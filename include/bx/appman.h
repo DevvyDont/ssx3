@@ -45,6 +45,29 @@ struct cAppMan {
     int LoadState;                  // 0x058 [O] volatile eLoadState
     void** mVtbl;                   // 0x05C [R] ctor / dtor store cAppMan_vtbl (g++ 2.95 puts the vptr after the
                                     //       members)
+
+    // Methods bound to their retail symbols by asm labels.
+    int checkHalt() __asm__("cAppMan_checkHalt__FP7cAppMan");
+    int isLoading() __asm__("cAppMan_isLoading");
+    void setGameRate(float fparg0) __asm__("cAppMan_setGameRate");
+    int getTimerHz() __asm__("cAppMan_getTimerHz");
+    float getTimerPeriod() __asm__("cAppMan_getTimerPeriod");
+    float getGameRate() __asm__("cAppMan_getGameRate");
+    float getFrameRate() __asm__("cAppMan_getFrameRate");
+    int getTick() __asm__("cAppMan_getTick");
+    int getTimerTick() __asm__("cAppMan_getTimerTick");
+    int getAIUpdatesPerRender() __asm__("cAppMan_getAIUpdatesPerRender");
+    void setAIUpdatesPerRender(int value) __asm__("cAppMan_setAIUpdatesPerRender");
+    void wakeup() __asm__("cAppMan_wakeup");
+    void wait() __asm__("cAppMan_wait");
+    unsigned int getCurrentThreadId() __asm__("cAppMan_getCurrentThreadId");
+    void prepause() __asm__("cAppMan_prepause");
+    void postpause() __asm__("cAppMan_postpause");
+    void lockThirtyFps(int value) __asm__("cAppMan_lockThirtyFps");
+    int run(char* exec, int ac, int av) __asm__("cAppMan_run");
+    void setNextModule(unsigned int module) __asm__("cAppMan_setNextModule__FP7cAppManUi");
+    void halt() __asm__("cAppMan_halt");
+    void loadexecpurge() __asm__("cAppMan_loadexecpurge");
 };
 
 CHECK_OFFSET(cAppMan, ActiveModule, 0x000);

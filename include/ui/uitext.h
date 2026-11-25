@@ -79,6 +79,19 @@ struct cUIText : public cUIThing {
                                      //       cUIText_getAsciiString/getUnicodeString, freed by cUIText_deleteText
     unsigned short mStringSize;      // 0x0B8 [O]; [R] = 0; [U] = length + 1 (cUIText_setUnicodeStringPrivate)
     unsigned short mLineSize;        // 0x0BA [O]; [R] = 0; [U] = mNumLines when there are 2+ lines (cUIText_setUnicodeStringPrivate)
+
+    // Methods bound to their retail symbols by asm labels.
+    void render2D(float x, float y) __asm__("cUIText_render2D");
+    void deleteText() __asm__("cUIText_deleteText");
+    int getAsciiString() __asm__("cUIText_getAsciiString");
+    int getUnicodeString() __asm__("cUIText_getUnicodeString");
+    void setAsciiString(const char* str) __asm__("cUIText_setAsciiString__FP7cUITextPCc");
+    void setAsciiStringPrivate(const char* str) __asm__("cUIText_setAsciiStringPrivate");
+    void setUnicodeStringWrap(unsigned short* str) __asm__("cUIText_setUnicodeStringWrap");
+    void setUnicodeString(const unsigned short* str) __asm__("cUIText_setUnicodeString");
+    void setUnicodeStringPrivate(const unsigned short* str) __asm__("cUIText_setUnicodeStringPrivate");
+    void setUnicodeStringByID(int id) __asm__("cUIText_setUnicodeStringByID__FP7cUITexti");
+    int getNumLinesOfString() __asm__("cUIText_getNumLinesOfString");
 };
 
 CHECK_OFFSET(cUIText, mAttrText, 0x074);

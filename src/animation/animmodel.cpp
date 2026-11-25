@@ -29,33 +29,33 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param part  the part header (On Tour: tMdfModelHeader*), its data following at +0x60
  * @param index  variant slot in the LOD's ref array (On Tour: variant)
  */
-extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part, int index)
+void cAnimModel::addModelPartLOD(int lod, char* part, int index)
 {
     char* data = part + 0x60;
-    for (int i = 0; i < self->numParts; i++) {
-        if (self->parts[i].id == *(signed char*)(part + 0x52)) {
-            self->parts[i].lods[lod].used = 1;
-            self->parts[i].lods[lod].refs[index].part = part;
-            self->parts[i].lods[lod].refs[index].data = data;
+    for (int i = 0; i < numParts; i++) {
+        if (parts[i].id == *(signed char*)(part + 0x52)) {
+            parts[i].lods[lod].used = 1;
+            parts[i].lods[lod].refs[index].part = part;
+            parts[i].lods[lod].refs[index].data = data;
             return;
         }
     }
     for (int k = 0; k < 4; k++) {
-        self->parts[self->numParts].lods[k].refs = new (str_ModelVariant, 0, 0) sAnimModelLodRef[self->numLodRefs];
-        MEM_fill(self->parts[self->numParts].lods[k].refs, 0, self->numLodRefs << 4);
+        parts[numParts].lods[k].refs = new (str_ModelVariant, 0, 0) sAnimModelLodRef[numLodRefs];
+        MEM_fill(parts[numParts].lods[k].refs, 0, numLodRefs << 4);
     }
-    self->parts[self->numParts].id = *(signed char*)(part + 0x52);
-    self->parts[self->numParts].lods[lod].used = 1;
-    self->parts[self->numParts].lods[lod].refs[index].part = part;
-    self->parts[self->numParts].lods[lod].refs[index].data = data;
-    self->parts[self->numParts].boneNames = data + *(int*)(part + 0x18);
-    self->parts[self->numParts].unk_40 = data + *(int*)(part + 0x2C);
-    self->parts[self->numParts].HotSpots = data + *(int*)(part + 0x1C);
-    self->parts[self->numParts].numBones = *(short*)(part + 0x4A);
-    self->parts[self->numParts].unk_48 = *(short*)(part + 0x4E);
-    self->parts[self->numParts].unk_4C = *(short*)(part + 0x50);
-    self->parts[self->numParts].refIndex = index;
-    self->numParts++;
+    parts[numParts].id = *(signed char*)(part + 0x52);
+    parts[numParts].lods[lod].used = 1;
+    parts[numParts].lods[lod].refs[index].part = part;
+    parts[numParts].lods[lod].refs[index].data = data;
+    parts[numParts].boneNames = data + *(int*)(part + 0x18);
+    parts[numParts].unk_40 = data + *(int*)(part + 0x2C);
+    parts[numParts].HotSpots = data + *(int*)(part + 0x1C);
+    parts[numParts].numBones = *(short*)(part + 0x4A);
+    parts[numParts].unk_48 = *(short*)(part + 0x4E);
+    parts[numParts].unk_4C = *(short*)(part + 0x50);
+    parts[numParts].refIndex = index;
+    numParts++;
 }
 #endif
 
@@ -113,14 +113,14 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_setScale);
  * @param lengthScale  scale along x
  * @param widthScale  scale along y and z
  */
-extern "C" void cAnimModel_setScale(cAnimModel* self, float lengthScale, float widthScale)
+void cAnimModel::setScale(float lengthScale, float widthScale)
 {
     t4Vector scale;
     scale.x = lengthScale;
     scale.y = widthScale;
     scale.z = widthScale;
     scale.w = 1.0f;
-    self->ScaleVect = scale;
+    ScaleVect = scale;
 }
 #endif
 
@@ -254,14 +254,14 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_isPartEnabled);
  * @return the part's lods[channel].used flag, or 0 when the id is above maxPartIndex, there is no partIndex table or
  *         the id maps to no part
  */
-extern "C" int cAnimModel_isPartEnabled(cAnimModel* self, int i, int channel)
+int cAnimModel::isPartEnabled(int i, int channel)
 {
     int idx;
-    if (i > self->maxPartIndex || self->partIndex == 0 || (idx = self->partIndex[i]) < 0)
+    if (i > maxPartIndex || partIndex == 0 || (idx = partIndex[i]) < 0)
     {
         return 0;
     }
-    return self->parts[idx].lods[channel].used;
+    return parts[idx].lods[channel].used;
 }
 #endif
 
@@ -278,24 +278,24 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_setModelPartVariant);
  * @param variant  the variant index (On Tour variant)
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimModel_setModelPartVariant(cAnimModel* self, int i, int variant)
+void cAnimModel::setModelPartVariant(int i, int variant)
 {
-    if (i > self->maxPartIndex)
+    if (i > maxPartIndex)
     {
         return;
     }
-    if (self->partIndex == 0)
+    if (partIndex == 0)
     {
         return;
     }
-    int idx = self->partIndex[i];
+    int idx = partIndex[i];
     if (idx < 0)
     {
         return;
     }
-    sAnimModelPart* animModelPart = &self->parts[idx];
+    sAnimModelPart* animModelPart = &parts[idx];
     animModelPart->refIndex = variant;
-    self->mask |= animModelPart->mask;
+    mask |= animModelPart->mask;
     for (int k = 0; k < 4; k++)
     {
         animModelPart->lods[k].used = 1;
@@ -315,10 +315,10 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_addAnimMinPart);
  * @param i  part number (On Tour: partID), mapped through partIndex
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimModel_addAnimMinPart(cAnimModel* self, int i)
+void cAnimModel::addAnimMinPart(int i)
 {
-    sAnimModelPart* animModelPart = &self->parts[self->partIndex[i]];
-    self->AnimMinPartsMask |= animModelPart->mask;
+    sAnimModelPart* animModelPart = &parts[partIndex[i]];
+    AnimMinPartsMask |= animModelPart->mask;
 }
 #endif
 
@@ -343,7 +343,7 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_setSkelMatrix);
 // (rot, rows 0-2) and position (pos, row 3), then unk_034[i] = unk_030[i] with each row scaled
 // by the matching component of unk_140.
 // PORT: index-first (int) address arithmetic (pointer in int).
-extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone* animModelBone)
+void cAnimModel::setSkelMatrix(int i, sAnimModelBone* animModelBone)
 {
     __asm__ __volatile__(
         ".set push\n"
@@ -383,7 +383,7 @@ extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone
         "sqc2       $vf12, 0x20(%1)\n"
         ".set pop\n"
         :
-        : "r"(animModelBone), "r"((t4Matrix*)((i << 6) + (int)self->SkelMatrices))
+        : "r"(animModelBone), "r"((t4Matrix*)((i << 6) + (int)SkelMatrices))
         : "memory");
     __asm__ __volatile__(
         ".set push\n"
@@ -403,7 +403,8 @@ extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone
         "sqc2       $vf11, 0x30(%1)\n"
         ".set pop\n"
         :
-        : "r"((t4Matrix*)((i << 6) + (int)self->SkelMatrices)), "r"((t4Matrix*)((i << 6) + (int)self->SkelMatricesScaled)), "r"(self)
+        : "r"((t4Matrix*)((i << 6) + (int)SkelMatrices)), "r"((t4Matrix*)((i << 6) + (int)SkelMatricesScaled)),
+                "r"(this)
         : "memory");
 }
 #endif
@@ -520,27 +521,28 @@ static inline sAnimModelBone amCombine_0200(const sAnimModelBone& a, const sAnim
  *               their count)
  */
 // Rebuilds the world bones from the local pose: bone k = parent (or the next root transform) * local k.
-extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
+void cAnimModel::transform(sAnimModelBone* roots)
 {
-    for (int i = 0; i < self->numParts; i++)
+    for (int i = 0; i < numParts; i++)
     {
         // PORT: pointer arithmetic through int (offset-first addu).
-        tMdfBone* info = (tMdfBone*)((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->boneNames;
-        for (int j = 0; j < ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->numBones; j++)
+        tMdfBone* info = (tMdfBone*)((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)parts))->boneNames;
+        for (int j = 0; j < ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)parts))->numBones; j++)
         {
-            int k = j + ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->firstBone;
+            int k = j + ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)parts))->firstBone;
             sAnimModelBone* parent;
             tMdfBone* boneInfo = &info[j];
             short parentIndex = boneInfo->mParentId;
             if (parentIndex < 0)
                 parent = roots++;
             else
-                parent = &self->bones[parentIndex];
-            t4Vector* lp = (t4Vector*)((k << 4) + (int)self->localPos);
+                parent = &bones[parentIndex];
+            t4Vector* lp = (t4Vector*)((k << 4) + (int)localPos);
             sAnimModelBone local;
-            *(sAmQuat_0200*)&local.pos = sAmQuat_0200(lp->x * self->ScaleVect.x, lp->y * self->ScaleVect.y, lp->z * self->ScaleVect.z, lp->w * self->ScaleVect.w);
-            *(sAmQuat_0200*)&local.rot = *(sAmQuat_0200*)((k << 4) + (int)self->localRot);
-            *(sAnimModelBone*)((k << 5) + (int)self->bones) = amCombine_0200(*parent, local);
+            *(sAmQuat_0200*)&local.pos = sAmQuat_0200(lp->x * ScaleVect.x, lp->y * ScaleVect.y, lp->z * ScaleVect.z,
+                    lp->w * ScaleVect.w);
+            *(sAmQuat_0200*)&local.rot = *(sAmQuat_0200*)((k << 4) + (int)localRot);
+            *(sAnimModelBone*)((k << 5) + (int)bones) = amCombine_0200(*parent, local);
         }
     }
 }
@@ -557,12 +559,12 @@ extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone
  * cAnimModel_setSkelMatrix writes unk_030[i] from the bone's rotation and position, and unk_034[i] as that matrix with
  * its rows scaled by unk_140 (probably On Tour's getSkelMatrices and getSkelMatricesScaled).
  */
-extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
+void cAnimModel::buildSkelMatrices()
 {
     int i;
-    for (i = 0; i < self->numBones; i++)
+    for (i = 0; i < numBones; i++)
     {
-        cAnimModel_setSkelMatrix(self, i, &self->bones[i]);
+        this->setSkelMatrix(i, &bones[i]);
     }
 }
 #endif
@@ -668,19 +670,19 @@ static inline t4Vector amVecAdd(const t4Vector& src, t4Vector* b)
  *
  * @param offset  translation to add
  */
-extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* offset)
+void cAnimModel::applyOffset(t4Vector* offset)
 {
-    for (int i = 0; i < self->numParts; i++) {
-        for (int j = 0; j < self->parts[i].numBones; j++) {
-            int k = j + self->parts[i].firstBone;
-            amVecAddEq(&self->bones[k].pos, offset);
+    for (int i = 0; i < numParts; i++) {
+        for (int j = 0; j < parts[i].numBones; j++) {
+            int k = j + parts[i].firstBone;
+            amVecAddEq(&bones[k].pos, offset);
             {
-                t4Vector shiftedPos = amVecAdd(self->SkelMatrices[k].row[3], offset);
-                self->SkelMatrices[k].row[3] = shiftedPos;
+                t4Vector shiftedPos = amVecAdd(SkelMatrices[k].row[3], offset);
+                SkelMatrices[k].row[3] = shiftedPos;
             }
             {
-                t4Vector shiftedPos = amVecAdd(self->SkelMatricesScaled[k].row[3], offset);
-                self->SkelMatricesScaled[k].row[3] = shiftedPos;
+                t4Vector shiftedPos = amVecAdd(SkelMatricesScaled[k].row[3], offset);
+                SkelMatricesScaled[k].row[3] = shiftedPos;
             }
         }
     }
@@ -795,39 +797,42 @@ extern sAmMat_0640 D_004FC420[];
  * @param x  draw flag for the part with id 2, probably the board (On Tour: additiveBoard)
  * @param y  draw flag for every other part (On Tour: additivePlayer)
  */
-extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
+void cAnimModel::render(int lod, int x, int y)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (D_004A5948 == 0) {
         new ((void*)D_004FC420) sAmMat_0640[64];
         D_004A5948 = 1;
     }
-    for (int i = 0; i < self->numBones; i++) {
-        D_004FC420[i] = mulMat_0640(((sAmMat_0640*)self->SkelMatricesScaled)[i], ((sAmMat_0640*)self->InvDefaultMatrices)[i]);
+    for (int i = 0; i < numBones; i++) {
+        D_004FC420[i] = mulMat_0640(((sAmMat_0640*)SkelMatricesScaled)[i], ((sAmMat_0640*)InvDefaultMatrices)[i]);
     }
-    if (self->unk_018 != 0) {
-        for (int j = 0; j < self->numParts; j++) {
+    if (unk_018 != 0) {
+        for (int j = 0; j < numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)parts);
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
                 if (animModelLodRef->part != 0) {
                     ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FC420, 0, (const tMdfBlendedMatrix*)animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
-                    int additive = self->parts[j].id == 2 ? x : y;
-                    ctx->DrawCharModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, self->ScaleVect.y, additive, 0);
+                    int additive = parts[j].id == 2 ? x : y;
+                    ctx->DrawCharModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data,
+                            ScaleVect.y, additive, 0);
                 }
             }
         }
     } else {
-        ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FC420, 0, (const tMdfBlendedMatrix*)self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
-        for (int j = 0; j < self->numParts; j++) {
+        ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FC420, 0, (const tMdfBlendedMatrix*)lodInfo[lod].unk_04,
+                lodInfo[lod].unk_00, 0);
+        for (int j = 0; j < numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)parts);
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
                     int additive = animModelPart->id == 2 ? x : y;
-                    ctx->DrawCharModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, self->ScaleVect.y, additive, 0);
+                    ctx->DrawCharModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data,
+                            ScaleVect.y, additive, 0);
                 }
             }
         }
@@ -943,35 +948,36 @@ extern sAmMat_0948 D_004FD420[];
  * @param x  colour for parts with id 1 or 2 (On Tour const tARGB& boardcol)
  * @param y  colour for all other parts (On Tour const tARGB& shdwcol)
  */
-extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
+void cAnimModel::rendershadow(int lod, int x, int y)
 {
     if (D_004A594C == 0) {
         new ((void*)D_004FD420) sAmMat_0948[64];
         D_004A594C = 1;
     }
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    for (int i = 0; i < self->numBones; i++) {
-        D_004FD420[i] = mulMat_0948(((sAmMat_0948*)self->SkelMatrices)[i], ((sAmMat_0948*)self->InvDefaultMatrices)[i]);
+    for (int i = 0; i < numBones; i++) {
+        D_004FD420[i] = mulMat_0948(((sAmMat_0948*)SkelMatrices)[i], ((sAmMat_0948*)InvDefaultMatrices)[i]);
     }
-    if (self->unk_018 != 0) {
-        for (int j = 0; j < self->numParts; j++) {
+    if (unk_018 != 0) {
+        for (int j = 0; j < numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)parts);
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
                 if (animModelLodRef->part != 0) {
                     ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FD420, 0, (const tMdfBlendedMatrix*)animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
-                    int ok = (unsigned)(self->parts[j].id - 1) < 2;
+                    int ok = (unsigned)(parts[j].id - 1) < 2;
                     int colour = ok ? x : y;
                     ctx->DrawCharShadowModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, *(const tARGB*)colour);
                 }
             }
         }
     } else {
-        ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FD420, 0, (const tMdfBlendedMatrix*)self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
-        for (int j = 0; j < self->numParts; j++) {
+        ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FD420, 0, (const tMdfBlendedMatrix*)lodInfo[lod].unk_04,
+                lodInfo[lod].unk_00, 0);
+        for (int j = 0; j < numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
-            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
+            sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)parts);
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
@@ -1003,9 +1009,9 @@ struct sAmItem50 {
  * @param name  bone name
  * @return the part's firstBone plus the bone's position in the part, or -1 when no bone has that name
  */
-extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char* name)
+int cAnimModel::getBoneSkelIndex(int idx, const char* name)
 {
-    sAnimModelPart* animModelPart = &self->parts[self->partIndex[idx]];
+    sAnimModelPart* animModelPart = &parts[partIndex[idx]];
     sAmItem50* items = (sAmItem50*)animModelPart->boneNames;
     for (int i = 0; i < animModelPart->numBones; i++)
     {
@@ -1034,16 +1040,16 @@ extern char str_morph[];
  * @return the mask; unknown names add nothing
  */
 // PORT: returns a 64-bit mask (long is 8 bytes on the EE).
-extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
+ulong cAnimModel::getGraftMask(int idx, char* names)
 {
-    if (self->maxPartIndex < idx)
+    if (maxPartIndex < idx)
         return 0;
-    int* tbl = self->partIndex;
+    int* tbl = partIndex;
     if (tbl == 0 || tbl[idx] < 0)
         return 0;
     char* token = names;
     ulong mask = 0;
-    sAnimModelPart* part = &self->parts[tbl[idx]];
+    sAnimModelPart* part = &parts[tbl[idx]];
     while (*token) {
         char* tokenEnd = token;
         if (*tokenEnd != 0 && *tokenEnd != ',') {
@@ -1053,7 +1059,7 @@ extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
         }
         int len = tokenEnd - token;
         if (part->unk_0C >= 0 && strncmp(token, str_morph, len) == 0) {
-            mask |= (ulong)1 << (part->unk_0C + self->numBones);
+            mask |= (ulong)1 << (part->unk_0C + numBones);
         } else {
             char* list = part->boneNames;
             int j = 0;
@@ -1088,9 +1094,9 @@ public:
  *
  * @param data  the replay frame stream (On Tour: cBxReplayFrame*)
  */
-extern "C" void cAnimModel_writeToReplayFrame(cAnimModel* self, cBxReplayFrame* data)
+void cAnimModel::writeToReplayFrame(cBxReplayFrame* data)
 {
-    data->write((const char*)self->bones, self->numBones << 5);
+    data->write((const char*)bones, numBones << 5);
 }
 #endif
 
@@ -1105,9 +1111,9 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_readFromReplayFrame);
  *
  * @param data  the replay frame stream (On Tour: cBxReplayFrame*)
  */
-extern "C" void cAnimModel_readFromReplayFrame(cAnimModel* self, cBxReplayFrame* data)
+void cAnimModel::readFromReplayFrame(cBxReplayFrame* data)
 {
-    data->read((char*)self->bones, self->numBones << 5);
+    data->read((char*)bones, numBones << 5);
 }
 #endif
 
@@ -1297,7 +1303,7 @@ extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, tAdfArchiv
 extern "C" void* cAdfDataSource_cAdfDataSource1(cAdfDataSource* self, char* data)
 {
     *(int*)self = 0;
-    cAdfDataSource_populateFromData((cAdfDataSource*)self, (tAdfArchive*)data);
+    self->populateFromData((tAdfArchive*)data);
     return ((void*)self);
 }
 #endif
@@ -1320,7 +1326,7 @@ extern "C" void* cAdfDataSource_cAdfDataSource(char** self, void* src)
 {
     char* data = FILE_loadpack(src, 0);
     *self = data;
-    cAdfDataSource_populateFromData((cAdfDataSource*)self, (tAdfArchive*)data);
+    ((cAdfDataSource*)self)->populateFromData((tAdfArchive*)data);
     return self;
 }
 #endif
@@ -1336,15 +1342,15 @@ INCLUDE_ASM("animation/animmodel", cAdfDataSource_populateFromData);
  *
  * @param data  the loaded animation archive
  */
-extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, tAdfArchive* data)
+void cAdfDataSource::populateFromData(tAdfArchive* data)
 {
     // ORIGINAL-PTR: a file blob: the loaded archive's header is followed by the animation headers and holds the byte
     // offsets of its other sections
-    self->Archive = data;
-    self->Anims = (tAdfAnimHeader*)(data + 1);
-    self->Chunks = (tAdfAnimChunk*)((char*)data + data->mAnimChunkOffset);
-    self->Tags = (tAdfTag*)((char*)data + data->mTagOffset);
-    self->ChannelData = (unsigned char*)((char*)data + data->mChannelOffset);
+    Archive = data;
+    Anims = (tAdfAnimHeader*)(data + 1);
+    Chunks = (tAdfAnimChunk*)((char*)data + data->mAnimChunkOffset);
+    Tags = (tAdfTag*)((char*)data + data->mTagOffset);
+    ChannelData = (unsigned char*)((char*)data + data->mChannelOffset);
 }
 #endif
 

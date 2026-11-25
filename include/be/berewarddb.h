@@ -63,6 +63,10 @@ struct cBERewardDB {
     int mNumToys;                     // 0x048 [O]
     int mNumVideos;                   // 0x04C [O]
     int mNumCheatChars;               // 0x050 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cBERewardDB_purge");
+    int getRewardName(int type, int idx) __asm__("cBERewardDB_getRewardName");
 };
 
 CHECK_OFFSET(cBERewardDB, mRewardFileIndex, 0x000);

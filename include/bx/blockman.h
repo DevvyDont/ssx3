@@ -44,6 +44,12 @@ struct cBlockMan {
     tBlockGroup* Groups;            // 0x008 [O]
     int NumGroups;                  // 0x00C [O]
     int Allignment;                 // 0x010 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    int allignSize(int size) __asm__("cBlockMan_allignSize");
+    int isBlock(int addr) __asm__("cBlockMan_isBlock");
+    int* alloc(unsigned int size) __asm__("cBlockMan_alloc");
+    void free(int* ptr) __asm__("cBlockMan_free");
 };
 
 CHECK_OFFSET(cBlockMan, Memory, 0x000);

@@ -145,10 +145,10 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  *
  * @return the save buffer (cBESaveInterface_buffer)
  */
-extern "C" void* cBESaveInterface_generateSaveGame(cBESaveInterface* self)
+void* cBESaveInterface::generateSaveGame()
 {
-    int size = cBESaveInterface_getSaveGameSize(self);
-    cBESaveInterface_releaseBuffer_s(self);
+    int size = cBESaveInterface_getSaveGameSize(this);
+    cBESaveInterface_releaseBuffer_s(this);
     cBESaveInterface_buffer = operator_new_tag(size, str_save_file_buffer, 0x100, 0);
     char* cursor = (char*)cBESaveInterface_buffer;
     *(sSaveHdr_2758*)cursor = cBELibrary_optionDB;
@@ -230,11 +230,11 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
  * @return the new buffer (cBESaveInterface_buffer)
  */
 // Builds the save block of rider profile 'idx': name, profile, character flag, CRC.
-extern "C" void* cBESaveInterface_generateSaveProfile(cBESaveInterface* self, int idx)
+void* cBESaveInterface::generateSaveProfile(int idx)
 {
     cBEIface_2950* iface;
     int size = cBESaveInterface_getSaveProfileSize_2950();
-    cBESaveInterface_releaseBuffer_2950(self);
+    cBESaveInterface_releaseBuffer_2950(this);
     cBESaveInterface_buffer = new (str_save_file_buffer, 0x100, 0) char[size];
     char* dataPtr = (char*)cBESaveInterface_buffer;
     strncpy(dataPtr, cBELibrary_playerDB[idx].strUserName, 0xC);
@@ -301,9 +301,9 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
  * @param buf  the save data read from the memory card
  * @return 1 when loaded, 0 when the CRC is wrong
  */
-extern "C" int cBESaveInterface_loadSaveGame(cBESaveInterface* self, char* buf)
+int cBESaveInterface::loadSaveGame(char* buf)
 {
-    int size = cBESaveInterface_getSaveGameSize(self) - 4;
+    int size = cBESaveInterface_getSaveGameSize(this) - 4;
     int crc = MEM_crc16(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
@@ -361,7 +361,7 @@ extern sCharFlag_2DE0 D_00535B31[];
  * @param idx  the profile slot to load into (On Tour iProfile)
  * @return 1 when loaded, 0 when the CRC is wrong
  */
-extern "C" int cBESaveInterface_loadSaveProfile(cBESaveInterface* self, char* buf, int idx)
+int cBESaveInterface::loadSaveProfile(char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;
     int crc = MEM_crc16(buf, size, 64490);

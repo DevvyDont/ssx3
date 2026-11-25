@@ -26,6 +26,8 @@
 #include "layout.h"
 #include "be/beinterface.h"
 
+struct cBERewardDB;
+
 struct cBERewardInterface : public cBEInterface {
     // cBEInterface (0x00-0x0F, be/beinterface.h):
     //   bCanSubmit: (On Tour: a bool at 0x0); no retail access seen
@@ -42,6 +44,107 @@ struct cBERewardInterface : public cBEInterface {
                                      //       clearUserAwards sets -1 (no medal, as in isBetterMedal); compared with
                                      //       0..3 by cOVState_RACE_FINISHOV_onCreateScreen/cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen, ==0 by func_002A3860, read by
                                      //       cOVState_REWARDS_checkRewardList (asm)
+
+    // Methods bound to their retail symbols by asm labels.
+    void awardUser(int profile, int iCharacterID, int bit) __asm__("cBERewardInterface_awardUser");
+    char* getTrophy(int peakId, int trophyId) __asm__("cBERewardInterface_getTrophy");
+    char* getMedal(int trophyId, int medalId) __asm__("cBERewardInterface_getMedal");
+    char* getPeakPass(int peakId, int charId) __asm__("cBERewardInterface_getPeakPass");
+    int getTrophies() __asm__("cBERewardInterface_getTrophies");
+    int getMedals() __asm__("cBERewardInterface_getMedals");
+    int getPeakPasses() __asm__("cBERewardInterface_getPeakPasses");
+    int getPosters() __asm__("cBERewardInterface_getPosters");
+    int getTradingCards() __asm__("cBERewardInterface_getTradingCards");
+    int getConceptArts() __asm__("cBERewardInterface_getConceptArts");
+    int getToys() __asm__("cBERewardInterface_getToys");
+    int getVideos() __asm__("cBERewardInterface_getVideos");
+    int getRandomLockedRewardIndex(int profile, int characterId, int kind)
+        __asm__("cBERewardInterface_getRandomLockedRewardIndex");
+    int getTotalNumRewards(int kind) __asm__("cBERewardInterface_getTotalNumRewards");
+    int countOwnedRewards(int count, signed char* bits) __asm__("cBERewardInterface_countOwnedRewards");
+    void markRewardOwned(int bit, char* bits) __asm__("cBERewardInterface_markRewardOwned");
+    int isRewardOwned(int bit, char* bits) __asm__("cBERewardInterface_isRewardOwned");
+    int isRewardOwned1(int profileIndex, int characterId, int kind, int bit)
+        __asm__("cBERewardInterface_isRewardOwned1");
+    int getNumOwnedRewards(int profileIndex, int characterId, int kind)
+        __asm__("cBERewardInterface_getNumOwnedRewards");
+    int getNumOwnedPosters(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedPosters");
+    int getNumOwnedTradingCards(int profileIndex, int characterId)
+        __asm__("cBERewardInterface_getNumOwnedTradingCards");
+    int getNumOwnedConceptArts(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedConceptArts");
+    int getNumOwnedToys(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedToys");
+    int getNumOwnedVideos(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedVideos");
+    int getNumOwnedCheatChars(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedCheatChars");
+    int isMountainConquered(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_isMountainConquered");
+    int isMountainCompleted(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_isMountainCompleted");
+    int isPeakConquered(int iProfileIndex, int iCharacterID, int k) __asm__("cBERewardInterface_isPeakConquered");
+    int isPeakCompleted(int iProfileIndex, int iCharacterID, int peakID) __asm__("cBERewardInterface_isPeakCompleted");
+    int isPeakLocked(int rider, int peak) __asm__("cBERewardInterface_isPeakLocked");
+    int isPeakLocked1(int profileIndex, int characterId, int peak) __asm__("cBERewardInterface_isPeakLocked1");
+    int isTrophyOwned(int iProfileIndex, int iCharacterID, int k, int i) __asm__("cBERewardInterface_isTrophyOwned");
+    int isPosterOwned(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isPosterOwned");
+    int isTradingCardOwned(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isTradingCardOwned");
+    int isConceptArtOwned(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isConceptArtOwned");
+    int isToyOwned(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isToyOwned");
+    int isVideoOwned(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isVideoOwned");
+    int isCheatCharOwned(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isCheatCharOwned");
+    int buyReward(int profileIndex, int characterId, int kind, int bit, int give)
+        __asm__("cBERewardInterface_buyReward");
+    void buyPoster(int profileIndex, int characterId, int bit, int give) __asm__("cBERewardInterface_buyPoster");
+    void buyTradingCard(int profileIndex, int characterId, int bit, int give)
+        __asm__("cBERewardInterface_buyTradingCard");
+    void buyConceptArt(int profileIndex, int characterId, int bit, int give)
+        __asm__("cBERewardInterface_buyConceptArt");
+    void buyToy(int profileIndex, int characterId, int bit, int give) __asm__("cBERewardInterface_buyToy");
+    void buyVideo(int profile, int characterId, int idx, int award) __asm__("cBERewardInterface_buyVideo");
+    void buySong(int profile, int characterId, int bit, int award) __asm__("cBERewardInterface_buySong");
+    void buyCheatChar(int profile, int characterId, int idx, int award) __asm__("cBERewardInterface_buyCheatChar");
+    int getRadioMode(int profileIndex, int characterId) __asm__("cBERewardInterface_getRadioMode");
+    long getOwnedSongList(int profileIndex, int characterId) __asm__("cBERewardInterface_getOwnedSongList");
+    long getPlayList(int profileIndex, int characterId) __asm__("cBERewardInterface_getPlayList");
+    int getNumOwnedSongs(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedSongs");
+    int getNumSongsInPlayList(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_getNumSongsInPlayList");
+    void setRadioMode(int profileIndex, int characterId, int value) __asm__("cBERewardInterface_setRadioMode");
+    void setOwnedSongList(int profileIndex, int characterId, long value) __asm__("cBERewardInterface_setOwnedSongList");
+    void setPlayList(int profileIndex, int characterId, long value) __asm__("cBERewardInterface_setPlayList");
+    int getCollectibleMedalTarget(int peakID, int medal) __asm__("cBERewardInterface_getCollectibleMedalTarget");
+    int getChallengesMedalTarget(int peakID, int medal) __asm__("cBERewardInterface_getChallengesMedalTarget");
+    int calculateCollectibleMedal(int idx, int numCollected) __asm__("cBERewardInterface_calculateCollectibleMedal");
+    int getTrackHighScore(int profileIndex, int characterId, int event, int locationId)
+        __asm__("cBERewardInterface_getTrackHighScore");
+    int getCollectiblesMedal(int iProfileIndex, int iCharacterID, int kind)
+        __asm__("cBERewardInterface_getCollectiblesMedal");
+    int getBigChallengesMedal(int iProfileIndex, int iCharacterID, int kind)
+        __asm__("cBERewardInterface_getBigChallengesMedal");
+    int getEarningsMedal(int iProfileIndex, int iCharacterID, int medal) __asm__("cBERewardInterface_getEarningsMedal");
+    int calculateBigChallengeMedal(int idx, int numCompleted) __asm__("cBERewardInterface_calculateBigChallengeMedal");
+    int calculateEarningMedal(int idx, unsigned int totalCash) __asm__("cBERewardInterface_calculateEarningMedal");
+    void* calculateNextEarningsLevel(int iProfileIndex, int iCharacterID)
+        __asm__("cBERewardInterface_calculateNextEarningsLevel");
+    int calculateNextCollectiblesLevel(int iProfileIndex, int iCharacterID, int kind)
+        __asm__("cBERewardInterface_calculateNextCollectiblesLevel");
+    int calculateNextBigChallengesLevel(int iProfileIndex, int iCharacterID, int kind)
+        __asm__("cBERewardInterface_calculateNextBigChallengesLevel");
+    void clearUserAwards() __asm__("cBERewardInterface_clearUserAwards");
+    void awardUserPeakPass(int profile, int characterId, int row, int mode)
+        __asm__("cBERewardInterface_awardUserPeakPass");
+    int getAwardTrophyCategory(int iProfileIndex, int iCharacterID, int kind, int tier)
+        __asm__("cBERewardInterface_getAwardTrophyCategory");
+    void awardUserTrophy(int iProfileIndex, int iCharacterID, int kind, int tier)
+        __asm__("cBERewardInterface_awardUserTrophy");
+    void calculateUserTrackMedalRewards(int profile, int charID, int mode, int event, int medal)
+        __asm__("cBERewardInterface_calculateUserTrackMedalRewards");
+    void awardUserCash(int rider, int money) __asm__("cBERewardInterface_awardUserCash");
+    void awardUserCash1(int profileIndex, int characterId, int amount) __asm__("cBERewardInterface_awardUserCash1");
+    void awardUserCollectible(int rider, int k) __asm__("cBERewardInterface_awardUserCollectible");
+    void awardUserBigChallenge(int rider, int k) __asm__("cBERewardInterface_awardUserBigChallenge");
+    void awardUser1(int rider, int bit) __asm__("cBERewardInterface_awardUser1");
+    int isAwardReceived(int iProfileIndex, int iCharacterID, int bit) __asm__("cBERewardInterface_isAwardReceived");
+    int isBitSet(int bit, unsigned char* bits) __asm__("cBERewardInterface_isBitSet");
+    void setBit(int bit, unsigned char* bits) __asm__("cBERewardInterface_setBit");
+    int getTrackPeakID(int locationID) __asm__("cBERewardInterface_getTrackPeakID");
+    int getTrackTrophyID(int eventID, int locationID) __asm__("cBERewardInterface_getTrackTrophyID");
+    cBERewardDB* getDB() __asm__("cBERewardInterface_getDB");
 };
 
 CHECK_OFFSET(cBERewardInterface, mLastEventCashReward, 0x10);

@@ -73,7 +73,7 @@ void* cBERewardInterface_getThis();
  * @return the interface's getThis() singleton, or 0 for an unknown kind
  */
 // Returns the backend interface singleton for the given kind.
-extern "C" void* cBEPostRaceState_getInterface(cBEPostRaceState* self, int kind)
+void* cBEPostRaceState::getInterface(int kind)
 {
     switch (kind) {
     case 0:
@@ -219,7 +219,7 @@ void* cBERewardInterface_getThis();
  * @return the interface's getThis() singleton, or 0 for an unknown kind
  */
 // Returns the backend interface singleton for the given kind.
-extern "C" void* cBEPreRaceState_getInterface(cBEPreRaceState* self, int kind)
+void* cBEPreRaceState::getInterface(int kind)
 {
     switch (kind) {
     case 0:
@@ -326,11 +326,11 @@ extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
  *
  * @param reload  nonzero to reload each character's item data first
  */
-extern "C" void cBEProfileLib_init(cBEProfileLib* self, int reload)
+void cBEProfileLib::init(int reload)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        cBECharProfileDB_init(&self->charProfile[i], i, reload);
+        cBECharProfileDB_init(&charProfile[i], i, reload);
     }
 }
 #endif
@@ -416,13 +416,12 @@ extern char cBEProfileLib_BackupCharProfile[];
  * Saves one character record of a profile into the backup buffer cBEProfileLib_BackupCharProfile and remembers its character index in
  * D_004A125C.
  *
- * @param base  the profile (10 character records)
  * @param idx  the character whose record is saved
  */
-extern "C" void cBEProfileLib_backupCharProfile(cBEProfileLib* base, int idx)
+void cBEProfileLib::backupCharProfile(int idx)
 {
     D_004A125C = idx;
-    MEM_copy(cBEProfileLib_BackupCharProfile, &base->charProfile[idx], 3976);
+    MEM_copy(cBEProfileLib_BackupCharProfile, &charProfile[idx], 3976);
 }
 #endif
 
@@ -437,11 +436,10 @@ extern char cBEProfileLib_BackupCharProfile[];
  * Copies the backup buffer cBEProfileLib_BackupCharProfile back into the profile's character record that cBEProfileLib_backupCharProfile saved (index
  * D_004A125C).
  *
- * @param base  the profile (10 character records)
  */
-extern "C" void cBEProfileLib_restoreCharProfile(cBEProfileLib* base)
+void cBEProfileLib::restoreCharProfile()
 {
-    MEM_copy(&base->charProfile[D_004A125C], cBEProfileLib_BackupCharProfile, 3976);
+    MEM_copy(&charProfile[D_004A125C], cBEProfileLib_BackupCharProfile, 3976);
 }
 #endif
 

@@ -23,6 +23,11 @@ struct cBEProfileLib {
     cBECharProfileDB charProfile[10];   // 0x0000 [O] charProfile (On Tour: one, not an array); [R] init / copy /
                                         //        func_00156810 loop i < 10 at i * 0xF88; [U] backupCharProfile /
                                         //        restoreCharProfile copy charProfile[idx] (3976 bytes)
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int reload) __asm__("cBEProfileLib_init");
+    void backupCharProfile(int idx) __asm__("cBEProfileLib_backupCharProfile");
+    void restoreCharProfile() __asm__("cBEProfileLib_restoreCharProfile");
 };
 
 CHECK_OFFSET(cBEProfileLib, charProfile, 0x0);

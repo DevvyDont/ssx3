@@ -42,6 +42,17 @@ struct cPathSys {
                                     //       was char[0x30]]
     char* Data;                     // 0x048 [O]
     int m_bIsFileLoaded;            // 0x04C [O] bool
+
+    // Methods bound to their retail symbols by asm labels.
+    int loadInjectedPaths(int data) __asm__("cPathSys_loadInjectedPaths");
+    void loadPaths(int name) __asm__("cPathSys_loadPaths");
+    int isPathfileLoaded() __asm__("cPathSys_isPathfileLoaded");
+    void resolvePaths() __asm__("cPathSys_resolvePaths");
+    void appendPaths(int name) __asm__("cPathSys_appendPaths");
+    void purgePaths() __asm__("cPathSys_purgePaths");
+    int getTrackPath(int pathIndex) __asm__("cPathSys_getTrackPath");
+    int getAIPath(int index) __asm__("cPathSys_getAIPath");
+    int getNearTrackPaths(float* pos, cTrackPath** out, int max) __asm__("cPathSys_getNearTrackPaths");
 };
 
 CHECK_OFFSET(cPathSys, NumStartpoints, 0x000);

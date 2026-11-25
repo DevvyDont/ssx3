@@ -13,18 +13,18 @@ INCLUDE_ASM("bx/blockman", cBlockMan_isBlock);
  * The test is offset > 0, so the very first block, at the start of the memory, is reported as outside; likely bug
  * (cBlockMan_free tests offset >= 0). Nothing in the C calls it.
  *
- * @param block  the block manager
  * @param addr  the address to test
  * @return 1 when inside, else 0
  */
-extern "C" int cBlockMan_isBlock(cBlockMan* block, int addr) {
+int cBlockMan::isBlock(int addr)
+{
     int temp_5;
     int var_3;
 
-    temp_5 = addr - ((int)block->Memory);
+    temp_5 = addr - ((int)Memory);
     var_3 = 0;
     if (temp_5 > 0) {
-        var_3 = temp_5 < (block->MemorySize);
+        var_3 = temp_5 < (MemorySize);
     }
     return var_3;
 }
@@ -42,13 +42,14 @@ INCLUDE_ASM("bx/blockman", cBlockMan_alloc);
  * @param size  the size needed in bytes
  * @return the block, or null when no group can serve it
  */
-extern "C" int* cBlockMan_alloc(cBlockMan* self, unsigned int size) {
+int* cBlockMan::alloc(unsigned int size)
+{
     int i;
     tBlockGroup* pool;
     int* head;
 
-    for (i = 0; i < self->NumGroups; i++) {
-        pool = (tBlockGroup*)((i << 4) + (int)self->Groups);
+    for (i = 0; i < NumGroups; i++) {
+        pool = (tBlockGroup*)((i << 4) + (int)Groups);
         if (pool->Size >= size) {
             head = ((int*)pool->FreeBlocks);
             if (head != 0) {
@@ -72,17 +73,18 @@ INCLUDE_ASM("bx/blockman", cBlockMan_free);
  *
  * @param ptr  the block to free
  */
-extern "C" void cBlockMan_free(cBlockMan* self, int* ptr) {
+void cBlockMan::free(int* ptr)
+{
     int i;
     int off;
     tBlockGroup* pool;
 
-    for (i = 0; i < self->NumGroups; i++) {
-        pool = (tBlockGroup*)((i << 4) + (int)self->Groups);
+    for (i = 0; i < NumGroups; i++) {
+        pool = (tBlockGroup*)((i << 4) + (int)Groups);
         off = (int)ptr - ((int)pool->MemBlock);
         if (off >= 0 && off < pool->MemBlockSize) {
             *ptr = (int)((int*)pool->FreeBlocks);
-            (*(int**)&((tBlockGroup*)((i << 4) + (int)self->Groups))->FreeBlocks) = ptr;
+            (*(int**)&((tBlockGroup*)((i << 4) + (int)Groups))->FreeBlocks) = ptr;
             return;
         }
     }

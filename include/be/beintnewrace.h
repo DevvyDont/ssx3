@@ -100,6 +100,41 @@ struct cBENewRaceInterface : public cBEInterface {
     //       by ~18 functions (cAI_initComputerRiders, cGFTrackStartState_preloadUpdate, cSectionMan_preLoadMode,
     //       cOVTemplate_Dialog_onWidgetEvent, ...), slot 2 (discard) by cBELibrary_readFromData and
     //       cBENetworkInterface_setSyncData
+
+    // Methods bound to their retail symbols by asm labels.
+    void setRaceTime(int raceTime) __asm__("cBENewRaceInterface_setRaceTime");
+    void setLocationID(int locationIndex) __asm__("cBENewRaceInterface_setLocationID");
+    void setNextLocationID(int nextLocation) __asm__("cBENewRaceInterface_setNextLocationID");
+    void* getCmdLineTrack() __asm__("cBENewRaceInterface_getCmdLineTrack");
+    void setDebugLocationFile(const char* name) __asm__("cBENewRaceInterface_setDebugLocationFile");
+    void* getLocationShortName() __asm__("cBENewRaceInterface_getLocationShortName");
+    void* getLocationBigFile(int i) __asm__("cBENewRaceInterface_getLocationBigFile");
+    void* getLocationFile(int iLocation) __asm__("cBENewRaceInterface_getLocationFile");
+    void* getLocationName(int iLocation) __asm__("cBENewRaceInterface_getLocationName");
+    int getLocationPeak(int location) __asm__("cBENewRaceInterface_getLocationPeak");
+    int getLocationType(int iLocation) __asm__("cBENewRaceInterface_getLocationType");
+    int getLocationIDFromScript(int scriptId) __asm__("cBENewRaceInterface_getLocationIDFromScript");
+    int getLocationDifficulty(int location) __asm__("cBENewRaceInterface_getLocationDifficulty");
+    void* getSectionFile(int iSection) __asm__("cBENewRaceInterface_getSectionFile");
+    int getSectionType(int iSection) __asm__("cBENewRaceInterface_getSectionType");
+    int setNumberAI(int count) __asm__("cBENewRaceInterface_setNumberAI");
+    int setGameMode(int mode) __asm__("cBENewRaceInterface_setGameMode");
+    void setGamePath(int mode) __asm__("cBENewRaceInterface_setGamePath");
+    int setGameEvent(int event) __asm__("cBENewRaceInterface_setGameEvent");
+    void* getEventName1(int i) __asm__("cBENewRaceInterface_getEventName1");
+    void* getModeName1(int gameMode) __asm__("cBENewRaceInterface_getModeName1");
+    int getSimThreshold(int kind, int place, int mode) __asm__("cBENewRaceInterface_getSimThreshold");
+    int getTimeLimit(int kind) __asm__("cBENewRaceInterface_getTimeLimit");
+    int getPeakGoal(int gameEvent, int tier) __asm__("cBENewRaceInterface_getPeakGoal");
+    int getPeakTimeLimit(int gameEvent, int tier) __asm__("cBENewRaceInterface_getPeakTimeLimit");
+    int getPeakRewardAmount(int gameEvent, int tier) __asm__("cBENewRaceInterface_getPeakRewardAmount");
+    int getPeakSplitTimePoints(int gameEvent, int tier, int checkpoint)
+        __asm__("cBENewRaceInterface_getPeakSplitTimePoints");
+    int getPlatinumGoal(int idx, int mode) __asm__("cBENewRaceInterface_getPlatinumGoal");
+    int getRival() __asm__("cBENewRaceInterface_getRival");
+    int getLocationDefaultGameMode(unsigned int location) __asm__("cBENewRaceInterface_getLocationDefaultGameMode");
+    int getLocationDefaultGameEvent(int idx) __asm__("cBENewRaceInterface_getLocationDefaultGameEvent");
+    int getDefaultGameMode(unsigned int gameEvent) __asm__("cBENewRaceInterface_getDefaultGameMode");
 };
 
 CHECK_SIZE(cBENewRaceInterface, 0x10);

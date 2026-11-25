@@ -428,6 +428,12 @@ struct cRiderState {
 
 CHECK_SIZE(cRiderState, 0x6C0);
 
+struct tQuaternion;
+
+struct t4Vector;
+
+union tControlCmd;
+
 struct cRider : public cRiderState, public cBeing {
     // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
     // 0x6C4-0x6CF: alignment padding; the compiler starts the derived part on a 16-byte boundary (cScriptObjRider,
@@ -542,6 +548,184 @@ struct cRider : public cRiderState, public cBeing {
     /* 0xB2C */ int mUberFlags; // [X]
     /* 0xB30 */ int mStartHandicap; // [X] = 0 (ctor)
     /* 0xB34 */ int mStatsIndex; // [X] stat column for cBEStatInterface_getCollisionAttrib
+
+    // Methods bound to their retail symbols by asm labels.
+    int GetWipeoutSlideHandle() __asm__("cRider_GetWipeoutSlideHandle");
+    void SetWipeoutSlideHandle(int slideHandle) __asm__("cRider_SetWipeoutSlideHandle");
+    int GetWipeoutTumbleHandle() __asm__("cRider_GetWipeoutTumbleHandle");
+    int GetRiderLOD() __asm__("cRider_GetRiderLOD");
+    int DoForceBoardVisualFXForNIS() __asm__("cRider_DoForceBoardVisualFXForNIS");
+    int IsOnGroundInNIS() __asm__("cRider_IsOnGroundInNIS");
+    int IsInNIS() __asm__("cRider_IsInNIS");
+    int IsRiderOnScreen() __asm__("cRider_IsRiderOnScreen");
+    void EulerToQuat(tQuaternion* out, float rx, float ry, float rz) __asm__("cRider_EulerToQuat");
+    void DoInSeqSoundUpdate(void* vobj, float when, float frameDelta, int flags) __asm__("cRider_DoInSeqSoundUpdate");
+    void flagEventBoostPowerUp(int mask, float amt) __asm__("cRider_flagEventBoostPowerUp");
+    void flagEventBump(cRider* attacker) __asm__("cRider_flagEventBump");
+    void flagEventBumpKnockdown(cRider* attacker) __asm__("cRider_flagEventBumpKnockdown");
+    void flagEventAddPoints() __asm__("cRider_flagEventAddPoints");
+    void flagEventLand(int isPipe, int rsm, int pressMode, tIntersectInfo* evt, float speed)
+        __asm__("cRider_flagEventLand");
+    void* flagEventMissionStart() __asm__("cRider_flagEventMissionStart__FPv");
+    void flagEventMissionSuccess(int peakID, int money) __asm__("cRider_flagEventMissionSuccess");
+    void flagEventAddCollectible(int peakID) __asm__("cRider_flagEventAddCollectible");
+    float calculateAheadDist(int useNormalDistance) __asm__("cRider_calculateAheadDist");
+    void checkAIPathSwitch(int keep) __asm__("cRider_checkAIPathSwitch");
+    void checkTrackPathEvents(float* pathDistXY, float* pathParam, t4Vector* pathPos)
+        __asm__("cRider_checkTrackPathEvents");
+    float getVerticalJump() __asm__("cRider_getVerticalJump");
+    int didPop() __asm__("cRider_didPop");
+    float getAudioBraking_0_to_1() __asm__("cRider_getAudioBraking_0_to_1");
+    float getAudioEdging_0_to_1() __asm__("cRider_getAudioEdging_0_to_1");
+    float getAudioPressure_0_to_1() __asm__("cRider_getAudioPressure_0_to_1");
+    float getAudioSpeed_0_to_1() __asm__("cRider_getAudioSpeed_0_to_1");
+    int getSphereTree() __asm__("cRider_getSphereTree");
+    float getHeading() __asm__("cRider_getHeading");
+    int getAnimModel() __asm__("cRider_getAnimModel");
+    int getRiderAnim() __asm__("cRider_getRiderAnim");
+    int getRiderHandler() __asm__("cRider_getRiderHandler");
+    int getPatchRID() __asm__("cRider_getPatchRID");
+    int getSectionID() __asm__("cRider_getSectionID");
+    int getTrackPath() __asm__("cRider_getTrackPath");
+    int getAIPath() __asm__("cRider_getAIPath");
+    int getPreviousRanking() __asm__("cRider_getPreviousRanking");
+    int getStartTick() __asm__("cRider_getStartTick");
+    int getFinishTick() __asm__("cRider_getFinishTick");
+    int getPenaltyTicks() __asm__("cRider_getPenaltyTicks");
+    int getDidNotFinish() __asm__("cRider_getDidNotFinish");
+    int getViewIndex() __asm__("cRider_getViewIndex");
+    int getRenderFlag() __asm__("cRider_getRenderFlag");
+    int getSafeRenderTick() __asm__("cRider_getSafeRenderTick");
+    int getMetrix() __asm__("cRider_getMetrix");
+    int getAirPredictor() __asm__("cRider_getAirPredictor");
+    void SetWipeoutTumbleHandle(int tumbleHandle) __asm__("cRider_SetWipeoutTumbleHandle");
+    int getFocusBox() __asm__("cRider_getFocusBox");
+    int getShadow() __asm__("cRider_getShadow");
+    int getBoostMode() __asm__("cRider_getBoostMode");
+    int getWipeoutRecoveryMode() __asm__("cRider_getWipeoutRecoveryMode");
+    int getLaunchDelaySecs() __asm__("cRider_getLaunchDelaySecs");
+    int getNaturalAirMode() __asm__("cRider_getNaturalAirMode");
+    void addFocusBox() __asm__("cRider_addFocusBox");
+    void addRiderMetrix() __asm__("cRider_addRiderMetrix__FP6cRider");
+    int isSafeToDelete() __asm__("cRider_isSafeToDelete");
+    void parsePartsFromBuf(int pData) __asm__("cRider_parsePartsFromBuf");
+    void initOnce(int immediate) __asm__("cRider_initOnce");
+    int isLoaded() __asm__("cRider_isLoaded");
+    void putAtDropOffBC() __asm__("cRider_putAtDropOffBC");
+    void putAtStartpoint(int StartpointID, int StartpointType) __asm__("cRider_putAtStartpoint");
+    void cleanupAfterPutAt(int notify) __asm__("cRider_cleanupAfterPutAt");
+    int getMotionState() __asm__("cRider_getMotionState__FPv");
+    void getMotionStateName() __asm__("cRider_getMotionStateName");
+    int getControlState() __asm__("cRider_getControlState__FPv");
+    void getControlStateName() __asm__("cRider_getControlStateName");
+    void getControlCmd(tControlCmd* out) __asm__("cRider_getControlCmd");
+    float getMass() __asm__("cRider_getMass");
+    float getGrabAnimSpeedScale() __asm__("cRider_getGrabAnimSpeedScale");
+    void initBoost() __asm__("cRider_initBoost");
+    void SetRiderLights() __asm__("cRider_SetRiderLights");
+    void renderBody() __asm__("cRider_renderBody");
+    void flushActiveLights() __asm__("cRider_flushActiveLights");
+    int isInVertZone() __asm__("cRider_isInVertZone");
+    int estimateFinishTick() __asm__("cRider_estimateFinishTick");
+    int estimateFinishScore() __asm__("cRider_estimateFinishScore");
+    int getMissionInt(int query) __asm__("cRider_getMissionInt");
+    int getIdentity() __asm__("cRider_getIdentity");
+    int getCheatIdentity() __asm__("cRider_getCheatIdentity");
+    int isGroundNormalValid() __asm__("cRider_isGroundNormalValid");
+    void OnStartObjectUse() __asm__("cRider_OnStartObjectUse");
+    void OnEndObjectUse() __asm__("cRider_OnEndObjectUse");
+    void OnInSeqUpdate(int id, float currFrame, float frameDelta, int type, int flags) __asm__("cRider_OnInSeqUpdate");
+    void OnInSeqKeyEvent(int id, float currFrame, float ignoredFloat, int type, int flags)
+        __asm__("cRider_OnInSeqKeyEvent");
+    void cancelRiderTransitions() __asm__("cRider_cancelRiderTransitions");
+    void doFinishEvent() __asm__("cRider_doFinishEvent");
+    void quitEvent() __asm__("cRider_quitEvent");
+    void flagEventReaction(int mode, float forceDelaySec) __asm__("cRider_flagEventReaction");
+    void flagEventPunch(cRider* attacker) __asm__("cRider_flagEventPunch");
+    void flagEventPunchKnockdown(cRider* attacker) __asm__("cRider_flagEventPunchKnockdown");
+    void flagEventPathCheckpoint(int* checkpoint) __asm__("cRider_flagEventPathCheckpoint");
+    void flagEventPathEvent(tPathEventNode* pathEvent, int isPrev, int isCur) __asm__("cRider_flagEventPathEvent");
+    void flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt) __asm__("cRider_flagEventWipeout");
+    void flagEventWorld(int kind, float amt) __asm__("cRider_flagEventWorld");
+    void flagEventWipeoutRecover() __asm__("cRider_flagEventWipeoutRecover");
+    void initPath(int flag) __asm__("cRider_initPath");
+    void updateTrackPath() __asm__("cRider_updateTrackPath");
+    void switchToResetPath() __asm__("cRider_switchToResetPath");
+    float getDistanceLeft() __asm__("cRider_getDistanceLeft__FPv");
+    float getTotalPathDistance() __asm__("cRider_getTotalPathDistance__FPv");
+    void setLocal(int isLocal) __asm__("cRider_setLocal");
+    int isLocal() __asm__("cRider_isLocal");
+    int isRidingFlexRail() __asm__("cRider_isRidingFlexRail");
+    void setVelocity(long long *velocity) __asm__("cRider_setVelocity");
+    int isOnRaceCourse() __asm__("cRider_isOnRaceCourse");
+    int isOnHalfPipeCourse() __asm__("cRider_isOnHalfPipeCourse");
+    void setTrackPath(int value) __asm__("cRider_setTrackPath");
+    void setAIPath(int value) __asm__("cRider_setAIPath");
+    void setTotalPathDistance(float fparg0) __asm__("cRider_setTotalPathDistance");
+    void setPreviousRanking(int value) __asm__("cRider_setPreviousRanking");
+    void setRaceUnfinished() __asm__("cRider_setRaceUnfinished");
+    void setFinishedRace() __asm__("cRider_setFinishedRace");
+    int isPastFinishLine() __asm__("cRider_isPastFinishLine");
+    int isFinishedRace() __asm__("cRider_isFinishedRace");
+    void setStartTick(int startTick) __asm__("cRider_setStartTick");
+    void setFinishTick(int finishTick) __asm__("cRider_setFinishTick");
+    void setPenaltyTicks(int penaltyTicks) __asm__("cRider_setPenaltyTicks");
+    void setDidNotFinish(int didNotFinish) __asm__("cRider_setDidNotFinish");
+    void setAIIndex(int aiIndex) __asm__("cRider_setAIIndex");
+    void setViewIndex(int viewIndex) __asm__("cRider_setViewIndex");
+    void setHuman() __asm__("cRider_setHuman");
+    void setActor() __asm__("cRider_setActor");
+    int isActor() __asm__("cRider_isActor");
+    int isLocalHuman() __asm__("cRider_isLocalHuman");
+    void setRenderFlag(int renderFlag) __asm__("cRider_setRenderFlag");
+    void setSafeRenderTick(int safeRenderTick) __asm__("cRider_setSafeRenderTick");
+    int isInTunnel() __asm__("cRider_isInTunnel");
+    void setInTunnel(int value) __asm__("cRider_setInTunnel");
+    void setBoostMode(int boostMode) __asm__("cRider_setBoostMode");
+    void setWipeoutRecoveryMode(int value) __asm__("cRider_setWipeoutRecoveryMode");
+    void setInitialBoost(float fparg0) __asm__("cRider_setInitialBoost");
+    void setBoostPowerSource(int sourceMask) __asm__("cRider_setBoostPowerSource");
+    void setLaunchDelaySecs(int handicap) __asm__("cRider_setLaunchDelaySecs");
+    void setForcedAttribLevel(int statsIndex) __asm__("cRider_setForcedAttribLevel");
+    void setNaturalAirMode(int value) __asm__("cRider_setNaturalAirMode");
+    int isUberGrabAllowed() __asm__("cRider_isUberGrabAllowed");
+    int isUberRailAllowed() __asm__("cRider_isUberRailAllowed");
+    void rotateOrientation(t4Vector* axis, float angle) __asm__("cRider_rotateOrientation");
+    void updateOrientationImplicit() __asm__("cRider_updateOrientationImplicit");
+    void updateAnimation(float value) __asm__("cRider_updateAnimation");
+    void* setMotionState() __asm__("cRider_setMotionState__FPv");
+    void* setControlState() __asm__("cRider_setControlState__FPv");
+    void updateTimeWarp(float x) __asm__("cRider_updateTimeWarp");
+    void updateBoost() __asm__("cRider_updateBoost");
+    void updateLegIK() __asm__("cRider_updateLegIK");
+    void updateFocus() __asm__("cRider_updateFocus");
+    void updateOverlapList() __asm__("cRider_updateOverlapList");
+    void updateSplitMiscFX() __asm__("cRider_updateSplitMiscFX");
+    void updateSplitPaused() __asm__("cRider_updateSplitPaused");
+    void updateSplit1() __asm__("cRider_updateSplit1");
+    void updateSplit2() __asm__("cRider_updateSplit2");
+    void updateSplit3() __asm__("cRider_updateSplit3");
+    void updateSplit4() __asm__("cRider_updateSplit4");
+    void* updateSplit5() __asm__("cRider_updateSplit5__FPv");
+    void updateSplit6() __asm__("cRider_updateSplit6");
+    void updateSplit7() __asm__("cRider_updateSplit7");
+    void updateSplit8() __asm__("cRider_updateSplit8");
+    void* updateSplit9() __asm__("cRider_updateSplit9__FPv");
+    void updateSplit10() __asm__("cRider_updateSplit10");
+    void updateSplit11() __asm__("cRider_updateSplit11");
+    void updateSplit12() __asm__("cRider_updateSplit12");
+    void updateActiveLights() __asm__("cRider_updateActiveLights");
+    int renderClip() __asm__("cRider_renderClip");
+    int renderLights() __asm__("cRider_renderLights");
+    void renderShadow() __asm__("cRider_renderShadow");
+    void renderFX() __asm__("cRider_renderFX");
+    void updateDangerLevel() __asm__("cRider_updateDangerLevel");
+    void resetForMission() __asm__("cRider_resetForMission");
+    int updateFinishTest() __asm__("cRider_updateFinishTest");
+    void setUbersAllowed(int uberAllowedFlags) __asm__("cRider_setUbersAllowed");
+    void updateWind() __asm__("cRider_updateWind");
+    int syncCheckSum() __asm__("cRider_syncCheckSum");
+    void updateTerminalVelocity() __asm__("cRider_updateTerminalVelocity");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

@@ -32,12 +32,12 @@ INCLUDE_ASM("bx/bigfile", cBigFile_cBigFile1__FP8cBigFile);
  *
  * @return @p self
  */
-cBigFile* cBigFile_cBigFile1(cBigFile* self)
+cBigFile* cBigFile::cBigFile1()
 {
-    self->Mounted = 0;
-    self->Handle = -1;
-    cBigFile_open(self);
-    return self;
+    Mounted = 0;
+    Handle = -1;
+    cBigFile_open(this);
+    return this;
 }
 #endif
 
@@ -54,7 +54,7 @@ INCLUDE_ASM("bx/bigfile", cBigFile__cBigFile__FP8cBigFilei);
  */
 void cBigFile__cBigFile(cBigFile* self, int flags)
 {
-    cBigFile_close(self);
+    self->close();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -75,13 +75,13 @@ int FILESYS_delbigsync_ret(int handle, int arg) __asm__("FILESYS_delbigsync");
  *
  * @return 1 when it was not open or closed cleanly, otherwise 0
  */
-int cBigFile_close(cBigFile* self)
+int cBigFile::close()
 {
     int result = 1;
-    if (self->Mounted != 0) {
-        result = FILESYS_delbigsync_ret(self->Handle, 100) != 0;
+    if (Mounted != 0) {
+        result = FILESYS_delbigsync_ret(Handle, 100) != 0;
     }
-    self->Mounted = 0;
+    Mounted = 0;
     return result;
 }
 #endif
@@ -155,9 +155,9 @@ INCLUDE_ASM("bx/bigfile", cBlockMan_allignSize);
  * @param size  the size in bytes
  * @return @p size rounded up
  */
-extern "C" int cBlockMan_allignSize(cBlockMan* self, int size)
+int cBlockMan::allignSize(int size)
 {
-    int align = self->Allignment;
+    int align = Allignment;
     return align * ((size + align - 1) / align);
 }
 #endif

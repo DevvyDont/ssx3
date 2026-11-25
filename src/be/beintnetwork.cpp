@@ -254,7 +254,7 @@ extern "C" void cBEProfileLib_copy(sBEPlayerData* dst, sBEPlayerData* src);
  * @param srcProfile  source profile index into cBELibrary_profileLib
  * @param destProfile  destination profile index
  */
-extern "C" void cBENetworkInterface_copyProfile(cBENetworkInterface* self, int srcProfile, int destProfile)
+void cBENetworkInterface::copyProfile(int srcProfile, int destProfile)
 {
     sBEPlayerData* src = &cBELibrary_profileLib[srcProfile];
     cBEProfileLib_copy(&cBELibrary_profileLib[destProfile], src);
@@ -282,16 +282,16 @@ extern sRiderEntry_0014E9F8 D_00535B3C;
  * player record 0 into record 1 and profile 0 into profile 1 (the client is player 1 online). Then it swaps
  * the two players' option records (func_0014EB08), which postInitBE swaps back.
  */
-extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
+void cBENetworkInterface::preInitBE()
 {
     cBEProfileLib_init(D_004BA348, 0);
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
         sRiderEntry_0014E9F8* riderEntry = &D_00535B3C;
         riderEntry[0] = riderEntry[-1];
-        cBENetworkInterface_copyProfile(self, 0, 1);
+        copyProfile(0, 1);
     }
-    func_0014EB08_self(self);
+    func_0014EB08_self(this);
 }
 #endif
 
@@ -311,13 +311,13 @@ void func_0014EB08_self(void* self) __asm__("func_0014EB08");
  * Reloads the Stat (BE interface 3) and Aggression (12) interfaces through their virtual discard (slot 2),
  * then swaps the two players' option records again (func_0014EB08), undoing preInitBE's swap.
  */
-extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
+void cBENetworkInterface::postInitBE()
 {
     cBEInterface* statInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 3);
     statInterface->discard();
     cBEInterface* aggressionInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
     aggressionInterface->discard();
-    func_0014EB08_self(self);
+    func_0014EB08_self(this);
 }
 #endif
 
@@ -410,7 +410,7 @@ extern "C" void cBEProfileLib_backupCharProfile(sBEPlayerData* data, int charID)
  *
  * @param idx  the player (profile index) whose character record is saved
  */
-extern "C" void cBENetworkInterface_backupCharProfile(cBENetworkInterface* self, int idx)
+void cBENetworkInterface::backupCharProfile(int idx)
 {
     cBEProfileLib_backupCharProfile(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].cCharacterID);
     for (int i = 0; i < 6; i++)
@@ -434,7 +434,7 @@ extern "C" void cBEProfileLib_restoreCharProfile(sBEPlayerData* data);
  *
  * @param idx  the player (profile index) to restore
  */
-extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self, int idx)
+void cBENetworkInterface::restoreCharProfile(int idx)
 {
     cBEProfileLib_restoreCharProfile(&cBELibrary_profileLib[idx]);
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
@@ -496,7 +496,7 @@ extern sNetChar_0014EE28 cBELibrary_characterDB[];
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the name
  */
-extern "C" void* cBECharacterInterface_getName(cBECharacterInterface* self, int rider)
+void* cBECharacterInterface::getName(int rider)
 {
     return &cBELibrary_characterDB[cBELibrary_getCharacterID(rider)];
 }
@@ -532,7 +532,7 @@ extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
  * @param rider  the rider whose character is used
  * @return the name
  */
-extern "C" void* cBECharacterInterface_getShortName(cBECharacterInterface* self, int rider)
+void* cBECharacterInterface::getShortName(int rider)
 {
     int characterId = cBELibrary_getCharacterID(rider);
     int index = cBELibrary_getCheatCharacterID(rider);
@@ -567,7 +567,7 @@ extern sNetEntry88_00530990 D_00530990[];
  * @param index  the cheat character id (0 for none)
  * @return the name
  */
-extern "C" void* cBECharacterInterface_getShortNameByCharacter(cBECharacterInterface* self, int player, int index)
+void* cBECharacterInterface::getShortNameByCharacter(int player, int index)
 {
     if (index >= 10 && index < 30) {
         return &D_0043FA38[index];
@@ -595,7 +595,7 @@ extern sNetChar_0014EF00 D_005309A0[];
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* cBECharacterInterface_getNickName(cBECharacterInterface* self, int rider)
+void* cBECharacterInterface::getNickName(int rider)
 {
     return &D_005309A0[cBELibrary_getCharacterID(rider)];
 }

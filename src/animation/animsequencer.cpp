@@ -19,11 +19,11 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeWeight__FP13cAnimSequen
  * @param targetWeight  the weight to reach
  * @param time  the fade time
  */
-void cAnimSequence_fadeWeight(cAnimSequence* self, float targetWeight, float time)
+void cAnimSequence::fadeWeight(float targetWeight, float time)
 {
-    self->TargetWeight = targetWeight;
-    self->WeightTimer = time;
-    self->IsFadeOutExpire = 0;
+    TargetWeight = targetWeight;
+    WeightTimer = time;
+    IsFadeOutExpire = 0;
 }
 #endif
 
@@ -38,14 +38,14 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeOutAndExpire);
  *
  * @param time  the fade-out time in seconds (On Tour time)
  */
-extern "C" void cAnimSequence_fadeOutAndExpire(cAnimSequence* self, float time)
+void cAnimSequence::fadeOutAndExpire(float time)
 {
-    if (self->TargetWeight != 0.0f || self->WeightTimer == 0.0f || time < self->WeightTimer)
+    if (TargetWeight != 0.0f || WeightTimer == 0.0f || time < WeightTimer)
     {
-        self->WeightTimer = time;
+        WeightTimer = time;
     }
-    self->TargetWeight = 0.0f;
-    self->IsFadeOutExpire = 1;
+    TargetWeight = 0.0f;
+    IsFadeOutExpire = 1;
 }
 #endif
 
@@ -64,11 +64,11 @@ extern const char str_AnimTrigger[];
  * @param key  the trigger's event id (On Tour id)
  * @param weight  the time it fires at (On Tour time); the current name is misleading
  */
-extern "C" void cAnimSequence_addTrigger(cAnimSequence* self, int key, float weight)
+void cAnimSequence::addTrigger(int key, float weight)
 {
     tTrigger* n = (tTrigger*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-    tTrigger* old = self->Triggers;
-    self->Triggers = (tTrigger*)n;
+    tTrigger* old = Triggers;
+    Triggers = (tTrigger*)n;
     n->ID = key;
     n->TriggerTime = weight;
     n->Next = old;
@@ -90,11 +90,11 @@ extern const char str_AnimTrigger[];
  *
  * @param key  the trigger's event id (On Tour id)
  */
-extern "C" void cAnimSequence_addEndTrigger(cAnimSequence* self, int key)
+void cAnimSequence::addEndTrigger(int key)
 {
     tTrigger* n = (tTrigger*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-    tTrigger* old = self->Triggers;
-    self->Triggers = (tTrigger*)n;
+    tTrigger* old = Triggers;
+    Triggers = (tTrigger*)n;
     n->ID = key;
     n->IsEndTrigger = 1;
     n->Next = old;
@@ -117,9 +117,10 @@ void operator_delete(int* ptr);
  * @param id  the trigger's event id
  * @param time  the time the trigger fires at
  */
-extern "C" void cAnimSequence_removeTrigger(cAnimSequence* self, int id, float time) {
+void cAnimSequence::removeTrigger(int id, float time)
+{
     tTrigger** link;
-    for (link = (tTrigger**)(&self->Triggers); *link != 0; link = &(*link)->Next) {
+    for (link = (tTrigger**)(&Triggers); *link != 0; link = &(*link)->Next) {
         tTrigger* n = *link;
         if (n->ID == id && n->TriggerTime == time && n->IsEndTrigger == 0) {
             *link = n->Next;
@@ -142,10 +143,10 @@ void operator_delete(int* ptr);
  *
  * @param key  the trigger's event id (On Tour id)
  */
-extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int key)
+void cAnimSequence::removeEndTrigger(int key)
 {
     tTrigger** pp;
-    for (pp = (tTrigger**)&self->Triggers; *pp != 0; pp = &(*pp)->Next)
+    for (pp = (tTrigger**)&Triggers; *pp != 0; pp = &(*pp)->Next)
     {
         if ((*pp)->ID == key)
         {
@@ -171,12 +172,12 @@ void operator_delete(int* ptr);
  *
  * Pops and deletes nodes from the list at +0xAC until it is empty.
  */
-extern "C" void cAnimSequence_removeAllTriggers(cAnimSequence* self)
+void cAnimSequence::removeAllTriggers()
 {
-    while ((char*)self->Triggers != 0)
+    while ((char*)Triggers != 0)
     {
-        tTrigger* node = self->Triggers;
-        self->Triggers = (tTrigger*)node->Next;
+        tTrigger* node = Triggers;
+        Triggers = (tTrigger*)node->Next;
         operator_delete((int*)node);
     }
 }
@@ -215,9 +216,9 @@ struct sSeq_00313C50
  * @param i  the sub-animation slot (On Tour sub)
  * @param anim  the animation: bank in the low byte, clip above it (On Tour tAnimID)
  */
-extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim)
+void cAnimSequence::setSubAnim(int i, int anim)
 {
-    sSeq_00313C50* sequence = (sSeq_00313C50*)self;
+    sSeq_00313C50* sequence = (sSeq_00313C50*)this;
     (sequence->e + i)->anim = anim;
     char* clip = (char*)cAnimDataBase_TheAnimDataBase->DataSources[anim & 0xFF];
     char* clipEntry = (char*)(((unsigned)anim >> 8) * 0x14 + *(int*)(clip + 0x8));
@@ -247,10 +248,10 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimTime);
  * @param index  the sub-animation slot
  * @param val  the time in seconds
  */
-extern "C" void cAnimSequence_setSubAnimTime(cAnimSequence* self, int index, float val)
+void cAnimSequence::setSubAnimTime(int index, float val)
 {
-    self->SubAnims[index].Time = val;
-    self->CheckTriggersAtCurrentFrame = 1;
+    SubAnims[index].Time = val;
+    CheckTriggersAtCurrentFrame = 1;
 }
 #endif
 
@@ -263,12 +264,12 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimTimeScale);
  * Stores @p fparg0 at +0x8 of the 0x1C-byte slot (at +0xC + index * 0x1C of the sequence), the field
  * cAnimSequence_setSubAnim resets to 1.
  *
- * @param sequence  the animation sequence
  * @param index  the sub-animation slot
  * @param fparg0  the time scale
  */
-extern "C" void cAnimSequence_setSubAnimTimeScale(cAnimSequence* sequence, int index, float fparg0) {
-    sequence->SubAnims[index].TimeScale = fparg0;
+void cAnimSequence::setSubAnimTimeScale(int index, float fparg0)
+{
+    SubAnims[index].TimeScale = fparg0;
 }
 #endif
 
@@ -284,9 +285,9 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimWeight);
  * @param index  the sub-animation slot
  * @param val  the weight, normally 0-1
  */
-extern "C" void cAnimSequence_setSubAnimWeight(cAnimSequence* self, int index, float val)
+void cAnimSequence::setSubAnimWeight(int index, float val)
 {
-    self->SubAnims[index].Weight = val;
+    SubAnims[index].Weight = val;
 }
 #endif
 
@@ -301,9 +302,9 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimType);
  * @param index  the sub-animation slot
  * @param val  the play type (0 hold, 1 loop)
  */
-extern "C" void cAnimSequence_setSubAnimType(cAnimSequence* self, int index, int val)
+void cAnimSequence::setSubAnimType(int index, int val)
 {
-    self->SubAnims[index].Type = val;
+    SubAnims[index].Type = val;
 }
 #endif
 
@@ -316,11 +317,11 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_resetSubAnim);
  * Clears the active flag at +0x14 of the 0x1C-byte slot (+0x18 + index * 0x1C); cAnimSequencer_getAnimBlendFrames
  * skips inactive slots, and cAnimSequence_setSubAnim reinitialises the slot the next time it fills it.
  *
- * @param sequence  the animation sequence
  * @param index  the sub-animation slot
  */
-extern "C" void cAnimSequence_resetSubAnim(cAnimSequence* sequence, int index) {
-    sequence->SubAnims[index].IsActive = 0;
+void cAnimSequence::resetSubAnim(int index)
+{
+    SubAnims[index].IsActive = 0;
 }
 #endif
 
@@ -338,19 +339,19 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_getNetWeight);
  * @return the net weight
  */
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
-extern "C" float cAnimSequence_getNetWeight(cAnimSequence* self, int i)
+float cAnimSequence::getNetWeight(int i)
 {
-    float time = self->SubAnims[i].Time;
-    float w = self->CurrentWeight * self->SubAnims[i].Weight;
-    float end = self->SubAnims[i].TotalTime;
-    if (time < self->StartFadeTime)
+    float time = SubAnims[i].Time;
+    float w = CurrentWeight * SubAnims[i].Weight;
+    float end = SubAnims[i].TotalTime;
+    if (time < StartFadeTime)
     {
-        w = (time / self->StartFadeTime) <? w;
+        w = (time / StartFadeTime) <? w;
     }
     float rem = end - time;
-    if (rem < self->EndFadeTime)
+    if (rem < EndFadeTime)
     {
-        w = (rem / self->EndFadeTime) <? w;
+        w = (rem / EndFadeTime) <? w;
     }
     return w;
 }
@@ -517,13 +518,12 @@ extern "C" void* cAnimSequence_cAnimSequence(void* mem, int arg);
  * Allocates 0xD0 bytes tagged 'AnimSequence', constructs it with cAnimSequence_cAnimSequence(@p sequenceID), links it at the head of the
  * list (+0x4, next at +0xC8) and increments the count (+0x0).
  *
- * @param seq  the sequencer (this)
  * @param sequenceID  the new sequence's id (On Tour sequenceID)
  * @return the new sequence
  */
-extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int sequenceID)
+void* cAnimSequencer::newSequence(int sequenceID)
 {
-    cAnimSequencer* self = seq;
+    cAnimSequencer* self = this;
     cAnimSequence* node = (cAnimSequence*)cAnimSequence_cAnimSequence(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
     node->Next = self->PlayList;
     *(cAnimSequence**)&self->PlayList = node;
@@ -549,11 +549,11 @@ struct sSequencer_00314368 {
  *
  * @param node  the sequence to append
  */
-extern "C" void cAnimSequencer_appendSequence(cAnimSequencer* self, cAnimSequence* node)
+void cAnimSequencer::appendSequence(cAnimSequence* node)
 {
-    if (self->PlayList != 0)
+    if (PlayList != 0)
     {
-        cAnimSequence* tail = self->PlayList;
+        cAnimSequence* tail = PlayList;
         while (tail->Next != 0)
         {
             tail = tail->Next;
@@ -562,10 +562,10 @@ extern "C" void cAnimSequencer_appendSequence(cAnimSequencer* self, cAnimSequenc
     }
     else
     {
-        self->PlayList = (cAnimSequence*)node;
+        PlayList = (cAnimSequence*)node;
     }
     node->Next = 0;
-    self->NumPlaying++;
+    NumPlaying++;
 }
 #endif
 
@@ -586,12 +586,12 @@ struct sSequencer_003143C8 {
  *
  * @param node  the sequence to unlink
  */
-extern "C" void cAnimSequencer_removeSequence(cAnimSequencer* self, cAnimSequence* node)
+void cAnimSequencer::removeSequence(cAnimSequence* node)
 {
-    if (self->PlayList == node) {
-        self->PlayList = (cAnimSequence*)node->Next;
+    if (PlayList == node) {
+        PlayList = (cAnimSequence*)node->Next;
     } else {
-        cAnimSequence* cur = self->PlayList;
+        cAnimSequence* cur = PlayList;
         while (cur != 0) {
             if (cur->Next == node) {
                 break;
@@ -601,7 +601,7 @@ extern "C" void cAnimSequencer_removeSequence(cAnimSequencer* self, cAnimSequenc
         cur->Next = node->Next;
     }
     node->Next = 0;
-    self->NumPlaying--;
+    NumPlaying--;
 }
 #endif
 
@@ -621,10 +621,10 @@ extern "C" float cAnimSequence_getNetWeight(cAnimSequence* self, int i);
  * @return the number of frames written
  */
 // PORT: Mask is 64-bit (ld/sd).
-extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, tAnimBlendFrame* out)
+int cAnimSequencer::getAnimBlendFrames(tAnimBlendFrame* out)
 {
     int count = 0;
-    cAnimSequence* n = self->PlayList;
+    cAnimSequence* n = PlayList;
     while (n != 0)
     {
         for (int j = 0; j < 3; j++)
@@ -638,7 +638,7 @@ extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, tAnimBlen
                 blendFrame->OrientationOffset.Q = n->OrientationOffset.Q;
                 blendFrame->IsFlipped = n->IsFlipped;
                 blendFrame->Priority = n->Priority;
-                blendFrame->Weight = cAnimSequence_getNetWeight(n, j);
+                blendFrame->Weight = n->getNetWeight(j);
                 blendFrame->Mask = n->Mask;
                 count++;
             }
@@ -666,12 +666,12 @@ extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
  * @param val  the start time in seconds (On Tour starttime)
  * @return the new sequence
  */
-extern "C" void* cAnimSequencer_playAndHold(cAnimSequencer* self, int sequenceID, int anim, float val)
+void* cAnimSequencer::playAndHold(int sequenceID, int anim, float val)
 {
-    void* node = cAnimSequencer_newSequence(self, sequenceID);
-    cAnimSequence_setSubAnim((cAnimSequence*)node, 0, anim);
-    cAnimSequence_setSubAnimTime((cAnimSequence*)node, 0, val);
-    cAnimSequence_setSubAnimType((cAnimSequence*)node, 0, 0);
+    void* node = newSequence(sequenceID);
+    ((cAnimSequence*)node)->setSubAnim(0, anim);
+    ((cAnimSequence*)node)->setSubAnimTime(0, val);
+    ((cAnimSequence*)node)->setSubAnimType(0, 0);
     return node;
 }
 #endif
@@ -693,12 +693,12 @@ extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
  * @param val  the start time in seconds (On Tour starttime)
  * @return the new sequence
  */
-extern "C" void* cAnimSequencer_playAndLoop(cAnimSequencer* self, int sequenceID, int anim, float val)
+void* cAnimSequencer::playAndLoop(int sequenceID, int anim, float val)
 {
-    void* node = cAnimSequencer_newSequence(self, sequenceID);
-    cAnimSequence_setSubAnim((cAnimSequence*)node, 0, anim);
-    cAnimSequence_setSubAnimTime((cAnimSequence*)node, 0, val);
-    cAnimSequence_setSubAnimType((cAnimSequence*)node, 0, 1);
+    void* node = newSequence(sequenceID);
+    ((cAnimSequence*)node)->setSubAnim(0, anim);
+    ((cAnimSequence*)node)->setSubAnimTime(0, val);
+    ((cAnimSequence*)node)->setSubAnimType(0, 1);
     return node;
 }
 #endif
@@ -720,10 +720,10 @@ struct sSequencer_003145F8 {
  *
  * @param node  the sequence to remove (On Tour seq)
  */
-extern "C" void cAnimSequencer_expire(cAnimSequencer* self, cAnimSequence* node)
+void cAnimSequencer::expire(cAnimSequence* node)
 {
     cAnimSequence** pp;
-    for (pp = (cAnimSequence**)&self->PlayList; *pp != 0; pp = &(*pp)->Next)
+    for (pp = (cAnimSequence**)&PlayList; *pp != 0; pp = &(*pp)->Next)
     {
         cAnimSequence* n = *pp;
         if (n == node)
@@ -731,10 +731,10 @@ extern "C" void cAnimSequencer_expire(cAnimSequencer* self, cAnimSequence* node)
             *pp = n->Next;
             if (n != 0)
             {
-                cAnimSequence_removeAllTriggers((cAnimSequence*)n);
+                n->removeAllTriggers();
                 operator_delete((int*)n);
             }
-            self->NumPlaying--;
+            NumPlaying--;
             return;
         }
     }
@@ -756,18 +756,18 @@ struct sSequencer_00314668 {
  * Each sequence is unlinked from the list head, has its triggers removed (cAnimSequence_removeAllTriggers, On Tour
  * cAnimSequence::removeAllTriggers) and is freed with operator delete; the count drops by one for each.
  */
-extern "C" void cAnimSequencer_expireAll(cAnimSequencer* self)
+void cAnimSequencer::expireAll()
 {
-    while (self->PlayList != 0)
+    while (PlayList != 0)
     {
-        cAnimSequence* n = self->PlayList;
-        self->PlayList = (cAnimSequence*)n->Next;
+        cAnimSequence* n = PlayList;
+        PlayList = (cAnimSequence*)n->Next;
         if (n != 0)
         {
-            cAnimSequence_removeAllTriggers((cAnimSequence*)n);
+            n->removeAllTriggers();
             operator_delete((int*)n);
         }
-        self->NumPlaying--;
+        NumPlaying--;
     }
 }
 #endif
@@ -782,11 +782,11 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_fadeOutAndExpireAll);
  *
  * @param time  the fade-out time in seconds (On Tour time)
  */
-extern "C" void cAnimSequencer_fadeOutAndExpireAll(cAnimSequencer* self, float time)
+void cAnimSequencer::fadeOutAndExpireAll(float time)
 {
-    for (cAnimSequence* node = self->PlayList; node != 0; node = node->Next)
+    for (cAnimSequence* node = PlayList; node != 0; node = node->Next)
     {
-        cAnimSequence_fadeOutAndExpire(node, time);
+        node->fadeOutAndExpire(time);
     }
 }
 #endif
@@ -803,11 +803,11 @@ extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int v);
  *
  * @param trig  the end trigger's event id (On Tour trig)
  */
-extern "C" void cAnimSequencer_removeAllEndTriggers(cAnimSequencer* self, int trig)
+void cAnimSequencer::removeAllEndTriggers(int trig)
 {
-    for (cAnimSequence* node = self->PlayList; node != 0; node = node->Next)
+    for (cAnimSequence* node = PlayList; node != 0; node = node->Next)
     {
-        cAnimSequence_removeEndTrigger(node, trig);
+        node->removeEndTrigger(trig);
     }
 }
 #endif
@@ -825,9 +825,9 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getSequence__FP14cAnimSequ
  * @param index  zero-based position in the list
  * @return the node, or 0 if the list has no node at that position
  */
-cAnimSequence* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
+cAnimSequence* cAnimSequencer::getSequence(int index)
 {
-    cAnimSequence* cur = self->PlayList;
+    cAnimSequence* cur = PlayList;
     while (cur != 0 && index-- > 0) {
         cur = cur->Next;
     }
@@ -844,8 +844,9 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_isPlaying);
  * @param id  the sequence id (the node's first word)
  * @return 1 when found, else 0
  */
-extern "C" int cAnimSequencer_isPlaying(cAnimSequencer* self, int id) {
-    for (cAnimSequence *n = self->PlayList; n != 0; n = n->Next) {
+int cAnimSequencer::isPlaying(int id)
+{
+    for (cAnimSequence *n = PlayList; n != 0; n = n->Next) {
         if (*(int *)n == id) {
             return 1;
         }
@@ -862,9 +863,10 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getPosition);
  * @param id  the sequence id (the node's first word; On Tour sequenceID)
  * @return the sequence's zero-based position from mFirstSequence, or -1 when it is not queued
  */
-extern "C" int cAnimSequencer_getPosition(cAnimSequencer* self, int id) {
+int cAnimSequencer::getPosition(int id)
+{
     int index = 0;
-    for (cAnimSequence *n = self->PlayList; n != 0; n = n->Next) {
+    for (cAnimSequence *n = PlayList; n != 0; n = n->Next) {
         if (*(int *)n == id) {
             return index;
         }
@@ -894,11 +896,11 @@ extern "C" void cAnimSequence_writeToReplayFrame(cAnimSequence* node, cBxReplayF
  *
  * @param stream  the output stream
  */
-extern "C" void cAnimSequencer_writeToReplayFrame(cAnimSequencer* self, cBxReplayFrame* stream)
+void cAnimSequencer::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((const char*)self, 4);
-    cAnimSequence* n = self->PlayList;
-    for (int i = 0; i < self->NumPlaying; i++)
+    stream->write((const char*)this, 4);
+    cAnimSequence* n = PlayList;
+    for (int i = 0; i < NumPlaying; i++)
     {
         cAnimSequence_writeToReplayFrame(n, stream);
         n = n->Next;
@@ -926,17 +928,17 @@ extern const char str_AnimSequence[];
  *
  * @param stream  the input stream
  */
-extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, cBxReplayFrame* stream)
+void cAnimSequencer::readFromReplayFrame(cBxReplayFrame* stream)
 {
     int n;
     stream->read((char*)&n, 4);
-    self->NumPlaying = 0;
+    NumPlaying = 0;
     for (int i = 0; i < n; i++)
     {
         cAnimSequence* node = new (str_AnimSequence, 0x20000000, 0) cAnimSequence;
         MEM_fill(node, 0, 208);
         cAnimSequence_readFromReplayFrame(node, stream);
-        cAnimSequencer_appendSequence(self, node);
+        appendSequence(node);
     }
 }
 #endif
@@ -1106,8 +1108,9 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_getNumModelParts);
  *
  * @return the model part count
  */
-extern "C" short cMdfArchive_getNumModelParts(cMdfArchive* self) {
-    tMdfArchive* header = self->ArchiveHeader;
+short cMdfArchive::getNumModelParts()
+{
+    tMdfArchive* header = ArchiveHeader;
     if (((char*)header) != 0) {
         return header->mNumModels;
     }
@@ -1128,10 +1131,11 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * @param name  the part name to look for
  * @return 1 when found, else 0
  */
-extern "C" int cMdfArchive_findModelPart(cMdfArchive* self, const char* name) {
+int cMdfArchive::findModelPart(const char* name)
+{
     int i;
-    for (i = 0; i < self->ArchiveHeader->mNumModels; i++) {
-        if (strcasecmp(name, (char*)&self->ModelHeaders[i]) == 0)
+    for (i = 0; i < ArchiveHeader->mNumModels; i++) {
+        if (strcasecmp(name, (char*)&ModelHeaders[i]) == 0)
             return 1;
     }
     return 0;
@@ -1150,11 +1154,12 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * @param name  the part name to look for
  * @return the part header inside the archive, or 0
  */
-extern "C" char* cMdfArchive_getModelPartPtr(cMdfArchive* self, const char* name) {
+char* cMdfArchive::getModelPartPtr(const char* name)
+{
     int i;
-    for (i = 0; i < self->ArchiveHeader->mNumModels; i++) {
-        if (strcasecmp(name, (char*)&self->ModelHeaders[i]) == 0)
-            return (char*)&self->ModelHeaders[i];
+    for (i = 0; i < ArchiveHeader->mNumModels; i++) {
+        if (strcasecmp(name, (char*)&ModelHeaders[i]) == 0)
+            return (char*)&ModelHeaders[i];
     }
     return 0;
 }
@@ -1181,12 +1186,12 @@ struct sMdfHeader {
  * @param name  part name to look for
  * @return the model part, or 0 if no part has that name
  */
-extern "C" void* cMdfArchive_getModelPart(cMdfArchive* self, const char* name)
+void* cMdfArchive::getModelPart(const char* name)
 {
-    for (int i = 0; i < ((sMdfHeader*)self->ArchiveHeader)->count; i++)
+    for (int i = 0; i < ((sMdfHeader*)ArchiveHeader)->count; i++)
     {
-        if (strcasecmp(name, self->ModelHeaders[i].mName) == 0)
-            return cMdfArchive_getModelPartByIndex(self, i);
+        if (strcasecmp(name, ModelHeaders[i].mName) == 0)
+            return cMdfArchive_getModelPartByIndex(this, i);
     }
     return 0;
 }
@@ -1201,11 +1206,11 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_getModelPartPtrByIndex);
  *
  * cMdfArchive_getModelPartByIndex returns an unpacked heap copy instead. No bounds check.
  *
- * @param archive  the archive wrapper
  * @param index  the part index
  * @return the part header inside the archive
  */
-extern "C" int cMdfArchive_getModelPartPtrByIndex(cMdfArchive* archive, int index) {
-    return ((int)archive->ModelHeaders) + (index * 0x60);
+int cMdfArchive::getModelPartPtrByIndex(int index)
+{
+    return ((int)ModelHeaders) + (index * 0x60);
 }
 #endif

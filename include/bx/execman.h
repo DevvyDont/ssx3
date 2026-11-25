@@ -39,6 +39,9 @@ struct cExecutionMan {
                                     //     cExecutionMan_checkHalt calls it with HaltData
     void* HaltData;                 // 0x4 [O]; [R] ctor 0; [U] cExecutionMan_halt stores it, checkHalt passes it
     void** mVtbl;                   // 0x8 [R] the ctor and dtor store cExecutionMan_vtbl; main() stores cPS2ExecutionMan_vtbl
+
+    // Methods bound to their retail symbols by asm labels.
+    int checkHalt(int flag) __asm__("cExecutionMan_checkHalt__FPvi");
 };
 
 CHECK_OFFSET(cExecutionMan, HaltCallback, 0x0);

@@ -14,6 +14,10 @@
 struct cBigFile {
     int Handle;                     // 0x00 [O]; [R] ctors -1; [U] close passes it to FILESYS_delbigsync
     int Mounted;                    // 0x04 [O] (On Tour bool); [R] ctors 0; [U] open sets it, close tests and clears it
+
+    // Methods bound to their retail symbols by asm labels.
+    cBigFile* cBigFile1() __asm__("cBigFile_cBigFile1__FP8cBigFile");
+    int close() __asm__("cBigFile_close__FP8cBigFile");
 };
 
 CHECK_OFFSET(cBigFile, Mounted, 0x04);

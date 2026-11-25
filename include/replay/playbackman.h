@@ -106,6 +106,9 @@ struct cPlaybackMan {
     int AsyncHandle;                // 0x78 [O]; [R] ctor -1; [U] cPlaybackMan_load: the async-file handle (-1 on
                                     //       failure),
                                     //      cPlaybackMan_update polls it (ASYNCFILE_getstatus) and resets it to -1
+
+    // Methods bound to their retail symbols by asm labels.
+    int isRecord() __asm__("cPlaybackMan_isRecord");
 };
 
 CHECK_OFFSET(cPlaybackMan, BigFile, 0x00);

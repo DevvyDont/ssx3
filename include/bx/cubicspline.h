@@ -64,6 +64,11 @@ struct cCubicSplineInterpolant {
     cCSICubicSpline* CubicSplines;  // 0x008 [O]; [R] ctor 0; [U] initCommon allocates NumSplines * 0x14 bytes
                                     //       ("cCSICubicSpline"), purge cMemMan_free's and zeroes it; addPoint /
                                     //       calculateSplines / evaluate / initAsClamped (start slope at +0x10) use it
+
+    // Methods bound to their retail symbols by asm labels.
+    void addPoint(float x, float y) __asm__("cCubicSplineInterpolant_addPoint");
+    void SpewGraphPoints() __asm__("cCubicSplineInterpolant_SpewGraphPoints");
+    void SpewSplineNumbers() __asm__("cCubicSplineInterpolant_SpewSplineNumbers");
 };
 
 CHECK_OFFSET(cCubicSplineInterpolant, MaxX, 0x004);

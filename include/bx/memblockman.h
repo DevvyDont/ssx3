@@ -139,6 +139,9 @@ struct TMemBlock256 {
 struct TMemContainer256 {
     TMemBlock256 m_blockList[512];  // 0x00000 [O]; [R] ctor links them, last link (+0x1FF00) 0
     TMemBlock256* m_freeList;       // 0x20000 [O]; [R] ctor: block 0; [U] alloc / free (view TMemContainer_0408)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc(unsigned int align) __asm__("TMemContainer256_alloc__FPv");
 };
 
 CHECK_OFFSET(TMemBlock256, unk_00, 0x0);
@@ -159,6 +162,9 @@ struct TMemBlock512 {
 struct TMemContainer512 {
     TMemBlock512 m_blockList[256];  // 0x00000 [O]; [R] ctor links them, last link (+0x1FE00) 0
     TMemBlock512* m_freeList;       // 0x20000 [O]; [R] ctor: block 0; [U] alloc / free (view TMemContainer_0448)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc(unsigned int align) __asm__("TMemContainer512_alloc__FPv");
 };
 
 CHECK_OFFSET(TMemBlock512, unk_00, 0x0);

@@ -37,6 +37,18 @@ struct cBEBAGTInterface : public cBEInterface {
     //       __16cBEBAGTInterface; [U] cFEStateUberTrick_onWidgetEvent / onPopupEvent call slot 1 (submit) through it;
     //       getThis, cBELibrary_newProfile, cBELibrary_readFromData, cBENetworkInterface_restoreCharProfile /
     //       setSyncData, cBESaveInterface_generateSaveProfile / loadSaveProfile call slot 2 (discard)
+
+    // Methods bound to their retail symbols by asm labels.
+    int chooseUberVar(int rider, int idx, int second) __asm__("cBEBAGTInterface_chooseUberVar");
+    unsigned short getGrabAnim(int rider, int grabIndex) __asm__("cBEBAGTInterface_getGrabAnim");
+    unsigned short getGrabCycleAnim(int rider, int grabIndex) __asm__("cBEBAGTInterface_getGrabCycleAnim");
+    unsigned short getGrabName(int rider, int grabIndex) __asm__("cBEBAGTInterface_getGrabName");
+    unsigned short getTweakAnim(int rider, int grabIndex) __asm__("cBEBAGTInterface_getTweakAnim");
+    unsigned short getTweakCycleAnim(int rider, int grabIndex) __asm__("cBEBAGTInterface_getTweakCycleAnim");
+    unsigned short getTweakName(int rider, int grabIndex) __asm__("cBEBAGTInterface_getTweakName");
+    int getUberAnim(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberAnim");
+    int getUberCycleAnim(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberCycleAnim");
+    int getUberName(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberName");
 };
 
 extern cBEBAGTInterface* cBEBAGTInterface_instance;

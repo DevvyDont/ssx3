@@ -34,6 +34,8 @@ struct tAttrTextScroll {
 
 CHECK_SIZE(tAttrTextScroll, 0x4);
 
+struct cUIInput;
+
 struct cUITextScroll : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUITextScroll_vtbl (the ctor cUITextScroll_cUITextScroll, cUITextScroll_cUITextScroll1, the dtor
@@ -63,6 +65,21 @@ struct cUITextScroll : public cUIThing {
     unsigned short mLineSize;        // 0x0C8 [O] line count; [R] = 0; [U] cUITextScroll_getLineSize (lhu), allocLine / cUITextScroll_clearBuffer
     char unk_0CA[0x2];               // 0x0CA padding
     float mPixelOffset;              // 0x0CC [O] float; [R] = 0 (sw zero); [U] render2D cUITextScroll_render2D (lwc1 $f13 = y offset)
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateLocale() __asm__("cUITextScroll_updateLocale");
+    int onInput(cUIInput* input) __asm__("cUITextScroll_onInput");
+    void render2D(float x, float y) __asm__("cUITextScroll_render2D");
+    void clearBuffer(void* ignored) __asm__("cUITextScroll_clearBuffer");
+    int allocLine() __asm__("cUITextScroll_allocLine");
+    void addAsciiString(char* str) __asm__("cUITextScroll_addAsciiString");
+    void addUnicodeString(unsigned short* str) __asm__("cUITextScroll_addUnicodeString");
+    void setAsciiString(char* str) __asm__("cUITextScroll_setAsciiString");
+    void setUnicodeStringWrap(void* pString) __asm__("cUITextScroll_setUnicodeStringWrap");
+    void addUnicodeStringWrap(void* vstr) __asm__("cUITextScroll_addUnicodeStringWrap");
+    void addUnicodeStringByID(int id) __asm__("cUITextScroll_addUnicodeStringByID");
+    void deleteLineByIndex(int idx) __asm__("cUITextScroll_deleteLineByIndex");
+    int getStringByIndex(int i) __asm__("cUITextScroll_getStringByIndex");
 };
 
 CHECK_OFFSET(cUITextScroll, mAttrTextScroll, 0x074);

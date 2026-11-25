@@ -47,10 +47,10 @@ extern const sProfileMasks_001523E8 D_0045A7C0;
  * @param kind  the peak, 0-2
  * @return 1 when a location of that peak was visited, else 0
  */
-extern "C" int cBECharProfileDB_hasVisitedPeak(cBECharProfileDB* self, int kind)
+int cBECharProfileDB::hasVisitedPeak(int kind)
 {
     sProfileMasks_001523E8 masks = D_0045A7C0;
-    return ((int)self->mVisitLocFlags & masks.m[kind]) != 0;
+    return ((int)mVisitLocFlags & masks.m[kind]) != 0;
 }
 #endif
 
@@ -65,13 +65,13 @@ INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_setLocationVisited);
  * @param bit  the location (On Tour eBELocationID locID)
  * @param on  On Tour visited: nonzero marks it visited
  */
-extern "C" void cBECharProfileDB_setLocationVisited(cBECharProfileDB* self, int bit, int on)
+void cBECharProfileDB::setLocationVisited(int bit, int on)
 {
     int mask = 1 << bit;
     if (on)
-        *(int*)&self->mVisitLocFlags |= mask;
+        *(int*)&mVisitLocFlags |= mask;
     else
-        *(int*)&self->mVisitLocFlags &= ~mask;
+        *(int*)&mVisitLocFlags &= ~mask;
 }
 #endif
 
@@ -112,14 +112,14 @@ static inline int IsBetter_00152460(int stat, tBETrackScore* s, unsigned int val
  * @param value  the new score or time
  * @return 1 when the record was updated, else 0
  */
-extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int locationId, int stat, unsigned int value)
+int cBECharProfileDB::updateScoreStats(int locationId, int stat, unsigned int value)
 {
     int type = cBELibrary_getScoreType(locationId, stat);
     if (type == 26)
         return 0;
     if (value == 0)
         return 0;
-    tBETrackScore* scoreStat = &((&self->mScoreStats[0]))[type];
+    tBETrackScore* scoreStat = &((&mScoreStats[0]))[type];
     if (scoreStat->uiHighScore == 0 || IsBetter_00152460(stat, scoreStat, value))
     {
         scoreStat->uiHighScore = value;

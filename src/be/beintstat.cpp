@@ -46,7 +46,7 @@ extern sCharStat_getCollisionAttrib cBELibrary_statDefault_getCollisionAttrib[] 
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's collision maximum
  */
-extern "C" float cBEStatInterface_getCollisionAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getCollisionAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -91,7 +91,7 @@ extern sCharStat_cBEStatInterface_getStrikingAttrib cBELibrary_statDefault_cBESt
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the striking attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getStrikingAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getStrikingAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -135,7 +135,7 @@ extern sCharStat_cBEStatInterface_getLandingAttrib cBELibrary_statDefault_cBESta
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the landing attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getLandingAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getLandingAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -181,7 +181,7 @@ extern sCharStat_cBEStatInterface_getBalanceAttrib cBELibrary_statDefault_cBESta
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's stability maximum
  */
-extern "C" float cBEStatInterface_getBalanceAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getBalanceAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -211,7 +211,7 @@ INCLUDE_ASM("be/beintstat", cBEStatInterface_getRecoveryAttrib);
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's stability maximum
  */
-extern "C" float cBEStatInterface_getRecoveryAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getRecoveryAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -256,7 +256,7 @@ extern sCharStat_cBEStatInterface_getAccelerationAttrib cBELibrary_statDefault_c
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's acceleration maximum
  */
-extern "C" float cBEStatInterface_getAccelerationAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getAccelerationAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -301,7 +301,7 @@ extern sCharStat_cBEStatInterface_getSpeedAttrib cBELibrary_statDefault_cBEStatI
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's speed maximum
  */
-extern "C" float cBEStatInterface_getSpeedAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getSpeedAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -345,7 +345,7 @@ extern sCharStat_cBEStatInterface_getSpinAttrib cBELibrary_statDefault_cBEStatIn
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the spin attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getSpinAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getSpinAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -389,7 +389,7 @@ extern sCharStat_cBEStatInterface_getTrickAttrib cBELibrary_statDefault_cBEStatI
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the trick attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getTrickAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getTrickAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -428,12 +428,12 @@ extern const sLevelTable_00149778 D_0045A2B0;
  * @param value  the trick's points (On Tour iPoints)
  * @return 1 when the points reach the threshold
  */
-extern "C" int cBEStatInterface_shouldCelebrateTrick(cBEStatInterface* self, int rider, int value)
+int cBEStatInterface::shouldCelebrateTrick(int rider, int value)
 {
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0;
     sLevelTable_00149778 pointThresholds = D_0045A2B0;
-    int n = cBEStatInterface_getStatLevel(self, rider) - 1;
+    int n = cBEStatInterface_getStatLevel(this, rider) - 1;
     int lvl;
     int hi = 10;
     if (n >= 0)

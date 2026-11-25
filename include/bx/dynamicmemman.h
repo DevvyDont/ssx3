@@ -89,6 +89,22 @@ struct cDynamicMemMan {
     char* Heap;                     // 0x004 [O]
     char* CoreTop;                  // 0x008 [O]
     unsigned int HeapSize;          // 0x00C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* sYSMALLOc(unsigned int nb, malloc_state* av) __asm__("cDynamicMemMan_sYSMALLOc");
+    int sYSTRIm(unsigned int topPad, malloc_state* av) __asm__("cDynamicMemMan_sYSTRIm");
+    void* dlmalloc(unsigned int bytes) __asm__("cDynamicMemMan_dlmalloc");
+    void malloc_consolidate(malloc_state* av) __asm__("cDynamicMemMan_malloc_consolidate");
+    void* dlrealloc(void* oldmem, unsigned int bytes) __asm__("cDynamicMemMan_dlrealloc");
+    void* dlcalloc(unsigned int n, unsigned int elem_size) __asm__("cDynamicMemMan_dlcalloc");
+    void dlcfree(void* mem) __asm__("cDynamicMemMan_dlcfree");
+    void* dlindependent_calloc(unsigned int n, unsigned int elem_size, void** chunks)
+        __asm__("cDynamicMemMan_dlindependent_calloc");
+    void* dlindependent_comalloc(unsigned int n, unsigned int* sizes, void** chunks)
+        __asm__("cDynamicMemMan_dlindependent_comalloc");
+    void* iALLOc(unsigned int n, unsigned int* sizes, int opts, void** chunks) __asm__("cDynamicMemMan_iALLOc");
+    void* alloc(unsigned int bytes) __asm__("cDynamicMemMan_alloc");
+    int isBlock(unsigned int addr) __asm__("cDynamicMemMan_isBlock");
 };
 
 CHECK_OFFSET(cDynamicMemMan, MallocState, 0x000);

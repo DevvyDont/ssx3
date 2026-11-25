@@ -45,6 +45,8 @@ struct tAttrVector {
 
 CHECK_SIZE(tAttrVector, 0x4);
 
+struct tARGB;
+
 struct cUIVector : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] _vt$9cUIVector D_004941B8 (cUIVector_vtbl), stored by cUIVector_cUIVector, cUIVector_cUIVector1 and
@@ -76,6 +78,9 @@ struct cUIVector : public cUIThing {
                                      //       reads it (never allocated by setUIData)
     tBxVertex* mpVertices;           // 0x08C [O]; [R] = 0, freed; [U] setUIData new[]s mNumVertices 0x30-byte entries
                                      //       ("UIVectorLine") when mFill is clear; cUIVector_render2D fills them
+
+    // Methods bound to their retail symbols by asm labels.
+    void setColour(tARGB* colour) __asm__("cUIVector_setColour");
 };
 
 CHECK_OFFSET(cUIVector, mAttrVector, 0x074);

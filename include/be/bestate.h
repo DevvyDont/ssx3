@@ -32,6 +32,9 @@ struct cBEPreRaceState {
     int nextState;                  // 0x0 [O] cBEState::nextState; [P] assert "nextState < kBESTATE_NULL"; [R] getState
                                     //     stores its argument (cBE_getBE passes a state index)
     void** mVtbl;                   // 0x4 [R] cBEPreRaceState_vtbl (getState, cBEPreRaceState_cBEPreRaceState)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getInterface(int kind) __asm__("cBEPreRaceState_getInterface");
 };
 
 CHECK_OFFSET(cBEPreRaceState, nextState, 0x0);
@@ -42,6 +45,9 @@ struct cBERaceState {
     // --- cBEState
     int nextState;                  // 0x0 [O] cBEState::nextState; [P] assert; [R] getState stores its argument
     void** mVtbl;                   // 0x4 [R] cBERaceState_vtbl (getState, cBERaceState_cBERaceState)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getInterface(int kind) __asm__("cBERaceState_getInterface");
 };
 
 CHECK_OFFSET(cBERaceState, nextState, 0x0);
@@ -52,6 +58,9 @@ struct cBEPostRaceState {
     // --- cBEState
     int nextState;                  // 0x0 [O] cBEState::nextState; [P] assert; [R] getState stores its argument
     void** mVtbl;                   // 0x4 [R] cBEPostRaceState_vtbl (getState, cBEPostRaceState_cBEPostRaceState)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getInterface(int kind) __asm__("cBEPostRaceState_getInterface");
 };
 
 CHECK_OFFSET(cBEPostRaceState, nextState, 0x0);

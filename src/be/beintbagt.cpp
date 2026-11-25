@@ -206,7 +206,7 @@ extern char D_00530EC0_raw[] __asm__("D_00530EC0");
  * @param second  nonzero to read the second (customisable) choice
  * @return the variant index, or -1
  */
-extern "C" int cBEBAGTInterface_chooseUberVar(cBEBAGTInterface* self, int rider, int idx, int second)
+int cBEBAGTInterface::chooseUberVar(int rider, int idx, int second)
 {
     if (kGrabDB[idx].numUbers == 0)
         return -1;
@@ -332,7 +332,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getGrabAnim(cBEBAGTInterface* self, int rider, int grabIndex)
+unsigned short cBEBAGTInterface::getGrabAnim(int rider, int grabIndex)
 {
     return kGrabDB[grabIndex].grabAnim;
 }
@@ -350,7 +350,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabCycleAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(cBEBAGTInterface* self, int rider, int grabIndex)
+unsigned short cBEBAGTInterface::getGrabCycleAnim(int rider, int grabIndex)
 {
     return kGrabDB[grabIndex].grabCycleAnim;
 }
@@ -367,7 +367,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabName);
  * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short cBEBAGTInterface_getGrabName(cBEBAGTInterface* self, int rider, int grabIndex)
+unsigned short cBEBAGTInterface::getGrabName(int rider, int grabIndex)
 {
     return kGrabDB[grabIndex].grabID;
 }
@@ -383,7 +383,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getTweakAnim(cBEBAGTInterface* self, int rider, int grabIndex)
+unsigned short cBEBAGTInterface::getTweakAnim(int rider, int grabIndex)
 {
     return kGrabDB[grabIndex].tweakAnim;
 }
@@ -400,7 +400,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakCycleAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(cBEBAGTInterface* self, int rider, int grabIndex)
+unsigned short cBEBAGTInterface::getTweakCycleAnim(int rider, int grabIndex)
 {
     return kGrabDB[grabIndex].tweakCycleAnim;
 }
@@ -416,7 +416,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakName);
  * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short cBEBAGTInterface_getTweakName(cBEBAGTInterface* self, int rider, int grabIndex)
+unsigned short cBEBAGTInterface::getTweakName(int rider, int grabIndex)
 {
     return kGrabDB[grabIndex].tweakID;
 }
@@ -456,7 +456,7 @@ extern sBagtCat_150198 kGrabDB_150198[] __asm__("kGrabDB");
  * @param second  passed to cBEBAGTInterface_chooseUberVar (the callers pass uber level >= 5)
  * @return the animation id
  */
-extern "C" int cBEBAGTInterface_getUberAnim(cBEBAGTInterface* self, int rider, int idx, int second)
+int cBEBAGTInterface::getUberAnim(int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -475,7 +475,7 @@ extern "C" int cBEBAGTInterface_getUberAnim(cBEBAGTInterface* self, int rider, i
         if (idx == 4) return 161;
         break;
     }
-    int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
+    int k = chooseUberVar(rider, idx, second);
     if (k < 0) return 438;
     return kGrabDB_150198[idx].anims[k].anim;
 }
@@ -515,7 +515,7 @@ extern sBagtCat_1502C8 kGrabDB_1502C8[] __asm__("kGrabDB");
  * @param second  passed to cBEBAGTInterface_chooseUberVar (uber level >= 5)
  * @return the animation id
  */
-extern "C" int cBEBAGTInterface_getUberCycleAnim(cBEBAGTInterface* self, int rider, int idx, int second)
+int cBEBAGTInterface::getUberCycleAnim(int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -534,7 +534,7 @@ extern "C" int cBEBAGTInterface_getUberCycleAnim(cBEBAGTInterface* self, int rid
         if (idx == 4) return 211;
         break;
     }
-    int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
+    int k = chooseUberVar(rider, idx, second);
     if (k < 0) return 438;
     return kGrabDB_1502C8[idx].anims[k].anim2;
 }
@@ -573,7 +573,7 @@ extern sBagtCat_1503F8 kGrabDB_1503F8[] __asm__("kGrabDB");
  * @param second  passed to cBEBAGTInterface_chooseUberVar (uber level >= 5)
  * @return the trick id
  */
-extern "C" int cBEBAGTInterface_getUberName(cBEBAGTInterface* self, int rider, int idx, int second)
+int cBEBAGTInterface::getUberName(int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -592,7 +592,7 @@ extern "C" int cBEBAGTInterface_getUberName(cBEBAGTInterface* self, int rider, i
         if (idx == 4) return 83;
         break;
     }
-    int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
+    int k = chooseUberVar(rider, idx, second);
     if (k < 0) return 0;
     return kGrabDB_1503F8[idx].anims[k].anim3;
 }

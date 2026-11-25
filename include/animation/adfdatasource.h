@@ -156,6 +156,9 @@ struct cAdfDataSource {
     tAdfAnimChunk* Chunks;          // 0x00C [O]
     tAdfTag* Tags;                  // 0x010 [O]
     unsigned char* ChannelData;     // 0x014 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void populateFromData(tAdfArchive* data) __asm__("cAdfDataSource_populateFromData");
 };
 
 CHECK_OFFSET(cAdfDataSource, Data, 0x000);

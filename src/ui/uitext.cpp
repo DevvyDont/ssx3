@@ -67,18 +67,18 @@ struct sLayerBits_05E8 {
  * @param x  horizontal offset added to the object's position
  * @param y  vertical offset added to the object's position
  */
-extern "C" void cUIText_render2D(cUIText* self, float x, float y)
+void cUIText::render2D(float x, float y)
 {
-    if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        self->updateLocale();
+    if (mpString == 0 || ((mAttr >> 2) & 1) == 0) {
+        updateLocale();
     }
-    int* ov = (int*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+    int* ov = (int*)mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (ov != 0 && ((*ov >> 27) & 1)) {
-        cFont* font = (cFont*)cUIText_getFont(self);
+        cFont* font = (cFont*)cUIText_getFont(this);
         if (font == 0) {
             return;
         }
-        int n = (int)(self->mSize.x / (cFont_charAdvance(font, 'W') * self->mScale.x));
+        int n = (int)(mSize.x / (cFont_charAdvance(font, 'W') * mScale.x));
         int i = 0;
         if (n < 0x400) {
             for (i = 0; i < n; i++) {
@@ -87,53 +87,54 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
         }
         D_00508750[i] = 0;
     }
-    if (self->mpString == 0) {
+    if (mpString == 0) {
         return;
     }
-    cFont* font = (cFont*)cUIText_getFont(self);
+    cFont* font = (cFont*)cUIText_getFont(this);
     if (font == 0) {
         return;
     }
-    t2Vector textScale(self->mScale.x, self->mScale.y);
+    t2Vector textScale(mScale.x, mScale.y);
     (*(t2Vector*)&font->Scale[0]).x = (*(t2Vector*)&font->BaseScale[0]).x * textScale.x;
     (*(t2Vector*)&font->Scale[0]).y = (*(t2Vector*)&font->BaseScale[0]).y * textScale.y;
-    if (((self->mAttr >> 5) & 1) && ((self->mAttrText >> 4) & 1)) {
-        (*(tARGB*)&font->Color[0]) = *(&self->mStaticColour);
-    } else if (((self->mAttr >> 3) & 1) == 0 && ((self->mAttrText >> 5) & 1)) {
-        (*(tARGB*)&font->Color[0]) = *(&self->mDisabledColour);
+    if (((mAttr >> 5) & 1) && ((mAttrText >> 4) & 1)) {
+        (*(tARGB*)&font->Color[0]) = *(&mStaticColour);
+    } else if (((mAttr >> 3) & 1) == 0 && ((mAttrText >> 5) & 1)) {
+        (*(tARGB*)&font->Color[0]) = *(&mDisabledColour);
     } else {
-        (*(tARGB*)&font->Color[0]) = *(&self->mColour);
+        (*(tARGB*)&font->Color[0]) = *(&mColour);
     }
-    if ((self->mAttrText >> 2) & 1) {
-        tARGB shadowCol = *(&self->mShadowColour);
-        shadowCol.A = (*(&self->mColour)).A;
+    if ((mAttrText >> 2) & 1) {
+        tARGB shadowCol = *(&mShadowColour);
+        shadowCol.A = (*(&mColour)).A;
         (*(tARGB*)&font->ShadowColor[0]) = shadowCol;
         (*(t2Vector*)&font->ShadowOffset[0]) = D_004A5A60;
     } else {
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
     int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
-    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
-    sV3_05E8 pos(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
+    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&mAttr)->layer + 9) << 5) & 0x3E0);
+    sV3_05E8 pos(mPosition.x + x, mPosition.y + y, 0.0f);
     int i = 0;
-    if (self->mNumLines > 0) do {
+    if (mNumLines > 0) do {
         unsigned short* str;
         if (i != 0) {
-            str = self->mpLineOffset[i];
+            str = mpLineOffset[i];
         } else {
-            str = self->mpString;
+            str = mpString;
         }
         if (ov != 0 && ((*ov >> 27) & 1)) {
             str = D_00508750;
         }
-        if (((self->mAttrText >> 6) & 1) && self->mNumLines >= 2) {
+        if (((mAttrText >> 6) & 1) && mNumLines >= 2) {
             unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, str_UITEXTTEMP_b, 0x100, 0);
             usprintf(buf, D_004A47B0, str);
             sRect_05E8 textBounds;
             cFont_textExtent1_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
-            sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
+            sV3_05E8 size(textBounds.x1, mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y),
+                    0.0f);
             sV3_05E8 drawPos = pos;
-            cUIThing_applyPivot(self, &drawPos, &size);
+            cUIThing_applyPivot(this, &drawPos, &size);
             pos.y += (float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y * textScale.y + 3.0f;
             cFont_text1_s(font, drawPos.x, drawPos.y, buf);
             if (buf != 0) {
@@ -144,12 +145,13 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
         sRect_05E8 textBounds;
         cFont_textExtent1_s(font, str, &textBounds, 0, textScale.x, textScale.y);
         i++;
-        sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
+        sV3_05E8 size(textBounds.x1, mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y),
+                0.0f);
         sV3_05E8 drawPos = pos;
-        cUIThing_applyPivot(self, &drawPos, &size);
+        cUIThing_applyPivot(this, &drawPos, &size);
         pos.y += (float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y * textScale.y + 3.0f;
         cFont_text1_s(font, drawPos.x, drawPos.y, str);
-    } while (i < self->mNumLines);
+    } while (i < mNumLines);
 }
 #endif
 
@@ -163,16 +165,16 @@ void cMemMan_free(void*);
  *
  * Sets mNumLines to 0, then frees mpLineOffset and mpString when they are set and clears both pointers.
  */
-extern "C" void cUIText_deleteText(cUIText* self)
+void cUIText::deleteText()
 {
-    self->mNumLines = 0;
-    if ((void*)self->mpLineOffset != 0) {
-        cMemMan_free(self->mpLineOffset);
-        self->mpLineOffset = (unsigned short**)0;
+    mNumLines = 0;
+    if ((void*)mpLineOffset != 0) {
+        cMemMan_free(mpLineOffset);
+        mpLineOffset = (unsigned short**)0;
     }
-    if ((void*)self->mpString != 0) {
-        cMemMan_free(self->mpString);
-        self->mpString = (unsigned short*)0;
+    if ((void*)mpString != 0) {
+        cMemMan_free(mpString);
+        mpString = (unsigned short*)0;
     }
 }
 #endif
@@ -225,10 +227,10 @@ INCLUDE_ASM("ui/uitext", cUIText_getAsciiString);
  *
  * @return mpString as an int when the bit is clear, otherwise 0
  */
-extern "C" int cUIText_getAsciiString(cUIText* self)
+int cUIText::getAsciiString()
 {
-    if (((self->mAttrText >> 3) & 1) == 0) {
-        return (int)self->mpString;
+    if (((mAttrText >> 3) & 1) == 0) {
+        return (int)mpString;
     }
     return 0;
 }
@@ -244,10 +246,10 @@ INCLUDE_ASM("ui/uitext", cUIText_getUnicodeString);
  *
  * @return mpString as an int when the bit is set, otherwise 0
  */
-extern "C" int cUIText_getUnicodeString(cUIText* self)
+int cUIText::getUnicodeString()
 {
-    if (((self->mAttrText >> 3) & 1) != 0) {
-        return (int)self->mpString;
+    if (((mAttrText >> 3) & 1) != 0) {
+        return (int)mpString;
     }
     return 0;
 }
@@ -266,10 +268,10 @@ INCLUDE_ASM("ui/uitext", cUIText_setAsciiString__FP7cUITextPCc);
  *
  * @param str  NUL-terminated ASCII text
  */
-void cUIText_setAsciiString(cUIText* self, const char* str)
+void cUIText::setAsciiString(const char* str)
 {
-    self->mStringID = 0;
-    cUIText_setAsciiStringPrivate(self, str);
+    mStringID = 0;
+    setAsciiStringPrivate(str);
 }
 #endif
 
@@ -289,14 +291,14 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned sh
  *
  * @param str  the ASCII string
  */
-extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str)
+void cUIText::setAsciiStringPrivate(const char* str)
 {
     unsigned short buf[0x200];
-    self->setCached(1);
-    self->setUnicode(0);
+    setCached(1);
+    setUnicode(0);
     if (strlen(str) + 1 < 0x200) {
         UIAsciiToUnicode(buf, str);
-        cUIText_setUnicodeStringPrivate(self, buf);
+        setUnicodeStringPrivate(buf);
     }
 }
 #endif
@@ -324,10 +326,10 @@ extern unsigned short gUSTRBackSlash;
  *
  * @param str  the UCS-2 string
  */
-extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
+void cUIText::setUnicodeStringWrap(unsigned short* str)
 {
-    self->setCached(1);
-    void* font = cUIText_getFont(self);
+    setCached(1);
+    void* font = cUIText_getFont(this);
     if (font == 0) {
         return;
     }
@@ -343,11 +345,11 @@ extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
             w = 0.0f;
             i += 2;
         } else {
-            w += cFont_charAdvance1(font, buf[i]) * self->mScale.x;
+            w += cFont_charAdvance1(font, buf[i]) * mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
-            if (w > self->mSize.x && last >= 0) {
+            if (w > mSize.x && last >= 0) {
                 buf[last] = 13;
                 i = last;
                 w = 0.0f;
@@ -356,7 +358,7 @@ extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
             i++;
         }
     }
-    cUIText_setUnicodeStringPrivate(self, buf);
+    setUnicodeStringPrivate(buf);
     if (buf) {
         cMemMan_free(buf);
     }
@@ -375,10 +377,10 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned sh
  *
  * @param str  NUL-terminated UCS-2 text
  */
-extern "C" void cUIText_setUnicodeString(cUIText* self, const unsigned short* str)
+void cUIText::setUnicodeString(const unsigned short* str)
 {
-    self->mStringID = 0;
-    cUIText_setUnicodeStringPrivate(self, str);
+    mStringID = 0;
+    setUnicodeStringPrivate(str);
 }
 #endif
 
@@ -402,26 +404,25 @@ extern unsigned short gUSTRBackSlash;
  * longer than 800 characters) and counts its lines. With two or more lines it builds the line-start table,
  * cutting the copy at each carriage return and doubled line-break marker.
  *
- * @param self_  the text object
  * @param str    the string to store
  */
-extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned short* str)
+void cUIText::setUnicodeStringPrivate(const unsigned short* str)
 {
-    self_->setCached(1);
-    self_->setUnicode(1);
-    cUIText_deleteText(self_);
+    setCached(1);
+    setUnicode(1);
+    deleteText();
     int len = USTR_length((unsigned short*)str);
     if (len < 801) {
-        *(short*)&self_->mStringSize = len + 1;
-        self_->mpString = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITextUStr, 0x100, 0);
-        USTR_copy(self_->mpString, (unsigned short*)str);
-        int n = cUIText_getNumTextLines(((char*)self_));
-        self_->mNumLines = n;
+        *(short*)&mStringSize = len + 1;
+        mpString = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITextUStr, 0x100, 0);
+        USTR_copy(mpString, (unsigned short*)str);
+        int n = cUIText_getNumTextLines(((char*)this));
+        mNumLines = n;
         if (n >= 2) {
             unsigned short** lines = (unsigned short**)operator_new_tag(n * 4, str_UITextLine, 0x100, 0);
-            unsigned short* text = self_->mpString;
-            self_->mpLineOffset = lines;
-            *(short*)&self_->mLineSize = *(unsigned short*)&self_->mNumLines;
+            unsigned short* text = mpString;
+            mpLineOffset = lines;
+            *(short*)&mLineSize = *(unsigned short*)&mNumLines;
             lines[0] = text;
             int k = 1;
             unsigned short* cursor = text;
@@ -455,10 +456,10 @@ INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringByID__FP7cUITexti);
  *
  * @param id  string id (hash of the text's key)
  */
-void cUIText_setUnicodeStringByID(cUIText* self, int id)
+void cUIText::setUnicodeStringByID(int id)
 {
-    self->mStringID = id;
-    self->setCached(0);  // virtual cUIThing::setCached(false)
+    mStringID = id;
+    setCached(0);  // virtual cUIThing::setCached(false)
 }
 #endif
 
@@ -520,12 +521,12 @@ INCLUDE_ASM("ui/uitext", cUIText_getNumLinesOfString);
  *
  * @return the number of lines
  */
-extern "C" int cUIText_getNumLinesOfString(cUIText* self)
+int cUIText::getNumLinesOfString()
 {
-    if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        self->updateLocale();
+    if ((int)mpString == 0 || ((mAttr >> 2) & 1) == 0) {
+        updateLocale();
     }
-    return self->mNumLines;
+    return mNumLines;
 }
 #endif
 
@@ -597,7 +598,7 @@ extern "C" void cUITextScroll_setUIData(cUITextScroll* self, tUITextScroll* data
     self->setShadow(data->mTextFlags & 1);
     if (((int)data->mStringID) != 0) {
         cUITextScroll_clearBuffer_1(self);
-        cUITextScroll_addUnicodeStringByID(self, ((int)data->mStringID));
+        self->addUnicodeStringByID(((int)data->mStringID));
     }
     int bits = *(int*)&self->mAttrTextScroll >> 3;
     if (bits & 1) {
@@ -683,17 +684,17 @@ public:
  *
  * Does nothing without a string id or a locale; the text is replaced (cUITextScroll_setUnicodeStringWrap) only when the locale has it.
  */
-extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
+void cUITextScroll::updateLocale()
 {
-    int id = (int)self->mStringID;
+    int id = (int)mStringID;
     if (id != 0) {
-        cUITextScroll_updateLocale_cVirtA* strings = (cUITextScroll_updateLocale_cVirtA*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+        cUITextScroll_updateLocale_cVirtA* strings = (cUITextScroll_updateLocale_cVirtA*)mpScreen->mpState->mpEngine->mpLocaleInterface;
         if (strings != 0) {
             void* wideStr = strings->getStringByHash(id);
             if (wideStr != 0) {
-                cUITextScroll_setUnicodeStringWrap(self, wideStr);
+                setUnicodeStringWrap(wideStr);
             }
-            ((cUITextScroll_updateLocale_cVirtB*)self)->setCached(1);
+            ((cUITextScroll_updateLocale_cVirtB*)this)->setCached(1);
         }
     }
 }
@@ -727,44 +728,44 @@ static inline int pressed13E0(char* input, int key)
  * @param input  the input (On Tour const cUIInput* pInput)
  * @return 1 when a key was used, else 0 (On Tour returns bool)
  */
-extern "C" int cUITextScroll_onInput(cUITextScroll* self, cUIInput* input)
+int cUITextScroll::onInput(cUIInput* input)
 {
-    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)self);
+    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)this);
     if (font == 0) {
         return 0;
     }
-    signed char rows = (int)(self->mSize.y / (self->mScale.y * ((float)font->MaxCharHeight * font->BaseScale[1]) + 3.0f));
-    if ((*(unsigned int*)&self->mAttrTextScroll) & 1) {
-        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[0])) != 0) {
-            if (self->mSelectedIndex != 0) {
-                self->mSelectedIndex--;
+    signed char rows = (int)(mSize.y / (mScale.y * ((float)font->MaxCharHeight * font->BaseScale[1]) + 3.0f));
+    if ((*(unsigned int*)&mAttrTextScroll) & 1) {
+        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[0])) != 0) {
+            if (mSelectedIndex != 0) {
+                mSelectedIndex--;
             }
             return 1;
         }
-        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[1])) != 0) {
-            if (self->mSelectedIndex < self->mLineSize - 1) {
-                self->mSelectedIndex++;
+        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[1])) != 0) {
+            if (mSelectedIndex < mLineSize - 1) {
+                mSelectedIndex++;
             }
             return 1;
         }
-        short rowOffset = self->mSelectedIndex - self->mLinesOffset;
+        short rowOffset = mSelectedIndex - mLinesOffset;
         if (rowOffset < 0) {
-            self->mLinesOffset = self->mSelectedIndex;
+            mLinesOffset = mSelectedIndex;
         } else if (rowOffset >= rows) {
-            self->mLinesOffset = self->mSelectedIndex - rows + 1;
+            mLinesOffset = mSelectedIndex - rows + 1;
         }
     } else {
-        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[0])) != 0) {
-            if (self->mLinesOffset != 0) {
-                self->mLinesOffset--;
+        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[0])) != 0) {
+            if (mLinesOffset != 0) {
+                mLinesOffset--;
             }
             return 1;
         }
-        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[1])) == 0) {
+        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[1])) == 0) {
             return 0;
         }
-        if (self->mLinesOffset < self->mLineSize - rows) {
-            self->mLinesOffset++;
+        if (mLinesOffset < mLineSize - rows) {
+            mLinesOffset++;
         }
         return 1;
     }
@@ -812,54 +813,55 @@ struct sDrawBits_1588 {
  * @param x  the parent's x offset
  * @param y  the parent's y offset
  */
-extern "C" void cUITextScroll_render2D(cUITextScroll* self, float x, float y)
+void cUITextScroll::render2D(float x, float y)
 {
-    if (((self->mAttr >> 2) & 1) == 0) {
-        self->updateLocale();
+    if (((mAttr >> 2) & 1) == 0) {
+        updateLocale();
     }
-    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)self);
+    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)this);
     if (font == 0) {
         return;
     }
-    t2Vector textScale(self->mScale.x, self->mScale.y);
+    t2Vector textScale(mScale.x, mScale.y);
     (*(t2Vector*)&font->Scale[0]).x = (*(t2Vector*)&font->BaseScale[0]).x * textScale.x;
     (*(t2Vector*)&font->Scale[0]).y = (*(t2Vector*)&font->BaseScale[0]).y * textScale.y;
-    if (((*(int*)&self->mAttrTextScroll) >> 3) & 1) {
-        tARGB shadowCol = self->mShadowColour;
-        shadowCol.A = self->mColour.A;
+    if (((*(int*)&mAttrTextScroll) >> 3) & 1) {
+        tARGB shadowCol = mShadowColour;
+        shadowCol.A = mColour.A;
         (*(tARGB*)&font->ShadowColor[0]) = shadowCol;
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(2.0f, 2.0f);
     } else {
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
     int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
-    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
-    sV3_1588 pos(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
-    float lineH = self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y) + 3.0f;
-    signed char rows = (int)(self->mSize.y / lineH);
+    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&mAttr)->layer + 9) << 5) & 0x3E0);
+    sV3_1588 pos(mPosition.x + x, mPosition.y + y, 0.0f);
+    float lineH = mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y) + 3.0f;
+    signed char rows = (int)(mSize.y / lineH);
     int i = 0;
     if (rows > 0) do {
-        unsigned short idx = self->mLinesOffset + i;
-        if (idx >= self->mLineSize) {
+        unsigned short idx = mLinesOffset + i;
+        if (idx >= mLineSize) {
             break;
         }
-        if (((*(int*)&self->mAttrTextScroll) & 1) && idx == self->mSelectedIndex) {
-            (*(tARGB*)&font->Color[0]) = self->mSelectedColour;
+        if (((*(int*)&mAttrTextScroll) & 1) && idx == mSelectedIndex) {
+            (*(tARGB*)&font->Color[0]) = mSelectedColour;
         } else {
-            (*(tARGB*)&font->Color[0]) = self->mColour;
+            (*(tARGB*)&font->Color[0]) = mColour;
         }
-        int str = ((int*)self->mpLineOffset)[i + self->mLinesOffset];
+        int str = ((int*)mpLineOffset)[i + mLinesOffset];
         i++;
         sRect_1588 textBounds;
-        cFont_textExtent1(font, str, &textBounds, 0, self->mScale.x, self->mScale.y);
-        sV3_1588 size(textBounds.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
+        cFont_textExtent1(font, str, &textBounds, 0, mScale.x, mScale.y);
+        sV3_1588 size(textBounds.x1, mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y),
+                0.0f);
         sV3_1588 drawPos = pos;
-        cUIThing_applyPivot(self, &drawPos, &size);
+        cUIThing_applyPivot(this, &drawPos, &size);
         pos.y += lineH;
-        cFont_text1(font, drawPos.x, drawPos.y + self->mPixelOffset, str);
+        cFont_text1(font, drawPos.x, drawPos.y + mPixelOffset, str);
     } while (i < rows);
-    if (((void*)self->mpScrollBar) != 0) {
-        cUIScrollBar_setValues(((void*)self->mpScrollBar), self->mLinesOffset, rows, self->mLineSize);
+    if (((void*)mpScrollBar) != 0) {
+        cUIScrollBar_setValues(((void*)mpScrollBar), mLinesOffset, rows, mLineSize);
     }
 }
 #endif
@@ -877,22 +879,22 @@ void cMemMan_free(void*);
  *
  * @param ignored  not read (callers pass whatever is in $a1)
  */
-extern "C" void cUITextScroll_clearBuffer(cUITextScroll* self, void* ignored)
+void cUITextScroll::clearBuffer(void* ignored)
 {
-    if (self->mpLineOffset != 0) {
+    if (mpLineOffset != 0) {
         unsigned short i;
-        for (i = 0; i < self->mLineSize; i++) {
-            if (self->mpLineOffset[i] != 0) {
-                cMemMan_free(self->mpLineOffset[i]);
+        for (i = 0; i < mLineSize; i++) {
+            if (mpLineOffset[i] != 0) {
+                cMemMan_free(mpLineOffset[i]);
             }
         }
-        if (self->mpLineOffset != 0) {
-            cMemMan_free(self->mpLineOffset);
+        if (mpLineOffset != 0) {
+            cMemMan_free(mpLineOffset);
         }
-        self->mpLineOffset = 0;
+        mpLineOffset = 0;
     }
-    self->mLinesOffset = 0;
-    self->mLineSize = 0;
+    mLinesOffset = 0;
+    mLineSize = 0;
 }
 #endif
 
@@ -912,20 +914,20 @@ extern char str_UITEXTSCBUF[];
  *
  * @return index of the new line slot (the old line count)
  */
-extern "C" int cUITextScroll_allocLine(cUITextScroll* self)
+int cUITextScroll::allocLine()
 {
-    unsigned short old = self->mLineSize;
-    self->mLineSize = old + 1;
-    void** arr = (void**)operator_new_tag(self->mLineSize * 4, str_UITEXTSCBUF, 0x100, 0);
-    if ((void**)self->mpLineOffset != 0) {
-        func_0041605C(arr, (void**)self->mpLineOffset, old * 4);
-        void** prev = (void**)self->mpLineOffset;
+    unsigned short old = mLineSize;
+    mLineSize = old + 1;
+    void** arr = (void**)operator_new_tag(mLineSize * 4, str_UITEXTSCBUF, 0x100, 0);
+    if ((void**)mpLineOffset != 0) {
+        func_0041605C(arr, (void**)mpLineOffset, old * 4);
+        void** prev = (void**)mpLineOffset;
         arr[old] = 0;
         if (prev != 0) {
             cMemMan_free(prev);
         }
     }
-    self->mpLineOffset = (unsigned short**)arr;
+    mpLineOffset = (unsigned short**)arr;
     return old;
 }
 #endif
@@ -947,10 +949,10 @@ extern "C" void func_002C2540(void* dst, void* src);
  *
  * @param str  the ASCII text (On Tour pString)
  */
-extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
+void cUITextScroll::addAsciiString(char* str)
 {
-    self->setCached(1);
-    void* font = (void*)cUITextScroll_getFont(self);
+    setCached(1);
+    void* font = (void*)cUITextScroll_getFont(this);
     if (font == 0) {
         return;
     }
@@ -965,23 +967,23 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
         if (buf[i] == 92 && buf[i + 1] == buf[i]) {
             buf[i] = 0;
             i += 2;
-            cUITextScroll_addUnicodeString(self, &buf[start]);
+            addUnicodeString(&buf[start]);
             last = -1;
             w = 0.0f;
             start = i;
         } else if (buf[i] == 13) {
             buf[i] = 0;
             i += 1;
-            cUITextScroll_addUnicodeString(self, &buf[start]);
+            addUnicodeString(&buf[start]);
             last = -1;
             w = 0.0f;
             start = i;
         } else {
-            w += cFont_charAdvance1(font, buf[i]) * self->mScale.x;
+            w += cFont_charAdvance1(font, buf[i]) * mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
-            if (w > self->mSize.x) {
+            if (w > mSize.x) {
                 if (last < 0) {
                     last = i - 1;
                 }
@@ -989,7 +991,7 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
                     buf[last] = 0;
                     i = last;
                     w = 0.0f;
-                    cUITextScroll_addUnicodeString(self, &buf[start]);
+                    addUnicodeString(&buf[start]);
                     last = -1;
                     start = i + 1;
                 }
@@ -998,7 +1000,7 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
         }
     }
     if (start != i) {
-        cUITextScroll_addUnicodeString(self, &buf[start]);
+        addUnicodeString(&buf[start]);
     }
     if (buf) {
         cMemMan_free(buf);
@@ -1021,12 +1023,12 @@ extern char str_UITXTSCRSTR[];
  *
  * @param str  the string to add
  */
-extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str)
+void cUITextScroll::addUnicodeString(unsigned short* str)
 {
-    int idx = cUITextScroll_allocLine(self);
+    int idx = allocLine();
     unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UITXTSCRSTR, 0x100, 0);
     USTR_copy(copy, str);
-    self->mpLineOffset[idx] = copy;
+    mpLineOffset[idx] = copy;
 }
 #endif
 
@@ -1043,13 +1045,13 @@ typedef void (*fnUT1C80)(char*, int);
  *
  * @param str  the ASCII text (On Tour pAscii)
  */
-extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
+void cUITextScroll::setAsciiString(char* str)
 {
-    cUITextScroll_clearBuffer_1(self);
-    self->mStringID = (unsigned int)0;
-    self->setCached(1);
-    self->setUnicode(0);
-    cUITextScroll_addAsciiString(self, str);
+    cUITextScroll_clearBuffer_1(this);
+    mStringID = (unsigned int)0;
+    setCached(1);
+    setUnicode(0);
+    addAsciiString(str);
 }
 #endif
 
@@ -1065,10 +1067,10 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll*, void*);
  *
  * @param pString  the UTF-16 text
  */
-extern "C" void cUITextScroll_setUnicodeStringWrap(cUITextScroll* self, void* pString)
+void cUITextScroll::setUnicodeStringWrap(void* pString)
 {
-    cUITextScroll_clearBuffer(self, pString);
-    cUITextScroll_addUnicodeStringWrap(self, pString);
+    clearBuffer(pString);
+    addUnicodeStringWrap(pString);
 }
 #endif
 
@@ -1086,11 +1088,11 @@ extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned sho
  *
  * @param vstr  the UTF-16 text (On Tour pString)
  */
-extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vstr)
+void cUITextScroll::addUnicodeStringWrap(void* vstr)
 {
     unsigned short* str = (unsigned short*)vstr;
-    self->setCached(1);
-    void* font = (void*)cUITextScroll_getFont(self);
+    setCached(1);
+    void* font = (void*)cUITextScroll_getFont(this);
     if (font == 0) {
         return;
     }
@@ -1105,16 +1107,16 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vs
         if (buf[i] == 92 && buf[i + 1] == buf[i]) {
             buf[i] = 0;
             i += 2;
-            cUITextScroll_addUnicodeString(self, &buf[start]);
+            addUnicodeString(&buf[start]);
             last = -1;
             w = 0.0f;
             start = i;
         } else {
-            w += cFont_charAdvance1(font, buf[i]) * self->mScale.x;
+            w += cFont_charAdvance1(font, buf[i]) * mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
-            if (w > self->mSize.x) {
+            if (w > mSize.x) {
                 if (last < 0) {
                     last = i - 1;
                 }
@@ -1122,7 +1124,7 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vs
                     buf[last] = 0;
                     i = last;
                     w = 0.0f;
-                    cUITextScroll_addUnicodeString(self, &buf[start]);
+                    addUnicodeString(&buf[start]);
                     last = -1;
                     start = i + 1;
                 }
@@ -1131,7 +1133,7 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vs
         }
     }
     if (start != i) {
-        cUITextScroll_addUnicodeString(self, &buf[start]);
+        addUnicodeString(&buf[start]);
     }
     if (buf) {
         cMemMan_free(buf);
@@ -1172,16 +1174,16 @@ public:
  *
  * @param id  the string's hash id (On Tour hashname)
  */
-extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
+void cUITextScroll::addUnicodeStringByID(int id)
 {
-    self->mStringID = (unsigned int)id;
-    cUITextScroll_addUnicodeStringByID_cVirtA* localeInterface = (cUITextScroll_addUnicodeStringByID_cVirtA*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+    mStringID = (unsigned int)id;
+    cUITextScroll_addUnicodeStringByID_cVirtA* localeInterface = (cUITextScroll_addUnicodeStringByID_cVirtA*)mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (localeInterface != 0) {
         void* unicodeString = localeInterface->getStringByHash(id);
         if (unicodeString != 0) {
-            cUITextScroll_addUnicodeStringWrap(self, unicodeString);
+            addUnicodeStringWrap(unicodeString);
         }
-        ((cUITextScroll_addUnicodeStringByID_cVirtB*)self)->setCached(1);
+        ((cUITextScroll_addUnicodeStringByID_cVirtB*)this)->setCached(1);
     }
 }
 #endif
@@ -1197,24 +1199,25 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_deleteLineByIndex);
  *
  * @param idx  the line index (On Tour index)
  */
-extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
+void cUITextScroll::deleteLineByIndex(int idx)
 {
-    if ((void**)self->mpLineOffset != 0) {
-        unsigned short n = self->mLineSize;
+    if ((void**)mpLineOffset != 0) {
+        unsigned short n = mLineSize;
         if (idx < n) {
             void** arr = (void**)operator_new_tag((n - 1) * 4, str_UITEXTSCBUF, 0x100, 0);
             if (idx > 0) {
-                func_0041605C(arr, (void**)self->mpLineOffset, idx * 4);
+                func_0041605C(arr, (void**)mpLineOffset, idx * 4);
             }
-            if (idx < self->mLineSize - 1) {
+            if (idx < mLineSize - 1) {
                 // PORT: pointer held in int (only spelling found that gives idx-first addu)
-                func_0041605C((void*)(idx * 4 + (int)arr), (void*)(idx * 4 + (int)self->mpLineOffset + 4), (self->mLineSize - idx - 1) * 4);
+                func_0041605C((void*)(idx * 4 + (int)arr), (void*)(idx * 4 + (int)mpLineOffset + 4),
+                        (mLineSize - idx - 1) * 4);
             }
-            if ((void**)self->mpLineOffset != 0) {
-                cMemMan_free((void**)self->mpLineOffset);
+            if ((void**)mpLineOffset != 0) {
+                cMemMan_free((void**)mpLineOffset);
             }
-            self->mpLineOffset = (unsigned short**)arr;
-            (self->mLineSize)--;
+            mpLineOffset = (unsigned short**)arr;
+            (mLineSize)--;
         }
     }
 }
@@ -1231,10 +1234,10 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_getStringByIndex);
  * @param i  the line index
  * @return the line, or 0
  */
-extern "C" int cUITextScroll_getStringByIndex(cUITextScroll* self, int i)
+int cUITextScroll::getStringByIndex(int i)
 {
-    int* arr = (int*)self->mpLineOffset;
-    if (arr != 0 && i >= 0 && i < self->mLineSize) {
+    int* arr = (int*)mpLineOffset;
+    if (arr != 0 && i >= 0 && i < mLineSize) {
         return arr[i];
     }
     return 0;
@@ -1830,20 +1833,20 @@ INCLUDE_ASM("ui/uitext", cUIVector_setColour);
  *
  * @param colour  the new colour (components 0 to 1)
  */
-extern "C" void cUIVector_setColour(cUIVector* self, tARGB* colour)
+void cUIVector::setColour(tARGB* colour)
 {
     tARGB scaled = *colour;
     unsigned int i;
-    *(&self->mColour) = *colour;
-    if (self->mpVertexColour == 0) {
+    *(&mColour) = *colour;
+    if (mpVertexColour == 0) {
         return;
     }
     scaled.A = (int)(colour->A * 255.0f);
     scaled.R = (int)(colour->R * 255.0f);
     scaled.G = (int)(colour->G * 255.0f);
     scaled.B = (int)(colour->B * 255.0f);
-    for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
-        (self->mpVertexColour)[i] = scaled;
+    for (i = 0; i < *(unsigned int*)&mAttrVector >> 17; i++) {
+        mpVertexColour[i] = scaled;
     }
 }
 #endif

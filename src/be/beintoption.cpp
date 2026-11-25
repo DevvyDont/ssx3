@@ -28,7 +28,7 @@ void* cBEOptionInterface_getThis()
         (*(void**)&VPTR_OF(cBEInterface, mem)) = cBEOptionInterface_vtbl;
         cBEOptionInterface_instance = (cBEOptionInterface*)(mem);
         mem->bIsActive = 0;
-        cBEOptionInterface_revert(mem);
+        mem->revert();
     }
     return cBEOptionInterface_instance;
 }
@@ -83,12 +83,12 @@ extern "C" void cBEOptionInterface_defaultSound(cBEOptionInterface* self);
  * Calls cBEOptionInterface_defaultCtrl, cBEOptionInterface_defaultHUD, cBEOptionInterface_defaultGame and cBEOptionInterface_defaultSound (On Tour defaultCtrl, defaultHUD, defaultGame,
  * defaultSound).
  */
-extern "C" void cBEOptionInterface_revert(cBEOptionInterface* self)
+void cBEOptionInterface::revert()
 {
-    cBEOptionInterface_defaultCtrl(self);
-    cBEOptionInterface_defaultHUD(self);
-    cBEOptionInterface_defaultGame(self);
-    cBEOptionInterface_defaultSound(self);
+    defaultCtrl();
+    defaultHUD();
+    defaultGame();
+    defaultSound();
 }
 #endif
 
@@ -106,7 +106,7 @@ extern tBEOptionDB cBEOptionInterface_mOptionDB[] __asm__("cBEOptionInterface_mO
  * and voice chat on; the low two bits of the second word become 1. Then calls the option interface's vtable slot 1
  * (cBEOptionInterface_submit).
  */
-extern "C" void cBEOptionInterface_defaultSound(cBEOptionInterface* self)
+void cBEOptionInterface::defaultSound()
 {
     tBEOptionDB* options = cBEOptionInterface_mOptionDB;
     options->iRadioBigVolume = 10;
@@ -157,7 +157,7 @@ public:
  * language, metric units and the replay option become 0, brightness 9, and the screen offsets (mOption +5, +6) 0. Then
  * calls the option interface's vtable slot 1 (cBEOptionInterface_submit).
  */
-extern "C" void cBEOptionInterface_defaultGame(cBEOptionInterface* self)
+void cBEOptionInterface::defaultGame()
 {
     switch (*(int*)((char*)SSXApp->ConsoleConfig + 0x24))
     {
@@ -189,7 +189,7 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultHUD);
 /**
  * Resets the HUD option (bits 30-31 of the first option word) to 0 and submits (vtable slot 1, cBEOptionInterface_submit).
  */
-extern "C" void cBEOptionInterface_defaultHUD(cBEOptionInterface* self)
+void cBEOptionInterface::defaultHUD()
 {
     cBEOptionInterface_mOptionDB[0].iHUDDetail = 0;
     cBEOptionInterface_instance->submit();
@@ -202,7 +202,7 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultCtrl);
 /**
  * Submits the options (the option interface's vtable slot 1, cBEOptionInterface_submit) without changing any.
  */
-extern "C" void cBEOptionInterface_defaultCtrl(cBEOptionInterface* self)
+void cBEOptionInterface::defaultCtrl()
 {
     cBEOptionInterface_instance->submit();
 }
@@ -242,7 +242,7 @@ extern char D_00535617[][0x40];
  * @param i  the message slot, 0-9
  * @return the message, or 0
  */
-extern "C" char* cBEOptionInterface_getQuickKeyMessage(cBEOptionInterface* self, int i)
+char* cBEOptionInterface::getQuickKeyMessage(int i)
 {
     char* message = D_00535617[i];
     if (strlen(message) == 0) {
@@ -271,12 +271,12 @@ struct sVEntry_0014F6E8
  *
  * @param i  the message slot, 0-9
  */
-extern "C" void cBEOptionInterface_resetQuickKey(cBEOptionInterface* self, int i)
+void cBEOptionInterface::resetQuickKey(int i)
 {
     cFELocale* obj = SSXApp->FELocale;
     sVEntry_0014F6E8* vt = (sVEntry_0014F6E8*)VPTR_OF(cUILocaleInterface, obj);
     void* localeThis = vthis(obj, vt[4]);
-    int hashValue = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);
+    int hashValue = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(this, i);
     void* text = vt[4].fn(localeThis, hashValue);
     USTR_strcpyW(D_00535617[i], text);
 }
@@ -290,11 +290,11 @@ extern "C" void cBEOptionInterface_resetQuickKey(cBEOptionInterface* self, int i
 /**
  * Restores all ten quick-chat messages to their defaults (cBEOptionInterface_resetQuickKey for slots 0-9).
  */
-extern "C" void cBEOptionInterface_resetAllQuickKeys(cBEOptionInterface* self)
+void cBEOptionInterface::resetAllQuickKeys()
 {
     for (int i = 0; i < 10; i++)
     {
-        cBEOptionInterface_resetQuickKey(self, i);
+        resetQuickKey(i);
     }
 }
 #endif

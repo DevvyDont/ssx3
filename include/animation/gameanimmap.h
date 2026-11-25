@@ -44,6 +44,8 @@ struct tAnimID {
 
 CHECK_SIZE(tAnimID, 0x4);
 
+struct cAdfDataSource;
+
 struct cGameAnimMap {
     unsigned int GameAnimHashes[518]; // 0x000 [O]; [U] initMap stores GetHashValue32(GameAnimNames[i]) in [i];
                                     //       lookupGAD compares the hash against GameAnimHashes[GameAnimSort[mid]]; initMap
@@ -54,6 +56,14 @@ struct cGameAnimMap {
                                     //       with -1 bytes (memset(.., -1, 2072)); setMap stores a clip, remSource
                                     //       kAnimIDInvalid; getAnimName searches it; cRiderAnimBase_play /
                                     //       getAIAnimFrame / getAIAnimDuration / getAIAnimEventTime read [gad]
+
+    // Methods bound to their retail symbols by asm labels.
+    void initMap() __asm__("cGameAnimMap_initMap");
+    void addSource(int kind, cAdfDataSource* list) __asm__("cGameAnimMap_addSource");
+    char* getAnimName(void* value) __asm__("cGameAnimMap_getAnimName");
+    int lookupGAD(unsigned int hash) __asm__("cGameAnimMap_lookupGAD");
+    void remSource(cAdfDataSource* list) __asm__("cGameAnimMap_remSource");
+    void setMap(unsigned int hash, void* value) __asm__("cGameAnimMap_setMap");
 };
 
 CHECK_OFFSET(cGameAnimMap, GameAnimHashes, 0x000);

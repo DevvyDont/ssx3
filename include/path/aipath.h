@@ -45,6 +45,10 @@ struct cAIPath {
                                     //       populateData(id 100) reads a tInt32 into it; cAIPath_getPathAttributes
     int IsResetPath;                // 0x03C [O] (an int in On Tour too); [P] getIsResetPath (lw 0x3C); [U]
                                     //       populateDataWithDefaults = 1, populateData(id 101); cAIPath_getIsResetPath
+
+    // Methods bound to their retail symbols by asm labels.
+    int populateDataWithDefaults() __asm__("cAIPath_populateDataWithDefaults__FPv");
+    void populateData(int data, int id) __asm__("cAIPath_populateData");
 };
 
 CHECK_OFFSET(cAIPath, NumEvents, 0x000);

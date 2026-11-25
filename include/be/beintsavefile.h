@@ -38,6 +38,12 @@ struct cBESaveInterface : public cBEInterface {
     //       cBEPostRaceState_onEnter/onExit, cBERaceState_onEnter/onExit set 0/1 (retail has no setSaveActive)
     //   the vptr (0x0C): [R] getThis stores cBESaveInterface_vtbl; [P] the preview's getThis stores
     //       _vt$16cBESaveInterface
+
+    // Methods bound to their retail symbols by asm labels.
+    void* generateSaveGame() __asm__("cBESaveInterface_generateSaveGame");
+    void* generateSaveProfile(int idx) __asm__("cBESaveInterface_generateSaveProfile");
+    int loadSaveGame(char* buf) __asm__("cBESaveInterface_loadSaveGame");
+    int loadSaveProfile(char* buf, int idx) __asm__("cBESaveInterface_loadSaveProfile");
 };
 
 CHECK_SIZE(cBESaveInterface, 0x10);

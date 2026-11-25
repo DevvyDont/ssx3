@@ -34,7 +34,7 @@ extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
     {
         cAnimSequencer_init(&self->Sequencer[i]);
     }
-    cRiderAnimBase_reset(self);
+    self->reset();
     return ((void*)self);
 }
 #endif
@@ -77,12 +77,12 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getSequencer);
 /**
  * Returns the address of animation sequencer @p slot of the rider animation (Sequencer + @p slot * 8).
  *
- * @param riderAnim  the cRiderAnimBase
  * @param slot  the sequencer slot, 0-5
  * @return the sequencer, as an int
  */
-extern "C" int cRiderAnimBase_getSequencer(cRiderAnimBase* riderAnim, int slot) {
-    return ((int)riderAnim->Sequencer) + (slot * 8);
+int cRiderAnimBase::getSequencer(int slot)
+{
+    return ((int)Sequencer) + (slot * 8);
 }
 #endif
 //100%
@@ -100,7 +100,7 @@ extern int D_0044AF80[];
  * @param anim  the AI anim id
  * @return the sequencer name (as an int)
  */
-extern "C" int cRiderAnimBase_getAIAnimSequencerName(cRiderAnimBase* self, int anim)
+int cRiderAnimBase::getAIAnimSequencerName(int anim)
 {
     int i = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
     return D_0044AF80[i];
@@ -119,7 +119,7 @@ extern "C" const char* func_00311860_anim(int anim) __asm__("func_00311860");
  * @param anim  the AI anim id (passed through; func_00311860 ignores it)
  * @return str_error
  */
-extern "C" const char* cRiderAnimBase_getAIAnimName(cRiderAnimBase* self, int anim)
+const char* cRiderAnimBase::getAIAnimName(int anim)
 {
     return func_00311860_anim(anim);
 }
@@ -139,11 +139,10 @@ extern tPose tPose_Identity;
  * Expires each sequencer and sets its CurrentAnimID to 0x1B6 (no anim), then IsFlipped = 0, FrameRateFactor =
  * 1.0, OrientationOffset = the identity pose (tPose_Identity) and GraftMask = -1 (cleared).
  *
- * @param riderAnimBase  the animation player (this)
  */
-extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
+void cRiderAnimBase::reset()
 {
-    cRiderAnimBase* self = riderAnimBase;
+    cRiderAnimBase* self = this;
     for (int i = 0; i < 6; i++)
     {
         cAnimSequencer_expireAll(&self->Sequencer[i]);
@@ -174,9 +173,9 @@ extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @return the anim category, 0 when the sequencer plays nothing
  */
-extern "C" int cRiderAnimBase_getCurrentAnimCategory(cRiderAnimBase* self, int i)
+int cRiderAnimBase::getCurrentAnimCategory(int i)
 {
-    int anim = self->CurrentAnimID[i];
+    int anim = CurrentAnimID[i];
     if (anim == 438) {
         return 0;
     }
@@ -199,9 +198,9 @@ cAnimSequence* cAnimSequencer_getSequence(cAnimSequencer* self, int index);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @return the sequence, or null
  */
-extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(cRiderAnimBase* self, int i)
+cAnimSequence* cRiderAnimBase::getCurrentAnimSequence(int i)
 {
-    cAnimSequencer* seqs = self->Sequencer;
+    cAnimSequencer* seqs = Sequencer;
     return cAnimSequencer_getSequence(&seqs[i], 0);
 }
 #endif
@@ -239,12 +238,12 @@ static inline tRabVector4 AxisAngle_00311B48(const t4Vector& axis, float angle)
  *
  * @param angle  the heading change (probably radians); applied with the opposite sign
  */
-extern "C" void cRiderAnimBase_changeHeadingOffset(cRiderAnimBase* self, float angle)
+void cRiderAnimBase::changeHeadingOffset(float angle)
 {
     tPose xf;
     xf.P = t4vect_Origin;
     xf.Q = AxisAngle_00311B48(t4vect_ZAxis, -angle);
-    cRiderAnimBase_changeOrientationOffset(self, &xf);
+    changeOrientationOffset(&xf);
 }
 #endif
 
@@ -345,17 +344,17 @@ static inline tPose Combine_00311BF0(const tPose& a, const tPose& b)
  *
  * @param xf  transform to apply: a position, then a rotation quaternion
  */
-extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, tPose* xf)
+void cRiderAnimBase::changeOrientationOffset(tPose* xf)
 {
     for (int i = 0; i < 6; i++) {
         int j = 0;
-        if (j < (self->Sequencer)[i].NumPlaying) {
+        if (j < Sequencer[i].NumPlaying) {
             do {
-            tPose* src = &cAnimSequencer_getSequence(&(self->Sequencer)[i], j)->OrientationOffset;
-            tPose* dst = &cAnimSequencer_getSequence(&(self->Sequencer)[i], j)->OrientationOffset;
+            tPose* src = &cAnimSequencer_getSequence(&Sequencer[i], j)->OrientationOffset;
+            tPose* dst = &cAnimSequencer_getSequence(&Sequencer[i], j)->OrientationOffset;
             *dst = Combine_00311BF0(*xf, *src);
                 j++;
-            } while (j < (self->Sequencer)[i].NumPlaying);
+            } while (j < Sequencer[i].NumPlaying);
         }
     }
 }
@@ -372,17 +371,17 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeIsFlipped);
  * @param value  nonzero to mirror the animations
  */
 // Sets the field at 0x80 of every sequence node of all 6 sequencers.
-extern "C" void cRiderAnimBase_changeIsFlipped(cRiderAnimBase* self, int value)
+void cRiderAnimBase::changeIsFlipped(int value)
 {
     for (int i = 0; i < 6; i++)
     {
         int j = 0;
-        if (j < self->Sequencer[i].NumPlaying)
+        if (j < Sequencer[i].NumPlaying)
         {
             do
             {
-                cAnimSequencer_getSequence(&self->Sequencer[i], j++)->IsFlipped = value;
-            } while (j < self->Sequencer[i].NumPlaying);
+                cAnimSequencer_getSequence(&Sequencer[i], j++)->IsFlipped = value;
+            } while (j < Sequencer[i].NumPlaying);
         }
     }
 }
@@ -398,10 +397,10 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_removeAll);
  * @param i  the sequencer slot, 0-5
  */
 // Resets sequencer i and marks its slot empty (0x1B6 = no anim, see cRiderAnimBase_getCurrentAnimCategory).
-extern "C" void cRiderAnimBase_removeAll(cRiderAnimBase* self, int i)
+void cRiderAnimBase::removeAll(int i)
 {
-    cAnimSequencer_expireAll(&self->Sequencer[i]);
-    self->CurrentAnimID[i] = 438;
+    cAnimSequencer_expireAll(&Sequencer[i]);
+    CurrentAnimID[i] = 438;
 }
 #endif
 
@@ -420,11 +419,11 @@ extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float v);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @param blendOut  the fade-out time in seconds (On Tour blendOut)
  */
-extern "C" void cRiderAnimBase_blendOutAll(cRiderAnimBase* self, int i, float blendOut)
+void cRiderAnimBase::blendOutAll(int i, float blendOut)
 {
-    cAnimSequencer_removeAllEndTriggers(&self->Sequencer[i], 0x3F);
-    cAnimSequencer_fadeOutAndExpireAll(&self->Sequencer[i], blendOut);
-    self->CurrentAnimID[i] = 438;
+    cAnimSequencer_removeAllEndTriggers(&Sequencer[i], 0x3F);
+    cAnimSequencer_fadeOutAndExpireAll(&Sequencer[i], blendOut);
+    CurrentAnimID[i] = 438;
 }
 #endif
 
@@ -488,9 +487,9 @@ static inline bool rabXformEq_1F00(const tPose& a, const tPose& b)
  */
 // Starts anim (packed clip id h) on sequencer vseq, blending over `blend` seconds. A sequence already
 // playing the same thing (same anim, flags and offset transform) hands over its tracks and weight.
-extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, cAnimSequencer* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
+int cRiderAnimBase::onInput(cAnimSequencer* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
 {
-    cRiderAnimBase* self = vself;
+    cRiderAnimBase* self = this;
     cAnimSequencer* seq = vseq;
     cAnimSequence* node;
     if (blend == 0.0f)
@@ -594,20 +593,20 @@ extern "C" void cRiderAnimBase_setupAnimation(cRiderAnimBase* self, int a1);
  * @param animMinParts  On Tour animMinParts: blend only the minimum parts
  * @param timescale  the time step (On Tour timescale)
  */
-extern "C" void cRiderAnimBase_updateAnimation(cRiderAnimBase* self, int animMinParts, float timescale)
+void cRiderAnimBase::updateAnimation(int animMinParts, float timescale)
 {
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequence* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
+        cAnimSequence* node = cAnimSequencer_getSequence(&Sequencer[i], 0);
         while (node)
         {
             cAnimSequence* next = node->Next;
-            tUpdateSequenceSlot* vt = (tUpdateSequenceSlot*)self->mVtbl;
-            vt[2].fn(vthis(self, vt[2]), &(self->Sequencer)[i], node, timescale);
+            tUpdateSequenceSlot* vt = (tUpdateSequenceSlot*)mVtbl;
+            vt[2].fn(vthis(this, vt[2]), &Sequencer[i], node, timescale);
             node = next;
         }
     }
-    cRiderAnimBase_setupAnimation(self, animMinParts);
+    setupAnimation(animMinParts);
 }
 #endif
 
@@ -627,19 +626,19 @@ typedef sVEntry<void(void*, cAnimSequencer*, cAnimSequence*)> tExpireSequenceSlo
  * then calls vtable slot 3 (mVtbl) on each. The release build drops On Tour's bound check on the 32-entry
  * list.
  */
-extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
+void cRiderAnimBase::expireAnimation()
 {
     tExpireInfo list[32];
     int n = 0;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequence* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
+        cAnimSequence* node = cAnimSequencer_getSequence(&Sequencer[i], 0);
         while (node)
         {
             if (tEventFlags_isSet1(&node->Events, 0x3F) != 0)
             {
                 (*(cAnimSequence**)&list[n].seq) = ((cAnimSequence*)node);
-                list[n].seqr = &(self->Sequencer)[i];
+                list[n].seqr = &Sequencer[i];
                 n++;
             }
             node = node->Next;
@@ -647,8 +646,8 @@ extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
     }
     for (int k = 0; k < n; k++)
     {
-        tExpireSequenceSlot* vt = (tExpireSequenceSlot*)self->mVtbl;
-        vt[3].fn(vthis(self, vt[3]), list[k].seqr, ((cAnimSequence*)list[k].seq));
+        tExpireSequenceSlot* vt = (tExpireSequenceSlot*)mVtbl;
+        vt[3].fn(vthis(this, vt[3]), list[k].seqr, ((cAnimSequence*)list[k].seq));
     }
 }
 #endif
@@ -666,18 +665,17 @@ extern "C" void func_0030F2B0(void* model, int count, tAnimBlendFrame* states, i
  * Fills a 64-entry frame array from each of the 6 sequencers (cAnimSequencer_getAnimBlendFrames, getAnimBlendFrames) and hands it to
  * func_0030F2B0 (On Tour cAnimModel::blend) on the model at +0x54.
  *
- * @param riderAnim  the rider anim (this)
  * @param animMinParts  On Tour animMinParts: blend only the minimum parts
  */
-extern "C" void cRiderAnimBase_setupAnimation(cRiderAnimBase* riderAnim, int animMinParts)
+void cRiderAnimBase::setupAnimation(int animMinParts)
 {
     int n = 0;
     tAnimBlendFrame states[0x40];
     for (int i = 0; i < 6; i++)
     {
-        n += cAnimSequencer_getAnimBlendFrames(&riderAnim->Sequencer[i], &states[n], 0x40 - n);
+        n += cAnimSequencer_getAnimBlendFrames(&Sequencer[i], &states[n], 0x40 - n);
     }
-    func_0030F2B0(riderAnim->AnimModel, n, states, animMinParts);
+    func_0030F2B0(AnimModel, n, states, animMinParts);
 }
 #endif
 
@@ -719,7 +717,7 @@ extern "C" tAnimBlendFrame cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, i
         // first).
         animid = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + vt[4].fn(vthis(self, vt[4]), anim));
     }
-    cRiderAnimBase_onInput(self, &seq, anim, animid, 1, 0, 0.0f);
+    self->onInput(&seq, anim, animid, 1, 0, 0.0f);
     cAnimSequence_setSubAnimTime(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
     cAnimSequencer_getAnimBlendFrames(&seq, (tAnimBlendFrame*)states, 0x40);
     cAnimSequencer_expireAll(&seq);
@@ -742,10 +740,10 @@ extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
  * @param aid  the AI animation (On Tour aid)
  * @return the clip length in seconds, 0 when the anim has no clip
  */
-extern "C" float cRiderAnimBase_getAIAnimDuration(cRiderAnimBase* self, int aid)
+float cRiderAnimBase::getAIAnimDuration(int aid)
 {
-    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-    int id = vt[4].fn(vthis(self, vt[4]), aid);
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)mVtbl;
+    int id = vt[4].fn(vthis(this, vt[4]), aid);
     if (id == 519)
         return 0.0f;
     // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
@@ -773,10 +771,10 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimEventTime);
  * @param frame  the tag number in the clip
  * @return the tag's time in seconds, -1 when the clip has no such tag, 0 when the anim has no game animation
  */
-extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int anim, int frame)
+float cRiderAnimBase::getAIAnimEventTime(int anim, int frame)
 {
-    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-    int id = vt[4].fn(vthis(self, vt[4]), anim);
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)mVtbl;
+    int id = vt[4].fn(vthis(this, vt[4]), anim);
     if (id == 519)
         return 0.0f;
     // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
@@ -839,7 +837,8 @@ int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
     // first).
     int animId = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + id);
     int slot = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
-    return self->CurrentAnimID[slot] = cRiderAnimBase_onInput((cRiderAnimBase*)self, &self->Sequencer[slot], anim, animId, flags, kSequencerPriority[slot], blend);
+    return self->CurrentAnimID[slot] = self->onInput(&self->Sequencer[slot], anim, animId, flags,
+            kSequencerPriority[slot], blend);
 }
 #endif
 
@@ -863,14 +862,14 @@ extern int kSequencerPriority[];
  * @param animid  the clip to play: bank in the low byte, clip above it (On Tour tAnimID animid)
  * @param blend  the blend-in time in seconds; negative uses the anim's default (On Tour blendIn)
  */
-extern "C" void cRiderAnimBase_playFromAnimID(cRiderAnimBase* self, int anim, int animid, float blend)
+void cRiderAnimBase::playFromAnimID(int anim, int animid, float blend)
 {
     int slot = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
     if (blend < 0.0f)
     {
         blend = cAIAnimEventMap_getAnimPlayAttr(anim)->BlendInTime;
     }
-    self->CurrentAnimID[slot] = cRiderAnimBase_onInput(self, &self->Sequencer[slot], anim, animid, 1, kSequencerPriority[slot], blend);
+    CurrentAnimID[slot] = onInput(&Sequencer[slot], anim, animid, 1, kSequencerPriority[slot], blend);
 }
 #endif
 
@@ -885,10 +884,9 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimID__FPvi);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @return the current AI anim id
  */
-int cRiderAnimBase_getCurrentAnimID(void* vself, int i)
+int cRiderAnimBase::getCurrentAnimID(int i)
 {
-    cRiderAnimBase* self = (cRiderAnimBase*)vself;
-    return self->CurrentAnimID[i];
+    return CurrentAnimID[i];
 }
 #endif
 
@@ -904,9 +902,9 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimFramePercent
  * @param i  the sequencer slot, 0-5
  * @return the fraction played, 0-1
  */
-extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(cRiderAnimBase* self, int i)
+float cRiderAnimBase::getCurrentAnimFramePercent(int i)
 {
-    cAnimSequencer* seqs = self->Sequencer;
+    cAnimSequencer* seqs = Sequencer;
     cAnimSequence* node = cAnimSequencer_getSequence(&seqs[i], 0);
     return node->SubAnims[0].Time / node->SubAnims[0].TotalTime;
 }
@@ -924,9 +922,9 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_isCurrentAnimEndFlag);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @return nonzero once the end event has fired
  */
-extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(cRiderAnimBase* self, int i)
+int cRiderAnimBase::isCurrentAnimEndFlag(int i)
 {
-    cAnimSequencer* seqs = self->Sequencer;
+    cAnimSequencer* seqs = Sequencer;
     return cAnimSequencer_getSequence(&seqs[i], 0)->EndEvent;
 }
 #endif
@@ -952,13 +950,13 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * @param anim  the AI anim to play
  * @return @p anim
  */
-extern "C" int cRiderAnimBase_playInto(cRiderAnimBase* self, cAnimSequencer* seq, cAnimSequence* node, int anim)
+int cRiderAnimBase::playInto(cAnimSequencer* seq, cAnimSequence* node, int anim)
 {
     float currentWeight = node->CurrentWeight;
     float timeLeft = node->WeightTimer;
     float targetWeight = node->TargetWeight;
     cAnimSequencer_expire(seq, node);
-    cRiderAnimBase_play(self, anim, 0, -1.0f);
+    cRiderAnimBase_play(this, anim, 0, -1.0f);
     cAnimSequence* sequence = cAnimSequencer_getSequence(seq, 0);
     sequence->TargetWeight = currentWeight;
     sequence->CurrentWeight = currentWeight;
@@ -986,10 +984,10 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * @param sequence  the sequence (cAnimSequence) that ended
  * @param anim  the AI anim to play
  */
-extern "C" void cRiderAnimBase_playBlendIn(cRiderAnimBase* self, void* sequencer, cAnimSequence* sequence, int anim)
+void cRiderAnimBase::playBlendIn(void* sequencer, cAnimSequence* sequence, int anim)
 {
     tEventFlags_clear1(&sequence->Events, 0x3F);
-    cRiderAnimBase_play(self, anim, 0, -1.0f);
+    cRiderAnimBase_play(this, anim, 0, -1.0f);
 }
 #endif
 
@@ -1351,7 +1349,7 @@ static inline float ffloor_003135B0(float x)
 
 static inline void fire_003135B0(cAnimSequence* self, float from, float to)
 {
-    cAnimSequence_checkTriggers(self, from, to);
+    self->checkTriggers(from, to);
 }
 
 /**
@@ -1377,7 +1375,7 @@ extern "C" int cAnimSequence_updateSubAnim(cAnimSequence* self, int i, float dt)
         self->Events.IsJustChanged = 0;
         self->EndEvent = 0;
         if (self->CheckTriggersAtCurrentFrame != 0) {
-            cAnimSequence_checkTriggersAtTime(self, startTime);
+            self->checkTriggersAtTime(startTime);
             self->CheckTriggersAtCurrentFrame = 0;
         }
     }
@@ -1385,12 +1383,12 @@ extern "C" int cAnimSequence_updateSubAnim(cAnimSequence* self, int i, float dt)
         if (newTime <= 0.0f) {
             newTime = 0.0f;
             if (i == 0) {
-                cAnimSequence_setEndTriggers(self);
+                self->setEndTriggers();
             }
         } else if (len <= newTime) {
             newTime = len;
             if (i == 0) {
-                cAnimSequence_setEndTriggers(self);
+                self->setEndTriggers();
             }
         }
         if (i == 0) {
@@ -1400,7 +1398,7 @@ extern "C" int cAnimSequence_updateSubAnim(cAnimSequence* self, int i, float dt)
         int n = (int)ffloor_003135B0(newTime / len);
         newTime -= len * (float)n;
         if (i == 0) {
-            cAnimSequence_setEndTriggers(self);
+            self->setEndTriggers();
             if (n >= 2) {
                 fire_003135B0(self, 0.0f, len);
             } else if (n < -1) {
@@ -1488,14 +1486,14 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggers);
 // Fires every kind-0 event whose time lies in (from, to] (or [to, from) when
 // playing backwards).
 // PORT: ulong is 64-bit here
-extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, float to)
+void cAnimSequence::checkTriggers(float from, float to)
 {
     if (from == to)
     {
         return;
     }
     int forward = from <= to;
-    for (tTrigger* event = self->Triggers; event != 0; event = event->Next)
+    for (tTrigger* event = Triggers; event != 0; event = event->Next)
     {
         if (event->IsEndTrigger == 0)
         {
@@ -1511,9 +1509,9 @@ extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, flo
                     continue;
             }
             ulong bit = (ulong)1 << event->ID;
-            ulong old = self->Events.IsSet;
-            self->Events.IsSet = old | bit;
-            self->Events.IsJustChanged |= bit & ~old;
+            ulong old = Events.IsSet;
+            Events.IsSet = old | bit;
+            Events.IsJustChanged |= bit & ~old;
         }
     }
 }
@@ -1532,16 +1530,16 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggersAtTime);
  * @param time  the time to check
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimSequence_checkTriggersAtTime(cAnimSequence* self, float time)
+void cAnimSequence::checkTriggersAtTime(float time)
 {
-    for (tTrigger* event = self->Triggers; event != 0; event = event->Next)
+    for (tTrigger* event = Triggers; event != 0; event = event->Next)
     {
         if (event->IsEndTrigger == 0 && event->TriggerTime == time)
         {
             ulong bit = (ulong)1 << event->ID;
-            ulong old = self->Events.IsSet;
-            self->Events.IsSet = old | bit;
-            self->Events.IsJustChanged |= bit & ~old;
+            ulong old = Events.IsSet;
+            Events.IsSet = old | bit;
+            Events.IsJustChanged |= bit & ~old;
         }
     }
 }
@@ -1556,17 +1554,17 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_setEndTriggers);
  * Each end trigger's id bit is set in the event flags (+0xB0) and, if newly set, in the just-changed flags (+0xB8).
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimSequence_setEndTriggers(cAnimSequence* self)
+void cAnimSequence::setEndTriggers()
 {
-    self->EndEvent = 1;
-    for (tTrigger* event = self->Triggers; event != 0; event = event->Next)
+    EndEvent = 1;
+    for (tTrigger* event = Triggers; event != 0; event = event->Next)
     {
         if (event->IsEndTrigger != 0)
         {
             ulong bit = (ulong)1 << event->ID;
-            ulong old = self->Events.IsSet;
-            self->Events.IsSet = old | bit;
-            self->Events.IsJustChanged |= bit & ~old;
+            ulong old = Events.IsSet;
+            Events.IsSet = old | bit;
+            Events.IsJustChanged |= bit & ~old;
         }
     }
 }

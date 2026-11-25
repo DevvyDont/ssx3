@@ -64,6 +64,8 @@ CHECK_OFFSET(tBEHighScore, cCharacter, 0x04);
 CHECK_OFFSET(tBEHighScore, strUserName, 0x08);
 CHECK_SIZE(tBEHighScore, 0x14);
 
+struct tRiderStats;
+
 struct cBEScoreInterface : public cBEInterface {
     // cBEInterface (0x00-0x0F, be/beinterface.h):
     //   bIsActive: [R] getThis sets 0; [P] setScoreActive; [U] cBEScoreInterface_setScoreActive (static:
@@ -90,6 +92,24 @@ struct cBEScoreInterface : public cBEInterface {
                                      //       0x20 + 3 * 0xB0) leaves room for exactly one more, matching
                                      //       cBELibrary_getProfileIndex's three profiles (0, 1 humans, 2 computer); no
                                      //       retail access to [2] (0x180-0x22F) seen
+
+    // Methods bound to their retail symbols by asm labels.
+    int isNewPersonalHighScore() __asm__("cBEScoreInterface_isNewPersonalHighScore");
+    int isNewTrackHighScore() __asm__("cBEScoreInterface_isNewTrackHighScore");
+    int convertRankToMedal(int rank) __asm__("cBEScoreInterface_convertRankToMedal");
+    void processEventRiderStats(int rider, tRiderStats* stats, unsigned int score)
+        __asm__("cBEScoreInterface_processEventRiderStats");
+    void processRiderRanking(int rider, int result, int score) __asm__("cBEScoreInterface_processRiderRanking");
+    void* getPlayerLastCompletedEventStats(int profileIndex)
+        __asm__("cBEScoreInterface_getPlayerLastCompletedEventStats");
+    void* getPlayerBestStats(int profileIndex, int characterId) __asm__("cBEScoreInterface_getPlayerBestStats");
+    int isBetterMedal(int currentMedal, int newMedal) __asm__("cBEScoreInterface_isBetterMedal");
+    bool isEligibleForHighScore(int rider) __asm__("cBEScoreInterface_isEligibleForHighScore");
+    int getNumberOfWinsOnTrack(int rider, int locationID, int eventID)
+        __asm__("cBEScoreInterface_getNumberOfWinsOnTrack");
+    int getBestMedalOnTrack(int rider, int locationID, int eventID) __asm__("cBEScoreInterface_getBestMedalOnTrack");
+    void setBestMedalOnTrack(int rider, int locationID, int eventID, int medal)
+        __asm__("cBEScoreInterface_setBestMedalOnTrack");
 };
 
 CHECK_OFFSET(cBEScoreInterface, bNewHighScore, 0x10);

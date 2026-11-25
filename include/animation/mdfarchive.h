@@ -85,6 +85,14 @@ struct cMdfArchive {
     tMdfArchive* ArchiveHeader;     // 0x004 [O]
     tMdfModelHeader* ModelHeaders;  // 0x008 [O]
     char* Data;                     // 0x00C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    short getNumModelParts() __asm__("cMdfArchive_getNumModelParts");
+    int findModelPart(const char* name) __asm__("cMdfArchive_findModelPart");
+    char* getModelPartPtr(const char* name) __asm__("cMdfArchive_getModelPartPtr");
+    void* getModelPart(const char* name) __asm__("cMdfArchive_getModelPart");
+    int getModelPartPtrByIndex(int index) __asm__("cMdfArchive_getModelPartPtrByIndex");
+    void* getModelPartByIndex(int i) __asm__("cMdfArchive_getModelPartByIndex");
 };
 
 CHECK_OFFSET(cMdfArchive, Archive, 0x000);

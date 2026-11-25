@@ -37,7 +37,7 @@ cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPla
     self->field_0x8 = 0;
     self->vtable = cBENewPlayerInterface_vtbl;
     cBENewPlayerInterface_discard((cBENewPlayerInterface*)self);
-    cBENewPlayerInterface_defaultCtrl((cBENewPlayerInterface*)self);
+    ((cBENewPlayerInterface*)self)->defaultCtrl();
     return self;
 }
 #endif
@@ -131,7 +131,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_defaultCtrl);
  *
  * The reload is the interface's slot 2 (discard).
  */
-extern "C" void cBENewPlayerInterface_defaultCtrl(cBENewPlayerInterface* self)
+void cBENewPlayerInterface::defaultCtrl()
 {
     int i;
     cBEPlayerDB* entry = cBELibrary_playerDB;
@@ -140,7 +140,7 @@ extern "C" void cBENewPlayerInterface_defaultCtrl(cBENewPlayerInterface* self)
         entry[i].cControlMap = 0;
         entry[i].iUseDualShock = 1;
     }
-    self->discard();
+    discard();
 }
 #endif
 
@@ -160,7 +160,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param index  the rider (On Tour iRider)
  * @return the flag word
  */
-extern "C" int cBENewPlayerInterface_isFirstTimeWC(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::isFirstTimeWC(int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -184,7 +184,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param index  the rider (On Tour iRider)
  * @param value  the new flag
  */
-extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setIsFirstTimeWC(int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -211,7 +211,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param bit  the location (On Tour eBELocationID locTrack)
  * @return true when the location has not been visited
  */
-extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(cBENewPlayerInterface* self, int index, int bit)
+int cBENewPlayerInterface::isFirstTimeOnTrack(int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -241,7 +241,7 @@ extern "C" void cBECharProfileDB_setLocationVisited(void* self, int bit, int on)
  * @param index  the rider (On Tour iRider)
  * @param bit  the location (On Tour eBELocationID locTrack)
  */
-extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(cBENewPlayerInterface* self, bool flag, int index, int bit)
+void cBENewPlayerInterface::setFirstTimeOnTrack(bool flag, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -269,7 +269,7 @@ extern "C" int cBECharProfileDB_hasVisitedPeak(void* self, int kind);
  * @param kind  the peak, 0-2
  * @return 1 when visited, else 0
  */
-extern "C" int cBENewPlayerInterface_hasVisitedPeakWC(cBENewPlayerInterface* self, int index, int kind)
+int cBENewPlayerInterface::hasVisitedPeakWC(int index, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -299,7 +299,7 @@ void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
  * @param event  the game event (On Tour eBEGameEvent)
  * @return 1 when the byte is nonzero, else 0
  */
-extern "C" int cBENewPlayerInterface_hasPlayedEvent(cBENewPlayerInterface* self, int index, int locationId, int event)
+int cBENewPlayerInterface::hasPlayedEvent(int index, int locationId, int event)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -325,7 +325,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return 1 when locked, else 0
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
-extern "C" int cBENewPlayerInterface_isPeakLocked(cBENewPlayerInterface* self, int iProfileIndex, int iCharacterID, int peak)
+int cBENewPlayerInterface::isPeakLocked(int iProfileIndex, int iCharacterID, int peak)
 {
     if (peak != 0)
     {
@@ -358,10 +358,10 @@ int cBELibrary_getCharacterID(int);
  * @param peak   peak to test
  * @return the result of cBENewPlayerInterface_isPeakLocked()
  */
-extern "C" int cBENewPlayerInterface_isPeakLocked1(cBENewPlayerInterface* self, int rider, int peak)
+int cBENewPlayerInterface::isPeakLocked1(int rider, int peak)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    return cBENewPlayerInterface_isPeakLocked(self, profile, cBELibrary_getCharacterID(rider), peak);
+    return isPeakLocked(profile, cBELibrary_getCharacterID(rider), peak);
 }
 #endif
 
@@ -383,7 +383,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param kind  the peak (0-based): 1, or 2 (any other value also writes bit 13)
  * @param value  1 to lock, 0 to unlock
  */
-extern "C" void cBENewPlayerInterface_setPeakLocked(cBENewPlayerInterface* self, int index, int kind, int value)
+void cBENewPlayerInterface::setPeakLocked(int index, int kind, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -416,7 +416,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return the bit, 0 or 1
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
-extern "C" int cBENewPlayerInterface_isRivalChallengePlayed(cBENewPlayerInterface* self, int index, int kind, int flag)
+int cBENewPlayerInterface::isRivalChallengePlayed(int index, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -462,7 +462,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0
  * @param value  the new bit
  */
-extern "C" void cBENewPlayerInterface_setRivalChallengePlayed(cBENewPlayerInterface* self, int index, int kind, int flag, int value)
+void cBENewPlayerInterface::setRivalChallengePlayed(int index, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -507,7 +507,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return 1 when locked, else 0
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
-extern "C" int cBENewPlayerInterface_isRivalEventLocked(cBENewPlayerInterface* self, int index, int character, int kind, int flag)
+int cBENewPlayerInterface::isRivalEventLocked(int index, int character, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
@@ -570,7 +570,7 @@ extern sTrackInfo_1466A0 cBELibrary_locationDB[];
  * @return 1 when locked, else 0
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
-extern "C" int cBENewPlayerInterface_isRivalEventLocked1(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::isRivalEventLocked1(int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -629,7 +629,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0
  * @param value  1 to lock, 0 to unlock
  */
-extern "C" void cBENewPlayerInterface_setRivalEventLocked(cBENewPlayerInterface* self, int index, int character, int kind, int flag, int value)
+void cBENewPlayerInterface::setRivalEventLocked(int index, int character, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
@@ -679,7 +679,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return 1 when locked
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
-extern "C" int cBENewPlayerInterface_isEventLocked(cBENewPlayerInterface* self, int index, int character, int kind)
+int cBENewPlayerInterface::isEventLocked(int index, int character, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     switch (kind) {
@@ -720,7 +720,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setEventLocked);
  * @param event  the game event, 6-11
  * @param locked  1 to lock, 0 to unlock
  */
-extern "C" void cBENewPlayerInterface_setEventLocked(cBENewPlayerInterface* self, int rider, int character, int event, int locked) {
+void cBENewPlayerInterface::setEventLocked(int rider, int character, int event, int locked)
+{
     int profile = cBELibrary_getProfileIndex(rider);
     switch (event) {
     case 6:
@@ -758,7 +759,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param index  the rider (On Tour: iRider); mapped to the profile and the player's character
  * @return the location id
  */
-extern "C" int cBENewPlayerInterface_getLastHub(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::getLastHub(int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -782,7 +783,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param index  the rider (On Tour iRider)
  * @param value  the hub location (On Tour locHub)
  */
-extern "C" void cBENewPlayerInterface_setLastHub(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setLastHub(int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -813,7 +814,7 @@ extern sPlayerSlot_00146E98 D_00534FEC[];
  * @param second  0 for the first human, nonzero for the second (On Tour bSecond)
  * @return the rider slot (0-5), or -1 when there is no such human
  */
-extern "C" int cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface* self, int second)
+int cBENewPlayerInterface::getHumanRider(int second)
 {
     int n = 0;
     for (int i = 0; i < 6; i++)
@@ -925,7 +926,7 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
  * @param playerIndex  the player slot (On Tour iPlayer)
  * @param name  the new name
  */
-extern "C" void cBENewPlayerInterface_setPlayerName(cBENewPlayerInterface* self, int playerIndex, const char* name)
+void cBENewPlayerInterface::setPlayerName(int playerIndex, const char* name)
 {
     strncpy(cBENewPlayerInterface_tempPlayers[playerIndex].strUserName, name, 0xC);
 }
@@ -948,7 +949,7 @@ extern char str_kT_MEMPlayerName[];
  * @param idx  the player slot (On Tour: iPlayer)
  * @return the name stored in the player table
  */
-extern "C" char* cBENewPlayerInterface_getPlayerName(cBENewPlayerInterface* self, int idx)
+char* cBENewPlayerInterface::getPlayerName(int idx)
 {
     char* name = (char*)&cBENewPlayerInterface_tempPlayers[idx];
     if (strlen(name) == 0)
@@ -977,7 +978,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
  * @param index  the rider; mapped to its player with cBENewPlayerInterface_getPlayerID()
  * @param ctrl  the controller id, or negative for none
  */
-extern "C" void cBENewPlayerInterface_setRiderCtrlID(cBENewPlayerInterface* self, int index, int ctrl)
+void cBENewPlayerInterface::setRiderCtrlID(int index, int ctrl)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBENewPlayerInterface_tempPlayers[id].iControllerID = ctrl;
@@ -1003,7 +1004,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
  * @param index  the rider (On Tour iRider)
  * @return the controller id
  */
-extern "C" int cBENewPlayerInterface_getRiderCtrlID(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::getRiderCtrlID(int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     return cBENewPlayerInterface_tempPlayers[id].iControllerID;
@@ -1023,7 +1024,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPlayerCtrlID);
  * @param iPlayer  the player slot (On Tour iPlayer)
  * @param ctrlID  the controller id, negative for none
  */
-extern "C" void cBENewPlayerInterface_setPlayerCtrlID(cBENewPlayerInterface* self, int iPlayer, int ctrlID)
+void cBENewPlayerInterface::setPlayerCtrlID(int iPlayer, int ctrlID)
 {
     cBENewPlayerInterface_tempPlayers[iPlayer].iControllerID = ctrlID;
     if (ctrlID >= 0) {
@@ -1045,7 +1046,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCtrlID);
  * @param iPlayer  the player slot (On Tour iPlayer)
  * @return the controller id, negative for none
  */
-extern "C" int cBENewPlayerInterface_getPlayerCtrlID(cBENewPlayerInterface* self, int iPlayer)
+int cBENewPlayerInterface::getPlayerCtrlID(int iPlayer)
 {
     return cBENewPlayerInterface_tempPlayers[iPlayer].iControllerID;
 }
@@ -1068,7 +1069,7 @@ static inline int func_00147338_isLocked(cBEPlayerDB* e)
  * @param index   rider slot, mapped to a player through cBENewPlayerInterface_getPlayerID()
  * @param charID  character ID to store
  */
-extern "C" void cBENewPlayerInterface_setRiderCharID(cBENewPlayerInterface* self, int index, int charID)
+void cBENewPlayerInterface::setRiderCharID(int index, int charID)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBEPlayerDB* entry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1114,7 +1115,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderCheatCharID);
  * @param index  the rider (On Tour iRider)
  * @param value  the cheat character id, 0 for none
  */
-extern "C" void cBENewPlayerInterface_setRiderCheatCharID(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setRiderCheatCharID(int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBENewPlayerInterface_tempPlayers[id].cCheatCharacterID = value;
@@ -1133,7 +1134,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderCheatCharID);
  * @param index  the rider (On Tour iRider)
  * @return the cheat character id
  */
-extern "C" signed char cBENewPlayerInterface_getRiderCheatCharID(cBENewPlayerInterface* self, int index)
+signed char cBENewPlayerInterface::getRiderCheatCharID(int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     return cBENewPlayerInterface_tempPlayers[id].cCheatCharacterID;
@@ -1158,7 +1159,7 @@ static inline int cBENewPlayerInterface_setPlayerCharID_isMissionMan(cBEPlayerDB
  * @param iPlayer  the player slot (On Tour iPlayer)
  * @param charID  the character to ride as
  */
-extern "C" void cBENewPlayerInterface_setPlayerCharID(cBENewPlayerInterface* self, int iPlayer, int charID)
+void cBENewPlayerInterface::setPlayerCharID(int iPlayer, int charID)
 {
     cBEPlayerDB* playerRec = &cBENewPlayerInterface_tempPlayers[iPlayer];
     if (cBENewPlayerInterface_setPlayerCharID_isMissionMan(playerRec) == 1) {
@@ -1193,7 +1194,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPlayerCheatCharID);
  * @param playerId  the player slot (On Tour iPlayer)
  * @param value  the cheat character id, 0 for none
  */
-extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(cBENewPlayerInterface* self, int playerId, int value)
+void cBENewPlayerInterface::setPlayerCheatCharID(int playerId, int value)
 {
     cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[playerId];
     playerEntry->cCheatCharacterID = value;
@@ -1209,7 +1210,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCheatCharID);
  * @param playerId  the player slot (On Tour iPlayer)
  * @return the cheat character id, 0 for none
  */
-extern "C" signed char cBENewPlayerInterface_getPlayerCheatCharID(cBENewPlayerInterface* self, int playerId)
+signed char cBENewPlayerInterface::getPlayerCheatCharID(int playerId)
 {
     cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[playerId];
     return playerEntry->cCheatCharacterID;
@@ -1228,7 +1229,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getUseDualShock);
  * @param index  the rider (On Tour iRider)
  * @return 1 when on, else 0
  */
-extern "C" int cBENewPlayerInterface_getUseDualShock(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::getUseDualShock(int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1245,7 +1246,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setUseDualShock);
  * @param index  the rider (On Tour iRider)
  * @param value  the new setting
  */
-extern "C" void cBENewPlayerInterface_setUseDualShock(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setUseDualShock(int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1265,7 +1266,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHelpDone);
  * @param index  the rider (On Tour iRider)
  * @return the bit, 0 or 1
  */
-extern "C" int cBENewPlayerInterface_getHelpDone(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::getHelpDone(int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1282,7 +1283,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setHelpDone);
  * @param index  the rider (On Tour iRider)
  * @param value  the new bit
  */
-extern "C" void cBENewPlayerInterface_setHelpDone(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setHelpDone(int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1301,7 +1302,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getControllerMapping);
  * @param index  the rider (On Tour iRider)
  * @return the controller mapping id
  */
-extern "C" signed char cBENewPlayerInterface_getControllerMapping(cBENewPlayerInterface* self, int index)
+signed char cBENewPlayerInterface::getControllerMapping(int index)
 {
     return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].cControlMap;
 }
@@ -1316,7 +1317,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setControllerMapping);
  * @param index  the rider (On Tour iRider)
  * @param value  the controller mapping id
  */
-extern "C" void cBENewPlayerInterface_setControllerMapping(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setControllerMapping(int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBENewPlayerInterface_tempPlayers[id].cControlMap = value;
@@ -1334,7 +1335,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getCamera);
  * @param index  the rider
  * @return the word
  */
-extern "C" int cBENewPlayerInterface_getCamera(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::getCamera(int index)
 {
     return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].iCamera;
 }
@@ -1350,7 +1351,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setCamera);
  * @param index  the rider
  * @param value  the new word
  */
-extern "C" void cBENewPlayerInterface_setCamera(cBENewPlayerInterface* self, int index, int value)
+void cBENewPlayerInterface::setCamera(int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBENewPlayerInterface_tempPlayers[id].iCamera = value;
@@ -1417,7 +1418,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderHumanIndex);
  * @param index  the player slot
  * @return -1, 0 or 1
  */
-extern "C" int cBENewPlayerInterface_getRiderHumanIndex(cBENewPlayerInterface* self, int index)
+int cBENewPlayerInterface::getRiderHumanIndex(int index)
 {
     if (cBENewPlayerInterface_tempPlayers[index].iControllerID == -1) {
         return -1;
@@ -1469,7 +1470,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_resetFromMissionMan);
  *
  * @param index  the rider; mapped to its player
  */
-extern "C" void cBENewPlayerInterface_resetFromMissionMan(cBENewPlayerInterface* self, int index)
+void cBENewPlayerInterface::resetFromMissionMan(int index)
 {
     cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].cCharacterID = 0;
     cBEPlayerDB* entry = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
@@ -1629,7 +1630,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param value  the level, 0-2 (func_00147D20 caps it at 2)
  * @param flag  picks the pair: nonzero mDifficulty, 0 unk_284
  */
-extern "C" void cBENewPlayerInterface_setDifficultyLevel(cBENewPlayerInterface* self, int value, int flag)
+void cBENewPlayerInterface::setDifficultyLevel(int value, int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
     if (flag != 0) {
@@ -1655,7 +1656,7 @@ int cBELibrary_getCharacterID(int);
  * @param which  picks the pair: nonzero mDifficulty, 0 unk_284 (cComputer passes game mode == 0)
  * @return the level, 0-2
  */
-extern "C" short cBENewPlayerInterface_getDifficultyLevel(cBENewPlayerInterface* self, int which)
+short cBENewPlayerInterface::getDifficultyLevel(int which)
 {
     int charId = cBELibrary_getCharacterID(0);
     if (which != 0)
@@ -1784,7 +1785,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param flag  picks the pair: nonzero mDifference, 0 unk_286
  * @return the streak, -1 to 1
  */
-extern "C" short cBENewPlayerInterface_getDifficultyDifference(cBENewPlayerInterface* self, int flag)
+short cBENewPlayerInterface::getDifficultyDifference(int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
     short result;
@@ -1905,7 +1906,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return the attribute value, or -1
  */
 // Returns one of a character's seven stat levels for the given profile, or -1.
-extern "C" int cBEStatInterface_getStatFromProfile(cBEStatInterface* self, int profile, unsigned int stat)
+int cBEStatInterface::getStatFromProfile(int profile, unsigned int stat)
 {
     int charId = cBELibrary_getCharacterID(profile);
     switch (stat) {
@@ -2009,7 +2010,7 @@ extern sPlayerStatRowView_001483A0 cBEStatInterface_currentStat_view001483A0[] _
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void cBEStatInterface_setSpeed(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setSpeed(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2041,7 +2042,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char cBEStatInterface_getSpeed(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getSpeed(int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2067,7 +2068,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void cBEStatInterface_setAccel(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setAccel(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2093,7 +2094,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char cBEStatInterface_getAccel(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getAccel(int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2119,7 +2120,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void cBEStatInterface_setTrick(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setTrick(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2145,7 +2146,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char cBEStatInterface_getTrick(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getTrick(int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2171,7 +2172,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void cBEStatInterface_setEdging(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setEdging(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2197,7 +2198,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char cBEStatInterface_getEdging(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getEdging(int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2223,7 +2224,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void cBEStatInterface_setSpin(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setSpin(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2249,7 +2250,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char cBEStatInterface_getSpin(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getSpin(int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2275,7 +2276,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void cBEStatInterface_setToughness(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setToughness(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2301,7 +2302,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char cBEStatInterface_getToughness(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getToughness(int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2328,7 +2329,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  race rider slot (On Tour iRider)
  * @param value  new stat value (On Tour var)
  */
-extern "C" void cBEStatInterface_setStability(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setStability(int rider, int value)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -2354,7 +2355,7 @@ extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("
  * @param rider  race rider slot (On Tour iRider)
  * @return the stability stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getStability(cBEStatInterface* self, int rider)
+signed char cBEStatInterface::getStability(int rider)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -2384,22 +2385,22 @@ extern "C" signed char cBEStatInterface_getStability(cBEStatInterface* self, int
  * @param rider  race rider slot (On Tour iRider)
  * @return the average level, or 1 when it would be 0 or less
  */
-extern "C" int cBEStatInterface_getStatLevel(cBEStatInterface* self, int rider)
+int cBEStatInterface::getStatLevel(int rider)
 {
     int statValue;
-    statValue = cBEStatInterface_getAccel(self, rider);
+    statValue = getAccel(rider);
     int sum = statValue / 5;
-    statValue = cBEStatInterface_getEdging(self, rider);
+    statValue = getEdging(rider);
     sum += statValue / 5;
-    statValue = cBEStatInterface_getSpeed(self, rider);
+    statValue = getSpeed(rider);
     sum += statValue / 5;
-    statValue = cBEStatInterface_getSpin(self, rider);
+    statValue = getSpin(rider);
     sum += statValue / 5;
-    statValue = cBEStatInterface_getToughness(self, rider);
+    statValue = getToughness(rider);
     sum += statValue / 5;
-    statValue = cBEStatInterface_getStability(self, rider);
+    statValue = getStability(rider);
     sum += statValue / 5;
-    statValue = cBEStatInterface_getTrick(self, rider);
+    statValue = getTrick(rider);
     sum += statValue / 5;
     int average = sum / 7;
     if (average > 0)
@@ -2421,16 +2422,16 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStatLevel);
  * @param rider  the rider (On Tour iRider)
  * @param value  the level (On Tour iLevel), 1 to the number of levels
  */
-extern "C" void cBEStatInterface_setStatLevel(cBEStatInterface* self, int rider, int value)
+void cBEStatInterface::setStatLevel(int rider, int value)
 {
     int statPoints = value * 5;
-    cBEStatInterface_setAccel(self, rider, statPoints);
-    cBEStatInterface_setEdging(self, rider, statPoints);
-    cBEStatInterface_setSpeed(self, rider, statPoints);
-    cBEStatInterface_setSpin(self, rider, statPoints);
-    cBEStatInterface_setToughness(self, rider, statPoints);
-    cBEStatInterface_setStability(self, rider, statPoints);
-    cBEStatInterface_setTrick(self, rider, statPoints);
+    setAccel(rider, statPoints);
+    setEdging(rider, statPoints);
+    setSpeed(rider, statPoints);
+    setSpin(rider, statPoints);
+    setToughness(rider, statPoints);
+    setStability(rider, statPoints);
+    setTrick(rider, statPoints);
 }
 #endif
 
@@ -2457,7 +2458,7 @@ extern sPlayerStatRowView_00148B50 cBEStatInterface_currentStat_view00148B50[] _
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanSpeed(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanSpeed(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat_view00148B50[humanIndex].e[charType].v[0] = value;
 }
@@ -2483,7 +2484,7 @@ extern sPlayerStatRow cBEStatInterface_currentStat[];
  * @param charType  character ID (On Tour charType)
  * @return the speed stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanSpeed(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanSpeed(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[0];
 }
@@ -2503,7 +2504,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanAccel);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanAccel(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanAccel(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat[humanIndex].e[charType].v[1] = value;
 }
@@ -2522,7 +2523,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanAccel);
  * @param charType  character ID (On Tour charType)
  * @return the acceleration stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanAccel(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanAccel(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[1];
 }
@@ -2541,7 +2542,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanTrick);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanTrick(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanTrick(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat[humanIndex].e[charType].v[2] = value;
 }
@@ -2559,7 +2560,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanTrick);
  * @param charType  character ID (On Tour charType)
  * @return the trick stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanTrick(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanTrick(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[2];
 }
@@ -2578,7 +2579,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanEdging);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanEdging(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanEdging(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat[humanIndex].e[charType].v[3] = value;
 }
@@ -2597,7 +2598,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanEdging);
  * @param charType  character ID (On Tour charType)
  * @return the edging stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanEdging(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanEdging(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[3];
 }
@@ -2616,7 +2617,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanSpin);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanSpin(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanSpin(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat[humanIndex].e[charType].v[4] = value;
 }
@@ -2634,7 +2635,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanSpin);
  * @param charType  character ID (On Tour charType)
  * @return the spin stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanSpin(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanSpin(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[4];
 }
@@ -2654,7 +2655,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanToughness);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanToughness(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanToughness(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat[humanIndex].e[charType].v[5] = value;
 }
@@ -2673,7 +2674,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanToughness);
  * @param charType  character ID (On Tour charType)
  * @return the toughness stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanToughness(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanToughness(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[5];
 }
@@ -2693,7 +2694,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanStability);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void cBEStatInterface_setHumanStability(cBEStatInterface* self, int humanIndex, int value, int charType)
+void cBEStatInterface::setHumanStability(int humanIndex, int value, int charType)
 {
     cBEStatInterface_currentStat[humanIndex].e[charType].v[6] = value;
 }
@@ -2712,7 +2713,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanStability);
  * @param charType  character ID (On Tour charType)
  * @return the stability stat (5 per level)
  */
-extern "C" signed char cBEStatInterface_getHumanStability(cBEStatInterface* self, int humanIndex, int charType)
+signed char cBEStatInterface::getHumanStability(int humanIndex, int charType)
 {
     return cBEStatInterface_currentStat[humanIndex].e[charType].v[6];
 }
@@ -2741,7 +2742,7 @@ extern sCharStat_005308D8 cBELibrary_statDefault[];
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's edging maximum
  */
-extern "C" float cBEStatInterface_getBrakingAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getBrakingAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -2780,7 +2781,7 @@ extern sCharStat_00148E68 cBELibrary_statDefault_00148E68[] __asm__("cBELibrary_
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's edging maximum
  */
-extern "C" float cBEStatInterface_getEdgingAttrib(cBEStatInterface* self, int rider, int value)
+float cBEStatInterface::getEdgingAttrib(int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);

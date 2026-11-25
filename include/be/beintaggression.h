@@ -42,6 +42,11 @@ struct cBEAggressionInterface : public cBEInterface {
     //       cBERaceState_onEnter/onExit set 0/1
     //   the vptr (0x0C): [R] getThis and cBEAggressionInterface_cBEAggressionInterface store
     //       cBEAggressionInterface_vtbl; [P] __22cBEAggressionInterface
+
+    // Methods bound to their retail symbols by asm labels.
+    int getAggression(int targetRider, int rider) __asm__("cBEAggressionInterface_getAggression");
+    void applyAggression(int iRider1, int iRider2, int event) __asm__("cBEAggressionInterface_applyAggression");
+    int getState(int targetRider, int rider) __asm__("cBEAggressionInterface_getState");
 };
 
 CHECK_SIZE(cBEAggressionInterface, 0x10);

@@ -59,6 +59,10 @@ struct sAnimModelLodInfo {
     int unk_04;
 };
 
+struct t4Vector;
+
+struct cBxReplayFrame;
+
 struct cAnimModel {
     /* 0x000 */ int MaxModelParts;          // [O] cAnimModel::MaxModelParts (init(int maxModels, int maxModelVariants));
                                             //     [R] cAnimModel_init stores its count here and allocates count * 0x58 parts
@@ -93,6 +97,23 @@ struct cAnimModel {
     /* 0x140 */ t4Vector ScaleVect;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
     /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (func_0030E9E0, func_0030EB60)
     /* 0x158 */ unsigned long AnimMinPartsMask;      // another such mask (cAnimModel_addAnimMinPart)
+
+    // Methods bound to their retail symbols by asm labels.
+    void addModelPartLOD(int lod, char* part, int index) __asm__("cAnimModel_addModelPartLOD");
+    int isPartEnabled(int i, int channel) __asm__("cAnimModel_isPartEnabled");
+    void addAnimMinPart(int i) __asm__("cAnimModel_addAnimMinPart");
+    void buildSkelMatrices() __asm__("cAnimModel_buildSkelMatrices");
+    void applyOffset(t4Vector* offset) __asm__("cAnimModel_applyOffset");
+    int getBoneSkelIndex(int idx, const char* name) __asm__("cAnimModel_getBoneSkelIndex");
+    ulong getGraftMask(int idx, char* names) __asm__("cAnimModel_getGraftMask");
+    void setModelPartVariant(int i, int variant) __asm__("cAnimModel_setModelPartVariant");
+    void render(int lod, int x, int y) __asm__("cAnimModel_render");
+    void rendershadow(int lod, int x, int y) __asm__("cAnimModel_rendershadow");
+    void readFromReplayFrame(cBxReplayFrame* data) __asm__("cAnimModel_readFromReplayFrame");
+    void setScale(float lengthScale, float widthScale) __asm__("cAnimModel_setScale");
+    void setSkelMatrix(int i, sAnimModelBone* animModelBone) __asm__("cAnimModel_setSkelMatrix");
+    void transform(sAnimModelBone* roots) __asm__("cAnimModel_transform");
+    void writeToReplayFrame(cBxReplayFrame* data) __asm__("cAnimModel_writeToReplayFrame");
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);

@@ -51,6 +51,16 @@ struct cPath {
     void** mVtbl;                   // 0x034 [R] vt_004814A8 (cPath), cTrackPath_vtbl (cTrackPath), cAIPath_vtbl (cAIPath) from
                                     //       the inlined ctors; [U] initPath calls populateDataWithDefaults /
                                     //       populateData through it (lw 0x34)
+
+    // Methods bound to their retail symbols by asm labels.
+    int initPath(char* src) __asm__("cPath_initPath");
+    void populateNode(void* src, tPathNode* dst) __asm__("cPath_populateNode");
+    void populateEvent(char* src, int* dst) __asm__("cPath_populateEvent");
+    tPathEventNode* findEvent(int firstKey, int secondKey) __asm__("cPath_findEvent");
+    tPathEventNode* findEvent1(int key) __asm__("cPath_findEvent1");
+    float getProximity(float* point) __asm__("cPath_getProximity");
+    float getLength() __asm__("cPath_getLength");
+    int isPathInBox(float* lo, float* hi) __asm__("cPath_isPathInBox");
 };
 
 CHECK_OFFSET(cPath, NumEvents, 0x000);

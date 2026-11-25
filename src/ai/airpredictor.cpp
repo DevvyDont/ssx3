@@ -28,18 +28,18 @@ extern sPair8 t2vect_Zero[];
  * Clears the air predictor's flight: no landing found yet (patch -1), zero times, zero vectors and default
  * landing data.
  */
-extern "C" void cAirPredictor_reset(cAirPredictor* self)
+void cAirPredictor::reset()
 {
-    self->SimState = 0;
-    *(int*)&self->CurAirTime = 0;
-    *(int*)&self->TotalAirTime = 0;
-    *(int*)&self->ApexTime = 0;
-    *(int*)&self->PrevTickTime = 0;
-    *(sQuadR*)&self->GuessLandNormal = t4vect_ZAxis;
-    *(sQuadR*)&self->GuessLandVelocity = t4vect_Zero;
-    self->GuessLandSurface = -1;
-    self->GuessLandPatchRID = 0xFFFFFFFF;
-    *(sPair8*)&self->GuessLandPatchUV[0] = t2vect_Zero[0];
+    SimState = 0;
+    *(int*)&CurAirTime = 0;
+    *(int*)&TotalAirTime = 0;
+    *(int*)&ApexTime = 0;
+    *(int*)&PrevTickTime = 0;
+    *(sQuadR*)&GuessLandNormal = t4vect_ZAxis;
+    *(sQuadR*)&GuessLandVelocity = t4vect_Zero;
+    GuessLandSurface = -1;
+    GuessLandPatchRID = 0xFFFFFFFF;
+    *(sPair8*)&GuessLandPatchUV[0] = t2vect_Zero[0];
 }
 #endif
 
@@ -200,9 +200,9 @@ static inline void vu0AddEq_3200(t4Vector& a, const t4Vector& b)
  * @param vself  the cAirPredictor (this)
  */
 // cAirPredictor::simStep (On Tour names; the loop is a do-while in SSX 3).
-extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
+void cAirPredictor::simStep()
 {
-    cAirPredictor* self = vself;
+    cAirPredictor* self = this;
     t4Vector prevPos = *(&self->CurSimPos);
     t4Vector prevVel = *(&self->CurSimVel);
     t4Vector uPrevVel = vu0Normalize_3200(*(&self->CurSimVel));
@@ -282,7 +282,7 @@ void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b);
  */
 extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* self, sQuad* launchPos, sQuad* launchVel, float terminalVel)
 {
-    cAirPredictor_reset(self);
+    self->reset();
     self->TerminalVel = terminalVel;
     cAirPredictor_initLaunch(((char*)self), launchPos, launchVel);
 }
@@ -376,57 +376,58 @@ static inline t4Vector vu0Add_3648(const t4Vector& a, const t4Vector& b)
  * @param airVel  receives the predicted air velocity (On Tour airVel); also the launch velocity on a re-launch
  * @param dt  seconds to advance
  */
-extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, t4Vector* airPos, t4Vector* airVel, float dt)
+void cAirPredictor::updateFlightPath(t4Vector* airPos, t4Vector* airVel, float dt)
 {
-    if (self->TotalAirTime > 60.0f) {
-        if (self->SimState == 2) {
-            self->SimState = 3;
-            *(sQuadR*)&self->GuessLandPosition = t4vect_Origin;
-            *(sQuadR*)&self->GuessLandVelocity = t4vect_XAxis;
-            *(sQuadR*)&self->GuessLandNormal = t4vect_ZAxis;
-            self->GuessLandSurface = 13;
+    if (TotalAirTime > 60.0f) {
+        if (SimState == 2) {
+            SimState = 3;
+            *(sQuadR*)&GuessLandPosition = t4vect_Origin;
+            *(sQuadR*)&GuessLandVelocity = t4vect_XAxis;
+            *(sQuadR*)&GuessLandNormal = t4vect_ZAxis;
+            GuessLandSurface = 13;
         } else {
             // Same-layout cast: initLaunch takes the vectors as its 16-byte sQuad (kept: its mangled name has it).
-            cAirPredictor_initLaunch(((char*)self), (sQuad*)airPos, (sQuad*)airVel);
-            self->SimState = 2;
+            cAirPredictor_initLaunch(((char*)this), (sQuad*)airPos, (sQuad*)airVel);
+            SimState = 2;
         }
     } else {
-        if (self->SimState == 1 && self->TotalAirTime - self->CurAirTime < -0.2f) {
+        if (SimState == 1 && TotalAirTime - CurAirTime < -0.2f) {
             // Same-layout cast: initLaunch takes the vectors as its 16-byte sQuad (kept: its mangled name has it).
-            cAirPredictor_initLaunch(((char*)self), (sQuad*)airPos, (sQuad*)airVel);
+            cAirPredictor_initLaunch(((char*)this), (sQuad*)airPos, (sQuad*)airVel);
         }
-        int st = self->SimState;
+        int st = SimState;
         if (st == 0) {
-            cAirPredictor_simStep(self);
-            while (self->SimState == 0 && self->TotalAirTime < self->CurAirTime + dt) {
-                cAirPredictor_simStep(self);
+            simStep();
+            while (SimState == 0 && TotalAirTime < CurAirTime + dt) {
+                simStep();
             }
         } else if (st == 2) {
-            cAirPredictor_simStep(self);
-            while (self->SimState == 2 && self->TotalAirTime < self->CurAirTime + dt) {
-                cAirPredictor_simStep(self);
+            simStep();
+            while (SimState == 2 && TotalAirTime < CurAirTime + dt) {
+                simStep();
             }
         }
     }
-    float sinceLastTick = self->CurAirTime - self->PrevTickTime + dt;
+    float sinceLastTick = CurAirTime - PrevTickTime + dt;
     while (sinceLastTick >= 0.01666666753590107f) {
         sinceLastTick -= 0.01666666753590107f;
-        cAirPredictor_simOneTick_3648(((char*)self), ((&self->PrevTickPos)), ((&self->PrevTickVel)), ((&self->PrevTickPos)), ((&self->PrevTickVel)));
-        self->PrevTickTime += 0.01666666753590107f;
+        cAirPredictor_simOneTick_3648(((char*)this), ((&PrevTickPos)), ((&PrevTickVel)), ((&PrevTickPos)),
+                ((&PrevTickVel)));
+        PrevTickTime += 0.01666666753590107f;
     }
     if (sinceLastTick > 0.009999999776482582f) {
         t4Vector nextSimPos;
         t4Vector nextSimVel;
-        cAirPredictor_simOneTick_3648(((char*)self), ((&self->PrevTickPos)), ((&self->PrevTickVel)), &nextSimPos, &nextSimVel);
+        cAirPredictor_simOneTick_3648(((char*)this), ((&PrevTickPos)), ((&PrevTickVel)), &nextSimPos, &nextSimVel);
         float k = sinceLastTick * 59.999996185302734f;
-        *airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(&self->PrevTickPos), 1.0f - k));
-        *airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(&self->PrevTickVel), 1.0f - k));
+        *airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(&PrevTickPos), 1.0f - k));
+        *airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(&PrevTickVel), 1.0f - k));
         airPos->w = 1.0f;
     } else {
-        *(sQuad*)airPos = *(sQuad*)&self->PrevTickPos;
-        *(sQuad*)airVel = *(sQuad*)&self->PrevTickVel;
+        *(sQuad*)airPos = *(sQuad*)&PrevTickPos;
+        *(sQuad*)airVel = *(sQuad*)&PrevTickVel;
     }
-    self->CurAirTime += dt;
+    CurAirTime += dt;
 }
 #endif
 
@@ -439,10 +440,9 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_land__FPv);
  * cWipeoutMotion_resolveAirMotion calls it with the rider's mPosition and mVelocity, which are ignored (the C
  * declaration takes only self).
  */
-void cAirPredictor_land(void* vself)
+void cAirPredictor::land()
 {
-    cAirPredictor* self = (cAirPredictor*)vself;
-    *(int*)&self->TotalAirTime = 0;
+    *(int*)&TotalAirTime = 0;
 }
 #endif
 
@@ -533,8 +533,7 @@ static inline float vu0Length_1139A0(const t4Vector& v)
  * @param outVel  receives the next velocity
  * @return the length of the new velocity, at most TerminalVel
  */
-extern "C" float cAirPredictor_simOneTick(cAirPredictor* self, t4Vector* pos, t4Vector* vel, t4Vector* outPos,
-                                          t4Vector* outVel)
+float cAirPredictor::simOneTick(t4Vector* pos, t4Vector* vel, t4Vector* outPos, t4Vector* outVel)
 {
     *outPos = vu0Add_1139A0(*pos, vu0Scale_1139A0(*vel, 0.01666666753590107f));
     float dx = vel->x * -0.0033333336468786f;
@@ -543,10 +542,10 @@ extern "C" float cAirPredictor_simOneTick(cAirPredictor* self, t4Vector* pos, t4
     if (vel->z > 0.0f) gravity = -14.166666984558105f;
     *outVel = vu0Add_1139A0(*vel, t4VectorXYZW(dx, dy, gravity, 0.0f));
     float len = vu0Length_1139A0(*outVel);
-    if (self->TerminalVel < len)
+    if (TerminalVel < len)
     {
-        vu0ScaleEq_1139A0(*outVel, self->TerminalVel / len);
-        len = self->TerminalVel;
+        vu0ScaleEq_1139A0(*outVel, TerminalVel / len);
+        len = TerminalVel;
     }
     return len;
 }
@@ -572,9 +571,9 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_writeToReplayFrame);
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cBxReplayFrame* obj)
+void cAirPredictor::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 176);
+    obj->write((const char*)this, 176);
 }
 #endif
 
@@ -587,9 +586,9 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_readFromReplayFrame);
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_readFromReplayFrame(cAirPredictor* self, cBxReplayFrame* obj)
+void cAirPredictor::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 176);
+    obj->read((char*)this, 176);
 }
 #endif
 

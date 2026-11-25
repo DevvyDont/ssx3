@@ -38,6 +38,20 @@ struct cBECharacterInterface : public cBEInterface {
     // cBEInterface (0x00-0x0F, be/beinterface.h):
     //   bIsActive: [R] getThis sets 0; [U] cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit set 0/1
     //   the vptr (0x0C): [R] getThis stores cBECharacterInterface_vtbl; no virtual call through it seen
+
+    // Methods bound to their retail symbols by asm labels.
+    bool getIsGoofyFoot(int riderIndex) __asm__("cBECharacterInterface_getIsGoofyFoot");
+    float getScale(int riderIndex) __asm__("cBECharacterInterface_getScale");
+    void* getBloodType(int riderIndex) __asm__("cBECharacterInterface_getBloodType");
+    bool getIsFemale(int riderIndex) __asm__("cBECharacterInterface_getIsFemale");
+    int getAge(int riderIndex) __asm__("cBECharacterInterface_getAge");
+    void* getHeight(int riderIndex) __asm__("cBECharacterInterface_getHeight");
+    void* getNationality(int riderIndex) __asm__("cBECharacterInterface_getNationality");
+    int getVoiceID(int riderIndex) __asm__("cBECharacterInterface_getVoiceID");
+    void* getName(int rider) __asm__("cBECharacterInterface_getName");
+    void* getShortName(int rider) __asm__("cBECharacterInterface_getShortName");
+    void* getShortNameByCharacter(int player, int index) __asm__("cBECharacterInterface_getShortNameByCharacter");
+    void* getNickName(int rider) __asm__("cBECharacterInterface_getNickName");
 };
 
 extern cBECharacterInterface* cBECharacterInterface_instance;

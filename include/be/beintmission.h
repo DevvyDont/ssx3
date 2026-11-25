@@ -52,6 +52,54 @@ struct cBEMissionInterface : public cBEInterface {
                                      //       cGFSessionTeleportState_gainFocus passes it to cRider_putAtStartpoint;
                                      //       cGFUserSelectState_update and cOVTemplate_Dialog_onWidgetEvent store it
                                      //       too
+
+    // Methods bound to their retail symbols by asm labels.
+    int getNextSessionID() __asm__("cBEMissionInterface_getNextSessionID");
+    void setNextSessionID(int sessionID) __asm__("cBEMissionInterface_setNextSessionID");
+    int getTotalCollectForMnt(int start) __asm__("cBEMissionInterface_getTotalCollectForMnt");
+    int getTotalCollectByType(int start) __asm__("cBEMissionInterface_getTotalCollectByType");
+    int getTotalCollectForSection(int start) __asm__("cBEMissionInterface_getTotalCollectForSection");
+    int getTotalCollectForPeak(int owner) __asm__("cBEMissionInterface_getTotalCollectForPeak");
+    int getCurrentCollectForMnt(int rider, int idx) __asm__("cBEMissionInterface_getCurrentCollectForMnt");
+    int getCurrentCollectByType(int rider, int idx) __asm__("cBEMissionInterface_getCurrentCollectByType");
+    int getCurrentCollectForSection(int rider, int idx) __asm__("cBEMissionInterface_getCurrentCollectForSection");
+    int getCurrentCollectForPeak(int rider, int owner) __asm__("cBEMissionInterface_getCurrentCollectForPeak");
+    int getCurrentCollectForPeak1(int profile, int character, int owner)
+        __asm__("cBEMissionInterface_getCurrentCollectForPeak1");
+    int getCurrentCollectForPeakByChar(int profile, int character, int owner)
+        __asm__("cBEMissionInterface_getCurrentCollectForPeakByChar");
+    char* getCollectBits(int rider, int idx) __asm__("cBEMissionInterface_getCollectBits");
+    int isBitSet(int rider, int bit, int idx) __asm__("cBEMissionInterface_isBitSet");
+    void setBit(int rider, int bit, int idx) __asm__("cBEMissionInterface_setBit");
+    unsigned short* getMissionName(int id) __asm__("cBEMissionInterface_getMissionName");
+    unsigned short* getMissionShortDesc(int id) __asm__("cBEMissionInterface_getMissionShortDesc");
+    unsigned short* getMissionLongDesc(int id) __asm__("cBEMissionInterface_getMissionLongDesc");
+    int isMissionCompleted(int id) __asm__("cBEMissionInterface_isMissionCompleted");
+    int isMissionReady(int id) __asm__("cBEMissionInterface_isMissionReady");
+    int isMissionLocked(int id) __asm__("cBEMissionInterface_isMissionLocked");
+    int isMissionAvailable(int id) __asm__("cBEMissionInterface_isMissionAvailable");
+    int isMissionShowIcon(int id) __asm__("cBEMissionInterface_isMissionShowIcon");
+    int getLocationID(int id) __asm__("cBEMissionInterface_getLocationID");
+    int getPoints(int id) __asm__("cBEMissionInterface_getPoints");
+    short getDiffLevel(int id) __asm__("cBEMissionInterface_getDiffLevel");
+    int getNextMissionID(int id) __asm__("cBEMissionInterface_getNextMissionID");
+    void setIsLocked(int id, int value) __asm__("cBEMissionInterface_setIsLocked");
+    void setIsReady(int id, int value) __asm__("cBEMissionInterface_setIsReady");
+    void setIsAvailable(int id, int value) __asm__("cBEMissionInterface_setIsAvailable");
+    void setIsCompleted(int id, int value) __asm__("cBEMissionInterface_setIsCompleted");
+    void setIsShowIcon(int id, int value) __asm__("cBEMissionInterface_setIsShowIcon");
+    int getMissionIdx(int id) __asm__("cBEMissionInterface_getMissionIdx");
+    int getNumberMissions() __asm__("cBEMissionInterface_getNumberMissions");
+    int getNumberMissionsOnTrack(int group) __asm__("cBEMissionInterface_getNumberMissionsOnTrack");
+    int getNumberCompletedMissionsOnTrack(int group) __asm__("cBEMissionInterface_getNumberCompletedMissionsOnTrack");
+    int getNumberMissionsOnPeak(int owner) __asm__("cBEMissionInterface_getNumberMissionsOnPeak");
+    int getNumberCompletedMissionsOnPeak(int owner) __asm__("cBEMissionInterface_getNumberCompletedMissionsOnPeak");
+    int getNumberCompletedMissionsOnPeakByChar(int profile, int character, int owner)
+        __asm__("cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar");
+    int getMissionID(int iIdx) __asm__("cBEMissionInterface_getMissionID");
+    int getMissionIDOnTrack(int index, int group) __asm__("cBEMissionInterface_getMissionIDOnTrack");
+    int getNumberSessionsOnTrack(int id) __asm__("cBEMissionInterface_getNumberSessionsOnTrack");
+    int isSessionPoint(int value, int id) __asm__("cBEMissionInterface_isSessionPoint");
 };
 
 extern cBEMissionInterface* cBEMissionInterface_instance;

@@ -102,31 +102,31 @@ static inline void call1_6D60(char* o, int vtoff, int slot, int a)
  * @param av  command-line arguments (char**, passed as int)
  * @return 0
  */
-extern "C" int cAppMan_run(cAppMan* self, char* exec, int ac, int av)
+int cAppMan::run(char* exec, int ac, int av)
 {
-    self->TimerPeriod = 0.01666666753590107f;
-    self->ExecutionMan = (cExecutionMan*)exec;
-    self->TimerHz = 60;
+    TimerPeriod = 0.01666666753590107f;
+    ExecutionMan = (cExecutionMan*)exec;
+    TimerHz = 60;
     call1_6D60(exec, 8, 2, 60);
-    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)self->mVtbl;
-    vt[3].fn(vthis(self, vt[3]), ac, av);
-    call1_6D60((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
-    while (call0_6D60((char*)self->ExecutionMan, 8, 10) == 0) {
-        callv_6D60((char*)self->ExecutionMan, 8, 11);
+    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)mVtbl;
+    vt[3].fn(vthis(this, vt[3]), ac, av);
+    call1_6D60((char*)ExecutionMan, 8, 9, (int)LoadingModule);
+    while (call0_6D60((char*)ExecutionMan, 8, 10) == 0) {
+        callv_6D60((char*)ExecutionMan, 8, 11);
         SYNCTASK_run(0);
-        callv_6D60((char*)self->ExecutionMan, 8, 12);
-        callv_6D60((char*)self->ExecutionMan, 8, 4);
-        cAppMan_checkHalt((cAppMan*)self);
+        callv_6D60((char*)ExecutionMan, 8, 12);
+        callv_6D60((char*)ExecutionMan, 8, 4);
+        checkHalt();
     }
-    char* next = (char*)self->LoadingModule;
-    self->LoadingModule = 0;
-    self->ActiveModule = (cAppModule*)next;
+    char* next = (char*)LoadingModule;
+    LoadingModule = 0;
+    ActiveModule = (cAppModule*)next;
     callv_6D60(next, 0, 5);
-    self->LoadState = 0;
-    cAppMan_mainLoop(self);
-    callv_6D60(((char*)self), 92, 4);
-    callv_6D60((char*)self->ExecutionMan, 8, 3);
-    char* execMan = (char*)self->ExecutionMan;
+    LoadState = 0;
+    cAppMan_mainLoop(this);
+    callv_6D60(((char*)this), 92, 4);
+    callv_6D60((char*)ExecutionMan, 8, 3);
+    char* execMan = (char*)ExecutionMan;
     if (execMan)
         call1_6D60(execMan, 8, 1, 3);
     return 0;
@@ -142,9 +142,9 @@ INCLUDE_ASM("bx/appman", cAppMan_setNextModule__FP7cAppManUi);
  *
  * @param module  the module, stored in LoadingModule
  */
-void cAppMan_setNextModule(cAppMan* self, unsigned int module)
+void cAppMan::setNextModule(unsigned int module)
 {
-    self->LoadingModule = (cAppModule*)module;
+    LoadingModule = (cAppModule*)module;
 }
 #endif
 
@@ -201,9 +201,9 @@ extern "C" void cAppMan_mainLoop(void* appMan)
         case 1:
             if (calli_6F00((char*)self->ExecutionMan, 8, 10)) {
                 *(volatile int*)&self->LoadState = 2;
-                cLoadTimer_endload(&self->LoadTimer);
+                self->LoadTimer.endload();
             } else {
-                cLoadTimer_update(&self->LoadTimer);
+                self->LoadTimer.update();
             }
             break;
         case 2:
@@ -241,7 +241,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
             break;
         case 0:
             if (self->LoadingModule) {
-                cLoadTimer_startload(&self->LoadTimer, 10.0f);
+                self->LoadTimer.startload(10.0f);
                 call1_6F00((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
                 *(volatile int*)&self->LoadState = 1;
             }
@@ -290,10 +290,10 @@ extern "C" void cExecutionMan_halt(int);
  * The second and third argument registers (the halt callback and its data) pass through unchanged, though the C
  * declares only the app manager. Nothing in the C calls it.
  *
- * @param appMan  the application manager
  */
-extern "C" void cAppMan_halt(cAppMan* appMan) {
-    cExecutionMan_halt((int)appMan->ExecutionMan);
+void cAppMan::halt()
+{
+    cExecutionMan_halt((int)ExecutionMan);
 }
 #endif
 
@@ -305,9 +305,9 @@ INCLUDE_ASM("bx/appman", cAppMan_checkHalt__FP7cAppMan);
  *
  * @return the result of cExecutionMan_checkHalt(ExecutionMan, 1)
  */
-int cAppMan_checkHalt(cAppMan* self)
+int cAppMan::checkHalt()
 {
-    return cExecutionMan_checkHalt(self->ExecutionMan, 1);
+    return ExecutionMan->checkHalt(1);
 }
 #endif
 
@@ -376,12 +376,12 @@ INCLUDE_ASM("bx/appman", cAppMan_loadexecpurge);
 /**
  * Tells the execution manager to purge (virtual slot 3), then deletes it (slot 1, its destructor, with flags 3).
  */
-extern "C" void cAppMan_loadexecpurge(cAppMan* self)
+void cAppMan::loadexecpurge()
 {
-    cExecutionMan* execMan = self->ExecutionMan;
+    cExecutionMan* execMan = ExecutionMan;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)execMan->mVtbl;
     vt[3].fn(vthis(execMan, vt[3]));
-    cExecutionMan* execMan2 = self->ExecutionMan;
+    cExecutionMan* execMan2 = ExecutionMan;
     if (execMan2 != 0)
     {
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)execMan2->mVtbl;
@@ -452,17 +452,16 @@ INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
  * @param flag  nonzero to also call the virtual halt (cAppMan_checkHalt() passes 1, cPS2ExecutionMan_halt() passes 0)
  * @return no meaningful value; the body sets no return value
  */
-int cExecutionMan_checkHalt(void* vself, int flag)
+int cExecutionMan::checkHalt(int flag)
 {
-    cExecutionMan* self = (cExecutionMan*)vself;
-    void (*fn)(void*) = self->HaltCallback;
+    void (*fn)(void*) = HaltCallback;
     if (fn != 0) {
-        fn(self->HaltData);
+        fn(HaltData);
         if (flag != 0) {
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)mVtbl;
             short delta = vt[14].delta;
             void (*signalHalt)(void*) = vt[14].fn;
-            signalHalt(vthis(self, delta));
+            signalHalt(vthis(this, delta));
         }
     }
 }
@@ -514,15 +513,14 @@ INCLUDE_ASM("bx/appman", cLoadTimer_startload__FPvf);
  *
  * @param rateScale  the estimated load time; cLoadTimer_setnextpercent scales the approach rate by it
  */
-void cLoadTimer_startload(void* vself, float rateScale)
+void cLoadTimer::startload(float rateScale)
 {
-    cLoadTimer* self = (cLoadTimer*)vself;
-    self->loadtime = rateScale;
-    *(int*)&self->loadpercent = 0;
-    *(int*)&self->target = 0;
-    *(int*)&self->offset = 0;
-    *(int*)&self->scale = 0;
-    *(int*)&self->decay = 0;
+    loadtime = rateScale;
+    *(int*)&loadpercent = 0;
+    *(int*)&target = 0;
+    *(int*)&offset = 0;
+    *(int*)&scale = 0;
+    *(int*)&decay = 0;
 }
 #endif
 
@@ -540,24 +538,23 @@ INCLUDE_ASM("bx/appman", cLoadTimer_setnextpercent__FPvf);
  *
  * @param newValue  the new target percentage
  */
-void cLoadTimer_setnextpercent(void* vself, float newValue)
+void cLoadTimer::setnextpercent(float newValue)
 {
-    cLoadTimer* self = (cLoadTimer*)vself;
-    float old8 = self->target;
-    float raw = self->loadtime;
+    float old8 = target;
+    float raw = loadtime;
     float diff = newValue - old8;
-    float x0 = self->loadpercent;
+    float x0 = loadpercent;
     float rate = raw * diff;
     int now = cAppMan_TheAppMan->Tick;
     x0 = x0 - newValue;
     rate = rate * 0.01f;
-    self->lasttarget = old8;
-    self->scale = x0;
-    self->targettick = now;
+    lasttarget = old8;
+    scale = x0;
+    targettick = now;
     float result = -1.5f / rate;
-    self->offset = newValue;
-    self->target = newValue;
-    self->decay = result;
+    offset = newValue;
+    target = newValue;
+    decay = result;
 }
 #endif
 
@@ -573,12 +570,11 @@ INCLUDE_ASM("bx/appman", cLoadTimer_update__FPv);
  * the app manager's Tick (+0x1C) and TimerPeriod (+0x14); expf is the exponential. cAppMan_mainLoop calls it
  * each frame while a module is loading.
  */
-void cLoadTimer_update(void* vself)
+void cLoadTimer::update()
 {
-    cLoadTimer* self = (cLoadTimer*)vself;
-    int delta = cAppMan_TheAppMan->Tick - self->targettick;
-    float ret = expf((float)delta * cAppMan_TheAppMan->TimerPeriod * self->decay);
-    self->loadpercent = self->offset + self->scale * ret;
+    int delta = cAppMan_TheAppMan->Tick - targettick;
+    float ret = expf((float)delta * cAppMan_TheAppMan->TimerPeriod * decay);
+    loadpercent = offset + scale * ret;
 }
 #endif
 
@@ -590,12 +586,11 @@ INCLUDE_ASM("bx/appman", cLoadTimer_endload__FPv);
  *
  * cAppMan_mainLoop calls it once the loading module reports it is done.
  */
-void cLoadTimer_endload(void* vself)
+void cLoadTimer::endload()
 {
-    cLoadTimer* self = (cLoadTimer*)vself;
-    self->offset = 100.0f;
-    *(int*)&self->scale = 0;
-    self->loadpercent = 100.0f;
+    offset = 100.0f;
+    *(int*)&scale = 0;
+    loadpercent = 100.0f;
 }
 #endif
 

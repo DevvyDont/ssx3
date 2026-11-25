@@ -53,6 +53,42 @@ struct cBXString {
     // copies in all_in_one_bx / fe / main); [R] retail reads the header at Str-0xC / Str-8 / Str-4 (see above).
     tStringData* getData() const { return (tStringData*)Str - 1; }
 #endif
+
+    // Methods bound to their retail symbols by asm labels.
+    cBXString* cBXString1(cBXString* other) __asm__("cBXString_cBXString1");
+    void Realloc(int size) __asm__("cBXString_Realloc");
+    void Reset() __asm__("cBXString_Reset");
+    void copyBeforeWrite() __asm__("cBXString_copyBeforeWrite");
+    void Resize(int size) __asm__("cBXString_Resize");
+    void allocCopy(cBXString* dst, int len, int pos, int extra) __asm__("cBXString_allocCopy");
+    cBXString* cBXString2(const char* str) __asm__("cBXString_cBXString2");
+    cBXString* cBXString3(const char* str, int n) __asm__("cBXString_cBXString3");
+    void InitFromCString(int len, const char* str) __asm__("cBXString_InitFromCString");
+    cBXString* operatorE(cBXString* other) __asm__("cBXString_operatorE");
+    cBXString* operatorE1(const char* str) __asm__("cBXString_operatorE1");
+    void concatCopy(int len1, const char* src1, int len2, const char* src2) __asm__("cBXString_concatCopy");
+    void ConcatImpl(int len, const char* str) __asm__("cBXString_ConcatImpl");
+    cBXString* Concat(const char* str) __asm__("cBXString_Concat");
+    char* getBuffer(int size) __asm__("cBXString_getBuffer");
+    void releaseBuffer(int len) __asm__("cBXString_releaseBuffer");
+    char* getBufferSetLength(int len) __asm__("cBXString_getBufferSetLength");
+    void freeExtra() __asm__("cBXString_freeExtra");
+    char* lockBuffer() __asm__("cBXString_lockBuffer");
+    int find(char ch, int start) __asm__("cBXString_find__FP9cBXStringci");
+    int reverseFind(char ch) __asm__("cBXString_reverseFind__FP9cBXStringc");
+    int find1(int subString, int start) __asm__("cBXString_find1");
+    void makeUpper() __asm__("cBXString_makeUpper");
+    void makeLower() __asm__("cBXString_makeLower");
+    void substitute(char from, char to) __asm__("cBXString_substitute");
+    void setAt(int idx, char ch) __asm__("cBXString_setAt");
+    cBXString* cBXString6(char ch, int n) __asm__("cBXString_cBXString6");
+    cBXString* operatorE2(char ch) __asm__("cBXString_operatorE2");
+    cBXString* mid(cBXString* other, int start) __asm__("cBXString_mid");
+    cBXString* mid1(cBXString* other, int start, int count) __asm__("cBXString_mid1");
+    cBXString* right(cBXString* other, int n) __asm__("cBXString_right");
+    cBXString* cBXString5(cBXString* other, int n) __asm__("cBXString_cBXString5");
+    cBXString* spanIncluding(cBXString* other, int ch) __asm__("cBXString_spanIncluding");
+    cBXString* spanExcluding(cBXString* other, int ch) __asm__("cBXString_spanExcluding");
 };
 
 CHECK_OFFSET(cBXString, Str, 0x0);

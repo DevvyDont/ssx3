@@ -117,9 +117,9 @@ extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
  * @param trophyId  the trophy
  * @return the trophy record
  */
-extern "C" char* cBERewardInterface_getTrophy(cBERewardInterface* self, int peakId, int trophyId)
+char* cBERewardInterface::getTrophy(int peakId, int trophyId)
 {
-    return (char*)&cBERewardInterface_getDB(self)->mpTrophies[trophyId * 3 + peakId];
+    return (char*)&getDB()->mpTrophies[trophyId * 3 + peakId];
 }
 #endif
 
@@ -136,9 +136,9 @@ extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
  * @param medalId  medal within it
  * @return the medal record
  */
-extern "C" char* cBERewardInterface_getMedal(cBERewardInterface* self, int trophyId, int medalId)
+char* cBERewardInterface::getMedal(int trophyId, int medalId)
 {
-    return (char*)&cBERewardInterface_getDB(self)->mpMedals[trophyId * 4 + medalId];
+    return (char*)&getDB()->mpMedals[trophyId * 4 + medalId];
 }
 #endif
 
@@ -155,9 +155,9 @@ extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
  * @param charId  the character
  * @return the peak pass record
  */
-extern "C" char* cBERewardInterface_getPeakPass(cBERewardInterface* self, int peakId, int charId)
+char* cBERewardInterface::getPeakPass(int peakId, int charId)
 {
-    return (char*)&cBERewardInterface_getDB(self)->mpPeakPasses[charId * 3 + peakId];
+    return (char*)&getDB()->mpPeakPasses[charId * 3 + peakId];
 }
 #endif
 
@@ -167,11 +167,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophies);
 /**
  * Returns the reward database's trophy table (cBERewardInterface_getDB +0x8, On Tour's mpTrophies).
  *
- * @param rewardInterface  the reward interface
  * @return the trophy records
  */
-extern "C" int cBERewardInterface_getTrophies(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpTrophies);
+int cBERewardInterface::getTrophies()
+{
+    return ((int)getDB()->mpTrophies);
 }
 #endif
 //100%
@@ -180,11 +180,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedals);
 /**
  * Returns the reward database's medal table (cBERewardInterface_getDB +0xC, On Tour's mpMedals).
  *
- * @param rewardInterface  the reward interface
  * @return the medal records
  */
-extern "C" int cBERewardInterface_getMedals(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpMedals);
+int cBERewardInterface::getMedals()
+{
+    return ((int)getDB()->mpMedals);
 }
 #endif
 //100%
@@ -193,11 +193,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPasses);
 /**
  * Returns the reward database's peak pass table (cBERewardInterface_getDB +0x10, On Tour's mpPeakPasses).
  *
- * @param rewardInterface  the reward interface
  * @return the peak pass records
  */
-extern "C" int cBERewardInterface_getPeakPasses(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpPeakPasses);
+int cBERewardInterface::getPeakPasses()
+{
+    return ((int)getDB()->mpPeakPasses);
 }
 #endif
 //100%
@@ -206,11 +206,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPosters);
 /**
  * Returns the reward database's poster table (cBERewardInterface_getDB +0x14, On Tour's mpPosters).
  *
- * @param rewardInterface  the reward interface
  * @return the poster records
  */
-extern "C" int cBERewardInterface_getPosters(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpPosters);
+int cBERewardInterface::getPosters()
+{
+    return ((int)getDB()->mpPosters);
 }
 #endif
 //100%
@@ -219,11 +219,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTradingCards);
 /**
  * Returns the reward database's trading card table (cBERewardInterface_getDB +0x18, On Tour's mpTradingCards).
  *
- * @param rewardInterface  the reward interface
  * @return the trading card records
  */
-extern "C" int cBERewardInterface_getTradingCards(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpTradingCards);
+int cBERewardInterface::getTradingCards()
+{
+    return ((int)getDB()->mpTradingCards);
 }
 #endif
 //100%
@@ -232,11 +232,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getConceptArts);
 /**
  * Returns the reward database's concept-art table (cBERewardInterface_getDB +0x1C, On Tour's mpConceptArts).
  *
- * @param rewardInterface  the reward interface
  * @return the concept-art records
  */
-extern "C" int cBERewardInterface_getConceptArts(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpConceptArts);
+int cBERewardInterface::getConceptArts()
+{
+    return ((int)getDB()->mpConceptArts);
 }
 #endif
 //100%
@@ -245,11 +245,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getToys);
 /**
  * Returns the reward database's toy table (cBERewardInterface_getDB +0x20, On Tour's mpToys).
  *
- * @param rewardInterface  the reward interface
  * @return the toy records
  */
-extern "C" int cBERewardInterface_getToys(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpToys);
+int cBERewardInterface::getToys()
+{
+    return ((int)getDB()->mpToys);
 }
 #endif
 //100%
@@ -258,11 +258,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getVideos);
 /**
  * Returns the reward database's video table (cBERewardInterface_getDB +0x24, On Tour's mpVideos).
  *
- * @param rewardInterface  the reward interface
  * @return the video records
  */
-extern "C" int cBERewardInterface_getVideos(cBERewardInterface* rewardInterface) {
-    return ((int)cBERewardInterface_getDB(rewardInterface)->mpVideos);
+int cBERewardInterface::getVideos()
+{
+    return ((int)getDB()->mpVideos);
 }
 #endif
 
@@ -512,11 +512,11 @@ extern "C" int cBERewardInterface_getNumOwnedRewards(cBERewardInterface* self, i
  * @param kind  reward kind, 3 to 7
  * @return the reward index, or -1 when every reward of the kind is owned
  */
-extern "C" int cBERewardInterface_getRandomLockedRewardIndex(cBERewardInterface* self, int profile, int characterId, int kind)
+int cBERewardInterface::getRandomLockedRewardIndex(int profile, int characterId, int kind)
 {
-    int total = cBERewardInterface_getTotalNumRewards(self, kind);
+    int total = getTotalNumRewards(kind);
     int result = -1;
-    int have = cBERewardInterface_getNumOwnedRewards(self, profile, characterId, kind);
+    int have = getNumOwnedRewards(profile, characterId, kind);
     if (have >= total) {
         return -1;
     }
@@ -564,19 +564,19 @@ int cBERewardInterface_getTotalNumToys(void* self);
  * @param kind  reward kind, 3 to 9
  * @return the number of rewards of that kind
  */
-extern "C" int cBERewardInterface_getTotalNumRewards(cBERewardInterface* self, int kind)
+int cBERewardInterface::getTotalNumRewards(int kind)
 {
     switch (kind) {
     case 3:
-        return cBERewardInterface_getTotalNumPosters(self);
+        return cBERewardInterface_getTotalNumPosters(this);
     case 4:
-        return cBERewardInterface_getTotalNumTradingCards(self);
+        return cBERewardInterface_getTotalNumTradingCards(this);
     case 5:
-        return cBERewardInterface_getTotalNumConceptArts(self);
+        return cBERewardInterface_getTotalNumConceptArts(this);
     case 6:
-        return cBERewardInterface_getTotalNumVideos(self);
+        return cBERewardInterface_getTotalNumVideos(this);
     case 7:
-        return cBERewardInterface_getTotalNumToys(self);
+        return cBERewardInterface_getTotalNumToys(this);
     case 8:
         return 20;
     case 9:
@@ -599,7 +599,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumPosters__FPv);
  */
 int cBERewardInterface_getTotalNumPosters(void* self)
 {
-    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumPosters;
+    return ((cBERewardInterface*)self)->getDB()->mNumPosters;
 }
 #endif
 
@@ -614,7 +614,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumTradingCards__FPv);
  */
 int cBERewardInterface_getTotalNumTradingCards(void* self)
 {
-    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumTradingCards;
+    return ((cBERewardInterface*)self)->getDB()->mNumTradingCards;
 }
 #endif
 
@@ -629,7 +629,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumConceptArts__FPv);
  */
 int cBERewardInterface_getTotalNumConceptArts(void* self)
 {
-    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumConceptArts;
+    return ((cBERewardInterface*)self)->getDB()->mNumConceptArts;
 }
 #endif
 
@@ -644,7 +644,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumToys__FPv);
  */
 int cBERewardInterface_getTotalNumToys(void* self)
 {
-    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumToys;
+    return ((cBERewardInterface*)self)->getDB()->mNumToys;
 }
 #endif
 
@@ -659,7 +659,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumVideos__FPv);
  */
 int cBERewardInterface_getTotalNumVideos(void* self)
 {
-    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumVideos;
+    return ((cBERewardInterface*)self)->getDB()->mNumVideos;
 }
 #endif
 
@@ -690,7 +690,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumCheatChars__FPv);
  */
 int cBERewardInterface_getTotalNumCheatChars(void* self)
 {
-    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumCheatChars;
+    return ((cBERewardInterface*)self)->getDB()->mNumCheatChars;
 }
 #endif
 
@@ -706,7 +706,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_countOwnedRewards);
  * @param bits  the bit array (On Tour flags)
  * @return the number of set bits
  */
-extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits)
+int cBERewardInterface::countOwnedRewards(int count, signed char* bits)
 {
     int i = 0;
     int total = 0;
@@ -734,7 +734,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_markRewardOwned);
  * @param bit  index of the bit to set (On Tour rewardIndex)
  * @param bits  the bit array (On Tour flags)
  */
-extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits)
+void cBERewardInterface::markRewardOwned(int bit, char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
@@ -753,7 +753,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isRewardOwned);
  * @param bits  the bit array (On Tour flags)
  * @return 1 when the bit is set, else 0
  */
-extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits)
+int cBERewardInterface::isRewardOwned(int bit, char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
@@ -784,15 +784,15 @@ extern "C" int cBERewardInterface_isCheatCharOwned(cBERewardInterface* self, int
  * @param bit  reward index
  * @return non-zero when owned
  */
-extern "C" int cBERewardInterface_isRewardOwned1(cBERewardInterface* self, int profileIndex, int characterId, int kind, int bit)
+int cBERewardInterface::isRewardOwned1(int profileIndex, int characterId, int kind, int bit)
 {
     switch (kind) {
-    case 3: return cBERewardInterface_isPosterOwned(self, profileIndex, characterId, bit);
-    case 4: return cBERewardInterface_isTradingCardOwned(self, profileIndex, characterId, bit);
-    case 5: return cBERewardInterface_isConceptArtOwned(self, profileIndex, characterId, bit);
-    case 6: return cBERewardInterface_isVideoOwned(self, profileIndex, characterId, bit);
-    case 7: return cBERewardInterface_isToyOwned(self, profileIndex, characterId, bit);
-    case 8: return cBERewardInterface_isCheatCharOwned(self, profileIndex, characterId, bit + 10);
+    case 3: return isPosterOwned(profileIndex, characterId, bit);
+    case 4: return isTradingCardOwned(profileIndex, characterId, bit);
+    case 5: return isConceptArtOwned(profileIndex, characterId, bit);
+    case 6: return isVideoOwned(profileIndex, characterId, bit);
+    case 7: return isToyOwned(profileIndex, characterId, bit);
+    case 8: return isCheatCharOwned(profileIndex, characterId, bit + 10);
     }
     return 0;
 }
@@ -820,15 +820,15 @@ extern "C" int cBERewardInterface_getNumOwnedCheatChars(cBERewardInterface* self
  * @param kind  reward kind, 3 to 8
  * @return the owned count
  */
-extern "C" int cBERewardInterface_getNumOwnedRewards(cBERewardInterface* self, int profileIndex, int characterId, int kind)
+int cBERewardInterface::getNumOwnedRewards(int profileIndex, int characterId, int kind)
 {
     switch (kind) {
-    case 3: return cBERewardInterface_getNumOwnedPosters(self, profileIndex, characterId);
-    case 4: return cBERewardInterface_getNumOwnedTradingCards(self, profileIndex, characterId);
-    case 5: return cBERewardInterface_getNumOwnedConceptArts(self, profileIndex, characterId);
-    case 6: return cBERewardInterface_getNumOwnedVideos(self, profileIndex, characterId);
-    case 7: return cBERewardInterface_getNumOwnedToys(self, profileIndex, characterId);
-    case 8: return cBERewardInterface_getNumOwnedCheatChars(self, profileIndex, characterId);
+    case 3: return getNumOwnedPosters(profileIndex, characterId);
+    case 4: return getNumOwnedTradingCards(profileIndex, characterId);
+    case 5: return getNumOwnedConceptArts(profileIndex, characterId);
+    case 6: return getNumOwnedVideos(profileIndex, characterId);
+    case 7: return getNumOwnedToys(profileIndex, characterId);
+    case 8: return getNumOwnedCheatChars(profileIndex, characterId);
     }
     return 0;
 }
@@ -852,10 +852,11 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of posters owned
  */
-extern "C" int cBERewardInterface_getNumOwnedPosters(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedPosters(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, cBERewardInterface_getDB_noargs()->mNumPosters, (signed char*)charRecord->mRewards.bPosters);
+    return countOwnedRewards(cBERewardInterface_getDB_noargs()->mNumPosters,
+            (signed char*)charRecord->mRewards.bPosters);
 }
 #endif
 
@@ -877,10 +878,11 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of trading cards owned
  */
-extern "C" int cBERewardInterface_getNumOwnedTradingCards(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedTradingCards(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, cBERewardInterface_getDB_noargs()->mNumTradingCards, (signed char*)charRecord->mRewards.bTradingCards);
+    return countOwnedRewards(cBERewardInterface_getDB_noargs()->mNumTradingCards,
+            (signed char*)charRecord->mRewards.bTradingCards);
 }
 #endif
 
@@ -902,10 +904,11 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of concept arts owned
  */
-extern "C" int cBERewardInterface_getNumOwnedConceptArts(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedConceptArts(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, cBERewardInterface_getDB_noargs()->mNumConceptArts, (signed char*)charRecord->mRewards.bConceptArts);
+    return countOwnedRewards(cBERewardInterface_getDB_noargs()->mNumConceptArts,
+            (signed char*)charRecord->mRewards.bConceptArts);
 }
 #endif
 
@@ -927,10 +930,10 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of toys owned
  */
-extern "C" int cBERewardInterface_getNumOwnedToys(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedToys(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, cBERewardInterface_getDB_noargs()->mNumToys, (signed char*)charRecord->mRewards.bToys);
+    return countOwnedRewards(cBERewardInterface_getDB_noargs()->mNumToys, (signed char*)charRecord->mRewards.bToys);
 }
 #endif
 
@@ -952,10 +955,10 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of videos owned
  */
-extern "C" int cBERewardInterface_getNumOwnedVideos(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedVideos(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, cBERewardInterface_getDB_noargs()->mNumVideos, (signed char*)charRecord->mRewards.bVideos);
+    return countOwnedRewards(cBERewardInterface_getDB_noargs()->mNumVideos, (signed char*)charRecord->mRewards.bVideos);
 }
 #endif
 
@@ -975,10 +978,10 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of cheat characters owned
  */
-extern "C" int cBERewardInterface_getNumOwnedCheatChars(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedCheatChars(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, 20, (signed char*)charRecord->mRewards.bCheatChars);
+    return countOwnedRewards(20, (signed char*)charRecord->mRewards.bCheatChars);
 }
 #endif
 
@@ -1001,11 +1004,11 @@ extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int 
  * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return 1 when conquered, else 0
  */
-extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
+int cBERewardInterface::isMountainConquered(int iProfileIndex, int iCharacterID)
 {
     for (int i = 0; i < 3; i++)
     {
-        if (!cBERewardInterface_isPeakConquered(self, iProfileIndex, iCharacterID, i))
+        if (!isPeakConquered(iProfileIndex, iCharacterID, i))
             return 0;
     }
     int total = 0;
@@ -1030,11 +1033,11 @@ extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int 
  * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return 1 when cBERewardInterface_isPeakCompleted() holds for peaks 0-2, else 0
  */
-extern "C" int cBERewardInterface_isMountainCompleted(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
+int cBERewardInterface::isMountainCompleted(int iProfileIndex, int iCharacterID)
 {
     for (int i = 0; i < 3; i++)
     {
-        if (cBERewardInterface_isPeakCompleted(self, iProfileIndex, iCharacterID, i) == 0)
+        if (isPeakCompleted(iProfileIndex, iCharacterID, i) == 0)
             return 0;
     }
     return 1;
@@ -1069,7 +1072,7 @@ extern sRewardReq_157920 gMedalsInfo_v157920[][4][5] __asm__("gMedalsInfo");
  * @param k  peak id
  * @return 1 when conquered, else 0
  */
-extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int k)
+int cBERewardInterface::isPeakConquered(int iProfileIndex, int iCharacterID, int k)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -1083,17 +1086,17 @@ extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int 
                 continue;
             if (i == 2)
             {
-                if (cBERewardInterface_getCollectiblesMedal(self, iProfileIndex, iCharacterID, k))
+                if (getCollectiblesMedal(iProfileIndex, iCharacterID, k))
                     return 0;
-                if (cBERewardInterface_getBigChallengesMedal(self, iProfileIndex, iCharacterID, k))
+                if (getBigChallengesMedal(iProfileIndex, iCharacterID, k))
                     return 0;
             }
             else
             {
-                int medal = cBERewardInterface_getTrackMedal(self, iProfileIndex, iCharacterID, track, kind);
+                int medal = cBERewardInterface_getTrackMedal(this, iProfileIndex, iCharacterID, track, kind);
                 if ((unsigned int)(track - 4) < 8)
                 {
-                    if (!cBERewardInterface_isBetterMedal(self, -1, medal))
+                    if (!cBERewardInterface_isBetterMedal(this, -1, medal))
                         return 0;
                 }
                 else if ((unsigned int)medal >= 2)
@@ -1118,11 +1121,11 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a,
  * @param peakID  peak id
  * @return 1 when cBERewardInterface_isTrophyOwned() holds for trophies 0-3, else 0
  */
-extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int peakID)
+int cBERewardInterface::isPeakCompleted(int iProfileIndex, int iCharacterID, int peakID)
 {
     for (int i = 0; i < 4; i++)
     {
-        if (cBERewardInterface_isTrophyOwned(self, iProfileIndex, iCharacterID, peakID, i) == 0)
+        if (isTrophyOwned(iProfileIndex, iCharacterID, peakID, i) == 0)
             return 0;
     }
     return 1;
@@ -1146,10 +1149,10 @@ extern "C" int cBERewardInterface_isPeakLocked1(cBERewardInterface* self, int a,
  * @param peak  the peak (On Tour peakID)
  * @return 1 when locked, else 0
  */
-extern "C" int cBERewardInterface_isPeakLocked(cBERewardInterface* self, int rider, int peak)
+int cBERewardInterface::isPeakLocked(int rider, int peak)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    return cBERewardInterface_isPeakLocked1(self, profile, cBELibrary_getCharacterID(rider), peak);
+    return isPeakLocked1(profile, cBELibrary_getCharacterID(rider), peak);
 }
 #endif
 
@@ -1171,7 +1174,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return 1 when locked, else 0
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
-extern "C" int cBERewardInterface_isPeakLocked1(cBERewardInterface* self, int profileIndex, int characterId, int peak)
+int cBERewardInterface::isPeakLocked1(int profileIndex, int characterId, int peak)
 {
     if (peak == 1)
     {
@@ -1215,7 +1218,7 @@ extern sRewardReq_157BF0 gMedalsInfo_v157BF0[][4][5] __asm__("gMedalsInfo");
  * @param i  trophy id, 0-3
  * @return 1 when the trophy is owned, 0 otherwise or for a trophy id outside 0-3
  */
-extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int k, int i)
+int cBERewardInterface::isTrophyOwned(int iProfileIndex, int iCharacterID, int k, int i)
 {
     switch (i)
     {
@@ -1227,19 +1230,21 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int iP
             int kind = gMedalsInfo_v157BF0[k][i][j].kind;
             if (track < 0)
                 break;
-            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, iProfileIndex, iCharacterID, track, kind)))
+            if (!cBERewardInterface_isBetterMedal(this, -1, cBERewardInterface_getTrackMedal(this, iProfileIndex,
+                    iCharacterID, track, kind)))
                 return 0;
         }
         return 1;
     case 2:
     {
         int owned = 0;
-        if (cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getCollectiblesMedal(self, iProfileIndex, iCharacterID, k)))
-            owned = cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getBigChallengesMedal(self, iProfileIndex, iCharacterID, k)) != 0;
+        if (cBERewardInterface_isBetterMedal(this, -1, getCollectiblesMedal(iProfileIndex, iCharacterID, k)))
+            owned = cBERewardInterface_isBetterMedal(this, -1, getBigChallengesMedal(iProfileIndex, iCharacterID,
+                    k)) != 0;
         return owned;
     }
     case 3:
-        return cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getEarningsMedal(self, iProfileIndex, iCharacterID, k));
+        return cBERewardInterface_isBetterMedal(this, -1, getEarningsMedal(iProfileIndex, iCharacterID, k));
     }
     return 0;
 }
@@ -1262,10 +1267,10 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  * @param bit  poster index (On Tour rewardIndex)
  * @return 1 when owned, else 0
  */
-extern "C" int cBERewardInterface_isPosterOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isPosterOwned(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_isRewardOwned(self, bit, charRecord->mRewards.bPosters);
+    return isRewardOwned(bit, charRecord->mRewards.bPosters);
 }
 #endif
 
@@ -1286,10 +1291,10 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  * @param bit  trading card index (On Tour rewardIndex)
  * @return 1 when owned, else 0
  */
-extern "C" int cBERewardInterface_isTradingCardOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isTradingCardOwned(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_isRewardOwned(self, bit, charRecord->mRewards.bTradingCards);
+    return isRewardOwned(bit, charRecord->mRewards.bTradingCards);
 }
 #endif
 
@@ -1310,10 +1315,10 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  * @param bit  concept art index (On Tour rewardIndex)
  * @return 1 when owned, else 0
  */
-extern "C" int cBERewardInterface_isConceptArtOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isConceptArtOwned(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_isRewardOwned(self, bit, charRecord->mRewards.bConceptArts);
+    return isRewardOwned(bit, charRecord->mRewards.bConceptArts);
 }
 #endif
 
@@ -1334,10 +1339,10 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  * @param bit  toy index (On Tour rewardIndex)
  * @return 1 when owned, else 0
  */
-extern "C" int cBERewardInterface_isToyOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isToyOwned(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_isRewardOwned(self, bit, charRecord->mRewards.bToys);
+    return isRewardOwned(bit, charRecord->mRewards.bToys);
 }
 #endif
 
@@ -1358,10 +1363,10 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  * @param bit  video index (On Tour rewardIndex)
  * @return 1 when owned, else 0
  */
-extern "C" int cBERewardInterface_isVideoOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isVideoOwned(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_isRewardOwned(self, bit, charRecord->mRewards.bVideos);
+    return isRewardOwned(bit, charRecord->mRewards.bVideos);
 }
 #endif
 
@@ -1407,10 +1412,10 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  * @param bit  cheat character id, 10 and up (On Tour cheatCharID)
  * @return 1 when owned, else 0
  */
-extern "C" int cBERewardInterface_isCheatCharOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isCheatCharOwned(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_isRewardOwned(self, bit-10, charRecord->mRewards.bCheatChars);
+    return isRewardOwned(bit-10, charRecord->mRewards.bCheatChars);
 }
 #endif
 
@@ -1441,15 +1446,15 @@ int cBERewardInterface_buyCheatChar_r(void* self, int a1, int a2, int bit, int g
  * @param give  non-zero to charge the price (On Tour payForIt)
  * @return the called function's result, or 0 for other kinds
  */
-extern "C" int cBERewardInterface_buyReward(cBERewardInterface* self, int profileIndex, int characterId, int kind, int bit, int give)
+int cBERewardInterface::buyReward(int profileIndex, int characterId, int kind, int bit, int give)
 {
     switch (kind) {
-    case 3: return cBERewardInterface_buyPoster_r(self, profileIndex, characterId, bit, give);
-    case 4: return cBERewardInterface_buyTradingCard_r(self, profileIndex, characterId, bit, give);
-    case 5: return cBERewardInterface_buyConceptArt_r(self, profileIndex, characterId, bit, give);
-    case 6: return cBERewardInterface_buyVideo_r(self, profileIndex, characterId, bit, give);
-    case 7: return cBERewardInterface_buyToy_r(self, profileIndex, characterId, bit, give);
-    case 8: return cBERewardInterface_buyCheatChar_r(self, profileIndex, characterId, bit + 10, give);
+    case 3: return cBERewardInterface_buyPoster_r(this, profileIndex, characterId, bit, give);
+    case 4: return cBERewardInterface_buyTradingCard_r(this, profileIndex, characterId, bit, give);
+    case 5: return cBERewardInterface_buyConceptArt_r(this, profileIndex, characterId, bit, give);
+    case 6: return cBERewardInterface_buyVideo_r(this, profileIndex, characterId, bit, give);
+    case 7: return cBERewardInterface_buyToy_r(this, profileIndex, characterId, bit, give);
+    case 8: return cBERewardInterface_buyCheatChar_r(this, profileIndex, characterId, bit + 10, give);
     }
     return 0;
 }
@@ -1487,11 +1492,11 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
  * @param bit  poster index (On Tour rewardIndex)
  * @param give  non-zero to charge the price (On Tour payForIt)
  */
-extern "C" void cBERewardInterface_buyPoster(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
+void cBERewardInterface::buyPoster(int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bPosters);
+    markRewardOwned(bit, charRecord->mRewards.bPosters);
     if (give)
     {
         tPosterInfo* poster = &cBERewardInterface_getDB_noargs()->mpPosters[bit];
@@ -1499,9 +1504,9 @@ extern "C" void cBERewardInterface_buyPoster(cBERewardInterface* self, int profi
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (cBERewardInterface_getNumOwnedPosters(self, profileIndex, characterId) == cBERewardInterface_getTotalNumPosters(self))
+    if (getNumOwnedPosters(profileIndex, characterId) == cBERewardInterface_getTotalNumPosters(this))
     {
-        cBERewardInterface_buyCheatChar(self, profileIndex, characterId, 20, 0);
+        buyCheatChar(profileIndex, characterId, 20, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1539,11 +1544,11 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
  * @param bit  trading card index (On Tour rewardIndex)
  * @param give  non-zero to charge the price (On Tour payForIt)
  */
-extern "C" void cBERewardInterface_buyTradingCard(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
+void cBERewardInterface::buyTradingCard(int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bTradingCards);
+    markRewardOwned(bit, charRecord->mRewards.bTradingCards);
     if (give)
     {
         tTradingCardInfo* card = &cBERewardInterface_getDB_noargs()->mpTradingCards[bit];
@@ -1551,9 +1556,9 @@ extern "C" void cBERewardInterface_buyTradingCard(cBERewardInterface* self, int 
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (cBERewardInterface_getNumOwnedTradingCards(self, profileIndex, characterId) == cBERewardInterface_getTotalNumTradingCards(self))
+    if (getNumOwnedTradingCards(profileIndex, characterId) == cBERewardInterface_getTotalNumTradingCards(this))
     {
-        cBERewardInterface_buyCheatChar(self, profileIndex, characterId, 17, 0);
+        buyCheatChar(profileIndex, characterId, 17, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1591,11 +1596,11 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
  * @param bit  concept art index (On Tour rewardIndex)
  * @param give  non-zero to charge the price (On Tour payForIt)
  */
-extern "C" void cBERewardInterface_buyConceptArt(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
+void cBERewardInterface::buyConceptArt(int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bConceptArts);
+    markRewardOwned(bit, charRecord->mRewards.bConceptArts);
     if (give)
     {
         tConceptArtInfo* art = &cBERewardInterface_getDB_noargs()->mpConceptArts[bit];
@@ -1603,9 +1608,9 @@ extern "C" void cBERewardInterface_buyConceptArt(cBERewardInterface* self, int p
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (cBERewardInterface_getNumOwnedConceptArts(self, profileIndex, characterId) == cBERewardInterface_getTotalNumConceptArts(self))
+    if (getNumOwnedConceptArts(profileIndex, characterId) == cBERewardInterface_getTotalNumConceptArts(this))
     {
-        cBERewardInterface_buyCheatChar(self, profileIndex, characterId, 22, 0);
+        buyCheatChar(profileIndex, characterId, 22, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1643,11 +1648,11 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
  * @param bit  toy index (On Tour rewardIndex)
  * @param give  non-zero to charge the price (On Tour payForIt)
  */
-extern "C" void cBERewardInterface_buyToy(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
+void cBERewardInterface::buyToy(int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bToys);
+    markRewardOwned(bit, charRecord->mRewards.bToys);
     if (give)
     {
         tToyInfo* toy = &cBERewardInterface_getDB_noargs()->mpToys[bit];
@@ -1655,9 +1660,9 @@ extern "C" void cBERewardInterface_buyToy(cBERewardInterface* self, int profileI
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (cBERewardInterface_getNumOwnedToys(self, profileIndex, characterId) == cBERewardInterface_getTotalNumToys(self))
+    if (getNumOwnedToys(profileIndex, characterId) == cBERewardInterface_getTotalNumToys(this))
     {
-        cBERewardInterface_buyCheatChar(self, profileIndex, characterId, 19, 0);
+        buyCheatChar(profileIndex, characterId, 19, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1690,11 +1695,11 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
  * @param idx  video index (On Tour rewardIndex)
  * @param award  non-zero to charge the price (On Tour payForIt)
  */
-extern "C" void cBERewardInterface_buyVideo(cBERewardInterface* self, int profile, int characterId, int idx, int award)
+void cBERewardInterface::buyVideo(int profile, int characterId, int idx, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profile][characterId];
-    cBERewardInterface_markRewardOwned(self, idx, charRecord->mRewards.bVideos);
+    markRewardOwned(idx, charRecord->mRewards.bVideos);
     if (award)
     {
         tVideoInfo* video = &cBERewardInterface_getDB_noargs()->mpVideos[idx];
@@ -1731,7 +1736,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
  * @param award  non-zero to charge the price (On Tour payForIt)
  */
 // PORT: 64-bit ulong bit set (sd/ld).
-extern "C" void cBERewardInterface_buySong(cBERewardInterface* self, int profile, int characterId, int bit, int award)
+void cBERewardInterface::buySong(int profile, int characterId, int bit, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profile][characterId];
@@ -1771,12 +1776,12 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
  * @param idx  cheat character id, 10 and up (On Tour cheatCharID)
  * @param award  non-zero to charge the price (On Tour payForIt)
  */
-extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int profile, int characterId, int idx, int award)
+void cBERewardInterface::buyCheatChar(int profile, int characterId, int idx, int award)
 {
     idx -= 10;
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profile][characterId];
-    cBERewardInterface_markRewardOwned(self, idx, charRecord->mRewards.bCheatChars);
+    markRewardOwned(idx, charRecord->mRewards.bCheatChars);
     if (award)
     {
         tCheatCharInfo* cheatChar = &cBERewardInterface_getDB_noargs()->mpCheatChars[idx];
@@ -1802,7 +1807,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the radio mode
  */
-extern "C" int cBERewardInterface_getRadioMode(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getRadioMode(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     return charRecord->mRadioMode;
@@ -1823,7 +1828,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the owned-song bits
  */
-extern "C" long cBERewardInterface_getOwnedSongList(cBERewardInterface* self, int profileIndex, int characterId)
+long cBERewardInterface::getOwnedSongList(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     return charRecord->mRewards.iOwnedSongList;
@@ -1844,7 +1849,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the playlist bits
  */
-extern "C" long cBERewardInterface_getPlayList(cBERewardInterface* self, int profileIndex, int characterId)
+long cBERewardInterface::getPlayList(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     return charRecord->mRewards.iPlayList;
@@ -1862,10 +1867,10 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedSongs);
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the number of owned songs
  */
-extern "C" int cBERewardInterface_getNumOwnedSongs(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getNumOwnedSongs(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
-    return cBERewardInterface_countOwnedRewards(self, 0x40, (signed char*)&charRecord->mRewards.iOwnedSongList);
+    return countOwnedRewards(0x40, (signed char*)&charRecord->mRewards.iOwnedSongList);
 }
 #endif
 
@@ -1883,10 +1888,10 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return the number of songs
  */
-extern "C" int cBERewardInterface_getNumSongsInPlayList(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
+int cBERewardInterface::getNumSongsInPlayList(int iProfileIndex, int iCharacterID)
 {
     cBECharProfileDB* charProfile = &cBELibrary_profileLib[iProfileIndex][iCharacterID];
-    return cBERewardInterface_countOwnedRewards(self, 0x40, (signed char*)&charProfile->mRewards.iPlayList);
+    return countOwnedRewards(0x40, (signed char*)&charProfile->mRewards.iPlayList);
 }
 #endif
 
@@ -1903,7 +1908,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iCharacterID)
  * @param value  the radio mode (On Tour radioMode)
  */
-extern "C" void cBERewardInterface_setRadioMode(cBERewardInterface* self, int profileIndex, int characterId, int value)
+void cBERewardInterface::setRadioMode(int profileIndex, int characterId, int value)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     charRecord->mRadioMode = value;
@@ -1924,7 +1929,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iCharacterID)
  * @param value  the owned-song bits (On Tour iOwnedSongList)
  */
-extern "C" void cBERewardInterface_setOwnedSongList(cBERewardInterface* self, int profileIndex, int characterId, long value)
+void cBERewardInterface::setOwnedSongList(int profileIndex, int characterId, long value)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     charRecord->mRewards.iOwnedSongList = value;
@@ -1945,7 +1950,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iCharacterID)
  * @param value  the playlist bits (On Tour iPlayList)
  */
-extern "C" void cBERewardInterface_setPlayList(cBERewardInterface* self, int profileIndex, int characterId, long value)
+void cBERewardInterface::setPlayList(int profileIndex, int characterId, long value)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     charRecord->mRewards.iPlayList = value;
@@ -1964,7 +1969,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
  * @param medal  the medal, 0 (best) to 3
  * @return the target count
  */
-extern "C" int cBERewardInterface_getCollectibleMedalTarget(cBERewardInterface* self, int peakID, int medal)
+int cBERewardInterface::getCollectibleMedalTarget(int peakID, int medal)
 {
     return gCollectiblesMedalLevel[peakID][medal];
 }
@@ -1982,7 +1987,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
  * @param medal  the medal, 0 (best) to 3
  * @return the target count
  */
-extern "C" int cBERewardInterface_getChallengesMedalTarget(cBERewardInterface* self, int peakID, int medal)
+int cBERewardInterface::getChallengesMedalTarget(int peakID, int medal)
 {
     return gBigChallengesMedalLevel[peakID][medal];
 }
@@ -2022,7 +2027,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateCollectibleMedal);
  * @param numCollected  number of collectibles found (On Tour numCollected)
  * @return the first medal (0 best to 3) whose target @p numCollected reaches, or -1
  */
-extern "C" int cBERewardInterface_calculateCollectibleMedal(cBERewardInterface* self, int idx, int numCollected)
+int cBERewardInterface::calculateCollectibleMedal(int idx, int numCollected)
 {
     int* row = gCollectiblesMedalLevel[idx];
     for (int i = 0; i < 4; i++) {
@@ -2074,7 +2079,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackHighScore);
  * @param locationId  the location (On Tour location)
  * @return the best time or score, or 0 when there is no record
  */
-extern "C" int cBERewardInterface_getTrackHighScore(cBERewardInterface* self, int profileIndex, int characterId, int event, int locationId)
+int cBERewardInterface::getTrackHighScore(int profileIndex, int characterId, int event, int locationId)
 {
     tBETrackScore* result =
         cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profileIndex][characterId], locationId, event);
@@ -2103,7 +2108,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, i
  * @param kind  the peak id (On Tour: peakID)
  * @return the best medal reached (0 best to 3), or -1
  */
-extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
+int cBERewardInterface::getCollectiblesMedal(int iProfileIndex, int iCharacterID, int kind)
 {
     int collected = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
     int* thresholds = gCollectiblesMedalLevel[kind];
@@ -2134,7 +2139,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
  * @param kind  the peak id (On Tour: peakID)
  * @return the best medal reached (0 best to 3), or -1
  */
-extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
+int cBERewardInterface::getBigChallengesMedal(int iProfileIndex, int iCharacterID, int kind)
 {
     int completed = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
     int* thresholds = gBigChallengesMedalLevel[kind];
@@ -2163,7 +2168,7 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
  * @param medal  the peak id (an index into gEarningsMedalLevel), despite the parameter's name
  * @return 1 (a medal) when the target is reached, else -1
  */
-extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int medal)
+int cBERewardInterface::getEarningsMedal(int iProfileIndex, int iCharacterID, int medal)
 {
     unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 11), iProfileIndex, iCharacterID);
     if (earned >= gEarningsMedalLevel[medal])
@@ -2185,7 +2190,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateBigChallengeMedal);
  * @param numCompleted  number of completed big challenges (On Tour numCompletedChallenges)
  * @return the first medal (0 best to 3) whose target @p numCompleted reaches, or -1
  */
-extern "C" int cBERewardInterface_calculateBigChallengeMedal(cBERewardInterface* self, int idx, int numCompleted)
+int cBERewardInterface::calculateBigChallengeMedal(int idx, int numCompleted)
 {
     int* row = gBigChallengesMedalLevel[idx];
     for (int i = 0; i < 4; i++) {
@@ -2206,7 +2211,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateEarningMedal);
  * @param totalCash  total cash earned (On Tour totalCashEarned)
  * @return 1 when @p totalCash reaches the target, else -1
  */
-extern "C" int cBERewardInterface_calculateEarningMedal(cBERewardInterface* self, int idx, unsigned int totalCash)
+int cBERewardInterface::calculateEarningMedal(int idx, unsigned int totalCash)
 {
     return (totalCash < gEarningsMedalLevel[idx]) ? -1 : 1;
 }
@@ -2227,11 +2232,11 @@ int cBERewardInterface_isBetterMedal(void* self, int a, int b);
  * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return the first unreached target (as a pointer-typed value), or 0 when all three are reached
  */
-extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
+void* cBERewardInterface::calculateNextEarningsLevel(int iProfileIndex, int iCharacterID)
 {
     for (int i = 0; i < 3; i++)
     {
-        if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getEarningsMedal(self, iProfileIndex, iCharacterID, i)))
+        if (!cBERewardInterface_isBetterMedal(this, -1, getEarningsMedal(iProfileIndex, iCharacterID, i)))
             return (void*)gEarningsMedalLevel[i];
     }
     return 0;
@@ -2256,13 +2261,13 @@ extern int gCollectiblesMedalLevel_2d[][4] __asm__("gCollectiblesMedalLevel");
  * @param kind  peak id
  * @return the next target, or 0 when the best medal is already held
  */
-extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
+int cBERewardInterface::calculateNextCollectiblesLevel(int iProfileIndex, int iCharacterID, int kind)
 {
-    int medal = cBERewardInterface_getCollectiblesMedal(self, iProfileIndex, iCharacterID, kind);
+    int medal = getCollectiblesMedal(iProfileIndex, iCharacterID, kind);
     int best = 0;
     for (int i = 0; i < 4; i++)
     {
-        if (cBERewardInterface_isBetterMedal(self, medal, i))
+        if (cBERewardInterface_isBetterMedal(this, medal, i))
         {
             if (best == 0 || gCollectiblesMedalLevel_2d[kind][i] < best)
                 best = gCollectiblesMedalLevel_2d[kind][i];
@@ -2290,13 +2295,13 @@ extern int gBigChallengesMedalLevel_2d[][4] __asm__("gBigChallengesMedalLevel");
  * @param kind  peak id
  * @return the next target, or 0 when the best medal is already held
  */
-extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
+int cBERewardInterface::calculateNextBigChallengesLevel(int iProfileIndex, int iCharacterID, int kind)
 {
-    int medal = cBERewardInterface_getBigChallengesMedal(self, iProfileIndex, iCharacterID, kind);
+    int medal = getBigChallengesMedal(iProfileIndex, iCharacterID, kind);
     int best = 0;
     for (int i = 0; i < 4; i++)
     {
-        if (cBERewardInterface_isBetterMedal(self, medal, i))
+        if (cBERewardInterface_isBetterMedal(this, medal, i))
         {
             if (best == 0 || gBigChallengesMedalLevel_2d[kind][i] < best)
                 best = gBigChallengesMedalLevel_2d[kind][i];
@@ -2323,15 +2328,15 @@ extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
  * into gNextEarningsLimit, gNextCollectiblesLimit[3] and gNextBigChallengesLimit[3]. Then zeroes +0x10 and stores -1 at +0x14 of
  * cBERewardInterface_instance (not of @p self).
  */
-extern "C" void cBERewardInterface_clearUserAwards(cBERewardInterface* self)
+void cBERewardInterface::clearUserAwards()
 {
-    cBEUserAwards_clear((cBEUserAwards*)cBELibrary_userAwards);
+    ((cBEUserAwards*)cBELibrary_userAwards)->clear();
     int charID = cBELibrary_getCharacterID(cBELibrary_getRiderIndex(0));
-    gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel(self, 0, charID);
+    gNextEarningsLimit = calculateNextEarningsLevel(0, charID);
     for (int i = 0; i < 3; i++)
-        gNextCollectiblesLimit[i] = cBERewardInterface_calculateNextCollectiblesLevel(self, 0, charID, i);
+        gNextCollectiblesLimit[i] = calculateNextCollectiblesLevel(0, charID, i);
     for (int i = 0; i < 3; i++)
-        gNextBigChallengesLimit[i] = cBERewardInterface_calculateNextBigChallengesLevel(self, 0, charID, i);
+        gNextBigChallengesLimit[i] = calculateNextBigChallengesLevel(0, charID, i);
     cBERewardInterface* rewardIface = cBERewardInterface_instance;
     rewardIface->mLastEventCashReward = 0;
     rewardIface->mLastEventMedal = -1;
@@ -2409,7 +2414,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param row  the award category the log entry goes under (On Tour awardCategory)
  * @param mode  which peaks to unlock: 1 or 2
  */
-extern "C" void cBERewardInterface_awardUserPeakPass(cBERewardInterface* self, int profile, int characterId, int row, int mode)
+void cBERewardInterface::awardUserPeakPass(int profile, int characterId, int row, int mode)
 {
     cBEUserAwards* awards = (cBEUserAwards*)cBELibrary_userAwards;
     switch (mode)
@@ -2420,13 +2425,13 @@ extern "C" void cBERewardInterface_awardUserPeakPass(cBERewardInterface* self, i
         if (cBELibrary_profileLib[profile][characterId].bPeak3Locked)
         {
             cBELibrary_profileLib[profile][characterId].bPeak3Locked = 0;
-            cBEUserAwards_setAward(awards, row, 2, characterId * 3 + 2);
+            awards->setAward(row, 2, characterId * 3 + 2);
         }
     case 1:
         if (cBELibrary_profileLib[profile][characterId].bPeak2Locked)
         {
             cBELibrary_profileLib[profile][characterId].bPeak2Locked = 0;
-            cBEUserAwards_setAward(awards, row, 2, characterId * 3 + 1);
+            awards->setAward(row, 2, characterId * 3 + 1);
         }
         break;
     }
@@ -2448,7 +2453,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getAwardTrophyCategory);
  * @param tier  trophy id, 0-3
  * @return the award category, or -1 for a peak or trophy id out of range
  */
-extern "C" int cBERewardInterface_getAwardTrophyCategory(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind, int tier)
+int cBERewardInterface::getAwardTrophyCategory(int iProfileIndex, int iCharacterID, int kind, int tier)
 {
     int category = -1;
     switch (tier)
@@ -2508,12 +2513,12 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, i
  * @param kind  peak id
  * @param tier  trophy id
  */
-extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind, int tier)
+void cBERewardInterface::awardUserTrophy(int iProfileIndex, int iCharacterID, int kind, int tier)
 {
-    int bit = cBERewardInterface_getAwardTrophyCategory(self, iProfileIndex, iCharacterID, kind, tier);
-    if (cBERewardInterface_isAwardReceived(self, iProfileIndex, iCharacterID, bit) == 0)
+    int bit = getAwardTrophyCategory(iProfileIndex, iCharacterID, kind, tier);
+    if (isAwardReceived(iProfileIndex, iCharacterID, bit) == 0)
     {
-        cBERewardInterface_awardUser(self, iProfileIndex, iCharacterID, bit);
+        awardUser(iProfileIndex, iCharacterID, bit);
     }
 }
 #endif
@@ -2591,14 +2596,14 @@ extern signed char D_005305F9[];
  * @param event  the location (On Tour locationID)
  * @param medal  the medal earned, 0 best to 3, -1 none (On Tour medalID)
  */
-extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInterface* self, int profile, int charID, int mode, int event, int medal)
+void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID, int mode, int event, int medal)
 {
     sProfileChar_1591E8* pc = &cBELibrary_profileLib_1591E8[profile][charID];
     int bit = -1;
     void* score = cBE_getInterface_Fv(cBE_getBE(), 11);
     sScoreStat_1591E8* stats = cBECharProfileDB_getScoreStats_1591E8(pc, event, mode);
-    int tier = cBERewardInterface_getTrackTrophyID(self, mode, event);
-    int group = cBERewardInterface_getTrackPeakID(self, event);
+    int tier = getTrackTrophyID(mode, event);
+    int group = getTrackPeakID(event);
     unsigned int money;
     int oldMedal = stats->medal;
     if (mode == 6 || mode == 9)
@@ -2637,29 +2642,29 @@ extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInter
     }
     if ((unsigned int)medal < 2) {
         if (stats->count == 0)
-            cBERewardInterface_awardUser((cBERewardInterface*)self, profile, charID, bit);
+            awardUser(profile, charID, bit);
     } else if ((unsigned int)(mode - 6) < 6 && D_005305F9[0] == 0) {
         if (medal == 3)
             func_001E1DD0(group, mode, 0);
         else if (medal == 2)
             func_001E1DD0(group, mode, 1);
     }
-    if (cBERewardInterface_isBetterMedal(self, oldMedal, medal)) {
-        int had = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, charID, group, tier);
-        cBERewardInterface_awardUserCash1(self, profile, charID, money);
+    if (cBERewardInterface_isBetterMedal(this, oldMedal, medal)) {
+        int had = isTrophyOwned(profile, charID, group, tier);
+        awardUserCash1(profile, charID, money);
         cBECharProfileDB_updateMedalStats(pc, event, mode, medal);
-        if (cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, charID, group, tier) && !had)
-            cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, profile, charID, group, tier);
+        if (isTrophyOwned(profile, charID, group, tier) && !had)
+            awardUserTrophy(profile, charID, group, tier);
     } else {
         cBECharProfileDB_updateMedalStats(pc, event, mode, medal);
         money >>= 1;
-        cBERewardInterface_awardUserCash1(self, profile, charID, money);
+        awardUserCash1(profile, charID, money);
     }
-    if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, profile, charID) && cBERewardInterface_isAwardReceived(self, profile, charID, 0) == 0)
-        cBERewardInterface_awardUser((cBERewardInterface*)self, profile, charID, 0);
+    if (isMountainConquered(profile, charID) && isAwardReceived(profile, charID, 0) == 0)
+        awardUser(profile, charID, 0);
     (cBERewardInterface_instance)->mLastEventMedal = medal;
     (cBERewardInterface_instance)->mLastEventCashReward = money;
-    if (!cBERewardInterface_isBetterMedal(self, -1, medal))
+    if (!cBERewardInterface_isBetterMedal(this, -1, medal))
         return;
     int any = 0;
     int okA = 1;
@@ -2674,12 +2679,14 @@ extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInter
         }
         if ((unsigned int)(track - 4) < 2) {
             any = 1;
-            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, charID, track, kind))) {
+            if (!cBERewardInterface_isBetterMedal(this, -1, cBERewardInterface_getTrackMedal(this, profile, charID,
+                    track, kind))) {
                 okB = 0;
                 break;
             }
         } else {
-            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, charID, track, kind))) {
+            if (!cBERewardInterface_isBetterMedal(this, -1, cBERewardInterface_getTrackMedal(this, profile, charID,
+                    track, kind))) {
                 if (!any) {
                     if (cBELibrary_raceDB_1591E8.cGamePath == 0)
                         func_001E1C10(group);
@@ -2742,10 +2749,10 @@ extern "C" void cBERewardInterface_awardUserCash1(cBERewardInterface* self, int 
  * @param rider  race rider slot (On Tour iRider)
  * @param money  the amount (On Tour cash)
  */
-extern "C" void cBERewardInterface_awardUserCash(cBERewardInterface* self, int rider, int money)
+void cBERewardInterface::awardUserCash(int rider, int money)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    cBERewardInterface_awardUserCash1(self, profile, cBELibrary_getCharacterID(rider), money);
+    awardUserCash1(profile, cBELibrary_getCharacterID(rider), money);
 }
 #endif
 
@@ -2777,7 +2784,7 @@ extern void* cBELibrary_userAwards[];
  * @param characterId  character ID (On Tour iCharacterID)
  * @param amount  the cash (On Tour cash)
  */
-extern "C" void cBERewardInterface_awardUserCash1(cBERewardInterface* self, int profileIndex, int characterId, int amount)
+void cBERewardInterface::awardUserCash1(int profileIndex, int characterId, int amount)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     *(int*)cBELibrary_userAwards += amount;
@@ -2786,13 +2793,13 @@ extern "C" void cBERewardInterface_awardUserCash1(cBERewardInterface* self, int 
         int before[3];
         int i;
         for (i = 0; i < 3; i++)
-            before[i] = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profileIndex, characterId, i, 3);
+            before[i] = isTrophyOwned(profileIndex, characterId, i, 3);
         cBEEconInterface_addMoney(econ, profileIndex, characterId, amount);
-        gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel((cBERewardInterface*)self, profileIndex, characterId);
+        gNextEarningsLimit = calculateNextEarningsLevel(profileIndex, characterId);
         for (i = 0; i < 3; i++)
         {
-            if (before[i] == 0 && cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profileIndex, characterId, i, 3))
-                cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, profileIndex, characterId, i, 3);
+            if (before[i] == 0 && isTrophyOwned(profileIndex, characterId, i, 3))
+                awardUserTrophy(profileIndex, characterId, i, 3);
         }
     }
     else
@@ -2830,7 +2837,7 @@ extern int gCollectiblesMedalLevel_2d[][4] __asm__("gCollectiblesMedalLevel");
  * @param rider  the rider index (On Tour: iRider)
  * @param k  the peak id
  */
-extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self, int rider, int k)
+void cBERewardInterface::awardUserCollectible(int rider, int k)
 {
     int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 10), rider, k);
     int* nextLevel = &gNextCollectiblesLimit[k];
@@ -2840,14 +2847,14 @@ extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self
         return;
     int prof = cBELibrary_getProfileIndex(rider);
     int ch = cBELibrary_getCharacterID(rider);
-    int was = cBERewardInterface_isTrophyOwned(self, prof, ch, k, 2);
-    *nextLevel = cBERewardInterface_calculateNextCollectiblesLevel(self, prof, ch, k);
+    int was = isTrophyOwned(prof, ch, k, 2);
+    *nextLevel = calculateNextCollectiblesLevel(prof, ch, k);
     if (was && cur == gCollectiblesMedalLevel_2d[k][3])
-        cBERewardInterface_awardUserTrophy(self, prof, ch, k, 2);
-    if (cBERewardInterface_isMountainConquered(self, prof, ch))
+        awardUserTrophy(prof, ch, k, 2);
+    if (isMountainConquered(prof, ch))
     {
-        if (cBERewardInterface_isAwardReceived(self, prof, ch, 0) == 0)
-            cBERewardInterface_awardUser(self, prof, ch, 0);
+        if (isAwardReceived(prof, ch, 0) == 0)
+            awardUser(prof, ch, 0);
     }
 }
 #endif
@@ -2883,7 +2890,7 @@ extern int gBigChallengesMedalLevel_2d[][4] __asm__("gBigChallengesMedalLevel");
  * @param rider  the rider (On Tour iRider)
  * @param k  the peak (On Tour peakID)
  */
-extern "C" void cBERewardInterface_awardUserBigChallenge(cBERewardInterface* self, int rider, int k)
+void cBERewardInterface::awardUserBigChallenge(int rider, int k)
 {
     int cur = cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBE_getInterface_Fv(cBE_getBE(), 10), k);
     int* nextLimit = &gNextBigChallengesLimit[k];
@@ -2893,14 +2900,14 @@ extern "C" void cBERewardInterface_awardUserBigChallenge(cBERewardInterface* sel
         return;
     int prof = cBELibrary_getProfileIndex(rider);
     int ch = cBELibrary_getCharacterID(rider);
-    int was = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, prof, ch, k, 2);
-    *nextLimit = cBERewardInterface_calculateNextBigChallengesLevel((cBERewardInterface*)self, prof, ch, k);
+    int was = isTrophyOwned(prof, ch, k, 2);
+    *nextLimit = calculateNextBigChallengesLevel(prof, ch, k);
     if (was && cur == gBigChallengesMedalLevel_2d[k][3])
-        cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, prof, ch, k, 2);
-    if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, prof, ch))
+        awardUserTrophy(prof, ch, k, 2);
+    if (isMountainConquered(prof, ch))
     {
-        if (cBERewardInterface_isAwardReceived(self, prof, ch, 0) == 0)
-            cBERewardInterface_awardUser((cBERewardInterface*)self, prof, ch, 0);
+        if (isAwardReceived(prof, ch, 0) == 0)
+            awardUser(prof, ch, 0);
     }
 }
 #endif
@@ -2918,10 +2925,10 @@ int cBELibrary_getCharacterID(int);
  * @param rider  race rider slot (On Tour iRider)
  * @param bit  the award category (On Tour awardCategory)
  */
-extern "C" void cBERewardInterface_awardUser1(cBERewardInterface* self, int rider, int bit)
+void cBERewardInterface::awardUser1(int rider, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    cBERewardInterface_awardUser((cBERewardInterface*)self, profile, cBELibrary_getCharacterID(rider), bit);
+    awardUser(profile, cBELibrary_getCharacterID(rider), bit);
 }
 #endif
 
@@ -2958,7 +2965,7 @@ extern sSlots2_00159CD0 D_004A1268[];
  * @param iCharacterID  character id (On Tour: iCharacterID)
  * @param bit  the award category, 0-31 (On Tour: awardCategory)
  */
-extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int iCharacterID, int bit)
+void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
 {
     cBECharProfileDB* rec = &cBELibrary_profileLib[profile][iCharacterID];
     cBEUserAwards* rewardLog = (cBEUserAwards*)cBELibrary_userAwards;
@@ -2968,7 +2975,7 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
     int value = 0;
 
     if (bit < 17 || bit > 19) {
-        if (cBERewardInterface_isAwardReceived(self, profile, iCharacterID, bit))
+        if (this->isAwardReceived(profile, iCharacterID, bit))
             return;
     }
 
@@ -2999,18 +3006,18 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
     case 14:
     {
         int i;
-        for (i = 0; i < 4 && (slots4.v[i] = cBERewardInterface_getRandomLockedRewardIndex(self, profile, iCharacterID, 4)) >= 0; i++) {
-            cBERewardInterface_buyTradingCard(self, profile, iCharacterID, slots4.v[i], 0);
-            cBEUserAwards_setAward(rewardLog, bit, 4, slots4.v[i]);
+        for (i = 0; i < 4 && (slots4.v[i] = this->getRandomLockedRewardIndex(profile, iCharacterID, 4)) >= 0; i++) {
+            this->buyTradingCard(profile, iCharacterID, slots4.v[i], 0);
+            rewardLog->setAward(bit, 4, slots4.v[i]);
         }
-        int rewardBit = cBERewardInterface_getRandomLockedRewardIndex(self, profile, iCharacterID, 3);
+        int rewardBit = this->getRandomLockedRewardIndex(profile, iCharacterID, 3);
         if (rewardBit >= 0) {
-            cBERewardInterface_buyPoster(self, profile, iCharacterID, rewardBit, 0);
-            cBEUserAwards_setAward(rewardLog, bit, 3, rewardBit);
+            this->buyPoster(profile, iCharacterID, rewardBit, 0);
+            rewardLog->setAward(bit, 3, rewardBit);
         }
         if (bit == 11)
             func_001E38B8(profile);
-        cBERewardInterface_awardUserPeakPass(self, profile, iCharacterID, bit, 1);
+        this->awardUserPeakPass(profile, iCharacterID, bit, 1);
         break;
     }
     case 6:
@@ -3019,18 +3026,18 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
     case 15:
     {
         int i;
-        int rewardBit = cBERewardInterface_getRandomLockedRewardIndex(self, profile, iCharacterID, 7);
+        int rewardBit = this->getRandomLockedRewardIndex(profile, iCharacterID, 7);
         if (rewardBit >= 0) {
-            cBERewardInterface_buyToy(self, profile, iCharacterID, rewardBit, 0);
-            cBEUserAwards_setAward(rewardLog, bit, 7, rewardBit);
+            this->buyToy(profile, iCharacterID, rewardBit, 0);
+            rewardLog->setAward(bit, 7, rewardBit);
         }
-        for (i = 0; i < 2 && (slots2.v[i] = cBERewardInterface_getRandomLockedRewardIndex(self, profile, iCharacterID, 5)) >= 0; i++) {
-            cBERewardInterface_buyConceptArt(self, profile, iCharacterID, slots2.v[i], 0);
-            cBEUserAwards_setAward(rewardLog, bit, 5, slots2.v[i]);
+        for (i = 0; i < 2 && (slots2.v[i] = this->getRandomLockedRewardIndex(profile, iCharacterID, 5)) >= 0; i++) {
+            this->buyConceptArt(profile, iCharacterID, slots2.v[i], 0);
+            rewardLog->setAward(bit, 5, slots2.v[i]);
         }
         if (bit == 12)
             func_001E38B8(profile);
-        cBERewardInterface_awardUserPeakPass(self, profile, iCharacterID, bit, 2);
+        this->awardUserPeakPass(profile, iCharacterID, bit, 2);
         break;
     }
     case 7:
@@ -3046,13 +3053,13 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
         value = 21;
         break;
     case 17:
-        item = func_00156C70(self, profile, iCharacterID, 0);
+        item = func_00156C70(this, profile, iCharacterID, 0);
         break;
     case 18:
-        item = func_00156C70(self, profile, iCharacterID, 1);
+        item = func_00156C70(this, profile, iCharacterID, 1);
         break;
     case 19:
-        item = func_00156C70(self, profile, iCharacterID, 2);
+        item = func_00156C70(this, profile, iCharacterID, 2);
         break;
     case 20:
     case 21:
@@ -3066,40 +3073,40 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
     case 29:
     case 30:
     case 31:
-        item = func_00156EE0(self, profile, iCharacterID);
+        item = func_00156EE0(this, profile, iCharacterID);
         break;
     }
 
-    cBERewardInterface_setBit(self, bit, (unsigned char*)(&rec->mAwardsReceived[0]));
+    this->setBit(bit, (unsigned char*)(&rec->mAwardsReceived[0]));
     if (value != 0) {
-        cBEUserAwards_setAward(rewardLog, bit, 8, value);
-        cBERewardInterface_buyCheatChar(self, profile, iCharacterID, value, 0);
+        rewardLog->setAward(bit, 8, value);
+        this->buyCheatChar(profile, iCharacterID, value, 0);
     }
     if (item != -1) {
         void* stats = cBE_getInterface_Fv(cBE_getBE(), 9);
-        cBEUserAwards_setAward(rewardLog, bit, 9, item);
+        rewardLog->setAward(bit, 9, item);
         func_0014B560(stats, profile, iCharacterID, item, 0);
     }
-    if (cBERewardInterface_isMountainConquered(self, profile, iCharacterID)) {
-        if (!cBERewardInterface_isAwardReceived(self, profile, iCharacterID, 0))
-            cBERewardInterface_awardUser(self, profile, iCharacterID, 0);
+    if (this->isMountainConquered(profile, iCharacterID)) {
+        if (!this->isAwardReceived(profile, iCharacterID, 0))
+            awardUser(profile, iCharacterID, 0);
     }
-    if (cBERewardInterface_isMountainCompleted(self, profile, iCharacterID)) {
-        if (!cBERewardInterface_isAwardReceived(self, profile, iCharacterID, 1))
-            cBERewardInterface_awardUser(self, profile, iCharacterID, 1);
+    if (this->isMountainCompleted(profile, iCharacterID)) {
+        if (!this->isAwardReceived(profile, iCharacterID, 1))
+            awardUser(profile, iCharacterID, 1);
     }
     for (int i = 0; i < 3; i++) {
-        if (cBERewardInterface_isPeakCompleted(self, profile, iCharacterID, i)) {
-            if (!cBERewardInterface_isAwardReceived(self, profile, iCharacterID, i + 2))
-                cBERewardInterface_awardUser(self, profile, iCharacterID, i + 2);
+        if (this->isPeakCompleted(profile, iCharacterID, i)) {
+            if (!this->isAwardReceived(profile, iCharacterID, i + 2))
+                awardUser(profile, iCharacterID, i + 2);
         }
     }
     for (int kind = 0; kind < 3; kind++) {
         for (int tier = 0; tier < 4; tier++) {
-            int trophyCategory = cBERewardInterface_getAwardTrophyCategory(self, profile, iCharacterID, kind, tier);
-            if (cBERewardInterface_isTrophyOwned(self, profile, iCharacterID, kind, tier)) {
-                if (!cBERewardInterface_isAwardReceived(self, profile, iCharacterID, trophyCategory))
-                    cBERewardInterface_awardUserTrophy(self, profile, iCharacterID, kind, tier);
+            int trophyCategory = this->getAwardTrophyCategory(profile, iCharacterID, kind, tier);
+            if (this->isTrophyOwned(profile, iCharacterID, kind, tier)) {
+                if (!this->isAwardReceived(profile, iCharacterID, trophyCategory))
+                    this->awardUserTrophy(profile, iCharacterID, kind, tier);
             }
         }
     }
@@ -3122,10 +3129,10 @@ extern "C" int cBERewardInterface_isBitSet(cBERewardInterface* self, int bit, un
  * @param bit  the award (On Tour awardCategory)
  * @return nonzero when received
  */
-extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int bit)
+int cBERewardInterface::isAwardReceived(int iProfileIndex, int iCharacterID, int bit)
 {
     cBECharProfileDB* profileRec = &cBELibrary_profileLib[iProfileIndex][iCharacterID];
-    return cBERewardInterface_isBitSet(self, bit, (unsigned char*)(&profileRec->mAwardsReceived[0]));
+    return isBitSet(bit, (unsigned char*)(&profileRec->mAwardsReceived[0]));
 }
 #endif
 
@@ -3141,7 +3148,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isBitSet);
  * @param bits  the bit array (On Tour pBitsArray)
  * @return 1 when set, else 0
  */
-extern "C" int cBERewardInterface_isBitSet(cBERewardInterface* self, int bit, unsigned char* bits)
+int cBERewardInterface::isBitSet(int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
@@ -3159,7 +3166,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_setBit);
  * @param bit  bit index (On Tour bitIndex)
  * @param bits  the bit array (On Tour pBitsArray)
  */
-extern "C" void cBERewardInterface_setBit(cBERewardInterface* self, int bit, unsigned char* bits)
+void cBERewardInterface::setBit(int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
@@ -3177,7 +3184,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackPeakID);
  * @param locationID  the location (On Tour locationID)
  * @return the peak ID
  */
-extern "C" int cBERewardInterface_getTrackPeakID(cBERewardInterface* self, int locationID)
+int cBERewardInterface::getTrackPeakID(int locationID)
 {
     return cBELibrary_locationDB[locationID].segmentID;
 }
@@ -3204,7 +3211,7 @@ extern sRewardPair_0015A3B8 gMedalsInfo[3][4][5];
  * @param locationID  the location (On Tour locationID)
  * @return the trophy index, 0 to 3, or -1 when no entry matches
  */
-extern "C" int cBERewardInterface_getTrackTrophyID(cBERewardInterface* self, int eventID, int locationID)
+int cBERewardInterface::getTrackTrophyID(int eventID, int locationID)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -3233,7 +3240,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getDB);
  *
  * @return cBELibrary_rewardDB
  */
-cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self)
+cBERewardDB* cBERewardInterface::getDB()
 {
     return (cBERewardDB*)(void*)cBELibrary_rewardDB;
 }
@@ -3264,7 +3271,7 @@ extern "C" void* cBEUserAwards_cBEUserAwards(cBEUserAwards* self)
     self->mpAwardBits[5] = (unsigned char*)(&self->mAwards.bConceptArts[0]);
     self->mpAwardBits[7] = (unsigned char*)(&self->mAwards.bToys[0]);
     self->mpAwardBits[8] = (unsigned char*)(&self->mAwards.bCheatChars[0]);
-    cBEUserAwards_clear(self);
+    self->clear();
     return (self);
 }
 #endif
@@ -3277,10 +3284,10 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 /**
  * Clears the awards log: zeroes its first 0x174 bytes and sets the short at +0x4 to -1.
  */
-extern "C" void cBEUserAwards_clear(cBEUserAwards* self)
+void cBEUserAwards::clear()
 {
-    MEM_fill(self, 0, 372);
-    self->mAwards.iCharBoltID = -1;
+    MEM_fill(this, 0, 372);
+    mAwards.iCharBoltID = -1;
 }
 #endif
 
@@ -3296,7 +3303,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_coutBits);
  * @param bits  the bit array (On Tour pBitsArray)
  * @return the number of set bits
  */
-extern "C" int cBEUserAwards_coutBits(cBEUserAwards* self, int n, unsigned char* bits)
+int cBEUserAwards::coutBits(int n, unsigned char* bits)
 {
     int i = 0;
     int bi = 0;
@@ -3325,7 +3332,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_setBit);
  * @param bit  bit index (On Tour bitIndex)
  * @param bits  the bit array (On Tour pBitsArray)
  */
-extern "C" void cBEUserAwards_setBit(cBEUserAwards* self, int bit, unsigned char* bits)
+void cBEUserAwards::setBit(int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
@@ -3344,7 +3351,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_isBitSet);
  * @param bits  the bit array (On Tour pBitsArray)
  * @return 1 when set, else 0
  */
-extern "C" int cBEUserAwards_isBitSet(cBEUserAwards* self, int bit, unsigned char* bits)
+int cBEUserAwards::isBitSet(int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
@@ -3366,7 +3373,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_setAward);
  * @param col  the reward type (On Tour rewardType)
  * @param value  the reward index or id (On Tour index)
  */
-extern "C" void cBEUserAwards_setAward(cBEUserAwards* self, int row, int col, int value)
+void cBEUserAwards::setAward(int row, int col, int value)
 {
     switch (col)
     {
@@ -3378,15 +3385,15 @@ extern "C" void cBEUserAwards_setAward(cBEUserAwards* self, int row, int col, in
     case 5:
     case 6:
     case 7:
-        cBEUserAwards_setBit(self, value, self->mpAwardBits[col]);
-        self->mAwards.iNumAwards[row][col]++;
+        setBit(value, mpAwardBits[col]);
+        mAwards.iNumAwards[row][col]++;
         break;
     case 8:
-        self->mAwards.iNumAwards[row][8] = value;
+        mAwards.iNumAwards[row][8] = value;
         break;
     case 9:
-        self->mAwards.iNumAwards[row][9] = 1;
-        self->mAwards.iCharBoltID = value;
+        mAwards.iNumAwards[row][9] = 1;
+        mAwards.iCharBoltID = value;
         break;
     }
 }
@@ -3433,9 +3440,9 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getNumAwards);
  * @param column  the reward type (On Tour rewardType)
  * @return the count
  */
-extern "C" signed char cBEUserAwards_getNumAwards(cBEUserAwards* self, int row, int column)
+signed char cBEUserAwards::getNumAwards(int row, int column)
 {
-    return self->mAwards.iNumAwards[row][column];
+    return mAwards.iNumAwards[row][column];
 }
 #endif
 
@@ -3448,10 +3455,9 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getAwardBits__FPvi);
  * @param i  the reward type (On Tour rewardType)
  * @return the bit array, or null for types without one
  */
-int cBEUserAwards_getAwardBits(void* vself, int i)
+int cBEUserAwards::getAwardBits(int i)
 {
-    cBEUserAwards* self = (cBEUserAwards*)vself;
-    return (int)self->mpAwardBits[i];
+    return (int)mpAwardBits[i];
 }
 #endif
 

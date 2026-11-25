@@ -70,7 +70,7 @@ void* cBESaveInterface_getThis();
  * @return the interface's getThis() singleton, or 0 for an unknown kind
  */
 // Returns the backend interface singleton for the given kind.
-extern "C" void* cBERaceState_getInterface(cBERaceState* self, int kind)
+void* cBERaceState::getInterface(int kind)
 {
     switch (kind) {
     case 0:

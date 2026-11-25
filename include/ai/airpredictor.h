@@ -24,6 +24,10 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+struct cBxReplayFrame;
+
+struct t4Vector;
+
 struct cAirPredictor {
     t4Vector GuessLandPosition;     // 0x00 [O]; [U] simStep stores the hit point (sq); updateFlightPath stores t4vect_Origin
                                     //      when it gives up (state 3); reset leaves it
@@ -51,6 +55,16 @@ struct cAirPredictor {
     float TerminalVel;              // 0xA8 [O]; [U] startLaunchIntoAir stores its terminalVel argument; simStep / simOneTick read it
     int SimState;                   // 0xAC [O] eSimState (0 simulating, 1 landed, 2 no landing yet, 3 gave up); [R] reset 0;
                                     //      [U] initLaunch 0, simStep / updateFlightPath set 1/2/3; read all over (== 1 || == 3)
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cAirPredictor_reset");
+    void land() __asm__("cAirPredictor_land__FPv");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cAirPredictor_readFromReplayFrame");
+    void simStep() __asm__("cAirPredictor_simStep");
+    float simOneTick(t4Vector* pos, t4Vector* vel, t4Vector* outPos, t4Vector* outVel)
+        __asm__("cAirPredictor_simOneTick");
+    void updateFlightPath(t4Vector* airPos, t4Vector* airVel, float dt) __asm__("cAirPredictor_updateFlightPath");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cAirPredictor_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cAirPredictor, GuessLandPosition, 0x00);

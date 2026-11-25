@@ -44,7 +44,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param charType  the character id
  * @return the cash, or 0
  */
-extern "C" int cBEEconInterface_getMoney(cBEEconInterface* self, int iHuman, int charType)
+int cBEEconInterface::getMoney(int iHuman, int charType)
 {
     if (iHuman >= 2) {
         return 0;
@@ -65,7 +65,7 @@ int cBELibrary_getCharacterID(int);
  * @param rider  the rider (selects profile slot and character)
  * @return the money
  */
-extern "C" int cBEEconInterface_getMoney1(cBEEconInterface* self, int rider)
+int cBEEconInterface::getMoney1(int rider)
 {
     int profileSlot = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -106,7 +106,7 @@ int cBELibrary_getCharacterID(int);
  * @param rider  the rider index (On Tour: iRider)
  * @return the total earned (mTotalMoneyEarned of the profile record)
  */
-extern "C" int cBEEconInterface_getTotalMoneyEarned1(cBEEconInterface* self, int rider)
+int cBEEconInterface::getTotalMoneyEarned1(int rider)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -124,7 +124,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_setMoney);
  * @param characterId  the character
  * @param value  the new amount
  */
-extern "C" void cBEEconInterface_setMoney(cBEEconInterface* self, int profileIndex, int characterId, int value)
+void cBEEconInterface::setMoney(int profileIndex, int characterId, int value)
 {
     if (profileIndex < 2) {
         cBELibrary_profileLib[profileIndex][characterId].mMoney = value;
@@ -146,7 +146,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param amount  the money earned
  * @return the new money, or 0
  */
-extern "C" int cBEEconInterface_addMoney(cBEEconInterface* self, int humanIndex, int characterId, int amount)
+int cBEEconInterface::addMoney(int humanIndex, int characterId, int amount)
 {
     if (humanIndex >= 2) {
         return 0;
@@ -170,10 +170,10 @@ int cBELibrary_getCharacterID(int);
  * @param amount  the money earned
  * @return the new money, or 0 for profile slots >= 2
  */
-extern "C" int cBEEconInterface_addMoney1(cBEEconInterface* self, int rider, int amount)
+int cBEEconInterface::addMoney1(int rider, int amount)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    return cBEEconInterface_addMoney(self, profile, cBELibrary_getCharacterID(rider), amount);
+    return addMoney(profile, cBELibrary_getCharacterID(rider), amount);
 }
 #endif
 
@@ -192,7 +192,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param amount  the money spent
  * @return the money left, or 0
  */
-extern "C" int cBEEconInterface_reduceMoney(cBEEconInterface* self, int profileIndex, int characterId, int amount)
+int cBEEconInterface::reduceMoney(int profileIndex, int characterId, int amount)
 {
     if (profileIndex >= 2) {
         return 0;
@@ -219,7 +219,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @return 1, or 0 for profile slots >= 2
  */
 // Sets the locked state of a peak for a profile/character: stores the inverse of `unlocked`.
-extern "C" int cBEEconInterface_getPeakPass(cBEEconInterface* self, int profileIndex, int characterId, int peak, int unlocked)
+int cBEEconInterface::getPeakPass(int profileIndex, int characterId, int peak, int unlocked)
 {
     if (profileIndex >= 2) {
         return 0;
@@ -257,7 +257,8 @@ int cBEEconInterface_getAttribCost(void* self, int a1);
  * @param attribute  the attribute, 0-6 (others read a null pointer)
  * @return 1 if bought, else 0
  */
-extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIndex, int characterId, unsigned int attribute) {
+int cBEEconInterface::buyAttribute(int humanIndex, int characterId, unsigned int attribute)
+{
     signed char *attribLevel;
     int cur;
     int cost;
@@ -291,7 +292,7 @@ extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIn
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cStability;
             break;
         }
-        cost = cBEEconInterface_getAttribCost(self, *attribLevel / 5 - 1);
+        cost = cBEEconInterface_getAttribCost(this, *attribLevel / 5 - 1);
         if (cur < cost || *attribLevel == 55) {
             return 0;
         }
@@ -348,7 +349,7 @@ extern sEcon0E68 cBELibrary_attribCost_0E68[] __asm__("cBELibrary_attribCost");
  * @param kind  the attribute, 0-6
  * @return 1 if refunded, else 0
  */
-extern "C" int cBEEconInterface_sellAttribute(cBEEconInterface* self, int profile, int characterId, unsigned int kind)
+int cBEEconInterface::sellAttribute(int profile, int characterId, unsigned int kind)
 {
     signed char* attribLevel;
     if (profile >= 2) return 0;
@@ -398,7 +399,7 @@ extern sEconPrize_151040 D_004405A0[];
  * @param place  the event (6-11 are the peak events)
  * @return the money
  */
-extern "C" int cBEEconInterface_getCashReward(cBEEconInterface* self, int medal, int key, int place)
+int cBEEconInterface::getCashReward(int medal, int key, int place)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int reward = 0;
@@ -453,7 +454,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getCollectableCash);
  * @param level  the peak, 0-2
  * @return the cash
  */
-extern "C" int cBEEconInterface_getCollectableCash(cBEEconInterface* self, int level)
+int cBEEconInterface::getCollectableCash(int level)
 {
     switch (level)
     {
@@ -477,7 +478,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getMissionCash);
  * @param level  the mission level, 1-3
  * @return the cash
  */
-extern "C" int cBEEconInterface_getMissionCash(cBEEconInterface* self, int level)
+int cBEEconInterface::getMissionCash(int level)
 {
     switch (level)
     {
@@ -506,7 +507,8 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getCostForNextIncrement);
  * @param attribute  the attribute, 0-6
  * @return the price
  */
-extern "C" int cBEEconInterface_getCostForNextIncrement(cBEEconInterface* self, int humanIndex, int characterId, unsigned int attribute) {
+int cBEEconInterface::getCostForNextIncrement(int humanIndex, int characterId, unsigned int attribute)
+{
     signed char *attribLevel;
     if (humanIndex >= 2) {
         return 0;

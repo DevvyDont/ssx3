@@ -34,6 +34,8 @@ struct cInput;
 struct cPadDevice;
 struct cReplayCache;
 
+union tControlCmd;
+
 struct cPlayer {
     // ---- base cRiderHandler (0x000-0xDF0) ----
     char unk_000[0x18];        // 0x000 the first part's own data
@@ -61,6 +63,17 @@ struct cPlayer {
     char pad_E04[0xC];         // 0xE04 the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xE10-0x1950) ----
     cRider Rider;              // 0xE10 [R] cPlayer_cPlayer: cRider_cRider(this + 0xE10) when in charge
+
+    // Methods bound to their retail symbols by asm labels.
+    void setInput(int input, int device) __asm__("cPlayer_setInput");
+    int getInput() __asm__("cPlayer_getInput");
+    int getGrabHeld() __asm__("cPlayer_getGrabHeld");
+    int getUberGrindHeld() __asm__("cPlayer_getUberGrindHeld");
+    void vibrationReset() __asm__("cPlayer_vibrationReset__FPv");
+    void vibrationBump(float val) __asm__("cPlayer_vibrationBump");
+    void vibrationRumble(float val) __asm__("cPlayer_vibrationRumble__FPvf");
+    void vibrationUpdate() __asm__("cPlayer_vibrationUpdate");
+    void getControlCmd(tControlCmd* cmd) __asm__("cPlayer_getControlCmd");
 };
 
 // Virtual slots of _vt$7cPlayer (D_00458338); names from the preview vtable where known.

@@ -2251,12 +2251,11 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_populateDataWithDefaults__FPv);
  *
  * @return 0x2E (the C's view; On Tour returns nothing)
  */
-int cAIPath_populateDataWithDefaults(void* vself)
+int cAIPath::populateDataWithDefaults()
 {
-    cAIPath* self = (cAIPath*)vself;
     int pathAttributes = 46;
-    self->PathAttributes = pathAttributes;
-    self->IsResetPath = 1;
+    PathAttributes = pathAttributes;
+    IsResetPath = 1;
     return pathAttributes;
 }
 #endif
@@ -2276,12 +2275,12 @@ extern "C" void pathREAD_tInt32(void* p);
  * @param data  the field's data in the path file (On Tour p)
  * @param id  the field id: 0x64 or 0x65
  */
-extern "C" void cAIPath_populateData(cAIPath* self, int data, int id)
+void cAIPath::populateData(int data, int id)
 {
     if (id == 100) {
-        pathREAD_tInt32(&self->PathAttributes);
+        pathREAD_tInt32(&PathAttributes);
     } else if (id == 101) {
-        pathREAD_tInt32(&self->IsResetPath);
+        pathREAD_tInt32(&IsResetPath);
     }
 }
 #endif
@@ -2367,10 +2366,9 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateDataWithDefaults__FPv);
  *
  * +0x38 = 0 (On Tour stores the float 0.0).
  */
-void cTrackPath_populateDataWithDefaults(void* vself)
+void cTrackPath::populateDataWithDefaults()
 {
-    cTrackPath* self = (cTrackPath*)vself;
-    *(int*)&self->BaseDistanceLeft = 0;
+    *(int*)&BaseDistanceLeft = 0;
 }
 #endif
 
@@ -2388,10 +2386,10 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
  * @param data  the field's data in the path file (On Tour p)
  * @param fieldId  the field id; only 0 is read
  */
-extern "C" void cTrackPath_populateData(cTrackPath* self, int data, int fieldId)
+void cTrackPath::populateData(int data, int fieldId)
 {
     if (fieldId == 0) {
-        pathREAD_float(&self->BaseDistanceLeft);
+        pathREAD_float(&BaseDistanceLeft);
     }
 }
 #endif
@@ -2415,10 +2413,10 @@ extern "C" int cPath_getEventsInRange(cTrackPath* self, tPathEventNode* out, int
  * @param hdist  the second distance from the finish (On Tour hdist)
  * @return the number of events written
  */
-extern "C" int cTrackPath_getEventsInRange(cTrackPath* self, tPathEventNode* out, int maxOut, float ldist, float hdist)
+int cTrackPath::getEventsInRange(tPathEventNode* out, int maxOut, float ldist, float hdist)
 {
-    float base = self->BaseDistanceLeft;
-    return cPath_getEventsInRange((self), out, maxOut, base - ldist, base - hdist);
+    float base = BaseDistanceLeft;
+    return cPath_getEventsInRange((this), out, maxOut, base - ldist, base - hdist);
 }
 #endif
 
@@ -2438,19 +2436,19 @@ extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi);
  * @param hdist  the second distance from the finish; negative for the path end (On Tour hdist)
  * @return nonzero when there is a fork in that stretch
  */
-extern "C" int cTrackPath_isForkInPath(cTrackPath* self, float ldist, float hdist)
+int cTrackPath::isForkInPath(float ldist, float hdist)
 {
     float lo;
     float hi;
     if (ldist >= 0.0f)
-        lo = self->BaseDistanceLeft - ldist;
+        lo = BaseDistanceLeft - ldist;
     else
         lo = 0.0f;
     if (hdist < 0.0f)
-        hi = cPath_getLength((cPath*)self);
+        hi = ((cPath*)this)->getLength();
     else
-        hi = self->BaseDistanceLeft - hdist;
-    return cPath_isForkInPath((self), lo, hi);
+        hi = BaseDistanceLeft - hdist;
+    return cPath_isForkInPath((this), lo, hi);
 }
 #endif
 
@@ -2503,15 +2501,15 @@ extern "C" void cPath_populateEvent(cPath* self, char* src, int* dst);
  * @param src  the serialized path data
  * @return the number of bytes read
  */
-extern "C" int cPath_initPath(cPath* self, char* src)
+int cPath::initPath(char* src)
 {
     char* start = src;
     int n;
     int chunkId;
     int itemSize;
     int itemCount;
-    sVEntry<void(void*)>* vt0 = (sVEntry<void(void*)>*)((void*)self->mVtbl);
-    vt0[3].fn(vthis(self, vt0[3]));
+    sVEntry<void(void*)>* vt0 = (sVEntry<void(void*)>*)((void*)mVtbl);
+    vt0[3].fn(vthis(this, vt0[3]));
     pathREAD_tInt32_A180(&n, src);
     src += 4;
     for (int i = 0; i < n; i++)
@@ -2520,32 +2518,32 @@ extern "C" int cPath_initPath(cPath* self, char* src)
         src += 4;
         pathREAD_tInt32_A180(&itemSize, src);
         src += 4;
-        sVEntry<void(void*, char*, int, int)>* vt1 = (sVEntry<void(void*, char*, int, int)>*)((void*)self->mVtbl);
-        vt1[4].fn(vthis(self, vt1[4]), src, chunkId, itemSize);
+        sVEntry<void(void*, char*, int, int)>* vt1 = (sVEntry<void(void*, char*, int, int)>*)((void*)mVtbl);
+        vt1[4].fn(vthis(this, vt1[4]), src, chunkId, itemSize);
         src += itemSize;
     }
     pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
-    self->NumNodes = itemCount;
+    NumNodes = itemCount;
     pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
-    self->NumEvents = itemCount;
-    pathREAD_t3Vector(((char*)&self->Start[0]), src);
+    NumEvents = itemCount;
+    pathREAD_t3Vector(((char*)&Start[0]), src);
     src += 0xC;
-    pathREAD_t3Vector(((char*)&self->MinBound[0]), src);
+    pathREAD_t3Vector(((char*)&MinBound[0]), src);
     src += 0xC;
-    pathREAD_t3Vector(((char*)&self->MaxBound[0]), src);
+    pathREAD_t3Vector(((char*)&MaxBound[0]), src);
     src += 0xC;
-    *(char**)&self->Nodes = src;
-    for (int i = 0; i < self->NumNodes; i++)
+    *(char**)&Nodes = src;
+    for (int i = 0; i < NumNodes; i++)
     {
-        cPath_populateNode(self, src, &self->Nodes[i]);
+        populateNode(src, &Nodes[i]);
         src += 16;
     }
-    *(char**)&self->Events = src;
-    for (int i = 0; i < self->NumEvents; i++)
+    *(char**)&Events = src;
+    for (int i = 0; i < NumEvents; i++)
     {
-        cPath_populateEvent(self, src, &self->Events[i].Type);
+        populateEvent(src, &Events[i].Type);
         src += 16;
     }
     return src - start;
@@ -2567,7 +2565,7 @@ void pathREAD_float_2(void* dst, void* src) __asm__("pathREAD_float");
  * @param src  the node in the serialized data
  * @param dst  the node to fill
  */
-extern "C" void cPath_populateNode(cPath* self, void* src, tPathNode* dst)
+void cPath::populateNode(void* src, tPathNode* dst)
 {
     pathREAD_t3Vector(dst, src);
     pathREAD_float_2(&dst->Len, (char*)src + 0xC);
@@ -2591,7 +2589,7 @@ extern int kEventTypeToUID[];
  * @param src  the event in the serialized data
  * @param dst  the event to fill
  */
-extern "C" void cPath_populateEvent(cPath* self, char* src, int* dst)
+void cPath::populateEvent(char* src, int* dst)
 {
     int key;
     int i;
@@ -3009,16 +3007,15 @@ INCLUDE_ASM("bx/bxstringctor", cPath_findEvent);
  *
  * Walks the 16-byte events at +0x4 (count +0x0). Nothing in the C calls it.
  *
- * @param table  the path
  * @param firstKey  the event type
  * @param secondKey  the event argument
  * @return the event, or null
  */
-extern "C" tPathEventNode* cPath_findEvent(cPath* table, int firstKey, int secondKey)
+tPathEventNode* cPath::findEvent(int firstKey, int secondKey)
 {
     int i = 0;
-    tPathEventNode* entry = table->Events;
-    while (i < table->NumEvents) {
+    tPathEventNode* entry = Events;
+    while (i < NumEvents) {
         i++;
         if (entry->Type == firstKey && entry->Arg == secondKey)
             return entry;
@@ -3036,15 +3033,14 @@ INCLUDE_ASM("bx/bxstringctor", cPath_findEvent1);
  *
  * Walks the 16-byte events at +0x4 (count +0x0). Nothing in the C calls it.
  *
- * @param table  the path
  * @param key  the event type
  * @return the event, or null
  */
-extern "C" tPathEventNode* cPath_findEvent1(cPath* table, int key)
+tPathEventNode* cPath::findEvent1(int key)
 {
     int i = 0;
-    tPathEventNode* entry = table->Events;
-    while (i < table->NumEvents) {
+    tPathEventNode* entry = Events;
+    while (i < NumEvents) {
         i++;
         if (entry->Type == key)
             return entry;
@@ -3066,25 +3062,25 @@ INCLUDE_ASM("bx/bxstringctor", cPath_getProximity);
  * @param point  the point (x, y, z)
  * @return the largest of the X, Y and Z distances to the box
  */
-extern "C" float cPath_getProximity(cPath* self, float* point)
+float cPath::getProximity(float* point)
 {
     float dx = 0.0f;
     float dy = 0.0f;
     float dz = 0.0f;
-    if (point[0] < self->MinBound[0]) {
-        dx = self->MinBound[0] - point[0];
-    } else if (self->MaxBound[0] < point[0]) {
-        dx = point[0] - self->MaxBound[0];
+    if (point[0] < MinBound[0]) {
+        dx = MinBound[0] - point[0];
+    } else if (MaxBound[0] < point[0]) {
+        dx = point[0] - MaxBound[0];
     }
-    if (point[1] < self->MinBound[1]) {
-        dy = self->MinBound[1] - point[1];
-    } else if (self->MaxBound[1] < point[1]) {
-        dy = point[1] - self->MaxBound[1];
+    if (point[1] < MinBound[1]) {
+        dy = MinBound[1] - point[1];
+    } else if (MaxBound[1] < point[1]) {
+        dy = point[1] - MaxBound[1];
     }
-    if (point[2] < self->MinBound[2]) {
-        dz = self->MinBound[2] - point[2];
-    } else if (self->MaxBound[2] < point[2]) {
-        dz = point[2] - self->MaxBound[2];
+    if (point[2] < MinBound[2]) {
+        dz = MinBound[2] - point[2];
+    } else if (MaxBound[2] < point[2]) {
+        dz = point[2] - MaxBound[2];
     }
     if (dy < dx) {
         if (dx < dz) {
@@ -3245,13 +3241,13 @@ INCLUDE_ASM("bx/bxstringctor", cPath_getLength);
  *
  * @return the path length
  */
-extern "C" float cPath_getLength(cPath* self)
+float cPath::getLength()
 {
-    int n = self->NumNodes;
+    int n = NumNodes;
     float sum = 0.0f;
     int i;
     for (i = 0; i < n; i++) {
-        sum += (self->Nodes)[i].Len;
+        sum += Nodes[i].Len;
     }
     return sum;
 }
@@ -3303,15 +3299,15 @@ struct sBXBox2 {
  * @param hi  the rectangle maximum (x, y)
  * @return 1 when they overlap, else 0
  */
-extern "C" int cPath_isPathInBox(cPath* self, float* lo, float* hi)
+int cPath::isPathInBox(float* lo, float* hi)
 {
-    if (hi[0] < self->MinBound[0])
+    if (hi[0] < MinBound[0])
         return 0;
-    if (hi[1] < self->MinBound[1])
+    if (hi[1] < MinBound[1])
         return 0;
-    if (lo[0] > self->MaxBound[0])
+    if (lo[0] > MaxBound[0])
         return 0;
-    if (lo[1] > self->MaxBound[1])
+    if (lo[1] > MaxBound[1])
         return 0;
     return 1;
 }
@@ -3331,11 +3327,11 @@ extern "C" void cPathSys_resolvePaths(cPathSys* self);
  * @param data  the path data
  * @return 1
  */
-extern "C" int cPathSys_loadInjectedPaths(cPathSys* self, int data)
+int cPathSys::loadInjectedPaths(int data)
 {
-    self->Data = (char*)data;
-    self->m_bIsFileLoaded = 1;
-    cPathSys_resolvePaths(self);
+    Data = (char*)data;
+    m_bIsFileLoaded = 1;
+    resolvePaths();
     return 1;
 }
 #endif
@@ -3363,13 +3359,13 @@ extern "C" int FILE_loadpack(int, int);
  *
  * cAI_swaploadPathFile calls it on gPaths after cPathSys_purgePaths; cPathSys_appendPaths calls it when no file is loaded yet.
  *
- * @param pathSys  the path system
  * @param name  the path file name (passed as an int)
  */
-extern "C" void cPathSys_loadPaths(cPathSys* pathSys, int name) {
-    pathSys->Data = (char*)FILE_loadpack(name, 0);
-    pathSys->m_bIsFileLoaded = 1;
-    cPathSys_resolvePaths((cPathSys*)pathSys);
+void cPathSys::loadPaths(int name)
+{
+    Data = (char*)FILE_loadpack(name, 0);
+    m_bIsFileLoaded = 1;
+    resolvePaths();
 }
 #endif
 //100%
@@ -3380,11 +3376,11 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_isPathfileLoaded);
  *
  * cPathSys_loadInjectedPaths and cPathSys_loadPaths set it.
  *
- * @param pathSys  the path system
  * @return non-zero when a path file is loaded
  */
-extern "C" int cPathSys_isPathfileLoaded(cPathSys* pathSys) {
-    return (pathSys->m_bIsFileLoaded);
+int cPathSys::isPathfileLoaded()
+{
+    return (m_bIsFileLoaded);
 }
 #endif
 
@@ -3405,19 +3401,19 @@ extern "C" void cPathSys_loadStartpoints(void* self, char* p);
  * cPathSys_loadAIPaths, cPathSys_loadTrackPaths, cPathSys_loadCheckpoints and cPathSys_loadStartpoints in turn, each starting where the
  * previous one stopped. cPathSys_loadInjectedPaths and cPathSys_loadPaths call it.
  */
-extern "C" void cPathSys_resolvePaths(cPathSys* self)
+void cPathSys::resolvePaths()
 {
     int header;
-    char* cursor = self->Data;
-    self->NumAIPaths = 0;
-    self->NumTrackPaths = 0;
-    self->NumStartpoints = 0;
+    char* cursor = Data;
+    NumAIPaths = 0;
+    NumTrackPaths = 0;
+    NumStartpoints = 0;
     pathREAD_tInt32_2(&header, cursor);
     cursor += 4;
-    cursor += cPathSys_loadAIPaths(self, cursor);
-    cursor += cPathSys_loadTrackPaths(self, cursor);
-    cursor += cPathSys_loadCheckpoints(self, cursor);
-    cPathSys_loadStartpoints(self, cursor);
+    cursor += cPathSys_loadAIPaths(this, cursor);
+    cursor += cPathSys_loadTrackPaths(this, cursor);
+    cursor += cPathSys_loadCheckpoints(this, cursor);
+    cPathSys_loadStartpoints(this, cursor);
 }
 #endif
 
@@ -3441,22 +3437,22 @@ extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
  *
  * @param name  the path file name (passed as an int)
  */
-extern "C" void cPathSys_appendPaths(cPathSys* self, int name)
+void cPathSys::appendPaths(int name)
 {
     int header;
-    void* old = self->Data;
+    void* old = Data;
     if (old != 0) {
         cMemMan_free(old);
     } else {
-        cPathSys_loadPaths(self, name);
+        loadPaths(name);
     }
-    self->Data = 0;
+    Data = 0;
     char* cursor = (char*)FILE_loadpack(name, 0);
-    self->Data = cursor;
+    Data = cursor;
     pathREAD_tInt32_3(&header, cursor);
     cursor += 4;
-    cursor += cPathSys_loadAIPaths(self, cursor);
-    cPathSys_loadTrackPaths(self, cursor);
+    cursor += cPathSys_loadAIPaths(this, cursor);
+    cPathSys_loadTrackPaths(this, cursor);
 }
 #endif
 
@@ -3471,18 +3467,18 @@ void cMemMan_free(void*);
  * Deletes the arrays at +0xC and +0x14 if present and the one at +0x48 if present and owned (+0x4C), then nulls them
  * and clears +0x4C.
  */
-extern "C" void cPathSys_purgePaths(cPathSys* self)
+void cPathSys::purgePaths()
 {
-    if (self->AIPaths != 0)
-        cMemMan_free(self->AIPaths);
-    self->AIPaths = 0;
-    if (self->TrackPaths != 0)
-        cMemMan_free(self->TrackPaths);
-    self->TrackPaths = 0;
-    if (self->Data != 0 && self->m_bIsFileLoaded != 0)
-        cMemMan_free(self->Data);
-    self->Data = 0;
-    self->m_bIsFileLoaded = 0;
+    if (AIPaths != 0)
+        cMemMan_free(AIPaths);
+    AIPaths = 0;
+    if (TrackPaths != 0)
+        cMemMan_free(TrackPaths);
+    TrackPaths = 0;
+    if (Data != 0 && m_bIsFileLoaded != 0)
+        cMemMan_free(Data);
+    Data = 0;
+    m_bIsFileLoaded = 0;
 }
 #endif
 
@@ -3497,9 +3493,9 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_getTrackPath);
  * @param pathIndex  the track path index
  * @return the track path
  */
-extern "C" int cPathSys_getTrackPath(cPathSys* self, int pathIndex)
+int cPathSys::getTrackPath(int pathIndex)
 {
-    return (int)self->TrackPaths + pathIndex * 0x3c;
+    return (int)TrackPaths + pathIndex * 0x3c;
 }
 #endif
 
@@ -3514,9 +3510,9 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_getAIPath);
  * @param index  the AI path index
  * @return the AI path
  */
-extern "C" int cPathSys_getAIPath(cPathSys* self, int index)
+int cPathSys::getAIPath(int index)
 {
-    return (int)self->AIPaths + (index << 6);
+    return (int)AIPaths + (index << 6);
 }
 #endif
 
@@ -3568,6 +3564,8 @@ struct cPathSys_AFB8 {
     int NumAIPaths;            // 0x8
     cAIPath_AFB8* AIPaths;     // 0xC
 };
+
+extern "C" float cPath_getProximity(cPath* self, float* p);
 
 /**
  * Lists the AI paths nearest to a position, those containing it first.
@@ -3650,17 +3648,17 @@ static inline int minB178(int a, int b)
  * @param max  the most paths to return
  * @return the number of paths written
  */
-extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, cTrackPath** out, int max)
+int cPathSys::getNearTrackPaths(float* pos, cTrackPath** out, int max)
 {
     float dist[52];
     int n = 0;
-    int want = minB178(self->NumTrackPaths, max);
+    int want = minB178(NumTrackPaths, max);
     int i;
-    for (i = 0; i < self->NumTrackPaths; i++) {
-        dist[i] = cPath_getProximity((cPath*)&(self->TrackPaths)[i], pos);
+    for (i = 0; i < NumTrackPaths; i++) {
+        dist[i] = ((cPath*)&TrackPaths[i])->getProximity(pos);
         if (dist[i] == 0.0f) {
             dist[i] = 1e37f;
-            out[n++] = &(self->TrackPaths)[i];
+            out[n++] = &TrackPaths[i];
             if (n == want) {
                 break;
             }
@@ -3669,14 +3667,14 @@ extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, cTrackPath
     while (n < want) {
         float best = dist[0];
         int bi = 0;
-        for (i = 1; i < self->NumTrackPaths; i++) {
+        for (i = 1; i < NumTrackPaths; i++) {
             if (dist[i] < best) {
                 best = dist[i];
                 bi = i;
             }
         }
         dist[bi] = 1e37f;
-        out[n] = &(self->TrackPaths)[bi];
+        out[n] = &TrackPaths[bi];
         n++;
     }
     return n;

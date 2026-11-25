@@ -41,6 +41,57 @@ struct cBENewPlayerInterface : public cBEInterface {
     //       cFEStateCharSelect_onWidgetEvent, cGFTrackStartState_gainFocus, ...), slot 2 (discard) by ~14
     //       (cBELibrary_newProfile, cBELibrary_readFromData, cBESaveInterface_loadSaveGame,
     //       cBENewPlayerInterface_defaultCtrl, ...)
+
+    // Methods bound to their retail symbols by asm labels.
+    void defaultCtrl() __asm__("cBENewPlayerInterface_defaultCtrl");
+    int isFirstTimeWC(int index) __asm__("cBENewPlayerInterface_isFirstTimeWC");
+    void setIsFirstTimeWC(int index, int value) __asm__("cBENewPlayerInterface_setIsFirstTimeWC");
+    int isFirstTimeOnTrack(int index, int bit) __asm__("cBENewPlayerInterface_isFirstTimeOnTrack");
+    void setFirstTimeOnTrack(bool flag, int index, int bit) __asm__("cBENewPlayerInterface_setFirstTimeOnTrack");
+    int hasVisitedPeakWC(int index, int kind) __asm__("cBENewPlayerInterface_hasVisitedPeakWC");
+    int hasPlayedEvent(int index, int locationId, int event) __asm__("cBENewPlayerInterface_hasPlayedEvent");
+    int isPeakLocked(int iProfileIndex, int iCharacterID, int peak) __asm__("cBENewPlayerInterface_isPeakLocked");
+    int isPeakLocked1(int rider, int peak) __asm__("cBENewPlayerInterface_isPeakLocked1");
+    void setPeakLocked(int index, int kind, int value) __asm__("cBENewPlayerInterface_setPeakLocked");
+    int isRivalChallengePlayed(int index, int kind, int flag) __asm__("cBENewPlayerInterface_isRivalChallengePlayed");
+    void setRivalChallengePlayed(int index, int kind, int flag, int value)
+        __asm__("cBENewPlayerInterface_setRivalChallengePlayed");
+    int isRivalEventLocked(int index, int character, int kind, int flag)
+        __asm__("cBENewPlayerInterface_isRivalEventLocked");
+    int isRivalEventLocked1(int index) __asm__("cBENewPlayerInterface_isRivalEventLocked1");
+    void setRivalEventLocked(int index, int character, int kind, int flag, int value)
+        __asm__("cBENewPlayerInterface_setRivalEventLocked");
+    int isEventLocked(int index, int character, int kind) __asm__("cBENewPlayerInterface_isEventLocked");
+    void setEventLocked(int rider, int character, int event, int locked)
+        __asm__("cBENewPlayerInterface_setEventLocked");
+    int getLastHub(int index) __asm__("cBENewPlayerInterface_getLastHub");
+    void setLastHub(int index, int value) __asm__("cBENewPlayerInterface_setLastHub");
+    int getHumanRider(int second) __asm__("cBENewPlayerInterface_getHumanRider");
+    void setPlayerName(int playerIndex, const char* name) __asm__("cBENewPlayerInterface_setPlayerName");
+    char* getPlayerName(int idx) __asm__("cBENewPlayerInterface_getPlayerName");
+    void setRiderCtrlID(int index, int ctrl) __asm__("cBENewPlayerInterface_setRiderCtrlID");
+    int getRiderCtrlID(int index) __asm__("cBENewPlayerInterface_getRiderCtrlID");
+    void setPlayerCtrlID(int iPlayer, int ctrlID) __asm__("cBENewPlayerInterface_setPlayerCtrlID");
+    int getPlayerCtrlID(int iPlayer) __asm__("cBENewPlayerInterface_getPlayerCtrlID");
+    void setRiderCharID(int index, int charID) __asm__("cBENewPlayerInterface_setRiderCharID");
+    void setRiderCheatCharID(int index, int value) __asm__("cBENewPlayerInterface_setRiderCheatCharID");
+    signed char getRiderCheatCharID(int index) __asm__("cBENewPlayerInterface_getRiderCheatCharID");
+    void setPlayerCharID(int iPlayer, int charID) __asm__("cBENewPlayerInterface_setPlayerCharID");
+    void setPlayerCheatCharID(int playerId, int value) __asm__("cBENewPlayerInterface_setPlayerCheatCharID");
+    signed char getPlayerCheatCharID(int playerId) __asm__("cBENewPlayerInterface_getPlayerCheatCharID");
+    int getUseDualShock(int index) __asm__("cBENewPlayerInterface_getUseDualShock");
+    void setUseDualShock(int index, int value) __asm__("cBENewPlayerInterface_setUseDualShock");
+    int getHelpDone(int index) __asm__("cBENewPlayerInterface_getHelpDone");
+    void setHelpDone(int index, int value) __asm__("cBENewPlayerInterface_setHelpDone");
+    signed char getControllerMapping(int index) __asm__("cBENewPlayerInterface_getControllerMapping");
+    void setControllerMapping(int index, int value) __asm__("cBENewPlayerInterface_setControllerMapping");
+    int getCamera(int index) __asm__("cBENewPlayerInterface_getCamera");
+    void setCamera(int index, int value) __asm__("cBENewPlayerInterface_setCamera");
+    int getRiderHumanIndex(int index) __asm__("cBENewPlayerInterface_getRiderHumanIndex");
+    void resetFromMissionMan(int index) __asm__("cBENewPlayerInterface_resetFromMissionMan");
+    void setDifficultyLevel(int value, int flag) __asm__("cBENewPlayerInterface_setDifficultyLevel");
+    short getDifficultyLevel(int which) __asm__("cBENewPlayerInterface_getDifficultyLevel");
+    short getDifficultyDifference(int flag) __asm__("cBENewPlayerInterface_getDifficultyDifference");
 };
 
 extern cBENewPlayerInterface* cBENewPlayerInterface_instance;

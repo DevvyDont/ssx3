@@ -88,6 +88,10 @@ struct cDangerMan {
     tDangerZoneTrack* mpActiveList;              // 0xB58 [O]; [R] Reset 0; [U] AddDangerVolume pushes, RemoveDangerVolume unlinks,
                                                  //       Update walks it
     int mRiderIndexDangerZoneCheck;              // 0xB5C [O]; [R] Reset 0; [U] Update tests one rider per tick (wraps to 0)
+
+    // Methods bound to their retail symbols by asm labels.
+    int DeleteTrackedDangerElemRecord(void* entry) __asm__("cDangerMan_DeleteTrackedDangerElemRecord__FPvT0");
+    int CalcAppliedDangerLevel(int pl) __asm__("cDangerMan_CalcAppliedDangerLevel");
 };
 
 CHECK_OFFSET(cDangerMan, mpAI, 0x000);

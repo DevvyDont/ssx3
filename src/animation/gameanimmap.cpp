@@ -344,11 +344,11 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_getFrameRateFactor);
 /**
  * Returns the rider animation's FrameRateFactor (the playback-rate factor copied into each sequence it starts).
  *
- * @param riderAnim  the cRiderAnimBase
  * @return FrameRateFactor
  */
-extern "C" float cRiderAnimBase_getFrameRateFactor(cRiderAnimBase* riderAnim) {
-    return (riderAnim->FrameRateFactor);
+float cRiderAnimBase::getFrameRateFactor()
+{
+    return (FrameRateFactor);
 }
 #endif
 //100%
@@ -361,8 +361,9 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_getGraftingMask);
  * @return GraftMask
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long cRiderAnimBase_getGraftingMask(cRiderAnimBase* riderAnim) {
-    return ((long)riderAnim->GraftMask);
+long cRiderAnimBase::getGraftingMask()
+{
+    return ((long)GraftMask);
 }
 #endif
 //100%
@@ -384,11 +385,11 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_isFlipped);
 /**
  * Returns the rider animation's IsFlipped flag (mirrored animations).
  *
- * @param riderAnim  the cRiderAnimBase
  * @return IsFlipped
  */
-extern "C" int cRiderAnimBase_isFlipped(cRiderAnimBase* riderAnim) {
-    return (riderAnim->IsFlipped);
+int cRiderAnimBase::isFlipped()
+{
+    return (IsFlipped);
 }
 #endif
 //100%
@@ -399,11 +400,11 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setIsFlipped);
  *
  * cRiderAnimBase_changeIsFlipped also changes the flag of the sequences already playing.
  *
- * @param riderAnim  the cRiderAnimBase
  * @param isFlipped  nonzero to mirror the animations
  */
-extern "C" void cRiderAnimBase_setIsFlipped(cRiderAnimBase* riderAnim, int isFlipped) {
-    riderAnim->IsFlipped = isFlipped;
+void cRiderAnimBase::setIsFlipped(int isFlipped)
+{
+    IsFlipped = isFlipped;
 }
 #endif
 //100%
@@ -412,11 +413,11 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setFrameRateFactor);
 /**
  * Sets the rider animation's FrameRateFactor (the playback-rate factor copied into each sequence it starts).
  *
- * @param riderAnim  the cRiderAnimBase
  * @param fparg0  the new factor
  */
-extern "C" void cRiderAnimBase_setFrameRateFactor(cRiderAnimBase* riderAnim, float fparg0) {
-    riderAnim->FrameRateFactor = fparg0;
+void cRiderAnimBase::setFrameRateFactor(float fparg0)
+{
+    FrameRateFactor = fparg0;
 }
 #endif
 //100%
@@ -436,19 +437,20 @@ extern t4Vector t4vect_ZAxis;
  *
  * @param angle  the heading offset (applied with the opposite sign)
  */
-extern "C" void cRiderAnimBase_setHeadingOffset(cRiderAnimBase* self, float angle) {
+void cRiderAnimBase::setHeadingOffset(float angle)
+{
     t4Vector rotation;
     float sinHalf;
     float cosHalf;
     const t4Vector* axis = &t4vect_ZAxis;
 
-    self->OrientationOffset.P = t4vect_Origin;
+    OrientationOffset.P = t4vect_Origin;
     fSinCos(&sinHalf, &cosHalf, -angle * 0.5f);
     rotation.w = cosHalf;
     rotation.x = sinHalf * axis->x;
     rotation.y = sinHalf * axis->y;
     rotation.z = sinHalf * axis->z;
-    self->OrientationOffset.Q = rotation;
+    OrientationOffset.Q = rotation;
 }
 #endif
 //100%
@@ -461,9 +463,10 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setOrientationOffset);
  * @param offset  the new orientation offset (tPose)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cRiderAnimBase_setOrientationOffset(cRiderAnimBase* riderAnim, tPose* offset) {
-    (*(long long*)&riderAnim->OrientationOffset) = (long long) (*(long long*)&offset->P);
-    (*(long long*)&riderAnim->OrientationOffset.Q) = (long long) (*(long long*)&offset->Q);
+void cRiderAnimBase::setOrientationOffset(tPose* offset)
+{
+    (*(long long*)&OrientationOffset) = (long long) (*(long long*)&offset->P);
+    (*(long long*)&OrientationOffset.Q) = (long long) (*(long long*)&offset->Q);
 }
 #endif
 //100%
@@ -476,8 +479,9 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setGraftingMask);
  * @param graftMask  the new mask
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cRiderAnimBase_setGraftingMask(cRiderAnimBase* riderAnim, long graftMask) {
-    ((long)riderAnim->GraftMask) = graftMask;
+void cRiderAnimBase::setGraftingMask(long graftMask)
+{
+    ((long)GraftMask) = graftMask;
 }
 #endif
 //100%
@@ -489,8 +493,9 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_clearGraftingMask);
  * @param riderAnim  the cRiderAnimBase
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cRiderAnimBase_clearGraftingMask(cRiderAnimBase* riderAnim) {
-    ((long)riderAnim->GraftMask) = -1;
+void cRiderAnimBase::clearGraftingMask()
+{
+    ((long)GraftMask) = -1;
 }
 #endif
 //100%

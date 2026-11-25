@@ -46,7 +46,7 @@ extern signed char cBELibrary_secCollectibles[];
  * @param start  the first section
  * @return the total
  */
-extern "C" int cBEMissionInterface_getTotalCollectForMnt(cBEMissionInterface* self, int start)
+int cBEMissionInterface::getTotalCollectForMnt(int start)
 {
     int sum = 0;
     for (int i = 0; i < 17; i++)
@@ -69,7 +69,7 @@ extern int D_005305F0[];
  * @param start  the offset from the race's location
  * @return the total
  */
-extern "C" int cBEMissionInterface_getTotalCollectByType(cBEMissionInterface* self, int start)
+int cBEMissionInterface::getTotalCollectByType(int start)
 {
     return cBELibrary_secCollectibles[start + D_005305F0[0]];
 }
@@ -86,7 +86,7 @@ extern signed char cBELibrary_secCollectibles[];
  * @param start  the location
  * @return the total
  */
-extern "C" int cBEMissionInterface_getTotalCollectForSection(cBEMissionInterface* self, int start)
+int cBEMissionInterface::getTotalCollectForSection(int start)
 {
     int sum = 0;
     for (int i = 0; i < 1; i++)
@@ -119,7 +119,7 @@ extern signed char cBELibrary_secCollectibles[];
  * @param owner  the peak (On Tour eBEPeakID)
  * @return the total number of collectibles on the peak
  */
-extern "C" int cBEMissionInterface_getTotalCollectForPeak(cBEMissionInterface* self, int owner)
+int cBEMissionInterface::getTotalCollectForPeak(int owner)
 {
     int sum = 0;
     for (int i = 0; i < 1; i++)
@@ -154,7 +154,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param idx  the first section
  * @return the count
  */
-extern "C" int cBEMissionInterface_getCurrentCollectForMnt(cBEMissionInterface* self, int rider, int idx)
+int cBEMissionInterface::getCurrentCollectForMnt(int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -183,7 +183,7 @@ extern int D_005305F0[];
  * @param idx  the offset from the race's location
  * @return the count
  */
-extern "C" int cBEMissionInterface_getCurrentCollectByType(cBEMissionInterface* self, int rider, int idx)
+int cBEMissionInterface::getCurrentCollectByType(int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -206,7 +206,7 @@ int cBELibrary_getCharacterID(int);
  * @param idx  the location
  * @return the count
  */
-extern "C" int cBEMissionInterface_getCurrentCollectForSection(cBEMissionInterface* self, int rider, int idx)
+int cBEMissionInterface::getCurrentCollectForSection(int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -238,7 +238,7 @@ extern sMissionEntry_0043D950 cBELibrary_locationDB[];
  * @param owner  the peak (On Tour eBEPeakID)
  * @return the number of collectibles collected on the peak
  */
-extern "C" int cBEMissionInterface_getCurrentCollectForPeak(cBEMissionInterface* self, int rider, int owner)
+int cBEMissionInterface::getCurrentCollectForPeak(int rider, int owner)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -273,7 +273,7 @@ extern sMissionEntry_0043D950 cBELibrary_locationDB[];
  * @param owner  the peak
  * @return the count
  */
-extern "C" int cBEMissionInterface_getCurrentCollectForPeak1(cBEMissionInterface* self, int profile, int character, int owner)
+int cBEMissionInterface::getCurrentCollectForPeak1(int profile, int character, int owner)
 {
     int sum = 0;
     for (int i = 0; i < 1; i++)
@@ -318,10 +318,10 @@ extern sMissionOwnerView_00153708 D_0043D9A4_v153708[] __asm__("D_0043D9A4");
  * @param owner  the peak (On Tour eBEPeakID peak)
  * @return the number of collectibles found
  */
-extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(cBEMissionInterface* self, int profile, int character, int owner)
+int cBEMissionInterface::getCurrentCollectForPeakByChar(int profile, int character, int owner)
 {
     if ((void*)SSXApp->Game != 0)
-        return cBEMissionInterface_getCurrentCollectForPeak(self, cBELibrary_getRiderIndex(profile), owner);
+        return getCurrentCollectForPeak(cBELibrary_getRiderIndex(profile), owner);
     int sum = 0;
     int off = profile * 39760 + character * 3976;
     for (int i = 0; i < 1; i++)
@@ -362,7 +362,7 @@ extern int D_005305F0[];
  * @param idx  the offset from the race's location
  * @return the bit words
  */
-extern "C" char* cBEMissionInterface_getCollectBits(cBEMissionInterface* self, int rider, int idx)
+char* cBEMissionInterface::getCollectBits(int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -388,7 +388,7 @@ extern char D_004A6CAC[];
  * @param idx  the offset from the race's location
  * @return 1 if found, else 0
  */
-extern "C" int cBEMissionInterface_isBitSet(cBEMissionInterface* self, int rider, int bit, int idx)
+int cBEMissionInterface::isBitSet(int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -470,7 +470,7 @@ extern sEconBitsChar_00153B00 D_004A6CAC_bits153B00[][10] __asm__("D_004A6CAC");
  * @param bit  the collectible's bit, 0-63
  * @param idx  the offset from the race's location
  */
-extern "C" void cBEMissionInterface_setBit(cBEMissionInterface* self, int rider, int bit, int idx)
+void cBEMissionInterface::setBit(int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -506,9 +506,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  mission ID (On Tour uiMissionId)
  * @return the name string from FELocale->getStringByHash, keyed by the mission record's nameHash
  */
-extern "C" unsigned short* cBEMissionInterface_getMissionName(cBEMissionInterface* self, int id)
+unsigned short* cBEMissionInterface::getMissionName(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo[i].nameHash);
 }
 #endif
@@ -529,9 +529,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @return the short-description string from FELocale->getStringByHash, keyed by shortDescHash
  */
-extern "C" unsigned short* cBEMissionInterface_getMissionShortDesc(cBEMissionInterface* self, int id)
+unsigned short* cBEMissionInterface::getMissionShortDesc(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo[i].shortDescHash);
 }
 #endif
@@ -551,9 +551,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  mission ID (On Tour uiMissionId)
  * @return the long-description string from FELocale->getStringByHash, keyed by longDescHash
  */
-extern "C" unsigned short* cBEMissionInterface_getMissionLongDesc(cBEMissionInterface* self, int id)
+unsigned short* cBEMissionInterface::getMissionLongDesc(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo[i].longDescHash);
 }
 #endif
@@ -570,9 +570,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  mission ID (On Tour uiMissionId)
  * @return 1 when completed, otherwise 0
  */
-extern "C" int cBEMissionInterface_isMissionCompleted(cBEMissionInterface* self, int id)
+int cBEMissionInterface::isMissionCompleted(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int characterId = cBELibrary_getCharacterID(0);
     return cBELibrary_profileLib[0][characterId].mMissions[i].bIsCompleted;
 }
@@ -590,9 +590,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @return 1 or 0
  */
-extern "C" int cBEMissionInterface_isMissionReady(cBEMissionInterface* self, int id)
+int cBEMissionInterface::isMissionReady(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     return cBELibrary_profileLib[0][charId].mMissions[i].bIsReady;
 }
@@ -613,9 +613,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id (On Tour uiMissionId)
  * @return 1 when locked, 0 when open
  */
-extern "C" int cBEMissionInterface_isMissionLocked(cBEMissionInterface* self, int id)
+int cBEMissionInterface::isMissionLocked(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int characterId = cBELibrary_getCharacterID(0);
     return cBELibrary_profileLib[0][characterId].mMissions[i].bIsLocked;
 }
@@ -634,9 +634,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  mission ID (On Tour uiMissionId)
  * @return 1 when available, otherwise 0
  */
-extern "C" int cBEMissionInterface_isMissionAvailable(cBEMissionInterface* self, int id)
+int cBEMissionInterface::isMissionAvailable(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int characterId = cBELibrary_getCharacterID(0);
     return cBELibrary_profileLib[0][characterId].mMissions[i].bIsAvailable;
 }
@@ -655,9 +655,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @return 1 or 0
  */
-extern "C" int cBEMissionInterface_isMissionShowIcon(cBEMissionInterface* self, int id)
+int cBEMissionInterface::isMissionShowIcon(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     return cBELibrary_profileLib[0][charId].mMissions[i].bIsShowIcon;
 }
@@ -677,9 +677,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @return the location
  */
-extern "C" int cBEMissionInterface_getLocationID(cBEMissionInterface* self, int id)
+int cBEMissionInterface::getLocationID(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return cBELibrary_missionInfo[i].locationID;
 }
 #endif
@@ -696,9 +696,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @return the value
  */
-extern "C" int cBEMissionInterface_getPoints(cBEMissionInterface* self, int id)
+int cBEMissionInterface::getPoints(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return cBELibrary_missionInfo[i].points;
 }
 #endif
@@ -718,9 +718,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @return the level, 1-3
  */
-extern "C" short cBEMissionInterface_getDiffLevel(cBEMissionInterface* self, int id)
+short cBEMissionInterface::getDiffLevel(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return cBELibrary_missionInfo[i].diffLevel;
 }
 #endif
@@ -743,9 +743,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the current mission's ID
  * @return the next mission's ID
  */
-extern "C" int cBEMissionInterface_getNextMissionID(cBEMissionInterface* self, int id)
+int cBEMissionInterface::getNextMissionID(int id)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     return cBELibrary_missionInfo[i].nextMissionID;
 }
 #endif
@@ -763,9 +763,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @param value  1 to lock
  */
-extern "C" void cBEMissionInterface_setIsLocked(cBEMissionInterface* self, int id, int value)
+void cBEMissionInterface::setIsLocked(int id, int value)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     cBELibrary_profileLib[0][charId].mMissions[i].bIsLocked = value;
 }
@@ -784,9 +784,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @param value  1 for ready
  */
-extern "C" void cBEMissionInterface_setIsReady(cBEMissionInterface* self, int id, int value)
+void cBEMissionInterface::setIsReady(int id, int value)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     cBELibrary_profileLib[0][charId].mMissions[i].bIsReady = value;
 }
@@ -805,9 +805,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @param value  1 for available
  */
-extern "C" void cBEMissionInterface_setIsAvailable(cBEMissionInterface* self, int id, int value)
+void cBEMissionInterface::setIsAvailable(int id, int value)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     cBELibrary_profileLib[0][charId].mMissions[i].bIsAvailable = value;
 }
@@ -826,9 +826,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @param value  1 for completed
  */
-extern "C" void cBEMissionInterface_setIsCompleted(cBEMissionInterface* self, int id, int value)
+void cBEMissionInterface::setIsCompleted(int id, int value)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     cBELibrary_profileLib[0][charId].mMissions[i].bIsCompleted = value;
 }
@@ -847,9 +847,9 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * @param id  the mission id
  * @param value  1 to show the icon
  */
-extern "C" void cBEMissionInterface_setIsShowIcon(cBEMissionInterface* self, int id, int value)
+void cBEMissionInterface::setIsShowIcon(int id, int value)
 {
-    int i = cBEMissionInterface_getMissionIdx(self, id);
+    int i = getMissionIdx(id);
     int charId = cBELibrary_getCharacterID(0);
     cBELibrary_profileLib[0][charId].mMissions[i].bIsShowIcon = value;
 }
@@ -866,7 +866,7 @@ extern tBEMissionInfo cBELibrary_missionInfo[];
  * @param id  the mission id
  * @return the index, or -1
  */
-extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id)
+int cBEMissionInterface::getMissionIdx(int id)
 {
     for (int i = 0; i < 88; i++) {
         if (cBELibrary_missionInfo[i].id == id) {
@@ -889,9 +889,9 @@ extern int D_005305F0[];
  * @return cBEMissionInterface_getNumberMissionsOnTrack() for the race's location (D_005305F0, iLocationIdx of
  *         the cBERaceDB copy at cBELibrary_raceDB)
  */
-extern "C" int cBEMissionInterface_getNumberMissions(cBEMissionInterface* self)
+int cBEMissionInterface::getNumberMissions()
 {
-    return cBEMissionInterface_getNumberMissionsOnTrack(self, D_005305F0[0]);
+    return getNumberMissionsOnTrack(D_005305F0[0]);
 }
 #endif
 
@@ -906,7 +906,7 @@ extern tBEMissionInfo cBELibrary_missionInfo[];
  * @param group  the location (On Tour eBELocationID), compared with each of the 88 mission table entries
  * @return the number of missions on that location
  */
-extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(cBEMissionInterface* self, int group)
+int cBEMissionInterface::getNumberMissionsOnTrack(int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
@@ -930,14 +930,14 @@ extern "C" int cBEMissionInterface_isMissionCompleted(cBEMissionInterface* self,
  * @param group  the location
  * @return the number completed
  */
-extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(cBEMissionInterface* self, int group)
+int cBEMissionInterface::getNumberCompletedMissionsOnTrack(int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++)
     {
         if (cBELibrary_missionInfo[i].locationID == group)
         {
-            if (cBEMissionInterface_isMissionCompleted(self, cBELibrary_missionInfo[i].id))
+            if (isMissionCompleted(cBELibrary_missionInfo[i].id))
                 n++;
         }
     }
@@ -957,7 +957,7 @@ extern tBEMissionInfo cBELibrary_missionInfo[];
  * @param owner  the peak (On Tour eBEPeakID)
  * @return the number of missions whose location belongs to the peak
  */
-extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(cBEMissionInterface* self, int owner)
+int cBEMissionInterface::getNumberMissionsOnPeak(int owner)
 {
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -991,7 +991,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnP
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Counts missions of an owner's groups that cBEMissionInterface_isMissionCompleted reports as done.
-extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBEMissionInterface* self, int owner)
+int cBEMissionInterface::getNumberCompletedMissionsOnPeak(int owner)
 {
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -1002,7 +1002,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBEMissionIn
             {
                 if (cBELibrary_locationDB[j].owner == owner)
                 {
-                    if (cBEMissionInterface_isMissionCompleted(self, cBELibrary_missionInfo[i].id))
+                    if (isMissionCompleted(cBELibrary_missionInfo[i].id))
                         n++;
                 }
             }
@@ -1038,11 +1038,11 @@ extern sMissionOwnerView_001544D0 D_0043D9A4[];
  * @param owner      the peak (On Tour eBEPeakID)
  * @return the number of completed missions
  */
-extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBEMissionInterface* self, int profile, int character, int owner)
+int cBEMissionInterface::getNumberCompletedMissionsOnPeakByChar(int profile, int character, int owner)
 {
     if ((void*)SSXApp->Game != 0)
     {
-        return cBEMissionInterface_getNumberCompletedMissionsOnPeak(self, owner);
+        return getNumberCompletedMissionsOnPeak(owner);
     }
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -1070,9 +1070,9 @@ extern int D_005305F0[];
  * @param iIdx  the mission's index at this location (On Tour iIdx)
  * @return the mission id, 0 when there are not that many
  */
-extern "C" int cBEMissionInterface_getMissionID(cBEMissionInterface* self, int iIdx)
+int cBEMissionInterface::getMissionID(int iIdx)
 {
-    return cBEMissionInterface_getMissionIDOnTrack(self, iIdx, D_005305F0[0]);
+    return getMissionIDOnTrack(iIdx, D_005305F0[0]);
 }
 #endif
 
@@ -1091,7 +1091,7 @@ extern tBEMissionInfo cBELibrary_missionInfo[];
  * @param group  the location (On Tour eBELocationID locID)
  * @return the mission id, or 0
  */
-extern "C" int cBEMissionInterface_getMissionIDOnTrack(cBEMissionInterface* self, int index, int group)
+int cBEMissionInterface::getMissionIDOnTrack(int index, int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
@@ -1119,7 +1119,7 @@ extern tBEPictureDB cBELibrary_pictureDB[];
  * @param id  track id to find
  * @return the value of the entry with that id, or 0 if there is none
  */
-extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(cBEMissionInterface* self, int id)
+int cBEMissionInterface::getNumberSessionsOnTrack(int id)
 {
     for (int i = 0; i < 22; i++) {
         if (cBELibrary_pictureDB[i].iLocationID == id) {
@@ -1142,7 +1142,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isSessionPoint);
  * @param id  the location (On Tour eBELocationID locID)
  * @return 1 when such a session point exists
  */
-extern "C" int cBEMissionInterface_isSessionPoint(cBEMissionInterface* self, int value, int id)
+int cBEMissionInterface::isSessionPoint(int value, int id)
 {
     for (int i = 0; i < 22; i++) {
         if (cBELibrary_pictureDB[i].iLocationID == id && cBELibrary_pictureDB[i].numSessionPoints >= value) {

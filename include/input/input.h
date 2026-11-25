@@ -18,6 +18,11 @@ struct cInputMap;
 struct cInput {
     cInputPad* Pad;                 // 0x00 [O]; [U] passed as the pad to cInputMap_getState / getValue
     cInputMap* Map;                 // 0x04 [O]; [U] the map whose statements getState / getValue evaluate
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getValue(int state) __asm__("cInput_getValue");
+    void getValue1(int state, int modifier) __asm__("cInput_getValue1");
+    void getState1(int state, int modifier) __asm__("cInput_getState1");
 };
 
 CHECK_OFFSET(cInput, Pad, 0x00);

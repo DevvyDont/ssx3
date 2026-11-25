@@ -46,6 +46,15 @@ struct cBEUserAwards {
     tUserAwardsData mAwards;        // 0x000 [O] tUserAwardsData mAwards; [R] clear zeroes its 0x174 bytes
     unsigned char* mpAwardBits[10]; // 0x174 [O]; [R] the ctor zeroes all 10, then points 7 of them into mAwards (above);
                                     //       [U] getAwardBits returns mpAwardBits[type], setAward passes it to setBit
+
+    // Methods bound to their retail symbols by asm labels.
+    void clear() __asm__("cBEUserAwards_clear");
+    int coutBits(int n, unsigned char* bits) __asm__("cBEUserAwards_coutBits");
+    void setBit(int bit, unsigned char* bits) __asm__("cBEUserAwards_setBit");
+    int isBitSet(int bit, unsigned char* bits) __asm__("cBEUserAwards_isBitSet");
+    void setAward(int row, int col, int value) __asm__("cBEUserAwards_setAward");
+    signed char getNumAwards(int row, int column) __asm__("cBEUserAwards_getNumAwards");
+    int getAwardBits(int i) __asm__("cBEUserAwards_getAwardBits__FPvi");
 };
 
 CHECK_OFFSET(cBEUserAwards, mAwards, 0x000);

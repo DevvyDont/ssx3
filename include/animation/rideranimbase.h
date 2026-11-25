@@ -61,6 +61,8 @@ CHECK_OFFSET(tAIAnimPlayAttr, EmptySeqrBlendInTime, 0x14);
 CHECK_OFFSET(tAIAnimPlayAttr, BlendOutTime, 0x18);
 CHECK_SIZE(tAIAnimPlayAttr, 0x1C);
 
+struct tPose;
+
 struct cRiderAnimBase {
     int CurrentAnimID[6];           // 0x000 [O] (cRiderAnimState::CurrentAnimID[6]); [R] reset stores 0x1B6 (no anim)
                                     //       in each; [U] cRiderAnimBase_play stores the started id at [slot],
@@ -89,6 +91,41 @@ struct cRiderAnimBase {
                                     //       cRiderAnim_vtbl; [P] preview vptr at 0x58; [U] slots 2 and 4 called
                                     //       (cRiderAnimBase_updateAnimation, cRiderAnimBase_play, cRiderAnimBase_getAIAnimFrame)
     char unk_05C[0x4];              // 0x05C tail padding (the class is 16-byte aligned by tPose)
+
+    // Methods bound to their retail symbols by asm labels.
+    float getFrameRateFactor() __asm__("cRiderAnimBase_getFrameRateFactor");
+    long getGraftingMask() __asm__("cRiderAnimBase_getGraftingMask");
+    int isFlipped() __asm__("cRiderAnimBase_isFlipped");
+    void clearGraftingMask() __asm__("cRiderAnimBase_clearGraftingMask");
+    int getAIAnimSequencerName(int anim) __asm__("cRiderAnimBase_getAIAnimSequencerName");
+    const char* getAIAnimName(int anim) __asm__("cRiderAnimBase_getAIAnimName");
+    void changeHeadingOffset(float angle) __asm__("cRiderAnimBase_changeHeadingOffset");
+    void changeOrientationOffset(tPose* xf) __asm__("cRiderAnimBase_changeOrientationOffset");
+    void changeIsFlipped(int value) __asm__("cRiderAnimBase_changeIsFlipped");
+    void blendOutAll(int i, float blendOut) __asm__("cRiderAnimBase_blendOutAll");
+    void expireAnimation() __asm__("cRiderAnimBase_expireAnimation");
+    float getAIAnimDuration(int aid) __asm__("cRiderAnimBase_getAIAnimDuration");
+    float getAIAnimEventTime(int anim, int frame) __asm__("cRiderAnimBase_getAIAnimEventTime");
+    void setFrameRateFactor(float fparg0) __asm__("cRiderAnimBase_setFrameRateFactor");
+    void setGraftingMask(long graftMask) __asm__("cRiderAnimBase_setGraftingMask");
+    int getSequencer(int slot) __asm__("cRiderAnimBase_getSequencer");
+    int getCurrentAnimCategory(int i) __asm__("cRiderAnimBase_getCurrentAnimCategory");
+    cAnimSequence* getCurrentAnimSequence(int i) __asm__("cRiderAnimBase_getCurrentAnimSequence");
+    int getCurrentAnimID(int i) __asm__("cRiderAnimBase_getCurrentAnimID__FPvi");
+    float getCurrentAnimFramePercent(int i) __asm__("cRiderAnimBase_getCurrentAnimFramePercent");
+    int isCurrentAnimEndFlag(int i) __asm__("cRiderAnimBase_isCurrentAnimEndFlag");
+    void setIsFlipped(int isFlipped) __asm__("cRiderAnimBase_setIsFlipped");
+    void setHeadingOffset(float angle) __asm__("cRiderAnimBase_setHeadingOffset");
+    void setOrientationOffset(tPose* offset) __asm__("cRiderAnimBase_setOrientationOffset");
+    void reset() __asm__("cRiderAnimBase_reset");
+    void removeAll(int i) __asm__("cRiderAnimBase_removeAll");
+    int onInput(cAnimSequencer* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
+        __asm__("cRiderAnimBase_onInput");
+    void updateAnimation(int animMinParts, float timescale) __asm__("cRiderAnimBase_updateAnimation");
+    void setupAnimation(int animMinParts) __asm__("cRiderAnimBase_setupAnimation");
+    void playFromAnimID(int anim, int animid, float blend) __asm__("cRiderAnimBase_playFromAnimID");
+    int playInto(cAnimSequencer* seq, cAnimSequence* node, int anim) __asm__("cRiderAnimBase_playInto");
+    void playBlendIn(void* sequencer, cAnimSequence* sequence, int anim) __asm__("cRiderAnimBase_playBlendIn");
 };
 
 CHECK_OFFSET(cRiderAnimBase, CurrentAnimID, 0x00);

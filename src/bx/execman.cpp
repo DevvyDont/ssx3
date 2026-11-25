@@ -54,11 +54,11 @@ INCLUDE_ASM("bx/execman", cAppMan_isLoading);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return 1 while a module is loading, else 0
  */
-extern "C" int cAppMan_isLoading(cAppMan* appMan) {
-    return ((int)appMan->LoadingModule) != 0;
+int cAppMan::isLoading()
+{
+    return ((int)LoadingModule) != 0;
 }
 #endif
 //100%
@@ -69,11 +69,11 @@ INCLUDE_ASM("bx/execman", cAppMan_setGameRate);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @param fparg0  the new game rate
  */
-extern "C" void cAppMan_setGameRate(cAppMan* appMan, float fparg0) {
-    appMan->GameRate = fparg0;
+void cAppMan::setGameRate(float fparg0)
+{
+    GameRate = fparg0;
 }
 #endif
 //100%
@@ -84,11 +84,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getTimerHz);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the timer rate in Hz
  */
-extern "C" int cAppMan_getTimerHz(cAppMan* appMan) {
-    return (appMan->TimerHz);
+int cAppMan::getTimerHz()
+{
+    return (TimerHz);
 }
 #endif
 //100%
@@ -99,11 +99,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getTimerPeriod);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the timer period
  */
-extern "C" float cAppMan_getTimerPeriod(cAppMan* appMan) {
-    return (appMan->TimerPeriod);
+float cAppMan::getTimerPeriod()
+{
+    return (TimerPeriod);
 }
 #endif
 //100%
@@ -114,11 +114,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getGameRate);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the game rate
  */
-extern "C" float cAppMan_getGameRate(cAppMan* appMan) {
-    return (appMan->GameRate);
+float cAppMan::getGameRate()
+{
+    return (GameRate);
 }
 #endif
 //100%
@@ -129,11 +129,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getFrameRate);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the frame rate
  */
-extern "C" float cAppMan_getFrameRate(cAppMan* appMan) {
-    return (appMan->FrameRate);
+float cAppMan::getFrameRate()
+{
+    return (FrameRate);
 }
 #endif
 //100%
@@ -144,11 +144,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getTick);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the tick count
  */
-extern "C" int cAppMan_getTick(cAppMan* appMan) {
-    return (appMan->Tick);
+int cAppMan::getTick()
+{
+    return (Tick);
 }
 #endif
 //100%
@@ -159,11 +159,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getTimerTick);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the timer tick count
  */
-extern "C" int cAppMan_getTimerTick(cAppMan* appMan) {
-    return (appMan->TimerTick);
+int cAppMan::getTimerTick()
+{
+    return (TimerTick);
 }
 #endif
 //100%
@@ -174,11 +174,11 @@ INCLUDE_ASM("bx/execman", cAppMan_getAIUpdatesPerRender);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @return the AI updates per render
  */
-extern "C" int cAppMan_getAIUpdatesPerRender(cAppMan* appMan) {
-    return (appMan->m_AIUpdatesPerRender);
+int cAppMan::getAIUpdatesPerRender()
+{
+    return (m_AIUpdatesPerRender);
 }
 #endif
 //100%
@@ -189,11 +189,11 @@ INCLUDE_ASM("bx/execman", cAppMan_setAIUpdatesPerRender);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @param value  the new count
  */
-extern "C" void cAppMan_setAIUpdatesPerRender(cAppMan* appMan, int value) {
-    appMan->m_AIUpdatesPerRender = value;
+void cAppMan::setAIUpdatesPerRender(int value)
+{
+    m_AIUpdatesPerRender = value;
 }
 #endif
 //100%
@@ -237,8 +237,9 @@ public:
  *
  * Nothing in the C calls it.
  */
-extern "C" void cAppMan_wakeup(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->sync();
+void cAppMan::wakeup()
+{
+    ((cExecObj *)ExecutionMan)->sync();
 }
 #endif
 //100%
@@ -249,8 +250,9 @@ INCLUDE_ASM("bx/execman", cAppMan_wait);
  *
  * cAppMan_mainLoop calls the same entry when a frame has nothing to render. Nothing in the C calls this copy.
  */
-extern "C" void cAppMan_wait(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->wait();
+void cAppMan::wait()
+{
+    ((cExecObj *)ExecutionMan)->wait();
 }
 #endif
 //100%
@@ -264,8 +266,9 @@ INCLUDE_ASM("bx/execman", cAppMan_getCurrentThreadId);
  *
  * @return the thread id, or 0xFFFFFFFF
  */
-extern "C" unsigned int cAppMan_getCurrentThreadId(cAppMan* self) {
-    cExecObj *obj = (cExecObj *)self->ExecutionMan;
+unsigned int cAppMan::getCurrentThreadId()
+{
+    cExecObj *obj = (cExecObj *)ExecutionMan;
     if (obj != 0) {
         return obj->v5();
     }
@@ -280,8 +283,9 @@ INCLUDE_ASM("bx/execman", cAppMan_prepause);
  *
  * Nothing in the C calls it.
  */
-extern "C" void cAppMan_prepause(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->prepause();
+void cAppMan::prepause()
+{
+    ((cExecObj *)ExecutionMan)->prepause();
 }
 #endif
 //100%
@@ -292,8 +296,9 @@ INCLUDE_ASM("bx/execman", cAppMan_postpause);
  *
  * Nothing in the C calls it.
  */
-extern "C" void cAppMan_postpause(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->postpause();
+void cAppMan::postpause()
+{
+    ((cExecObj *)ExecutionMan)->postpause();
 }
 #endif
 //100%
@@ -333,11 +338,11 @@ INCLUDE_ASM("bx/execman", cAppMan_lockThirtyFps);
  *
  * Nothing in the C calls it.
  *
- * @param appMan  the application manager
  * @param value  non-zero to lock to 30 fps
  */
-extern "C" void cAppMan_lockThirtyFps(cAppMan* appMan, int value) {
-    appMan->mLock30Fps = value;
+void cAppMan::lockThirtyFps(int value)
+{
+    mLock30Fps = value;
 }
 #endif
 
@@ -463,9 +468,9 @@ extern "C" void* cInputMap_getValue(cInputMap* map, cInputPad* pad, int state);
  * @param state  input state id (On Tour eInputStates), the index of the compiled map statement to evaluate
  * @return the state's value (a float in practice; meaningless as a pointer)
  */
-extern "C" void* cInput_getValue(cInput* self, int state)
+void* cInput::getValue(int state)
 {
-    return cInputMap_getValue(self->Map, self->Pad, state);
+    return cInputMap_getValue(Map, Pad, state);
 }
 #endif
 
@@ -484,12 +489,12 @@ extern "C" void cInputMap_getValue1(cInputMap* map, cInputPad* pad, int state, i
  * argument registers, which the C does not declare. The value comes back in the float return register although the C
  * returns void. Nothing in the C calls it.
  *
- * @param input  the input
  * @param state  the input state id
  * @param modifier  the button modifier
  */
-extern "C" void cInput_getValue1(cInput* input, int state, int modifier) {
-    cInputMap_getValue1(input->Map, input->Pad, state, modifier);
+void cInput::getValue1(int state, int modifier)
+{
+    cInputMap_getValue1(Map, Pad, state, modifier);
 }
 #endif
 
@@ -525,11 +530,11 @@ extern "C" void cInputMap_getState1(cInputMap* map, cInputPad* pad, int state, i
  * argument registers, which the C does not declare. The result is left in the return register although the C returns
  * void. Nothing in the C calls it.
  *
- * @param input  the input
  * @param state  the input state id
  * @param modifier  the button modifier
  */
-extern "C" void cInput_getState1(cInput* input, int state, int modifier) {
-    cInputMap_getState1(input->Map, input->Pad, state, modifier);
+void cInput::getState1(int state, int modifier)
+{
+    cInputMap_getState1(Map, Pad, state, modifier);
 }
 #endif

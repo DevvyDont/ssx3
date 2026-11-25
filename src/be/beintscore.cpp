@@ -182,32 +182,31 @@ extern sEvent_154AB8 cBELibrary_locationDB_154AB8[] __asm__("cBELibrary_location
  * @param stats  the rider's event stats, 0xAC bytes (On Tour pRiderStats)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void cBEScoreInterface_processEventRiderStats(cBEScoreInterface* self, int rider, tRiderStats* stats,
-                                                        unsigned int score)
+void cBEScoreInterface::processEventRiderStats(int rider, tRiderStats* stats, unsigned int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
         return;
-    self->LastEventStats[profile].ridingStats = *stats;
+    LastEventStats[profile].ridingStats = *stats;
     int mode;
     cBECharProfileDB* pc;
     int timed = 0;
-    self->LastEventStats[profile].rank = -1;
+    LastEventStats[profile].rank = -1;
     cBEScoreInterface_processRiderStats(rider, (int)stats);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = cBELibrary_locationDB_154AB8[cBELibrary_raceDB_154AB8.iLocationIdx].id;
     pc = &cBELibrary_profileLib[profile][charID];
-    self->bNewHighScore[profile] = 0;
-    self->mNewTrackHighScoreIndex[profile] = -1;
+    bNewHighScore[profile] = 0;
+    mNewTrackHighScoreIndex[profile] = -1;
     if (event == 22)
         event = 0;
     if (cBELibrary_raceDB_154AB8.cGameMode == 0 || cBELibrary_raceDB_154AB8.cGameMode == 5) {
         timed = 1;
         score = (int)(score * (1.0f / 60.0f));
     }
-    if (cBEScoreInterface_isEligibleForHighScore(self, profile)) {
+    if (isEligibleForHighScore(profile)) {
         tBEHighScore* highScores = cBELibrary_getHighScoreTable_154AB8(event, mode);
         if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
@@ -222,12 +221,12 @@ extern "C" void cBEScoreInterface_processEventRiderStats(cBEScoreInterface* self
                     highScores[i].cCharacter = charID;
                     highScores[i].uiHighScore = score;
                     strcpy(highScores[i].strUserName, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
-                    self->mNewTrackHighScoreIndex[profile] = i;
+                    mNewTrackHighScoreIndex[profile] = i;
                     if (cBENewRaceInterface_newRace.iNumberHumans >= 2) {
-                        if (self->mNewTrackHighScoreIndex[1 - profile] >= i) {
-                            self->mNewTrackHighScoreIndex[1 - profile]++;
-                            if (self->mNewTrackHighScoreIndex[1 - profile] >= 5)
-                                self->mNewTrackHighScoreIndex[1 - profile] = -1;
+                        if (mNewTrackHighScoreIndex[1 - profile] >= i) {
+                            mNewTrackHighScoreIndex[1 - profile]++;
+                            if (mNewTrackHighScoreIndex[1 - profile] >= 5)
+                                mNewTrackHighScoreIndex[1 - profile] = -1;
                         }
                     }
                     break;
@@ -240,7 +239,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(cBEScoreInterface* self
     else
         cBEScoreInterface_processRiderBest(rider, (int)stats, score, -1);
     if (cBELibrary_raceDB_154AB8.cGamePath == 0)
-        self->bNewHighScore[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
+        bNewHighScore[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
 }
 #endif
 
@@ -284,19 +283,19 @@ extern sEvent_154EE8 cBELibrary_locationDB[];
  * @param result  the finishing rank, 0 first (On Tour iRanking)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void cBEScoreInterface_processRiderRanking(cBEScoreInterface* self, int rider, int result, int score)
+void cBEScoreInterface::processRiderRanking(int rider, int result, int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
         return;
-    self->LastEventStats[profile].rank = result;
+    LastEventStats[profile].rank = result;
     void* be = cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     int mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = cBELibrary_locationDB[cBELibrary_raceDB.iLocationIdx].id;
     if (event == 22)
         event = 0;
-    int medal = cBEScoreInterface_convertRankToMedal(self, result);
+    int medal = convertRankToMedal(result);
     if (mode == 4 || mode == 5)
         medal = result == 0 ? 1 : -1;
     if (cBELibrary_raceDB.cGamePath == 0)
@@ -443,9 +442,9 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getPlayerLastCompletedEventStats)
  * @param profileIndex  profile index, 0 or 1 (On Tour iProfileIndex)
  * @return the stats block (0xAC bytes of stats, then the rank)
  */
-extern "C" void* cBEScoreInterface_getPlayerLastCompletedEventStats(cBEScoreInterface* self, int profileIndex)
+void* cBEScoreInterface::getPlayerLastCompletedEventStats(int profileIndex)
 {
-    return (char*)&self->LastEventStats[profileIndex];
+    return (char*)&LastEventStats[profileIndex];
 }
 #endif
 
@@ -464,7 +463,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID (On Tour iChar)
  * @return the best-stats block
  */
-extern "C" void* cBEScoreInterface_getPlayerBestStats(cBEScoreInterface* self, int profileIndex, int characterId)
+void* cBEScoreInterface::getPlayerBestStats(int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
     return charRecord + 0xde4;
@@ -505,7 +504,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_isBetterMedal);
  * @param newMedal  the medal just won, or -1
  * @return 1 when the new medal is better, else 0
  */
-extern "C" int cBEScoreInterface_isBetterMedal(cBEScoreInterface* self, int currentMedal, int newMedal)
+int cBEScoreInterface::isBetterMedal(int currentMedal, int newMedal)
 {
     if (newMedal == -1) {
         return 0;
@@ -527,7 +526,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_convertRankToMedal);
  * @param rank  the finishing position, 0 for first
  * @return the medal id, or -1
  */
-extern "C" int cBEScoreInterface_convertRankToMedal(cBEScoreInterface* self, int rank)
+int cBEScoreInterface::convertRankToMedal(int rank)
 {
     switch (rank) {
     case 0:
@@ -785,7 +784,7 @@ extern "C" bool cBERules_hasModifiedRules(int i);
  * @param rider  the profile index (On Tour iProfile)
  * @return true when the profile is eligible
  */
-extern "C" bool cBEScoreInterface_isEligibleForHighScore(cBEScoreInterface* self, int rider)
+bool cBEScoreInterface::isEligibleForHighScore(int rider)
 {
     if (rider >= 2 || cBERules_hasModifiedRules(0))
         return false;
@@ -815,7 +814,7 @@ extern signed char D_005305F9[];
  * @param eventID  the game event (On Tour iEvent)
  * @return the win count
  */
-extern "C" int cBEScoreInterface_getNumberOfWinsOnTrack(cBEScoreInterface* self, int rider, int locationID, int eventID)
+int cBEScoreInterface::getNumberOfWinsOnTrack(int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return 0;
@@ -850,7 +849,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param eventID  the game event (On Tour iEvent)
  * @return the medal, 0 best to 3, or -1
  */
-extern "C" int cBEScoreInterface_getBestMedalOnTrack(cBEScoreInterface* self, int rider, int locationID, int eventID)
+int cBEScoreInterface::getBestMedalOnTrack(int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return -1;
@@ -883,7 +882,7 @@ extern signed char D_005305F9[];
  * @param eventID  the game event (On Tour iEvent)
  * @param medal  the medal (On Tour iMedal)
  */
-extern "C" void cBEScoreInterface_setBestMedalOnTrack(cBEScoreInterface* self, int rider, int locationID, int eventID, int medal)
+void cBEScoreInterface::setBestMedalOnTrack(int rider, int locationID, int eventID, int medal)
 {
     if (D_005305F9[0] != 0)
         return;

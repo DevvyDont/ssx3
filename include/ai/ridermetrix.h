@@ -147,6 +147,8 @@ CHECK_OFFSET(tRiderStats, BestTrick, 0x94);
 CHECK_OFFSET(tRiderStats, TotalPointsLostToResets, 0xA8);
 CHECK_SIZE(tRiderStats, 0xAC);
 
+struct cBxReplayFrame;
+
 struct cRiderMetrix {
     // cRiderMetrixState
     int InitTrickIsFakie;            // 0x000 [O] (bool there)
@@ -201,6 +203,64 @@ struct cRiderMetrix {
     int IsActiveFXListCacheInvalid;  // 0x1C0 [O] (bool there)
     float mPointsMultiplier;         // 0x1C4 [O]; [R] ctor = 1.0; [U] evAddPoints, getCurTrickPoints
     int mPointsTotalInitial;         // 0x1C8 [O]; [R] ctor = 0; [U] setInitialPointsTotal
+
+    // Methods bound to their retail symbols by asm labels.
+    void addToComboChain(int points) __asm__("cRiderMetrix_addToComboChain");
+    void cancelComboChainReset() __asm__("cRiderMetrix_cancelComboChainReset");
+    void delayComboChainReset(float seconds) __asm__("cRiderMetrix_delayComboChainReset");
+    void earnComboChain() __asm__("cRiderMetrix_earnComboChain");
+    int allocHUDfx(int type) __asm__("cRiderMetrix_allocHUDfx");
+    void addGrab(int value) __asm__("cRiderMetrix_addGrab");
+    int calcTrickLevel(int points) __asm__("cRiderMetrix_calcTrickLevel");
+    float evFinishRace() __asm__("cRiderMetrix_evFinishRace");
+    float evFrag() __asm__("cRiderMetrix_evFrag");
+    float evCollectMultiplier(float value) __asm__("cRiderMetrix_evCollectMultiplier");
+    float evCheckpoint(int timeBonusSec) __asm__("cRiderMetrix_evCheckpoint");
+    float evAddPoints(int pts) __asm__("cRiderMetrix_evAddPoints");
+    float evGrabHold(int id) __asm__("cRiderMetrix_evGrabHold");
+    float evReleaseGrab(int grabID) __asm__("cRiderMetrix_evReleaseGrab");
+    float evFlip(float x) __asm__("cRiderMetrix_evFlip");
+    void* evRailSpin(int rsm) __asm__("cRiderMetrix_evRailSpin__FPvi");
+    float evPressStart(int pressMode) __asm__("cRiderMetrix_evPressStart");
+    float evPressEnd() __asm__("cRiderMetrix_evPressEnd");
+    float evPressPivot(int pressMode) __asm__("cRiderMetrix_evPressPivot");
+    float evHandplantStart(int plant) __asm__("cRiderMetrix_evHandplantStart");
+    float evHandplantEnd() __asm__("cRiderMetrix_evHandplantEnd");
+    float evLateSpin(int isFakieInit) __asm__("cRiderMetrix_evLateSpin");
+    float evLand(int stance, int alternate, int style, int flag) __asm__("cRiderMetrix_evLand");
+    float evMissionStart() __asm__("cRiderMetrix_evMissionStart");
+    float evMissionSuccess(int amount) __asm__("cRiderMetrix_evMissionSuccess");
+    void earnName(int stance, int alternate, int style, int flag) __asm__("cRiderMetrix_earnName");
+    float earnNameAndPoints(int stance, int alternate, int style, int flag, int takeoff)
+        __asm__("cRiderMetrix_earnNameAndPoints");
+    void linkToRider(cRider* rider) __asm__("cRiderMetrix_linkToRider");
+    int hasActiveHUDfx(int type) __asm__("cRiderMetrix_hasActiveHUDfx");
+    float getCurTrickPower() __asm__("cRiderMetrix_getCurTrickPower__FPv");
+    int getCurTrickStyleSubPoints() __asm__("cRiderMetrix_getCurTrickStyleSubPoints");
+    int getCurTrickPoints() __asm__("cRiderMetrix_getCurTrickPoints");
+    int getCurTrickPointsWithMult() __asm__("cRiderMetrix_getCurTrickPointsWithMult");
+    float evReset(int isUserReset) __asm__("cRiderMetrix_evReset");
+    float evSplitTime(int value) __asm__("cRiderMetrix_evSplitTime");
+    float evSplitPoints(int value) __asm__("cRiderMetrix_evSplitPoints");
+    float evUberGrindStart(int grindID, int rsm) __asm__("cRiderMetrix_evUberGrindStart__FPvii");
+    float evUberGrindEnd(int rsm) __asm__("cRiderMetrix_evUberGrindEnd");
+    float evWipeout(int flag) __asm__("cRiderMetrix_evWipeout");
+    float evWipeoutRecover(int isUserRecover) __asm__("cRiderMetrix_evWipeoutRecover");
+    float evTakeoff(int isFakieTakeoff, int isPipeTakeoff) __asm__("cRiderMetrix_evTakeoff");
+    void resetHUDfx() __asm__("cRiderMetrix_resetHUDfx");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRiderMetrix_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cRiderMetrix_readFromReplayFrame");
+    void setInitialPointsTotal(int pointsTotal) __asm__("cRiderMetrix_setInitialPointsTotal");
+    void reset() __asm__("cRiderMetrix_reset");
+    void resetTotals() __asm__("cRiderMetrix_resetTotals");
+    void resetComboChain() __asm__("cRiderMetrix_resetComboChain");
+    void resetCurTrick() __asm__("cRiderMetrix_resetCurTrick");
+    void removeHUDfx(int type) __asm__("cRiderMetrix_removeHUDfx");
+    void update() __asm__("cRiderMetrix_update");
+    void updateStaticHUD() __asm__("cRiderMetrix_updateStaticHUD");
+    int updateBonusLevelAndCalcPoints(int* idx, tHoldBonusDB* tbl, int type, float x)
+        __asm__("cRiderMetrix_updateBonusLevelAndCalcPoints");
+    int losePoints() __asm__("cRiderMetrix_losePoints");
 };
 
 CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);

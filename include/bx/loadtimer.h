@@ -20,6 +20,12 @@ struct cLoadTimer {
     float offset;                   // 0x014 [O]
     float scale;                    // 0x018 [O]
     float decay;                    // 0x01C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void startload(float rateScale) __asm__("cLoadTimer_startload__FPvf");
+    void setnextpercent(float newValue) __asm__("cLoadTimer_setnextpercent__FPvf");
+    void update() __asm__("cLoadTimer_update__FPv");
+    void endload() __asm__("cLoadTimer_endload__FPv");
 };
 
 CHECK_OFFSET(cLoadTimer, loadpercent, 0x000);

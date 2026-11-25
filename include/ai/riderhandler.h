@@ -74,6 +74,8 @@ enum eControlState {
 
 // cGroundMotion (cRiderHandler + 0x000, 0x20 bytes): motion state 0 (MS_Ground). Base cGroundMotionState (0x00-0x18,
 // [O] size 0x18).
+struct tSurfData;
+
 struct cGroundMotion {
     float ChatterTime;     // 0x00 [O] cGroundMotionState; [U] float (gainFocus, step cGroundMotion_step)
     float PowderDepth1G;   // 0x04 [O]; [U] float (gainFocus, cGroundMotion_getSnowForce, step)
@@ -84,6 +86,17 @@ struct cGroundMotion {
     cRider* mRider;        // 0x18 [R] virtual-base pointer to the shared cRider; [R] ctor cGroundMotion_cGroundMotion (in charge:
                            //      this + 0x20)
     char pad_1C[0x4];      // 0x1C the part is 16-byte aligned
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGroundMotion_gainFocus");
+    float getSnowForce(float* snow, float height, float normalVel) __asm__("cGroundMotion_getSnowForce");
+    float getBoostForce(tSurfData* snow) __asm__("cGroundMotion_getBoostForce");
+    float getSlipForce(tSurfData* cfg, float forwardVel) __asm__("cGroundMotion_getSlipForce");
+    float getDigForce(float* snow, float dv, float sv, float lean) __asm__("cGroundMotion_getDigForce");
+    int setupGroundVectors(tIntersectInfo* out, float* dist) __asm__("cGroundMotion_setupGroundVectors");
+    void resolve() __asm__("cGroundMotion_resolve");
+    void loseFocus() __asm__("cGroundMotion_loseFocus");
+    void checkWallCollisions() __asm__("cGroundMotion_checkWallCollisions");
 };
 
 CHECK_OFFSET(cGroundMotion, ChatterTime, 0x00);
@@ -102,6 +115,14 @@ struct cAirMotion {
     cRider* mRider;     // 0x04 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10
                         //      (D_004599E8)
     char pad_08[0x8];   // 0x08
+
+    // Methods bound to their retail symbols by asm labels.
+    void step() __asm__("cAirMotion_step");
+    void resolve() __asm__("cAirMotion_resolve");
+    float intersectBoard(tIntersectInfo* hit) __asm__("cAirMotion_intersectBoard");
+    void chooseFakieLandAnim(float normSpeed) __asm__("cAirMotion_chooseFakieLandAnim");
+    void chooseLandAnim(float normSpeed) __asm__("cAirMotion_chooseLandAnim");
+    int checkTerrainCollisions(t4Vector* outp) __asm__("cAirMotion_checkTerrainCollisions");
 };
 
 CHECK_OFFSET(cAirMotion, IsLandVelAlign, 0x00);
@@ -124,6 +145,16 @@ struct cWipeoutMotion {
     cRiderSphereTree* BoardSphereTree; // 0x44 [P] getBoardSphereTree (retail cWipeoutMotion_getBoardSphereTree lw 0x44; preview 0x48); [O]
     char pad_48[0x8];                  // 0x48
     tBoundBox BoardIntersectBox;       // 0x50 [P] getBoardBoundBox (cWipeoutMotion_getBoardBoundBox = this + 0x50); [O]; [U] lq/sq
+
+    // Methods bound to their retail symbols by asm labels.
+    void step() __asm__("cWipeoutMotion_step");
+    void resolve() __asm__("cWipeoutMotion_resolve");
+    float intersectGround(tIntersectInfo* hit, t4Vector* dir) __asm__("cWipeoutMotion_intersectGround");
+    void stepAirMotion() __asm__("cWipeoutMotion_stepAirMotion");
+    void stepGroundMotion() __asm__("cWipeoutMotion_stepGroundMotion");
+    int getBoardSphereTree() __asm__("cWipeoutMotion_getBoardSphereTree");
+    void throwRider(t4Vector* initVel, t4Vector* initAngVel) __asm__("cWipeoutMotion_throwRider");
+    void updateBoardSphereTree() __asm__("cWipeoutMotion_updateBoardSphereTree");
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);
@@ -142,6 +173,9 @@ CHECK_SIZE(cWipeoutMotion, 0x70);
 struct cStaticMotion {
     cRider* mRider;   // 0x00 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00459700)
     char pad_04[0xC]; // 0x04
+
+    // Methods bound to their retail symbols by asm labels.
+    void step() __asm__("cStaticMotion_step");
 };
 
 CHECK_OFFSET(cStaticMotion, mRider, 0x00);
@@ -150,6 +184,8 @@ CHECK_SIZE(cStaticMotion, 0x10);
 
 // cRailslideMotion (cRiderHandler + 0x0B0, 0x60 bytes): motion state 4 (MS_Railslide). Base cRailslideMotionState
 // (0x00-0x50, [O] size 0x50).
+struct t4Vector;
+
 struct cRailslideMotion {
     t4Vector RailNorm;       // 0x00 [O]; [R] cRiderHandler ctor = t4vect_ZAxis; [U] read via handler+0xB0 (getRailNorm)
     float RailLeanAngle;     // 0x10 [O]; [U] float
@@ -166,6 +202,14 @@ struct cRailslideMotion {
     cRider* mRider;          // 0x50 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x60
                              //      (D_004598F0)
     char pad_54[0xC];        // 0x54
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cRailslideMotion_gainFocus");
+    void setCrookedAngle(t4Vector* railnorm) __asm__("cRailslideMotion_setCrookedAngle");
+    void step() __asm__("cRailslideMotion_step");
+    void resolve() __asm__("cRailslideMotion_resolve");
+    void checkTerrainCollisions() __asm__("cRailslideMotion_checkTerrainCollisions");
+    void loseFocus() __asm__("cRailslideMotion_loseFocus");
 };
 
 CHECK_OFFSET(cRailslideMotion, RailNorm, 0x00);
@@ -185,6 +229,8 @@ CHECK_SIZE(cRailslideMotion, 0x60);
 
 // cHandplantMotion (cRiderHandler + 0x110, 0xB0 bytes): motion state 5 (MS_Handplant). Base cHandplantMotionState
 // (0x00-0xA0, [O] size 0xA0).
+struct tIntersectInfo;
+
 struct cHandplantMotion {
     t4Vector InitPos;          // 0x00 [O]; [U] sq/lqc2 (cHandplantMotion_init)
     t4Vector ExitVel;          // 0x10 [O]; [U] vector and x/y/z/w reads (cHandplantMotion_calcExitVel calcExitVel)
@@ -204,6 +250,12 @@ struct cHandplantMotion {
     cRider* mRider;            // 0xA0 [R] virtual-base pointer to the shared cRider; [R] ctor cHandplantMotion_cHandplantMotion (in charge:
                                //      this + 0xB0)
     char pad_A4[0xC];          // 0xA4
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cHandplantMotion_gainFocus");
+    void init(tIntersectInfo* hit, float dur) __asm__("cHandplantMotion_init");
+    void loseFocus() __asm__("cHandplantMotion_loseFocus");
+    void* resolve() __asm__("cHandplantMotion_resolve__FPv");
 };
 
 CHECK_OFFSET(cHandplantMotion, InitPos, 0x00);
@@ -227,9 +279,17 @@ CHECK_SIZE(cHandplantMotion, 0xB0);
 
 // cCruiseControl (cRiderHandler + 0x1C0, 0x10 bytes): control state 0 (CS_Cruise). No state base in retail (On Tour
 // added cCruiseControlState).
+struct tCruiseCmd;
+
 struct cCruiseControl {
     cRider* mRider;   // 0x00 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00459510)
     char pad_04[0xC]; // 0x04
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cCruiseControl_gainFocus__FPv");
+    void update(tCruiseCmd* in) __asm__("cCruiseControl_update");
+    void loseFocus(int next) __asm__("cCruiseControl_loseFocus");
+    int checkAirMotion() __asm__("cCruiseControl_checkAirMotion");
 };
 
 CHECK_OFFSET(cCruiseControl, mRider, 0x00);
@@ -238,6 +298,8 @@ CHECK_SIZE(cCruiseControl, 0x10);
 
 // cBoardPressControl (cRiderHandler + 0x1D0, 0x20 bytes): control state 1 (CS_BoardPress). Base
 // cBoardPressControlState (0x00-0x14).
+struct tBoardPressCmd;
+
 struct cBoardPressControl {
     int State;           // 0x00 [O] eBoardPressState (BP_Into 0, BP_Balance 1, BP_IntoAir 2, BP_Exit 3); [U] lw/sw
     float BalanceSec;    // 0x04 [O]; [U] float
@@ -247,6 +309,19 @@ struct cBoardPressControl {
     cRider* mRider;      // 0x14 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x20
                          //      (D_00459418)
     char pad_18[0x8];    // 0x18
+
+    // Methods bound to their retail symbols by asm labels.
+    void update(tBoardPressCmd* in) __asm__("cBoardPressControl_update");
+    void loseFocus() __asm__("cBoardPressControl_loseFocus");
+    void changeFakieBoardPress() __asm__("cBoardPressControl_changeFakieBoardPress");
+    int checkForFakie() __asm__("cBoardPressControl_checkForFakie");
+    int checkForOllie(tBoardPressCmd* cmd) __asm__("cBoardPressControl_checkForOllie");
+    int checkForPivot(tBoardPressCmd* in) __asm__("cBoardPressControl_checkForPivot");
+    int checkForWipeout(tBoardPressCmd* in) __asm__("cBoardPressControl_checkForWipeout");
+    int checkForExit(tBoardPressCmd* cmd) __asm__("cBoardPressControl_checkForExit");
+    void forceExit() __asm__("cBoardPressControl_forceExit");
+    void autoCompletePivot() __asm__("cBoardPressControl_autoCompletePivot");
+    void blendOutOfPivot() __asm__("cBoardPressControl_blendOutOfPivot");
 };
 
 CHECK_OFFSET(cBoardPressControl, State, 0x00);
@@ -259,9 +334,17 @@ CHECK_OFFSET(cBoardPressControl, pad_18, 0x18);
 CHECK_SIZE(cBoardPressControl, 0x20);
 
 // cPrewindControl (cRiderHandler + 0x1F0, 0x10 bytes): control state 2 (CS_Prewind). No state base.
+struct tPrewindCmd;
+
 struct cPrewindControl {
     cRider* mRider;   // 0x00 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00459320)
     char pad_04[0xC]; // 0x04
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cPrewindControl_gainFocus");
+    void update(tPrewindCmd* in) __asm__("cPrewindControl_update");
+    void playFromTable(int (*tbl)[5]) __asm__("cPrewindControl_playFromTable");
+    float getFlipSpinInputAng(int* out) __asm__("cPrewindControl_getFlipSpinInputAng");
 };
 
 CHECK_OFFSET(cPrewindControl, mRider, 0x00);
@@ -269,9 +352,14 @@ CHECK_OFFSET(cPrewindControl, pad_04, 0x04);
 CHECK_SIZE(cPrewindControl, 0x10);
 
 // cBumpControl (cRiderHandler + 0x200, 0x10 bytes): control state 3 (CS_Bump). No state base.
+struct tBumpCmd;
+
 struct cBumpControl {
     cRider* mRider;   // 0x00 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00459228)
     char pad_04[0xC]; // 0x04
+
+    // Methods bound to their retail symbols by asm labels.
+    void update(tBumpCmd* in) __asm__("cBumpControl_update");
 };
 
 CHECK_OFFSET(cBumpControl, mRider, 0x00);
@@ -280,6 +368,8 @@ CHECK_SIZE(cBumpControl, 0x10);
 
 // cNaturalAirControl (cRiderHandler + 0x210, 0x20 bytes): control state 4 (CS_NaturalAir). Base
 // cNaturalAirControlState (0x00-0x14; On Tour 0x10 with byte bools).
+struct tNaturalAirCmd;
+
 struct cNaturalAirControl {
     float LimitAng;   // 0x00 [O]; [U] float (gainFocus cNaturalAirControl_gainFocus)
     float LimitMag;   // 0x04 [O]; [U] float
@@ -288,6 +378,11 @@ struct cNaturalAirControl {
     int InitGrabHeld; // 0x10 [O]; [U] lw/sw
     cRider* mRider;   // 0x14 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x20 (D_00459130)
     char pad_18[0x8]; // 0x18
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cNaturalAirControl_gainFocus");
+    void update(tNaturalAirCmd* in) __asm__("cNaturalAirControl_update");
+    void loseFocus(int next) __asm__("cNaturalAirControl_loseFocus");
 };
 
 CHECK_OFFSET(cNaturalAirControl, LimitAng, 0x00);
@@ -330,6 +425,22 @@ struct cSpinControl {
     cRider* mRider;             // 0x58 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x60
                                 //      (D_00459038)
     char pad_5C[0x4];           // 0x5C
+
+    // Methods bound to their retail symbols by asm labels.
+    void loseFocus() __asm__("cSpinControl_loseFocus");
+    float calcFlipAxisWeight() __asm__("cSpinControl_calcFlipAxisWeight");
+    int isGrabPlaying(int trick, int held) __asm__("cSpinControl_isGrabPlaying");
+    void initDesSpin(float flip, float spin) __asm__("cSpinControl_initDesSpin");
+    int checkChangeFakieAir() __asm__("cSpinControl_checkChangeFakieAir");
+    void predictSpinSec(float* cur, float* next) __asm__("cSpinControl_predictSpinSec");
+    void predictFlipSec(float* cur, float* next) __asm__("cSpinControl_predictFlipSec");
+    int isGrabHeld() __asm__("cSpinControl_isGrabHeld");
+    int isTweakHeld() __asm__("cSpinControl_isTweakHeld");
+    int isUberHeld() __asm__("cSpinControl_isUberHeld");
+    float getFlipSpinAng(int* out) __asm__("cSpinControl_getFlipSpinAng");
+    float getFlipSpinInputAng(int* out) __asm__("cSpinControl_getFlipSpinInputAng");
+    float getInvertScale() __asm__("cSpinControl_getInvertScale");
+    float getOffAxisScale() __asm__("cSpinControl_getOffAxisScale");
 };
 
 CHECK_OFFSET(cSpinControl, AirAdjState, 0x00);
@@ -359,6 +470,8 @@ CHECK_OFFSET(cSpinControl, pad_5C, 0x5C);
 CHECK_SIZE(cSpinControl, 0x60);
 
 // cGateControl (cRiderHandler + 0x290, 0x20 bytes): control state 6 (CS_Gate). Base cGateControlState (0x00-0x14).
+struct tGateCmd;
+
 struct cGateControl {
     int GateState;          // 0x00 [O] eGateState (GS_GateRock 0, GS_GateLaunch 1, GS_Sit 2, GS_GetupFromSit 3); [R]
                             //      cRiderHandler ctor = 0; [U] set via handler+0x290
@@ -369,6 +482,12 @@ struct cGateControl {
     cRider* mRider;         // 0x14 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x20
                             //      (D_00458F40)
     char pad_18[0x8];       // 0x18
+
+    // Methods bound to their retail symbols by asm labels.
+    int isForceLaunch() __asm__("cGateControl_isForceLaunch");
+    void doGateLaunch(tGateCmd* cmd) __asm__("cGateControl_doGateLaunch");
+    void update(tGateCmd* cmd) __asm__("cGateControl_update");
+    int isLaunchAllowed() __asm__("cGateControl_isLaunchAllowed");
 };
 
 CHECK_OFFSET(cGateControl, GateState, 0x00);
@@ -382,12 +501,23 @@ CHECK_SIZE(cGateControl, 0x20);
 
 // cRailslideControl (cRiderHandler + 0x2B0, 0x10 bytes): control state 7 (CS_Railslide). Base cRailslideControlState
 // (0x00-0x08).
+struct tRailslideCmd;
+
 struct cRailslideControl {
     float RSpinAngle;  // 0x00 [O]; [U] float
     int PrevGrindHeld; // 0x04 [O]; [U] lw/sw
     cRider* mRider;    // 0x08 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10
                        //      (D_00458E48)
     char pad_0C[0x4];  // 0x0C
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cRailslideControl_gainFocus");
+    void update(tRailslideCmd* in) __asm__("cRailslideControl_update");
+    void loseFocus() __asm__("cRailslideControl_loseFocus");
+    void chooseRailSpin(int dir) __asm__("cRailslideControl_chooseRailSpin");
+    int checkForUberGrind(int id) __asm__("cRailslideControl_checkForUberGrind");
+    void playGainFocusAnim(int alt) __asm__("cRailslideControl_playGainFocusAnim");
+    int checkAirMotion(tRailslideCmd* cmd) __asm__("cRailslideControl_checkAirMotion");
 };
 
 CHECK_OFFSET(cRailslideControl, RSpinAngle, 0x00);
@@ -398,6 +528,8 @@ CHECK_SIZE(cRailslideControl, 0x10);
 
 // cWipeoutControl (cRiderHandler + 0x2C0, 0x90 bytes): control state 8 (CS_Wipeout). Base cWipeoutControlState
 // (0x00-0x80; On Tour 0xA0: BoardPrevPose[2]).
+struct tWipeoutCmd;
+
 struct cWipeoutControl {
     int RiderState;         // 0x00 [O] eWRiderState (RS_Launch 0, RS_Air 1, RS_Ground 2, RS_Recover 3, RS_Stuck 4); [U]
                             //      lw/sw
@@ -413,6 +545,22 @@ struct cWipeoutControl {
     cRider* mRider;         // 0x80 [R] virtual-base pointer to the shared cRider; [R] ctor cWipeoutControl_cWipeoutControl (in charge:
                             //      this + 0x90)
     char pad_84[0xC];       // 0x84
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cWipeoutControl_gainFocus");
+    void update(tWipeoutCmd* input) __asm__("cWipeoutControl_update");
+    void updateLaunch() __asm__("cWipeoutControl_updateLaunch");
+    void updateRecover() __asm__("cWipeoutControl_updateRecover");
+    void updateStuck() __asm__("cWipeoutControl_updateStuck");
+    void playWipeoutHitTransitionAnim() __asm__("cWipeoutControl_playWipeoutHitTransitionAnim");
+    void playWipeoutAirAnim() __asm__("cWipeoutControl_playWipeoutAirAnim");
+    void playWipeoutGroundAnim() __asm__("cWipeoutControl_playWipeoutGroundAnim");
+    void playWipeoutAirRecoverAnim() __asm__("cWipeoutControl_playWipeoutAirRecoverAnim");
+    void playWipeoutGroundRecoverAnim() __asm__("cWipeoutControl_playWipeoutGroundRecoverAnim");
+    void playWipeoutStuckAnim() __asm__("cWipeoutControl_playWipeoutStuckAnim");
+    void playWipeoutGroundImpactAnim() __asm__("cWipeoutControl_playWipeoutGroundImpactAnim");
+    float chooseTumbleAnimRate() __asm__("cWipeoutControl_chooseTumbleAnimRate");
+    void loseFocus() __asm__("cWipeoutControl_loseFocus");
 };
 
 CHECK_OFFSET(cWipeoutControl, RiderState, 0x00);
@@ -430,12 +578,19 @@ CHECK_OFFSET(cWipeoutControl, pad_84, 0x84);
 CHECK_SIZE(cWipeoutControl, 0x90);
 
 // cResetControl (cRiderHandler + 0x350, 0x10 bytes): control state 9 (CS_Reset). Base cResetControlState (0x00-0x08).
+struct tResetCmd;
+
 struct cResetControl {
     int IsAutoReset;   // 0x00 [O] bool (word); [U] lw; set via handler+0x350 (setIsAutoReset)
     float FadePercent; // 0x04 [O]; [U] float
     cRider* mRider;    // 0x08 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10
                        //      (D_00458A68)
     char pad_0C[0x4];  // 0x0C
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cResetControl_gainFocus");
+    void update(tResetCmd* cmd) __asm__("cResetControl_update");
+    int shouldTransition() __asm__("cResetControl_shouldTransition");
 };
 
 CHECK_OFFSET(cResetControl, IsAutoReset, 0x00);
@@ -446,10 +601,16 @@ CHECK_SIZE(cResetControl, 0x10);
 
 // cFinishLineControl (cRiderHandler + 0x360, 0x10 bytes): control state 10 (CS_FinishLine). Base
 // cFinishLineControlState (0x00-0x04).
+struct tFinishLineCmd;
+
 struct cFinishLineControl {
     int FinishState;  // 0x00 [O] eFinishState (Brake 0, IntoStance 1, Reaction 2, Done 3); [U] lw/sw
     cRider* mRider;   // 0x04 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00458B60)
     char pad_08[0x8]; // 0x08
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cFinishLineControl_gainFocus");
+    void update(tFinishLineCmd* cmd) __asm__("cFinishLineControl_update");
 };
 
 CHECK_OFFSET(cFinishLineControl, FinishState, 0x00);
@@ -459,6 +620,8 @@ CHECK_SIZE(cFinishLineControl, 0x10);
 
 // cHandplantControl (cRiderHandler + 0x370, 0x20 bytes): control state 11 (CS_Handplant). Base cHandplantControlState
 // (0x00-0x14; On Tour 0x10 with byte bools).
+struct tHandplantCmd;
+
 struct cHandplantControl {
     float EnterSec;        // 0x00 [O]; [U] float
     float CurBalance;      // 0x04 [O]; [U] float
@@ -468,6 +631,13 @@ struct cHandplantControl {
     cRider* mRider;        // 0x14 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x20
                            //      (D_00458878)
     char pad_18[0x8];      // 0x18
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cHandplantControl_gainFocus");
+    void init(tIntersectInfo* intersectInfo, int flag, float enterSec) __asm__("cHandplantControl_init");
+    void update(tHandplantCmd* in) __asm__("cHandplantControl_update");
+    void loseFocus() __asm__("cHandplantControl_loseFocus");
+    void playHandplantAnim(int mode, int type) __asm__("cHandplantControl_playHandplantAnim");
 };
 
 CHECK_OFFSET(cHandplantControl, EnterSec, 0x00);
@@ -493,11 +663,16 @@ CHECK_SIZE(tHandplantAnimInfo, 0x8);
 
 // cUberGrindControl (cRiderHandler + 0x390, 0x10 bytes): control state 12 (CS_UberGrind). Base cUberGrindControlState
 // (0x00-0x08).
+struct tUberGrindCmd;
+
 struct cUberGrindControl {
     int GrindState;   // 0x00 [O] eGrindState (GS_Locked 0, GS_Hold 1, GS_Over 2); [U] lw/sw
     int CurrentGrind; // 0x04 [O]; [U] lw; read/written via handler+0x394 (get/setCurrentGrind)
     cRider* mRider;   // 0x08 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00458D50)
     char pad_0C[0x4]; // 0x0C
+
+    // Methods bound to their retail symbols by asm labels.
+    void update(tUberGrindCmd* in) __asm__("cUberGrindControl_update");
 };
 
 CHECK_OFFSET(cUberGrindControl, GrindState, 0x00);
@@ -1034,6 +1209,10 @@ CHECK_OFFSET(cCheatFX, m_cheatState, 0x04);
 CHECK_OFFSET(cCheatFX, pad_08, 0x08);
 CHECK_SIZE(cCheatFX, 0x10);
 
+struct cBxReplayFrame;
+
+union tControlCmd;
+
 struct cRiderHandler {
     cGroundMotion GroundMotion;             // 0x000
     cAirMotion AirMotion;                   // 0x020
@@ -1076,6 +1255,20 @@ struct cRiderHandler {
     void** mVtbl;                           // 0xDE8 [R] _vt$13cRiderHandler cRiderHandler_vtbl (cPlayer and cComputer
                                             //       store their own here: D_00458338, D_004585F0)
     char pad_DEC[0x4];                      // 0xDEC cRiderHandler is 16-byte aligned
+
+    // Methods bound to their retail symbols by asm labels.
+    void loseMotionState(int a1) __asm__("cRiderHandler_loseMotionState");
+    void gainMotionState(int prev) __asm__("cRiderHandler_gainMotionState");
+    void stepMotion() __asm__("cRiderHandler_stepMotion");
+    void resolveMotion() __asm__("cRiderHandler_resolveMotion");
+    void loseControlState(int a1) __asm__("cRiderHandler_loseControlState");
+    void gainControlState(int prev) __asm__("cRiderHandler_gainControlState");
+    void resetRiderFX() __asm__("cRiderHandler_resetRiderFX");
+    void renderRiderFX() __asm__("cRiderHandler_renderRiderFX");
+    void readFromReplayFrame(cBxReplayFrame* data) __asm__("cRiderHandler_readFromReplayFrame");
+    void updateControl(tControlCmd* cmd) __asm__("cRiderHandler_updateControl");
+    void updateRiderFX() __asm__("cRiderHandler_updateRiderFX");
+    void writeToReplayFrame(cBxReplayFrame* data) __asm__("cRiderHandler_writeToReplayFrame");
 };
 
 // Virtual slots of _vt$13cRiderHandler (cRiderHandler_vtbl; [O] cRiderHandler's virtual order).

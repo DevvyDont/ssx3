@@ -79,6 +79,10 @@ CHECK_SIZE(tTrigger, 0x10);
 struct tEventFlags {
     unsigned long IsSet;            // 0x0 [O]; [P] isSet / clear: ld 0x0
     unsigned long IsJustChanged;    // 0x8 [O]; [P] isJustChanged / clear: ld/sd 0x8
+
+    // Methods bound to their retail symbols by asm labels.
+    bool isSet1(int bit) __asm__("tEventFlags_isSet1");
+    bool isJustChanged(int bit) __asm__("tEventFlags_isJustChanged");
 };
 
 CHECK_OFFSET(tEventFlags, IsSet, 0x0);
@@ -114,6 +118,25 @@ struct cAnimSequence {
     cAnimSequence* Next;            // 0x0C8 [O] (On Tour 0xC4); [U] cAnimSequencer_appendSequence links through it,
                                     //       cAnimSequencer_expire / expireAll walk it
     char unk_0CC[0x4];              // 0x0CC tail padding (16-byte alignment from tPose)
+
+    // Methods bound to their retail symbols by asm labels.
+    void fadeWeight(float targetWeight, float time) __asm__("cAnimSequence_fadeWeight__FP13cAnimSequenceff");
+    void fadeOutAndExpire(float time) __asm__("cAnimSequence_fadeOutAndExpire");
+    void addTrigger(int key, float weight) __asm__("cAnimSequence_addTrigger");
+    void addEndTrigger(int key) __asm__("cAnimSequence_addEndTrigger");
+    void removeTrigger(int id, float time) __asm__("cAnimSequence_removeTrigger");
+    void removeEndTrigger(int key) __asm__("cAnimSequence_removeEndTrigger");
+    void removeAllTriggers() __asm__("cAnimSequence_removeAllTriggers");
+    void setSubAnim(int i, int anim) __asm__("cAnimSequence_setSubAnim");
+    void setSubAnimTime(int index, float val) __asm__("cAnimSequence_setSubAnimTime");
+    void setSubAnimTimeScale(int index, float fparg0) __asm__("cAnimSequence_setSubAnimTimeScale");
+    void setSubAnimWeight(int index, float val) __asm__("cAnimSequence_setSubAnimWeight");
+    void setSubAnimType(int index, int val) __asm__("cAnimSequence_setSubAnimType");
+    void resetSubAnim(int index) __asm__("cAnimSequence_resetSubAnim");
+    float getNetWeight(int i) __asm__("cAnimSequence_getNetWeight");
+    void checkTriggers(float from, float to) __asm__("cAnimSequence_checkTriggers");
+    void checkTriggersAtTime(float time) __asm__("cAnimSequence_checkTriggersAtTime");
+    void setEndTriggers() __asm__("cAnimSequence_setEndTriggers");
 };
 
 CHECK_OFFSET(cAnimSequence, SequenceID, 0x000);
@@ -188,6 +211,8 @@ CHECK_SIZE(tAnimBlendFrame, 0x50);
 // (animation/rideranimbase.h: cRiderAnimBase::Sequencer, +0x50). Size 0x8 [R]: that allocation; init writes 0x0 and 0x4.
 // Retail methods: unit animation/animsequencer 0x003142E8 (init) .. 0x00314880 (readFromReplayFrame).
 // [P]: no preview evidence (tools/layout_xlate.py pairs no cAnimSequencer method).
+struct cBxReplayFrame;
+
 struct cAnimSequencer {
     int NumPlaying;                 // 0x0 [O]; [R] cAnimSequencer_init__FPv 0; [U] newSequence / appendSequence +1,
                                     //       removeSequence / expire / expireAll -1; writeToReplayFrame serializes it (4 bytes)
@@ -195,6 +220,23 @@ struct cAnimSequencer {
     cAnimSequence* PlayList;        // 0x4 [O]; [R] init 0; [U] newSequence pushes at the head, appendSequence links at the
                                     //       tail through cAnimSequence::Next; getSequence / isPlaying / getPosition /
                                     //       getAnimBlendFrames / fadeOutAndExpireAll / removeAllEndTriggers walk it
+
+    // Methods bound to their retail symbols by asm labels.
+    void appendSequence(cAnimSequence* node) __asm__("cAnimSequencer_appendSequence");
+    void expire(cAnimSequence* node) __asm__("cAnimSequencer_expire");
+    void* newSequence(int sequenceID) __asm__("cAnimSequencer_newSequence");
+    int getAnimBlendFrames(tAnimBlendFrame* out) __asm__("cAnimSequencer_getAnimBlendFrames");
+    void* playAndHold(int sequenceID, int anim, float val) __asm__("cAnimSequencer_playAndHold");
+    void expireAll() __asm__("cAnimSequencer_expireAll");
+    void fadeOutAndExpireAll(float time) __asm__("cAnimSequencer_fadeOutAndExpireAll");
+    cAnimSequence* getSequence(int index) __asm__("cAnimSequencer_getSequence__FP14cAnimSequenceri");
+    int isPlaying(int id) __asm__("cAnimSequencer_isPlaying");
+    int getPosition(int id) __asm__("cAnimSequencer_getPosition");
+    void removeSequence(cAnimSequence* node) __asm__("cAnimSequencer_removeSequence");
+    void* playAndLoop(int sequenceID, int anim, float val) __asm__("cAnimSequencer_playAndLoop");
+    void removeAllEndTriggers(int trig) __asm__("cAnimSequencer_removeAllEndTriggers");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimSequencer_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cAnimSequencer_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cAnimSequencer, NumPlaying, 0x0);

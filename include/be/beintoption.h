@@ -38,6 +38,33 @@ struct cBEOptionInterface : public cBEInterface {
     //   the vptr (0x0C): [R] getThis and cBEOptionInterface_cBEOptionInterface store cBEOptionInterface_vtbl; [P]
     //       __18cBEOptionInterface; [U] defaultSound/defaultGame/defaultHUD/defaultCtrl and func_001C2BA8 call slot 1
     //       (submit) through it, cBESaveInterface_loadSaveGame slot 2 (discard)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setUseMetricUnits(int useMetricUnits) __asm__("cBEOptionInterface_setUseMetricUnits");
+    void setUseWidescreen(int widescreen) __asm__("cBEOptionInterface_setUseWidescreen");
+    void setLanguage(int language) __asm__("cBEOptionInterface_setLanguage");
+    void setBrightness(int brightness) __asm__("cBEOptionInterface_setBrightness");
+    void setReplayOption(int replayOption) __asm__("cBEOptionInterface_setReplayOption");
+    void setSoundMode(int soundMode) __asm__("cBEOptionInterface_setSoundMode");
+    void setAudioMix(int audioMix) __asm__("cBEOptionInterface_setAudioMix");
+    void setRadioBigVolume(int radioVolume) __asm__("cBEOptionInterface_setRadioBigVolume");
+    void setCharacterVolume(int charVolume) __asm__("cBEOptionInterface_setCharacterVolume");
+    void setSFXVolume(int sfxVolume) __asm__("cBEOptionInterface_setSFXVolume");
+    void setUseArcadeSFX(int useArcadeSfx) __asm__("cBEOptionInterface_setUseArcadeSFX");
+    void setUseDJSpeechSFX(int useDJSpeech) __asm__("cBEOptionInterface_setUseDJSpeechSFX");
+    void setUseVOIP(int useVoip) __asm__("cBEOptionInterface_setUseVOIP");
+    void setQuickKeyMessage(int idx, const char* name) __asm__("cBEOptionInterface_setQuickKeyMessage");
+    void setHUDDetail(int value) __asm__("cBEOptionInterface_setHUDDetail");
+    void setVtDelta(int vertDelta) __asm__("cBEOptionInterface_setVtDelta");
+    void setHzDelta(int horzDelta) __asm__("cBEOptionInterface_setHzDelta");
+    void revert() __asm__("cBEOptionInterface_revert");
+    void defaultSound() __asm__("cBEOptionInterface_defaultSound");
+    void defaultGame() __asm__("cBEOptionInterface_defaultGame");
+    void defaultHUD() __asm__("cBEOptionInterface_defaultHUD");
+    void defaultCtrl() __asm__("cBEOptionInterface_defaultCtrl");
+    char* getQuickKeyMessage(int i) __asm__("cBEOptionInterface_getQuickKeyMessage");
+    void resetQuickKey(int i) __asm__("cBEOptionInterface_resetQuickKey");
+    void resetAllQuickKeys() __asm__("cBEOptionInterface_resetAllQuickKeys");
 };
 
 extern cBEOptionInterface* cBEOptionInterface_instance;

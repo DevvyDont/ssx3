@@ -38,6 +38,51 @@ struct cBEStatInterface : public cBEInterface {
     //       __16cBEStatInterface; [U] slot 2 (discard) is called through it by getThis, cBEEconInterface_buyAttribute,
     //       cBELibrary_newProfile, cBELibrary_readFromData, cBENetworkInterface_postInitBE,
     //       cBESaveInterface_generateSaveProfile / loadSaveProfile and cGameComm_gameExit
+
+    // Methods bound to their retail symbols by asm labels.
+    float getAccelerationAttrib(int rider, int value) __asm__("cBEStatInterface_getAccelerationAttrib");
+    int getStatFromProfile(int profile, unsigned int stat) __asm__("cBEStatInterface_getStatFromProfile");
+    void setSpeed(int rider, int value) __asm__("cBEStatInterface_setSpeed");
+    signed char getSpeed(int rider) __asm__("cBEStatInterface_getSpeed");
+    void setAccel(int rider, int value) __asm__("cBEStatInterface_setAccel");
+    signed char getAccel(int rider) __asm__("cBEStatInterface_getAccel");
+    void setTrick(int rider, int value) __asm__("cBEStatInterface_setTrick");
+    signed char getTrick(int rider) __asm__("cBEStatInterface_getTrick");
+    void setEdging(int rider, int value) __asm__("cBEStatInterface_setEdging");
+    signed char getEdging(int rider) __asm__("cBEStatInterface_getEdging");
+    void setSpin(int rider, int value) __asm__("cBEStatInterface_setSpin");
+    signed char getSpin(int rider) __asm__("cBEStatInterface_getSpin");
+    void setToughness(int rider, int value) __asm__("cBEStatInterface_setToughness");
+    signed char getToughness(int rider) __asm__("cBEStatInterface_getToughness");
+    void setStability(int rider, int value) __asm__("cBEStatInterface_setStability");
+    signed char getStability(int rider) __asm__("cBEStatInterface_getStability");
+    int getStatLevel(int rider) __asm__("cBEStatInterface_getStatLevel");
+    void setStatLevel(int rider, int value) __asm__("cBEStatInterface_setStatLevel");
+    void setHumanSpeed(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanSpeed");
+    signed char getHumanSpeed(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanSpeed");
+    void setHumanAccel(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanAccel");
+    signed char getHumanAccel(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanAccel");
+    void setHumanTrick(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanTrick");
+    signed char getHumanTrick(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanTrick");
+    void setHumanEdging(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanEdging");
+    signed char getHumanEdging(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanEdging");
+    void setHumanSpin(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanSpin");
+    signed char getHumanSpin(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanSpin");
+    void setHumanToughness(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanToughness");
+    signed char getHumanToughness(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanToughness");
+    void setHumanStability(int humanIndex, int value, int charType) __asm__("cBEStatInterface_setHumanStability");
+    signed char getHumanStability(int humanIndex, int charType) __asm__("cBEStatInterface_getHumanStability");
+    float getBrakingAttrib(int rider, int value) __asm__("cBEStatInterface_getBrakingAttrib");
+    float getEdgingAttrib(int rider, int value) __asm__("cBEStatInterface_getEdgingAttrib");
+    float getCollisionAttrib(int rider, int value) __asm__("cBEStatInterface_getCollisionAttrib");
+    float getStrikingAttrib(int rider, int value) __asm__("cBEStatInterface_getStrikingAttrib");
+    float getLandingAttrib(int rider, int value) __asm__("cBEStatInterface_getLandingAttrib");
+    float getBalanceAttrib(int rider, int value) __asm__("cBEStatInterface_getBalanceAttrib");
+    float getRecoveryAttrib(int rider, int value) __asm__("cBEStatInterface_getRecoveryAttrib");
+    float getSpeedAttrib(int rider, int value) __asm__("cBEStatInterface_getSpeedAttrib");
+    float getSpinAttrib(int rider, int value) __asm__("cBEStatInterface_getSpinAttrib");
+    float getTrickAttrib(int rider, int value) __asm__("cBEStatInterface_getTrickAttrib");
+    int shouldCelebrateTrick(int rider, int value) __asm__("cBEStatInterface_shouldCelebrateTrick");
 };
 
 extern cBEStatInterface* cBEStatInterface_instance;

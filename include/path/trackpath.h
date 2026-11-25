@@ -45,6 +45,13 @@ struct cTrackPath {
     float BaseDistanceLeft;         // 0x038 [O]; [P] getBaseDistanceLeft (lwc1 0x38); [U] populateDataWithDefaults = 0
                                     //       (sw $0), populateData(id 0) reads a float into it; getEventsInRange /
                                     //       isForkInPath subtract from it (lwc1; view sBXRangeList field_0x38)
+
+    // Methods bound to their retail symbols by asm labels.
+    void populateDataWithDefaults() __asm__("cTrackPath_populateDataWithDefaults__FPv");
+    void populateData(int data, int fieldId) __asm__("cTrackPath_populateData");
+    int getEventsInRange(tPathEventNode* out, int maxOut, float ldist, float hdist)
+        __asm__("cTrackPath_getEventsInRange");
+    int isForkInPath(float ldist, float hdist) __asm__("cTrackPath_isForkInPath");
 };
 
 CHECK_OFFSET(cTrackPath, NumEvents, 0x000);

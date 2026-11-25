@@ -77,7 +77,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param rider  the rider whose feelings are read
  * @return the relation state (0-3; On Tour friend, neutral, rival, enemy)
  */
-extern "C" int cBEAggressionInterface_getState(cBEAggressionInterface* self, int targetRider, int rider)
+int cBEAggressionInterface::getState(int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int ca = cBELibrary_getCharacterID(targetRider);
@@ -109,7 +109,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param rider  the rider whose aggression is read
  * @return the aggression level (0-4; On Tour none, mild, moderate, hard, chase)
  */
-extern "C" int cBEAggressionInterface_getAggression(cBEAggressionInterface* self, int targetRider, int rider)
+int cBEAggressionInterface::getAggression(int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int ca = cBELibrary_getCharacterID(targetRider);
@@ -141,7 +141,7 @@ extern signed char D_005305F9[];
  * @param iRider2  the rider they are angry at (On Tour iRider2)
  * @param event  the contact (On Tour eBEAggBehaviors): 0 mild, 1 moderate, 2 hard, 3 Bertuzzi
  */
-extern "C" void cBEAggressionInterface_applyAggression(cBEAggressionInterface* self, int iRider1, int iRider2, int event)
+void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event)
 {
     int profile = cBELibrary_getProfileIndex(iRider1);
     int ca = cBELibrary_getCharacterID(iRider1);

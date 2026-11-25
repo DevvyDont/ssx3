@@ -54,6 +54,8 @@ CHECK_OFFSET(tComputerCruiseLogic, index, 0x2);
 CHECK_OFFSET(tComputerCruiseLogic, u, 0x4);
 CHECK_SIZE(tComputerCruiseLogic, 0x8);
 
+struct cAIPath;
+
 struct cComputer {
     // ---- base cRiderHandler (0x000-0xDF0), as in cPlayer ----
     cRiderHandler RiderHandler;    // 0x000 cRiderHandler base (ai/riderhandler.h): [O] class cComputer : cRiderHandler;
@@ -107,6 +109,31 @@ struct cComputer {
     char pad_F4C[0x4];         // 0xF4C the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xF50-0x1A90) ----
     cRider Rider;              // 0xF50 [R] cComputer_cComputer: cRider_cRider(this + 0xF50) when in charge
+
+    // Methods bound to their retail symbols by asm labels.
+    void setIndividualRiderDifficulty(int level, int mode) __asm__("cComputer_setIndividualRiderDifficulty");
+    void setAttributeLevels() __asm__("cComputer_setAttributeLevels");
+    void initRiderDifficulty() __asm__("cComputer_initRiderDifficulty");
+    int chooseGrabMain(float airTime) __asm__("cComputer_chooseGrabMain");
+    int chooseRandomGrab(float time) __asm__("cComputer_chooseRandomGrab");
+    int chooseRandomTweakGrab(float time) __asm__("cComputer_chooseRandomTweakGrab");
+    int chooseRandomUberGrab(float time) __asm__("cComputer_chooseRandomUberGrab");
+    void resetCounters() __asm__("cComputer_resetCounters");
+    int checkForReset() __asm__("cComputer_checkForReset");
+    float scorePath(cAIPath* tgt) __asm__("cComputer_scorePath");
+    float calculateDifficultyScore(int IsEasy, int IsMedium, int IsHard) __asm__("cComputer_calculateDifficultyScore");
+    int myOpponentIndex() __asm__("cComputer_myOpponentIndex");
+    int isFarBehind() __asm__("cComputer_isFarBehind");
+    int isFarAhead() __asm__("cComputer_isFarAhead");
+    int checkForAttack(int oppID) __asm__("cComputer_checkForAttack");
+    int checkForBlock() __asm__("cComputer_checkForBlock");
+    int checkForPunching(int* side) __asm__("cComputer_checkForPunching");
+    int getRival() __asm__("cComputer_getRival");
+    float setupWarp() __asm__("cComputer_setupWarp");
+    void setInput(int input) __asm__("cComputer_setInput");
+    int getCurrentTarget() __asm__("cComputer_getCurrentTarget");
+    int isAboutToRail(float fparg0) __asm__("cComputer_isAboutToRail");
+    void setCruiseLogic(int idx) __asm__("cComputer_setCruiseLogic");
 };
 
 // Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: __pure_virtual);

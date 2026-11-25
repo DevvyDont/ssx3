@@ -85,6 +85,8 @@ struct tBENetworkDB {
     char unk_4AF[0x1];               // 0x4AF padding
 };
 
+struct tRiderStats;
+
 struct cBENetworkInterface : public cBEInterface {
     // cBEInterface (0x00-0x0F, be/beinterface.h):
     //   bIsActive: [R] getThis sets 0; [U] setNetworkActive (cBENetworkInterface_setNetworkActive, static:
@@ -93,6 +95,25 @@ struct cBENetworkInterface : public cBEInterface {
     //   the vptr (0x0C): [R] cBENetworkInterface_vtbl (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the
     //       preview ctor __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC; [U] func_00259098 calls slot
     //       1 (submit) through it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setIsNetworkGame(int isNetworkGame) __asm__("cBENetworkInterface_setIsNetworkGame");
+    void setIsRankedGame(int isRanked) __asm__("cBENetworkInterface_setIsRankedGame");
+    void setIsHost(int isHost) __asm__("cBENetworkInterface_setIsHost");
+    void setPort(int port) __asm__("cBENetworkInterface_setPort");
+    void setClientID(int clientID) __asm__("cBENetworkInterface_setClientID");
+    void setHostName(const char* name) __asm__("cBENetworkInterface_setHostName");
+    void setGameName(const char* name) __asm__("cBENetworkInterface_setGameName");
+    void setPassword(const char* name) __asm__("cBENetworkInterface_setPassword");
+    void setMyCharacterID(int characterID) __asm__("cBENetworkInterface_setMyCharacterID");
+    void setOpponentCharacterID(int characterID) __asm__("cBENetworkInterface_setOpponentCharacterID");
+    void setMyStats(tRiderStats* src) __asm__("cBENetworkInterface_setMyStats");
+    void setOpponentStats(tRiderStats* src) __asm__("cBENetworkInterface_setOpponentStats");
+    void copyProfile(int srcProfile, int destProfile) __asm__("cBENetworkInterface_copyProfile");
+    void preInitBE() __asm__("cBENetworkInterface_preInitBE");
+    void postInitBE() __asm__("cBENetworkInterface_postInitBE");
+    void backupCharProfile(int idx) __asm__("cBENetworkInterface_backupCharProfile");
+    void restoreCharProfile(int idx) __asm__("cBENetworkInterface_restoreCharProfile");
 };
 
 CHECK_OFFSET(tBENetworkDB, bIsNetworkGame, 0x000);

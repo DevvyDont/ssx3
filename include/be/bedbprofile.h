@@ -267,6 +267,11 @@ struct cBECharProfileDB {
     tRewardBits mRewards;           // 0xF30 [O]; [R] init MEM_fills 80; [U] cBERewardInterface (see tRewardBits)
     int mRadioMode;                 // 0xF80 [O] eRadioModeID (after mRewards in both games); [R] init: 0; [U] the radio
                                     //       mode getter / setter
+
+    // Methods bound to their retail symbols by asm labels.
+    int hasVisitedPeak(int kind) __asm__("cBECharProfileDB_hasVisitedPeak");
+    void setLocationVisited(int bit, int on) __asm__("cBECharProfileDB_setLocationVisited");
+    int updateScoreStats(int locationId, int stat, unsigned int value) __asm__("cBECharProfileDB_updateScoreStats");
 };
 CHECK_OFFSET(cBECharProfileDB, bFirstTimeWorldCircuit, 0x0);
 CHECK_OFFSET(cBECharProfileDB, mCollectibles, 0x4);

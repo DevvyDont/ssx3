@@ -91,37 +91,37 @@ struct sBEDB_0015AE00
  * func_0019DC20 and func_0019D4B8. The file buffer (+0x4) is freed with cMemMan_free. Then +0x0 becomes -1 and the
  * other words up to +0x4C become 0, except +0x28, which is left as it was (likely an oversight).
  */
-extern "C" void cBERewardDB_purge(cBERewardDB* self)
+void cBERewardDB::purge()
 {
-    if (self->mRewardFileIndex >= 0)
+    if (mRewardFileIndex >= 0)
     {
         char* snd = SSXApp->RealFE->mBoltFileManager;
-        func_0019DC20(snd, 0, self->mRewardFileIndex);
-        func_0019D4B8(snd, 0, self->mRewardFileIndex);
+        func_0019DC20(snd, 0, mRewardFileIndex);
+        func_0019D4B8(snd, 0, mRewardFileIndex);
     }
-    if (self->mpRewardsFile != 0)
+    if (mpRewardsFile != 0)
     {
-        cMemMan_free(self->mpRewardsFile);
+        cMemMan_free(mpRewardsFile);
     }
-    self->mRewardFileIndex = -1;
-    self->mpRewardsFile = 0;
-    self->mpTrophies = 0;
-    self->mpMedals = 0;
-    self->mpPeakPasses = 0;
-    self->mpPosters = 0;
-    self->mpTradingCards = 0;
-    self->mpConceptArts = 0;
-    self->mpToys = 0;
-    self->mpVideos = 0;
-    self->mpStrings = 0;
-    self->mNumTrophies = 0;
-    self->mNumMedals = 0;
-    self->mNumPeakPasses = 0;
-    self->mNumPosters = 0;
-    self->mNumTradingCards = 0;
-    self->mNumConceptArts = 0;
-    self->mNumToys = 0;
-    self->mNumVideos = 0;
+    mRewardFileIndex = -1;
+    mpRewardsFile = 0;
+    mpTrophies = 0;
+    mpMedals = 0;
+    mpPeakPasses = 0;
+    mpPosters = 0;
+    mpTradingCards = 0;
+    mpConceptArts = 0;
+    mpToys = 0;
+    mpVideos = 0;
+    mpStrings = 0;
+    mNumTrophies = 0;
+    mNumMedals = 0;
+    mNumPeakPasses = 0;
+    mNumPosters = 0;
+    mNumTradingCards = 0;
+    mNumConceptArts = 0;
+    mNumToys = 0;
+    mNumVideos = 0;
 }
 #endif
 
@@ -184,18 +184,18 @@ struct sRewardDB_AF40 {
  * @return the record's first word
  */
 // Returns the id of entry idx in the reward table of the given type.
-extern "C" int cBERewardDB_getRewardName(cBERewardDB* self, int type, int idx)
+int cBERewardDB::getRewardName(int type, int idx)
 {
     switch (type) {
-    case 0: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)self->mpTrophies + off); }
-    case 1: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)self->mpMedals + off); }
-    case 2: { int off = idx * 8; return *(int*)((char*)self->mpPeakPasses + off); }
-    case 3: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpPosters + off); }
-    case 4: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpTradingCards + off); }
-    case 5: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpConceptArts + off); }
-    case 6: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpVideos + off); }
-    case 7: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpToys + off); }
-    case 8: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpCheatChars + off); }
+    case 0: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)mpTrophies + off); }
+    case 1: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)mpMedals + off); }
+    case 2: { int off = idx * 8; return *(int*)((char*)mpPeakPasses + off); }
+    case 3: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpPosters + off); }
+    case 4: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpTradingCards + off); }
+    case 5: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpConceptArts + off); }
+    case 6: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpVideos + off); }
+    case 7: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpToys + off); }
+    case 8: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpCheatChars + off); }
     case 9: break;
     }
     return 0;
@@ -340,7 +340,8 @@ INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setRaceTime);
  *
  * @param raceTime  the race time
  */
-extern "C" void cBENewRaceInterface_setRaceTime(cBENewRaceInterface* self, int raceTime) {
+void cBENewRaceInterface::setRaceTime(int raceTime)
+{
     cBENewRaceInterface_newRace.iRaceTime = raceTime;
 }
 #endif
@@ -412,7 +413,7 @@ extern int cBENewRaceInterface_bIsBamLocation;
  *
  * @param locationIndex  the location index
  */
-extern "C" void cBENewRaceInterface_setLocationID(cBENewRaceInterface* self, int locationIndex)
+void cBENewRaceInterface::setLocationID(int locationIndex)
 {
     cBENewRaceInterface_newRace.iLocationIdx = locationIndex;
     cBENewRaceInterface_bIsBamLocation = 1;
@@ -428,7 +429,8 @@ extern int cBENewRaceInterface_mNextLocation;
  *
  * @param nextLocation  the location to go to next
  */
-extern "C" void cBENewRaceInterface_setNextLocationID(cBENewRaceInterface* self, int nextLocation) {
+void cBENewRaceInterface::setNextLocationID(int nextLocation)
+{
     cBENewRaceInterface_mNextLocation = nextLocation;
 }
 #endif
@@ -498,10 +500,10 @@ extern "C" void cBXString_cBXString1(void*, int*);
  *
  * @return @p self, the returned cBXString
  */
-extern "C" void* cBENewRaceInterface_getCmdLineTrack(cBENewRaceInterface* self)
+void* cBENewRaceInterface::getCmdLineTrack()
 {
-    cBXString_cBXString1(self, &cBENewRaceInterface_commandLineTrack);
-    return ((void*)self);
+    cBXString_cBXString1(this, &cBENewRaceInterface_commandLineTrack);
+    return ((void*)this);
 }
 #endif
 //100%
@@ -608,11 +610,11 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_getNextSessionID);
  * Returns the mission interface's next session ID (+0x10): the session point the map overlay chose, which
  * cBEMissionInterface_setNextSessionID stores.
  *
- * @param missionInterface  the mission interface
  * @return the flag
  */
-extern "C" int cBEMissionInterface_getNextSessionID(cBEMissionInterface* missionInterface) {
-    return ((int)missionInterface->nextSessionID);
+int cBEMissionInterface::getNextSessionID()
+{
+    return ((int)nextSessionID);
 }
 #endif
 //100%
@@ -621,11 +623,11 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_setNextSessionID);
 /**
  * Sets the mission interface's next session ID (+0x10), which cBEMissionInterface_getNextSessionID returns.
  *
- * @param missionInterface  the mission interface
  * @param sessionID  the session point to start the next session at
  */
-extern "C" void cBEMissionInterface_setNextSessionID(cBEMissionInterface* missionInterface, int sessionID) {
-    missionInterface->nextSessionID = sessionID;
+void cBEMissionInterface::setNextSessionID(int sessionID)
+{
+    nextSessionID = sessionID;
 }
 #endif
 //100%
@@ -717,7 +719,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useMetricUnits  nonzero for metric units
  */
-extern "C" void cBEOptionInterface_setUseMetricUnits(cBEOptionInterface* self, int useMetricUnits)
+void cBEOptionInterface::setUseMetricUnits(int useMetricUnits)
 {
     int enabled = useMetricUnits != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x80000) | (enabled << 19);
@@ -733,7 +735,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param widescreen  the widescreen mode, 0-3
  */
-extern "C" void cBEOptionInterface_setUseWidescreen(cBEOptionInterface* self, int widescreen)
+void cBEOptionInterface::setUseWidescreen(int widescreen)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x300000) | ((widescreen & 3) << 20);
 }
@@ -748,7 +750,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param language  the language index, 0-7
  */
-extern "C" void cBEOptionInterface_setLanguage(cBEOptionInterface* self, int language)
+void cBEOptionInterface::setLanguage(int language)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1C00000) | ((language & 7) << 22);
 }
@@ -763,7 +765,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param brightness  the brightness level, 0-15
  */
-extern "C" void cBEOptionInterface_setBrightness(cBEOptionInterface* self, int brightness)
+void cBEOptionInterface::setBrightness(int brightness)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1E000000) | ((brightness & 0xF) << 25);
 }
@@ -778,7 +780,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param replayOption  the replay setting, 0 or 1
  */
-extern "C" void cBEOptionInterface_setReplayOption(cBEOptionInterface* self, int replayOption)
+void cBEOptionInterface::setReplayOption(int replayOption)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000000) | ((replayOption & 1) << 29);
 }
@@ -818,7 +820,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param soundMode  the sound output mode, 0-3
  */
-extern "C" void cBEOptionInterface_setSoundMode(cBEOptionInterface* self, int soundMode)
+void cBEOptionInterface::setSoundMode(int soundMode)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x3000) | ((soundMode & 3) << 12);
 }
@@ -833,7 +835,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param audioMix  the mix setting, 0-3
  */
-extern "C" void cBEOptionInterface_setAudioMix(cBEOptionInterface* self, int audioMix)
+void cBEOptionInterface::setAudioMix(int audioMix)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xC000) | ((audioMix & 3) << 14);
 }
@@ -848,7 +850,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param radioVolume  the volume, 0-15
  */
-extern "C" void cBEOptionInterface_setRadioBigVolume(cBEOptionInterface* self, int radioVolume)
+void cBEOptionInterface::setRadioBigVolume(int radioVolume)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF) | (radioVolume & 0xF);
 }
@@ -864,7 +866,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param charVolume  the volume, 0-15
  */
-extern "C" void cBEOptionInterface_setCharacterVolume(cBEOptionInterface* self, int charVolume)
+void cBEOptionInterface::setCharacterVolume(int charVolume)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF0) | ((charVolume & 0xF) << 4);
 }
@@ -879,7 +881,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param sfxVolume  the volume, 0-15
  */
-extern "C" void cBEOptionInterface_setSFXVolume(cBEOptionInterface* self, int sfxVolume)
+void cBEOptionInterface::setSFXVolume(int sfxVolume)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF00) | ((sfxVolume & 0xF) << 8);
 }
@@ -895,7 +897,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useArcadeSfx  nonzero to enable
  */
-extern "C" void cBEOptionInterface_setUseArcadeSFX(cBEOptionInterface* self, int useArcadeSfx)
+void cBEOptionInterface::setUseArcadeSFX(int useArcadeSfx)
 {
     int enabled = useArcadeSfx != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x10000) | (enabled << 16);
@@ -911,7 +913,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useDJSpeech  nonzero to enable
  */
-extern "C" void cBEOptionInterface_setUseDJSpeechSFX(cBEOptionInterface* self, int useDJSpeech)
+void cBEOptionInterface::setUseDJSpeechSFX(int useDJSpeech)
 {
     int enabled = useDJSpeech != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000) | (enabled << 17);
@@ -927,7 +929,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useVoip  nonzero to enable
  */
-extern "C" void cBEOptionInterface_setUseVOIP(cBEOptionInterface* self, int useVoip)
+void cBEOptionInterface::setUseVOIP(int useVoip)
 {
     int enabled = useVoip != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x40000) | (enabled << 18);
@@ -1056,7 +1058,7 @@ extern char D_00535617[];
  * @param idx  the message slot
  * @param name  the message text
  */
-extern "C" void cBEOptionInterface_setQuickKeyMessage(cBEOptionInterface* self, int idx, const char* name)
+void cBEOptionInterface::setQuickKeyMessage(int idx, const char* name)
 {
     strcpy(D_00535617 + (idx << 6), name);
 }
@@ -1073,7 +1075,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param value  the new value of the top bits
  */
-extern "C" void cBEOptionInterface_setHUDDetail(cBEOptionInterface* self, int value)
+void cBEOptionInterface::setHUDDetail(int value)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & 0x3FFFFFFF) | (value << 30);
 }
@@ -1089,7 +1091,8 @@ extern char D_00535615[];
  *
  * @param vertDelta  the new value
  */
-extern "C" void cBEOptionInterface_setVtDelta(cBEOptionInterface* self, int vertDelta) {
+void cBEOptionInterface::setVtDelta(int vertDelta)
+{
     *(char*)D_00535615 = vertDelta;
 }
 #endif
@@ -1104,7 +1107,8 @@ extern char D_00535616[];
  *
  * @param horzDelta  the new value
  */
-extern "C" void cBEOptionInterface_setHzDelta(cBEOptionInterface* self, int horzDelta) {
+void cBEOptionInterface::setHzDelta(int horzDelta)
+{
     *(char*)D_00535616 = horzDelta;
 }
 #endif
@@ -1182,7 +1186,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setIsNetworkGame);
  *
  * @param isNetworkGame  nonzero for an online game
  */
-extern "C" void cBENetworkInterface_setIsNetworkGame(cBENetworkInterface* self, int isNetworkGame) {
+void cBENetworkInterface::setIsNetworkGame(int isNetworkGame)
+{
     cBENetworkInterface_networkOpt.bIsNetworkGame = isNetworkGame;
 }
 #endif
@@ -1208,7 +1213,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setIsRankedGame);
  *
  * @param isRanked  nonzero for a ranked game
  */
-extern "C" void cBENetworkInterface_setIsRankedGame(cBENetworkInterface* self, int isRanked) {
+void cBENetworkInterface::setIsRankedGame(int isRanked)
+{
     cBENetworkInterface_networkOpt.bIsRankedGame = isRanked;
 }
 #endif
@@ -1235,7 +1241,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setIsHost);
  *
  * @param isHost  nonzero when hosting
  */
-extern "C" void cBENetworkInterface_setIsHost(cBENetworkInterface* self, int isHost) {
+void cBENetworkInterface::setIsHost(int isHost)
+{
     cBENetworkInterface_networkOpt.bIsHost = isHost;
 }
 #endif
@@ -1261,7 +1268,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setPort);
  *
  * @param port  the port
  */
-extern "C" void cBENetworkInterface_setPort(cBENetworkInterface* self, int port) {
+void cBENetworkInterface::setPort(int port)
+{
     cBENetworkInterface_networkOpt.iPort = port;
 }
 #endif
@@ -1313,7 +1321,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setClientID);
  *
  * @param clientID  the client id
  */
-extern "C" void cBENetworkInterface_setClientID(cBENetworkInterface* self, int clientID) {
+void cBENetworkInterface::setClientID(int clientID)
+{
     cBENetworkInterface_networkOpt.iClientID = clientID;
 }
 #endif
@@ -1341,7 +1350,7 @@ extern "C" char* strcpy(char*, const char*);
  * @param name  the host name
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
-extern "C" void cBENetworkInterface_setHostName(cBENetworkInterface* self, const char* name)
+void cBENetworkInterface::setHostName(const char* name)
 {
     strcpy(cBENetworkInterface_networkOpt.strHostName, name);
 }
@@ -1370,7 +1379,7 @@ extern "C" char* strcpy(char*, const char*);
  * @param name  the online game's name
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
-extern "C" void cBENetworkInterface_setGameName(cBENetworkInterface* self, const char* name)
+void cBENetworkInterface::setGameName(const char* name)
 {
     strcpy(cBENetworkInterface_networkOpt.strGameName, name);
 }
@@ -1399,7 +1408,7 @@ extern "C" char* strcpy(char*, const char*);
  * @param name  the game password
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
-extern "C" void cBENetworkInterface_setPassword(cBENetworkInterface* self, const char* name)
+void cBENetworkInterface::setPassword(const char* name)
 {
     strcpy(cBENetworkInterface_networkOpt.strPassword, name);
 }
@@ -1440,7 +1449,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setMyCharacterID);
  *
  * @param characterID  the character id
  */
-extern "C" void cBENetworkInterface_setMyCharacterID(cBENetworkInterface* self, int characterID) {
+void cBENetworkInterface::setMyCharacterID(int characterID)
+{
     cBENetworkInterface_networkOpt.MyCharacterID = characterID;
 }
 #endif
@@ -1467,7 +1477,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setOpponentCharacterID);
  *
  * @param characterID  the character id
  */
-extern "C" void cBENetworkInterface_setOpponentCharacterID(cBENetworkInterface* self, int characterID) {
+void cBENetworkInterface::setOpponentCharacterID(int characterID)
+{
     cBENetworkInterface_networkOpt.OpponentCharacterID = characterID;
 }
 #endif
@@ -1494,7 +1505,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setMyStats);
  *
  * @param src  this player's rider stats (tRiderStats)
  */
-extern "C" void cBENetworkInterface_setMyStats(cBENetworkInterface* self, tRiderStats* src)
+void cBENetworkInterface::setMyStats(tRiderStats* src)
 {
     (*(&cBENetworkInterface_networkOpt.MyStats)) = *src;
 }
@@ -1522,7 +1533,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setOpponentStats);
  *
  * @param src  the remote player's rider stats (tRiderStats)
  */
-extern "C" void cBENetworkInterface_setOpponentStats(cBENetworkInterface* self, tRiderStats* src)
+void cBENetworkInterface::setOpponentStats(tRiderStats* src)
 {
     (*(&cBENetworkInterface_networkOpt.OpponentStats)) = *src;
 }
@@ -1801,14 +1812,14 @@ INCLUDE_ASM("be/bedbreward", cBEScoreInterface_isNewPersonalHighScore);
  *
  * cBEScoreInterface_discard clears both words.
  *
- * @param scoreInterface  the score interface
  * @return 1 or 0
  */
-extern "C" int cBEScoreInterface_isNewPersonalHighScore(cBEScoreInterface* scoreInterface) {
+int cBEScoreInterface::isNewPersonalHighScore()
+{
     int var_3;
 
     var_3 = 0;
-    if (((scoreInterface->bNewHighScore[0]) != 0) || ((scoreInterface->bNewHighScore[1]) != 0)) {
+    if (((bNewHighScore[0]) != 0) || ((bNewHighScore[1]) != 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -1822,14 +1833,14 @@ INCLUDE_ASM("be/bedbreward", cBEScoreInterface_isNewTrackHighScore);
  *
  * cBEScoreInterface_discard resets both to -1.
  *
- * @param scoreInterface  the score interface
  * @return 1 or 0
  */
-extern "C" int cBEScoreInterface_isNewTrackHighScore(cBEScoreInterface* scoreInterface) {
+int cBEScoreInterface::isNewTrackHighScore()
+{
     int var_3;
 
     var_3 = 0;
-    if (((scoreInterface->mNewTrackHighScoreIndex[0]) >= 0) || ((scoreInterface->mNewTrackHighScoreIndex[1]) >= 0)) {
+    if (((mNewTrackHighScoreIndex[0]) >= 0) || ((mNewTrackHighScoreIndex[1]) >= 0)) {
         var_3 = 1;
     }
     return var_3;

@@ -58,6 +58,10 @@ CHECK_OFFSET(cPreRaceHandler, mVtbl, 0x0);
 CHECK_OFFSET(cPreRaceHandler, unk_04, 0x4);
 CHECK_SIZE(cPreRaceHandler, 0x8);
 
+struct cBxReplayFrame;
+
+struct cAIPath;
+
 struct cAI {
     // ---- base cAIState (0x00-0x28) ----
     int CurrentAIState;             // 0x00 [P] getAIState; [O] tAIState; [U] setAIState/forceAIState
@@ -97,6 +101,84 @@ struct cAI {
     cAIStateHandler mEndRaceHandler;  // 0xC4 [R] cEndRaceHandler_vtbl (unnamed in the preview); [O] the member in this place
     cAIStateHandler mShutdownHandler; // 0xC8 [R] _vt$16cShutdownHandler (D_004584D8)
     void** mVtbl;                   // 0xCC [R] _vt$3cAI (D_00458488), stored by cAI_cAI and the destructor
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cAI_init");
+    void initAIRiders() __asm__("cAI_initAIRiders");
+    void initAIActors(int n) __asm__("cAI_initAIActors");
+    void initFreeride() __asm__("cAI_initFreeride");
+    void setRaceRankType(int mode) __asm__("cAI_setRaceRankType");
+    void reinitMissionRiders() __asm__("cAI_reinitMissionRiders");
+    void update() __asm__("cAI_update");
+    void updateAnimation() __asm__("cAI_updateAnimation");
+    void render() __asm__("cAI_render");
+    void loadRiders() __asm__("cAI_loadRiders");
+    void restart(int state) __asm__("cAI_restart");
+    void* commonInit(int flag) __asm__("cAI_commonInit");
+    void InitPlayers() __asm__("cAI_InitPlayers");
+    void initMissionRiders() __asm__("cAI_initMissionRiders");
+    void initComputerRiders() __asm__("cAI_initComputerRiders");
+    void initComputerActors() __asm__("cAI_initComputerActors");
+    int isAILoadedAndReady() __asm__("cAI_isAILoadedAndReady");
+    int isRaceFinished() __asm__("cAI_isRaceFinished");
+    void swaploadPathFile(int filename) __asm__("cAI_swaploadPathFile");
+    int swaploadInjectedPathFile(int uiSectionID, int mode, int data) __asm__("cAI_swaploadInjectedPathFile");
+    void prepareToPurgeComputerRiders() __asm__("cAI_prepareToPurgeComputerRiders");
+    int isReadyToPurgeComputerRiders() __asm__("cAI_isReadyToPurgeComputerRiders");
+    void prepareToPurgeComputerActors() __asm__("cAI_prepareToPurgeComputerActors");
+    int isReadyToPurgeComputerActors() __asm__("cAI_isReadyToPurgeComputerActors");
+    void prepareToPurgeMissionRiders() __asm__("cAI_prepareToPurgeMissionRiders");
+    int isReadyToPurgeMissionRiders() __asm__("cAI_isReadyToPurgeMissionRiders");
+    void purgeComputerRiders() __asm__("cAI_purgeComputerRiders");
+    void purgeComputerActors() __asm__("cAI_purgeComputerActors");
+    void purgeMissionRiders() __asm__("cAI_purgeMissionRiders");
+    void cleanupActors() __asm__("cAI_cleanupActors");
+    void cleanupAfterRace() __asm__("cAI_cleanupAfterRace");
+    void cleanupAfterFreeride() __asm__("cAI_cleanupAfterFreeride");
+    void shutdown() __asm__("cAI_shutdown");
+    void resetRidersStatTotals() __asm__("cAI_resetRidersStatTotals");
+    void purgeAnims() __asm__("cAI_purgeAnims");
+    void finishRemotePlayer() __asm__("cAI_finishRemotePlayer");
+    int syncCheckSum() __asm__("cAI_syncCheckSum");
+    void applyPlayerRulesCustom(cPlayer* obj, int i) __asm__("cAI_applyPlayerRulesCustom");
+    void applyComputerRulesCustom(cComputer* rider) __asm__("cAI_applyComputerRulesCustom");
+    void updateOverlapList() __asm__("cAI_updateOverlapList");
+    void writeToReplayFrame(cBxReplayFrame* frame) __asm__("cAI_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* frame) __asm__("cAI_readFromReplayFrame");
+    void setPodiumActorList(int* src) __asm__("cAI_setPodiumActorList");
+    void getPodiumActorList(int* dst) __asm__("cAI_getPodiumActorList");
+    void onlineAICheck() __asm__("cAI_onlineAICheck");
+    void UpdateGroupAI() __asm__("cAI_UpdateGroupAI");
+    void UpdateAggression() __asm__("cAI_UpdateAggression");
+    void UpdateRankingPlacement() __asm__("cAI_UpdateRankingPlacement");
+    int ridersOnPath(int value) __asm__("cAI_ridersOnPath");
+    int aiRidersOnPath(cAIPath* path) __asm__("cAI_aiRidersOnPath");
+    int getDangerMan() __asm__("cAI_getDangerMan");
+    int getNumRiders() __asm__("cAI_getNumRiders");
+    int getNumPlayers() __asm__("cAI_getNumPlayers");
+    int getNumComputers() __asm__("cAI_getNumComputers");
+    int getNumActors() __asm__("cAI_getNumActors");
+    int getNumMissionRiders() __asm__("cAI_getNumMissionRiders");
+    int getRider(int index) __asm__("cAI_getRider");
+    int getPlayer(int index) __asm__("cAI_getPlayer");
+    int getComputer(int index) __asm__("cAI_getComputer");
+    int getActor(int index) __asm__("cAI_getActor");
+    int getMissionRider(int index) __asm__("cAI_getMissionRider");
+    void setComputerRidersActive(int active) __asm__("cAI_setComputerRidersActive");
+    void setComputerActorsActive(int active) __asm__("cAI_setComputerActorsActive");
+    int getComputerActorsActive() __asm__("cAI_getComputerActorsActive");
+    int getAITick() __asm__("cAI_getAITick");
+    void setAITick(int tick) __asm__("cAI_setAITick");
+    int getEventTimerTick() __asm__("cAI_getEventTimerTick");
+    void incrementEventTimerTick() __asm__("cAI_incrementEventTimerTick");
+    void setEventTimerTick(int tick) __asm__("cAI_setEventTimerTick");
+    int getRaceTimeElapsed() __asm__("cAI_getRaceTimeElapsed");
+    int getCountdownTicksLeft() __asm__("cAI_getCountdownTicksLeft");
+    void setCountdownTicksLeft(int ticksLeft) __asm__("cAI_setCountdownTicksLeft");
+    void setPodiumActor(int index, int value) __asm__("cAI_setPodiumActor");
+    int getPodiumActor(int index) __asm__("cAI_getPodiumActor");
+    int getEndOfRaceTimer() __asm__("cAI_getEndOfRaceTimer");
+    int getFocusMan() __asm__("cAI_getFocusMan");
 };
 
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).
