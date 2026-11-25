@@ -3,7 +3,10 @@
 #include "ealib/filesys.h"
 #include "ealib/hlsfile.h"
 #include "ealib/lobbyapi.h"
+#include "ealib/locale.h"
+#include "ealib/netgamelink.h"
 #include "ealib/stream.h"
+#include "ealib/threads.h"
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", getstringidbyindex);
 #ifdef SKIP_ASM
@@ -40,33 +43,43 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LOCALE_getstr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int getstringidbyindex_BB68(int, unsigned char *) __asm__("getstringidbyindex");
-typedef struct { unsigned char b[4]; } W_BB68;
-static inline unsigned rd_BB68(unsigned char *p) {
+/* little-endian 32- and 16-bit file fields, read byte by byte */
+static inline unsigned rd_BB68(const void *field) {
+    const unsigned char *p = field;
     return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
+}
+static inline unsigned rd16_BB68(const void *field) {
+    const unsigned char *p = field;
+    return p[1] << 8 | p[0];
 }
 /**
  * Returns string @p idx of a locale file's current language, or 0 when it is out of range.
  *
- * A file with an index (flag bit 0 at +0x8) maps @p idx through it first (getstringidbyindex, index chunk at the offset in
- * +0x4). The language block is entry [language id +0xE] of the offset table at +0x10; the string offsets follow its
- * +0x10, count at +0xC. All values are little-endian.
+ * A file with an index (header flags bit 0) maps @p idx through it first (getstringidbyindex; the index chunk follows
+ * the header chunk, chunksize bytes in). The language chunk is entry [languageid] of the offset table after the header;
+ * its string offsets follow it, stringcount of them. All values are little-endian.
  *
  * @param table  the locale file
  * @param idx  the string id (number, or hashed id when indexed)
  * @return the string, or 0
  */
 unsigned char *LOCALE_getstr(unsigned char *table, int idx) {
-    unsigned char *block;
-    if (table[8] & 1) {
-        idx = getstringidbyindex_BB68(idx & 0xFFFF, table + rd_BB68(table + 4));
+    LOCALE_HEADER *header = (LOCALE_HEADER *)table;
+    LOCALE_LANGUAGE *bank;
+    unsigned char *str;
+    if (rd_BB68(&header->flags) & 1) {
+        idx = getstringidbyindex_BB68(idx & 0xFFFF, table + rd_BB68(&header->chunksize));
     }
-    block = table + rd_BB68((unsigned char *)((W_BB68 *)(table + 0x10) + (table[0xF] << 8 | table[0xE])));
-    if (idx >= 0 && (unsigned)idx < rd_BB68(block + 0xC)) {
-        block += rd_BB68((unsigned char *)((W_BB68 *)(block + 0x10) + idx));
+    // ORIGINAL-PTR: a locale file blob: the per-language offset table follows the header chunk and each language's
+    // string offset table follows its chunk; the offsets are byte offsets from the file / the language chunk.
+    bank = (LOCALE_LANGUAGE *)(table + rd_BB68((unsigned int *)(header + 1) + rd16_BB68(&header->languageid)));
+    str = (unsigned char *)bank;
+    if (idx >= 0 && (unsigned)idx < rd_BB68(&bank->stringcount)) {
+        str += rd_BB68((unsigned int *)(bank + 1) + idx);
     } else {
-        block = 0;
+        str = 0;
     }
-    return block;
+    return str;
 }
 #endif
 
@@ -766,6 +779,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_sprintf);
 #ifdef SKIP_ASM
 extern void USTR_vsprintf(char *, const char *, char *);
 
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+#define USTR_sprintf_va_start(ap)                                        \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
 /**
  * Formats a 16-bit string printf-style.
  *
@@ -774,10 +792,9 @@ extern void USTR_vsprintf(char *, const char *, char *);
  * @param dst  the 16-bit destination
  * @param fmt  the format string
  */
-// PORT: SN-specific va_start
 void USTR_sprintf(char *dst, const char *fmt, ...) {
     char *ap;
-    ap = (char*)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
+    USTR_sprintf_va_start(ap);
     USTR_vsprintf(dst, fmt, ap);
 }
 #endif
@@ -999,26 +1016,28 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_opstatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct H_CE90 { unsigned int v; };
+
+/* A handle word has OP_def's layout (a union over its int id): it is valid while it is not 0 and its serial (bits
+   0..19) still matches the id of the pool slot its index byte names. */
+static __inline__ int FILESYS_validop(int ophandle) {
+    int ok = 0;
+    if (ophandle != 0) {
+        ok = ((gFileDevice.oplist[((OP_def *)&ophandle)->sep.index].op.id ^ ophandle) & 0xFFFFF) == 0;
+    }
+    return ok;
+}
 
 /**
- * Returns the status (+0x8) of a file operation, or -3 when the handle is stale (its low 20 bits no longer match the
- * slot named by its low byte).
+ * Returns the status of a file operation, or -3 when the handle is stale (its serial no longer matches the slot named
+ * by its index byte).
  *
- * @param opHandle  the operation handle
+ * @param ophandle  the operation handle
  * @return the status, or -3
  */
-int FILESYS_opstatus(struct H_CE90 opHandle) {
-    struct H_CE90 handleCopy;
-    unsigned int handleBits = opHandle.v;
-    int ok = 0;
-    handleCopy.v = handleBits;
-    if (handleBits != 0) {
-        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + (char*)gFileDevice.oplist) ^ handleBits) & 0xFFFFF) == 0;
-    }
-    if (ok == 0) return -3;
-    // volatile (table entry, not a global): retail keeps this load out of the b delay slot
-    return *(volatile int *)(((unsigned char *)&opHandle)[3] * 0x30 + (char*)gFileDevice.oplist + 8);
+int FILESYS_opstatus(int ophandle) {
+    if (FILESYS_validop(ophandle) == 0) return -3;
+    // status is volatile (FILEOPERATION_def): retail keeps this load out of the b delay slot
+    return gFileDevice.oplist[((OP_def *)&ophandle)->sep.index].status;
 }
 #endif
 
@@ -1067,14 +1086,14 @@ void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
 /**
  * Sets the completion callback of a pending file operation.
  *
- * The operation slot is the handle's low byte. When the operation has already finished (its result word is set),
- * @p fn is called immediately with the handle, the result and the user data.
+ * The operation slot is the handle's index byte (OP_def). When the operation has already finished (its status is
+ * set), @p fn is called immediately with the handle, the status and the user data.
  *
  * @param ophandle   the operation handle
  * @param fn  the completion callback
  */
 void FILESYS_callbackop_impl(int ophandle, Fn_CF70 fn) {
-    struct FILEOPERATION_def *fop = &gFileDevice.oplist[((unsigned char *)&ophandle)[3]];
+    struct FILEOPERATION_def *fop = &gFileDevice.oplist[((OP_def *)&ophandle)->sep.index];
     fop->callback = fn;
     if (fop->status != 0) {
         fn(ophandle, fop->status, ((int)fop->userdata));
@@ -1156,29 +1175,20 @@ void FILESYS_priorityop_impl(struct H_CFC0 opHandle, int prio) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_cancelop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct H_D148 { unsigned int v; };
-
 /**
  * Asks the file system to cancel a pending operation.
  *
- * The handle must still match its slot (low 20 bits of the slot's id word); operations of type 3 and 0xA (bits
- * 20..23) cannot be cancelled, the others get their cancel flag (+0x4) set.
+ * The handle must still be valid (FILESYS_validop); operations of type 3 and 0xA (OP_def's type bits) cannot be
+ * cancelled, the others get their cancelled flag set.
  *
  * @param ophandle  the operation handle
  */
-void FILESYS_cancelop(struct H_D148 ophandle) {
-    struct H_D148 handleCopy;
-    unsigned int handleBits = ophandle.v;
+void FILESYS_cancelop(int ophandle) {
     int opType;
-    int ok = 0;
-    handleCopy.v = handleBits;
-    if (handleBits != 0) {
-        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + (char*)gFileDevice.oplist) ^ handleBits) & 0xFFFFF) == 0;
-    }
-    if (ok != 0) {
-        opType = (handleBits >> 20) & 0xF;
+    if (FILESYS_validop(ophandle) != 0) {
+        opType = ((unsigned int)ophandle >> 20) & 0xF;
         if (opType != 3 && opType != 10) {
-            *(int *)(((unsigned char *)&ophandle)[3] * 0x30 + (char*)gFileDevice.oplist + 4) = 1;
+            gFileDevice.oplist[((OP_def *)&ophandle)->sep.index].cancelled = 1;
         }
     }
 }
@@ -1268,16 +1278,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_completeop);
 extern void freeop_p(void *) __asm__("freeop");
 extern void freehandle_p(void *) __asm__("freehandle");
 
-struct sHandle_D310 {
-    char b0;
-    char b1;
-    char b2;
-    unsigned char idx;
-};
-
-
-
-int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
+int FILESYS_completeop_a(int ophandle) __asm__("FILESYS_completeop");
 /**
  * Finishes a completed file operation: returns its result and releases its resources.
  *
@@ -1287,20 +1288,20 @@ int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
  * @param ophandle  the operation handle
  * @return the operation's result
  */
-int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
+int FILESYS_completeop_a(int ophandle) {
     int ret = 0;
-    struct FILEOPERATION_def *slot = &gFileDevice.oplist[ophandle.idx];
+    struct FILEOPERATION_def *slot = &gFileDevice.oplist[((OP_def *)&ophandle)->sep.index];
     int sum;
-    int *fileHandle;
+    struct HANDLE_def *fileHandle;
 
     switch (slot->status) {
     case 0:
         break;
     case 1:
-        switch (((*(unsigned int*)&slot->op) >> 20) & 0xF) {
+        switch (slot->op.sep.type) {
         case 2:
         case 9:
-            ret = (int)((int*)slot->handle);
+            ret = (int)slot->handle;
             break;
         case 3:
         case 7:
@@ -1315,20 +1316,20 @@ int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
             ret = slot->amount;
             break;
         case 5:
-            fileHandle = ((int*)slot->handle);
+            fileHandle = slot->handle;
             ret = slot->amount;
             sum = ret + slot->value;
-            if (fileHandle[1] < sum) {
-                fileHandle[1] = sum;
+            if (fileHandle->length < sum) {
+                fileHandle->length = sum;
             }
             break;
         }
         break;
     case -2:
     case -1: {
-        int type = ((*(unsigned int*)&slot->op) >> 20) & 0xF;
+        int type = ((unsigned int)slot->op.id >> 20) & 0xF;
         if (type == 2 || type == 9) {
-            freehandle_p(((int*)slot->handle));
+            freehandle_p(slot->handle);
         }
         break;
     }
@@ -1419,42 +1420,42 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_close);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-typedef struct { unsigned int pad0 : 20; unsigned int f : 4; unsigned int pad1 : 8; int a; int b; int c; int d; int e; int f1; int g; int h; } C_D5A0;
-extern C_D5A0 *reserveop_D5A0(void) __asm__("reserveop");
-extern void iFILE_perror_D5A0(C_D5A0 *) __asm__("iFILE_perror");
-extern void iFILESYS_ExecCommand_D5A0(C_D5A0 *) __asm__("iFILESYS_ExecCommand");
+extern FILEOPERATION_def *reserveop_D5A0(void) __asm__("reserveop");
+extern void iFILE_perror_D5A0(FILEOPERATION_def *) __asm__("iFILE_perror");
+extern void iFILESYS_ExecCommand_D5A0(FILEOPERATION_def *) __asm__("iFILESYS_ExecCommand");
 
-int FILESYS_close_impl(int arg0, int arg1, int arg2) __asm__("FILESYS_close");
+int FILESYS_close_impl(int filehandle, int priority, void *userdata) __asm__("FILESYS_close");
 /**
  * Queues an asynchronous file close and returns the operation handle.
  *
- * Reserves an operation slot (type 3), records @p filehandle, the priority and the user data; when the handle is found
- * in the D_00519AE4 list the operation is failed with error 3 instead. The command goes to iFILESYS_ExecCommand.
+ * Reserves an operation slot (type 3), records @p filehandle, the priority and the user data; when the handle is a
+ * mounted BIG archive's (gFileDevice.bigfilelist) the operation is failed with error 3 instead. The command goes to
+ * iFILESYS_ExecCommand.
  *
  * @param filehandle  the file handle
  * @param priority  queue priority
  * @param userdata  user data passed to the completion callback
  * @return the operation handle
  */
-int FILESYS_close_impl(int filehandle, int priority, int userdata) {
-    C_D5A0 *fop;
+int FILESYS_close_impl(int filehandle, int priority, void *userdata) {
+    FILEOPERATION_def *fop;
     struct FILEBIG_def *n;
 
     fop = reserveop_D5A0();
-    n = (struct FILEBIG_def*)gFileDevice.bigfilelist;
-    fop->f = 3;
-    *(int*)((char*)fop + 0x10) = priority;
-    *(int*)((char*)fop + 0x14) = userdata;
-    *(int*)((char*)fop + 0x24) = filehandle;
+    n = gFileDevice.bigfilelist;
+    fop->op.sep.type = 3;
+    fop->priority = priority;
+    fop->userdata = userdata;
+    fop->handle = (struct HANDLE_def *)filehandle;
     for (; n != 0; n = n->next) {
         if ((int)n->handle == filehandle) {
-            *(int*)((char*)fop + 0xC) = 3;
+            fop->error = 3;
             iFILE_perror_D5A0(fop);
             break;
         }
     }
     iFILESYS_ExecCommand_D5A0(fop);
-    return *(int*)fop;
+    return fop->op.id;
 }
 #endif
 
@@ -1462,17 +1463,17 @@ int FILESYS_close_impl(int filehandle, int priority, int userdata) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_read);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { unsigned int pad0 : 20; unsigned int f : 4; unsigned int pad1 : 8; int a; int b; int c; int d; int e; int f1; int g; int h; } C_D648;
-extern C_D648 *reserveop_D648(void) __asm__("reserveop");
-extern void iFILE_perror_D648(C_D648 *) __asm__("iFILE_perror");
-extern void iFILESYS_ExecCommand_D648(C_D648 *) __asm__("iFILESYS_ExecCommand");
+extern FILEOPERATION_def *reserveop_D648(void) __asm__("reserveop");
+extern void iFILE_perror_D648(FILEOPERATION_def *) __asm__("iFILE_perror");
+extern void iFILESYS_ExecCommand_D648(FILEOPERATION_def *) __asm__("iFILESYS_ExecCommand");
 
-int FILESYS_read_impl(int *arg0, int arg1, int arg2, int arg3, int arg4, int arg5) __asm__("FILESYS_read");
+int FILESYS_read_impl(HANDLE_def *filehandle, int offset, void *buffer, int bytes, int priority, void *userdata)
+    __asm__("FILESYS_read");
 /**
  * Queues an asynchronous read and returns the operation handle.
  *
  * Reserves an operation slot (type 4), records the handle, offset, buffer, priority and user data, clamps the
- * byte count so the read stops at the end of the file (handle +0x4) and hands the command to
+ * byte count so the read stops at the end of the file (the handle's length) and hands the command to
  * iFILESYS_ExecCommand. A null handle fails the operation with error 6.
  *
  * @param filehandle  the file handle
@@ -1483,26 +1484,26 @@ int FILESYS_read_impl(int *arg0, int arg1, int arg2, int arg3, int arg4, int arg
  * @param userdata  user data passed to the completion callback
  * @return the operation handle
  */
-int FILESYS_read_impl(int *filehandle, int offset, int buffer, int bytes, int priority, int userdata) {
-    C_D648 *fop;
+int FILESYS_read_impl(HANDLE_def *filehandle, int offset, void *buffer, int bytes, int priority, void *userdata) {
+    FILEOPERATION_def *fop;
     int n;
 
     fop = reserveop_D648();
-    *(int*)((char*)fop + 0x14) = userdata;
-    *(int*)((char*)fop + 0x10) = priority;
-    fop->f = 4;
+    fop->userdata = userdata;
+    fop->priority = priority;
+    fop->op.sep.type = 4;
     if (filehandle == 0) {
-        *(int*)((char*)fop + 0xC) = 6;
+        fop->error = 6;
         iFILE_perror_D648(fop);
     }
-    *(int**)((char*)fop + 0x24) = filehandle;
-    n = filehandle[1];
-    *(int*)((char*)fop + 0x20) = buffer;
+    fop->handle = filehandle;
+    n = filehandle->length;
+    fop->data = buffer;
     if (n < offset + bytes) bytes = n - offset;
-    *(int*)((char*)fop + 0x18) = offset;
-    *(int*)((char*)fop + 0x1C) = bytes;
+    fop->value = offset;
+    fop->amount = bytes;
     iFILESYS_ExecCommand_D648(fop);
-    return *(int*)fop;
+    return fop->op.id;
 }
 #endif
 
@@ -1619,7 +1620,7 @@ extern char iFILE_addbigreadcallback_D8E8[] __asm__("iFILE_addbigreadcallback");
 
 /**
  * Read callback of adding an archive: completes the read and checks the BIG header; reads the whole header when it is
- * larger than the buffer, else links the archive (gFileDevice +0x34) and runs the add operation.
+ * larger than the buffer, else links the archive (gFileDevice.bigfilelist) and runs the add operation.
  *
  * A buffer that does not hold a BIG header (BIG_typeofheader 0) is freed. A larger header gets a new buffer of
  * BIG_sizeofheader bytes and another FILESYS_read with this callback.
@@ -1632,7 +1633,7 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bi
     int n, k;
     struct HANDLE_def *fileHd;
     struct FILESYSOPTS *fs;
-    struct FILEOPERATION_def *fileCmd = &gFileDevice.oplist[((unsigned char *)&opHandle)[3]];
+    struct FILEOPERATION_def *fileCmd = &gFileDevice.oplist[((OP_def *)&opHandle)->sep.index];
     fileHd = fileCmd->handle;
     k = fileCmd->priority;
     bigNode->handle = fileHd;
@@ -1662,30 +1663,30 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILE_addbigopencallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct H_DA10 { unsigned int v; };
-extern int FILESYS_completeop_DA10(unsigned int) __asm__("FILESYS_completeop");
-extern int FILESYS_read_DA10(int, int, int, int, int, int *) __asm__("FILESYS_read");
-extern void FILESYS_callbackop_DA10(unsigned int, void *) __asm__("FILESYS_callbackop");
-extern void iFILESYS_ExecCommand_DA10(int) __asm__("iFILESYS_ExecCommand");
+extern int FILESYS_completeop_DA10(int) __asm__("FILESYS_completeop");
+extern int FILESYS_read_DA10(int, int, void *, int, int, struct FILEBIG_def *) __asm__("FILESYS_read");
+extern void FILESYS_callbackop_DA10(int, void *) __asm__("FILESYS_callbackop");
+extern void iFILESYS_ExecCommand_DA10(struct FILEOPERATION_def *) __asm__("iFILESYS_ExecCommand");
 extern char iFILE_addbigreadcallback_DA10[] __asm__("iFILE_addbigreadcallback");
 
 /**
- * Open callback of adding an archive: on success reads the first 0x800 bytes into the record's buffer with callback
- * iFILE_addbigreadcallback; on failure sets error 4 on the add operation and runs it.
+ * Open callback of adding an archive: on success reads the first 0x800 bytes into the record's header buffer (at the
+ * open operation's priority) with callback iFILE_addbigreadcallback; on failure sets error 4 on the add operation (fop)
+ * and runs it.
  *
  * @param opHandle  the open operation's handle
  * @param opStatus  its status (1 = opened)
  * @param bigRec  the archive record
  */
-void iFILE_addbigopencallback(struct H_DA10 opHandle, int opStatus, int *bigRec) {
-    int x = *(int *)(((unsigned char *)&opHandle)[3] * 0x30 + (char*)gFileDevice.oplist + 0x10);
-    int fileHandle = FILESYS_completeop_DA10(opHandle.v);
+void iFILE_addbigopencallback(int opHandle, int opStatus, struct FILEBIG_def *bigRec) {
+    int priority = gFileDevice.oplist[((OP_def *)&opHandle)->sep.index].priority;
+    int fileHandle = FILESYS_completeop_DA10(opHandle);
     if (opStatus != 1) {
-        *(int *)(bigRec[4] + 0xC) = 4;
-        iFILESYS_ExecCommand_DA10(bigRec[4]);
+        bigRec->fop->error = 4;
+        iFILESYS_ExecCommand_DA10(bigRec->fop);
     } else {
-        opHandle.v = FILESYS_read_DA10(fileHandle, 0, bigRec[0], 0x800, x, bigRec);
-        FILESYS_callbackop_DA10(opHandle.v, iFILE_addbigreadcallback_DA10);
+        opHandle = FILESYS_read_DA10(fileHandle, 0, bigRec->header, 0x800, priority, bigRec);
+        FILESYS_callbackop_DA10(opHandle, iFILE_addbigreadcallback_DA10);
     }
 }
 #endif
@@ -2278,7 +2279,7 @@ struct FILEOPERATION_def *reserveop_impl(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", freeop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void MUTEX_unlock(int *);
+extern void MUTEX_unlock(void *);
 
 /**
  * Releases a file operation slot.
@@ -2299,21 +2300,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", reservehandle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_unlock_E800(void *) __asm__("MUTEX_unlock");
-struct Slot_E800 { int used; char pad[0x10C]; };
-struct G_E800 { int f0; int count; char pad[0xC]; char mutex[0x18]; struct Slot_E800 *slots; };
-
-struct Slot_E800 *reservehandle_impl(void) __asm__("reservehandle");
+struct HANDLE_def *reservehandle_impl(void) __asm__("reservehandle");
 /**
- * Takes a free file handle slot (gFileDevice +0x2C, 0x110 bytes each) under the mutex. Spins forever when none is free.
+ * Takes a free file handle slot (gFileDevice.handlelist, maxopen entries) under the mutex: a free slot has info 0, a
+ * taken one gets 1 until the open fills it. Spins forever when none is free.
  *
  * @return the handle slot
  */
-struct Slot_E800 *reservehandle_impl(void) {
+struct HANDLE_def *reservehandle_impl(void) {
     int i;
     MUTEX_lock(((char*)&gFileDevice.mutex[0]));
     for (i = 0; i < gFileDevice.maxopen; i++) {
-        if (((struct Slot_E800*)gFileDevice.handlelist)[i].used == 0) {
-            ((struct Slot_E800*)gFileDevice.handlelist)[i].used = 1;
+        if (gFileDevice.handlelist[i].info == 0) {
+            gFileDevice.handlelist[i].info = 1;
             break;
         }
     }
@@ -2322,7 +2321,7 @@ struct Slot_E800 *reservehandle_impl(void) {
         for (;;) {
         }
     }
-    return &((struct Slot_E800*)gFileDevice.handlelist)[i];
+    return &gFileDevice.handlelist[i];
 }
 #endif
 
@@ -2330,7 +2329,7 @@ struct Slot_E800 *reservehandle_impl(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", freehandle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void MUTEX_unlock(int *);
+extern void MUTEX_unlock(void *);
 
 /**
  * Releases a file handle slot.
@@ -2760,18 +2759,18 @@ extern char hlafile_mutex_9C08[] __asm__("hlafile_mutex");
 /**
  * Appends an async-file request to the end of a request queue (head, tail), under the async-file mutex.
  *
- * @param list  the queue: head pointer at +0, tail at +4
- * @param node  the request to append; its link (+4) is cleared
+ * @param list  the queue
+ * @param node  the request to append; its link (nextreq) is cleared
  */
-void queueadd(char *list, char *node) {
+void queueadd(REQUESTQUEUE *list, REQUESTSTRUCTtag *node) {
     MUTEX_lock(hlafile_mutex_9C08);
-    if (*(char **)list == 0) {
-        *(char **)list = node;
+    if (list->head == 0) {
+        list->head = node;
     } else {
-        *(char **)(*(char **)(list + 4) + 4) = node;
+        list->tail->nextreq = node;
     }
-    *(char **)(list + 4) = node;
-    *(int *)(node + 4) = 0;
+    list->tail = node;
+    node->nextreq = 0;
     MUTEX_unlock_qa(hlafile_mutex_9C08);
 }
 #endif
@@ -3557,28 +3556,28 @@ void MUTEX_unlock_FC48(void *) __asm__("MUTEX_unlock");
 void FILESYS_priorityop_FC48(int, int) __asm__("FILESYS_priorityop");
 
 /**
- * Lowers a stream's buffer usage (+0x4C) by @p size under its mutex; when that takes it below the greedy level (+0x44)
- * the greedy state (+0x48) is set and, while the stream is reading (state +0x38 == 1), its read operation gets the high
- * priority again (FILESYS_priorityop with +0x40).
+ * Lowers a stream's bufferusage by @p size under its mutex; when that takes it below the greedylevel the greedystate
+ * is set and, while the stream is reading (state 1), its read operation (fop) gets the high priority again
+ * (FILESYS_priorityop with priorityhigh).
  *
  * @param stream  the stream header
  * @param size  the bytes released
  */
-void decbufferusage(char *stream, int size) {
-    char *mutex;
+void decbufferusage(STREAMHEADERtag *stream, int size) {
+    MUTEX *mutex;
     int old, nw, lim;
 
-    mutex = stream + 4;
+    mutex = &stream->mutex;
     MUTEX_lock(mutex);
-    old = *(int *)(stream + 0x4C);
+    old = stream->bufferusage;
     nw = old - size;
-    *(int *)(stream + 0x4C) = nw;
+    stream->bufferusage = nw;
     MUTEX_unlock_FC48(mutex);
-    lim = *(int *)(stream + 0x44);
+    lim = stream->greedylevel;
     if (old >= lim && nw < lim) {
-        *(int *)(stream + 0x48) = 1;
-        if (*(volatile int *)(stream + 0x38) == 1) {
-            FILESYS_priorityop_FC48(*(int *)(stream + 0x174), *(int *)(stream + 0x40));
+        stream->greedystate = 1;
+        if (stream->state == 1) {
+            FILESYS_priorityop_FC48(stream->fop, stream->priorityhigh);
         }
     }
 }
@@ -3589,33 +3588,33 @@ INCLUDE_ASM("ealib/seg_2DCAE8", getfreerequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int stream_requestidcounter_FCD8[] __asm__("stream_requestidcounter");
-extern void *getfreerequest_impl(char *arg0) __asm__("getfreerequest");
+extern STREAMREQUESTtag *getfreerequest_impl(STREAMHEADERtag *strm) __asm__("getfreerequest");
 
 /**
  * Takes a free request from a stream and gives it a new id; null when none is free.
  *
- * Pops the free list (+0x68) under the stream's mutex (+0x4) and ORs a fresh stream_requestidcounter value (step
- * 0x100, never 0) above the request's slot byte.
+ * Pops the free list (freereq) under the stream's mutex and ORs a fresh stream_requestidcounter value (step 0x100,
+ * never 0) above the request's slot byte.
  *
  * @param strm  the stream header
  * @return the request, or null
  */
-void *getfreerequest_impl(char *strm) {
-    char *req;
+STREAMREQUESTtag *getfreerequest_impl(STREAMHEADERtag *strm) {
+    STREAMREQUESTtag *req;
     int nextId;
-    MUTEX_lock(strm + 4);
+    MUTEX_lock(&strm->mutex);
     req = 0;
-    if (*(char **)(strm + 0x68) != 0) {
-        req = *(char **)(strm + 0x68);
+    if (strm->freereq != 0) {
+        req = strm->freereq;
         nextId = stream_requestidcounter_FCD8[0] + 0x100;
-        *(char **)(strm + 0x68) = *(char **)(req + 0xC);
+        strm->freereq = req->next;
         stream_requestidcounter_FCD8[0] = nextId;
         if (nextId == 0) {
             stream_requestidcounter_FCD8[0] = 0x100;
         }
-        *(int *)req = *(unsigned char *)req | stream_requestidcounter_FCD8[0];
+        req->id = (unsigned char)req->id | stream_requestidcounter_FCD8[0];
     }
-    MUTEX_unlock((int *)(strm + 4));
+    MUTEX_unlock(&strm->mutex);
     return req;
 }
 #endif
@@ -3630,30 +3629,30 @@ extern void MUTEX_unlock_FD58(void *) __asm__("MUTEX_unlock");
 /**
  * Appends a request to a stream's queue.
  *
- * Marks the request pending (+0x4 = 1, no next link) and links it after the tail (+0x64), or makes it head,
- * current and tail (+0x5C, +0x60, +0x64) of an empty queue, under the stream's mutex.
+ * Marks the request pending (state 1, no next link) and links it after the tail (lastreq), or makes it firstreq,
+ * curreq and lastreq of an empty queue, under the stream's mutex.
  *
  * @param strm  the stream header
  * @param req  the request
  */
-void queuerequest(char *strm, char *req) {
-    char *temp_2;
+void queuerequest(STREAMHEADERtag *strm, STREAMREQUESTtag *req) {
+    STREAMREQUESTtag *last;
 
-    (*(int *)((char*)(req) + (0xC))) = 0;
-    (*(int *)((char*)(req) + (4))) = 1;
-    MUTEX_lock_FD58(strm + 4);
-    temp_2 = (*(char **)((char*)(strm) + (0x64)));
-    if (temp_2 == 0) {
-        (*(char **)((char*)(req) + (8))) = 0;
-        (*(char **)((char*)(strm) + (0x5C))) = req;
-        (*(char **)((char*)(strm) + (0x60))) = req;
-        (*(char **)((char*)(strm) + (0x64))) = req;
+    req->next = 0;
+    req->state = 1;
+    MUTEX_lock_FD58(&strm->mutex);
+    last = strm->lastreq;
+    if (last == 0) {
+        req->prev = 0;
+        strm->firstreq = req;
+        strm->curreq = req;
+        strm->lastreq = req;
     } else {
-        (*(char **)((char*)(req) + (8))) = temp_2;
-        (*(char **)((char*)((*(char **)((char*)(strm) + (0x64)))) + (0xC))) = req;
-        (*(char **)((char*)(strm) + (0x64))) = req;
+        req->prev = last;
+        strm->lastreq->next = req;
+        strm->lastreq = req;
     }
-    MUTEX_unlock_FD58(strm + 4);
+    MUTEX_unlock_FD58(&strm->mutex);
 }
 #endif
 
@@ -3661,24 +3660,24 @@ void queuerequest(char *strm, char *req) {
 INCLUDE_ASM("ealib/seg_2DCAE8", locaterequest1);
 #ifdef SKIP_ASM
 /**
- * Returns a stream's request with this id (slot = low byte, 0x124 bytes each from +0x14, count +0x18) when the id
- * matches and the request is in use (+0x4); otherwise 0.
+ * Returns a stream's request with this id (slot = low byte, into the request array of `requests` entries) when the id
+ * matches and the request is in use (state not 0); otherwise 0.
  *
  * @param stream  the stream header
  * @param requestId  the request id
  * @return the request, or 0
  */
-void *locaterequest1(void *stream, int requestId) {
-    int temp_3;
-    void *temp_2;
+STREAMREQUESTtag *locaterequest1(STREAMHEADERtag *stream, int requestId) {
+    int slot;
+    STREAMREQUESTtag *req;
 
-    temp_3 = requestId & 0xFF;
-    if (temp_3 >= (*(int *)((char*)(stream) + (0x18)))) {
+    slot = requestId & 0xFF;
+    if (slot >= stream->requests) {
         return 0;
     }
-    temp_2 = (*(int *)((char*)(stream) + (0x14))) + (temp_3 * 292);
-    if (requestId == (*(int *)((char*)(temp_2) + (0)))) {
-        return ((*(int *)((char*)(temp_2) + (4))) == 0) ? 0 : temp_2;
+    req = &stream->request[slot];
+    if (requestId == req->id) {
+        return (req->state == 0) ? 0 : req;
     }
     return 0;
 }
@@ -3688,31 +3687,31 @@ void *locaterequest1(void *stream, int requestId) {
 INCLUDE_ASM("ealib/seg_2DCAE8", freerequest);
 #ifdef SKIP_ASM
 /**
- * Unlinks a request from a stream's queue (first +0x5C, last +0x64, current +0x60 moves to a neighbour) and pushes it
- * on the free list (+0x68), marking it unused.
+ * Unlinks a request from a stream's queue (firstreq, lastreq; curreq moves to a neighbour) and pushes it on the free
+ * list (freereq), marking it unused.
  *
  * @param stream  the stream header
  * @param n  the request
  */
-void freerequest(char *stream, char *n) {
-    if (n == *(char **)(stream + 0x5C)) {
-        *(int *)(stream + 0x5C) = *(int *)(n + 0xC);
+void freerequest(STREAMHEADERtag *stream, STREAMREQUESTtag *n) {
+    if (n == stream->firstreq) {
+        stream->firstreq = n->next;
     } else {
-        *(int *)(*(char **)(n + 8) + 0xC) = *(int *)(n + 0xC);
+        n->prev->next = n->next;
     }
-    if (n == *(char **)(stream + 0x64)) {
-        *(int *)(stream + 0x64) = *(int *)(n + 8);
+    if (n == stream->lastreq) {
+        stream->lastreq = n->prev;
     } else {
-        *(int *)(*(char **)(n + 0xC) + 8) = *(int *)(n + 8);
+        n->next->prev = n->prev;
     }
-    if (n == *(char **)(stream + 0x60)) {
-        char *neighbor = *(char **)(n + 0xC);
-        if (neighbor == 0) neighbor = *(char **)(n + 8);
-        *(char **)(stream + 0x60) = neighbor;
+    if (n == stream->curreq) {
+        STREAMREQUESTtag *neighbor = n->next;
+        if (neighbor == 0) neighbor = n->prev;
+        stream->curreq = neighbor;
     }
-    *(int *)(n + 4) = 0;
-    *(int *)(n + 0xC) = *(int *)(stream + 0x68);
-    *(char **)(stream + 0x68) = n;
+    n->state = 0;
+    n->next = stream->freereq;
+    stream->freereq = n;
 }
 #endif
 
@@ -3747,91 +3746,89 @@ int filterchunk(struct T_FE88 *table, int *key) {
 INCLUDE_ASM("ealib/seg_2DCAE8", parsechunks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int filterchunk_FED0(char *, char *) __asm__("filterchunk");
+extern int filterchunk_FED0(STREAMHEADERtag *, STREAMCHUNKHDR *) __asm__("filterchunk");
 extern void MUTEX_unlock_FED0(void *) __asm__("MUTEX_unlock");
 
 /* pads n so that p + n ends on a 64-byte boundary */
 #define ALIGN64_FED0(n, p) ((((n) + ((int)(p) & 0x3F) + 0x3F) & ~0x3F) - ((int)(p) & 0x3F))
 
-struct E_FED0 { int a; int b; int count; char *first; };
-
 /**
  * Hands the newly read chunks of a stream to its taps; returns 1 when the current request's end chunk was reached.
  *
- * Walks the chunk headers from +0x54 while a whole header and chunk are in (up to +0x58). A size with a top byte set
- * marks a padding chunk. The end chunk (type = the current request's +0x11C) is padded to 64 bytes. Each chunk is
- * tagged with its tap (filterchunk) and added to the tap's byte count, the stream's usage (+0x4C) goes up (clearing
- * the greedy state at the level) and +0x54 moves on; a chunk with no tap is marked -2. A cancelled request (state 4)
- * stops the walk.
+ * Walks the chunk headers from datatail while a whole header and chunk are in (up to dataend). A size with a top byte
+ * set marks a padding chunk. The end chunk (type = the current request's endchunkid) is padded to 64 bytes. Each chunk
+ * is tagged with its tap (filterchunk) and added to the tap's gettable, the stream's bufferusage goes up (clearing the
+ * greedystate at the greedylevel) and datatail moves on; a chunk with no tap is marked -2. A cancelled request (state
+ * 4) stops the walk.
  *
  * @return 1 at the end chunk, else 0
  */
-int parsechunks(char *self) {
-    char *current;
-    char *rec;
-    char *mutex;
+int parsechunks(STREAMHEADERtag *self) {
+    STREAMREQUESTtag *current;
+    STREAMCHUNKHDR *chunk;
+    MUTEX *mutex;
     int len;
-    int channel;
+    int tapnum;
     int busy;
     int old;
     int nw;
     int lim;
-    struct E_FED0 *channelInfo;
+    TAPSTRUCTtag *tap;
 
-    current = *(char **)(self + 0x60);
-    while (*(char **)(self + 0x58) - *(char **)(self + 0x54) >= 8) {
-        rec = *(char **)(self + 0x54);
-        len = *(int *)(rec + 4);
+    current = self->curreq;
+    while (self->dataend - self->datatail >= 8) {
+        chunk = (STREAMCHUNKHDR *)self->datatail;
+        len = chunk->size;
         if (len & 0xFF000000) {
-            *(int *)rec = *(int *)(current + 0x11C);
+            chunk->type = current->endchunkid;
             len = 8;
-            *(int *)(rec + 4) = 8;
+            chunk->size = 8;
         }
-        if (*(char **)(self + 0x58) < *(char **)(self + 0x54) + len) {
+        if (self->dataend < self->datatail + len) {
             break;
         }
-        if (*(int *)rec == *(int *)(current + 0x11C)) {
-            len = ALIGN64_FED0(len, *(char **)(self + 84));
+        if (chunk->type == current->endchunkid) {
+            len = ALIGN64_FED0(len, self->datatail);
         }
-        channel = filterchunk_FED0(self, rec);
-        if (channel < 0) {
-            mutex = self + 4;
+        tapnum = filterchunk_FED0(self, chunk);
+        if (tapnum < 0) {
+            mutex = &self->mutex;
             MUTEX_lock(mutex);
-            busy = *(int *)(current + 4) == 4;
+            busy = current->state == 4;
             if (!busy) {
-                *(int *)rec = -2;
-                *(char **)(self + 0x54) += len;
+                chunk->type = -2;
+                self->datatail += len;
             }
             MUTEX_unlock_FED0(mutex);
         } else {
-            *(int *)(rec + 4) = len | (channel << 24);
-            MUTEX_lock(self + 4);
-            busy = *(int *)(current + 4) == 4;
+            chunk->size = len | (tapnum << 24);
+            MUTEX_lock(&self->mutex);
+            busy = current->state == 4;
             if (!busy) {
-                channelInfo = &(*(struct E_FED0 **)(self + 0x24))[channel - 1];
-                channelInfo->count += len;
-                if (channelInfo->count == len) {
-                    channelInfo->first = rec;
+                tap = &self->tap[tapnum - 1];
+                tap->gettable += len;
+                if (tap->gettable == len) {
+                    tap->getptr = (char *)chunk;
                 }
-                old = *(int *)(self + 0x4C);
+                old = self->bufferusage;
                 nw = old + len;
-                *(int *)(self + 0x4C) = nw;
-                *(char **)(self + 0x54) += len;
-                lim = *(int *)(self + 0x44);
+                self->bufferusage = nw;
+                self->datatail += len;
+                lim = self->greedylevel;
                 if (old < lim && nw >= lim) {
-                    *(int *)(self + 0x48) = 0;
+                    self->greedystate = 0;
                 }
             }
-            MUTEX_unlock_FED0(self + 4);
+            MUTEX_unlock_FED0(&self->mutex);
         }
         if (busy) {
-            if (*(int *)rec != *(int *)(current + 0x11C)) {
-                len = ALIGN64_FED0(len, *(char **)(self + 84));
-                *(int *)(rec + 4) = len | (channel << 24);
+            if (chunk->type != current->endchunkid) {
+                len = ALIGN64_FED0(len, self->datatail);
+                chunk->size = len | (tapnum << 24);
             }
             return 0;
         }
-        if (*(int *)rec == *(int *)(current + 0x11C)) {
+        if (chunk->type == current->endchunkid) {
             return 1;
         }
     }
@@ -3847,20 +3844,20 @@ int FILESYS_completeop_00D8(int) __asm__("FILESYS_completeop");
 void restartstream_00D8(void *, int) __asm__("restartstream");
 
 /**
- * Open callback of a stream: completes the open, stores the file handle (+0x16C) and, when it opened, restarts the
- * stream (restartstream with the high priority +0x40).
+ * Open callback of a stream: completes the open, stores the file handle (fhandle) and, when it opened, restarts the
+ * stream (restartstream with priorityhigh).
  *
  * @param request  the open operation's handle
  * @param status  its status
  * @param stream  the stream header
  */
-void opencallback(int request, int status, char *stream) {
-    int temp_2;
+void opencallback(int request, int status, STREAMHEADERtag *stream) {
+    int fileHandle;
 
-    temp_2 = FILESYS_completeop_00D8(*(int *)(stream + 0x174));
-    *(int *)(stream + 0x16C) = temp_2;
-    if (temp_2 != 0) {
-        restartstream_00D8(stream, *(int *)(stream + 0x40));
+    fileHandle = FILESYS_completeop_00D8(stream->fop);
+    stream->fhandle = fileHandle;
+    if (fileHandle != 0) {
+        restartstream_00D8(stream, stream->priorityhigh);
     }
 }
 #endif
@@ -3874,21 +3871,21 @@ void FILESYS_completeop_0118(int) __asm__("FILESYS_completeop");
 int FILESYS_open_0118(void *, int, int, void *) __asm__("FILESYS_open");
 
 /**
- * Close callback of a stream: completes the close and opens the next file (+0x6C, high priority +0x40) with callback
+ * Close callback of a stream: completes the close and opens the next file (fname, priorityhigh) with callback
  * opencallback.
  *
  * @param request  the close operation's handle
  * @param status  its status
  * @param stream  the stream header
  */
-void closecallback(int request, int status, char *stream) {
-    int temp_2;
+void closecallback(int request, int status, STREAMHEADERtag *stream) {
+    int opHandle;
 
-    FILESYS_completeop_0118(*(int *)(stream + 0x174));
-    temp_2 = FILESYS_open_0118(stream + 0x6C, 1, *(int *)(stream + 0x40), stream);
-    *(int *)(stream + 0x174) = temp_2;
-    if (temp_2 != 0) {
-        FILESYS_callbackop_0118(temp_2, (void *)opencallback);
+    FILESYS_completeop_0118(stream->fop);
+    opHandle = FILESYS_open_0118(stream->fname, 1, stream->priorityhigh, stream);
+    stream->fop = opHandle;
+    if (opHandle != 0) {
+        FILESYS_callbackop_0118(opHandle, (void *)opencallback);
     }
 }
 #endif
@@ -3901,47 +3898,47 @@ INCLUDE_ASM("ealib/seg_2DCAE8", readcallback);
 extern void MUTEX_lock_0170(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_0170(void *) __asm__("MUTEX_unlock");
 extern int fD310_0170(int) __asm__("FILESYS_completeop");
-extern int fFED0_0170(char *) __asm__("parsechunks");
-extern void f0270_0170(char *, int) __asm__("startnextrequest");
-extern void f03D0_0170(char *, int) __asm__("restartstream");
+extern int fFED0_0170(STREAMHEADERtag *) __asm__("parsechunks");
+extern void f0270_0170(STREAMHEADERtag *, int) __asm__("startnextrequest");
+extern void f03D0_0170(STREAMHEADERtag *, int) __asm__("restartstream");
 
 /**
  * Read callback of a stream: accounts the bytes read, hands complete chunks to the taps (parsechunks) and starts the
  * next read or the next request.
  *
- * A memory request (+0x10 == 1) counts its whole read size; a file request counts what the read returned
- * (FILESYS_completeop). The request is done at its end (+0x118), on a short read, at its end chunk, or when cancelled
- * (state 4); then it is marked done (3, unless cancelled) and startnextrequest runs. Otherwise the stream restarts at
- * one below the high priority (restartstream).
+ * A memory request (type 1) counts its whole readsize; a file request counts what the read returned
+ * (FILESYS_completeop). The request is done at its end (parm, the memory length), on a short read, at its end chunk,
+ * or when cancelled (state 4); then it is marked done (3, unless cancelled) and startnextrequest runs. Otherwise the
+ * stream restarts at one below priorityhigh (restartstream).
  *
  * @param request  the read operation's handle
  * @param status  its status
  * @param stream  the stream header
  */
-void readcallback(int request, int status, char *stream) {
-    char *current = *(char **)(stream + 0x60);
+void readcallback(int request, int status, STREAMHEADERtag *stream) {
+    STREAMREQUESTtag *current = stream->curreq;
     int n;
     int flag;
     int finished;
-    if (*(int *)(current + 0x10) == 1) {
-        n = *(int *)(stream + 0x178);
-        flag = *(int *)(stream + 0x170) + n >= *(int *)(current + 0x118);
+    if (current->type == 1) {
+        n = stream->readsize;
+        flag = stream->foffset + n >= current->parm;
     } else {
-        n = fD310_0170(*(int *)(stream + 0x174));
-        flag = n < *(int *)(stream + 0x178);
+        n = fD310_0170(stream->fop);
+        flag = n < stream->readsize;
     }
-    *(int *)(stream + 0x170) += n;
-    *(int *)(stream + 0x58) += n;
+    stream->foffset += n;
+    stream->dataend += n;
     finished = fFED0_0170(stream);
-    if (*(int *)(current + 4) == 4 || flag || finished != 0) {
-        if (*(int *)(current + 4) != 4) {
-            MUTEX_lock_0170(stream + 4);
-            if (*(int *)(current + 4) != 4) *(int *)(current + 4) = 3;
-            MUTEX_unlock_0170(stream + 4);
+    if (current->state == 4 || flag || finished != 0) {
+        if (current->state != 4) {
+            MUTEX_lock_0170(&stream->mutex);
+            if (current->state != 4) current->state = 3;
+            MUTEX_unlock_0170(&stream->mutex);
         }
-        f0270_0170(stream, *(int *)(stream + 0x40));
+        f0270_0170(stream, stream->priorityhigh);
     } else {
-        f03D0_0170(stream, *(int *)(stream + 0x40) - 1);
+        f03D0_0170(stream, stream->priorityhigh - 1);
     }
 }
 #endif
@@ -3957,7 +3954,7 @@ extern char *strcpy_0270(char *, char *) __asm__("strcpy");
 extern int FILESYS_open_0270(char *, int, int, void *) __asm__("FILESYS_open");
 extern void cb_00D8_0270(void) __asm__("opencallback");
 extern void cb_0118_0270(void) __asm__("closecallback");
-extern void restartstream_0270(char *, int) __asm__("restartstream");
+extern void restartstream_0270(STREAMHEADERtag *, int) __asm__("restartstream");
 
 /**
  * Moves a stream on to its next queued file request.
@@ -3968,53 +3965,53 @@ extern void restartstream_0270(char *, int) __asm__("restartstream");
  *
  * @param priority  queue priority for the file operations
  */
-void startnextrequest(char *self, int priority) {
-    char *job;
+void startnextrequest(STREAMHEADERtag *self, int priority) {
+    STREAMREQUESTtag *job;
     int none;
-    int tk;
+    char *tail;
     job = 0;
-    MUTEX_lock(self + 4);
-    if (*(char **)(self + 0x60) == 0) {
+    MUTEX_lock(&self->mutex);
+    if (self->curreq == 0) {
         none = 1;
     } else {
-        char *cur = *(char **)(self + 0x60);
+        STREAMREQUESTtag *cur = self->curreq;
         none = 0;
-        if (*(int *)(cur + 4) != 1) {
-            if (*(int *)(cur + 0xC) == 0) {
+        if (cur->state != 1) {
+            if (cur->next == 0) {
                 none = 1;
             } else {
-                *(int *)(self + 0x60) = *(int *)(cur + 0xC);
+                self->curreq = cur->next;
             }
         }
     }
     if (none) {
-        *(volatile int *)(self + 0x38) = 0;
+        self->state = 0;
     } else {
-        job = *(char **)(self + 0x60);
-        tk = *(int *)(self + 0x54);
-        *(int *)(job + 4) = 2;
-        *(int *)(job + 0x120) = tk;
+        job = self->curreq;
+        tail = self->datatail;
+        job->state = 2;
+        job->datastart = tail;
     }
-    MUTEX_unlock_0270(self + 4);
+    MUTEX_unlock_0270(&self->mutex);
     if (!none) {
-        *(int *)(self + 0x58) = *(int *)(self + 0x54);
-        if (*(int *)(job + 0x10) == 1) {
-            *(int *)(self + 0x170) = 0;
+        self->dataend = self->datatail;
+        if (job->type == 1) {
+            self->foffset = 0;
         } else {
-            char *nm = self + 0x6C;
+            char *nm = self->fname;
             int opHandle;
-            *(int *)(self + 0x170) = *(int *)(job + 0x118);
-            if (strcmp_0270(job + 0x14, nm) != 0) {
-                strcpy_0270(nm, job + 0x14);
-                if (*(int *)(self + 0x16C) == 0) {
+            self->foffset = job->parm;
+            if (strcmp_0270(job->fname, nm) != 0) {
+                strcpy_0270(nm, job->fname);
+                if (self->fhandle == 0) {
                     opHandle = FILESYS_open_0270(nm, 1, priority, self);
-                    *(int *)(self + 0x174) = opHandle;
+                    self->fop = opHandle;
                     if (opHandle != 0) {
                         FILESYS_callbackop(opHandle, cb_00D8_0270);
                     }
                 } else {
-                    opHandle = FILESYS_close(*(int *)(self + 0x16C), priority, self);
-                    *(int *)(self + 0x174) = opHandle;
+                    opHandle = FILESYS_close(self->fhandle, priority, self);
+                    self->fop = opHandle;
                     if (opHandle != 0) {
                         FILESYS_callbackop(opHandle, cb_0118_0270);
                     }
@@ -4172,11 +4169,11 @@ extern void MUTEX_create_06D8(void *) __asm__("MUTEX_create");
 extern void MEM_clear_06D8(void *, int) __asm__("MEM_clear");
 
 /**
- * Creates a stream in a caller-supplied buffer; returns its handle (0 on failure).
+ * Creates a stream in a caller-supplied buffer; returns its handle (the first tap; 0 on failure).
  *
  * The space left after STREAM_overhead's bookkeeping must hold at least 0x1800 bytes of data, and the slot count
- * must be 2..0x100. Lays out the header ('STRM'), request slots, filter and tap tables, creates the mutex and
- * clears the tables with MEM_clear.
+ * must be 2..0x100. Lays out the header ('STRM'), request slots, filter and tap tables, creates the mutex, clears the
+ * file name with MEM_clear and chains the requests into the free list.
  *
  * @param nslots  the number of requests
  * @param nq      the number of filters
@@ -4187,10 +4184,11 @@ extern void MEM_clear_06D8(void *, int) __asm__("MEM_clear");
  */
 void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
     int avail;
-    char *slots;
-    char *qs;
-    char *reqs;
-    int data;
+    STREAMHEADERtag *strm;
+    STREAMREQUESTtag *slots;
+    FILTERSTRUCTtag *qs;
+    TAPSTRUCTtag *reqs;
+    char *data;
     int i;
 
     avail = size - STREAM_overhead(nslots, nq, nreq);
@@ -4209,74 +4207,77 @@ void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
     if (nreq <= 0 || nq < nreq) {
         return 0;
     }
-    *(int *)mem = 0x4D525453;
-    MUTEX_create_06D8(mem + 4);
+    strm = (STREAMHEADERtag *)mem;
+    strm->id = 0x4D525453;
+    MUTEX_create_06D8(&strm->mutex);
     /* PORT: pointer arithmetic done in int */
-    slots = mem + 0x180;
-    *(char **)(mem + 0x14) = slots;
-    *(int *)(mem + 0x18) = nslots;
-    qs = (char *)(nslots * 0x124 + (int)slots);
-    *(char **)(mem + 0x1C) = qs;
-    *(int *)(mem + 0x20) = nq;
-    reqs = (char *)(nq * 0xC + (int)qs);
-    *(char **)(mem + 0x24) = reqs;
-    *(int *)(mem + 0x28) = nreq;
-    data = (((int)reqs + nreq * 0x10) & ~0x3F) + 0x40;
-    *(int *)(mem + 0x2C) = data;
-    *(int *)(mem + 0x30) = data;
-    *(char **)(mem + 0x34) = mem + size;
-    *(volatile int *)(mem + 0x38) = 0;
-    *(int *)(mem + 0x3C) = 150;
-    *(int *)(mem + 0x40) = 50;
-    *(int *)(mem + 0x44) = 0;
-    *(int *)(mem + 0x48) = 0;
-    *(int *)(mem + 0x4C) = 0;
-    *(int *)(mem + 0x50) = data;
-    *(int *)(mem + 0x54) = data;
-    *(int *)(mem + 0x58) = data;
-    *(int *)(mem + 0x5C) = 0;
-    *(int *)(mem + 0x60) = 0;
-    *(int *)(mem + 0x64) = 0;
-    *(char **)(mem + 0x68) = slots;
-    MEM_clear_06D8(mem + 0x6C, 0x100);
-    *(int *)(mem + 0x16C) = 0;
+    // ORIGINAL-PTR: carves one caller-supplied block (allocator-style): the request / filter / tap arrays follow the
+    // 0x180-byte STREAMHEADERtag and the data area starts at the next 64-byte boundary (STREAM_overhead's sizes).
+    slots = (STREAMREQUESTtag *)(mem + 0x180);
+    strm->request = slots;
+    strm->requests = nslots;
+    qs = (FILTERSTRUCTtag *)&slots[nslots];
+    strm->filter = qs;
+    strm->filters = nq;
+    reqs = (TAPSTRUCTtag *)&qs[nq];
+    strm->tap = reqs;
+    strm->taps = nreq;
+    data = (char *)(((int)&reqs[nreq] & ~0x3F) + 0x40);
+    strm->actualbufferstart = data;
+    strm->bufferstart = data;
+    strm->bufferend = mem + size;
+    strm->state = 0;
+    strm->prioritylow = 150;
+    strm->priorityhigh = 50;
+    strm->greedylevel = 0;
+    strm->greedystate = 0;
+    strm->bufferusage = 0;
+    strm->datastart = data;
+    strm->datatail = data;
+    strm->dataend = data;
+    strm->firstreq = 0;
+    strm->curreq = 0;
+    strm->lastreq = 0;
+    strm->freereq = slots;
+    MEM_clear_06D8(strm->fname, 0x100);
+    strm->fhandle = 0;
     if (avail < 0x4000) {
-        *(int *)(mem + 0x17C) = 0x800;
+        strm->readblocksize = 0x800;
     } else if (avail < 0x8000) {
-        *(int *)(mem + 0x17C) = 0x1000;
+        strm->readblocksize = 0x1000;
     } else if (avail < 0x10000) {
-        *(int *)(mem + 0x17C) = 0x2000;
+        strm->readblocksize = 0x2000;
     } else if (avail < 0x20000) {
-        *(int *)(mem + 0x17C) = 0x4000;
+        strm->readblocksize = 0x4000;
     } else {
-        *(int *)(mem + 0x17C) = 0x8000;
+        strm->readblocksize = 0x8000;
     }
     for (i = 0; i < nslots; i++) {
-        char *entry;
+        STREAMREQUESTtag *entry;
 
-        entry = *(char **)(mem + 0x14) + i * 292;
-        *(int *)(entry + 0) = i;
-        *(int *)(entry + 4) = 0;
-        *(char **)(entry + 0xC) = *(char **)(mem + 0x14) + (i + 1) * 292;
+        entry = &strm->request[i];
+        entry->id = i;
+        entry->state = 0;
+        entry->next = &strm->request[i + 1];
     }
-    *(char **)(*(char **)(mem + 0x14) + (nslots - 1) * 0x124 + 0xC) = 0;
+    strm->request[nslots - 1].next = 0;
     for (i = 0; i < nq; i++) {
-        char *entry;
+        FILTERSTRUCTtag *entry;
 
-        entry = *(char **)(mem + 0x1C) + i * 0xC;
-        *(int *)(entry + 0) = 0;
-        *(int *)(entry + 4) = 0;
-        *(int *)(entry + 8) = 1;
+        entry = &strm->filter[i];
+        entry->mask = 0;
+        entry->value = 0;
+        entry->tapnum = 1;
     }
     for (i = 0; i < nreq; i++) {
-        char *entry;
+        TAPSTRUCTtag *entry;
 
-        entry = *(char **)(mem + 0x24) + i * 0x10;
-        *(char **)(entry + 0) = mem;
-        *(int *)(entry + 4) = i + 1;
-        *(int *)(entry + 8) = 0;
+        entry = &strm->tap[i];
+        entry->stream = strm;
+        entry->tapnum = i + 1;
+        entry->gettable = 0;
     }
-    return *(void **)(mem + 0x24);
+    return strm->tap;
 }
 #endif
 
@@ -4284,7 +4285,6 @@ void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
 INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_setfilter);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct T_0948 { int a, b, c; };
 extern int fFBD0_0948(int, void *, void *) __asm__("validatehandle");
 
 /**
@@ -4299,16 +4299,16 @@ extern int fFBD0_0948(int, void *, void *) __asm__("validatehandle");
  * @param tapNum  the tap number
  */
 void STREAM_setfilter(int handle, int channel, int typeMask, int typeValue, int tapNum) {
-    char *stream;
-    int entry;
-    if (fFBD0_0948(handle, &stream, &entry) == 0 && channel > 0) {
-        int count = *(int *)(stream + 0x20);
-        if (count >= channel && (channel != count || (typeMask | typeValue) == 0) && (tapNum > 0 || tapNum == -1 || tapNum == -2)
-            && *(int *)(stream + 0x28) >= tapNum && *(volatile int *)(stream + 0x38) == 0) {
-            struct T_0948 *chanInfo = &(*(struct T_0948 **)(stream + 0x1C))[channel - 1];
-            chanInfo->a = typeMask;
-            chanInfo->b = typeValue;
-            chanInfo->c = tapNum;
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
+    if (fFBD0_0948(handle, &stream, &tap) == 0 && channel > 0) {
+        int count = stream->filters;
+        if (count >= channel && (channel != count || (typeMask | typeValue) == 0)
+            && (tapNum > 0 || tapNum == -1 || tapNum == -2) && stream->taps >= tapNum && stream->state == 0) {
+            FILTERSTRUCTtag *filter = &stream->filter[channel - 1];
+            filter->mask = typeMask;
+            filter->value = typeValue;
+            filter->tapnum = tapNum;
         }
     }
 }
@@ -4381,20 +4381,20 @@ extern int validatehandle(int, void *, void *);
 extern void STREAM_setgreedystate(int, int);
 
 /**
- * Sets a stream's greedy level (+0x44); when the buffer usage (+0x4C) moves across it, the greedy state follows
+ * Sets a stream's greedylevel; when the bufferusage moves across it, the greedy state follows
  * (STREAM_setgreedystate).
  *
  * @param handle  the stream handle
  * @param threshold  the new greedy level in bytes
  */
 void STREAM_setgreedylevel(int handle, int threshold) {
-    char *stream;
-    int entry;
-    if (validatehandle(handle, &stream, &entry) == 0) {
-        int old = *(int *)(stream + 0x44);
-        *(int *)(stream + 0x44) = threshold;
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
+    if (validatehandle(handle, &stream, &tap) == 0) {
+        int old = stream->greedylevel;
+        stream->greedylevel = threshold;
         {
-            int lim = *(int *)(stream + 0x4C);
+            int lim = stream->bufferusage;
             if ((lim < old) != (lim < threshold)) {
                 STREAM_setgreedystate(handle, lim < threshold);
             }
@@ -4436,25 +4436,24 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_taphandle);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int validatehandle_0BF8(int, void *, void *) __asm__("validatehandle");
 
-struct E_0BF8 { int w[4]; };
-
 /**
- * Returns the handle of a stream's tap @p k (1-based; its 0x10-byte entry at +0x24), or 0 for a bad handle or tap.
+ * Returns the handle of a stream's tap @p k (1-based; its entry in the tap array), or 0 for a bad handle or tap.
  *
  * @param handle  the stream handle
  * @param k  the tap number
  * @return the tap handle, or 0
  */
-struct E_0BF8 *STREAM_taphandle(int handle, int k) {
-    char *loc[2];
+TAPSTRUCTtag *STREAM_taphandle(int handle, int k) {
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle_0BF8(handle, &loc[0], &loc[1]) != 0) {
+    if (validatehandle_0BF8(handle, &stream, &tap) != 0) {
         return 0;
     }
-    if (k <= 0 || *(int *)(loc[0] + 0x28) < k) {
+    if (k <= 0 || stream->taps < k) {
         return 0;
     }
-    return &(*(struct E_0BF8 **)(loc[0] + 0x24))[k - 1];
+    return &stream->tap[k - 1];
 }
 #endif
 
@@ -4464,18 +4463,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_tapnum);
 extern int validatehandle(int, void *, void *);
 
 /**
- * Returns the tap number (+0x4) of a tap handle, or 0 for a bad handle.
+ * Returns the tap number (tapnum) of a tap handle, or 0 for a bad handle.
  *
  * @param handle  the tap handle
  * @return the tap number, or 0
  */
 int STREAM_tapnum(int handle) {
-    int loc[2];
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle(handle, &loc[0], &loc[1]) != 0) {
+    if (validatehandle(handle, &stream, &tap) != 0) {
         return 0;
     }
-    return *(int *)((char*)loc[1] + 4);
+    return tap->tapnum;
 }
 #endif
 
@@ -4483,13 +4483,12 @@ int STREAM_tapnum(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_queuefile);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct L_0C88 { char *p; int q; };
 extern int validatehandle_0C88(int, void *, void *) __asm__("validatehandle");
-extern char *getfreerequest_0C88(char *) __asm__("getfreerequest");
-extern void queuerequest_0C88(char *, char *) __asm__("queuerequest");
-extern void startnextrequest_0C88(char *, int) __asm__("startnextrequest");
-extern void MUTEX_lock_0C88(char *) __asm__("MUTEX_lock");
-extern void MUTEX_unlock_0C88(char *) __asm__("MUTEX_unlock");
+extern STREAMREQUESTtag *getfreerequest_0C88(STREAMHEADERtag *) __asm__("getfreerequest");
+extern void queuerequest_0C88(STREAMHEADERtag *, STREAMREQUESTtag *) __asm__("queuerequest");
+extern void startnextrequest_0C88(STREAMHEADERtag *, int) __asm__("startnextrequest");
+extern void MUTEX_lock_0C88(MUTEX *) __asm__("MUTEX_lock");
+extern void MUTEX_unlock_0C88(MUTEX *) __asm__("MUTEX_unlock");
 
 /**
  * Queues a file (from an offset up to an end chunk id) for streaming; returns the request id (0 on failure).
@@ -4499,40 +4498,41 @@ extern void MUTEX_unlock_0C88(char *) __asm__("MUTEX_unlock");
  *
  * @param handle    the stream handle
  * @param name  the file name
- * @param x     the offset to start at
- * @param y     the chunk id to stop at
+ * @param offset  the offset to start at
+ * @param endchunkid  the chunk id to stop at
  * @return the request id, or 0
  */
-int STREAM_queuefile(int handle, char *name, int x, int y) {
-    struct L_0C88 streamRefs;
-    char *node;
+int STREAM_queuefile(int handle, char *name, int offset, int endchunkid) {
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
+    STREAMREQUESTtag *node;
     int old;
-    if (validatehandle_0C88(handle, &streamRefs.p, &streamRefs.q) != 0) {
+    if (validatehandle_0C88(handle, &stream, &tap) != 0) {
         return 0;
     }
-    node = getfreerequest_0C88(streamRefs.p);
+    node = getfreerequest_0C88(stream);
     if (node == 0) {
         return 0;
     }
-    *(int *)(node + 0x10) = 0;
-    strncpy(node + 0x14, name, 0xFF);
-    *(int *)(node + 0x118) = x;
-    *(int *)(node + 0x11C) = y;
-    queuerequest_0C88(streamRefs.p, node);
-    MUTEX_lock_0C88(streamRefs.p + 4);
-    old = *(volatile int *)(streamRefs.p + 0x38);
+    node->type = 0;
+    strncpy(node->fname, name, 0xFF);
+    node->parm = offset;
+    node->endchunkid = endchunkid;
+    queuerequest_0C88(stream, node);
+    MUTEX_lock_0C88(&stream->mutex);
+    old = stream->state;
     if (old == 0) {
-        *(volatile int *)(streamRefs.p + 0x38) = 1;
+        stream->state = 1;
     }
-    MUTEX_unlock_0C88(streamRefs.p + 4);
+    MUTEX_unlock_0C88(&stream->mutex);
     if (old == 0) {
-        if (*(int *)(streamRefs.p + 0x48) != 0) {
-            startnextrequest_0C88(streamRefs.p, *(int *)(streamRefs.p + 0x40));
+        if (stream->greedystate != 0) {
+            startnextrequest_0C88(stream, stream->priorityhigh);
         } else {
-            startnextrequest_0C88(streamRefs.p, *(int *)(streamRefs.p + 0x3C));
+            startnextrequest_0C88(stream, stream->prioritylow);
         }
     }
-    return *(int *)node;
+    return node->id;
 }
 #endif
 
@@ -4540,19 +4540,18 @@ int STREAM_queuefile(int handle, char *name, int x, int y) {
 INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_queuemem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int validatehandle_0D80(int, char **, int *) __asm__("validatehandle");
-extern char *getfreerequest_0D80(char *) __asm__("getfreerequest");
-extern void queuerequest_0D80(char *, char *) __asm__("queuerequest");
-extern void MUTEX_lock_0D80(char *) __asm__("MUTEX_lock");
-extern void MUTEX_unlock_0D80(char *) __asm__("MUTEX_unlock");
-extern void startnextrequest_0D80(char *, int) __asm__("startnextrequest");
+extern int validatehandle_0D80(int, STREAMHEADERtag **, TAPSTRUCTtag **) __asm__("validatehandle");
+extern STREAMREQUESTtag *getfreerequest_0D80(STREAMHEADERtag *) __asm__("getfreerequest");
+extern void queuerequest_0D80(STREAMHEADERtag *, STREAMREQUESTtag *) __asm__("queuerequest");
+extern void MUTEX_lock_0D80(MUTEX *) __asm__("MUTEX_lock");
+extern void MUTEX_unlock_0D80(MUTEX *) __asm__("MUTEX_unlock");
+extern void startnextrequest_0D80(STREAMHEADERtag *, int) __asm__("startnextrequest");
 
 /**
  * Queues a memory block on a stream; returns the request id, or 0 for a bad handle or no free request.
  *
- * With @p n 0 the length runs up to and including the chunk whose type is @p key. The request (memory kind, +0x10 = 1)
- * keeps the data (+0x114), length (+0x118) and end chunk type (+0x11C); an idle stream starts reading
- * (startnextrequest).
+ * With @p n 0 the length runs up to and including the chunk whose type is @p key. The request (memory type 1) keeps
+ * the data (address), length (parm) and end chunk type (endchunkid); an idle stream starts reading (startnextrequest).
  *
  * @param handle  the stream handle
  * @param data  the chunk data
@@ -4560,37 +4559,38 @@ extern void startnextrequest_0D80(char *, int) __asm__("startnextrequest");
  * @param key  the end chunk type
  * @return the request id, or 0
  */
-int STREAM_queuemem(int handle, int *data, int n, int key) {
-    char *stream;
-    int entry;
-    char *request;
-    int *chunk;
+int STREAM_queuemem(int handle, char *data, int n, int key) {
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
+    STREAMREQUESTtag *request;
+    STREAMCHUNKHDR *chunk;
     int chunkLen, prevState;
-    if (validatehandle_0D80(handle, &stream, &entry) != 0) return 0;
+    if (validatehandle_0D80(handle, &stream, &tap) != 0) return 0;
     request = getfreerequest_0D80(stream);
     if (request == 0) return 0;
     if (n == 0) {
-        chunk = data;
-        if (*chunk != key) {
+        chunk = (STREAMCHUNKHDR *)data;
+        if (chunk->type != key) {
             do {
-                chunkLen = chunk[1];
-                chunk = (int *)((char *)chunk + chunkLen);
+                chunkLen = chunk->size;
+                // ORIGINAL-PTR: stream chunks are variable-length records ({type, size} header, size bytes each).
+                chunk = (STREAMCHUNKHDR *)((char *)chunk + chunkLen);
                 n += chunkLen;
-            } while (*chunk != key);
+            } while (chunk->type != key);
         }
-        n += chunk[1];
+        n += chunk->size;
     }
-    *(int *)(request + 0x118) = n;
-    *(int **)(request + 0x114) = data;
-    *(int *)(request + 0x11C) = key;
-    *(int *)(request + 0x10) = 1;
+    request->parm = n;
+    request->address = data;
+    request->endchunkid = key;
+    request->type = 1;
     queuerequest_0D80(stream, request);
-    MUTEX_lock_0D80(stream + 4);
-    prevState = *(volatile int *)(stream + 0x38);
-    if (prevState == 0) *(volatile int *)(stream + 0x38) = 1;
-    MUTEX_unlock_0D80(stream + 4);
+    MUTEX_lock_0D80(&stream->mutex);
+    prevState = stream->state;
+    if (prevState == 0) stream->state = 1;
+    MUTEX_unlock_0D80(&stream->mutex);
     if (prevState == 0) startnextrequest_0D80(stream, 0);
-    return *(int *)request;
+    return request->id;
 }
 #endif
 
@@ -4599,8 +4599,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_cancelrequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_unlock_0E90(void *) __asm__("MUTEX_unlock");
-extern int STREAM_get_0E90(char *) __asm__("STREAM_get");
-extern void STREAM_release_0E90(char *, int) __asm__("STREAM_release");
+extern STREAMCHUNKHDR *STREAM_get_0E90(TAPSTRUCTtag *) __asm__("STREAM_get");
+extern void STREAM_release_0E90(TAPSTRUCTtag *, STREAMCHUNKHDR *) __asm__("STREAM_release");
 
 /**
  * Cancels a stream request and throws away the chunks it already delivered.
@@ -4614,13 +4614,13 @@ extern void STREAM_release_0E90(char *, int) __asm__("STREAM_release");
  * @param id  the request id
  */
 void STREAM_cancelrequest(int hnd, int id) {
-    char *st;
-    char *tap;
-    int *head;
-    int *from;
-    int *to;
-    char *request;
-    char *nx;
+    STREAMHEADERtag *st;
+    TAPSTRUCTtag *tap;
+    char *head;
+    char *from;
+    char *to;
+    STREAMREQUESTtag *request;
+    STREAMREQUESTtag *nx;
     int fail;
     int i;
 
@@ -4630,64 +4630,65 @@ void STREAM_cancelrequest(int hnd, int id) {
     if (validatehandle(hnd, &st, &tap) != 0) {
         return;
     }
-    MUTEX_lock(st + 4);
+    MUTEX_lock(&st->mutex);
     request = locaterequest1(st, id);
-    if (request == 0 || *(int *)(request + 4) == 4) {
+    if (request == 0 || request->state == 4) {
         fail = 1;
-    } else if (*(int *)(request + 4) == 1) {
+    } else if (request->state == 1) {
         freerequest(st, request);
         fail = 1;
     } else {
-        *(int *)(request + 4) = 4;
-        head = *(int **)(st + 0x50);
-        if (request == *(char **)(st + 0x5C)) {
+        request->state = 4;
+        head = st->datastart;
+        if (request == st->firstreq) {
             from = head;
         } else {
-            from = *(int **)(request + 0x120);
+            from = request->datastart;
         }
-        nx = *(char **)(request + 0xC);
-        if (nx == 0 || *(int *)(nx + 4) == 1) {
-            to = *(int **)(st + 0x54);
+        nx = request->next;
+        if (nx == 0 || nx->state == 1) {
+            to = st->datatail;
         } else {
-            to = *(int **)(nx + 0x120);
+            to = nx->datastart;
         }
         fail = 0;
     }
-    MUTEX_unlock_0E90(st + 4);
+    MUTEX_unlock_0E90(&st->mutex);
     if (fail) {
         return;
     }
-    for (i = 0; i < *(int *)(st + 0x28); i++) {
-        tap = *(char **)(st + 0x24) + i * 0x10;
-        if (*(int *)(tap + 8) <= 0) {
+    for (i = 0; i < st->taps; i++) {
+        tap = &st->tap[i];
+        if (tap->gettable <= 0) {
             continue;
         }
-        if (inbetween((unsigned int)head, (unsigned int)from, *(unsigned int *)(tap + 0xC))) {
-            int *chunk = from;
-            int tag = *(int *)(tap + 4) << 24;
+        if (inbetween((unsigned int)head, (unsigned int)from, (unsigned int)tap->getptr)) {
+            STREAMCHUNKHDR *chunk = (STREAMCHUNKHDR *)from;
+            int tag = tap->tapnum << 24;
             int len;
 
-            while (chunk != to) {
-                if (chunk[0] == -1) {
-                    chunk = *(int **)(st + 0x30);
+            while ((char *)chunk != to) {
+                if (chunk->type == -1) {
+                    chunk = (STREAMCHUNKHDR *)st->bufferstart;
                 } else {
-                    len = chunk[1] & 0xFFFFFF;
-                    if ((chunk[1] & 0xFF000000) == tag) {
-                        MUTEX_lock(st + 4);
-                        *(int *)(tap + 8) -= len;
-                        MUTEX_unlock_0E90(st + 4);
+                    len = chunk->size & 0xFFFFFF;
+                    if ((chunk->size & 0xFF000000) == tag) {
+                        MUTEX_lock(&st->mutex);
+                        tap->gettable -= len;
+                        MUTEX_unlock_0E90(&st->mutex);
                         decbufferusage(st, len);
-                        chunk[0] = -2;
-                        chunk[1] = len;
+                        chunk->type = -2;
+                        chunk->size = len;
                     }
-                    chunk = (int *)((char *)chunk + len);
+                    // ORIGINAL-PTR: stream chunks are variable-length records ({type, size} header, size bytes each).
+                    chunk = (STREAMCHUNKHDR *)((char *)chunk + len);
                 }
             }
-        } else if (inbetween((unsigned int)from, (unsigned int)to, *(unsigned int *)(tap + 0xC))) {
+        } else if (inbetween((unsigned int)from, (unsigned int)to, (unsigned int)tap->getptr)) {
             do {
-                int n = STREAM_get_0E90(tap);
-                STREAM_release_0E90(tap, n);
-            } while (*(int *)(tap + 8) > 0 && inbetween((unsigned int)from, (unsigned int)to, *(unsigned int *)(tap + 0xC)));
+                STREAMCHUNKHDR *taken = STREAM_get_0E90(tap);
+                STREAM_release_0E90(tap, taken);
+            } while (tap->gettable > 0 && inbetween((unsigned int)from, (unsigned int)to, (unsigned int)tap->getptr));
         }
     }
 }
@@ -4844,34 +4845,34 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_release);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int fFBD0_13E8(int, void *, void *) __asm__("validatehandle");
-extern void fFC48_13E8(char *, int) __asm__("decbufferusage");
-extern void fMLK_13E8(char *) __asm__("MUTEX_lock");
-extern void fMUL_13E8(char *) __asm__("MUTEX_unlock");
-extern void f03D0_13E8(char *, int) __asm__("restartstream");
+extern void fFC48_13E8(STREAMHEADERtag *, int) __asm__("decbufferusage");
+extern void fMLK_13E8(MUTEX *) __asm__("MUTEX_lock");
+extern void fMUL_13E8(MUTEX *) __asm__("MUTEX_unlock");
+extern void f03D0_13E8(STREAMHEADERtag *, int) __asm__("restartstream");
 
 /**
  * Gives a chunk back to its stream: marks it released (-2), lowers the buffer usage (decbufferusage) and restarts a
- * stalled stream (state 2 to 1; restartstream with the high priority when greedy, else the low one). Chunks outside the
- * buffer or already released are ignored.
+ * stalled stream (state 2 to 1; restartstream with priorityhigh when greedy, else prioritylow). Chunks outside the
+ * buffer (bufferstart .. bufferend - 8) or already released are ignored.
  *
  * @param handle  the tap handle
  * @param chunk  the chunk
  */
-void STREAM_release(int handle, unsigned int chunk) {
-    char *stream;
-    int entry;
+void STREAM_release(int handle, STREAMCHUNKHDR *chunk) {
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
     int state;
-    if (fFBD0_13E8(handle, &stream, &entry) == 0 && chunk >= *(unsigned int *)(stream + 0x30)
-        && (unsigned int)(*(int *)(stream + 0x34) - 8) >= chunk && *(int *)chunk != -2) {
-        *(int *)chunk = -2;
-        fFC48_13E8(stream, *(int *)(chunk + 4));
-        fMLK_13E8(stream + 4);
-        state = *(volatile int *)(stream + 0x38);
-        if (state == 2) *(volatile int *)(stream + 0x38) = 1;
-        fMUL_13E8(stream + 4);
+    if (fFBD0_13E8(handle, &stream, &tap) == 0 && (char *)chunk >= stream->bufferstart
+        && stream->bufferend - 8 >= (char *)chunk && chunk->type != -2) {
+        chunk->type = -2;
+        fFC48_13E8(stream, chunk->size);
+        fMLK_13E8(&stream->mutex);
+        state = stream->state;
+        if (state == 2) stream->state = 1;
+        fMUL_13E8(&stream->mutex);
         if (state == 2) {
-            if (*(int *)(stream + 0x48) != 0) f03D0_13E8(stream, *(int *)(stream + 0x40));
-            else f03D0_13E8(stream, *(int *)(stream + 0x3C));
+            if (stream->greedystate != 0) f03D0_13E8(stream, stream->priorityhigh);
+            else f03D0_13E8(stream, stream->prioritylow);
         }
     }
 }
@@ -4883,18 +4884,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_gettable);
 extern int validatehandle(int, void *, void *);
 
 /**
- * Returns the bytes a tap has ready (+0x8), or 0 for a bad handle.
+ * Returns the bytes a tap has ready (gettable), or 0 for a bad handle.
  *
  * @param handle  the tap handle
  * @return the byte count
  */
 int STREAM_gettable(int handle) {
-    int loc[2];
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle(handle, &loc[0], &loc[1]) != 0) {
+    if (validatehandle(handle, &stream, &tap) != 0) {
         return 0;
     }
-    return *(int *)((char*)loc[1] + 8);
+    return tap->gettable;
 }
 #endif
 
@@ -4904,18 +4906,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_state);
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 /**
- * Returns a stream's state (+0x38: 0 idle, 1 reading, 2 stalled for room), or 0 for a bad handle.
+ * Returns a stream's state (0 idle, 1 reading, 2 stalled for room), or 0 for a bad handle.
  *
  * @param handle  the stream or tap handle
  * @return the state
  */
 int STREAM_state(int handle) {
-    int loc[2];
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle(handle, &loc[0], &loc[1]) != 0) {
+    if (validatehandle(handle, &stream, &tap) != 0) {
         return 0;
     }
-    return *(volatile int *)((char*)loc[0] + 0x38);
+    return stream->state;
 }
 #endif
 
@@ -4923,19 +4926,20 @@ int STREAM_state(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_isendofstream);
 #ifdef SKIP_ASM
 /**
- * Returns whether a stream has ended for a tap: the stream is idle and the tap has nothing left (+0x8 == 0).
+ * Returns whether a stream has ended for a tap: the stream is idle and the tap has nothing left (gettable 0).
  *
  * @param handle  the tap handle
  * @return 1 at the end, else 0 (also for a bad handle)
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int STREAM_isendofstream(int handle) {
-    int loc[2];
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle(handle, &loc[0], &loc[1]) != 0) {
+    if (validatehandle(handle, &stream, &tap) != 0) {
         return 0;
     }
-    return *(volatile int *)((char*)loc[0] + 0x38) == 0 && *(int *)((char*)loc[1] + 8) == 0;
+    return stream->state == 0 && tap->gettable == 0;
 }
 #endif
 
@@ -4946,19 +4950,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_buffersize);
 int validatehandle_1580(void *, void *, void *) __asm__("validatehandle");
 
 /**
- * Returns a stream's buffer size: buffer end (+0x34) minus the actual buffer start (+0x2C); 0 for a bad handle.
+ * Returns a stream's buffer size: bufferend minus actualbufferstart; 0 for a bad handle.
  *
  * @param handle  the stream handle
  * @return the size in bytes
  */
 int STREAM_buffersize(void *handle) {
-    char *stream;
-    int entry;
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle_1580(handle, &stream, &entry) != 0) {
+    if (validatehandle_1580(handle, &stream, &tap) != 0) {
         return 0;
     }
-    return *(int *)(stream + 0x34) - *(int *)(stream + 0x2C);
+    return stream->bufferend - stream->actualbufferstart;
 }
 #endif
 
@@ -4968,18 +4972,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_bufferusage);
 extern int validatehandle(int, void *, void *);
 
 /**
- * Returns a stream's buffer usage (+0x4C), or 0 for a bad handle.
+ * Returns a stream's bufferusage, or 0 for a bad handle.
  *
  * @param handle  the stream handle
  * @return the bytes in use
  */
 int STREAM_bufferusage(int handle) {
-    int loc[2];
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
 
-    if (validatehandle(handle, &loc[0], &loc[1]) != 0) {
+    if (validatehandle(handle, &stream, &tap) != 0) {
         return 0;
     }
-    return *(int *)((char*)loc[0] + 0x4C);
+    return stream->bufferusage;
 }
 #endif
 
@@ -5026,26 +5031,25 @@ int STREAM_taprequestid(int tapHandle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_requeststate);
 #ifdef SKIP_ASM
 /**
- * Returns the state (+0x4) of a stream request (1 queued, 3 done, 4 cancelled), or 0 for a bad handle or an unknown
- * request.
+ * Returns the state of a stream request (1 queued, 3 done, 4 cancelled), or 0 for a bad handle or an unknown request.
  *
  * @param handle  the stream handle
  * @param requestId  the request id
  * @return the state, or 0
  */
 int STREAM_requeststate(int handle, int requestId) {
-    int *stream;
-    int *entry;
-    int *request;
+    STREAMHEADERtag *stream;
+    TAPSTRUCTtag *tap;
+    STREAMREQUESTtag *request;
 
-    if (validatehandle(handle, &stream, &entry) != 0) {
+    if (validatehandle(handle, &stream, &tap) != 0) {
         return 0;
     }
     request = locaterequest1(stream, requestId);
     if (request == 0) {
         return 0;
     }
-    return request[1];
+    return request->state;
 }
 #endif
 
@@ -5262,30 +5266,29 @@ int loadfilesizeatom(int priority, int *loadArgs) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadsize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { int a; int b; int sz; int c; int d; } FLS_args_1A10;
 extern int FILESYS_atomic_1A10(void (*)(void), int, int, void*) __asm__("FILESYS_atomic");
 extern int sync_priority_0C38[] __asm__("sync_priority");
 extern void loadfilesizeatom_1948(void) __asm__("loadfilesizeatom");
 
 /**
  * Loads a whole file into allocated memory and reports its size: runs loadfilesizeatom through FILESYS_atomic at the sync
- * priority (fourth word 1, flags in word 4).
+ * priority with a FILEREQUEST (abortflag 1, the allocation flags; the size comes back in parm).
  *
  * @param fileName  the path
  * @param sizeOut  receives the size, or 0
  * @param memFlags  the allocation flags
  * @return the data, or 0
  */
-int FILE_loadsize(int fileName, int *sizeOut, int memFlags) {
-    FLS_args_1A10 loadArgs;
+int FILE_loadsize(const char *fileName, int *sizeOut, int memFlags) {
+    FILEREQUEST loadArgs;
     int data;
 
-    loadArgs.a = fileName;
-    loadArgs.c = 1;
-    loadArgs.d = memFlags;
+    loadArgs.name = fileName;
+    loadArgs.abortflag = 1;
+    loadArgs.flags = memFlags;
     data = FILESYS_atomic_1A10(loadfilesizeatom_1948, 0, sync_priority_0C38[0], &loadArgs);
     if (sizeOut != 0) {
-        *sizeOut = loadArgs.sz;
+        *sizeOut = loadArgs.parm;
     }
     return data;
 }
@@ -5295,7 +5298,6 @@ int FILE_loadsize(int fileName, int *sizeOut, int memFlags) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadsizez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { int a; int b; int sz; int c; int d; } FLS_args_1ACC;
 extern int FILESYS_atomic_1ACC(void (*)(void), int, int, void*) __asm__("FILESYS_atomic");
 extern int sync_priority_0C38[] __asm__("sync_priority");
 extern void loadfilesizeatom_1948(void) __asm__("loadfilesizeatom");
@@ -5303,8 +5305,8 @@ extern void loadfilesizeatom_1948(void) __asm__("loadfilesizeatom");
 /**
  * Loads a whole file into newly allocated memory, synchronously, and reports its size.
  *
- * Runs loadfilesizeatom through FILESYS_atomic() at sync_priority; it works like FILE_load's loader but also
- * stores the file size in the argument block.
+ * Runs loadfilesizeatom through FILESYS_atomic() at sync_priority with a FILEREQUEST (abortflag 0); it works like
+ * FILE_load's loader but also stores the file size in the request's parm.
  *
  * @param name  file name
  * @param size  if not 0, receives the file size
@@ -5312,15 +5314,15 @@ extern void loadfilesizeatom_1948(void) __asm__("loadfilesizeatom");
  * @return the loaded buffer, or 0 on failure
  */
 int FILE_loadsizez(int name, int *size, int flags) {
-    FLS_args_1ACC req;
+    FILEREQUEST req;
     int buffer;
 
-    req.a = name;
-    req.c = 0;
-    req.d = flags;
+    req.name = (const char *)name;
+    req.abortflag = 0;
+    req.flags = flags;
     buffer = FILESYS_atomic_1ACC(loadfilesizeatom_1948, 0, sync_priority_0C38[0], &req);
     if (size != 0) {
-        *size = req.sz;
+        *size = req.parm;
     }
     return buffer;
 }
@@ -5421,10 +5423,10 @@ void FILE_loadatz(int name, int address, int maxsize) {
 INCLUDE_ASM("ealib/seg_2DCAE8", scatterloadatom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
+extern void *FILE_loadz_1C00(const char *, int) __asm__("FILE_loadz");
 
 /**
- * Batch load step for FILESYS_atomic: loads each name of the batch with FILE_loadz (batch flags at +0xC) into its
+ * Batch load step for FILESYS_atomic: loads each name of the batch with FILE_loadz (the batch's flags) into its
  * buffer slot; returns 1 when all loaded. The first argument (the priority) is not used.
  *
  * @param priority  the priority (unused)
@@ -5432,7 +5434,6 @@ extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
  * @return 1 when every file loaded, else 0
  */
 int scatterloadatom(void *priority, SCATTERREQUEST* batch) {
-    int offset;
     int index;
     int allOk;
 
@@ -5440,10 +5441,9 @@ int scatterloadatom(void *priority, SCATTERREQUEST* batch) {
     allOk = 1;
     if ((batch->num) > 0) {
         do {
-            offset = index * 4;
-            index += 1;
-            *(int *)(offset + ((int)batch->buffers)) = FILE_loadz_1C00(*(int *)(offset + ((int)batch->names)), (batch->flags));
-            allOk = (*(int *)(offset + ((int)batch->buffers)) == 0) ? 0 : allOk;
+            batch->buffers[index] = FILE_loadz_1C00(batch->names[index], batch->flags);
+            allOk = (batch->buffers[index] == 0) ? 0 : allOk;
+            index++;
         } while (index < (batch->num));
     }
     return allOk;
@@ -6041,6 +6041,8 @@ extern int BIG_sizeofheader_debuginfo(char *) __asm__("BIG_sizeofheader");
  */
 int BIG_debuginfo(char *base, int *num, int *tag) {
     int infoSize = 0;
+    // ORIGINAL-PTR: a BIG file header blob: the optional 8-byte debug trailer ends the variable-size header
+    // (BIG_sizeofheader); On Tour's BIG_debuginfo keeps a byte pointer into it (`const char* venomptr`).
     unsigned char *headerEnd = (unsigned char *)base + BIG_sizeofheader_debuginfo(base);
     unsigned char firstChar = headerEnd[-8];
     unsigned char *venomPtr = headerEnd - 8;
@@ -6121,6 +6123,9 @@ char *BIG_locateentryz_LOC(char *base, char *name, int idx, int *out1, int *out2
  * @return the entry's name in the directory, or 0 when not found
  */
 char *BIG_locateentryz_LOC(char *base, char *name, int idx, int *out1, int *out2) {
+    // ORIGINAL-PTR: a BIG directory: variable-length entries (offset and size fields of 3..5 bytes, then a zero-
+    // terminated name) after the 16-byte (compact type: 6-byte) header; On Tour walks it with byte pointers
+    // (`const unsigned char* bigentry`, `unsigned char* hend`).
     unsigned char *bigEntry = (unsigned char *)base + 0x10;
     int sizeOfOffset = 4;
     int sizeOfLen = 4;
@@ -8233,25 +8238,25 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_destroy);
 extern void iTerminateThread_51A0(int) __asm__("iTerminateThread");
 extern int bInTimerSubroutine_51A0[] __asm__("bInTimerSubroutine");
 
-void THREAD_destroy_51A0(char *arg0) __asm__("THREAD_destroy");
+void THREAD_destroy_51A0(THREAD *thread) __asm__("THREAD_destroy");
 /**
  * Ends and deletes a thread.
  *
- * Takes the thread id from the record's +4, or the calling thread's when @p thread is -1, and reads its status
+ * Takes the thread id from the record (threadId), or the calling thread's when @p thread is -1, and reads its status
  * (iReferThreadStatus inside the timer interrupt, flag bInTimerSubroutine, else ReferThreadStatus). A thread that is running,
  * ready, waiting or suspended (status & 0xF) is terminated (iTerminateThread / TerminateThread) and deleted; a dormant
  * one (status & 0x10) is only deleted.
  *
  * @param thread  the thread record, or -1 for the calling thread
  */
-void THREAD_destroy_51A0(char *thread) {
+void THREAD_destroy_51A0(THREAD *thread) {
     int threadId;
     int st[12];
 
-    if (thread == (char*)0xFFFFFFFF) {
+    if (thread == (THREAD *)0xFFFFFFFF) {
         threadId = GetThreadId();
     } else {
-        threadId = *(int*)(thread + 4);
+        threadId = thread->threadId;
     }
     if (bInTimerSubroutine_51A0[0] != 0) {
         iReferThreadStatus(threadId, st);
@@ -8519,14 +8524,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_testexit);
 extern void ReferThreadStatus(int, void *);
 extern void iReferThreadStatus(int, void *);
 extern int bInTimerSubroutine_0DE4[] __asm__("bInTimerSubroutine");
-/* THREAD (0x8): REAL's thread record ([O] On Tour's THREAD_testexit(THREAD* thread); its DWARF keeps the struct opaque,
-   `int reserved[2]`). [U] THREAD_createparam stores the kernel thread id (CreateThread) at 0x4 and, once the thread
-   exists, the tag 0x50533254 at 0x0; THREAD_destroy, THREAD_iscurrent and THREAD_getpriority read the id at 0x4.
-   Member names ours. */
-typedef struct THREAD {
-    int tag;                        /* 0x0 [U] 0x50533254 once created */
-    int threadId;                   /* 0x4 [U] the kernel thread id */
-} THREAD;
+/* THREAD: ealib/threads.h */
 
 /**
  * Tells whether a thread has stopped running.
@@ -8608,21 +8606,31 @@ void THREAD_exit(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_create);
 #ifdef SKIP_ASM
-typedef struct { int a; int b; int c; int d[5]; } S_5698;
-extern int CreateSema(S_5698 *);
+/* the Sony EE kernel's semaphore parameters (eekernel.h) */
+struct SemaParam {
+    int currentCount;
+    int maxCount;
+    int initCount;
+    int numWaitThreads;
+    unsigned int attr;
+    unsigned int option;
+};
+extern int CreateSema(struct SemaParam *);
 
 /**
- * Creates a recursive mutex (@p self): no owner, count 0, and a binary semaphore (CreateSema).
+ * Creates a recursive mutex: no owner, count 0, and a binary semaphore (CreateSema, max and initial count 1).
  *
+ * @param mutex  the mutex (a MUTEX handle; PS2MUTEX layout)
  * @return 0
  */
-int MUTEX_create(int *self) {
-    S_5698 optParam;
-    self[2] = 0;
-    self[1] = 0;
-    optParam.b = 1;
-    optParam.c = 1;
-    self[3] = CreateSema(&optParam);
+int MUTEX_create(void *mutex) {
+    PS2MUTEX *pmutex = mutex;
+    struct SemaParam optParam;
+    pmutex->lockcount = 0;
+    pmutex->lockthreadid = 0;
+    optParam.maxCount = 1;
+    optParam.initCount = 1;
+    pmutex->mutex = CreateSema(&optParam);
     return 0;
 }
 #endif
@@ -8633,7 +8641,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_destroy);
 extern void DeleteSema(int);
 
 /**
- * Destroys a mutex by deleting its kernel semaphore (DeleteSema on +0xC).
+ * Destroys a mutex by deleting its kernel semaphore (DeleteSema on PS2MUTEX::mutex).
  *
  * Used for the library mutex (THREAD_restore), memory classes (MEMCLASS_remove), the file system, async files, streams,
  * the quadtree loader and cCommSystem's destructor.
@@ -8641,7 +8649,8 @@ extern void DeleteSema(int);
  * @param mutex  the mutex
  */
 void MUTEX_destroy(void *mutex) {
-    DeleteSema((*(int *)((char*)(mutex) + (0xC))));
+    PS2MUTEX *pmutex = mutex;
+    DeleteSema(pmutex->mutex);
 }
 #endif
 
@@ -8654,16 +8663,17 @@ extern void WaitSema(int);
 /**
  * Locks a recursive mutex: a thread that already owns it only bumps the count, others wait on its semaphore.
  *
- * @param mutex  the mutex (On Tour MUTEX*)
+ * @param mutex  the mutex (On Tour MUTEX*; PS2MUTEX layout)
  */
 void MUTEX_lock(void *mutex) {
-    if ((*(int *)((char*)(mutex) + (4))) == GetThreadId()) {
-        (*(int *)((char*)(mutex) + (8))) = (int) ((*(int *)((char*)(mutex) + (8))) + 1);
+    PS2MUTEX *pmutex = mutex;
+    if (pmutex->lockthreadid == GetThreadId()) {
+        pmutex->lockcount = pmutex->lockcount + 1;
         return;
     }
-    WaitSema((*(int *)((char*)(mutex) + (0xC))));
-    (*(int *)((char*)(mutex) + (4))) = GetThreadId();
-    (*(int *)((char*)(mutex) + (8))) = (int) ((*(int *)((char*)(mutex) + (8))) + 1);
+    WaitSema(pmutex->mutex);
+    pmutex->lockthreadid = GetThreadId();
+    pmutex->lockcount = pmutex->lockcount + 1;
 }
 #endif
 
@@ -8684,18 +8694,18 @@ void MUTEX_unlock_5760(void *arg0) __asm__("MUTEX_unlock");
  * signals the semaphore. A caller that does not own it signals the semaphore anyway. Inside a timer handler
  * the interrupt-safe signal is used.
  *
- * @param mutex  the mutex (owner thread at word 1, lock count at word 2, semaphore ID at word 3)
+ * @param mutex  the mutex (PS2MUTEX layout: lockthreadid, lockcount, the semaphore)
  */
 void MUTEX_unlock_5760(void *mutex) {
-    int *mutexWords = (int *)mutex;
-    if (mutexWords[1] == GetThreadId()) {
-        if (--mutexWords[2] != 0) return;
-        mutexWords[1] = 0;
+    PS2MUTEX *pmutex = mutex;
+    if (pmutex->lockthreadid == GetThreadId()) {
+        if (--pmutex->lockcount != 0) return;
+        pmutex->lockthreadid = 0;
     }
     if (bInTimerSubroutine_5760[0] != 0) {
-        iSignalSema(mutexWords[3]);
+        iSignalSema(pmutex->mutex);
     } else {
-        SignalSema(mutexWords[3]);
+        SignalSema(pmutex->mutex);
     }
 }
 #endif
@@ -9015,6 +9025,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_string);
 #ifdef SKIP_ASM
 extern void PRINT_vstring(char *, const char *, char *);
 
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+#define PRINT_string_va_start(ap)                                        \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
 /**
  * Formats a message and sends it to the debug print outputs.
  *
@@ -9025,10 +9040,9 @@ extern void PRINT_vstring(char *, const char *, char *);
  * @param dst  debug channel number, declared as a char pointer
  * @param fmt  printf-style format; the arguments follow
  */
-// PORT: SN-specific va_start
 void PRINT_string(char *dst, const char *fmt, ...) {
     char *ap;
-    ap = (char*)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
+    PRINT_string_va_start(ap);
     PRINT_vstring(dst, fmt, ap);
 }
 #endif
@@ -9038,6 +9052,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_string1);
 #ifdef SKIP_ASM
 extern void PRINT_vstring_5D78(int, int, char *) __asm__("PRINT_vstring");
 
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+#define PRINT_string1_va_start(ap)                                       \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
 /**
  * Prints a printf-style message on print channel 2.
  *
@@ -9045,8 +9064,7 @@ extern void PRINT_vstring_5D78(int, int, char *) __asm__("PRINT_vstring");
  */
 void PRINT_string1(int format, ...) {
     char *ap;
-    // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-    ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
+    PRINT_string1_va_start(ap);
     PRINT_vstring_5D78(2, format, ap);
 }
 #endif
@@ -9281,6 +9299,11 @@ extern char str_FILE_pct_s_LINE_pct_d[];
 extern char *REALabortfilename_100C[] __asm__("REALabortfilename");
 extern int REALabortlinenum_1010[] __asm__("REALabortlinenum");
 
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+#define SYSTEM_abortmessage_va_start(ap)                                 \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+
 /**
  * Prints "ERROR: " and a formatted message, plus the recorded source file and line when set, then exits the
  * program.
@@ -9289,9 +9312,10 @@ extern int REALabortlinenum_1010[] __asm__("REALabortlinenum");
  */
 void SYSTEM_abortmessage(char *fmt, ...) {
     char buf[512];
-    // PORT: hand-rolled EE EABI va_start
     if (fmt != 0) {
-        vsprintf_60E8(buf, fmt, (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0));
+        char *ap;
+        SYSTEM_abortmessage_va_start(ap);
+        vsprintf_60E8(buf, fmt, ap);
     } else {
         buf[0] = 0;
     }
@@ -9537,6 +9561,8 @@ void MEM_fill_memset(char *p, int c, int n) __asm__("MEM_fill");
  * @param n  number of bytes
  */
 void MEM_fill_memset(char *dest, int fillValue, int n) {
+    // ORIGINAL-PTR: a memset-style fill of untyped memory: 1-, 2-, 4- and 8-byte stores through the advancing byte
+    // pointer (On Tour's MEM_fill keeps no typed pointer locals, only `val64` / `val32[2]`).
     if (n > 0 && ((int)dest & 1)) {
         *dest = fillValue;
         n--;
@@ -9746,54 +9772,55 @@ void func_003E6690(int videoMode) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkCreate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *RpcAlloc_66F0(int) __asm__("RpcAlloc");
+extern void *RpcAlloc_66F0(int) __asm__("RpcAlloc");
 extern void func_003F4C68_66F0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_66F0(int *, int, int) __asm__("func_003F4C98");
-extern void func_003F4E80_66F0(int, int) __asm__("func_003F4E80");
-extern void memset_66F0(char *, int, int) __asm__("memset");
+extern void func_003F4E80_66F0(void *, int) __asm__("func_003F4E80");
+extern void memset_66F0(void *, int, int) __asm__("memset");
 
 /**
  * Creates a DirtySock game link on the IOP and returns its EE-side block.
  *
- * Allocates @p n + 916 bytes with RpcAlloc and zeroes them: a 0x180-byte header followed by three 64-byte-aligned
- * buffers, the receive buffer (@p n bytes; address +0x16C, size +0x168), the 336-byte status copy area (+0x158) and a
- * 4-byte word (+0x17C) where the IOP reports its send-buffer read position. Sets the status flag +4 to -1 (no status
- * read yet) and the send window +0x174 to @p n, passes the three buffers to func_003F4E80, then sends 'gmlk'/'crea'
- * (func_003F4C98 binds the request to that command, func_003F4C68 sends it) with @p commRef, @p n and the address of the
- * +0x17C word, waiting for the IOP's link reference, which lands in the block's +0. The channel (cDSockChannel) keeps
- * the block as mGameLink; @p owner is not sent.
+ * Allocates @p n + 916 bytes with RpcAlloc and zeroes them: the 0x180-byte NetGameLinkRefT followed by three
+ * 64-byte-aligned buffers, the receive buffer (@p n bytes; recvbuf, recvsize), the 336-byte status area (statbuf) and
+ * a 4-byte word (sendreadpos) where the IOP reports its send-buffer read position. Sets statstate to -1 (no status
+ * read yet) and the sendwindow to @p n, passes the three buffers to func_003F4E80, then sends 'gmlk'/'crea'
+ * (func_003F4C98 binds the request to that command, func_003F4C68 sends it) with @p commRef, @p n and the address of
+ * sendreadpos, waiting for the IOP's link reference, which lands in iopref. The channel (cDSockChannel) keeps the
+ * block as mGameLink; @p owner is not sent.
  *
  * @param commRef  the connection (comm ref) from NetGameUtilComplete
  * @param owner  owner value (unused)
  * @param n  the receive buffer size in bytes (the channel passes 9084)
  * @return the link block
  */
-// `buf` is advanced in place, so the 0x158 store is not forwarded to the first call (it reloads the field).
-char *NetGameLinkCreate(int commRef, int owner, int n) {
+// `buf` is advanced in place, so the statbuf store is not forwarded to the first call (it reloads the field).
+NetGameLinkRefT *NetGameLinkCreate(int commRef, int owner, int n) {
     int msg[4];
     int size;
     int buf;
-    char *block;
+    NetGameLinkRefT *block;
     size = n + 916;
     block = RpcAlloc_66F0(size);
     memset_66F0(block, 0, size);
-    buf = (int)(block + 0x1BF) & ~0x3F;
-    *(int *)(block + 0x16C) = buf;
-    *(int *)(block + 4) = -1;
-    *(int *)(block + 0x168) = n;
+    /* PORT: the buffer addresses are aligned in int */
+    buf = ((int)block + 0x1BF) & ~0x3F;
+    block->recvbuf = (char *)buf;
+    block->statstate = -1;
+    block->recvsize = n;
     buf += n;
     buf += 0x3F;
     buf &= ~0x3F;
-    *(int *)(block + 0x174) = n;
-    *(int *)(block + 0x158) = buf;
+    block->sendwindow = n;
+    block->statbuf = (char *)buf;
     buf += 399;
     buf &= ~0x3F;
-    *(int *)(block + 0x17C) = buf;
-    func_003F4E80_66F0(*(int *)(block + 0x158), 336);
-    func_003F4E80_66F0(*(int *)(block + 0x16C), *(int *)(block + 0x168));
-    func_003F4E80_66F0(*(int *)(block + 0x17C), 4);
+    block->sendreadpos = (int *)buf;
+    func_003F4E80_66F0(block->statbuf, 336);
+    func_003F4E80_66F0(block->recvbuf, block->recvsize);
+    func_003F4E80_66F0(block->sendreadpos, 4);
     func_003F4C98_66F0(msg, 0x676D6C6B, 0x63726561);
-    func_003F4C68_66F0(msg, 1, commRef, n, (int)(block + 0x17C), 4, 0, 0, 1, (int)block);
+    func_003F4C68_66F0(msg, 1, commRef, n, (int)&block->sendreadpos, 4, 0, 0, 1, (int)block);
     return block;
 }
 #endif
@@ -9898,32 +9925,35 @@ char *NetGameLinkStatus(G_6958 *self) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkPeek);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { char b[4]; } U4_6A70;
 extern void func_0041605C_6A70(short *, int, int) __asm__("func_0041605C");
 
 /**
  * Looks at the next packet in the game link's receive buffer without consuming it.
  *
- * When @p outPacket is not null: if the read position (+0x160) is before the end of the received data (+0x164) it
- * copies the packet's 4-byte header from the uncached receive buffer (+0x16C) into the buffer *@p outPacket points to,
- * then the whole packet (its length is the header's first halfword) with func_0041605C; otherwise it sets *@p outPacket
+ * When @p outPacket is not null: if the read position (readpos) is before the end of the received data (readend) it
+ * copies the packet's 4-byte head from the uncached receive buffer (recvbuf) into the buffer *@p outPacket points to,
+ * then the whole packet (its length is the head's first halfword) with func_0041605C; otherwise it sets *@p outPacket
  * to 0. NetGameLinkRecv uses it for single-packet reads.
  *
  * @param block  the link block
  * @param outPacket  points to the destination packet buffer pointer, or 0 to only ask for the count
  * @return the number of received bytes not yet read
  */
-int NetGameLinkPeek(char *block, short **outPacket) {
+int NetGameLinkPeek(NetGameLinkRefT *block, short **outPacket) {
     if (outPacket != 0) {
-        int readPos = *(int *)(block + 0x160);
-        if (readPos < *(int *)(block + 0x164)) {
-            *(U4_6A70 *)*outPacket = *(U4_6A70 *)(((*(int *)(block + 0x16C) + readPos) & 0x0FFFFFFF) | 0x20000000);
-            func_0041605C_6A70(*outPacket, ((*(int *)(block + 0x16C) + *(int *)(block + 0x160)) & 0x0FFFFFFF) | 0x20000000, **outPacket);
+        int readPos = block->readpos;
+        if (readPos < block->readend) {
+            // ORIGINAL-PTR: a hardware address: the IOP fills the receive buffer, so the EE reads it through the
+            // uncached alias of its address ((address & 0x0FFFFFFF) | 0x20000000).
+            *(NetGameLinkPacketHead *)*outPacket =
+                *(NetGameLinkPacketHead *)((((int)block->recvbuf + readPos) & 0x0FFFFFFF) | 0x20000000);
+            func_0041605C_6A70(*outPacket, (((int)block->recvbuf + block->readpos) & 0x0FFFFFFF) | 0x20000000,
+                               **outPacket);
         } else {
             *outPacket = 0;
         }
     }
-    return *(int *)(block + 0x164) - *(int *)(block + 0x160);
+    return block->readend - block->readpos;
 }
 #endif
 
@@ -9971,7 +10001,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) {
     }
     if (*(int *)(self + 0x160) < *(int *)(self + 0x164)) {
         if (n == 1) {
-            NetGameLinkPeek(self, &out);
+            NetGameLinkPeek((NetGameLinkRefT *)self, &out);
             ret = *out;
             *(int *)(self + 0x160) += ret;
         } else {

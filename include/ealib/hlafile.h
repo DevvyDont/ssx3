@@ -10,13 +10,15 @@
 // NAME CLASH: stream.cpp has its own 0x124 REQUESTSTRUCTtag, and both modules sit in the same C unit
 // (ealib/seg_2DCAE8.c), so ealib/stream.h gives that one the C name STREAMREQUESTtag; the name here is EA's.
 //
-// Names, member order and offsets: [O] On Tour struct REQUESTSTRUCTtag (0x30); [U] retail use as noted.
-// C struct. Tags: [O] SSX On Tour's DWARF; [U] retail use.
+// Names, member order and offsets: [O] On Tour struct REQUESTSTRUCTtag (0x30) and REQUESTQUEUE (0x8, queueadd(
+// REQUESTQUEUE* queue, REQUESTSTRUCTtag* req)); [U] retail use as noted.
+// C structs. Tags: [O] SSX On Tour's DWARF; [U] retail use.
 
 #include "layout.h"
 
 #ifndef __cplusplus
 typedef struct REQUESTSTRUCTtag REQUESTSTRUCTtag;
+typedef struct REQUESTQUEUE REQUESTQUEUE;
 #endif
 
 struct REQUESTSTRUCTtag {
@@ -50,5 +52,16 @@ CHECK_OFFSET(REQUESTSTRUCTtag, foffset, 0x24);
 CHECK_OFFSET(REQUESTSTRUCTtag, readsize, 0x28);
 CHECK_OFFSET(REQUESTSTRUCTtag, destaddr, 0x2C);
 CHECK_SIZE(REQUESTSTRUCTtag, 0x30);
+
+// A request queue (0x8 [O]): the loader's free / pending request lists. [U] queueadd appends at tail (linking through
+// nextreq), queuefetch pops head.
+struct REQUESTQUEUE {
+    struct REQUESTSTRUCTtag* head;      // 0x0 [O]; [U] queuefetch pops it; queueadd sets it on an empty queue
+    struct REQUESTSTRUCTtag* tail;      // 0x4 [O]; [U] queueadd links after it and moves it
+};
+
+CHECK_OFFSET(REQUESTQUEUE, head, 0x0);
+CHECK_OFFSET(REQUESTQUEUE, tail, 0x4);
+CHECK_SIZE(REQUESTQUEUE, 0x8);
 
 #endif /* EALIB_HLAFILE_H */

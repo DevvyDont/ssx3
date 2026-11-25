@@ -14,6 +14,7 @@
 
 #ifndef __cplusplus
 typedef struct SCATTERREQUEST SCATTERREQUEST;
+typedef struct FILEREQUEST FILEREQUEST;
 #endif
 
 struct SCATTERREQUEST {
@@ -30,5 +31,24 @@ CHECK_OFFSET(SCATTERREQUEST, buffers, 0x08);
 CHECK_OFFSET(SCATTERREQUEST, flags, 0x0C);
 CHECK_OFFSET(SCATTERREQUEST, abortflag, 0x10);
 CHECK_SIZE(SCATTERREQUEST, 0x14);
+
+// FILEREQUEST: the argument block of a single-file high-level load (0x14 [O]: On Tour's FILE_loadsize(const char* name,
+// int* size, int flags) keeps a local `FILEREQUEST req` and hands it to FILESYS_atomic). [U] FILE_load / FILE_loadsize
+// store name, abortflag 1 and flags; the z variants (FILE_loadz, FILE_loadsizez) store abortflag 0; loadfilesizeatom
+// returns the size in parm. Names, member order and offsets: [O].
+struct FILEREQUEST {
+    const char* name;               // 0x00 [O]; [U] the path
+    void* location;                 // 0x04 [O]
+    int parm;                       // 0x08 [O]; [U] loadfilesizeatom stores the file size
+    int abortflag;                  // 0x0C [O]; [U] 1 from FILE_load / FILE_loadsize, 0 from the z variants
+    int flags;                      // 0x10 [O]; [U] the allocation flags (FILESYSOPTS::malloc)
+};
+
+CHECK_OFFSET(FILEREQUEST, name, 0x00);
+CHECK_OFFSET(FILEREQUEST, location, 0x04);
+CHECK_OFFSET(FILEREQUEST, parm, 0x08);
+CHECK_OFFSET(FILEREQUEST, abortflag, 0x0C);
+CHECK_OFFSET(FILEREQUEST, flags, 0x10);
+CHECK_SIZE(FILEREQUEST, 0x14);
 
 #endif /* EALIB_HLSFILE_H */

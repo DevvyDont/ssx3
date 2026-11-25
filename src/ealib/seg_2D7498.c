@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ealib/locale.h"
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6498);
@@ -4270,32 +4271,41 @@ int func_003DB9A0(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", LOCALE_getstate);
 #ifdef SKIP_ASM
-static __inline__ int get32_B9D8(unsigned char *q) {
+/* little-endian 32- and 16-bit file fields, read byte by byte */
+static __inline__ int get32_B9D8(const void *field) {
+    const unsigned char *q = field;
     return (q[3] << 24) | (q[2] << 16) | (q[1] << 8) | q[0];
 }
+static __inline__ int get16_B9D8(const void *field) {
+    const unsigned char *q = field;
+    return (q[1] << 8) | q[0];
+}
 /**
- * Returns a value of a locale (.loc) file's header, read little-endian: state 0 the current language id (+0xE), 1 the
- * language count (+0xC), 2 the current language's string count (+0xC of the language block whose offset is entry
- * [language id] of the table at +0x10), 3 whether it has an index (bit 0 of the flags +0x8); 0 for other states.
- * cLocaleFile_loadFile reads state 2.
+ * Returns a value of a locale (.loc) file's header, read little-endian: state 0 the current languageid, 1 the
+ * languagecount, 2 the current language's stringcount (its LOCALE_LANGUAGE chunk's offset is entry [languageid] of the
+ * table after the header), 3 whether it has an index (bit 0 of the flags); 0 for other states. cLocaleFile_loadFile
+ * reads state 2.
  *
  * @param table  the locale file
  * @param sel  the state
  * @return the value
  */
 int LOCALE_getstate(unsigned char *table, int sel) {
-    unsigned char *block;
+    LOCALE_HEADER *header = (LOCALE_HEADER *)table;
+    LOCALE_LANGUAGE *language;
 
     switch (sel) {
     case 0:
-        return (table[0xF] << 8) | table[0xE];
+        return get16_B9D8(&header->languageid);
     case 1:
-        return (table[0xD] << 8) | table[0xC];
+        return get16_B9D8(&header->languagecount);
     case 2:
-        block = table + get32_B9D8(table + *(unsigned short *)(table + 0xE) * 4 + 0x10);
-        return get32_B9D8(block + 0xC);
+        // ORIGINAL-PTR: a locale file blob: the per-language offset table follows the header chunk and holds byte
+        // offsets from the file start.
+        language = (LOCALE_LANGUAGE *)(table + get32_B9D8((unsigned int *)(header + 1) + header->languageid));
+        return get32_B9D8(&language->stringcount);
     case 3:
-        return table[8] & 1;
+        return get32_B9D8(&header->flags) & 1;
     }
     return 0;
 }
@@ -4305,17 +4315,20 @@ int LOCALE_getstate(unsigned char *table, int sel) {
 INCLUDE_ASM("ealib/seg_2D7498", LOCALE_setstate);
 #ifdef SKIP_ASM
 /**
- * Sets a value of a locale file's header: only state 0, the current language id (+0xE, little-endian), is writable.
+ * Sets a value of a locale file's header: only state 0, the current languageid, is writable (stored, then rewritten
+ * little-endian byte by byte).
  *
  * @param table  the locale file
  * @param which  the state
  * @param value  the new value
  */
 void LOCALE_setstate(void *table, int which, unsigned int value) {
+    LOCALE_HEADER *header = table;
     if (which == 0) {
-        *(unsigned short *)((char *)table + 0xE) = value;
-        *(unsigned char *)((char *)table + 0xE) = value;
-        *(unsigned char *)((char *)table + 0xF) = value >> 8;
+        unsigned char *field = (unsigned char *)&header->languageid;
+        header->languageid = value;
+        field[0] = value;
+        field[1] = value >> 8;
     }
 }
 #endif
@@ -4332,6 +4345,7 @@ INCLUDE_ASM("ealib/seg_2D7498", compare);
  * @return the difference, negative when @p key sorts first
  */
 int compare(unsigned short *key, void *entry) {
-    return *key - (((*(unsigned char *)((char*)(entry) + (1))) << 8) | (*(unsigned char *)((char*)(entry) + (0))));
+    unsigned char *entryId = entry;
+    return *key - ((entryId[1] << 8) | entryId[0]);
 }
 #endif
