@@ -23,6 +23,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
+#include "visualfx/renderstateman.h"
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_cBoardWakeFX);
@@ -48,8 +49,7 @@ extern char D_00459B90[];
 extern char str_WakeLines_cBoardWakeFX[];
 extern char str_WakeVerts_cBoardWakeFX[];
 extern "C" void cRider_cRider(void* self);
-struct sWakeDCF28;
-extern "C" void cBoardWakeFX_reset(sWakeDCF28* self);
+extern "C" void cBoardWakeFX_reset(cBoardWakeFX* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
@@ -116,7 +116,7 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
         rows[i] = (sWakeElemBW*)self->mWakeVerts[0] + i * 32;
     }
     self->mWakeLineSegs = -1;
-    cBoardWakeFX_reset((sWakeDCF28*)self);
+    cBoardWakeFX_reset(self);
     return ((void*)self);
 }
 #endif
@@ -149,37 +149,6 @@ __asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_reset);
 #ifdef SKIP_ASM
-struct sWakeElemDCF28 {
-    int a;
-    float b;
-    float c;
-    int d;
-    char pad10[0x20];
-};
-
-struct sWakeColDCF28 {
-    float r, g, b, a;
-};
-
-struct sWakeDCF28 {
-    cRider* obj;                  // 0x00
-    int f4;                       // 0x04
-    int f8;                       // 0x08
-    int fC;                       // 0x0C
-    sWakeElemDCF28* elems[5];     // 0x10
-    float vals[5];                // 0x24
-    int f38;                      // 0x38
-    int f3C;                      // 0x3C
-    int f40;                      // 0x40
-    char pad44[0x1C];             // 0x44
-    char sub60[0x40];             // 0x60
-    sWakeColDCF28 col;            // 0xA0
-    int fB0;                      // 0xB0
-    int count;                    // 0xB4
-    int fB8;                      // 0xB8
-    float fBC;                    // 0xBC
-};
-
 extern "C" void cWakeParams_Clear(cWakeParams* self);
 
 /**
@@ -190,44 +159,46 @@ extern "C" void cWakeParams_Clear(cWakeParams* self);
  * and 0.8 s. It sets the colour to white and clears the state. When the row count changed, each row's points
  * get a height factor and the rows' sink speeds (0 down to -25) are recomputed.
  */
-extern "C" void cBoardWakeFX_reset(sWakeDCF28* self)
+extern "C" void cBoardWakeFX_reset(cBoardWakeFX* self)
 {
-    int old = self->count;
+    int old = self->mWakeLineSegs;
     float one;
-    sWakeColDCF28 white;
+    tARGB white;
     int i;
-    if (self->obj->mViewIndex >= 0) {
-        self->count = 5;
-        self->fB8 = 0x20;
-        self->fBC = 1.25f;
+    if (self->mRider->mViewIndex >= 0) {
+        self->mWakeLineSegs = 5;
+        self->mWakeMaxNumLines = 0x20;
+        self->mWakeLife = 1.25f;
     } else {
-        self->count = 4;
-        self->fB8 = 22;
-        self->fBC = 0.800000011920929f;
+        self->mWakeLineSegs = 4;
+        self->mWakeMaxNumLines = 22;
+        self->mWakeLife = 0.800000011920929f;
     }
     one = 1.0f;
-    white.r = one;
-    white.g = one;
-    white.b = one;
-    white.a = one;
-    self->col = white;
-    self->f38 = 0;
-    self->f4 = 0;
-    self->f8 = 0;
-    self->f3C = 0;
-    self->f40 = 0;
-    cWakeParams_Clear((cWakeParams*)self->sub60);
-    if (old != self->count) {
+    white.A = one;
+    white.R = one;
+    white.G = one;
+    white.B = one;
+    self->mGroundColour = white;
+    self->mWakeRandomnessSeed = 0.0f;
+    self->mNumWakeLines = 0;
+    self->mCurrentWakeLine = 0;
+    self->mWasSpraying = 0;
+    self->mWakeLength = 0;
+    cWakeParams_Clear(&self->mWakeParams);
+    if (old != self->mWakeLineSegs) {
         for (i = 0; i < 5; i++) {
-            float heightFactor = 0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->count - 1));
+            float heightFactor =
+                0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->mWakeLineSegs - 1));
             int j;
             for (j = 0; j < 32; j++) {
-                self->elems[i][j].a = 0;
-                self->elems[i][j].b = heightFactor;
-                self->elems[i][j].c = 1.0f;
-                self->elems[i][j].d = 0;
+                self->mWakeVerts[i][j].u = 0.0f;
+                self->mWakeVerts[i][j].v = heightFactor;
+                self->mWakeVerts[i][j].one = 1.0f;
+                self->mWakeVerts[i][j].w = 0;
             }
-            self->vals[i] = (float)i / (float)(self->count - 1) * -25.000001907348633f;
+            self->mPreCalculatedGravityMultiplier[i] =
+                (float)i / (float)(self->mWakeLineSegs - 1) * -25.000001907348633f;
         }
     }
 }
@@ -236,53 +207,6 @@ extern "C" void cBoardWakeFX_reset(sWakeDCF28* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_update);
 #ifdef SKIP_ASM
-struct sWakeElemD0B8 {
-    t4Vector pts[5];            // 0x00
-    t4Vector dir;               // 0x50
-    float width;                // 0x60
-    float age;                  // 0x64
-    char pad68[0x8];            // 0x68
-};
-
-struct sWakeRingD0B8 {
-    char pad0[0x20];            // 0x00
-    t4Vector pos;               // 0x20
-};
-
-struct sWakeSurfD0B8 {
-    char pad0[0x48];            // 0x00
-    float f48;                  // 0x48
-    float f4C;                  // 0x4C
-    char pad50[0x34];           // 0x50
-    int i84;                    // 0x84
-    char pad88[0x28];           // 0x88
-};
-
-struct sWakeD0B8 {
-    cRider* rider;              // 0x00
-    int count;                  // 0x04
-    int head;                   // 0x08
-    sWakeElemD0B8* elems;       // 0x0C
-    sWakeRingD0B8* rings[5];    // 0x10
-    float vals[5];              // 0x24
-    float phase;                // 0x38
-    int active;                 // 0x3C
-    int frame;                  // 0x40
-    char pad44[0xC];            // 0x44
-    t4Vector v50;               // 0x50
-    t4Vector v60;               // 0x60
-    t4Vector v70;               // 0x70
-    t4Vector v80;               // 0x80
-    float f90;                  // 0x90
-    float f94;                  // 0x94
-    char pad98[0x8];            // 0x98
-    t4Vector col;               // 0xA0
-    int fB0;                    // 0xB0
-    int n;                      // 0xB4
-    int max;                    // 0xB8
-    float life;                 // 0xBC
-};
-
 struct sWakeParamsD0B8 {
     float strength;
     float grip;
@@ -478,118 +402,124 @@ static inline float wakeMinStrengthD0B8()
  * Advances a rider's board wake by one frame: ages and spreads the segments, then starts or extends the wake.
  *
  * Segments older than the life are dropped; the rest drift outwards and their lower rows sink. The new wake
- * strength comes from the rider's speed, lean and sideways slip and the surface's wake scale (+0x4C). There
- * is no wake off the ground, at a low strength, at a small lean or on a surface with little grip (+0x48). A
+ * strength comes from the rider's speed, lean and sideways slip and the surface's WakeSpeed. There
+ * is no wake off the ground, at a low strength, at a small lean or on a surface with little grip (WakeAlpha). A
  * running wake adds a segment every 50 units (createSeg, cBoardWakeFX_createSeg) and refreshes the current one
  * (fillCurrentSeg, cBoardWakeFX_fillCurrentSeg). It ends when the grip or strength falls too low or the lean changes side.
  */
 // PORT: g++ minimum/maximum operators (<?, >?).
-extern "C" void cBoardWakeFX_update(sWakeD0B8* self)
+extern "C" void cBoardWakeFX_update(cBoardWakeFX* self)
 {
-    sWakeSurfD0B8* surf = (sWakeSurfD0B8*)((char*)SSXApp->Game->SurfPropCache + self->rider->mSurfaceType * 0xB0);
+    tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[self->mRider->mSurfaceType];
     int i;
-    for (i = 0; i < self->count; i++) {
-        int idx = (self->head + i) % self->max;
-        sWakeElemD0B8* elem = &self->elems[idx];
-        elem->age += 0.01666666753590107f;
-        if (self->life < elem->age) {
-            self->count = i;
+    for (i = 0; i < self->mNumWakeLines; i++) {
+        int idx = (self->mCurrentWakeLine + i) % self->mWakeMaxNumLines;
+        tWakeLine* elem = &self->mWakeLines[idx];
+        elem->mAge += 0.01666666753590107f;
+        if (self->mWakeLife < elem->mAge) {
+            self->mNumWakeLines = i;
             goto done;
         }
-        float grow = ((1.0f - ((elem->age * 20.0f) <? 1.0f)) * elem->width + 1.0f) * 0.01666666753590107f;
-        float fade = (1.0f - elem->age * 3.3333332538604736f) >? 0.0f;
-        t4Vector drift = wakeScaleD0B8(wakeScaleD0B8(elem->dir, fade), 0.01666666753590107f);
-        wakeAddEqD0B8(self->rings[0][idx].pos, drift);
-        for (int j = 1; j < self->n; j++) {
-            wakeAddEqD0B8(self->rings[j][idx].pos, wakeAddD0B8(wakeScaleD0B8(elem->pts[j], grow), drift));
-            elem->pts[j].z += self->vals[j];
+        float grow =
+            ((1.0f - ((elem->mAge * 20.0f) <? 1.0f)) * elem->mExtraInitalVelocityFactor + 1.0f) * 0.01666666753590107f;
+        float fade = (1.0f - elem->mAge * 3.3333332538604736f) >? 0.0f;
+        t4Vector drift = wakeScaleD0B8(wakeScaleD0B8(elem->mAngleCorrection, fade), 0.01666666753590107f);
+        wakeAddEqD0B8(self->mWakeVerts[0][idx].p, drift);
+        for (int j = 1; j < self->mWakeLineSegs; j++) {
+            wakeAddEqD0B8(self->mWakeVerts[j][idx].p, wakeAddD0B8(wakeScaleD0B8(elem->mVel[j], grow), drift));
+            elem->mVel[j].z += self->mPreCalculatedGravityMultiplier[j];
         }
     }
 done:
-    float lean = -self->rider->mSlewed[0].cur;
-    float k = 1.0f - wakeAbsD0B8(self->rider->mSlewed[3].cur);
-    t4Vector normal = self->rider->mGroundNormal;
+    float lean = -self->mRider->mSlewed[0].cur;
+    float k = 1.0f - wakeAbsD0B8(self->mRider->mSlewed[3].cur);
+    t4Vector normal = self->mRider->mGroundNormal;
     float amt = wakeAbsD0B8(lean) * k;
     t4Vector side;
     t4Vector fwd;
     sWakeParamsD0B8 curParams;
-    fwd = wakeRow34D0B8(self->rider, 0);
-    if (self->rider->IsRidingFakie != 0) {
+    fwd = wakeRow34D0B8(self->mRider, 0);
+    if (self->mRider->IsRidingFakie != 0) {
         fwd = wakeScaleD0B8(fwd, -1.0f);
     }
     t4Vector right = wakeCrossD0B8(fwd, normal);
     side = lean < 0.0f ? wakeScaleD0B8(right, -1.0f) : right;
-    float speed = WAKE_MAX_D0B8(WAKE_MIN_D0B8(wakeMaxSpeedD0B8(), wakeLenD0B8(self->rider->mVelocity)), 0.0f);
-    curParams.grip = surf->f48;
+    float speed = WAKE_MAX_D0B8(WAKE_MIN_D0B8(wakeMaxSpeedD0B8(), wakeLenD0B8(self->mRider->mVelocity)), 0.0f);
+    curParams.grip = surf->WakeAlpha;
     float sign = 1.0f;
-    if (self->rider->IsRidingFakie != 0) {
+    if (self->mRider->IsRidingFakie != 0) {
         sign = -1.0f;
     }
-    float off = wakeAbsD0B8(self->rider->mSlewed[2].cur) * 118.0f + -40.0f;
+    float off = wakeAbsD0B8(self->mRider->mSlewed[2].cur) * 118.0f + -40.0f;
     t4Vector pos = wakeAddD0B8(
-        wakeAddD0B8(wakeRowD0B8(self->rider, 3), wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->rider, 0), off), sign)),
-        wakeScaleD0B8(wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->rider, 2), 15.0f), lean < 0.0f ? -1.0f : 1.0f), sign));
-    t4Vector dirn = wakeNormD0B8(self->rider->mVelocity);
-    float bal = (wakeAbsD0B8(wakeDotD0B8(self->rider->mGroundSide, dirn)) * 0.8f + amt * 0.5f) <? 1.0f;
+        wakeAddD0B8(wakeRowD0B8(self->mRider, 3),
+                    wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->mRider, 0), off), sign)),
+        wakeScaleD0B8(wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->mRider, 2), 15.0f), lean < 0.0f ? -1.0f : 1.0f),
+            sign));
+    t4Vector dirn = wakeNormD0B8(self->mRider->mVelocity);
+    float bal = (wakeAbsD0B8(wakeDotD0B8(self->mRider->mGroundSide, dirn)) * 0.8f + amt * 0.5f) <? 1.0f;
     float baseStrength = wakeClampD0B8(bal + bal, 0.0f, 0.25f);
     float speedBonus = 0.0f;
     if (555.5555419921875f < speed) {
         speedBonus = wakeClampD0B8((bal - 0.25f) * 2.7f, 0.0f, 0.35f);
     }
     float width = 0.0f;
-    if (surf->i84 != 0 && 1111.111083984375f < speed) {
+    if (surf->HasVeryTightTurnWake != 0 && 1111.111083984375f < speed) {
         width = wakeClampD0B8((bal - 0.54f) * 35.0f, 0.0f, 4.5f);
     }
-    curParams.strength = speed * (baseStrength + speedBonus) * surf->f4C;
+    curParams.strength = speed * (baseStrength + speedBonus) * surf->WakeSpeed;
     int ok = 1;
-    if (cRider_getMotionState(self->rider) != 0 || wakeAbsD0B8(self->rider->mSlewed[11].cur) > 0.15f ||
+    if (cRider_getMotionState(self->mRider) != 0 || wakeAbsD0B8(self->mRider->mSlewed[11].cur) > 0.15f ||
         wakeMinStrengthD0B8() > curParams.strength || amt < 0.15f || curParams.grip < 0.05f) {
         curParams.strength = 0.0f;
         ok = 0;
     }
-    if (self->active != 0) {
-        if (self->fB0 != 0 ? lean < 0.0f : lean > 0.0f) {
+    if (self->mWasSpraying != 0) {
+        if (self->mLeanPositive != 0 ? lean < 0.0f : lean > 0.0f) {
             curParams.strength = 0.0f;
-            self->f90 = 0.0f;
+            self->mWakeParams.mSpeed = 0.0f;
         }
-        if (cRider_getMotionState(self->rider) == 0) {
-            self->v60 = wakeAddD0B8(wakeScaleD0B8(self->v60, 0.8f), wakeScaleD0B8(normal, 0.19999998807907104f));
-            self->v70 = wakeAddD0B8(wakeScaleD0B8(self->v70, 0.8f), wakeScaleD0B8(side, 0.19999998807907104f));
-            self->v80 = wakeAddD0B8(wakeScaleD0B8(self->v80, 0.8f), wakeScaleD0B8(fwd, 0.19999998807907104f));
-            self->f94 = self->f94 * 0.7f + curParams.grip * 0.3f;
-            self->f90 = self->f90 * 0.8f + curParams.strength * 0.19999998807907104f;
-            if (self->f94 > 0.05f && self->f90 > 55.55555725097656f) {
-                if (wakeLenD0B8(wakeSubD0B8(pos, self->v50)) > 50.0f) {
+        if (cRider_getMotionState(self->mRider) == 0) {
+            self->mWakeParams.mUp = wakeAddD0B8(wakeScaleD0B8(self->mWakeParams.mUp, 0.8f),
+                wakeScaleD0B8(normal, 0.19999998807907104f));
+            self->mWakeParams.mSide = wakeAddD0B8(wakeScaleD0B8(self->mWakeParams.mSide, 0.8f),
+                wakeScaleD0B8(side, 0.19999998807907104f));
+            self->mWakeParams.mForward = wakeAddD0B8(wakeScaleD0B8(self->mWakeParams.mForward, 0.8f),
+                wakeScaleD0B8(fwd, 0.19999998807907104f));
+            self->mWakeParams.mAlpha = self->mWakeParams.mAlpha * 0.7f + curParams.grip * 0.3f;
+            self->mWakeParams.mSpeed = self->mWakeParams.mSpeed * 0.8f + curParams.strength * 0.19999998807907104f;
+            if (self->mWakeParams.mAlpha > 0.05f && self->mWakeParams.mSpeed > 55.55555725097656f) {
+                if (wakeLenD0B8(wakeSubD0B8(pos, self->mLastWakePos)) > 50.0f) {
                     cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
-                    self->v50 = pos;
+                    self->mLastWakePos = pos;
                 }
                 cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
             } else {
-                self->f94 = 0.0f;
-                self->active = 0;
-                cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->f94);
+                self->mWakeParams.mAlpha = 0.0f;
+                self->mWasSpraying = 0;
+                cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->mWakeParams.mAlpha);
             }
         } else {
-            self->f94 = 0.0f;
-            self->active = 0;
-            cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->f94);
+            self->mWakeParams.mAlpha = 0.0f;
+            self->mWasSpraying = 0;
+            cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->mWakeParams.mAlpha);
         }
     } else if (ok) {
-        self->f90 = 0.0f;
-        width = self->f90;
-        self->v80 = fwd;
-        self->v70 = side;
-        self->v60 = normal;
-        self->v50 = pos;
-        self->frame = 0;
-        self->fB0 = width < lean;
-        self->f94 = width;
+        self->mWakeParams.mSpeed = 0.0f;
+        width = self->mWakeParams.mSpeed;
+        self->mWakeParams.mForward = fwd;
+        self->mWakeParams.mSide = side;
+        self->mWakeParams.mUp = normal;
+        self->mLastWakePos = pos;
+        self->mWakeLength = 0;
+        self->mLeanPositive = width < lean;
+        self->mWakeParams.mAlpha = width;
         cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
         cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
-        self->f94 = curParams.grip;
+        self->mWakeParams.mAlpha = curParams.grip;
         cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
         cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
-        self->active = 1;
+        self->mWasSpraying = 1;
     }
 }
 #endif
@@ -625,22 +555,12 @@ struct sGs_DAB8 {
 
 extern sGs_DAB8 sDrawState_s_defaultDrawState_DAB8 __asm__("sDrawState_s_defaultDrawState");
 
-struct sWakeVtx_DAB8 {
-    char pad0[0x64];
-    float age;               // 0x64
-    char pad68[0x8];
-};
-
-
 class cGfx_DAB8 {
 public:
     char pad[0xE84];
     sGs_DAB8* stateTop;
-    char padE88[0x1030 - 0xE88];
-    int f1030;
-    int Get1030() { return f1030; }
     void PushState() { stateTop[1] = stateTop[0]; stateTop++; }
-    char pad1034[0x10D8 - 0x1034];
+    char padE88[0x10D8 - 0xE88];
     virtual void v1();
     virtual void v2();
     virtual void v3();
@@ -744,7 +664,7 @@ extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
     *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = sDrawState_s_defaultDrawState_DAB8;
-    *(short*)(*(char**)(GrMan_boardwakefx + 0xE84) + 0x10) = ((cGfx_DAB8*)GrMan_boardwakefx)->Get1030();
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = GrMan->getEffectTexMap(56);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
@@ -761,7 +681,7 @@ extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
     if (over >= 1)
         draw -= over;
     int last = (self->mCurrentWakeLine + n - 1) % self->mWakeMaxNumLines;
-    float ageRatio = (self->mWakeLife - ((sWakeVtx_DAB8*)self->mWakeLines)[last].age) / self->mWakeLife;
+    float ageRatio = (self->mWakeLife - self->mWakeLines[last].mAge) / self->mWakeLife;
     float alphaStart = 1.0f;
     if (ageRatio <= 0.8f)
         alphaStart = ageRatio * k;
@@ -775,37 +695,6 @@ extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_fillCurrentSeg);
 #ifdef SKIP_ASM
-
-struct sElemDD30 {
-    t4Vector pts[5];            // 0x00
-    t4Vector dir;               // 0x50
-    float width;                // 0x60
-    int i64;                    // 0x64
-};
-
-struct sSegDD30 {
-    char pad0[0x1C];            // 0x00
-    int f1C;                    // 0x1C
-    t4Vector pos;               // 0x20
-};
-
-struct sWakeDD30 {
-    cRider* obj;                // 0x00
-    int i4;                     // 0x04
-    int head;                   // 0x08
-    sElemDD30* elems;           // 0x0C
-    sSegDD30* rings[5];         // 0x10
-    char pad24[0x14];           // 0x24
-    float phase;                // 0x38
-    char pad3C[0x24];           // 0x3C
-    t4Vector v60;               // 0x60
-    t4Vector v70;               // 0x70
-    t4Vector v80;               // 0x80
-    float f90;                  // 0x90
-    float f94;                  // 0x94
-    char pad98[0x1C];           // 0x98
-    int n;                      // 0xB4
-};
 
 extern t4Vector t4vect_Zero_DD30 __asm__("t4vect_Zero");
 extern "C" float perlinNoise(int n, float x);
@@ -878,56 +767,60 @@ static inline float wakeLenDD30(const t4Vector& v)
     return r;
 }
 
+// Places a new segment's head vertex 5 units below @p pos along the ground normal. (Its address is formed before the
+// VU0 arithmetic, as in retail.)
+static inline void placeWakeHead(tBoardWakeVertex* head, const t4Vector& pos, const t4Vector& groundNormal)
+{
+    t4Vector x = wakeSubDD30(pos, wakeScaleDD30(groundNormal, 5.0f));
+    head->p = x;
+}
+
 /**
  * Fills the current board wake line from the wake parameters: its spray direction, its row points and the rows' head
  * positions.
  *
- * The line is +0xC[head] (head +0x8). Its age (+0x64) and first point are zeroed and its direction (+0x50) becomes 0.85
- * * (mVelocity - forward * |mVelocity|), with forward the wake parameters' third vector (+0x80). Point i of the +0xB4
- * rows is (side (+0x70) * t * t * 0.75 + up (+0x60) * t) * w, where t = i / (rows - 1) (times 0.9 for the last row) and
- * w = the parameters' speed (+0x90) * (1 + 0.25 * perlinNoise(3, phase +0x38)). Row 0's entry at the head gets @p pos
- * minus 5 * mGroundNormal and the alpha (+0x94) * 128 (+0x1C), copied to the other rows. @p width goes to the line's
- * +0x60.
+ * The line is mWakeLines[mCurrentWakeLine]. Its age and first point are zeroed and its mAngleCorrection becomes 0.85 *
+ * (mVelocity - mForward * |mVelocity|). Point i of the mWakeLineSegs rows is (mSide * t * t * 0.75 + mUp * t) * w,
+ * where t = i / (rows - 1) (times 0.9 for the last row) and w = mSpeed * (1 + 0.25 * perlinNoise(3,
+ * mWakeRandomnessSeed)). Row 0's vertex at the head gets @p pos minus 5 * mGroundNormal and the alpha mAlpha * 128,
+ * copied to the other rows. @p width goes to the line's mExtraInitalVelocityFactor.
  *
  * cBoardWakeFX_update calls it with an extra forward-vector argument between @p pos and @p width, which this definition
  * does not declare or use.
  *
  * @param pos  the wake position
- * @param width  the value stored at the line's +0x60
+ * @param width  the line's extra initial velocity factor
  */
-extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, t4Vector* pos, float width)
+extern "C" void cBoardWakeFX_fillCurrentSeg(cBoardWakeFX* self, t4Vector* pos, float width)
 {
-    float w = self->f90 * (perlinNoise(3, self->phase) * 0.25f + 1.0f);
-    sElemDD30* wakeLine = &self->elems[self->head];
-    wakeLine->i64 = 0;
-    wakeLine->pts[0] = t4vect_Zero_DD30;
-    t4Vector dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(self->obj->mVelocity));
-    t4Vector neg = wakeScaleDD30(self->obj->mVelocity, -1.0f);
+    float w = self->mWakeParams.mSpeed * (perlinNoise(3, self->mWakeRandomnessSeed) * 0.25f + 1.0f);
+    tWakeLine* wakeLine = &self->mWakeLines[self->mCurrentWakeLine];
+    wakeLine->mAge = 0.0f;
+    wakeLine->mVel[0] = t4vect_Zero_DD30;
+    t4Vector dir = wakeScaleDD30(wakeScaleDD30(self->mWakeParams.mForward, -1.0f),
+        wakeLenDD30(self->mRider->mVelocity));
+    t4Vector neg = wakeScaleDD30(self->mRider->mVelocity, -1.0f);
     {
         t4Vector x = wakeScaleDD30(wakeSubDD30(dir, neg), 0.85f);
-        wakeLine->dir = x;
+        wakeLine->mAngleCorrection = x;
     }
-    for (int i = 0; i < self->n; i++) {
-        float rowFrac = (float)i / (float)(self->n - 1);
+    for (int i = 0; i < self->mWakeLineSegs; i++) {
+        float rowFrac = (float)i / (float)(self->mWakeLineSegs - 1);
         float rowFracSq = rowFrac * rowFrac;
-        if (i == self->n - 1) {
+        if (i == self->mWakeLineSegs - 1) {
             rowFrac *= 0.9f;
         }
-        t4Vector x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->v70, rowFracSq), 0.75f), wakeScaleDD30(self->v60, rowFrac)), w);
-        wakeLine->pts[i] = x;
+        t4Vector x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->mWakeParams.mSide, rowFracSq), 0.75f),
+            wakeScaleDD30(self->mWakeParams.mUp, rowFrac)), w);
+        wakeLine->mVel[i] = x;
     }
-    {
-        sSegDD30* firstRow = self->rings[0];
-        sSegDD30* headEntry = (sSegDD30*)(self->head * (int)sizeof(sSegDD30) + (int)firstRow); // PORT: pointer in int
-        t4Vector x = wakeSubDD30(*pos, wakeScaleDD30(self->obj->mGroundNormal, 5.0f));
-        headEntry->pos = x;
+    placeWakeHead(&self->mWakeVerts[0][self->mCurrentWakeLine], *pos, self->mRider->mGroundNormal);
+    self->mWakeVerts[0][self->mCurrentWakeLine].a = (int)(self->mWakeParams.mAlpha * 128.0f);
+    for (int j = 1; j < self->mWakeLineSegs; j++) {
+        self->mWakeVerts[j][self->mCurrentWakeLine].p = self->mWakeVerts[0][self->mCurrentWakeLine].p;
+        self->mWakeVerts[j][self->mCurrentWakeLine].a = self->mWakeVerts[0][self->mCurrentWakeLine].a;
     }
-    self->rings[0][self->head].f1C = (int)(self->f94 * 128.0f);
-    for (int j = 1; j < self->n; j++) {
-        self->rings[j][self->head].pos = self->rings[0][self->head].pos;
-        self->rings[j][self->head].f1C = self->rings[0][self->head].f1C;
-    }
-    wakeLine->width = width;
+    wakeLine->mExtraInitalVelocityFactor = width;
 }
 #endif
 
@@ -935,41 +828,8 @@ extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, t4Vector* pos, floa
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_createSeg);
 #ifdef SKIP_ASM
 
-struct sEnt_E058 {
-    tARGB col;              // 0x00
-    char pad10[0xE0];
-};
-
-struct sSeg_E058 {
-    float f0;                   // 0x00
-    char pad4[0xC];             // 0x04
-    int r;                      // 0x10
-    int g;                      // 0x14
-    int b;                      // 0x18
-    char pad1C[0x14];           // 0x1C
-};
-
-
-struct sWake_E058 {
-    cRider* obj;                // 0x00
-    int count;                  // 0x04
-    int head;                   // 0x08
-    char padC[0x4];             // 0x0C
-    sSeg_E058* ring;            // 0x10
-    sSeg_E058* trails[4];       // 0x14
-    char pad24[0x14];           // 0x24
-    float phase;                // 0x38
-    char pad3C[0x4];            // 0x3C
-    int frame;                  // 0x40
-    char pad44[0x5C];           // 0x44
-    tARGB col;              // 0xA0
-    char padB0[0x8];            // 0xB0
-    int cap;                    // 0xB8
-};
-
-// cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_E058 views a row from
-// its +0x28 field
-extern char cRenderStateMan_m_state[];
+// cRenderStateMan::m_state: the per-view render states (visualfx/renderstateman.h, 8 rows of 0xF0 bytes).
+extern tRenderState cRenderStateMan_m_state[];
 
 // PORT: g++ minimum operator (<?).
 static inline float wakeClampE058(float v, float lo, float hi)
@@ -984,29 +844,30 @@ static inline float wakeClampE058(float v, float lo, float hi)
 }
 
 /**
- * Starts a new board wake segment: advances the ring head and sets the new entries' texture offset and ground colour.
+ * Starts a new board wake segment: advances the ring head and sets the new vertices' texture offset and ground colour.
  *
- * Advances the phase (+0x38) by 1/30, wrapping at 4, grows the count (+0x4) up to the maximum (+0xB8) and moves the
- * head (+0x8) back one place in the ring. The ground colour (+0xA0) is the rider's row (kRiderVt_getAIIndex) of the
- * 0xF0-byte table at cRenderStateMan_m_state + 0x28, doubled and clamped to 0..1. Row 0's entry at the head gets the
- * frame counter (+0x40) * 0.5 wrapped into -32..32 and the colour * 128 as integers; rows 1..4 copy it. Then the frame
- * counter increments.
+ * Advances mWakeRandomnessSeed by 1/30, wrapping at 4, grows mNumWakeLines up to mWakeMaxNumLines and moves
+ * mCurrentWakeLine back one place in the ring. mGroundColour is the rider's render-state colour (row
+ * kRiderVt_getAIIndex of cRenderStateMan_m_state), doubled and clamped to 0..1. Row 0's vertex at the head gets u =
+ * mWakeLength * 0.5 wrapped into -32..32 and the colour * 128 as integers; rows 1..4 copy it. Then mWakeLength
+ * increments.
  *
  * cBoardWakeFX_update calls it with a surface record and a position, which this definition does not declare or use.
  */
-extern "C" void cBoardWakeFX_createSeg(sWake_E058* self)
+extern "C" void cBoardWakeFX_createSeg(cBoardWakeFX* self)
 {
-    self->phase += 0.03333333507180214f;
-    if (self->phase >= 4.0f) {
-        self->phase -= 4.0f;
+    self->mWakeRandomnessSeed += 0.03333333507180214f;
+    if (self->mWakeRandomnessSeed >= 4.0f) {
+        self->mWakeRandomnessSeed -= 4.0f;
     }
-    if (self->count < self->cap) {
-        self->count++;
+    if (self->mNumWakeLines < self->mWakeMaxNumLines) {
+        self->mNumWakeLines++;
     }
-    self->head = (self->head + self->cap - 1) % self->cap;
-    char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
+    self->mCurrentWakeLine = (self->mCurrentWakeLine + self->mWakeMaxNumLines - 1) % self->mWakeMaxNumLines;
+    char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    tARGB col = ((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
+    // m_colour is On Tour's tARGB m_colour (the header keeps it as float[4], the same layout)
+    tARGB col = *(const tARGB*)cRenderStateMan_m_state[vt[7].fn(sub + vt[7].delta)].m_colour;
     col.A *= 2.0f;
     col.R *= 2.0f;
     col.G *= 2.0f;
@@ -1015,20 +876,21 @@ extern "C" void cBoardWakeFX_createSeg(sWake_E058* self)
     col.G = wakeClampE058(col.G, 0.0f, 1.0f);
     col.B = wakeClampE058(col.B, 0.0f, 1.0f);
     col.A = wakeClampE058(col.A, 0.0f, 1.0f);
-    self->col = col;
-    self->ring[self->head].f0 = (float)self->frame * 0.5f;
-    self->ring[self->head].f0 -= (float)(int)(self->ring[self->head].f0 * 0.015625f) * 64.0f + 32.0f;
-    self->ring[self->head].r = (int)(self->col.R * 128.0f);
-    self->ring[self->head].g = (int)(self->col.G * 128.0f);
-    self->ring[self->head].b = (int)(self->col.B * 128.0f);
+    self->mGroundColour = col;
+    self->mWakeVerts[0][self->mCurrentWakeLine].u = (float)self->mWakeLength * 0.5f;
+    self->mWakeVerts[0][self->mCurrentWakeLine].u -=
+        (float)(int)(self->mWakeVerts[0][self->mCurrentWakeLine].u * 0.015625f) * 64.0f + 32.0f;
+    self->mWakeVerts[0][self->mCurrentWakeLine].r = (int)(self->mGroundColour.R * 128.0f);
+    self->mWakeVerts[0][self->mCurrentWakeLine].g = (int)(self->mGroundColour.G * 128.0f);
+    self->mWakeVerts[0][self->mCurrentWakeLine].b = (int)(self->mGroundColour.B * 128.0f);
     int i;
-    for (i = 0; i < 4; i++) {
-        self->trails[i][self->head].f0 = self->ring[self->head].f0;
-        self->trails[i][self->head].r = self->ring[self->head].r;
-        self->trails[i][self->head].g = self->ring[self->head].g;
-        self->trails[i][self->head].b = self->ring[self->head].b;
+    for (i = 1; i < 5; i++) {
+        self->mWakeVerts[i][self->mCurrentWakeLine].u = self->mWakeVerts[0][self->mCurrentWakeLine].u;
+        self->mWakeVerts[i][self->mCurrentWakeLine].r = self->mWakeVerts[0][self->mCurrentWakeLine].r;
+        self->mWakeVerts[i][self->mCurrentWakeLine].g = self->mWakeVerts[0][self->mCurrentWakeLine].g;
+        self->mWakeVerts[i][self->mCurrentWakeLine].b = self->mWakeVerts[0][self->mCurrentWakeLine].b;
     }
-    self->frame++;
+    self->mWakeLength++;
 }
 #endif
 
@@ -2282,12 +2144,13 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     char* sub2 = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
-    sEnt_E058* colourRow = &((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[idx];
+    // m_colour is On Tour's tARGB m_colour (the header keeps it as float[4], the same layout)
+    const tARGB* colourRow = (const tARGB*)cRenderStateMan_m_state[idx].m_colour;
     t4Vector groundColour;
-    groundColour.x = colourRow->col.R;
-    groundColour.y = colourRow->col.G;
-    groundColour.z = colourRow->col.B;
-    groundColour.w = colourRow->col.A;
+    groundColour.x = colourRow->R;
+    groundColour.y = colourRow->G;
+    groundColour.z = colourRow->B;
+    groundColour.w = colourRow->A;
     self->col = groundColour;
     wakeScaleE398(self->col, self->col, 2.0f);
     self->col.w = 1.0f;
@@ -3716,115 +3579,24 @@ void* cHalo_cHalo(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cLightHalo_Render);
 #ifdef SKIP_ASM
-struct sV4_2868 { float x, y, z, w; sV4_2868(const float& a, const float& b, const float& c, const float& d) { x = a; y = b; z = c; w = d; } };
-struct sV2_2868 { float x, y; sV2_2868() { x = 0.0f; y = 0.0f; } sV2_2868(const float& a, const float& b) { x = a; y = b; } };
-
-struct sRsState_2868 {
-    int f0;                 // 0x0
-    int flagsA;             // 0x4
-    int flagsB;             // 0x8
-    int fC;                 // 0xC
-    short tex;              // 0x10
-    short pad;
+// t4Vector with the On Tour constructors the halo temporaries below use (t4Vector(float, float, float, float),
+// t4Vector(const t3vect&, float)).
+struct t4VectorInit : t4Vector {
+    t4VectorInit(const float& ax, const float& ay, const float& az, const float& aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+    t4VectorInit(const t3Vector& v, const float& aw) // [O] t4Vector(const t3vect&, float); cLightHalo_Process
+    {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = aw;
+    }
 };
-
-struct sRsVEnt_2868 {
-    short delta;
-    short index;
-    void (*fn)(void*, sV4_2868*, sV2_2868*, sV2_2868*, sV2_2868*, tARGB*, float, int);
-};
-
-struct sRsCtx_2868 {
-    char pad0[0xE84];
-    sRsState_2868* top;         // 0xE84
-    char pad1[0x1024 - 0xE88];
-    int tex1024;                // 0x1024
-    int tex1028;                // 0x1028
-    char pad2[0x10D8 - 0x102C];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void Draw(const sV4_2868& pos, const sV2_2868& size, const sV2_2868& uv0, const sV2_2868& uv1, const tARGB& col, float rot, int flags);
-};
-
-
-
-extern sRsCtx_2868* cGraphicsMan_TheGraphicsMan_2868 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_2868(float x)
@@ -3834,19 +3606,11 @@ static inline float Sqrt_2868(float x)
     return r;
 }
 
-static inline int rsTex1024_2868(sRsCtx_2868* ctx)
+// Sets one field of the current draw state's second state word.
+static inline void rsSetA_2868(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    return ctx->tex1024;
-}
-
-static inline int rsTex1028_2868(sRsCtx_2868* ctx)
-{
-    return ctx->tex1028;
-}
-
-static inline void rsSetA_2868(sRsCtx_2868* ctx, int mask, int shift, int v)
-{
-    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[1] & ~mask)
+        | ((v << shift) & mask);
 }
 
 /**
@@ -3856,9 +3620,9 @@ static inline void rsSetA_2868(sRsCtx_2868* ctx, int mask, int shift, int v)
  * vector at +0x10 normalised to unit length. With a z-buffer sample (+0x2E) the alpha is the record's visibility for
  * view @p idx (+0x40 + 4 * @p idx) and the render state's flag A bits 23-24 are set to 2, otherwise the alpha is 1 with
  * bits 23-24 = 1; bits 20-21 are cleared and bits 12-19 set to 20 either way. Skips a non-positive alpha. The halo type
- * (record flags & 0x70) picks the texture and size: 0x10 GrMan +0x1024 at 180, 0x20 GrMan +0x1028 at 100, 0x40 GrMan
- * +0x1024 at 350. Draws at the record's position (+0x1C) with UVs 0..1 and rotation +0x28 through GrMan virtual slot
- * 79. cLensFxMan_DrawLens calls it for every halo on screen.
+ * (record flags & 0x70) picks the texture and size: 0x10 effect texture 53 at 180, 0x20 effect texture 54 at 100,
+ * 0x40 effect texture 53 at 350. Draws at the record's position (+0x1C) with UVs 0..1 and rotation +0x28 through GrMan
+ * virtual slot 79 (DrawRotatedSprite). cLensFxMan_DrawLens calls it for every halo on screen.
  *
  * @param idx  the view index
  */
@@ -3887,7 +3651,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     (*(t3Vector*)&col.R).x = n.x;
     (*(t3Vector*)&col.R).y = n.y;
     (*(t3Vector*)&col.R).z = n.z;
-    sRsCtx_2868* ctx = cGraphicsMan_TheGraphicsMan_2868;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (self->mbRequestZSample != 0) {
         col.A = self->mpHalo->m_fOcclude[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
@@ -3905,20 +3669,23 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     float size = 0.0f;
     switch ((unsigned int)(((int)(self->mpHalo)->m_iFlags) & 0x70)) {
     case 0x10:
-        ctx->top->tex = rsTex1024_2868(ctx);
+        *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(53);
         size = 180.0f;
         break;
     case 0x20:
-        ctx->top->tex = rsTex1028_2868(ctx);
+        *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(54);
         size = 100.0f;
         break;
     case 0x40:
-        ctx->top->tex = rsTex1024_2868(ctx);
+        *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(53);
         size = 350.0f;
         break;
     }
     tHaloRecord* drawRecord = self->mpHalo;
-    ctx->Draw(sV4_2868((*(t3Vector*)&drawRecord->m_fvWorldPos[0]).x, (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).y, (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->mAngle, 2);
+    ctx->DrawRotatedSprite(t4VectorInit((*(t3Vector*)&drawRecord->m_fvWorldPos[0]).x,
+                                        (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).y,
+                                        (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).z, 1.0f),
+                           t2Vector(size, size), t2Vector(0.0f, 0.0f), t2Vector(1.0f, 1.0f), col, self->mAngle, 2);
 }
 #endif
 
@@ -3928,19 +3695,19 @@ INCLUDE_ASM("visualfx/boardwakefx", cLightHalo_Process);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 
-struct sV3c_2B00 {
-    float x, y, z;
-    sV3c_2B00(const float& a, const float& b, const float& c) { x = a; y = b; z = c; }
+// t3Vector with On Tour's t3Vector(float, float, float) constructor.
+struct t3VectorInit : t3Vector {
+    t3VectorInit(const float& ax, const float& ay, const float& az)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+    }
 };
-
-struct sV4c_2B00 {
-    float x, y, z, w;
-    sV4c_2B00(const sV3c_2B00& v, const float& d) { x = v.x; y = v.y; z = v.z; w = d; }
-} __attribute__((aligned(16)));
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline t4Vector Sub_2B00(const t4Vector& a, const sV4c_2B00& b)
+static inline t4Vector Sub_2B00(const t4Vector& a, const t4Vector& b)
 {
     t4Vector r;
     __asm__(
@@ -3964,18 +3731,17 @@ static inline int clampI_2B00(int v, int lo, int hi)
  * Clips the halo record's position (+0x20, +0x1C) with GrMan virtual slot 91: when clipped, clears +0x2C and +0x2E.
  * Otherwise it sets +0x2C and projects the point with slot 92; at a depth (z * 2^-24) of 0.005 or less it stops there.
  * Else it sets +0x2E, the sample rectangle +0x0..+0xC (depth * 800 by depth * 400 pixels, clamped to 16 by 8, centred
- * on the point) and the 16 by 8 rectangle +0x10..+0x1C clamped inside the view rectangle (@p viewInfo +0x0..+0xC). +0x24
- * becomes the projected depth of the point moved toward the camera by 100, 80 or 200 units by type (along the view
- * matrix column at @p viewInfo +0x18, +0x28, +0x38), and +0x28 the angle (screen x mapped to -1..1) * pi/2. cLensFxMan_ProcessLens
+ * on the point) and the 16 by 8 rectangle +0x10..+0x1C clamped inside the view rectangle (mViewRect). +0x24 becomes
+ * the projected depth of the point moved toward the camera by 100, 80 or 200 units by type (along the view matrix's
+ * z column, mViewMat rows 0..2 .z), and +0x28 the angle (screen x mapped to -1..1) * pi/2. cLensFxMan_ProcessLens
  * calls it for each halo of the view.
  *
  * @param vself  the halo
- * @param viewInfo  the view information ([O] tViewInfo): view rectangle at +0x0, view matrix from +0x10
+ * @param viewInfo  the view information ([O] tViewInfo): its view rectangle and view matrix
  */
 extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
 {
     cLightHalo* self = vself;
-    float* rect = (float*)viewInfo;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     t4Vector pos;
     pos.x = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).x;
@@ -4006,8 +3772,10 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
             self->mZSRect.Y = scr.y - 4.0f;
             self->mZSRect.W = 16.0f;
             self->mZSRect.H = 8.0f;
-            self->mZSRect.X = wakeClampD0B8(self->mZSRect.X, 0.0f, (rect[0] + rect[2]) - self->mZSRect.W);
-            self->mZSRect.Y = wakeClampD0B8(self->mZSRect.Y, 0.0f, (rect[1] + rect[3]) - self->mZSRect.H);
+            self->mZSRect.X = wakeClampD0B8(self->mZSRect.X, 0.0f,
+                (viewInfo->mViewRect.X + viewInfo->mViewRect.W) - self->mZSRect.W);
+            self->mZSRect.Y = wakeClampD0B8(self->mZSRect.Y, 0.0f,
+                (viewInfo->mViewRect.Y + viewInfo->mViewRect.H) - self->mZSRect.H);
             float pullBack = 0.0f;
             switch ((unsigned int)(((int)(self->mpHalo)->m_iFlags) & 0x70)) {
             case 0x10:
@@ -4021,15 +3789,16 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
                 break;
             }
             t3Vector viewDir;
-            viewDir.x = rect[6];
-            viewDir.y = rect[10];
-            viewDir.z = rect[14];
-            t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
+            viewDir.x = viewInfo->mViewMat.row[0].z;
+            viewDir.y = viewInfo->mViewMat.row[1].z;
+            viewDir.z = viewInfo->mViewMat.row[2].z;
+            t4Vector lp = Sub_2B00(pos, t4VectorInit(t3VectorInit(viewDir.x * pullBack, viewDir.y * pullBack,
+                                                              viewDir.z * pullBack), 0.0f));
             t4Vector sc = obj->GetScreenCoord(lp);
             self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
-            float screenFrac = scr.x - rect[0];
-            screenFrac = (screenFrac + screenFrac) / rect[2] - 1.0f;
+            float screenFrac = scr.x - viewInfo->mViewRect.X;
+            screenFrac = (screenFrac + screenFrac) / viewInfo->mViewRect.W - 1.0f;
             self->mAngle = screenFrac * 1.5707964f;
         }
     }
@@ -4039,16 +3808,6 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_cLensFxMan);
 #ifdef SKIP_ASM
-
-struct sWakePair2E18 {
-    int a;
-    int b;
-};
-
-struct sWakeMgr2E18 {
-    char pad0[0x60];
-    sWakePair2E18 pairs[1];     // 0x60
-};
 
 extern void* cLensFxMan_vtbl[];
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
@@ -4061,9 +3820,10 @@ extern "C" void cSunHalo_cSunHalo(void* self);
  * Constructs the lens effects manager base: its element arrays, then registers its callback with the graphics
  * manager.
  *
- * It builds 2 x 256 elements of 0x30 bytes at +0x68 (cHalo_cHalo) and two 0x210-byte objects at +0x6070
- * (cSunHalo_cSunHalo), sets +0x6494 to 1 and clears the pair at +0x60. It then passes cLensFxMan__drawFrameCallBack and itself to
- * graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor (cPS2LensFxMan_cPS2LensFxMan) calls this.
+ * It builds the 2 x 256 halos mLightHalo (cHalo_cHalo) and the two suns mSunHalo (cSunHalo_cSunHalo), sets
+ * mbLocked to 1 and clears both views' mNumHalo. It then passes cLensFxMan__drawFrameCallBack
+ * and itself to graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor
+ * (cPS2LensFxMan_cPS2LensFxMan) calls this.
  *
  * @return self
  */
@@ -4104,10 +3864,13 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
     }
     self->mbLocked = 1;
     {
+        // both views' halo counts, cleared a pair at a time (retail's one-pass loop keeps two strided stores)
+        int* firstViewCount = &self->mNumHalo[0];
+        int* secondViewCount = &self->mNumHalo[1];
         int i;
         for (i = 0; i < 1; i++) {
-            ((sWakeMgr2E18*)self)->pairs[i].a = 0;
-            ((sWakeMgr2E18*)self)->pairs[i].b = 0;
+            firstViewCount[i * 2] = 0;
+            secondViewCount[i * 2] = 0;
         }
     }
     {
@@ -4367,10 +4130,6 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 extern "C" void cLightHalo_Process(cLightHalo* part, tViewInfo* viewInfo);
 extern "C" void cSunHalo_Process(void* emit, void* owner, int idx);
 
-struct sWkPart3338 { char data[0x30]; };
-struct sWkEmit3338 { char data[0x210]; };
-
-struct sWkVtR3338 { short delta; short index; void (*fn)(tRect*, void*); };
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrix3338(t4Matrix* dst, t4Matrix* src)
 {
@@ -4392,9 +4151,9 @@ static inline void vu0CopyMatrix3338(t4Matrix* dst, t4Matrix* src)
  * Prepares one view's halos: stores the view's rectangle, matrix and projection values, then processes the sun and each
  * halo.
  *
- * Fills +0x0..+0xC from GrMan virtual slot 28 (the view rectangle), copies the matrix from slot 35 to +0x10 and gets
- * three floats into +0x50, +0x54, +0x58 from slot 30. Then processes view @p idx's sun (+0x6070 + @p idx * 0x210) with
- * cSunHalo_Process and each of its halos with cLightHalo_Process. cLensFxMan_render calls it.
+ * Fills mViewInfo.mViewRect from GrMan virtual slot 28 (the view rectangle), copies the matrix from slot 35 to
+ * mViewInfo.mViewMat and gets mFOV, mZNear and mZFar from slot 30. Then processes view @p idx's sun (mSunHalo[@p idx])
+ * with cSunHalo_Process and each of its halos with cLightHalo_Process. cLensFxMan_render calls it.
  *
  * @param vself  the lens manager (this)
  * @param idx  the view index
@@ -4412,13 +4171,13 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
     {
         ctx->GetViewportPerspective(self->mViewInfo.mFOV, self->mViewInfo.mZNear, self->mViewInfo.mZFar);
     }
-    sWkEmit3338* em = ((sWkEmit3338*)&self->mSunHalo[0]);
-    cSunHalo_Process(&em[idx], self, idx);
+    cSunHalo* suns = self->mSunHalo;
+    cSunHalo_Process(&suns[idx], self, idx);
     if (i < self->mNumHalo[idx]) {
-        sWkPart3338(*pp)[0x100] = ((sWkPart3338 (*)[256])&self->mLightHalo[0][0]);
-        sWkPart3338* halo = pp[idx];
+        cLightHalo (*viewHalos)[256] = self->mLightHalo;
+        cLightHalo* halo = viewHalos[idx];
         do {
-            cLightHalo_Process((cLightHalo*)halo, &self->mViewInfo);
+            cLightHalo_Process(halo, &self->mViewInfo);
             i++;
             halo++;
         } while (i < self->mNumHalo[idx]);
@@ -4644,33 +4403,28 @@ __asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_reset);
 #ifdef SKIP_ASM
-struct sWakeVec4_3930 {
-    float x;
-    float y;
-    float z;
-    float w;
-    sWakeVec4_3930() {}
-    sWakeVec4_3930(float ax, float ay, float az, float aw)
+// tARGB with On Tour's tARGB(float a, float r, float g, float b) constructor.
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b)
     {
-        x = ax;
-        y = ay;
-        z = az;
-        w = aw;
+        A = a;
+        R = r;
+        G = g;
+        B = b;
     }
 };
-
 
 /**
  * Resets a player indicator's colours; despite the name it reads no replay data (it takes no frame).
  *
- * The pulse runs between (0.5, 1, 0, 0) and (0.7, 1, 0.7, 0.7), starting at the first; +0x4 is cleared.
+ * The pulse runs between (0.5, 1, 0, 0) and (0.7, 1, 0.7, 0.7), starting at the first; PulseAng is cleared.
  */
 extern "C" void cPlayerIndicatorFX_reset(cPlayerIndicatorFX* self)
 {
-    (*(sWakeVec4_3930*)&self->MinColor) = sWakeVec4_3930(0.5f, 1.0f, 0.0f, 0.0f);
-    (*(sWakeVec4_3930*)&self->MaxColor) = sWakeVec4_3930(0.699999988079071f, 1.0f, 0.699999988079071f, 0.699999988079071f);
-    (*(sWakeVec4_3930*)&self->CurColor) = (*(sWakeVec4_3930*)&self->MinColor);
-    (*(int*)&self->PulseAng) = 0;
+    self->MinColor = tARGBInit(0.5f, 1.0f, 0.0f, 0.0f);
+    self->MaxColor = tARGBInit(0.699999988079071f, 1.0f, 0.699999988079071f, 0.699999988079071f);
+    self->CurColor = self->MinColor;
+    self->PulseAng = 0.0f;
 }
 #endif
 
@@ -4726,12 +4480,12 @@ struct sWkColor_3AF8 {
 };
 
 
-extern sRsState_2868 sDrawState_s_defaultDrawState_3AF8 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState sDrawState_s_defaultDrawState_3AF8 __asm__("sDrawState_s_defaultDrawState");
 
 // Render context (GrMan): state stack at 0xE84, vtable at 0x10D8.
 struct sRCtx_3AF8 {
     char pad[0xE84];
-    sRsState_2868* top;         // 0xE84
+    sDrawState* top;            // 0xE84
     char padE88[0xFFC - 0xE88];
     int tex;                    // 0xFFC
     char pad1000[0x10D8 - 0x1000];
@@ -4865,12 +4619,12 @@ static inline void Set4_3AF8(t4Vector& v, float x, float y, float z, float w)
 
 static inline void rsSetA_3AF8(sRCtx_3AF8* ctx, int mask, int shift, int v)
 {
-    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+    ctx->top->m_bitGroups[1] = ((int)ctx->top->m_bitGroups[1] & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSetB_3AF8(sRCtx_3AF8* ctx, int mask, int shift, int v)
 {
-    ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
+    ctx->top->m_bitGroups[2] = ((int)ctx->top->m_bitGroups[2] & ~mask) | ((v << shift) & mask);
 }
 
 static inline int rsTex_3AF8(sRCtx_3AF8* ctx)
@@ -4935,14 +4689,15 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
         rsSetA_3AF8(renderCtx, 0x3, 0, 2);
         rsSetB_3AF8(renderCtx, 0x1FFFFC00, 10, 0);
         rsSetB_3AF8(renderCtx, 0x3E0, 5, 7);
-        *(short*)((char*)renderCtx->top + 0x10) = rsTex_3AF8(renderCtx);
+        *renderCtx->top->m_textureState.m_texid = rsTex_3AF8(renderCtx);
     }
     float* viewMat = (float *)GrMan->GetView();
     t4Vector side;
     Set4_3AF8(side, viewMat[0], viewMat[4], viewMat[8], 0.0f);
     t4Vector up;
     Set4_3AF8(up, viewMat[1], viewMat[5], viewMat[9], 0.0f);
-    t4Vector pos = *(t4Vector*)((char*)self->mRider->mAnimModel->SkelMatrices + (self->mRider->mBoneHead << 6) + 0x30);
+    const t4Matrix& headBone = self->mRider->mAnimModel->SkelMatrices[self->mRider->mBoneHead];
+    t4Vector pos = headBone.row[3];
     const t4Vector* base = &pos;
     t4Vector beamTip = Add_3AF8(*base, Scale_3AF8(up, 20260.0f));
     t4Vector beamUpper = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
@@ -5421,11 +5176,8 @@ void cWorldPainterMan_reset_47E8() __asm__("cWorldPainterMan_reset__FPv");
 
 
 
-struct sFadeVt47E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, float);
-};
+// cTransitionObj's slot 2, Draw(float amount) (visualfx/transitionobj.h).
+typedef sVEntry<void(void*, float)> tTransitionDrawSlot;
 
 
 static inline void rsSetA47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
@@ -5471,20 +5223,20 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
         ctx->TakeScreenGrab(self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }
-    char* transition;
+    cTransitionObj* transition;
     float alpha;
-    if ((char*)self->mTransitionIn == 0) {
+    if (self->mTransitionIn == 0) {
         alpha = 1.0f - (curTime - self->mfHoldTime) / self->mfOutTime;
-        transition = (char*)self->mTransitionOut;
-    } else if (curTime < self->mfInTime || (char*)self->mTransitionOut == 0) {
+        transition = self->mTransitionOut;
+    } else if (curTime < self->mfInTime || self->mTransitionOut == 0) {
         alpha = curTime / self->mfInTime;
-        transition = (char*)self->mTransitionIn;
+        transition = self->mTransitionIn;
     } else if (curTime < self->mfInTime + self->mfHoldTime) {
         alpha = 1.0f;
-        transition = (char*)self->mTransitionIn;
+        transition = self->mTransitionIn;
     } else {
         alpha = 1.0f - (curTime - (self->mfInTime + self->mfHoldTime)) / self->mfOutTime;
-        transition = (char*)self->mTransitionOut;
+        transition = self->mTransitionOut;
     }
     float clamped = wakeClampE058(alpha, 0.0f, 1.0f);
     if (clamped >= 0.93f) {
@@ -5511,7 +5263,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
         ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
     }
     if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
-        sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
+        tTransitionDrawSlot* ov = *(tTransitionDrawSlot**)transition; // its vptr, at 0x0
         ov[2].fn(vthis(transition, ov[2]), clamped);
     }
     ctx->PopView();
@@ -5990,21 +5742,22 @@ extern "C" void cSnowBox_update(cSnowBox* self, const tWorldPainterSnowfallParam
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_updateForCameraPosition);
 #ifdef SKIP_ASM
-struct sWakeVec5430 {
-    float x, y, z, w;
-    sWakeVec5430() {}
-    sWakeVec5430(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-struct sWakeGrid5430 {
-    char pad_0x0[0xC];
-    float size;                 // 0xC
-    char pad_0x10[0x10];
-    sWakeVec5430 pos;           // 0x20
+// t4Vector with On Tour's t4Vector() and t4Vector(float, float, float, float) constructors (the snow and speed boost
+// temporaries), and the placement new[] cSnowFall's constructor runs over its camera positions.
+struct t4VectorCtor : t4Vector {
+    t4VectorCtor() {}
+    t4VectorCtor(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+    void* operator new[](unsigned int, void* p) { return p; }
 };
 
 // PORT: PS2-only VU0 inline asm (a -= b).
-static inline void wakeSub5430(sWakeVec5430& a, const sWakeVec5430& b)
+static inline void wakeSub5430(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -6030,14 +5783,14 @@ static inline void wakeWrap5430(float& r, float v, float s)
 /**
  * Moves a snow box's offset by the camera's movement and wraps it back into the box size.
  *
- * Subtracts @p delta from the offset (+0x20) and wraps each axis into the box size (+0xC). cSnowFall_render calls it
- * with the camera's change in position.
+ * Subtracts @p delta from mOffset and wraps each axis into the box size (mBoxScale). cSnowFall_render calls it with
+ * the camera's change in position.
  *
  * @param delta  the camera movement since the last frame
  */
-extern "C" void cSnowBox_updateForCameraPosition(cSnowBox* self, sWakeVec5430* delta)
+extern "C" void cSnowBox_updateForCameraPosition(cSnowBox* self, const t4Vector* delta)
 {
-    wakeSub5430(*(sWakeVec5430*)&self->mOffset, *delta);
+    wakeSub5430(self->mOffset, *delta);
     float x = self->mOffset.x;
     float y = self->mOffset.y;
     float z = self->mOffset.z;
@@ -6047,22 +5800,18 @@ extern "C" void cSnowBox_updateForCameraPosition(cSnowBox* self, sWakeVec5430* d
     wakeWrap5430(x, px, self->mBoxScale);
     wakeWrap5430(y, py, self->mBoxScale);
     wakeWrap5430(z, pz, self->mBoxScale);
-    *(sWakeVec5430*)&self->mOffset = sWakeVec5430(x, y, z, 1.0f);
+    self->mOffset = t4VectorCtor(x, y, z, 1.0f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_render);
 #ifdef SKIP_ASM
-struct sMat_6008;
-extern char* GrMan_boardwakefx __asm__("GrMan");
-
-
-struct sMat55D8 {
-    t4Vector v[4];
-    sMat55D8() {}
+// t4Matrix copied through the VU0 registers (lqc2/sqc2), as retail's inlined matrix copies.
+struct t4MatrixVu0 : t4Matrix {
+    t4MatrixVu0() {}
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-    sMat55D8(const sMat55D8& o)
+    t4MatrixVu0(const t4MatrixVu0& o)
     {
         __asm__ __volatile__(
             "lqc2      $vf1, 0x0(%1)\n"
@@ -6077,43 +5826,40 @@ struct sMat55D8 {
             : "r"(this), "r"(&o)
             : "memory");
     }
-    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-    sMat55D8& operator=(const sMat55D8& o)
-    {
-        __asm__ __volatile__(
-            "lqc2      $vf1, 0x0(%1)\n"
-            "lqc2      $vf2, 0x10(%1)\n"
-            "lqc2      $vf3, 0x20(%1)\n"
-            "lqc2      $vf4, 0x30(%1)\n"
-            "sqc2      $vf1, 0x0(%0)\n"
-            "sqc2      $vf2, 0x10(%0)\n"
-            "sqc2      $vf3, 0x20(%0)\n"
-            "sqc2      $vf4, 0x30(%0)\n"
-            :
-            : "r"(this), "r"(&o)
-            : "memory");
-        return *this;
-    }
-} __attribute__((aligned(16)));
-
-
-
-struct sVt55D8 {
-    short delta;
-    short index;
-    void (*fn)(void*, tSnowBoxData*);
 };
 
-// PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct).
-typedef int cQuad55D8 __attribute__((mode(TI)));
-extern cQuad55D8 t4vect_XAxis;
-extern cQuad55D8 t4vect_YAxis;
-extern cQuad55D8 t4vect_ZAxis;
+
+
+
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+static inline void vu0SetMatrix55D8(t4Matrix& dst, const t4Matrix& o)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(&dst), "r"(&o)
+        : "memory");
+}
+
+// PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct); retail takes the axes' addresses into a register
+// (lui/addiu) before the lqc2, as for a TImode object.
+typedef int cQuad128 __attribute__((mode(TI)));
+extern cQuad128 t4vect_XAxis;
+extern cQuad128 t4vect_YAxis;
+extern cQuad128 t4vect_ZAxis;
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * matrix).
-static inline sMat55D8 wakeMulMat55D8(const sMat55D8& a, const sMat55D8& b)
+static inline t4MatrixVu0 wakeMulMat55D8(const t4Matrix& a, const t4Matrix& b)
 {
-    sMat55D8 r;
+    t4MatrixVu0 r;
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
         "lqc2      $vf5, 0x10(%1)\n"
@@ -6169,7 +5915,7 @@ static inline t4Vector wakeDiv55D8(const t4Vector& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void wakeAddEq55D8(t4Vector& a, const cQuad55D8& b)
+static inline void wakeAddEq55D8(t4Vector& a, const cQuad128& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -6182,7 +5928,7 @@ static inline void wakeAddEq55D8(t4Vector& a, const cQuad55D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a -= b).
-static inline void wakeSubEq55D8(t4Vector& a, const cQuad55D8& b)
+static inline void wakeSubEq55D8(t4Vector& a, const cQuad128& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -6210,21 +5956,19 @@ static inline void wakeSubV55D8(t4Vector& a, const t4Vector& b)
 /**
  * Draws one snow box: builds its draw record and hands it to the graphics manager.
  *
- * Does nothing while the box is inactive (+0x8). The record holds @p snowMatrix times the box matrix (+0x50), the offset (+0x20)
- * divided by the size (+0xC) and shifted by one box toward the cell (@p x, @p y, @p z) to (x+1, y+1, z+1), minus 1.5;
- * the colour (+0xA4..+0xAC) and alpha (+0x18) times 128; the flake values +0x8, +0x98, +0x9C, +0xA0; and the cell
- * bounds with +0x14 and the size. Type 0 (+0x4) draws through GrMan virtual slot 85, type 1 through slot 86.
- * cSnowFall_render calls it for each box.
+ * Does nothing while the box has no flakes (mNumFlakes). The record holds @p snowMatrix times mBoxMatrix, mOffset
+ * divided by mBoxScale and shifted by one box toward the cell (@p x, @p y, @p z) to (x+1, y+1, z+1), minus 1.5; the
+ * colour (mColourR..B) and mOpacity times 128; mNumFlakes and the three random seeds; and the cell bounds with
+ * mFlakeSize and mBoxScale. Type 0 (mSnowBoxType) draws through RenderSnowBoxFlakes (GrMan slot 85), type 1 through
+ * RenderSnowBoxFluffs (slot 86). cSnowFall_render calls it for each box.
  *
- * @param snowBox  the snow box
  * @param snowMatrix  the snow matrix
  * @param x  minimum x of the cell
  * @param y  minimum y of the cell
  * @param z  minimum z of the cell
  */
-extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, float y, float z)
+extern "C" void cSnowBox_render(cSnowBox* self, const t4Matrix* snowMatrix, float x, float y, float z)
 {
-    cSnowBox* self = (cSnowBox*)snowBox;
     if (self->mNumFlakes == 0) {
         return;
     }
@@ -6232,9 +5976,9 @@ extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, fl
     float y1 = y + 1.0f;
     float z1 = z + 1.0f;
     tSnowBoxData info;
-    (*(sMat55D8*)&info.mSnowBoxToWorldMatrix) = wakeMulMat55D8(*(sMat55D8*)snowMatrix, (*(sMat55D8*)&self->mBoxMatrix));
-    t4Vector tempVec = wakeDiv55D8((*(t4Vector*)&self->mOffset), self->mBoxScale);
-    (*(t4Vector*)&info.mParticleOffset) = tempVec;
+    vu0SetMatrix55D8(info.mSnowBoxToWorldMatrix, wakeMulMat55D8(*snowMatrix, self->mBoxMatrix));
+    t4Vector tempVec = wakeDiv55D8(self->mOffset, self->mBoxScale);
+    info.mParticleOffset = tempVec;
     float red = self->mColourR * 128.0f;
     float green = self->mColourG * 128.0f;
     float blue = self->mColourB * 128.0f;
@@ -6244,50 +5988,48 @@ extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, fl
     info.mRandSeed = self->mRandSeed;
     info.mRandSeed2 = self->mRandSeed2;
     info.mRandSeed3 = self->mRandSeed3;
-    (*(t4Vector*)&info.mMinX).w = self->mFlakeSize;
-    (*(t4Vector*)&info.mMaxX).w = self->mBoxScale;
+    info.mFlakeSize = self->mFlakeSize;
+    info.mBoxScale = self->mBoxScale;
     tempVec.x = red;
     tempVec.z = blue;
-    (*(t4Vector*)&info.mMinX).x = x;
-    (*(t4Vector*)&info.mMinX).y = y;
-    (*(t4Vector*)&info.mMinX).z = z;
-    (*(t4Vector*)&info.mMaxX).x = x1;
-    (*(t4Vector*)&info.mMaxX).y = y1;
-    (*(t4Vector*)&info.mMaxX).z = z1;
+    info.mMinX = x;
+    info.mMinY = y;
+    info.mMinZ = z;
+    info.mMaxX = x1;
+    info.mMaxY = y1;
+    info.mMaxZ = z1;
     tempVec.w = alpha;
-    (*(t4Vector*)&info.mColour) = tempVec;
-    if ((*(t4Vector*)&info.mParticleOffset).x < x + -0.5f) {
-        wakeAddEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_XAxis);
+    *(t4Vector*)&info.mColour = tempVec; // the colour as one quadword (tARGB, same layout as t4Vector here)
+    if (info.mParticleOffset.x < x + -0.5f) {
+        wakeAddEq55D8(info.mParticleOffset, t4vect_XAxis);
     }
-    if (x1 + 0.5f < (*(t4Vector*)&info.mParticleOffset).x) {
-        wakeSubEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_XAxis);
+    if (x1 + 0.5f < info.mParticleOffset.x) {
+        wakeSubEq55D8(info.mParticleOffset, t4vect_XAxis);
     }
-    if ((*(t4Vector*)&info.mParticleOffset).y < y + -0.5f) {
-        wakeAddEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_YAxis);
+    if (info.mParticleOffset.y < y + -0.5f) {
+        wakeAddEq55D8(info.mParticleOffset, t4vect_YAxis);
     }
-    if (y1 + 0.5f < (*(t4Vector*)&info.mParticleOffset).y) {
-        wakeSubEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_YAxis);
+    if (y1 + 0.5f < info.mParticleOffset.y) {
+        wakeSubEq55D8(info.mParticleOffset, t4vect_YAxis);
     }
-    if ((*(t4Vector*)&info.mParticleOffset).z < z + -0.5f) {
-        wakeAddEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_ZAxis);
+    if (info.mParticleOffset.z < z + -0.5f) {
+        wakeAddEq55D8(info.mParticleOffset, t4vect_ZAxis);
     }
-    if (z1 + 0.5f < (*(t4Vector*)&info.mParticleOffset).z) {
-        wakeSubEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_ZAxis);
+    if (z1 + 0.5f < info.mParticleOffset.z) {
+        wakeSubEq55D8(info.mParticleOffset, t4vect_ZAxis);
     }
     tempVec.x = 1.5f;
     tempVec.y = 1.5f;
     tempVec.z = 1.5f;
     tempVec.w = 0.0f;
-    wakeSubV55D8((*(t4Vector*)&info.mParticleOffset), tempVec);
+    wakeSubV55D8(info.mParticleOffset, tempVec);
     switch (self->mSnowBoxType) {
     case 0: {
-        sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
-        vt[85].fn(vthis(GrMan_boardwakefx, vt[85]), &info);
+        GrMan->RenderSnowBoxFlakes(info);
         break;
     }
     case 1: {
-        sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
-        vt[86].fn(vthis(GrMan_boardwakefx, vt[86]), &info);
+        GrMan->RenderSnowBoxFluffs(info);
         break;
     }
     }
@@ -6302,14 +6044,6 @@ extern "C" void cMemMan_validate(void);
 extern char str_SnowBox[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sVec5920 {
-    float x, y, z, w;
-    sVec5920() {}
-    sVec5920(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-    void* operator new[](unsigned int, void* p) { return p; }
-} __attribute__((aligned(16)));
-
-
 /**
  * Constructs the falling snow: six snow boxes ("SnowBox") per view, the second set only for two players.
  *
@@ -6323,13 +6057,13 @@ extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
 {
     cObjNode_cObjNode1(self, bucket);
     VPTR_OF(cObjNode, self) = cSnowFall_vtbl;
-    new (((sVec5920*)&self->mLastCameraPosition[0])) sVec5920[2];
+    new (self->mLastCameraPosition) t4VectorCtor[2];
     cMemMan_validate();
     for (int i = 11; i >= 0; i--) {
         self->mSnowBoxes[i] = 0;
     }
     for (int j = 0; j < 2; j++) {
-        ((sVec5920*)&self->mLastCameraPosition[0])[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
+        self->mLastCameraPosition[j] = t4VectorCtor(0.0f, 0.0f, 0.0f, 1.0f);
     }
     self->mSnowBoxes[0] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
     self->mSnowBoxes[1] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
@@ -6484,10 +6218,10 @@ extern "C" void cSnowFall_update(cSnowFall* self)
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_render);
 #ifdef SKIP_ASM
 
-struct sMat_6008 {
-    t4Vector v[4];
+// The view matrix copy: a t4Matrix assigned through the VU0 registers (lqc2/sqc2), as retail's inlined copy.
+struct t4MatrixVu0Set : t4Matrix {
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-    sMat_6008& operator=(const sMat_6008& o)
+    t4MatrixVu0Set& operator=(const t4Matrix& o)
     {
         __asm__ __volatile__(
             ".set noreorder\n"
@@ -6505,60 +6239,23 @@ struct sMat_6008 {
             : "memory");
         return *this;
     }
-} __attribute__((aligned(16)));
-
-struct sRsState_6008 {
-    int f0;                 // 0x0
-    int flagsA;             // 0x4
-    int flagsB;             // 0x8
-    int fC;                 // 0xC
-    short tex;              // 0x10
-    short pad;
-};
-
-struct sRsVEnt_6008 {
-    short delta;
-    short index;
-    sMat_6008* (*fn)(void*);
-};
-
-struct sRsCtx_6008 {
-    char pad0[0xE84];
-    sRsState_6008* top;         // 0xE84
-    char pad1[0xF70 - 0xE88];
-    int texF70;                 // 0xF70
-    char pad2[0x10D8 - 0xF74];
-    sRsVEnt_6008* vtable;       // 0x10D8
-};
-
-struct sRiders_6008 {
-    int f0;
-    char* riders[4];            // 0x4
-    int cur;                    // 0x14
-};
-
-struct sWakeFx_6008 {
-    char pad0[0x10];
-    int* parts[12];             // 0x10
-    sWakeVec5430 last[4];       // 0x40
 };
 
 extern int cRenderToggles_m_DisableSnowFall;
 extern int cSnowfallToggles_m_TestAdditive[1];
-extern sRsCtx_6008* cGraphicsMan_TheGraphicsMan_6008 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sRsState_6008 sDrawState_s_defaultDrawState_6008[] __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState sDrawState_s_defaultDrawState_6008[] __asm__("sDrawState_s_defaultDrawState");
 extern t4Vector t4vect_Origin;
-extern "C" void cSnowBox_render(int* p, sMat_6008* m, float r, float g, float b);
+extern "C" void cSnowBox_render(cSnowBox* self, const t4Matrix* snowMatrix, float x, float y, float z);
 
-static inline sRiders_6008* riders_6008()
+static inline cGameViewMan* riders_6008()
 {
-    return (sRiders_6008*)SSXApp->Game->ViewMan;
+    return SSXApp->Game->ViewMan;
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sWakeVec5430 sub_6008(const sWakeVec5430& a, const sWakeVec5430& b)
+static inline t4Vector sub_6008(const t4Vector& a, const t4Vector& b)
 {
-    sWakeVec5430 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -6570,42 +6267,39 @@ static inline sWakeVec5430 sub_6008(const sWakeVec5430& a, const sWakeVec5430& b
     return r;
 }
 
-static inline int rsTexF70_6008(sRsCtx_6008* ctx)
+static inline void rsSetA_6008(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    return ctx->texF70;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[1] & ~mask)
+        | ((v << shift) & mask);
 }
 
-static inline void rsSetA_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
+static inline void rsSetB_6008(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
-}
-
-static inline void rsSetB_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
-{
-    ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[2] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[2] & ~mask)
+        | ((v << shift) & mask);
 }
 
 /**
  * Draws the falling snow for the current view, moving its boxes with the camera.
  *
- * The boxes of the current view move by that view's position change since the last frame (+0x20). The colour
- * comes from the view's +0x80 colour (times 0.6, minus 0.5). Skipped when cRenderToggles_m_DisableSnowFall is set;
- * cSnowfallToggles_m_TestAdditive selects additive blending.
+ * The boxes of the current view move by that view's camera position change since the last frame
+ * (mLastCameraPosition). The cell the boxes draw in starts at the camera direction times 0.6, minus 0.5. Skipped when
+ * cRenderToggles_m_DisableSnowFall is set; cSnowfallToggles_m_TestAdditive selects additive blending.
  */
-extern "C" void cSnowFall_render(sWakeFx_6008* self)
+extern "C" void cSnowFall_render(cSnowFall* self)
 {
     if (cRenderToggles_m_DisableSnowFall != 0) {
         return;
     }
-    sRiders_6008* rs = riders_6008();
-    int k = rs->cur;
-    sWakeVec5430 camPos = *(sWakeVec5430*)(rs->riders[k] + 0x20);
-    sWakeVec5430 camDiff = sub_6008(camPos, self->last[k]);
-    self->last[k] = camPos;
-    sRsCtx_6008* ctx = cGraphicsMan_TheGraphicsMan_6008;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    *ctx->top = sDrawState_s_defaultDrawState_6008[0];
+    cGameViewMan* views = riders_6008();
+    int k = views->m_uiCurrentView;
+    t4Vector camPos = views->PlayerCamera[k]->Pose.P;
+    t4Vector camDiff = sub_6008(camPos, self->mLastCameraPosition[k]);
+    self->mLastCameraPosition[k] = camPos;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
+    *ctx->m_pCurrentDrawState = sDrawState_s_defaultDrawState_6008[0];
     rsSetA_6008(ctx, 0x400000, 22, 1);
     rsSetB_6008(ctx, 0x3E0, 5, 7);
     if (cSnowfallToggles_m_TestAdditive[0] != 0) {
@@ -6615,24 +6309,24 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
     }
     rsSetA_6008(ctx, 0x3, 0, 2);
     rsSetB_6008(ctx, 0x1FFFFC00, 10, 0);
-    ctx->top->tex = rsTexF70_6008(ctx);
-    sMat_6008 snowMatrix;
-    snowMatrix = *ctx->vtable[35].fn(vthis(ctx, ctx->vtable[35]));
-    snowMatrix.v[3] = t4vect_Origin;
-    sRiders_6008* rs2 = riders_6008();
-    sWakeVec5430 camDir = *(sWakeVec5430*)(rs2->riders[rs2->cur] + 0x80);
+    *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(8);
+    t4MatrixVu0Set snowMatrix;
+    snowMatrix = *ctx->GetView();
+    snowMatrix.row[3] = t4vect_Origin;
+    cGameViewMan* viewsNow = riders_6008();
+    t4Vector camDir = viewsNow->PlayerCamera[viewsNow->m_uiCurrentView]->Direction;
     float boxMinX = camDir.x * 0.6f + -0.5f;
     float boxMinY = camDir.y * 0.6f + -0.5f;
     float boxMinZ = camDir.z * 0.6f + -0.5f;
     int i;
     for (i = 0; i < 12; i++) {
-        int* snowBox = self->parts[i];
-        if (snowBox != 0 && *snowBox == k) {
-            cSnowBox_updateForCameraPosition((cSnowBox*)((sWakeGrid5430*)snowBox), &camDiff);
-            cSnowBox_render(self->parts[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
+        cSnowBox* snowBox = self->mSnowBoxes[i];
+        if (snowBox != 0 && snowBox->mViewNum == k) {
+            cSnowBox_updateForCameraPosition(snowBox, &camDiff);
+            cSnowBox_render(self->mSnowBoxes[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
         }
     }
-    ctx->top--;
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -6886,29 +6580,13 @@ int cRider_getMotionState(void*);
 
 
 
-struct sWake_66B8 {
-    cRider* rider;          // 0x000 (virtual base)
-    float f4;               // 0x004
-    float f8;               // 0x008
-    float fC;               // 0x00C
-    float phase;            // 0x010
-    int f14;                // 0x014
-    int f18;                // 0x018
-    char pad1C[0x398 - 0x1C];
-    int tex;                // 0x398
-    int head;               // 0x39C
-    int count;              // 0x3A0
-    int max;                // 0x3A4
-    int air;                // 0x3A8
-    tSpeedBoostStreamerSeg* segs;        // 0x3AC
-    float& Width() { return fC; }
-};
 
 extern int cPowerUpFXToggles_m_EnableSpeedBoostStreamers;
 extern int cPowerUpFXToggles_m_TestSpeedBoostRibbon;
 extern int cPowerUpFXToggles_m_TestRedRibbon;
 extern int cPowerUpFXToggles_m_TestOrangeRibbon;
-extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(sWake_66B8* self) __asm__("cSpeedBoostFX_UpdateSpeedBoostTrail");
+extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(cSpeedBoostFX* self)
+    __asm__("cSpeedBoostFX_UpdateSpeedBoostTrail");
 
 // PORT: <? and >? (g++ min/max operators)
 static inline float Clamp_66B8(float v, float lo, float hi)
@@ -6953,45 +6631,53 @@ static inline void SubEq_66B8(t4Vector& a, const t4Vector& b)
 
 static inline t4Vector BonePos_66B8(cRider* o, int bone)
 {
-    return ((t4Vector*)((char*)o->mAnimModel->SkelMatrices + (bone << 6)))[3];
+    const t4Matrix& boneMatrix = o->mAnimModel->SkelMatrices[bone];
+    return boneMatrix.row[3];
 }
 
-static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, float k, float speed)
+// The trail width through a reference accessor, as the landed code had it (the update's register allocation follows
+// the accessor form; plain member access allocates the on-flag to another register).
+static inline float& trailWidth(cSpeedBoostFX* self)
+{
+    return self->mWidth;
+}
+
+static inline void Trail_66B8(cSpeedBoostFX* self, const t4Vector& pos, int on, float k, float speed)
 {
     if (on) {
-        int prev = self->head;
-        self->head++;
-        self->head %= 20;
-        if (self->count < self->max) {
-            self->count++;
+        int prev = self->mStreamBufHead;
+        self->mStreamBufHead++;
+        self->mStreamBufHead %= 20;
+        if (self->mStreamBufLen < self->mMaxStreamerSegments) {
+            self->mStreamBufLen++;
         }
-        self->segs[self->head] = self->segs[prev];
+        self->mStreamBuf[self->mStreamBufHead] = self->mStreamBuf[prev];
         t4Vector d = vu0Scale(pos, 1.4f);
         for (int i = 0; i < 20; i++) {
-            SubEq_66B8(self->segs[i].l, d);
-            vu0AddEq(self->segs[i].r, d);
+            SubEq_66B8(self->mStreamBuf[i].l, d);
+            vu0AddEq(self->mStreamBuf[i].r, d);
         }
     } else {
-        self->count = Approach_66B8(self->count, 0, 1);
+        self->mStreamBufLen = Approach_66B8(self->mStreamBufLen, 0, 1);
     }
-    if (self->count > 0) {
-        cRider* o = self->rider;
+    if (self->mStreamBufLen > 0) {
+        cRider* o = self->mRider;
         t4Vector a = BonePos_66B8(o, o->mBoneHips);
         t4Vector b = BonePos_66B8(o, o->LHandSkelIndex);
         t4Vector c = BonePos_66B8(o, o->RHandSkelIndex);
         if (vu0Dot(b, pos) < vu0Dot(c, pos)) {
-            self->segs[self->head].l = vu0Sub(b, vu0Scale(a, 0.7f));
-            self->segs[self->head].r = vu0Sub(c, vu0Scale(a, 0.7f));
+            self->mStreamBuf[self->mStreamBufHead].l = vu0Sub(b, vu0Scale(a, 0.7f));
+            self->mStreamBuf[self->mStreamBufHead].r = vu0Sub(c, vu0Scale(a, 0.7f));
         } else {
-            self->segs[self->head].l = vu0Sub(c, vu0Scale(a, 0.7f));
-            self->segs[self->head].r = vu0Sub(b, vu0Scale(a, 0.7f));
+            self->mStreamBuf[self->mStreamBufHead].l = vu0Sub(c, vu0Scale(a, 0.7f));
+            self->mStreamBuf[self->mStreamBufHead].r = vu0Sub(b, vu0Scale(a, 0.7f));
         }
-        self->phase -= k * (speed * 0.016666668f);
-        if (self->phase < 0.0f) {
-            self->phase += 1.0f;
+        self->mVOffset -= k * (speed * 0.016666668f);
+        if (self->mVOffset < 0.0f) {
+            self->mVOffset += 1.0f;
         }
-        if (1.0f < self->phase) {
-            self->phase -= 1.0f;
+        if (1.0f < self->mVOffset) {
+            self->mVOffset -= 1.0f;
         }
     }
 }
@@ -7003,54 +6689,54 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
  * (orange) at 5 or more, otherwise 57. On the ground with a boost running, the trail length and width follow
  * the boost and speed; otherwise they fade by 5 % a frame. The trail is cleared on landing.
  */
-extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
+extern "C" void cSpeedBoostFX_update(cSpeedBoostFX* self)
 {
-    int air = cRider_getMotionState(self->rider) == 1;
+    int air = cRider_getMotionState(self->mRider) == 1;
     int on = 0;
     if (!air) {
-        cRider* riderPtr = self->rider;
+        cRider* riderPtr = self->mRider;
         if (0.0f < riderPtr->mBoostStrength || 0.0f < riderPtr->mPowerUpBoostTimer) {
             on = 1;
         }
     }
-    if (self->air != 0 && !air) {
-        self->count = 0;
-        self->f18 = 0;
-        self->f14 = 0;
+    if (self->mWasInAir != 0 && !air) {
+        self->mStreamBufLen = 0;
+        self->mSpeedBoostTrailCurrentLength = 0.0f;
+        self->mSpeedBoostTrailNumSegs = 0;
     }
-    self->air = air;
-    cRider* riderPtr = self->rider;
+    self->mWasInAir = air;
+    cRider* riderPtr = self->mRider;
     float k = 0.002f;
     int type = riderPtr->mUberLevel;
     if (type == 11) {
         k = 0.01f;
-        self->tex = 61;
+        self->mCurrentTexture = 61;
     } else if (0.01f < riderPtr->mPowerUpBoostTimer || cPowerUpFXToggles_m_TestSpeedBoostRibbon != 0) {
         k = 0.01f;
-        self->tex = 60;
+        self->mCurrentTexture = 60;
     } else if (type >= 10 || cPowerUpFXToggles_m_TestRedRibbon != 0) {
         k = 0.01f;
-        self->tex = 59;
+        self->mCurrentTexture = 59;
     } else if (type >= 5 || cPowerUpFXToggles_m_TestOrangeRibbon != 0) {
         k = 0.005f;
-        self->tex = 58;
+        self->mCurrentTexture = 58;
     } else {
-        self->tex = 57;
+        self->mCurrentTexture = 57;
     }
-    riderPtr = self->rider;
+    riderPtr = self->mRider;
     float speed = vu0Length(riderPtr->mVelocity);
     if (on) {
         float boostAmt = Clamp_66B8(Max_66B8(riderPtr->mPowerUpBoostTimer, riderPtr->mBoostStrength), 0.0f, 1.0f);
-        self->f4 = (boostAmt * 400.0f + 400.0f) * (speed / 3333.3335f);
-        self->Width() = (riderPtr->mUberLevel == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
-        self->f8 = 1.0f;
+        self->mTrailLength = (boostAmt * 400.0f + 400.0f) * (speed / 3333.3335f);
+        trailWidth(self) = (riderPtr->mUberLevel == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
+        self->mAlpha = 1.0f;
     } else {
-        self->f4 *= 0.95f;
-        self->f8 *= 0.95f;
-        self->Width() *= 0.95f;
+        self->mTrailLength *= 0.95f;
+        self->mAlpha *= 0.95f;
+        trailWidth(self) *= 0.95f;
     }
     if (cPowerUpFXToggles_m_EnableSpeedBoostStreamers != 0) {
-        t4Vector pos = self->rider->mMatrix.row[0];
+        t4Vector pos = self->mRider->mMatrix.row[0];
         Trail_66B8(self, pos, on, k, speed);
     }
     cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(self);
@@ -7060,12 +6746,6 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_UpdateSpeedBoostTrail);
 #ifdef SKIP_ASM
-// Three floats (12 bytes, unaligned); built through a temporary like a constructed value.
-struct sV3E6C08 {
-    float x, y, z;
-    sV3E6C08() {}
-    sV3E6C08(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
-};
 
 
 
@@ -7311,8 +6991,8 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
             } else {
                 hi = wakeDropE6C08(self, tailPos, tailPosOff);
             }
-            (*(sV3E6C08*)&self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mLeft) = sV3E6C08(lo.x, lo.y, lo.z);
-            (*(sV3E6C08*)&self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mRight) = sV3E6C08(hi.x, hi.y, hi.z);
+            self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mLeft = t3VectorInit(lo.x, lo.y, lo.z);
+            self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mRight = t3VectorInit(hi.x, hi.y, hi.z);
         }
     }
     int keep = 0;
@@ -7334,21 +7014,18 @@ extern "C" void* func_0037A260(void* gfx, int n);
 extern "C" void func_0037A430(void* gfx);
 
 
-struct sWakeV4_7A10 {
-    float x, y, z, w;
-    sWakeV4_7A10() {}
-    void SetXYZ(const t3Vector& v)
-    {
-        x = v.x;
-        y = v.y;
-        z = v.z;
-    }
-} __attribute__((aligned(16)));
+// The x, y, z of a vertex position from a trail corner (On Tour t4Vector = t3Vector form).
+static inline void setXYZ(t4Vector& v, const t3Vector& p)
+{
+    v.x = p.x;
+    v.y = p.y;
+    v.z = p.z;
+}
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sWakeV4_7A10 scale_7A10(const sWakeV4_7A10& v, float s)
+static inline t4VectorCtor scale_7A10(const t4Vector& v, float s)
 {
-    sWakeV4_7A10 r;
+    t4VectorCtor r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -7363,9 +7040,9 @@ static inline sWakeV4_7A10 scale_7A10(const sWakeV4_7A10& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sWakeV4_7A10 add_7A10(const sWakeV4_7A10& a, const sWakeV4_7A10& b)
+static inline t4VectorCtor add_7A10(const t4Vector& a, const t4Vector& b)
 {
-    sWakeV4_7A10 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -7378,9 +7055,9 @@ static inline sWakeV4_7A10 add_7A10(const sWakeV4_7A10& a, const sWakeV4_7A10& b
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sWakeV4_7A10 sub_7A10(const sWakeV4_7A10& a, const sWakeV4_7A10& b)
+static inline t4VectorCtor sub_7A10(const t4Vector& a, const t4Vector& b)
 {
-    sWakeV4_7A10 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -7392,72 +7069,23 @@ static inline sWakeV4_7A10 sub_7A10(const sWakeV4_7A10& a, const sWakeV4_7A10& b
     return r;
 }
 
-// Vertex colour, alpha first (as sCol_E058).
-struct sWakeCol_7A10 {
-    float a, r, g, b;
-};
-
-
-// Trail segment (0x1C bytes, 30 of them at self+0x50).
-struct sWakeSeg_7A10 {
-    float len;              // 0x00
-    t3Vector p0;        // 0x04
-    t3Vector p1;        // 0x10
-};
-
-// Ribbon point pair (0x20 bytes, 20 of them at self->pts).
-struct sWakePt_7A10 {
-    sWakeV4_7A10 a;
-    sWakeV4_7A10 b;
-};
-
-struct sBoardWake_7A10 {
-    cRider* rider;              // 0x000 (virtual base pointer)
-    float f4;                   // 0x004
-    float alpha;                // 0x008
-    float width;                // 0x00C
-    float v0;                   // 0x010
-    int nsegs;                  // 0x014
-    float f18;                  // 0x018
-    char pad1C[0x14];
-    int head;                   // 0x030
-    char pad34[0x1C];
-    sWakeSeg_7A10 segs[30];     // 0x050
-    int tex;                    // 0x398
-    int ptHead;                 // 0x39C
-    int npts;                   // 0x3A0
-    int f3A4;                   // 0x3A4
-    int f3A8;                   // 0x3A8
-    sWakePt_7A10* pts;          // 0x3AC
-};
-
-// The renderer at GrMan; its 71st virtual draws a strip of n vertices.
-struct sGfxTex_7A10 {
-    char pad[0xF50];
-    int tex[1];             // 0xF50
-};
-
-static inline int texId_7A10(int i)
+// The rider's hip bone position (row 3 of its bone matrix).
+static inline t4Vector bonePos_7A10(cRider* rider)
 {
-    return ((sGfxTex_7A10*)GrMan_boardwakefx)->tex[i];
-}
-
-// Bone position (row 3 of the rider's bone matrix unk_89C).
-static inline sWakeV4_7A10 bonePos_7A10(cRider* rider)
-{
-    return *(sWakeV4_7A10*)((char*)rider->mAnimModel->SkelMatrices + (rider->mBoneHips << 6) + 0x30);
+    const t4Matrix& hips = rider->mAnimModel->SkelMatrices[rider->mBoneHips];
+    return hips.row[3];
 }
 
 // Fills vertex i of a strip: colour (alpha scaled to 0..128), q = 1, position, then st.
-static inline void setVtx_7A10(tBxVertex* base, int i, float s, float t, const sWakeCol_7A10& c, const sWakeV4_7A10& p)
+static inline void setVtx_7A10(tBxVertex* base, int i, float s, float t, const tARGB& c, const t4Vector& p)
 {
     tBxVertex* vx = &base[i];
-    vx->r = (int)(c.r * 255.0f);
-    vx->g = (int)(c.g * 255.0f);
-    vx->b = (int)(c.b * 255.0f);
-    vx->a = (int)(c.a * 128.0f);
+    vx->r = (int)(c.R * 255.0f);
+    vx->g = (int)(c.G * 255.0f);
+    vx->b = (int)(c.B * 255.0f);
+    vx->a = (int)(c.A * 128.0f);
     vx->one = 1.0f;
-    (*(sWakeV4_7A10*)&vx->p) = p;
+    vx->p = p;
     vx->u = s;
     vx->v = t;
 }
@@ -7469,13 +7097,14 @@ static inline void setVtx_7A10(tBxVertex* base, int i, float s, float t, const s
  * Nothing is drawn when the trail is empty, short (under 3) or nearly transparent, or when
  * cPowerUpFXToggles_m_EnableSpeedBoostFX is off.
  */
-extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
+extern "C" void cSpeedBoostFX_render(cSpeedBoostFX* self)
 {
-    if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
+    if (self->mStreamBufLen == 0 || self->mTrailLength < 3.0f || self->mAlpha < 0.05f
+        || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
     *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = sDrawState_s_defaultDrawState_DAB8;
-    *(short*)(*(char**)(GrMan_boardwakefx + 0xE84) + 0x10) = texId_7A10(self->tex);
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = GrMan->getEffectTexMap(self->mCurrentTexture);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
@@ -7490,29 +7119,29 @@ extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
         tBxVertex right[42];
         int n = 0;
         int vertIdx = 0;
-        float k = 1.0f / (float)((self->npts - 1) * (self->npts - 1));
-        sWakeV4_7A10 offs = scale_7A10(bonePos_7A10(self->rider), 0.7f);
-        sWakeCol_7A10 col;
-        col.a = 1.0f;
-        col.r = 1.0f;
-        col.g = 1.0f;
-        col.b = 1.0f;
-        sWakeV4_7A10 pa, pb;
-        float dv = 1.0f / (float)self->npts;
+        float k = 1.0f / (float)((self->mStreamBufLen - 1) * (self->mStreamBufLen - 1));
+        t4VectorCtor offs = scale_7A10(bonePos_7A10(self->mRider), 0.7f);
+        tARGB col;
+        col.A = 1.0f;
+        col.R = 1.0f;
+        col.G = 1.0f;
+        col.B = 1.0f;
+        t4VectorCtor pa, pb;
+        float dv = 1.0f / (float)self->mStreamBufLen;
         float x = 0.0f;
-        float texV = self->v0;
-        sWakeV4_7A10 dir = *(sWakeV4_7A10*)&self->rider->mMatrix.row[0];
-        sWakeV4_7A10 side = scale_7A10(dir, self->width * 0.5f);
-        int idx = self->ptHead;
-        for (int i = 0; i < self->npts; i++) {
+        float texV = self->mVOffset;
+        t4Vector dir = self->mRider->mMatrix.row[0];
+        t4VectorCtor side = scale_7A10(dir, self->mWidth * 0.5f);
+        int idx = self->mStreamBufHead;
+        for (int i = 0; i < self->mStreamBufLen; i++) {
             if (idx < 0)
                 idx = 19;
-            col.a = self->alpha * (1.0f - x * x * k);
-            if (col.a < 0.0f)
-                col.a = 0.0f;
+            col.A = self->mAlpha * (1.0f - x * x * k);
+            if (col.A < 0.0f)
+                col.A = 0.0f;
             n += 2;
-            pa = add_7A10(self->pts[idx].a, offs);
-            pb = add_7A10(self->pts[idx].b, offs);
+            pa = add_7A10(self->mStreamBuf[idx].l, offs);
+            pb = add_7A10(self->mStreamBuf[idx].r, offs);
             idx--;
             x += 1.0f;
             setVtx_7A10(left, vertIdx, 0.0f, texV, col, sub_7A10(pa, side));
@@ -7528,30 +7157,30 @@ extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
             GrMan->RenderTriStrip(n, right, 0);
         }
     }
-    if (self->nsegs >= 2) {
-        char* gfx = cGraphicsMan_TheGraphicsMan_boardwakefx;
-        tBxVertex* verts = (tBxVertex*)func_0037A260(gfx, self->nsegs * 2);
+    if (self->mSpeedBoostTrailNumSegs >= 2) {
+        cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
+        tBxVertex* verts = (tBxVertex*)func_0037A260(gfx, self->mSpeedBoostTrailNumSegs * 2);
         // PORT: g++ minimum operator (<?).
-        float len = self->f4 <? self->f18;
+        float len = self->mTrailLength <? self->mSpeedBoostTrailCurrentLength;
         float acc = 0.0f;
         int j;
         int vertIdx = 0;
-        for (j = 0; j < self->nsegs; j++) {
-            acc += self->segs[j].len;
+        for (j = 0; j < self->mSpeedBoostTrailNumSegs; j++) {
+            acc += self->mSpeedBoostTrail[j].mLength;
             float trailFrac = acc / len;
-            float vv = self->v0 + trailFrac;
-            float al = wakeClampE058(self->alpha * (1.0f - trailFrac), 0.0f, 1.0f);
-            sWakeCol_7A10 vertColour;
-            vertColour.a = wakeClampE058(al, 0.0f, 1.0f);
-            vertColour.r = 1.0f;
-            vertColour.g = 1.0f;
-            vertColour.b = 1.0f;
-            int si = (self->head + j) % 30;
-            sWakeV4_7A10 pos;
-            pos.SetXYZ(self->segs[si].p0);
+            float vv = self->mVOffset + trailFrac;
+            float al = wakeClampE058(self->mAlpha * (1.0f - trailFrac), 0.0f, 1.0f);
+            tARGB vertColour;
+            vertColour.A = wakeClampE058(al, 0.0f, 1.0f);
+            vertColour.R = 1.0f;
+            vertColour.G = 1.0f;
+            vertColour.B = 1.0f;
+            int si = (self->mSpeedBoostTrailCurrentSeg + j) % 30;
+            t4VectorCtor pos;
+            setXYZ(pos, self->mSpeedBoostTrail[si].mLeft);
             pos.w = 1.0f;
             setVtx_7A10(verts, vertIdx++, 0.0f, vv, vertColour, pos);
-            pos.SetXYZ(self->segs[si].p1);
+            setXYZ(pos, self->mSpeedBoostTrail[si].mRight);
             pos.w = 1.0f;
             setVtx_7A10(verts, vertIdx++, 1.0f, vv, vertColour, pos);
         }

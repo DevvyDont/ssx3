@@ -64,7 +64,7 @@ CHECK_SIZE(cSnowBox, 0xC0);
 
 // The per-box parameters the renderer draws a snow box's flakes and fluffs from (On Tour struct tSnowBoxData, 0x90;
 // On Tour also has a ctor). [O] cGraphicsMan::RenderSnowBoxFlakes(const tSnowBoxData&) /
-// RenderSnowBoxFluffs(const tSnowBoxData&); [R] cSnowBox_render fills one on the stack (its view sCellInfo55D8) and
+// RenderSnowBoxFluffs(const tSnowBoxData&); [R] cSnowBox_render fills one on the stack and
 // cPS2GraphicsMan_RenderSnowBoxFlakes / RenderSnowBoxFluffs read it (views sPtObj_1310 / sPtObj_16F0: five quadwords
 // and the matrix at 0x50) at the On Tour offsets.
 struct tSnowBoxData {

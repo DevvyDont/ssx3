@@ -46,7 +46,6 @@ struct cRiderSphereTree;
 struct cDynamicColourEmitter; // render/particle.h
 struct tParticleData;         // render/particle.h (On Tour 0xD8; retail copies 0xD8)
 struct tParticleEmitter;      // render/particle.h
-struct tBoardWakeVertex;      // On Tour 0x20; retail 0x30 (cBoardWakeFX_reset's view)
 struct tBxVertex;             // render/2drender.h (cBoardTrailFX's strips)
 
 // On Tour struct tCheatState (4 chars). Retail reads m_misc with lbu only (it also holds the cheat input bits).
@@ -517,14 +516,41 @@ CHECK_OFFSET(cVoidControl, mRider, 0x00);
 CHECK_OFFSET(cVoidControl, pad_04, 0x04);
 CHECK_SIZE(cVoidControl, 0x10);
 
+// One board-wake ribbon vertex (On Tour struct tBoardWakeVertex, 0x20: a, r, g, b bytes, u, v, p). Retail's is 0x30 and
+// laid out like tBxVertex (render/2drender.h): [U] func_003885E0 (under cPS2GraphicsMan_RenderBoardWake) copies each
+// one into the VIF packet as a tBxVertex; [R] cBoardWakeFX_cBoardWakeFX allocates one block of 160 (5 rows x 32).
+struct tBoardWakeVertex {
+    float u;                             // 0x00 [O]; [U] createSeg: the wake length * 0.5 wrapped into -32..32; reset 0
+    float v;                             // 0x04 [O]; [U] reset: the row's height factor
+                                         //      (0.99 - row * 0.98 / (rows - 1))
+    float one;                           // 0x08 (name as tBxVertex::one) [U] reset 1.0 (the Q coordinate)
+    int w;                               // 0x0C (name ours; tBxVertex::pad) [U] reset 0 (the texture qword's 4th word)
+    int r;                               // 0x10 [O]; [U] createSeg: the ground colour's R * 128
+    int g;                               // 0x14 [O]; [U] createSeg: G * 128
+    int b;                               // 0x18 [O]; [U] createSeg: B * 128
+    int a;                               // 0x1C [O]; [U] fillCurrentSeg: the wake parameters' alpha * 128
+    t4Vector p;                          // 0x20 [O]; [U] fillCurrentSeg sets the head entry's position;
+                                         //      update drifts it
+};
+
+CHECK_OFFSET(tBoardWakeVertex, u, 0x00);
+CHECK_OFFSET(tBoardWakeVertex, v, 0x04);
+CHECK_OFFSET(tBoardWakeVertex, one, 0x08);
+CHECK_OFFSET(tBoardWakeVertex, w, 0x0C);
+CHECK_OFFSET(tBoardWakeVertex, r, 0x10);
+CHECK_OFFSET(tBoardWakeVertex, g, 0x14);
+CHECK_OFFSET(tBoardWakeVertex, b, 0x18);
+CHECK_OFFSET(tBoardWakeVertex, a, 0x1C);
+CHECK_OFFSET(tBoardWakeVertex, p, 0x20);
+CHECK_SIZE(tBoardWakeVertex, 0x30);
+
 // cBoardWakeFX (cRiderHandler + 0x3B0, 0xC0 bytes): FX part; ctor cBoardWakeFX_cBoardWakeFX (in charge: cRider at this
 // + 0xC0); vtable cBoardWakeFX$6cRider D_00488DF0.
 // Members: [O] On Tour's cBoardWakeFX (same order; retail has 5 vertex rows where On Tour has 4, so mWakeVerts and
 // mPreCalculatedGravityMultiplier have 5 entries and the members after them sit 8 bytes higher until mLastWakePos;
 // retail has no mWorldOffset). [P] the preview's IsWakeActive / GetChunkySprayVelocity and its asserts
 // "mWakeLineSegs %d kMaxWakeLineSegs %d" / "mWakeMaxNumLines %d kMaxWakeNumLines %d" (d:/ssx/code/source/visualfx/
-// boardwakefx.cpp). [U] the unit's views (cBoardWakeFX_reset sWakeDCF28, cBoardWakeFX_update sWakeD0B8,
-// cBoardWakeFX_createSeg sWake_E058).
+// boardwakefx.cpp). [U] cBoardWakeFX_reset, cBoardWakeFX_update, cBoardWakeFX_fillCurrentSeg, cBoardWakeFX_createSeg.
 // One wake line of cBoardWakeFX (On Tour struct tWakeLine, 0x60 with mVel[4]; retail 0x70 with five rows, like
 // mWakeVerts[5]). [R] cBoardWakeFX_cBoardWakeFX: operator new[](32 x 0x70, "WakeLines_cBoardWakeFX"); [P] the preview's
 // GetChunkySprayVelocity__12cBoardWakeFX steps mWakeLines by 0x70 and returns mVel[mWakeLineSegs - 1] (retail
@@ -713,7 +739,7 @@ CHECK_SIZE(cBoardTrailFX, 0xF0);
 // cSpeedBoostFX (cRiderHandler + 0x610, 0x3B0 bytes): FX part; ctor cSpeedBoostFX_cSpeedBoostFX (in charge: cRider at
 // this + 0x3B0); vtable cSpeedBoostFX$6cRider D_00488598.
 // On Tour's tSpeedBoostTrailSeg (0x30 there: t4Vector ends); retail 0x1C: [U] cSpeedBoostFX_UpdateSpeedBoostTrail
-// stores the two ends as 3-float values (sV3E6C08) at +0x4 / +0x10, the ctor's 30-entry loop strides 0x1C.
+// stores the two ends as 3-float values (t3Vector) at +0x4 / +0x10, the ctor's 30-entry loop strides 0x1C.
 struct tSpeedBoostTrailSeg {
     float mLength;   // 0x00 [O]; [U] UpdateSpeedBoostTrail: the distance from the previous sample (summed into
                      //      mSpeedBoostTrailCurrentLength)
@@ -728,8 +754,8 @@ CHECK_SIZE(tSpeedBoostTrailSeg, 0x1C);
 
 // On Tour's tSpeedBoostStreamerSeg (0x20, same in retail): one streamer ribbon step.
 struct tSpeedBoostStreamerSeg {
-    t4Vector l; // 0x00 [O]; [U] cSpeedBoostFX_update (sSeg_66B8.a)
-    t4Vector r; // 0x10 [O]; [U] cSpeedBoostFX_update (sSeg_66B8.b)
+    t4Vector l; // 0x00 [O]; [U] cSpeedBoostFX_update, cSpeedBoostFX_render
+    t4Vector r; // 0x10 [O]; [U] cSpeedBoostFX_update, cSpeedBoostFX_render
 };
 
 CHECK_OFFSET(tSpeedBoostStreamerSeg, l, 0x00);
@@ -737,8 +763,8 @@ CHECK_OFFSET(tSpeedBoostStreamerSeg, r, 0x10);
 CHECK_SIZE(tSpeedBoostStreamerSeg, 0x20);
 
 // Members: [O] On Tour's cSpeedBoostFX (same order; On Tour has no vbptr, so the members up to
-// mSpeedBoostTrailCurrentLength sit 4 bytes higher in retail; tSpeedBoostTrailSeg is 0x1C here). [U] the unit's views
-// (cSpeedBoostFX_reset, cSpeedBoostFX_update sWake_66B8, UpdateSpeedBoostTrail sTrailE6C08, render sBoardWake_7A10).
+// mSpeedBoostTrailCurrentLength sit 4 bytes higher in retail; tSpeedBoostTrailSeg is 0x1C here). [U]
+// cSpeedBoostFX_reset, cSpeedBoostFX_update, cSpeedBoostFX_UpdateSpeedBoostTrail, cSpeedBoostFX_render.
 struct cSpeedBoostFX {
     cRider* mRider;                          // 0x000 [R] virtual-base pointer to the shared cRider; [R] cSpeedBoostFX_cSpeedBoostFX
     float mTrailLength;                      // 0x004 [O] (On Tour 0x0); [U] update: (boost * 400 + 400) * speed / 3333,

@@ -45,7 +45,7 @@
 // Retail's record is more compact than the PSP one (no intensity / direction pads) and keeps one occlusion value per
 // view. Placed by [U] cChunkResolve_resolveHalo ([O] cChunkResolve::resolveHalo(tHaloRecord* pLightHalo): the box
 // is the position -/+ the radius of the halo type flags & 0x70; it clears both occlusion words; its view
-// cChunkResolve_resolveHalo_sObj in world/worldview.cpp) and cLightHalo_Render (boardwakefx view sPart_2868: the
+// cChunkResolve_resolveHalo_sObj in world/worldview.cpp) and cLightHalo_Render (the
 // colour is the normalised vector at 0x10, the sprite is drawn at 0x1C, alpha = the occlusion of the view index,
 // flags & 0x70 pick texture and size). The type / flags swap of tLightRecord (visualfx/worldlightman.h) shows here
 // too: retail flags at 0xC. Size: 0x48 is the end of the last member retail touches; no array stride is known.

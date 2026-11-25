@@ -18,7 +18,7 @@
 // One weighted matrix of a blended (skinning) matrix (On Tour struct tMdfBlendedMatrixComponent, 0x4).
 // [U] cPS2GraphicsMan_ResolveCharModel rebases m_iMatrixId by the part's bone offset (w[j*4+2] += tbl[w[j*4+3]]);
 // cPS2GraphicsMan_GenerateBlendedMatrices reads the weight (lh +0) and the matrix id (lbu +2) (its view sBlendLink_6BD0);
-// areBlendedMatricesEqual compares the weights (lh) and the two id bytes together (lhu +2, its view sKey_9A78).
+// areBlendedMatricesEqual compares the weights (lh) and the two id bytes together (lhu +2, its helper componentKey).
 struct tMdfBlendedMatrixComponent {
     short m_iWeight;                // 0x0 [O]; [U] GenerateBlendedMatrices, areBlendedMatricesEqual (tolerances)
     unsigned char m_iMatrixId;      // 0x2 [O]; [U] ResolveCharModel rebases it; GenerateBlendedMatrices indexes the
@@ -29,7 +29,7 @@ struct tMdfBlendedMatrixComponent {
 // A blended (skinning) matrix: up to three weighted matrices (On Tour struct tMdfBlendedMatrix, 0xC).
 // [R] cGraphicsMan_AddBlendedMatrix allocates the 512-entry history (0x3000 bytes "BlendedMatrixHistory": 512 x 0xC
 // records, then 512 x 3 components) and points each m_matrixList at its 3 components; [U] areBlendedMatricesEqual
-// (its view sEnt_9A78), AddBlendedMatrix (sBlendMatrix), ResolveCharModel (sBlend_66F0), GenerateBlendedMatrices
+// and AddBlendedMatrix (through this type), ResolveCharModel (sBlend_66F0), GenerateBlendedMatrices
 // (sBlendEnt_6BD0).
 struct tMdfBlendedMatrix {
     int m_iNumMatrices;             // 0x0 [O]; [U] the count compared / copied (1..3)
@@ -150,6 +150,10 @@ public:
     int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (cGraphicsMan_GetSpecID/cGraphicsMan_SetSpecID)
     int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (cGraphicsMan_GetPatchSpecID/cGraphicsMan_SetPatchSpecID)
     int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors cGraphicsMan_SetCharSpecID/cGraphicsMan_GetCharSpecID
+    // [P] getEffectTexMap__12cGraphicsMani, inline (retail's out-of-line copy: cGraphicsMan_getEffectTexMap in
+    // render/font);
+    // [U] cStaticEmitter_render1 reads the effect texture through it (lw, then sh into the draw state)
+    int getEffectTexMap(int i) { return _EffectTexMap[i]; }
     // 0x10D8: the vptr (ee-gcc 2.95.3 puts it after the own data of the class that declares the first virtual).
     // [R] cGraphicsMan_vtbl (pure slots: __pure_virtual) / cPS2GraphicsMan_vtbl (the PS2 overrides) give the slots and
     // the names; parameters: the matched implementations [R], or On Tour's cGraphicsMan / cPSPGraphicsMan [O] where its

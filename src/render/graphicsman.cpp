@@ -5,8 +5,10 @@
 #include "world/instancerecord.h"
 #include "render/2drender.h"
 #include "bx/appman.h"
+#include "bx/execman.h"
 #include "bx/math3d.h"
 #include "render/graphicsman.h"
+#include "ui/uithing.h"
 #include "world/worldview.h"
 #include "render/particle.h"
 #include "render/ps2graphicsman.h"
@@ -23,53 +25,41 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_AddBlendedMatrix);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_BlendedMatrixHistory[];
 
-struct sBlendWeight {
-    short bone;
-    short weight;
-};
-
-struct sBlendMatrix {
-    int count;              // 0x0
-    sBlendWeight* weights;  // 0x4
-    int pad_0x8;
-};
-
-
 extern "C" int areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int tol2);
 
 /**
  * Adds a skinning blend matrix to the shared history, or reuses a near-identical one already there.
  *
- * The 512-entry "BlendedMatrixHistory" is allocated on first use. A match within areBlendedMatricesEqual's tolerances
- * copies the stored bone indices into @p blendedMatrix; otherwise it is appended, with no check against the
- * 512
- * entries.
+ * The 512-entry "BlendedMatrixHistory" is allocated on first use: 512 records, then 512 x 3 components, each record's
+ * m_matrixList pointing at its three. A match within areBlendedMatricesEqual's tolerances copies the stored weights
+ * into @p blendedMatrix; otherwise it is appended, with no check against the 512 entries.
  *
- * @param blendedMatrix  the bone weights to add (On Tour tMdfBlendedMatrix*)
+ * @param blendedMatrix  the bone weights to add
  */
-extern "C" void cGraphicsMan_AddBlendedMatrix(cGraphicsMan* self, sBlendMatrix* blendedMatrix)
+extern "C" void cGraphicsMan_AddBlendedMatrix(cGraphicsMan* self, tMdfBlendedMatrix* blendedMatrix)
 {
-    if (((sBlendMatrix*)self->m_blendedMatrixHistory) == 0) {
-        sBlendMatrix* mem = (sBlendMatrix*)operator_new_tag(0x3000, str_BlendedMatrixHistory, 0x100, 0);
-        (*(sBlendMatrix**)&self->m_blendedMatrixHistory) = mem;
-        sBlendWeight* w = (sBlendWeight*)(mem + 0x200);
+    if (self->m_blendedMatrixHistory == 0) {
+        tMdfBlendedMatrix* mem = (tMdfBlendedMatrix*)operator_new_tag(0x3000, str_BlendedMatrixHistory, 0x100, 0);
+        self->m_blendedMatrixHistory = mem;
+        // the components follow the 512 records in the same block
+        tMdfBlendedMatrixComponent* w = (tMdfBlendedMatrixComponent*)&mem[0x200];
         for (int k = 0; k < 0x200; k++) {
-            ((sBlendMatrix*)self->m_blendedMatrixHistory)[k].weights = w;
+            self->m_blendedMatrixHistory[k].m_matrixList = w;
             w += 3;
         }
     }
-    sBlendMatrix* existing = ((sBlendMatrix*)self->m_blendedMatrixHistory);
+    tMdfBlendedMatrix* existing = self->m_blendedMatrixHistory;
     for (int i = 0; i < self->m_blendedMatrixHistorySize; i++, existing++) {
         if (areBlendedMatricesEqual(existing, blendedMatrix, 10, 20, 20)) {
-            for (int j = 0; j < existing->count; j++) {
-                blendedMatrix->weights[j].bone = existing->weights[j].bone;
+            for (int j = 0; j < existing->m_iNumMatrices; j++) {
+                blendedMatrix->m_matrixList[j].m_iWeight = existing->m_matrixList[j].m_iWeight;
             }
             return;
         }
     }
-    ((sBlendMatrix*)self->m_blendedMatrixHistory)[self->m_blendedMatrixHistorySize].count = blendedMatrix->count;
-    for (int j = 0; j < blendedMatrix->count; j++) {
-        ((sBlendMatrix*)self->m_blendedMatrixHistory)[self->m_blendedMatrixHistorySize].weights[j] = blendedMatrix->weights[j];
+    self->m_blendedMatrixHistory[self->m_blendedMatrixHistorySize].m_iNumMatrices = blendedMatrix->m_iNumMatrices;
+    for (int j = 0; j < blendedMatrix->m_iNumMatrices; j++) {
+        self->m_blendedMatrixHistory[self->m_blendedMatrixHistorySize].m_matrixList[j] = blendedMatrix->m_matrixList[j];
     }
     self->m_blendedMatrixHistorySize++;
 }
@@ -78,15 +68,11 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(cGraphicsMan* self, sBlendMatrix* 
 //100%
 INCLUDE_ASM("render/graphicsman", areBlendedMatricesEqual);
 #ifdef SKIP_ASM
-struct sKey_9A78 {
-    short x;                        // 0x0
-    unsigned short id;              // 0x2
-    short y;                        // 0x4
-    unsigned short idA;             // 0x6
-    short z;                        // 0x8
-    unsigned short idB;             // 0xA
-};
-
+// A component's matrix id and part id as one halfword: retail compares the two bytes with a single lhu.
+static inline unsigned short componentKey(const tMdfBlendedMatrixComponent* c)
+{
+    return *(const unsigned short*)&c->m_iMatrixId;
+}
 
 static inline int iabs_9A78(int v)
 {
@@ -121,15 +107,17 @@ extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, i
     tMdfBlendedMatrix* rhs = (tMdfBlendedMatrix*)bp;
     if (lhs->m_iNumMatrices != rhs->m_iNumMatrices)
         goto fail;
-    if (((sKey_9A78*)lhs->m_matrixList)->id != ((sKey_9A78*)rhs->m_matrixList)->id)
+    if (componentKey(&lhs->m_matrixList[0]) != componentKey(&rhs->m_matrixList[0]))
         goto fail;
     switch (lhs->m_iNumMatrices) {
     case 1:
-        if (((sKey_9A78*)lhs->m_matrixList)->x == ((sKey_9A78*)rhs->m_matrixList)->x)
+        if (lhs->m_matrixList[0].m_iWeight == rhs->m_matrixList[0].m_iWeight)
             return 1;
         break;
     case 2:
-        if (((sKey_9A78*)lhs->m_matrixList)->x == ((sKey_9A78*)rhs->m_matrixList)->x && ((sKey_9A78*)lhs->m_matrixList)->idA == ((sKey_9A78*)rhs->m_matrixList)->idA && ((sKey_9A78*)lhs->m_matrixList)->y == ((sKey_9A78*)rhs->m_matrixList)->y)
+        if (lhs->m_matrixList[0].m_iWeight == rhs->m_matrixList[0].m_iWeight
+            && componentKey(&lhs->m_matrixList[1]) == componentKey(&rhs->m_matrixList[1])
+            && lhs->m_matrixList[1].m_iWeight == rhs->m_matrixList[1].m_iWeight)
             return 1;
         break;
     case 3:
@@ -137,13 +125,19 @@ extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, i
     default:
         goto fail;
     }
-    if (((sKey_9A78*)lhs->m_matrixList)->idA == ((sKey_9A78*)rhs->m_matrixList)->idA && ((sKey_9A78*)lhs->m_matrixList)->idB == ((sKey_9A78*)rhs->m_matrixList)->idB) {
-        if (iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->x - ((sKey_9A78*)rhs->m_matrixList)->x) > tol0 || iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->y - ((sKey_9A78*)rhs->m_matrixList)->y) > tol1 || iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->z - ((sKey_9A78*)rhs->m_matrixList)->z) > tol2)
+    if (componentKey(&lhs->m_matrixList[1]) == componentKey(&rhs->m_matrixList[1])
+        && componentKey(&lhs->m_matrixList[2]) == componentKey(&rhs->m_matrixList[2])) {
+        if (iabs_9A78(lhs->m_matrixList[0].m_iWeight - rhs->m_matrixList[0].m_iWeight) > tol0
+            || iabs_9A78(lhs->m_matrixList[1].m_iWeight - rhs->m_matrixList[1].m_iWeight) > tol1
+            || iabs_9A78(lhs->m_matrixList[2].m_iWeight - rhs->m_matrixList[2].m_iWeight) > tol2)
             goto fail;
         return 1;
     }
-    if (((sKey_9A78*)lhs->m_matrixList)->idB == ((sKey_9A78*)rhs->m_matrixList)->idA && ((sKey_9A78*)lhs->m_matrixList)->idA == ((sKey_9A78*)rhs->m_matrixList)->idB) {
-        if (iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->x - ((sKey_9A78*)rhs->m_matrixList)->x) <= tol0 && iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->z - ((sKey_9A78*)rhs->m_matrixList)->y) <= tol1 && iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->y - ((sKey_9A78*)rhs->m_matrixList)->z) <= tol2)
+    if (componentKey(&lhs->m_matrixList[2]) == componentKey(&rhs->m_matrixList[1])
+        && componentKey(&lhs->m_matrixList[1]) == componentKey(&rhs->m_matrixList[2])) {
+        if (iabs_9A78(lhs->m_matrixList[0].m_iWeight - rhs->m_matrixList[0].m_iWeight) <= tol0
+            && iabs_9A78(lhs->m_matrixList[2].m_iWeight - rhs->m_matrixList[1].m_iWeight) <= tol1
+            && iabs_9A78(lhs->m_matrixList[1].m_iWeight - rhs->m_matrixList[2].m_iWeight) <= tol2)
             return 1;
     }
 fail:
@@ -158,36 +152,25 @@ extern "C" void SYNCTASK_run(int a);
 extern "C" void THREAD_yield(int a);
 
 
-class cGmApp_9C28 {
-public:
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void prepause();
-    virtual void postpause();
-};
+// cExecutionMan's vtable slots 11 / 12 (prepause / postpause; [R] cExecutionMan_vtbl, cPS2ExecutionMan_vtbl).
+typedef sVEntry<void(void*)> tExecPauseSlot;
 
 /**
- * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app object's (cAppMan_TheAppMan + 8) slot 11,
- * SYNCTASK_run(0), THREAD_yield(0) and the app's slot 12.
+ * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app's execution manager's slot 11
+ * (prepause), SYNCTASK_run(0), THREAD_yield(0) and its slot 12 (postpause).
  */
 extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 {
     for (;;) {
         if (self->IsRenderIdle() != 0) break;
-        ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->prepause();
+        cExecutionMan* exec = cAppMan_TheAppMan->ExecutionMan;
+        tExecPauseSlot* vt = (tExecPauseSlot*)exec->mVtbl;
+        vt[11].fn(vthis(exec, vt[11]));
         SYNCTASK_run(0);
         THREAD_yield(0);
-        ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->postpause();
+        cExecutionMan* execAfter = cAppMan_TheAppMan->ExecutionMan;
+        tExecPauseSlot* vtAfter = (tExecPauseSlot*)execAfter->mVtbl;
+        vtAfter[12].fn(vthis(execAfter, vtAfter[12]));
     }
 }
 #endif
@@ -215,30 +198,40 @@ extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, tInstanceRecord* ob
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderIndexedTriList);
 #ifdef SKIP_ASM
-struct sGmV3_369CF8 {
-    float x, y, z;
-    sGmV3_369CF8() {}
-    sGmV3_369CF8(float a, float b, float c) : x(a), y(b), z(c) {}
+// t3Vector / t4Vector with the On Tour inline constructors used below (t3Vector(float, float, float), t4Vector(),
+// t4Vector(float, float, float, float), t4Vector(const t3vect&, float)), and t3vect's operator+ ([O] t3Vector
+// operator+(const t3vect&) const).
+struct t3VectorInit : t3Vector {
+    t3VectorInit(float ax, float ay, float az)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+    }
 };
 
-struct sGmV4_369CF8 {
-    float x, y, z, w;
-    sGmV4_369CF8() {}
-    sGmV4_369CF8(const sGmV3_369CF8& v, const float& d) : x(v.x), y(v.y), z(v.z), w(d) {}
-} __attribute__((aligned(16)));
+struct t4VectorInit : t4Vector {
+    t4VectorInit() {}
+    t4VectorInit(const float& ax, const float& ay, const float& az, const float& aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+    t4VectorInit(const t3Vector& v, const float& aw)
+    {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = aw;
+    }
+};
 
-static inline sGmV3_369CF8 operator+(const sGmV3_369CF8& a, const sGmV3_369CF8& b)
+static inline t3VectorInit operator+(const t3Vector& a, const t3Vector& b)
 {
-    return sGmV3_369CF8(a.x + b.x, a.y + b.y, a.z + b.z);
+    return t3VectorInit(a.x + b.x, a.y + b.y, a.z + b.z);
 }
-
-struct sGmUV_369CF8 {
-    float u, v;
-    float x() const { return u; }
-    float y() const { return v; }
-};
-
-
 
 /**
  * Draws an indexed triangle list one triangle at a time through virtual slot 71 (three vertices per call).
@@ -255,8 +248,9 @@ struct sGmUV_369CF8 {
  * @param Color  the vertex colours (a, r, g, b floats)
  * @param Offset  a translation added to every position
  */
-extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
-                              sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
+extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices,
+                                                  const t3Vector* Positions, const t2Vector* UV, const tARGB* Color,
+                                                  const t3Vector* Offset)
 {
     tBxVertex verts[3];
     (*(t4Vector*)&verts[2].u).z = 1.0f;
@@ -266,13 +260,13 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                (*(sGmV4_369CF8*)&verts[j].p) = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
-                verts[j].a = (int)(Color[Index].x * 0.5f);
-                verts[j].r = (int)(Color[Index].y * 0.5f);
-                verts[j].g = (int)(Color[Index].z * 0.5f);
-                verts[j].b = (int)(Color[Index].w * 0.5f);
-                (*(t4Vector*)&verts[j].u).x = UV[Index].x();
-                (*(t4Vector*)&verts[j].u).y = UV[Index].y();
+                verts[j].p = t4VectorInit(Positions[Index] + *Offset, 1.0f);
+                verts[j].a = (int)(Color[Index].A * 0.5f);
+                verts[j].r = (int)(Color[Index].R * 0.5f);
+                verts[j].g = (int)(Color[Index].G * 0.5f);
+                verts[j].b = (int)(Color[Index].B * 0.5f);
+                (*(t4Vector*)&verts[j].u).x = UV[Index].X();
+                (*(t4Vector*)&verts[j].u).y = UV[Index].Y();
             }
             Indices += 3;
             self->RenderTriStrip(3, verts, 0);
@@ -281,11 +275,11 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                (*(sGmV4_369CF8*)&verts[j].p) = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
-                verts[j].a = (int)(Color[Index].x * 0.5f);
-                verts[j].r = (int)(Color[Index].y * 0.5f);
-                verts[j].g = (int)(Color[Index].z * 0.5f);
-                verts[j].b = (int)(Color[Index].w * 0.5f);
+                verts[j].p = t4VectorInit(Positions[Index] + *Offset, 1.0f);
+                verts[j].a = (int)(Color[Index].A * 0.5f);
+                verts[j].r = (int)(Color[Index].R * 0.5f);
+                verts[j].g = (int)(Color[Index].G * 0.5f);
+                verts[j].b = (int)(Color[Index].B * 0.5f);
                 (*(t4Vector*)&verts[j].u).z = 1.0f;
                 (*(t4Vector*)&verts[j].u).x = 0.0f;
                 (*(t4Vector*)&verts[j].u).y = 0.0f;
@@ -314,12 +308,11 @@ void cGraphicsMan_update(void* self)
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_UploadTextures);
 #ifdef SKIP_ASM
 /**
- * Calls the graphics manager's virtual slot 121 (vtable entry at +0x3C8), the platform texture upload.
+ * Calls the graphics manager's virtual slot 121, PlatformUploadTextures (the platform texture upload).
  */
 extern "C" void cGraphicsMan_UploadTextures(cGraphicsMan* self)
 {
-    char* vt = (char*)VPTR_OF(cGraphicsMan, self);
-    ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
+    self->PlatformUploadTextures();
 }
 #endif
 
@@ -327,12 +320,11 @@ extern "C" void cGraphicsMan_UploadTextures(cGraphicsMan* self)
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_PurgeTextures);
 #ifdef SKIP_ASM
 /**
- * Calls the graphics manager's virtual slot 120 (vtable entry at +0x3C0), the platform texture purge.
+ * Calls the graphics manager's virtual slot 120, PlatformPurgeTextures (the platform texture purge).
  */
 extern "C" void cGraphicsMan_PurgeTextures(cGraphicsMan* self)
 {
-    char* vt = (char*)VPTR_OF(cGraphicsMan, self);
-    ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
+    self->PlatformPurgeTextures();
 }
 #endif
 
@@ -340,22 +332,10 @@ extern "C" void cGraphicsMan_PurgeTextures(cGraphicsMan* self)
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderSpline);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sV4_A048 {
-    float x, y, z, w;
-    sV4_A048() {}
-    sV4_A048(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-struct sBezVert_A048 {
-    float st[4];                    // 0x00
-    int rgba[4];                    // 0x10
-    sV4_A048 pos;                   // 0x20
-};
-
 // PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
-static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
+static inline t4VectorInit vu0MtxMul_A048(const t4Matrix* m, const t4VectorInit& v)
 {
-    sV4_A048 r;
+    t4VectorInit r;
     __asm__(
         "lqc2         $vf8, %1\n"
         "lqc2         $vf4, %2\n"
@@ -368,7 +348,7 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
         "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
         "sqc2         $vf12, %0\n"
         : "=m"(r)
-        : "m"(v), "m"(m[0]), "m"(m[1]), "m"(m[2]), "m"(m[3])
+        : "m"(v), "m"(m->row[0]), "m"(m->row[1]), "m"(m->row[2]), "m"(m->row[3])
         : "memory");
     return r;
 }
@@ -384,7 +364,7 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
  * @param color  the colour as four floats a, r, g, b in 0..1
  * @param n  the number of points (On Tour NumPoints); at most 20
  */
-extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, sV4_A048* BezMat, float* color, int n)
+extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, const t4Matrix* BezMat, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
     int red = (int)(color[1] * 128.0f);
@@ -392,22 +372,22 @@ extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, sV4_A048* BezMat, 
     int blue = (int)(color[3] * 128.0f);
     int alpha = (int)(color[0] * 128.0f);
     float curveParam = 0.0f;
-    sV4_A048 pos;
-    sBezVert_A048 verts[20];
+    t4VectorInit pos;
+    tBxVertex verts[20];
     for (int i = 0; i < n; i++) {
         float curveParamSq = curveParam * curveParam;
-        pos = vu0MtxMul_A048(BezMat, sV4_A048(curveParam * curveParamSq, curveParamSq, curveParam, 1.0f));
-        verts[i].st[0] = 0.0f;
-        verts[i].st[1] = 0.0f;
-        verts[i].st[2] = 1.0f;
-        verts[i].rgba[0] = red;
-        verts[i].rgba[1] = green;
-        verts[i].rgba[2] = blue;
-        verts[i].rgba[3] = alpha;
-        verts[i].pos = pos;
+        pos = vu0MtxMul_A048(BezMat, t4VectorInit(curveParam * curveParamSq, curveParamSq, curveParam, 1.0f));
+        verts[i].u = 0.0f;
+        verts[i].v = 0.0f;
+        verts[i].one = 1.0f;
+        verts[i].r = red;
+        verts[i].g = green;
+        verts[i].b = blue;
+        verts[i].a = alpha;
+        verts[i].p = pos;
         curveParam += step;
     }
-    self->RenderLineStrip(n, (const tBxVertex*)verts, 0);
+    self->RenderLineStrip(n, verts, 0);
 }
 #endif
 
@@ -2253,15 +2233,15 @@ extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, floa
         }
         self->EndTime = time - step;
         gmVecAddEq_D428(*(&self->X0), *(&self->Xi));
-        func_0036D400_f(&((float*)&self->SeedX0)[0]);
-        func_0036D400_f(&((float*)&self->SeedX0)[1]);
-        func_0036D400_f(&((float*)&self->SeedX0)[2]);
-        func_0036D400_f(&((float*)&self->SeedX0)[3]);
-        func_0036D400_f(&((float*)&self->SeedX0)[4]);
-        func_0036D400_f(&((float*)&self->SeedX0)[6]);
-        func_0036D400_f(&((float*)&self->SeedX0)[7]);
-        func_0036D400_f(&((float*)&self->SeedX0)[8]);
-        func_0036D400_f(&((float*)&self->SeedX0)[9]);
+        func_0036D400_f(&self->SeedX0);
+        func_0036D400_f(&self->SeedX1);
+        func_0036D400_f(&self->SeedV0);
+        func_0036D400_f(&self->SeedV1);
+        func_0036D400_f(&self->SeedV2);
+        func_0036D400_f(&self->SeedC0);
+        func_0036D400_f(&self->SeedC1);
+        func_0036D400_f(&self->SeedSize);
+        func_0036D400_f(&self->SeedLife);
     }
 }
 #endif
@@ -2272,56 +2252,30 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_calcBoundBox);
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sGmBox_D500 {
-    t4Vector min;               // 0x00
-    t4Vector max;               // 0x10
-};
-
-struct sGmEmit_D500 {
-    int count;                  // 0x00
-    int f04;                    // 0x04
-    float time;                 // 0x08
-    float step;                 // 0x0C
-    float f10;                  // 0x10
-    float f14;                  // 0x14
-    float f18;                  // 0x18
-    float f1C;                  // 0x1C
-    char pad_0x20[0x40];
-    t4Vector v60;               // 0x60
-    t4Vector v70;               // 0x70
-    t4Vector v80;               // 0x80
-    t4Vector v90;               // 0x90
-    t4Vector vA0;               // 0xA0
-    t4Vector vB0;               // 0xB0
-    t4Vector vC0;               // 0xC0
-    t4Vector vD0;               // 0xD0
-    t4Vector vE0;               // 0xE0
-};
-
-static inline void boxAdd_D500(sGmBox_D500& b, const t4Vector& p)
+static inline void boxAdd_D500(tBoundBox& b, const t4Vector& p)
 {
-    if (p.x < b.min.x) b.min.x = p.x;
-    if (p.y < b.min.y) b.min.y = p.y;
-    if (p.z < b.min.z) b.min.z = p.z;
-    if (p.x > b.max.x) b.max.x = p.x;
-    if (p.y > b.max.y) b.max.y = p.y;
-    if (p.z > b.max.z) b.max.z = p.z;
+    if (p.x < b.MinPoint.x) b.MinPoint.x = p.x;
+    if (p.y < b.MinPoint.y) b.MinPoint.y = p.y;
+    if (p.z < b.MinPoint.z) b.MinPoint.z = p.z;
+    if (p.x > b.MaxPoint.x) b.MaxPoint.x = p.x;
+    if (p.y > b.MaxPoint.y) b.MaxPoint.y = p.y;
+    if (p.z > b.MaxPoint.z) b.MaxPoint.z = p.z;
 }
 
-static inline void boxInit_D500(sGmBox_D500& b, const t4Vector& p)
+static inline void boxInit_D500(tBoundBox& b, const t4Vector& p)
 {
-    b.min = b.max = p;
+    b.MinPoint = b.MaxPoint = p;
 }
 
 // Grows box b by the four extreme trajectory points at time t: start corner + v * t + d * drag(td),
 // drag(t) = t * (DRAG_A * t + DRAG_B).
 #define ADD_TRAJECTORY_D500(b, start, v, d1, d2, t, td) \
     { \
-        float g = (td) * ((td) * DRAG_A_D500 + DRAG_B_D500); \
-        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.min, vu0ScaleGM(v, t)), vu0ScaleGM(d1, g))); \
-        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.min, vu0ScaleGM(v, t)), vu0ScaleGM(d2, g))); \
-        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.max, vu0ScaleGM(v, t)), vu0ScaleGM(d1, g))); \
-        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.max, vu0ScaleGM(v, t)), vu0ScaleGM(d2, g))); \
+        float drag = (td) * ((td) * DRAG_A_D500 + DRAG_B_D500); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.MinPoint, vu0ScaleGM(v, t)), vu0ScaleGM(d1, drag))); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.MinPoint, vu0ScaleGM(v, t)), vu0ScaleGM(d2, drag))); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.MaxPoint, vu0ScaleGM(v, t)), vu0ScaleGM(d1, drag))); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.MaxPoint, vu0ScaleGM(v, t)), vu0ScaleGM(d2, drag))); \
     }
 
 #define DRAG_TMAX_D500 2.7f
@@ -2332,82 +2286,89 @@ static inline void boxInit_D500(sGmBox_D500& b, const t4Vector& p)
 #define TURN_TIME_D500(v, b) (((v) / ((b) - (v)) - DRAG_B_D500) * (1.0f / (2.0f * DRAG_A_D500)))
 
 // Bounding box of every particle the emitter can produce over its lifetime.
-extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500* out) __asm__("tParticleEmitter_calcBoundBox");
+extern "C" void tParticleEmitter_calcBoundBox_D500(tParticleEmitter* self, tBoundBox* bb)
+    __asm__("tParticleEmitter_calcBoundBox");
 /**
  * Computes a bounding box for every particle the emitter can produce over its lifetime.
  *
- * life is the larger of +0x1C + +0x14 and +0x1C + 2 * +0x14. The box starts as the spawn-position box (vB0 + vC0 * r1 +
- * vD0 * r2 (+ vE0 * count), r in [1, 2]); a second box bounds the velocities (v70 + v80 * r1 + v90 * r2 + vA0 * r3).
- * Each trajectory corner is then added at time life (drag time clamped to 2.7) and at the six per-axis turning times
- * where the drag curve t * (0.113 * t - 0.73) stops the motion (On Tour's tcx0..tcz1), when positive. Callers:
- * tParticleEmitter_setupEmitter and cStaticEmitter_readFromReplayFrame (box at +0x160 of the static emitter).
+ * life is the larger of Life0 + LifeR and Life0 + 2 * LifeR. The box starts as the spawn-position box (X0 + Xr0 * r1 +
+ * Xr1 * r2 (+ Xi * NumParticles), r in [1, 2]); a second box bounds the velocities (V0 + Vr0 * r1 + Vr1 * r2 + Vr2 *
+ * r3). Each trajectory corner is then added at time life (drag time clamped to 2.7) and at the six per-axis turning
+ * times where the drag curve t * (0.113 * t - 0.73) stops the motion (On Tour's tcx0..tcz1), when positive. Callers:
+ * tParticleEmitter_setupEmitter and cStaticEmitter_readFromReplayFrame (the static emitter's bounding box).
  *
- * @param e    the particle emitter (this)
- * @param out  receives the bounding box (min at +0x00, max at +0x10)
+ * @param bb  receives the bounding box
  */
-extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500* out)
+extern "C" void tParticleEmitter_calcBoundBox_D500(tParticleEmitter* self, tBoundBox* bb)
 {
-    float lifeA = e->f1C + e->f14;
-    float lifeB = e->f1C + e->f14 * 2.0f;
+    float lifeA = self->Life0 + self->LifeR;
+    float lifeB = self->Life0 + self->LifeR * 2.0f;
     float life = lifeA > lifeB ? lifeA : lifeB;
 
     // spawn positions: B0 + C0 * r1 + D0 * r2 (+ E0 * count), r in [1, 2]
-    boxInit_D500(*out, vu0AddGM(vu0AddGM(e->vB0, e->vC0), e->vD0));
-    boxAdd_D500(*out, vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), e->vD0));
-    boxAdd_D500(*out, vu0AddGM(vu0AddGM(e->vB0, e->vC0), vu0ScaleGM(e->vD0, 2.0f)));
-    boxAdd_D500(*out, vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), vu0ScaleGM(e->vD0, 2.0f)));
-    boxAdd_D500(*out, vu0AddGM(vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), e->vD0), vu0ScaleGM(e->vE0, (float)e->count)));
-    boxAdd_D500(*out, vu0AddGM(vu0AddGM(vu0AddGM(e->vB0, e->vC0), vu0ScaleGM(e->vD0, 2.0f)), vu0ScaleGM(e->vE0, (float)e->count)));
-    boxAdd_D500(*out, vu0AddGM(vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), vu0ScaleGM(e->vD0, 2.0f)), vu0ScaleGM(e->vE0, (float)e->count)));
+    boxInit_D500(*bb, vu0AddGM(vu0AddGM(self->X0, self->Xr0), self->Xr1));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), self->Xr1));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(self->X0, self->Xr0), vu0ScaleGM(self->Xr1, 2.0f)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), vu0ScaleGM(self->Xr1, 2.0f)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), self->Xr1),
+        vu0ScaleGM(self->Xi, (float)self->NumParticles)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(self->X0, self->Xr0), vu0ScaleGM(self->Xr1, 2.0f)),
+        vu0ScaleGM(self->Xi, (float)self->NumParticles)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), vu0ScaleGM(self->Xr1, 2.0f)),
+        vu0ScaleGM(self->Xi, (float)self->NumParticles)));
 
-    sGmBox_D500 start = *out;
+    tBoundBox start = *bb;
 
     // velocities: 70 + 80 * r1 + 90 * r2 + A0 * r3, r in [1, 2]
-    sGmBox_D500 vel;
-    boxInit_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), e->v90), e->vA0));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), e->v90), e->vA0));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), vu0ScaleGM(e->v90, 2.0f)), e->vA0));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), e->v90), vu0ScaleGM(e->vA0, 2.0f)));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), vu0ScaleGM(e->v90, 2.0f)), e->vA0));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), e->v90), vu0ScaleGM(e->vA0, 2.0f)));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), vu0ScaleGM(e->v90, 2.0f)), vu0ScaleGM(e->vA0, 2.0f)));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), vu0ScaleGM(e->v90, 2.0f)), vu0ScaleGM(e->vA0, 2.0f)));
+    tBoundBox vel;
+    boxInit_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), self->Vr1), self->Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), self->Vr1), self->Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), vu0ScaleGM(self->Vr1, 2.0f)), self->Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), self->Vr1), vu0ScaleGM(self->Vr2, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), vu0ScaleGM(self->Vr1, 2.0f)),
+        self->Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), self->Vr1),
+        vu0ScaleGM(self->Vr2, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), vu0ScaleGM(self->Vr1, 2.0f)),
+        vu0ScaleGM(self->Vr2, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), vu0ScaleGM(self->Vr1, 2.0f)),
+        vu0ScaleGM(self->Vr2, 2.0f)));
 
-    t4Vector d1 = vu0SubGM(e->v60, vel.max);
-    t4Vector d2 = vu0SubGM(e->v60, vel.min);
+    t4Vector deltaMax = vu0SubGM(self->Force, vel.MaxPoint);
+    t4Vector deltaMin = vu0SubGM(self->Force, vel.MinPoint);
 
-    ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, life, life <? DRAG_TMAX_D500);
+    ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, life, life <? DRAG_TMAX_D500);
 
-    float tx0 = TURN_TIME_D500(e->v60.x, vel.min.x);
-    float tx1 = TURN_TIME_D500(e->v60.x, vel.max.x);
-    float ty0 = TURN_TIME_D500(e->v60.y, vel.min.y);
-    float ty1 = TURN_TIME_D500(e->v60.y, vel.max.y);
-    float tz0 = TURN_TIME_D500(e->v60.z, vel.min.z);
-    float tz1 = TURN_TIME_D500(e->v60.z, vel.max.z);
+    float tx0 = TURN_TIME_D500(self->Force.x, vel.MinPoint.x);
+    float tx1 = TURN_TIME_D500(self->Force.x, vel.MaxPoint.x);
+    float ty0 = TURN_TIME_D500(self->Force.y, vel.MinPoint.y);
+    float ty1 = TURN_TIME_D500(self->Force.y, vel.MaxPoint.y);
+    float tz0 = TURN_TIME_D500(self->Force.z, vel.MinPoint.z);
+    float tz1 = TURN_TIME_D500(self->Force.z, vel.MaxPoint.z);
 
     if (tx0 > 0.0f) {
         tx0 = tx0 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tx0, tx0);
+        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tx0, tx0);
     }
     if (tx1 > 0.0f) {
         tx1 = tx1 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tx1, tx1);
+        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tx1, tx1);
     }
     if (ty0 > 0.0f) {
         ty0 = ty0 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, ty0, ty0);
+        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, ty0, ty0);
     }
     if (ty1 > 0.0f) {
         ty1 = ty1 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, ty1, ty1);
+        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, ty1, ty1);
     }
     if (tz0 > 0.0f) {
         tz0 = tz0 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tz0, tz0);
+        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tz0, tz0);
     }
     if (tz1 > 0.0f) {
         tz1 = tz1 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tz1, tz1);
+        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tz1, tz1);
     }
 }
 #endif
@@ -2442,23 +2403,30 @@ extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float a, float 
 extern "C" void tParticleEmitter_randomize(tParticleEmitter* self);
 extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self);
 extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
-struct sGmV4_0058 {
-    float x, y, z, w;
-    sGmV4_0058() {}
-    sGmV4_0058(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+// t4Vector with On Tour's inline constructors t4Vector(), t4Vector(float, float, float, float) and t4Vector(const
+// t4vect&); the copy constructor makes the by-value returns below go through memory, as in retail.
+struct t4VectorCtor : t4Vector {
+    t4VectorCtor() {}
+    t4VectorCtor(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
     // PORT: 128-bit integer copy (one lq/sq pair).
-    sGmV4_0058(const sGmV4_0058& o) { *(cQuad128*)this = *(const cQuad128*)&o; }
-} __attribute__((aligned(16)));
+    t4VectorCtor(const t4VectorCtor& o) { *(cQuad128*)this = *(const cQuad128*)&o; }
+};
 
 // The unit's tParticleEmitter_setColour takes pointers; this caller passes the four corners as references to temporaries.
-extern "C" void tParticleEmitter_setColour_0058(void* self, const sGmV4_0058& a, const sGmV4_0058& b, const sGmV4_0058& c,
-                                   const sGmV4_0058& d, float t) __asm__("tParticleEmitter_setColour");
+extern "C" void tParticleEmitter_setColour_0058(void* self, const t4Vector& a, const t4Vector& b, const t4Vector& c,
+                                   const t4Vector& d, float t) __asm__("tParticleEmitter_setColour");
 
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sGmV4_0058 vu0Add_0058(const sGmV4_0058& a, const sGmV4_0058& b)
+static inline t4VectorCtor vu0Add_0058(const t4Vector& a, const t4Vector& b)
 {
-    sGmV4_0058 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2471,9 +2439,9 @@ static inline sGmV4_0058 vu0Add_0058(const sGmV4_0058& a, const sGmV4_0058& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sGmV4_0058 vu0Scale_0058(const sGmV4_0058& v, float s)
+static inline t4VectorCtor vu0Scale_0058(const t4Vector& v, float s)
 {
-    sGmV4_0058 r;
+    t4VectorCtor r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2488,9 +2456,9 @@ static inline sGmV4_0058 vu0Scale_0058(const sGmV4_0058& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sGmV4_0058 vu0Div_0058(const sGmV4_0058& v, float s)
+static inline t4VectorCtor vu0Div_0058(const t4Vector& v, float s)
 {
-    sGmV4_0058 r;
+    t4VectorCtor r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2507,9 +2475,9 @@ static inline sGmV4_0058 vu0Div_0058(const sGmV4_0058& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (m * v).
-static inline sGmV4_0058 vu0ApplyGM_0058(const t4Matrix* m, const sGmV4_0058& v)
+static inline t4VectorCtor vu0ApplyGM_0058(const t4Matrix* m, const t4Vector& v)
 {
-    sGmV4_0058 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -2528,7 +2496,7 @@ static inline sGmV4_0058 vu0ApplyGM_0058(const t4Matrix* m, const sGmV4_0058& v)
 }
 
 // PORT: PS2-only VU0 inline asm (d -= b).
-static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
+static inline void vu0SubInGM_0058(t4Vector& d, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -2569,20 +2537,29 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* 
         self->SeedX0 = seed;
     }
     tParticleEmitter_stopMotion(self);
-    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058(transform, sGmV4_0058(particleData->OffX, particleData->OffY, particleData->OffZ, 1.0f));
-    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R0X, particleData->R0Y, particleData->R0Z, 0.0f));
-    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R1X, particleData->R1Y, particleData->R1Z, 0.0f));
-    vu0SubInGM_0058(*(sGmV4_0058*)&self->X0, vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)&self->Xr0, *(sGmV4_0058*)&self->Xr1), 1.5f));
-    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->VelX, particleData->VelY, particleData->VelZ, 0.0f)), particleData->Damp);
-    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R0VX, particleData->R0VY, particleData->R0VZ, 0.0f)), particleData->Damp);
-    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R1VX, particleData->R1VY, particleData->R1VZ, 0.0f)), particleData->Damp);
-    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R2VX, particleData->R2VY, particleData->R2VZ, 0.0f)), particleData->Damp);
-    vu0SubInGM_0058(*(sGmV4_0058*)&self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)&self->Vr0, *(sGmV4_0058*)&self->Vr1), *(sGmV4_0058*)&self->Vr2), 1.5f));
+    self->X0 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->OffX, particleData->OffY, particleData->OffZ,
+        1.0f));
+    self->Xr0 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R0X, particleData->R0Y, particleData->R0Z, 0.0f));
+    self->Xr1 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R1X, particleData->R1Y, particleData->R1Z, 0.0f));
+    vu0SubInGM_0058(self->X0, vu0Scale_0058(vu0Add_0058(self->Xr0, self->Xr1), 1.5f));
+    self->V0 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->VelX, particleData->VelY,
+        particleData->VelZ, 0.0f)), particleData->Damp);
+    self->Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R0VX, particleData->R0VY,
+        particleData->R0VZ, 0.0f)), particleData->Damp);
+    self->Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R1VX, particleData->R1VY,
+        particleData->R1VZ, 0.0f)), particleData->Damp);
+    self->Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R2VX, particleData->R2VY,
+        particleData->R2VZ, 0.0f)), particleData->Damp);
+    vu0SubInGM_0058(self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(self->Vr0, self->Vr1), self->Vr2), 1.5f));
     tParticleEmitter_setColour_0058(self,
-                       vu0Scale_0058(sGmV4_0058(particleData->StartColR, particleData->StartColG, particleData->StartColB, particleData->StartColA), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(particleData->EndColR, particleData->EndColG, particleData->EndColB, particleData->EndColA), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(particleData->R0R, particleData->R0G, particleData->R0B, particleData->R0A), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(particleData->R1R, particleData->R1G, particleData->R1B, particleData->R1A), 128.0f),
+                       vu0Scale_0058(t4VectorCtor(particleData->StartColR, particleData->StartColG,
+                           particleData->StartColB, particleData->StartColA), 128.0f),
+                       vu0Scale_0058(t4VectorCtor(particleData->EndColR, particleData->EndColG, particleData->EndColB,
+                           particleData->EndColA), 128.0f),
+                       vu0Scale_0058(t4VectorCtor(particleData->R0R, particleData->R0G, particleData->R0B,
+                           particleData->R0A), 128.0f),
+                       vu0Scale_0058(t4VectorCtor(particleData->R1R, particleData->R1G, particleData->R1B,
+                           particleData->R1A), 128.0f),
                        particleData->Life + particleData->LifeR * 0.5f);
     tParticleEmitter_setTime(self, particleData->Duration < 0.0f ? particleData->Life + particleData->LifeR * 0.5f : 0.0f);
     tParticleEmitter_calcBoundBox(self, boundBox);
@@ -2640,19 +2617,18 @@ extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
  * Sets the emitter's Duration to @p duration (unless it is 0) and its particle system's time with
  * tParticleEmitter_setTime.
  *
- * The emitter starts at @p self and its tParticleEmitter at +0x10. A zero @p duration leaves Duration as it is and
- * calls tParticleEmitter_setTime(..., 0).
+ * A zero @p duration leaves Duration as it is and calls tParticleEmitter_setTime(&Emitter, 0).
  *
  * @param duration  the new duration; 0 resets only the particle time
  */
-extern "C" void cStaticEmitter_setTime(float *self, float duration)
+extern "C" void cStaticEmitter_setTime(cStaticEmitter* self, float duration)
 {
     if (duration == 0.0f) {
-        tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), 0.0f);
+        tParticleEmitter_setTime(&self->Emitter, 0.0f);
         return;
     }
-    *self = duration;
-    tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), duration);
+    self->Duration = duration;
+    tParticleEmitter_setTime(&self->Emitter, duration);
 }
 #endif
 
@@ -2747,76 +2723,51 @@ extern "C" void cStaticEmitter_render(cStaticEmitter* self, const tBoundBox* bbo
 //100%
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_render1);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sGfxRS_708C0 {
-    int field_0x0;          // 0x0
-    int flagsA;             // 0x4, bits 2..6 = layer
-    int flagsB;             // 0x8, bits 5..9 = blend
-    int field_0xC;          // 0xC
-    short tex;              // 0x10
-    short pad;
-};
-
-struct sGfxMat_708C0 {
-    float m[4][4];
-};
-
-
-struct sGfxCtx_708C0 {
-    char pad_0x0[0xE84];
-    sGfxRS_708C0* top;          // 0xE84
-    char pad_0xE88[0xF50 - 0xE88];
-    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sVEntry<void>* vtable;   // 0x10D8
-};
-
-extern sGfxCtx_708C0* cGraphicsMan_TheGraphicsMan_708C0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int gBlendTable[];
 
-typedef sGfxMat_708C0 (*tGetMat_708C0)(void*);
-typedef int (*tCull_708C0)(void*, void*, void*, const sGfxMat_708C0&);
-typedef void (*tDraw_708C0)(void*, void*);
-
-
-static inline int GetTexId_708C0(int i)
-{
-    return cGraphicsMan_TheGraphicsMan_708C0->texIds[i];
-}
+// The graphics-manager slots render1 calls by hand: 43 GetNetMatrix, 93 ClipBoundBox, 82 RenderParticleEmitter (real
+// virtual calls keep the slot address live, retail reads the vtable entries directly).
+typedef sVEntry<t4Matrix(void*)> tNetMatrixSlot;
+typedef sVEntry<int(void*, const t4Vector*, const t4Vector*, const t4Matrix&)> tClipBoundBoxSlot;
+typedef sVEntry<void(void*, const tParticleEmitter*)> tRenderEmitterSlot;
 
 /**
  * Draws a static emitter's particles with its texture-animation frame, unless it is culled or hidden.
  *
- * Pushes a render state with the layer for its kind (gBlendTable) and blend flags, draws through GrMan slot 82
- * and
+ * Culls BoundBox against the net matrix (GrMan slots 93 ClipBoundBox and 43 GetNetMatrix), then pushes a render state
+ * with the layer for its kind (gBlendTable) and blend flags, draws through GrMan slot 82 (RenderParticleEmitter) and
  * pops the state.
  *
  * @param selfp  the emitter
  */
 extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
 {
-    sGfxCtx_708C0* gfx = cGraphicsMan_TheGraphicsMan_708C0;
-    sVEntry<void>* vt = gfx->vtable;
-    if (((tCull_708C0)vt[93].fn)(vthis(gfx, vt[93]), (char*)&selfp->BoundBox, (char*)&selfp->BoundBox.MaxPoint,
-                                 ((tGetMat_708C0)vt[43].fn)(vthis(gfx, vt[43]))) == 1) {
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
+    tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, gfx);
+    tNetMatrixSlot* vtMat = (tNetMatrixSlot*)vt;
+    if (vt[93].fn(vthis(gfx, vt[93]), &selfp->BoundBox.MinPoint, &selfp->BoundBox.MaxPoint,
+                  vtMat[43].fn(vthis(gfx, vtMat[43]))) == 1) {
         return;
     }
     if ((selfp)->m_initialized == 0) {
         return;
     }
     int layer = gBlendTable[(selfp)->BlendMode];
-    gfx->top[1] = gfx->top[0];
-    sGfxRS_708C0* prev = gfx->top;
-    gfx->top = prev + 1;
-    prev[1].flagsB = (prev[1].flagsB & ~0x3E0) | 0xE0;
-    gfx->top->flagsA = (gfx->top->flagsA & 0xFFBFFFFF) | 0x400000;
-    gfx->top->flagsA = gfx->top->flagsA & 0xFE7FFFFF;
-    gfx->top->flagsA = gfx->top->flagsA & 0xFFCFFFFF;
-    gfx->top->flagsA = (gfx->top->flagsA & 0xFFF00FFF) | 0x14000;
-    gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
-    gfx->top->tex = GetTexId_708C0((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
-    sVEntry<void>* vt2 = gfx->vtable;
-    ((tDraw_708C0)vt2[82].fn)(vthis(gfx, vt2[82]), (char*)&selfp->Emitter);
-    gfx->top--;
+    gfx->m_pCurrentDrawState[1] = gfx->m_pCurrentDrawState[0];
+    sDrawState* prev = gfx->m_pCurrentDrawState;
+    gfx->m_pCurrentDrawState = prev + 1;
+    prev[1].m_bitGroups[2] = ((int)prev[1].m_bitGroups[2] & ~0x3E0) | 0xE0;
+    gfx->m_pCurrentDrawState->m_bitGroups[1] = ((int)gfx->m_pCurrentDrawState->m_bitGroups[1] & 0xFFBFFFFF) | 0x400000;
+    gfx->m_pCurrentDrawState->m_bitGroups[1] = (int)gfx->m_pCurrentDrawState->m_bitGroups[1] & 0xFE7FFFFF;
+    gfx->m_pCurrentDrawState->m_bitGroups[1] = (int)gfx->m_pCurrentDrawState->m_bitGroups[1] & 0xFFCFFFFF;
+    gfx->m_pCurrentDrawState->m_bitGroups[1] = ((int)gfx->m_pCurrentDrawState->m_bitGroups[1] & 0xFFF00FFF) | 0x14000;
+    gfx->m_pCurrentDrawState->m_bitGroups[1] = ((int)gfx->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C)
+        | ((layer << 2) & 0x7C);
+    *gfx->m_pCurrentDrawState->m_textureState.m_texid =
+        cGraphicsMan_TheGraphicsMan->getEffectTexMap((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
+    tRenderEmitterSlot* vtDraw = (tRenderEmitterSlot*)VPTR_OF(cGraphicsMan, gfx);
+    vtDraw[82].fn(vthis(gfx, vtDraw[82]), &selfp->Emitter);
+    gfx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -2915,7 +2866,7 @@ extern "C" cBaseClass_DynamicEmitter* cBaseClass_DynamicEmitter_cBaseClass_Dynam
     self->m_enabledCount = 0;
     char* blk = ((char*)&self->mDrawState);
     for (unsigned int i = 0; i < 2; i++) {
-        ((short*)&self->mDrawState.m_textureState)[i] = -1;
+        self->mDrawState.m_textureState.m_texid[i] = -1;
     }
     memset(blk, 0, 0x10);
     return (self);

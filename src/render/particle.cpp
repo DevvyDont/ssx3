@@ -10,6 +10,7 @@
 #include "ealib/shape.h"
 #include "visualfx/worldlightman.h"
 #include "world/instancerecord.h"
+#include "world/worldrecords.h"
 #include "visualfx/transitionman.h"
 #include "ui/uithing.h"
 #include "render/2drender.h"
@@ -21,6 +22,7 @@
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
 #include "render/ps2scratchpad.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_Allocate);
@@ -31,28 +33,25 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char str_DynEmitterData_Positions[];
 extern char str_DynEmitterData_Velocities[];
 
-struct sEmitParticle_0C60 {
-    float v[4];
-    sEmitParticle_0C60() {}
-};
-
-struct sEmitState_0C60 {
-    float v[4];
-    sEmitState_0C60() {}
+// t4Vector with an empty default constructor (as On Tour's t4Vector()): the array new-expressions below keep their
+// construction loop.
+struct t4VectorElem : t4Vector {
+    t4VectorElem() {}
 };
 
 /**
  * Allocates a dynamic emitter's position and velocity arrays, one 16-byte vector per sub-emitter.
  *
- * The count is the word at +0x178; positions go to +0x1A0 ("DynEmitterData Positions") and velocities to
- * +0x1A4 ("DynEmitterData Velocities").
+ * The count is m_numSubEmitters; positions go to m_positions ("DynEmitterData Positions") and velocities to
+ * m_velocities ("DynEmitterData Velocities").
  */
 extern "C" void cBaseClass_DynamicEmitter_Allocate(cBaseClass_DynamicEmitter* self)
 {
-    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(&self->m_positions);
-    *pp = new (str_DynEmitterData_Positions, 0, 0) sEmitParticle_0C60[self->m_numSubEmitters];
-    sEmitState_0C60** ps = (sEmitState_0C60**)(&self->m_velocities);
-    *ps = new (str_DynEmitterData_Velocities, 0, 0) sEmitState_0C60[self->m_numSubEmitters];
+    // each destination's address is taken before its allocation, as in retail
+    t4Vector** positions = &self->m_positions;
+    *positions = new (str_DynEmitterData_Positions, 0, 0) t4VectorElem[self->m_numSubEmitters];
+    t4Vector** velocities = &self->m_velocities;
+    *velocities = new (str_DynEmitterData_Velocities, 0, 0) t4VectorElem[self->m_numSubEmitters];
 }
 #endif
 
@@ -93,16 +92,16 @@ extern t4Vector t4vect_Zero;
 /**
  * Resets a dynamic emitter: zeroes both of its vector arrays and its counters.
  *
- * For each of the +0x178 entries, the vectors at +0x1A0 and +0x1A4 are set to zero; the words at +0x17C and
- * +0x1E0 are cleared.
+ * For each of the m_numSubEmitters entries, m_positions[i] and m_velocities[i] are set to zero; m_subEmitterId and
+ * m_enabledCount are cleared.
  */
 extern "C" void cBaseClass_DynamicEmitter_reset(cBaseClass_DynamicEmitter* self)
 {
     int i;
     self->m_subEmitterId = 0;
     for (i = 0; i < self->m_numSubEmitters; i++) {
-        ((t4Vector*)self->m_positions)[i] = t4vect_Zero;
-        ((t4Vector*)self->m_velocities)[i] = t4vect_Zero;
+        self->m_positions[i] = t4vect_Zero;
+        self->m_velocities[i] = t4vect_Zero;
         self->m_subEmitterId = 0;
         self->m_enabledCount = 0;
     }
@@ -118,54 +117,17 @@ extern "C" void tParticleEmitter_init(void* sys, int count, int a2, t4Vector* v,
 extern "C" void tParticleEmitter_setupEmitter(void* sys, void* a1, void* def, void* a3, float f);
 extern t4Matrix t4mat_Identity;
 
-struct sGsState_00370DC8 {
-    int w0;
-    unsigned int a : 2;
-    unsigned int pad2 : 18;
-    unsigned int b : 2;
-    unsigned int c : 1;
-    unsigned int pad23 : 9;
-    unsigned int pad0_ : 10;
-    unsigned int d : 19;
-    unsigned int pad29 : 3;
-    int w3;
-    int w4;
-};
+extern sDrawState sDrawState_s_defaultDrawState_0DC8 __asm__("sDrawState_s_defaultDrawState");
 
-extern sGsState_00370DC8 sDrawState_s_defaultDrawState;
+// The emitter's virtual slots setupEmitter calls (cBaseClass_DynamicEmitter_vtbl: 1 purge(int), 2 reset, 5 Allocate).
+typedef sVEntry<void(void*, int)> tEmitterPurgeSlot;
+typedef sVEntry<void(void*)> tEmitterSlot;
 
-
-class cEmitter_00370DC8 {
-public:
-    float start;            // 0x0
-    int f4;                 // 0x4
-    int f8;                 // 0x8
-    int fC;                 // 0xC
-    float f10;              // 0x10
-    float f14;              // 0x14
-    char pad18[0x8];
-    char sys[0x150];        // 0x20
-    int active;             // 0x170
-    int f174;               // 0x174
-    int count;              // 0x178
-    int f17C;               // 0x17C
-    char f180[0x30];        // 0x180
-    char v1B0[0x10];        // 0x1B0
-    char v1C0[0x10];        // 0x1C0
-    char v1D0[0x10];        // 0x1D0
-    int f1E0;               // 0x1E0
-    sGsState_00370DC8 gs;   // 0x1E4
-    virtual void purge(int a);
-    virtual void reset();
-    virtual void v03();
-    virtual void v04();
-    virtual void Allocate();
-
-    void setA(int v) { gs.a = v; }
-    void setB(int v) { gs.b = v; }
-    void setC(int v) { gs.c = v; }
-    void setD(int v) { gs.d = v; }
-};
+// Sets one field of a draw-state word.
+static inline void setDrawStateBits(unsigned int& word, int mask, int shift, int v)
+{
+    word = ((int)word & ~mask) | ((v << shift) & mask);
+}
 
 static inline float randf_00370DC8()
 {
@@ -209,61 +171,64 @@ static inline float start_00370DC8(char* vdef)
  * Configures a dynamic emitter from particle data: sub-emitter count, timing, ring size, the particle system and its
  * draw state.
  *
- * Copies the flip-texture count (+0xD0 of the data, to +0xC, On Tour mNumFlipTextures) and rate (+0xD4, to +0x14); with
- * two or more flip textures the current one (+0x10) starts at count * a BXrand fraction, else 0. +0x4/+0x8 take the
- * data's +0xC4/+0xC8 (On Tour TextureId, BlendMode). Duration (+0x0) and the emission life come from the data's +0x8,
- * +0x14 and +0x1C. The sub-emitter count (+0x178, On Tour m_numSubEmitters) is ceil(life * 60); when it changes the
- * emitter rebuilds its buffers through vtable slots 1 (with 0), 5 and 2 (On Tour: rebuild). Zeroes the three vectors
- * +0x1B0..+0x1D0, then tParticleEmitter_init on the embedded system (+0x20) with data[0] particles per sub-emitter and
- * tParticleEmitter_setupEmitter with t4mat_Identity and the box at +0x180. Marks it active (+0x170) and copies
- * sDrawState_s_defaultDrawState to +0x1E4 with four bitfields overridden.
+ * Copies the flip-texture count (NumFlipTextures to mNumFlipTextures) and rate (FlipTextureRate to
+ * mFlipTextureRate); with two or more flip textures mCurrentFlipTexture starts at count * a BXrand fraction, else 0.
+ * TextureId and BlendMode are copied. Duration and the emission life come from the data's Duration, Life and LifeR.
+ * The sub-emitter count m_numSubEmitters is ceil(life * 60); when it changes the emitter rebuilds its buffers through
+ * vtable slots 1 (purge(0)), 5 (Allocate) and 2 (reset) (On Tour: rebuild). Zeroes m_currPosition, m_currVelocity and
+ * m_currColour, then tParticleEmitter_init on m_emitter with NumParticles particles per sub-emitter and
+ * tParticleEmitter_setupEmitter with t4mat_Identity and m_boundBox. Sets m_initialized and copies
+ * sDrawState_s_defaultDrawState to mDrawState with four bit fields overridden.
  *
  * @param def  the particle data (const tParticleData*)
  * @param seed    the random seed passed on to tParticleEmitter_setupEmitter (-1.0 from the effect modifiers)
  */
-extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, tParticleData* def, float seed)
+extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cBaseClass_DynamicEmitter* self, tParticleData* def, float seed)
 {
     int n = def->NumFlipTextures;
-    self->fC = n;
-    self->f14 = def->FlipTextureRate;
+    self->mNumFlipTextures = n;
+    self->mFlipTextureRate = def->FlipTextureRate;
     if (n >= 2) {
         float fn = (float)n;
-        self->f10 = fn * randf_00370DC8();
+        self->mCurrentFlipTexture = fn * randf_00370DC8();
     } else {
-        self->f10 = 0.0f;
+        self->mCurrentFlipTexture = 0.0f;
     }
-    self->f4 = def->TextureId;
-    self->f8 = def->BlendMode;
-    self->start = start_00370DC8(((char*)def));
+    self->TextureId = def->TextureId;
+    self->BlendMode = def->BlendMode;
+    self->Duration = start_00370DC8(((char*)def));
     int changed = 0;
     float frames = life_00370DC8(((char*)def)) * 60.0f;
-    if (self->count != (int)fceil_00370DC8(frames)) {
-        self->count = (int)fceil_00370DC8(frames);
+    if (self->m_numSubEmitters != (int)fceil_00370DC8(frames)) {
+        self->m_numSubEmitters = (int)fceil_00370DC8(frames);
         changed = 1;
     }
-    *(t4Vector*)self->v1B0 = t4vect_Zero;
-    *(t4Vector*)self->v1C0 = t4vect_Zero;
-    *(t4Vector*)self->v1D0 = t4vect_Zero;
+    self->m_currPosition = t4vect_Zero;
+    self->m_currVelocity = t4vect_Zero;
+    self->m_currColour = t4vect_Zero;
     float life = life_00370DC8(((char*)def));
     t4Vector force;
     force.x = def->ForceX;
     force.y = def->ForceY;
     force.z = def->ForceZ;
     force.w = 0.0f;
-    tParticleEmitter_init(self->sys, def->NumParticles * self->count, def->NumBlur, &force, life,
+    tParticleEmitter_init(&self->m_emitter, def->NumParticles * self->m_numSubEmitters, def->NumBlur, &force, life,
                   def->BlurStep, def->Damp);
-    tParticleEmitter_setupEmitter(self->sys, &t4mat_Identity, def, self->f180, seed);
+    tParticleEmitter_setupEmitter(&self->m_emitter, &t4mat_Identity, def, &self->m_boundBox, seed);
     if (changed) {
-        self->purge(0);
-        self->Allocate();
-        self->reset();
+        tEmitterPurgeSlot* purgeSlot = (tEmitterPurgeSlot*)self->mVtbl;
+        purgeSlot[1].fn(vthis(self, purgeSlot[1]), 0);
+        tEmitterSlot* vt = (tEmitterSlot*)self->mVtbl;
+        vt[5].fn(vthis(self, vt[5]));
+        tEmitterSlot* vtReset = (tEmitterSlot*)self->mVtbl;
+        vtReset[2].fn(vthis(self, vtReset[2]));
     }
-    self->active = 1;
-    self->gs = sDrawState_s_defaultDrawState;
-    self->setC(1);
-    self->setB(0);
-    self->setA(2);
-    self->setD(0);
+    self->m_initialized = 1;
+    self->mDrawState = sDrawState_s_defaultDrawState_0DC8;
+    setDrawStateBits(self->mDrawState.m_bitGroups[1], 0x400000, 22, 1);
+    setDrawStateBits(self->mDrawState.m_bitGroups[1], 0x300000, 20, 0);
+    setDrawStateBits(self->mDrawState.m_bitGroups[1], 0x3, 0, 2);
+    setDrawStateBits(self->mDrawState.m_bitGroups[2], 0x1FFFFC00, 10, 0);
 }
 #endif
 
@@ -366,67 +331,54 @@ extern "C" void cBaseClass_DynamicEmitter_setTime(cBaseClass_DynamicEmitter* sel
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream003712B8 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-};
-
 /**
  * Saves a dynamic emitter to a replay frame: writes 0x14 bytes (Duration, the emitter's EndTime, m_enabled,
  * m_initialized, m_subEmitterId) with the stream's slot 1.
  *
  * @param stream  the replay frame to write to (On Tour data)
  */
-extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicEmitter* self, cStream003712B8* stream)
+extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicEmitter* self, cBxReplayFrame* stream)
 {
     struct {
-        float a;
-        float b;
-        int c;
-        int d;
-        int e;
+        float duration;
+        float endTime;
+        int enabled;
+        int initialized;
+        int subEmitterId;
     } buf;
-    buf.a = self->Duration;
-    buf.b = self->m_emitter.EndTime;
-    buf.d = self->m_initialized;
-    buf.c = self->m_enabled;
-    buf.e = self->m_subEmitterId;
-    stream->write(&buf, 20);
+    buf.duration = self->Duration;
+    buf.endTime = self->m_emitter.EndTime;
+    buf.initialized = self->m_initialized;
+    buf.enabled = self->m_enabled;
+    buf.subEmitterId = self->m_subEmitterId;
+    stream->write((const char*)&buf, 20);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream00371318 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 /**
  * Restores a dynamic emitter from a replay frame: reads the 0x14 bytes written by writeToReplayFrame (Duration,
  * EndTime, m_enabled, m_initialized, m_subEmitterId) with the stream's slot 2.
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_DynamicEmitter* self, cStream00371318* stream)
+extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_DynamicEmitter* self, cBxReplayFrame* stream)
 {
     struct {
-        float a;
-        float b;
-        int c;
-        int d;
-        int e;
+        float duration;
+        float endTime;
+        int enabled;
+        int initialized;
+        int subEmitterId;
     } buf;
-    stream->read(&buf, 20);
-    self->Duration = buf.a;
-    self->m_emitter.EndTime = buf.b;
-    self->m_initialized = buf.d;
-    self->m_enabled = buf.c;
-    self->m_subEmitterId = buf.e;
+    stream->read((char*)&buf, 20);
+    self->Duration = buf.duration;
+    self->m_emitter.EndTime = buf.endTime;
+    self->m_initialized = buf.initialized;
+    self->m_enabled = buf.enabled;
+    self->m_subEmitterId = buf.subEmitterId;
 }
 #endif
 
@@ -1386,29 +1338,11 @@ extern "C" void cSimpleTube__cSimpleTube(cSimpleTube* self, int flags)
 INCLUDE_ASM("render/particle", cSimpleTube_render);
 #ifdef SKIP_ASM
 
-struct sPtVtx_26C8 {
-    t4Vector a;
-    t4Vector b;
-    t4Vector pos;                 // 0x20
-};
-
-struct sPtRS_26C8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
-
-
-
 extern int cTube_m_Enable;
 extern float cTube_m_ScaleWidth;
 extern float cTube_m_ScaleHeight;
 extern t4Vector t4vect_ZAxis;
-extern sPtVtx_26C8 cSimpleTube_m_vertices_v26C8[] __asm__("cSimpleTube_m_vertices");
-extern sPtRS_26C8 sDrawState_s_defaultDrawState_rs26C8 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState sDrawState_s_defaultDrawState_rs26C8 __asm__("sDrawState_s_defaultDrawState");
 extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -1513,7 +1447,7 @@ static inline t4Vector Scale_26C8(const t4Vector& v, float s)
  * Draws a segmented tube effect: a ribbon of two tilted sides along its points, then a line strip along the points.
  *
  * Does nothing while the tube enable flag cTube_m_Enable is 0. The direction is the normalised vector from point 0 to point
- * n (n = +0x4, the points at +0x8 are t4Vectors); the side vector is the normalised cross product of it with
+ * n (n = m_numSegments, the points m_positions); the side vector is the normalised cross product of it with
  * t4vect_ZAxis scaled by the width cTube_m_ScaleWidth, and both it and its negation are lowered along Z by the height
  * cTube_m_ScaleHeight. For each of the n + 1 points it fills four of the shared vertices cSimpleTube_m_vertices: point + negated side and
  * the point for the first strip, the point and point + side for the second; two extra vertices copy their neighbours so
@@ -1535,23 +1469,23 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     for (int i = 0; i < self->m_numSegments + 1; i++) {
-        cSimpleTube_m_vertices_v26C8[2 * i].pos = Add_26C8((self->m_positions)[i], otherSideOffset);
-        cSimpleTube_m_vertices_v26C8[2 * i + 1].pos = (self->m_positions)[i];
-        cSimpleTube_m_vertices_v26C8[2 * (i + self->m_numSegments + 2)].pos = (self->m_positions)[i];
-        cSimpleTube_m_vertices_v26C8[((self->m_numSegments + i) << 1) + 5].pos = Add_26C8((self->m_positions)[i], sideOffset);
+        cSimpleTube_m_vertices[2 * i].p = Add_26C8((self->m_positions)[i], otherSideOffset);
+        cSimpleTube_m_vertices[2 * i + 1].p = (self->m_positions)[i];
+        cSimpleTube_m_vertices[2 * (i + self->m_numSegments + 2)].p = (self->m_positions)[i];
+        cSimpleTube_m_vertices[((self->m_numSegments + i) << 1) + 5].p = Add_26C8((self->m_positions)[i], sideOffset);
     }
-    cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 2] = cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 1];
-    cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 3] = cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 4];
+    cSimpleTube_m_vertices[2 * self->m_numSegments + 2] = cSimpleTube_m_vertices[2 * self->m_numSegments + 1];
+    cSimpleTube_m_vertices[2 * self->m_numSegments + 3] = cSimpleTube_m_vertices[2 * self->m_numSegments + 4];
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx26C8;
-    ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = *(sPtRS_26C8*)&ctx->m_pCurrentDrawState->m_bitGroups[0];
-    (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)++;
-    *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs26C8;
-    ctx->RenderTriStrip(((self->m_numSegments + 1) << 2) | 2, (tBxVertex*)cSimpleTube_m_vertices_v26C8, 0);
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
+    *ctx->m_pCurrentDrawState = sDrawState_s_defaultDrawState_rs26C8;
+    ctx->RenderTriStrip(((self->m_numSegments + 1) << 2) | 2, cSimpleTube_m_vertices, 0);
     for (int i = 0; i < self->m_numSegments + 1; i++) {
-        cSimpleTube_m_vertices_v26C8[i].pos = (self->m_positions)[i];
+        cSimpleTube_m_vertices[i].p = (self->m_positions)[i];
     }
-    ctx->RenderLineStrip(self->m_numSegments + 1, (const tBxVertex*)cSimpleTube_m_vertices_v26C8, 0);
-    (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)--;
+    ctx->RenderLineStrip(self->m_numSegments + 1, cSimpleTube_m_vertices, 0);
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -2866,97 +2800,31 @@ INCLUDE_ASM("render/particle", func_00374D00);
 //100%
 INCLUDE_ASM("render/particle", cPlayerShadow_AddShadow);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
-
-struct sPtVec4_5890 {
-    float x, y, z, w;
-    sPtVec4_5890(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
-};
-
-class cGfxMan_5890 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void AddProjectiveTexture(const sPtVec4_5890& pos, void* a, void* b, int tex, float scale);
+// A t4Vector with constructors (ours has none), for the by-value temporaries and VU0 helpers below
+// (On Tour t4Vector(), t4Vector(float, float, float, float)).
+struct t4VectorInit : t4Vector {
+    t4VectorInit() {}
+    t4VectorInit(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
 };
 
 /**
  * Registers a rider's shadow with the renderer as a projective texture.
  *
- * Calls cGraphicsMan_TheGraphicsMan's virtual slot 67 (cPS2GraphicsMan_AddProjectiveTexture) with the position (+0xC,
- * +0x10, +0x14, w = 1; On Tour's cPlayerShadow mProjPos), the matrices at +0x90 and +0xD0 (On Tour mCProjMat and
- * mUVProjMat), intensity 1.0 and the texture id at +0x170 (On Tour mLockTexture). cRider_RenderShadow calls it.
+ * Calls cGraphicsMan_TheGraphicsMan's virtual slot 67 (cPS2GraphicsMan_AddProjectiveTexture) with the position
+ * (mProjPos, w = 1), the matrices mCProjMat and mUVProjMat, intensity 1.0 and the texture id mLockTexture.
+ * cRider_RenderShadow calls it.
  */
 extern "C" void cPlayerShadow_AddShadow(cPlayerShadow* self)
 {
-    cPlayerShadow* shadow = (cPlayerShadow*)self;
-    ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan_particle)->AddProjectiveTexture(sPtVec4_5890(shadow->mProjPos[0], shadow->mProjPos[1], shadow->mProjPos[2], 1.0f),
-                                     &shadow->mCProjMat, &shadow->mUVProjMat, shadow->mLockTexture, 1.0f);
+    cGraphicsMan_TheGraphicsMan->AddProjectiveTexture(
+        t4VectorInit(self->mProjPos[0], self->mProjPos[1], self->mProjPos[2], 1.0f), self->mCProjMat, self->mUVProjMat,
+        1.0f, self->mLockTexture);
 }
 #endif
 
@@ -3646,16 +3514,14 @@ extern "C" sPartVec4i* cPS2GraphicsMan_GetViewportWindow(sPartVec4i* out, cPS2Gr
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportFOV);
 #ifdef SKIP_ASM
 /**
- * Returns the current viewport's field of view (the float at +0x6D38 in viewport stack entry mViewportDepth, 0x230
- * bytes each).
+ * Returns the current viewport's field of view (mProjParams[2] of viewport stack entry mViewportDepth).
  *
  * @return the field of view
  */
 extern "C" float cPS2GraphicsMan_GetViewportFOV(cPS2GraphicsMan* self)
 {
     int i = self->mViewportDepth;
-    char* stackEntry = (char*)self + i * 0x230;
-    return *(float*)(stackEntry + 0x6d38);
+    return self->mViewportStack[i].mProjParams[2];
 }
 #endif
 
@@ -3890,17 +3756,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportZBias);
 #ifdef SKIP_ASM
-// A t4Vector with constructors (ours has none), for the by-value VU0 helpers below.
-struct t4VectorInit : t4Vector {
-    t4VectorInit() {}
-    t4VectorInit(float ax, float ay, float az, float aw)
-    {
-        x = ax;
-        y = ay;
-        z = az;
-        w = aw;
-    }
-};
+// (t4VectorInit, the t4Vector with constructors, is defined with cPlayerShadow_AddShadow above.)
 
 
 
@@ -4386,51 +4242,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawSprite);
 typedef int cQuad_7CF0 __attribute__((mode(TI)));
 
 
-struct sMat_7CF0 {
-    float m[4][4];
-} __attribute__((aligned(16)));
-
-struct sRS_7CF0 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
-
-struct sEnt_7CF0 {
-    sRS_7CF0 rs;                    // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
-
-struct sGfx_7CF0 {
-    char pad_0x0[0xE84];
-    sRS_7CF0* top;                  // 0xE84
-    char pad_0xE88[0x18F0 - 0xE88];
-    cPS2DeferManager* ring;         // 0x18F0
-    char pad_0x18F4[0x5A00 - 0x18F4];
-    unsigned int bufAddr;           // 0x5A00
-    char pad_0x5A04[0x6AF0 - 0x5A04];
-    sMat_7CF0 projMtx;              // 0x6AF0
-    sMat_7CF0 clipMtx;              // 0x6B30
-    float minX;                     // 0x6B70
-    float minY;                     // 0x6B74
-    float maxZ;                     // 0x6B78
-    float field_0x6B7C;
-    float maxX;                     // 0x6B80
-    float maxY;                     // 0x6B84
-    float minZ;                     // 0x6B88
-    float field_0x6B8C;
-    int clipValid;                  // 0x6B90
-};
-
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline t4Vector mtxApply_7CF0(sMat_7CF0* m, const t4Vector& v)
+static inline t4Vector mtxApply_7CF0(t4Matrix* m, const t4Vector& v)
 {
     t4Vector out;
     __asm__(
@@ -4484,28 +4297,28 @@ static inline t4Vector Sub_7CF0(const t4Vector& a, const t4Vector& b)
 }
 
 // Guard-band outcode of a projected point (as cPS2GraphicsMan_GetOutCode).
-static inline int ClipCode_7CF0(sGfx_7CF0* self, const t4Vector& v)
+static inline int ClipCode_7CF0(cPS2GraphicsMan* self, const t4Vector& v)
 {
     int code = 0;
-    if (v.x < self->minX) {
+    if (v.x < self->mClipMin.x) {
         code |= 2;
     }
-    if (self->maxX < v.x) {
+    if (self->mClipMax.x < v.x) {
         code |= 1;
     }
-    if (v.y < self->minY) {
+    if (v.y < self->mClipMin.y) {
         code |= 8;
     }
-    if (self->maxY < v.y) {
+    if (self->mClipMax.y < v.y) {
         code |= 4;
     }
     if (v.w < 0.0f) {
         code ^= 0x2F;
     } else {
-        if (v.z > self->maxZ) {
+        if (v.z > self->mClipMin.z) {
             code |= 0x20;
         }
-        if (v.z < self->minZ) {
+        if (v.z < self->mClipMax.z) {
             code |= 0x10;
         }
     }
@@ -4527,17 +4340,18 @@ static inline int ClipCode_7CF0(sGfx_7CF0* self, const t4Vector& v)
  */
 // PORT: uncached (0x30000000) pointers held in int.
 // Emits one screen-aligned sprite (GS SPRITE, ST + RGBAQ + two XYZ2) centred on pos.
-extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, t4Vector* pos, float* size, int* uv0, int* uv1, float* col)
+extern "C" void cPS2GraphicsMan_DrawSprite(cPS2GraphicsMan* self, t4Vector* pos, float* size, int* uv0, int* uv1,
+    float* col)
 {
-    if (self->clipValid == 0) {
-        func_0037D968((cPS2GraphicsMan*)self);
+    if (self->mMatricesValid == 0) {
+        func_0037D968(self);
     }
-    t4Vector clipPos = mtxApply_7CF0(&self->clipMtx, *pos);
+    t4Vector clipPos = mtxApply_7CF0(&self->mScreenWorld, *pos);
     float sw = size[0];
     float sh = size[1];
     float w = 1.0f / clipPos.w;
-    float sx = self->projMtx.m[0][0] * sw;
-    float sy = self->projMtx.m[1][1] * sh;
+    float sx = self->mScreenMatrix.row[0].x * sw;
+    float sy = self->mScreenMatrix.row[1].y * sh;
     clipPos.x *= w;
     clipPos.y *= w;
     clipPos.w = w;
@@ -4553,7 +4367,9 @@ extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, t4Vector* pos, float
     }
 
     float gsQ = 1.0f;
-    unsigned int buf = self->bufAddr;
+    unsigned int buf = self->mVifCursor;
+    // ORIGINAL-PTR: the GIF packet and the defer record are written through the EE's uncached-accelerated alias
+    // (address | 0x30000000, a hardware address segment)
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     *(cQuad_7CF0*)packet = 0x10000005;
     packet[2] = 0;
@@ -4570,47 +4386,34 @@ extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, t4Vector* pos, float
     packet[11] = (unsigned long)(int)hi.x | ((unsigned long)(int)hi.y << 16) | ((unsigned long)(int)(hi.z * hi.w) << 32);
     packet += 12;
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-    self->bufAddr = next;
-    cPS2DeferManager* ring = self->ring;
-    sRS_7CF0* rs = self->top;
+    self->mVifCursor = next;
+    cPS2DeferManager* ring = self->mpDeferMan;
+    sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = ((int)rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
-        sEnt_7CF0* ringEntry = (sEnt_7CF0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)ring->mSubmits | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->buf = buf;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->flag = 0;
+        tDeferSubmit* ringEntry =
+            (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)ring->mSubmits | 0x30000000));
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 0;
     }
-    self->bufAddr += 0x10;
+    self->mVifCursor += 0x10;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawRotatedSprite);
 #ifdef SKIP_ASM
-struct sV_81A0 {
-    float x, y, z, w;
-    sV_81A0() {}
-    sV_81A0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-
-struct sVEnt_81A0 {
-    short delta;
-    short index;
-    sV_81A0 (*fn)(void*, const sV_81A0*);
-};
-
-
-
-
+// GrMan slot 92, GetScreenCoord (the projected position, returned by value).
+typedef sVEntry<t4VectorInit(void*, const t4Vector*)> tScreenCoordSlot;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV_81A0 Scale_81A0(const sV_81A0& v, float s)
+static inline t4VectorInit Scale_81A0(const t4Vector& v, float s)
 {
-    sV_81A0 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4625,9 +4428,9 @@ static inline sV_81A0 Scale_81A0(const sV_81A0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV_81A0 Add_81A0(const sV_81A0& a, const sV_81A0& b)
+static inline t4VectorInit Add_81A0(const t4Vector& a, const t4Vector& b)
 {
-    sV_81A0 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4640,9 +4443,9 @@ static inline sV_81A0 Add_81A0(const sV_81A0& a, const sV_81A0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV_81A0 Sub_81A0(const sV_81A0& a, const sV_81A0& b)
+static inline t4VectorInit Sub_81A0(const t4Vector& a, const t4Vector& b)
 {
-    sV_81A0 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4654,21 +4457,21 @@ static inline sV_81A0 Sub_81A0(const sV_81A0& a, const sV_81A0& b)
     return r;
 }
 
-static inline void Rot_81A0(sV_81A0* out, const t4Matrix* m, const sV_81A0& v)
+static inline void Rot_81A0(t4Vector* out, const t4Matrix* m, const t4Vector& v)
 {
-    float x = v.x * ((float (*)[4])&m->row[0])[0][0] + v.y * ((float (*)[4])&m->row[0])[0][1];
-    float y = v.x * ((float (*)[4])&m->row[0])[1][0] + v.y * ((float (*)[4])&m->row[0])[1][1];
-    float z = v.x * ((float (*)[4])&m->row[0])[2][0] + v.y * ((float (*)[4])&m->row[0])[2][1];
-    float w = v.x * ((float (*)[4])&m->row[0])[3][0] + v.y * ((float (*)[4])&m->row[0])[3][1];
+    float x = v.x * m->row[0].x + v.y * m->row[0].y;
+    float y = v.x * m->row[1].x + v.y * m->row[1].y;
+    float z = v.x * m->row[2].x + v.y * m->row[2].y;
+    float w = v.x * m->row[3].x + v.y * m->row[3].y;
     out->x = x;
     out->y = y;
     out->z = z;
     out->w = w;
 }
 
-static inline sV_81A0 Project_81A0(cPS2GraphicsMan* self, const sV_81A0* v)
+static inline t4VectorInit Project_81A0(cPS2GraphicsMan* self, const t4Vector* v)
 {
-    sVEnt_81A0* vt = ((sVEnt_81A0*)VPTR_OF(cGraphicsMan, self));
+    tScreenCoordSlot* vt = (tScreenCoordSlot*)VPTR_OF(cGraphicsMan, self);
     return vt[92].fn(vthis(self, vt[92]), v);
 }
 
@@ -4692,31 +4495,34 @@ extern "C" void fSinCos(float* s, float* c, float angle);
  */
 // PORT: uncached (0x30000000) pointers held in int.
 // Emits count camera-facing rotated sprites (GS tri-strip quads) centred on pos.
-extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, sV_81A0* pos, float* size, int* uv0, int* uv1, float* col, int count, float angle)
+extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, const t4Vector* pos, float* size, int* uv0,
+    int* uv1, float* col, int count, float angle)
 {
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
     float gsQ = 1.0f;
-    sV_81A0 center = Project_81A0(self, pos);
+    t4VectorInit center = Project_81A0(self, pos);
     float sinAngle, cosAngle;
     fSinCos(&sinAngle, &cosAngle, angle);
-    sV_81A0 axisU;
-    sV_81A0 axisV(cosAngle, sinAngle, 0.0f, 0.0f);
+    t4VectorInit axisU;
+    t4VectorInit axisV(cosAngle, sinAngle, 0.0f, 0.0f);
     Rot_81A0(&axisU, self->mCurrentView, axisV);
-    Rot_81A0(&axisV, self->mCurrentView, sV_81A0(-axisV.y, axisV.x, axisV.z, axisV.w));
-    sV_81A0 edgeU = Add_81A0(*pos, Scale_81A0(axisU, size[0]));
-    sV_81A0 edgeV = Add_81A0(*pos, Scale_81A0(axisV, size[1]));
+    Rot_81A0(&axisV, self->mCurrentView, t4VectorInit(-axisV.y, axisV.x, axisV.z, axisV.w));
+    t4VectorInit edgeU = Add_81A0(*pos, Scale_81A0(axisU, size[0]));
+    t4VectorInit edgeV = Add_81A0(*pos, Scale_81A0(axisV, size[1]));
     edgeU.w = gsQ;
     edgeV.w = gsQ;
-    sV_81A0 halfU = Sub_81A0(Project_81A0(self, &edgeU), center);
-    sV_81A0 halfV = Sub_81A0(Project_81A0(self, &edgeV), center);
-    sV_81A0 corner0 = Sub_81A0(Sub_81A0(center, halfU), halfV);
-    sV_81A0 corner1 = Sub_81A0(Add_81A0(center, halfU), halfV);
-    sV_81A0 corner2 = Add_81A0(Sub_81A0(center, halfU), halfV);
-    sV_81A0 corner3 = Add_81A0(Add_81A0(center, halfU), halfV);
+    t4VectorInit halfU = Sub_81A0(Project_81A0(self, &edgeU), center);
+    t4VectorInit halfV = Sub_81A0(Project_81A0(self, &edgeV), center);
+    t4VectorInit corner0 = Sub_81A0(Sub_81A0(center, halfU), halfV);
+    t4VectorInit corner1 = Sub_81A0(Add_81A0(center, halfU), halfV);
+    t4VectorInit corner2 = Add_81A0(Sub_81A0(center, halfU), halfV);
+    t4VectorInit corner3 = Add_81A0(Add_81A0(center, halfU), halfV);
 
     unsigned int buf = self->mVifCursor;
+    // ORIGINAL-PTR: the GIF packet and the defer record are written through the EE's uncached-accelerated alias
+    // (address | 0x30000000, a hardware address segment)
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     int xoff = (0x800 - (((unsigned int)self->mFBWidth) >> 1)) << 4;
     int yoff = (0x800 - (((unsigned int)self->mFBHeight) >> 1)) << 4;
@@ -4829,8 +4635,8 @@ static inline int Bits_CF0(float f)
 
 // Homogeneous position (w given) with a const-reference ctor: its stores, w included, go straight to the stack
 // slot, where the by-value t4VectorInit ctor keeps `this` in a register for a constant w.
-struct sPtPos8808 : t4VectorInit {
-    sPtPos8808(const float& ax, const float& ay, const float& az, const float& aw)
+struct t4VectorRefInit : t4VectorInit {
+    t4VectorRefInit(const float& ax, const float& ay, const float& az, const float& aw)
     {
         x = ax;
         y = ay;
@@ -4903,6 +4709,8 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
         func_0037D968((cPS2GraphicsMan*)self);
     }
     unsigned int buf = self->mVifCursor;
+    // ORIGINAL-PTR: the GIF packet and the defer record are written through the EE's uncached-accelerated alias
+    // (address | 0x30000000, a hardware address segment)
     unsigned long* packetHead = (unsigned long*)(buf | 0x30000000);
     unsigned long* glyphOut = packetHead + 10;
     int nloop = 0;
@@ -4945,7 +4753,8 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
                 Set2_8808(uv0, glyphRec->u * su, glyphRec->v * sv);
                 Set2_8808(uv1, (glyphRec->u + glyphRec->width) * su, (glyphRec->v + glyphRec->height) * sv);
                 Set2_8808(size, glyphRec->width * sx * 0.5f, glyphRec->height * sy * 0.5f);
-                sPtPos8808 pos(x + glyphRec->xoffset * sx + size[0], y + glyphRec->yoffset * sy + size[1], z, 1.0f);
+                t4VectorRefInit pos(x + glyphRec->xoffset * sx + size[0], y + glyphRec->yoffset * sy + size[1], z,
+                    1.0f);
                 t4VectorInit projCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / projCentre.w;
                 projCentre.x *= inv;
@@ -4979,18 +4788,18 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
     packetHead[9] = 21074;
     unsigned int next = (unsigned int)glyphOut & 0x0FFFFFFF;
     cPS2DeferManager* ring = self->mpDeferMan;
-    sPtRenderState* rs = ((sPtRenderState*)self->m_pCurrentDrawState);
+    sDrawState* rs = self->m_pCurrentDrawState;
     self->mVifCursor = next + 0x10;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = ((int)rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
-        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
+        tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7)
             + ((unsigned int)ring->mSubmits | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->buf = buf;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->flag = 0;
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 0;
     }
 }
 #endif
@@ -6619,16 +6428,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddTexture);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sTexHdr_C8C0 {
-    int f0;                         // 0x0: low byte = type, upper 24 bits = offset to base header
-    short s4;                       // 0x4
-    short s6;                       // 0x6
-    short s8;                       // 0x8
-    char pad_0xA[2];
-    unsigned int fC;                // 0xC
-    int f10;                        // 0x10
-};
-
 extern "C" double fptodp(float f);
 extern "C" double dlog_C8C0(double) __asm__("log");
 extern "C" double dpmul(double, double);
@@ -6661,14 +6460,14 @@ static inline int clampW_C8C0(int v, int lo, int hi)
  * Registers a texture from an EA shape record: works out its texel and CLUT formats and passes it on to vtable slot 47
  * (cPS2GraphicsMan_AddTexture1).
  *
- * The record is On Tour's SHAPE: f0's low byte is the type and its upper 24 bits the offset to the next record (the
- * palette); s4/s6 are width and height; fC bit 0x1000 means the texels sit at the offset in f10 (else right after the
- * 16-byte header), bit 0x2000 picks the swizzled format, and its top four bits are the mipmap count. Type 1 gives texel
+ * The record is On Tour's SHAPE: type is the pixel format and next the offset to the next record (the palette);
+ * flags bit 0x1000 means the texels sit at dataoffset (else right after the 16-byte header), bit 0x2000 picks the
+ * swizzled format, and its top four bits are the mipmap count. Type 1 gives texel
  * format 11 (12 when swizzled) and type 2 gives 9 (10), both with CLUT format 1 and the palette record's texels; type 3
  * gives 2 and type 5 gives 0, without a CLUT. A palettised record whose offset is 0 would make the palette record null
  * and be dereferenced.
  *
- * For a mipmapped record with a non-zero s8 it then computes k = -16 * log2(240 / (s8 / 16384)), clamped to
+ * For a mipmapped record with a non-zero centerx it then computes k = -16 * log2(240 / (centerx / 16384)), clamped to
  * -2047..-135, and calls func_0037D090(self, id, 5, 1, 0, k). Slot 46 of cPS2GraphicsMan_vtbl.
  *
  * @param src  the shape record
@@ -6678,32 +6477,35 @@ static inline int clampW_C8C0(int v, int lo, int hi)
  * @param bindId  the bind id, passed through
  * @return the texture id slot 47 returns
  */
-extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int textureName, int lockType, int copyMem, int bindId)
+extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, const SHAPEIMAGE* src, int textureName, int lockType,
+    int copyMem, int bindId)
 {
     int fmt = 0;
     int cls = 0;
     void* pal = 0;
     void* data;
     unsigned int type = *(unsigned char*)src;
+    // ORIGINAL-PTR: a SHAPE file blob: the palette shape starts next bytes after this one, and the pixels start
+    // dataoffset bytes into a shape (flag 0x1000) or right after its 16-byte header
     switch (type) {
     case 1: {
-        sTexHdr_C8C0* base = src->f0 >> 8 ? (sTexHdr_C8C0*)((char*)src + (src->f0 >> 8)) : 0;
+        const SHAPEIMAGE* base = src->next ? (const SHAPEIMAGE*)((char*)src + src->next) : 0;
         fmt = 11;
-        if (src->fC & 0x2000) fmt = 0xC;
+        if (src->flags & 0x2000) fmt = 0xC;
         cls = 1;
-        if (base->fC & 0x1000)
-            pal = (char*)base + base->f10;
+        if (base->flags & 0x1000)
+            pal = (char*)base + base->dataoffset;
         else
             pal = (char*)base + 0x10;
         break;
     }
     case 2: {
-        sTexHdr_C8C0* base = src->f0 >> 8 ? (sTexHdr_C8C0*)((char*)src + (src->f0 >> 8)) : 0;
+        const SHAPEIMAGE* base = src->next ? (const SHAPEIMAGE*)((char*)src + src->next) : 0;
         fmt = 9;
-        if (src->fC & 0x2000) fmt = 10;
+        if (src->flags & 0x2000) fmt = 10;
         cls = 1;
-        if (base->fC & 0x1000)
-            pal = (char*)base + base->f10;
+        if (base->flags & 0x1000)
+            pal = (char*)base + base->dataoffset;
         else
             pal = (char*)base + 0x10;
         break;
@@ -6717,13 +6519,14 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* s
     default:
         break;
     }
-    unsigned int flags = src->fC;
+    unsigned int flags = src->flags;
     data = (char*)src + 0x10;
     if (flags & 0x1000)
-        data = (char*)src + src->f10;
-    int textureId = self->AddTexture1((const char*)data, (const char*)textureName, src->s4, src->s6, flags >> 28, fmt, cls, (const char*)pal, lockType, copyMem, bindId);
-    if ((src->fC & 0xF0000000) != 0 && src->s8 != 0) {
-        double lodValue = fptodp(240.0f / ((float)src->s8 * 6.1035156e-05f));
+        data = (char*)src + src->dataoffset;
+    int textureId = self->AddTexture1((const char*)data, (const char*)textureName, src->width, src->height,
+        flags >> 28, fmt, cls, (const char*)pal, lockType, copyMem, bindId);
+    if ((src->flags & 0xF0000000) != 0 && src->centerx != 0) {
+        double lodValue = fptodp(240.0f / ((float)src->centerx * 6.1035156e-05f));
         lodValue = dlog_C8C0(lodValue);
         lodValue = dpmul(lodValue, 1.4426950408889634);
         lodValue = dpsub(0.0, lodValue);
@@ -7071,14 +6874,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetNewTextureData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sTexSrc_D0B0 {
-    int f0;                         // 0x0: low byte = type, upper 24 bits = offset
-    short s4;                       // 0x4
-    short s6;                       // 0x6
-    char pad8[4];
-    unsigned int fC;                // 0xC
-};
-
 struct sVE_D0B0 {
     short delta;
     short index;
@@ -7112,20 +6907,23 @@ extern "C" void* MEM_free(void* p);
 extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int textureId, void* objp, int copyMem)
 {
     cPS2GraphicsMan* self = selfp;
-    sTexSrc_D0B0* obj = (sTexSrc_D0B0*)objp;
+    SHAPEIMAGE* obj = (SHAPEIMAGE*)objp;
     int mode = 0;
     char* extra = 0;
     int flagB = 0;
     unsigned int type = *(unsigned char*)obj;
+    // ORIGINAL-PTR: a SHAPE file blob: the palette shape starts next bytes after this one, the pixels start
+    // dataoffset bytes into a shape (flag 0x1000) or right after its 16-byte header, and a packed shape's stream
+    // header is read byte by byte
     switch (type) {
     case 1: {
         mode = 11;
-        int w = obj->f0 >> 8;
+        int w = obj->next;
         flagB = 1;
         char* sub = w ? (char*)obj + w : 0;
-        int hi = obj->fC & 0x2000;
+        int hi = obj->flags & 0x2000;
         if (hi) mode = 0xC;
-        if (((sTexSrc_D0B0*)sub)->fC & 0x1000)
+        if (((SHAPEIMAGE*)sub)->flags & 0x1000)
             extra = sub + *(int*)(sub + 0x10);
         else
             extra = sub + 0x10;
@@ -7133,12 +6931,12 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
     }
     case 2: {
         mode = 9;
-        int w = obj->f0 >> 8;
+        int w = obj->next;
         flagB = 1;
         char* sub = w ? (char*)obj + w : 0;
-        int hi = obj->fC & 0x2000;
+        int hi = obj->flags & 0x2000;
         if (hi) mode = 10;
-        if (((sTexSrc_D0B0*)sub)->fC & 0x1000)
+        if (((SHAPEIMAGE*)sub)->flags & 0x1000)
             extra = sub + *(int*)(sub + 0x10);
         else
             extra = sub + 0x10;
@@ -7165,22 +6963,23 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
         char* payload = unpackedCopy + 0x10;
         unpack(afterHeader, payload);
         *(unsigned char*)unpackedCopy &= 0x7F;
-        if (((sTexSrc_D0B0*)unpackedCopy)->fC & 0x1000) {
+        if (((SHAPEIMAGE*)unpackedCopy)->flags & 0x1000) {
             data = unpackedCopy + *(int*)(unpackedCopy + 0x10);
-            fC = obj->fC;
+            fC = obj->flags;
         } else {
             data = unpackedCopy + 0x10;
-            fC = obj->fC;
+            fC = obj->flags;
         }
     } else {
-        if (obj->fC & 0x1000)
+        if (obj->flags & 0x1000)
             data = (char*)obj + *(int*)((char*)obj + 0x10);
         else
             data = afterHeader;
-        fC = obj->fC;
+        fC = obj->flags;
     }
     sVE_D0B0* slotEntry = &((sVE_D0B0*)VPTR_OF(cGraphicsMan, self))[0x188 / 8];
-    slotEntry->fn(vthis(self, *slotEntry), textureId, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, copyMem);
+    slotEntry->fn(vthis(self, *slotEntry), textureId, data, obj->width, obj->height, fC >> 28, mode, flagB, extra,
+        copyMem);
     if (allocated) {
         MEM_free(unpackedCopy);
     }
@@ -7246,6 +7045,8 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
+        // ORIGINAL-PTR: the GS packet and the defer record are written through the EE's uncached-accelerated alias
+        // (address | 0x30000000, a hardware address segment), so the index is added to the aliased address
         tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ringEntry->mDrawState = *rs;
         ringEntry->mPacket = buf;
@@ -7277,6 +7078,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RestoreFrameLock);
 extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
 {
     unsigned int buf = self->mVifCursor;
+    // ORIGINAL-PTR: the GS packet and the defer record are written through the EE's uncached-accelerated alias
+    // (address | 0x30000000, a hardware address segment)
     ulong* packet = (ulong*)(buf | 0x30000000);
     packet[0] = 0x10000006;
     packet[1] = 0;
@@ -7481,13 +7284,16 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
-        tDeferSubmit* e = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
-        ASSERT_D800(e != 0);
-        e->mDrawState = *rs;
-        e->mPacket = buf;
-        e->mTail = next;
-        e->mViewIndex = key;
-        e->mContinuation = 1;
+        // ORIGINAL-PTR: the GS packet and the defer record are written through the EE's uncached-accelerated alias
+        // (address | 0x30000000, a hardware address segment), so the index is added to the aliased address
+        tDeferSubmit* ringEntry =
+            (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
+        ASSERT_D800(ringEntry != 0);
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 1;
     }
     self->mVifCursor += 0x10;
 }
@@ -10797,57 +10603,39 @@ extern "C" void func_00385A38_vt(void* self, void* dst, int idx, float* src) __a
 
 extern "C" void func_00385AA0_col(void* self, void* dst, int idx, float* src) __asm__("func_00385AA0");
 
-struct sPartRow_56B8 {
-    int cnt;
-    void* verts;                    // 0x4
-    void* uv;                       // 0x8
-    void* colors;                   // 0xC
-};
-
-struct sPartGrid_56B8 {
-    char pad_0x0[0x190];
-    unsigned short width;           // 0x190
-    char pad_0x192[0x1A0 - 0x192];
-    int sel;                        // 0x1A0
-    int done;                       // 0x1A4
-    char pad_0x1A8[0xC];
-    sPartRow_56B8* rows[2];         // 0x1B4
-    int height;                     // 0x1BC
-};
-
 /**
  * Updates the mesh's positions, colours and texture coordinates; on the first call fills both buffers.
  *
- * When the buffer index (+0x1A0) is still -1 it becomes 0 and the call counts as the first. For each strip of the
- * buffer not in use it stores, for row i and row i + 1 alternately, the uv (func_00385BA0), colour (func_00385AA0) and
- * position (func_00385A38); on the first call it then fills buffer 0's strips the same way. Sets the updated flag
- * +0x1A4. Slot 6 of the grid-mesh vtable cPS2GridMesh_vtbl.
+ * When the buffer index (mScreenBuffer) is still -1 it becomes 0 and the call counts as the first. For each strip of
+ * the buffer not in use it stores, for row i and row i + 1 alternately, the uv (func_00385BA0), colour (func_00385AA0)
+ * and position (func_00385A38); on the first call it then fills buffer 0's strips the same way. Sets the updated flag
+ * m_bUpdate. Slot 6 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param verts  the grid positions, row by row (x, y, z floats)
  * @param colors  the grid colours, row by row (a, r, g, b floats, 0..1)
  * @param uvs  the grid texture coordinates, row by row (u, v floats)
  */
-extern "C" void cPS2GridMesh_Update3(sPartGrid_56B8* self, float* verts, float* colors, float* uvs)
+extern "C" void cPS2GridMesh_Update3(cPS2GridMesh* self, float* verts, float* colors, float* uvs)
 {
     int first = 0;
-    if (self->sel < 0) {
-        self->sel = 0;
+    if (self->mScreenBuffer < 0) {
+        self->mScreenBuffer = 0;
         first = 1;
     }
-    int z = self->sel == 0;
+    int z = self->mScreenBuffer == 0;
     int rowIndex;
-    for (rowIndex = 0; rowIndex < self->height; rowIndex++) {
-        sPartRow_56B8* strip = &self->rows[z][rowIndex];
-        int topIdx = rowIndex * self->width;
-        int bottomIdx = topIdx + self->width;
+    for (rowIndex = 0; rowIndex < self->m_iNumStrip; rowIndex++) {
+        tGridMeshStrip* strip = &self->mStripTable[z][rowIndex];
+        int topIdx = rowIndex * self->m_iWidth;
+        int bottomIdx = topIdx + self->m_iWidth;
         int idx = 0;
-        for (int col = 0; col < self->width; col++) {
-            func_00385BA0_uv(self, strip->uv, idx, uvs + topIdx * 2);
-            func_00385AA0_col(self, strip->colors, idx, colors + topIdx * 4);
-            func_00385A38_vt(self, strip->verts, idx, verts + topIdx * 3);
-            func_00385BA0_uv(self, strip->uv, idx + 1, uvs + bottomIdx * 2);
-            func_00385AA0_col(self, strip->colors, idx + 1, colors + bottomIdx * 4);
-            func_00385A38_vt(self, strip->verts, idx + 1, verts + bottomIdx * 3);
+        for (int col = 0; col < self->m_iWidth; col++) {
+            func_00385BA0_uv(self, strip->mUVs, idx, uvs + topIdx * 2);
+            func_00385AA0_col(self, strip->mColours, idx, colors + topIdx * 4);
+            func_00385A38_vt(self, strip->mPositions, idx, verts + topIdx * 3);
+            func_00385BA0_uv(self, strip->mUVs, idx + 1, uvs + bottomIdx * 2);
+            func_00385AA0_col(self, strip->mColours, idx + 1, colors + bottomIdx * 4);
+            func_00385A38_vt(self, strip->mPositions, idx + 1, verts + bottomIdx * 3);
             idx += 2;
             topIdx++;
             bottomIdx++;
@@ -10857,25 +10645,25 @@ extern "C" void cPS2GridMesh_Update3(sPartGrid_56B8* self, float* verts, float* 
     // row counter (one spill slot) and indexing rows[z] with z reset to 0, so it is written out here.
     if (first) {
         z = 0;
-        for (rowIndex = 0; rowIndex < self->height; rowIndex++) {
-            sPartRow_56B8* strip = &self->rows[z][rowIndex];
-            int topIdx = rowIndex * self->width;
-            int bottomIdx = topIdx + self->width;
+        for (rowIndex = 0; rowIndex < self->m_iNumStrip; rowIndex++) {
+            tGridMeshStrip* strip = &self->mStripTable[z][rowIndex];
+            int topIdx = rowIndex * self->m_iWidth;
+            int bottomIdx = topIdx + self->m_iWidth;
             int idx = 0;
-            for (int col = 0; col < self->width; col++) {
-                func_00385BA0_uv(self, strip->uv, idx, uvs + topIdx * 2);
-                func_00385AA0_col(self, strip->colors, idx, colors + topIdx * 4);
-                func_00385A38_vt(self, strip->verts, idx, verts + topIdx * 3);
-                func_00385BA0_uv(self, strip->uv, idx + 1, uvs + bottomIdx * 2);
-                func_00385AA0_col(self, strip->colors, idx + 1, colors + bottomIdx * 4);
-                func_00385A38_vt(self, strip->verts, idx + 1, verts + bottomIdx * 3);
+            for (int col = 0; col < self->m_iWidth; col++) {
+                func_00385BA0_uv(self, strip->mUVs, idx, uvs + topIdx * 2);
+                func_00385AA0_col(self, strip->mColours, idx, colors + topIdx * 4);
+                func_00385A38_vt(self, strip->mPositions, idx, verts + topIdx * 3);
+                func_00385BA0_uv(self, strip->mUVs, idx + 1, uvs + bottomIdx * 2);
+                func_00385AA0_col(self, strip->mColours, idx + 1, colors + bottomIdx * 4);
+                func_00385A38_vt(self, strip->mPositions, idx + 1, verts + bottomIdx * 3);
                 idx += 2;
                 topIdx++;
                 bottomIdx++;
             }
         }
     }
-    self->done = 1;
+    self->m_bUpdate = 1;
 }
 #endif
 
@@ -10984,18 +10772,19 @@ public:
 };
 
 /**
- * Draws the mesh with a material's texture: calls virtual slot 8 (cPS2GridMesh_Render1) with @p meshMatrix, the texture id (the first
- * short of the record that @p materialBlock's +0x4 points to) and @p texMatrix.
+ * Draws the mesh with a material's texture: calls virtual slot 8 (cPS2GridMesh_Render1) with @p meshMatrix, the texture
+ * id of @p materialBlock's first material (m_sTexture) and @p texMatrix.
  *
  * Slot 7 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param meshMatrix  the object matrix
- * @param materialBlock  the material record
+ * @param materialBlock  the material list (On Tour const tMaterialBlockRecord* material)
  * @param texMatrix  passed on as cPS2GridMesh_Render1's last argument (a texture matrix, or 0)
  */
-extern "C" void cPS2GridMesh_Render(cPS2GridMesh* self, int meshMatrix, void* materialBlock, int texMatrix)
+extern "C" void cPS2GridMesh_Render(cPS2GridMesh* self, int meshMatrix, const tMaterialBlockRecord* materialBlock,
+                                    int texMatrix)
 {
-    ((cPartVirt*)self)->Render1(meshMatrix, **(short**)((char*)materialBlock + 4), texMatrix);
+    ((cPartVirt*)self)->Render1(meshMatrix, materialBlock->GetMaterialRecordList()[0]->m_sTexture, texMatrix);
 }
 #endif
 
@@ -11607,12 +11396,14 @@ extern "C" void cPS2GraphicsMan_GenerateBlendedMatrices(cPS2GraphicsMan* self, s
         sBlendMtx_6BD0* dst = out++;
         sBlendEnt_6BD0* entry = &ents[i];
         sBlendLink_6BD0* link = entry->links;
-        blendFirst_6BD0((sBlendMtx_6BD0*)((char*)mats + (link->idx << 6)), link->w);
+        const sBlendMtx_6BD0* bone = &mats[link->idx];
+        blendFirst_6BD0(bone, link->w);
         int cnt = entry->count;
         link++;
         int k;
         for (k = 1; k < cnt; k++) {
-            blendAdd_6BD0((sBlendMtx_6BD0*)((char*)mats + (link->idx << 6)), link->w);
+            const sBlendMtx_6BD0* nextBone = &mats[link->idx];
+            blendAdd_6BD0(nextBone, link->w);
             link++;
         }
         blendStore_6BD0(dst);
@@ -12871,8 +12662,7 @@ INCLUDE_ASM("render/particle", func_00389840);
 //100%
 INCLUDE_ASM("render/particle", func_00389C38);
 #ifdef SKIP_ASM
-struct sParticleEntryA0;
-extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i);
+extern "C" cIrradiance* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i);
 extern "C" void func_00389CB8(t4Vector* self, void* p, float s);
 extern int cIrradianceDataBase_mDefaultId;
 
@@ -13601,26 +13391,22 @@ extern "C" void func_0038A6A8(void* self, float* point, tLightRecord* forceSrc)
 //100%
 INCLUDE_ASM("render/particle", cIrradianceDataBase_Get);
 #ifdef SKIP_ASM
-struct sParticleEntryA0 {
-    char pad_0x00[0xA0];
-};
-
 /**
- * Returns irradiance entry @p i of the irradiance database (0xA0-byte entries at +0x8), clamping @p i to the last entry
- * (count at +0x4).
+ * Returns irradiance entry @p i of the irradiance database (mIrradianceArray), clamping @p i to the last entry
+ * (mNumItem - 1).
  *
  * func_00389C38 and cIrradianceDataBase_Get1 call it.
  *
  * @param i  the entry index
  * @return the entry
  */
-extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i)
+extern "C" cIrradiance* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i)
 {
     int count = self->mNumItem;
     if (i >= count) {
         i = count - 1;
     }
-    return (sParticleEntryA0*)self->mIrradianceArray + i;
+    return &self->mIrradianceArray[i];
 }
 #endif
 
@@ -13638,7 +13424,7 @@ extern "C" int cIrradianceDataBase_GetIDByName(cIrradianceDataBase* self, const 
  * @param name  the entry name
  * @return the entry
  */
-extern "C" sParticleEntryA0* cIrradianceDataBase_Get1(cIrradianceDataBase* self, const char* name)
+extern "C" cIrradiance* cIrradianceDataBase_Get1(cIrradianceDataBase* self, const char* name)
 {
     return cIrradianceDataBase_Get(self, cIrradianceDataBase_GetIDByName(self, name));
 }

@@ -46,6 +46,8 @@ struct t2Vector {
     float x, y;
     float& X() { return x; }
     float& Y() { return y; }
+    float X() const { return x; }   // [O] t2vect's float x() const / y() const
+    float Y() const { return y; }
     t2Vector() {}
     t2Vector(float x_, float y_) { X() = x_; Y() = y_; }
 };

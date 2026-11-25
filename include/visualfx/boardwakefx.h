@@ -8,8 +8,7 @@
 // the class's only out-of-line method).
 // EA's source: d:/ssx/code/source/visualfx/boardwakefx.cpp (July 2003 preview assert strings; On Tour compiles
 // cWakeParams::Clear in visualfx/all_in_one_visualfx.cpp). Retail: unit visualfx/boardwakefx (0x002DE368 Clear).
-// (cBoardWakeFX itself, a cRider-derived class with a virtual base, is not laid out here; the C views sWakeDCF28,
-// sWakeD0B8 and sWakeDD30 in src/visualfx/boardwakefx.cpp cover it.)
+// (cBoardWakeFX itself, a cRider-derived class with a virtual base, is laid out in ai/riderhandler.h.)
 //
 // Size 0x40: [U] cBoardWakeFX's views place it at +0x60 and the next member (the wake colour) at +0xA0; Clear writes
 // 0x0-0x34; t4Vector alignment rounds the three floats up to 0x40. On Tour: 0x40, same offsets.
