@@ -10,6 +10,7 @@
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
 #include "online/dsockchannel.h"
+#include "ealib/netgamelink.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -66,7 +67,7 @@ extern "C" void ccs_3B18(void *) __asm__("NetConnStartup");
 extern char str_Comm_pool[];
 extern char str_www_ea_com[];
 extern int cCommSystem_mNumNetConn;
-extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSystem");
+extern "C" cCommSystem *cCommSystem_cCommSystem_(cCommSystem *self) __asm__("cCommSystem_cCommSystem");
 /**
  * Constructs the comm system: its message-element pool, the channel slot and an idle net connection.
  *
@@ -77,33 +78,27 @@ extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSy
  *
  * @return self
  */
-extern "C" int *cCommSystem_cCommSystem_(int *self) {
-    int nextOffset, blockOffset, n;
+extern "C" cCommSystem *cCommSystem_cCommSystem_(cCommSystem *self) {
+    int k;
     int i;
-    ccs_5698(self + 1);
-    ccs_6448(self, 0, 4);
-    self[5] = (int)ccs_new(0xFC00, str_Comm_pool, 0x20000000, 0);
-    ccs_6448((void *)self[5], 0, 0xFC00);
-    self[6] = self[5];
-    nextOffset = 0xFC;
-    blockOffset = 0;
-    n = 0xFE;
-    do {
-        n--;
-        *(int *)(blockOffset + self[5]) = self[5] + nextOffset;
-        nextOffset += 0xFC;
-        blockOffset += 0xFC;
-    } while (n >= 0);
+    ccs_5698(self->mCommMsgAllocMutex);
+    ccs_6448(self->mChannels, 0, 4);
+    self->mPool = (tCommMsgElem *)ccs_new(0xFC00, str_Comm_pool, 0x20000000, 0);
+    ccs_6448(self->mPool, 0, 0xFC00);
+    self->mFree = self->mPool;
+    for (k = 0; k < 255; k++) {
+        self->mPool[k].mNext = &self->mPool[k + 1];
+    }
     for (i = 0; i < 1; i++) {
-        self[i] = 0;
+        self->mChannels[i] = 0;
     }
     cCommSystem_mNumNetConn = 0;
-    self[7] = -1;
-    self[9] = 0;
-    self[10] = 0;
-    self[11] = 0;
-    self[12] = 1;
-    self[8] = 1;
+    self->mActiveNetConn = -1;
+    self->mNetConnTimeOut = 0;
+    self->mNetConnError = 0;
+    self->mBroadBand = 0;
+    self->mInterfaceType = 1;
+    self->mNetConnState = 1;
     ccs_3B18(str_www_ea_com);
     return self;
 }
@@ -170,28 +165,6 @@ extern "C" void cCommSystem_netConnLocalAddr(cCommSystem* self, int* out);
 // cCommSystem_mNetConns: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
 extern char cCommSystem_mNetConns[];
 
-struct sCommVE_5A20 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
-struct sCommObj_5A20 {
-    char pad0[8];
-    sCommVE_5A20* vt;   // 0x8
-};
-
-struct sComm_5A20 {
-    sCommObj_5A20* objs[1];   // 0x0
-    char pad4[0x1C - 4];
-    int index;                // 0x1C
-    int state;                // 0x20
-    int timer;                // 0x24
-    char pad28[4];
-    int bband;                // 0x2C
-    int type;                 // 0x30
-};
-
 /**
  * Runs the online connection manager: brings the network interface up and updates the channels.
  *
@@ -245,9 +218,10 @@ extern "C" void cCommSystem_update(cCommSystem* self)
     }
     case 5:
         for (i = 0; i < 1; i++) {
-            sCommObj_5A20* channel = ((sCommObj_5A20*)self->mChannels[i]);
+            cCommChannel* channel = self->mChannels[i];
             if (channel != 0) {
-                channel->vt[3].fn(vthis(channel, channel->vt[3]));
+                sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)channel->mVtbl;
+                vt[kCommChannelVt_update].fn(vthis(channel, vt[kCommChannelVt_update]));
             }
         }
         break;
@@ -309,7 +283,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_closeChannel);
 /**
  * Closes and deletes one of the connection manager's channels.
  *
- * When the channel is open (its first word nonzero) it calls its virtual disconnect (cDSockChannel_vtbl slot 2), then
+ * When the channel is open (mChannelOpen nonzero) it calls its virtual disconnect (cDSockChannel_vtbl slot 2), then
  * its virtual destructor with flags 3, and clears the slot. cRealFE_loadStartState and the game-connection code call
  * it.
  *
@@ -317,18 +291,16 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_closeChannel);
  * @param channelIndex  the channel slot
  */
 extern "C" void cCommSystem_closeChannel(cCommSystem* commSystem, int channelIndex) {
-    void **slot = (void **)&commSystem->mChannels[channelIndex];
-    char *channel = (char *)*slot;
-    if (*(int *)channel != 0) {
-        char *vt = *(char **)(channel + 8);
-        void (*fn)(void *) = *(void (**)(void *))(vt + 0x14);
-        fn(channel + *(short *)(vt + 0x10));
+    cCommChannel **slot = &commSystem->mChannels[channelIndex];
+    cCommChannel *channel = *slot;
+    if (channel->mChannelOpen != 0) {
+        sVEntry<void(void *)> *vt = (sVEntry<void(void *)> *)channel->mVtbl;
+        vt[kCommChannelVt_disconnect].fn(vthis(channel, vt[kCommChannelVt_disconnect]));
     }
-    char *channelToFree = (char *)*slot;
+    cCommChannel *channelToFree = *slot;
     if (channelToFree != 0) {
-        char *vt = *(char **)(channelToFree + 8);
-        void (*fn)(void *, int) = *(void (**)(void *, int))(vt + 0xC);
-        fn(channelToFree + *(short *)(vt + 8), 3);
+        sVEntry<void(void *, int)> *vt = (sVEntry<void(void *, int)> *)channelToFree->mVtbl;
+        vt[kCommChannelVt_dtor].fn(vthis(channelToFree, vt[kCommChannelVt_dtor]), 3);
     }
     *slot = 0;
 }
@@ -363,8 +335,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelConnected);
  */
 extern "C" int cCommSystem_isChannelConnected(cCommSystem* commSystem, int channelIndex) {
     cCommChannel* obj = commSystem->mChannels[channelIndex];
-    char *vt = (char*)obj->mVtbl;
-    return (*(int (**)(void *))(vt + 0x24))(((char*)obj) + *(short *)(vt + 0x20));
+    sVEntry<int(void *)> *vt = (sVEntry<int(void *)> *)obj->mVtbl;
+    return vt[kCommChannelVt_isConnected].fn(vthis(obj, vt[kCommChannelVt_isConnected]));
 }
 #endif
 
@@ -380,10 +352,10 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_getLatency);
  * @param channelIndex  the channel slot
  * @return the latency
  */
-extern "C" float cCommSystem_getLatency(int commSystem, int channelIndex) {
-    char *obj = *(char **)(commSystem + (channelIndex << 2));
-    char *vt = *(char **)(obj + 8);
-    return (*(float (**)(void *))(vt + 0x2C))(obj + *(short *)(vt + 0x28));
+extern "C" float cCommSystem_getLatency(cCommSystem* commSystem, int channelIndex) {
+    cCommChannel* obj = commSystem->mChannels[channelIndex];
+    sVEntry<float(void *)> *vt = (sVEntry<float(void *)> *)obj->mVtbl;
+    return vt[kCommChannelVt_getLatency].fn(vthis(obj, vt[kCommChannelVt_getLatency]));
 }
 #endif
 
@@ -403,8 +375,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_readPacket);
  */
 extern "C" int cCommSystem_readPacket(cCommSystem* commSystem, int channelIndex, int data, int maxSize) {
     cCommChannel* obj = commSystem->mChannels[channelIndex];
-    char *vt = (char*)obj->mVtbl;
-    return (*(int (**)(void *, int, int))(vt + 0x3C))(((char*)obj) + *(short *)(vt + 0x38), data, maxSize);
+    sVEntry<int(void *, int, int)> *vt = (sVEntry<int(void *, int, int)> *)obj->mVtbl;
+    return vt[kCommChannelVt_readPacket].fn(vthis(obj, vt[kCommChannelVt_readPacket]), data, maxSize);
 }
 #endif
 
@@ -424,8 +396,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_writePacket);
  */
 extern "C" int cCommSystem_writePacket(cCommSystem* commSystem, int channelIndex, int data, int size) {
     cCommChannel* obj = commSystem->mChannels[channelIndex];
-    char *vt = (char*)obj->mVtbl;
-    return (*(int (**)(void *, int, int))(vt + 0x44))(((char*)obj) + *(short *)(vt + 0x40), data, size);
+    sVEntry<int(void *, int, int)> *vt = (sVEntry<int(void *, int, int)> *)obj->mVtbl;
+    return vt[kCommChannelVt_writePacket].fn(vthis(obj, vt[kCommChannelVt_writePacket]), data, size);
 }
 #endif
 
@@ -1067,7 +1039,7 @@ extern "C" void cDSockChannel__cDSockChannel(cDSockChannel* dSockChannel, int fl
 INCLUDE_ASM("seg/seg_156860", cDSockChannel_readPacket);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void MEM_copy_6730(char *, char *, int) __asm__("MEM_copy");
+extern "C" void MEM_copy_6730(char *, const void *, int) __asm__("MEM_copy");
 extern "C" int NetGameLinkRecv_6730(int, char *, int) __asm__("NetGameLinkRecv");
 
 /**
@@ -1088,7 +1060,7 @@ extern "C" unsigned char cDSockChannel_readPacket(cDSockChannel* self, char *dst
             if (buf[2] == 5) {
                 if (buf[3] != 0 && maxlen >= (int)buf[3]) {
                     unsigned char n = buf[3];
-                    MEM_copy_6730(dst, (char *)buf + 4, n);
+                    MEM_copy_6730(dst, buf + 4, n);
                     return buf[3];
                 }
             } else {
@@ -1156,8 +1128,8 @@ extern char str_pct_s_pct_d_pct_d[];
 extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
     int n = port & 0xFFFF;
     char buf[0x100];
-    char *vt = (char*)self->mVtbl;
-    (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
+    sVEntry<void(void *)> *vt = (sVEntry<void(void *)> *)self->mVtbl;
+    vt[kCommChannelVt_disconnect].fn(vthis(self, vt[kCommChannelVt_disconnect]));
     cCommChannel_channelOpen__FPv_6860(((char*)self));
     int gameUtil = NetGameUtilCreate_6860();
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
@@ -1193,8 +1165,8 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
     int n = port & 0xFFFF;
     char buf[0x100];
     self->mError = 0;
-    char *vt = (char*)self->mVtbl;
-    (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
+    sVEntry<void(void *)> *vt = (sVEntry<void(void *)> *)self->mVtbl;
+    vt[kCommChannelVt_disconnect].fn(vthis(self, vt[kCommChannelVt_disconnect]));
     cCommChannel_channelOpen__FPv_68F8(((char*)self));
     int gameUtil = NetGameUtilCreate_68F8();
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
@@ -1306,40 +1278,34 @@ extern "C" void cDSockChannel_updateConnecting(cDSockChannel* channel) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cDSockChannel_updateConnected);
 #ifdef SKIP_ASM
-struct VEnt_6AA8 {
-    short delta;
-    short index;
-    void (*fn)(char*);
-};
-
-extern "C" char* NetGameLinkStatus(int id);
+extern "C" NetGameLinkStatT* NetGameLinkStatus(int id);
 
 /**
  * Checks a connected channel's link health and smooths its latency.
  *
- * Reads the NetGameLink status (NetGameLinkStatus): a gap over 30000 between its first word and +0x20 (probably
- * ms since the last receive) sets state 3, a zero byte at +0x45 (link lost) disconnects; both set mError.
- * Otherwise mLatency = (4 * mLatency + ping) / 5, the ping (+0xC, ms) in seconds capped at 1, and a pending
+ * Reads the NetGameLink status (NetGameLinkStatus): a gap over 30000 between its tick and rcvdlast (probably
+ * ms since the last receive) sets state 3, isopen 0 (link lost) disconnects; both set mError.
+ * Otherwise mLatency = (4 * mLatency + late) / 5, the link latency (late, ms) in seconds capped at 1, and a pending
  * mPacketError then sets state 4 and mError.
  *
  * @param dSockChannel  the channel (this)
  */
 extern "C" void cDSockChannel_updateConnected(cDSockChannel* dSockChannel)
 {
-    char* st = NetGameLinkStatus((int)dSockChannel->mGameLink);
+    NetGameLinkStatT* st = NetGameLinkStatus((int)dSockChannel->mGameLink);
     if (st) {
-        if (*(int*)(st + 0x0) - *(int*)(st + 0x20) > 30000) {
+        if ((int)(st->tick - st->rcvdlast) > 30000) {
             dSockChannel->mState = 3;
             dSockChannel->mError = 1;
             return;
         }
-        if (*(unsigned char*)(st + 0x45) == 0) {
-            VEnt_6AA8* vt = (VEnt_6AA8*)dSockChannel->mVtbl;
-            vt[2].fn(((char*)dSockChannel) + vt[2].delta);
+        if (st->isopen == 0) {
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)dSockChannel->mVtbl;
+            vt[kCommChannelVt_disconnect].fn(vthis(dSockChannel, vt[kCommChannelVt_disconnect]));
             dSockChannel->mError = 1;
             return;
         }
-        float latency = (float)*(unsigned int*)(st + 0xC) * 0.0010000000474974513f;
+        float latency = (float)st->late * 0.0010000000474974513f;
         if (latency > 1.0f) latency = 1.0f;
         dSockChannel->mLatency = (dSockChannel->mLatency * 4.0f + latency) * 0.20000000298023224f;
     }
@@ -2198,19 +2164,6 @@ extern "C" void cGameComm_checkActive(cGameComm* gameComm)
 //100%
 INCLUDE_ASM("seg/seg_156860", cGameComm_readPacket);
 #ifdef SKIP_ASM
-struct Packet_7BD8 {
-    unsigned char type;
-    unsigned char flags;
-    unsigned short size;    // 0x2, includes the 4-byte header
-    char data[1];           // 0x4
-};
-
-struct PacketQueue_7BD8 {
-    int wr;                         // 0x0
-    int rd;                         // 0x4
-    Packet_7BD8* slots[32];         // 0x8
-};
-
 
 extern "C" void cGameComm_updateReadQueue(cGameComm* c);
 extern "C" void cGameComm_freePacket(cGameComm* arg0, int *arg1);
@@ -2236,11 +2189,11 @@ extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsiz
     cGameComm* gameComm = self;
     if (gameComm->mError != 0) return 0;
     cGameComm_updateReadQueue(gameComm);
-    PacketQueue_7BD8* queue = &((PacketQueue_7BD8*)&gameComm->mReadQueue[0])[ch];
-    if (queue->rd != queue->wr) {
-        Packet_7BD8* packet = queue->slots[queue->rd++ % 32];
-        int len = packet->size - 4;
-        MEM_copy_7BD8((void*)dst, packet->data, len);
+    tGameCommQueue* queue = &gameComm->mReadQueue[ch];
+    if (queue->mTail != queue->mHead) {
+        tGameCommPacket* packet = queue->mQueue[queue->mTail++ % 32];
+        int len = packet->mSize - 4;
+        MEM_copy_7BD8((void*)dst, packet->mData, len);
         cGameComm_freePacket((cGameComm*)gameComm, (int*)packet);
         if (ch == 0) {
             gameComm->mSyncInputDelay = 0;
@@ -2336,31 +2289,21 @@ extern "C" void cGameComm_updateWriteQueue(cGameComm* self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cGameComm_writePacket);
 #ifdef SKIP_ASM
-struct Packet_7E98 {
-    unsigned char type;     // 0x0
-    unsigned char flags;    // 0x1
-    unsigned short size;    // 0x2, includes this 4-byte header
-    char data[0xEC];        // 0x4
-};
-
-extern "C" int cCommSystem_writePacket_7E98(int sys, int port, Packet_7E98* p, int size) __asm__("cCommSystem_writePacket");
-extern "C" Packet_7E98* cGameComm_allocPacket_7E98(char* self) __asm__("cGameComm_allocPacket");
+extern "C" int cCommSystem_writePacket_7E98(int sys, int port, tGameCommPacket* p, int size)
+    __asm__("cCommSystem_writePacket");
+extern "C" tGameCommPacket* cGameComm_allocPacket_7E98(char* self) __asm__("cGameComm_allocPacket");
 extern "C" void MEM_copy_7E98(void* dst, const void* src, int n) __asm__("MEM_copy");
 extern "C" void cGameComm_updateWriteQueue(cGameComm* self);
-
-struct Conn_7E98 {
-    char pad0[0x36C];
-    Packet_7E98* slots[32];     // 0x36C
-};
 
 // PORT: the unit declares this void(void*, int, int, int); the target returns a status
 extern "C" int cGameComm_writePacket_impl(char* self, int type, const void* data, int len) __asm__("cGameComm_writePacket");
 /**
  * Sends a packet to the peer, queueing it when it cannot go out now.
  *
- * Returns 0 while the link is busy (+4). Otherwise flushes the write queue (cGameComm_updateWriteQueue), builds the
- * packet: type byte, flags 0, size @p len + 4 and the data. When the write queue (+0x364 / +0x368) is empty and the
- * channel (+0x6C) takes it (cCommSystem_writePacket) it is sent at once; otherwise a copy (cGameComm_allocPacket) is queued.
+ * Returns 0 after a link error (mError). Otherwise flushes the write queue (cGameComm_updateWriteQueue), builds the
+ * packet: type byte, player id 0, size @p len + 4 and the data. When the write queue (mWriteQueue) is empty and the
+ * channel (mChannel) takes it (cCommSystem_writePacket) it is sent at once; otherwise a copy (cGameComm_allocPacket) is
+ * queued.
  *
  * @param type  the packet type
  * @param data  the data
@@ -2370,20 +2313,20 @@ extern "C" int cGameComm_writePacket_impl(char* self, int type, const void* data
 extern "C" int cGameComm_writePacket_impl(char* vself, int type, const void* data, int len)
 {
     cGameComm* self = (cGameComm*)vself;
-    Packet_7E98 pkt;
+    tGameCommPacket pkt;
     if (self->mError != 0) return 0;
     cGameComm_updateWriteQueue((cGameComm*)self);
-    pkt.type = type;
-    pkt.size = len + 4;
-    pkt.flags = 0;
-    MEM_copy_7E98(pkt.data, data, len);
+    pkt.mType = type;
+    pkt.mSize = len + 4;
+    pkt.mPlayerID = 0;
+    MEM_copy_7E98(pkt.mData, data, len);
     if (self->mWriteQueue.mTail == self->mWriteQueue.mHead) {
-        if (cCommSystem_writePacket_7E98((int)cCommSystem_mCommSystem, self->mChannel, &pkt, pkt.size)) return 1;
+        if (cCommSystem_writePacket_7E98((int)cCommSystem_mCommSystem, self->mChannel, &pkt, pkt.mSize)) return 1;
     }
     {
-        Packet_7E98* queuedPacket = cGameComm_allocPacket_7E98(((char*)self));
-        MEM_copy_7E98(queuedPacket, &pkt, pkt.size);
-        ((Conn_7E98*)self)->slots[(self->mWriteQueue.mHead)++ % 32] = queuedPacket;
+        tGameCommPacket* queuedPacket = cGameComm_allocPacket_7E98(((char*)self));
+        MEM_copy_7E98(queuedPacket, &pkt, pkt.mSize);
+        self->mWriteQueue.mQueue[(self->mWriteQueue.mHead)++ % 32] = queuedPacket;
     }
     return 1;
 }
@@ -2574,7 +2517,7 @@ extern "C" void cGameComm_asyncReadUpdate(cGameComm* gameComm) {
         int n = gameComm->mAsyncReadSize;
         if (n >= 237) n = 236;
         if (cGameComm_readPacket(gameComm, 2, readData, n) == 0) break;
-        gameComm->mAsyncReadData = (char*)((int)gameComm->mAsyncReadData + n);
+        gameComm->mAsyncReadData += n;
         int rem = gameComm->mAsyncReadSize - n;
         gameComm->mAsyncReadSize = rem;
         if (rem <= 0) {
@@ -2637,7 +2580,7 @@ extern "C" void cGameComm_asyncWriteUpdate(cGameComm* gameComm) {
         int n = gameComm->mAsyncWriteSize;
         if (n >= 237) n = 236;
         if (cGameComm_writePacket_82A0(((char*)gameComm), 2, writeData, n) != 0) {
-            gameComm->mAsyncWriteData = (char*)((int)gameComm->mAsyncWriteData + n);
+            gameComm->mAsyncWriteData += n;
             int rem = gameComm->mAsyncWriteSize - n;
             gameComm->mAsyncWriteSize = rem;
             if (rem <= 0) {
@@ -2678,7 +2621,7 @@ extern "C" void cGameComm_calcLatency(cGameComm* gameComm) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_156860", cGameComm_getLatency);
 #ifdef SKIP_ASM
-extern "C" float cCommSystem_getLatency(int, int);
+extern "C" float cCommSystem_getLatency(cCommSystem*, int);
 
 /**
  * Returns the game link's input latency: the channel's latency (cCommSystem_getLatency on channel +0x6C) plus mNumSamples frame
@@ -2690,7 +2633,8 @@ extern "C" float cCommSystem_getLatency(int, int);
  * @return the latency
  */
 extern "C" float cGameComm_getLatency(cGameComm* gameComm) {
-    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, gameComm->mChannel) + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
+    return cCommSystem_getLatency(cCommSystem_mCommSystem, gameComm->mChannel)
+           + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
 }
 #endif
 

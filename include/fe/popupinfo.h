@@ -31,6 +31,7 @@
 //   [O] On Tour's member order and types.
 
 #include "layout.h"
+#include "bx/math3d.h"
 
 // tPopupElement (On Tour: size 0x8): a string given as unicode (eType 1), ascii (2) or a localisation hash id (3);
 // 0 = none (ePopupStringType). The preview's setters store eType and the union in one go (setPopupMessage(PCUs) li 1).
@@ -81,7 +82,7 @@ struct cPopupInfo {
     int miMiscData;                 // 0x094 [O]; [P] getMiscData/setMiscData lw/sw 0x94; [R] clear 0; [U] the online
                                     //       states store the popup's message id (0x806..0x83E), seen again in onPopupEvent
     int mbPassUpdate;               // 0x098 [O] (On Tour: bool); [P] getPassUpdate/setPassUpdate lw/sw 0x98; [R] clear 0
-    float mvOffset[3];              // 0x09C [O] t3Vector; [P] getOffset/setOffset 0x9C..0xA4; [R] clear copies t3vect_Zero
+    t3Vector mvOffset;              // 0x09C [O]; [P] getOffset/setOffset 0x9C..0xA4; [R] clear copies t3vect_Zero
     int mbReceivePrev;              // 0x0A8 [O] (bool); [P] getReceivePrevCommand/setReceivePrevCommand lw/sw 0xA8;
                                     //       [R] clear 1
     int miDefaultOption;            // 0x0AC [O]; [P] getDefaultOption/setDefaultOption lw/sw 0xAC; [R] clear -1

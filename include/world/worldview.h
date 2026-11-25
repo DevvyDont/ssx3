@@ -68,14 +68,15 @@ struct tBxBSPHeader {
     int m_iNumHulls;                // 0x4 [O]
     int m_iGlobalHull;              // 0x8 [P] assert mp_Section[i].m_BSP.m_iGlobalHull; [U] the section's own hull page
                                     //     (cWorldView_update touchPage/isPageLoaded; cWorldView_isBoxValid)
-    tBxBSPNode* unk_0C;             // 0xC [O] an anonymous union; [R] cWorldView_init fixes the root node index up to a
+    tBxBSPNode* m_pRoot;            // 0xC [O] an anonymous union {tBxBSPNode* m_pRoot; unsigned int m_uiRoot} (names
+                                    //     from the prx DIEs); [R] cWorldView_init fixes the root node index up to a
                                     //     pointer; [U] the recursive tree walks start here
 };
 
 CHECK_OFFSET(tBxBSPHeader, m_iNumNodes, 0x0);
 CHECK_OFFSET(tBxBSPHeader, m_iNumHulls, 0x4);
 CHECK_OFFSET(tBxBSPHeader, m_iGlobalHull, 0x8);
-CHECK_OFFSET(tBxBSPHeader, unk_0C, 0xC);
+CHECK_OFFSET(tBxBSPHeader, m_pRoot, 0xC);
 CHECK_SIZE(tBxBSPHeader, 0x10);
 
 // One world section's record in the .sdb (On Tour tBxSection). 0x58 bytes: cWorldView_init steps 0x58.

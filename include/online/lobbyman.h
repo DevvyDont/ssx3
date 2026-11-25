@@ -185,8 +185,9 @@ struct LobbyMan {
     char* mRoomName;                // 0x084 [U] onroomselected ("move" reply) stores "NAME", resets on error;
                                     //       func_0025DA90 returns it when connected and non-empty
     char* mGameName;                // 0x088 [U] onplaymsg: "NAME" of the game session
-    char* unk_08C;                  // 0x08C [U] cFEStateChallengeReceivedPopup_onCreateScreen copies the buddy race setup's name into it;
-                                    //       func_00263CF0 hands the word to the setup manager
+    char* mChallengeMessage;        // 0x08C [U] cFEStateChallengeReceivedPopup_onCreateScreen copies the received
+                                    //       challenge's chat message (cChallenger::mMessage) into it; func_00263CF0
+                                    //       hands the word to the setup manager (name ours)
     char* mHostName;                // 0x090 [U] onplaymsg: "HOST"
     char* mOppoName;                // 0x094 [U] onplaymsg: "OPPO"
     char* mOpponent;                // 0x098 [U] onplaymsg: the one of HOST/OPPO that is not "SELF"; challenge
@@ -248,7 +249,7 @@ CHECK_OFFSET(LobbyMan, mPersonas, 0x070);
 CHECK_OFFSET(LobbyMan, mPersona, 0x080);
 CHECK_OFFSET(LobbyMan, mRoomName, 0x084);
 CHECK_OFFSET(LobbyMan, mGameName, 0x088);
-CHECK_OFFSET(LobbyMan, unk_08C, 0x08C);
+CHECK_OFFSET(LobbyMan, mChallengeMessage, 0x08C);
 CHECK_OFFSET(LobbyMan, mHostName, 0x090);
 CHECK_OFFSET(LobbyMan, mOppoName, 0x094);
 CHECK_OFFSET(LobbyMan, mOpponent, 0x098);

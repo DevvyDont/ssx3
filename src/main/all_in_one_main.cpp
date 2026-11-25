@@ -2947,7 +2947,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setOffset);
  * @param offset  the offset (x, y, z)
  */
 extern "C" void cPopupInfo_setOffset(cPopupInfo* self, t3Vector offset) {
-    *(t3Vector*)&self->mvOffset[0] = offset;
+    self->mvOffset = offset;
 }
 #endif
 
@@ -2964,7 +2964,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getOffset);
  * @return @p dst
  */
 extern "C" t3Vector* cPopupInfo_getOffset(t3Vector* dst, cPopupInfo* src) {
-    *dst = *(t3Vector*)&src->mvOffset[0];
+    *dst = src->mvOffset;
     return dst;
 }
 #endif
@@ -3619,8 +3619,8 @@ extern "C" cScreenPopup *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
     cUIState_cUIState1_DBD0((self), 0, 0);
     VPTR_OF(cListNode, self) = (void**)cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char*)&self->info);
-    self->mszInputText = (char*)cBXString_EmptyString;
-    self->mszStaticText = (char*)cBXString_EmptyString;
+    self->mszInputText.Str = (char*)cBXString_EmptyString;
+    self->mszStaticText.Str = (char*)cBXString_EmptyString;
     return (self);
 }
 #endif
@@ -3677,7 +3677,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getEntryBoxText);
  * @return the input text
  */
 extern "C" int cScreenPopup_getEntryBoxText(cScreenPopup* screenPopup) {
-    return ((int)screenPopup->mszInputText);
+    return ((int)screenPopup->mszInputText.Str);
 }
 #endif
 
@@ -4608,7 +4608,7 @@ extern "C" cKeyboardPopup *cKeyboardPopup_cKeyboardPopup1(cKeyboardPopup* self) 
     cUIState_cUIState1_E288((self), 0, 0);
     VPTR_OF(cListNode, self) = (void**)cKeyboardPopup_vtbl;
     self->miMaxCharacters = 0x3F;
-    self->mszStatic = (char*)cBXString_EmptyString;
+    self->mszStatic.Str = (char*)cBXString_EmptyString;
     return (self);
 }
 #endif

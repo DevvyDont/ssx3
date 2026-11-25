@@ -7105,7 +7105,7 @@ extern "C" void func_001AC9C0(cFEUseExistingAccount* self, cScreenPopup* popup, 
     if (event == 0xF) {
         int three = 3;
         cFEStateNet_onPopupEvent(self, popup, 0xF);
-        cBXString_operatorE1((char*)&self->mszEmail, (const char*)popup->mszInputText);
+        cBXString_operatorE1((char*)&self->mszEmail, popup->mszInputText.Str);
         cScreenPopup* newPopup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
         newPopup->info.meType = 0;
         newPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204RequestAccount);
@@ -9505,7 +9505,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     *(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats = *(sInfo_FE68*)challenge->info;
     if (challenge == 0)
         return;
-    cBXString_operatorE1(&LobbyMan_mLobbyMan->unk_08C, challenge->name);
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mChallengeMessage, challenge->name);
     MEM_fill(&(*(sRaceFlags_FE68*)&cBERules_mRules), 0, 0x20);
     (*(sRaceFlags_FE68*)&cBERules_mRules).b6 = challenge->f18;
     (*(sRaceFlags_FE68*)&cBERules_mRules).b7 = challenge->f24;
@@ -18681,7 +18681,7 @@ extern "C" void func_001BB0E8(cFEStateCreateStep2* self, cScreenPopup* popup, in
 {
     if (event == 0xF) {
         cFEStateNet_onPopupEvent(self, popup, 0xF);
-        cBXString_operatorE1(&self->mpAccount->mParentMail, (const char*)popup->mszInputText);
+        cBXString_operatorE1(&self->mpAccount->mParentMail, popup->mszInputText.Str);
         func_001BA9F8(self, 0);
     } else {
         cFEStateNet_onPopupEvent(self, popup, event);
@@ -26592,7 +26592,7 @@ extern "C" void cPopupInfo_clear(cPopupInfo* self)
     *(int*)&self->mfMinSize = 0;
     self->meType = 0;
     self->miLayerOffset = 0;
-    *(t3Vector*)&self->mvOffset[0] = t3vect_Zero;
+    self->mvOffset = t3vect_Zero;
     self->miDefaultOption = -1;
     self->meBackgroundType = 0;
     self->mbDeferEventsFlag = 0;

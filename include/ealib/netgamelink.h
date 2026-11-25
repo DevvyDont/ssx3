@@ -19,6 +19,8 @@
 #ifndef __cplusplus
 typedef struct NetGameLinkRefT NetGameLinkRefT;
 typedef struct NetGameLinkPacketHead NetGameLinkPacketHead;
+typedef struct NetGameLinkHistT NetGameLinkHistT;
+typedef struct NetGameLinkStatT NetGameLinkStatT;
 #endif
 
 struct NetGameLinkRefT {
@@ -69,5 +71,52 @@ struct NetGameLinkPacketHead {
 CHECK_OFFSET(NetGameLinkPacketHead, len, 0x0);
 CHECK_OFFSET(NetGameLinkPacketHead, info, 0x2);
 CHECK_SIZE(NetGameLinkPacketHead, 0x4);
+
+// One ping-history slot of the link status. [O] On Tour's NetGameLinkHistT (0x8; its min / max are spelled
+// __dont_use_min_use_MIN__ / __dont_use_max_use_MAX__ there, DirtySock's names mangled by MIN / MAX macros).
+struct NetGameLinkHistT {
+    unsigned short min;             // 0x0 [O]
+    unsigned short max;             // 0x2 [O]
+    unsigned short avg;             // 0x4 [O]
+    unsigned short cnt;             // 0x6 [O]
+};
+
+// The link status NetGameLinkStatus returns (NetGameLinkRefT::stat, 336 bytes). [O] On Tour's NetGameLinkStatT
+// (0x150, the same size), names and types (On Tour's tick / tickseqn are volatile). [U] cDSockChannel_updateConnected
+// reads tick - rcvdlast (a gap over 30000 times the link out), isopen (0: the link is lost) and late (the latency in
+// ms).
+struct NetGameLinkStatT {
+    unsigned int tick;              // 0x000 [O]; [U] updateConnected: the link's current time
+    unsigned int tickseqn;          // 0x004 [O]
+    unsigned int ping;              // 0x008 [O]
+    unsigned int late;              // 0x00C [O]; [U] updateConnected: the latency (ms) it smooths into mLatency
+    unsigned int conn;              // 0x010 [O]
+    unsigned int sent;              // 0x014 [O]
+    unsigned int rcvd;              // 0x018 [O]
+    unsigned int sentlast;          // 0x01C [O]
+    unsigned int rcvdlast;          // 0x020 [O]; [U] updateConnected: the time of the last receive
+    unsigned int sentshow;          // 0x024 [O]
+    unsigned int rcvdshow;          // 0x028 [O]
+    unsigned int senthide;          // 0x02C [O]
+    unsigned int rcvdhide;          // 0x030 [O]
+    unsigned int bps;               // 0x034 [O]
+    unsigned int pps;               // 0x038 [O]
+    unsigned int rps;               // 0x03C [O]
+    unsigned int stattick;          // 0x040 [O]
+    unsigned char isconn;           // 0x044 [O]
+    unsigned char isopen;           // 0x045 [O]; [U] updateConnected disconnects the channel when it is 0
+    unsigned char _unused1;         // 0x046 [O]
+    unsigned char _unused2;         // 0x047 [O]
+    unsigned int pingtick;          // 0x048 [O]
+    unsigned int pingslot;          // 0x04C [O]
+    struct NetGameLinkHistT pinghist[32]; // 0x050 [O]
+};
+
+CHECK_OFFSET(NetGameLinkStatT, tick, 0x000);
+CHECK_OFFSET(NetGameLinkStatT, late, 0x00C);
+CHECK_OFFSET(NetGameLinkStatT, rcvdlast, 0x020);
+CHECK_OFFSET(NetGameLinkStatT, isopen, 0x045);
+CHECK_OFFSET(NetGameLinkStatT, pinghist, 0x050);
+CHECK_SIZE(NetGameLinkStatT, 0x150);
 
 #endif /* EALIB_NETGAMELINK_H */

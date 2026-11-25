@@ -20,6 +20,8 @@
 // t3Vector.
 
 #include "layout.h"
+#include "bx/bxstring.h"
+#include "bx/math3d.h"
 #include "ui/uistate.h"
 
 struct cListNode;
@@ -64,16 +66,16 @@ struct cKeyboardPopup : public cUIState {
     int mbRegular[84];              // 0x148 [O] (On Tour: bool[84]); [U] cKeyboardPopup_setIncludeKey (modes 0/2) and
                                     //       cKeyboardPopup_allowSelection index it by key
     int mbAlternate[84];            // 0x298 [O] (On Tour: bool[84]); [U] setIncludeKey (modes 1/2), allowSelection
-    float mvPosEnter[3];            // 0x3E8 [O] t3Vector; [U] position of "EnterValue" (onGainTransition, updateCursor)
-    float mvSizeEnter[3];           // 0x3F4 [O] t3Vector; [U] size of "EnterValue" (vt slot 20)
-    float mvSizeCursor[3];          // 0x400 [O] t3Vector; [U] size of "CharacterCursor" (onGainTransition)
-    float mvPosCursor[3];           // 0x40C [O] t3Vector; [U] position of "CharacterCursor"
+    t3Vector mvPosEnter;            // 0x3E8 [O]; [U] position of "EnterValue" (onGainTransition, updateCursor)
+    t3Vector mvSizeEnter;           // 0x3F4 [O]; [U] size of "EnterValue" (vt slot 20)
+    t3Vector mvSizeCursor;          // 0x400 [O]; [U] size of "CharacterCursor" (onGainTransition)
+    t3Vector mvPosCursor;           // 0x40C [O]; [U] position of "CharacterCursor"
     int mbSetInputText;             // 0x418 [O]; [R] ctor zeroes; [U] setInputText sets it; onGainTransition re-applies
                                     //       mszEditString when set
     int mbTransistionDone;          // 0x41C [O] (EA's spelling); [R] ctor zeroes; [U] set by the first onGainTransition;
                                     //       setInputText calls updateEdit only when set
     int mbPopOnEnd;                 // 0x420 [O]; [R] ctor 1; [U] pressKey's accept key pops the state stack when set
-    char* mszStatic;                // 0x424 [O] cBXString; [R] ctor stores the empty-string rep cBXString_EmptyString then
+    cBXString mszStatic;            // 0x424 [O]; [R] ctor stores the empty-string rep cBXString_EmptyString then
                                     //       cBXString_Reset, the dtor destroys it; [U] setStatic(const char*) (cKeyboardPopup_setStatic2)
     unsigned short* mpustrStatic;   // 0x428 [O]; [R] ctor zeroes, the dtor frees it; [U] cKeyboardPopup_setStatic copies
                                     //       the unicode string into it before the screen exists

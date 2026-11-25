@@ -87,6 +87,10 @@ struct cUIThing : public cListNode {
 
     // EA's inline accessor ([P] the preview's setMiscData, sw 0x18; retail's out-of-line copy cUIThing_setMiscData).
     void setMiscData(int data) { mMiscData = data; }
+    // EA's inline draw-layer accessors, bits 8-12 of mAttr ([P] the preview's getDrawLayer / setDrawLayer; retail's
+    // out-of-line copies cUIThing_getDrawLayer / cUIThing_setDrawLayer; inlined in cScreenPopup_adjustLayer).
+    int getDrawLayer() { return ((unsigned int)mAttr >> 8) & 0x1F; }
+    void setDrawLayer(int layer) { mAttr = (mAttr & ~0x1F00) | ((layer & 0x1F) << 8); }
 
     // Virtuals. Slots [R] cUIThing_vtbl (slots 2-3 are cListNode's traverseFlat / traverseRecurse, not overridden),
     // names and order [O] (On Tour class cUIThing); parameter types from the retail implementations (the bool

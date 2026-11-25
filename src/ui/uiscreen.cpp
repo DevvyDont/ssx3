@@ -20,13 +20,6 @@
 
 extern "C" void cListNode_removeFromList(void* self);
 
-struct sDeleteTarget {
-    char pad_0x00[0x8];
-    short dtorDelta;
-    char pad_0xA[2];
-    void (*fn)(void*, int); // 0xC
-};
-
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIThread_deleteThread__FPv);
 #ifdef SKIP_ASM
@@ -38,8 +31,8 @@ void cUIThread_deleteThread(void* vself)
     cUIThread* self = (cUIThread*)vself;
     cListNode_removeFromList(self);
     if (((void*)self) != 0) {
-        sDeleteTarget* target = (sDeleteTarget*)self->mVtbl;
-        target->fn((char*)self + target->dtorDelta, 3);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+        vt[1].fn(vthis(self, vt[1]), 3); // slot 1: the deleting destructor
     }
 }
 #endif
@@ -127,6 +120,7 @@ extern "C" void cUIScreen_setData(cUIScreen* self, tUIScreenHeader* data)
         self->mAttrScreen &= ~2;
     }
     self->mpScreenHeader = data;
+    // ORIGINAL-PTR: the screen data is a file blob; its header holds the byte offsets of the keyframe and object blocks
     self->mpKeyframeBlock = (tUIKeyframeBlock*)((char*)data + data->mFrameBlockOffset);
     self->mpObjectBlock = (tUIObjectBlock*)((char*)data + data->mObjectBlockOffset);
 }
@@ -147,6 +141,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByIndex);
 extern "C" tUIFrameHeader* cUIScreen_getFrameByIndex(cUIScreen* self, unsigned short frame)
 {
     tUIKeyframeBlock* list = self->mpKeyframeBlock;
+    // ORIGINAL-PTR: the frames follow the block's count and are variable-length records (each mByteSize bytes)
     tUIFrameHeader* frameHeader = (tUIFrameHeader*)(list + 1);
     unsigned int i;
     for (i = 0; i < list->mNumFrames; i++) {
@@ -172,6 +167,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
     tUIKeyframeBlock* list = self->mpKeyframeBlock;
+    // ORIGINAL-PTR: the frames follow the block's count and are variable-length records (each mByteSize bytes)
     tUIFrameHeader* entry = (tUIFrameHeader*)(list + 1);
     unsigned int i;
     for (i = 0; i < list->mNumFrames; i++) {
@@ -249,28 +245,6 @@ void cUIThread_deleteThread(void* self);
 extern char str_UIThread[];
 extern void* cUIThread_vtbl[];
 
-// cUIThread (On Tour member names): a cListNode (prev, next, vptr) plus frame state.
-struct cUIThread_C870 {
-    cUIThread_C870* mpPrev;             // 0x00
-    cUIThread_C870* mpNext;             // 0x04
-    void** vt;                          // 0x08
-    unsigned short mCurrentFrameNumber; // 0x0C
-    unsigned short mLastFrameNumber;    // 0x0E
-    unsigned short mStopFrameNumber;    // 0x10
-    signed char mFrameIncrement;        // 0x12
-    unsigned int mIsActive : 1;         // 0x10 bit 24
-    unsigned int mIsPrimary : 1;        // 0x10 bit 25
-
-    unsigned short getCurrentFrameNumber() { return mCurrentFrameNumber; }
-    signed char getFrameIncrement() { return mFrameIncrement; }
-    void setCurrentFrameNumber(unsigned short v) { mCurrentFrameNumber = v; }
-    void setLastFrameNumber(unsigned short v) { mLastFrameNumber = v; }
-    void setStopFrameNumber(unsigned short v) { mStopFrameNumber = v; }
-    void setFrameIncrement(signed char v) { mFrameIncrement = v; }
-    void setActive(bool b) { mIsActive = b; }
-    void setPrimary(bool b) { mIsPrimary = b; }
-};
-
 // PORT: the unit declares cUIScreen_playFrame as void; the body returns the new thread. Bound by asm label.
 void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType) __asm__("cUIScreen_playFrame");
 
@@ -291,7 +265,7 @@ void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType
             cUIThread_deleteThread(pPrimary);
         }
     }
-    cUIThread_C870* pNewThread = new (str_UIThread, 0x100, 0) cUIThread_C870;
+    cUIThread* pNewThread = new (str_UIThread, 0x100, 0) cUIThread;
     // inlined cUIThread ctor: direct member stores (the target writes these twice: the
     // second pair goes through the setters, whose promoted int params keep separate constants)
     pNewThread->mStopFrameNumber = 0xFFFF;
@@ -300,11 +274,12 @@ void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType
     pNewThread->mIsPrimary = 0;
     pNewThread->setFrameIncrement(1);
     pNewThread->setStopFrameNumber(0xFFFF);
-    pNewThread->vt = cUIThread_vtbl;
+    pNewThread->mVtbl = cUIThread_vtbl;
     pNewThread->setCurrentFrameNumber(frame);
     pNewThread->setLastFrameNumber(0xFFFF);
-    pNewThread->mpNext = pNewThread;
-    pNewThread->mpPrev = pNewThread;
+    // same layout: a cUIThread is a cListNode (flat here: mpPrev, mpNext and the vptr come first)
+    pNewThread->mpNext = (cListNode*)pNewThread;
+    pNewThread->mpPrev = (cListNode*)pNewThread;
     pNewThread->setActive(true);
     pNewThread->setPrimary(ThreadType == 0);
     cList_addToEnd((cList*)(&self->mThreads), (cListNode*)pNewThread);
@@ -342,7 +317,7 @@ extern void cUIScreen_parseScreenEnd_4(void *, void *, void *, void *) __asm__("
  */
 extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
 {
-    cUIThread_C870 *uiThread = (cUIThread_C870 *)thread;
+    cUIThread *uiThread = thread;
     tUIFrameHeader *list;
     tUIKCPBase *cmd;
     unsigned int i;
@@ -362,7 +337,9 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
         uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
     }
     list = cUIScreen_getFrameByIndex(self, CurrentFrame);
-    cmd = (tUIKCPBase *)(list + 1); // the frame's packets follow its header
+    // ORIGINAL-PTR: the frame's key-channel packets follow its header in the loaded screen data and are
+    // variable-length (each mPacketSize bytes), so they are walked by byte offsets
+    cmd = (tUIKCPBase *)(list + 1);
     if (list != 0) {
         i = 0;
         if (list->mNumKCP != 0) {
@@ -443,6 +420,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
  */
 extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, tUIKCPKeyframeJump* pKCP, cUIThread* pThread)
 {
+    // ORIGINAL-PTR: the frames follow the block's count and are variable-length records (each mByteSize bytes)
     tUIFrameHeader* entry = (tUIFrameHeader*)(self->mpKeyframeBlock + 1);
     unsigned int i;
     for (i = 0; i < self->mpKeyframeBlock->mNumFrames; i++) {
@@ -466,6 +444,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
  */
 extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, tUIKCPKeyframeJump* pKCP)
 {
+    // ORIGINAL-PTR: the frames follow the block's count and are variable-length records (each mByteSize bytes)
     tUIFrameHeader* entry = (tUIFrameHeader*)(self->mpKeyframeBlock + 1);
     unsigned int i;
     for (i = 0; i < self->mpKeyframeBlock->mNumFrames; i++) {
@@ -730,6 +709,7 @@ extern char str_UIScreenObjs[];
 extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
 {
     tUIObjectBlock* data = self->mpObjectBlock;
+    // ORIGINAL-PTR: the object records follow the block's count and are variable-length (each mByteSize bytes)
     tUIBaseObject* rec = (tUIBaseObject*)(data + 1);
     if (data->mNumObjects != 0) {
         self->mppObjectList =
@@ -771,6 +751,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByHashName);
  */
 extern "C" void* cUIScreen_createObjectByHashName(cUIScreen* self, int key)
 {
+    // ORIGINAL-PTR: the object records follow the block's count and are variable-length (each mByteSize bytes)
     tUIBaseObject* record = (tUIBaseObject*)(self->mpObjectBlock + 1);
     unsigned int i;
     for (i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
@@ -1033,6 +1014,7 @@ extern "C" cUIThing* cUIScreen_createObjectByStruct(cUIScreen* self, tUIBaseObje
         cUITextScroll* created =
             (cUITextScroll*)cUITextScroll_cUITextScroll(alloc_D078(sizeof(cUITextScroll), str_cUITextScroll), self, 0);
         tUITextScroll* data = (tUITextScroll*)rec;
+        // ORIGINAL-PTR: a text scroll's record is variable-length: its mNumItems item widgets follow it
         tUIPlaceWidget* pPBW = (tUIPlaceWidget*)(data + 1);
         for (unsigned int i = 0; i < data->mNumItems; i++, pPBW++) {
             cUIThing* child = cUIScreen_getObjectByHashName(self, pPBW->mHashID);
@@ -1097,8 +1079,8 @@ extern "C" void cUIScreen_update(cUIScreen* self)
                 if ((flags & 1) == 0) {
                     cListNode_removeFromList(n);
                     if (((void*)n) != 0) {
-                        sDeleteTarget* target = (sDeleteTarget*)n->mVtbl;
-                        target->fn((char*)n + target->dtorDelta, 3);
+                        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)n->mVtbl;
+                        vt[1].fn(vthis(n, vt[1]), 3); // slot 1: the deleting destructor
                     }
                 }
             }
@@ -1159,15 +1141,9 @@ extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
     VPTR_OF(cListNode, self) = cUIScrollBar_vtbl;
     cUIThing* background = self->mpObjBackground;
-    if (background != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, background);
-        dtorEntry->fn((char*)background + dtorEntry->dtorDelta, 3);
-    }
+    delete background;
     cUIThing* knob = self->mpObjKnob;
-    if (knob != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, knob);
-        dtorEntry->fn((char*)knob + dtorEntry->dtorDelta, 3);
-    }
+    delete knob;
     cUIThing__cUIThing(self, flags);
 }
 #endif
@@ -1445,15 +1421,9 @@ extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
     VPTR_OF(cListNode, self) = cUISlider_vtbl;
     cUIThing* background = self->mpObjBackground;
-    if (background != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, background);
-        dtorEntry->fn((char*)background + dtorEntry->dtorDelta, 3);
-    }
+    delete background;
     cUIThing* knob = self->mpObjKnob;
-    if (knob != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, knob);
-        dtorEntry->fn((char*)knob + dtorEntry->dtorDelta, 3);
-    }
+    delete knob;
     cUIThing__cUIThing(self, flags);
 }
 #endif

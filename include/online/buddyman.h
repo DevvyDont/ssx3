@@ -147,7 +147,8 @@ struct cChallenger {
                                     //      [U] func_00262E20 / func_00263128 / func_00263270 compare it with the
                                     //      challenger's name (strcasecmp / strcmp)
     char* mMessage;                 // 0x04 [R] cBXString(messageText) (this + 4): the whole chat message; dtor destroys
-                                    //      it; [U] the challenge popup copies it to LobbyMan::unk_08C (view `name`)
+                                    //      it; [U] the challenge popup copies it to LobbyMan::mChallengeMessage
+                                    //      (view `name`)
     int miLocation;                 // 0x08 [R] the message's 1st number; [U] the popup stores it in
                                     //      cBENewRaceInterface_newRace.iLocationIdx (view f8)
     int miGameMode;                 // 0x0C [R] 2nd number; [U] the popup's setGameMode (view mode)

@@ -16,11 +16,14 @@
 //   [O] SSX On Tour's DWARF (class cListNode / cUIState / cScreenPopup): same member order; On Tour's bools are
 //       1 byte (retail's are words) and its tARGBs are 16-aligned, so its offsets drift by 0..0x14. Used only where
 //       the fields on both sides are placed by other evidence.
-// Vectors are EA's t3Vector (3 floats, 4-aligned) and tARGB (4 floats {A, R, G, B}); they are written as float
-// arrays here because fe/fepopup.cpp defines its own t3Vector.
+// Vectors are EA's t3Vector (bx/math3d.h, 3 floats, 4-aligned) and tARGB (ui/uithing.h, 4 floats {A, R, G, B}),
+// the types On Tour's DWARF gives them.
 
 #include "layout.h"
+#include "bx/bxstring.h"
+#include "bx/math3d.h"
 #include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "fe/popupinfo.h"
 
 struct cListNode;
@@ -68,41 +71,42 @@ struct cScreenPopup : public cUIState {
     cUIText* mpOptions[5];          // 0x090 [O]; [U] widgets "Option%d"; [R] ctor zeroes 5
     int miGainTransistionCount;     // 0x0A4 [O]; [U] onGainTransition counts it from 1 up to miStartFrame
     int miStartFrame;               // 0x0A8 [O]; [U] onGainTransition: frame of a label, else 25
-    float mvAnimateIncrement[3];    // 0x0AC [O] t3Vector; [U] onGainTransition: per-frame scale step (x at 0xAC, y at 0xB0)
+    t3Vector mvAnimateIncrement;    // 0x0AC [O]; [U] onGainTransition: per-frame scale step (x at 0xAC, y at 0xB0)
     int mbNoEntryOnNext;            // 0x0B8 [O] (On Tour: bool); [U] cScreenPopup_onWidgetEvent sets/clears it,
                                     //       cScreenPopup_onWidgetMenu (case 6) tests it
     cPopupInfo info;                // 0x0BC [O] cPopupInfo info; [R] constructed by cPopupInfo_cPopupInfo(self + 0xBC), destroyed by
                                     //       cPopupInfo__cPopupInfo; getPopupInfo (cScreenPopup_getPopupInfo) returns self + 0xBC; retail cPopupInfo
                                     //       is 0xCC bytes (data to 0xC4, vptr cPopupInfo_vtbl at 0xC8)
-    float mvPosBackWhite[3];        // 0x188 [O]; [U] FillObjectPointers: "whitefg" position
-    float mvPosBackRed[3];          // 0x194 [O]; [U] "redbg" position
-    float mvPosMenu[3];             // 0x1A0 [O]; [U] "Menu0000" position
-    float mvPosButtons[3];          // 0x1AC [O]; [U] "buttons" position
-    float mvPosTitle[3];            // 0x1B8 [O]; [U] "popupTitle" position
-    float mvPosText[3];             // 0x1C4 [O]; [U] "popupText" position
-    float mvPosPost[3];             // 0x1D0 [O]; [U] "popupPost" position
-    float mvPosEntryText[3];        // 0x1DC [O]; [U] "EnterTextBox" position
-    float mvPosTextBoxPair[3];      // 0x1E8 [O]; [U] "TextBoxPair" position
-    float mvSizeBackWhite[3];       // 0x1F4 [O]; [U] "whitefg" size (vt slot 20 GetRect)
-    float mvPosBackEnterBox[3];     // 0x200 [O]; [U] "EnterBackground" position
-    float mvSizeBackEnterBox[3];    // 0x20C [O]; [U] "EnterBackground" size
-    float mvSizeBackSmall[3];       // 0x218 [O]; [U] "Small shape" size
-    float mvPosBackLarge[3];        // 0x224 [O]; [U] "Big shape" position
-    float mvPosBackLargeOutline[3]; // 0x230 [O]; [U] "Big outline" position
-    float mvPosBackSmall[3];        // 0x23C [O]; [U] "Small shape" position
-    float mvPosBackSmallOutline[3]; // 0x248 [O]; [U] "Small outline" position
-    float mvPosBackShadow[3];       // 0x254 [O]; [U] "Shadow" position
-    float mvCurSize[3];             // 0x260 [O]; [U] grown by every text line (cScreenPopup_increaseBoxSize calls)
-    float mvOffset[3];              // 0x26C [O]; [U] copied from the popup info's mvOffset (info + 0x9C)
-    float mvCurrentScale[3];        // 0x278 [O]; [R] ctor sets (1, 1, 1); [U] passed to scaleBackground
-    float mvMenuSize[3];            // 0x284 [O]; [U] setPopupMessage copies mvCurSize into it
-    float mvButtonOffset[3];        // 0x290 [O]; [U] cScreenPopup_adjustMenuPosition writes it, cScreenPopup_adjustButtonPosition adds it to mvPosButtons
-    float mvLargestOption[3];       // 0x29C [O]; [U] FillOptions keeps the widest option width in x
+    t3Vector mvPosBackWhite;        // 0x188 [O]; [U] FillObjectPointers: "whitefg" position
+    t3Vector mvPosBackRed;          // 0x194 [O]; [U] "redbg" position
+    t3Vector mvPosMenu;             // 0x1A0 [O]; [U] "Menu0000" position
+    t3Vector mvPosButtons;          // 0x1AC [O]; [U] "buttons" position
+    t3Vector mvPosTitle;            // 0x1B8 [O]; [U] "popupTitle" position
+    t3Vector mvPosText;             // 0x1C4 [O]; [U] "popupText" position
+    t3Vector mvPosPost;             // 0x1D0 [O]; [U] "popupPost" position
+    t3Vector mvPosEntryText;        // 0x1DC [O]; [U] "EnterTextBox" position
+    t3Vector mvPosTextBoxPair;      // 0x1E8 [O]; [U] "TextBoxPair" position
+    t3Vector mvSizeBackWhite;       // 0x1F4 [O]; [U] "whitefg" size (vt slot 20 GetRect)
+    t3Vector mvPosBackEnterBox;     // 0x200 [O]; [U] "EnterBackground" position
+    t3Vector mvSizeBackEnterBox;    // 0x20C [O]; [U] "EnterBackground" size
+    t3Vector mvSizeBackSmall;       // 0x218 [O]; [U] "Small shape" size
+    t3Vector mvPosBackLarge;        // 0x224 [O]; [U] "Big shape" position
+    t3Vector mvPosBackLargeOutline; // 0x230 [O]; [U] "Big outline" position
+    t3Vector mvPosBackSmall;        // 0x23C [O]; [U] "Small shape" position
+    t3Vector mvPosBackSmallOutline; // 0x248 [O]; [U] "Small outline" position
+    t3Vector mvPosBackShadow;       // 0x254 [O]; [U] "Shadow" position
+    t3Vector mvCurSize;             // 0x260 [O]; [U] grown by every text line (cScreenPopup_increaseBoxSize calls)
+    t3Vector mvOffset;              // 0x26C [O]; [U] copied from the popup info's mvOffset (info + 0x9C)
+    t3Vector mvCurrentScale;        // 0x278 [O]; [R] ctor sets (1, 1, 1); [U] passed to scaleBackground
+    t3Vector mvMenuSize;            // 0x284 [O]; [U] setPopupMessage copies mvCurSize into it
+    t3Vector mvButtonOffset;        // 0x290 [O]; [U] cScreenPopup_adjustMenuPosition writes it,
+                                    //       cScreenPopup_adjustButtonPosition adds it to mvPosButtons
+    t3Vector mvLargestOption;       // 0x29C [O]; [U] FillOptions keeps the widest option width in x
     cKeyboardPopup* mpKeyboard;     // 0x2A8 [O]; [R] ctor zeroes; [U] onWidgetEvent allocates the cKeyboardPopup into it
     cScreenPopup* mpConfirmPopup;   // 0x2AC [O]; [U] createConfirmationPopup stores the "Confirmation Popup" there
-    char* mszInputText;             // 0x2B0 [P] getEntryBoxText (preview 0x16C, seen); [O] cBXString; [R] ctor stores
-                                    //       the empty-string rep cBXString_EmptyString; [U] filled from the keyboard's text
-    char* mszStaticText;            // 0x2B4 [O] cBXString; [R] ctor/dtor like mszInputText
+    cBXString mszInputText;         // 0x2B0 [P] getEntryBoxText (preview 0x16C, seen); [O]; [R] ctor stores the
+                                    //       empty-string rep cBXString_EmptyString; [U] filled from the keyboard's text
+    cBXString mszStaticText;        // 0x2B4 [O]; [R] ctor/dtor like mszInputText
     int mbShowing;                  // 0x2B8 [P] isShowing (preview 0x174, seen); [U] onCreateScreen 1, onDestroyScreen 0
     int mbFirstGainTran;            // 0x2BC [O]; [U] set on the first onGainTransition; redrawPopup checks it
     int mbPassUpdate;               // 0x2C0 [P] getPassUpdate/setPassUpdate (preview 0x178, seen); [U] onUpdate calls
@@ -119,9 +123,9 @@ struct cScreenPopup : public cUIState {
     int miConfimationReturnCode;    // 0x320 [O] (EA's spelling); [U] onPopupEvent sets it and reports it to the parent
     int miActiveConfirmation;       // 0x324 [O]; [U] createConfirmationPopup stores the option index
     int miMaxChars;                 // 0x328 [O]; [R] ctor 0x3F; [U] from info + 0xC4; passed to the keyboard
-    float mtHighlightedColor[4];    // 0x32C [O] tARGB; [U] onWidgetMenu colours the selected entry with it
-    float mtUnhighlightColor[4];    // 0x33C [O] tARGB; [U] the other entries
-    float mtIndicatorColor[4];      // 0x34C [O] tARGB; no retail access seen (placed by the 0x360 size)
+    tARGB mtHighlightedColor;       // 0x32C [O]; [U] onWidgetMenu colours the selected entry with it
+    tARGB mtUnhighlightColor;       // 0x33C [O]; [U] the other entries
+    tARGB mtIndicatorColor;         // 0x34C [O]; no retail access seen (placed by the 0x360 size)
     float mfIndicatorAlpha;         // 0x35C [O]; no retail access seen (placed by the 0x360 size)
 };
 

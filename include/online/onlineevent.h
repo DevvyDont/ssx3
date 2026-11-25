@@ -11,7 +11,8 @@
 // Struct names follow the fork's Outer_Inner convention for nested names (functions are already online_Event_*).
 //
 // Retail adds five event classes the preview does not have (vtables 0x00481230, 0x004811B0, 0x00481150, 0x00481130,
-// 0x00481110); with only one name signal each they are not declared here (see the group I report).
+// 0x00481110); with only one name signal each they are not declared here (see the group I report), except ChatEvent
+// (0x00481230), named after its "ChatEvent" allocation tag like its destructor and clone (online_ChatEvent_*).
 //
 // Layout: online::Event has one data member and declares the virtuals, so g++ 2.95 puts its vptr after it, at 0x4;
 // the subclasses append from 0x8. Every event is allocated with cMemMan_alloc(size, "NetEvent" | "NetErrorEvent" |
@@ -179,5 +180,25 @@ CHECK_OFFSET(online_PingEvent, mVtbl, 0x4);
 CHECK_OFFSET(online_PingEvent, mName, 0x8);
 CHECK_OFFSET(online_PingEvent, mPing, 0xC);
 CHECK_SIZE(online_PingEvent, 0x10);
+
+// online::ChatEvent: type 222, size 0x10 ([R] func_0025AB40 and online_ChatEvent_clone allocate 0x10 bytes tagged
+// "ChatEvent"). Vtable 0x00481230 (D_00481230: 1 online_ChatEvent__ChatEvent, 2 online_ChatEvent_clone). Retail only
+// (not in the preview), so the class and member names are ours.
+struct online_ChatEvent {
+    // --- online::Event
+    int mType;                      // 0x0 [R] 222 (func_0025AB40, clone)
+    void** mVtbl;                   // 0x4 [R] D_00481230; the destructor stores online_Event_vtbl back
+    // --- online::ChatEvent
+    char* mSender;                  // 0x8 [R] cBXString: func_0025AB40 copies its sender argument (the chat line's
+                                    //     sender, from LobbyMan_onchatmsg); clone copies it; destroyed second
+    char* mText;                    // 0xC [R] cBXString: the message text (func_0025AB40's text argument); destroyed
+                                    //     first
+};
+
+CHECK_OFFSET(online_ChatEvent, mType, 0x0);
+CHECK_OFFSET(online_ChatEvent, mVtbl, 0x4);
+CHECK_OFFSET(online_ChatEvent, mSender, 0x8);
+CHECK_OFFSET(online_ChatEvent, mText, 0xC);
+CHECK_SIZE(online_ChatEvent, 0x10);
 
 #endif /* ONLINE_ONLINEEVENT_H */

@@ -42,8 +42,9 @@ struct tWorldPainterQuery;
 struct tLightRecord {
     int m_iIntersect[3];            // 0x00 [O] (the Nash space-node header: next, prev, type); [U] IntersectLights
                                     //      tests [2] == 6 (kSNT_Light)
-    int unk_00C;                    // 0x0C no retail access seen (On Tour's m_eLightType / m_iFlags pair is swapped
-                                    //      here: the halo records keep their flags at 0xC, see cLightHalo_Process)
+    int m_iFlags;                   // 0x0C [O] m_iFlags (On Tour's m_eLightType / m_iFlags pair is swapped here: the
+                                    //      halo records keep their flags at 0xC too, see cLightHalo_Process); [U]
+                                    //      cChunkResolve_resolveLight / unresolveLight reject a light with 0x100 set
     int m_eLightType;               // 0x10 [O] eNEWLightType (On Tour at 0xC): 0 directional, 1 spot, 2 point,
                                     //      3 ambient; [U] GetIntensity and CreateLights switch on it
     float m_fIntensity;             // 0x14 [O]; [U] GetIntensity, CreateLights
@@ -63,7 +64,7 @@ struct tLightRecord {
 };
 
 CHECK_OFFSET(tLightRecord, m_iIntersect, 0x00);
-CHECK_OFFSET(tLightRecord, unk_00C, 0x0C);
+CHECK_OFFSET(tLightRecord, m_iFlags, 0x0C);
 CHECK_OFFSET(tLightRecord, m_eLightType, 0x10);
 CHECK_OFFSET(tLightRecord, m_fIntensity, 0x14);
 CHECK_OFFSET(tLightRecord, m_fRGBIntensity, 0x18);

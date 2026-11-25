@@ -112,6 +112,17 @@ struct cUIThread {
                                     //       keyframe stop handlers clear it (&= 0xFEFFFFFF)
     unsigned int mIsPrimary : 1;    // 0x013 bit 1 (bit 25 of the word at 0x10) [O]; [R] playFrame: ThreadType == 0; [U]
                                     //       cUIScreen_getPrimaryThread tests it
+
+    // [O] On Tour's inline accessors (cUIThread::getCurrentFrameNumber ... setPrimary); retail inlines them in
+    // cUIScreen_playFrame / cUIScreen_playFrameByThread.
+    unsigned short getCurrentFrameNumber() { return mCurrentFrameNumber; }
+    signed char getFrameIncrement() { return mFrameIncrement; }
+    void setCurrentFrameNumber(unsigned short v) { mCurrentFrameNumber = v; }
+    void setLastFrameNumber(unsigned short v) { mLastFrameNumber = v; }
+    void setStopFrameNumber(unsigned short v) { mStopFrameNumber = v; }
+    void setFrameIncrement(signed char v) { mFrameIncrement = v; }
+    void setActive(bool b) { mIsActive = b; }
+    void setPrimary(bool b) { mIsPrimary = b; }
 };
 
 CHECK_OFFSET(cUIThread, mpPrev, 0x000);
