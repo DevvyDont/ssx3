@@ -141,6 +141,9 @@ struct cAudioOverlapList {
     t4Vector lastposition;          // 0x110 [O]; [R] the ctor copies t4vect_Zero (lq/sq); [U] cAudioOverlapList_update
                                     //       re-queries when its w is 0 or the listener moved more than 10, then stores
                                     //       it
+
+    // Methods bound to their retail symbols by asm labels.
+    void update(const t4Vector* pos) __asm__("cAudioOverlapList_update");
 };
 
 CHECK_OFFSET(cAudioOverlapList, numoverlaps, 0x000);
@@ -148,6 +151,9 @@ CHECK_OFFSET(cAudioOverlapList, overlaps, 0x004);
 CHECK_OFFSET(cAudioOverlapList, unk_104, 0x104);
 CHECK_OFFSET(cAudioOverlapList, lastposition, 0x110);
 CHECK_SIZE(cAudioOverlapList, 0x120);
+
+struct t3Vector;
+struct t4Vector;
 
 struct cWorldSound {
     cAudioOverlapList m_OverlapLists[2];    // 0x000 [O]; [R] the ctor's 2-element loop (stride 0x120); [U]
@@ -158,6 +164,19 @@ struct cWorldSound {
                                             //       retail's up to here and in size (0x250)
     int m_AudioRenderHull;                  // 0x244 [O] only: as above, never accessed in retail
     char unk_248[0x8];                      // 0x248 tail padding to the 16-byte-aligned size 0x250 (On Tour has it too)
+
+    // Methods bound to their retail symbols by asm labels.
+    int InitWorldAudioFile(int icePickData) __asm__("cWorldSound_InitWorldAudioFile");
+    void PurgeWorldAudioFile(int icePickData) __asm__("cWorldSound_PurgeWorldAudioFile");
+    int CreateAudioGrid(int icePickData, tInstanceAudio* entries, int n) __asm__("cWorldSound_CreateAudioGrid");
+    void CalcInstAudioBoundingBox(tInstanceAudio* entry, t3Vector* lo, t3Vector* hi)
+        __asm__("cWorldSound_CalcInstAudioBoundingBox");
+    void AddInstanceToGrid(tInstanceAudio* entry) __asm__("cWorldSound_AddInstanceToGrid");
+    void RemoveInstanceFromGrid(tInstanceAudio* instAudio) __asm__("cWorldSound_RemoveInstanceFromGrid");
+    void RemoveInstanceFromOverlapList(tInstanceAudio* pInst) __asm__("cWorldSound_RemoveInstanceFromOverlapList");
+    void TriggerWorldAudio(const t4Vector* pos, int k) __asm__("cWorldSound_TriggerWorldAudio");
+    void GetAudioVolumeTriggers(tInstanceRecord* obj, int* id0, int* id1, int* id2, int* id3)
+        __asm__("cWorldSound_GetAudioVolumeTriggers");
 };
 
 CHECK_OFFSET(cWorldSound, m_OverlapLists, 0x000);

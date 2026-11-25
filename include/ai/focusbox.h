@@ -47,6 +47,9 @@ CHECK_OFFSET(FocusRecord, unk_004, 0x4);
 CHECK_OFFSET(FocusRecord, LastUpdatePos, 0x10);
 CHECK_SIZE(FocusRecord, 0x20);
 
+struct cBxReplayFrame;
+struct tInstanceRecord;
+
 struct cFocusMan {
     int NumBoxes;                   // 0x000 [O]; [R] 0; [U] addbox appends at it, removebox shifts the boxes down and
                                     //       decrements it; update / write/readFromReplayFrame loop over it
@@ -64,6 +67,15 @@ struct cFocusMan {
     // [R] EA's inline constructor, as cAI_cAI expands it after cMemMan_alloc(0x8E0, "FocusMan"): NumBoxes 0, the six
     // FocusRecord constructors, then LastUpdateTick -1, IsEven 1, NumFocusInstances 0.
     cFocusMan() : NumBoxes(0) { LastUpdateTick = -1; IsEven = 1; NumFocusInstances = 0; }
+
+    // Methods bound to their retail symbols by asm labels.
+    void addfocusinstance(tInstanceRecord* instance) __asm__("cFocusMan_addfocusinstance");
+    void purgesection(int sectionId) __asm__("cFocusMan_purgesection");
+    void reset() __asm__("cFocusMan_reset");
+    void addbox(cFocusBox *focusBox) __asm__("cFocusMan_addbox");
+    void removebox(int id) __asm__("cFocusMan_removebox");
+    void writeToReplayFrame(cBxReplayFrame* data) __asm__("cFocusMan_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* data) __asm__("cFocusMan_readFromReplayFrame");
 };
 CHECK_OFFSET(cFocusMan, NumBoxes, 0x0);
 CHECK_OFFSET(cFocusMan, unk_004, 0x4);
@@ -87,9 +99,14 @@ struct tBoundBox;
 // instances[512]; FocusQuery(), addcell(const Cell*, bool isleaf), getnuminstances, getinstance, getinstances).
 // [U] FocusQuery_addcell appends the cell's focus instances at numinstances (no bound check); cFocusMan_update keeps
 // one on its stack (512 entries, its local view sFocusList).
+struct nash_Cell;
+
 struct FocusQuery {
     int numinstances;                   // 0x000 [O]; [U] FocusQuery_addcell (count, then the pointers)
     tInstanceRecord* instances[512];    // 0x004 [O]; [U] FocusQuery_addcell stores the instances
+
+    // Methods bound to their retail symbols by asm labels.
+    void addcell(nash_Cell* node, int recurse) __asm__("FocusQuery_addcell");
 };
 
 CHECK_OFFSET(FocusQuery, numinstances, 0x000);

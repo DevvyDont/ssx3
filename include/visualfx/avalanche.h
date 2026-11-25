@@ -49,6 +49,9 @@ struct cAvalanche {
     // --- cVisualEffect (vptr only)
     void** mVtbl;                   // 0x000 [R] cAvalanche_vtbl (cAvalanche_cAvalanche, the allocation above);
                                     //       cAvalanche__cAvalanche stores it, then cVisualEffect's cVisualEffect_vtbl
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cAvalanche_reset");
 };
 
 CHECK_OFFSET(cAvalanche, mVtbl, 0x000);
@@ -66,6 +69,10 @@ struct tAvalanchePackedFrameData {
     signed char m_ry;               // 0x007 [O]; [U] ditto
     signed char m_rz;               // 0x008 [O]; [U] ditto
     unsigned char m_rs;             // 0x009 [O]; [U] ditto
+
+    // Methods bound to their retail symbols by asm labels.
+    void setPositionOffset(float red, float green, float blue) __asm__("tAvalanchePackedFrameData_setPositionOffset");
+    void setColour(float red, float green, float blue) __asm__("tAvalanchePackedFrameData_setColour");
 };
 
 CHECK_OFFSET(tAvalanchePackedFrameData, m_x, 0x000);
@@ -123,6 +130,11 @@ struct tAvalanche {
     unsigned short m_numGroundCollisions; // 0x00E [O]; [R] zeroed (sh); [U] addGroundCollision (lh/sh), resolveDataPointers
     tAvalancheCollision m_collisions[32]; // 0x010 [O]; [U] resolveDataPointers
     tAvalancheGroundCollision m_groundCollisions[64]; // 0x110 [O]; [U] addGroundCollision (+0x110 / +0x112), resolveDataPointers
+
+    // Methods bound to their retail symbols by asm labels.
+    void calculate() __asm__("tAvalanche_calculate");
+    tAvalancheNode* getNode(tInstanceRecord* id) __asm__("tAvalanche_getNode");
+    void addGroundCollision(int time, tAvalancheNode* stop) __asm__("tAvalanche_addGroundCollision");
 };
 
 CHECK_OFFSET(tAvalanche, m_id, 0x000);
@@ -135,6 +147,8 @@ CHECK_OFFSET(tAvalanche, m_groundCollisions, 0x110);
 CHECK_SIZE(tAvalanche, 0x210);
 
 // One falling instance of a recorded avalanche (cAvalanche_m_nodeList[id]; the instance's flags at +0x92 keep id << 8).
+struct t4Vector;
+
 struct tAvalancheNode {
     tParticleData m_data;           // 0x000 [O] tParticleData (render/particle.h, 0xD8); [U] setAvalancheNodeEmitterData
                                     //       copies the 0xD8-byte record in when the node gets an emitter
@@ -155,6 +169,9 @@ struct tAvalancheNode {
     float m_radius;                 // 0x110 [O]; [R] 0.2 * the smallest bound-box extent; [U] calculate
     tActiveAvalancheNode* m_activeNode; // 0x114 [O]; [R] zeroed; [U] cAvalanche_getColour reads its m_colour (+0xC0)
     char unk_118[0x8];              // 0x118 tail padding to the 16-byte-aligned size 0x120
+
+    // Methods bound to their retail symbols by asm labels.
+    void fixVelocity(t4Vector* velocity) __asm__("tAvalancheNode_fixVelocity");
 };
 
 CHECK_OFFSET(tAvalancheNode, m_data, 0x000);
@@ -184,6 +201,10 @@ struct tActiveAvalanche {
     int m_nextCollision;            // 0x010 [O]; [U] update; triggerAvalanche / readFromReplayFrame zero it
     int m_nextGroundCollision;      // 0x014 [O]; [U] ditto
     float m_currTime;               // 0x018 [O]; [U] update / render (lwc1); writeToReplayFrame saves it
+
+    // Methods bound to their retail symbols by asm labels.
+    void buildArray() __asm__("tActiveAvalanche_buildArray");
+    void render() __asm__("tActiveAvalanche_render");
 };
 
 CHECK_OFFSET(tActiveAvalanche, m_avalanche, 0x000);
@@ -213,6 +234,12 @@ struct tActiveAvalancheNode {
     tActiveAvalancheNode* m_next;   // 0x2E4 [O]; [U] triggerAvalanche links the slot's nodes
     unsigned int m_endFrame;        // 0x2E8 [O] (no retail access through the struct seen)
     int m_updateEmitters;           // 0x2EC [O] bool (a word in retail); [U] getFrameData, triggerAvalanche (lw/sw)
+
+    // Methods bound to their retail symbols by asm labels.
+    void calculateScale(float currTime) __asm__("tActiveAvalancheNode_calculateScale");
+    int update(float currTime) __asm__("tActiveAvalancheNode_update");
+    void end(int force) __asm__("tActiveAvalancheNode_end");
+    void renderLines() __asm__("tActiveAvalancheNode_renderLines");
 };
 
 CHECK_OFFSET(tActiveAvalancheNode, m_lastKeyFrame, 0x000);

@@ -33,6 +33,9 @@ struct cInstanceMan {
     tInstanceManRecord* Instances;  // 0xC [O]; [P] asserts "(tInstanceManRecord*)(inst) - Instances"; [R] ctor:
                                     //     operator new(n * 0xB0, "Instance"); [U] a record's index = inst - Instances;
                                     //     the dtor frees it (cMemMan_free)
+
+    // Methods bound to their retail symbols by asm labels.
+    int freeInstance(void* node) __asm__("cInstanceMan_freeInstance__FPvT0");
 };
 
 CHECK_OFFSET(cInstanceMan, InstanceSectionId, 0x0);

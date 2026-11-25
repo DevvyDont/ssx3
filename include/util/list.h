@@ -40,6 +40,13 @@ public:
     virtual ~cListNode();                                        // 1 cListNode__cListNode
     virtual void* traverseFlat(cListOperator* pOperator);        // 2 cListNode_traverseFlat
     virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cListNode_traverseRecurse
+
+    // Methods bound to their retail symbols by asm labels.
+    int next() __asm__("cListNode_next");
+    void setNext(int next) __asm__("cListNode_setNext");
+    void destroyListNode() __asm__("cListNode_destroyListNode");
+    int isSentinel() __asm__("cListNode_isSentinel__FP9cListNode");
+    void removeFromList() __asm__("cListNode_removeFromList");
 };
 
 CHECK_OFFSET(cListNode, mpPrev, 0x0);
@@ -56,6 +63,15 @@ public:
     virtual ~cList();                                            // 1 cList__cList
     virtual void* traverseFlat(cListOperator* pOperator);        // 2 cList_traverseFlat
     virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cList_traverseRecurse
+
+    // Methods bound to their retail symbols by asm labels.
+    cListNode* first() __asm__("cList_first__FP5cList");
+    int * last() __asm__("cList_last");
+    cListNode* getByIndex(int count) __asm__("cList_getByIndex");
+    void addToFront(cListNode* newNode) __asm__("cList_addToFront__FP5cListP9cListNode");
+    void addToEnd(cListNode* newNode) __asm__("cList_addToEnd__FP5cListP9cListNode");
+    void destroyList() __asm__("cList_destroyList");
+    int size() __asm__("cList_size");
 };
 
 CHECK_OFFSET(cList, mStart, 0x00);

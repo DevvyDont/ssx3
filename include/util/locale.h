@@ -94,6 +94,13 @@ public:
 
     // Methods bound to their retail symbols by asm labels.
     void deleteAllFiles() __asm__("cFELocale_deleteAllFiles");
+    void addFile(int lang) __asm__("cFELocale_addFile");
+    void deleteFile(signed char i) __asm__("cFELocale_deleteFile");
+    void loadCommon() __asm__("cFELocale_loadCommon");
+    void loadFE() __asm__("cFELocale_loadFE");
+    void unloadFE() __asm__("cFELocale_unloadFE");
+    void loadOV() __asm__("cFELocale_loadOV");
+    void unloadOV() __asm__("cFELocale_unloadOV");
 };
 
 CHECK_SIZE(tAttrLocale, 0x1);

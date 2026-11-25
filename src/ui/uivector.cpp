@@ -577,9 +577,10 @@ extern void* cUIAnimation_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIAnimation_cUIAnimation1(cUIAnimation* self) {
-    self->mVtbl = cUIAnimation_vtbl;
-    return ((void*)self);
+void* cUIAnimation::cUIAnimation1()
+{
+    mVtbl = cUIAnimation_vtbl;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -588,11 +589,11 @@ INCLUDE_ASM("ui/uivector", cUIAnimation_getHashName);
 /**
  * Returns the animation's hash name: the word at +0x8 of the animation header its first member points to.
  *
- * @param anim  the cUIAnimation
  * @return the header's hash id
  */
-extern "C" int cUIAnimation_getHashName(cUIAnimation* anim) {
-    return anim->mpAnimHeader->mHashID;
+int cUIAnimation::getHashName()
+{
+    return mpAnimHeader->mHashID;
 }
 #endif
 //100%
@@ -601,11 +602,11 @@ INCLUDE_ASM("ui/uivector", cUIAnimation_setFrameNumber);
 /**
  * Sets the animation's current frame number (the short at +0xA) to @p frame.
  *
- * @param anim  the cUIAnimation
  * @param frame  the frame number
  */
-extern "C" void cUIAnimation_setFrameNumber(cUIAnimation* anim, short frame) {
-    anim->mFrameNum = frame;
+void cUIAnimation::setFrameNumber(short frame)
+{
+    mFrameNum = frame;
 }
 #endif
 
@@ -669,7 +670,7 @@ extern void* cListNode_vtbl[];
 extern "C" void cListNode__cListNode(cListNode* self, int flags)
 {
     VPTR_OF(cListNode, self) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)self);
+    self->destroyListNode();
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -697,11 +698,11 @@ INCLUDE_ASM("ui/uivector", cListNode_next);
 /**
  * Returns the list node's next node (mpNext).
  *
- * @param listNode  the cListNode
  * @return mpNext
  */
-extern "C" int cListNode_next(cListNode* listNode) {
-    return ((int)listNode->mpNext);
+int cListNode::next()
+{
+    return ((int)mpNext);
 }
 #endif
 //100%
@@ -723,11 +724,11 @@ INCLUDE_ASM("ui/uivector", cListNode_setNext);
 /**
  * Sets the list node's next node (mpNext) to @p next.
  *
- * @param node  the cListNode
  * @param next  the new next node
  */
-extern "C" void cListNode_setNext(cListNode* node, int next) {
-    node->mpNext = (cListNode*)next;
+void cListNode::setNext(int next)
+{
+    mpNext = (cListNode*)next;
 }
 #endif
 
@@ -737,9 +738,9 @@ INCLUDE_ASM("ui/uivector", cListNode_destroyListNode);
 /**
  * Unlinks the node from its list (cListNode_removeFromList).
  */
-extern "C" void cListNode_destroyListNode(cListNode* self)
+void cListNode::destroyListNode()
 {
-    cListNode_removeFromList(self);
+    cListNode_removeFromList(this);
 }
 #endif
 
@@ -761,9 +762,9 @@ extern "C" void cList__cList(cList* self, int flags)
     VPTR_OF(cList, self) = cList_vtbl;
     cList_destroyList(self);
     VPTR_OF(cListNode, &self->mEnd) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)&self->mEnd);
+    self->mEnd.destroyListNode();
     VPTR_OF(cListNode, &self->mStart) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)self);
+    ((cListNode*)self)->destroyListNode();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -784,13 +785,13 @@ extern void* cUIThing_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIThing_cUIThing1(cUIThing* self)
+void* cUIThing::cUIThing1()
 {
-    self->mpNext = (cListNode*)self;
-    self->mpPrev = (cListNode*)self;
-    VPTR_OF(cListNode, self) = cUIThing_vtbl;
-    tAttrThing_tAttrThing((tAttrThing*)(&self->mAttr));
-    return ((char*)self);
+    mpNext = (cListNode*)this;
+    mpPrev = (cListNode*)this;
+    VPTR_OF(cListNode, this) = cUIThing_vtbl;
+    tAttrThing_tAttrThing((tAttrThing*)(&mAttr));
+    return ((char*)this);
 }
 #endif
 //100%
@@ -799,11 +800,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isPlayingAnimation);
 /**
  * Returns whether the UI thing has an animation attached (mpAnim is not null).
  *
- * @param uiThing  the cUIThing
  * @return 1 when mpAnim is set, else 0
  */
-extern "C" int cUIThing_isPlayingAnimation(cUIThing* uiThing) {
-    return ((int)uiThing->mpAnim) != 0;
+int cUIThing::isPlayingAnimation()
+{
+    return ((int)mpAnim) != 0;
 }
 #endif
 //100%
@@ -812,11 +813,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getAnimation);
 /**
  * Returns the UI thing's current animation (mpAnim).
  *
- * @param uiThing  the cUIThing
  * @return mpAnim
  */
-extern "C" int cUIThing_getAnimation(cUIThing* uiThing) {
-    return ((int)uiThing->mpAnim);
+int cUIThing::getAnimation()
+{
+    return ((int)mpAnim);
 }
 #endif
 //100%
@@ -825,11 +826,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isHorizontal);
 /**
  * Returns whether the UI thing is horizontal: 1 when the orientation bit (mAttr bit 0) is clear.
  *
- * @param uiThing  the cUIThing
  * @return 1 for horizontal, 0 for vertical
  */
-extern "C" int cUIThing_isHorizontal(cUIThing* uiThing) {
-    return ((uiThing->mAttr) ^ 1) & 1;
+int cUIThing::isHorizontal()
+{
+    return ((mAttr) ^ 1) & 1;
 }
 #endif
 //100%
@@ -838,11 +839,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isVertical);
 /**
  * Returns whether the UI thing is vertical: the orientation bit (mAttr bit 0).
  *
- * @param uiThing  the cUIThing
  * @return 1 for vertical, 0 for horizontal
  */
-extern "C" int cUIThing_isVertical(cUIThing* uiThing) {
-    return (uiThing->mAttr) & 1;
+int cUIThing::isVertical()
+{
+    return (mAttr) & 1;
 }
 #endif
 //100%
@@ -851,11 +852,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isActive);
 /**
  * Returns the UI thing's active flag (mAttr bit 1).
  *
- * @param uiThing  the cUIThing
  * @return 1 when active, else 0
  */
-extern "C" int cUIThing_isActive(cUIThing* uiThing) {
-    return ((int) (uiThing->mAttr) >> 1) & 1;
+int cUIThing::isActive()
+{
+    return ((int) (mAttr) >> 1) & 1;
 }
 #endif
 //100%
@@ -864,11 +865,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isCached);
 /**
  * Returns the UI thing's cached flag (mAttr bit 2).
  *
- * @param uiThing  the cUIThing
  * @return 1 when cached, else 0
  */
-extern "C" int cUIThing_isCached(cUIThing* uiThing) {
-    return ((int) (uiThing->mAttr) >> 2) & 1;
+int cUIThing::isCached()
+{
+    return ((int) (mAttr) >> 2) & 1;
 }
 #endif
 //100%
@@ -877,11 +878,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isEnabled);
 /**
  * Returns the UI thing's enabled flag (mAttr bit 3).
  *
- * @param uiThing  the cUIThing
  * @return 1 when enabled, else 0
  */
-extern "C" int cUIThing_isEnabled(cUIThing* uiThing) {
-    return ((int) (uiThing->mAttr) >> 3) & 1;
+int cUIThing::isEnabled()
+{
+    return ((int) (mAttr) >> 3) & 1;
 }
 #endif
 //100%
@@ -890,11 +891,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isFocused);
 /**
  * Returns the UI thing's focused flag (mAttr bit 4).
  *
- * @param uiThing  the cUIThing
  * @return 1 when focused, else 0
  */
-extern "C" int cUIThing_isFocused(cUIThing* uiThing) {
-    return ((int) (uiThing->mAttr) >> 4) & 1;
+int cUIThing::isFocused()
+{
+    return ((int) (mAttr) >> 4) & 1;
 }
 #endif
 //100%
@@ -903,11 +904,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isStatic);
 /**
  * Returns the UI thing's static flag (mAttr bit 5).
  *
- * @param uiThing  the cUIThing
  * @return 1 when static, else 0
  */
-extern "C" int cUIThing_isStatic(cUIThing* uiThing) {
-    return ((int) (uiThing->mAttr) >> 5) & 1;
+int cUIThing::isStatic()
+{
+    return ((int) (mAttr) >> 5) & 1;
 }
 #endif
 //100%
@@ -916,11 +917,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isVisible);
 /**
  * Returns the UI thing's visible flag (mAttr bit 6).
  *
- * @param uiThing  the cUIThing
  * @return 1 when visible, else 0
  */
-extern "C" int cUIThing_isVisible(cUIThing* uiThing) {
-    return ((int) (uiThing->mAttr) >> 6) & 1;
+int cUIThing::isVisible()
+{
+    return ((int) (mAttr) >> 6) & 1;
 }
 #endif
 //100%
@@ -929,11 +930,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_isWrap);
 /**
  * Returns the UI thing's wrap flag (mAttr bit 7).
  *
- * @param uiThing  the cUIThing
  * @return 1 when wrapping is on, else 0
  */
-extern "C" int cUIThing_isWrap(cUIThing* uiThing) {
-    int wrapBits = uiThing->mAttr >> 7;
+int cUIThing::isWrap()
+{
+    int wrapBits = mAttr >> 7;
     return wrapBits & 1;
 }
 #endif
@@ -1052,9 +1053,9 @@ struct sUIVectorFlags8 {
  *
  * @param enable  non-zero to wrap
  */
-extern "C" void cUIThing_setWrap(cUIThing* self, int enable)
+void cUIThing::setWrap(int enable)
 {
-    ((sUIVectorFlags8*)&self->mAttr)->bit7 = enable;
+    ((sUIVectorFlags8*)&mAttr)->bit7 = enable;
 }
 #endif
 //100%
@@ -1063,11 +1064,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getMiscData);
 /**
  * Returns the UI thing's caller-defined data word (mMiscData).
  *
- * @param uiThing  the cUIThing
  * @return mMiscData
  */
-extern "C" int cUIThing_getMiscData(cUIThing* uiThing) {
-    return (uiThing->mMiscData);
+int cUIThing::getMiscData()
+{
+    return (mMiscData);
 }
 #endif
 //100%
@@ -1089,11 +1090,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_setOrientation);
 /**
  * Sets the UI thing's orientation bit (mAttr bit 0) to the low bit of @p orientation (0 horizontal, 1 vertical).
  *
- * @param uiThing  the cUIThing
  * @param orientation  0 for horizontal, 1 for vertical
  */
-extern "C" void cUIThing_setOrientation(cUIThing* uiThing, int orientation) {
-    uiThing->mAttr = (int) (((uiThing->mAttr) & ~1) | (orientation & 1));
+void cUIThing::setOrientation(int orientation)
+{
+    mAttr = (int) (((mAttr) & ~1) | (orientation & 1));
 }
 #endif
 
@@ -1133,9 +1134,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getColour1);
  *
  * @param out  receives the colour (a, r, g, b)
  */
-extern "C" void cUIThing_getColour1(cUIThing* self, tARGB* out)
+void cUIThing::getColour1(tARGB* out)
 {
-    *out = *(&self->mColour);
+    *out = *(&mColour);
 }
 #endif
 //100%
@@ -1144,11 +1145,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_setRadAngle);
 /**
  * Sets the UI thing's rotation in radians (mAngle.z) to @p fparg0.
  *
- * @param uiThing  the cUIThing
  * @param fparg0  the angle in radians
  */
-extern "C" void cUIThing_setRadAngle(cUIThing* uiThing, float fparg0) {
-    uiThing->mAngle.z = fparg0;
+void cUIThing::setRadAngle(float fparg0)
+{
+    mAngle.z = fparg0;
 }
 #endif
 //100%
@@ -1157,11 +1158,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getRadAngle);
 /**
  * Returns the UI thing's rotation in radians (mAngle.z).
  *
- * @param uiThing  the cUIThing
  * @return mAngle.z
  */
-extern "C" float cUIThing_getRadAngle(cUIThing* uiThing) {
-    return (uiThing->mAngle.z);
+float cUIThing::getRadAngle()
+{
+    return (mAngle.z);
 }
 #endif
 //100%
@@ -1196,11 +1197,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_setPivot);
 /**
  * Sets the UI thing's pivot (mAttr bits 13-18) to the low 6 bits of @p pivot.
  *
- * @param uiThing  the cUIThing
  * @param pivot  the pivot code (0..63; tAttrThing_tAttrThing starts it at 9)
  */
-extern "C" void cUIThing_setPivot(cUIThing* uiThing, int pivot) {
-    uiThing->mAttr = (int) (((uiThing->mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 13));
+void cUIThing::setPivot(int pivot)
+{
+    mAttr = (int) (((mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 13));
 }
 #endif
 //100%
@@ -1209,11 +1210,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getPivot);
 /**
  * Returns the UI thing's pivot (mAttr bits 13-18, 0..63).
  *
- * @param uiThing  the cUIThing
  * @return the pivot code
  */
-extern "C" int cUIThing_getPivot(cUIThing* uiThing) {
-    return ((unsigned int) ((unsigned int)uiThing->mAttr) >> 0xD) & 0x3F;
+int cUIThing::getPivot()
+{
+    return ((unsigned int) ((unsigned int)mAttr) >> 0xD) & 0x3F;
 }
 #endif
 //100%
@@ -1222,11 +1223,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_setHashName);
 /**
  * Sets the UI thing's hash name (mHashName) to @p hashName.
  *
- * @param uiThing  the cUIThing
  * @param hashName  the hashed name
  */
-extern "C" void cUIThing_setHashName(cUIThing* uiThing, int hashName) {
-    uiThing->mHashName = hashName;
+void cUIThing::setHashName(int hashName)
+{
+    mHashName = hashName;
 }
 #endif
 //100%
@@ -1235,11 +1236,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getHashName);
 /**
  * Returns the UI thing's hash name (mHashName).
  *
- * @param uiThing  the cUIThing
  * @return mHashName
  */
-extern "C" int cUIThing_getHashName(cUIThing* uiThing) {
-    return (uiThing->mHashName);
+int cUIThing::getHashName()
+{
+    return (mHashName);
 }
 #endif
 
@@ -1296,11 +1297,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_setParent);
 /**
  * Sets the UI thing's parent (mpParent, at +0x40) to @p parent.
  *
- * @param uiThing  the cUIThing
  * @param parent  the new parent thing
  */
-extern "C" void cUIThing_setParent(cUIThing* uiThing, int parent) {
-    uiThing->mpParent = (cUIThing*)parent;
+void cUIThing::setParent(int parent)
+{
+    mpParent = (cUIThing*)parent;
 }
 #endif
 //100%
@@ -1309,11 +1310,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getParent);
 /**
  * Returns the UI thing's parent (mpParent).
  *
- * @param uiThing  the cUIThing
  * @return mpParent
  */
-extern "C" int cUIThing_getParent(cUIThing* uiThing) {
-    return ((int)uiThing->mpParent);
+int cUIThing::getParent()
+{
+    return ((int)mpParent);
 }
 #endif
 //100%
@@ -1324,9 +1325,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getPosition);
  *
  * @param out  receives the position
  */
-extern "C" void cUIThing_getPosition(cUIThing* self, t3Vector* out)
+void cUIThing::getPosition(t3Vector* out)
 {
-    *out = *(&self->mPosition);
+    *out = *(&mPosition);
 }
 #endif
 //100%
@@ -1337,9 +1338,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setPosition);
  *
  * @param out  the new position (read, despite its name; On Tour vec)
  */
-extern "C" void cUIThing_setPosition(cUIThing* self, t3Vector* out)
+void cUIThing::setPosition(t3Vector* out)
 {
-    *(&self->mPosition) = *out;
+    *(&mPosition) = *out;
 }
 #endif
 //100%
@@ -1350,9 +1351,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getScale);
  *
  * @param out  receives the scale
  */
-extern "C" void cUIThing_getScale(cUIThing* self, t3Vector* out)
+void cUIThing::getScale(t3Vector* out)
 {
-    *out = *(&self->mScale);
+    *out = *(&mScale);
 }
 #endif
 //100%
@@ -1363,9 +1364,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setScale);
  *
  * @param out  the new scale (read, despite its name; On Tour vec)
  */
-extern "C" void cUIThing_setScale(cUIThing* self, t3Vector* out)
+void cUIThing::setScale(t3Vector* out)
 {
-    *(&self->mScale) = *out;
+    *(&mScale) = *out;
 }
 #endif
 //100%
@@ -1374,11 +1375,11 @@ INCLUDE_ASM("ui/uivector", cUIThing_getScreen);
 /**
  * Returns the screen the UI thing belongs to (mpScreen).
  *
- * @param uiThing  the cUIThing
  * @return mpScreen
  */
-extern "C" int cUIThing_getScreen(cUIThing* uiThing) {
-    return ((int)uiThing->mpScreen);
+int cUIThing::getScreen()
+{
+    return ((int)mpScreen);
 }
 #endif
 
@@ -1583,12 +1584,12 @@ extern void* cUIIcon_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIIcon_cUIIcon1(cUIIcon* self)
+void* cUIIcon::cUIIcon1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIIcon_vtbl;
-    func_0021CCC8(&self->mAttrIcon);
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIIcon_vtbl;
+    func_0021CCC8(&mAttrIcon);
+    return ((char*)this);
 }
 #endif
 //100%
@@ -1673,11 +1674,11 @@ INCLUDE_ASM("ui/uivector", cUIIcon_isTiled);
 /**
  * Returns whether the icon is drawn tiled (mAttrIcon bit 0, mIconTiled).
  *
- * @param uiIcon  the cUIIcon
  * @return 1 when tiled, else 0
  */
-extern "C" int cUIIcon_isTiled(cUIIcon* uiIcon) {
-    return (*(int*)&uiIcon->mAttrIcon) & 1;
+int cUIIcon::isTiled()
+{
+    return (*(int*)&mAttrIcon) & 1;
 }
 #endif
 //100%
@@ -1686,11 +1687,11 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setTiled);
 /**
  * Sets the icon's tiled flag (mAttrIcon bit 0, mIconTiled) to @p tiled != 0.
  *
- * @param uiIcon  the cUIIcon
  * @param tiled  non-zero to draw the texture tiled
  */
-extern "C" void cUIIcon_setTiled(cUIIcon* uiIcon, int tiled) {
-    *(int*)&uiIcon->mAttrIcon = (int) (((*(int*)&uiIcon->mAttrIcon) & ~1) | (tiled != 0));
+void cUIIcon::setTiled(int tiled)
+{
+    *(int*)&mAttrIcon = (int) (((*(int*)&mAttrIcon) & ~1) | (tiled != 0));
 }
 #endif
 //100%
@@ -1699,11 +1700,11 @@ INCLUDE_ASM("ui/uivector", cUIIcon_isIconFlip);
 /**
  * Returns the icon's flip flag (mAttrIcon bit 1, mIconFlip).
  *
- * @param uiIcon  the cUIIcon
  * @return 1 when flipped, else 0
  */
-extern "C" int cUIIcon_isIconFlip(cUIIcon* uiIcon) {
-    return ((int) (*(int*)&uiIcon->mAttrIcon) >> 1) & 1;
+int cUIIcon::isIconFlip()
+{
+    return ((int) (*(int*)&mAttrIcon) >> 1) & 1;
 }
 #endif
 //100%
@@ -1714,9 +1715,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setIconFlip);
  *
  * @param enable  1 to flip the icon, 0 not to
  */
-extern "C" void cUIIcon_setIconFlip(cUIIcon* self, int enable)
+void cUIIcon::setIconFlip(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrIcon)->bit1 = enable;
+    ((sUIVectorFlags*)&mAttrIcon)->bit1 = enable;
 }
 #endif
 //100%
@@ -1726,11 +1727,11 @@ INCLUDE_ASM("ui/uivector", cUIIcon_isIconRotate);
  * Returns whether the icon is drawn rotated: whether its 2-bit rotate field (mAttrIcon bits 2-3, mIconRotate) is
  * non-zero.
  *
- * @param uiIcon  the cUIIcon
  * @return 1 when rotated, else 0
  */
-extern "C" int cUIIcon_isIconRotate(cUIIcon* uiIcon) {
-    return ((*(int*)&uiIcon->mAttrIcon) & 0xC) != 0;
+int cUIIcon::isIconRotate()
+{
+    return ((*(int*)&mAttrIcon) & 0xC) != 0;
 }
 #endif
 //100%
@@ -1747,9 +1748,9 @@ struct sUIVectorFlagsB {
  *
  * @param enable  non-zero to draw the icon rotated
  */
-extern "C" void cUIIcon_setIconRotate(cUIIcon* self, int enable)
+void cUIIcon::setIconRotate(int enable)
 {
-    ((sUIVectorFlagsB*)&self->mAttrIcon)->bits23 = enable;
+    ((sUIVectorFlagsB*)&mAttrIcon)->bits23 = enable;
 }
 #endif
 //100%
@@ -1758,11 +1759,11 @@ INCLUDE_ASM("ui/uivector", cUIIcon_getElement);
 /**
  * Returns the icon's texture element (mpTextureElem; null when the icon draws by texture id).
  *
- * @param uiIcon  the cUIIcon
  * @return mpTextureElem
  */
-extern "C" int cUIIcon_getElement(cUIIcon* uiIcon) {
-    return ((int)uiIcon->mpTextureElem);
+int cUIIcon::getElement()
+{
+    return ((int)mpTextureElem);
 }
 #endif
 //100%
@@ -1771,12 +1772,12 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setElement);
 /**
  * Makes the icon draw the texture element @p textureElem: stores it in mpTextureElem and sets mTextureID to -1.
  *
- * @param icon  the cUIIcon
  * @param textureElem  the cTextureElement to draw
  */
-extern "C" void cUIIcon_setElement(cUIIcon* icon, int textureElem) {
-    icon->mpTextureElem = (const cTextureElement*)textureElem;
-    icon->mTextureID = -1;
+void cUIIcon::setElement(int textureElem)
+{
+    mpTextureElem = (const cTextureElement*)textureElem;
+    mTextureID = -1;
 }
 #endif
 //100%
@@ -1785,11 +1786,11 @@ INCLUDE_ASM("ui/uivector", cUIIcon_getTexture);
 /**
  * Returns the icon's texture id (mTextureID; -1 when it draws a texture element instead).
  *
- * @param uiIcon  the cUIIcon
  * @return mTextureID
  */
-extern "C" int cUIIcon_getTexture(cUIIcon* uiIcon) {
-    return (uiIcon->mTextureID);
+int cUIIcon::getTexture()
+{
+    return (mTextureID);
 }
 #endif
 //100%
@@ -1798,12 +1799,12 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setTexture);
 /**
  * Makes the icon draw texture @p textureId: stores it in mTextureID and clears mpTextureElem.
  *
- * @param icon  the cUIIcon
  * @param textureId  the texture id
  */
-extern "C" void cUIIcon_setTexture(cUIIcon* icon, int textureId) {
-    icon->mTextureID = textureId;
-    icon->mpTextureElem = 0;
+void cUIIcon::setTexture(int textureId)
+{
+    mTextureID = textureId;
+    mpTextureElem = 0;
 }
 #endif
 //100%
@@ -1844,12 +1845,12 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setTileUV1);
  * @param x  how many times the texture repeats across
  * @param y  how many times the texture repeats down
  */
-extern "C" void cUIIcon_setTileUV1(cUIIcon* self, float x, float y)
+void cUIIcon::setTileUV1(float x, float y)
 {
     sVec2 tileUv;
     tileUv.x = x;
     tileUv.y = y;
-    *(sVec2*)&self->mTileUV[0] = tileUv;
+    *(sVec2*)&mTileUV[0] = tileUv;
 }
 #endif
 //100%
@@ -1867,12 +1868,12 @@ extern void* cUIGroup_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIGroup_cUIGroup1(cUIGroup* self)
+void* cUIGroup::cUIGroup1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIGroup_vtbl;
-    cList_cList(&self->mList);
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIGroup_vtbl;
+    cList_cList(&mList);
+    return ((char*)this);
 }
 #endif
 //100%
@@ -1921,7 +1922,7 @@ extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
     VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v(&self->mList);
     VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
+    self->mList.mEnd.destroyListNode();
     VPTR_OF(cListNode, &self->mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList));
     cUIThing__cUIThing_2(((char*)self), flag);
@@ -2135,7 +2136,7 @@ extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
     VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v(&self->mList);
     VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
+    self->mList.mEnd.destroyListNode();
     VPTR_OF(cListNode, &self->mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList));
     cUIThing__cUIThing_2(((char*)self), flag);
@@ -2178,11 +2179,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_isFlipInput);
 /**
  * Returns the menu's flip-input flag (mAttrMenu bit 1, mFlipInput).
  *
- * @param uiMenu  the cUIMenu
  * @return 1 when input is flipped, else 0
  */
-extern "C" int cUIMenu_isFlipInput(cUIMenu* uiMenu) {
-    return ((int) (*(int*)&uiMenu->mAttrMenu) >> 1) & 1;
+int cUIMenu::isFlipInput()
+{
+    return ((int) (*(int*)&mAttrMenu) >> 1) & 1;
 }
 #endif
 //100%
@@ -2193,9 +2194,9 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setFlipInput);
  *
  * @param enable  1 to flip the menu's input directions, 0 not to
  */
-extern "C" void cUIMenu_setFlipInput(cUIMenu* self, int enable)
+void cUIMenu::setFlipInput(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrMenu)->bit1 = enable;
+    ((sUIVectorFlags*)&mAttrMenu)->bit1 = enable;
 }
 #endif
 //100%
@@ -2205,11 +2206,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_isDisableDirSound);
  * Returns the menu's disable-direction-sound flag (mAttrMenu bit 3, mDisableDirSound): when set the menu stays silent
  * as the selection moves.
  *
- * @param uiMenu  the cUIMenu
  * @return 1 when the direction sound is off, else 0
  */
-extern "C" int cUIMenu_isDisableDirSound(cUIMenu* uiMenu) {
-    return ((int) (*(int*)&uiMenu->mAttrMenu) >> 3) & 1;
+int cUIMenu::isDisableDirSound()
+{
+    return ((int) (*(int*)&mAttrMenu) >> 3) & 1;
 }
 #endif
 //100%
@@ -2220,9 +2221,9 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setDisableDirSound);
  *
  * @param enable  nonzero (odd) to silence direction changes (On Tour bool a)
  */
-extern "C" void cUIMenu_setDisableDirSound(cUIMenu* self, int enable)
+void cUIMenu::setDisableDirSound(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrMenu)->bit3 = enable;
+    ((sUIVectorFlags*)&mAttrMenu)->bit3 = enable;
 }
 #endif
 //100%
@@ -2232,11 +2233,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_isCreateThead);
  * Returns the menu's create-thread flag (mAttrMenu bit 0, mCreateThread), which cUIMenu_onInputChangeItem passes on to
  * cUIMenu_setSelected.
  *
- * @param uiMenu  the cUIMenu
  * @return 1 when set, else 0
  */
-extern "C" int cUIMenu_isCreateThead(cUIMenu* uiMenu) {
-    return (*(int*)&uiMenu->mAttrMenu) & 1;
+int cUIMenu::isCreateThead()
+{
+    return (*(int*)&mAttrMenu) & 1;
 }
 #endif
 //100%
@@ -2245,11 +2246,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setCreateThread);
 /**
  * Sets the menu's create-thread flag (mAttrMenu bit 0, mCreateThread) to @p createThread != 0.
  *
- * @param uiMenu  the cUIMenu
  * @param createThread  non-zero to set the flag
  */
-extern "C" void cUIMenu_setCreateThread(cUIMenu* uiMenu, int createThread) {
-    *(int*)&uiMenu->mAttrMenu = (int) (((*(int*)&uiMenu->mAttrMenu) & ~1) | (createThread != 0));
+void cUIMenu::setCreateThread(int createThread)
+{
+    *(int*)&mAttrMenu = (int) (((*(int*)&mAttrMenu) & ~1) | (createThread != 0));
 }
 #endif
 //100%
@@ -2258,11 +2259,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getScrollIndex);
 /**
  * Returns the menu's current item index (mScrollItemCurrent).
  *
- * @param uiMenu  the cUIMenu
  * @return mScrollItemCurrent
  */
-extern "C" unsigned char cUIMenu_getScrollIndex(cUIMenu* uiMenu) {
-    return (uiMenu->mScrollItemCurrent);
+unsigned char cUIMenu::getScrollIndex()
+{
+    return (mScrollItemCurrent);
 }
 #endif
 //100%
@@ -2271,11 +2272,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getScrollOffset);
 /**
  * Returns the menu's scroll offset (mScrollItemOffset), the first item shown.
  *
- * @param uiMenu  the cUIMenu
  * @return mScrollItemOffset
  */
-extern "C" unsigned char cUIMenu_getScrollOffset(cUIMenu* uiMenu) {
-    return (uiMenu->mScrollItemOffset);
+unsigned char cUIMenu::getScrollOffset()
+{
+    return (mScrollItemOffset);
 }
 #endif
 //100%
@@ -2284,11 +2285,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getScrollNum);
 /**
  * Returns the menu's item count (mScrollItemNum).
  *
- * @param uiMenu  the cUIMenu
  * @return mScrollItemNum
  */
-extern "C" unsigned char cUIMenu_getScrollNum(cUIMenu* uiMenu) {
-    return (uiMenu->mScrollItemNum);
+unsigned char cUIMenu::getScrollNum()
+{
+    return (mScrollItemNum);
 }
 #endif
 //100%
@@ -2297,11 +2298,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollIndex);
 /**
  * Sets the menu's current item index (mScrollItemCurrent) to @p scrollItemCurrent, without touching the selection.
  *
- * @param uiMenu  the cUIMenu
  * @param scrollItemCurrent  the new index
  */
-extern "C" void cUIMenu_setScrollIndex(cUIMenu* uiMenu, signed char scrollItemCurrent) {
-    *(signed char*)&uiMenu->mScrollItemCurrent = scrollItemCurrent;
+void cUIMenu::setScrollIndex(signed char scrollItemCurrent)
+{
+    *(signed char*)&mScrollItemCurrent = scrollItemCurrent;
 }
 #endif
 //100%
@@ -2310,11 +2311,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollNum);
 /**
  * Sets the menu's item count (mScrollItemNum) to @p scrollItemNum.
  *
- * @param uiMenu  the cUIMenu
  * @param scrollItemNum  the new count
  */
-extern "C" void cUIMenu_setScrollNum(cUIMenu* uiMenu, signed char scrollItemNum) {
-    *(signed char*)&uiMenu->mScrollItemNum = scrollItemNum;
+void cUIMenu::setScrollNum(signed char scrollItemNum)
+{
+    *(signed char*)&mScrollItemNum = scrollItemNum;
 }
 #endif
 //100%
@@ -2323,11 +2324,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollOffset);
 /**
  * Sets the menu's scroll offset (mScrollItemOffset, the first item shown) to @p scrollItemOffset.
  *
- * @param uiMenu  the cUIMenu
  * @param scrollItemOffset  the new offset
  */
-extern "C" void cUIMenu_setScrollOffset(cUIMenu* uiMenu, signed char scrollItemOffset) {
-    *(signed char*)&uiMenu->mScrollItemOffset = scrollItemOffset;
+void cUIMenu::setScrollOffset(signed char scrollItemOffset)
+{
+    *(signed char*)&mScrollItemOffset = scrollItemOffset;
 }
 #endif
 //100%
@@ -2336,11 +2337,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getSelected);
 /**
  * Returns the menu's selected item (mpSelected).
  *
- * @param uiMenu  the cUIMenu
  * @return mpSelected
  */
-extern "C" int cUIMenu_getSelected(cUIMenu* uiMenu) {
-    return ((int)uiMenu->mpSelected);
+int cUIMenu::getSelected()
+{
+    return ((int)mpSelected);
 }
 #endif
 //100%
@@ -2349,11 +2350,11 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getSelectedIndex);
 /**
  * Returns the menu's selected item index (mScrollItemCurrent, the same byte cUIMenu_getScrollIndex returns).
  *
- * @param uiMenu  the cUIMenu
  * @return mScrollItemCurrent
  */
-extern "C" unsigned char cUIMenu_getSelectedIndex(cUIMenu* uiMenu) {
-    return (uiMenu->mScrollItemCurrent);
+unsigned char cUIMenu::getSelectedIndex()
+{
+    return (mScrollItemCurrent);
 }
 #endif
 //100%
@@ -2371,12 +2372,12 @@ extern void* cUIPair_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIPair_cUIPair1(cUIPair* self)
+void* cUIPair::cUIPair1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIPair_vtbl;
-    tAttrPair_tAttrPair(&self->mAttrPair);
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIPair_vtbl;
+    tAttrPair_tAttrPair(&mAttrPair);
+    return ((char*)this);
 }
 #endif
 //100%
@@ -2466,11 +2467,11 @@ INCLUDE_ASM("ui/uivector", cUIPair_getEntry);
 /**
  * Returns the pair's entry (label) object (mpEntry).
  *
- * @param uiPair  the cUIPair
  * @return mpEntry
  */
-extern "C" int cUIPair_getEntry(cUIPair* uiPair) {
-    return ((int)uiPair->mpEntry);
+int cUIPair::getEntry()
+{
+    return ((int)mpEntry);
 }
 #endif
 //100%
@@ -2483,11 +2484,11 @@ INCLUDE_ASM("ui/uivector", cUIPair_setEntry);
  *
  * @param obj  the new entry (On Tour pWidget)
  */
-extern "C" void cUIPair_setEntry(cUIPair* self, cUIThing* obj)
+void cUIPair::setEntry(cUIThing* obj)
 {
-    cUIThing* old = self->mpEntry;
+    cUIThing* old = mpEntry;
     delete old;
-    self->mpEntry = (cUIThing*)obj;
+    mpEntry = (cUIThing*)obj;
 }
 #endif
 //100%
@@ -2496,11 +2497,11 @@ INCLUDE_ASM("ui/uivector", cUIPair_getWidget);
 /**
  * Returns the pair's widget (value) object (mpWidget).
  *
- * @param uiPair  the cUIPair
  * @return mpWidget
  */
-extern "C" int cUIPair_getWidget(cUIPair* uiPair) {
-    return ((int)uiPair->mpWidget);
+int cUIPair::getWidget()
+{
+    return ((int)mpWidget);
 }
 #endif
 //100%
@@ -2513,11 +2514,11 @@ INCLUDE_ASM("ui/uivector", cUIPair_setWidget);
  *
  * @param obj  the new widget (On Tour pWidget)
  */
-extern "C" void cUIPair_setWidget(cUIPair* self, cUIThing* obj)
+void cUIPair::setWidget(cUIThing* obj)
 {
-    cUIThing* old = self->mpWidget;
+    cUIThing* old = mpWidget;
     delete old;
-    self->mpWidget = (cUIThing*)obj;
+    mpWidget = (cUIThing*)obj;
 }
 #endif
 //100%
@@ -2537,18 +2538,18 @@ extern void* cUIListBox_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIListBox_cUIListBox1(cUIListBox* self)
+void* cUIListBox::cUIListBox1()
 {
     int i;
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIListBox_vtbl;
-    tAttrListBox_tAttrListBox((unsigned char*)(&self->mAttrListBox));
-    char* entry = (char*)&self->mpEntries[0];
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIListBox_vtbl;
+    tAttrListBox_tAttrListBox((unsigned char*)(&mAttrListBox));
+    char* entry = (char*)&mpEntries[0];
     for (i = 0x1F; i != -1; i--) {
         tListBoxEntry_tListBoxEntry((tListBoxEntry*)entry);
         entry += 0x14;
     }
-    return ((char*)self);
+    return ((char*)this);
 }
 #endif
 
@@ -2597,11 +2598,11 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setFontIndex);
 /**
  * Sets the list box's font index (mAttrListBox bits 0-1, mFont) to the low two bits of @p font.
  *
- * @param uiListBox  the cUIListBox
  * @param font  the font index (0..3)
  */
-extern "C" void cUIListBox_setFontIndex(cUIListBox* uiListBox, int font) {
-    *(int*)&uiListBox->mAttrListBox = (int) (((*(int*)&uiListBox->mAttrListBox) & ~3) | (font & 3));
+void cUIListBox::setFontIndex(int font)
+{
+    *(int*)&mAttrListBox = (int) (((*(int*)&mAttrListBox) & ~3) | (font & 3));
 }
 #endif
 //100%
@@ -2610,11 +2611,11 @@ INCLUDE_ASM("ui/uivector", cUIListBox_hasShadow);
 /**
  * Returns whether the list box draws its text with a shadow (mAttrListBox bit 2, mShadow).
  *
- * @param uiListBox  the cUIListBox
  * @return 1 when shadowed, else 0
  */
-extern "C" int cUIListBox_hasShadow(cUIListBox* uiListBox) {
-    return ((int) (*(int*)&uiListBox->mAttrListBox) >> 2) & 1;
+int cUIListBox::hasShadow()
+{
+    return ((int) (*(int*)&mAttrListBox) >> 2) & 1;
 }
 #endif
 
@@ -2637,11 +2638,11 @@ INCLUDE_ASM("ui/uivector", cUIListBox_getUseStaticColour);
 /**
  * Returns whether the list box uses its static colour (mAttrListBox bit 5, mStaticColour).
  *
- * @param uiListBox  the cUIListBox
  * @return 1 when set, else 0
  */
-extern "C" int cUIListBox_getUseStaticColour(cUIListBox* uiListBox) {
-    return ((int) (*(int*)&uiListBox->mAttrListBox) >> 5) & 1;
+int cUIListBox::getUseStaticColour()
+{
+    return ((int) (*(int*)&mAttrListBox) >> 5) & 1;
 }
 #endif
 
@@ -2665,11 +2666,11 @@ INCLUDE_ASM("ui/uivector", cUIListBox_isWrapping);
 /**
  * Returns whether the list box wraps around at its ends: the cUIThing wrap flag (mAttr bit 7).
  *
- * @param uiListBox  the cUIListBox
  * @return 1 when wrapping, else 0
  */
-extern "C" int cUIListBox_isWrapping(cUIListBox* uiListBox) {
-    int wrapBits = uiListBox->mAttr >> 7;
+int cUIListBox::isWrapping()
+{
+    int wrapBits = mAttr >> 7;
     return wrapBits & 1;
 }
 #endif
@@ -2681,9 +2682,9 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setWrapping);
  *
  * @param enable  1 to wrap around at the ends, 0 not to
  */
-extern "C" void cUIListBox_setWrapping(cUIListBox* self, int enable)
+void cUIListBox::setWrapping(int enable)
 {
-    ((sUIVectorFlags8*)&self->mAttr)->bit7 = enable;
+    ((sUIVectorFlags8*)&mAttr)->bit7 = enable;
 }
 #endif
 //100%
@@ -2694,9 +2695,9 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setShadowColour);
  *
  * @param in  the shadow colour (On Tour pSColour)
  */
-extern "C" void cUIListBox_setShadowColour(cUIListBox* self, tARGB* in)
+void cUIListBox::setShadowColour(tARGB* in)
 {
-    *(&self->mShadowColour) = *in;
+    *(&mShadowColour) = *in;
 }
 #endif
 //100%
@@ -2707,9 +2708,9 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setStaticColour);
  *
  * @param in  the static colour (On Tour pSColour)
  */
-extern "C" void cUIListBox_setStaticColour(cUIListBox* self, tARGB* in)
+void cUIListBox::setStaticColour(tARGB* in)
 {
-    *(&self->mStaticColour) = *in;
+    *(&mStaticColour) = *in;
 }
 #endif
 //100%
@@ -2718,11 +2719,11 @@ INCLUDE_ASM("ui/uivector", cUIListBox_getCurrentEntryIndex);
 /**
  * Returns the index of the list box's current entry (mCurrentEntry).
  *
- * @param uiListBox  the cUIListBox
  * @return mCurrentEntry
  */
-extern "C" unsigned char cUIListBox_getCurrentEntryIndex(cUIListBox* uiListBox) {
-    return (uiListBox->mCurrentEntry);
+unsigned char cUIListBox::getCurrentEntryIndex()
+{
+    return (mCurrentEntry);
 }
 #endif
 //100%
@@ -2731,11 +2732,11 @@ INCLUDE_ASM("ui/uivector", cUIListBox_getNumEntries);
 /**
  * Returns the number of entries in the list box (mNumEntries).
  *
- * @param uiListBox  the cUIListBox
  * @return mNumEntries
  */
-extern "C" unsigned char cUIListBox_getNumEntries(cUIListBox* uiListBox) {
-    return (uiListBox->mNumEntries);
+unsigned char cUIListBox::getNumEntries()
+{
+    return (mNumEntries);
 }
 #endif
 //100%
@@ -2755,14 +2756,14 @@ extern void* cUIState_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIState_cUIState2(cUIState* self)
+void* cUIState::cUIState2()
 {
-    self->mpNext = (cListNode*)self;
-    self->mpPrev = (cListNode*)self;
-    VPTR_OF(cListNode, self) = cUIState_vtbl;
-    tAttrState_tAttrState(&self->mAttrState);
-    cList_cList(&self->mScreens);
-    return ((char*)self);
+    mpNext = (cListNode*)this;
+    mpPrev = (cListNode*)this;
+    VPTR_OF(cListNode, this) = cUIState_vtbl;
+    tAttrState_tAttrState(&mAttrState);
+    cList_cList(&mScreens);
+    return ((char*)this);
 }
 #endif
 //100%
@@ -2771,11 +2772,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setHashName);
 /**
  * Sets the state's hash name (mHashName, the state id) to @p hashName.
  *
- * @param uiState  the cUIState
  * @param hashName  the hashed name
  */
-extern "C" void cUIState_setHashName(cUIState* uiState, int hashName) {
-    uiState->mHashName = hashName;
+void cUIState::setHashName(int hashName)
+{
+    mHashName = hashName;
 }
 #endif
 //100%
@@ -2784,11 +2785,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getHashName);
 /**
  * Returns the state's hash name (mHashName, the state id).
  *
- * @param uiState  the cUIState
  * @return mHashName
  */
-extern "C" int cUIState_getHashName(cUIState* uiState) {
-    return (uiState->mHashName);
+int cUIState::getHashName()
+{
+    return (mHashName);
 }
 #endif
 //100%
@@ -2797,11 +2798,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getEngine);
 /**
  * Returns the UI engine that owns the state (mpEngine).
  *
- * @param uiState  the cUIState
  * @return mpEngine
  */
-extern "C" int cUIState_getEngine(cUIState* uiState) {
-    return ((int)uiState->mpEngine);
+int cUIState::getEngine()
+{
+    return ((int)mpEngine);
 }
 #endif
 //100%
@@ -2810,11 +2811,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setCurrentCtrl);
 /**
  * Sets the state's current controller (mCurrentCtrl) to @p currentCtrl.
  *
- * @param uiState  the cUIState
  * @param currentCtrl  the controller index (-1 for none)
  */
-extern "C" void cUIState_setCurrentCtrl(cUIState* uiState, signed char currentCtrl) {
-    uiState->mCurrentCtrl = currentCtrl;
+void cUIState::setCurrentCtrl(signed char currentCtrl)
+{
+    mCurrentCtrl = currentCtrl;
 }
 #endif
 //100%
@@ -2823,11 +2824,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getCurrentCtrl);
 /**
  * Returns the state's current controller (mCurrentCtrl, sign-extended; -1 for none).
  *
- * @param uiState  the cUIState
  * @return mCurrentCtrl
  */
-extern "C" signed char cUIState_getCurrentCtrl(cUIState* uiState) {
-    return (uiState->mCurrentCtrl);
+signed char cUIState::getCurrentCtrl()
+{
+    return (mCurrentCtrl);
 }
 #endif
 //100%
@@ -2836,11 +2837,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setAllCtrlBits);
 /**
  * Sets the state's whole controller bit mask (mCtrlBits) to @p ctrlBits.
  *
- * @param uiState  the cUIState
  * @param ctrlBits  one bit per controller that may drive the state
  */
-extern "C" void cUIState_setAllCtrlBits(cUIState* uiState, signed char ctrlBits) {
-    *(signed char*)&uiState->mCtrlBits = ctrlBits;
+void cUIState::setAllCtrlBits(signed char ctrlBits)
+{
+    *(signed char*)&mCtrlBits = ctrlBits;
 }
 #endif
 //100%
@@ -2849,11 +2850,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getCtrlBitMask);
 /**
  * Returns the state's controller bit mask (mCtrlBits).
  *
- * @param uiState  the cUIState
  * @return mCtrlBits
  */
-extern "C" unsigned char cUIState_getCtrlBitMask(cUIState* uiState) {
-    return (uiState->mCtrlBits);
+unsigned char cUIState::getCtrlBitMask()
+{
+    return (mCtrlBits);
 }
 #endif
 //100%
@@ -2862,11 +2863,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getMiscData);
 /**
  * Returns the state's caller-defined data word (miMiscData).
  *
- * @param uiState  the cUIState
  * @return miMiscData
  */
-extern "C" int cUIState_getMiscData(cUIState* uiState) {
-    return (uiState->miMiscData);
+int cUIState::getMiscData()
+{
+    return (miMiscData);
 }
 #endif
 //100%
@@ -2875,11 +2876,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setMiscData);
 /**
  * Sets the state's caller-defined data word (miMiscData) to @p miscData.
  *
- * @param uiState  the cUIState
  * @param miscData  the value to store
  */
-extern "C" void cUIState_setMiscData(cUIState* uiState, int miscData) {
-    uiState->miMiscData = miscData;
+void cUIState::setMiscData(int miscData)
+{
+    miMiscData = miscData;
 }
 #endif
 //100%
@@ -2888,11 +2889,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getMode);
 /**
  * Returns the state's mode (mAttrState bits 8-13, read from byte +0x1D; the constructors start it at 2).
  *
- * @param uiState  the cUIState
  * @return the mode (0..63)
  */
-extern "C" int cUIState_getMode(cUIState* uiState) {
-    return (*(unsigned char *)((char*)(uiState) + (0x1D))) & 0x3F;
+int cUIState::getMode()
+{
+    return (*(unsigned char *)((char*)(this) + (0x1D))) & 0x3F;
 }
 #endif
 //100%
@@ -2901,11 +2902,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setMode);
 /**
  * Sets the state's mode (mAttrState bits 8-13) to the low six bits of @p mode.
  *
- * @param uiState  the cUIState
  * @param mode  the mode (0..63)
  */
-extern "C" void cUIState_setMode(cUIState* uiState, int mode) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x3F00) | ((mode & 0x3F) << 8));
+void cUIState::setMode(int mode)
+{
+    mAttrState = (int) (((mAttrState) & ~0x3F00) | ((mode & 0x3F) << 8));
 }
 #endif
 //100%
@@ -2914,11 +2915,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isFirstTime);
 /**
  * Returns the state's first-time flag (mAttrState bit 4).
  *
- * @param uiState  the cUIState
  * @return 1 when set, else 0
  */
-extern "C" int cUIState_isFirstTime(cUIState* uiState) {
-    return ((int) (uiState->mAttrState) >> 4) & 1;
+int cUIState::isFirstTime()
+{
+    return ((int) (mAttrState) >> 4) & 1;
 }
 #endif
 //100%
@@ -2927,11 +2928,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setFirstTime);
 /**
  * Sets the state's first-time flag (mAttrState bit 4) to the low bit of @p firstTime.
  *
- * @param uiState  the cUIState
  * @param firstTime  1 to set the flag, 0 to clear it
  */
-extern "C" void cUIState_setFirstTime(cUIState* uiState, int firstTime) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x10) | ((firstTime & 1) * 0x10));
+void cUIState::setFirstTime(int firstTime)
+{
+    mAttrState = (int) (((mAttrState) & ~0x10) | ((firstTime & 1) * 0x10));
 }
 #endif
 //100%
@@ -2940,11 +2941,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isEnabled);
 /**
  * Returns the state's enabled flag (mAttrState bit 5).
  *
- * @param uiState  the cUIState
  * @return 1 when enabled, else 0
  */
-extern "C" int cUIState_isEnabled(cUIState* uiState) {
-    return ((int) (uiState->mAttrState) >> 5) & 1;
+int cUIState::isEnabled()
+{
+    return ((int) (mAttrState) >> 5) & 1;
 }
 #endif
 //100%
@@ -2953,11 +2954,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setEnabled);
 /**
  * Sets the state's enabled flag (mAttrState bit 5) to the low bit of @p enabled.
  *
- * @param uiState  the cUIState
  * @param enabled  1 to enable the state, 0 to disable it
  */
-extern "C" void cUIState_setEnabled(cUIState* uiState, int enabled) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x20) | ((enabled & 1) << 5));
+void cUIState::setEnabled(int enabled)
+{
+    mAttrState = (int) (((mAttrState) & ~0x20) | ((enabled & 1) << 5));
 }
 #endif
 //100%
@@ -2966,11 +2967,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isPushCheck);
 /**
  * Returns the state's push-check flag (mAttrState bit 14).
  *
- * @param uiState  the cUIState
  * @return 1 when set, else 0
  */
-extern "C" int cUIState_isPushCheck(cUIState* uiState) {
-    return ((int) (uiState->mAttrState) >> 0xE) & 1;
+int cUIState::isPushCheck()
+{
+    return ((int) (mAttrState) >> 0xE) & 1;
 }
 #endif
 //100%
@@ -2979,11 +2980,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setPushCheck);
 /**
  * Sets the state's push-check flag (mAttrState bit 14) to the low bit of @p pushCheck.
  *
- * @param uiState  the cUIState
  * @param pushCheck  1 to set the flag, 0 to clear it
  */
-extern "C" void cUIState_setPushCheck(cUIState* uiState, int pushCheck) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x4000) | ((pushCheck & 1) << 0xE));
+void cUIState::setPushCheck(int pushCheck)
+{
+    mAttrState = (int) (((mAttrState) & ~0x4000) | ((pushCheck & 1) << 0xE));
 }
 #endif
 //100%
@@ -2992,11 +2993,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isPopFloor);
 /**
  * Returns the state's pop-floor flag (mAttrState bit 15).
  *
- * @param uiState  the cUIState
  * @return 1 when set, else 0
  */
-extern "C" int cUIState_isPopFloor(cUIState* uiState) {
-    return ((int) (uiState->mAttrState) >> 0xF) & 1;
+int cUIState::isPopFloor()
+{
+    return ((int) (mAttrState) >> 0xF) & 1;
 }
 #endif
 //100%
@@ -3005,11 +3006,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setPopFloor);
 /**
  * Sets the state's pop-floor flag (mAttrState bit 15) to the low bit of @p popFloor.
  *
- * @param uiState  the cUIState
  * @param popFloor  1 to set the flag, 0 to clear it
  */
-extern "C" void cUIState_setPopFloor(cUIState* uiState, int popFloor) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & 0xFFFF7FFF) | ((popFloor & 1) << 0xF));
+void cUIState::setPopFloor(int popFloor)
+{
+    mAttrState = (int) (((mAttrState) & 0xFFFF7FFF) | ((popFloor & 1) << 0xF));
 }
 #endif
 //100%
@@ -3018,11 +3019,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isExplicit);
 /**
  * Returns the state's explicit flag (mAttrState bit 6).
  *
- * @param uiState  the cUIState
  * @return 1 when set, else 0
  */
-extern "C" int cUIState_isExplicit(cUIState* uiState) {
-    return ((int) (uiState->mAttrState) >> 6) & 1;
+int cUIState::isExplicit()
+{
+    return ((int) (mAttrState) >> 6) & 1;
 }
 #endif
 //100%
@@ -3031,11 +3032,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setExplicit);
 /**
  * Sets the state's explicit flag (mAttrState bit 6) to the low bit of @p isExplicit.
  *
- * @param uiState  the cUIState
  * @param isExplicit  1 to set the flag, 0 to clear it
  */
-extern "C" void cUIState_setExplicit(cUIState* uiState, int isExplicit) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x40) | ((isExplicit & 1) << 6));
+void cUIState::setExplicit(int isExplicit)
+{
+    mAttrState = (int) (((mAttrState) & ~0x40) | ((isExplicit & 1) << 6));
 }
 #endif
 //100%
@@ -3044,11 +3045,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isPendingDelete);
 /**
  * Returns the state's pending-delete flag (mAttrState bit 7).
  *
- * @param uiState  the cUIState
  * @return 1 when set, else 0
  */
-extern "C" int cUIState_isPendingDelete(cUIState* uiState) {
-    int pendingBits = uiState->mAttrState >> 7;
+int cUIState::isPendingDelete()
+{
+    int pendingBits = mAttrState >> 7;
     return pendingBits & 1;
 }
 #endif
@@ -3058,11 +3059,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setPendingDelete);
 /**
  * Sets the state's pending-delete flag (mAttrState bit 7) to the low bit of @p pendingDelete.
  *
- * @param uiState  the cUIState
  * @param pendingDelete  1 to set the flag, 0 to clear it
  */
-extern "C" void cUIState_setPendingDelete(cUIState* uiState, int pendingDelete) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x80) | ((pendingDelete & 1) << 7));
+void cUIState::setPendingDelete(int pendingDelete)
+{
+    mAttrState = (int) (((mAttrState) & ~0x80) | ((pendingDelete & 1) << 7));
 }
 #endif
 //100%
@@ -3071,11 +3072,11 @@ INCLUDE_ASM("ui/uivector", cUIState_hasPopup);
 /**
  * Returns whether the state has a popup open: whether its 2-bit popup count (mAttrState bits 1-2) is non-zero.
  *
- * @param uiState  the cUIState
  * @return 1 when the count is non-zero, else 0
  */
-extern "C" int cUIState_hasPopup(cUIState* uiState) {
-    return ((uiState->mAttrState) & 6) != 0;
+int cUIState::hasPopup()
+{
+    return ((mAttrState) & 6) != 0;
 }
 #endif
 //100%
@@ -3084,11 +3085,11 @@ INCLUDE_ASM("ui/uivector", cUIState_numPopup);
 /**
  * Returns the state's popup count (mAttrState bits 1-2, 0..3).
  *
- * @param uiState  the cUIState
  * @return the popup count
  */
-extern "C" int cUIState_numPopup(cUIState* uiState) {
-    return ((unsigned int) ((unsigned int)uiState->mAttrState) >> 1) & 3;
+int cUIState::numPopup()
+{
+    return ((unsigned int) ((unsigned int)mAttrState) >> 1) & 3;
 }
 #endif
 //100%
@@ -3097,11 +3098,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setHasPopup);
 /**
  * Sets the state's popup count (mAttrState bits 1-2) to the low two bits of @p popupCount.
  *
- * @param uiState  the cUIState
  * @param popupCount  the count (0..3)
  */
-extern "C" void cUIState_setHasPopup(cUIState* uiState, int popupCount) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~6) | ((popupCount & 3) * 2));
+void cUIState::setHasPopup(int popupCount)
+{
+    mAttrState = (int) (((mAttrState) & ~6) | ((popupCount & 3) * 2));
 }
 #endif
 //100%
@@ -3114,9 +3115,9 @@ struct sUIVecMode1C {
 /**
  * Increments the state's popup count (mHasPopup, the 2-bit field at bits 1-2 of mAttrState). It wraps from 3 to 0.
  */
-extern "C" void cUIState_incrementPopup(cUIState* self)
+void cUIState::incrementPopup()
 {
-    sUIVecMode1C* attr = (sUIVecMode1C*)(&self->mAttrState);
+    sUIVecMode1C* attr = (sUIVecMode1C*)(&mAttrState);
     attr->mode = attr->mode + 1;
 }
 #endif
@@ -3126,9 +3127,9 @@ INCLUDE_ASM("ui/uivector", cUIState_decrementPopup);
 /**
  * Decrements the state's popup count (mHasPopup, bits 1-2 of mAttrState) when it is non-zero.
  */
-extern "C" void cUIState_decrementPopup(cUIState* self)
+void cUIState::decrementPopup()
 {
-    sUIVecMode1C* attr = (sUIVecMode1C*)(&self->mAttrState);
+    sUIVecMode1C* attr = (sUIVecMode1C*)(&mAttrState);
     if (attr->mode != 0)
         attr->mode = attr->mode - 1;
 }
@@ -3139,11 +3140,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isPopup);
 /**
  * Returns whether the state is a popup (mAttrState bit 0).
  *
- * @param uiState  the cUIState
  * @return 1 for a popup, else 0
  */
-extern "C" int cUIState_isPopup(cUIState* uiState) {
-    return (uiState->mAttrState) & 1;
+int cUIState::isPopup()
+{
+    return (mAttrState) & 1;
 }
 #endif
 //100%
@@ -3152,11 +3153,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setPopup);
 /**
  * Sets the state's popup flag (mAttrState bit 0) to the low bit of @p isPopup.
  *
- * @param uiState  the cUIState
  * @param isPopup  1 to mark the state as a popup, 0 not to
  */
-extern "C" void cUIState_setPopup(cUIState* uiState, int isPopup) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~1) | (isPopup & 1));
+void cUIState::setPopup(int isPopup)
+{
+    mAttrState = (int) (((mAttrState) & ~1) | (isPopup & 1));
 }
 #endif
 //100%
@@ -3165,11 +3166,11 @@ INCLUDE_ASM("ui/uivector", cUIState_isVisible);
 /**
  * Returns the state's visible flag (mAttrState bit 3).
  *
- * @param uiState  the cUIState
  * @return 1 when visible, else 0
  */
-extern "C" int cUIState_isVisible(cUIState* uiState) {
-    return ((int) (uiState->mAttrState) >> 3) & 1;
+int cUIState::isVisible()
+{
+    return ((int) (mAttrState) >> 3) & 1;
 }
 #endif
 //100%
@@ -3178,11 +3179,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setVisible);
 /**
  * Sets the state's visible flag (mAttrState bit 3) to the low bit of @p visible.
  *
- * @param uiState  the cUIState
  * @param visible  1 to show the state, 0 to hide it
  */
-extern "C" void cUIState_setVisible(cUIState* uiState, int visible) {
-    uiState->mAttrState = (int) (((uiState->mAttrState) & ~8) | ((visible & 1) * 8));
+void cUIState::setVisible(int visible)
+{
+    mAttrState = (int) (((mAttrState) & ~8) | ((visible & 1) * 8));
 }
 #endif
 
@@ -3282,11 +3283,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setParentState);
 /**
  * Sets the state's parent state (mpParentState) to @p parentState.
  *
- * @param uiState  the cUIState
  * @param parentState  the new parent state
  */
-extern "C" void cUIState_setParentState(cUIState* uiState, int parentState) {
-    uiState->mpParentState = (cUIState*)parentState;
+void cUIState::setParentState(int parentState)
+{
+    mpParentState = (cUIState*)parentState;
 }
 #endif
 //100%
@@ -3295,11 +3296,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getParentState);
 /**
  * Returns the state's parent state (mpParentState).
  *
- * @param uiState  the cUIState
  * @return mpParentState
  */
-extern "C" int cUIState_getParentState(cUIState* uiState) {
-    return ((int)uiState->mpParentState);
+int cUIState::getParentState()
+{
+    return ((int)mpParentState);
 }
 #endif
 //100%
@@ -3308,11 +3309,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getScreen);
 /**
  * Returns the state's screen (mpScreen).
  *
- * @param uiState  the cUIState
  * @return mpScreen
  */
-extern "C" int cUIState_getScreen(cUIState* uiState) {
-    return ((int)uiState->mpScreen);
+int cUIState::getScreen()
+{
+    return ((int)mpScreen);
 }
 #endif
 //100%
@@ -3321,11 +3322,11 @@ INCLUDE_ASM("ui/uivector", cUIState_setUserNum);
 /**
  * Sets the user (player) number the state belongs to (mUserNum) to @p userNum.
  *
- * @param uiState  the cUIState
  * @param userNum  the user number (-1 for none)
  */
-extern "C" void cUIState_setUserNum(cUIState* uiState, signed char userNum) {
-    uiState->mUserNum = userNum;
+void cUIState::setUserNum(signed char userNum)
+{
+    mUserNum = userNum;
 }
 #endif
 //100%
@@ -3334,11 +3335,11 @@ INCLUDE_ASM("ui/uivector", cUIState_getUserNum);
 /**
  * Returns the user (player) number the state belongs to (mUserNum, sign-extended; -1 for none).
  *
- * @param uiState  the cUIState
  * @return mUserNum
  */
-extern "C" signed char cUIState_getUserNum(cUIState* uiState) {
-    return (uiState->mUserNum);
+signed char cUIState::getUserNum()
+{
+    return (mUserNum);
 }
 #endif
 
@@ -3464,7 +3465,7 @@ extern void* cListNode_vtbl[];
 extern "C" void cUIThread__cUIThread(cUIThread* self, int flags)
 {
     self->mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)self);
+    ((cListNode*)self)->destroyListNode();
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -3488,17 +3489,17 @@ extern void* cUIScreen_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIScreen_cUIScreen1(cUIScreen* self)
+void* cUIScreen::cUIScreen1()
 {
-    self->mpNext = (cListNode*)self;
-    self->mpPrev = (cListNode*)self;
-    self->mVtbl = cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen(&self->mAttrScreen);
-    cList_cList(&self->mThreads);
-    cUIThing_cUIThing(&self->mRootGroup, 0, 0);
-    VPTR_OF(cListNode, &self->mRootGroup) = cUIGroup_vtbl;
-    cList_cList(&self->mRootGroup.mList);
-    return ((char*)self);
+    mpNext = (cListNode*)this;
+    mpPrev = (cListNode*)this;
+    mVtbl = cUIScreen_vtbl;
+    tAttrScreen_tAttrScreen(&mAttrScreen);
+    cList_cList(&mThreads);
+    cUIThing_cUIThing(&mRootGroup, 0, 0);
+    VPTR_OF(cListNode, &mRootGroup) = cUIGroup_vtbl;
+    cList_cList(&mRootGroup.mList);
+    return ((char*)this);
 }
 #endif
 //100%
@@ -3545,11 +3546,11 @@ INCLUDE_ASM("ui/uivector", cUIScreen_getHashName);
 /**
  * Returns the screen's hash name: the first word of its screen record (mpScreenHeader).
  *
- * @param uiScreen  the cUIScreen
  * @return the record's hash name
  */
-extern "C" int cUIScreen_getHashName(cUIScreen* uiScreen) {
-    return *((int*)uiScreen->mpScreenHeader);
+int cUIScreen::getHashName()
+{
+    return *((int*)mpScreenHeader);
 }
 #endif
 //100%
@@ -3573,11 +3574,11 @@ INCLUDE_ASM("ui/uivector", cUIScreen_hasFocus);
 /**
  * Returns whether the screen has focus (mAttrScreen bit 0).
  *
- * @param uiScreen  the cUIScreen
  * @return 1 when focused, else 0
  */
-extern "C" int cUIScreen_hasFocus(cUIScreen* uiScreen) {
-    return (uiScreen->mAttrScreen) & 1;
+int cUIScreen::hasFocus()
+{
+    return (mAttrScreen) & 1;
 }
 #endif
 //100%
@@ -3586,11 +3587,11 @@ INCLUDE_ASM("ui/uivector", cUIScreen_setFocus);
 /**
  * Sets the screen's focus flag (mAttrScreen bit 0) to @p focused != 0.
  *
- * @param uiScreen  the cUIScreen
  * @param focused  non-zero to give the screen focus
  */
-extern "C" void cUIScreen_setFocus(cUIScreen* uiScreen, int focused) {
-    uiScreen->mAttrScreen = (int) (((uiScreen->mAttrScreen) & ~1) | (focused != 0));
+void cUIScreen::setFocus(int focused)
+{
+    mAttrScreen = (int) (((mAttrScreen) & ~1) | (focused != 0));
 }
 #endif
 //100%
@@ -3629,9 +3630,9 @@ INCLUDE_ASM("ui/uivector", cUIScreen_setVisible);
  *
  * @param enable  non-zero to show (On Tour b)
  */
-extern "C" void cUIScreen_setVisible(cUIScreen* self, int enable)
+void cUIScreen::setVisible(int enable)
 {
-    ((sUIVectorFlags*)(&self->mRootGroup.mAttr))->bit6 = enable;
+    ((sUIVectorFlags*)(&mRootGroup.mAttr))->bit6 = enable;
 }
 #endif
 //100%
@@ -3640,11 +3641,11 @@ INCLUDE_ASM("ui/uivector", cUIScreen_isVisible);
 /**
  * Returns whether the screen is visible: the visible bit (bit 6) of its root group's mAttr (+0x54).
  *
- * @param uiScreen  the cUIScreen
  * @return 1 when visible, else 0
  */
-extern "C" int cUIScreen_isVisible(cUIScreen* uiScreen) {
-    return ((int) (uiScreen->mRootGroup.mAttr) >> 6) & 1;
+int cUIScreen::isVisible()
+{
+    return ((int) (mRootGroup.mAttr) >> 6) & 1;
 }
 #endif
 //100%
@@ -3653,11 +3654,11 @@ INCLUDE_ASM("ui/uivector", cUIScreen_getEngine);
 /**
  * Returns the UI engine of the screen's state (mpState's mpEngine).
  *
- * @param uiScreen  the cUIScreen
  * @return the state's engine
  */
-extern "C" int cUIScreen_getEngine(cUIScreen* uiScreen) {
-    return ((int)uiScreen->mpState->mpEngine);
+int cUIScreen::getEngine()
+{
+    return ((int)mpState->mpEngine);
 }
 #endif
 //100%
@@ -3666,11 +3667,11 @@ INCLUDE_ASM("ui/uivector", cUIScreen_getParentState);
 /**
  * Returns the state that owns the screen (mpState).
  *
- * @param uiScreen  the cUIScreen
  * @return mpState
  */
-extern "C" int cUIScreen_getParentState(cUIScreen* uiScreen) {
-    return ((int)uiScreen->mpState);
+int cUIScreen::getParentState()
+{
+    return ((int)mpState);
 }
 #endif
 //100%
@@ -3688,12 +3689,12 @@ extern void* cUIText_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIText_cUIText1(cUIText* self)
+void* cUIText::cUIText1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIText_vtbl;
-    tAttrText_tAttrText((unsigned char*)(&self->mAttrText));
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIText_vtbl;
+    tAttrText_tAttrText((unsigned char*)(&mAttrText));
+    return ((char*)this);
 }
 #endif
 
@@ -3744,11 +3745,11 @@ INCLUDE_ASM("ui/uivector", cUIText_setFontIndex);
 /**
  * Sets the text's font index (mAttrText bits 0-1, mFont) to the low two bits of @p fontIndex.
  *
- * @param uiText  the cUIText
  * @param fontIndex  the font index (0..3)
  */
-extern "C" void cUIText_setFontIndex(cUIText* uiText, int fontIndex) {
-    uiText->mAttrText = (int) (((uiText->mAttrText) & ~3) | (fontIndex & 3));
+void cUIText::setFontIndex(int fontIndex)
+{
+    mAttrText = (int) (((mAttrText) & ~3) | (fontIndex & 3));
 }
 #endif
 //100%
@@ -3757,11 +3758,11 @@ INCLUDE_ASM("ui/uivector", cUIText_hasShadow);
 /**
  * Returns whether the text is drawn with a shadow (mAttrText bit 2, mShadow).
  *
- * @param uiText  the cUIText
  * @return 1 when shadowed, else 0
  */
-extern "C" int cUIText_hasShadow(cUIText* uiText) {
-    return ((int) (uiText->mAttrText) >> 2) & 1;
+int cUIText::hasShadow()
+{
+    return ((int) (mAttrText) >> 2) & 1;
 }
 #endif
 //100%
@@ -3770,11 +3771,11 @@ INCLUDE_ASM("ui/uivector", cUIText_isUnicode);
 /**
  * Returns whether the text holds a Unicode (UCS-2) string (mAttrText bit 3, mUnicode).
  *
- * @param uiText  the cUIText
  * @return 1 for Unicode, else 0
  */
-extern "C" int cUIText_isUnicode(cUIText* uiText) {
-    return ((int) (uiText->mAttrText) >> 3) & 1;
+int cUIText::isUnicode()
+{
+    return ((int) (mAttrText) >> 3) & 1;
 }
 #endif
 //100%
@@ -3784,11 +3785,11 @@ INCLUDE_ASM("ui/uivector", cUIText_getUseStaticColour);
  * Returns whether the text uses its static colour (mAttrText bit 4), which cUIText_render2D applies when the thing is
  * static.
  *
- * @param uiText  the cUIText
  * @return 1 when set, else 0
  */
-extern "C" int cUIText_getUseStaticColour(cUIText* uiText) {
-    return ((int) (uiText->mAttrText) >> 4) & 1;
+int cUIText::getUseStaticColour()
+{
+    return ((int) (mAttrText) >> 4) & 1;
 }
 #endif
 //100%
@@ -3798,11 +3799,11 @@ INCLUDE_ASM("ui/uivector", cUIText_getUseDisabledColour);
  * Returns whether the text uses its disabled colour (mAttrText bit 5), which cUIText_render2D applies when the thing is
  * not enabled.
  *
- * @param uiText  the cUIText
  * @return 1 when set, else 0
  */
-extern "C" int cUIText_getUseDisabledColour(cUIText* uiText) {
-    return ((int) (uiText->mAttrText) >> 5) & 1;
+int cUIText::getUseDisabledColour()
+{
+    return ((int) (mAttrText) >> 5) & 1;
 }
 #endif
 //100%
@@ -3811,11 +3812,11 @@ INCLUDE_ASM("ui/uivector", cUIText_isEllipses);
 /**
  * Returns the text's ellipses flag (mAttrText bit 6).
  *
- * @param uiText  the cUIText
  * @return 1 when set, else 0
  */
-extern "C" int cUIText_isEllipses(cUIText* uiText) {
-    return ((int) (uiText->mAttrText) >> 6) & 1;
+int cUIText::isEllipses()
+{
+    return ((int) (mAttrText) >> 6) & 1;
 }
 #endif
 
@@ -3900,9 +3901,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setShadowColour);
  *
  * @param in  the shadow colour (On Tour pSColour)
  */
-extern "C" void cUIText_setShadowColour(cUIText* self, tARGB* in)
+void cUIText::setShadowColour(tARGB* in)
 {
-    *(&self->mShadowColour) = *in;
+    *(&mShadowColour) = *in;
 }
 #endif
 //100%
@@ -3913,9 +3914,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setStaticColour);
  *
  * @param in  the static colour (On Tour pSColour)
  */
-extern "C" void cUIText_setStaticColour(cUIText* self, tARGB* in)
+void cUIText::setStaticColour(tARGB* in)
 {
-    *(&self->mStaticColour) = *in;
+    *(&mStaticColour) = *in;
 }
 #endif
 //100%
@@ -3924,11 +3925,11 @@ INCLUDE_ASM("ui/uivector", cUIText_getStringID);
 /**
  * Returns the text's string-table id (mStringID; 0 when the text was set directly).
  *
- * @param uiText  the cUIText
  * @return mStringID
  */
-extern "C" int cUIText_getStringID(cUIText* uiText) {
-    return (uiText->mStringID);
+int cUIText::getStringID()
+{
+    return (mStringID);
 }
 #endif
 //100%
@@ -3943,11 +3944,11 @@ extern void* cUIScrollBar_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIScrollBar_cUIScrollBar1(cUIScrollBar* self)
+void* cUIScrollBar::cUIScrollBar1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIScrollBar_vtbl;
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIScrollBar_vtbl;
+    return ((char*)this);
 }
 #endif
 //100%
@@ -4005,11 +4006,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setBackgroundObject);
 /**
  * Sets the scroll bar's background object (mpObjBackground) to @p background.
  *
- * @param scrollBar  the cUIScrollBar
  * @param background  the background UI object
  */
-extern "C" void cUIScrollBar_setBackgroundObject(cUIScrollBar* scrollBar, int background) {
-    scrollBar->mpObjBackground = (cUIThing*)background;
+void cUIScrollBar::setBackgroundObject(int background)
+{
+    mpObjBackground = (cUIThing*)background;
 }
 #endif
 //100%
@@ -4018,11 +4019,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setKnobObject);
 /**
  * Sets the scroll bar's knob object (mpObjKnob) to @p knob.
  *
- * @param scrollBar  the cUIScrollBar
  * @param knob  the knob UI object
  */
-extern "C" void cUIScrollBar_setKnobObject(cUIScrollBar* scrollBar, int knob) {
-    scrollBar->mpObjKnob = (cUIThing*)knob;
+void cUIScrollBar::setKnobObject(int knob)
+{
+    mpObjKnob = (cUIThing*)knob;
 }
 #endif
 //100%
@@ -4031,11 +4032,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setUpArrowObject);
 /**
  * Sets the scroll bar's up-arrow object (mpUpArrow) to @p upArrow.
  *
- * @param scrollBar  the cUIScrollBar
  * @param upArrow  the up-arrow UI object
  */
-extern "C" void cUIScrollBar_setUpArrowObject(cUIScrollBar* scrollBar, int upArrow) {
-    scrollBar->mpUpArrow = (cUIThing*)upArrow;
+void cUIScrollBar::setUpArrowObject(int upArrow)
+{
+    mpUpArrow = (cUIThing*)upArrow;
 }
 #endif
 //100%
@@ -4044,11 +4045,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setDownArrowObject);
 /**
  * Sets the scroll bar's down-arrow object (mpDownArrow) to @p downArrow.
  *
- * @param scrollBar  the cUIScrollBar
  * @param downArrow  the down-arrow UI object
  */
-extern "C" void cUIScrollBar_setDownArrowObject(cUIScrollBar* scrollBar, int downArrow) {
-    scrollBar->mpDownArrow = (cUIThing*)downArrow;
+void cUIScrollBar::setDownArrowObject(int downArrow)
+{
+    mpDownArrow = (cUIThing*)downArrow;
 }
 #endif
 //100%
@@ -4057,11 +4058,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setHideOnEmpty);
 /**
  * Sets the object the scroll bar hides when there is nothing to scroll (mpHideOnEmpty) to @p hideOnEmpty.
  *
- * @param scrollBar  the cUIScrollBar
  * @param hideOnEmpty  the UI object to hide
  */
-extern "C" void cUIScrollBar_setHideOnEmpty(cUIScrollBar* scrollBar, int hideOnEmpty) {
-    scrollBar->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
+void cUIScrollBar::setHideOnEmpty(int hideOnEmpty)
+{
+    mpHideOnEmpty = (cUIThing*)hideOnEmpty;
 }
 #endif
 //100%
@@ -4070,11 +4071,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setHideState);
 /**
  * Sets the scroll bar's hide mode (meHideState) to @p hideState.
  *
- * @param uiScrollBar  the cUIScrollBar
  * @param hideState  the eScrollBarHide value
  */
-extern "C" void cUIScrollBar_setHideState(cUIScrollBar* uiScrollBar, int hideState) {
-    uiScrollBar->meHideState = hideState;
+void cUIScrollBar::setHideState(int hideState)
+{
+    meHideState = hideState;
 }
 #endif
 //100%
@@ -4089,13 +4090,13 @@ extern "C" char* strcpy(char*, const char*);
  *
  * @param str  the animation name
  */
-extern "C" void cUIScrollBar_setUpAnimationName(cUIScrollBar* self, char* str)
+void cUIScrollBar::setUpAnimationName(char* str)
 {
     if (strlen(str) >= 25U) {
-        *(self->mszUpAnimation) = 0;
+        *(mszUpAnimation) = 0;
         return;
     }
-    strcpy(self->mszUpAnimation, str);
+    strcpy(mszUpAnimation, str);
 }
 #endif
 //100%
@@ -4110,13 +4111,13 @@ extern "C" char* strcpy(char*, const char*);
  *
  * @param str  the animation name
  */
-extern "C" void cUIScrollBar_setDownAnimationName(cUIScrollBar* self, char* str)
+void cUIScrollBar::setDownAnimationName(char* str)
 {
     if (strlen(str) >= 25U) {
-        self->mszDownAnimation[0] = 0;
+        mszDownAnimation[0] = 0;
         return;
     }
-    strcpy(self->mszDownAnimation, str);
+    strcpy(mszDownAnimation, str);
 }
 #endif
 //100%
@@ -4125,11 +4126,11 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_getValue);
 /**
  * Returns the scroll bar's current position (mValue).
  *
- * @param uiScrollBar  the cUIScrollBar
  * @return mValue
  */
-extern "C" int cUIScrollBar_getValue(cUIScrollBar* uiScrollBar) {
-    return (uiScrollBar->mValue);
+int cUIScrollBar::getValue()
+{
+    return (mValue);
 }
 #endif
 //100%
@@ -4144,11 +4145,11 @@ extern void* cUIProgress_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIProgress_cUIProgress1(cUIProgress* self)
+void* cUIProgress::cUIProgress1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIProgress_vtbl;
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIProgress_vtbl;
+    return ((char*)this);
 }
 #endif
 //100%
@@ -4197,11 +4198,11 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setBackgroundObject);
 /**
  * Sets the progress bar's background object (mpObjBackground) to @p background.
  *
- * @param progress  the cUIProgress
  * @param background  the background UI object
  */
-extern "C" void cUIProgress_setBackgroundObject(cUIProgress* progress, int background) {
-    progress->mpObjBackground = (cUIThing*)background;
+void cUIProgress::setBackgroundObject(int background)
+{
+    mpObjBackground = (cUIThing*)background;
 }
 #endif
 //100%
@@ -4210,11 +4211,11 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setKnobObject);
 /**
  * Sets the progress bar's knob object (mpObjKnob) to @p knob.
  *
- * @param progress  the cUIProgress
  * @param knob  the knob UI object
  */
-extern "C" void cUIProgress_setKnobObject(cUIProgress* progress, int knob) {
-    progress->mpObjKnob = (cUIThing*)knob;
+void cUIProgress::setKnobObject(int knob)
+{
+    mpObjKnob = (cUIThing*)knob;
 }
 #endif
 //100%
@@ -4223,11 +4224,11 @@ INCLUDE_ASM("ui/uivector", cUIProgress_getValue);
 /**
  * Returns the progress bar's value (mValue).
  *
- * @param uiProgress  the cUIProgress
  * @return mValue
  */
-extern "C" int cUIProgress_getValue(cUIProgress* uiProgress) {
-    return (uiProgress->mValue);
+int cUIProgress::getValue()
+{
+    return (mValue);
 }
 #endif
 //100%
@@ -4236,11 +4237,11 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setNumValues);
 /**
  * Sets the progress bar's number of steps (mNumValues) to @p numValues.
  *
- * @param uiProgress  the cUIProgress
  * @param numValues  the step count
  */
-extern "C" void cUIProgress_setNumValues(cUIProgress* uiProgress, int numValues) {
-    uiProgress->mNumValues = numValues;
+void cUIProgress::setNumValues(int numValues)
+{
+    mNumValues = numValues;
 }
 #endif
 //100%
@@ -4255,11 +4256,11 @@ extern void* cUISlider_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUISlider_cUISlider1(cUISlider* self)
+void* cUISlider::cUISlider1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUISlider_vtbl;
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUISlider_vtbl;
+    return ((char*)this);
 }
 #endif
 //100%
@@ -4309,11 +4310,11 @@ INCLUDE_ASM("ui/uivector", cUISlider_getValue);
 /**
  * Returns the slider's value (mValue).
  *
- * @param uiSlider  the cUISlider
  * @return mValue
  */
-extern "C" int cUISlider_getValue(cUISlider* uiSlider) {
-    return (uiSlider->mValue);
+int cUISlider::getValue()
+{
+    return (mValue);
 }
 #endif
 //100%
@@ -4322,11 +4323,11 @@ INCLUDE_ASM("ui/uivector", cUISlider_setValue);
 /**
  * Sets the slider's value (mValue) to @p value, with no range check.
  *
- * @param uiSlider  the cUISlider
  * @param value  the new value
  */
-extern "C" void cUISlider_setValue(cUISlider* uiSlider, int value) {
-    uiSlider->mValue = value;
+void cUISlider::setValue(int value)
+{
+    mValue = value;
 }
 #endif
 //100%
@@ -4335,11 +4336,11 @@ INCLUDE_ASM("ui/uivector", cUISlider_setNumValues);
 /**
  * Sets the slider's number of steps (mNumValues) to @p numValues.
  *
- * @param uiSlider  the cUISlider
  * @param numValues  the step count
  */
-extern "C" void cUISlider_setNumValues(cUISlider* uiSlider, int numValues) {
-    uiSlider->mNumValues = numValues;
+void cUISlider::setNumValues(int numValues)
+{
+    mNumValues = numValues;
 }
 #endif
 //100%
@@ -4348,11 +4349,11 @@ INCLUDE_ASM("ui/uivector", cUISlider_setBackgroundObject);
 /**
  * Sets the slider's background object (mpObjBackground) to @p background.
  *
- * @param slider  the cUISlider
  * @param background  the background UI object
  */
-extern "C" void cUISlider_setBackgroundObject(cUISlider* slider, int background) {
-    slider->mpObjBackground = (cUIThing*)background;
+void cUISlider::setBackgroundObject(int background)
+{
+    mpObjBackground = (cUIThing*)background;
 }
 #endif
 //100%
@@ -4361,11 +4362,11 @@ INCLUDE_ASM("ui/uivector", cUISlider_setKnobObject);
 /**
  * Sets the slider's knob object (mpObjKnob) to @p knob.
  *
- * @param slider  the cUISlider
  * @param knob  the knob UI object
  */
-extern "C" void cUISlider_setKnobObject(cUISlider* slider, int knob) {
-    slider->mpObjKnob = (cUIThing*)knob;
+void cUISlider::setKnobObject(int knob)
+{
+    mpObjKnob = (cUIThing*)knob;
 }
 #endif
 //100%
@@ -4385,13 +4386,13 @@ extern void* cUITextScroll_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUITextScroll_cUITextScroll1(cUITextScroll* self)
+void* cUITextScroll::cUITextScroll1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUITextScroll_vtbl;
-    tAttrTextScroll_tAttrTextScroll((unsigned char*)(&self->mAttrTextScroll));
-    cList_cList(&self->mList);
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUITextScroll_vtbl;
+    tAttrTextScroll_tAttrTextScroll((unsigned char*)(&mAttrTextScroll));
+    cList_cList(&mList);
+    return ((char*)this);
 }
 #endif
 
@@ -4422,7 +4423,7 @@ extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
     VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v((char*)&self->mList);
     VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
+    self->mList.mEnd.destroyListNode();
     VPTR_OF(cListNode, &self->mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)&self->mList);
     cUIThing__cUIThing_dtor(self, flags);
@@ -4451,11 +4452,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setFontIndex);
 /**
  * Sets the text scroll's font index (mAttrTextScroll bits 1-2, mFont) to the low two bits of @p font.
  *
- * @param uiTextScroll  the cUITextScroll
  * @param font  the font index (0..3)
  */
-extern "C" void cUITextScroll_setFontIndex(cUITextScroll* uiTextScroll, int font) {
-    *(int*)&uiTextScroll->mAttrTextScroll = (int) (((*(int*)&uiTextScroll->mAttrTextScroll) & ~6) | ((font & 3) * 2));
+void cUITextScroll::setFontIndex(int font)
+{
+    *(int*)&mAttrTextScroll = (int) (((*(int*)&mAttrTextScroll) & ~6) | ((font & 3) * 2));
 }
 #endif
 //100%
@@ -4464,11 +4465,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_hasShadow);
 /**
  * Returns whether the text scroll draws its text with a shadow (mAttrTextScroll bit 3, mShadow).
  *
- * @param uiTextScroll  the cUITextScroll
  * @return 1 when shadowed, else 0
  */
-extern "C" int cUITextScroll_hasShadow(cUITextScroll* uiTextScroll) {
-    return ((int) (*(int*)&uiTextScroll->mAttrTextScroll) >> 3) & 1;
+int cUITextScroll::hasShadow()
+{
+    return ((int) (*(int*)&mAttrTextScroll) >> 3) & 1;
 }
 #endif
 //100%
@@ -4477,11 +4478,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_isUnicode);
 /**
  * Returns whether the text scroll's lines are Unicode (mAttrTextScroll bit 4, mUnicode).
  *
- * @param uiTextScroll  the cUITextScroll
  * @return 1 for Unicode, else 0
  */
-extern "C" int cUITextScroll_isUnicode(cUITextScroll* uiTextScroll) {
-    return ((int) (*(int*)&uiTextScroll->mAttrTextScroll) >> 4) & 1;
+int cUITextScroll::isUnicode()
+{
+    return ((int) (*(int*)&mAttrTextScroll) >> 4) & 1;
 }
 #endif
 
@@ -4521,9 +4522,9 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setShadowColour);
  *
  * @param in  the shadow colour (On Tour pSColour)
  */
-extern "C" void cUITextScroll_setShadowColour(cUITextScroll* self, tARGB* in)
+void cUITextScroll::setShadowColour(tARGB* in)
 {
-    *(&self->mShadowColour) = *in;
+    *(&mShadowColour) = *in;
 }
 #endif
 //100%
@@ -4607,10 +4608,10 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setChatWindowMode);
 /**
  * Puts the text scroll into chat-window mode: sets mAttrTextScroll bit 0 (mMode). There is no way here to clear it.
  *
- * @param uiTextScroll  the cUITextScroll
  */
-extern "C" void cUITextScroll_setChatWindowMode(cUITextScroll* uiTextScroll) {
-    *(int*)&uiTextScroll->mAttrTextScroll = (int) ((*(int*)&uiTextScroll->mAttrTextScroll) | 1);
+void cUITextScroll::setChatWindowMode()
+{
+    *(int*)&mAttrTextScroll = (int) ((*(int*)&mAttrTextScroll) | 1);
 }
 #endif
 //100%
@@ -4619,11 +4620,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_isChatWindowMode);
 /**
  * Returns whether the text scroll is in chat-window mode (mAttrTextScroll bit 0, mMode).
  *
- * @param uiTextScroll  the cUITextScroll
  * @return 1 in chat-window mode, else 0
  */
-extern "C" int cUITextScroll_isChatWindowMode(cUITextScroll* uiTextScroll) {
-    return (*(int*)&uiTextScroll->mAttrTextScroll) & 1;
+int cUITextScroll::isChatWindowMode()
+{
+    return (*(int*)&mAttrTextScroll) & 1;
 }
 #endif
 //100%
@@ -4635,9 +4636,9 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setSelectedColour);
  *
  * @param in  the colour (a, r, g, b)
  */
-extern "C" void cUITextScroll_setSelectedColour(cUITextScroll* self, tARGB* in)
+void cUITextScroll::setSelectedColour(tARGB* in)
 {
-    *(&self->mSelectedColour) = *in;
+    *(&mSelectedColour) = *in;
 }
 #endif
 //100%
@@ -4646,11 +4647,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setScrollBar);
 /**
  * Sets the scroll bar the text scroll drives (mpScrollBar) to @p scrollBar.
  *
- * @param textScroll  the cUITextScroll
  * @param scrollBar  the cUIScrollBar
  */
-extern "C" void cUITextScroll_setScrollBar(cUITextScroll* textScroll, int scrollBar) {
-    textScroll->mpScrollBar = (cUIThing*)scrollBar;
+void cUITextScroll::setScrollBar(int scrollBar)
+{
+    mpScrollBar = (cUIThing*)scrollBar;
 }
 #endif
 //100%
@@ -4659,11 +4660,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setLineOffset);
 /**
  * Sets the text scroll's first visible line (mLinesOffset) to @p linesOffset.
  *
- * @param uiTextScroll  the cUITextScroll
  * @param linesOffset  the line index
  */
-extern "C" void cUITextScroll_setLineOffset(cUITextScroll* uiTextScroll, short linesOffset) {
-    *(short*)&uiTextScroll->mLinesOffset = linesOffset;
+void cUITextScroll::setLineOffset(short linesOffset)
+{
+    *(short*)&mLinesOffset = linesOffset;
 }
 #endif
 //100%
@@ -4672,11 +4673,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_getLineOffset);
 /**
  * Returns the text scroll's first visible line (mLinesOffset).
  *
- * @param uiTextScroll  the cUITextScroll
  * @return mLinesOffset
  */
-extern "C" unsigned short cUITextScroll_getLineOffset(cUITextScroll* uiTextScroll) {
-    return (uiTextScroll->mLinesOffset);
+unsigned short cUITextScroll::getLineOffset()
+{
+    return (mLinesOffset);
 }
 #endif
 //100%
@@ -4685,11 +4686,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_getLineSize);
 /**
  * Returns the number of lines in the text scroll (mLineSize).
  *
- * @param uiTextScroll  the cUITextScroll
  * @return mLineSize
  */
-extern "C" unsigned short cUITextScroll_getLineSize(cUITextScroll* uiTextScroll) {
-    return (uiTextScroll->mLineSize);
+unsigned short cUITextScroll::getLineSize()
+{
+    return (mLineSize);
 }
 #endif
 //100%
@@ -4698,11 +4699,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setSelectedIndex);
 /**
  * Sets the text scroll's selected line (mSelectedIndex) to @p selectedIndex.
  *
- * @param uiTextScroll  the cUITextScroll
  * @param selectedIndex  the line index
  */
-extern "C" void cUITextScroll_setSelectedIndex(cUITextScroll* uiTextScroll, short selectedIndex) {
-    *(short*)&uiTextScroll->mSelectedIndex = selectedIndex;
+void cUITextScroll::setSelectedIndex(short selectedIndex)
+{
+    *(short*)&mSelectedIndex = selectedIndex;
 }
 #endif
 //100%
@@ -4711,11 +4712,11 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_getSelectedIndex);
 /**
  * Returns the text scroll's selected line (mSelectedIndex).
  *
- * @param uiTextScroll  the cUITextScroll
  * @return mSelectedIndex
  */
-extern "C" unsigned short cUITextScroll_getSelectedIndex(cUITextScroll* uiTextScroll) {
-    return (uiTextScroll->mSelectedIndex);
+unsigned short cUITextScroll::getSelectedIndex()
+{
+    return (mSelectedIndex);
 }
 #endif
 //100%
@@ -4733,12 +4734,12 @@ extern void* cUIVector_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIVector_cUIVector1(cUIVector* self)
+void* cUIVector::cUIVector1()
 {
-    cUIThing_cUIThing(((char*)self), 0, 0);
-    VPTR_OF(cListNode, self) = cUIVector_vtbl;
-    tAttrVector_tAttrVector(&self->mAttrVector);
-    return ((char*)self);
+    cUIThing_cUIThing(((char*)this), 0, 0);
+    VPTR_OF(cListNode, this) = cUIVector_vtbl;
+    tAttrVector_tAttrVector(&mAttrVector);
+    return ((char*)this);
 }
 #endif
 

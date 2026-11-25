@@ -55,6 +55,10 @@ struct cObjNode {
     virtual unsigned int getSectionId();                            // 11
     virtual void writeToReplayFrame(cBxReplayFrame* data);          // 12
     virtual void readFromReplayFrame(cBxReplayFrame* data);         // 13
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cObjNode2() __asm__("cObjNode_cObjNode2");
+    cObjNode* cObjNode1(void* bucket) __asm__("cObjNode_cObjNode1");
 };
 
 CHECK_OFFSET(cObjNode, unk_00, 0x00);
@@ -100,6 +104,13 @@ struct cTypeObjNode : public cObjNode {
     unsigned short Flags;           // 0x12 [O] cTypeObjNodeState::Flags (short); [R] cTypeObjNode1 zeroes it (sh $0);
                                     //      [P] bit 0 = RootTransformDirty; [U] set/is/resetRootTransformDirty (lhu/sh,
                                     //      | 1, & 1, & 0xFFFE)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cTypeObjNode1(void* bucket, int type) __asm__("cTypeObjNode_cTypeObjNode1");
+    short getType() __asm__("cTypeObjNode_getType");
+    void setRootTransformDirty() __asm__("cTypeObjNode_setRootTransformDirty");
+    int isRootTransformDirty() __asm__("cTypeObjNode_isRootTransformDirty");
+    void resetRootTransformDirty() __asm__("cTypeObjNode_resetRootTransformDirty");
 };
 
 CHECK_OFFSET(cTypeObjNode, ObjNodeType, 0x10);
@@ -142,6 +153,9 @@ struct cSortObjNode : public cTypeObjNode {
     unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState::SortIndex; [R] cSortObjNode1 sw the counter's old
                                     //      value; [P] getSortIndex (lw 0x14); [U] compare: other.getSortIndex() >=
                                     //      SortIndex (sltu: unsigned), equal: ==
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cSortObjNode1(void* bucket, int type) __asm__("cSortObjNode_cSortObjNode1");
 };
 
 CHECK_OFFSET(cSortObjNode, SortIndex, 0x14);

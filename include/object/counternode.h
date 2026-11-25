@@ -58,6 +58,9 @@ struct cCounterNode : public cInstanceNode {
                                     //      update: 0 -> -1 and expire; signal decrements it while > 0 (lw/sw)
     int Counted;                    // 0x20 [O]; [P] preview 0x20; [R] ctor1 0 (sw $0); [U] signal 500/501 test and set
                                     //      one bit per level 1..10 (lw/sw)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cCounterNode1(void* bucket, void* inst, tMakeCounterData* counterData) __asm__("cCounterNode_cCounterNode1");
 };
 
 CHECK_OFFSET(cCounterNode, Count, 0x1C);

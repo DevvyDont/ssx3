@@ -220,14 +220,14 @@ INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_OPTS_Radius);
  * @param dist  the first distance (+0x6C)
  * @param vanish  the second distance (+0x68); negative to use @p dist
  */
-extern "C" void cSndPlayOpts_OPTS_Radius(cSndPlayOpts* self, float dist, float vanish)
+void cSndPlayOpts::OPTS_Radius(float dist, float vanish)
 {
-    (self->mRadius)[(int)self->mInst] = dist;
+    mRadius[(int)mInst] = dist;
     if (vanish < 0.0f) {
-        (self->mVanish)[(int)self->mInst] = dist;
+        mVanish[(int)mInst] = dist;
         return;
     }
-    (self->mVanish)[(int)self->mInst] = vanish;
+    mVanish[(int)mInst] = vanish;
 }
 #endif
 

@@ -41,6 +41,9 @@
 
 struct tAnimRecord;
 
+struct cBxReplayFrame;
+struct t4Vector;
+
 struct cAnimFrame {
     // --- cAnimFrameState (On Tour 0x40)
     int Seg[16];                    // 0x000 [O] cAnimFrameState::Seg; [R] cAnimFrame_init MEM_fill(this, 0, 0x40); [U]
@@ -57,6 +60,16 @@ struct cAnimFrame {
                                     //       Vals[0..2] / [3..5] / [11] (0x70); cMeshAnimFrame_update reads Vals[0..5]
     void** mVtbl;                   // 0x084 [R] cAnimFrame_vtbl (0x00490AF0) in both ctors and the dtor; [P] 0x84 in the
                                     //       preview's ~cAnimFrame
+
+    // Methods bound to their retail symbols by asm labels.
+    void setAnimRecord(float* src) __asm__("cAnimFrame_setAnimRecord");
+    void init() __asm__("cAnimFrame_init");
+    void writeToReplayFrame(cBxReplayFrame* sink) __asm__("cAnimFrame_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* sink) __asm__("cAnimFrame_readFromReplayFrame");
+    float getStartTime() __asm__("cAnimFrame_getStartTime");
+    void getDeriv(t4Vector* vel, t4Vector* rotVel, float time) __asm__("cAnimFrame_getDeriv");
+    void* cAnimFrame1() __asm__("cAnimFrame_cAnimFrame1");
+    void getAngles(t4Vector* out) __asm__("cAnimFrame_getAngles");
 };
 
 CHECK_OFFSET(cAnimFrame, Seg, 0x000);
@@ -64,6 +77,8 @@ CHECK_OFFSET(cAnimFrame, AnimRecord, 0x040);
 CHECK_OFFSET(cAnimFrame, Vals, 0x044);
 CHECK_OFFSET(cAnimFrame, mVtbl, 0x084);
 CHECK_SIZE(cAnimFrame, 0x88);
+
+struct t3Vector;
 
 struct cCamAnimFrame {
     // --- cAnimFrame (0x88; above)
@@ -74,6 +89,13 @@ struct cCamAnimFrame {
                                     //       {Vals[0..2], 1}, getAngles Vals[3..5] (a t3Vector), getFocalLength Vals[11]
     void** mVtbl;                   // 0x084 [R] cCamAnimFrame_vtbl (0x00490AB0) in both ctors; the dtor restores
                                     //       cAnimFrame_vtbl; [P] 0x84 in the preview's ~cCamAnimFrame
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cCamAnimFrame1() __asm__("cCamAnimFrame_cCamAnimFrame1");
+    void setAnimRecord(int source) __asm__("cCamAnimFrame_setAnimRecord");
+    void getPosition(t4Vector* out) __asm__("cCamAnimFrame_getPosition");
+    void getAngles(t3Vector* out) __asm__("cCamAnimFrame_getAngles");
+    void getFocalLength(float *out) __asm__("cCamAnimFrame_getFocalLength");
 };
 
 CHECK_OFFSET(cCamAnimFrame, Seg, 0x000);
@@ -96,6 +118,11 @@ struct cMeshAnimFrame {
                                     //       into it; [P] getFrameMatrix__C14cMeshAnimFrame; [U] update writes all 16
                                     //       words from Vals[0..5]; transform multiplies it; getFrameMatrix returns
                                     //       this + 0x90
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cMeshAnimFrame_update");
+    void* cMeshAnimFrame1() __asm__("cMeshAnimFrame_cMeshAnimFrame1");
+    void init() __asm__("cMeshAnimFrame_init");
 };
 
 CHECK_OFFSET(cMeshAnimFrame, Seg, 0x000);

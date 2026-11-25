@@ -163,6 +163,9 @@ struct tWPInGameData {
     virtual void debugBlend();                                      // 67
     virtual bool isEqual(const tWPData* data) = 0;                  // 68
     virtual void setDefaults() = 0;                                 // 69
+
+    // Methods bound to their retail symbols by asm labels.
+    void blend1(float* dst, float* src, float blend) __asm__("tWPInGameData_blend1");
 };
 
 CHECK_OFFSET(tWPInGameData, m_wpTravelDistance, 0x0);

@@ -40,6 +40,13 @@ struct cIrradianceDataBase {
     int mNumItem;                   // 0x004 [O]
     cIrradiance* mIrradianceArray;  // 0x008 [O]
     char* mIrradianceNames;         // 0x00C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void Load() __asm__("cIrradianceDataBase_Load");
+    void Purge() __asm__("cIrradianceDataBase_Purge");
+    cIrradiance* Get(int i) __asm__("cIrradianceDataBase_Get");
+    cIrradiance* Get1(const char* name) __asm__("cIrradianceDataBase_Get1");
+    int GetIDByName(const char* name) __asm__("cIrradianceDataBase_GetIDByName");
 };
 
 CHECK_OFFSET(cIrradianceDataBase, mData, 0x000);

@@ -783,6 +783,14 @@ struct cBoardWakeFX {
     int mWakeMaxNumLines;                     // 0xB8 [O]; [P] assert "mWakeMaxNumLines %d kMaxWakeNumLines %d"; [U] reset
                                               //      32 / 22; update / createSeg: the ring size
     float mWakeLife;                          // 0xBC [O]; [U] reset 1.25f / 0.8f; update drops lines older than it
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cBoardWakeFX_reset");
+    void update() __asm__("cBoardWakeFX_update");
+    void render() __asm__("cBoardWakeFX_render");
+    void fillCurrentSeg(t4Vector* pos, float width) __asm__("cBoardWakeFX_fillCurrentSeg");
+    void createSeg() __asm__("cBoardWakeFX_createSeg");
+    int IsWakeActive() __asm__("cBoardWakeFX_IsWakeActive");
 };
 
 CHECK_OFFSET(cBoardWakeFX, mRider, 0x00);
@@ -836,6 +844,10 @@ struct cBoardSparkFX {
                                         //      texture 22; render pushes it
     sDrawState mSparkFlashDrawState;    // 0x90 [O]; [U] reset (the second state, word 0 |= 0xC); render pushes it
     char pad_A4[0xC];                   // 0xA4 (the part is 16-byte aligned)
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cBoardSparkFX_reset");
+    void render() __asm__("cBoardSparkFX_render");
 };
 
 CHECK_OFFSET(cBoardSparkFX, mRider, 0x00);
@@ -887,6 +899,13 @@ struct cBoardTrailFX {
     t4Vector LastSide;              // 0xD0 [O] (0xF0); [U] reset t4vect_Zero; update: the last side vector
     int DelaySampling;              // 0xE0 [O] (0x100); [U] reset 0; shouldSample counts it down, sets 2 on landing
     char unk_0E4[0xC];              // 0xE4 tail padding to 0xF0 (On Tour 0x104 likewise)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* initialize(int inChrg) __asm__("cBoardTrailFX_initialize");
+    void reset() __asm__("cBoardTrailFX_reset");
+    int shouldSample(float dirDot) __asm__("cBoardTrailFX_shouldSample");
+    int shouldPlow() __asm__("cBoardTrailFX_shouldPlow");
+    void render() __asm__("cBoardTrailFX_render");
 };
 
 CHECK_OFFSET(cBoardTrailFX, mRider, 0x00);
@@ -968,6 +987,12 @@ struct cSpeedBoostFX {
                                              //       (motion state == MS_Air)
     tSpeedBoostStreamerSeg* mStreamBuf;      // 0x3AC [O]; [R] ctor operator new[](20 x 0x20, "cSpeedBoostStreamerFX");
                                              //       dtor frees it; [U] update, render
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cSpeedBoostFX_reset");
+    void update() __asm__("cSpeedBoostFX_update");
+    void UpdateSpeedBoostTrail() __asm__("cSpeedBoostFX_UpdateSpeedBoostTrail");
+    void render() __asm__("cSpeedBoostFX_render");
 };
 
 CHECK_OFFSET(cSpeedBoostFX, mRider, 0x000);
@@ -1009,6 +1034,11 @@ struct cTrickBoostFX {
     t4Vector mConnectVertLeft;      // 0x0E0 [O] (On Tour 0xD0); [U] update: board position - side * 12; render
     t4Vector mConnectVertRight;     // 0x0F0 [O] (On Tour 0xE0); [U] update: board position + side * 12; render
     char unk_100[0x10];             // 0x100 On Tour's mVOffset (0xF0) by order; no retail access seen
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cTrickBoostFX_reset__FPv");
+    void update() __asm__("cTrickBoostFX_update");
+    void render() __asm__("cTrickBoostFX_render");
 };
 
 CHECK_OFFSET(cTrickBoostFX, mRider, 0x000);
@@ -1049,6 +1079,11 @@ struct cAirStreamerFX {
     float mVOffset;            // 0x10 [O]; [U] reset 0 (sw $0); update scrolls it by speed / 6000 (wraps 0..1)
     int mMaxStreamerSegments;  // 0x14 [O]; [U] reset 25 for a rider with a view, else 18
     char pad_18[0x8];          // 0x18 (the part is 16-byte aligned)
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cAirStreamerFX_reset");
+    void update() __asm__("cAirStreamerFX_update");
+    void render() __asm__("cAirStreamerFX_render");
 };
 
 CHECK_OFFSET(cAirStreamerFX, mRider, 0x00);
@@ -1083,6 +1118,11 @@ struct cPlayerIndicatorFX {
     tARGB MaxColor;     // 0x18 [O]; [U] reset: (0.7, 1, 0.7, 0.7)
     tARGB CurColor;     // 0x28 [O]; [U] reset copies MinColor; update stores the blend
     char unk_038[0x8];  // 0x38 no retail access seen (the cRider virtual base starts at 0x40)
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cPlayerIndicatorFX_reset");
+    void update() __asm__("cPlayerIndicatorFX_update");
+    void render() __asm__("cPlayerIndicatorFX_render");
 };
 
 CHECK_OFFSET(cPlayerIndicatorFX, mRider, 0x00);
@@ -1185,6 +1225,11 @@ struct cPunchFX {
     int mActive;        // 0xA0 [O] cPunchFX::mActive (bool, after mSprites[4]); [R] cPunchFX_reset clears it, as On Tour's
                         //      reset does (sb zero,0xD0); [U] cPunchFX_update sets it to rider PunchStrength > 0
     char unk_0A4[0xC];  // 0xA4
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cPunchFX_reset");
+    void update() __asm__("cPunchFX_update");
+    void render() __asm__("cPunchFX_render");
 };
 
 CHECK_OFFSET(cPunchFX, mRider, 0x00);
@@ -1202,6 +1247,14 @@ struct cCheatFX {
                               //      update/updateState byte fields
     char pad_08[0x8];         // 0x08 On Tour's m_input (0x8) is not in retail: setCheatInput/getInput use
                               //      m_cheatState.m_misc
+
+    // Methods bound to their retail symbols by asm labels.
+    void* resetStates() __asm__("cCheatFX_resetStates__FPv");
+    void update() __asm__("cCheatFX_update");
+    void updateState() __asm__("cCheatFX_updateState");
+    void setCheatInput(int type) __asm__("cCheatFX_setCheatInput");
+    void clearInput() __asm__("cCheatFX_clearInput");
+    int getInput() __asm__("cCheatFX_getInput");
 };
 
 CHECK_OFFSET(cCheatFX, mRider, 0x00);

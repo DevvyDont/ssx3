@@ -31,6 +31,25 @@ struct cMenu {
                                      //       cMenu_onLoseFocus clears it; cMenu_render reads the display size through it
     int DrawLayer;                   // 0x128 [O] (On Tour: int, between MenuSys and the vptr); no retail access seen
     void** mVtbl;                    // 0x12C [R] _vt$5cMenu (cMenu_vtbl), stored by cMenu_cMenu and cMenu__cMenu
+
+    // Methods bound to their retail symbols by asm labels.
+    int getItem(int itemIndex) __asm__("cMenu_getItem");
+    int getMenuSys() __asm__("cMenu_getMenuSys");
+    int getFont() __asm__("cMenu_getFont");
+    void checkFocus() __asm__("cMenu_checkFocus");
+    void nextFocus() __asm__("cMenu_nextFocus");
+    void prevFocus() __asm__("cMenu_prevFocus");
+    int input() __asm__("cMenu_input");
+    void render() __asm__("cMenu_render");
+    void drawBox1(void* rect, int on) __asm__("cMenu_drawBox1");
+    void renderUpArrow(float* rect) __asm__("cMenu_renderUpArrow");
+    void renderDownArrow(float* rect) __asm__("cMenu_renderDownArrow");
+    void remAllItems() __asm__("cMenu_remAllItems");
+    void sortItems(int (*cmp)(int, int)) __asm__("cMenu_sortItems");
+    int getFocus() __asm__("cMenu_getFocus");
+    void* getFocusItem() __asm__("cMenu_getFocusItem");
+    void onGainFocus(int wrap) __asm__("cMenu_onGainFocus");
+    void onLoseFocus() __asm__("cMenu_onLoseFocus");
 };
 
 CHECK_OFFSET(cMenu, NumItems, 0x000);
@@ -52,6 +71,25 @@ struct cMenuItem {
     int ID;                          // 0x08 [O]; [R] ctor = its argument (-1 from derived items without one)
     void* Arg;                       // 0x0C [O]; [R] ctor = 0
     void** mVtbl;                    // 0x10 [R] ctor = cMenuItem_vtbl; derived ctors store their own
+
+    // Methods bound to their retail symbols by asm labels.
+    void setID(int itemId) __asm__("cMenuItem_setID");
+    int getID() __asm__("cMenuItem_getID");
+    void setArg(int itemArg) __asm__("cMenuItem_setArg");
+    int getArg() __asm__("cMenuItem_getArg");
+    int getFont() __asm__("cMenuItem_getFont");
+    int input() __asm__("cMenuItem_input");
+    int canHaveFocus() __asm__("cMenuItem_canHaveFocus");
+    int isActive() __asm__("cMenuItem_isActive");
+    void activate(int enable) __asm__("cMenuItem_activate");
+    int isLocked() __asm__("cMenuItem_isLocked");
+    void lock(int enable) __asm__("cMenuItem_lock");
+    void* getLeft() __asm__("cMenuItem_getLeft__FPv");
+    void* getRight() __asm__("cMenuItem_getRight__FPv");
+    void* getUp() __asm__("cMenuItem_getUp__FPv");
+    void* getDown() __asm__("cMenuItem_getDown__FPv");
+    void* getLeftShift() __asm__("cMenuItem_getLeftShift__FPv");
+    void* getRightShift() __asm__("cMenuItem_getRightShift__FPv");
 };
 
 CHECK_OFFSET(cMenuItem, Flags, 0x04);
@@ -115,6 +153,11 @@ struct cBoolMenuItem {
     const char* OffText;             // 0x1C [O]; [R] ctor; [U] input/preRender/render
     int* Flag;                       // 0x20 [O] (EA: bool*; retail bools are words); [R] ctor; [P] setValue (sw 0x20; retail
                                      //       cBoolMenuItem_setValue); [U] input xors bit 0 of *Flag (lw/sw), render reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setValue(int value) __asm__("cBoolMenuItem_setValue");
+    void setCaption(int value) __asm__("cBoolMenuItem_setCaption");
+    void render(int rect) __asm__("cBoolMenuItem_render");
 };
 
 CHECK_OFFSET(cBoolMenuItem, Menu, 0x00);
@@ -156,6 +199,18 @@ struct cEnumMenuItem {
                                      //       [U] setEnumTagsNullTerm, input/preRender/render
     int* Enum;                       // 0x20 [O]; [R] ctors; [P] setEnum (sw 0x20; retail cEnumMenuItem_setEnum); [U] input
                                      //       writes *Enum, render compares it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setEnumTags(int numTags, int tagTable) __asm__("cEnumMenuItem_setEnumTags");
+    void setEnum(int value) __asm__("cEnumMenuItem_setEnum");
+    void setCaption(int value) __asm__("cEnumMenuItem_setCaption");
+    int getCaption() __asm__("cEnumMenuItem_getCaption");
+    void* cEnumMenuItem1(void* text) __asm__("cEnumMenuItem_cEnumMenuItem1");
+    void* cEnumMenuItem2(void* text, int enumPtr, int caption, int numTags, int tags)
+        __asm__("cEnumMenuItem_cEnumMenuItem2");
+    void setEnumTagsNullTerm(int *table) __asm__("cEnumMenuItem_setEnumTagsNullTerm");
+    int input() __asm__("cEnumMenuItem_input");
+    void render(int rect) __asm__("cEnumMenuItem_render");
 };
 
 CHECK_OFFSET(cEnumMenuItem, Menu, 0x00);
@@ -181,6 +236,13 @@ struct cSubMenuItem {
     const char* Caption;             // 0x14 [O]; [R] ctor (cap); [U] preRender/render centre text
     cMenu* Sub;                      // 0x18 [O]; [R] ctor (sub); [P] setMenu/getSubMenu (sw/lw 0x18; retail
                                      //       cSubMenuItem_setMenu/getSubMenu); [U] input: cMenuSys_pushMenu(MenuSys, Sub)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setMenu(int value) __asm__("cSubMenuItem_setMenu");
+    int getSubMenu() __asm__("cSubMenuItem_getSubMenu");
+    int input() __asm__("cSubMenuItem_input");
+    void* preRender(cSubMenuItem* item) __asm__("cSubMenuItem_preRender");
+    void* render(int rect) __asm__("cSubMenuItem_render__FPvi");
 };
 
 CHECK_OFFSET(cSubMenuItem, Menu, 0x00);
@@ -203,6 +265,12 @@ struct cPopMenuItem {
     void** mVtbl;                    // 0x10 [R] cPopMenuItem_vtbl (ctor)
     const char* Caption;             // 0x14 [O]; [R] ctor; [P] setCaption (sw 0x14; retail cPopMenuItem_setCaption);
                                      //       [U] preRender/render centre text
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cPopMenuItem_setCaption");
+    int input() __asm__("cPopMenuItem_input");
+    void* preRender(cPopMenuItem* item) __asm__("cPopMenuItem_preRender");
+    void* render(int rect) __asm__("cPopMenuItem_render__FPvi");
 };
 
 CHECK_OFFSET(cPopMenuItem, Menu, 0x00);
@@ -230,6 +298,19 @@ struct cCommandMenuItem {
                                      //       init; [U] input passes it to Menu's onCommand
     void* Data;                      // 0x20 [O]; [R] ctors = 0; [P] setData/getData (sw/lw 0x20; retail
                                      //       cCommandMenuItem_setData/getData)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setStateText(int value) __asm__("cCommandMenuItem_setStateText");
+    void setCaption(int value) __asm__("cCommandMenuItem_setCaption");
+    int getCaption() __asm__("cCommandMenuItem_getCaption");
+    void setData(int value) __asm__("cCommandMenuItem_setData");
+    int getData() __asm__("cCommandMenuItem_getData");
+    void* cCommandMenuItem1(void* text) __asm__("cCommandMenuItem_cCommandMenuItem1");
+    cCommandMenuItem* cCommandMenuItem2(void* text, int caption, int commandArg)
+        __asm__("cCommandMenuItem_cCommandMenuItem2");
+    void init(int label, int commandArg) __asm__("cCommandMenuItem_init");
+    int input() __asm__("cCommandMenuItem_input");
+    void render(int rect) __asm__("cCommandMenuItem_render");
 };
 
 CHECK_OFFSET(cCommandMenuItem, Menu, 0x00);
@@ -255,6 +336,15 @@ struct cCallbackMenuItem {
     const char* Caption;             // 0x14 [O]; [R] ctors, cCallbackMenuItem_init; [P] setCaption/getCaption (retail
                                      //       cCallbackMenuItem_setCaption/getCaption); [U] preRender/render
     void (*Callback)();              // 0x18 [O]; [R] ctors, init; [U] input calls it (jalr) on select
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cCallbackMenuItem_setCaption");
+    int getCaption() __asm__("cCallbackMenuItem_getCaption");
+    void* cCallbackMenuItem1(void* text, int caption, int callback) __asm__("cCallbackMenuItem_cCallbackMenuItem1");
+    void init(int label, int callback) __asm__("cCallbackMenuItem_init");
+    int input() __asm__("cCallbackMenuItem_input");
+    void* preRender(cCallbackMenuItem* item) __asm__("cCallbackMenuItem_preRender");
+    void* render(int rect) __asm__("cCallbackMenuItem_render__FPvi");
 };
 
 CHECK_OFFSET(cCallbackMenuItem, Menu, 0x00);
@@ -279,6 +369,12 @@ struct cNullMenuItem {
                                      //       [U] preRender/render centre text
     const char* State;               // 0x18 [O]; [P] setStateText (sw 0x18; retail cNullMenuItem_setStateText); the ctor
                                      //       leaves it unset, preRender/render never read it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cNullMenuItem_setCaption");
+    void setStateText(int value) __asm__("cNullMenuItem_setStateText");
+    void* preRender(cNullMenuItem* item) __asm__("cNullMenuItem_preRender");
+    void* render(int rect) __asm__("cNullMenuItem_render__FPvi");
 };
 
 CHECK_OFFSET(cNullMenuItem, Menu, 0x00);
@@ -330,6 +426,18 @@ struct cCharMenuItem {
     int AccelCount;                  // 0x20 [O]; [R] ctors = 0; [U] input: frames the direction is held
     int AccelDir;                    // 0x24 [O]; [R] ctors = 0; [U] input: -1, 0, 1
     float Fraction;                  // 0x28 [O]; [R] ctors = 0; [U] input: the sub-step accumulator (lwc1/swc1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setValue(int value) __asm__("cCharMenuItem_setValue");
+    void setCaption(int value) __asm__("cCharMenuItem_setCaption");
+    void* cCharMenuItem1(void* text) __asm__("cCharMenuItem_cCharMenuItem1");
+    void* cCharMenuItem2(void* text, int valuePtr, signed char minValue, signed char maxValue, int caption)
+        __asm__("cCharMenuItem_cCharMenuItem2");
+    void setMinMax(int lo, int hi) __asm__("cCharMenuItem_setMinMax");
+    void zeroValue() __asm__("cCharMenuItem_zeroValue");
+    int input() __asm__("cCharMenuItem_input");
+    void* preRender(cCharMenuItem* item) __asm__("cCharMenuItem_preRender");
+    void render(int rect) __asm__("cCharMenuItem_render");
 };
 
 CHECK_OFFSET(cCharMenuItem, Menu, 0x00);
@@ -365,6 +473,17 @@ struct cIntMenuItem {
     int AccelCount;                  // 0x24 [O]; [R] ctors = 0; [U] input: frames the direction is held
     int AccelDir;                    // 0x28 [O]; [R] ctors = 0; [U] input: -1, 0, 1
     float Fraction;                  // 0x2C [O]; [R] ctors = 0; [U] input: the sub-step accumulator (lwc1/swc1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setValue(int value) __asm__("cIntMenuItem_setValue");
+    void setCaption(int value) __asm__("cIntMenuItem_setCaption");
+    void* cIntMenuItem1() __asm__("cIntMenuItem_cIntMenuItem1");
+    void* cIntMenuItem2(void* text) __asm__("cIntMenuItem_cIntMenuItem2");
+    void setMinMax(int minValue, int maxValue) __asm__("cIntMenuItem_setMinMax");
+    void zeroValue() __asm__("cIntMenuItem_zeroValue");
+    int input() __asm__("cIntMenuItem_input");
+    void* preRender(cIntMenuItem* item) __asm__("cIntMenuItem_preRender");
+    void render(int rect) __asm__("cIntMenuItem_render");
 };
 
 CHECK_OFFSET(cIntMenuItem, Menu, 0x00);
@@ -404,6 +523,19 @@ struct cFloatMenuItem {
                                      //       cVectorMenuItem_input
     int AccelCount;                  // 0x2C [O]; [R] ctors = 0; [U] input: frames the direction is held
     int AccelDir;                    // 0x30 [O]; [R] ctors = 0; [U] input: -1, 0, 1
+
+    // Methods bound to their retail symbols by asm labels.
+    void setValue(int value) __asm__("cFloatMenuItem_setValue");
+    void setMinMax(float fparg0, float fparg1) __asm__("cFloatMenuItem_setMinMax");
+    void setCaption(int value) __asm__("cFloatMenuItem_setCaption");
+    void setValueScale(float fparg0, float fparg1) __asm__("cFloatMenuItem_setValueScale");
+    void setValue1(float fparg0) __asm__("cFloatMenuItem_setValue1");
+    float getValue() __asm__("cFloatMenuItem_getValue");
+    void* cFloatMenuItem1() __asm__("cFloatMenuItem_cFloatMenuItem1");
+    int input() __asm__("cFloatMenuItem_input");
+    void zeroValue() __asm__("cFloatMenuItem_zeroValue");
+    void* preRender(cFloatMenuItem* item) __asm__("cFloatMenuItem_preRender");
+    void render(int rect) __asm__("cFloatMenuItem_render");
 };
 
 CHECK_OFFSET(cFloatMenuItem, Menu, 0x00);
@@ -439,6 +571,14 @@ struct cAngleMenuItem {
     float Max;                       // 0x20 [O]; [R] ctor; [P] setMinMax (swc1 0x20); [U] input clamp
     int AccelCount;                  // 0x24 [O]; [R] ctor = 0; [U] input: frames the direction is held
     int AccelDir;                    // 0x28 [O]; [R] ctor = 0; [U] input: -1, 0, 1
+
+    // Methods bound to their retail symbols by asm labels.
+    void setValue(int value) __asm__("cAngleMenuItem_setValue");
+    void setMinMax(float fparg0, float fparg1) __asm__("cAngleMenuItem_setMinMax");
+    void setCaption(int value) __asm__("cAngleMenuItem_setCaption");
+    int input() __asm__("cAngleMenuItem_input");
+    void* preRender(cAngleMenuItem* item) __asm__("cAngleMenuItem_preRender");
+    void render(int rect) __asm__("cAngleMenuItem_render");
 };
 
 CHECK_OFFSET(cAngleMenuItem, Menu, 0x00);
@@ -468,6 +608,11 @@ struct cTextMenuItem {
                                      //       settext (sb 0, then copy; retail cTextMenuItem_gettext/settext); [U] input
                                      //       edits it byte by byte, preRender/render print it
     int CursorPos;                   // 0x28 [O]; [R] ctor = 0; [U] input moves it, preRender/render draw the cursor there
+
+    // Methods bound to their retail symbols by asm labels.
+    int settext(int text) __asm__("cTextMenuItem_settext");
+    int input() __asm__("cTextMenuItem_input");
+    void render(float* rect) __asm__("cTextMenuItem_render");
 };
 
 CHECK_OFFSET(cTextMenuItem, Menu, 0x00);
@@ -493,6 +638,10 @@ struct cColorMenuItem {
     int Adjust;                      // 0x18 [O] (tCMIColor); [R] ctor; [U] channel index (<< 2) and name index (ColorNames)
     int AccelCount;                  // 0x1C [O]; [U] input: frames the direction is held (the ctor leaves it unset)
     int AccelDir;                    // 0x20 [O]; [U] input: -1, 0, 1 (the ctor leaves it unset)
+
+    // Methods bound to their retail symbols by asm labels.
+    int input() __asm__("cColorMenuItem_input");
+    void render(float* rect) __asm__("cColorMenuItem_render");
 };
 
 CHECK_OFFSET(cColorMenuItem, Menu, 0x00);
@@ -519,6 +668,10 @@ struct cRGBTitleMenuItem {
     tARGB* Color;                    // 0x14 [O]; [R] ctor; [U] render draws the swatch in it
     const char* Caption;             // 0x18 [O]; [R] ctor; [P] setCaption (sw 0x18; retail cRGBTitleMenuItem_setCaption);
                                      //       [U] preRender/render left text
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cRGBTitleMenuItem_setCaption");
+    void render(float* rect) __asm__("cRGBTitleMenuItem_render");
 };
 
 CHECK_OFFSET(cRGBTitleMenuItem, Menu, 0x00);
@@ -543,6 +696,10 @@ struct cVectorTitleMenuItem {
     t3Vector* Vector;                // 0x14 [O]; [R] ctor; [U] preRender/render print its three floats
     const char* Caption;             // 0x18 [O]; [R] ctor; [P] setCaption (sw 0x18; retail cVectorTitleMenuItem_setCaption);
                                      //       [U] preRender/render left text
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cVectorTitleMenuItem_setCaption");
+    void render(int rect) __asm__("cVectorTitleMenuItem_render");
 };
 
 CHECK_OFFSET(cVectorTitleMenuItem, Menu, 0x00);
@@ -577,6 +734,12 @@ struct cGraphMenuItem {
     int Slope;                       // 0x3C [O]; [R] ctor; [U] input: > 0 keeps y rising, < 0 falling, 0 free
     int IsEditMode;                  // 0x40 [O] (bool; retail word); [R] ctor = 0; [U] input toggles it (key 6),
                                      //       cGraphMenuItem_gainFocus clears it, preRender/render test it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cGraphMenuItem_setCaption");
+    void gainFocus() __asm__("cGraphMenuItem_gainFocus");
+    int input() __asm__("cGraphMenuItem_input");
+    void render(float* rect) __asm__("cGraphMenuItem_render");
 };
 
 CHECK_OFFSET(cGraphMenuItem, Menu, 0x00);
@@ -609,6 +772,10 @@ struct cExpandMenuItemMenu {
     void** mVtbl;                    // 0x12C [R] cExpandMenuItem ctors store cExpandMenuItemMenu_vtbl (at item+0x144)
     cExpandMenuItem* Item;           // 0x130 [O]; [R] cExpandMenuItem ctors store the item (at item+0x148); [U]
                                      //       cExpandMenuItemMenu_onCommand/onChange call its entries 9/10
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand(int item, int cmdArg) __asm__("cExpandMenuItemMenu_onCommand");
+    void onChange(int item) __asm__("cExpandMenuItemMenu_onChange");
 };
 
 CHECK_OFFSET(cExpandMenuItemMenu, NumItems, 0x000);
@@ -637,6 +804,16 @@ struct cExpandMenuItem {
                                      //       destructor cMenu__cMenu(this + 0x18, 2); [U] addItem/remItem/setFocus on it
     tRect ItemRect[70];              // 0x14C [O]; [U] preRender stores each row's rect (sq/lq at 0x14C + 16i), render
                                      //       draws each row in it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cExpandMenuItem1() __asm__("cExpandMenuItem_cExpandMenuItem1");
+    void zeroValue() __asm__("cExpandMenuItem_zeroValue");
+    void addItem(void* item) __asm__("cExpandMenuItem_addItem__FPvT0");
+    void remAllItems() __asm__("cExpandMenuItem_remAllItems");
+    void setTitle(cMenuItem* item) __asm__("cExpandMenuItem_setTitle");
+    void* input() __asm__("cExpandMenuItem_input");
+    void gainFocus(int mode) __asm__("cExpandMenuItem_gainFocus");
+    void loseFocus() __asm__("cExpandMenuItem_loseFocus");
 };
 
 CHECK_OFFSET(cExpandMenuItem, Menu, 0x000);
@@ -670,6 +847,9 @@ struct cARGBMenuItem {
     cRGBTitleMenuItem TitleItem;     // 0x640 [O] cARGBMenuItem::Title (renamed: the base already has a Title); [R] ctor,
                                      //       dtor; [P] setCaption writes TitleItem.Caption (sw 0x658; retail
                                      //       cARGBMenuItem_setCaption)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cARGBMenuItem_setCaption");
 };
 
 CHECK_OFFSET(cARGBMenuItem, Menu, 0x000);
@@ -712,6 +892,10 @@ struct cVectorMenuItem {
                                      //       dtor; [P] setCaption writes TitleItem.Caption (sw 0x66C; retail
                                      //       cVectorMenuItem_setCaption)
     int Normalize;                   // 0x670 [O] (bool; retail word); [R] ctor = 0; [U] input renormalises the vector when set
+
+    // Methods bound to their retail symbols by asm labels.
+    void setCaption(int value) __asm__("cVectorMenuItem_setCaption");
+    void* input() __asm__("cVectorMenuItem_input");
 };
 
 CHECK_OFFSET(cVectorMenuItem, Menu, 0x000);
@@ -746,6 +930,9 @@ struct cErrorMenu {
     cNullMenuItem Error;             // 0x130 [O]; [R] ctors cNullMenuItem_cNullMenuItem(this + 0x130, text), dtor
     cSpaceMenuItem Space;            // 0x14C [O]; [R] ctors (space 10 or 30), dtor
     cPopMenuItem Ok;                 // 0x164 [O]; [R] ctors cPopMenuItem_cPopMenuItem(this + 0x164, caption), dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cErrorMenu1(void* nullText, void* text3) __asm__("cErrorMenu_cErrorMenu1");
 };
 
 CHECK_OFFSET(cErrorMenu, NumItems, 0x000);

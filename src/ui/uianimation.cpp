@@ -102,9 +102,9 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_getAnimChanType);
  *
  * @return the channel type
  */
-extern "C" unsigned short cUIAnimationChannel_getAnimChanType(cUIAnimationChannel* self)
+unsigned short cUIAnimationChannel::getAnimChanType()
 {
-    tUIAnimChannel* anim = self->mpAnimChan;
+    tUIAnimChannel* anim = mpAnimChan;
     if (anim != 0) {
         return anim->mType;
     }
@@ -122,10 +122,9 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_setAnimChanData__FPvi);
  *
  * @param val  the channel data record
  */
-void cUIAnimationChannel_setAnimChanData(void* vself, int val)
+void cUIAnimationChannel::setAnimChanData(int val)
 {
-    cUIAnimationChannel* self = (cUIAnimationChannel*)vself;
-    self->mpAnimChan = (tUIAnimChannel*)val;
+    mpAnimChan = (tUIAnimChannel*)val;
 }
 #endif
 
@@ -171,7 +170,7 @@ extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
         char* chanData = *(char**)self + 0x10;
         for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 4); i++) {
             // PORT: the entry pointer is passed as int
-            cUIAnimationChannel_setAnimChanData(&self->mpAnimChannels[i], (int)chanData);
+            self->mpAnimChannels[i].setAnimChanData((int)chanData);
             chanData += *(unsigned short*)(chanData + 4);
         }
     }
@@ -219,11 +218,11 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_isLastFrame);
  *
  * cUIThing_isLastAnimFrame uses it.
  *
- * @param anim  the animation
  * @return 1 at or past the last frame, else 0
  */
-extern "C" int cUIAnimation_isLastFrame(cUIAnimation* anim) {
-    return (anim->mFrameNum) >= (int) (anim->mpAnimHeader->mNumFrames);
+int cUIAnimation::isLastFrame()
+{
+    return (mFrameNum) >= (int) (mpAnimHeader->mNumFrames);
 }
 #endif
 //100%
@@ -234,11 +233,11 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_getNumFrames);
  *
  * cUIThing_setFrameByPercent uses it.
  *
- * @param anim  the animation
  * @return the number of frames
  */
-extern "C" short cUIAnimation_getNumFrames(cUIAnimation* anim) {
-    return *(short*)&anim->mpAnimHeader->mNumFrames;
+short cUIAnimation::getNumFrames()
+{
+    return *(short*)&mpAnimHeader->mNumFrames;
 }
 #endif
 
@@ -255,18 +254,18 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
  * @param mode      playback mode (On Tour playback): 0 external clock, 1 forward, 2 backward, 3 ping-pong
  * @param FrameNum  the current clock frame, kept as the start frame in mode 0
  */
-extern "C" void cUIAnimation_start(cUIAnimation* self, int mode, unsigned short FrameNum)
+void cUIAnimation::start(int mode, unsigned short FrameNum)
 {
     mode &= 7;
     if (mode == 0) {
-        self->mScreenStartFrame = FrameNum;
+        mScreenStartFrame = FrameNum;
     }
     if (mode == 2) {
-        *(unsigned char*)&self->mFrameDirection = 1;
-        *(unsigned short*)&self->mFrameNum = self->mpAnimHeader->mNumFrames - 1;
+        *(unsigned char*)&mFrameDirection = 1;
+        *(unsigned short*)&mFrameNum = mpAnimHeader->mNumFrames - 1;
     } else {
-        *(unsigned char*)&self->mFrameDirection = 0;
-        *(unsigned short*)&self->mFrameNum = 0;
+        *(unsigned char*)&mFrameDirection = 0;
+        *(unsigned short*)&mFrameNum = 0;
     }
 }
 #endif
@@ -289,9 +288,9 @@ struct cUIAnimation_updateFrame_sData {
  *
  * @param flags  play mode in bits 0-2, wrap flag in bit 3
  */
-extern "C" void cUIAnimation_updateFrame(cUIAnimation* self, unsigned char flags)
+void cUIAnimation::updateFrame(unsigned char flags)
 {
-    cUIAnimation_updateFrame_sData* data = ((cUIAnimation_updateFrame_sData*)self->mpAnimHeader);
+    cUIAnimation_updateFrame_sData* data = ((cUIAnimation_updateFrame_sData*)mpAnimHeader);
     int mode;
     if (data == 0) {
         return;
@@ -302,41 +301,41 @@ extern "C" void cUIAnimation_updateFrame(cUIAnimation* self, unsigned char flags
     }
     switch (mode) {
     case 2:
-        self->mFrameNum--;
-        if (self->mFrameNum < 0) {
+        mFrameNum--;
+        if (mFrameNum < 0) {
             if (flags & 8) {
-                self->mFrameNum = data->count - 1;
+                mFrameNum = data->count - 1;
             } else {
-                self->mFrameNum = 0;
+                mFrameNum = 0;
             }
         }
         break;
     case 1:
-        self->mFrameNum++;
-        if (self->mFrameNum >= data->count) {
+        mFrameNum++;
+        if (mFrameNum >= data->count) {
             if (!(flags & 8)) {
-                self->mFrameNum = data->count - 1;
+                mFrameNum = data->count - 1;
             } else {
-                self->mFrameNum = 0;
+                mFrameNum = 0;
             }
         }
         break;
     case 3:
-        if ((*(signed char*)&self->mFrameDirection) == 0) {
-            self->mFrameNum++;
+        if ((*(signed char*)&mFrameDirection) == 0) {
+            mFrameNum++;
         } else {
-            self->mFrameNum--;
+            mFrameNum--;
         }
-        if ((*(signed char*)&self->mFrameDirection) == 0) {
-            if (self->mFrameNum >= ((cUIAnimation_updateFrame_sData*)self->mpAnimHeader)->count) {
-                self->mFrameDirection = 1;
-                self->mFrameNum = ((cUIAnimation_updateFrame_sData*)self->mpAnimHeader)->count - 1;
+        if ((*(signed char*)&mFrameDirection) == 0) {
+            if (mFrameNum >= ((cUIAnimation_updateFrame_sData*)mpAnimHeader)->count) {
+                mFrameDirection = 1;
+                mFrameNum = ((cUIAnimation_updateFrame_sData*)mpAnimHeader)->count - 1;
                 return;
             }
         }
-        if ((*(signed char*)&self->mFrameDirection) == 1 && self->mFrameNum < 0) {
-            self->mFrameDirection = 0;
-            self->mFrameNum = 0;
+        if ((*(signed char*)&mFrameDirection) == 1 && mFrameNum < 0) {
+            mFrameDirection = 0;
+            mFrameNum = 0;
         }
         break;
     }
@@ -359,24 +358,24 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_updateThing);
  * @param mode      playback mode; only the low 3 bits count
  * @param FrameNum  the external clock frame, used in mode 0
  */
-extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int mode, unsigned short FrameNum)
+void cUIAnimation::updateThing(cUIThing* obj, int mode, unsigned short FrameNum)
 {
-    unsigned short frame = self->mFrameNum;
-    if ((mode & 7) == 0 && self->mScreenStartFrame != 0xFFFF) {
-        if (FrameNum < self->mScreenStartFrame) return;
-        frame = FrameNum - self->mScreenStartFrame;
-        if (self->mFrameNum == frame) return;
-        self->mFrameNum = frame;
+    unsigned short frame = mFrameNum;
+    if ((mode & 7) == 0 && mScreenStartFrame != 0xFFFF) {
+        if (FrameNum < mScreenStartFrame) return;
+        frame = FrameNum - mScreenStartFrame;
+        if (mFrameNum == frame) return;
+        mFrameNum = frame;
     }
-    if (self->mLastFrameEval == frame) return;
-    if (frame < (self->mpAnimHeader)->mNumFrames) {
-        for (unsigned int i = 0; i < (self->mpAnimHeader)->mNumChannels; i++) {
-            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&self->mpAnimChannels[i], frame);
+    if (mLastFrameEval == frame) return;
+    if (frame < mpAnimHeader->mNumFrames) {
+        for (unsigned int i = 0; i < mpAnimHeader->mNumChannels; i++) {
+            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&mpAnimChannels[i], frame);
             sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)VPTR_OF(cListNode, obj);
-            vt[12].fn(vthis(obj, vt[12]), cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);
+            vt[12].fn(vthis(obj, vt[12]), mpAnimChannels[i].getAnimChanType(), chanValue);
         }
     }
-    self->mLastFrameEval = frame;
+    mLastFrameEval = frame;
 }
 #endif
 

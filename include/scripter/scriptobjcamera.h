@@ -46,6 +46,15 @@ struct cScriptObjCamera {
     void ResumeObjScript() __asm__("cScriptObjCamera_ResumeObjScript");
     void OnStartObjectUse() __asm__("cScriptObjCamera_OnStartObjectUse");
     void OnEndObjectUse() __asm__("cScriptObjCamera_OnEndObjectUse");
+    int GetCameraEntity() __asm__("cScriptObjCamera_GetCameraEntity");
+    float GetCameraWeight() __asm__("cScriptObjCamera_GetCameraWeight");
+    float GetBaseRotX() __asm__("cScriptObjCamera_GetBaseRotX");
+    float GetBaseRotY() __asm__("cScriptObjCamera_GetBaseRotY");
+    float GetBaseRotZ() __asm__("cScriptObjCamera_GetBaseRotZ");
+    int GetViewIndex() __asm__("cScriptObjCamera_GetViewIndex");
+    int GetCameraManager() __asm__("cScriptObjCamera_GetCameraManager");
+    void SetCameraAlgorithm(int algorithm) __asm__("cScriptObjCamera_SetCameraAlgorithm");
+    int GetCameraAlgorithm() __asm__("cScriptObjCamera_GetCameraAlgorithm");
 };
 
 CHECK_OFFSET(cScriptObjCamera, mObjType, 0x000);

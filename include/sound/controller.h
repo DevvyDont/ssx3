@@ -57,6 +57,11 @@ struct cController {
     // --- cController
     int execFlag;                   // 0x5720 [O] (cController's only member in On Tour); [R] ctor 0
     char unk_5724[0x4];             // 0x5724 padding (the non-virtual part ends 8-aligned; cSoundSys starts at 0x5728)
+
+    // Methods bound to their retail symbols by asm labels.
+    void BANKMONITOR_Update(float time) __asm__("cController_BANKMONITOR_Update");
+    void MONITOR_Update() __asm__("cController_MONITOR_Update");
+    void Update(float frameTime) __asm__("cController_Update");
 };
 
 CHECK_OFFSET(cController, mpVBankManager, 0x0000);

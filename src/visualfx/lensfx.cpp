@@ -163,20 +163,20 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(cBoltOnFXInterface* self, int charIdPtr, int emitterOwner)
+void* cBoltOnFXInterface::cBoltOnFXInterface1(int charIdPtr, int emitterOwner)
 {
-    self->mVtbl = cBoltOnFXInterface_vtbl;
-    self->mDirty = 1;
-    self->mpCharId = (int*)charIdPtr;
-    self->mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
-    self->mpRider = 0;
-    char* entry = (char*)&self->mEntries[0];
+    mVtbl = cBoltOnFXInterface_vtbl;
+    mDirty = 1;
+    mpCharId = (int*)charIdPtr;
+    mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
+    mpRider = 0;
+    char* entry = (char*)&mEntries[0];
     int i;
     for (i = 14; i != -1; i--, entry += 0xC) {
         func_002EC9D0(entry);
     }
-    func_002ECAF0(self);
-    return ((void*)self);
+    func_002ECAF0(this);
+    return ((void*)this);
 }
 #endif
 

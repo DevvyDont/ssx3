@@ -36,6 +36,9 @@ struct cHideNode : public cInstanceNode {
     // cHideNode's notes on cInstanceNode's fields:
     //   ObjNodeType: [R] node type 16 (cInstanceNode_cInstanceNode1)
     //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cHideNode1() __asm__("cHideNode_cHideNode1");
 };
 
 CHECK_SIZE(cHideNode, 0x1C);

@@ -66,14 +66,14 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
  * @param type  node type (tObjNodeType)
  * @return self
  */
-extern "C" void* cTypeObjNode_cTypeObjNode1(cTypeObjNode* self, void* bucket, int type)
+void* cTypeObjNode::cTypeObjNode1(void* bucket, int type)
 {
-    cObjNode_cObjNode1(self, bucket);
-    VPTR_OF(cObjNode, self) = cTypeObjNode_vtbl;
-    self->ObjNodeType = type;
-    *(short*)&self->Flags = 0;
-    cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
-    return ((void*)self);
+    cObjNode_cObjNode1(this, bucket);
+    VPTR_OF(cObjNode, this) = cTypeObjNode_vtbl;
+    ObjNodeType = type;
+    *(short*)&Flags = 0;
+    cTypeObjNode_ObjNodeCount[ObjNodeType]++;
+    return ((void*)this);
 }
 #endif
 
@@ -150,18 +150,18 @@ static inline int objNextId_4850(int* c)
  * @param type  node type
  * @return self
  */
-extern "C" void* cSortObjNode_cSortObjNode1(cSortObjNode* self, void* bucket, int type)
+void* cSortObjNode::cSortObjNode1(void* bucket, int type)
 {
     int id;
-    cTypeObjNode_cTypeObjNode1((cTypeObjNode*)self, bucket, type);
-    VPTR_OF(cObjNode, self) = cSortObjNode_vtbl;
+    this->cTypeObjNode1(bucket, type);
+    VPTR_OF(cObjNode, this) = cSortObjNode_vtbl;
     if (type == 6) {
         id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
     } else {
         id = objNextId_4850(&cSortObjNode_ObjNodeSortIndex);
     }
-    self->SortIndex = (unsigned int)id;
-    return ((void*)self);
+    SortIndex = (unsigned int)id;
+    return ((void*)this);
 }
 #endif
 

@@ -120,6 +120,22 @@ struct cTextureMan {
                                          //        0x1000, m_pTexInfo); cPS2GraphicsMan_Init stores this + 0x4350 at +0x6340;
                                          //        [U] func_00367340 re-initialises it; cTextureMan_AddTexture reads its size
                                          //        (+0x1FF4 = 0x6344)
+
+    // Methods bound to their retail symbols by asm labels.
+    void SetTextureMemType(int val) __asm__("cTextureMan_SetTextureMemType__FPvi");
+    void InitTexInfo() __asm__("cTextureMan_InitTexInfo");
+    int NewNonBindTexID() __asm__("cTextureMan_NewNonBindTexID");
+    void DeleteNonBindTexID(int id) __asm__("cTextureMan_DeleteNonBindTexID");
+    void NewBindTexID(int id) __asm__("cTextureMan_NewBindTexID");
+    void DeleteBindTexID(int idx) __asm__("cTextureMan_DeleteBindTexID");
+    int AddTexture(int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
+                   int clutFormat, int clutData, int vramMode, int ownsData, int bindId)
+        __asm__("cTextureMan_AddTexture");
+    void RemoveTexture(int id) __asm__("cTextureMan_RemoveTexture");
+    int AddLockedFrameTexture(int width, int height, int format) __asm__("cTextureMan_AddLockedFrameTexture");
+    void SetNewTextureData(int idx, void* data, int width, int height, int mipCount, int texelFormat, int clutFormat,
+                           void* clut, int upload)
+        __asm__("cTextureMan_SetNewTextureData");
 };
 
 CHECK_OFFSET(tTexInfo, mMemAlloc, 0x00);

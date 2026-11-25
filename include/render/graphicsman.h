@@ -281,6 +281,78 @@ public:
     virtual void loadexecpurge();                                                                        // slot 119: [R] cPS2GraphicsMan_loadexecpurge
     virtual void PlatformPurgeTextures() = 0;                                                            // slot 120: [R] cPS2GraphicsMan_PlatformPurgeTextures
     virtual void PlatformUploadTextures() = 0;                                                           // slot 121: [R] cPS2GraphicsMan_PlatformUploadTextures__FPv; parameters [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void SetNumViews(int numViews) __asm__("cGraphicsMan_SetNumViews");
+    int GetNumViews() __asm__("cGraphicsMan_GetNumViews");
+    void SetViewIndex(int viewIndex) __asm__("cGraphicsMan_SetViewIndex");
+    int GetViewIndex() __asm__("cGraphicsMan_GetViewIndex");
+    void setSpecularTextureId(int value, int idx) __asm__("cGraphicsMan_setSpecularTextureId");
+    int getSpecularTextureId(int idx) __asm__("cGraphicsMan_getSpecularTextureId");
+    void setPatchSpecularTextureId(int value, int idx) __asm__("cGraphicsMan_setPatchSpecularTextureId");
+    int getPatchSpecularTextureId(int idx) __asm__("cGraphicsMan_getPatchSpecularTextureId");
+    void setSnowSparkleTextureId(int value, int idx) __asm__("cGraphicsMan_setSnowSparkleTextureId");
+    int getSnowSparkleTextureId(int idx) __asm__("cGraphicsMan_getSnowSparkleTextureId");
+    void setRimTextureId(int value, int idx) __asm__("cGraphicsMan_setRimTextureId");
+    int getRimTextureId(int idx) __asm__("cGraphicsMan_getRimTextureId");
+    void setisInNIS(int value, int idx) __asm__("cGraphicsMan_setisInNIS");
+    int getisInNIS(int idx) __asm__("cGraphicsMan_getisInNIS");
+    void setSnowSparkleDensity(int idx, float value) __asm__("cGraphicsMan_setSnowSparkleDensity");
+    float getSnowSparkleDensity(int idx) __asm__("cGraphicsMan_getSnowSparkleDensity");
+    void setDrawDistance(int idx, float value) __asm__("cGraphicsMan_setDrawDistance");
+    float getDrawDistance(int idx) __asm__("cGraphicsMan_getDrawDistance");
+    void setFogDensity(int idx, float value) __asm__("cGraphicsMan_setFogDensity");
+    float getFogDensity(int idx) __asm__("cGraphicsMan_getFogDensity");
+    void setFogColourR(int idx, float value) __asm__("cGraphicsMan_setFogColourR");
+    float getFogColourR(int idx) __asm__("cGraphicsMan_getFogColourR");
+    void setFogColourG(int idx, float value) __asm__("cGraphicsMan_setFogColourG");
+    float getFogColourG(int idx) __asm__("cGraphicsMan_getFogColourG");
+    void setFogColourB(int idx, float value) __asm__("cGraphicsMan_setFogColourB");
+    float getFogColourB(int idx) __asm__("cGraphicsMan_getFogColourB");
+    void setFogNear(int idx, float value) __asm__("cGraphicsMan_setFogNear");
+    float getFogNear(int idx) __asm__("cGraphicsMan_getFogNear");
+    void setFogFar(int idx, float value) __asm__("cGraphicsMan_setFogFar");
+    float getFogFar(int idx) __asm__("cGraphicsMan_getFogFar");
+    void setScreenTintScaleR(int idx, float value) __asm__("cGraphicsMan_setScreenTintScaleR");
+    void setScreenTintScaleG(int idx, float value) __asm__("cGraphicsMan_setScreenTintScaleG");
+    void setScreenTintScaleB(int idx, float value) __asm__("cGraphicsMan_setScreenTintScaleB");
+    void setScreenTintOffsetR(int idx, float value) __asm__("cGraphicsMan_setScreenTintOffsetR");
+    void setScreenTintOffsetG(int idx, float value) __asm__("cGraphicsMan_setScreenTintOffsetG");
+    void setScreenTintOffsetB(int idx, float value) __asm__("cGraphicsMan_setScreenTintOffsetB");
+    void SetDefaultDrawState() __asm__("cGraphicsMan_SetDefaultDrawState");
+    void SetDrawState(sDrawState* src) __asm__("cGraphicsMan_SetDrawState");
+    int CurrentDrawState() __asm__("cGraphicsMan_CurrentDrawState");
+    int CurrentDrawState1() __asm__("cGraphicsMan_CurrentDrawState1");
+    void SetDepthMask(int enable) __asm__("cGraphicsMan_SetDepthMask");
+    void SetDrawLayer(int value) __asm__("cGraphicsMan_SetDrawLayer");
+    void SetBlendMode(int mode, int context) __asm__("cGraphicsMan_SetBlendMode");
+    void SetAlphaSort(int alphaSort, int sortKey) __asm__("cGraphicsMan_SetAlphaSort");
+    void SetTextureClamp(int mode, int context) __asm__("cGraphicsMan_SetTextureClamp");
+    void SetDmaDataPtr(int value) __asm__("cGraphicsMan_SetDmaDataPtr");
+    unsigned int GetDrawLayer() __asm__("cGraphicsMan_GetDrawLayer");
+    unsigned int GetBlendMode() __asm__("cGraphicsMan_GetBlendMode");
+    int GetAlphaSort() __asm__("cGraphicsMan_GetAlphaSort");
+    unsigned int GetAlphaSortKey() __asm__("cGraphicsMan_GetAlphaSortKey");
+    int GetNumTexRefs() __asm__("cGraphicsMan_GetNumTexRefs");
+    char* GetTexRef(int idx) __asm__("cGraphicsMan_GetTexRef");
+    void SetSpecID(int texId) __asm__("cGraphicsMan_SetSpecID");
+    int GetSpecID() __asm__("cGraphicsMan_GetSpecID");
+    void SetPatchSpecID(int texId) __asm__("cGraphicsMan_SetPatchSpecID");
+    int GetPatchSpecID() __asm__("cGraphicsMan_GetPatchSpecID");
+    void SkipNextPageFlip() __asm__("cGraphicsMan_SkipNextPageFlip");
+    void SetPixelTest(int depthtestmode, int atestmode, int aref) __asm__("cGraphicsMan_SetPixelTest");
+    void SetTexture(short value, int idx) __asm__("cGraphicsMan_SetTexture");
+    void PushDrawState() __asm__("cGraphicsMan_PushDrawState");
+    void PopDrawState() __asm__("cGraphicsMan_PopDrawState");
+    int DrawStateChanged() __asm__("cGraphicsMan_DrawStateChanged");
+    void setEffectTexMap(int idx, int value) __asm__("cGraphicsMan_setEffectTexMap");
+    void AddBlendedMatrix(tMdfBlendedMatrix* blendedMatrix) __asm__("cGraphicsMan_AddBlendedMatrix");
+    void UploadTextures() __asm__("cGraphicsMan_UploadTextures");
+    void PurgeTextures() __asm__("cGraphicsMan_PurgeTextures");
+    void SetTextureRefs(int count, tTextureRef* src) __asm__("cGraphicsMan_SetTextureRefs");
+    int GetTextureID(const char* name) __asm__("cGraphicsMan_GetTextureID");
+    void InitTextureFiles(int numFiles, int fileNames) __asm__("cGraphicsMan_InitTextureFiles__FPvii");
+    void ResetBlendedMatrixHistory() __asm__("cGraphicsMan_ResetBlendedMatrixHistory");
 };
 
 CHECK_OFFSET(cGraphicsMan, m_SpecularTextureId, 0x00C);

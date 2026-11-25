@@ -30,6 +30,8 @@ CHECK_OFFSET(tRGB, G, 0x4);
 CHECK_OFFSET(tRGB, B, 0x8);
 CHECK_SIZE(tRGB, 0xC);
 
+struct t4Vector;
+
 struct cPlayerLights {
     tRGB mExtraAmbientLight;                    // 0x00 [O]; [U] Clear zeroes it (12-byte copy), AddAmbient adds to it
     int mNumDirectionalLights;                  // 0x0C [O]; [U] Clear = 0; AddDirectional indexes with it, then ++
@@ -39,6 +41,13 @@ struct cPlayerLights {
     int mPlayerIsAdditive;                      // 0xA0 [O] bool (a word in retail); [U] Clear = 0, PlayerIsAdditive
     int mBoardIsAdditive;                       // 0xA4 [O] bool (word); [U] Clear = 0, BoardIsAdditive
     char pad_A8[0x8];                           // 0xA8 the class is 16-byte aligned
+
+    // Methods bound to their retail symbols by asm labels.
+    void Clear() __asm__("cPlayerLights_Clear");
+    void AddAmbient(tRGB* colour) __asm__("cPlayerLights_AddAmbient");
+    void AddDirectional(t4Vector* direction, tRGB* colour) __asm__("cPlayerLights_AddDirectional");
+    void PlayerIsAdditive(int value) __asm__("cPlayerLights_PlayerIsAdditive");
+    void BoardIsAdditive(int val) __asm__("cPlayerLights_BoardIsAdditive__FPvi");
 };
 
 CHECK_OFFSET(cPlayerLights, mExtraAmbientLight, 0x00);

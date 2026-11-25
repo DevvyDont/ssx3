@@ -98,6 +98,7 @@ struct cScriptObjCameraManager {
     int GetCameraObjectByTrack(int i) __asm__("cScriptObjCameraManager_GetCameraObjectByTrack");
     void DoCameraTransition(tSSXFrameCameraManager* frame, float currFrame)
         __asm__("cScriptObjCameraManager_DoCameraTransition");
+    int GetViewIndex() __asm__("cScriptObjCameraManager_GetViewIndex");
 };
 
 CHECK_OFFSET(cScriptObjCameraManager, mObjType, 0x000);

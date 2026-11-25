@@ -84,6 +84,9 @@ CHECK_OFFSET(tMakeAnimComboData, Stop, 0x34);
 CHECK_OFFSET(tMakeAnimComboData, unk_038, 0x38);
 CHECK_SIZE(tMakeAnimComboData, 0x3C);
 
+struct cBxReplayFrame;
+struct tIntersectInfo;
+
 struct cAnimComboNode {
     // --- cAnimComboNodeState (On Tour 0x18; getNodeState returns +0x0; replay ctor/writeToReplayFrame move these 0x18
     //       bytes)
@@ -153,6 +156,16 @@ struct cAnimComboNode {
                                     //       it;
                                     //       [U] setComboXform fills it, cacheFrame applies it
                                     //       (cMeshAnimFrame_transform)
+
+    // Methods bound to their retail symbols by asm labels.
+    int updateNode() __asm__("cAnimComboNode_updateNode");
+    void updateIntersectInfo(tIntersectInfo* out) __asm__("cAnimComboNode_updateIntersectInfo");
+    void signal(int msg) __asm__("cAnimComboNode_signal");
+    void setComboXform() __asm__("cAnimComboNode_setComboXform");
+    void loseFocus() __asm__("cAnimComboNode_loseFocus");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cAnimComboNode_writeToReplayFrame");
+    void cacheFrame() __asm__("cAnimComboNode_cacheFrame");
+    int getAnimDir() __asm__("cAnimComboNode_getAnimDir");
 };
 
 CHECK_OFFSET(cAnimComboNode, AnimSpeed2, 0x00);

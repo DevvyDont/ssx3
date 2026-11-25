@@ -89,6 +89,9 @@ struct cBXString {
     cBXString* cBXString5(cBXString* other, int n) __asm__("cBXString_cBXString5");
     cBXString* spanIncluding(cBXString* other, int ch) __asm__("cBXString_spanIncluding");
     cBXString* spanExcluding(cBXString* other, int ch) __asm__("cBXString_spanExcluding");
+    void vprintf(const char* fmt, char* args) __asm__("cBXString_vprintf");
+    void trimRight() __asm__("cBXString_trimRight");
+    void trimLeft() __asm__("cBXString_trimLeft");
 };
 
 CHECK_OFFSET(cBXString, Str, 0x0);

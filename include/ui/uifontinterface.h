@@ -46,6 +46,12 @@ struct cUIFontInterface {
     cUIEngine* mpEngine;            // 0x38 [O]; [R] = 0
     char* mpFontPath;               // 0x3C [O]; [R] = 0
     char* mpFontExt;                // 0x40 [O]; [R] = 0
+
+    // Methods bound to their retail symbols by asm labels.
+    int getFontByHashName(int key) __asm__("cUIFontInterface_getFontByHashName");
+    void purgeFonts() __asm__("cUIFontInterface_purgeFonts");
+    void setData(tUIFontTableHeader* hdr) __asm__("cUIFontInterface_setData");
+    void loadFonts() __asm__("cUIFontInterface_loadFonts");
 };
 
 CHECK_OFFSET(tUIFontTableHeader, mNumEntries, 0x0);

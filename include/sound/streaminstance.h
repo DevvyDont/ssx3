@@ -11,6 +11,8 @@
 #include "layout.h"
 
 
+struct cSndPlayOpts;
+
 struct cStreamInstance {
     char* mBuffer;                  // 0x000 [O]
     int mExternalBuffer;            // 0x004 [O] bool
@@ -23,6 +25,32 @@ struct cStreamInstance {
     int mBigHandle;                 // 0x078 [O]
     int mMemAllocType;              // 0x07C [O]
     int mQueuedTimeout;             // 0x080 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    cStreamInstance* cStreamInstance1(cSndPlayOpts* p, char* mem, int size, int n, int maxChunks)
+        __asm__("cStreamInstance_cStreamInstance1");
+    void * cStreamInstance2(int handle) __asm__("cStreamInstance_cStreamInstance2");
+    void SetBigFile(int name) __asm__("cStreamInstance_SetBigFile");
+    void Set3DPosition(int azimuth, int elevation) __asm__("cStreamInstance_Set3DPosition");
+    void SetBaseVolume(int val) __asm__("cStreamInstance_SetBaseVolume__FPvi");
+    void SetPitch(int pitch) __asm__("cStreamInstance_SetPitch");
+    void Update() __asm__("cStreamInstance_Update");
+    float GetTime() __asm__("cStreamInstance_GetTime");
+    float GetTimeRemaining() __asm__("cStreamInstance_GetTimeRemaining");
+    int IsBufferFilled(int minVal) __asm__("cStreamInstance_IsBufferFilled");
+    int IsCurrRequestedRead() __asm__("cStreamInstance_IsCurrRequestedRead");
+    int Playing() __asm__("cStreamInstance_Playing");
+    void ReleaseHold() __asm__("cStreamInstance_ReleaseHold");
+    int GetCurrActiveSampleHandle() __asm__("cStreamInstance_GetCurrActiveSampleHandle");
+    void ReleaseHold1(int requestHandle) __asm__("cStreamInstance_ReleaseHold1");
+    float GetRequestLength() __asm__("cStreamInstance_GetRequestLength");
+    void Pause() __asm__("cStreamInstance_Pause");
+    void Resume() __asm__("cStreamInstance_Resume");
+    int Queue(int holdTime, int buf, int off) __asm__("cStreamInstance_Queue");
+    int Queue1(int holdTime, int element, int off) __asm__("cStreamInstance_Queue1");
+    void* Purge() __asm__("cStreamInstance_Purge__FPv");
+    int Requests() __asm__("cStreamInstance_Requests");
+    int TimeMult(int multAmount) __asm__("cStreamInstance_TimeMult");
 };
 
 CHECK_OFFSET(cStreamInstance, mBuffer, 0x000);

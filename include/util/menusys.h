@@ -36,6 +36,20 @@ struct cMenuSys {
     int getDisplayWidth() { return 640; }
     int getDisplayHeight() { return 480 - MenuYOffset; }
 #endif
+
+    // Methods bound to their retail symbols by asm labels.
+    int isActive() __asm__("cMenuSys_isActive");
+    void activate(int val) __asm__("cMenuSys_activate__FPvi");
+    int getKey() __asm__("cMenuSys_getKey__FPv");
+    int getVKey() __asm__("cMenuSys_getVKey__FPv");
+    int getAsciiKey() __asm__("cMenuSys_getAsciiKey__FPv");
+    void* getLeft() __asm__("cMenuSys_getLeft__FPv");
+    void* getRight() __asm__("cMenuSys_getRight__FPv");
+    void* getUp() __asm__("cMenuSys_getUp__FPv");
+    void* getDown() __asm__("cMenuSys_getDown__FPv");
+    void render() __asm__("cMenuSys_render");
+    void pushMenu(cMenu* item) __asm__("cMenuSys_pushMenu");
+    void popMenu() __asm__("cMenuSys_popMenu");
 };
 
 CHECK_OFFSET(cMenuSys, MenuDepth, 0x000);

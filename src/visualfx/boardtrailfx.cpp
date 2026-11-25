@@ -59,43 +59,43 @@ struct sBTTrailVtx {
  */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xF0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
+void* cBoardTrailFX::initialize(int inChrg)
 {
     if (inChrg) {
-        (*(char**)&self->mRider) = (char*)self + 0xF0;
-        cRider_cRider((char*)self + 0xF0);
+        (*(char**)&mRider) = (char*)this + 0xF0;
+        cRider_cRider((char*)this + 0xF0);
     }
-    self->mRider->mScriptObjectVtbl = (void*)(&D_00488BB8);
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488C00;
+    mRider->mScriptObjectVtbl = (void*)(&D_00488BB8);
+    mRider->mScriptObjRiderVtbl = D_00459B90;
+    VPTR_AT(mRider, sizeof(cRiderState)) = (void**)&D_00488C00;
     if (inChrg == 0) {
         int vc;
         sBTVt9 vtbl1 = D_00488BB8;
-        self->mRider->mScriptObjectVtbl = &vtbl1;
+        mRider->mScriptObjectVtbl = &vtbl1;
         {
-            char* vbo = ((char*)self->mRider) - 0xF0;
-            vc = (char*)self - vbo;
+            char* vbo = ((char*)mRider) - 0xF0;
+            vc = (char*)this - vbo;
         }
         vtbl1.e[1].delta = D_00488BB8.e[1].delta + vc;
         sBTVt22 vtbl2 = D_00488C00;
-        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
+        VPTR_AT(mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488C00.e[1].delta + vc;
     }
-    self->CurSliceCap = 0;
+    CurSliceCap = 0;
     short neg = -1;
     int i;
     for (i = 47; i >= 0; i--) {
-        self->SliceCaps[i] = neg;
+        SliceCaps[i] = neg;
     }
-    sBTTrailVtx** strips = ((sBTTrailVtx**)&self->BufVerts[0]);
+    sBTTrailVtx** strips = ((sBTTrailVtx**)&BufVerts[0]);
     strips[0] = new (str_BoardTrailVertices, 0, 0) sBTTrailVtx[324];
     for (i = 1; i < 6; i++) {
-        strips[i] = ((sBTTrailVtx*)self->BufVerts[0]) + i * 54;
+        strips[i] = ((sBTTrailVtx*)BufVerts[0]) + i * 54;
     }
-    self->BufId = 0;
-    MEM_fill(((sBTTrailVtx*)self->BufVerts[0]), 0, 15552);
-    cBoardTrailFX_reset((cBoardTrailFX*)self);
-    return self;
+    BufId = 0;
+    MEM_fill(((sBTTrailVtx*)BufVerts[0]), 0, 15552);
+    reset();
+    return this;
 }
 #endif
 
@@ -148,31 +148,31 @@ extern float cBoardTrail_m_OuterU;
  * scales to 1, and rewrites the first three floats of all 54 vertices in each strip: probably texture
  * coordinates, with u fixed per strip (0.25, 0.75, 0.0, 1.0, 0.375, 0.625), v alternating 0 and 1, and q = 1.
  */
-extern "C" void cBoardTrailFX_reset(cBoardTrailFX* self)
+void cBoardTrailFX::reset()
 {
-    self->State = 2;
-    self->BufLen = 0;
-    self->BufHead = 0;
-    (*(int*)&self->CurAlpha) = 0;
-    (*(int*)&self->CurDepth) = 0;
-    (*(int*)&self->CurHeight) = 0;
-    (*(int*)&self->LightSide) = 0;
-    self->LastCen = t4vect_Origin;
-    self->LastVel = t4vect_Zero;
-    self->LastSide = t4vect_Zero;
-    self->LeftRandWidth = 1.0f;
-    self->RightRandWidth = 1.0f;
-    self->DelaySampling = 0;
+    State = 2;
+    BufLen = 0;
+    BufHead = 0;
+    (*(int*)&CurAlpha) = 0;
+    (*(int*)&CurDepth) = 0;
+    (*(int*)&CurHeight) = 0;
+    (*(int*)&LightSide) = 0;
+    LastCen = t4vect_Origin;
+    LastVel = t4vect_Zero;
+    LastSide = t4vect_Zero;
+    LeftRandWidth = 1.0f;
+    RightRandWidth = 1.0f;
+    DelaySampling = 0;
     for (int i = 0; i < 54; i++) {
         float vCoord = (float)(i & 1);
-        ((float*)self->BufVerts[2])[i * 12] = cBoardTrail_m_OuterU;
-        ((float*)self->BufVerts[0])[i * 12] = cBoardTrail_m_InnerU;
-        ((float*)self->BufVerts[3])[i * 12] = cBoardTrail_m_BaseU;
-        ((float*)self->BufVerts[4])[i * 12] = 1.0f - cBoardTrail_m_BaseU;
-        ((float*)self->BufVerts[1])[i * 12] = 1.0f - cBoardTrail_m_InnerU;
-        ((float*)self->BufVerts[5])[i * 12] = 1.0f - cBoardTrail_m_OuterU;
-        ((float*)self->BufVerts[2])[i * 12 + 1] = ((float*)self->BufVerts[0])[i * 12 + 1] = ((float*)self->BufVerts[3])[i * 12 + 1] = ((float*)self->BufVerts[4])[i * 12 + 1] = ((float*)self->BufVerts[1])[i * 12 + 1] = ((float*)self->BufVerts[5])[i * 12 + 1] = vCoord;
-        ((float*)self->BufVerts[2])[i * 12 + 2] = ((float*)self->BufVerts[0])[i * 12 + 2] = ((float*)self->BufVerts[3])[i * 12 + 2] = ((float*)self->BufVerts[4])[i * 12 + 2] = ((float*)self->BufVerts[1])[i * 12 + 2] = ((float*)self->BufVerts[5])[i * 12 + 2] = 1.0f;
+        ((float*)BufVerts[2])[i * 12] = cBoardTrail_m_OuterU;
+        ((float*)BufVerts[0])[i * 12] = cBoardTrail_m_InnerU;
+        ((float*)BufVerts[3])[i * 12] = cBoardTrail_m_BaseU;
+        ((float*)BufVerts[4])[i * 12] = 1.0f - cBoardTrail_m_BaseU;
+        ((float*)BufVerts[1])[i * 12] = 1.0f - cBoardTrail_m_InnerU;
+        ((float*)BufVerts[5])[i * 12] = 1.0f - cBoardTrail_m_OuterU;
+        ((float*)BufVerts[2])[i * 12 + 1] = ((float*)BufVerts[0])[i * 12 + 1] = ((float*)BufVerts[3])[i * 12 + 1] = ((float*)BufVerts[4])[i * 12 + 1] = ((float*)BufVerts[1])[i * 12 + 1] = ((float*)BufVerts[5])[i * 12 + 1] = vCoord;
+        ((float*)BufVerts[2])[i * 12 + 2] = ((float*)BufVerts[0])[i * 12 + 2] = ((float*)BufVerts[3])[i * 12 + 2] = ((float*)BufVerts[4])[i * 12 + 2] = ((float*)BufVerts[1])[i * 12 + 2] = ((float*)BufVerts[5])[i * 12 + 2] = 1.0f;
     }
 }
 #endif
@@ -240,23 +240,23 @@ static inline int boardTrailCanDraw_86F0(char* vvr)
  * @param dirDot  dot product of this frame's and the last direction (1 = no turn)
  * @return 1 when a new sample is taken, otherwise 0
  */
-extern "C" int cBoardTrailFX_shouldSample(cBoardTrailFX* self, float dirDot)
+int cBoardTrailFX::shouldSample(float dirDot)
 {
-    if (self->DelaySampling > 0) {
-        self->DelaySampling--;
+    if (DelaySampling > 0) {
+        DelaySampling--;
         return 0;
     }
-    t4Vector dist = btSub_86F0(self->mRider->mGroundContactPoint, (*(&self->LastCen)));
+    t4Vector dist = btSub_86F0(mRider->mGroundContactPoint, (*(&LastCen)));
     float maxLen = 110.0f;
     float len = btLength_86F0(dist);
-    if (boardTrailCanDraw_86F0(((char*)self->mRider))) {
+    if (boardTrailCanDraw_86F0(((char*)mRider))) {
         maxLen = 30.0f;
     }
-    if (self->State == 1 || maxLen <= len || dirDot < 0.999f) {
-        if (self->State == 1) {
-            self->DelaySampling = 2;
+    if (State == 1 || maxLen <= len || dirDot < 0.999f) {
+        if (State == 1) {
+            DelaySampling = 2;
         }
-        (*(&self->LastCen)) = self->mRider->mGroundContactPoint;
+        (*(&LastCen)) = mRider->mGroundContactPoint;
         return 1;
     }
     return 0;
@@ -295,39 +295,39 @@ static inline int boardTrailCanDraw(cRider* r)
  *
  * @return 1 when a trail is laid, otherwise 0
  */
-extern "C" int cBoardTrailFX_shouldPlow(cBoardTrailFX* self)
+int cBoardTrailFX::shouldPlow()
 {
-    if (cRider_getMotionState(self->mRider) == 2) {
-        if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState != 0) {
+    if (cRider_getMotionState(mRider) == 2) {
+        if (mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState != 0) {
             return 0;
         }
-    } else if (cRider_getMotionState(self->mRider) != 0) {
-        if (!boardTrailCanDraw(self->mRider)) return 0;
-        if (self->mRider->mOnGroundNIS == 0) return 0;
+    } else if (cRider_getMotionState(mRider) != 0) {
+        if (!boardTrailCanDraw(mRider)) return 0;
+        if (mRider->mOnGroundNIS == 0) return 0;
     }
-    if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 22) {
-        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0)) {
-            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
+    if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) == 22) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 0)) {
+            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 1)) {
                 return 0;
             }
         }
     }
-    switch (self->mRider->mSurfaceType) {
+    switch (mRider->mSurfaceType) {
     case 1:
-        self->CurDepth = cBoardTrail_m_LooseDepthScale;
+        CurDepth = cBoardTrail_m_LooseDepthScale;
         return 1;
     case 0:
     case 5:
     case 6:
     case 12:
-        self->CurDepth = cBoardTrail_m_PackedDepthScale;
+        CurDepth = cBoardTrail_m_PackedDepthScale;
         return 1;
     case 2:
     case 13:
-        self->CurDepth = cBoardTrail_m_PowderDepthScale;
+        CurDepth = cBoardTrail_m_PowderDepthScale;
         return 1;
     case 3:
-        self->CurDepth = cBoardTrail_m_DeepPowderDepthScale;
+        CurDepth = cBoardTrail_m_DeepPowderDepthScale;
         return 1;
     }
     return 0;
@@ -656,7 +656,7 @@ static inline void btGrow(sBTrail_8938* self)
 extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
     int prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
-    if (cBoardTrailFX_shouldPlow((cBoardTrailFX*)self) == 0) {
+    if (((cBoardTrailFX*)self)->shouldPlow() == 0) {
         if (self->state == 0) return;
         if (self->state == 1) {
             self->head = (self->head + kTrailNumSeg - 3) % kTrailNumSeg;
@@ -934,18 +934,18 @@ static inline void pop_A480(sRenderCtx_A480* ctx)
  * Returns early when cRenderToggles_m_DisableBoardTrail is set, when cRenderToggles_m_DisableAIBoardTrail is set and the rider part's virtual slot 9 is true,
  * or with fewer than 2 segments (BufLen).
  */
-extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
+void cBoardTrailFX::render()
 {
     if (cRenderToggles_m_DisableBoardTrail != 0) {
         return;
     }
     if (cRenderToggles_m_DisableAIBoardTrail != 0) {
-        cBoardTrailFX_render_cObj* being = (cBoardTrailFX_render_cObj*)&VPTR_AT(self->mRider, sizeof(cRiderState));
+        cBoardTrailFX_render_cObj* being = (cBoardTrailFX_render_cObj*)&VPTR_AT(mRider, sizeof(cRiderState));
         if (being->isComputer() != 0) {
             return;
         }
     }
-    if (self->BufLen < 2) {
+    if (BufLen < 2) {
         return;
     }
     push_A480((sRenderCtx_A480*)GrMan);
@@ -1030,7 +1030,7 @@ extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(cCutSceneTransiti
     VPTR_OF(cObjNode, self) = cCutSceneTransitionMan_vtbl;
     self->mCurrentState = 0;
     self->mNumPause = 0;
-    cCutSceneTransitionMan_FindTVParameters(self);
+    self->FindTVParameters();
     return ((void*)self);
 }
 #endif
@@ -1056,30 +1056,30 @@ struct cCutSceneTransitionMan_StartCutScene_sFade {
  *
  * @param dur  transition length (On Tour time)
  */
-extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan* self, float dur)
+void cCutSceneTransitionMan::StartCutScene(float dur)
 {
-    switch (self->mCurrentState) {
+    switch (mCurrentState) {
     case 0:
-        cCutSceneTransitionMan_FindTVParameters(self);
-        self->mfLengthOfTime = dur;
-        self->mfCurrentTime = 0.0f;
+        FindTVParameters();
+        mfLengthOfTime = dur;
+        mfCurrentTime = 0.0f;
         break;
     case 1:
         return;
     case 2: {
-        float progress = self->mfCurrentTime / self->mfLengthOfTime;
-        self->mfLengthOfTime = dur;
-        self->mfCurrentTime = (1.0f - progress) * dur;
+        float progress = mfCurrentTime / mfLengthOfTime;
+        mfLengthOfTime = dur;
+        mfCurrentTime = (1.0f - progress) * dur;
         break;
     }
     case 3: {
-        float progress = self->mfCurrentTime / self->mfLengthOfTime;
-        self->mfLengthOfTime = dur;
-        self->mfCurrentTime = progress * dur;
+        float progress = mfCurrentTime / mfLengthOfTime;
+        mfLengthOfTime = dur;
+        mfCurrentTime = progress * dur;
         break;
     }
     }
-    self->mCurrentState = 3;
+    mCurrentState = 3;
 }
 #endif
 
@@ -1103,25 +1103,25 @@ struct sTrailFade {
  *
  * @param fadeTime  transition length
  */
-extern "C" void cCutSceneTransitionMan_EndCutScene(cCutSceneTransitionMan* self, float fadeTime)
+void cCutSceneTransitionMan::EndCutScene(float fadeTime)
 {
-    switch (self->mCurrentState) {
+    switch (mCurrentState) {
     case 0:
         return;
     case 1:
-        self->mfLengthOfTime = fadeTime;
-        self->mfCurrentTime = 0.0f;
+        mfLengthOfTime = fadeTime;
+        mfCurrentTime = 0.0f;
         break;
     case 2:
-        self->mfCurrentTime = (self->mfCurrentTime / self->mfLengthOfTime) * fadeTime;
-        self->mfLengthOfTime = fadeTime;
+        mfCurrentTime = (mfCurrentTime / mfLengthOfTime) * fadeTime;
+        mfLengthOfTime = fadeTime;
         break;
     case 3:
-        self->mfCurrentTime = (1.0f - self->mfCurrentTime / self->mfLengthOfTime) * fadeTime;
-        self->mfLengthOfTime = fadeTime;
+        mfCurrentTime = (1.0f - mfCurrentTime / mfLengthOfTime) * fadeTime;
+        mfLengthOfTime = fadeTime;
         break;
     }
-    self->mCurrentState = 2;
+    mCurrentState = 2;
 }
 #endif
 
@@ -1135,12 +1135,12 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToRegularMode);
  * When the mode flag at +0x10 is set, clears it and passes the regular parameters at +0x20 to the graphics manager's
  * virtual slot 41.
  */
-extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan* self)
+void cCutSceneTransitionMan::ForceToRegularMode()
 {
-    if (self->mCurrentState != 0) {
-        self->mCurrentState = 0;
+    if (mCurrentState != 0) {
+        mCurrentState = 0;
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-        obj->SetTVDisplayFormat1(self->mRegularTVFormat);
+        obj->SetTVDisplayFormat1(mRegularTVFormat);
     }
 }
 #endif
@@ -1155,14 +1155,14 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToCutSceneMode)
  * Reads the TV parameters first if the mode flag at +0x10 is clear, sets the flag and passes the cut-scene parameters
  * at +0x34 to the graphics manager's virtual slot 41.
  */
-extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMan* self)
+void cCutSceneTransitionMan::ForceToCutSceneMode()
 {
-    if (self->mCurrentState == 0) {
-        cCutSceneTransitionMan_FindTVParameters(self);
+    if (mCurrentState == 0) {
+        FindTVParameters();
     }
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    self->mCurrentState = 1;
-    obj->SetTVDisplayFormat1(self->mCutSceneTVFormat);
+    mCurrentState = 1;
+    obj->SetTVDisplayFormat1(mCutSceneTVFormat);
 }
 #endif
 
@@ -1178,19 +1178,19 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_Pause);
  *
  * @param up  nonzero to pause, zero to resume
  */
-extern "C" void cCutSceneTransitionMan_Pause(cCutSceneTransitionMan* self, int up)
+void cCutSceneTransitionMan::Pause(int up)
 {
-    int state = self->mCurrentState;
+    int state = mCurrentState;
     if (state == 2 || state == 3) {
-        self->mNumPause = 0;
+        mNumPause = 0;
         return;
     }
     if (up) {
-        self->mNumPause += 1;
+        mNumPause += 1;
         return;
     }
-    if (self->mNumPause > 0) {
-        self->mNumPause -= 1;
+    if (mNumPause > 0) {
+        mNumPause -= 1;
     }
 }
 #endif
@@ -1233,9 +1233,9 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     self->mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     if (self->mfLengthOfTime < self->mfCurrentTime) {
         if (mode == 2)
-            cCutSceneTransitionMan_ForceToRegularMode(self);
+            self->ForceToRegularMode();
         else
-            cCutSceneTransitionMan_ForceToCutSceneMode(self);
+            self->ForceToCutSceneMode();
         return;
     }
     float k = self->mfCurrentTime / self->mfLengthOfTime;
@@ -1272,9 +1272,9 @@ struct sBTState {
  * cut-scene format (2, y offset 0, y scale 1.0, aspect 0.75/0.63); any other gets (1, 0.125, 0.75,
  * 0.75/0.63), probably a letterbox.
  */
-extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* self)
+void cCutSceneTransitionMan::FindTVParameters()
 {
-    cCutSceneTransitionMan* transMan = self;
+    cCutSceneTransitionMan* transMan = this;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     (*(sBTState*)&transMan->mRegularTVFormat) = *(sBTState*)obj->GetTVDisplayFormat();
     float xAspectAngle = 0.75f;
@@ -1359,11 +1359,10 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_reset__FPv);
  * readFromReplayFrame). Called by the constructor, cRiderHandler_resetRiderFX,
  * cRiderHandler_readFromReplayFrame and cTrickBoostFX_readFromReplayFrame.
  */
-void cTrickBoostFX_reset(void* vself)
+void cTrickBoostFX::reset()
 {
-    cTrickBoostFX* self = (cTrickBoostFX*)vself;
-    self->mNumActiveBlurBuffers = 0;
-    self->mCurrentBlurBuffer = 0;
+    mNumActiveBlurBuffers = 0;
+    mCurrentBlurBuffer = 0;
 }
 #endif
 
@@ -1454,16 +1453,16 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
  * state 1) it stores a 140 x 36 quad around the board bone in a ring of 3 (up to 3 kept), plus two points 12
  * to each side; otherwise the count drops to 0.
  */
-extern "C" void cTrickBoostFX_update(cTrickBoostFX* self)
+void cTrickBoostFX::update()
 {
-    float speed = self->mRider->mPowerUpTrickTimer;
+    float speed = mRider->mPowerUpTrickTimer;
     if (cPowerUpFXToggles_m_TestTrickBoost != 0)
         speed = 10.0f;
     float zeroF = 0.0f;
     if (zeroF < speed)
     {
-        cPlayerLights_BoardIsAdditive(&self->mRider->mRiderHandler->PlayerLights, 1);
-        cRider* riderBase = (cRider*)((char*)self->mRider);
+        cPlayerLights_BoardIsAdditive(&mRider->mRiderHandler->PlayerLights, 1);
+        cRider* riderBase = (cRider*)((char*)mRider);
         sV3_2EADD0 sz;
         sz.x = 2.0f;
         sz.y = 2.0f;
@@ -1476,25 +1475,29 @@ extern "C" void cTrickBoostFX_update(cTrickBoostFX* self)
         col.w = zeroF;
         cPlayerLights_AddDirectional(fs, &col, &sz);
     }
-    if (zeroF < speed && cRider_getMotionState(((char*)self->mRider)) == 1)
+    if (zeroF < speed && cRider_getMotionState(((char*)mRider)) == 1)
     {
-        self->mCurrentBlurBuffer = (self->mCurrentBlurBuffer + 2) % 3;
-        int n = self->mNumActiveBlurBuffers + 1;
-        self->mNumActiveBlurBuffers = n < 4 ? n : 3;
-        cRider* riderPtr = (cRider*)((char*)self->mRider);
+        mCurrentBlurBuffer = (mCurrentBlurBuffer + 2) % 3;
+        int n = mNumActiveBlurBuffers + 1;
+        mNumActiveBlurBuffers = n < 4 ? n : 3;
+        cRider* riderPtr = (cRider*)((char*)mRider);
         sV4_2EADD0 pos = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->SkelMatrices + (riderPtr->mBoneBoardChild << 6)))->pos;
         sV4_2EADD0 fwd = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->SkelMatrices + (riderPtr->mBoneBoardChild << 6)))->fwd;
         sV4_2EADD0 side = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->SkelMatrices + (riderPtr->mBoneBoardChild << 6)))->side;
-        (*(sV4_2EADD0*)&self->mConnectVertLeft) = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
-        (*(sV4_2EADD0*)&self->mConnectVertRight) = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
-        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
-        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[1] = Add_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
-        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[2] = Add_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
-        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[3] = Sub_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        (*(sV4_2EADD0*)&mConnectVertLeft) = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
+        (*(sV4_2EADD0*)&mConnectVertRight) = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
+        ((sSlot_2EADD0*)&mPositionBuffer[0][0])[mCurrentBlurBuffer].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd,
+                70.0f)), Scale_2EADD0(side, 18.0f));
+        ((sSlot_2EADD0*)&mPositionBuffer[0][0])[mCurrentBlurBuffer].v[1] = Add_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd,
+                70.0f)), Scale_2EADD0(side, 18.0f));
+        ((sSlot_2EADD0*)&mPositionBuffer[0][0])[mCurrentBlurBuffer].v[2] = Add_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd,
+                70.0f)), Scale_2EADD0(side, 18.0f));
+        ((sSlot_2EADD0*)&mPositionBuffer[0][0])[mCurrentBlurBuffer].v[3] = Sub_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd,
+                70.0f)), Scale_2EADD0(side, 18.0f));
     }
     else
     {
-        self->mNumActiveBlurBuffers = 0;
+        mNumActiveBlurBuffers = 0;
     }
 }
 #endif
@@ -1562,9 +1565,9 @@ static inline void addVtx_B198(tBxVertex* v, const sTrailCol_B198& c, float s, f
  * Needs at least 2 quads. Uses effect texture 62 and its own draw state; each quad edge pair forms a strip
  * whose v coordinate runs from 1 (newest) to 0, drawn through the graphics manager's virtual slot 71.
  */
-extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
+void cTrickBoostFX::render()
 {
-    if (self->mNumActiveBlurBuffers < 2) {
+    if (mNumActiveBlurBuffers < 2) {
         return;
     }
     push_B198((sRctx_B198*)GrMan);
@@ -1592,23 +1595,23 @@ extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
     col.r = 1.0f;
     col.g = 1.0f;
     col.b = 1.0f;
-    addVtx_B198(&verts[1][counts[1]++], col, 0.5f, 0.0f, (*(sV4_2EADD0*)&self->mConnectVertRight));
-    addVtx_B198(&verts[3][counts[3]++], col, 0.5f, 0.0f, (*(sV4_2EADD0*)&self->mConnectVertLeft));
-    for (int i = 0; i < self->mNumActiveBlurBuffers; i++) {
-        int slotIdx = (self->mCurrentBlurBuffer + i) % 3;
+    addVtx_B198(&verts[1][counts[1]++], col, 0.5f, 0.0f, (*(sV4_2EADD0*)&mConnectVertRight));
+    addVtx_B198(&verts[3][counts[3]++], col, 0.5f, 0.0f, (*(sV4_2EADD0*)&mConnectVertLeft));
+    for (int i = 0; i < mNumActiveBlurBuffers; i++) {
+        int slotIdx = (mCurrentBlurBuffer + i) % 3;
         col.a = 0.5f;
         col.r = 0.5f;
         col.g = 0.5f;
         col.b = 0.5f;
-        float texV = 1.0f - (float)i / (float)(self->mNumActiveBlurBuffers - 1);
-        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[0]);
-        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[1]);
-        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[1]);
-        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[2]);
-        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[2]);
-        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[3]);
-        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[3]);
-        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[0]);
+        float texV = 1.0f - (float)i / (float)(mNumActiveBlurBuffers - 1);
+        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[0]);
+        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, texV, ((sSlot_2EADD0*)&mPositionBuffer[0][0])[slotIdx].v[0]);
     }
     for (int k = 0; k < 4; k++) {
         cPS2GraphicsMan* ctx = GrMan;
@@ -1669,10 +1672,10 @@ extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, fl
  *
  * @param amount  how far the fade has covered the screen, 0..1 (On Tour d)
  */
-extern "C" void cFade_TObj_Draw(cFade_TObj* self, float amount)
+void cFade_TObj::Draw(float amount)
 {
-    sBTRect4 color = *(sBTRect4*)&self->mColour;
-    color.x = ((sBTRect4*)(&self->mColour))->x * amount;
+    sBTRect4 color = *(sBTRect4*)&mColour;
+    color.x = ((sBTRect4*)(&mColour))->x * amount;
     sBTRect4 pos;
     pos.x = 0.0f;
     pos.y = 0.0f;
@@ -1741,11 +1744,11 @@ extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, fl
  *
  * @param amount  how far the wipe has covered the screen, 0..1 (On Tour d)
  */
-extern "C" void cWipe_TObj_Draw(cWipe_TObj* self, float amount)
+void cWipe_TObj::Draw(float amount)
 {
     float k = 1.0f - amount;
-    float dx = (float)self->mHDir * k * 640.0f;
-    float dy = (float)self->mVDir * k * -480.0f;
+    float dx = (float)mHDir * k * 640.0f;
+    float dy = (float)mVDir * k * -480.0f;
     float w = 640.0f;
     float uStart, uEnd;
     if (dx < 0.0f) {
@@ -1782,7 +1785,7 @@ extern "C" void cWipe_TObj_Draw(cWipe_TObj* self, float amount)
     rect.y = vStart;
     rect.z = uw;
     rect.w = vh;
-    func_002EB938(&pos, &rect, (sBTRect4*)(&self->mColour), 0.0f);
+    func_002EB938(&pos, &rect, (sBTRect4*)(&mColour), 0.0f);
 }
 #endif
 
@@ -1955,11 +1958,11 @@ static inline void BuildArc_C060(float* ys, float* xs, const float& cx, float r,
  *
  * @param amount  how far the circle has closed, 0..1 (On Tour delta)
  */
-extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
+void cCircle_TObj::Draw(float amount)
 {
     float radius = (1.0f - amount) * 800.0f;
-    float x1 = self->mOriginX + radius;
-    float x0 = self->mOriginX - radius;
+    float x1 = mOriginX + radius;
+    float x0 = mOriginX - radius;
     sBTRect4 pos;
     sBTRect4 rect;
     pos.x = 0.0f;
@@ -1970,7 +1973,7 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
     rect.x = gUStart;
     rect.y = gVStart;
     rect.w = gVHeight;
-    func_002EB938(&pos, &rect, (sBTRect4*)(&self->mScreenColour), 0.0f);
+    func_002EB938(&pos, &rect, (sBTRect4*)(&mScreenColour), 0.0f);
     float w = 640.0f - x1;
     pos.x = x1;
     pos.y = 0.0f;
@@ -1980,25 +1983,25 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
     rect.y = gVStart;
     rect.z = gUStart + gUWidth * w * 0.0015625000232830644f;
     rect.w = gVHeight;
-    func_002EB938(&pos, &rect, (sBTRect4*)(&self->mScreenColour), 0.0f);
+    func_002EB938(&pos, &rect, (sBTRect4*)(&mScreenColour), 0.0f);
 
     float ys[40];
     float xs[40];
-    BuildArc_C060(ys, xs, self->mOriginX, radius, 0.08055365830659866f); // pi / 39
+    BuildArc_C060(ys, xs, mOriginX, radius, 0.08055365830659866f); // pi / 39
 
     tBxVertex top[80];
     tBxVertex bot[80];
     for (int i = 0; i < 40; i++) {
         tBxVertex* topVert = top + i * 2;
-        InitVertex_C060(((float*)&topVert->u), (float*)(&self->mScreenColour), xs[i], 0.0f);
+        InitVertex_C060(((float*)&topVert->u), (float*)(&mScreenColour), xs[i], 0.0f);
         tBxVertex* topArcVert = top + i * 2 + 1;
-        float y0 = clampBT(self->mOriginY - ys[i], 0.0f, 480.0f);
-        InitVertex_C060(((float*)&topArcVert->u), (float*)(&self->mScreenColour), xs[i], y0);
-        float y1 = clampBT(self->mOriginY + ys[i], 0.0f, 480.0f);
+        float y0 = clampBT(mOriginY - ys[i], 0.0f, 480.0f);
+        InitVertex_C060(((float*)&topArcVert->u), (float*)(&mScreenColour), xs[i], y0);
+        float y1 = clampBT(mOriginY + ys[i], 0.0f, 480.0f);
         tBxVertex* botArcVert = bot + i * 2;
-        InitVertex_C060(((float*)&botArcVert->u), (float*)(&self->mScreenColour), xs[i], y1);
+        InitVertex_C060(((float*)&botArcVert->u), (float*)(&mScreenColour), xs[i], y1);
         tBxVertex* botBaseVert = bot + i * 2 + 1;
-        InitVertex_C060(((float*)&botBaseVert->u), (float*)(&self->mScreenColour), xs[i], 480.0f);
+        InitVertex_C060(((float*)&botBaseVert->u), (float*)(&mScreenColour), xs[i], 480.0f);
     }
 
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;

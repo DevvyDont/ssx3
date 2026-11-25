@@ -20,6 +20,9 @@ struct cStatsCalc {
     float MinSample;                // 0x08 [O]; [U] add: = x on the first sample, else lowered to x
     float MaxSample;                // 0x0C [O]; [U] add: = x on the first sample, else raised to x
     int Samples;                    // 0x10 [O]; [U] add: 0 = first sample; incremented
+
+    // Methods bound to their retail symbols by asm labels.
+    void add(float x) __asm__("cStatsCalc_add");
 };
 
 CHECK_OFFSET(cStatsCalc, Sum, 0x00);

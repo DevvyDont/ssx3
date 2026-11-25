@@ -109,6 +109,8 @@ CHECK_OFFSET(tMakeSpringRailData, TorqueScale, 0x50);
 CHECK_OFFSET(tMakeSpringRailData, unk_054, 0x54);
 CHECK_SIZE(tMakeSpringRailData, 0x58);
 
+struct cBxReplayFrame;
+
 struct cSpringRailNode : public cFlexRailNode {
     // cFlexRailNode (object/flexrailnode.h, 0x60): the vptr at 0x0C:
     //   [R] cSpringRailNode_vtbl in both ctors and the dtor (after cFlexRailNode's own); [P]
@@ -131,6 +133,10 @@ struct cSpringRailNode : public cFlexRailNode {
                                     //      "SpringRailNodes"), dtor frees it; [U] every method walks it (lw 0x70);
                                     //      getMesh returns Nodes[seg].Mesh
     char unk_074[0xC];              // 0x074 tail padding to the 16-byte-aligned size 0x80 (never accessed)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cSpringRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cSpringRailNode_cSpringRailNode1");
+    void getPosition(tSpringRailNode* node) __asm__("cSpringRailNode_getPosition");
 };
 
 CHECK_OFFSET(cSpringRailNode, ASpring, 0x060);

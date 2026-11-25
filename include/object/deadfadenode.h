@@ -93,6 +93,9 @@ struct cDeadFadeNode : public cInstanceNode {
     t4Matrix* AnimMats;             // 0x38 [O]; [P] 0x38 (dtor); [R] ctor operator new(mesh count * 0x40,
                                     //      "DeadFadeAnimMats"), filled per mesh; replay ctor 0; dtor frees it; [U]
                                     //      render passes it as the mesh matrices
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cDeadFadeNode1() __asm__("cDeadFadeNode_cDeadFadeNode1");
 };
 
 CHECK_OFFSET(cDeadFadeNode, Data, 0x1C);

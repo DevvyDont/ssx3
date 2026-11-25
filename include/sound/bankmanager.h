@@ -68,6 +68,15 @@ struct cBankInstance {
     cBankInstance* mpPrev;      // 0x1C [O]; [R] ctor 0; [U] ShareBank / UnshareBank
     char mBankFilename[64];     // 0x20 [O]; [R] ctor clears byte 0; [U] SyncLoad / OnEndAsyncLoad strcpy() the file
                                 //       name, IsBankLoaded compares it
+
+    // Methods bound to their retail symbols by asm labels.
+    void SharedUnload() __asm__("cBankInstance_SharedUnload");
+    void* AllocMem(int size, int extra, int tag) __asm__("cBankInstance_AllocMem");
+    void DeallocMem() __asm__("cBankInstance_DeallocMem");
+    void ShareBank(cBankInstance* src) __asm__("cBankInstance_ShareBank");
+    void UnshareBank() __asm__("cBankInstance_UnshareBank");
+    int IsBankLoaded(void* name) __asm__("cBankInstance_IsBankLoaded");
+    int OnAsyncMainMemSize() __asm__("cBankInstance_OnAsyncMainMemSize__FPv");
 };
 
 struct cBankManager {
@@ -104,6 +113,21 @@ struct cBankManager {
     int BANK_Loading(int bankId) __asm__("cBankManager_BANK_Loading");
     int BANK_InUse(int idx) __asm__("cBankManager_BANK_InUse");
     int BANK_Handle(int bankId) __asm__("cBankManager_BANK_Handle");
+    void BANK_SyncLoad(int i, void* id, int mainMemFlag) __asm__("cBankManager_BANK_SyncLoad");
+    void BANK_UnLoad(int i) __asm__("cBankManager_BANK_UnLoad");
+    void BANK_AsyncLoad(int i, void* id, int mainMemFlag) __asm__("cBankManager_BANK_AsyncLoad");
+    void* BANK_AllocMem(int i, int mainMemSize, int soundMemSize, int memFlags) __asm__("cBankManager_BANK_AllocMem");
+    void BANK_DeallocMem(int i) __asm__("cBankManager_BANK_DeallocMem");
+    void BANK_ShareBank(int i, int j) __asm__("cBankManager_BANK_ShareBank");
+    void BANK_UnshareBank(int i) __asm__("cBankManager_BANK_UnshareBank");
+    void BANK_Attach(int i, int mainMemData, int mainMemSize) __asm__("cBankManager_BANK_Attach");
+    void BANK_UnAttach(int i) __asm__("cBankManager_BANK_UnAttach");
+    void ASYNCSYS_OnBeginAsyncLoad(int i) __asm__("cBankManager_ASYNCSYS_OnBeginAsyncLoad");
+    void ASYNCSYS_OnAsyncMainMemAlloc(int i, int size, int memflags)
+        __asm__("cBankManager_ASYNCSYS_OnAsyncMainMemAlloc");
+    void ASYNCSYS_OnAsyncMainMemSize(int i) __asm__("cBankManager_ASYNCSYS_OnAsyncMainMemSize");
+    void ASYNCSYS_OnEndAsyncLoad(int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
+        __asm__("cBankManager_ASYNCSYS_OnEndAsyncLoad");
 };
 
 CHECK_OFFSET(cBankInstance, mBankStatus, 0x00);

@@ -21,6 +21,10 @@ struct cCrowdAnim2D {
     int m_iUpdateTick;              // 0x014 [O]
     int m_iLastTick;                // 0x018 [O]
     cCrowdRender2D* m_pCR2D;        // 0x01C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    int advanceFrame(int frame, int n, int* mode) __asm__("cCrowdAnim2D_advanceFrame");
+    void update() __asm__("cCrowdAnim2D_update");
 };
 
 CHECK_OFFSET(cCrowdAnim2D, m_TargetState, 0x000);

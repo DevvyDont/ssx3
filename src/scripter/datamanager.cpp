@@ -38,7 +38,7 @@ extern "C" cDataManager* cDataManager_cDataManager(cDataManager* self, int flags
     *(tDataInstanceInfo**)&self->mpDataInstanceHeap = (tDataInstanceInfo*)operator_new_tag(count * sizeof(tDataInstanceInfo), str_tDataInstanceInfo, flags, 0);
     *(int*)&self->mpEmptyDataInstanceList = 0;
     for (int i = 0; i < count; i++) {
-        cDataManager_AddToEmptyInstanceList(self, &(self->mpDataInstanceHeap)[i]);
+        self->AddToEmptyInstanceList(&(self->mpDataInstanceHeap)[i]);
     }
     return self;
 }
@@ -98,9 +98,9 @@ extern int REALabortflag[];
  * @param size  its size in bytes
  * @return the instance record (the data handle)
  */
-extern "C" tDataInstanceInfo* cDataManager_AttachData(cDataManager* self, int pName, void* data, int size)
+tDataInstanceInfo* cDataManager::AttachData(int pName, void* data, int size)
 {
-    tDataInstanceInfo* n = (tDataInstanceInfo*)cDataManager_GetEmptyInstance(self);
+    tDataInstanceInfo* n = (tDataInstanceInfo*)GetEmptyInstance();
     int saved = REALabortflag[0];
     n->pData = data;
     n->isRoot = 1;
@@ -109,12 +109,14 @@ extern "C" tDataInstanceInfo* cDataManager_AttachData(cDataManager* self, int pN
     int big = BIG_sizeofheader(data);
     REALabortflag[0] = saved;
     if (big != 0) {
-        sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
-        vt[4].fn(vthis(self, vt[4]), pName, data, size, n, &(*(int*)&n->pUserData2));
-        cDataManager_AttachDataFromBigfile(self, (char*)data, n);
+        sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*,
+                void*)>*)mVtbl;
+        vt[4].fn(vthis(this, vt[4]), pName, data, size, n, &(*(int*)&n->pUserData2));
+        AttachDataFromBigfile((char*)data, n);
     } else {
-        sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
-        vt[2].fn(vthis(self, vt[2]), pName, data, size, n, &(*(int*)&n->pUserData2));
+        sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*,
+                void*)>*)mVtbl;
+        vt[2].fn(vthis(this, vt[2]), pName, data, size, n, &(*(int*)&n->pUserData2));
     }
     return n;
 }
@@ -151,7 +153,7 @@ int cDataManager_DetachData_impl(cDataManager* self, tDataInstanceInfo* entry)
             tDataInstanceInfo* next = n->pNext;
             tDetachHookSlot* vt = (tDetachHookSlot*)self->mVtbl;
             vt[3].fn(vthis(self, vt[3]), n->pData, n->dataSize, n->pUserData1, n->pUserData2); // OnDetachData
-            cDataManager_AddToEmptyInstanceList(self, n);
+            self->AddToEmptyInstanceList(n);
             n = next;
         } while (n != 0);
         tDetachHookSlot* vt = (tDetachHookSlot*)self->mVtbl;
@@ -161,7 +163,7 @@ int cDataManager_DetachData_impl(cDataManager* self, tDataInstanceInfo* entry)
         vt[3].fn(vthis(self, vt[3]), entry->pData, entry->dataSize, entry->pUserData1, entry->pUserData2);
     }
     int key = ((int)entry->pData);
-    cDataManager_AddToEmptyInstanceList(self, entry);
+    self->AddToEmptyInstanceList(entry);
     return key;
 }
 #endif
@@ -176,12 +178,12 @@ extern "C" void cDataManager_DetachData(void* self, void* entry);
 /**
  * Detaches every data entry of the data manager that is in use, through cDataManager_DetachData().
  */
-extern "C" void cDataManager_DetachAll(cDataManager* self)
+void cDataManager::DetachAll()
 {
     int i;
-    for (i = 0; i < self->mMaxDataInstances; i++) {
-        if ((self->mpDataInstanceHeap)[i].isRoot != 0) {
-            cDataManager_DetachData(self, &(self->mpDataInstanceHeap)[i]);
+    for (i = 0; i < mMaxDataInstances; i++) {
+        if (mpDataInstanceHeap[i].isRoot != 0) {
+            cDataManager_DetachData(this, &mpDataInstanceHeap[i]);
         }
     }
 }
@@ -196,7 +198,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetData);
  * @param dataHandle  the handle cDataManager_AttachData returned
  * @return the attached data
  */
-extern "C" int cDataManager_GetData(cDataManager* self, tDataInstanceInfo* dataHandle)
+int cDataManager::GetData(tDataInstanceInfo* dataHandle)
 {
     return (int)dataHandle->pData;
 }
@@ -211,7 +213,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetDataUserData);
  * @param out0  receives the first user-data word
  * @param out1  receives the second user-data word
  */
-extern "C" void cDataManager_GetDataUserData(cDataManager* self, tDataInstanceInfo* dataHandle, int* out0, int* out1)
+void cDataManager::GetDataUserData(tDataInstanceInfo* dataHandle, int* out0, int* out1)
 {
     *out0 = *(int*)dataHandle;
     *out1 = (int)dataHandle->pUserData2;
@@ -244,7 +246,7 @@ extern int REALabortflag[];
  * @param prev  the record to chain the new records after
  * @return the last record of the chain
  */
-extern "C" tDataInstanceInfo* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, tDataInstanceInfo* prev)
+tDataInstanceInfo* cDataManager::AttachDataFromBigfile(char* big, tDataInstanceInfo* prev)
 {
     int ent[2];
     ent[0] = 0;
@@ -258,15 +260,16 @@ extern "C" tDataInstanceInfo* cDataManager_AttachDataFromBigfile(cDataManager* s
         int headerSize = BIG_sizeofheader(sub);
         REALabortflag[0] = saved;
         if (headerSize != 0) {
-            prev = cDataManager_AttachDataFromBigfile(self, sub, prev);
+            prev = AttachDataFromBigfile(sub, prev);
         } else {
-            tDataInstanceInfo* n = (tDataInstanceInfo*)cDataManager_GetEmptyInstance(self);
+            tDataInstanceInfo* n = (tDataInstanceInfo*)GetEmptyInstance();
             (*(char**)&n->pData) = sub;
             n->dataSize = ent[1];
             prev->pNext = n;
             prev = n;
-            sVEntry<void(void*, char*, char*, int, void*, void*)>* vt = (sVEntry<void(void*, char*, char*, int, void*, void*)>*)self->mVtbl;
-            vt[2].fn(vthis(self, vt[2]), name, sub, ent[1], prev, &(*(int*)&prev->pUserData2));
+            sVEntry<void(void*, char*, char*, int, void*, void*)>* vt = (sVEntry<void(void*, char*, char*, int, void*,
+                    void*)>*)mVtbl;
+            vt[2].fn(vthis(this, vt[2]), name, sub, ent[1], prev, &(*(int*)&prev->pUserData2));
         }
         name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
     }
@@ -285,17 +288,16 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_AddToEmptyInstanceList__FPvT0);
  *
  * @param vnode  the instance record (On Tour tDataInstanceInfo*)
  */
-void cDataManager_AddToEmptyInstanceList(void* vself, void* vnode)
+void cDataManager::AddToEmptyInstanceList(void* vnode)
 {
     tDataInstanceInfo* node = (tDataInstanceInfo*)vnode;
-    cDataManager* self = (cDataManager*)vself;
     node->pData = 0;
     node->dataSize = 0;
     node->isRoot = 0;
     node->pUserData1 = 0;
     node->pUserData2 = 0;
-    node->pNext = (tDataInstanceInfo*)((void*)self->mpEmptyDataInstanceList);
-    self->mpEmptyDataInstanceList = (tDataInstanceInfo*)node;
+    node->pNext = (tDataInstanceInfo*)((void*)mpEmptyDataInstanceList);
+    mpEmptyDataInstanceList = (tDataInstanceInfo*)node;
 }
 #endif
 
@@ -310,11 +312,10 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetEmptyInstance__FPv);
  *
  * @return the instance record
  */
-void* cDataManager_GetEmptyInstance(void* vself)
+void* cDataManager::GetEmptyInstance()
 {
-    cDataManager* self = (cDataManager*)vself;
-    tDataInstanceInfo* head = self->mpEmptyDataInstanceList;
-    self->mpEmptyDataInstanceList = (tDataInstanceInfo*)(head->pNext);
+    tDataInstanceInfo* head = mpEmptyDataInstanceList;
+    mpEmptyDataInstanceList = (tDataInstanceInfo*)(head->pNext);
     head->pNext = 0;
     return ((void*)head);
 }
@@ -371,7 +372,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void tNISList__tNISList(int* self, int flags)
 {
-    tNISList_Reset((tNISList*)self, 1);
+    ((tNISList*)self)->Reset(1);
     *self = 0;
     if (flags & 1) {
         operator_delete(self);
@@ -418,9 +419,9 @@ struct sDmCmd5DD8 {
  * @param controlBits  the entry's control bits
  * @return 1 when queued, 0 when the list is full
  */
-extern "C" int tNISList_AddByVideoCategory(tNISList* self, int videoCategory, int controlBits)
+int tNISList::AddByVideoCategory(int videoCategory, int controlBits)
 {
-    if (cCircularBuffer_IsFull(&self->mList) != 0) {
+    if (cCircularBuffer_IsFull(&mList) != 0) {
         return 0;
     }
     sDmCmd5DD8 cmd;
@@ -433,20 +434,20 @@ extern "C" int tNISList_AddByVideoCategory(tNISList* self, int videoCategory, in
     // 64-bit "none" value compared against the pending index below; needed for the target's branch layout
     long none = 0;
     cmd.a6 = -1;
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     cCircularBuffer_AddToTail(list, &cmd);
-    if (self->mState == 0) {
+    if (mState == 0) {
         return 1;
     }
-    if (self->mNextPendingScriptIndex >= none) {
+    if (mNextPendingScriptIndex >= none) {
         return 1;
     }
-    self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
-    if (self->mState == 3) {
-        int ok = cBXScriptEngine_GetRequestPlayerByReqHandle(self->mpNISEngine,
+    mNextPendingScriptIndex = SetupNextScript(cCircularBuffer_GetNumEntries_count(list) - 1, 0);
+    if (mState == 3) {
+        int ok = cBXScriptEngine_GetRequestPlayerByReqHandle(mpNISEngine,
             cCircularBuffer_operatorIndex(list, 0)->scriptHandle)->mPlayState == keScriptPlayState_PlayEnding;
         if (ok)
-            tNISList_WaitOnPendingNextScript(self);
+            WaitOnPendingNextScript();
     }
     return 1;
 }
@@ -495,9 +496,10 @@ struct sDmCmd5ED0 {
  * @param aiCharIndexSupport1  the second supporting AI rider index
  * @return 1 when queued, 0 when full or no script was found
  */
-extern "C" int tNISList_AddByScriptCategory(tNISList* self, int scriptCategory, int controlBits, int lookup, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
+int tNISList::AddByScriptCategory(int scriptCategory, int controlBits, int lookup, int aiCharIndexMain,
+                                  int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
-    if (cCircularBuffer_IsFull(&self->mList) != 0) {
+    if (cCircularBuffer_IsFull(&mList) != 0) {
         return 0;
     }
     sDmCmd5ED0 cmd;
@@ -509,31 +511,32 @@ extern "C" int tNISList_AddByScriptCategory(tNISList* self, int scriptCategory, 
     cmd.a5 = aiCharIndexSupport0;
     cmd.a6 = aiCharIndexSupport1;
     if (lookup != 0) {
-        int id = cSSXScriptEngine_SelectScriptFromCategory(*(void**)self, scriptCategory, aiCharIndexMain, aiCharIndexSupport0, aiCharIndexSupport1);
+        int id = cSSXScriptEngine_SelectScriptFromCategory(*(void**)this, scriptCategory, aiCharIndexMain,
+                aiCharIndexSupport0, aiCharIndexSupport1);
         if (id < 0) {
             return 0;
         }
         cmd.id = id;
     }
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     cCircularBuffer_AddToTail(list, &cmd);
-    if (self->mState == 0) {
+    if (mState == 0) {
         return 1;
     }
-    if (self->mNextPendingScriptIndex >= 0) {
+    if (mNextPendingScriptIndex >= 0) {
         return 1;
     }
-    self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
-    if (self->mState == 3) {
+    mNextPendingScriptIndex = SetupNextScript(cCircularBuffer_GetNumEntries_count(list) - 1, 0);
+    if (mState == 3) {
         int ok;
-        if (tNISList_IsVideo(self, cCircularBuffer_operatorIndex(list, 0)) == 0) {
-            ok = cBXScriptEngine_GetRequestPlayerByReqHandle(self->mpNISEngine,
+        if (IsVideo(cCircularBuffer_operatorIndex(list, 0)) == 0) {
+            ok = cBXScriptEngine_GetRequestPlayerByReqHandle(mpNISEngine,
                 cCircularBuffer_operatorIndex(list, 0)->scriptHandle)->mPlayState == keScriptPlayState_PlayEnding;
         } else {
-            ok = cVidEngine_IsVideoOnLastFrame(&self->mpNISEngine->mpPlayer);
+            ok = cVidEngine_IsVideoOnLastFrame(&mpNISEngine->mpPlayer);
         }
         if (ok) {
-            tNISList_WaitOnPendingNextScript(self);
+            WaitOnPendingNextScript();
         }
     }
     return 1;
@@ -571,10 +574,11 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param aiCharIndexSupport1  the second supporting AI rider index
  * @return 1 when queued, 0 when the list is full
  */
-extern "C" int tNISList_AddByScriptIndex(tNISList* self, int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
+int tNISList::AddByScriptIndex(int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0,
+                               int aiCharIndexSupport1)
 {
-    if (cCircularBuffer_IsFull(&self->mList) == 0) {
-        void* list = (char*)&self->mList;
+    if (cCircularBuffer_IsFull(&mList) == 0) {
+        void* list = (char*)&mList;
         tNISListEntry cmd;
         cmd.category = 0x1C;
         cmd.scriptHandle = -1;
@@ -584,18 +588,18 @@ extern "C" int tNISList_AddByScriptIndex(tNISList* self, int scriptIndex, int co
         cmd.aiCharIndexSupport0 = aiCharIndexSupport0;
         cmd.aiCharIndexSupport1 = aiCharIndexSupport1;
         cCircularBuffer_AddToTail(list, &cmd);
-        if (self->mState != 0 && self->mNextPendingScriptIndex < 0) {
-        self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
-        if (self->mState == 3) {
+        if (mState != 0 && mNextPendingScriptIndex < 0) {
+        mNextPendingScriptIndex = SetupNextScript(cCircularBuffer_GetNumEntries_count(list) - 1, 0);
+        if (mState == 3) {
             int ok;
-            if (tNISList_IsVideo(self, cCircularBuffer_operatorIndex(list, 0)) == 0) {
-                ok = cBXScriptEngine_GetRequestPlayerByReqHandle(self->mpNISEngine,
+            if (IsVideo(cCircularBuffer_operatorIndex(list, 0)) == 0) {
+                ok = cBXScriptEngine_GetRequestPlayerByReqHandle(mpNISEngine,
                     cCircularBuffer_operatorIndex(list, 0)->scriptHandle)->mPlayState == keScriptPlayState_PlayEnding;
             } else {
-                ok = cVidEngine_IsVideoOnLastFrame(&self->mpNISEngine->mpPlayer);
+                ok = cVidEngine_IsVideoOnLastFrame(&mpNISEngine->mpPlayer);
             }
             if (ok) {
-                tNISList_WaitOnPendingNextScript(self);
+                WaitOnPendingNextScript();
             }
         }
         }
@@ -626,20 +630,20 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param other  the source NIS list
  * @return 1, or 0 when @p other is playing
  */
-extern "C" int tNISList_TransferFromNISList(tNISList* self, tNISList* other)
+int tNISList::TransferFromNISList(tNISList* other)
 {
     int cmd[8];
-    int n = cCircularBuffer_GetNumEntries_count((char*)&self->mList);
+    int n = cCircularBuffer_GetNumEntries_count((char*)&mList);
     if (other->mState == 3) {
         return 0;
     }
     if (cCircularBuffer_GetNumEntries_count(&other->mList) != 0) {
         while (cCircularBuffer_RemoveFromHead(&other->mList, cmd) != 0) {
-            cCircularBuffer_AddToTail((char*)&self->mList, cmd);
+            cCircularBuffer_AddToTail((char*)&mList, cmd);
         }
-        tNISList_Reset((tNISList*)other, 1);
-        if (self->mState != 0 && self->mNextPendingScriptIndex < 0) {
-            self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, n, 0);
+        other->Reset(1);
+        if (mState != 0 && mNextPendingScriptIndex < 0) {
+            mNextPendingScriptIndex = SetupNextScript(n, 0);
         }
     }
     return 1;
@@ -673,41 +677,41 @@ extern "C" tNISListEntry* cCircularBuffer_operatorIndex(void* list, int i);
  * @param playOnReady  0 = no, 1 = play with transition in, 2 = play without (On Tour ePlayOnReady)
  * @return the list state (+0xA4)
  */
-extern "C" int tNISList_ReadyList(tNISList* self, int playOnReady)
+int tNISList::ReadyList(int playOnReady)
 {
-    if (self->mState == 1) {
-        tNISList_CheckOnLoading(self);
+    if (mState == 1) {
+        CheckOnLoading();
     }
-    if (self->mState != 0) {
-        return self->mState;
+    if (mState != 0) {
+        return mState;
     }
-    self->mPlayOnReady = playOnReady;
-    void* list = (char*)&self->mList;
+    mPlayOnReady = playOnReady;
+    void* list = (char*)&mList;
     if (cCircularBuffer_GetNumEntries(list) == 0) {
         return 0;
     }
-    int idx = tNISList_SetupNextScript(self, 0, 0);
+    int idx = SetupNextScript(0, 0);
     if (idx < 0) {
-        tNISList_Reset(self, 1);
-        return self->mState;
+        Reset(1);
+        return mState;
     }
-    tNISList_RemoveFromHead(self, idx);
+    RemoveFromHead(idx);
     tNISListEntry* entry = (tNISListEntry*)cCircularBuffer_operatorIndex(list, 0);
-    if (tNISList_IsVideo(self, entry) == 0) {
-        if (cBXScriptEngine_GetRequestState(*(void**)self, entry->scriptHandle) == 1) {
-            self->mState = 1;
+    if (IsVideo(entry) == 0) {
+        if (cBXScriptEngine_GetRequestState(*(void**)this, entry->scriptHandle) == 1) {
+            mState = 1;
         } else {
-            self->mState = 2;
+            mState = 2;
         }
     } else {
         if (entry->scriptHandle < 0) {
-            self->mState = 1;
+            mState = 1;
         } else {
-            self->mState = 2;
+            mState = 2;
         }
     }
-    self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, idx + 1, 0);
-    return self->mState;
+    mNextPendingScriptIndex = SetupNextScript(idx + 1, 0);
+    return mState;
 }
 #endif
 
@@ -774,7 +778,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
     tNISList* self = (tNISList*)vself;
     tNISList* dm = (tNISList*)self;
     if (self->mState == 1) {
-        tNISList_CheckOnLoading((tNISList*)self);
+        self->CheckOnLoading();
     }
     if (self->mState != 2) {
         return self->mState;
@@ -786,7 +790,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
     if (hudState != 0) {
         hudState->handleEvent(0, 0);
     }
-    if (tNISList_IsVideo((tNISList*)self, item) == 0) {
+    if (self->IsVideo(item) == 0) {
         cSSXScriptEngine_PlayRequestScript_i(*(void**)self, self->mViewIndex, item->scriptHandle, 0, (item->controlBits >> 3) & 1);
         if (self->mIsCutSceneHandler != 0) {
             cTransitionMan* snd = cGame_getTransitionMan(SSXApp->Game, 0);
@@ -911,57 +915,57 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param force  nonzero to try a transition to the next script (On Tour doTransition)
  * @return the list state (+0xA4)
  */
-extern "C" int tNISList_SkipForward(tNISList* self, int delta, int force)
+int tNISList::SkipForward(int delta, int force)
 {
-    int pos = delta + self->mNumScriptsToSkipInProgress;
-    if (pos == self->mNumScriptsToSkipInProgress) {
-        return self->mState;
+    int pos = delta + mNumScriptsToSkipInProgress;
+    if (pos == mNumScriptsToSkipInProgress) {
+        return mState;
     }
-    if (pos < self->mNextPendingScriptIndex) {
-        pos = self->mNextPendingScriptIndex;
+    if (pos < mNextPendingScriptIndex) {
+        pos = mNextPendingScriptIndex;
     }
-    int n = cCircularBuffer_GetNumEntries_count(((char*)&self->mList));
-    if (self->mState != 3) {
-        self->mNumScriptsToSkipInProgress = 0;
+    int n = cCircularBuffer_GetNumEntries_count(((char*)&mList));
+    if (mState != 3) {
+        mNumScriptsToSkipInProgress = 0;
         if (pos < n) {
-            tNISList_RemoveFromHead(self, pos);
-            int st = self->mState;
-            self->mNextPendingScriptIndex = -1;
-            self->mState = 0;
+            RemoveFromHead(pos);
+            int st = mState;
+            mNextPendingScriptIndex = -1;
+            mState = 0;
             if (st != 0) {
-                tNISList_ReadyList(self, self->mPlayOnReady);
+                ReadyList(mPlayOnReady);
             }
-            return self->mState;
+            return mState;
         }
         goto reset;
     }
-    self->mNumScriptsToSkipInProgress = pos;
-    if (self->mNextPendingScriptIndex > 0 && self->mNextPendingScriptIndex < pos) {
-        tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&self->mList), self->mNextPendingScriptIndex);
-        if (tNISList_IsVideo(self, it) == 0) {
-            cBXScriptEngine_ReleaseRequest((char*)self->mpNISEngine, it->scriptHandle);
+    mNumScriptsToSkipInProgress = pos;
+    if (mNextPendingScriptIndex > 0 && mNextPendingScriptIndex < pos) {
+        tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&mList), mNextPendingScriptIndex);
+        if (IsVideo(it) == 0) {
+            cBXScriptEngine_ReleaseRequest((char*)mpNISEngine, it->scriptHandle);
         } else if (it->scriptHandle != 0) {
-            cVidEngine_ResetVideoEngine(&self->mpNISEngine->mpPlayer);
+            cVidEngine_ResetVideoEngine(&mpNISEngine->mpPlayer);
         }
         it->scriptHandle = -1;
-        self->mNextPendingScriptIndex = -1;
-        if (self->mPausedOnNextScriptLoading) {
-            tNISList_DoPause((self), 0, 1);
+        mNextPendingScriptIndex = -1;
+        if (mPausedOnNextScriptLoading) {
+            tNISList_DoPause((this), 0, 1);
         }
-        self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, pos, 0);
+        mNextPendingScriptIndex = SetupNextScript(pos, 0);
     }
-    if (self->mPausedOnNextScriptLoading == 0) {
-        if (force == 0 || tNISList_DoTransitionToNext_r((self)) == 0) {
-            if (self->mNextPendingScriptIndex < 0) {
+    if (mPausedOnNextScriptLoading == 0) {
+        if (force == 0 || tNISList_DoTransitionToNext_r((this)) == 0) {
+            if (mNextPendingScriptIndex < 0) {
                 goto reset;
             }
-            tNISList_PlayNextScriptOnAvailable(self);
+            PlayNextScriptOnAvailable();
         }
     }
-    return self->mState;
+    return mState;
 reset:
-    tNISList_Reset(self, 1);
-    return self->mState;
+    Reset(1);
+    return mState;
 }
 #endif
 
@@ -988,23 +992,22 @@ extern "C" void* tNISList_DoPause(void*, int, int);
  * (cUIStateStack_findState) with (1, 0). Last it drops all five entries (tNISList_RemoveFromHead) and clears the pending index
  * (-1), state and the flag and counter words at +0xAC-+0xC8.
  *
- * @param nisList  the NIS list
  * @param resetTransition  nonzero to also leave cut-scene mode and end the running transition
  */
-extern "C" void tNISList_Reset(tNISList* nisList, int resetTransition)
+void tNISList::Reset(int resetTransition)
 {
-    if (nisList->mPausedOnNextScriptLoading != 0) {
-        tNISList_DoPause(((char*)nisList), 0, 1);
+    if (mPausedOnNextScriptLoading != 0) {
+        tNISList_DoPause(((char*)this), 0, 1);
     }
-    if (nisList->mNumPause != 0) {
-        nisList->mNumPause = 1;
-        tNISList_DoPause(((char*)nisList), 0, 0);
+    if (mNumPause != 0) {
+        mNumPause = 1;
+        tNISList_DoPause(((char*)this), 0, 0);
     }
-    if (nisList->mIsCutSceneHandler != 0 && nisList->mState == 3) {
+    if (mIsCutSceneHandler != 0 && mState == 3) {
         void* gm = SSXApp->Game->CutSceneTransitionMan;
         if (resetTransition != 0) {
             cCutSceneTransitionMan_ForceToRegularMode(gm);
-            if (nisList->mInScriptTransition != 0) {
+            if (mInScriptTransition != 0) {
                 cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
             }
         }
@@ -1014,16 +1017,16 @@ extern "C" void tNISList_Reset(tNISList* nisList, int resetTransition)
             hudState->handleEvent(1, 0);
         }
     }
-    tNISList_RemoveFromHead(nisList, 5);
-    nisList->mNextPendingScriptIndex = -1;
-    nisList->mState = 0;
-    nisList->mDoSkip = 0;
-    nisList->mInScriptTransition = 0;
-    nisList->mTransitionWaitFrames = 0;
-    nisList->mIsStartTransition = 0;
-    nisList->mNumScriptsToSkipInProgress = 0;
-    nisList->mNumPause = 0;
-    nisList->mPlayOnReady = 0;
+    RemoveFromHead(5);
+    mNextPendingScriptIndex = -1;
+    mState = 0;
+    mDoSkip = 0;
+    mInScriptTransition = 0;
+    mTransitionWaitFrames = 0;
+    mIsStartTransition = 0;
+    mNumScriptsToSkipInProgress = 0;
+    mNumPause = 0;
+    mPlayOnReady = 0;
 }
 #endif
 
@@ -1042,9 +1045,9 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param i  the entry index
  * @return the script category
  */
-extern "C" int tNISList_GetScriptCategory(tNISList* self, int i)
+int tNISList::GetScriptCategory(int i)
 {
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     if (i < cCircularBuffer_GetNumEntries_count(list) && *(int*)cCircularBuffer_operatorIndex(list, i) < 0x1C) {
         return *(int*)cCircularBuffer_operatorIndex(list, i);
     }
@@ -1067,9 +1070,9 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param i  the entry index
  * @return the video category
  */
-extern "C" int tNISList_GetVideoCategory(tNISList* self, int i)
+int tNISList::GetVideoCategory(int i)
 {
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     if (i < cCircularBuffer_GetNumEntries_count(list) && *(int*)cCircularBuffer_operatorIndex(list, i) >= 29) {
         return *(int*)cCircularBuffer_operatorIndex(list, i);
     }
@@ -1093,14 +1096,14 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param i  the entry index
  * @return the script index, or -1
  */
-extern "C" int tNISList_GetScriptIndex(tNISList* self, int i)
+int tNISList::GetScriptIndex(int i)
 {
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     if (i >= cCircularBuffer_GetNumEntries_count(list)) {
         return -1;
     }
     tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, i);
-    if (tNISList_IsVideo(self, item) != 0) {
+    if (IsVideo(item) != 0) {
         return -1;
     }
     int scriptIndex = item->scriptIndex;
@@ -1108,7 +1111,7 @@ extern "C" int tNISList_GetScriptIndex(tNISList* self, int i)
         int id = item->scriptHandle;
         scriptIndex = -1;
         if (id >= 0) {
-            scriptIndex = cBXScriptEngine_GetRequestScriptIndex(*(void**)self, id);
+            scriptIndex = cBXScriptEngine_GetRequestScriptIndex(*(void**)this, id);
         }
     }
     return scriptIndex;
@@ -1129,15 +1132,15 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param i  the entry index
  * @return the player, or 0
  */
-extern "C" void* tNISList_GetScriptPlayer(tNISList* self, int i)
+void* tNISList::GetScriptPlayer(int i)
 {
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     if (i < cCircularBuffer_GetNumEntries_count(list)) {
         tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, i);
-        if (tNISList_IsVideo(self, item) == 0) {
+        if (IsVideo(item) == 0) {
             int id = item->scriptHandle;
             if (id >= 0) {
-                return cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, id);
+                return cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)this, id);
             }
         }
     }
@@ -1158,12 +1161,12 @@ extern "C" void tNISList_CheckOnLoading(tNISList* self);
  *
  * @return the list state (+0xA4)
  */
-extern "C" int tNISList_GetState(tNISList* self)
+int tNISList::GetState()
 {
-    if (self->mState == 1) {
-        tNISList_CheckOnLoading(self);
+    if (mState == 1) {
+        CheckOnLoading();
     }
-    return self->mState;
+    return mState;
 }
 #endif
 
@@ -1184,21 +1187,21 @@ extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(void* self, int a1);
  *
  * @return the play state, 0..5
  */
-extern "C" int tNISList_GetPlayState(tNISList* self)
+int tNISList::GetPlayState()
 {
-    if (self->mState != 3) return 0;
-    if (self->mNumPause != 0) return 3;
-    if (self->mDoSkip == 0) {
-        void* list = (char*)&self->mList;
+    if (mState != 3) return 0;
+    if (mNumPause != 0) return 3;
+    if (mDoSkip == 0) {
+        void* list = (char*)&mList;
         if (cCircularBuffer_operatorIndex(list, 0)->controlBits & 8) {
-            if (self->mInScriptTransition == 0) return 2;
-            if (self->mTransitionWaitFrames - 1 > 0) return 2;
+            if (mInScriptTransition == 0) return 2;
+            if (mTransitionWaitFrames - 1 > 0) return 2;
         } else {
-            if (cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self,
+            if (cBXScriptEngine_IsRequestPlaybackEnding(*(void**)this,
                     cCircularBuffer_operatorIndex(list, 0)->scriptHandle) == 0) return 1;
         }
     }
-    return self->mNextPendingScriptIndex < 0 ? 5 : 4;
+    return mNextPendingScriptIndex < 0 ? 5 : 4;
 }
 #endif
 
@@ -1255,7 +1258,7 @@ extern "C" void cTransitionMan_EndTransition(void* p);
 extern "C" void tNISList_Update(tNISList* self)
 {
     if (self->mState == 1) {
-        tNISList_CheckOnLoading(self);
+        self->CheckOnLoading();
         return;
     }
     if (self->mState == 2) {
@@ -1277,10 +1280,10 @@ extern "C" void tNISList_Update(tNISList* self)
         if (self->mTransitionWaitFrames != 0) {
             if (--self->mTransitionWaitFrames == 0) {
                 if (self->mIsStartTransition == 0) {
-                    tNISList_PlayNextScriptOnAvailable(self);
+                    self->PlayNextScriptOnAvailable();
                     return;
                 }
-                if (tNISList_IsVideo(self, item) == 0) {
+                if (self->IsVideo(item) == 0) {
                     cBXScriptEngine_ResumeScript(*(void**)self, item->scriptHandle);
                 } else {
                     cVidEngine_PlayVideo(&self->mpNISEngine->mpPlayer);
@@ -1296,7 +1299,7 @@ extern "C" void tNISList_Update(tNISList* self)
         void* list = (char*)&self->mList;
         tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
         int ok;
-        if (tNISList_IsVideo(self, item) == 0) {
+        if (self->IsVideo(item) == 0) {
             ok = cBXScriptEngine_GetRequestState(*(void**)self,
                      cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex)->scriptHandle) == 2;
         } else {
@@ -1304,7 +1307,7 @@ extern "C" void tNISList_Update(tNISList* self)
         }
         if (ok) {
             tNISList_DoPause(((char*)self), 0, 1);
-            tNISList_PlayNextScript(self);
+            self->PlayNextScript();
         }
         return;
     }
@@ -1316,13 +1319,13 @@ extern "C" void tNISList_Update(tNISList* self)
                 self->mInScriptTransition = 0;
                 self->mTransitionWaitFrames = 0;
             }
-            tNISList_PlayNextScriptOnAvailable(self);
+            self->PlayNextScriptOnAvailable();
             return;
         }
     }
     tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList, 0);
     int done = 0;
-    if (tNISList_IsVideo(self, item) == 0) {
+    if (self->IsVideo(item) == 0) {
         if (cBXScriptEngine_GetRequestState(*(void**)self, item->scriptHandle) == 2 || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, item->scriptHandle) != 0) {
             done = 1;
         }
@@ -1331,7 +1334,7 @@ extern "C" void tNISList_Update(tNISList* self)
         done = 1;
     }
     if (done) {
-        tNISList_PlayNextScriptOnAvailable(self);
+        self->PlayNextScriptOnAvailable();
     }
 }
 #endif
@@ -1357,37 +1360,37 @@ extern "C" tNISListEntry* cCircularBuffer_operatorIndex(void* list, int i);
  *
  * Quirk: with nothing pending, the search from entry 1 runs but its result is not stored.
  */
-extern "C" void tNISList_DoSkip(tNISList* self)
+void tNISList::DoSkip()
 {
-    if (self->mState != 3) {
+    if (mState != 3) {
         return;
     }
-    if (self->mDoSkip != 0) {
+    if (mDoSkip != 0) {
         return;
     }
-    void* list = (char*)&self->mList;
+    void* list = (char*)&mList;
     tNISListEntry* entry = cCircularBuffer_operatorIndex(list, 0);
     if (!(entry->controlBits & 1)) {
         return;
     }
-    self->mDoSkip = 1;
-    if (self->mNextPendingScriptIndex < 0) {
-        tNISList_SetupNextScript(self, 1, 1);
+    mDoSkip = 1;
+    if (mNextPendingScriptIndex < 0) {
+        SetupNextScript(1, 1);
         return;
     }
-    int idx = tNISList_SetupNextScript(self, self->mNextPendingScriptIndex, 1);
-    if (idx != self->mNextPendingScriptIndex) {
-        tNISListEntry* pendingEntry = (tNISListEntry*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
-        if (tNISList_IsVideo(self, pendingEntry) == 0) {
-            cBXScriptEngine_ReleaseRequest(*(void**)self, pendingEntry->scriptHandle);
+    int idx = SetupNextScript(mNextPendingScriptIndex, 1);
+    if (idx != mNextPendingScriptIndex) {
+        tNISListEntry* pendingEntry = (tNISListEntry*)cCircularBuffer_operatorIndex(list, mNextPendingScriptIndex);
+        if (IsVideo(pendingEntry) == 0) {
+            cBXScriptEngine_ReleaseRequest(*(void**)this, pendingEntry->scriptHandle);
             pendingEntry->scriptHandle = -1;
         } else if (pendingEntry->scriptHandle >= 0) {
-            cVidEngine_ResetVideoEngine(&self->mpNISEngine->mpPlayer);
+            cVidEngine_ResetVideoEngine(&mpNISEngine->mpPlayer);
         }
-        self->mNextPendingScriptIndex = idx;
+        mNextPendingScriptIndex = idx;
     }
     if (idx >= 0) {
-        tNISList_PlayNextScriptOnAvailable(self);
+        PlayNextScriptOnAvailable();
     }
 }
 #endif
@@ -1406,15 +1409,15 @@ extern "C" tNISListEntry* cCircularBuffer_operatorIndex(void* list, int i);
  *
  * @return 1 if the list may be skipped, else 0
  */
-extern "C" int tNISList_IsSkipAllowed(tNISList* self)
+int tNISList::IsSkipAllowed()
 {
-    if (self->mState != 3) {
+    if (mState != 3) {
         return 0;
     }
     int allowed = 0;
-    tNISListEntry* headEntry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
+    tNISListEntry* headEntry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&mList, 0);
     if (headEntry->controlBits & 1) {
-        allowed = self->mPausedOnNextScriptLoading == 0;
+        allowed = mPausedOnNextScriptLoading == 0;
     }
     return allowed;
 }
@@ -1431,12 +1434,12 @@ extern "C" tNISListEntry* cCircularBuffer_operatorIndex(void* list, int i);
  *
  * @return 1 when allowed, else 0
  */
-extern "C" int tNISList_IsPauseMenuAllowed(tNISList* self)
+int tNISList::IsPauseMenuAllowed()
 {
-    if (self->mState != 3) {
+    if (mState != 3) {
         return 1;
     }
-    tNISListEntry* entry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
+    tNISListEntry* entry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&mList, 0);
     return (entry->controlBits >> 2) & 1;
 }
 #endif
@@ -1452,22 +1455,22 @@ INCLUDE_ASM("scripter/datamanager", tNISList_IsPendingScriptReady);
  *
  * @return 1 when ready, else 0
  */
-extern "C" int tNISList_IsPendingScriptReady(tNISList* self)
+int tNISList::IsPendingScriptReady()
 {
-    if (self->mState == 1) {
+    if (mState == 1) {
         return 0;
     }
-    int idx = self->mNextPendingScriptIndex;
-    void* list = (char*)&self->mList;
+    int idx = mNextPendingScriptIndex;
+    void* list = (char*)&mList;
     if (idx < 0) {
         return 1;
     }
     tNISListEntry* item = cCircularBuffer_operatorIndex(list, idx);
-    if (tNISList_IsVideo(self, item) != 0) {
+    if (IsVideo(item) != 0) {
         return item->scriptHandle >= 0;
     }
-    return cBXScriptEngine_GetRequestState(*(void**)self,
-               cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex)->scriptHandle) == 2;
+    return cBXScriptEngine_GetRequestState(*(void**)this,
+               cCircularBuffer_operatorIndex(list, mNextPendingScriptIndex)->scriptHandle) == 2;
 }
 #endif
 //100%
@@ -1503,13 +1506,13 @@ extern "C" cScriptPlayerMain* cBXScriptEngine_GetRequestPlayerByReqHandle(void* 
  * @param obj  the InSeq script player (cScriptPlayerMain)
  * @return 1 when it is, else 0
  */
-extern "C" int tNISList_IsPlayingScriptOwner(tNISList* self, cScriptPlayerMain* obj)
+int tNISList::IsPlayingScriptOwner(cScriptPlayerMain* obj)
 {
-    if (self->mState != 3) {
+    if (mState != 3) {
         return 0;
     }
-    tNISListEntry* headEntry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
-    if (tNISList_IsVideo(self, headEntry) != 0) {
+    tNISListEntry* headEntry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&mList, 0);
+    if (IsVideo(headEntry) != 0) {
         return 0;
     }
     return ((void*)obj) == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, headEntry->scriptHandle);
@@ -1527,12 +1530,12 @@ extern "C" int tNISList_IsVideo(tNISList* self, void* a1);
  *
  * @return 1 when playing a video, else 0
  */
-extern "C" int tNISList_IsPlayingVideo(tNISList* self)
+int tNISList::IsPlayingVideo()
 {
-    if (self->mState != 3) {
+    if (mState != 3) {
         return 0;
     }
-    return tNISList_IsVideo(self, cCircularBuffer_operatorIndex(&self->mList, 0));
+    return IsVideo(cCircularBuffer_operatorIndex(&mList, 0));
 }
 #endif
 
@@ -1547,11 +1550,11 @@ INCLUDE_ASM("scripter/datamanager", tNISList_IsPausedPendingNextScript);
  *
  * @return 1 if paused pending the next script, else 0
  */
-extern "C" int tNISList_IsPausedPendingNextScript(tNISList* self)
+int tNISList::IsPausedPendingNextScript()
 {
     int paused = 0;
-    if (self->mState == 3) {
-        paused = self->mPausedOnNextScriptLoading != 0;
+    if (mState == 3) {
+        paused = mPausedOnNextScriptLoading != 0;
     }
     return paused;
 }
@@ -1590,9 +1593,9 @@ extern char str_TRANSP[];
  * @param requestHandle   the play request handle (On Tour requestHandle); unused
  * @param obj  the script player (On Tour cScriptPlayerMain*)
  */
-extern "C" void tNISList_OnScriptPlay(tNISList* self, int requestHandle, cScriptPlayerMain* obj)
+void tNISList::OnScriptPlay(int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0) {
+    if (IsPlayingScriptOwner((cScriptPlayerMain*)obj) != 0) {
         char* name = GetSSXScriptHeader(obj);
         char* msg = str_TRANSP;
         if (*name != 0) {
@@ -1621,13 +1624,13 @@ extern "C" void tNISList_DoTransitionToNext(void* self);
  * @param requestHandle  the request handle (unused)
  * @param obj  the cScriptPlayerMain being updated
  */
-extern "C" void tNISList_OnScriptUpdate(tNISList* self, int requestHandle, cScriptPlayerMain* obj)
+void tNISList::OnScriptUpdate(int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0 && self->mIsCutSceneHandler != 0 &&
+    if (IsPlayingScriptOwner((cScriptPlayerMain*)obj) != 0 && mIsCutSceneHandler != 0 &&
         obj->mLoopScript == 0) {
         tSSXScriptHeader* name = (tSSXScriptHeader*)GetSSXScriptHeader(obj);
         if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= name->endFadeToTransitionFrames) {
-            tNISList_DoTransitionToNext(self);
+            tNISList_DoTransitionToNext(this);
         }
     }
 }
@@ -1649,13 +1652,13 @@ extern "C" void cBXScriptEngine_PauseScript(void* self, int a1);
  * @param requestHandle  the stopping script's request handle
  * @param obj  the stopping InSeq player
  */
-extern "C" void tNISList_OnScriptStopping(tNISList* self, int requestHandle, cScriptPlayerMain* obj)
+void tNISList::OnScriptStopping(int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0) {
-        if (self->mTransitionWaitFrames != 0) {
-            cBXScriptEngine_PauseScript(*(void**)self, requestHandle);
+    if (IsPlayingScriptOwner((cScriptPlayerMain*)obj) != 0) {
+        if (mTransitionWaitFrames != 0) {
+            cBXScriptEngine_PauseScript(*(void**)this, requestHandle);
         }
-        tNISList_WaitOnPendingNextScript(self);
+        WaitOnPendingNextScript();
     }
 }
 #endif
@@ -1677,9 +1680,9 @@ extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
  * @param requestHandle  the request handle (unused)
  * @param obj  the cScriptPlayerMain that stopped
  */
-extern "C" void tNISList_OnScriptStop(tNISList* self, int requestHandle, cScriptPlayerMain* obj)
+void tNISList::OnScriptStop(int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0) {
+    if (IsPlayingScriptOwner((cScriptPlayerMain*)obj) != 0) {
         if (*GetSSXScriptHeader(obj) != 0) {
             cRenderStateMan_setCustomIrradiance(0);
         }
@@ -1708,33 +1711,33 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * (or by category when it has none) and returned when the request succeeds; a video entry readies its video
  * when no video player exists yet and is returned.
  *
- * @param vself  the NIS list (tNISList)
  * @param index  entry to start searching at (On Tour startSearchIndex)
  * @param skipFlagged  nonzero to pass over entries with flag 2 (On Tour ignoreSkipInheritScripts)
  * @return the index of the entry set up, or -1 when none can be
  */
-extern "C" int tNISList_SetupNextScript(tNISList* vself, int index, int skipFlagged)
+int tNISList::SetupNextScript(int index, int skipFlagged)
 {
-    int count = cCircularBuffer_GetNumEntries_count(&vself->mList);
+    int count = cCircularBuffer_GetNumEntries_count(&mList);
     int i = index;
     for (; i < count; i++) {
-        tNISListEntry* currEntry = (tNISListEntry*)cCircularBuffer_operatorIndex(&vself->mList, i);
+        tNISListEntry* currEntry = (tNISListEntry*)cCircularBuffer_operatorIndex(&mList, i);
         if (skipFlagged && (currEntry->controlBits & 2))
             continue;
         if (currEntry->scriptHandle >= 0)
             return i;
-        if (tNISList_IsVideo(vself, currEntry) == 0) {
-            void* eng = *(void**)vself;
+        if (IsVideo(currEntry) == 0) {
+            void* eng = *(void**)this;
             if (currEntry->scriptIndex >= 0)
                 currEntry->scriptHandle = cSSXScriptEngine_RequestScriptByIndex(eng, currEntry->scriptIndex, currEntry->aiCharIndexMain, currEntry->aiCharIndexSupport0, currEntry->aiCharIndexSupport1);
             else
-                currEntry->scriptHandle = cSSXScriptEngine_RequestScriptByCategory(*(void**)vself, currEntry->category, currEntry->aiCharIndexMain, currEntry->aiCharIndexSupport0, currEntry->aiCharIndexSupport1);
+                currEntry->scriptHandle = cSSXScriptEngine_RequestScriptByCategory(*(void**)this, currEntry->category,
+                        currEntry->aiCharIndexMain, currEntry->aiCharIndexSupport0, currEntry->aiCharIndexSupport1);
             if (currEntry->scriptHandle >= 0)
                 return i;
         } else {
-            if (vself->mpNISEngine->mpPlayer == 0) {
-                int* videoEntry = tNISList_GetVideoDBRecord_p(((char*)vself), currEntry);
-                if (cVidEngine_ReadyVideo((void**)&vself->mpNISEngine->mpPlayer, *videoEntry) != 0)
+            if (mpNISEngine->mpPlayer == 0) {
+                int* videoEntry = tNISList_GetVideoDBRecord_p(((char*)this), currEntry);
+                if (cVidEngine_ReadyVideo((void**)&mpNISEngine->mpPlayer, *videoEntry) != 0)
                     currEntry->scriptHandle = 0;
             }
             return i;
@@ -1770,24 +1773,23 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
  * bxAudio sound system (cAudioInterface_bxAudio, +0x118); then resets the video engine (cVidEngine_ResetVideoEngine).
  * Each entry is then popped (cCircularBuffer_RemoveFromHead).
  *
- * @param selfp  the NIS list
  * @param n  the number of entries to remove
  */
-extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
+void tNISList::RemoveFromHead(int n)
 {
     while (n != 0) {
-        if (cCircularBuffer_IsEmpty(&selfp->mList) != 0) {
+        if (cCircularBuffer_IsEmpty(&mList) != 0) {
             return;
         }
-        tNISListEntry cmd = *(tNISListEntry*)cCircularBuffer_operatorIndex(&selfp->mList, 0);
+        tNISListEntry cmd = *(tNISListEntry*)cCircularBuffer_operatorIndex(&mList, 0);
         if (cmd.scriptHandle >= 0) {
-            if (tNISList_IsVideo(selfp, &cmd) == 0) {
-                cBXScriptEngine_ReleaseRequest(*(void**)selfp, cmd.scriptHandle);
+            if (IsVideo(&cmd) == 0) {
+                cBXScriptEngine_ReleaseRequest(*(void**)this, cmd.scriptHandle);
             } else {
-                if (selfp->mpNISEngine->mIsPlaying != 0) {
-                    int* ent = (int*)tNISList_GetVideoDBRecord(selfp, (int*)&cmd);
+                if (mpNISEngine->mIsPlaying != 0) {
+                    int* ent = (int*)tNISList_GetVideoDBRecord(this, (int*)&cmd);
                     int snd;
-                    if (cVidEngine_IsVideoOnLastFrame(&selfp->mpNISEngine->mpPlayer) != 0) {
+                    if (cVidEngine_IsVideoOnLastFrame(&mpNISEngine->mpPlayer) != 0) {
                         snd = ent[6];
                     } else {
                         snd = ent[5];
@@ -1799,10 +1801,10 @@ extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
                         vt[4].fn(vthis(sys, vt[4]), snd);
                     }
                 }
-                cVidEngine_ResetVideoEngine(&selfp->mpNISEngine->mpPlayer);
+                cVidEngine_ResetVideoEngine(&mpNISEngine->mpPlayer);
             }
         }
-        cCircularBuffer_RemoveFromHead(&selfp->mList, 0);
+        cCircularBuffer_RemoveFromHead(&mList, 0);
         n--;
     }
 }
@@ -1822,21 +1824,21 @@ extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
  * or, for a video, it has no handle (scriptHandle < 0); then tNISList_DoPause(self, 1, 1) pauses the list. Nothing
  * happens with nothing pending.
  */
-extern "C" void tNISList_WaitOnPendingNextScript(tNISList* self)
+void tNISList::WaitOnPendingNextScript()
 {
-    int idx = self->mNextPendingScriptIndex;
+    int idx = mNextPendingScriptIndex;
     if (idx >= 0) {
-        void* list = (char*)&self->mList;
+        void* list = (char*)&mList;
         tNISListEntry* nextEntry = cCircularBuffer_operatorIndex(list, idx);
         int ok;
-        if (tNISList_IsVideo(self, nextEntry) == 0) {
-            ok = cBXScriptEngine_GetRequestState(*(void**)self,
-                               cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex)->scriptHandle) == 1;
+        if (IsVideo(nextEntry) == 0) {
+            ok = cBXScriptEngine_GetRequestState(*(void**)this,
+                               cCircularBuffer_operatorIndex(list, mNextPendingScriptIndex)->scriptHandle) == 1;
         } else {
             ok = nextEntry->scriptHandle < 0;
         }
         if (ok) {
-            tNISList_DoPause(self, 1, 1);
+            tNISList_DoPause(this, 1, 1);
         }
     }
 }
@@ -1854,17 +1856,17 @@ extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
  *
  * A head video counts as ready at once; a head script when its request state (cBXScriptEngine_GetRequestState) is 2.
  */
-extern "C" void tNISList_CheckOnLoading(tNISList* self)
+void tNISList::CheckOnLoading()
 {
-    if (self->mState == 1) {
-        tNISListEntry* headEntry = (tNISListEntry*)((char*)cCircularBuffer_operatorIndex((char*)&self->mList, 0));
-        if (tNISList_IsVideo(self, headEntry) == 0) {
-            int requestState = cBXScriptEngine_GetRequestState(*(void**)self, headEntry->scriptHandle);
+    if (mState == 1) {
+        tNISListEntry* headEntry = (tNISListEntry*)((char*)cCircularBuffer_operatorIndex((char*)&mList, 0));
+        if (IsVideo(headEntry) == 0) {
+            int requestState = cBXScriptEngine_GetRequestState(*(void**)this, headEntry->scriptHandle);
             if (requestState == 2) {
-                self->mState = requestState;
+                mState = requestState;
             }
         } else {
-            self->mState = 2;
+            mState = 2;
         }
     }
 }
@@ -1880,11 +1882,11 @@ extern "C" void tNISList_PlayNextScript(tNISList* self);
  * Plays the NIS list's next script when it is available: tNISList_WaitOnPendingNextScript first, then tNISList_PlayNextScript unless the list is now
  * paused on loading (+0xA8).
  */
-extern "C" void tNISList_PlayNextScriptOnAvailable(tNISList* self)
+void tNISList::PlayNextScriptOnAvailable()
 {
-    tNISList_WaitOnPendingNextScript(self);
-    if (self->mPausedOnNextScriptLoading == 0) {
-        tNISList_PlayNextScript(self);
+    WaitOnPendingNextScript();
+    if (mPausedOnNextScriptLoading == 0) {
+        PlayNextScript();
     }
 }
 #endif
@@ -1916,32 +1918,32 @@ extern "C" void cCutSceneTransitionMan_EndCutScene(void* self, float t);
  * list (+0x4), the game's fade (+0x64 of the game) gets cCutSceneTransitionMan_EndCutScene with the transition manager's remaining time
  * (cTransitionMan_GetTransitionTimeLeft) when a script transition was running and the manager is busy, else 0.5.
  *
- * @param selfp  the NIS list
  */
-extern "C" void tNISList_PlayNextScript(tNISList* selfp)
+void tNISList::PlayNextScript()
 {
-    if (selfp->mNextPendingScriptIndex > 0) {
-        selfp->mDoSkip = 0;
-        tNISList_RemoveFromHead(selfp, selfp->mNextPendingScriptIndex);
-        selfp->mNumScriptsToSkipInProgress = 0;
-        selfp->mNextPendingScriptIndex = -1;
-        tNISListEntry* cmd = (tNISListEntry*)cCircularBuffer_operatorIndex(&selfp->mList, 0);
-        if (tNISList_IsVideo(selfp, cmd) == 0) {
-            cSSXScriptEngine_PlayRequestScript(*(void**)selfp, selfp->mViewIndex, cmd->scriptHandle, 0, (cmd->controlBits >> 3) & 1);
-            cSSXScriptEngine* eng = selfp->mpNISEngine;
+    if (mNextPendingScriptIndex > 0) {
+        mDoSkip = 0;
+        RemoveFromHead(mNextPendingScriptIndex);
+        mNumScriptsToSkipInProgress = 0;
+        mNextPendingScriptIndex = -1;
+        tNISListEntry* cmd = (tNISListEntry*)cCircularBuffer_operatorIndex(&mList, 0);
+        if (IsVideo(cmd) == 0) {
+            cSSXScriptEngine_PlayRequestScript(*(void**)this, mViewIndex, cmd->scriptHandle, 0,
+                    (cmd->controlBits >> 3) & 1);
+            cSSXScriptEngine* eng = mpNISEngine;
             sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)eng->mVtbl;
             vt[6].fn(vthis(eng, vt[6]), cmd->scriptHandle); // ForcePlayUpdate
         } else {
-            cVidEngine_PlayVideo(&selfp->mpNISEngine->mpPlayer);
+            cVidEngine_PlayVideo(&mpNISEngine->mpPlayer);
         }
-        if (selfp->mInScriptTransition != 0) {
-            selfp->mIsStartTransition = 1;
+        if (mInScriptTransition != 0) {
+            mIsStartTransition = 1;
         }
-        selfp->mNextPendingScriptIndex = tNISList_SetupNextScript(selfp, 1, 0);
+        mNextPendingScriptIndex = SetupNextScript(1, 0);
     } else {
-        int wasOn = selfp->mInScriptTransition;
-        tNISList_Reset(selfp, 0);
-        if (selfp->mIsCutSceneHandler != 0) {
+        int wasOn = mInScriptTransition;
+        Reset(0);
+        if (mIsCutSceneHandler != 0) {
             cGame* app = SSXApp->Game;
             void* fade = app->CutSceneTransitionMan;
             cTransitionMan* transitionMan = cGame_getTransitionMan(app, 0);
@@ -2003,7 +2005,7 @@ int tNISList_DoTransitionToNext_impl(char* vself)
         return 1;
     }
     tNISListEntry* item = cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
-    if (tNISList_IsVideo((tNISList*)self, item) == 0) {
+    if (self->IsVideo(item) == 0) {
         tSSXScriptHeader* transitionInfo = (tSSXScriptHeader*)GetSSXScriptHeader(
             cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, item->scriptHandle));
         cTransitionMan* snd = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
@@ -2119,7 +2121,7 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
     }
     if (on) {
         tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&self->mList), 0);
-        if (tNISList_IsVideo((tNISList*)self, it) == 0) {
+        if (self->IsVideo(it) == 0) {
             int st = cBXScriptEngine_GetRequestState(((char*)self->mpNISEngine), it->scriptHandle);
             if (st >= 3 && st <= 5) {
                 cBXScriptEngine_PauseScript(((char*)self->mpNISEngine), it->scriptHandle);
@@ -2136,7 +2138,7 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
         }
     } else {
         tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&self->mList), 0);
-        if (tNISList_IsVideo((tNISList*)self, it) == 0) {
+        if (self->IsVideo(it) == 0) {
             if (cBXScriptEngine_GetRequestState(((char*)self->mpNISEngine), it->scriptHandle) == 5) {
                 cBXScriptEngine_ResumeScript(((char*)self->mpNISEngine), it->scriptHandle);
             }
@@ -2163,7 +2165,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_IsVideo);
  * @param entry  the list entry
  * @return 1 for a video, 0 for a script
  */
-extern "C" int tNISList_IsVideo(tNISList* self, void* entry)
+int tNISList::IsVideo(void* entry)
 {
     return *(int*)entry >= 29;
 }
@@ -2340,7 +2342,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     self->mDataManagerVtbl = D_00482168;
     self->mVtbl = cSSXScriptEngine_vtbl;
     if ((int)self->mpMasterTableHeader != 0) {
-        cSSXScriptEngine_DeInitOnce(self);
+        self->DeInitOnce();
     }
     D_004A34B0 = 0;
     cScriptSoundBankManager__cScriptSoundBankManager(self->mSoundBankManager, 2);
@@ -2429,17 +2431,17 @@ extern "C" void* MEM_free(void* self);
  * Purges the BX engine, frees the master table header and, when loaded, the debug table, then clears
  * mpMasterTableHeader, mpMasterTable, mpMasterTableDebug and mNumFramesNoSkip.
  */
-extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self)
+void cSSXScriptEngine::DeInitOnce()
 {
-    cBXScriptEngine_PurgeBXEngine(self);
-    MEM_free(self->mpMasterTableHeader);
-    if (self->mpMasterTableDebug != 0) {
-        MEM_free(self->mpMasterTableDebug);
+    cBXScriptEngine_PurgeBXEngine(this);
+    MEM_free(mpMasterTableHeader);
+    if (mpMasterTableDebug != 0) {
+        MEM_free(mpMasterTableDebug);
     }
-    self->mpMasterTableHeader = 0;
-    self->mpMasterTable = 0;
-    self->mpMasterTableDebug = 0;
-    self->mNumFramesNoSkip = 0;
+    mpMasterTableHeader = 0;
+    mpMasterTable = 0;
+    mpMasterTableDebug = 0;
+    mNumFramesNoSkip = 0;
 }
 #endif
 

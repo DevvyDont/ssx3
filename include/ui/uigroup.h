@@ -31,6 +31,9 @@ struct cUIGroup : public cUIThing {
                                      //       (cList_destroyList on this + 0x74, vptrs 0x8C / 0x88 / 0x7C);
                                      //       [U] cUIGroup_first..cUIGroup_addToEnd (first/last/getByIndex/addToFront/addToEnd
                                      //       on this + 0x74), every cUIGroup_* walker
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cUIGroup1() __asm__("cUIGroup_cUIGroup1");
 };
 
 CHECK_OFFSET(cUIGroup, mList, 0x074);

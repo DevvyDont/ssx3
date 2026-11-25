@@ -12,6 +12,10 @@
 
 struct tSplineSegmentRecord;  // world/worldrecords.h
 
+struct t4Vector;
+
+struct cBxReplayFrame;
+
 struct cSpline {
     unsigned int SplineId;          // 0x00 [R] owners' ctors store -1; [U] readFromReplayFrame resolves it (low 8 bits:
                                     //      resource set, >> 8: index) to the spline whose +0x24 is the first segment
@@ -19,6 +23,15 @@ struct cSpline {
                                     //      many times
     tSplineSegmentRecord* Seg;      // 0x08 [O] Seg (tSplineSegmentRecord*); [U] calcLength walks it; cSpline_draw reads Seg->m_Parent
     float Length;                   // 0x0C [O]; [U] readFromReplayFrame stores calcLength()
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(unsigned int id) __asm__("cSpline_init");
+    void getPos(float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc) __asm__("cSpline_getPos");
+    int isVisible() __asm__("cSpline_isVisible");
+    void draw(int lineColour) __asm__("cSpline_draw");
+    float calcLength() __asm__("cSpline_calcLength__FP7cSpline");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cSpline_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cSpline_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cSpline, SplineId, 0x00);

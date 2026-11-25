@@ -75,17 +75,29 @@ struct cReplayFrameList {
     cReplayFrame* Head;    // 0x004 [O]; [U] the newest frame: cReplayFrameList_addFrame appends there (frame->Prev = Head)
     int NumFrames;         // 0x008 [O]; [U] ++/-- by cReplayFrameList_addFrame/cReplayFrameList_remFrame; cReplay_allocReplayFrame tests
                            //       FreeFrameList.NumFrames
+
+    // Methods bound to their retail symbols by asm labels.
+    void reset() __asm__("cReplayFrameList_reset__FPv");
 };
 
 // One player's highlight being marked (On Tour cReplayHighlight, 0xB8; retail 0xB4 [R]: cReplayHighlight_reset
 // writes +0, +0xB0 and fills +4..+0xB0, cReplay_reset strides 0xB4). Methods cReplayHighlight_begin, cReplayHighlight_end,
 // cReplayHighlight_cancel, cReplayHighlight_setRanking.
+struct cReplayFrame;
+struct tRiderStats;
+
 struct cReplayHighlight {
     int PlayerId;          // 0x000 [O]; [R] cReplayHighlight_reset stores -1; [U] cReplay_reset stores 0 / 1
     tRiderStats Stats;     // 0x004 [O] tRiderStats (On Tour 0xB0; retail 0xAC, ai/ridermetrix.h); [R] ctor MEM_fill(this + 4, 0,
                            //       0xAC); [U] cReplay_reset walks the highlights from +0x498 (Highlight[0].Stats)
     cReplayFrame* Frame;   // 0x0B0 [O]; [R] ctor 0; [U] non-zero = marking (cReplay_beginMarkHighlight begins only when 0,
                            //       cReplay_endMarkHighlight)
+
+    // Methods bound to their retail symbols by asm labels.
+    void begin(cReplayFrame* rider, tRiderStats* src) __asm__("cReplayHighlight_begin");
+    void end() __asm__("cReplayHighlight_end__FPv");
+    void cancel() __asm__("cReplayHighlight_cancel");
+    int setRanking(tRiderStats* stats, int mode) __asm__("cReplayHighlight_setRanking");
 };
 
 // The save stream's running size and byte checksum (On Tour tWriteCheckSum, 0x8).
@@ -94,6 +106,9 @@ struct tWriteCheckSum {
     int CheckSum;          // 0x004 [O]; [U] cReplay_writeSetup adds every written (signed) byte; cReplay_initSave seeds
                            //       0xDEADBEEF
 };
+
+struct cBxReplayFrame;
+struct tReplayFrameType;
 
 struct cReplay {
     int State;                           // 0x000 [O] tReplayState (values below); [U] cReplay_setReplayState stores
@@ -211,6 +226,88 @@ struct cReplay {
                                          //       out as padding
     tWriteCheckSum WriteCheckSum;        // 0x680 [O]; [U] cReplay_writeSetup updates it, cReplay_writeCheckSum writes its 8 bytes
                                          //       last
+
+    // Methods bound to their retail symbols by asm labels.
+    void cycleReplayCameraAlgorithm() __asm__("cReplay_cycleReplayCameraAlgorithm");
+    void setCurrentReplayCamera() __asm__("cReplay_setCurrentReplayCamera");
+    void setupReplayCameras() __asm__("cReplay_setupReplayCameras");
+    void setupGameCamerasOnExitReplay() __asm__("cReplay_setupGameCamerasOnExitReplay");
+    void setupInstantReplayCameras() __asm__("cReplay_setupInstantReplayCameras");
+    void init() __asm__("cReplay_init");
+    void reset() __asm__("cReplay_reset");
+    void purge() __asm__("cReplay_purge");
+    void setReplayState(int val) __asm__("cReplay_setReplayState__FPvi");
+    void update() __asm__("cReplay_update");
+    void pushReplaySaveFrame() __asm__("cReplay_pushReplaySaveFrame");
+    void popReplaySaveFrame() __asm__("cReplay_popReplaySaveFrame");
+    void setReplayPadNum(int val) __asm__("cReplay_setReplayPadNum__FPvi");
+    void startReplay(void* frame, int instantReplay, int autoReplay) __asm__("cReplay_startReplay");
+    void stopReplay() __asm__("cReplay_stopReplay");
+    void endReplay() __asm__("cReplay_endReplay");
+    void processInput() __asm__("cReplay_processInput");
+    void* addReplayFrame() __asm__("cReplay_addReplayFrame__FPv");
+    void* saveReplayFrame(tReplayFrameType* src) __asm__("cReplay_saveReplayFrame");
+    void saveFrame(cBxReplayFrame* stream) __asm__("cReplay_saveFrame");
+    void saveBucket(cBxReplayFrame* data, int bucket) __asm__("cReplay_saveBucket");
+    void saveDeadBucket(cBxReplayFrame* data) __asm__("cReplay_saveDeadBucket");
+    void restoreReplayFrame(void* frame) __asm__("cReplay_restoreReplayFrame");
+    void restoreFrame1() __asm__("cReplay_restoreFrame1");
+    void restoreFrame(cBxReplayFrame* stream) __asm__("cReplay_restoreFrame");
+    void restoreBucket(void* bucket, cBxReplayFrame* stream) __asm__("cReplay_restoreBucket");
+    void applyBucket(int bucket) __asm__("cReplay_applyBucket");
+    void restoreObject(void* bucket, cBxReplayFrame* stream) __asm__("cReplay_restoreObject");
+    void restoreDeadBucket(cBxReplayFrame* stream) __asm__("cReplay_restoreDeadBucket");
+    void* findFrame() __asm__("cReplay_findFrame__FPv");
+    void* findNextFrame() __asm__("cReplay_findNextFrame");
+    void* findPrevFrame() __asm__("cReplay_findPrevFrame");
+    void rewindFrame() __asm__("cReplay_rewindFrame");
+    void nextFrame() __asm__("cReplay_nextFrame");
+    void prevFrame() __asm__("cReplay_prevFrame");
+    void* addCache() __asm__("cReplay_addCache");
+    void removeCache(void* pCache) __asm__("cReplay_removeCache");
+    void* allocReplayFrame() __asm__("cReplay_allocReplayFrame");
+    void freeOneReplayFrame() __asm__("cReplay_freeOneReplayFrame");
+    void freeReplayFrame(void* node) __asm__("cReplay_freeReplayFrame");
+    int isPauseAI() __asm__("cReplay_isPauseAI");
+    void rewind(void* frame) __asm__("cReplay_rewind");
+    void lastFrame() __asm__("cReplay_lastFrame");
+    void stepFrame(int reset) __asm__("cReplay_stepFrame");
+    void purgeIdleFrames() __asm__("cReplay_purgeIdleFrames");
+    void endMarkInstantReplay(int obj, int alt) __asm__("cReplay_endMarkInstantReplay");
+    void startInstantReplay() __asm__("cReplay_startInstantReplay");
+    void stopInstantReplay() __asm__("cReplay_stopInstantReplay");
+    void startAutoReplay() __asm__("cReplay_startAutoReplay");
+    void stopAutoReplay() __asm__("cReplay_stopAutoReplay__FPv");
+    void eventJump(int key, int id) __asm__("cReplay_eventJump");
+    void eventLand(int key, int id) __asm__("cReplay_eventLand");
+    void eventWipeout(int key, int id) __asm__("cReplay_eventWipeout");
+    void eventReset(int key) __asm__("cReplay_eventReset");
+    void eventWScript(int key, int mode) __asm__("cReplay_eventWScript");
+    void eventChapter(int key, int bit) __asm__("cReplay_eventChapter");
+    void beginMarkHighlight(int playerId, int id) __asm__("cReplay_beginMarkHighlight");
+    int countHighlights(int i, int positive) __asm__("cReplay_countHighlights");
+    int maxHighlights(int land) __asm__("cReplay_maxHighlights");
+    void endMarkHighlight(int playerId, int id, int positive) __asm__("cReplay_endMarkHighlight");
+    void cancelMarkHighlight(int i) __asm__("cReplay_cancelMarkHighlight");
+    void cancelMarkHighlights() __asm__("cReplay_cancelMarkHighlights");
+    void initSave() __asm__("cReplay_initSave");
+    void allocSaveSpace() __asm__("cReplay_allocSaveSpace");
+    void* purgeSaveSpace() __asm__("cReplay_purgeSaveSpace");
+    void writeBuffered() __asm__("cReplay_writeBuffered");
+    void writeSetup(signed char* data, int size) __asm__("cReplay_writeSetup");
+    int getSaveData(char** block, int* size) __asm__("cReplay_getSaveData");
+    void writeHeaderStart() __asm__("cReplay_writeHeaderStart");
+    void writeHeader() __asm__("cReplay_writeHeader");
+    int writeFrameCount() __asm__("cReplay_writeFrameCount");
+    void writeFramesStart() __asm__("cReplay_writeFramesStart");
+    void writeFrames() __asm__("cReplay_writeFrames");
+    void writeInputStart() __asm__("cReplay_writeInputStart");
+    void writeInput() __asm__("cReplay_writeInput");
+    void writePadStart() __asm__("cReplay_writePadStart");
+    void writePad() __asm__("cReplay_writePad");
+    void* writeCheckSumStart() __asm__("cReplay_writeCheckSumStart__FPv");
+    void writeCheckSum() __asm__("cReplay_writeCheckSum");
+    int load(char* buf) __asm__("cReplay_load");
 };
 
 CHECK_OFFSET(cReplayFrameList, Tail, 0x0);

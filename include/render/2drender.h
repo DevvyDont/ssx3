@@ -69,8 +69,22 @@ CHECK_OFFSET(tRect, W, 0x8);
 CHECK_OFFSET(tRect, H, 0xC);
 CHECK_SIZE(tRect, 0x10);
 
+struct t4Vector;
+
 struct c2DRender {
     // no members ([O] On Tour size 0x1; [R] cMemMan_alloc(1, "2DRender"))
+
+    // Methods bound to their retail symbols by asm labels.
+    void drawRect(tBxVertex* verts, float* rect) __asm__("c2DRender_drawRect");
+    void drawRotRect(tBxVertex* verts, float* rect) __asm__("c2DRender_drawRotRect");
+    void drawRect1(tBxVertex* verts, float* rect, float* mat) __asm__("c2DRender_drawRect1");
+    void drawRotRect1(tBxVertex* verts, float* rect, float* mat) __asm__("c2DRender_drawRotRect1");
+    void drawRect2(tBxVertex* vtx, float* rect, float* uv) __asm__("c2DRender_drawRect2");
+    void drawRotRect2(tBxVertex* vtx, float* rect, float* uv) __asm__("c2DRender_drawRotRect2");
+    void drawRect3(tBxVertex* vtx, float* rect, float* uv, float* mat) __asm__("c2DRender_drawRect3");
+    void drawRotRect3(tBxVertex* vtx, float* rect, float* uv, float* mat) __asm__("c2DRender_drawRotRect3");
+    void drawRect4(float* topLeft, float* bottomRight, float* col, float z) __asm__("c2DRender_drawRect4");
+    void drawLine(t4Vector* start, t4Vector* end, float* col) __asm__("c2DRender_drawLine");
 };
 
 CHECK_SIZE(c2DRender, 0x1);

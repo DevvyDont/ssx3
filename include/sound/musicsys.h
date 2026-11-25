@@ -71,6 +71,8 @@ struct cMusicSys {
     void MUSIC_StoreDefaultActiveMap() __asm__("cMusicSys_MUSIC_StoreDefaultActiveMap");
     long MUSIC_GetDefaultActiveMap() __asm__("cMusicSys_MUSIC_GetDefaultActiveMap");
     void setCurrentSongNum(int songNum) __asm__("cMusicSys_setCurrentSongNum");
+    long getActiveMap() __asm__("cMusicSys_getActiveMap");
+    int GetMPFFile() __asm__("cMusicSys_GetMPFFile__FPv");
 };
 
 CHECK_OFFSET(cMusicSys, mpVStreamSys, 0x0000);

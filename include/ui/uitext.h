@@ -42,6 +42,8 @@ struct tAttrText {
 
 CHECK_SIZE(tAttrText, 0x4);
 
+struct tARGB;
+
 struct cUIText : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] _vt$7cUIText (cUIText_vtbl), stored by cUIText_cUIText/cUIText_cUIText1
@@ -92,6 +94,17 @@ struct cUIText : public cUIThing {
     void setUnicodeStringPrivate(const unsigned short* str) __asm__("cUIText_setUnicodeStringPrivate");
     void setUnicodeStringByID(int id) __asm__("cUIText_setUnicodeStringByID__FP7cUITexti");
     int getNumLinesOfString() __asm__("cUIText_getNumLinesOfString");
+    int getFont() __asm__("cUIText_getFont");
+    void* cUIText1() __asm__("cUIText_cUIText1");
+    void setFontIndex(int fontIndex) __asm__("cUIText_setFontIndex");
+    int hasShadow() __asm__("cUIText_hasShadow");
+    int isUnicode() __asm__("cUIText_isUnicode");
+    int getUseStaticColour() __asm__("cUIText_getUseStaticColour");
+    int getUseDisabledColour() __asm__("cUIText_getUseDisabledColour");
+    int isEllipses() __asm__("cUIText_isEllipses");
+    void setShadowColour(tARGB* in) __asm__("cUIText_setShadowColour");
+    void setStaticColour(tARGB* in) __asm__("cUIText_setStaticColour");
+    int getStringID() __asm__("cUIText_getStringID");
 };
 
 CHECK_OFFSET(cUIText, mAttrText, 0x074);

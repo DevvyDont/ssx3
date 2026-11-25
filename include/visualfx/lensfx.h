@@ -135,6 +135,10 @@ struct cLightHalo {
     unsigned short mbOnScreen;      // 0x02C [O]
     unsigned short mbRequestZSample; // 0x02E [O]
     // --- cLightHalo (no data)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Render(int idx) __asm__("cLightHalo_Render");
+    void Process(tViewInfo* viewInfo) __asm__("cLightHalo_Process");
 };
 
 CHECK_OFFSET(cLightHalo, mZRect, 0x000);
@@ -180,6 +184,10 @@ struct cSunHalo {
     float mfOcclude;                // 0x204 [O]; [R] ctor zeroes; [U] SampleLens stores the visible fraction; Process
                                     //       zeroes it when culled; Render / RenderLens scale the alpha by it
     char unk_208[0x8];              // 0x208 padding (16-aligned class)
+
+    // Methods bound to their retail symbols by asm labels.
+    void RenderLens() __asm__("cSunHalo_RenderLens");
+    void Render(tViewInfo* viewInfo, int viewId) __asm__("cSunHalo_Render");
 };
 
 CHECK_OFFSET(cSunHalo, mZRect, 0x000);
@@ -216,6 +224,14 @@ struct cLensFxMan {
                                     //       after mbLocked is int mTexID)
     void** mVtbl;                   // 0x649C [R] cLensFxMan_vtbl (ctor, dtor), cPS2LensFxMan_vtbl (PS2 ctor, dtor);
                                     //       [U] DrawLens calls slots 2 / 3, SampleLens slot 4; [P] same offset
+
+    // Methods bound to their retail symbols by asm labels.
+    void Reset(int i) __asm__("cLensFxMan_Reset__FPvi");
+    void AddLightHalos(int* vals, int count, int ignored, int i) __asm__("cLensFxMan_AddLightHalos");
+    void render(int i) __asm__("cLensFxMan_render");
+    void ProcessLens(int idx) __asm__("cLensFxMan_ProcessLens");
+    void SetNumViews(int numViews) __asm__("cLensFxMan_SetNumViews");
+    void Lock(int locked) __asm__("cLensFxMan_Lock");
 };
 
 CHECK_OFFSET(cLensFxMan, mViewInfo, 0x000);

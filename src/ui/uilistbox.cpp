@@ -26,14 +26,14 @@ extern char str_UILBAscii[];
  * @param data  caller data stored with the entry (On Tour void* pData)
  * @return the new entry's index
  */
-extern "C" unsigned char cUIListBox_addEntryByAsciiString(cUIListBox* self, const char* text, int data)
+unsigned char cUIListBox::addEntryByAsciiString(const char* text, int data)
 {
     unsigned short* wide = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, str_UILBAscii, 0x100, 0);
     UIAsciiToUnicode(wide, text);
-    self->mpEntries[self->mNumEntries].mpAsciiString = text;
-    *(unsigned short**)&self->mpEntries[self->mNumEntries].mpString = wide;
-    *(int*)&self->mpEntries[self->mNumEntries].mpData = data;
-    return (self->mNumEntries)++;
+    mpEntries[mNumEntries].mpAsciiString = text;
+    *(unsigned short**)&mpEntries[mNumEntries].mpString = wide;
+    *(int*)&mpEntries[mNumEntries].mpData = data;
+    return (mNumEntries)++;
 }
 #endif
 
@@ -56,14 +56,14 @@ extern char str_UILISTBOXSTR[];
  * @param data  the entry's user data (On Tour pData)
  * @return the new entry's index
  */
-extern "C" unsigned char cUIListBox_addEntryByUnicodeString(cUIListBox* self, unsigned short* str, int data)
+unsigned char cUIListBox::addEntryByUnicodeString(unsigned short* str, int data)
 {
     unsigned short* tempString = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
     USTR_copy(tempString, str);
-    self->mpEntries[self->mNumEntries].mpAsciiString = 0;
-    *(unsigned short**)&self->mpEntries[self->mNumEntries].mpString = tempString;
-    *(int*)&self->mpEntries[self->mNumEntries].mpData = data;
-    return (self->mNumEntries)++;
+    mpEntries[mNumEntries].mpAsciiString = 0;
+    *(unsigned short**)&mpEntries[mNumEntries].mpString = tempString;
+    *(int*)&mpEntries[mNumEntries].mpData = data;
+    return (mNumEntries)++;
 }
 #endif
 
@@ -86,21 +86,21 @@ extern char str_UILBStrID[];
  * @param data  caller data stored with the entry (On Tour void* pData)
  * @return the new entry's index
  */
-extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id, void* data)
+unsigned char cUIListBox::addEntryByStringID(int id, void* data)
 {
-    cUILocaleInterface* loc = self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+    cUILocaleInterface* loc = mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (loc != 0) {
         unsigned short* str = loc->getStringByHash(id);
         if (str != 0) {
             unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILBStrID, 0x100, 0);
             USTR_copy(wide, str);
-            self->mpEntries[self->mNumEntries].mpAsciiString = 0;
-            self->mpEntries[self->mNumEntries].mpString = wide;
-            self->mpEntries[self->mNumEntries].mpData = data;
-            self->mpEntries[self->mNumEntries].mStringID = id;
+            mpEntries[mNumEntries].mpAsciiString = 0;
+            mpEntries[mNumEntries].mpString = wide;
+            mpEntries[mNumEntries].mpData = data;
+            mpEntries[mNumEntries].mStringID = id;
         }
     }
-    return (self->mNumEntries)++;
+    return (mNumEntries)++;
 }
 #endif
 
@@ -116,22 +116,22 @@ void cMemMan_free(void*);
  * of the mNumEntries entries frees its mpString. Then mCurrentEntry and mNumEntries are cleared. The options,
  * rule-select and network screens call it before refilling a list.
  */
-extern "C" void cUIListBox_deleteAllEntries(cUIListBox* self)
+void cUIListBox::deleteAllEntries()
 {
-    if (self->mAttrListBox.mCallback) {
-        if (self->mpEntries[0].mpString != 0) {
-            cMemMan_free((void*)self->mpEntries[0].mpString);
+    if (mAttrListBox.mCallback) {
+        if (mpEntries[0].mpString != 0) {
+            cMemMan_free((void*)mpEntries[0].mpString);
         }
     } else {
-        for (int i = 0; i < self->mNumEntries; i++) {
-            tListBoxEntry* entry = &self->mpEntries[i];
+        for (int i = 0; i < mNumEntries; i++) {
+            tListBoxEntry* entry = &mpEntries[i];
             if (entry->mpString != 0) {
                 cMemMan_free((void*)entry->mpString);
             }
         }
     }
-    self->mCurrentEntry = 0;
-    self->mNumEntries = 0;
+    mCurrentEntry = 0;
+    mNumEntries = 0;
 }
 #endif
 
@@ -143,10 +143,10 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentAsciiText);
  *
  * @return the text pointer (as an int)
  */
-extern "C" int cUIListBox_getCurrentAsciiText(cUIListBox* self)
+int cUIListBox::getCurrentAsciiText()
 {
-    if (self->mCurrentEntry < self->mNumEntries) {
-        return (int)self->mpEntries[self->mCurrentEntry].mpAsciiString;
+    if (mCurrentEntry < mNumEntries) {
+        return (int)mpEntries[mCurrentEntry].mpAsciiString;
     }
     return 0;
 }
@@ -160,10 +160,10 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentEntryData);
  *
  * @return the data (as an int)
  */
-extern "C" int cUIListBox_getCurrentEntryData(cUIListBox* self)
+int cUIListBox::getCurrentEntryData()
 {
-    if (self->mCurrentEntry < self->mNumEntries) {
-        return (int)self->mpEntries[self->mCurrentEntry].mpData;
+    if (mCurrentEntry < mNumEntries) {
+        return (int)mpEntries[mCurrentEntry].mpData;
     }
     return 0;
 }
@@ -179,11 +179,11 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_getEntryByData);
  * @param out  receives the entry index (On Tour pIndex)
  * @return 1 when found, 0 otherwise
  */
-extern "C" int cUIListBox_getEntryByData(cUIListBox* self, int key, unsigned char* out)
+int cUIListBox::getEntryByData(int key, unsigned char* out)
 {
     int i;
-    for (i = 0; i < self->mNumEntries; i++) {
-        if ((int)self->mpEntries[i].mpData == key) {
+    for (i = 0; i < mNumEntries; i++) {
+        if ((int)mpEntries[i].mpData == key) {
             *out = i;
             return 1;
         }
@@ -200,11 +200,11 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_setCurrentEntryByIndex);
  *
  * @param Index  the entry index
  */
-extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int Index)
+void cUIListBox::setCurrentEntryByIndex(int Index)
 {
     unsigned char entryIndex = (unsigned char)Index;
-    if (entryIndex < self->mNumEntries) {
-        *(char*)&self->mCurrentEntry = entryIndex;
+    if (entryIndex < mNumEntries) {
+        *(char*)&mCurrentEntry = entryIndex;
     }
 }
 #endif
@@ -218,11 +218,11 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryDataByIndex);
  * @param Index  the entry index
  * @param value  the new user data (On Tour pData)
  */
-extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int Index, int value)
+void cUIListBox::setEntryDataByIndex(int Index, int value)
 {
     unsigned char entryIndex = (unsigned char)Index;
-    if (entryIndex < self->mNumEntries) {
-        *(int*)&self->mpEntries[entryIndex].mpData = value;
+    if (entryIndex < mNumEntries) {
+        *(int*)&mpEntries[entryIndex].mpData = value;
     }
 }
 #endif
@@ -293,13 +293,13 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_setCallbackListBox);
  *
  * @param count  the number of entries (On Tour NumEntries)
  */
-extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
+void cUIListBox::setCallbackListBox(int count)
 {
-    *(char*)&self->mNumEntries = count;
-    *(char*)&self->mCurrentEntry = 0;
-    *(int*)&self->mAttrListBox |= 0x10;
-    cUIState* obj = self->mpScreen->mpState;
-    obj->onWidgetEvent((cUIThing*)self, 9);
+    *(char*)&mNumEntries = count;
+    *(char*)&mCurrentEntry = 0;
+    *(int*)&mAttrListBox |= 0x10;
+    cUIState* obj = mpScreen->mpState;
+    obj->onWidgetEvent((cUIThing*)this, 9);
 }
 #endif
 
@@ -385,7 +385,7 @@ extern "C" void cUIMenu_setUIData(cUIMenu* self)
     char count = cList_size((char*)&self->mList);
     *(char*)&self->mScrollItemNumVisible = count;
     *(char*)&self->mScrollItemNum = count;
-    cUIMenu_setInputMap(self, 0);
+    self->setInputMap(0);
 }
 #endif
 
@@ -397,18 +397,18 @@ INCLUDE_ASM("ui/uilistbox", cUIMenu_setInputMap);
  *
  * @param value  0 for the first input set, nonzero for the second
  */
-extern "C" void cUIMenu_setInputMap(cUIMenu* self, char value)
+void cUIMenu::setInputMap(char value)
 {
     if (value == 0) {
-        self->mInputMap[0] = 0;
-        self->mInputMap[1] = 1;
-        self->mInputMap[2] = 2;
-        self->mInputMap[3] = 3;
+        mInputMap[0] = 0;
+        mInputMap[1] = 1;
+        mInputMap[2] = 2;
+        mInputMap[3] = 3;
     } else {
-        self->mInputMap[0] = 4;
-        self->mInputMap[1] = 5;
-        self->mInputMap[2] = 6;
-        self->mInputMap[3] = 7;
+        mInputMap[0] = 4;
+        mInputMap[1] = 5;
+        mInputMap[2] = 6;
+        mInputMap[3] = 7;
     }
 }
 #endif
@@ -426,24 +426,24 @@ extern "C" void* cList_getByIndex(void* list, unsigned char i);
  *
  * @return the next item's index, or the current one at the end of a non-wrapping menu
  */
-extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
+unsigned char cUIMenu::getNext()
 {
-    unsigned char i = self->mScrollItemCurrent + 1;
-    unsigned char n = self->mScrollItemNum;
+    unsigned char i = mScrollItemCurrent + 1;
+    unsigned char n = mScrollItemNum;
     do {
-        if (i < self->mScrollItemNum) {
-            if (*(int*)&self->mAttrMenu & 4) {
-                cUIState* owner = self->mpScreen->mpState;
-                if (owner->onWidgetMenu(self, 1, i) != 0) return i;
+        if (i < mScrollItemNum) {
+            if (*(int*)&mAttrMenu & 4) {
+                cUIState* owner = mpScreen->mpState;
+                if (owner->onWidgetMenu(this, 1, i) != 0) return i;
             } else {
-                cUIThing* item = (cUIThing*)cList_getByIndex((char*)&self->mList, i);
+                cUIThing* item = (cUIThing*)cList_getByIndex((char*)&mList, i);
                 int bits = item->mAttr >> 5;
                 if ((bits & 1) == 0) return i;
             }
             i = i + 1;
         } else {
-            int bits = self->mAttr >> 7;
-            if ((bits & 1) == 0) return self->mScrollItemCurrent;
+            int bits = mAttr >> 7;
+            if ((bits & 1) == 0) return mScrollItemCurrent;
             i = 0;
         }
     } while (n-- != 0);
@@ -465,19 +465,19 @@ extern "C" void* cList_getByIndex(void* list, unsigned char i);
  *
  * @return the item index, the current index (start reached without wrap), or 0 when none is selectable
  */
-extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
+unsigned char cUIMenu::getPrev()
 {
-    unsigned char n = self->mScrollItemNum;
-    unsigned char i = self->mScrollItemCurrent - 1;
+    unsigned char n = mScrollItemNum;
+    unsigned char i = mScrollItemCurrent - 1;
     do {
         if (i != 0xFF) {
-            if (*(int*)&self->mAttrMenu & 4) {
-                cUIState* mgr = self->mpScreen->mpState;
-                if (mgr->onWidgetMenu(self, 1, i)) {
+            if (*(int*)&mAttrMenu & 4) {
+                cUIState* mgr = mpScreen->mpState;
+                if (mgr->onWidgetMenu(this, 1, i)) {
                     return i;
                 }
             } else {
-                cUIThing* item = (cUIThing*)cList_getByIndex((char*)&self->mList, i);
+                cUIThing* item = (cUIThing*)cList_getByIndex((char*)&mList, i);
                 int bits = item->mAttr;
                 if (((bits >> 5) & 1) == 0) {
                     return i;
@@ -485,11 +485,11 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
             }
             i--;
         } else {
-            int bits = self->mAttr >> 7;
+            int bits = mAttr >> 7;
             if ((bits & 1) == 0) {
-                return self->mScrollItemCurrent;
+                return mScrollItemCurrent;
             }
-            i = self->mScrollItemNum - 1;
+            i = mScrollItemNum - 1;
         }
         n--;
     } while (n != 0xFF);

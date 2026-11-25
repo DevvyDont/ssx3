@@ -90,6 +90,28 @@ struct cPS2BezierMan {
     int mNumMixedPatches;            // 0x4D84 [U] ClearPatches = 0; func_0038B190 appends (limit 75)
     tBezierMixedPatchEntry mMixedPatches[75]; // 0x4D88 [U] func_0038B190 (edges differ)
     char unk_5364[0x492C];           // 0x5364 [U] DrawPatches cPS2BezierMan_DrawPatches (sw 0x5364, ...); not laid out
+
+    // Methods bound to their retail symbols by asm labels.
+    void Init() __asm__("cPS2BezierMan_Init");
+    void Purge() __asm__("cPS2BezierMan_Purge");
+    void* Reset() __asm__("cPS2BezierMan_Reset__FPv");
+    void ClearPatches() __asm__("cPS2BezierMan_ClearPatches__FPv");
+    void AddPatch(void* pPatch, void* edges, void* texid, void* clip) __asm__("cPS2BezierMan_AddPatch");
+    void DrawPatches() __asm__("cPS2BezierMan_DrawPatches");
+    void SetNearLOD(float nearLOD) __asm__("cPS2BezierMan_SetNearLOD__FPvf");
+    void SetFarLOD(float farLOD) __asm__("cPS2BezierMan_SetFarLOD__FPvf");
+    float GetNearLOD() __asm__("cPS2BezierMan_GetNearLOD__FPv");
+    float GetFarLOD() __asm__("cPS2BezierMan_GetFarLOD__FPv");
+    void SetLmapStart(int lmapStart) __asm__("cPS2BezierMan_SetLmapStart__FPvi");
+    void EnableWireMode(int enable) __asm__("cPS2BezierMan_EnableWireMode__FPvi");
+    void EnableLightMaps(int enable) __asm__("cPS2BezierMan_EnableLightMaps__FPvi");
+    void EnableShadows(int enable) __asm__("cPS2BezierMan_EnableShadows__FPvi");
+    int IsWireModeEnabled() __asm__("cPS2BezierMan_IsWireModeEnabled__FPv");
+    int IsLightMapsEnabled() __asm__("cPS2BezierMan_IsLightMapsEnabled__FPv");
+    int IsShadowsEnabled() __asm__("cPS2BezierMan_IsShadowsEnabled__FPv");
+    int GetVifCache(int shift, int idx) __asm__("cPS2BezierMan_GetVifCache");
+    int GetBezST() __asm__("cPS2BezierMan_GetBezST");
+    int GetBezdST() __asm__("cPS2BezierMan_GetBezdST");
 };
 
 CHECK_OFFSET(cPS2BezierMan, m_currPatchDist, 0x0000);

@@ -186,11 +186,11 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
  * @param n       how many records to create
  * @param base    index of the first light to fill (On Tour: index)
  */
-extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, tLightRecord* lights, int n, int base)
+void cPS2LightMan::CreateLights(tLightRecord* lights, int n, int base)
 {
     int i;
     for (i = 0; i < n; i++) {
-        void** obj = (void**)((cLightSrc_DC70*)self)->GetLightObj(base + i);
+        void** obj = (void**)((cLightSrc_DC70*)this)->GetLightObj(base + i);
         obj[0] = &lights[i];
         sCol_DC70 col;
         col.a = 1.0f;
@@ -233,15 +233,14 @@ void cLightInst_CreateAmbient_3(void* p, int b, float f) __asm__("cLightInst_Cre
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator cLightInst_CreateAmbient, an empty stub on the PS2. Vtable slot 9 of vt_00493650.
  *
- * @param obj  the light manager (this)
  * @param light    index of the light to set up
  * @param colour    the colour (const tARGB&, passed by address)
  * @param intensity    the intensity
  */
-extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int light, int colour, float intensity)
+void cPS2LightMan::CreateAmbient(int light, int colour, float intensity)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreateAmbient_3(vt[2].fn(vthis(obj, vt[2]), light), colour, intensity);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreateAmbient_3(vt[2].fn(vthis(this, vt[2]), light), colour, intensity);
 }
 #endif
 
@@ -258,16 +257,15 @@ void cLightInst_CreateDirectional_4(void* p, int b, int c, float f) __asm__("cLi
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator cLightInst_CreateDirectional, an empty stub on the PS2. Vtable slot 10 of vt_00493650.
  *
- * @param obj  the light manager (this)
  * @param light    index of the light to set up
  * @param colour    the colour (const tARGB&, passed by address)
  * @param dir    the direction (const t3vect&)
  * @param intensity    the intensity
  */
-extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int light, int colour, int dir, float intensity)
+void cPS2LightMan::CreateDirectional(int light, int colour, int dir, float intensity)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreateDirectional_4(vt[2].fn(vthis(obj, vt[2]), light), colour, dir, intensity);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreateDirectional_4(vt[2].fn(vthis(this, vt[2]), light), colour, dir, intensity);
 }
 #endif
 
@@ -284,17 +282,16 @@ void cLightInst_CreatePoint_5(void* p, int b, int c, float f, int d) __asm__("cL
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator cLightInst_CreatePoint, an empty stub on the PS2. Vtable slot 11 of vt_00493650.
  *
- * @param obj  the light manager (this)
  * @param light    index of the light to set up
  * @param colour    the colour (const tARGB&, passed by address)
  * @param pos    the position (const t3vect&)
  * @param intensity    the intensity
  * @param decay    the decay type
  */
-extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int light, int colour, int pos, float intensity, int decay)
+void cPS2LightMan::CreatePoint(int light, int colour, int pos, float intensity, int decay)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreatePoint_5(vt[2].fn(vthis(obj, vt[2]), light), colour, pos, intensity, decay);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreatePoint_5(vt[2].fn(vthis(this, vt[2]), light), colour, pos, intensity, decay);
 }
 #endif
 
@@ -311,7 +308,6 @@ void cLightInst_CreateSpot_8(void* p, int b, int c, int d, float x, float y, int
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator cLightInst_CreateSpot, an empty stub on the PS2. Vtable slot 12 of vt_00493650.
  *
- * @param obj  the light manager (this)
  * @param light    index of the light to set up
  * @param colour    the colour (const tARGB&, passed by address)
  * @param pos    the position (const t3vect&)
@@ -321,10 +317,10 @@ void cLightInst_CreateSpot_8(void* p, int b, int c, int d, float x, float y, int
  * @param decay    the decay type
  * @param z    the dropoff
  */
-extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int light, int colour, int pos, int dir, float x, float y, int decay, float z)
+void cPS2LightMan::CreateSpot(int light, int colour, int pos, int dir, float x, float y, int decay, float z)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreateSpot_8(vt[2].fn(vthis(obj, vt[2]), light), colour, pos, dir, x, y, decay, z);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreateSpot_8(vt[2].fn(vthis(this, vt[2]), light), colour, pos, dir, x, y, decay, z);
 }
 #endif
 
@@ -387,7 +383,7 @@ struct sLmQuadCtx_E118 {
  * @param verts  the four vertices
  * @param rect  the rectangle {x, y, w, h}
  */
-extern "C" void c2DRender_drawRect(c2DRender* self, tBxVertex* verts, float* rect)
+void c2DRender::drawRect(tBxVertex* verts, float* rect)
 {
     verts[0].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     verts[1].p = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
@@ -413,7 +409,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect);
  * @param verts  the four vertices
  * @param rect  the rectangle {x, y, w, h}
  */
-extern "C" void c2DRender_drawRotRect(c2DRender* self, tBxVertex* verts, float* rect)
+void c2DRender::drawRotRect(tBxVertex* verts, float* rect)
 {
     verts[1].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     verts[3].p = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
@@ -441,7 +437,7 @@ extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
  * @param rect  the rectangle {x, y, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRect1(c2DRender* self, tBxVertex* verts, float* rect, float* mat)
+void c2DRender::drawRect1(tBxVertex* verts, float* rect, float* mat)
 {
     t4Vector* corner0 = &verts[0].p;
     t4Vector* corner1 = &verts[1].p;
@@ -478,7 +474,7 @@ extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
  * @param rect  the rectangle {x, y, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRotRect1(c2DRender* self, tBxVertex* verts, float* rect, float* mat)
+void c2DRender::drawRotRect1(tBxVertex* verts, float* rect, float* mat)
 {
     t4Vector* corner0 = &verts[0].p;
     t4Vector* corner1 = &verts[1].p;
@@ -513,7 +509,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRect2);
  * @param rect  the rectangle {x, y, w, h}
  * @param uv  the UV rectangle {u, v, w, h}
  */
-extern "C" void c2DRender_drawRect2(c2DRender* self, tBxVertex* vtx, float* rect, float* uv)
+void c2DRender::drawRect2(tBxVertex* vtx, float* rect, float* uv)
 {
     vtx[0].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].u = uv[0];
@@ -548,7 +544,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect2);
  * @param rect  the rectangle {x, y, w, h}
  * @param uv  the UV rectangle {u, v, w, h}
  */
-extern "C" void c2DRender_drawRotRect2(c2DRender* self, tBxVertex* vtx, float* rect, float* uv)
+void c2DRender::drawRotRect2(tBxVertex* vtx, float* rect, float* uv)
 {
     vtx[0].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].u = uv[0] + uv[2];
@@ -586,7 +582,7 @@ extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
  * @param uv  the UV rectangle {u, v, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRect3(c2DRender* self, tBxVertex* vtx, float* rect, float* uv, float* mat)
+void c2DRender::drawRect3(tBxVertex* vtx, float* rect, float* uv, float* mat)
 {
     t4Vector* corner0 = &vtx[0].p;
     t4Vector* corner1 = &vtx[1].p;
@@ -632,7 +628,7 @@ extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
  * @param uv  the UV rectangle {u, v, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRotRect3(c2DRender* self, tBxVertex* vtx, float* rect, float* uv, float* mat)
+void c2DRender::drawRotRect3(tBxVertex* vtx, float* rect, float* uv, float* mat)
 {
     t4Vector* corner0 = &vtx[0].p;
     t4Vector* corner1 = &vtx[1].p;
@@ -702,7 +698,7 @@ struct sLmQuadCtx {
  * @param col  the colour {a, r, g, b} in 0..1
  * @param z  the depth
  */
-extern "C" void c2DRender_drawRect4(c2DRender* self, float* topLeft, float* bottomRight, float* col, float z)
+void c2DRender::drawRect4(float* topLeft, float* bottomRight, float* col, float z)
 {
     sLmQuadVtx verts[4];
     float zero = 0.0f;
@@ -748,7 +744,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawLine);
  * @param end  the second end point
  * @param col  the colour {a, r, g, b} in 0..1
  */
-extern "C" void c2DRender_drawLine(c2DRender* self, t4Vector* start, t4Vector* end, float* col)
+void c2DRender::drawLine(t4Vector* start, t4Vector* end, float* col)
 {
     tBxVertex verts[2];
     int red = (int)(col[1] * 255.0f);
@@ -2404,26 +2400,26 @@ struct tARGBInit : tARGB {
  *
  * @return @p self
  */
-extern "C" void* cFont_cFont1(cFont* self)
+void* cFont::cFont1()
 {
-    *(t2Vector*)&self->ShadowOffset[0] = t2Vector(0.0f, 0.0f);
-    *(t2Vector*)&self->BaseScale[0] = t2Vector(1.0f, 1.0f);
-    *(t2Vector*)&self->Scale[0] = *(t2Vector*)&self->BaseScale[0];
+    *(t2Vector*)&ShadowOffset[0] = t2Vector(0.0f, 0.0f);
+    *(t2Vector*)&BaseScale[0] = t2Vector(1.0f, 1.0f);
+    *(t2Vector*)&Scale[0] = *(t2Vector*)&BaseScale[0];
     {
         tARGBInit allOnes;
         allOnes.A = 1.0f; allOnes.R = 1.0f; allOnes.G = 1.0f; allOnes.B = 1.0f;
-        *(tARGB*)&self->Color[0] = allOnes;
+        *(tARGB*)&Color[0] = allOnes;
     }
-    *(tARGB*)&self->ShadowColor[0] = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
-    self->TextureID = -1;
-    self->NumGlyphs = 0;
-    self->Glyphs = 0;
-    self->MissingGlyph = 0;
-    self->MaxCharHeight = 0;
-    self->FirstCode = 0;
-    self->LastLinearCode = 0;
-    self->FontName[0] = 0;
-    return ((char*)self);
+    *(tARGB*)&ShadowColor[0] = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
+    TextureID = -1;
+    NumGlyphs = 0;
+    Glyphs = 0;
+    MissingGlyph = 0;
+    MaxCharHeight = 0;
+    FirstCode = 0;
+    LastLinearCode = 0;
+    FontName[0] = 0;
+    return ((char*)this);
 }
 #endif
 
@@ -2460,7 +2456,7 @@ extern "C" cFont* cFont_cFont(cFont* self, const char* name, int flags)
     }
     (*(tARGB*)&self->ShadowColor[0]) = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
     self->FontName[0] = 0;
-    cFont_loadFont((cFont*)self, name, flags);
+    self->loadFont(name, flags);
     return self;
 }
 #endif
@@ -2507,13 +2503,13 @@ extern const char str_font_pct_24s[];
  * @param name  font file name
  * @param flags  memory flags for the glyph table (On Tour: memtype)
  */
-extern "C" void cFont_loadFont(cFont* self, const char* name, int flags)
+void cFont::loadFont(const char* name, int flags)
 {
     void* data;
 
-    sprintf((char*)&self->FontName, str_font_pct_24s, name);
+    sprintf((char*)&FontName, str_font_pct_24s, name);
     data = FILE_load(name, flags ^ 0x100);
-    cFont_linkFont(self, data, flags);
+    cFont_linkFont(this, data, flags);
     if (data != 0) {
         cMemMan_free(data);
     }

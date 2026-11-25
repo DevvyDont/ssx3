@@ -81,6 +81,17 @@ struct cWorldTriggerInstance {
     int m_iPatchReference;              // 0x64 [O] (On Tour 0x60); [R] ctor / Reset / Stop 0; [U] Update stores the patch
     float m_iLastAnimFrame;             // 0x68 [O] (On Tour 0x64; EA's name, a float); [R] ctor / Reset / Stop -1.0f
     int m_bLastAnimFrameDecrease;       // 0x6C [O] (On Tour bool at 0x68; retail word); [R] ctor / Reset / Stop 0
+
+    // Methods bound to their retail symbols by asm labels.
+    int SameTriggerInstance(int objectRef, int volNum, int viewPort)
+        __asm__("cWorldTriggerInstance_SameTriggerInstance");
+    void Update() __asm__("cWorldTriggerInstance_Update");
+    void Stop() __asm__("cWorldTriggerInstance_Stop");
+    int TriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
+        __asm__("cWorldTriggerInstance_TriggerToPatch");
+    int CrowdTrigger(int trigger) __asm__("cWorldTriggerInstance_CrowdTrigger");
+    int SwapTriggerToString(int idx, char* dst) __asm__("cWorldTriggerInstance_SwapTriggerToString");
+    void Reset() __asm__("cWorldTriggerInstance_Reset");
 };
 
 CHECK_OFFSET(cWorldTriggerInstance, m_bInUse, 0x00);
@@ -132,6 +143,10 @@ CHECK_OFFSET(tTriggerInfoFileHeader, unk_1, 0x1);
 CHECK_OFFSET(tTriggerInfoFileHeader, mNumTriggers, 0x8);
 CHECK_OFFSET(tTriggerInfoFileHeader, mRecords, 0xC);
 
+struct cRider;
+struct t3Vector;
+struct tInstanceRecord;
+
 struct cWorldTriggerManager {
     cWorldTriggerInstance* m_aWorldTriggerInstances; // 0x000 [O]; [R] new[40] 0x70-byte instances
                                                      //       ("m_aWorldTriggerInstances", count word at -0x10); [U] the
@@ -160,6 +175,36 @@ struct cWorldTriggerManager {
                                         //       DuckAmbientAudioTrigger / HandleCollision index it by trigger number
     int m_iNumTriggers;                 // 0x340 [O]; [U] LoadTriggerInfo: the file's count (+0x8) + 2; TriggerToPatch /
                                         //       SwapTriggerToString bound the trigger number by it
+
+    // Methods bound to their retail symbols by asm labels.
+    void UnloadTriggerInfo() __asm__("cWorldTriggerManager_UnloadTriggerInfo");
+    cWorldTriggerInstance* GetFreeInstance() __asm__("cWorldTriggerManager_GetFreeInstance");
+    cWorldTriggerInstance* GetTriggerInstance(int objectRef, int volNum, int viewPort)
+        __asm__("cWorldTriggerManager_GetTriggerInstance");
+    void HandleTrigger(int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume,
+                       const t3Vector& pos)
+        __asm__("cWorldTriggerManager_HandleTrigger");
+    void Update() __asm__("cWorldTriggerManager_Update");
+    void StopAllTriggers() __asm__("cWorldTriggerManager_StopAllTriggers");
+    void StopTrigger(int id) __asm__("cWorldTriggerManager_StopTrigger");
+    int HandleCollision(void* evt, int id, cRider* rider, int vol) __asm__("cWorldTriggerManager_HandleCollision");
+    int TriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
+        __asm__("cWorldTriggerManager_TriggerToPatch");
+    int AdvancedTriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort)
+        __asm__("cWorldTriggerManager_AdvancedTriggerToPatch");
+    int SwapTriggerToString(int idx, char* out) __asm__("cWorldTriggerManager_SwapTriggerToString");
+    int HasAfterCollisionTrigger(void* obj) __asm__("cWorldTriggerManager_HasAfterCollisionTrigger");
+    int AfterCollisionTrigger(unsigned int i) __asm__("cWorldTriggerManager_AfterCollisionTrigger");
+    int ObjectHit(int id) __asm__("cWorldTriggerManager_ObjectHit");
+    void AddHitObject(int id) __asm__("cWorldTriggerManager_AddHitObject");
+    void Reset() __asm__("cWorldTriggerManager_Reset");
+    void ResetStates() __asm__("cWorldTriggerManager_ResetStates__FPv");
+    int SwapTrigger(int trigger) __asm__("cWorldTriggerManager_SwapTrigger");
+    void MonitorTriggers(int enable, int delay) __asm__("cWorldTriggerManager_MonitorTriggers");
+    int SyncToAnimationTrigger(unsigned int i) __asm__("cWorldTriggerManager_SyncToAnimationTrigger");
+    int ObjectRefFirstFrame(tInstanceRecord* src, cWorldTriggerInstance* state)
+        __asm__("cWorldTriggerManager_ObjectRefFirstFrame");
+    int DuckAmbientAudioTrigger(unsigned int idx) __asm__("cWorldTriggerManager_DuckAmbientAudioTrigger");
 };
 
 CHECK_OFFSET(cWorldTriggerManager, m_aWorldTriggerInstances, 0x000);

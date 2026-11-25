@@ -36,6 +36,11 @@ struct tMissionMenuQueue {
     int Next;                       // 0x04 [O]; [R] init / empty 0; [U] the write index: addEntry fills Queue[Next]
                                     //      and advances it mod 16
     tMissionMenuQueueEntry Queue[16]; // 0x08 [O]; [R] init / empty MEM_fill 0xC0 bytes
+
+    // Methods bound to their retail symbols by asm labels.
+    void addEntry(int missionId, int cmd, int being) __asm__("tMissionMenuQueue_addEntry");
+    tMissionMenuQueueEntry* getNextEntry() __asm__("tMissionMenuQueue_getNextEntry");
+    tMissionMenuQueueEntry* getEntry() __asm__("tMissionMenuQueue_getEntry");
 };
 
 CHECK_OFFSET(tMissionMenuQueue, Current, 0x00);

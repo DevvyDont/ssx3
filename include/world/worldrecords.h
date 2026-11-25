@@ -323,6 +323,9 @@ struct tSphTreeList {
     bxSphereTree* MeshTree;         // 0x0 [O]; [U] resolveCollideModel points it at the tree array (0x140 each) and
                                     //      loads each (bxSphereTree_Load)
     int NumMesh;                    // 0x4 [O]; [U] resolveCollideModel stores the mesh count and loops to it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getMeshTree(int meshNum) __asm__("tSphTreeList_getMeshTree");
 };
 
 CHECK_OFFSET(tSphTreeList, MeshTree, 0x0);

@@ -80,25 +80,25 @@ struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
  *
  * @return 1 if the video is (now) playing, 0 without a movie player
  */
-extern "C" int cVidEngine_PlayVideo(cVidEngine* self)
+int cVidEngine::PlayVideo()
 {
-    void* player = self->mpPlayer;
+    void* player = mpPlayer;
     if (player == 0) return 0;
-    if (self->mIsPlaying != 0) return 1;
+    if (mIsPlaying != 0) return 1;
     cMoviePlayer_asyncPlay(player);
     int n = cPauseState_StackIdx + 1;
-    self->mIsPlaying = 1;
+    mIsPlaying = 1;
     cPauseState_Stack[n] = 10;
     cPauseState_Flags = D_00442918[0];
     cPauseState_StackIdx = n;
     sVidObj* cutSceneMan = ((sVidOwner*)SSXApp->Game)->obj;
-    self->mRestoreCutSceneMode = 0;
+    mRestoreCutSceneMode = 0;
     int cutSceneState = cutSceneMan->state;
-    if (cutSceneState != 0 && cutSceneState != 2) self->mRestoreCutSceneMode = 1;
+    if (cutSceneState != 0 && cutSceneState != 2) mRestoreCutSceneMode = 1;
     cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        self->mSavedDisplayFormat = *(int*)ps2GraphicsMan->GetTVDisplayFormat();
+        mSavedDisplayFormat = *(int*)ps2GraphicsMan->GetTVDisplayFormat();
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -121,12 +121,12 @@ extern "C" void cMoviePlayer_asyncUpdate(void* self);
  * (On Tour cMoviePlayer::asyncUpdate) and sets the frame-updated flag (+0x8, On Tour mFrameUpdated).
  * cSSXScriptEngine_Update calls it every frame on the engine's video engine (+0x500).
  */
-extern "C" void cVidEngine_UpdateVideo(cVidEngine* self)
+void cVidEngine::UpdateVideo()
 {
-    void* player = *(void**)self;
-    if (player != 0 && self->mIsPlaying != 0 && self->mNumPause == 0) {
+    void* player = *(void**)this;
+    if (player != 0 && mIsPlaying != 0 && mNumPause == 0) {
         cMoviePlayer_asyncUpdate(player);
-        self->mFrameUpdated = 1;
+        mFrameUpdated = 1;
     }
 }
 #endif
@@ -145,11 +145,11 @@ extern "C" void cMoviePlayer_asyncResume(void* self);
  * paused (cMoviePlayer_asyncResume), otherwise it is paused if running (cMoviePlayer_asyncPause); then cMoviePlayer_asyncRender(mpPlayer,
  * !mFrameUpdated) and mFrameUpdated is cleared.
  */
-extern "C" void cVidEngine_RenderVideo(cVidEngine* self)
+void cVidEngine::RenderVideo()
 {
-    cMoviePlayer* videoPlayer = self->mpPlayer;
-    if (((void*)videoPlayer) != 0 && self->mIsPlaying != 0) {
-        if (self->mFrameUpdated != 0) {
+    cMoviePlayer* videoPlayer = mpPlayer;
+    if (((void*)videoPlayer) != 0 && mIsPlaying != 0) {
+        if (mFrameUpdated != 0) {
             if (videoPlayer->mbPaused != 0) {
                 cMoviePlayer_asyncResume(videoPlayer);
             }
@@ -158,8 +158,8 @@ extern "C" void cVidEngine_RenderVideo(cVidEngine* self)
                 cMoviePlayer_asyncPause(videoPlayer);
             }
         }
-        cMoviePlayer_asyncRender(self->mpPlayer, self->mFrameUpdated ^ 1);
-        self->mFrameUpdated = 0;
+        cMoviePlayer_asyncRender(mpPlayer, mFrameUpdated ^ 1);
+        mFrameUpdated = 0;
     }
 }
 #endif
@@ -173,13 +173,13 @@ INCLUDE_ASM("scripter/videngine", cVidEngine_PauseVideo);
  *
  * @param inc  non-zero to pause, 0 to resume
  */
-extern "C" void cVidEngine_PauseVideo(cVidEngine* self, int inc)
+void cVidEngine::PauseVideo(int inc)
 {
-    if ((int)self->mpPlayer != 0 && self->mIsPlaying != 0) {
+    if ((int)mpPlayer != 0 && mIsPlaying != 0) {
         if (inc != 0) {
-            self->mNumPause += 1;
-        } else if (self->mNumPause != 0) {
-            self->mNumPause -= 1;
+            mNumPause += 1;
+        } else if (mNumPause != 0) {
+            mNumPause -= 1;
         }
     }
 }
@@ -194,10 +194,10 @@ INCLUDE_ASM("scripter/videngine", cVidEngine_IsVideoOnLastFrame);
  *
  * @return the player's word +0x0, or 0
  */
-extern "C" int cVidEngine_IsVideoOnLastFrame(cVidEngine* self)
+int cVidEngine::IsVideoOnLastFrame()
 {
-    int* videoPlayer = (int*)self->mpPlayer;
-    if (videoPlayer == 0 || self->mIsPlaying == 0) {
+    int* videoPlayer = (int*)mpPlayer;
+    if (videoPlayer == 0 || mIsPlaying == 0) {
         return 0;
     }
     return *videoPlayer;
@@ -227,12 +227,11 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_Reset__FPv);
  * Empties a circular buffer of NIS list entries: head (+0x8C, On Tour mHeadIndex), tail (+0x90, mTailIndex) and full
  * flag (+0x94, mIsFull) become 0.
  */
-void cCircularBuffer_Reset(void* vself)
+void cCircularBuffer::Reset()
 {
-    cCircularBuffer* self = (cCircularBuffer*)vself;
-    self->mHeadIndex = 0;
-    self->mTailIndex = 0;
-    self->mIsFull = 0;
+    mHeadIndex = 0;
+    mTailIndex = 0;
+    mIsFull = 0;
 }
 #endif
 
@@ -248,7 +247,7 @@ void cCircularBuffer_Reset(void*);
  */
 extern "C" void* cCircularBuffer_cCircularBuffer(cCircularBuffer* self)
 {
-    cCircularBuffer_Reset(self);
+    self->Reset();
     return ((void*)self);
 }
 #endif
@@ -261,10 +260,9 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_IsFull__FPv);
  *
  * @return the flag
  */
-int cCircularBuffer_IsFull(void* vself)
+int cCircularBuffer::IsFull()
 {
-    cCircularBuffer* self = (cCircularBuffer*)vself;
-    return self->mIsFull;
+    return mIsFull;
 }
 #endif
 
@@ -277,7 +275,7 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_IncBufferIndex);
  * @param index  the index (0-4)
  * @return the next index
  */
-extern "C" int cCircularBuffer_IncBufferIndex(cCircularBuffer* self, int index)
+int cCircularBuffer::IncBufferIndex(int index)
 {
     if (index == 4) {
         return 0;
@@ -300,13 +298,13 @@ extern "C" int cCircularBuffer_IncBufferIndex(cCircularBuffer* self, int a1);
  * @param cmd  the entry to copy
  * @return 1, or 0 when the buffer was full
  */
-extern "C" int cCircularBuffer_AddToTail(cCircularBuffer* self, tNISListEntry* cmd)
+int cCircularBuffer::AddToTail(tNISListEntry* cmd)
 {
-    if (cCircularBuffer_IsFull(self) != 0) return 0;
-    ((tNISListEntry*)self)[self->mTailIndex] = *cmd;
-    self->mTailIndex = cCircularBuffer_IncBufferIndex(self, self->mTailIndex);
-    if (self->mTailIndex == self->mHeadIndex) {
-        self->mIsFull = 1;
+    if (IsFull() != 0) return 0;
+    ((tNISListEntry*)this)[mTailIndex] = *cmd;
+    mTailIndex = IncBufferIndex(mTailIndex);
+    if (mTailIndex == mHeadIndex) {
+        mIsFull = 1;
     }
     return 1;
 }
@@ -323,13 +321,13 @@ int cCircularBuffer_IsFull(void*);
  *
  * @return the entry count (0-5)
  */
-extern "C" int cCircularBuffer_GetNumEntries(cCircularBuffer* self)
+int cCircularBuffer::GetNumEntries()
 {
     int n;
-    if (cCircularBuffer_IsFull(self) != 0) {
+    if (IsFull() != 0) {
         return 5;
     }
-    n = self->mTailIndex - self->mHeadIndex;
+    n = mTailIndex - mHeadIndex;
     if (n < 0) {
         n += 5;
     }
@@ -347,9 +345,9 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_operatorIndex);
  * @param index  the position from the head
  * @return the entry
  */
-extern "C" void* cCircularBuffer_operatorIndex(cCircularBuffer* self, int index)
+void* cCircularBuffer::operatorIndex(int index)
 {
-    return (char*)self + ((self->mHeadIndex + index) % 5) * 0x1c;
+    return (char*)this + ((mHeadIndex + index) % 5) * 0x1c;
 }
 #endif
 
@@ -362,11 +360,11 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_IsEmpty);
  *
  * @return 1 when empty, else 0
  */
-extern "C" int cCircularBuffer_IsEmpty(cCircularBuffer* self)
+int cCircularBuffer::IsEmpty()
 {
     int isEmpty = 0;
-    if (self->mTailIndex == self->mHeadIndex) {
-        isEmpty = self->mIsFull == 0;
+    if (mTailIndex == mHeadIndex) {
+        isEmpty = mIsFull == 0;
     }
     return isEmpty;
 }
@@ -389,14 +387,14 @@ struct sVidEntry1C { int v[7]; };
  */
 extern "C" int cCircularBuffer_RemoveFromHead(cCircularBuffer* self, sVidEntry1C* out)
 {
-    if (cCircularBuffer_IsEmpty(self) != 0) {
+    if (self->IsEmpty() != 0) {
         return 0;
     }
     self->mIsFull = 0;
     if (out != 0) {
         *out = ((sVidEntry1C*)self)[self->mHeadIndex];
     }
-    self->mHeadIndex = cCircularBuffer_IncBufferIndex(self, self->mHeadIndex);
+    self->mHeadIndex = self->IncBufferIndex(self->mHeadIndex);
     return 1;
 }
 #endif

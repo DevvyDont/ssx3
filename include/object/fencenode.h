@@ -67,6 +67,8 @@ CHECK_OFFSET(cFenceNodeState, NextPropTime, 0x1C);
 CHECK_OFFSET(cFenceNodeState, PrevPropTime, 0x20);
 CHECK_SIZE(cFenceNodeState, 0x24);
 
+struct tCollideInfo;
+
 struct cFenceNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cFenceNode_vtbl (every ctor and the dtor); [U] update calls slot 34 (expire)
@@ -99,6 +101,15 @@ struct cFenceNode : public cInstanceNode {
                                     //       reads both
     tInstanceRecord* NextInstance;  // 0x104 [O]; [U] setupFence clears it, cFenceNode1/update/makeNeighbour use it
     tInstanceRecord* PrevInstance;  // 0x108 [O]; [U] as NextInstance
+
+    // Methods bound to their retail symbols by asm labels.
+    cFenceNode* cFenceNode1(int bucket, void* pInst, tMakeFenceData* tdata, tCollideInfo* info)
+        __asm__("cFenceNode_cFenceNode1");
+    void makeNeighbour(tInstanceRecord* obj, int flag) __asm__("cFenceNode_makeNeighbour");
+    void neighbourCollide(int on, float dt) __asm__("cFenceNode_neighbourCollide");
+    void updateGrid() __asm__("cFenceNode_updateGrid");
+    void setupFence() __asm__("cFenceNode_setupFence");
+    void setForce(float force) __asm__("cFenceNode_setForce");
 };
 
 CHECK_OFFSET(cFenceNode, FenceData, 0x01C);

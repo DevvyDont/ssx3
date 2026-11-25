@@ -794,7 +794,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode*);
 extern "C" void cFlexBridgeNode_update(cFlexBridgeNode* self)
 {
     cSpring_update((char*)&self->Mesh);
-    cFlexBridgeNode_updateGrid(self);
+    self->updateGrid();
 }
 #endif
 
@@ -963,9 +963,9 @@ static inline t4Vector MulMat_75D8(const t4Matrix* m, const t4Vector& v)
  */
 // Re-poses the bridge strip from its nodes: two rows of points (node pos +/- the rotated
 // side/up offsets), per-triangle normals, the transformed bounding box and the mesh update.
-extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
+void cFlexBridgeNode::updateGrid()
 {
-    cFlexBridgeNode* self = vself;
+    cFlexBridgeNode* self = this;
     int n = self->Mesh.Width;
     t4Vector upRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->BottomRightOffset));
     t4Vector sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->BottomLeftOffset));
@@ -1183,15 +1183,15 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket, cBxReplayFrame* stream)
+void* cFlexRailNode::cFlexRailNode1(void* bucket, cBxReplayFrame* stream)
 {
-    t4Matrix** segs = &self->Mats;
-    cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
-    VPTR_OF(cObjNode, self) = (void**)cFlexRailNode_vtbl;
-    stream->read((char*)&self->NumNodes, 0x30);
-    *segs = new (str_FlexNodeMats, 0x20000000, 0) tFlexNodeMat[self->NumNodes - 1];
-    self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
-    return ((char*)self);
+    t4Matrix** segs = &Mats;
+    cInstanceNode_cInstanceNode(((char*)this), bucket, stream);
+    VPTR_OF(cObjNode, this) = (void**)cFlexRailNode_vtbl;
+    stream->read((char*)&NumNodes, 0x30);
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) tFlexNodeMat[NumNodes - 1];
+    Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), NumNodes * 8 - 9);
+    return ((char*)this);
 }
 #endif
 
@@ -1243,7 +1243,7 @@ extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 {
     self->updateNodes();
     self->updateMats();
-    cFlexRailNode_updateSpaceHash(self);
+    self->updateSpaceHash();
 }
 #endif
 
@@ -1262,11 +1262,10 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box
  * The box comes from virtual slot 50 (cSpringRailNode_updateBoundBox: the rail elements' box, padded by 200); the node moves
  * from its old box to the new one as type 2.
  *
- * @param node  the flexible rail node
  */
-extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
+void cFlexRailNode::updateSpaceHash()
 {
-    cFlexRailNode* self = node;
+    cFlexRailNode* self = this;
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
     self->updateBoundBox();

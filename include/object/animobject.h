@@ -95,6 +95,9 @@ struct cAnimObjectNode {
     void updateOnce() __asm__("cAnimObjectNode_updateOnce");
     void expire(int runscript) __asm__("cAnimObjectNode_expire");
     void writeToReplayFrame(void* stream) __asm__("cAnimObjectNode_writeToReplayFrame");
+    float getAnimSpeed() __asm__("cAnimObjectNode_getAnimSpeed");
+    int getAnimDir() __asm__("cAnimObjectNode_getAnimDir");
+    int isComplete() __asm__("cAnimObjectNode_isComplete__FPv");
 };
 
 CHECK_OFFSET(cAnimObjectNode, AnimType, 0x00);

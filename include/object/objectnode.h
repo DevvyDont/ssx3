@@ -35,6 +35,9 @@ struct cObjectNode : public cMoveNode {
     // cObjectNode's notes on cMoveNode's fields:
     //   ObjNodeType: [R] cObjectNode_cObjectNode passes 17 to cMoveNode_cMoveNode1
     //   Instance: [U] cObjectNode_cObjectNode updates the record's flags word (+0x8) through it (view sMoveFlags_6DB0)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cObjectNode1() __asm__("cObjectNode_cObjectNode1");
 };
 
 CHECK_SIZE(cObjectNode, 0x2C);

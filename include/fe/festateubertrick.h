@@ -33,6 +33,8 @@ struct cFEStateUberTrick : public cUIState {
     void costVisible(int on) __asm__("cFEStateUberTrick_costVisible");
     void previewVisible(int on) __asm__("cFEStateUberTrick_previewVisible");
     void trickVisible(int on) __asm__("cFEStateUberTrick_trickVisible");
+    void updateTrickMenu() __asm__("cFEStateUberTrick_updateTrickMenu");
+    void updateTrickMenuEntry() __asm__("cFEStateUberTrick_updateTrickMenuEntry");
 };
 
 CHECK_OFFSET(cFEStateUberTrick, mbModelVisible, 0x048);

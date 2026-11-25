@@ -109,6 +109,24 @@ struct cPlaybackMan {
 
     // Methods bound to their retail symbols by asm labels.
     int isRecord() __asm__("cPlaybackMan_isRecord");
+    void update() __asm__("cPlaybackMan_update");
+    void initLocation(const char* name) __asm__("cPlaybackMan_initLocation");
+    void purgeLocation() __asm__("cPlaybackMan_purgeLocation");
+    int isLoaded(int fileId) __asm__("cPlaybackMan_isLoaded");
+    int load(int key) __asm__("cPlaybackMan_load");
+    void restart() __asm__("cPlaybackMan_restart");
+    int setupPreview(int fileId) __asm__("cPlaybackMan_setupPreview");
+    void reset() __asm__("cPlaybackMan_reset__FPv");
+    void saveFrame() __asm__("cPlaybackMan_saveFrame");
+    void* restoreFrame() __asm__("cPlaybackMan_restoreFrame");
+    void startPreview() __asm__("cPlaybackMan_startPreview");
+    void stopPreview() __asm__("cPlaybackMan_stopPreview");
+    void startPerform() __asm__("cPlaybackMan_startPerform");
+    void stopPerform() __asm__("cPlaybackMan_stopPerform__FPv");
+    void stop() __asm__("cPlaybackMan_stop");
+    int isPauseAI() __asm__("cPlaybackMan_isPauseAI");
+    int findFileById(int id) __asm__("cPlaybackMan_findFileById");
+    int setupFile(int idx) __asm__("cPlaybackMan_setupFile");
 };
 
 CHECK_OFFSET(cPlaybackMan, BigFile, 0x00);

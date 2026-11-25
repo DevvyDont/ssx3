@@ -167,12 +167,11 @@ INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_freeInstance__FPvT0);
  * @param node  the instance record
  * @return the previous list head
  */
-int cInstanceMan_freeInstance(void* vself, void* node)
+int cInstanceMan::freeInstance(void* node)
 {
-    cInstanceMan* self = (cInstanceMan*)vself;
-    int oldHead = (int)self->FreeInstances;
+    int oldHead = (int)FreeInstances;
     *(int*)node = oldHead;
-    self->FreeInstances = (tInstanceList*)((int)node);
+    FreeInstances = (tInstanceList*)((int)node);
     return oldHead;
 }
 #endif

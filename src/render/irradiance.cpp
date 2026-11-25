@@ -27,22 +27,22 @@ struct cIrradianceDataBase_ACD0 {
  * "IrradianceNames" (+0xC) and "IrradianceArray" (+0x8) blocks, n goes to +0x4 and the loaded file is freed,
  * leaving +0x0 pointing at the freed block.
  */
-extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase* self)
+void cIrradianceDataBase::Load()
 {
     int* file = (int*)FILE_load(str_data_worlds_irr_dat, 0x100);
-    self->mData = (char*)file;
+    mData = (char*)file;
     int n = file[0];
     char* src = (char*)(file + 1);
     int indexSize = n * 8;
     int sampleSize = n * 160;
-    self->mNumItem = n;
-    self->mIrradianceNames = (char*)operator_new_tag(indexSize, str_IrradianceNames, 0, 0);
+    mNumItem = n;
+    mIrradianceNames = (char*)operator_new_tag(indexSize, str_IrradianceNames, 0, 0);
     char* src2 = src + indexSize;
-    self->mIrradianceArray = (cIrradiance*)operator_new_tag(sampleSize, str_IrradianceArray, 0x2000000, 0);
-    func_0041605C(self->mIrradianceNames, src, indexSize);
-    func_0041605C(self->mIrradianceArray, src2, sampleSize);
-    if ((int*)self->mData != 0) {
-        cMemMan_free((int*)self->mData);
+    mIrradianceArray = (cIrradiance*)operator_new_tag(sampleSize, str_IrradianceArray, 0x2000000, 0);
+    func_0041605C(mIrradianceNames, src, indexSize);
+    func_0041605C(mIrradianceArray, src2, sampleSize);
+    if ((int*)mData != 0) {
+        cMemMan_free((int*)mData);
     }
 }
 #endif
@@ -58,18 +58,18 @@ void cMemMan_free(void*);
  * When the word at +0x4 is non-zero it frees the blocks at +0xC and +0x8 with cMemMan_free, then zeroes +0xC, +0x8 and
  * +0x4. Callers: cRealFE_purge and cGame_purge.
  */
-extern "C" void cIrradianceDataBase_Purge(cIrradianceDataBase* self)
+void cIrradianceDataBase::Purge()
 {
-    if (self->mNumItem != 0) {
-        if (self->mIrradianceNames != 0) {
-            cMemMan_free(self->mIrradianceNames);
+    if (mNumItem != 0) {
+        if (mIrradianceNames != 0) {
+            cMemMan_free(mIrradianceNames);
         }
-        if (self->mIrradianceArray != 0) {
-            cMemMan_free(self->mIrradianceArray);
+        if (mIrradianceArray != 0) {
+            cMemMan_free(mIrradianceArray);
         }
-        self->mIrradianceNames = 0;
-        self->mIrradianceArray = 0;
-        self->mNumItem = 0;
+        mIrradianceNames = 0;
+        mIrradianceArray = 0;
+        mNumItem = 0;
     }
 }
 #endif

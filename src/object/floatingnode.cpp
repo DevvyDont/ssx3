@@ -25,11 +25,11 @@ void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("
  * Allocates a floating node's info block (0x30 bytes, "FloatingBoundBox") and fills it with the instance's
  * bounding box (+0x0) and the value cInstanceNode_getBoundBoxInfo() writes at +0x20 (the radius).
  */
-void cFloatingNode_initInfo(cFloatingNode* self)
+void cFloatingNode::initInfo()
 {
     tFloatBoundBoxInfo* mem = (tFloatBoundBoxInfo*)cMemMan_alloc(0x30, str_FloatingBoundBox, 0x20000000, 0);
-    (*(void**)&self->Info) = ((void*)mem);
-    cInstanceNode_getBoundBoxInfo_3(self, mem, &mem->Radius);
+    (*(void**)&Info) = ((void*)mem);
+    cInstanceNode_getBoundBoxInfo_3(this, mem, &mem->Radius);
 }
 #endif
 
@@ -41,11 +41,11 @@ void operator_delete(int* ptr);
 /**
  * Frees the floating node's info block (+0x78) with operator delete, when there is one, and clears the pointer.
  */
-extern "C" void cFloatingNode_purgeInfo(cFloatingNode* self)
+void cFloatingNode::purgeInfo()
 {
-    if (((void*)self->Info) != 0) {
-        operator_delete((int*)((void*)self->Info));
-        (*(void**)&self->Info) = 0;
+    if (((void*)Info) != 0) {
+        operator_delete((int*)((void*)Info));
+        (*(void**)&Info) = 0;
     }
 }
 #endif
@@ -161,7 +161,7 @@ extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
         *info = nb;
         void* id = self->Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &nb, &old);
-        cFloatingNode_purgeInfo(self);
+        self->purgeInfo();
     } else {
         cMoveNode_restoreOverlapSystem(self);
     }
@@ -725,18 +725,18 @@ extern char cInstanceNode_vtbl[];
  * @param node  instance record the node drives
  * @return self
  */
-extern "C" void* cInstanceNode_cInstanceNode1(cInstanceNode* self, void* bucket, int type, cInstanceNode* node)
+void* cInstanceNode::cInstanceNode1(void* bucket, int type, cInstanceNode* node)
 {
-    cSortObjNode_cSortObjNode1(self, bucket, type);
-    self->Instance = (tInstanceRecord*)node;
-    VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
-    cInstanceNode_setActiveNode(self, node);
+    cSortObjNode_cSortObjNode1(this, bucket, type);
+    Instance = (tInstanceRecord*)node;
+    VPTR_OF(cObjNode, this) = (void**)cInstanceNode_vtbl;
+    cInstanceNode_setActiveNode(this, node);
     if (((int)node->Prev & 0x100) == 0) {
         if (type != 6 && type != 0x10 && type != 22) {
             cObjectInterface_addToFocusBox(node);
         }
     }
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 

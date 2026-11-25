@@ -54,6 +54,8 @@ CHECK_OFFSET(tListBoxEntry, mpData, 0x0C);
 CHECK_OFFSET(tListBoxEntry, mUnicodeBufferSize, 0x10);
 CHECK_SIZE(tListBoxEntry, 0x14);
 
+struct tARGB;
+
 struct cUIListBox : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIListBox_vtbl (the ctor cUIListBox_cUIListBox, cUIListBox_cUIListBox1, the dtor cUIListBox__cUIListBox)
@@ -75,6 +77,30 @@ struct cUIListBox : public cUIThing {
     unsigned char mCurrentEntry;     // 0x319 [O]; [R] = 0; [U] onInput cUIListBox_onInput (lbu/sb), cUIListBox_setCurrentEntryByIndex setCurrent;
                                      //       cUIListBox_getCurrentEntryIndex getCurrentEntryIndex (lbu)
     char unk_31A[0x2];               // 0x31A padding
+
+    // Methods bound to their retail symbols by asm labels.
+    int getFont() __asm__("cUIListBox_getFont");
+    void setUnicodePrivate(unsigned char idx, unsigned short* str) __asm__("cUIListBox_setUnicodePrivate");
+    unsigned char addEntryByAsciiString(const char* text, int data) __asm__("cUIListBox_addEntryByAsciiString");
+    unsigned char addEntryByUnicodeString(unsigned short* str, int data) __asm__("cUIListBox_addEntryByUnicodeString");
+    unsigned char addEntryByStringID(int id, void* data) __asm__("cUIListBox_addEntryByStringID");
+    void deleteAllEntries() __asm__("cUIListBox_deleteAllEntries");
+    int getCurrentAsciiText() __asm__("cUIListBox_getCurrentAsciiText");
+    int getCurrentEntryData() __asm__("cUIListBox_getCurrentEntryData");
+    int getEntryByData(int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
+    void setCurrentEntryByIndex(int Index) __asm__("cUIListBox_setCurrentEntryByIndex");
+    void setEntryDataByIndex(int Index, int value) __asm__("cUIListBox_setEntryDataByIndex");
+    void setCallbackListBox(int count) __asm__("cUIListBox_setCallbackListBox");
+    void* cUIListBox1() __asm__("cUIListBox_cUIListBox1");
+    void setFontIndex(int font) __asm__("cUIListBox_setFontIndex");
+    int hasShadow() __asm__("cUIListBox_hasShadow");
+    int getUseStaticColour() __asm__("cUIListBox_getUseStaticColour");
+    int isWrapping() __asm__("cUIListBox_isWrapping");
+    void setWrapping(int enable) __asm__("cUIListBox_setWrapping");
+    void setShadowColour(tARGB* in) __asm__("cUIListBox_setShadowColour");
+    void setStaticColour(tARGB* in) __asm__("cUIListBox_setStaticColour");
+    unsigned char getCurrentEntryIndex() __asm__("cUIListBox_getCurrentEntryIndex");
+    unsigned char getNumEntries() __asm__("cUIListBox_getNumEntries");
 };
 
 CHECK_OFFSET(cUIListBox, mAttrListBox, 0x074);

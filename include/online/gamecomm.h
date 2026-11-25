@@ -207,6 +207,40 @@ struct cGameComm {
 
     // Methods bound to their retail symbols by asm labels.
     void stopSyncInput() __asm__("cGameComm_stopSyncInput__FPv");
+    void setState(int mode) __asm__("cGameComm_setState");
+    void update() __asm__("cGameComm_update");
+    void localDisconnected(int force) __asm__("cGameComm_localDisconnected");
+    void setCommError() __asm__("cGameComm_setCommError");
+    void updateTimeout() __asm__("cGameComm_updateTimeout");
+    void displayError() __asm__("cGameComm_displayError");
+    void updateDisplayError() __asm__("cGameComm_updateDisplayError");
+    int readPacket(int ch, int dst, int maxsize) __asm__("cGameComm_readPacket");
+    void updateReadQueue() __asm__("cGameComm_updateReadQueue");
+    void updateWriteQueue() __asm__("cGameComm_updateWriteQueue");
+    void updateCmdQueue() __asm__("cGameComm_updateCmdQueue");
+    void freePacket(int *packet) __asm__("cGameComm_freePacket");
+    int asyncReadComplete() __asm__("cGameComm_asyncReadComplete");
+    void asyncRead(int data, int size) __asm__("cGameComm_asyncRead");
+    void asyncReadUpdate() __asm__("cGameComm_asyncReadUpdate");
+    int asyncWriteComplete() __asm__("cGameComm_asyncWriteComplete");
+    void asyncWrite(int data, int size) __asm__("cGameComm_asyncWrite");
+    void asyncWriteUpdate() __asm__("cGameComm_asyncWriteUpdate");
+    void calcLatency() __asm__("cGameComm_calcLatency");
+    float getLatency() __asm__("cGameComm_getLatency");
+    void syncGame() __asm__("cGameComm_syncGame");
+    void syncWait() __asm__("cGameComm_syncWait");
+    void sendPauseCmd(int pause) __asm__("cGameComm_sendPauseCmd");
+    void setUnPauseTimer() __asm__("cGameComm_setUnPauseTimer");
+    void setFinishRaceAlone() __asm__("cGameComm_setFinishRaceAlone");
+    void gameStartGate() __asm__("cGameComm_gameStartGate");
+    void gameStartRace() __asm__("cGameComm_gameStartRace");
+    void gameEnded() __asm__("cGameComm_gameEnded");
+    void gameExit() __asm__("cGameComm_gameExit");
+    void sendExitGame() __asm__("cGameComm_sendExitGame");
+    void sendUnplugCmd() __asm__("cGameComm_sendUnplugCmd");
+    void sendChat(int message) __asm__("cGameComm_sendChat");
+    void updateMessageDisplay() __asm__("cGameComm_updateMessageDisplay");
+    void updateSyncPacket(int frame, int value) __asm__("cGameComm_updateSyncPacket");
 };
 
 CHECK_SIZE(tGameCommPacket, 0xF0);

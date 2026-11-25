@@ -36,6 +36,9 @@ struct cScriptHeap {
                               //     returns it, not emitted in retail)
     tFreeBlock* mpTopFreeBlock; // 0x8 [O]; [R] ctor = pHeap (one block of heapSize - 8); [U] head of the
                               //     address-ordered free list: AllocMem unlinks from it, FreeMem inserts/merges
+
+    // Methods bound to their retail symbols by asm labels.
+    void FreeMem(void* pMem) __asm__("cScriptHeap_FreeMem");
 };
 
 CHECK_OFFSET(tFreeBlock, size, 0x0);

@@ -20,6 +20,13 @@ struct cHUDFX {
     int DisplayInt;                 // 0x014 [O]
     char DisplayStr[128];           // 0x018 [O]
     int SlotID;                     // 0x098 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cHUDFX_update");
+    void copyDispStr(signed char *str) __asm__("cHUDFX_copyDispStr");
+    void set(int id, signed char *displayStr, int decayTime, float fparg0) __asm__("cHUDFX_set");
+    void set1(int id, int displayInt, float fparg0, int data) __asm__("cHUDFX_set1");
+    void setAsync(int fxId, int displayInt, float fparg0, int fxData) __asm__("cHUDFX_setAsync");
 };
 
 CHECK_OFFSET(cHUDFX, ID, 0x000);

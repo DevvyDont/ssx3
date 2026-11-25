@@ -39,7 +39,7 @@ extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
     self->m_streamHandle = (int)STREAM_create(2, 1, 1, buf, size);
     self->m_streamRequest = 0;
     self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, str_cStreamMan_DECOMPRESS, 0, 0);
-    cStreamMan_reset(self);
+    self->reset();
     return ((void*)self);
 }
 #endif
@@ -68,8 +68,8 @@ extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
     if (buf != 0 && (int)self->m_uiBxChunkSizeLeft != 0 && *(unsigned char*)&self->m_BxChunkResourceID == 0xFF) {
         cMemMan_free(buf);
     }
-    cStreamMan_reset(self);
-    cStreamMan_purge(self);
+    self->reset();
+    self->purge();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -113,22 +113,22 @@ extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int size);
  * allocation-failure state, turns m_bLimitBandWidth on and calls cStreamMan_setBandWidthLimit() with 0x19000
  * bytes (100 KB) per second.
  */
-extern "C" void cStreamMan_reset(cStreamMan* self)
+void cStreamMan::reset()
 {
-    self->m_ActiveHull = -1;
-    self->m_bLimitBandWidth = 1;
-    self->m_uiNumHullChunk = (unsigned int)0;
-    self->m_filename[0] = 0;
-    self->m_bActive = 0;
-    self->m_uiBxChunkSizeLeft = (unsigned int)0;
-    self->m_pBxChunkMemHandle = 0;
-    self->m_pBxChunkMemPtr = 0;
-    self->m_bBxChunkWriteEnable = 0;
-    self->m_bBxNullChunk = 0;
-    self->m_bAllocFailed = 0;
-    self->m_iDecompressSizeLeft = 0;
-    self->m_pDecompressDataLeft = 0;
-    cStreamMan_setBandWidthLimit(self, 0x19000);
+    m_ActiveHull = -1;
+    m_bLimitBandWidth = 1;
+    m_uiNumHullChunk = (unsigned int)0;
+    m_filename[0] = 0;
+    m_bActive = 0;
+    m_uiBxChunkSizeLeft = (unsigned int)0;
+    m_pBxChunkMemHandle = 0;
+    m_pBxChunkMemPtr = 0;
+    m_bBxChunkWriteEnable = 0;
+    m_bBxNullChunk = 0;
+    m_bAllocFailed = 0;
+    m_iDecompressSizeLeft = 0;
+    m_pDecompressDataLeft = 0;
+    setBandWidthLimit(0x19000);
 }
 #endif
 
@@ -144,14 +144,14 @@ extern "C" void STREAM_destroy(int h);
  * STREAM_destroy() waits while the stream is busy and then shuts it down; m_streamBuffer and
  * m_pDecompressBuffer are freed when set. The pointers are not cleared afterwards.
  */
-extern "C" void cStreamMan_purge(cStreamMan* self)
+void cStreamMan::purge()
 {
-    STREAM_destroy(self->m_streamHandle);
-    if (self->m_streamBuffer != 0) {
-        cMemMan_free(self->m_streamBuffer);
+    STREAM_destroy(m_streamHandle);
+    if (m_streamBuffer != 0) {
+        cMemMan_free(m_streamBuffer);
     }
-    if (self->m_pDecompressBuffer != 0) {
-        cMemMan_free(self->m_pDecompressBuffer);
+    if (m_pDecompressBuffer != 0) {
+        cMemMan_free(m_pDecompressBuffer);
     }
 }
 #endif
@@ -175,19 +175,19 @@ extern "C" int STREAM_queuefile(int h, void* p, int a, int tag);
  * @return 1 when the read was queued (stored in m_streamRequest), 0 when a request was already active or
  *         queuing failed
  */
-extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int uiNumHullChunk, int uiFileOffset)
+int cStreamMan::addStreamRequest(int uiHullID, int uiNumHullChunk, int uiFileOffset)
 {
-    if (self->m_bActive == 0) {
-        int streamReq = STREAM_queuefile(self->m_streamHandle, (char*)&self->m_filename, uiFileOffset, 0x444E4543);
-        self->m_streamRequest = streamReq;
+    if (m_bActive == 0) {
+        int streamReq = STREAM_queuefile(m_streamHandle, (char*)&m_filename, uiFileOffset, 0x444E4543);
+        m_streamRequest = streamReq;
         if (streamReq != 0) {
-            self->m_ActiveHull = uiHullID;
-            self->m_bActive = 1;
-            self->m_uiNumHullChunk = (unsigned int)uiNumHullChunk;
-            self->m_iCarrySize = 0;
-            self->m_bBxNullChunk = 0;
-            self->m_iLastTimerTick = 0;
-            *(int*)&self->m_fTicksLeft = 0;
+            m_ActiveHull = uiHullID;
+            m_bActive = 1;
+            m_uiNumHullChunk = (unsigned int)uiNumHullChunk;
+            m_iCarrySize = 0;
+            m_bBxNullChunk = 0;
+            m_iLastTimerTick = 0;
+            *(int*)&m_fTicksLeft = 0;
             return 1;
         }
     }
@@ -206,12 +206,12 @@ extern "C" void STREAM_cancelrequest(int, int);
  * Passes m_streamRequest to the EA stream's cancel (STREAM_cancelrequest), clears m_bActive and sets m_ActiveHull to
  * -1. On Tour's version takes the hull ID (and only asserts on it); this one takes none.
  */
-extern "C" void cStreamMan_cancelStreamRequest(cStreamMan* self)
+void cStreamMan::cancelStreamRequest()
 {
-    if (self->m_bActive != 0) {
-        STREAM_cancelrequest(self->m_streamHandle, self->m_streamRequest);
-        self->m_bActive = 0;
-        self->m_ActiveHull = -1;
+    if (m_bActive != 0) {
+        STREAM_cancelrequest(m_streamHandle, m_streamRequest);
+        m_bActive = 0;
+        m_ActiveHull = -1;
     }
 }
 #endif
@@ -233,12 +233,12 @@ static inline int imax(int a, int b)
  *
  * @param rate  bytes per second (On Tour iBytesPerSecond); values below 0x8000 are raised to it
  */
-extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
+void cStreamMan::setBandWidthLimit(int rate)
 {
     rate = imax(0x8000, rate);
     cAppMan* app = cAppMan_TheAppMan;
-    self->m_iDataRatePerSecond = rate;
-    self->m_fTicksPerChunk = (float)app->TimerHz / ((float)rate * 0.000030517578125f);
+    m_iDataRatePerSecond = rate;
+    m_fTicksPerChunk = (float)app->TimerHz / ((float)rate * 0.000030517578125f);
 }
 #endif
 
@@ -263,51 +263,52 @@ extern "C" int STREAM_isendofstream(void* cache);
  * taken per call while throttled. Once STREAM_isendofstream reports the end of the stream, the world cache is told page +0x94
  * is loaded, the manager goes inactive and the page becomes -1.
  */
-extern "C" void cStreamMan_update(cStreamMan* self)
+void cStreamMan::update()
 {
     unsigned char* chunk;
-    if (self->m_bActive == 0) {
+    if (m_bActive == 0) {
         return;
     }
-    if (self->m_bAllocFailed != 0) {
-        if (cStreamMan_processChunk(self, (void**)&self->m_iDecompressSizeLeft, (int*)&self->m_pDecompressDataLeft) == 0) {
+    if (m_bAllocFailed != 0) {
+        if (processChunk((void**)&m_iDecompressSizeLeft, (int*)&m_pDecompressDataLeft) == 0) {
             return;
         }
     }
-    if (self->m_bLimitBandWidth != 0) {
+    if (m_bLimitBandWidth != 0) {
         int tick = cAppMan_TheAppMan->TimerTick;
-        if (self->m_iLastTimerTick != tick) {
-            self->m_fTicksLeft -= (float)(tick - self->m_iLastTimerTick);
-            self->m_iLastTimerTick = tick;
+        if (m_iLastTimerTick != tick) {
+            m_fTicksLeft -= (float)(tick - m_iLastTimerTick);
+            m_iLastTimerTick = tick;
         }
-        if (0.0f < self->m_fTicksLeft) {
+        if (0.0f < m_fTicksLeft) {
             return;
         }
     }
-    chunk = STREAM_get(((void*)self->m_streamHandle));
+    chunk = STREAM_get(((void*)m_streamHandle));
     while (chunk != 0) {
         int size;
-        self->m_fTicksLeft = self->m_fTicksPerChunk;
+        m_fTicksLeft = m_fTicksPerChunk;
         size = (chunk[7] << 24) | (chunk[6] << 16) | (chunk[5] << 8) | chunk[4];
         // PORT: the payload pointer is passed as an int.
-        *(void**)&self->m_iDecompressSizeLeft = cStreamMan_decompressChunk(self, ((int)self->m_pDecompressBuffer), size - 8, (int)(chunk + 8));
-        STREAM_release(((void*)self->m_streamHandle), chunk);
-        *(int*)&self->m_pDecompressDataLeft = ((int)self->m_pDecompressBuffer);
-        if (cStreamMan_processChunk(self, (void**)&self->m_iDecompressSizeLeft, (int*)&self->m_pDecompressDataLeft) == 0) {
-            self->m_bAllocFailed = 1;
+        *(void**)&m_iDecompressSizeLeft = cStreamMan_decompressChunk(this, ((int)m_pDecompressBuffer), size - 8,
+                (int)(chunk + 8));
+        STREAM_release(((void*)m_streamHandle), chunk);
+        *(int*)&m_pDecompressDataLeft = ((int)m_pDecompressBuffer);
+        if (processChunk((void**)&m_iDecompressSizeLeft, (int*)&m_pDecompressDataLeft) == 0) {
+            m_bAllocFailed = 1;
             return;
         }
-        if (self->m_bLimitBandWidth != 0) {
+        if (m_bLimitBandWidth != 0) {
             break;
         }
-        chunk = STREAM_get(((void*)self->m_streamHandle));
+        chunk = STREAM_get(((void*)m_streamHandle));
     }
-    if (STREAM_isendofstream(((void*)self->m_streamHandle)) == 0) {
+    if (STREAM_isendofstream(((void*)m_streamHandle)) == 0) {
         return;
     }
-    cWorldCache_signalPageLoadComplete(((void*)self->mp_WorldCache), self->m_ActiveHull);
-    self->m_bActive = 0;
-    self->m_ActiveHull = -1;
+    cWorldCache_signalPageLoadComplete(((void*)mp_WorldCache), m_ActiveHull);
+    m_bActive = 0;
+    m_ActiveHull = -1;
 }
 #endif
 
@@ -379,9 +380,9 @@ struct sStreamMan7238 {
  * @return 1 when the buffer was used up, 0 when the cache had no room and the call must be repeated
  */
 // PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.
-extern "C" int cStreamMan_processChunk(cStreamMan* self_, void* pcount_, void* pdata_)
+int cStreamMan::processChunk(void* pcount_, void* pdata_)
 {
-    sStreamMan7238* self = (sStreamMan7238*)self_;
+    sStreamMan7238* self = (sStreamMan7238*)this;
     int* pcount = (int*)pcount_;
     unsigned char** pdata = (unsigned char**)pdata_;
     while (*pcount >= 8 || (*pcount > 0 && self->size != 0) || self->retry != 0)

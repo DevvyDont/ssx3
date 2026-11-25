@@ -50,6 +50,8 @@ struct cScriptEntityCamera {
     void OnInSeqLock(cScriptPlayerEntity* pEntity) __asm__("cScriptEntityCamera_OnInSeqLock");
     void OnInSeqRelease() __asm__("cScriptEntityCamera_OnInSeqRelease");
     bool IsMatchingEntity(cScriptPlayerEntity* pEntity, int type) __asm__("cScriptEntityCamera_IsMatchingEntity");
+    void SetCameraManager(int camManager) __asm__("cScriptEntityCamera_SetCameraManager");
+    int GetSubType() __asm__("cScriptEntityCamera_GetSubType");
 };
 
 CHECK_OFFSET(cScriptEntityCamera, mVtbl, 0x00);

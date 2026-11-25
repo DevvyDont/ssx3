@@ -24,15 +24,15 @@ extern "C" void cAI_forceAIState(void *);
  * cAI_forceAIState(), which receives @p state unchanged in its second argument register and installs the new
  * state's id, handler and name. Asking for the current state does nothing.
  *
- * @param self  the AI
  * @param state  the new AI state (tAIState)
  */
-extern "C" void cAI_setAIState(cAI* self, int state) {
-    int old = self->CurrentAIState;
+void cAI::setAIState(int state)
+{
+    int old = CurrentAIState;
     if (state != old) {
-        self->PreviousAIState = old;
-        self->PreviousAIStateHandler = (cAIStateHandler*)((int)self->CurrentAIStateHandler);
-        cAI_forceAIState(self);
+        PreviousAIState = old;
+        PreviousAIStateHandler = (cAIStateHandler*)((int)CurrentAIStateHandler);
+        cAI_forceAIState(this);
     }
 }
 #endif
@@ -123,16 +123,17 @@ public:
  * Runs the AI's game-flow state: on a change, the old handler's exit and the new handler's enter, then the
  * update.
  */
-extern "C" void cAI_AIStateUpdate(cAI* self) {
-    if (self->PreviousAIState != self->CurrentAIState) {
-        cAIState_3C20 *prev = (cAIState_3C20*)self->PreviousAIStateHandler;
+void cAI::AIStateUpdate()
+{
+    if (PreviousAIState != CurrentAIState) {
+        cAIState_3C20 *prev = (cAIState_3C20*)PreviousAIStateHandler;
         if (prev != 0)
-            prev->m1((char*)self);
-        ((cAIState_3C20*)self->CurrentAIStateHandler)->m0((char*)self);
-        self->PreviousAIStateHandler = 0;
-        self->PreviousAIState = self->CurrentAIState;
+            prev->m1((char*)this);
+        ((cAIState_3C20*)CurrentAIStateHandler)->m0((char*)this);
+        PreviousAIStateHandler = 0;
+        PreviousAIState = CurrentAIState;
     }
-    ((cAIState_3C20*)self->CurrentAIStateHandler)->m2((char*)self);
+    ((cAIState_3C20*)CurrentAIStateHandler)->m2((char*)this);
 }
 #endif
 
@@ -158,7 +159,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param aiObj  the AI
  */
 extern "C" void cGameInitHandler_OnUpdate(void *stateHandler, cAI* aiObj) {
-    cAI_setAIState((cAI*)aiObj, 2);
+    aiObj->setAIState(2);
 }
 #endif
 
@@ -200,7 +201,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param aiObj  the AI
  */
 extern "C" void cFreerideHandler_OnUpdate(void *stateHandler, cAI* aiObj) {
-    cAI_setAIState((cAI*)aiObj, 5);
+    aiObj->setAIState(5);
 }
 #endif
 
@@ -281,7 +282,7 @@ extern "C" void cCountdownHandler_OnUpdate(void *handler, cAI* aiManager) {
 
     temp_2 = (aiManager->CountdownTicksLeft);
     if (temp_2 <= 0) {
-        cAI_setAIState((cAI*)aiManager, 5);
+        aiManager->setAIState(5);
         return;
     }
     aiManager->CountdownTicksLeft = (int) (temp_2 - 1);
@@ -344,7 +345,7 @@ extern "C" void cGame_setState(int, int, int, int);
 extern "C" void cRaceHandler_OnUpdate(void *handler, cAI* aiManager) {
     aiManager->EventTimerTick = (int) ((aiManager->EventTimerTick) + 1);
     if (cAI_isRaceFinished(aiManager) == 1) {
-        cAI_setAIState((cAI*)aiManager, 6);
+        aiManager->setAIState(6);
         cGame_setState(((int)SSXApp->Game), 5, 0, 0);
     }
 }
@@ -467,17 +468,18 @@ static inline float Clamp_3E80(float v, float lo, float hi)
  *
  * @param desLean  the desired lean (the steering input)
  */
-extern "C" void cRider_setupLean(cRider* self, float desLean) {
-    float speedScale = Len_3E80(*(&self->mVelocity)) / 694.538818359375f;
+void cRider::setupLean(float desLean)
+{
+    float speedScale = Len_3E80(*(&mVelocity)) / 694.538818359375f;
     if (speedScale < 1.0f)
         desLean = desLean * speedScale;
-    float rawRate = Abs_3E80(desLean - self->mSlewed[0].cur) * 12.002403259277344f;
+    float rawRate = Abs_3E80(desLean - mSlewed[0].cur) * 12.002403259277344f;
     float leanRate = Clamp_3E80(rawRate, 0.10000000149011612f, 14.001209259033203f);
-    int st = self->mSurfaceType;
+    int st = mSurfaceType;
     if (st == 2 || st == 3 || st == 13)
         leanRate = leanRate * 0.7561339735984802f;
-    self->mSlewed[0].target = desLean;
-    self->mSlewed[0].rate = leanRate * 0.01666666753590107f;
+    mSlewed[0].target = desLean;
+    mSlewed[0].rate = leanRate * 0.01666666753590107f;
 }
 #endif
 
@@ -507,11 +509,12 @@ static inline float Clamp_3F38(float v, float lo, float hi)
  *
  * @param desBal  the desired balance (the stick input)
  */
-extern "C" void cRider_setupRailBalance(cRider* self, float desBal) {
-    float rawRate = Abs_3F38(desBal - self->mSlewed[5].cur) * 7.0f;
+void cRider::setupRailBalance(float desBal)
+{
+    float rawRate = Abs_3F38(desBal - mSlewed[5].cur) * 7.0f;
     float desRate = Clamp_3F38(rawRate, 0.1f, 8.0f);
-    self->mSlewed[5].target = desBal;
-    self->mSlewed[5].rate = desRate * 0.01666666753590107f;
+    mSlewed[5].target = desBal;
+    mSlewed[5].rate = desRate * 0.01666666753590107f;
 }
 #endif
 
@@ -578,35 +581,36 @@ static inline float flipBackwards_3F88(float b, char *vvself, float th)
  * @param desCrouch  the desired crouch, 0..1
  * @param desBrake  the desired brake, 0..1
  */
-extern "C" void cRider_setupCrouchBrake(cRider* self, float desCrouch, float desBrake) {
-    if (0.0f < desCrouch && self->mSlewed[3].cur != 0.0f) {
-        self->mSlewed[3].target = 0.0f;
-        self->mSlewed[3].rate = 0.04166241362690926f;
+void cRider::setupCrouchBrake(float desCrouch, float desBrake)
+{
+    if (0.0f < desCrouch && mSlewed[3].cur != 0.0f) {
+        mSlewed[3].target = 0.0f;
+        mSlewed[3].rate = 0.04166241362690926f;
         return;
     }
-    if (0.0f < desBrake && self->mSlewed[4].cur != 0.0f) {
-        self->mSlewed[4].target = 0.0f;
-        self->mSlewed[4].rate = 0.10000182688236237f;
+    if (0.0f < desBrake && mSlewed[4].cur != 0.0f) {
+        mSlewed[4].target = 0.0f;
+        mSlewed[4].rate = 0.10000182688236237f;
         return;
     }
-    if (0.0f < desCrouch && self->mSlewed[3].cur != 0.0f) {
+    if (0.0f < desCrouch && mSlewed[3].cur != 0.0f) {
         desCrouch = 0.0f;
     }
-    float crouchDelta = Abs_3F88(desCrouch - self->mSlewed[4].cur);
+    float crouchDelta = Abs_3F88(desCrouch - mSlewed[4].cur);
     float crouchRate = (0.1f <= crouchDelta) ? crouchDelta * 0.10000182688236237f : 0.010000183247029781f;
-    self->mSlewed[4].target = desCrouch;
-    self->mSlewed[4].rate = crouchRate;
+    mSlewed[4].target = desCrouch;
+    mSlewed[4].rate = crouchRate;
     if (0.0f < desBrake) {
-        if (0.0f < self->mSlewed[4].cur) {
+        if (0.0f < mSlewed[4].cur) {
             desBrake = 0.0f;
-        } else if (vu0Dot_3F88(*(&self->mVelocity), *(&self->mGroundForward)) < 0.0f) {
+        } else if (vu0Dot_3F88(*(&mVelocity), *(&mGroundForward)) < 0.0f) {
             desBrake = 0.0f;
         }
     }
-    desBrake = flipBackwards_3F88(desBrake, ((char*)self), 0.1f);
-    float brakeDelta = Clamp_3F88(Abs_3F88(desBrake - self->mSlewed[3].cur), 0.1f, 1.0f);
-    self->mSlewed[3].target = desBrake;
-    self->mSlewed[3].rate = brakeDelta * 0.04166241362690926f;
+    desBrake = flipBackwards_3F88(desBrake, ((char*)this), 0.1f);
+    float brakeDelta = Clamp_3F88(Abs_3F88(desBrake - mSlewed[3].cur), 0.1f, 1.0f);
+    mSlewed[3].target = desBrake;
+    mSlewed[3].rate = brakeDelta * 0.04166241362690926f;
 }
 #endif
 
@@ -629,31 +633,30 @@ extern "C" void cSSXAudio_TurboOff(int mgr, char* rider);
  * cSSXAudio_TurboDeny. In every other case an active boost is stopped (cSSXAudio_TurboOff, On Tour TurboOff) and
  * mBoostStrength cleared.
  *
- * @param rider  the rider (this)
  * @param isHeld  nonzero while the boost button is held
  * @param isPressed  nonzero on the frame the boost button is pressed
  */
-extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
+void cRider::setupBoostWarp(int isHeld, int isPressed)
 {
-    if (isPressed) cCheatFX_setCheatInput((char*)&rider->mRiderHandler->CheatFX, 0);
+    if (isPressed) cCheatFX_setCheatInput((char*)&mRiderHandler->CheatFX, 0);
     if (isHeld) {
-        if (rider->BoostPowerBar > 0.0f) {
-            if (rider->mBoostStrength == 0.0f) {
-                float x = rider->BoostPowerBar;
-                if (x > 0.6666666865348816f) rider->mBoostStrength = 1.0f;
-                else if (x > 0.3333333432674408f) rider->mBoostStrength = 0.625f;
-                else rider->mBoostStrength = 0.25f;
-                cSSXAudio_TurboOn(cAudioInterface_bxAudio(), ((char*)rider), isPressed);
+        if (BoostPowerBar > 0.0f) {
+            if (mBoostStrength == 0.0f) {
+                float x = BoostPowerBar;
+                if (x > 0.6666666865348816f) mBoostStrength = 1.0f;
+                else if (x > 0.3333333432674408f) mBoostStrength = 0.625f;
+                else mBoostStrength = 0.25f;
+                cSSXAudio_TurboOn(cAudioInterface_bxAudio(), ((char*)this), isPressed);
             }
-            if (rider->mPowerUpBoostTimer == 0.0f && rider->mBoostMode != 0 && rider->mUberLevel < 10) {
-                rider->BoostPowerBar -= 0.00150679936632514f;
+            if (mPowerUpBoostTimer == 0.0f && mBoostMode != 0 && mUberLevel < 10) {
+                BoostPowerBar -= 0.00150679936632514f;
             }
             return;
         }
-        if (isPressed) cSSXAudio_TurboDeny(cAudioInterface_bxAudio(), ((char*)rider));
+        if (isPressed) cSSXAudio_TurboDeny(cAudioInterface_bxAudio(), ((char*)this));
     }
-    if (rider->mBoostStrength > 0.0f) cSSXAudio_TurboOff(cAudioInterface_bxAudio(), ((char*)rider));
-    rider->mBoostStrength = 0.0f;
+    if (mBoostStrength > 0.0f) cSSXAudio_TurboOff(cAudioInterface_bxAudio(), ((char*)this));
+    mBoostStrength = 0.0f;
 }
 #endif
 
@@ -1393,30 +1396,29 @@ static inline Q_5168 Scale_5168(const Q_5168& v, float s)
  * (+0x3A0) and mGroundSide (+0x3B0), and negates the current and target values of slewed channels 0 (lean), 1, 2, 3
  * (brake) and 12 (+0x280).
  *
- * @param rider  the rider (this)
  */
-extern "C" void cRider_doChangeFakie(cRider* rider)
+void cRider::doChangeFakie()
 {
-    rider->IsRidingFakie ^= 1;
-    cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, 3.1415927410125732f);
-    if (rider->IsRidingFakie) {
-        SetHeading_5168(rider->mRiderAnim, 3.1415927410125732f);
+    IsRidingFakie ^= 1;
+    cRiderAnimBase_changeHeadingOffset(mRiderAnim, 3.1415927410125732f);
+    if (IsRidingFakie) {
+        SetHeading_5168(mRiderAnim, 3.1415927410125732f);
     } else {
-        SetHeading_5168(rider->mRiderAnim, 0.0f);
+        SetHeading_5168(mRiderAnim, 0.0f);
     }
-    rider->mRiderAnim->IsFlipped = rider->IsRidingFakie;
-    *(Q_5168*)&rider->mGroundForward = Scale_5168(*(Q_5168*)&rider->mGroundForward, -1.0f);
-    *(Q_5168*)&rider->mGroundSide = Scale_5168(*(Q_5168*)&rider->mGroundSide, -1.0f);
-    rider->mSlewed[0].cur = -rider->mSlewed[0].cur;
-    rider->mSlewed[0].target = -rider->mSlewed[0].target;
-    rider->mSlewed[3].cur = -rider->mSlewed[3].cur;
-    rider->mSlewed[3].target = -rider->mSlewed[3].target;
-    rider->mSlewed[2].cur = -rider->mSlewed[2].cur;
-    rider->mSlewed[2].target = -rider->mSlewed[2].target;
-    rider->mSlewed[1].cur = -rider->mSlewed[1].cur;
-    rider->mSlewed[1].target = -rider->mSlewed[1].target;
-    rider->mSlewed[12].cur = -rider->mSlewed[12].cur;
-    rider->mSlewed[12].target = -rider->mSlewed[12].target;
+    mRiderAnim->IsFlipped = IsRidingFakie;
+    *(Q_5168*)&mGroundForward = Scale_5168(*(Q_5168*)&mGroundForward, -1.0f);
+    *(Q_5168*)&mGroundSide = Scale_5168(*(Q_5168*)&mGroundSide, -1.0f);
+    mSlewed[0].cur = -mSlewed[0].cur;
+    mSlewed[0].target = -mSlewed[0].target;
+    mSlewed[3].cur = -mSlewed[3].cur;
+    mSlewed[3].target = -mSlewed[3].target;
+    mSlewed[2].cur = -mSlewed[2].cur;
+    mSlewed[2].target = -mSlewed[2].target;
+    mSlewed[1].cur = -mSlewed[1].cur;
+    mSlewed[1].target = -mSlewed[1].target;
+    mSlewed[12].cur = -mSlewed[12].cur;
+    mSlewed[12].target = -mSlewed[12].target;
 }
 #endif
 
@@ -1470,39 +1472,39 @@ static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
  * half-turn back when needed, then turn the rider and its animation heading a quarter turn (+90 degrees for
  * style 4, else -90).
  */
-extern "C" void cRider_doRailslideModeOrientation(cRider* self)
+void cRider::doRailslideModeOrientation()
 {
     // Half turn about the up axis (quaternion (up, 0)) whenever the landing state disagrees with the stance flag.
-    int state = self->RailslideMode;
+    int state = RailslideMode;
     if (state == 2) {
-        if (self->IsRidingFakie == 0) {
-            self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
-            cRider_updateOrientationImplicit(self);
-            cRider_doChangeFakie(self);
+        if (IsRidingFakie == 0) {
+            mRotation = QuatMul_5358(Q_5358(V3_5358(mMatrix.row[2]), 0.0f), mRotation);
+            cRider_updateOrientationImplicit(this);
+            doChangeFakie();
         }
     } else if (state == 1) {
-        if (self->IsRidingFakie != 0) {
-            self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
-            cRider_updateOrientationImplicit(self);
-            cRider_doChangeFakie(self);
+        if (IsRidingFakie != 0) {
+            mRotation = QuatMul_5358(Q_5358(V3_5358(mMatrix.row[2]), 0.0f), mRotation);
+            cRider_updateOrientationImplicit(this);
+            doChangeFakie();
         }
     } else {
-        if (self->IsRidingFakie != 0) {
-            self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
-            cRider_updateOrientationImplicit(self);
-            cRider_doChangeFakie(self);
+        if (IsRidingFakie != 0) {
+            mRotation = QuatMul_5358(Q_5358(V3_5358(mMatrix.row[2]), 0.0f), mRotation);
+            cRider_updateOrientationImplicit(this);
+            doChangeFakie();
         }
-        if (self->RailslideMode == 4) {
-            cRider_rotateOrientation_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
-            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
-            SetHeading_5168(self->mRiderAnim, 1.5707964f);
+        if (RailslideMode == 4) {
+            cRider_rotateOrientation_5358(this, *(Q_5168*)&mMatrix.row[2], 1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(mRiderAnim, 1.5707964f);
+            SetHeading_5168(mRiderAnim, 1.5707964f);
         } else {
-            cRider_rotateOrientation_5358(self, *(Q_5168*)&self->mMatrix.row[2], -1.5707964f);
-            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707964f);
-            SetHeading_5168(self->mRiderAnim, -1.5707964f);
+            cRider_rotateOrientation_5358(this, *(Q_5168*)&mMatrix.row[2], -1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(mRiderAnim, -1.5707964f);
+            SetHeading_5168(mRiderAnim, -1.5707964f);
         }
     }
-    cRider_verifyRailslideModeDEBUG_5358(self);
+    cRider_verifyRailslideModeDEBUG_5358(this);
 }
 #endif
 
@@ -1548,33 +1550,33 @@ static inline void SetHeading_5640(cRiderAnim* a, float angle)
  * cRider_verifyRailslideModeDEBUG runs (an empty stub: On Tour verifyRailslideModeDEBUG).
  */
 // Finishes a pending turn-around request (state 3 = left, 4 = right) of the rider.
-extern "C" void cRider_undoRailslideModeOrientation(cRider* self)
+void cRider::undoRailslideModeOrientation()
 {
-    if (self->RailslideMode == 0)
+    if (RailslideMode == 0)
         return;
-    if (cRider_getMotionState((char*)self) == 1) {
-        if (self->RailslideMode == 3 || self->RailslideMode == 4)
-            SetHeading_5640(self->mRiderAnim, 0.0f);
-        if (self->RailslideMode == 3)
-            cRiderAnimBase_play(self->mRiderAnim, 282, 0, -1.0f);
-        else if (self->RailslideMode == 4)
-            cRiderAnimBase_play(self->mRiderAnim, 277, 0, -1.0f);
+    if (cRider_getMotionState((char*)this) == 1) {
+        if (RailslideMode == 3 || RailslideMode == 4)
+            SetHeading_5640(mRiderAnim, 0.0f);
+        if (RailslideMode == 3)
+            cRiderAnimBase_play(mRiderAnim, 282, 0, -1.0f);
+        else if (RailslideMode == 4)
+            cRiderAnimBase_play(mRiderAnim, 277, 0, -1.0f);
         else
-            cRiderAnimBase_play(self->mRiderAnim, 268, 0, -1.0f);
-    } else if (cRider_getMotionState((char*)self) == 0) {
-        if (self->RailslideMode == 3) {
-            cRider_rotateOrientation(((char*)self), *(Q_5640*)&self->mMatrix.row[2], 1.5707964f);
-            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
-            SetHeading_5640(self->mRiderAnim, 0.0f);
-        } else if (self->RailslideMode == 4) {
-            cRider_rotateOrientation(((char*)self), *(Q_5640*)&self->mMatrix.row[2], -1.5707964f);
-            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707964f);
-            SetHeading_5640(self->mRiderAnim, 0.0f);
+            cRiderAnimBase_play(mRiderAnim, 268, 0, -1.0f);
+    } else if (cRider_getMotionState((char*)this) == 0) {
+        if (RailslideMode == 3) {
+            cRider_rotateOrientation(((char*)this), *(Q_5640*)&mMatrix.row[2], 1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(mRiderAnim, 1.5707964f);
+            SetHeading_5640(mRiderAnim, 0.0f);
+        } else if (RailslideMode == 4) {
+            cRider_rotateOrientation(((char*)this), *(Q_5640*)&mMatrix.row[2], -1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(mRiderAnim, -1.5707964f);
+            SetHeading_5640(mRiderAnim, 0.0f);
         }
-        cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
+        cRiderAnimBase_play(mRiderAnim, 5, 0, -1.0f);
     }
-    self->RailslideMode = 0;
-    cRider_verifyRailslideModeDEBUG_p((char*)self);
+    RailslideMode = 0;
+    cRider_verifyRailslideModeDEBUG_p((char*)this);
 }
 #endif
 
@@ -1640,7 +1642,7 @@ static inline float Clamp_58B8(float v, float lo, float hi)
  * @param step  the angle increment in radians (On Tour rad)
  * @param eps  the dead zone (On Tour deadZone)
  */
-extern "C" void cRider_snapAxisIncrement(cRider* self, float* y, float* x, float step, float eps)
+void cRider::snapAxisIncrement(float* y, float* x, float step, float eps)
 {
     float px, py, len, ang, steps, rounded;
     float sc[2];
@@ -1672,11 +1674,11 @@ extern "C" float cBECharacterInterface_getScale(int, int);
 /**
  * Returns how far the rider crouches at the start gate, from its character's model scale (75 - 90 x scale).
  *
- * @param self  the rider
  * @return the knee offset
  */
-extern "C" float cRider_getStartGateKneeOffset(cRider* self) {
-    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (self->mAIIndex)) * -90.0f) + 75.0f;
+float cRider::getStartGateKneeOffset()
+{
+    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (mAIIndex)) * -90.0f) + 75.0f;
 }
 #endif
 
@@ -1693,11 +1695,11 @@ extern "C" float cBECharacterInterface_getScale(int, int);
  * The value is the character's scale (cBECharacterInterface_getScale on BE interface 2, for the rider's +0x86C) times
  * 90, minus 90. cRider_putAtDropOffBC, cRider_initPath and cRider_DoInSeqAnimUpdate add it along the rider's front.
  *
- * @param rider  the rider
  * @return the offset (0 at scale 1)
  */
-extern "C" float cRider_getStartGateHorizOffset(cRider* rider) {
-    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (rider->mAIIndex)) * 90.0f) - 90.0f;
+float cRider::getStartGateHorizOffset()
+{
+    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (mAIIndex)) * 90.0f) - 90.0f;
 }
 #endif
 
@@ -1729,58 +1731,58 @@ static inline float vAbs_115B58(float x)
  * types 1 and 2 also cue func_0029FF80), 0x13A for type 4, and 0x13E for types 5 and 6 when |mSlewed[1].cur| < 0.75 and
  * the control state is 0. The reaction is then cleared (type 0, tick -1), also when it is older than 180 ticks.
  */
-extern "C" void cRider_checkForReaction(cRider* self)
+void cRider::checkForReaction()
 {
-    if (self->ReactionEventType == 0) {
+    if (ReactionEventType == 0) {
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 5) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == 5) {
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 0) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) != 0) {
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 10) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == 10) {
         return;
     }
-    int delTick = AITick() - self->ReactionEventTick;
+    int delTick = AITick() - ReactionEventTick;
     if (delTick < 180) {
         if (delTick < 0) {
             return;
         }
-        switch (self->ReactionEventType) {
+        switch (ReactionEventType) {
         case 1:
-            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
-            cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
-            *(long*)&self->mRiderAnim->GraftMask = -1;
-            func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 0);
+            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
+            *(long*)&mRiderAnim->GraftMask = -1;
+            func_0029FF80(cAudioInterface_bxAudio(), ((char*)this), 0);
             break;
         case 2:
-            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
-            cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
-            *(long*)&self->mRiderAnim->GraftMask = -1;
-            func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 1);
+            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
+            *(long*)&mRiderAnim->GraftMask = -1;
+            func_0029FF80(cAudioInterface_bxAudio(), ((char*)this), 1);
             break;
         case 3:
-            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
-            cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
-            *(long*)&self->mRiderAnim->GraftMask = -1;
+            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
+            *(long*)&mRiderAnim->GraftMask = -1;
             break;
         case 4:
-            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
-            cRiderAnimBase_play(self->mRiderAnim, 314, 0, -1.0f);
-            *(long*)&self->mRiderAnim->GraftMask = -1;
+            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            cRiderAnimBase_play(mRiderAnim, 314, 0, -1.0f);
+            *(long*)&mRiderAnim->GraftMask = -1;
             break;
         case 5:
         case 6:
-            if (vAbs_115B58(self->mSlewed[1].cur) < 0.75f && cRider_getControlState((char*)self) == 0) {
-                cRiderAnimBase_play(self->mRiderAnim, 318, 0, -1.0f);
+            if (vAbs_115B58(mSlewed[1].cur) < 0.75f && cRider_getControlState((char*)this) == 0) {
+                cRiderAnimBase_play(mRiderAnim, 318, 0, -1.0f);
             }
             break;
         }
     }
-    self->ReactionEventType = 0;
-    self->ReactionEventTick = -1;
+    ReactionEventType = 0;
+    ReactionEventTick = -1;
 }
 #endif
 
@@ -1821,42 +1823,42 @@ static inline t4Vector GetFront_5D48(cRider* rider)
  * (below 100 of 100) always passes.
  */
 // Plays a glance animation towards a nearby rider (sRiderPair mDistance/mAngle).
-extern "C" void cRider_checkForProximityAction(cRider* self)
+void cRider::checkForProximityAction()
 {
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 0) {
-        self->ProximityActionDelay = 0.0f;
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) != 0) {
+        ProximityActionDelay = 0.0f;
         return;
     }
-    self->ProximityActionDelay += 0.01666666753590107f;
-    if (self->ProximityActionDelay < 1.0f)
+    ProximityActionDelay += 0.01666666753590107f;
+    if (ProximityActionDelay < 1.0f)
         return;
 
-    float heading = Atan2_58B8(GetFront_5D48(self).y, GetFront_5D48(self).x);
+    float heading = Atan2_58B8(GetFront_5D48(this).y, GetFront_5D48(this).x);
     int i;
 
     if ((int)(AIrand() % 100) < 90) {
         float glance = 1.047197699546814f;
         float behind = 2.3561947345733643f;
         for (i = 0; i < 6; i++) {
-            if (self->mRelations[i].mValid != 0 && self->mRelations[i].mAggressive != 0) {
-                if (self->mRelations[i].unk_20 + 600 <= AITick()) {
-                    float diff = Wrap_5D48(self->mRelations[i].mAngle - heading);
-                    if (self->mRelations[i].mDistance < 1000.0f) {
+            if (mRelations[i].mValid != 0 && mRelations[i].mAggressive != 0) {
+                if (mRelations[i].unk_20 + 600 <= AITick()) {
+                    float diff = Wrap_5D48(mRelations[i].mAngle - heading);
+                    if (mRelations[i].mDistance < 1000.0f) {
                         float ad = __builtin_fabsf(diff);
                         if (ad > glance) {
-                            self->mRelations[i].unk_20 = AITick();
+                            mRelations[i].unk_20 = AITick();
                             // PORT: 64-bit long
-                            *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
+                            *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
                             if (ad > behind) {
-                                cRiderAnimBase_play(self->mRiderAnim, 319, 0, -1.0f);
+                                cRiderAnimBase_play(mRiderAnim, 319, 0, -1.0f);
                             } else {
                                 int left = diff < 0.0f;
-                                if (left == self->IsRidingFakie)
-                                    cRiderAnimBase_play(self->mRiderAnim, 321, 0, -1.0f);
+                                if (left == IsRidingFakie)
+                                    cRiderAnimBase_play(mRiderAnim, 321, 0, -1.0f);
                                 else
-                                    cRiderAnimBase_play(self->mRiderAnim, 320, 0, -1.0f);
+                                    cRiderAnimBase_play(mRiderAnim, 320, 0, -1.0f);
                             }
-                            *(long*)&self->mRiderAnim->GraftMask = -1;
+                            *(long*)&mRiderAnim->GraftMask = -1;
                             return;
                         }
                     }
@@ -1868,17 +1870,17 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
     if ((int)(AIrand() % 100) < 100) {
         float wide = 2.094395399093628f;
         for (i = 0; i < 6; i++) {
-            if (self->mRelations[i].mValid != 0) {
-                float diff = Wrap_5D48(self->mRelations[i].mAngle - heading);
-                if (self->mRelations[i].mDistance < 1000.0f) {
+            if (mRelations[i].mValid != 0) {
+                float diff = Wrap_5D48(mRelations[i].mAngle - heading);
+                if (mRelations[i].mDistance < 1000.0f) {
                     if (__builtin_fabsf(diff) > wide) {
-                        *(long*)&self->mRiderAnim->GraftMask = self->mHeadBoneMask;
+                        *(long*)&mRiderAnim->GraftMask = mHeadBoneMask;
                         int left = diff < 0.0f;
-                        if (left == self->IsRidingFakie)
-                            cRiderAnimBase_play(self->mRiderAnim, 317, 0, -1.0f);
+                        if (left == IsRidingFakie)
+                            cRiderAnimBase_play(mRiderAnim, 317, 0, -1.0f);
                         else
-                            cRiderAnimBase_play(self->mRiderAnim, 316, 0, -1.0f);
-                        *(long*)&self->mRiderAnim->GraftMask = -1;
+                            cRiderAnimBase_play(mRiderAnim, 316, 0, -1.0f);
+                        *(long*)&mRiderAnim->GraftMask = -1;
                         return;
                     }
                 }
@@ -1910,17 +1912,18 @@ extern "C" void cReplay_eventReset(int, int);
  * @param forceAutoReset  automatic reset kind, 0 for none (On Tour eAutoReset)
  * @return 1 when the rider resets, otherwise 0
  */
-extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAutoReset) {
+int cRider::checkForReset(int isResetInput, int forceAutoReset)
+{
     if (isResetInput != 0 || forceAutoReset != 0) {
-        *(int*)&self->mPowerUpBoostTimer = 0;
-        *(int*)&self->mPowerUpTrickTimer = 0;
+        *(int*)&mPowerUpBoostTimer = 0;
+        *(int*)&mPowerUpTrickTimer = 0;
         if (forceAutoReset == 1 || forceAutoReset == 4)
-            cRiderMetrix_evAutoResetSurface(self->mMetrix);
-        self->mRiderHandler->ResetControl.IsAutoReset = (forceAutoReset != 0);
-        cRider_setControlState_6120(((char*)self), 9);
-        cRider_setMotionState_6120(((char*)self), 3);
-        cSSXAudio_PlayerResetEvent(cAudioInterface_bxAudio(), ((char*)self));
-        cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
+            cRiderMetrix_evAutoResetSurface(mMetrix);
+        mRiderHandler->ResetControl.IsAutoReset = (forceAutoReset != 0);
+        cRider_setControlState_6120(((char*)this), 9);
+        cRider_setMotionState_6120(((char*)this), 3);
+        cSSXAudio_PlayerResetEvent(cAudioInterface_bxAudio(), ((char*)this));
+        cReplay_eventReset((int)SSXApp->Game->Replay, mAIIndex);
         return 1;
     }
     return 0;
@@ -1965,26 +1968,25 @@ void cRider_setControlState_61D0(void* self, int on) __asm__("cRider_setControlS
  * (PressMode, +0x330; On Tour PressMode) to 1, a negative one plays 0x20 and sets 2; then control state 1
  * (cRider_setControlState__FPv).
  *
- * @param rider  the rider (this)
  * @param dir  the press input (On Tour boardPress): its sign picks the press
  * @return 1 when a press started, else 0
  */
-extern "C" int cRider_checkForBoardPress(cRider* rider, float dir)
+int cRider::checkForBoardPress(float dir)
 {
     int st;
     if (dir == 0.0f) return 0;
-    if (rider->RailslideMode == 3 || rider->RailslideMode == 4) return 0;
-    if (!cRider_getMotionState((char*)rider)) {
-        if (Dot4_61D0(*(&rider->mVelocity), *(&rider->mGroundForward)) < 0.0f) return 0;
+    if (RailslideMode == 3 || RailslideMode == 4) return 0;
+    if (!cRider_getMotionState((char*)this)) {
+        if (Dot4_61D0(*(&mVelocity), *(&mGroundForward)) < 0.0f) return 0;
     }
     if (dir > 0.0f) {
-        cRiderAnimBase_play_61D0(rider->mRiderAnim, 0x18, 0, -1.0f);
-        rider->PressMode = 1;
+        cRiderAnimBase_play_61D0(mRiderAnim, 0x18, 0, -1.0f);
+        PressMode = 1;
     } else {
-        cRiderAnimBase_play_61D0(rider->mRiderAnim, 0x20, 0, -1.0f);
-        rider->PressMode = 2;
+        cRiderAnimBase_play_61D0(mRiderAnim, 0x20, 0, -1.0f);
+        PressMode = 2;
     }
-    cRider_setControlState_61D0(((char*)rider), 1);
+    cRider_setControlState_61D0(((char*)this), 1);
     return 1;
 }
 #endif
@@ -2009,16 +2011,17 @@ extern "C" void cCheatFX_setCheatInput(char *, int);
  * @param isJumpPressed  nonzero on the frame the jump button is pressed
  * @return 1 when the prewind started, else 0
  */
-extern "C" int cRider_checkForPrewind(cRider* self, int isJumpHeld, int isJumpPressed) {
+int cRider::checkForPrewind(int isJumpHeld, int isJumpPressed)
+{
     if (isJumpPressed != 0)
-        cCheatFX_setCheatInput((char*)&self->mRiderHandler->CheatFX, 1);
-    if ((self->JumpHeldSec == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
-        if (cRider_getControlState_62C8((char*)self) == 1)
-            cBoardPressControl_forceExit((char*)&self->mRiderHandler->BoardPressControl);
-        cRider_setControlState_62C8(((char*)self), 2);
+        cCheatFX_setCheatInput((char*)&mRiderHandler->CheatFX, 1);
+    if ((JumpHeldSec == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
+        if (cRider_getControlState_62C8((char*)this) == 1)
+            cBoardPressControl_forceExit((char*)&mRiderHandler->BoardPressControl);
+        cRider_setControlState_62C8(((char*)this), 2);
         return 1;
     }
-    self->JumpHeldSec = 1.0f;
+    JumpHeldSec = 1.0f;
     return 0;
 }
 #endif
@@ -2035,12 +2038,12 @@ extern "C" void cRider_setControlState_6378(void *, int) __asm__("cRider_setCont
  * The control updates (cCruiseControl_update, cPrewindControl_update, cBumpControl_update, cBoardPressControl_update)
  * call it.
  *
- * @param rider  the rider
  * @return 1 when the state was set, else 0
  */
-extern "C" int cRider_checkForFinishLine(cRider* rider) {
-    if (rider->mFinishTime >= 0.0f) {
-        cRider_setControlState_6378(rider, 10);
+int cRider::checkForFinishLine()
+{
+    if (mFinishTime >= 0.0f) {
+        cRider_setControlState_6378(this, 10);
         return 1;
     }
     return 0;
@@ -2099,93 +2102,99 @@ static inline int seqDone_163B0(tEventFlags* p)
  * @param isRight  nonzero when the right punch input is down
  * @return 1 while a punch animation is playing, otherwise 0
  */
-extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
+int cRider::checkForPunch(int isLeft, int isRight)
 {
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) == 3) {
         if (isLeft != 0 && isRight != 0) {
-            if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events)) {
-                cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 0.0f;
-                *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
-                cRiderAnimBase_play(self->mRiderAnim, 325, 0, -1.0f);
-                float w = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->CurrentWeight;
-                float targWeight = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TargetWeight;
-                float weightTimer = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->WeightTimer;
-                cAnimSequence* baseSeq = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
+            if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events)) {
+                cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 0.0f;
+                *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+                cRiderAnimBase_play(mRiderAnim, 325, 0, -1.0f);
+                float w = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->CurrentWeight;
+                float targWeight = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TargetWeight;
+                float weightTimer = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->WeightTimer;
+                cAnimSequence* baseSeq = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 0);
                 baseSeq->TargetWeight = w;
                 baseSeq->CurrentWeight = w;
                 if (weightTimer != 0.0f)
-                    cAnimSequence_fadeWeight(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0), targWeight, weightTimer);
-                *(long*)&self->mRiderAnim->GraftMask = -1;
+                    cAnimSequence_fadeWeight(cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 0), targWeight,
+                            weightTimer);
+                *(long*)&mRiderAnim->GraftMask = -1;
             }
         } else {
-            cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 1.0f;
-            cRiderAnimBase_blendOutAll(self->mRiderAnim, 0, 0.1f);
+            cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 1.0f;
+            cRiderAnimBase_blendOutAll(mRiderAnim, 0, 0.1f);
         }
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
-        int id = cRiderAnimBase_getCurrentAnimID(self->mRiderAnim, 1);
-        int match = self->IsRidingFakie ? id == 323 : id == 324;
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) == 13) {
+        int id = cRiderAnimBase_getCurrentAnimID(mRiderAnim, 1);
+        int match = IsRidingFakie ? id == 323 : id == 324;
         if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
-            if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events)) {
-                cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 0.0f;
-                *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
+            if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events)) {
+                cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 0.0f;
+                *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
                 if (id == 323)
-                    cRiderAnimBase_play(self->mRiderAnim, 326, 0, -1.0f);
+                    cRiderAnimBase_play(mRiderAnim, 326, 0, -1.0f);
                 else
-                    cRiderAnimBase_play(self->mRiderAnim, 327, 0, -1.0f);
-                *(long*)&self->mRiderAnim->GraftMask = -1;
+                    cRiderAnimBase_play(mRiderAnim, 327, 0, -1.0f);
+                *(long*)&mRiderAnim->GraftMask = -1;
             }
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 0) == 13) {
-                float blendStep = self->mTimeScale * 0.01111111231148243f;
-                float cur = self->PunchStrength;
+            if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 0) == 13) {
+                float blendStep = mTimeScale * 0.01111111231148243f;
+                float cur = PunchStrength;
                 float newBlend = 1.0f;
                 if (blendStep + 1.0f < cur)
                     newBlend = cur - blendStep;
                 else if (cur < 1.0f - blendStep)
                     newBlend = cur + blendStep;
-                self->PunchStrength = newBlend;
-                cAnimSequence* baseSeq = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
-                baseSeq->CurrentWeight = baseSeq->TargetWeight = self->PunchStrength;
+                PunchStrength = newBlend;
+                cAnimSequence* baseSeq = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 0);
+                baseSeq->CurrentWeight = baseSeq->TargetWeight = PunchStrength;
             }
             if (match)
-                self->PunchVect = Scale_163B0(GetSide_163B0(self), -1.0f);
+                PunchVect = Scale_163B0(GetSide_163B0(this), -1.0f);
             else
-                self->PunchVect = GetSide_163B0(self);
+                PunchVect = GetSide_163B0(this);
         } else {
-            cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 1.0f;
-            cRiderAnimBase_blendOutAll(self->mRiderAnim, 0, 0.1f);
+            cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 1.0f;
+            cRiderAnimBase_blendOutAll(mRiderAnim, 0, 0.1f);
         }
     }
     if (isLeft != 0 && isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0) != 0 &&
-            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
+                1) == 13 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 0) != 0 &&
+            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
+                1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 1) == 0)
             return 1;
-        *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
-        cRiderAnimBase_play(self->mRiderAnim, 322, 1, -1.0f);
-        *(long*)&self->mRiderAnim->GraftMask = -1;
-        self->PunchStrength = 0.0f;
+        *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+        cRiderAnimBase_play(mRiderAnim, 322, 1, -1.0f);
+        *(long*)&mRiderAnim->GraftMask = -1;
+        PunchStrength = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0) != 0 &&
-            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
+                1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 0) != 0 &&
+            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
+                1) == 13 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 1) == 0)
             return 1;
         int anim;
         if (isLeft != 0) {
-            anim = self->IsRidingFakie ? 323 : 324;
-            self->PunchVect = Scale_163B0(GetSide_163B0(self), -1.0f);
+            anim = IsRidingFakie ? 323 : 324;
+            PunchVect = Scale_163B0(GetSide_163B0(this), -1.0f);
         } else {
-            self->PunchVect = GetSide_163B0(self);
-            anim = self->IsRidingFakie ? 324 : 323;
+            PunchVect = GetSide_163B0(this);
+            anim = IsRidingFakie ? 324 : 323;
         }
-        *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
-        cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
-        *(long*)&self->mRiderAnim->GraftMask = -1;
-        self->PunchStrength = 0.0f;
+        *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+        cRiderAnimBase_play(mRiderAnim, anim, 1, -1.0f);
+        *(long*)&mRiderAnim->GraftMask = -1;
+        PunchStrength = 0.0f;
     }
-    return cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 || cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13;
+    return cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
+            1) == 3 || cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) == 13;
 }
 #endif
 
@@ -2403,14 +2412,15 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_update);
  * (+0x8) grows by 1/60 and the slot becomes empty (ID 0x34) once it reaches MaxDecay. Called for each slot by
  * cRiderMetrix_update (the rider metrics update).
  */
-extern "C" void cHUDFX_update(cHUDFX* self) {
-    if (self->ID != 52) {
-        float lim = self->MaxDecay;
+void cHUDFX::update()
+{
+    if (ID != 52) {
+        float lim = MaxDecay;
         if (lim != -1.0f) {
-            float curDecay = self->CurDecay + 0.01666666753590107f;
-            self->CurDecay = curDecay;
+            float curDecay = CurDecay + 0.01666666753590107f;
+            CurDecay = curDecay;
             if (lim <= curDecay)
-                self->ID = 52;
+                ID = 52;
         }
     }
 }
@@ -2424,9 +2434,10 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
  *
  * @param str  the string, or 0 (On Tour s)
  */
-extern "C" void cHUDFX_copyDispStr(cHUDFX* self, signed char *str) {
+void cHUDFX::copyDispStr(signed char *str)
+{
     signed char *src = str;
-    unsigned char *dst = (unsigned char*)(&self->DisplayStr[0]);
+    unsigned char *dst = (unsigned char*)(&DisplayStr[0]);
     if (src != 0) {
         while (*src != 0) {
             *dst = *src;
@@ -2455,13 +2466,14 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
  * @param decayTime  the effect's data (On Tour int data)
  * @param fparg0  how long the effect lasts (On Tour float decayTime)
  */
-extern "C" void cHUDFX_set(cHUDFX* self, int id, signed char *displayStr, int decayTime, float fparg0) {
-    cHUDFX_copyDispStr(self, displayStr);
-    self->ID = id;
-    self->MaxDecay = fparg0;
-    self->Data = decayTime;
-    *(int*)&self->CurDecay = 0;
-    self->DisplayInt = 0;
+void cHUDFX::set(int id, signed char *displayStr, int decayTime, float fparg0)
+{
+    copyDispStr(displayStr);
+    ID = id;
+    MaxDecay = fparg0;
+    Data = decayTime;
+    *(int*)&CurDecay = 0;
+    DisplayInt = 0;
 }
 #endif
 
@@ -2482,14 +2494,15 @@ extern char str_pct_d[];
  * @param data  the effect's data
  */
 // Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
-extern "C" void cHUDFX_set1(cHUDFX* self, int id, int displayInt, float fparg0, int data) {
+void cHUDFX::set1(int id, int displayInt, float fparg0, int data)
+{
     sprintf((char*)gGenIntStr_gQuickBuf, str_pct_d, displayInt);
-    cHUDFX_copyDispStr(self, gGenIntStr_gQuickBuf);
-    self->DisplayInt = displayInt;
-    self->ID = id;
-    self->MaxDecay = fparg0;
-    self->Data = data;
-    *(int*)&self->CurDecay = 0;
+    copyDispStr(gGenIntStr_gQuickBuf);
+    DisplayInt = displayInt;
+    ID = id;
+    MaxDecay = fparg0;
+    Data = data;
+    *(int*)&CurDecay = 0;
 }
 #endif
 
@@ -2512,7 +2525,7 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
  * @param fparg0  the animation position (stored negated)
  */
 extern "C" void func_00117138(cHUDFX* hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
-    cHUDFX_copyDispStr((cHUDFX*)hudFx, displayStr);
+    hudFx->copyDispStr(displayStr);
     hudFx->ID = fxId;
     hudFx->Data = data;
     hudFx->CurDecay = -fparg0;
@@ -2544,14 +2557,15 @@ extern char str_pct_d[];
  * @param fxData  the effect's data
  */
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
-extern "C" void cHUDFX_setAsync(cHUDFX* hudFx, int fxId, int displayInt, float fparg0, int fxData) {
+void cHUDFX::setAsync(int fxId, int displayInt, float fparg0, int fxData)
+{
     sprintf((char*)gGenIntStr_gQuickBuf, str_pct_d, displayInt);
-    cHUDFX_copyDispStr((cHUDFX*)hudFx, gGenIntStr_gQuickBuf);
-    hudFx->DisplayInt = displayInt;
-    hudFx->ID = fxId;
-    hudFx->CurDecay = -fparg0;
-    hudFx->Data = fxData;
-    hudFx->MaxDecay = -1.0f;
+    copyDispStr(gGenIntStr_gQuickBuf);
+    DisplayInt = displayInt;
+    ID = fxId;
+    CurDecay = -fparg0;
+    Data = fxData;
+    MaxDecay = -1.0f;
 }
 #endif
 

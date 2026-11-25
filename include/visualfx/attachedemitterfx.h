@@ -39,6 +39,9 @@ struct cAttachedEmitterFX {
                                     //       func_002F1A00 clears it; func_002F1A08 sets it while an emitter
                                     //       sits on attach point 25 (name ours)
     void** mVtbl;                   // 0x0A4 [R] cAttachedEmitterFX_vtbl (both ctors and the dtor store it)
+
+    // Methods bound to their retail symbols by asm labels.
+    int ShouldDisableSnowTrailSpray() __asm__("cAttachedEmitterFX_ShouldDisableSnowTrailSpray");
 };
 
 CHECK_OFFSET(cAttachedEmitterFX, mBonesLookedUp, 0x000);

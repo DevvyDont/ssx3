@@ -33,9 +33,9 @@ INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
  *
  * @return the spline's length
  */
-float cSpline_calcLength(cSpline* self)
+float cSpline::calcLength()
 {
-    sSplineHeader* header = ((sSplineHeader*)(self->Seg)->m_Parent);
+    sSplineHeader* header = ((sSplineHeader*)(Seg)->m_Parent);
     sSplinePoint* cur = header->first;
     for (int i = 1; i < header->numPoints; i++) {
         cur = cur->m_NextSeg;
@@ -52,9 +52,9 @@ INCLUDE_ASM("object/spline3d", cSpline_writeToReplayFrame);
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cSpline_writeToReplayFrame(cSpline* self, cBxReplayFrame* obj)
+void cSpline::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 8);
+    obj->write((const char*)this, 8);
 }
 #endif
 
@@ -106,14 +106,14 @@ struct sTrackRef5570 {
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cSpline_readFromReplayFrame(cSpline* self, cBxReplayFrame* stream)
+void cSpline::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    stream->read((char*)self, 8);
-    self->Seg = (tSplineSegmentRecord*)(*(sTrackRef5570*)&self->SplineId).get()->node;
-    for (int i = 0; i < self->SegIndex; i++) {
-        self->Seg = self->Seg->m_NextSeg;
+    stream->read((char*)this, 8);
+    Seg = (tSplineSegmentRecord*)(*(sTrackRef5570*)&SplineId).get()->node;
+    for (int i = 0; i < SegIndex; i++) {
+        Seg = Seg->m_NextSeg;
     }
-    self->Length = cSpline_calcLength((cSpline*)self);
+    Length = calcLength();
 }
 #endif
 

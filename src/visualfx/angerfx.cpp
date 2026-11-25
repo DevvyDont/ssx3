@@ -470,16 +470,15 @@ INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setPositionOffset);
  *
  * tAvalancheNode_calculate is its only caller.
  *
- * @param rgb  the record
  * @param red  value for byte 0
  * @param green  value for byte 1
  * @param blue  value for byte 2
  */
-extern "C" void tAvalanchePackedFrameData_setPositionOffset(tAvalanchePackedFrameData* rgb, float red, float green, float blue)
+void tAvalanchePackedFrameData::setPositionOffset(float red, float green, float blue)
 {
-    rgb->m_x = (int)red;
-    rgb->m_y = (int)green;
-    rgb->m_z = (int)blue;
+    m_x = (int)red;
+    m_y = (int)green;
+    m_z = (int)blue;
 }
 #endif
 
@@ -500,7 +499,7 @@ extern float cAvalanche_m_Brightness;
  * @param blue  blue
  */
 // PORT: <? (g++ min operator)
-extern "C" void tAvalanchePackedFrameData_setColour(tAvalanchePackedFrameData* record, float red, float green, float blue)
+void tAvalanchePackedFrameData::setColour(float red, float green, float blue)
 {
     float zero = 0.0f;
     float one = 1.0f;
@@ -511,9 +510,9 @@ extern "C" void tAvalanchePackedFrameData_setColour(tAvalanchePackedFrameData* r
     if (red >= zero) cr = red <? one; else cr = zero;
     if (green >= zero) cg = green <? one; else cg = zero;
     if (blue >= zero) cb = blue <? one; else cb = zero;
-    record->m_r = (int)(cr * 255.0f);
-    record->m_g = (int)(cg * 255.0f);
-    record->m_b = (int)(cb * 255.0f);
+    m_r = (int)(cr * 255.0f);
+    m_g = (int)(cg * 255.0f);
+    m_b = (int)(cb * 255.0f);
 }
 #endif
 

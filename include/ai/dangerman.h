@@ -92,6 +92,12 @@ struct cDangerMan {
     // Methods bound to their retail symbols by asm labels.
     int DeleteTrackedDangerElemRecord(void* entry) __asm__("cDangerMan_DeleteTrackedDangerElemRecord__FPvT0");
     int CalcAppliedDangerLevel(int pl) __asm__("cDangerMan_CalcAppliedDangerLevel");
+    void Reset() __asm__("cDangerMan_Reset");
+    void AddDangerElem(unsigned int* idp, float x, float y) __asm__("cDangerMan_AddDangerElem");
+    void RemoveDangerElem(unsigned int* idp) __asm__("cDangerMan_RemoveDangerElem");
+    void AddDangerVolume(int *instId, int level) __asm__("cDangerMan_AddDangerVolume");
+    void RemoveDangerVolume(int* key) __asm__("cDangerMan_RemoveDangerVolume");
+    int GetRiderDangerLevel(int aiIndex) __asm__("cDangerMan_GetRiderDangerLevel");
 };
 
 CHECK_OFFSET(cDangerMan, mpAI, 0x000);

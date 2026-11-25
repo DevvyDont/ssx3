@@ -41,9 +41,9 @@ static inline void cReplayFramePtr_setBlockInl(void* vself, char* buf, int size)
  *
  * @param size  size of the block in bytes
  */
-extern "C" void cReplayFramePtr_initBlock(cReplayFramePtr* self, unsigned int size)
+void cReplayFramePtr::initBlock(unsigned int size)
 {
-    cReplayFramePtr_setBlockInl(self, (char*)operator_new_tag(size, str_Frame_Block, 0, 0), 0);
+    cReplayFramePtr_setBlockInl(this, (char*)operator_new_tag(size, str_Frame_Block, 0, 0), 0);
 }
 #endif
 
@@ -58,12 +58,12 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_setBlock);
  * @param data  the block's data (On Tour char* data)
  * @param size  the block's size in bytes (On Tour size)
  */
-extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, char* data, int size)
+void cReplayFramePtr::setBlock(char* data, int size)
 {
-    self->Block = data;
-    self->WriteData = data + size;
-    self->ReadData = data;
-    self->Size = size;
+    Block = data;
+    WriteData = data + size;
+    ReadData = data;
+    Size = size;
 }
 #endif
 
@@ -72,16 +72,18 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_purgeBlock);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
+extern "C" void cReplayFramePtr_purgeBlock(cReplayFramePtr* self);
+
 /**
  * Frees the frame's data block, when it has one, and resets the block and its cursors to empty (size 0).
  */
-extern "C" void cReplayFramePtr_purgeBlock(cReplayFramePtr* self)
+void cReplayFramePtr::purgeBlock()
 {
-    void* block = self->Block;
+    void* block = Block;
     if (block != 0) {
         cMemMan_free(block);
     }
-    cReplayFramePtr_setBlockInl(self, 0, 0);
+    cReplayFramePtr_setBlockInl(this, 0, 0);
 }
 #endif
 
@@ -92,9 +94,9 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
 /**
  * Rewinds the frame pointer's read position (+0xC) to the start of its block (+0x4).
  */
-void cReplayFramePtr_readRewind(cReplayFramePtr* self)
+void cReplayFramePtr::readRewind()
 {
-    *(int*)&self->ReadData = ((int)self->Block);
+    *(int*)&ReadData = ((int)Block);
 }
 #endif
 
@@ -108,12 +110,11 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeRewind__FPv);
  *
  * @return the block start (Block)
  */
-int cReplayFramePtr_writeRewind(void* vself)
+int cReplayFramePtr::writeRewind()
 {
-    cReplayFramePtr* self = (cReplayFramePtr*)vself;
-    int block = (int)self->Block;
-    self->Size = 0;
-    self->WriteData = (char*)block;
+    int block = (int)Block;
+    Size = 0;
+    WriteData = (char*)block;
     return block;
 }
 #endif
@@ -166,15 +167,15 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_peekObjNodeType);
  * @return the record's object node type (On Tour tObjNodeType)
  */
 // Peek the next frame header's id without consuming it.
-extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
+short cReplayFramePtr::peekObjNodeType()
 {
     struct {
         short id;
         short size;
     } hdr;
-    char* pos = self->ReadData;
-    self->read((char*)&hdr, 4);
-    self->ReadData = pos;
+    char* pos = ReadData;
+    read((char*)&hdr, 4);
+    ReadData = pos;
     return hdr.id;
 }
 #endif
@@ -195,7 +196,7 @@ extern "C" int HUFF_decode(void* src, int a, char* dst);
  * @param src  the frame's save record (On Tour tFramePtrSave* ptrsave)
  * @return always 1
  */
-extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, tFramePtrSave* src)
+int cReplayFramePtr::loadBlock(char** pp, tFramePtrSave* src)
 {
     struct {
         int tag;
@@ -204,10 +205,10 @@ extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, tFram
     MEM_copy(&hdr.tag, src, 4);
     MEM_copy(&hdr.size, *pp, 4);
     *pp += 4;
-    int n = HUFF_decode(*pp, 0, self->Block);
+    int n = HUFF_decode(*pp, 0, Block);
     *pp += hdr.size;
-    self->WriteData = self->Block + n;
-    cReplayFramePtr_readRewind(self);
+    WriteData = Block + n;
+    readRewind();
     return 1;
 }
 #endif
@@ -447,10 +448,10 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
 /**
  * Steps the replay camera to the next of the 9 (CurrentReplayCamIndex + 1, mod 9) and applies it to every view.
  */
-extern "C" void cReplay_cycleReplayCameraAlgorithm(cReplay* self)
+void cReplay::cycleReplayCameraAlgorithm()
 {
-    self->CurrentReplayCamIndex = (self->CurrentReplayCamIndex + 1) % 9;
-    cReplay_setCurrentReplayCamera(self);
+    CurrentReplayCamIndex = (CurrentReplayCamIndex + 1) % 9;
+    setCurrentReplayCamera();
 }
 #endif
 
@@ -470,13 +471,14 @@ struct sRiderList_EDD8 {
  *
  * The views are the game's ViewMan list; each switch is cChaseCameraController_switchCamera_ReplayToggle.
  */
-extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
+void cReplay::setCurrentReplayCamera()
 {
     sRiderList_EDD8* list = (sRiderList_EDD8*)SSXApp->Game->ViewMan;
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        cChaseCameraController_switchCamera_ReplayToggle(((cCamera*)list->riders[i])->ChaseController, camSubset[self->CurrentReplayCamIndex]);
+        cChaseCameraController_switchCamera_ReplayToggle(((cCamera*)list->riders[i])->ChaseController,
+                camSubset[CurrentReplayCamIndex]);
     }
 }
 #endif
@@ -491,10 +493,10 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
  * Puts the cameras into replay mode: the camera triggers' replay set (cCameraTriggerMan_setReplayTriggers, setReplayTriggers), then the
  * current replay camera.
  */
-extern "C" void cReplay_setupReplayCameras(cReplay* self)
+void cReplay::setupReplayCameras()
 {
     cCameraTriggerMan_setReplayTriggers(((void**)&gCamTriggerMan));
-    cReplay_setCurrentReplayCamera(self);
+    setCurrentReplayCamera();
 }
 #endif
 
@@ -516,7 +518,7 @@ struct sRiderList_EEA0 {
  * Restores the in-game camera triggers, sets each view's current controller to 2 and ends its replay camera
  * (cChaseCameraController_switchCamera_EndReplay), and resets CurrentReplayCamIndex to 0.
  */
-extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
+void cReplay::setupGameCamerasOnExitReplay()
 {
     cCameraTriggerMan_setInGameTriggers(((void**)&gCamTriggerMan));
     sRiderList_EEA0* list = (sRiderList_EEA0*)SSXApp->Game->ViewMan;
@@ -528,7 +530,7 @@ extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
         cCamera_setCurrentController(camera, 2);
         cChaseCameraController_switchCamera_EndReplay(cam);
     }
-    self->CurrentReplayCamIndex = 0;
+    CurrentReplayCamIndex = 0;
 }
 #endif
 
@@ -539,10 +541,10 @@ INCLUDE_ASM("replay/frameptr", cReplay_setupInstantReplayCameras);
  * Sets up the instant-replay cameras: installs the replay camera triggers (cCameraTriggerMan_setReplayTriggers, cCameraTriggerMan::
  * setReplayTriggers, on gCamTriggerMan) and steps CurrentInstantReplayCamIndex to the next of 9.
  */
-extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
+void cReplay::setupInstantReplayCameras()
 {
     cCameraTriggerMan_setReplayTriggers(((void**)&gCamTriggerMan));
-    self->CurrentInstantReplayCamIndex = (self->CurrentInstantReplayCamIndex + 1) % 9;
+    CurrentInstantReplayCamIndex = (CurrentInstantReplayCamIndex + 1) % 9;
 }
 #endif
 
@@ -594,7 +596,7 @@ extern "C" void* cReplay_cReplay(cReplay* self)
     for (int i = 1; i != -1; i--, highlight++) {
         cReplayHighlight_reset(highlight);
     }
-    cReplay_setReplayState(self, 15);
+    self->setReplayState(15);
     for (int i = 1; i >= 0; i--) {
         self->InputCache[i] = 0;
     }
@@ -635,10 +637,10 @@ extern "C" void cReplay__cReplay(int* self, int flags)
         ok = ok < 10;
     }
     if (ok) {
-        cReplay_stopReplay((cReplay*)((cReplay*)self));
+        ((cReplay*)self)->stopReplay();
     }
     cReplay_frameSync(self);
-    cReplay_purge((cReplay*)((cReplay*)self));
+    ((cReplay*)self)->purge();
     if (replay + 0x494 != 0) {
         char* element = replay + 0x494 + 0x168;
         while (replay + 0x494 != element) {
@@ -675,18 +677,18 @@ void cReplay_setReplayState(void* self, int state);
  * Uses 0x14000-byte blocks, as many as fit in 0xC9800 bytes (10), clears SaveFrameTicks, sets the state to
  * kPreRace (10) and calls cReplay_reset().
  */
-extern "C" void cReplay_init(cReplay* self)
+void cReplay::init()
 {
-    self->FrameBlockSize = 0x14000;
-    self->MaxFrames = 0xC9800 / self->FrameBlockSize;
-    self->SaveFrameTicks = 0;
+    FrameBlockSize = 0x14000;
+    MaxFrames = 0xC9800 / FrameBlockSize;
+    SaveFrameTicks = 0;
     int i = 0;
     do {
-        cReplayFramePtr_initBlock((cReplayFramePtr*)(&((&self->Frames[0]))[i]), self->FrameBlockSize);
+        cReplayFramePtr_initBlock((cReplayFramePtr*)(&((&Frames[0]))[i]), FrameBlockSize);
         i++;
-    } while (i < self->MaxFrames);
-    cReplay_setReplayState((self), 10);
-    cReplay_reset(self);
+    } while (i < MaxFrames);
+    setReplayState(10);
+    reset();
 }
 #endif
 
@@ -710,58 +712,58 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * MaxFrames frames to the free list. With one human player (cAI NumberOfPlayersAllocated == 1) it keeps 3
  * highlights and 3 chapters, else 1 and 0.
  */
-extern "C" void cReplay_reset(cReplay* self)
+void cReplay::reset()
 {
-    unsigned int st = self->State - 14;
+    unsigned int st = State - 14;
     bool resettable = !(st < 2);
     if (!resettable) return;
-    cReplay_frameSync(self);
+    cReplay_frameSync(this);
     int i = 0;
-    char* frameList = (char*)&self->FrameList;
-    char* freeList = (char*)&self->FreeFrameList;
+    char* frameList = (char*)&FrameList;
+    char* freeList = (char*)&FreeFrameList;
     int none = -1;
-    self->SaveState = 15;
-    cReplay_setReplayState(self, 10);
-    self->EndReplay = 0;
-    self->ReplayError = 0;
-    self->ShowError = 0;
-    self->PauseRecord = 0;
-    self->PauseRecordTick = 0;
-    self->PadNum = 0;
-    self->Loaded = 0;
-    self->PlaybackTick = 0;
-    self->RecordTick = 0;
-    self->EndRecordTick = 0;
-    self->PlaybackFrame = 0;
-    self->InstantReplayFrame = 0;
-    self->NextCandidate = 0;
-    self->SaveFrame = 0;
-    self->SkipFrameTicks = 0;
-    self->SkipFrame = 0;
-    self->Cmd = 0;
-    self->AutoReplay = 0;
-    self->InstantReplay = 0;
-    self->StartInstantReplay = 0;
-    self->WriteBlock = 0;
-    self->WriteData = 0;
-    self->WriteTmp = 0;
-    self->WriteSrc = 0;
-    self->WriteSrcSize = 0;
-    self->WriteState = 0;
-    self->WriteSize = 0;
-    self->WriteIndex = 0;
-    self->WriteIndexMax = 0;
-    self->WriteFrame = 0;
-    self->WriteBlockData = 0;
-    self->WriteBlockDataSize = 0;
-    self->WriteCmdFrame = 0;
-    self->WriteCacheSave = 0;
-    self->WriteSaveSize = 0;
-    self->WriteRemaining = 0;
-    self->WriteFrameCount = 0;
-    cReplayHighlight* highlight = ((&self->Highlight[0]));
-    char* highlightData = (char*)&self->Highlight[0].Stats;
-    void** pp = (void**)(&self->InputCache[0]);
+    SaveState = 15;
+    setReplayState(10);
+    EndReplay = 0;
+    ReplayError = 0;
+    ShowError = 0;
+    PauseRecord = 0;
+    PauseRecordTick = 0;
+    PadNum = 0;
+    Loaded = 0;
+    PlaybackTick = 0;
+    RecordTick = 0;
+    EndRecordTick = 0;
+    PlaybackFrame = 0;
+    InstantReplayFrame = 0;
+    NextCandidate = 0;
+    SaveFrame = 0;
+    SkipFrameTicks = 0;
+    SkipFrame = 0;
+    Cmd = 0;
+    AutoReplay = 0;
+    InstantReplay = 0;
+    StartInstantReplay = 0;
+    WriteBlock = 0;
+    WriteData = 0;
+    WriteTmp = 0;
+    WriteSrc = 0;
+    WriteSrcSize = 0;
+    WriteState = 0;
+    WriteSize = 0;
+    WriteIndex = 0;
+    WriteIndexMax = 0;
+    WriteFrame = 0;
+    WriteBlockData = 0;
+    WriteBlockDataSize = 0;
+    WriteCmdFrame = 0;
+    WriteCacheSave = 0;
+    WriteSaveSize = 0;
+    WriteRemaining = 0;
+    WriteFrameCount = 0;
+    cReplayHighlight* highlight = ((&Highlight[0]));
+    char* highlightData = (char*)&Highlight[0].Stats;
+    void** pp = (void**)(&InputCache[0]);
     do {
         if (*pp) cReplayCache_reset(*pp);
         *(int*)&highlight->Frame = 0;
@@ -775,18 +777,18 @@ extern "C" void cReplay_reset(cReplay* self)
     } while (i < 2);
     cReplayFrameList_reset(frameList);
     cReplayFrameList_reset(freeList);
-    for (i = 0; i < self->MaxFrames; i++) {
-        cReplayFrameList_addFrame(freeList, &self->Frames[i]);
+    for (i = 0; i < MaxFrames; i++) {
+        cReplayFrameList_addFrame(freeList, &Frames[i]);
     }
     int three = 3;
-    self->CurrentReplayCamIndex = 0;
-    self->CurrentInstantReplayCamIndex = 0;
+    CurrentReplayCamIndex = 0;
+    CurrentInstantReplayCamIndex = 0;
     if (SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
-        self->MaxPlayerHighlights = three;
-        self->MaxChapters = three;
+        MaxPlayerHighlights = three;
+        MaxChapters = three;
     } else {
-        self->MaxPlayerHighlights = 1;
-        self->MaxChapters = 0;
+        MaxPlayerHighlights = 1;
+        MaxChapters = 0;
     }
 }
 #endif
@@ -801,14 +803,14 @@ void cReplayFrameList_reset(void* self);
 /**
  * Frees the data block of each of the MaxFrames frames and empties FrameList and FreeFrameList.
  */
-extern "C" void cReplay_purge(cReplay* self)
+void cReplay::purge()
 {
     int i;
-    for (i = 0; i < self->MaxFrames; i++) {
-        cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((&self->Frames[0]))[i]));
+    for (i = 0; i < MaxFrames; i++) {
+        cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((&Frames[0]))[i]));
     }
-    cReplayFrameList_reset((char*)&self->FrameList);
-    cReplayFrameList_reset((char*)&self->FreeFrameList);
+    cReplayFrameList_reset((char*)&FrameList);
+    cReplayFrameList_reset((char*)&FreeFrameList);
 }
 #endif
 
@@ -833,10 +835,9 @@ INCLUDE_ASM("replay/frameptr", cReplay_setReplayState__FPvi);
  *
  * @param val  the new state (On Tour tReplayState)
  */
-void cReplay_setReplayState(void* vself, int val)
+void cReplay::setReplayState(int val)
 {
-    cReplay* self = (cReplay*)vself;
-    self->State = val;
+    State = val;
 }
 #endif
 
@@ -900,84 +901,84 @@ static inline void addFrame_F4A8(cReplay* self, short type)
  * - 10 and 13 do nothing; any other state (1) runs processInput.
  */
 // Replay recorder/player: per-frame update of the replay state machine.
-extern "C" void cReplay_update(cReplay* self)
+void cReplay::update()
 {
-    int state = self->State;
+    int state = State;
     bool ok = !(state == 14 || state == 15);
     if (!ok)
         return;
-    if (self->ShowError > 0)
-        self->ShowError--;
-    self->NextFrame = 0;
-    if (self->Cmd == 7)
-        cReplay_setReplayState((self), 3);
-    if (!(self->State == 3 || self->State == 4))
-        self->SkipFrame = 0;
-    switch (self->State) {
+    if (ShowError > 0)
+        ShowError--;
+    NextFrame = 0;
+    if (Cmd == 7)
+        setReplayState(3);
+    if (!(State == 3 || State == 4))
+        SkipFrame = 0;
+    switch (State) {
     case 11:
-        cReplay_setReplayState((self), 12);
+        setReplayState(12);
         return;
     case 2:
-        if (self->PlaybackTick < self->RecordTick - 1) {
-            cReplay_updateInput((self), 0);
-            cReplay_processInput(self);
+        if (PlaybackTick < RecordTick - 1) {
+            cReplay_updateInput((this), 0);
+            processInput();
             return;
         }
-        cReplay_stopInstantReplay((self));
+        cReplay_stopInstantReplay((this));
     case 0:
     case 12:
-        cReplay_setReplayState((self), 0);
-        self->SaveFrame = 0;
-        if (self->EndReplay != 0) {
-            if (self->Loaded != 0)
+        setReplayState(0);
+        SaveFrame = 0;
+        if (EndReplay != 0) {
+            if (Loaded != 0)
                 return;
-            cReplay_cancelMarkInstantReplay((self));
-            cReplay_cancelMarkHighlights((self));
-            cReplay_purgeIdleFrames((self));
-            addFrame_F4A8((self), 1);
-            cReplay_setReplayState((self), 13);
+            cReplay_cancelMarkInstantReplay((this));
+            cReplay_cancelMarkHighlights((this));
+            cReplay_purgeIdleFrames((this));
+            addFrame_F4A8((this), 1);
+            setReplayState(13);
             return;
         }
-        if (self->StartInstantReplay != 0) {
-            cReplay_startReplay_F4A8((self), (int)self->InstantReplayFrame, 1, 0);
-            cReplay_setReplayState((self), 2);
-            self->StartInstantReplay = 0;
-            self->InstantReplay = 1;
+        if (StartInstantReplay != 0) {
+            cReplay_startReplay_F4A8((this), (int)InstantReplayFrame, 1, 0);
+            setReplayState(2);
+            StartInstantReplay = 0;
+            InstantReplay = 1;
             return;
         }
-        if (self->ReplayError == 0 && self->RecordTick % 60 == 0) {
-            cReplay_purgeIdleFrames((self));
-            if (self->RecordTick == 0 || (self->SaveFrameTicks != 0 && self->RecordTick % self->SaveFrameTicks == 0))
-                addFrame_F4A8((self), 1);
+        if (ReplayError == 0 && RecordTick % 60 == 0) {
+            cReplay_purgeIdleFrames((this));
+            if (RecordTick == 0 || (SaveFrameTicks != 0 && RecordTick % SaveFrameTicks == 0))
+                addFrame_F4A8((this), 1);
             else
-                addFrame_F4A8((self), 0);
+                addFrame_F4A8((this), 0);
         }
-        if (self->ReplayError == 0)
-            self->EndRecordTick++;
-        self->RecordTick++;
+        if (ReplayError == 0)
+            EndRecordTick++;
+        RecordTick++;
         return;
     case 3: {
-        void* input = SSXApp_F4A8->players[self->PadNum];
+        void* input = SSXApp_F4A8->players[PadNum];
         if (input != 0 && cInput_getState(input, 107))
-            cReplay_updateInput((self), 0);
-        cReplay_processInput(self);
+            cReplay_updateInput((this), 0);
+        processInput();
         return;
     }
     case 9:
-        cReplay_startReplay_F4A8((self), 0, 0, 1);
-        cReplay_setReplayState((self), 1);
-        self->AutoReplay = 1;
+        cReplay_startReplay_F4A8((this), 0, 0, 1);
+        setReplayState(1);
+        AutoReplay = 1;
         return;
     case 8:
-        cReplay_startReplay_F4A8((self), 0, 0, 0);
+        cReplay_startReplay_F4A8((this), 0, 0, 0);
     case 4:
     case 5:
     case 6:
     case 7:
-        cReplay_setReplayState((self), 3);
+        setReplayState(3);
         return;
     default:
-        cReplay_processInput(self);
+        processInput();
     case 10:
     case 13:
         return;
@@ -1022,16 +1023,16 @@ void cReplay_addReplayFrame_2(void* self, void* block) __asm__("cReplay_addRepla
  *
  * The frame is also added to the replay (cReplay_addReplayFrame, addReplayFrame).
  */
-extern "C" void cReplay_pushReplaySaveFrame(cReplay* self)
+void cReplay::pushReplaySaveFrame()
 {
-    if (self->SaveFrame == 0) {
+    if (SaveFrame == 0) {
         tReplayFrameType desc;
         desc.Type = 1;
         desc.Highlights = 0;
         desc.Chapter = 0;
-        void* block = cReplay_saveReplayFrame(self, &desc);
-        self->SaveFrame = (cReplayFrame*)block;
-        cReplay_addReplayFrame_2(self, block);
+        void* block = cReplay_saveReplayFrame(this, &desc);
+        SaveFrame = (cReplayFrame*)block;
+        cReplay_addReplayFrame_2(this, block);
     }
 }
 #endif
@@ -1045,13 +1046,13 @@ extern "C" void cReplay_freeReplayFrame(void* self, void* p);
 /**
  * Restores the live game from SaveFrame and frees that frame, when one was saved.
  */
-extern "C" void cReplay_popReplaySaveFrame(cReplay* self)
+void cReplay::popReplaySaveFrame()
 {
-    void* frame = self->SaveFrame;
+    void* frame = SaveFrame;
     if (frame != 0) {
-        cReplay_restoreReplayFrame(self, frame);
-        cReplay_freeReplayFrame(self, self->SaveFrame);
-        self->SaveFrame = 0;
+        cReplay_restoreReplayFrame(this, frame);
+        cReplay_freeReplayFrame(this, SaveFrame);
+        SaveFrame = 0;
     }
 }
 #endif
@@ -1064,10 +1065,9 @@ INCLUDE_ASM("replay/frameptr", cReplay_setReplayPadNum__FPvi);
  *
  * @param val  the pad number
  */
-void cReplay_setReplayPadNum(void* vself, int val)
+void cReplay::setReplayPadNum(int val)
 {
-    cReplay* self = (cReplay*)vself;
-    self->PadNum = val;
+    PadNum = val;
 }
 #endif
 
@@ -1097,23 +1097,23 @@ extern "C" void func_0028F200(void* self);
  * @param instantReplay  nonzero for an instant replay
  * @param autoReplay  nonzero for an automatic (attract) replay; only decides the sound call
  */
-extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantReplay, int autoReplay)
+void cReplay::startReplay(void* frame, int instantReplay, int autoReplay)
 {
-    int ok = !(self->State == 14 || self->State == 15);
+    int ok = !(State == 14 || State == 15);
     if (ok) {
-        if (self->Loaded == 0) {
-            cReplay_pushReplaySaveFrame(self);
+        if (Loaded == 0) {
+            pushReplaySaveFrame();
         }
-        cReplay_setReplayState((self), 7);
-        self->Cmd = 0;
-        self->AutoReplay = 0;
-        self->InstantReplay = instantReplay;
-        cReplay_rewind((self), frame);
-        cReplay_stepFrame((self), 1);
+        setReplayState(7);
+        Cmd = 0;
+        AutoReplay = 0;
+        InstantReplay = instantReplay;
+        cReplay_rewind((this), frame);
+        cReplay_stepFrame((this), 1);
         if (instantReplay) {
-            cReplay_setupInstantReplayCameras(self);
+            setupInstantReplayCameras();
         } else {
-            cReplay_setupReplayCameras(self);
+            setupReplayCameras();
         }
         if (instantReplay == 0 && autoReplay == 0) {
             func_0028F200(cAudioInterface_bxAudio());
@@ -1143,28 +1143,28 @@ extern "C" void func_0028F2C0(void* self);
  * set, else 0 (kGameRecording). InstantReplay is cleared before it is tested, so cReplay_setupGameCamerasOnExitInstantReplay (the instant-replay
  * camera exit) runs only if restoring the save frame sets InstantReplay again.
  */
-extern "C" void cReplay_stopReplay(cReplay* self)
+void cReplay::stopReplay()
 {
-    int ok = !(self->State == 14 || self->State == 15);
+    int ok = !(State == 14 || State == 15);
     if (ok) {
-        cReplay_cancelMarkInstantReplay((self));
-        if (self->AutoReplay == 0 && self->InstantReplay == 0) {
+        cReplay_cancelMarkInstantReplay((this));
+        if (AutoReplay == 0 && InstantReplay == 0) {
             func_0028F2C0(cAudioInterface_bxAudio());
         }
-        self->AutoReplay = 0;
-        self->InstantReplay = 0;
-        self->StartInstantReplay = 0;
-        if (self->Loaded == 0) {
-            cReplay_popReplaySaveFrame(self);
-            if (self->InstantReplay) {
-                cReplay_setupGameCamerasOnExitInstantReplay((self));
+        AutoReplay = 0;
+        InstantReplay = 0;
+        StartInstantReplay = 0;
+        if (Loaded == 0) {
+            popReplaySaveFrame();
+            if (InstantReplay) {
+                cReplay_setupGameCamerasOnExitInstantReplay((this));
             } else {
-                cReplay_setupGameCamerasOnExitReplay(self);
+                setupGameCamerasOnExitReplay();
             }
-            if (self->EndReplay) {
-                cReplay_setReplayState((self), 13);
+            if (EndReplay) {
+                setReplayState(13);
             } else {
-                cReplay_setReplayState((self), 0);
+                setReplayState(0);
             }
         }
     }
@@ -1178,12 +1178,12 @@ INCLUDE_ASM("replay/frameptr", cReplay_endReplay);
  * Requests the end of the recording: sets EndReplay unless the replay is paused or uninitialised (State 14 / 15).
  * cReplay_update acts on it.
  */
-extern "C" void cReplay_endReplay(cReplay* self)
+void cReplay::endReplay()
 {
-    int curState = self->State;
+    int curState = State;
     bool ok = !(curState == 0xE || curState == 0xF);
     if (ok) {
-        self->EndReplay = 1;
+        EndReplay = 1;
     }
 }
 #endif
@@ -1345,7 +1345,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
             }
         } else if (cInput_getState(input, 108)) {
             uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
-            cReplay_cycleReplayCameraAlgorithm((cReplay*)self);
+            ((cReplay*)self)->cycleReplayCameraAlgorithm();
         }
     }
     replay->Cmd = command;
@@ -1382,82 +1382,82 @@ extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
  * on ViewMan's PlayerCamera[0]->ChaseController), call its snapCurrent (virtual slot 4) and update all views
  * (cGameViewMan_updateAll).
  */
-extern "C" void cReplay_processInput(cReplay* self)
+void cReplay::processInput()
 {
     int redraw = 0;
-    switch (self->Cmd) {
+    switch (Cmd) {
     case 1:
-        cReplay_rewind(((char*)self), 0);
+        cReplay_rewind(((char*)this), 0);
         redraw = 1;
-        cReplay_stepFrame(((char*)self), 1);
-        if (self->PlaybackTick == 0) {
-            cReplay_setReplayState(((char*)self), 6);
+        cReplay_stepFrame(((char*)this), 1);
+        if (PlaybackTick == 0) {
+            cReplay_setReplayState(((char*)this), 6);
         } else {
-            cReplay_setReplayState(((char*)self), 5);
+            cReplay_setReplayState(((char*)this), 5);
         }
         break;
     case 2:
-        cReplay_lastFrame(((char*)self));
+        cReplay_lastFrame(((char*)this));
         redraw = 1;
-        cReplay_stepFrame(((char*)self), 1);
-        if (self->PlaybackTick == 0) {
-            cReplay_setReplayState(((char*)self), 6);
+        cReplay_stepFrame(((char*)this), 1);
+        if (PlaybackTick == 0) {
+            cReplay_setReplayState(((char*)this), 6);
         } else {
-            cReplay_setReplayState(((char*)self), 5);
+            cReplay_setReplayState(((char*)this), 5);
         }
         break;
     case 3: {
         redraw = 1;
-        cReplayFrame* frame = (cReplayFrame*)((char*)cReplay_findFrame_2(((char*)self), self->PlaybackTick));
-        self->PlaybackFrame = (cReplayFrame*)frame;
-        if (self->PlaybackTick == frame->FrameStartTick) {
-            cReplay_prevFrame(((char*)self));
+        cReplayFrame* frame = (cReplayFrame*)((char*)cReplay_findFrame_2(((char*)this), PlaybackTick));
+        PlaybackFrame = (cReplayFrame*)frame;
+        if (PlaybackTick == frame->FrameStartTick) {
+            cReplay_prevFrame(((char*)this));
         } else {
             cReplayFrame* n = frame->Next;
-            if (((char*)n) != 0 && n->FrameStartTick == self->PlaybackTick) {
-                cReplay_prevFrame(((char*)self));
+            if (((char*)n) != 0 && n->FrameStartTick == PlaybackTick) {
+                cReplay_prevFrame(((char*)this));
             }
         }
-        cReplay_stepFrame(((char*)self), 1);
-        if (self->PlaybackTick == 0) {
-            cReplay_setReplayState(((char*)self), 6);
+        cReplay_stepFrame(((char*)this), 1);
+        if (PlaybackTick == 0) {
+            cReplay_setReplayState(((char*)this), 6);
         } else {
-            cReplay_setReplayState(((char*)self), 5);
+            cReplay_setReplayState(((char*)this), 5);
         }
         break;
     }
     case 4:
         redraw = 1;
-        if ((int)self->PlaybackFrame->Next != 0) {
-            cReplay_nextFrame(((char*)self));
-            cReplay_stepFrame(((char*)self), 1);
-            cReplay_setReplayState(((char*)self), 5);
+        if ((int)PlaybackFrame->Next != 0) {
+            cReplay_nextFrame(((char*)this));
+            cReplay_stepFrame(((char*)this), 1);
+            cReplay_setReplayState(((char*)this), 5);
         }
         break;
     case 5:
-        cReplay_stepFrame(((char*)self), 0);
-        cReplay_setReplayState(((char*)self), 4);
+        cReplay_stepFrame(((char*)this), 0);
+        cReplay_setReplayState(((char*)this), 4);
         break;
     case 6:
-        if (self->State == 3) {
-            cReplay_setReplayState(((char*)self), 1);
+        if (State == 3) {
+            cReplay_setReplayState(((char*)this), 1);
         } else {
-            cReplay_setReplayState(((char*)self), 3);
+            cReplay_setReplayState(((char*)this), 3);
         }
         break;
     case 7:
-        cReplay_setReplayState(((char*)self), 3);
+        cReplay_setReplayState(((char*)this), 3);
         break;
     case 8:
         break;
     default:
-        if (self->State != 3) {
-            self->NextFrame = 1;
-            cReplay_stepFrame(((char*)self), 0);
+        if (State != 3) {
+            NextFrame = 1;
+            cReplay_stepFrame(((char*)this), 0);
         }
         break;
     }
-    self->Cmd = 0;
+    Cmd = 0;
     if (redraw) {
         cGameViewMan* views = SSXApp->Game->ViewMan;
         cChaseCameraController* controller = views->PlayerCamera[0]->ChaseController;

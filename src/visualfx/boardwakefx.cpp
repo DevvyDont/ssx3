@@ -116,7 +116,7 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
         rows[i] = (sWakeElemBW*)self->mWakeVerts[0] + i * 32;
     }
     self->mWakeLineSegs = -1;
-    cBoardWakeFX_reset(self);
+    self->reset();
     return ((void*)self);
 }
 #endif
@@ -159,46 +159,46 @@ extern "C" void cWakeParams_Clear(cWakeParams* self);
  * and 0.8 s. It sets the colour to white and clears the state. When the row count changed, each row's points
  * get a height factor and the rows' sink speeds (0 down to -25) are recomputed.
  */
-extern "C" void cBoardWakeFX_reset(cBoardWakeFX* self)
+void cBoardWakeFX::reset()
 {
-    int old = self->mWakeLineSegs;
+    int old = mWakeLineSegs;
     float one;
     tARGB white;
     int i;
-    if (self->mRider->mViewIndex >= 0) {
-        self->mWakeLineSegs = 5;
-        self->mWakeMaxNumLines = 0x20;
-        self->mWakeLife = 1.25f;
+    if (mRider->mViewIndex >= 0) {
+        mWakeLineSegs = 5;
+        mWakeMaxNumLines = 0x20;
+        mWakeLife = 1.25f;
     } else {
-        self->mWakeLineSegs = 4;
-        self->mWakeMaxNumLines = 22;
-        self->mWakeLife = 0.800000011920929f;
+        mWakeLineSegs = 4;
+        mWakeMaxNumLines = 22;
+        mWakeLife = 0.800000011920929f;
     }
     one = 1.0f;
     white.A = one;
     white.R = one;
     white.G = one;
     white.B = one;
-    self->mGroundColour = white;
-    self->mWakeRandomnessSeed = 0.0f;
-    self->mNumWakeLines = 0;
-    self->mCurrentWakeLine = 0;
-    self->mWasSpraying = 0;
-    self->mWakeLength = 0;
-    cWakeParams_Clear(&self->mWakeParams);
-    if (old != self->mWakeLineSegs) {
+    mGroundColour = white;
+    mWakeRandomnessSeed = 0.0f;
+    mNumWakeLines = 0;
+    mCurrentWakeLine = 0;
+    mWasSpraying = 0;
+    mWakeLength = 0;
+    mWakeParams.Clear();
+    if (old != mWakeLineSegs) {
         for (i = 0; i < 5; i++) {
             float heightFactor =
-                0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->mWakeLineSegs - 1));
+                0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(mWakeLineSegs - 1));
             int j;
             for (j = 0; j < 32; j++) {
-                self->mWakeVerts[i][j].u = 0.0f;
-                self->mWakeVerts[i][j].v = heightFactor;
-                self->mWakeVerts[i][j].one = 1.0f;
-                self->mWakeVerts[i][j].w = 0;
+                mWakeVerts[i][j].u = 0.0f;
+                mWakeVerts[i][j].v = heightFactor;
+                mWakeVerts[i][j].one = 1.0f;
+                mWakeVerts[i][j].w = 0;
             }
-            self->mPreCalculatedGravityMultiplier[i] =
-                (float)i / (float)(self->mWakeLineSegs - 1) * -25.000001907348633f;
+            mPreCalculatedGravityMultiplier[i] =
+                (float)i / (float)(mWakeLineSegs - 1) * -25.000001907348633f;
         }
     }
 }
@@ -408,56 +408,56 @@ static inline float wakeMinStrengthD0B8()
  * (fillCurrentSeg, cBoardWakeFX_fillCurrentSeg). It ends when the grip or strength falls too low or the lean changes side.
  */
 // PORT: g++ minimum/maximum operators (<?, >?).
-extern "C" void cBoardWakeFX_update(cBoardWakeFX* self)
+void cBoardWakeFX::update()
 {
-    tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[self->mRider->mSurfaceType];
+    tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[mRider->mSurfaceType];
     int i;
-    for (i = 0; i < self->mNumWakeLines; i++) {
-        int idx = (self->mCurrentWakeLine + i) % self->mWakeMaxNumLines;
-        tWakeLine* elem = &self->mWakeLines[idx];
+    for (i = 0; i < mNumWakeLines; i++) {
+        int idx = (mCurrentWakeLine + i) % mWakeMaxNumLines;
+        tWakeLine* elem = &mWakeLines[idx];
         elem->mAge += 0.01666666753590107f;
-        if (self->mWakeLife < elem->mAge) {
-            self->mNumWakeLines = i;
+        if (mWakeLife < elem->mAge) {
+            mNumWakeLines = i;
             goto done;
         }
         float grow =
             ((1.0f - ((elem->mAge * 20.0f) <? 1.0f)) * elem->mExtraInitalVelocityFactor + 1.0f) * 0.01666666753590107f;
         float fade = (1.0f - elem->mAge * 3.3333332538604736f) >? 0.0f;
         t4Vector drift = wakeScaleD0B8(wakeScaleD0B8(elem->mAngleCorrection, fade), 0.01666666753590107f);
-        wakeAddEqD0B8(self->mWakeVerts[0][idx].p, drift);
-        for (int j = 1; j < self->mWakeLineSegs; j++) {
-            wakeAddEqD0B8(self->mWakeVerts[j][idx].p, wakeAddD0B8(wakeScaleD0B8(elem->mVel[j], grow), drift));
-            elem->mVel[j].z += self->mPreCalculatedGravityMultiplier[j];
+        wakeAddEqD0B8(mWakeVerts[0][idx].p, drift);
+        for (int j = 1; j < mWakeLineSegs; j++) {
+            wakeAddEqD0B8(mWakeVerts[j][idx].p, wakeAddD0B8(wakeScaleD0B8(elem->mVel[j], grow), drift));
+            elem->mVel[j].z += mPreCalculatedGravityMultiplier[j];
         }
     }
 done:
-    float lean = -self->mRider->mSlewed[0].cur;
-    float k = 1.0f - wakeAbsD0B8(self->mRider->mSlewed[3].cur);
-    t4Vector normal = self->mRider->mGroundNormal;
+    float lean = -mRider->mSlewed[0].cur;
+    float k = 1.0f - wakeAbsD0B8(mRider->mSlewed[3].cur);
+    t4Vector normal = mRider->mGroundNormal;
     float amt = wakeAbsD0B8(lean) * k;
     t4Vector side;
     t4Vector fwd;
     sWakeParamsD0B8 curParams;
-    fwd = wakeRow34D0B8(self->mRider, 0);
-    if (self->mRider->IsRidingFakie != 0) {
+    fwd = wakeRow34D0B8(mRider, 0);
+    if (mRider->IsRidingFakie != 0) {
         fwd = wakeScaleD0B8(fwd, -1.0f);
     }
     t4Vector right = wakeCrossD0B8(fwd, normal);
     side = lean < 0.0f ? wakeScaleD0B8(right, -1.0f) : right;
-    float speed = WAKE_MAX_D0B8(WAKE_MIN_D0B8(wakeMaxSpeedD0B8(), wakeLenD0B8(self->mRider->mVelocity)), 0.0f);
+    float speed = WAKE_MAX_D0B8(WAKE_MIN_D0B8(wakeMaxSpeedD0B8(), wakeLenD0B8(mRider->mVelocity)), 0.0f);
     curParams.grip = surf->WakeAlpha;
     float sign = 1.0f;
-    if (self->mRider->IsRidingFakie != 0) {
+    if (mRider->IsRidingFakie != 0) {
         sign = -1.0f;
     }
-    float off = wakeAbsD0B8(self->mRider->mSlewed[2].cur) * 118.0f + -40.0f;
+    float off = wakeAbsD0B8(mRider->mSlewed[2].cur) * 118.0f + -40.0f;
     t4Vector pos = wakeAddD0B8(
-        wakeAddD0B8(wakeRowD0B8(self->mRider, 3),
-                    wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->mRider, 0), off), sign)),
-        wakeScaleD0B8(wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->mRider, 2), 15.0f), lean < 0.0f ? -1.0f : 1.0f),
+        wakeAddD0B8(wakeRowD0B8(mRider, 3),
+                    wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(mRider, 0), off), sign)),
+        wakeScaleD0B8(wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(mRider, 2), 15.0f), lean < 0.0f ? -1.0f : 1.0f),
             sign));
-    t4Vector dirn = wakeNormD0B8(self->mRider->mVelocity);
-    float bal = (wakeAbsD0B8(wakeDotD0B8(self->mRider->mGroundSide, dirn)) * 0.8f + amt * 0.5f) <? 1.0f;
+    t4Vector dirn = wakeNormD0B8(mRider->mVelocity);
+    float bal = (wakeAbsD0B8(wakeDotD0B8(mRider->mGroundSide, dirn)) * 0.8f + amt * 0.5f) <? 1.0f;
     float baseStrength = wakeClampD0B8(bal + bal, 0.0f, 0.25f);
     float speedBonus = 0.0f;
     if (555.5555419921875f < speed) {
@@ -469,57 +469,57 @@ done:
     }
     curParams.strength = speed * (baseStrength + speedBonus) * surf->WakeSpeed;
     int ok = 1;
-    if (cRider_getMotionState(self->mRider) != 0 || wakeAbsD0B8(self->mRider->mSlewed[11].cur) > 0.15f ||
+    if (cRider_getMotionState(mRider) != 0 || wakeAbsD0B8(mRider->mSlewed[11].cur) > 0.15f ||
         wakeMinStrengthD0B8() > curParams.strength || amt < 0.15f || curParams.grip < 0.05f) {
         curParams.strength = 0.0f;
         ok = 0;
     }
-    if (self->mWasSpraying != 0) {
-        if (self->mLeanPositive != 0 ? lean < 0.0f : lean > 0.0f) {
+    if (mWasSpraying != 0) {
+        if (mLeanPositive != 0 ? lean < 0.0f : lean > 0.0f) {
             curParams.strength = 0.0f;
-            self->mWakeParams.mSpeed = 0.0f;
+            mWakeParams.mSpeed = 0.0f;
         }
-        if (cRider_getMotionState(self->mRider) == 0) {
-            self->mWakeParams.mUp = wakeAddD0B8(wakeScaleD0B8(self->mWakeParams.mUp, 0.8f),
+        if (cRider_getMotionState(mRider) == 0) {
+            mWakeParams.mUp = wakeAddD0B8(wakeScaleD0B8(mWakeParams.mUp, 0.8f),
                 wakeScaleD0B8(normal, 0.19999998807907104f));
-            self->mWakeParams.mSide = wakeAddD0B8(wakeScaleD0B8(self->mWakeParams.mSide, 0.8f),
+            mWakeParams.mSide = wakeAddD0B8(wakeScaleD0B8(mWakeParams.mSide, 0.8f),
                 wakeScaleD0B8(side, 0.19999998807907104f));
-            self->mWakeParams.mForward = wakeAddD0B8(wakeScaleD0B8(self->mWakeParams.mForward, 0.8f),
+            mWakeParams.mForward = wakeAddD0B8(wakeScaleD0B8(mWakeParams.mForward, 0.8f),
                 wakeScaleD0B8(fwd, 0.19999998807907104f));
-            self->mWakeParams.mAlpha = self->mWakeParams.mAlpha * 0.7f + curParams.grip * 0.3f;
-            self->mWakeParams.mSpeed = self->mWakeParams.mSpeed * 0.8f + curParams.strength * 0.19999998807907104f;
-            if (self->mWakeParams.mAlpha > 0.05f && self->mWakeParams.mSpeed > 55.55555725097656f) {
-                if (wakeLenD0B8(wakeSubD0B8(pos, self->mLastWakePos)) > 50.0f) {
-                    cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
-                    self->mLastWakePos = pos;
+            mWakeParams.mAlpha = mWakeParams.mAlpha * 0.7f + curParams.grip * 0.3f;
+            mWakeParams.mSpeed = mWakeParams.mSpeed * 0.8f + curParams.strength * 0.19999998807907104f;
+            if (mWakeParams.mAlpha > 0.05f && mWakeParams.mSpeed > 55.55555725097656f) {
+                if (wakeLenD0B8(wakeSubD0B8(pos, mLastWakePos)) > 50.0f) {
+                    cBoardWakeFX_createSeg_D0B8(this, surf, &pos);
+                    mLastWakePos = pos;
                 }
-                cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
+                cBoardWakeFX_fillCurrentSeg_D0B8(this, &pos, &fwd, width);
             } else {
-                self->mWakeParams.mAlpha = 0.0f;
-                self->mWasSpraying = 0;
-                cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->mWakeParams.mAlpha);
+                mWakeParams.mAlpha = 0.0f;
+                mWasSpraying = 0;
+                cBoardWakeFX_fillCurrentSeg_D0B8(this, &pos, &fwd, mWakeParams.mAlpha);
             }
         } else {
-            self->mWakeParams.mAlpha = 0.0f;
-            self->mWasSpraying = 0;
-            cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->mWakeParams.mAlpha);
+            mWakeParams.mAlpha = 0.0f;
+            mWasSpraying = 0;
+            cBoardWakeFX_fillCurrentSeg_D0B8(this, &pos, &fwd, mWakeParams.mAlpha);
         }
     } else if (ok) {
-        self->mWakeParams.mSpeed = 0.0f;
-        width = self->mWakeParams.mSpeed;
-        self->mWakeParams.mForward = fwd;
-        self->mWakeParams.mSide = side;
-        self->mWakeParams.mUp = normal;
-        self->mLastWakePos = pos;
-        self->mWakeLength = 0;
-        self->mLeanPositive = width < lean;
-        self->mWakeParams.mAlpha = width;
-        cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
-        cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
-        self->mWakeParams.mAlpha = curParams.grip;
-        cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
-        cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
-        self->mWasSpraying = 1;
+        mWakeParams.mSpeed = 0.0f;
+        width = mWakeParams.mSpeed;
+        mWakeParams.mForward = fwd;
+        mWakeParams.mSide = side;
+        mWakeParams.mUp = normal;
+        mLastWakePos = pos;
+        mWakeLength = 0;
+        mLeanPositive = width < lean;
+        mWakeParams.mAlpha = width;
+        cBoardWakeFX_createSeg_D0B8(this, surf, &pos);
+        cBoardWakeFX_fillCurrentSeg_D0B8(this, &pos, &fwd, width);
+        mWakeParams.mAlpha = curParams.grip;
+        cBoardWakeFX_createSeg_D0B8(this, surf, &pos);
+        cBoardWakeFX_fillCurrentSeg_D0B8(this, &pos, &fwd, width);
+        mWasSpraying = 1;
     }
 }
 #endif
@@ -658,9 +658,9 @@ public:
  *
  * Skipped when cRenderToggles_m_DisableBoardWake is set or there are no segments; at most max - 2 segments are drawn.
  */
-extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
+void cBoardWakeFX::render()
 {
-    if (cRenderToggles_m_DisableBoardWake != 0 || self->mNumWakeLines == 0)
+    if (cRenderToggles_m_DisableBoardWake != 0 || mNumWakeLines == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
     *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = sDrawState_s_defaultDrawState_DAB8;
@@ -675,19 +675,20 @@ extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_5 = 7;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_2 = 5;
     float k = 1.25f;
-    int draw = self->mNumWakeLines;
+    int draw = mNumWakeLines;
     int n = draw;
-    int over = draw + 2; over -= self->mWakeMaxNumLines;
+    int over = draw + 2; over -= mWakeMaxNumLines;
     if (over >= 1)
         draw -= over;
-    int last = (self->mCurrentWakeLine + n - 1) % self->mWakeMaxNumLines;
-    float ageRatio = (self->mWakeLife - self->mWakeLines[last].mAge) / self->mWakeLife;
+    int last = (mCurrentWakeLine + n - 1) % mWakeMaxNumLines;
+    float ageRatio = (mWakeLife - mWakeLines[last].mAge) / mWakeLife;
     float alphaStart = 1.0f;
     if (ageRatio <= 0.8f)
         alphaStart = ageRatio * k;
     float da = (alphaStart - k) / (float)n;
     if (draw >= 2)
-        ((cGfx_DAB8*)GrMan_boardwakefx)->DrawStrip(((char*)&self->mWakeVerts[0]), self->mWakeLineSegs, self->mCurrentWakeLine, self->mWakeMaxNumLines, draw, k, da);
+        ((cGfx_DAB8*)GrMan_boardwakefx)->DrawStrip(((char*)&mWakeVerts[0]), mWakeLineSegs, mCurrentWakeLine,
+                mWakeMaxNumLines, draw, k, da);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop--;
 }
 #endif
@@ -791,34 +792,34 @@ static inline void placeWakeHead(tBoardWakeVertex* head, const t4Vector& pos, co
  * @param pos  the wake position
  * @param width  the line's extra initial velocity factor
  */
-extern "C" void cBoardWakeFX_fillCurrentSeg(cBoardWakeFX* self, t4Vector* pos, float width)
+void cBoardWakeFX::fillCurrentSeg(t4Vector* pos, float width)
 {
-    float w = self->mWakeParams.mSpeed * (perlinNoise(3, self->mWakeRandomnessSeed) * 0.25f + 1.0f);
-    tWakeLine* wakeLine = &self->mWakeLines[self->mCurrentWakeLine];
+    float w = mWakeParams.mSpeed * (perlinNoise(3, mWakeRandomnessSeed) * 0.25f + 1.0f);
+    tWakeLine* wakeLine = &mWakeLines[mCurrentWakeLine];
     wakeLine->mAge = 0.0f;
     wakeLine->mVel[0] = t4vect_Zero_DD30;
-    t4Vector dir = wakeScaleDD30(wakeScaleDD30(self->mWakeParams.mForward, -1.0f),
-        wakeLenDD30(self->mRider->mVelocity));
-    t4Vector neg = wakeScaleDD30(self->mRider->mVelocity, -1.0f);
+    t4Vector dir = wakeScaleDD30(wakeScaleDD30(mWakeParams.mForward, -1.0f),
+        wakeLenDD30(mRider->mVelocity));
+    t4Vector neg = wakeScaleDD30(mRider->mVelocity, -1.0f);
     {
         t4Vector x = wakeScaleDD30(wakeSubDD30(dir, neg), 0.85f);
         wakeLine->mAngleCorrection = x;
     }
-    for (int i = 0; i < self->mWakeLineSegs; i++) {
-        float rowFrac = (float)i / (float)(self->mWakeLineSegs - 1);
+    for (int i = 0; i < mWakeLineSegs; i++) {
+        float rowFrac = (float)i / (float)(mWakeLineSegs - 1);
         float rowFracSq = rowFrac * rowFrac;
-        if (i == self->mWakeLineSegs - 1) {
+        if (i == mWakeLineSegs - 1) {
             rowFrac *= 0.9f;
         }
-        t4Vector x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->mWakeParams.mSide, rowFracSq), 0.75f),
-            wakeScaleDD30(self->mWakeParams.mUp, rowFrac)), w);
+        t4Vector x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(mWakeParams.mSide, rowFracSq), 0.75f),
+            wakeScaleDD30(mWakeParams.mUp, rowFrac)), w);
         wakeLine->mVel[i] = x;
     }
-    placeWakeHead(&self->mWakeVerts[0][self->mCurrentWakeLine], *pos, self->mRider->mGroundNormal);
-    self->mWakeVerts[0][self->mCurrentWakeLine].a = (int)(self->mWakeParams.mAlpha * 128.0f);
-    for (int j = 1; j < self->mWakeLineSegs; j++) {
-        self->mWakeVerts[j][self->mCurrentWakeLine].p = self->mWakeVerts[0][self->mCurrentWakeLine].p;
-        self->mWakeVerts[j][self->mCurrentWakeLine].a = self->mWakeVerts[0][self->mCurrentWakeLine].a;
+    placeWakeHead(&mWakeVerts[0][mCurrentWakeLine], *pos, mRider->mGroundNormal);
+    mWakeVerts[0][mCurrentWakeLine].a = (int)(mWakeParams.mAlpha * 128.0f);
+    for (int j = 1; j < mWakeLineSegs; j++) {
+        mWakeVerts[j][mCurrentWakeLine].p = mWakeVerts[0][mCurrentWakeLine].p;
+        mWakeVerts[j][mCurrentWakeLine].a = mWakeVerts[0][mCurrentWakeLine].a;
     }
     wakeLine->mExtraInitalVelocityFactor = width;
 }
@@ -854,17 +855,17 @@ static inline float wakeClampE058(float v, float lo, float hi)
  *
  * cBoardWakeFX_update calls it with a surface record and a position, which this definition does not declare or use.
  */
-extern "C" void cBoardWakeFX_createSeg(cBoardWakeFX* self)
+void cBoardWakeFX::createSeg()
 {
-    self->mWakeRandomnessSeed += 0.03333333507180214f;
-    if (self->mWakeRandomnessSeed >= 4.0f) {
-        self->mWakeRandomnessSeed -= 4.0f;
+    mWakeRandomnessSeed += 0.03333333507180214f;
+    if (mWakeRandomnessSeed >= 4.0f) {
+        mWakeRandomnessSeed -= 4.0f;
     }
-    if (self->mNumWakeLines < self->mWakeMaxNumLines) {
-        self->mNumWakeLines++;
+    if (mNumWakeLines < mWakeMaxNumLines) {
+        mNumWakeLines++;
     }
-    self->mCurrentWakeLine = (self->mCurrentWakeLine + self->mWakeMaxNumLines - 1) % self->mWakeMaxNumLines;
-    char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
+    mCurrentWakeLine = (mCurrentWakeLine + mWakeMaxNumLines - 1) % mWakeMaxNumLines;
+    char* sub = (char*)&VPTR_AT(mRider, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     // m_colour is On Tour's tARGB m_colour (the header keeps it as float[4], the same layout)
     tARGB col = *(const tARGB*)cRenderStateMan_m_state[vt[7].fn(sub + vt[7].delta)].m_colour;
@@ -876,21 +877,21 @@ extern "C" void cBoardWakeFX_createSeg(cBoardWakeFX* self)
     col.G = wakeClampE058(col.G, 0.0f, 1.0f);
     col.B = wakeClampE058(col.B, 0.0f, 1.0f);
     col.A = wakeClampE058(col.A, 0.0f, 1.0f);
-    self->mGroundColour = col;
-    self->mWakeVerts[0][self->mCurrentWakeLine].u = (float)self->mWakeLength * 0.5f;
-    self->mWakeVerts[0][self->mCurrentWakeLine].u -=
-        (float)(int)(self->mWakeVerts[0][self->mCurrentWakeLine].u * 0.015625f) * 64.0f + 32.0f;
-    self->mWakeVerts[0][self->mCurrentWakeLine].r = (int)(self->mGroundColour.R * 128.0f);
-    self->mWakeVerts[0][self->mCurrentWakeLine].g = (int)(self->mGroundColour.G * 128.0f);
-    self->mWakeVerts[0][self->mCurrentWakeLine].b = (int)(self->mGroundColour.B * 128.0f);
+    mGroundColour = col;
+    mWakeVerts[0][mCurrentWakeLine].u = (float)mWakeLength * 0.5f;
+    mWakeVerts[0][mCurrentWakeLine].u -=
+        (float)(int)(mWakeVerts[0][mCurrentWakeLine].u * 0.015625f) * 64.0f + 32.0f;
+    mWakeVerts[0][mCurrentWakeLine].r = (int)(mGroundColour.R * 128.0f);
+    mWakeVerts[0][mCurrentWakeLine].g = (int)(mGroundColour.G * 128.0f);
+    mWakeVerts[0][mCurrentWakeLine].b = (int)(mGroundColour.B * 128.0f);
     int i;
     for (i = 1; i < 5; i++) {
-        self->mWakeVerts[i][self->mCurrentWakeLine].u = self->mWakeVerts[0][self->mCurrentWakeLine].u;
-        self->mWakeVerts[i][self->mCurrentWakeLine].r = self->mWakeVerts[0][self->mCurrentWakeLine].r;
-        self->mWakeVerts[i][self->mCurrentWakeLine].g = self->mWakeVerts[0][self->mCurrentWakeLine].g;
-        self->mWakeVerts[i][self->mCurrentWakeLine].b = self->mWakeVerts[0][self->mCurrentWakeLine].b;
+        mWakeVerts[i][mCurrentWakeLine].u = mWakeVerts[0][mCurrentWakeLine].u;
+        mWakeVerts[i][mCurrentWakeLine].r = mWakeVerts[0][mCurrentWakeLine].r;
+        mWakeVerts[i][mCurrentWakeLine].g = mWakeVerts[0][mCurrentWakeLine].g;
+        mWakeVerts[i][mCurrentWakeLine].b = mWakeVerts[0][mCurrentWakeLine].b;
     }
-    self->mWakeLength++;
+    mWakeLength++;
 }
 #endif
 
@@ -906,13 +907,13 @@ extern t4Vector t4vect_Zero;
  *
  * cBoardWakeFX_reset (the wake reset) calls it on cBoardWakeFX + 0x60.
  */
-extern "C" void cWakeParams_Clear(cWakeParams* self)
+void cWakeParams::Clear()
 {
-    *(int*)&self->mAlpha = 0;
-    *(int*)&self->mSpeed = 0;
-    *(t4Vector*)&self->mUp = t4vect_Zero;
-    *(t4Vector*)&self->mForward = t4vect_Zero;
-    *(t4Vector*)&self->mSide = t4vect_Zero;
+    *(int*)&mAlpha = 0;
+    *(int*)&mSpeed = 0;
+    *(t4Vector*)&mUp = t4vect_Zero;
+    *(t4Vector*)&mForward = t4vect_Zero;
+    *(t4Vector*)&mSide = t4vect_Zero;
 }
 #endif
 
@@ -3613,6 +3614,8 @@ static inline void rsSetA_2868(cPS2GraphicsMan* ctx, int mask, int shift, int v)
         | ((v << shift) & mask);
 }
 
+extern "C" void cLightHalo_Render(cLightHalo* self, int idx);
+
 /**
  * Draws one light halo as a camera-facing sprite in the halo's colour.
  *
@@ -3626,13 +3629,13 @@ static inline void rsSetA_2868(cPS2GraphicsMan* ctx, int mask, int shift, int v)
  *
  * @param idx  the view index
  */
-extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
+void cLightHalo::Render(int idx)
 {
-    if (self->mbOnScreen == 0) {
+    if (mbOnScreen == 0) {
         return;
     }
     t3Vector n;
-    tHaloRecord* haloRecord = self->mpHalo;
+    tHaloRecord* haloRecord = mpHalo;
     float x = (*(t3Vector*)&haloRecord->m_fvColor[0]).x;
     float y = (*(t3Vector*)&haloRecord->m_fvColor[0]).y;
     float z = (*(t3Vector*)&haloRecord->m_fvColor[0]).z;
@@ -3652,8 +3655,8 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     (*(t3Vector*)&col.R).y = n.y;
     (*(t3Vector*)&col.R).z = n.z;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    if (self->mbRequestZSample != 0) {
-        col.A = self->mpHalo->m_fOcclude[idx];
+    if (mbRequestZSample != 0) {
+        col.A = mpHalo->m_fOcclude[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
         rsSetA_2868(ctx, 0x300000, 20, 0);
         rsSetA_2868(ctx, 0xFF000, 12, 20);
@@ -3667,7 +3670,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         return;
     }
     float size = 0.0f;
-    switch ((unsigned int)(((int)(self->mpHalo)->m_iFlags) & 0x70)) {
+    switch ((unsigned int)(((int)(mpHalo)->m_iFlags) & 0x70)) {
     case 0x10:
         *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(53);
         size = 180.0f;
@@ -3681,11 +3684,11 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         size = 350.0f;
         break;
     }
-    tHaloRecord* drawRecord = self->mpHalo;
+    tHaloRecord* drawRecord = mpHalo;
     ctx->DrawRotatedSprite(t4VectorInit((*(t3Vector*)&drawRecord->m_fvWorldPos[0]).x,
                                         (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).y,
                                         (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).z, 1.0f),
-                           t2Vector(size, size), t2Vector(0.0f, 0.0f), t2Vector(1.0f, 1.0f), col, self->mAngle, 2);
+                           t2Vector(size, size), t2Vector(0.0f, 0.0f), t2Vector(1.0f, 1.0f), col, mAngle, 2);
 }
 #endif
 
@@ -3736,12 +3739,11 @@ static inline int clampI_2B00(int v, int lo, int hi)
  * z column, mViewMat rows 0..2 .z), and +0x28 the angle (screen x mapped to -1..1) * pi/2. cLensFxMan_ProcessLens
  * calls it for each halo of the view.
  *
- * @param vself  the halo
  * @param viewInfo  the view information ([O] tViewInfo): its view rectangle and view matrix
  */
-extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
+void cLightHalo::Process(tViewInfo* viewInfo)
 {
-    cLightHalo* self = vself;
+    cLightHalo* self = this;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     t4Vector pos;
     pos.x = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).x;
@@ -3892,10 +3894,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_Reset__FPvi);
  *
  * @param i  the view index
  */
-void cLensFxMan_Reset(void* vself, int i)
+void cLensFxMan::Reset(int i)
 {
-    cLensFxMan* self = (cLensFxMan*)vself;
-    self->mNumHalo[i] = 0;
+    mNumHalo[i] = 0;
 }
 #endif
 
@@ -3953,11 +3954,11 @@ extern "C" void cLensFxMan_AddHalo(sWakeFx* self, int v, int i);
  * @param ignored  the clip code, unused
  * @param i  the view index
  */
-extern "C" void cLensFxMan_AddLightHalos(cLensFxMan* self, int* vals, int count, int ignored, int i)
+void cLensFxMan::AddLightHalos(int* vals, int count, int ignored, int i)
 {
     int n;
     for (n = 0; n < count; n++) {
-        cLensFxMan_AddHalo(((sWakeFx*)self), vals[n], i);
+        cLensFxMan_AddHalo(((sWakeFx*)this), vals[n], i);
     }
 }
 #endif
@@ -4001,10 +4002,10 @@ extern "C" void cLensFxMan_DrawLens(cLensFxMan* self, int i);
  *
  * @param i  the view index
  */
-extern "C" void cLensFxMan_render(cLensFxMan* self, int i)
+void cLensFxMan::render(int i)
 {
-    cLensFxMan_ProcessLens(self, i);
-    cLensFxMan_DrawLens(self, i);
+    ProcessLens(i);
+    cLensFxMan_DrawLens(this, i);
 }
 #endif
 
@@ -4155,12 +4156,11 @@ static inline void vu0CopyMatrix3338(t4Matrix* dst, t4Matrix* src)
  * mViewInfo.mViewMat and gets mFOV, mZNear and mZFar from slot 30. Then processes view @p idx's sun (mSunHalo[@p idx])
  * with cSunHalo_Process and each of its halos with cLightHalo_Process. cLensFxMan_render calls it.
  *
- * @param vself  the lens manager (this)
  * @param idx  the view index
  */
-extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
+void cLensFxMan::ProcessLens(int idx)
 {
-    cLensFxMan* self = vself;
+    cLensFxMan* self = this;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     tRect viewRect = ctx->GetViewportWindow();
     self->mViewInfo.mViewRect = viewRect;
@@ -4177,7 +4177,7 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
         cLightHalo (*viewHalos)[256] = self->mLightHalo;
         cLightHalo* halo = viewHalos[idx];
         do {
-            cLightHalo_Process(halo, &self->mViewInfo);
+            halo->Process(&self->mViewInfo);
             i++;
             halo++;
         } while (i < self->mNumHalo[idx]);
@@ -4372,7 +4372,7 @@ extern "C" void* cPlayerIndicatorFX_cPlayerIndicatorFX(cPlayerIndicatorFX* self,
         VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488A10.e[1].delta + vc;
     }
-    cPlayerIndicatorFX_reset(self);
+    self->reset();
     return ((void*)self);
 }
 #endif
@@ -4419,12 +4419,12 @@ struct tARGBInit : tARGB {
  *
  * The pulse runs between (0.5, 1, 0, 0) and (0.7, 1, 0.7, 0.7), starting at the first; PulseAng is cleared.
  */
-extern "C" void cPlayerIndicatorFX_reset(cPlayerIndicatorFX* self)
+void cPlayerIndicatorFX::reset()
 {
-    self->MinColor = tARGBInit(0.5f, 1.0f, 0.0f, 0.0f);
-    self->MaxColor = tARGBInit(0.699999988079071f, 1.0f, 0.699999988079071f, 0.699999988079071f);
-    self->CurColor = self->MinColor;
-    self->PulseAng = 0.0f;
+    MinColor = tARGBInit(0.5f, 1.0f, 0.0f, 0.0f);
+    MaxColor = tARGBInit(0.699999988079071f, 1.0f, 0.699999988079071f, 0.699999988079071f);
+    CurColor = MinColor;
+    PulseAng = 0.0f;
 }
 #endif
 
@@ -4441,24 +4441,24 @@ extern float kBeamPulseRate;
  * The phase advances by kBeamPulseRate / 60 each frame and wraps at 2 pi. Nothing happens when the rider's
  * virtual slot 8 (on its +0x6C0 part) returns 0.
  */
-extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
+void cPlayerIndicatorFX::update()
 {
-    if (self->mRider->isHuman() == 0) return;
+    if (mRider->isHuman() == 0) return;
     float half = 0.5f;
-    float newPhase = self->PulseAng + kBeamPulseRate * 0.01666666753590107f;
+    float newPhase = PulseAng + kBeamPulseRate * 0.01666666753590107f;
     float turns = newPhase * 0.15915493667125702f + half;
     float wholeTurns;
     // PORT: FPU-only float->int->float round trip (floor helper); no C cast reproduces it.
     __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(wholeTurns) : "f"(turns));
     if (turns < wholeTurns) wholeTurns -= 1.0f;
     float wrapped = newPhase - wholeTurns * 6.2831854820251465f;
-    self->PulseAng = wrapped;
+    PulseAng = wrapped;
     float blend = fCos(wrapped) * half + half;
     float invBlend = 1.0f - blend;
-    self->CurColor.A = blend * self->MinColor.A + invBlend * self->MaxColor.A;
-    self->CurColor.R = blend * self->MinColor.R + invBlend * self->MaxColor.R;
-    self->CurColor.G = blend * self->MinColor.G + invBlend * self->MaxColor.G;
-    self->CurColor.B = blend * self->MinColor.B + invBlend * self->MaxColor.B;
+    CurColor.A = blend * MinColor.A + invBlend * MaxColor.A;
+    CurColor.R = blend * MinColor.R + invBlend * MaxColor.R;
+    CurColor.G = blend * MinColor.G + invBlend * MaxColor.G;
+    CurColor.B = blend * MinColor.B + invBlend * MaxColor.B;
 }
 #endif
 
@@ -4671,9 +4671,9 @@ static inline int ShouldDraw_3AF8(cPlayerIndicatorFX* self)
  * other player's rider seen from the other view, for remote riders in network games, and for AI riders in
  * some event modes. It is never drawn during an in-game cutscene (mIsInNIS).
  */
-extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
+void cPlayerIndicatorFX::render()
 {
-    if (!ShouldDraw_3AF8(self)) {
+    if (!ShouldDraw_3AF8(this)) {
         return;
     }
     {
@@ -4696,7 +4696,7 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     Set4_3AF8(side, viewMat[0], viewMat[4], viewMat[8], 0.0f);
     t4Vector up;
     Set4_3AF8(up, viewMat[1], viewMat[5], viewMat[9], 0.0f);
-    const t4Matrix& headBone = self->mRider->mAnimModel->SkelMatrices[self->mRider->mBoneHead];
+    const t4Matrix& headBone = mRider->mAnimModel->SkelMatrices[mRider->mBoneHead];
     t4Vector pos = headBone.row[3];
     const t4Vector* base = &pos;
     t4Vector beamTip = Add_3AF8(*base, Scale_3AF8(up, 20260.0f));
@@ -4705,9 +4705,9 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     t4Vector off = Scale_3AF8(side, 85.0f);
     sWkColor_3AF8 fade;
     fade.a = 0.0f;
-    fade.r = (*(sWkColor_3AF8*)&self->CurColor).r;
-    fade.g = (*(sWkColor_3AF8*)&self->CurColor).g;
-    fade.b = (*(sWkColor_3AF8*)&self->CurColor).b;
+    fade.r = (*(sWkColor_3AF8*)&CurColor).r;
+    fade.g = (*(sWkColor_3AF8*)&CurColor).g;
+    fade.b = (*(sWkColor_3AF8*)&CurColor).b;
     sVtx_3AF8 verts[8];
     {
         t4Vector vertPos = Sub_3AF8(*base, off);
@@ -4733,10 +4733,10 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     }
     {
         t4Vector vertPos = Sub_3AF8(beamLower, off);
-        verts[2].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
-        verts[2].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
-        verts[2].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
-        verts[2].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
+        verts[2].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
+        verts[2].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
+        verts[2].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
+        verts[2].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
         verts[2].q = 1.0f;
         verts[2].pos = vertPos;
         verts[2].s = 0.0f;
@@ -4744,10 +4744,10 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     }
     {
         t4Vector vertPos = Add_3AF8(beamLower, off);
-        verts[3].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
-        verts[3].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
-        verts[3].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
-        verts[3].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
+        verts[3].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
+        verts[3].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
+        verts[3].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
+        verts[3].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
         verts[3].q = 1.0f;
         verts[3].pos = vertPos;
         verts[3].s = 1.0f;
@@ -4755,10 +4755,10 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     }
     {
         t4Vector vertPos = Sub_3AF8(beamUpper, off);
-        verts[4].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
-        verts[4].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
-        verts[4].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
-        verts[4].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
+        verts[4].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
+        verts[4].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
+        verts[4].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
+        verts[4].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
         verts[4].q = 1.0f;
         verts[4].pos = vertPos;
         verts[4].s = 0.0f;
@@ -4766,10 +4766,10 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     }
     {
         t4Vector vertPos = Add_3AF8(beamUpper, off);
-        verts[5].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
-        verts[5].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
-        verts[5].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
-        verts[5].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
+        verts[5].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
+        verts[5].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
+        verts[5].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
+        verts[5].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
         verts[5].q = 1.0f;
         verts[5].pos = vertPos;
         verts[5].s = 1.0f;
@@ -4871,7 +4871,7 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
     self->mScriptVtbl = cTransitionMan_cScriptObjTransition_vtbl;
     VPTR_OF(cObjNode, self) = cTransitionMan_vtbl;
     char* scriptObj = (char*)&self->mObjType;
-    cTransitionMan_EndTransition(self);
+    self->EndTransition();
     if (self->mRequestingDelete != 0) {
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
         obj->RemoveScreenGrabTexture(self->mScreenGrabHandle);
@@ -4917,7 +4917,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
 {
     cTransitionMan* self = (cTransitionMan*)vself;
     if (self->mbPlayingTransition != 0) {
-        cTransitionMan_EndTransition((cTransitionMan*)self);
+        self->EndTransition();
     }
     self->mCurrentInitiator = initiator;
     self->mExternalTimePercentage = (float*)externalTimePercentage;
@@ -4973,9 +4973,9 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param inTime  the in time
  * @param holdTime  the hold time
  */
-extern "C" void cTransitionMan_StartTransitionIn(cTransitionMan* self, int initiator, int transitionIn, float inTime, float holdTime)
+void cTransitionMan::StartTransitionIn(int initiator, int transitionIn, float inTime, float holdTime)
 {
-    cTransitionMan_StartTransition(self, initiator, transitionIn, 0, inTime, holdTime, 0, 0, 0.0f);
+    cTransitionMan_StartTransition(this, initiator, transitionIn, 0, inTime, holdTime, 0, 0, 0.0f);
 }
 #endif
 
@@ -4996,13 +4996,13 @@ extern "C" int cTransitionMan_StartTransition_i(void* self, int a1, int a2, int 
  * @param outTime  length of the out part (On Tour outTime)
  * @return cTransitionMan_StartTransition's result, or 1 when added to a running transition
  */
-extern "C" int cTransitionMan_StartTransitionOut(cTransitionMan* self, int initiator, int transition, float outTime)
+int cTransitionMan::StartTransitionOut(int initiator, int transition, float outTime)
 {
-    if (self->mbPlayingTransition == 0) {
-        return cTransitionMan_StartTransition_i(self, initiator, 0, transition, 0.0f, 0.0f, 0, 0, outTime);
+    if (mbPlayingTransition == 0) {
+        return cTransitionMan_StartTransition_i(this, initiator, 0, transition, 0.0f, 0.0f, 0, 0, outTime);
     }
-    self->mTransitionOut = (cTransitionObj*)transition;
-    self->mfOutTime = outTime;
+    mTransitionOut = (cTransitionObj*)transition;
+    mfOutTime = outTime;
     return 1;
 }
 #endif
@@ -5023,9 +5023,11 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
  * @param transitionTime  length of the transition (On Tour transitionTime)
  */
-extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, int initiator, int transition, int externalTimePercentage, float transitionTime)
+void cTransitionMan::StartTransitionScreenGrab(int initiator, int transition, int externalTimePercentage,
+                                               float transitionTime)
 {
-    cTransitionMan_StartTransition(self, initiator, 0, transition, 0.0f, 0.0f, 1, externalTimePercentage, transitionTime);
+    cTransitionMan_StartTransition(this, initiator, 0, transition, 0.0f, 0.0f, 1, externalTimePercentage,
+            transitionTime);
 }
 #endif
 
@@ -5045,32 +5047,32 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
  * +0x80 and clears +0x60 and +0x64. Finally clears +0x78. Script commands, the rider and AI code, cTransitionMan_update
  * and cTransitionMan_OnEndObjectUse call it.
  */
-extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
+void cTransitionMan::EndTransition()
 {
-    if (self->mbPlayingTransition != 0) {
-        self->mbPlayingTransition = 0;
-        self->mNumPause = 0;
-        char* object = (char*)self->mTransitionIn;
+    if (mbPlayingTransition != 0) {
+        mbPlayingTransition = 0;
+        mNumPause = 0;
+        char* object = (char*)mTransitionIn;
         if (object != 0) {
             sVEntry<void(void*, int)>* entry = &(*(sVEntry<void(void*, int)>**)object)[1];
             entry->fn(vthis(object, *entry), 3);
         }
-        self->mTransitionIn = 0;
-        object = (char*)self->mTransitionOut;
+        mTransitionIn = 0;
+        object = (char*)mTransitionOut;
         if (object != 0) {
             sVEntry<void(void*, int)>* entry = &(*(sVEntry<void(void*, int)>**)object)[1];
             entry->fn(vthis(object, *entry), 3);
         }
-        self->mTransitionOut = 0;
-        self->mExternalTimePercentage = 0;
-        if (~self->mScreenGrabHandle.mTextureId != 0) {
+        mTransitionOut = 0;
+        mExternalTimePercentage = 0;
+        if (~mScreenGrabHandle.mTextureId != 0) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-            self->mRequestingDelete = 1;
-            self->mRequestDeleteFrame = obj->getCurrentFrameCount();
-            self->mRequestingScreenGrab = 0;
-            self->mUsingScreenGrab = 0;
+            mRequestingDelete = 1;
+            mRequestDeleteFrame = obj->getCurrentFrameCount();
+            mRequestingScreenGrab = 0;
+            mUsingScreenGrab = 0;
         }
-        self->mCurrentInitiator = 0;
+        mCurrentInitiator = 0;
     }
 }
 #endif
@@ -5086,18 +5088,18 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_PauseTransition);
  *
  * @param up  nonzero to pause, zero to resume
  */
-extern "C" void cTransitionMan_PauseTransition(cTransitionMan* self, int up)
+void cTransitionMan::PauseTransition(int up)
 {
-    if (self->mbPlayingTransition == 0) {
-        self->mNumPause = 0;
+    if (mbPlayingTransition == 0) {
+        mNumPause = 0;
         return;
     }
     if (up) {
-        self->mNumPause += 1;
+        mNumPause += 1;
         return;
     }
-    if (self->mNumPause != 0) {
-        self->mNumPause -= 1;
+    if (mNumPause != 0) {
+        mNumPause -= 1;
     }
 }
 #endif
@@ -5113,13 +5115,13 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_GetTransitionTimeLeft);
  *
  * @return the remaining time in seconds
  */
-extern "C" float cTransitionMan_GetTransitionTimeLeft(cTransitionMan* self)
+float cTransitionMan::GetTransitionTimeLeft()
 {
-    if (self->mbPlayingTransition == 0) {
+    if (mbPlayingTransition == 0) {
         return 0.0f;
     }
-    float remaining = self->mfInTime + self->mfHoldTime
-            + self->mfOutTime - self->mfCurrentTime;
+    float remaining = mfInTime + mfHoldTime
+            + mfOutTime - mfCurrentTime;
     if (remaining < 0.0f) {
         return 0.0f;
     }
@@ -5159,7 +5161,7 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
         self->mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     }
     if (self->mfInTime + self->mfHoldTime + self->mfOutTime <= self->mfCurrentTime) {
-        cTransitionMan_EndTransition(self);
+        self->EndTransition();
     }
 }
 #endif
@@ -5289,18 +5291,22 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, i
  * with in, hold and out times from +0x34, +0x30 and +0x2C. Type 7 starts a screen-grab transition with one object and
  * the time at +0x34. The level at +0x3C is then copied to +0x48.
  */
-extern "C" void cTransitionMan_OnStartObjectUse(cTransitionMan* self)
+void cTransitionMan::OnStartObjectUse()
 {
-    tScriptObjTransitionInfo* transitionInfo = (&self->mInfo);
-    cScriptObject_OnStartObjectUse((char*)&self->mObjType);
-    if (self->mInfo.transition != 7) {
-        int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
-        int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
-        cTransitionMan_StartTransition(self, 2, transitionIn, transitionOut, self->mInfo.outTime, self->mInfo.holdTime, 0, 0, self->mInfo.inTime);
+    tScriptObjTransitionInfo* transitionInfo = (&mInfo);
+    cScriptObject_OnStartObjectUse((char*)&mObjType);
+    if (mInfo.transition != 7) {
+        int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
+                mInfo.transitionColour);
+        int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
+                mInfo.transitionColour);
+        cTransitionMan_StartTransition(this, 2, transitionIn, transitionOut, mInfo.outTime, mInfo.holdTime, 0, 0,
+                mInfo.inTime);
     } else {
-        cTransitionMan_StartTransitionScreenGrab(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, self->mInfo.transitionColour), 0, self->mInfo.outTime);
+        StartTransitionScreenGrab(2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, mInfo.transitionColour), 0,
+                mInfo.outTime);
     }
-    self->mfCurrentTime = transitionInfo->currTime;
+    mfCurrentTime = transitionInfo->currTime;
 }
 #endif
 
@@ -5316,10 +5322,10 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
  * Runs cScriptObject_OnEndObjectUse on the script object at +0x10, then cTransitionMan_EndTransition. It sits in the
  * cScriptObjTransition part's vtable (cTransitionMan_cScriptObjTransition_vtbl) right after cTransitionMan_OnStartObjectUse.
  */
-extern "C" void cTransitionMan_OnEndObjectUse(cTransitionMan* self)
+void cTransitionMan::OnEndObjectUse()
 {
-    cScriptObject_OnEndObjectUse((char*)&self->mObjType);
-    cTransitionMan_EndTransition(self);
+    cScriptObject_OnEndObjectUse((char*)&mObjType);
+    EndTransition();
 }
 #endif
 
@@ -5334,11 +5340,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_IsTransitionPending);
  *
  * @return 1 when both flags are set, otherwise 0
  */
-extern "C" int cTransitionMan_IsTransitionPending(cTransitionMan* self)
+int cTransitionMan::IsTransitionPending()
 {
     int result = 0;
-    if (self->mUsingScreenGrab != 0) {
-        result = self->mRequestingScreenGrab != 0;
+    if (mUsingScreenGrab != 0) {
+        result = mRequestingScreenGrab != 0;
     }
     return result;
 }
@@ -5578,12 +5584,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_resetWind__FPv);
  *
  * Zeroes +0x90 and +0x94 and sets +0xB0 to 1.
  */
-void cSnowBox_resetWind(void* vself)
+void cSnowBox::resetWind()
 {
-    cSnowBox* self = (cSnowBox*)vself;
-    *(int*)&self->mTotalTimeToWindChange = 0;
-    self->mResetWind = 1;
-    *(int*)&self->mCurrentTimeToWindChange = 0;
+    *(int*)&mTotalTimeToWindChange = 0;
+    mResetWind = 1;
+    *(int*)&mCurrentTimeToWindChange = 0;
 }
 #endif
 
@@ -6413,7 +6418,7 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
     new ((char*)&self->mSpeedBoostTrail[0]) sWakeSeg_6320[30];
     sWakePt_6320*& pts = (sWakePt_6320*)self->mStreamBuf;
     pts = new (str_cSpeedBoostStreamerFX, 0, 0) sWakePt_6320[20];
-    cSpeedBoostFX_reset(self);
+    self->reset();
     return ((void*)self);
 }
 #endif
@@ -6460,25 +6465,25 @@ struct sWakeVec4 {
  * Sets the colour to red, the ribbon texture to 57 and clears the trail. mMaxStreamerSegments is 20 for a rider with a
  * view (a player) and 18 for others.
  */
-extern "C" void cSpeedBoostFX_reset(cSpeedBoostFX* self)
+void cSpeedBoostFX::reset()
 {
     sWakeVec4 defaultSide;
     defaultSide.x = 1.0f;
     defaultSide.y = 0.0f;
     defaultSide.z = 0.0f;
     defaultSide.w = 1.0f;
-    self->mCurrentTexture = 57;
-    *(int*)&self->mAlpha = 0;
-    *(sWakeVec4*)&self->mLastSide = defaultSide;
-    *(int*)&self->mWidth = 0;
-    *(int*)&self->mVOffset = 0;
-    *(int*)&self->mSpeedBoostTrailCurrentLength = 0;
-    self->mSpeedBoostTrailNumSegs = 0;
-    self->mSpeedBoostTrailCurrentSeg = 0;
-    self->mStreamBufLen = 0;
-    self->mStreamBufHead = 0;
-    self->mMaxStreamerSegments = (self->mRider->mViewIndex >= 0) ? 20 : 18;
-    self->mWasInAir = 0;
+    mCurrentTexture = 57;
+    *(int*)&mAlpha = 0;
+    *(sWakeVec4*)&mLastSide = defaultSide;
+    *(int*)&mWidth = 0;
+    *(int*)&mVOffset = 0;
+    *(int*)&mSpeedBoostTrailCurrentLength = 0;
+    mSpeedBoostTrailNumSegs = 0;
+    mSpeedBoostTrailCurrentSeg = 0;
+    mStreamBufLen = 0;
+    mStreamBufHead = 0;
+    mMaxStreamerSegments = (mRider->mViewIndex >= 0) ? 20 : 18;
+    mWasInAir = 0;
 }
 #endif
 
@@ -6689,57 +6694,57 @@ static inline void Trail_66B8(cSpeedBoostFX* self, const t4Vector& pos, int on, 
  * (orange) at 5 or more, otherwise 57. On the ground with a boost running, the trail length and width follow
  * the boost and speed; otherwise they fade by 5 % a frame. The trail is cleared on landing.
  */
-extern "C" void cSpeedBoostFX_update(cSpeedBoostFX* self)
+void cSpeedBoostFX::update()
 {
-    int air = cRider_getMotionState(self->mRider) == 1;
+    int air = cRider_getMotionState(mRider) == 1;
     int on = 0;
     if (!air) {
-        cRider* riderPtr = self->mRider;
+        cRider* riderPtr = mRider;
         if (0.0f < riderPtr->mBoostStrength || 0.0f < riderPtr->mPowerUpBoostTimer) {
             on = 1;
         }
     }
-    if (self->mWasInAir != 0 && !air) {
-        self->mStreamBufLen = 0;
-        self->mSpeedBoostTrailCurrentLength = 0.0f;
-        self->mSpeedBoostTrailNumSegs = 0;
+    if (mWasInAir != 0 && !air) {
+        mStreamBufLen = 0;
+        mSpeedBoostTrailCurrentLength = 0.0f;
+        mSpeedBoostTrailNumSegs = 0;
     }
-    self->mWasInAir = air;
-    cRider* riderPtr = self->mRider;
+    mWasInAir = air;
+    cRider* riderPtr = mRider;
     float k = 0.002f;
     int type = riderPtr->mUberLevel;
     if (type == 11) {
         k = 0.01f;
-        self->mCurrentTexture = 61;
+        mCurrentTexture = 61;
     } else if (0.01f < riderPtr->mPowerUpBoostTimer || cPowerUpFXToggles_m_TestSpeedBoostRibbon != 0) {
         k = 0.01f;
-        self->mCurrentTexture = 60;
+        mCurrentTexture = 60;
     } else if (type >= 10 || cPowerUpFXToggles_m_TestRedRibbon != 0) {
         k = 0.01f;
-        self->mCurrentTexture = 59;
+        mCurrentTexture = 59;
     } else if (type >= 5 || cPowerUpFXToggles_m_TestOrangeRibbon != 0) {
         k = 0.005f;
-        self->mCurrentTexture = 58;
+        mCurrentTexture = 58;
     } else {
-        self->mCurrentTexture = 57;
+        mCurrentTexture = 57;
     }
-    riderPtr = self->mRider;
+    riderPtr = mRider;
     float speed = vu0Length(riderPtr->mVelocity);
     if (on) {
         float boostAmt = Clamp_66B8(Max_66B8(riderPtr->mPowerUpBoostTimer, riderPtr->mBoostStrength), 0.0f, 1.0f);
-        self->mTrailLength = (boostAmt * 400.0f + 400.0f) * (speed / 3333.3335f);
-        trailWidth(self) = (riderPtr->mUberLevel == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
-        self->mAlpha = 1.0f;
+        mTrailLength = (boostAmt * 400.0f + 400.0f) * (speed / 3333.3335f);
+        trailWidth(this) = (riderPtr->mUberLevel == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
+        mAlpha = 1.0f;
     } else {
-        self->mTrailLength *= 0.95f;
-        self->mAlpha *= 0.95f;
-        trailWidth(self) *= 0.95f;
+        mTrailLength *= 0.95f;
+        mAlpha *= 0.95f;
+        trailWidth(this) *= 0.95f;
     }
     if (cPowerUpFXToggles_m_EnableSpeedBoostStreamers != 0) {
-        t4Vector pos = self->mRider->mMatrix.row[0];
-        Trail_66B8(self, pos, on, k, speed);
+        t4Vector pos = mRider->mMatrix.row[0];
+        Trail_66B8(this, pos, on, k, speed);
     }
-    cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(self);
+    cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(this);
 }
 #endif
 
@@ -6903,43 +6908,43 @@ static inline t4Vector wakeDropE6C08(cSpeedBoostFX* self, const t4Vector& c, con
  * (10 units above mGroundContactPoint) and stored as the sample's edges. Then the oldest samples are dropped while the
  * total exceeds the maximum, keeping at least 3 when the maximum is above 1. cSpeedBoostFX_update calls it.
  */
-extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
+void cSpeedBoostFX::UpdateSpeedBoostTrail()
 {
-    if (0.0f < self->mTrailLength || 0.0f < self->mSpeedBoostTrailCurrentLength) {
-        if (0.0f < wakeLenE6C08(self->mRider->mVelocity)) {
+    if (0.0f < mTrailLength || 0.0f < mSpeedBoostTrailCurrentLength) {
+        if (0.0f < wakeLenE6C08(mRider->mVelocity)) {
             tSpeedBoostTrailSeg* ring;
-            if (self->mSpeedBoostTrailNumSegs == 30) {
-                self->mSpeedBoostTrailCurrentLength -= self->mSpeedBoostTrail[(self->mSpeedBoostTrailCurrentSeg + 29) % 30].mLength;
-                ring = self->mSpeedBoostTrail;
+            if (mSpeedBoostTrailNumSegs == 30) {
+                mSpeedBoostTrailCurrentLength -= mSpeedBoostTrail[(mSpeedBoostTrailCurrentSeg + 29) % 30].mLength;
+                ring = mSpeedBoostTrail;
             } else {
-                ring = self->mSpeedBoostTrail;
-                self->mSpeedBoostTrailNumSegs++;
+                ring = mSpeedBoostTrail;
+                mSpeedBoostTrailNumSegs++;
             }
-            self->mSpeedBoostTrailCurrentSeg = (self->mSpeedBoostTrailCurrentSeg + 29) % 30;
-            t4Vector pos = *self->mRider->getPosition();
-            t4Vector boardPos = wakeRowE6C08(self->mRider, 3);
-            t4Vector boardSide = wakeRowE6C08(self->mRider, 2);
-            t4Vector boardFwd = wakeRowE6C08(self->mRider, 0);
-            if (self->mRider->IsRidingFakie != 0) {
+            mSpeedBoostTrailCurrentSeg = (mSpeedBoostTrailCurrentSeg + 29) % 30;
+            t4Vector pos = *mRider->getPosition();
+            t4Vector boardPos = wakeRowE6C08(mRider, 3);
+            t4Vector boardSide = wakeRowE6C08(mRider, 2);
+            t4Vector boardFwd = wakeRowE6C08(mRider, 0);
+            if (mRider->IsRidingFakie != 0) {
                 boardFwd = wakeScaleE6C08(boardFwd, -1.0f);
             }
             float dist;
-            if (self->mSpeedBoostTrailNumSegs >= 2) {
-                dist = wakeLenE6C08(wakeSubE6C08(pos, self->mSpeedBoostTrailLastPos));
+            if (mSpeedBoostTrailNumSegs >= 2) {
+                dist = wakeLenE6C08(wakeSubE6C08(pos, mSpeedBoostTrailLastPos));
             } else {
                 dist = 0.0f;
             }
-            self->mSpeedBoostTrailLastPos = pos;
-            ring[self->mSpeedBoostTrailCurrentSeg].mLength = 0.0f;
-            ring[(self->mSpeedBoostTrailCurrentSeg + 1) % 30].mLength = dist;
-            self->mSpeedBoostTrailCurrentLength += dist;
+            mSpeedBoostTrailLastPos = pos;
+            ring[mSpeedBoostTrailCurrentSeg].mLength = 0.0f;
+            ring[(mSpeedBoostTrailCurrentSeg + 1) % 30].mLength = dist;
+            mSpeedBoostTrailCurrentLength += dist;
             t4Vector noseNeg = wakeSubE6C08(wakeAddE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             t4Vector nosePos = wakeAddE6C08(wakeAddE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             t4Vector tailNeg = wakeSubE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             t4Vector tailPos = wakeAddE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             float lean = 0.0f;
-            if (self->mRider->PressMode != 0) {
-                int curID = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
+            if (mRider->PressMode != 0) {
+                int curID = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
                 if ((curID >= 23 && curID <= 28) || curID == 37 || curID == 38) {
                     lean = 1.0f;
                 } else {
@@ -6953,15 +6958,15 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
                 wakeAddEqE6C08(noseNeg, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
                 wakeAddEqE6C08(nosePos, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
             }
-            t4Vector n = wakeCrossE6C08(self->mRider->mVelocity, self->mRider->mGroundNormal);
-            if (wakeDotE6C08(n, self->mLastSide) < 0.0f) {
+            t4Vector n = wakeCrossE6C08(mRider->mVelocity, mRider->mGroundNormal);
+            if (wakeDotE6C08(n, mLastSide) < 0.0f) {
                 n = wakeScaleE6C08(n, -1.0f);
             }
-            self->mLastSide = n;
-            t4Vector noseNegOff = wakeSubE6C08(noseNeg, self->mRider->mGroundContactPoint);
-            t4Vector nosePosOff = wakeSubE6C08(nosePos, self->mRider->mGroundContactPoint);
-            t4Vector tailNegOff = wakeSubE6C08(tailNeg, self->mRider->mGroundContactPoint);
-            t4Vector tailPosOff = wakeSubE6C08(tailPos, self->mRider->mGroundContactPoint);
+            mLastSide = n;
+            t4Vector noseNegOff = wakeSubE6C08(noseNeg, mRider->mGroundContactPoint);
+            t4Vector nosePosOff = wakeSubE6C08(nosePos, mRider->mGroundContactPoint);
+            t4Vector tailNegOff = wakeSubE6C08(tailNeg, mRider->mGroundContactPoint);
+            t4Vector tailPosOff = wakeSubE6C08(tailPos, mRider->mGroundContactPoint);
             float noseNegDist = wakeDotE6C08(noseNegOff, n);
             float nosePosDist = wakeDotE6C08(nosePosOff, n);
             float tailNegDist = wakeDotE6C08(tailNegOff, n);
@@ -6974,34 +6979,34 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
             t4Vector lo;
             t4Vector hi;
             if (noseNegNorm < nosePosNorm && noseNegNorm < tailNegNorm + 0.5f && noseNegNorm < tailPosNorm + 0.5f) {
-                lo = wakeDropE6C08(self, noseNeg, noseNegOff);
+                lo = wakeDropE6C08(this, noseNeg, noseNegOff);
             } else if (nosePosNorm < noseNegNorm && nosePosNorm < tailNegNorm + 0.5f && nosePosNorm < tailPosNorm + 0.5f) {
-                lo = wakeDropE6C08(self, nosePos, nosePosOff);
+                lo = wakeDropE6C08(this, nosePos, nosePosOff);
             } else if (tailNegNorm < noseNegNorm && tailNegNorm < nosePosNorm && tailNegNorm < tailPosNorm) {
-                lo = wakeDropE6C08(self, tailNeg, tailNegOff);
+                lo = wakeDropE6C08(this, tailNeg, tailNegOff);
             } else {
-                lo = wakeDropE6C08(self, tailPos, tailPosOff);
+                lo = wakeDropE6C08(this, tailPos, tailPosOff);
             }
             if (nosePosNorm <= noseNegNorm && tailNegNorm - 0.5f <= noseNegNorm && tailPosNorm - 0.5f <= noseNegNorm) {
-                hi = wakeDropE6C08(self, noseNeg, noseNegOff);
+                hi = wakeDropE6C08(this, noseNeg, noseNegOff);
             } else if (noseNegNorm <= nosePosNorm && tailNegNorm - 0.5f <= nosePosNorm && tailPosNorm - 0.5f <= nosePosNorm) {
-                hi = wakeDropE6C08(self, nosePos, nosePosOff);
+                hi = wakeDropE6C08(this, nosePos, nosePosOff);
             } else if (noseNegNorm <= tailNegNorm && nosePosNorm <= tailNegNorm && tailPosNorm <= tailNegNorm) {
-                hi = wakeDropE6C08(self, tailNeg, tailNegOff);
+                hi = wakeDropE6C08(this, tailNeg, tailNegOff);
             } else {
-                hi = wakeDropE6C08(self, tailPos, tailPosOff);
+                hi = wakeDropE6C08(this, tailPos, tailPosOff);
             }
-            self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mLeft = t3VectorInit(lo.x, lo.y, lo.z);
-            self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mRight = t3VectorInit(hi.x, hi.y, hi.z);
+            mSpeedBoostTrail[mSpeedBoostTrailCurrentSeg].mLeft = t3VectorInit(lo.x, lo.y, lo.z);
+            mSpeedBoostTrail[mSpeedBoostTrailCurrentSeg].mRight = t3VectorInit(hi.x, hi.y, hi.z);
         }
     }
     int keep = 0;
-    if (1.0f < self->mTrailLength) {
+    if (1.0f < mTrailLength) {
         keep = 3;
     }
-    while (keep < self->mSpeedBoostTrailNumSegs && self->mTrailLength < self->mSpeedBoostTrailCurrentLength) {
-        self->mSpeedBoostTrailCurrentLength -= self->mSpeedBoostTrail[(self->mSpeedBoostTrailCurrentSeg + self->mSpeedBoostTrailNumSegs - 1) % 30].mLength;
-        self->mSpeedBoostTrailNumSegs--;
+    while (keep < mSpeedBoostTrailNumSegs && mTrailLength < mSpeedBoostTrailCurrentLength) {
+        mSpeedBoostTrailCurrentLength -= mSpeedBoostTrail[(mSpeedBoostTrailCurrentSeg + mSpeedBoostTrailNumSegs - 1) % 30].mLength;
+        mSpeedBoostTrailNumSegs--;
     }
 }
 #endif
@@ -7097,14 +7102,14 @@ static inline void setVtx_7A10(tBxVertex* base, int i, float s, float t, const t
  * Nothing is drawn when the trail is empty, short (under 3) or nearly transparent, or when
  * cPowerUpFXToggles_m_EnableSpeedBoostFX is off.
  */
-extern "C" void cSpeedBoostFX_render(cSpeedBoostFX* self)
+void cSpeedBoostFX::render()
 {
-    if (self->mStreamBufLen == 0 || self->mTrailLength < 3.0f || self->mAlpha < 0.05f
+    if (mStreamBufLen == 0 || mTrailLength < 3.0f || mAlpha < 0.05f
         || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
     *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = sDrawState_s_defaultDrawState_DAB8;
-    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = GrMan->getEffectTexMap(self->mCurrentTexture);
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = GrMan->getEffectTexMap(mCurrentTexture);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
@@ -7119,29 +7124,29 @@ extern "C" void cSpeedBoostFX_render(cSpeedBoostFX* self)
         tBxVertex right[42];
         int n = 0;
         int vertIdx = 0;
-        float k = 1.0f / (float)((self->mStreamBufLen - 1) * (self->mStreamBufLen - 1));
-        t4VectorCtor offs = scale_7A10(bonePos_7A10(self->mRider), 0.7f);
+        float k = 1.0f / (float)((mStreamBufLen - 1) * (mStreamBufLen - 1));
+        t4VectorCtor offs = scale_7A10(bonePos_7A10(mRider), 0.7f);
         tARGB col;
         col.A = 1.0f;
         col.R = 1.0f;
         col.G = 1.0f;
         col.B = 1.0f;
         t4VectorCtor pa, pb;
-        float dv = 1.0f / (float)self->mStreamBufLen;
+        float dv = 1.0f / (float)mStreamBufLen;
         float x = 0.0f;
-        float texV = self->mVOffset;
-        t4Vector dir = self->mRider->mMatrix.row[0];
-        t4VectorCtor side = scale_7A10(dir, self->mWidth * 0.5f);
-        int idx = self->mStreamBufHead;
-        for (int i = 0; i < self->mStreamBufLen; i++) {
+        float texV = mVOffset;
+        t4Vector dir = mRider->mMatrix.row[0];
+        t4VectorCtor side = scale_7A10(dir, mWidth * 0.5f);
+        int idx = mStreamBufHead;
+        for (int i = 0; i < mStreamBufLen; i++) {
             if (idx < 0)
                 idx = 19;
-            col.A = self->mAlpha * (1.0f - x * x * k);
+            col.A = mAlpha * (1.0f - x * x * k);
             if (col.A < 0.0f)
                 col.A = 0.0f;
             n += 2;
-            pa = add_7A10(self->mStreamBuf[idx].l, offs);
-            pb = add_7A10(self->mStreamBuf[idx].r, offs);
+            pa = add_7A10(mStreamBuf[idx].l, offs);
+            pb = add_7A10(mStreamBuf[idx].r, offs);
             idx--;
             x += 1.0f;
             setVtx_7A10(left, vertIdx, 0.0f, texV, col, sub_7A10(pa, side));
@@ -7157,30 +7162,30 @@ extern "C" void cSpeedBoostFX_render(cSpeedBoostFX* self)
             GrMan->RenderTriStrip(n, right, 0);
         }
     }
-    if (self->mSpeedBoostTrailNumSegs >= 2) {
+    if (mSpeedBoostTrailNumSegs >= 2) {
         cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-        tBxVertex* verts = (tBxVertex*)func_0037A260(gfx, self->mSpeedBoostTrailNumSegs * 2);
+        tBxVertex* verts = (tBxVertex*)func_0037A260(gfx, mSpeedBoostTrailNumSegs * 2);
         // PORT: g++ minimum operator (<?).
-        float len = self->mTrailLength <? self->mSpeedBoostTrailCurrentLength;
+        float len = mTrailLength <? mSpeedBoostTrailCurrentLength;
         float acc = 0.0f;
         int j;
         int vertIdx = 0;
-        for (j = 0; j < self->mSpeedBoostTrailNumSegs; j++) {
-            acc += self->mSpeedBoostTrail[j].mLength;
+        for (j = 0; j < mSpeedBoostTrailNumSegs; j++) {
+            acc += mSpeedBoostTrail[j].mLength;
             float trailFrac = acc / len;
-            float vv = self->mVOffset + trailFrac;
-            float al = wakeClampE058(self->mAlpha * (1.0f - trailFrac), 0.0f, 1.0f);
+            float vv = mVOffset + trailFrac;
+            float al = wakeClampE058(mAlpha * (1.0f - trailFrac), 0.0f, 1.0f);
             tARGB vertColour;
             vertColour.A = wakeClampE058(al, 0.0f, 1.0f);
             vertColour.R = 1.0f;
             vertColour.G = 1.0f;
             vertColour.B = 1.0f;
-            int si = (self->mSpeedBoostTrailCurrentSeg + j) % 30;
+            int si = (mSpeedBoostTrailCurrentSeg + j) % 30;
             t4VectorCtor pos;
-            setXYZ(pos, self->mSpeedBoostTrail[si].mLeft);
+            setXYZ(pos, mSpeedBoostTrail[si].mLeft);
             pos.w = 1.0f;
             setVtx_7A10(verts, vertIdx++, 0.0f, vv, vertColour, pos);
-            setXYZ(pos, self->mSpeedBoostTrail[si].mRight);
+            setXYZ(pos, mSpeedBoostTrail[si].mRight);
             pos.w = 1.0f;
             setVtx_7A10(verts, vertIdx++, 1.0f, vv, vertColour, pos);
         }

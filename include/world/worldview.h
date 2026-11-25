@@ -198,6 +198,8 @@ CHECK_OFFSET(tStreamFocusInfo, m_fSafeRadius, 0x44);
 CHECK_OFFSET(tStreamFocusInfo, m_fSafeTestRadius, 0x48);
 CHECK_SIZE(tStreamFocusInfo, 0x50);
 
+struct t4Vector;
+
 struct cWorldView {
     cWorldCache* mp_WorldCache;     // 0x000 [P] assert mp_WorldCache->isPageEmpty; [R] init's third argument (the
                                     //       cache; the init view calls it `id`), reset = 0; [U] every page call
@@ -214,6 +216,25 @@ struct cWorldView {
                                     //       and calls setFocus(i, zero, 0)
     unsigned int m_uiNumSectionsLoaded; // 0x2E0 [O]; [R] reset = 0; [U] update counts sections in state 5 or 6
     unsigned int m_uiNumSectionsActive; // 0x2E4 [O]; [R] reset = 0; [U] update counts sections in state 6
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cWorldView_update");
+    int getFocus(int i, t4Vector* outPos, float* outT) __asm__("cWorldView_getFocus");
+    int getTestFocus(int i, t4Vector* outPos, float* outT) __asm__("cWorldView_getTestFocus");
+    int getNumSections() __asm__("cWorldView_getNumSections__FP10cWorldView");
+    void* getSectionName(unsigned int i) __asm__("cWorldView_getSectionName");
+    int isSectionLoaded(int section) __asm__("cWorldView_isSectionLoaded__FP10cWorldViewi");
+    int isSectionUnLoaded(unsigned int i) __asm__("cWorldView_isSectionUnLoaded");
+    int loadSection(unsigned int idx, float value) __asm__("cWorldView_loadSection");
+    int unloadSection(unsigned int idx) __asm__("cWorldView_unloadSection");
+    int activateSection(unsigned int i) __asm__("cWorldView_activateSection");
+    int deactivateSection(unsigned int idx) __asm__("cWorldView_deactivateSection");
+    void* getHull(int uiIdx) __asm__("cWorldView_getHull");
+    int getNumHull() __asm__("cWorldView_getNumHull__FPv");
+    int isBoxValid(int box) __asm__("cWorldView_isBoxValid");
+    void recursiveIsValid(tBxBSPNode* sec, t4Vector* box, int* ok) __asm__("cWorldView_recursiveIsValid");
+    void refreshStreamFocus(int cam) __asm__("cWorldView_refreshStreamFocus");
+    void recursiveTreeFocus(tBxBSPNode* sec_, int cam, int loaded) __asm__("cWorldView_recursiveTreeFocus");
 };
 
 CHECK_OFFSET(cWorldView, mp_WorldCache, 0x000);

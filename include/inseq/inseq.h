@@ -54,6 +54,22 @@ struct cInSeq {
                                       //      from it, RecyclePlayer pushes back
     tScriptMainNode* mpScriptUsed;    // 0x1C [O]; [R] ctor 0; [U] ReadyPlayer pushes, RecyclePlayer unlinks;
                                       //      UpdateFrame and the *All methods walk it
+
+    // Methods bound to their retail symbols by asm labels.
+    void UpdateFrame() __asm__("cInSeq_UpdateFrame");
+    int ReadyPlayer(void* src) __asm__("cInSeq_ReadyPlayer");
+    void RecyclePlayer(int playerID) __asm__("cInSeq_RecyclePlayer");
+    void RecycleAll() __asm__("cInSeq_RecycleAll");
+    void Preview(int playerID, int flag) __asm__("cInSeq_Preview");
+    void* Play(int playerID, int loopScript) __asm__("cInSeq_Play");
+    void PlayAll(int loopScript) __asm__("cInSeq_PlayAll");
+    void Stop(int playerID) __asm__("cInSeq_Stop");
+    void StopAll() __asm__("cInSeq_StopAll");
+    void Pause(int playerID) __asm__("cInSeq_Pause");
+    void PauseAll() __asm__("cInSeq_PauseAll");
+    void Resume(int playerID) __asm__("cInSeq_Resume");
+    void ResumeAll() __asm__("cInSeq_ResumeAll");
+    void* GetPlayer(int playerID) __asm__("cInSeq_GetPlayer");
 };
 
 CHECK_OFFSET(tScriptMainNode, unk_00, 0x00);

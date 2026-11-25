@@ -53,6 +53,15 @@ struct cCutSceneTransitionMan : public cObjNode {
     tTVDisplayFormat mCutSceneTVFormat; // 0x34 [O]; [U] FindTVParameters fills it (2, 0, 1.0, 0.75, 0.63 for display
                                         //      format 2, else 1, 0.125, 0.75, 0.75, 0.63); ForceToCutSceneMode passes
                                         //      its address to slot 41; update lerps to its four floats
+
+    // Methods bound to their retail symbols by asm labels.
+    void StartCutScene(float dur) __asm__("cCutSceneTransitionMan_StartCutScene");
+    void EndCutScene(float fadeTime) __asm__("cCutSceneTransitionMan_EndCutScene");
+    void ForceToRegularMode() __asm__("cCutSceneTransitionMan_ForceToRegularMode");
+    void ForceToCutSceneMode() __asm__("cCutSceneTransitionMan_ForceToCutSceneMode");
+    void Pause(int up) __asm__("cCutSceneTransitionMan_Pause");
+    void FindTVParameters() __asm__("cCutSceneTransitionMan_FindTVParameters");
+    int GetCurrentState() __asm__("cCutSceneTransitionMan_GetCurrentState");
 };
 
 CHECK_OFFSET(cCutSceneTransitionMan, mCurrentState, 0x10);

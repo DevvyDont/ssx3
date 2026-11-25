@@ -70,6 +70,10 @@ CHECK_OFFSET(tMakeFlexRailData, Mesh8, 0x40);
 CHECK_OFFSET(tMakeFlexRailData, Flags, 0x44);
 CHECK_SIZE(tMakeFlexRailData, 0x48);
 
+struct cBxReplayFrame;
+
+struct t4Matrix;
+
 struct cFlexRailNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cFlexRailNode_cFlexRailNode / _cFlexRailNode1 / __cFlexRailNode store cFlexRailNode_vtbl (D_004900D0); the
@@ -107,6 +111,15 @@ struct cFlexRailNode : public cInstanceNode {
     cSimpleTube* Tube;           // 0x058 [O]; [R] cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, "Tube"), NumNodes * 8 -
                                  //       9); [U] the destructor calls its slot 1 (flags 3)
     char unk_05C[0x4];           // 0x05C tail padding to the 16-byte-aligned size 0x60 (never accessed)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFlexRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFlexRailNode_cFlexRailNode1");
+    void updateSpaceHash() __asm__("cFlexRailNode_updateSpaceHash");
+    void addSpaceHash() __asm__("cFlexRailNode_addSpaceHash");
+    void remSpaceHash() __asm__("cFlexRailNode_remSpaceHash");
+    void updateMat(t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2,
+                   const float* ctrlPoint3)
+        __asm__("cFlexRailNode_updateMat");
 };
 
 CHECK_OFFSET(cFlexRailNode, unk_01C, 0x01C);

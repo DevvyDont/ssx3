@@ -79,12 +79,11 @@ struct sFsMesh_CM {
  * are
  * interpolated from the quad's corners (renderer slot 97). The four flag phases start random.
  *
- * @param flagSet  the flag set
  * @param item  the flag's instance record (On Tour tInstanceRecord* pInst)
  */
-extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
+void cFlagSet::CreateMesh(tInstanceRecord* item)
 {
-    cFlagSet* self = flagSet;
+    cFlagSet* self = this;
     int i;
     for (i = 0; i < 4; i++) {
         self->mFlagTime[i] = randf_CM();
@@ -133,7 +132,7 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
         }
     }
     sFsV3_CM verts[50];
-    cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
+    self->updateGrid((t3Vector*)verts);
     sFsMesh_CM* flagMesh = ((sFsMesh_CM*)self->mGridMesh);
     flagMesh->vt[6].fn(vthis(flagMesh, flagMesh->vt[6]), verts, col, uv);
 }
@@ -150,17 +149,17 @@ void cMemMan_free(void*);
  * Releases the grid mesh (+0x60) through graphics-manager slot 77 and frees the vertex array (+0x74) with cMemMan_free,
  * nulling each pointer.
  */
-extern "C" void cFlagSet_PurgeMesh(cFlagSet* self)
+void cFlagSet::PurgeMesh()
 {
-    cGridMesh* mesh = self->mGridMesh;
+    cGridMesh* mesh = mGridMesh;
     if (mesh != 0) {
         cGraphicsMan_TheGraphicsMan->DeleteGridMesh(mesh);
-        self->mGridMesh = 0;
+        mGridMesh = 0;
     }
-    void* verts = self->mVerts;
+    void* verts = mVerts;
     if (verts != 0) {
         cMemMan_free(verts);
-        self->mVerts = 0;
+        mVerts = 0;
     }
 }
 #endif
@@ -187,11 +186,10 @@ extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
  * to the mesh's vtable entry 3. When either scroll rate (+0x50, +0x54) exceeds 0.001 it adds them to mScrollU/V (+0x88,
  * +0x8C), wrapping at 1.
  *
- * @param elem  the flag set
  */
-extern "C" void cFlagSet_update(cFlagSet* elem)
+void cFlagSet::update()
 {
-    cFlagSet* self = elem;
+    cFlagSet* self = this;
     if (cFlags_m_EnableUpdate == 0) {
         return;
     }
@@ -213,7 +211,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
     }
     if (cObjectInterface_getAITick() % 2 == self->mFrameToUpdateGrid) {
         sFsV3_CM verts[50];
-        cFlagSet_updateGrid((cFlagSet*)self, verts);
+        self->updateGrid(verts);
         cGridMesh* gridMesh = self->mGridMesh;
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)gridMesh->mVtbl;
         sVEntry<void(void*, void*)>* setVertsSlot = &vt[3];
@@ -303,9 +301,8 @@ static inline void MatCopy_34B9B0(t4Matrix* d, const t4Matrix* s)
  * (+0x88, +0x8C) and draws the grid mesh (+0x60, its vtable entry 7, with the instance matrix and its +0x94) or,
  * without a mesh, the instance itself (graphics-manager slot 96). Pops the draw state.
  *
- * @param flagSet  the flag set
  */
-extern "C" void cFlagSet_render(cFlagSet* flagSet)
+void cFlagSet::render()
 {
     if (cFlags_m_EnableRender == 0) {
         return;
@@ -313,15 +310,15 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
     cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
     gm->m_pCurrentDrawState[1] = gm->m_pCurrentDrawState[0];
     *++gm->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
-    if (*(signed char*)&flagSet->mFlagData.mOverSaturate != 0) {
+    if (*(signed char*)&mFlagData.mOverSaturate != 0) {
         SetDrawStateAlpha(cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState, 0xFF);
         SetDrawStateBlendMode(cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState, 11);
     } else {
         SetDrawStateBlendMode(gm->m_pCurrentDrawState, 5);
     }
     float one = 1.0f;
-    for (int i = 0; i < flagSet->mCurrentNumInstances; i++) {
-        tInstanceRecord* instRecord = (flagSet)->mInstances[i];
+    for (int i = 0; i < mCurrentNumInstances; i++) {
+        tInstanceRecord* instRecord = mInstances[i];
         if (!IsLoaded_34B9B0(instRecord)) {
             continue;
         }
@@ -341,9 +338,9 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
             void* pos = &instRecord->m_fmTransform;
             t4Matrix mat;
             MatCopy_34B9B0(&mat, &t4mat_Identity);
-            mat.row[3].x = flagSet->mScrollU;
-            mat.row[3].y = flagSet->mScrollV;
-            cGridMesh* gridMesh = flagSet->mGridMesh;
+            mat.row[3].x = mScrollU;
+            mat.row[3].y = mScrollV;
+            cGridMesh* gridMesh = mGridMesh;
             if (gridMesh != 0) {
                 tGridMeshRenderSlot* hv = (tGridMeshRenderSlot*)gridMesh->mVtbl;
                 hv[7].fn(vthis(gridMesh, hv[7]), pos, instRecord->m_MaterialBlock, &mat);
@@ -414,9 +411,9 @@ struct sFlagElem_BCA0 {
  * @param vout  output vertex array (cols * rows t3Vectors)
  */
 // cFlagSet::updateGrid(t3Vector* verts) (SSX On Tour symbols). Animates the flag mesh: waves along the columns, then per-vertex ripples, into out[cols * rows].
-extern "C" void cFlagSet_updateGrid(cFlagSet* vself, t3Vector* vout)
+void cFlagSet::updateGrid(t3Vector* vout)
 {
-    sFlagElem_BCA0* self = (sFlagElem_BCA0*)vself;
+    sFlagElem_BCA0* self = (sFlagElem_BCA0*)this;
     sFsV3_CM* out = (sFsV3_CM*)vout;
     int bothHeld = self->b0 != 0 && self->mode != 0;
     int neitherHeld = self->b0 == 0 && self->mode == 0;
@@ -535,13 +532,12 @@ struct sFlagSetVEntryC2E0b {
  * Writes the 0x60-byte set state (flag data, model id, instance count) through the stream's write slot (vtable entry
  * 1), then each instance in mInstances (+0x94, count +0x5C) through the instance-write slot (vtable entry 5).
  *
- * @param elem  the flag set
  * @param stream  replay stream to write to
  */
-extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, cBxReplayFrame* stream)
+void cFlagSet::writeToReplayFrame(cBxReplayFrame* stream)
 {
     int i;
-    cFlagSet* self = elem;
+    cFlagSet* self = this;
     stream->write((const char*)self, 0x60);
     for (i = 0; i < self->mCurrentNumInstances; i++) {
         stream->writeReplayInstance(self->mInstances[i]);
@@ -563,19 +559,18 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* self, tInstanceRecord* item);
  * vtable entry 3 into mInstances (+0x94), and rebuilds the cloth mesh from the first instance (cFlagSet_CreateMesh)
  * when the set is not empty.
  *
- * @param elem  the flag set
  * @param stream  replay stream to read from
  */
-extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, cBxReplayFrame* stream)
+void cFlagSet::readFromReplayFrame(cBxReplayFrame* stream)
 {
     int i;
-    cFlagSet* self = elem;
+    cFlagSet* self = this;
     stream->read((char*)self, 0x60);
     for (i = 0; i < self->mCurrentNumInstances; i++) {
         self->mInstances[i] = stream->readReplayInstance();
     }
     if (self->mCurrentNumInstances > 0) {
-        cFlagSet_CreateMesh(self, self->mInstances[0]);
+        self->CreateMesh(self->mInstances[0]);
     }
 }
 #endif
@@ -663,17 +658,17 @@ extern "C" void cFlagSet_AddFlag(void* self, void* data, void* ctx);
  * @param node  instance record of the flag
  * @param desc  converted flag data (tFlagState, 0x58 bytes)
  */
-extern "C" void cFlagManager_AddFlag(cFlagManager* self, cFlagNode* node, void* desc)
+void cFlagManager::AddFlag(cFlagNode* node, void* desc)
 {
     int i;
     cFlagSet* existing;
-    for (i = 0, existing = ((&self->mFlagSets[0])); i < 15; i++, existing++) {
+    for (i = 0, existing = ((&mFlagSets[0])); i < 15; i++, existing++) {
         if (existing->mCurrentNumInstances != 0 && cFlagSet_SameKind(existing, desc, node) != 0) {
             cFlagSet_AddFlag(existing, desc, node);
             return;
         }
     }
-    cFlagSet* freeElem = ((&self->mFlagSets[0]));
+    cFlagSet* freeElem = ((&mFlagSets[0]));
     for (int j = 0; j < 15; j++, freeElem++) {
         if (freeElem->mCurrentNumInstances == 0) {
             cFlagSet_AddFlag(freeElem, desc, node);
@@ -701,10 +696,10 @@ extern "C" int cFlagSet_RemoveFlag(void* elem, void* arg);
  *
  * @param instRecord  instance record of the flag
  */
-extern "C" void cFlagManager_RemoveFlag(cFlagManager* self, tInstanceRecord* instRecord)
+void cFlagManager::RemoveFlag(tInstanceRecord* instRecord)
 {
     int i;
-    cFlagSet* elem = ((&self->mFlagSets[0]));
+    cFlagSet* elem = ((&mFlagSets[0]));
     for (i = 0; i < 15; i++, elem++) {
         if (elem->mCurrentNumInstances != 0 && cFlagSet_RemoveFlag(elem, instRecord) != 0) {
             return;
@@ -779,7 +774,7 @@ extern "C" void cFlagManager_update(cFlagManager* self)
     for (i = 0; i < 15; i++) {
         cFlagSet* entry = &((&self->mFlagSets[0]))[i];
         if (entry->mCurrentNumInstances != 0) {
-            cFlagSet_update((cFlagSet*)entry);
+            entry->update();
         }
     }
 }
@@ -801,7 +796,7 @@ extern "C" void cFlagManager_render(cFlagManager* self)
     for (i = 0; i < 15; i++) {
         cFlagSet* entry = &self->mFlagSets[i];
         if (entry->mCurrentNumInstances != 0) {
-            cFlagSet_render(entry);
+            entry->render();
         }
     }
 }
@@ -830,7 +825,7 @@ extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, cBxReplayFra
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_writeToReplayFrame((cFlagSet*)(&((&self->mFlagSets[0]))[i]), stream);
+        (((&self->mFlagSets[0]))[i]).writeToReplayFrame(stream);
     }
 }
 #endif
@@ -857,7 +852,7 @@ extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, cBxReplayFr
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_readFromReplayFrame((cFlagSet*)(&((&self->mFlagSets[0]))[i]), stream);
+        (((&self->mFlagSets[0]))[i]).readFromReplayFrame(stream);
     }
 }
 #endif
@@ -971,23 +966,23 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj,
  * @param info  intersect info of the hit
  * @return self
  */
-extern "C" cFenceNode* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void* pInst, tMakeFenceData* tdata, tCollideInfo* info)
+cFenceNode* cFenceNode::cFenceNode1(int bucket, void* pInst, tMakeFenceData* tdata, tCollideInfo* info)
 {
     float force;
-    cInstanceNode_cInstanceNode1((self), bucket, 9, pInst);
-    self->FenceData.InstId = 0xFFFFFFFF;
-    VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
-    new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
-    *(&self->FenceData) = *tdata;
-    *(int*)&self->ForceMax = 0;
-    *(int*)&self->Force = 0;
-    *(int*)&self->ForceStep = 0;
-    self->FenceData.InstId = 0xFFFFFFFF;
-    cFenceNode_setupFence(self);
-    self->NextPropTime = 0;
-    self->PrevPropTime = 0;
-    if (self->GridMesh != 0) {
-        t4Vector dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(&self->Instance->m_fmTransform), &t4vect_XAxis));
+    cInstanceNode_cInstanceNode1((this), bucket, 9, pInst);
+    FenceData.InstId = 0xFFFFFFFF;
+    VPTR_OF(cObjNode, this) = cFenceNode_vtbl;
+    new (((t3Vector_C8E8*)&Verts[0])) t3Vector_C8E8[16];
+    *(&FenceData) = *tdata;
+    *(int*)&ForceMax = 0;
+    *(int*)&Force = 0;
+    *(int*)&ForceStep = 0;
+    FenceData.InstId = 0xFFFFFFFF;
+    setupFence();
+    NextPropTime = 0;
+    PrevPropTime = 0;
+    if (GridMesh != 0) {
+        t4Vector dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(&Instance->m_fmTransform), &t4vect_XAxis));
         float speed = fabs_C8E8(info->Vel);
         force = Dot_C8E8(dir, *(t4Vector*)&info->Direct);
         force = speed * (force * 0.0010000000474974513f);
@@ -995,12 +990,12 @@ extern "C" cFenceNode* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void
         force = Dot_C8E8(*(t4Vector*)&info->Reflect, *(t4Vector*)&info->Direct);
         force = force * 0.0010000000474974513f * fabs_C8E8(info->Vel);
     }
-    cFenceNode_setForce(self, force);
-    if ((char*)self->NextInstance != 0)
-        cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->NextInstance, 1);
-    if ((char*)self->PrevInstance != 0)
-        cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->PrevInstance, 0);
-    return (self);
+    setForce(force);
+    if ((char*)NextInstance != 0)
+        makeNeighbour((tInstanceRecord*)NextInstance, 1);
+    if ((char*)PrevInstance != 0)
+        makeNeighbour((tInstanceRecord*)PrevInstance, 0);
+    return (this);
 }
 #endif
 
@@ -1061,8 +1056,8 @@ extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int b
     self->field_0x2c = 0;
     self->field_0x34 = 0;
     self->block.w[0] = 0xFFFFFFFF;
-    cFenceNode_setupFence((cFenceNode*)self);
-    cFenceNode_setForce((cFenceNode*)self, dt);
+    ((cFenceNode*)self)->setupFence();
+    ((cFenceNode*)self)->setForce(dt);
     self->field_0x38 = 4;
     self->field_0x3c = 4;
     return self;
@@ -1125,7 +1120,7 @@ extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, cBxReplay
     VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
     new ((char*)&self->GridMesh) sFlagElem_CBE8[16];
     stream->read((char*)&self->FenceData, 36);
-    cFenceNode_setupFence(self);
+    self->setupFence();
     return ((void*)self);
 }
 #endif
@@ -1173,19 +1168,19 @@ static inline float fabs_34CC80(float x)
  * @param obj  neighbour instance record (NextInstance or PrevInstance)
  * @param flag  1 for the next neighbour, 0 for the previous
  */
-extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj, int flag)
+void cFenceNode::makeNeighbour(tInstanceRecord* obj, int flag)
 {
-    if ((int)self->GridMesh == 0) {
+    if ((int)GridMesh == 0) {
         return;
     }
     if (((char*)obj) == 0) {
         return;
     }
     float force;
-    if (self->ForceStep < 0.0f) {
-        force = self->ForceMax * 0.4f;
+    if (ForceStep < 0.0f) {
+        force = ForceMax * 0.4f;
     } else {
-        force = self->ForceMax * -0.4f;
+        force = ForceMax * -0.4f;
     }
     cFlagObj_CC80* node = (cFlagObj_CC80*)obj->m_pActiveNode;
     if (node != 0) {
@@ -1196,7 +1191,7 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj,
             return;
         }
         if (flag != 0) {
-            tInstanceRecord* neighbor = self->NextInstance;
+            tInstanceRecord* neighbor = NextInstance;
             if (((char*)neighbor) == 0) {
                 return;
             }
@@ -1204,9 +1199,9 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj,
             if (neighborNode == 0) {
                 return;
             }
-            cFenceNode_neighbourCollide((cFenceNode*)neighborNode, flag, force);
+            ((cFenceNode*)neighborNode)->neighbourCollide(flag, force);
         } else {
-            tInstanceRecord* neighbor = self->PrevInstance;
+            tInstanceRecord* neighbor = PrevInstance;
             if (((char*)neighbor) == 0) {
                 return;
             }
@@ -1214,11 +1209,11 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj,
             if (neighborNode == 0) {
                 return;
             }
-            cFenceNode_neighbourCollide((cFenceNode*)neighborNode, 0, force);
+            ((cFenceNode*)neighborNode)->neighbourCollide(0, force);
         }
     } else if (0.25f <= fabs_34CC80(force)) {
         void* fence = cMemMan_alloc(268, str_Fence_b, 0x20000000, 0);
-        cFenceNode_cFenceNode2(fence, 1, obj, &self->FenceData, flag, force);
+        cFenceNode_cFenceNode2(fence, 1, obj, &FenceData, flag, force);
     }
 }
 #endif
@@ -1237,16 +1232,16 @@ extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
  * @param on  1 when the force came through the next neighbour, 0 for the previous
  * @param dt  force to apply
  */
-extern "C" void cFenceNode_neighbourCollide(cFenceNode* self, int on, float dt)
+void cFenceNode::neighbourCollide(int on, float dt)
 {
-    cFenceNode_setForce(self, dt);
+    setForce(dt);
     if (on) {
-        if (self->NextPropTime == 0) {
-            self->NextPropTime = 4;
+        if (NextPropTime == 0) {
+            NextPropTime = 4;
         }
     } else {
-        if (self->PrevPropTime == 0) {
-            self->PrevPropTime = 4;
+        if (PrevPropTime == 0) {
+            PrevPropTime = 4;
         }
     }
 }
@@ -1279,12 +1274,12 @@ extern "C" void cFenceNode_update(cFenceNode* self)
 {
     if (self->NextPropTime > 0) {
         if (--self->NextPropTime == 0) {
-            cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->NextInstance, 1);
+            self->makeNeighbour((tInstanceRecord*)self->NextInstance, 1);
         }
     }
     if (self->PrevPropTime > 0) {
         if (--self->PrevPropTime == 0) {
-            cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->PrevInstance, 0);
+            self->makeNeighbour((tInstanceRecord*)self->PrevInstance, 0);
         }
     }
     cFenceNodeState* state = (cFenceNodeState*)&self->FenceData; // the cFenceNodeState part (+0x1C)
@@ -1311,7 +1306,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
             self->ForceStep = halfAmp * 0.1f;
         }
     }
-    cFenceNode_updateGrid(self);
+    self->updateGrid();
 }
 #endif
 
@@ -1386,11 +1381,10 @@ struct sFlagMesh_CF98 {
  * (+0xA4) moves too when the fence Type (+0x20) is 1, otherwise it stays at rest. The 16 points go to the mesh's vtable
  * entry 3.
  *
- * @param fenceNode  the fence node
  */
-extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
+void cFenceNode::updateGrid()
 {
-    cFenceNode* self = fenceNode;
+    cFenceNode* self = this;
     if (((sFlagMesh_CF98*)self->GridMesh) == 0) {
         return;
     }
@@ -1468,11 +1462,10 @@ struct sFsMesh_D1E8 {
  * (+0xA4) vertices, 16 UVs and 16 colours (alpha 1.0) are interpolated in sevenths between the quad's corners, handed
  * to the grid mesh (its slot 6), and cFenceNode_updateGrid updates the grid.
  *
- * @param fenceNode  the fence node
  */
-extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
+void cFenceNode::setupFence()
 {
-    cFenceNode* self = fenceNode;
+    cFenceNode* self = this;
     self->NextInstance = 0;
     self->PrevInstance = 0;
     self->Instance->m_iFlags = (self->Instance->m_iFlags & ~2u) | 4;
@@ -1501,7 +1494,7 @@ extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
     }
     sFsMesh_D1E8* gridMesh = ((sFsMesh_D1E8*)self->GridMesh);
     gridMesh->vt[6].fn(vthis(gridMesh, gridMesh->vt[6]), pos, col, uv);
-    cFenceNode_updateGrid((cFenceNode*)self);
+    self->updateGrid();
 }
 #endif
 
@@ -1544,7 +1537,7 @@ extern "C" void cFenceNode_onCollide(cFenceNode* self, void* obj)
     tCollideInfo* hitInfo = (tCollideInfo*)obj;
     if (self->ForceMax >= 1.0f) return;
     float dot = fsDot_D650(hitInfo->Reflect, hitInfo->Direct);
-    cFenceNode_setForce(self, dot * 0.0010000000474974513f * hitInfo->Vel);
+    self->setForce(dot * 0.0010000000474974513f * hitInfo->Vel);
     if (self->NextPropTime == 0) self->NextPropTime = 4;
     if (self->PrevPropTime == 0) self->PrevPropTime = 4;
 }
@@ -1568,12 +1561,11 @@ static inline float fabs_34D6F0(float x)
  * ForceMax (+0x30) grows by |force| up to 1. ForceStep (+0x34) becomes ForceMax * 0.1, signed like force when the fence
  * is at rest (ForceStep 0) and keeping its current sign otherwise.
  *
- * @param vself  the fence node
  * @param force  force to add (sign gives the direction when at rest)
  */
-extern "C" void cFenceNode_setForce(cFenceNode* vself, float force)
+void cFenceNode::setForce(float force)
 {
-    cFenceNode* self = vself;
+    cFenceNode* self = this;
     self->ForceMax += fabs_34D6F0(force);
     if (self->ForceMax > 1.0f) {
         self->ForceMax = 1.0f;
@@ -1713,7 +1705,7 @@ extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType
         tInstanceRecord* n = (tInstanceRecord*)sub->Instance;
         n->m_iFlags = ((unsigned int)n->m_iFlags & ~2u) | 4;
     }
-    cAnimNode_cacheFrame(self);
+    self->cacheFrame();
     return ((char*)self);
 }
 #endif
@@ -1736,20 +1728,20 @@ extern "C" void* cMoveNode_cMoveNode_3(void* self, void* a1, void* stream) __asm
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, cBxReplayFrame* stream)
+void* cAnimNode::cAnimNode1(void* bucket, cBxReplayFrame* stream)
 {
     int skippedWord;
-    cMoveNode* node = (cMoveNode*)&self->MoveNodeBase;
-    t4Matrix** slot = &self->AnimMats;
+    cMoveNode* node = (cMoveNode*)&MoveNodeBase;
+    t4Matrix** slot = &AnimMats;
     cMoveNode_cMoveNode_3(node, bucket, stream);
-    self->mVtbl = cAnimNode_vtbl;
+    mVtbl = cAnimNode_vtbl;
     // The element type has an empty constructor (tAnimMat, cAnimNode_cAnimNode); the array new keeps its loop.
     *slot = new (str_AnimMats, 0x20000000, 0) tAnimMat[node->Instance->m_Model->m_iNumMeshes];
-    cAnimNode_setAnimMeshCache(((char*)self));
-    stream->read((char*)self, 20);
+    cAnimNode_setAnimMeshCache(((char*)this));
+    stream->read((char*)this, 20);
     stream->read((char*)&skippedWord, 4);
-    cAnimNode_cacheFrame(self);
-    return ((char*)self);
+    cacheFrame();
+    return ((char*)this);
 }
 #endif
 
@@ -1827,17 +1819,17 @@ struct sFlagSetVEntry_DC90c {
  * and clears RootTransformDirty (bit 0 of the cMoveNode part's Flags, +0x26). Overrides
  * cMoveNode_updateRootTransform (vtable slot 51).
  */
-extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
+void cAnimNode::updateRootTransform()
 {
-    sFlagSetVEntry_DC90a* vt = (sFlagSetVEntry_DC90a*)self->mVtbl;
-    vt[52].fn(vthis(self, vt[52]));
-    char* sub = (char*)&self->MoveNodeBase;
-    sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
+    sFlagSetVEntry_DC90a* vt = (sFlagSetVEntry_DC90a*)mVtbl;
+    vt[52].fn(vthis(this, vt[52]));
+    char* sub = (char*)&MoveNodeBase;
+    sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)mVtbl;
     sFlagSetVEntry_DC90b* vtGet = (sFlagSetVEntry_DC90b*)vt2;
     void* objB = vthis(sub, vt2[33]);
     void* rootTransform = vtGet[24].fn(vthis(sub, vt2[24]));
-    vt2[33].fn(objB, rootTransform, (int)self->AnimMats);
-    self->Flags &= ~1;
+    vt2[33].fn(objB, rootTransform, (int)AnimMats);
+    Flags &= ~1;
 }
 #endif
 
@@ -1988,9 +1980,9 @@ extern "C" void cAnimNode_makeAnimMats(cAnimNode* self, t4Matrix* vroot, sFsMtx_
     for (int i = 0; i < skel->count; i++, bone++) {
         if (bone->animated) {
             if (bone->parent != -1) {
-                out[i] = mulScaledFS(out[bone->parent], *(sFsMtx_DD18*)cAnimNode_getFrameMat(self, k++), scale);
+                out[i] = mulScaledFS(out[bone->parent], *(sFsMtx_DD18*)self->getFrameMat(k++), scale);
             } else {
-                out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)cAnimNode_getFrameMat(self, k++), scale);
+                out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)self->getFrameMat(k++), scale);
             }
         } else {
             if (bone->parent != -1) {
@@ -2014,8 +2006,9 @@ extern t4Matrix t4mat_Identity;
  * @param i  animated-mesh index
  * @return AnimFrames[i] +0x90 (0xD0-byte frames at +0x48), or t4mat_Identity
  */
-extern "C" void* cAnimNode_getFrameMat(cAnimNode* self, int i) {
-    char* base = (char*)self->AnimFrames;
+void* cAnimNode::getFrameMat(int i)
+{
+    char* base = (char*)AnimFrames;
     if (base == 0) {
         return &t4mat_Identity;
     }
@@ -2046,18 +2039,18 @@ struct sFlagOwner_E348 {
  * 2 with CacheTime (+0x4); then sets MeshVelocityDirty (+0x10) so cAnimNode_updateMeshVelocity recomputes the velocities on demand.
  * Slot 52 of cAnimNode's vtable.
  */
-extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
+void cAnimNode::cacheFrame()
 {
     int i;
-    if (self->AnimFrames != 0) {
-        for (i = 0; i < self->NumAnimMeshes; i++) {
+    if (AnimFrames != 0) {
+        for (i = 0; i < NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
-            cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)self->AnimFrames);
+            cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)AnimFrames);
             sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)animFrame->mVtbl;
-            vt[2].fn(vthis(animFrame, vt[2]), self->CacheTime);
+            vt[2].fn(vthis(animFrame, vt[2]), CacheTime);
         }
     }
-    self->MeshVelocityDirty = 1;
+    MeshVelocityDirty = 1;
 }
 #endif
 
@@ -2075,11 +2068,11 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, cBxReplayFrame* stream)
+void cAnimNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
     int dummy;
-    cMoveNode_writeToReplayFrame(&self->MoveNodeBase, stream);
-    stream->write((const char*)self, 20);
+    cMoveNode_writeToReplayFrame(&MoveNodeBase, stream);
+    stream->write((const char*)this, 20);
     stream->write((const char*)&dummy, 4);
 }
 #endif

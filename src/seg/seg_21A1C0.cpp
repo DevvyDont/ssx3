@@ -30,9 +30,9 @@ extern "C" void cBXString_releaseBuffer(cBXString* self, int len);
  */
 // vsprintf into a cBXString: estimates the formatted length first (the MFC CString::FormatV
 // scheme), reserves it, then formats in place.
-extern "C" void cBXString_vprintf(cBXString* self_, const char* fmt, char* args)
+void cBXString::vprintf(const char* fmt, char* args)
 {
-    cBXString* self = (cBXString*)self_;
+    cBXString* self = (cBXString*)this;
     char* ap = args;
     int maxLen = 1;
     const char* fmtPos;
@@ -158,7 +158,7 @@ extern "C" void cBXString_printf(void* str, const char* fmt, ...)
 {
     char* ap;
     ap = (char*)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    cBXString_vprintf((cBXString*)str, fmt, ap);
+    ((cBXString*)str)->vprintf(fmt, ap);
 }
 #endif
 
@@ -175,12 +175,12 @@ extern unsigned char D_00499C81[];
  * table D_00499C81) starts, cuts the text there and sets the header's DataLength (text - 8). No retail code calls it.
  */
 // Strips trailing white space (D_00499C81 is the ctype table + 1, bit 8 = space).
-extern "C" void cBXString_trimRight(cBXString* self)
+void cBXString::trimRight()
 {
-    cBXString_copyBeforeWrite(self);
+    cBXString_copyBeforeWrite(this);
     char* end = 0;
     char* scanPos;
-    for (scanPos = self->Str; *scanPos != 0; scanPos++) {
+    for (scanPos = Str; *scanPos != 0; scanPos++) {
         if (end == 0)
             end = scanPos;
         if (!(D_00499C81[(int)*scanPos] & 8))
@@ -188,7 +188,7 @@ extern "C" void cBXString_trimRight(cBXString* self)
     }
     if (end != 0) {
         *end = 0;
-        self->getData()->DataLength = end - self->Str;
+        getData()->DataLength = end - Str;
     }
 }
 #endif
@@ -208,15 +208,15 @@ extern unsigned char D_00499C81[];
  * - 8). No retail code calls it.
  */
 // Strips leading white space.
-extern "C" void cBXString_trimLeft(cBXString* self)
+void cBXString::trimLeft()
 {
-    cBXString_copyBeforeWrite(self);
-    char* textStart = self->Str;
+    cBXString_copyBeforeWrite(this);
+    char* textStart = Str;
     while (D_00499C81[(int)*textStart] & 8)
         textStart++;
-    int len = self->getData()->DataLength - (textStart - self->Str);
-    func_0041610C(self->Str, textStart, len + 1);
-    self->getData()->DataLength = len;
+    int len = getData()->DataLength - (textStart - Str);
+    func_0041610C(Str, textStart, len + 1);
+    getData()->DataLength = len;
 }
 #endif
 

@@ -32,6 +32,12 @@ struct cRailLink;
 struct cRailSpaceNode;
 struct tInstanceRecord;
 
+struct t4Matrix;
+struct t4Vector;
+struct tIntersectInfo;
+
+struct cBxReplayFrame;
+
 struct cRailModifier : public cRailLink {
     // cRailLink (object/raillink.h, 0xC): the vptr at 0x08:
     //   [R] ctors store cRailModifier_vtbl; the destructor stores it, then cRailLink_vtbl before unlinking
@@ -64,6 +70,16 @@ struct cRailModifier : public cRailLink {
     char unk_48[0x8];             // 0x48 padding (XForm is 16-byte aligned)
     t4Matrix XForm;               // 0x50 [O]; [U] buildXform writes the inverse rail transform (sqc2 0x50-0x80,
                                   //      transposes lwc1/swc1 0x54-0x74); getInvMat copies it (lqc2 0x50-0x80)
+
+    // Methods bound to their retail symbols by asm labels.
+    void buildXform() __asm__("cRailModifier_buildXform");
+    void getInvMat(t4Matrix* mat) __asm__("cRailModifier_getInvMat");
+    void splineIntersect(t4Vector* box, t4Vector* box2, const t4Vector* point, unsigned int mask, int* found,
+                         float* bestDist, tIntersectInfo* out)
+        __asm__("cRailModifier_splineIntersect");
+    int getSplineId() __asm__("cRailModifier_getSplineId");
+    char* cRailModifier1(cBxReplayFrame* src) __asm__("cRailModifier_cRailModifier1");
+    void updateBoundBox() __asm__("cRailModifier_updateBoundBox");
 };
 
 CHECK_OFFSET(cRailModifier, unk_0C, 0x0C);

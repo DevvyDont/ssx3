@@ -144,6 +144,10 @@ CHECK_OFFSET(tLightCacheEntry, pPrev, 0x174);
 CHECK_OFFSET(tLightCacheEntry, unk_178, 0x178);
 CHECK_SIZE(tLightCacheEntry, 0x180);
 
+struct cIrradiance;
+struct t4Vector;
+struct tInstanceRecord;
+
 struct cWorldLightMan {
     cBXNash* m_pNash;               // 0x000 [O]; [R] the ctor's pNash (cGame's BXNash); [U] initLightCache gives each
                                     //       overlap list it
@@ -160,6 +164,16 @@ struct cWorldLightMan {
     unsigned int m_uiNumLightCacheEntry; // 0x3290 [O]; [R] initLightCache 0; [U] getRealTimeLights counts up to 32
     char unk_3294[0xC];             // 0x3294 no retail access (On Tour's next member is unsigned int
                                     //       m_uiNumOverlapList), then padding to the 16-aligned size
+
+    // Methods bound to their retail symbols by asm labels.
+    void initLightCache() __asm__("cWorldLightMan_initLightCache");
+    void purgeLightCache() __asm__("cWorldLightMan_purgeLightCache");
+    cIrradiance* getRealTimeLights(tInstanceRecord* obj, int force) __asm__("cWorldLightMan_getRealTimeLights");
+    tLightCacheEntry* evictHashTableEntry(int priority) __asm__("cWorldLightMan_evictHashTableEntry");
+    void IntersectLights1(void* pos, void* overlapList, cIrradiance* irradiance, int count)
+        __asm__("cWorldLightMan_IntersectLights1");
+    void IntersectLights(void* point, void* mgrp, void** outp, int max) __asm__("cWorldLightMan_IntersectLights");
+    float GetIntensity(t4Vector* point, tLightRecord* lp) __asm__("cWorldLightMan_GetIntensity");
 };
 
 CHECK_OFFSET(cWorldLightMan, m_pNash, 0x000);

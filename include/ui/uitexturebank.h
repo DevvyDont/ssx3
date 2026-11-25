@@ -52,6 +52,11 @@ struct cUITextureBank {
     cTextureElement* mpElements;                 // 0x00C [O]
     int mNumElements;                            // 0x010 [O]
     cUIEngine* mpEngine;                         // 0x014 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void setData(int id, void* vdata) __asm__("cUITextureBank_setData");
+    cTextureElement* getElementByHashname(int id) __asm__("cUITextureBank_getElementByHashname");
+    int getTextureByHashname(int key) __asm__("cUITextureBank_getTextureByHashname");
 };
 
 CHECK_OFFSET(cUITextureBank, mpTextureTableHeader, 0x000);

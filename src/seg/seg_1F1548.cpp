@@ -167,27 +167,27 @@ extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
  * from D_004A3BA8 and a virtual of GrMan (the cPS2GraphicsMan) with the view index. On Tour passes the query ID as view
  * + 6.
  */
-extern "C" void cPS2VisualEffectsMan_update(cPS2VisualEffectsMan* self)
+void cPS2VisualEffectsMan::update()
 {
-    ((cObj_0A98*)(&self->m_RenderToggles)[0])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[1])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[2])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[3])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[4])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[5])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[6])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[7])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[8])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[9])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[10])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[11])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[12])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[13])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[14])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[15])->Reset();
-    ((cObj_0A98*)(&self->m_RenderToggles)[16])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[0])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[1])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[2])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[3])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[4])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[5])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[6])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[7])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[8])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[9])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[10])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[11])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[12])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[13])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[14])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[15])->Reset();
+    ((cObj_0A98*)(&m_RenderToggles)[16])->Reset();
     for (int i = 0; i < (int)SSXApp->Game->ViewMan->m_uiNumView; i++) {
-        cVisualEffectsMan_commonUpdate(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
+        cVisualEffectsMan_commonUpdate(this, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
         GrMan->UpdateFullScreenEffects(i);
     }
 }
@@ -213,25 +213,25 @@ struct sMgr_0CD0 {
  * Calls vtable slot +0x18 of each of the 17 components in member order (+0x00..+0x40); per On Tour that slot is the
  * component's render (the retail view names it Update).
  */
-extern "C" void cPS2VisualEffectsMan_render(cPS2VisualEffectsMan* self)
+void cPS2VisualEffectsMan::render()
 {
-    ((cObj_0CD0*)(&self->m_RenderToggles)[0])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[1])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[2])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[3])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[4])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[5])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[6])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[7])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[8])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[9])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[10])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[11])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[12])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[13])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[14])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[15])->Update();
-    ((cObj_0CD0*)(&self->m_RenderToggles)[16])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[0])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[1])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[2])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[3])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[4])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[5])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[6])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[7])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[8])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[9])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[10])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[11])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[12])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[13])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[14])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[15])->Update();
+    ((cObj_0CD0*)(&m_RenderToggles)[16])->Update();
 }
 #endif
 
@@ -298,8 +298,9 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_reset);
  * Despite the name it reads nothing from a replay frame (On Tour's version takes a cReplayFramePtr*); the
  * constructor calls it as a reset.
  */
-extern "C" void cPunchFX_reset(cPunchFX* self) {
-    self->mActive = 0;
+void cPunchFX::reset()
+{
+    mActive = 0;
 }
 #endif
 
@@ -397,41 +398,41 @@ static inline float randRange_1150(float lo, float hi)
  * gets a random offset of up to 3 * blend around a point 8 units along the bone, a size of 15 to
  * 15 + 15 * blend and a grey level of at most 0.9 x blend.
  */
-extern "C" void cPunchFX_update(cPunchFX* self)
+void cPunchFX::update()
 {
-    int active = 0.0f < self->mRider->PunchStrength;
-    self->mActive = active;
+    int active = 0.0f < mRider->PunchStrength;
+    mActive = active;
     if (!active)
         return;
-    int bone = self->mRider->LHandSkelIndex;
+    int bone = mRider->LHandSkelIndex;
     int flag = 0;
-    int layer0Anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 0);
-    int layer1Anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 1);
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 1) == 13) {
-        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->Events, 1) == 0) {
-            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->Events, 0)
+    int layer0Anim = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 0);
+    int layer1Anim = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 1);
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == 13) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 1)->Events, 1) == 0) {
+            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 1)->Events, 0)
                    != 0;
         }
     }
     if (layer0Anim == 326 || (layer1Anim == 323 && flag)) {
-        if (self->mRider->IsRidingFakie)
-            bone = self->mRider->LHandSkelIndex;
+        if (mRider->IsRidingFakie)
+            bone = mRider->LHandSkelIndex;
         else
-            bone = self->mRider->RHandSkelIndex;
+            bone = mRider->RHandSkelIndex;
     } else if (layer0Anim == 327 || (layer1Anim == 324 && flag)) {
-        if (self->mRider->IsRidingFakie)
-            bone = self->mRider->RHandSkelIndex;
+        if (mRider->IsRidingFakie)
+            bone = mRider->RHandSkelIndex;
         else
-            bone = self->mRider->LHandSkelIndex;
+            bone = mRider->LHandSkelIndex;
     } else {
-        self->mActive = 0;
+        mActive = 0;
     }
-    if (self->mActive) {
+    if (mActive) {
         // the bone position through a pointer to its matrix: retail adds base first (a subscript puts the index first)
-        t4Matrix* boneSkel = &self->mRider->mAnimModel->SkelMatrices[bone];
+        t4Matrix* boneSkel = &mRider->mAnimModel->SkelMatrices[bone];
         t4Vector base = boneSkel->row[3];
         t4Matrix boneMat;
-        CopyMat_1150(&boneMat, &self->mRider->mAnimModel->SkelMatrices[bone]);
+        CopyMat_1150(&boneMat, &mRider->mAnimModel->SkelMatrices[bone]);
         boneMat.row[3] = t4vect_Zero;
         t4Vector point;
         t4Vector rnd;
@@ -446,7 +447,7 @@ extern "C" void cPunchFX_update(cPunchFX* self)
             base = point;
         }
         for (int i = 0; i < 4; i++) {
-            float attackBlend = self->mRider->PunchStrength;
+            float attackBlend = mRider->PunchStrength;
             float jitter = attackBlend * 3.0f;
             float hi = attackBlend * 15.0f + 15.0f;
             rnd.w = 0.0f;
@@ -454,15 +455,15 @@ extern "C" void cPunchFX_update(cPunchFX* self)
             rnd.y = randRange_1150(-jitter, jitter);
             rnd.z = randRange_1150(-jitter, jitter);
             Add_1150(&point, base, rnd);
-            self->mSpritePos[i] = point;
-            self->mSpriteSize[i] = randRange_1150(15.0f, hi);
-            float shade = self->mRider->PunchStrength * 0.9f;
+            mSpritePos[i] = point;
+            mSpriteSize[i] = randRange_1150(15.0f, hi);
+            float shade = mRider->PunchStrength * 0.9f;
             shade *= randf_1150();
             point.x = 1.0f;
             point.y = shade;
             point.z = shade;
             point.w = shade;
-            self->mSpriteColour[i] = *(tARGB*)&point; // built in the t4Vector temporary: A, R, G, B in x .. w
+            mSpriteColour[i] = *(tARGB*)&point; // built in the t4Vector temporary: A, R, G, B in x .. w
         }
     }
 }
@@ -503,9 +504,9 @@ static inline void SetDrawBits(sDrawState* drawState, int word, unsigned int v, 
  * _EffectTexMap[24]) and its blend settings, draws each sprite at mSpritePos[i] with its size and colour over the
  * whole texture (DrawSprite), then pops the state.
  */
-extern "C" void cPunchFX_render(cPunchFX* self)
+void cPunchFX::render()
 {
-    if (self->mActive == 0)
+    if (mActive == 0)
         return;
     PushDrawState(GrMan);
     *GrMan->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
@@ -520,8 +521,8 @@ extern "C" void cPunchFX_render(cPunchFX* self)
     SetDrawBits(GrMan->m_pCurrentDrawState, 1, 7, 0x1F, 2);
     SetDrawBits(GrMan->m_pCurrentDrawState, 1, 1, 1, 22);
     for (int i = 0; i < 4; i++) {
-        GrMan->DrawSprite(self->mSpritePos[i], t2VectorRef(self->mSpriteSize[i], self->mSpriteSize[i]),
-                          t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), self->mSpriteColour[i]);
+        GrMan->DrawSprite(mSpritePos[i], t2VectorRef(mSpriteSize[i], mSpriteSize[i]),
+                          t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), mSpriteColour[i]);
     }
     GrMan->m_pCurrentDrawState--;
 }
@@ -2069,7 +2070,7 @@ extern int D_004A5528_3418 __asm__("D_004A5528");
  *
  * @param off  the screen offset added to the crystal position
  */
-extern "C" void tCrystal_render(tCrystal* self, const t2Vector* off)
+void tCrystal::render(const t2Vector* off)
 {
     if (D_004A5518_3418 == 0) {
         D_004A5510_3418 = 0.0f;
@@ -2081,12 +2082,12 @@ extern "C" void tCrystal_render(tCrystal* self, const t2Vector* off)
         D_004A5520_3418 = 1.0f;
         D_004A5524_3418 = 1.0f;
     }
-    float fade = self->mAge / self->mDeath;
-    sV4_3418 col = *(sV4_3418*)&self->mColour[0];
+    float fade = mAge / mDeath;
+    sV4_3418 col = *(sV4_3418*)&mColour[0];
     fade = 1.0f - fade * fade;
     col.x *= fade;
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = ((sWorld_3418*)GrMan)->GetFB();
-    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(t3Vector*)&self->mSize[0], *(t2Vector*)&D_004A5510_3418, *(t2Vector*)&D_004A5520_3418, col, 1);
+    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((mRotation + mAge / mDeath * mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(mPosition[0] + off->x, mPosition[1] + off->y), *(t3Vector*)&mSize[0], *(t2Vector*)&D_004A5510_3418, *(t2Vector*)&D_004A5520_3418, col, 1);
 }
 #endif
 
@@ -2207,18 +2208,18 @@ static inline float randRange_3640(float lo, float hi)
  * @param basePos  the group position
  * @param n  how many crystals to add
  */
-extern "C" void cSplashManager_AddCrystal(cSplashManager* self, t2Vector* basePos, int n)
+void cSplashManager::AddCrystal(t2Vector* basePos, int n)
 {
     for (int i = 0; i < n; i++) {
-        if (self->mNumActiveCrystals < cSplashToggles_m_NumIceCrystals) {
+        if (mNumActiveCrystals < cSplashToggles_m_NumIceCrystals) {
             t2Vector off;
             off.x = randRange_3640(-cSplashToggles_m_CrystalGroupSpacingX, cSplashToggles_m_CrystalGroupSpacingX);
             off.y = randRange_3640(-cSplashToggles_m_CrystalGroupSpacingY, cSplashToggles_m_CrystalGroupSpacingY);
             t2Vector pos;
             pos.x = basePos->x + off.x;
             pos.y = basePos->y + off.y;
-            tCrystal_init(&((&self->mCrystalList[0]))[self->mNumActiveCrystals], &pos, i);
-            self->mNumActiveCrystals++;
+            tCrystal_init(&((&mCrystalList[0]))[mNumActiveCrystals], &pos, i);
+            mNumActiveCrystals++;
         }
     }
 }
@@ -2287,11 +2288,11 @@ static inline float randScaled_3810(float s)
  * size is BXrand() % (maximum - minimum), a division by zero when the two settings are equal. cSplashManager_update
  * calls it.
  */
-extern "C" void cSplashManager_AddSplashes(cSplashManager* self)
+void cSplashManager::AddSplashes()
 {
-    float acc = self->mNumSplashesToAdd;
+    float acc = mNumSplashesToAdd;
     int n = (int)acc;
-    self->mNumSplashesToAdd = acc - (float)n;
+    mNumSplashesToAdd = acc - (float)n;
     while (n > 0) {
         t2Vector pos;
         pos.x = randScaled_3810(640.0f);
@@ -2301,12 +2302,12 @@ extern "C" void cSplashManager_AddSplashes(cSplashManager* self)
             if (k <= 0)
                 k = 1;
             n -= k;
-            cSplashManager_AddCrystal_3810(((char*)self), &pos, k);
+            cSplashManager_AddCrystal_3810(((char*)this), &pos, k);
         } else {
             t2Vector dropSize;
             dropSize.x = cSplashToggles_m_DropMaxSize;
             dropSize.y = cSplashToggles_m_DropMaxSize;
-            cSplashManager_AddDrop(((char*)self), &pos, &dropSize);
+            cSplashManager_AddDrop(((char*)this), &pos, &dropSize);
             n--;
         }
     }
@@ -2464,7 +2465,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         self->speed = 0.0f;
     }
     self->prevPos = pos;
-    cSplashManager_AddSplashes((cSplashManager*)self);
+    ((cSplashManager*)self)->AddSplashes();
 
     int i = 0;
     while (i < self->nSmoke) {
@@ -2559,7 +2560,7 @@ extern "C" void cSplashManager_render(cSplashManager* self)
     for (i = 0; i < self->mNumActiveDrops; i++)
         tDrop_render(&self->mDropList[i], &off);
     for (i = 0; i < self->mNumActiveCrystals; i++)
-        tCrystal_render(&self->mCrystalList[i], &off);
+        self->mCrystalList[i].render(&off);
     ps2GraphicsMan->m_pCurrentDrawState--;
     ps2GraphicsMan->PopView();
     ps2GraphicsMan->PopViewport();
@@ -2680,14 +2681,15 @@ extern float cSplashToggles_m_ImpactMultiplier;
  * @param impactPos  the impact position
  * @param speed  the impact strength (times 0.036, km/h)
  */
-extern "C" void cSplashManager_ReportImpactLocal(cSplashManager* self, t4Vector* impactPos, float speed)
+void cSplashManager::ReportImpactLocal(t4Vector* impactPos, float speed)
 {
-    float k = 1.0f - Length_4260(Sub_4260(*(&self->mLastCameraPosition), *impactPos)) / cSplashToggles_m_FarthestImpactDistance;
-    if (k > 0.0f && self->mLastSnowfallIntensity > cSplashToggles_m_MinimumSnowfallForImpacts) {
+    float k = 1.0f - Length_4260(Sub_4260(*(&mLastCameraPosition),
+            *impactPos)) / cSplashToggles_m_FarthestImpactDistance;
+    if (k > 0.0f && mLastSnowfallIntensity > cSplashToggles_m_MinimumSnowfallForImpacts) {
         float lo = cSplashToggles_m_LowestImpactItensity;
         float impactRamp = (speed * 0.036f - lo) / (120.0f - lo);
         float impactWeight = (impactRamp >= 0.0f) ? (impactRamp <? 1.0f) : 0.0f;
-        self->mNumSplashesToAdd += k * impactWeight * cSplashToggles_m_ImpactMultiplier;
+        mNumSplashesToAdd += k * impactWeight * cSplashToggles_m_ImpactMultiplier;
     }
 }
 #endif
@@ -2705,15 +2707,15 @@ extern float cSplashToggles_m_SnowfallMultiplier;
  * it adds @p intensity * (mLastCameraSpeed + 10) * "Snowfall Multiplier" / 130 to the splash counter
  * (mNumSplashesToAdd). The board-wake code calls it per view with the snow intensity.
  *
- * @param splashManager  the splash manager
  * @param intensity  the snowfall intensity
  */
-extern "C" void cSplashManager_ReportSnowfall(cSplashManager* splashManager, float intensity) {
+void cSplashManager::ReportSnowfall(float intensity)
+{
     // stored through a reference: the plain member store sinks below the toggle load, unlike retail
-    float& last = splashManager->mLastSnowfallIntensity;
+    float& last = mLastSnowfallIntensity;
     last = intensity;
     if (cSplashToggles_m_LowestSnowfallAmount < intensity) {
-        splashManager->mNumSplashesToAdd += intensity * (splashManager->mLastCameraSpeed + 10.0f)
+        mNumSplashesToAdd += intensity * (mLastCameraSpeed + 10.0f)
                                             * (cSplashToggles_m_SnowfallMultiplier * 0.007692307699471712f);
     }
 }
@@ -2873,23 +2875,23 @@ struct t4VectorRef : t4Vector {
  * cRenderStateMan_LensIntensity(6), its UVs pick a quarter of the texture by kind (0-3; others the left half) and it is
  * drawn as a size * 300 square with cPS2GraphicsMan_DrawSprite (virtual slot 78). cSunHalo_Render calls it.
  */
-extern "C" void cSunHalo_RenderLens(cSunHalo* self)
+void cSunHalo::RenderLens()
 {
     // the screen size converts as unsigned (cvt with the 2^32 fix-up), as retail does
     float cx = (float)(unsigned int)GrMan->GetScreenWidth() * 0.5f;
     float cy = (float)(unsigned int)GrMan->GetScreenHeight() * 0.5f;
     t2Vector center(cx, cy);
-    t2Vector sun(self->mScreenPosition.x, self->mScreenPosition.y);
+    t2Vector sun(mScreenPosition.x, mScreenPosition.y);
     t2Vector dir = sun - center;
     cPS2GraphicsMan* gfx = GrMan;
     gfx->m_pCurrentDrawState->m_textureState.m_texid[0] = gfx->getEffectTexMap(45);
-    for (int i = 0; i < self->mNumLens; i++) {
-        t2Vector pos = center + dir * self->mSunLens[i].mPosition;
+    for (int i = 0; i < mNumLens; i++) {
+        t2Vector pos = center + dir * mSunLens[i].mPosition;
         t2Vector uv0;
-        tARGB col = *(tARGB*)self->mSunLens[i].mColor; // same layout: mColor is On Tour's tARGB (A, R, G, B)
-        col.A *= self->mfOcclude * cRenderStateMan_LensIntensity(6);
+        tARGB col = *(tARGB*)mSunLens[i].mColor; // same layout: mColor is On Tour's tARGB (A, R, G, B)
+        col.A *= mfOcclude * cRenderStateMan_LensIntensity(6);
         t2Vector uv1;
-        switch (self->mSunLens[i].mType) {
+        switch (mSunLens[i].mType) {
         case 0:
             uv0 = t2Vector(0.0f, 0.0f);
             uv1 = t2Vector(0.5f, 0.5f);
@@ -2911,7 +2913,7 @@ extern "C" void cSunHalo_RenderLens(cSunHalo* self)
             uv1 = t2Vector(0.5f, 1.0f);
             break;
         }
-        float spriteSize = self->mSunLens[i].mScale * 300.0f;
+        float spriteSize = mSunLens[i].mScale * 300.0f;
         t2Vector sz(spriteSize, spriteSize);
         GrMan->DrawSprite(t4VectorRef(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
     }
@@ -2954,9 +2956,9 @@ struct tARGBRef : tARGB {
  * @param viewInfo  the view (On Tour ViewInfo): its mViewRect is the viewport
  * @param viewId  the view index (On Tour ViewID): render-state set 6 for view 0, 7 otherwise
  */
-extern "C" void cSunHalo_Render(cSunHalo* self, tViewInfo* viewInfo, int viewId)
+void cSunHalo::Render(tViewInfo* viewInfo, int viewId)
 {
-    if (self->mbOnScreen == 0)
+    if (mbOnScreen == 0)
         return;
     int id = !viewId ? 6 : 7;
     float sunRed = cRenderStateMan_SunColorR(id);
@@ -2964,7 +2966,7 @@ extern "C" void cSunHalo_Render(cSunHalo* self, tViewInfo* viewInfo, int viewId)
     float sunBlue = cRenderStateMan_SunColorB(id);
     tARGBRef col;
     col = tARGBRef(1.0f, sunRed, sunGreen, sunBlue);
-    col.A *= self->mfOcclude * cRenderStateMan_SunIntensity(id);
+    col.A *= mfOcclude * cRenderStateMan_SunIntensity(id);
     float size = cRenderStateMan_SunRadius(id);
     int tex = cRenderStateMan_SunType(id);
     if (size == 1.0f)
@@ -2989,9 +2991,9 @@ extern "C" void cSunHalo_Render(cSunHalo* self, tViewInfo* viewInfo, int viewId)
     SetDrawBits(gfx->m_pCurrentDrawState, 1, 7, 0x1F, 2);
     SetDrawBits(gfx->m_pCurrentDrawState, 2, 8, 0x1F, 5);
     gfx->m_pCurrentDrawState->m_textureState.m_texid[0] = gfx->getEffectTexMap(tex + 51);
-    t4VectorRef pos(self->mScreenPosition.x, self->mScreenPosition.y, 0.0f, 1.0f);
+    t4VectorRef pos(mScreenPosition.x, mScreenPosition.y, 0.0f, 1.0f);
     gfx->DrawSprite(pos, t2VectorRef(size, size), t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), col);
-    cSunHalo_RenderLens_4A08(self, viewInfo);
+    cSunHalo_RenderLens_4A08(this, viewInfo);
     gfx->m_pCurrentDrawState--;
     gfx->PopView();
     gfx->PopViewport();

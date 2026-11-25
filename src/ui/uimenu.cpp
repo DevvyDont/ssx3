@@ -33,33 +33,33 @@ struct cUIMenu_sVEntryB {
  * @param item  the widget to select (On Tour cUIThing* pWidget)
  * @param play  nonzero to play the selection animation, 0 to jump to its end (On Tour createContext)
  */
-extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
+void cUIMenu::setSelected(cUIThing* item, int play)
 {
-    self->mStoredIndex = 0xFF;
-    cUIThing* cur = self->mpSelected;
+    mStoredIndex = 0xFF;
+    cUIThing* cur = mpSelected;
     if (((char*)cur) != 0 && ((cur->mAttr >> 4) & 1)) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
         if (ev != 0xFFFF) {
-            void* scr = self->mpSelected->mpScreen;
+            void* scr = mpSelected->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        cUIThing* oldSelected = self->mpSelected;
+        cUIThing* oldSelected = mpSelected;
         oldSelected->setFocus(0);
-        char* screenState = (char*)self->mpScreen->mpState;
+        char* screenState = (char*)mpScreen->mpState;
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(screenState + 8);
-        vb[19].fn(vthis(screenState, vb[19]), self->mpSelected, 2);
+        vb[19].fn(vthis(screenState, vb[19]), mpSelected, 2);
     }
-    self->mpSelected = (cUIThing*)item;
-    char* selState = (char*)self->mpScreen->mpState;
+    mpSelected = (cUIThing*)item;
+    char* selState = (char*)mpScreen->mpState;
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(selState + 8);
     vb2[19].fn(vthis(selState, vb2[19]), ((char*)item), 1);
-    cUIThing* newSelected = self->mpSelected;
+    cUIThing* newSelected = mpSelected;
     newSelected->setFocus(1);
-    unsigned short ev2 = cUIThing_getKeyframerEvent(self->mpSelected, 0);
+    unsigned short ev2 = cUIThing_getKeyframerEvent(mpSelected, 0);
     if (ev2 != 0xFFFF) {
-        void* scr = self->mpSelected->mpScreen;
+        void* scr = mpSelected->mpScreen;
         if (scr != 0) {
             if (play) {
                 cUIScreen_playFrame(scr, ev2, 1);
@@ -106,24 +106,24 @@ static inline void cUIMenu_onInputChangeItem_notify(char* vself, int ev, unsigne
 // cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent) (On Tour debug 0x0027E39C):
 // keeps the selected row (0x95) inside the visible window (top 0x98, rows 0x97), then reselects.
 // MenuEntryIndex is a short in On Tour's DWARF; the short is what keeps the second 0x95 load.
-extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScrollItemCurrent)
+int cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent)
 {
-    if (OldScrollItemCurrent != selfp->mScrollItemCurrent) {
-        short MenuEntryIndex = selfp->mScrollItemCurrent - selfp->mScrollItemOffset;
+    if (OldScrollItemCurrent != mScrollItemCurrent) {
+        short MenuEntryIndex = mScrollItemCurrent - mScrollItemOffset;
         if (MenuEntryIndex < 0) {
-            selfp->mScrollItemOffset = selfp->mScrollItemCurrent;
+            mScrollItemOffset = mScrollItemCurrent;
             MenuEntryIndex = 0;
-            cUIMenu_onInputChangeItem_notify(((char*)selfp), 2, selfp->mScrollItemOffset);
-            cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
-        } else if (MenuEntryIndex >= selfp->mScrollItemNumVisible) {
-            selfp->mScrollItemOffset = selfp->mScrollItemCurrent - selfp->mScrollItemNumVisible + 1;
-            MenuEntryIndex = selfp->mScrollItemNumVisible - 1;
-            cUIMenu_onInputChangeItem_notify(((char*)selfp), 3, selfp->mScrollItemOffset);
-            cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
+            cUIMenu_onInputChangeItem_notify(((char*)this), 2, mScrollItemOffset);
+            cUIMenu_onInputChangeItem_notify(((char*)this), 4, mScrollItemOffset);
+        } else if (MenuEntryIndex >= mScrollItemNumVisible) {
+            mScrollItemOffset = mScrollItemCurrent - mScrollItemNumVisible + 1;
+            MenuEntryIndex = mScrollItemNumVisible - 1;
+            cUIMenu_onInputChangeItem_notify(((char*)this), 3, mScrollItemOffset);
+            cUIMenu_onInputChangeItem_notify(((char*)this), 4, mScrollItemOffset);
         }
-        char* pNextSelected = (char*)cList_getByIndex_i_AE98(&selfp->mList, MenuEntryIndex);
-        cUIMenu_setSelected(selfp, (cUIThing*)pNextSelected, *(int*)&selfp->mAttrMenu & 1);
-        cUIMenu_onInputChangeItem_notify(((char*)selfp), 5, selfp->mScrollItemOffset);
+        char* pNextSelected = (char*)cList_getByIndex_i_AE98(&mList, MenuEntryIndex);
+        setSelected((cUIThing*)pNextSelected, *(int*)&mAttrMenu & 1);
+        cUIMenu_onInputChangeItem_notify(((char*)this), 5, mScrollItemOffset);
         return 1;
     }
     return 0;
@@ -229,7 +229,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             }
         }
         self->mScrollItemCurrent = cUIMenu_getNext(((char*)self));
-        int moved = cUIMenu_onInputChangeItem(self, old);
+        int moved = self->onInputChangeItem(old);
         if (!bit_B000(((char*)self), 144, 3)) {
             if (moved) {
                 result = 1;
@@ -252,7 +252,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             }
         }
         self->mScrollItemCurrent = cUIMenu_getPrev(((char*)self));
-        int moved = cUIMenu_onInputChangeItem(self, old);
+        int moved = self->onInputChangeItem(old);
         if (!bit_B000(((char*)self), 144, 3)) {
             if (moved) {
                 result = 1;
@@ -371,13 +371,13 @@ extern "C" char cList_size(void*);
  *
  * @param NumItems  total number of items
  */
-extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
+void cUIMenu::setScrollableMenu(char NumItems)
 {
-    *(char*)&self->mScrollItemCurrent = 0;
-    *(char*)&self->mScrollItemNum = NumItems;
-    *(int*)&self->mAttrMenu |= 4;
-    *(char*)&self->mScrollItemNumVisible = cList_size((char*)&self->mList);
-    *(char*)&self->mScrollItemOffset = 0;
+    *(char*)&mScrollItemCurrent = 0;
+    *(char*)&mScrollItemNum = NumItems;
+    *(int*)&mAttrMenu |= 4;
+    *(char*)&mScrollItemNumVisible = cList_size((char*)&mList);
+    *(char*)&mScrollItemOffset = 0;
 }
 #endif
 
@@ -389,11 +389,11 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollBar);
  *
  * Nothing in the retail code references it.
  *
- * @param menu  the menu
  * @param scrollBar  the scroll bar widget
  */
-extern "C" void cUIMenu_setScrollBar(cUIMenu* menu, int scrollBar) {
-    menu->mpScrollBar = (cUIScrollBar*)scrollBar;
+void cUIMenu::setScrollBar(int scrollBar)
+{
+    mpScrollBar = (cUIScrollBar*)scrollBar;
 }
 #endif
 
@@ -417,14 +417,14 @@ struct cUIMenu_findFirstHighlightable_sVEntry {
  * @param start  the first index to try (On Tour startIndex); 0xFF means 0
  * @return the item's index, or 0xFF when none qualifies
  */
-extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned char start)
+unsigned char cUIMenu::findFirstHighlightable(unsigned char start)
 {
     unsigned char i = start == 0xFF ? 0 : start;
-    for (; i < self->mScrollItemNum; i++) {
-        void* item = cList_getByIndex((char*)&self->mList, i);
-        if (*(int*)&self->mAttrMenu & 4) {
-            cUIState* mgr = self->mpScreen->mpState;
-            if (mgr->onWidgetMenu(self, 1, i)) {
+    for (; i < mScrollItemNum; i++) {
+        void* item = cList_getByIndex((char*)&mList, i);
+        if (*(int*)&mAttrMenu & 4) {
+            cUIState* mgr = mpScreen->mpState;
+            if (mgr->onWidgetMenu(this, 1, i)) {
                 return i;
             }
         } else {
@@ -453,24 +453,25 @@ extern "C" void* cList_getByIndex_i(void*, int) __asm__("cList_getByIndex");
  * @param idx  the index to start from (On Tour startIndex)
  * @return the item index, or 0xFF when none is selectable
  */
-extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, unsigned char idx) {
+unsigned char cUIMenu::reverseFindFirstHighlightable(unsigned char idx)
+{
     short i;
     unsigned char cnt;
     char* obj;
     char* vtbl;
     char* item;
 
-    cnt = self->mScrollItemNum;
+    cnt = mScrollItemNum;
     if (idx >= cnt) {
         idx = cnt - 1;
     }
     i = idx;
     for (; i >= 0; i--) {
-        item = (char*)cList_getByIndex_i(&self->mList, i);
-        if (*(int*)&self->mAttrMenu & 4) {
-            obj = (char*)self->mpScreen->mpState;
+        item = (char*)cList_getByIndex_i(&mList, i);
+        if (*(int*)&mAttrMenu & 4) {
+            obj = (char*)mpScreen->mpState;
             vtbl = *(char**)(obj + 8);
-            if ((*(int (**)(void*, void*, int, int))(vtbl + 0xA4))(obj + *(short*)(vtbl + 0xA0), ((char*)self), 1, i)) {
+            if ((*(int (**)(void*, void*, int, int))(vtbl + 0xA4))(obj + *(short*)(vtbl + 0xA0), ((char*)this), 1, i)) {
                 return i;
             }
         } else if (((*(int*)(item + 0x14) >> 5) & 1) == 0) {
@@ -502,25 +503,25 @@ static inline void cUIMenu_notify(char* vself, int ev, unsigned char v)
  *
  * @param idx  the item index (On Tour Index)
  */
-extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
+void cUIMenu::setSelectedByIndex(unsigned char idx)
 {
-    if (((self->mAttr >> 4) & 1) == 0 || ((self->mpScreen->mpState->mAttrState >> 5) & 1) == 0) {
-        self->mStoredIndex = idx;
+    if (((mAttr >> 4) & 1) == 0 || ((mpScreen->mpState->mAttrState >> 5) & 1) == 0) {
+        mStoredIndex = idx;
         return;
     }
-    unsigned char top = self->mScrollItemOffset;
-    unsigned char vis = self->mScrollItemNumVisible;
-    self->mScrollItemCurrent = idx;
+    unsigned char top = mScrollItemOffset;
+    unsigned char vis = mScrollItemNumVisible;
+    mScrollItemCurrent = idx;
     if (idx >= top + vis) {
-        self->mScrollItemOffset = idx - vis + 1;
-        cUIMenu_notify(((char*)self), 3, self->mScrollItemOffset);
-        cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
+        mScrollItemOffset = idx - vis + 1;
+        cUIMenu_notify(((char*)this), 3, mScrollItemOffset);
+        cUIMenu_notify(((char*)this), 4, mScrollItemOffset);
     } else if (idx < top) {
-        self->mScrollItemOffset = idx;
-        cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
-        cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
+        mScrollItemOffset = idx;
+        cUIMenu_notify(((char*)this), 2, mScrollItemOffset);
+        cUIMenu_notify(((char*)this), 4, mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (cUIThing*)cList_getByIndex_i(&self->mList, idx - self->mScrollItemOffset), 1);
+    setSelected((cUIThing*)cList_getByIndex_i(&mList, idx - mScrollItemOffset), 1);
 }
 #endif
 
@@ -784,17 +785,17 @@ INCLUDE_ASM("ui/uimenu", cUIPair_destroyPair);
 /**
  * Deletes both widgets of a pair and clears the pointers.
  */
-extern "C" void cUIPair_destroyPair(cUIPair* self)
+void cUIPair::destroyPair()
 {
-    cUIThing* entry = self->mpEntry;
+    cUIThing* entry = mpEntry;
     if (entry != 0) {
         delete entry;
-        self->mpEntry = 0;
+        mpEntry = 0;
     }
-    cUIThing* widget = self->mpWidget;
+    cUIThing* widget = mpWidget;
     if (widget != 0) {
         delete widget;
-        self->mpWidget = 0;
+        mpWidget = 0;
     }
 }
 #endif
@@ -1105,23 +1106,23 @@ public:
  *
  * @param pos  the new value (On Tour value)
  */
-extern "C" void cUIProgress_setValue(cUIProgress* self, int pos)
+void cUIProgress::setValue(int pos)
 {
-    self->mValue = pos;
-    cUIProgress_setValue_cWidget* background = (cUIProgress_setValue_cWidget*)self->mpObjBackground;
+    mValue = pos;
+    cUIProgress_setValue_cWidget* background = (cUIProgress_setValue_cWidget*)mpObjBackground;
     cUIProgress_setValue_sVec3 newSize = t3vect_Zero;
     if (background != 0) {
         background->getSize(&newSize);
     }
-    if (self->mpObjKnob != 0) {
-        int n = self->mNumValues;
+    if (mpObjKnob != 0) {
+        int n = mNumValues;
         if (n != 0) {
-            if (!(self->mAttr & 1)) {
-                newSize.x *= (float)self->mValue / (float)n;
+            if (!(mAttr & 1)) {
+                newSize.x *= (float)mValue / (float)n;
             } else {
-                newSize.y *= (float)self->mValue / (float)n;
+                newSize.y *= (float)mValue / (float)n;
             }
-            ((cUIProgress_setValue_cWidget*)self->mpObjKnob)->setSize(&newSize);
+            ((cUIProgress_setValue_cWidget*)mpObjKnob)->setSize(&newSize);
         }
     }
 }

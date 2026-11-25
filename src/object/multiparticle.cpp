@@ -47,15 +47,15 @@ struct sMPRef {
  * ("Emitter", constructed by cStaticEmitter_cStaticEmitter), set up by cStaticEmitter_setupEmitter (On Tour setupEmitter) with an identity
  * transform and the particle data (+0x8).
  */
-extern "C" void cMultiParticle_setupMultiParticle(cMultiParticle* self)
+void cMultiParticle::setupMultiParticle()
 {
-    sMPRef** slot = &(*(sMPRef**)&self->InstIds);
-    *slot = new (str_InstIds, 0x20000000, 0) sMPRef[self->MaxInst];
-    (*(void**)&self->Emitter) = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
-    for (int i = 0; i < self->MaxInst; i++) {
-        self->InstIds[i] = tResourceID::Invalid();
+    sMPRef** slot = &(*(sMPRef**)&InstIds);
+    *slot = new (str_InstIds, 0x20000000, 0) sMPRef[MaxInst];
+    (*(void**)&Emitter) = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
+    for (int i = 0; i < MaxInst; i++) {
+        InstIds[i] = tResourceID::Invalid();
     }
-    cStaticEmitter_setupEmitter(((void*)self->Emitter), &t4mat_Identity, ((int)self->Particle));
+    cStaticEmitter_setupEmitter(((void*)Emitter), &t4mat_Identity, ((int)Particle));
 }
 #endif
 
@@ -69,9 +69,9 @@ extern "C" void cStaticEmitter_update(void* self, float dt);
  *
  * Calls cStaticEmitter_update() on the emitter that offset 0x10 points to.
  */
-extern "C" void cMultiParticle_update(cMultiParticle* self)
+void cMultiParticle::update()
 {
-    cStaticEmitter_update(self->Emitter, 0.01666666753590107f);
+    cStaticEmitter_update(Emitter, 0.01666666753590107f);
 }
 #endif
 
@@ -87,17 +87,17 @@ INCLUDE_ASM("object/multiparticle", cMultiParticle_unloadSection);
  *
  * @param key  world section id
  */
-extern "C" void cMultiParticle_unloadSection(cMultiParticle* self, unsigned int key)
+void cMultiParticle::unloadSection(unsigned int key)
 {
     int i;
-    for (i = 0; i < self->NumInst; i++) {
-        if (self->InstIds[i].m_bfRID.m_uiSectionID == key) {
-            self->NumInst--;
-            if (i < self->NumInst) {
-                self->InstIds[i] = self->InstIds[self->NumInst];
+    for (i = 0; i < NumInst; i++) {
+        if (InstIds[i].m_bfRID.m_uiSectionID == key) {
+            NumInst--;
+            if (i < NumInst) {
+                InstIds[i] = InstIds[NumInst];
                 i--;
             } else {
-                self->InstIds[i] = tResourceID::Invalid();
+                InstIds[i] = tResourceID::Invalid();
             }
         }
     }
@@ -143,18 +143,18 @@ INCLUDE_ASM("object/multiparticle", cMultiParticle_remInst);
  * @param key  instance id to remove
  */
 // Removes the first entry equal to key, filling the hole with the last entry.
-extern "C" void cMultiParticle_remInst(cMultiParticle* self, unsigned int key)
+void cMultiParticle::remInst(unsigned int key)
 {
     int i;
-    for (i = 0; i < self->NumInst; i++) {
-        if (self->InstIds[i].m_uiRID == key) {
-            self->NumInst--;
+    for (i = 0; i < NumInst; i++) {
+        if (InstIds[i].m_uiRID == key) {
+            NumInst--;
             // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
             do {
-                if (i < self->NumInst) {
-                    self->InstIds[i] = self->InstIds[self->NumInst];
+                if (i < NumInst) {
+                    InstIds[i] = InstIds[NumInst];
                 } else {
-                    self->InstIds[i] = tResourceID::Invalid();
+                    InstIds[i] = tResourceID::Invalid();
                 }
                 return;
             } while (0);
@@ -237,15 +237,15 @@ static inline t4Vector vu0Add58260(const t4Vector& a, const t4Vector& b)
  * cStaticEmitter_render() with BoundBox (+0x20) moved by the record's position (record +0x40), drawing at
  * that position plus Offset (+0x40).
  */
-extern "C" void cMultiParticle_render(cMultiParticle* self)
+void cMultiParticle::render()
 {
-    for (int i = 0; i < self->NumInst; i++) {
-        tInstanceRecord* inst = instanceRecord58260(self->InstIds[i], cObjectInterface_getWorld());
+    for (int i = 0; i < NumInst; i++) {
+        tInstanceRecord* inst = instanceRecord58260(InstIds[i], cObjectInterface_getWorld());
         if (inst != 0) {
-            tBoundBox bounds = self->BoundBox;
+            tBoundBox bounds = BoundBox;
             vu0AddTo58260(bounds.MinPoint, instancePos58260(inst));
             vu0AddTo58260(bounds.MaxPoint, instancePos58260(inst));
-            cStaticEmitter_render(((void*)self->Emitter), &bounds, vu0Add58260(instancePos58260(inst), self->Offset));
+            cStaticEmitter_render(((void*)Emitter), &bounds, vu0Add58260(instancePos58260(inst), Offset));
         }
     }
 }
@@ -268,16 +268,16 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, cBxReplayFrame* stream)
+void cMultiParticle::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((const char*)self, 4);
-    stream->write((const char*)&self->NumInst, 4);
-    stream->write((const char*)self->Particle, 216);
-    cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
-    stream->write((const char*)&self->Offset, 0x10);
-    stream->write((const char*)&self->BoundBox, 0x20);
-    if (self->NumInst > 0) {
-        stream->write((const char*)self->InstIds, self->NumInst << 2);
+    stream->write((const char*)this, 4);
+    stream->write((const char*)&NumInst, 4);
+    stream->write((const char*)Particle, 216);
+    cStaticEmitter_writeToReplayFrame(Emitter, stream);
+    stream->write((const char*)&Offset, 0x10);
+    stream->write((const char*)&BoundBox, 0x20);
+    if (NumInst > 0) {
+        stream->write((const char*)InstIds, NumInst << 2);
     }
 }
 #endif
@@ -338,20 +338,20 @@ extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* a1, int type);
  * @param bucket  update bucket
  * @return self
  */
-extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
+void* cRailManNode::cRailManNode1(void* bucket)
 {
     int i;
-    cSortObjNode_cSortObjNode1(self, bucket, 18);
-    VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
-    unsigned int* railSlot = &self->RailInfo[0].RailRID.m_uiRID;
+    cSortObjNode_cSortObjNode1(this, bucket, 18);
+    VPTR_OF(cObjNode, this) = cRailManNode_vtbl;
+    unsigned int* railSlot = &RailInfo[0].RailRID.m_uiRID;
     for (i = 0x7F; i != -1; i--, railSlot++) {
         *railSlot = 0xFFFFFFFF;
     }
-    cRailManNode_ActiveNode = ((void*)self);
+    cRailManNode_ActiveNode = ((void*)this);
     for (i = 0; i < 0x80; i++) {
-        self->RailInfo[i].RailRID = tResourceID::Invalid();
+        RailInfo[i].RailRID = tResourceID::Invalid();
     }
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 
@@ -389,7 +389,7 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cBx
     stream->read((char*)&self->RailInfo[0], 0x200);
     for (i = 0; i < 0x80; i++) {
         if (self->RailInfo[i].RailRID != tResourceID::Invalid()) {
-            cRailManNode_disableRail(self, i);
+            self->disableRail(i);
         }
     }
     return ((void*)self);
@@ -420,7 +420,7 @@ extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
     VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
         if (self->RailInfo[i].RailRID != tResourceID::Invalid()) {
-            cRailManNode_enableRail(self, i);
+            self->enableRail(i);
         }
     }
     cRailManNode_ActiveNode = 0;
@@ -459,7 +459,7 @@ extern "C" void cRailManNode_unloadSection(int kind)
         for (i = 0; i < 0x80; i++) {
             sMpMgr_8700* railMan = (sMpMgr_8700*)cRailManNode_ActiveNode;
             if (((unsigned int*)((char*)railMan + 0x18))[i] != 0xFFFFFFFF && railMan->slots[i].kind == kind) {
-                cRailManNode_enableRail((cRailManNode*)railMan, i);
+                ((cRailManNode*)railMan)->enableRail(i);
             }
         }
     }
@@ -557,9 +557,9 @@ static inline void remove_8780(char* vw, void* item, const tBoundBox* box)
  * @param idx  rail slot index
  */
 // Removes every particle node of slot 'idx' from the world's spatial tree.
-extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
+void cRailManNode::disableRail(int idx)
 {
-    tResourceID ref = self->RailInfo[idx].RailRID;
+    tResourceID ref = RailInfo[idx].RailRID;
     tSplineRecord* spline = splineRecord_8780(ref, cObjectInterface_getWorld());
     tSplineSegmentRecord* node = spline->m_HeaderSeg;
     for (int i = 0; i < spline->m_iNumSegments; i++) {
@@ -645,9 +645,9 @@ static inline void insert_8998(char* w, void* item, const tBoundBox* box)
  * @param idx  rail slot index
  */
 // Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
-extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
+void cRailManNode::enableRail(int idx)
 {
-    tResourceID ref = self->RailInfo[idx].RailRID;
+    tResourceID ref = RailInfo[idx].RailRID;
     tSplineRecord* spline = splineRecord_8998(ref, cObjectInterface_getWorld());
     tSplineSegmentRecord* node = spline->m_HeaderSeg;
     for (int i = 0; i < spline->m_iNumSegments; i++) {
@@ -663,7 +663,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
         insert_8998(cObjectInterface_getNash(), node, &box);
         node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
-    self->RailInfo[idx].RailRID = tResourceID::Invalid();
+    RailInfo[idx].RailRID = tResourceID::Invalid();
 }
 #endif
 
@@ -692,7 +692,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 extern "C" void cRailManNode_addRail(tResourceID key, int add)
 {
     if (cRailManNode_ActiveNode == 0) {
-        cRailManNode_cRailManNode1((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
+        ((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0))->cRailManNode1((void*)1);
     }
     tRailInfo kFree;
     int idx = -1;
@@ -718,9 +718,9 @@ found:
         }
         mgr->RailInfo[idx].RailRID = key;
         if (add != 0) {
-            cRailManNode_enableRail((cRailManNode*)mgr, idx);
+            mgr->enableRail(idx);
         } else {
-            cRailManNode_disableRail((cRailManNode*)mgr, idx);
+            mgr->disableRail(idx);
         }
     }
 }
@@ -846,7 +846,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucke
     self->mVtbl = (void**)cAnimComboNode_vtbl;
     stream->read((char*)self, 0x18);
     *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[self->NumAnimMeshes];
-    cAnimComboNode_setComboXform(self);
+    self->setComboXform();
     return ((void*)self);
 }
 #endif
@@ -898,40 +898,40 @@ extern "C" int cAnimNode_frameUpdate(void* p);
  *
  * @return 0 when the frame-update script asks to stop updating, else 1
  */
-extern "C" int cAnimComboNode_updateNode(cAnimComboNode* self)
+int cAnimComboNode::updateNode()
 {
-    self->FrameStart = 10000000000.0f;
-    self->FrameEnd = 10000000000.0f;
-    if (*(signed char*)&self->AnimComplete2 == 0) {
-        if (*(signed char*)&self->AnimActive2 != 0) {
-            int countdown = self->Delay;
+    FrameStart = 10000000000.0f;
+    FrameEnd = 10000000000.0f;
+    if (*(signed char*)&AnimComplete2 == 0) {
+        if (*(signed char*)&AnimActive2 != 0) {
+            int countdown = Delay;
             if (countdown >= 0) {
                 if (countdown > 0) {
-                    self->Delay = countdown - 1;
+                    Delay = countdown - 1;
                 } else {
-                    float pos = self->CurrTime2 + self->AnimSpeed2;
-                    float max = self->ToTime2;
-                    float frameTime = self->CurrTime;
-                    self->FrameStart = frameTime;
-                    self->FrameEnd = frameTime;
-                    self->CurrTime2 = pos;
+                    float pos = CurrTime2 + AnimSpeed2;
+                    float max = ToTime2;
+                    float frameTime = CurrTime;
+                    FrameStart = frameTime;
+                    FrameEnd = frameTime;
+                    CurrTime2 = pos;
                     if (max <= pos) {
-                        self->CurrTime2 = max;
-                        if (*(signed char*)&self->Stop != 0) {
-                            *(signed char*)&self->AnimComplete2 = 1;
+                        CurrTime2 = max;
+                        if (*(signed char*)&Stop != 0) {
+                            *(signed char*)&AnimComplete2 = 1;
                         }
-                        *(signed char*)&self->AnimActive2 = 0;
+                        *(signed char*)&AnimActive2 = 0;
                     }
-                    if (cAnimNode_frameUpdate(&self->CurrTime) == 0) {
+                    if (cAnimNode_frameUpdate(&CurrTime) == 0) {
                         return 0;
                     }
                 }
             }
         } else {
-            cAnimObjectNode_updateNode(&self->AnimType);
+            cAnimObjectNode_updateNode(&AnimType);
             return 1;
         }
-        self->Flags |= 1;
+        Flags |= 1;
     }
     return 1;
 }
@@ -955,9 +955,9 @@ extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
  *
  * @param out  the intersection info (On Tour tIntersectInfo& intInfo)
  */
-extern "C" void cAnimComboNode_updateIntersectInfo(cAnimComboNode* self, tIntersectInfo* out)
+void cAnimComboNode::updateIntersectInfo(tIntersectInfo* out)
 {
-    cMoveNode_updateIntersectInfo(&self->MoveNodeBase, out);
+    cMoveNode_updateIntersectInfo(&MoveNodeBase, out);
     *(sMpQuad*)&out->Ivel = t4vect_Zero;
     *(sMpQuad*)&out->Iangvel = t4vect_Zero;
 }
@@ -978,17 +978,17 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode*);
  *
  * @param msg  signal id
  */
-extern "C" void cAnimComboNode_signal(cAnimComboNode* self, int msg)
+void cAnimComboNode::signal(int msg)
 {
     if (msg == 130) {
-        if (*(unsigned short*)&self->AnimActive2 == 0) {
-            self->ComboTime = self->CacheTime;
-            cAnimComboNode_setComboXform(self);
-            self->AnimActive2 = 1;
-            self->CurrTime2 = self->FromTime2;
+        if (*(unsigned short*)&AnimActive2 == 0) {
+            ComboTime = CacheTime;
+            setComboXform();
+            AnimActive2 = 1;
+            CurrTime2 = FromTime2;
         }
     } else {
-        cAnimObjectNode_signal((char*)&self->AnimType);
+        cAnimObjectNode_signal((char*)&AnimType);
     }
 }
 #endif
@@ -1024,9 +1024,9 @@ static inline void vu0CopyMatrix_9030(void* dst, void* src)
  * @param vself  the anim combo node
  */
 // Gathers the world matrices of the model's active parts into the matrix buffer at 0x84.
-extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
+void cAnimComboNode::setComboXform()
 {
-    cAnimComboNode* self = vself;
+    cAnimComboNode* self = this;
     if (self->NumAnimMeshes <= 0) {
         return;
     }
@@ -1054,10 +1054,10 @@ extern "C" void cInstanceNode_loseFocus(void*);
  * Calls cInstanceNode_loseFocus() on the node at offset 0x48 only while byte 0x15 is 0; the update sets that
  * byte when the animation reaches its end with byte 0x16 set.
  */
-extern "C" void cAnimComboNode_loseFocus(cAnimComboNode* self)
+void cAnimComboNode::loseFocus()
 {
-    if (*(signed char*)&self->AnimComplete2 == 0) {
-        cInstanceNode_loseFocus(&self->MoveNodeBase);
+    if (*(signed char*)&AnimComplete2 == 0) {
+        cInstanceNode_loseFocus(&MoveNodeBase);
     }
 }
 #endif
@@ -1074,10 +1074,10 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, cBxReplayFrame* obj)
+void cAnimComboNode::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    cAnimObjectNode_writeToReplayFrame((char*)&self->AnimType, obj);
-    obj->write((const char*)self, 0x18);
+    cAnimObjectNode_writeToReplayFrame((char*)&AnimType, obj);
+    obj->write((const char*)this, 0x18);
 }
 #endif
 
@@ -1096,26 +1096,26 @@ extern "C" void cMeshAnimFrame_transform(cMeshAnimFrame* item, t4Matrix* mtx);
  * (+0x14 set, or both +0x17 and +0x15 set), each mesh of the instance's model (+0x60, model +0x80) that has an
  * animation (part info +0x1C) gets its frame transformed by the next ComboXform matrix (+0x84) with cMeshAnimFrame_transform.
  */
-extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
+void cAnimComboNode::cacheFrame()
 {
-    cAnimNode_cacheFrame(&self->CurrTime);
-    if ((self->AnimFrames) == 0) {
+    cAnimNode_cacheFrame(&CurrTime);
+    if ((AnimFrames) == 0) {
         return;
     }
-    if (*(signed char*)&self->AnimActive2 == 0) {
-        if (*(signed char*)&self->StopInPlace == 0) {
+    if (*(signed char*)&AnimActive2 == 0) {
+        if (*(signed char*)&StopInPlace == 0) {
             return;
         }
-        if (*(signed char*)&self->AnimComplete2 == 0) {
+        if (*(signed char*)&AnimComplete2 == 0) {
             return;
         }
     }
-    tModelRecord* model = ((self->Instance)->m_Model);
+    tModelRecord* model = (Instance->m_Model);
     int n = 0;
     tMeshHeirarchyRecord* meshPart = model->m_MeshHeirarchy;
     for (int i = 0; i < model->m_iNumMeshes; i++, meshPart++) {
         if (meshPart->m_MeshAnim->m_NumChannels != 0) {
-            cMeshAnimFrame_transform(&(self->AnimFrames)[n], &self->ComboXform[n]);
+            cMeshAnimFrame_transform(&AnimFrames[n], &ComboXform[n]);
             n++;
         }
     }
@@ -1138,13 +1138,13 @@ extern void* cAnimDeltaNode_vtbl[];
  * @param animData  anim delta make-data
  * @return self
  */
-extern "C" void* cAnimDeltaNode_cAnimDeltaNode1(cAnimDeltaNode* self, int bucket, int instRecord, int animData)
+void* cAnimDeltaNode::cAnimDeltaNode1(int bucket, int instRecord, int animData)
 {
-    cAnimObjectNode_cAnimObjectNode1(self, bucket, 2, instRecord, animData);
-    self->mVtbl = cAnimDeltaNode_vtbl;
-    *(int*)&self->Delta = 0;
-    self->AnimActive = 0;
-    return ((void*)self);
+    cAnimObjectNode_cAnimObjectNode1(this, bucket, 2, instRecord, animData);
+    mVtbl = cAnimDeltaNode_vtbl;
+    *(int*)&Delta = 0;
+    AnimActive = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -1193,43 +1193,43 @@ extern "C" void cAnimObjectNode_updateNode(void* p);
  *
  * @return 0 only from that dead expire branch, else 1
  */
-extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
+int cAnimDeltaNode::updateNode()
 {
-    self->FrameStart = 10000000000.0f;
-    self->FrameEnd = 10000000000.0f;
-    if (self->AnimComplete == 0) {
-        float curDelta = self->Delta;
-        int countdown = self->Delay;
+    FrameStart = 10000000000.0f;
+    FrameEnd = 10000000000.0f;
+    if (AnimComplete == 0) {
+        float curDelta = Delta;
+        int countdown = Delay;
         if (curDelta > 0.0f) {
             if (countdown >= 0) {
                 if (countdown == 0 && curDelta > 0.0f) {
-                    float newDelta = curDelta - __builtin_fabsf(self->AnimSpeed);
-                    self->Delta = newDelta;
+                    float newDelta = curDelta - __builtin_fabsf(AnimSpeed);
+                    Delta = newDelta;
                     if (newDelta < 0.0f) {
-                        self->Delta = 0.0f;
+                        Delta = 0.0f;
                     }
                 }
-                cAnimObjectNode_updateNode(((char*)self));
-                if (self->Delta > 0.0f) {
-                    self->AnimActive = 1;
+                cAnimObjectNode_updateNode(((char*)this));
+                if (Delta > 0.0f) {
+                    AnimActive = 1;
                 } else {
-                    self->AnimActive = 0;
+                    AnimActive = 0;
                 }
                 return 1;
             }
         } else {
             if (countdown > 0) {
-                self->Delay = countdown - 1;
+                Delay = countdown - 1;
             }
-            if (self->AnimComplete != 0) {
-                char* obj = (char*)&self->MoveNodeBase;
-                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+            if (AnimComplete != 0) {
+                char* obj = (char*)&MoveNodeBase;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mVtbl;
                 sVEntry<void(void*, int)>* vtEntry = &vt[34];
                 vtEntry->fn(vthis(obj, *vtEntry), 1);
                 return 0;
             }
         }
-        self->Flags |= 1;
+        Flags |= 1;
     }
     return 1;
 }
@@ -1247,12 +1247,12 @@ extern "C" void cAnimObjectNode_signal_set(void* self, int id, float v) __asm__(
  * @param id  signal id
  * @param signalArg  signal argument
  */
-extern "C" void cAnimDeltaNode_signal(cAnimDeltaNode* self, int id, float signalArg)
+void cAnimDeltaNode::signal(int id, float signalArg)
 {
     if (id == 140) {
-        self->Delta += signalArg * 0.03333333507180214f;
+        Delta += signalArg * 0.03333333507180214f;
     } else {
-        cAnimObjectNode_signal_set(self, id, signalArg);
+        cAnimObjectNode_signal_set(this, id, signalArg);
     }
 }
 #endif
@@ -1268,10 +1268,10 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, cBxReplayFrame* stream)
+void cAnimDeltaNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cAnimObjectNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Delta, 0x4);
+    cAnimObjectNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Delta, 0x4);
 }
 #endif
 

@@ -75,6 +75,25 @@ struct cScriptPlayerMain {
                                            //      in progress; Play(bool) clears it; DoUpdateFrame acts on it
     cInSeqComm* mpPreviewCommInterface;    // 0x44 [O]; [R] ctor 0; [U] Preview stores/clears it;
                                            //      GetInSeqCommInterface (cScriptPlayerMain_GetInSeqCommInterface) prefers it
+
+    // Methods bound to their retail symbols by asm labels.
+    void DeInit() __asm__("cScriptPlayerMain_DeInit");
+    void SetPlaySpeed(float val) __asm__("cScriptPlayerMain_SetPlaySpeed__FPvf");
+    void* Play() __asm__("cScriptPlayerMain_Play__FPv");
+    void SetLoop(int loopScript) __asm__("cScriptPlayerMain_SetLoop");
+    void Preview(int flag) __asm__("cScriptPlayerMain_Preview");
+    void GoToFrame(int frameNum) __asm__("cScriptPlayerMain_GoToFrame");
+    void StepNextFrame() __asm__("cScriptPlayerMain_StepNextFrame");
+    void Stop() __asm__("cScriptPlayerMain_Stop");
+    void Pause() __asm__("cScriptPlayerMain_Pause");
+    void Resume() __asm__("cScriptPlayerMain_Resume");
+    void UpdateFrame() __asm__("cScriptPlayerMain_UpdateFrame");
+    int SetUserData(int userData) __asm__("cScriptPlayerMain_SetUserData__FPvi");
+    void* GetEntity(int entityIndex) __asm__("cScriptPlayerMain_GetEntity");
+    int GetScriptLength() __asm__("cScriptPlayerMain_GetScriptLength");
+    int GetNumUpdatesToEndLeft() __asm__("cScriptPlayerMain_GetNumUpdatesToEndLeft");
+    int GetInSeqCommInterface() __asm__("cScriptPlayerMain_GetInSeqCommInterface");
+    int DoUpdate(float time, float prev, float speed) __asm__("cScriptPlayerMain_DoUpdate");
 };
 
 CHECK_OFFSET(tInSeqScriptHeader, isSmallEndian, 0x0);

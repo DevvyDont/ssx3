@@ -189,6 +189,8 @@ CHECK_OFFSET(tPackedRGBA, a, 0x3);
 CHECK_SIZE(tPackedRGBA, 0x4);
 
 // The particle system (On Tour struct tParticleEmitter, 0x150). Its methods take the Damp value as their time scale.
+struct tBoundBox;
+
 struct tParticleEmitter {
     int NumParticles;               // 0x000 [O]; [U] init sw (num); stepContinous/calcBoundBox read it (lwc1 + cvt.s.w)
     int NumBlur;                    // 0x004 [O]; [U] init sw (numblur), BlurAlpha = 1 / NumBlur
@@ -237,6 +239,28 @@ struct tParticleEmitter {
     t4Vector Ct;                    // 0x120 [O]; [U] setColour ((cend - cstart) / (time * Damp))
     t4Vector UpperUV;               // 0x130 [O]; [U] init zeroes it
     t4Vector LowerUV;               // 0x140 [O]; [U] init stores {1, 1, 0, 0}
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int w, int numblur, float x, float y, float damp, t4Vector* force) __asm__("tParticleEmitter_init");
+    void randomize() __asm__("tParticleEmitter_randomize");
+    void setSize(float startsize, float endsize, float sizerandomness) __asm__("tParticleEmitter_setSize");
+    void setLife(float minlife, float maxlife) __asm__("tParticleEmitter_setLife");
+    void setEternal() __asm__("tParticleEmitter_setEternal");
+    void setPoint(long long *point) __asm__("tParticleEmitter_setPoint");
+    void setLine(t4Vector* start, t4Vector* end) __asm__("tParticleEmitter_setLine");
+    void setPlane(t4Vector* center, t4Vector* axis0, t4Vector* axis1) __asm__("tParticleEmitter_setPlane");
+    void setMotion(t4Vector* delta, float time) __asm__("tParticleEmitter_setMotion");
+    void stopMotion() __asm__("tParticleEmitter_stopMotion");
+    void setVelocity(const t4Vector* dir, float spread) __asm__("tParticleEmitter_setVelocity");
+    void setVelocity1(const t4Vector* baseVel, const t4Vector* randVel0, const t4Vector* randVel1,
+                      const t4Vector* randVel2)
+        __asm__("tParticleEmitter_setVelocity1");
+    void setColour(t4Vector* colStart, t4Vector* colEnd, t4Vector* colRand0, t4Vector* colRand1, float time)
+        __asm__("tParticleEmitter_setColour");
+    void setTime(float val) __asm__("tParticleEmitter_setTime");
+    void step(float deltaTime) __asm__("tParticleEmitter_step");
+    void setupEmitter(t4Matrix* transform, tParticleData* particleData, tBoundBox* boundBox, float seed)
+        __asm__("tParticleEmitter_setupEmitter");
 };
 
 CHECK_OFFSET(tParticleEmitter, NumParticles, 0x00);
@@ -281,6 +305,9 @@ CHECK_OFFSET(tParticleEmitter, LowerUV, 0x140);
 CHECK_SIZE(tParticleEmitter, 0x150);
 
 // A fixed emitter (On Tour class cStaticEmitter, 0x190).
+struct cBxReplayFrame;
+struct t4Matrix;
+
 struct cStaticEmitter {
     float Duration;                 // 0x000 [O]; [R] setupEmitter (cStaticEmitter_setupEmitter); [U] update counts it down by one app
                                     //       tick (negative = endless, 0 = stopped), setTime cStaticEmitter_setTime, replay
@@ -302,6 +329,15 @@ struct cStaticEmitter {
     void** mVtbl;                   // 0x18C [R] ctor cStaticEmitter_cStaticEmitter and dtor cStaticEmitter__cStaticEmitter store cStaticEmitter_vtbl (1 slot: the
                                     //       dtor); [P] the preview's cStaticEmitter slot-1 pair touches 0x18C (On Tour
                                     //       has no virtuals here)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setPosition(long long *position) __asm__("cStaticEmitter_setPosition");
+    void setupEmitter(t4Matrix* transform, tParticleData* particleData) __asm__("cStaticEmitter_setupEmitter");
+    void setTime(float duration) __asm__("cStaticEmitter_setTime");
+    void update(float dt) __asm__("cStaticEmitter_update");
+    void render1() __asm__("cStaticEmitter_render1");
+    void writeToReplayFrame(cBxReplayFrame* out) __asm__("cStaticEmitter_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cStaticEmitter_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cStaticEmitter, Duration, 0x00);
@@ -362,6 +398,24 @@ struct cBaseClass_DynamicEmitter {
     void** mVtbl;                   // 0x1F8 [R] ctor/dtor store cBaseClass_DynamicEmitter_vtbl (7 slots); subclasses
                                     //       store theirs; [U] setupEmitter calls slots 1, 5, 2; [P] the preview's slot
                                     //       pairs touch 0x1F8
+
+    // Methods bound to their retail symbols by asm labels.
+    void setSeed(float fparg0) __asm__("cBaseClass_DynamicEmitter_setSeed");
+    int numSubEmitters() __asm__("cBaseClass_DynamicEmitter_numSubEmitters");
+    int subEmitterId() __asm__("cBaseClass_DynamicEmitter_subEmitterId");
+    int enabled() __asm__("cBaseClass_DynamicEmitter_enabled");
+    void setEnabled(int enable) __asm__("cBaseClass_DynamicEmitter_setEnabled");
+    int getEnabledCount() __asm__("cBaseClass_DynamicEmitter_getEnabledCount");
+    void getSubEmitterPositionVelocity(int idx, t4Vector** outA, t4Vector** outB)
+        __asm__("cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity");
+    void getSubEmitterPositionVelocity1(int idx, t4Vector* outA, t4Vector* outB)
+        __asm__("cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1");
+    void Allocate() __asm__("cBaseClass_DynamicEmitter_Allocate");
+    void purge(int reset) __asm__("cBaseClass_DynamicEmitter_purge");
+    void reset() __asm__("cBaseClass_DynamicEmitter_reset");
+    void setupEmitter(tParticleData* def, float seed) __asm__("cBaseClass_DynamicEmitter_setupEmitter");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBaseClass_DynamicEmitter_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cBaseClass_DynamicEmitter_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cBaseClass_DynamicEmitter, Duration, 0x00);
@@ -457,6 +511,9 @@ struct cDynamicEmitter {
     void** mVtbl;                   // 0x1F8 [R] ctor/dtor store cBaseClass_DynamicEmitter_vtbl (7 slots); subclasses
                                     //       store theirs; [U] setupEmitter calls slots 1, 5, 2; [P] the preview's slot
                                     //       pairs touch 0x1F8
+
+    // Methods bound to their retail symbols by asm labels.
+    void render(int blend) __asm__("cDynamicEmitter_render");
 };
 
 CHECK_OFFSET(cDynamicEmitter, Duration, 0x00);
@@ -484,6 +541,8 @@ CHECK_OFFSET(cDynamicEmitter, mVtbl, 0x1F8);
 CHECK_SIZE(cDynamicEmitter, 0x200);
 
 // cDynamicColourEmitter: cBaseClass_DynamicEmitter + one packed colour per sub-emitter.
+struct t4Vector;
+
 struct cDynamicColourEmitter {
     // --- cBaseClass_DynamicEmitter (0x000-0x1FC)
     float Duration;                 // 0x000 [O]; [U] setupEmitter (cBaseClass_DynamicEmitter_setupEmitter), setTime (cBaseClass_DynamicEmitter_setTime), replay
@@ -539,6 +598,18 @@ struct cDynamicColourEmitter {
                                     //       tPackedRGBA&)); [R] ctor 0; [U] Allocate, purge, reset (0, 0, 0, 0), update
                                     //       writes [m_subEmitterId] (bytes r, g, b, a = clamp(c * 255))
     char unk_208[0x8];              // 0x208 padding to the 16-byte size
+
+    // Methods bound to their retail symbols by asm labels.
+    void getSubEmitterPositionVelocityColour(int idx, t4Vector** outA, t4Vector** outB, tPackedRGBA** outC)
+        __asm__("cDynamicColourEmitter_getSubEmitterPositionVelocityColour");
+    void getSubEmitterPositionVelocityColour1(int idx, t4Vector* out0, t4Vector* out1, tPackedRGBA* out2)
+        __asm__("cDynamicColourEmitter_getSubEmitterPositionVelocityColour1");
+    tPackedRGBA getSubEmitterColour(int idx) __asm__("cDynamicColourEmitter_getSubEmitterColour");
+    void Allocate() __asm__("cDynamicColourEmitter_Allocate");
+    void purge(int resetEmitter) __asm__("cDynamicColourEmitter_purge");
+    void reset() __asm__("cDynamicColourEmitter_reset");
+    void render(int blend) __asm__("cDynamicColourEmitter_render");
+    void update(int position, int velocity, t4Vector* col, int enable) __asm__("cDynamicColourEmitter_update");
 };
 
 CHECK_OFFSET(cDynamicColourEmitter, Duration, 0x00);

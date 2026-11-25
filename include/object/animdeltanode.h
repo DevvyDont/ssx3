@@ -38,6 +38,8 @@ struct tModifierBlock;
 struct cMeshAnimFrame;
 struct tMeshVelocity;
 
+struct cBxReplayFrame;
+
 struct cAnimDeltaNode {
     // --- cAnimObjectNode (0x6C; object/animobject.h): cAnimObjectNodeState (On Tour 0x14, retail 0x1C)
     short AnimType;                 // 0x00 [O]; [R] cAnimObjectNode_cAnimObjectNode1 (data Type)
@@ -81,6 +83,12 @@ struct cAnimDeltaNode {
     // --- cAnimDeltaNode (On Tour 0x68, + 4 here)
     float Delta;                    // 0x6C [O]; [P] preview 0x68; [R] ctor1 0 (sw $0); the replay ctor reads 4 bytes;
                                     //      [U] updateNode spends it (lwc1/swc1, clamps at 0), signal 140 adds arg / 30
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cAnimDeltaNode1(int bucket, int instRecord, int animData) __asm__("cAnimDeltaNode_cAnimDeltaNode1");
+    int updateNode() __asm__("cAnimDeltaNode_updateNode");
+    void signal(int id, float signalArg) __asm__("cAnimDeltaNode_signal");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimDeltaNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cAnimDeltaNode, AnimType, 0x00);

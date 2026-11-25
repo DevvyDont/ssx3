@@ -49,6 +49,11 @@ struct cLocaleFile {
                                         //      missing); getStringByHash returns 0 when it is 0
     tHashEntry* mpHashTableData;        // 0x10 [O]; [U] loadFile points it after the LOCT chunk header and converts the
                                         //      entries; getStringByHash binary-searches it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getStringByIndex() __asm__("cLocaleFile_getStringByIndex__FPv");
+    int getStringByHash(unsigned int key) __asm__("cLocaleFile_getStringByHash");
+    void loadFile(const char* name, char kind) __asm__("cLocaleFile_loadFile");
 };
 
 CHECK_OFFSET(cLocaleFile, mLanguage, 0x00);

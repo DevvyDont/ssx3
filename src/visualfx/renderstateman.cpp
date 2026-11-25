@@ -1147,13 +1147,13 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_reset);
  * (mMaxStreamerSegments) to 25 segments for a rider with a view (mRider->mViewIndex >= 0), otherwise 18. Despite the
  * name it reads nothing from a replay frame.
  */
-extern "C" void cAirStreamerFX_reset(cAirStreamerFX* self)
+void cAirStreamerFX::reset()
 {
-    int mode = (self->mRider->mViewIndex >= 0) ? 25 : 18;
-    *(int*)&self->mVOffset = 0;
-    self->StreamBufHead = 0;
-    self->StreamBufLen = 0;
-    self->mMaxStreamerSegments = mode;
+    int mode = (mRider->mViewIndex >= 0) ? 25 : 18;
+    *(int*)&mVOffset = 0;
+    StreamBufHead = 0;
+    StreamBufLen = 0;
+    mMaxStreamerSegments = mode;
 }
 #endif
 
@@ -1247,33 +1247,33 @@ static inline int Approach_EF6D0(int n, int step)
  * the 25-entry ring and the count grows up to the length. Otherwise the count drops by 2 per frame. The
  * texture offset moves by the rider's speed / 6000 and wraps into 0..1.
  */
-extern "C" void cAirStreamerFX_update(cAirStreamerFX* self)
+void cAirStreamerFX::update()
 {
-    if (cRider_getMotionState(((char*)self->mRider)) == 1) {
-        char* riderPtr = ((char*)self->mRider);
+    if (cRider_getMotionState(((char*)mRider)) == 1) {
+        char* riderPtr = ((char*)mRider);
         t4Vector bodyOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
         t4Vector boardOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
         t4Vector boardDir = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
         t4Vector streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
-        (*(t4Vector*)&self->StreamBuf[self->StreamBufHead].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
-        (*(t4Vector*)&self->StreamBuf[self->StreamBufHead].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(t4Vector*)&StreamBuf[StreamBufHead].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(t4Vector*)&StreamBuf[StreamBufHead].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         if ((AITick() & 1) == 0) {
-            int old = self->StreamBufHead;
-            self->StreamBufHead = old + 1;
-            self->StreamBufHead %= 25;
-            if (self->StreamBufLen < self->mMaxStreamerSegments)
-                self->StreamBufLen++;
-            self->StreamBuf[self->StreamBufHead] = self->StreamBuf[old];
+            int old = StreamBufHead;
+            StreamBufHead = old + 1;
+            StreamBufHead %= 25;
+            if (StreamBufLen < mMaxStreamerSegments)
+                StreamBufLen++;
+            StreamBuf[StreamBufHead] = StreamBuf[old];
         }
     } else {
-        int n = self->StreamBufLen;
-        self->StreamBufLen = Approach_EF6D0(n, 2);
+        int n = StreamBufLen;
+        StreamBufLen = Approach_EF6D0(n, 2);
     }
-    self->mVOffset -= Length_EF6D0(self->mRider->mVelocity) * 0.00016666666488163173f;
-    if (self->mVOffset < 0.0f)
-        self->mVOffset += 1.0f;
-    if (self->mVOffset > 1.0f)
-        self->mVOffset -= 1.0f;
+    mVOffset -= Length_EF6D0(mRider->mVelocity) * 0.00016666666488163173f;
+    if (mVOffset < 0.0f)
+        mVOffset += 1.0f;
+    if (mVOffset > 1.0f)
+        mVOffset -= 1.0f;
 }
 #endif
 
@@ -1429,9 +1429,9 @@ static inline void rsVert_EF950(tBxVertex* v, float u, float w, const sRsColor_E
  * D_004A3B74, _EffectTexMap[61] scrolled by the trail offset. Segment alpha falls off as 1 - t^2/(len-1)^2,
  * and the segments are placed back at 0.7 x the current hips position.
  */
-extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
+void cAirStreamerFX::render()
 {
-    if (self->StreamBufLen < 2) {
+    if (StreamBufLen < 2) {
         return;
     }
     rsPush_EF950(GrMan_renderstateman);
@@ -1439,12 +1439,12 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
-    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < self->mRider->mPowerUpTrickTimer) {
+    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < mRider->mPowerUpTrickTimer) {
         glow = 1;
         alpha = 1.0f;
         *(short*)((char*)GrMan_renderstateman->top + 0x10) = rsTex1044_EF950(GrMan_renderstateman);
         GrMan_renderstateman->top->f0 &= ~0xC;
-        start = self->mVOffset;
+        start = mVOffset;
     } else {
         sRsCtx_EF950* renderCtx = GrMan_renderstateman;
         renderCtx->top->f0 |= 0xC;
@@ -1461,11 +1461,11 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     rsSetA_EF950(ctx, 0x7C, 2, 7);
     tBxVertex vertsL[52];
     tBxVertex vertsR[52];
-    cRider* rider = self->mRider;
+    cRider* rider = mRider;
     float uvy = start;
-    float invSq = 1.0f / (float)((self->mMaxStreamerSegments - 1) * (self->mMaxStreamerSegments - 1));
+    float invSq = 1.0f / (float)((mMaxStreamerSegments - 1) * (mMaxStreamerSegments - 1));
     t4Vector off = rsScale_EF950(rsRow_EF950((char*)rider->mAnimModel->SkelMatrices, rider->mBoneHips, 0x30), 0.7f);
-    float dv = 1.0f / (float)self->StreamBufLen;
+    float dv = 1.0f / (float)StreamBufLen;
     float falloffT = 0.0f;
     int nverts = 0;
     sRsColor_EF950 color;
@@ -1475,7 +1475,7 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     color.w = 1.0f;
     t4Vector leftPos;
     t4Vector rightPos;
-    rider = (cRider*)self->mRider;
+    rider = (cRider*)mRider;
     t4Vector col = rsRow_EF950((char*)rider->mAnimModel->SkelMatricesScaled, rider->mBoneBoardChild, 0x20);
     float size = 15.0f;
     if (glow) {
@@ -1484,9 +1484,9 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
         size = 37.5f;
     }
     t4Vector half = rsScale_EF950(col, size * 0.5f);
-    int j = self->StreamBufHead;
+    int j = StreamBufHead;
     int k = 0;
-    for (int i = 0; i < self->StreamBufLen; i++) {
+    for (int i = 0; i < StreamBufLen; i++) {
         if (j < 0) {
             j = 24;
         }
@@ -1494,8 +1494,8 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
         if (color.x < 0.0f) {
             color.x = 0.0f;
         }
-        leftPos = rsAdd_EF950((*(&(self->StreamBuf)[j].l)), off);
-        rightPos = rsAdd_EF950((*(&(self->StreamBuf)[j].r)), off);
+        leftPos = rsAdd_EF950((*(&StreamBuf[j].l)), off);
+        rightPos = rsAdd_EF950((*(&StreamBuf[j].r)), off);
         rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(leftPos, half));
         rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(rightPos, half));
         k++;
@@ -1686,7 +1686,7 @@ extern tARGB cDepthFog_m_Colour;
  *
  * @param i  which camera's render state to use (On Tour cameraId)
  */
-extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
+void cVisualEffectsMan::commonUpdate(int i)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (cDepthFog_m_OverrideWP == 0) {

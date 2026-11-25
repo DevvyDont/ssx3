@@ -106,6 +106,13 @@ struct cSpring {
     float SegLen;                   // 0x20 [O]; [U] setupSpring, update
     tSpringNode* Nodes;             // 0x24 [O]; [U] setupSpring allocates Width 0x50-byte nodes ("SpringNodes"),
                                     //      setupNodes / update walk them; the cFlexBridgeNode methods read +0x74
+
+    // Methods bound to their retail symbols by asm labels.
+    void setupSpring(tSpringData* sdata, float len) __asm__("cSpring_setupSpring");
+    void* cSpring1(cBxReplayFrame* stream) __asm__("cSpring_cSpring1");
+    void setupNodes() __asm__("cSpring_setupNodes");
+    void update() __asm__("cSpring_update");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSpring_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cSpring, Width, 0x00);
@@ -119,6 +126,8 @@ CHECK_OFFSET(cSpring, Length, 0x1C);
 CHECK_OFFSET(cSpring, SegLen, 0x20);
 CHECK_OFFSET(cSpring, Nodes, 0x24);
 CHECK_SIZE(cSpring, 0x28);
+
+struct cBxReplayFrame;
 
 struct cFlexBridgeNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
@@ -157,6 +166,10 @@ struct cFlexBridgeNode : public cInstanceNode {
     tBoundBox BoundBox;             // 0x090 [O]; [P]; [U] setupGrid / updateGrid recompute it (sq 0x90 / 0xA0) and move
                                     //      the Nash node; getBoundBox returns +0x90; render culls with it; the dtor
                                     //      removes it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFlexBridgeNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFlexBridgeNode_cFlexBridgeNode1");
+    void updateGrid() __asm__("cFlexBridgeNode_updateGrid");
 };
 
 CHECK_OFFSET(cFlexBridgeNode, unk_01C, 0x01C);

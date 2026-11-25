@@ -62,7 +62,7 @@ extern char cScriptAnimBankManager_vtbl[];
 extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(cScriptAnimBankManager* self, int flags)
 {
     self->mVtbl = (void**)cScriptAnimBankManager_vtbl;
-    cScriptAnimBankManager_UnlinkBanksAll(self);
+    self->UnlinkBanksAll();
     void* banks = self->mpBankInfo;
     if (banks != 0) {
         cMemMan_free(banks);
@@ -129,14 +129,15 @@ extern "C" void* cScriptAnimBankManager_GetEmptyBankInfo_v(void* self) __asm__("
  * @param data  the attached animation bank data
  * @return the entry's slot (set by the constructor to the base slot plus the entry index)
  */
-extern "C" int cScriptAnimBankManager_LinkBank(cScriptAnimBankManager* self, int id, void* data)
+int cScriptAnimBankManager::LinkBank(int id, void* data)
 {
-    sScLinkEntry* bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetBankInfo(self, id);
+    sScLinkEntry* bankInfo = (sScLinkEntry*)GetBankInfo(id);
     if (bankInfo == 0) {
-        bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetEmptyBankInfo_v(self);
+        bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetEmptyBankInfo_v(this);
         bankInfo->id = id;
         bankInfo->data = data;
-        sScBank* bank = (sScBank*)cAdfDataSource_cAdfDataSource1(cMemMan_alloc(0x18, str_cAdfDataSource, self->mMemFlags, 0), bankInfo->data);
+        sScBank* bank = (sScBank*)cAdfDataSource_cAdfDataSource1(cMemMan_alloc(0x18, str_cAdfDataSource, mMemFlags, 0),
+                bankInfo->data);
         int n = bank->hdr->count;
         bankInfo->used = 0;
         for (int i = 0; i < n; i++) {
@@ -145,7 +146,7 @@ extern "C" int cScriptAnimBankManager_LinkBank(cScriptAnimBankManager* self, int
             }
         }
         if (bankInfo->used != 0) {
-            bankInfo->map = (int*)operator_new_tag(bankInfo->used * 4, str_pTableAnimID, self->mMemFlags, 0);
+            bankInfo->map = (int*)operator_new_tag(bankInfo->used * 4, str_pTableAnimID, mMemFlags, 0);
             int k = 0;
             for (int i = 0; i < n; i++) {
                 if (bank->items[i].ptr != 0) {
@@ -181,12 +182,12 @@ extern "C" void* cScriptAnimBankManager_GetBankInfo(cScriptAnimBankManager* self
  *
  * @param id  the bank's user ID
  */
-extern "C" void cScriptAnimBankManager_UnlinkBank(cScriptAnimBankManager* self, int id)
+void cScriptAnimBankManager::UnlinkBank(int id)
 {
-    void* bankInfo = cScriptAnimBankManager_GetBankInfo((self), id);
+    void* bankInfo = GetBankInfo(id);
     if (bankInfo != 0) {
-        sScAnimVEntry* vt = (sScAnimVEntry*)self->mVtbl;
-        vt[2].fn(vthis(self, vt[2]), bankInfo);
+        sScAnimVEntry* vt = (sScAnimVEntry*)mVtbl;
+        vt[2].fn(vthis(this, vt[2]), bankInfo);
     }
 }
 #endif
@@ -204,11 +205,10 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBanksAll);
  * In cScriptAnimBankManager's vtable that is cScriptAnimBankManager_UnlinkBank1, which takes the bank out of the anim database's
  * table, destroys it, frees its index table and clears the entry.
  *
- * @param self_  the cScriptAnimBankManager, untyped
  */
-extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* self_)
+void cScriptAnimBankManager::UnlinkBanksAll()
 {
-    cScriptAnimBankManager* self = self_;
+    cScriptAnimBankManager* self = this;
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
         if (((int)(self->mpBankInfo)[i].pData) != 0) {
@@ -232,11 +232,11 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetBankInfo);
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" void* cScriptAnimBankManager_GetBankInfo(cScriptAnimBankManager* self, int id)
+void* cScriptAnimBankManager::GetBankInfo(int id)
 {
-    for (int i = 0; i < self->mMaxBanks; i++) {
-        if (((void*)self->mpBankInfo[i].pData) != 0 && self->mpBankInfo[i].userID == id) {
-            return &self->mpBankInfo[i];
+    for (int i = 0; i < mMaxBanks; i++) {
+        if (((void*)mpBankInfo[i].pData) != 0 && mpBankInfo[i].userID == id) {
+            return &mpBankInfo[i];
         }
     }
     return 0;
@@ -259,7 +259,7 @@ void cMemMan_free(void*);
  *
  * @param bankInfo  the bank record
  */
-extern "C" void cScriptAnimBankManager_UnlinkBank1(cScriptAnimBankManager* self, tScriptAnimBankInfo* bankInfo)
+void cScriptAnimBankManager::UnlinkBank1(tScriptAnimBankInfo* bankInfo)
 {
     cAnimDataBase* tbl = cAnimDataBase_TheAnimDataBase;
     void** slot = &((void**)tbl)[*(unsigned char*)&bankInfo->bankNum];
@@ -289,11 +289,11 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetEmptyBankInfo);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" tScriptAnimBankInfo* cScriptAnimBankManager_GetEmptyBankInfo(cScriptAnimBankManager* self)
+tScriptAnimBankInfo* cScriptAnimBankManager::GetEmptyBankInfo()
 {
-    for (int i = 0; i < self->mMaxBanks; i++) {
-        if (((void*)self->mpBankInfo[i].pData) == 0) {
-            return &self->mpBankInfo[i];
+    for (int i = 0; i < mMaxBanks; i++) {
+        if (((void*)mpBankInfo[i].pData) == 0) {
+            return &mpBankInfo[i];
         }
     }
     return 0;

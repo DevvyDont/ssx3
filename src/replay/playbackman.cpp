@@ -110,7 +110,7 @@ extern "C" void cPlaybackMan__cPlaybackMan(cPlaybackMan* self, int flags)
     }
     operator_delete((int*)self->Input);
     operator_delete((int*)self->InputPad);
-    cPlaybackMan_purgeLocation(self);
+    self->purgeLocation();
     self->SaveFramePtr.mVtbl = cReplayFramePtr_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -143,19 +143,19 @@ static inline void allocPackData(tPlaybackFile& entry, int size)
  * result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer and
  * sets the handle to -1. cPlaybackMan_load starts these loads.
  */
-extern "C" void cPlaybackMan_update(cPlaybackMan* self)
+void cPlaybackMan::update()
 {
-    if (self->AsyncHandle >= 0 && ASYNCFILE_getstatus(self->AsyncHandle) == 1) {
+    if (AsyncHandle >= 0 && ASYNCFILE_getstatus(AsyncHandle) == 1) {
         void* data = 0;
         int size = 0;
-        ASYNCFILE_release(self->AsyncHandle, &data, &size);
+        ASYNCFILE_release(AsyncHandle, &data, &size);
         if (data != 0 && size > 0) {
-            allocPackData(self->PlaybackFiles[self->AsyncFileNum], size);
-            self->PlaybackFiles[self->AsyncFileNum].Size = size;
-            MEM_copy(self->PlaybackFiles[self->AsyncFileNum].PackData, data, size);
+            allocPackData(PlaybackFiles[AsyncFileNum], size);
+            PlaybackFiles[AsyncFileNum].Size = size;
+            MEM_copy(PlaybackFiles[AsyncFileNum].PackData, data, size);
             MEM_free(data);
         }
-        self->AsyncHandle = -1;
+        AsyncHandle = -1;
     }
 }
 #endif
@@ -190,31 +190,31 @@ extern char str_tPlaybackFile[];
  *
  * @param name  location name (cWScriptMan_setupMissions passes the BE location record + 0x34)
  */
-extern "C" void cPlaybackMan_initLocation(cPlaybackMan* self, const char* name)
+void cPlaybackMan::initLocation(const char* name)
 {
-    strcpy(self->Location, name);
-    self->SaveFrame = 0;
-    self->AsyncFileNum = -1;
-    self->AsyncHandle = -1;
-    self->SaveFrameData = (char*)operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
-    cReplayFrame_clearFrame((cReplayFrame*)(&self->SaveFramePtr));
-    cReplayFramePtr_setBlock(&self->SaveFramePtr, ((void*)self->SaveFrameData), 0);
+    strcpy(Location, name);
+    SaveFrame = 0;
+    AsyncFileNum = -1;
+    AsyncHandle = -1;
+    SaveFrameData = (char*)operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
+    SaveFramePtr.clearFrame();
+    cReplayFramePtr_setBlock(&SaveFramePtr, ((void*)SaveFrameData), 0);
     tPlaybackFrame* frame = (tPlaybackFrame*)cMemMan_alloc(0x1C22C, str_CurrentFrame, 0, 0);
-    self->CurrentFrame = frame;
+    CurrentFrame = frame;
     MEM_fill(frame, 0, 0x1C22C);
-    int n = self->MaxPlaybackFiles;
+    int n = MaxPlaybackFiles;
     frame->Version = 0xDBAC0101;
     frame->Buffer.Size = 0x1C200;
-    self->PlaybackFiles = (tPlaybackFile*)operator_new_tag(n * 12, str_tPlaybackFile, 0x20000000, 0);
-    for (int i = 0; i < self->MaxPlaybackFiles; i++) {
-        self->PlaybackFiles[i].Id = 0xFFFFFFFF;
-        self->PlaybackFiles[i].PackData = 0;
-        self->PlaybackFiles[i].Size = 0;
+    PlaybackFiles = (tPlaybackFile*)operator_new_tag(n * 12, str_tPlaybackFile, 0x20000000, 0);
+    for (int i = 0; i < MaxPlaybackFiles; i++) {
+        PlaybackFiles[i].Id = 0xFFFFFFFF;
+        PlaybackFiles[i].PackData = 0;
+        PlaybackFiles[i].Size = 0;
     }
     void* iface = cBE_getInterface_C6E8(cBE_getBE(), 10);
-    self->NumPlaybackFiles = cBEMissionInterface_getNumberMissions(iface);
-    for (int j = 0; j < self->NumPlaybackFiles; j++)
-        self->PlaybackFiles[j].Id = cBEMissionInterface_getMissionID(iface, j);
+    NumPlaybackFiles = cBEMissionInterface_getNumberMissions(iface);
+    for (int j = 0; j < NumPlaybackFiles; j++)
+        PlaybackFiles[j].Id = cBEMissionInterface_getMissionID(iface, j);
 }
 #endif
 
@@ -233,11 +233,10 @@ extern "C" void ASYNCFILE_cancel(int handle);
  * and clears its state (table +0x58, count +0x50), then the table; frees the frame buffer (+0x4C); clears +0x10 and
  * deletes the input stream (+0x4); clears +0x70. Called by the destructor and by cWScriptMan_setupMissions.
  *
- * @param playbackMan  the playback manager (this)
  */
-extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* playbackMan)
+void cPlaybackMan::purgeLocation()
 {
-    cPlaybackMan* self = playbackMan;
+    cPlaybackMan* self = this;
     if (self->AsyncHandle != -1) {
         ASYNCFILE_cancel(self->AsyncHandle);
         self->AsyncHandle = -1;
@@ -283,13 +282,13 @@ extern "C" int cPlaybackMan_findFileById();
  * @param fileId  the playback file id
  * @return 1 when the file is loaded or no load is pending, 0 otherwise
  */
-extern "C" int cPlaybackMan_isLoaded(cPlaybackMan* self, int fileId)
+int cPlaybackMan::isLoaded(int fileId)
 {
     int idx = cPlaybackMan_findFileById();
     if (idx >= 0) {
-        if ((int)self->PlaybackFiles[idx].PackData != 0)
+        if ((int)PlaybackFiles[idx].PackData != 0)
             return 1;
-        if (self->AsyncHandle < 0)
+        if (AsyncHandle < 0)
             return 1;
     }
     return 0;
@@ -322,22 +321,22 @@ extern char str_bar_c[];
  * @param key  the playback file id
  * @return 1 when loaded or the load started, 0 for an unknown id or a failed start
  */
-extern "C" int cPlaybackMan_load(cPlaybackMan* self, int key)
+int cPlaybackMan::load(int key)
 {
     char path[0x100];
-    int idx = cPlaybackMan_findFileById_C9F0(self, key);
+    int idx = cPlaybackMan_findFileById_C9F0(this, key);
     if (idx >= 0) {
-        if (self->PlaybackFiles[idx].PackData != 0)
+        if (PlaybackFiles[idx].PackData != 0)
             return 1;
-        self->AsyncFileNum = idx;
-        self->AsyncHandle = -1;
+        AsyncFileNum = idx;
+        AsyncHandle = -1;
         int num = kPlaybackPath;
-        sprintf(path, D_004A3414, str_bar_c, num, self->Location, self->PlaybackFiles[idx].Id);
+        sprintf(path, D_004A3414, str_bar_c, num, Location, PlaybackFiles[idx].Id);
         int asyncHandle = ASYNCFILE_load(path, 0x100);
-        self->AsyncHandle = asyncHandle;
+        AsyncHandle = asyncHandle;
         if (asyncHandle >= 0)
             return 1;
-        self->AsyncHandle = -1;
+        AsyncHandle = -1;
     }
     return 0;
 }
@@ -356,12 +355,12 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * CurrentFrame buffer at +0x4 exists, its 0x1C22C bytes are cleared and its header rewritten (0xDBAC0101,
  * 0x1C200), as cPlaybackMan_initLocation() does. cGame_resetWorld() and cGame_partialRestart() call it.
  */
-extern "C" void cPlaybackMan_restart(cPlaybackMan* self)
+void cPlaybackMan::restart()
 {
-    cPlaybackMan_stop(self);
-    unsigned int* buf = (unsigned int*)self->CurrentFrame;
-    self->SaveFrame = 0;
-    self->State = 0;
+    stop();
+    unsigned int* buf = (unsigned int*)CurrentFrame;
+    SaveFrame = 0;
+    State = 0;
     if (buf != 0) {
         MEM_fill(buf, 0, 0x1C22C);
         buf[0] = 0xDBAC0101;
@@ -391,17 +390,17 @@ extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx);
  * @param fileId  the playback file id
  * @return 1 when the file was unpacked and its recorded input end (current frame +0xC) is above 0, else 0
  */
-extern "C" int cPlaybackMan_setupPreview(cPlaybackMan* self, int fileId)
+int cPlaybackMan::setupPreview(int fileId)
 {
     int idx;
-    if (self->State == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && cPlaybackMan_load(self, fileId) != 0) {
-        while (cPlaybackMan_isLoaded(self, fileId) == 0) {
-            cPlaybackMan_update(self);
+    if (State == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && load(fileId) != 0) {
+        while (isLoaded(fileId) == 0) {
+            update();
             SYNCTASK_run(0);
             THREAD_yieldticks(1);
         }
-        if (cPlaybackMan_setupFile(self, idx) != 0) {
-            if (self->CurrentFrame->Buffer.IndexMax > 0)
+        if (setupFile(idx) != 0) {
+            if (CurrentFrame->Buffer.IndexMax > 0)
                 return 1;
         }
     }
@@ -418,10 +417,9 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_reset__FPv);
  * Clears the saved-frame flag (+0x10) that cPlaybackMan_saveFrame sets and cPlaybackMan_restoreFrame tests. The mission
  * scripts call it after cPlaybackMan_stop when a local mission is cancelled or quit.
  */
-void cPlaybackMan_reset(void* vself)
+void cPlaybackMan::reset()
 {
-    cPlaybackMan* self = (cPlaybackMan*)vself;
-    self->SaveFrame = 0;
+    SaveFrame = 0;
 }
 #endif
 
@@ -438,17 +436,17 @@ extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* 
  * Unless the saved-frame flag (+0x10) is already set, calls cReplay_saveFrame1 (On Tour cReplay::saveFrame(frame, type)) on
  * Game->Replay (+0x5C, +0x28) with the frame at +0x14 and a type-1 descriptor, then sets the flag.
  */
-extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self)
+void cPlaybackMan::saveFrame()
 {
-    if (self->SaveFrame == 0) {
+    if (SaveFrame == 0) {
         int one = 1;
         tReplayFrameType desc;
         desc.Type = one;
         desc.Highlights = 0;
         desc.Chapter = 0;
-        cReplay_saveFrame1((cReplay*)(self->Game->Replay), (cReplayFrame*)((char*)&self->SaveFramePtr),
+        cReplay_saveFrame1((cReplay*)(Game->Replay), (cReplayFrame*)((char*)&SaveFramePtr),
                       (sPbBytes4*)&desc);
-        self->SaveFrame = one;
+        SaveFrame = one;
     }
 }
 #endif
@@ -468,10 +466,10 @@ extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cRep
  *
  * @return nothing meaningful: declared void* in this unit, the body returns no value
  */
-extern "C" void* cPlaybackMan_restoreFrame(cPlaybackMan* self)
+void* cPlaybackMan::restoreFrame()
 {
-    if (self->SaveFrame) {
-        cReplay_restoreFrame1_2(self->Game->Replay, (char*)&self->SaveFramePtr);
+    if (SaveFrame) {
+        cReplay_restoreFrame1_2(Game->Replay, (char*)&SaveFramePtr);
     }
 }
 #endif
@@ -495,22 +493,22 @@ void AIsetseed(void* self);
  * 0x1C214; AI + 0x8 = the word at buffer + 0x1C210), sets mode 1 and switches the chase camera's target
  * (cCamera_switchChaseControllerTargetRider) to the AI's mission rider (+0x70).
  */
-extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
+void cPlaybackMan::startPreview()
 {
-    if (self->State == 0 && self->CurrentFrame->Buffer.IndexMax > 0) {
-        cAI_purgeMissionRiders(self->AI);
-        cAI_reinitMissionRiders(self->AI);
-        cReplay* replay = self->Game->Replay;
+    if (State == 0 && CurrentFrame->Buffer.IndexMax > 0) {
+        cAI_purgeMissionRiders(AI);
+        cAI_reinitMissionRiders(AI);
+        cReplay* replay = Game->Replay;
         replay->SaveState = *(int*)replay;
         cReplay_setReplayState(replay, 14);
-        cPlaybackMan_saveFrame(self);
-        self->CurrentFrame->Buffer.Index = 0;
-        AIsetseed(&self->CurrentFrame->AISeed[0]);
-        self->AI->AITick = self->CurrentFrame->AITick;
-        self->State = 1;
-        cMissionRider* x = self->AI->MissionRiders[0];
+        saveFrame();
+        CurrentFrame->Buffer.Index = 0;
+        AIsetseed(&CurrentFrame->AISeed[0]);
+        AI->AITick = CurrentFrame->AITick;
+        State = 1;
+        cMissionRider* x = AI->MissionRiders[0];
         int targetRider = x ? (int)x->mRider : 0;
-        cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
+        cCamera_switchChaseControllerTargetRider(Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
 #endif
@@ -530,17 +528,17 @@ void cReplay_setReplayState(void* self, int val);
  * restores the frame (cPlaybackMan_restoreFrame), sets mode 0 and switches the chase camera back to the first rider (AI
  * + 0x28).
  */
-extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self)
+void cPlaybackMan::stopPreview()
 {
-    if (self->State == 1) {
-        cAI_purgeMissionRiders(self->AI);
-        cAI_reinitMissionRiders(self->AI);
-        cReplay* replay = self->Game->Replay;
+    if (State == 1) {
+        cAI_purgeMissionRiders(AI);
+        cAI_reinitMissionRiders(AI);
+        cReplay* replay = Game->Replay;
         cReplay_setReplayState(replay, replay->SaveState);
-        cPlaybackMan_restoreFrame(self);
-        self->State = 0;
-        int targetRider = (int)self->AI->Riders[0];
-        cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
+        restoreFrame();
+        State = 0;
+        int targetRider = (int)AI->Riders[0];
+        cCamera_switchChaseControllerTargetRider(Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
 #endif
@@ -557,11 +555,11 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_startPerform);
  * cPlaybackMan_stop ends with cPlaybackMan_stopPerform. Unlike cPlaybackMan_startPreview it checks no mode and does not
  * reseed the AI. No retail caller was found.
  */
-extern "C" void cPlaybackMan_startPerform(cPlaybackMan* self)
+void cPlaybackMan::startPerform()
 {
-    cPlaybackMan_saveFrame(self);
-    self->CurrentFrame->Buffer.Index = 0;
-    self->State = 2;
+    saveFrame();
+    CurrentFrame->Buffer.Index = 0;
+    State = 2;
 }
 #endif
 
@@ -573,11 +571,10 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_stopPerform__FPv);
  *
  * Calls cPlaybackMan_restoreFrame, then sets the mode (+0x70) to 0. cPlaybackMan_stop uses it for mode 2.
  */
-void cPlaybackMan_stopPerform(void* vself)
+void cPlaybackMan::stopPerform()
 {
-    cPlaybackMan* self = (cPlaybackMan*)vself;
-    cPlaybackMan_restoreFrame((cPlaybackMan*)self);
-    self->State = 0;
+    restoreFrame();
+    State = 0;
 }
 #endif
 
@@ -593,17 +590,17 @@ void cPlaybackMan_stopPerform(void* self);
  * Mode (+0x70) 1 calls cPlaybackMan_stopPreview, mode 2 cPlaybackMan_stopPerform; other modes do nothing. Called by
  * cPlaybackMan_restart and the mission scripts.
  */
-extern "C" void cPlaybackMan_stop(cPlaybackMan* self)
+void cPlaybackMan::stop()
 {
-    switch (self->State) {
+    switch (State) {
     case 0:
     default:
         break;
     case 1:
-        cPlaybackMan_stopPreview(self);
+        stopPreview();
         break;
     case 2:
-        cPlaybackMan_stopPerform(self);
+        stopPerform();
         break;
     }
 }
@@ -627,30 +624,30 @@ extern "C" void cInputPad_update(void* self, int n, float* vals);
  */
 // Replay channel step: mode 1 plays back one packed frame of axis values, mode 3 records one.
 // Returns 1 when the buffer is exhausted (or full), 0 otherwise.
-extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
+int cPlaybackMan::isPauseAI()
 {
     float vals[24];
-    if (self->State == 1) {
-        tPlaybackFrame* buf = self->CurrentFrame;
+    if (State == 1) {
+        tPlaybackFrame* buf = CurrentFrame;
         if (buf->Buffer.Index < buf->Buffer.IndexMax) {
             unsigned char* cursor = &buf->Buffer.Buffer[buf->Buffer.Index];
             int n = *cursor++;
             for (int i = 0; i < n; i++)
                 vals[i] = *cursor++ * 0.003921568859368563f;
-            self->CurrentFrame->Buffer.Index += 1 + n;
-            cInputPad_update(self->InputPad, n, vals);
+            CurrentFrame->Buffer.Index += 1 + n;
+            cInputPad_update(InputPad, n, vals);
             return 0;
         } else {
             return 1;
         }
-    } else if (self->State == 3) {
-        tPlaybackFrame* buf = self->CurrentFrame;
+    } else if (State == 3) {
+        tPlaybackFrame* buf = CurrentFrame;
         if (buf->Buffer.Index < buf->Buffer.Size - 0x18) {
             unsigned char* cursor = &buf->Buffer.Buffer[buf->Buffer.Index];
-            int n = self->RealInputPad->NumButtons;
+            int n = RealInputPad->NumButtons;
             *cursor++ = n;
             for (int i = 0; i < n; i++) {
-                cInputPad* axes = self->RealInputPad;
+                cInputPad* axes = RealInputPad;
                 float axisValue;
                 if (i < axes->NumButtons)
                     axisValue = axes->Buttons[i].Value;
@@ -659,9 +656,9 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
                 *cursor = (int)(axisValue * 255.0f);
                 vals[i] = *cursor++ * 0.003921568859368563f;
             }
-            self->CurrentFrame->Buffer.Index += 1 + n;
-            self->CurrentFrame->Buffer.IndexMax += 1 + n;
-            cInputPad_update(self->InputPad, n, vals);
+            CurrentFrame->Buffer.Index += 1 + n;
+            CurrentFrame->Buffer.IndexMax += 1 + n;
+            cInputPad_update(InputPad, n, vals);
             return 0;
         } else {
             return 1;
@@ -684,11 +681,11 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_findFileById);
  * @param id  the playback file id
  * @return the entry index, or -1 when no entry has that id
  */
-extern "C" int cPlaybackMan_findFileById(cPlaybackMan* self, int id)
+int cPlaybackMan::findFileById(int id)
 {
-    int count = self->NumPlaybackFiles;
+    int count = NumPlaybackFiles;
     for (int i = 0; i < count; i++) {
-        tPlaybackFile *entries = self->PlaybackFiles;
+        tPlaybackFile *entries = PlaybackFiles;
         if (((int)entries[i].Id) == id) {
             return i;
         }
@@ -713,14 +710,14 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param idx  the index in the playback file table (PlaybackFiles)
  * @return 1 when the file's data was unpacked, 0 when the frame was reset instead
  */
-extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx)
+int cPlaybackMan::setupFile(int idx)
 {
-    char* data = self->PlaybackFiles[idx].PackData;
+    char* data = PlaybackFiles[idx].PackData;
     if (data != 0) {
-        HUFF_decode(data, 0, (int)self->CurrentFrame);
+        HUFF_decode(data, 0, (int)CurrentFrame);
         return 1;
     }
-    tPlaybackFrame* buf = self->CurrentFrame;
+    tPlaybackFrame* buf = CurrentFrame;
     MEM_fill(buf, 0, 0x1C22C);
     buf->Version = 0xDBAC0101;
     buf->Buffer.Size = 0x1C200;
@@ -747,7 +744,7 @@ void cReplayCache_reset(void* self);
 extern "C" void* cReplayCache_cReplayCache(cReplayCache* self)
 {
     self->CmdFrame = (tControlCmd*)operator_new_tag(0x8000, str_CmdFrame, 0, 0);
-    cReplayCache_reset(self);
+    self->reset();
     return ((void*)self);
 }
 #endif
@@ -767,7 +764,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void cReplayCache__cReplayCache(int* self, int flags)
 {
-    cReplayCache_purge((cReplayCache*)self);
+    ((cReplayCache*)self)->purge();
     if (flags & 1) {
         operator_delete(self);
     }
@@ -784,12 +781,12 @@ void cMemMan_free(void* p);
  *
  * cReplayCache__cReplayCache calls it when the cache is destroyed.
  */
-extern "C" void cReplayCache_purge(cReplayCache* self)
+void cReplayCache::purge()
 {
-    void* buffer = self->CmdFrame;
+    void* buffer = CmdFrame;
     if (buffer != 0) {
         cMemMan_free(buffer);
-        self->CmdFrame = 0;
+        CmdFrame = 0;
     }
 }
 #endif
@@ -803,12 +800,11 @@ INCLUDE_ASM("replay/playbackman", cReplayCache_reset__FPv);
  *
  * The command buffer itself is kept. cReplay_init and cReplay_reset call it for each input cache.
  */
-void cReplayCache_reset(void* vself)
+void cReplayCache::reset()
 {
-    cReplayCache* self = (cReplayCache*)vself;
-    self->RecordCursor = 0;
-    self->PlaybackCursor = 0;
-    self->PlaybackLeft = 0;
+    RecordCursor = 0;
+    PlaybackCursor = 0;
+    PlaybackLeft = 0;
 }
 #endif
 
@@ -830,9 +826,9 @@ extern "C" int cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* cmd);
  * @param controlCmd  the 8-byte control command: read when recording, overwritten during playback
  * @return 0 when recording or idle, cReplayCache_getControlCmd's result during playback, 1 in the other states
  */
-extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, tControlCmd* controlCmd)
+int cReplayCache::updateControlCmd(tControlCmd* controlCmd)
 {
-    if ((int)self->CmdFrame == 0) {
+    if ((int)CmdFrame == 0) {
         return 0;
     }
     int result = 1;
@@ -842,14 +838,14 @@ extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, tControlCmd* co
         if (replay->EndReplay != 0 || replay->Loaded != 0 || replay->ReplayError != 0) {
             break;
         }
-        cReplayCache_addControlCmd(self, controlCmd);
+        addControlCmd(controlCmd);
     }
         /* fall through */
     case 10: case 11: case 12: case 14:
         result = 0;
         break;
     case 1: case 2: case 4:
-        result = cReplayCache_getControlCmd(self, controlCmd);
+        result = cReplayCache_getControlCmd(this, controlCmd);
         break;
     case 3: case 5: case 6: case 7: case 8: case 9: case 13:
         break;
@@ -870,12 +866,11 @@ INCLUDE_ASM("replay/playbackman", cReplayCache_addCmdFrame);
  * The buffer (+0xC) holds 0x1000 8-byte chunks; the low 12 bits of a chunk's first word are its repeat count. When the
  * cache is full nothing is stored: the replay's ReplayError is set and ShowError set to 180 (frames of error display).
  *
- * @param stream  the replay input cache
  * @param chunkp  the command to append
  */
-extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, tControlCmd* chunkp)
+void cReplayCache::addCmdFrame(tControlCmd* chunkp)
 {
-    cReplayCache* self = stream;
+    cReplayCache* self = this;
     if (self->RecordCursor >= 0x1000) {
         cReplay* replay = SSXApp->Game->Replay;
         replay->ReplayError = 1;
@@ -904,19 +899,19 @@ extern "C" void cReplayCache_addCmdFrame(cReplayCache* self, tControlCmd* chunk)
  * @param chunk  the command to record
  * @return always 1
  */
-extern "C" int cReplayCache_addControlCmd(cReplayCache* self, tControlCmd* chunk)
+int cReplayCache::addControlCmd(tControlCmd* chunk)
 {
-    if (self->RecordCursor > 0) {
-        int i = self->RecordCursor - 1;
-        tControlCmd last = self->CmdFrame[i];
+    if (RecordCursor > 0) {
+        int i = RecordCursor - 1;
+        tControlCmd last = CmdFrame[i];
         last.CruiseCmd.Count = 0;
-        if (memcmp(&last, chunk, 8) == 0 && (int)self->CmdFrame[i].CruiseCmd.Count < 0xFFF) {
-            self->CmdFrame[i].CruiseCmd.Count++;
+        if (memcmp(&last, chunk, 8) == 0 && (int)CmdFrame[i].CruiseCmd.Count < 0xFFF) {
+            CmdFrame[i].CruiseCmd.Count++;
         } else {
-            cReplayCache_addCmdFrame(self, chunk);
+            addCmdFrame(chunk);
         }
     } else {
-        cReplayCache_addCmdFrame(self, chunk);
+        addCmdFrame(chunk);
     }
     return 1;
 }
@@ -936,11 +931,11 @@ INCLUDE_ASM("replay/playbackman", cReplayCache_truncate);
  *
  * @param pos  the tick to cut at
  */
-extern "C" void cReplayCache_truncate(cReplayCache* self, unsigned int pos)
+void cReplayCache::truncate(unsigned int pos)
 {
-    int n = self->RecordCursor;
+    int n = RecordCursor;
     unsigned int sum = 0;
-    tControlCmd* entry = self->CmdFrame;
+    tControlCmd* entry = CmdFrame;
     int i = 0;
     if (n > 0) {
         sum = entry->CruiseCmd.Count;
@@ -955,8 +950,8 @@ extern "C" void cReplayCache_truncate(cReplayCache* self, unsigned int pos)
             } while (pos >= sum);
         }
     }
-    self->CmdFrame[i].CruiseCmd.Count = sum - pos + 1;
-    self->RecordCursor = i + 1;
+    CmdFrame[i].CruiseCmd.Count = sum - pos + 1;
+    RecordCursor = i + 1;
 }
 #endif
 
@@ -1018,22 +1013,22 @@ struct sPlaybackStream {
  * @param pos  the tick to move to
  * @return 1 on success, 0 when the tick lies past the recorded input
  */
-extern "C" int cReplayCache_moveTo(cReplayCache* self, unsigned int pos)
+int cReplayCache::moveTo(unsigned int pos)
 {
     int i = 0;
-    sPlaybackChunk* chunk = (sPlaybackChunk*)self->CmdFrame;
+    sPlaybackChunk* chunk = (sPlaybackChunk*)CmdFrame;
     unsigned int total = 0;
-    for (; i < self->RecordCursor; i++) {
+    for (; i < RecordCursor; i++) {
         total += (chunk++)->info & 0xFFF;
         if (pos < total) {
             break;
         }
     }
-    if (i >= self->RecordCursor) {
+    if (i >= RecordCursor) {
         return 0;
     }
-    self->PlaybackCursor = i;
-    self->PlaybackLeft = total - pos;
+    PlaybackCursor = i;
+    PlaybackLeft = total - pos;
     return 1;
 }
 #endif
@@ -1092,7 +1087,7 @@ extern "C" void* cReplayFrame_cReplayFrame(cReplayFrame* self)
 {
     cReplayFramePtr_cReplayFramePtr(self);
     *(void***)self = cReplayFrame_vtbl;
-    cReplayFrame_clearFrame(self);
+    self->clearFrame();
     return ((void*)self);
 }
 #endif
@@ -1113,22 +1108,22 @@ struct sPlaybackKey {
  * and +0x10, and sets the words at +0x20, +0x24, +0x28, +0x2C and +0x34 to -1. The vtable and the list links
  * (+0x14, +0x18) are left alone.
  */
-extern "C" void cReplayFrame_clearFrame(cReplayFrame* self)
+void cReplayFrame::clearFrame()
 {
     sPlaybackKey k;
     k.a = 0;
     k.b = 0;
     k.c = 0;
-    self->FrameStartTick = 0;
-    self->FrameEndTick = -1;
-    *(sPlaybackKey*)&self->FrameType = k;
-    self->Ranking[0] = -1;
-    self->Ranking[1] = -1;
-    self->HighlightEndTick[0] = -1;
-    self->WriteData = 0;
-    self->ReadData = 0;
-    self->HighlightEndTick[1] = -1;
-    self->Size = 0;
+    FrameStartTick = 0;
+    FrameEndTick = -1;
+    *(sPlaybackKey*)&FrameType = k;
+    Ranking[0] = -1;
+    Ranking[1] = -1;
+    HighlightEndTick[0] = -1;
+    WriteData = 0;
+    ReadData = 0;
+    HighlightEndTick[1] = -1;
+    Size = 0;
 }
 #endif
 
@@ -1167,22 +1162,22 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  * @param pp  in/out: the read cursor in the save data
  * @return 1 (always; On Tour asserts the save type)
  */
-extern "C" int cReplayFrame_loadFrame(cReplayFrame* self, char** pp)
+int cReplayFrame::loadFrame(char** pp)
 {
     tReplayFrameSave header;
     char* start = *pp;
     *pp = start + 0x28;
     MEM_copy(&header, start, 40);
-    self->Size = header.Size;
-    self->FrameStartTick = ((int)header.FrameStartTick);
-    self->FrameEndTick = ((int)header.FrameEndTick);
-    (*(&self->FrameType)) = header.FrameType;
-    self->Ranking[0] = header.Ranking[0];
-    self->Ranking[1] = header.Ranking[1];
-    self->HighlightEndTick[0] = header.HighlightEndTick[0];
-    self->HighlightEndTick[1] = header.HighlightEndTick[1];
-    cReplayFramePtr_loadBlock(self, pp, start + 0x24);
-    cReplayFramePtr_putFrameBlock_2(self, 1);
+    Size = header.Size;
+    FrameStartTick = ((int)header.FrameStartTick);
+    FrameEndTick = ((int)header.FrameEndTick);
+    (*(&FrameType)) = header.FrameType;
+    Ranking[0] = header.Ranking[0];
+    Ranking[1] = header.Ranking[1];
+    HighlightEndTick[0] = header.HighlightEndTick[0];
+    HighlightEndTick[1] = header.HighlightEndTick[1];
+    cReplayFramePtr_loadBlock(this, pp, start + 0x24);
+    cReplayFramePtr_putFrameBlock_2(this, 1);
     return 1;
 }
 #endif
@@ -1198,10 +1193,9 @@ INCLUDE_ASM("replay/playbackman", cReplayFrame_setRanking__FPvii);
  * @param i  the player index
  * @param value  the value to store
  */
-void cReplayFrame_setRanking(void* vself, int i, int value)
+void cReplayFrame::setRanking(int i, int value)
 {
-    cReplayFrame* self = (cReplayFrame*)vself;
-    self->Ranking[i] = value;
+    Ranking[i] = value;
 }
 #endif
 
@@ -1218,10 +1212,9 @@ INCLUDE_ASM("replay/playbackman", cReplay_addReplayFrame__FPv);
  *
  * @return cReplayFrameList_addFrame's result as this unit declares it (addFrame returns nothing)
  */
-void* cReplay_addReplayFrame(void* vself)
+void* cReplay::addReplayFrame()
 {
-    cReplay* self = (cReplay*)vself;
-    return cReplayFrameList_addFrame(&self->FrameList);
+    return cReplayFrameList_addFrame(&FrameList);
 }
 #endif
 
@@ -1244,12 +1237,12 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  * @param src  the frame type, passed by address here (On Tour tReplayFrameType type)
  * @return the saved frame
  */
-extern "C" void* cReplay_saveReplayFrame(cReplay* self, tReplayFrameType* src)
+void* cReplay::saveReplayFrame(tReplayFrameType* src)
 {
-    cReplayFrame* out = (cReplayFrame*)cReplay_allocReplayFrame(self);
+    cReplayFrame* out = (cReplayFrame*)cReplay_allocReplayFrame(this);
     out->FrameType = *src;
-    cReplay_saveFrame((cReplay*)self, (cBxReplayFrame*)out);
-    out->FrameStartTick = self->RecordTick;
+    saveFrame((cBxReplayFrame*)out);
+    out->FrameStartTick = RecordTick;
     cReplayFramePtr_putFrameBlock_2(out, 0);
     return ((void*)out);
 }
@@ -1276,7 +1269,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* out);
 extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* src)
 {
     *(sPbBytes4*)&out->FrameType = *src;
-    cReplay_saveFrame((cReplay*)self, (cBxReplayFrame*)out);
+    self->saveFrame((cBxReplayFrame*)out);
     out->FrameStartTick = self->RecordTick;
 }
 #endif
@@ -1324,7 +1317,7 @@ typedef sVEntry<void(void*, cBxReplayFrame*)> tSaveSlot;
  *
  * @param stream  the frame stream to write (On Tour: cReplayFramePtr*)
  */
-extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* stream)
+void cReplay::saveFrame(cBxReplayFrame* stream)
 {
     cBxReplayFrame* out = stream;
     sPbTime timeStamp;
@@ -1348,8 +1341,8 @@ extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* stream)
     func_00229E20(TheCrowdMan2d_D818, out);
     func_003441A8(TheCrowdMan3d, out);
     cMultiParticleMan_writeToReplayFrame(cMultiParticleMan_TheMultiParticleMan, out);
-    cReplay_saveBucket(self, out, 1);
-    cReplay_saveDeadBucket(self, out);
+    saveBucket(out, 1);
+    saveDeadBucket(out);
     cFocusMan_writeToReplayFrame(SSXApp->Game->AI->FocusMan, out);
 }
 #endif
@@ -1373,7 +1366,7 @@ static inline cBucketMan* bucketMan_D988() { return (cBucketMan*)&gBucketMan; }
  * @param bucket  the bucket
  */
 // Writes the bucket's node count (8-byte header) and then each node's serialised form to the stream.
-extern "C" void cReplay_saveBucket(cReplay* self, cBxReplayFrame* data, int bucket)
+void cReplay::saveBucket(cBxReplayFrame* data, int bucket)
 {
     int hdr[2];
     void* node;
@@ -1407,7 +1400,7 @@ static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
  *
  * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
  */
-extern "C" void cReplay_saveDeadBucket(cReplay* self, cBxReplayFrame* data)
+void cReplay::saveDeadBucket(cBxReplayFrame* data)
 {
     int hdr[2];
     void* node;
@@ -1444,10 +1437,10 @@ extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cRep
  *
  * @param frame  the frame to restore (On Tour cReplayFrame*)
  */
-extern "C" void cReplay_restoreReplayFrame(cReplay* self, void* frame)
+void cReplay::restoreReplayFrame(void* frame)
 {
     cReplayFramePtr_getFrameBlock_2(frame, 1);
-    cReplay_restoreFrame1_2(self, frame);
+    cReplay_restoreFrame1_2(this, frame);
 }
 #endif
 
@@ -1459,9 +1452,9 @@ INCLUDE_ASM("replay/playbackman", cReplay_restoreFrame1);
 /**
  * Thin wrapper that restores a replay frame through cReplay_restoreFrame().
  */
-extern "C" void cReplay_restoreFrame1(cReplay* self)
+void cReplay::restoreFrame1()
 {
-    cReplay_restoreFrame(self);
+    cReplay_restoreFrame(this);
 }
 #endif
 

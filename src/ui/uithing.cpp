@@ -20,11 +20,11 @@ INCLUDE_ASM("ui/uithing", cUIThing_getKeyframerEvent__FP8cUIThingi);
  * @param x  event index; only its low 8 bits are used, as a signed value
  * @return mEvents[x], or 0xFFFF when the thing has no event table
  */
-unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
+unsigned short cUIThing::getKeyframerEvent(int x)
 {
     signed char idx = (signed char)x;
-    if (self->mpEvents != 0) {
-        return self->mpEvents[idx];
+    if (mpEvents != 0) {
+        return mpEvents[idx];
     }
     return 0xFFFF;
 }
@@ -43,12 +43,12 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
  * @param idx  the event index (On Tour char e)
  * @return 1 when the event was played, else 0 (On Tour returns bool)
  */
-extern "C" int cUIThing_playKeyframerEvent(cUIThing* self, signed char idx)
+int cUIThing::playKeyframerEvent(signed char idx)
 {
-    if (self->mpEvents != 0 && self->mpEvents[idx] != 0xFFFF) {
-        void* scr = self->mpScreen;
+    if (mpEvents != 0 && mpEvents[idx] != 0xFFFF) {
+        void* scr = mpScreen;
         if (scr != 0) {
-            cUIScreen_playFrame(scr, self->mpEvents[idx], 1);
+            cUIScreen_playFrame(scr, mpEvents[idx], 1);
             return 1;
         }
     }
@@ -226,10 +226,10 @@ INCLUDE_ASM("ui/uithing", cUIThing_getAbsPosition);
  *
  * @param out  receives the summed position (x, y, z)
  */
-extern "C" void cUIThing_getAbsPosition(cUIThing* self, t3Vector* out)
+void cUIThing::getAbsPosition(t3Vector* out)
 {
-    *out = self->mPosition;
-    for (cUIThing* ancestor = self->mpParent; ancestor != 0; ancestor = ancestor->mpParent) {
+    *out = mPosition;
+    for (cUIThing* ancestor = mpParent; ancestor != 0; ancestor = ancestor->mpParent) {
         t3Vector ancestorPos = ancestor->mPosition;
         out->x += ancestorPos.x;
         out->y += ancestorPos.y;
@@ -250,9 +250,9 @@ INCLUDE_ASM("ui/uithing", cUIThing_getSound);
  * @param soundIndex  which of the two sounds (0 or 1)
  * @return the sound id stored there (the cUIThing constructor stores 4 and 6)
  */
-extern "C" int cUIThing_getSound(cUIThing* self, int soundIndex)
+int cUIThing::getSound(int soundIndex)
 {
-    return self->mSound[(signed char)soundIndex];
+    return mSound[(signed char)soundIndex];
 }
 #endif
 
@@ -268,9 +268,9 @@ INCLUDE_ASM("ui/uithing", cUIThing_setSound);
  * @param soundIndex  which of the two sounds (0 or 1)
  * @param sound  the sound id to store
  */
-extern "C" void cUIThing_setSound(cUIThing* self, int soundIndex, int sound)
+void cUIThing::setSound(int soundIndex, int sound)
 {
-    self->mSound[(signed char)soundIndex] = sound;
+    mSound[(signed char)soundIndex] = sound;
 }
 #endif
 
@@ -363,13 +363,13 @@ INCLUDE_ASM("ui/uithing", cUIText_getFont);
  *
  * @return the cFont (as int), or 0 without a font interface
  */
-extern "C" int cUIText_getFont(cUIText* self)
+int cUIText::getFont()
 {
-    cUIEngine* engine = self->mpScreen->mpState->mpEngine;
+    cUIEngine* engine = mpScreen->mpState->mpEngine;
     if (engine != 0) {
         // the font index is tAttrText::mFont, read as the low byte of mAttrText (EA's tAttrText is one byte);
         // indexing from &mFontEntry[0] keeps retail's index-first address add
-        return (int)(&engine->mpFontInterface->mFontEntry[0])[*(unsigned char*)&self->mAttrText & 3].mpFont;
+        return (int)(&engine->mpFontInterface->mFontEntry[0])[*(unsigned char*)&mAttrText & 3].mpFont;
     }
     return 0;
 }

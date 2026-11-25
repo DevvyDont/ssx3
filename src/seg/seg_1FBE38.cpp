@@ -9085,9 +9085,10 @@ extern "C" void cWScriptProcess_processStart_71F0(void*) __asm__("cWScriptProces
  * Starts a mission: shows HUD effect 0x1A for one second on the manager's rider (cRider_flagEventMissionStart), then
  * runs the base process start.
  */
-extern "C" void cWScriptMission_processStart(cWScriptMission* self) {
-    cRider_flagEventMissionStart_71F0(SSXApp->Game->AI->Riders[self->Manager->Being]);
-    cWScriptProcess_processStart_71F0(self);
+void cWScriptMission::processStart()
+{
+    cRider_flagEventMissionStart_71F0(SSXApp->Game->AI->Riders[Manager->Being]);
+    cWScriptProcess_processStart_71F0(this);
 }
 #endif
 
@@ -9103,10 +9104,11 @@ extern "C" void cSSXAudio_BigChallengeComplete_7240(void*) __asm__("cSSXAudio_Bi
  * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18, then calls
  * cSSXAudio_BigChallengeComplete on the sound system.
  */
-extern "C" void cWScriptMission_processComplete(cWScriptMission* self) {
-    if (cWScriptMan_isProcessActive_7240(self->Manager, ((P_7240*)self))) {
-        ((P_7240*)self)->v06();
-        ((P_7240*)self)->v18();
+void cWScriptMission::processComplete()
+{
+    if (cWScriptMan_isProcessActive_7240(Manager, ((P_7240*)this))) {
+        ((P_7240*)this)->v06();
+        ((P_7240*)this)->v18();
         cSSXAudio_BigChallengeComplete_7240(cAudioInterface_bxAudio_7240());
     }
 }
@@ -9169,34 +9171,34 @@ extern "C" void cReplay_startRace(void* replay);
  * On Tour also awards leaderboard points and a medal and triggers an overlay; retail has none of that.
  */
 // Mission completed: pays the reward the first time, unlocks the follow-up mission and resets the script.
-extern "C" void cWScriptMission_missionPass(cWScriptMission* self)
+void cWScriptMission::missionPass()
 {
     int money = 0;
     void* missions = cBE_getInterface_Fv(cBE_getBE(), 10);
-    if (cBEMissionInterface_isMissionCompleted(missions, (int)self->ProcessId) == 0) {
-        cBEMissionInterface_setIsCompleted(missions, (int)self->ProcessId, 1);
-        int reward = cBEMissionInterface_getDiffLevel(missions, (int)self->ProcessId);
+    if (cBEMissionInterface_isMissionCompleted(missions, (int)ProcessId) == 0) {
+        cBEMissionInterface_setIsCompleted(missions, (int)ProcessId, 1);
+        int reward = cBEMissionInterface_getDiffLevel(missions, (int)ProcessId);
         money = cBEEconInterface_getMissionCash(cBE_getInterface_Fv(cBE_getBE(), 11), reward);
     }
     int pl = cBENewRaceInterface_getLocationPeak1(cBE_getInterface_Fv(cBE_getBE(), 0));
     cAI* ai = SSXApp->Game->AI;
-    cRider_flagEventMissionSuccess(ai->Riders[self->Manager->Being], pl, money);
-    unsigned int next = cBEMissionInterface_getNextMissionID(missions, (int)self->ProcessId);
+    cRider_flagEventMissionSuccess(ai->Riders[Manager->Being], pl, money);
+    unsigned int next = cBEMissionInterface_getNextMissionID(missions, (int)ProcessId);
     if (next != 0xFFFFFFFF) {
-        cBEMissionInterface_setIsShowIcon(missions, (int)self->ProcessId, 0);
-        if ((int)self->MissionScriptCode[1] != 0) {
-            cWScriptMan_runScriptCode(self->Manager, self, (int)self->MissionScriptCode[1]);
+        cBEMissionInterface_setIsShowIcon(missions, (int)ProcessId, 0);
+        if ((int)MissionScriptCode[1] != 0) {
+            cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
         }
         if (cBEMissionInterface_isMissionLocked(missions, next) != 0) {
             cBEMissionInterface_setIsLocked(missions, next, 0);
             cBEMissionInterface_setIsReady(missions, next, 1);
             cBEMissionInterface_setIsShowIcon(missions, next, 1);
         }
-    } else if ((int)self->MissionScriptCode[1] != 0) {
-        cWScriptMan_runScriptCode(self->Manager, self, (int)self->MissionScriptCode[1]);
+    } else if ((int)MissionScriptCode[1] != 0) {
+        cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
     }
-    cWScriptMan_updateWorld(self->Manager);
-    cWScriptMan_processPass(self->Manager, self);
+    cWScriptMan_updateWorld(Manager);
+    cWScriptMan_processPass(Manager, this);
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace(SSXApp->Game->Replay);
 }
@@ -9221,17 +9223,18 @@ struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(
  * the virtual at vtable +0xA0 (cWScriptMission_missionUpdateWorld, missionUpdateWorld) runs. A running process (state
  * 2) is then ended with cWScriptProcess_end.
  */
-extern "C" void cWScriptMission_missionFail(cWScriptMission* self) {
+void cWScriptMission::missionFail()
+{
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
-    if (!cBEMissionInterface_isMissionAvailable_74C0(iface, self->ProcessId))
-        cBEMissionInterface_setIsAvailable_74C0(iface, self->ProcessId, 1);
-    int failScript = (int)self->MissionScriptCode[2];
+    if (!cBEMissionInterface_isMissionAvailable_74C0(iface, ProcessId))
+        cBEMissionInterface_setIsAvailable_74C0(iface, ProcessId, 1);
+    int failScript = (int)MissionScriptCode[2];
     if (failScript)
-        cWScriptMan_runScriptCode(self->Manager, self, failScript);
+        cWScriptMan_runScriptCode(Manager, this, failScript);
     else
-        ((P_74C0*)self)->v20();
-    if (self->State == 2)
-        cWScriptProcess_end_74C0(self);
+        ((P_74C0*)this)->v20();
+    if (State == 2)
+        cWScriptProcess_end_74C0(this);
 }
 #endif
 
@@ -9246,14 +9249,14 @@ extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, int);
  * Calls cWScriptMan_runScriptCode(Manager, this, code) with the fourth script entry point (MissionScriptCode[3]).
  * cWScriptMission_missionFail calls it through the vtable when the mission has no fail script.
  *
- * @param mission  the mission (this)
  */
-extern "C" void cWScriptMission_missionUpdateWorld(cWScriptMission* mission) {
+void cWScriptMission::missionUpdateWorld()
+{
     int temp_6;
 
-    temp_6 = ((int)mission->MissionScriptCode[3]);
+    temp_6 = ((int)MissionScriptCode[3]);
     if (temp_6 != 0) {
-        cWScriptMan_runScriptCode(mission->Manager, mission, temp_6);
+        cWScriptMan_runScriptCode(Manager, this, temp_6);
     }
 }
 #endif

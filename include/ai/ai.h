@@ -179,6 +179,8 @@ struct cAI {
     int getPodiumActor(int index) __asm__("cAI_getPodiumActor");
     int getEndOfRaceTimer() __asm__("cAI_getEndOfRaceTimer");
     int getFocusMan() __asm__("cAI_getFocusMan");
+    void setAIState(int state) __asm__("cAI_setAIState");
+    void AIStateUpdate() __asm__("cAI_AIStateUpdate");
 };
 
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).

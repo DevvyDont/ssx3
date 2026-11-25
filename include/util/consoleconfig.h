@@ -46,6 +46,17 @@ struct cConsoleConfig {
     int mLanguage;                  // 0x30 [O] eConsoleLanguage; [R] ctor: sceScfGetLanguage 0..7, else 1
     void** mVtbl;                   // 0x34 [R] cPS2ConsoleConfig_vtbl (ctor, dtor), cConsoleConfig_vtbl (cConsoleConfig's, stored
                                     //      by both destructors); slot 1 = destructor
+
+    // Methods bound to their retail symbols by asm labels.
+    void setTimeString(char* dst, int size, int hour, int min, int sec, int mode)
+        __asm__("cConsoleConfig_setTimeString");
+    void setDateString(char* dst, int size, int day, int month, int year, int mode)
+        __asm__("cConsoleConfig_setDateString");
+    void getTime(int *hour, int *minute, int *second) __asm__("cConsoleConfig_getTime");
+    void getDate(int *day, int *month, int *year) __asm__("cConsoleConfig_getDate");
+    int isLeapYear(int year) __asm__("cConsoleConfig_isLeapYear");
+    int addSecondsToTime(int* sec, int* min, int* hour, int add) __asm__("cConsoleConfig_addSecondsToTime");
+    void updateDateTime() __asm__("cConsoleConfig_updateDateTime");
 };
 
 CHECK_OFFSET(cConsoleConfig, mDateFormat, 0x00);

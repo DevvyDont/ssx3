@@ -44,6 +44,14 @@ struct cUIEngine {
     cUITextureBank mTextureBank;           // 0x58 [O] cUITextureBank (ui/uitexturebank.h): header, texture IDs, count,
                                            //      elements, count (0x58..0x68, zeroed by the ctor), mpEngine (0x6C = this,
                                            //      [R]); [U] cUITextureBank_getElementByHashname(&mTextureBank, ...)
+
+    // Methods bound to their retail symbols by asm labels.
+    int loadFile(int id) __asm__("cUIEngine_loadFile");
+    void* addScreenByHashName(cUIState* owner, unsigned int hash, void* screen)
+        __asm__("cUIEngine_addScreenByHashName");
+    void render2D() __asm__("cUIEngine_render2D");
+    void render3D() __asm__("cUIEngine_render3D");
+    void update() __asm__("cUIEngine_update");
 };
 
 CHECK_OFFSET(cUIEngine, mpSound, 0x14);

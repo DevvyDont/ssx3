@@ -52,6 +52,16 @@ struct cDataManager {
     void** mVtbl;                               // 0xC [R] the ctor and destructor store cDataManager_vtbl (D_004825A0);
                                                 //      [U] AttachData calls slot 2 / 4, DetachData slot 3 / 5,
                                                 //      AttachDataFromBigfile slot 2
+
+    // Methods bound to their retail symbols by asm labels.
+    tDataInstanceInfo* AttachData(int pName, void* data, int size) __asm__("cDataManager_AttachData");
+    void DetachAll() __asm__("cDataManager_DetachAll");
+    int GetData(tDataInstanceInfo* dataHandle) __asm__("cDataManager_GetData");
+    void GetDataUserData(tDataInstanceInfo* dataHandle, int* out0, int* out1) __asm__("cDataManager_GetDataUserData");
+    tDataInstanceInfo* AttachDataFromBigfile(char* big, tDataInstanceInfo* prev)
+        __asm__("cDataManager_AttachDataFromBigfile");
+    void AddToEmptyInstanceList(void* vnode) __asm__("cDataManager_AddToEmptyInstanceList__FPvT0");
+    void* GetEmptyInstance() __asm__("cDataManager_GetEmptyInstance__FPv");
 };
 
 CHECK_OFFSET(cDataManager, mMaxDataInstances, 0x0);

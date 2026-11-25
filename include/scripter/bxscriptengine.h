@@ -193,6 +193,7 @@ struct cBXScriptEngine {
     tScriptRequestInfo* CreateNewRequest(eScriptRequestType requestType) __asm__("cBXScriptEngine_CreateNewRequest");
     void ResetRequest(tScriptRequestInfo* pRequest) __asm__("cBXScriptEngine_ResetRequest__FPvT0");
     tScriptRequestInfo* GetRequest(int requestHandle) __asm__("cBXScriptEngine_GetRequest");
+    int GetScriptDatabaseSize() __asm__("cBXScriptEngine_GetScriptDatabaseSize");
 };
 
 CHECK_OFFSET(cBXScriptEngine, mpObjectDatabase, 0x000);

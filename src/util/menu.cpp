@@ -72,9 +72,9 @@ extern "C" int cMenuItem_getKey(void** self);
  *
  * @return the navigation result (0 none, 1 pop menu, 2 exit menus, 3 next item, 4 previous item)
  */
-extern "C" int cMenuItem_input(cMenuItem* self)
+int cMenuItem::input()
 {
-    switch (cMenuItem_getKey((void**)self)) {
+    switch (cMenuItem_getKey((void**)this)) {
     case 8:
         return 1;
     case 7:
@@ -99,11 +99,11 @@ extern "C" int cMenuItem_isLocked(cMenuItem* self);
  *
  * @return 1 when the item is active (cMenuItem_isActive) and not locked (cMenuItem_isLocked), else 0
  */
-extern "C" int cMenuItem_canHaveFocus(cMenuItem* self)
+int cMenuItem::canHaveFocus()
 {
     int canFocus = 0;
-    if (cMenuItem_isActive(self) != 0) {
-        canFocus = cMenuItem_isLocked(self) == 0;
+    if (isActive() != 0) {
+        canFocus = isLocked() == 0;
     }
     return canFocus;
 }
@@ -139,9 +139,9 @@ INCLUDE_ASM("util/menu", cMenuItem_isActive);
  *
  * @return 1 when the item is active, otherwise 0
  */
-extern "C" int cMenuItem_isActive(cMenuItem* self)
+int cMenuItem::isActive()
 {
-    return self->Flags & 1;
+    return Flags & 1;
 }
 #endif
 
@@ -154,12 +154,12 @@ INCLUDE_ASM("util/menu", cMenuItem_activate);
  *
  * @param enable  nonzero to activate
  */
-extern "C" void cMenuItem_activate(cMenuItem* self, int enable)
+void cMenuItem::activate(int enable)
 {
     if (enable) {
-        self->Flags |= 1;
+        Flags |= 1;
     } else {
-        self->Flags &= ~1;
+        Flags &= ~1;
     }
 }
 #endif
@@ -174,9 +174,9 @@ INCLUDE_ASM("util/menu", cMenuItem_isLocked);
  *
  * @return 8 when the item is locked, otherwise 0
  */
-extern "C" int cMenuItem_isLocked(cMenuItem* self)
+int cMenuItem::isLocked()
 {
-    return self->Flags & 8;
+    return Flags & 8;
 }
 #endif
 
@@ -189,8 +189,9 @@ INCLUDE_ASM("util/menu", cMenuItem_lock);
  *
  * @param enable  nonzero to lock
  */
-extern "C" void cMenuItem_lock(cMenuItem* self, int enable) {
-    int *flags = (int *)&self->Flags;
+void cMenuItem::lock(int enable)
+{
+    int *flags = (int *)&Flags;
 
     if (enable != 0) {
         *flags |= 8;
@@ -213,7 +214,7 @@ int cMenuSys_getKey(void* self);
  */
 extern "C" int cMenuItem_getKey(void** self)
 {
-    return cMenuSys_getKey(((cMenu*)*self)->MenuSys);
+    return (((cMenu*)*self)->MenuSys)->getKey();
 }
 #endif
 
@@ -229,10 +230,9 @@ INCLUDE_ASM("util/menu", cMenuItem_getLeft__FPv);
  *
  * @return cMenuSys_getLeft__FPv's result
  */
-void* cMenuItem_getLeft(void* vself)
+void* cMenuItem::getLeft()
 {
-    cMenuItem* self = (cMenuItem*)vself;
-    return cMenuSys_getLeft((int)self->Menu->MenuSys);
+    return cMenuSys_getLeft((int)Menu->MenuSys);
 }
 #endif
 
@@ -248,10 +248,9 @@ INCLUDE_ASM("util/menu", cMenuItem_getRight__FPv);
  *
  * @return cMenuSys_getRight__FPv's result
  */
-void* cMenuItem_getRight(void* vself)
+void* cMenuItem::getRight()
 {
-    cMenuItem* self = (cMenuItem*)vself;
-    return cMenuSys_getRight((int)self->Menu->MenuSys);
+    return cMenuSys_getRight((int)Menu->MenuSys);
 }
 #endif
 
@@ -267,10 +266,9 @@ INCLUDE_ASM("util/menu", cMenuItem_getUp__FPv);
  *
  * @return cMenuSys_getUp__FPv's result
  */
-void* cMenuItem_getUp(void* vself)
+void* cMenuItem::getUp()
 {
-    cMenuItem* self = (cMenuItem*)vself;
-    return cMenuSys_getUp((int)self->Menu->MenuSys);
+    return cMenuSys_getUp((int)Menu->MenuSys);
 }
 #endif
 
@@ -286,10 +284,9 @@ INCLUDE_ASM("util/menu", cMenuItem_getDown__FPv);
  *
  * @return cMenuSys_getDown__FPv's result
  */
-void* cMenuItem_getDown(void* vself)
+void* cMenuItem::getDown()
 {
-    cMenuItem* self = (cMenuItem*)vself;
-    return cMenuSys_getDown((int)self->Menu->MenuSys);
+    return cMenuSys_getDown((int)Menu->MenuSys);
 }
 #endif
 
@@ -298,6 +295,8 @@ extern "C" void* cMenuSys_getLeftShift(int);
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getLeftShift__FPv);
 #ifdef SKIP_ASM
+void* cMenuItem_getLeftShift(void* vself);
+
 /**
  * Tells whether the menu's left-shift key is held, asked of the item's Menu->MenuSys.
  *
@@ -306,10 +305,9 @@ INCLUDE_ASM("util/menu", cMenuItem_getLeftShift__FPv);
  *
  * @return nonzero while left shift is held
  */
-void* cMenuItem_getLeftShift(void* vself)
+void* cMenuItem::getLeftShift()
 {
-    cMenuItem* self = (cMenuItem*)vself;
-    return cMenuSys_getLeftShift((int)self->Menu->MenuSys);
+    return cMenuSys_getLeftShift((int)Menu->MenuSys);
 }
 #endif
 
@@ -318,6 +316,8 @@ extern "C" void* cMenuSys_getRightShift(int);
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getRightShift__FPv);
 #ifdef SKIP_ASM
+void* cMenuItem_getRightShift(void* vself);
+
 /**
  * Tells whether the menu's right-shift key is held, asked of the item's Menu->MenuSys.
  *
@@ -326,10 +326,9 @@ INCLUDE_ASM("util/menu", cMenuItem_getRightShift__FPv);
  *
  * @return nonzero while right shift is held
  */
-void* cMenuItem_getRightShift(void* vself)
+void* cMenuItem::getRightShift()
 {
-    cMenuItem* self = (cMenuItem*)vself;
-    return cMenuSys_getRightShift((int)self->Menu->MenuSys);
+    return cMenuSys_getRightShift((int)Menu->MenuSys);
 }
 #endif
 
@@ -519,7 +518,7 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  */
 void* cMenuItem_textRender1_5(void* self, int rect, int leftText, int centerText, void* rightText)
 {
-    int focused = self == cMenu_getFocusItem((cMenu*)(*(void**)self));
+    int focused = self == ((cMenu*)(*(void**)self))->getFocusItem();
     char* style = focused ? kBoxSelectedColor : kBoxUnselectedColor;
     cMenuItem_textRender1_sVec3* textRgb = focused ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
@@ -598,11 +597,11 @@ extern "C" void cMenu_nextFocus(cMenu* self);
  * Asks Items[FocusItem] through its virtual slot 3 (the base version: active and not locked); on 0, calls
  * cMenu_nextFocus().
  */
-extern "C" void cMenu_checkFocus(cMenu* self)
+void cMenu::checkFocus()
 {
-    cMenu_checkFocus_cItem* item = (cMenu_checkFocus_cItem*)self->Items[self->FocusItem];
+    cMenu_checkFocus_cItem* item = (cMenu_checkFocus_cItem*)Items[FocusItem];
     if (item->canHaveFocus() == 0) {
-        cMenu_nextFocus(self);
+        nextFocus();
     }
 }
 #endif
@@ -637,11 +636,10 @@ struct cMenu_nextFocus_sMenu {
  * to the starting item, focus stays there and nothing is notified; otherwise the old item gets its loseFocus
  * (slot 7) and the new one gainFocus(0) (slot 6).
  *
- * @param menu  the menu to update
  */
-extern "C" void cMenu_nextFocus(cMenu* menu)
+void cMenu::nextFocus()
 {
-    cMenu_nextFocus_sMenu* self = (cMenu_nextFocus_sMenu*)menu;
+    cMenu_nextFocus_sMenu* self = (cMenu_nextFocus_sMenu*)this;
     int start = self->cur;
     do {
         self->cur = (self->cur + 1) % self->count;
@@ -684,11 +682,10 @@ struct cMenu_prevFocus_sMenu {
  * back to the starting item, focus stays there and nothing is notified; otherwise the old item gets its
  * loseFocus (slot 7) and the new one gainFocus(1) (slot 6).
  *
- * @param menu  the menu to update
  */
-extern "C" void cMenu_prevFocus(cMenu* menu)
+void cMenu::prevFocus()
 {
-    cMenu_prevFocus_sMenu* self = (cMenu_prevFocus_sMenu*)menu;
+    cMenu_prevFocus_sMenu* self = (cMenu_prevFocus_sMenu*)this;
     int start = self->cur;
     do {
         self->cur = (self->cur + self->count - 1) % self->count;
@@ -722,17 +719,17 @@ extern "C" void cMenu_prevFocus(cMenu* self);
  *
  * @return the focus item's input result, or 0 when the focus moved
  */
-extern "C" int cMenu_input(cMenu* self)
+int cMenu::input()
 {
-    cMenu_checkFocus((cMenu*)self);
-    cMenu_input_cItem* item = (cMenu_input_cItem*)self->Items[self->FocusItem];
+    checkFocus();
+    cMenu_input_cItem* item = (cMenu_input_cItem*)Items[FocusItem];
     int inputResult = item->input();
     switch (inputResult) {
     case 3:
-        cMenu_nextFocus((cMenu*)self);
+        nextFocus();
         return 0;
     case 4:
-        cMenu_prevFocus((cMenu*)self);
+        prevFocus();
         return 0;
     }
     return inputResult;
@@ -790,17 +787,17 @@ void cMenu_renderDownArrow_r(void* self, const tRect& r) __asm__("cMenu_renderDo
  * Asks each active item for its rect, fits as many as the display height (480 minus the menu system's offset) allows
  * from the top item, then renders them, with the up and down arrows when items are hidden above or below.
  */
-extern "C" void cMenu_render(cMenu* self)
+void cMenu::render()
 {
     tMenuRect total;
     tMenuRect item[70];
     int i;
     total.X = total.Y = total.W = total.H = 0.0f;
-    for (i = 0; i < self->NumItems; i++) {
-        if (cMenuItem_isActive(self->Items[i])) {
+    for (i = 0; i < NumItems; i++) {
+        if (Items[i]->isActive()) {
             // cMenuItem entry 4: preRender, the row's rect (returned by value)
-            sVEntry<tRect(void*)>* vt = (sVEntry<tRect(void*)>*)self->Items[i]->mVtbl;
-            (tRect&)item[i] = vt[4].fn(vthis(self->Items[i], vt[4]));
+            sVEntry<tRect(void*)>* vt = (sVEntry<tRect(void*)>*)Items[i]->mVtbl;
+            (tRect&)item[i] = vt[4].fn(vthis(Items[i], vt[4]));
             total.H += item[i].H;
             if (item[i].W > total.W) {
                 total.W = item[i].W;
@@ -809,56 +806,56 @@ extern "C" void cMenu_render(cMenu* self)
             item[i].W = item[i].H = 0.0f;
         }
     }
-    total.X = (self->MenuSys->getDisplayWidth() - total.W) * 0.5f;
-    if (total.H > self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
-        if (self->FocusItem < self->TopItem) {
-            self->TopItem = self->FocusItem;
+    total.X = (MenuSys->getDisplayWidth() - total.W) * 0.5f;
+    if (total.H > MenuSys->MenuYOffset + MenuSys->getDisplayHeight() - kScreenGapY * 2) {
+        if (FocusItem < TopItem) {
+            TopItem = FocusItem;
         }
         float th = 0.0f;
-        for (int i = self->TopItem; i <= self->FocusItem; i++) {
+        for (int i = TopItem; i <= FocusItem; i++) {
             th += item[i].H;
         }
-        while (self->TopItem < self->FocusItem && th > self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
-            th -= item[self->TopItem].H;
-            self->TopItem++;
+        while (TopItem < FocusItem && th > MenuSys->getDisplayHeight() - kScreenGapY * 2) {
+            th -= item[TopItem].H;
+            TopItem++;
         }
         total.Y = kScreenGapY;
     } else {
-        self->TopItem = 0;
-        total.Y = (self->MenuSys->getDisplayHeight() - total.H) * 0.5f;
+        TopItem = 0;
+        total.Y = (MenuSys->getDisplayHeight() - total.H) * 0.5f;
     }
-    cMenu_preRender_s(self);
-    for (i = self->TopItem; i < self->NumItems; i++) {
-        if (cMenuItem_isActive(self->Items[i])) {
-            if (i != self->FocusItem && total.Y + item[i].H > self->MenuSys->getDisplayHeight() - kScreenGapY) {
+    cMenu_preRender_s(this);
+    for (i = TopItem; i < NumItems; i++) {
+        if (Items[i]->isActive()) {
+            if (i != FocusItem && total.Y + item[i].H > MenuSys->getDisplayHeight() - kScreenGapY) {
                 break;
             }
             item[i].X = total.X;
-            item[i].Y = self->MenuSys->MenuYOffset + total.Y;
+            item[i].Y = MenuSys->MenuYOffset + total.Y;
             item[i].W = total.W;
             total.Y += item[i].H;
             // cMenuItem entry 5: render in the rect
-            sVEntry<void(void*, tRect*)>* vt = (sVEntry<void(void*, tRect*)>*)self->Items[i]->mVtbl;
-            vt[5].fn(vthis(self->Items[i], vt[5]), &item[i]);
+            sVEntry<void(void*, tRect*)>* vt = (sVEntry<void(void*, tRect*)>*)Items[i]->mVtbl;
+            vt[5].fn(vthis(Items[i], vt[5]), &item[i]);
         }
     }
-    if (self->TopItem) {
+    if (TopItem) {
         tMenuRect up;
-        up.Y = self->MenuSys->MenuYOffset + kArrowEdgeOffset;
-        up.X = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
+        up.Y = MenuSys->MenuYOffset + kArrowEdgeOffset;
+        up.X = (MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
         up.W = kArrowWidth;
         up.H = kArrowHeight;
-        cMenu_renderUpArrow_r(self, up);
+        cMenu_renderUpArrow_r(this, up);
     }
-    if (i != self->NumItems) {
+    if (i != NumItems) {
         tMenuRect down;
-        down.X = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
-        down.Y = self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
+        down.X = (MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
+        down.Y = MenuSys->MenuYOffset + MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
         down.W = kArrowWidth;
         down.H = kArrowHeight;
-        cMenu_renderDownArrow_r(self, down);
+        cMenu_renderDownArrow_r(this, down);
     }
-    cMenu_postRender_s(self);
+    cMenu_postRender_s(this);
 }
 #endif
 
@@ -1116,11 +1113,11 @@ typedef sVEntry<tMenuDrawBoxFn> sMenuDrawBoxEntry;
  * @param rect  the box rect
  * @param on  nonzero for the selected colour
  */
-extern "C" void cMenu_drawBox1(cMenu* self, void* rect, int on)
+void cMenu::drawBox1(void* rect, int on)
 {
-    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)self->mVtbl;
+    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)mVtbl;
     tMenuDrawBoxFn** drawBoxFn = &vt[8].fn;
-    (*drawBoxFn)(vthis(self, vt[8]), rect, on ? kBoxSelectedColor : kBoxUnselectedColor);
+    (*drawBoxFn)(vthis(this, vt[8]), rect, on ? kBoxSelectedColor : kBoxUnselectedColor);
 }
 #endif
 
@@ -1138,10 +1135,10 @@ INCLUDE_ASM("util/menu", cMenu_renderUpArrow);
  *
  * @param rect  the arrow's rect (x, y, w, h)
  */
-extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
+void cMenu::renderUpArrow(float* rect)
 {
-    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)self->mVtbl;
-    vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
+    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)mVtbl;
+    vt[8].fn(vthis(this, vt[8]), rect, kBoxSelectedColor);
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->m_pCurrentDrawState->m_bitGroups[1] =
         ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
@@ -1190,10 +1187,10 @@ INCLUDE_ASM("util/menu", cMenu_renderDownArrow);
  *
  * @param rect  the arrow's rect (x, y, w, h)
  */
-extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
+void cMenu::renderDownArrow(float* rect)
 {
-    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)self->mVtbl;
-    vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
+    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)mVtbl;
+    vt[8].fn(vthis(this, vt[8]), rect, kBoxSelectedColor);
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->m_pCurrentDrawState->m_bitGroups[1] =
         ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
@@ -1300,7 +1297,7 @@ void cMenu_remItem_impl(cMenuList* list, int index)
         list->selected = list->count - 1;
     }
     if (index == list->selected) {
-        cMenu_checkFocus((cMenu*)list);
+        ((cMenu*)list)->checkFocus();
     }
     if (list->selected < 0) {
         list->selected = 0;
@@ -1310,12 +1307,15 @@ void cMenu_remItem_impl(cMenuList* list, int index)
 //100%
 INCLUDE_ASM("util/menu", cMenu_remAllItems);
 #ifdef SKIP_ASM
+extern "C" void cMenu_remAllItems(cMenu* self);
+
 /**
  * Empties a menu: sets FocusItem (+0x4) and NumItems (+0x0) to 0 (TopItem and the Items pointers stay).
  */
-extern "C" void cMenu_remAllItems(cMenu* self) {
-    self->FocusItem = 0;
-    self->NumItems = 0;
+void cMenu::remAllItems()
+{
+    FocusItem = 0;
+    NumItems = 0;
 }
 #endif
 //100%
@@ -1334,12 +1334,12 @@ extern "C" int func_002D4008(const void*, const void*);
  *
  * @param cmp  compares two items; called through func_002D4008
  */
-extern "C" void cMenu_sortItems(cMenu* self, int (*cmp)(int, int))
+void cMenu::sortItems(int (*cmp)(int, int))
 {
     D_004A54BC = cmp;
-    qsort(&self->Items[0], *(int*)self, 4, func_002D4008);
+    qsort(&Items[0], *(int*)this, 4, func_002D4008);
     D_004A54BC = 0;
-    cMenu_checkFocus((cMenu*)self);
+    checkFocus();
 }
 #endif
 
@@ -1385,7 +1385,7 @@ extern "C" void cMenu_setFocus(cMenu_setFocus_sMenu* self, int index)
         self->items[self->selected]->loseFocus();
         self->selected = index;
         self->items[index]->gainFocus(2);
-        cMenu_checkFocus((cMenu*)self);
+        ((cMenu*)self)->checkFocus();
     }
 }
 #endif
@@ -1403,10 +1403,10 @@ extern "C" void cMenu_checkFocus(cMenu* self);
  *
  * @return FocusItem after the check
  */
-extern "C" int cMenu_getFocus(cMenu* self)
+int cMenu::getFocus()
 {
-    cMenu_checkFocus(self);
-    return self->FocusItem;
+    checkFocus();
+    return FocusItem;
 }
 #endif
 
@@ -1418,9 +1418,9 @@ INCLUDE_ASM("util/menu", cMenu_getFocusItem);
  *
  * @return Items[cMenu_getFocus()], the focused cMenuItem
  */
-extern "C" void* cMenu_getFocusItem(cMenu* self)
+void* cMenu::getFocusItem()
 {
-    return (void*)self->Items[cMenu_getFocus(self)];
+    return (void*)Items[getFocus()];
 }
 #endif
 
@@ -1447,23 +1447,24 @@ struct cMenu_onGainFocus_sMenu {
     int wrap;           // 0x124
 };
 
+extern "C" void cMenu_onGainFocus(cMenu* menu, int wrap);
+
 /**
  * Activates the menu: records its owner, clamps the focus index and tells the focused item it has focus.
  *
  * Clamps FocusItem to NumItems - 1, calls that item's gainFocus(2) (slot 6), then cMenu_checkFocus().
  *
- * @param menu     the menu (this)
  * @param wrap  the owning cMenuSys (On Tour's onGainFocus parent), stored in MenuSys (+0x124)
  */
-extern "C" void cMenu_onGainFocus(cMenu* menu, int wrap)
+void cMenu::onGainFocus(int wrap)
 {
-    cMenu_onGainFocus_sMenu* self = (cMenu_onGainFocus_sMenu*)menu;
+    cMenu_onGainFocus_sMenu* self = (cMenu_onGainFocus_sMenu*)this;
     self->wrap = wrap;
     if (self->selected >= self->count) {
         self->selected = self->count - 1;
     }
     self->items[self->selected]->gainFocus(2);
-    cMenu_checkFocus((cMenu*)self);
+    ((cMenu*)self)->checkFocus();
 }
 #endif
 
@@ -1490,11 +1491,10 @@ struct s2CBFD0Menu {
  * Calls Items[FocusItem]'s loseFocus (cMenuItem vtable slot 7, empty in the base item) and clears MenuSys
  * (+0x124, which the local struct calls wrap). cMenuSys calls it on the menu a newly pushed menu covers.
  *
- * @param menu  the menu (this)
  */
-extern "C" void cMenu_onLoseFocus(cMenu* menu)
+void cMenu::onLoseFocus()
 {
-    s2CBFD0Menu* self = (s2CBFD0Menu*)menu;
+    s2CBFD0Menu* self = (s2CBFD0Menu*)this;
     cMenuItem* item = (cMenuItem*)self->items[self->selected];
     sVEntry2CBFD0* vt = (sVEntry2CBFD0*)item->mVtbl;
     vt[7].fn(vthis(item, vt[7]));
@@ -1571,11 +1571,11 @@ INCLUDE_ASM("util/menu", cMenuSys_isActive);
  *
  * @return 1 when +0x0 and +0x54 are both non-zero, else 0
  */
-extern "C" int cMenuSys_isActive(cMenuSys* self)
+int cMenuSys::isActive()
 {
     int active = 0;
-    if (*(int*)self != 0) {
-        active = self->Active != 0;
+    if (*(int*)this != 0) {
+        active = Active != 0;
     }
     return active;
 }
@@ -1592,10 +1592,9 @@ INCLUDE_ASM("util/menu", cMenuSys_activate__FPvi);
  *
  * @param val  nonzero to activate
  */
-void cMenuSys_activate(void* vself, int val)
+void cMenuSys::activate(int val)
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    self->Active = val;
+    Active = val;
 }
 #endif
 
@@ -1659,11 +1658,11 @@ extern "C" void cMenuSys_input(cMenuSys* self)
     sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)menu->mVtbl;
     switch (vt[2].fn(vthis(menu, vt[2]))) {
     case 1:
-        cMenuSys_popMenu(self);
+        self->popMenu();
         break;
     case 2:
         while (self->MenuDepth != 0) {
-            cMenuSys_popMenu(self);
+            self->popMenu();
         }
         break;
     }
@@ -1678,10 +1677,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getKey__FPv);
  *
  * @return the menu key code (0 up, 1 down, 2 left, 3 right, 6 select, 7 back, ...)
  */
-int cMenuSys_getKey(void* vself)
+int cMenuSys::getKey()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return self->Key;
+    return Key;
 }
 #endif
 
@@ -1693,10 +1691,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getVKey__FPv);
  *
  * @return the virtual key code
  */
-int cMenuSys_getVKey(void* vself)
+int cMenuSys::getVKey()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return self->VKey;
+    return VKey;
 }
 #endif
 
@@ -1708,10 +1705,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getAsciiKey__FPv);
  *
  * @return the character code
  */
-int cMenuSys_getAsciiKey(void* vself)
+int cMenuSys::getAsciiKey()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return self->AsciiKey;
+    return AsciiKey;
 }
 #endif
 
@@ -1727,10 +1723,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getLeft__FPv);
  *
  * @return the left value
  */
-void* cMenuSys_getLeft(void* vself)
+void* cMenuSys::getLeft()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue((int)self->Input, 0x3e);
+    return cInput_getValue((int)Input, 0x3e);
 }
 #endif
 
@@ -1744,10 +1739,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getRight__FPv);
  *
  * @return the right value
  */
-void* cMenuSys_getRight(void* vself)
+void* cMenuSys::getRight()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue((int)self->Input, 0x3f);
+    return cInput_getValue((int)Input, 0x3f);
 }
 #endif
 
@@ -1761,10 +1755,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getUp__FPv);
  *
  * @return the up value
  */
-void* cMenuSys_getUp(void* vself)
+void* cMenuSys::getUp()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue((int)self->Input, 0x40);
+    return cInput_getValue((int)Input, 0x40);
 }
 #endif
 
@@ -1778,10 +1771,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getDown__FPv);
  *
  * @return the down value
  */
-void* cMenuSys_getDown(void* vself)
+void* cMenuSys::getDown()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue((int)self->Input, 65);
+    return cInput_getValue((int)Input, 65);
 }
 #endif
 
@@ -1859,13 +1851,13 @@ struct cMenuSys_render_sStack {
  * Sets the font's (+0x58) Scale to BaseScale * 0.85 on both axes and calls the top menu's (MenuStack[MenuDepth - 1])
  * vtable slot 5 (render). Callers check that the system is active (cMenuSys_isActive) first.
  */
-extern "C" void cMenuSys_render(cMenuSys* self)
+void cMenuSys::render()
 {
     cMenuSys_render_sVec2 scale(0.8500000238418579f, 0.8500000238418579f);
-    cFont* font = self->Font;
+    cFont* font = Font;
     font->Scale[0] = font->BaseScale[0] * scale.x;
     font->Scale[1] = font->BaseScale[1] * scale.y;
-    cMenuSys_render_sStack* st = (cMenuSys_render_sStack*)self;
+    cMenuSys_render_sStack* st = (cMenuSys_render_sStack*)this;
     st->items[st->count - 1]->render();
 }
 #endif
@@ -1899,12 +1891,11 @@ struct cMenuSys_pushMenu_sStack {
  * Calls the old top menu's vtable slot 7 (onLoseFocus), stores @p item at MenuStack[MenuDepth++], calls its slot 6
  * (onGainFocus) with the menu system, then cMenuSys_activate with 1. There is no overflow check.
  *
- * @param stack  the menu system
  * @param item  the menu to open
  */
-extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item)
+void cMenuSys::pushMenu(cMenu* item)
 {
-    cMenuSys_pushMenu_sStack* self = (cMenuSys_pushMenu_sStack*)stack;
+    cMenuSys_pushMenu_sStack* self = (cMenuSys_pushMenu_sStack*)this;
     if (self->count != 0) {
         self->items[self->count - 1]->onLoseFocus();
     }
@@ -1942,11 +1933,10 @@ struct cMenuSys_popMenu_sStack {
  * slot 6 (onGainFocus) with the menu system; with none left it calls cMenuSys_activate with 0. There is no
  * underflow check.
  *
- * @param menuSys  the menu system
  */
-extern "C" void cMenuSys_popMenu(cMenuSys* menuSys)
+void cMenuSys::popMenu()
 {
-    cMenuSys_popMenu_sStack* self = (cMenuSys_popMenu_sStack*)menuSys;
+    cMenuSys_popMenu_sStack* self = (cMenuSys_popMenu_sStack*)this;
     self->count--;
     self->entries[self->count]->onLoseFocus();
     if (self->count != 0) {
@@ -2018,8 +2008,8 @@ public:
  */
 extern "C" int cBoolMenuItem_input(void** self)
 {
-    int baseResult = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0) {
+    int baseResult = ((cMenuItem*)self)->input();
+    if (((cMenuItem*)self)->isLocked() == 0 && baseResult == 0) {
         if ((self[6] != 0 && self[7] != 0 && (cMenuItem_getKey(self) == 2 || cMenuItem_getKey(self) == 3)) || cMenuItem_getKey(self) == 6) {
             *(int*)self[8] ^= 1;
             ((cBoolMenuItem_input_cMenu*)self[0])->onChange(self);
@@ -2077,14 +2067,14 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  *
  * @param rect  the row's rect
  */
-extern "C" void cBoolMenuItem_render(cBoolMenuItem* self, int rect)
+void cBoolMenuItem::render(int rect)
 {
-    const char* trueText = self->OnText;
+    const char* trueText = OnText;
     const char* falseText;
-    if (trueText != 0 && (falseText = self->OffText) != 0) {
-        cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, (void*)(*self->Flag ? trueText : falseText));
+    if (trueText != 0 && (falseText = OffText) != 0) {
+        cMenuItem_textRender1_5(this, rect, (int)Caption, 0, (void*)(*Flag ? trueText : falseText));
     } else {
-        cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
+        cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
     }
 }
 #endif
@@ -2128,14 +2118,14 @@ extern void* cEnumMenuItem_vtbl[];
  * @param text  the item's ID
  * @return @p self
  */
-extern "C" void* cEnumMenuItem_cEnumMenuItem1(cEnumMenuItem* self, void* text)
+void* cEnumMenuItem::cEnumMenuItem1(void* text)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = 0;
-    self->mVtbl = cEnumMenuItem_vtbl;
-    self->Enum = 0;
-    self->NumTags = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = 0;
+    mVtbl = cEnumMenuItem_vtbl;
+    Enum = 0;
+    NumTags = 0;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -2156,15 +2146,15 @@ extern void* cEnumMenuItem_vtbl[];
  * @param tags  the entries, 8 bytes each: name, value
  * @return @p self
  */
-extern "C" void* cEnumMenuItem_cEnumMenuItem2(cEnumMenuItem* self, void* text, int enumPtr, int caption, int numTags, int tags)
+void* cEnumMenuItem::cEnumMenuItem2(void* text, int enumPtr, int caption, int numTags, int tags)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->mVtbl = cEnumMenuItem_vtbl;
-    self->Caption = (const char*)caption;
-    self->Enum = (int*)enumPtr;
-    self->NumTags = numTags;
-    self->Tags = (const tCFMEnumTag*)tags;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    mVtbl = cEnumMenuItem_vtbl;
+    Caption = (const char*)caption;
+    Enum = (int*)enumPtr;
+    NumTags = numTags;
+    Tags = (const tCFMEnumTag*)tags;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -2176,15 +2166,16 @@ INCLUDE_ASM("util/menu", cEnumMenuItem_setEnumTagsNullTerm);
  *
  * @param table  {name, value} pairs ending with a null name
  */
-extern "C" void cEnumMenuItem_setEnumTagsNullTerm(cEnumMenuItem* self, int *table) {
+void cEnumMenuItem::setEnumTagsNullTerm(int *table)
+{
     int index;
 
-    self->Tags = (const tCFMEnumTag*)table;
-    self->NumTags = 0;
+    Tags = (const tCFMEnumTag*)table;
+    NumTags = 0;
     if (*table != 0) {
         do {
-            index = self->NumTags + 1;
-            self->NumTags = index;
+            index = NumTags + 1;
+            NumTags = index;
         } while (table[index * 2] != 0);
     }
 }
@@ -2219,14 +2210,13 @@ static inline void notifyChange(cEnumMenuItem* self)
  * is not in the table, 2/0 pick the first entry and 3/1 the last. Each change calls the menu's slot 4 (onChange). (Keys
  * 0 and 1 never get here: the base input already returned for them.)
  *
- * @param vself  the list-choice item
  * @return the base input's result, or onCommand's on select
  */
-extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
+int cEnumMenuItem::input()
 {
-    cEnumMenuItem* self = vself;
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    cEnumMenuItem* self = this;
+    int result = ((cMenuItem*)self)->input();
+    if (((cMenuItem*)self)->isLocked() != 0) {
         return result;
     }
     if (result != 0) {
@@ -2310,16 +2300,16 @@ extern char str_Invalid_b[];
  *
  * @param rect  the row's rect
  */
-extern "C" void cEnumMenuItem_render(cEnumMenuItem* self, int rect)
+void cEnumMenuItem::render(int rect)
 {
     int i = 0;
     for (;;) {
-        if (i == self->NumTags) {
-            cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, str_Invalid_b);
+        if (i == NumTags) {
+            cMenuItem_textRender1_5(this, rect, (int)Caption, 0, str_Invalid_b);
             break;
         }
-        if (*self->Enum == self->Tags[i].Value) {
-            cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, (char*)self->Tags[i].Text);
+        if (*Enum == Tags[i].Value) {
+            cMenuItem_textRender1_5(this, rect, (int)Caption, 0, (char*)Tags[i].Text);
             return;
         }
         i++;
@@ -2374,11 +2364,11 @@ extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item);
  * @return the base navigation result from cMenuItem_input (tMIR: 0 none, 1 close this menu, 2 close all menus,
  *         3 next item, 4 previous item)
  */
-extern "C" int cSubMenuItem_input(cSubMenuItem* self)
+int cSubMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_pushMenu(self->Menu->MenuSys, (cMenu*)(self->Sub));
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == 6) {
+        Menu->MenuSys->pushMenu((cMenu*)(Sub));
     }
     return result;
 }
@@ -2399,10 +2389,10 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the sub-menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cSubMenuItem_preRender(cSubMenuItem* self, cSubMenuItem* item)
+void* cSubMenuItem::preRender(cSubMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, 0, (int)item->Caption, 0);
+    return ((void*)this);
 }
 #endif
 
@@ -2424,10 +2414,9 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
  */
-void* cSubMenuItem_render(void* vself, int rect)
+void* cSubMenuItem::render(int rect)
 {
-    cSubMenuItem* self = (cSubMenuItem*)vself;
-    return cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
+    return cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
 }
 #endif
 
@@ -2471,11 +2460,11 @@ extern "C" void cMenuSys_popMenu(cMenuSys* stack);
  *
  * @return the base input's result
  */
-extern "C" int cPopMenuItem_input(cPopMenuItem* self)
+int cPopMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_popMenu(self->Menu->MenuSys);
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == 6) {
+        Menu->MenuSys->popMenu();
     }
     return result;
 }
@@ -2492,10 +2481,10 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cPopMenuItem_preRender(cPopMenuItem* self, cPopMenuItem* item)
+void* cPopMenuItem::preRender(cPopMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, 0, (int)item->Caption, 0);
+    return ((void*)this);
 }
 #endif
 
@@ -2512,10 +2501,9 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row's rect
  * @return cMenuItem_textRender1's return value
  */
-void* cPopMenuItem_render(void* vself, int rect)
+void* cPopMenuItem::render(int rect)
 {
-    cPopMenuItem* self = (cPopMenuItem*)vself;
-    return cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
+    return cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
 }
 #endif
 
@@ -2560,15 +2548,15 @@ extern void* cCommandMenuItem_vtbl[];
  * @param text  the item's ID
  * @return @p self
  */
-extern "C" void* cCommandMenuItem_cCommandMenuItem1(cCommandMenuItem* self, void* text)
+void* cCommandMenuItem::cCommandMenuItem1(void* text)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = 0;
-    self->mVtbl = cCommandMenuItem_vtbl;
-    self->CmdArg = 0;
-    self->Data = 0;
-    self->State = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = 0;
+    mVtbl = cCommandMenuItem_vtbl;
+    CmdArg = 0;
+    Data = 0;
+    State = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -2590,15 +2578,15 @@ extern void* cCommandMenuItem_vtbl[];
  * @param commandArg  argument for onCommand
  * @return @p self
  */
-extern "C" cCommandMenuItem* cCommandMenuItem_cCommandMenuItem2(cCommandMenuItem* self, void* text, int caption, int commandArg)
+cCommandMenuItem* cCommandMenuItem::cCommandMenuItem2(void* text, int caption, int commandArg)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)caption;
-    self->mVtbl = (void**)cCommandMenuItem_vtbl;
-    self->CmdArg = commandArg;
-    self->Data = 0;
-    self->State = 0;
-    return (self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = (const char*)caption;
+    mVtbl = (void**)cCommandMenuItem_vtbl;
+    CmdArg = commandArg;
+    Data = 0;
+    State = 0;
+    return (this);
 }
 #endif
 
@@ -2608,14 +2596,14 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_init);
 /**
  * Sets a command item's caption (+0x14) and argument (+0x1C) and clears its state text (+0x18).
  *
- * @param item  the command item
  * @param label  caption
  * @param commandArg  argument for onCommand
  */
-extern "C" void cCommandMenuItem_init(cCommandMenuItem* item, int label, int commandArg) {
-    item->Caption = (const char*)label;
-    item->CmdArg = commandArg;
-    item->State = 0;
+void cCommandMenuItem::init(int label, int commandArg)
+{
+    Caption = (const char*)label;
+    CmdArg = commandArg;
+    State = 0;
 }
 #endif
 
@@ -2640,11 +2628,11 @@ extern "C" int cMenuItem_getKey(void** self);
  *
  * @return the base input's result, or onCommand's
  */
-extern "C" int cCommandMenuItem_input(cCommandMenuItem* self)
+int cCommandMenuItem::input()
 {
-    int baseResult = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0 && cMenuItem_getKey((void**)self) == 6) {
-        baseResult = (*(cCommandMenuItem_input_cMenu**)self)->onCommand(self, (void*)self->CmdArg);
+    int baseResult = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() == 0 && baseResult == 0 && cMenuItem_getKey((void**)this) == 6) {
+        baseResult = (*(cCommandMenuItem_input_cMenu**)this)->onCommand(this, (void*)CmdArg);
     }
     return baseResult;
 }
@@ -2687,13 +2675,13 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  *
  * @param rect  the row's rect
  */
-extern "C" void cCommandMenuItem_render(cCommandMenuItem* self, int rect)
+void cCommandMenuItem::render(int rect)
 {
-    const char* rightText = self->State;
+    const char* rightText = State;
     if (rightText != 0) {
-        cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, (void*)rightText);
+        cMenuItem_textRender1_5(this, rect, (int)Caption, 0, (void*)rightText);
     } else {
-        cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
+        cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
     }
 }
 #endif
@@ -2738,13 +2726,13 @@ extern void* cCallbackMenuItem_vtbl[];
  * @param callback  function called on select
  * @return @p self
  */
-extern "C" void* cCallbackMenuItem_cCallbackMenuItem1(cCallbackMenuItem* self, void* text, int caption, int callback)
+void* cCallbackMenuItem::cCallbackMenuItem1(void* text, int caption, int callback)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)caption;
-    self->Callback = (void (*)())callback;
-    self->mVtbl = cCallbackMenuItem_vtbl;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = (const char*)caption;
+    Callback = (void (*)())callback;
+    mVtbl = cCallbackMenuItem_vtbl;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -2756,9 +2744,10 @@ INCLUDE_ASM("util/menu", cCallbackMenuItem_init);
  * @param label  caption
  * @param callback  function called on select
  */
-extern "C" void cCallbackMenuItem_init(cCallbackMenuItem* self, int label, int callback) {
-    self->Caption = (const char*)label;
-    self->Callback = (void (*)())callback;
+void cCallbackMenuItem::init(int label, int callback)
+{
+    Caption = (const char*)label;
+    Callback = (void (*)())callback;
 }
 #endif
 
@@ -2774,11 +2763,11 @@ extern "C" int cMenuItem_getKey(void** self);
  *
  * @return the base input's result
  */
-extern "C" int cCallbackMenuItem_input(cCallbackMenuItem* self)
+int cCallbackMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        (self->Callback)();
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == 6) {
+        (Callback)();
     }
     return result;
 }
@@ -2797,10 +2786,10 @@ extern void* D_004866C8[];
  * @param item  the callback item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCallbackMenuItem_preRender(cCallbackMenuItem* self, cCallbackMenuItem* item)
+void* cCallbackMenuItem::preRender(cCallbackMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866C8);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866C8);
+    return ((void*)this);
 }
 #endif
 
@@ -2820,10 +2809,9 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row's rect
  * @return cMenuItem_textRender1's return value
  */
-void* cCallbackMenuItem_render(void* vself, int rect)
+void* cCallbackMenuItem::render(int rect)
 {
-    cCallbackMenuItem* self = (cCallbackMenuItem*)vself;
-    return cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, D_004866C8);
+    return cMenuItem_textRender1_5(this, rect, (int)Caption, 0, D_004866C8);
 }
 #endif
 
@@ -2883,10 +2871,10 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the text-only item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cNullMenuItem_preRender(cNullMenuItem* self, cNullMenuItem* item)
+void* cNullMenuItem::preRender(cNullMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, 0, (int)item->Caption, 0);
+    return ((void*)this);
 }
 #endif
 
@@ -2906,10 +2894,9 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
  */
-void* cNullMenuItem_render(void* vself, int rect)
+void* cNullMenuItem::render(int rect)
 {
-    cNullMenuItem* self = (cNullMenuItem*)vself;
-    return cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
+    return cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
 }
 #endif
 
@@ -3027,18 +3014,18 @@ extern void* cCharMenuItem_vtbl[];
  * @param text  the item's ID
  * @return @p self
  */
-extern "C" void* cCharMenuItem_cCharMenuItem1(cCharMenuItem* self, void* text)
+void* cCharMenuItem::cCharMenuItem1(void* text)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = 0;
-    self->mVtbl = cCharMenuItem_vtbl;
-    self->Value = 0;
-    *(char*)&self->Min = 0;
-    *(char*)&self->Max = 0;
-    self->AccelDir = 0;
-    self->AccelCount = 0;
-    *(int*)&self->Fraction = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = 0;
+    mVtbl = cCharMenuItem_vtbl;
+    Value = 0;
+    *(char*)&Min = 0;
+    *(char*)&Max = 0;
+    AccelDir = 0;
+    AccelCount = 0;
+    *(int*)&Fraction = 0;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -3060,18 +3047,18 @@ extern void* cCharMenuItem_vtbl[];
  * @param caption  caption
  * @return @p self
  */
-extern "C" void* cCharMenuItem_cCharMenuItem2(cCharMenuItem* self, void* text, int valuePtr, signed char minValue, signed char maxValue, int caption)
+void* cCharMenuItem::cCharMenuItem2(void* text, int valuePtr, signed char minValue, signed char maxValue, int caption)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)caption;
-    self->Value = (signed char*)valuePtr;
-    *(char*)&self->Min = minValue;
-    *(char*)&self->Max = maxValue;
-    self->mVtbl = cCharMenuItem_vtbl;
-    self->AccelDir = 0;
-    self->AccelCount = 0;
-    *(int*)&self->Fraction = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = (const char*)caption;
+    Value = (signed char*)valuePtr;
+    *(char*)&Min = minValue;
+    *(char*)&Max = maxValue;
+    mVtbl = cCharMenuItem_vtbl;
+    AccelDir = 0;
+    AccelCount = 0;
+    *(int*)&Fraction = 0;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -3084,17 +3071,17 @@ INCLUDE_ASM("util/menu", cCharMenuItem_setMinMax);
  * @param lo  minimum value
  * @param hi  maximum value
  */
-extern "C" void cCharMenuItem_setMinMax(cCharMenuItem* self, int lo, int hi)
+void cCharMenuItem::setMinMax(int lo, int hi)
 {
-    signed char* valuePtr = self->Value;
-    self->Max = hi;
-    self->Min = lo;
+    signed char* valuePtr = Value;
+    Max = hi;
+    Min = lo;
     if (valuePtr != 0) {
-        if (*valuePtr < self->Min)
+        if (*valuePtr < Min)
             *valuePtr = lo;
-        signed char* valuePtrAgain = self->Value;
-        if (self->Max < *valuePtrAgain)
-            *valuePtrAgain = self->Max;
+        signed char* valuePtrAgain = Value;
+        if (Max < *valuePtrAgain)
+            *valuePtrAgain = Max;
     }
 }
 #endif
@@ -3107,12 +3094,12 @@ INCLUDE_ASM("util/menu", cCharMenuItem_zeroValue);
  *
  * Slot 8 (zeroValue) of the item's vtable cCharMenuItem_vtbl.
  */
-extern "C" void cCharMenuItem_zeroValue(cCharMenuItem* self)
+void cCharMenuItem::zeroValue()
 {
-    if (self->Min <= 0) {
-        *self->Value = 0;
+    if (Min <= 0) {
+        *Value = 0;
     } else {
-        *self->Value = self->Min;
+        *Value = Min;
     }
 }
 #endif
@@ -3148,16 +3135,16 @@ static inline float ffloor_002CD5A0(float x)
  *
  * @return the base input's result (tMIR)
  */
-extern "C" int cCharMenuItem_input(cCharMenuItem* self)
+int cCharMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() != 0) {
         return result;
     }
     if (result != 0) {
         return result;
     }
-    float step = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
+    float step = cMenuItem_getRight_f(this) - cMenuItem_getLeft_f(this);
     int dir;
     if (step <= -0.1f || step >= 0.1f) {
         dir = 1;
@@ -3167,46 +3154,46 @@ extern "C" int cCharMenuItem_input(cCharMenuItem* self)
     } else {
         dir = 0;
     }
-    if (dir == self->AccelDir) {
-        self->AccelCount += 1;
+    if (dir == AccelDir) {
+        AccelCount += 1;
     } else {
-        self->AccelCount = 0;
-        self->AccelDir = dir;
-        self->Fraction = (float)dir;
+        AccelCount = 0;
+        AccelDir = dir;
+        Fraction = (float)dir;
     }
     if (dir != 0) {
-        int n = self->AccelCount;
+        int n = AccelCount;
         step *= 0.1f;
         step *= (float)(n * n / 288);
         float div = 1.0f;
-        if (cMenuItem_getLeftShift(self) != 0 && cMenuItem_getRightShift(self) != 0) {
+        if (cMenuItem_getLeftShift(this) != 0 && cMenuItem_getRightShift(this) != 0) {
             div = 50.0f;
-        } else if (cMenuItem_getLeftShift(self) != 0) {
+        } else if (cMenuItem_getLeftShift(this) != 0) {
             div = 20.0f;
-        } else if (cMenuItem_getRightShift(self) != 0) {
+        } else if (cMenuItem_getRightShift(this) != 0) {
             div = 5.0f;
         }
         step = step / div;
-        self->Fraction += step;
-        step = self->Fraction;
-        signed char* valuePtr = self->Value;
+        Fraction += step;
+        step = Fraction;
+        signed char* valuePtr = Value;
         int cur = *valuePtr;
         int newValue = (int)ffloor_002CD5A0((float)cur + step);
-        int lo = self->Min;
-        int hi = self->Max;
+        int lo = Min;
+        int hi = Max;
         if (newValue < lo) {
             newValue = lo;
         }
         if (hi < newValue) {
             newValue = hi;
         }
-        self->Fraction = step + (float)(cur - newValue);
+        Fraction = step + (float)(cur - newValue);
         *valuePtr = newValue;
-        cMenu* menu = self->Menu;
+        cMenu* menu = Menu;
         // cMenu entry 4: onChange(item)
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
         sVEntry<void(void*, void*)>* entry = &vt[4];
-        entry->fn(vthis(menu, *entry), self);
+        entry->fn(vthis(menu, *entry), this);
     }
     return result;
 }
@@ -3225,10 +3212,10 @@ extern void* D_004866E0[];
  * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCharMenuItem_preRender(cCharMenuItem* self, cCharMenuItem* item)
+void* cCharMenuItem::preRender(cCharMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866E0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866E0);
+    return ((void*)this);
 }
 #endif
 
@@ -3246,11 +3233,11 @@ extern char str_pct_d_i[];
  *
  * @param rect  the row's rect
  */
-extern "C" void cCharMenuItem_render(cCharMenuItem* self, int rect)
+void cCharMenuItem::render(int rect)
 {
     char buf[0x70];
-    sprintf(buf, str_pct_d_i, *self->Value);
-    cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, buf);
+    sprintf(buf, str_pct_d_i, *Value);
+    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
 }
 #endif
 
@@ -3267,18 +3254,18 @@ extern void* cIntMenuItem_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cIntMenuItem_cIntMenuItem1(cIntMenuItem* self)
+void* cIntMenuItem::cIntMenuItem1()
 {
-    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->Caption = 0;
-    self->mVtbl = cIntMenuItem_vtbl;
-    self->Value = 0;
-    self->Min = 0;
-    self->Max = 0;
-    self->AccelDir = 0;
-    self->AccelCount = 0;
-    *(int*)&self->Fraction = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem_id((cMenuItem*)this, -1);
+    Caption = 0;
+    mVtbl = cIntMenuItem_vtbl;
+    Value = 0;
+    Min = 0;
+    Max = 0;
+    AccelDir = 0;
+    AccelCount = 0;
+    *(int*)&Fraction = 0;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -3292,18 +3279,18 @@ extern void* cIntMenuItem_vtbl[];
  * @param text  the item's ID
  * @return @p self
  */
-extern "C" void* cIntMenuItem_cIntMenuItem2(cIntMenuItem* self, void* text)
+void* cIntMenuItem::cIntMenuItem2(void* text)
 {
-    cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = 0;
-    self->mVtbl = cIntMenuItem_vtbl;
-    self->Value = 0;
-    self->Min = 0;
-    self->Max = 0;
-    self->AccelDir = 0;
-    self->AccelCount = 0;
-    *(int*)&self->Fraction = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem((cMenuItem*)this, text);
+    Caption = 0;
+    mVtbl = cIntMenuItem_vtbl;
+    Value = 0;
+    Min = 0;
+    Max = 0;
+    AccelDir = 0;
+    AccelCount = 0;
+    *(int*)&Fraction = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3349,24 +3336,24 @@ INCLUDE_ASM("util/menu", cIntMenuItem_setMinMax);
  * Sets an int item's range to [@p minValue, @p maxValue] (+0x1C, +0x20) and clamps its value (*(+0x18)) into it when it
  * has one.
  *
- * @param item  the int item
  * @param minValue  minimum value
  * @param maxValue  maximum value
  */
-extern "C" void cIntMenuItem_setMinMax(cIntMenuItem* item, int minValue, int maxValue) {
+void cIntMenuItem::setMinMax(int minValue, int maxValue)
+{
     int *temp_3;
     int *temp_3_2;
     int temp_4;
 
-    temp_3 = item->Value;
-    item->Max = maxValue;
-    item->Min = minValue;
+    temp_3 = Value;
+    Max = maxValue;
+    Min = minValue;
     if (temp_3 != 0) {
         if (*temp_3 < minValue) {
             *temp_3 = minValue;
         }
-        temp_3_2 = item->Value;
-        temp_4 = item->Max;
+        temp_3_2 = Value;
+        temp_4 = Max;
         if (temp_4 < *temp_3_2) {
             *temp_3_2 = temp_4;
         }
@@ -3382,10 +3369,10 @@ INCLUDE_ASM("util/menu", cIntMenuItem_zeroValue);
  *
  * Writes through the value pointer at +0x18: 0 when the minimum (+0x1C) is 0 or less, else the minimum. Virtual slot 8.
  */
-extern "C" void cIntMenuItem_zeroValue(cIntMenuItem* self)
+void cIntMenuItem::zeroValue()
 {
-    int* valuePtr = self->Value;
-    int minValue = self->Min;
+    int* valuePtr = Value;
+    int minValue = Min;
     if (minValue <= 0) {
         *valuePtr = 0;
     } else {
@@ -3427,16 +3414,16 @@ static inline float ffloor_002CD9D8(float x)
  * @return the base navigation result from cMenuItem_input (tMIR: 0 none, 1 close this menu, 2 close all menus,
  *         3 next item, 4 previous item)
  */
-extern "C" int cIntMenuItem_input(cIntMenuItem* self)
+int cIntMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() != 0) {
         return result;
     }
     if (result != 0) {
         return result;
     }
-    float side = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
+    float side = cMenuItem_getRight_f(this) - cMenuItem_getLeft_f(this);
     int dir;
     if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
@@ -3446,46 +3433,46 @@ extern "C" int cIntMenuItem_input(cIntMenuItem* self)
     } else {
         dir = 0;
     }
-    if (dir == self->AccelDir) {
-        self->AccelCount += 1;
+    if (dir == AccelDir) {
+        AccelCount += 1;
     } else {
-        self->AccelCount = 0;
-        self->AccelDir = dir;
-        self->Fraction = (float)dir;
+        AccelCount = 0;
+        AccelDir = dir;
+        Fraction = (float)dir;
     }
     if (dir != 0) {
-        int n = self->AccelCount;
+        int n = AccelCount;
         side *= 0.1f;
         side *= (float)(n * n / 288);
         float div = 1.0f;
-        if (cMenuItem_getLeftShift(self) != 0 && cMenuItem_getRightShift(self) != 0) {
+        if (cMenuItem_getLeftShift(this) != 0 && cMenuItem_getRightShift(this) != 0) {
             div = 50.0f;
-        } else if (cMenuItem_getLeftShift(self) != 0) {
+        } else if (cMenuItem_getLeftShift(this) != 0) {
             div = 20.0f;
-        } else if (cMenuItem_getRightShift(self) != 0) {
+        } else if (cMenuItem_getRightShift(this) != 0) {
             div = 5.0f;
         }
         side = side / div;
-        self->Fraction += side;
-        side = self->Fraction;
-        int* valuePtr = self->Value;
+        Fraction += side;
+        side = Fraction;
+        int* valuePtr = Value;
         int cur = *valuePtr;
         int newValue = (int)ffloor_002CD9D8((float)cur + side);
-        int lo = self->Min;
-        int hi = self->Max;
+        int lo = Min;
+        int hi = Max;
         if (newValue < lo) {
             newValue = lo;
         }
         if (hi < newValue) {
             newValue = hi;
         }
-        self->Fraction = side + (float)(cur - newValue);
+        Fraction = side + (float)(cur - newValue);
         *valuePtr = newValue;
-        cMenu* menu = self->Menu;
+        cMenu* menu = Menu;
         // cMenu entry 4: onChange(item)
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
         sVEntry<void(void*, void*)>* vtEntry = &vt[4];
-        vtEntry->fn(vthis(menu, *vtEntry), self);
+        vtEntry->fn(vthis(menu, *vtEntry), this);
     }
     return result;
 }
@@ -3507,10 +3494,10 @@ extern void* D_004866E0[];
  * @param item  the int menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cIntMenuItem_preRender(cIntMenuItem* self, cIntMenuItem* item)
+void* cIntMenuItem::preRender(cIntMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866E0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866E0);
+    return ((void*)this);
 }
 #endif
 
@@ -3530,11 +3517,11 @@ extern char str_pct_d_i[];
  *
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  */
-extern "C" void cIntMenuItem_render(cIntMenuItem* self, int rect)
+void cIntMenuItem::render(int rect)
 {
     char buf[0x70];
-    sprintf(buf, str_pct_d_i, *self->Value);
-    cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, buf);
+    sprintf(buf, str_pct_d_i, *Value);
+    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
 }
 #endif
 
@@ -3551,19 +3538,19 @@ extern void* cFloatMenuItem_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFloatMenuItem_cFloatMenuItem1(cFloatMenuItem* self)
+void* cFloatMenuItem::cFloatMenuItem1()
 {
-    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->mVtbl = cFloatMenuItem_vtbl;
-    self->ValueScale = 1.0f;
-    self->Caption = 0;
-    self->Value = 0;
-    *(int*)&self->Min = 0;
-    *(int*)&self->Max = 0;
-    self->AccelDir = 0;
-    self->AccelCount = 0;
-    *(int*)&self->ValueOffset = 0;
-    return ((void*)self);
+    cMenuItem_cMenuItem_id((cMenuItem*)this, -1);
+    mVtbl = cFloatMenuItem_vtbl;
+    ValueScale = 1.0f;
+    Caption = 0;
+    Value = 0;
+    *(int*)&Min = 0;
+    *(int*)&Max = 0;
+    AccelDir = 0;
+    AccelCount = 0;
+    *(int*)&ValueOffset = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3635,16 +3622,16 @@ void* cMenuItem_getRightShift_DD78(void* self) __asm__("cMenuItem_getRightShift_
  *         3 next item, 4 previous item)
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" int cFloatMenuItem_input(cFloatMenuItem* self)
+int cFloatMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() != 0) {
         return result;
     }
     if (result != 0) {
         return result;
     }
-    float side = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
+    float side = cMenuItem_getRight_f(this) - cMenuItem_getLeft_f(this);
     int dir;
     if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
@@ -3654,22 +3641,22 @@ extern "C" int cFloatMenuItem_input(cFloatMenuItem* self)
     } else {
         dir = 0;
     }
-    if (dir == self->AccelDir) {
-        self->AccelCount += 1;
+    if (dir == AccelDir) {
+        AccelCount += 1;
     } else {
-        self->AccelCount = 0;
-        self->AccelDir = dir;
+        AccelCount = 0;
+        AccelDir = dir;
     }
     if (dir != 0) {
         float div = 1.0f;
-        if (cMenuItem_getLeftShift_DD78(self) != 0 && cMenuItem_getRightShift_DD78(self) != 0) {
+        if (cMenuItem_getLeftShift_DD78(this) != 0 && cMenuItem_getRightShift_DD78(this) != 0) {
             div = 50.0f;
-        } else if (cMenuItem_getLeftShift_DD78(self) != 0) {
+        } else if (cMenuItem_getLeftShift_DD78(this) != 0) {
             div = 20.0f;
-        } else if (cMenuItem_getRightShift_DD78(self) != 0) {
+        } else if (cMenuItem_getRightShift_DD78(this) != 0) {
             div = 5.0f;
         }
-        int n = self->AccelCount;
+        int n = AccelCount;
         float k = (float)(n * n) * 50.0f;
         k /= div;
         k *= 6.944444612599909e-05f;
@@ -3677,19 +3664,19 @@ extern "C" int cFloatMenuItem_input(cFloatMenuItem* self)
         float step = 4.999999873689376e-05f;
         step = k * step;
         step /= div;
-        float* valuePtr = self->Value;
-        float value = self->ValueScale * *valuePtr + self->ValueOffset;
-        value += side * step * (self->Max - self->Min);
-        if (value < self->Min) {
-            value = self->Min;
+        float* valuePtr = Value;
+        float value = ValueScale * *valuePtr + ValueOffset;
+        value += side * step * (Max - Min);
+        if (value < Min) {
+            value = Min;
         }
-        if (self->Max < value) {
-            value = self->Max;
+        if (Max < value) {
+            value = Max;
         }
-        *self->Value = (value - self->ValueOffset) / self->ValueScale;
-        cMenu* menu = (cMenu*)(*(char**)self);
+        *Value = (value - ValueOffset) / ValueScale;
+        cMenu* menu = (cMenu*)(*(char**)this);
         sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)menu->mVtbl;
-        vt[4].fn(vthis(menu, vt[4]), self);
+        vt[4].fn(vthis(menu, vt[4]), this);
     }
     return result;
 }
@@ -3704,10 +3691,10 @@ INCLUDE_ASM("util/menu", cFloatMenuItem_zeroValue);
  * Writes through the value pointer at +0x18: 0.0 when the minimum (+0x1C) is 0 or less, else the minimum. Virtual slot
  * 8.
  */
-extern "C" void cFloatMenuItem_zeroValue(cFloatMenuItem* self)
+void cFloatMenuItem::zeroValue()
 {
-    float* valuePtr = self->Value;
-    float minValue = self->Min;
+    float* valuePtr = Value;
+    float minValue = Min;
     if (minValue <= 0.0f) {
         *valuePtr = 0.0f;
     } else {
@@ -3732,10 +3719,10 @@ extern void* D_004866F0[];
  * @param item  the float menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cFloatMenuItem_preRender(cFloatMenuItem* self, cFloatMenuItem* item)
+void* cFloatMenuItem::preRender(cFloatMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866F0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866F0);
+    return ((void*)this);
 }
 #endif
 
@@ -3825,11 +3812,11 @@ extern "C" void prettyFloat(cFloatMenuItem_render_sString* out, float v);
  *
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  */
-extern "C" void cFloatMenuItem_render(cFloatMenuItem* self, int rect)
+void cFloatMenuItem::render(int rect)
 {
     cFloatMenuItem_render_sString pretty;
-    prettyFloat(&pretty, *self->Value * self->ValueScale + self->ValueOffset);
-    cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, pretty.str);
+    prettyFloat(&pretty, *Value * ValueScale + ValueOffset);
+    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, pretty.str);
     cBXString__cBXString(&pretty, 2);
 }
 #endif
@@ -3887,16 +3874,16 @@ extern "C" int cMenuItem_isLocked(cMenuItem* self);
  *         3 next item, 4 previous item)
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" int cAngleMenuItem_input(cAngleMenuItem* self)
+int cAngleMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() != 0) {
         return result;
     }
     if (result != 0) {
         return result;
     }
-    float side = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
+    float side = cMenuItem_getRight_f(this) - cMenuItem_getLeft_f(this);
     int dir;
     if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
@@ -3906,29 +3893,29 @@ extern "C" int cAngleMenuItem_input(cAngleMenuItem* self)
     } else {
         dir = 0;
     }
-    if (dir == self->AccelDir) {
-        self->AccelCount += 1;
+    if (dir == AccelDir) {
+        AccelCount += 1;
     } else {
-        self->AccelCount = 0;
-        self->AccelDir = dir;
+        AccelCount = 0;
+        AccelDir = dir;
     }
     if (dir != 0) {
-        int n = self->AccelCount;
+        int n = AccelCount;
         float k = (float)(n * n) * 0.0034722222480922937f;
         k = k >? 1.0f;
         float step = 4.999999873689376e-05f;
         step = k * step;
-        float* valuePtr = self->Value;
-        *valuePtr = *valuePtr + side * step * (self->Max - self->Min);
-        if (*self->Value < self->Min) {
-            *self->Value = self->Min;
+        float* valuePtr = Value;
+        *valuePtr = *valuePtr + side * step * (Max - Min);
+        if (*Value < Min) {
+            *Value = Min;
         }
-        if (self->Max < *self->Value) {
-            *self->Value = self->Max;
+        if (Max < *Value) {
+            *Value = Max;
         }
-        cMenu* menu = (cMenu*)(*(char**)self);
+        cMenu* menu = (cMenu*)(*(char**)this);
         sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)menu->mVtbl;
-        vt[4].fn(vthis(menu, vt[4]), self);
+        vt[4].fn(vthis(menu, vt[4]), this);
     }
     return result;
 }
@@ -3950,10 +3937,10 @@ extern void* D_004866F0[];
  * @param item  the angle menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cAngleMenuItem_preRender(cAngleMenuItem* self, cAngleMenuItem* item)
+void* cAngleMenuItem::preRender(cAngleMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866F0);
-    return ((void*)self);
+    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866F0);
+    return ((void*)this);
 }
 #endif
 
@@ -3975,11 +3962,11 @@ extern char str_pct_3_2f[];
  *
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  */
-extern "C" void cAngleMenuItem_render(cAngleMenuItem* self, int rect)
+void cAngleMenuItem::render(int rect)
 {
     char buf[0x70];
-    sprintf(buf, str_pct_3_2f, fptodp(*self->Value * 57.2957763671875f));
-    cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, buf);
+    sprintf(buf, str_pct_3_2f, fptodp(*Value * 57.2957763671875f));
+    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
 }
 #endif
 
@@ -4053,57 +4040,57 @@ static inline void stepChar_E488(char* c, int step)
  *
  * @return the base input's result, or 3 on select
  */
-extern "C" int cTextMenuItem_input(cTextMenuItem* self)
+int cTextMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
+    int result = ((cMenuItem*)this)->input();
     if (result == 0) {
-    int len = strlen(self->Text);
+    int len = strlen(Text);
     int mod = len + 1;
     if (mod >= 16) {
         mod = 15;
     }
-    int key = cMenuItem_getKey((void**)self);
+    int key = cMenuItem_getKey((void**)this);
     if (key == 2) {
-        self->CursorPos = (self->CursorPos + mod - 1) % mod;
+        CursorPos = (CursorPos + mod - 1) % mod;
     } else if (key == 3) {
-        self->CursorPos = (self->CursorPos + 1) % mod;
+        CursorPos = (CursorPos + 1) % mod;
     } else if (key == 4) {
-        stepChar_E488(&self->Text[self->CursorPos], -1);
+        stepChar_E488(&Text[CursorPos], -1);
     } else if (key == 5) {
-        stepChar_E488(&self->Text[self->CursorPos], 1);
+        stepChar_E488(&Text[CursorPos], 1);
     } else if (key == 9) {
         if (len < 14) {
-            for (int i = self->CursorPos; i < len; i++) {
-                self->Text[i + 1] = self->Text[i];
+            for (int i = CursorPos; i < len; i++) {
+                Text[i + 1] = Text[i];
             }
-            self->Text[self->CursorPos] = '_';
+            Text[CursorPos] = '_';
         }
     } else if (key == 10) {
-        if (len != 0 && self->CursorPos < len) {
-            for (int i = self->CursorPos; i < len - 1; i++) {
-                self->Text[i] = self->Text[i + 1];
+        if (len != 0 && CursorPos < len) {
+            for (int i = CursorPos; i < len - 1; i++) {
+                Text[i] = Text[i + 1];
             }
-            self->Text[len - 1] = 0;
+            Text[len - 1] = 0;
         }
     } else if (key == 6) {
         result = 3;
     } else {
-        int code = cMenuSys_getVKey(self->Menu->MenuSys);
-        int ch = cMenuSys_getAsciiKey(self->Menu->MenuSys);
+        int code = Menu->MenuSys->getVKey();
+        int ch = Menu->MenuSys->getAsciiKey();
         if (code == 8) {
-            if (len != 0 && self->CursorPos > 0) {
-                for (int i = self->CursorPos; i < len - 1; i++) {
-                    self->Text[i] = self->Text[i + 1];
+            if (len != 0 && CursorPos > 0) {
+                for (int i = CursorPos; i < len - 1; i++) {
+                    Text[i] = Text[i + 1];
                 }
-                self->Text[len - 1] = 0;
-                self->CursorPos--;
+                Text[len - 1] = 0;
+                CursorPos--;
             }
         } else if (validChar_E488(ch)) {
             if (len < 14) {
-                for (int i = self->CursorPos; i < len; i++) {
-                    self->Text[i + 1] = self->Text[i];
+                for (int i = CursorPos; i < len; i++) {
+                    Text[i + 1] = Text[i];
                 }
-                self->Text[self->CursorPos++] = ch;
+                Text[CursorPos++] = ch;
             }
         }
     }
@@ -4147,7 +4134,7 @@ extern "C" cTextMenuItem_preRender_sResult cTextMenuItem_preRender(cTextMenuItem
 {
     char buf[0x20];
     char* name = item->Text;
-    int focused = ((void*)item) == cMenu_getFocusItem((cMenu*)(*(void**)item));
+    int focused = ((void*)item) == ((cMenu*)(*(void**)item))->getFocusItem();
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && item->CursorPos == len && item->CursorPos < 15) {
@@ -4179,45 +4166,45 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
  *
  * @param rect  the row's rect (x, y, w, h)
  */
-extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
+void cTextMenuItem::render(float* rect)
 {
     char buf[0x20];
-    char* name = self->Text;
-    int focused = ((void*)self) == cMenu_getFocusItem(self->Menu);
+    char* name = Text;
+    int focused = ((void*)this) == Menu->getFocusItem();
     strcpy(buf, name);
     int len = strlen(name);
-    if (focused && self->CursorPos == len && self->CursorPos < 15) {
+    if (focused && CursorPos == len && CursorPos < 15) {
         strcat(buf, str_underscore);
     }
     {
-        cMenu* menu = self->Menu;
+        cMenu* menu = Menu;
         sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)menu->mVtbl;
         tMenuDrawBoxFn** drawBoxFn = &vt[8].fn;
         (*drawBoxFn)(vthis(menu, vt[8]), rect, focused ? kBoxSelectedColor : kBoxUnselectedColor);
     }
     cMenuItem_textRender1_sVec3* col =
-        ((void*)self) == cMenu_getFocusItem(self->Menu) ? &kTextSelectedColor : &kTextUnselectedColor;
+        ((void*)this) == Menu->getFocusItem() ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;
     textColor.g = col->y;
     textColor.b = col->z;
-    *(cMenuItem_textRender1_sColor*)self->Menu->MenuSys->Font->Color = textColor;
+    *(cMenuItem_textRender1_sColor*)Menu->MenuSys->Font->Color = textColor;
     // Same-layout cast: cFont::ShadowOffset is On Tour's t2Vector, kept as float[2] in render/font.h.
-    *(t2Vector*)self->Menu->MenuSys->Font->ShadowOffset = t2Vector(2.0f, 2.0f);
-    char* label = (char*)self->Caption;
+    *(t2Vector*)Menu->MenuSys->Font->ShadowOffset = t2Vector(2.0f, 2.0f);
+    char* label = (char*)Caption;
     if (label) {
-        cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
+        cFont_text(Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
     }
-    cFont* font = self->Menu->MenuSys->Font;
+    cFont* font = Menu->MenuSys->Font;
     float w = cFont_textExtent(font, buf, 0, 0, font->Scale[0], font->Scale[1]);
-    cFont_text(self->Menu->MenuSys->Font, rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
+    cFont_text(Menu->MenuSys->Font, rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
     if (focused) {
-        font = self->Menu->MenuSys->Font;
-        float w1 = cFont_textExtent(font, buf + self->CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
-        font = self->Menu->MenuSys->Font;
+        font = Menu->MenuSys->Font;
+        float w1 = cFont_textExtent(font, buf + CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
+        font = Menu->MenuSys->Font;
         char* next = buf + 1;
-        float w2 = cFont_textExtent(font, next + self->CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
+        float w2 = cFont_textExtent(font, next + CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
         float x1 = rect[0] + (rect[2] - w1) - 16.0f;
         float bot = rect[1] + rect[3] - 6.0f;
         float x2 = rect[0] + (rect[2] - w2) - 16.0f;
@@ -4262,7 +4249,7 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
         *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
         GrMan->RenderTriStrip(4, cursorVerts, 0);
     }
-    *(t2Vector*)self->Menu->MenuSys->Font->ShadowOffset = t2Vector(0.0f, 0.0f);
+    *(t2Vector*)Menu->MenuSys->Font->ShadowOffset = t2Vector(0.0f, 0.0f);
 }
 #endif
 
@@ -4314,16 +4301,16 @@ extern "C" int cMenuItem_isLocked(cMenuItem* self);
  *         3 next item, 4 previous item)
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" int cColorMenuItem_input(cColorMenuItem* self)
+int cColorMenuItem::input()
 {
-    int result = cMenuItem_input((cMenuItem*)self);
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    int result = ((cMenuItem*)this)->input();
+    if (((cMenuItem*)this)->isLocked() != 0) {
         return result;
     }
     if (result != 0) {
         return result;
     }
-    float side = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
+    float side = cMenuItem_getRight_f(this) - cMenuItem_getLeft_f(this);
     int dir;
     if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
@@ -4333,17 +4320,17 @@ extern "C" int cColorMenuItem_input(cColorMenuItem* self)
     } else {
         dir = 0;
     }
-    if (dir == self->AccelDir) {
-        self->AccelCount += 1;
+    if (dir == AccelDir) {
+        AccelCount += 1;
     } else {
-        self->AccelCount = 0;
-        self->AccelDir = dir;
+        AccelCount = 0;
+        AccelDir = dir;
     }
     if (dir != 0) {
-        int n = self->AccelCount;
+        int n = AccelCount;
         int accel = (n * n / 288) >? 1;
         // channel Adjust of the colour (A, R, G, B in order)
-        float* chanPtr = &(&self->Color->A)[self->Adjust];
+        float* chanPtr = &(&Color->A)[Adjust];
         float step = 0.0003906250058207661f;
         step = (float)accel * step;
         float value = *chanPtr;
@@ -4355,9 +4342,9 @@ extern "C" int cColorMenuItem_input(cColorMenuItem* self)
             value = 1.0f;
         }
         *chanPtr = value;
-        cMenu* menu = self->Menu;
+        cMenu* menu = Menu;
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
-        vt[4].fn(vthis(menu, vt[4]), self);
+        vt[4].fn(vthis(menu, vt[4]), this);
     }
     return result;
 }
@@ -4450,39 +4437,39 @@ static inline float& colorChannel(tARGB* color, int adjust)
  *
  * @param rect  the row rectangle (x, y, w, h)
  */
-extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
+void cColorMenuItem::render(float* rect)
 {
     {
-        cMenu* menu = self->Menu;
+        cMenu* menu = Menu;
         sVEntry<void(void*, float*, int)>* vt = (sVEntry<void(void*, float*, int)>*)menu->mVtbl;
-        vt[9].fn(vthis(menu, vt[9]), rect, ((void*)self) == cMenu_getFocusItem((cMenu*)menu));
+        vt[9].fn(vthis(menu, vt[9]), rect, ((void*)this) == menu->getFocusItem());
     }
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;
     float textX = barX - 16.0f;
     cMenuItem_textRender1_sVec3* col =
-        ((void*)self) == cMenu_getFocusItem(self->Menu) ? &kTextSelectedColor : &kTextUnselectedColor;
+        ((void*)this) == Menu->getFocusItem() ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textClr;
     textClr.a = 1.0f;
     textClr.r = col->x;
     textClr.g = col->y;
     textClr.b = col->z;
-    *(cMenuItem_textRender1_sColor*)self->Menu->MenuSys->Font->Color = textClr;
+    *(cMenuItem_textRender1_sColor*)Menu->MenuSys->Font->Color = textClr;
     // Same-layout cast: cFont::ShadowOffset is On Tour's t2Vector, kept as float[2] in render/font.h.
-    *(t2Vector*)self->Menu->MenuSys->Font->ShadowOffset = t2Vector(2.0f, 2.0f);
-    cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
-                  ColorNames[self->Adjust]);
+    *(t2Vector*)Menu->MenuSys->Font->ShadowOffset = t2Vector(2.0f, 2.0f);
+    cFont_text(Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
+                  ColorNames[Adjust]);
     char buf[0x10];
     sprintf(buf, str_pct_3f_pct_03d,
-            fptodp(colorChannel(self->Color, self->Adjust)),
-            (int)(colorChannel(self->Color, self->Adjust) * 255.99000549316406f));
-    cFont* font = self->Menu->MenuSys->Font;
+            fptodp(colorChannel(Color, Adjust)),
+            (int)(colorChannel(Color, Adjust) * 255.99000549316406f));
+    cFont* font = Menu->MenuSys->Font;
     float w = cFont_textExtent(font, buf, 0, 0, font->Scale[0], font->Scale[1]);
     cFont_text(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
 
-    tARGB rampStart = *self->Color;
-    tARGB rampEnd = *self->Color;
-    colorChannel(&rampStart, self->Adjust) = 0.0f;
-    colorChannel(&rampEnd, self->Adjust) = 1.0f;
+    tARGB rampStart = *Color;
+    tARGB rampEnd = *Color;
+    colorChannel(&rampStart, Adjust) = 0.0f;
+    colorChannel(&rampEnd, Adjust) = 1.0f;
     tRect barRect;
     barRect.X = barX;
     barRect.Y = rect[1] + rect[3] - 6.0f - 10.0f;
@@ -4540,7 +4527,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     vertPos.z = zero;
     vertPos.w = one;
     verts[3].p = vertPos;
-    if (self->Color->A != 1.0f) {
+    if (Color->A != 1.0f) {
         GrMan->m_pCurrentDrawState->m_bitGroups[1] =
             ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (5 << 2);
     } else {
@@ -4550,7 +4537,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->RenderTriStrip(4, verts, 0);
 
-    float mx = barRect.X + barRect.W * colorChannel(self->Color, self->Adjust);
+    float mx = barRect.X + barRect.W * colorChannel(Color, Adjust);
     verts[0].r = (int)(textClr.r * 128.0f);
     verts[0].g = (int)(textClr.g * 128.0f);
     verts[0].b = (int)(textClr.b * 128.0f);
@@ -4599,9 +4586,9 @@ public:
  * @param cmdArg     the command's argument (item-specific: 0, or a word of the item's data; On Tour arg)
  * @return the parent menu's tMIR result
  */
-extern "C" int cExpandMenuItemMenu_onCommand(cExpandMenuItemMenu* self, int item, int cmdArg)
+int cExpandMenuItemMenu::onCommand(int item, int cmdArg)
 {
-    return ((cExpandMenuItemMenu_onCommand_cItem*)self->Item)->onCommand(item, cmdArg);
+    return ((cExpandMenuItemMenu_onCommand_cItem*)Item)->onCommand(item, cmdArg);
 }
 #endif
 
@@ -4632,9 +4619,9 @@ public:
  *
  * @param item  the inner menu item whose value changed
  */
-extern "C" void cExpandMenuItemMenu_onChange(cExpandMenuItemMenu* self, int item)
+void cExpandMenuItemMenu::onChange(int item)
 {
-    ((cExpandMenuItemMenu_onChange_cItem*)self->Item)->onChange(item);
+    ((cExpandMenuItemMenu_onChange_cItem*)Item)->onChange(item);
 }
 #endif
 
@@ -4666,16 +4653,16 @@ struct sMenuSlot_F7E8 {
  *
  * @return @p self
  */
-extern "C" void* cExpandMenuItem_cExpandMenuItem1(cExpandMenuItem* self)
+void* cExpandMenuItem::cExpandMenuItem1()
 {
-    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->Title = 0;
-    self->mVtbl = cExpandMenuItem_vtbl;
-    cMenu_cMenu(&self->ExpandMenu);
-    self->ExpandMenu.mVtbl = cExpandMenuItemMenu_vtbl;
-    new ((char*)&self->ExpandMenu.Items[0]) sMenuSlot_F7E8[70];
-    self->ExpandMenu.Item = (cExpandMenuItem*)((void*)self);
-    return ((void*)self);
+    cMenuItem_cMenuItem_id((cMenuItem*)this, -1);
+    Title = 0;
+    mVtbl = cExpandMenuItem_vtbl;
+    cMenu_cMenu(&ExpandMenu);
+    ExpandMenu.mVtbl = cExpandMenuItemMenu_vtbl;
+    new ((char*)&ExpandMenu.Items[0]) sMenuSlot_F7E8[70];
+    ExpandMenu.Item = (cExpandMenuItem*)((void*)this);
+    return ((void*)this);
 }
 #endif
 
@@ -4741,9 +4728,9 @@ extern "C" void* cMenu_getFocusItem(cMenu* self);
  *
  * Gets the focus item of the menu embedded at +0x18 (cMenu_getFocusItem) and calls its virtual slot 8.
  */
-extern "C" void cExpandMenuItem_zeroValue(cExpandMenuItem* self)
+void cExpandMenuItem::zeroValue()
 {
-    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)(&self->ExpandMenu)))->zeroValue();
+    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)(&ExpandMenu)))->zeroValue();
 }
 #endif
 
@@ -4760,10 +4747,9 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_addItem__FPvT0);
  *
  * @param item  the menu item to add
  */
-void cExpandMenuItem_addItem(void* vself, void* item)
+void cExpandMenuItem::addItem(void* item)
 {
-    cExpandMenuItem* self = (cExpandMenuItem*)vself;
-    cMenu_addItem2(&self->ExpandMenu, item);
+    cMenu_addItem2(&ExpandMenu, item);
 }
 #endif
 
@@ -4790,12 +4776,12 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_remAllItems);
  * Empties an expandable item's sub-menu (cMenu_remAllItems on +0x18), then adds the title item (+0x14) back to it, when
  * there is one.
  */
-extern "C" void cExpandMenuItem_remAllItems(cExpandMenuItem* self)
+void cExpandMenuItem::remAllItems()
 {
-    cMenu_remAllItems((cMenu*)(&self->ExpandMenu));
-    void* item = self->Title;
+    cMenu_remAllItems((cMenu*)(&ExpandMenu));
+    void* item = Title;
     if (item != 0) {
-        cExpandMenuItem_addItem3(self, item, -1);
+        cExpandMenuItem_addItem3(this, item, -1);
     }
 }
 #endif
@@ -4812,16 +4798,16 @@ void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpan
  *
  * @param item  the new title item
  */
-extern "C" void cExpandMenuItem_setTitle(cExpandMenuItem* self, cMenuItem* item)
+void cExpandMenuItem::setTitle(cMenuItem* item)
 {
-    for (int i = 0; i < ((cMenuList*)(&self->ExpandMenu))->count; i++) {
-        if (((cMenuList*)(&self->ExpandMenu))->items[i] == (void*)self->Title) {
-            cMenu_remItem_pi(&self->ExpandMenu, i);
+    for (int i = 0; i < ((cMenuList*)(&ExpandMenu))->count; i++) {
+        if (((cMenuList*)(&ExpandMenu))->items[i] == (void*)Title) {
+            cMenu_remItem_pi(&ExpandMenu, i);
             break;
         }
     }
-    self->Title = (cMenuItem*)((void*)item);
-    cExpandMenuItem_addItem3(self, item, 0);
+    Title = (cMenuItem*)((void*)item);
+    cExpandMenuItem_addItem3(this, item, 0);
 }
 #endif
 
@@ -4853,13 +4839,13 @@ public:
  * @return 0 when the move was handled inside the sub-menu, otherwise the focused item's input result (tMIR)
  */
 // PORT: returns a key code (int) through the unit's void* declaration.
-extern "C" void* cExpandMenuItem_input(cExpandMenuItem* expandItem)
+void* cExpandMenuItem::input()
 {
-    cExpandMenuItem* self = expandItem;
+    cExpandMenuItem* self = this;
     cMenu_checkFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
     int prev = (*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected;
     int key = ((cExpandMenuItem_input_cItem*)(*(cMenu_setFocus_sMenu*)&self->ExpandMenu).items[prev])->input();
-    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
+    if (((cMenuItem*)self)->isLocked() != 0) {
         return (void*)key;
     }
     switch (key) {
@@ -4959,11 +4945,11 @@ extern "C" tRect* cExpandMenuItem_preRender(tRect* ret, cExpandMenuItem* self)
     total.X = zero;
     self->ExpandMenu.MenuSys = self->Menu->MenuSys;
     for (int i = 0; i < self->ExpandMenu.NumItems; i++) {
-        if (cMenuItem_isActive(self->ExpandMenu.Items[i])) {
+        if (self->ExpandMenu.Items[i]->isActive()) {
             // cMenuItem entry 4: preRender, the row's rect (returned by value)
             sVEntry<tRect(void*)>* vt = (sVEntry<tRect(void*)>*)self->ExpandMenu.Items[i]->mVtbl;
             self->ItemRect[i] = vt[4].fn(vthis(self->ExpandMenu.Items[i], vt[4]));
-            if (self == cMenu_getFocusItem(self->Menu) || self->ExpandMenu.Items[i] == self->Title) {
+            if (self == self->Menu->getFocusItem() || self->ExpandMenu.Items[i] == self->Title) {
                 total.H += self->ItemRect[i].H;
             }
             float itemWidth = self->ItemRect[i].W;
@@ -5034,10 +5020,10 @@ extern "C" void cExpandMenuItem_render(cExpandMenuItem_render_sOwner* self, cExp
 {
     cExpandMenuItem_render_sRect pos = *irect;
     for (int i = 0; i < self->count; i++) {
-        if (cMenuItem_isActive((cMenuItem*)self->items[i]) == 0) {
+        if (((cMenuItem*)self->items[i])->isActive() == 0) {
             continue;
         }
-        if ((void*)self == cMenu_getFocusItem((cMenu*)self->menu) || self->items[i] == self->cur) {
+        if ((void*)self == ((cMenu*)self->menu)->getFocusItem() || self->items[i] == self->cur) {
             int off = self->items[i] == self->cur ? 0 : 20;
             self->rects[i].x = pos.x + (float)off;
             self->rects[i].y = pos.y;
@@ -5064,18 +5050,18 @@ extern "C" void cMenu_setFocus_v(void* self, int index) __asm__("cMenu_setFocus"
  *
  * @param mode  how the focus arrived (On Tour tMIGainFocus whence)
  */
-extern "C" void cExpandMenuItem_gainFocus(cExpandMenuItem* self, int mode)
+void cExpandMenuItem::gainFocus(int mode)
 {
-    cMenuItem_gainFocus_2(self, mode);
+    cMenuItem_gainFocus_2(this, mode);
     switch (mode) {
     case 0:
-        cMenu_setFocus_v(&self->ExpandMenu, 0);
+        cMenu_setFocus_v(&ExpandMenu, 0);
         break;
     case 1:
-        cMenu_setFocus_v(&self->ExpandMenu, -1);
+        cMenu_setFocus_v(&ExpandMenu, -1);
         break;
     }
-    cMenu_onGainFocus((cMenu*)(&self->ExpandMenu), (int)self->Menu->MenuSys);
+    cMenu_onGainFocus((cMenu*)(&ExpandMenu), (int)Menu->MenuSys);
 }
 #endif
 
@@ -5089,10 +5075,10 @@ extern "C" void cMenu_onLoseFocus(cMenu* p);
  *
  * Calls cMenuItem_loseFocus (base cMenuItem loseFocus) and cMenu_onLoseFocus on the menu embedded at +0x18.
  */
-extern "C" void cExpandMenuItem_loseFocus(cExpandMenuItem* self)
+void cExpandMenuItem::loseFocus()
 {
-    cMenuItem_loseFocus(self);
-    cMenu_onLoseFocus((cMenu*)(&self->ExpandMenu));
+    cMenuItem_loseFocus(this);
+    cMenu_onLoseFocus((cMenu*)(&ExpandMenu));
 }
 #endif
 
@@ -5187,9 +5173,9 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row rectangle (x, y, w, h)
  */
 // PORT: rect pointer passed through cMenuItem_textRender1's int parameter
-extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
+void cRGBTitleMenuItem::render(float* rect)
 {
-    cMenuItem_textRender1_5(((char*)self), (int)rect, (int)self->Caption, 0, 0);
+    cMenuItem_textRender1_5(((char*)this), (int)rect, (int)Caption, 0, 0);
     tBxVertex verts[4];
     tRect rc;
     rc.W = 20.0f;
@@ -5198,7 +5184,7 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     rc.Y = rect[1] + 6.0f + 2.0f;
     float x2 = rc.X + rc.W;
     float y2 = rc.Y + rc.H;
-    tARGB* colour = self->Color;
+    tARGB* colour = Color;
     float zeroF = 0.0f;
     float one = 1.0f;
     verts[0].r = (int)(colour->R * 128.0f);
@@ -5300,7 +5286,7 @@ INCLUDE_ASM("util/menu", cARGBMenuItem_input__FPv);
  */
 void* cARGBMenuItem_input(void* self)
 {
-    return cExpandMenuItem_input((cExpandMenuItem*)self);
+    return ((cExpandMenuItem*)self)->input();
 }
 #endif
 
@@ -5389,15 +5375,15 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  *
  * @param rect  the row's rect
  */
-extern "C" void cVectorTitleMenuItem_render(cVectorTitleMenuItem* self, int rect)
+void cVectorTitleMenuItem::render(int rect)
 {
     char buf[0x80];
     const char* fmt = str_pct_2f_pct_2f_pct_2f;
-    int x = fptodp(self->Vector->x);
-    int y = fptodp(self->Vector->y);
-    int z = fptodp(self->Vector->z);
+    int x = fptodp(Vector->x);
+    int y = fptodp(Vector->y);
+    int z = fptodp(Vector->z);
     sprintf(buf, fmt, x, y, z);
-    cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, buf);
+    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
 }
 #endif
 
@@ -5494,18 +5480,18 @@ static inline void normalize(t3Vector& out, const t3Vector& v)
  *
  * @return cExpandMenuItem_input()'s result
  */
-extern "C" void* cVectorMenuItem_input(cVectorMenuItem* self)
+void* cVectorMenuItem::input()
 {
-    void* ret = cExpandMenuItem_input((cExpandMenuItem*)self);
-    if (self->Normalize != 0) {
+    void* ret = ((cExpandMenuItem*)this)->input();
+    if (Normalize != 0) {
         t3VectorXYZ n;
-        t3VectorXYZ vec(self->X.ValueScale * itemValue(&self->X) + self->X.ValueOffset,
-                        self->Y.ValueScale * itemValue(&self->Y) + self->Y.ValueOffset,
-                        self->Z.ValueScale * itemValue(&self->Z) + self->Z.ValueOffset);
+        t3VectorXYZ vec(X.ValueScale * itemValue(&X) + X.ValueOffset,
+                        Y.ValueScale * itemValue(&Y) + Y.ValueOffset,
+                        Z.ValueScale * itemValue(&Z) + Z.ValueOffset);
         normalize(n, vec);
-        setItemValue(&self->X, n.x);
-        setItemValue(&self->Y, n.y);
-        setItemValue(&self->Z, n.z);
+        setItemValue(&X, n.x);
+        setItemValue(&Y, n.y);
+        setItemValue(&Z, n.z);
     }
     return ret;
 }
@@ -5563,10 +5549,10 @@ void cMenuItem_gainFocus(void* self);
 /**
  * Gives a graph item the focus: runs the base cMenuItem_gainFocus and leaves edit mode (+0x40 = 0).
  */
-extern "C" void cGraphMenuItem_gainFocus(cGraphMenuItem* self)
+void cGraphMenuItem::gainFocus()
 {
-    cMenuItem_gainFocus(self);
-    self->IsEditMode = 0;
+    cMenuItem_gainFocus(this);
+    IsEditMode = 0;
 }
 #endif
 
@@ -5597,88 +5583,88 @@ float cMenuItem_getDown_f(void* self) __asm__("cMenuItem_getDown__FPv");
  *
  * @return the base input's result outside edit mode, else 0
  */
-extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
+int cGraphMenuItem::input()
 {
     int result = 0;
-    if (cMenuItem_isLocked((cMenuItem*)self) == 0) {
+    if (((cMenuItem*)this)->isLocked() == 0) {
     int changed = 0;
-    if (cMenuItem_getKey((void**)self) == 6) {
-        self->IsEditMode ^= 1;
+    if (cMenuItem_getKey((void**)this) == 6) {
+        IsEditMode ^= 1;
     }
-    if (self->IsEditMode != 0) {
-        if (cMenuItem_getKey((void**)self) == 8) {
-            self->IsEditMode = 0;
-        } else if (cMenuItem_getKey((void**)self) == 7) {
-            self->IsEditMode = 0;
-        } else if (self->IsEditMode != 0) {
-            if (cMenuItem_getKey((void**)self) == 4) {
-                if (self->OnPoint > 0) {
-                    self->OnPoint--;
+    if (IsEditMode != 0) {
+        if (cMenuItem_getKey((void**)this) == 8) {
+            IsEditMode = 0;
+        } else if (cMenuItem_getKey((void**)this) == 7) {
+            IsEditMode = 0;
+        } else if (IsEditMode != 0) {
+            if (cMenuItem_getKey((void**)this) == 4) {
+                if (OnPoint > 0) {
+                    OnPoint--;
                     changed = 1;
                 }
-            } else if (cMenuItem_getKey((void**)self) == 5) {
-                if (self->OnPoint < self->NumPoints - 1) {
-                    self->OnPoint++;
+            } else if (cMenuItem_getKey((void**)this) == 5) {
+                if (OnPoint < NumPoints - 1) {
+                    OnPoint++;
                     changed = 1;
                 }
             }
-            float step = (self->MaxPoint[0] - self->MinPoint[0]) / (float)(self->NumPoints * 2 > 49 ? self->NumPoints * 2 : 50);
-            float dy = cMenuItem_getUp_f(self) - cMenuItem_getDown_f(self);
-            if (dy != 0.0f && (self->YLock & (1 << self->OnPoint)) == 0) {
-                self->Points[self->OnPoint].y += dy * (self->MaxPoint[1] - self->MinPoint[1]) * 0.008333333767950535f;
+            float step = (MaxPoint[0] - MinPoint[0]) / (float)(NumPoints * 2 > 49 ? NumPoints * 2 : 50);
+            float dy = cMenuItem_getUp_f(this) - cMenuItem_getDown_f(this);
+            if (dy != 0.0f && (YLock & (1 << OnPoint)) == 0) {
+                Points[OnPoint].y += dy * (MaxPoint[1] - MinPoint[1]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->MaxPoint[1] < self->Points[self->OnPoint].y) {
-                    self->Points[self->OnPoint].y = self->MaxPoint[1];
+                if (MaxPoint[1] < Points[OnPoint].y) {
+                    Points[OnPoint].y = MaxPoint[1];
                 }
-                if (self->Points[self->OnPoint].y < self->MinPoint[1]) {
-                    self->Points[self->OnPoint].y = self->MinPoint[1];
+                if (Points[OnPoint].y < MinPoint[1]) {
+                    Points[OnPoint].y = MinPoint[1];
                 }
-                if (self->OnPoint < self->NumPoints - 1) {
-                    if (self->Slope > 0 && self->Points[self->OnPoint + 1].y < self->Points[self->OnPoint].y) {
-                        self->Points[self->OnPoint].y = self->Points[self->OnPoint + 1].y;
-                    } else if (self->Slope < 0 && self->Points[self->OnPoint].y < self->Points[self->OnPoint + 1].y) {
-                        self->Points[self->OnPoint].y = self->Points[self->OnPoint + 1].y;
+                if (OnPoint < NumPoints - 1) {
+                    if (Slope > 0 && Points[OnPoint + 1].y < Points[OnPoint].y) {
+                        Points[OnPoint].y = Points[OnPoint + 1].y;
+                    } else if (Slope < 0 && Points[OnPoint].y < Points[OnPoint + 1].y) {
+                        Points[OnPoint].y = Points[OnPoint + 1].y;
                     }
                 }
-                if (self->OnPoint > 0) {
-                    if (self->Slope > 0 && self->Points[self->OnPoint].y < self->Points[self->OnPoint - 1].y) {
-                        self->Points[self->OnPoint].y = self->Points[self->OnPoint - 1].y;
-                    } else if (self->Slope < 0 && self->Points[self->OnPoint - 1].y < self->Points[self->OnPoint].y) {
-                        self->Points[self->OnPoint].y = self->Points[self->OnPoint - 1].y;
+                if (OnPoint > 0) {
+                    if (Slope > 0 && Points[OnPoint].y < Points[OnPoint - 1].y) {
+                        Points[OnPoint].y = Points[OnPoint - 1].y;
+                    } else if (Slope < 0 && Points[OnPoint - 1].y < Points[OnPoint].y) {
+                        Points[OnPoint].y = Points[OnPoint - 1].y;
                     }
                 }
             }
-            float dx = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
-            if (dx != 0.0f && (self->XLock & (1 << self->OnPoint)) == 0) {
-                self->Points[self->OnPoint].x += dx * (self->MaxPoint[0] - self->MinPoint[0]) * 0.008333333767950535f;
+            float dx = cMenuItem_getRight_f(this) - cMenuItem_getLeft_f(this);
+            if (dx != 0.0f && (XLock & (1 << OnPoint)) == 0) {
+                Points[OnPoint].x += dx * (MaxPoint[0] - MinPoint[0]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->MaxPoint[0] < self->Points[self->OnPoint].x) {
-                    self->Points[self->OnPoint].x = self->MaxPoint[0];
+                if (MaxPoint[0] < Points[OnPoint].x) {
+                    Points[OnPoint].x = MaxPoint[0];
                 }
-                if (self->Points[self->OnPoint].x < self->MinPoint[0]) {
-                    self->Points[self->OnPoint].x = self->MinPoint[0];
+                if (Points[OnPoint].x < MinPoint[0]) {
+                    Points[OnPoint].x = MinPoint[0];
                 }
-                if (self->OnPoint < self->NumPoints - 1) {
-                    if (self->Points[self->OnPoint + 1].x - step < self->Points[self->OnPoint].x) {
-                        self->Points[self->OnPoint].x = self->Points[self->OnPoint + 1].x - step;
+                if (OnPoint < NumPoints - 1) {
+                    if (Points[OnPoint + 1].x - step < Points[OnPoint].x) {
+                        Points[OnPoint].x = Points[OnPoint + 1].x - step;
                     }
                 }
-                if (self->OnPoint > 0) {
-                    if (self->Points[self->OnPoint].x < self->Points[self->OnPoint - 1].x + step) {
-                        self->Points[self->OnPoint].x = self->Points[self->OnPoint - 1].x + step;
+                if (OnPoint > 0) {
+                    if (Points[OnPoint].x < Points[OnPoint - 1].x + step) {
+                        Points[OnPoint].x = Points[OnPoint - 1].x + step;
                     }
                 }
             }
         } else {
-            result = cMenuItem_input((cMenuItem*)self);
+            result = ((cMenuItem*)this)->input();
         }
     } else {
-        result = cMenuItem_input((cMenuItem*)self);
+        result = ((cMenuItem*)this)->input();
     }
     if (changed) {
         // cMenu entry 4: onChange(item)
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)self->Menu->mVtbl;
-        vt[4].fn(vthis(self->Menu, vt[4]), self);
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)Menu->mVtbl;
+        vt[4].fn(vthis(Menu, vt[4]), this);
     }
     }
     return result;
@@ -5713,7 +5699,7 @@ extern "C" tRect* cGraphMenuItem_preRender(tRect* ret, cGraphMenuItem* item)
 {
     int margin = 100;
     int focused = 0;
-    if (((char*)item) == cMenu_getFocusItem(item->Menu)) {
+    if (((char*)item) == item->Menu->getFocusItem()) {
         focused = item->IsEditMode != 0;
     }
     int minHeight = focused ? 80 : 20;
@@ -5956,32 +5942,32 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
  *
  * @param rect  the row's rect (x, y, w, h)
  */
-extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
+void cGraphMenuItem::render(float* rect)
 {
-    int focused = self == cMenu_getFocusItem(self->Menu);
+    int focused = this == Menu->getFocusItem();
     {
-        cMenu* menu = self->Menu;
+        cMenu* menu = Menu;
         sVEntry<void(void*, float*, int)>* vt = (sVEntry<void (void*, float*, int)>*)menu->mVtbl;
         vt[9].fn(vthis(menu, vt[9]), rect, focused);
     }
-    cFont* font = self->Menu->MenuSys->Font;
+    cFont* font = Menu->MenuSys->Font;
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1];
     cMenuItem_textRender1_sVec3* col =
-        self == cMenu_getFocusItem(self->Menu) ? &kTextSelectedColor : &kTextUnselectedColor;
+        this == Menu->getFocusItem() ? &kTextSelectedColor : &kTextUnselectedColor;
     sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;
     textColor.g = col->y;
     textColor.b = col->z;
-    *(sColor*)self->Menu->MenuSys->Font->Color = textColor;
-    *(sVec2r_D0EF8*)self->Menu->MenuSys->Font->ShadowOffset = sVec2r_D0EF8(2.0f, 2.0f);
-    cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, ((char*)self->Caption));
-    if (self->IsEditMode && focused) {
-        cBXStr_D0EF8 str = FormatValue_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint].x) + str_comma + FormatValue_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint].y);
-        cFont_text(self->Menu->MenuSys->Font, rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
+    *(sColor*)Menu->MenuSys->Font->Color = textColor;
+    *(sVec2r_D0EF8*)Menu->MenuSys->Font->ShadowOffset = sVec2r_D0EF8(2.0f, 2.0f);
+    cFont_text(Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, ((char*)Caption));
+    if (IsEditMode && focused) {
+        cBXStr_D0EF8 str = FormatValue_D0EF8(((sGraphPt_D0EF8*)Points)[OnPoint].x) + str_comma + FormatValue_D0EF8(((sGraphPt_D0EF8*)Points)[OnPoint].y);
+        cFont_text(Menu->MenuSys->Font, rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
     }
     float graphHeight;
-    if (focused && self->IsEditMode) {
+    if (focused && IsEditMode) {
         graphHeight = rect[3] - 24.0f;
     } else {
         graphHeight = rect[3] - 12.0f;
@@ -6010,11 +5996,11 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         fullUv[3] = 1.0f;
         func_002CB350_0EF8((tBxVertex*)quadVerts, &gr.x, fullUv);
     }
-    float sx = gr.w / (self->MaxPoint[0] - self->MinPoint[0]);
-    float sy = gr.h / (self->MinPoint[1] - self->MaxPoint[1]);
-    float ox = gr.x - self->MinPoint[0] * sx;
-    float oy = gr.y - self->MaxPoint[1] * sy;
-    if ((self->MinPoint[1] >= 0.0f) != (self->MaxPoint[1] > 0.0f)) {
+    float sx = gr.w / (MaxPoint[0] - MinPoint[0]);
+    float sy = gr.h / (MinPoint[1] - MaxPoint[1]);
+    float ox = gr.x - MinPoint[0] * sx;
+    float oy = gr.y - MaxPoint[1] * sy;
+    if ((MinPoint[1] >= 0.0f) != (MaxPoint[1] > 0.0f)) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 1);
         for (i = 0; i < 2; i++) {
             quadVerts[i].a = (int)(kBoxSelectedColor_c.a * 128.0f);
@@ -6042,11 +6028,11 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         quadVerts[i].g = (int)(D_004D53D0.g * 128.0f);
         quadVerts[i].b = (int)(D_004D53D0.b * 128.0f);
     }
-    for (i = 1; i < self->NumPoints; i++) {
-        float x0 = GraphX_D0EF8(((sGraphPt_D0EF8*)self->Points)[i - 1], sx, ox);
-        float y0 = GraphY_D0EF8(((sGraphPt_D0EF8*)self->Points)[i - 1], sy, oy);
-        float x1 = GraphX_D0EF8(((sGraphPt_D0EF8*)self->Points)[i], sx, ox);
-        float y1 = GraphY_D0EF8(((sGraphPt_D0EF8*)self->Points)[i], sy, oy);
+    for (i = 1; i < NumPoints; i++) {
+        float x0 = GraphX_D0EF8(((sGraphPt_D0EF8*)Points)[i - 1], sx, ox);
+        float y0 = GraphY_D0EF8(((sGraphPt_D0EF8*)Points)[i - 1], sy, oy);
+        float x1 = GraphX_D0EF8(((sGraphPt_D0EF8*)Points)[i], sx, ox);
+        float y1 = GraphY_D0EF8(((sGraphPt_D0EF8*)Points)[i], sy, oy);
         sVec4 vertexPos;
         vertexPos.x = x0;
         vertexPos.y = y0;
@@ -6060,7 +6046,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         *(sVec4*)quadVerts[1].pos = vertexPos;
         cGraphicsMan_TheGraphicsMan->RenderLineStrip(2, (const tBxVertex*)quadVerts, 0);
     }
-    if (self->IsEditMode) {
+    if (IsEditMode) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 3);
         for (i = 0; i < 4; i++) {
             quadVerts[i].a = (int)(D_004D53E0.a * 128.0f);
@@ -6070,8 +6056,8 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         }
         float markerRect[4];
         float tt[4];
-        float px = GraphX_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint], sx, ox);
-        float py = GraphY_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint], sy, oy);
+        float px = GraphX_D0EF8(((sGraphPt_D0EF8*)Points)[OnPoint], sx, ox);
+        float py = GraphY_D0EF8(((sGraphPt_D0EF8*)Points)[OnPoint], sy, oy);
         markerRect[0] = px - 2.0f;
         markerRect[1] = py - 2.0f;
         markerRect[2] = 5.0f;
@@ -6131,20 +6117,20 @@ extern void* cErrorMenu_vtbl[];
  * @param text3  caption of the item that closes the menu
  * @return @p self
  */
-extern "C" void* cErrorMenu_cErrorMenu1(cErrorMenu* self, void* nullText, void* text3)
+void* cErrorMenu::cErrorMenu1(void* nullText, void* text3)
 {
-    char* nullItem = (char*)&self->Error;
-    cMenu_cMenu(self);
-    char* item3 = (char*)&self->Ok;
-    self->mVtbl = cErrorMenu_vtbl;
-    char* spaceItem = (char*)&self->Space;
+    char* nullItem = (char*)&Error;
+    cMenu_cMenu(this);
+    char* item3 = (char*)&Ok;
+    mVtbl = cErrorMenu_vtbl;
+    char* spaceItem = (char*)&Space;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, nullText);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)0x1E);
     cPopMenuItem_cPopMenuItem((cPopMenuItem*)((cPopMenuItem*)item3), text3);
-    cMenu_addItem((cMenuList*)self, (void**)nullItem, -1);
-    cMenu_addItem((cMenuList*)self, (void**)spaceItem, -1);
-    cMenu_addItem((cMenuList*)self, (void**)item3, -1);
-    return ((void*)self);
+    cMenu_addItem((cMenuList*)this, (void**)nullItem, -1);
+    cMenu_addItem((cMenuList*)this, (void**)spaceItem, -1);
+    cMenu_addItem((cMenuList*)this, (void**)item3, -1);
+    return ((void*)this);
 }
 #endif
 

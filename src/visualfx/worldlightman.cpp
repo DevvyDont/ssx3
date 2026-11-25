@@ -39,31 +39,31 @@ extern t4Vector t4vect_Zero;
  * Sets up the world light cache: eight empty light slots with their "RTLOverlapList" buffers and 32 free
  * light nodes.
  */
-extern "C" void cWorldLightMan_initLightCache(cWorldLightMan* self)
+void cWorldLightMan::initLightCache()
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        self->OverlapNodeList[i].RID = tResourceID::Invalid();
-        self->OverlapNodeList[i].iTick = 0;
+        OverlapNodeList[i].RID = tResourceID::Invalid();
+        OverlapNodeList[i].iTick = 0;
         cOverlapList* list = (cOverlapList*)operator new(sizeof(cOverlapList), str_RTLOverlapList, 0x20000000, 0);
-        list->nash = self->m_pNash;
+        list->nash = m_pNash;
         list->deletecount = 0;
         list->numinstances = 0xFFFFFFFF;
         list->numpatches = 0xFFFFFFFF;
         list->numtyped = 0xFFFFFFFF;
-        self->OverlapNodeList[i].pOverlapList = list;
+        OverlapNodeList[i].pOverlapList = list;
     }
     for (i = 0; i < 32; i++) {
-        self->LightCacheArray[i].iTick = 0;
-        self->LightCacheArray[i].RID = 0xFFFFFFFF;
-        self->LightCacheArray[i].pos = t4vect_Zero;
-        self->LightCacheArray[i].pOverlapNode = 0;
-        self->LightCacheArray[i].pNext = 0;
-        self->LightCacheArray[i].pPrev = 0;
+        LightCacheArray[i].iTick = 0;
+        LightCacheArray[i].RID = 0xFFFFFFFF;
+        LightCacheArray[i].pos = t4vect_Zero;
+        LightCacheArray[i].pOverlapNode = 0;
+        LightCacheArray[i].pNext = 0;
+        LightCacheArray[i].pPrev = 0;
     }
-    self->m_uiNumLightCacheEntry = 0;
+    m_uiNumLightCacheEntry = 0;
     for (i = 0; i < 32; i++) {
-        self->LightCacheHashTable[i] = 0;
+        LightCacheHashTable[i] = 0;
     }
 }
 #endif
@@ -78,11 +78,11 @@ void operator_delete(int*);
  *
  * Deletes the overlap list of each of the eight overlap nodes (allocated by initLightCache).
  */
-extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan* self)
+void cWorldLightMan::purgeLightCache()
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        operator_delete((int*)self->OverlapNodeList[i].pOverlapList);
+        operator_delete((int*)OverlapNodeList[i].pOverlapList);
     }
 }
 #endif
@@ -235,13 +235,13 @@ static inline tWPNameField* GetRef_5400(tWPInGameData* o, int slot)
  * @param force  nonzero for a moving instance: re-check its position
  * @return the entry's current light set (RTlightInfo)
  */
-extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(cWorldLightMan* self, tInstanceRecord* obj, int force)
+cIrradiance* cWorldLightMan::getRealTimeLights(tInstanceRecord* obj, int force)
 {
     unsigned int key = obj->m_RID;
     int slot = (key >> 8) & 0x1F;
     int found = 0;
     tLightCacheEntry* node;
-    for (node = self->LightCacheHashTable[slot]; node != 0; node = node->pNext) {
+    for (node = LightCacheHashTable[slot]; node != 0; node = node->pNext) {
         if (node->RID == obj->m_RID) {
             found = 1;
             break;
@@ -249,13 +249,13 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(cWorldLightMan* self, t
     }
     int prio = cAppMan_TheAppMan->TimerTick;
     if (!found) {
-        if (self->m_uiNumLightCacheEntry < 32) {
-            node = &self->LightCacheArray[self->m_uiNumLightCacheEntry++];
+        if (m_uiNumLightCacheEntry < 32) {
+            node = &LightCacheArray[m_uiNumLightCacheEntry++];
         } else {
-            node = cWorldLightMan_evictHashTableEntry(self, prio);
+            node = evictHashTableEntry(prio);
         }
         node->RID = obj->m_RID;
-        Link_5400(self->LightCacheHashTable, slot, node);
+        Link_5400(LightCacheHashTable, slot, node);
     }
     node->iTick = prio;
     int reload = 0;
@@ -287,7 +287,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(cWorldLightMan* self, t
         node->pos = pos;
         int rebuild = 0;
         if (node->pOverlapNode == 0 || node->pOverlapNode->RID.m_uiRID != node->RID) {
-            node->pOverlapNode = cWorldLightMan_evictOverlapNode(self, node->iTick);
+            node->pOverlapNode = cWorldLightMan_evictOverlapNode(this, node->iTick);
             node->pOverlapNode->RID.m_uiRID = node->RID;
             rebuild = 1;
         }
@@ -312,13 +312,13 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(cWorldLightMan* self, t
             if (cRenderStateMan_m_hasCustomIrradiance != 0) {
                 node->ObjIrradiance = *cRenderStateMan_getCustomIrradiance();
             } else {
-                tWorldPainterQuery* world = self->m_pWPQuery;
+                tWorldPainterQuery* world = m_pWPQuery;
                 world->queryPosition(node->pos.x, node->pos.y, -99999.0f);
-                tWPNameField* ref = GetRef_5400(self->m_pWPQuery->m_data, 40);
+                tWPNameField* ref = GetRef_5400(m_pWPQuery->m_data, 40);
                 if (*(signed char*)ref != 0) {
                     node->ObjIrradiance = *Resolve_5400(ref);
                 } else {
-                    ref = GetRef_5400(self->m_pWPQuery->m_data, 37);
+                    ref = GetRef_5400(m_pWPQuery->m_data, 37);
                     if (*(signed char*)ref != 0) {
                         node->ObjIrradiance = *Resolve_5400(ref);
                     } else {
@@ -328,7 +328,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(cWorldLightMan* self, t
             }
         }
         node->RTlightInfo = node->ObjIrradiance;
-        cWorldLightMan_IntersectLights1(self, &node->pos, node->pOverlapNode->pOverlapList, &node->RTlightInfo, 4);
+        IntersectLights1(&node->pos, node->pOverlapNode->pOverlapList, &node->RTlightInfo, 4);
     }
     return &node->RTlightInfo;
 }
@@ -374,16 +374,16 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictHashTableEntry);
  * @param priority  the current tick (cAppMan_TheAppMan->TimerTick)
  * @return the entry, or null when every tick is at least @p priority
  */
-extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry(cWorldLightMan* self, int priority)
+tLightCacheEntry* cWorldLightMan::evictHashTableEntry(int priority)
 {
     tLightCacheEntry* best = 0;
     int min = priority + 1;
     unsigned int i;
     for (i = 0; i < 32; i++) {
-        int nodePriority = self->LightCacheArray[i].iTick;
+        int nodePriority = LightCacheArray[i].iTick;
         if (nodePriority < min) {
             min = nodePriority;
-            best = &self->LightCacheArray[i];
+            best = &LightCacheArray[i];
         }
     }
     // Retail loads RID together with iTick as one doubleword and hashes bits 8-12 of it.
@@ -391,7 +391,7 @@ extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry(cWorldLightMan* 
     long ridAndTick = *(long*)&best->RID;
     int slot = (int)(ridAndTick >> 8) & 0x1F;
     if (best->pPrev == 0) {
-        self->LightCacheHashTable[slot] = best->pNext;
+        LightCacheHashTable[slot] = best->pNext;
         if (best->pNext != 0) {
             best->pNext->pPrev = 0;
         }
@@ -461,11 +461,11 @@ extern "C" void func_0038A6A8(void* a, void* b, void* c);
  * @param irradiance  the light set (On Tour cIrradiance&) to add the lights to
  * @param count  the maximum number of lights
  */
-extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* pos, void* overlapList, cIrradiance* irradiance, int count)
+void cWorldLightMan::IntersectLights1(void* pos, void* overlapList, cIrradiance* irradiance, int count)
 {
     void* buf[32];
     int i;
-    cWorldLightMan_IntersectLights(self, pos, overlapList, buf, count);
+    IntersectLights(pos, overlapList, buf, count);
     for (i = 0; i < count; i++) {
         if (buf[i] != 0) {
             func_0038A6A8(irradiance, pos, buf[i]);
@@ -488,13 +488,12 @@ extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* a, t4Vector* b, tLi
  * weakest kept score, and scores of 0 or less never count. Called by cWorldLightMan_IntersectLights1 and cRider_updateActiveLights (8
  * lights at the rider's hips).
  *
- * @param lightMan  the world light manager (passed on to cWorldLightMan_GetIntensity)
  * @param point  the point to light
  * @param mgrp  the overlap list
  * @param outp  receives the lights; @p max entries
  * @param max  how many lights to keep, at most 32
  */
-extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* lightMan, void* point, void* mgrp, void** outp, int max)
+void cWorldLightMan::IntersectLights(void* point, void* mgrp, void** outp, int max)
 {
     cOverlapList* mgr = (cOverlapList*)mgrp;
     tLightRecord** out = (tLightRecord**)outp;
@@ -511,7 +510,7 @@ extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* lightMan, void* p
         // A typed space node of type 6 (kSNT_Light) is a tLightRecord, which begins with the node's next, prev, type.
         tLightRecord* lightRec = (tLightRecord*)mgr->typed[j];
         if (lightRec->m_iIntersect[2] == 6) {
-            float lightScore = cWorldLightMan_GetIntensity(lightMan, (t4Vector*)point, lightRec);
+            float lightScore = GetIntensity((t4Vector*)point, lightRec);
             if (minScore < lightScore) {
                 int k;
                 for (k = 0; k < count && lightScore < score[k]; k++) {
@@ -617,12 +616,11 @@ static inline float Pow_5D30(float x, int n)
  * by cosine^n (n = +0x65) inside the inner value (+0x5C), else by inner^n scaled linearly between outer and inner.
  * Anything else gives 0. Likely bug: for a radius above 5000 the fade turns negative past a distance of 5000.
  *
- * @param lightMan  the world light manager (passed on to cWorldLightMan_CalcLightDist)
  * @param point  the point to light
  * @param lp  the light record
  * @return the intensity
  */
-extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* lightMan, t4Vector* point, tLightRecord* lp)
+float cWorldLightMan::GetIntensity(t4Vector* point, tLightRecord* lp)
 {
     tLightRecord* light = (tLightRecord*)lp;
     float dist;
@@ -634,7 +632,7 @@ extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* lightMan, t4Vector*
     case 0:
         return light->m_fRGBIntensity;
     case 1:
-        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, &dot)) {
+        if (cWorldLightMan_CalcLightDist(this, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, &dot)) {
             if (dot >= light->unk_060) {
                 att = Atten_5D30(light, dist);
                 amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
@@ -649,7 +647,7 @@ extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* lightMan, t4Vector*
         }
         break;
     case 2:
-        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, 0)) {
+        if (cWorldLightMan_CalcLightDist(this, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, 0)) {
             att = Atten_5D30(light, dist);
             amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
             return light->m_fRGBIntensity * amount;
@@ -776,7 +774,7 @@ extern "C" void* cCheatFX_cCheatFX(cCheatFX* self, int inChrg)
         *(void**)(*(char**)self + 0x6C0) = &ctorVtbl22;
         ctorVtbl22.e[1].delta = D_00488728.e[1].delta + vc;
     }
-    cCheatFX_resetStates(self);
+    self->resetStates();
     return ((void*)self);
 }
 #endif
@@ -827,10 +825,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
  *
  * @return the cleared state's address (the memset result; On Tour's version returns nothing)
  */
-void* cCheatFX_resetStates(void* vself)
+void* cCheatFX::resetStates()
 {
-    cCheatFX* self = (cCheatFX*)vself;
-    return memset((&self->m_cheatState.m_state), 0, 4);
+    return memset((&m_cheatState.m_state), 0, 4);
 }
 #endif
 
@@ -955,41 +952,41 @@ static inline t4Vector add6518(const t4Vector& a, const t4Vector& b)
  * true,
  * so the velocity reset after it is dead code.
  */
-extern "C" void cCheatFX_update(cCheatFX* self)
+void cCheatFX::update()
 {
-    if (self->mRider->isComputer() != 0) {
+    if (mRider->isComputer() != 0) {
         return;
     }
     if (cCheatFX_m_resetStates >= 2) {
-        cCheatFX_resetStates_v(self);
+        cCheatFX_resetStates_v(this);
         cCheatFX_m_resetStates--;
     }
-    cCheatFX_updateState(self);
+    updateState();
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-        (*(signed char*)&self->m_cheatState) = 0;
+        (*(signed char*)&m_cheatState) = 0;
     }
-    if ((*(signed char*)&self->m_cheatState) == 1) {
-        (self->mRider)->mUberLevel = 11;
-        (self->mRider)->mAllowNaturalAir = ((*(unsigned char*)&self->m_cheatState.m_misc) >> 1) & 1;
-        (self->mRider)->BoostPowerBar = 1.0f;
-        (self->mRider)->mUberTimer = 60.0f;
-        (self->mRider)->mPowerUpTrickTimer = 60.0f;
-        (self->mRider)->mPowerUpBoostTimer = 60.0f;
-        (self->mRider)->mBoostMode = 0;
+    if ((*(signed char*)&m_cheatState) == 1) {
+        mRider->mUberLevel = 11;
+        mRider->mAllowNaturalAir = ((*(unsigned char*)&m_cheatState.m_misc) >> 1) & 1;
+        mRider->BoostPowerBar = 1.0f;
+        mRider->mUberTimer = 60.0f;
+        mRider->mPowerUpTrickTimer = 60.0f;
+        mRider->mPowerUpBoostTimer = 60.0f;
+        mRider->mBoostMode = 0;
     } else {
-        (self->mRider)->mAllowNaturalAir = 1;
-        if ((self->mRider)->mUberLevel != 11) {
+        mRider->mAllowNaturalAir = 1;
+        if (mRider->mUberLevel != 11) {
             return;
         }
-        (self->mRider)->mUberLevel = 0;
-        (self->mRider)->BoostPowerBar = 0.0f;
-        (self->mRider)->mUberTimer = 0.0f;
-        (self->mRider)->mPowerUpTrickTimer = 0.0f;
-        (self->mRider)->mPowerUpBoostTimer = 0.0f;
-        (self->mRider)->mBoostMode = 1;
+        mRider->mUberLevel = 0;
+        mRider->BoostPowerBar = 0.0f;
+        mRider->mUberTimer = 0.0f;
+        mRider->mPowerUpTrickTimer = 0.0f;
+        mRider->mPowerUpBoostTimer = 0.0f;
+        mRider->mBoostMode = 1;
     }
-    cRider* curRider = (self->mRider);
+    cRider* curRider = (mRider);
     if (curRider->mUberLevel != 11) {
         return;
     }
@@ -999,10 +996,11 @@ extern "C" void cCheatFX_update(cCheatFX* self)
     float len = len6518((*(t4Vector*)&curRider->mVelocity));
     if (len < curRider->mBoostMaxSpeed && len != 0.0f) {
         (*(t4Vector*)&curRider->mVelocity) = norm6518((*(t4Vector*)&curRider->mVelocity));
-        scaleEq6518((*(t4Vector*)&(self->mRider)->mVelocity), (self->mRider)->mBoostMaxSpeed * (self->mRider)->mCheatSpeedLerp + len * (1.0f - (self->mRider)->mCheatSpeedLerp));
-        len = len6518((*(t4Vector*)&(self->mRider)->mVelocity));
+        scaleEq6518((*(t4Vector*)&mRider->mVelocity),
+                mRider->mBoostMaxSpeed * mRider->mCheatSpeedLerp + len * (1.0f - mRider->mCheatSpeedLerp));
+        len = len6518((*(t4Vector*)&mRider->mVelocity));
     }
-    curRider = (self->mRider);
+    curRider = (mRider);
     if (curRider->mCheatSteerAlign == 0.0f) {
         return;
     }
@@ -1012,9 +1010,10 @@ extern "C" void cCheatFX_update(cCheatFX* self)
     if (!(9.999999747378752e-05f < len6518((*(t4Vector*)&curRider->mVelocity)))) {
         return;
     }
-    (*(t4Vector*)&curRider->mVelocity) = add6518(scale6518(norm6518((*(t4Vector*)&curRider->mGroundForward)), len * (self->mRider)->mCheatSteerAlign),
-                     scale6518(norm6518((*(t4Vector*)&(self->mRider)->mVelocity)), len * (1.0f - (self->mRider)->mCheatSteerAlign)));
-    curRider = (self->mRider);
+    (*(t4Vector*)&curRider->mVelocity) = add6518(scale6518(norm6518((*(t4Vector*)&curRider->mGroundForward)),
+            len * mRider->mCheatSteerAlign),
+                     scale6518(norm6518((*(t4Vector*)&mRider->mVelocity)), len * (1.0f - mRider->mCheatSteerAlign)));
+    curRider = (mRider);
     if ((*(t4Vector*)&curRider->mVelocity).x < 0.0f && (*(t4Vector*)&curRider->mVelocity).x >= 0.0f) {
         (*(t4Vector*)&curRider->mVelocity) = t4vect_Origin;
     }
@@ -1051,41 +1050,41 @@ extern "C" int cCheatFX_getInput(cCheatFX* self);
  * back to -1. State 1: exactly 0x60 sets cCheatFX_m_resetStates to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
  * it.
  */
-extern "C" void cCheatFX_updateState(cCheatFX* self)
+void cCheatFX::updateState()
 {
-    int cheatInput = cCheatFX_getInput((cCheatFX*)self);
-    cCheatFX_clearInput((cCheatFX*)self);
+    int cheatInput = getInput();
+    clearInput();
     if (cheatInput == 0) {
-        (*(unsigned char*)&self->m_cheatState.m_misc) &= ~1;
+        (*(unsigned char*)&m_cheatState.m_misc) &= ~1;
         return;
     }
-    if ((*(unsigned char*)&self->m_cheatState.m_misc) & 1) {
+    if ((*(unsigned char*)&m_cheatState.m_misc) & 1) {
         return;
     }
-    (*(unsigned char*)&self->m_cheatState.m_misc) |= 1;
-    switch ((*(signed char*)&self->m_cheatState)) {
+    (*(unsigned char*)&m_cheatState.m_misc) |= 1;
+    switch ((*(signed char*)&m_cheatState)) {
     case -1:
         if (cheatInput & 0x40) {
-            (*(signed char*)&self->m_cheatState) = 0;
-            self->m_cheatState.m_count = 0;
-            self->m_cheatState.m_index = 0;
-            self->m_cheatState.m_misc = 0;
+            (*(signed char*)&m_cheatState) = 0;
+            m_cheatState.m_count = 0;
+            m_cheatState.m_index = 0;
+            m_cheatState.m_misc = 0;
         }
         break;
     case 0:
         if (cheatInput & 0x10) {
-            (*(signed char*)&self->m_cheatState.m_count)++;
+            (*(signed char*)&m_cheatState.m_count)++;
         } else if (cheatInput & 0x20) {
-            if ((*(signed char*)&self->m_cheatState.m_count) == cCheatFX_m_cheatStateEnterCounts[(signed char)(*(unsigned char*)&self->m_cheatState.m_index)]) {
-                self->m_cheatState.m_count = 0;
-                (*(unsigned char*)&self->m_cheatState.m_index)++;
-                if ((*(unsigned char*)&self->m_cheatState.m_index) == 9) {
-                    self->m_cheatState.m_index = 0;
-                    self->m_cheatState.m_count = 0;
-                    (*(signed char*)&self->m_cheatState) = 1;
+            if ((*(signed char*)&m_cheatState.m_count) == cCheatFX_m_cheatStateEnterCounts[(signed char)(*(unsigned char*)&m_cheatState.m_index)]) {
+                m_cheatState.m_count = 0;
+                (*(unsigned char*)&m_cheatState.m_index)++;
+                if ((*(unsigned char*)&m_cheatState.m_index) == 9) {
+                    m_cheatState.m_index = 0;
+                    m_cheatState.m_count = 0;
+                    (*(signed char*)&m_cheatState) = 1;
                 }
             } else {
-                (*(signed char*)&self->m_cheatState) = -1;
+                (*(signed char*)&m_cheatState) = -1;
             }
         }
         break;
@@ -1093,7 +1092,7 @@ extern "C" void cCheatFX_updateState(cCheatFX* self)
         if (cheatInput == 0x60) {
             cCheatFX_m_resetStates = 8;
         } else if (cheatInput & 0x40) {
-            (*(unsigned char*)&self->m_cheatState.m_misc) ^= 2;
+            (*(unsigned char*)&m_cheatState.m_misc) ^= 2;
         }
         break;
     }
@@ -1147,17 +1146,17 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_setCheatInput);
  *
  * @param type  the input, 0 to 2 (On Tour flag)
  */
-extern "C" void cCheatFX_setCheatInput(cCheatFX* self, int type)
+void cCheatFX::setCheatInput(int type)
 {
     switch (type) {
     case 0:
-        *(unsigned char*)&self->m_cheatState.m_misc |= 0x10;
+        *(unsigned char*)&m_cheatState.m_misc |= 0x10;
         break;
     case 1:
-        *(unsigned char*)&self->m_cheatState.m_misc |= 0x20;
+        *(unsigned char*)&m_cheatState.m_misc |= 0x20;
         break;
     case 2:
-        *(unsigned char*)&self->m_cheatState.m_misc |= 0x40;
+        *(unsigned char*)&m_cheatState.m_misc |= 0x40;
         break;
     }
 }
@@ -1171,9 +1170,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_clearInput);
  *
  * cCheatFX_updateState calls it after reading the input.
  */
-extern "C" void cCheatFX_clearInput(cCheatFX* self)
+void cCheatFX::clearInput()
 {
-    unsigned char* flagByte = (unsigned char*)(&self->m_cheatState.m_misc);
+    unsigned char* flagByte = (unsigned char*)(&m_cheatState.m_misc);
     *flagByte &= 0x8f;
 }
 #endif
@@ -1188,9 +1187,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_getInput);
  *
  * @return the input bits
  */
-extern "C" int cCheatFX_getInput(cCheatFX* self)
+int cCheatFX::getInput()
 {
-    return *(unsigned char*)&self->m_cheatState.m_misc & 0x70;
+    return *(unsigned char*)&m_cheatState.m_misc & 0x70;
 }
 #endif
 
@@ -1783,11 +1782,11 @@ INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_IsWakeActive);
  *
  * Nothing in the retail code references it.
  *
- * @param arg0  the object to test
  * @return 1 when +0x4 > 0, else 0
  */
-extern "C" int cBoardWakeFX_IsWakeActive(cBoardWakeFX* arg0) {
-    return (arg0->mNumWakeLines) > 0;
+int cBoardWakeFX::IsWakeActive()
+{
+    return (mNumWakeLines) > 0;
 }
 #endif
 //100%
@@ -2027,11 +2026,11 @@ INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_SetNumViews);
  *
  * The lens code reads it as the number of views to process. Nothing in the retail code references it.
  *
- * @param lensMan  the lens effect manager
  * @param numViews  the number of views
  */
-extern "C" void cLensFxMan_SetNumViews(cLensFxMan* lensMan, int numViews) {
-    lensMan->mNumViews = numViews;
+void cLensFxMan::SetNumViews(int numViews)
+{
+    mNumViews = numViews;
 }
 #endif
 //100%
@@ -2043,11 +2042,11 @@ INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_Lock);
  * cGame_renderLightHalos sets the same flag to 1 while it adds and renders halos and back to 0 after. Nothing in the
  * retail code references it.
  *
- * @param lensMan  the lens effect manager
  * @param locked  the flag
  */
-extern "C" void cLensFxMan_Lock(cLensFxMan* lensMan, int locked) {
-    lensMan->mbLocked = locked;
+void cLensFxMan::Lock(int locked)
+{
+    mbLocked = locked;
 }
 #endif
 
@@ -2921,11 +2920,11 @@ INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_ShouldDisableSnowTrailS
  *
  * Nothing in the retail code references it.
  *
- * @param arg0  the object
  * @return the value
  */
-extern "C" int cAttachedEmitterFX_ShouldDisableSnowTrailSpray(cAttachedEmitterFX* arg0) {
-    return (arg0->mDisableSnowTrailSpray);
+int cAttachedEmitterFX::ShouldDisableSnowTrailSpray()
+{
+    return (mDisableSnowTrailSpray);
 }
 #endif
 //100%
@@ -2961,11 +2960,11 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsTransitionActive);
  * It reads the flag cTransitionMan_StartTransition sets to 1 when it starts and checks to end a running one. Nothing in
  * the retail code references it.
  *
- * @param transitionMan  the transition manager
  * @return the playing flag
  */
-extern "C" int cTransitionMan_IsTransitionActive(cTransitionMan* transitionMan) {
-    return (transitionMan->mbPlayingTransition);
+int cTransitionMan::IsTransitionActive()
+{
+    return (mbPlayingTransition);
 }
 #endif
 //100%
@@ -2977,11 +2976,11 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsWaitingForScreenGrab);
  * It reads the flag cTransitionMan_StartTransition sets with a screen grab, right after the using-screen-grab flag
  * (+0x60). Nothing in the retail code references it.
  *
- * @param transitionMan  the transition manager
  * @return the requesting flag
  */
-extern "C" int cTransitionMan_IsWaitingForScreenGrab(cTransitionMan* transitionMan) {
-    return (transitionMan->mRequestingScreenGrab);
+int cTransitionMan::IsWaitingForScreenGrab()
+{
+    return (mRequestingScreenGrab);
 }
 #endif
 //100%
@@ -2992,11 +2991,11 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetTransitionInitiator);
  *
  * It reads the initiator cTransitionMan_StartTransition stores. Nothing in the retail code references it.
  *
- * @param transitionMan  the transition manager
  * @return the initiator
  */
-extern "C" int cTransitionMan_GetTransitionInitiator(cTransitionMan* transitionMan) {
-    return (transitionMan->mCurrentInitiator);
+int cTransitionMan::GetTransitionInitiator()
+{
+    return (mCurrentInitiator);
 }
 #endif
 
@@ -3011,10 +3010,9 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetViewIndex__FPv);
  *
  * @return the view index
  */
-int cTransitionMan_GetViewIndex(void* vself)
+int cTransitionMan::GetViewIndex()
 {
-    cTransitionMan* self = (cTransitionMan*)vself;
-    return self->mViewIndex;
+    return mViewIndex;
 }
 #endif
 
@@ -3026,11 +3024,11 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsUsingTexture);
  *
  * It reads the useScreenGrab flag cTransitionMan_StartTransition stores. Nothing in the retail code references it.
  *
- * @param transitionMan  the transition manager
  * @return the flag
  */
-extern "C" int cTransitionMan_IsUsingTexture(cTransitionMan* transitionMan) {
-    return (transitionMan->mUsingScreenGrab);
+int cTransitionMan::IsUsingTexture()
+{
+    return (mUsingScreenGrab);
 }
 #endif
 
@@ -3260,11 +3258,11 @@ INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan_GetCurrentState);
  * The state is the one cCutSceneTransitionMan_StartCutScene switches on (0 regular, 1 cut scene, 2 going out, 3 going
  * in). Nothing in the retail code references it.
  *
- * @param cutSceneMan  the cut-scene transition manager
  * @return the state
  */
-extern "C" int cCutSceneTransitionMan_GetCurrentState(cCutSceneTransitionMan* cutSceneMan) {
-    return (cutSceneMan->mCurrentState);
+int cCutSceneTransitionMan::GetCurrentState()
+{
+    return (mCurrentState);
 }
 #endif
 //100%

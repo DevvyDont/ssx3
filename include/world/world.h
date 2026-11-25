@@ -28,6 +28,8 @@ struct cWorldPainterMan;
 struct tSphTreeList;
 struct tPolyModelList;
 
+struct tInstanceRecord;
+
 struct cWorld {
     cWorldCache* m_pWorldCache;          // 0x00 [O]; [R] cWorldCache_cWorldCache(cMemMan_alloc(0x1C00, "cWorldCache"));
                                          //      [U] update/load/resetMap; ~110 functions read m_pTheWorld->m_pWorldCache
@@ -38,6 +40,19 @@ struct cWorld {
     char* m_pDataMaster;                 // 0x0C [O] alone: no retail code reads or writes it (the ctor leaves it)
     tSphTreeList* m_pSphTrees;           // 0x10 [O]; [R] ctor = 0
     tPolyModelList* m_pPolyModels;       // 0x14 [O]; [R] ctor = 0
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cWorld_init");
+    void resetMap() __asm__("cWorld_resetMap");
+    void load(const char* name, int nash) __asm__("cWorld_load");
+    int getWScriptHeaderId(tInstanceRecord* obj, int i) __asm__("cWorld_getWScriptHeaderId");
+    int getNumGlobalScripts(int i) __asm__("cWorld_getNumGlobalScripts");
+    int getGlobalScripts(int i) __asm__("cWorld_getGlobalScripts");
+    int getNumProcessScripts(int i) __asm__("cWorld_getNumProcessScripts");
+    int getProcessScripts(int i) __asm__("cWorld_getProcessScripts");
+    int getNumMissionScripts(int i) __asm__("cWorld_getNumMissionScripts");
+    int getMissionScripts(int i) __asm__("cWorld_getMissionScripts");
+    int getWScriptScript(unsigned int* handle) __asm__("cWorld_getWScriptScript");
 };
 
 CHECK_OFFSET(cWorld, m_pWorldCache, 0x00);

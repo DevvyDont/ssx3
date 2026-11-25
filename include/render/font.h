@@ -47,6 +47,29 @@ struct cFont {
     float ShadowColor[4];           // 0x50 [O] tARGB; [R] ctor (1, 0, 0, 0)
     int TextureID;                  // 0x60 [O]; [U] cFont_downloadTexture
     char FontName[32];              // 0x64 [O]; [R] cFont_loadFont sprintf("font:%24s")
+
+    // Methods bound to their retail symbols by asm labels.
+    void linkFont(void* vdata, int flags) __asm__("cFont_linkFont");
+    void purge() __asm__("cFont_purge");
+    void vtextf(float x, float y) __asm__("cFont_vtextf");
+    void text(float x, float y, const char* str) __asm__("cFont_text");
+    void text1(float x, float y, void* unicodeStr) __asm__("cFont_text1");
+    float textExtent(const char* str, void* r_, int mono, float sx, float sy) __asm__("cFont_textExtent");
+    float textExtent1(const unsigned short* unicodeText, void* r_, int mono, float sx, float sy)
+        __asm__("cFont_textExtent1");
+    char* textSmartLimit(const char* str, char* dst, int max, float sx, float width) __asm__("cFont_textSmartLimit");
+    unsigned short* textSmartLimit1(float sx, float width, const unsigned short* str, unsigned short* dst, int max)
+        __asm__("cFont_textSmartLimit1");
+    void centertext(float x, float y, const char* str) __asm__("cFont_centertext");
+    void centertext1(const unsigned short* str, float x, float y) __asm__("cFont_centertext1");
+    void vcentertextf(const char* fmt, void* ap, float x, float y) __asm__("cFont_vcentertextf");
+    void righttext(const char* str, float x, float y) __asm__("cFont_righttext");
+    void righttext1(const unsigned short* str, float x, float y) __asm__("cFont_righttext1");
+    void vrighttextf(const char* fmt, void* ap, float x, float y) __asm__("cFont_vrighttextf");
+    float charAdvance(char charCode) __asm__("cFont_charAdvance");
+    float charAdvance1(unsigned short charCode) __asm__("cFont_charAdvance1");
+    void* cFont1() __asm__("cFont_cFont1");
+    void loadFont(const char* name, int flags) __asm__("cFont_loadFont");
 };
 
 // --- layout checks

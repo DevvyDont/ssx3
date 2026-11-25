@@ -21,11 +21,11 @@ void cList_addToEnd(cList*, cListNode*);
  *
  * @param state  the state to add (On Tour pPushState)
  */
-extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIState* state)
+void cUIStateStack::pushExplicit(cUIState* state)
 {
     state->mAttrState |= 0x60;
     state->onCreateScreen();
-    cList_addToEnd((cList*)&self->mExplicitStack, state);
+    cList_addToEnd((cList*)&mExplicitStack, state);
 }
 #endif
 
@@ -118,7 +118,7 @@ extern "C" void* cUIStateStack_getCurrentState(cUIStateStack* self);
  */
 extern "C" void cUIStateStack_pushSpecial(cUIStateStack* self, cUIStateStack_sState* st, int bEnable, int bDestroyCurrent)
 {
-    cUIStateStack_sState* cur = (cUIStateStack_sState*)cUIStateStack_getCurrentState(self);
+    cUIStateStack_sState* cur = (cUIStateStack_sState*)self->getCurrentState();
     if (cur != 0) {
         if (((*(int*)((char*)cur + 0x1C) >> 5) & 1) && cUIStateStack_stateId(cur) == 5) {
             cur->id = 7;
@@ -440,7 +440,7 @@ static inline void Set39F7B8(cUIState* s, int on)
  * @param on  1 to show, 0 to hide
  * @param last  nonzero to include the state without a parent
  */
-extern "C" void cUIStateStack_setVisibleToChain(cUIStateStack* self, cUIState* state, int on, int last)
+void cUIStateStack::setVisibleToChain(cUIState* state, int on, int last)
 {
     if (state == 0) {
         return;
@@ -487,11 +487,10 @@ static inline void cUIStateStack_purgeNormalStates_setB5(cUIStateStack_purgeNorm
  * Walks the list from cList_first to the sentinel and, in each state's mAttrState (+0x1C), sets mMode to 7 and
  * mPendingDelete and mEnabled to 1. Callers pass the UI engine's state stack (+0x18).
  *
- * @param list  the state list
  */
-extern "C" void cUIStateStack_purgeNormalStates(cUIStateStack* list)
+void cUIStateStack::purgeNormalStates()
 {
-    cUIStateStack_purgeNormalStates_node* n = (cUIStateStack_purgeNormalStates_node*)cList_first(((cList*)list));
+    cUIStateStack_purgeNormalStates_node* n = (cUIStateStack_purgeNormalStates_node*)cList_first(((cList*)this));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIStateStack_purgeNormalStates_node* next = n->next;
@@ -533,10 +532,10 @@ static inline void cUIStateStack_destroyStates_purge(cList* list)
  * Each state without the explicit bit (6) gets virtual slot 5, then is deleted through slot 1 with 3. cUIStateStack__cUIStateStack
  * calls it first.
  */
-extern "C" void cUIStateStack_destroyStates(cUIStateStack* self)
+void cUIStateStack::destroyStates()
 {
-    cUIStateStack_destroyStates_purge(((cList*)self));
-    cUIStateStack_destroyStates_purge((cList*)&self->mExplicitStack);
+    cUIStateStack_destroyStates_purge(((cList*)this));
+    cUIStateStack_destroyStates_purge((cList*)&mExplicitStack);
 }
 #endif
 
@@ -552,9 +551,9 @@ int cListNode_isSentinel(cListNode*);
  * @param id  the state's hash name (mHashName, On Tour hashName)
  * @return the first state with that hash name, or 0 when there is none
  */
-extern "C" void* cUIStateStack_findState(cUIStateStack* self, int id)
+void* cUIStateStack::findState(int id)
 {
-    cUIState* n = (cUIState*)cList_first((cList*)self);
+    cUIState* n = (cUIState*)cList_first((cList*)this);
     if (((char*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             if (n->mHashName == id) {
@@ -563,7 +562,7 @@ extern "C" void* cUIStateStack_findState(cUIStateStack* self, int id)
             n = (cUIState*)n->mpNext;
         }
     }
-    n = (cUIState*)cList_first((cList*)&self->mExplicitStack);
+    n = (cUIState*)cList_first((cList*)&mExplicitStack);
     if (((char*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             if (n->mHashName == id) {
@@ -589,9 +588,9 @@ int cListNode_isSentinel(cListNode*);
  *
  * @return that state, or 0 when no state on the stack is enabled
  */
-extern "C" void* cUIStateStack_getCurrentState(cUIStateStack* self)
+void* cUIStateStack::getCurrentState()
 {
-    cUIState* n = (cUIState*)cList_first((cList*)self);
+    cUIState* n = (cUIState*)cList_first((cList*)this);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             if ((n->mAttrState >> 5) & 1) {
@@ -617,9 +616,9 @@ INCLUDE_ASM("ui/uistatestack", cUIStateStack_getTopState);
  *
  * @return the top state, or null
  */
-extern "C" void* cUIStateStack_getTopState(cUIStateStack* self)
+void* cUIStateStack::getTopState()
 {
-    return cList_first((cList*)self);
+    return cList_first((cList*)this);
 }
 #endif
 
@@ -769,14 +768,14 @@ extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v);
  * @param mode  playback mode (On Tour playback)
  * @param frameNum     frame to start from (On Tour FrameNum)
  */
-extern "C" void cUIThing_playAnimation(cUIThing* self, void* anim, unsigned char mode, unsigned short frameNum)
+void cUIThing::playAnimation(void* anim, unsigned char mode, unsigned short frameNum)
 {
-    if ((void*)self->mpAnim != anim) {
-        cUIThing_deleteAnimation(self);
+    if ((void*)mpAnim != anim) {
+        deleteAnimation();
     }
-    self->mAnimPlaybackStatus = mode;
-    self->mpAnim = (cUIAnimation*)anim;
-    cUIAnimation_start(anim, self->mAnimPlaybackStatus, frameNum);
+    mAnimPlaybackStatus = mode;
+    mpAnim = (cUIAnimation*)anim;
+    cUIAnimation_start(anim, mAnimPlaybackStatus, frameNum);
 }
 #endif
 
@@ -789,13 +788,13 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_deleteAnimation);
  *
  * Does nothing when there is no animation.
  */
-extern "C" void cUIThing_deleteAnimation(cUIThing* self)
+void cUIThing::deleteAnimation()
 {
-    cUIAnimation* obj = self->mpAnim;
+    cUIAnimation* obj = mpAnim;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
-        self->mpAnim = (cUIAnimation*)0;
+        mpAnim = (cUIAnimation*)0;
     }
 }
 #endif
@@ -812,12 +811,12 @@ extern "C" int cUIAnimation_getNumFrames(void* obj);
  *
  * @param fraction  the position in the animation, 0..1
  */
-extern "C" void cUIThing_setFrameByPercent(cUIThing* self, float fraction)
+void cUIThing::setFrameByPercent(float fraction)
 {
-    void* obj = self->mpAnim;
+    void* obj = mpAnim;
     if (obj != 0) {
         float frame = (float)cUIAnimation_getNumFrames(obj) * fraction;
-        self->mpAnim->mFrameNum = (short)frame;
+        mpAnim->mFrameNum = (short)frame;
     }
 }
 #endif
@@ -831,14 +830,14 @@ extern "C" int cUIAnimation_isLastFrame(int);
  *
  * Uses cUIAnimation_isLastFrame.
  *
- * @param uiThing  the UI thing
  * @return 1 at the last frame, else 0
  */
-extern "C" int cUIThing_isLastAnimFrame(cUIThing* uiThing) {
+int cUIThing::isLastAnimFrame()
+{
     int temp_4;
     int var_2;
 
-    temp_4 = ((int)uiThing->mpAnim);
+    temp_4 = ((int)mpAnim);
     var_2 = 0;
     if (temp_4 != 0) {
         var_2 = cUIAnimation_isLastFrame(temp_4);
@@ -958,10 +957,9 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getEngine__FPv);
  *
  * @return the UI engine
  */
-int cUIThing_getEngine(void* vself)
+int cUIThing::getEngine()
 {
-    cUIThing* self = (cUIThing*)vself;
-    return (int)self->mpScreen->mpState->mpEngine;
+    return (int)mpScreen->mpState->mpEngine;
 }
 #endif
 

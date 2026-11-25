@@ -42,21 +42,21 @@ public:
  * @return no meaningful value
  */
 // PORT: the unit declares this void* (a caller forwards its $v0), but no value is returned.
-extern "C" void* cBankInstance_AllocMem(cBankInstance* self, int size, int extra, int tag)
+void* cBankInstance::AllocMem(int size, int extra, int tag)
 {
     if (size != 0 || extra != 0) {
-        self->mAllocLocation = 1;
+        mAllocLocation = 1;
         if (extra != 0) {
             int id = ((cSndStream_B588*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->alloc(extra);
             if (id >= 0) {
-                self->mSoundMemHandle = id;
-                self->mAllocLocation = 2;
+                mSoundMemHandle = id;
+                mAllocLocation = 2;
             } else if (id == -3) {
                 size += extra;
             }
         }
-        self->mMainMemDataSize = size;
-        self->mpMainMemData = (char*)MEM_alloc(str_StaticSoundMem, size, tag);
+        mMainMemDataSize = size;
+        mpMainMemData = (char*)MEM_alloc(str_StaticSoundMem, size, tag);
     }
 }
 #endif
@@ -86,19 +86,19 @@ public:
  * data at +0x10 and zeroes the data pointer, the size at +0x14 and the location. Called by cBankInstance__cBankInstance
  * and, by bank index, by cBankManager_BANK_DeallocMem.
  */
-extern "C" void cBankInstance_DeallocMem(cBankInstance* self)
+void cBankInstance::DeallocMem()
 {
-    cBankInstance_Unload(self);
-    int state = self->mAllocLocation;
+    cBankInstance_Unload(this);
+    int state = mAllocLocation;
     if (state != 0) {
         if (state == 2) {
-            ((cSndStream_B650*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->stop(self->mSoundMemHandle);
-            self->mSoundMemHandle = -1;
+            ((cSndStream_B650*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->stop(mSoundMemHandle);
+            mSoundMemHandle = -1;
         }
-        MEM_free(self->mpMainMemData);
-        self->mpMainMemData = 0;
-        self->mMainMemDataSize = 0;
-        self->mAllocLocation = 0;
+        MEM_free(mpMainMemData);
+        mpMainMemData = 0;
+        mMainMemDataSize = 0;
+        mAllocLocation = 0;
     }
 }
 #endif
@@ -114,29 +114,29 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_ShareBank);
  * location, the main-memory data and size (mpMainMemData, mMainMemDataSize) and the sound-memory handle
  * (mSoundMemHandle) into @p dst. Called by cBankManager_BANK_ShareBank with two banks of the manager's array.
  *
- * @param dst  the bank that shares
  * @param src  the bank whose memory is shared
  */
-extern "C" void cBankInstance_ShareBank(cBankInstance* dst, cBankInstance* src) {
+void cBankInstance::ShareBank(cBankInstance* src)
+{
     int flag;
 
     if (src->mpNext != 0) {
-        dst->mpNext = src;
-        dst->mpPrev = src->mpPrev;
-        src->mpPrev = dst;
-        dst->mpPrev->mpNext = dst;
+        mpNext = src;
+        mpPrev = src->mpPrev;
+        src->mpPrev = this;
+        mpPrev->mpNext = this;
     } else {
-        src->mpNext = dst;
-        src->mpPrev = dst;
-        dst->mpNext = src;
-        dst->mpPrev = src;
+        src->mpNext = this;
+        src->mpPrev = this;
+        mpNext = src;
+        mpPrev = src;
     }
     flag = src->mAllocLocation;
     if (flag != 0) {
-        dst->mAllocLocation = flag;
-        dst->mpMainMemData = src->mpMainMemData;
-        dst->mMainMemDataSize = src->mMainMemDataSize;
-        dst->mSoundMemHandle = src->mSoundMemHandle;
+        mAllocLocation = flag;
+        mpMainMemData = src->mpMainMemData;
+        mMainMemDataSize = src->mMainMemDataSize;
+        mSoundMemHandle = src->mSoundMemHandle;
     }
 }
 #endif
@@ -153,22 +153,22 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_UnshareBank);
  * ring) the other bank's next and prev are cleared, otherwise the neighbours are joined. Its own next and prev are then
  * cleared. Called by cBankInstance__cBankInstance and, by bank index, by cBankManager_BANK_UnshareBank.
  */
-extern "C" void cBankInstance_UnshareBank(cBankInstance* self)
+void cBankInstance::UnshareBank()
 {
-    if (self->mpNext != 0) {
-        self->mSoundMemHandle = -1;
-        (*(int*)&self->mpMainMemData) = 0;
-        self->mMainMemDataSize = 0;
-        self->mAllocLocation = 0;
-        if (self->mpNext == self->mpPrev) {
-            self->mpNext->mpNext = 0;
-            self->mpNext->mpPrev = 0;
+    if (mpNext != 0) {
+        mSoundMemHandle = -1;
+        (*(int*)&mpMainMemData) = 0;
+        mMainMemDataSize = 0;
+        mAllocLocation = 0;
+        if (mpNext == mpPrev) {
+            mpNext->mpNext = 0;
+            mpNext->mpPrev = 0;
         } else {
-            self->mpNext->mpPrev = self->mpPrev;
-            self->mpPrev->mpNext = self->mpNext;
+            mpNext->mpPrev = mpPrev;
+            mpPrev->mpNext = mpNext;
         }
-        self->mpPrev = 0;
-        self->mpNext = 0;
+        mpPrev = 0;
+        mpNext = 0;
     }
 }
 #endif
@@ -237,13 +237,13 @@ extern "C" int strcmp(void*, void*);
  * @param name  file name to compare
  * @return 1 when the bank is loaded from @p name, else 0
  */
-extern "C" int cBankInstance_IsBankLoaded(cBankInstance* self, void* name)
+int cBankInstance::IsBankLoaded(void* name)
 {
-    int status = *(int*)self;
+    int status = *(int*)this;
     if (status != 1) {
         return 0;
     }
-    if (strcmp(name, (char*)&self->mBankFilename) != 0) {
+    if (strcmp(name, (char*)&mBankFilename) != 0) {
         status = 0;
     }
     return status;
@@ -323,10 +323,9 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemSize__FPv);
  *
  * @return the bank's main-memory data size (+0x14, On Tour mMainMemDataSize)
  */
-int cBankInstance_OnAsyncMainMemSize(void* vself)
+int cBankInstance::OnAsyncMainMemSize()
 {
-    cBankInstance* self = (cBankInstance*)vself;
-    return self->mMainMemDataSize;
+    return mMainMemDataSize;
 }
 #endif
 
@@ -541,12 +540,12 @@ extern "C" void cBankInstance_SyncLoad(void* bank, void* id, int a3);
  * @param id  bank file name
  * @param mainMemFlag  passed to cBankInstance_SyncLoad (callers pass 0)
  */
-extern "C" void cBankManager_BANK_SyncLoad(cBankManager* self, int i, void* id, int mainMemFlag)
+void cBankManager::BANK_SyncLoad(int i, void* id, int mainMemFlag)
 {
     int off = i * 0x60;
-    if (cBankInstance_IsBankLoaded((cBankInstance*)((char*)self->mBank + off), id) == 0) {
-        cAsyncSys_ASYNCSYS_Cancel(self, i);
-        cBankInstance_SyncLoad((char*)self->mBank + off, id, mainMemFlag);
+    if (((cBankInstance*)((char*)mBank + off))->IsBankLoaded(id) == 0) {
+        cAsyncSys_ASYNCSYS_Cancel(this, i);
+        cBankInstance_SyncLoad((char*)mBank + off, id, mainMemFlag);
     }
 }
 #endif
@@ -561,9 +560,9 @@ extern "C" void cBankInstance_Unload(void*);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i)
+void cBankManager::BANK_UnLoad(int i)
 {
-    cBankInstance_Unload(&self->mBank[i]);
+    cBankInstance_Unload(&mBank[i]);
 }
 #endif
 
@@ -586,11 +585,11 @@ extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int i, void* id, int a3
  * @param id  bank file name
  * @param mainMemFlag  main-memory allocation flags for the load
  */
-extern "C" void cBankManager_BANK_AsyncLoad(cBankManager* self, int i, void* id, int mainMemFlag)
+void cBankManager::BANK_AsyncLoad(int i, void* id, int mainMemFlag)
 {
-    if (cBankInstance_IsBankLoaded(&self->mBank[i], id) == 0) {
-        cAsyncSys_ASYNCSYS_Cancel(self, i);
-        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, (self->mBank)[i].mAllocLocation, mainMemFlag);
+    if (mBank[i].IsBankLoaded(id) == 0) {
+        cAsyncSys_ASYNCSYS_Cancel(this, i);
+        cAsyncSys_ASYNCSYS_QueueLoad(this, i, id, mBank[i].mAllocLocation, mainMemFlag);
     }
 }
 #endif
@@ -612,9 +611,9 @@ extern "C" void* cBankInstance_AllocMem(cBankInstance* inst, int a, int b, int c
  * @param memFlags  allocation flags
  * @return cBankInstance_AllocMem's result
  */
-extern "C" void* cBankManager_BANK_AllocMem(cBankManager* self, int i, int mainMemSize, int soundMemSize, int memFlags)
+void* cBankManager::BANK_AllocMem(int i, int mainMemSize, int soundMemSize, int memFlags)
 {
-    return cBankInstance_AllocMem(&self->mBank[i], mainMemSize, soundMemSize, memFlags);
+    return mBank[i].AllocMem(mainMemSize, soundMemSize, memFlags);
 }
 #endif
 
@@ -630,9 +629,9 @@ extern "C" void cBankInstance_DeallocMem(cBankInstance*);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_DeallocMem(cBankManager* self, int i)
+void cBankManager::BANK_DeallocMem(int i)
 {
-    cBankInstance_DeallocMem(&self->mBank[i]);
+    mBank[i].DeallocMem();
 }
 #endif
 
@@ -648,9 +647,9 @@ extern "C" void cBankInstance_ShareBank(cBankInstance* dst, cBankInstance* src);
  * @param i  bank slot that shares
  * @param j  bank slot whose memory is shared
  */
-extern "C" void cBankManager_BANK_ShareBank(cBankManager* self, int i, int j)
+void cBankManager::BANK_ShareBank(int i, int j)
 {
-    cBankInstance_ShareBank(&self->mBank[i], &self->mBank[j]);
+    mBank[i].ShareBank(&mBank[j]);
 }
 #endif
 //100%
@@ -662,9 +661,9 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_UnshareBank);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_UnshareBank(cBankManager* self, int i)
+void cBankManager::BANK_UnshareBank(int i)
 {
-    cBankInstance_UnshareBank((&self->mBank[i]));
+    mBank[i].UnshareBank();
 }
 #endif
 
@@ -683,9 +682,9 @@ extern "C" void cBankInstance_Attach(cBankInstance* inst, int a, int b);
  * @param mainMemData  address of the bank image
  * @param mainMemSize  size of the image in bytes
  */
-extern "C" void cBankManager_BANK_Attach(cBankManager* self, int i, int mainMemData, int mainMemSize)
+void cBankManager::BANK_Attach(int i, int mainMemData, int mainMemSize)
 {
-    cBankInstance_Attach(&self->mBank[i], mainMemData, mainMemSize);
+    cBankInstance_Attach(&mBank[i], mainMemData, mainMemSize);
 }
 #endif
 
@@ -702,9 +701,9 @@ extern "C" void cBankInstance_UnAttach(cBankInstance*);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_UnAttach(cBankManager* self, int i)
+void cBankManager::BANK_UnAttach(int i)
 {
-    cBankInstance_UnAttach(&self->mBank[i]);
+    cBankInstance_UnAttach(&mBank[i]);
 }
 #endif
 
@@ -721,9 +720,9 @@ extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance*);
  *
  * @param i  the user handle given to the loader: the bank number
  */
-extern "C" void cBankManager_ASYNCSYS_OnBeginAsyncLoad(cBankManager* self, int i)
+void cBankManager::ASYNCSYS_OnBeginAsyncLoad(int i)
 {
-    cBankInstance_OnBeginAsyncLoad(&self->mBank[i]);
+    cBankInstance_OnBeginAsyncLoad(&mBank[i]);
 }
 #endif
 
@@ -743,9 +742,9 @@ extern "C" void cBankInstance_OnAsyncMainMemAlloc(void* inst, int a, int b);
  * @param size  the buffer size in bytes
  * @param memflags  the allocation flags
  */
-extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(cBankManager* self, int i, int size, int memflags)
+void cBankManager::ASYNCSYS_OnAsyncMainMemAlloc(int i, int size, int memflags)
 {
-    cBankInstance_OnAsyncMainMemAlloc(&self->mBank[i], size, memflags);
+    cBankInstance_OnAsyncMainMemAlloc(&mBank[i], size, memflags);
 }
 #endif
 
@@ -762,9 +761,9 @@ int cBankInstance_OnAsyncMainMemSize(void*);
  *
  * @param i  the user handle given to the loader: the bank number
  */
-extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemSize(cBankManager* self, int i)
+void cBankManager::ASYNCSYS_OnAsyncMainMemSize(int i)
 {
-    cBankInstance_OnAsyncMainMemSize(&self->mBank[i]);
+    mBank[i].OnAsyncMainMemSize();
 }
 #endif
 
@@ -786,9 +785,10 @@ extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* inst, int a, int b, 
  * @param pBuffer  the load buffer
  * @param dataSize  the number of bytes loaded
  */
-extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(cBankManager* self, int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
+void cBankManager::ASYNCSYS_OnEndAsyncLoad(int i, int soundHandle, int endState, int pFilename, int pBuffer,
+                                           int dataSize)
 {
-    cBankInstance_OnEndAsyncLoad(&self->mBank[i], soundHandle, endState, pFilename, pBuffer, dataSize);
+    cBankInstance_OnEndAsyncLoad(&mBank[i], soundHandle, endState, pFilename, pBuffer, dataSize);
 }
 #endif
 
@@ -2843,7 +2843,7 @@ extern void* D_004A3624;
  */
 extern "C" void func_0028F700(cSSXAudio* self)
 {
-    cBankManager_BANK_SyncLoad(self->MusicSys.mpVStreamSys->mpVBankManager, 13, D_004A3624, 0);
+    self->MusicSys.mpVStreamSys->mpVBankManager->BANK_SyncLoad(13, D_004A3624, 0);
 }
 #endif
 
@@ -2861,7 +2861,7 @@ extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i);
 extern "C" void func_0028F730(cSSXAudio* self)
 {
     func_0028FA98(self, 0.0f);
-    cBankManager_BANK_UnLoad(self->MusicSys.mpVStreamSys->mpVBankManager, 0);
+    self->MusicSys.mpVStreamSys->mpVBankManager->BANK_UnLoad(0);
 }
 #endif
 

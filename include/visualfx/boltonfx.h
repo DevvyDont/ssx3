@@ -54,6 +54,9 @@ struct cBoltOnFXInterface {
                                             //      (func_002ECAF0); [U] func_002ECBC0 / func_002ECC28 / func_002ECCB8 /
                                             //      cBoltOnFXInterface__cBoltOnFXInterface walk 15; [P] "Ran out of bolt on emitters"
     void** mVtbl;                           // 0xC4 [R] cBoltOnFXInterface_vtbl (_vt$18cBoltOnFXInterface), stored by the ctors / dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cBoltOnFXInterface1(int charIdPtr, int emitterOwner) __asm__("cBoltOnFXInterface_cBoltOnFXInterface1");
 };
 
 CHECK_OFFSET(tBoltOnFXEntry, mEmitter, 0x0);

@@ -41,6 +41,9 @@ CHECK_OFFSET(tModifierBlockInfo, NumRails, 0x10);
 CHECK_OFFSET(tModifierBlockInfo, EffectType, 0x14);
 CHECK_SIZE(tModifierBlockInfo, 0x34);
 
+struct cBxReplayFrame;
+struct cEffectLink;
+
 struct tModifierBlock {
     cTransformModifier* RootTransform; // 0x00 [O]; [R] ctor 0; [U] getBoundBox / getRadius / applyForce call through
                                        //      its vtable
@@ -52,6 +55,33 @@ struct tModifierBlock {
                                        //      modifier list's head (postUpdate, fadeEffectModifier, remEffectModifier)
     cRailLink Rail;                    // 0x1C [O]; [R] ctor: Next / Prev 0, mVtbl = cRailLink_vtbl; [U] the rail
                                        //      modifier list's head (findRail, remRailModifier)
+
+    // Methods bound to their retail symbols by asm labels.
+    int getBoundBox() __asm__("tModifierBlock_getBoundBox");
+    float getRadius() __asm__("tModifierBlock_getRadius");
+    void setRadius() __asm__("tModifierBlock_setRadius__FP14tModifierBlock");
+    void preUpdate() __asm__("tModifierBlock_preUpdate");
+    void postUpdate() __asm__("tModifierBlock_postUpdate");
+    void render() __asm__("tModifierBlock_render");
+    int isRootTransformDirty() __asm__("tModifierBlock_isRootTransformDirty");
+    void updateRootTransform() __asm__("tModifierBlock_updateRootTransform");
+    int isComplete() __asm__("tModifierBlock_isComplete");
+    void clearComplete() __asm__("tModifierBlock_clearComplete");
+    void signal(int id, float value) __asm__("tModifierBlock_signal");
+    void applyForce(int intInfo, int force) __asm__("tModifierBlock_applyForce");
+    void updateIntersectInfo(void* intInfo) __asm__("tModifierBlock_updateIntersectInfo");
+    void remTransformModifier() __asm__("tModifierBlock_remTransformModifier");
+    void remUVScrollModifier() __asm__("tModifierBlock_remUVScrollModifier");
+    void remTexFlipModifier() __asm__("tModifierBlock_remTexFlipModifier");
+    void remPhysicsModifier() __asm__("tModifierBlock_remPhysicsModifier");
+    void remEffectModifier() __asm__("tModifierBlock_remEffectModifier");
+    void fadeEffectModifier() __asm__("tModifierBlock_fadeEffectModifier");
+    void remHaloModifier() __asm__("tModifierBlock_remHaloModifier");
+    void remRailModifier(unsigned int id) __asm__("tModifierBlock_remRailModifier");
+    void transferEffectModifier(cEffectLink* list) __asm__("tModifierBlock_transferEffectModifier");
+    int findRail(int id) __asm__("tModifierBlock_findRail");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("tModifierBlock_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("tModifierBlock_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tModifierBlock, RootTransform, 0x00);

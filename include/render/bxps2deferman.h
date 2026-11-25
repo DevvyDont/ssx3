@@ -172,6 +172,10 @@ struct cPS2DeferManager {
                                     //         appends at it (sRailKeyTable::count)
     tDeferViewPort mViewPorts[64];  // 0x6AED4 [P] kMaxNumViewPort 64; [U] func_00364B88 (keys), func_00363C20
     char unk_6B0D4[0x2C];           // 0x6B0D4 not accessed by any matched or asm method (size from the allocation)
+
+    // Methods bound to their retail symbols by asm labels.
+    tDeferBucket* Find1(int stateEntry, int texKey, unsigned char hash, int matrixIndex)
+        __asm__("cPS2DeferManager_Find1");
 };
 
 CHECK_OFFSET(cPS2DeferManager, mNumSubmitDMA, 0x00000);

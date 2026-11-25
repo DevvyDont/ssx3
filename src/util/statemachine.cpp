@@ -25,7 +25,7 @@ extern char str_pct_02d_pct_02d_pct_02d_PM[];
  * @param sec   seconds
  * @param mode  0 for 24-hour time, 1 for AM/PM
  */
-extern "C" void cConsoleConfig_setTimeString(cConsoleConfig* self, char* dst, int size, int hour, int min, int sec, int mode)
+void cConsoleConfig::setTimeString(char* dst, int size, int hour, int min, int sec, int mode)
 {
     char buf[0x40];
     switch (mode) {
@@ -64,7 +64,7 @@ extern char str_pct_02d_pct_02d_pct_04d[];
  * @param year  year
  * @param mode  0 year first, 1 month first, 2 day first
  */
-extern "C" void cConsoleConfig_setDateString(cConsoleConfig* self, char* dst, int size, int day, int month, int year, int mode)
+void cConsoleConfig::setDateString(char* dst, int size, int day, int month, int year, int mode)
 {
     char buf[0x40];
     switch (mode) {
@@ -94,11 +94,12 @@ extern "C" void cConsoleConfig_updateDateTime(cConsoleConfig*);
  * @param minute  receives the minute
  * @param second  receives the second
  */
-extern "C" void cConsoleConfig_getTime(cConsoleConfig* self, int *hour, int *minute, int *second) {
-    cConsoleConfig_updateDateTime(self);
-    *hour = (self->m_iHour);
-    *minute = (self->m_iMinute);
-    *second = (self->m_iSecond);
+void cConsoleConfig::getTime(int *hour, int *minute, int *second)
+{
+    updateDateTime();
+    *hour = (m_iHour);
+    *minute = (m_iMinute);
+    *second = (m_iSecond);
 }
 #endif
 //100%
@@ -114,11 +115,12 @@ extern "C" void cConsoleConfig_updateDateTime(cConsoleConfig*);
  * @param month  receives the month
  * @param year  receives the year
  */
-extern "C" void cConsoleConfig_getDate(cConsoleConfig* self, int *day, int *month, int *year) {
-    cConsoleConfig_updateDateTime(self);
-    *day = (self->m_iDay);
-    *month = (self->m_iMonth);
-    *year = (self->m_iYear);
+void cConsoleConfig::getDate(int *day, int *month, int *year)
+{
+    updateDateTime();
+    *day = (m_iDay);
+    *month = (m_iMonth);
+    *year = (m_iYear);
 }
 #endif
 //100%
@@ -130,7 +132,8 @@ INCLUDE_ASM("util/statemachine", cConsoleConfig_isLeapYear);
  * @param year  the year
  * @return 1 for a leap year, else 0
  */
-extern "C" int cConsoleConfig_isLeapYear(cConsoleConfig* self, int year) {
+int cConsoleConfig::isLeapYear(int year)
+{
     int leap;
 
     leap = 0;
@@ -164,7 +167,7 @@ extern "C" int cConsoleConfig_numberOfDays(int self, int month, int year)
         if (m >= 8) m++;
         return (m & 1) ? 31 : 30;
     }
-    m = cConsoleConfig_isLeapYear((cConsoleConfig*)((void*)self), year);
+    m = ((cConsoleConfig*)((void*)self))->isLeapYear(year);
     return m == 0 ? 28 : 29;
 }
 #endif
@@ -227,7 +230,8 @@ INCLUDE_ASM("util/statemachine", cConsoleConfig_addSecondsToTime);
  * @param add  seconds to add
  * @return the number of days carried
  */
-extern "C" int cConsoleConfig_addSecondsToTime(cConsoleConfig* self, int* sec, int* min, int* hour, int add) {
+int cConsoleConfig::addSecondsToTime(int* sec, int* min, int* hour, int add)
+{
     int total;
     int rem;
     int days;
@@ -256,18 +260,19 @@ extern "C" void cConsoleConfig_addDaysToDate_v(void*, int*, int*, int*, int) __a
  * slowly falls behind), adds them to second/minute/hour (cConsoleConfig_addSecondsToTime on +0x10/+0xC/+0x8) and adds the carried days to
  * day/month/year (cConsoleConfig_addDaysToDate on +0x1C/+0x18/+0x14).
  */
-extern "C" void cConsoleConfig_updateDateTime(cConsoleConfig* self) {
+void cConsoleConfig::updateDateTime()
+{
     int rem;
     int now;
     int ticks;
 
     now = SSXApp->TimerTick;
-    ticks = (now - self->m_iStartTick) / SSXApp->TimerHz;
+    ticks = (now - m_iStartTick) / SSXApp->TimerHz;
     if (ticks != 0) {
-        self->m_iStartTick = now;
-        rem = cConsoleConfig_addSecondsToTime_v(self, (int*)(&self->m_iSecond), (int*)(&self->m_iMinute), (int*)(&self->m_iHour), ticks);
+        m_iStartTick = now;
+        rem = cConsoleConfig_addSecondsToTime_v(this, (int*)(&m_iSecond), (int*)(&m_iMinute), (int*)(&m_iHour), ticks);
         if (rem != 0) {
-            cConsoleConfig_addDaysToDate_v(self, (int*)(&self->m_iDay), (int*)(&self->m_iMonth), (int*)(&self->m_iYear), rem);
+            cConsoleConfig_addDaysToDate_v(this, (int*)(&m_iDay), (int*)(&m_iMonth), (int*)(&m_iYear), rem);
         }
     }
 }

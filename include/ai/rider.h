@@ -434,6 +434,8 @@ struct t4Vector;
 
 union tControlCmd;
 
+struct cWorldIntersectType;
+
 struct cRider : public cRiderState, public cBeing {
     // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
     // 0x6C4-0x6CF: alignment padding; the compiler starts the derived part on a 16-byte boundary (cScriptObjRider,
@@ -726,6 +728,33 @@ struct cRider : public cRiderState, public cBeing {
     void updateWind() __asm__("cRider_updateWind");
     int syncCheckSum() __asm__("cRider_syncCheckSum");
     void updateTerminalVelocity() __asm__("cRider_updateTerminalVelocity");
+    float objectIntersect(cWorldIntersectType* sc, tIntersectInfo* out) __asm__("cRider_objectIntersect");
+    void doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tIntersectInfo* hit, float depth)
+        __asm__("cRider_doObjectCollision");
+    void updateCollideInfo() __asm__("cRider_updateCollideInfo");
+    int checkRailBoardCollisions() __asm__("cRider_checkRailBoardCollisions");
+    int checkHandplantCollisions() __asm__("cRider_checkHandplantCollisions");
+    void checkOpponentCollisions() __asm__("cRider_checkOpponentCollisions");
+    void doOpponentCollision(cRider* other, t4Vector* n, int flag, float speed) __asm__("cRider_doOpponentCollision");
+    void doBump(tCollideInfo* info, int flag) __asm__("cRider_doBump");
+    int isRailLandSuccess(tIntersectInfo* hit) __asm__("cRider_isRailLandSuccess");
+    void setupLean(float desLean) __asm__("cRider_setupLean");
+    void setupRailBalance(float desBal) __asm__("cRider_setupRailBalance");
+    void setupCrouchBrake(float desCrouch, float desBrake) __asm__("cRider_setupCrouchBrake");
+    void setupBoostWarp(int isHeld, int isPressed) __asm__("cRider_setupBoostWarp");
+    void doChangeFakie() __asm__("cRider_doChangeFakie");
+    void doRailslideModeOrientation() __asm__("cRider_doRailslideModeOrientation");
+    void undoRailslideModeOrientation() __asm__("cRider_undoRailslideModeOrientation");
+    void snapAxisIncrement(float* y, float* x, float step, float eps) __asm__("cRider_snapAxisIncrement");
+    float getStartGateKneeOffset() __asm__("cRider_getStartGateKneeOffset");
+    float getStartGateHorizOffset() __asm__("cRider_getStartGateHorizOffset");
+    void checkForReaction() __asm__("cRider_checkForReaction");
+    void checkForProximityAction() __asm__("cRider_checkForProximityAction");
+    int checkForReset(int isResetInput, int forceAutoReset) __asm__("cRider_checkForReset");
+    int checkForBoardPress(float dir) __asm__("cRider_checkForBoardPress");
+    int checkForPrewind(int isJumpHeld, int isJumpPressed) __asm__("cRider_checkForPrewind");
+    int checkForFinishLine() __asm__("cRider_checkForFinishLine");
+    int checkForPunch(int isLeft, int isRight) __asm__("cRider_checkForPunch");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

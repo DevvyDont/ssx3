@@ -56,6 +56,18 @@ CHECK_SIZE(tComputerCruiseLogic, 0x8);
 
 struct cAIPath;
 
+struct cBxReplayFrame;
+struct t4Vector;
+struct tBoardPressCmd;
+struct tCruiseCmd;
+struct tGateCmd;
+struct tNaturalAirCmd;
+struct tPrewindCmd;
+struct tRailslideCmd;
+struct tSpinCmd;
+struct tWipeoutCmd;
+union tControlCmd;
+
 struct cComputer {
     // ---- base cRiderHandler (0x000-0xDF0), as in cPlayer ----
     cRiderHandler RiderHandler;    // 0x000 cRiderHandler base (ai/riderhandler.h): [O] class cComputer : cRiderHandler;
@@ -134,6 +146,33 @@ struct cComputer {
     int getCurrentTarget() __asm__("cComputer_getCurrentTarget");
     int isAboutToRail(float fparg0) __asm__("cComputer_isAboutToRail");
     void setCruiseLogic(int idx) __asm__("cComputer_setCruiseLogic");
+    float calcTilt(const t4Vector* direction) __asm__("cComputer_calcTilt");
+    void jumpSetupCruise(tCruiseCmd* cmd) __asm__("cComputer_jumpSetupCruise");
+    void getControlCmd(tControlCmd* _cmd) __asm__("cComputer_getControlCmd");
+    void writeToReplayFrame(cBxReplayFrame* data) __asm__("cComputer_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* data) __asm__("cComputer_readFromReplayFrame");
+    void getPrewindCmd(tPrewindCmd* cmd) __asm__("cComputer_getPrewindCmd");
+    void getBoardPressCmd(tBoardPressCmd* cmd) __asm__("cComputer_getBoardPressCmd");
+    void getRailslideCmd(tRailslideCmd* cmd) __asm__("cComputer_getRailslideCmd");
+    void setupEndSpin(float airTime) __asm__("cComputer_setupEndSpin");
+    int getSpinCmd(tSpinCmd* cmd) __asm__("cComputer_getSpinCmd");
+    void getNaturalAirCmd(tNaturalAirCmd* cmd) __asm__("cComputer_getNaturalAirCmd");
+    void getWipeoutCmd(tWipeoutCmd* controlCmd) __asm__("cComputer_getWipeoutCmd");
+    void getGateCmd(tGateCmd* cmd) __asm__("cComputer_getGateCmd");
+    int checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
+        __asm__("cComputer_checkForJumpEvent");
+    int checkForSpeedZone(float* out, int* ok) __asm__("cComputer_checkForSpeedZone");
+    int checkForBoardPress(int* out) __asm__("cComputer_checkForBoardPress");
+    int checkForRail() __asm__("cComputer_checkForRail");
+    int checkForTargets(int* isAttack) __asm__("cComputer_checkForTargets");
+    void setupPrewindState(int isSpin, int isFlip, int toRail, int toPipe) __asm__("cComputer_setupPrewindState");
+    void setupCrouch(void* cmd) __asm__("cComputer_setupCrouch");
+    void setupRecklessCrouch(void* cmd) __asm__("cComputer_setupRecklessCrouch");
+    int shouldRiderWipeout() __asm__("cComputer_shouldRiderWipeout");
+    int shouldRiderUber() __asm__("cComputer_shouldRiderUber");
+    int shouldRiderTweak() __asm__("cComputer_shouldRiderTweak");
+    int shouldRiderGrab() __asm__("cComputer_shouldRiderGrab");
+    int updateRiderPathDifficulty(int RiderID, int Heat) __asm__("cComputer_updateRiderPathDifficulty");
 };
 
 // Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: __pure_virtual);

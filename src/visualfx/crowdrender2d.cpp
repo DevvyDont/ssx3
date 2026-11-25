@@ -204,7 +204,7 @@ INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_advanceFrame);
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Steps a crowd animation frame for the current play mode and returns the new frame.
-extern "C" int cCrowdAnim2D_advanceFrame(cCrowdAnim2D* self, int frame, int n, int* mode)
+int cCrowdAnim2D::advanceFrame(int frame, int n, int* mode)
 {
     switch (*mode) {
     case 0:
@@ -292,65 +292,67 @@ struct sCrowdAnim2D_BAC0 {
  * The table (cCrowdRender2D_mAnimStateMap, by type and current animation) gives the next animation. Kind 0 switches when back
  * at frame 0, kind 1 at the last frame, kind 2 at once; then the frame's texture is stored.
  */
-extern "C" void cCrowdAnim2D_update(cCrowdAnim2D* self)
+void cCrowdAnim2D::update()
 {
     int now = cAppMan_TheAppMan->Tick;
-    if (now - self->m_iLastTick < self->m_iUpdateTick) {
+    if (now - m_iLastTick < m_iUpdateTick) {
         return;
     }
-    self->m_iLastTick = now;
-    sCrowdTrans_BAC0* base = &cCrowdRender2D_mAnimStateMap[cCrowdRender2D_mTargetAnimCrowdState[self->m_TargetState]];
+    m_iLastTick = now;
+    sCrowdTrans_BAC0* base = &cCrowdRender2D_mAnimStateMap[cCrowdRender2D_mTargetAnimCrowdState[m_TargetState]];
     // PORT: int arithmetic on the table address (matches the original operand order).
-    sCrowdTrans_BAC0* tr = (sCrowdTrans_BAC0*)(self->m_CurrentAnimation * (int)sizeof(sCrowdTrans_BAC0) + (int)base);
-    if (tr->anim == self->m_CurrentAnimation) {
-        self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, cCrowdRender2D_mAnimTable[tr->anim].count, &self->m_CurrentPlayType);
+    sCrowdTrans_BAC0* tr = (sCrowdTrans_BAC0*)(m_CurrentAnimation * (int)sizeof(sCrowdTrans_BAC0) + (int)base);
+    if (tr->anim == m_CurrentAnimation) {
+        m_iCurrentFrame = advanceFrame(m_iCurrentFrame, cCrowdRender2D_mAnimTable[tr->anim].count, &m_CurrentPlayType);
     } else {
         switch (tr->kind) {
         case 0: {
-            int* dir = &self->m_CurrentPlayType;
+            int* dir = &m_CurrentPlayType;
             if (*dir == 0) {
                 *dir = 1;
             }
-            if (self->m_iCurrentFrame == 0) {
-                self->m_CurrentAnimation = tr->anim;
-                self->m_CurrentPlayType = tr->mode;
-                if (self->m_CurrentPlayType == 1) {
-                    self->m_iCurrentFrame = cCrowdRender2D_mAnimTable[self->m_CurrentAnimation].count - 1;
+            if (m_iCurrentFrame == 0) {
+                m_CurrentAnimation = tr->anim;
+                m_CurrentPlayType = tr->mode;
+                if (m_CurrentPlayType == 1) {
+                    m_iCurrentFrame = cCrowdRender2D_mAnimTable[m_CurrentAnimation].count - 1;
                 } else {
-                    self->m_iCurrentFrame = 0;
+                    m_iCurrentFrame = 0;
                 }
             } else {
-                self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, cCrowdRender2D_mAnimTable[self->m_CurrentAnimation].count, dir);
+                m_iCurrentFrame = advanceFrame(m_iCurrentFrame, cCrowdRender2D_mAnimTable[m_CurrentAnimation].count,
+                        dir);
             }
             break;
         }
         case 1: {
-            int* dir = &self->m_CurrentPlayType;
+            int* dir = &m_CurrentPlayType;
             if (*dir == 1) {
                 *dir = 0;
             }
-            int cnt = cCrowdRender2D_mAnimTable[self->m_CurrentAnimation].count;
-            if (self->m_iCurrentFrame == cnt - 1) {
-                self->m_CurrentAnimation = tr->anim;
-                self->m_CurrentPlayType = tr->mode;
-                if (self->m_CurrentPlayType == 1) {
-                    self->m_iCurrentFrame = cCrowdRender2D_mAnimTable[self->m_CurrentAnimation].count - 1;
+            int cnt = cCrowdRender2D_mAnimTable[m_CurrentAnimation].count;
+            if (m_iCurrentFrame == cnt - 1) {
+                m_CurrentAnimation = tr->anim;
+                m_CurrentPlayType = tr->mode;
+                if (m_CurrentPlayType == 1) {
+                    m_iCurrentFrame = cCrowdRender2D_mAnimTable[m_CurrentAnimation].count - 1;
                 } else {
-                    self->m_iCurrentFrame = 0;
+                    m_iCurrentFrame = 0;
                 }
             } else {
-                self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, cnt, dir);
+                m_iCurrentFrame = advanceFrame(m_iCurrentFrame, cnt, dir);
             }
             break;
         }
         case 2:
-            self->m_CurrentAnimation = tr->anim;
-            self->m_CurrentPlayType = tr->mode;
-            self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, cCrowdRender2D_mAnimTable[self->m_CurrentAnimation].count, &self->m_CurrentPlayType);
+            m_CurrentAnimation = tr->anim;
+            m_CurrentPlayType = tr->mode;
+            m_iCurrentFrame = advanceFrame(m_iCurrentFrame, cCrowdRender2D_mAnimTable[m_CurrentAnimation].count,
+                    &m_CurrentPlayType);
             break;
         }
     }
-    self->m_iCurrentFrameTexID = cCrowdRender2D_mAnimTable[self->m_CurrentAnimation].frames[self->m_iCurrentFrame];
+    m_iCurrentFrameTexID = cCrowdRender2D_mAnimTable[m_CurrentAnimation].frames[m_iCurrentFrame];
 }
 #endif
 

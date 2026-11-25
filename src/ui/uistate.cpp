@@ -23,9 +23,9 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
  *
  * @param name  the object's name
  */
-extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
+void cUIState::hideObjSafe(char* name)
 {
-    cListNode* n = cList_first((cList*)&self->mScreens);
+    cListNode* n = cList_first((cList*)&mScreens);
     if (n != 0) {
         do {
             cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(n, GetHashValue32(name));
@@ -58,9 +58,9 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
  *
  * @param name  the object's name
  */
-extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
+void cUIState::showObjSafe(char* name)
 {
-    cListNode* n = cList_first((cList*)&self->mScreens);
+    cListNode* n = cList_first((cList*)&mScreens);
     if (n != 0) {
         do {
             cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(n, GetHashValue32(name));
@@ -150,13 +150,12 @@ static inline void cUIStateStack_enableState_setB4(cUIStateStack_enableState_nod
  * Modes are bits 8..13 of the state's attribute word (+0x1C); explicit states (bit 6) are skipped. cUIStateStack_updateLoop uses
  * it to bring up a mode-1 or mode-8 state when nothing is current.
  *
- * @param list  the state stack (its main list)
  * @param id  the mode to look for
  * @return 1 when a state was enabled, else 0
  */
-extern "C" int cUIStateStack_enableState(cUIStateStack* list, signed char id)
+int cUIStateStack::enableState(signed char id)
 {
-    cUIStateStack_enableState_node* n = (cUIStateStack_enableState_node*)cList_first(((cList*)list));
+    cUIStateStack_enableState_node* n = (cUIStateStack_enableState_node*)cList_first(((cList*)this));
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
@@ -193,13 +192,12 @@ struct cUIStateStack_checkForState_node {
  *
  * cUIStateStack_updateLoop uses it with mode 1 when a popup closes.
  *
- * @param list  the state stack (its main list)
  * @param id  the mode to look for
  * @return 1 when one exists, else 0
  */
-extern "C" int cUIStateStack_checkForState(cUIStateStack* list, signed char id)
+int cUIStateStack::checkForState(signed char id)
 {
-    cUIStateStack_checkForState_node* n = (cUIStateStack_checkForState_node*)cList_first(((cList*)list));
+    cUIStateStack_checkForState_node* n = (cUIStateStack_checkForState_node*)cList_first(((cList*)this));
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
@@ -220,9 +218,9 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_render2D);
  *
  * Visible is bit 3 of a state's attribute word (+0x1C). cUIEngine_render2D calls it on the engine's state stack.
  */
-extern "C" void cUIStateStack_render2D(cUIStateStack* self)
+void cUIStateStack::render2D()
 {
-    cUIState* n = (cUIState*)cList_first((cList*)self);
+    cUIState* n = (cUIState*)cList_first((cList*)this);
     if (((char*)n) != 0) {
         do {
             if ((n->mAttrState >> 3) & 1) {
@@ -231,7 +229,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
             n = (cUIState*)n->mpNext;
         } while (!cListNode_isSentinel((cListNode*)n));
     }
-    n = (cUIState*)cList_first((cList*)&self->mExplicitStack);
+    n = (cUIState*)cList_first((cList*)&mExplicitStack);
     if (((char*)n) != 0) {
         do {
             if ((n->mAttrState >> 3) & 1) {
@@ -318,11 +316,11 @@ struct cUIStateStack_updateLoop_sVEntryV {
  *
  * @return nonzero when a state finished closing and none started in this pass (cUIStateStack_update then runs another pass)
  */
-extern "C" int cUIStateStack_updateLoop(cUIStateStack* self)
+int cUIStateStack::updateLoop()
 {
     int popped = 0;
     int any = 0;
-    cUIStateStack_updateLoop_node* n = (cUIStateStack_updateLoop_node*)cList_first((cList*)self);
+    cUIStateStack_updateLoop_node* n = (cUIStateStack_updateLoop_node*)cList_first((cList*)this);
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIStateStack_updateLoop_node* next = n->next;
@@ -336,7 +334,7 @@ extern "C" int cUIStateStack_updateLoop(cUIStateStack* self)
                     if (n->flags & 1) {
                         cUIStateStack_updateLoop_node* o = n->owner;
                         if (o != 0) {
-                            cUIStateStack_setVisibleToChain(self, o, 1, 1);
+                            cUIStateStack_setVisibleToChain(this, o, 1, 1);
                             VCALLV_ECB0(o, 17, n, 0x15);
                         }
                     }
@@ -383,7 +381,7 @@ extern "C" int cUIStateStack_updateLoop(cUIStateStack* self)
                         cUIStateStack_updateLoop_node* o = n->owner;
                         popped = 0;
                         if (((n->flags >> 14) & 1) == 0) {
-                            found = cUIStateStack_checkForState(self, 1);
+                            found = checkForState(1);
                         } else {
                             found = 0;
                         }
@@ -397,7 +395,7 @@ extern "C" int cUIStateStack_updateLoop(cUIStateStack* self)
                                 VCALLV_ECB0(o, 17, n, 0x16);
                             }
                         } else if (o != 0) {
-                            cUIStateStack_setVisibleToChain(self, o, 0, 1);
+                            cUIStateStack_setVisibleToChain(this, o, 0, 1);
                         }
                     }
                     if (n != 0) {
@@ -409,8 +407,8 @@ extern "C" int cUIStateStack_updateLoop(cUIStateStack* self)
                         }
                     }
                     if (top == 0 || found != 0) {
-                        if (cUIStateStack_getCurrentState(self) == 0 && cUIStateStack_enableState(self, 1) == 0) {
-                            cUIStateStack_enableState(self, 8);
+                        if (cUIStateStack_getCurrentState(this) == 0 && enableState(1) == 0) {
+                            enableState(8);
                         }
                     }
                     break;
@@ -441,12 +439,12 @@ extern "C" void cUIState_updateScreens(void* self);
  * Every state of the explicit list (+0x1C) gets virtual slot 12 when enabled and cUIState_updateScreens. The UI engine
  * update cUIEngine_update calls it.
  */
-extern "C" void cUIStateStack_update(cUIStateStack* self)
+void cUIStateStack::update()
 {
-    if (cUIStateStack_updateLoop(self) != 0) {
-        cUIStateStack_updateLoop(self);
+    if (updateLoop() != 0) {
+        updateLoop();
     }
-    cListNode* n = cList_first((cList*)&self->mExplicitStack);
+    cListNode* n = cList_first((cList*)&mExplicitStack);
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
@@ -517,7 +515,7 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_pop1);
  *
  * @param node  the state to close
  */
-extern "C" void cUIStateStack_pop1(cUIStateStack* self, cUIState* node)
+void cUIStateStack::pop1(cUIState* node)
 {
     int flags = node->mAttrState;
     if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == 5) {

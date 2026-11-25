@@ -40,13 +40,12 @@ extern char str_Glyphs[];
  * missing
  * glyph, gives 0xA0 (no-break space) the space's metrics, and tracks the tallest glyph.
  *
- * @param vself  the font
  * @param vdata  the font file's data (On Tour const char* data)
  * @param flags  memory class for the glyph table (On Tour memtype)
  */
-extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
+void cFont::linkFont(void* vdata, int flags)
 {
-    cFont* self = vself;
+    cFont* self = this;
     char* data = (char*)vdata;
     // ORIGINAL-PTR: an .sfn font file (a file blob): its header holds the byte offsets of the glyph table (+0x14) and
     // of the glyph sheet's SHAPE (+0x1C) from the start of the file
@@ -113,16 +112,16 @@ struct sFont_19E8 {
 /**
  * Frees a font's glyph table and releases its texture.
  */
-extern "C" void cFont_purge(cFont* self)
+void cFont::purge()
 {
-    if (self->Glyphs != 0) {
-        cMemMan_free(self->Glyphs);
+    if (Glyphs != 0) {
+        cMemMan_free(Glyphs);
     }
-    self->Glyphs = 0;
-    self->NumGlyphs = 0;
+    Glyphs = 0;
+    NumGlyphs = 0;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    if (self->TextureID >= 0) {
-        ps2GraphicsMan->RemoveTexture(self->TextureID);
+    if (TextureID >= 0) {
+        ps2GraphicsMan->RemoveTexture(TextureID);
     }
 }
 #endif
@@ -228,10 +227,10 @@ extern "C" void cFont_text(cFont* self, float x, float y, const char* str);
  * @param x  screen x
  * @param y  screen y
  */
-extern "C" void cFont_vtextf(cFont* self, float x, float y)
+void cFont::vtextf(float x, float y)
 {
     vsprintf(cFont_vtextf_buf);
-    cFont_text(self, x, y, cFont_vtextf_buf);
+    text(x, y, cFont_vtextf_buf);
 }
 #endif
 
@@ -262,26 +261,26 @@ static inline int fontGetTex(void* vs)
  * @param y  the screen y
  * @param str  the text to draw (On Tour const char* str)
  */
-extern "C" void cFont_text(cFont* self, float x, float y, const char* str)
+void cFont::text(float x, float y, const char* str)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex(self);
-    t4VectorXYZW pos(x + self->Offset[0] * self->Scale[0],
-                     y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
-    if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
+    ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex(this);
+    t4VectorXYZW pos(x + Offset[0] * Scale[0],
+                     y + Offset[1] * Scale[1], 0.0f, 0.0f);
+    if (ShadowOffset[0] != 0.0f || ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
         int saved = (unsigned)(((int)top->m_bitGroups[2]) & 0x3E0) >> 5;
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        ps2GraphicsMan->DrawString3D(*self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], str,
-                                     self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1],
-                                     *(const tARGB*)&self->ShadowColor[0], pos.z);
+        ps2GraphicsMan->DrawString3D(*this, pos.x + ShadowOffset[0], pos.y + ShadowOffset[1], str,
+                                     Scale[0], Scale[1], UVScale[0], UVScale[1],
+                                     *(const tARGB*)&ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    ps2GraphicsMan->DrawString3D(*self, pos.x, pos.y, str, self->Scale[0], self->Scale[1], self->UVScale[0],
-                                 self->UVScale[1], *(const tARGB*)&self->Color[0], pos.z);
+    ps2GraphicsMan->DrawString3D(*this, pos.x, pos.y, str, Scale[0], Scale[1], UVScale[0],
+                                 UVScale[1], *(const tARGB*)&Color[0], pos.z);
 }
 #endif
 
@@ -311,23 +310,26 @@ static inline int fontGetTex1E30(void* vs)
  * @param y  the screen y
  * @param unicodeStr  the 0-terminated 16-bit string
  */
-extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
+void cFont::text1(float x, float y, void* unicodeStr)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex1E30(self);
-    t4VectorXYZW pos(x + self->Offset[0] * self->Scale[0],
-                     y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
-    if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
+    ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex1E30(this);
+    t4VectorXYZW pos(x + Offset[0] * Scale[0],
+                     y + Offset[1] * Scale[1], 0.0f, 0.0f);
+    if (ShadowOffset[0] != 0.0f || ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
         int saved = (unsigned)(((int)top->m_bitGroups[2]) & 0x3E0) >> 5;
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        ps2GraphicsMan->DrawString3D1(*self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->ShadowColor[0], pos.z);
+        ps2GraphicsMan->DrawString3D1(*this, pos.x + ShadowOffset[0], pos.y + ShadowOffset[1],
+                (const unsigned short*)unicodeStr, Scale[0], Scale[1], UVScale[0], UVScale[1],
+                *(const tARGB*)&ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    ps2GraphicsMan->DrawString3D1(*self, pos.x, pos.y, (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->Color[0], pos.z);
+    ps2GraphicsMan->DrawString3D1(*this, pos.x, pos.y, (const unsigned short*)unicodeStr, Scale[0], Scale[1],
+            UVScale[0], UVScale[1], *(const tARGB*)&Color[0], pos.z);
 }
 #endif
 
@@ -371,9 +373,9 @@ static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
  * @return the box's right edge
  */
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono, float sx, float sy)
+float cFont::textExtent(const char* str, void* r_, int mono, float sx, float sy)
 {
-    cFont* font = f_;
+    cFont* font = this;
     tRect* rect = (tRect*)r_;
     tRect localRect;
     tRect* rc = rect ? rect : &localRect;
@@ -464,9 +466,9 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
  * @return the rectangle's x1 (the text width including the shadow)
  */
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float cFont_textExtent1(cFont* f_, const unsigned short* unicodeText, void* r_, int mono, float sx, float sy)
+float cFont::textExtent1(const unsigned short* unicodeText, void* r_, int mono, float sx, float sy)
 {
-    cFont* font = f_;
+    cFont* font = this;
     tRect* outRect = (tRect*)r_;
     tRect localRect;
     tRect* rc = outRect ? outRect : &localRect;
@@ -556,7 +558,6 @@ static inline float fabs_2430(float x)
  * @p max - 1 characters; if the text still fits at that point the function returns 0 as if the whole string had been
  * copied (the rest is dropped).
  *
- * @param f_  the font (this)
  * @param str  the 0-terminated source string
  * @param dst  the buffer for the part that fits (0-terminated)
  * @param max  the size of @p dst in characters
@@ -564,9 +565,9 @@ static inline float fabs_2430(float x)
  * @param width  the available width
  * @return the start of the remaining text, or 0 when everything copied fits
  */
-extern "C" char* cFont_textSmartLimit(cFont* f_, const char* str, char* dst, int max, float sx, float width)
+char* cFont::textSmartLimit(const char* str, char* dst, int max, float sx, float width)
 {
-    cFont* font = f_;
+    cFont* font = this;
     width -= fabs_2430(font->ShadowOffset[0]);
     if (width < 0.0f)
         width = 0.0f;
@@ -664,7 +665,6 @@ static inline float fabs_2680(float x)
  * cut after the last whole word (skipping the spaces that follow) or inside the first word when no word fits, and
  * copying stops at @p max - 1 characters, in which case a text that still fits returns 0 and the rest is dropped.
  *
- * @param f_  the font (this)
  * @param sx  the horizontal scale
  * @param width  the available width
  * @param str  the 0-terminated source string
@@ -672,9 +672,9 @@ static inline float fabs_2680(float x)
  * @param max  the size of @p dst in characters
  * @return the start of the remaining text, or 0 when everything copied fits
  */
-extern "C" unsigned short* cFont_textSmartLimit1(cFont* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
+unsigned short* cFont::textSmartLimit1(float sx, float width, const unsigned short* str, unsigned short* dst, int max)
 {
-    cFont* font = f_;
+    cFont* font = this;
     width -= fabs_2680(font->ShadowOffset[0]);
     if (width < 0.0f)
         width = 0.0f;
@@ -743,10 +743,10 @@ extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n
  * @param y  the screen y
  * @param str  the 0-terminated string
  */
-extern "C" void cFont_centertext(cFont* self, float x, float y, const char* str)
+void cFont::centertext(float x, float y, const char* str)
 {
-    float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    cFont_text(self, x - w * 0.5f, y, str);
+    float w = textExtent(str, 0, 0, Scale[0], Scale[1]);
+    text(x - w * 0.5f, y, str);
 }
 #endif
 
@@ -761,10 +761,10 @@ INCLUDE_ASM("render/font", cFont_centertext1);
  * @param x  the centre x
  * @param y  the screen y
  */
-extern "C" void cFont_centertext1(cFont* self, const unsigned short* str, float x, float y)
+void cFont::centertext1(const unsigned short* str, float x, float y)
 {
-    float w = cFont_textExtent1(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    cFont_text1(self, x - w * 0.5f, y, (void*)str);
+    float w = textExtent1(str, 0, 0, Scale[0], Scale[1]);
+    text1(x - w * 0.5f, y, (void*)str);
 }
 #endif
 
@@ -784,12 +784,12 @@ extern "C" void cBXString__cBXString(void* self, int flags);
  * @param x  screen x of the centre
  * @param y  screen y
  */
-extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float x, float y)
+void cFont::vcentertextf(const char* fmt, void* ap, float x, float y)
 {
     cBXString txt;
     txt.Str = (char*)cBXString_EmptyString;
     cBXString_vprintf(&txt, fmt, ap);
-    cFont_centertext(self, x, y, txt.Str);
+    centertext(x, y, txt.Str);
     cBXString__cBXString(&txt, 2);
 }
 #endif
@@ -807,10 +807,10 @@ extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n
  * @param x  the right edge x
  * @param y  the screen y
  */
-extern "C" void cFont_righttext(cFont* self, const char* str, float x, float y)
+void cFont::righttext(const char* str, float x, float y)
 {
-    float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    cFont_text(self, x - w, y, str);
+    float w = textExtent(str, 0, 0, Scale[0], Scale[1]);
+    text(x - w, y, str);
 }
 #endif
 
@@ -825,10 +825,10 @@ INCLUDE_ASM("render/font", cFont_righttext1);
  * @param x  the right edge x
  * @param y  the screen y
  */
-extern "C" void cFont_righttext1(cFont* self, const unsigned short* str, float x, float y)
+void cFont::righttext1(const unsigned short* str, float x, float y)
 {
-    float w = cFont_textExtent1(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    cFont_text1(self, x - w, y, (void*)str);
+    float w = textExtent1(str, 0, 0, Scale[0], Scale[1]);
+    text1(x - w, y, (void*)str);
 }
 #endif
 
@@ -848,12 +848,12 @@ extern "C" void cBXString__cBXString(void* self, int flags);
  * @param x  screen x of the right edge
  * @param y  screen y
  */
-extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float x, float y)
+void cFont::vrighttextf(const char* fmt, void* ap, float x, float y)
 {
     cBXString txt;
     txt.Str = (char*)cBXString_EmptyString;
     cBXString_vprintf(&txt, fmt, ap);
-    cFont_righttext(self, txt.Str, x, y);
+    righttext(txt.Str, x, y);
     cBXString__cBXString(&txt, 2);
 }
 #endif
@@ -890,13 +890,12 @@ static inline tGlyph* findGlyph(cFont* font, int c)
  * Finds the glyph (codes below FirstCode have none; up to LastLinearCode it is indexed directly, above that a binary
  * search by code, falling back to MissingGlyph).
  *
- * @param font  the font (this)
  * @param charCode  the character
  * @return the glyph's advance, or 0.0
  */
-extern "C" float cFont_charAdvance(cFont* font, char charCode)
+float cFont::charAdvance(char charCode)
 {
-    tGlyph* glyph = findGlyph((font), charCode);
+    tGlyph* glyph = findGlyph((this), charCode);
     if (glyph)
         return glyph->advance;
     return 0.0f;
@@ -912,13 +911,12 @@ INCLUDE_ASM("render/font", cFont_charAdvance1);
  * The same glyph lookup as cFont_charAdvance (direct index up to LastLinearCode, binary search above, MissingGlyph as the
  * fallback, nothing below FirstCode).
  *
- * @param font  the font (this)
  * @param charCode  the character code
  * @return the glyph's advance, or 0.0
  */
-extern "C" float cFont_charAdvance1(cFont* font, unsigned short charCode)
+float cFont::charAdvance1(unsigned short charCode)
 {
-    tGlyph* glyph = findGlyph((font), charCode);
+    tGlyph* glyph = findGlyph((this), charCode);
     if (glyph)
         return glyph->advance;
     return 0.0f;
@@ -937,16 +935,16 @@ struct sFontQuad {
 /**
  * Clears the player lights: no directional lights, no extra ambient light, neither rider nor board additive.
  */
-extern "C" void cPlayerLights_Clear(cPlayerLights* self)
+void cPlayerLights::Clear()
 {
     tRGB ambient;
     ambient.R = 0.0f;
     ambient.G = 0.0f;
     ambient.B = 0.0f;
-    self->mNumDirectionalLights = 0;
-    (*(&self->mExtraAmbientLight)) = ambient;
-    self->mPlayerIsAdditive = 0;
-    self->mBoardIsAdditive = 0;
+    mNumDirectionalLights = 0;
+    (*(&mExtraAmbientLight)) = ambient;
+    mPlayerIsAdditive = 0;
+    mBoardIsAdditive = 0;
 }
 #endif
 
@@ -956,13 +954,13 @@ INCLUDE_ASM("render/font", cPlayerLights_AddAmbient);
 /**
  * Adds a colour's R, G and B to mExtraAmbientLight.
  *
- * @param playerLights  the player lights (this)
  * @param colour  the colour to add (three floats R, G, B)
  */
-extern "C" void cPlayerLights_AddAmbient(cPlayerLights* playerLights, tRGB* colour) {
-    playerLights->mExtraAmbientLight.R = (float) (playerLights->mExtraAmbientLight.R + (colour->R));
-    playerLights->mExtraAmbientLight.G = (float) (playerLights->mExtraAmbientLight.G + (colour->G));
-    playerLights->mExtraAmbientLight.B = (float) (playerLights->mExtraAmbientLight.B + (colour->B));
+void cPlayerLights::AddAmbient(tRGB* colour)
+{
+    mExtraAmbientLight.R = (float) (mExtraAmbientLight.R + (colour->R));
+    mExtraAmbientLight.G = (float) (mExtraAmbientLight.G + (colour->G));
+    mExtraAmbientLight.B = (float) (mExtraAmbientLight.B + (colour->B));
 }
 #endif
 
@@ -977,11 +975,11 @@ INCLUDE_ASM("render/font", cPlayerLights_AddDirectional);
  * @param direction  the light's direction (a 16-byte vector)
  * @param colour  the light's colour
  */
-extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, t4Vector* direction, tRGB* colour)
+void cPlayerLights::AddDirectional(t4Vector* direction, tRGB* colour)
 {
-    ((&self->mDirectionalLightColours[0]))[self->mNumDirectionalLights] = *colour;
-    (&self->mDirectionalLightDirections[0])[self->mNumDirectionalLights] = *direction;
-    self->mNumDirectionalLights++;
+    ((&mDirectionalLightColours[0]))[mNumDirectionalLights] = *colour;
+    (&mDirectionalLightDirections[0])[mNumDirectionalLights] = *direction;
+    mNumDirectionalLights++;
 }
 #endif
 
@@ -991,11 +989,11 @@ INCLUDE_ASM("render/font", cPlayerLights_PlayerIsAdditive);
 /**
  * Sets mPlayerIsAdditive to @p value.
  *
- * @param playerLights  the player lights (this)
  * @param value  the new flag
  */
-extern "C" void cPlayerLights_PlayerIsAdditive(cPlayerLights* playerLights, int value) {
-    playerLights->mPlayerIsAdditive = value;
+void cPlayerLights::PlayerIsAdditive(int value)
+{
+    mPlayerIsAdditive = value;
 }
 #endif
 
@@ -1009,10 +1007,9 @@ INCLUDE_ASM("render/font", cPlayerLights_BoardIsAdditive__FPvi);
  *
  * @param val  the new flag
  */
-void cPlayerLights_BoardIsAdditive(void* vself, int val)
+void cPlayerLights::BoardIsAdditive(int val)
 {
-    cPlayerLights* self = (cPlayerLights*)vself;
-    self->mBoardIsAdditive = val;
+    mBoardIsAdditive = val;
 }
 #endif
 
@@ -1281,11 +1278,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetNumViews);
 /**
  * Sets mNumViews to @p numViews.
  *
- * @param graphicsMan  the graphics manager (this)
  * @param numViews  the number of views
  */
-extern "C" void cGraphicsMan_SetNumViews(cGraphicsMan* graphicsMan, int numViews) {
-    graphicsMan->mNumViews = numViews;
+void cGraphicsMan::SetNumViews(int numViews)
+{
+    mNumViews = numViews;
 }
 #endif
 //100%
@@ -1294,11 +1291,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetNumViews);
 /**
  * Returns the graphics manager's mNumViews (the number of views rendered; the constructor sets 1).
  *
- * @param graphicsMan  the graphics manager
  * @return mNumViews
  */
-extern "C" int cGraphicsMan_GetNumViews(cGraphicsMan* graphicsMan) {
-    return (graphicsMan->mNumViews);
+int cGraphicsMan::GetNumViews()
+{
+    return (mNumViews);
 }
 #endif
 //100%
@@ -1307,11 +1304,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetViewIndex);
 /**
  * Sets mViewIndex to @p viewIndex.
  *
- * @param graphicsMan  the graphics manager (this)
  * @param viewIndex  the current view
  */
-extern "C" void cGraphicsMan_SetViewIndex(cGraphicsMan* graphicsMan, int viewIndex) {
-    graphicsMan->mViewIndex = viewIndex;
+void cGraphicsMan::SetViewIndex(int viewIndex)
+{
+    mViewIndex = viewIndex;
 }
 #endif
 //100%
@@ -1320,11 +1317,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetViewIndex);
 /**
  * Returns the graphics manager's mViewIndex (the view being worked on; the constructor sets 0).
  *
- * @param graphicsMan  the graphics manager
  * @return mViewIndex
  */
-extern "C" int cGraphicsMan_GetViewIndex(cGraphicsMan* graphicsMan) {
-    return (graphicsMan->mViewIndex);
+int cGraphicsMan::GetViewIndex()
+{
+    return (mViewIndex);
 }
 #endif
 //100%
@@ -1333,12 +1330,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSpecularTextureId);
 /**
  * Stores @p value in m_SpecularTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setSpecularTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    graphicsMan->m_SpecularTextureId[idx] = value;
+void cGraphicsMan::setSpecularTextureId(int value, int idx)
+{
+    m_SpecularTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1347,12 +1344,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSpecularTextureId);
 /**
  * Returns m_SpecularTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getSpecularTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_SpecularTextureId[idx];
+int cGraphicsMan::getSpecularTextureId(int idx)
+{
+    return m_SpecularTextureId[idx];
 }
 #endif
 //100%
@@ -1361,12 +1358,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setPatchSpecularTextureId);
 /**
  * Stores @p value in m_PatchSpecularTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setPatchSpecularTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    graphicsMan->m_PatchSpecularTextureId[idx] = value;
+void cGraphicsMan::setPatchSpecularTextureId(int value, int idx)
+{
+    m_PatchSpecularTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1375,12 +1372,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getPatchSpecularTextureId);
 /**
  * Returns m_PatchSpecularTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getPatchSpecularTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_PatchSpecularTextureId[idx];
+int cGraphicsMan::getPatchSpecularTextureId(int idx)
+{
+    return m_PatchSpecularTextureId[idx];
 }
 #endif
 //100%
@@ -1389,12 +1386,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSnowSparkleTextureId);
 /**
  * Stores @p value in m_SnowSparkleTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setSnowSparkleTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    graphicsMan->m_SnowSparkleTextureId[idx] = value;
+void cGraphicsMan::setSnowSparkleTextureId(int value, int idx)
+{
+    m_SnowSparkleTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1403,12 +1400,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSnowSparkleTextureId);
 /**
  * Returns m_SnowSparkleTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getSnowSparkleTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_SnowSparkleTextureId[idx];
+int cGraphicsMan::getSnowSparkleTextureId(int idx)
+{
+    return m_SnowSparkleTextureId[idx];
 }
 #endif
 //100%
@@ -1417,12 +1414,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setRimTextureId);
 /**
  * Stores @p value in m_RimTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setRimTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    graphicsMan->m_RimTextureId[idx] = value;
+void cGraphicsMan::setRimTextureId(int value, int idx)
+{
+    m_RimTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1431,12 +1428,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getRimTextureId);
 /**
  * Returns m_RimTextureId[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getRimTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_RimTextureId[idx];
+int cGraphicsMan::getRimTextureId(int idx)
+{
+    return m_RimTextureId[idx];
 }
 #endif
 //100%
@@ -1445,12 +1442,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setisInNIS);
 /**
  * Stores @p value in m_isInNIS[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param value  the new flag
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setisInNIS(cGraphicsMan* graphicsMan, int value, int idx) {
-    graphicsMan->m_isInNIS[idx] = value;
+void cGraphicsMan::setisInNIS(int value, int idx)
+{
+    m_isInNIS[idx] = value;
 }
 #endif
 //100%
@@ -1459,12 +1456,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getisInNIS);
 /**
  * Returns m_isInNIS[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored flag
  */
-extern "C" int cGraphicsMan_getisInNIS(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_isInNIS[idx];
+int cGraphicsMan::getisInNIS(int idx)
+{
+    return m_isInNIS[idx];
 }
 #endif
 //100%
@@ -1473,12 +1470,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSnowSparkleDensity);
 /**
  * Stores @p value in m_SnowSparkleDensity[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new density
  */
-extern "C" void cGraphicsMan_setSnowSparkleDensity(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_SnowSparkleDensity[idx] = value;
+void cGraphicsMan::setSnowSparkleDensity(int idx, float value)
+{
+    m_SnowSparkleDensity[idx] = value;
 }
 #endif
 //100%
@@ -1487,12 +1484,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSnowSparkleDensity);
 /**
  * Returns m_SnowSparkleDensity[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored density
  */
-extern "C" float cGraphicsMan_getSnowSparkleDensity(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_SnowSparkleDensity[idx];
+float cGraphicsMan::getSnowSparkleDensity(int idx)
+{
+    return m_SnowSparkleDensity[idx];
 }
 #endif
 //100%
@@ -1501,12 +1498,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setDrawDistance);
 /**
  * Stores @p value in m_DrawDistance[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new distance
  */
-extern "C" void cGraphicsMan_setDrawDistance(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_DrawDistance[idx] = value;
+void cGraphicsMan::setDrawDistance(int idx, float value)
+{
+    m_DrawDistance[idx] = value;
 }
 #endif
 //100%
@@ -1515,12 +1512,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getDrawDistance);
 /**
  * Returns m_DrawDistance[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored distance
  */
-extern "C" float cGraphicsMan_getDrawDistance(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_DrawDistance[idx];
+float cGraphicsMan::getDrawDistance(int idx)
+{
+    return m_DrawDistance[idx];
 }
 #endif
 //100%
@@ -1529,12 +1526,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogDensity);
 /**
  * Stores @p value in m_FogDensity[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new density
  */
-extern "C" void cGraphicsMan_setFogDensity(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_FogDensity[idx] = value;
+void cGraphicsMan::setFogDensity(int idx, float value)
+{
+    m_FogDensity[idx] = value;
 }
 #endif
 //100%
@@ -1543,12 +1540,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogDensity);
 /**
  * Returns m_FogDensity[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored density
  */
-extern "C" float cGraphicsMan_getFogDensity(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_FogDensity[idx];
+float cGraphicsMan::getFogDensity(int idx)
+{
+    return m_FogDensity[idx];
 }
 #endif
 //100%
@@ -1557,12 +1554,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourR);
 /**
  * Stores @p value in m_FogColourR[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new red component
  */
-extern "C" void cGraphicsMan_setFogColourR(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_FogColourR[idx] = value;
+void cGraphicsMan::setFogColourR(int idx, float value)
+{
+    m_FogColourR[idx] = value;
 }
 #endif
 //100%
@@ -1571,12 +1568,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourR);
 /**
  * Returns m_FogColourR[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored red component
  */
-extern "C" float cGraphicsMan_getFogColourR(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_FogColourR[idx];
+float cGraphicsMan::getFogColourR(int idx)
+{
+    return m_FogColourR[idx];
 }
 #endif
 //100%
@@ -1585,12 +1582,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourG);
 /**
  * Stores @p value in m_FogColourG[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new green component
  */
-extern "C" void cGraphicsMan_setFogColourG(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_FogColourG[idx] = value;
+void cGraphicsMan::setFogColourG(int idx, float value)
+{
+    m_FogColourG[idx] = value;
 }
 #endif
 //100%
@@ -1599,12 +1596,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourG);
 /**
  * Returns m_FogColourG[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored green component
  */
-extern "C" float cGraphicsMan_getFogColourG(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_FogColourG[idx];
+float cGraphicsMan::getFogColourG(int idx)
+{
+    return m_FogColourG[idx];
 }
 #endif
 //100%
@@ -1613,12 +1610,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourB);
 /**
  * Stores @p value in m_FogColourB[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new blue component
  */
-extern "C" void cGraphicsMan_setFogColourB(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_FogColourB[idx] = value;
+void cGraphicsMan::setFogColourB(int idx, float value)
+{
+    m_FogColourB[idx] = value;
 }
 #endif
 //100%
@@ -1627,12 +1624,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourB);
 /**
  * Returns m_FogColourB[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored blue component
  */
-extern "C" float cGraphicsMan_getFogColourB(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_FogColourB[idx];
+float cGraphicsMan::getFogColourB(int idx)
+{
+    return m_FogColourB[idx];
 }
 #endif
 //100%
@@ -1641,12 +1638,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogNear);
 /**
  * Stores @p value in m_FogNear[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new distance
  */
-extern "C" void cGraphicsMan_setFogNear(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_FogNear[idx] = value;
+void cGraphicsMan::setFogNear(int idx, float value)
+{
+    m_FogNear[idx] = value;
 }
 #endif
 //100%
@@ -1655,12 +1652,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogNear);
 /**
  * Returns m_FogNear[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored distance
  */
-extern "C" float cGraphicsMan_getFogNear(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_FogNear[idx];
+float cGraphicsMan::getFogNear(int idx)
+{
+    return m_FogNear[idx];
 }
 #endif
 //100%
@@ -1669,12 +1666,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogFar);
 /**
  * Stores @p value in m_FogFar[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new distance
  */
-extern "C" void cGraphicsMan_setFogFar(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_FogFar[idx] = value;
+void cGraphicsMan::setFogFar(int idx, float value)
+{
+    m_FogFar[idx] = value;
 }
 #endif
 //100%
@@ -1683,12 +1680,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogFar);
 /**
  * Returns m_FogFar[@p idx].
  *
- * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored distance
  */
-extern "C" float cGraphicsMan_getFogFar(cGraphicsMan* graphicsMan, int idx) {
-    return graphicsMan->m_FogFar[idx];
+float cGraphicsMan::getFogFar(int idx)
+{
+    return m_FogFar[idx];
 }
 #endif
 //100%
@@ -1700,12 +1697,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleR);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new red tint scale
  */
-extern "C" void cGraphicsMan_setScreenTintScaleR(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_ScreenTintScaleR[idx] = value;
+void cGraphicsMan::setScreenTintScaleR(int idx, float value)
+{
+    m_ScreenTintScaleR[idx] = value;
 }
 #endif
 //100%
@@ -1733,12 +1730,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleG);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new green tint scale
  */
-extern "C" void cGraphicsMan_setScreenTintScaleG(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_ScreenTintScaleG[idx] = value;
+void cGraphicsMan::setScreenTintScaleG(int idx, float value)
+{
+    m_ScreenTintScaleG[idx] = value;
 }
 #endif
 //100%
@@ -1766,12 +1763,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleB);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new blue tint scale
  */
-extern "C" void cGraphicsMan_setScreenTintScaleB(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_ScreenTintScaleB[idx] = value;
+void cGraphicsMan::setScreenTintScaleB(int idx, float value)
+{
+    m_ScreenTintScaleB[idx] = value;
 }
 #endif
 //100%
@@ -1799,12 +1796,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetR);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new red tint offset
  */
-extern "C" void cGraphicsMan_setScreenTintOffsetR(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_ScreenTintOffsetR[idx] = value;
+void cGraphicsMan::setScreenTintOffsetR(int idx, float value)
+{
+    m_ScreenTintOffsetR[idx] = value;
 }
 #endif
 //100%
@@ -1832,12 +1829,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetG);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new green tint offset
  */
-extern "C" void cGraphicsMan_setScreenTintOffsetG(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_ScreenTintOffsetG[idx] = value;
+void cGraphicsMan::setScreenTintOffsetG(int idx, float value)
+{
+    m_ScreenTintOffsetG[idx] = value;
 }
 #endif
 //100%
@@ -1865,12 +1862,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetB);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new blue tint offset
  */
-extern "C" void cGraphicsMan_setScreenTintOffsetB(cGraphicsMan* graphicsMan, int idx, float value) {
-    graphicsMan->m_ScreenTintOffsetB[idx] = value;
+void cGraphicsMan::setScreenTintOffsetB(int idx, float value)
+{
+    m_ScreenTintOffsetB[idx] = value;
 }
 #endif
 //100%
@@ -1990,9 +1987,9 @@ extern sDrawState sDrawState_s_defaultDrawState;
  * Resets the current draw state (*m_pCurrentDrawState) to the default draw state sDrawState_s_defaultDrawState built by the cGraphicsMan
  * constructor.
  */
-extern "C" void cGraphicsMan_SetDefaultDrawState(cGraphicsMan* self)
+void cGraphicsMan::SetDefaultDrawState()
 {
-    *(self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
+    *(m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
 }
 #endif
 //100%
@@ -2004,9 +2001,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDrawState);
  *
  * @param src  the draw state to apply
  */
-extern "C" void cGraphicsMan_SetDrawState(cGraphicsMan* self, sDrawState* src)
+void cGraphicsMan::SetDrawState(sDrawState* src)
 {
-    *(self->m_pCurrentDrawState) = *src;
+    *(m_pCurrentDrawState) = *src;
 }
 #endif
 //100%
@@ -2017,11 +2014,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_CurrentDrawState);
  *
  * Identical to cGraphicsMan_CurrentDrawState1.
  *
- * @param graphicsMan  the graphics manager
  * @return m_pCurrentDrawState (as an int)
  */
-extern "C" int cGraphicsMan_CurrentDrawState(cGraphicsMan* graphicsMan) {
-    return ((int)graphicsMan->m_pCurrentDrawState);
+int cGraphicsMan::CurrentDrawState()
+{
+    return ((int)m_pCurrentDrawState);
 }
 #endif
 //100%
@@ -2032,11 +2029,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_CurrentDrawState1);
  *
  * Identical to cGraphicsMan_CurrentDrawState.
  *
- * @param graphicsMan  the graphics manager
  * @return m_pCurrentDrawState (as an int)
  */
-extern "C" int cGraphicsMan_CurrentDrawState1(cGraphicsMan* graphicsMan) {
-    return ((int)graphicsMan->m_pCurrentDrawState);
+int cGraphicsMan::CurrentDrawState1()
+{
+    return ((int)m_pCurrentDrawState);
 }
 #endif
 //100%
@@ -2047,11 +2044,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDepthMask);
  *
  * Only bit 0 of @p enable is used.
  *
- * @param graphicsMan  the graphics manager
  * @param enable  the depth mask mode (On Tour eGMDepthMaskMode); bit 0 is stored
  */
-extern "C" void cGraphicsMan_SetDepthMask(cGraphicsMan* graphicsMan, int enable) {
-    int *drawState = (int*)graphicsMan->m_pCurrentDrawState;
+void cGraphicsMan::SetDepthMask(int enable)
+{
+    int *drawState = (int*)m_pCurrentDrawState;
     int bit = (enable << 22) & 0x400000;
     drawState[1] = (drawState[1] & ~0x400000) | bit;
 }
@@ -2064,13 +2061,13 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDrawLayer);
  *
  * cGraphicsMan_GetDrawLayer reads the field back.
  *
- * @param graphicsMan  the graphics manager
  * @param value  the draw layer (On Tour eGMDrawLayer; 5 bits)
  */
-extern "C" void cGraphicsMan_SetDrawLayer(cGraphicsMan* graphicsMan, int value) {
+void cGraphicsMan::SetDrawLayer(int value)
+{
     sDrawState* temp_6;
 
-    temp_6 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    temp_6 = (sDrawState*)((void*)m_pCurrentDrawState);
     ((int)temp_6->m_bitGroups[2]) = (int) ((((int)temp_6->m_bitGroups[2]) & ~0x3E0) | ((value << 5) & 0x3E0));
 }
 #endif
@@ -2119,16 +2116,16 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetBlendMode);
  * Sets the blend mode of one GS context in the current draw state (*m_pCurrentDrawState): 5 bits of word 1 at bit 2 + 5
  * * @p context.
  *
- * @param graphicsMan  the graphics manager
  * @param mode  the blend mode (On Tour eGMBlendMode)
  * @param context  the GS context (0 or 1)
  */
-extern "C" void cGraphicsMan_SetBlendMode(cGraphicsMan* graphicsMan, int mode, int context) {
+void cGraphicsMan::SetBlendMode(int mode, int context)
+{
     int temp_2;
     int temp_4;
     sDrawState* temp_7;
 
-    temp_7 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    temp_7 = (sDrawState*)((void*)m_pCurrentDrawState);
     temp_2 = (context * 5) + 2;
     temp_4 = 0x1F << temp_2;
     ((int)temp_7->m_bitGroups[1]) = (int) ((((int)temp_7->m_bitGroups[1]) & ~temp_4) | ((mode << temp_2) & temp_4));
@@ -2143,17 +2140,17 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetAlphaSort);
  * The mode goes in bits 0-1 of word 1, the key in bits 10-28 of word 2 (19 bits); cGraphicsMan_GetAlphaSort and cGraphicsMan_GetAlphaSortKey read
  * them back.
  *
- * @param graphicsMan  the graphics manager
  * @param alphaSort  the alpha sort mode (On Tour eGMAlphaSort; 2 bits)
  * @param sortKey  the sort key (19 bits)
  */
-extern "C" void cGraphicsMan_SetAlphaSort(cGraphicsMan* graphicsMan, int alphaSort, int sortKey) {
+void cGraphicsMan::SetAlphaSort(int alphaSort, int sortKey)
+{
     sDrawState* temp_3;
     sDrawState* temp_8;
 
-    temp_8 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    temp_8 = (sDrawState*)((void*)m_pCurrentDrawState);
     ((int)temp_8->m_bitGroups[1]) = (int) ((((int)temp_8->m_bitGroups[1]) & ~3) | (alphaSort & 3));
-    temp_3 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    temp_3 = (sDrawState*)((void*)m_pCurrentDrawState);
     ((int)temp_3->m_bitGroups[2]) = (int) ((((int)temp_3->m_bitGroups[2]) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
 }
 #endif
@@ -2164,16 +2161,16 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetTextureClamp);
  * Sets the texture clamp mode of one GS context in the current draw state (*m_pCurrentDrawState): 2 bits of word 0 at
  * bit 2 + 2 * @p context.
  *
- * @param graphicsMan  the graphics manager
  * @param mode  the clamp mode (On Tour eGMClampMode)
  * @param context  the GS context (0 or 1)
  */
-extern "C" void cGraphicsMan_SetTextureClamp(cGraphicsMan* graphicsMan, int mode, int context) {
+void cGraphicsMan::SetTextureClamp(int mode, int context)
+{
     int *temp_7;
     int temp_4;
     int temp_6;
 
-    temp_7 = ((int*)graphicsMan->m_pCurrentDrawState);
+    temp_7 = ((int*)m_pCurrentDrawState);
     temp_6 = (context * 2) + 2;
     temp_4 = 3 << temp_6;
     *temp_7 = (*temp_7 & ~temp_4) | ((mode << temp_6) & temp_4);
@@ -2186,11 +2183,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDmaDataPtr);
  * Stores the low 30 bits of @p value in word 3 of the current draw state (*m_pCurrentDrawState), keeping its top two
  * bits.
  *
- * @param graphicsMan  the graphics manager
  * @param value  the DMA data pointer / offset to record (30 bits)
  */
-extern "C" void cGraphicsMan_SetDmaDataPtr(cGraphicsMan* graphicsMan, int value) {
-    int *drawState = (int*)graphicsMan->m_pCurrentDrawState;
+void cGraphicsMan::SetDmaDataPtr(int value)
+{
+    int *drawState = (int*)m_pCurrentDrawState;
     int masked = value & 0x3FFFFFFF;
     drawState[3] = (drawState[3] & 0xC0000000) | masked;
 }
@@ -2203,11 +2200,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetDrawLayer);
  *
  * cGraphicsMan_SetDrawLayer sets it.
  *
- * @param graphicsMan  the graphics manager
  * @return the draw layer (0-31)
  */
-extern "C" unsigned int cGraphicsMan_GetDrawLayer(cGraphicsMan* graphicsMan) {
-    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[2]) & 0x3E0) >> 5;
+unsigned int cGraphicsMan::GetDrawLayer()
+{
+    return (unsigned int) (((int)m_pCurrentDrawState->m_bitGroups[2]) & 0x3E0) >> 5;
 }
 #endif
 //100%
@@ -2218,11 +2215,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetBlendMode);
  *
  * cGraphicsMan_SetBlendMode sets it.
  *
- * @param graphicsMan  the graphics manager
  * @return the blend mode (0-31)
  */
-extern "C" unsigned int cGraphicsMan_GetBlendMode(cGraphicsMan* graphicsMan) {
-    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[1]) & 0x7C) >> 2;
+unsigned int cGraphicsMan::GetBlendMode()
+{
+    return (unsigned int) (((int)m_pCurrentDrawState->m_bitGroups[1]) & 0x7C) >> 2;
 }
 #endif
 //100%
@@ -2233,11 +2230,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSort);
  *
  * cGraphicsMan_SetAlphaSort sets it.
  *
- * @param graphicsMan  the graphics manager
  * @return the alpha sort mode (0-3)
  */
-extern "C" int cGraphicsMan_GetAlphaSort(cGraphicsMan* graphicsMan) {
-    return ((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[1]) & 3;
+int cGraphicsMan::GetAlphaSort()
+{
+    return ((int)m_pCurrentDrawState->m_bitGroups[1]) & 3;
 }
 #endif
 //100%
@@ -2248,11 +2245,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSortKey);
  *
  * cGraphicsMan_SetAlphaSort sets it.
  *
- * @param graphicsMan  the graphics manager
  * @return the sort key
  */
-extern "C" unsigned int cGraphicsMan_GetAlphaSortKey(cGraphicsMan* graphicsMan) {
-    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[2]) & 0x1FFFFC00) >> 10;
+unsigned int cGraphicsMan::GetAlphaSortKey()
+{
+    return (unsigned int) (((int)m_pCurrentDrawState->m_bitGroups[2]) & 0x1FFFFC00) >> 10;
 }
 #endif
 
@@ -2352,11 +2349,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetNumTexRefs);
 /**
  * Returns the number of texture references (mNumTexRefs).
  *
- * @param graphicsMan  the graphics manager
  * @return mNumTexRefs
  */
-extern "C" int cGraphicsMan_GetNumTexRefs(cGraphicsMan* graphicsMan) {
-    return (graphicsMan->mNumTexRefs);
+int cGraphicsMan::GetNumTexRefs()
+{
+    return (mNumTexRefs);
 }
 #endif
 //100%
@@ -2367,13 +2364,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetTexRef);
  *
  * No range check (the preview's version asserted the index).
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the texture reference index
  * @return a pointer to mTexRefs[@p idx]
  */
-extern "C" char* cGraphicsMan_GetTexRef(cGraphicsMan* graphicsMan, int idx)
+char* cGraphicsMan::GetTexRef(int idx)
 {
-    return (char*)&graphicsMan->mTexRefs[idx];
+    return (char*)&mTexRefs[idx];
 }
 #endif
 
@@ -2607,11 +2603,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetSpecID);
 /**
  * Sets the specular texture id (mSpecTexID).
  *
- * @param graphicsMan  the graphics manager
  * @param texId  the texture id
  */
-extern "C" void cGraphicsMan_SetSpecID(cGraphicsMan* graphicsMan, int texId) {
-    graphicsMan->mSpecTexID = texId;
+void cGraphicsMan::SetSpecID(int texId)
+{
+    mSpecTexID = texId;
 }
 #endif
 //100%
@@ -2620,11 +2616,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetSpecID);
 /**
  * Returns the specular texture id (mSpecTexID).
  *
- * @param graphicsMan  the graphics manager
  * @return mSpecTexID
  */
-extern "C" int cGraphicsMan_GetSpecID(cGraphicsMan* graphicsMan) {
-    return (graphicsMan->mSpecTexID);
+int cGraphicsMan::GetSpecID()
+{
+    return (mSpecTexID);
 }
 #endif
 //100%
@@ -2665,11 +2661,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPatchSpecID);
 /**
  * Sets the patch specular texture id (mPatchSpecTexID).
  *
- * @param graphicsMan  the graphics manager
  * @param texId  the texture id
  */
-extern "C" void cGraphicsMan_SetPatchSpecID(cGraphicsMan* graphicsMan, int texId) {
-    graphicsMan->mPatchSpecTexID = texId;
+void cGraphicsMan::SetPatchSpecID(int texId)
+{
+    mPatchSpecTexID = texId;
 }
 #endif
 //100%
@@ -2678,11 +2674,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetPatchSpecID);
 /**
  * Returns the patch specular texture id (mPatchSpecTexID).
  *
- * @param graphicsMan  the graphics manager
  * @return mPatchSpecTexID
  */
-extern "C" int cGraphicsMan_GetPatchSpecID(cGraphicsMan* graphicsMan) {
-    return (graphicsMan->mPatchSpecTexID);
+int cGraphicsMan::GetPatchSpecID()
+{
+    return (mPatchSpecTexID);
 }
 #endif
 //100%
@@ -2691,10 +2687,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_SkipNextPageFlip);
 /**
  * Requests that the next page flip be skipped: sets mSkipNextPageFlip to 1.
  *
- * @param graphicsMan  the graphics manager
  */
-extern "C" void cGraphicsMan_SkipNextPageFlip(cGraphicsMan* graphicsMan) {
-    graphicsMan->mSkipNextPageFlip = 1;
+void cGraphicsMan::SkipNextPageFlip()
+{
+    mSkipNextPageFlip = 1;
 }
 #endif
 
@@ -2723,14 +2719,14 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
  * @param atestmode  the alpha test mode (2 bits)
  * @param aref  the alpha reference value (8 bits)
  */
-extern "C" void cGraphicsMan_SetPixelTest(cGraphicsMan* self, int depthtestmode, int atestmode, int aref)
+void cGraphicsMan::SetPixelTest(int depthtestmode, int atestmode, int aref)
 {
     int sa = (depthtestmode << 23) & 0x01800000;
-    self->m_pCurrentDrawState->m_bitGroups[1] = ((int)self->m_pCurrentDrawState->m_bitGroups[1] & ~0x01800000) | sa;
+    m_pCurrentDrawState->m_bitGroups[1] = ((int)m_pCurrentDrawState->m_bitGroups[1] & ~0x01800000) | sa;
     int sb = (atestmode << 20) & 0x00300000;
-    self->m_pCurrentDrawState->m_bitGroups[1] = ((int)self->m_pCurrentDrawState->m_bitGroups[1] & ~0x00300000) | sb;
+    m_pCurrentDrawState->m_bitGroups[1] = ((int)m_pCurrentDrawState->m_bitGroups[1] & ~0x00300000) | sb;
     int sc = (aref << 12) & 0x000FF000;
-    self->m_pCurrentDrawState->m_bitGroups[1] = ((int)self->m_pCurrentDrawState->m_bitGroups[1] & ~0x000FF000) | sc;
+    m_pCurrentDrawState->m_bitGroups[1] = ((int)m_pCurrentDrawState->m_bitGroups[1] & ~0x000FF000) | sc;
 }
 #endif
 //100%
@@ -2743,8 +2739,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetTexture);
  * @param value  the texture id to store (On Tour texid)
  * @param idx  the texture context (On Tour contextID); not range-checked
  */
-extern "C" void cGraphicsMan_SetTexture(cGraphicsMan* self, short value, int idx) {
-    self->m_pCurrentDrawState->m_textureState.m_texid[idx] = value;
+void cGraphicsMan::SetTexture(short value, int idx)
+{
+    m_pCurrentDrawState->m_textureState.m_texid[idx] = value;
 }
 #endif
 //100%
@@ -2755,11 +2752,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_PushDrawState);
  * Pushes the draw-state stack: copies the current draw state into the next entry and makes that entry current. No
  * overflow check.
  */
-extern "C" void cGraphicsMan_PushDrawState(cGraphicsMan* self)
+void cGraphicsMan::PushDrawState()
 {
-    sDrawState* top = self->m_pCurrentDrawState;
+    sDrawState* top = m_pCurrentDrawState;
     top[1] = top[0];
-    self->m_pCurrentDrawState = self->m_pCurrentDrawState + 1;
+    m_pCurrentDrawState = m_pCurrentDrawState + 1;
 }
 #endif
 //100%
@@ -2770,10 +2767,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_PopDrawState);
  *
  * No underflow check; the preview's version asserted that the pointer was above m_drawStateStack.
  *
- * @param graphicsMan  the graphics manager
  */
-extern "C" void cGraphicsMan_PopDrawState(cGraphicsMan* graphicsMan) {
-    graphicsMan->m_pCurrentDrawState = (sDrawState*)((int) (((int)graphicsMan->m_pCurrentDrawState) - 20));
+void cGraphicsMan::PopDrawState()
+{
+    m_pCurrentDrawState = (sDrawState*)((int) (((int)m_pCurrentDrawState) - 20));
 }
 #endif
 //100%
@@ -2793,18 +2790,18 @@ static inline short* sFontRS_shorts_47D8(char* vst)
  *
  * @return 1 at the first difference, else 0
  */
-extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
+int cGraphicsMan::DrawStateChanged()
 {
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        int* current = (int*)&self->m_pCurrentDrawState->m_bitGroups[i];
-        const sDrawState* cmp = self->ActiveDrawState();
+        int* current = (int*)&m_pCurrentDrawState->m_bitGroups[i];
+        const sDrawState* cmp = ActiveDrawState();
         if (*current != (int)cmp->m_bitGroups[i]) return 1;
     }
     for (j = 0; j < 2; j++) {
-        short* current = sFontRS_shorts_47D8((char*)self->m_pCurrentDrawState) + j;
-        const sDrawState* cmp = self->ActiveDrawState();
+        short* current = sFontRS_shorts_47D8((char*)m_pCurrentDrawState) + j;
+        const sDrawState* cmp = ActiveDrawState();
         if (*current != cmp->m_textureState.m_texid[j]) return 1;
     }
     return 0;
@@ -2818,12 +2815,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setEffectTexMap);
  *
  * No range check (86 entries); the preview's version asserted the index.
  *
- * @param graphicsMan  the graphics manager
  * @param idx  the effect id
  * @param value  the texture id
  */
-extern "C" void cGraphicsMan_setEffectTexMap(cGraphicsMan* graphicsMan, int idx, int value) {
-    graphicsMan->_EffectTexMap[idx] = value;
+void cGraphicsMan::setEffectTexMap(int idx, int value)
+{
+    _EffectTexMap[idx] = value;
 }
 #endif
 //100%
@@ -3138,10 +3135,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_SetNearLOD__FPvf);
  *
  * @param nearLOD  the near LOD distance
  */
-void cPS2BezierMan_SetNearLOD(void* vself, float nearLOD)
+void cPS2BezierMan::SetNearLOD(float nearLOD)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mNearLODcm = nearLOD;
+    mNearLODcm = nearLOD;
 }
 #endif
 
@@ -3155,10 +3151,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_SetFarLOD__FPvf);
  *
  * @param farLOD  the far LOD distance
  */
-void cPS2BezierMan_SetFarLOD(void* vself, float farLOD)
+void cPS2BezierMan::SetFarLOD(float farLOD)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mFarLODcm = farLOD;
+    mFarLODcm = farLOD;
 }
 #endif
 
@@ -3172,10 +3167,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetNearLOD__FPv);
  *
  * @return the near LOD distance
  */
-float cPS2BezierMan_GetNearLOD(void* vself)
+float cPS2BezierMan::GetNearLOD()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return self->mNearLODcm;
+    return mNearLODcm;
 }
 #endif
 
@@ -3189,10 +3183,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetFarLOD__FPv);
  *
  * @return the far LOD distance
  */
-float cPS2BezierMan_GetFarLOD(void* vself)
+float cPS2BezierMan::GetFarLOD()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return self->mFarLODcm;
+    return mFarLODcm;
 }
 #endif
 
@@ -3206,10 +3199,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_SetLmapStart__FPvi);
  *
  * @param lmapStart  the first light-map index
  */
-void cPS2BezierMan_SetLmapStart(void* vself, int lmapStart)
+void cPS2BezierMan::SetLmapStart(int lmapStart)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mLmapStart = lmapStart;
+    mLmapStart = lmapStart;
 }
 #endif
 
@@ -3223,10 +3215,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_EnableWireMode__FPvi);
  *
  * @param enable  non-zero to draw wireframe
  */
-void cPS2BezierMan_EnableWireMode(void* vself, int enable)
+void cPS2BezierMan::EnableWireMode(int enable)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mWireModeEnabled = enable;
+    mWireModeEnabled = enable;
 }
 #endif
 
@@ -3240,10 +3231,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_EnableLightMaps__FPvi);
  *
  * @param enable  non-zero to use light maps
  */
-void cPS2BezierMan_EnableLightMaps(void* vself, int enable)
+void cPS2BezierMan::EnableLightMaps(int enable)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mLightMapsEnabled = enable;
+    mLightMapsEnabled = enable;
 }
 #endif
 
@@ -3257,10 +3247,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_EnableShadows__FPvi);
  *
  * @param enable  non-zero to draw shadows
  */
-void cPS2BezierMan_EnableShadows(void* vself, int enable)
+void cPS2BezierMan::EnableShadows(int enable)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mShadowsEnabled = enable;
+    mShadowsEnabled = enable;
 }
 #endif
 
@@ -3274,10 +3263,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_IsWireModeEnabled__FPv);
  *
  * @return the wireframe flag
  */
-int cPS2BezierMan_IsWireModeEnabled(void* vself)
+int cPS2BezierMan::IsWireModeEnabled()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return self->mWireModeEnabled;
+    return mWireModeEnabled;
 }
 #endif
 
@@ -3291,10 +3279,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_IsLightMapsEnabled__FPv);
  *
  * @return the light-map flag
  */
-int cPS2BezierMan_IsLightMapsEnabled(void* vself)
+int cPS2BezierMan::IsLightMapsEnabled()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return self->mLightMapsEnabled;
+    return mLightMapsEnabled;
 }
 #endif
 
@@ -3308,10 +3295,9 @@ INCLUDE_ASM("render/font", cPS2BezierMan_IsShadowsEnabled__FPv);
  *
  * @return the shadow flag
  */
-int cPS2BezierMan_IsShadowsEnabled(void* vself)
+int cPS2BezierMan::IsShadowsEnabled()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return self->mShadowsEnabled;
+    return mShadowsEnabled;
 }
 #endif
 
@@ -3321,13 +3307,13 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetVifCache);
 /**
  * Returns VIF cache cursor @p idx advanced by @p shift quadword blocks: mVifCachePos[idx] + (shift << 8).
  *
- * @param base  the Bezier patch manager
  * @param shift  the number of 256-byte blocks to skip
  * @param idx  the VIF cache (0: 4x4, 1: 6x6, 2: 8x8)
  * @return the cache address
  */
-extern "C" int cPS2BezierMan_GetVifCache(cPS2BezierMan* base, int shift, int idx) {
-    return (int)base->mVifCachePos[idx] + (shift << 8);
+int cPS2BezierMan::GetVifCache(int shift, int idx)
+{
+    return (int)mVifCachePos[idx] + (shift << 8);
 }
 #endif
 //100%
@@ -3336,11 +3322,11 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetBezST);
 /**
  * Returns the word at +0x1A0 of the Bezier manager (inside the patch cache at +0x10).
  *
- * @param bezierMan  the Bezier patch manager
  * @return the word at +0x1A0
  */
-extern "C" int cPS2BezierMan_GetBezST(cPS2BezierMan* bezierMan) {
-    return ((int)bezierMan->mPatchCache.unk_190[0]);
+int cPS2BezierMan::GetBezST()
+{
+    return ((int)mPatchCache.unk_190[0]);
 }
 #endif
 //100%
@@ -3349,11 +3335,11 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetBezdST);
 /**
  * Returns the word at +0x320 of the Bezier manager (inside the patch cache at +0x10).
  *
- * @param bezierMan  the Bezier patch manager
  * @return the word at +0x320
  */
-extern "C" int cPS2BezierMan_GetBezdST(cPS2BezierMan* bezierMan) {
-    return ((int)bezierMan->mPatchCache.unk_310[0]);
+int cPS2BezierMan::GetBezdST()
+{
+    return ((int)mPatchCache.unk_310[0]);
 }
 #endif
 //100%
@@ -3451,10 +3437,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetLightObj__FPvi);
  * @param index  the light index
  * @return a pointer to m_pLights[@p index]
  */
-void* cPS2LightMan_GetLightObj(void* vself, int index)
+void* cPS2LightMan::GetLightObj(int index)
 {
-    cPS2LightMan* self = (cPS2LightMan*)vself;
-    return &self->m_pLights[index];
+    return &m_pLights[index];
 }
 #endif
 
@@ -3473,12 +3458,12 @@ extern const char str_LightInst[];
  *
  * @param numLights  the number of static lights
  */
-extern "C" void cPS2LightMan_Init(cPS2LightMan* self, int numLights)
+void cPS2LightMan::Init(int numLights)
 {
-    self->m_iStartDynLight = numLights;
-    self->m_iDynLight = 0;
-    self->m_iMaxLights = numLights + 50;
-    self->m_pLights = (cLightInst**)operator_new_tag((numLights + 50) * 4, str_LightInst, 0, 0);
+    m_iStartDynLight = numLights;
+    m_iDynLight = 0;
+    m_iMaxLights = numLights + 50;
+    m_pLights = (cLightInst**)operator_new_tag((numLights + 50) * 4, str_LightInst, 0, 0);
 }
 #endif
 
@@ -3490,9 +3475,9 @@ void cMemMan_free(void*);
 /**
  * Frees the light manager's light buffer.
  */
-extern "C" void cPS2LightMan_Purge(cPS2LightMan* self)
+void cPS2LightMan::Purge()
 {
-    void* lights = self->m_pLights;
+    void* lights = m_pLights;
     if (lights != 0) {
         cMemMan_free(lights);
     }
@@ -3505,10 +3490,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_ResetDynamicLights__FPv);
 /**
  * Removes all dynamic lights by zeroing the light manager's dynamic light count (+0xC).
  */
-void cPS2LightMan_ResetDynamicLights(void* vself)
+void cPS2LightMan::ResetDynamicLights()
 {
-    cPS2LightMan* self = (cPS2LightMan*)vself;
-    self->m_iDynLight = 0;
+    m_iDynLight = 0;
 }
 #endif
 
@@ -3524,9 +3508,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetDynamicLight);
  *
  * @return the light index
  */
-extern "C" int cPS2LightMan_GetDynamicLight(cPS2LightMan* self)
+int cPS2LightMan::GetDynamicLight()
 {
-    return self->m_iStartDynLight + (self->m_iDynLight)++;
+    return m_iStartDynLight + (m_iDynLight)++;
 }
 #endif
 
@@ -3735,9 +3719,9 @@ INCLUDE_ASM("render/font", cPS2DeferManager_Find1);
  * @param matrixIndex  the matrix index
  * @return the bucket, or 0 if none matches
  */
-extern "C" tDeferBucket* cPS2DeferManager_Find1(cPS2DeferManager* self, int stateEntry, int texKey, unsigned char hash, int matrixIndex)
+tDeferBucket* cPS2DeferManager::Find1(int stateEntry, int texKey, unsigned char hash, int matrixIndex)
 {
-    tDeferBucket** pp = &self->mBucketHash[hash];
+    tDeferBucket** pp = &mBucketHash[hash];
     while (*pp != 0) {
         tDeferBucket* node;
         int hit = 0;
@@ -3747,12 +3731,12 @@ extern "C" tDeferBucket* cPS2DeferManager_Find1(cPS2DeferManager* self, int stat
         }
         node = *pp;
         if (hit) {
-            if ((*pp) == self->mBucketHash[hash]) {
+            if ((*pp) == mBucketHash[hash]) {
                 return node;
             }
             *pp = node->mpNext;
-            node->mpNext = self->mBucketHash[hash];
-            self->mBucketHash[hash] = node;
+            node->mpNext = mBucketHash[hash];
+            mBucketHash[hash] = node;
             return node;
         }
         pp = &node->mpNext;
@@ -4004,7 +3988,7 @@ extern "C" void cPS2GraphicsMan_updateNetMat(cPS2GraphicsMan* self);
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void* cPS2GraphicsMan_GetNetMatrix(void* out, cPS2GraphicsMan* self)
 {
-    cPS2GraphicsMan_updateNetMat((cPS2GraphicsMan*)self);
+    self->updateNetMat();
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4058,11 +4042,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetNumProjTextures);
 /**
  * Returns the number of projective textures (mNumShdw).
  *
- * @param pS2GraphicsMan  the graphics manager
  * @return mNumShdw
  */
-extern "C" int cPS2GraphicsMan_GetNumProjTextures(cPS2GraphicsMan* pS2GraphicsMan) {
-    return (pS2GraphicsMan->mNumShdw);
+int cPS2GraphicsMan::GetNumProjTextures()
+{
+    return (mNumShdw);
 }
 #endif
 //100%
@@ -4073,13 +4057,12 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetProjTexInfo);
  *
  * No range check (eight entries); the preview's version asserted the index.
  *
- * @param base  the graphics manager
  * @param idx  the projective texture index
  * @return a pointer to the entry
  */
-extern "C" char* cPS2GraphicsMan_GetProjTexInfo(cPS2GraphicsMan* base, int idx)
+char* cPS2GraphicsMan::GetProjTexInfo(int idx)
 {
-    return (char*)&base->mProjTextures[idx];
+    return (char*)&mProjTextures[idx];
 }
 #endif
 //100%
@@ -4088,13 +4071,13 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetVifCodeState);
 /**
  * Sets bits 6-9 of word 0 of the current draw state (*m_pCurrentDrawState) (the VIF code state).
  *
- * @param ps2GraphicsMan  the graphics manager
  * @param value  the VIF code state (preview VifCodeState; 4 bits)
  */
-extern "C" void cPS2GraphicsMan_SetVifCodeState(cPS2GraphicsMan* ps2GraphicsMan, int value) {
+void cPS2GraphicsMan::SetVifCodeState(int value)
+{
     int *temp_6;
 
-    temp_6 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_6 = ((int*)m_pCurrentDrawState);
     *temp_6 = (*temp_6 & ~0x3C0) | ((value << 6) & 0x3C0);
 }
 #endif
@@ -4104,13 +4087,13 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetVUCodeInitType);
 /**
  * Sets bits 10-11 of word 0 of the current draw state (*m_pCurrentDrawState) (the VU code init type).
  *
- * @param ps2GraphicsMan  the graphics manager
  * @param value  the VU code init type (preview VUCodeInitType; 2 bits)
  */
-extern "C" void cPS2GraphicsMan_SetVUCodeInitType(cPS2GraphicsMan* ps2GraphicsMan, int value) {
+void cPS2GraphicsMan::SetVUCodeInitType(int value)
+{
     int *temp_6;
 
-    temp_6 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_6 = ((int*)m_pCurrentDrawState);
     *temp_6 = (*temp_6 & ~0xC00) | ((value << 0xA) & 0xC00);
 }
 #endif
@@ -4121,16 +4104,16 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetFixAlpha);
  * Sets the fixed alpha of one GS context in the current draw state (*m_pCurrentDrawState): 8 bits of word 0 at bit 12 +
  * 8 * @p context.
  *
- * @param ps2GraphicsMan  the graphics manager
  * @param alpha  the fixed alpha (0-255)
  * @param context  the GS context (0 or 1)
  */
-extern "C" void cPS2GraphicsMan_SetFixAlpha(cPS2GraphicsMan* ps2GraphicsMan, int alpha, int context) {
+void cPS2GraphicsMan::SetFixAlpha(int alpha, int context)
+{
     int *temp_7;
     int temp_3;
     int temp_6;
 
-    temp_7 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_7 = ((int*)m_pCurrentDrawState);
     temp_6 = (context * 8) + 0xC;
     temp_3 = 0xFF << temp_6;
     *temp_7 = (*temp_7 & ~temp_3) | (((alpha & 0xFF) << temp_6) & temp_3);
@@ -4204,11 +4187,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentFrameBufferPage);
 /**
  * Returns the current frame-buffer page (mCurrentFrameBufferPage).
  *
- * @param graphicsMan  the graphics manager
  * @return mCurrentFrameBufferPage
  */
-extern "C" int cPS2GraphicsMan_GetCurrentFrameBufferPage(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mCurrentFrameBufferPage);
+int cPS2GraphicsMan::GetCurrentFrameBufferPage()
+{
+    return (mCurrentFrameBufferPage);
 }
 #endif
 //100%
@@ -4217,11 +4200,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentZBufferPage);
 /**
  * Returns the current Z-buffer page (mCurrentZBufferPage).
  *
- * @param graphicsMan  the graphics manager
  * @return mCurrentZBufferPage
  */
-extern "C" int cPS2GraphicsMan_GetCurrentZBufferPage(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mCurrentZBufferPage);
+int cPS2GraphicsMan::GetCurrentZBufferPage()
+{
+    return (mCurrentZBufferPage);
 }
 #endif
 //100%
@@ -4230,11 +4213,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentFBFormat);
 /**
  * Returns the current frame-buffer pixel format (mCurrentFBFormat).
  *
- * @param graphicsMan  the graphics manager
  * @return mCurrentFBFormat
  */
-extern "C" int cPS2GraphicsMan_GetCurrentFBFormat(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mCurrentFBFormat);
+int cPS2GraphicsMan::GetCurrentFBFormat()
+{
+    return (mCurrentFBFormat);
 }
 #endif
 //100%
@@ -4243,11 +4226,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentZBFormat);
 /**
  * Returns the current Z-buffer format (mCurrentZBFormat).
  *
- * @param graphicsMan  the graphics manager
  * @return mCurrentZBFormat
  */
-extern "C" int cPS2GraphicsMan_GetCurrentZBFormat(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mCurrentZBFormat);
+int cPS2GraphicsMan::GetCurrentZBFormat()
+{
+    return (mCurrentZBFormat);
 }
 #endif
 //100%
@@ -4256,11 +4239,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetTextureMan);
 /**
  * Returns the texture manager (mTexMan).
  *
- * @param pS2GraphicsMan  the graphics manager
  * @return mTexMan
  */
-extern "C" int cPS2GraphicsMan_GetTextureMan(cPS2GraphicsMan* pS2GraphicsMan) {
-    return ((int)pS2GraphicsMan->mTexMan);
+int cPS2GraphicsMan::GetTextureMan()
+{
+    return ((int)mTexMan);
 }
 #endif
 //100%
@@ -4269,11 +4252,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetMinFlipWait);
 /**
  * Sets the minimum number of vblanks between page flips (mMinFlipWait).
  *
- * @param graphicsMan  the graphics manager
  * @param minWait  the vblank count
  */
-extern "C" void cPS2GraphicsMan_SetMinFlipWait(cPS2GraphicsMan* graphicsMan, int minWait) {
-    graphicsMan->mMinFlipWait = minWait;
+void cPS2GraphicsMan::SetMinFlipWait(int minWait)
+{
+    mMinFlipWait = minWait;
 }
 #endif
 //100%
@@ -4282,11 +4265,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayBufferAddress);
 /**
  * Returns the display buffer address (mDisplayBufferAddress).
  *
- * @param graphicsMan  the graphics manager
  * @return mDisplayBufferAddress
  */
-extern "C" int cPS2GraphicsMan_GetDisplayBufferAddress(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mDisplayBufferAddress);
+int cPS2GraphicsMan::GetDisplayBufferAddress()
+{
+    return (mDisplayBufferAddress);
 }
 #endif
 //100%
@@ -4311,11 +4294,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetFrameBufferWidth);
 /**
  * Returns the frame-buffer width (mFrameBufferWidth).
  *
- * @param graphicsMan  the graphics manager
  * @return mFrameBufferWidth
  */
-extern "C" int cPS2GraphicsMan_GetFrameBufferWidth(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mFrameBufferWidth);
+int cPS2GraphicsMan::GetFrameBufferWidth()
+{
+    return (mFrameBufferWidth);
 }
 #endif
 //100%
@@ -4324,11 +4307,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetPSMFormat);
 /**
  * Returns the current frame-buffer pixel format (mCurrentFBFormat), like cPS2GraphicsMan_GetCurrentFBFormat.
  *
- * @param graphicsMan  the graphics manager
  * @return mCurrentFBFormat
  */
-extern "C" int cPS2GraphicsMan_GetPSMFormat(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mCurrentFBFormat);
+int cPS2GraphicsMan::GetPSMFormat()
+{
+    return (mCurrentFBFormat);
 }
 #endif
 //100%
@@ -4337,10 +4320,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_EnableFilter);
 /**
  * Enables the display filter: sets mFilterEnabled to 1.
  *
- * @param graphicsMan  the graphics manager
  */
-extern "C" void cPS2GraphicsMan_EnableFilter(cPS2GraphicsMan* graphicsMan) {
-    graphicsMan->mFilterEnabled = 1;
+void cPS2GraphicsMan::EnableFilter()
+{
+    mFilterEnabled = 1;
 }
 #endif
 //100%
@@ -4349,10 +4332,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_DisableFilter);
 /**
  * Disables the display filter: sets mFilterEnabled to 0.
  *
- * @param graphicsMan  the graphics manager
  */
-extern "C" void cPS2GraphicsMan_DisableFilter(cPS2GraphicsMan* graphicsMan) {
-    graphicsMan->mFilterEnabled = 0;
+void cPS2GraphicsMan::DisableFilter()
+{
+    mFilterEnabled = 0;
 }
 #endif
 //100%
@@ -4371,9 +4354,9 @@ static inline float clamp_5580(float x, float hi)
  *
  * @param x  the requested brightness
  */
-extern "C" void cPS2GraphicsMan_SetScreenBrightness(cPS2GraphicsMan* self, float x)
+void cPS2GraphicsMan::SetScreenBrightness(float x)
 {
-    self->mScreenBrightness = clamp_5580(x, 2.0f);
+    mScreenBrightness = clamp_5580(x, 2.0f);
 }
 #endif
 //100%
@@ -4382,11 +4365,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenBrightness);
 /**
  * Returns the screen brightness (mScreenBrightness).
  *
- * @param graphicsMan  the graphics manager
  * @return mScreenBrightness
  */
-extern "C" float cPS2GraphicsMan_GetScreenBrightness(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mScreenBrightness);
+float cPS2GraphicsMan::GetScreenBrightness()
+{
+    return (mScreenBrightness);
 }
 #endif
 //100%
@@ -4407,15 +4390,14 @@ struct sGfx_55B0 {
  * through the uncached alias (| 0x30000000): the draw state, @p buf, @p next, the defer manager's word at +0x69CC0 as a
  * 16-bit key, and @p flag.
  *
- * @param gfx  the graphics manager
  * @param buf  the start of the DMA chain
  * @param next  the chain's end / next pointer
  * @param flag  a flag stored with the record (preview: bool)
  */
-extern "C" void cPS2GraphicsMan_AddDMAToWorld(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
+void cPS2GraphicsMan::AddDMAToWorld(unsigned int buf, unsigned int next, int flag)
 {
-    sDrawState* rs = gfx->m_pCurrentDrawState;
-    cPS2DeferManager* ring = gfx->mpDeferMan;
+    sDrawState* rs = m_pCurrentDrawState;
+    cPS2DeferManager* ring = mpDeferMan;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -4436,11 +4418,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDeferMan);
 /**
  * Returns the deferred-draw manager (mpDeferMan).
  *
- * @param pS2GraphicsMan  the graphics manager
  * @return mpDeferMan (as an int)
  */
-extern "C" int cPS2GraphicsMan_GetDeferMan(cPS2GraphicsMan* pS2GraphicsMan) {
-    return ((int)pS2GraphicsMan->mpDeferMan);
+int cPS2GraphicsMan::GetDeferMan()
+{
+    return ((int)mpDeferMan);
 }
 #endif
 //100%
@@ -4482,10 +4464,10 @@ extern "C" void func_0037D968(void* self);
  *
  * Called by cPS2GraphicsMan_GetNetMatrix before it copies mNetMatrix.
  */
-extern "C" void cPS2GraphicsMan_updateNetMat(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::updateNetMat()
 {
-    if (self->mMatricesValid == 0) {
-        func_0037D968(self);
+    if (mMatricesValid == 0) {
+        func_0037D968(this);
     }
 }
 #endif
@@ -5012,11 +4994,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_CalcSortZ);
  * @return the clamped, scaled w as an integer
  */
 // PORT: PS2-only VU0 inline asm (matrix * vector, clamp, clip flags read back from vi1).
-extern "C" int cPS2GraphicsMan_CalcSortZ(cPS2GraphicsMan* self, void* vec)
+int cPS2GraphicsMan::CalcSortZ(void* vec)
 {
     long sortZ;
-    if (self->mMatricesValid == 0) {
-        func_0037D968(self);
+    if (mMatricesValid == 0) {
+        func_0037D968(this);
     }
     __asm__ __volatile__(
         "lqc2      $vf5, 0x5920(%1)\n"
@@ -5036,7 +5018,7 @@ extern "C" int cPS2GraphicsMan_CalcSortZ(cPS2GraphicsMan* self, void* vec)
         "vmtir      $vi1, $vf11w\n"
         "cfc2.ni    %0, $vi1\n"
         : "=&r"(sortZ)
-        : "r"(((void*)self)), "r"(vec), "r"((char*)&self->mNetMatrix)
+        : "r"(((void*)this)), "r"(vec), "r"((char*)&mNetMatrix)
         : "memory");
     return (int)sortZ;
 }
@@ -5099,30 +5081,31 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_projOutCode);
  * @param vec  the point (x, y, z, w)
  * @return the out-code bits
  */
-extern "C" int cPS2GraphicsMan_projOutCode(cPS2GraphicsMan* self, t4Vector* vec) {
+int cPS2GraphicsMan::projOutCode(t4Vector* vec)
+{
     float x = vec->x;
     int flags = 0;
-    if (x < self->mClipMin.x) {
+    if (x < mClipMin.x) {
         flags = 2;
     }
-    if (self->mClipMax.x < x) {
+    if (mClipMax.x < x) {
         flags |= 1;
     }
     float y = vec->y;
-    if (y < self->mClipMin.y) {
+    if (y < mClipMin.y) {
         flags |= 8;
     }
-    if (self->mClipMax.y < y) {
+    if (mClipMax.y < y) {
         flags |= 4;
     }
     if (vec->w < 0.0f) {
         return flags ^ 0x2F;
     }
     float z = vec->z;
-    if (self->mClipMin.z < z) {
+    if (mClipMin.z < z) {
         flags |= 0x20;
     }
-    if (z < self->mClipMax.z) {
+    if (z < mClipMax.z) {
         flags |= 0x10;
     }
     return flags;
@@ -5174,8 +5157,9 @@ extern "C" void func_00382AF0(void* self, int arg1, int arg2);
  *
  * @param arg1  passed through as func_00382AF0's second argument (preview: a bool)
  */
-extern "C" void cPS2GraphicsMan_PageFlip(cPS2GraphicsMan* self, int arg1) {
-    func_00382AF0(self, arg1, 1);
+void cPS2GraphicsMan::PageFlip(int arg1)
+{
+    func_00382AF0(this, arg1, 1);
 }
 #endif
 
@@ -5189,10 +5173,9 @@ INCLUDE_ASM("render/font", cPS2GridMesh_IsOk__FPv);
  *
  * @return the word at +0x1C8
  */
-int cPS2GridMesh_IsOk(void* vself)
+int cPS2GridMesh::IsOk()
 {
-    cPS2GridMesh* self = (cPS2GridMesh*)vself;
-    return self->mbOK;
+    return mbOK;
 }
 #endif
 
@@ -5206,10 +5189,10 @@ INCLUDE_ASM("render/font", cPS2GridMesh_SetScale);
  *
  * @param range  the scale / range value
  */
-extern "C" void cPS2GridMesh_SetScale(cPS2GridMesh* self, float range)
+void cPS2GridMesh::SetScale(float range)
 {
-    self->mScale = range;
-    self->mPosToShort = 32767.0f / range;
+    mScale = range;
+    mPosToShort = 32767.0f / range;
 }
 #endif
 
@@ -6400,8 +6383,9 @@ INCLUDE_ASM("render/font", cStaticEmitter_setPosition);
  */
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
-extern "C" void cStaticEmitter_setPosition(cStaticEmitter* emitter, long long *position) {
-    (*(long long*)&emitter->Emitter.X0) = (long long) *position;
+void cStaticEmitter::setPosition(long long *position)
+{
+    (*(long long*)&Emitter.X0) = (long long) *position;
 }
 #endif
 //100%
@@ -6427,11 +6411,11 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_setSeed);
  *
  * No caller.
  *
- * @param emitter  the dynamic emitter
  * @param fparg0  the seed
  */
-extern "C" void cBaseClass_DynamicEmitter_setSeed(cBaseClass_DynamicEmitter* emitter, float fparg0) {
-    emitter->m_emitter.SeedX0 = fparg0;
+void cBaseClass_DynamicEmitter::setSeed(float fparg0)
+{
+    m_emitter.SeedX0 = fparg0;
 }
 #endif
 //100%
@@ -6442,11 +6426,11 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_numSubEmitters);
  *
  * No caller.
  *
- * @param emitter  the dynamic emitter
  * @return m_numSubEmitters
  */
-extern "C" int cBaseClass_DynamicEmitter_numSubEmitters(cBaseClass_DynamicEmitter* emitter) {
-    return (emitter->m_numSubEmitters);
+int cBaseClass_DynamicEmitter::numSubEmitters()
+{
+    return (m_numSubEmitters);
 }
 #endif
 //100%
@@ -6457,11 +6441,11 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_subEmitterId);
  *
  * No caller.
  *
- * @param emitter  the dynamic emitter
  * @return m_subEmitterId
  */
-extern "C" int cBaseClass_DynamicEmitter_subEmitterId(cBaseClass_DynamicEmitter* emitter) {
-    return (emitter->m_subEmitterId);
+int cBaseClass_DynamicEmitter::subEmitterId()
+{
+    return (m_subEmitterId);
 }
 #endif
 //100%
@@ -6472,11 +6456,11 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_enabled);
  *
  * No caller.
  *
- * @param emitter  the dynamic emitter
  * @return m_enabled
  */
-extern "C" int cBaseClass_DynamicEmitter_enabled(cBaseClass_DynamicEmitter* emitter) {
-    return (emitter->m_enabled);
+int cBaseClass_DynamicEmitter::enabled()
+{
+    return (m_enabled);
 }
 #endif
 //100%
@@ -6487,11 +6471,11 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_setEnabled);
  *
  * No caller.
  *
- * @param emitter  the dynamic emitter
  * @param enable  nonzero to enable
  */
-extern "C" void cBaseClass_DynamicEmitter_setEnabled(cBaseClass_DynamicEmitter* emitter, int enable) {
-    emitter->m_enabled = enable;
+void cBaseClass_DynamicEmitter::setEnabled(int enable)
+{
+    m_enabled = enable;
 }
 #endif
 //100%
@@ -6502,11 +6486,11 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getEnabledCount);
  *
  * No caller.
  *
- * @param emitter  the dynamic emitter
  * @return m_enabledCount
  */
-extern "C" int cBaseClass_DynamicEmitter_getEnabledCount(cBaseClass_DynamicEmitter* emitter) {
-    return (emitter->m_enabledCount);
+int cBaseClass_DynamicEmitter::getEnabledCount()
+{
+    return (m_enabledCount);
 }
 #endif
 //100%
@@ -6560,13 +6544,12 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPositionVeloci
  * @param outA  receives &m_positions[slot]
  * @param outB  receives &m_velocities[slot]
  */
-extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity(cBaseClass_DynamicEmitter* self, int idx,
-                                                                        t4Vector** outA, t4Vector** outB)
+void cBaseClass_DynamicEmitter::getSubEmitterPositionVelocity(int idx, t4Vector** outA, t4Vector** outB)
 {
-    int next = self->m_subEmitterId + 1;
-    int slot = (idx + next) % self->m_numSubEmitters;
-    *outA = &self->m_positions[slot];
-    *outB = &self->m_velocities[slot];
+    int next = m_subEmitterId + 1;
+    int slot = (idx + next) % m_numSubEmitters;
+    *outA = &m_positions[slot];
+    *outB = &m_velocities[slot];
 }
 #endif
 //100%
@@ -6583,12 +6566,12 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPositionVeloci
  * @param outA  receives the position
  * @param outB  receives the velocity
  */
-extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1(cBaseClass_DynamicEmitter* self, int idx, t4Vector* outA, t4Vector* outB)
+void cBaseClass_DynamicEmitter::getSubEmitterPositionVelocity1(int idx, t4Vector* outA, t4Vector* outB)
 {
-    int next = self->m_subEmitterId + 1;
-    int i = (idx + next) % self->m_numSubEmitters;
-    *outA = (self->m_positions)[i];
-    *outB = (self->m_velocities)[i];
+    int next = m_subEmitterId + 1;
+    int i = (idx + next) % m_numSubEmitters;
+    *outA = m_positions[i];
+    *outB = m_velocities[i];
 }
 #endif
 //100%
@@ -6606,15 +6589,14 @@ INCLUDE_ASM("render/font", cDynamicColourEmitter_getSubEmitterPositionVelocityCo
  * @param outB  receives &m_velocities[slot]
  * @param outC  receives &m_colours[slot]
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(cDynamicColourEmitter* self, int idx,
-                                                                           t4Vector** outA, t4Vector** outB,
-                                                                           tPackedRGBA** outC)
+void cDynamicColourEmitter::getSubEmitterPositionVelocityColour(int idx, t4Vector** outA, t4Vector** outB,
+                                                                tPackedRGBA** outC)
 {
-    int next = self->m_subEmitterId + 1;
-    int i = (idx + next) % self->m_numSubEmitters;
-    *outA = &self->m_positions[i];
-    *outB = &self->m_velocities[i];
-    *outC = &self->m_colours[i];
+    int next = m_subEmitterId + 1;
+    int i = (idx + next) % m_numSubEmitters;
+    *outA = &m_positions[i];
+    *outB = &m_velocities[i];
+    *outC = &m_colours[i];
 }
 #endif
 //100%
@@ -6633,14 +6615,13 @@ INCLUDE_ASM("render/font", cDynamicColourEmitter_getSubEmitterPositionVelocityCo
  * @param out1  receives the velocity
  * @param out2  receives the packed colour
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(cDynamicColourEmitter* self, int idx,
-                                                                            t4Vector* out0, t4Vector* out1,
-                                                                            tPackedRGBA* out2)
+void cDynamicColourEmitter::getSubEmitterPositionVelocityColour1(int idx, t4Vector* out0, t4Vector* out1,
+                                                                 tPackedRGBA* out2)
 {
-    int i = (idx + 1 + self->m_subEmitterId) % self->m_numSubEmitters;
-    *out0 = self->m_positions[i];
-    *out1 = self->m_velocities[i];
-    *out2 = self->m_colours[i];
+    int i = (idx + 1 + m_subEmitterId) % m_numSubEmitters;
+    *out0 = m_positions[i];
+    *out1 = m_velocities[i];
+    *out2 = m_colours[i];
 }
 #endif
 //100%
@@ -6660,10 +6641,10 @@ struct sFontP_67D8 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the colour
  */
-extern "C" tPackedRGBA cDynamicColourEmitter_getSubEmitterColour(cDynamicColourEmitter* self, int idx)
+tPackedRGBA cDynamicColourEmitter::getSubEmitterColour(int idx)
 {
-    int next = self->m_subEmitterId + 1;
-    return (self->m_colours)[(idx + next) % self->m_numSubEmitters];
+    int next = m_subEmitterId + 1;
+    return m_colours[(idx + next) % m_numSubEmitters];
 }
 #endif
 //100%
@@ -6835,9 +6816,9 @@ INCLUDE_ASM("render/font", cSimpleTube_setPosition);
  * @param index  the entry
  * @param src  the vector to store
  */
-extern "C" void cSimpleTube_setPosition(cSimpleTube* self, int index, void* src)
+void cSimpleTube::setPosition(int index, void* src)
 {
-    cQuad128* quads = (cQuad128*)self->m_positions;
+    cQuad128* quads = (cQuad128*)m_positions;
     quads[index] = *(cQuad128*)src;
 }
 #endif
@@ -8508,10 +8489,9 @@ INCLUDE_ASM("render/font", cUIAnimationBank_setData__FPvi);
  *
  * @param val  the animation block's address (On Tour: char* pData)
  */
-void cUIAnimationBank_setData(void* vself, int val)
+void cUIAnimationBank::setData(int val)
 {
-    cUIAnimationBank* self = (cUIAnimationBank*)vself;
-    self->mpAnimationBlock = (tUIAnimationBlock*)val;
+    mpAnimationBlock = (tUIAnimationBlock*)val;
 }
 #endif
 

@@ -22,6 +22,9 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+struct cBxReplayFrame;
+struct t4Vector;
+
 struct cRigidBody {
     // --- cRigidBodyState (On Tour 0x50; the 0x50-byte replay-frame block)
     tPose Pose;            // 0x00 [O] cRigidBodyState::Pose; [U] stepMotion (cRigidBody_stepMotion) integrates Pose.P/Pose.Q
@@ -37,6 +40,12 @@ struct cRigidBody {
     t4Vector V;            // 0x80 [O] velocity; [U] updateImplicit/applyImpulse write it (sq 0x80), stepMotion,
                            //      rigidImpact read it
     t4Vector W;            // 0x90 [O] angular velocity; [U] setW stores its argument (sq 0x90), updateImplicit writes it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setW(const t4Vector* newPos) __asm__("cRigidBody_setW");
+    void stepMotion(const t4Vector* force, const t4Vector* torque, float dt) __asm__("cRigidBody_stepMotion");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRigidBody_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cRigidBody_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cRigidBody, Pose, 0x00);

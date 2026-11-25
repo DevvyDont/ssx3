@@ -43,6 +43,9 @@ struct cFade_TObj {
     // --- cFade_TObj
     tARGB mColour;                  // 0x04 [O]; [R] ctor stores the colour (A, R, G, B); [U] Draw draws it with
                                     //      A * amount (lwc1 0x4)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Draw(float amount) __asm__("cFade_TObj_Draw");
 };
 
 CHECK_OFFSET(cFade_TObj, mVtbl, 0x00);
@@ -59,6 +62,9 @@ struct cWipe_TObj {
                                     //      [U] Draw: x offset = mHDir * (1 - amount) * 640 (lwc1 + cvt.s.w)
     int mVDir;                      // 0x18 [O] eTransitionVertical; [R] ctor; [U] Draw: y offset = mVDir * (1 - amount)
                                     //      * -480 (lwc1 + cvt.s.w)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Draw(float amount) __asm__("cWipe_TObj_Draw");
 };
 
 CHECK_OFFSET(cWipe_TObj, mVtbl, 0x00);
@@ -76,6 +82,9 @@ struct cCircle_TObj {
                                     //      vertex helpers (func_002EB938, InitVertex)
     float mOriginX;                 // 0x14 [O]; [R] ctor (rand % 1000) * 0.64, func_002EBD88 originX; [U] Draw (lwc1)
     float mOriginY;                 // 0x18 [O]; [R] ctor (rand % 1000) * 0.48, func_002EBD88 originY; [U] Draw (lwc1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Draw(float amount) __asm__("cCircle_TObj_Draw");
 };
 
 CHECK_OFFSET(cCircle_TObj, mVtbl, 0x00);

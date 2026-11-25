@@ -75,6 +75,27 @@ struct cScriptPlayerEntity {
     int mSetupScriptInitialEventBits;             // 0x34 [O]; [U] SetupPlay 0, then ORs each channel's event bits;
                                                   //      ExecutePlay passes it to OnInSeqKeyEvent/OnInSeqUpdate, clears it
     int mWaitingPlayExec;                         // 0x38 [O] (bool); [U] SetupPlay 1; ExecutePlay and DeInit 0
+
+    // Methods bound to their retail symbols by asm labels.
+    int Init(tInSeqScriptEntityBlockHeader* data, int size) __asm__("cScriptPlayerEntity_Init");
+    void DeInit() __asm__("cScriptPlayerEntity_DeInit");
+    void SetEntityVariation(int idx) __asm__("cScriptPlayerEntity_SetEntityVariation");
+    int SetupPlay() __asm__("cScriptPlayerEntity_SetupPlay");
+    int ExecutePlay() __asm__("cScriptPlayerEntity_ExecutePlay");
+    void Stop() __asm__("cScriptPlayerEntity_Stop");
+    int Restart() __asm__("cScriptPlayerEntity_Restart");
+    int Update(float prev, float time, float speed, int jump) __asm__("cScriptPlayerEntity_Update");
+    int SetUserData(int userData) __asm__("cScriptPlayerEntity_SetUserData");
+    cInSeqCommEntity* SetEntityComm(cInSeqCommEntity* pEntityComm) __asm__("cScriptPlayerEntity_SetEntityComm");
+    int GetChannel(int channelIndex) __asm__("cScriptPlayerEntity_GetChannel__FPvi");
+    void* GetHeader(int i) __asm__("cScriptPlayerEntity_GetHeader");
+    int GetScriptLength() __asm__("cScriptPlayerEntity_GetScriptLength__FPv");
+    int GetCurrVariation() __asm__("cScriptPlayerEntity_GetCurrVariation");
+    int GetNumVariations() __asm__("cScriptPlayerEntity_GetNumVariations__FPv");
+    int GetProjectID() __asm__("cScriptPlayerEntity_GetProjectID");
+    int GetDataSize() __asm__("cScriptPlayerEntity_GetDataSize");
+    unsigned char GetType() __asm__("cScriptPlayerEntity_GetType__FPv");
+    int DoFrameUpdate(float currFrameNum, float dt) __asm__("cScriptPlayerEntity_DoFrameUpdate");
 };
 
 CHECK_OFFSET(tInSeqScriptEntityBlockHeader, blockSize, 0x0);

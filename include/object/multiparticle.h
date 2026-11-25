@@ -23,6 +23,8 @@ struct cStaticEmitter;
 struct tParticleData;
 struct tResourceID;     // 4 bytes; the low byte is the world section (unloadSection compares it)
 
+struct cBxReplayFrame;
+
 struct cMultiParticle {
     int MaxInst;                    // 0x000 [O]; [R] ctor stores maxInst; [U] setupMultiParticle sizes InstIds, addInst
                                     //       caps NumInst at it
@@ -40,6 +42,15 @@ struct cMultiParticle {
                                     //       instance's position; replay record
     t4Vector Offset;                // 0x040 [O]; [R] ctor: Emitter->Emitter.X0 with w = 0; [U] render adds it to each
                                     //       instance's position; replay record
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cMultiParticle1(cBxReplayFrame* stream) __asm__("cMultiParticle_cMultiParticle1");
+    void setupMultiParticle() __asm__("cMultiParticle_setupMultiParticle");
+    void update() __asm__("cMultiParticle_update");
+    void unloadSection(unsigned int key) __asm__("cMultiParticle_unloadSection");
+    void remInst(unsigned int key) __asm__("cMultiParticle_remInst");
+    void render() __asm__("cMultiParticle_render");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMultiParticle_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cMultiParticle, MaxInst, 0x00);
@@ -56,6 +67,11 @@ struct cMultiParticleMan {
     cMultiParticle* Particles[4];   // 0x000 [O]; [R] ctor cMultiParticleMan_cMultiParticleMan zeroes all 4; [U] addParticle allocates [id]
                                     //       (cMemMan_alloc(0x50, "MultiParticle")), reset/dtor delete them,
                                     //       update/render/replay/unloadSection loop over 4
+
+    // Methods bound to their retail symbols by asm labels.
+    void addParticle(int i, void* pdata, void* numInst) __asm__("cMultiParticleMan_addParticle");
+    void* addInst(int particleIndex, int instId) __asm__("cMultiParticleMan_addInst__FPvii");
+    void* remInst(int particleIndex, int instId) __asm__("cMultiParticleMan_remInst__FPvii");
 };
 
 CHECK_OFFSET(cMultiParticleMan, Particles, 0x00);

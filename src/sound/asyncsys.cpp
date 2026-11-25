@@ -27,11 +27,11 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags) __asm__
  * @param x      buffer size in bytes, or 0 for no buffer
  * @param flags  allocation type passed to operator new
  */
-void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
+void cAsyncSys::ASYNCSYS_Init(unsigned int x, int flags)
 {
     if (x != 0) {
-        self->mBufferSize = x;
-        *(void**)&self->mpBuffer = operator_new_tag(x, str_AsyncSysBuffer, flags, 0);
+        mBufferSize = x;
+        *(void**)&mpBuffer = operator_new_tag(x, str_AsyncSysBuffer, flags, 0);
     }
 }
 #endif
@@ -49,17 +49,17 @@ void cMemMan_free(void* p);
  * Calls cAsyncSys_DoCancel(self, 1) and, while the pending count (+0x4) is nonzero, sleeps (TIMER_waitticks(2)) and calls
  * it again. Frees the "AsyncSysBuffer" (+0x1CC) and clears it and its size (+0x1D0).
  */
-extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
+void cAsyncSys::ASYNCSYS_DeInit()
 {
-    cAsyncSys_DoCancel(self, 1);
-    while (self->mBusy != 0) {
+    cAsyncSys_DoCancel(this, 1);
+    while (mBusy != 0) {
         TIMER_waitticks(2);
-        cAsyncSys_DoCancel(self, 1);
+        cAsyncSys_DoCancel(this, 1);
     }
-    if (((void*)self->mpBuffer) != 0) {
-        cMemMan_free(((void*)self->mpBuffer));
-        *(void**)&self->mpBuffer = 0;
-        self->mBufferSize = 0;
+    if (((void*)mpBuffer) != 0) {
+        cMemMan_free(((void*)mpBuffer));
+        *(void**)&mpBuffer = 0;
+        mBufferSize = 0;
     }
 }
 #endif
@@ -96,9 +96,9 @@ public:
  *
  * The queues are only peeked here; cAsyncSys_ASYNCSYS_Update pops them when the load has ended.
  */
-extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
+void cAsyncSys::ASYNCSYS_StartLoad()
 {
-    cAsyncSys* asyncSys = self;
+    cAsyncSys* asyncSys = this;
     if (asyncSys->mBusy != 0) {
         return;
     }
@@ -107,7 +107,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
         return;
     }
     asyncSys->mBusy = 1;
-    ((cAsync_A298*)self)->notify(userHandleQueue->Array[userHandleQueue->Tail]);
+    ((cAsync_A298*)this)->notify(userHandleQueue->Array[userHandleQueue->Tail]);
     int kind;
     {
         cCircBuffer* peekQueue = (&asyncSys->mMemType);
@@ -234,9 +234,9 @@ struct sAsync28A558 {
  * @param memType  where the bank goes: 0 dynamic (shared buffer), 1 main memory, 2 sound memory (On Tour eSoundMemLocation)
  * @param memFlags  main-memory allocation flags (On Tour allocMainMemFlags)
  */
-extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(cAsyncSys* self, int bankId, const char* name, int memType, int memFlags)
+void cAsyncSys::ASYNCSYS_QueueLoad(int bankId, const char* name, int memType, int memFlags)
 {
-    sAsync28A558* asyncSys = (sAsync28A558*)self;
+    sAsync28A558* asyncSys = (sAsync28A558*)this;
     {
         sRing28A558* pushQueue = &asyncSys->q18C;
         if ((asyncSys->q18C.head + 1) % asyncSys->q18C.size != asyncSys->q18C.tail) {
@@ -278,7 +278,7 @@ extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(cAsyncSys* self, int bankId, const 
     if (asyncSys->slot >= 6) {
         asyncSys->slot = 0;
     }
-    cAsyncSys_ASYNCSYS_StartLoad(self);
+    ASYNCSYS_StartLoad();
 }
 #endif
 
@@ -443,11 +443,11 @@ static inline void Push1BC_A728(sAsync_A728* s, int v)
  *
  * @param id  the bank's user handle (On Tour bankID)
  */
-extern "C" void cAsyncSys_ASYNCSYS_Cancel(cAsyncSys* self, int id)
+void cAsyncSys::ASYNCSYS_Cancel(int id)
 {
-    sAsync_A728* asyncSys = (sAsync_A728*)self;
+    sAsync_A728* asyncSys = (sAsync_A728*)this;
     if (asyncSys->busy != 0 && Peek18C_A728(asyncSys) == id) {
-        cAsyncSys_DoCancel(self, 0);
+        cAsyncSys_DoCancel(this, 0);
         return;
     }
     int n = (asyncSys->q18C.head - asyncSys->q18C.tail + asyncSys->q18C.size) % asyncSys->q18C.size;
@@ -465,7 +465,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Cancel(cAsyncSys* self, int id)
         }
     }
     if (asyncSys->busy == 0) {
-        cAsyncSys_ASYNCSYS_StartLoad(self);
+        ASYNCSYS_StartLoad();
     }
 }
 #endif
@@ -530,9 +530,9 @@ struct sAsync_AAF8 {
  *
  * cController_Update (the stream system's update) calls it.
  */
-extern "C" void cAsyncSys_ASYNCSYS_Update(cAsyncSys* self)
+void cAsyncSys::ASYNCSYS_Update()
 {
-    sAsync_AAF8* asyncSys = (sAsync_AAF8*)self;
+    sAsync_AAF8* asyncSys = (sAsync_AAF8*)this;
     if (asyncSys->busy == 0) {
         return;
     }
@@ -687,7 +687,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(cAsyncSys* self)
                     asyncSys->q1BC.tail = 0;
                 }
             }
-            cAsyncSys_ASYNCSYS_StartLoad((cAsyncSys*)asyncSys);
+            ((cAsyncSys*)asyncSys)->ASYNCSYS_StartLoad();
             break;
         }
         case -1:
@@ -769,7 +769,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(cAsyncSys* self)
                     asyncSys->q1BC.tail = 0;
                 }
             }
-            cAsyncSys_ASYNCSYS_StartLoad((cAsyncSys*)asyncSys);
+            ((cAsyncSys*)asyncSys)->ASYNCSYS_StartLoad();
             break;
         }
         case -1:
@@ -804,20 +804,20 @@ struct sAsync_0028B0F0 {
  *
  * @param size  the number of bytes wanted
  */
-extern "C" void cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc(cAsyncSys* self, int size)
+void cAsyncSys::ASYNCSYS_OnCurAsyncMainMemAlloc(int size)
 {
-    sVEntry<void(void*, int, int, int)>* vtEntry = &((sVEntry<void(void*, int, int, int)>*)self->mVtbl)[3];
+    sVEntry<void(void*, int, int, int)>* vtEntry = &((sVEntry<void(void*, int, int, int)>*)mVtbl)[3];
     void (**pf)(void*, int, int, int) = &vtEntry->fn;
-    char* thisp = (char*)self + vtEntry->delta;
-    cCircBuffer* handleQueue = &(*(&self->mUserHandle));
+    char* thisp = (char*)this + vtEntry->delta;
+    cCircBuffer* handleQueue = &(*(&mUserHandle));
     int userHandle;
     int memFlags;
-    if (self->mUserHandle.Head == self->mUserHandle.Tail)
+    if (mUserHandle.Head == mUserHandle.Tail)
         userHandle = -1;
     else
         userHandle = handleQueue->Array[handleQueue->Tail];
-    cCircBuffer* flagsQueue = &(*(&self->mMainMemFlags));
-    if (self->mMainMemFlags.Head == self->mMainMemFlags.Tail)
+    cCircBuffer* flagsQueue = &(*(&mMainMemFlags));
+    if (mMainMemFlags.Head == mMainMemFlags.Tail)
         memFlags = -1;
     else
         memFlags = flagsQueue->Array[flagsQueue->Tail];
@@ -1075,10 +1075,10 @@ extern "C" void cBankInstance_Unload(cBankInstance* self);
  *
  * Does nothing when the instance is not shared (+0x18 null).
  */
-extern "C" void cBankInstance_SharedUnload(cBankInstance* self)
+void cBankInstance::SharedUnload()
 {
-    if (self->mpNext != 0) {
-        for (cBankInstance* node = self->mpNext; node != self; node = node->mpNext) {
+    if (mpNext != 0) {
+        for (cBankInstance* node = mpNext; node != this; node = node->mpNext) {
             cBankInstance_Unload(node);
         }
     }
@@ -1137,7 +1137,7 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
 {
     void* data = 0;
     cBankInstance_Unload(self);
-    cBankInstance_SharedUnload(self);
+    self->SharedUnload();
     int size = 0;
     switch (self->mAllocLocation) {
     case 0:

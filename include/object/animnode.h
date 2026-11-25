@@ -58,6 +58,10 @@ CHECK_SIZE(tMeshVelocity, 0x20);
 struct t4Vector;
 struct tIntersectInfo;
 
+struct cBxReplayFrame;
+
+struct t4Matrix;
+
 struct cAnimNode {
     // --- cAnimNodeState (On Tour 0x14; [R] the replay ctor reads these 0x14 bytes, writeToReplayFrame writes them)
     float CurrTime;                 // 0x00 [O]; [R] ctor: the first frame's start time; [U] getAnimFrame returns it *
@@ -108,6 +112,15 @@ struct cAnimNode {
     void updateMeshVelocity() __asm__("cAnimNode_updateMeshVelocity");
     int frameUpdate() __asm__("cAnimNode_frameUpdate");
     int frameUpdateEvent(float frame) __asm__("cAnimNode_frameUpdateEvent");
+    void* cAnimNode1(void* bucket, cBxReplayFrame* stream) __asm__("cAnimNode_cAnimNode1");
+    void updateRootTransform() __asm__("cAnimNode_updateRootTransform");
+    void* getFrameMat(int i) __asm__("cAnimNode_getFrameMat");
+    void cacheFrame() __asm__("cAnimNode_cacheFrame");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimNode_writeToReplayFrame");
+    float getAnimFrame() __asm__("cAnimNode_getAnimFrame");
+    int getAnimMats() __asm__("cAnimNode_getAnimMats");
+    t4Matrix* getAnimMat(int i) __asm__("cAnimNode_getAnimMat");
+    void clearFrameEvent() __asm__("cAnimNode_clearFrameEvent");
 };
 
 CHECK_OFFSET(cAnimNode, CurrTime, 0x00);

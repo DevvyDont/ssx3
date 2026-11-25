@@ -114,6 +114,7 @@ struct cAnimModel {
     void setSkelMatrix(int i, sAnimModelBone* animModelBone) __asm__("cAnimModel_setSkelMatrix");
     void transform(sAnimModelBone* roots) __asm__("cAnimModel_transform");
     void writeToReplayFrame(cBxReplayFrame* data) __asm__("cAnimModel_writeToReplayFrame");
+    void init(int count, int maxVariants) __asm__("cAnimModel_init");
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);

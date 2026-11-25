@@ -14,16 +14,17 @@ INCLUDE_ASM("seg/seg_218AE8", cStatsCalc_add);
  *
  * @param x  the sample
  */
-extern "C" void cStatsCalc_add(cStatsCalc* self, float x) {
-    if (self->Samples == 0) {
-        self->MinSample = self->MaxSample = x;
+void cStatsCalc::add(float x)
+{
+    if (Samples == 0) {
+        MinSample = MaxSample = x;
     } else {
-        if (x < self->MinSample) self->MinSample = x;
-        if (self->MaxSample < x) self->MaxSample = x;
+        if (x < MinSample) MinSample = x;
+        if (MaxSample < x) MaxSample = x;
     }
-    self->Sum = self->Sum + x;
-    self->SumSquare = self->SumSquare + x * x;
-    self->Samples = self->Samples + 1;
+    Sum = Sum + x;
+    SumSquare = SumSquare + x * x;
+    Samples = Samples + 1;
 }
 #endif
 

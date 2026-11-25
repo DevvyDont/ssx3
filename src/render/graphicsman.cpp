@@ -36,20 +36,20 @@ extern "C" int areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int
  *
  * @param blendedMatrix  the bone weights to add
  */
-extern "C" void cGraphicsMan_AddBlendedMatrix(cGraphicsMan* self, tMdfBlendedMatrix* blendedMatrix)
+void cGraphicsMan::AddBlendedMatrix(tMdfBlendedMatrix* blendedMatrix)
 {
-    if (self->m_blendedMatrixHistory == 0) {
+    if (m_blendedMatrixHistory == 0) {
         tMdfBlendedMatrix* mem = (tMdfBlendedMatrix*)operator_new_tag(0x3000, str_BlendedMatrixHistory, 0x100, 0);
-        self->m_blendedMatrixHistory = mem;
+        m_blendedMatrixHistory = mem;
         // the components follow the 512 records in the same block
         tMdfBlendedMatrixComponent* w = (tMdfBlendedMatrixComponent*)&mem[0x200];
         for (int k = 0; k < 0x200; k++) {
-            self->m_blendedMatrixHistory[k].m_matrixList = w;
+            m_blendedMatrixHistory[k].m_matrixList = w;
             w += 3;
         }
     }
-    tMdfBlendedMatrix* existing = self->m_blendedMatrixHistory;
-    for (int i = 0; i < self->m_blendedMatrixHistorySize; i++, existing++) {
+    tMdfBlendedMatrix* existing = m_blendedMatrixHistory;
+    for (int i = 0; i < m_blendedMatrixHistorySize; i++, existing++) {
         if (areBlendedMatricesEqual(existing, blendedMatrix, 10, 20, 20)) {
             for (int j = 0; j < existing->m_iNumMatrices; j++) {
                 blendedMatrix->m_matrixList[j].m_iWeight = existing->m_matrixList[j].m_iWeight;
@@ -57,11 +57,11 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(cGraphicsMan* self, tMdfBlendedMat
             return;
         }
     }
-    self->m_blendedMatrixHistory[self->m_blendedMatrixHistorySize].m_iNumMatrices = blendedMatrix->m_iNumMatrices;
+    m_blendedMatrixHistory[m_blendedMatrixHistorySize].m_iNumMatrices = blendedMatrix->m_iNumMatrices;
     for (int j = 0; j < blendedMatrix->m_iNumMatrices; j++) {
-        self->m_blendedMatrixHistory[self->m_blendedMatrixHistorySize].m_matrixList[j] = blendedMatrix->m_matrixList[j];
+        m_blendedMatrixHistory[m_blendedMatrixHistorySize].m_matrixList[j] = blendedMatrix->m_matrixList[j];
     }
-    self->m_blendedMatrixHistorySize++;
+    m_blendedMatrixHistorySize++;
 }
 #endif
 
@@ -310,9 +310,9 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_UploadTextures);
 /**
  * Calls the graphics manager's virtual slot 121, PlatformUploadTextures (the platform texture upload).
  */
-extern "C" void cGraphicsMan_UploadTextures(cGraphicsMan* self)
+void cGraphicsMan::UploadTextures()
 {
-    self->PlatformUploadTextures();
+    PlatformUploadTextures();
 }
 #endif
 
@@ -322,9 +322,9 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_PurgeTextures);
 /**
  * Calls the graphics manager's virtual slot 120, PlatformPurgeTextures (the platform texture purge).
  */
-extern "C" void cGraphicsMan_PurgeTextures(cGraphicsMan* self)
+void cGraphicsMan::PurgeTextures()
 {
-    self->PlatformPurgeTextures();
+    PlatformPurgeTextures();
 }
 #endif
 
@@ -1556,22 +1556,22 @@ static inline t4Vector vu0DivGM(const t4Vector& v, float s)
  * @param damp  the time scale (tParticleData::Damp)
  * @param force  the force vector, divided by damp squared
  */
-extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int numblur, float x, float y, float damp, t4Vector* force)
+void tParticleEmitter::init(int w, int numblur, float x, float y, float damp, t4Vector* force)
 {
-    self->NumParticles = w;
-    self->NumBlur = numblur;
-    self->TimeStep = x * damp / (float)w;
-    *(t4Vector*)&self->Force = vu0DivGM(vu0DivGM(*force, damp), damp);
-    self->Damp = damp;
-    self->BlurAlpha = 1.0f / (float)self->NumBlur;
-    self->BlurStep = y * damp;
+    NumParticles = w;
+    NumBlur = numblur;
+    TimeStep = x * damp / (float)w;
+    *(t4Vector*)&Force = vu0DivGM(vu0DivGM(*force, damp), damp);
+    Damp = damp;
+    BlurAlpha = 1.0f / (float)NumBlur;
+    BlurStep = y * damp;
     t4Vector one;
     one.x = 1.0f;
     one.y = 1.0f;
     one.z = 0.0f;
     one.w = 0.0f;
-    *(cQuad128*)&self->UpperUV = t4vect_Zero;
-    *(t4Vector*)&self->LowerUV = one;
+    *(cQuad128*)&UpperUV = t4vect_Zero;
+    *(t4Vector*)&LowerUV = one;
 }
 #endif
 
@@ -1592,17 +1592,17 @@ static inline float randf_0036CCB8(float a, float b)
  *
  * Sets SeedX0, SeedX1, SeedV0, SeedV1, SeedV2, SeedC0, SeedC1, SeedSize and SeedLife each to randf_0036CCB8(1.0, 2.0).
  */
-extern "C" void tParticleEmitter_randomize(tParticleEmitter* self)
+void tParticleEmitter::randomize()
 {
-    self->SeedX0 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedX1 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedV0 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedV1 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedV2 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedC0 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedC1 = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedSize = randf_0036CCB8(1.0f, 2.0f);
-    self->SeedLife = randf_0036CCB8(1.0f, 2.0f);
+    SeedX0 = randf_0036CCB8(1.0f, 2.0f);
+    SeedX1 = randf_0036CCB8(1.0f, 2.0f);
+    SeedV0 = randf_0036CCB8(1.0f, 2.0f);
+    SeedV1 = randf_0036CCB8(1.0f, 2.0f);
+    SeedV2 = randf_0036CCB8(1.0f, 2.0f);
+    SeedC0 = randf_0036CCB8(1.0f, 2.0f);
+    SeedC1 = randf_0036CCB8(1.0f, 2.0f);
+    SeedSize = randf_0036CCB8(1.0f, 2.0f);
+    SeedLife = randf_0036CCB8(1.0f, 2.0f);
 }
 #endif
 
@@ -1616,11 +1616,11 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setSize);
  * @param endsize  the size at death
  * @param sizerandomness  the random size spread
  */
-extern "C" void tParticleEmitter_setSize(tParticleEmitter* self, float startsize, float endsize, float sizerandomness)
+void tParticleEmitter::setSize(float startsize, float endsize, float sizerandomness)
 {
-    self->SizeR = sizerandomness;
-    self->SizeFinalDelta = endsize - startsize;
-    self->Size0 = startsize - sizerandomness * 1.5f;
+    SizeR = sizerandomness;
+    SizeFinalDelta = endsize - startsize;
+    Size0 = startsize - sizerandomness * 1.5f;
 }
 #endif
 
@@ -1633,14 +1633,14 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setLife);
  * @param minlife  the shortest particle life
  * @param maxlife  the longest particle life
  */
-extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float minlife, float maxlife)
+void tParticleEmitter::setLife(float minlife, float maxlife)
 {
     float range = maxlife - minlife;
-    float dampFactor = self->Damp;
+    float dampFactor = Damp;
     minlife = minlife * dampFactor;
     range = range * dampFactor;
-    self->LifeR = range;
-    self->Life0 = minlife - range;
+    LifeR = range;
+    Life0 = minlife - range;
 }
 #endif
 
@@ -1652,11 +1652,11 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setEternal);
  *
  * No caller.
  *
- * @param particleEmitter  the emitter
  */
-extern "C" void tParticleEmitter_setEternal(tParticleEmitter* particleEmitter) {
-    *(int*)&particleEmitter->LifeR = 0;
-    particleEmitter->Life0 = 1e20f;
+void tParticleEmitter::setEternal()
+{
+    *(int*)&LifeR = 0;
+    Life0 = 1e20f;
 }
 #endif
 //100%
@@ -1672,10 +1672,11 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setPoint);
  */
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
-extern "C" void tParticleEmitter_setPoint(tParticleEmitter* particleEmitter, long long *point) {
-    *(long long*)&particleEmitter->X0 = (long long) *point;
-    *(long long*)&particleEmitter->Xr0 = (long long) t4vect_Zero;
-    *(long long*)&particleEmitter->Xr1 = (long long) t4vect_Zero;
+void tParticleEmitter::setPoint(long long *point)
+{
+    *(long long*)&X0 = (long long) *point;
+    *(long long*)&Xr0 = (long long) t4vect_Zero;
+    *(long long*)&Xr1 = (long long) t4vect_Zero;
 }
 #endif
 //100%
@@ -1722,11 +1723,11 @@ static inline t4Vector vu0Scale_CE80(const t4Vector& v, float s)
  * @param start  one end of the segment
  * @param end  the other end
  */
-extern "C" void tParticleEmitter_setLine(tParticleEmitter* self, t4Vector* start, t4Vector* end)
+void tParticleEmitter::setLine(t4Vector* start, t4Vector* end)
 {
-    *(t4Vector*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
-    *(t4Vector*)&self->Xr0 = vu0Sub_CE80(*end, *start);
-    *(cQuad128*)&self->Xr1 = t4vect_Zero;
+    *(t4Vector*)&X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
+    *(t4Vector*)&Xr0 = vu0Sub_CE80(*end, *start);
+    *(cQuad128*)&Xr1 = t4vect_Zero;
 }
 #endif
 
@@ -1790,11 +1791,11 @@ static inline t4Vector vu0ScaleGM(const t4Vector& v, float s)
  * @param axis0  the first half axis
  * @param axis1  the second half axis
  */
-extern "C" void tParticleEmitter_setPlane(tParticleEmitter* self, t4Vector* center, t4Vector* axis0, t4Vector* axis1)
+void tParticleEmitter::setPlane(t4Vector* center, t4Vector* axis0, t4Vector* axis1)
 {
-    *(t4Vector*)&self->X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
-    *(t4Vector*)&self->Xr0 = vu0ScaleGM(*axis0, 2.0f);
-    *(t4Vector*)&self->Xr1 = vu0ScaleGM(*axis1, 2.0f);
+    *(t4Vector*)&X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
+    *(t4Vector*)&Xr0 = vu0ScaleGM(*axis0, 2.0f);
+    *(t4Vector*)&Xr1 = vu0ScaleGM(*axis1, 2.0f);
 }
 #endif
 
@@ -1812,9 +1813,9 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setMotion);
  * @param delta  the total displacement
  * @param time  the time it takes
  */
-extern "C" void tParticleEmitter_setMotion(tParticleEmitter* self, t4Vector* delta, float time)
+void tParticleEmitter::setMotion(t4Vector* delta, float time)
 {
-    *(t4Vector*)&self->Xi = vu0DivGM(vu0ScaleGM(*delta, self->TimeStep), time * self->Damp);
+    *(t4Vector*)&Xi = vu0DivGM(vu0ScaleGM(*delta, TimeStep), time * Damp);
 }
 #endif
 
@@ -1824,9 +1825,9 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_stopMotion);
 /**
  * Stops the emitter's own motion: zeroes Xi (On Tour stopMotion).
  */
-extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self)
+void tParticleEmitter::stopMotion()
 {
-    *(cQuad128*)&self->Xi = t4vect_Zero;
+    *(cQuad128*)&Xi = t4vect_Zero;
 }
 #endif
 
@@ -1989,16 +1990,16 @@ static inline t4Vector gmNormalizeD020(const t4Vector& v)
  * @param dir  the base velocity (direction and speed)
  * @param spread  the cone spread, relative to the speed
  */
-extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const t4Vector* dir, float spread)
+void tParticleEmitter::setVelocity(const t4Vector* dir, float spread)
 {
-    *(&self->V0) = gmDivD020(*dir, self->Damp);
-    float len = gmLengthD020(*(&self->V0));
+    *(&V0) = gmDivD020(*dir, Damp);
+    float len = gmLengthD020(*(&V0));
     const t4Vector* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &t4vect_XAxis;
     t4Vector norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
-    *(&self->Vr0) = gmScaleD020(gmScaleD020(norm, spread), len);
-    *(&self->Vr1) = gmScaleD020(gmCrossD020(*(&self->V0), norm), spread);
-    *(cQuad128*)(&self->Vr2) = t4vect_Zero;
-    gmSubFromD020(*(&self->V0), gmScaleD020(gmAddD020(gmAddD020(*(&self->Vr0), *(&self->Vr1)), *(&self->Vr2)), 1.5f));
+    *(&Vr0) = gmScaleD020(gmScaleD020(norm, spread), len);
+    *(&Vr1) = gmScaleD020(gmCrossD020(*(&V0), norm), spread);
+    *(cQuad128*)(&Vr2) = t4vect_Zero;
+    gmSubFromD020(*(&V0), gmScaleD020(gmAddD020(gmAddD020(*(&Vr0), *(&Vr1)), *(&Vr2)), 1.5f));
 }
 #endif
 
@@ -2090,13 +2091,14 @@ static inline t4Vector gmScaleD1F0(const t4Vector& v, float s)
  * @param randVel1  random term 1 (vr1)
  * @param randVel2  random term 2 (vr2)
  */
-extern "C" void tParticleEmitter_setVelocity1(tParticleEmitter* self, const t4Vector* baseVel, const t4Vector* randVel0,
-                              const t4Vector* randVel1, const t4Vector* randVel2)
+void tParticleEmitter::setVelocity1(const t4Vector* baseVel, const t4Vector* randVel0, const t4Vector* randVel1,
+                                    const t4Vector* randVel2)
 {
-    *(t4Vector*)&self->Vr0 = gmDivD1F0(*randVel0, self->Damp);
-    *(t4Vector*)&self->Vr1 = gmDivD1F0(*randVel1, self->Damp);
-    *(t4Vector*)&self->Vr2 = gmDivD1F0(*randVel2, self->Damp);
-    *(t4Vector*)&self->V0 = gmSubD1F0(gmDivD1F0(*baseVel, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(*(t4Vector*)&self->Vr0, *(t4Vector*)&self->Vr1), *(t4Vector*)&self->Vr2), 1.5f));
+    *(t4Vector*)&Vr0 = gmDivD1F0(*randVel0, Damp);
+    *(t4Vector*)&Vr1 = gmDivD1F0(*randVel1, Damp);
+    *(t4Vector*)&Vr2 = gmDivD1F0(*randVel2, Damp);
+    *(t4Vector*)&V0 = gmSubD1F0(gmDivD1F0(*baseVel, Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(*(t4Vector*)&Vr0,
+            *(t4Vector*)&Vr1), *(t4Vector*)&Vr2), 1.5f));
 }
 #endif
 
@@ -2119,12 +2121,13 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setColour);
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-extern "C" void tParticleEmitter_setColour(tParticleEmitter* self, t4Vector* colStart, t4Vector* colEnd, t4Vector* colRand0, t4Vector* colRand1, float time)
+void tParticleEmitter::setColour(t4Vector* colStart, t4Vector* colEnd, t4Vector* colRand0, t4Vector* colRand1,
+                                 float time)
 {
-    *(t4Vector*)&self->C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
-    *(t4Vector*)&self->Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * self->Damp);
-    *(t4Vector*)&self->Cr0 = *colRand0;
-    *(t4Vector*)&self->Cr1 = *colRand1;
+    *(t4Vector*)&C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
+    *(t4Vector*)&Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * Damp);
+    *(t4Vector*)&Cr0 = *colRand0;
+    *(t4Vector*)&Cr1 = *colRand1;
 }
 #endif
 
@@ -2136,9 +2139,9 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setTime);
  *
  * @param val  the time in seconds (On Tour t)
  */
-extern "C" void tParticleEmitter_setTime(tParticleEmitter* self, float val)
+void tParticleEmitter::setTime(float val)
 {
-    self->EndTime = val * self->Damp;
+    EndTime = val * Damp;
 }
 #endif
 
@@ -2152,9 +2155,9 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_step);
  *
  * @param deltaTime  the elapsed time
  */
-extern "C" void tParticleEmitter_step(tParticleEmitter* self, float deltaTime)
+void tParticleEmitter::step(float deltaTime)
 {
-    self->EndTime += deltaTime * self->Damp;
+    EndTime += deltaTime * Damp;
 }
 #endif
 
@@ -2224,7 +2227,7 @@ extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, floa
  */
 extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, float dt)
 {
-    tParticleEmitter_step((tParticleEmitter*)self, dt);
+    self->step(dt);
     for (;;) {
         float step = self->TimeStep;
         float time = self->EndTime;
@@ -2526,32 +2529,32 @@ static inline void vu0SubInGM_0058(t4Vector& d, const t4Vector& b)
  * @param boundBox  receives the emitter's bounding box
  * @param seed  the random seed; negative picks a random one
  */
-extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* transform, tParticleData* particleData, tBoundBox* boundBox, float seed)
+void tParticleEmitter::setupEmitter(t4Matrix* transform, tParticleData* particleData, tBoundBox* boundBox, float seed)
 {
-    tParticleEmitter_setSize(self, particleData->Size, particleData->SizeFinal, particleData->SizeR);
+    setSize(particleData->Size, particleData->SizeFinal, particleData->SizeR);
     float halfSpread = particleData->LifeR * 0.5f;
-    tParticleEmitter_setLife(self, particleData->Life - halfSpread, particleData->Life + halfSpread);
+    setLife(particleData->Life - halfSpread, particleData->Life + halfSpread);
     if (seed < 0.0f) {
-        tParticleEmitter_randomize(self);
+        randomize();
     } else {
-        self->SeedX0 = seed;
+        SeedX0 = seed;
     }
-    tParticleEmitter_stopMotion(self);
-    self->X0 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->OffX, particleData->OffY, particleData->OffZ,
+    stopMotion();
+    X0 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->OffX, particleData->OffY, particleData->OffZ,
         1.0f));
-    self->Xr0 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R0X, particleData->R0Y, particleData->R0Z, 0.0f));
-    self->Xr1 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R1X, particleData->R1Y, particleData->R1Z, 0.0f));
-    vu0SubInGM_0058(self->X0, vu0Scale_0058(vu0Add_0058(self->Xr0, self->Xr1), 1.5f));
-    self->V0 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->VelX, particleData->VelY,
+    Xr0 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R0X, particleData->R0Y, particleData->R0Z, 0.0f));
+    Xr1 = vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R1X, particleData->R1Y, particleData->R1Z, 0.0f));
+    vu0SubInGM_0058(X0, vu0Scale_0058(vu0Add_0058(Xr0, Xr1), 1.5f));
+    V0 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->VelX, particleData->VelY,
         particleData->VelZ, 0.0f)), particleData->Damp);
-    self->Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R0VX, particleData->R0VY,
+    Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R0VX, particleData->R0VY,
         particleData->R0VZ, 0.0f)), particleData->Damp);
-    self->Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R1VX, particleData->R1VY,
+    Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R1VX, particleData->R1VY,
         particleData->R1VZ, 0.0f)), particleData->Damp);
-    self->Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R2VX, particleData->R2VY,
+    Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, t4VectorCtor(particleData->R2VX, particleData->R2VY,
         particleData->R2VZ, 0.0f)), particleData->Damp);
-    vu0SubInGM_0058(self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(self->Vr0, self->Vr1), self->Vr2), 1.5f));
-    tParticleEmitter_setColour_0058(self,
+    vu0SubInGM_0058(V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(Vr0, Vr1), Vr2), 1.5f));
+    tParticleEmitter_setColour_0058(this,
                        vu0Scale_0058(t4VectorCtor(particleData->StartColR, particleData->StartColG,
                            particleData->StartColB, particleData->StartColA), 128.0f),
                        vu0Scale_0058(t4VectorCtor(particleData->EndColR, particleData->EndColG, particleData->EndColB,
@@ -2561,8 +2564,8 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* 
                        vu0Scale_0058(t4VectorCtor(particleData->R1R, particleData->R1G, particleData->R1B,
                            particleData->R1A), 128.0f),
                        particleData->Life + particleData->LifeR * 0.5f);
-    tParticleEmitter_setTime(self, particleData->Duration < 0.0f ? particleData->Life + particleData->LifeR * 0.5f : 0.0f);
-    tParticleEmitter_calcBoundBox(self, boundBox);
+    setTime(particleData->Duration < 0.0f ? particleData->Life + particleData->LifeR * 0.5f : 0.0f);
+    tParticleEmitter_calcBoundBox(this, boundBox);
 }
 #endif
 
@@ -2583,12 +2586,12 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, t4Matrix* a
  * @param transform  the emitter's world transform
  * @param particleData  the tParticleData to read
  */
-extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* transform, tParticleData* particleData)
+void cStaticEmitter::setupEmitter(t4Matrix* transform, tParticleData* particleData)
 {
-    self->mNumFlipTextures = particleData->NumFlipTextures;
-    self->mFlipTextureRate = particleData->FlipTextureRate;
-    self->TextureId = particleData->TextureId;
-    self->BlendMode = particleData->BlendMode;
+    mNumFlipTextures = particleData->NumFlipTextures;
+    mFlipTextureRate = particleData->FlipTextureRate;
+    TextureId = particleData->TextureId;
+    BlendMode = particleData->BlendMode;
     float dataDuration = particleData->Duration;
     float totalDuration;
     if (dataDuration < 0.0f) {
@@ -2596,15 +2599,16 @@ extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* tran
     } else {
         totalDuration = dataDuration + particleData->Life + particleData->LifeR * 0.5f;
     }
-    self->Duration = totalDuration;
+    Duration = totalDuration;
     float x = particleData->Duration >= 0.0f ? particleData->Duration : particleData->Life + particleData->LifeR * 0.5f;
     t4Vector force;
     force.x = particleData->ForceX;
     force.y = particleData->ForceY;
     force.z = particleData->ForceZ;
     force.w = 0.0f;
-    tParticleEmitter_init((tParticleEmitter*)(&self->Emitter), particleData->NumParticles, particleData->NumBlur, x, particleData->BlurStep, particleData->Damp, &force);
-    tParticleEmitter_setupEmitter((tParticleEmitter*)(&self->Emitter), transform, particleData, (tBoundBox*)(&self->BoundBox), -1.0f);
+    Emitter.init(particleData->NumParticles, particleData->NumBlur, x, particleData->BlurStep, particleData->Damp,
+            &force);
+    Emitter.setupEmitter(transform, particleData, (tBoundBox*)(&BoundBox), -1.0f);
 }
 #endif
 
@@ -2621,14 +2625,14 @@ extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
  *
  * @param duration  the new duration; 0 resets only the particle time
  */
-extern "C" void cStaticEmitter_setTime(cStaticEmitter* self, float duration)
+void cStaticEmitter::setTime(float duration)
 {
     if (duration == 0.0f) {
-        tParticleEmitter_setTime(&self->Emitter, 0.0f);
+        Emitter.setTime(0.0f);
         return;
     }
-    self->Duration = duration;
-    tParticleEmitter_setTime(&self->Emitter, duration);
+    Duration = duration;
+    Emitter.setTime(duration);
 }
 #endif
 
@@ -2672,27 +2676,27 @@ extern "C" void tParticleEmitter_stepContinous(void* self, float val);
  *
  * @param dt  time step in seconds
  */
-extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
+void cStaticEmitter::update(float dt)
 {
-    float timer = self->Duration;
+    float timer = Duration;
     if (timer == 0.0f) {
         return;
     }
     if (timer < 0.0f) {
-        tParticleEmitter_stepContinous(&self->Emitter, 1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        tParticleEmitter_stepContinous(&Emitter, 1.0f / (float)cAppMan_TheAppMan->TimerHz);
     } else {
-        tParticleEmitter_step((tParticleEmitter*)(&self->Emitter), 1.0f / (float)cAppMan_TheAppMan->TimerHz);
-        self->Duration -= 1.0f / (float)cAppMan_TheAppMan->TimerHz;
-        if (self->Duration < 0.0f) {
-            self->Duration = 0.0f;
+        Emitter.step(1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        Duration -= 1.0f / (float)cAppMan_TheAppMan->TimerHz;
+        if (Duration < 0.0f) {
+            Duration = 0.0f;
         }
     }
-    float animFrame = self->mCurrentFlipTexture + self->mFlipTextureRate * dt;
-    self->mCurrentFlipTexture = animFrame;
-    if ((int)animFrame >= self->mNumFlipTextures) {
-        self->mCurrentFlipTexture = 0.0f;
+    float animFrame = mCurrentFlipTexture + mFlipTextureRate * dt;
+    mCurrentFlipTexture = animFrame;
+    if ((int)animFrame >= mNumFlipTextures) {
+        mCurrentFlipTexture = 0.0f;
     }
-    self->m_initialized = 1;
+    m_initialized = 1;
 }
 #endif
 
@@ -2716,7 +2720,7 @@ extern "C" void cStaticEmitter_render(cStaticEmitter* self, const tBoundBox* bbo
 {
     *(&self->BoundBox) = *bbox;
     *(sGmQuad*)&self->Emitter.X0 = *pos;
-    cStaticEmitter_render1(self);
+    self->render1();
 }
 #endif
 
@@ -2738,21 +2742,20 @@ typedef sVEntry<void(void*, const tParticleEmitter*)> tRenderEmitterSlot;
  * with the layer for its kind (gBlendTable) and blend flags, draws through GrMan slot 82 (RenderParticleEmitter) and
  * pops the state.
  *
- * @param selfp  the emitter
  */
-extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
+void cStaticEmitter::render1()
 {
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, gfx);
     tNetMatrixSlot* vtMat = (tNetMatrixSlot*)vt;
-    if (vt[93].fn(vthis(gfx, vt[93]), &selfp->BoundBox.MinPoint, &selfp->BoundBox.MaxPoint,
+    if (vt[93].fn(vthis(gfx, vt[93]), &BoundBox.MinPoint, &BoundBox.MaxPoint,
                   vtMat[43].fn(vthis(gfx, vtMat[43]))) == 1) {
         return;
     }
-    if ((selfp)->m_initialized == 0) {
+    if (m_initialized == 0) {
         return;
     }
-    int layer = gBlendTable[(selfp)->BlendMode];
+    int layer = gBlendTable[BlendMode];
     gfx->m_pCurrentDrawState[1] = gfx->m_pCurrentDrawState[0];
     sDrawState* prev = gfx->m_pCurrentDrawState;
     gfx->m_pCurrentDrawState = prev + 1;
@@ -2764,9 +2767,9 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
     gfx->m_pCurrentDrawState->m_bitGroups[1] = ((int)gfx->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C)
         | ((layer << 2) & 0x7C);
     *gfx->m_pCurrentDrawState->m_textureState.m_texid =
-        cGraphicsMan_TheGraphicsMan->getEffectTexMap((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
+        cGraphicsMan_TheGraphicsMan->getEffectTexMap(TextureId + (int)mCurrentFlipTexture);
     tRenderEmitterSlot* vtDraw = (tRenderEmitterSlot*)VPTR_OF(cGraphicsMan, gfx);
-    vtDraw[82].fn(vthis(gfx, vtDraw[82]), &selfp->Emitter);
+    vtDraw[82].fn(vthis(gfx, vtDraw[82]), &Emitter);
     gfx->m_pCurrentDrawState--;
 }
 #endif
@@ -2798,12 +2801,12 @@ struct sGmSer12 {
  *
  * @param out  replay stream to write to
  */
-extern "C" void cStaticEmitter_writeToReplayFrame(cStaticEmitter* self, cBxReplayFrame* out)
+void cStaticEmitter::writeToReplayFrame(cBxReplayFrame* out)
 {
     sGmSer12 buf;
-    buf.a = self->Duration;
-    buf.b = self->Emitter.EndTime;
-    buf.c = self->m_initialized;
+    buf.a = Duration;
+    buf.b = Emitter.EndTime;
+    buf.c = m_initialized;
     out->write((const char*)&buf, 12);
 }
 #endif
@@ -2819,7 +2822,7 @@ extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cBxReplayFrame* stream)
+void cStaticEmitter::readFromReplayFrame(cBxReplayFrame* stream)
 {
     struct {
         float a;
@@ -2827,10 +2830,10 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cBxRepl
         int c;
     } buf;
     stream->read((char*)&buf, 0xC);
-    self->Duration = buf.a;
-    self->Emitter.EndTime = buf.b;
-    tParticleEmitter_calcBoundBox((char*)&self->Emitter, (char*)&self->BoundBox);
-    self->m_initialized = buf.c;
+    Duration = buf.a;
+    Emitter.EndTime = buf.b;
+    tParticleEmitter_calcBoundBox((char*)&Emitter, (char*)&BoundBox);
+    m_initialized = buf.c;
 }
 #endif
 

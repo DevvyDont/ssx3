@@ -245,7 +245,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
     sBsEmitter* em = ((sBsEmitter*)self->mEmitter);
     em->vt[3].fn(vthis(em, em->vt[3]), ((sBsParams*)self->mEmitterData), em->rate);
     self->mSetupEmitters = 0;
-    cBoardSparkFX_reset((cBoardSparkFX*)self);
+    self->reset();
     return self;
 }
 #endif
@@ -315,9 +315,9 @@ struct sSparkFx_AA78 {
  * @param vself  the spark effect
  */
 // Spark FX init: two render states copied from the defaults with their mode bits set (the second also sets f0 bits 2-3).
-extern "C" void cBoardSparkFX_reset(cBoardSparkFX* vself)
+void cBoardSparkFX::reset()
 {
-    sSparkFx_AA78* self = (sSparkFx_AA78*)vself;
+    sSparkFx_AA78* self = (sSparkFx_AA78*)this;
     self->pos = t4vect_Origin;
     self->f70 = 0;
     self->f74 = 0;
@@ -677,22 +677,22 @@ static inline void pop_B478(cPS2GraphicsMan* ctx)
  *
  * The sprites use the second render state and a full white UV quad (statics set up on first use).
  */
-extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
+void cBoardSparkFX::render()
 {
-    cDynamicColourEmitter* gfx = self->mEmitter;
+    cDynamicColourEmitter* gfx = mEmitter;
     if (gfx->m_enabledCount > 0) {
         cDynamicColourEmitter_render(gfx, 7);
     }
-    if (self->mRenderSparks != 0) {
+    if (mRenderSparks != 0) {
         push_B478(GrMan);
-        *GrMan->m_pCurrentDrawState = self->mSparkDrawState;
+        *GrMan->m_pCurrentDrawState = mSparkDrawState;
         cPS2GraphicsMan* ctx = GrMan;
-        ctx->RenderParticleEmitter(*self->mSparkEmitter);
+        ctx->RenderParticleEmitter(*mSparkEmitter);
         pop_B478(GrMan);
     }
-    if (self->mRenderSparkFlash != 0) {
+    if (mRenderSparkFlash != 0) {
         push_B478(GrMan);
-        *GrMan->m_pCurrentDrawState = self->mSparkFlashDrawState;
+        *GrMan->m_pCurrentDrawState = mSparkFlashDrawState;
         if (D_004A54D8 == 0) {
             D_004A54D8 = 1;
             D_004A54D0 = 0.0f;
@@ -713,9 +713,10 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         t2Vector* uv0 = (t2Vector*)&D_004A54D0;
         t2Vector* uv1 = (t2Vector*)&D_004A54E0;
         for (int i = 0; i < 3; i++) {
-            t2Vector size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
+            t2Vector size(((float*)(((char*)this) + 0x60))[i], ((float*)(((char*)this) + 0x60))[i]);
             cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-            ctx->DrawSprite(*(const t4Vector*)(((char*)self) + 0x30 + i * 0x10), size, *uv0, *uv1, *(const tARGB*)&D_004D57A0);
+            ctx->DrawSprite(*(const t4Vector*)(((char*)this) + 0x30 + i * 0x10), size, *uv0, *uv1,
+                    *(const tARGB*)&D_004D57A0);
         }
         pop_B478(GrMan);
     }

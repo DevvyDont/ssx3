@@ -92,6 +92,11 @@ struct cReplayFrame {
     int FrameStartTick;             // 0x30 [O]; [R] clearFrame / allocReplayFrame 0; [U] cReplay_saveFrame1 stores
                                     //      RecordTick, cReplayFrameList_findFrame compares it, playback seeks to it
     int FrameEndTick;               // 0x34 [O]; [R] clearFrame / allocReplayFrame -1; [U] loadFrame restores it
+
+    // Methods bound to their retail symbols by asm labels.
+    void clearFrame() __asm__("cReplayFrame_clearFrame");
+    int loadFrame(char** pp) __asm__("cReplayFrame_loadFrame");
+    void setRanking(int i, int value) __asm__("cReplayFrame_setRanking__FPvii");
 };
 
 CHECK_OFFSET(cReplayFrame, mVtbl, 0x00);

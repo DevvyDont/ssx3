@@ -80,6 +80,9 @@ struct tQuadTreeNode {
     // a free node keeps the next free node's index in its first short (cQuadTree_getFreeNode)
     void setNext(unsigned short next) { m_free.m_next = next; }
     unsigned short getNext() const { return m_free.m_next; }
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("tQuadTreeNode_init");
 };
 
 CHECK_OFFSET(tQuadTreeNode, m_leaf, 0x0);
@@ -103,6 +106,18 @@ struct cQuadTree {
     tQuadTreeNode* m_nodes;         // 0x20 [O]; [R] ctor 0, getFreeNode reallocates it ("QuadTreeNodeList"),
                                     //       resolve = this + 1
     tQuadTreeNode* m_freeNodes;     // 0x24 [O]; [R] ctor 0, getFreeNode pops it, resolve = this + 1; exported copy 0
+
+    // Methods bound to their retail symbols by asm labels.
+    unsigned short getFreeNode() __asm__("cQuadTree_getFreeNode");
+    void setFreeNodes(unsigned short nodeid0, unsigned short nodeid1, unsigned short nodeid2, unsigned short nodeid3)
+        __asm__("cQuadTree_setFreeNodes");
+    void setData(int leafKey, int leafData, float fx, float fz, float fsize) __asm__("cQuadTree_setData");
+    void* getLeaf(float fx, float fz) __asm__("cQuadTree_getLeaf");
+    void exportTree(char** out, int* size, void* ctx, float (*fixFloat)(void*, float), int (*fixInt)(int, void*),
+                    unsigned short (*fixShort)(unsigned short, void*))
+        __asm__("cQuadTree_exportTree");
+    int calcUsedNodes(unsigned short *node) __asm__("cQuadTree_calcUsedNodes");
+    void resolve() __asm__("cQuadTree_resolve__FPv");
 };
 
 CHECK_OFFSET(cQuadTree, m_scale, 0x00);

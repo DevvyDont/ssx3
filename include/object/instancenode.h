@@ -72,6 +72,15 @@ struct cInstanceNode : public cSortObjNode {
     // --- cInstanceNode ---
     tInstanceRecord* Instance;   // 0x018 [P] getInstance (lw 0x18); [O] cInstanceNode::Instance; [R] cInstanceNode_cInstanceNode1 stores
                                  //       its record arg; [U] record flags at +0x8, root transform at +0x10, model at +0x80
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cInstanceNode1(void* bucket, int type, cInstanceNode* node) __asm__("cInstanceNode_cInstanceNode1");
+    void clearActiveNode(cInstanceNode* inst) __asm__("cInstanceNode_clearActiveNode");
+    void runInitScript() __asm__("cInstanceNode_runInitScript");
+    void* runExpireScript() __asm__("cInstanceNode_runExpireScript__FPv");
+    void* runOnLoseFocusScript() __asm__("cInstanceNode_runOnLoseFocusScript__FPv");
+    void makeThisDead() __asm__("cInstanceNode_makeThisDead");
+    int getInstance() __asm__("cInstanceNode_getInstance");
 };
 
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);

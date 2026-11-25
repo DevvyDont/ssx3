@@ -27,10 +27,16 @@ struct tUIAnimChannel;
 struct cUIAnimationChannel {
     tUIAnimChannel* mpAnimChan;      // 0x000 [O]; [U] setAnimChanData stores its argument (sw 0x0); evalAtFrameFloat
                                      //       and getAnimChanType read it (lw 0x0) and walk the record
+
+    // Methods bound to their retail symbols by asm labels.
+    unsigned short getAnimChanType() __asm__("cUIAnimationChannel_getAnimChanType");
+    void setAnimChanData(int val) __asm__("cUIAnimationChannel_setAnimChanData__FPvi");
 };
 
 CHECK_OFFSET(cUIAnimationChannel, mpAnimChan, 0x000);
 CHECK_SIZE(cUIAnimationChannel, 0x4);
+
+struct cUIThing;
 
 struct cUIAnimation {
     tUIAnimation* mpAnimHeader;          // 0x000 [O]
@@ -42,6 +48,16 @@ struct cUIAnimation {
     char unk_00F[0x1];                   // 0x00F padding
     void** mVtbl;                        // 0x010 [R] ctor = cUIAnimation_vtbl (g++ 2.95 puts the vptr after the
                                          //       members)
+
+    // Methods bound to their retail symbols by asm labels.
+    int isLastFrame() __asm__("cUIAnimation_isLastFrame");
+    short getNumFrames() __asm__("cUIAnimation_getNumFrames");
+    void start(int mode, unsigned short FrameNum) __asm__("cUIAnimation_start");
+    void updateFrame(unsigned char flags) __asm__("cUIAnimation_updateFrame");
+    void updateThing(cUIThing* obj, int mode, unsigned short FrameNum) __asm__("cUIAnimation_updateThing");
+    void* cUIAnimation1() __asm__("cUIAnimation_cUIAnimation1");
+    int getHashName() __asm__("cUIAnimation_getHashName");
+    void setFrameNumber(short frame) __asm__("cUIAnimation_setFrameNumber");
 };
 
 CHECK_OFFSET(cUIAnimation, mpAnimHeader, 0x000);
@@ -73,6 +89,9 @@ struct cUIAnimationBank {
     tUIAnimationBlock* mpAnimationBlock; // 0x000 [O]; [U] setData stores the block; getAnimationByHashName reads its
                                     //       count (first word) and walks the entries after it
     cUIEngine* mpEngine;            // 0x004 [O]; [R] cUIEngine_cUIEngine stores the engine (sw this, 0x54)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setData(int val) __asm__("cUIAnimationBank_setData__FPvi");
 };
 
 CHECK_OFFSET(cUIAnimationBank, mpAnimationBlock, 0x000);

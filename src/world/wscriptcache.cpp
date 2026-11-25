@@ -41,14 +41,14 @@ struct cWScriptCacheEntryArr : cWScriptCacheEntry {
  *
  * @param count  number of world sections (On Tour numSections)
  */
-extern "C" void cWScriptCache_init(cWScriptCache* self, int count)
+void cWScriptCache::init(int count)
 {
     // Same-layout cast: cWScriptCacheEntryArr only adds the constructor and destructor.
-    delete[] (cWScriptCacheEntryArr*)self->mpCache;
-    self->mNumSections = (unsigned int)count;
-    cWScriptCacheEntry*& cache = self->mpCache;
+    delete[] (cWScriptCacheEntryArr*)mpCache;
+    mNumSections = (unsigned int)count;
+    cWScriptCacheEntry*& cache = mpCache;
     cache = new (str_tWScriptCache, 0x20000000, 0) cWScriptCacheEntryArr[count];
-    self->mNumLoading = 0;
+    mNumLoading = 0;
 }
 #endif
 
@@ -91,11 +91,12 @@ extern "C" void cWScriptCacheEntry_update(int);
  *
  * No C caller in the source.
  */
-extern "C" void cWScriptCache_update(cWScriptCache* self) {
+void cWScriptCache::update()
+{
     unsigned int i;
 
-    for (i = 0; i < self->mNumSections; i++) {
-        cWScriptCacheEntry_update((int)self->mpCache + i * 0xC);
+    for (i = 0; i < mNumSections; i++) {
+        cWScriptCacheEntry_update((int)mpCache + i * 0xC);
     }
 }
 #endif
@@ -109,12 +110,12 @@ extern "C" void cWScriptCacheEntry_load(int, int);
  *
  * No C caller in the source.
  *
- * @param cache  the cWScriptCache
  * @param index  the section id
  * @param fileNum  the file name passed on to cWScriptCacheEntry_load
  */
-extern "C" void cWScriptCache_load(cWScriptCache* cache, int index, int fileNum) {
-    cWScriptCacheEntry_load(((int)cache->mpCache) + (index * 0xC), fileNum);
+void cWScriptCache::load(int index, int fileNum)
+{
+    cWScriptCacheEntry_load(((int)mpCache) + (index * 0xC), fileNum);
 }
 #endif
 
@@ -132,10 +133,10 @@ extern "C" void cWScriptCacheEntry_load1(cWScriptCacheEntry* e, int index, int v
  * @param index  the section id
  * @param value  the script file header
  */
-extern "C" void cWScriptCache_load1(cWScriptCache* self, int index, int value)
+void cWScriptCache::load1(int index, int value)
 {
-    cWScriptCacheEntry* items = self->mpCache;
-    cWScriptCacheEntry_load1(&items[index], index, value);
+    cWScriptCacheEntry* items = mpCache;
+    items[index].load1(index, value);
 }
 #endif
 
@@ -151,9 +152,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
  * @param sectionId  the section id
  * @return the script file header
  */
-extern "C" int cWScriptCache_getScriptBase(cWScriptCache* self, int sectionId)
+int cWScriptCache::getScriptBase(int sectionId)
 {
-    cWScriptCacheEntry* entries = self->mpCache;
+    cWScriptCacheEntry* entries = mpCache;
     return ((int)entries[sectionId].mpScriptHeader);
 }
 #endif
@@ -300,17 +301,16 @@ extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* e, cWorld* world,
  * Gives an entry the script data that came with the stream: stores @p value, marks it streamed (mStreamed 1, not freed
  * by the entry), sets state 2 and resolves it (cWScriptCacheEntry_resolve with cWorld_m_pTheWorld and @p index).
  *
- * @param item  the cWScriptCacheEntry
  * @param index  the section id
  * @param value  the script file header
  */
-extern "C" void cWScriptCacheEntry_load1(cWScriptCacheEntry* item, int index, int value)
+void cWScriptCacheEntry::load1(int index, int value)
 {
-    sWSCItemFields* fields = (sWSCItemFields*)item;
+    sWSCItemFields* fields = (sWSCItemFields*)this;
     fields->value = value;
     fields->owned = 1;
     fields->type = 2;
-    cWScriptCacheEntry_resolve(item, cWorld_m_pTheWorld, index);
+    resolve(cWorld_m_pTheWorld, index);
 }
 #endif
 
@@ -402,56 +402,58 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
  * +0x1C; and the records of the tables at +0x2C (0x40 bytes) and +0x24 (0x54 bytes) get their +0x8 offsets fixed. There
  * are no null checks on the looked-up resources.
  *
- * @param ep  the cWScriptCacheEntry
  * @param world  the cWorld
  * @param index  the section id
  */
-extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* ep, cWorld* world, int index)
+void cWScriptCacheEntry::resolve(cWorld* world, int index)
 {
     char** wp = (char**)world;
-    tScriptFileHeader* scriptData = ep->mpScriptHeader;
+    tScriptFileHeader* scriptData = mpScriptHeader;
     if (((char*)scriptData) == 0) {
-        ep->mState = 3;
+        mState = 3;
         return;
     }
     {
         if (!(*(unsigned short*)scriptData == 0x1000 && scriptData->WorldCheckSum == *(int*)(*(char**)*wp + 0x4))) {
-            if (ep->mStreamed == 0) {
+            if (mStreamed == 0) {
                 cMemMan_free(scriptData);
             }
-            ep->mpScriptHeader = 0;
+            mpScriptHeader = 0;
         }
-        if (ep->mpScriptHeader != 0) {
-            ep->mpScriptHeader->GlobalScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->GlobalScriptDataOff;
-            ep->mpScriptHeader->InstanceScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->InstanceScriptDataOff;
-            ep->mpScriptHeader->MissionScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->MissionScriptDataOff;
-            ep->mpScriptHeader->ProcessScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->ProcessScriptDataOff;
-            ep->mpScriptHeader->TaskScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->TaskScriptDataOff;
-            ep->mpScriptHeader->WScriptScriptHeadersOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->WScriptScriptHeadersOff;
-            ep->mpScriptHeader->CollideRecordsOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->CollideRecordsOff;
-            ep->mpScriptHeader->CollideHandleTableOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->CollideHandleTableOff;
-            ep->mpScriptHeader->CollideRecordEntryTableOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->CollideRecordEntryTableOff;
-            ep->mpScriptHeader->SplineDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->SplineDataOff;
-            int* t3c = (int*)ep->mpScriptHeader->WScriptScriptHeaders;
-            for (int i = 0; i < ep->mpScriptHeader->NumWScriptScriptHeaders; i++) {
-                t3c[i] = (int)ep->mpScriptHeader + t3c[i];
+        if (mpScriptHeader != 0) {
+            mpScriptHeader->GlobalScriptDataOff = (int)mpScriptHeader + mpScriptHeader->GlobalScriptDataOff;
+            mpScriptHeader->InstanceScriptDataOff = (int)mpScriptHeader + mpScriptHeader->InstanceScriptDataOff;
+            mpScriptHeader->MissionScriptDataOff = (int)mpScriptHeader + mpScriptHeader->MissionScriptDataOff;
+            mpScriptHeader->ProcessScriptDataOff = (int)mpScriptHeader + mpScriptHeader->ProcessScriptDataOff;
+            mpScriptHeader->TaskScriptDataOff = (int)mpScriptHeader + mpScriptHeader->TaskScriptDataOff;
+            mpScriptHeader->WScriptScriptHeadersOff = (int)mpScriptHeader + mpScriptHeader->WScriptScriptHeadersOff;
+            mpScriptHeader->CollideRecordsOff = (int)mpScriptHeader + mpScriptHeader->CollideRecordsOff;
+            mpScriptHeader->CollideHandleTableOff = (int)mpScriptHeader + mpScriptHeader->CollideHandleTableOff;
+            mpScriptHeader->CollideRecordEntryTableOff =
+                (int)mpScriptHeader + mpScriptHeader->CollideRecordEntryTableOff;
+            mpScriptHeader->SplineDataOff = (int)mpScriptHeader + mpScriptHeader->SplineDataOff;
+            int* t3c = (int*)mpScriptHeader->WScriptScriptHeaders;
+            for (int i = 0; i < mpScriptHeader->NumWScriptScriptHeaders; i++) {
+                t3c[i] = (int)mpScriptHeader + t3c[i];
             }
-            for (int i = 0; i < ep->mpScriptHeader->NumCollideRecords; i++) {
-                ((int*)ep->mpScriptHeader->CollideRecordEntryTable)[i] = ep->mpScriptHeader->CollideRecordsOff + ((int*)ep->mpScriptHeader->CollideRecordEntryTable)[i];
+            for (int i = 0; i < mpScriptHeader->NumCollideRecords; i++) {
+                ((int*)mpScriptHeader->CollideRecordEntryTable)[i] =
+                    mpScriptHeader->CollideRecordsOff + ((int*)mpScriptHeader->CollideRecordEntryTable)[i];
             }
             sRef_CCD8 ref;
             *(unsigned int*)&ref = 0xFFFFFFFF;
             ref.idx = index;
-            for (int i = 0; i < ep->mpScriptHeader->NumCollideHandleTable; i++) {
+            for (int i = 0; i < mpScriptHeader->NumCollideHandleTable; i++) {
                 ref.slot = i;
                 tInstanceRecord* record = (tInstanceRecord*)resolve_CCD8(*wp, ref, 0x1C);
-                char* x = (char*)((int*)ep->mpScriptHeader->CollideRecordEntryTable)[*(unsigned short*)((char*)ep->mpScriptHeader->CollideHandleTable + (i << 1))];
+                char* x = (char*)((int*)mpScriptHeader->CollideRecordEntryTable)[
+                    *(unsigned short*)((char*)mpScriptHeader->CollideHandleTable + (i << 1))];
                 record->m_pCollideRecord = (tCollideRecord*)x;
                 int highBits = *(int*)(x + 0x4) & 0xFFFF0000;
                 record->m_iFlags = highBits | (highBits >> 16) | 2;
             }
-            for (int i = 0; i < ep->mpScriptHeader->NumCollideRecords; i++) {
-                char* tableEntry = ((char**)ep->mpScriptHeader->CollideRecordEntryTable)[i];
+            for (int i = 0; i < mpScriptHeader->NumCollideRecords; i++) {
+                char* tableEntry = ((char**)mpScriptHeader->CollideRecordEntryTable)[i];
                 int type = *(int*)tableEntry;
                 if (type == 1 || type == 3) {
                     *(void**)(tableEntry + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(tableEntry + 0xC), 100);
@@ -459,33 +461,33 @@ extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* ep, cWorld* world
                     *(void**)(tableEntry + 0xC) = 0;
                 }
             }
-            int numSplines = ep->mpScriptHeader->NumSplineData;
+            int numSplines = mpScriptHeader->NumSplineData;
             for (int i = 0; i < numSplines; i++) {
                 char* w = *wp;
                 ref.slot = i;
                 tInstanceRecord* record = (tInstanceRecord*)resolve_CCD8(w, ref, 68);
-                sPair_CCD8 splinePair = ((sPair_CCD8*)ep->mpScriptHeader->SplineData)[i];
+                sPair_CCD8 splinePair = ((sPair_CCD8*)mpScriptHeader->SplineData)[i];
                 *(int*)&record->m_fmTransform.m[1][2] = (short)splinePair.b;
                 unsigned int highBits = splinePair.a << 16;
                 *(unsigned int*)&record->m_fmTransform.m[0][3] = (highBits & 0xFFFF0000) | (highBits >> 16);
             }
             {
-                sRec40_CCD8* tableEntry = (sRec40_CCD8*)ep->mpScriptHeader->ProcessScriptData;
-                int n = ep->mpScriptHeader->NumProcessScriptData;
+                sRec40_CCD8* tableEntry = (sRec40_CCD8*)mpScriptHeader->ProcessScriptData;
+                int n = mpScriptHeader->NumProcessScriptData;
                 for (int i = 0; i < n; i++, tableEntry++) {
-                    tableEntry->f8 = (int)ep->mpScriptHeader + tableEntry->f8;
+                    tableEntry->f8 = (int)mpScriptHeader + tableEntry->f8;
                 }
             }
             {
-                sRec54_CCD8* tableEntry = (sRec54_CCD8*)ep->mpScriptHeader->MissionScriptData;
-                int n = ep->mpScriptHeader->NumMissionScriptData;
+                sRec54_CCD8* tableEntry = (sRec54_CCD8*)mpScriptHeader->MissionScriptData;
+                int n = mpScriptHeader->NumMissionScriptData;
                 for (int i = 0; i < n; i++, tableEntry++) {
-                    tableEntry->f8 = (int)ep->mpScriptHeader + tableEntry->f8;
+                    tableEntry->f8 = (int)mpScriptHeader + tableEntry->f8;
                 }
             }
         }
     }
-    ep->mState = 3;
+    mState = 3;
 }
 #endif
 
@@ -510,22 +512,21 @@ static inline int valid_D120(sRef_D120 r)
  *
  * Returns -1 when the instance has no script record (+0x88), the entry has no data or the record's id (+0x8) is -1.
  *
- * @param cache  the cWScriptCacheEntry of the instance's section
  * @param inst  the tInstanceRecord
  * @param entry  the script slot
  * @return the tResourceID, or -1
  */
-extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry* cache, tInstanceRecord* inst, int entry)
+unsigned int cWScriptCacheEntry::getWScriptHeaderId(tInstanceRecord* inst, int entry)
 {
     char* data = (char*)inst->m_pCollideRecord;
-    if (data == 0 || cache->mpScriptHeader == 0) {
+    if (data == 0 || mpScriptHeader == 0) {
         return 0xFFFFFFFF;
     }
     sRef_D120 id = *(sRef_D120*)(data + 0x8);
     if (!valid_D120(id)) {
         return 0xFFFFFFFF;
     }
-    return *(unsigned int*)((char*)&cache->mpScriptHeader->InstanceScriptData[id.slot] + entry * 4);
+    return *(unsigned int*)((char*)&mpScriptHeader->InstanceScriptData[id.slot] + entry * 4);
 }
 #endif
 
@@ -1025,10 +1026,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
  * @param i  index of the script within the section
  * @return the script's code pointer, or 0 when the entry is not loaded
  */
-extern "C" int cWScriptCacheEntry_getWScriptScript(cWScriptCacheEntry* self, int i)
+int cWScriptCacheEntry::getWScriptScript(int i)
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         return data->WScriptScriptHeaders[i].ScriptCode;
     }
     return 0;
@@ -1044,10 +1045,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumGlobalScripts);
  * @return the count at +0x10 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
  *         has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getNumGlobalScripts(cWScriptCacheEntry* self)
+int cWScriptCacheEntry::getNumGlobalScripts()
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->NumGlobalScriptData;
         }
@@ -1065,10 +1066,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getGlobalScripts);
  * @return the pointer at +0x14 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
  *         it has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getGlobalScripts(cWScriptCacheEntry* self)
+int cWScriptCacheEntry::getGlobalScripts()
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->GlobalScriptDataOff;
         }
@@ -1085,10 +1086,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumProcessScripts);
  *
  * @return the count at +0x28 of the entry's data when the entry is loaded (state 3) and has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getNumProcessScripts(cWScriptCacheEntry* self)
+int cWScriptCacheEntry::getNumProcessScripts()
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->NumProcessScriptData;
         }
@@ -1105,10 +1106,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getProcessScripts);
  *
  * @return the pointer at +0x2C of the entry's data when the entry is loaded (state 3) and has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getProcessScripts(cWScriptCacheEntry* self)
+int cWScriptCacheEntry::getProcessScripts()
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->ProcessScriptDataOff;
         }
@@ -1126,10 +1127,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumMissionScripts);
  * @return the count at +0x20 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
  *         has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getNumMissionScripts(cWScriptCacheEntry* self)
+int cWScriptCacheEntry::getNumMissionScripts()
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->NumMissionScriptData;
         }
@@ -1147,10 +1148,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getMissionScripts);
  * @return the pointer at +0x24 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
  *         it has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getMissionScripts(cWScriptCacheEntry* self)
+int cWScriptCacheEntry::getMissionScripts()
 {
-    if (*(short*)self == 3) {
-        tScriptFileHeader* data = self->mpScriptHeader;
+    if (*(short*)this == 3) {
+        tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->MissionScriptDataOff;
         }

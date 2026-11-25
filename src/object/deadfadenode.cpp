@@ -219,13 +219,13 @@ extern char cDeadFadeNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cDeadFadeNode_cDeadFadeNode1(cDeadFadeNode* self)
+void* cDeadFadeNode::cDeadFadeNode1()
 {
-    cInstanceNode_ctor_v(self);
-    VPTR_OF(cObjNode, self) = (void**)cDeadFadeNode_vtbl;
-    self->Data.InstId = 0xFFFFFFFFU;
-    self->AnimMats = 0;
-    return ((void*)self);
+    cInstanceNode_ctor_v(this);
+    VPTR_OF(cObjNode, this) = (void**)cDeadFadeNode_vtbl;
+    Data.InstId = 0xFFFFFFFFU;
+    AnimMats = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -485,11 +485,11 @@ extern char cHideNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cHideNode_cHideNode1(cHideNode* self)
+void* cHideNode::cHideNode1()
 {
-    cInstanceNode_cInstanceNode(self);
-    VPTR_OF(cObjNode, self) = (void**)cHideNode_vtbl;
-    return ((void*)self);
+    cInstanceNode_cInstanceNode(this);
+    VPTR_OF(cObjNode, this) = (void**)cHideNode_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -551,11 +551,11 @@ extern char cRestoreNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cRestoreNode_cRestoreNode1(cRestoreNode* self)
+void* cRestoreNode::cRestoreNode1()
 {
-    cInstanceNode_cInstanceNode(self);
-    VPTR_OF(cObjNode, self) = (void**)cRestoreNode_vtbl;
-    return ((void*)self);
+    cInstanceNode_cInstanceNode(this);
+    VPTR_OF(cObjNode, this) = (void**)cRestoreNode_vtbl;
+    return ((void*)this);
 }
 #endif
 

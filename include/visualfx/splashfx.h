@@ -68,6 +68,9 @@ struct tCrystal {
     float mSmallMovementTimeLeft;   // 0x040 [O]; [U] init, update
     float mSmallMovementX;          // 0x044 [O]; [U] init, update
     float mSmallMovementY;          // 0x048 [O]; [U] init, update
+
+    // Methods bound to their retail symbols by asm labels.
+    void render(const t2Vector* off) __asm__("tCrystal_render");
 };
 
 CHECK_OFFSET(tCrystal, mNumSpawned, 0x000);
@@ -84,6 +87,9 @@ CHECK_OFFSET(tCrystal, mSmallMovementTimeLeft, 0x040);
 CHECK_OFFSET(tCrystal, mSmallMovementX, 0x044);
 CHECK_OFFSET(tCrystal, mSmallMovementY, 0x048);
 CHECK_SIZE(tCrystal, 0x04C);
+
+struct t2Vector;
+struct t4Vector;
 
 struct cSplashManager : public cObjNode {
     // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
@@ -103,6 +109,12 @@ struct cSplashManager : public cObjNode {
     float mNumSplashesToAdd;        // 0x1024 [O]; [R] zeroed; [U] reset, AddSplashes, ReportImpactLocal, ReportSnowfall
     float mLastSnowfallIntensity;   // 0x1028 [O]; [U] reset zeroes it; ReportSnowfall / ReportImpactLocal
     char unk_102C[0x4];             // 0x102C tail padding to the 16-byte-aligned size 0x1030
+
+    // Methods bound to their retail symbols by asm labels.
+    void AddCrystal(t2Vector* basePos, int n) __asm__("cSplashManager_AddCrystal");
+    void AddSplashes() __asm__("cSplashManager_AddSplashes");
+    void ReportImpactLocal(t4Vector* impactPos, float speed) __asm__("cSplashManager_ReportImpactLocal");
+    void ReportSnowfall(float intensity) __asm__("cSplashManager_ReportSnowfall");
 };
 
 CHECK_OFFSET(cSplashManager, mViewIndex, 0x010);

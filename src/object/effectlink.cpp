@@ -23,17 +23,16 @@ INCLUDE_ASM("object/effectlink", cEffectLink_add__FP11cEffectLinkT0);
 /**
  * Inserts an effect link into the chain directly after another.
  *
- * @param link   link to insert after
  * @param other  link to insert
  */
-void cEffectLink_add(cEffectLink* link, cEffectLink* other)
+void cEffectLink::add(cEffectLink* other)
 {
-    if (link->Next != 0) {
-        link->Next->Prev = other;
+    if (Next != 0) {
+        Next->Prev = other;
     }
-    other->Prev = link;
-    other->Next = link->Next;
-    link->Next = other;
+    other->Prev = this;
+    other->Next = Next;
+    Next = other;
 }
 #endif
 
@@ -69,18 +68,17 @@ INCLUDE_ASM("object/effectlink", cEffectLink_unlink);
  * Points the next link's Prev at this link's Prev and the previous link's Next at this link's Next (each only when
  * present), then clears this link's Next and Prev.
  *
- * @param link  the link to remove
  */
-extern "C" void cEffectLink_unlink(cEffectLink* link)
+void cEffectLink::unlink()
 {
-    if (link->Next != 0) {
-        link->Next->Prev = link->Prev;
+    if (Next != 0) {
+        Next->Prev = Prev;
     }
-    if (link->Prev != 0) {
-        link->Prev->Next = link->Next;
+    if (Prev != 0) {
+        Prev->Next = Next;
     }
-    link->Next = 0;
-    link->Prev = 0;
+    Next = 0;
+    Prev = 0;
 }
 #endif
 
@@ -124,18 +122,17 @@ extern void* cEffectModifier_vtbl[];
  * (instance-pointer read) and increments the live effect count cEffectModifier_EffectCount (read by cEffectModifier_getEffectCount). The particle and
  * halo replay constructors (cParticleModifier_cParticleModifier1, cHaloModifier_cHaloModifier1) start with it.
  *
- * @param effectModifier  the modifier being constructed
  * @param obj  replay stream to read from
  * @return effectModifier
  */
-extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifier, cBxReplayFrame* obj)
+void* cEffectModifier::cEffectModifier1(cBxReplayFrame* obj)
 {
-    effectModifier->Next = 0;
-    effectModifier->Prev = 0;
-    VPTR_OF(cEffectLink, effectModifier) = cEffectModifier_vtbl;
-    effectModifier->Instance = obj->readReplayInstance();
+    Next = 0;
+    Prev = 0;
+    VPTR_OF(cEffectLink, this) = cEffectModifier_vtbl;
+    Instance = obj->readReplayInstance();
     cEffectModifier_EffectCount++;
-    return ((void*)effectModifier);
+    return ((void*)this);
 }
 #endif
 
@@ -160,7 +157,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
     VPTR_OF(cEffectLink, effectLink) = cEffectModifier_vtbl;
     cEffectModifier_EffectCount--;
     VPTR_OF(cEffectLink, effectLink) = cEffectLink_vtbl;
-    cEffectLink_unlink((cEffectLink*)(sEffectLinkView*)&effectLink->Next);
+    ((cEffectLink*)(sEffectLinkView*)&effectLink->Next)->unlink();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -273,25 +270,25 @@ extern t4Matrix t4mat_Identity;
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, cBxReplayFrame* stream)
+void* cParticleModifier::cParticleModifier1(cBxReplayFrame* stream)
 {
-    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
-    VPTR_OF(cEffectLink, self) = cParticleModifier_vtbl;
-    cStaticEmitter_cStaticEmitter(&self->Emitter);
-    stream->read((char*)&self->Complete, 4);
-    if (self->Complete == 0) {
+    this->cEffectModifier1(stream);
+    VPTR_OF(cEffectLink, this) = cParticleModifier_vtbl;
+    cStaticEmitter_cStaticEmitter(&Emitter);
+    stream->read((char*)&Complete, 4);
+    if (Complete == 0) {
         void* buf = operator_new1(216);
-        self->ParticleData = (tParticleData*)buf;
+        ParticleData = (tParticleData*)buf;
         stream->read((char*)buf, 216);
-        stream->read((char*)&self->Transform, 0x40);
-        cStaticEmitter_setupEmitter(&self->Emitter, &self->Transform, (int)self->ParticleData);
-        cStaticEmitter_readFromReplayFrame(&self->Emitter, stream);
+        stream->read((char*)&Transform, 0x40);
+        cStaticEmitter_setupEmitter(&Emitter, &Transform, (int)ParticleData);
+        cStaticEmitter_readFromReplayFrame(&Emitter, stream);
     } else {
-        vu0CopyMatrix003458C0(&self->Transform, &t4mat_Identity);
-        self->ParticleData = 0;
+        vu0CopyMatrix003458C0(&Transform, &t4mat_Identity);
+        ParticleData = 0;
     }
     cParticleModifier_ParticleCount++;
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 
@@ -435,26 +432,26 @@ struct t4VectorXYZW : t4Vector {
  * @param pos  offset from that mesh
  * @return @p self
  */
-extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(
-    cDynamicParticleModifier* self, tParticleData* particleDesc, int owner, int bone, t4Vector* pos)
+cDynamicParticleModifier* cDynamicParticleModifier::cDynamicParticleModifier1(tParticleData* particleDesc, int owner,
+                                                                              int bone, t4Vector* pos)
 {
-    cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
-    VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
-    cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
-    self->Emitter.mVtbl = cDynamicEmitter_vtbl;
-    self->ParticleData = (tParticleData*)particleDesc;
-    self->Mesh = bone;
-    self->Offset = *pos;
-    self->InitVel = t4VectorXYZW(particleDesc->VelX, particleDesc->VelY, particleDesc->VelZ, 0.0f);
-    self->Fade = 0;
+    cEffectModifier_cEffectModifier((cEffectModifier*)this, owner);
+    VPTR_OF(cEffectLink, this) = cDynamicParticleModifier_vtbl;
+    cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&Emitter));
+    Emitter.mVtbl = cDynamicEmitter_vtbl;
+    ParticleData = (tParticleData*)particleDesc;
+    Mesh = bone;
+    Offset = *pos;
+    InitVel = t4VectorXYZW(particleDesc->VelX, particleDesc->VelY, particleDesc->VelZ, 0.0f);
+    Fade = 0;
     particleDesc->VelX = 0.0f;
     particleDesc->VelY = 0.0f;
     particleDesc->VelZ = 0.0f;
-    cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), self->ParticleData, -1.0f);
-    cDynamicParticleModifier_updatePosition(self);
+    cBaseClass_DynamicEmitter_setupEmitter(((char*)&Emitter), ParticleData, -1.0f);
+    updatePosition();
     cDynamicParticleModifier_DynamicParticleCount++;
-    self->Complete = 0;
-    return (self);
+    Complete = 0;
+    return (this);
 }
 #endif
 
@@ -484,7 +481,7 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b
 extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self,
                                                                                          cBxReplayFrame* stream)
 {
-    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
+    self->cEffectModifier1(stream);
     VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
     void* data = &self->Mesh;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
@@ -585,12 +582,12 @@ struct sEffectLink5EF8 {
  * Builds the mesh matrix of Instance/Mesh with cInstanceNode_buildMeshMat() and sets Pos to that matrix applied to
  * Offset and Vel to it applied to InitVel.
  */
-extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self)
+void cDynamicParticleModifier::updatePosition()
 {
     sEffMtx_5EF8 meshMat;
-    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (t4Matrix*)&meshMat);
-    *(t4Vector*)&self->Pos = effMtxApply5EF8(&meshMat, (t4Vector*)&self->Offset);
-    *(t4Vector*)&self->Vel = effMtxApply5EF8(&meshMat, (t4Vector*)&self->InitVel);
+    cInstanceNode_buildMeshMat(Instance, Mesh, (t4Matrix*)&meshMat);
+    *(t4Vector*)&Pos = effMtxApply5EF8(&meshMat, (t4Vector*)&Offset);
+    *(t4Vector*)&Vel = effMtxApply5EF8(&meshMat, (t4Vector*)&InitVel);
 }
 #endif
 
@@ -614,7 +611,7 @@ extern "C" void cDynamicParticleModifier_update(cDynamicParticleModifier* self)
     if (self->Complete != 0) {
         return;
     }
-    cDynamicParticleModifier_updatePosition(self);
+    self->updatePosition();
     if (self->Fade > 0) {
         float* sub = (float*)(&self->Emitter);
         if (self->Emitter.m_enabledCount > 0) {
@@ -746,13 +743,13 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, cBxReplayF
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, cBxReplayFrame* stream)
+void* cHaloModifier::cHaloModifier1(cBxReplayFrame* stream)
 {
-    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
-    VPTR_OF(cEffectLink, self) = cHaloModifier_vtbl;
-    stream->read((char*)&self->Color, 0x30);
+    this->cEffectModifier1(stream);
+    VPTR_OF(cEffectLink, this) = cHaloModifier_vtbl;
+    stream->read((char*)&Color, 0x30);
     cHaloModifier_HaloCount++;
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 
@@ -941,16 +938,16 @@ extern void* cFlexBridgeNode_vtbl[];
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* bucket, cBxReplayFrame* stream)
+void* cFlexBridgeNode::cFlexBridgeNode1(void* bucket, cBxReplayFrame* stream)
 {
-    void* payload = (char*)&self->BottomLeftOffset;
-    cInstanceNode_cInstanceNode(self, bucket, stream);
-    VPTR_OF(cObjNode, self) = cFlexBridgeNode_vtbl;
-    cSpring_cSpring1((char*)&self->Mesh, stream);
-    cFlexBridgeNode_setupGrid(self);
+    void* payload = (char*)&BottomLeftOffset;
+    cInstanceNode_cInstanceNode(this, bucket, stream);
+    VPTR_OF(cObjNode, this) = cFlexBridgeNode_vtbl;
+    cSpring_cSpring1((char*)&Mesh, stream);
+    cFlexBridgeNode_setupGrid(this);
     stream->read((char*)payload, 0x30);
-    cFlexBridgeNode_updateGrid(self);
-    return ((void*)self);
+    cFlexBridgeNode_updateGrid(this);
+    return ((void*)this);
 }
 #endif
 

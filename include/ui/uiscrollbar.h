@@ -40,6 +40,19 @@ struct cUIScrollBar : public cUIThing {
     int mValue;                      // 0x0C0 [O]; [R] = 0; [U] cUIScrollBar_getValue getValue (lw); cUIScrollBar_setValues stores the position
     int mNumValues;                  // 0x0C4 [O]; [R] = 0; [U] cUIScrollBar_setValues (sw)
     int mPage;                       // 0x0C8 [O]; [R] = 0; [U] cUIScrollBar_setValues (sw)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setScrollVisibile(int bVisible) __asm__("cUIScrollBar_setScrollVisibile");
+    void* cUIScrollBar1() __asm__("cUIScrollBar_cUIScrollBar1");
+    void setBackgroundObject(int background) __asm__("cUIScrollBar_setBackgroundObject");
+    void setKnobObject(int knob) __asm__("cUIScrollBar_setKnobObject");
+    void setUpArrowObject(int upArrow) __asm__("cUIScrollBar_setUpArrowObject");
+    void setDownArrowObject(int downArrow) __asm__("cUIScrollBar_setDownArrowObject");
+    void setHideOnEmpty(int hideOnEmpty) __asm__("cUIScrollBar_setHideOnEmpty");
+    void setHideState(int hideState) __asm__("cUIScrollBar_setHideState");
+    void setUpAnimationName(char* str) __asm__("cUIScrollBar_setUpAnimationName");
+    void setDownAnimationName(char* str) __asm__("cUIScrollBar_setDownAnimationName");
+    int getValue() __asm__("cUIScrollBar_getValue");
 };
 
 CHECK_OFFSET(cUIScrollBar, mpObjBackground, 0x074);

@@ -166,10 +166,10 @@ extern "C" int cBankMonitorInstance_IsFree(void*);
  * @param n  which free instance to return: 1 for the first (On Tour SkipCount)
  * @return the instance index, or -1 if there are not that many free
  */
-extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n)
+int cBankMonitor::FindFreeInstance(int n)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) != 0) {
+        if (cBankMonitorInstance_IsFree(&mBankMonitorInstance[i]) != 0) {
             if (--n == 0) {
                 return i;
             }
@@ -337,7 +337,7 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
 {
     sBmVoice* instance = 0;
     self->busy++;
-    int idx = cBankMonitor_FindFreeInstance((cBankMonitor*)self, self->busy);
+    int idx = ((cBankMonitor*)self)->FindFreeInstance(self->busy);
     if (idx >= 0) {
         instance = &self->voices[idx];
         cBankMonitorInstance_Reset(instance);
@@ -390,11 +390,11 @@ extern "C" void cBankMonitorInstance_Pause(void*);
 /**
  * Pauses every bank-sound instance and marks the monitor paused (+0x8E8).
  */
-extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
+void cBankMonitor::BANKMONITOR_Pause()
 {
-    self->mBankMonitorPaused = 1;
+    mBankMonitorPaused = 1;
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Pause(&self->mBankMonitorInstance[i]);
+        cBankMonitorInstance_Pause(&mBankMonitorInstance[i]);
     }
 }
 #endif
@@ -407,12 +407,12 @@ extern "C" void cBankMonitorInstance_Resume(void*);
 /**
  * Resumes every bank-sound instance and clears the monitor's paused flag (+0x8E8).
  */
-extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
+void cBankMonitor::BANKMONITOR_Resume()
 {
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Resume(&self->mBankMonitorInstance[i]);
+        cBankMonitorInstance_Resume(&mBankMonitorInstance[i]);
     }
-    self->mBankMonitorPaused = 0;
+    mBankMonitorPaused = 0;
 }
 #endif
 
@@ -430,9 +430,9 @@ extern "C" void cBankMonitorInstance_Fade(void* voice, int a, int b, float v);
  * @param type  passed to GetHandle (On Tour eMonitorType type)
  * @param FadeTime  the fade time (On Tour float FadeTime)
  */
-extern "C" void cBankMonitor_BANKMONITOR_FadeOut(cBankMonitor* self, int idx, int type, float FadeTime)
+void cBankMonitor::BANKMONITOR_FadeOut(int idx, int type, float FadeTime)
 {
-    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, type);
+    void* voice = BANKMONITOR_GetHandle(idx, type);
     if (voice != 0) {
         cBankMonitorInstance_Fade(voice, -1, 0, FadeTime);
     }
@@ -449,9 +449,9 @@ extern "C" void cBankMonitorInstance_Reset(void*);
  *
  * @param i  the instance index (On Tour Index)
  */
-extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i)
+void cBankMonitor::BANKMONITOR_Destroy(int i)
 {
-    cBankMonitorInstance_Reset(&self->mBankMonitorInstance[i]);
+    cBankMonitorInstance_Reset(&mBankMonitorInstance[i]);
 }
 #endif
 
@@ -466,11 +466,11 @@ extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i);
  * cBankMonitor's virtual slot 2 (cBankMonitor_vtbl). A cSSXAudio method in sound/ssxAudio.cpp calls it on the shared
  * cBankManager's monitor (+0x1D8).
  */
-extern "C" void cBankMonitor_BANKMONITOR_DestroyAll(cBankMonitor* self)
+void cBankMonitor::BANKMONITOR_DestroyAll()
 {
     int i;
     for (i = 0; i < 64; i++) {
-        cBankMonitor_BANKMONITOR_Destroy(self, i);
+        BANKMONITOR_Destroy(i);
     }
 }
 #endif
@@ -530,11 +530,11 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_DestroyAllWithPtr);
  *
  * @param id  the owner pointer to match (On Tour Ptr), as an int
  */
-extern "C" void cBankMonitor_BANKMONITOR_DestroyAllWithPtr(cBankMonitor* self, int id)
+void cBankMonitor::BANKMONITOR_DestroyAllWithPtr(int id)
 {
     for (int i = 0; i < 64; i++) {
-        if ((int)self->mBankMonitorInstance[i].mPtr == id) {
-            cBankMonitorInstance_Reset(&self->mBankMonitorInstance[i]);
+        if ((int)mBankMonitorInstance[i].mPtr == id) {
+            cBankMonitorInstance_Reset(&mBankMonitorInstance[i]);
         }
     }
 }
@@ -551,13 +551,13 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_GetHandle);
  * @param key  the monitor type (+0x0; On Tour eMonitorType: 1 bank, 2 MIDI, 3 stream)
  * @return the instance, or 0 if none matches
  */
-extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int key)
+void* cBankMonitor::BANKMONITOR_GetHandle(int idx, int key)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0
-            && (self->mBankMonitorInstance)[i].mMonitorType == key
-            && (self->mBankMonitorInstance)[i].mHandle == idx) {
-            return &(self->mBankMonitorInstance)[i];
+        if (cBankMonitorInstance_IsFree(&mBankMonitorInstance[i]) == 0
+            && mBankMonitorInstance[i].mMonitorType == key
+            && mBankMonitorInstance[i].mHandle == idx) {
+            return &mBankMonitorInstance[i];
         }
     }
     return 0;
@@ -580,9 +580,9 @@ extern "C" void cBankMonitorInstance_Fade(void* voice, int a, int b, float v);
  * @param type  despite its name, the monitor type passed to GetHandle
  * @param FadeTime      despite its name, the fade time; 0 stops the sound at once
  */
-extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int type, float FadeTime)
+void cBankMonitor::BANKMONITOR_StopHandle(int idx, int type, float FadeTime)
 {
-    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, type);
+    void* voice = BANKMONITOR_GetHandle(idx, type);
     if (voice != 0) {
         if (FadeTime != 0.0f) {
             cBankMonitorInstance_Fade(voice, -1, 1, FadeTime);
@@ -611,12 +611,12 @@ void cBankMonitorInstance_Fade_f(void* voice, float v, int a, int b) __asm__("cB
  * @param id  the bank's handle (On Tour BankHandle)
  * @param FadeTime   fade time; 0 stops at once (On Tour FadeTime)
  */
-extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, float FadeTime)
+void cBankMonitor::BANKMONITOR_StopBank(int id, float FadeTime)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
+        if (cBankMonitorInstance_IsFree(&mBankMonitorInstance[i]) == 0) {
             // PORT: pointer arithmetic through int
-            cBankMonitorInstance* instance = (cBankMonitorInstance*)(i * 0xC0 + (int)self->mBankMonitorInstance);
+            cBankMonitorInstance* instance = (cBankMonitorInstance*)(i * 0xC0 + (int)mBankMonitorInstance);
             if (instance->mMonitorType == 1 && instance->mRestartInfo.bank.mBank == id) {
                 if (FadeTime != 0.0f) {
                     cBankMonitorInstance_Fade_f(instance, FadeTime, -1, 1);
@@ -640,13 +640,13 @@ extern "C" int cBankMonitorInstance_IsFree(void*);
  *
  * @return the number of active instances
  */
-extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
+int cBankMonitor::BANKMONITOR_Active()
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
+        if (cBankMonitorInstance_IsFree(&mBankMonitorInstance[i]) == 0) {
             // PORT: pointer arithmetic through int
-            cBankMonitorInstance* instance = (cBankMonitorInstance*)(i * 0xC0 + (int)self->mBankMonitorInstance);
+            cBankMonitorInstance* instance = (cBankMonitorInstance*)(i * 0xC0 + (int)mBankMonitorInstance);
             if (instance->mActive != 0) {
                 count++;
             }
@@ -665,11 +665,11 @@ extern "C" int cBankMonitorInstance_IsFree(void*);
  *
  * @return the number of instances in use
  */
-extern "C" int cBankMonitor_BANKMONITOR_Used(cBankMonitor* self)
+int cBankMonitor::BANKMONITOR_Used()
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
+        if (cBankMonitorInstance_IsFree(&mBankMonitorInstance[i]) == 0) {
             count++;
         }
     }
@@ -685,10 +685,10 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_CameraChange);
  * Forgets every instance's last listener distance (+0x5C = -1) after a camera cut, so no Doppler jump is
  * heard.
  */
-extern "C" void cBankMonitor_BANKMONITOR_CameraChange(cBankMonitor* self)
+void cBankMonitor::BANKMONITOR_CameraChange()
 {
     for (int i = 0; i < 64; i++) {
-        (self->mBankMonitorInstance)[i].mLastDist = -1.0f;
+        mBankMonitorInstance[i].mLastDist = -1.0f;
     }
 }
 #endif
@@ -755,18 +755,18 @@ void cMonitorInstance_Enable(void* self);
  * @param Data4    fourth data word (mData4)
  */
 // PORT: 64-bit long sound key
-extern "C" void cMonitorInstance_Create(cMonitorInstance* self, int Freq, long key, int Ptr, int Data1, int Data2, int Data3, int Data4)
+void cMonitorInstance::Create(int Freq, long key, int Ptr, int Data1, int Data2, int Data3, int Data4)
 {
-    cMonitorInstance_Reset(self);
-    cMonitorInstance_CountReset(self, Freq);
+    Reset();
+    CountReset(Freq);
     // PORT: the 8-byte key is copied through its in-memory layout
-    *(&self->mCallback) = *(tSndCallback*)&key;
-    self->mPtr = (void*)Ptr;
-    self->mData1 = Data1;
-    self->mData2 = Data2;
-    self->mData3 = Data3;
-    self->mData4 = Data4;
-    cMonitorInstance_Enable(self);
+    *(&mCallback) = *(tSndCallback*)&key;
+    mPtr = (void*)Ptr;
+    mData1 = Data1;
+    mData2 = Data2;
+    mData3 = Data3;
+    mData4 = Data4;
+    cMonitorInstance_Enable(this);
 }
 #endif
 
@@ -778,9 +778,9 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_IsFree);
  *
  * @return 1 when free, otherwise 0
  */
-extern "C" int cMonitorInstance_IsFree(cMonitorInstance* self)
+int cMonitorInstance::IsFree()
 {
-    return self->mCountReset == -1;
+    return mCountReset == -1;
 }
 #endif
 
@@ -793,10 +793,10 @@ void cMonitorInstance_CountReset(void* self, int a1);
 /**
  * Frees a monitor instance: disables it (cMonitorInstance_Disable, probably Disable) and sets its reset count to -1.
  */
-extern "C" void cMonitorInstance_Reset(cMonitorInstance* self)
+void cMonitorInstance::Reset()
 {
-    cMonitorInstance_Disable(self);
-    cMonitorInstance_CountReset(self, -1);
+    Disable();
+    CountReset(-1);
 }
 #endif
 
@@ -811,11 +811,10 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_CountReset__FPvi);
  *
  * @param periodMs  the callback period in ms, or -1 to free the instance
  */
-void cMonitorInstance_CountReset(void* vself, int periodMs)
+void cMonitorInstance::CountReset(int periodMs)
 {
-    cMonitorInstance* self = (cMonitorInstance*)vself;
-    self->mCountReset = periodMs;
-    self->mCountdown = periodMs;
+    mCountReset = periodMs;
+    mCountdown = periodMs;
 }
 #endif
 
@@ -841,10 +840,9 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_Disable__FPv);
  *
  * cMonitorInstance_Reset calls it before marking the instance free.
  */
-void cMonitorInstance_Disable(void* vself)
+void cMonitorInstance::Disable()
 {
-    cMonitorInstance* self = (cMonitorInstance*)vself;
-    self->mEnabled = 0;
+    mEnabled = 0;
 }
 #endif
 
@@ -1032,10 +1030,10 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Update);
 /**
  * Counts one monitor tick (mCounter), unless the monitor is paused.
  */
-extern "C" void cMonitor_MONITOR_Update(cMonitor* self)
+void cMonitor::MONITOR_Update()
 {
-    if (self->mPaused == 0) {
-        self->mCounter += 1;
+    if (mPaused == 0) {
+        mCounter += 1;
     }
 }
 #endif
@@ -1049,10 +1047,10 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_GetFreeInstance);
  * @param n  which free instance to return: 1 for the first (On Tour Count)
  * @return the instance index, or -1 if there are not that many free
  */
-extern "C" int cMonitor_MONITOR_GetFreeInstance(cMonitor* self, int n)
+int cMonitor::MONITOR_GetFreeInstance(int n)
 {
     for (int i = 0; i < 48; i++) {
-        if (cMonitorInstance_IsFree(&self->mMonitorInstance[i]) != 0) {
+        if (mMonitorInstance[i].IsFree() != 0) {
             if (--n == 0) {
                 return i;
             }
@@ -1095,7 +1093,7 @@ extern "C" int cMonitor_MONITOR_Create_pl(cMonitor* self, int freq, sSndCallback
                                           int data3, int data4)
 {
     self->mReEntryCheck = self->mReEntryCheck + 1;
-    int idx = cMonitor_MONITOR_GetFreeInstance(self, self->mReEntryCheck);
+    int idx = self->MONITOR_GetFreeInstance(self->mReEntryCheck);
     if (idx >= 0) {
         cMonitorInstance_Create_cb(&self->mMonitorInstance[idx], freq, cb, userPtr, data1, data2, data3, data4);
     }
@@ -1112,9 +1110,9 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Destroy);
  *
  * @param idx  the instance (On Tour int Index)
  */
-extern "C" void cMonitor_MONITOR_Destroy(cMonitor* self, int idx)
+void cMonitor::MONITOR_Destroy(int idx)
 {
-    cMonitorInstance_Reset(&self->mMonitorInstance[idx]);
+    mMonitorInstance[idx].Reset();
 }
 #endif
 
@@ -1128,12 +1126,12 @@ extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
  *
  * The audio system calls it on the cBankMonitor of the shared cBankManager when it purges or shuts down.
  */
-extern "C" void cMonitor_MONITOR_DestroyAll(cMonitor* self)
+void cMonitor::MONITOR_DestroyAll()
 {
-    char* instance = (char*)&self->mMonitorInstance;
+    char* instance = (char*)&mMonitorInstance;
     int i;
     for (i = 47; i >= 0; i--) {
-        cMonitorInstance_Reset((cMonitorInstance*)instance);
+        ((cMonitorInstance*)instance)->Reset();
         instance += 0x2C;
     }
 }
@@ -1186,7 +1184,7 @@ void cMonitor_MONITOR_DestroyAll1_impl(void* vself, sBmKeyDDE0 key)
     cMonitor* self = (cMonitor*)vself;
     for (int i = 0; i < 48; i++) {
         if (cMonitor_MONITOR_DestroyAll1_match(&self->mMonitorInstance[i], key)) {
-            cMonitorInstance_Reset(&self->mMonitorInstance[i]);
+            self->mMonitorInstance[i].Reset();
         }
         ASSERT_DDE0(i < 48);
     }
@@ -1307,9 +1305,9 @@ public:
  * @param mode  the new sound mode (On Tour eSOUNDDEF_MODE mode)
  * @return the manager's result (On Tour eSOUNDMANAGER_SETMODE)
  */
-extern "C" int cSoundSys_SetMode(cSoundSys* self, int mode)
+int cSoundSys::SetMode(int mode)
 {
-    return ((cSoundSys_SetMode_cObj*)self->pManager)->v02(mode);
+    return ((cSoundSys_SetMode_cObj*)pManager)->v02(mode);
 }
 #endif
 
@@ -4944,7 +4942,7 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
         if (func_002B4AA0(gMusicSys, force) == 0)
             return;
         (mon)->unk_2C = 1;
-        func_003D2350(cMusicSys_GetMPFFile(gMusicSys));
+        func_003D2350(gMusicSys->GetMPFFile());
         char buf[256];
         sprintf(buf, str_pct_spct_s_c, mon->mPath, mon->mpConfig->mMusData);
         mon->mHandle = func_003D25F0(0x11000001, buf, 500, &mon->mPlayOpts, 2, 150, mon->unk_24, 0x37000);
@@ -6310,8 +6308,9 @@ INCLUDE_ASM("sound/bankmonitor", cMusicSys_getActiveMap);
  * @return the 64-bit active song mask
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long cMusicSys_getActiveMap(cMusicSys* musicSys) {
-    return ((long)musicSys->mActiveMap);
+long cMusicSys::getActiveMap()
+{
+    return ((long)mActiveMap);
 }
 #endif
 
@@ -7111,10 +7110,9 @@ INCLUDE_ASM("sound/bankmonitor", cMusicSys_GetMPFFile__FPv);
  *
  * @return mMPFFile
  */
-int cMusicSys_GetMPFFile(void* vself)
+int cMusicSys::GetMPFFile()
 {
-    cMusicSys* self = (cMusicSys*)vself;
-    return (int)self->mMPFFile;
+    return (int)mMPFFile;
 }
 #endif
 

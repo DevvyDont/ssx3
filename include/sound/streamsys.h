@@ -30,6 +30,8 @@
 struct cBankManager;
 struct cStreamInstance;
 
+struct cMonitorInstance;
+
 struct cStreamSys {
     cBankManager* mpVBankManager;       // 0x000 [R] g++ 2.95 virtual-base pointer to cBankManager (this + 0x14 in a
                                         //       complete cStreamSys; cSSXAudio + 0x6C98); [U] STREAM_Create reaches the
@@ -41,6 +43,37 @@ struct cStreamSys {
                                         //       the dtor destroys each instance (cStreamInstance__cStreamInstance(p,
                                         //       3))
                                         //       and frees it; [U] every STREAM_* method indexes it by stream number
+
+    // Methods bound to their retail symbols by asm labels.
+    void STREAM_CreateInstance(int idx, int heap, int extra) __asm__("cStreamSys_STREAM_CreateInstance");
+    void STREAM_CreateInstance1(int idx, int heap, char* mem, int size, int n, int maxChunks)
+        __asm__("cStreamSys_STREAM_CreateInstance1");
+    void STREAM_Create(int streamIndex, int volControl, int memType, int buffSpace) __asm__("cStreamSys_STREAM_Create");
+    void STREAM_SetBigFile(int i, int val) __asm__("cStreamSys_STREAM_SetBigFile");
+    void STREAM_Destroy(int i) __asm__("cStreamSys_STREAM_Destroy");
+    void STREAM_Update() __asm__("cStreamSys_STREAM_Update");
+    void STREAM_Pause() __asm__("cStreamSys_STREAM_Pause");
+    void STREAM_Resume() __asm__("cStreamSys_STREAM_Resume");
+    int STREAM_Queue(int i, int holdTime, int buf, int offset) __asm__("cStreamSys_STREAM_Queue");
+    int STREAM_Queue1(int idx, int holdTime, int element, int offset) __asm__("cStreamSys_STREAM_Queue1");
+    int STREAM_Requests(int i) __asm__("cStreamSys_STREAM_Requests");
+    void STREAM_Purge(int i) __asm__("cStreamSys_STREAM_Purge");
+    float STREAM_TimeRemaining(int i) __asm__("cStreamSys_STREAM_TimeRemaining");
+    float STREAM_RequestLength(int idx) __asm__("cStreamSys_STREAM_RequestLength");
+    int STREAM_IsBufferFilled(int idx, int minVal) __asm__("cStreamSys_STREAM_IsBufferFilled");
+    int STREAM_IsCurrRequestedRead(int idx) __asm__("cStreamSys_STREAM_IsCurrRequestedRead");
+    int STREAM_IsRequestedDequeued(int handle) __asm__("cStreamSys_STREAM_IsRequestedDequeued");
+    int STREAM_IsRequestedPlaying(int handle) __asm__("cStreamSys_STREAM_IsRequestedPlaying");
+    int STREAM_Playing(int i) __asm__("cStreamSys_STREAM_Playing");
+    void STREAM_ReleaseHold(int idx) __asm__("cStreamSys_STREAM_ReleaseHold");
+    void STREAM_ReleaseHold1(int idx, int requestHandle) __asm__("cStreamSys_STREAM_ReleaseHold1");
+    void STREAM_SetVolControl(int i, int val) __asm__("cStreamSys_STREAM_SetVolControl");
+    void STREAM_SetBaseVolume(int idx, int val) __asm__("cStreamSys_STREAM_SetBaseVolume");
+    int STREAM_GetHandle(int idx) __asm__("cStreamSys_STREAM_GetHandle");
+    int STREAM_GetCurrActiveSampleHandle(int i) __asm__("cStreamSys_STREAM_GetCurrActiveSampleHandle");
+    int STREAM_GetInstance(int index) __asm__("cStreamSys_STREAM_GetInstance__FPvi");
+    int STREAM_ReleaseHoldCallback(cMonitorInstance* monitorInst) __asm__("cStreamSys_STREAM_ReleaseHoldCallback");
+    int STREAM_TimeMult(int idx, int multAmount) __asm__("cStreamSys_STREAM_TimeMult");
 };
 
 CHECK_OFFSET(cStreamSys, mpVBankManager, 0x000);

@@ -705,6 +705,9 @@ struct cSSXScriptEngine {
     void ReleaseScriptSetupInfo(void* vsetupInfo) __asm__("cSSXScriptEngine_ReleaseScriptSetupInfo__FPvT0");
     int IsBankLoading(int i) __asm__("cSSXScriptEngine_IsBankLoading");
     void ClearNISPlayListState() __asm__("cSSXScriptEngine_ClearNISPlayListState");
+    int IsNISActive() __asm__("cSSXScriptEngine_IsNISActive");
+    int GetActiveNIS() __asm__("cSSXScriptEngine_GetActiveNIS");
+    void DeInitOnce() __asm__("cSSXScriptEngine_DeInitOnce");
 };
 
 CHECK_OFFSET(cSSXScriptEngine, mpObjectDatabase, 0x000);

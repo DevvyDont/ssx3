@@ -47,6 +47,15 @@ struct cPS2SoundManager {
     int mFreeNodeHead;                // 0x318 (name ours) [R] ctor -1; Init -1; [U] head of the free-block list (sorted
                                       //        by address: AllocSoundMem / DeallocSoundMem)
     int mMemLoadLimited;              // 0x31C [R] ctor 0; [U] SetSoundMemLoadLimits (cPS2SoundManager_SetSoundMemLoadLimits) 1, RestoreSoundMemLoadLimits (cPS2SoundManager_RestoreSoundMemLoadLimits) 0; AllocSoundMem returns -2 while set (preview lw 796)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Init(int mode) __asm__("cPS2SoundManager_Init");
+    int SetMode(int mode) __asm__("cPS2SoundManager_SetMode");
+    void Shutdown() __asm__("cPS2SoundManager_Shutdown");
+    int AllocSoundMem(int size) __asm__("cPS2SoundManager_AllocSoundMem");
+    void DeallocSoundMem(int memHandle) __asm__("cPS2SoundManager_DeallocSoundMem");
+    void SetSoundMemLoadLimits(int memHandle) __asm__("cPS2SoundManager_SetSoundMemLoadLimits");
+    void RestoreSoundMemLoadLimits() __asm__("cPS2SoundManager_RestoreSoundMemLoadLimits");
 };
 
 CHECK_OFFSET(tPS2SoundMemNode, index, 0x00);

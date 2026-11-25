@@ -37,6 +37,11 @@ struct cSimpleTube {
                                     //     m_numSegments + 1 points (m_positions[0 .. m_numSegments])
     t4Vector* m_positions;          // 0x8 [O]; [R] ctor 0; [U] the dtor frees it (cMemMan_free) when set, render reads
                                     //     the points (lq), setPosition (cSimpleTube_setPosition) stores m_positions[id]
+
+    // Methods bound to their retail symbols by asm labels.
+    void setPosition(int index, void* src) __asm__("cSimpleTube_setPosition");
+    void* updateColours() __asm__("cSimpleTube_updateColours");
+    void render() __asm__("cSimpleTube_render");
 };
 
 CHECK_OFFSET(cSimpleTube, mVtbl, 0x0);

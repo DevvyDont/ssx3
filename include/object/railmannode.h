@@ -58,6 +58,11 @@ struct cRailManNode : public cSortObjNode {
                                     //      reads / writeToReplayFrame writes 0x200 bytes here; [U] enableRail /
                                     //      disableRail look up RailInfo[i] in the world's resource tables, the dtor and
                                     //      cRailManNode_unloadSection scan it (lw 0x18 + 4i, lbu for the section byte)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cRailManNode1(void* bucket) __asm__("cRailManNode_cRailManNode1");
+    void disableRail(int idx) __asm__("cRailManNode_disableRail");
+    void enableRail(int idx) __asm__("cRailManNode_enableRail");
 };
 
 CHECK_OFFSET(cRailManNode, RailInfo, 0x018);

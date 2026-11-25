@@ -44,6 +44,21 @@ struct cUIIcon : public cUIThing {
                                      //       setElement (sw); cUIIcon_setTextureByHashValue / cUIIcon_setUIData look it up by id; render2D
     float mTileUV[2];                // 0x080 [O] t2Vector (x, y); [U] cUIIcon_getTileUV getTileUV, cUIIcon_setTileUV / cUIIcon_setTileUV1
                                      //       setTileUV (8-byte ldl/ldr copies); cUIIcon_setUIData; render2D
+
+    // Methods bound to their retail symbols by asm labels.
+    void setTextureByHashValue(int id) __asm__("cUIIcon_setTextureByHashValue");
+    void* cUIIcon1() __asm__("cUIIcon_cUIIcon1");
+    int isTiled() __asm__("cUIIcon_isTiled");
+    void setTiled(int tiled) __asm__("cUIIcon_setTiled");
+    int isIconFlip() __asm__("cUIIcon_isIconFlip");
+    void setIconFlip(int enable) __asm__("cUIIcon_setIconFlip");
+    int isIconRotate() __asm__("cUIIcon_isIconRotate");
+    void setIconRotate(int enable) __asm__("cUIIcon_setIconRotate");
+    int getElement() __asm__("cUIIcon_getElement");
+    void setElement(int textureElem) __asm__("cUIIcon_setElement");
+    int getTexture() __asm__("cUIIcon_getTexture");
+    void setTexture(int textureId) __asm__("cUIIcon_setTexture");
+    void setTileUV1(float x, float y) __asm__("cUIIcon_setTileUV1");
 };
 
 CHECK_OFFSET(cUIIcon, mAttrIcon, 0x074);

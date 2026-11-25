@@ -34,6 +34,14 @@ struct cUISlider : public cUIThing {
                                      //       setBackground (sw); the dtor cUISlider__cUISlider deletes it; render2D
     cUIThing* mpObjKnob;             // 0x08C [O]; [R] = 0, then the child named at rec+0x28; [U] cUISlider_setKnobObject setKnob;
                                      //       the dtor deletes it; render2D moves it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cUISlider1() __asm__("cUISlider_cUISlider1");
+    int getValue() __asm__("cUISlider_getValue");
+    void setValue(int value) __asm__("cUISlider_setValue");
+    void setNumValues(int numValues) __asm__("cUISlider_setNumValues");
+    void setBackgroundObject(int background) __asm__("cUISlider_setBackgroundObject");
+    void setKnobObject(int knob) __asm__("cUISlider_setKnobObject");
 };
 
 CHECK_OFFSET(cUISlider, mValue, 0x074);

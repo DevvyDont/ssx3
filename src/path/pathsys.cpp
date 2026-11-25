@@ -35,17 +35,17 @@ struct sPathB310 {
  * @param data  the serialized data: a count, then each path
  * @return number of bytes read
  */
-extern "C" int cPathSys_loadTrackPaths(cPathSys* self, char* data)
+int cPathSys::loadTrackPaths(char* data)
 {
     int count;
-    sPathB310** slot = (sPathB310**)&self->TrackPaths;
+    sPathB310** slot = (sPathB310**)&TrackPaths;
     char* start = data;
     pathREAD_tInt32(&count, data);
     data += 4;
-    self->NumTrackPaths = count;
+    NumTrackPaths = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB310), str_TrackPaths, 0, 0)) sPathB310[count];
-    for (int i = 0; i < self->NumTrackPaths; i++) {
-        data += cPath_initPath(&((sPathB310*)self->TrackPaths)[i], data);
+    for (int i = 0; i < NumTrackPaths; i++) {
+        data += cPath_initPath(&((sPathB310*)TrackPaths)[i], data);
     }
     return data - start;
 }
@@ -77,17 +77,17 @@ struct sPathB410 {
  * @param data  the serialized data: a count, then each path
  * @return number of bytes read
  */
-extern "C" int cPathSys_loadAIPaths(cPathSys* self, char* data)
+int cPathSys::loadAIPaths(char* data)
 {
     int count;
-    sPathB410** slot = (sPathB410**)&self->AIPaths;
+    sPathB410** slot = (sPathB410**)&AIPaths;
     char* start = data;
     pathREAD_tInt32(&count, data);
     data += 4;
-    self->NumAIPaths = count;
+    NumAIPaths = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB410), str_AIPaths, 0, 0)) sPathB410[count];
-    for (int i = 0; i < self->NumAIPaths; i++) {
-        data += cPath_initPath(&((sPathB410*)self->AIPaths)[i], data);
+    for (int i = 0; i < NumAIPaths; i++) {
+        data += cPath_initPath(&((sPathB410*)AIPaths)[i], data);
     }
     return data - start;
 }
@@ -110,12 +110,12 @@ INCLUDE_ASM("path/pathsys", cPathSys_getTrackPathIndex);
  * @param entry  the track path to look up
  * @return its index, or -1
  */
-extern "C" int cPathSys_getTrackPathIndex(cPathSys* self, cTrackPath* entry)
+int cPathSys::getTrackPathIndex(cTrackPath* entry)
 {
     int i;
     if (entry != 0) {
-        for (i = 0; i < self->NumTrackPaths; i++) {
-            if (&(self->TrackPaths)[i] == entry) {
+        for (i = 0; i < NumTrackPaths; i++) {
+            if (&TrackPaths[i] == entry) {
                 return i;
             }
         }
@@ -137,12 +137,12 @@ INCLUDE_ASM("path/pathsys", cPathSys_getAIPathIndex);
  * @param entry  the AI path to look up
  * @return its index, or -1
  */
-extern "C" int cPathSys_getAIPathIndex(cPathSys* self, cAIPath* entry)
+int cPathSys::getAIPathIndex(cAIPath* entry)
 {
     int i;
     if (entry != 0) {
-        for (i = 0; i < self->NumAIPaths; i++) {
-            if (&(self->AIPaths)[i] == entry) {
+        for (i = 0; i < NumAIPaths; i++) {
+            if (&AIPaths[i] == entry) {
                 return i;
             }
         }
@@ -164,12 +164,12 @@ INCLUDE_ASM("path/pathsys", cPathSys_isStartpoint);
  * @param startpointId  the startpoint id (a session or rider index)
  * @return 1 if such a startpoint exists, else 0
  */
-extern "C" int cPathSys_isStartpoint(cPathSys* self, int type, int startpointId)
+int cPathSys::isStartpoint(int type, int startpointId)
 {
     int i;
-    int count = self->NumStartpoints;
+    int count = NumStartpoints;
     for (i = 0; i < count; i++) {
-        if (self->Startpoints[i].Type == type && self->Startpoints[i].Arg == startpointId) {
+        if (Startpoints[i].Type == type && Startpoints[i].Arg == startpointId) {
             return 1;
         }
     }
@@ -226,18 +226,18 @@ INCLUDE_ASM("path/pathsys", cPathSys_getStartpointByIndex);
  *
  * Returns 0 when the startpoint count (+0x0) is not positive, or @p index is negative or not below it.
  *
- * @param list  the path system
  * @param index  the startpoint index
  * @return the startpoint, or 0
  */
-extern "C" int cPathSys_getStartpointByIndex(cPathSys* list, int index) {
+int cPathSys::getStartpointByIndex(int index)
+{
     int temp_2;
 
-    temp_2 = list->NumStartpoints;
+    temp_2 = NumStartpoints;
     if ((temp_2 <= 0) || (index >= temp_2) || (index < 0)) {
         return 0;
     }
-    return ((int)list->Startpoints) + (index * 40);
+    return ((int)Startpoints) + (index * 40);
 }
 #endif
 
@@ -337,16 +337,16 @@ extern "C" void pathREAD_float(void* dst, void* src);
  * @param cursor  the file data at the checkpoint count
  * @return the number of bytes consumed
  */
-extern "C" int cPathSys_loadCheckpoints(cPathSys* self, char* cursor)
+int cPathSys::loadCheckpoints(char* cursor)
 {
     int count;
     char* start = cursor;
     pathREAD_tInt32(&count, cursor);
     cursor += 4;
     for (int i = 0; i < count; i++) {
-        pathREAD_float(&(*(int*)&((&self->CheckpointList[0]))[i].DistanceLeft), cursor);
+        pathREAD_float(&(*(int*)&((&CheckpointList[0]))[i].DistanceLeft), cursor);
         cursor += 4;
-        pathREAD_tInt32(&((&self->CheckpointList[0]))[i].TimeBonusSec, cursor);
+        pathREAD_tInt32(&((&CheckpointList[0]))[i].TimeBonusSec, cursor);
         cursor += 4;
     }
     return cursor - start;
@@ -375,7 +375,7 @@ extern int kPathStartToUID[];
  * @param cursor  the file data at the startpoint count
  * @return the number of bytes consumed
  */
-extern "C" int cPathSys_loadStartpoints(cPathSys* self, char* cursor)
+int cPathSys::loadStartpoints(char* cursor)
 {
     int fileWord;
     int aiPathIndex;
@@ -383,30 +383,30 @@ extern "C" int cPathSys_loadStartpoints(cPathSys* self, char* cursor)
     char* start = cursor;
     pathREAD_tInt32(&fileWord, cursor);
     cursor += 4;
-    *(tPathStartpoint**)&self->Startpoints = (tPathStartpoint*)cursor;
-    self->NumStartpoints = fileWord;
-    for (int i = 0; i < self->NumStartpoints; i++) {
-        pathREAD_tInt32(&(self->Startpoints)[i].Arg, cursor);
+    *(tPathStartpoint**)&Startpoints = (tPathStartpoint*)cursor;
+    NumStartpoints = fileWord;
+    for (int i = 0; i < NumStartpoints; i++) {
+        pathREAD_tInt32(&Startpoints[i].Arg, cursor);
         cursor += 4;
         pathREAD_tInt32(&fileWord, cursor);
         cursor += 4;
-        pathREAD_t3Vector(((char*)&(self->Startpoints)[i].Pos), cursor);
+        pathREAD_t3Vector(((char*)&Startpoints[i].Pos), cursor);
         cursor += 0xC;
-        pathREAD_t3Vector(((char*)&(self->Startpoints)[i].Dir), cursor);
+        pathREAD_t3Vector(((char*)&Startpoints[i].Dir), cursor);
         cursor += 0xC;
         pathREAD_tInt32(&aiPathIndex, cursor);
         cursor += 4;
         pathREAD_tInt32(&trackPathIndex, cursor);
         cursor += 4;
-        (self->Startpoints)[i].Type = 0;
+        Startpoints[i].Type = 0;
         for (int j = 0; j < 3; j++) {
             if (kPathStartToUID[j] == fileWord) {
-                (self->Startpoints)[i].Type = j;
+                Startpoints[i].Type = j;
                 break;
             }
         }
-        (*(char**)&(self->Startpoints)[i].InitAIPath) = (char*)&self->AIPaths[aiPathIndex];
-        (*(char**)&(self->Startpoints)[i].InitTrackPath) = (char*)&self->TrackPaths[trackPathIndex];
+        (*(char**)&Startpoints[i].InitAIPath) = (char*)&AIPaths[aiPathIndex];
+        (*(char**)&Startpoints[i].InitTrackPath) = (char*)&TrackPaths[trackPathIndex];
     }
     return cursor - start;
 }
@@ -703,11 +703,11 @@ INCLUDE_ASM("path/pathsys", cPath_getAllEvents);
 /**
  * Returns a path's event array (+0x4, On Tour Events).
  *
- * @param path  the path
  * @return the 16-byte event nodes
  */
-extern "C" int cPath_getAllEvents(cPath* path) {
-    return ((int)path->Events);
+int cPath::getAllEvents()
+{
+    return ((int)Events);
 }
 #endif
 //100%
@@ -754,11 +754,11 @@ INCLUDE_ASM("path/pathsys", cAIPath_getPathAttributes);
 /**
  * Returns an AI path's attribute word (+0x38, On Tour PathAttributes).
  *
- * @param aiPath  the AI path
  * @return the attributes
  */
-extern "C" int cAIPath_getPathAttributes(cAIPath* aiPath) {
-    return (aiPath->PathAttributes);
+int cAIPath::getPathAttributes()
+{
+    return (PathAttributes);
 }
 #endif
 //100%
@@ -767,11 +767,11 @@ INCLUDE_ASM("path/pathsys", cAIPath_getIsResetPath);
 /**
  * Returns an AI path's reset-path flag (+0x3C, On Tour IsResetPath).
  *
- * @param aiPath  the AI path
  * @return nonzero for a reset path
  */
-extern "C" int cAIPath_getIsResetPath(cAIPath* aiPath) {
-    return (aiPath->IsResetPath);
+int cAIPath::getIsResetPath()
+{
+    return (IsResetPath);
 }
 #endif
 //100%
@@ -780,11 +780,11 @@ INCLUDE_ASM("path/pathsys", cTrackPath_getBaseDistanceLeft);
 /**
  * Returns a track path's base distance left (+0x38, On Tour BaseDistanceLeft), the float cTrackPath_populateData reads.
  *
- * @param trackPath  the track path
  * @return the distance
  */
-extern "C" float cTrackPath_getBaseDistanceLeft(cTrackPath* trackPath) {
-    return (trackPath->BaseDistanceLeft);
+float cTrackPath::getBaseDistanceLeft()
+{
+    return (BaseDistanceLeft);
 }
 #endif
 

@@ -53,6 +53,8 @@ struct cFloatingNode : public cMoveNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFloatingNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFloatingNode_cFloatingNode1");
+    void initInfo() __asm__("cFloatingNode_initInfo__FP13cFloatingNode");
+    void purgeInfo() __asm__("cFloatingNode_purgeInfo");
 };
 
 CHECK_OFFSET(cFloatingNode, ZSpring, 0x2C);

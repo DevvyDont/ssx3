@@ -9,12 +9,11 @@ INCLUDE_ASM("util/list", cListNode_isSentinel__FP9cListNode);
 /**
  * Tells whether a list node is an end marker, i.e. links to itself in either direction.
  *
- * @param node  node to test
  * @return 1 if node->next or node->prev points back at the node, else 0
  */
-int cListNode_isSentinel(cListNode* node)
+int cListNode::isSentinel()
 {
-    return (node->mpNext == node) || (node->mpPrev == node);
+    return (mpNext == this) || (mpPrev == this);
 }
 #endif
 
@@ -27,26 +26,26 @@ INCLUDE_ASM("util/list", cListNode_removeFromList);
  * Neighbour links that are null or point at the node are skipped. When the node was a self-linked end on one
  * side, the neighbour on the other side becomes self-linked on that side, so it is the new end.
  */
-extern "C" void cListNode_removeFromList(cListNode* self)
+void cListNode::removeFromList()
 {
-    cListNode* prevNode = self->mpPrev;
-    cListNode* nextNode = self->mpNext;
-    if (prevNode != 0 && prevNode != self) {
-        if (nextNode == self) {
+    cListNode* prevNode = mpPrev;
+    cListNode* nextNode = mpNext;
+    if (prevNode != 0 && prevNode != this) {
+        if (nextNode == this) {
             prevNode->mpNext = prevNode;
         } else {
             prevNode->mpNext = nextNode;
         }
     }
-    if (nextNode != 0 && nextNode != self) {
-        if (prevNode == self) {
+    if (nextNode != 0 && nextNode != this) {
+        if (prevNode == this) {
             nextNode->mpPrev = nextNode;
         } else {
             nextNode->mpPrev = prevNode;
         }
     }
-    self->mpNext = self;
-    self->mpPrev = self;
+    mpNext = this;
+    mpPrev = this;
 }
 #endif
 
@@ -135,12 +134,11 @@ INCLUDE_ASM("util/list", cList_first__FP5cList);
 /**
  * Returns the list's first node.
  *
- * @param list  list to read
  * @return the first node (list->mStart.mpNext), or 0 when the head's next link points at itself (an empty list)
  */
-cListNode* cList_first(cList* list)
+cListNode* cList::first()
 {
-    cListNode* head = list->mStart.mpNext;
+    cListNode* head = mStart.mpNext;
     return (head->mpNext == head) ? 0 : head;
 }
 #endif
@@ -152,13 +150,13 @@ INCLUDE_ASM("util/list", cList_last);
  * Returns the last node of a list: the end sentinel's mpPrev (mEnd.mpPrev, +0xC), or 0 when that node's mpPrev points
  * to itself, which only the start sentinel of an empty list does.
  *
- * @param list  the cList
  * @return the last node, or 0 for an empty list
  */
-extern "C" int *cList_last(cList* list) {
+int * cList::last()
+{
     int *temp_2;
 
-    temp_2 = (*(int**)&list->mEnd);
+    temp_2 = (*(int**)&mEnd);
     return ((*temp_2 ^ (int) temp_2) == 0) ? 0 : temp_2;
 }
 #endif
@@ -171,23 +169,22 @@ INCLUDE_ASM("util/list", cList_getByIndex);
  *
  * Starts at cList_first and follows the next links @p count times, stopping early at a null node or the sentinel.
  *
- * @param list   the list (this)
  * @param count  zero-based position (On Tour index)
  * @return the node, or 0 when it is null or the sentinel (the list is shorter)
  */
-extern "C" cListNode* cList_getByIndex(cList* list, int count)
+cListNode* cList::getByIndex(int count)
 {
-    cListNode* n = cList_first(list);
+    cListNode* n = first();
     for (; count > 0; count--) {
         if (n == 0) {
             return 0;
         }
-        if (cListNode_isSentinel(n)) {
+        if (n->isSentinel()) {
             break;
         }
         n = n->mpNext;
     }
-    if (n != 0 && !cListNode_isSentinel(n)) {
+    if (n != 0 && !n->isSentinel()) {
         return n;
     }
     return 0;
@@ -216,16 +213,15 @@ INCLUDE_ASM("util/list", cList_addToFront__FP5cListP9cListNode);
  * Sets newNode->next to the old head, newNode->prev to the old head's prev, and the old head's prev to newNode.
  * In this list, next links run from the head towards the tail (cList_size() walks them).
  *
- * @param list     list to add to
  * @param newNode  node to insert
  */
-void cList_addToFront(cList* list, cListNode* newNode)
+void cList::addToFront(cListNode* newNode)
 {
-    cListNode* head = list->mStart.mpNext;
+    cListNode* head = mStart.mpNext;
     newNode->mpNext = head;
     newNode->mpPrev = head->mpPrev;
     head->mpPrev = newNode;
-    list->mStart.mpNext = newNode;
+    mStart.mpNext = newNode;
 }
 #endif
 
@@ -238,16 +234,15 @@ INCLUDE_ASM("util/list", cList_addToEnd__FP5cListP9cListNode);
  * Sets newNode->prev to the old tail, newNode->next to the old tail's next, and the old tail's next to newNode.
  * In this list, prev links run from the tail towards the head.
  *
- * @param list     list to add to
  * @param newNode  node to insert
  */
-void cList_addToEnd(cList* list, cListNode* newNode)
+void cList::addToEnd(cListNode* newNode)
 {
-    cListNode* tail = list->mEnd.mpPrev;
+    cListNode* tail = mEnd.mpPrev;
     newNode->mpPrev = tail;
     newNode->mpNext = tail->mpNext;
     tail->mpNext = newNode;
-    list->mEnd.mpPrev = newNode;
+    mEnd.mpPrev = newNode;
 }
 #endif
 
@@ -289,15 +284,15 @@ public:
  * deleting destructor (slot 1, flags 3), then relinks the empty list (cList_clear). The null check on each
  * node comes after its next link has been read.
  */
-extern "C" void cList_destroyList(cList* self)
+void cList::destroyList()
 {
-    cList_destroyList_cVirt* n = (cList_destroyList_cVirt*)self->mStart.mpNext;
+    cList_destroyList_cVirt* n = (cList_destroyList_cVirt*)mStart.mpNext;
     while (n->mpNext != n) {
         cList_destroyList_cVirt* nextNode = n->mpNext;
         delete n;
         n = nextNode;
     }
-    cList_clear(self);
+    cList_clear(this);
 }
 #endif
 
@@ -309,12 +304,11 @@ INCLUDE_ASM("util/list", cList_size);
  *
  * Follows next links from the head until a node whose next points at itself; that end node is not counted.
  *
- * @param list  list to count
  * @return the number of nodes
  */
-extern "C" int cList_size(cList* list)
+int cList::size()
 {
-    cListNode* node = list->mStart.mpNext;
+    cListNode* node = mStart.mpNext;
     int count = 0;
     while (node->mpNext != node) {
         node = node->mpNext;

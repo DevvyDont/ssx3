@@ -48,12 +48,21 @@ struct cWScriptTask {
     virtual void eventOnEvent1();                                  // 14
     virtual void eventOnEvent2();                                  // 15
     virtual void eventOnEvent3();                                  // 16
+
+    // Methods bound to their retail symbols by asm labels.
+    int getLocalTable() __asm__("cWScriptTask_getLocalTable");
+    int getTaskId() __asm__("cWScriptTask_getTaskId");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWScriptTask_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWScriptTask_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cWScriptTask, TaskId, 0x04);
 CHECK_OFFSET(cWScriptTask, EventScriptCode, 0x14);
 CHECK_OFFSET(cWScriptTask, Process, 0x3C);
 CHECK_SIZE(cWScriptTask, 0x44);
+
+struct cBxReplayFrame;
+struct tWScriptEvent;
 
 struct cWScriptProcess {
     // cWScriptProcessState
@@ -73,6 +82,37 @@ struct cWScriptProcess {
     char* EventScriptCode[10];         // 0x34 [O] (const char* there); [U] eventOnCollide (0x34) ... eventOnEvent3
                                        //      (0x58)
     void** mVtbl;                      // 0x5C [R] ctor = cWScriptProcess_vtbl
+
+    // Methods bound to their retail symbols by asm labels.
+    int getNext() __asm__("cWScriptProcess_getNext");
+    void setNext(int nextProcess) __asm__("cWScriptProcess_setNext");
+    int getSectionId() __asm__("cWScriptProcess_getSectionId");
+    void setTrickDef(int trickDef) __asm__("cWScriptProcess_setTrickDef");
+    int getLocalTable() __asm__("cWScriptProcess_getLocalTable");
+    int getProcessId() __asm__("cWScriptProcess_getProcessId");
+    void runScriptCode() __asm__("cWScriptProcess_runScriptCode");
+    void runScriptCode1() __asm__("cWScriptProcess_runScriptCode1");
+    void dispatchProcessEvent(tWScriptEvent* vmsg) __asm__("cWScriptProcess_dispatchProcessEvent");
+    unsigned int getRunningTaskId() __asm__("cWScriptProcess_getRunningTaskId");
+    void dispatchTaskEvent(int event) __asm__("cWScriptProcess_dispatchTaskEvent");
+    void eventOnCollide() __asm__("cWScriptProcess_eventOnCollide");
+    void eventOnJump() __asm__("cWScriptProcess_eventOnJump");
+    void eventOnLand() __asm__("cWScriptProcess_eventOnLand");
+    void eventOnTrick() __asm__("cWScriptProcess_eventOnTrick");
+    void eventOnWipeout() __asm__("cWScriptProcess_eventOnWipeout");
+    void eventOnReset() __asm__("cWScriptProcess_eventOnReset");
+    void eventOnCollect() __asm__("cWScriptProcess_eventOnCollect");
+    void eventOnEvent1() __asm__("cWScriptProcess_eventOnEvent1");
+    void eventOnEvent2() __asm__("cWScriptProcess_eventOnEvent2");
+    void eventOnEvent3() __asm__("cWScriptProcess_eventOnEvent3");
+    void processStart() __asm__("cWScriptProcess_processStart");
+    void processUpdate() __asm__("cWScriptProcess_processUpdate");
+    void processComplete() __asm__("cWScriptProcess_processComplete");
+    void gotoTask(int id) __asm__("cWScriptProcess_gotoTask");
+    void advanceToTask(int id) __asm__("cWScriptProcess_advanceToTask");
+    void* getScriptCode() __asm__("cWScriptProcess_getScriptCode__FPv");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cWScriptProcess_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cWScriptProcess_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cWScriptProcess, StateSectionId, 0x0C);

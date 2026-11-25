@@ -220,13 +220,13 @@ static inline t4Matrix scaled_C0E8(const t4Matrix* src, const t4Vector& s)
  * (transposed rotation, rotated negative translation) is stored in XForm. Then allocates a 0x10-byte
  * "RailNode" (cRailSpaceNode: type 2, Rail pointing back here) as Node.
  */
-extern "C" void cRailModifier_buildXform(cRailModifier* self)
+void cRailModifier::buildXform()
 {
-    sModel_C0E8* model = ((sModel_C0E8*)self->Instance);
+    sModel_C0E8* model = ((sModel_C0E8*)Instance);
     sLink_C0E8* links = model->tbl->links;
     t4Matrix* xform;
-    if (self->Mesh < 0) {
-        t4Matrix* selfMat = &self->XForm;
+    if (Mesh < 0) {
+        t4Matrix* selfMat = &XForm;
         vu0CopyMat_C0E8(selfMat, &model->mat);
         xform = selfMat;
     } else {
@@ -236,19 +236,19 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
         scl.y = modelScale;
         scl.z = modelScale;
         scl.w = 1.0f;
-        t4Matrix* selfMat = &self->XForm;
+        t4Matrix* selfMat = &XForm;
         // links[k].mat / .next read straight off the subscript, k in a local: retail's index-first add, formed once
-        int mesh = self->Mesh;
+        int mesh = Mesh;
         vu0CopyMat_C0E8(selfMat, links[mesh].mat);
         xform = selfMat;
         {
         t4Vector rr;
-        t4Vector origin = self->XForm.row[3];
+        t4Vector origin = XForm.row[3];
         rr.x = origin.x * scl.x;
         rr.y = origin.y * scl.y;
         rr.z = origin.z * scl.z;
         rr.w = origin.w * scl.w;
-        self->XForm.row[3] = rr;
+        XForm.row[3] = rr;
         int i = links[mesh].next;
         while (i != -1) {
             t4Matrix* mm = xform;
@@ -282,29 +282,29 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
         t4Matrix worldProduct;
         t4Matrix* pt3 = &worldProduct;
         t4Matrix* pt4 = &worldCopy;
-        vu0MulMat_C0E8(pt3, &((sModel_C0E8*)self->Instance)->mat, xform);
+        vu0MulMat_C0E8(pt3, &((sModel_C0E8*)Instance)->mat, xform);
         vu0CopyMat_C0E8(pt4, &worldProduct);
         vu0CopyMat_C0E8(xform, pt4);
     }
     float swapValue;
-    swapValue = self->XForm.row[0].y;
-    self->XForm.row[0].y = self->XForm.row[1].x;
-    self->XForm.row[1].x = swapValue;
-    swapValue = self->XForm.row[0].z;
-    self->XForm.row[0].z = self->XForm.row[2].x;
-    self->XForm.row[2].x = swapValue;
-    swapValue = self->XForm.row[1].z;
-    self->XForm.row[1].z = self->XForm.row[2].y;
-    self->XForm.row[2].y = swapValue;
-    t4Vector invTranslation = vu0Scale(row_C0E8(&self->XForm, 3), -1.0f);
+    swapValue = XForm.row[0].y;
+    XForm.row[0].y = XForm.row[1].x;
+    XForm.row[1].x = swapValue;
+    swapValue = XForm.row[0].z;
+    XForm.row[0].z = XForm.row[2].x;
+    XForm.row[2].x = swapValue;
+    swapValue = XForm.row[1].z;
+    XForm.row[1].z = XForm.row[2].y;
+    XForm.row[2].y = swapValue;
+    t4Vector invTranslation = vu0Scale(row_C0E8(&XForm, 3), -1.0f);
     invTranslation.w = 0.0f;
     invTranslation = vu0MtxMul_C0E8(xform, invTranslation);
     invTranslation.w = 1.0f;
-    self->XForm.row[3] = invTranslation;
+    XForm.row[3] = invTranslation;
     cRailSpaceNode* n = (cRailSpaceNode*)cMemMan_alloc(0x10, str_RailNode, 0x20000000, 0);
-    n->Rail = self;
+    n->Rail = this;
     n->type = 2;
-    self->Node = n;
+    Node = n;
 }
 #endif
 
@@ -414,10 +414,10 @@ extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, t4Matrix* out)
  *
  * @param mat  receives the matrix (On Tour t4Matrix& mat)
  */
-extern "C" void cRailModifier_getInvMat(cRailModifier* self, t4Matrix* mat)
+void cRailModifier::getInvMat(t4Matrix* mat)
 {
-    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, mat);
-    t4Matrix* src = (&self->XForm);
+    cInstanceNode_buildMeshMat(Instance, Mesh, mat);
+    t4Matrix* src = (&XForm);
     t4Matrix copy;
     t4Matrix product;
     vu0MulMatC5A0(&product, mat, src);
@@ -741,15 +741,15 @@ static inline void resetHit_C698(tIntersectInfo* h)
  * @param bestDist  in/out: the best distance so far (On Tour float& dist)
  * @param out  receives the hit (On Tour tIntersectInfo* intInfo)
  */
-extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box, t4Vector* box2, const t4Vector* point, unsigned int mask,
-                              int* found, float* bestDist, tIntersectInfo* out)
+void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vector* point, unsigned int mask,
+                                    int* found, float* bestDist, tIntersectInfo* out)
 {
-    tSplineRecord* spline = (tSplineRecord*)(*(sRmRef_C698*)&self->SplineId).get(*cObjectInterface_getWorld());
+    tSplineRecord* spline = (tSplineRecord*)(*(sRmRef_C698*)&SplineId).get(*cObjectInterface_getWorld());
     if ((((unsigned int)spline->m_iFlags) & mask) == 0) {
         return;
     }
     sRmMat44 mat;
-    cRailModifier_getInvMat_C698((self), &mat);
+    cRailModifier_getInvMat_C698((this), &mat);
     tSplineSegmentRecord* seg = spline->m_HeaderSeg;
     for (int i = 0; i < spline->m_iNumSegments; i++, seg = seg->m_NextSeg) {
         float tLo = 0.0f;
@@ -831,8 +831,8 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box
             out->Ipos = pos;
             out->Inorm = vu0Normal_C698(evalTan_C698(&segMat, t));
             out->Stype = spline->m_eSurfaceType;
-            (*(void**)&out->Inst) = (void*)self->Instance;
-            out->Mesh = self->Mesh;
+            (*(void**)&out->Inst) = (void*)Instance;
+            out->Mesh = Mesh;
             out->T = t;
             (*(void**)&out->Spline) = spline;
             (*(void**)&out->Patch) = 0;
@@ -928,13 +928,13 @@ static inline t4Vector xformCFF0(const t3Matrix& m, cRigidBody* b)
  *
  * @param newPos  new angular velocity W
  */
-extern "C" void cRigidBody_setW(cRigidBody* self, const t4Vector* newPos)
+void cRigidBody::setW(const t4Vector* newPos)
 {
-    (*(t4Vector*)&self->W) = *newPos;
+    (*(t4Vector*)&W) = *newPos;
     // InvMOI is On Tour's t3Matrix ([O]), kept as float[3][3]: the same nine floats.
-    t3Matrix invRot = (*(t3Matrix*)&self->InvMOI[0][0]);
+    t3Matrix invRot = (*(t3Matrix*)&InvMOI[0][0]);
     invertCFF0(invRot);
-    (*(t4Vector*)&self->L) = xformCFF0(invRot, self);
+    (*(t4Vector*)&L) = xformCFF0(invRot, this);
 }
 #endif
 
@@ -1079,30 +1079,29 @@ static inline void NormalizeD340(t4Vector& v)
  * Position (+0x0) += V (+0x80) * dt; the orientation quaternion (+0x10) += its derivative from W (+0x90) * dt and is
  * renormalised; the linear momentum (+0x20) += force * dt and the angular momentum (+0x30) += torque * dt.
  *
- * @param body  the rigid body
  * @param force  force applied over the step
  * @param torque  torque applied over the step
  * @param dt  time step
  */
-extern "C" void cRigidBody_stepMotion(cRigidBody* body, const t4Vector* force, const t4Vector* torque, float dt)
+void cRigidBody::stepMotion(const t4Vector* force, const t4Vector* torque, float dt)
 {
     t4Vector step;
-    ScaleD340(step, body->V, dt);
-    AddEqD340(body->Pose.P, step);
+    ScaleD340(step, V, dt);
+    AddEqD340(Pose.P, step);
     {
         t4Vector quatDeriv;
-        QuatDerivD340(quatDeriv, body->Pose.Q, body->W);
+        QuatDerivD340(quatDeriv, Pose.Q, W);
         ScaleD340(step, quatDeriv, dt);
     }
-    body->Pose.Q.x += step.x;
-    body->Pose.Q.y += step.y;
-    body->Pose.Q.z += step.z;
-    body->Pose.Q.w += step.w;
-    NormalizeD340(body->Pose.Q);
+    Pose.Q.x += step.x;
+    Pose.Q.y += step.y;
+    Pose.Q.z += step.z;
+    Pose.Q.w += step.w;
+    NormalizeD340(Pose.Q);
     ScaleD340(step, *force, dt);
-    AddEqD340(body->P, step);
+    AddEqD340(P, step);
     ScaleD340(step, *torque, dt);
-    AddEqD340(body->L, step);
+    AddEqD340(L, step);
 }
 #endif
 
@@ -1308,14 +1307,16 @@ INCLUDE_ASM("object/railmodifier", func_0035D908);
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_writeToReplayFrame);
 #ifdef SKIP_ASM
+extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cBxReplayFrame* obj);
+
 /**
  * Writes a rigid body's state (its first 0x50 bytes: pose, momentum, inverse mass) to a replay frame.
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame*)
  */
-extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cBxReplayFrame* obj)
+void cRigidBody::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 80);
+    obj->write((const char*)this, 80);
 }
 #endif
 
@@ -1330,9 +1331,9 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_readFromReplayFrame);
  *
  * @param obj  the replay frame to read from (On Tour data)
  */
-extern "C" void cRigidBody_readFromReplayFrame(cRigidBody* self, cBxReplayFrame* obj)
+void cRigidBody::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 80);
+    obj->read((char*)this, 80);
 }
 #endif
 
@@ -1531,7 +1532,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     *(&self->Pose) = x;
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
     QuatPosToMtx_DA70(&self->Transform, *(t4Vector*)&y.Q, *(t4Vector*)&y.P);
-    cRollerModifier_updateMOI((cRollerModifier*)(((char*)self)));
+    self->updateMOI();
     cRigidBody_updateImplicit((cRollerModifier*)(&self->Pose));
     self->ContactElastic = 0.10000000149011612f;
     self->ContactFriction = 0.4000000059604645f;
@@ -1734,40 +1735,41 @@ struct sRmSrcDF70 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* self, cBxReplayFrame* stream)
+cRollerModifier* cRollerModifier::cRollerModifier1(cBxReplayFrame* stream)
 {
-    VPTR_AT(self, 0) = cTransformModifier_vtbl;
-    cRigidBody_cRigidBody(((char*)&self->Pose));
-    VPTR_AT(self, 0) = cRollerModifier_vtbl;
-    SphereTree_SphereTree(((char*)&self->SphTree));
-    cRigidBody_readFromReplayFrame((cRigidBody*)(((char*)&self->Pose)), stream);
-    stream->read((char*)&self->mKineticEnergy, 40);
-    (*(int*)&self->m_pInstance) = (int)stream->readReplayInstance();
-    void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)((int)self->m_pInstance)), 0);
-    bxSphereTree_operatorE(((char*)&self->SphTree), meshTree);
-    sRmSrcDF70* src = ((sRmSrcDF70*)self->SphTree.treeInfo);
+    VPTR_AT(this, 0) = cTransformModifier_vtbl;
+    cRigidBody_cRigidBody(((char*)&Pose));
+    VPTR_AT(this, 0) = cRollerModifier_vtbl;
+    SphereTree_SphereTree(((char*)&SphTree));
+    ((cRigidBody*)(((char*)&Pose)))->readFromReplayFrame(stream);
+    stream->read((char*)&mKineticEnergy, 40);
+    (*(int*)&m_pInstance) = (int)stream->readReplayInstance();
+    void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(),
+            (void*)((int)m_pInstance)), 0);
+    bxSphereTree_operatorE(((char*)&SphTree), meshTree);
+    sRmSrcDF70* src = ((sRmSrcDF70*)SphTree.treeInfo);
     t4Vector off;
     off.x = src->x;
     off.y = src->y;
     off.z = src->z;
     off.w = 0.0f;
-    (*(t4Vector*)&self->COMOffset) = off;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]) = src->rot;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[0] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[1] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[2] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[3] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[4] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[5] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[6] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[7] *= 0.5f;
-    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[8] *= 0.5f;
-    tPose x = cRollerModifier_getBodyPose_DA70(self);
-    QuatPosToMtx_DA70(&self->Transform, *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
-    SphereTree_TransformAbs(((char*)&self->SphTree), &self->Transform, 1.0f);
-    cRollerModifier_updateMOI((cRollerModifier*)self);
-    cRigidBody_updateImplicit((cRollerModifier*)((char*)&self->Pose));
-    return self;
+    (*(t4Vector*)&COMOffset) = off;
+    (*(t3Matrix*)&InvBodyMOI[0][0]) = src->rot;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[0] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[1] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[2] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[3] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[4] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[5] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[6] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[7] *= 0.5f;
+    (*(t3Matrix*)&InvBodyMOI[0][0]).m[8] *= 0.5f;
+    tPose x = cRollerModifier_getBodyPose_DA70(this);
+    QuatPosToMtx_DA70(&Transform, *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
+    SphereTree_TransformAbs(((char*)&SphTree), &Transform, 1.0f);
+    updateMOI();
+    cRigidBody_updateImplicit((cRollerModifier*)((char*)&Pose));
+    return this;
 }
 #endif
 
@@ -1899,16 +1901,16 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const cRollerModifier* body)
  * Turns the body's orientation quaternion (+0x40) into a rotation R and stores R * InvBodyMOI * R^T (InvBodyMOI at
  * +0x280) as the rigid body's InvMOI (+0x80), ready for cRigidBody_updateImplicit.
  */
-extern "C" void cRollerModifier_updateMOI(cRollerModifier* self)
+void cRollerModifier::updateMOI()
 {
     t4Matrix rotMat4;
-    QuatToMtx_E248(rotMat4, *(t4Vector*)&self->Pose.Q);
+    QuatToMtx_E248(rotMat4, *(t4Vector*)&Pose.Q);
     sRmMat33 rot;
     sRmMat33 rotT;
     rotT = Get33_E248(rotMat4);
     rot = rotT;
     Transpose33_E248(rotT);
-    *(sRmMat33*)&self->InvMOI[0] = Mul33_E248(MulI_E248(rot, self), rotT);
+    *(sRmMat33*)&InvMOI[0] = Mul33_E248(MulI_E248(rot, this), rotT);
 }
 #endif
 
@@ -2036,10 +2038,10 @@ static inline void vu0AddED90(t4Vector& dst, const t4Vector& b)
  *
  * @param off  the offset (On Tour off)
  */
-extern "C" void cRollerModifier_translateMe(cRollerModifier* self, const t4Vector* off)
+void cRollerModifier::translateMe(const t4Vector* off)
 {
-    vu0AddED90(self->Pose.P, *off);
-    SphereTree_MoveOffset(&self->SphTree, off);
+    vu0AddED90(Pose.P, *off);
+    SphereTree_MoveOffset(&SphTree, off);
 }
 #endif
 
@@ -2235,7 +2237,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     overlap -= SphereTree_GetResolution((char*)&self->SphTree);
     if (zeroF < overlap) {
         t4Vector push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
-        cRollerModifier_translateMe(self, &push);
+        self->translateMe(&push);
         float k = 0.975f;
         setPosEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->L, k));
         setOutDirEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->V, k));
@@ -2310,7 +2312,7 @@ extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier*
     } else {
         self->TexIndex = n;
     }
-    cTexFlipModifier_setupTexFlip(self);
+    self->setupTexFlip();
     return (self);
 }
 #endif
@@ -2327,12 +2329,12 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
  * @param obj  replay stream to read from
  * @return self
  */
-extern "C" void* cTexFlipModifier_cTexFlipModifier1(cTexFlipModifier* self, cBxReplayFrame* obj)
+void* cTexFlipModifier::cTexFlipModifier1(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x18);
-    self->Instance = (tInstanceRecord*)(void*)obj->readReplayInstance();
-    cTexFlipModifier_setupTexFlip(self);
-    return ((void*)self);
+    obj->read((char*)this, 0x18);
+    Instance = (tInstanceRecord*)(void*)obj->readReplayInstance();
+    setupTexFlip();
+    return ((void*)this);
 }
 #endif
 
@@ -2379,11 +2381,10 @@ extern void ms_F218(void* p, int v, int n) __asm__("MEM_fill");
  * record (+0x48, 0x14 bytes) holding the flip frame's value, or to the material itself when it does not flip.
  * Likely bug (kept for matching): the -1 fill of slots 1..3 always writes record 0, not the current one.
  *
- * @param selfv  the texture-flip modifier
  */
-extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
+void cTexFlipModifier::setupTexFlip()
 {
-    sRailSelF218* self = (sRailSelF218*)selfv;
+    sRailSelF218* self = (sRailSelF218*)this;
     int i;
     self->f20 = 0;
     self->count = **(int**)(self->owner + 0x94);
@@ -2430,14 +2431,14 @@ extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self);
  *
  * @param i  the texture index (On Tour texindex)
  */
-extern "C" void cTexFlipModifier_setTexIndex(cTexFlipModifier* self, int i)
+void cTexFlipModifier::setTexIndex(int i)
 {
-    int n = self->NumTexFlipMaterials;
+    int n = NumTexFlipMaterials;
     if (i >= n) {
         i = n - 1;
     }
-    self->TexIndex = i;
-    cTexFlipModifier_setupMaterialRecords(self);
+    TexIndex = i;
+    setupMaterialRecords();
 }
 #endif
 
@@ -2451,15 +2452,15 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setupMaterialRecords);
  * has a texture table (m_TextureFlip), copies the texture for TexIndex into that material's record (m_sTexture) in
  * MaterialBlock.
  */
-extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self)
+void cTexFlipModifier::setupMaterialRecords()
 {
     int i;
-    for (i = 0; i < self->NumMaterials; i++) {
-        tMaterialBlockRecord* list = self->Instance->m_MaterialBlock;
+    for (i = 0; i < NumMaterials; i++) {
+        tMaterialBlockRecord* list = Instance->m_MaterialBlock;
         tMaterialRecord* item = list->GetMaterialRecordList()[i];
         tTextureFlipRecord* table = item->m_TextureFlip.m_pTextureFlip;
         if (table != 0) {
-            self->MaterialBlock.MaterialRecords[i].m_sTexture = table->GetTextureTable()[self->TexIndex];
+            MaterialBlock.MaterialRecords[i].m_sTexture = table->GetTextureTable()[TexIndex];
         }
     }
 }
@@ -2513,7 +2514,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
             self->TexIndex = 0;
         }
     }
-    cTexFlipModifier_setTexIndex(self, self->TexIndex);
+    self->setTexIndex(self->TexIndex);
 }
 #endif
 
@@ -2551,11 +2552,11 @@ static inline float fTrunc_F598(float x)
  * @param id  the signal id (On Tour signal)
  * @param value  the signal's argument value (On Tour arg)
  */
-extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float value)
+void cTexFlipModifier::signal(int id, float value)
 {
     switch (id) {
     case 300:
-        self->Speed = value;
+        Speed = value;
         break;
     case 301:
         if (value >= 0.0f && value < 9.0f) {
@@ -2564,16 +2565,16 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
                 ceilVal += 1.0f;
             }
             int n = (int)ceilVal;
-            self->TexIndex = n;
-            cTexFlipModifier_setTexIndex(self, n);
+            TexIndex = n;
+            setTexIndex(n);
         }
         break;
     case 302:
-        self->TexIndex++;
-        if (self->TexIndex >= self->NumTexFlipMaterials) {
-            self->TexIndex = 1;
+        TexIndex++;
+        if (TexIndex >= NumTexFlipMaterials) {
+            TexIndex = 1;
         }
-        cTexFlipModifier_setTexIndex(self, self->TexIndex);
+        setTexIndex(TexIndex);
         break;
     }
 }
@@ -2588,10 +2589,10 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cBxReplayFrame* stream)
+void cTexFlipModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((const char*)&self->Type, 0x18);
-    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
+    stream->write((const char*)&Type, 0x18);
+    stream->writeReplayInstance((const tInstanceRecord*)Instance);
 }
 #endif
 
@@ -2678,10 +2679,10 @@ struct sRailSerVEntry {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cUVScrollModifier_cUVScrollModifier1(cUVScrollModifier* self, cBxReplayFrame* stream)
+void* cUVScrollModifier::cUVScrollModifier1(cBxReplayFrame* stream)
 {
-    stream->read((char*)self, 80);
-    return ((void*)self);
+    stream->read((char*)this, 80);
+    return ((void*)this);
 }
 #endif
 
@@ -2728,72 +2729,72 @@ struct sRmState_F7D0 {
  * adjusts AngVel instead of Angle, and its second test is AngVel <= 2*pi (not -2*pi), so a slow AngVel gains 2*pi
  * every other frame and Angle grows without bound (harmless for the rotation, likely an original bug).
  */
-extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
+void cUVScrollModifier::update()
 {
-    if (self->TimeOn > 0.0f || self->TimeOff > 0.0f) {
-        self->Time += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
-        if (self->On) {
-            if (self->AngVel != 0.0f) {
-                self->Angle += self->AngVel;
-                if (self->AngVel >= 6.2831854820251465f) {
-                    self->AngVel = self->AngVel - 6.2831854820251465f;
-                } else if (self->AngVel <= 6.2831854820251465f) {
-                    self->AngVel = self->AngVel + 6.2831854820251465f;
+    if (TimeOn > 0.0f || TimeOff > 0.0f) {
+        Time += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
+        if (On) {
+            if (AngVel != 0.0f) {
+                Angle += AngVel;
+                if (AngVel >= 6.2831854820251465f) {
+                    AngVel = AngVel - 6.2831854820251465f;
+                } else if (AngVel <= 6.2831854820251465f) {
+                    AngVel = AngVel + 6.2831854820251465f;
                 }
             }
-            if (self->Time >= self->TimeOn) {
-                self->Time = 0.0f;
-                if (self->Time < self->TimeOff) {
-                    self->On = 0;
+            if (Time >= TimeOn) {
+                Time = 0.0f;
+                if (Time < TimeOff) {
+                    On = 0;
                 }
-                if (self->Type == 2 || self->Type == 6) {
-                    *(sV2_F7D0*)&self->UVScroll[0] = -*(sV2_F7D0*)&self->UVScroll[0];
+                if (Type == 2 || Type == 6) {
+                    *(sV2_F7D0*)&UVScroll[0] = -*(sV2_F7D0*)&UVScroll[0];
                 }
             }
-            if (self->On) {
-                if (self->Type == 6) {
-                    if (self->UVScroll[0] < 0.0f) {
-                        float time = self->Time;
-                        if (time < self->TimeOn * 0.5f) {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * time * (1.0f / self->TimeOn);
-                            self->UV[0] += step.x;
-                            self->UV[1] += step.y;
+            if (On) {
+                if (Type == 6) {
+                    if (UVScroll[0] < 0.0f) {
+                        float time = Time;
+                        if (time < TimeOn * 0.5f) {
+                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * time * (1.0f / TimeOn);
+                            UV[0] += step.x;
+                            UV[1] += step.y;
                         } else {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - time) * (1.0f / self->TimeOn);
-                            self->UV[0] += step.x;
-                            self->UV[1] += step.y;
+                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * (TimeOn - time) * (1.0f / TimeOn);
+                            UV[0] += step.x;
+                            UV[1] += step.y;
                         }
                     } else {
-                        float remaining = self->TimeOn - self->Time;
-                        if (remaining < self->TimeOn * 0.5f) {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * remaining * (1.0f / self->TimeOn);
-                            self->UV[0] += step.x;
-                            self->UV[1] += step.y;
+                        float remaining = TimeOn - Time;
+                        if (remaining < TimeOn * 0.5f) {
+                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * remaining * (1.0f / TimeOn);
+                            UV[0] += step.x;
+                            UV[1] += step.y;
                         } else {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - remaining) * (1.0f / self->TimeOn);
-                            self->UV[0] += step.x;
-                            self->UV[1] += step.y;
+                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * (TimeOn - remaining) * (1.0f / TimeOn);
+                            UV[0] += step.x;
+                            UV[1] += step.y;
                         }
                     }
                 } else {
-                    self->UV[0] += self->UVScroll[0];
-                    self->UV[1] += self->UVScroll[1];
+                    UV[0] += UVScroll[0];
+                    UV[1] += UVScroll[1];
                 }
-                if (self->UV[0] > 1.0f) {
-                    self->UV[0] = self->UV[0] - 1.0f;
-                } else if (self->UV[0] < -1.0f) {
-                    self->UV[0] = self->UV[0] + 1.0f;
+                if (UV[0] > 1.0f) {
+                    UV[0] = UV[0] - 1.0f;
+                } else if (UV[0] < -1.0f) {
+                    UV[0] = UV[0] + 1.0f;
                 }
-                if (self->UV[1] > 1.0f) {
-                    self->UV[1] = self->UV[1] - 1.0f;
-                } else if (self->UV[1] < -1.0f) {
-                    self->UV[1] = self->UV[1] + 1.0f;
+                if (UV[1] > 1.0f) {
+                    UV[1] = UV[1] - 1.0f;
+                } else if (UV[1] < -1.0f) {
+                    UV[1] = UV[1] + 1.0f;
                 }
             }
-        } else if (self->Time >= self->TimeOff) {
-            self->Time = 0.0f;
-            if (self->TimeOn > 0.0f) {
-                self->On = 1;
+        } else if (Time >= TimeOff) {
+            Time = 0.0f;
+            if (TimeOn > 0.0f) {
+                On = 1;
             }
         }
     }
@@ -2813,30 +2814,30 @@ INCLUDE_ASM("object/railmodifier", cUVScrollModifier_signal);
  * @param id  the signal id (On Tour signal)
  * @param value  the signal's argument value (On Tour arg)
  */
-extern "C" void cUVScrollModifier_signal(cUVScrollModifier* self, int id, float value)
+void cUVScrollModifier::signal(int id, float value)
 {
     if (id == 200 || id == 201) {
         if (value >= -1.0f && value <= 1.0f) {
             if (id == 201) {
-                self->UVScroll[0] = value;
+                UVScroll[0] = value;
             } else {
-                self->UVScroll[1] = value;
+                UVScroll[1] = value;
             }
         }
     } else if (id == 202 || id == 203) {
         if (value >= 0.0f && value <= 60.0f) {
             if (id == 202) {
-                self->TimeOn = value;
+                TimeOn = value;
             } else {
-                self->TimeOff = value;
+                TimeOff = value;
             }
         }
     } else if (id == 204 || id == 205) {
         if (value >= -4.0f && value <= 4.0f) {
             if (id == 204) {
-                self->UV[0] = value;
+                UV[0] = value;
             } else {
-                self->UV[1] = value;
+                UV[1] = value;
             }
         }
     }
@@ -2857,32 +2858,32 @@ extern t4Matrix t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
  * @param mat  receives the matrix (On Tour t4Matrix& mat)
  * @return @p mat
  */
-extern "C" t4Matrix* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, t4Matrix* mat)
+t4Matrix* cUVScrollModifier::getTextureMat(t4Matrix* mat)
 {
     float zeroF = 0.0f;
-    if (self->Angle != zeroF) {
+    if (Angle != zeroF) {
         float sinA;
         float cosA;
-        fSinCos(&sinA, &cosA, self->Angle);
+        fSinCos(&sinA, &cosA, Angle);
         float one = 1.0f;
         float oneMinusCos = one - cosA;
-        float tx = oneMinusCos * self->Axis.x;
-        float sy = sinA * self->Axis.y;
-        float sz = sinA * self->Axis.z;
-        float sx = sinA * self->Axis.x;
-        float ty = oneMinusCos * self->Axis.y;
-        float tz = oneMinusCos * self->Axis.z;
-        mat->row[0].x = tx * self->Axis.x + cosA;
-        mat->row[1].x = tx * self->Axis.y + sz;
-        mat->row[2].x = tx * self->Axis.z - sy;
+        float tx = oneMinusCos * Axis.x;
+        float sy = sinA * Axis.y;
+        float sz = sinA * Axis.z;
+        float sx = sinA * Axis.x;
+        float ty = oneMinusCos * Axis.y;
+        float tz = oneMinusCos * Axis.z;
+        mat->row[0].x = tx * Axis.x + cosA;
+        mat->row[1].x = tx * Axis.y + sz;
+        mat->row[2].x = tx * Axis.z - sy;
         mat->row[3].x = zeroF;
-        mat->row[0].y = ty * self->Axis.x - sz;
-        mat->row[1].y = ty * self->Axis.y + cosA;
-        mat->row[2].y = ty * self->Axis.z + sx;
+        mat->row[0].y = ty * Axis.x - sz;
+        mat->row[1].y = ty * Axis.y + cosA;
+        mat->row[2].y = ty * Axis.z + sx;
         mat->row[3].y = zeroF;
-        mat->row[0].z = tz * self->Axis.x + sy;
-        mat->row[1].z = tz * self->Axis.y - sx;
-        mat->row[2].z = tz * self->Axis.z + cosA;
+        mat->row[0].z = tz * Axis.x + sy;
+        mat->row[1].z = tz * Axis.y - sx;
+        mat->row[2].z = tz * Axis.z + cosA;
         mat->row[3].z = zeroF;
         mat->row[0].w = zeroF;
         mat->row[1].w = zeroF;
@@ -2905,8 +2906,8 @@ extern "C" t4Matrix* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, t4
             : "r"(mat), "r"(t4mat_Identity_35FC20)
             : "memory");
     }
-    mat->row[3].x = self->UV[0];
-    mat->row[3].y = self->UV[1];
+    mat->row[3].x = UV[0];
+    mat->row[3].y = UV[1];
     return mat;
 }
 #endif
@@ -2920,9 +2921,9 @@ INCLUDE_ASM("object/railmodifier", cUVScrollModifier_writeToReplayFrame);
  *
  * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cBxReplayFrame* obj)
+void cUVScrollModifier::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 80);
+    obj->write((const char*)this, 80);
 }
 #endif
 
@@ -3136,12 +3137,12 @@ extern void* cObjNode_vtbl[];
  *
  * @return self
  */
-extern "C" void* cObjNode_cObjNode2(cObjNode* self)
+void* cObjNode::cObjNode2()
 {
-    self->Next = 0;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cObjNode_vtbl);
-    self->Prev = 0;
-    return ((void*)self);
+    Next = 0;
+    VPTR_OF(cObjNode, this) = (void**)((int)(void*)cObjNode_vtbl);
+    Prev = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3352,11 +3353,11 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_getType);
 /**
  * Returns a typed object node's ObjNodeType (+0x10, tObjNodeType).
  *
- * @param node  the typed object node
  * @return ObjNodeType
  */
-extern "C" short cTypeObjNode_getType(cTypeObjNode* node) {
-    return (node->ObjNodeType);
+short cTypeObjNode::getType()
+{
+    return (ObjNodeType);
 }
 #endif
 //100%
@@ -3365,10 +3366,10 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_setRootTransformDirty);
 /**
  * Sets the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
  *
- * @param node  the typed object node
  */
-extern "C" void cTypeObjNode_setRootTransformDirty(cTypeObjNode* node) {
-    node->Flags = (unsigned short) ((node->Flags) | 1);
+void cTypeObjNode::setRootTransformDirty()
+{
+    Flags = (unsigned short) ((Flags) | 1);
 }
 #endif
 //100%
@@ -3377,11 +3378,11 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_isRootTransformDirty);
 /**
  * Tests the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
  *
- * @param node  the typed object node
  * @return that bit (0 or 1)
  */
-extern "C" int cTypeObjNode_isRootTransformDirty(cTypeObjNode* node) {
-    return (node->Flags) & 1;
+int cTypeObjNode::isRootTransformDirty()
+{
+    return (Flags) & 1;
 }
 #endif
 //100%
@@ -3390,10 +3391,10 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_resetRootTransformDirty);
 /**
  * Clears the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
  *
- * @param node  the typed object node
  */
-extern "C" void cTypeObjNode_resetRootTransformDirty(cTypeObjNode* node) {
-    node->Flags = (unsigned short) (node->Flags & 0xFFFE);
+void cTypeObjNode::resetRootTransformDirty()
+{
+    Flags = (unsigned short) (Flags & 0xFFFE);
 }
 #endif
 //100%
@@ -3784,11 +3785,11 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getInstance);
 /**
  * Returns an instance node's Instance (+0x18).
  *
- * @param instanceNode  the instance node
  * @return Instance
  */
-extern "C" int cInstanceNode_getInstance(cInstanceNode* instanceNode) {
-    return ((int)instanceNode->Instance);
+int cInstanceNode::getInstance()
+{
+    return ((int)Instance);
 }
 #endif
 
@@ -4612,13 +4613,13 @@ extern void* cPhysicsModifier_vtbl[];
 /**
  * Constructs a physics modifier: installs cPhysicsModifier_vtbl and sets Active to 1.
  *
- * @param physicsModifier  the physics modifier
  * @return physicsModifier
  */
-extern "C" void *cPhysicsModifier_cPhysicsModifier1(cPhysicsModifier* physicsModifier) {
-    ((int*)VPTR_OF(cPhysicsModifier, physicsModifier)) = (int*)&cPhysicsModifier_vtbl;
-    physicsModifier->Active = 1;
-    return ((void*)physicsModifier);
+void * cPhysicsModifier::cPhysicsModifier1()
+{
+    ((int*)VPTR_OF(cPhysicsModifier, this)) = (int*)&cPhysicsModifier_vtbl;
+    Active = 1;
+    return ((void*)this);
 }
 #endif
 
@@ -4924,11 +4925,11 @@ INCLUDE_ASM("object/railmodifier", cRailModifier_getSplineId);
 /**
  * Returns a rail modifier's SplineId (+0x30).
  *
- * @param railModifier  the rail modifier
  * @return SplineId
  */
-extern "C" int cRailModifier_getSplineId(cRailModifier* railModifier) {
-    return ((int)railModifier->SplineId);
+int cRailModifier::getSplineId()
+{
+    return ((int)SplineId);
 }
 #endif
 
@@ -5016,9 +5017,9 @@ public:
  *
  * @return the modifier's mesh index, or 0
  */
-extern "C" int cMoveNode_getParentMesh(cMoveNode* self)
+int cMoveNode::getParentMesh()
 {
-    cVirt16** holder = (cVirt16**)self->ModifierBlock;
+    cVirt16** holder = (cVirt16**)ModifierBlock;
     if (holder != 0) {
         cVirt16* obj = *holder;
         if (obj != 0) {
@@ -5036,9 +5037,9 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getTransformModifier);
  *
  * @return the transform modifier, or 0 when the node has no modifier block
  */
-extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
+int cMoveNode::getTransformModifier()
 {
-    int* modBlock = (int*)self->ModifierBlock;
+    int* modBlock = (int*)ModifierBlock;
     if (modBlock != 0) {
         return *modBlock;
     }
@@ -5054,14 +5055,14 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_hasTextureMat);
  * True when ModifierBlock exists and its UV-scroll slot (+0x4) is set; cMoveNode_getTextureMat reads the matrix from
  * that modifier.
  *
- * @param moveNode  the move node
  * @return 1 if it has one, else 0
  */
-extern "C" int cMoveNode_hasTextureMat(cMoveNode* moveNode) {
+int cMoveNode::hasTextureMat()
+{
     int var_2;
     tModifierBlock* temp_3;
 
-    temp_3 = (tModifierBlock*)((void*)moveNode->ModifierBlock);
+    temp_3 = (tModifierBlock*)((void*)ModifierBlock);
     var_2 = 0;
     if (((void*)temp_3) != 0) {
         var_2 = ((int)temp_3->UVScroll) != 0;
@@ -5077,14 +5078,14 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_hasMaterialBlock);
  *
  * True when ModifierBlock exists and its texture-flip slot (+0x8) is set.
  *
- * @param moveNode  the move node
  * @return 1 if it has one, else 0
  */
-extern "C" int cMoveNode_hasMaterialBlock(cMoveNode* moveNode) {
+int cMoveNode::hasMaterialBlock()
+{
     int var_2;
     tModifierBlock* temp_3;
 
-    temp_3 = (tModifierBlock*)((void*)moveNode->ModifierBlock);
+    temp_3 = (tModifierBlock*)((void*)ModifierBlock);
     var_2 = 0;
     if (((void*)temp_3) != 0) {
         var_2 = ((int)temp_3->TexFlip) != 0;
@@ -5101,10 +5102,10 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getMaterialBlock);
  *
  * @return the material block record (On Tour const tMaterialBlockRecord*)
  */
-extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
+int cMoveNode::getMaterialBlock()
 {
     int cond;
-    tModifierBlock* modBlock = self->ModifierBlock;
+    tModifierBlock* modBlock = ModifierBlock;
     cond = 0;
     if (((char*)modBlock) != 0) {
         cond = (int)modBlock->TexFlip != 0;
@@ -5116,7 +5117,7 @@ extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
         }
         return 0;
     }
-    return (int)self->Instance->m_MaterialBlock;
+    return (int)Instance->m_MaterialBlock;
 }
 #endif
 //100%
@@ -5133,9 +5134,9 @@ void* cUVScrollModifier_getTextureMat_1arg(void*) __asm__("cUVScrollModifier_get
  *
  * @return the matrix, or 0 when the node has no UV-scroll modifier
  */
-extern "C" void* cMoveNode_getTextureMat(cMoveNode* self)
+void* cMoveNode::getTextureMat()
 {
-    tModifierBlock* modBlock = self->ModifierBlock;
+    tModifierBlock* modBlock = ModifierBlock;
     int cond = 0;
     if (((char*)modBlock) != 0) {
         cond = (int)modBlock->UVScroll != 0;
@@ -5157,12 +5158,12 @@ extern "C" void tModifierBlock_remTransformModifier(int);
 /**
  * Removes a move node's transform modifier (tModifierBlock_remTransformModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_remTransformModifier(cMoveNode* moveNode) {
+void cMoveNode::remTransformModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remTransformModifier(temp_4);
     }
@@ -5176,12 +5177,12 @@ extern "C" void tModifierBlock_remUVScrollModifier(int);
 /**
  * Removes a move node's UV-scroll modifier (tModifierBlock_remUVScrollModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_remUVScrollModifier(cMoveNode* moveNode) {
+void cMoveNode::remUVScrollModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remUVScrollModifier(temp_4);
     }
@@ -5195,12 +5196,12 @@ extern "C" void tModifierBlock_remTexFlipModifier(int);
 /**
  * Removes a move node's texture-flip modifier (tModifierBlock_remTexFlipModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_remTexFlipModifier(cMoveNode* moveNode) {
+void cMoveNode::remTexFlipModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remTexFlipModifier(temp_4);
     }
@@ -5214,12 +5215,12 @@ extern "C" void tModifierBlock_remPhysicsModifier(int);
 /**
  * Removes a move node's physics modifier (tModifierBlock_remPhysicsModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_remPhysicsModifier(cMoveNode* moveNode) {
+void cMoveNode::remPhysicsModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remPhysicsModifier(temp_4);
     }
@@ -5233,12 +5234,12 @@ extern "C" void tModifierBlock_remHaloModifier(int);
 /**
  * Removes a move node's halo effects (tModifierBlock_remHaloModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_remHaloModifier(cMoveNode* moveNode) {
+void cMoveNode::remHaloModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remHaloModifier(temp_4);
     }
@@ -5252,12 +5253,12 @@ extern "C" void tModifierBlock_remEffectModifier(int);
 /**
  * Removes a move node's effect modifiers (tModifierBlock_remEffectModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_remEffectModifier(cMoveNode* moveNode) {
+void cMoveNode::remEffectModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_remEffectModifier(temp_4);
     }
@@ -5271,12 +5272,12 @@ extern "C" void tModifierBlock_fadeEffectModifier(int);
 /**
  * Fades out a move node's effects (tModifierBlock_fadeEffectModifier), if it has a modifier block.
  *
- * @param moveNode  the move node
  */
-extern "C" void cMoveNode_fadeEffectModifier(cMoveNode* moveNode) {
+void cMoveNode::fadeEffectModifier()
+{
     int temp_4;
 
-    temp_4 = ((int)moveNode->ModifierBlock);
+    temp_4 = ((int)ModifierBlock);
     if (temp_4 != 0) {
         tModifierBlock_fadeEffectModifier(temp_4);
     }
@@ -5323,9 +5324,9 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimFrame);
  *
  * @return the float at +0x0 multiplied by 30
  */
-extern "C" float cAnimNode_getAnimFrame(cAnimNode* self)
+float cAnimNode::getAnimFrame()
 {
-    float input = self->CurrTime;
+    float input = CurrTime;
     return input * 30.0f;
 }
 #endif
@@ -5370,14 +5371,14 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMats);
  *
  * @return the matrix array pointer stored at +0x44
  */
-extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
+int cAnimNode::getAnimMats()
 {
-    if (self->Flags & 1) {
-        void* sub = (char*)&self->MoveNodeBase;
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+    if (Flags & 1) {
+        void* sub = (char*)&MoveNodeBase;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)mVtbl;
         vt[51].fn(vthis(sub, vt[51]));
     }
-    return (int)self->AnimMats;
+    return (int)AnimMats;
 }
 #endif
 
@@ -5395,14 +5396,14 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMat);
  * @param i  index of the matrix in the array at +0x44 (0x40-byte matrices)
  * @return the address of matrix @p i
  */
-extern "C" t4Matrix* cAnimNode_getAnimMat(cAnimNode* self, int i)
+t4Matrix* cAnimNode::getAnimMat(int i)
 {
-    char* obj = (char*)&self->MoveNodeBase;
-    if (self->Flags & 1) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+    char* obj = (char*)&MoveNodeBase;
+    if (Flags & 1) {
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)mVtbl;
         vt[51].fn(vthis(obj, vt[51]));
     }
-    return &(self->AnimMats)[i];
+    return &AnimMats[i];
 }
 #endif
 
@@ -5415,11 +5416,11 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_clearFrameEvent);
  * The animated-node update functions (cAnimComboNode_updateNode, cAnimDeltaNode_updateNode) store the same 1e10 into these fields of their
  * embedded animated node.
  *
- * @param animNode  the animated node
  */
-extern "C" void cAnimNode_clearFrameEvent(cAnimNode* animNode) {
-    animNode->FrameStart = 1e10f;
-    animNode->FrameEnd = 1e10f;
+void cAnimNode::clearFrameEvent()
+{
+    FrameStart = 1e10f;
+    FrameEnd = 1e10f;
 }
 #endif
 
@@ -5445,9 +5446,9 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getAnimSpeed);
  *
  * @return the speed, or 0.0f
  */
-extern "C" float cAnimObjectNode_getAnimSpeed(cAnimObjectNode* self)
+float cAnimObjectNode::getAnimSpeed()
 {
-    return self->AnimComplete == 0 ? self->AnimSpeed : 0.0f;
+    return AnimComplete == 0 ? AnimSpeed : 0.0f;
 }
 #endif
 
@@ -5459,10 +5460,10 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getAnimDir);
  *
  * @return 1 or -1
  */
-extern "C" int cAnimObjectNode_getAnimDir(cAnimObjectNode* self)
+int cAnimObjectNode::getAnimDir()
 {
     int direction = -1;
-    if (self->AnimSpeed >= 0.0f) {
+    if (AnimSpeed >= 0.0f) {
         direction = 1;
     }
     return direction;
@@ -5477,10 +5478,9 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_isComplete__FPv);
  *
  * @return the completion flag (nonzero when complete)
  */
-int cAnimObjectNode_isComplete(void* vself)
+int cAnimObjectNode::isComplete()
 {
-    cAnimObjectNode* self = (cAnimObjectNode*)vself;
-    return self->AnimComplete;
+    return AnimComplete;
 }
 #endif
 
@@ -5495,11 +5495,11 @@ extern "C" void cAnimFrame_init(void*);
  *
  * @return self
  */
-extern "C" void* cAnimFrame_cAnimFrame1(cAnimFrame* self)
+void* cAnimFrame::cAnimFrame1()
 {
-    self->mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
-    cAnimFrame_init(self);
-    return ((void*)self);
+    mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
+    cAnimFrame_init(this);
+    return ((void*)this);
 }
 #endif
 
@@ -5532,12 +5532,12 @@ INCLUDE_ASM("object/railmodifier", cAnimFrame_getAngles);
  *
  * @param out  receives the angles
  */
-extern "C" void cAnimFrame_getAngles(cAnimFrame* self, t4Vector* out)
+void cAnimFrame::getAngles(t4Vector* out)
 {
     t4Vector negated;
-    negated.x = -self->Vals[3];
-    negated.y = -self->Vals[4];
-    negated.z = -self->Vals[5];
+    negated.x = -Vals[3];
+    negated.y = -Vals[4];
+    negated.z = -Vals[5];
     negated.w = 0.0f;
     *out = negated;
 }
@@ -5558,13 +5558,13 @@ extern "C" void cMeshAnimFrame_init(cMeshAnimFrame*);
  *
  * @return self
  */
-extern "C" void* cMeshAnimFrame_cMeshAnimFrame1(cMeshAnimFrame* self)
+void* cMeshAnimFrame::cMeshAnimFrame1()
 {
-    self->mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
-    cAnimFrame_init(self);
-    self->mVtbl = (void**)((int)(void*)cMeshAnimFrame_vtbl);
-    cMeshAnimFrame_init(self);
-    return ((void*)self);
+    mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
+    cAnimFrame_init(this);
+    mVtbl = (void**)((int)(void*)cMeshAnimFrame_vtbl);
+    init();
+    return ((void*)this);
 }
 #endif
 
@@ -5600,7 +5600,7 @@ extern t4Matrix t4mat_Identity;
  * Resets a mesh animation frame's FrameMatrix (+0x90) to t4mat_Identity.
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void cMeshAnimFrame_init(cMeshAnimFrame* self)
+void cMeshAnimFrame::init()
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -5614,7 +5614,7 @@ extern "C" void cMeshAnimFrame_init(cMeshAnimFrame* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->FrameMatrix), "r"(&t4mat_Identity)
+        : "r"((char*)&FrameMatrix), "r"(&t4mat_Identity)
         : "memory");
 }
 #endif
@@ -5644,12 +5644,12 @@ extern "C" void cAnimFrame_init(void*);
  *
  * @return self
  */
-extern "C" void* cCamAnimFrame_cCamAnimFrame1(cCamAnimFrame* self)
+void* cCamAnimFrame::cCamAnimFrame1()
 {
-    self->mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
-    cAnimFrame_init(self);
-    self->mVtbl = (void**)((int)(void*)cCamAnimFrame_vtbl);
-    return ((void*)self);
+    mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
+    cAnimFrame_init(this);
+    mVtbl = (void**)((int)(void*)cCamAnimFrame_vtbl);
+    return ((void*)this);
 }
 #endif
 
@@ -5679,11 +5679,11 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_setAnimRecord);
 /**
  * Sets a camera animation frame's animation record (+0x40).
  *
- * @param frame  the camera animation frame
  * @param source  the animation record
  */
-extern "C" void cCamAnimFrame_setAnimRecord(cCamAnimFrame* frame, int source) {
-    frame->AnimRecord = (const tAnimRecord*)source;
+void cCamAnimFrame::setAnimRecord(int source)
+{
+    AnimRecord = (const tAnimRecord*)source;
 }
 #endif
 //100%
@@ -5695,12 +5695,12 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getPosition);
  *
  * @param out  receives the position
  */
-extern "C" void cCamAnimFrame_getPosition(cCamAnimFrame* self, t4Vector* out)
+void cCamAnimFrame::getPosition(t4Vector* out)
 {
     t4Vector result;
-    result.x = self->Vals[0];
-    result.y = self->Vals[1];
-    result.z = self->Vals[2];
+    result.x = Vals[0];
+    result.y = Vals[1];
+    result.z = Vals[2];
     result.w = 1.0f;
     *out = result;
 }
@@ -5714,12 +5714,12 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getAngles);
  *
  * @param out  receives the angles
  */
-extern "C" void cCamAnimFrame_getAngles(cCamAnimFrame* self, t3Vector* out)
+void cCamAnimFrame::getAngles(t3Vector* out)
 {
     t3Vector result;
-    result.x = self->Vals[3];
-    result.y = self->Vals[4];
-    result.z = self->Vals[5];
+    result.x = Vals[3];
+    result.y = Vals[4];
+    result.z = Vals[5];
     *out = result;
 }
 #endif
@@ -5729,11 +5729,11 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getFocalLength);
 /**
  * Returns a camera animation frame's focal length (+0x70) through out.
  *
- * @param frame  the camera animation frame
  * @param out  receives the focal length
  */
-extern "C" void cCamAnimFrame_getFocalLength(cCamAnimFrame* frame, float *out) {
-    *out = frame->Vals[11];
+void cCamAnimFrame::getFocalLength(float *out)
+{
+    *out = Vals[11];
 }
 #endif
 
@@ -5784,10 +5784,10 @@ INCLUDE_ASM("object/railmodifier", cAnimTeeterNode_getAnimDir);
  *
  * @return 1 or -1
  */
-extern "C" int cAnimTeeterNode_getAnimDir(cAnimTeeterNode* self)
+int cAnimTeeterNode::getAnimDir()
 {
     int direction = -1;
-    if (self->AnimSpeed >= 0.0f) {
+    if (AnimSpeed >= 0.0f) {
         direction = 1;
     }
     return direction;
@@ -6177,7 +6177,8 @@ typedef int tMmiQuad __attribute__((mode(TI)));
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void cFlexRailNode_updateMat(cFlexRailNode* self, t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2, const float* ctrlPoint3)
+void cFlexRailNode::updateMat(t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2,
+                              const float* ctrlPoint3)
 {
     t4Matrix coeffMat;
     t4Vector zCoeffs;
@@ -6201,11 +6202,11 @@ INCLUDE_ASM("object/railmodifier", cFlagSet_Empty);
 /**
  * Tells whether a flag set holds no flags: its flag count (+0x5C) is 0.
  *
- * @param flagSet  the flag set
  * @return 1 if empty, else 0
  */
-extern "C" int cFlagSet_Empty(cFlagSet* flagSet) {
-    return (flagSet->mCurrentNumInstances) == 0;
+int cFlagSet::Empty()
+{
+    return (mCurrentNumInstances) == 0;
 }
 #endif
 //100%
@@ -6214,11 +6215,11 @@ INCLUDE_ASM("object/railmodifier", cFlagManager_GetWindFactor);
 /**
  * Returns a flag manager's current wind factor (+0x10).
  *
- * @param flagManager  the flag manager
  * @return the wind factor
  */
-extern "C" float cFlagManager_GetWindFactor(cFlagManager* flagManager) {
-    return (flagManager->mCurrentWindFactor);
+float cFlagManager::GetWindFactor()
+{
+    return (mCurrentWindFactor);
 }
 #endif
 
@@ -6564,11 +6565,11 @@ INCLUDE_ASM("object/railmodifier", cParentModifier_setParent);
 /**
  * Sets a parent modifier's ParentInst (+0xA0). Nothing in retail calls it.
  *
- * @param modifier  the parent modifier
  * @param parentInst  instance record to follow
  */
-extern "C" void cParentModifier_setParent(cParentModifier* modifier, int parentInst) {
-    modifier->ParentInst = (tInstanceRecord*)parentInst;
+void cParentModifier::setParent(int parentInst)
+{
+    ParentInst = (tInstanceRecord*)parentInst;
 }
 #endif
 
@@ -7019,11 +7020,11 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getFocusCount);
 /**
  * Returns a multi-spline modifier's FocusCount.
  *
- * @param multiSplineModifier  the multi-spline modifier
  * @return FocusCount
  */
-extern "C" int cMultiSplineModifier_getFocusCount(cMultiSplineModifier* multiSplineModifier) {
-    return (multiSplineModifier->FocusCount);
+int cMultiSplineModifier::getFocusCount()
+{
+    return (FocusCount);
 }
 #endif
 
@@ -7154,11 +7155,10 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_collide1__FPv);
  *
  * @return no meaningful value (cRollerModifier_Collision returns nothing)
  */
-void* cRollerModifier_collide1(void* vself)
+void* cRollerModifier::collide1()
 {
-    cRollerModifier* self = (cRollerModifier*)vself;
-    *(int*)&self->Life = 0;
-    return cRollerModifier_Collision(self);
+    *(int*)&Life = 0;
+    return cRollerModifier_Collision(this);
 }
 #endif
 
@@ -7354,18 +7354,18 @@ INCLUDE_ASM("object/railmodifier", cAnimComboNode_getAnimDir);
  *
  * @return 1 or -1
  */
-extern "C" int cAnimComboNode_getAnimDir(cAnimComboNode* self)
+int cAnimComboNode::getAnimDir()
 {
     int direction;
-    if (*(signed char*)&self->AnimActive2 != 0) {
+    if (*(signed char*)&AnimActive2 != 0) {
         direction = -1;
-        if (self->AnimSpeed2 >= 0.0f) {
+        if (AnimSpeed2 >= 0.0f) {
             direction = 1;
         }
         return direction;
     }
     direction = -1;
-    if (self->AnimSpeed >= 0.0f) {
+    if (AnimSpeed >= 0.0f) {
         direction = 1;
     }
     return direction;
@@ -10693,10 +10693,9 @@ INCLUDE_ASM("object/railmodifier", cTextureMan_SetTextureMemType__FPvi);
  *
  * @param val  the new memory type (cPS2GraphicsMan_InitTextures passes its memtype)
  */
-void cTextureMan_SetTextureMemType(void* vself, int val)
+void cTextureMan::SetTextureMemType(int val)
 {
-    cTextureMan* self = (cTextureMan*)vself;
-    self->TexMemType = val;
+    TexMemType = val;
 }
 #endif
 
@@ -10717,7 +10716,7 @@ extern "C" void func_00365E40(void* list, int a, int size, void* pool);
 extern "C" void func_00366FE8(cTextureMan* self)
 {
     self->TexMemType = 0;
-    cTextureMan_InitTexInfo(self);
+    self->InitTexInfo();
     int* bound = (int*)(&self->mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;
@@ -10764,15 +10763,15 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * bytes), then points the free list head (+0x1F48) at slot 1500 (+0x1778) and makes each of slots 1500 to 1998 point at
  * the next one; slot 1999 stays 0 and ends the list. cTextureMan_NewNonBindTexID pops ids from this list.
  */
-extern "C" void cTextureMan_InitTexInfo(cTextureMan* self)
+void cTextureMan::InitTexInfo()
 {
     int i;
-    self->m_iNumBindTextures = 0;
-    self->m_iNumNonBindTextures = 0;
-    MEM_fill(&self->m_pTexInfo[0], 0, 8000);
-    self->m_pNonBindFreeTexInfo = (cLinkTexInfo*)((void**)(&self->m_pTexInfo[1500]));
+    m_iNumBindTextures = 0;
+    m_iNumNonBindTextures = 0;
+    MEM_fill(&m_pTexInfo[0], 0, 8000);
+    m_pNonBindFreeTexInfo = (cLinkTexInfo*)((void**)(&m_pTexInfo[1500]));
     for (i = 0; i < 499; i++) {
-        void** list = (void**)self->m_pNonBindFreeTexInfo;
+        void** list = (void**)m_pNonBindFreeTexInfo;
         list[i] = &list[i + 1];
     }
 }

@@ -55,6 +55,8 @@ struct tAttrMenu {
 
 CHECK_SIZE(tAttrMenu, 0x1);
 
+struct cUIThing;
+
 struct cUIMenu : public cUIGroup {
     // cUIGroup (ui/uigroup.h, 0x90): the vptr at 0x008:
     //   [R] _vt$7cUIMenu D_00494928 (cUIMenu_vtbl), stored after cUIGroup's D_004949E8; the destructor stores
@@ -89,6 +91,32 @@ struct cUIMenu : public cUIGroup {
     unsigned char mStoredIndex;      // 0x0A4 [O]; [R] = 0xFF; [U] cUIMenu_setSelected / setSelectedByIndex store it (sb),
                                      //       cUIMenu_setFocus reads it (lbu)
     char unk_0A5[0x3];               // 0x0A5 padding (placed by the 0xA8 allocation)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setInputMap(char value) __asm__("cUIMenu_setInputMap");
+    unsigned char getNext() __asm__("cUIMenu_getNext");
+    unsigned char getPrev() __asm__("cUIMenu_getPrev");
+    void setSelected(cUIThing* item, int play) __asm__("cUIMenu_setSelected");
+    int onInputChangeItem(unsigned char OldScrollItemCurrent) __asm__("cUIMenu_onInputChangeItem");
+    void setScrollableMenu(char NumItems) __asm__("cUIMenu_setScrollableMenu");
+    void setScrollBar(int scrollBar) __asm__("cUIMenu_setScrollBar");
+    unsigned char findFirstHighlightable(unsigned char start) __asm__("cUIMenu_findFirstHighlightable");
+    unsigned char reverseFindFirstHighlightable(unsigned char idx) __asm__("cUIMenu_reverseFindFirstHighlightable");
+    void setSelectedByIndex(unsigned char idx) __asm__("cUIMenu_setSelectedByIndex");
+    int isFlipInput() __asm__("cUIMenu_isFlipInput");
+    void setFlipInput(int enable) __asm__("cUIMenu_setFlipInput");
+    int isDisableDirSound() __asm__("cUIMenu_isDisableDirSound");
+    void setDisableDirSound(int enable) __asm__("cUIMenu_setDisableDirSound");
+    int isCreateThead() __asm__("cUIMenu_isCreateThead");
+    void setCreateThread(int createThread) __asm__("cUIMenu_setCreateThread");
+    unsigned char getScrollIndex() __asm__("cUIMenu_getScrollIndex");
+    unsigned char getScrollOffset() __asm__("cUIMenu_getScrollOffset");
+    unsigned char getScrollNum() __asm__("cUIMenu_getScrollNum");
+    void setScrollIndex(signed char scrollItemCurrent) __asm__("cUIMenu_setScrollIndex");
+    void setScrollNum(signed char scrollItemNum) __asm__("cUIMenu_setScrollNum");
+    void setScrollOffset(signed char scrollItemOffset) __asm__("cUIMenu_setScrollOffset");
+    int getSelected() __asm__("cUIMenu_getSelected");
+    unsigned char getSelectedIndex() __asm__("cUIMenu_getSelectedIndex");
 };
 
 CHECK_OFFSET(cUIMenu, mAttrMenu, 0x090);

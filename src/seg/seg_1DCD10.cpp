@@ -284,9 +284,10 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
  * manager's top render-state record (GrMan +0xE84) and sets several of its fields, calls virtual slot 3
  * (platformrender, cPS2FogParticleMan_platformrender in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
  */
-extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
-    if (self->miNumSphere) {
-        qsort_BF98(cFogParticleMan_mSortKey, self->miNumSphere, 8, cFogParticleMan__FogSortFuc);
+void cFogParticleMan::render()
+{
+    if (miNumSphere) {
+        qsort_BF98(cFogParticleMan_mSortKey, miNumSphere, 8, cFogParticleMan__FogSortFuc);
         Push_BF98();
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;
@@ -303,11 +304,11 @@ extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
         }
         G3_BF98(5, 1, 0, 3, 0);
         {
-            VEnt_BF98* vtEntry = (VEnt_BF98*)((char*)self->mVtbl + 0x18);
-            vtEntry->fn(vthis(self, *vtEntry));
+            VEnt_BF98* vtEntry = (VEnt_BF98*)((char*)mVtbl + 0x18);
+            vtEntry->fn(vthis(this, *vtEntry));
         }
         Pop_BF98();
-        self->miNumSphere = 0;
+        miNumSphere = 0;
     }
 }
 #endif
@@ -715,11 +716,10 @@ static inline int FBits_C7B0(float f) { return *(int*)&f; }
  * (+0xE84, its low 5 bits of word 2 replaced from ring +0x69CC4), the packet start and end and the sort key at ring
  * +0x69CC0. The buffer address then moves to the end + 0x10. Does nothing when miNumSphere is 0 or less.
  *
- * @param list  the fog particle manager whose miNumSphere sprites are drawn
  */
-extern "C" void cPS2FogParticleMan_platformrender(cPS2FogParticleMan* list)
+void cPS2FogParticleMan::platformrender()
 {
-    int left = list->miNumSphere;
+    int left = miNumSphere;
     int start = 0;
     int max = (D_004A4474_C7B0->size - 4) * 2 / 5 - 1;
     sGfx_C7B0* graphicsMan = cGraphicsMan_TheGraphicsMan_C7B0;
@@ -758,7 +758,7 @@ extern "C" void cPS2FogParticleMan_platformrender(cPS2FogParticleMan* list)
         int rest = left - n;
         packet += 10;
         for (int i = start; i < start + n; i++) {
-            tFogSprite* fogSprite = &((&list->mSprites[0]))[((sSort_C7B0*)cFogParticleMan_mSortKey)[i].idx];
+            tFogSprite* fogSprite = &((&mSprites[0]))[((sSort_C7B0*)cFogParticleMan_mSortKey)[i].idx];
             float invW = fogSprite->mTopLeft.w;
             packet[0] = FBits_C7B0(st0[0] * invW) | ((unsigned long)FBits_C7B0(st0[1] * invW) << 32);
             packet[1] = (int)fogSprite->mColour[1] | ((unsigned long)(int)fogSprite->mColour[2] << 8) | ((unsigned long)(int)fogSprite->mColour[3] << 16) | ((unsigned long)(int)fogSprite->mColour[0] << 24) | ((unsigned long)FBits_C7B0(invW) << 32);

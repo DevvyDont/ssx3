@@ -81,6 +81,7 @@ struct cUIVector : public cUIThing {
 
     // Methods bound to their retail symbols by asm labels.
     void setColour(tARGB* colour) __asm__("cUIVector_setColour");
+    void* cUIVector1() __asm__("cUIVector_cUIVector1");
 };
 
 CHECK_OFFSET(cUIVector, mAttrVector, 0x074);

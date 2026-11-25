@@ -59,6 +59,21 @@ struct cReplayFramePtr : public cBxReplayFrame {
                             //      from it and advances it; peekObjNodeType restores it; readRewind = Block
     int Size;               // 0x10 [O]; [P] GetSize / getBlockSaveSize (cReplayFramePtr_getBlockSaveSize / cReplayFramePtr_GetSize) lw 0x10; [R]
                             //      ctor 0; [U] write adds len; setBlock stores size; writeRewind / purgeBlock 0
+
+    // Methods bound to their retail symbols by asm labels.
+    void initBlock(unsigned int size) __asm__("cReplayFramePtr_initBlock");
+    void setBlock(char* data, int size) __asm__("cReplayFramePtr_setBlock");
+    void purgeBlock() __asm__("cReplayFramePtr_purgeBlock");
+    void readRewind() __asm__("cReplayFramePtr_readRewind__FP15cReplayFramePtr");
+    int writeRewind() __asm__("cReplayFramePtr_writeRewind__FPv");
+    short peekObjNodeType() __asm__("cReplayFramePtr_peekObjNodeType");
+    int loadBlock(char** pp, tFramePtrSave* src) __asm__("cReplayFramePtr_loadBlock");
+    void clearBlock() __asm__("cReplayFramePtr_clearBlock");
+    int getBlock() __asm__("cReplayFramePtr_getBlock");
+    void getReadPos(int *outPos) __asm__("cReplayFramePtr_getReadPos");
+    void setReadPos(int *readPos) __asm__("cReplayFramePtr_setReadPos");
+    int getBlockSaveSize() __asm__("cReplayFramePtr_getBlockSaveSize");
+    int GetSize() __asm__("cReplayFramePtr_GetSize");
 };
 
 

@@ -36,6 +36,10 @@ struct tUIScreenHeader;
 struct tUIKeyframeBlock;
 struct tUIObjectBlock;
 
+struct tUIBaseObject;
+struct tUIFrameHeader;
+struct tUIKCPObjectAnimate;
+
 struct cUIScreen {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] cUIState_updateScreens walks screens by it
@@ -60,6 +64,28 @@ struct cUIScreen {
                                      //       pass it to cUIGroup_onInput/cUIGroup_update/cUIGroup_setFocus
     cUIState* mpState;               // 0x0D0 [P] getParentState (preview lw 0xC8; retail cUIScreen_getParentState lw 0xD0), getEngine = mpState's
                                      //       mpEngine (retail cUIScreen_getEngine); [R] = pState (cUIScreen_cUIScreen, cUIEngine_addScreenByHashName)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setData(tUIScreenHeader* data) __asm__("cUIScreen_setData");
+    tUIFrameHeader* getFrameByIndex(unsigned short frame) __asm__("cUIScreen_getFrameByIndex");
+    unsigned short getFrameByLabel(int label) __asm__("cUIScreen_getFrameByLabel__FP9cUIScreeni");
+    void parseObjectAnim(tUIFrameHeader* pFrame, tUIKCPObjectAnimate* msg) __asm__("cUIScreen_parseObjectAnim");
+    void parseObjectSetPos(int pFrame, int* msg) __asm__("cUIScreen_parseObjectSetPos");
+    void parseEventTrigger(void* pFrame, int* msg) __asm__("cUIScreen_parseEventTrigger");
+    void parseScreenFocusGain() __asm__("cUIScreen_parseScreenFocusGain");
+    void parseScreenFocusLose() __asm__("cUIScreen_parseScreenFocusLose");
+    cUIThing* createObjectByStruct(tUIBaseObject* rec) __asm__("cUIScreen_createObjectByStruct");
+    void* onInput() __asm__("cUIScreen_onInput__FPv");
+    void update() __asm__("cUIScreen_update");
+    cUIThing* getObjectByHashName(int hash) __asm__("cUIScreen_getObjectByHashName");
+    void* cUIScreen1() __asm__("cUIScreen_cUIScreen1");
+    int getHashName() __asm__("cUIScreen_getHashName");
+    int hasFocus() __asm__("cUIScreen_hasFocus");
+    void setFocus(int focused) __asm__("cUIScreen_setFocus");
+    void setVisible(int enable) __asm__("cUIScreen_setVisible");
+    int isVisible() __asm__("cUIScreen_isVisible");
+    int getEngine() __asm__("cUIScreen_getEngine");
+    int getParentState() __asm__("cUIScreen_getParentState");
 };
 
 CHECK_OFFSET(cUIScreen, mpPrev, 0x000);
@@ -123,6 +149,9 @@ struct cUIThread {
     void setFrameIncrement(signed char v) { mFrameIncrement = v; }
     void setActive(bool b) { mIsActive = b; }
     void setPrimary(bool b) { mIsPrimary = b; }
+
+    // Methods bound to their retail symbols by asm labels.
+    void deleteThread() __asm__("cUIThread_deleteThread__FPv");
 };
 
 CHECK_OFFSET(cUIThread, mpPrev, 0x000);

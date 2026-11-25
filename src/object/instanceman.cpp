@@ -127,8 +127,8 @@ extern "C" void* cAnimFrame_cAnimFrame_impl(char* vself, float* src, float time)
 {
     cAnimFrame* self = (cAnimFrame*)vself;
     self->mVtbl = (void**)cAnimFrame_vtbl;
-    cAnimFrame_init((cAnimFrame*)self);
-    cAnimFrame_setAnimRecord((cAnimFrame*)self, src);
+    self->init();
+    self->setAnimRecord(src);
     cAnimFrame_update_impl(((char*)self), time);
     return ((char*)self);
 }
@@ -144,15 +144,15 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_setAnimRecord);
  *
  * @param src  anim record (tAnimRecord)
  */
-extern "C" void cAnimFrame_setAnimRecord(cAnimFrame* self, float* src)
+void cAnimFrame::setAnimRecord(float* src)
 {
-    self->AnimRecord = (const tAnimRecord*)src;
-    self->Vals[0] = src[0];
-    self->Vals[1] = src[1];
-    self->Vals[2] = src[2];
-    self->Vals[3] = src[3];
-    self->Vals[4] = src[4];
-    self->Vals[5] = src[5];
+    AnimRecord = (const tAnimRecord*)src;
+    Vals[0] = src[0];
+    Vals[1] = src[1];
+    Vals[2] = src[2];
+    Vals[3] = src[3];
+    Vals[4] = src[4];
+    Vals[5] = src[5];
 }
 #endif
 
@@ -164,11 +164,11 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
 /**
  * Clears an animation frame: zeroes its two 0x40-byte value blocks (+0x0, +0x44) and the record pointer (+0x40).
  */
-extern "C" void cAnimFrame_init(cAnimFrame* self)
+void cAnimFrame::init()
 {
-    MEM_fill(self, 0, 0x40);
-    MEM_fill(&self->Vals[0], 0, 0x40);
-    self->AnimRecord = 0;
+    MEM_fill(this, 0, 0x40);
+    MEM_fill(&Vals[0], 0, 0x40);
+    AnimRecord = 0;
 }
 #endif
 
@@ -184,11 +184,11 @@ public:
 /**
  * Writes an animation frame's 0x40-byte value block to a replay stream (stream vtable entry 1).
  *
- * @param src  the animation frame
  * @param sink  replay stream to write to
  */
-extern "C" void cAnimFrame_writeToReplayFrame(cAnimFrame* src, cBxReplayFrame* sink) {
-    sink->write((const char*)src, 0x40);
+void cAnimFrame::writeToReplayFrame(cBxReplayFrame* sink)
+{
+    sink->write((const char*)this, 0x40);
 }
 #endif
 //100%
@@ -197,11 +197,11 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_readFromReplayFrame);
 /**
  * Reads an animation frame's 0x40-byte value block back from a replay stream (stream vtable entry 2).
  *
- * @param src  the animation frame
  * @param sink  replay stream to read from
  */
-extern "C" void cAnimFrame_readFromReplayFrame(cAnimFrame* src, cBxReplayFrame* sink) {
-    sink->read((char*)src, 0x40);
+void cAnimFrame::readFromReplayFrame(cBxReplayFrame* sink)
+{
+    sink->read((char*)this, 0x40);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -265,10 +265,10 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_getStartTime);
  * @return the start time in frames, or 0.0
  */
 // PORT: the original reads *a before checking a for null.
-extern "C" float cAnimFrame_getStartTime(cAnimFrame* self)
+float cAnimFrame::getStartTime()
 {
     float startTime = 0.0f;
-    char** channelList = (char**)self->AnimRecord->m_pChannels;
+    char** channelList = (char**)AnimRecord->m_pChannels;
     tChannelRecord* channel = (tChannelRecord*)(*channelList);
     if (channelList != 0 && ((char*)channel) != 0) {
         tSegmentRecord* segments = channel->m_Segments;
@@ -355,16 +355,16 @@ static inline bool inRange_351660(tSegmentRecord* e, float x)
  * @param rotVel  receives the negated angle rates (w = 0) (On Tour dAng)
  * @param time       the animation time
  */
-extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, t4Vector* vel, t4Vector* rotVel, float time)
+void cAnimFrame::getDeriv(t4Vector* vel, t4Vector* rotVel, float time)
 {
     float out[16];
-    tChannelRecord** curves = self->AnimRecord->m_pChannels;
-    int* cur = (int*)self;
+    tChannelRecord** curves = AnimRecord->m_pChannels;
+    int* cur = (int*)this;
     int mask = 1;
     float* outRate = out;
     for (int i = 0; i < 16; i++, mask <<= 1, outRate++) {
         tChannelRecord* channel = *curves;
-        if (self->AnimRecord->m_ChannelMask & mask) {
+        if (AnimRecord->m_ChannelMask & mask) {
             tSegmentRecord* segment = &channel->m_Segments[*cur];
             if (!inRange_351660(segment, time)) {
                 segment = (tSegmentRecord*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
@@ -395,14 +395,14 @@ extern "C" void* cAnimFrame_update(void* self);
  * cAnimFrame_update untouched in $f12 (a port must pass it). The matrix is the X-Y-Z Euler rotation of minus the
  * rotation values (converted to radians, fSinCos sine / cosine) with the translation in row 3.
  */
-extern "C" void cMeshAnimFrame_update(cMeshAnimFrame* self)
+void cMeshAnimFrame::update()
 {
-    cAnimFrame_update(self);
+    cAnimFrame_update(this);
     float rotRad[3];
     float sc[3][2];
-    rotRad[0] = -self->Vals[3] * 0.01745329424738884f;
-    rotRad[1] = -self->Vals[4] * 0.01745329424738884f;
-    rotRad[2] = -self->Vals[5] * 0.01745329424738884f;
+    rotRad[0] = -Vals[3] * 0.01745329424738884f;
+    rotRad[1] = -Vals[4] * 0.01745329424738884f;
+    rotRad[2] = -Vals[5] * 0.01745329424738884f;
     fSinCos(&sc[0][0], &sc[0][1], rotRad[0]);
     fSinCos(&sc[1][0], &sc[1][1], rotRad[1]);
     fSinCos(&sc[2][0], &sc[2][1], rotRad[2]);
@@ -415,22 +415,22 @@ extern "C" void cMeshAnimFrame_update(cMeshAnimFrame* self)
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;
-    self->FrameMatrix.row[0].x = cy * cz;
-    self->FrameMatrix.row[0].y = -cy * sz;
-    self->FrameMatrix.row[0].z = sy;
-    self->FrameMatrix.row[0].w = 0.0f;
-    self->FrameMatrix.row[1].x = sxsy * cz + cxsz;
-    self->FrameMatrix.row[1].y = cx * cz - sxsy * sz;
-    self->FrameMatrix.row[1].z = -sx * cy;
-    self->FrameMatrix.row[1].w = 0.0f;
-    self->FrameMatrix.row[2].x = sx * sz - cxsy * cz;
-    self->FrameMatrix.row[2].y = cxsz * sy + sx * cz;
-    self->FrameMatrix.row[2].z = cx * cy;
-    self->FrameMatrix.row[2].w = 0.0f;
-    self->FrameMatrix.row[3].x = self->Vals[0];
-    self->FrameMatrix.row[3].y = self->Vals[1];
-    self->FrameMatrix.row[3].z = self->Vals[2];
-    self->FrameMatrix.row[3].w = 1.0f;
+    FrameMatrix.row[0].x = cy * cz;
+    FrameMatrix.row[0].y = -cy * sz;
+    FrameMatrix.row[0].z = sy;
+    FrameMatrix.row[0].w = 0.0f;
+    FrameMatrix.row[1].x = sxsy * cz + cxsz;
+    FrameMatrix.row[1].y = cx * cz - sxsy * sz;
+    FrameMatrix.row[1].z = -sx * cy;
+    FrameMatrix.row[1].w = 0.0f;
+    FrameMatrix.row[2].x = sx * sz - cxsy * cz;
+    FrameMatrix.row[2].y = cxsz * sy + sx * cz;
+    FrameMatrix.row[2].z = cx * cy;
+    FrameMatrix.row[2].w = 0.0f;
+    FrameMatrix.row[3].x = Vals[0];
+    FrameMatrix.row[3].y = Vals[1];
+    FrameMatrix.row[3].z = Vals[2];
+    FrameMatrix.row[3].w = 1.0f;
 }
 #endif
 
@@ -912,7 +912,7 @@ extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, vo
     }
     self->model->flags = (self->model->flags & ~2u) | 4u;
     self->model->flags &= ~0x60u;
-    cMeshAnimNode_init((cMeshAnimNode*)self);
+    ((cMeshAnimNode*)self)->init();
     return self;
 }
 #endif
@@ -1060,11 +1060,10 @@ static inline void AddEq_352230(t4Vector& d, const t4Vector& b)
  * vector. Then Vel = InitVel (+0x3A0) * cAppMan_TheAppMan +0x14 plus a random per-axis term up to Disperse (+0x390)
  * with random sign, divided by the frame rate.
  *
- * @param debris  the mesh-anim node
  */
-extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
+void cMeshAnimNode::init()
 {
-    cMeshAnimNode* self = debris;
+    cMeshAnimNode* self = this;
     tModelRecord* modelDef = (tModelRecord*)self->Instance->m_Model;
     for (int i = 0; i < modelDef->m_iNumMeshes; i++) {
         self->Angle[i] = self->AngVel * randRange_352230(0.5f, 1.0f);

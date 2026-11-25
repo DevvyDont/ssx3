@@ -22,6 +22,8 @@
 
 struct cLightInst;
 
+struct tLightRecord;
+
 struct cPS2LightMan {
     // --- cLightMan
     void** mVtbl;                    // 0x00 [R] cLightMan_vtbl (cPSPLightMan ctor), cPS2LightMan_vtbl (cLightMan_construct)
@@ -31,6 +33,19 @@ struct cPS2LightMan {
     int m_iStartDynLight;            // 0x08 [O]; [R] Init: = n (the static light count); [U] GetDynamicLight adds it
     int m_iDynLight;                 // 0x0C [O]; [R] Init: = 0; [U] ResetDynamicLights = 0, GetDynamicLight post-increments it
     int m_iMaxLights;                // 0x10 [O]; [R] Init: = n + 50
+
+    // Methods bound to their retail symbols by asm labels.
+    void* GetLightObj(int index) __asm__("cPS2LightMan_GetLightObj__FPvi");
+    void Init(int numLights) __asm__("cPS2LightMan_Init");
+    void Purge() __asm__("cPS2LightMan_Purge");
+    void ResetDynamicLights() __asm__("cPS2LightMan_ResetDynamicLights__FPv");
+    int GetDynamicLight() __asm__("cPS2LightMan_GetDynamicLight");
+    void CreateLights(tLightRecord* lights, int n, int base) __asm__("cPS2LightMan_CreateLights");
+    void CreateAmbient(int light, int colour, float intensity) __asm__("cPS2LightMan_CreateAmbient");
+    void CreateDirectional(int light, int colour, int dir, float intensity) __asm__("cPS2LightMan_CreateDirectional");
+    void CreatePoint(int light, int colour, int pos, float intensity, int decay) __asm__("cPS2LightMan_CreatePoint");
+    void CreateSpot(int light, int colour, int pos, int dir, float x, float y, int decay, float z)
+        __asm__("cPS2LightMan_CreateSpot");
 };
 
 CHECK_OFFSET(cPS2LightMan, mVtbl, 0x00);

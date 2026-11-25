@@ -107,6 +107,8 @@ CHECK_OFFSET(tMakeFloatRailData, ForceScale, 0x50);
 CHECK_OFFSET(tMakeFloatRailData, unk_054, 0x54);
 CHECK_SIZE(tMakeFloatRailData, 0x58);
 
+struct cBxReplayFrame;
+
 struct cFloatRailNode : public cFlexRailNode {
     // cFlexRailNode (object/flexrailnode.h, 0x60): the vptr at 0x0C:
     //   [R] cFloatRailNode_vtbl in both ctors and the dtor (after cFlexRailNode's own); [P]
@@ -129,6 +131,10 @@ struct cFloatRailNode : public cFlexRailNode {
                                     //      "FloatRailNodes"), dtor frees it; [U] every method walks it (lw 0x70);
                                     //      getMesh returns Nodes[seg].Mesh
     char unk_074[0xC];              // 0x074 tail padding to the 16-byte-aligned size 0x80 (never accessed)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFloatRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFloatRailNode_cFloatRailNode1");
+    void getPosition(tFloatRailNode* node) __asm__("cFloatRailNode_getPosition");
 };
 
 CHECK_OFFSET(cFloatRailNode, LSpring, 0x060);

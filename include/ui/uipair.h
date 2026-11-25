@@ -24,6 +24,8 @@ struct tAttrPair {
 
 CHECK_SIZE(tAttrPair, 0x2);
 
+struct cUIThing;
+
 struct cUIPair : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIPair_vtbl D_00494868 (createObjectByStruct, cUIPair_cUIPair1, cUIPair_cUIPair, the dtor)
@@ -38,6 +40,14 @@ struct cUIPair : public cUIThing {
                                      //       cUIPair_destroyPair, setActive/setVisible/setFocus, traverseRecurse, render2D, update
     cUIThing* mpWidget;              // 0x07C [O]; [R] = 0, then the second child (its mAttr bit 0 cleared);
                                      //       [U] cUIPair_getWidget getWidget (lw), cUIPair_setWidget setWidget; the same methods
+
+    // Methods bound to their retail symbols by asm labels.
+    void destroyPair() __asm__("cUIPair_destroyPair");
+    void* cUIPair1() __asm__("cUIPair_cUIPair1");
+    int getEntry() __asm__("cUIPair_getEntry");
+    void setEntry(cUIThing* obj) __asm__("cUIPair_setEntry");
+    int getWidget() __asm__("cUIPair_getWidget");
+    void setWidget(cUIThing* obj) __asm__("cUIPair_setWidget");
 };
 
 CHECK_OFFSET(cUIPair, mAttrPair, 0x074);

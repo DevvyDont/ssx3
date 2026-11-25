@@ -53,6 +53,14 @@ struct cPathSys {
     int getTrackPath(int pathIndex) __asm__("cPathSys_getTrackPath");
     int getAIPath(int index) __asm__("cPathSys_getAIPath");
     int getNearTrackPaths(float* pos, cTrackPath** out, int max) __asm__("cPathSys_getNearTrackPaths");
+    int loadTrackPaths(char* data) __asm__("cPathSys_loadTrackPaths");
+    int loadAIPaths(char* data) __asm__("cPathSys_loadAIPaths");
+    int getTrackPathIndex(cTrackPath* entry) __asm__("cPathSys_getTrackPathIndex");
+    int getAIPathIndex(cAIPath* entry) __asm__("cPathSys_getAIPathIndex");
+    int isStartpoint(int type, int startpointId) __asm__("cPathSys_isStartpoint");
+    int getStartpointByIndex(int index) __asm__("cPathSys_getStartpointByIndex");
+    int loadCheckpoints(char* cursor) __asm__("cPathSys_loadCheckpoints");
+    int loadStartpoints(char* cursor) __asm__("cPathSys_loadStartpoints");
 };
 
 CHECK_OFFSET(cPathSys, NumStartpoints, 0x000);

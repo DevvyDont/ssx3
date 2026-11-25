@@ -61,6 +61,8 @@ CHECK_OFFSET(tMakeConveyorData, Rotate7, 0x2C);
 CHECK_OFFSET(tMakeConveyorData, unk_030, 0x30);
 CHECK_SIZE(tMakeConveyorData, 0x34);
 
+struct cBxReplayFrame;
+
 struct cConveyorNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cConveyorNode_vtbl (0x00490570) in both ctors and the dtor; [P] 0xC; [U] updateIntersectInfo calls slot 24
@@ -79,6 +81,9 @@ struct cConveyorNode : public cInstanceNode {
                                     //      sdl/sdr); [P] 0x38 / 0x3C; [U] update adds it to UV (lwc1)
     float UV[2];                    // 0x40 [O] t2Vector; [R] ctor 0 (sw $0); [P] 0x40 / 0x44; [U] update advances and
                                     //      wraps it (lwc1/swc1), render puts it in the draw matrix's position row
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cConveyorNode1(void* bucket, cBxReplayFrame* stream) __asm__("cConveyorNode_cConveyorNode1");
 };
 
 CHECK_OFFSET(cConveyorNode, Vel, 0x1C);

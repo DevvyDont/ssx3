@@ -44,6 +44,15 @@ struct cVidEngine {
                                 //      and calls cCutSceneTransitionMan_ForceToCutSceneMode
     void** mVtbl;               // 0x18 [R] cVidEngine_cVidEngine and cVidEngine__cVidEngine store cVidEngine_vtbl
                                 //      (D_00482228); cSSXScriptEngine overwrites it with D_004821A0; [P] preview 0x10
+
+    // Methods bound to their retail symbols by asm labels.
+    int IsVideoEnginePlaying() __asm__("cVidEngine_IsVideoEnginePlaying");
+    void ResetVideoEngine() __asm__("cVidEngine_ResetVideoEngine");
+    int PlayVideo() __asm__("cVidEngine_PlayVideo");
+    void UpdateVideo() __asm__("cVidEngine_UpdateVideo");
+    void RenderVideo() __asm__("cVidEngine_RenderVideo");
+    void PauseVideo(int inc) __asm__("cVidEngine_PauseVideo");
+    int IsVideoOnLastFrame() __asm__("cVidEngine_IsVideoOnLastFrame");
 };
 
 CHECK_OFFSET(cVidEngine, mpPlayer, 0x00);

@@ -30,12 +30,12 @@ INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
  *
  * @return mp_Hdr->m_uiNumSections, or 0 when there is no section table
  */
-int cWorldView_getNumSections(cWorldView* self)
+int cWorldView::getNumSections()
 {
-    if (self->mp_Hdr == 0) {
+    if (mp_Hdr == 0) {
         return 0;
     }
-    return self->mp_Hdr->m_uiNumSections;
+    return mp_Hdr->m_uiNumSections;
 }
 #endif
 
@@ -48,13 +48,13 @@ INCLUDE_ASM("world/worldview", cWorldView_getSectionName);
  * @param i  section id
  * @return the 0x58-byte section record, or 0 when there is no header or i is out of range
  */
-extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i)
+void* cWorldView::getSectionName(unsigned int i)
 {
-    tStreamDataHeader* list = self->mp_Hdr;
+    tStreamDataHeader* list = mp_Hdr;
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
         return 0;
     }
-    return (char*)&self->mp_Section[i];
+    return (char*)&mp_Section[i];
 }
 #endif
 
@@ -68,12 +68,12 @@ INCLUDE_ASM("world/worldview", cWorldView_isSectionLoaded__FP10cWorldViewi);
  * @param section  section id
  * @return 1 when loaded, 0 otherwise (also for an out-of-range id)
  */
-int cWorldView_isSectionLoaded(cWorldView* self, int section)
+int cWorldView::isSectionLoaded(int section)
 {
-    if (self->mp_Hdr == 0 || (unsigned int)section >= (unsigned int)self->mp_Hdr->m_uiNumSections) {
+    if (mp_Hdr == 0 || (unsigned int)section >= (unsigned int)mp_Hdr->m_uiNumSections) {
         return 0;
     }
-    return (unsigned int)(self->mp_SectionState[section].state - 5) < 2;
+    return (unsigned int)(mp_SectionState[section].state - 5) < 2;
 }
 #endif
 
@@ -86,13 +86,13 @@ INCLUDE_ASM("world/worldview", cWorldView_isSectionUnLoaded);
  * @param i  section id
  * @return 1 when unloaded, 0 otherwise (also for an out-of-range id)
  */
-extern "C" int cWorldView_isSectionUnLoaded(cWorldView* self, unsigned int i)
+int cWorldView::isSectionUnLoaded(unsigned int i)
 {
-    tStreamDataHeader* list = self->mp_Hdr;
+    tStreamDataHeader* list = mp_Hdr;
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
         return 0;
     }
-    return self->mp_SectionState[i].state == 0;
+    return mp_SectionState[i].state == 0;
 }
 #endif
 
@@ -110,16 +110,16 @@ INCLUDE_ASM("world/worldview", cWorldView_loadSection);
  * @param value  load priority (On Tour fPriority)
  * @return 0 when the section is in state 4, else 1
  */
-extern "C" int cWorldView_loadSection(cWorldView* self, unsigned int idx, float value)
+int cWorldView::loadSection(unsigned int idx, float value)
 {
-    if (self->mp_Hdr != 0 && idx < self->mp_Hdr->m_uiNumSections) {
-        self->mp_SectionState[idx].priority = value;
-        switch (self->mp_SectionState[idx].state) {
+    if (mp_Hdr != 0 && idx < mp_Hdr->m_uiNumSections) {
+        mp_SectionState[idx].priority = value;
+        switch (mp_SectionState[idx].state) {
         case 0:
-            self->mp_SectionState[idx].state = 1;
+            mp_SectionState[idx].state = 1;
             break;
         case 3:
-            self->mp_SectionState[idx].state = 5;
+            mp_SectionState[idx].state = 5;
             break;
         case 4:
             return 0;
@@ -145,17 +145,17 @@ INCLUDE_ASM("world/worldview", cWorldView_unloadSection);
  * @param idx  the section id
  * @return 0 while the section is loading, else 1
  */
-extern "C" int cWorldView_unloadSection(cWorldView* self, unsigned int idx)
+int cWorldView::unloadSection(unsigned int idx)
 {
-    if (self->mp_Hdr != 0 && idx < self->mp_Hdr->m_uiNumSections) {
-        switch (self->mp_SectionState[idx].state) {
+    if (mp_Hdr != 0 && idx < mp_Hdr->m_uiNumSections) {
+        switch (mp_SectionState[idx].state) {
         case 2:
             return 0;
         case 5: case 6:
-            self->mp_SectionState[idx].state = 3;
+            mp_SectionState[idx].state = 3;
             break;
         case 1:
-            self->mp_SectionState[idx].state = 0;
+            mp_SectionState[idx].state = 0;
             break;
         case 0: case 3: case 4:
             break;
@@ -177,14 +177,14 @@ extern "C" void cWorldCache_activateSectionPatches(void* world, unsigned int i);
  * @param i  section id
  * @return 1 if the section is now active (or already was), 0 if it is not loaded or the id is out of range
  */
-extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
+int cWorldView::activateSection(unsigned int i)
 {
-    tStreamDataHeader* list = self->mp_Hdr;
+    tStreamDataHeader* list = mp_Hdr;
     if (list != 0 && i < (unsigned int)list->m_uiNumSections) {
-        int st = self->mp_SectionState[i].state;
+        int st = mp_SectionState[i].state;
         if (st == 5) {
-            self->mp_SectionState[i].state = 6;
-            cWorldCache_activateSectionPatches(self->mp_WorldCache, i);
+            mp_SectionState[i].state = 6;
+            cWorldCache_activateSectionPatches(mp_WorldCache, i);
             return 1;
         } else if (st == 6) {
             return 1;
@@ -205,11 +205,11 @@ INCLUDE_ASM("world/worldview", cWorldView_deactivateSection);
  * @param idx  the section id
  * @return 1 for a valid index, else 0
  */
-extern "C" int cWorldView_deactivateSection(cWorldView* self, unsigned int idx)
+int cWorldView::deactivateSection(unsigned int idx)
 {
-    if (self->mp_Hdr != 0 && idx < (unsigned int)self->mp_Hdr->m_uiNumSections) {
-        if (self->mp_SectionState[idx].state == 6) {
-            self->mp_SectionState[idx].state = 5;
+    if (mp_Hdr != 0 && idx < (unsigned int)mp_Hdr->m_uiNumSections) {
+        if (mp_SectionState[idx].state == 6) {
+            mp_SectionState[idx].state = 5;
         }
         return 1;
     }
@@ -239,9 +239,9 @@ INCLUDE_ASM("world/worldview", cWorldView_getHull);
  * @param uiIdx  hull index (no range check)
  * @return the 0x44-byte hull (On Tour const tBxBSPHull*)
  */
-extern "C" void* cWorldView_getHull(cWorldView* self, int uiIdx)
+void* cWorldView::getHull(int uiIdx)
 {
-    return (char*)&self->mp_Hulls[uiIdx];
+    return (char*)&mp_Hulls[uiIdx];
 }
 #endif
 
@@ -255,10 +255,9 @@ INCLUDE_ASM("world/worldview", cWorldView_getNumHull__FPv);
  *
  * @return the hull count
  */
-int cWorldView_getNumHull(void* vself)
+int cWorldView::getNumHull()
 {
-    cWorldView* self = (cWorldView*)vself;
-    return (int)self->mp_Hdr->m_uiNumBSPHulls;
+    return (int)mp_Hdr->m_uiNumBSPHulls;
 }
 #endif
 
@@ -275,25 +274,24 @@ extern void cWorldView_recursiveIsValid_9AC0(void* self, int sec, int box, int* 
  * First section 0's own hull page (m_BSP.m_iGlobalHull) must be loaded when it has chunks; then each Active section's
  * tree is searched with cWorldView_recursiveIsValid. No C caller in the source.
  *
- * @param vself  the cWorldView
  * @param box  the box (minimum and maximum corners)
  * @return 1 when all those pages are loaded
  */
-extern "C" int cWorldView_isBoxValid(cWorldView* vself, int box)
+int cWorldView::isBoxValid(int box)
 {
-    tBxSection* cur = vself->mp_Section;
+    tBxSection* cur = mp_Section;
     int ok;
     unsigned i;
     int off = cur->m_BSP.m_iGlobalHull;
     off *= 68;
-    if (*(unsigned short*)(off + (int)vself->mp_Hulls) != 0) {
-        if (cWorldCache_isPageLoaded(vself->mp_WorldCache, cur->m_BSP.m_iGlobalHull) == 0)
+    if (*(unsigned short*)(off + (int)mp_Hulls) != 0) {
+        if (cWorldCache_isPageLoaded(mp_WorldCache, cur->m_BSP.m_iGlobalHull) == 0)
             return 0;
     }
     ok = 1;
-    for (i = 0; i < ((cWorldView*)vself)->mp_Hdr->m_uiNumSections; i++) {
-        if (vself->mp_SectionState[i].state == 6)
-            cWorldView_recursiveIsValid_9AC0(((char*)vself), (int)vself->mp_Section[i].m_BSP.m_pRoot, box, &ok);
+    for (i = 0; i < ((cWorldView*)this)->mp_Hdr->m_uiNumSections; i++) {
+        if (mp_SectionState[i].state == 6)
+            cWorldView_recursiveIsValid_9AC0(((char*)this), (int)mp_Section[i].m_BSP.m_pRoot, box, &ok);
     }
     return ok;
 }
@@ -349,33 +347,32 @@ static inline int overlap_9BB8(const t4Vector* c, const tBxBSPNode* s)
  * node's first plane (+0x20) gives a negative dot with the box's minimum, the second (+0x54) when the second plane
  * (+0x30) does with its maximum. Stops once @p ok is 0.
  *
- * @param world  the cWorldView
  * @param sec  the tBxBSPNode
  * @param box  the box (minimum and maximum corners)
  * @param ok  set on entry; cleared when a page is missing
  */
-extern "C" void cWorldView_recursiveIsValid(cWorldView* world, tBxBSPNode* sec, t4Vector* box, int* ok)
+void cWorldView::recursiveIsValid(tBxBSPNode* sec, t4Vector* box, int* ok)
 {
     if (*ok == 0)
         return;
     if (!overlap_9BB8(box, sec))
         return;
     if (((sSecInfo_9BB8*)sec->m_pHull) != 0) {
-        if (cWorldCache_isPageLoaded(world->mp_WorldCache, ((sSecInfo_9BB8*)sec->m_pHull)->id) == 0) {
+        if (cWorldCache_isPageLoaded(mp_WorldCache, ((sSecInfo_9BB8*)sec->m_pHull)->id) == 0) {
             *ok = 0;
             return;
         }
     }
     if (sec->m_pInChild != 0) {
         if (Dot_9BB8((*(t4Vector*)&sec->m_v4SplitPlaneIn), box[0]) < 0.0f) {
-            cWorldView_recursiveIsValid(world, sec->m_pInChild, box, ok);
+            recursiveIsValid(sec->m_pInChild, box, ok);
             if (*ok == 0)
                 return;
         }
     }
     if (sec->m_pOutChild != 0) {
         if (Dot_9BB8((*(t4Vector*)&sec->m_v4SplitPlaneOut), box[1]) < 0.0f)
-            cWorldView_recursiveIsValid(world, sec->m_pOutChild, box, ok);
+            recursiveIsValid(sec->m_pOutChild, box, ok);
     }
 }
 #endif
@@ -396,22 +393,22 @@ extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self, tBxBSPNode* sect
  *
  * @param cam  the focus index (0 or 1)
  */
-extern "C" void cWorldView_refreshStreamFocus(cWorldView* self, int cam)
+void cWorldView::refreshStreamFocus(int cam)
 {
-    if (self->m_StreamFocus[cam].m_bActive != 0) {
+    if (m_StreamFocus[cam].m_bActive != 0) {
         int frame = cAppMan_TheAppMan->TimerTick;
-        float loadRadius = self->m_StreamFocus[cam].m_fLoadRadius;
-        self->m_StreamFocus[cam].m_fSafeRadius = loadRadius;
-        self->m_StreamFocus[cam].m_fSafeTestRadius = loadRadius;
+        float loadRadius = m_StreamFocus[cam].m_fLoadRadius;
+        m_StreamFocus[cam].m_fSafeRadius = loadRadius;
+        m_StreamFocus[cam].m_fSafeTestRadius = loadRadius;
         unsigned int i;
-        for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
-            int st = ((&self->mp_SectionState[0]))[i].state;
+        for (i = 0; i < (unsigned int)mp_Hdr->m_uiNumSections; i++) {
+            int st = ((&mp_SectionState[0]))[i].state;
             if (st == 5 || st == 6) {
-                cWorldView_recursiveTreeFocus(self, self->mp_Section[i].m_BSP.m_pRoot, cam, st == 6);
+                recursiveTreeFocus(mp_Section[i].m_BSP.m_pRoot, cam, st == 6);
             }
         }
-        self->m_StreamFocus[cam].m_iFocusTick = frame;
-        self->m_StreamFocus[cam].m_bFocusUpdate = 0;
+        m_StreamFocus[cam].m_iFocusTick = frame;
+        m_StreamFocus[cam].m_bFocusUpdate = 0;
     }
 }
 #endif
@@ -577,46 +574,45 @@ static inline int overlap_A028(const t4Vector* c, const tBxBSPNode* s)
  * the page is touched (cWorldCache_touchPage). Children are visited by the same plane tests as cWorldView_recursiveIsValid, against the focus
  * box.
  *
- * @param self_  the cWorldView
  * @param sec_  the tBxBSPNode
  * @param cam  the focus index
  * @param loaded  set for an Active section (updates the safe radius)
  */
-extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self_, tBxBSPNode* sec_, int cam, int loaded)
+void cWorldView::recursiveTreeFocus(tBxBSPNode* sec_, int cam, int loaded)
 {
-    if (!overlap_A028(&self_->m_StreamFocus[cam].m_FocusBox.MinPoint, sec_))
+    if (!overlap_A028(&m_StreamFocus[cam].m_FocusBox.MinPoint, sec_))
         return;
     if (sec_->m_pHull != 0) {
         float dist =
-            cWorldView_getDistanceToBox(self_, &self_->m_StreamFocus[cam].m_v4LoadPos, sec_, sec_->m_v4BoxMax.m);
-        float safeRadius = self_->m_StreamFocus[cam].m_fSafeRadius;
+            cWorldView_getDistanceToBox(this, &m_StreamFocus[cam].m_v4LoadPos, sec_, sec_->m_v4BoxMax.m);
+        float safeRadius = m_StreamFocus[cam].m_fSafeRadius;
         float w;
         if (dist < 0.0f) {
             w = 0.800000011920929f;
-            if (cWorldCache_isPageLoaded(self_->mp_WorldCache, sec_->m_pHull->m_uiHullIndex) == 0)
+            if (cWorldCache_isPageLoaded(mp_WorldCache, sec_->m_pHull->m_uiHullIndex) == 0)
                 safeRadius = 0.0f;
         } else {
-            if (self_->m_StreamFocus[cam].m_fLoadRadius < dist)
+            if (m_StreamFocus[cam].m_fLoadRadius < dist)
                 return;
-            w = (1.0f - dist / self_->m_StreamFocus[cam].m_fLoadRadius) * 0.800000011920929f;
+            w = (1.0f - dist / m_StreamFocus[cam].m_fLoadRadius) * 0.800000011920929f;
             if (dist < safeRadius) {
-                if (cWorldCache_isPageLoaded(self_->mp_WorldCache, sec_->m_pHull->m_uiHullIndex) == 0)
+                if (cWorldCache_isPageLoaded(mp_WorldCache, sec_->m_pHull->m_uiHullIndex) == 0)
                     safeRadius = dist;
             }
         }
         if (loaded)
-            self_->m_StreamFocus[cam].m_fSafeRadius = safeRadius;
-        if (safeRadius < self_->m_StreamFocus[cam].m_fSafeTestRadius)
-            self_->m_StreamFocus[cam].m_fSafeTestRadius = safeRadius;
-        cWorldCache_touchPage(self_->mp_WorldCache, sec_->m_pHull->m_uiHullIndex, w);
+            m_StreamFocus[cam].m_fSafeRadius = safeRadius;
+        if (safeRadius < m_StreamFocus[cam].m_fSafeTestRadius)
+            m_StreamFocus[cam].m_fSafeTestRadius = safeRadius;
+        cWorldCache_touchPage(mp_WorldCache, sec_->m_pHull->m_uiHullIndex, w);
     }
     if (sec_->m_pInChild != 0) {
-        if (Dot_A028((*(t4Vector*)&sec_->m_v4SplitPlaneIn), self_->m_StreamFocus[cam].m_FocusBox.MinPoint) < 0.0f)
-            cWorldView_recursiveTreeFocus(self_, sec_->m_pInChild, cam, loaded);
+        if (Dot_A028((*(t4Vector*)&sec_->m_v4SplitPlaneIn), m_StreamFocus[cam].m_FocusBox.MinPoint) < 0.0f)
+            recursiveTreeFocus(sec_->m_pInChild, cam, loaded);
     }
     if (sec_->m_pOutChild != 0) {
-        if (Dot_A028((*(t4Vector*)&sec_->m_v4SplitPlaneOut), self_->m_StreamFocus[cam].m_FocusBox.MaxPoint) < 0.0f)
-            cWorldView_recursiveTreeFocus(self_, sec_->m_pOutChild, cam, loaded);
+        if (Dot_A028((*(t4Vector*)&sec_->m_v4SplitPlaneOut), m_StreamFocus[cam].m_FocusBox.MaxPoint) < 0.0f)
+            recursiveTreeFocus(sec_->m_pOutChild, cam, loaded);
     }
 }
 #endif
@@ -729,11 +725,11 @@ public:
  * @return always 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveModel(cChunkResolve* self, tModelRecord* pModel)
+int cChunkResolve::resolveModel(tModelRecord* pModel)
 {
     *(int*)&pModel->m_MeshHeirarchy += (int)pModel;
     *(int*)&pModel->m_MaterialBlock += (int)pModel;
-    ((cChunkResolve_resolveModel_cObj*)self)->resolveModelHeirarchy(pModel);
+    ((cChunkResolve_resolveModel_cObj*)this)->resolveModelHeirarchy(pModel);
     return 1;
 }
 #endif
@@ -772,7 +768,7 @@ extern t4Matrix t4mat_Identity;
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, tModelRecord* pModel)
+int cChunkResolve::resolveModelHeirarchy(tModelRecord* pModel)
 {
     int n = pModel->m_iNumMeshes;
     tMeshHeirarchyRecord* meshHierarchy = pModel->m_MeshHeirarchy;
@@ -780,7 +776,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, tModelRe
     for (i = 0; i < n; i++, meshHierarchy++) {
         if (((int)meshHierarchy->m_Mesh) != 0) {
             (*(int*)&meshHierarchy->m_Mesh) += (int)pModel;
-            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveMesh((void*)((int)meshHierarchy->m_Mesh), pModel);
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)this)->resolveMesh((void*)((int)meshHierarchy->m_Mesh), pModel);
         }
         if (((unsigned int)meshHierarchy->m_pMeshMatrix) == 0xFFFFFFFF) {
             (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) = (unsigned int)&t4mat_Identity;
@@ -789,7 +785,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, tModelRe
         }
         if (((int)meshHierarchy->m_MeshAnim) != 0) {
             (*(int*)&meshHierarchy->m_MeshAnim) += (int)pModel;
-            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveAnimation((void*)((int)meshHierarchy->m_MeshAnim), pModel);
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)this)->resolveAnimation((void*)((int)meshHierarchy->m_MeshAnim), pModel);
         }
     }
     return 1;
@@ -824,13 +820,13 @@ public:
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMesh(cChunkResolve* self, tMeshRecord* pMesh, int base)
+int cChunkResolve::resolveMesh(tMeshRecord* pMesh, int base)
 {
     int i = 0;
     int* contextEntry = (int*)(*(int*)&pMesh->m_pContexts += base);
     for (; i < pMesh->m_iNumContexts; i++) {
         *contextEntry += base;
-        ((cChunkResolve_resolveMesh_cObj*)self)->resolveMeshContext((void*)*contextEntry++, base);
+        ((cChunkResolve_resolveMesh_cObj*)this)->resolveMeshContext((void*)*contextEntry++, base);
     }
     return 1;
 }
@@ -869,10 +865,10 @@ public:
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve* self, tParticleModelRecord* pModel)
+int cChunkResolve::resolveParticleModel(tParticleModelRecord* pModel)
 {
     *(int*)&pModel->m_ParticleMeshHeirarchy += (int)pModel;
-    ((cChunkResolve_resolveParticleModel_cObj*)self)->resolveParticleModelHeirarchy(pModel);
+    ((cChunkResolve_resolveParticleModel_cObj*)this)->resolveParticleModelHeirarchy(pModel);
     return 1;
 }
 #endif
@@ -916,7 +912,7 @@ extern t4Matrix t4mat_Identity;
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, tParticleModelRecord* pModel)
+int cChunkResolve::resolveParticleModelHeirarchy(tParticleModelRecord* pModel)
 {
     int n = pModel->m_iNumParticleMeshes;
     tParticleMeshHeirarchyRecord* meshHierarchy = (tParticleMeshHeirarchyRecord*)pModel->m_ParticleMeshHeirarchy;
@@ -924,7 +920,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, 
     for (i = 0; i < n; i++, meshHierarchy++) {
         if (((int)meshHierarchy->m_ParticleMesh) != 0) {
             (*(int*)&meshHierarchy->m_ParticleMesh) += (int)pModel;
-            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveParticleMesh((void*)((int)meshHierarchy->m_ParticleMesh));
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)this)->resolveParticleMesh((void*)((int)meshHierarchy->m_ParticleMesh));
         }
         if (((unsigned int)meshHierarchy->m_pParticleMeshMatrix) == 0xFFFFFFFF) {
             (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) = (unsigned int)&t4mat_Identity;
@@ -933,7 +929,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, 
         }
         if (((int)meshHierarchy->m_ParticleMeshAnim) != 0) {
             (*(int*)&meshHierarchy->m_ParticleMeshAnim) += (int)pModel;
-            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveAnimation((void*)((int)meshHierarchy->m_ParticleMeshAnim), 0);
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)this)->resolveAnimation((void*)((int)meshHierarchy->m_ParticleMeshAnim), 0);
         }
     }
     return 1;
@@ -951,7 +947,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleMesh);
  * @param pMesh  the particle mesh record (On Tour pMesh)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveParticleMesh(cChunkResolve* self, tParticleMeshRecord* pMesh)
+int cChunkResolve::resolveParticleMesh(tParticleMeshRecord* pMesh)
 {
     *(int*)&pMesh->m_ParticleVolumes += (int)pMesh;
     return 1;
@@ -972,10 +968,10 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleInstance);
  * @return 1
  */
 // PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleInstance(cChunkResolve* self, tParticleInstanceRecord* pInstance)
+int cChunkResolve::resolveParticleInstance(tParticleInstanceRecord* pInstance)
 {
     unsigned int resourceId = (unsigned int)pInstance->m_Model;
-    cWorldCacheTable* sec = self->mp_World->m_pWorldCache->m_pSectionCacheTable[resourceId & 0xFF];
+    cWorldCacheTable* sec = mp_World->m_pWorldCache->m_pSectionCacheTable[resourceId & 0xFF];
     void* res;
     unsigned int i;
     // m_pCacheTable[4]: kBxStreamData_ParticleModel
@@ -1003,7 +999,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterial);
  * @return 1
  */
 // PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMaterial(cChunkResolve* self, tMaterialRecord* pMaterial)
+int cChunkResolve::resolveMaterial(tMaterialRecord* pMaterial)
 {
     if (pMaterial->m_TextureFlip.m_iTextureFlip == -1) {
         pMaterial->m_TextureFlip.m_iTextureFlip = 0;
@@ -1029,7 +1025,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterialBlocks);
  * @return 1
  */
 // PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMaterialBlocks(cChunkResolve* self, int n, int* data)
+int cChunkResolve::resolveMaterialBlocks(int n, int* data)
 {
     int blockIndex;
     for (blockIndex = 0; blockIndex < n; blockIndex++) {
@@ -1039,7 +1035,7 @@ extern "C" int cChunkResolve_resolveMaterialBlocks(cChunkResolve* self, int n, i
         unsigned int* hp = (unsigned int*)(data + 1);
         for (j = 0; j < *data; j++, hp++) {
             unsigned int materialId = *hp;
-            cWorldCacheTable* sec = self->mp_World->m_pWorldCache->m_pSectionCacheTable[materialId & 0xFF];
+            cWorldCacheTable* sec = mp_World->m_pWorldCache->m_pSectionCacheTable[materialId & 0xFF];
             void* res;
             unsigned int i;
             // m_pCacheTable[0]: kBxStreamData_Material
@@ -1088,13 +1084,13 @@ public:
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveAnimation(cChunkResolve* self, tAnimRecord* pAnimation, int base)
+int cChunkResolve::resolveAnimation(tAnimRecord* pAnimation, int base)
 {
     int i = 0;
     int* channelId = (int*)(*(int*)&pAnimation->m_pChannels += base);
     for (; i < pAnimation->m_NumChannels; i++) {
         *channelId += base;
-        ((cChunkResolve_resolveAnimation_cObj*)self)->resolveChannel((void*)*channelId++, base);
+        ((cChunkResolve_resolveAnimation_cObj*)this)->resolveChannel((void*)*channelId++, base);
     }
     return 1;
 }
@@ -1112,7 +1108,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveChannel);
  * @param pBase  address the offset is relative to (On Tour pBase)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveChannel(cChunkResolve* self, tChannelRecord* pChannel, int pBase)
+int cChunkResolve::resolveChannel(tChannelRecord* pChannel, int pBase)
 {
     *(int*)&pChannel->m_Segments += pBase;
     return 1;
@@ -1134,10 +1130,10 @@ static inline tModelRecord *conv_A8F0(unsigned i) { if (i == 0) return 0; return
  * @return always 1
  */
 // Resolves the node's object handle (0x80) to its object pointer and caches the object's 0xC field.
-extern "C" int cChunkResolve_resolveInstance(cChunkResolve* self, tInstanceRecord* node)
+int cChunkResolve::resolveInstance(tInstanceRecord* node)
 {
     unsigned id = (unsigned int)node->m_Model;
-    cWorldCacheTable *section = self->mp_World->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    cWorldCacheTable *section = mp_World->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
     unsigned i;
     tModelRecord *resolved;
     if (!section)
@@ -1169,7 +1165,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveSpline);
  * @return 1
  */
 // PORT: the link fields hold -1 or an index before the fix-up (tested as ints); not 64-bit safe.
-extern "C" int cChunkResolve_resolveSpline(cChunkResolve* self, tSplineRecord* list)
+int cChunkResolve::resolveSpline(tSplineRecord* list)
 {
     int i;
     int count = list->m_iNumSegments;
@@ -1224,7 +1220,7 @@ extern "C" int bxSphereTree_Load(void* self, char* data, void* ctx);
  * @param pCollideModel  the collision model record (On Tour pCollideModel)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx, tCollideModelRecord* pCollideModel)
+int cChunkResolve::resolveCollideModel(void* ctx, tCollideModelRecord* pCollideModel)
 {
     // ORIGINAL-PTR: the loaded record (a file blob) holds byte offsets from itself in m_pColData / m_pPolyModelList /
     // m_pSphTree, and each tPolyModelMesh byte offsets from itself in its four arrays; they are made absolute here
@@ -1292,7 +1288,7 @@ float getHaloRadius_f(int flags) __asm__("getHaloRadius__FPv");
  * @param obj  the halo record (On Tour pLightHalo)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveHalo(cChunkResolve* self, tHaloRecord* obj)
+int cChunkResolve::resolveHalo(tHaloRecord* obj)
 {
     float haloRadius = getHaloRadius_f(((int)obj->m_iFlags) & 0x70);
     (*(int*)&obj->m_fOcclude[1]) = 0;
@@ -1319,7 +1315,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveLight);
  * @param obj  the light record (On Tour pRTLight)
  * @return 1 when the light is used, else 0
  */
-extern "C" int cChunkResolve_resolveLight(cChunkResolve* self, tLightRecord* obj)
+int cChunkResolve::resolveLight(tLightRecord* obj)
 {
     if (obj->m_iFlags & 0x100) {
         return 0;
@@ -1346,7 +1342,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_unresolveLight);
  * @param pRTLight  the light record (On Tour pRTLight)
  * @return 1 for a light of type 1 or 2 without flag 0x100, else 0
  */
-extern "C" int cChunkResolve_unresolveLight(cChunkResolve* self, tLightRecord* pRTLight)
+int cChunkResolve::unresolveLight(tLightRecord* pRTLight)
 {
     if (pRTLight->m_iFlags & 0x100) {
         return 0;
@@ -1378,7 +1374,7 @@ extern "C" float logf(float);
  * @param divisor  the threshold strength
  * @return the distance
  */
-extern "C" float cChunkResolve_calcMaxLightDistance(cChunkResolve* self, tLightRecord* light, float divisor)
+float cChunkResolve::calcMaxLightDistance(tLightRecord* light, float divisor)
 {
     float prod = light->m_fIntensity * light->m_fRGBIntensity;
     float ratio = prod / divisor;
@@ -1579,12 +1575,12 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
  * @param obj  the loaded data (On Tour pData)
  * @return @p obj
  */
-extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsigned int RID, char* obj)
+void* cPS2ChunkResolve::resolve(int msg, unsigned int RID, char* obj)
 {
     switch (msg) {
     case 1:
-        *(unsigned short*)(obj + 0x1A2) += self->m_iNumImages;
-        insert_AE68(self, 1, obj, 344);
+        *(unsigned short*)(obj + 0x1A2) += m_iNumImages;
+        insert_AE68(this, 1, obj, 344);
         break;
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
@@ -1593,50 +1589,50 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        (void*)w->AddTexture((const SHAPE*)obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
+        (void*)w->AddTexture((const SHAPE*)obj, str_strm_lpg, 0, 0, (RID >> 8) + m_iNumImages);
         break;
     }
     case 3:
-        CALL1_AE68(self, 104, obj);
-        insert_AE68(self, 0, obj, 0x60);
+        CALL1_AE68(this, 104, obj);
+        insert_AE68(this, 0, obj, 0x60);
         break;
     case 2:
-        CALL1_AE68(self, 40, obj);
+        CALL1_AE68(this, 40, obj);
         break;
     case 0:
-        CALL1_AE68(self, 72, obj);
+        CALL1_AE68(this, 72, obj);
         break;
     case 6:
-        if (CALL1_AE68(self, 168, obj)) {
+        if (CALL1_AE68(this, 168, obj)) {
             *(int*)(obj + 8) = 6;
-            insert_AE68(self, 2, obj, 68);
+            insert_AE68(this, 2, obj, 68);
         }
         break;
     case 7:
-        CALL1_AE68(self, 160, obj);
+        CALL1_AE68(this, 160, obj);
         *(int*)(obj + 8) = 8;
-        insert_AE68(self, 2, obj, 40);
+        insert_AE68(this, 2, obj, 40);
         break;
     case 8: {
-        CALL1_AE68(self, 144, obj);
+        CALL1_AE68(this, 144, obj);
         tSplineSegmentRecord* child = (tSplineSegmentRecord*)(*(char**)(obj + 0x24));
         for (int i = 0; i < *(int*)(obj + 0x20); i++) {
             child->m_iIntersect[2] = 1;
-            insert_AE68(self, 2, ((char*)child), 108);
+            insert_AE68(this, 2, ((char*)child), 108);
             child = (tSplineSegmentRecord*)child->m_NextSeg;
         }
         break;
     }
     case 5:
-        CALL1_AE68(self, 136, obj);
+        CALL1_AE68(this, 136, obj);
         *(int*)(obj + 8) = 7;
-        insert_AE68(self, 2, obj, 104);
+        insert_AE68(this, 2, obj, 104);
         break;
     case 4:
-        CALL1_AE68(self, 0x70, obj);
+        CALL1_AE68(this, 0x70, obj);
         break;
     case 12:
-        ((tMsg2_AE68)VT_AE68(self, 152)->fn)((char*)self + VT_AE68(self, 0x98)->delta, RID, obj);
+        ((tMsg2_AE68)VT_AE68(this, 152)->fn)((char*)this + VT_AE68(this, 0x98)->delta, RID, obj);
         break;
     case 13:
         cWorldSound_InitWorldAudioFile(*(void**)(cAudioInterface_getGame_AE68() + 0x4C), obj, RID);
@@ -1784,7 +1780,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * @param data  the chunk's data (On Tour pData)
  * @return @p data, or 0 for type 14
  */
-extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int msg, unsigned int resourceId, char* data)
+void* cPS2ChunkResolve::unresolve(unsigned int msg, unsigned int resourceId, char* data)
 {
     switch (msg) {
     case 0:
@@ -1792,7 +1788,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     case 1: {
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 344);
-        update_B498((char*)self->mp_Nash, 1, data, &box);
+        update_B498((char*)mp_Nash, 1, data, &box);
         break;
     }
     case 9: {
@@ -1802,13 +1798,13 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     }
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        ps2GraphicsMan->RemoveTexture((resourceId >> 8) + self->m_iNumImages);
+        ps2GraphicsMan->RemoveTexture((resourceId >> 8) + m_iNumImages);
         break;
     }
     case 3: {
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 0x60);
-        update_B498((char*)self->mp_Nash, 0, data, &box);
+        update_B498((char*)mp_Nash, 0, data, &box);
         break;
     }
     case 8: {
@@ -1820,7 +1816,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
                 *(int*)(node + 0x8) = one;
                 sWVBox_B498 box;
                 WV_MAKEBOX_B498(box, node, 108);
-                update_B498((char*)self->mp_Nash, 2, node, &box);
+                update_B498((char*)mp_Nash, 2, node, &box);
                 node = *(char**)(node + 0x64);
                 i++;
             } while (i < *(int*)(data + 0x20));
@@ -1828,12 +1824,12 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
         break;
     }
     case 6: {
-        sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
-        if (((int (*)(void*, void*))vt[22].fn)(vthis(self, vt[22]), data)) {
+        sVEntry<void>* vt = (sVEntry<void>*)mVtbl;
+        if (((int (*)(void*, void*))vt[22].fn)(vthis(this, vt[22]), data)) {
             *(int*)(data + 0x8) = 6;
             sWVBox_B498 box;
             WV_MAKEBOX_B498(box, data, 68);
-            update_B498((char*)self->mp_Nash, 2, data, &box);
+            update_B498((char*)mp_Nash, 2, data, &box);
         }
         break;
     }
@@ -1841,14 +1837,14 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
         *(int*)(data + 0x8) = 8;
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 40);
-        update_B498((char*)self->mp_Nash, 2, data, &box);
+        update_B498((char*)mp_Nash, 2, data, &box);
         break;
     }
     case 5: {
         *(int*)(data + 0x8) = 7;
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 104);
-        update_B498((char*)self->mp_Nash, 2, data, &box);
+        update_B498((char*)mp_Nash, 2, data, &box);
         break;
     }
     case 13:
@@ -1941,7 +1937,7 @@ static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve
  * @return always 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve* self, tModelRecord* pModel)
+int cPS2ChunkResolve::resolveModel(tModelRecord* pModel)
 {
     int i = 0;
     *(int*)&pModel->m_MeshHeirarchy += (int)pModel;
@@ -1949,11 +1945,11 @@ extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve* self, tModelRecor
     tMaterialBlockRecord* block = pModel->m_MaterialBlock;
     tMaterialRecord** entry = block->GetMaterialRecordList();
     for (; i < block->m_iNumMaterials; i++, entry++) {
-        *entry = (tMaterialRecord*)cPS2ChunkResolve_resolveModel_lookup(((cPS2ChunkResolve_resolveModel_cObj*)self),
+        *entry = (tMaterialRecord*)cPS2ChunkResolve_resolveModel_lookup(((cPS2ChunkResolve_resolveModel_cObj*)this),
                                                                          (unsigned int)*entry);
     }
-    ((cPS2ChunkResolve_resolveModel_cObj*)self)->resolveModelHeirarchy(pModel);
-    func_003ABF20(self, (cList*)pModel);
+    ((cPS2ChunkResolve_resolveModel_cObj*)this)->resolveModelHeirarchy(pModel);
+    func_003ABF20(this, (cList*)pModel);
     return 1;
 }
 #endif
@@ -2194,16 +2190,17 @@ static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveIns
  * @return always 1
  */
 // PORT: stores pointers in int fields; not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve* self, tInstanceRecord* pInstance)
+int cPS2ChunkResolve::resolveInstance(tInstanceRecord* pInstance)
 {
-    cPS2ChunkResolve_resolveInstance_sRes* resolved = cPS2ChunkResolve_resolveInstance_lookup(self, (unsigned int)pInstance->m_Model);
+    cPS2ChunkResolve_resolveInstance_sRes* resolved = cPS2ChunkResolve_resolveInstance_lookup(this,
+            (unsigned int)pInstance->m_Model);
     pInstance->m_Model = (tModelRecord*)resolved;
     pInstance->m_MaterialBlock = (tMaterialBlockRecord*)resolved->fC;
     pInstance->m_pInstanceAudio = 0;
-    pInstance->m_pCollideRecord = (tCollideRecord*)(self->m_pDummyCollideRecord);
-    int x = self->m_pDummyCollideRecord->InitFlags & 0xFFFF0000;
+    pInstance->m_pCollideRecord = (tCollideRecord*)(m_pDummyCollideRecord);
+    int x = m_pDummyCollideRecord->InitFlags & 0xFFFF0000;
     pInstance->m_iFlags = x | (x >> 16) | 2;
-    func_003AC358((cPS2ChunkResolve*)self, pInstance);
+    func_003AC358((cPS2ChunkResolve*)this, pInstance);
     return 1;
 }
 #endif

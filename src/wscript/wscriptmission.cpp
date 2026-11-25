@@ -95,11 +95,10 @@ static inline void setTab_3DE0(char* t, int c)
  * "square NML") and lays out the instruction texts "inst0".."inst2" around them. Called by the store's
  * uber-trick states (fe/festatestore).
  *
- * @param vself  the store state
  */
-extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
+void cFEStateUberTrick::updateTrickMenu()
 {
-    void* screen = cList_first((cList*)(&vself->mScreens));
+    void* screen = cList_first((cList*)(&mScreens));
     char* labels[9];
     char* marks[9];
     for (int i = 0; i < 9; i++) {
@@ -130,15 +129,15 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     int count;
     int cur;
     int slot = 1;
-    char* rider = *(char**)((char*)vself->mpMainMenu + 0xA0);
+    char* rider = *(char**)((char*)mpMainMenu + 0xA0);
     if (rider != 0)
         slot = *(signed char*)(rider + 0x18);
     int shown = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)func_0014FF90(iface, vself->mUserNum, slot, &count);
-    cur = cBEBAGTInterface_chooseUberVar(iface, vself->mUserNum, slot, 1);
+    sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)func_0014FF90(iface, mUserNum, slot, &count);
+    cur = cBEBAGTInterface_chooseUberVar(iface, mUserNum, slot, 1);
     for (int j = 0; j < count; j++) {
-        if (func_00150048(iface, vself->mUserNum, slot, j)) {
+        if (func_00150048(iface, mUserNum, slot, j)) {
             cUIThing* uiObj = (cUIThing*)labels[shown];
             if (((char*)uiObj) != 0) {
                 cUIText_setAsciiString((cUIText*)uiObj, gGetGrabName(tbl[j].name));
@@ -149,23 +148,23 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
             uiObj = (cUIThing*)marks[shown];
             if (((char*)uiObj) != 0) {
                 uiCall_3DE0(((char*)uiObj), 9, 1);
-                if (func_0014FFB8(iface, vself->mUserNum, slot, j))
-                    setHighlight_3DE0(((char*)uiObj), (int)vself->mpDollarSign);
+                if (func_0014FFB8(iface, mUserNum, slot, j))
+                    setHighlight_3DE0(((char*)uiObj), (int)mpDollarSign);
                 else if (cur == j)
-                    setHighlight_3DE0(((char*)uiObj), (int)vself->mpCheckmark);
+                    setHighlight_3DE0(((char*)uiObj), (int)mpCheckmark);
                 else
-                    setHighlight_3DE0(((char*)uiObj), (int)vself->mpCheckbox);
+                    setHighlight_3DE0(((char*)uiObj), (int)mpCheckbox);
             }
             shown++;
         }
     }
     int ca = 0;
     int cb = 0;
-    int iconL2 = lookup_3DE0(((char*)vself), str_bsl2);
-    int iconL1 = lookup_3DE0(((char*)vself), str_bsl1);
-    int iconR1 = lookup_3DE0(((char*)vself), str_bsr1);
-    int iconR2 = lookup_3DE0(((char*)vself), str_bsr2);
-    int iconSquare = lookup_3DE0(((char*)vself), str_square_NML);
+    int iconL2 = lookup_3DE0(((char*)this), str_bsl2);
+    int iconL1 = lookup_3DE0(((char*)this), str_bsl1);
+    int iconR1 = lookup_3DE0(((char*)this), str_bsr1);
+    int iconR2 = lookup_3DE0(((char*)this), str_bsr2);
+    int iconSquare = lookup_3DE0(((char*)this), str_square_NML);
     switch (slot) {
     case 1:
         ca = iconL1;
@@ -278,21 +277,22 @@ extern "C" const char* getDollarString(int id);
  * cFEStateUberTrick_onPopupEvent calls it after a trick is bought, cFEStateUberTrick_onWidgetEvent when a trick is
  * highlighted.
  */
-extern "C" void cFEStateUberTrick_updateTrickMenuEntry(cFEStateUberTrick* self)
+void cFEStateUberTrick::updateTrickMenuEntry()
 {
-    signed char categoryIndex = ((sWSMPlayer4520*)self->mpMainMenu)->rider->slot;
-    signed char trickIndex = ((sWSMPlayer4520*)self->mpTrickMenu)->rider->slot;
+    signed char categoryIndex = ((sWSMPlayer4520*)mpMainMenu)->rider->slot;
+    signed char trickIndex = ((sWSMPlayer4520*)mpTrickMenu)->rider->slot;
     char buf[16];
-    tBEUber* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->mUserNum, categoryIndex, buf);
-    void* screen = cList_first((cList*)((char*)&self->mScreens));
+    tBEUber* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), mUserNum, categoryIndex, buf);
+    void* screen = cList_first((cList*)((char*)&mScreens));
     cUIText* costText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costText != 0) {
         cUIText_setAsciiString(costText, getDollarString(tbl[trickIndex].cost));
     }
     cUIText* moneyText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (moneyText != 0) {
-        signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
-        cUIText_setAsciiString(moneyText, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, cid)));
+        signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
+        cUIText_setAsciiString(moneyText, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(),
+                11), mUserNum, cid)));
     }
 }
 #endif

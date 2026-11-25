@@ -135,6 +135,24 @@ struct cTransitionMan : public cObjNode {
                                     //       held; update/dtor release the grab (slot 60) and clear it
     int mRequestDeleteFrame;        // 0x80 [O]; [R] ctor 0; [U] EndTransition stores graphics slot 114 (frame count);
                                     //       update releases the grab 3 frames later
+
+    // Methods bound to their retail symbols by asm labels.
+    void StartTransitionIn(int initiator, int transitionIn, float inTime, float holdTime)
+        __asm__("cTransitionMan_StartTransitionIn");
+    int StartTransitionOut(int initiator, int transition, float outTime) __asm__("cTransitionMan_StartTransitionOut");
+    void StartTransitionScreenGrab(int initiator, int transition, int externalTimePercentage, float transitionTime)
+        __asm__("cTransitionMan_StartTransitionScreenGrab");
+    void EndTransition() __asm__("cTransitionMan_EndTransition");
+    void PauseTransition(int up) __asm__("cTransitionMan_PauseTransition");
+    float GetTransitionTimeLeft() __asm__("cTransitionMan_GetTransitionTimeLeft");
+    void OnStartObjectUse() __asm__("cTransitionMan_OnStartObjectUse");
+    void OnEndObjectUse() __asm__("cTransitionMan_OnEndObjectUse");
+    int IsTransitionPending() __asm__("cTransitionMan_IsTransitionPending");
+    int IsTransitionActive() __asm__("cTransitionMan_IsTransitionActive");
+    int IsWaitingForScreenGrab() __asm__("cTransitionMan_IsWaitingForScreenGrab");
+    int GetTransitionInitiator() __asm__("cTransitionMan_GetTransitionInitiator");
+    int GetViewIndex() __asm__("cTransitionMan_GetViewIndex__FPv");
+    int IsUsingTexture() __asm__("cTransitionMan_IsUsingTexture");
 };
 
 CHECK_OFFSET(cTransitionMan, mObjType, 0x10);

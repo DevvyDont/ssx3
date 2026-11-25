@@ -57,6 +57,8 @@ struct tAttrState {
     unsigned short mPopFloor : 1;      // bit 15 [O]
 };
 
+struct cListNode;
+
 struct cUIState : public cListNode {
     // cListNode (util/list.h): mpPrev 0x000 / mpNext 0x004 ([R] the constructors self-link them), the vptr 0x008:
     //   [R] _vt$8cUIState (cUIState_vtbl), stored by cUIState_cUIState/cUIState_cUIState1/cUIState_cUIState2
@@ -108,6 +110,55 @@ struct cUIState : public cListNode {
     virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int Event);            // 22
     virtual void* getData(int msg);                                                   // 23
     virtual int handleEvent(int msg, void* pParam);                                   // 24
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cUIState1(int engine, int parentState) __asm__("cUIState_cUIState1");
+    void setCtrlBitsByCtrlIndex(signed char bit) __asm__("cUIState_setCtrlBitsByCtrlIndex");
+    void clearCtrlBits(signed char bit) __asm__("cUIState_clearCtrlBits");
+    void addScreen(cListNode* node) __asm__("cUIState_addScreen");
+    void hideScreens() __asm__("cUIState_hideScreens");
+    void showScreens() __asm__("cUIState_showScreens");
+    void updateScreens() __asm__("cUIState_updateScreens");
+    void hideObjSafe(char* name) __asm__("cUIState_hideObjSafe");
+    void showObjSafe(char* name) __asm__("cUIState_showObjSafe");
+    void* cUIState2() __asm__("cUIState_cUIState2");
+    void setHashName(int hashName) __asm__("cUIState_setHashName");
+    int getHashName() __asm__("cUIState_getHashName");
+    int getEngine() __asm__("cUIState_getEngine");
+    void setCurrentCtrl(signed char currentCtrl) __asm__("cUIState_setCurrentCtrl");
+    signed char getCurrentCtrl() __asm__("cUIState_getCurrentCtrl");
+    void setAllCtrlBits(signed char ctrlBits) __asm__("cUIState_setAllCtrlBits");
+    unsigned char getCtrlBitMask() __asm__("cUIState_getCtrlBitMask");
+    int getMiscData() __asm__("cUIState_getMiscData");
+    void setMiscData(int miscData) __asm__("cUIState_setMiscData");
+    int getMode() __asm__("cUIState_getMode");
+    void setMode(int mode) __asm__("cUIState_setMode");
+    int isFirstTime() __asm__("cUIState_isFirstTime");
+    void setFirstTime(int firstTime) __asm__("cUIState_setFirstTime");
+    int isEnabled() __asm__("cUIState_isEnabled");
+    void setEnabled(int enabled) __asm__("cUIState_setEnabled");
+    int isPushCheck() __asm__("cUIState_isPushCheck");
+    void setPushCheck(int pushCheck) __asm__("cUIState_setPushCheck");
+    int isPopFloor() __asm__("cUIState_isPopFloor");
+    void setPopFloor(int popFloor) __asm__("cUIState_setPopFloor");
+    int isExplicit() __asm__("cUIState_isExplicit");
+    void setExplicit(int isExplicit) __asm__("cUIState_setExplicit");
+    int isPendingDelete() __asm__("cUIState_isPendingDelete");
+    void setPendingDelete(int pendingDelete) __asm__("cUIState_setPendingDelete");
+    int hasPopup() __asm__("cUIState_hasPopup");
+    int numPopup() __asm__("cUIState_numPopup");
+    void setHasPopup(int popupCount) __asm__("cUIState_setHasPopup");
+    void incrementPopup() __asm__("cUIState_incrementPopup");
+    void decrementPopup() __asm__("cUIState_decrementPopup");
+    int isPopup() __asm__("cUIState_isPopup");
+    void setPopup(int isPopup) __asm__("cUIState_setPopup");
+    int isVisible() __asm__("cUIState_isVisible");
+    void setVisible(int visible) __asm__("cUIState_setVisible");
+    void setParentState(int parentState) __asm__("cUIState_setParentState");
+    int getParentState() __asm__("cUIState_getParentState");
+    int getScreen() __asm__("cUIState_getScreen");
+    void setUserNum(signed char userNum) __asm__("cUIState_setUserNum");
+    signed char getUserNum() __asm__("cUIState_getUserNum");
 };
 
 CHECK_SIZE(tAttrState, 0x2);

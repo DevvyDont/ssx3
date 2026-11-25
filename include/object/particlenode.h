@@ -33,6 +33,10 @@ struct cParticleNode : public cMoveNode {
     //   Instance: [U] cMoveNode_addParticle passes it to the cParticleModifier ctor
     //   ModifierBlock: [U] update: deletes the node when ModifierBlock is null or its effect chain (+0x10, cEffectLink
     //       head) is empty
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cParticleNode1(void* bucket, void* instRecord, void* particle, void* oldNode)
+        __asm__("cParticleNode_cParticleNode1");
 };
 
 CHECK_SIZE(cParticleNode, 0x2C);

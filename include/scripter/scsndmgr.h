@@ -49,6 +49,14 @@ struct cScriptSoundBankManager {
                                        //     memFlags); [U] the dtor frees it (cMemMan_free), the lookups index it
     void** mVtbl;                      // 0xC [R] cScriptSoundBankManager_vtbl (ctor and dtor); [U] UnlinkBank1 and
                                        //     UnlinkBanksAll call slot 2 (UnlinkBank) through it
+
+    // Methods bound to their retail symbols by asm labels.
+    int LinkBank(int id, void* data, int dataSize) __asm__("cScriptSoundBankManager_LinkBank");
+    void UnlinkBank1(int id) __asm__("cScriptSoundBankManager_UnlinkBank1");
+    void UnlinkBanksAll() __asm__("cScriptSoundBankManager_UnlinkBanksAll");
+    tScriptSoundBankInfo* GetBankInfo(int id) __asm__("cScriptSoundBankManager_GetBankInfo");
+    void UnlinkBank(tScriptSoundBankInfo* pBankInfo) __asm__("cScriptSoundBankManager_UnlinkBank");
+    tScriptSoundBankInfo* GetEmptyBankInfo() __asm__("cScriptSoundBankManager_GetEmptyBankInfo");
 };
 
 CHECK_OFFSET(cScriptSoundBankManager, mMemFlags, 0x0);

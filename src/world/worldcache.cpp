@@ -117,12 +117,11 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_getFreeBlock__FPv);
  *
  * @return the tWorldMemBlock
  */
-void* cWorldBlockAllocator_getFreeBlock(void* vself)
+void* cWorldBlockAllocator::getFreeBlock()
 {
-    cWorldBlockAllocator* self = (cWorldBlockAllocator*)vself;
-    tWorldMemBlock* item = self->m_pFreeBlocks;
-    self->m_pFreeBlocks = (tWorldMemBlock*)(item->pNext);
-    *(int*)&self->m_uiNumFreeBlocks -= 1;
+    tWorldMemBlock* item = m_pFreeBlocks;
+    m_pFreeBlocks = (tWorldMemBlock*)(item->pNext);
+    *(int*)&m_uiNumFreeBlocks -= 1;
     item->bActive = 1;
     return ((void*)item);
 }
@@ -137,14 +136,13 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_releaseBlock__FPvT0);
  *
  * @param vitem  the tWorldMemBlock
  */
-void cWorldBlockAllocator_releaseBlock(void* vself, void* vitem)
+void cWorldBlockAllocator::releaseBlock(void* vitem)
 {
     tWorldMemBlock* item = (tWorldMemBlock*)vitem;
-    cWorldBlockAllocator* self = (cWorldBlockAllocator*)vself;
     item->bActive = 0;
-    item->pNext = (tWorldMemBlock*)((void*)self->m_pFreeBlocks);
-    self->m_pFreeBlocks = (tWorldMemBlock*)item;
-    *(int*)&self->m_uiNumFreeBlocks += 1;
+    item->pNext = (tWorldMemBlock*)((void*)m_pFreeBlocks);
+    m_pFreeBlocks = (tWorldMemBlock*)item;
+    *(int*)&m_uiNumFreeBlocks += 1;
 }
 #endif
 
@@ -184,7 +182,7 @@ extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* sel
  */
 extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(cSectionBlockAllocator* self, int flags)
 {
-    cSectionBlockAllocator_releaseBlocks((cSectionBlockAllocator*)self);
+    self->releaseBlocks();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -201,16 +199,16 @@ void cWorldBlockAllocator_releaseBlock(void* self, void* item);
  *
  * m_pAllocBlocks ends up null; m_pMRUBlock is not cleared.
  */
-extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* self)
+void cSectionBlockAllocator::releaseBlocks()
 {
-    if (self->m_pAllocBlocks != 0) {
+    if (m_pAllocBlocks != 0) {
         void* next;
         do {
-            tWorldMemBlock* item = self->m_pAllocBlocks;
+            tWorldMemBlock* item = m_pAllocBlocks;
             next = (void*)item->pNext;
-            cWorldBlockAllocator_releaseBlock(*(void**)self, item);
-            self->m_pAllocBlocks = (tWorldMemBlock*)next;
-            self->m_uiNumBlocks = (int)self->m_uiNumBlocks - 1;
+            cWorldBlockAllocator_releaseBlock(*(void**)this, item);
+            m_pAllocBlocks = (tWorldMemBlock*)next;
+            m_uiNumBlocks = (int)m_uiNumBlocks - 1;
         } while (next != 0);
     }
 }
@@ -247,11 +245,11 @@ static inline void NewBlock_7878(cSectionBlockAllocator* self)
  * @param flags  bits 24-27 select the alignment
  * @return the memory
  */
-extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, int size, unsigned int flags)
+char* cSectionBlockAllocator::allocate(int size, unsigned int flags)
 {
-    if (self->m_uiNumBlocks == 0)
-        NewBlock_7878(self);
-    tWorldMemBlock* first = (self->m_pMRUBlock);
+    if (m_uiNumBlocks == 0)
+        NewBlock_7878(this);
+    tWorldMemBlock* first = (m_pMRUBlock);
     int align = 4 << ((flags >> 24) & 0xF);
     int pos = first->iOffset;
     int rem = pos % align;
@@ -263,17 +261,17 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
         first->iOffset = pos + (alignPad + size);
         char* allocPtr = first->pBaseMem + pos;
         allocPtr += alignPad;
-        (self->m_pMRUBlock)->iPad += alignPad;
+        m_pMRUBlock->iPad += alignPad;
         return allocPtr;
     }
-    if (self->m_uiNumBlocks >= 2)
+    if (m_uiNumBlocks >= 2)
     {
-        *(tWorldMemBlock**)&self->m_pMRUBlock = (self->m_pAllocBlocks);
-        if ((self->m_pMRUBlock))
+        *(tWorldMemBlock**)&m_pMRUBlock = (m_pAllocBlocks);
+        if ((m_pMRUBlock))
         {
             do
             {
-                tWorldMemBlock* block = (self->m_pMRUBlock);
+                tWorldMemBlock* block = (m_pMRUBlock);
                 if (block != first)
                 {
                     int bpos = block->iOffset;
@@ -286,17 +284,17 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
                         block->iOffset = bpos + (alignPad + size);
                         char* allocPtr = block->pBaseMem + bpos;
                         allocPtr += alignPad;
-                        (self->m_pMRUBlock)->iPad += alignPad;
+                        m_pMRUBlock->iPad += alignPad;
                         return allocPtr;
                     }
                 }
-                *(tWorldMemBlock**)&self->m_pMRUBlock = (self->m_pMRUBlock)->pNext;
-            } while ((self->m_pMRUBlock));
+                *(tWorldMemBlock**)&m_pMRUBlock = m_pMRUBlock->pNext;
+            } while ((m_pMRUBlock));
         }
     }
-    NewBlock_7878(self);
-    (self->m_pMRUBlock)->iOffset += size;
-    return (self->m_pMRUBlock)->pBaseMem;
+    NewBlock_7878(this);
+    m_pMRUBlock->iOffset += size;
+    return m_pMRUBlock->pBaseMem;
 }
 #endif
 
@@ -379,12 +377,12 @@ extern char str_Section_Allocator[];
  * blocktype)
  */
 // PORT: the section pointer is passed as int (the callee's mangled name is __FPvii).
-extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int index, int section)
+void cWorldMemoryMan::activateSectionMem(int index, int section)
 {
-    void** mem = (void**)&self->m_pSectionAllocator;
+    void** mem = (void**)&m_pSectionAllocator;
     void** slot = &mem[index];
     *slot = cSectionBlockAllocator_cSectionBlockAllocator(cMemMan_alloc(20, str_Section_Allocator, 0x20000000, 0),
-                          (int)&self->m_BlockAllocator[section], index);
+                          (int)&m_BlockAllocator[section], index);
 }
 #endif
 
@@ -398,9 +396,9 @@ extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(cSectionBlockAllo
  *
  * @param i  the section id
  */
-extern "C" void cWorldMemoryMan_deactivateSectionMem(cWorldMemoryMan* self, int i)
+void cWorldMemoryMan::deactivateSectionMem(int i)
 {
-    cSectionBlockAllocator** base = &self->m_pSectionAllocator[0];
+    cSectionBlockAllocator** base = &m_pSectionAllocator[0];
     cSectionBlockAllocator** slot = base + i;
     if (*slot != 0) {
         cSectionBlockAllocator__cSectionBlockAllocator(*slot, 3);
@@ -580,7 +578,7 @@ extern "C" void cWorldView__cWorldView(cWorldView* p, int flags);
  */
 extern "C" void cWorldCache__cWorldCache(cWorldCache* self, int flags)
 {
-    cWorldCache_purge((cWorldCache*)self);
+    self->purge();
     cStreamMan__cStreamMan(&self->m_StreamMan, 2);
     cWorldView__cWorldView((cWorldView*)(&self->m_WorldView), 2);
     if (flags & 1) {
@@ -616,12 +614,11 @@ struct cWorldCache_purge_sObj {
  * Unloads everything the world cache holds: pages, chunk resolver, cache tables, active sections, header and
  * memory manager.
  *
- * @param worldCache  the world cache
  */
-extern "C" void cWorldCache_purge(cWorldCache* worldCache)
+void cWorldCache::purge()
 {
-    cWorldCache* self = worldCache;
-    cWorldCache_resetPageMap((cWorldCache*)self);
+    cWorldCache* self = this;
+    self->resetPageMap();
     cWorldCache_purge_sObj* chunkResolve = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
     if (chunkResolve != 0) {
         chunkResolve->vt[1].fn(vthis(chunkResolve, chunkResolve->vt[1]), 3);
@@ -633,7 +630,7 @@ extern "C" void cWorldCache_purge(cWorldCache* worldCache)
         unsigned int i;
         for (i = 0; i < (self->mp_DataHeader)->m_uiNumSections; i++) {
             if (cWorldView_isSectionUnLoaded(((char*)&self->m_WorldView), i) == 0) {
-                cWorldCache_deactivateSectionMem((cWorldCache*)self, i);
+                self->deactivateSectionMem(i);
             }
         }
         if (((void*)self->m_pSectionCacheTable) != 0) {
@@ -660,12 +657,12 @@ extern "C" void cWorldCache_purge(cWorldCache* self);
  * cWorldCache_purge() deletes the chunk resolver and the cache tables; reset then zeroes mp_DataHeader,
  * m_uiNumHullPage and mp_ChunkResolve.
  */
-extern "C" void cWorldCache_reset(cWorldCache* self)
+void cWorldCache::reset()
 {
-    cWorldCache_purge(self);
-    self->mp_DataHeader = 0;
-    self->m_uiNumHullPage = (unsigned int)0;
-    self->mp_ChunkResolve = 0;
+    purge();
+    mp_DataHeader = 0;
+    m_uiNumHullPage = (unsigned int)0;
+    mp_ChunkResolve = 0;
 }
 #endif
 
@@ -739,7 +736,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     int viewOk = cWorldView_init_p((char*)&self->m_WorldView, self->mp_DataHeader, self);
     if (viewOk == 0)
         return 0;
-    cWorldCache_initPageMap(self);
+    self->initPageMap();
     return viewOk;
 }
 #endif
@@ -763,11 +760,11 @@ struct cWorldCacheTableNew : cWorldCacheTable {
  * @param i  the section ID (On Tour uiSectionID)
  * @param section  despite the name, the block memory type (On Tour eWorldBlockMemType blocktype)
  */
-extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int section)
+void cWorldCache::activateSectionMem(int i, int section)
 {
-    cWorldMemoryMan_activateSectionMem(self->m_pWorldMemMan, i, section);
-    self->m_pSectionCacheTable[i] = new (str_SectionTable, 0, 0)
-        cWorldCacheTableNew(&self->mp_DataHeader->m_pSection[i].m_iTable[0]);
+    m_pWorldMemMan->activateSectionMem(i, section);
+    m_pSectionCacheTable[i] = new (str_SectionTable, 0, 0)
+        cWorldCacheTableNew(&mp_DataHeader->m_pSection[i].m_iTable[0]);
 }
 #endif
 
@@ -782,14 +779,14 @@ extern "C" void cWorldCacheTable__cWorldCacheTable(int* self, int flags);
  *
  * @param i  the section ID (On Tour uiSectionID)
  */
-extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i)
+void cWorldCache::deactivateSectionMem(int i)
 {
-    cWorldMemoryMan_deactivateSectionMem(self->m_pWorldMemMan, i);
-    int* sectionTable = ((int*)self->m_pSectionCacheTable[i]);
+    m_pWorldMemMan->deactivateSectionMem(i);
+    int* sectionTable = ((int*)m_pSectionCacheTable[i]);
     if (sectionTable != 0) {
         cWorldCacheTable__cWorldCacheTable(sectionTable, 3);
     }
-    self->m_pSectionCacheTable[i] = 0;
+    m_pSectionCacheTable[i] = 0;
 }
 #endif
 
@@ -806,11 +803,11 @@ extern "C" void cStreamMan_update(void* p);
  * Updates the world view (offset 0x10), the cache pages, then the stream manager (offset 0x300) with
  * cStreamMan_update().
  */
-extern "C" void cWorldCache_update(cWorldCache* self)
+void cWorldCache::update()
 {
-    cWorldView_update((cWorldView*)&self->m_WorldView);
-    cWorldCache_updatePages(self);
-    cStreamMan_update((char*)&self->m_StreamMan);
+    m_WorldView.update();
+    updatePages();
+    cStreamMan_update((char*)&m_StreamMan);
 }
 #endif
 
@@ -825,17 +822,17 @@ int cWorldView_getNumHull(void*);
  * Stores the view's page count (cWorldView_getNumHull, a word of the view's header) in m_uiNumHullPage and zeroes
  * the six words of each m_HullPages entry.
  */
-extern "C" void cWorldCache_initPageMap(cWorldCache* self)
+void cWorldCache::initPageMap()
 {
     unsigned int i;
-    self->m_uiNumHullPage = cWorldView_getNumHull(&self->m_WorldView);
-    for (i = 0; i < self->m_uiNumHullPage; i++) {
-        self->m_HullPages[i].m_State = 0;
-        self->m_HullPages[i].m_bLock = 0;
-        self->m_HullPages[i].mp_Page = 0;
-        self->m_HullPages[i].m_iTouchTick = 0;
-        self->m_HullPages[i].m_iRenderTick = 0;
-        self->m_HullPages[i].m_fPriority = 0;
+    m_uiNumHullPage = cWorldView_getNumHull(&m_WorldView);
+    for (i = 0; i < m_uiNumHullPage; i++) {
+        m_HullPages[i].m_State = 0;
+        m_HullPages[i].m_bLock = 0;
+        m_HullPages[i].mp_Page = 0;
+        m_HullPages[i].m_iTouchTick = 0;
+        m_HullPages[i].m_iRenderTick = 0;
+        m_HullPages[i].m_fPriority = 0;
     }
 }
 #endif
@@ -865,11 +862,10 @@ struct sWc_8330 {
 /**
  * Empties every hull page: cancels pages being streamed, purges loaded ones, and clears each entry.
  *
- * @param vself  the world cache
  */
-extern "C" void cWorldCache_resetPageMap(cWorldCache* vself)
+void cWorldCache::resetPageMap()
 {
-    sWc_8330* self = (sWc_8330*)vself;
+    sWc_8330* self = (sWc_8330*)this;
     unsigned int i;
     for (i = 0; i < self->count; i++) {
         switch (self->ents[i].state) {
@@ -879,12 +875,12 @@ extern "C" void cWorldCache_resetPageMap(cWorldCache* vself)
         case 2:
             cStreamMan_cancelStreamRequest((char*)self + 0x300, i);
             self->ents[i].state = 4;
-            cWorldCache_purgePage((cWorldCache*)self, i);
+            ((cWorldCache*)self)->purgePage(i);
             break;
         case 3:
         case 4:
             self->ents[i].state = 4;
-            cWorldCache_purgePage((cWorldCache*)self, i);
+            ((cWorldCache*)self)->purgePage(i);
             break;
         }
         self->ents[i].state = 0;
@@ -962,9 +958,9 @@ INCLUDE_ASM("world/worldcache", cWorldCache_setPageLock);
  * @param hullPage  the hull page
  * @param lock  the lock flag
  */
-extern "C" void cWorldCache_setPageLock(cWorldCache* self, int hullPage, int lock)
+void cWorldCache::setPageLock(int hullPage, int lock)
 {
-    self->m_HullPages[hullPage].m_bLock = lock;
+    m_HullPages[hullPage].m_bLock = lock;
 }
 #endif
 
@@ -974,12 +970,12 @@ INCLUDE_ASM("world/worldcache", cWorldCache_isPageLocked);
 /**
  * Returns hull page @p hullPage's m_bLock.
  *
- * @param worldCache  the cWorldCache (this)
  * @param hullPage  the hull page
  * @return the lock flag
  */
-extern "C" int cWorldCache_isPageLocked(cWorldCache* worldCache, int hullPage) {
-    return worldCache->m_HullPages[hullPage].m_bLock;
+int cWorldCache::isPageLocked(int hullPage)
+{
+    return m_HullPages[hullPage].m_bLock;
 }
 #endif
 
@@ -995,20 +991,20 @@ extern "C" void cHullPage__cHullPage(cHullPage* self, int flags);
  * @param cell  the page index (On Tour uiHullPage)
  */
 // Unloads a cache cell: reports each referenced object (kind, handle) to cWorldCache_removeBxStreamData, then frees the list.
-extern "C" void cWorldCache_purgePage(cWorldCache* self, int cell)
+void cWorldCache::purgePage(int cell)
 {
-    cHullPage* list = self->m_HullPages[cell].mp_Page;
+    cHullPage* list = m_HullPages[cell].mp_Page;
     tResourceID resHandle;
     *(unsigned int*)&resHandle = 0xFFFFFFFF;  // starts as the invalid handle
     for (int i = ((int)list->m_uiCurrentPageEntry) - 1; i >= 0; i--) {
         resHandle.m_bfRID.m_uiSectionID = (list->m_pPageEntries)[i].m_uiSectionID;
         resHandle.m_bfRID.m_uiUID = (list->m_pPageEntries)[i].m_uiGUID;
-        cWorldCache_removeBxStreamData(self, cell, (list->m_pPageEntries)[i].m_uiType, resHandle);
+        cWorldCache_removeBxStreamData(this, cell, (list->m_pPageEntries)[i].m_uiType, resHandle);
     }
-    if (self->m_HullPages[cell].mp_Page != 0)
-        cHullPage__cHullPage(self->m_HullPages[cell].mp_Page, 3);
-    self->m_HullPages[cell].mp_Page = 0;
-    self->m_HullPages[cell].m_State = 0;
+    if (m_HullPages[cell].mp_Page != 0)
+        cHullPage__cHullPage(m_HullPages[cell].mp_Page, 3);
+    m_HullPages[cell].mp_Page = 0;
+    m_HullPages[cell].m_State = 0;
 }
 #endif
 
@@ -1021,9 +1017,9 @@ INCLUDE_ASM("world/worldcache", cWorldCache_isPageLoaded);
  * @param uiHullPage  the page index (On Tour uiHullPage)
  * @return 1 when loaded, otherwise 0
  */
-extern "C" int cWorldCache_isPageLoaded(cWorldCache* self, int uiHullPage)
+int cWorldCache::isPageLoaded(int uiHullPage)
 {
-    return self->m_HullPages[uiHullPage].m_State == 3;
+    return m_HullPages[uiHullPage].m_State == 3;
 }
 #endif
 
@@ -1036,9 +1032,9 @@ INCLUDE_ASM("world/worldcache", cWorldCache_isPageEmpty);
  * @param uiHullPage  the page index (On Tour uiHullPage)
  * @return 1 when empty, otherwise 0
  */
-extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int uiHullPage)
+int cWorldCache::isPageEmpty(int uiHullPage)
 {
-    return self->m_HullPages[uiHullPage].m_State == 0;
+    return m_HullPages[uiHullPage].m_State == 0;
 }
 #endif
 
@@ -1050,9 +1046,9 @@ INCLUDE_ASM("world/worldcache", cWorldCache_signalPageLoadComplete);
  *
  * @param uiHullPage  the page index (On Tour uiHullPage)
  */
-extern "C" void cWorldCache_signalPageLoadComplete(cWorldCache* self, int uiHullPage)
+void cWorldCache::signalPageLoadComplete(int uiHullPage)
 {
-    self->m_HullPages[uiHullPage].m_State = 3;
+    m_HullPages[uiHullPage].m_State = 3;
 }
 #endif
 
@@ -1086,18 +1082,18 @@ static inline int Frame_8668()
  * stale
  * age drop their request or start purging; a purge completes 5 frames later.
  */
-extern "C" void cWorldCache_updatePages(cWorldCache* self)
+void cWorldCache::updatePages()
 {
     int now = cAppMan_TheAppMan->Tick;
     int best = -1;
     float bestPri = -1.0f;
-    for (unsigned int i = 0; i < self->m_uiNumHullPage; i++)
+    for (unsigned int i = 0; i < m_uiNumHullPage; i++)
     {
-        int st = self->m_HullPages[i].m_State;
+        int st = m_HullPages[i].m_State;
         if (st == 0)
             continue;
         int expired = 0;
-        if (self->m_HullPages[i].m_bLock == 0 && now - self->m_HullPages[i].m_iTouchTick >= self->m_iTouchStaleAge)
+        if (m_HullPages[i].m_bLock == 0 && now - m_HullPages[i].m_iTouchTick >= m_iTouchStaleAge)
             expired = 1;
         switch (st)
         {
@@ -1106,38 +1102,38 @@ extern "C" void cWorldCache_updatePages(cWorldCache* self)
         case 1:
             if (expired)
             {
-                self->m_HullPages[i].m_State = 0;
+                m_HullPages[i].m_State = 0;
                 break;
             }
-            if (self->m_HullPages[i].m_fPriority > bestPri)
+            if (m_HullPages[i].m_fPriority > bestPri)
             {
-                bestPri = self->m_HullPages[i].m_fPriority;
+                bestPri = m_HullPages[i].m_fPriority;
                 best = i;
             }
             break;
         case 3:
             if (!expired)
                 break;
-            self->m_HullPages[i].m_State = 4;
-            self->m_HullPages[i].m_iRenderTick = Frame_8668();
+            m_HullPages[i].m_State = 4;
+            m_HullPages[i].m_iRenderTick = Frame_8668();
             break;
         case 4:
-            if (Frame_8668() - self->m_HullPages[i].m_iRenderTick < 5)
+            if (Frame_8668() - m_HullPages[i].m_iRenderTick < 5)
                 break;
-            cWorldCache_purgePage(self, i);
-            self->m_HullPages[i].m_State = 0;
+            purgePage(i);
+            m_HullPages[i].m_State = 0;
             break;
         }
     }
     if (best < 0)
         return;
-    cStreamMan* mgr = &self->m_StreamMan;
-    if (self->m_StreamMan.m_bActive != 0)
+    cStreamMan* mgr = &m_StreamMan;
+    if (m_StreamMan.m_bActive != 0)
         return;
-    tBxBSPHull* hull = (tBxBSPHull*)cWorldView_getHull(&self->m_WorldView, best);
-    self->m_HullPages[best].mp_Page = new (str_cHullPage, 0x20000000, 0) cHullPageNew(hull);
+    tBxBSPHull* hull = (tBxBSPHull*)cWorldView_getHull(&m_WorldView, best);
+    m_HullPages[best].mp_Page = new (str_cHullPage, 0x20000000, 0) cHullPageNew(hull);
     cStreamMan_addStreamRequest(mgr, best, hull->m_uiNumChunk, hull->m_iStreamOffset);
-    self->m_HullPages[best].m_State = 2;
+    m_HullPages[best].m_State = 2;
 }
 #endif
 
@@ -1152,16 +1148,16 @@ INCLUDE_ASM("world/worldcache", cWorldCache_flushInActivePages);
  * (cWorldCache_purgePage) and set Empty. Loading pages are left alone. Called by cGame_update and cGame_updateStreamLoading.
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void cWorldCache_flushInActivePages(cWorldCache* self)
+void cWorldCache::flushInActivePages()
 {
     int now = cAppMan_TheAppMan->Tick;
-    for (unsigned int i = 0; i < self->m_uiNumHullPage; i++)
+    for (unsigned int i = 0; i < m_uiNumHullPage; i++)
     {
-        int st = self->m_HullPages[i].m_State;
+        int st = m_HullPages[i].m_State;
         if (st == 0)
             continue;
         int expired = 0;
-        if (self->m_HullPages[i].m_bLock == 0 && self->m_HullPages[i].m_iTouchTick < now)
+        if (m_HullPages[i].m_bLock == 0 && m_HullPages[i].m_iTouchTick < now)
             expired = 1;
         switch (st)
         {
@@ -1169,15 +1165,15 @@ extern "C" void cWorldCache_flushInActivePages(cWorldCache* self)
             break;
         case 1:
             if (expired)
-                self->m_HullPages[i].m_State = 0;
+                m_HullPages[i].m_State = 0;
             break;
         case 3:
             if (!expired)
                 break;
-            self->m_HullPages[i].m_State = 4;
+            m_HullPages[i].m_State = 4;
         case 4:
-            cWorldCache_purgePage(self, i);
-            self->m_HullPages[i].m_State = 0;
+            purgePage(i);
+            m_HullPages[i].m_State = 0;
             break;
         }
     }
@@ -1211,11 +1207,10 @@ extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
  * The page is set InActive, purged (cWorldCache_purgePage) and set Empty. Does nothing when no page qualifies. No C
  * caller in the source.
  *
- * @param vself  the cWorldCache
  */
-extern "C" void cWorldCache_flushOnePage(cWorldCache* vself)
+void cWorldCache::flushOnePage()
 {
-    sWc_89C8* self = (sWc_89C8*)vself;
+    sWc_89C8* self = (sWc_89C8*)this;
     int best = -1;
     float bestPri = 1.0f;
     unsigned int i;
@@ -1238,7 +1233,7 @@ extern "C" void cWorldCache_flushOnePage(cWorldCache* vself)
     }
     if (best >= 0) {
         self->ents[best].state = 4;
-        cWorldCache_purgePage((cWorldCache*)self, best);
+        ((cWorldCache*)self)->purgePage(best);
         self->ents[best].state = 0;
     }
 }
@@ -1259,7 +1254,7 @@ static inline void* bxAlloc_8AA8(cWorldMemoryMan* mem, int bank, int size, unsig
 {
     if (bank == 0xFF)
         return operator_new_bx(size, D_00494D40, flags, 0);
-    return cSectionBlockAllocator_allocate(mem->m_pSectionAllocator[bank], size, flags);
+    return mem->m_pSectionAllocator[bank]->allocate(size, flags);
 }
 
 // Takes a reference on a data tag; nonzero when the data was already referenced (resident or loading).
@@ -1296,17 +1291,17 @@ static inline void release_8AA8(tWorldCacheDataTag* tag)
  *         failed
  */
 // Adds one stream data item (type, bank|id<<8) to a load list, allocating its storage on first use.
-extern "C" unsigned int cWorldCache_addBxStreamDataTest(cWorldCache* self, int slot, int type, unsigned int key, int size)
+unsigned int cWorldCache::addBxStreamDataTest(int slot, int type, unsigned int key, int size)
 {
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
     cWorldCacheTable* table;
     if (bank == 0xFF)
-        table = self->m_pSharedCacheTable;
+        table = m_pSharedCacheTable;
     else
-        table = self->m_pSectionCacheTable[bank];
+        table = m_pSectionCacheTable[bank];
     if (addRef_8AA8(&table->m_pCacheTable[type].m_pDataTag[id])) {
-        cHullPage* page = self->m_HullPages[slot].mp_Page;
+        cHullPage* page = m_HullPages[slot].mp_Page;
         page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiType = type;
         page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiSectionID = key;
         page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiGUID = key >> 8;
@@ -1319,20 +1314,20 @@ extern "C" unsigned int cWorldCache_addBxStreamDataTest(cWorldCache* self, int s
     switch (type) {
     case 9:
     case 10:
-        data = bxAlloc_8AA8(self->m_pWorldMemMan, bank, size, 0x45000000);
+        data = bxAlloc_8AA8(m_pWorldMemMan, bank, size, 0x45000000);
         break;
     case 1:
     case 2:
     case 3:
     case 11:
     case 12:
-        data = bxAlloc_8AA8(self->m_pWorldMemMan, bank, size, 0x22000000);
+        data = bxAlloc_8AA8(m_pWorldMemMan, bank, size, 0x22000000);
         break;
     case 14:
         data = operator_new_bx(size, str_BxStream_AIPATH, 0, 0);
         break;
     default:
-        data = bxAlloc_8AA8(self->m_pWorldMemMan, bank, size, 0);
+        data = bxAlloc_8AA8(m_pWorldMemMan, bank, size, 0);
         break;
     }
     if (data != 0)
@@ -1362,27 +1357,27 @@ extern int cStreamMan_NULLCHUNK;
  * @param chunk  the data, or cStreamMan_NULLCHUNK
  */
 // PORT: a4 is a pointer carried in an int (compared against &cStreamMan_NULLCHUNK, then shifted).
-extern "C" void cWorldCache_addBxStreamDataSubmit(cWorldCache* self, int group, int id, unsigned int key, int chunk)
+void cWorldCache::addBxStreamDataSubmit(int group, int id, unsigned int key, int chunk)
 {
     cWorldCacheTable* table;
     cHullPage* page;
     unsigned int hi = key >> 8;
     if ((key & 0xFF) == 0xFF) {
-        table = self->m_pSharedCacheTable;
+        table = m_pSharedCacheTable;
     } else {
-        table = self->m_pSectionCacheTable[key & 0xFF];
+        table = m_pSectionCacheTable[key & 0xFF];
     }
-    page = self->m_HullPages[group].mp_Page;
+    page = m_HullPages[group].mp_Page;
     page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiType = id;
     page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiSectionID = key;
     page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiGUID = key >> 8;
     page->m_uiCurrentPageEntry++;
     if (chunk == (int)&cStreamMan_NULLCHUNK) {
-        cChunkResolve* resolver = self->mp_ChunkResolve;
+        cChunkResolve* resolver = mp_ChunkResolve;
         sVEntry<int(void*, int, unsigned int, int)>* vt = (sVEntry<int(void*, int, unsigned int, int)>*)resolver->mVtbl;
         vt[3].fn(vthis(resolver, vt[3]), id, key, 0);
     } else {
-        cChunkResolve* resolver = self->mp_ChunkResolve;
+        cChunkResolve* resolver = mp_ChunkResolve;
         sVEntry<int(void*, int, unsigned int, int)>* vt = (sVEntry<int(void*, int, unsigned int, int)>*)resolver->mVtbl;
         chunk = vt[3].fn(vthis(resolver, vt[3]), id, key, chunk);
     }
@@ -1465,10 +1460,10 @@ static inline char *conv_8F10(unsigned i) { if (i == 0) return 0; return refToPt
  * @param idx  the section id
  */
 // Sets flag 0x40 on every object listed for cell idx.
-extern "C" void cWorldCache_activateSectionPatches(cWorldCache* self, int idx)
+void cWorldCache::activateSectionPatches(int idx)
 {
-    int n = self->mp_DataHeader->m_pSection[idx].m_iTable[1];
-    cWorldCacheTable* list = self->m_pSectionCacheTable[idx];
+    int n = mp_DataHeader->m_pSection[idx].m_iTable[1];
+    cWorldCacheTable* list = m_pSectionCacheTable[idx];
     for (unsigned i = 0; i < n; i++) {
         tPatchRecord* object = (tPatchRecord*)conv_8F10(list->m_pCacheTable[1].m_pDataTag[i].m_bfuiMemLoc);
         object->m_sSurfaceFlags |= 0x40;
@@ -1758,11 +1753,10 @@ struct sWCLoader_9258 {
  * renderer
  * (slot 102).
  *
- * @param worldView  the world view
  */
-extern "C" void cWorldView_update(cWorldView* worldView)
+void cWorldView::update()
 {
-    sWCLoader_9258* self = (sWCLoader_9258*)worldView;
+    sWCLoader_9258* self = (sWCLoader_9258*)this;
     if (self->info == 0)
         return;
     self->f2E0 = 0;
@@ -1777,27 +1771,27 @@ extern "C" void cWorldView_update(cWorldView* worldView)
                 || strncmp(self->sections[i].name, str_CSKY, 4) == 0
                 || strncmp(self->sections[i].name, str_DSKY, 4) == 0
                 || strncmp(self->sections[i].name, str_ESKY, 4) == 0)
-                cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 0);
+                ((cWorldCache*)self->cache)->activateSectionMem(i, 0);
             else
-                cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 2);
+                ((cWorldCache*)self->cache)->activateSectionMem(i, 2);
             cWorldCache_touchPage((sWCSlots*)self->cache, self->sections[i].id, self->entries[i].pri);
-            cWorldCache_setPageLock((cWorldCache*)self->cache, self->sections[i].id, 1);
+            ((cWorldCache*)self->cache)->setPageLock(self->sections[i].id, 1);
             self->entries[i].state = 2;
             break;
         case 2:
-            if (cWorldCache_isPageLoaded((cWorldCache*)self->cache, self->sections[i].id)) {
+            if (((cWorldCache*)self->cache)->isPageLoaded(self->sections[i].id)) {
                 self->entries[i].state = 5;
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
                 ps2GraphicsMan->SectionLoaded(i);
             }
             break;
         case 4:
-            if (cWorldCache_isPageEmpty((cWorldCache*)self->cache, self->sections[i].id)) {
+            if (((cWorldCache*)self->cache)->isPageEmpty(self->sections[i].id)) {
                 int ok = 1;
                 cWorldView_recursiveIsEmptyPages((void**)self, (tBxBSPNode*)self->sections[i].tree, &ok);
                 if (ok) {
                     self->entries[i].state = 0;
-                    cWorldCache_deactivateSectionMem((cWorldCache*)self->cache, i);
+                    ((cWorldCache*)self->cache)->deactivateSectionMem(i);
                     flushWorldLightCache();
                 }
             }
@@ -1869,7 +1863,7 @@ extern "C" void cWorldView_recursiveIsEmptyPages(void** self, tBxBSPNode* node, 
 {
     if (*ok != 0) {
         tBxBSPHull* pageRef = node->m_pHull;
-        if (((void*)pageRef) != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), pageRef->m_uiHullIndex) == 0) {
+        if (((void*)pageRef) != 0 && ((cWorldCache*)(*self))->isPageEmpty(pageRef->m_uiHullIndex) == 0) {
             *ok = 0;
             return;
         }
@@ -1969,15 +1963,15 @@ extern "C" void cWorldView_refreshStreamFocus(void* self, int i);
  * @param outT  receives the safe radius (On Tour fsafeRadius)
  * @return 1 when the focus is active and the radius positive, otherwise 0
  */
-extern "C" int cWorldView_getFocus(cWorldView* self, int i, t4Vector* outPos, float* outT)
+int cWorldView::getFocus(int i, t4Vector* outPos, float* outT)
 {
-    if (self->m_StreamFocus[i].m_bActive == 0) {
+    if (m_StreamFocus[i].m_bActive == 0) {
         return 0;
     }
-    cWorldView_refreshStreamFocus(self, i);
+    cWorldView_refreshStreamFocus(this, i);
     int valid = 1;
-    *outPos = self->m_StreamFocus[i].m_v4LoadPos;
-    float safeRadius = self->m_StreamFocus[i].m_fSafeRadius - 0.5f;
+    *outPos = m_StreamFocus[i].m_v4LoadPos;
+    float safeRadius = m_StreamFocus[i].m_fSafeRadius - 0.5f;
     *outT = safeRadius;
     if (!(safeRadius > 0.0f)) {
         valid = 0;
@@ -1999,15 +1993,15 @@ extern "C" void cWorldView_refreshStreamFocus(void* self, int i);
  * @param outT  receives the test safe radius (On Tour fsafeRadius)
  * @return 1 when the focus is active and the radius positive, otherwise 0
  */
-extern "C" int cWorldView_getTestFocus(cWorldView* self, int i, t4Vector* outPos, float* outT)
+int cWorldView::getTestFocus(int i, t4Vector* outPos, float* outT)
 {
-    if (self->m_StreamFocus[i].m_bActive == 0) {
+    if (m_StreamFocus[i].m_bActive == 0) {
         return 0;
     }
-    cWorldView_refreshStreamFocus(self, i);
+    cWorldView_refreshStreamFocus(this, i);
     int valid = 1;
-    *outPos = self->m_StreamFocus[i].m_v4LoadPos;
-    float safeRadius = self->m_StreamFocus[i].m_fSafeTestRadius - 0.5f;
+    *outPos = m_StreamFocus[i].m_v4LoadPos;
+    float safeRadius = m_StreamFocus[i].m_fSafeTestRadius - 0.5f;
     *outT = safeRadius;
     if (!(safeRadius > 0.0f)) {
         valid = 0;

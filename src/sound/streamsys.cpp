@@ -71,20 +71,19 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance1);
  * @param maxChunks  the maximum number of chunks
  * @return this
  */
-extern "C" cStreamInstance* cStreamInstance_cStreamInstance1(cStreamInstance* self, cSndPlayOpts* p, char* mem,
-                                                            int size, int n, int maxChunks)
+cStreamInstance* cStreamInstance::cStreamInstance1(cSndPlayOpts* p, char* mem, int size, int n, int maxChunks)
 {
-    self->mVolControl = p->mVolControl[p->mInst];
-    self->mBaseVol = curVol_99D8(p);
-    if (self->mVolControl) {
+    mVolControl = p->mVolControl[p->mInst];
+    mBaseVol = curVol_99D8(p);
+    if (mVolControl) {
         p->mBaseVol[p->mInst] =
-            (int)MAX_99D8(MIN_99D8((float)p->mBaseVol[p->mInst] * *self->mVolControl, 127.0f), 0.0f);
+            (int)MAX_99D8(MIN_99D8((float)p->mBaseVol[p->mInst] * *mVolControl, 127.0f), 0.0f);
         p->mCurrent[p->mInst].vol = MAX_99D8(MIN_99D8(p->mBaseVol[p->mInst], 127), 0);
     }
-    self->mBuffer = mem;
-    self->mExternalBuffer = 1;
-    self->mHandle = SNDSTRM_create(&p->mCurrent[p->mInst], n, maxChunks, mem, size);
-    return self;
+    mBuffer = mem;
+    mExternalBuffer = 1;
+    mHandle = SNDSTRM_create(&p->mCurrent[p->mInst], n, maxChunks, mem, size);
+    return this;
 }
 #endif
 //100%
@@ -93,16 +92,16 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance2);
 /**
  * Constructs a stream instance around an existing stream handle: no buffer, no big-file data.
  *
- * @param stream  this
  * @param handle  the sound-driver stream handle
  * @return this
  */
-extern "C" void *cStreamInstance_cStreamInstance2(cStreamInstance* stream, int handle) {
-    stream->mHandle = handle;
-    stream->mBuffer = 0;
-    stream->mBigHeader = 0;
-    stream->mBigHandle = 0;
-    return ((void*)stream);
+void * cStreamInstance::cStreamInstance2(int handle)
+{
+    mHandle = handle;
+    mBuffer = 0;
+    mBigHeader = 0;
+    mBigHandle = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -153,11 +152,11 @@ extern "C" int FILE_loadbigheader(const char* name, int a1);
  * @param name  the big-file name
  */
 // PORT: second parameter is a const char* passed as int (unit declares cStreamInstance_SetBigFile(void*, int)).
-extern "C" void cStreamInstance_SetBigFile(cStreamInstance* self, int name)
+void cStreamInstance::SetBigFile(int name)
 {
     if (BXFILE_exists((const char*)name) != 0) {
-        strcpy((char*)&self->mBigFileName, (const char*)name);
-        self->mBigHeader = (char*)FILE_loadbigheader((char*)&self->mBigFileName, self->mMemAllocType);
+        strcpy((char*)&mBigFileName, (const char*)name);
+        mBigHeader = (char*)FILE_loadbigheader((char*)&mBigFileName, mMemAllocType);
     }
 }
 #endif
@@ -175,10 +174,10 @@ extern "C" void func_003B7F60(int h, int a, int b);
  * @param azimuth  the azimuth
  * @param elevation  the elevation
  */
-extern "C" void cStreamInstance_Set3DPosition(cStreamInstance* self, int azimuth, int elevation)
+void cStreamInstance::Set3DPosition(int azimuth, int elevation)
 {
     SNDSYS_entercritical();
-    func_003B7F60(self->mHandle, azimuth, elevation);
+    func_003B7F60(mHandle, azimuth, elevation);
     SNDSYS_leavecritical();
 }
 #endif
@@ -193,10 +192,9 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBaseVolume__FPvi);
  *
  * @param val  the volume, 0..127 (On Tour Vol)
  */
-void cStreamInstance_SetBaseVolume(void* vself, int val)
+void cStreamInstance::SetBaseVolume(int val)
 {
-    cStreamInstance* self = (cStreamInstance*)vself;
-    *(char*)&self->mBaseVol = (char)val;
+    *(char*)&mBaseVol = (char)val;
 }
 #endif
 
@@ -212,10 +210,10 @@ extern "C" void SNDSTRM_pitchmult(int h, int v);
  *
  * @param pitch  the pitch (0x1000 = normal)
  */
-extern "C" void cStreamInstance_SetPitch(cStreamInstance* self, int pitch)
+void cStreamInstance::SetPitch(int pitch)
 {
     SNDSYS_entercritical();
-    SNDSTRM_pitchmult(self->mHandle, pitch);
+    SNDSTRM_pitchmult(mHandle, pitch);
     SNDSYS_leavecritical();
 }
 #endif
@@ -233,16 +231,16 @@ extern "C" void func_003B7E70(int h, int vol);
  * Updates a stream instance: purges it once its counter (+0x80) passes twice the timer rate, otherwise re-applies the
  * volume scaled by its volume control (clamped 0..127, func_003B7E70).
  */
-extern "C" void cStreamInstance_Update(cStreamInstance* self)
+void cStreamInstance::Update()
 {
-    if (cAudioInterface_getTimerHz(self) * 2 < self->mQueuedTimeout) {
-        cStreamInstance_Purge(self);
-        self->mQueuedTimeout = 0;
+    if (cAudioInterface_getTimerHz(this) * 2 < mQueuedTimeout) {
+        Purge();
+        mQueuedTimeout = 0;
         return;
     }
-    float* volumeScale = self->mVolControl;
+    float* volumeScale = mVolControl;
     if (volumeScale != 0) {
-        int volume = (int)((float)self->mBaseVol * *volumeScale);
+        int volume = (int)((float)mBaseVol * *volumeScale);
         if (volume > 0x7F) {
             volume = 0x7F;
         }
@@ -250,7 +248,7 @@ extern "C" void cStreamInstance_Update(cStreamInstance* self)
             volume = 0;
         }
         SNDSYS_entercritical();
-        func_003B7E70(self->mHandle, volume);
+        func_003B7E70(mHandle, volume);
         SNDSYS_leavecritical();
     }
 }
@@ -334,10 +332,10 @@ void cStreamInstance_GetRequestStatus_status(void* self, cStreamInstance_GetTime
  *
  * @return the time
  */
-extern "C" float cStreamInstance_GetTime(cStreamInstance* self)
+float cStreamInstance::GetTime()
 {
     cStreamInstance_GetTime_sStatus st;
-    cStreamInstance_GetRequestStatus_status(self, &st, 0);
+    cStreamInstance_GetRequestStatus_status(this, &st, 0);
     if (st.state == 2) {
         return (float)st.a;
     }
@@ -363,10 +361,10 @@ struct cStreamInstance_GetTimeRemaining_sStatus {
  *
  * @return the time
  */
-extern "C" float cStreamInstance_GetTimeRemaining(cStreamInstance* self)
+float cStreamInstance::GetTimeRemaining()
 {
     cStreamInstance_GetTimeRemaining_sStatus st;
-    cStreamInstance_GetRequestStatus(self, (cStreamInstance_Playing_sStatus*)&st, 0);
+    cStreamInstance_GetRequestStatus(this, (cStreamInstance_Playing_sStatus*)&st, 0);
     if (st.state == 2) {
         return (float)st.b;
     }
@@ -390,10 +388,10 @@ struct cStreamInstance_IsBufferFilled_sStatus {
  * @param minVal  the amount (milliseconds)
  * @return 1 or 0
  */
-extern "C" int cStreamInstance_IsBufferFilled(cStreamInstance* self, int minVal)
+int cStreamInstance::IsBufferFilled(int minVal)
 {
     cStreamInstance_IsBufferFilled_sStatus st;
-    cStreamInstance_GetStatus(self, &st);
+    cStreamInstance_GetStatus(this, &st);
     return st.b >= minVal;
 }
 #endif
@@ -412,10 +410,10 @@ struct cStreamInstance_IsCurrRequestedRead_sStatus {
  *
  * @return 1 or 0
  */
-extern "C" int cStreamInstance_IsCurrRequestedRead(cStreamInstance* self)
+int cStreamInstance::IsCurrRequestedRead()
 {
     cStreamInstance_IsCurrRequestedRead_sStatus st;
-    cStreamInstance_GetRequestStatus(self, (cStreamInstance_Playing_sStatus*)&st, 0);
+    cStreamInstance_GetRequestStatus(this, (cStreamInstance_Playing_sStatus*)&st, 0);
     return st.state == 1;
 }
 #endif
@@ -437,10 +435,10 @@ extern "C" void cStreamInstance_GetRequestStatus(void* self, cStreamInstance_Pla
  *
  * @return 1 or 0
  */
-extern "C" int cStreamInstance_Playing(cStreamInstance* self)
+int cStreamInstance::Playing()
 {
     cStreamInstance_Playing_sStatus st;
-    cStreamInstance_GetRequestStatus(self, &st, 0);
+    cStreamInstance_GetRequestStatus(this, &st, 0);
     return st.state == 2;
 }
 #endif
@@ -453,10 +451,10 @@ extern "C" void SNDSTRM_modifyhold(int, int);
 /**
  * Releases the hold on the stream's current request (SNDSTRM_modifyhold(request, 0)).
  */
-extern "C" void cStreamInstance_ReleaseHold(cStreamInstance* self)
+void cStreamInstance::ReleaseHold()
 {
     int buf[2];
-    cStreamInstance_GetStatus(self, buf);
+    cStreamInstance_GetStatus(this, buf);
     SNDSTRM_modifyhold(buf[1], 0);
 }
 #endif
@@ -473,10 +471,10 @@ int cStreamInstance_GetStatus_st(void* self, int* out) __asm__("cStreamInstance_
  *
  * @return the request handle, or -1
  */
-extern "C" int cStreamInstance_GetCurrActiveSampleHandle(cStreamInstance* self)
+int cStreamInstance::GetCurrActiveSampleHandle()
 {
     int st[2];
-    cStreamInstance_GetStatus_st(self, st);
+    cStreamInstance_GetStatus_st(this, st);
     if (st[0] == 0) {
         return -1;
     }
@@ -494,7 +492,7 @@ extern "C" void SNDSTRM_modifyhold(int, int);
  *
  * @param requestHandle  the request
  */
-extern "C" void cStreamInstance_ReleaseHold1(cStreamInstance* self, int requestHandle)
+void cStreamInstance::ReleaseHold1(int requestHandle)
 {
     SNDSTRM_modifyhold(requestHandle, 0);
 }
@@ -517,10 +515,10 @@ void cStreamInstance_GetRequestStatus_status(void* self, cStreamInstance_GetRequ
  *
  * @return the length
  */
-extern "C" float cStreamInstance_GetRequestLength(cStreamInstance* self)
+float cStreamInstance::GetRequestLength()
 {
     cStreamInstance_GetRequestLength_sStatus st;
-    cStreamInstance_GetRequestStatus_status(self, &st, 0);
+    cStreamInstance_GetRequestStatus_status(this, &st, 0);
     if (st.state == 2) {
         return (float)(st.a + st.b);
     }
@@ -533,11 +531,11 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Pause);
 /**
  * Pauses the stream: pitch multiplier 0 (SNDSTRM_pitchmult, in a critical section).
  *
- * @param stream  this
  */
-extern "C" void cStreamInstance_Pause(cStreamInstance* stream) {
+void cStreamInstance::Pause()
+{
     SNDSYS_entercritical();
-    SNDSTRM_pitchmult(stream->mHandle, 0);
+    SNDSTRM_pitchmult(mHandle, 0);
     SNDSYS_leavecritical();
 }
 #endif
@@ -547,11 +545,11 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Resume);
 /**
  * Resumes the stream: pitch multiplier 0x1000 (SNDSTRM_pitchmult, in a critical section).
  *
- * @param stream  this
  */
-extern "C" void cStreamInstance_Resume(cStreamInstance* stream) {
+void cStreamInstance::Resume()
+{
     SNDSYS_entercritical();
-    SNDSTRM_pitchmult(stream->mHandle, 0x1000);
+    SNDSTRM_pitchmult(mHandle, 0x1000);
     SNDSYS_leavecritical();
 }
 #endif
@@ -572,14 +570,14 @@ extern "C" void BIG_locateentry(void* dec, int src, int a, int* out, int b);
  * @return the request handle
  */
 // PORT: buf is a pointer carried in an int (the unit's caller declares this function with int params).
-extern "C" int cStreamInstance_Queue(cStreamInstance* self, int holdTime, int buf, int off)
+int cStreamInstance::Queue(int holdTime, int buf, int off)
 {
-    if (self->mBigHeader != 0) {
+    if (mBigHeader != 0) {
         int n;
-        BIG_locateentry(self->mBigHeader, buf, 0, &n, 0);
-        return SNDSTRM_queuefile(self->mHandle, holdTime, (int)((char*)&self->mBigFileName), off + n);
+        BIG_locateentry(mBigHeader, buf, 0, &n, 0);
+        return SNDSTRM_queuefile(mHandle, holdTime, (int)((char*)&mBigFileName), off + n);
     }
-    return SNDSTRM_queuefile(self->mHandle, holdTime, buf, off);
+    return SNDSTRM_queuefile(mHandle, holdTime, buf, off);
 }
 #endif
 
@@ -596,13 +594,13 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Queue1);
  * @param off  the offset in the element
  * @return the request handle, or 0
  */
-extern "C" int cStreamInstance_Queue1(cStreamInstance* self, int holdTime, int element, int off)
+int cStreamInstance::Queue1(int holdTime, int element, int off)
 {
-    void* dec = self->mBigHeader;
+    void* dec = mBigHeader;
     if (dec != 0) {
         int n;
         BIG_locateentry(dec, 0, element, &n, 0);
-        return SNDSTRM_queuefile(self->mHandle, holdTime, (int)((char*)&self->mBigFileName), off + n);
+        return SNDSTRM_queuefile(mHandle, holdTime, (int)((char*)&mBigFileName), off + n);
     }
     return 0;
 }
@@ -618,10 +616,9 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Purge__FPv);
  *
  * @return SNDSTRM_purge's result
  */
-void* cStreamInstance_Purge(void* vself)
+void* cStreamInstance::Purge()
 {
-    cStreamInstance* self = (cStreamInstance*)vself;
-    return SNDSTRM_purge(self->mHandle);
+    return SNDSTRM_purge(mHandle);
 }
 #endif
 
@@ -636,10 +633,10 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Requests);
  *
  * @return the count
  */
-extern "C" int cStreamInstance_Requests(cStreamInstance* self)
+int cStreamInstance::Requests()
 {
     int buf[4];
-    cStreamInstance_GetStatus(self, buf);
+    cStreamInstance_GetStatus(this, buf);
     return buf[0];
 }
 #endif
@@ -652,15 +649,15 @@ extern "C" int SNDSTRM_timemult(int, int);
 /**
  * Multiplies the stream's timing (SNDSTRM_timemult, in a critical section) and returns the driver's result.
  *
- * @param stream  this
  * @param multAmount  the multiplier
  * @return the driver's result
  */
-extern "C" int cStreamInstance_TimeMult(cStreamInstance* stream, int multAmount) {
+int cStreamInstance::TimeMult(int multAmount)
+{
     int result;
 
     SNDSYS_entercritical();
-    result = SNDSTRM_timemult(stream->mHandle, multAmount);
+    result = SNDSTRM_timemult(mHandle, multAmount);
     SNDSYS_leavecritical();
     return result;
 }
@@ -828,11 +825,11 @@ extern char str_StreamBuffer[];
  * @param heap  the memory type
  * @param extra  the extra buffer space
  */
-extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int idx, int heap, int extra)
+void cStreamSys::STREAM_CreateInstance(int idx, int heap, int extra)
 {
-    cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)self->mStreamInstance);
+    cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)mStreamInstance);
     void* mem = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = cStreamInstance_cStreamInstance((cStreamInstance*)mem, (cSndPlayOpts*)&self->mpVBankManager->BankMonitor,
+    *slot = cStreamInstance_cStreamInstance((cStreamInstance*)mem, (cSndPlayOpts*)&mpVBankManager->BankMonitor,
                                             heap, extra);
 }
 #endif
@@ -856,11 +853,11 @@ extern "C" cStreamInstance* cStreamInstance_cStreamInstance1(cStreamInstance* se
  * @param n  the maximum number of requests
  * @param maxChunks  the maximum number of chunks
  */
-extern "C" void cStreamSys_STREAM_CreateInstance1(cStreamSys* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
+void cStreamSys::STREAM_CreateInstance1(int idx, int heap, char* mem, int size, int n, int maxChunks)
 {
-    cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)self->mStreamInstance);
+    cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)mStreamInstance);
     void* obj = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = cStreamInstance_cStreamInstance1((cStreamInstance*)obj, (cSndPlayOpts*)&self->mpVBankManager->BankMonitor,
+    *slot = ((cStreamInstance*)obj)->cStreamInstance1((cSndPlayOpts*)&mpVBankManager->BankMonitor,
                                              mem, size, n, maxChunks);
 }
 #endif
@@ -880,9 +877,9 @@ extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int a1, int a
  * @param memType  the memory type
  * @param buffSpace  the extra buffer space
  */
-extern "C" void cStreamSys_STREAM_Create(cStreamSys* self, int streamIndex, int volControl, int memType, int buffSpace)
+void cStreamSys::STREAM_Create(int streamIndex, int volControl, int memType, int buffSpace)
 {
-    cBankManager* bankMgr = self->mpVBankManager;
+    cBankManager* bankMgr = mpVBankManager;
     cBankMonitor* st = &bankMgr->BankMonitor;
     bankMgr->BankMonitor.mInst++;
     st->mCurrent[bankMgr->BankMonitor.mInst] = bankMgr->BankMonitor.mDefault;
@@ -904,9 +901,9 @@ extern "C" void cStreamSys_STREAM_Create(cStreamSys* self, int streamIndex, int 
     st->mTwoPlayerSide[bankMgr->BankMonitor.mInst] = 0;
     st->mMapToMaxVol[bankMgr->BankMonitor.mInst] = 127;
     st->mCloseOnEnd[bankMgr->BankMonitor.mInst] = 1;
-    self->mpVBankManager->BankMonitor.mVolControl[self->mpVBankManager->BankMonitor.mInst] = (float*)volControl;
-    cStreamSys_STREAM_CreateInstance(self, streamIndex, memType, buffSpace);
-    self->mpVBankManager->BankMonitor.mInst--;
+    mpVBankManager->BankMonitor.mVolControl[mpVBankManager->BankMonitor.mInst] = (float*)volControl;
+    STREAM_CreateInstance(streamIndex, memType, buffSpace);
+    mpVBankManager->BankMonitor.mInst--;
 }
 #endif
 
@@ -921,11 +918,11 @@ extern "C" void cStreamInstance_SetBigFile(cStreamInstance*, int);
  * @param i  the stream index
  * @param val  the big-file name
  */
-extern "C" void cStreamSys_STREAM_SetBigFile(cStreamSys* self, int i, int val)
+void cStreamSys::STREAM_SetBigFile(int i, int val)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        cStreamInstance_SetBigFile(stream, val);
+        stream->SetBigFile(val);
     }
 }
 #endif
@@ -940,13 +937,13 @@ extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* e, int a1);
  *
  * @param i  the stream index
  */
-extern "C" void cStreamSys_STREAM_Destroy(cStreamSys* self, int i)
+void cStreamSys::STREAM_Destroy(int i)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
         cStreamInstance__cStreamInstance(stream, 3);
     }
-    self->mStreamInstance[i] = 0;
+    mStreamInstance[i] = 0;
 }
 #endif
 
@@ -958,12 +955,12 @@ extern "C" void cStreamInstance_Update(cStreamInstance* e);
 /**
  * Updates every stream instance (cStreamInstance_Update); cController_Update calls it each frame.
  */
-extern "C" void cStreamSys_STREAM_Update(cStreamSys* self)
+void cStreamSys::STREAM_Update()
 {
-    for (int i = 0; i < self->mNumStreams; i++) {
-        cStreamInstance* stream = self->mStreamInstance[i];
+    for (int i = 0; i < mNumStreams; i++) {
+        cStreamInstance* stream = mStreamInstance[i];
         if (stream != 0) {
-            cStreamInstance_Update(stream);
+            stream->Update();
         }
     }
 }
@@ -977,13 +974,13 @@ extern "C" void cStreamInstance_Pause(cStreamInstance* p);
 /**
  * Pauses every stream instance (cStreamInstance_Pause).
  */
-extern "C" void cStreamSys_STREAM_Pause(cStreamSys* self)
+void cStreamSys::STREAM_Pause()
 {
     int i;
-    for (i = 0; i < self->mNumStreams; i++) {
-        cStreamInstance* stream = self->mStreamInstance[i];
+    for (i = 0; i < mNumStreams; i++) {
+        cStreamInstance* stream = mStreamInstance[i];
         if (stream != 0) {
-            cStreamInstance_Pause(stream);
+            stream->Pause();
         }
     }
 }
@@ -996,13 +993,13 @@ extern "C" void cStreamInstance_Resume(cStreamInstance* p);
 /**
  * Resumes every stream instance (cStreamInstance_Resume).
  */
-extern "C" void cStreamSys_STREAM_Resume(cStreamSys* self)
+void cStreamSys::STREAM_Resume()
 {
     int i;
-    for (i = 0; i < self->mNumStreams; i++) {
-        cStreamInstance* stream = self->mStreamInstance[i];
+    for (i = 0; i < mNumStreams; i++) {
+        cStreamInstance* stream = mStreamInstance[i];
         if (stream != 0) {
-            cStreamInstance_Resume(stream);
+            stream->Resume();
         }
     }
 }
@@ -1022,11 +1019,11 @@ extern "C" int cStreamInstance_Queue(cStreamInstance* e, int a, int b, int c);
  * @param offset  the offset in the file
  * @return the request handle, or -1
  */
-extern "C" int cStreamSys_STREAM_Queue(cStreamSys* self, int i, int holdTime, int buf, int offset)
+int cStreamSys::STREAM_Queue(int i, int holdTime, int buf, int offset)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_Queue(stream, holdTime, buf, offset);
+        return stream->Queue(holdTime, buf, offset);
     }
     return -1;
 }
@@ -1046,11 +1043,11 @@ extern "C" int cStreamInstance_Queue1(cStreamInstance*, int, int, int);
  * @param offset  the offset in the element
  * @return the request handle, or -1
  */
-extern "C" int cStreamSys_STREAM_Queue1(cStreamSys* self, int idx, int holdTime, int element, int offset)
+int cStreamSys::STREAM_Queue1(int idx, int holdTime, int element, int offset)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
+    cStreamInstance* stream = mStreamInstance[idx];
     if (stream != 0) {
-        return cStreamInstance_Queue1(stream, holdTime, element, offset);
+        return stream->Queue1(holdTime, element, offset);
     }
     return -1;
 }
@@ -1067,11 +1064,11 @@ extern "C" int cStreamInstance_Requests(cStreamInstance*);
  * @param i  the stream index
  * @return the count
  */
-extern "C" int cStreamSys_STREAM_Requests(cStreamSys* self, int i)
+int cStreamSys::STREAM_Requests(int i)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_Requests(stream);
+        return stream->Requests();
     }
     return 0;
 }
@@ -1085,11 +1082,11 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Purge);
  *
  * @param i  the stream index
  */
-extern "C" void cStreamSys_STREAM_Purge(cStreamSys* self, int i)
+void cStreamSys::STREAM_Purge(int i)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        cStreamInstance_Purge(stream);
+        stream->Purge();
     }
 }
 #endif
@@ -1105,13 +1102,13 @@ extern "C" float cStreamInstance_GetTimeRemaining(cStreamInstance* self);
  * @param i  the stream index (negative gives 0)
  * @return the time
  */
-extern "C" float cStreamSys_STREAM_TimeRemaining(cStreamSys* self, int i)
+float cStreamSys::STREAM_TimeRemaining(int i)
 {
     cStreamInstance* stream;
-    if (i < 0 || (stream = self->mStreamInstance[i]) == 0) {
+    if (i < 0 || (stream = mStreamInstance[i]) == 0) {
         return 0.0f;
     }
-    return cStreamInstance_GetTimeRemaining(stream);
+    return stream->GetTimeRemaining();
 }
 #endif
 
@@ -1126,13 +1123,13 @@ extern "C" float cStreamInstance_GetRequestLength(cStreamInstance*);
  * @param idx  the stream index (negative gives 0)
  * @return the length
  */
-extern "C" float cStreamSys_STREAM_RequestLength(cStreamSys* self, int idx)
+float cStreamSys::STREAM_RequestLength(int idx)
 {
     cStreamInstance* stream;
-    if (idx < 0 || (stream = self->mStreamInstance[idx]) == 0) {
+    if (idx < 0 || (stream = mStreamInstance[idx]) == 0) {
         return 0.0f;
     }
-    return cStreamInstance_GetRequestLength(stream);
+    return stream->GetRequestLength();
 }
 #endif
 //100%
@@ -1147,10 +1144,10 @@ extern "C" int cStreamInstance_IsBufferFilled(cStreamInstance*, int);
  * @param minVal  the amount (milliseconds)
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsBufferFilled(cStreamSys* self, int idx, int minVal)
+int cStreamSys::STREAM_IsBufferFilled(int idx, int minVal)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
-    return stream != 0 ? cStreamInstance_IsBufferFilled(stream, minVal) : 0;
+    cStreamInstance* stream = mStreamInstance[idx];
+    return stream != 0 ? stream->IsBufferFilled(minVal) : 0;
 }
 #endif
 //100%
@@ -1164,10 +1161,10 @@ extern "C" int cStreamInstance_IsCurrRequestedRead(cStreamInstance*);
  * @param idx  the stream index
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsCurrRequestedRead(cStreamSys* self, int idx)
+int cStreamSys::STREAM_IsCurrRequestedRead(int idx)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
-    return stream != 0 ? cStreamInstance_IsCurrRequestedRead(stream) : 0;
+    cStreamInstance* stream = mStreamInstance[idx];
+    return stream != 0 ? stream->IsCurrRequestedRead() : 0;
 }
 #endif
 //100%
@@ -1182,7 +1179,7 @@ int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus")
  * @param handle  the request handle
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsRequestedDequeued(cStreamSys* self, int handle)
+int cStreamSys::STREAM_IsRequestedDequeued(int handle)
 {
     int st[4];
     int result;
@@ -1204,7 +1201,7 @@ int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus")
  * @param handle  the request handle
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsRequestedPlaying(cStreamSys* self, int handle)
+int cStreamSys::STREAM_IsRequestedPlaying(int handle)
 {
     int st[4];
     int result;
@@ -1226,11 +1223,11 @@ extern "C" int cStreamInstance_Playing(cStreamInstance*);
  * @param i  the stream index
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_Playing(cStreamSys* self, int i)
+int cStreamSys::STREAM_Playing(int i)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_Playing(stream);
+        return stream->Playing();
     }
     return 0;
 }
@@ -1246,11 +1243,11 @@ extern "C" void cStreamInstance_ReleaseHold(cStreamInstance*);
  *
  * @param idx  the stream index
  */
-extern "C" void cStreamSys_STREAM_ReleaseHold(cStreamSys* self, int idx)
+void cStreamSys::STREAM_ReleaseHold(int idx)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
+    cStreamInstance* stream = mStreamInstance[idx];
     if (stream != 0) {
-        cStreamInstance_ReleaseHold(stream);
+        stream->ReleaseHold();
     }
 }
 #endif
@@ -1265,11 +1262,11 @@ extern "C" void cStreamInstance_ReleaseHold1(cStreamInstance*, int);
  * @param idx  the stream index
  * @param requestHandle  the request
  */
-extern "C" void cStreamSys_STREAM_ReleaseHold1(cStreamSys* self, int idx, int requestHandle)
+void cStreamSys::STREAM_ReleaseHold1(int idx, int requestHandle)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
+    cStreamInstance* stream = mStreamInstance[idx];
     if (stream != 0) {
-        cStreamInstance_ReleaseHold1(stream, requestHandle);
+        stream->ReleaseHold1(requestHandle);
     }
 }
 #endif
@@ -1283,9 +1280,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetVolControl);
  * @param i  the stream index
  * @param val  the volume control
  */
-extern "C" void cStreamSys_STREAM_SetVolControl(cStreamSys* self, int i, int val)
+void cStreamSys::STREAM_SetVolControl(int i, int val)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (((void*)stream) != 0) {
         stream->mVolControl = (float*)val;
     }
@@ -1301,11 +1298,11 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetBaseVolume);
  * @param idx  the stream index
  * @param val  the volume
  */
-extern "C" void cStreamSys_STREAM_SetBaseVolume(cStreamSys* self, int idx, int val)
+void cStreamSys::STREAM_SetBaseVolume(int idx, int val)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
+    cStreamInstance* stream = mStreamInstance[idx];
     if (stream != 0) {
-        cStreamInstance_SetBaseVolume(stream, val);
+        stream->SetBaseVolume(val);
     }
 }
 #endif
@@ -1318,9 +1315,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetHandle);
  * @param idx  the stream index
  * @return the handle, or -1
  */
-extern "C" int cStreamSys_STREAM_GetHandle(cStreamSys* self, int idx)
+int cStreamSys::STREAM_GetHandle(int idx)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
+    cStreamInstance* stream = mStreamInstance[idx];
     if (stream != 0) {
         return stream->mHandle;
     }
@@ -1339,11 +1336,11 @@ extern "C" int cStreamInstance_GetCurrActiveSampleHandle(cStreamInstance*);
  * @param i  the stream index
  * @return the request handle, or -1
  */
-extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(cStreamSys* self, int i)
+int cStreamSys::STREAM_GetCurrActiveSampleHandle(int i)
 {
-    cStreamInstance* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_GetCurrActiveSampleHandle(stream);
+        return stream->GetCurrActiveSampleHandle();
     }
     return -1;
 }
@@ -1358,10 +1355,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetInstance__FPvi);
  * @param index  the stream index
  * @return the stream instance
  */
-int cStreamSys_STREAM_GetInstance(void* vself, int index)
+int cStreamSys::STREAM_GetInstance(int index)
 {
-    cStreamSys* self = (cStreamSys*)vself;
-    return (int)self->mStreamInstance[index];
+    return (int)mStreamInstance[index];
 }
 #endif
 
@@ -1376,7 +1372,7 @@ extern "C" void SNDSTRM_modifyhold(int, int);
  * @param monitorInst  the monitor instance
  * @return 1
  */
-extern "C" int cStreamSys_STREAM_ReleaseHoldCallback(cStreamSys* self, cMonitorInstance* monitorInst)
+int cStreamSys::STREAM_ReleaseHoldCallback(cMonitorInstance* monitorInst)
 {
     SNDSTRM_modifyhold(monitorInst->mData1, 0);
     return 1;
@@ -1394,10 +1390,10 @@ extern "C" int cStreamInstance_TimeMult(cStreamInstance*, int);
  * @param multAmount  the multiplier
  * @return the driver's result, or -1
  */
-extern "C" int cStreamSys_STREAM_TimeMult(cStreamSys* self, int idx, int multAmount)
+int cStreamSys::STREAM_TimeMult(int idx, int multAmount)
 {
-    cStreamInstance* stream = self->mStreamInstance[idx];
-    return stream != 0 ? cStreamInstance_TimeMult(stream, multAmount) : -1;
+    cStreamInstance* stream = mStreamInstance[idx];
+    return stream != 0 ? stream->TimeMult(multAmount) : -1;
 }
 #endif
 
@@ -1606,16 +1602,15 @@ struct sStrmVoiceCb {
  * member-function callback mCallback on the controller (if set), then cBankMonitorInstance_Update3D with the
  * controller's bank monitor (the shared cBankManager's BankMonitor, or 0 without a controller).
  *
- * @param voice  the bank-monitor instance (this)
  * @param controller  the controller (On Tour cController* Monitor)
  * @param time   elapsed time (On Tour Time)
  */
-extern "C" void cBankMonitorInstance_Update(cBankMonitorInstance* voice, cController* controller, float time)
+void cBankMonitorInstance::Update(cController* controller, float time)
 {
-    if (cBankMonitorInstance_IsFree(voice) == 0 && time > 0.0f) {
-        sStrmVoiceCb* sv = (sStrmVoiceCb*)voice;
+    if (IsFree() == 0 && time > 0.0f) {
+        sStrmVoiceCb* sv = (sStrmVoiceCb*)this;
         if (sv->cb) {
-            (((cStrmCbOwner*)controller)->*(sv->cb))(voice, time);
+            (((cStrmCbOwner*)controller)->*(sv->cb))(this, time);
         }
         char* bm = 0;
         if (((void*)controller)) {
@@ -1626,7 +1621,7 @@ extern "C" void cBankMonitorInstance_Update(cBankMonitorInstance* voice, cContro
                 bm += 0x1D8;
             }
         }
-        cBankMonitorInstance_Update3D(voice, (cBankMonitor*)bm, time);
+        cBankMonitorInstance_Update3D(this, (cBankMonitor*)bm, time);
     }
 }
 #endif
@@ -1644,14 +1639,13 @@ extern "C" void cBankMonitorInstance_Update(cBankMonitorInstance* voice, cContro
  *
  * @param time  elapsed time (On Tour Time)
  */
-extern "C" void cController_BANKMONITOR_Update(cController* self, float time)
+void cController::BANKMONITOR_Update(float time)
 {
-    if (self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mBankMonitorPaused != 0) {
+    if (MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mBankMonitorPaused != 0) {
         time = 0.0f;
     }
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Update(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mBankMonitorInstance[i],
-                                    self, time);
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mBankMonitorInstance[i].Update(this, time);
     }
 }
 #endif
@@ -1707,15 +1701,15 @@ extern "C" void cMonitorInstance_Update(void* e, cController* self);
  *
  * It fills slot 1 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has cMonitor_MONITOR_Update.
  */
-extern "C" void cController_MONITOR_Update(cController* self)
+void cController::MONITOR_Update()
 {
-    cBankManager* bankManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+    cBankManager* bankManager = MusicSys.mpVStreamSys->mpVBankManager;
     cBankMonitor* bm = &bankManager->BankMonitor;
     if (bankManager->BankMonitor.mPaused == 0) {
         cMonitor_MONITOR_Update(bm);
         for (int i = 0; i < 48; i++) {
-            cMonitorInstance_Update(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mMonitorInstance[i],
-                                    self);
+            cMonitorInstance_Update(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mMonitorInstance[i],
+                                    this);
         }
     }
 }
@@ -1738,19 +1732,19 @@ extern "C" void func_002B4388(void* self);
  *
  * @param frameTime  the frame time
  */
-extern "C" void cController_Update(cController* self, float frameTime)
+void cController::Update(float frameTime)
 {
-    cMusicSys* sys = &self->MusicSys;
+    cMusicSys* sys = &MusicSys;
     cAsyncSys_ASYNCSYS_Update(sys->mpVStreamSys->mpVBankManager);
-    func_002A6D18(self);
+    func_002A6D18(this);
     cBankManager* bankMan = sys->mpVStreamSys->mpVBankManager;
     cBankMonitor* bankMon = &bankMan->BankMonitor;
     sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)bankMan->BankMonitor.mVtbl;
     sVEntry<void(void*, float)>* entry = &vt[5];
     entry->fn(vthis(bankMon, *entry), frameTime);
     func_002B4388(sys);
-    func_002B0C78(&self->SpeechSys);
-    cStreamSys_STREAM_Update(sys->mpVStreamSys);
+    func_002B0C78(&SpeechSys);
+    sys->mpVStreamSys->STREAM_Update();
 }
 #endif
 
@@ -1810,26 +1804,26 @@ int SNDSTRM_requeststatus_st(int h, int* st) __asm__("SNDSTRM_requeststatus");
  *
  * @return nonzero when done
  */
-extern "C" int cBankMonitorInstance_DonePlaying(cBankMonitorInstance* self)
+int cBankMonitorInstance::DonePlaying()
 {
-    int type = *(int*)self;
+    int type = *(int*)this;
     switch (type) {
     case 1: {
         SNDSYS_entercritical();
-        int result = SNDover(self->mHandle) != 0;
+        int result = SNDover(mHandle) != 0;
         SNDSYS_leavecritical();
         return result;
     }
     case 2: {
         SNDSYS_entercritical();
-        int result = SNDseqstatus(self->mHandle);
+        int result = SNDseqstatus(mHandle);
         SNDSYS_leavecritical();
         return result == 2 || result < 0;
     }
     case 3: {
         int st[4];
         SNDSYS_entercritical();
-        if (SNDSTRM_requeststatus_st(self->mHandle, st) >= 0) {
+        if (SNDSTRM_requeststatus_st(mHandle, st) >= 0) {
             SNDSYS_leavecritical();
             return st[0] == 3;
         }
@@ -1852,15 +1846,15 @@ extern "C" void cBankMonitorInstance_StopSound(cBankMonitorInstance*);
  * Calls cBankMonitorInstance_StopSound, then sets the cached pitch (+0xB0) to 0x8000, the cached volume (+0xB4) to -1, the cached
  * position (+0xB8) to 0xFFFF and clears the type (+0), the stopping flag (+0x54) and +0x58.
  */
-extern "C" void cBankMonitorInstance_Reset(cBankMonitorInstance* self)
+void cBankMonitorInstance::Reset()
 {
-    cBankMonitorInstance_StopSound(self);
-    self->mLastPitch = 0x8000;
-    self->mLastVolume = -1;
-    self->mMonitorType = 0;
-    self->mFading = 0;
-    self->mCloseStateLocked = 0;
-    self->mLastAzimuth = 0xFFFF;
+    StopSound();
+    mLastPitch = 0x8000;
+    mLastVolume = -1;
+    mMonitorType = 0;
+    mFading = 0;
+    mCloseStateLocked = 0;
+    mLastAzimuth = 0xFFFF;
 }
 #endif
 
@@ -1878,18 +1872,18 @@ extern "C" void cBankMonitorInstance_Reset(cBankMonitorInstance* self);
  *
  * @return nonzero when free
  */
-extern "C" int cBankMonitorInstance_IsFree(cBankMonitorInstance* self)
+int cBankMonitorInstance::IsFree()
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 1;
     }
-    if (self->mCloseOnEnd == 0) {
+    if (mCloseOnEnd == 0) {
         return 0;
     }
-    if (cBankMonitorInstance_DonePlaying(self) == 0) {
+    if (DonePlaying() == 0) {
         return 0;
     }
-    cBankMonitorInstance_Reset(self);
+    Reset();
     return 1;
 }
 #endif
@@ -1904,7 +1898,7 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_DistSq);
  * @param posB  the second position
  * @return the squared distance
  */
-extern "C" float cBankMonitorInstance_DistSq(cBankMonitorInstance* self, float* posA, float* posB)
+float cBankMonitorInstance::DistSq(float* posA, float* posB)
 {
     float dx = posA[0] - posB[0];
     float dy = posA[1] - posB[1];
@@ -1998,11 +1992,10 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetBank__FPvii);
  * @param bank  the bank
  * @param patch  the patch
  */
-void cBankMonitorInstance_SetBank(void* vself, int bank, int patch)
+void cBankMonitorInstance::SetBank(int bank, int patch)
 {
-    cBankMonitorInstance* self = (cBankMonitorInstance*)vself;
-    self->mRestartInfo.bank.mBank = bank;
-    self->mRestartInfo.bank.mPatch = patch;
+    mRestartInfo.bank.mBank = bank;
+    mRestartInfo.bank.mPatch = patch;
 }
 #endif
 
@@ -2018,11 +2011,11 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param name  the file name
  * @param fileOffset  the offset in the file
  */
-extern "C" void cBankMonitorInstance_SetStream(cBankMonitorInstance* self, int streamInst, const char* name, int fileOffset)
+void cBankMonitorInstance::SetStream(int streamInst, const char* name, int fileOffset)
 {
-    self->mRestartInfo.bank.mBank = streamInst;
-    strcpy((char*)&self->mRestartInfo.bank.mPatch, name);
-    self->mRestartInfo.stream.mOffset = fileOffset;
+    mRestartInfo.bank.mBank = streamInst;
+    strcpy((char*)&mRestartInfo.bank.mPatch, name);
+    mRestartInfo.stream.mOffset = fileOffset;
 }
 #endif
 
@@ -2035,11 +2028,10 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetMIDI__FPvii);
  * @param midiData  the sequence data
  * @param bank  the bank
  */
-void cBankMonitorInstance_SetMIDI(void* vself, int midiData, int bank)
+void cBankMonitorInstance::SetMIDI(int midiData, int bank)
 {
-    cBankMonitorInstance* self = (cBankMonitorInstance*)vself;
-    self->mRestartInfo.bank.mBank = midiData;
-    self->mRestartInfo.bank.mPatch = bank;
+    mRestartInfo.bank.mBank = midiData;
+    mRestartInfo.bank.mPatch = bank;
 }
 #endif
 
@@ -2093,26 +2085,26 @@ extern "C" void SNDMIDI_azimuth(int h, int pos);
  * @param pos  the azimuth (On Tour Azimuth)
  * @param elevation  the elevation (On Tour Elevation)
  */
-extern "C" void cBankMonitorInstance_PosUpdate(cBankMonitorInstance* self, int pos, int elevation)
+void cBankMonitorInstance::PosUpdate(int pos, int elevation)
 {
-    int azimuthDiff = pos - self->mLastAzimuth;
+    int azimuthDiff = pos - mLastAzimuth;
     if (azimuthDiff >= -0x1FF && azimuthDiff <= 0x1FF) {
         return;
     }
-    self->mLastAzimuth = pos;
-    switch (*(int*)self) {
+    mLastAzimuth = pos;
+    switch (*(int*)this) {
     case 1:
         SNDSYS_entercritical();
-        SND3dpos(self->mHandle, pos, elevation);
+        SND3dpos(mHandle, pos, elevation);
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
-        SNDMIDI_azimuth(self->mHandle, pos);
+        SNDMIDI_azimuth(mHandle, pos);
         SNDSYS_leavecritical();
         break;
     case 3:
-        cStreamInstance_Set3DPosition((cStreamInstance*)(*(void**)&self->mRestartInfo), pos, elevation);
+        ((cStreamInstance*)(*(void**)&mRestartInfo))->Set3DPosition(pos, elevation);
         break;
     }
 }
@@ -2136,7 +2128,7 @@ extern "C" void SNDMIDI_pitchmult(int h, int vol);
  *
  * @param vol  the pitch multiplier, 4.12 fixed point (On Tour Pitch)
  */
-extern "C" void cBankMonitorInstance_PitchUpdate(cBankMonitorInstance* self, int vol)
+void cBankMonitorInstance::PitchUpdate(int vol)
 {
     if (vol > 0x3FFF) {
         vol = 0x3FFF;
@@ -2144,24 +2136,24 @@ extern "C" void cBankMonitorInstance_PitchUpdate(cBankMonitorInstance* self, int
     if (vol < 0) {
         vol = 0;
     }
-    int pitchDiff = vol - self->mLastPitch;
+    int pitchDiff = vol - mLastPitch;
     if (pitchDiff >= -0xFF && pitchDiff <= 0xFF) {
         return;
     }
-    self->mLastPitch = vol;
-    switch (*(int*)self) {
+    mLastPitch = vol;
+    switch (*(int*)this) {
     case 1:
         SNDSYS_entercritical();
-        SNDpitchmult(self->mHandle, vol);
+        SNDpitchmult(mHandle, vol);
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
-        SNDMIDI_pitchmult(self->mHandle, vol);
+        SNDMIDI_pitchmult(mHandle, vol);
         SNDSYS_leavecritical();
         break;
     case 3:
-        cStreamInstance_SetPitch((cStreamInstance*)(*(void**)&self->mRestartInfo), vol);
+        ((cStreamInstance*)(*(void**)&mRestartInfo))->SetPitch(vol);
         break;
     }
 }
@@ -2188,72 +2180,72 @@ extern "C" void SNDseqvol(int h, int a);
  *
  * @param vol  the volume 0..127, or -1 to stop (On Tour Vol)
  */
-extern "C" void cBankMonitorInstance_VolUpdate(cBankMonitorInstance* self, int vol)
+void cBankMonitorInstance::VolUpdate(int vol)
 {
     int orig = vol;
-    switch (*(int*)self) {
+    switch (*(int*)this) {
     case 1: {
-        if (self->mVolMultiplier >= 0.0f)
-            vol = (int)(self->mVolMultiplier * (float)vol);
+        if (mVolMultiplier >= 0.0f)
+            vol = (int)(mVolMultiplier * (float)vol);
         if (vol > 127)
             vol = 127;
         int none = -1;
         if (vol <= none)
             vol = 0;
-        if (self->mLastVolume >= 0) {
-            int volDiff = vol - self->mLastVolume;
+        if (mLastVolume >= 0) {
+            int volDiff = vol - mLastVolume;
             if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
-        self->mLastVolume = vol;
+        mLastVolume = vol;
         SNDSYS_entercritical();
         if (orig == none)
-            SNDstop(self->mHandle);
+            SNDstop(mHandle);
         else
-            SNDvol(self->mHandle, vol);
+            SNDvol(mHandle, vol);
         SNDSYS_leavecritical();
         break;
     }
     case 2: {
-        if (self->mVolMultiplier >= 0.0f)
-            vol = (int)(self->mVolMultiplier * (float)vol);
+        if (mVolMultiplier >= 0.0f)
+            vol = (int)(mVolMultiplier * (float)vol);
         if (vol > 127)
             vol = 127;
         int none = -1;
         if (vol <= none)
             vol = 0;
-        if (self->mLastVolume >= 0) {
-            int volDiff = vol - self->mLastVolume;
+        if (mLastVolume >= 0) {
+            int volDiff = vol - mLastVolume;
             if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
-        self->mLastVolume = vol;
+        mLastVolume = vol;
         SNDSYS_entercritical();
         if (orig == none)
-            SNDseqstop(self->mHandle);
+            SNDseqstop(mHandle);
         else
-            SNDseqvol(self->mHandle, vol);
+            SNDseqvol(mHandle, vol);
         SNDSYS_leavecritical();
         break;
     }
     case 3: {
-        if (self->mVolMultiplier >= 0.0f)
-            vol = (int)(self->mVolMultiplier * (float)vol);
+        if (mVolMultiplier >= 0.0f)
+            vol = (int)(mVolMultiplier * (float)vol);
         if (vol > 127)
             vol = 127;
         int none = -1;
         if (vol <= none)
             vol = 0;
-        if (self->mLastVolume >= 0) {
-            int volDiff = vol - self->mLastVolume;
+        if (mLastVolume >= 0) {
+            int volDiff = vol - mLastVolume;
             if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
-        self->mLastVolume = vol;
+        mLastVolume = vol;
         if (orig == none)
-            cStreamInstance_Purge(*(void**)&self->mRestartInfo);
+            cStreamInstance_Purge(*(void**)&mRestartInfo);
         else
-            cStreamInstance_SetBaseVolume(*(void**)&self->mRestartInfo, vol);
+            cStreamInstance_SetBaseVolume(*(void**)&mRestartInfo, vol);
         break;
     }
     }
@@ -2274,22 +2266,22 @@ extern "C" void SNDseqautovol(int h, int a, int b);
  * Does nothing when already stopping (+0x54). Otherwise clears +0x8, sets +0x54 and starts an automatic volume ramp
  * (0x19, -1) on the sample (SNDautovol) or sequence (SNDseqautovol).
  */
-extern "C" void cBankMonitorInstance_StopSound(cBankMonitorInstance* self)
+void cBankMonitorInstance::StopSound()
 {
-    if (self->mFading != 0) {
+    if (mFading != 0) {
         return;
     }
-    self->mActive = 0;
-    self->mFading = 1;
-    switch (*(int*)self) {
+    mActive = 0;
+    mFading = 1;
+    switch (*(int*)this) {
     case 1:
         SNDSYS_entercritical();
-        SNDautovol(self->mHandle, 25, -1);
+        SNDautovol(mHandle, 25, -1);
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
-        SNDseqautovol(self->mHandle, 25, -1);
+        SNDseqautovol(mHandle, 25, -1);
         SNDSYS_leavecritical();
         break;
     }
@@ -2442,21 +2434,21 @@ extern "C" void cBankMonitorInstance_RestartSound(void*);
  * @param radius  the current distance (On Tour Radius)
  * @return nonzero while the sound should play
  */
-extern "C" int cBankMonitorInstance_CheckActive(cBankMonitorInstance* self, float radius)
+int cBankMonitorInstance::CheckActive(float radius)
 {
-    float th = self->mRadius;
+    float th = mRadius;
     if (th == 0.0f) {
         return 1;
     }
-    if (self->mActive != 0) {
+    if (mActive != 0) {
         if (th < radius) {
-            cBankMonitorInstance_StopSound(self);
+            StopSound();
             return 0;
         }
         return 1;
     }
     if (radius < th) {
-        cBankMonitorInstance_RestartSound(self);
+        cBankMonitorInstance_RestartSound(this);
         return 1;
     }
     return 0;
@@ -2550,8 +2542,8 @@ extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBank
             } else {
                 time = 1.0f;
             }
-            cBankMonitorInstance_PosUpdate(voice, pos.pos, pos.pos2);
-            cBankMonitorInstance_PitchUpdate(voice, (int)(time * 4096.0f));
+            voice->PosUpdate(pos.pos, pos.pos2);
+            voice->PitchUpdate((int)(time * 4096.0f));
             if (voice->mExternalVol != 0) {
                 vol = voice->mBaseVol;
             } else {
@@ -2588,10 +2580,10 @@ extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBank
         if (volControl != 0) {
             vol = (int)((float)vol * *volControl);
         }
-        cBankMonitorInstance_VolUpdate(voice, vol);
+        voice->VolUpdate(vol);
         return;
     }
-    if (cBankMonitorInstance_DonePlaying(voice) != 0) {
+    if (voice->DonePlaying() != 0) {
         voice->mActive = 0;
         voice->mFading = 0;
         voice->mHandle = -1;
@@ -2615,9 +2607,9 @@ extern "C" void SNDseqpause(int h);
  */
 extern "C" void cBankMonitorInstance_Pause(cBankMonitorInstance* self)
 {
-    if (cBankMonitorInstance_IsFree(self) == 0 && self->mFading == 0) {
-        cBankMonitorInstance_PitchUpdate(self, 0);
-        cBankMonitorInstance_VolUpdate(self, 0);
+    if (self->IsFree() == 0 && self->mFading == 0) {
+        self->PitchUpdate(0);
+        self->VolUpdate(0);
         if (self->mMonitorType == 2) {
             SNDseqpause(self->mHandle);
         }
@@ -2642,8 +2634,8 @@ extern "C" void SNDseqresume(int h);
  */
 extern "C" void cBankMonitorInstance_Resume(cBankMonitorInstance* self)
 {
-    if (cBankMonitorInstance_IsFree(self) == 0) {
-        cBankMonitorInstance_PitchUpdate(self, 0x1000);
+    if (self->IsFree() == 0) {
+        self->PitchUpdate(0x1000);
         if (*(int*)self == 2) {
             SNDseqresume(self->mHandle);
         }
@@ -2675,17 +2667,17 @@ void cStreamInstance_SetBaseVolume(void* self, int val);
  * @param resetMonitor  nonzero to release the instance afterwards (On Tour ResetMonitor)
  * @param duration  the fade time in seconds (On Tour Duration)
  */
-extern "C" void cBankMonitorInstance_Fade(cBankMonitorInstance* self, int n, int resetMonitor, float duration)
+void cBankMonitorInstance::Fade(int n, int resetMonitor, float duration)
 {
     if (resetMonitor) {
-        self->mCloseStateLocked = 1;
-        self->mCloseOnEnd = 1;
+        mCloseStateLocked = 1;
+        mCloseOnEnd = 1;
     }
-    if (self->mFading != 0) {
+    if (mFading != 0) {
         return;
     }
     if (n == -1) {
-        self->mFading = 1;
+        mFading = 1;
     } else {
         if (n > 127) {
             n = 127;
@@ -2694,30 +2686,30 @@ extern "C" void cBankMonitorInstance_Fade(cBankMonitorInstance* self, int n, int
             n = 0;
         }
     }
-    switch (*(int*)self) {
+    switch (*(int*)this) {
     case 1:
         SNDSYS_entercritical();
         if (duration != 0.0f) {
-            SNDautovol(self->mHandle, (int)(duration * 100.0f), n);
+            SNDautovol(mHandle, (int)(duration * 100.0f), n);
         } else {
-            SNDvol(self->mHandle, n);
+            SNDvol(mHandle, n);
         }
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
         if (duration != 0.0f) {
-            SNDseqautovol(self->mHandle, (int)(duration * 100.0f), n);
+            SNDseqautovol(mHandle, (int)(duration * 100.0f), n);
         } else {
-            SNDseqvol(self->mHandle, n);
+            SNDseqvol(mHandle, n);
         }
         SNDSYS_leavecritical();
         break;
     case 3:
-        if (self->mFading != 0) {
-            cStreamInstance_Purge(*(void**)&self->mRestartInfo);
+        if (mFading != 0) {
+            cStreamInstance_Purge(*(void**)&mRestartInfo);
         } else {
-            cStreamInstance_SetBaseVolume(*(void**)&self->mRestartInfo, n);
+            cStreamInstance_SetBaseVolume(*(void**)&mRestartInfo, n);
         }
         break;
     }

@@ -12,6 +12,9 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+struct cBxReplayFrame;
+struct t4Matrix;
+
 struct cUVScrollModifier {
     // --- cUVScrollModifierState (the whole object)
     int Type;                       // 0x00 [O]; [R] ctor (desc +0x4); [U] update switches on it
@@ -26,6 +29,13 @@ struct cUVScrollModifier {
     float UVScroll[2];              // 0x38 [O] t2Vector; [R] ctor; [U] update (unaligned sdl/sdr copy), signal
     int On;                         // 0x40 [O] bool; [R] ctor stores 1; [U] update, signal
     char unk_44[0xc];               // 0x44 padding to the 0x50 allocation
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cUVScrollModifier1(cBxReplayFrame* stream) __asm__("cUVScrollModifier_cUVScrollModifier1");
+    void update() __asm__("cUVScrollModifier_update");
+    void signal(int id, float value) __asm__("cUVScrollModifier_signal");
+    t4Matrix* getTextureMat(t4Matrix* mat) __asm__("cUVScrollModifier_getTextureMat");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cUVScrollModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cUVScrollModifier, Type, 0x00);

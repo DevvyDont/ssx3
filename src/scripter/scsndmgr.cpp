@@ -62,7 +62,7 @@ extern char cScriptSoundBankManager_vtbl[];
 extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(cScriptSoundBankManager* self, int flags)
 {
     self->mVtbl = (void**)cScriptSoundBankManager_vtbl;
-    cScriptSoundBankManager_UnlinkBanksAll(self);
+    self->UnlinkBanksAll();
     void* bankInfo = self->mpBankInfo;
     if (bankInfo != 0) {
         cMemMan_free(bankInfo);
@@ -94,11 +94,11 @@ extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int
  * @param dataSize  size of the bank data in bytes
  * @return the slot's bank number
  */
-extern "C" int cScriptSoundBankManager_LinkBank(cScriptSoundBankManager* self, int id, void* data, int dataSize)
+int cScriptSoundBankManager::LinkBank(int id, void* data, int dataSize)
 {
-    tScriptSoundBankInfo* bankInfo = cScriptSoundBankManager_GetBankInfo(self, id);
+    tScriptSoundBankInfo* bankInfo = GetBankInfo(id);
     if (((char*)bankInfo) == 0) {
-        bankInfo = cScriptSoundBankManager_GetEmptyBankInfo(self);
+        bankInfo = GetEmptyBankInfo();
         bankInfo->userID = id;
         bankInfo->pData = (char*)data;
         cBankManager_BANK_Attach(**(void***)&cAudioInterface_bxAudio()->MusicSys, bankInfo->bankNum, data, dataSize);
@@ -127,12 +127,12 @@ extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetBankInfo(cScriptSoun
  *
  * @param id  the bank's user ID
  */
-extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* self, int id)
+void cScriptSoundBankManager::UnlinkBank1(int id)
 {
-    tScriptSoundBankInfo* bankInfo = cScriptSoundBankManager_GetBankInfo((self), id);
+    tScriptSoundBankInfo* bankInfo = GetBankInfo(id);
     if (bankInfo != 0) {
-        sScSndVEntry* vt = (sScSndVEntry*)self->mVtbl;
-        vt[2].fn(vthis(self, vt[2]), bankInfo);
+        sScSndVEntry* vt = (sScSndVEntry*)mVtbl;
+        vt[2].fn(vthis(this, vt[2]), bankInfo);
     }
 }
 #endif
@@ -149,11 +149,10 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBanksAll);
  * Calls the manager's virtual slot 2 (cScriptSoundBankManager_UnlinkBank) on each used slot of the bank table (On Tour mpBankInfo);
  * it releases the bank from the audio object's sound system and resets the slot's ID to -1.
  *
- * @param self_  the script sound bank manager (this)
  */
-extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* self_)
+void cScriptSoundBankManager::UnlinkBanksAll()
 {
-    cScriptSoundBankManager* self = self_;
+    cScriptSoundBankManager* self = this;
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
         if (((int)(self->mpBankInfo)[i].pData) != 0) {
@@ -174,11 +173,11 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetBankInfo);
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id)
+tScriptSoundBankInfo* cScriptSoundBankManager::GetBankInfo(int id)
 {
-    for (int i = 0; i < self->mMaxBanks; i++) {
-        if (self->mpBankInfo[i].pData != 0 && self->mpBankInfo[i].userID == id) {
-            return &self->mpBankInfo[i];
+    for (int i = 0; i < mMaxBanks; i++) {
+        if (mpBankInfo[i].pData != 0 && mpBankInfo[i].userID == id) {
+            return &mpBankInfo[i];
         }
     }
     return 0;
@@ -199,7 +198,7 @@ extern "C" void cBankManager_BANK_UnAttach(void* bank, int handle);
  *
  * @param pBankInfo  the bank's slot (On Tour tScriptSoundBankInfo* pBankInfo: userID, bankNum, pData)
  */
-extern "C" void cScriptSoundBankManager_UnlinkBank(cScriptSoundBankManager* self, tScriptSoundBankInfo* pBankInfo)
+void cScriptSoundBankManager::UnlinkBank(tScriptSoundBankInfo* pBankInfo)
 {
     cBankManager_BANK_UnAttach(**(void***)&cAudioInterface_bxAudio()->MusicSys, pBankInfo->bankNum);
     pBankInfo->userID = -1;
@@ -216,11 +215,11 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetEmptyBankInfo);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self)
+tScriptSoundBankInfo* cScriptSoundBankManager::GetEmptyBankInfo()
 {
-    for (int i = 0; i < self->mMaxBanks; i++) {
-        if (self->mpBankInfo[i].pData == 0) {
-            return &self->mpBankInfo[i];
+    for (int i = 0; i < mMaxBanks; i++) {
+        if (mpBankInfo[i].pData == 0) {
+            return &mpBankInfo[i];
         }
     }
     return 0;
@@ -266,7 +265,7 @@ extern char cVidEngine_vtbl[];
 extern "C" void cVidEngine__cVidEngine(cVidEngine* self, int flags)
 {
     self->mVtbl = (void**)cVidEngine_vtbl;
-    cVidEngine_ResetVideoEngine(self);
+    self->ResetVideoEngine();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -294,24 +293,24 @@ extern int cPauseState_FlagsTable[];
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
  * and cCutSceneTransitionMan_ForceToCutSceneMode() is called on the cutscene transition manager. The first four words are then cleared.
  */
-extern "C" void cVidEngine_ResetVideoEngine(cVidEngine* self)
+void cVidEngine::ResetVideoEngine()
 {
-    if (self->mpPlayer != 0) {
-        cMoviePlayer__cMoviePlayer(self->mpPlayer, 3);
-        if (self->mIsPlaying != 0) {
+    if (mpPlayer != 0) {
+        cMoviePlayer__cMoviePlayer(mpPlayer, 3);
+        if (mIsPlaying != 0) {
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());
-            GrMan->SetTVDisplayFormat(self->mSavedDisplayFormat);
-            if (self->mRestoreCutSceneMode != 0) {
-                self->mRestoreCutSceneMode = 0;
+            GrMan->SetTVDisplayFormat(mSavedDisplayFormat);
+            if (mRestoreCutSceneMode != 0) {
+                mRestoreCutSceneMode = 0;
                 cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);
             }
         }
     }
-    self->mpPlayer = 0;
-    self->mIsPlaying = 0;
-    self->mFrameUpdated = 0;
-    self->mNumPause = 0;
+    mpPlayer = 0;
+    mIsPlaying = 0;
+    mFrameUpdated = 0;
+    mNumPause = 0;
 }
 #endif
 

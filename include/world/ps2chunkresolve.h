@@ -24,6 +24,9 @@ struct cWorld;
 struct tCollideRecord;
 struct Nash;          // the world's nash cell tree / stream (On Tour Nash)
 
+struct tInstanceRecord;
+struct tModelRecord;
+
 struct cPS2ChunkResolve {
     // --- cChunkResolve (world/chunkresolve.h, 0xC)
     cWorld* mp_World;                       // 0x000 [O] cChunkResolve::mp_World; [R] cPS2ChunkResolve_init stores its third
@@ -39,6 +42,12 @@ struct cPS2ChunkResolve {
     int m_iNumImages;                       // 0x010 [O] cPspChunkResolve::m_iNumImages; [R] init stores the short at +0x2A of
                                             //       **(void***)pWorld (lh, then sw); [U] resolve / unresolve add it to texture
                                             //       ids (lw; one resolve path reads only the low half, lhu)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* resolve(int msg, unsigned int RID, char* obj) __asm__("cPS2ChunkResolve_resolve");
+    void* unresolve(unsigned int msg, unsigned int resourceId, char* data) __asm__("cPS2ChunkResolve_unresolve");
+    int resolveModel(tModelRecord* pModel) __asm__("cPS2ChunkResolve_resolveModel");
+    int resolveInstance(tInstanceRecord* pInstance) __asm__("cPS2ChunkResolve_resolveInstance");
 };
 CHECK_OFFSET(cPS2ChunkResolve, mp_World, 0x0);
 CHECK_OFFSET(cPS2ChunkResolve, m_pDummyCollideRecord, 0x4);

@@ -34,16 +34,16 @@ extern const char str_FlexRailSpaceNode[];
  * Allocates a 0x10-byte cFlexRailSpaceNode ("FlexRailSpaceNode") with type 3 (+0x8) and this node as its
  * owner (+0xC), keeps it in Node (+0x54) and inserts it into octree list 2 under the bound box at +0x30.
  */
-extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self)
+void cFlexRailNode::addSpaceHash()
 {
     cFlexRailSpaceNode* n = (cFlexRailSpaceNode*)cMemMan_alloc(0x10, str_FlexRailSpaceNode, 0x20000000, 0);
-    (*(void**)&n->FlexNode) = ((void*)self);
+    (*(void**)&n->FlexNode) = ((void*)this);
     n->type = 3;
-    self->Node = (cFlexRailSpaceNode*)n;
+    Node = (cFlexRailSpaceNode*)n;
     nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
-    cFlexRailSpaceNode* node = self->Node;
+    cFlexRailSpaceNode* node = Node;
     nash_CellKey key;
-    nash_Nash_findkey(&key, (char*)&self->BoundBox);
+    nash_Nash_findkey(&key, (char*)&BoundBox);
     nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
     nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
     nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
@@ -81,14 +81,14 @@ static inline int octEmpty_8C48(nash_Cell* o)
  * cell's list 2 (nash_Cell_remnode). An octant left with no children and no lists is deleted. Finally deletes the hash
  * node and nulls Node.
  */
-extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
+void cFlexRailNode::remSpaceHash()
 {
     cBXNash* nash = (cBXNash*)cObjectInterface_getNash();
-    cFlexRailSpaceNode* node = self->Node;
+    cFlexRailSpaceNode* node = Node;
     nash->deletecount++;
     nash_Octant* cell = nash->octant[0][0];
     nash_CellKey key;
-    nash_Nash_findkey(&key, (char*)&self->BoundBox);
+    nash_Nash_findkey(&key, (char*)&BoundBox);
     nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
     nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
     nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
@@ -98,8 +98,8 @@ extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
         operator_delete((int*)(octant->rootcell));
         (*(nash_Cell**)&octant->rootcell) = 0;
     }
-    operator_delete((int*)self->Node);
-    self->Node = 0;
+    operator_delete((int*)Node);
+    Node = 0;
 }
 #endif
 
@@ -171,12 +171,12 @@ extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instR
         self->Nodes[j].Mesh = bones[j];
         self->Nodes[j].Vel = t4vect_Zero;
         self->Nodes[j].Force = t4vect_Zero;
-        cFloatRailNode_getPosition(self, &self->Nodes[j]);
+        self->getPosition(&self->Nodes[j]);
         self->Nodes[j].OPos = self->Nodes[j].Pos;
     }
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox(self);
-    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
+    self->addSpaceHash();
     return ((char*)self);
 }
 #endif
@@ -208,18 +208,18 @@ extern char str_FloatRailNodes[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* bucket, cBxReplayFrame* stream)
+void* cFloatRailNode::cFloatRailNode1(void* bucket, cBxReplayFrame* stream)
 {
-    cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
-    VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
-    stream->read((char*)&self->LSpring, 0xC);
-    tFloatRailNode** nodes = &self->Nodes;
-    *nodes = new (str_FloatRailNodes, 0x20000000, 0) tFloatRailNodeInit[self->NumNodes];
-    stream->read((char*)self->Nodes, self->NumNodes * 80);
-    cFloatRailNode_updateMats(self);
-    cFloatRailNode_updateBoundBox(self);
-    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
-    return ((char*)self);
+    cFlexRailNode_cFlexRailNode1(((char*)this), bucket, stream);
+    VPTR_OF(cObjNode, this) = (void**)cFloatRailNode_vtbl;
+    stream->read((char*)&LSpring, 0xC);
+    tFloatRailNode** nodes = &Nodes;
+    *nodes = new (str_FloatRailNodes, 0x20000000, 0) tFloatRailNodeInit[NumNodes];
+    stream->read((char*)Nodes, NumNodes * 80);
+    cFloatRailNode_updateMats(this);
+    cFloatRailNode_updateBoundBox(this);
+    this->addSpaceHash();
+    return ((char*)this);
 }
 #endif
 
@@ -242,7 +242,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 extern "C" void cFloatRailNode__cFloatRailNode(cFloatRailNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
-    cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
+    self->remSpaceHash();
     void* railNodes = self->Nodes;
     if (railNodes != 0) {
         cMemMan_free(railNodes);
@@ -375,7 +375,7 @@ static inline tInstanceRecord* getRailInstance(const unsigned int& id)
  *
  * @param node  rail node to update
  */
-extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node)
+void cFloatRailNode::getPosition(tFloatRailNode* node)
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(getRailInstance(node->InstId), node->Mesh, &boneMat);
@@ -662,7 +662,7 @@ extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
     tFloatRailNode* n = self->Nodes;
     for (int i = 0; i < self->NumNodes; i++, n++) {
         if (getRailInstance(n->InstId)->m_pActiveNode)
-            cFloatRailNode_getPosition(self, (tFloatRailNode*)n);
+            self->getPosition((tFloatRailNode*)n);
         // The three cFloatRailNodeState words (LSpring, LDamp, ForceScale): retail keeps their address in a register
         // and reads ForceScale as its third word.
         float* state = &self->LSpring;
@@ -780,14 +780,14 @@ extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* in
         self->Nodes[j].T = t4vect_Zero_9B48;
         self->Nodes[j].O = t4vect_Zero_9B48;
         self->Nodes[j].V = t4vect_Zero_9B48;
-        cSpringRailNode_getPosition(self, &self->Nodes[j]);
+        self->getPosition(&self->Nodes[j]);
     }
     for (int k = 0; k < self->NumNodes - 1; k++) {
         self->Nodes[k].V = Sub_9B48(self->Nodes[k + 1].P, self->Nodes[k].P);
     }
     cSpringRailNode_updateMats(self);
     cSpringRailNode_updateBoundBox(self);
-    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
+    self->addSpaceHash();
     return ((char*)self);
 }
 #endif
@@ -817,17 +817,17 @@ extern char str_SpringRailNodes[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* bucket, cBxReplayFrame* stream)
+void* cSpringRailNode::cSpringRailNode1(void* bucket, cBxReplayFrame* stream)
 {
-    cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
-    VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
-    stream->read((char*)&self->ASpring, 0xC);
-    tSpringRailNode** nodes = &self->Nodes;
-    *nodes = new (str_SpringRailNodes, 0x20000000, 0) tSpringRailNodeInit[self->NumNodes];
-    stream->read((char*)self->Nodes, self->NumNodes * 0x60);
-    cSpringRailNode_updateMats(self);
-    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
-    return ((char*)self);
+    cFlexRailNode_cFlexRailNode1(((char*)this), bucket, stream);
+    VPTR_OF(cObjNode, this) = (void**)cSpringRailNode_vtbl;
+    stream->read((char*)&ASpring, 0xC);
+    tSpringRailNode** nodes = &Nodes;
+    *nodes = new (str_SpringRailNodes, 0x20000000, 0) tSpringRailNodeInit[NumNodes];
+    stream->read((char*)Nodes, NumNodes * 0x60);
+    cSpringRailNode_updateMats(this);
+    this->addSpaceHash();
+    return ((char*)this);
 }
 #endif
 
@@ -850,7 +850,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 extern "C" void cSpringRailNode__cSpringRailNode(cSpringRailNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
-    cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
+    self->remSpaceHash();
     void* railNodes = self->Nodes;
     if (railNodes != 0) {
         cMemMan_free(railNodes);
@@ -927,7 +927,7 @@ INCLUDE_ASM("object/flexrailnode", cSpringRailNode_getPosition);
  *
  * @param node  rail node to update
  */
-extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNode* node)
+void cSpringRailNode::getPosition(tSpringRailNode* node)
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(getRailInstance(node->InstId), node->Mesh, &boneMat);
@@ -1571,15 +1571,15 @@ extern "C" void cFlagManager_AddFlag(void* mgr, tInstanceRecord* node, tFlagStat
  * @param src  flag make-data
  * @return self
  */
-extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, tInstanceRecord* node, void* src)
+void* cFlagNode::cFlagNode1(void* bucket, tInstanceRecord* node, void* src)
 {
     tFlagState desc;
-    cInstanceNode_cInstanceNode1(self, bucket, 10, node);
-    VPTR_OF(cObjNode, self) = (void**)cFlagNode_vtbl;
+    cInstanceNode_cInstanceNode1(this, bucket, 10, node);
+    VPTR_OF(cObjNode, this) = (void**)cFlagNode_vtbl;
     node->m_iFlags = (node->m_iFlags & 0xFFFFFFFD) | 4;
     tFlagState_tFlagState(&desc, src);
     cFlagManager_AddFlag(cObjectInterface_getFlagManager(), node, &desc);
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 
@@ -1749,15 +1749,15 @@ extern "C" int memcmp(const void* a, const void* b, int n);
  * @param ctx  instance record of the new flag
  * @return 1 if the flag can join this set, else 0
  */
-extern "C" int cFlagSet_SameKind(cFlagSet* self, void* data, tInstanceRecord* ctx)
+int cFlagSet::SameKind(void* data, tInstanceRecord* ctx)
 {
-    if (self->mCurrentNumInstances == 0) {
+    if (mCurrentNumInstances == 0) {
         return 0;
     }
-    if (*(int*)ctx->m_Model != self->mModelID) {
+    if (*(int*)ctx->m_Model != mModelID) {
         return 0;
     }
-    return memcmp(data, self, 88) == 0;
+    return memcmp(data, this, 88) == 0;
 }
 #endif
 
@@ -1777,15 +1777,15 @@ extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
  * @param def  converted flag data
  * @param mesh  instance record of the flag
  */
-extern "C" void cFlagSet_AddFlag(cFlagSet* self, tFlagState* def, tInstanceRecord* mesh)
+void cFlagSet::AddFlag(tFlagState* def, tInstanceRecord* mesh)
 {
-    if (self->mCurrentNumInstances == 0) {
-        self->mFlagData = *def;
-        self->mModelID = mesh->m_Model->m_RID;
-        cFlagSet_CreateMesh(self, mesh);
+    if (mCurrentNumInstances == 0) {
+        mFlagData = *def;
+        mModelID = mesh->m_Model->m_RID;
+        cFlagSet_CreateMesh(this, mesh);
     }
-    self->mInstances[self->mCurrentNumInstances] = mesh;
-    self->mCurrentNumInstances++;
+    mInstances[mCurrentNumInstances] = mesh;
+    mCurrentNumInstances++;
 }
 #endif
 

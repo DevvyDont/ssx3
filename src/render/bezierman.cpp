@@ -62,24 +62,24 @@ extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
  * 15000, calls virtual slot 17 (func_0038D638) and fills the UV grids in D_005049C0: 6 x 6 at step 0.2 and 8 x 8 at
  * step 1/7.
  */
-extern "C" void cPS2BezierMan_Init(cPS2BezierMan* self)
+void cPS2BezierMan::Init()
 {
-    func_00372B78(&self->mPatchCache, 900, 220, 140, 0, 146, 93);
-    self->mVifCache[0] = operator_new_tag_AF30(0x38400, str_4x4VifCache, 0, 0);
-    self->mVifCache[1] = operator_new_tag_AF30(56320, str_6x6VifCache, 0, 0);
-    self->mVifCache[2] = operator_new_tag_AF30(35840, str_8x8VifCache, 0, 0);
-    self->mVifCachePos[0] = self->mVifCache[0];
-    self->mVifCachePos[1] = self->mVifCache[1];
-    self->mVifCachePos[2] = self->mVifCache[2];
-    self->mWireModeEnabled = 1;
-    self->mBasePassEnabled = 1;
-    self->mLightMapsEnabled = 1;
-    self->mShadowsEnabled = 1;
-    self->mLmapStart = 0;
-    self->unk_0358 = 8.0f;
-    self->mNearLODcm = 3000.0f;
-    self->mFarLODcm = 15000.0f;
-    func_0038D638((cBezierVirt*)self);
+    func_00372B78(&mPatchCache, 900, 220, 140, 0, 146, 93);
+    mVifCache[0] = operator_new_tag_AF30(0x38400, str_4x4VifCache, 0, 0);
+    mVifCache[1] = operator_new_tag_AF30(56320, str_6x6VifCache, 0, 0);
+    mVifCache[2] = operator_new_tag_AF30(35840, str_8x8VifCache, 0, 0);
+    mVifCachePos[0] = mVifCache[0];
+    mVifCachePos[1] = mVifCache[1];
+    mVifCachePos[2] = mVifCache[2];
+    mWireModeEnabled = 1;
+    mBasePassEnabled = 1;
+    mLightMapsEnabled = 1;
+    mShadowsEnabled = 1;
+    mLmapStart = 0;
+    unk_0358 = 8.0f;
+    mNearLODcm = 3000.0f;
+    mFarLODcm = 15000.0f;
+    func_0038D638((cBezierVirt*)this);
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 6; j++) {
             sUV_AF30 gridUV;
@@ -109,17 +109,17 @@ void cMemMan_free(void*);
  * Releases the Bezier patch manager's resources: runs the base purge (func_0038D660, empty) and frees the three VIF
  * packet caches allocated by Init.
  */
-extern "C" void cPS2BezierMan_Purge(cPS2BezierMan* self)
+void cPS2BezierMan::Purge()
 {
-    func_0038D660(self);
-    if (self->mVifCache[0] != 0) {
-        cMemMan_free(self->mVifCache[0]);
+    func_0038D660(this);
+    if (mVifCache[0] != 0) {
+        cMemMan_free(mVifCache[0]);
     }
-    if (self->mVifCache[1] != 0) {
-        cMemMan_free(self->mVifCache[1]);
+    if (mVifCache[1] != 0) {
+        cMemMan_free(mVifCache[1]);
     }
-    if (self->mVifCache[2] != 0) {
-        cMemMan_free(self->mVifCache[2]);
+    if (mVifCache[2] != 0) {
+        cMemMan_free(mVifCache[2]);
     }
 }
 #endif
@@ -137,10 +137,9 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_Reset__FPv);
  *
  * @return no meaningful value (func_003739D0 returns nothing)
  */
-void* cPS2BezierMan_Reset(void* vself)
+void* cPS2BezierMan::Reset()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return func_003739D0(&self->mPatchCache);
+    return func_003739D0(&mPatchCache);
 }
 #endif
 
@@ -153,13 +152,12 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_ClearPatches__FPv);
  * It sits in slot 17 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl), between the shadow switches and
  * cPS2BezierMan_DrawPatches; func_0038D638 calls it through that slot from cPS2BezierMan_Init.
  */
-void cPS2BezierMan_ClearPatches(void* vself)
+void cPS2BezierMan::ClearPatches()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->mNum4x4Patches = 0;
-    self->mNum6x6Patches = 0;
-    self->mNum8x8Patches = 0;
-    self->mNumMixedPatches = 0;
+    mNum4x4Patches = 0;
+    mNum6x6Patches = 0;
+    mNum8x8Patches = 0;
+    mNumMixedPatches = 0;
 }
 #endif
 
@@ -261,11 +259,12 @@ extern int cRenderToggles_m_DisablePatches;
  * @param texid  the patch's texture id (passed through as a pointer-sized value)
  * @param clip  the patch's clip data
  */
-extern "C" void cPS2BezierMan_AddPatch(cPS2BezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
+void cPS2BezierMan::AddPatch(void* pPatch, void* edges, void* texid, void* clip)
 {
     if (cRenderToggles_m_DisablePatches == 0) {
-        sVEntry<void(void*, void*, void*, void*, void*, int)>* vt = (sVEntry<void(void*, void*, void*, void*, void*, int)>*)self->mVtbl;
-        vt[22].fn(vthis(self, vt[22]), pPatch, edges, texid, clip, 0);
+        sVEntry<void(void*, void*, void*, void*, void*, int)>* vt = (sVEntry<void(void*, void*, void*, void*, void*,
+                int)>*)mVtbl;
+        vt[22].fn(vthis(this, vt[22]), pPatch, edges, texid, clip, 0);
     }
 }
 #endif
@@ -856,9 +855,9 @@ static inline void Render_B370(sBezMan_B370* self)
  * (func_0038C788, func_0038CA70, func_0038CE20 for the mixed list). Deferred patches are flushed into DeferMan
  * buckets grouped by texture. Finally pops the draw state and calls func_0038D968.
  */
-extern "C" void cPS2BezierMan_DrawPatches(cPS2BezierMan* self)
+void cPS2BezierMan::DrawPatches()
 {
-    Render_B370(((sBezMan_B370*)self));
+    Render_B370(((sBezMan_B370*)this));
 }
 #endif
 

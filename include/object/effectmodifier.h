@@ -49,6 +49,9 @@ struct cEffectModifier : public cEffectLink {
                                     //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cEffectModifier1(cBxReplayFrame* obj) __asm__("cEffectModifier_cEffectModifier1");
 };
 
 CHECK_OFFSET(cEffectModifier, Instance, 0x0C);
@@ -69,6 +72,9 @@ struct cParticleModifier : public cEffectModifier {
     int Complete;                   // 0x1E4 [O] bool (retail 4 bytes); [R] ctor 0, replay ctor reads it first; [U]
                                     //       update sets 1 once Emitter.Duration runs out, render returns while set
     char unk_1E8[0x8];              // 0x1E8 padding to the 16-byte size
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cParticleModifier1(cBxReplayFrame* stream) __asm__("cParticleModifier_cParticleModifier1");
 };
 
 CHECK_OFFSET(cParticleModifier, Transform, 0x10);
@@ -79,6 +85,8 @@ CHECK_OFFSET(cParticleModifier, unk_1E8, 0x1E8);
 CHECK_SIZE(cParticleModifier, 0x1F0);
 
 // cDynamicParticleModifier: a dynamic emitter that follows one mesh of the instance.
+struct t4Vector;
+
 struct cDynamicParticleModifier : public cEffectModifier {
     // cEffectModifier (object/effectmodifier.h, 0x10): the vptr at 0x08:
     //   [R] each ctor/dtor stores its vtable (cEffectLink_vtbl, cEffectModifier_vtbl, ...)
@@ -101,6 +109,11 @@ struct cDynamicParticleModifier : public cEffectModifier {
     tParticleData* ParticleData;    // 0x260 [O]; [R] ctor stores pdata (owned), the replay ctor allocates 0xD8; dtor
                                     //       deletes it; [U] setupEmitter, writeToReplayFrame
     char unk_264[0xC];              // 0x264 padding to the 16-byte size
+
+    // Methods bound to their retail symbols by asm labels.
+    cDynamicParticleModifier* cDynamicParticleModifier1(tParticleData* particleDesc, int owner, int bone, t4Vector* pos)
+        __asm__("cDynamicParticleModifier_cDynamicParticleModifier1");
+    void updatePosition() __asm__("cDynamicParticleModifier_updatePosition");
 };
 
 CHECK_OFFSET(cDynamicParticleModifier, Mesh, 0x10);
@@ -153,6 +166,8 @@ CHECK_SIZE(tAddHaloData, 0x28);
 // Speed, Angle) at 0x10. The ctor copies the fields from a tAddHaloData (On Tour 0x28: InstId, Type, Mesh, ColourA,
 // ColourR, ColourG, ColourB, Radius, Speed), reordering A,R,G,B into Color = {R, G, B, A}.
 // Tags as above, plus [P] tools/layout_xlate.py (preview == retail at 0x24, 0x28, 0x2C, 0x30: render / update).
+struct cBxReplayFrame;
+
 struct cHaloModifier : public cEffectModifier {
     // cEffectModifier (object/effectmodifier.h, 0x10): the vptr at 0x08:
     //   [R] cHaloModifier_vtbl (0x00491220) in both ctors and the dtor
@@ -169,6 +184,9 @@ struct cHaloModifier : public cEffectModifier {
     float Angle;                    // 0x030 [O] (state); [R] ctor 0 (sw $0); [P]; [U] update advances it and resets it
                                     //       to 0 past +-360; render passes it
     char unk_034[0xC];              // 0x034 padding (16-byte aligned: Color is a t4Vector)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cHaloModifier1(cBxReplayFrame* stream) __asm__("cHaloModifier_cHaloModifier1");
 };
 
 CHECK_OFFSET(cHaloModifier, Color, 0x010);

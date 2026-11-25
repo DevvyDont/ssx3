@@ -279,7 +279,7 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     }
     cSSXAudio_SetCurrVolume_4C68(self, 0, 0.9090909361839294f);
     self->mPreset = 0;
-    cSSXAudio_SetPreset(self, 0);
+    self->SetPreset(0);
     func_00289470(self);
     func_00289520((cSSXAudio*)self, A_4C68->m60A4);
     cSSXAudio_LoadMixes_4C68(self);
@@ -303,7 +303,7 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     func_002A4590(self, 1);
     func_0029ED90(S_4C68, 0);
     SPCH_Init(A_4C68->m5560);
-    func_002B0E60(A_4C68->m5560, 0, 0, str_CHAR, (int)cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 4, 0), 1, -1);
+    func_002B0E60(A_4C68->m5560, 0, 0, str_CHAR, (int)self->GetCurrAppliedVolumePtr(4, 0), 1, -1);
     func_0028F700(self);
     return S_4C68;
 }
@@ -425,11 +425,11 @@ extern "C" int cSoundSys_SetMode_2(void* bank, int a1) __asm__("cSoundSys_SetMod
  * @param value  the new mode (On Tour an eSOUNDDEF_MODE)
  * @return the sound system's result (On Tour eSOUNDMANAGER_SETMODE); 2 means the mode was taken
  */
-extern "C" int cSSXAudio_SetMode(cSSXAudio* self, int value)
+int cSSXAudio::SetMode(int value)
 {
-    int retVal = cSoundSys_SetMode_2(self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys, value);
+    int retVal = cSoundSys_SetMode_2(MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys, value);
     if (retVal == 2) {
-        self->mAudioMode = value;
+        mAudioMode = value;
     }
     return retVal;
 }
@@ -487,7 +487,6 @@ static inline void pushPlayOptsLevel(cBankManager* bankMgr)
  * cSSXAudio's cSpeechSys vtable (D_004836D8; pure virtual in cSpeechSys), which func_002B04D8 calls to start a speech
  * line.
  *
- * @param vself  the audio system
  * @param streamIndex  the stream index
  * @param fileName  the file name (the speech .big path)
  * @param fileOffset  the offset of the line in the file
@@ -499,9 +498,10 @@ static inline void pushPlayOptsLevel(cBankManager* bankMgr)
  * @param viewport  the speaker's view (two-player side)
  * @return the stream voice handle, or a negative value on failure
  */
-extern "C" int cSSXAudio_PlayPositional(cSSXAudio* vself, int streamIndex, const char* fileName, int fileOffset, int position, int holdTime, int userInfo, int isHuman, float radius, int viewport)
+int cSSXAudio::PlayPositional(int streamIndex, const char* fileName, int fileOffset, int position, int holdTime,
+                              int userInfo, int isHuman, float radius, int viewport)
 {
-    cSSXAudio* self = vself;
+    cSSXAudio* self = this;
     // PORT: a2 (a name pointer) is passed through cStreamSys_STREAM_Queue as an int
     int voiceHandle = cStreamSys_STREAM_Queue(self->MusicSys.mpVStreamSys, streamIndex, holdTime, (int)fileName,
                                               fileOffset);
@@ -528,7 +528,8 @@ extern "C" int cSSXAudio_PlayPositional(cSSXAudio* vself, int streamIndex, const
         int closestView = cSSXAudio_GetClosestCamera(self, position);
         streamSys->mpVBankManager->BankMonitor.mViewport[streamSys->mpVBankManager->BankMonitor.mInst] = closestView;
     }
-    if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGamePath == 2 && isHuman != 0 && cSSXAudio_ReplayMode(self) == 0) {
+    if (cBE_getInterface_Fv(cBE_getBE(),
+            0) != 0 && cBENewRaceInterface_newRace.cGamePath == 2 && isHuman != 0 && self->ReplayMode() == 0) {
         self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
             .mTwoPlayerPan[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
         self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
@@ -620,12 +621,11 @@ static inline float Atan2_5930(float y, float x)
  * distance). It fills
  * slot 6 of cSSXAudio's cBankMonitor vtable (D_00483640), pure virtual in cBankMonitor's cBankMonitor_vtbl.
  *
- * @param audio  the audio system
  * @param source  the voice's monitor instance (cBankMonitorInstance)
  * @param outAngles  the sound driver's play options (SNDPLAYOPTS) to fill
  * @return the squared distance in square metres
  */
-extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, cBankMonitorInstance* source, SNDPLAYOPTS* outAngles)
+float cSSXAudio::Calc3DPos(cBankMonitorInstance* source, SNDPLAYOPTS* outAngles)
 {
     if ((int)cAudioInterface_getApp()->Game == 0)
         return 1.0f;
@@ -640,7 +640,7 @@ extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, cBankMonitorInstance* sou
     cy = 25.0f;
     relPos.y = (tp.y + cy) * 0.009999999776482582f;
     relPos.z = (tp.z + cz) * 0.009999999776482582f;
-    if (audio->mAudioMode == 0) {
+    if (mAudioMode == 0) {
         *(short*)&outAngles->azimuth = 0;
         outAngles->elevation = 0;
     } else {
@@ -668,9 +668,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetAudioUpdateState);
  * @param State  the update state (On Tour eUpdateState: 0 default, 1 front end, 2 music, 3 pre-game, 4 pre-race,
  *            5 pre-countdown, 6 in game)
  */
-extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int State)
+void cSSXAudio::SetAudioUpdateState(int State)
 {
-    int* updateState = (int*)&self->mAudioUpdateState;
+    int* updateState = (int*)&mAudioUpdateState;
     if (*updateState != State) {
         *updateState = State;
     }
@@ -731,11 +731,11 @@ extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
             if (cStreamSys_STREAM_Playing(*(void**)&self->MusicSys, st) != 0)
                 self->mDuckedStreamHasStarted = 1;
         } else if (cStreamSys_STREAM_Playing(*(void**)&self->MusicSys, st) == 0) {
-            cSSXAudio_DuckToStream(self, 3, 0.5f, 1.0f);
+            self->DuckToStream(3, 0.5f, 1.0f);
         }
     }
-    cSSXAudio_UpdateDuck((cSSXAudio*)self);
-    cSSXAudio_UpdateMix(self);
+    self->UpdateDuck();
+    self->UpdateMix();
     if ((int)cAudioInterface_getApp()->Game != 0) {
         func_0028C8C8(((char*)self));
         if (self->mAudioUpdateState == 6) {
@@ -754,10 +754,10 @@ extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
             cSSXAudio_UpdateTimedEvent(((char*)self));
             cSSXAudio_UpdateTone(((char*)self));
             if (self->mAudioPaused != 0 && !(cPauseState_Flags & 2))
-                cSSXAudio_ResumeAudio(self);
+                self->ResumeAudio();
         }
     }
-    cSSXAudio_ApplyRMSData((cSSXAudio*)self);
+    self->ApplyRMSData();
 }
 #endif
 
@@ -785,9 +785,9 @@ static inline int isLocalHuman(cRider* rider)
  * @return the rider (cRider*)
  */
 // PORT: returns a rider pointer; the unit declares the return type as int.
-extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which)
+int cSSXAudio::GetFocusRider(int which)
 {
-    if (cSSXAudio_ReplayMode(self) != 0) {
+    if (ReplayMode() != 0) {
         cPlayer* player = ((cAI*)cAudioInterface_getAI())->Players[0];
         return player ? (int)player->mRider : 0;
     }
@@ -833,10 +833,10 @@ extern "C" void cBankMonitor_BANKMONITOR_DestroyAll(void*);
  *
  * It fills slot 2 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has cBankMonitor_BANKMONITOR_DestroyAll.
  */
-extern "C" void cSSXAudio_BANKMONITOR_DestroyAll(cSSXAudio* self)
+void cSSXAudio::BANKMONITOR_DestroyAll()
 {
-    func_002A7718(self);
-    cBankManager* inner = self->MusicSys.mpVStreamSys->mpVBankManager;
+    func_002A7718(this);
+    cBankManager* inner = MusicSys.mpVStreamSys->mpVBankManager;
     cBankMonitor_BANKMONITOR_DestroyAll(&inner->BankMonitor);
 }
 #endif
@@ -915,15 +915,15 @@ struct sSaVt5FB0 { short delta; short index; void (*fn)(void*, char*, int, void*
  * mRadioModeID, and resumes the audio (cSSXAudio_ResumeAudio). cRealFE_load and the sound-mode setters of the options
  * and memory-card screens call it.
  */
-extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
+void cSSXAudio::FrontEndLoad()
 {
     sIniParser5FB0 parser;
     char key[0x80];
     char name[0x80];
     char val[0x60];
     char msg[0x40];
-    cSSXAudio_InitSoundLevels((cSSXAudio*)self, 0);
-    cSSXAudio_SetAudioUpdateState((cSSXAudio*)self, 1);
+    InitSoundLevels(0);
+    SetAudioUpdateState(1);
     FileParser_FileParser_r(&parser, str_H_H, 0x100);
     parser.cur = parser.start;
     if (FileParser_FindSection(&parser, str_GLOBAL)) {
@@ -941,19 +941,19 @@ extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
             if (strcasecmp(k, str_MAIN) == 0) {
                 FileParser_AssignString_r(&parser, str_MAIN, val);
                 sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 0, msg, 0);
+                cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 0, msg, 0);
             }
         }
     }
-    cSSXAudio_DuckToStream(self, 3, 0.5f, 1.0f);
-    char* mon = (char*)&self->MusicSys;
-    sSaVt5FB0* vt = (sSaVt5FB0*)self->MusicSys.mVtbl;
+    DuckToStream(3, 0.5f, 1.0f);
+    char* mon = (char*)&MusicSys;
+    sSaVt5FB0* vt = (sSaVt5FB0*)MusicSys.mVtbl;
     char* thisp = mon + vt[2].delta;
-    vt[2].fn(thisp, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 1, 0), 1);
+    vt[2].fn(thisp, str_charsel, 0xC, GetCurrAppliedVolumePtr(1, 0), 1);
     func_002B49C0(mon, 301);
-    self->mFrontEndMusicMode = 10;
-    self->mFrontEndRadioModeID = self->mRadioModeID;
-    cSSXAudio_ResumeAudio(self);
+    mFrontEndMusicMode = 10;
+    mFrontEndRadioModeID = mRadioModeID;
+    ResumeAudio();
     FileParser__FileParser(&parser, 2);
 }
 #endif
@@ -964,10 +964,10 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndFadeSong);
 /**
  * Calls the music system's vtable slot 4 (set track) with 1; the retail image has no call or data reference to it.
  */
-extern "C" void cSSXAudio_FrontEndFadeSong(cSSXAudio* self)
+void cSSXAudio::FrontEndFadeSong()
 {
-    cMusicSys* musicSys = &self->MusicSys;
-    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl;
+    cMusicSys* musicSys = &MusicSys;
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)MusicSys.mVtbl;
     vt[4].fn(vthis(musicSys, vt[4]), 1);
 }
 #endif
@@ -988,20 +988,20 @@ extern "C" void cBankManager_BANK_UnLoad(void*, int);
  * Otherwise it calls func_002B3D48 with 1.0 (probably a one-second fade). It then sets the update state to 0
  * and resets the bank monitor (cMonitor_MONITOR_DestroyAll) and the bank manager (its virtual slot 2).
  */
-extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
+void cSSXAudio::FrontEndPurge()
 {
-    if (self->mRadioModeID == 2 || self->mFrontEndRadioModeID == 2) {
-        func_002B3AC0((char*)&self->MusicSys);
+    if (mRadioModeID == 2 || mFrontEndRadioModeID == 2) {
+        func_002B3AC0((char*)&MusicSys);
     } else {
-        func_002B3D48((char*)&self->MusicSys, 1.0f);
+        func_002B3D48((char*)&MusicSys, 1.0f);
     }
-    cSSXAudio_SetAudioUpdateState(self, 0);
-    cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)self->MusicSys.mpVStreamSys)->BankMonitor);
-    cBankManager* bankManager = *(cBankManager**)self->MusicSys.mpVStreamSys;
+    SetAudioUpdateState(0);
+    cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)MusicSys.mpVStreamSys)->BankMonitor);
+    cBankManager* bankManager = *(cBankManager**)MusicSys.mpVStreamSys;
     cBankMonitor* monitor = &bankManager->BankMonitor;
     cSSXAudio_FrontEndPurge_vte* vt = (cSSXAudio_FrontEndPurge_vte*)bankManager->BankMonitor.mVtbl;
     vt[2].fn(vthis(monitor, vt[2]));
-    cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, 0);
+    cBankManager_BANK_UnLoad(*(void**)MusicSys.mpVStreamSys, 0);
 }
 #endif
 
@@ -1040,7 +1040,7 @@ extern char str_TRANSPORT[];
  * sounds load from data/config/crowd.inf, with 2 or 1 by the race type (newRace +0x49). The // comment above
  * calls this front-end setup; it is the in-game load.
  */
-extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
+void cSSXAudio::InGameLoad()
 {
     char ext[0x40];
     char key[0x80];
@@ -1049,10 +1049,10 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
     char val[0x60];
     char msg[0x70];
     __builtin_memcpy(ext, D_004A35A0, 6);
-    cSSXAudio_InitSoundLevels((cSSXAudio*)self, 1);
-    cAsyncSys_Init3(**(cAsyncSys***)&self->MusicSys, 0, 0);
-    self->mUsedBank[0] = str_empty_j[0];
-    self->mNextUsedBank = 0;
+    InitSoundLevels(1);
+    cAsyncSys_Init3(**(cAsyncSys***)&MusicSys, 0, 0);
+    mUsedBank[0] = str_empty_j[0];
+    mNextUsedBank = 0;
     FileParser_FileParser_r(&parser, str_H_H, 0x100);
     parser.cur = parser.start;
     if (FileParser_FindSection(&parser, str_GLOBAL)) {
@@ -1067,60 +1067,60 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
     while ((section = FileParser_FindNextSection(&parser)) != 0) {
         if (strcmp(section, ext) == 0) {
             strcpy(name, key);
-            strcpy(self->mSwapBasePath, name);
+            strcpy(mSwapBasePath, name);
             while (FileParser_IsEOF(&parser) == 0) {
                 char* k = FileParser_GetName(&parser);
                 FileParser_AssignString_r(&parser, str_BASEPATH, name);
                 if (strcasecmp(k, str_MAIN) == 0) {
                     FileParser_AssignString_r(&parser, str_MAIN, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 0, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 0, msg, 0);
                 } else if (strcasecmp(k, str_BOARD) == 0) {
                     FileParser_AssignString_r(&parser, str_BOARD, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 1, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 1, msg, 0);
                 } else if (strcasecmp(k, str_SPUBOARD) == 0) {
                     FileParser_AssignString_r(&parser, str_SPUBOARD, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 0x10, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 0x10, msg, 0);
                 } else if (strcasecmp(k, str_CROWD) == 0) {
                     FileParser_AssignString_r(&parser, str_CROWD, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 5, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 5, msg, 0);
                 } else if (strcasecmp(k, str_AUX) == 0) {
                     FileParser_AssignString_r(&parser, str_AUX, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 6, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 6, msg, 0);
                 } else if (strcasecmp(k, str_TRICKY) == 0) {
                     FileParser_AssignString_r(&parser, str_TRICKY, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 7, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 7, msg, 0);
                 } else if (strcasecmp(k, str_MOUNTAIN) == 0) {
                     FileParser_AssignString_r(&parser, str_MOUNTAIN, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 2, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 2, msg, 0);
                 } else if (strcasecmp(k, str_TRANSPORT) == 0) {
                     FileParser_AssignString_r(&parser, str_TRANSPORT, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 4, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 4, msg, 0);
                 } else if (strcasecmp(k, str_LAND) == 0) {
                     FileParser_AssignString_r(&parser, str_LAND, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&self->MusicSys, 10, msg, 0);
+                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 10, msg, 0);
                 }
             }
         }
     }
-    cBankManager_BANK_AllocMem(**(void***)&self->MusicSys, 3, 0x19000, 0, 0);
-    cBankManager_BANK_AllocMem(**(void***)&self->MusicSys, 12, 0x6A400, 0, 0);
+    cBankManager_BANK_AllocMem(**(void***)&MusicSys, 3, 0x19000, 0, 0);
+    cBankManager_BANK_AllocMem(**(void***)&MusicSys, 12, 0x6A400, 0, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
-        func_002A6D78(((char*)self), str_H, ext, 2, 5);
+        func_002A6D78(((char*)this), str_H, ext, 2, 5);
     } else {
-        func_002A6D78(((char*)self), str_H, ext, 1, 5);
+        func_002A6D78(((char*)this), str_H, ext, 1, 5);
     }
-    func_0029F3F8(((char*)self), 0);
-    self->mRaceMusicOn = 1;
+    func_0029F3F8(((char*)this), 0);
+    mRaceMusicOn = 1;
     FileParser__FileParser(&parser, 2);
 }
 #endif
@@ -1180,49 +1180,49 @@ public:
  * manager, resets the ambience bookkeeping, sets mix channel 3 (cSSXAudio_DuckToStream), records per-track first-time flags for
  * 23 tracks when the race state is 0 (cBENewPlayerInterface_isFirstTimeOnTrack), and finishes with func_0028DF08, cSSXAudio_StartEvent and func_002A4A78.
  */
-extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
+void cSSXAudio::InGameInit()
 {
     void* be = cBE_getInterface_Fv(cBE_getBE(), 13);
     cAI* ai = (cAI*)cAudioInterface_getAI();
     void* rider = cRider_getIdentity(ai->Riders[0]);
     int radioPlaylist = cBERewardInterface_getPlayList(be, 0, (int)rider);
-    func_0028BF78(((char*)self), cBERewardInterface_getRadioMode(be, 0, (int)rider));
-    func_0028C2D0(((char*)self), radioPlaylist);
-    char* musicSys = (char*)&self->MusicSys;
-    if (self->MusicSys.mSongPlaying == 0 || func_002B49E0(musicSys) != 401) {
-        func_0028D488(((char*)self));
+    func_0028BF78(((char*)this), cBERewardInterface_getRadioMode(be, 0, (int)rider));
+    func_0028C2D0(((char*)this), radioPlaylist);
+    char* musicSys = (char*)&MusicSys;
+    if (MusicSys.mSongPlaying == 0 || func_002B49E0(musicSys) != 401) {
+        func_0028D488(((char*)this));
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (sa_state_867E8() == 0) {
-            func_0028CF98(((char*)self), 0, 0, -1, 0);
+            func_0028CF98(((char*)this), 0, 0, -1, 0);
         } else {
-            func_0028CF98(((char*)self), 36, 0, -1, 0);
+            func_0028CF98(((char*)this), 36, 0, -1, 0);
         }
     }
-    cSSXAudio_ResetLift(((char*)self));
+    cSSXAudio_ResetLift(((char*)this));
     cWorldPainterManArg* pa = (cWorldPainterManArg*)&kWPR_MusicTrigger_2;
     cWorldPainterManArg* pb = (cWorldPainterManArg*)&kWPR_Ambience_2;
     cWorldPainterManArg* pc = (cWorldPainterManArg*)&kWPR_Mix_2;
     void* painterMan = SSXApp->Game->World->m_pWorldPainterMan;
-    self->mpMusicTriggerQuery[0] = cWorldPainterMan_getQuery(painterMan, pa);
-    self->mpMusicTriggerQuery[1] = cWorldPainterMan_getQuery(painterMan, pa);
-    self->mpAmbienceQuery[0] = cWorldPainterMan_getQuery(painterMan, pb);
-    self->mpAmbienceQuery[1] = cWorldPainterMan_getQuery(painterMan, pb);
-    self->mpMixQuery[0] = cWorldPainterMan_getQuery(painterMan, pc);
+    mpMusicTriggerQuery[0] = cWorldPainterMan_getQuery(painterMan, pa);
+    mpMusicTriggerQuery[1] = cWorldPainterMan_getQuery(painterMan, pa);
+    mpAmbienceQuery[0] = cWorldPainterMan_getQuery(painterMan, pb);
+    mpAmbienceQuery[1] = cWorldPainterMan_getQuery(painterMan, pb);
+    mpMixQuery[0] = cWorldPainterMan_getQuery(painterMan, pc);
     tWorldPainterQuery* secondMixQuery = cWorldPainterMan_getQuery(painterMan, pc);
-    self->unk_626C = 0;
-    self->mMusicRequestPending = 0;
-    self->mPlayingTone = 0;
-    self->mLastMusicTriggerType = -1;
-    self->mLastMusicTriggerValue = -1;
-    self->mMusicTriggerReady = 1;
-    *(char*)&self->mLastPatchRID = 50;
-    self->mpMixQuery[1] = secondMixQuery;
-    cSSXAudio_DuckToStream(self, 3, 0.5f, 1.0f);
-    self->mMusicRampState = 0;
+    unk_626C = 0;
+    mMusicRequestPending = 0;
+    mPlayingTone = 0;
+    mLastMusicTriggerType = -1;
+    mLastMusicTriggerValue = -1;
+    mMusicTriggerReady = 1;
+    *(char*)&mLastPatchRID = 50;
+    mpMixQuery[1] = secondMixQuery;
+    DuckToStream(3, 0.5f, 1.0f);
+    mMusicRampState = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (sa_state_867E8() == 0) {
         int i = 0;
-        int* firstTimeFlag = (int*)(&self->mFirstTimeOnTrack[0]);
+        int* firstTimeFlag = (int*)(&mFirstTimeOnTrack[0]);
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             cRider* playerRider = ((cAI*)cAudioInterface_getAI())->Riders[0];
@@ -1231,9 +1231,9 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
             firstTimeFlag++;
         } while (i < 23);
     }
-    func_0028DF08_C7B0(((char*)self));
-    cSSXAudio_StartEvent(self);
-    func_002A4A78(((char*)self));
+    func_0028DF08_C7B0(((char*)this));
+    StartEvent();
+    func_002A4A78(((char*)this));
 }
 #endif
 
@@ -1272,28 +1272,28 @@ static inline void saDeleteObj(void** slot)
  * resets the bank monitor and bank manager as FrontEndPurge does, and calls func_002B11B0 on the speech
  * system.
  */
-extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
+void cSSXAudio::InGameDeInit()
 {
-    cSSXAudio_ResumeAudio(self);
-    cSSXAudio_SetAudioUpdateState(self, 0);
-    func_002B3AC0((char*)&self->MusicSys);
-    cSSXAudio_StopTone(self, 0.0f);
-    func_002A4550(self);
-    cSSXAudio_StopAllRiderSounds(self);
-    saDeleteObj((void**)(&self->mpMusicTriggerQuery[0]));
-    saDeleteObj((void**)(&self->mpMusicTriggerQuery[1]));
-    saDeleteObj((void**)&self->mpAmbienceQuery);
-    saDeleteObj((void**)(&self->mpAmbienceQuery[1]));
-    saDeleteObj((void**)&self->mpMixQuery);
-    saDeleteObj((void**)(&self->mpMixQuery[1]));
-    cSSXAudio_ResetAttachedSounds(self);
-    cSSXAudio_MixVolume(self, 0);
-    cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)self->MusicSys.mpVStreamSys)->BankMonitor);
-    cBankManager* bankManager = *(cBankManager**)self->MusicSys.mpVStreamSys;
+    ResumeAudio();
+    SetAudioUpdateState(0);
+    func_002B3AC0((char*)&MusicSys);
+    cSSXAudio_StopTone(this, 0.0f);
+    func_002A4550(this);
+    cSSXAudio_StopAllRiderSounds(this);
+    saDeleteObj((void**)(&mpMusicTriggerQuery[0]));
+    saDeleteObj((void**)(&mpMusicTriggerQuery[1]));
+    saDeleteObj((void**)&mpAmbienceQuery);
+    saDeleteObj((void**)(&mpAmbienceQuery[1]));
+    saDeleteObj((void**)&mpMixQuery);
+    saDeleteObj((void**)(&mpMixQuery[1]));
+    cSSXAudio_ResetAttachedSounds(this);
+    MixVolume(0);
+    cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)MusicSys.mpVStreamSys)->BankMonitor);
+    cBankManager* bankManager = *(cBankManager**)MusicSys.mpVStreamSys;
     cBankMonitor* monitor = &bankManager->BankMonitor;
     cSSXAudio_FrontEndPurge_vte* vt = (cSSXAudio_FrontEndPurge_vte*)bankManager->BankMonitor.mVtbl;
     vt[2].fn(vthis(monitor, vt[2]));
-    func_002B11B0((char*)&self->SpeechSys, 0);
+    func_002B11B0((char*)&SpeechSys, 0);
 }
 #endif
 
@@ -1313,20 +1313,20 @@ extern "C" void func_0029F5E0(void*);
  * Also calls func_002A6F38, cAsyncSys_DoCancel (on the bank manager), cAsyncSys_ASYNCSYS_DeInit and func_0029F5E0 (all
  * unknown).
  */
-extern "C" void cSSXAudio_InGamePurge(cSSXAudio* self)
+void cSSXAudio::InGamePurge()
 {
     int i;
-    func_002A6F38(self);
-    cAsyncSys_DoCancel((cAsyncSys*)(*(void**)self->MusicSys.mpVStreamSys), 1);
+    func_002A6F38(this);
+    ((cAsyncSys*)(*(void**)MusicSys.mpVStreamSys))->DoCancel(1);
     for (i = 0; i < 17; i++) {
         if (i != 13) {
-            cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, i);
+            cBankManager_BANK_UnLoad(*(void**)MusicSys.mpVStreamSys, i);
         }
     }
-    cBankManager_BANK_DeallocMem(*(void**)self->MusicSys.mpVStreamSys, 3);
-    cBankManager_BANK_DeallocMem(*(void**)self->MusicSys.mpVStreamSys, 12);
-    cAsyncSys_ASYNCSYS_DeInit(*(void**)self->MusicSys.mpVStreamSys);
-    func_0029F5E0(self);
+    cBankManager_BANK_DeallocMem(*(void**)MusicSys.mpVStreamSys, 3);
+    cBankManager_BANK_DeallocMem(*(void**)MusicSys.mpVStreamSys, 12);
+    cAsyncSys_ASYNCSYS_DeInit(*(void**)MusicSys.mpVStreamSys);
+    func_0029F5E0(this);
 }
 #endif
 
@@ -1345,13 +1345,13 @@ extern "C" void cBankManager_BANK_Attach(void* self, int i, int a, int b);
  * @param id  the handle: slot << 8 | section
  * @param on  the bank data in main memory, or 0 to do nothing
  */
-extern "C" void cSSXAudio_AttachAudioBank(cSSXAudio* self, unsigned int id, int on)
+void cSSXAudio::AttachAudioBank(unsigned int id, int on)
 {
     unsigned int bank = id >> 8;
     if (on != 0) {
-        cBankManager_BANK_Attach(**(void***)&self->MusicSys, bank + 8, on, 0x20000);
-        self->mTrackBankLoaded[bank] = 1;
-        self->mTrackBankLoadedSection[bank] = id & 0xFF;
+        cBankManager_BANK_Attach(**(void***)&MusicSys, bank + 8, on, 0x20000);
+        mTrackBankLoaded[bank] = 1;
+        mTrackBankLoadedSection[bank] = id & 0xFF;
     }
 }
 #endif
@@ -1373,30 +1373,30 @@ extern "C" void cBankManager_BANK_UnAttach(void* mgr, int i);
  *
  * @param handle  the bank handle: slot << 8 | section
  */
-extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle)
+void cSSXAudio::UnAttachAudioBank(unsigned int handle)
 {
     unsigned int slot = handle >> 8;
-    if ((unsigned int)self->mTrackBankLoadedSection[slot] != (handle & 0xFF)) return;
+    if ((unsigned int)mTrackBankLoadedSection[slot] != (handle & 0xFF)) return;
     if (slot == 0) {
-        cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
+        cBankManager* mgr = (cBankManager*)(*(char**)MusicSys.mpVStreamSys);
         cBankInstance* cfg = mgr->mBank;
         char* bm = (char*)&mgr->BankMonitor;
         int id = cfg[8].mBankStatus == 1;
         if (id) id = cfg[8].mBankHandle; else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     } else {
-        cSSXAudio_StopTone(self, 0.0f);
-        cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
+        cSSXAudio_StopTone(this, 0.0f);
+        cBankManager* mgr = (cBankManager*)(*(char**)MusicSys.mpVStreamSys);
         cBankInstance* cfg = mgr->mBank;
         char* bm = (char*)&mgr->BankMonitor;
         int id = cfg[9].mBankStatus == 1;
         if (id) id = cfg[9].mBankHandle; else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     }
-    if (self->mTrackBankLoaded[slot] != 0) {
-        cBankManager_BANK_UnAttach(*(void**)self->MusicSys.mpVStreamSys, slot + 8);
-        self->mTrackBankLoaded[slot] = 0;
-        self->mTrackBankLoadedSection[slot] = -1;
+    if (mTrackBankLoaded[slot] != 0) {
+        cBankManager_BANK_UnAttach(*(void**)MusicSys.mpVStreamSys, slot + 8);
+        mTrackBankLoaded[slot] = 0;
+        mTrackBankLoadedSection[slot] = -1;
     }
 }
 #endif
@@ -1420,12 +1420,12 @@ extern "C" void func_002A39E0(void* self);
  * (cSSXAudio_BeginAllRiderSound) and stores the cAI's AITick in mGruntCycle. In game paths 1 and 2 (newRace.cGamePath) it also
  * requests the PA's location line func_002A39E0. cSSXAudio_InGameInit calls it.
  */
-extern "C" void cSSXAudio_StartEvent(cSSXAudio* self)
+void cSSXAudio::StartEvent()
 {
-    cSSXAudio_SetAudioUpdateState((cSSXAudio*)self, 6);
+    SetAudioUpdateState(6);
     cWorldTriggerManager_ResetStates(gWorldTriggerManager);
-    cSSXAudio_BeginAllRiderSound(self);
-    self->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
+    cSSXAudio_BeginAllRiderSound(this);
+    mGruntCycle = cAudioInterface_getGame()->AI->AITick;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = cBENewRaceInterface_newRace.cGamePath;
     if (mode == 1) {
@@ -1433,7 +1433,7 @@ extern "C" void cSSXAudio_StartEvent(cSSXAudio* self)
     }
     if (mode == 2) {
     load:
-        func_002A39E0(self);
+        func_002A39E0(this);
     }
 }
 #endif
@@ -1479,15 +1479,15 @@ struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
  * @param rider  the rider (cRider)
  */
 // PORT: rider pointers passed through int parameters of some callees.
-extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
+void cSSXAudio::OnFinishEvent(cRider* rider)
 {
-    if (((char*)rider) != (char*)cSSXAudio_GetFocusRider((cSSXAudio*)self, rider->mViewIndex))
+    if (((char*)rider) != (char*)GetFocusRider(rider->mViewIndex))
         return;
-    func_002A73A8((char*)gSSXAudio, 2, cSSXAudio_ReplayMode((cSSXAudio*)self) ? 0 : rider->mViewIndex);
+    func_002A73A8((char*)gSSXAudio, 2, ReplayMode() ? 0 : rider->mViewIndex);
     int flag = 1;
-    cSSXAudio_WipeoutSlideEnd(((char*)self), (int)rider);
-    cSSXAudio_WipeoutTumbleEnd(((char*)self), (int)rider);
-    cSSXAudio_EndUberSpin(((char*)self), (int)rider);
+    cSSXAudio_WipeoutSlideEnd(((char*)this), (int)rider);
+    cSSXAudio_WipeoutTumbleEnd(((char*)this), (int)rider);
+    cSSXAudio_EndUberSpin(((char*)this), (int)rider);
     cGameModeMan* cfg = SSXApp->GameModeMan;
     int nextHeat = cfg->iNextHeat;
     int heatNum = cfg->iHeatNum;
@@ -1495,37 +1495,37 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
     signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
     if ((mode == 2 || mode == 3) && heatNum < nextHeat) {
-        if (func_0028D960(((char*)self))) {
-            char* mon = (char*)&self->MusicSys;
-            sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
+        if (func_0028D960(((char*)this))) {
+            char* mon = (char*)&MusicSys;
+            sSaVt6EA0* vt = (sSaVt6EA0*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), 36);
             flag = 0;
-            self->mRaceMusicOn = 0;
+            mRaceMusicOn = 0;
         }
     }
     if (flag) {
-        if (func_0028D960(((char*)self))) {
-            char* mon = (char*)&self->MusicSys;
-            sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
+        if (func_0028D960(((char*)this))) {
+            char* mon = (char*)&MusicSys;
+            sSaVt6EA0* vt = (sSaVt6EA0*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), 10);
         }
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (rider->mDidNotFinish == 0) {
-        if (func_002A4078(((char*)self)))
-            func_002A3708(((char*)self), ((char*)rider));
+        if (func_002A4078(((char*)this)))
+            func_002A3708(((char*)this), ((char*)rider));
         else if (sa_state6EA0() == 2) {
             if (cAI_isRaceFinished(cAudioInterface_getAI()))
-                func_002A3708(((char*)self), ((char*)rider));
+                func_002A3708(((char*)this), ((char*)rider));
             else
-                func_002A34D0(((char*)self), ((char*)rider), 0, -1);
+                func_002A34D0(((char*)this), ((char*)rider), 0, -1);
         } else if (heatNum < 3)
-            func_002A34D0(((char*)self), ((char*)rider), 0, -1);
+            func_002A34D0(((char*)this), ((char*)rider), 0, -1);
         else
-            func_002A3708(((char*)self), ((char*)rider));
+            func_002A3708(((char*)this), ((char*)rider));
     }
     if (sa_state6EA0() == 0)
-        func_002A45C0(((char*)self));
+        func_002A45C0(((char*)this));
 }
 #endif
 
@@ -1542,11 +1542,11 @@ extern "C" void cSSXAudio_PlayHistoryAdd(void* self, int a, int b, int c, int d,
  *
  * Calls cSSXAudio_ResetAudioVariables (On Tour ResetAudioVariables). The entry is only added when func_002A4040 returns 0.
  */
-extern "C" void cSSXAudio_RestartEvent(cSSXAudio* self)
+void cSSXAudio::RestartEvent()
 {
-    cSSXAudio_ResetAudioVariables(self);
-    if (func_002A4040(self) == 0 && cSSXAudio_PlayHistoryExists(self, 0, 0) == 0) {
-        cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0);
+    ResetAudioVariables();
+    if (func_002A4040(this) == 0 && cSSXAudio_PlayHistoryExists(this, 0, 0) == 0) {
+        cSSXAudio_PlayHistoryAdd(this, 0, 0, -1, 0, 0);
     }
 }
 #endif
@@ -1568,14 +1568,14 @@ extern "C" int func_002A41D8(void* self);
  * That event is added (cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0)) when the game mode is not 4, mGateDropHeat has
  * reached cGameModeMan iNextHeat and the event is not live yet. cGame_partialRestart calls it.
  */
-extern "C" void cSSXAudio_PartialRestart(cSSXAudio* self)
+void cSSXAudio::PartialRestart()
 {
-    cSSXAudio_ResetAudioVariables(self);
-    if (func_002A4168(self) != 0 || func_002A41D8(self) != 0) {
-        if (func_002A4040(self) == 0
-            && self->mGateDropHeat >= SSXApp->GameModeMan->iNextHeat
-            && cSSXAudio_PlayHistoryExists(self, 0, 0) == 0) {
-            cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0);
+    ResetAudioVariables();
+    if (func_002A4168(this) != 0 || func_002A41D8(this) != 0) {
+        if (func_002A4040(this) == 0
+            && mGateDropHeat >= SSXApp->GameModeMan->iNextHeat
+            && cSSXAudio_PlayHistoryExists(this, 0, 0) == 0) {
+            cSSXAudio_PlayHistoryAdd(this, 0, 0, -1, 0, 0);
         }
     }
 }
@@ -1601,23 +1601,23 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  * back from the just-cleared mCurTrickPower[0]) and clears mTurboRef. cSSXAudio_RestartEvent, cSSXAudio_PartialRestart and
  * cGFPreEventState_ResetGameState call it.
  */
-extern "C" void cSSXAudio_ResetAudioVariables(cSSXAudio* self)
+void cSSXAudio::ResetAudioVariables()
 {
     int i = 0;
-    cSSXAudio_ResetLift(self);
-    cSSXAudio_EndUberSpin(self, 0);
-    cSSXAudio_DuckToStream(self, 3, 0.5f, 1.0f);
+    cSSXAudio_ResetLift(this);
+    cSSXAudio_EndUberSpin(this, 0);
+    DuckToStream(3, 0.5f, 1.0f);
     cWorldTriggerManager_ResetStates(gWorldTriggerManager);
     int n = ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated;
     for (; i < n; i++) {
-        cSSXAudio_WipeoutSlideEnd(self, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
-        cSSXAudio_WipeoutTumbleEnd(self, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
+        cSSXAudio_WipeoutSlideEnd(this, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
+        cSSXAudio_WipeoutTumbleEnd(this, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
     }
-    *(int*)&self->mCurTrickPower[0] = 0;
-    *(int*)&self->mCurTrickPower[1] = 0;
-    if (self->mTurboRef > 0) {
-        cBankMonitor_BANKMONITOR_StopHandle(**(char***)&self->MusicSys + 0x1D8, self->mTurboHandle, 1, self->mCurTrickPower[0]);
-        self->mTurboRef = 0;
+    *(int*)&mCurTrickPower[0] = 0;
+    *(int*)&mCurTrickPower[1] = 0;
+    if (mTurboRef > 0) {
+        cBankMonitor_BANKMONITOR_StopHandle(**(char***)&MusicSys + 0x1D8, mTurboHandle, 1, mCurTrickPower[0]);
+        mTurboRef = 0;
     }
 }
 #endif
@@ -1643,34 +1643,34 @@ int func_002B4908(void* mon);
  * func_002A26F0(0, 0) at once, then queues the song announcement (mSongAnnouncePending, mSongAnnounceNum =
  * func_002B4908). The pre-event overlays in fe/ovstatepause.cpp call it when they close.
  */
-extern "C" void cSSXAudio_StartEventWithNoStartGate(cSSXAudio* self)
+void cSSXAudio::StartEventWithNoStartGate()
 {
-    self->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
+    mGruntCycle = cAudioInterface_getGame()->AI->AITick;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
     if (mode != 5 && mode != 6) return;
-    char* mon = (char*)&self->MusicSys;
-    if (self->MusicSys.mSongPlaying != 0) {
-        sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl; // slot 4 sets the music state
+    char* mon = (char*)&MusicSys;
+    if (MusicSys.mSongPlaying != 0) {
+        sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)MusicSys.mVtbl; // slot 4 sets the music state
         vt[4].fn(vthis(mon, vt[4]), 0);
     } else {
-        func_0028D488(self);
-        func_0028CF98(self, 0, 0, -1, 0);
+        func_0028D488(this);
+        func_0028CF98(this, 0, 0, -1, 0);
     }
-    if (cSSXAudio_PlayHistoryExists(self, 0, 0) != 0) return;
+    if (cSSXAudio_PlayHistoryExists(this, 0, 0) != 0) return;
     signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
     int gameEvent = newRace[0x4A];
     if (gameEvent == 4 || gameEvent == 5) {
         if (newRace[0x49] != 2) {
-            self->mRiderRemarkPending = 1;
+            mRiderRemarkPending = 1;
         } else {
-            func_002A26F0(self, 0, 0);
-            func_002B1758(&self->SpeechSys, 0);
+            func_002A26F0(this, 0, 0);
+            func_002B1758(&SpeechSys, 0);
         }
     }
-    self->mSongAnnouncePending = 1;
-    self->mSongAnnounceNum = func_002B4908(mon);
+    mSongAnnouncePending = 1;
+    mSongAnnounceNum = func_002B4908(mon);
 }
 #endif
 
@@ -1738,16 +1738,16 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  * Sets controls 5, 3, 6 and 7 to cSSXAudio_Volume2Float's level, and with mArcadeSFX set also 9 and 10 (ArcadeSFX,
  * ArcadeSpeech). The setting is not a declared parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
-extern "C" void cSSXAudio_SetSFXVolume(cSSXAudio* self)
+void cSSXAudio::SetSFXVolume()
 {
-    float level = cSSXAudio_Volume2Float(self);
-    cSSXAudio_SetCurrVolume_if(self, 5, level);
-    cSSXAudio_SetCurrVolume_if(self, 3, level);
-    cSSXAudio_SetCurrVolume_if(self, 6, level);
-    cSSXAudio_SetCurrVolume_if(self, 7, level);
-    if (self->mArcadeSFX != 0) {
-        cSSXAudio_SetCurrVolume_if(self, 9, level);
-        cSSXAudio_SetCurrVolume_if(self, 10, level);
+    float level = cSSXAudio_Volume2Float(this);
+    cSSXAudio_SetCurrVolume_if(this, 5, level);
+    cSSXAudio_SetCurrVolume_if(this, 3, level);
+    cSSXAudio_SetCurrVolume_if(this, 6, level);
+    cSSXAudio_SetCurrVolume_if(this, 7, level);
+    if (mArcadeSFX != 0) {
+        cSSXAudio_SetCurrVolume_if(this, 9, level);
+        cSSXAudio_SetCurrVolume_if(this, 10, level);
     }
 }
 #endif
@@ -1765,7 +1765,7 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
  */
 extern "C" void func_00287520(cSSXAudio* self)
 {
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_Volume2Float(self), 4);
+    self->SetCurrVolume(cSSXAudio_Volume2Float(self), 4);
 }
 #endif
 
@@ -1784,14 +1784,14 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @param on  nonzero to enable the DJ speech (On Tour bOn)
  */
-extern "C" void cSSXAudio_SetDJSpeech(cSSXAudio* self, int on)
+void cSSXAudio::SetDJSpeech(int on)
 {
-    if (on != 0 && self->mRadioModeID != 2 && self->mRadioModeID != 3) {
-        cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 1), 2);
-        self->mDJSpeech = 1;
+    if (on != 0 && mRadioModeID != 2 && mRadioModeID != 3) {
+        SetCurrVolume(GetCurrSetVolume(1), 2);
+        mDJSpeech = 1;
     } else {
-        cSSXAudio_SetCurrVolume((cSSXAudio*)self, 0.0f, 2);
-        self->mDJSpeech = 0;
+        SetCurrVolume(0.0f, 2);
+        mDJSpeech = 0;
     }
 }
 #endif
@@ -1809,16 +1809,16 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @param on  nonzero to enable the arcade sounds
  */
-extern "C" void cSSXAudio_SetArcadeSFX(cSSXAudio* self, int on)
+void cSSXAudio::SetArcadeSFX(int on)
 {
     if (on != 0) {
-        cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 5), 9);
-        cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 5), 10);
+        SetCurrVolume(GetCurrSetVolume(5), 9);
+        SetCurrVolume(GetCurrSetVolume(5), 10);
     } else {
-        cSSXAudio_SetCurrVolume((cSSXAudio*)self, 0.0f, 9);
-        cSSXAudio_SetCurrVolume((cSSXAudio*)self, 0.0f, 10);
+        SetCurrVolume(0.0f, 9);
+        SetCurrVolume(0.0f, 10);
     }
-    self->mArcadeSFX = on;
+    mArcadeSFX = on;
 }
 #endif
 
@@ -1834,7 +1834,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  */
 extern "C" int func_00287670(cSSXAudio* self)
 {
-    return (int)(cSSXAudio_GetCurrSetVolume((cSSXAudio*)self, 1) * 11.0f);
+    return (int)(self->GetCurrSetVolume(1) * 11.0f);
 }
 #endif
 
@@ -1848,9 +1848,9 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int cSSXAudio_GetSFXVolume(cSSXAudio* self)
+int cSSXAudio::GetSFXVolume()
 {
-    return (int)(cSSXAudio_GetCurrSetVolume(self, 5) * 11.0f);
+    return (int)(GetCurrSetVolume(5) * 11.0f);
 }
 #endif
 
@@ -1866,7 +1866,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  */
 extern "C" int func_002876D0(cSSXAudio* self)
 {
-    return (int)(cSSXAudio_GetCurrSetVolume((cSSXAudio*)self, 4) * 11.0f);
+    return (int)(self->GetCurrSetVolume(4) * 11.0f);
 }
 #endif
 
@@ -1913,9 +1913,9 @@ extern "C" void SNDmastervol(signed char vol);
  * @param ch     the volume control (On Tour eVolumeControl volumeControl)
  */
 // PORT: `<?`/`>?` are the g++ min/max operators (EE min.s/max.s).
-extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
+void cSSXAudio::SetCurrVolume(float volume, int ch)
 {
-    cSSXAudio* self = self_;
+    cSSXAudio* self = this;
     volume = (volume <? 1.0f) >? 0.0f;
     tSoundVolume* currVolume = &((&self->mSoundVolume[0]))[ch];
     switch (ch) {
@@ -1999,9 +1999,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrSetVolume);
  * @param volumeIndex  the volume control (eVolumeControl)
  * @return the level, 0.0..1.0
  */
-extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int volumeIndex)
+float cSSXAudio::GetCurrSetVolume(int volumeIndex)
 {
-    cSSXAudio* audio = (cSSXAudio*)self;
+    cSSXAudio* audio = (cSSXAudio*)this;
     return audio->mSoundVolume[volumeIndex].setVolume;
 }
 #endif
@@ -2019,12 +2019,12 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolume);
  * @param charIndex  the character for control 4
  * @return the level
  */
-extern "C" float cSSXAudio_GetCurrAppliedVolume(cSSXAudio* self, int volumeIndex, int charIndex)
+float cSSXAudio::GetCurrAppliedVolume(int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
-        return self->mSoundVolume[volumeIndex].appliedVolume;
+        return mSoundVolume[volumeIndex].appliedVolume;
     }
-    return self->mCharacterVolume[charIndex];
+    return mCharacterVolume[charIndex];
 }
 #endif
 
@@ -2040,12 +2040,12 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolumePtr);
  * @param charIndex  the character for control 4
  * @return a pointer to the level (float)
  */
-extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int volumeIndex, int charIndex)
+void* cSSXAudio::GetCurrAppliedVolumePtr(int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
-        return &self->mSoundVolume[volumeIndex].appliedVolume;
+        return &mSoundVolume[volumeIndex].appliedVolume;
     }
-    return (char*)&self->mCharacterVolume[charIndex];
+    return (char*)&mCharacterVolume[charIndex];
 }
 #endif
 
@@ -2058,9 +2058,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrSetVolumePtr);
  * @param idx  the volume control (eVolumeControl)
  * @return a pointer to the level
  */
-extern "C" char* cSSXAudio_GetCurrSetVolumePtr(cSSXAudio* self, int idx)
+char* cSSXAudio::GetCurrSetVolumePtr(int idx)
 {
-    return (char*)&self->mSoundVolume[idx].setVolume;
+    return (char*)&mSoundVolume[idx].setVolume;
 }
 #endif
 //100%
@@ -2075,9 +2075,9 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  * @param idx  the volume control (On Tour eVolumeControl: 0 master, 1 music, 2 DJ, 3 PA, 4 character, 5 SFX,
  *             ...)
  */
-extern "C" void cSSXAudio_IncCurrVolume(cSSXAudio* self, int idx)
+void cSSXAudio::IncCurrVolume(int idx)
 {
-    cSSXAudio_SetCurrVolume_if(((char*)self), idx, self->mSoundVolume[idx].setVolume + 0.09090909361839294f);
+    cSSXAudio_SetCurrVolume_if(((char*)this), idx, mSoundVolume[idx].setVolume + 0.09090909361839294f);
 }
 #endif
 //100%
@@ -2092,9 +2092,9 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  * @param idx  the volume control (On Tour eVolumeControl: 0 master, 1 music, 2 DJ, 3 PA, 4 character, 5 SFX,
  *             ...)
  */
-extern "C" void cSSXAudio_DecCurrVolume(cSSXAudio* self, int idx)
+void cSSXAudio::DecCurrVolume(int idx)
 {
-    cSSXAudio_SetCurrVolume_if(((char*)self), idx, self->mSoundVolume[idx].setVolume - 0.09090909361839294f);
+    cSSXAudio_SetCurrVolume_if(((char*)this), idx, mSoundVolume[idx].setVolume - 0.09090909361839294f);
 }
 #endif
 
@@ -2132,17 +2132,17 @@ static inline void duckVolumeSet(cSSXAudio* self, int j, float v)
  * @param finalLevel      the duck level to reach (On Tour finalLevel)
  * @param time   fade time in seconds; 0 applies the level at once
  */
-extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int mask, float finalLevel, float time)
+void cSSXAudio::DuckVolume(int mask, float finalLevel, float time)
 {
     if (time == 0.0f) {
         if (mask & 1)
-            duckVolumeSet(self, 1, finalLevel);
+            duckVolumeSet(this, 1, finalLevel);
         if (mask & 2)
-            duckVolumeSet(self, 5, finalLevel);
+            duckVolumeSet(this, 5, finalLevel);
         if (mask & 4) {
-            duckVolumeSet(self, 4, finalLevel);
-            float level = self->mSoundVolume[4].appliedVolume;
-            cSSXAudio* mixOut = self;
+            duckVolumeSet(this, 4, finalLevel);
+            float level = mSoundVolume[4].appliedVolume;
+            cSSXAudio* mixOut = this;
             mixOut->mCharacterVolume[0] = level * gMobyScaling;
             mixOut->mCharacterVolume[1] = level * gKaoriScaling;
             mixOut->mCharacterVolume[2] = level * gAerielScaling;
@@ -2155,25 +2155,25 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int mask, float finalLevel
             mixOut->mCharacterVolume[9] = level * gDeiterScaling;
         }
         if (mask & 8)
-            duckVolumeSet(self, 2, finalLevel);
+            duckVolumeSet(this, 2, finalLevel);
         if (mask & 0x80)
-            duckVolumeSet(self, 3, finalLevel);
+            duckVolumeSet(this, 3, finalLevel);
         if (mask & 0x20)
-            duckVolumeSet(self, 6, finalLevel);
+            duckVolumeSet(this, 6, finalLevel);
         if (mask & 0x40)
-            duckVolumeSet(self, 7, finalLevel);
+            duckVolumeSet(this, 7, finalLevel);
         if (mask & 0x10)
-            duckVolumeSet(self, 8, finalLevel);
+            duckVolumeSet(this, 8, finalLevel);
         if (mask & 0x100)
-            duckVolumeSet(self, 9, finalLevel);
+            duckVolumeSet(this, 9, finalLevel);
         if (mask & 0x200)
-            duckVolumeSet(self, 10, finalLevel);
+            duckVolumeSet(this, 10, finalLevel);
     } else {
-        self->mCurDuck = mask;
-        self->mDuckFinalValue = finalLevel;
-        self->mDuckStep = (finalLevel - self->mDuckCurValue) / time * 0.01666666753590107f;
-        if (self->mDuckStep != 0.0f)
-            self->mDucking = 1;
+        mCurDuck = mask;
+        mDuckFinalValue = finalLevel;
+        mDuckStep = (finalLevel - mDuckCurValue) / time * 0.01666666753590107f;
+        if (mDuckStep != 0.0f)
+            mDucking = 1;
     }
 }
 #endif
@@ -2205,27 +2205,27 @@ static inline void updateDuckSet(cSSXAudio* self, int j, float v)
  *
  * The level stops at its target, which ends the fade. The controls are those of the DuckVolume mask.
  */
-extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self)
+void cSSXAudio::UpdateDuck()
 {
-    if (self->mDucking) {
-        self->mDuckCurValue += self->mDuckStep;
-        if (self->mDuckStep < 0.0f) {
-            if (self->mDuckCurValue < self->mDuckFinalValue) {
-                self->mDuckCurValue = self->mDuckFinalValue;
-                self->mDucking = 0;
+    if (mDucking) {
+        mDuckCurValue += mDuckStep;
+        if (mDuckStep < 0.0f) {
+            if (mDuckCurValue < mDuckFinalValue) {
+                mDuckCurValue = mDuckFinalValue;
+                mDucking = 0;
             }
-        } else if (self->mDuckCurValue > self->mDuckFinalValue) {
-            self->mDuckCurValue = self->mDuckFinalValue;
-            self->mDucking = 0;
+        } else if (mDuckCurValue > mDuckFinalValue) {
+            mDuckCurValue = mDuckFinalValue;
+            mDucking = 0;
         }
-        if (self->mCurDuck & 1)
-            updateDuckSet(self, 1, self->mDuckCurValue);
-        if (self->mCurDuck & 2)
-            updateDuckSet(self, 5, self->mDuckCurValue);
-        if (self->mCurDuck & 4) {
-            updateDuckSet(self, 4, self->mDuckCurValue);
-            float level = self->mSoundVolume[4].appliedVolume;
-            cSSXAudio* mixOut = self;
+        if (mCurDuck & 1)
+            updateDuckSet(this, 1, mDuckCurValue);
+        if (mCurDuck & 2)
+            updateDuckSet(this, 5, mDuckCurValue);
+        if (mCurDuck & 4) {
+            updateDuckSet(this, 4, mDuckCurValue);
+            float level = mSoundVolume[4].appliedVolume;
+            cSSXAudio* mixOut = this;
             mixOut->mCharacterVolume[0] = level * gMobyScaling;
             mixOut->mCharacterVolume[1] = level * gKaoriScaling;
             mixOut->mCharacterVolume[2] = level * gAerielScaling;
@@ -2237,20 +2237,20 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self)
             mixOut->mCharacterVolume[8] = level * gPsymonScaling;
             mixOut->mCharacterVolume[9] = level * gDeiterScaling;
         }
-        if (self->mCurDuck & 8)
-            updateDuckSet(self, 2, self->mDuckCurValue);
-        if (self->mCurDuck & 0x80)
-            updateDuckSet(self, 3, self->mDuckCurValue);
-        if (self->mCurDuck & 0x20)
-            updateDuckSet(self, 6, self->mDuckCurValue);
-        if (self->mCurDuck & 0x40)
-            updateDuckSet(self, 7, self->mDuckCurValue);
-        if (self->mCurDuck & 0x10)
-            updateDuckSet(self, 8, self->mDuckCurValue);
-        if (self->mCurDuck & 0x100)
-            updateDuckSet(self, 9, self->mDuckCurValue);
-        if (self->mCurDuck & 0x200)
-            updateDuckSet(self, 10, self->mDuckCurValue);
+        if (mCurDuck & 8)
+            updateDuckSet(this, 2, mDuckCurValue);
+        if (mCurDuck & 0x80)
+            updateDuckSet(this, 3, mDuckCurValue);
+        if (mCurDuck & 0x20)
+            updateDuckSet(this, 6, mDuckCurValue);
+        if (mCurDuck & 0x40)
+            updateDuckSet(this, 7, mDuckCurValue);
+        if (mCurDuck & 0x10)
+            updateDuckSet(this, 8, mDuckCurValue);
+        if (mCurDuck & 0x100)
+            updateDuckSet(this, 9, mDuckCurValue);
+        if (mCurDuck & 0x200)
+            updateDuckSet(this, 10, mDuckCurValue);
     }
 }
 #endif
@@ -2273,21 +2273,21 @@ extern "C" int StreamToDuckVolumeControl(int);
  * @param fadeTime  the fade time
  * @param duckLevel  the ducked level
  */
-extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int duckStream, float fadeTime, float duckLevel)
+void cSSXAudio::DuckToStream(int duckStream, float fadeTime, float duckLevel)
 {
     if (duckStream == 3) {
-        if (self->mStreamIsDucked != 0) {
-            cSSXAudio_DuckVolume((cSSXAudio*)self, StreamToDuckVolumeControl(self->mDuckStream), 1.0f, fadeTime);
-            self->mDuckScale = duckLevel;
-            self->mDuckStream = duckStream;
-            self->mStreamIsDucked = 0;
+        if (mStreamIsDucked != 0) {
+            DuckVolume(StreamToDuckVolumeControl(mDuckStream), 1.0f, fadeTime);
+            mDuckScale = duckLevel;
+            mDuckStream = duckStream;
+            mStreamIsDucked = 0;
         }
-    } else if (self->mStreamIsDucked == 0) {
-        cSSXAudio_DuckVolume((cSSXAudio*)self, StreamToDuckVolumeControl(duckStream), duckLevel, fadeTime);
-        self->mDuckStream = duckStream;
-        self->mStreamIsDucked = 1;
-        self->mDuckScale = duckLevel;
-        self->mDuckedStreamHasStarted = 0;
+    } else if (mStreamIsDucked == 0) {
+        DuckVolume(StreamToDuckVolumeControl(duckStream), duckLevel, fadeTime);
+        mDuckStream = duckStream;
+        mStreamIsDucked = 1;
+        mDuckScale = duckLevel;
+        mDuckedStreamHasStarted = 0;
     }
 }
 #endif
@@ -2331,61 +2331,61 @@ struct sIniParser7FC8 {
  * the next mix from its MUSIC, DJ, PA, CHARACTER, BOARD, COLLISION, AMBIENT, ARCADESFX and ARCADESPEECH values;
  * TIME is given in milliseconds and stored in seconds. The number of mixes read goes into the count.
  */
-extern "C" void cSSXAudio_LoadMixes(cSSXAudio* self)
+void cSSXAudio::LoadMixes()
 {
     sIniParser7FC8 parser;
     int val;
-    self->mNumAudioMixes = 0;
+    mNumAudioMixes = 0;
     FileParser_FileParser_r(&parser, kpAudioMixFilename, 0x100);
     parser.cur = parser.start;
     for (int i = 0; i < 25; i++) {
-        self->mAudioMixes[i].musicLevel = 100;
-        self->mAudioMixes[i].djLevel = 100;
-        self->mAudioMixes[i].paLevel = 100;
-        self->mAudioMixes[i].characterLevel = 100;
-        self->mAudioMixes[i].boardLevel = 100;
-        self->mAudioMixes[i].collisionLevel = 100;
-        self->mAudioMixes[i].ambientLevel = 100;
-        self->mAudioMixes[i].arcadeSFXLevel = 100;
-        self->mAudioMixes[i].arcadeSpeechLevel = 100;
-        self->mAudioMixes[i].time = 0.0f;
+        mAudioMixes[i].musicLevel = 100;
+        mAudioMixes[i].djLevel = 100;
+        mAudioMixes[i].paLevel = 100;
+        mAudioMixes[i].characterLevel = 100;
+        mAudioMixes[i].boardLevel = 100;
+        mAudioMixes[i].collisionLevel = 100;
+        mAudioMixes[i].ambientLevel = 100;
+        mAudioMixes[i].arcadeSFXLevel = 100;
+        mAudioMixes[i].arcadeSpeechLevel = 100;
+        mAudioMixes[i].time = 0.0f;
     }
-    while (self->mNumAudioMixes < 25 && FileParser_FindNextSection(&parser) != 0) {
+    while (mNumAudioMixes < 25 && FileParser_FindNextSection(&parser) != 0) {
         while (FileParser_IsEOF(&parser) == 0) {
             char* key = FileParser_GetName(&parser);
             if (strcasecmp(key, str_MUSIC) == 0) {
                 FileParser_AssignInt(&parser, str_MUSIC, &val);
-                self->mAudioMixes[self->mNumAudioMixes].musicLevel = val;
+                mAudioMixes[mNumAudioMixes].musicLevel = val;
             } else if (strcasecmp(key, str_DJ) == 0) {
                 FileParser_AssignInt(&parser, str_DJ, &val);
-                self->mAudioMixes[self->mNumAudioMixes].djLevel = val;
+                mAudioMixes[mNumAudioMixes].djLevel = val;
             } else if (strcasecmp(key, str_PA) == 0) {
                 FileParser_AssignInt(&parser, str_PA, &val);
-                self->mAudioMixes[self->mNumAudioMixes].paLevel = val;
+                mAudioMixes[mNumAudioMixes].paLevel = val;
             } else if (strcasecmp(key, str_CHARACTER) == 0) {
                 FileParser_AssignInt(&parser, str_CHARACTER, &val);
-                self->mAudioMixes[self->mNumAudioMixes].characterLevel = val;
+                mAudioMixes[mNumAudioMixes].characterLevel = val;
             } else if (strcasecmp(key, str_BOARD) == 0) {
                 FileParser_AssignInt(&parser, str_BOARD, &val);
-                self->mAudioMixes[self->mNumAudioMixes].boardLevel = val;
+                mAudioMixes[mNumAudioMixes].boardLevel = val;
             } else if (strcasecmp(key, str_COLLISION) == 0) {
                 FileParser_AssignInt(&parser, str_COLLISION, &val);
-                self->mAudioMixes[self->mNumAudioMixes].collisionLevel = val;
+                mAudioMixes[mNumAudioMixes].collisionLevel = val;
             } else if (strcasecmp(key, str_AMBIENT) == 0) {
                 FileParser_AssignInt(&parser, str_AMBIENT, &val);
-                self->mAudioMixes[self->mNumAudioMixes].ambientLevel = val;
+                mAudioMixes[mNumAudioMixes].ambientLevel = val;
             } else if (strcasecmp(key, str_ARCADESFX) == 0) {
                 FileParser_AssignInt(&parser, str_ARCADESFX, &val);
-                self->mAudioMixes[self->mNumAudioMixes].arcadeSFXLevel = val;
+                mAudioMixes[mNumAudioMixes].arcadeSFXLevel = val;
             } else if (strcasecmp(key, str_ARCADESPEECH) == 0) {
                 FileParser_AssignInt(&parser, str_ARCADESPEECH, &val);
-                self->mAudioMixes[self->mNumAudioMixes].arcadeSpeechLevel = val;
+                mAudioMixes[mNumAudioMixes].arcadeSpeechLevel = val;
             } else if (strcasecmp(key, str_TIME_b) == 0) {
                 FileParser_AssignInt(&parser, str_TIME_b, &val);
-                self->mAudioMixes[self->mNumAudioMixes].time = (float)val * 0.0010000000474974513f;
+                mAudioMixes[mNumAudioMixes].time = (float)val * 0.0010000000474974513f;
             }
         }
-        self->mNumAudioMixes++;
+        mNumAudioMixes++;
     }
     FileParser__FileParser(&parser, 2);
 }
@@ -2402,15 +2402,15 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_MixIntToFloat);
  * @param pct  the mix value (percent), or negative to keep the control's level
  * @return the level
  */
-extern "C" float cSSXAudio_MixIntToFloat(cSSXAudio* self, int i, int pct)
+float cSSXAudio::MixIntToFloat(int i, int pct)
 {
     if (pct >= 0) {
         return pct * 0.009999999776482582f;
     }
-    if (self->mMixing != 0) {
-        return self->mMixFinalValue[i];
+    if (mMixing != 0) {
+        return mMixFinalValue[i];
     }
-    return self->mMixLevel[i];
+    return mMixLevel[i];
 }
 #endif
 
@@ -2440,40 +2440,40 @@ extern float gDeiterScaling;
  *
  * @param id     the mix preset, 0-24 (On Tour Parm)
  */
-extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id)
+void cSSXAudio::MixVolume(int id)
 {
     if (id < 0) {
         id = 0;
     }
-    if (id == self->mLastMix) {
+    if (id == mLastMix) {
         return;
     }
-    self->mLastMix = id;
-    float musicVol = cSSXAudio_MixIntToFloat(self, 1, self->mAudioMixes[id].musicLevel);
-    float djVol = cSSXAudio_MixIntToFloat(self, 2, self->mAudioMixes[id].djLevel);
-    float paVol = cSSXAudio_MixIntToFloat(self, 3, self->mAudioMixes[id].paLevel);
-    float characterVol = cSSXAudio_MixIntToFloat(self, 4, self->mAudioMixes[id].characterLevel);
-    float boardVol = cSSXAudio_MixIntToFloat(self, 6, self->mAudioMixes[id].boardLevel);
-    float collisionVol = cSSXAudio_MixIntToFloat(self, 7, self->mAudioMixes[id].collisionLevel);
-    float ambientVol = cSSXAudio_MixIntToFloat(self, 8, self->mAudioMixes[id].ambientLevel);
-    float arcadeSfxVol = cSSXAudio_MixIntToFloat(self, 9, self->mAudioMixes[id].arcadeSFXLevel);
-    float arcadeSpeechVol = cSSXAudio_MixIntToFloat(self, 10, self->mAudioMixes[id].arcadeSpeechLevel);
-    float fadeTime = self->mAudioMixes[id].time;
+    mLastMix = id;
+    float musicVol = MixIntToFloat(1, mAudioMixes[id].musicLevel);
+    float djVol = MixIntToFloat(2, mAudioMixes[id].djLevel);
+    float paVol = MixIntToFloat(3, mAudioMixes[id].paLevel);
+    float characterVol = MixIntToFloat(4, mAudioMixes[id].characterLevel);
+    float boardVol = MixIntToFloat(6, mAudioMixes[id].boardLevel);
+    float collisionVol = MixIntToFloat(7, mAudioMixes[id].collisionLevel);
+    float ambientVol = MixIntToFloat(8, mAudioMixes[id].ambientLevel);
+    float arcadeSfxVol = MixIntToFloat(9, mAudioMixes[id].arcadeSFXLevel);
+    float arcadeSpeechVol = MixIntToFloat(10, mAudioMixes[id].arcadeSpeechLevel);
+    float fadeTime = mAudioMixes[id].time;
     if (fadeTime == 0.0f) {
-        self->mMixLevel[1] = musicVol;
-        self->mMixLevel[2] = djVol;
-        self->mMixLevel[3] = paVol;
-        self->mMixLevel[4] = characterVol;
-        self->mMixLevel[6] = boardVol;
-        self->mMixLevel[7] = collisionVol;
-        self->mMixLevel[8] = ambientVol;
-        self->mMixLevel[9] = arcadeSfxVol;
-        self->mMixLevel[10] = arcadeSpeechVol;
+        mMixLevel[1] = musicVol;
+        mMixLevel[2] = djVol;
+        mMixLevel[3] = paVol;
+        mMixLevel[4] = characterVol;
+        mMixLevel[6] = boardVol;
+        mMixLevel[7] = collisionVol;
+        mMixLevel[8] = ambientVol;
+        mMixLevel[9] = arcadeSfxVol;
+        mMixLevel[10] = arcadeSpeechVol;
         for (int k = 0; k < 11; k++) {
-            self->mSoundVolume[k].appliedVolume = self->mSoundVolume[k].duckedVolume * self->mMixLevel[k];
+            mSoundVolume[k].appliedVolume = mSoundVolume[k].duckedVolume * mMixLevel[k];
         }
-        float characterOut = self->mSoundVolume[4].appliedVolume;
-        cSSXAudio* mixOut = self;
+        float characterOut = mSoundVolume[4].appliedVolume;
+        cSSXAudio* mixOut = this;
         mixOut->mCharacterVolume[0] = characterOut * gMobyScaling;
         mixOut->mCharacterVolume[1] = characterOut * gKaoriScaling;
         mixOut->mCharacterVolume[2] = characterOut * gAerielScaling;
@@ -2485,21 +2485,21 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id)
         mixOut->mCharacterVolume[8] = characterOut * gPsymonScaling;
         mixOut->mCharacterVolume[9] = characterOut * gDeiterScaling;
     } else {
-        cSSXAudio* fader = self;
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->mAudioMixes[id].musicLevel != -1, musicVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 2, self->mAudioMixes[id].djLevel != -1, djVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 3, self->mAudioMixes[id].paLevel != -1, paVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 4, self->mAudioMixes[id].characterLevel != -1, characterVol,
+        cSSXAudio* fader = this;
+        fader->ChangeMixFinalAndStepValues(1, mAudioMixes[id].musicLevel != -1, musicVol, fadeTime);
+        fader->ChangeMixFinalAndStepValues(2, mAudioMixes[id].djLevel != -1, djVol, fadeTime);
+        fader->ChangeMixFinalAndStepValues(3, mAudioMixes[id].paLevel != -1, paVol, fadeTime);
+        fader->ChangeMixFinalAndStepValues(4, mAudioMixes[id].characterLevel != -1, characterVol,
                                               fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 6, self->mAudioMixes[id].boardLevel != -1, boardVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 7, self->mAudioMixes[id].collisionLevel != -1, collisionVol,
+        fader->ChangeMixFinalAndStepValues(6, mAudioMixes[id].boardLevel != -1, boardVol, fadeTime);
+        fader->ChangeMixFinalAndStepValues(7, mAudioMixes[id].collisionLevel != -1, collisionVol,
                                               fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 8, self->mAudioMixes[id].ambientLevel != -1, ambientVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 9, self->mAudioMixes[id].arcadeSFXLevel != -1, arcadeSfxVol,
+        fader->ChangeMixFinalAndStepValues(8, mAudioMixes[id].ambientLevel != -1, ambientVol, fadeTime);
+        fader->ChangeMixFinalAndStepValues(9, mAudioMixes[id].arcadeSFXLevel != -1, arcadeSfxVol,
                                               fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 10, self->mAudioMixes[id].arcadeSpeechLevel != -1,
+        fader->ChangeMixFinalAndStepValues(10, mAudioMixes[id].arcadeSpeechLevel != -1,
                                               arcadeSpeechVol, fadeTime);
-        self->mMixing = 1;
+        mMixing = 1;
     }
 }
 #endif
@@ -2518,16 +2518,16 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ChangeMixFinalAndStepValues);
  * @param target  the final level
  * @param time  the fade time in seconds
  */
-extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(cSSXAudio* self, int i, int smooth, float target, float time)
+void cSSXAudio::ChangeMixFinalAndStepValues(int i, int smooth, float target, float time)
 {
-    self->mMixFinalValue[i] = target;
-    float cur = self->mMixLevel[i];
+    mMixFinalValue[i] = target;
+    float cur = mMixLevel[i];
     if (target != cur) {
         if (smooth != 0) {
-            self->mMixStep[i] = (target - cur) / time * 0.01666666753590107f;
+            mMixStep[i] = (target - cur) / time * 0.01666666753590107f;
         }
     } else {
-        self->mMixStep[i] = 0.0f;
+        mMixStep[i] = 0.0f;
     }
 }
 #endif
@@ -2554,32 +2554,32 @@ extern float gDeiterScaling;
  * ten character levels mCharacterVolume are the Character control's applied volume times the constants gMobyScaling ..
  * gDeiterScaling.
  */
-extern "C" void cSSXAudio_UpdateMix(cSSXAudio* self)
+void cSSXAudio::UpdateMix()
 {
-    if (self->mMixing == 0) return;
-    self->mMixing = 0;
+    if (mMixing == 0) return;
+    mMixing = 0;
     for (int i = 0; i < 11; i++) {
-        if (self->mMixStep[i] == 0.0f) continue;
-        float mixValue = self->mMixLevel[i] + self->mMixStep[i];
-        self->mMixLevel[i] = mixValue;
-        if (self->mMixStep[i] < 0.0f) {
-            if (mixValue <= self->mMixFinalValue[i]) {
-                self->mMixLevel[i] = self->mMixFinalValue[i];
-                self->mMixStep[i] = 0.0f;
+        if (mMixStep[i] == 0.0f) continue;
+        float mixValue = mMixLevel[i] + mMixStep[i];
+        mMixLevel[i] = mixValue;
+        if (mMixStep[i] < 0.0f) {
+            if (mixValue <= mMixFinalValue[i]) {
+                mMixLevel[i] = mMixFinalValue[i];
+                mMixStep[i] = 0.0f;
             } else {
-                self->mMixing = 1;
+                mMixing = 1;
             }
         } else {
-            if (self->mMixFinalValue[i] <= mixValue) {
-                self->mMixLevel[i] = self->mMixFinalValue[i];
-                self->mMixStep[i] = 0.0f;
+            if (mMixFinalValue[i] <= mixValue) {
+                mMixLevel[i] = mMixFinalValue[i];
+                mMixStep[i] = 0.0f;
             } else {
-                self->mMixing = 1;
+                mMixing = 1;
             }
         }
-        self->mSoundVolume[i].appliedVolume = self->mSoundVolume[i].duckedVolume * self->mMixLevel[i];
+        mSoundVolume[i].appliedVolume = mSoundVolume[i].duckedVolume * mMixLevel[i];
     }
-    cSSXAudio* mixOut = self;
+    cSSXAudio* mixOut = this;
     float charLevel = mixOut->mSoundVolume[4].appliedVolume;
     mixOut->mCharacterVolume[0] = charLevel * gMobyScaling;
     mixOut->mCharacterVolume[1] = charLevel * gKaoriScaling;
@@ -2678,7 +2678,7 @@ int cSSXAudio_GetNumViews_self(void* self) __asm__("cSSXAudio_GetNumViews");
  * @param obj  the rider (cRider)
  * @return the view index
  */
-extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
+int cSSXAudio::GetClosestCamera1(cRider* obj)
 {
     if (cAudioInterface_isInGame() == 0) {
         return 0;
@@ -2687,10 +2687,10 @@ extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
     if (ok) {
         return obj->mViewIndex;
     }
-    if (cSSXAudio_GetNumViews_self(self) == 1) {
+    if (cSSXAudio_GetNumViews_self(this) == 1) {
         return 0;
     }
-    return cSSXAudio_GetClosestCamera(self, (int)obj->getPosition());
+    return cSSXAudio_GetClosestCamera(this, (int)obj->getPosition());
 }
 #endif
 
@@ -2727,7 +2727,7 @@ extern "C" cGame* cAudioInterface_getGame();
  *
  * @return 1 during replay playback, else 0
  */
-extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self)
+int cSSXAudio::ReplayMode()
 {
     if (cAudioInterface_isInGame() != 0) {
         if ((int*)cAudioInterface_getGame()->Replay != 0) {
@@ -2792,13 +2792,13 @@ static inline float audVu0Dot(const t4Vector& a, const t4Vector& b)
  * @param radius  the distance, in units of 100 (On Tour Dist)
  * @return the view index, or -1 when no camera is in range
  */
-extern "C" int cSSXAudio_CameraInRange(cSSXAudio* self, t4Vector* pos, float radius)
+int cSSXAudio::CameraInRange(t4Vector* pos, float radius)
 {
     float rangeSq = radius * 100.0f;
     rangeSq = rangeSq * rangeSq;
     int i;
-    for (i = 0; i < cSSXAudio_GetNumViews_self(self); i++) {
-        t4Vector toCamera = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(self, i), *pos);
+    for (i = 0; i < cSSXAudio_GetNumViews_self(this); i++) {
+        t4Vector toCamera = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(this, i), *pos);
         if (audVu0Dot(toCamera, toCamera) < rangeSq) {
             return i;
         }
@@ -2823,13 +2823,13 @@ void* cSSXAudio_GetCameraPos(void* self, int a1);
  */
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-extern "C" int cSSXAudio_InCameraView(cSSXAudio* self, t4Vector* pos, float radius)
+int cSSXAudio::InCameraView(t4Vector* pos, float radius)
 {
     float radiusSq = radius * 100.0f;
     radiusSq = radiusSq * radiusSq;
     int i;
-    for (i = 0; i < cSSXAudio_GetNumViews_self(self); i++) {
-        t4Vector offset = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(self, i), *pos);
+    for (i = 0; i < cSSXAudio_GetNumViews_self(this); i++) {
+        t4Vector offset = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(this, i), *pos);
         if (audVu0Dot(offset, offset) < radiusSq && 0.0f < offset.z) {
             return 1;
         }
@@ -2894,7 +2894,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @param mode  0 front end, 1 mountain (On Tour eGameAudioStates)
  */
-extern "C" void cSSXAudio_InitSoundLevels(cSSXAudio* self, int mode)
+void cSSXAudio::InitSoundLevels(int mode)
 {
     if (mode == 0) {
         gSFXScaling = 1.0f;
@@ -2939,17 +2939,17 @@ extern "C" void cSSXAudio_InitSoundLevels(cSSXAudio* self, int mode)
         gPsymonScaling = 1.0f;
         gDeiterScaling = 0.949999988079071f;
     }
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 0), 0);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 1), 1);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 2), 2);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 3), 3);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 4), 4);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 5), 5);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 6), 6);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 7), 7);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 8), 8);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 9), 9);
-    cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 10), 10);
+    SetCurrVolume(GetCurrSetVolume(0), 0);
+    SetCurrVolume(GetCurrSetVolume(1), 1);
+    SetCurrVolume(GetCurrSetVolume(2), 2);
+    SetCurrVolume(GetCurrSetVolume(3), 3);
+    SetCurrVolume(GetCurrSetVolume(4), 4);
+    SetCurrVolume(GetCurrSetVolume(5), 5);
+    SetCurrVolume(GetCurrSetVolume(6), 6);
+    SetCurrVolume(GetCurrSetVolume(7), 7);
+    SetCurrVolume(GetCurrSetVolume(8), 8);
+    SetCurrVolume(GetCurrSetVolume(9), 9);
+    SetCurrVolume(GetCurrSetVolume(10), 10);
 }
 #endif
 
@@ -2968,87 +2968,87 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  *
  * @param mode  the preset, 0..5
  */
-extern "C" void cSSXAudio_SetPreset(cSSXAudio* self, int mode)
+void cSSXAudio::SetPreset(int mode)
 {
-    self->mPreset = mode;
+    mPreset = mode;
     switch (mode) {
     case 0:
-        cSSXAudio_SetCurrVolume_if(self, 1, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 5, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 2, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 3, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 4, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 6, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 7, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 9, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 10, 0.9090909361839294f);
-        cSSXAudio_SetArcadeSFX(self, 1);
+        cSSXAudio_SetCurrVolume_if(this, 1, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 5, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 2, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 3, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 4, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 6, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 7, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 8, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 9, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 10, 0.9090909361839294f);
+        SetArcadeSFX(1);
         break;
     case 1:
-        cSSXAudio_SetCurrVolume_if(self, 1, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 5, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 2, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 3, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 4, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 6, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 7, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        cSSXAudio_SetArcadeSFX(self, 1);
+        cSSXAudio_SetCurrVolume_if(this, 1, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 5, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 2, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 3, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 4, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 6, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 7, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 8, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 9, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 10, 0.0f);
+        SetArcadeSFX(1);
         break;
     case 2:
-        cSSXAudio_SetCurrVolume_if(self, 1, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 5, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 2, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 3, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 4, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 6, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 7, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 9, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 10, 0.9090909361839294f);
-        cSSXAudio_SetArcadeSFX(self, 1);
+        cSSXAudio_SetCurrVolume_if(this, 1, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 5, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 2, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 3, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 4, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 6, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 7, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 8, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 9, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 10, 0.9090909361839294f);
+        SetArcadeSFX(1);
         break;
     case 3:
-        cSSXAudio_SetCurrVolume_if(self, 1, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 5, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 2, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 3, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 4, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 6, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 7, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        cSSXAudio_SetArcadeSFX(self, 1);
+        cSSXAudio_SetCurrVolume_if(this, 1, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 5, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 2, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 3, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 4, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 6, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 7, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 8, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 9, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 10, 0.0f);
+        SetArcadeSFX(1);
         break;
     case 4:
-        cSSXAudio_SetCurrVolume_if(self, 1, 0.9090909361839294f);
-        cSSXAudio_SetCurrVolume_if(self, 5, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 2, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 3, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 4, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 6, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 7, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 8, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        cSSXAudio_SetArcadeSFX(self, 0);
+        cSSXAudio_SetCurrVolume_if(this, 1, 0.9090909361839294f);
+        cSSXAudio_SetCurrVolume_if(this, 5, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 2, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 3, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 4, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 6, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 7, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 8, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 9, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 10, 0.0f);
+        SetArcadeSFX(0);
         break;
     case 5:
-        cSSXAudio_SetCurrVolume_if(self, 1, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 5, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 2, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 3, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 4, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 6, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 7, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 8, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
-        cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        cSSXAudio_SetArcadeSFX(self, 0);
+        cSSXAudio_SetCurrVolume_if(this, 1, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 5, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 2, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 3, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 4, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 6, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 7, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 8, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 9, 0.0f);
+        cSSXAudio_SetCurrVolume_if(this, 10, 0.0f);
+        SetArcadeSFX(0);
         break;
     }
 }
@@ -3062,15 +3062,15 @@ extern "C" void cSSXAudio_SetPreset(cSSXAudio* self, int mode);
 /**
  * Steps to the previous sound preset (wrapping 0 to 5) and applies it (cSSXAudio_SetPreset).
  */
-extern "C" void cSSXAudio_PrevPreset(cSSXAudio* self)
+void cSSXAudio::PrevPreset()
 {
-    int cur = self->mPreset;
+    int cur = mPreset;
     if (cur == 0) {
-        self->mPreset = 5;
+        mPreset = 5;
     } else {
-        self->mPreset = cur - 1;
+        mPreset = cur - 1;
     }
-    cSSXAudio_SetPreset(self, self->mPreset);
+    SetPreset(mPreset);
 }
 #endif
 //100%
@@ -3081,14 +3081,14 @@ extern "C" void cSSXAudio_SetPreset(cSSXAudio* self, int mode);
 /**
  * Steps to the next sound preset (wrapping 5 to 0) and applies it (cSSXAudio_SetPreset).
  */
-extern "C" void cSSXAudio_NextPreset(cSSXAudio* self)
+void cSSXAudio::NextPreset()
 {
-    int n = self->mPreset + 1;
-    self->mPreset = n;
+    int n = mPreset + 1;
+    mPreset = n;
     if (n == 6) {
-        self->mPreset = 0;
+        mPreset = 0;
     }
-    cSSXAudio_SetPreset(self, self->mPreset);
+    SetPreset(mPreset);
 }
 #endif
 //100%
@@ -3106,9 +3106,9 @@ extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, in
  * cMonitor_MONITOR_Create is probably MONITOR_Create; this probably holds back the monitor triggers for that time.
  */
 // PORT: 64-bit long sound key
-extern "C" void cSSXAudio_DelayMonitorTriggers(cSSXAudio* self)
+void cSSXAudio::DelayMonitorTriggers()
 {
-    cMonitor_MONITOR_Create(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, 250, D_004A3600->v, 0, 0, 0, 0, 0);
+    cMonitor_MONITOR_Create(*(char**)MusicSys.mpVStreamSys + 0x1D8, 250, D_004A3600->v, 0, 0, 0, 0, 0);
 }
 #endif
 //100%
@@ -3268,11 +3268,10 @@ extern "C" void cSSXAudio_DuckByRMS(cSSXAudio* self, float v);
  * func_0029F088 a value of 30 or more gives level 0; otherwise the level is 1. The level goes to DuckByRMS
  * (cSSXAudio_DuckByRMS) right away. The ramp branch only runs if something else sets the step counter negative.
  *
- * @param self_  the audio system
  */
-extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
+void cSSXAudio::ApplyRMSData()
 {
-    cSSXAudio* audio = self_;
+    cSSXAudio* audio = this;
     if (audio->mValidRMSData != 0) {
         int frame = audio->mRMSFrameTick;
         if (frame == (frame / 2) * 2) {
@@ -3284,7 +3283,7 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
                 if (val > 0) {
                     int lowThreshold, midThreshold, highThreshold;
                     float vb, va;
-                    switch (func_0029F088(((char*)self_), 0)) {
+                    switch (func_0029F088(((char*)this), 0)) {
                     case 2:
                         lowThreshold = 0;
                         midThreshold = 0;
@@ -3329,11 +3328,11 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
     int stepFrame = audio->mRMSStepFrame;
     if (stepFrame <= 0) {
         if (stepFrame == 0) {
-            cSSXAudio_DuckByRMS(self_, audio->mRMSFinalValue);
+            DuckByRMS(audio->mRMSFinalValue);
             (audio->mRMSStepFrame)++;
         } else {
             audio->mRMSCurValue = audio->mRMSCurValue + audio->mRMSStepValue;
-            cSSXAudio_DuckByRMS(self_, audio->mRMSCurValue);
+            DuckByRMS(audio->mRMSCurValue);
             (audio->mRMSStepFrame)++;
         }
     }
@@ -3351,11 +3350,11 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int a1, float a2, float a3
  *
  * @param duckLevel  the duck level
  */
-extern "C" void cSSXAudio_DuckByRMS(cSSXAudio* self, float duckLevel)
+void cSSXAudio::DuckByRMS(float duckLevel)
 {
-    if (self->mLastRMSDuckLevel != duckLevel) {
-        cSSXAudio_DuckVolume((cSSXAudio*)self, 1, duckLevel, 0.0f);
-        self->mLastRMSDuckLevel = duckLevel;
+    if (mLastRMSDuckLevel != duckLevel) {
+        DuckVolume(1, duckLevel, 0.0f);
+        mLastRMSDuckLevel = duckLevel;
     }
 }
 #endif
@@ -3369,13 +3368,13 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_CancelRMSData);
  *
  * The retail image has no call or data reference to it.
  *
- * @param audio  the audio system
  */
-extern "C" void cSSXAudio_CancelRMSData(cSSXAudio* audio) {
-    audio->mValidRMSData = 0;
-    audio->mRMSFinalValue = 1.0f;
-    audio->mRMSStepFrame = 0;
-    audio->mRMSStepValue = (float) (1.0f - (audio->mRMSCurValue));
+void cSSXAudio::CancelRMSData()
+{
+    mValidRMSData = 0;
+    mRMSFinalValue = 1.0f;
+    mRMSStepFrame = 0;
+    mRMSStepValue = (float) (1.0f - (mRMSCurValue));
 }
 #endif
 
@@ -3398,7 +3397,7 @@ extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameDa
  *
  * @param rider  the rider (On Tour cRider*)
  */
-extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider)
+void cSSXAudio::UpdateAudioWorldPainter(cRider* rider)
 {
     unsigned int idx = (unsigned int)rider->mViewIndex;
     if (idx >= 2) return;
@@ -3406,17 +3405,17 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
     {
         pos = *rider->getPosition();
     }
-    if (func_0028D960(self) != 0) {
+    if (func_0028D960(this) != 0) {
         float k = -99999.0f;
-        tWorldPainterQuery* musicQuery = self->mpMusicTriggerQuery[idx];
-        func_0028D988(self, rider, musicQuery->queryPosition(pos.x, pos.y, k));
-        tWorldPainterQuery* mixQuery = self->mpMixQuery[idx];
+        tWorldPainterQuery* musicQuery = mpMusicTriggerQuery[idx];
+        func_0028D988(this, rider, musicQuery->queryPosition(pos.x, pos.y, k));
+        tWorldPainterQuery* mixQuery = mpMixQuery[idx];
         // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
-        cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)mixQuery->queryPosition(pos.x, pos.y, k));
+        ReactToWPMixEvent((int)rider, (tWPInGameData*)mixQuery->queryPosition(pos.x, pos.y, k));
     }
-    if (cSSXAudio_NeedWPAmbience(self) != 0) {
-        tWorldPainterQuery* ambienceQuery = self->mpAmbienceQuery[idx];
-        cSSXAudio_ReactToWPAmbienceEvent(self, rider,
+    if (NeedWPAmbience() != 0) {
+        tWorldPainterQuery* ambienceQuery = mpAmbienceQuery[idx];
+        ReactToWPAmbienceEvent(rider,
                                          (tWPInGameData*)ambienceQuery->queryPosition(pos.x, pos.y, -99999.0f));
     }
 }
@@ -3430,9 +3429,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_NeedWPAmbience);
  *
  * @return 1 when it is needed, otherwise 0
  */
-extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self)
+int cSSXAudio::NeedWPAmbience()
 {
-    return self->mRadioModeID == 2;
+    return mRadioModeID == 2;
 }
 #endif
 
@@ -3457,23 +3456,23 @@ void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFoc
  * @param rider  the rider
  * @param obj  the world-painter data (tWPInGameData)
  */
-extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider, tWPInGameData* obj)
+void cSSXAudio::ReactToWPAmbienceEvent(cRider* rider, tWPInGameData* obj)
 {
-    if (((void*)rider) != cSSXAudio_GetFocusRider_p(self, -1)) return;
+    if (((void*)rider) != cSSXAudio_GetFocusRider_p(this, -1)) return;
     if (((void*)obj) == 0) return;
     int id = obj->BankID();
     if (id == -1) return;
     if (id == 0x1F) {
-        if (func_002B49E0((char*)&self->MusicSys) != 101) {
-            func_0028CF98(self, 0, 0, 1, 0);
+        if (func_002B49E0((char*)&MusicSys) != 101) {
+            func_0028CF98(this, 0, 0, 1, 0);
         }
     } else if (id == 0x20) {
-        if (func_002B49E0((char*)&self->MusicSys) != 102) {
-            func_0028CF98(self, 0, 0, 2, 0);
+        if (func_002B49E0((char*)&MusicSys) != 102) {
+            func_0028CF98(this, 0, 0, 2, 0);
         }
     } else if (id != 33) {
-        char* mon = (char*)&self->MusicSys;
-        sVEntry<int(void*, int)>* vb = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl;
+        char* mon = (char*)&MusicSys;
+        sVEntry<int(void*, int)>* vb = (sVEntry<int(void*, int)>*)MusicSys.mVtbl;
         vb[4].fn(vthis(mon, vb[4]), id);
     }
 }
@@ -3520,18 +3519,17 @@ extern "C" void cSSXAudio_UndoBindings(void* a0, void* a1);
 /**
  * Plays an animation's sound tag: 80 cSSXAudio_BindingsOff, 81 cSSXAudio_BindingsOn, 82 cSSXAudio_UndoBindings.
  *
- * @param ssxAudio  the audio system
  * @param rider  the rider
  * @param type  the tag (patch)
  */
-extern "C" void cSSXAudio_PlayAniTag(cSSXAudio* ssxAudio, cRider* rider, int type)
+void cSSXAudio::PlayAniTag(cRider* rider, int type)
 {
     if (type == 80) {
-        cSSXAudio_BindingsOff(ssxAudio, rider);
+        cSSXAudio_BindingsOff(this, rider);
     } else if (type == 81) {
-        cSSXAudio_BindingsOn(ssxAudio, rider);
+        cSSXAudio_BindingsOn(this, rider);
     } else if (type == 82) {
-        cSSXAudio_UndoBindings(ssxAudio, rider);
+        cSSXAudio_UndoBindings(this, rider);
     }
 }
 #endif
@@ -3545,12 +3543,12 @@ extern "C" void func_002B3A70(void*);
 /**
  * Pauses the sound effects (PauseSFX) and the stream part at +0x118, unless the audio is already paused.
  */
-extern "C" void cSSXAudio_PauseAudio(cSSXAudio* self)
+void cSSXAudio::PauseAudio()
 {
-    if (self->mAudioPaused == 0) {
-        cSSXAudio_PauseSFX(self);
-        func_002B3A70((char*)&self->MusicSys);
-        self->mAudioPaused = 1;
+    if (mAudioPaused == 0) {
+        cSSXAudio_PauseSFX(this);
+        func_002B3A70((char*)&MusicSys);
+        mAudioPaused = 1;
     }
 }
 #endif
@@ -3570,16 +3568,16 @@ extern "C" void func_002A4550(void*);
  * (func_002A4550) and mStopSpeechOnResume. cSSXAudio_Update, cSSXAudio_FrontEndLoad, cSSXAudio_InGameDeInit and a game
  * state call it.
  */
-extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self)
+void cSSXAudio::ResumeAudio()
 {
-    if (self->mAudioPaused != 0) {
-        func_002B3A98((char*)&self->MusicSys);
-        cSSXAudio_ResumeSFX(self);
-        self->mAudioPaused = 0;
-        if (self->mStopSpeechOnResume != 0) {
-            func_002B11B0((char*)&self->SpeechSys, 0);
-            func_002A4550(self);
-            self->mStopSpeechOnResume = 0;
+    if (mAudioPaused != 0) {
+        func_002B3A98((char*)&MusicSys);
+        cSSXAudio_ResumeSFX(this);
+        mAudioPaused = 0;
+        if (mStopSpeechOnResume != 0) {
+            func_002B11B0((char*)&SpeechSys, 0);
+            func_002A4550(this);
+            mStopSpeechOnResume = 0;
         }
     }
 }
@@ -3602,7 +3600,7 @@ extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
  * @param src  the rider (cRider)
  * @return 0, 1 or 2
  */
-extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, cRider* src)
+int cSSXAudio::GetCharacterLevel(cRider* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     int n = cBEStatInterface_getStatLevel(iface, src->getAIIndex());
@@ -3631,10 +3629,10 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id);
  * @param id   the rider (On Tour pRider), passed as an int
  * @param obj  the painter data at the rider's position (On Tour const tWPInGameData*), or 0
  */
-extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj)
+void cSSXAudio::ReactToWPMixEvent(int id, tWPInGameData* obj)
 {
-    if (id == cSSXAudio_GetFocusRider(self, -1) && ((void*)obj) != 0) {
-        cSSXAudio_MixVolume(self, obj->MixPreset());
+    if (id == GetFocusRider(-1) && ((void*)obj) != 0) {
+        MixVolume(obj->MixPreset());
     }
 }
 #endif
@@ -3650,7 +3648,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_BEAudioModeToAudioMode);
  * @param beMode  the options' sound mode
  * @return the driver mode (eSOUNDDEF_MODE)
  */
-extern "C" int cSSXAudio_BEAudioModeToAudioMode(cSSXAudio* self, unsigned char beMode)
+int cSSXAudio::BEAudioModeToAudioMode(unsigned char beMode)
 {
     int result = 1;
     switch (beMode) {
@@ -3679,7 +3677,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_AudioModeToBEAudioMode);
  * @param audioMode  the driver mode (eSOUNDDEF_MODE)
  * @return the options' sound mode
  */
-extern "C" void* cSSXAudio_AudioModeToBEAudioMode(cSSXAudio* self, int audioMode)
+void* cSSXAudio::AudioModeToBEAudioMode(int audioMode)
 {
     int result = 0;
     switch (audioMode) {
@@ -3711,10 +3709,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrentSoundMode__FPv);
  *
  * @return the options' sound mode
  */
-void* cSSXAudio_GetCurrentSoundMode(void* vself)
+void* cSSXAudio::GetCurrentSoundMode()
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    return cSSXAudio_AudioModeToBEAudioMode((cSSXAudio*)self, self->mAudioMode);
+    return AudioModeToBEAudioMode(mAudioMode);
 }
 #endif
 
@@ -3728,11 +3725,10 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_PlayIntroMovieWithDJ__FPv);
  *
  * @return the previous flag
  */
-int cSSXAudio_PlayIntroMovieWithDJ(void* vself)
+int cSSXAudio::PlayIntroMovieWithDJ()
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    int old = self->mPlayIntroMovieWithDJ;
-    self->mPlayIntroMovieWithDJ = 0;
+    int old = mPlayIntroMovieWithDJ;
+    mPlayIntroMovieWithDJ = 0;
     return old;
 }
 #endif
@@ -3759,9 +3755,9 @@ typedef void tAsyncOnEndLoad(void* self, int userHandle, int soundHandle, int en
  *
  * @param flush  nonzero to cancel every queued request too
  */
-extern "C" void cAsyncSys_DoCancel(cAsyncSys* self, int flush)
+void cAsyncSys::DoCancel(int flush)
 {
-    cAsyncSys* asyncSys = self;
+    cAsyncSys* asyncSys = this;
     int id = -1;
     {
         cCircBuffer* queue = &asyncSys->mUserHandle;
@@ -3831,7 +3827,7 @@ extern "C" void cAsyncSys_DoCancel(cAsyncSys* self, int flush)
         asyncSys->mMemType.Tail = asyncSys->mMemType.Head;
         asyncSys->mMainMemFlags.Tail = asyncSys->mMainMemFlags.Head;
     }
-    cAsyncSys_ASYNCSYS_StartLoad(self);
+    cAsyncSys_ASYNCSYS_StartLoad(this);
 }
 #endif
 

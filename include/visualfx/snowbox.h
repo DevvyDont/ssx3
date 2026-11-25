@@ -37,6 +37,9 @@ struct cSnowBox {
     float mColourB;                 // 0x0AC [O]
     int mResetWind;                 // 0x0B0 [O] bool
     char unk_0B4[0xC];              // 0x0B4 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void resetWind() __asm__("cSnowBox_resetWind__FPv");
 };
 
 CHECK_OFFSET(cSnowBox, mViewNum, 0x000);

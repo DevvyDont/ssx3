@@ -79,6 +79,8 @@ CHECK_OFFSET(tAddMultiSplineData, NumModels, 0x2C);
 CHECK_OFFSET(tAddMultiSplineData, unk_030, 0x30);
 CHECK_SIZE(tAddMultiSplineData, 0x34);
 
+struct cBxReplayFrame;
+
 struct cMultiSplineModifier : public cTransformModifier {
     // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
     //   [R] ctors store the 0x0048F168 vtable; the dtor stores it, then cTransformModifier_vtbl
@@ -109,6 +111,20 @@ struct cMultiSplineModifier : public cTransformModifier {
                                     //      it
     cSpline Spline;                 // 0x48 [O]; [R] ctors: SplineId -1, SegIndex 0, Seg 0, Length 0; replay ctor reads
                                     //      it
+
+    // Methods bound to their retail symbols by asm labels.
+    int getFocusCount() __asm__("cMultiSplineModifier_getFocusCount");
+    cMultiSplineModifier* cMultiSplineModifier1(cBxReplayFrame* stream)
+        __asm__("cMultiSplineModifier_cMultiSplineModifier1");
+    void allocNodes() __asm__("cMultiSplineModifier_allocNodes");
+    void allocInstances() __asm__("cMultiSplineModifier_allocInstances");
+    void setupNodes() __asm__("cMultiSplineModifier_setupNodes");
+    void setSpeed(float speed) __asm__("cMultiSplineModifier_setSpeed");
+    void setupOverlapSystem() __asm__("cMultiSplineModifier_setupOverlapSystem");
+    void restoreOverlapSystem() __asm__("cMultiSplineModifier_restoreOverlapSystem");
+    int incFocusCount() __asm__("cMultiSplineModifier_incFocusCount__FPv");
+    int decFocusCount() __asm__("cMultiSplineModifier_decFocusCount__FPv");
+    void* updateNodes() __asm__("cMultiSplineModifier_updateNodes");
 };
 
 CHECK_OFFSET(cMultiSplineModifier, NumModels, 0x04);

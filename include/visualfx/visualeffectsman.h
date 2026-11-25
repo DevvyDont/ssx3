@@ -84,6 +84,9 @@ struct cVisualEffectsMan {
     cPathArrow* m_PathArrow;                // 0x40 [O]; [R] ctor 0; PS2 ctor "PathArrow" (cPathArrow_cPathArrow)
     void** mVtbl;                           // 0x44 [R] cVisualEffectsMan_vtbl (ctor and dtor); [U] cVisualEffectsObjNode
                                             //      calls slots 1-3 through it
+
+    // Methods bound to their retail symbols by asm labels.
+    void commonUpdate(int i) __asm__("cVisualEffectsMan_commonUpdate");
 };
 
 CHECK_OFFSET(cVisualEffectsMan, m_RenderToggles, 0x00);
@@ -130,6 +133,10 @@ struct cPS2VisualEffectsMan {
     cPathArrow* m_PathArrow;                // 0x40 [O]; [R] "PathArrow"
     void** mVtbl;                           // 0x44 [R] cPS2VisualEffectsMan_vtbl (ctor; dtor, which then stores
                                             //      cVisualEffectsMan_vtbl)
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cPS2VisualEffectsMan_update");
+    void render() __asm__("cPS2VisualEffectsMan_render");
 };
 
 CHECK_OFFSET(cPS2VisualEffectsMan, m_RenderToggles, 0x00);

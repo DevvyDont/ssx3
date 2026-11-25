@@ -63,6 +63,15 @@ struct cAsyncSys {
     int ASYNCSYS_GetCurrOperationUserHandle() __asm__("cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle");
     void ASYNCSYS_CancelCurrent() __asm__("cAsyncSys_ASYNCSYS_CancelCurrent");
     void ASYNCSYS_CancelAll() __asm__("cAsyncSys_ASYNCSYS_CancelAll");
+    void ASYNCSYS_Init(unsigned int x, int flags) __asm__("cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi");
+    void ASYNCSYS_DeInit() __asm__("cAsyncSys_ASYNCSYS_DeInit");
+    void ASYNCSYS_StartLoad() __asm__("cAsyncSys_ASYNCSYS_StartLoad");
+    void ASYNCSYS_QueueLoad(int bankId, const char* name, int memType, int memFlags)
+        __asm__("cAsyncSys_ASYNCSYS_QueueLoad");
+    void ASYNCSYS_Cancel(int id) __asm__("cAsyncSys_ASYNCSYS_Cancel");
+    void ASYNCSYS_Update() __asm__("cAsyncSys_ASYNCSYS_Update");
+    void ASYNCSYS_OnCurAsyncMainMemAlloc(int size) __asm__("cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc");
+    void DoCancel(int flush) __asm__("cAsyncSys_DoCancel");
 };
 
 CHECK_OFFSET(cCircBuffer, ArraySize, 0x0);

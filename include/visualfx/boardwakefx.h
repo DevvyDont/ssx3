@@ -37,6 +37,9 @@ struct cWakeParams {
                                     //      +0x94), passed as the segment width; fillCurrentSeg alpha = mAlpha * 128
     float mVeryTightTurn;           // 0x38 [O]; no retail access found (Clear leaves it; the views pad it)
     char unk_3C[0x4];               // 0x3C padding (t4Vector alignment)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Clear() __asm__("cWakeParams_Clear");
 };
 
 CHECK_OFFSET(cWakeParams, mUp, 0x00);

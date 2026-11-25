@@ -75,6 +75,9 @@ struct cMeshAnimNode : public cInstanceNode {
     float Drag;                     // 0x6B4 [O]; [R] ctor1 data Drag (+0x8) (swc1); [U] update: Vel.z += Drag * -980 *
                                     //       frame time (a gravity scale) (lwc1)
     char unk_6B8[0x8];              // 0x6B8 tail padding to the 16-byte alignment (no access)
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cMeshAnimNode_init");
 };
 
 CHECK_OFFSET(cMeshAnimNode, Life, 0x01C);

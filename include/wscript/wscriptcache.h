@@ -185,11 +185,25 @@ CHECK_SIZE(tScriptFileHeader, 0x5C);
 // allocates the array with a 0xC stride (behind a 0x10-byte count header) and constructs each entry
 // (cWScriptCacheEntry_cWScriptCacheEntry: mState 0, mAsyncHandle -1, no header). Member names are EA's ([O]); every
 // retail access through `this` in its 13 methods falls on a member start.
+struct tInstanceRecord;
+
 struct cWScriptCacheEntry {
     short mState;                   // 0x000 [O]; [R] ctor 0
     short mStreamed;                // 0x002 [O]; [R] ctor 0
     int mAsyncHandle;               // 0x004 [O]; [R] ctor -1
     tScriptFileHeader* mpScriptHeader; // 0x008 [O]; [R] ctor 0
+
+    // Methods bound to their retail symbols by asm labels.
+    void load1(int index, int value) __asm__("cWScriptCacheEntry_load1");
+    void resolve(cWorld* world, int index) __asm__("cWScriptCacheEntry_resolve");
+    unsigned int getWScriptHeaderId(tInstanceRecord* inst, int entry) __asm__("cWScriptCacheEntry_getWScriptHeaderId");
+    int getWScriptScript(int i) __asm__("cWScriptCacheEntry_getWScriptScript");
+    int getNumGlobalScripts() __asm__("cWScriptCacheEntry_getNumGlobalScripts");
+    int getGlobalScripts() __asm__("cWScriptCacheEntry_getGlobalScripts");
+    int getNumProcessScripts() __asm__("cWScriptCacheEntry_getNumProcessScripts");
+    int getProcessScripts() __asm__("cWScriptCacheEntry_getProcessScripts");
+    int getNumMissionScripts() __asm__("cWScriptCacheEntry_getNumMissionScripts");
+    int getMissionScripts() __asm__("cWScriptCacheEntry_getMissionScripts");
 };
 
 CHECK_OFFSET(cWScriptCacheEntry, mAsyncHandle, 0x004);
@@ -201,6 +215,13 @@ struct cWScriptCache {
     cWScriptCacheEntry* mpCache;    // 0x004 [O]
     unsigned int mNumSections;      // 0x008 [O]
     int mNumLoading;                // 0x00C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int count) __asm__("cWScriptCache_init");
+    void update() __asm__("cWScriptCache_update");
+    void load(int index, int fileNum) __asm__("cWScriptCache_load");
+    void load1(int index, int value) __asm__("cWScriptCache_load1");
+    int getScriptBase(int sectionId) __asm__("cWScriptCache_getScriptBase");
 };
 
 CHECK_OFFSET(cWScriptCache, mpWorld, 0x000);

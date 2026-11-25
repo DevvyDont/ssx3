@@ -23,6 +23,9 @@ struct cPhysicsModifier {
     virtual bool isActive();                                    // 4
     virtual int getPhysicsType();                               // 5
     virtual void writeToReplayFrame(cBxReplayFrame* data);      // 6
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cPhysicsModifier1() __asm__("cPhysicsModifier_cPhysicsModifier1");
 };
 
 CHECK_OFFSET(cPhysicsModifier, Active, 0x00);

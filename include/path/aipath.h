@@ -49,6 +49,8 @@ struct cAIPath {
     // Methods bound to their retail symbols by asm labels.
     int populateDataWithDefaults() __asm__("cAIPath_populateDataWithDefaults__FPv");
     void populateData(int data, int id) __asm__("cAIPath_populateData");
+    int getPathAttributes() __asm__("cAIPath_getPathAttributes");
+    int getIsResetPath() __asm__("cAIPath_getIsResetPath");
 };
 
 CHECK_OFFSET(cAIPath, NumEvents, 0x000);

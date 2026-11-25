@@ -52,6 +52,8 @@ CHECK_OFFSET(tTexFlipMaterialBlockRecord, Materials, 0x04);
 CHECK_OFFSET(tTexFlipMaterialBlockRecord, MaterialRecords, 0x24);
 CHECK_SIZE(tTexFlipMaterialBlockRecord, 0xC4);
 
+struct cBxReplayFrame;
+
 struct cTexFlipModifier {
     // --- cTexFlipModifierState (0x18; the replay block)
     int Type;                       // 0x00 [O]; [R] ctor; [U] update switches on it
@@ -67,6 +69,14 @@ struct cTexFlipModifier {
     int NumTexFlipMaterials;        // 0x20 [O]; [R] ctor zeroes it; [U] setup, update
     tTexFlipMaterialBlockRecord MaterialBlock; // 0x24 [O] (On Tour 0x84; retail 0xC4); [U] setup MEM_fills and
                                     //      fills it; passed to cTexFlipModifier_setTexIndex
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cTexFlipModifier1(cBxReplayFrame* obj) __asm__("cTexFlipModifier_cTexFlipModifier1");
+    void setupTexFlip() __asm__("cTexFlipModifier_setupTexFlip");
+    void setTexIndex(int i) __asm__("cTexFlipModifier_setTexIndex");
+    void setupMaterialRecords() __asm__("cTexFlipModifier_setupMaterialRecords");
+    void signal(int id, float value) __asm__("cTexFlipModifier_signal");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cTexFlipModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cTexFlipModifier, Type, 0x00);

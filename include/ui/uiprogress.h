@@ -29,6 +29,14 @@ struct cUIProgress : public cUIThing {
     int mValue;                      // 0x07C [O]; [R] = 0; [U] cUIProgress_getValue getValue (lw), cUIProgress_setValue setValue (sw)
     int mNumValues;                  // 0x080 [O]; [R] = 0; [U] cUIProgress_setUIData (sw), cUIProgress_setNumValues setNumValues
     int mBackWidth;                  // 0x084 [O]; [R] = 0; [U] cUIProgress_setUIData (sw); cUIProgress_setValue
+
+    // Methods bound to their retail symbols by asm labels.
+    void setValue(int pos) __asm__("cUIProgress_setValue");
+    void* cUIProgress1() __asm__("cUIProgress_cUIProgress1");
+    void setBackgroundObject(int background) __asm__("cUIProgress_setBackgroundObject");
+    void setKnobObject(int knob) __asm__("cUIProgress_setKnobObject");
+    int getValue() __asm__("cUIProgress_getValue");
+    void setNumValues(int numValues) __asm__("cUIProgress_setNumValues");
 };
 
 CHECK_OFFSET(cUIProgress, mpObjBackground, 0x074);

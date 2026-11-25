@@ -58,6 +58,8 @@ struct tAttrThing {
                                      //       cUIVector_setChannelDataKCP channel 12 write bits 13-18
 };
 
+struct t3Vector;
+
 struct cUIThing : public cListNode {
     // cListNode (util/list.h): mpPrev 0x000 and mpNext 0x004 ([R] the constructor self-links them; [U] walked by the
     // cList code), the vptr 0x008 ([R] _vt$8cUIThing (cUIThing_vtbl), stored by cUIThing_cUIThing and cUIThing_cUIThing1)
@@ -117,6 +119,47 @@ struct cUIThing : public cListNode {
     virtual void getSize(t3Vector* vec);                                  // 20 cUIThing_getSize
     virtual void setSize(const t3Vector* vec);                            // 21 cUIThing_setSize
     virtual char getType() = 0;                                           // 22 __pure_virtual
+
+    // Methods bound to their retail symbols by asm labels.
+    void playAnimation(void* anim, unsigned char mode, unsigned short frameNum) __asm__("cUIThing_playAnimation");
+    void deleteAnimation() __asm__("cUIThing_deleteAnimation");
+    void setFrameByPercent(float fraction) __asm__("cUIThing_setFrameByPercent");
+    int isLastAnimFrame() __asm__("cUIThing_isLastAnimFrame");
+    int getEngine() __asm__("cUIThing_getEngine__FPv");
+    unsigned short getKeyframerEvent(int x) __asm__("cUIThing_getKeyframerEvent__FP8cUIThingi");
+    int playKeyframerEvent(signed char idx) __asm__("cUIThing_playKeyframerEvent");
+    void getAbsPosition(t3Vector* out) __asm__("cUIThing_getAbsPosition");
+    int getSound(int soundIndex) __asm__("cUIThing_getSound");
+    void setSound(int soundIndex, int sound) __asm__("cUIThing_setSound");
+    void* cUIThing1() __asm__("cUIThing_cUIThing1");
+    int isPlayingAnimation() __asm__("cUIThing_isPlayingAnimation");
+    int getAnimation() __asm__("cUIThing_getAnimation");
+    int isHorizontal() __asm__("cUIThing_isHorizontal");
+    int isVertical() __asm__("cUIThing_isVertical");
+    int isActive() __asm__("cUIThing_isActive");
+    int isCached() __asm__("cUIThing_isCached");
+    int isEnabled() __asm__("cUIThing_isEnabled");
+    int isFocused() __asm__("cUIThing_isFocused");
+    int isStatic() __asm__("cUIThing_isStatic");
+    int isVisible() __asm__("cUIThing_isVisible");
+    int isWrap() __asm__("cUIThing_isWrap");
+    void setWrap(int enable) __asm__("cUIThing_setWrap");
+    int getMiscData() __asm__("cUIThing_getMiscData");
+    void setOrientation(int orientation) __asm__("cUIThing_setOrientation");
+    void getColour1(tARGB* out) __asm__("cUIThing_getColour1");
+    void setRadAngle(float fparg0) __asm__("cUIThing_setRadAngle");
+    float getRadAngle() __asm__("cUIThing_getRadAngle");
+    void setPivot(int pivot) __asm__("cUIThing_setPivot");
+    int getPivot() __asm__("cUIThing_getPivot");
+    void setHashName(int hashName) __asm__("cUIThing_setHashName");
+    int getHashName() __asm__("cUIThing_getHashName");
+    void setParent(int parent) __asm__("cUIThing_setParent");
+    int getParent() __asm__("cUIThing_getParent");
+    void getPosition(t3Vector* out) __asm__("cUIThing_getPosition");
+    void setPosition(t3Vector* out) __asm__("cUIThing_setPosition");
+    void getScale(t3Vector* out) __asm__("cUIThing_getScale");
+    void setScale(t3Vector* out) __asm__("cUIThing_setScale");
+    int getScreen() __asm__("cUIThing_getScreen");
 };
 
 CHECK_SIZE(tAttrThing, 0x4);

@@ -57,6 +57,14 @@ struct cScriptAnimBankManager {
                                         //     memFlags); [U] the dtor frees it (cMemMan_free), the lookups index it
     void** mVtbl;                       // 0xC [R] cScriptAnimBankManager_vtbl (ctor and dtor); [U] UnlinkBank and
                                         //     UnlinkBanksAll call slot 2 (UnlinkBank1) through it
+
+    // Methods bound to their retail symbols by asm labels.
+    int LinkBank(int id, void* data) __asm__("cScriptAnimBankManager_LinkBank");
+    void UnlinkBank(int id) __asm__("cScriptAnimBankManager_UnlinkBank");
+    void UnlinkBanksAll() __asm__("cScriptAnimBankManager_UnlinkBanksAll");
+    void* GetBankInfo(int id) __asm__("cScriptAnimBankManager_GetBankInfo");
+    void UnlinkBank1(tScriptAnimBankInfo* bankInfo) __asm__("cScriptAnimBankManager_UnlinkBank1");
+    tScriptAnimBankInfo* GetEmptyBankInfo() __asm__("cScriptAnimBankManager_GetEmptyBankInfo");
 };
 
 CHECK_OFFSET(cScriptAnimBankManager, mMemFlags, 0x0);

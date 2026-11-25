@@ -62,6 +62,15 @@ struct cWScriptMission {
     char* MissionScriptCode[4];        // 0x68 [O] (const char* there); [R] ctor: cWScriptMan_getScriptCode(Manager,
                                        //      data's 4 script IDs at +0x40); [U] [1] (0x6C) missionPass, [2] (0x70)
                                        //      missionFail, [3] (0x74) missionUpdateWorld; [0] is never read in retail
+
+    // Methods bound to their retail symbols by asm labels.
+    void processStart() __asm__("cWScriptMission_processStart");
+    void processComplete() __asm__("cWScriptMission_processComplete");
+    void missionPass() __asm__("cWScriptMission_missionPass");
+    void missionFail() __asm__("cWScriptMission_missionFail");
+    void missionUpdateWorld() __asm__("cWScriptMission_missionUpdateWorld");
+    int getSortKey() __asm__("cWScriptMission_getSortKey");
+    int isScopeLocal() __asm__("cWScriptMission_isScopeLocal");
 };
 
 CHECK_OFFSET(cWScriptMission, State, 0x00);

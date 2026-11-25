@@ -37,6 +37,9 @@ struct cRestoreNode : public cInstanceNode {
     // cRestoreNode's notes on cInstanceNode's fields:
     //   ObjNodeType: [R] node type 19 (cInstanceNode_cInstanceNode1)
     //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cRestoreNode1() __asm__("cRestoreNode_cRestoreNode1");
 };
 
 CHECK_SIZE(cRestoreNode, 0x1C);

@@ -34,13 +34,13 @@ extern sSpVec_53EF0 t4vect_Zero_53EF0 __asm__("t4vect_Zero");
  * Allocates the spring's chain of nodes ("SpringNodes") with zero position, velocity, force, angle and
  * torque.
  */
-extern "C" void cSpring_setupNodes(cSpring* self)
+void cSpring::setupNodes()
 {
     int i;
-    sSpNode_53EF0** dst = &(*(sSpNode_53EF0**)&self->Nodes);
-    *dst = new (str_SpringNodes, 0x20000000, 0) sSpNode_53EF0[self->Width];
-    sSpNode_53EF0* nd = ((sSpNode_53EF0*)self->Nodes);
-    for (i = 0; i < self->Width; i++, nd++) {
+    sSpNode_53EF0** dst = &(*(sSpNode_53EF0**)&Nodes);
+    *dst = new (str_SpringNodes, 0x20000000, 0) sSpNode_53EF0[Width];
+    sSpNode_53EF0* nd = ((sSpNode_53EF0*)Nodes);
+    for (i = 0; i < Width; i++, nd++) {
         nd->p = t4vect_Zero_53EF0;
         nd->v = t4vect_Zero_53EF0;
         nd->f = t4vect_Zero_53EF0;
@@ -203,44 +203,48 @@ static inline float spLength_53FC0(const sSpVec_53FC0& v)
  * The end nodes stay fixed. Velocities are solved semi-implicitly with each node's neighbours for stability;
  * gravity is -980 on z. The applied forces and torques are cleared afterwards.
  */
-extern "C" void cSpring_update(cSpring* self)
+void cSpring::update()
 {
     sSpVec_53FC0 gravity(0.0f, 0.0f, -980.0f, 0.0f);
     float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     sSpVec_53FC0 forces[16];
     float torques[16];
-    forces[0] = forces[self->Width - 1] = t4vect_Zero_sp;
-    torques[0] = torques[self->Width - 1] = 0.0f;
-    for (int i = 1; i < self->Width - 1; i++) {
-        sSpVec_53FC0 toPrev = spSub_53FC0((*(sSpVec_53FC0*)&self->Nodes[i - 1].P), (*(sSpVec_53FC0*)&self->Nodes[i].P));
-        sSpVec_53FC0 toNext = spSub_53FC0((*(sSpVec_53FC0*)&self->Nodes[i + 1].P), (*(sSpVec_53FC0*)&self->Nodes[i].P));
-        spScaleEq_53FC0(toPrev, 1.0f - self->Length * self->SegLen / spLength_53FC0(toPrev));
-        spScaleEq_53FC0(toNext, 1.0f - self->Length * self->SegLen / spLength_53FC0(toNext));
-        forces[i] = spScaleF_53FC0(self->LSpring, spAdd_53FC0(toPrev, toNext));
-        spAddEq_53FC0(forces[i], spScaleF_53FC0(dt * self->LSpring, spSub_53FC0(spAdd_53FC0((*(sSpVec_53FC0*)&self->Nodes[i - 1].V), (*(sSpVec_53FC0*)&self->Nodes[i + 1].V)), spScale_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].V), 2.0f))));
+    forces[0] = forces[Width - 1] = t4vect_Zero_sp;
+    torques[0] = torques[Width - 1] = 0.0f;
+    for (int i = 1; i < Width - 1; i++) {
+        sSpVec_53FC0 toPrev = spSub_53FC0((*(sSpVec_53FC0*)&Nodes[i - 1].P), (*(sSpVec_53FC0*)&Nodes[i].P));
+        sSpVec_53FC0 toNext = spSub_53FC0((*(sSpVec_53FC0*)&Nodes[i + 1].P), (*(sSpVec_53FC0*)&Nodes[i].P));
+        spScaleEq_53FC0(toPrev, 1.0f - Length * SegLen / spLength_53FC0(toPrev));
+        spScaleEq_53FC0(toNext, 1.0f - Length * SegLen / spLength_53FC0(toNext));
+        forces[i] = spScaleF_53FC0(LSpring, spAdd_53FC0(toPrev, toNext));
+        spAddEq_53FC0(forces[i], spScaleF_53FC0(dt * LSpring,
+                spSub_53FC0(spAdd_53FC0((*(sSpVec_53FC0*)&Nodes[i - 1].V), (*(sSpVec_53FC0*)&Nodes[i + 1].V)),
+                spScale_53FC0((*(sSpVec_53FC0*)&Nodes[i].V), 2.0f))));
         // PORT: pointer arithmetic in int (only form that gives the target's index-first addu and
         // signed -0x30 offsets; g++ 2.95 turns nd[-1] into an unsigned 0xFFFFFFB0 offset).
-        tSpringNode* nd = (tSpringNode*)(i * 0x50 + (int)self->Nodes);
-        torques[i] = self->ASpring * (((tSpringNode*)((int)nd - 0x50))->O - nd->O + nd[1].O - nd->O);
-        torques[i] += dt * self->ASpring * (((tSpringNode*)((int)nd - 0x50))->W + nd[1].W - nd->W * 2.0f);
-        spAddEq_53FC0(forces[i], spAdd_53FC0(spScale_53FC0((*(sSpVec_53FC0*)&nd->V), -self->LDamp), gravity));
-        torques[i] += -self->ADamp * self->Nodes[i].W;
+        tSpringNode* nd = (tSpringNode*)(i * 0x50 + (int)Nodes);
+        torques[i] = ASpring * (((tSpringNode*)((int)nd - 0x50))->O - nd->O + nd[1].O - nd->O);
+        torques[i] += dt * ASpring * (((tSpringNode*)((int)nd - 0x50))->W + nd[1].W - nd->W * 2.0f);
+        spAddEq_53FC0(forces[i], spAdd_53FC0(spScale_53FC0((*(sSpVec_53FC0*)&nd->V), -LDamp), gravity));
+        torques[i] += -ADamp * Nodes[i].W;
     }
-    for (int i = 1; i < self->Width - 1; i++) {
-        spAddEq_53FC0(forces[i], (*(sSpVec_53FC0*)&self->Nodes[i].F));
-        torques[i] += self->Nodes[i].T;
+    for (int i = 1; i < Width - 1; i++) {
+        spAddEq_53FC0(forces[i], (*(sSpVec_53FC0*)&Nodes[i].F));
+        torques[i] += Nodes[i].T;
     }
-    for (int i = 1; i < self->Width - 1; i++) {
-        sSpVec_53FC0 deltaVel = spAdd_53FC0(spScale_53FC0(forces[i], dt), spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * self->LSpring, spAdd_53FC0(forces[i - 1], forces[i + 1])), dt * dt * 2.0f * self->LSpring + 1.0f));
-        deltaVel = spDiv_53FC0(deltaVel, dt * dt * 2.0f * self->LSpring + 1.0f);
-        spAddEq_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].V), deltaVel);
-        spAddEq_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].P), spScale_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].V), dt));
-        self->Nodes[i].W += (dt * torques[i] + dt * dt * dt * self->ASpring * (torques[i - 1] + torques[i + 1]) / (dt * dt * 2.0f * self->ASpring + 1.0f)) / (dt * dt * 2.0f * self->ASpring + 1.0f);
-        self->Nodes[i].O += dt * self->Nodes[i].W;
+    for (int i = 1; i < Width - 1; i++) {
+        sSpVec_53FC0 deltaVel = spAdd_53FC0(spScale_53FC0(forces[i], dt),
+                spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * LSpring, spAdd_53FC0(forces[i - 1], forces[i + 1])),
+                dt * dt * 2.0f * LSpring + 1.0f));
+        deltaVel = spDiv_53FC0(deltaVel, dt * dt * 2.0f * LSpring + 1.0f);
+        spAddEq_53FC0((*(sSpVec_53FC0*)&Nodes[i].V), deltaVel);
+        spAddEq_53FC0((*(sSpVec_53FC0*)&Nodes[i].P), spScale_53FC0((*(sSpVec_53FC0*)&Nodes[i].V), dt));
+        Nodes[i].W += (dt * torques[i] + dt * dt * dt * ASpring * (torques[i - 1] + torques[i + 1]) / (dt * dt * 2.0f * ASpring + 1.0f)) / (dt * dt * 2.0f * ASpring + 1.0f);
+        Nodes[i].O += dt * Nodes[i].W;
     }
-    for (int i = 0; i < self->Width; i++) {
-        (*(sSpVec_53FC0*)&self->Nodes[i].F) = t4vect_Zero_sp;
-        self->Nodes[i].T = 0.0f;
+    for (int i = 0; i < Width; i++) {
+        (*(sSpVec_53FC0*)&Nodes[i].F) = t4vect_Zero_sp;
+        Nodes[i].T = 0.0f;
     }
 }
 #endif
@@ -257,10 +261,10 @@ INCLUDE_ASM("object/spring", cSpring_writeToReplayFrame);
  *
  * @param stream  the replay frame to write to (On Tour data)
  */
-extern "C" void cSpring_writeToReplayFrame(cSpring* self, cBxReplayFrame* stream)
+void cSpring::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((const char*)self, 36);
-    stream->write((const char*)self->Nodes, *(int*)self * 80);
+    stream->write((const char*)this, 36);
+    stream->write((const char*)Nodes, *(int*)this * 80);
 }
 #endif
 
@@ -281,11 +285,11 @@ extern char gBucketMan;
  * @param bucket  bucket index (callers pass 3, 4, 6 and others)
  * @return @p self
  */
-extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* bucket)
+cObjNode* cObjNode::cObjNode1(void* bucket)
 {
-    (*(void**)&VPTR_OF(cObjNode, self)) = cObjNode_vtbl;
-    cBucketMan_add(&gBucketMan, self, bucket);
-    return self;
+    (*(void**)&VPTR_OF(cObjNode, this)) = cObjNode_vtbl;
+    cBucketMan_add(&gBucketMan, this, bucket);
+    return this;
 }
 #endif
 

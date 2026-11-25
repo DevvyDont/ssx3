@@ -135,6 +135,8 @@ struct sViewportStack {
     char unk_22C[0x4];              // 0x22C padding to 16
 };
 
+struct t4Vector;
+
 class cPS2GraphicsMan : public cGraphicsMan {
 public:
     // 0x0000-0x10DB: cGraphicsMan (render/graphicsman.h), the vptr at 0x10D8
@@ -282,6 +284,32 @@ public:
     virtual void* SetDisplayMode();                                                                      // slot 122: [R] cPS2GraphicsMan_SetDisplayMode
     virtual int GetDisplayMode(int width, int height, unsigned int bpp, unsigned int clutBpp, int fmt, int id); // slot 123: [R] cPS2GraphicsMan_GetDisplayMode
     virtual void InitCharMatrices();                                                                     // slot 124: [R] cPS2GraphicsMan_InitCharMatrices
+
+    // Methods bound to their retail symbols by asm labels.
+    int GetNumProjTextures() __asm__("cPS2GraphicsMan_GetNumProjTextures");
+    char* GetProjTexInfo(int idx) __asm__("cPS2GraphicsMan_GetProjTexInfo");
+    void SetVifCodeState(int value) __asm__("cPS2GraphicsMan_SetVifCodeState");
+    void SetVUCodeInitType(int value) __asm__("cPS2GraphicsMan_SetVUCodeInitType");
+    void SetFixAlpha(int alpha, int context) __asm__("cPS2GraphicsMan_SetFixAlpha");
+    int GetCurrentFrameBufferPage() __asm__("cPS2GraphicsMan_GetCurrentFrameBufferPage");
+    int GetCurrentZBufferPage() __asm__("cPS2GraphicsMan_GetCurrentZBufferPage");
+    int GetCurrentFBFormat() __asm__("cPS2GraphicsMan_GetCurrentFBFormat");
+    int GetCurrentZBFormat() __asm__("cPS2GraphicsMan_GetCurrentZBFormat");
+    int GetTextureMan() __asm__("cPS2GraphicsMan_GetTextureMan");
+    void SetMinFlipWait(int minWait) __asm__("cPS2GraphicsMan_SetMinFlipWait");
+    int GetDisplayBufferAddress() __asm__("cPS2GraphicsMan_GetDisplayBufferAddress");
+    int GetFrameBufferWidth() __asm__("cPS2GraphicsMan_GetFrameBufferWidth");
+    int GetPSMFormat() __asm__("cPS2GraphicsMan_GetPSMFormat");
+    void EnableFilter() __asm__("cPS2GraphicsMan_EnableFilter");
+    void DisableFilter() __asm__("cPS2GraphicsMan_DisableFilter");
+    void SetScreenBrightness(float x) __asm__("cPS2GraphicsMan_SetScreenBrightness");
+    float GetScreenBrightness() __asm__("cPS2GraphicsMan_GetScreenBrightness");
+    void AddDMAToWorld(unsigned int buf, unsigned int next, int flag) __asm__("cPS2GraphicsMan_AddDMAToWorld");
+    int GetDeferMan() __asm__("cPS2GraphicsMan_GetDeferMan");
+    void updateNetMat() __asm__("cPS2GraphicsMan_updateNetMat");
+    int CalcSortZ(void* vec) __asm__("cPS2GraphicsMan_CalcSortZ");
+    int projOutCode(t4Vector* vec) __asm__("cPS2GraphicsMan_projOutCode");
+    void PageFlip(int arg1) __asm__("cPS2GraphicsMan_PageFlip");
 };
 
 // --- layout checks

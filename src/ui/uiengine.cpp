@@ -147,18 +147,18 @@ extern const char str_pct_s_lui[];
  * @param id  base name of the UI file (char*, passed as int)
  * @return 1 (the load result is not checked)
  */
-extern "C" int cUIEngine_loadFile(cUIEngine* self, int id)
+int cUIEngine::loadFile(int id)
 {
     char name[100];
     sprintf(name, str_pct_s_lui, id);
     char* file = (char*)FILE_load(name, 0);
-    self->mpData = file;
+    mpData = file;
     tUIHeaderBlock* header = (tUIHeaderBlock*)file;
     // PORT: the animation bank's setter takes the data pointer as an int.
-    cUIAnimationBank_setData(&self->mAnimBank, (int)(file + header->mAnimBlockOffset));
-    file = self->mpData;
+    cUIAnimationBank_setData(&mAnimBank, (int)(file + header->mAnimBlockOffset));
+    file = mpData;
     header = (tUIHeaderBlock*)file;
-    cUITextureBank_setData(&self->mTextureBank, id, file + header->mTextureBlockOffset);
+    mTextureBank.setData(id, file + header->mTextureBlockOffset);
     return 1;
 }
 #endif
@@ -211,9 +211,9 @@ struct sUIScrTbl { unsigned int count; sUIScrEnt ents[1]; };
  * @param screen  an existing screen object to fill, or 0 to allocate one
  * @return the screen
  */
-extern "C" void* cUIEngine_addScreenByHashName(cUIEngine* self, cUIState* owner, unsigned int hash, void* screen)
+void* cUIEngine::addScreenByHashName(cUIState* owner, unsigned int hash, void* screen)
 {
-    char* bank = self->mpData;
+    char* bank = mpData;
     sUIScrTbl* tbl = (sUIScrTbl*)(bank + *(int*)(bank + 0xC));
     sUIScrEnt* found = 0;
     sUIScrEnt* screenOffset = tbl->ents;
@@ -331,7 +331,7 @@ static inline void setF4_2_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_2 = v; }
  * stack (+0x18) with cUIStateStack_render2D and pops the draw state. cRealFE_render, the load screens and the game and app
  * render code call it each frame.
  */
-extern "C" void cUIEngine_render2D(cUIEngine* self)
+void cUIEngine::render2D()
 {
     cUICtx_7DF8* ctx = GrMan_7df8;
     ctx->top[1] = ctx->top[0];
@@ -347,7 +347,7 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     setF4_12_7DF8(GrMan_7df8->top, 20);
     setF4_2_7DF8(GrMan_7df8->top, 5);
     GrMan_7df8->top->f0_2 = 3;
-    cUIStateStack_render2D((char*)&self->mStateStack);
+    cUIStateStack_render2D((char*)&mStateStack);
     GrMan->PopViewport();
     GrMan->PopView();
     GrMan_7df8->top--;
@@ -364,9 +364,9 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_render3D);
  *
  * cRealFE_render calls it just before cUIEngine_render2D.
  */
-extern "C" void cUIEngine_render3D(cUIEngine* self)
+void cUIEngine::render3D()
 {
-    cUIStateStack_render3D((char*)&self->mStateStack);
+    cUIStateStack_render3D((char*)&mStateStack);
 }
 #endif
 
@@ -382,11 +382,11 @@ extern "C" void cUIStateStack_update(void*);
  *
  * cRealFE_update, cFELoadScreen_update, the game loader and the app's UI loops call it.
  */
-extern "C" void cUIEngine_update(cUIEngine* self)
+void cUIEngine::update()
 {
-    cUIInput* obj = self->mpInput;
+    cUIInput* obj = mpInput;
     obj->update();
-    cUIStateStack_update((char*)&self->mStateStack);
+    cUIStateStack_update((char*)&mStateStack);
 }
 #endif
 
@@ -488,13 +488,12 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
  * Every shape becomes a texture in the "UITPage" group (renderer slot 46); each element of @p vdata keeps its
  * texture coordinates and the texture ID of its shape.
  *
- * @param vbank  the texture bank
  * @param id  base name of the texture sheet (char*, passed as int; On Tour pShapeName)
  * @param vdata  the UI file's texture-element block (On Tour pData)
  */
-extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdata)
+void cUITextureBank::setData(int id, void* vdata)
 {
-    cUITextureBank* self = vbank;
+    cUITextureBank* self = this;
     sUITexData8138* data = (sUITexData8138*)vdata;
     char name[0x70];
     int i = 0;
@@ -543,11 +542,11 @@ INCLUDE_ASM("ui/uiengine", cUITextureBank_getElementByHashname);
  * @param id  hashed element name (On Tour hashname)
  * @return the element (On Tour cTextureElement), or 0
  */
-extern "C" cTextureElement* cUITextureBank_getElementByHashname(cUITextureBank* self, int id)
+cTextureElement* cUITextureBank::getElementByHashname(int id)
 {
     int i;
-    for (i = 0; i < self->mNumElements; i++) {
-        cTextureElement* item = &(self->mpElements)[i];
+    for (i = 0; i < mNumElements; i++) {
+        cTextureElement* item = &mpElements[i];
         if (((int)item->mHashID) == id) {
             return item;
         }
@@ -569,11 +568,11 @@ INCLUDE_ASM("ui/uiengine", cUITextureBank_getTextureByHashname);
  * @param key  the element hash name
  * @return the texture, or 0 when not found
  */
-extern "C" int cUITextureBank_getTextureByHashname(cUITextureBank* self, int key)
+int cUITextureBank::getTextureByHashname(int key)
 {
-    int count = self->mNumElements;
+    int count = mNumElements;
     for (int i = 0; i < count; i++) {
-        cTextureElement* entry = &(self->mpElements)[i];
+        cTextureElement* entry = &mpElements[i];
         if (((int)entry->mHashID) == key) {
             return entry->mSourceShape;
         }
@@ -596,11 +595,11 @@ INCLUDE_ASM("ui/uiengine", cUIFontInterface_getFontByHashName);
  * @param key  the font hash name
  * @return the font, or 0 when not found
  */
-extern "C" int cUIFontInterface_getFontByHashName(cUIFontInterface* self, int key)
+int cUIFontInterface::getFontByHashName(int key)
 {
     signed char i;
-    for (i = 0; i < self->mFontCount; i++) {
-        cUIFontEntry* entry = &((&self->mFontEntry[0]))[i];
+    for (i = 0; i < mFontCount; i++) {
+        cUIFontEntry* entry = &((&mFontEntry[0]))[i];
         if (((int)entry->mHashID) == key) {
             return ((int)entry->mpFont);
         }
@@ -620,17 +619,17 @@ extern "C" void cFont__cFont(int h, int a);
  * Each entry with a font (+0x8) has it destroyed with cFont__cFont(font, 3); every entry's name and hash are cleared
  * and the count (+0x34) goes to 0. cSSXApp_purge calls it.
  */
-extern "C" void cUIFontInterface_purgeFonts(cUIFontInterface* self)
+void cUIFontInterface::purgeFonts()
 {
-    for (int i = 0; i < self->mFontCount; i++) {
-        cUIFontEntry* fontEntry = &((&self->mFontEntry[0]))[i];
+    for (int i = 0; i < mFontCount; i++) {
+        cUIFontEntry* fontEntry = &((&mFontEntry[0]))[i];
         if (((int)fontEntry->mpFont) != 0) {
             cFont__cFont(((int)fontEntry->mpFont), 3);
         }
         (*(int*)&fontEntry->mpFileName) = 0;
         fontEntry->mHashID = 0;
     }
-    self->mFontCount = 0;
+    mFontCount = 0;
 }
 #endif
 
@@ -687,19 +686,19 @@ extern "C" void cUIFontInterface_addFontEntry(void* self, unsigned int index, vo
  *
  * @param hdr  the font table: a count followed by the records
  */
-extern "C" void cUIFontInterface_setData(cUIFontInterface* self, tUIFontTableHeader* hdr)
+void cUIFontInterface::setData(tUIFontTableHeader* hdr)
 {
     // ORIGINAL-PTR: the records are variable-length ({hash, name size, name}) in the loaded UI file's font chunk, so
     // the walk steps over each by its stored size
     char* rec = (char*)hdr + 4;
-    self->mpFontTableHeader = hdr;
+    mpFontTableHeader = hdr;
     unsigned int i = 0;
     if (hdr->mNumEntries != 0) {
         do {
-            cUIFontInterface_addFontEntry(self, i, rec + 8, *(int*)rec);
+            cUIFontInterface_addFontEntry(this, i, rec + 8, *(int*)rec);
             i++;
             rec += *(int*)(rec + 4) + 8;
-        } while (i < self->mpFontTableHeader->mNumEntries);
+        } while (i < mpFontTableHeader->mNumEntries);
     }
 }
 #endif
@@ -719,11 +718,12 @@ static inline int uiFontNameOf(cUIFontEntry* e)
 /**
  * Creates a cFont for each of the UI's font entries.
  */
-extern "C" void cUIFontInterface_loadFonts(cUIFontInterface* self)
+void cUIFontInterface::loadFonts()
 {
-    for (int i = 0; i < self->mFontCount; i++) {
+    for (int i = 0; i < mFontCount; i++) {
         signed char j = i;
-        *(int*)&self->mFontEntry[j].mpFont = cFont_cFont(cMemMan_alloc(132, str_UI_Font, 0, 0), uiFontNameOf(&((&self->mFontEntry[0]))[i]), 0);
+        *(int*)&mFontEntry[j].mpFont = cFont_cFont(cMemMan_alloc(132, str_UI_Font, 0, 0),
+                uiFontNameOf(&((&mFontEntry[0]))[i]), 0);
     }
 }
 #endif
@@ -966,8 +966,8 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, tUIIcon* data)
     cUIThing_setUIData_8998(self, data);
     self->mAttrIcon.mIconFlip = data->mIconFlags >> 2;
     self->mAttrIcon.mIconRotate = (unsigned char)data->mIconFlags;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(
-        (cUITextureBank*)(&self->mpScreen->mpState->mpEngine->mTextureBank), data->mTextureID);
+    self->mpTextureElem = (const cTextureElement*)self->mpScreen->mpState->mpEngine->mTextureBank.getElementByHashname(
+        data->mTextureID);
     *(t2Vector*)&self->mTileUV[0] = t2Vector(data->mTiledU * 0.01f, data->mTiledV * 0.01f);
 }
 #endif
@@ -1270,12 +1270,12 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_setTextureByHashValue);
  *
  * @param id  the texture's name hash (On Tour int hashVal)
  */
-extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
+void cUIIcon::setTextureByHashValue(int id)
 {
-    cUIScreen* screen = self->mpScreen;
+    cUIScreen* screen = mpScreen;
     cUIState* state = screen->mpState;
     cUIEngine* engine = state->mpEngine;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(&engine->mTextureBank), id);
+    mpTextureElem = (const cTextureElement*)engine->mTextureBank.getElementByHashname(id);
 }
 #endif
 
@@ -1375,12 +1375,12 @@ struct cUIListBox_getFont_sEntry {
  *
  * @return the cFont (as an int), or 0 without an engine
  */
-extern "C" int cUIListBox_getFont(cUIListBox* self)
+int cUIListBox::getFont()
 {
-    cUIEngine* engine = (cUIEngine*)cUIThing_getEngine(self);
+    cUIEngine* engine = (cUIEngine*)cUIThing_getEngine(this);
     if (((void*)engine) != 0) {
         cUIListBox_getFont_sEntry* fonts = (cUIListBox_getFont_sEntry*)engine->mpFontInterface;
-        return fonts[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
+        return fonts[(*(unsigned char*)&mAttrListBox & 3) + 1].a;
     }
     return 0;
 }
@@ -1562,13 +1562,13 @@ struct cUIListBox_setUnicodePrivate_sEntry {
  * @param idx  the entry index (On Tour Index); not range-checked
  * @param str  the UTF-16 text (On Tour pUnicode)
  */
-extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
+void cUIListBox::setUnicodePrivate(unsigned char idx, unsigned short* str)
 {
-    cUIScreen* screen = self->mpScreen;
+    cUIScreen* screen = mpScreen;
     cUIState* state = screen->mpState;
     cUIEngine* engine = state->mpEngine;
     if (engine->mpLocaleInterface != 0) {
-        cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)(&self->mpEntries[0].mpString);
+        cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)(&mpEntries[0].mpString);
         cUIListBox_setUnicodePrivate_sEntry* entry = &tbl[idx];
         if (entry->str) {
             cMemMan_free(entry->str);
@@ -1604,7 +1604,7 @@ extern "C" void cUIListBox_updateLocale(cUIListBox* self)
             if (id != 0) {
                 unsigned short* unicodeStr = loc->getStringByHash(id);
                 if (unicodeStr != 0) {
-                    cUIListBox_setUnicodePrivate(self, i, unicodeStr);
+                    self->setUnicodePrivate(i, unicodeStr);
                 }
             }
         }
@@ -1676,7 +1676,7 @@ static inline void setLayer_9F00(cUIListBox* self)
  */
 extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
 {
-    cFont* font = (cFont*)cUIListBox_getFont(self);
+    cFont* font = (cFont*)self->getFont();
     if (font == 0 || self->mNumEntries == 0) {
         return;
     }

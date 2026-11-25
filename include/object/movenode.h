@@ -66,6 +66,15 @@ CHECK_OFFSET(tAddRailData, Mesh, 0x8);
 CHECK_OFFSET(tAddRailData, unk_00C, 0xC);
 CHECK_SIZE(tAddRailData, 0x10);
 
+struct cInstanceNode;
+struct cPhysicsModifier;
+struct cRailModifier;
+struct cTexFlipModifier;
+struct cTransformModifier;
+struct cUVScrollModifier;
+struct t4Matrix;
+struct t4Vector;
+
 struct cMoveNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C holds [R] cMoveNode_vtbl (0x00491028) or a
     // subclass's (each ctor stores its own); [U] every virtual call (cMoveNode_apply, update, render, ...). Its new
@@ -91,6 +100,45 @@ struct cMoveNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cMoveNode1(void* bucket, int type, void* instRecord) __asm__("cMoveNode_cMoveNode1");
+    void addModifierBlock() __asm__("cMoveNode_addModifierBlock__FP9cMoveNode");
+    void addTransformModifier(cTransformModifier* mod) __asm__("cMoveNode_addTransformModifier");
+    void addUVScrollModifier(cUVScrollModifier* modifier) __asm__("cMoveNode_addUVScrollModifier");
+    void addTexFlipModifier(cTexFlipModifier* modifier) __asm__("cMoveNode_addTexFlipModifier");
+    void addPhysicsModifier(cPhysicsModifier* modifier) __asm__("cMoveNode_addPhysicsModifier");
+    void addEffectModifier(void* effect) __asm__("cMoveNode_addEffectModifier__FP9cMoveNodePv");
+    void addRailModifier(cRailModifier* item) __asm__("cMoveNode_addRailModifier");
+    void preUpdateModifierBlock() __asm__("cMoveNode_preUpdateModifierBlock");
+    void postUpdateModifierBlock() __asm__("cMoveNode_postUpdateModifierBlock");
+    float addFade(void* vfadeData) __asm__("cMoveNode_addFade__FPvT0");
+    void addDebounce(tAddDebounceData* data) __asm__("cMoveNode_addDebounce");
+    void addPosition1(t4Matrix* desc) __asm__("cMoveNode_addPosition1");
+    void addMagnet(t4Matrix* mat, float radius, float magnetSpeed) __asm__("cMoveNode_addMagnet");
+    void addAvaSpline() __asm__("cMoveNode_addAvaSpline");
+    void addSpline1(void* desc) __asm__("cMoveNode_addSpline1");
+    void addSpline(void* desc) __asm__("cMoveNode_addSpline");
+    void addUVScroll(void* desc) __asm__("cMoveNode_addUVScroll");
+    void addTexFlip(void* desc) __asm__("cMoveNode_addTexFlip");
+    void addBoost(void* desc) __asm__("cMoveNode_addBoost");
+    void addParticle(void* desc) __asm__("cMoveNode_addParticle");
+    void addDynamicParticle(void* desc, int index, t4Vector* offset) __asm__("cMoveNode_addDynamicParticle");
+    void addRoller(void* rdata, void* ii, void* ci) __asm__("cMoveNode_addRoller");
+    void addRail(tAddRailData* desc) __asm__("cMoveNode_addRail");
+    void addHalo(void* desc) __asm__("cMoveNode_addHalo");
+    void transferFromOld(cInstanceNode* srcv) __asm__("cMoveNode_transferFromOld");
+    void transferEffectModifier(cMoveNode* other) __asm__("cMoveNode_transferEffectModifier");
+    int getParentMesh() __asm__("cMoveNode_getParentMesh");
+    int getTransformModifier() __asm__("cMoveNode_getTransformModifier");
+    int hasTextureMat() __asm__("cMoveNode_hasTextureMat");
+    int hasMaterialBlock() __asm__("cMoveNode_hasMaterialBlock");
+    int getMaterialBlock() __asm__("cMoveNode_getMaterialBlock");
+    void* getTextureMat() __asm__("cMoveNode_getTextureMat");
+    void remTransformModifier() __asm__("cMoveNode_remTransformModifier");
+    void remUVScrollModifier() __asm__("cMoveNode_remUVScrollModifier");
+    void remTexFlipModifier() __asm__("cMoveNode_remTexFlipModifier");
+    void remPhysicsModifier() __asm__("cMoveNode_remPhysicsModifier");
+    void remHaloModifier() __asm__("cMoveNode_remHaloModifier");
+    void remEffectModifier() __asm__("cMoveNode_remEffectModifier");
+    void fadeEffectModifier() __asm__("cMoveNode_fadeEffectModifier");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

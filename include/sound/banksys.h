@@ -26,6 +26,8 @@
 
 struct cBankManager;
 
+struct cMonitorInstance;
+
 struct cBankSys {
     cBankManager* mpVBankManager; // 0x000 [R] g++ 2.95 virtual-base pointer to cBankManager (this + 0x18 in a complete cBankSys; cSSXAudio + 0x6C98); [U] every SFX_ method reaches the play options as mpVBankManager + 0x1D8 (cBankMonitor's cSndPlayOpts)
     int* mBank;                   // 0x004 [O]; [R] operator new(0x10, "mBank") (one per play-option level); [U] SFX_Bank (cBankSys_SFX_Bank) / SFX_Begin store mBank[mInst], SFX_End (cBankSys_SFX_End) reads it
@@ -40,6 +42,9 @@ struct cBankSys {
     void SFX_Begin2(int bank, int patch) __asm__("cBankSys_SFX_Begin2");
     void SFX_Play2D(int bank, int patch) __asm__("cBankSys_SFX_Play2D");
     void SFX_Play2DVol(int bank, int patch, int volume) __asm__("cBankSys_SFX_Play2DVol");
+    int Play2DCallback(cMonitorInstance* req) __asm__("cBankSys_Play2DCallback");
+    int Play2DCallbackWithPitchMult(cMonitorInstance* req) __asm__("cBankSys_Play2DCallbackWithPitchMult");
+    int SFX_End() __asm__("cBankSys_SFX_End");
 };
 
 CHECK_OFFSET(cBankSys, mpVBankManager, 0x000);

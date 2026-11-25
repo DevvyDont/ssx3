@@ -64,6 +64,8 @@ CHECK_OFFSET(tFlagState, mUScrollRate, 0x050);
 CHECK_OFFSET(tFlagState, mVScrollRate, 0x054);
 CHECK_SIZE(tFlagState, 0x058);
 
+struct cBxReplayFrame;
+
 struct cFlagSet {
     // --- tFlagSetState (On Tour struct, 0x60)
     tFlagState mFlagData;           // 0x000 [O]; [U] AddFlag copies the caller's tFlagState into it (ldl/ldr, 0x58
@@ -90,6 +92,18 @@ struct cFlagSet {
     tInstanceRecord* mInstances[60]; // 0x094 [O]; [P] assert "mInstances[i]->m_Model..."; [R] ctor zeroes 60 words
                                     //       (0x180 down to 0x94); [U] AddFlag / RemoveFlag / render / replay
     void** mVtbl;                   // 0x184 [R] cFlagSet_cFlagSet and __cFlagSet store cFlagSet_vtbl (D_0048FBF8)
+
+    // Methods bound to their retail symbols by asm labels.
+    void CreateMesh(tInstanceRecord* item) __asm__("cFlagSet_CreateMesh");
+    void PurgeMesh() __asm__("cFlagSet_PurgeMesh");
+    void update() __asm__("cFlagSet_update");
+    void render() __asm__("cFlagSet_render");
+    void updateGrid(t3Vector* vout) __asm__("cFlagSet_updateGrid");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlagSet_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cFlagSet_readFromReplayFrame");
+    int SameKind(void* data, tInstanceRecord* ctx) __asm__("cFlagSet_SameKind");
+    void AddFlag(tFlagState* def, tInstanceRecord* mesh) __asm__("cFlagSet_AddFlag");
+    int Empty() __asm__("cFlagSet_Empty");
 };
 
 CHECK_OFFSET(cFlagSet, mFlagData, 0x000);
@@ -130,6 +144,8 @@ CHECK_SIZE(cFlagSet, 0x188);
 
 struct cObjNode;
 
+struct cFlagNode;
+
 struct cFlagManager : public cObjNode {
     // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
     //   [R] cFlagManager_vtbl (0x0048FB80) in the ctor and the dtor
@@ -144,6 +160,11 @@ struct cFlagManager : public cObjNode {
                                     //       dtor: each set's virtual dtor (slot 1, vptr at +0x184) in reverse;
                                     //       [U] AddFlag / RemoveFlag / update / render test mCurrentNumInstances (+0x5C);
                                     //       write/readFromReplayFrame call the sets' replay methods
+
+    // Methods bound to their retail symbols by asm labels.
+    void AddFlag(cFlagNode* node, void* desc) __asm__("cFlagManager_AddFlag");
+    void RemoveFlag(tInstanceRecord* instRecord) __asm__("cFlagManager_RemoveFlag");
+    float GetWindFactor() __asm__("cFlagManager_GetWindFactor");
 };
 
 CHECK_OFFSET(cFlagManager, mCurrentWindFactor, 0x010);

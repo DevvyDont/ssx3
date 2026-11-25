@@ -36,6 +36,8 @@ CHECK_SIZE(tAttrTextScroll, 0x4);
 
 struct cUIInput;
 
+struct tARGB;
+
 struct cUITextScroll : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUITextScroll_vtbl (the ctor cUITextScroll_cUITextScroll, cUITextScroll_cUITextScroll1, the dtor
@@ -80,6 +82,20 @@ struct cUITextScroll : public cUIThing {
     void addUnicodeStringByID(int id) __asm__("cUITextScroll_addUnicodeStringByID");
     void deleteLineByIndex(int idx) __asm__("cUITextScroll_deleteLineByIndex");
     int getStringByIndex(int i) __asm__("cUITextScroll_getStringByIndex");
+    void* cUITextScroll1() __asm__("cUITextScroll_cUITextScroll1");
+    void setFontIndex(int font) __asm__("cUITextScroll_setFontIndex");
+    int hasShadow() __asm__("cUITextScroll_hasShadow");
+    int isUnicode() __asm__("cUITextScroll_isUnicode");
+    void setShadowColour(tARGB* in) __asm__("cUITextScroll_setShadowColour");
+    void setChatWindowMode() __asm__("cUITextScroll_setChatWindowMode");
+    int isChatWindowMode() __asm__("cUITextScroll_isChatWindowMode");
+    void setSelectedColour(tARGB* in) __asm__("cUITextScroll_setSelectedColour");
+    void setScrollBar(int scrollBar) __asm__("cUITextScroll_setScrollBar");
+    void setLineOffset(short linesOffset) __asm__("cUITextScroll_setLineOffset");
+    unsigned short getLineOffset() __asm__("cUITextScroll_getLineOffset");
+    unsigned short getLineSize() __asm__("cUITextScroll_getLineSize");
+    void setSelectedIndex(short selectedIndex) __asm__("cUITextScroll_setSelectedIndex");
+    unsigned short getSelectedIndex() __asm__("cUITextScroll_getSelectedIndex");
 };
 
 CHECK_OFFSET(cUITextScroll, mAttrTextScroll, 0x074);

@@ -22,13 +22,13 @@ extern const char str_NBTexInfo[];
  *
  * @return the new texture id (its slot index)
  */
-extern "C" int cTextureMan_NewNonBindTexID(cTextureMan* self)
+int cTextureMan::NewNonBindTexID()
 {
-    cLinkTexInfo* head = self->m_pNonBindFreeTexInfo;
-    int id = head - self->m_pTexInfo;
-    self->m_pNonBindFreeTexInfo = head->pNextFree;
-    self->m_iNumNonBindTextures++;
-    cLinkTexInfo* texInfo = self->m_pTexInfo;
+    cLinkTexInfo* head = m_pNonBindFreeTexInfo;
+    int id = head - m_pTexInfo;
+    m_pNonBindFreeTexInfo = head->pNextFree;
+    m_iNumNonBindTextures++;
+    cLinkTexInfo* texInfo = m_pTexInfo;
     cLinkTexInfo* slot = texInfo + id;
     slot->pTexInfo = (tTexInfo*)cMemMan_alloc(88, str_NBTexInfo, 0x21000000, 0);
     return id;
@@ -50,12 +50,12 @@ void operator_delete(int* ptr);
  *
  * @param id  the texture id (slot index) to free
  */
-extern "C" void cTextureMan_DeleteNonBindTexID(cTextureMan* self, int id)
+void cTextureMan::DeleteNonBindTexID(int id)
 {
-    operator_delete((int*)self->m_pTexInfo[id].pTexInfo);
-    self->m_pTexInfo[id].pNextFree = self->m_pNonBindFreeTexInfo;
-    self->m_pNonBindFreeTexInfo = &self->m_pTexInfo[id];
-    self->m_iNumNonBindTextures--;
+    operator_delete((int*)m_pTexInfo[id].pTexInfo);
+    m_pTexInfo[id].pNextFree = m_pNonBindFreeTexInfo;
+    m_pNonBindFreeTexInfo = &m_pTexInfo[id];
+    m_iNumNonBindTextures--;
 }
 #endif
 
@@ -88,12 +88,12 @@ extern const char str_BTexInfo[];
  *
  * @param id  texture id (slot index) to fill
  */
-extern "C" void cTextureMan_NewBindTexID(cTextureMan* self, int id)
+void cTextureMan::NewBindTexID(int id)
 {
-    cLinkTexInfo* texInfo = self->m_pTexInfo;
+    cLinkTexInfo* texInfo = m_pTexInfo;
     cLinkTexInfo* slot = texInfo + id;
     slot->pTexInfo = (tTexInfo*)cMemMan_alloc(88, str_BTexInfo, 0x21000000, 0);
-    self->m_iNumBindTextures += 1;
+    m_iNumBindTextures += 1;
 }
 #endif
 
@@ -110,12 +110,12 @@ void operator_delete(int* ptr);
  *
  * @param idx  the texture id (slot index) to free
  */
-extern "C" void cTextureMan_DeleteBindTexID(cTextureMan* self, int idx)
+void cTextureMan::DeleteBindTexID(int idx)
 {
-    int** base = ((int**)&self->m_pTexInfo[0]); int** slot = base + idx;
+    int** base = ((int**)&m_pTexInfo[0]); int** slot = base + idx;
     operator_delete(*slot);
     *slot = 0;
-    self->m_iNumBindTextures--;
+    m_iNumBindTextures--;
 }
 #endif
 
@@ -363,8 +363,8 @@ static inline int clutPsm_7440(int f)
  * @param bindId  the id to use, or a negative value to take a free non-bound id
  * @return the texture id, or -1 for a format with no bit depth
  */
-extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat, int clutFormat,
-                             int clutData, int vramMode, int ownsData, int bindId)
+int cTextureMan::AddTexture(int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
+                            int clutFormat, int clutData, int vramMode, int ownsData, int bindId)
 {
     void* data = (void*)pixelData;
     const char* name = (const char*)texName;
@@ -376,12 +376,12 @@ extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* te
     void* clut = (void*)clutData;
     int id;
     if (bindId < 0) {
-        id = cTextureMan_NewNonBindTexID(self);
+        id = NewNonBindTexID();
     } else {
-        cTextureMan_NewBindTexID(self, bindId);
+        NewBindTexID(bindId);
         id = bindId;
     }
-    tTexInfo* tex = self->m_pTexInfo[id].pTexInfo;
+    tTexInfo* tex = m_pTexInfo[id].pTexInfo;
     strncpy(tex->mName, name, 8);
     tex->mMemAlloc = ownsData;
     tex->mFormat = fmt;
@@ -430,7 +430,7 @@ extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* te
         tex->mVRAMSize = vram;
         tex->mSize = size;
         if (tex->mMemAlloc != 0) {
-            void* copy = operator_new_7440(size, name, self->TexMemType | 0x05000000, 0);
+            void* copy = operator_new_7440(size, name, TexMemType | 0x05000000, 0);
             tex->mpTexels = copy;
             MEM_copy(copy, data, size);
         } else {
@@ -445,7 +445,7 @@ extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* te
     if (clut != 0 && (esz = clutEntryBytes_7440(clutFmt)) != 0) {
         int entries = (unsigned int)(tex->mFormat - 11) <= 1 ? 0x10 : 0x100;
         if (tex->mMemAlloc != 0) {
-            void* copy = operator_new_7440(0x400, name, self->TexMemType | 0x05000000, 0);
+            void* copy = operator_new_7440(0x400, name, TexMemType | 0x05000000, 0);
             tex->mCLUTData = copy;
             MEM_copy(copy, clut, entries * esz);
         } else {
@@ -480,15 +480,15 @@ extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* te
             | ((ulong)((w + 0xFFF) >> 12) << 54);
     }
     if (vramMode == 1) {
-        int node = func_00366CE0(self->mMainHeap, tex->mVRAMSize, id, -1, -1, 1);
-        int* nodeFlags = (int*)(*(char**)(((char*)self) + 0x3F50) + node * 0x1C);
+        int node = func_00366CE0(mMainHeap, tex->mVRAMSize, id, -1, -1, 1);
+        int* nodeFlags = (int*)(*(char**)(((char*)this) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 2;
         *nodeFlags = fl;
         tex->mTexBlock = node;
         tex->mTexAddr = fl >> 8;
     } else if (vramMode == 3) {
-        int node = func_00366CE0(self->mMainHeap, tex->mVRAMSize + 0x2000, id, -1, -1, 1);
-        int* nodeFlags = (int*)(*(char**)(((char*)self) + 0x3F50) + node * 0x1C);
+        int node = func_00366CE0(mMainHeap, tex->mVRAMSize + 0x2000, id, -1, -1, 1);
+        int* nodeFlags = (int*)(*(char**)(((char*)this) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 0x22;
         *nodeFlags = fl;
         tex->mTexBlock = node;
@@ -497,8 +497,8 @@ extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* te
     }
     if (tex->mMemAlloc != 0) {
         if (tex->mFormat == 9) {
-            if (*(int*)(((char*)self) + 0x6344) < tex->mVRAMSize && vramMode == 0)
-                func_00366E90(self, tex);
+            if (*(int*)(((char*)this) + 0x6344) < tex->mVRAMSize && vramMode == 0)
+                func_00366E90(this, tex);
             else
                 tex->mTEX0 = (tex->mTEX0 & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
         }
@@ -556,14 +556,14 @@ static inline void fill7BC0(int* p, int v)
  *
  * @param id  the texture id
  */
-extern "C" void cTextureMan_RemoveTexture(cTextureMan* self, int id)
+void cTextureMan::RemoveTexture(int id)
 {
-    tTexInfo* tex = self->m_pTexInfo[id].pTexInfo;
+    tTexInfo* tex = m_pTexInfo[id].pTexInfo;
     if (tex->mTexAddr != -1) {
-        func_003663D8(tex->mFormat != 9 ? self->mMainHeap : self->mTempHeap, tex->mTexBlock);
+        func_003663D8(tex->mFormat != 9 ? mMainHeap : mTempHeap, tex->mTexBlock);
     }
     if (tex->mCLUTAddr != -1) {
-        func_003663D8(self->mMainHeap, tex->mCLUTBlock);
+        func_003663D8(mMainHeap, tex->mCLUTBlock);
     }
     if (tex->mMemAlloc != 0) {
         if (tex->mpTexels != 0) {
@@ -574,12 +574,12 @@ extern "C" void cTextureMan_RemoveTexture(cTextureMan* self, int id)
         }
     }
     if (id < 1500) {
-        cTextureMan_DeleteBindTexID(self, id);
+        DeleteBindTexID(id);
     } else {
-        cTextureMan_DeleteNonBindTexID(self, id);
+        DeleteNonBindTexID(id);
     }
-    fill7BC0(self->mBoundTex, -1);
-    self->mCLUTTex = -1;
+    fill7BC0(mBoundTex, -1);
+    mCLUTTex = -1;
 }
 #endif
 
@@ -601,9 +601,9 @@ extern char str_LockTex[];
  * @param format  the texel format
  * @return the new texture id
  */
-extern "C" int cTextureMan_AddLockedFrameTexture(cTextureMan* self, int width, int height, int format)
+int cTextureMan::AddLockedFrameTexture(int width, int height, int format)
 {
-    return cTextureMan_AddTexture(self, 0, str_LockTex, width, height, 0, format, 0, 0, 3, 0, -1);
+    return AddTexture(0, str_LockTex, width, height, 0, format, 0, 0, 3, 0, -1);
 }
 #endif
 
@@ -630,10 +630,10 @@ extern "C" void func_00369098(cTextureMan* self, int idx);
  * @param clut  the new CLUT, or null
  * @param upload  nonzero to copy the data into the texture's buffers
  */
-extern "C" void cTextureMan_SetNewTextureData(cTextureMan* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
-                              int clutFormat, void* clut, int upload)
+void cTextureMan::SetNewTextureData(int idx, void* data, int width, int height, int mipCount, int texelFormat,
+                                    int clutFormat, void* clut, int upload)
 {
-    tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
+    tTexInfo* tex = m_pTexInfo[idx].pTexInfo;
     if (upload != 0) {
         if (data != 0) {
             MEM_copy(tex->mpTexels, data, tex->mSize);
@@ -642,7 +642,7 @@ extern "C" void cTextureMan_SetNewTextureData(cTextureMan* self, int idx, void* 
             MEM_copy(tex->mCLUTData, clut, 4 << tex->mBPP);
         }
     }
-    func_00369098(self, idx);
+    func_00369098(this, idx);
 }
 #endif
 
@@ -1615,10 +1615,10 @@ extern "C" void* MEM_copy(void*, void*, int);
  * @param count  number of references
  * @param src  the tTextureRef array to copy
  */
-extern "C" void cGraphicsMan_SetTextureRefs(cGraphicsMan* self, int count, tTextureRef* src)
+void cGraphicsMan::SetTextureRefs(int count, tTextureRef* src)
 {
-    self->mNumTexRefs = count;
-    MEM_copy(&self->mTexRefs[0], src, count * 0xC);
+    mNumTexRefs = count;
+    MEM_copy(&mTexRefs[0], src, count * 0xC);
 }
 #endif
 
@@ -1645,9 +1645,9 @@ extern char str_charshp_b[];
  * @return the texture id, or -1 when no texture file has the shape
  */
 // Look up (or load and cache) a texture by its 4-character name.
-extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* name)
+int cGraphicsMan::GetTextureID(const char* name)
 {
-    cGraphicsMan* self = graphicsMan;
+    cGraphicsMan* self = this;
     char buf[0x10];
     const char* namePtr = name;
     if (*namePtr) {
@@ -1689,12 +1689,11 @@ INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_InitTextureFiles__FPvii);
  * @param numFiles  number of texture file names
  * @param fileNames  the array of file names (const char**, held as an int)
  */
-void cGraphicsMan_InitTextureFiles(void* vself, int numFiles, int fileNames)
+void cGraphicsMan::InitTextureFiles(int numFiles, int fileNames)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    self->mTextureFiles = (void**)fileNames;
-    self->mNumTextureFiles = numFiles;
-    self->mNumTexRefs = 0;
+    mTextureFiles = (void**)fileNames;
+    mNumTextureFiles = numFiles;
+    mNumTexRefs = 0;
 }
 #endif
 
@@ -1709,14 +1708,14 @@ void cMemMan_free(void* p);
  *
  * cAnimModel_compile calls it; cGraphicsMan_AddBlendedMatrix fills the history again.
  */
-extern "C" void cGraphicsMan_ResetBlendedMatrixHistory(cGraphicsMan* self)
+void cGraphicsMan::ResetBlendedMatrixHistory()
 {
-    void* history = self->m_blendedMatrixHistory;
+    void* history = m_blendedMatrixHistory;
     if (history != 0) {
         cMemMan_free(history);
     }
-    self->m_blendedMatrixHistory = 0;
-    self->m_blendedMatrixHistorySize = 0;
+    m_blendedMatrixHistory = 0;
+    m_blendedMatrixHistorySize = 0;
 }
 #endif
 

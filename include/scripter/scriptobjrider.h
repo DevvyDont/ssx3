@@ -72,6 +72,9 @@ struct cScriptObjRider {
     void ScriptSoundIDToGameSoundInfo(int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
         __asm__("cScriptObjRider_ScriptSoundIDToGameSoundInfo__FPviT0T0");
     bool IsSuitableRole(cRider* rider, int id, int playerMain) __asm__("cScriptObjRider_IsSuitableRole");
+    float GetBaseRotX() __asm__("cScriptObjRider_GetBaseRotX");
+    float GetBaseRotY() __asm__("cScriptObjRider_GetBaseRotY");
+    float GetBaseRotZ() __asm__("cScriptObjRider_GetBaseRotZ");
 };
 
 CHECK_OFFSET(cScriptObjRider, mVtbl, 0x00);

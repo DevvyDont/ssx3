@@ -58,6 +58,22 @@ struct cCommSystem {
                                  //      cGameComm_syncGame (tServerSettings), the ping (func_002583A8), tagsunk
     int mInterfaceType;          // 0x30 [O]; [R] 1; [U] netConnConnect sets 1, update stores the 'type' status; read by
                                  //      tagsunk func_0025C610
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cCommSystem_update");
+    void closeChannel(int channelIndex) __asm__("cCommSystem_closeChannel");
+    int isChannelOpen(int channelIndex) __asm__("cCommSystem_isChannelOpen");
+    int isChannelConnected(int channelIndex) __asm__("cCommSystem_isChannelConnected");
+    float getLatency(int channelIndex) __asm__("cCommSystem_getLatency");
+    int readPacket(int channelIndex, int data, int maxSize) __asm__("cCommSystem_readPacket");
+    int writePacket(int channelIndex, int data, int size) __asm__("cCommSystem_writePacket");
+    int getError(int channelIndex) __asm__("cCommSystem_getError");
+    int * allocCommMsgElem() __asm__("cCommSystem_allocCommMsgElem");
+    void freeCommMsgElem(tCommMsgElem* node) __asm__("cCommSystem_freeCommMsgElem");
+    void netConnConnect(int configIndex) __asm__("cCommSystem_netConnConnect");
+    void netConnDisconnect() __asm__("cCommSystem_netConnDisconnect");
+    void netConnFailed(int errorCode) __asm__("cCommSystem_netConnFailed");
+    void netConnLocalAddr(int *localAddr) __asm__("cCommSystem_netConnLocalAddr");
 };
 
 CHECK_SIZE(tCommMsgElem, 0xFC);

@@ -28,6 +28,20 @@
 struct cWorld;
 struct tCollideRecord;      // retail: 0x130 bytes (the ctor MEM_fill's the static dummy record)
 
+struct tAnimRecord;
+struct tChannelRecord;
+struct tCollideModelRecord;
+struct tHaloRecord;
+struct tInstanceRecord;
+struct tLightRecord;
+struct tMaterialRecord;
+struct tMeshRecord;
+struct tModelRecord;
+struct tParticleInstanceRecord;
+struct tParticleMeshRecord;
+struct tParticleModelRecord;
+struct tSplineRecord;
+
 struct cChunkResolve {
     cWorld* mp_World;                       // 0x0 [O]; [R] the ctor zeroes it; [U] cPS2ChunkResolve_init stores it;
                                             //     resolveInstance / resolveMaterialBlocks / resolveParticleInstance
@@ -41,6 +55,27 @@ struct cChunkResolve {
                                             //       resolveMesh,
                                             //     resolveAnimation and the particle resolvers make virtual calls
                                             //       through it
+
+    // Methods bound to their retail symbols by asm labels.
+    int resolveModel(tModelRecord* pModel) __asm__("cChunkResolve_resolveModel");
+    int resolveModelHeirarchy(tModelRecord* pModel) __asm__("cChunkResolve_resolveModelHeirarchy");
+    int resolveMesh(tMeshRecord* pMesh, int base) __asm__("cChunkResolve_resolveMesh");
+    int resolveParticleModel(tParticleModelRecord* pModel) __asm__("cChunkResolve_resolveParticleModel");
+    int resolveParticleModelHeirarchy(tParticleModelRecord* pModel)
+        __asm__("cChunkResolve_resolveParticleModelHeirarchy");
+    int resolveParticleMesh(tParticleMeshRecord* pMesh) __asm__("cChunkResolve_resolveParticleMesh");
+    int resolveParticleInstance(tParticleInstanceRecord* pInstance) __asm__("cChunkResolve_resolveParticleInstance");
+    int resolveMaterial(tMaterialRecord* pMaterial) __asm__("cChunkResolve_resolveMaterial");
+    int resolveMaterialBlocks(int n, int* data) __asm__("cChunkResolve_resolveMaterialBlocks");
+    int resolveAnimation(tAnimRecord* pAnimation, int base) __asm__("cChunkResolve_resolveAnimation");
+    int resolveChannel(tChannelRecord* pChannel, int pBase) __asm__("cChunkResolve_resolveChannel");
+    int resolveInstance(tInstanceRecord* node) __asm__("cChunkResolve_resolveInstance");
+    int resolveSpline(tSplineRecord* list) __asm__("cChunkResolve_resolveSpline");
+    int resolveCollideModel(void* ctx, tCollideModelRecord* pCollideModel) __asm__("cChunkResolve_resolveCollideModel");
+    int resolveHalo(tHaloRecord* obj) __asm__("cChunkResolve_resolveHalo");
+    int resolveLight(tLightRecord* obj) __asm__("cChunkResolve_resolveLight");
+    int unresolveLight(tLightRecord* pRTLight) __asm__("cChunkResolve_unresolveLight");
+    float calcMaxLightDistance(tLightRecord* light, float divisor) __asm__("cChunkResolve_calcMaxLightDistance");
 };
 
 CHECK_OFFSET(cChunkResolve, mp_World, 0x0);

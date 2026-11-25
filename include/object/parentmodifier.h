@@ -30,6 +30,9 @@ struct cParentModifier : public cPositionModifier {
     tInstanceRecord* ParentInst;    // 0xA0 [O]; [R] ctors; [U] updateRootTransform cParentModifier_updateRootTransform, updateIntersectInfo
                                     //      cParentModifier_updateIntersectInfo; cParentModifier_setParent (unreferenced setter) stores it
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
+
+    // Methods bound to their retail symbols by asm labels.
+    void setParent(int parentInst) __asm__("cParentModifier_setParent");
 };
 
 CHECK_OFFSET(cParentModifier, Mesh, 0x90);

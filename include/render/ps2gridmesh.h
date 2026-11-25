@@ -60,6 +60,10 @@ CHECK_OFFSET(tGridMeshStrip, mUVs, 0x8);
 CHECK_OFFSET(tGridMeshStrip, mColours, 0xC);
 CHECK_SIZE(tGridMeshStrip, 0x10);
 
+struct t2Vector;
+struct t3Vector;
+struct tMaterialBlockRecord;
+
 struct cPS2GridMesh {
     // --- cGridMesh / cGarbageMan (0x8)
     cGridMesh* mNext;               // 0x000 [O] cGarbageMan::mNext (no retail access seen)
@@ -92,6 +96,15 @@ struct cPS2GridMesh {
     cPS2GraphicsMan* m_pGfxMan;     // 0x1C4 [O] cPSPGridMesh::m_pGfxMan; [R] the ctor's graphics manager; [U] Render1
     int mbOK;                       // 0x1C8 [O] cPSPGridMesh::mbOK (bool; a word here); [R] 1 when the allocation
                                     //       succeeded, else 0; [P] IsOk__12cPS2GridMesh (lw 0x1C8)
+
+    // Methods bound to their retail symbols by asm labels.
+    int IsOk() __asm__("cPS2GridMesh_IsOk__FPv");
+    void SetScale(float range) __asm__("cPS2GridMesh_SetScale");
+    void Update(t3Vector* verts) __asm__("cPS2GridMesh_Update");
+    void Update1(t2Vector* uvs) __asm__("cPS2GridMesh_Update1");
+    void Update3(float* verts, float* colors, float* uvs) __asm__("cPS2GridMesh_Update3");
+    void Render(int meshMatrix, const tMaterialBlockRecord* materialBlock, int texMatrix)
+        __asm__("cPS2GridMesh_Render");
 };
 
 CHECK_OFFSET(cPS2GridMesh, mNext, 0x000);

@@ -87,6 +87,14 @@ struct cScriptPlayerChannelSpline {
                                    //       GetCustom returns it
     tInSeqSplineChannelKey* mpNextKey; // 0x024 [O]; [U] Play: next key when there are 2+, else 0; Update returns 0
                                    //       when it is 0
+
+    // Methods bound to their retail symbols by asm labels.
+    int Play(unsigned int* data, int key) __asm__("cScriptPlayerChannelSpline_Play");
+    void Stop() __asm__("cScriptPlayerChannelSpline_Stop__FPv");
+    int Update(float currFrameNum) __asm__("cScriptPlayerChannelSpline_Update");
+    int GetCustom() __asm__("cScriptPlayerChannelSpline_GetCustom__FPv");
+    int GetOwner() __asm__("cScriptPlayerChannelSpline_GetOwner__FPv");
+    int IsPlaying() __asm__("cScriptPlayerChannelSpline_IsPlaying__FPv");
 };
 
 // cScriptPlayerChannelObject: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 1;
@@ -110,6 +118,16 @@ struct cScriptPlayerChannelObject {
     tObjectEntry* mpActiveObjectList; // 0x020 [O]; [U] cScriptPlayerChannelObject_AddActiveKey pushes onto it; Update
                                    //       (cScriptPlayerChannelObject_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveObjects;         // 0x024 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
+
+    // Methods bound to their retail symbols by asm labels.
+    int Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags) __asm__("cScriptPlayerChannelObject_Play");
+    void Stop() __asm__("cScriptPlayerChannelObject_Stop");
+    int Update(int* flags, float frameDelta, float dt) __asm__("cScriptPlayerChannelObject_Update");
+    int GetNextKeyFrame() __asm__("cScriptPlayerChannelObject_GetNextKeyFrame");
+    void LoadNextScriptKey() __asm__("cScriptPlayerChannelObject_LoadNextScriptKey");
+    int GetCustom() __asm__("cScriptPlayerChannelObject_GetCustom__FPv");
+    int GetOwner() __asm__("cScriptPlayerChannelObject_GetOwner__FPv");
+    int IsPlaying() __asm__("cScriptPlayerChannelObject_IsPlaying__FPv");
 };
 
 // cScriptPlayerChannelBlock: size 0x2C [R] (cScriptPlayerEntity_SetupPlay allocates 0x2C); GetType() = 2;
@@ -136,6 +154,16 @@ struct cScriptPlayerChannelBlock {
     tBlockEntry* mpActiveBlockList; // 0x024 [O]; [U] cScriptPlayerChannelBlock_AddActiveKey pushes onto it; Update
                                    //       (cScriptPlayerChannelBlock_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveBlocks;          // 0x028 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
+
+    // Methods bound to their retail symbols by asm labels.
+    int Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags) __asm__("cScriptPlayerChannelBlock_Play");
+    void Stop() __asm__("cScriptPlayerChannelBlock_Stop");
+    int Update(int* flags, float currFrameNum) __asm__("cScriptPlayerChannelBlock_Update");
+    int GetNextKeyFrame() __asm__("cScriptPlayerChannelBlock_GetNextKeyFrame");
+    void LoadNextScriptKey() __asm__("cScriptPlayerChannelBlock_LoadNextScriptKey");
+    int GetCustom() __asm__("cScriptPlayerChannelBlock_GetCustom__FPv");
+    int GetOwner() __asm__("cScriptPlayerChannelBlock_GetOwner__FPv");
+    int IsPlaying() __asm__("cScriptPlayerChannelBlock_IsPlaying__FPv");
 };
 
 // cScriptPlayerChannelEvent: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 3;
@@ -160,6 +188,17 @@ struct cScriptPlayerChannelEvent {
                                    //       frame; GetValue returns its address
     float mEventFrame;             // 0x024 [O]; [U] Update compares/stores it as a float (lwc1/swc1); Play and Stop
                                    //       store 0 with sw $zero
+
+    // Methods bound to their retail symbols by asm labels.
+    int Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags) __asm__("cScriptPlayerChannelEvent_Play");
+    void Stop() __asm__("cScriptPlayerChannelEvent_Stop");
+    int Update(int* flags, float currFrameNum) __asm__("cScriptPlayerChannelEvent_Update");
+    int GetNextKeyFrame() __asm__("cScriptPlayerChannelEvent_GetNextKeyFrame");
+    tEventEntry* AddActiveKey(tInSeqEventChannelKey* rec) __asm__("cScriptPlayerChannelEvent_AddActiveKey");
+    void LoadNextScriptKey() __asm__("cScriptPlayerChannelEvent_LoadNextScriptKey");
+    int GetCustom() __asm__("cScriptPlayerChannelEvent_GetCustom__FPv");
+    int GetOwner() __asm__("cScriptPlayerChannelEvent_GetOwner__FPv");
+    int IsPlaying() __asm__("cScriptPlayerChannelEvent_IsPlaying__FPv");
 };
 
 CHECK_OFFSET(cScriptPlayerChannel, unk_00, 0x0);

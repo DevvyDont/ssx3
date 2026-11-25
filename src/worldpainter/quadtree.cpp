@@ -31,29 +31,29 @@ static inline unsigned short getNodeId_17D0(cQuadTree* self, tQuadTreeNode* node
  *
  * @return the index of the node taken
  */
-extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
+unsigned short cQuadTree::getFreeNode()
 {
     unsigned short ret;
-    if (self->m_freeNodes == self->m_nodes) {
-        tQuadTreeNode* newnodelist = new (str_QuadTreeNodeList, 0, 0) tQuadTreeNode[self->m_numNodes + 1024];
-        if (self->m_nodes != 0) {
-            func_0041605C(newnodelist, self->m_nodes, self->m_numNodes * sizeof(tQuadTreeNode));
+    if (m_freeNodes == m_nodes) {
+        tQuadTreeNode* newnodelist = new (str_QuadTreeNodeList, 0, 0) tQuadTreeNode[m_numNodes + 1024];
+        if (m_nodes != 0) {
+            func_0041605C(newnodelist, m_nodes, m_numNodes * sizeof(tQuadTreeNode));
         }
         int i;
-        for (i = self->m_numNodes; i < self->m_numNodes + 1023; i++) {
+        for (i = m_numNodes; i < m_numNodes + 1023; i++) {
             newnodelist[i].setNext(i + 1);
         }
-        newnodelist[self->m_numNodes + 1023].setNext(0);
-        (*(tQuadTreeNode**)&self->m_freeNodes) = &newnodelist[self->m_numNodes];
-        self->m_numNodes += 1024;
-        if (self->m_nodes != 0) {
-            cMemMan_free(self->m_nodes);
+        newnodelist[m_numNodes + 1023].setNext(0);
+        (*(tQuadTreeNode**)&m_freeNodes) = &newnodelist[m_numNodes];
+        m_numNodes += 1024;
+        if (m_nodes != 0) {
+            cMemMan_free(m_nodes);
         }
-        (*(tQuadTreeNode**)&self->m_nodes) = newnodelist;
+        (*(tQuadTreeNode**)&m_nodes) = newnodelist;
     }
-    ret = getNodeId_17D0(self, self->m_freeNodes);
-    (*(tQuadTreeNode**)&self->m_freeNodes) = &(self->m_nodes)[(self->m_freeNodes)->getNext()];
-    self->m_numUsedNodes++;
+    ret = getNodeId_17D0(this, m_freeNodes);
+    (*(tQuadTreeNode**)&m_freeNodes) = &m_nodes[m_freeNodes->getNext()];
+    m_numUsedNodes++;
     return ret;
 }
 #endif
@@ -70,14 +70,16 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_setFreeNodes);
  * @param nodeid2  the third (On Tour nodeid2)
  * @param nodeid3  the fourth (On Tour nodeid3)
  */
-extern "C" void cQuadTree_setFreeNodes(cQuadTree* self, unsigned short nodeid0, unsigned short nodeid1, unsigned short nodeid2, unsigned short nodeid3) {
-    char *arr = (char*)self->m_nodes;
+void cQuadTree::setFreeNodes(unsigned short nodeid0, unsigned short nodeid1, unsigned short nodeid2,
+                             unsigned short nodeid3)
+{
+    char *arr = (char*)m_nodes;
     *(unsigned short *)(arr + (nodeid0 << 3)) = nodeid1;
     *(unsigned short *)(arr + (nodeid1 << 3)) = nodeid2;
     *(unsigned short *)(arr + (nodeid2 << 3)) = nodeid3;
-    *(unsigned short *)(arr + (nodeid3 << 3)) = *(unsigned short*)self->m_freeNodes;
-    *(unsigned short*)self->m_freeNodes = nodeid0;
-    self->m_numUsedNodes = self->m_numUsedNodes - 4;
+    *(unsigned short *)(arr + (nodeid3 << 3)) = *(unsigned short*)m_freeNodes;
+    *(unsigned short*)m_freeNodes = nodeid0;
+    m_numUsedNodes = m_numUsedNodes - 4;
 }
 #endif
 //100%
@@ -100,16 +102,16 @@ extern "C" void func_002C1A00(void* self, void* node, unsigned short x, unsigned
  * @param fz  the area's minimum y (the tree's second axis) in world units
  * @param fsize  the area's width in world units
  */
-extern "C" void cQuadTree_setData(cQuadTree* self, int leafKey, int leafData, float fx, float fz, float fsize)
+void cQuadTree::setData(int leafKey, int leafData, float fx, float fz, float fsize)
 {
-    int x = (int)((fx - self->m_offsetX) * *(float*)self);
-    int z = (int)((fz - self->m_offsetY) * *(float*)self);
-    fsize = fsize * *(float*)self;
+    int x = (int)((fx - m_offsetX) * *(float*)this);
+    int z = (int)((fz - m_offsetY) * *(float*)this);
+    fsize = fsize * *(float*)this;
     if ((unsigned int)x > 0x7FFF || (unsigned int)z > 0x7FFF) {
         return;
     }
     int size = 0x8000 / (int)fsize;
-    func_002C1A00(self, &self->m_nodes[self->m_root], (unsigned short)(x << 1), (unsigned short)(z << 1), size, leafKey, leafData);
+    func_002C1A00(this, &m_nodes[m_root], (unsigned short)(x << 1), (unsigned short)(z << 1), size, leafKey, leafData);
 }
 #endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C1A00);
@@ -129,17 +131,17 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getLeaf);
  * @param fz  the world z (On Tour y)
  * @return the leaf node (On Tour const tQuadTreeLeafNode*)
  */
-extern "C" void* cQuadTree_getLeaf(cQuadTree* self, float fx, float fz)
+void* cQuadTree::getLeaf(float fx, float fz)
 {
-    int x = (int)((fx - self->m_offsetX) * *(float*)self);
-    int z = (int)((fz - self->m_offsetY) * *(float*)self);
+    int x = (int)((fx - m_offsetX) * *(float*)this);
+    int z = (int)((fz - m_offsetY) * *(float*)this);
     if ((unsigned int)x > 0x7FFF || (unsigned int)z > 0x7FFF) {
-        return (char*)&self->m_defaultNode;
+        return (char*)&m_defaultNode;
     }
     unsigned short ux = x << 1;
     unsigned short uz = z << 1;
-    tQuadTreeNode* nodes = self->m_nodes;
-    unsigned short* node = &nodes[self->m_root].m_sub.m_children[0];
+    tQuadTreeNode* nodes = m_nodes;
+    unsigned short* node = &nodes[m_root].m_sub.m_children[0];
     while (node[0] & 1) {
         int idx = ((ux >> 15) << 1) | (uz >> 15);
         ux <<= 1;
@@ -194,22 +196,22 @@ struct sQTHeader_1DA8 {
  * @param fixInt  int converter (On Tour convertInt)
  * @param fixShort  unsigned short converter
  */
-extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, void* ctx,
-                                     float (*fixFloat)(void*, float), int (*fixInt)(int, void*),
-                                     unsigned short (*fixShort)(unsigned short, void*))
+void cQuadTree::exportTree(char** out, int* size, void* ctx, float (*fixFloat)(void*, float), int (*fixInt)(int,
+                           void*), unsigned short (*fixShort)(unsigned short, void*))
 {
     int i;
-    *size = self->m_numUsedNodes * 8 + 40;
-    int* map = new (str_QuadTreeRemapTable, 0, 0) int[self->m_numNodes];
-    for (i = 0; i < self->m_numNodes; i++)
+    *size = m_numUsedNodes * 8 + 40;
+    int* map = new (str_QuadTreeRemapTable, 0, 0) int[m_numNodes];
+    for (i = 0; i < m_numNodes; i++)
         map[i] = -1;
     *out = new (str_QuadTreeOutputBuffer, 0, 0) char[*size];
     memset(*out, 0xDEADBEEF, *size);
     sQTHeader_1DA8* header = (sQTHeader_1DA8*)*out;
-    *header = *((sQTHeader_1DA8*)self);
+    *header = *((sQTHeader_1DA8*)this);
     int cnt = 0;
     unsigned short* nodeData = (unsigned short*)(header + 1);
-    cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map, (cQuadTree_exportNode_sNode*)&self->m_nodes[self->m_root]);
+    cQuadTree_exportNode(this, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map,
+            (cQuadTree_exportNode_sNode*)&m_nodes[m_root]);
     for (i = 0; i < cnt; i++, nodeData += 4) {
         if (nodeData[0] & 1) {
             tQuadTreeNode_setSubNodes(nodeData, map[nodeData[0] >> 1], map[nodeData[1] >> 1], map[nodeData[2] >> 1], map[nodeData[3] >> 1]);
@@ -224,8 +226,8 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
     }
     header->f10 = 0;
     header->f24 = 0;
-    header->f1C = fixInt((int)self->m_defaultNode.m_key, ctx);
-    header->f18 = fixInt(*(int*)&self->m_defaultNode, ctx);
+    header->f1C = fixInt((int)m_defaultNode.m_key, ctx);
+    header->f18 = fixInt(*(int*)&m_defaultNode, ctx);
     header->f0 = fixFloat(ctx, header->f0);
     header->f4 = fixFloat(ctx, header->f4);
     header->f8 = fixFloat(ctx, header->f8);
@@ -284,7 +286,8 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_calcUsedNodes);
  * @param node  the subtree's root
  * @return the node count
  */
-extern "C" int cQuadTree_calcUsedNodes(cQuadTree* self, unsigned short *node) {
+int cQuadTree::calcUsedNodes(unsigned short *node)
+{
     int count = 1;
     if (node != 0) {
         if (*node & 1) {
@@ -294,7 +297,7 @@ extern "C" int cQuadTree_calcUsedNodes(cQuadTree* self, unsigned short *node) {
                 unsigned short childRef = *childPtr;
                 childPtr += 1;
                 i -= 1;
-                count += cQuadTree_calcUsedNodes(self, &self->m_nodes[childRef >> 1].m_sub.m_children[0]);
+                count += calcUsedNodes(&m_nodes[childRef >> 1].m_sub.m_children[0]);
             } while (i >= 0);
         }
     }
@@ -1413,7 +1416,7 @@ extern void* cMemCard_vtbl[];
 extern "C" void cPS2MemCard__cPS2MemCard(cPS2MemCard* self, int flags)
 {
     *(void***)self = cPS2MemCard_vtbl;
-    cPS2MemCard_CleanUp((cPS2MemCard*)self);
+    self->CleanUp();
     void* iconData = (void*)self->mIconFileData;
     if (iconData != 0) {
         MEM_free(iconData);
@@ -1508,12 +1511,12 @@ char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
  *
  * @param name  the sceMcGetDir pattern (16-bit characters)
  */
-extern "C" void cPS2MemCard_GetDir1(cPS2MemCard* self, unsigned short* name)
+void cPS2MemCard::GetDir1(unsigned short* name)
 {
     char buf[1000];
     strcpy2_impl(buf, name);
-    sVEntry<void(void*, char*)>* vt = *(sVEntry<void(void*, char*)>**)self;
-    vt[6].fn(vthis(self, vt[6]), buf);
+    sVEntry<void(void*, char*)>* vt = *(sVEntry<void(void*, char*)>**)this;
+    vt[6].fn(vthis(this, vt[6]), buf);
 }
 #endif
 
@@ -1528,10 +1531,10 @@ extern "C" void* func_002C48C0(cPS2MemCard*, int);
  *
  * @param name  the sceMcGetDir pattern (ASCII; no length check)
  */
-extern "C" void cPS2MemCard_GetDir(cPS2MemCard* self, const char* name)
+void cPS2MemCard::GetDir(const char* name)
 {
-    strcpy(self->mDirPattern, name);
-    func_002C48C0(self, 5);
+    strcpy(mDirPattern, name);
+    func_002C48C0(this, 5);
 }
 #endif
 
@@ -1670,11 +1673,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DeleteFileSlot__FPvi);
  * @param fileSlot  the file slot (0..mMaxFiles-1)
  * @return func_002C48C0's result
  */
-void* cPS2MemCard_DeleteFileSlot(void* vself, int fileSlot)
+void* cPS2MemCard::DeleteFileSlot(int fileSlot)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mCurrentFileSlot = fileSlot;
-    return func_002C48C0((cPS2MemCard*)self, 19);
+    mCurrentFileSlot = fileSlot;
+    return func_002C48C0((cPS2MemCard*)this, 19);
 }
 #endif
 
@@ -1688,10 +1690,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetDataSize__FPv);
  *
  * @return the file size in bytes
  */
-int cPS2MemCard_GetDataSize(void* vself)
+int cPS2MemCard::GetDataSize()
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    return (int)self->mFileDirEntry.m_fileSizeByte;
+    return (int)mFileDirEntry.m_fileSizeByte;
 }
 #endif
 
@@ -1707,10 +1708,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetDataSize__FPvi);
  *
  * @param val  the data size in bytes
  */
-void cPS2MemCard_SetDataSize(void* vself, int val)
+void cPS2MemCard::SetDataSize(int val)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mDataSize = val;
+    mDataSize = val;
 }
 #endif
 
@@ -1752,12 +1752,12 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CheckDevice);
  *
  * @param device  the port to use (0 or 1)
  */
-extern "C" void cPS2MemCard_CheckDevice(cPS2MemCard* self, int device)
+void cPS2MemCard::CheckDevice(int device)
 {
-    self->mDevice = device;
-    if (((cMemCard*)self)->IsBusy() == 0) {
-        self->mGetInfoDevice = device;
-        func_002C48C0(self, 3);
+    mDevice = device;
+    if (((cMemCard*)this)->IsBusy() == 0) {
+        mGetInfoDevice = device;
+        func_002C48C0(this, 3);
     }
 }
 #endif
@@ -1771,11 +1771,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ClearCardChanged);
  * Clears the current port's card-changed flag (mCardChanged of mDevices[mDevice]) and turns a last libmc result
  * (mLastError) of -1 into 0. Card vtable slot 47.
  */
-extern "C" void cPS2MemCard_ClearCardChanged(cPS2MemCard* self)
+void cPS2MemCard::ClearCardChanged()
 {
-    self->mDevices[self->mDevice].mCardChanged = 0;
-    if (self->mDevices[self->mDevice].mLastError == -1) {
-        self->mDevices[self->mDevice].mLastError = 0;
+    mDevices[mDevice].mCardChanged = 0;
+    if (mDevices[mDevice].mLastError == -1) {
+        mDevices[mDevice].mLastError = 0;
     }
 }
 #endif
@@ -1796,12 +1796,12 @@ extern char str_slash_pct_s[];
  *
  * @param name  the directory name (ASCII; no length check)
  */
-extern "C" void cPS2MemCard_CreateFileSlot(cPS2MemCard* self, const char* name)
+void cPS2MemCard::CreateFileSlot(const char* name)
 {
-    char* fileName = self->mFileName;
+    char* fileName = mFileName;
     strcpy(fileName, name);
-    sprintf(self->mFilePath, str_slash_pct_s, fileName);
-    func_002C48C0(self, 20);
+    sprintf(mFilePath, str_slash_pct_s, fileName);
+    func_002C48C0(this, 20);
 }
 #endif
 
@@ -1820,12 +1820,12 @@ char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
  *
  * @param name  the directory name (16-bit characters)
  */
-extern "C" void cPS2MemCard_CreateFileSlot1(cPS2MemCard* self, unsigned short* name)
+void cPS2MemCard::CreateFileSlot1(unsigned short* name)
 {
-    char* fileName = self->mFileName;
+    char* fileName = mFileName;
     strcpy2_impl(fileName, name);
-    sprintf(self->mFilePath, str_slash_pct_s, fileName);
-    func_002C48C0(self, 20);
+    sprintf(mFilePath, str_slash_pct_s, fileName);
+    func_002C48C0(this, 20);
 }
 #endif
 
@@ -1846,14 +1846,14 @@ extern char str_pct_s_pct_s_h[];
  * @param writeBuffer  the data to write
  * @param writeSize  the number of bytes to write
  */
-extern "C" void cPS2MemCard_StartFileSlotWrite1(cPS2MemCard* self, unsigned short* wname, int writeBuffer, int writeSize)
+void cPS2MemCard::StartFileSlotWrite1(unsigned short* wname, int writeBuffer, int writeSize)
 {
-    char* name = self->mFileName;
+    char* name = mFileName;
     strcpy2_impl(name, wname);
-    sprintf(self->mFilePath, str_pct_s_pct_s_h, name, name);
-    self->mBuffer = writeBuffer;
-    self->mTransferSize = writeSize;
-    func_002C48C0(self, 21);
+    sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
+    mBuffer = writeBuffer;
+    mTransferSize = writeSize;
+    func_002C48C0(this, 21);
 }
 #endif
 
@@ -1876,14 +1876,14 @@ extern char str_pct_s_pct_s_h[];
  * @param writeBuffer  the data to write
  * @param writeSize  the number of bytes to write
  */
-extern "C" void cPS2MemCard_StartFileSlotWrite(cPS2MemCard* self, const char* src, int writeBuffer, int writeSize)
+void cPS2MemCard::StartFileSlotWrite(const char* src, int writeBuffer, int writeSize)
 {
-    char* name = self->mFileName;
+    char* name = mFileName;
     strcpy(name, src);
-    sprintf(self->mFilePath, str_pct_s_pct_s_h, name, name);
-    self->mBuffer = writeBuffer;
-    self->mTransferSize = writeSize;
-    func_002C48C0(self, 21);
+    sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
+    mBuffer = writeBuffer;
+    mTransferSize = writeSize;
+    func_002C48C0(this, 21);
 }
 #endif
 
@@ -1900,11 +1900,11 @@ extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
  * @param writeBuffer  the data to write
  * @param writeSize  the number of bytes to write
  */
-extern "C" void cPS2MemCard_StartFileSlotWrite2(cPS2MemCard* self, int fileSlot, int writeBuffer, int writeSize)
+void cPS2MemCard::StartFileSlotWrite2(int fileSlot, int writeBuffer, int writeSize)
 {
     char name[64];
-    func_002C54D0(self, fileSlot, name);
-    ((cMemCard*)self)->StartFileSlotWrite(name, writeBuffer, writeSize);
+    func_002C54D0(this, fileSlot, name);
+    ((cMemCard*)this)->StartFileSlotWrite(name, writeBuffer, writeSize);
 }
 #endif
 
@@ -1919,12 +1919,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_WriteData__FPvii);
  * @param transferSize  the number of bytes to write
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* cPS2MemCard_WriteData(void* vself, int buffer, int transferSize)
+void* cPS2MemCard::WriteData(int buffer, int transferSize)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mBuffer = buffer;
-    self->mTransferSize = transferSize;
-    return func_002C48C0((cPS2MemCard*)self, 23);
+    mBuffer = buffer;
+    mTransferSize = transferSize;
+    return func_002C48C0((cPS2MemCard*)this, 23);
 }
 #endif
 
@@ -1936,9 +1935,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsWriteWaiting);
  *
  * @return 1 when mState is 52 (0x34), else 0
  */
-extern "C" int cPS2MemCard_IsWriteWaiting(cPS2MemCard* self)
+int cPS2MemCard::IsWriteWaiting()
 {
-    return self->mState == 52;
+    return mState == 52;
 }
 #endif
 
@@ -1949,10 +1948,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteFailed__FPv);
  * Marks the current write as failed: sets mWriteFailed to 1, and cPS2MemCard_Update then abandons the write by calling
  * func_002C48C0 with state 24, which closes the save file. On Tour's cMemCard::SetWriteFailed; card vtable slot 44.
  */
-void cPS2MemCard_SetWriteFailed(void* vself)
+void cPS2MemCard::SetWriteFailed()
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mWriteFailed = 1;
+    mWriteFailed = 1;
 }
 #endif
 
@@ -2018,11 +2016,11 @@ extern "C" void func_002C4788(cPS2MemCard* self, char* name, int a2, int a3);
  * @param buffer  where the data goes
  * @param transferSize  number of bytes to read
  */
-extern "C" void cPS2MemCard_StartFileSlotRead(cPS2MemCard* self, int fileSlot, int buffer, int transferSize)
+void cPS2MemCard::StartFileSlotRead(int fileSlot, int buffer, int transferSize)
 {
     char name[64];
-    func_002C54D0(self, fileSlot, name);
-    func_002C4788(self, name, buffer, transferSize);
+    func_002C54D0(this, fileSlot, name);
+    func_002C4788(this, name, buffer, transferSize);
 }
 #endif
 
@@ -2037,12 +2035,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ReadData__FPvii);
  * @param transferSize  the number of bytes to read
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* cPS2MemCard_ReadData(void* vself, int buffer, int transferSize)
+void* cPS2MemCard::ReadData(int buffer, int transferSize)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mBuffer = buffer;
-    self->mTransferSize = transferSize;
-    return func_002C48C0((cPS2MemCard*)self, 29);
+    mBuffer = buffer;
+    mTransferSize = transferSize;
+    return func_002C48C0((cPS2MemCard*)this, 29);
 }
 #endif
 
@@ -2054,9 +2051,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsReadWaiting);
  *
  * @return 1 when mState is 53 (0x35), else 0
  */
-extern "C" int cPS2MemCard_IsReadWaiting(cPS2MemCard* self)
+int cPS2MemCard::IsReadWaiting()
 {
-    return self->mState == 53;
+    return mState == 53;
 }
 #endif
 
@@ -2067,10 +2064,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadFailed__FPv);
  * Marks the current read as failed: sets mReadFailed to 1, and cPS2MemCard_Update then abandons the read by calling
  * func_002C48C0 with state 30, which closes the save file. On Tour's cMemCard::SetReadFailed; card vtable slot 33.
  */
-void cPS2MemCard_SetReadFailed(void* vself)
+void cPS2MemCard::SetReadFailed()
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mReadFailed = 1;
+    mReadFailed = 1;
 }
 #endif
 
@@ -2514,9 +2510,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsBusy);
  *
  * @return 1 when mState is not idle (0) or a sceMcGetInfo is still pending (mGetInfoPending), else 0
  */
-extern "C" int cPS2MemCard_IsBusy(cPS2MemCard* self)
+int cPS2MemCard::IsBusy()
 {
-    if (self->mState != 0 || self->mGetInfoPending != 0) {
+    if (mState != 0 || mGetInfoPending != 0) {
         return 1;
     }
     return 0;
@@ -2535,9 +2531,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DidFormatFail);
  *
  * @return 1 when the last result is one of those codes, else 0
  */
-extern "C" int cPS2MemCard_DidFormatFail(cPS2MemCard* self)
+int cPS2MemCard::DidFormatFail()
 {
-    switch (((&self->mDevices[0]))[self->mDevice].mLastError) {
+    switch (((&mDevices[0]))[mDevice].mLastError) {
     case -1:
     case -3:
     case -8:
@@ -2602,10 +2598,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DidErrorOccur__FPv);
  *
  * @return 1 when cPS2MemCard_GetLastError returns nonzero, else 0
  */
-int cPS2MemCard_DidErrorOccur(void* vself)
+int cPS2MemCard::DidErrorOccur()
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    return (cPS2MemCard_GetLastError(self, self->mDevice) != 0);
+    return (cPS2MemCard_GetLastError(this, mDevice) != 0);
 }
 #endif
 
@@ -2668,9 +2663,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsInvalid);
  * @param device  the memory-card port (0 or 1)
  * @return 1 for a non-PS2 card, else 0
  */
-extern "C" int cPS2MemCard_IsInvalid(cPS2MemCard* self, int device)
+int cPS2MemCard::IsInvalid(int device)
 {
-    return self->mDevices[device].mLastError == -10002;
+    return mDevices[device].mLastError == -10002;
 }
 #endif
 
@@ -2684,9 +2679,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeSpace1);
  * @param device  the memory-card port (0 or 1)
  * @return the free clusters (1 KB each on a PS2 card)
  */
-extern "C" void* cPS2MemCard_GetFreeSpace1(cPS2MemCard* self, int device)
+void* cPS2MemCard::GetFreeSpace1(int device)
 {
-    return (void*)self->mDevices[device].mFreeClusters;
+    return (void*)mDevices[device].mFreeClusters;
 }
 #endif
 
@@ -2701,10 +2696,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeSpace__FPv);
  *
  * @return the free space in KB
  */
-void* cPS2MemCard_GetFreeSpace(void* vself)
+void* cPS2MemCard::GetFreeSpace()
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    return cPS2MemCard_GetFreeSpace1((cPS2MemCard*)self, self->mDevice);
+    return GetFreeSpace1(mDevice);
 }
 #endif
 
@@ -2718,9 +2712,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsAvailable);
  * @param i  the memory-card port (0 or 1)
  * @return 1 for a usable code, else 0
  */
-extern "C" int cPS2MemCard_IsAvailable(cPS2MemCard* self, int i)
+int cPS2MemCard::IsAvailable(int i)
 {
-    switch (((&self->mDevices[0]))[i].mLastError) {
+    switch (((&mDevices[0]))[i].mLastError) {
     case -10001:
     case -7:
     case -5:
@@ -2745,9 +2739,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFormatted);
  * @param device  the memory-card port (0 or 1)
  * @return 1 when formatted, else 0
  */
-extern "C" int cPS2MemCard_IsFormatted(cPS2MemCard* self, int device)
+int cPS2MemCard::IsFormatted(int device)
 {
-    return self->mDevices[device].mFormat != 0;
+    return mDevices[device].mFormat != 0;
 }
 #endif
 
@@ -2761,9 +2755,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CardChanged);
  * @param device  the memory-card port (0 or 1)
  * @return 1 when the flag is set, else 0
  */
-extern "C" int cPS2MemCard_CardChanged(cPS2MemCard* self, int device)
+int cPS2MemCard::CardChanged(int device)
 {
-    return self->mDevices[device].mCardChanged != 0;
+    return mDevices[device].mCardChanged != 0;
 }
 #endif
 
@@ -2795,19 +2789,19 @@ struct cPS2MemCard_GetStatus_sVEntry {
  * @param idx  the memory-card port (0 or 1)
  * @param dst  the 16-bit output buffer
  */
-extern "C" void cPS2MemCard_GetStatus(cPS2MemCard* self, int idx, unsigned short* dst)
+void cPS2MemCard::GetStatus(int idx, unsigned short* dst)
 {
-    if (self->mDevices[idx].mFormat == 0) {
+    if (mDevices[idx].mFormat == 0) {
         func_002C2540(dst, str_sp_d);
         return;
     }
-    switch (self->mDevices[idx].mLastError) {
+    switch (mDevices[idx].mLastError) {
     case -2:
         func_002C2540(dst, str_sp_d);
         break;
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
-        int freeClusters = cPS2MemCard_GetFreeSpace1_i(self, idx) >? 0;
+        int freeClusters = cPS2MemCard_GetFreeSpace1_i(this, idx) >? 0;
         cFELocale* obj = SSXApp->FELocale;
         cPS2MemCard_GetStatus_sVEntry* vt = (cPS2MemCard_GetStatus_sVEntry*)VPTR_OF(cUILocaleInterface, obj);
         void* thisp = vthis(obj, vt[4]);
@@ -2849,10 +2843,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetTitleString__FPv);
  *
  * @return strcpy2's result
  */
-void* cPS2MemCard_SetTitleString(void* vself)
+void* cPS2MemCard::SetTitleString()
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    return strcpy2(self->mTitle);
+    return strcpy2(mTitle);
 }
 #endif
 
@@ -2878,9 +2871,9 @@ extern "C" int strlen(const char* s);
  * @param fileSlot  the file slot
  * @return true when mFileSlots[@p fileSlot].mFileName is not an empty string
  */
-extern "C" bool cPS2MemCard_HasFileName(cPS2MemCard* self, int fileSlot)
+bool cPS2MemCard::HasFileName(int fileSlot)
 {
-    return strlen(self->mFileSlots[fileSlot].mFileName) != 0;
+    return strlen(mFileSlots[fileSlot].mFileName) != 0;
 }
 #endif
 
@@ -2895,9 +2888,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetBrokenFile);
  *
  * @param fileSlot  the file slot
  */
-extern "C" void cPS2MemCard_SetBrokenFile(cPS2MemCard* self, int fileSlot)
+void cPS2MemCard::SetBrokenFile(int fileSlot)
 {
-    self->mFileSlots[fileSlot].mBroken = 1;
+    mFileSlots[fileSlot].mBroken = 1;
 }
 #endif
 
@@ -2926,9 +2919,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFileSlotBroken);
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @return 1 when either flag is set, else 0
  */
-extern "C" int cPS2MemCard_IsFileSlotBroken(cPS2MemCard* self, int fileSlot)
+int cPS2MemCard::IsFileSlotBroken(int fileSlot)
 {
-    if (self->mFileSlots[fileSlot].mIconSysUnreadable != 0 || self->mFileSlots[fileSlot].mBroken != 0) {
+    if (mFileSlots[fileSlot].mIconSysUnreadable != 0 || mFileSlots[fileSlot].mBroken != 0) {
         return 1;
     }
     return 0;
@@ -2946,9 +2939,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFileSlotDisabled);
  * @param fileSlot  the file slot
  * @return 1 when the flag is set, else 0
  */
-extern "C" int cPS2MemCard_IsFileSlotDisabled(cPS2MemCard* self, int fileSlot)
+int cPS2MemCard::IsFileSlotDisabled(int fileSlot)
 {
-    return self->mFileSlots[fileSlot].mDisabled != 0;
+    return mFileSlots[fileSlot].mDisabled != 0;
 }
 #endif
 
@@ -3402,21 +3395,21 @@ static inline unsigned short* qtLoc6128(char* key)
  * @param fileSlot  the file slot
  * @param dst  the wide-character buffer that receives the text
  */
-extern "C" void cPS2MemCard_GetTitleString(cPS2MemCard* self, int fileSlot, unsigned short* dst)
+void cPS2MemCard::GetTitleString(int fileSlot, unsigned short* dst)
 {
     unsigned short buf[64];
-    if (((cMemCard*)self)->IsAvailable1() == 0) {
+    if (((cMemCard*)this)->IsAvailable1() == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
-    } else if (((cMemCard*)self)->IsFormatted() == 0) {
+    } else if (((cMemCard*)this)->IsFormatted() == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMUnavailable));
-    } else if (self->mFileSlots[fileSlot].mBroken != 0 || self->mFileSlots[fileSlot].mIconSysUnreadable != 0) {
+    } else if (mFileSlots[fileSlot].mBroken != 0 || mFileSlots[fileSlot].mIconSysUnreadable != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMFileCorruptPS2));
-    } else if (self->mFileSlots[fileSlot].mDisabled != 0) {
+    } else if (mFileSlots[fileSlot].mDisabled != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMNoFreeSpace));
-    } else if (((cMemCard*)self)->HasFileName(fileSlot) == 0) {
+    } else if (((cMemCard*)this)->HasFileName(fileSlot) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else {
-        func_002C2540(buf, &self->mFileSlots[fileSlot].mTitle[6]);
+        func_002C2540(buf, &mFileSlots[fileSlot].mTitle[6]);
     }
     buf[32] = 0;
     strcpy1(dst, buf);
@@ -3467,11 +3460,10 @@ extern int D_004A3940;
  * words of device record 0 (mDevices[0]: type, free clusters, result, format word), mFileInfoValid and the directory
  * table (func_002C5278). mState is left as it is. Called by the destructor.
  *
- * @param pS2MemCard  the memory card object (this)
  */
-extern "C" void cPS2MemCard_CleanUp(cPS2MemCard* pS2MemCard)
+void cPS2MemCard::CleanUp()
 {
-    cPS2MemCard* self = pS2MemCard;
+    cPS2MemCard* self = this;
     if (self->mGetInfoPending != 0) {
         D_004A3940 = 0;
         sceMcSync(0, 0, &D_004A3940);
@@ -3534,7 +3526,7 @@ struct cPS2MemCard_GetDeviceName_sVEntry {
  * @param dst  the wide-character buffer that receives the name
  * @param dstLen  the buffer's length (unused here; the callers pass it)
  */
-extern "C" void cPS2MemCard_GetDeviceName(cPS2MemCard* self, int device, unsigned short* dst, int dstLen)
+void cPS2MemCard::GetDeviceName(int device, unsigned short* dst, int dstLen)
 {
     unsigned short fmt[8];
     unsigned short num[8];
@@ -3564,7 +3556,7 @@ extern char str_sp_d[];
  * @param fileSlot  the file slot (unused)
  * @param dst  the wide-character buffer that receives the text
  */
-extern "C" void cPS2MemCard_GetFileDate(cPS2MemCard* self, int fileSlot, unsigned short* dst)
+void cPS2MemCard::GetFileDate(int fileSlot, unsigned short* dst)
 {
     func_002C2540(dst, str_sp_d);
 }
@@ -3583,7 +3575,7 @@ extern char str_sp_d[];
  * @param fileSlot  the file slot (unused)
  * @param dst  the wide-character buffer that receives the text
  */
-extern "C" void cPS2MemCard_GetFileTime(cPS2MemCard* self, int fileSlot, unsigned short* dst)
+void cPS2MemCard::GetFileTime(int fileSlot, unsigned short* dst)
 {
     func_002C2540(dst, str_sp_d);
 }
@@ -3602,28 +3594,28 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastSavedFile);
  *
  * @return the slot index (0-5) of the latest save, or -1 when there is none
  */
-extern "C" int cPS2MemCard_GetLastSavedFile(cPS2MemCard* self)
+int cPS2MemCard::GetLastSavedFile()
 {
     int best = -1;
-    if (((cMemCard*)self)->IsFormatted() == 0) {
+    if (((cMemCard*)this)->IsFormatted() == 0) {
         return -1;
     }
     for (int i = 0; i < 6; i++) {
-        if (self->mFileSlots[i].mBroken == 0 && self->mFileSlots[i].mIconSysUnreadable == 0
-            && ((cMemCard*)self)->HasFileName(i) != 0 && self->mFileSlots[i].mDisabled == 0) {
+        if (mFileSlots[i].mBroken == 0 && mFileSlots[i].mIconSysUnreadable == 0
+            && ((cMemCard*)this)->HasFileName(i) != 0 && mFileSlots[i].mDisabled == 0) {
             if (best != -1) {
-                unsigned int ct = self->mFileSlots[i].mModifyTime.m_hour * 3600
-                                  + self->mFileSlots[i].mModifyTime.m_min * 60
-                                  + self->mFileSlots[best].mModifyTime.m_sec;
-                unsigned short cy = self->mFileSlots[i].mModifyTime.m_year;
-                unsigned char cd = self->mFileSlots[i].mModifyTime.m_day;
-                unsigned int bt = self->mFileSlots[best].mModifyTime.m_hour * 3600
-                                  + self->mFileSlots[best].mModifyTime.m_min * 60
-                                  + self->mFileSlots[best].mModifyTime.m_sec;
-                unsigned short by = self->mFileSlots[best].mModifyTime.m_year;
-                unsigned char bm = self->mFileSlots[best].mModifyTime.m_month;
-                unsigned char bd = self->mFileSlots[best].mModifyTime.m_day;
-                unsigned char cm = self->mFileSlots[i].mModifyTime.m_month;
+                unsigned int ct = mFileSlots[i].mModifyTime.m_hour * 3600
+                                  + mFileSlots[i].mModifyTime.m_min * 60
+                                  + mFileSlots[best].mModifyTime.m_sec;
+                unsigned short cy = mFileSlots[i].mModifyTime.m_year;
+                unsigned char cd = mFileSlots[i].mModifyTime.m_day;
+                unsigned int bt = mFileSlots[best].mModifyTime.m_hour * 3600
+                                  + mFileSlots[best].mModifyTime.m_min * 60
+                                  + mFileSlots[best].mModifyTime.m_sec;
+                unsigned short by = mFileSlots[best].mModifyTime.m_year;
+                unsigned char bm = mFileSlots[best].mModifyTime.m_month;
+                unsigned char bd = mFileSlots[best].mModifyTime.m_day;
+                unsigned char cm = mFileSlots[i].mModifyTime.m_month;
                 if (cy < by) {
                 } else if (by < cy) {
                     best = i;
@@ -3660,10 +3652,10 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param name  the icon source path (the preview's pszInfo)
  * @param flag  nonzero leaves the path unchanged
  */
-extern "C" void cPS2MemCard_SetFileSlotInfo(cPS2MemCard* self, const char* name, int flag)
+void cPS2MemCard::SetFileSlotInfo(const char* name, int flag)
 {
     if (flag == 0) {
-        strcpy((char*)&self->mSourceIconPath, name);
+        strcpy((char*)&mSourceIconPath, name);
     }
 }
 #endif
@@ -3678,9 +3670,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_FileExistsError);
  *
  * @return 1 when the result is -11, else 0
  */
-extern "C" int cPS2MemCard_FileExistsError(cPS2MemCard* self)
+int cPS2MemCard::FileExistsError()
 {
-    return self->mDevices[self->mDevice].mLastError == -11;
+    return mDevices[mDevice].mLastError == -11;
 }
 #endif
 
@@ -3753,9 +3745,9 @@ public:
  * Asks the card's virtual slot 61 about the current port (mDevice) and passes its result back; in cPS2MemCard_vtbl that
  * slot is func_002C6710__FPv, which always returns 1.
  */
-extern "C" void cPS2MemCard_IsRemovable(cPS2MemCard* self)
+void cPS2MemCard::IsRemovable()
 {
-    ((cQuadTreeVObj*)self)->v61(self->mDevice);
+    ((cQuadTreeVObj*)this)->v61(mDevice);
 }
 #endif
 
@@ -3797,7 +3789,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SpaceRequired);
  * @param byteSize  the save data size in bytes
  * @return (byteSize + 1023) / 1024 + 77
  */
-extern "C" int cPS2MemCard_SpaceRequired(cPS2MemCard* self, int byteSize)
+int cPS2MemCard::SpaceRequired(int byteSize)
 {
     return (byteSize + 0x3ff) / 0x400 + 77;
 }
@@ -3813,9 +3805,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SpaceRequired1);
  * Asks the card's virtual slot 22 (cPS2MemCard_SpaceRequired) for the space the current data size (mDataSize) needs and
  * passes its result back.
  */
-extern "C" void cPS2MemCard_SpaceRequired1(cPS2MemCard* self)
+void cPS2MemCard::SpaceRequired1()
 {
-    ((cMemCard*)self)->SpaceRequired(self->mDataSize);
+    ((cMemCard*)this)->SpaceRequired(mDataSize);
 }
 #endif
 
@@ -3843,9 +3835,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsDamaged);
  * Asks the card's virtual slot 50 about the current port (mDevice) and passes its result back; in cPS2MemCard_vtbl that
  * slot is func_002C67A8__FPv, which always returns 0.
  */
-extern "C" void cPS2MemCard_IsDamaged(cPS2MemCard* self)
+void cPS2MemCard::IsDamaged()
 {
-    ((cQuadTreeVObj*)self)->v50(self->mDevice);
+    ((cQuadTreeVObj*)this)->v50(mDevice);
 }
 #endif
 
@@ -4354,10 +4346,9 @@ INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByIndex__FPv);
  *
  * @return LOCALE_getstr's result (the string, or 0)
  */
-void* cLocaleFile_getStringByIndex(void* vself)
+void* cLocaleFile::getStringByIndex()
 {
-    cLocaleFile* self = (cLocaleFile*)vself;
-    return LOCALE_getstr((int)self->mpStringTableData);
+    return LOCALE_getstr((int)mpStringTableData);
 }
 #endif
 
@@ -4376,17 +4367,17 @@ INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByHash);
  * @param key  the string's hash (GetHashValue32 of its id)
  * @return the string, or 0
  */
-extern "C" int cLocaleFile_getStringByHash(cLocaleFile* self, unsigned int key)
+int cLocaleFile::getStringByHash(unsigned int key)
 {
     int lo = 0;
-    int hi = ((int)self->mNumEntries);
-    if (((int)self->mpHashTableHeader) != 0) {
-        if ((self->mpHashTableData)[hi].mHashID < key || key < (self->mpHashTableData)[0].mHashID) {
+    int hi = ((int)mNumEntries);
+    if (((int)mpHashTableHeader) != 0) {
+        if (mpHashTableData[hi].mHashID < key || key < mpHashTableData[0].mHashID) {
             return 0;
         }
         int mid = hi >> 1;
-        while ((self->mpHashTableData)[mid].mHashID != key) {
-            if (key < (self->mpHashTableData)[mid].mHashID) {
+        while (mpHashTableData[mid].mHashID != key) {
+            if (key < mpHashTableData[mid].mHashID) {
                 hi = mid;
             } else {
                 lo = mid;
@@ -4397,7 +4388,7 @@ extern "C" int cLocaleFile_getStringByHash(cLocaleFile* self, unsigned int key)
             }
             mid = next;
         }
-        return ((int)(self->mpHashTableData)[mid].mID);
+        return ((int)(mpHashTableData)[mid].mID);
     }
     return 0;
 }
@@ -4433,23 +4424,24 @@ struct cLocaleFile_loadFile_sChunk {
  * @param name  the file path
  * @param kind  the language byte stored at +0x0 (cFELocale_addFile passes the file's D_00441188 entry)
  */
-extern "C" void cLocaleFile_loadFile(cLocaleFile* self, const char* name, char kind)
+void cLocaleFile::loadFile(const char* name, char kind)
 {
     unsigned int i;
     int size;
-    self->mLanguage = kind;
-    (*(cLocaleFile_loadFile_sChunk**)&self->mpStringTableData) = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
-    self->mNumEntries = LOCALE_getstate(((cLocaleFile_loadFile_sChunk*)self->mpStringTableData), 2);
-    size = ((cLocaleFile_loadFile_sChunk*)self->mpStringTableData)->size;
-    (*(cLocaleFile_loadFile_sChunk**)&self->mpHashTableHeader) = (cLocaleFile_loadFile_sChunk*)((char*)((cLocaleFile_loadFile_sChunk*)self->mpStringTableData) + size);
-    if (strncmp(((cLocaleFile_loadFile_sChunk*)self->mpHashTableHeader), str_LOCT, 4) != 0) {
-        (*(cLocaleFile_loadFile_sChunk**)&self->mpHashTableHeader) = 0;
+    mLanguage = kind;
+    (*(cLocaleFile_loadFile_sChunk**)&mpStringTableData) = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
+    mNumEntries = LOCALE_getstate(((cLocaleFile_loadFile_sChunk*)mpStringTableData), 2);
+    size = ((cLocaleFile_loadFile_sChunk*)mpStringTableData)->size;
+    (*(cLocaleFile_loadFile_sChunk**)&mpHashTableHeader) = (cLocaleFile_loadFile_sChunk*)((char*)((cLocaleFile_loadFile_sChunk*)mpStringTableData) + size);
+    if (strncmp(((cLocaleFile_loadFile_sChunk*)mpHashTableHeader), str_LOCT, 4) != 0) {
+        (*(cLocaleFile_loadFile_sChunk**)&mpHashTableHeader) = 0;
         return;
     }
-    size = ((cLocaleFile_loadFile_sChunk*)self->mpHashTableHeader)->size;
-    (*(cLocaleFile_loadFile_sEnt**)&self->mpHashTableData) = (cLocaleFile_loadFile_sEnt*)((char*)((cLocaleFile_loadFile_sChunk*)self->mpHashTableHeader) + size);
-    for (i = 0; i < ((int)self->mNumEntries); i++) {
-        ((cLocaleFile_loadFile_sEnt*)self->mpHashTableData)[i].f4 = (int)cLocaleFile_getStringByIndex_2(self, ((cLocaleFile_loadFile_sEnt*)self->mpHashTableData)[i].f4);
+    size = ((cLocaleFile_loadFile_sChunk*)mpHashTableHeader)->size;
+    (*(cLocaleFile_loadFile_sEnt**)&mpHashTableData) = (cLocaleFile_loadFile_sEnt*)((char*)((cLocaleFile_loadFile_sChunk*)mpHashTableHeader) + size);
+    for (i = 0; i < ((int)mNumEntries); i++) {
+        ((cLocaleFile_loadFile_sEnt*)mpHashTableData)[i].f4 = (int)cLocaleFile_getStringByIndex_2(this,
+                ((cLocaleFile_loadFile_sEnt*)mpHashTableData)[i].f4);
     }
 }
 #endif

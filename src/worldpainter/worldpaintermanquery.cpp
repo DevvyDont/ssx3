@@ -62,7 +62,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_blend1);
  * @param src  the target value
  * @param blend  the blend factor (0 keeps dst, 1 takes src)
  */
-extern "C" void tWPInGameData_blend1(tWPInGameData* self, float* dst, float* src, float blend)
+void tWPInGameData::blend1(float* dst, float* src, float blend)
 {
     if (blend == 1.0f) {
         *dst = *src;
@@ -1248,11 +1248,11 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_init);
 /**
  * Clears a quad-tree node: zeroes both of its words (a leaf with key 0 and no data).
  *
- * @param node  the tQuadTreeNode
  */
-extern "C" void tQuadTreeNode_init(tQuadTreeNode* node) {
-    (*(int*)&node->m_leaf) = 0;
-    ((int)node->m_leaf.m_key) = 0;
+void tQuadTreeNode::init()
+{
+    (*(int*)&m_leaf) = 0;
+    ((int)m_leaf.m_key) = 0;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1301,12 +1301,11 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_resolve__FPv);
  * Points m_nodes and m_freeNodes at the node array stored right after the 0x28-byte tree in streamed world-painter data
  * (this + 0x28). cWorldPainterLayer_resolve calls it.
  */
-void cQuadTree_resolve(void* vself)
+void cQuadTree::resolve()
 {
-    cQuadTree* self = (cQuadTree*)vself;
-    void* nodes = (char*)self + 0x28;
-    self->m_nodes = (tQuadTreeNode*)nodes;
-    self->m_freeNodes = (tQuadTreeNode*)nodes;
+    void* nodes = (char*)this + 0x28;
+    m_nodes = (tQuadTreeNode*)nodes;
+    m_freeNodes = (tQuadTreeNode*)nodes;
 }
 #endif
 

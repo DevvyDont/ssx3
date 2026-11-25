@@ -13,9 +13,26 @@
 #include "util/list.h"
 
 
+struct cUIState;
+
 struct cUIStateStack {
     cList mStack;                   // 0x000 [O]
     cList mExplicitStack;           // 0x01C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    int enableState(signed char id) __asm__("cUIStateStack_enableState");
+    int checkForState(signed char id) __asm__("cUIStateStack_checkForState");
+    void render2D() __asm__("cUIStateStack_render2D");
+    int updateLoop() __asm__("cUIStateStack_updateLoop");
+    void update() __asm__("cUIStateStack_update");
+    void pop1(cUIState* node) __asm__("cUIStateStack_pop1");
+    void pushExplicit(cUIState* state) __asm__("cUIStateStack_pushExplicit");
+    void setVisibleToChain(cUIState* state, int on, int last) __asm__("cUIStateStack_setVisibleToChain");
+    void purgeNormalStates() __asm__("cUIStateStack_purgeNormalStates");
+    void destroyStates() __asm__("cUIStateStack_destroyStates");
+    void* findState(int id) __asm__("cUIStateStack_findState");
+    void* getCurrentState() __asm__("cUIStateStack_getCurrentState");
+    void* getTopState() __asm__("cUIStateStack_getTopState");
 };
 
 CHECK_OFFSET(cUIStateStack, mStack, 0x000);

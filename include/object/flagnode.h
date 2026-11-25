@@ -37,6 +37,9 @@ struct cFlagNode : public cInstanceNode {
     // cFlagNode's notes on cInstanceNode's fields:
     //   ObjNodeType: [R] node type 10 (cInstanceNode_cInstanceNode1)
     //   Instance: [R] the dtor passes it to cFlagManager_RemoveFlag (lw 0x18)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFlagNode1(void* bucket, tInstanceRecord* node, void* src) __asm__("cFlagNode_cFlagNode1");
 };
 
 CHECK_SIZE(cFlagNode, 0x1C);

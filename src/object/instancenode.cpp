@@ -57,7 +57,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
-    cInstanceNode_clearActiveNode(self, (cInstanceNode*)self->Instance);
+    self->clearActiveNode((cInstanceNode*)self->Instance);
     self->Instance->m_iFlags &= 0xFFFF0300;
     {
         tInstanceRecord* instance = self->Instance;
@@ -92,10 +92,10 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_clearActiveNode);
  *
  * @param inst  instance record (may be 0)
  */
-extern "C" void cInstanceNode_clearActiveNode(cInstanceNode* self, cInstanceNode* inst)
+void cInstanceNode::clearActiveNode(cInstanceNode* inst)
 {
     if (((void*)inst) != 0) {
-        if ((int)VPTR_OF(cObjNode, inst) == (int)self) {
+        if ((int)VPTR_OF(cObjNode, inst) == (int)this) {
             VPTR_OF(cObjNode, inst) = 0;
         }
     }
@@ -112,10 +112,10 @@ extern "C" void cObjectInterface_runInitScript(int);
 /**
  * Runs the init world script (type 0) of the node's instance (cObjectInterface_runInitScript on Instance).
  *
- * @param instanceNode  the instance node
  */
-extern "C" void cInstanceNode_runInitScript(cInstanceNode* instanceNode) {
-    cObjectInterface_runInitScript(((int)instanceNode->Instance));
+void cInstanceNode::runInitScript()
+{
+    cObjectInterface_runInitScript(((int)Instance));
 }
 #endif
 
@@ -127,10 +127,9 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runExpireScript__FPv);
  *
  * @return cObjectInterface_runExpireScript's result (nonzero when a script ran)
  */
-void* cInstanceNode_runExpireScript(void* vself)
+void* cInstanceNode::runExpireScript()
 {
-    cInstanceNode* self = (cInstanceNode*)vself;
-    return cObjectInterface_runExpireScript((int)self->Instance);
+    return cObjectInterface_runExpireScript((int)Instance);
 }
 #endif
 
@@ -146,10 +145,9 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runOnLoseFocusScript__FPv);
  *
  * @return cObjectInterface_runOnLoseFocusScript()'s result
  */
-void* cInstanceNode_runOnLoseFocusScript(void* vself)
+void* cInstanceNode::runOnLoseFocusScript()
 {
-    cInstanceNode* self = (cInstanceNode*)vself;
-    return cObjectInterface_runOnLoseFocusScript((int)self->Instance);
+    return cObjectInterface_runOnLoseFocusScript((int)Instance);
 }
 #endif
 
@@ -169,7 +167,7 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_expire);
 extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
 {
     if (runscript != 0) {
-        if (cInstanceNode_runExpireScript(self) != 0) return;
+        if (self->runExpireScript() != 0) return;
     }
     self->Instance->m_iFlags &= 0xFFFF0300;
     {
@@ -239,10 +237,10 @@ extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, int v);
  * ("DeadNode") is constructed as a cDeadNode for the saved instance record by cDeadNode_cDeadNode. The record's
  * flags are not touched.
  */
-extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
+void cInstanceNode::makeThisDead()
 {
-    int instance = (int)self->Instance;
-    delete self;
+    int instance = (int)Instance;
+    delete this;
     cDeadNode_cDeadNode((cDeadNode*)cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
 #endif

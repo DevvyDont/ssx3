@@ -86,6 +86,14 @@ struct cMonitorInstance {
     int mData2;             // 0x20 [O]; [U] Create
     int mData3;             // 0x24 [O]; [U] Create
     int mData4;             // 0x28 [O]; [U] Create
+
+    // Methods bound to their retail symbols by asm labels.
+    void Create(int Freq, long key, int Ptr, int Data1, int Data2, int Data3, int Data4)
+        __asm__("cMonitorInstance_Create");
+    int IsFree() __asm__("cMonitorInstance_IsFree");
+    void Reset() __asm__("cMonitorInstance_Reset");
+    void CountReset(int periodMs) __asm__("cMonitorInstance_CountReset__FPvi");
+    void Disable() __asm__("cMonitorInstance_Disable__FPv");
 };
 
 // cBankMonitorInstance::mRestartInfo (On Tour: an anonymous union __C1 of three anonymous structs, members bank /
@@ -113,6 +121,8 @@ union tRestartInfo {                // On Tour __C1 (0x48)
 
 // One of cBankMonitor's 64 monitored sounds (On Tour class cBankMonitorInstance, 0xC0). mMonitorType is On Tour's
 // eMonitorType (MONITOR_NONE 0 = free, MONITOR_BANK 1, MONITOR_MIDI 2, MONITOR_STREAM 3), kept as an int.
+struct cController;
+
 struct cBankMonitorInstance {
     int mMonitorType;               // 0x00 [O]; [R] ctor 0; [U] DonePlaying / PosUpdate / PitchUpdate / VolUpdate /
                                     //       StopSound / RestartSound / Fade switch on it (1 SND*, 2 SNDseq* /
@@ -165,6 +175,22 @@ struct cBankMonitorInstance {
     int mLastVolume;                // 0xB4 [O] (On Tour 0xB0); [R] ctor -1; [U] VolUpdate's cache; Reset -1
     int mLastAzimuth;               // 0xB8 [O] (On Tour 0xB4); [R] ctor -30000; [U] PosUpdate's cache; Reset 0xFFFF
     char unk_BC[0x4];               // 0xBC tail padding (the class is 16-aligned); no access seen
+
+    // Methods bound to their retail symbols by asm labels.
+    void Update(cController* controller, float time) __asm__("cBankMonitorInstance_Update");
+    int DonePlaying() __asm__("cBankMonitorInstance_DonePlaying");
+    void Reset() __asm__("cBankMonitorInstance_Reset");
+    int IsFree() __asm__("cBankMonitorInstance_IsFree");
+    float DistSq(float* posA, float* posB) __asm__("cBankMonitorInstance_DistSq");
+    void SetBank(int bank, int patch) __asm__("cBankMonitorInstance_SetBank__FPvii");
+    void SetStream(int streamInst, const char* name, int fileOffset) __asm__("cBankMonitorInstance_SetStream");
+    void SetMIDI(int midiData, int bank) __asm__("cBankMonitorInstance_SetMIDI__FPvii");
+    void PosUpdate(int pos, int elevation) __asm__("cBankMonitorInstance_PosUpdate");
+    void PitchUpdate(int vol) __asm__("cBankMonitorInstance_PitchUpdate");
+    void VolUpdate(int vol) __asm__("cBankMonitorInstance_VolUpdate");
+    void StopSound() __asm__("cBankMonitorInstance_StopSound");
+    int CheckActive(float radius) __asm__("cBankMonitorInstance_CheckActive");
+    void Fade(int n, int resetMonitor, float duration) __asm__("cBankMonitorInstance_Fade");
 };
 
 CHECK_OFFSET(tBankRestartInfo, mBank, 0x0);
@@ -289,6 +315,7 @@ struct cSndPlayOpts {
     void OPTS_CloseOnEnd(int closeOnEnd) __asm__("cSndPlayOpts_OPTS_CloseOnEnd");
     void OPTS_TwoPlayerPan(int twoPlayerPan) __asm__("cSndPlayOpts_OPTS_TwoPlayerPan");
     void OPTS_TwoPlayerSide(int twoPlayerSide) __asm__("cSndPlayOpts_OPTS_TwoPlayerSide");
+    void OPTS_Radius(float dist, float vanish) __asm__("cSndPlayOpts_OPTS_Radius");
 };
 
 CHECK_OFFSET(cSndPlayOpts, mDefault, 0x004);
@@ -342,6 +369,10 @@ struct cMonitor {
     int MONITOR_Paused() __asm__("cMonitor_MONITOR_Paused");
     int MONITOR_Counter() __asm__("cMonitor_MONITOR_Counter");
     float MONITOR_Delta() __asm__("cMonitor_MONITOR_Delta");
+    void MONITOR_Update() __asm__("cMonitor_MONITOR_Update");
+    int MONITOR_GetFreeInstance(int n) __asm__("cMonitor_MONITOR_GetFreeInstance");
+    void MONITOR_Destroy(int idx) __asm__("cMonitor_MONITOR_Destroy");
+    void MONITOR_DestroyAll() __asm__("cMonitor_MONITOR_DestroyAll");
 };
 
 struct cBankMonitor {
@@ -395,6 +426,19 @@ struct cBankMonitor {
     void BANKMONITOR_SetPositional(int enable) __asm__("cBankMonitor_BANKMONITOR_SetPositional");
     int BANKMONITOR_DopplerEnabled() __asm__("cBankMonitor_BANKMONITOR_DopplerEnabled");
     int BANKMONITOR_PositionalEnabled() __asm__("cBankMonitor_BANKMONITOR_PositionalEnabled");
+    int FindFreeInstance(int n) __asm__("cBankMonitor_FindFreeInstance");
+    void BANKMONITOR_Pause() __asm__("cBankMonitor_BANKMONITOR_Pause");
+    void BANKMONITOR_Resume() __asm__("cBankMonitor_BANKMONITOR_Resume");
+    void BANKMONITOR_FadeOut(int idx, int type, float FadeTime) __asm__("cBankMonitor_BANKMONITOR_FadeOut");
+    void BANKMONITOR_Destroy(int i) __asm__("cBankMonitor_BANKMONITOR_Destroy");
+    void BANKMONITOR_DestroyAll() __asm__("cBankMonitor_BANKMONITOR_DestroyAll");
+    void BANKMONITOR_DestroyAllWithPtr(int id) __asm__("cBankMonitor_BANKMONITOR_DestroyAllWithPtr");
+    void* BANKMONITOR_GetHandle(int idx, int key) __asm__("cBankMonitor_BANKMONITOR_GetHandle");
+    void BANKMONITOR_StopHandle(int idx, int type, float FadeTime) __asm__("cBankMonitor_BANKMONITOR_StopHandle");
+    void BANKMONITOR_StopBank(int id, float FadeTime) __asm__("cBankMonitor_BANKMONITOR_StopBank");
+    int BANKMONITOR_Active() __asm__("cBankMonitor_BANKMONITOR_Active");
+    int BANKMONITOR_Used() __asm__("cBankMonitor_BANKMONITOR_Used");
+    void BANKMONITOR_CameraChange() __asm__("cBankMonitor_BANKMONITOR_CameraChange");
 };
 
 CHECK_SIZE(cDelayOpts, 0x10);

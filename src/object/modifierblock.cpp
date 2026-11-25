@@ -86,12 +86,12 @@ void operator_delete(int* ptr);
  */
 extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
 {
-    tModifierBlock_remTransformModifier(self);
-    tModifierBlock_remUVScrollModifier(self);
-    tModifierBlock_remTexFlipModifier(self);
-    tModifierBlock_remPhysicsModifier(self);
-    tModifierBlock_remEffectModifier(self);
-    tModifierBlock_remRailModifier(self, 0xFFFFFFFF);
+    self->remTransformModifier();
+    self->remUVScrollModifier();
+    self->remTexFlipModifier();
+    self->remPhysicsModifier();
+    self->remEffectModifier();
+    self->remRailModifier(0xFFFFFFFF);
     VPTR_OF(cRailLink, &self->Rail) = cRailLink_vtbl;
     cRailLink_unlink(&self->Rail);
     VPTR_OF(cEffectLink, &self->Effect) = cEffectLink_vtbl;
@@ -112,9 +112,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_getBoundBox);
  *
  * @return the node's result, or 0 when the block has no node
  */
-extern "C" int tModifierBlock_getBoundBox(tModifierBlock* self)
+int tModifierBlock::getBoundBox()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         return (int)node->getBoundBox();
     }
@@ -153,9 +153,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_getRadius);
  *
  * @return the radius (0.0 when the block has no transform modifier)
  */
-extern "C" float tModifierBlock_getRadius(tModifierBlock* self)
+float tModifierBlock::getRadius()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         return node->getRadius();
     }
@@ -172,9 +172,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_setRadius__FP14tModifierBlock
  * Does nothing without a root transform modifier (+0x0, On Tour RootTransform). The radius (On Tour's float
  * argument) travels in $f12 untouched; the mangled name and the C declare no float parameter.
  */
-void tModifierBlock_setRadius(tModifierBlock* self)
+void tModifierBlock::setRadius()
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    sBoundBoxNode* node = (sBoundBoxNode*)RootTransform;
     if (node != 0) {
         sBoundBoxTarget* target = node->target;
         target->fnRadius((char*)node + target->field_0x78);
@@ -199,24 +199,24 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self);
  * Runs RootTransform's update (slot 2), cUVScrollModifier_update and cTexFlipModifier_update, then Physics' update
  * (slot 2); when Physics' isActive (slot 4) is 0 afterwards it is removed (tModifierBlock_remPhysicsModifier).
  */
-extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
+void tModifierBlock::preUpdate()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->update();
     }
-    if (self->UVScroll != 0) {
-        cUVScrollModifier_update(self->UVScroll);
+    if (UVScroll != 0) {
+        cUVScrollModifier_update(UVScroll);
     }
-    if (self->TexFlip != 0) {
-        cTexFlipModifier_update(self->TexFlip);
+    if (TexFlip != 0) {
+        cTexFlipModifier_update(TexFlip);
     }
-    cPhysicsModifier* physicsModifier = self->Physics;
+    cPhysicsModifier* physicsModifier = Physics;
     if (physicsModifier != 0) {
         physicsModifier->update();
-        physicsModifier = self->Physics;
+        physicsModifier = Physics;
         if (physicsModifier->isActive() == 0) {
-            tModifierBlock_remPhysicsModifier(self);
+            remPhysicsModifier();
         }
     }
 }
@@ -234,9 +234,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_postUpdate);
  * +0x1C) and postUpdate (slot 4) on the root transform modifier (+0x0) when there is one. Each link's next
  * pointer is read before its call.
  */
-extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
+void tModifierBlock::postUpdate()
 {
-    void* head = self->Effect.Next;  // one local for both list heads (the effect list, then the rail list)
+    void* head = Effect.Next;  // one local for both list heads (the effect list, then the rail list)
     if (head != 0) {
         cEffectModifier* link = (cEffectModifier*)head;
         do {
@@ -245,7 +245,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
             link = next;
         } while (link != 0);
     }
-    head = self->Rail.Next;
+    head = Rail.Next;
     if (head != 0) {
         cRailModifier* link = (cRailModifier*)head;
         do {
@@ -254,7 +254,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
             link = next;
         } while (link != 0);
     }
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->postUpdate();
     }
@@ -268,10 +268,10 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_render);
 /**
  * Renders a modifier block: slot 6 of each effect link in the list at +0x10, then slot 11 of the transform modifier.
  */
-extern "C" void tModifierBlock_render(tModifierBlock* self)
+void tModifierBlock::render()
 {
-    if (self->Effect.Next != 0) {
-        cEffectModifier* effect = (cEffectModifier*)self->Effect.Next;
+    if (Effect.Next != 0) {
+        cEffectModifier* effect = (cEffectModifier*)Effect.Next;
         cEffectModifier* next;
         do {
             next = (cEffectModifier*)effect->Next;
@@ -279,7 +279,7 @@ extern "C" void tModifierBlock_render(tModifierBlock* self)
             effect = next;
         } while (effect != 0);
     }
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->render();
     }
@@ -294,9 +294,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_isRootTransformDirty);
  *
  * @return 1 when there is a transform modifier and it is dirty, otherwise 0
  */
-extern "C" int tModifierBlock_isRootTransformDirty(tModifierBlock* self)
+int tModifierBlock::isRootTransformDirty()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         if (node->isRootTransformDirty() != 0) {
             return 1;
@@ -313,9 +313,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_updateRootTransform);
 /**
  * Updates the block's root transform: slot 3 of its transform modifier (+0x0), when it has one.
  */
-extern "C" void tModifierBlock_updateRootTransform(tModifierBlock* self)
+void tModifierBlock::updateRootTransform()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->updateRootTransform();
     }
@@ -332,9 +332,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_isComplete);
  *
  * @return the node's answer, or 0 when the block has no node
  */
-extern "C" int tModifierBlock_isComplete(tModifierBlock* self)
+int tModifierBlock::isComplete()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         return node->isComplete();
     }
@@ -350,9 +350,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_clearComplete);
  *
  * Calls slot 7 of the node at offset 0; does nothing when the block has no node.
  */
-extern "C" void tModifierBlock_clearComplete(tModifierBlock* self)
+void tModifierBlock::clearComplete()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->clearComplete();
     }
@@ -377,23 +377,23 @@ extern "C" void cTexFlipModifier_signal(void* self, int id, float v);
  * @param id  the signal id (On Tour signal)
  * @param value  the signal's argument value (On Tour arg)
  */
-extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
+void tModifierBlock::signal(int id, float value)
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->signal(id, value);
     }
-    if (self->UVScroll != 0) {
-        cUVScrollModifier_signal(self->UVScroll, id, value);
+    if (UVScroll != 0) {
+        cUVScrollModifier_signal(UVScroll, id, value);
     }
-    if (self->TexFlip != 0) {
-        cTexFlipModifier_signal(self->TexFlip, id, value);
+    if (TexFlip != 0) {
+        cTexFlipModifier_signal(TexFlip, id, value);
     }
-    cPhysicsModifier* physicsModifier = self->Physics;
+    cPhysicsModifier* physicsModifier = Physics;
     if (physicsModifier != 0) {
         physicsModifier->signal(id, value);
     }
-    cEffectLink* firstEffect = self->Effect.Next;
+    cEffectLink* firstEffect = Effect.Next;
     if (firstEffect != 0) {
         cEffectModifier* effect = (cEffectModifier*)firstEffect;
         do {
@@ -419,9 +419,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_applyForce);
  * @param intInfo  the intersect info, passed through (On Tour const tIntersectInfo&)
  * @param force    the force vector, passed through (On Tour const t4Vector&)
  */
-extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int force)
+void tModifierBlock::applyForce(int intInfo, int force)
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     cMoveNode* obj;
     if (node != 0) {
         obj = node->getParent();
@@ -446,9 +446,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_updateIntersectInfo);
  *
  * @param intInfo  the intersect info to update (On Tour tIntersectInfo&)
  */
-extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* intInfo)
+void tModifierBlock::updateIntersectInfo(void* intInfo)
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->updateIntersectInfo(*(tIntersectInfo*)intInfo);
     }
@@ -461,12 +461,12 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remTransformModifier);
 /**
  * Deletes the block's transform modifier through its destructor virtual (slot 1, flags 3) and clears the slot.
  */
-extern "C" void tModifierBlock_remTransformModifier(tModifierBlock* self)
+void tModifierBlock::remTransformModifier()
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         delete node;
-        self->RootTransform = 0;
+        RootTransform = 0;
     }
 }
 #endif
@@ -479,11 +479,11 @@ void operator_delete(int* ptr);
 /**
  * Frees the block's UV-scroll modifier (operator_delete only, no destructor runs) and clears the slot.
  */
-extern "C" void tModifierBlock_remUVScrollModifier(tModifierBlock* self)
+void tModifierBlock::remUVScrollModifier()
 {
-    if (self->UVScroll != 0) {
-        operator_delete((int*)self->UVScroll);
-        self->UVScroll = 0;
+    if (UVScroll != 0) {
+        operator_delete((int*)UVScroll);
+        UVScroll = 0;
     }
 }
 #endif
@@ -496,11 +496,11 @@ void operator_delete(int* ptr);
 /**
  * Frees the block's tex-flip modifier (operator_delete only, no destructor runs) and clears the slot.
  */
-extern "C" void tModifierBlock_remTexFlipModifier(tModifierBlock* self)
+void tModifierBlock::remTexFlipModifier()
 {
-    if (self->TexFlip != 0) {
-        operator_delete((int*)self->TexFlip);
-        self->TexFlip = 0;
+    if (TexFlip != 0) {
+        operator_delete((int*)TexFlip);
+        TexFlip = 0;
     }
 }
 #endif
@@ -512,12 +512,12 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remPhysicsModifier);
  * Deletes the block's physics modifier through its destructor virtual (vtable at +0x4, slot 1, flags 3) and clears
  * the slot.
  */
-extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
+void tModifierBlock::remPhysicsModifier()
 {
-    cPhysicsModifier* obj = self->Physics;
+    cPhysicsModifier* obj = Physics;
     if (obj != 0) {
         delete obj;
-        self->Physics = 0;
+        Physics = 0;
     }
 }
 #endif
@@ -531,9 +531,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remEffectModifier);
  * Walks the Effect list (head at +0x10), reading each link's next first, and deletes each one through virtual slot 1
  * (the destructor, flags 3); each destructor unlinks itself (On Tour asserts the list is empty afterwards).
  */
-extern "C" void tModifierBlock_remEffectModifier(tModifierBlock* self)
+void tModifierBlock::remEffectModifier()
 {
-    cEffectLink* head = self->Effect.Next;
+    cEffectLink* head = Effect.Next;
     if (head != 0) {
         cEffectLink* effect = head;
         do {
@@ -555,9 +555,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_fadeEffectModifier);
  * Walks the effect chain (+0x10, cEffectLink list) and calls each link's vtable entry 3 (fadeEffect), reading the next
  * link first.
  */
-extern "C" void tModifierBlock_fadeEffectModifier(tModifierBlock* self)
+void tModifierBlock::fadeEffectModifier()
 {
-    cEffectLink* head = *(cEffectLink**)&self->Effect;
+    cEffectLink* head = *(cEffectLink**)&Effect;
     if (head != 0) {
         cEffectLink* link = head;
         do {
@@ -579,9 +579,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remHaloModifier);
  * Walks the effect chain (+0x10) and deletes (vtable entry 1, flags 3) each link whose getType (vtable entry 2) is 3,
  * the halo modifier's type.
  */
-extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* self)
+void tModifierBlock::remHaloModifier()
 {
-    cEffectLink* head = *(cEffectLink**)&self->Effect;
+    cEffectLink* head = *(cEffectLink**)&Effect;
     if (head != 0) {
         cEffectLink* link = head;
         do {
@@ -609,9 +609,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remRailModifier);
  *
  * @param id  the rail's spline resource id (On Tour splineId), or -1 for all
  */
-extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned int id)
+void tModifierBlock::remRailModifier(unsigned int id)
 {
-    cRailModifier* head = *(cRailModifier**)&self->Rail;
+    cRailModifier* head = *(cRailModifier**)&Rail;
     if (head == 0) return;
     cRailModifier* rail = head;
     if (~id) {
@@ -649,13 +649,13 @@ extern "C" void cEffectLink_append(void* pool, void* item);
  *
  * @param list  the effect list head to empty (On Tour link): another modifier block's +0x10
  */
-extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEffectLink* list)
+void tModifierBlock::transferEffectModifier(cEffectLink* list)
 {
     cEffectLink* effect = (cEffectLink*)(*(void**)list);
     while (((void*)effect) != 0) {
         void* next = *(void**)effect;
         effect->fadeEffect();
-        cEffectLink_append(&self->Effect, effect);
+        cEffectLink_append(&Effect, effect);
         effect = (cEffectLink*)next;
     }
     *(void**)list = 0;
@@ -680,9 +680,9 @@ struct sModifierLink {
  * @param id  the spline's resource id (On Tour tResourceID splineId)
  * @return 1 if a rail with that spline id is found, otherwise 0
  */
-extern "C" int tModifierBlock_findRail(tModifierBlock* self, int id)
+int tModifierBlock::findRail(int id)
 {
-    sModifierLink* rail = *(sModifierLink**)&self->Rail;
+    sModifierLink* rail = *(sModifierLink**)&Rail;
     while (rail != 0) {
         if (rail->id == id) {
             return 1;
@@ -726,7 +726,7 @@ static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, cBxReplayFrame* stream)
+void tModifierBlock::writeToReplayFrame(cBxReplayFrame* stream)
 {
     tModifierBlockInfo info;
     info.Flags = 0;
@@ -737,29 +737,29 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, cBxRepla
     for (int i = 0; i < 32; i++) {
         info.EffectType[i] = 0;
     }
-    char* transformModifier = (char*)self->RootTransform;
+    char* transformModifier = (char*)RootTransform;
     if (transformModifier != 0) {
         info.Flags |= 1;
         info.TransformType = VCall0_353448(transformModifier, 0, 26);
     }
-    if (self->UVScroll != 0) {
+    if (UVScroll != 0) {
         info.Flags |= 2;
     }
-    if (self->TexFlip != 0) {
+    if (TexFlip != 0) {
         info.Flags |= 4;
     }
-    char* oC = (char*)self->Physics;
+    char* oC = (char*)Physics;
     if (oC != 0) {
         info.Flags |= 8;
         info.PhysicsType = VCall0_353448(oC, 4, 5);
     }
-    for (char* link = *(char**)&self->Effect; link; link = *(char**)link) {
+    for (char* link = *(char**)&Effect; link; link = *(char**)link) {
         info.EffectType[info.NumEffects++] = VCall0_353448(link, 8, 2);
     }
     if (info.NumEffects > 0) {
         info.Flags |= 0x10;
     }
-    for (char* link = *(char**)&self->Rail; link; link = *(char**)link) {
+    for (char* link = *(char**)&Rail; link; link = *(char**)link) {
         info.NumRails++;
     }
     if (info.NumRails > 0) {
@@ -768,27 +768,27 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, cBxRepla
     {
         stream->write((const char*)&info, 52);
     }
-    char* w0 = (char*)self->RootTransform;
+    char* w0 = (char*)RootTransform;
     if (w0 != 0) {
         VCall1_353448(w0, 0, 27, stream);
     }
-    if (self->UVScroll != 0) {
-        cUVScrollModifier_writeToReplayFrame(self->UVScroll, stream);
+    if (UVScroll != 0) {
+        cUVScrollModifier_writeToReplayFrame(UVScroll, stream);
     }
-    if (self->TexFlip != 0) {
-        cTexFlipModifier_writeToReplayFrame(self->TexFlip, stream);
+    if (TexFlip != 0) {
+        cTexFlipModifier_writeToReplayFrame(TexFlip, stream);
     }
-    char* wC = (char*)self->Physics;
+    char* wC = (char*)Physics;
     if (wC != 0) {
         VCall1_353448(wC, 4, 6, stream);
     }
     if (info.NumEffects > 0) {
-        for (char* link = *(char**)&self->Effect; link; link = *(char**)link) {
+        for (char* link = *(char**)&Effect; link; link = *(char**)link) {
             VCall1_353448(link, 8, 4, stream);
         }
     }
     if (info.NumRails > 0) {
-        for (char* link = *(char**)&self->Rail; link; link = *(char**)link) {
+        for (char* link = *(char**)&Rail; link; link = *(char**)link) {
             VCall1_353448(link, 8, 2, stream);
         }
     }
@@ -851,42 +851,52 @@ extern const char str_RailModifier[];
  *
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  */
-extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cBxReplayFrame* stream)
+void tModifierBlock::readFromReplayFrame(cBxReplayFrame* stream)
 {
     sMbReplayHdr36D8 hdr;
     int i;
 
-    *(void**)&self->RootTransform = 0;
-    self->UVScroll = 0;
-    self->TexFlip = 0;
-    self->Physics = 0;
+    *(void**)&RootTransform = 0;
+    UVScroll = 0;
+    TexFlip = 0;
+    Physics = 0;
     stream->read((char*)&hdr, 52);
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {
-            self->RootTransform = (cTransformModifier*)cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0,
+                    str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 2) {
-            self->RootTransform = (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88, str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88,
+                    str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 4) {
-            self->RootTransform = (cTransformModifier*)cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier,
+                    0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 3) {
-            self->RootTransform = (cTransformModifier*)cPositionModifier_cPositionModifier2(cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cPositionModifier_cPositionModifier2(cMemMan_alloc(144,
+                    str_PositionModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 5) {
-            self->RootTransform = (cTransformModifier*)cRollerModifier_cRollerModifier1(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cRollerModifier_cRollerModifier1(cMemMan_alloc(720,
+                    str_RollerModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 6) {
-            self->RootTransform = (cTransformModifier*)cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176,
+                    str_MagnetModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 7) {
-            self->RootTransform = (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+            RootTransform = (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144,
+                    str_AvaSplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         }
     }
     if (hdr.flags & 2) {
-        self->UVScroll = (cUVScrollModifier*)cUVScrollModifier_cUVScrollModifier1(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+        UVScroll = (cUVScrollModifier*)cUVScrollModifier_cUVScrollModifier1(cMemMan_alloc(80, str_UVScrollModifier,
+                0x20000000, 0), (cReplayFramePtr*)stream);
     }
     if (hdr.flags & 4) {
-        self->TexFlip = (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+        TexFlip = (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier,
+                0x20000000, 0), (cReplayFramePtr*)stream);
     }
     if ((hdr.flags & 8) && hdr.kind == 1) {
-        self->Physics = (cPhysicsModifier*)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
+        Physics = (cPhysicsModifier*)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000,
+                0), (cReplayFramePtr*)stream);
     }
     for (i = 0; i < hdr.numA; i++) {
         void* effect;
@@ -899,10 +909,11 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cBxRepl
         } else {
             effect = 0;
         }
-        cEffectLink_append(&self->Effect, effect);
+        cEffectLink_append(&Effect, effect);
     }
     for (i = 0; i < hdr.numB; i++) {
-        cRailLink_append((char*)&self->Rail, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), (cReplayFramePtr*)stream));
+        cRailLink_append((char*)&Rail, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000,
+                0), (cReplayFramePtr*)stream));
     }
 }
 #endif
@@ -1121,18 +1132,18 @@ struct sMbTrackRef3CF0 {
  *
  * @param id  world section id, or negative for none
  */
-extern "C" void cSkyBox_setSection(cSkyBox* self, int id)
+void cSkyBox::setSection(int id)
 {
-    self->m_iSectionID = id;
+    m_iSectionID = id;
     if (id < 0) {
-        cSkyBox_reset(self);
+        reset();
         return;
     }
     sMbWorld3CF0* w = *cObjectInterface_getWorld();
     if (w->table->entries[id].count > 0) {
         sMbModelRef3CF0 ref;
         ref.id = id & 0xFF;
-        self->m_pInstanceSky = (tInstanceRecord*)ref.get(w);
+        m_pInstanceSky = (tInstanceRecord*)ref.get(w);
     }
 }
 #endif
@@ -1145,12 +1156,11 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_reset__FPv);
  *
  * @return -1 (left over from the store; callers ignore it)
  */
-int cSkyBox_reset(void* vself)
+int cSkyBox::reset()
 {
-    cSkyBox* self = (cSkyBox*)vself;
     int invalid = -1;
-    self->m_pInstanceSky = 0;
-    self->m_iSectionID = invalid;
+    m_pInstanceSky = 0;
+    m_iSectionID = invalid;
     return invalid;
 }
 #endif
@@ -1212,9 +1222,9 @@ extern "C" void cSpring_setupNodes(void* self);
  * @param sdata    the spring data (On Tour tSpringData* sdata)
  * @param len  the spring's length (On Tour length)
  */
-extern "C" void cSpring_setupSpring(cSpring* self, tSpringData* sdata, float len)
+void cSpring::setupSpring(tSpringData* sdata, float len)
 {
-    cSpring* spring = (cSpring*)self;
+    cSpring* spring = (cSpring*)this;
     int n = sdata->Width;
     spring->Width = n;
     spring->LSpring = sdata->LSpring;
@@ -1225,7 +1235,7 @@ extern "C" void cSpring_setupSpring(cSpring* self, tSpringData* sdata, float len
     spring->TorqueScale = sdata->TorqueScale * 9.999999974752427e-07f;
     spring->Length = sdata->LengthScale;
     spring->SegLen = len / (float)(n - 1);
-    cSpring_setupNodes(self);
+    cSpring_setupNodes(this);
 }
 #endif
 
@@ -1244,12 +1254,12 @@ extern "C" void cSpring_setupNodes(void* self);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cSpring_cSpring1(cSpring* self, cBxReplayFrame* stream)
+void* cSpring::cSpring1(cBxReplayFrame* stream)
 {
-    stream->read((char*)self, 36);
-    cSpring_setupNodes(self);
-    stream->read((char*)self->Nodes, *(int*)self * 80);
-    return ((void*)self);
+    stream->read((char*)this, 36);
+    cSpring_setupNodes(this);
+    stream->read((char*)Nodes, *(int*)this * 80);
+    return ((void*)this);
 }
 #endif
 

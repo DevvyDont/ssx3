@@ -89,9 +89,9 @@ INCLUDE_ASM("world/world", cWorld_init);
 /**
  * Initialises the world by resetting its map with cWorld_resetMap().
  */
-extern "C" void cWorld_init(cWorld* self)
+void cWorld::init()
 {
-    cWorld_resetMap(self);
+    resetMap();
 }
 #endif
 
@@ -163,11 +163,10 @@ static inline sWRMObj* sWRM_get(sWRMWorld* w, unsigned int id)
  * index) and rewrites the object's flag word: the low half is replaced by the high half, probably the initial
  * state, and bit 1 (value 2) is set. cInstanceNode_loseFocus applies the same change to one instance.
  *
- * @param selfp  the world
  */
-extern "C" void cWorld_resetMap(cWorld* selfp)
+void cWorld::resetMap()
 {
-    sWRMWorld** self = (sWRMWorld**)selfp;
+    sWRMWorld** self = (sWRMWorld**)this;
     unsigned int ref = 0xFFFFFFFF;
     unsigned int i;
     for (i = 0; i < (unsigned int)cWorldView_getNumSections((cWorldView*)(*self)->view); i++) {
@@ -314,14 +313,14 @@ struct cWorld_load_sBXString {
  * @param name  the world's base file name (On Tour base)
  * @param nash  the Nash collision grid to use (On Tour nash::Nash*)
  */
-extern "C" void cWorld_load(cWorld* self, const char* name, int nash)
+void cWorld::load(const char* name, int nash)
 {
     cWorld_load_sBXString nameStr;
     cBXString_cBXString2(&nameStr, name);
-    cWorldCache_reset(self->m_pWorldCache);
-    cWorldCache_init(self->m_pWorldCache, name, nash);
-    cWScriptCache_init(self->m_pWScriptCache, cWorldView_getNumSections(&self->m_pWorldCache->m_WorldView));
-    cWorldPainterMan_init(self->m_pWorldPainterMan, cWorldView_getNumSections(&self->m_pWorldCache->m_WorldView));
+    cWorldCache_reset(m_pWorldCache);
+    cWorldCache_init(m_pWorldCache, name, nash);
+    cWScriptCache_init(m_pWScriptCache, cWorldView_getNumSections(&m_pWorldCache->m_WorldView));
+    cWorldPainterMan_init(m_pWorldPainterMan, cWorldView_getNumSections(&m_pWorldCache->m_WorldView));
     cBXString__cBXString(&nameStr, 2);
 }
 #endif
@@ -350,9 +349,9 @@ extern "C" int cWScriptCacheEntry_getWScriptHeaderId(cWorld_getWScriptHeaderId_s
  * @param i    which script entry
  * @return the header's resource id (On Tour tResourceID)
  */
-extern "C" int cWorld_getWScriptHeaderId(cWorld* self, tInstanceRecord* obj, int i)
+int cWorld::getWScriptHeaderId(tInstanceRecord* obj, int i)
 {
-    return cWScriptCacheEntry_getWScriptHeaderId(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)&obj->m_RID], obj, i);
+    return cWScriptCacheEntry_getWScriptHeaderId(&((cWorld_getWScriptHeaderId_sTable*)m_pWScriptCache)->entries[*(unsigned char*)&obj->m_RID], obj, i);
 }
 #endif
 
@@ -378,9 +377,9 @@ extern "C" int cWScriptCacheEntry_getNumGlobalScripts(cWorld_getNumGlobalScripts
  * @param i  section id
  * @return the number of global scripts
  */
-extern "C" int cWorld_getNumGlobalScripts(cWorld* self, int i)
+int cWorld::getNumGlobalScripts(int i)
 {
-    return cWScriptCacheEntry_getNumGlobalScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getNumGlobalScripts(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -395,9 +394,9 @@ extern "C" int cWScriptCacheEntry_getGlobalScripts(cWorld_getNumGlobalScripts_sE
  * @param i  section id
  * @return the global script records (On Tour const tWScriptGlobalData*)
  */
-extern "C" int cWorld_getGlobalScripts(cWorld* self, int i)
+int cWorld::getGlobalScripts(int i)
 {
-    return cWScriptCacheEntry_getGlobalScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getGlobalScripts(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -413,9 +412,9 @@ extern "C" int cWScriptCacheEntry_getNumProcessScripts(cWorld_getNumGlobalScript
  * @return the entry data's count at offset 0x28, or 0 when the entry's state is not 3 (probably loaded) or it has
  *         no data
  */
-extern "C" int cWorld_getNumProcessScripts(cWorld* self, int i)
+int cWorld::getNumProcessScripts(int i)
 {
-    return cWScriptCacheEntry_getNumProcessScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getNumProcessScripts(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -431,9 +430,9 @@ extern "C" int cWScriptCacheEntry_getProcessScripts(cWorld_getNumGlobalScripts_s
  * @return the entry data's word at offset 0x2C, or 0 when the entry's state is not 3 (probably loaded) or it has
  *         no data
  */
-extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
+int cWorld::getProcessScripts(int i)
 {
-    return cWScriptCacheEntry_getProcessScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getProcessScripts(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -448,9 +447,9 @@ extern "C" int cWScriptCacheEntry_getNumMissionScripts(cWorld_getNumGlobalScript
  * @param i  section id
  * @return the number of mission scripts
  */
-extern "C" int cWorld_getNumMissionScripts(cWorld* self, int i)
+int cWorld::getNumMissionScripts(int i)
 {
-    return cWScriptCacheEntry_getNumMissionScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getNumMissionScripts(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -465,9 +464,9 @@ extern "C" int cWScriptCacheEntry_getMissionScripts(cWorld_getNumGlobalScripts_s
  * @param i  section id
  * @return the mission script records (On Tour const tWScriptMissionData*)
  */
-extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
+int cWorld::getMissionScripts(int i)
 {
-    return cWScriptCacheEntry_getMissionScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getMissionScripts(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -517,9 +516,9 @@ INCLUDE_ASM("world/world", tSphTreeList_getMeshTree);
  * @param meshNum  mesh index (On Tour meshNum)
  * @return the tree at index @p meshNum of the array at +0x0 (0x140 bytes each)
  */
-extern "C" void* tSphTreeList_getMeshTree(tSphTreeList* self, int meshNum)
+void* tSphTreeList::getMeshTree(int meshNum)
 {
-    return &self->MeshTree[meshNum];
+    return &MeshTree[meshNum];
 }
 #endif
 
@@ -549,10 +548,10 @@ extern "C" int cWScriptCacheEntry_getWScriptScript(cWorld_getNumGlobalScripts_sE
  * @param handle  the script's resource id (On Tour const tResourceID&)
  * @return the script code (On Tour const char*)
  */
-extern "C" int cWorld_getWScriptScript(cWorld* self, unsigned int* handle)
+int cWorld::getWScriptScript(unsigned int* handle)
 {
     unsigned int packed = *handle;
-    return cWScriptCacheEntry_getWScriptScript(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[packed & 0xFF], packed >> 8);
+    return cWScriptCacheEntry_getWScriptScript(&((cWorld_getNumGlobalScripts_sTable*)m_pWScriptCache)->entries[packed & 0xFF], packed >> 8);
 }
 #endif
 

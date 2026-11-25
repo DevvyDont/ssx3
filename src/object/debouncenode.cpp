@@ -257,12 +257,12 @@ extern char cConveyorNode_vtbl[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket, cBxReplayFrame* stream)
+void* cConveyorNode::cConveyorNode1(void* bucket, cBxReplayFrame* stream)
 {
-    cInstanceNode_cInstanceNode(self, bucket, stream);
-    VPTR_OF(cObjNode, self) = (void**)cConveyorNode_vtbl;
-    stream->read((char*)&self->Vel, 44);
-    return ((void*)self);
+    cInstanceNode_cInstanceNode(this, bucket, stream);
+    VPTR_OF(cObjNode, this) = (void**)cConveyorNode_vtbl;
+    stream->read((char*)&Vel, 44);
+    return ((void*)this);
 }
 #endif
 
@@ -697,13 +697,13 @@ extern char cCounterNode_vtbl[];
  * @param counterData  counter make-data (StartCount at +0x4)
  * @return self
  */
-extern "C" void* cCounterNode_cCounterNode1(cCounterNode* self, void* bucket, void* inst, tMakeCounterData* counterData)
+void* cCounterNode::cCounterNode1(void* bucket, void* inst, tMakeCounterData* counterData)
 {
-    cInstanceNode_cInstanceNode1(self, bucket, 7, inst);
-    VPTR_OF(cObjNode, self) = (void**)cCounterNode_vtbl;
-    self->Count = counterData->StartCount;
-    self->Counted = 0;
-    return ((void*)self);
+    cInstanceNode_cInstanceNode1(this, bucket, 7, inst);
+    VPTR_OF(cObjNode, this) = (void**)cCounterNode_vtbl;
+    Count = counterData->StartCount;
+    Counted = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -2179,13 +2179,13 @@ static inline tSplineRecord* splineRecord(const unsigned int& id)
  *
  * @param id  resource id of the spline (low 8 bits: resource set, >> 8: index)
  */
-extern "C" void cSpline_init(cSpline* self, unsigned int id)
+void cSpline::init(unsigned int id)
 {
-    self->SplineId = id;
-    tSplineRecord* spline = splineRecord(self->SplineId);
-    self->Seg = spline->m_HeaderSeg;
-    self->SegIndex = 0;
-    self->Length = cSpline_calcLength((cSpline*)self);
+    SplineId = id;
+    tSplineRecord* spline = splineRecord(SplineId);
+    Seg = spline->m_HeaderSeg;
+    SegIndex = 0;
+    Length = cSpline_calcLength((cSpline*)this);
 }
 #endif
 
@@ -2214,28 +2214,28 @@ static inline float ftrunc_00345248(float x)
  * @param vel  receives the direction
  * @param acc  receives the direction's derivative (On Tour dDir)
  */
-extern "C" void cSpline_getPos(cSpline* self, float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc)
+void cSpline::getPos(float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc)
 {
-    float len = self->Length;
+    float len = Length;
     float laps = distance / len;
     float wholeLaps = ftrunc_00345248(laps);
     if (laps < wholeLaps) {
         wholeLaps -= 1.0f;
     }
     distance -= wholeLaps * len;
-    while (distance < self->Seg->m_fDistance && self->Seg->m_PrevSeg != 0) {
-        tSplineSegmentRecord* prev = self->Seg->m_PrevSeg;
-        self->SegIndex--;
-        self->Seg = prev;
+    while (distance < Seg->m_fDistance && Seg->m_PrevSeg != 0) {
+        tSplineSegmentRecord* prev = Seg->m_PrevSeg;
+        SegIndex--;
+        Seg = prev;
     }
-    tSplineSegmentRecord* next = self->Seg->m_NextSeg;
+    tSplineSegmentRecord* next = Seg->m_NextSeg;
     while (next != 0 && next->m_fDistance <= distance) {
-        tSplineSegmentRecord* following = self->Seg->m_NextSeg;
-        self->SegIndex++;
-        self->Seg = following;
-        next = self->Seg->m_NextSeg;
+        tSplineSegmentRecord* following = Seg->m_NextSeg;
+        SegIndex++;
+        Seg = following;
+        next = Seg->m_NextSeg;
     }
-    cSplineSegment_getPos((sDebCurve*)self->Seg, distance, pos, vel, acc);
+    cSplineSegment_getPos((sDebCurve*)Seg, distance, pos, vel, acc);
 }
 #endif
 
@@ -2250,9 +2250,9 @@ INCLUDE_ASM("object/debouncenode", cSpline_isVisible);
  *
  * @return 1 unless the cull test returns 1 (fully outside)
  */
-extern "C" int cSpline_isVisible(cSpline* self)
+int cSpline::isVisible()
 {
-    tSplineRecord* spline = splineRecord(self->SplineId);
+    tSplineRecord* spline = splineRecord(SplineId);
     t4Vector box[2];
     box[0].x = spline->m_fvMin.m[0];
     box[0].y = spline->m_fvMin.m[1];
@@ -2376,10 +2376,10 @@ struct sCtl00345430 {
  *
  * @param lineColour  address of the colour to draw with (cSplineModifier passes its +0x20)
  */
-extern "C" void cSpline_draw(cSpline* self, int lineColour)
+void cSpline::draw(int lineColour)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    tSplineRecord* list = (tSplineRecord*)self->Seg->m_Parent;
+    tSplineRecord* list = (tSplineRecord*)Seg->m_Parent;
     int n = list->m_iNumSegments;
     tSplineSegmentRecord* node = list->m_HeaderSeg;
     (((sCtl00345430*)w->m_pCurrentDrawState))->f10 = -1;

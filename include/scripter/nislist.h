@@ -94,6 +94,8 @@ enum eNISListStatePlay {
     keNISListStatePlay_GoingToStop = 5
 };
 
+struct cScriptPlayerMain;
+
 struct tNISList {
     cSSXScriptEngine* mpNISEngine;      // 0x000 [O]; [R] the ctor zeroes it, cSSXScriptEngine_Load stores the engine;
                                         //       [U] read by every method that calls the engine (e.g. DoSkip)
@@ -121,6 +123,43 @@ struct tNISList {
     int mNumPause;                      // 0x0C4 [O]; [U] DoPause counts it up and down
     int mDoSkip;                        // 0x0C8 [O] (On Tour 0xC0); [U] DoSkip tests and sets it (On Tour's DoSkip
                                         //       lw/sw 0xC0 at the same statements)
+
+    // Methods bound to their retail symbols by asm labels.
+    int AddByVideoCategory(int videoCategory, int controlBits) __asm__("tNISList_AddByVideoCategory");
+    int AddByScriptCategory(int scriptCategory, int controlBits, int lookup, int aiCharIndexMain,
+                            int aiCharIndexSupport0, int aiCharIndexSupport1)
+        __asm__("tNISList_AddByScriptCategory");
+    int AddByScriptIndex(int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0,
+                         int aiCharIndexSupport1)
+        __asm__("tNISList_AddByScriptIndex");
+    int TransferFromNISList(tNISList* other) __asm__("tNISList_TransferFromNISList");
+    int ReadyList(int playOnReady) __asm__("tNISList_ReadyList");
+    int SkipForward(int delta, int force) __asm__("tNISList_SkipForward");
+    void Reset(int resetTransition) __asm__("tNISList_Reset");
+    int GetScriptCategory(int i) __asm__("tNISList_GetScriptCategory");
+    int GetVideoCategory(int i) __asm__("tNISList_GetVideoCategory");
+    int GetScriptIndex(int i) __asm__("tNISList_GetScriptIndex");
+    void* GetScriptPlayer(int i) __asm__("tNISList_GetScriptPlayer");
+    int GetState() __asm__("tNISList_GetState");
+    int GetPlayState() __asm__("tNISList_GetPlayState");
+    void DoSkip() __asm__("tNISList_DoSkip");
+    int IsSkipAllowed() __asm__("tNISList_IsSkipAllowed");
+    int IsPauseMenuAllowed() __asm__("tNISList_IsPauseMenuAllowed");
+    int IsPendingScriptReady() __asm__("tNISList_IsPendingScriptReady");
+    int IsPlayingScriptOwner(cScriptPlayerMain* obj) __asm__("tNISList_IsPlayingScriptOwner");
+    int IsPlayingVideo() __asm__("tNISList_IsPlayingVideo");
+    int IsPausedPendingNextScript() __asm__("tNISList_IsPausedPendingNextScript");
+    void OnScriptPlay(int requestHandle, cScriptPlayerMain* obj) __asm__("tNISList_OnScriptPlay");
+    void OnScriptUpdate(int requestHandle, cScriptPlayerMain* obj) __asm__("tNISList_OnScriptUpdate");
+    void OnScriptStopping(int requestHandle, cScriptPlayerMain* obj) __asm__("tNISList_OnScriptStopping");
+    void OnScriptStop(int requestHandle, cScriptPlayerMain* obj) __asm__("tNISList_OnScriptStop");
+    int SetupNextScript(int index, int skipFlagged) __asm__("tNISList_SetupNextScript");
+    void RemoveFromHead(int n) __asm__("tNISList_RemoveFromHead");
+    void WaitOnPendingNextScript() __asm__("tNISList_WaitOnPendingNextScript");
+    void CheckOnLoading() __asm__("tNISList_CheckOnLoading");
+    void PlayNextScriptOnAvailable() __asm__("tNISList_PlayNextScriptOnAvailable");
+    void PlayNextScript() __asm__("tNISList_PlayNextScript");
+    int IsVideo(void* entry) __asm__("tNISList_IsVideo");
 };
 
 CHECK_OFFSET(tNISList, mpNISEngine, 0x000);

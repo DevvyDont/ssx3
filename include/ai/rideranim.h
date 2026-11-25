@@ -30,6 +30,9 @@ struct cAnimModel;
 struct cRider;
 struct cFERider;
 
+struct cAnimSequence;
+struct cBxReplayFrame;
+
 struct cRiderAnim {
     // --- cRiderAnimBase (animation/rideranimbase.h; ctor cRiderAnimBase_cRiderAnimBase, methods in
     //       animation/rideranimbase)
@@ -63,6 +66,47 @@ struct cRiderAnim {
                                     //       (cRiderAnim_linkToFERider) sets it, linkToRider clears it; mapAIDToGAD reads +0xCD8
                                     //       through it; onExpireBLENDTO_AIR tests it
     char unk_068[0x8];              // 0x068 tail padding to the 16-byte-aligned size 0x70 (never accessed)
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateRule(void* x, int* anim, float dt) __asm__("cRiderAnim_updateRule");
+    void expireRule(cAnimSequencer* ev, int* data) __asm__("cRiderAnim_expireRule");
+    void checkForSoundEvents(cAnimSequence* sequence) __asm__("cRiderAnim_checkForSoundEvents");
+    int updatePosNegSlider(void* x, cAnimSequence* anim, int posAnim, int negAnim, float dt, float weight)
+        __asm__("cRiderAnim_updatePosNegSlider");
+    int update3Cycle(void* x, cAnimSequence* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
+        __asm__("cRiderAnim_update3Cycle");
+    int update5Cycle(void* x, cAnimSequence* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim,
+                     int posEndAnim, float dt, float weight)
+        __asm__("cRiderAnim_update5Cycle");
+    int updateIntoCycle(void* x, cAnimSequence* anim, int intoAnim, float dt, int cycleAnim)
+        __asm__("cRiderAnim_updateIntoCycle");
+    int onUpdateASYNC_CRUISE3(void *sequencer, int *sequence, float deltaTime)
+        __asm__("cRiderAnim_onUpdateASYNC_CRUISE3");
+    int onUpdateASYNC_CRUISE5(void* x, int* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_CRUISE5");
+    void onUpdateASYNC_RAIL(void *sequencer, int *sequence, float deltaTime) __asm__("cRiderAnim_onUpdateASYNC_RAIL");
+    void onUpdateASYNC_BRAKE(void *sequencer, char *sequence, float dt) __asm__("cRiderAnim_onUpdateASYNC_BRAKE");
+    int onUpdateASYNC_UBERGRIND(void *sequencer, int *sequence, float deltaTime)
+        __asm__("cRiderAnim_onUpdateASYNC_UBERGRIND");
+    int onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_PREWIND");
+    int onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_ADJ");
+    int onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_GATEROCK");
+    int onUpdateASYNC_HANDPLANT(void *sequencer, int *sequence, float deltaTime)
+        __asm__("cRiderAnim_onUpdateASYNC_HANDPLANT");
+    int onUpdateASYNC_BP_BAL(void* x, int* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_BAL");
+    int onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_INTO");
+    int onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_PIVOT");
+    int onUpdateFWD(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateFWD");
+    int onUpdateHOLD_LAST(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateHOLD_LAST");
+    int onUpdateCYCLE(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateCYCLE");
+    int onExpireINTO_SPIN_CYC(void* sequencer, int* sequence) __asm__("cRiderAnim_onExpireINTO_SPIN_CYC");
+    int onExpireBLENDTO_AIR(int sequencer, int sequence) __asm__("cRiderAnim_onExpireBLENDTO_AIR");
+    int onExpireINTO_PRESS(int sequencer, int sequence) __asm__("cRiderAnim_onExpireINTO_PRESS");
+    void triggerAnimSound(int soundId) __asm__("cRiderAnim_triggerAnimSound");
+    void mapAIDToGAD(int aid) __asm__("cRiderAnim_mapAIDToGAD");
+    void linkToRider(cRider* rider) __asm__("cRiderAnim_linkToRider");
+    void linkToFERider(cFERider* feRider) __asm__("cRiderAnim_linkToFERider");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cRiderAnim_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cRiderAnim_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cRiderAnim, CurrentAnimID, 0x000);

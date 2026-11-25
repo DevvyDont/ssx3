@@ -180,11 +180,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_GetObjectID);
 /**
  * Returns the object ID, the word at +0x4 of a script object (On Tour's cScriptObject::mObjID).
  *
- * @param scriptObject  the script object
  * @return its object ID
  */
-extern "C" int cScriptObject_GetObjectID(cScriptObject* scriptObject) {
-    return (scriptObject->mObjID);
+int cScriptObject::GetObjectID()
+{
+    return (mObjID);
 }
 #endif
 
@@ -194,11 +194,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_IsInUse);
 /**
  * Returns whether a script object is in use: 1 when its use count (+0x8, On Tour's cScriptObject::mInUse) is above 0.
  *
- * @param scriptObject  the script object
  * @return 1 if in use, else 0
  */
-extern "C" int cScriptObject_IsInUse(cScriptObject* scriptObject) {
-    return (scriptObject->mInUse) > 0;
+int cScriptObject::IsInUse()
+{
+    return (mInUse) > 0;
 }
 #endif
 
@@ -266,11 +266,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_GetScriptDatabaseSiz
 /**
  * Returns the engine's mScriptDatabaseSize (+0x2B4), the script slot count SetupBXEngine stores.
  *
- * @param bxEngine  the script engine (cSSXScriptEngine)
  * @return mScriptDatabaseSize
  */
-extern "C" int cBXScriptEngine_GetScriptDatabaseSize(cBXScriptEngine* bxEngine) {
-    return (bxEngine->mScriptDatabaseSize);
+int cBXScriptEngine::GetScriptDatabaseSize()
+{
+    return (mScriptDatabaseSize);
 }
 #endif
 
@@ -324,11 +324,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetPlayer);
 /**
  * Returns the InSeq player entity (+0x8, On Tour's cScriptEntity::mpEntity) a script entity is bound to.
  *
- * @param entity  the script entity
  * @return its player entity
  */
-extern "C" int cScriptEntity_GetPlayer(cScriptEntity* entity) {
-    return ((int)entity->mpEntity);
+int cScriptEntity::GetPlayer()
+{
+    return ((int)mpEntity);
 }
 #endif
 
@@ -338,11 +338,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetDatabaseID);
 /**
  * Returns a script entity's database ID (+0x4, On Tour's cScriptEntity::mDBID).
  *
- * @param entity  the script entity
  * @return its database ID
  */
-extern "C" int cScriptEntity_GetDatabaseID(cScriptEntity* entity) {
-    return (entity->mDBID);
+int cScriptEntity::GetDatabaseID()
+{
+    return (mDBID);
 }
 #endif
 
@@ -352,11 +352,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_SetDatabaseID);
 /**
  * Sets a script entity's database ID (+0x4, On Tour's cScriptEntity::mDBID).
  *
- * @param entity  the script entity
  * @param databaseId  the new database ID
  */
-extern "C" void cScriptEntity_SetDatabaseID(cScriptEntity* entity, int databaseId) {
-    entity->mDBID = databaseId;
+void cScriptEntity::SetDatabaseID(int databaseId)
+{
+    mDBID = databaseId;
 }
 #endif
 
@@ -366,10 +366,10 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_ClearDatabaseID);
 /**
  * Clears a script entity's database ID (+0x4, On Tour's cScriptEntity::mDBID) to -1.
  *
- * @param entity  the script entity
  */
-extern "C" void cScriptEntity_ClearDatabaseID(cScriptEntity* entity) {
-    entity->mDBID = -1;
+void cScriptEntity::ClearDatabaseID()
+{
+    mDBID = -1;
 }
 #endif
 
@@ -410,11 +410,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_SetCameraManager
 /**
  * Sets a camera script entity's camera manager (+0x10, On Tour's cScriptEntityCamera::mpCamManager).
  *
- * @param entityCamera  the camera script entity
  * @param camManager  the camera manager (cScriptObjCameraManager)
  */
-extern "C" void cScriptEntityCamera_SetCameraManager(cScriptEntityCamera* entityCamera, int camManager) {
-    entityCamera->mpCamManager = (cScriptObjCameraManager*)camManager;
+void cScriptEntityCamera::SetCameraManager(int camManager)
+{
+    mpCamManager = (cScriptObjCameraManager*)camManager;
 }
 #endif
 
@@ -424,11 +424,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_GetSubType);
 /**
  * Returns a camera script entity's sub-type (+0xC, On Tour's cScriptEntityCamera::mSubType).
  *
- * @param entityCamera  the camera script entity
  * @return its sub-type
  */
-extern "C" int cScriptEntityCamera_GetSubType(cScriptEntityCamera* entityCamera) {
-    return (entityCamera->mSubType);
+int cScriptEntityCamera::GetSubType()
+{
+    return (mSubType);
 }
 #endif
 
@@ -463,11 +463,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCameraManager_GetViewIndex
 /**
  * Returns a camera manager's view index (+0xF8; On Tour's cScriptObjCameraManager::mViewIndex).
  *
- * @param camManager  the camera manager
  * @return its view index
  */
-extern "C" int cScriptObjCameraManager_GetViewIndex(cScriptObjCameraManager* camManager) {
-    return (camManager->mViewIndex);
+int cScriptObjCameraManager::GetViewIndex()
+{
+    return (mViewIndex);
 }
 #endif
 
@@ -612,11 +612,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cVidEngine_IsVideoEnginePlaying);
 /**
  * Returns the video engine's mIsPlaying flag (+0x4 of the cVidEngine part; cVidEngine_PlayVideo sets it).
  *
- * @param vidEngine  the cVidEngine part of the script engine
  * @return mIsPlaying
  */
-extern "C" int cVidEngine_IsVideoEnginePlaying(cVidEngine* vidEngine) {
-    return (vidEngine->mIsPlaying);
+int cVidEngine::IsVideoEnginePlaying()
+{
+    return (mIsPlaying);
 }
 #endif
 
@@ -626,11 +626,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_IsNISActive);
 /**
  * Returns whether an NIS list is playing: mPlayingNISList (+0x550) is not 2, the constructor's "none" value.
  *
- * @param scriptEngine  the script engine
  * @return 1 if an NIS list is active, else 0
  */
-extern "C" int cSSXScriptEngine_IsNISActive(cSSXScriptEngine* scriptEngine) {
-    return (scriptEngine->mPlayingNISList) != 2;
+int cSSXScriptEngine::IsNISActive()
+{
+    return (mPlayingNISList) != 2;
 }
 #endif
 
@@ -640,11 +640,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_GetActiveNIS);
 /**
  * Returns the playing NIS list, mPlayingNISList (+0x550; 2 means none).
  *
- * @param scriptEngine  the script engine
  * @return mPlayingNISList
  */
-extern "C" int cSSXScriptEngine_GetActiveNIS(cSSXScriptEngine* scriptEngine) {
-    return (scriptEngine->mPlayingNISList);
+int cSSXScriptEngine::GetActiveNIS()
+{
+    return (mPlayingNISList);
 }
 #endif
 
@@ -706,11 +706,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraEntity);
 /**
  * Returns a script camera object's camera entity (+0x14, On Tour's cScriptObjCamera::mpCameraEntity).
  *
- * @param cameraObj  the camera object
  * @return its camera entity
  */
-extern "C" int cScriptObjCamera_GetCameraEntity(cScriptObjCamera* cameraObj) {
-    return ((int)cameraObj->mpCameraEntity);
+int cScriptObjCamera::GetCameraEntity()
+{
+    return ((int)mpCameraEntity);
 }
 #endif
 
@@ -720,11 +720,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraWeight);
 /**
  * Returns a script camera object's weight (float +0x18, On Tour's cScriptObjCamera::mWeight).
  *
- * @param cameraObj  the camera object
  * @return its weight
  */
-extern "C" float cScriptObjCamera_GetCameraWeight(cScriptObjCamera* cameraObj) {
-    return (cameraObj->mWeight);
+float cScriptObjCamera::GetCameraWeight()
+{
+    return (mWeight);
 }
 #endif
 
@@ -748,11 +748,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotX);
 /**
  * Returns a script camera object's base X rotation (float +0x70, On Tour's mBaseRotX).
  *
- * @param cameraObj  the camera object
  * @return its base X rotation
  */
-extern "C" float cScriptObjCamera_GetBaseRotX(cScriptObjCamera* cameraObj) {
-    return (cameraObj->mBaseRotX);
+float cScriptObjCamera::GetBaseRotX()
+{
+    return (mBaseRotX);
 }
 #endif
 
@@ -762,11 +762,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotY);
 /**
  * Returns a script camera object's base Y rotation (float +0x74, On Tour's mBaseRotY).
  *
- * @param cameraObj  the camera object
  * @return its base Y rotation
  */
-extern "C" float cScriptObjCamera_GetBaseRotY(cScriptObjCamera* cameraObj) {
-    return (cameraObj->mBaseRotY);
+float cScriptObjCamera::GetBaseRotY()
+{
+    return (mBaseRotY);
 }
 #endif
 
@@ -776,11 +776,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotZ);
 /**
  * Returns a script camera object's base Z rotation (float +0x78, On Tour's mBaseRotZ).
  *
- * @param cameraObj  the camera object
  * @return its base Z rotation
  */
-extern "C" float cScriptObjCamera_GetBaseRotZ(cScriptObjCamera* cameraObj) {
-    return (cameraObj->mBaseRotZ);
+float cScriptObjCamera::GetBaseRotZ()
+{
+    return (mBaseRotZ);
 }
 #endif
 
@@ -790,11 +790,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetViewIndex);
 /**
  * Returns a script camera object's view index (+0x7C, On Tour's cScriptObjCamera::mViewIndex).
  *
- * @param cameraObj  the camera object
  * @return its view index
  */
-extern "C" int cScriptObjCamera_GetViewIndex(cScriptObjCamera* cameraObj) {
-    return (cameraObj->mViewIndex);
+int cScriptObjCamera::GetViewIndex()
+{
+    return (mViewIndex);
 }
 #endif
 
@@ -804,11 +804,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraManager);
 /**
  * Returns a script camera object's camera manager (+0x10, On Tour's cScriptObjCamera::mpCameraManager).
  *
- * @param cameraObj  the camera object
  * @return its camera manager
  */
-extern "C" int cScriptObjCamera_GetCameraManager(cScriptObjCamera* cameraObj) {
-    return ((int)cameraObj->mpCameraManager);
+int cScriptObjCamera::GetCameraManager()
+{
+    return ((int)mpCameraManager);
 }
 #endif
 
@@ -850,11 +850,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_SetCameraAlgorithm)
 /**
  * Sets a script camera object's camera algorithm (+0x1C, On Tour's cScriptObjCamera::mpCameraAlgorithm).
  *
- * @param cameraObj  the camera object
  * @param algorithm  the camera algorithm
  */
-extern "C" void cScriptObjCamera_SetCameraAlgorithm(cScriptObjCamera* cameraObj, int algorithm) {
-    cameraObj->mpCameraAlgorithm = (cScriptAlgorithm*)algorithm;
+void cScriptObjCamera::SetCameraAlgorithm(int algorithm)
+{
+    mpCameraAlgorithm = (cScriptAlgorithm*)algorithm;
 }
 #endif
 
@@ -864,11 +864,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraAlgorithm)
 /**
  * Returns a script camera object's camera algorithm (+0x1C, On Tour's cScriptObjCamera::mpCameraAlgorithm).
  *
- * @param cameraObj  the camera object
  * @return its camera algorithm
  */
-extern "C" int cScriptObjCamera_GetCameraAlgorithm(cScriptObjCamera* cameraObj) {
-    return ((int)cameraObj->mpCameraAlgorithm);
+int cScriptObjCamera::GetCameraAlgorithm()
+{
+    return ((int)mpCameraAlgorithm);
 }
 #endif
 
@@ -909,11 +909,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetCameraManage
 /**
  * Returns a script transition object's camera manager (+0x10, On Tour's cScriptObjTransition::mpCameraManager).
  *
- * @param transitionObj  the transition object
  * @return its camera manager
  */
-extern "C" int cScriptObjTransition_GetCameraManager(cScriptObjTransition* transitionObj) {
-    return ((int)transitionObj->mpCameraManager);
+int cScriptObjTransition::GetCameraManager()
+{
+    return ((int)mpCameraManager);
 }
 #endif
 
@@ -1024,11 +1024,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotX);
 /**
  * Returns a script rider object's base X rotation (float +0x70, On Tour's cScriptObjRider::mBaseRotX).
  *
- * @param riderObject  the rider script object
  * @return its base X rotation
  */
-extern "C" float cScriptObjRider_GetBaseRotX(cScriptObjRider* riderObject) {
-    return (riderObject->mBaseRotX);
+float cScriptObjRider::GetBaseRotX()
+{
+    return (mBaseRotX);
 }
 #endif
 
@@ -1038,11 +1038,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotY);
 /**
  * Returns a script rider object's base Y rotation (float +0x74, On Tour's cScriptObjRider::mBaseRotY).
  *
- * @param riderObject  the rider script object
  * @return its base Y rotation
  */
-extern "C" float cScriptObjRider_GetBaseRotY(cScriptObjRider* riderObject) {
-    return (riderObject->mBaseRotY);
+float cScriptObjRider::GetBaseRotY()
+{
+    return (mBaseRotY);
 }
 #endif
 
@@ -1052,11 +1052,11 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotZ);
 /**
  * Returns a script rider object's base Z rotation (float +0x78, On Tour's cScriptObjRider::mBaseRotZ).
  *
- * @param riderObject  the rider script object
  * @return its base Z rotation
  */
-extern "C" float cScriptObjRider_GetBaseRotZ(cScriptObjRider* riderObject) {
-    return (riderObject->mBaseRotZ);
+float cScriptObjRider::GetBaseRotZ()
+{
+    return (mBaseRotZ);
 }
 #endif
 

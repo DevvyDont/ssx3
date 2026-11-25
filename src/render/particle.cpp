@@ -45,13 +45,13 @@ struct t4VectorElem : t4Vector {
  * The count is m_numSubEmitters; positions go to m_positions ("DynEmitterData Positions") and velocities to
  * m_velocities ("DynEmitterData Velocities").
  */
-extern "C" void cBaseClass_DynamicEmitter_Allocate(cBaseClass_DynamicEmitter* self)
+void cBaseClass_DynamicEmitter::Allocate()
 {
     // each destination's address is taken before its allocation, as in retail
-    t4Vector** positions = &self->m_positions;
-    *positions = new (str_DynEmitterData_Positions, 0, 0) t4VectorElem[self->m_numSubEmitters];
-    t4Vector** velocities = &self->m_velocities;
-    *velocities = new (str_DynEmitterData_Velocities, 0, 0) t4VectorElem[self->m_numSubEmitters];
+    t4Vector** positions = &m_positions;
+    *positions = new (str_DynEmitterData_Positions, 0, 0) t4VectorElem[m_numSubEmitters];
+    t4Vector** velocities = &m_velocities;
+    *velocities = new (str_DynEmitterData_Velocities, 0, 0) t4VectorElem[m_numSubEmitters];
 }
 #endif
 
@@ -66,19 +66,19 @@ void cMemMan_free(void* p);
  *
  * @param reset  non-zero to reset the emitter as well (On Tour resetEmitter)
  */
-extern "C" void cBaseClass_DynamicEmitter_purge(cBaseClass_DynamicEmitter* self, int reset)
+void cBaseClass_DynamicEmitter::purge(int reset)
 {
-    if (self->m_positions != 0) {
-        cMemMan_free(self->m_positions);
-        self->m_positions = 0;
+    if (m_positions != 0) {
+        cMemMan_free(m_positions);
+        m_positions = 0;
     }
-    if (self->m_velocities != 0) {
-        cMemMan_free(self->m_velocities);
-        self->m_velocities = 0;
+    if (m_velocities != 0) {
+        cMemMan_free(m_velocities);
+        m_velocities = 0;
     }
     if (reset) {
-        self->m_initialized = 0;
-        self->m_numSubEmitters = -1;
+        m_initialized = 0;
+        m_numSubEmitters = -1;
     }
 }
 #endif
@@ -95,15 +95,15 @@ extern t4Vector t4vect_Zero;
  * For each of the m_numSubEmitters entries, m_positions[i] and m_velocities[i] are set to zero; m_subEmitterId and
  * m_enabledCount are cleared.
  */
-extern "C" void cBaseClass_DynamicEmitter_reset(cBaseClass_DynamicEmitter* self)
+void cBaseClass_DynamicEmitter::reset()
 {
     int i;
-    self->m_subEmitterId = 0;
-    for (i = 0; i < self->m_numSubEmitters; i++) {
-        self->m_positions[i] = t4vect_Zero;
-        self->m_velocities[i] = t4vect_Zero;
-        self->m_subEmitterId = 0;
-        self->m_enabledCount = 0;
+    m_subEmitterId = 0;
+    for (i = 0; i < m_numSubEmitters; i++) {
+        m_positions[i] = t4vect_Zero;
+        m_velocities[i] = t4vect_Zero;
+        m_subEmitterId = 0;
+        m_enabledCount = 0;
     }
 }
 #endif
@@ -183,52 +183,52 @@ static inline float start_00370DC8(char* vdef)
  * @param def  the particle data (const tParticleData*)
  * @param seed    the random seed passed on to tParticleEmitter_setupEmitter (-1.0 from the effect modifiers)
  */
-extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cBaseClass_DynamicEmitter* self, tParticleData* def, float seed)
+void cBaseClass_DynamicEmitter::setupEmitter(tParticleData* def, float seed)
 {
     int n = def->NumFlipTextures;
-    self->mNumFlipTextures = n;
-    self->mFlipTextureRate = def->FlipTextureRate;
+    mNumFlipTextures = n;
+    mFlipTextureRate = def->FlipTextureRate;
     if (n >= 2) {
         float fn = (float)n;
-        self->mCurrentFlipTexture = fn * randf_00370DC8();
+        mCurrentFlipTexture = fn * randf_00370DC8();
     } else {
-        self->mCurrentFlipTexture = 0.0f;
+        mCurrentFlipTexture = 0.0f;
     }
-    self->TextureId = def->TextureId;
-    self->BlendMode = def->BlendMode;
-    self->Duration = start_00370DC8(((char*)def));
+    TextureId = def->TextureId;
+    BlendMode = def->BlendMode;
+    Duration = start_00370DC8(((char*)def));
     int changed = 0;
     float frames = life_00370DC8(((char*)def)) * 60.0f;
-    if (self->m_numSubEmitters != (int)fceil_00370DC8(frames)) {
-        self->m_numSubEmitters = (int)fceil_00370DC8(frames);
+    if (m_numSubEmitters != (int)fceil_00370DC8(frames)) {
+        m_numSubEmitters = (int)fceil_00370DC8(frames);
         changed = 1;
     }
-    self->m_currPosition = t4vect_Zero;
-    self->m_currVelocity = t4vect_Zero;
-    self->m_currColour = t4vect_Zero;
+    m_currPosition = t4vect_Zero;
+    m_currVelocity = t4vect_Zero;
+    m_currColour = t4vect_Zero;
     float life = life_00370DC8(((char*)def));
     t4Vector force;
     force.x = def->ForceX;
     force.y = def->ForceY;
     force.z = def->ForceZ;
     force.w = 0.0f;
-    tParticleEmitter_init(&self->m_emitter, def->NumParticles * self->m_numSubEmitters, def->NumBlur, &force, life,
+    tParticleEmitter_init(&m_emitter, def->NumParticles * m_numSubEmitters, def->NumBlur, &force, life,
                   def->BlurStep, def->Damp);
-    tParticleEmitter_setupEmitter(&self->m_emitter, &t4mat_Identity, def, &self->m_boundBox, seed);
+    tParticleEmitter_setupEmitter(&m_emitter, &t4mat_Identity, def, &m_boundBox, seed);
     if (changed) {
-        tEmitterPurgeSlot* purgeSlot = (tEmitterPurgeSlot*)self->mVtbl;
-        purgeSlot[1].fn(vthis(self, purgeSlot[1]), 0);
-        tEmitterSlot* vt = (tEmitterSlot*)self->mVtbl;
-        vt[5].fn(vthis(self, vt[5]));
-        tEmitterSlot* vtReset = (tEmitterSlot*)self->mVtbl;
-        vtReset[2].fn(vthis(self, vtReset[2]));
+        tEmitterPurgeSlot* purgeSlot = (tEmitterPurgeSlot*)mVtbl;
+        purgeSlot[1].fn(vthis(this, purgeSlot[1]), 0);
+        tEmitterSlot* vt = (tEmitterSlot*)mVtbl;
+        vt[5].fn(vthis(this, vt[5]));
+        tEmitterSlot* vtReset = (tEmitterSlot*)mVtbl;
+        vtReset[2].fn(vthis(this, vtReset[2]));
     }
-    self->m_initialized = 1;
-    self->mDrawState = sDrawState_s_defaultDrawState_0DC8;
-    setDrawStateBits(self->mDrawState.m_bitGroups[1], 0x400000, 22, 1);
-    setDrawStateBits(self->mDrawState.m_bitGroups[1], 0x300000, 20, 0);
-    setDrawStateBits(self->mDrawState.m_bitGroups[1], 0x3, 0, 2);
-    setDrawStateBits(self->mDrawState.m_bitGroups[2], 0x1FFFFC00, 10, 0);
+    m_initialized = 1;
+    mDrawState = sDrawState_s_defaultDrawState_0DC8;
+    setDrawStateBits(mDrawState.m_bitGroups[1], 0x400000, 22, 1);
+    setDrawStateBits(mDrawState.m_bitGroups[1], 0x300000, 20, 0);
+    setDrawStateBits(mDrawState.m_bitGroups[1], 0x3, 0, 2);
+    setDrawStateBits(mDrawState.m_bitGroups[2], 0x1FFFFC00, 10, 0);
 }
 #endif
 
@@ -337,7 +337,7 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_writeToReplayFrame);
  *
  * @param stream  the replay frame to write to (On Tour data)
  */
-extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicEmitter* self, cBxReplayFrame* stream)
+void cBaseClass_DynamicEmitter::writeToReplayFrame(cBxReplayFrame* stream)
 {
     struct {
         float duration;
@@ -346,11 +346,11 @@ extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicE
         int initialized;
         int subEmitterId;
     } buf;
-    buf.duration = self->Duration;
-    buf.endTime = self->m_emitter.EndTime;
-    buf.initialized = self->m_initialized;
-    buf.enabled = self->m_enabled;
-    buf.subEmitterId = self->m_subEmitterId;
+    buf.duration = Duration;
+    buf.endTime = m_emitter.EndTime;
+    buf.initialized = m_initialized;
+    buf.enabled = m_enabled;
+    buf.subEmitterId = m_subEmitterId;
     stream->write((const char*)&buf, 20);
 }
 #endif
@@ -364,7 +364,7 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_readFromReplayFrame);
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_DynamicEmitter* self, cBxReplayFrame* stream)
+void cBaseClass_DynamicEmitter::readFromReplayFrame(cBxReplayFrame* stream)
 {
     struct {
         float duration;
@@ -374,11 +374,11 @@ extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_Dynamic
         int subEmitterId;
     } buf;
     stream->read((char*)&buf, 20);
-    self->Duration = buf.duration;
-    self->m_emitter.EndTime = buf.endTime;
-    self->m_initialized = buf.initialized;
-    self->m_enabled = buf.enabled;
-    self->m_subEmitterId = buf.subEmitterId;
+    Duration = buf.duration;
+    m_emitter.EndTime = buf.endTime;
+    m_initialized = buf.initialized;
+    m_enabled = buf.enabled;
+    m_subEmitterId = buf.subEmitterId;
 }
 #endif
 
@@ -404,26 +404,26 @@ extern int gBlendTable[];
  *
  * @param blend  value for bits 5-9 of the draw state's word 2 (On Tour: drawLayer, an eGMDrawLayer)
  */
-extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
+void cDynamicEmitter::render(int blend)
 {
-    if (self->m_enabled == 0) {
+    if (m_enabled == 0) {
         return;
     }
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx;
-    if (self->m_enabledCount == 0) {
+    if (m_enabledCount == 0) {
         return;
     }
-    int tex = ctx->_EffectTexMap[self->TextureId + (int)self->mCurrentFlipTexture];
+    int tex = ctx->_EffectTexMap[TextureId + (int)mCurrentFlipTexture];
     if (tex < 0) {
         return;
     }
-    self->mDrawState.m_bitGroups[1] = (unsigned int)(((int)self->mDrawState.m_bitGroups[1] & ~0x7C) | ((gBlendTable[self->BlendMode] << 2) & 0x7C));
-    self->mDrawState.m_bitGroups[2] = (unsigned int)(((int)self->mDrawState.m_bitGroups[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
-    self->mDrawState.m_textureState.m_texid[0] = tex;
+    mDrawState.m_bitGroups[1] = (unsigned int)(((int)mDrawState.m_bitGroups[1] & ~0x7C) | ((gBlendTable[BlendMode] << 2) & 0x7C));
+    mDrawState.m_bitGroups[2] = (unsigned int)(((int)mDrawState.m_bitGroups[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
+    mDrawState.m_textureState.m_texid[0] = tex;
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
-    *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
-    ctx->RenderDynamicParticleEmitter((self));
+    *ctx->m_pCurrentDrawState = (*(&mDrawState));
+    ctx->RenderDynamicParticleEmitter((this));
     ctx->m_pCurrentDrawState--;
 }
 #endif
@@ -466,7 +466,7 @@ extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self,
 extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(cDynamicColourEmitter* self, int flags)
 {
     self->mVtbl = cDynamicColourEmitter_vtbl;
-    cDynamicColourEmitter_purge(self, 0);
+    self->purge(0);
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(self, flags);
 }
 #endif
@@ -483,11 +483,11 @@ extern char str_DynEmitterData_Colours[];
  *
  * The colours (4 bytes per sub-emitter, count at +0x178) go to +0x204, tagged "DynEmitterData Colours".
  */
-extern "C" void cDynamicColourEmitter_Allocate(cDynamicColourEmitter* self)
+void cDynamicColourEmitter::Allocate()
 {
-    tPackedRGBA** pc = (tPackedRGBA**)(&self->m_colours);
-    cBaseClass_DynamicEmitter_Allocate((cBaseClass_DynamicEmitter*)self);
-    *pc = new (str_DynEmitterData_Colours, 0, 0) tPackedRGBA[self->m_numSubEmitters];
+    tPackedRGBA** pc = (tPackedRGBA**)(&m_colours);
+    ((cBaseClass_DynamicEmitter*)this)->Allocate();
+    *pc = new (str_DynEmitterData_Colours, 0, 0) tPackedRGBA[m_numSubEmitters];
 }
 #endif
 
@@ -505,14 +505,14 @@ extern "C" void cBaseClass_DynamicEmitter_purge(cBaseClass_DynamicEmitter* self,
  *
  * @param resetEmitter  nonzero to also reset the emitter's count and state word
  */
-extern "C" void cDynamicColourEmitter_purge(cDynamicColourEmitter* self, int resetEmitter)
+void cDynamicColourEmitter::purge(int resetEmitter)
 {
-    void* colours = self->m_colours;
+    void* colours = m_colours;
     if (colours != 0) {
         cMemMan_free(colours);
-        self->m_colours = 0;
+        m_colours = 0;
     }
-    cBaseClass_DynamicEmitter_purge((cBaseClass_DynamicEmitter*)self, resetEmitter);
+    ((cBaseClass_DynamicEmitter*)this)->purge(resetEmitter);
 }
 #endif
 
@@ -533,11 +533,11 @@ extern int D_004A599C;
  *
  * The (0, 0, 0, 0) colour is a function-local static, constructed on first use.
  */
-extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
+void cDynamicColourEmitter::reset()
 {
     int i;
-    cBaseClass_DynamicEmitter_reset((cBaseClass_DynamicEmitter*)self);
-    for (i = 0; i < self->m_numSubEmitters; i++) {
+    ((cBaseClass_DynamicEmitter*)this)->reset();
+    for (i = 0; i < m_numSubEmitters; i++) {
         if (D_004A599C == 0) {
             D_004A5998 = 0;
             D_004A5999 = 0;
@@ -545,7 +545,7 @@ extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
             D_004A599B = 0;
             D_004A599C = 1;
         }
-        (self->m_colours)[i] = *(tPackedRGBA*)&D_004A5998;
+        m_colours[i] = *(tPackedRGBA*)&D_004A5998;
     }
 }
 #endif
@@ -571,26 +571,26 @@ extern int gBlendTable[];
  *
  * @param blend  the draw layer (On Tour drawLayer)
  */
-extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int blend)
+void cDynamicColourEmitter::render(int blend)
 {
-    if (self->m_enabled == 0) {
+    if (m_enabled == 0) {
         return;
     }
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx1688;
-    if (self->m_enabledCount == 0) {
+    if (m_enabledCount == 0) {
         return;
     }
-    int tex = ctx->_EffectTexMap[self->TextureId + (int)self->mCurrentFlipTexture];
+    int tex = ctx->_EffectTexMap[TextureId + (int)mCurrentFlipTexture];
     if (tex < 0) {
         return;
     }
-    self->mDrawState.m_bitGroups[1] = (unsigned int)(((int)self->mDrawState.m_bitGroups[1] & ~0x7C) | ((gBlendTable[self->BlendMode] << 2) & 0x7C));
-    self->mDrawState.m_bitGroups[2] = (unsigned int)(((int)self->mDrawState.m_bitGroups[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
-    self->mDrawState.m_textureState.m_texid[0] = tex;
+    mDrawState.m_bitGroups[1] = (unsigned int)(((int)mDrawState.m_bitGroups[1] & ~0x7C) | ((gBlendTable[BlendMode] << 2) & 0x7C));
+    mDrawState.m_bitGroups[2] = (unsigned int)(((int)mDrawState.m_bitGroups[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
+    mDrawState.m_textureState.m_texid[0] = tex;
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
-    *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
-    ctx->RenderDynamicParticleEmitter1((self));
+    *ctx->m_pCurrentDrawState = (*(&mDrawState));
+    ctx->RenderDynamicParticleEmitter1((this));
     ctx->m_pCurrentDrawState--;
 }
 #endif
@@ -626,18 +626,18 @@ static inline float clamp17C0(float v, float lo, float hi)
  * @param col  the colour (r, g, b, a floats) or 0 to keep the previous one
  * @param enable   nonzero to emit this frame (On Tour: bool enable)
  */
-extern "C" void cDynamicColourEmitter_update(cDynamicColourEmitter* self, int position, int velocity, t4Vector* col, int enable)
+void cDynamicColourEmitter::update(int position, int velocity, t4Vector* col, int enable)
 {
     if (col != 0) {
-        *(&self->m_currColour) = *col;
+        *(&m_currColour) = *col;
     } else {
-        col = (&self->m_currColour);
+        col = (&m_currColour);
     }
-    (self->m_colours)[self->m_subEmitterId].a = (int)clamp17C0(col->w * 255.0f, 0.0f, 255.0f);
-    (self->m_colours)[self->m_subEmitterId].r = (int)clamp17C0(col->x * 255.0f, 0.0f, 255.0f);
-    (self->m_colours)[self->m_subEmitterId].g = (int)clamp17C0(col->y * 255.0f, 0.0f, 255.0f);
-    (self->m_colours)[self->m_subEmitterId].b = (int)clamp17C0(col->z * 255.0f, 0.0f, 255.0f);
-    cBaseClass_DynamicEmitter_updateBASE(self, position, velocity, enable);
+    m_colours[m_subEmitterId].a = (int)clamp17C0(col->w * 255.0f, 0.0f, 255.0f);
+    m_colours[m_subEmitterId].r = (int)clamp17C0(col->x * 255.0f, 0.0f, 255.0f);
+    m_colours[m_subEmitterId].g = (int)clamp17C0(col->y * 255.0f, 0.0f, 255.0f);
+    m_colours[m_subEmitterId].b = (int)clamp17C0(col->z * 255.0f, 0.0f, 255.0f);
+    cBaseClass_DynamicEmitter_updateBASE(this, position, velocity, enable);
 }
 #endif
 
@@ -1217,7 +1217,7 @@ INCLUDE_ASM("render/particle", cTube_update__FPv);
  */
 void* cTube_update(void* self)
 {
-    return cSimpleTube_updateColours((cSimpleTube*)self);
+    return ((cSimpleTube*)self)->updateColours();
 }
 #endif
 
@@ -1288,7 +1288,7 @@ extern float cSimpleTube_updateColours_b;
  *
  * @return nothing meaningful: declared as returning void* but falls off the end without a return value
  */
-extern "C" void* cSimpleTube_updateColours(cSimpleTube* self)
+void* cSimpleTube::updateColours()
 {
     if (cSimpleTube_updateColours_r != (float)cTube_m_R || cSimpleTube_updateColours_g != (float)cTube_m_G || cSimpleTube_updateColours_b != (float)cTube_m_B) {
         int i;
@@ -1458,33 +1458,33 @@ static inline t4Vector Scale_26C8(const t4Vector& v, float s)
  * the first n + 1 vertices and draws them through slot 73 (cPS2GraphicsMan_RenderLineStrip, a line strip), and pops the draw state. Slot
  * 3 (render) of cSimpleTube_vtbl.
  */
-extern "C" void cSimpleTube_render(cSimpleTube* self)
+void cSimpleTube::render()
 {
     if (cTube_m_Enable == 0) {
         return;
     }
-    t4Vector dir = Norm_26C8(Sub_26C8((self->m_positions)[self->m_numSegments], (self->m_positions)[0]));
+    t4Vector dir = Norm_26C8(Sub_26C8(m_positions[m_numSegments], m_positions[0]));
     t4Vector sideOffset = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), cTube_m_ScaleWidth);
     t4Vector otherSideOffset = Scale_26C8(sideOffset, -1.0f);
     SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
-    for (int i = 0; i < self->m_numSegments + 1; i++) {
-        cSimpleTube_m_vertices[2 * i].p = Add_26C8((self->m_positions)[i], otherSideOffset);
-        cSimpleTube_m_vertices[2 * i + 1].p = (self->m_positions)[i];
-        cSimpleTube_m_vertices[2 * (i + self->m_numSegments + 2)].p = (self->m_positions)[i];
-        cSimpleTube_m_vertices[((self->m_numSegments + i) << 1) + 5].p = Add_26C8((self->m_positions)[i], sideOffset);
+    for (int i = 0; i < m_numSegments + 1; i++) {
+        cSimpleTube_m_vertices[2 * i].p = Add_26C8(m_positions[i], otherSideOffset);
+        cSimpleTube_m_vertices[2 * i + 1].p = m_positions[i];
+        cSimpleTube_m_vertices[2 * (i + m_numSegments + 2)].p = m_positions[i];
+        cSimpleTube_m_vertices[((m_numSegments + i) << 1) + 5].p = Add_26C8(m_positions[i], sideOffset);
     }
-    cSimpleTube_m_vertices[2 * self->m_numSegments + 2] = cSimpleTube_m_vertices[2 * self->m_numSegments + 1];
-    cSimpleTube_m_vertices[2 * self->m_numSegments + 3] = cSimpleTube_m_vertices[2 * self->m_numSegments + 4];
+    cSimpleTube_m_vertices[2 * m_numSegments + 2] = cSimpleTube_m_vertices[2 * m_numSegments + 1];
+    cSimpleTube_m_vertices[2 * m_numSegments + 3] = cSimpleTube_m_vertices[2 * m_numSegments + 4];
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx26C8;
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
     *ctx->m_pCurrentDrawState = sDrawState_s_defaultDrawState_rs26C8;
-    ctx->RenderTriStrip(((self->m_numSegments + 1) << 2) | 2, cSimpleTube_m_vertices, 0);
-    for (int i = 0; i < self->m_numSegments + 1; i++) {
-        cSimpleTube_m_vertices[i].p = (self->m_positions)[i];
+    ctx->RenderTriStrip(((m_numSegments + 1) << 2) | 2, cSimpleTube_m_vertices, 0);
+    for (int i = 0; i < m_numSegments + 1; i++) {
+        cSimpleTube_m_vertices[i].p = m_positions[i];
     }
-    ctx->RenderLineStrip(self->m_numSegments + 1, cSimpleTube_m_vertices, 0);
+    ctx->RenderLineStrip(m_numSegments + 1, cSimpleTube_m_vertices, 0);
     ctx->m_pCurrentDrawState--;
 }
 #endif
@@ -2784,14 +2784,14 @@ INCLUDE_ASM("render/particle", cPlayerShadow_InitBones);
  * @param rFoot  the right foot bone
  * @param hips  the hips bone
  */
-extern "C" void cPlayerShadow_InitBones(cPlayerShadow* self, int head, int lHand, int rHand, int lFoot, int rFoot, int hips)
+void cPlayerShadow::InitBones(int head, int lHand, int rHand, int lFoot, int rFoot, int hips)
 {
-    self->ShadowBone[0] = head;
-    self->ShadowBone[1] = lHand;
-    self->ShadowBone[2] = rHand;
-    self->ShadowBone[3] = lFoot;
-    self->ShadowBone[4] = rFoot;
-    self->ShadowBone[5] = hips;
+    ShadowBone[0] = head;
+    ShadowBone[1] = lHand;
+    ShadowBone[2] = rHand;
+    ShadowBone[3] = lFoot;
+    ShadowBone[4] = rFoot;
+    ShadowBone[5] = hips;
 }
 #endif
 
@@ -2820,11 +2820,11 @@ struct t4VectorInit : t4Vector {
  * (mProjPos, w = 1), the matrices mCProjMat and mUVProjMat, intensity 1.0 and the texture id mLockTexture.
  * cRider_RenderShadow calls it.
  */
-extern "C" void cPlayerShadow_AddShadow(cPlayerShadow* self)
+void cPlayerShadow::AddShadow()
 {
     cGraphicsMan_TheGraphicsMan->AddProjectiveTexture(
-        t4VectorInit(self->mProjPos[0], self->mProjPos[1], self->mProjPos[2], 1.0f), self->mCProjMat, self->mUVProjMat,
-        1.0f, self->mLockTexture);
+        t4VectorInit(mProjPos[0], mProjPos[1], mProjPos[2], 1.0f), mCProjMat, mUVProjMat,
+        1.0f, mLockTexture);
 }
 #endif
 
@@ -2896,9 +2896,9 @@ extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraph
  * AddLockedFrameTexture(width, height, texeltype)) for a texture of the size at +0x174 and +0x178 (mShadowTexWidth,
  * mShadowTexHeight) in texel format 2 and stores the id. cRider_loadRider calls it.
  */
-extern "C" void cPlayerShadow_LockShadowTexture(cPlayerShadow* self)
+void cPlayerShadow::LockShadowTexture()
 {
-    cPlayerShadow* shadow = (cPlayerShadow*)self;
+    cPlayerShadow* shadow = (cPlayerShadow*)this;
     if (shadow->mLockTexture < 0) {
         cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
         shadow->mLockTexture = mgr->AddLockedFrameTexture(shadow->mShadowTexWidth, shadow->mShadowTexHeight, 2);
@@ -10451,30 +10451,30 @@ extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, t3Vector* v
  *
  * @param verts  the grid positions, row by row (x, y, z floats)
  */
-extern "C" void cPS2GridMesh_Update(cPS2GridMesh* self, t3Vector* verts)
+void cPS2GridMesh::Update(t3Vector* verts)
 {
-    int idx = self->mScreenBuffer == 0;
-    for (int i = 0; i < self->m_iNumStrip; i++) {
-        int w = self->m_iWidth;
-        tGridMeshStrip* row = &self->mStripTable[idx][i];
+    int idx = mScreenBuffer == 0;
+    for (int i = 0; i < m_iNumStrip; i++) {
+        int w = m_iWidth;
+        tGridMeshStrip* row = &mStripTable[idx][i];
         int base = i * w;
         int next = base + w;
         int k = 0;
         int j = 0;
-        if (j < self->m_iWidth) {
+        if (j < m_iWidth) {
             t3Vector* lowerVert = &verts[next];
             t3Vector* upperVert = &verts[base];
             do {
-                func_00385A38(self, row->mPositions, k, upperVert);
-                func_00385A38(self, row->mPositions, k + 1, lowerVert);
+                func_00385A38(this, row->mPositions, k, upperVert);
+                func_00385A38(this, row->mPositions, k + 1, lowerVert);
                 k += 2;
                 upperVert++;
                 lowerVert++;
                 j++;
-            } while (j < self->m_iWidth);
+            } while (j < m_iWidth);
         }
     }
-    self->m_bUpdate = 1;
+    m_bUpdate = 1;
 }
 #endif
 
@@ -10495,31 +10495,31 @@ extern "C" void func_00385BA0(cPS2GridMesh* self, sShortUV* dst, int idx, float*
  *
  * @param uvs  the grid texture coordinates, row by row (u, v floats)
  */
-extern "C" void cPS2GridMesh_Update1(cPS2GridMesh* self, t2Vector* uvs)
+void cPS2GridMesh::Update1(t2Vector* uvs)
 {
-    int idx = self->mScreenBuffer == 0;
-    for (int i = 0; i < self->m_iNumStrip; i++) {
-        int w = self->m_iWidth;
-        tGridMeshStrip* row = &self->mStripTable[idx][i];
+    int idx = mScreenBuffer == 0;
+    for (int i = 0; i < m_iNumStrip; i++) {
+        int w = m_iWidth;
+        tGridMeshStrip* row = &mStripTable[idx][i];
         int base = i * w;
         int next = base + w;
         int k = 0;
         int j = 0;
-        if (j < self->m_iWidth) {
+        if (j < m_iWidth) {
             // PORT: pointers in int (retail adds the offset first; &uvs[next] adds uvs first).
             t2Vector* lowerUv = (t2Vector*)((next << 3) + (int)uvs);
             t2Vector* upperUv = (t2Vector*)((base << 3) + (int)uvs);
             do {
-                func_00385BA0(self, row->mUVs, k, (float*)upperUv);
-                func_00385BA0(self, row->mUVs, k + 1, (float*)lowerUv);
+                func_00385BA0(this, row->mUVs, k, (float*)upperUv);
+                func_00385BA0(this, row->mUVs, k + 1, (float*)lowerUv);
                 k += 2;
                 upperUv++;
                 lowerUv++;
                 j++;
-            } while (j < self->m_iWidth);
+            } while (j < m_iWidth);
         }
     }
-    self->m_bUpdate = 1;
+    m_bUpdate = 1;
 }
 #endif
 
@@ -10615,27 +10615,27 @@ extern "C" void func_00385AA0_col(void* self, void* dst, int idx, float* src) __
  * @param colors  the grid colours, row by row (a, r, g, b floats, 0..1)
  * @param uvs  the grid texture coordinates, row by row (u, v floats)
  */
-extern "C" void cPS2GridMesh_Update3(cPS2GridMesh* self, float* verts, float* colors, float* uvs)
+void cPS2GridMesh::Update3(float* verts, float* colors, float* uvs)
 {
     int first = 0;
-    if (self->mScreenBuffer < 0) {
-        self->mScreenBuffer = 0;
+    if (mScreenBuffer < 0) {
+        mScreenBuffer = 0;
         first = 1;
     }
-    int z = self->mScreenBuffer == 0;
+    int z = mScreenBuffer == 0;
     int rowIndex;
-    for (rowIndex = 0; rowIndex < self->m_iNumStrip; rowIndex++) {
-        tGridMeshStrip* strip = &self->mStripTable[z][rowIndex];
-        int topIdx = rowIndex * self->m_iWidth;
-        int bottomIdx = topIdx + self->m_iWidth;
+    for (rowIndex = 0; rowIndex < m_iNumStrip; rowIndex++) {
+        tGridMeshStrip* strip = &mStripTable[z][rowIndex];
+        int topIdx = rowIndex * m_iWidth;
+        int bottomIdx = topIdx + m_iWidth;
         int idx = 0;
-        for (int col = 0; col < self->m_iWidth; col++) {
-            func_00385BA0_uv(self, strip->mUVs, idx, uvs + topIdx * 2);
-            func_00385AA0_col(self, strip->mColours, idx, colors + topIdx * 4);
-            func_00385A38_vt(self, strip->mPositions, idx, verts + topIdx * 3);
-            func_00385BA0_uv(self, strip->mUVs, idx + 1, uvs + bottomIdx * 2);
-            func_00385AA0_col(self, strip->mColours, idx + 1, colors + bottomIdx * 4);
-            func_00385A38_vt(self, strip->mPositions, idx + 1, verts + bottomIdx * 3);
+        for (int col = 0; col < m_iWidth; col++) {
+            func_00385BA0_uv(this, strip->mUVs, idx, uvs + topIdx * 2);
+            func_00385AA0_col(this, strip->mColours, idx, colors + topIdx * 4);
+            func_00385A38_vt(this, strip->mPositions, idx, verts + topIdx * 3);
+            func_00385BA0_uv(this, strip->mUVs, idx + 1, uvs + bottomIdx * 2);
+            func_00385AA0_col(this, strip->mColours, idx + 1, colors + bottomIdx * 4);
+            func_00385A38_vt(this, strip->mPositions, idx + 1, verts + bottomIdx * 3);
             idx += 2;
             topIdx++;
             bottomIdx++;
@@ -10645,25 +10645,25 @@ extern "C" void cPS2GridMesh_Update3(cPS2GridMesh* self, float* verts, float* co
     // row counter (one spill slot) and indexing rows[z] with z reset to 0, so it is written out here.
     if (first) {
         z = 0;
-        for (rowIndex = 0; rowIndex < self->m_iNumStrip; rowIndex++) {
-            tGridMeshStrip* strip = &self->mStripTable[z][rowIndex];
-            int topIdx = rowIndex * self->m_iWidth;
-            int bottomIdx = topIdx + self->m_iWidth;
+        for (rowIndex = 0; rowIndex < m_iNumStrip; rowIndex++) {
+            tGridMeshStrip* strip = &mStripTable[z][rowIndex];
+            int topIdx = rowIndex * m_iWidth;
+            int bottomIdx = topIdx + m_iWidth;
             int idx = 0;
-            for (int col = 0; col < self->m_iWidth; col++) {
-                func_00385BA0_uv(self, strip->mUVs, idx, uvs + topIdx * 2);
-                func_00385AA0_col(self, strip->mColours, idx, colors + topIdx * 4);
-                func_00385A38_vt(self, strip->mPositions, idx, verts + topIdx * 3);
-                func_00385BA0_uv(self, strip->mUVs, idx + 1, uvs + bottomIdx * 2);
-                func_00385AA0_col(self, strip->mColours, idx + 1, colors + bottomIdx * 4);
-                func_00385A38_vt(self, strip->mPositions, idx + 1, verts + bottomIdx * 3);
+            for (int col = 0; col < m_iWidth; col++) {
+                func_00385BA0_uv(this, strip->mUVs, idx, uvs + topIdx * 2);
+                func_00385AA0_col(this, strip->mColours, idx, colors + topIdx * 4);
+                func_00385A38_vt(this, strip->mPositions, idx, verts + topIdx * 3);
+                func_00385BA0_uv(this, strip->mUVs, idx + 1, uvs + bottomIdx * 2);
+                func_00385AA0_col(this, strip->mColours, idx + 1, colors + bottomIdx * 4);
+                func_00385A38_vt(this, strip->mPositions, idx + 1, verts + bottomIdx * 3);
                 idx += 2;
                 topIdx++;
                 bottomIdx++;
             }
         }
     }
-    self->m_bUpdate = 1;
+    m_bUpdate = 1;
 }
 #endif
 
@@ -10781,10 +10781,9 @@ public:
  * @param materialBlock  the material list (On Tour const tMaterialBlockRecord* material)
  * @param texMatrix  passed on as cPS2GridMesh_Render1's last argument (a texture matrix, or 0)
  */
-extern "C" void cPS2GridMesh_Render(cPS2GridMesh* self, int meshMatrix, const tMaterialBlockRecord* materialBlock,
-                                    int texMatrix)
+void cPS2GridMesh::Render(int meshMatrix, const tMaterialBlockRecord* materialBlock, int texMatrix)
 {
-    ((cPartVirt*)self)->Render1(meshMatrix, materialBlock->GetMaterialRecordList()[0]->m_sTexture, texMatrix);
+    ((cPartVirt*)this)->Render1(meshMatrix, materialBlock->GetMaterialRecordList()[0]->m_sTexture, texMatrix);
 }
 #endif
 
@@ -12696,7 +12695,7 @@ extern "C" void func_00389C38(t4Vector* self, void* sunPos)
     cIrradiance_Clear(self);
     cIrradianceDataBase* lib = &cIrradianceDataBase_TheDataBase;
     if (lib->mNumItem > 0) {
-        func_00389590(self, (t4Vector*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &cIrradiance_kv4White, 1.0f);
+        func_00389590(self, (t4Vector*)lib->Get(cIrradianceDataBase_mDefaultId), &cIrradiance_kv4White, 1.0f);
     }
     if (sunPos != 0) {
         func_00389CB8(self, sunPos, 1.0f);
@@ -13412,13 +13411,13 @@ INCLUDE_ASM("render/particle", cIrradianceDataBase_Get);
  * @param i  the entry index
  * @return the entry
  */
-extern "C" cIrradiance* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i)
+cIrradiance* cIrradianceDataBase::Get(int i)
 {
-    int count = self->mNumItem;
+    int count = mNumItem;
     if (i >= count) {
         i = count - 1;
     }
-    return &self->mIrradianceArray[i];
+    return &mIrradianceArray[i];
 }
 #endif
 
@@ -13436,9 +13435,9 @@ extern "C" int cIrradianceDataBase_GetIDByName(cIrradianceDataBase* self, const 
  * @param name  the entry name
  * @return the entry
  */
-extern "C" cIrradiance* cIrradianceDataBase_Get1(cIrradianceDataBase* self, const char* name)
+cIrradiance* cIrradianceDataBase::Get1(const char* name)
 {
-    return cIrradianceDataBase_Get(self, cIrradianceDataBase_GetIDByName(self, name));
+    return Get(GetIDByName(name));
 }
 #endif
 
@@ -13457,11 +13456,11 @@ extern "C" int strcmp(const void* a, const void* b);
  * @param name  the irradiance name
  * @return the entry's index, or 0 when the name is unknown
  */
-extern "C" int cIrradianceDataBase_GetIDByName(cIrradianceDataBase* self, const char* name)
+int cIrradianceDataBase::GetIDByName(const char* name)
 {
     int i;
-    for (i = 0; i < self->mNumItem; i++) {
-        if (strcmp(name, self->mIrradianceNames + (i << 3)) == 0) {
+    for (i = 0; i < mNumItem; i++) {
+        if (strcmp(name, mIrradianceNames + (i << 3)) == 0) {
             return i;
         }
     }

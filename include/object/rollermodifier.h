@@ -92,6 +92,8 @@ CHECK_OFFSET(tAddRollerData, unk_00C, 0x0C);
 CHECK_OFFSET(tAddRollerData, unk_010, 0x10);
 CHECK_SIZE(tAddRollerData, 0x14);
 
+struct cBxReplayFrame;
+
 struct cRollerModifier : public cTransformModifier {
     // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
     //   [R] ctors store cTransformModifier_vtbl (cTransformModifier) then cRollerModifier_vtbl; the destructor stores
@@ -137,6 +139,12 @@ struct cRollerModifier : public cTransformModifier {
     t4Vector COMOffset;           // 0x2B0 [O]; [R] ctors: tree info + 0x2C (x, y, z; w = 0); [U] getBodyPose
     char RollerHint[0x10];        // 0x2C0 [O] tIntHint RollerHint (not laid out); [U] collide passes its address to
                                   //       the world intersect query (cBXNash_terrainIntersect1)
+
+    // Methods bound to their retail symbols by asm labels.
+    cRollerModifier* cRollerModifier1(cBxReplayFrame* stream) __asm__("cRollerModifier_cRollerModifier1");
+    void updateMOI() __asm__("cRollerModifier_updateMOI");
+    void translateMe(const t4Vector* off) __asm__("cRollerModifier_translateMe");
+    void* collide1() __asm__("cRollerModifier_collide1__FPv");
 };
 
 CHECK_OFFSET(cRollerModifier, mKineticEnergy, 0x004);

@@ -35,6 +35,11 @@ struct cPlayerShadow {
     int mShadowTexHeight;           // 0x178 [O]
     int ShadowBone[6];              // 0x17C [O]
     char unk_194[0xC];              // 0x194 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void InitBones(int head, int lHand, int rHand, int lFoot, int rFoot, int hips) __asm__("cPlayerShadow_InitBones");
+    void AddShadow() __asm__("cPlayerShadow_AddShadow");
+    void LockShadowTexture() __asm__("cPlayerShadow_LockShadowTexture");
 };
 
 CHECK_OFFSET(cPlayerShadow, mObjUp, 0x000);

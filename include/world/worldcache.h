@@ -103,6 +103,10 @@ struct cWorldBlockAllocator {
     unsigned int m_uiNumFreeBlocks; // 0x08 [P] assert m_uiNumFreeBlocks; [R] = count; [U] get/release -1/+1
     tWorldMemBlock* m_pBlockArray;  // 0x0C [O]; [R] new(count * 0x18, "WORLD BLOCK ARRAY")
     tWorldMemBlock* m_pFreeBlocks;  // 0x10 [P] assert m_pFreeBlocks; [R] = m_pBlockArray; [U] free-list head
+
+    // Methods bound to their retail symbols by asm labels.
+    void* getFreeBlock() __asm__("cWorldBlockAllocator_getFreeBlock__FPv");
+    void releaseBlock(void* vitem) __asm__("cWorldBlockAllocator_releaseBlock__FPvT0");
 };
 
 CHECK_OFFSET(cWorldBlockAllocator, m_uiBlockSize, 0x00);
@@ -120,6 +124,10 @@ struct cSectionBlockAllocator {
     unsigned int m_uiNumBlocks;     // 0x08 [P] assert !m_uiNumBlocks; [R] = 0; [U] allocate +1, releaseBlocks -1
     tWorldMemBlock* m_pAllocBlocks; // 0x0C [O]; [R] = 0; [U] list of the arena's blocks
     tWorldMemBlock* m_pMRUBlock;    // 0x10 [P] assert m_pMRUBlock->iBaseSize; [R] = 0; [U] allocate's current block
+
+    // Methods bound to their retail symbols by asm labels.
+    void releaseBlocks() __asm__("cSectionBlockAllocator_releaseBlocks");
+    char* allocate(int size, unsigned int flags) __asm__("cSectionBlockAllocator_allocate");
 };
 
 CHECK_OFFSET(cSectionBlockAllocator, m_pBlockAllocator, 0x00);
@@ -138,6 +146,10 @@ struct cWorldMemoryMan {
                                     //       [U] activateSectionMem hands &m_BlockAllocator[blocktype] to the arena
     cSectionBlockAllocator* m_pSectionAllocator[64]; // 0x03C [P] assert !m_pSectionAllocator[uiSectionID];
                                     //       [R] ctor zeroes 64; [U] activate/deactivateSectionMem, allocate
+
+    // Methods bound to their retail symbols by asm labels.
+    void activateSectionMem(int index, int section) __asm__("cWorldMemoryMan_activateSectionMem");
+    void deactivateSectionMem(int i) __asm__("cWorldMemoryMan_deactivateSectionMem");
 };
 
 CHECK_OFFSET(cWorldMemoryMan, m_BlockAllocator, 0x000);
@@ -254,6 +266,29 @@ struct cWorldCache {
     tWorldCacheHullPage m_HullPages[256]; // 0x03F0 [P] assert m_HullPages[uiHullPage]; [R] initPageMap clears them
     int m_iTouchStaleAge;              // 0x1BF0 [O]; [R] ctor = (int)(ticks per second * 0.1); [U] updatePages,
                                     //        flushPage
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cWorldCache_purge");
+    void reset() __asm__("cWorldCache_reset");
+    void activateSectionMem(int i, int section) __asm__("cWorldCache_activateSectionMem");
+    void deactivateSectionMem(int i) __asm__("cWorldCache_deactivateSectionMem");
+    void update() __asm__("cWorldCache_update");
+    void initPageMap() __asm__("cWorldCache_initPageMap");
+    void resetPageMap() __asm__("cWorldCache_resetPageMap");
+    void setPageLock(int hullPage, int lock) __asm__("cWorldCache_setPageLock");
+    int isPageLocked(int hullPage) __asm__("cWorldCache_isPageLocked");
+    void purgePage(int cell) __asm__("cWorldCache_purgePage");
+    int isPageLoaded(int uiHullPage) __asm__("cWorldCache_isPageLoaded");
+    int isPageEmpty(int uiHullPage) __asm__("cWorldCache_isPageEmpty");
+    void signalPageLoadComplete(int uiHullPage) __asm__("cWorldCache_signalPageLoadComplete");
+    void updatePages() __asm__("cWorldCache_updatePages");
+    void flushInActivePages() __asm__("cWorldCache_flushInActivePages");
+    void flushOnePage() __asm__("cWorldCache_flushOnePage");
+    unsigned int addBxStreamDataTest(int slot, int type, unsigned int key, int size)
+        __asm__("cWorldCache_addBxStreamDataTest");
+    void addBxStreamDataSubmit(int group, int id, unsigned int key, int chunk)
+        __asm__("cWorldCache_addBxStreamDataSubmit");
+    void activateSectionPatches(int idx) __asm__("cWorldCache_activateSectionPatches");
 };
 
 CHECK_OFFSET(cWorldCache, mp_DataHeader, 0x0000);

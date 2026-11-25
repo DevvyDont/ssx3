@@ -42,11 +42,11 @@ struct cFELocale_sFiles {
  *
  * @param lang  language index (0 English, 1 French, 2 German, 3 Spanish)
  */
-extern "C" void cFELocale_addFile(cFELocale* self, int lang)
+void cFELocale::addFile(int lang)
 {
     signed char i = lang;
     if (i >= 0) {
-        cFELocale_sFiles* arr = (cFELocale_sFiles*)&self->mpLocaleFile;
+        cFELocale_sFiles* arr = (cFELocale_sFiles*)&mpLocaleFile;
         if (arr->items[i] == 0) {
             cFELocale_sFile* file = (cFELocale_sFile*)operator new(20, str_LocaleFile, 0, 0);
             arr->items[i] = file;
@@ -74,9 +74,9 @@ struct s195A50Arr {
  *
  * @param i  the file entry index (0 .. 19)
  */
-extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i)
+void cFELocale::deleteFile(signed char i)
 {
-    s195A50Arr* arr = (s195A50Arr*)&self->mpLocaleFile;
+    s195A50Arr* arr = (s195A50Arr*)&mpLocaleFile;
     if (arr->items[i] != 0) {
         cLocaleFile__cLocaleFile(arr->items[i], 3);
         arr->items[i] = 0;
@@ -135,11 +135,11 @@ extern "C" void cFELocale_setLanguage(cFELocale* self, signed char lang)
                 langIndex = 3;
                 break;
             }
-            cFELocale_addFile(self, langIndex);
+            self->addFile(langIndex);
             if (self->mModule == 1) {
-                cFELocale_loadFE(self);
+                self->loadFE();
             } else {
-                cFELocale_loadOV(self);
+                self->loadOV();
             }
         }
     }
@@ -157,10 +157,10 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang);
  * Maps the language at +0x1 (0 to 3) to the matching file entry, or -1 for any other value, and passes it to
  * cFELocale_addFile.
  */
-extern "C" void cFELocale_loadCommon(cFELocale* self)
+void cFELocale::loadCommon()
 {
     int lang = -1;
-    switch (self->mLanguage) {
+    switch (mLanguage) {
     case 0:
         lang = 0;
         break;
@@ -174,7 +174,7 @@ extern "C" void cFELocale_loadCommon(cFELocale* self)
         lang = 3;
         break;
     }
-    cFELocale_addFile(self, lang);
+    addFile(lang);
 }
 #endif
 
@@ -188,13 +188,12 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang);
  * 4-7, 8-11 and 16-19, the one of each group that matches the language (+0x1, 0-3) with cFELocale_addFile. Any other
  * language adds nothing.
  *
- * @param locale  the cFELocale
  */
-extern "C" void cFELocale_loadFE(cFELocale* locale)
+void cFELocale::loadFE()
 {
     int id = -1;
-    *(char*)&locale->mModule = 1;
-    switch (locale->mLanguage) {
+    *(char*)&mModule = 1;
+    switch (mLanguage) {
     case 0:
         id = 4;
         break;
@@ -208,8 +207,8 @@ extern "C" void cFELocale_loadFE(cFELocale* locale)
         id = 7;
         break;
     }
-    cFELocale_addFile(locale, id);
-    switch (locale->mLanguage) {
+    addFile(id);
+    switch (mLanguage) {
     case 0:
         id = 8;
         break;
@@ -223,9 +222,9 @@ extern "C" void cFELocale_loadFE(cFELocale* locale)
         id = 11;
         break;
     }
-    cFELocale_addFile(locale, id);
+    addFile(id);
     id = -1;
-    switch (locale->mLanguage) {
+    switch (mLanguage) {
     case 0:
         id = 0x10;
         break;
@@ -239,7 +238,7 @@ extern "C" void cFELocale_loadFE(cFELocale* locale)
         id = 19;
         break;
     }
-    cFELocale_addFile(locale, id);
+    addFile(id);
 }
 #endif
 
@@ -253,18 +252,18 @@ extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i);
  * 4-7 and 16-19 with cFELocale_deleteFile. Entries 8-11, which cFELocale_loadFE also loads, stay loaded, and the module byte is
  * not changed.
  */
-extern "C" void cFELocale_unloadFE(cFELocale* self)
+void cFELocale::unloadFE()
 {
-    int flags = *(signed char*)&self->mAttrLocale;
+    int flags = *(signed char*)&mAttrLocale;
     if ((flags & 1) == 0) {
-        cFELocale_deleteFile(self, 4);
-        cFELocale_deleteFile(self, 5);
-        cFELocale_deleteFile(self, 6);
-        cFELocale_deleteFile(self, 7);
-        cFELocale_deleteFile(self, 0x10);
-        cFELocale_deleteFile(self, 17);
-        cFELocale_deleteFile(self, 18);
-        cFELocale_deleteFile(self, 19);
+        deleteFile(4);
+        deleteFile(5);
+        deleteFile(6);
+        deleteFile(7);
+        deleteFile(0x10);
+        deleteFile(17);
+        deleteFile(18);
+        deleteFile(19);
     }
 }
 #endif
@@ -278,11 +277,11 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang);
  * Loads the in-game string file for the current language: sets the module byte (+0x58) to 2 and adds file entry 12-15,
  * the one matching the language (+0x1, 0-3), with cFELocale_addFile (-1, nothing, for any other language).
  */
-extern "C" void cFELocale_loadOV(cFELocale* self)
+void cFELocale::loadOV()
 {
     int file = -1;
-    self->mModule = 2;
-    switch (self->mLanguage) {
+    mModule = 2;
+    switch (mLanguage) {
     case 0:
         file = 0xC;
         break;
@@ -296,7 +295,7 @@ extern "C" void cFELocale_loadOV(cFELocale* self)
         file = 0xF;
         break;
     }
-    cFELocale_addFile(self, file);
+    addFile(file);
 }
 #endif
 
@@ -309,14 +308,14 @@ extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i);
  * Unloads the in-game string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
  * 12-15 with cFELocale_deleteFile.
  */
-extern "C" void cFELocale_unloadOV(cFELocale* self)
+void cFELocale::unloadOV()
 {
-    int flags = *(signed char*)&self->mAttrLocale;
+    int flags = *(signed char*)&mAttrLocale;
     if ((flags & 1) == 0) {
-        cFELocale_deleteFile(self, 0xC);
-        cFELocale_deleteFile(self, 13);
-        cFELocale_deleteFile(self, 0xE);
-        cFELocale_deleteFile(self, 0xF);
+        deleteFile(0xC);
+        deleteFile(13);
+        deleteFile(0xE);
+        deleteFile(0xF);
     }
 }
 #endif

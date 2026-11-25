@@ -40,6 +40,10 @@ struct cSkyBox : public cObjNode {
     tInstanceRecord* m_pInstanceSky;    // 0x14 [O]; [R] ctor 0; [U] setSection stores record 0 of the section's
                                         //      resource set, reset 0; render skips when 0, sets bit 2 / clears bit 1 of
                                         //      the record's +0x8 flags and draws it (graphics slot 95, model +0x80)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setSection(int id) __asm__("cSkyBox_setSection");
+    int reset() __asm__("cSkyBox_reset__FPv");
 };
 
 CHECK_OFFSET(cSkyBox, m_iSectionID, 0x10);

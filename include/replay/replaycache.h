@@ -27,6 +27,8 @@
 // allocates 0x8000 bytes = 0x1000 commands; [O] cReplayCache::getControlCmd(tControlCmd&), addCmdFrame(const
 // tControlCmd&), getCmdFrame() returns tControlCmd*.
 
+union tControlCmd;
+
 struct cReplayCache {
     // --- cReplayCacheState (On Tour: size 0xC; [O] names, placed by [U])
     int RecordCursor;               // 0x000 [O]; [U] the number of CmdFrame entries: addCmdFrame appends at it and
@@ -41,6 +43,15 @@ struct cReplayCache {
     tControlCmd* CmdFrame;          // 0x00C [O]; [R] ctor: operator new(0x8000, "CmdFrame", 0, 0); [U] purge cMemMan_frees
                                     //       it; load HUFF_decodes into it; updateControlCmd returns 0 while it is 0;
                                     //       cReplay_writeInput saves 0x8000 bytes of it
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cReplayCache_purge");
+    void reset() __asm__("cReplayCache_reset__FPv");
+    int updateControlCmd(tControlCmd* controlCmd) __asm__("cReplayCache_updateControlCmd");
+    void addCmdFrame(tControlCmd* chunkp) __asm__("cReplayCache_addCmdFrame");
+    int addControlCmd(tControlCmd* chunk) __asm__("cReplayCache_addControlCmd");
+    void truncate(unsigned int pos) __asm__("cReplayCache_truncate");
+    int moveTo(unsigned int pos) __asm__("cReplayCache_moveTo");
 };
 CHECK_OFFSET(cReplayCache, RecordCursor, 0x0);
 CHECK_OFFSET(cReplayCache, PlaybackCursor, 0x4);

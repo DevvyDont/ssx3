@@ -48,6 +48,9 @@ struct cFogParticleMan {
                                     //       its unsigned-short index)
     void** mVtbl;                   // 0x004 [R] ctor stores cFogParticleMan_vtbl (cFogParticleMan: dtor cFogParticleMan__cFogParticleMan + 2 pure
                                     //       virtuals); render calls slot 3
+
+    // Methods bound to their retail symbols by asm labels.
+    void render() __asm__("cFogParticleMan_render");
 };
 
 CHECK_OFFSET(cFogParticleMan, miNumSphere, 0x00);
@@ -67,6 +70,9 @@ struct cPS2FogParticleMan {
     tFogSprite mSprites[256];       // 0x010 [R] cGame_loadTrack constructs 256 x 0x30 at +0x10 (alloc 0x3010); [U]
                                     //       addFogInstance writes [miNumSphere++] (no bound check), platformrender
                                     //       reads [mSortKey[i].mIdx]
+
+    // Methods bound to their retail symbols by asm labels.
+    void platformrender() __asm__("cPS2FogParticleMan_platformrender");
 };
 
 CHECK_OFFSET(cPS2FogParticleMan, miNumSphere, 0x00);

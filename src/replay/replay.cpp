@@ -56,7 +56,7 @@ struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
  *
  * @param stream  the frame's stream (On Tour cReplayFramePtr* framePtr)
  */
-extern "C" void cReplay_restoreFrame(cReplay* self, cBxReplayFrame* stream)
+void cReplay::restoreFrame(cBxReplayFrame* stream)
 {
     void* bm = &gBucketMan;
     cBucketMan_mergeBucket(bm, (void*)1);
@@ -85,10 +85,10 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cBxReplayFrame* stream)
     func_00229E58(TheCrowdMan2d, stream);
     func_00344240(TheCrowdMan3d, stream);
     cMultiParticleMan_readFromReplayFrame(cMultiParticleMan_TheMultiParticleMan, stream);
-    cReplay_restoreBucket(self, (void*)1, stream);
-    cReplay_restoreDeadBucket(self, stream);
+    restoreBucket((void*)1, stream);
+    restoreDeadBucket(stream);
     cFocusMan_readFromReplayFrame(SSXApp->Game->AI->FocusMan, stream);
-    cReplay_applyBucket(self, 1);
+    applyBucket(1);
     cAI_updateOverlapList(SSXApp->Game->AI);
     cGameViewMan_updateAll(SSXApp->Game->ViewMan);
 }
@@ -117,7 +117,7 @@ extern char gBucketMan;
  * @param bucket  the bucket the objects are restored into
  * @param stream  the replay stream to read from
  */
-extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cBxReplayFrame* stream)
+void cReplay::restoreBucket(void* bucket, cBxReplayFrame* stream)
 {
     struct {
         int count;
@@ -126,7 +126,7 @@ extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cBxReplayFram
     int i;
     stream->read((char*)&hdr, 8);
     for (i = 0; i < hdr.count; i++) {
-        cReplay_restoreObject(self, bucket, stream);
+        restoreObject(bucket, stream);
     }
     cBucketMan_mergeBucket(&gBucketMan, bucket);
 }
@@ -144,7 +144,7 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index);
  * @param bucket  the bucket (On Tour const int bucket)
  */
 // Calls virtual slot 3 on every object in the given bucket of the global bucket manager.
-extern "C" void cReplay_applyBucket(cReplay* self, int bucket)
+void cReplay::applyBucket(int bucket)
 {
     cObjNode* node = (cObjNode*)cBucketMan_first((cBucketMan*)&gBucketMan, bucket);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
@@ -219,7 +219,7 @@ extern "C" sObj_RO* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, vo
  * @param stream  the frame's stream, positioned at the object (On Tour cReplayFramePtr* data)
  */
 // Recreates a replay object of the recorded type and links it into the bucket.
-extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cBxReplayFrame* stream)
+void cReplay::restoreObject(void* bucket, cBxReplayFrame* stream)
 {
     switch (cReplayFramePtr_peekObjNodeType(stream)) {
     case 0:
@@ -349,7 +349,7 @@ struct sRdbRef {
  *
  * @param stream  the replay stream to read from
  */
-extern "C" void cReplay_restoreDeadBucket(cReplay* self, cBxReplayFrame* stream)
+void cReplay::restoreDeadBucket(cBxReplayFrame* stream)
 {
     struct {
         int count;
@@ -378,10 +378,9 @@ INCLUDE_ASM("replay/replay", cReplay_findFrame__FPv);
  *
  * @return the frame containing the tick (see cReplayFrameList_findFrame)
  */
-void* cReplay_findFrame(void* vself)
+void* cReplay::findFrame()
 {
-    cReplay* self = (cReplay*)vself;
-    return cReplayFrameList_findFrame(&self->FrameList);
+    return cReplayFrameList_findFrame(&FrameList);
 }
 #endif
 
@@ -397,9 +396,9 @@ INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
  *
  * @return the next cReplayFrame
  */
-extern "C" void* cReplay_findNextFrame(cReplay* self)
+void* cReplay::findNextFrame()
 {
-    cReplayFrame* frame = (cReplayFrame*)cReplay_findFrame(self);
+    cReplayFrame* frame = (cReplayFrame*)findFrame();
     void* nextFrame = frame->Next;
     if (nextFrame != 0) {
         frame = (cReplayFrame*)nextFrame;
@@ -420,9 +419,9 @@ INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
  *
  * @return the previous cReplayFrame
  */
-extern "C" void* cReplay_findPrevFrame(cReplay* self)
+void* cReplay::findPrevFrame()
 {
-    cReplayFrame* frame = (cReplayFrame*)cReplay_findFrame(self);
+    cReplayFrame* frame = (cReplayFrame*)findFrame();
     void* prevFrame = frame->Prev;
     if (prevFrame != 0) {
         frame = (cReplayFrame*)prevFrame;
@@ -445,11 +444,10 @@ extern "C" int cReplayCache_moveTo(void* stream, unsigned int pos);
  * PlaybackTick = its FrameStartTick (+0x30), and each rider input cache moves there (cReplayCache_moveTo,
  * cReplayCache::moveTo).
  *
- * @param self_  the replay (this; copied into a local self)
  */
-extern "C" void cReplay_rewindFrame(cReplay* self_)
+void cReplay::rewindFrame()
 {
-    cReplay* self = self_;
+    cReplay* self = this;
     int i;
     void* frame = cReplay_findFrame_2(self, self->PlaybackTick);
     (*(void**)&self->PlaybackFrame) = frame;
@@ -473,12 +471,12 @@ extern "C" void cReplay_rewindFrame(cReplay* self);
  * Moves the playback cursor to the start of the next recorded frame (findNextFrame of PlaybackTick), then rewindFrame
  * re-syncs the frame and the input caches.
  */
-extern "C" void cReplay_nextFrame(cReplay* self)
+void cReplay::nextFrame()
 {
-    cReplayFrame* frame = (cReplayFrame*)cReplay_findNextFrame_2(self, self->PlaybackTick);
-    self->PlaybackFrame = (cReplayFrame*)frame;
-    self->PlaybackTick = frame->FrameStartTick;
-    cReplay_rewindFrame(self);
+    cReplayFrame* frame = (cReplayFrame*)cReplay_findNextFrame_2(this, PlaybackTick);
+    PlaybackFrame = (cReplayFrame*)frame;
+    PlaybackTick = frame->FrameStartTick;
+    rewindFrame();
 }
 #endif
 
@@ -493,12 +491,12 @@ extern "C" void cReplay_rewindFrame(cReplay* self);
  * Moves the playback cursor to the start of the previous recorded frame (findPrevFrame of PlaybackTick), then
  * rewindFrame re-syncs the frame and the input caches.
  */
-extern "C" void cReplay_prevFrame(cReplay* self)
+void cReplay::prevFrame()
 {
-    cReplayFrame* frame = (cReplayFrame*)cReplay_findPrevFrame_2(self, self->PlaybackTick);
-    self->PlaybackFrame = (cReplayFrame*)frame;
-    self->PlaybackTick = frame->FrameStartTick;
-    cReplay_rewindFrame(self);
+    cReplayFrame* frame = (cReplayFrame*)cReplay_findPrevFrame_2(this, PlaybackTick);
+    PlaybackFrame = (cReplayFrame*)frame;
+    PlaybackTick = frame->FrameStartTick;
+    rewindFrame();
 }
 #endif
 
@@ -532,12 +530,11 @@ INCLUDE_ASM("replay/replay", cReplayFrameList_reset__FPv);
  * Clears the head (+0x0), tail (+0x4) and count (+0x8) without touching the frames. cReplay_reset and cReplay_purge
  * reset FrameList and FreeFrameList with it, cReplay_load FrameList.
  */
-void cReplayFrameList_reset(void* vself)
+void cReplayFrameList::reset()
 {
-    cReplayFrameList* self = (cReplayFrameList*)vself;
-    self->Head = 0;
-    self->Tail = 0;
-    self->NumFrames = 0;
+    Head = 0;
+    Tail = 0;
+    NumFrames = 0;
 }
 #endif
 
@@ -696,12 +693,12 @@ void cReplayFrame_setRanking(void*, int, int);
  * @param rider  the replay frame the highlight starts on
  * @param src  the rider stats at the start of the highlight
  */
-extern "C" void cReplayHighlight_begin(cReplayHighlight* self, cReplayFrame* rider, tRiderStats* src)
+void cReplayHighlight::begin(cReplayFrame* rider, tRiderStats* src)
 {
-    rider->FrameType.Highlights |= 1 << self->PlayerId;
-    cReplayFrame_setRanking(rider, self->PlayerId, 0);
-    (*(void**)&self->Frame) = ((char*)rider);
-    self->Stats = *src;
+    rider->FrameType.Highlights |= 1 << PlayerId;
+    cReplayFrame_setRanking(rider, PlayerId, 0);
+    (*(void**)&Frame) = ((char*)rider);
+    Stats = *src;
 }
 #endif
 
@@ -713,10 +710,9 @@ INCLUDE_ASM("replay/replay", cReplayHighlight_end__FPv);
  *
  * cReplay_endMarkHighlight calls it on Highlight[playerId] once the highlight is kept.
  */
-void cReplayHighlight_end(void* vself)
+void cReplayHighlight::end()
 {
-    cReplayHighlight* self = (cReplayHighlight*)vself;
-    self->Frame = 0;
+    Frame = 0;
 }
 #endif
 
@@ -729,12 +725,12 @@ INCLUDE_ASM("replay/replay", cReplayHighlight_cancel);
  *
  * Does nothing when no frame is marked (Frame, +0xB0, is null).
  */
-extern "C" void cReplayHighlight_cancel(cReplayHighlight* self)
+void cReplayHighlight::cancel()
 {
-    unsigned char* cache = (unsigned char*)self->Frame;
+    unsigned char* cache = (unsigned char*)Frame;
     if (cache) {
-        cache[0x1e] &= ~(1 << *(int*)self);
-        self->Frame = 0;
+        cache[0x1e] &= ~(1 << *(int*)this);
+        Frame = 0;
     }
 }
 #endif
@@ -757,24 +753,24 @@ void cReplayFrame_setRanking(void*, int, int);
  * @param mode  non-zero when the highlight ended with a landing
  * @return 1 when a ranking was stored, 0 when nothing changed
  */
-extern "C" int cReplayHighlight_setRanking(cReplayHighlight* self, tRiderStats* stats, int mode)
+int cReplayHighlight::setRanking(tRiderStats* stats, int mode)
 {
     if (mode) {
-        int pointsGained = stats->TotalPoints - self->Stats.TotalPoints;
+        int pointsGained = stats->TotalPoints - Stats.TotalPoints;
         if (pointsGained == 0) return 0;
         if (pointsGained >= 1000) {
-            cReplayFrame_setRanking(self->Frame, *(int*)self, pointsGained);
+            cReplayFrame_setRanking(Frame, *(int*)this, pointsGained);
             return 1;
         }
         float airTime = stats->AirTime;
         if (airTime >= 5.0f) {
-            cReplayFrame_setRanking(self->Frame, *(int*)self, (int)(airTime * 1000.0f));
+            cReplayFrame_setRanking(Frame, *(int*)this, (int)(airTime * 1000.0f));
             return 1;
         }
     }
-    int pointsLost = stats->TotalPointsLostToWipeouts - self->Stats.TotalPointsLostToWipeouts;
+    int pointsLost = stats->TotalPointsLostToWipeouts - Stats.TotalPointsLostToWipeouts;
     if (pointsLost == 0) return 0;
-    cReplayFrame_setRanking(self->Frame, *(int*)self, -pointsLost);
+    cReplayFrame_setRanking(Frame, *(int*)this, -pointsLost);
     return 1;
 }
 #endif
