@@ -70,6 +70,23 @@ struct cProcessList {
 // 0x184, cWScriptMan::Events). [U] cWScriptMan_update copies the list and walks it (views sCmdList_309270,
 // sCmd_309270: flags 0x0, the instance id 0x4 it looks up, a word 0x8). The union's member names are not in the
 // DWARF dump, so its words stay unk_.
+// A world-script event's type, EventId's low halfword (names ours). [U] cWScriptMan_eventCollide / eventJump /
+// eventLand / eventTrick / eventWipeout / eventReset push 0x70000-0x70005, and cWScriptProcess_dispatchProcessEvent /
+// cWScriptTask_dispatchTaskEvent call eventOnCollide, OnJump, OnLand, OnTrick, OnWipeout, OnReset, OnCollect,
+// OnEvent1, OnEvent2 and OnEvent3 (virtual slots 7-16) for types 0-9.
+enum eWScriptEventType {
+    kWSEvent_Collide = 0,
+    kWSEvent_Jump = 1,
+    kWSEvent_Land = 2,
+    kWSEvent_Trick = 3,
+    kWSEvent_Wipeout = 4,
+    kWSEvent_Reset = 5,
+    kWSEvent_Collect = 6,
+    kWSEvent_Event1 = 7,
+    kWSEvent_Event2 = 8,
+    kWSEvent_Event3 = 9
+};
+
 struct tWScriptEvent {
     unsigned int EventId;           // 0x0 [O] tWScriptEventBase::EventId; [U] masked and tested by update
     unsigned int unk_04;            // 0x4 [O] union; [U] the instance resource id update looks up
@@ -93,6 +110,85 @@ CHECK_SIZE(tWScriptEventList, 0x184);
 struct cBeing;
 struct cBxReplayFrame;
 struct nash_Node;
+
+// World-script "none" values (names ours). [U] The script functions' parameter blocks default their ids and riders
+// to -1; a mission, process or collect-pool id of -1 names nothing (cCollectPool_init's PoolId; doProcessCmd and
+// doMissionCmd then act on the current process or mission), and cWScriptMan::Being is -1 when the script has no rider
+// (RiderInTunnelFunc, SetGameModeFunc and others test it; a Being argument of -1 means the script's own rider).
+enum {
+    kWScriptId_None = -1,
+    kWScriptBeing_None = -1
+};
+
+// A mission or process command (doMissionCmd's cmd, doProcessCmd's kind; names ours, from what doMissionCmd and
+// doProcessCmd do with each). [U] 0-2 and 18 go to doProcessCmd: 0 stopProcess, 1 startProcess (from the idle list),
+// 2 cWScriptProcess_endTask, 18 cWScriptProcess_end. 3-5 and 17 call the mission's missionRestart, processComplete,
+// missionFail and missionUpdateWorld virtuals. 8, 9 and 11 are queued for the front end (tMissionMenuQueue): cGame's
+// updateUI opens the big-challenge start overlay (29) for 8 and fails the mission (command 5) with the fail overlay
+// (30) for 9; nothing in retail reads 11. 12-16 and 19 ask the BE mission interface: isMissionReady, isMissionLocked,
+// isMissionAvailable, isMissionCompleted, isMissionShowIcon, and getNextMissionID == -1 (the last of its chain).
+// cWScriptMan_processLocalMissionCmd sends 1, 3, 5 and 18.
+enum eWScriptMissionCmd {
+    kMissionCmd_Stop = 0,
+    kMissionCmd_Start = 1,
+    kMissionCmd_EndTask = 2,
+    kMissionCmd_Restart = 3,
+    kMissionCmd_Complete = 4,
+    kMissionCmd_Fail = 5,
+    kMissionCmd_MenuStart = 8,
+    kMissionCmd_MenuFail = 9,
+    kMissionCmd_IsReady = 12,
+    kMissionCmd_IsLocked = 13,
+    kMissionCmd_IsAvailable = 14,
+    kMissionCmd_IsCompleted = 15,
+    kMissionCmd_IsShowIcon = 16,
+    kMissionCmd_UpdateWorld = 17,
+    kMissionCmd_End = 18,
+    kMissionCmd_IsLast = 19
+};
+
+// A local mission request (LocalMissionCmd; names ours). [U] startLocalMission, restartLocalMission,
+// cancelLocalMission, quitLocalMission, previewLocalMission and cancelPreviewLocalMission store 1-6, and
+// processLocalMissionCmd carries them out and clears the request to 0.
+enum eWScriptLocalMissionCmd {
+    kLocalMissionCmd_None = 0,
+    kLocalMissionCmd_Start = 1,
+    kLocalMissionCmd_Restart = 2,
+    kLocalMissionCmd_Cancel = 3,
+    kLocalMissionCmd_Quit = 4,
+    kLocalMissionCmd_Preview = 5,
+    kLocalMissionCmd_CancelPreview = 6
+};
+
+// A field of the current trick definition (getCurrentTrick's which; names ours, after On Tour's tTrickNameDef bit
+// fields). [U] getCurrentTrick returns the field each names; 12, the place of the one field it does not return
+// (lateGrab), has no case and gives 0, so it is not named.
+enum eWScriptTrickField {
+    kTrickField_Rail = 0,
+    kTrickField_RailSpin = 1,
+    kTrickField_Takeoff = 2,
+    kTrickField_Orient = 3,
+    kTrickField_Spin = 4,
+    kTrickField_Reps = 5,
+    kTrickField_Flip = 6,
+    kTrickField_Special = 7,
+    kTrickField_PostSpin = 8,
+    kTrickField_UberGrind = 9,
+    kTrickField_Grab = 10,
+    kTrickField_ToLate = 11,
+    kTrickField_Handplant = 13,
+    kTrickField_Land = 14,
+    kTrickField_Press = 15
+};
+
+// What cWScriptMan_checkGate says about the rider and a gate (names ours). [U] its returns: 1 when the rider went
+// through the gate instance, 0 while it is within range of it, -1 when it missed it. CheckGateFunc plays the gate
+// sound on kGate_Passed.
+enum eWScriptGateResult {
+    kGate_Missed = -1,
+    kGate_Near = 0,
+    kGate_Passed = 1
+};
 
 struct cWScriptMan {
     // cWScriptManState
@@ -154,17 +250,17 @@ struct cWScriptMan {
     void runGlobalScripts() __asm__("cWScriptMan_runGlobalScripts");
     void doOnCollideScript(tCollideInfo* collideInfo, tIntersectInfo* intersectInfo, cBeing* obj)
         __asm__("cWScriptMan_doOnCollideScript");
-    int hasOnFocusScript(int id) __asm__("cWScriptMan_hasOnFocusScript");
+    bool hasOnFocusScript(int id) __asm__("cWScriptMan_hasOnFocusScript");
     void doOnFocusScript(int id) __asm__("cWScriptMan_doOnFocusScript");
-    int hasOnLoseFocusScript(int id) __asm__("cWScriptMan_hasOnLoseFocusScript");
-    int isFocusInstance(nash_Node* obj) __asm__("cWScriptMan_isFocusInstance");
+    bool hasOnLoseFocusScript(int id) __asm__("cWScriptMan_hasOnLoseFocusScript");
+    bool isFocusInstance(nash_Node* obj) __asm__("cWScriptMan_isFocusInstance");
     void upFocusScript(tInstanceRecord* obj) __asm__("cWScriptMan_upFocusScript");
     void downFocusScript(tInstanceRecord* obj) __asm__("cWScriptMan_downFocusScript");
     void doOnLoseFocusScript(int id) __asm__("cWScriptMan_doOnLoseFocusScript");
-    int hasOnExpireScript(int id) __asm__("cWScriptMan_hasOnExpireScript");
+    bool hasOnExpireScript(int id) __asm__("cWScriptMan_hasOnExpireScript");
     void doOnExpireScript(int id) __asm__("cWScriptMan_doOnExpireScript");
     void doOnInitScript(int id) __asm__("cWScriptMan_doOnInitScript");
-    int hasOnFrameUpdateScript(int scriptId) __asm__("cWScriptMan_hasOnFrameUpdateScript");
+    bool hasOnFrameUpdateScript(int scriptId) __asm__("cWScriptMan_hasOnFrameUpdateScript");
     void doOnFrameUpdateScript(int id) __asm__("cWScriptMan_doOnFrameUpdateScript");
     void gotoTask() __asm__("cWScriptMan_gotoTask");
     void advanceToTask() __asm__("cWScriptMan_advanceToTask");
@@ -180,14 +276,14 @@ struct cWScriptMan {
     void updateMissionTicks(int ticks, int dir) __asm__("cWScriptMan_updateMissionTicks__FPvii");
     void updateMissionHeight(int being, void* src) __asm__("cWScriptMan_updateMissionHeight__FPviT0");
     void startLocalMission() __asm__("cWScriptMan_startLocalMission");
-    int previewLocalMission() __asm__("cWScriptMan_previewLocalMission");
+    bool previewLocalMission() __asm__("cWScriptMan_previewLocalMission");
     void cancelPreviewLocalMission() __asm__("cWScriptMan_cancelPreviewLocalMission");
     void cancelLocalMission() __asm__("cWScriptMan_cancelLocalMission");
     void restartLocalMission() __asm__("cWScriptMan_restartLocalMission");
     void quitLocalMission() __asm__("cWScriptMan_quitLocalMission");
     void failActiveLocalMission() __asm__("cWScriptMan_failActiveLocalMission");
-    int isProcessActive(void* process) __asm__("cWScriptMan_isProcessActive__FPvT0");
-    int isLocalMissionActive() __asm__("cWScriptMan_isLocalMissionActive");
+    bool isProcessActive(void* process) __asm__("cWScriptMan_isProcessActive__FPvT0");
+    bool isLocalMissionActive() __asm__("cWScriptMan_isLocalMissionActive");
     void collectPool(unsigned int id, int size) __asm__("cWScriptMan_collectPool");
     void collect(int rider, int id, int instId) __asm__("cWScriptMan_collect");
     int collectCount(int id) __asm__("cWScriptMan_collectCount");
@@ -217,7 +313,7 @@ struct cWScriptMan {
     int getCurrentTask() __asm__("cWScriptMan_getCurrentTask");
     void setCurrentTask(cWScriptTask* task) __asm__("cWScriptMan_setCurrentTask");
     int getCurrentProcess() __asm__("cWScriptMan_getCurrentProcess");
-    int isMenuQueueReady() __asm__("cWScriptMan_isMenuQueueReady");
+    bool isMenuQueueReady() __asm__("cWScriptMan_isMenuQueueReady");
     void popMenuQueueEntry() __asm__("cWScriptMan_popMenuQueueEntry");
     void getMenuQueueEntry() __asm__("cWScriptMan_getMenuQueueEntry");
     void init() __asm__("cWScriptMan_init");

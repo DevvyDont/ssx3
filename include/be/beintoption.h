@@ -106,6 +106,21 @@ struct tBEOptionDB {
     char szQuickMessage[10][64];        // 0x7 [O]; [R] setQuickKeyMessage / resetQuickKey: 64-byte entries from +7
 };
 
+// tBEOptionDB::iUseWidescreen's settings (names ours). [U] the game options screen (cFEStateOptionsGame_onCreateScreen)
+// lists kT_CMNOff, kT_19Widescreen169 and kT_19WidescreenAnimorphic in this order and selects iUseWidescreen.
+enum eWidescreenSetting {
+    kWidescreen_Off = 0,
+    kWidescreen_16x9 = 1,
+    kWidescreen_Anamorphic = 2
+};
+
+// iUseWidescreen's place in the option block's first word (bits 20-21), for code that tests the whole word (names
+// ours; [U] tNISList_GetVideoDBRecord).
+enum {
+    kOptionWidescreenShift = 20,
+    kOptionWidescreenMask = 3 << kOptionWidescreenShift
+};
+
 CHECK_OFFSET(tBEOptionDB, iVtDelta, 0x5);
 CHECK_OFFSET(tBEOptionDB, iHzDelta, 0x6);
 CHECK_OFFSET(tBEOptionDB, szQuickMessage, 0x7);

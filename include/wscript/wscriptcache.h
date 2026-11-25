@@ -52,6 +52,18 @@ CHECK_OFFSET(tWScriptMissionData, MissionScriptId, 0x40);
 CHECK_OFFSET(tWScriptMissionData, Scope, 0x50);
 CHECK_SIZE(tWScriptMissionData, 0x54);
 
+// An instance's event script (tWScriptInstanceData::EventScriptId's index, getWScriptHeaderId's entry; names ours).
+// [U] cWScriptMan's doOnInitScript, doOnFocusScript, doOnCollideScript, doOnLoseFocusScript, doOnExpireScript and
+// doOnFrameUpdateScript run entries 0-5.
+enum eWScriptInstanceScript {
+    kInstScript_Init = 0,
+    kInstScript_Focus = 1,
+    kInstScript_Collide = 2,
+    kInstScript_LoseFocus = 3,
+    kInstScript_Expire = 4,
+    kInstScript_FrameUpdate = 5
+};
+
 struct tWScriptInstanceData {
     unsigned int EventScriptId[6];  // 0x00 [O] tResourceID[6]; [U] cWScriptCacheEntry_getWScriptHeaderId returns
                                     //      InstanceScriptData[slot].EventScriptId[entry] (0x18 stride)
@@ -187,8 +199,18 @@ CHECK_SIZE(tScriptFileHeader, 0x5C);
 // retail access through `this` in its 13 methods falls on a member start.
 struct tInstanceRecord;
 
+// A cached section script's state (cWScriptCacheEntry::mState; names ours). [R] the ctor stores 0; [U]
+// cWScriptCacheEntry_load stores 1 (loading), or 2 when the async load could not start; resolve stores 3 once the file
+// is fixed up (or there is none); cWScriptMan's isFocusInstance / upFocusScript want 3, rebuildGlobalTables 2 or more.
+enum eWScriptCacheState {
+    kWSCacheState_Empty = 0,
+    kWSCacheState_Loading = 1,
+    kWSCacheState_Loaded = 2,
+    kWSCacheState_Ready = 3
+};
+
 struct cWScriptCacheEntry {
-    short mState;                   // 0x000 [O]; [R] ctor 0
+    short mState;                   // 0x000 [O] eWScriptCacheState; [R] ctor 0
     short mStreamed;                // 0x002 [O]; [R] ctor 0
     int mAsyncHandle;               // 0x004 [O]; [R] ctor -1
     tScriptFileHeader* mpScriptHeader; // 0x008 [O]; [R] ctor 0

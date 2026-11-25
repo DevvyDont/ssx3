@@ -102,6 +102,19 @@ CHECK_SIZE(tBEGrabDB, 0x14);
 // The grab table (On Tour: const tBEGrabDB kGrabDB[]), indexed by grab.
 extern const tBEGrabDB kGrabDB[];
 
+// A kGrabDB index by the shoulder buttons that do the grab (names ours, only the grabs with uber variants). [R]
+// kGrabDB's records 0-4 and 9 are the ones with ubers (numUbers 6, 6, 6, 6, 11, 11); [U] the store's uber-trick
+// menu (cFEStateUberTrick_updateTrickMenu) shows the button icons bsl2, bsl1, bsr1, bsr2, bsl2 + bsl1 and
+// bsr1 + bsr2 for them.
+enum eGrabButtons {
+    kGrabButtons_L2 = 0,
+    kGrabButtons_L1 = 1,
+    kGrabButtons_R1 = 2,
+    kGrabButtons_R2 = 3,
+    kGrabButtons_L2L1 = 4,
+    kGrabButtons_R1R2 = 9
+};
+
 // A grab's points (On Tour struct tBEGrabPointsDB, 0x8). [U] cBELibrary_loadData fills cBELibrary_grabPointsDB
 // (85 entries); cBEBAGTInterface_getGrabPoints / getGrabPointsPerSec read them.
 struct tBEGrabPointsDB {

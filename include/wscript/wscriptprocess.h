@@ -21,6 +21,18 @@ struct cWScriptMan;
 struct cWScriptProcess;
 struct cLunoTable;
 
+// A task's or a process's run state (cWScriptTask::State, cWScriptProcess::State): [O] enum tTaskState, names and
+// values (cWScriptTaskState::State; On Tour's cWScriptProcessState::State is a plain int). [U] retail uses them the
+// same way for both: taskStart / taskEnd set 1 / 3 once, cWScriptTask_update and cWScriptProcess_update turn 1 into 2
+// and run the update script in 2, dispatchTaskEvent only passes events to a task in 2, and cWScriptProcess_endTask,
+// missionRestart and missionFail test 3 and 2.
+enum tTaskState {
+    kTaskState_Init = 0,
+    kTaskState_Start = 1,
+    kTaskState_Update = 2,
+    kTaskState_End = 3
+};
+
 struct cWScriptTask {
     // cWScriptTaskState
     int State;                         // 0x00 [O] tTaskState; [U] taskEnd, abortTask, dispatchTaskEvent

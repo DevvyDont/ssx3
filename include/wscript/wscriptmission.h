@@ -35,6 +35,10 @@ struct cWScriptTask;
 struct cWScriptProcess;
 struct cLunoTable;
 
+// A mission's scope (Scope): [U] isScopeLocal ([O] On Tour's name) and cWScriptMan_isLocalMissionActive test it for
+// 2. The name is ours; the other values are not known.
+enum { kMissionScope_Local = 2 };
+
 struct cWScriptMission {
     // --- cWScriptProcess (wscript/wscriptprocess.h, 0x60), whose first part is cWScriptProcessState (0x00-0x0F)
     int State;                         // 0x00 [O]; [R] base ctor 0; [U] missionRestart / missionFail test 2 (running)
@@ -70,7 +74,7 @@ struct cWScriptMission {
     void missionFail() __asm__("cWScriptMission_missionFail");
     void missionUpdateWorld() __asm__("cWScriptMission_missionUpdateWorld");
     int getSortKey() __asm__("cWScriptMission_getSortKey");
-    int isScopeLocal() __asm__("cWScriptMission_isScopeLocal");
+    bool isScopeLocal() __asm__("cWScriptMission_isScopeLocal");
 };
 
 CHECK_OFFSET(cWScriptMission, State, 0x00);

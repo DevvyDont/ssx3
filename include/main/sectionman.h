@@ -76,6 +76,21 @@ CHECK_OFFSET(tSectionMap, State, 0x8);
 CHECK_OFFSET(tSectionMap, Priority, 0xC);
 CHECK_SIZE(tSectionMap, 0x10);
 
+// A section-manager game mode (mMode, eventbegin's mode): [O] enum eSectionManMode, names and values. [U] the script
+// mode table D_00445E40 that SetGameModeFunc and SectionFunc read holds {2, 3, 4, 5, 1, 1, 1, 0}: script modes 0-3 are
+// race, slopestyle, big air and halfpipe, 4-6 freeride, 7 none.
+enum eSectionManMode {
+    kSMMode_None = 0,
+    kSMMode_Freeride = 1,
+    kSMMode_Race = 2,
+    kSMMode_SlopeStype = 3,                // [O] spelling
+    kSMMode_BigAir = 4,
+    kSMMode_HalfPipe = 5,
+    kSMMode_TimeChallenge = 6,
+    kSMMode_Default = 7,
+    kSMMode_Num = 8
+};
+
 struct cSectionMan {
     tSectionManEvent m_EventPool[51];      // 0x000 [O] (On Tour 61); [R] initEventPool: 50 linked + a terminator at 0x190
     tSectionManEvent* m_pFreeEventList;    // 0x198 [P] assert m_pFreeEventList; [R] = &m_EventPool[0];

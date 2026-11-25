@@ -49,6 +49,14 @@ enum eScriptTransition {
     keScriptTransition_Num = 9
 };
 
+// A script transition's colour (tScriptObjTransitionInfo::transitionColour, tVideoDB::transitionColour). [O] On Tour's
+// enum eScriptTransitionColour, names and values; [U] cSSXScriptEngine_MakeTransitionObject makes Black (1, 0, 0, 0)
+// and White (1, 1, 1, 1) in tARGB's A, R, G, B order.
+enum eScriptTransitionColour {
+    keScriptTransitionColour_Black = 0,
+    keScriptTransitionColour_White = 1
+};
+
 // The script's transition request (On Tour tScriptObjTransitionInfo, 0x18). [R] cScriptObjTransition's ctor stores
 // transition = 9 and zeroes the rest; [U] cTransitionMan_OnStartObjectUse reads all six (it passes outTime (+0xC) as
 // StartTransition's inTime and inTime (+0x4) as its outTime).

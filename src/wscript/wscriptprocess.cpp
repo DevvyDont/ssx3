@@ -154,21 +154,22 @@ public:
 /**
  * Updates a running script process for one frame: its current task first, then the process itself.
  *
- * State (+0x0) 1 becomes 2 and falls through; in state 2 the current task (index +0x8, when below the task
- * count +0x4) gets its virtual update (slot 2, cWScriptTask_update), and if the state is still 2 afterwards the
+ * State (+0x0) kTaskState_Start becomes kTaskState_Update and falls through; in kTaskState_Update the current task
+ * (index +0x8, when below the task count +0x4) gets its virtual update (slot 2, cWScriptTask_update), and if the state
+ * is still kTaskState_Update afterwards the
  * process's virtual slot 5 (cWScriptProcess_processUpdate) runs. Other states do nothing. cWScriptMan_update calls it
  * for every active process.
  */
 extern "C" void cWScriptProcess_update(cWScriptProcess_update_cProc* self)
 {
     switch (self->state) {
-    case 0:
+    case kTaskState_Init:
         break;
-    case 1:
-        self->state = 2;
-    case 2: {
+    case kTaskState_Start:
+        self->state = kTaskState_Update;
+    case kTaskState_Update: {
         int st = self->state;
-        if (st == 2) {
+        if (st == kTaskState_Update) {
             if (self->cur < self->count) {
                 self->elems[self->cur].update();
             }
@@ -201,8 +202,9 @@ static inline void VCall_003078C0(char* self, int slot)
 /**
  * Dispatches a process event to the matching virtual handler of the process.
  *
- * The event's first halfword picks the handler: 0-9 call vtable slots 7-16 (cWScriptProcess_eventOnCollide, OnJump,
- * OnLand, OnTrick, OnWipeout, OnReset, OnCollect, OnEvent1, OnEvent2, OnEvent3). For a trick (3) the manager's (+0x10)
+ * The event's first halfword (an eWScriptEventType) picks the handler: kWSEvent_Collide .. kWSEvent_Event3 call vtable
+ * slots 7-16 (cWScriptProcess_eventOnCollide, OnJump, OnLand, OnTrick, OnWipeout, OnReset, OnCollect, OnEvent1,
+ * OnEvent2, OnEvent3). For a trick (kWSEvent_Trick) the manager's (+0x10)
  * TrickDef (+0x29C) points at the event's data (+0x4) during the call and is cleared after. Other ids are ignored.
  * cWScriptMan_update calls it for events flagged 0x20000.
  *
@@ -214,36 +216,36 @@ void cWScriptProcess::dispatchProcessEvent(tWScriptEvent* vmsg)
 {
     unsigned short* msg = (unsigned short*)vmsg;
     switch (*msg) {
-    case 0:
+    case kWSEvent_Collide:
         VCall_003078C0(((char*)this), 7);
         break;
-    case 1:
+    case kWSEvent_Jump:
         VCall_003078C0(((char*)this), 8);
         break;
-    case 2:
+    case kWSEvent_Land:
         VCall_003078C0(((char*)this), 9);
         break;
-    case 3:
+    case kWSEvent_Trick:
         Manager->TrickDef = (tTrickNameDef*)(msg + 2);
         VCall_003078C0(((char*)this), 10);
         Manager->TrickDef = 0;
         break;
-    case 4:
+    case kWSEvent_Wipeout:
         VCall_003078C0(((char*)this), 11);
         break;
-    case 5:
+    case kWSEvent_Reset:
         VCall_003078C0(((char*)this), 12);
         break;
-    case 6:
+    case kWSEvent_Collect:
         VCall_003078C0(((char*)this), 13);
         break;
-    case 7:
+    case kWSEvent_Event1:
         VCall_003078C0(((char*)this), 14);
         break;
-    case 8:
+    case kWSEvent_Event2:
         VCall_003078C0(((char*)this), 15);
         break;
-    case 9:
+    case kWSEvent_Event3:
         VCall_003078C0(((char*)this), 16);
         break;
     }
@@ -600,15 +602,16 @@ extern "C" void cWScriptProcess_end(cWScriptProcess* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processComplete);
 #ifdef SKIP_ASM
-int cWScriptMan_isProcessActive(void* man, void* proc);
+bool cWScriptMan_isProcessActive(void* man, void* proc);
 
 
 /**
  * Completes a world-script process if its manager still has it on the running list.
  *
- * cWScriptMan_isProcessActive() looks for a process with the same id (+0x20) on the running list; when there is one, this
- * calls its own virtual slot 6, which for cWScriptProcess (cWScriptProcess_processEnd) sets the state to 3, runs the script
- * at +0x30 and calls cWScriptProcess_end(). The task stepper cWScriptProcess_endTask calls it after the last task.
+ * cWScriptMan_isProcessActive() looks for a process with the same id (+0x20) on the running list; when there is one,
+ * this calls its own virtual slot 6, which for cWScriptProcess (cWScriptProcess_processEnd) sets the state to 3, runs
+ * the script at +0x30 and calls cWScriptProcess_end(). The task stepper cWScriptProcess_endTask calls it after the last
+ * task.
  */
 void cWScriptProcess::processComplete()
 {
@@ -650,13 +653,13 @@ public:
 /**
  * Ends the process's current task and moves on to the next.
  *
- * Does nothing once the process has ended (state 3). Otherwise calls virtual slot 6 of the current task (index +0x8
- * into the 0x44-byte tasks at +0x14); if another task follows (count at +0x4) it becomes current and gets its virtual
- * slot 4, else the process's own virtual slot 2 runs.
+ * Does nothing once the process has ended (kTaskState_End). Otherwise calls virtual slot 6 of the current task (index
+ * +0x8 into the 0x44-byte tasks at +0x14); if another task follows (count at +0x4) it becomes current and gets its
+ * virtual slot 4, else the process's own virtual slot 2 runs.
  */
 extern "C" void cWScriptProcess_endTask(cWScriptProcess_endTask_cProc* self)
 {
-    if (self->state == 3) {
+    if (self->state == kTaskState_End) {
         return;
     }
     self->elems[self->cur].taskEnd();
@@ -705,9 +708,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_advanceToTask);
 /**
  * Advances a script process to the task with id @p id: ends the current task and starts that one.
  *
- * Like cWScriptProcess_gotoTask, but the current task (index +0x8, when valid) is ended normally through its virtual slot 6
- * (cWScriptTask_taskEnd) instead of being aborted; the found task becomes current and gets slot 4
- * (cWScriptTask_taskStart). An unknown id does nothing. cWScriptMan_advanceToTask calls it on the manager's current process.
+ * Like cWScriptProcess_gotoTask, but the current task (index +0x8, when valid) is ended normally through its virtual
+ * slot 6 (cWScriptTask_taskEnd) instead of being aborted; the found task becomes current and gets slot 4
+ * (cWScriptTask_taskStart). An unknown id does nothing. cWScriptMan_advanceToTask calls it on the manager's current
+ * process.
  *
  * @param id  the task id to advance to
  */
@@ -736,7 +740,8 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getScriptCode__FPv);
  * Returns the script code for a resource id.
  *
  * Forwards to cWScriptMan_getScriptCode with the process's manager (+0x10); the id in the second argument is passed
- * through untouched. The declaration here takes only the process; callers use the cWScriptProcess_getScriptCode__FPv alias.
+ * through untouched. The declaration here takes only the process; callers use the cWScriptProcess_getScriptCode__FPv
+ * alias.
  *
  * @return the code, or 0 when the id is invalid
  */
@@ -759,8 +764,9 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int 
  *
  * Writes the first 0x10 bytes (state, task count, current task index, +0xC) with the frame's first virtual, gets the
  * section's script base with cWScriptCache_getScriptBase (cWorld_m_pTheWorld's cache, section +0x24), writes whether
- * the process has a local table (+0x1C) and, if so, the table with luno_cLunoTable_writeToReplayFrame against that base, then each task
- * with cWScriptTask_writeToReplayFrame. cWScriptMan_writeReplayProcessList calls it for each process in a list.
+ * the process has a local table (+0x1C) and, if so, the table with luno_cLunoTable_writeToReplayFrame against that
+ * base, then each task with cWScriptTask_writeToReplayFrame. cWScriptMan_writeReplayProcessList calls it for each
+ * process in a list.
  *
  * @param stream  the replay frame
  */
@@ -797,7 +803,8 @@ extern "C" void cWScriptTask_readFromReplayFrame(cWScriptTask* a, cBxReplayFrame
  * Reads the first 0x10 bytes with the frame's second virtual, gets the section's script base, destroys any local
  * table (+0x1C, flags 3) and clears it, reads the has-table flag and, if set, allocates a new 4-byte
  * "ProcessLocalTable" cLunoTable (constructed with 8) and fills it with luno_cLunoTable_readFromReplayFrame, then
- * reads each task with cWScriptTask_readFromReplayFrame. cWScriptMan_readReplayProcessList calls it for each process in a list.
+ * reads each task with cWScriptTask_readFromReplayFrame. cWScriptMan_readReplayProcessList calls it for each process in
+ * a list.
  *
  * @param stream  the replay frame
  */
@@ -871,8 +878,8 @@ struct cWScriptTask_initTask_sObj {
 /**
  * Initialises a world-script task from its task data, resolving the data's script ids to script code.
  *
- * Stores @p owner, copies the task id from the data's first word to +0x4 (cWScriptProcess_gotoTask finds tasks by it), and
- * turns the data's 3 + 10 script resource ids into code pointers with cWScriptMan_getScriptCode() through the
+ * Stores @p owner, copies the task id from the data's first word to +0x4 (cWScriptProcess_gotoTask finds tasks by it),
+ * and turns the data's 3 + 10 script resource ids into code pointers with cWScriptMan_getScriptCode() through the
  * owner's manager (cWScriptProcess_getScriptCode).
  *
  * @param owner  the cWScriptProcess the task belongs to
@@ -909,19 +916,19 @@ public:
 };
 
 /**
- * Runs one frame of a world-script task: a started task (state 1) becomes running (2), and a running task runs its
- * update script (slot 5, taskUpdate).
+ * Runs one frame of a world-script task: a started task (kTaskState_Start) becomes running (kTaskState_Update), and a
+ * running task runs its update script (slot 5, taskUpdate).
  */
 extern "C" void cWScriptTask_update(cWScriptTask_update_cProcess* self)
 {
     switch (self->state) {
-    case 0:
+    case kTaskState_Init:
         break;
-    case 1:
-        self->state = 2;
+    case kTaskState_Start:
+        self->state = kTaskState_Update;
         self->taskUpdate();
         break;
-    case 2:
+    case kTaskState_Update:
         self->taskUpdate();
         break;
     }
@@ -945,52 +952,53 @@ static inline void VCall_003083A0(char* self, int slot)
 }
 
 /**
- * Passes a world-script event to a running task (state 2) as the matching event virtual.
+ * Passes a world-script event to a running task (kTaskState_Update) as the matching event virtual.
  *
- * Event types 0-9 call slots 7-16: on collide, jump, land, trick, wipeout, reset, collect and event 1-3. For a
- * trick the event's data (+0x4) is put in the script manager's word +0x29C while the handler runs.
+ * Event types (eWScriptEventType) kWSEvent_Collide .. kWSEvent_Event3 call slots 7-16: on collide, jump, land, trick,
+ * wipeout, reset, collect and event 1-3. For a trick the event's data (+0x4) is put in the script manager's word +0x29C
+ * while the handler runs.
  *
  * @param vself  the task (On Tour this)
  * @param vmsg  the event (On Tour const tWScriptEvent& event): type in the first halfword
  */
-// Same event dispatch as cWScriptProcess_dispatchProcessEvent for a running (state 2) sub-process.
+// Same event dispatch as cWScriptProcess_dispatchProcessEvent for a running (kTaskState_Update) sub-process.
 extern "C" void cWScriptTask_dispatchTaskEvent(cWScriptTask* vself, void* vmsg)
 {
     unsigned short* msg = (unsigned short*)vmsg;
-    if (*(int*)vself != 2) {
+    if (*(int*)vself != kTaskState_Update) {
         return;
     }
     switch (*msg) {
-    case 0:
+    case kWSEvent_Collide:
         VCall_003083A0(((char*)vself), 7);
         break;
-    case 1:
+    case kWSEvent_Jump:
         VCall_003083A0(((char*)vself), 8);
         break;
-    case 2:
+    case kWSEvent_Land:
         VCall_003083A0(((char*)vself), 9);
         break;
-    case 3:
+    case kWSEvent_Trick:
         vself->Process->Manager->TrickDef = (tTrickNameDef*)(msg + 2);
         VCall_003083A0(((char*)vself), 10);
         vself->Process->Manager->TrickDef = 0;
         break;
-    case 4:
+    case kWSEvent_Wipeout:
         VCall_003083A0(((char*)vself), 11);
         break;
-    case 5:
+    case kWSEvent_Reset:
         VCall_003083A0(((char*)vself), 12);
         break;
-    case 6:
+    case kWSEvent_Collect:
         VCall_003083A0(((char*)vself), 13);
         break;
-    case 7:
+    case kWSEvent_Event1:
         VCall_003083A0(((char*)vself), 14);
         break;
-    case 8:
+    case kWSEvent_Event2:
         VCall_003083A0(((char*)vself), 15);
         break;
-    case 9:
+    case kWSEvent_Event3:
         VCall_003083A0(((char*)vself), 16);
         break;
     }
@@ -1183,13 +1191,13 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskStart);
 extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
 
 /**
- * Starts the task once: sets its state to 1 (started) and runs its start script (TaskScriptCode[0], +0x8) when it
+ * Starts the task once: sets its state to kTaskState_Start and runs its start script (TaskScriptCode[0], +0x8) when it
  * has one.
  */
 extern "C" void cWScriptTask_taskStart(cWScriptTask* self)
 {
-    if (*(int*)self != 1) {
-        *(int*)self = 1;
+    if (*(int*)self != kTaskState_Start) {
+        *(int*)self = kTaskState_Start;
         void* script = self->TaskScriptCode[0];
         if (script != 0) {
             cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
@@ -1222,13 +1230,13 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskEnd);
 extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
 
 /**
- * Ends the task once: sets its state to 3 (ended) and runs its end script (TaskScriptCode[2], +0x10) when it has
+ * Ends the task once: sets its state to kTaskState_End and runs its end script (TaskScriptCode[2], +0x10) when it has
  * one.
  */
 extern "C" void cWScriptTask_taskEnd(cWScriptTask* self)
 {
-    if (*(int*)self != 3) {
-        *(int*)self = 3;
+    if (*(int*)self != kTaskState_End) {
+        *(int*)self = kTaskState_End;
         void* script = self->TaskScriptCode[2];
         if (script != 0) {
             cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
@@ -1300,8 +1308,8 @@ extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan"
 /**
  * Constructs the world script manager.
  *
- * Sets +0x2C to -1, constructs the mission menu queue at +0x1C4, sets the vtable cWScriptMan_vtbl at +0x494, constructs the
- * idle (+0x2B4), active (+0x2B8) and pending (+0x2BC) process lists and the collect pool at +0x2C0, stores this in
+ * Sets +0x2C to -1, constructs the mission menu queue at +0x1C4, sets the vtable cWScriptMan_vtbl at +0x494, constructs
+ * the idle (+0x2B4), active (+0x2B8) and pending (+0x2BC) process lists and the collect pool at +0x2C0, stores this in
  * cWScriptMan_TheWScriptMan, takes cWorld_m_pTheWorld as its world (+0x28C), zeroes the 50 section table pointers at
  * +0x3CC and runs cWScriptMan_init.
  *
@@ -1347,8 +1355,9 @@ extern int cWScriptMan_TheWScriptMan;
 /**
  * Destroys the world script manager.
  *
- * Restores the vtable cWScriptMan_vtbl, runs cWScriptMan_purgeGlobalTables, clears cWScriptMan_TheWScriptMan, destroys the pending, active
- * and idle process lists (cProcessList__cProcessList, flag 2) and calls operator delete when bit 0 of @p flags is set.
+ * Restores the vtable cWScriptMan_vtbl, runs cWScriptMan_purgeGlobalTables, clears cWScriptMan_TheWScriptMan, destroys
+ * the pending, active and idle process lists (cProcessList__cProcessList, flag 2) and calls operator delete when bit 0
+ * of @p flags is set.
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
@@ -1458,8 +1467,8 @@ void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptM
 /**
  * Recreates the global script tables for the loaded world sections.
  *
- * Runs cWScriptMan_purgeGlobalTables, then for every section of the world view whose script cache entry has reached state 2 and has
- * data, calls cWScriptMan_allocateGlobalTable with the section index.
+ * Runs cWScriptMan_purgeGlobalTables, then for every section of the world view whose script cache entry has reached
+ * state 2 and has data, calls cWScriptMan_allocateGlobalTable with the section index.
  */
 void cWScriptMan::rebuildGlobalTables()
 {
@@ -1482,7 +1491,8 @@ extern "C" void* cWScriptMan_allocateGlobalTable(void* self);
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_loadSection__FPv);
 #ifdef SKIP_ASM
 /**
- * Prepares a loaded world section's scripts: allocates the section's global Luno table with cWScriptMan_allocateGlobalTable.
+ * Prepares a loaded world section's scripts: allocates the section's global Luno table with
+ * cWScriptMan_allocateGlobalTable.
  *
  * The section index arrives in the second argument register and is passed through untouched (the C here declares
  * only @p self). gameload calls it on cWScriptMan_TheWScriptMan once a section's scripts are loaded.
@@ -1508,9 +1518,10 @@ void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptM
 /**
  * (Re)allocates the global Luno table of world section @p i: destroys the old one (flags 3) and stores a new one.
  *
- * The table array starts at +0x3CC (cWScriptMan_getGlobalTable reads it); the new table is a 4-byte "cLunoTable" allocation
- * (flags 0x20000000) constructed with 0x40. No bounds check (On Tour asserts sectionId < kMaxGlobalTables).
- * cWScriptMan_rebuildGlobalTables calls it for every section whose script data is loaded, cWScriptMan_loadSection for one.
+ * The table array starts at +0x3CC (cWScriptMan_getGlobalTable reads it); the new table is a 4-byte "cLunoTable"
+ * allocation (flags 0x20000000) constructed with 0x40. No bounds check (On Tour asserts sectionId < kMaxGlobalTables).
+ * cWScriptMan_rebuildGlobalTables calls it for every section whose script data is loaded, cWScriptMan_loadSection for
+ * one.
  *
  * @param i  the world section index
  * @return the new table
@@ -1578,21 +1589,22 @@ static inline void* wsPlayback8C60()
 }
 
 /**
- * Sets up the world's missions: in game mode 4 with one player, creates a mission process for every mission
- * script of every world section.
+ * Sets up the world's missions: in game mode kGAMEMODE_FREERIDE with one player, creates a mission process for every
+ * mission script of every world section.
  *
  * First releases the playback manager's loaded data (cPlaybackMan_purgeLocation). When cGameMode (newRace.cGameMode) is
- * 4 and the AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1) per 0x54-byte
- * mission script (tWScriptMissionData), keyed (section << 16) + section, and calls cPlaybackMan_initLocation() for the
- * race location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs each mission script's code at +0x4C
- * and clears the manager's mission state.
+ * kGAMEMODE_FREERIDE and the AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1)
+ * per 0x54-byte mission script (tWScriptMissionData), keyed (section << 16) + section, and calls
+ * cPlaybackMan_initLocation() for the race location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs
+ * each mission script's code at +0x4C and clears the manager's mission state.
  */
 void cWScriptMan::setupMissions()
 {
     void* iface;
     cPlaybackMan_purgeLocation(wsPlayback8C60());
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGameMode == 4 && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
+    if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE
+        && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
         int i = 0;
         int n = cWorldView_getNumSections(&World->m_pWorldCache->m_WorldView);
         for (; i < n; i++) {
@@ -1814,13 +1826,16 @@ extern "C" void cPlaybackMan_startPreview(void* p);
 /**
  * Carries out the local mission request queued by the menus, then clears it.
  *
- * Switches on the request at +0x2AC for the mission saved in +0x2B0: 1 (cWScriptMan_startLocalMission) updates the world, sends mission
- * command 1, plays the big-challenge start audio (cSSXAudio_BigChallengeBegin) and calls cReplay_startRace; 2
- * (cWScriptMan_restartLocalMission) sends command 3; 3 (cWScriptMan_cancelLocalMission) and 4
- * (cWScriptMan_quitLocalMission) send commands 18 and 5, update the world and play the failure audio
- * (cSSXAudio_BigChallengeFailed); 5 (cWScriptMan_previewLocalMission) starts the playback preview (cPlaybackMan_startPreview), sends
- * command 1 with argument 1 and updates the world; 6 (cWScriptMan_cancelPreviewLocalMission) sends 18 and updates the world. The request is
- * then cleared (0, mission -1). Mission commands go through cWScriptMan_doMissionCmd.
+ * Switches on the request at +0x2AC (eWScriptLocalMissionCmd) for the mission saved in +0x2B0: kLocalMissionCmd_Start
+ * (cWScriptMan_startLocalMission) updates the world, sends kMissionCmd_Start, plays the big-challenge start audio
+ * (cSSXAudio_BigChallengeBegin) and calls cReplay_startRace; kLocalMissionCmd_Restart (cWScriptMan_restartLocalMission)
+ * sends kMissionCmd_Restart; kLocalMissionCmd_Cancel (cWScriptMan_cancelLocalMission) and kLocalMissionCmd_Quit
+ * (cWScriptMan_quitLocalMission) send kMissionCmd_End and kMissionCmd_Fail, update the world and play the failure audio
+ * (cSSXAudio_BigChallengeFailed); kLocalMissionCmd_Preview (cWScriptMan_previewLocalMission) starts the playback
+ * preview (cPlaybackMan_startPreview), sends kMissionCmd_Start for rider 1 and updates the world;
+ * kLocalMissionCmd_CancelPreview (cWScriptMan_cancelPreviewLocalMission) sends kMissionCmd_End and updates the world.
+ * The request is then cleared (kLocalMissionCmd_None, mission kWScriptId_None). Mission commands go through
+ * cWScriptMan_doMissionCmd.
  *
  * @param vself  the world script manager (this)
  */
@@ -1828,37 +1843,37 @@ extern "C" void cPlaybackMan_startPreview(void* p);
 void cWScriptMan::processLocalMissionCmd()
 {
     switch (LocalMissionCmd) {
-    case 1:
+    case kLocalMissionCmd_Start:
         updateWorld();
-        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, 1, 0);
+        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, kMissionCmd_Start, 0);
         cSSXAudio_BigChallengeBegin(cAudioInterface_bxAudio(), (int)LocalMissionId);
         cReplay_startRace(SSXApp->Game->Replay);
         break;
-    case 2:
-        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, 3, 0);
+    case kLocalMissionCmd_Restart:
+        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, kMissionCmd_Restart, 0);
         break;
-    case 3:
-        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, 18, 0);
+    case kLocalMissionCmd_Cancel:
+        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, kMissionCmd_End, 0);
         updateWorld();
         cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 1);
         break;
-    case 4:
-        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, 5, 0);
+    case kLocalMissionCmd_Quit:
+        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, kMissionCmd_Fail, 0);
         updateWorld();
         cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 1);
         break;
-    case 5:
+    case kLocalMissionCmd_Preview:
         cPlaybackMan_startPreview(SSXApp->Game->PlaybackMan);
-        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, 1, 1);
+        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, kMissionCmd_Start, 1);
         updateWorld();
         break;
-    case 6:
-        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, 18, 0);
+    case kLocalMissionCmd_CancelPreview:
+        cWScriptMan_doMissionCmd(((char*)this), (int)LocalMissionCmdId, kMissionCmd_End, 0);
         updateWorld();
         break;
     }
-    LocalMissionCmd = 0;
-    LocalMissionCmdId = 0xFFFFFFFF;
+    LocalMissionCmd = kLocalMissionCmd_None;
+    LocalMissionCmdId = kWScriptId_None;
 }
 #endif
 
@@ -1909,11 +1924,11 @@ static inline void* lookup_309270(sRefWorld_309270* w, unsigned int id)
 /**
  * Runs the world script manager for one frame.
  *
- * Runs cWScriptMan_processLocalMissionCmd and clears the per-frame counters. Each process in the pending list (+0x2BC) is moved to the idle
- * list and started. The event list at +0x40 is taken and emptied, and each event (with the instance for its id looked
- * up when its low 16 flag bits are 0) is passed to every active process: cWScriptProcess_dispatchProcessEvent for process events (0x20000) and
- * cWScriptProcess_dispatchTaskEvent for task events (0x10000). Finally every active process is updated with cWScriptProcess_update, each made
- * current in turn.
+ * Runs cWScriptMan_processLocalMissionCmd and clears the per-frame counters. Each process in the pending list (+0x2BC)
+ * is moved to the idle list and started. The event list at +0x40 is taken and emptied, and each event (with the
+ * instance for its id looked up when its low 16 flag bits are 0) is passed to every active process:
+ * cWScriptProcess_dispatchProcessEvent for process events (0x20000) and cWScriptProcess_dispatchTaskEvent for task
+ * events (0x10000). Finally every active process is updated with cWScriptProcess_update, each made current in turn.
  */
 void cWScriptMan::update()
 {

@@ -70,7 +70,7 @@ struct cScriptObject {
     int OnStartObjectUse() __asm__("cScriptObject_OnStartObjectUse__FPv");
     int OnEndObjectUse() __asm__("cScriptObject_OnEndObjectUse__FPv");
     int GetObjectID() __asm__("cScriptObject_GetObjectID");
-    int IsInUse() __asm__("cScriptObject_IsInUse");
+    bool IsInUse() __asm__("cScriptObject_IsInUse");
 };
 
 CHECK_OFFSET(cScriptObject, mObjType, 0x0);

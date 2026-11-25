@@ -500,6 +500,53 @@ enum eSSXEntityType {
     keSSXEntityType_GameEvent = 7
 };
 
+// A script subject: which cast member or rider a script refers to (cSSXScriptEngine::GetSubjectRider's slot, the index
+// of BuildCharacterBitRoleArray's flags; names ours). [U] both map 0-2 to the request's main and supporting characters
+// (tSSXScriptSetupInfo's AI indexes), 3-4 to the human players, 5-9 to the computer riders and then the actors, 10-14
+// to the actors and then the computer riders, and 15-20 to the AI's riders by index.
+enum eSSXScriptSubject {
+    keSSXSubject_MainChar = 0,
+    keSSXSubject_SupportChar0 = 1,
+    keSSXSubject_SupportChar1 = 2,
+    keSSXSubject_Player0 = 3,
+    keSSXSubject_Player1 = 4,
+    keSSXSubject_Computer0 = 5,
+    keSSXSubject_Computer1 = 6,
+    keSSXSubject_Computer2 = 7,
+    keSSXSubject_Computer3 = 8,
+    keSSXSubject_Computer4 = 9,
+    keSSXSubject_Actor0 = 10,
+    keSSXSubject_Actor1 = 11,
+    keSSXSubject_Actor2 = 12,
+    keSSXSubject_Actor3 = 13,
+    keSSXSubject_Actor4 = 14,
+    keSSXSubject_Rider0 = 15,
+    keSSXSubject_Rider1 = 16,
+    keSSXSubject_Rider2 = 17,
+    keSSXSubject_Rider3 = 18,
+    keSSXSubject_Rider4 = 19,
+    keSSXSubject_Rider5 = 20,
+    keSSXSubject_Num = 21
+};
+
+// The kind of a script bank's attached data (OnAttachData's kind, OnDetachData's type; names ours). [U] OnAttachData
+// stores Script for "scr" data, Animation for "anm" and Sound for "snd"; OnDetachData detaches each accordingly.
+enum eScriptBankDataKind {
+    keScriptBankData_Script = 0,
+    keScriptBankData_Animation = 1,
+    keScriptBankData_Sound = 2
+};
+
+// How a race start is reached (AppendStartSequence's state). [O] On Tour's enum eNISStartSituation, names and values;
+// [U] AppendStartSequence queues the fly-in for InitEvent, the start frame for RestartEvent and NextHeat, and the
+// start gate and frame for LastHeat.
+enum eNISStartSituation {
+    keNISStartSituation_InitEvent = 0,
+    keNISStartSituation_RestartEvent = 1,
+    keNISStartSituation_NextHeat = 2,
+    keNISStartSituation_LastHeat = 3
+};
+
 struct tSSXScriptBankInfo {
     void* dataBankHandle; // 0x0 [O]; [R] cDataManager attach handle (SyncLoadScriptBank); [U] detached by PurgeScriptBank
     int dataIdentifier;   // 0x4 [O]; [R] the bank's key (SyncLoadScriptBank, cSSXScriptEngine_AsyncLoadScriptBank); Clear sets -1
@@ -518,6 +565,11 @@ struct cRider;
 struct t4Vector;
 
 struct cSSXScriptEngine {
+    // FillOrientationFromObjectOrientationInfo's section for "the current location's" (one past mpAnchorTableDB's 50
+    // sections; name ours). [U] it then looks the section up from the new-race location (D_00482660); On Tour calls
+    // the parameter overrideSectionID, and GetAnchorOrientation passes this for every object anchor but two.
+    enum { kAnchorSection_CurrentLocation = 50 };
+
     // --- cScriptDatabaseObject (base of cBXScriptEngine; ctor cScriptDatabaseObject_cScriptDatabaseObject, vtable _vt$21cScriptDatabaseObject)
     cScriptObject* mpObjectDatabase[20];         // 0x000 [O]; [R] cScriptDatabaseObject_cScriptDatabaseObject zeroes 20 words
     tScriptEntityRecord mEntityDatabase[30];     // 0x050 [O] tScriptEntityRecord[30]; [R] cScriptDatabaseObject_cScriptDatabaseObject sets 30
@@ -683,7 +735,7 @@ struct cSSXScriptEngine {
     void OnInSeqStop(cScriptPlayerMain* pPlayer) __asm__("cSSXScriptEngine_OnInSeqStop");
     void PlayTransportSequence(int online, int intro) __asm__("cSSXScriptEngine_PlayTransportSequence");
     bool EndTransportSequence() __asm__("cSSXScriptEngine_EndTransportSequence");
-    int IsInTransportSequence() __asm__("cSSXScriptEngine_IsInTransportSequence");
+    bool IsInTransportSequence() __asm__("cSSXScriptEngine_IsInTransportSequence");
     void AppendStartSequence(int state) __asm__("cSSXScriptEngine_AppendStartSequence");
     void AppendEndEventSequence() __asm__("cSSXScriptEngine_AppendEndEventSequence");
     int* GetScriptFromCategory(int cat) __asm__("cSSXScriptEngine_GetScriptFromCategory");
@@ -703,9 +755,9 @@ struct cSSXScriptEngine {
         __asm__("cSSXScriptEngine_FillOrientationFromRiderOrientationInfo");
     void* AllocScriptSetupInfo() __asm__("cSSXScriptEngine_AllocScriptSetupInfo__FPv");
     void ReleaseScriptSetupInfo(void* vsetupInfo) __asm__("cSSXScriptEngine_ReleaseScriptSetupInfo__FPvT0");
-    int IsBankLoading(int i) __asm__("cSSXScriptEngine_IsBankLoading");
+    bool IsBankLoading(int i) __asm__("cSSXScriptEngine_IsBankLoading");
     void ClearNISPlayListState() __asm__("cSSXScriptEngine_ClearNISPlayListState");
-    int IsNISActive() __asm__("cSSXScriptEngine_IsNISActive");
+    bool IsNISActive() __asm__("cSSXScriptEngine_IsNISActive");
     int GetActiveNIS() __asm__("cSSXScriptEngine_GetActiveNIS");
     void DeInitOnce() __asm__("cSSXScriptEngine_DeInitOnce");
 };

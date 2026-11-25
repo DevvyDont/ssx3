@@ -142,6 +142,10 @@ CHECK_SIZE(tLobbyEventList, 0x8);
 struct LobbyApiMsgT;
 
 struct LobbyMan {
+    // A room-list index for no room (name ours): [U] func_0025D770 ('peek') and func_0025D800 (join) use an empty
+    // room name for it instead of looking the room up (func_0025F150).
+    enum { kRoomIndex_None = -1 };
+
     int mState;                     // 0x000 [P] "state == ..." asserts (preview offset 0x4); [R] ctor 0;
                                     //       [U] func_0025B608 (send request) stores the new state; values above
     int mServerAddr;                // 0x004 [R] ctor 0; [U] connect (func_0025B6D8) / update (func_0025AC50) store

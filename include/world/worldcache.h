@@ -68,6 +68,7 @@ struct tResourceID {
     bool operator==(const tResourceID& a) const { return m_uiRID == a.m_uiRID; } // [O]
     bool operator!=(const tResourceID& a) const { return m_uiRID != a.m_uiRID; } // [O]
     static const tResourceID Invalid() { return tResourceID(0xFFFFFFFF); }      // [O] [P] "tResourceID::Invalid()"
+    enum { kInvalidRID = 0xFFFFFFFF };                  // Invalid()'s word (name ours), for word compares
 };
 
 CHECK_OFFSET(tResourceID, m_bfRID, 0x0);

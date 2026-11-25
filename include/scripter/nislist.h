@@ -22,12 +22,51 @@
 
 struct cSSXScriptEngine;
 
+// A script entry's category (tNISListEntry::category below 29; 29 and up are video categories, tNISList_IsVideo).
+// [O] On Tour's enum eSSXScriptCategory, names and values. [U] retail uses them as On Tour names them:
+// cSSXScriptEngine_PlayTransportSequence queues the heli (12-15) or gondola (18-21) leave, in-transit start and loop
+// scripts, the loop's mp variant when more than one player is allocated; EndTransportSequence and
+// IsInTransportSequence pair 12/18, 13/19 and 14/20; AppendStartSequence queues 4 and 5 (race start gate, frame);
+// AppendEndEventSequence picks 9 or 10 (champion, cheat character) for the podium and 24 / 25 for the rider
+// challenge; tNISList_AddByScriptIndex stores keSSXScriptCategory_Num as "no category".
+enum eSSXScriptCategory {
+    keSSXScriptCategory_wcentryfirsttimearrive = 0,
+    keSSXScriptCategory_wcentryfirsttimeunload = 1,
+    keSSXScriptCategory_wcracestartestablish = 2,
+    keSSXScriptCategory_wcracestartentrance = 3,
+    keSSXScriptCategory_wcracestartgate = 4,
+    keSSXScriptCategory_wcracestartframe = 5,
+    keSSXScriptCategory_wcraceendpodiumplacenone = 6,
+    keSSXScriptCategory_wcraceendpodiumplace2 = 7,
+    keSSXScriptCategory_wcraceendpodiumplace3 = 8,
+    keSSXScriptCategory_wcraceendpodiumchampion = 9,
+    keSSXScriptCategory_wcraceendpodiumchampioncheat = 10,
+    keSSXScriptCategory_wctransportstart = 11,
+    keSSXScriptCategory_wctransporthelileave = 12,
+    keSSXScriptCategory_wctransportheliintransitstart = 13,
+    keSSXScriptCategory_wctransportheliintransitloop = 14,
+    keSSXScriptCategory_wctransportheliintransitloopmp = 15,
+    keSSXScriptCategory_wctransporthelibcarrive = 16,
+    keSSXScriptCategory_wctransporthelibcunload = 17,
+    keSSXScriptCategory_wctransportgondolaleave = 18,
+    keSSXScriptCategory_wctransportgondolaintransitstart = 19,
+    keSSXScriptCategory_wctransportgondolaintransitloop = 20,
+    keSSXScriptCategory_wctransportgondolaintransitloopmp = 21,
+    keSSXScriptCategory_wclodgearrive = 22,
+    keSSXScriptCategory_wclodgeleave = 23,
+    keSSXScriptCategory_wcriderchallengeoneventendintro = 24,
+    keSSXScriptCategory_wcriderchallengeoneventendmain = 25,
+    keSSXScriptCategory_wcriderchallengeonbc = 26,
+    keSSXScriptCategory_wcfirsttimeintrobc = 27,
+    keSSXScriptCategory_Num = 28
+};
+
 // One queued NIS (cutscene) request (On Tour tNISListEntry, 0x1C): the cCircularBuffer<5, tNISListEntry> element of
 // tNISList::mList. [U] cCircularBuffer_AddToTail copies 0x1C bytes (view sVidCmd3C80); tNISList_RemoveFromHead /
 // PlayNextScript / SkipForward / DoPause read category, scriptIndex, controlBits and scriptHandle (views sDmCmd7598,
 // sDmCmd7838, sSeqItem_66D0, sSeqItem_7C08).
 struct tNISListEntry {
-    int category;                   // 0x00 [O]
+    int category;                   // 0x00 [O]; eSSXScriptCategory, or a video category (29 and up)
     int scriptIndex;                // 0x04 [O]
     int controlBits;                // 0x08 [O]
     int scriptHandle;               // 0x0C [O]; [U] the request handle (cBXScriptEngine_GetRequestPlayerByReqHandle)
@@ -97,6 +136,15 @@ enum eNISListStatePlay {
 struct cScriptPlayerMain;
 
 struct tNISList {
+    // A ready list's start mode (mPlayOnReady, ReadyList's playOnReady). [O] On Tour's enum tNISList::ePlayOnReady,
+    // names and values; [U] tNISList_Update plays a ready list with its transition in for
+    // kePlayOnReady_YesWithTransitionIn, without for kePlayOnReady_YesWithNoTransition.
+    enum ePlayOnReady {
+        kePlayOnReady_No = 0,
+        kePlayOnReady_YesWithTransitionIn = 1,
+        kePlayOnReady_YesWithNoTransition = 2
+    };
+
     cSSXScriptEngine* mpNISEngine;      // 0x000 [O]; [R] the ctor zeroes it, cSSXScriptEngine_Load stores the engine;
                                         //       [U] read by every method that calls the engine (e.g. DoSkip)
     int mIsCutSceneHandler;             // 0x004 [O] bool; [R] the ctor sets 1, Load sets 0 for the idle lists
@@ -125,14 +173,14 @@ struct tNISList {
                                         //       lw/sw 0xC0 at the same statements)
 
     // Methods bound to their retail symbols by asm labels.
-    int AddByVideoCategory(int videoCategory, int controlBits) __asm__("tNISList_AddByVideoCategory");
-    int AddByScriptCategory(int scriptCategory, int controlBits, int lookup, int aiCharIndexMain,
+    bool AddByVideoCategory(int videoCategory, int controlBits) __asm__("tNISList_AddByVideoCategory");
+    bool AddByScriptCategory(int scriptCategory, int controlBits, int lookup, int aiCharIndexMain,
                             int aiCharIndexSupport0, int aiCharIndexSupport1)
         __asm__("tNISList_AddByScriptCategory");
-    int AddByScriptIndex(int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0,
+    bool AddByScriptIndex(int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0,
                          int aiCharIndexSupport1)
         __asm__("tNISList_AddByScriptIndex");
-    int TransferFromNISList(tNISList* other) __asm__("tNISList_TransferFromNISList");
+    bool TransferFromNISList(tNISList* other) __asm__("tNISList_TransferFromNISList");
     int ReadyList(int playOnReady) __asm__("tNISList_ReadyList");
     int SkipForward(int delta, int force) __asm__("tNISList_SkipForward");
     void Reset(int resetTransition) __asm__("tNISList_Reset");
@@ -145,8 +193,8 @@ struct tNISList {
     void DoSkip() __asm__("tNISList_DoSkip");
     int IsSkipAllowed() __asm__("tNISList_IsSkipAllowed");
     int IsPauseMenuAllowed() __asm__("tNISList_IsPauseMenuAllowed");
-    int IsPendingScriptReady() __asm__("tNISList_IsPendingScriptReady");
-    int IsPlayingScriptOwner(cScriptPlayerMain* obj) __asm__("tNISList_IsPlayingScriptOwner");
+    bool IsPendingScriptReady() __asm__("tNISList_IsPendingScriptReady");
+    bool IsPlayingScriptOwner(cScriptPlayerMain* obj) __asm__("tNISList_IsPlayingScriptOwner");
     int IsPlayingVideo() __asm__("tNISList_IsPlayingVideo");
     int IsPausedPendingNextScript() __asm__("tNISList_IsPausedPendingNextScript");
     void OnScriptPlay(int requestHandle, cScriptPlayerMain* obj) __asm__("tNISList_OnScriptPlay");
@@ -159,7 +207,7 @@ struct tNISList {
     void CheckOnLoading() __asm__("tNISList_CheckOnLoading");
     void PlayNextScriptOnAvailable() __asm__("tNISList_PlayNextScriptOnAvailable");
     void PlayNextScript() __asm__("tNISList_PlayNextScript");
-    int IsVideo(void* entry) __asm__("tNISList_IsVideo");
+    bool IsVideo(void* entry) __asm__("tNISList_IsVideo");
 };
 
 CHECK_OFFSET(tNISList, mpNISEngine, 0x000);

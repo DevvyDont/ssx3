@@ -34,6 +34,9 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern signed char D_004A4A70;
 extern unsigned char D_004964C0[];
+// D_004964C0's class for the name / value dividers ':' and '=' (name ours). [R] the table maps letters to upper case
+// and digits and '_' to themselves, these two to 1 and every other byte to 0.
+enum { kTagCharClass_Divider = 1 };
 extern "C" int memcmp(const void* a, const void* b, unsigned int n);
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
@@ -90,7 +93,7 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* fi
                 cursor++;
                 continue;
             }
-            if (D_004964C0[*cursor] == 1) {
+            if (D_004964C0[*cursor] == kTagCharClass_Divider) {
                 end = cursor;
                 start = cursor;
                 break;
@@ -103,7 +106,7 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* fi
                 recordClass = D_004964C0[cursor[n]];
                 fieldClass = D_004964C0[field[n]];
             }
-            if (recordClass + fieldClass == 2) {
+            if (recordClass + fieldClass == kTagCharClass_Divider + kTagCharClass_Divider) {
                 end = cursor;
                 start = cursor;
                 while (*end >= 0x20) end++;

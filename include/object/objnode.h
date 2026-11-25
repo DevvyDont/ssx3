@@ -93,6 +93,37 @@ CHECK_SIZE(cObjNode, 0x10);
 
 struct cObjNode;
 
+// A node's type (cTypeObjNode::ObjNodeType, isType's argument): [O] enum tObjNodeType, names and values. [U] the node
+// constructors pass them (cAnimObjectNode 1, cAnimDeltaNode 2, cAnimComboNode 3, cAnimTeeterNode 4), and
+// checkActiveNode (seg/seg_1FBE38) builds a cParticleNode for 13, a cMeshAnimNode for 11, a cDebounceNode for 0 and a
+// cDeadFadeNode for 22.
+enum tObjNodeType {
+    ATYPE_DEBOUNCE = 0,
+    ATYPE_ANIMOBJECT = 1,
+    ATYPE_ANIMDELTA = 2,
+    ATYPE_ANIMCOMBO = 3,
+    ATYPE_ANIMTEETER = 4,
+    ATYPE_FLEXBRIDGE = 5,
+    ATYPE_DEAD = 6,
+    ATYPE_COUNTER = 7,
+    ATYPE_BOOST = 8,
+    ATYPE_FENCE = 9,
+    ATYPE_FLAG = 10,
+    ATYPE_MESHANIM = 11,
+    ATYPE_TRICKTRIGGER = 12,
+    ATYPE_PARTICLE = 13,
+    ATYPE_FLOATING = 14,
+    ATYPE_CONVEYOR = 15,
+    ATYPE_HIDE = 16,
+    ATYPE_OBJECT = 17,
+    ATYPE_RAILMAN = 18,
+    ATYPE_RESTORE = 19,
+    ATYPE_FLOATRAIL = 20,
+    ATYPE_SPRINGRAIL = 21,
+    ATYPE_DEADFADE = 22,
+    kNumObjNodeType = 23
+};
+
 struct cTypeObjNode : public cObjNode {
     // cObjNode (above, 0x10): the vptr at 0x0C holds [R] cTypeObjNode_vtbl (0x00491E80) in both ctors and the dtor.
     // Its one new slot ([R] cTypeObjNode_vtbl, [O] cTypeObjNode::shouldRebound):

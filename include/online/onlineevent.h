@@ -70,6 +70,20 @@ CHECK_OFFSET(online_Event, mType, 0x0);
 CHECK_OFFSET(online_Event, mVtbl, 0x4);
 CHECK_SIZE(online_Event, 0x8);
 
+// Four-character codes of the LobbyApi and BuddyApi messages that are not errors, written as EA's multi-character
+// constants (the comment gives the ASCII, most significant byte first). Names ours, after the ASCII. [U]
+// LobbyMan_onconnectionmsg marks the lobby disconnected on 'disc'; LobbyMan_onchatmsg treats a 'priv' chat as a
+// private message; LobbyMan_onNewsRetrieved posts the news text for 'new1' and only marks the login done for 'new0';
+// BuddyMan_onconnect handles 'conn' (connection state) and 'auth' (login result) messages.
+enum tLobbyMsgCode {
+    kLobbyMsg_disc = 0x64697363,        // 'disc'
+    kLobbyMsg_new0 = 0x6E657730,        // 'new0'
+    kLobbyMsg_new1 = 0x6E657731,        // 'new1'
+    kLobbyMsg_priv = 0x70726976,        // 'priv'
+    kBuddyMsg_auth = 0x61757468,        // 'auth'
+    kBuddyMsg_conn = 0x636F6E6E         // 'conn'
+};
+
 // The four-character error codes of online::ErrorEvent::mError (the lobby's replies) and online::NetErrorEvent::mError
 // (the disconnect reasons, '-' first), written as EA's multi-character constants: the comment gives the ASCII of the
 // value's bytes from the most significant down. Names ours, after the ASCII. [U] the front end's error handlers

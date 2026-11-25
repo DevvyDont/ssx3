@@ -442,18 +442,18 @@ static inline sMsgListIterK2 sMsgListK2_insert(sMsgListIterK2 pos, void* const& 
 /**
  * Handles a lobby connection message: on a 'disc' (disconnect) message it marks the lobby disconnected.
  *
- * When the message code at +0x4 is 'disc' it pushes a type-277 event (8 bytes, vtable online_Event_vtbl) onto mEventList, sets
- * mDisconnected (func_0025AC50() then disconnects), and when the game connection object func_002591D0() returns is
- * active it shuts that down with func_00263BA8(..., 2). Called through the functor thunk func_00268B58 (LobbyApi
- * callback 3).
+ * When the message code at +0x4 is 'disc' (kLobbyMsg_disc) it pushes a kNetEvent_ConnectionMsg event (8 bytes, vtable
+ * online_Event_vtbl) onto mEventList, sets mDisconnected (func_0025AC50() then disconnects), and when the game
+ * connection object func_002591D0() returns is active it shuts that down with func_00263BA8(..., 2). Called through the
+ * functor thunk func_00268B58 (LobbyApi callback 3).
  *
  * @param msg  the LobbyApi message (word +0x4 is its code)
  */
 void LobbyMan::onconnectionmsg(int* msg)
 {
-    if (msg[1] == 0x64697363) {
+    if (msg[1] == kLobbyMsg_disc) {
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
-        event->mType = 277;
+        event->mType = kNetEvent_ConnectionMsg;
         event->mVtbl = online_Event_vtbl;
         void* mp = event;
         sMsgListK2_insert((sMsgListNodeK2*)mEventList.mpHead, mp);
@@ -585,7 +585,7 @@ extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(BuddyMan* p);
 extern "C" void func_0025B800(LobbyMan* self);
 extern "C" int func_002623B0(BuddyMan* self, int name);
-extern "C" int func_00263128(BuddyMan* self, char* name);
+extern "C" bool func_00263128(BuddyMan* self, char* name);
 extern "C" void func_00263018(BuddyMan* self, void* name);
 extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4, int a5, int a6, int a7,
                               int s0, int s1, char* s2, int s3, int s4, int s5, int s6);
@@ -702,7 +702,7 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
                                       str_empty_i);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A2F48), text, 0x100, str_empty_i);
     switch (msg->mKind) {
-    case 0x70726976: { // 'priv'
+    case kLobbyMsg_priv: {
         int flags = msg->mStatus;
         if (flags & 0x200000)
             break;
@@ -882,10 +882,11 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  * that is not us). Unless mState is 24 or 20 (waits that expect this message) it just sets mState 25 and shuts the game
  * connection down (func_00263BA8(..., 0)). Otherwise it sets mState 25 and, when P1 is present, configures
  * cBENewRaceInterface: P2 0 or 1 selects game mode 0 or 1 (5 or 6, with event 4 or 5, when P1 is 14..16), 2 selects
- * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and cBENewRaceInterface_bIsBamLocation = 1, and when cBENetworkInterface_networkOpt.bIsRankedGame[0] is set ORs 0x1C0 into the
- * word at cBERules_mRules + 0x18, sets no AI riders and calls the interface's virtual slot 1. Finally it starts the game
- * connection with func_00259098(..., mMatchType, 0) and posts a type-239 event. Called through the functor thunk
- * func_00268B80 (LobbyApi callback 4).
+ * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and cBENewRaceInterface_bIsBamLocation = 1,
+ * and when cBENetworkInterface_networkOpt.bIsRankedGame[0] is set ORs 0x1C0 into the word at cBERules_mRules + 0x18,
+ * sets no AI riders and calls the interface's virtual slot 1. Finally it starts the game connection with
+ * func_00259098(..., mMatchType, 0) and posts a type-239 event. Called through the functor thunk func_00268B80
+ * (LobbyApi callback 4).
  *
  * @param msg  the LobbyApi message (tag record pointer mpTagText)
  */
@@ -1309,8 +1310,8 @@ struct cBXStrAB40 {
 /**
  * Posts a chat event carrying a sender and a text on mEventList.
  *
- * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable D_00481230, cBXString copies of @p sender at
- * +0x8 and @p text at +0xC. The chat handler LobbyMan_onchatmsg() calls it for room chat and broadcasts.
+ * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable D_00481230, cBXString copies of @p sender
+ * at +0x8 and @p text at +0xC. The chat handler LobbyMan_onchatmsg() calls it for room chat and broadcasts.
  *
  * @param sender  the sender's name
  * @param text  the message text
@@ -1359,7 +1360,7 @@ extern "C" void func_00260F80(void);
 extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(BuddyMan* p);
 extern "C" void func_00261408(BuddyMan* self);
-extern "C" int func_00263128(BuddyMan* self, char* name);
+extern "C" bool func_00263128(BuddyMan* self, char* name);
 extern "C" void func_00263018(BuddyMan* self, void* name);
 extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag);
 extern "C" void func_0025EED8(LobbyMan* self);
@@ -1472,10 +1473,12 @@ static inline void closeConn_AC50(char* self)
  * mState:
  * - 2 (host lookup): polls mpHostLookup; on success stores the address in mServerAddr and D_004A3018, enters mState 3
  *   with a 30-second mTimeout and connects to port 11000 (func_003E8260, reply thunk func_00268BA8); on failure
- *   disconnects and posts an error event (vtable online_ErrorEvent_vtbl, type 258) with 'dnsf'; either way releases the lookup.
+ *   disconnects and posts an error event (vtable online_ErrorEvent_vtbl, type 258) with 'dnsf'; either way releases the
+ * lookup.
  * - 3 (connecting): status 0x400 posts an error event (vtable D_004811B0) with 'down' and the server's 'down' text and
  *   disconnects; a timeout disconnects with error 'time' and releases the lookup.
- * - 26: a BuddyMan miError calls func_00261408() and posts it in an event (vtable online_BuddyErrorEvent_vtbl, type 259); a connected
+ * - 26: a BuddyMan miError calls func_00261408() and posts it in an event (vtable online_BuddyErrorEvent_vtbl, type
+ * 259); a connected
  *   BuddyMan (func_00261460) sets mState 1 and posts type 218.
  * - 23 and 24 (challenge waits): lower D_004A5154 to mTimeout whenever it falls more than 1 below it; on timeout post
  *   type 274, then 23 removes mOpponent's pending challenge from BuddyMan and returns to mState 1, 24 calls
@@ -1672,8 +1675,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* LobbyMan_LobbyMan(LobbyMan* self);
 
 /**
- * Creates the lobby manager singleton: allocates 0x300 bytes ("LobbyMan") and constructs them with LobbyMan_LobbyMan() into
- * LobbyMan_mLobbyMan.
+ * Creates the lobby manager singleton: allocates 0x300 bytes ("LobbyMan") and constructs them with LobbyMan_LobbyMan()
+ * into LobbyMan_mLobbyMan.
  *
  * An existing instance is overwritten without a check. The main menu and the debug menu screen call it.
  */
@@ -1693,8 +1696,8 @@ extern "C" void cGameComm_destroy(void);
 /**
  * Destroys the lobby manager singleton and the in-race comm object.
  *
- * When LobbyMan_mLobbyMan exists it disconnects it (func_0025B800), runs the destructor LobbyMan__LobbyMan() with flags 3
- * (free) and clears the pointer; then destroys cGameComm_mGameComm with cGameComm_destroy() if there is one.
+ * When LobbyMan_mLobbyMan exists it disconnects it (func_0025B800), runs the destructor LobbyMan__LobbyMan() with flags
+ * 3 (free) and clears the pointer; then destroys cGameComm_mGameComm with cGameComm_destroy() if there is one.
  */
 extern "C" void func_0025B688(void)
 {
@@ -1854,8 +1857,8 @@ static inline void post_B848(char* self, void* msg)
  *
  * Sets mState to 1. On success (reply mStatus 0) it sends a 'sele' request with "ROOMS=1 USERS=1 RANKS=0
  * MESGS=1 GAMES=1" (no reply callback) and posts a type-201 event; otherwise it posts an error event (vtable
- * online_ErrorEvent_vtbl, type 258) carrying the code and sets mDisconnected. Called through the functor thunk func_00268BA8, which
- * func_0025B6D8() and func_0025AC50() pass to func_003E8260().
+ * online_ErrorEvent_vtbl, type 258) carrying the code and sets mDisconnected. Called through the functor thunk
+ * func_00268BA8, which func_0025B6D8() and func_0025AC50() pass to func_003E8260().
  *
  * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
@@ -2069,9 +2072,10 @@ static inline void post_BD30(char* self, void* msg)
  * Handles the create-account reply.
  *
  * Sets mState to 1. Success (mStatus 0) posts a type-203 event. 'tooy' (too young) posts a 0x10-byte error event
- * (vtable online_AcctTooYoungEvent_vtbl, type 258) with the code and the reply's "AGE" number. Any other code posts an error event (vtable
- * online_ErrorEvent_vtbl, type 258) with the code, after loading the suggested names (func_0025BC48) when the code is 'dupl'.
- * Called through the functor thunk func_00268BD0, the reply callback of func_0025B9C8().
+ * (vtable online_AcctTooYoungEvent_vtbl, type 258) with the code and the reply's "AGE" number. Any other code posts an
+ * error event (vtable online_ErrorEvent_vtbl, type 258) with the code, after loading the suggested names
+ * (func_0025BC48) when the code is 'dupl'. Called through the functor thunk func_00268BD0, the reply callback of
+ * func_0025B9C8().
  *
  * @param msg  the LobbyApi reply (error code mStatus, tag record pointer mpTagText)
  */
@@ -2084,7 +2088,7 @@ void LobbyMan::onaccountcreated(LobbyApiMsgT* msg)
         event->mType = 203;
         event->mVtbl = online_Event_vtbl;
         post_BD30(((char*)this), event);
-    } else if (err == 0x746F6F79) {
+    } else if (err == kLobbyErr_tooy) {
         int n = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_AGE), 0);
         online_AcctTooYoungEvent* event = (online_AcctTooYoungEvent*)operator new(0x10, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
@@ -2093,7 +2097,7 @@ void LobbyMan::onaccountcreated(LobbyApiMsgT* msg)
         event->mAge = n;
         post_BD30(((char*)this), event);
     } else {
-        if (err == 0x6475706C)
+        if (err == kLobbyErr_dupl)
             func_0025BC48(this, msg);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
@@ -2561,8 +2565,8 @@ struct sDsSlotC610 {
  * adds 0x800 and 0x100. HWFLAG adds 0x800 when bit 0 of the word at +0x88 is set in any of 8 0x8C-byte records of the
  * USB keyboard object Keyboard (read with no null check, unlike the other Keyboard users), and 0x100 when the
  * voice-chat manager VoipMan's status (func_00266F38) has bit 0x10. func_0025B608() then sends it (mState 8, 20 s
- * timeout, reply through func_00268C70 to LobbyMan_onauthentication()), and an Event of type 211 (vtable online_Event_vtbl) is pushed onto
- * mEventList.
+ * timeout, reply through func_00268C70 to LobbyMan_onauthentication()), and an Event of type 211 (vtable
+ * online_Event_vtbl) is pushed onto mEventList.
  */
 extern "C" void func_0025C610(LobbyMan* self)
 {
@@ -2838,8 +2842,8 @@ extern "C" void func_0025CD50_impl(char* self, const char* name) __asm__("func_0
  *
  * Assigns @p name to mPersona, then builds PERS = @p name, MID = NetConnMAC()'s hex string, PID = "SSX-PS2-2004"
  * and, when mHaveCPAT is set, CDEV = mCPAT. func_0025B608() sends it (mState 9, 20 s timeout, reply through
- * func_00268C98 to LobbyMan_onpersonaselected()) and an Event of type 217 is pushed onto mEventList. Unlike most requests it does
- * not check mState first.
+ * func_00268C98 to LobbyMan_onpersonaselected()) and an Event of type 217 is pushed onto mEventList. Unlike most
+ * requests it does not check mState first.
  *
  * @param name  the persona name
  */
@@ -2910,8 +2914,8 @@ static inline void post_CEB0(char* self, void* msg)
  * Handles the lobby server's reply to the persona selection ('pers') request.
  *
  * Sets mState to 1. On success it requests the persona's online stats with func_0025CFE0() and pushes an Event of type
- * 218 onto mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
- * from the LobbyApi callback thunk func_00268C98.
+ * 218 onto mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status.
+ * Called only from the LobbyApi callback thunk func_00268C98.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3015,8 +3019,8 @@ static inline void post_D048(char* self, void* msg)
  * Sets mState to 1. On success it decodes the "STAT" field with the "l*" template (cDirtysock_tag_TagFieldGetStructure)
  * and stores mStats.unk_04 = item 2, mStats.unk_08 = items 2 + 3 + 4, mStats.unk_0C = item 6, mStats.mRank = the "R"
  * number (default 0) and mStats.unk_10 = -1, then requests news item 0 with func_0025E0C8() (no event is posted).
- * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
- * callback thunk func_00268CC0.
+ * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the
+ * LobbyApi callback thunk func_00268CC0.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3086,9 +3090,9 @@ static inline sMsgListIterD1B8 sMsgListD1B8_insert(sMsgListIterD1B8 pos, void* c
  * Sends the create-persona ('cper') request and adds the name to the persona list ahead of the reply.
  *
  * Does nothing when mState is 0. Sends PERS = @p name with func_0025B608() (mState 10, 20 s timeout, reply through
- * func_00268CE8 to LobbyMan_onpersonacreated()), assigns @p name to mPersonas[mNumPersonas] (the count only grows when the reply
- * succeeds) and pushes an Event of type 213 onto mEventList. Likely bug: there is no check that mNumPersonas is below 4
- * (the preview asserted "numpersonas < max_personas"), so a fifth persona would overwrite mPersona.
+ * func_00268CE8 to LobbyMan_onpersonacreated()), assigns @p name to mPersonas[mNumPersonas] (the count only grows when
+ * the reply succeeds) and pushes an Event of type 213 onto mEventList. Likely bug: there is no check that mNumPersonas
+ * is below 4 (the preview asserted "numpersonas < max_personas"), so a fifth persona would overwrite mPersona.
  *
  * @param name  the new persona's name
  */
@@ -3161,8 +3165,8 @@ static inline void post_D2D8(char* self, void* msg)
  *
  * Sets mState to 1. On success it increments mNumPersonas (keeping the name func_0025D1B8() stored) and pushes an Event
  * of type 214 onto mEventList. On failure it first passes a 'dupl' (name taken) reply to func_0025BC48(), which reads
- * the server's suggested names, then pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
- * from the LobbyApi callback thunk func_00268CE8.
+ * the server's suggested names, then pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status.
+ * Called only from the LobbyApi callback thunk func_00268CE8.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3176,7 +3180,7 @@ void LobbyMan::onpersonacreated(LobbyApiMsgT* msg)
         event->mVtbl = online_Event_vtbl;
         post_D2D8(((char*)this), event);
     } else {
-        if (msg->mStatus == 0x6475706C)
+        if (msg->mStatus == kLobbyErr_dupl)
             func_0025BC48(this, msg);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
@@ -3225,8 +3229,8 @@ static inline sMsgListIterD428 sMsgListD428_insert(sMsgListIterD428 pos, void* c
  * Sends the delete-persona ('dper') request for one of the account's personas.
  *
  * Does nothing when mState is 0. Sends PERS = mPersonas[@p idx] with func_0025B608() (mState 11, 20 s timeout, reply
- * through func_00268D10 to LobbyMan_onpersonadeleted()), stores @p idx in mDeletePersonaIdx and pushes an Event of type 215 onto
- * mEventList.
+ * through func_00268D10 to LobbyMan_onpersonadeleted()), stores @p idx in mDeletePersonaIdx and pushes an Event of type
+ * 215 onto mEventList.
  *
  * @param idx  index into mPersonas; not range-checked
  */
@@ -3299,8 +3303,8 @@ static inline void post_D538(char* lst, void* msg)
  *
  * Sets mState to 1. On success it decrements mNumPersonas, shifts the mPersonas entries after mDeletePersonaIdx down by
  * one (the old last slot keeps a copy of its name) and pushes an Event of type 216 onto mEventList; otherwise it pushes
- * a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
- * func_00268D10.
+ * a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback
+ * thunk func_00268D10.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3391,10 +3395,10 @@ extern "C" void* func_0025F150(LobbyMan* self);
  * Sends a 'peek' request for a room in the room list, or with an empty name.
  *
  * Does nothing when mState is 0. NAME is the name of room @p idx (func_0025F150(), which gets @p idx through the second
- * argument register its C declaration omits) or "" for -1; the request goes straight to func_003E8B10() with no
- * callback, no state change and no timeout.
+ * argument register its C declaration omits) or "" for kRoomIndex_None; the request goes straight to func_003E8B10()
+ * with no callback, no state change and no timeout.
  *
- * @param idx  index into the room list, or -1
+ * @param idx  index into the room list, or LobbyMan::kRoomIndex_None
  */
 extern "C" void func_0025D770(LobbyMan* self, int idx)
 {
@@ -3403,7 +3407,7 @@ extern "C" void func_0025D770(LobbyMan* self, int idx)
         const char* key = str_NAME;
         const char* name;
         buf[0] = 0;
-        if (idx != -1) {
+        if (idx != LobbyMan::kRoomIndex_None) {
             name = (const char*)func_0025F150(self);
         } else {
             name = str_empty_i;
@@ -3422,18 +3426,18 @@ extern "C" void* func_0025F150(LobbyMan* self);
 extern "C" void func_0025D860(LobbyMan* self, void* name, int a2);
 
 /**
- * Joins a room from the room list (or the room with an empty name for index -1) with an optional password.
+ * Joins a room from the room list (or the room with an empty name for kRoomIndex_None) with an optional password.
  *
  * Takes the name of room @p idx from func_0025F150() (which gets @p idx through the second argument register) and
  * passes it to func_0025D860().
  *
- * @param idx  index into the room list, or -1
+ * @param idx  index into the room list, or LobbyMan::kRoomIndex_None
  * @param password   the room password, or 0
  */
 extern "C" void func_0025D800(LobbyMan* self, int idx, int password)
 {
     void* name;
-    if (idx != -1) {
+    if (idx != LobbyMan::kRoomIndex_None) {
         name = func_0025F150(self);
     } else {
         name = str_empty_i;
@@ -3523,8 +3527,8 @@ static inline void post_D8F8(char* self, void* msg)
  * Handles the lobby server's reply to the room-join ('move') request.
  *
  * Sets mState to 1. On success it stores the reply's "NAME" in mRoomName and pushes an Event of type 220 onto
- * mEventList; otherwise it empties mRoomName (cBXString_Reset) and pushes a type-258 error event (vtable online_ErrorEvent_vtbl)
- * carrying the status. Called only from the LobbyApi callback thunk func_00268D38.
+ * mEventList; otherwise it empties mRoomName (cBXString_Reset) and pushes a type-258 error event (vtable
+ * online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268D38.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3663,8 +3667,8 @@ static inline void post_DB80(char* self, void* msg)
  * Handles the lobby server's reply to the create-room ('room') request.
  *
  * Sets mState to 1. On success it stores the reply's "NAME" in mRoomName and pushes an Event of type 228 onto
- * mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the
- * LobbyApi callback thunk func_00268D60.
+ * mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called
+ * only from the LobbyApi callback thunk func_00268D60.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3787,8 +3791,8 @@ static inline sMsgListIterDDE0 sMsgListDDE0_insert(sMsgListIterDDE0 pos, void* c
  * Handles a ping reply: pushes an event with the player's name and ping time onto mEventList.
  *
  * Reads "NAME" (up to 0x1F characters) and, on success, the "PING" number (default 0); a failed ping gets 32656. The
- * event is 0x10 bytes: type 229, vtable online_PingEvent_vtbl, the name as a cBXString at +0x8 and the ping at +0xC. mState is not
- * touched. Called only from the LobbyApi callback thunk func_00268D88.
+ * event is 0x10 bytes: type 229, vtable online_PingEvent_vtbl, the name as a cBXString at +0x8 and the ping at +0xC.
+ * mState is not touched. Called only from the LobbyApi callback thunk func_00268D88.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3884,7 +3888,8 @@ static inline void post_DF98(char* self, void* msg)
  * Handles the lobby server's reply to the report-abuse ('rept') request.
  *
  * Sets mState to 1. On success it pushes an Event of type 232 onto mEventList; otherwise it pushes a type-258 error
- * event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268DB0.
+ * event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
+ * func_00268DB0.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3998,12 +4003,12 @@ static inline void post_E138(char* self, void* msg)
 /**
  * Handles the lobby server's reply to a 'news' request, starting the buddy-server login on item 0.
  *
- * Sets mState to 1. Status 'new1' pushes a news event (0xC bytes, type 226, vtable online_NewsEvent_vtbl) holding the reply record
- * as a string. Status 'new0' sets mLoggedIn and, when BuddyMan_mBuddyMan is not already connected (func_00261460()
- * returns 0), reads "BUDDYSERVERNAME", "BUDDYPORT" (default 13505), "BUDDYRESOURCE" (default "SSX-PS2-2004") and
- * "BUDDYMSGTIMEOUT" (default 864000, stored in BuddyMan_mBuddyMan->miMsgTimeout) and connects with func_00261248()
- * using mPersona and mPassword; it then pushes an Event of type 273. Other statuses post nothing. Called only from the
- * LobbyApi callback thunk func_00268DD8.
+ * Sets mState to 1. Status 'new1' pushes a news event (0xC bytes, type 226, vtable online_NewsEvent_vtbl) holding the
+ * reply record as a string. Status 'new0' sets mLoggedIn and, when BuddyMan_mBuddyMan is not already connected
+ * (func_00261460() returns 0), reads "BUDDYSERVERNAME", "BUDDYPORT" (default 13505), "BUDDYRESOURCE" (default
+ * "SSX-PS2-2004") and "BUDDYMSGTIMEOUT" (default 864000, stored in BuddyMan_mBuddyMan->miMsgTimeout) and connects with
+ * func_00261248() using mPersona and mPassword; it then pushes an Event of type 273. Other statuses post nothing.
+ * Called only from the LobbyApi callback thunk func_00268DD8.
  *
  * @param msg  the LobbyApi reply: mStatus ('new0' or 'new1'), the tag record mpTagText
  */
@@ -4012,13 +4017,13 @@ void LobbyMan::onNewsRetrieved(LobbyApiMsgT* msg)
     LobbyMan* st = this;
     st->mState = 1;
     int type = msg->mStatus;
-    if (type == 0x6E657731) {
+    if (type == kLobbyMsg_new1) {
         online_NewsEvent* event = (online_NewsEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 226;
         event->mVtbl = online_NewsEvent_vtbl;
         cBXString_cBXString2(&event->mText, msg->mpTagText);
         post_E138(((char*)this), event);
-    } else if (type == 0x6E657730) {
+    } else if (type == kLobbyMsg_new0) {
         st->mLoggedIn = 1;
         if (func_00261460(BuddyMan_mBuddyMan) == 0) {
             char host[0x100];
@@ -4068,8 +4073,8 @@ struct sDsSlotSessK2 {
  * Does nothing when mState is 0 (the view's `active`). Stores @p slot in mRankSlot and func_003E8F08(mpLobbyApi,
  * 'slot') in mpSlotTag. When the slot's snapshot holds fewer rows (func_0025F338()) than mRankCount[@p slot], it
  * releases the slot's mRankSnapshot entry (func_003E8688(api, 4, ..)) and asks for rows 0..99 with func_0025E420()
- * (passing the previous slot); otherwise it just calls the snapshot callback LobbyMan_onranklistupdate() with no message. The
- * parameter's view type (sDsSlotSessK2) is LobbyMan read through its own layout.
+ * (passing the previous slot); otherwise it just calls the snapshot callback LobbyMan_onranklistupdate() with no
+ * message. The parameter's view type (sDsSlotSessK2) is LobbyMan read through its own layout.
  *
  * @param slot  rank-list slot, 0..28; not range-checked
  */
@@ -4128,9 +4133,9 @@ struct sDsSlotSessE420 {
  *
  * Does nothing when mState is 0. Opens a type-4 snapshot for mRankSlot when it has none (func_003E85B0, callback thunk
  * func_00268AE0), builds INDEX = mRankSlot, CHAN = D_004A3180 + 4 (D_004A3180 is zero and only read here), START = @p
- * a1, RANGE = @p range and SEQN = mRankSlot, cancels the request stored for slot @p prevSlot (func_003E8D70) and sends 'snap'
- * with func_0025B608(), keeping the current mState (20 s timeout, reply through func_00268E00 to LobbyMan_onRanklistRetrieved()). The
- * new request id goes into mRankRequest[mRankSlot].
+ * a1, RANGE = @p range and SEQN = mRankSlot, cancels the request stored for slot @p prevSlot (func_003E8D70) and sends
+ * 'snap' with func_0025B608(), keeping the current mState (20 s timeout, reply through func_00268E00 to
+ * LobbyMan_onRanklistRetrieved()). The new request id goes into mRankRequest[mRankSlot].
  *
  * @param self_  the lobby manager (LobbyMan_mLobbyMan)
  * @param start     first row to fetch
@@ -4194,8 +4199,8 @@ static inline sMsgListIterE590 sMsgListE590_insert(sMsgListIterE590 pos, online_
  * Handles a rank-list ('snap') reply: records how many rows of the slot are available.
  *
  * On success it stores "START" + "RANGE" in mRankCount["SEQN"] (the index comes from the server and is not
- * range-checked); otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. mState is not
- * touched. Called only from the LobbyApi callback thunk func_00268E00.
+ * range-checked); otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status.
+ * mState is not touched. Called only from the LobbyApi callback thunk func_00268E00.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -4358,11 +4363,11 @@ struct sMsgE7F0 {
  * Handles the lobby server's reply to the find-player ('user') request.
  *
  * Clears mFindingPlayer (mState is not touched). On success it reads "PERS", "STAT" (decoded with the "l*" template),
- * "RANK" (default -1), "ADDR" as a number and "ROOM", and pushes a 44-byte event: type 227, vtable online_FindPlayerEvent_vtbl, the
- * persona and room as cBXStrings at +0x8 and +0xC, 1 at +0x10 when ADDR is positive, ADDR at +0x14, and at +0x18 a
- * tLobbyStats-shaped block (RANK, item 2, items 2 + 3 + 4, item 6, -1) that func_001AFA60 copies into mOpponentStats.
- * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
- * callback thunk func_00268E28.
+ * "RANK" (default -1), "ADDR" as a number and "ROOM", and pushes a 44-byte event: type 227, vtable
+ * online_FindPlayerEvent_vtbl, the persona and room as cBXStrings at +0x8 and +0xC, 1 at +0x10 when ADDR is positive,
+ * ADDR at +0x14, and at +0x18 a tLobbyStats-shaped block (RANK, item 2, items 2 + 3 + 4, item 6, -1) that func_001AFA60
+ * copies into mOpponentStats. Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the
+ * status. Called only from the LobbyApi callback thunk func_00268E28.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -4539,7 +4544,7 @@ extern "C" void func_0025EB00(LobbyMan* self, LobbyApiMsgT* msg)
         sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&self->mEventList.mpHead);
         void* mp = netEvent;
         eventList->insert(eventList->end(), mp);
-    } else if (type != 0x75757372) {
+    } else if (type != kLobbyErr_uusr) {
         int* netEvent = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         netEvent[0] = 258;
         *(void***)((char*)netEvent + 0x4) = online_ErrorEvent_vtbl;
@@ -4642,8 +4647,8 @@ static inline void post_EED8(char* self, void* msg)
  *
  * Does nothing when mState is 0. In state 25 (in game) it closes the game connection held at SSXApp->RealFE + 0xB5ABC
  * (func_002591D0) with func_00263BA8(conn, 2) when that is active. In any other state but 1 it sends 'quik' with KIND =
- * "*" straight to func_003E8B10() (setting mTimeout to 20.0 and mRequestId; reply to LobbyMan_onQuickMatchResponse()). Then sets mState
- * to 1 and pushes an Event of type 231 onto mEventList.
+ * "*" straight to func_003E8B10() (setting mTimeout to 20.0 and mRequestId; reply to LobbyMan_onQuickMatchResponse()).
+ * Then sets mState to 1 and pushes an Event of type 231 onto mEventList.
  */
 extern "C" void func_0025EED8(LobbyMan* self)
 {
@@ -4711,8 +4716,8 @@ extern void* online_ErrorEvent_vtbl[];
  * Handles the lobby server's reply to a quick-match ('quik') request.
  *
  * On success it moves mState from 18 to 20 (other states are kept). On failure it sets mState to 1 and pushes a
- * type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
- * func_00268E78.
+ * type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback
+ * thunk func_00268E78.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -4904,8 +4909,8 @@ struct sDsPeerInfoK2 {
 /**
  * Fills a small info block about a player in the room's user list.
  *
- * Does nothing when mState is 0. For entry @p userIndex of mpUserList it stores the entry's word +0x34 in @p out +0x0 and the
- * number parsed (atoi, base 10) from its text at +0x28 in @p out +0x10, then decodes the stats record at +0x38
+ * Does nothing when mState is 0. For entry @p userIndex of mpUserList it stores the entry's word +0x34 in @p out +0x0
+ * and the number parsed (atoi, base 10) from its text at +0x28 in @p out +0x10, then decodes the stats record at +0x38
  * with the "l*" template and stores item 2 at +0x4, items 2 + 3 + 4 at +0x8 and item 6 at +0xC. Without an entry +0x0
  * and +0x10 are 0 and the stats come from decoding a null record.
  *
@@ -5112,12 +5117,12 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__
 /**
  * Challenges a player: sends a "challenge" private message with the race setup and waits for the answer.
  *
- * Does nothing when mState is 0. Sets mIsHost to 1, assigns @p name to mOpponent and stores @p matchType in mMatchType. It
- * then formats "%s %d %d %d %d %d %d %d %d %s %d %d %d %d" into a 64-byte buffer: "challenge", the location id
- * (cBENewRaceInterface_getLocationID), cBENewRaceInterface_newRace's cGameMode and cGameEvent, cBENetworkInterface_networkOpt.bIsRankedGame, bits 0x40
- * and 0x100 of D_005308D0, iNumberAI, bit 0x80 of D_005308D0, cCommSystem_getSignature(), then mStats.unk_04, unk_08,
- * unk_0C and mRank. func_0025FB80() sends it to mOpponent, and mState becomes 22. The first
- * cBE_getInterface__Fv(SSXApp->BE, 7) call's result is unused.
+ * Does nothing when mState is 0. Sets mIsHost to 1, assigns @p name to mOpponent and stores @p matchType in mMatchType.
+ * It then formats "%s %d %d %d %d %d %d %d %d %s %d %d %d %d" into a 64-byte buffer: "challenge", the location id
+ * (cBENewRaceInterface_getLocationID), cBENewRaceInterface_newRace's cGameMode and cGameEvent,
+ * cBENetworkInterface_networkOpt.bIsRankedGame, bits 0x40 and 0x100 of D_005308D0, iNumberAI, bit 0x80 of D_005308D0,
+ * cCommSystem_getSignature(), then mStats.unk_04, unk_08, unk_0C and mRank. func_0025FB80() sends it to mOpponent, and
+ * mState becomes 22. The first cBE_getInterface__Fv(SSXApp->BE, 7) call's result is unused.
  *
  * @param name  the challenged persona
  * @param matchType    the game kind, kept in mMatchType
@@ -5191,8 +5196,8 @@ static inline sMsgListIterF628 sMsgListF628_insert(sMsgListIterF628 pos, void* c
  * Does nothing when mState is 0. In the challenge states 21, 22 and 24 it first sends "abortChal" to mOpponent
  * (func_0025FC48) when @p flag is set, cancels the pending request (func_003E8D70(mpLobbyApi, mRequestId)) and sends an
  * empty "chal" request (func_0025F858, which sets mState to 1). In state 25 (in game) it calls func_0025F740(self, 0)
- * instead. With @p notify set it then posts an online::Event of type 238 (vtable online_Event_vtbl) on mEventList. The update
- * func_0025AC50 calls it when the state-24 timeout runs out; the challenge popup calls it to cancel.
+ * instead. With @p notify set it then posts an online::Event of type 238 (vtable online_Event_vtbl) on mEventList. The
+ * update func_0025AC50 calls it when the state-24 timeout runs out; the challenge popup calls it to cancel.
  *
  * @param selfp   the lobby manager
  * @param notify  nonzero to post the type-238 event
@@ -5261,8 +5266,8 @@ static inline sMsgListIterF740 sMsgListF740_insert(sMsgListIterF740 pos, void* c
  *
  * Does nothing when mState is 0. In state 25 (in game) it sets mTimeout to 20.0, sends a "chal" request (func_003E8B10,
  * no callback) whose record holds PERS="*" (str_star), and sets mState to 1. When @p type is nonzero it then posts an
- * online::Event of that type (vtable online_Event_vtbl) on mEventList. The challenge-received popup calls it to back out of an
- * accepted game.
+ * online::Event of that type (vtable online_Event_vtbl) on mEventList. The challenge-received popup calls it to back
+ * out of an accepted game.
  *
  * @param selfp  the lobby manager
  * @param type   event type to post, or 0 for none
@@ -5357,8 +5362,9 @@ static inline sMsgListIterF8A0 sMsgListF8A0_insert(sMsgListIterF8A0 pos, void* c
  * The callback thunk func_00268EA0 calls it; func_0025FA48 and func_0025FAD0 register it. It reads the reply's "MODE"
  * field (up to 15 characters, default ""). A reply with an error code (mStatus of @p msg) in state 21 sets
  * mState to 1, sends "abortChal" to mOpponent (func_0025FC48) and posts an online error event of type 258 (vtable
- * online_ErrorEvent_vtbl) carrying the code. Otherwise, in state 21: MODE "chal" sends "lockChal" to mOpponent and enters state 24
- * (func_0025FC70); "play" sets mState to 24 and mTimeout and the countdown D_004A5154 to 20.0; "idle" does nothing.
+ * online_ErrorEvent_vtbl) carrying the code. Otherwise, in state 21: MODE "chal" sends "lockChal" to mOpponent and
+ * enters state 24 (func_0025FC70); "play" sets mState to 24 and mTimeout and the countdown D_004A5154 to 20.0; "idle"
+ * does nothing.
  *
  * @param msg   the LobbyApi reply: error code mStatus, tag record pointer mpTagText
  */
@@ -5403,8 +5409,8 @@ extern "C" void func_00268EA0(void* self, void* a1, int a2);
  * Sends a "chal" challenge request for the given persona as the host side and enters state 21.
  *
  * The record holds PERS = @p name and HOST="1" (D_004A3240). It sets mState to 1, then func_0025B608 sends the request
- * with the reply callback func_00268EA0 (which runs LobbyMan_onchallengeresponse), sets mState to 21 and mTimeout to 20.0 and stores
- * mRequestId. Called from LobbyMan_onchatmsg.
+ * with the reply callback func_00268EA0 (which runs LobbyMan_onchallengeresponse), sets mState to 21 and mTimeout to
+ * 20.0 and stores mRequestId. Called from LobbyMan_onchatmsg.
  *
  * @param name  persona name sent as PERS
  */
@@ -6149,7 +6155,7 @@ static inline void post_0C68(char* lst, void* msg)
 void LobbyMan::onresultsreportresponse(LobbyApiMsgT* msg)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (msg->mStatus == 0 || (msg->mStatus == 0x72616E6B && cBENetworkInterface_networkOpt.bIsRankedGame == 0)) {
+    if (msg->mStatus == 0 || (msg->mStatus == kLobbyErr_rank && cBENetworkInterface_networkOpt.bIsRankedGame == 0)) {
         int type = 257;
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = type;
@@ -6190,7 +6196,8 @@ extern char str_Unknown_Error_Code_pct_08x_pct_cpct_cpct[];
  * Builds the display text for a lobby error code given as a four-character tag.
  *
  * 'dupl' gives "Duplicate", 'time' gives "Timeout"; any other code is formatted with cBXString_printf as "Unknown Error
- * Code %08x '%c%c%c%c'\n" (str_Unknown_Error_Code_pct_08x_pct_cpct_cpct) from the code and its four bytes. Used by the debug front end (cDebugLobbyScreen_draw).
+ * Code %08x '%c%c%c%c'\n" (str_Unknown_Error_Code_pct_08x_pct_cpct_cpct) from the code and its four bytes. Used by the
+ * debug front end (cDebugLobbyScreen_draw).
  *
  * @param ret   the cBXString to construct (the g++ return slot)
  * @param tag   the error code
@@ -6201,10 +6208,10 @@ extern "C" void* func_00260E50(void* ret, void* self, unsigned int tag)
 {
     switch (tag)
     {
-    case 0x6475706C:
+    case kLobbyErr_dupl:
         cBXString_cBXString2(ret, str_Duplicate);
         break;
-    case 0x74696D65:
+    case kLobbyErr_time:
         cBXString_cBXString2(ret, str_Timeout);
         break;
     default:
@@ -6448,11 +6455,12 @@ struct sBXStr_261248 {
  * Connects the buddy manager to a buddy server and logs in.
  *
  * Creates the BuddyApi on first use (func_002614E8 with the resource name, then func_003F0818(mpBuddyApi, resource,
- * 'ssx3', "en", 0)). Copies the host into mServerName, @p port into miPort, the user into mUserName and the password into
- * mPassword; clears miError, mbDisconnected and mbLoggedIn, sets mfTimeout to 30.0 and mState to 1 (connecting). It
- * stores the resource in mResource and calls func_003F08E8(mpBuddyApi, host, port, 30, "user:password", "/cso/" +
- * resource, func_00268F18, self), whose callback runs BuddyMan_onconnect. LobbyMan's LobbyMan_onNewsRetrieved passes the server's
- * BUDDYSERVERNAME / BUDDYPORT values; func_002613C8 reconnects with the saved ones. No length checks on the strcpy's.
+ * 'ssx3', "en", 0)). Copies the host into mServerName, @p port into miPort, the user into mUserName and the password
+ * into mPassword; clears miError, mbDisconnected and mbLoggedIn, sets mfTimeout to 30.0 and mState to 1 (connecting).
+ * It stores the resource in mResource and calls func_003F08E8(mpBuddyApi, host, port, 30, "user:password", "/cso/" +
+ * resource, func_00268F18, self), whose callback runs BuddyMan_onconnect. LobbyMan's LobbyMan_onNewsRetrieved passes
+ * the server's BUDDYSERVERNAME / BUDDYPORT values; func_002613C8 reconnects with the saved ones. No length checks on
+ * the strcpy's.
  *
  * @param self_  the buddy manager
  * @param name_  buddy server host name (at most 0x3F characters)
@@ -6610,8 +6618,8 @@ extern "C" void func_003F17C8(void* h, void (*cb)(void*), void* user);
 /**
  * Creates the buddy manager's BuddyApi instance and registers its incoming-message callback.
  *
- * Stores func_003F0710(@p resourceName, "2003-10-20") in mpBuddyApi and registers func_00268F40 (which runs BuddyMan_onReceiveMessage) with
- * func_003F17C8(mpBuddyApi, .., self).
+ * Stores func_003F0710(@p resourceName, "2003-10-20") in mpBuddyApi and registers func_00268F40 (which runs
+ * BuddyMan_onReceiveMessage) with func_003F17C8(mpBuddyApi, .., self).
  *
  * @param resourceName    the resource name passed on from func_00261248
  */
@@ -6724,16 +6732,16 @@ static inline void post_15C8(char* owner, void* msg)
  * The callback thunk func_00268F18 (registered by func_00261248) calls it. 'conn' with status 2, 3, 4 or 6 marks a lost
  * connection: sets mbDisconnected and miError (1 when it was 0); status 6 also clears mbRosterDone. 'auth' with no
  * error (@p msg[2] == 0) creates the roster (mpRoster = func_003F0C90(mpBuddyApi, func_00268F68, self), whose callback
- * runs BuddyMan_onrosterupdate), installs func_002634C0 on it with func_003EE5A0, publishes the presence (func_00262768(self, 1,
- * 0, 0, 0, 0)) and sets mState to 0 and mbLoggedIn to 1. A failed 'auth' posts an online::Event of type 260 on
- * LobbyMan_mLobbyMan's mEventList and stores the error in miError, setting mbDisconnected.
+ * runs BuddyMan_onrosterupdate), installs func_002634C0 on it with func_003EE5A0, publishes the presence
+ * (func_00262768(self, 1, 0, 0, 0, 0)) and sets mState to 0 and mbLoggedIn to 1. A failed 'auth' posts an online::Event
+ * of type 260 on LobbyMan_mLobbyMan's mEventList and stores the error in miError, setting mbDisconnected.
  *
  * @param msg   the BuddyApi message: kind at [0] ('conn' / 'auth'), status at [1], error at [2]
  */
 void BuddyMan::onconnect(int* msg)
 {
     switch (msg[0]) {
-    case 0x636F6E6E:
+    case kBuddyMsg_conn:
         {
             int status = msg[1];
             if (status == 2) {
@@ -6756,7 +6764,7 @@ void BuddyMan::onconnect(int* msg)
             }
         }
         break;
-    case 0x61757468:
+    case kBuddyMsg_auth:
         if (msg[2] == 0) {
             // PORT: function pointers passed as callbacks.
             mpRoster = func_003F0C90(mpBuddyApi, (void*)func_00268F68, ((char*)this));
@@ -6768,7 +6776,7 @@ void BuddyMan::onconnect(int* msg)
             LobbyMan* owner = LobbyMan_mLobbyMan;
             online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
             event->mVtbl = online_Event_vtbl;
-            event->mType = 260;
+            event->mType = kNetEvent_BuddyConnect;
             post_15C8((char*)owner, event);
             int error = msg[2];
             mbDisconnected = 1;
@@ -7155,8 +7163,8 @@ static inline void post_1CD0(char* owner, void* msg)
  * When the sender's roster entry has none of the flags 4, 0x200 and 0x100000 (func_00262360, func_002623B0,
  * func_00262438), it adds them with flag 0x100000 (func_002620D8 kind 2); if that fails because 10 such entries already
  * exist (error 2), it removes the first one (func_00262400 / func_00262EC0), retries and posts an online::Event of type
- * 264 on LobbyMan_mLobbyMan's mEventList. It then allocates a 0x10-byte cPrivateMessage (vtable cPrivateMessage_vtbl at +0xC;
- * cBXStrings name, text and date at +0x0/+0x4/+0x8) and appends it to mMessages (func_00267128 when the vector is
+ * 264 on LobbyMan_mLobbyMan's mEventList. It then allocates a 0x10-byte cPrivateMessage (vtable cPrivateMessage_vtbl at
+ * +0xC; cBXStrings name, text and date at +0x0/+0x4/+0x8) and appends it to mMessages (func_00267128 when the vector is
  * full).
  *
  * @param name  the sender's name
@@ -7203,7 +7211,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00261EF8);
 extern "C" void* func_003F14D8(void* h);
 extern "C" int func_002620D8(BuddyMan* self, char* name, int kind, int* err, char* other);
 extern "C" void func_00263018(BuddyMan* self, void* name);
-extern "C" int func_00263128(BuddyMan* self, char* name);
+extern "C" bool func_00263128(BuddyMan* self, char* name);
 extern "C" void func_003F11F8(void* h, void* e, void* cb, void* user, int timeout);
 extern "C" void func_00268F90(void* self, void* a1, int a2);
 
@@ -7760,12 +7768,12 @@ extern char str_en[];
 /**
  * Publishes this player's presence on the buddy server.
  *
- * Does nothing without mpBuddyApi. Builds an 80-byte tag record: S = mResource, SSXID = 3, LOCID = @p locationId, then SZ1, SZ2
- * and SZ3 from @p detail1..@p detail3 (each only when it and the ones before it are non-null), and passes it through
- * func_003F1538(), func_003F1548() (with the record) and func_003F1578() ("is playing SSX 3", "en"); finally
- * func_003F15C8() gets mResource, the state func_002628C0() maps @p presenceState to, and 2000. func_00261408 calls it with state
- * 0 and location 1 on disconnect, func_00263CF0 with state 1, location 9 and the opponent's name when an online race
- * starts.
+ * Does nothing without mpBuddyApi. Builds an 80-byte tag record: S = mResource, SSXID = 3, LOCID = @p locationId, then
+ * SZ1, SZ2 and SZ3 from @p detail1..@p detail3 (each only when it and the ones before it are non-null), and passes it
+ * through func_003F1538(), func_003F1548() (with the record) and func_003F1578() ("is playing SSX 3", "en"); finally
+ * func_003F15C8() gets mResource, the state func_002628C0() maps @p presenceState to, and 2000. func_00261408 calls it
+ * with state 0 and location 1 on disconnect, func_00263CF0 with state 1, location 9 and the opponent's name when an
+ * online race starts.
  *
  * @param self_  the BuddyMan
  * @param presenceState     presence state, 0..3 (anything else becomes -1)
@@ -7915,15 +7923,15 @@ extern "C" int strcmp(void*, void*);
  * Compares each message's first string (the sender) with @p name using strcmp (strcmp).
  *
  * @param name  the player name
- * @return 1 when a message from that player is held, otherwise 0
+ * @return true when a message from that player is held
  */
-extern "C" int func_00262A38(BuddyMan* self, void* name)
+extern "C" bool func_00262A38(BuddyMan* self, void* name)
 {
     for (void*** it = (void***)self->mMessagesStart; it != (void***)self->mMessagesFinish; it++) {
         if (strcmp(**it, name) == 0)
-            return 1;
+            return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7937,16 +7945,16 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00262AB0);
  * returns 1 whenever the message vector is non-empty. No caller in the source.
  *
  * @param nameStr  the name as a cBXString (a pointer to the text pointer)
- * @return 1 when at least one message is held, otherwise 0
+ * @return true when at least one message is held
  */
-extern "C" int func_00262AB0(BuddyMan* self, void** nameStr)
+extern "C" bool func_00262AB0(BuddyMan* self, void** nameStr)
 {
     void*** messageIter = (void***)self->mMessagesStart;
     if (messageIter != (void***)self->mMessagesFinish) {
         strcmp(**messageIter, *nameStr);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7965,7 +7973,7 @@ extern "C" int func_00262468(BuddyMan* self, int a1);
 extern "C" int func_00262598(BuddyMan* self);
 extern "C" void func_00262EC0(BuddyMan* self, int idx);
 extern "C" void func_00263018(BuddyMan* self, void* name);
-extern "C" int func_00263128(BuddyMan* self, char* name);
+extern "C" bool func_00263128(BuddyMan* self, char* name);
 extern "C" void* strcasecmp(void*, void*);
 struct sPtrVec72C8;
 extern "C" void func_002672C8(sPtrVec72C8* self, void** pos, void* const& x);
@@ -8041,8 +8049,8 @@ static inline void push_back_262AF0(char* vo, sObjVec_262AF0* v, void* const& x)
  * is added as a kind-2 entry with func_002620D8(); when those are full (error 2) it removes the first entry with bit 20
  * (func_00262EC0()), retries, and posts an online::Event of type 264 to LobbyMan's mEventList. A name on the roster
  * with the blocked flag (func_002623E0()) is ignored. Otherwise it allocates a 0x40-byte object (tag "cChallenger",
- * vtable cChallenger_vtbl at +0x3C) holding @p name and @p messageText as cBXStrings and the numbers below, appends it to
- * mChallengersStart..mChallengersFinish (func_002672C8 when full) and posts an event of type 236. The only caller,
+ * vtable cChallenger_vtbl at +0x3C) holding @p name and @p messageText as cBXStrings and the numbers below, appends it
+ * to mChallengersStart..mChallengersFinish (func_002672C8 when full) and posts an event of type 236. The only caller,
  * LobbyMan_onchatmsg, passes the fields of a "challenge" private message.
  *
  * @param name  challenger's name; stored at +0x0
@@ -8165,9 +8173,9 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" int func_00262400(BuddyMan* self, int a1);
 extern "C" void* func_002625C8(BuddyMan* self, int idx);
 extern "C" int func_00262938(BuddyMan* self);
-extern "C" int func_00262A38(BuddyMan* self, void* name);
+extern "C" bool func_00262A38(BuddyMan* self, void* name);
 extern "C" int func_00262E20(BuddyMan* self, void* name);
-extern "C" int func_00263128(BuddyMan* self, char* name);
+extern "C" bool func_00263128(BuddyMan* self, char* name);
 extern "C" void func_002635A8(BuddyMan* self, int i);
 extern "C" void* func_00263630(BuddyMan* self, unsigned int i);
 extern "C" void func_003F11F8(void* h, void* e, void* cb, void* user, int timeout);
@@ -8241,7 +8249,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00263018);
 void func_0025FC28_v(void* self, int a1) __asm__("func_0025FC28__FPvi");
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 extern "C" int func_00262438(BuddyMan* self, int a1);
-extern "C" int func_00262A38(BuddyMan* self, void* name);
+extern "C" bool func_00262A38(BuddyMan* self, void* name);
 extern "C" int func_00262468(BuddyMan* self, int a1);
 extern "C" void* func_002625C8(BuddyMan* self, int idx);
 extern "C" void func_003F11F8(void* h, void* e, void* cb, void* user, int timeout);
@@ -8319,24 +8327,24 @@ extern "C" int strcmp(void*, void*);
  * and destroys an unused cBXString copy of @p name on every step.
  *
  * @param name  the challenger's name
- * @return 1 when a challenge from that player is pending, otherwise 0
+ * @return true when a challenge from that player is pending
  */
 // Returns 1 if any entry's name equals `name`.
-extern "C" int func_00263128(BuddyMan* self, char* name)
+extern "C" bool func_00263128(BuddyMan* self, char* name)
 {
     if (((void***)self->mChallengersFinish - (void***)self->mChallengersStart) == 0)
-        return 0;
+        return false;
     for (void*** it = (void***)self->mChallengersStart; it != (void***)self->mChallengersFinish; it++) {
         void** challenger = *it;
         char* nameCopy;
         cBXString_cBXString2(&nameCopy, name);
         if (strcmp(*challenger, name) == 0) {
             cBXString__cBXString(&nameCopy, 2);
-            return 1;
+            return true;
         }
         cBXString__cBXString(&nameCopy, 2);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -8349,20 +8357,20 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002631E0);
  * Like func_00263128() (strcmp on each cChallenger's name) without the temporary copies. No caller in the source.
  *
  * @param name  the name as a cBXString (a pointer to the text pointer)
- * @return 1 when a challenge from that player is pending, otherwise 0
+ * @return true when a challenge from that player is pending
  */
-extern "C" int func_002631E0(BuddyMan* self, void** name)
+extern "C" bool func_002631E0(BuddyMan* self, void** name)
 {
     if ((unsigned int)((void**)self->mChallengersFinish - (void**)self->mChallengersStart) == 0) {
-        return 0;
+        return false;
     }
     for (void** it = (void**)self->mChallengersStart; it != (void**)self->mChallengersFinish; it++) {
         void* challenger = *it;
         if (strcmp(*(void**)challenger, *name) == 0) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -8487,19 +8495,19 @@ extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int
  * with this BuddyMan still in the first argument register and lets idx == count through.
  *
  * @param idx  index into mpRoster
- * @return 1 when the entry's "S" value equals mResource, otherwise 0 (also for a missing entry)
+ * @return true when the entry's "S" value equals mResource (false also for a missing entry)
  */
-extern "C" int func_002633F8(BuddyMan* self, int idx)
+extern "C" bool func_002633F8(BuddyMan* self, int idx)
 {
     if (idx < 0) {
-        return 0;
+        return false;
     }
     if (func_00262598_noarg() < idx) {
-        return 0;
+        return false;
     }
     char* rosterEntry = (char*)func_002625C8(self, idx);
     if (rosterEntry == 0) {
-        return 0;
+        return false;
     }
     char buf[16];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(rosterEntry + 0x54, D_004A31F8), buf, 0x10,
@@ -8512,7 +8520,7 @@ extern "C" int func_002633F8(BuddyMan* self, int idx)
 INCLUDE_ASM("dirtysock/tagsunk", func_00263490);
 #ifdef SKIP_ASM
 extern "C" int func_00262468(BuddyMan* self, int a1);
-extern "C" int func_002633F8(BuddyMan* self, int a1);
+extern "C" bool func_002633F8(BuddyMan* self, int a1);
 
 /**
  * Tells whether the buddy with a given name runs the same game resource as this player.
@@ -8659,8 +8667,8 @@ INCLUDE_ASM("dirtysock/tagsunk", cConnMan_cConnMan__FPv);
 /**
  * Constructs the front end's connection manager: clears its state word and stores vtable cConnMan_vtbl at +0x8.
  *
- * cRealFE's constructor (cRealFE_cRealFE) builds it at +0xB5AB0; func_002636A8() starts a connection and func_00263828()
- * updates it.
+ * cRealFE's constructor (cRealFE_cRealFE) builds it at +0xB5AB0; func_002636A8() starts a connection and
+ * func_00263828() updates it.
  *
  * @return the object
  */
@@ -8707,9 +8715,9 @@ extern "C" void cCommSystem_netConnConnect(void* p);
  * Starts connecting to the network: calls cCommSystem_netConnConnect (cCommSystem's netConnConnect) and arms a timeout.
  *
  * The connection manager is cRealFE + 0xB5AB0 (func_002591B8 returns it). The caller's second argument (the network
- * configuration func_001B45E8 chose) is not in the C declaration and reaches cCommSystem_netConnConnect untouched in the second
- * argument register. Sets the timeout at +0x4 to 60.0 seconds on broadband (mBroadBand set) or 180.0 otherwise, and the
- * state at +0x0 to 1; func_00263828() then watches mNetConnState.
+ * configuration func_001B45E8 chose) is not in the C declaration and reaches cCommSystem_netConnConnect untouched in
+ * the second argument register. Sets the timeout at +0x4 to 60.0 seconds on broadband (mBroadBand set) or 180.0
+ * otherwise, and the state at +0x0 to 1; func_00263828() then watches mNetConnState.
  */
 extern "C" void func_002636A8(cConnMan* self)
 {
@@ -8772,9 +8780,9 @@ static inline bool isState_36F0(int st)
  *
  * Makes sure BuddyMan_mBuddyMan exists and is connected (func_00260F80 / func_002613C8, func_0025B800 if it still does
  * not exist), then disconnects it (func_00261408()) and the lobby (func_0025B800). Unless mNetConnState is 1 (idle) it
- * also calls cCommSystem_netConnDisconnect (netConnDisconnect), posts an online::Event of type 278 (tag "NetErrorEvent", vtable
- * online_NetErrorEvent_vtbl, @p val at +0x8) to LobbyMan's mEventList when @p val is non-zero, and sets the connection manager's state
- * to 0. Quirk: it may create and reconnect BuddyMan only to disconnect it.
+ * also calls cCommSystem_netConnDisconnect (netConnDisconnect), posts an online::Event of type 278 (tag
+ * "NetErrorEvent", vtable online_NetErrorEvent_vtbl, @p val at +0x8) to LobbyMan's mEventList when @p val is non-zero,
+ * and sets the connection manager's state to 0. Quirk: it may create and reconnect BuddyMan only to disconnect it.
  *
  * @param out  the connection manager's state word (cRealFE + 0xB5AB0, from func_002591B8)
  * @param val  error code for the event (mNetConnError, or 0x2D3F3F3F '-???' on a timeout), or 0 for none
@@ -8902,7 +8910,8 @@ extern void* cGameConnMan_vtbl[];
 INCLUDE_ASM("dirtysock/tagsunk", cGameConnMan_cGameConnMan__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the front end's game-connection manager: clears its state word and stores vtable cGameConnMan_vtbl at +0x14.
+ * Constructs the front end's game-connection manager: clears its state word and stores vtable cGameConnMan_vtbl at
+ * +0x14.
  *
  * cRealFE's constructor (cRealFE_cRealFE) builds it at +0xB5ABC; func_002639E0() starts it, func_00263CF0() updates it
  * and func_00263BA8() shuts it down.
@@ -8925,7 +8934,8 @@ extern void* cGameConnMan_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the game-connection manager: restores vtable cGameConnMan_vtbl at +0x14, then frees the object when asked to.
+ * Destroys the game-connection manager: restores vtable cGameConnMan_vtbl at +0x14, then frees the object when asked
+ * to.
  *
  * cRealFE__cRealFE calls it with flags 2 for its member at +0xB5ABC.
  *
@@ -8969,13 +8979,13 @@ struct sNetCfg_002639E0 {
 /**
  * Sets up a two-player online race and opens the peer-to-peer channel to the opponent.
  *
- * Sets the new-race interface to 2 humans, player 0's controller to @p ctrlId and player 1's to 0 (each interface's slot-1
- * virtual applies it), and writes the network options: bIsNetworkGame 1, fLatency 1/60, iPort 3658, bIsHost @p isHost
- * (the network interface's slot-1 virtual runs twice). Formats @p ip as dotted decimal and opens a DirtySock channel to
- * it with cCommSystem_openDSockChannel(), keeping the channel at +0x4. When bit 18 of cBEOptionInterface_mOption is set
- * it also passes @p ip to the voice manager VoipMan (tag "cVoipMan"): func_00266D58, then func_00266E30. Finally
- * sets the timeout at +0x10 to 60.0 and the state at +0x0 to 1 for func_00263CF0(). func_00259098 calls it with the
- * opponent's lobby address once LobbyMan has a game.
+ * Sets the new-race interface to 2 humans, player 0's controller to @p ctrlId and player 1's to 0 (each interface's
+ * slot-1 virtual applies it), and writes the network options: bIsNetworkGame 1, fLatency 1/60, iPort 3658, bIsHost @p
+ * isHost (the network interface's slot-1 virtual runs twice). Formats @p ip as dotted decimal and opens a DirtySock
+ * channel to it with cCommSystem_openDSockChannel(), keeping the channel at +0x4. When bit 18 of
+ * cBEOptionInterface_mOption is set it also passes @p ip to the voice manager VoipMan (tag "cVoipMan"): func_00266D58,
+ * then func_00266E30. Finally sets the timeout at +0x10 to 60.0 and the state at +0x0 to 1 for func_00263CF0().
+ * func_00259098 calls it with the opponent's lobby address once LobbyMan has a game.
  *
  * @param ip      the opponent's IPv4 address, most significant byte first
  * @param isHost  non-zero when this console hosts the race; stored at +0x8
@@ -9069,10 +9079,11 @@ static inline void post_3BA8(char* self, void* msg)
 /**
  * Shuts the game-connection manager down and tells the front end why.
  *
- * When it is active and its channel is open (cCommSystem_isChannelOpen) it closes the channel (cCommSystem_closeChannel) and calls
- * func_00266E88 and func_00266DF8 on the voice manager VoipMan. It destroys the setup manager if there is one
- * (func_00264098()), calls func_0025F740(LobbyMan, 0), clears the state and posts an online::Event to LobbyMan's
- * mEventList: type 268 for @p reason 1, type 274 for @p reason 0, none otherwise (callers pass 2).
+ * When it is active and its channel is open (cCommSystem_isChannelOpen) it closes the channel
+ * (cCommSystem_closeChannel) and calls func_00266E88 and func_00266DF8 on the voice manager VoipMan. It destroys the
+ * setup manager if there is one (func_00264098()), calls func_0025F740(LobbyMan, 0), clears the state and posts an
+ * online::Event to LobbyMan's mEventList: type 268 for @p reason 1, type 274 for @p reason 0, none otherwise (callers
+ * pass 2).
  *
  * @param gameConn    the game-connection manager (cRealFE + 0xB5ABC, from func_002591D0)
  * @param reason  reason: 0 connect failure or timeout, 1 cancelled after connecting, other values post nothing
@@ -9160,16 +9171,16 @@ static inline void* Mgr_263CF0()
  * Updates the game-connection manager once per front-end frame (cRealFE_update) and starts the race when both sides are
  * set up.
  *
- * State 1 (connecting): once the channel is connected (cCommSystem_isChannelConnected) it either shuts down with reason 1 (cancel flag
- * +0xC set) or creates the setup manager (func_00264030() with the channel, host flag and bIsRankedGame), sends our
- * rank to the peer (func_00264CB8()) and moves to state 2; a channel error (cCommSystem_getError) or an expired timeout
- * (+0x10, counted down by the frame time) shuts down with reason 0. State 2: a channel error posts event 275 (unless
- * the setup manager is in state 11) and shuts down with reason 2; otherwise it updates the setup manager
- * (func_002642B8()). Setup state 11 shuts down with reason 2; state 13 starts the race: destroys the setup manager,
- * disconnects the lobby (func_0025B800), sets cRealFE_mStartState to 52, publishes buddy presence (state 1, location 9,
- * the opponent's name), applies MyCharacterID to rider 0, backs up the character profile, replaces any old cGameComm
- * (cGameComm_destroy, cGameComm_construct with the channel and host flag), queues a cPreGameLoadScreen as the next module
- * and returns to state 0.
+ * State 1 (connecting): once the channel is connected (cCommSystem_isChannelConnected) it either shuts down with reason
+ * 1 (cancel flag +0xC set) or creates the setup manager (func_00264030() with the channel, host flag and
+ * bIsRankedGame), sends our rank to the peer (func_00264CB8()) and moves to state 2; a channel error
+ * (cCommSystem_getError) or an expired timeout (+0x10, counted down by the frame time) shuts down with reason 0. State
+ * 2: a channel error posts event 275 (unless the setup manager is in state 11) and shuts down with reason 2; otherwise
+ * it updates the setup manager (func_002642B8()). Setup state 11 shuts down with reason 2; state 13 starts the race:
+ * destroys the setup manager, disconnects the lobby (func_0025B800), sets cRealFE_mStartState to 52, publishes buddy
+ * presence (state 1, location 9, the opponent's name), applies MyCharacterID to rider 0, backs up the character
+ * profile, replaces any old cGameComm (cGameComm_destroy, cGameComm_construct with the channel and host flag), queues a
+ * cPreGameLoadScreen as the next module and returns to state 0.
  */
 extern "C" void func_00263CF0(int* self)
 {
@@ -9271,7 +9282,8 @@ extern void* cSetupMan_mSetupMan;
 extern "C" void cSetupMan__cSetupMan(cSetupMan* self, int flags);
 
 /**
- * Destroys the online setup manager cSetupMan_mSetupMan, if any (cSetupMan__cSetupMan() with flags 3), and clears the pointer.
+ * Destroys the online setup manager cSetupMan_mSetupMan, if any (cSetupMan__cSetupMan() with flags 3), and clears the
+ * pointer.
  */
 extern "C" void func_00264098(void)
 {
@@ -9398,7 +9410,7 @@ extern "C" void func_00260F80(void);
 extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(BuddyMan* p);
 extern "C" void func_0025B800(LobbyMan* self);
-extern "C" int func_00263128(BuddyMan* self, char* name);
+extern "C" bool func_00263128(BuddyMan* self, char* name);
 extern "C" void func_00263018(BuddyMan* self, void* name);
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int i);
@@ -9479,7 +9491,8 @@ static inline void post_42B8(char* g, void* msg)
 
 
 /**
- * Updates the online setup manager (cSetupMan_mSetupMan): pumps its packet queues and handles one message from the peer.
+ * Updates the online setup manager (cSetupMan_mSetupMan): pumps its packet queues and handles one message from the
+ * peer.
  *
  * Pumps both queues (func_00264A58(), func_00264B20()). In state 5 or 10: when the game is ranked (+0x128) or the state
  * is 10, the host moves to state 12 and sends message 0xF; an unranked state 5 moves to 7 and posts an online::Event of
@@ -9714,9 +9727,9 @@ struct sDsRecvQueue_00264A58 {
 /**
  * Reads every pending packet from the setup manager's comm channel into its 32-slot receive queue.
  *
- * Allocates a 0xF0-byte buffer (func_00264960()) as the pending one at +0x4 and fills it with cCommSystem_readPacket on the
- * channel (+0x120); each packet read is queued. It stops when the read returns nothing (freeing the unused buffer) or
- * when 31 packets are queued (keeping the filled buffer pending for the next call).
+ * Allocates a 0xF0-byte buffer (func_00264960()) as the pending one at +0x4 and fills it with cCommSystem_readPacket on
+ * the channel (+0x120); each packet read is queued. It stops when the read returns nothing (freeing the unused buffer)
+ * or when 31 packets are queued (keeping the filled buffer pending for the next call).
  *
  * @param setupMan  the setup manager (receive queue: tail +0x8, head +0xC, slots +0x10)
  */
@@ -9750,8 +9763,8 @@ extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
 /**
  * Sends the setup manager's queued outgoing packets until the queue is empty or the channel refuses one.
  *
- * Each packet goes to cCommSystem_writePacket on the channel (+0x120) with its size (u16 at +0x2); a sent packet is freed with
- * func_00264990().
+ * Each packet goes to cCommSystem_writePacket on the channel (+0x120) with its size (u16 at +0x2); a sent packet is
+ * freed with func_00264990().
  *
  * @param setupMan  the setup manager (send queue: tail +0x90, head +0x94, slots +0x98)
  */
@@ -9807,9 +9820,9 @@ int func_00264BE8_impl(void* p, const void* src, int len) __asm__("func_00264BE8
  * Sends a message to the peer through the setup manager's channel, queueing it when the channel is busy.
  *
  * Flushes the send queue first (func_00264B20()), then wraps @p src in a packet with a 4-byte header (kind 0, flags 0,
- * u16 size = @p len + 4) and offers it to cCommSystem_writePacket; when that refuses, a copy goes into a new 0xF0-byte buffer at
- * the tail of the send queue. Quirks: there is no check that the queue has room or that @p len fits 0xEC bytes, and a
- * new message can go out ahead of older ones still queued.
+ * u16 size = @p len + 4) and offers it to cCommSystem_writePacket; when that refuses, a copy goes into a new 0xF0-byte
+ * buffer at the tail of the send queue. Quirks: there is no check that the queue has room or that @p len fits 0xEC
+ * bytes, and a new message can go out ahead of older ones still queued.
  *
  * @param setupMan  the setup manager (send queue: tail +0x90, slots +0x98; channel +0x120)
  * @param src       the message
@@ -9959,8 +9972,10 @@ struct sTagMsg264E50 {
  * Sends a character-select message to the peer with the rider's 7 attribute values.
  *
  * Builds a 20-byte message {@p type, @p rider, @p state, 7 bytes}: on a ranked game (+0x128 set) every attribute is 40,
- * otherwise they come from interface 3's getters cBEStatInterface_getHumanAccel, cBEStatInterface_getHumanEdging, cBEStatInterface_getHumanSpeed, cBEStatInterface_getHumanSpin,
- * cBEStatInterface_getHumanStability, cBEStatInterface_getHumanToughness and cBEStatInterface_getHumanTrick (player 0, @p rider); then sends it with func_00264BE8().
+ * otherwise they come from interface 3's getters cBEStatInterface_getHumanAccel, cBEStatInterface_getHumanEdging,
+ * cBEStatInterface_getHumanSpeed, cBEStatInterface_getHumanSpin, cBEStatInterface_getHumanStability,
+ * cBEStatInterface_getHumanToughness and cBEStatInterface_getHumanTrick (player 0, @p rider); then sends it with
+ * func_00264BE8().
  *
  * @param type   message type (func_00264F88, func_00265018 and func_00265140 send 0..5: pick, confirm and withdraw,
  *               host then client)
@@ -10159,10 +10174,10 @@ static inline sMsgListIter5190 sMsgList5190_insert(sMsgListIter5190 pos, void* c
 /**
  * Handles the opponent's character choice on the host's setup manager: records it, echoes it back and posts an event.
  *
- * The setup manager (cSetupMan_mSetupMan, built by cSetupMan_cSetupMan) moves its state word (+0x0) from 1 to 2, stores the opponent's
- * character and name in the back end (func_00264D80), sends a type-1 message with that character and the new state
- * (func_00264E50) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's
- * mEventList. func_002642B8 calls it for a type-1 message while the host is in a state below 7.
+ * The setup manager (cSetupMan_mSetupMan, built by cSetupMan_cSetupMan) moves its state word (+0x0) from 1 to 2, stores
+ * the opponent's character and name in the back end (func_00264D80), sends a type-1 message with that character and the
+ * new state (func_00264E50) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent")
+ * onto LobbyMan's mEventList. func_002642B8 calls it for a type-1 message while the host is in a state below 7.
  *
  * @param rider  the opponent's character id from the message
  * @param name   the opponent's name block from the message, copied into the back end
@@ -10368,9 +10383,9 @@ struct sNetMsg5458 {
 /**
  * Sends the row highlighted on the bragging-rights screen to the peer and posts it as a lobby event.
  *
- * Does nothing in state 12. On the host (+0x124 set, cSetupMan_cSetupMan's isHost) the state word moves from 5 or 6 to 7 and
- * the message type is 6; a client sends type 7. The {type, id, state} message goes out through func_00264BE8, and a
- * 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update") carrying @p id is pushed onto LobbyMan's
+ * Does nothing in state 12. On the host (+0x124 set, cSetupMan_cSetupMan's isHost) the state word moves from 5 or 6 to
+ * 7 and the message type is 6; a client sends type 7. The {type, id, state} message goes out through func_00264BE8, and
+ * a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update") carrying @p id is pushed onto LobbyMan's
  * mEventList. cFEStateBraggingRights_onWidgetMenu calls it with the menu's current row.
  *
  * @param id  the highlighted row (the menu's byte at +0x95)
@@ -10649,7 +10664,8 @@ extern "C" void cSharedLoginMan__cSharedLoginMan(cSharedLoginMan* self, int flag
 /**
  * Destroys the shared-login manager singleton SharedLoginMan, if there is one, and clears the pointer.
  *
- * Calls the deleting destructor cSharedLoginMan__cSharedLoginMan with flags 3. cFEStateNetAccountMem__cFEStateNetAccountMem calls it.
+ * Calls the deleting destructor cSharedLoginMan__cSharedLoginMan with flags 3.
+ * cFEStateNetAccountMem__cFEStateNetAccountMem calls it.
  */
 extern "C" void func_002658B8(void)
 {
@@ -11023,17 +11039,17 @@ extern void* D_004A33D8;
 /**
  * Tells whether the memory card is present but unformatted.
  *
- * Uses the card's virtual slots 53 (cPS2MemCard_IsAvailable1, cPS2MemCard_IsAvailable for the current port) and 55 (cPS2MemCard_IsFormatted1,
- * cPS2MemCard_IsFormatted for it).
+ * Uses the card's virtual slots 53 (cPS2MemCard_IsAvailable1, cPS2MemCard_IsAvailable for the current port) and 55
+ * (cPS2MemCard_IsFormatted1, cPS2MemCard_IsFormatted for it).
  *
- * @return 1 when the card is available and not formatted, otherwise 0
+ * @return true when the card is available and not formatted
  */
-extern "C" int func_00265CB0(cSharedLoginMan* self)
+extern "C" bool func_00265CB0(cSharedLoginMan* self)
 {
     if (((cDsObj265CB0*)D_004A33D8)->IsAvailable1() != 0) {
         return !((cDsObj265CB0*)D_004A33D8)->IsFormatted1();
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -11093,7 +11109,8 @@ struct cDsObj265D08 {
 extern void* D_004A33D8;
 
 /**
- * Clears the memory card's changed flag for the current port, through the card's virtual slot 47 (cPS2MemCard_ClearCardChanged).
+ * Clears the memory card's changed flag for the current port, through the card's virtual slot 47
+ * (cPS2MemCard_ClearCardChanged).
  *
  * That slot also turns a last result of -1 into 0. func_001B70D0 calls it before starting most card steps.
  */
@@ -11175,8 +11192,8 @@ struct cDsObj265D38 {
 extern void* D_004A33D8;
 
 /**
- * Tells whether the memory card in the current port was changed, through the card's virtual slot 63 (cPS2MemCard_CardChanged1,
- * cPS2MemCard_CardChanged).
+ * Tells whether the memory card in the current port was changed, through the card's virtual slot 63
+ * (cPS2MemCard_CardChanged1, cPS2MemCard_CardChanged).
  *
  * @return non-zero when the card was changed
  */
@@ -11251,9 +11268,9 @@ extern void* D_004A33D8;
  * Tells whether there is no usable memory card, by negating the card's virtual slot 53 (cPS2MemCard_IsAvailable1,
  * cPS2MemCard_IsAvailable for the current port).
  *
- * @return 1 when the card is not available, otherwise 0
+ * @return true when the card is not available
  */
-extern "C" int func_00265D68(cSharedLoginMan* self)
+extern "C" bool func_00265D68(cSharedLoginMan* self)
 {
     return !((cDsObj265D68*)D_004A33D8)->IsAvailable1();
 }
@@ -11270,9 +11287,9 @@ extern "C" int func_003F8000(void* p);
 /**
  * Starts reading the saved account from the card: the shared-login manager's step for state 2.
  *
- * Clears the result word (+0x4) and D_004A33E0, zeroes the 36-byte account buffer AccountData (user name at +0, password
- * at +0x11), starts func_003F8000(AccountData) and sets the state word to 3. func_001B7A98 later compares the buffer
- * with the typed user name and password.
+ * Clears the result word (+0x4) and D_004A33E0, zeroes the 36-byte account buffer AccountData (user name at +0,
+ * password at +0x11), starts func_003F8000(AccountData) and sets the state word to 3. func_001B7A98 later compares the
+ * buffer with the typed user name and password.
  */
 extern "C" void func_00265D98(cSharedLoginMan* self)
 {
@@ -11503,8 +11520,8 @@ struct sDsErr265FB8 {
  * Memory-card callback 0 of the network-account library: starts a directory search on the card.
  *
  * Decodes @p code into a port/slot pair (func_003FA1D0; the result is not used), clears the 0x40-byte name buffer
- * D_00537190 and starts a sceMcGetDir with @p pattern as the pattern (func_002C6810 on the card D_004A33D8). Sets the card
- * operation D_004A33D4 to 2; func_00266358 then looks for a matching entry. Entry 0 of D_00442A18.
+ * D_00537190 and starts a sceMcGetDir with @p pattern as the pattern (func_002C6810 on the card D_004A33D8). Sets the
+ * card operation D_004A33D4 to 2; func_00266358 then looks for a matching entry. Entry 0 of D_00442A18.
  *
  * @param pattern   the directory pattern
  * @param code  the library's card unit code
@@ -11590,9 +11607,9 @@ struct sDsErr266060 {
 /**
  * Memory-card callback 3 of the network-account library: starts checking the card in a port.
  *
- * Decodes @p code into a port/slot pair (func_003FA1D0), stores the port in MemCardDevice, sets the retry count D_004A33E4
- * to 9, starts a card check on that port (func_002C67E8: sceMcGetInfo) and sets the card operation D_004A33D4 to 1.
- * func_00266358 repeats the check until the retries run out. Entry 3 of D_00442A18.
+ * Decodes @p code into a port/slot pair (func_003FA1D0), stores the port in MemCardDevice, sets the retry count
+ * D_004A33E4 to 9, starts a card check on that port (func_002C67E8: sceMcGetInfo) and sets the card operation
+ * D_004A33D4 to 1. func_00266358 repeats the check until the retries run out. Entry 3 of D_00442A18.
  *
  * @param code  the library's card unit code (port in the high bits, slot in the low two)
  */
@@ -11652,9 +11669,9 @@ struct sDsErr2660C8 {
 /**
  * Memory-card callback 5 of the network-account library: opens a file on the card.
  *
- * Decodes @p code (func_003FA1D0), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no length check),
- * starts a sceMcOpen of it with mode @p openMode (func_002C6968) and sets the card operation D_004A33D4 to 4. Entry 5 of
- * D_00442A18.
+ * Decodes @p code (func_003FA1D0), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no
+ * length check), starts a sceMcOpen of it with mode @p openMode (func_002C6968) and sets the card operation D_004A33D4
+ * to 4. Entry 5 of D_00442A18.
  *
  * @param dirName    the directory name
  * @param fileName    the file name
@@ -11709,8 +11726,8 @@ struct sDsErr266170 {
  * Memory-card callback 7 of the network-account library: creates a directory on the card.
  *
  * Decodes @p code (func_003FA1D0), copies @p name into an 80-byte stack buffer (no length check), starts a sceMcMkdir
- * of it (func_002C6C50, which also stores @p requestValue in the card's unk_020) and sets the card operation D_004A33D4 to 11.
- * Entry 7 of D_00442A18.
+ * of it (func_002C6C50, which also stores @p requestValue in the card's unk_020) and sets the card operation D_004A33D4
+ * to 11. Entry 7 of D_00442A18.
  *
  * @param name  the directory name
  * @param requestValue    value stored with the request (the card's unk_020)
@@ -11745,8 +11762,9 @@ struct sDsErr2661D8 {
 /**
  * Memory-card callback 8 of the network-account library: deletes a file on the card.
  *
- * Decodes @p code (func_003FA1D0), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no length check),
- * starts a sceMcDelete of it (func_002C6CE0) and sets the card operation D_004A33D4 to 12. Entry 8 of D_00442A18.
+ * Decodes @p code (func_003FA1D0), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no
+ * length check), starts a sceMcDelete of it (func_002C6CE0) and sets the card operation D_004A33D4 to 12. Entry 8 of
+ * D_00442A18.
  *
  * @param dirName    the directory name
  * @param fileName    the file name
@@ -11831,8 +11849,8 @@ void func_002C6BD0(void* obj, int a1, int a2);
 /**
  * Memory-card callback 11 of the network-account library: writes to the open card file.
  *
- * Starts a sceMcWrite from @p source of @p byteCount bytes (func_002C6BD0) and sets the card operation D_004A33D4 to 14;
- * func_00266358 reports the libmc result (bytes written). Entry 11 of D_00442A18.
+ * Starts a sceMcWrite from @p source of @p byteCount bytes (func_002C6BD0) and sets the card operation D_004A33D4 to
+ * 14; func_00266358 reports the libmc result (bytes written). Entry 11 of D_00442A18.
  *
  * @param fileHandle  not read (the library's file handle)
  * @param source  the source buffer
@@ -11855,8 +11873,8 @@ void func_002C6A60(void* obj, int a1, int a2);
 /**
  * Memory-card callback 12 of the network-account library: seeks in the open card file.
  *
- * Starts a sceMcSeek to @p offset (func_002C6A60) and sets the card operation D_004A33D4 to 5. The origin passed on is 1
- * when @p origin is 1 and 0 otherwise. Quirk: an origin of 2 (from the end) becomes 0 (from the start). Entry 12 of
+ * Starts a sceMcSeek to @p offset (func_002C6A60) and sets the card operation D_004A33D4 to 5. The origin passed on is
+ * 1 when @p origin is 1 and 0 otherwise. Quirk: an origin of 2 (from the end) becomes 0 (from the start). Entry 12 of
  * D_00442A18.
  *
  * @param fileHandle  not read (the library's file handle)
@@ -11946,11 +11964,11 @@ struct cDsObj266358 {
  * Memory-card callback 15 of the network-account library: polls the card operation started by the other callbacks.
  *
  * Operations 3, 15 and 16 report done (status 2) at once, operation 10 reports done with 0x800. Otherwise, while the
- * card D_004A33D8 is busy (slot 11) the status is 1; when it is idle the status is 2, and a card error (cPS2MemCard_GetLastError
- * for the current port) is returned through func_00266578. Per operation D_004A33D4: 1 re-runs the card check while the
- * retry count D_004A33E4 lasts (status stays 1), then sets D_004A33E0; 2 copies each directory entry (mNumDirTable at
- * +0x54, func_002C68C8) into D_00537190 and reports 1 for the first one func_003FA360 accepts; 5, 6 and 14 report the
- * last libmc result D_004A3940; 9 reports the free space (slot 20) times 1024.
+ * card D_004A33D8 is busy (slot 11) the status is 1; when it is idle the status is 2, and a card error
+ * (cPS2MemCard_GetLastError for the current port) is returned through func_00266578. Per operation D_004A33D4: 1
+ * re-runs the card check while the retry count D_004A33E4 lasts (status stays 1), then sets D_004A33E0; 2 copies each
+ * directory entry (mNumDirTable at +0x54, func_002C68C8) into D_00537190 and reports 1 for the first one func_003FA360
+ * accepts; 5, 6 and 14 report the last libmc result D_004A3940; 9 reports the free space (slot 20) times 1024.
  *
  * @param status  receives 1 while busy, 2 when finished
  * @param out     receives the operation's result (0 when there is none)
@@ -12203,7 +12221,8 @@ extern "C" void* cUsbKeyboard_cUsbKeyboard(cUsbKeyboard* self);
 /**
  * Creates the USB keyboard reader singleton Keyboard.
  *
- * Allocates 1124 bytes tagged "cUsbKeyboard" and runs the constructor cUsbKeyboard_cUsbKeyboard on them. initOnline calls it.
+ * Allocates 1124 bytes tagged "cUsbKeyboard" and runs the constructor cUsbKeyboard_cUsbKeyboard on them. initOnline
+ * calls it.
  */
 extern "C" void func_00266788(void)
 {
@@ -12294,8 +12313,8 @@ extern "C" void sceUsbKbSetReadMode(void* self, int a1);
  * Sets up a newly connected USB keyboard: the connect callback cUsbKeyboard_cUsbKeyboard registers.
  *
  * Runs the library's default callback func_003F6358 (LED setup; the second argument register passes through untouched),
- * then sceUsbKbSetArrangement and sceUsbKbSetReadMode with the keyboard number (the first argument) and 0, which put that keyboard's
- * two modes back to 0.
+ * then sceUsbKbSetArrangement and sceUsbKbSetReadMode with the keyboard number (the first argument) and 0, which put
+ * that keyboard's two modes back to 0.
  */
 extern "C" void func_002668A8(void* self)
 {
@@ -12441,10 +12460,10 @@ struct sChanSet_266BA8 {
  * @param ch         the keyboard slot
  * @param firstOut   receives the pair's first byte, or -1
  * @param secondOut  receives the pair's second byte, or -1
- * @return 1 when a pair was taken, 0 when the ring is empty
+ * @return true when a pair was taken, false when the ring is empty
  */
 // Pops the next (a, b) pair from channel ch's 64-entry ring; zero entries leave the outputs at -1.
-extern "C" int func_00266BA8(sChanSet_266BA8* self, int ch, int* firstOut, int* secondOut)
+extern "C" bool func_00266BA8(sChanSet_266BA8* self, int ch, int* firstOut, int* secondOut)
 {
     *firstOut = -1;
     *secondOut = -1;
@@ -12457,10 +12476,10 @@ extern "C" int func_00266BA8(sChanSet_266BA8* self, int ch, int* firstOut, int* 
             if (self->chan[ch].buf[i][1] != 0)
                 *secondOut = self->chan[ch].buf[i][1];
             self->chan[ch].read++;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -12475,8 +12494,8 @@ void* cVoipMan_cVoipMan(void* self);
 /**
  * Creates the voice-chat manager singleton VoipMan.
  *
- * Allocates 8 bytes tagged "cVoipMan" and runs the constructor cVoipMan_cVoipMan on them. cFEStateMainMenu_onWidgetEvent
- * and cDebugMenuScreen_cDebugMenuScreen call it.
+ * Allocates 8 bytes tagged "cVoipMan" and runs the constructor cVoipMan_cVoipMan on them.
+ * cFEStateMainMenu_onWidgetEvent and cDebugMenuScreen_cDebugMenuScreen call it.
  */
 extern "C" void func_00266CA0(void)
 {
@@ -12695,8 +12714,8 @@ extern int D_004A33F8;
 extern "C" void func_003F6C10(int a0, int a1);
 
 /**
- * Sets the voice level: sends @p level and @p maxLevel to the voice module (func_003F6C10) when connected, and always stores @p
- * a1 in D_004A33F8.
+ * Sets the voice level: sends @p level and @p maxLevel to the voice module (func_003F6C10) when connected, and always
+ * stores @p a1 in D_004A33F8.
  *
  * cOVState_PAUSE_OPTIONS_onWidgetEvent passes the voice slider value times 10 and the maximum func_00266F90 read.
  *
@@ -12756,15 +12775,15 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00267000);
  * @param last1   end of the first range
  * @param first2  start of the second range
  * @param last2   end of the second range
- * @return 1 when the first range sorts before the second (including when it is a proper prefix of it), otherwise 0
+ * @return true when the first range sorts before the second (including when it is a proper prefix of it)
  */
-extern "C" int func_00267000(signed char* first1, signed char* last1, signed char* first2, signed char* last2)
+extern "C" bool func_00267000(signed char* first1, signed char* last1, signed char* first2, signed char* last2)
 {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2)
-            return 1;
+            return true;
         if (*first2 < *first1)
-            return 0;
+            return false;
         ++first1;
         ++first2;
     }
@@ -13122,12 +13141,12 @@ extern sHandle_267468 D_004A5150;
  * 24-bit index; D_004A50E0 is zeroed.
  *
  * @param initialize  non-zero to construct
- * @param priority    the init priority; only 0xFFFF does anything
+ * @param priority    the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 // Static initializer (initialize, priority).
 extern "C" void func_00267468(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004D2C38) sColor_267468(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004D2C48) sColor_267468(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004D2C58) sColor_267468(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -13346,11 +13365,11 @@ INCLUDE_ASM("dirtysock/tagsunk", cDSockChannel_isConnected);
 /**
  * Tells whether the DirtySock channel is connected.
  *
- * @return 1 when mState is 2 (connected), otherwise 0
+ * @return true when mState is kState_Connected
  */
-int cDSockChannel::isConnected()
+bool cDSockChannel::isConnected()
 {
-    return mState == 2;
+    return mState == kState_Connected;
 }
 #endif
 
@@ -13375,11 +13394,11 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a plain online event: restores the event vtable online_Event_vtbl at +0x4 and frees the object when bit 0 of @p
- * flags is set.
+ * Destroys a plain online event: restores the event vtable online_Event_vtbl at +0x4 and frees the object when bit 0 of
+ * @p flags is set.
  *
- * Slot 1 of online_Event_vtbl, the vtable of the 8-byte kind-only events (kind at +0x0, tag "NetEvent") posted on LobbyMan's
- * mEventList.
+ * Slot 1 of online_Event_vtbl, the vtable of the 8-byte kind-only events (kind at +0x0, tag "NetEvent") posted on
+ * LobbyMan's mEventList.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -13401,7 +13420,8 @@ extern void* online_Event_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
- * Copies a plain online event: allocates 8 bytes tagged "NetEvent" with the same kind (+0x0) and vtable online_Event_vtbl.
+ * Copies a plain online event: allocates 8 bytes tagged "NetEvent" with the same kind (+0x0) and vtable
+ * online_Event_vtbl.
  *
  * Slot 2 of online_Event_vtbl.
  *
@@ -13424,11 +13444,11 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys an error event (vtable online_ErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees the object
- * when bit 0 of @p flags is set.
+ * Destroys an error event (vtable online_ErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and
+ * frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of online_ErrorEvent_vtbl, the vtable of the 0xC-byte kind-258 events that carry an error code at +0x8 (LobbyMan posts
- * them with codes such as 'time').
+ * Slot 1 of online_ErrorEvent_vtbl, the vtable of the 0xC-byte kind-258 events that carry an error code at +0x8
+ * (LobbyMan posts them with codes such as 'time').
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -13450,8 +13470,8 @@ extern void* online_ErrorEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
- * Copies an error event: allocates 0xC bytes tagged "NetEvent" with kind 258, vtable online_ErrorEvent_vtbl and the error code
- * (+0x8) of @p self.
+ * Copies an error event: allocates 0xC bytes tagged "NetEvent" with kind 258, vtable online_ErrorEvent_vtbl and the
+ * error code (+0x8) of @p self.
  *
  * Slot 2 of online_ErrorEvent_vtbl.
  *
@@ -13475,11 +13495,11 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a buddy error event (vtable online_BuddyErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees the
- * object when bit 0 of @p flags is set.
+ * Destroys a buddy error event (vtable online_BuddyErrorEvent_vtbl): restores the base event vtable online_Event_vtbl
+ * at +0x4 and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of online_BuddyErrorEvent_vtbl, the vtable of the kind-259 events LobbyMan's update (func_0025AC50) posts with BuddyMan's
- * miError at +0x8 when the buddy login fails.
+ * Slot 1 of online_BuddyErrorEvent_vtbl, the vtable of the kind-259 events LobbyMan's update (func_0025AC50) posts with
+ * BuddyMan's miError at +0x8 when the buddy login fails.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -13504,8 +13524,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  * Copies a buddy error event, but as a plain error event: allocates 0xC bytes tagged "NetEvent" with kind 258, vtable
  * online_ErrorEvent_vtbl and the error code (+0x8) of @p self.
  *
- * Slot 2 of online_BuddyErrorEvent_vtbl. Quirk: the copy gets the error event's kind (258) and vtable online_ErrorEvent_vtbl, not this event's kind
- * 259 and vtable online_BuddyErrorEvent_vtbl; the body is identical to online_ErrorEvent_clone (the July 2003 preview's copy does the same).
+ * Slot 2 of online_BuddyErrorEvent_vtbl. Quirk: the copy gets the error event's kind (258) and vtable
+ * online_ErrorEvent_vtbl, not this event's kind 259 and vtable online_BuddyErrorEvent_vtbl; the body is identical to
+ * online_ErrorEvent_clone (the July 2003 preview's copy does the same).
  *
  * @return the new event
  */
@@ -13527,11 +13548,11 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a network error event (vtable online_NetErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees the
- * object when bit 0 of @p flags is set.
+ * Destroys a network error event (vtable online_NetErrorEvent_vtbl): restores the base event vtable online_Event_vtbl
+ * at +0x4 and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of online_NetErrorEvent_vtbl, the vtable of the kind-278 events (error value at +0x8) that tagsunk allocates with the tag
- * "NetErrorEvent".
+ * Slot 1 of online_NetErrorEvent_vtbl, the vtable of the kind-278 events (error value at +0x8) that tagsunk allocates
+ * with the tag "NetErrorEvent".
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -13553,8 +13574,8 @@ extern void* online_NetErrorEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
- * Copies a network error event: allocates 0xC bytes tagged "NetEvent" with kind 278, vtable online_NetErrorEvent_vtbl and the value
- * (+0x8) of @p self.
+ * Copies a network error event: allocates 0xC bytes tagged "NetEvent" with kind 278, vtable online_NetErrorEvent_vtbl
+ * and the value (+0x8) of @p self.
  *
  * Slot 2 of online_NetErrorEvent_vtbl.
  *
@@ -13648,8 +13669,8 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
 /**
- * Destroys a news event (vtable online_NewsEvent_vtbl): destroys its cBXString (+0x8), restores the base event vtable online_Event_vtbl
- * at +0x4 and frees the object when bit 0 of @p flags is set.
+ * Destroys a news event (vtable online_NewsEvent_vtbl): destroys its cBXString (+0x8), restores the base event vtable
+ * online_Event_vtbl at +0x4 and frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of online_NewsEvent_vtbl.
  *
@@ -13674,8 +13695,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 
 /**
- * Copies a news event: allocates 0xC bytes tagged "NetEvent" with kind 226, vtable online_NewsEvent_vtbl and a cBXString built
- * from @p self's string (+0x8).
+ * Copies a news event: allocates 0xC bytes tagged "NetEvent" with kind 226, vtable online_NewsEvent_vtbl and a
+ * cBXString built from @p self's string (+0x8).
  *
  * Slot 2 of online_NewsEvent_vtbl.
  *
@@ -13699,11 +13720,11 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys an account-too-young event (vtable online_AcctTooYoungEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees
- * the object when bit 0 of @p flags is set.
+ * Destroys an account-too-young event (vtable online_AcctTooYoungEvent_vtbl): restores the base event vtable
+ * online_Event_vtbl at +0x4 and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of online_AcctTooYoungEvent_vtbl, the vtable of the kind-258 events that LobbyMan_onaccountcreated posts for the 'tooy' account error, with
- * the reply's "AGE" number at +0xC.
+ * Slot 1 of online_AcctTooYoungEvent_vtbl, the vtable of the kind-258 events that LobbyMan_onaccountcreated posts for
+ * the 'tooy' account error, with the reply's "AGE" number at +0xC.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -13755,8 +13776,8 @@ void operator_delete(int*);
  * Destroys the account-locked error event (an online::Event of type 258 with the code 'lock').
  *
  * Destroys the two cBXStrings at +0x10 (the reply's INTRO text) and +0xC (its DATE text), restores the online::Event
- * base vtable online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's LobbyMan_onauthentication posts
- * this event when the login reply's status is 'lock'.
+ * base vtable online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's
+ * LobbyMan_onauthentication posts this event when the login reply's status is 'lock'.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -13794,8 +13815,8 @@ static inline void Init268308(online_AcctLockedEvent* m, const char* a, const ch
  * Returns a heap copy of this account-locked error event (type 258, code 'lock').
  *
  * Allocates 20 bytes with the "NetEvent" tag, stores type 0x102 (258), code 'lock' (0x6C6F636B) at +0x8 and vtable
- * online_AcctLockedEvent_vtbl at +0x4, and copies the two strings at +0xC (DATE) and +0x10 (INTRO) with cBXString_cBXString2. The
- * matched code's view struct calls the vtable word at +0x4 `name`; it is the vtable.
+ * online_AcctLockedEvent_vtbl at +0x4, and copies the two strings at +0xC (DATE) and +0x10 (INTRO) with
+ * cBXString_cBXString2. The matched code's view struct calls the vtable word at +0x4 `name`; it is the vtable.
  *
  * @return the new event
  */
@@ -13818,9 +13839,9 @@ void operator_delete(int*);
 /**
  * Destroys the server-down error event (an online::Event of type 258 with the code 'down').
  *
- * Destroys the cBXString at +0xC (the server's message text), restores the online::Event base vtable online_Event_vtbl at +0x4
- * and calls operator_delete when bit 0 of flags is set. LobbyMan's update func_0025AC50 posts this event when the lobby
- * server reports 'down' while connecting.
+ * Destroys the cBXString at +0xC (the server's message text), restores the online::Event base vtable online_Event_vtbl
+ * at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's update func_0025AC50 posts this event when
+ * the lobby server reports 'down' while connecting.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -13870,8 +13891,8 @@ void operator_delete(int*);
  * Destroys the find-player result event (an online::Event of type 227).
  *
  * Destroys the cBXStrings at +0xC (the room name) and +0x8 (the player's persona name), restores the online::Event base
- * vtable online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's find-player reply handler
- * LobbyMan_onPlayerFound posts this event.
+ * vtable online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's find-player reply
+ * handler LobbyMan_onPlayerFound posts this event.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -13910,9 +13931,10 @@ static inline void Init2684C0(online_FindPlayerEvent* m, const char* a, const ch
 /**
  * Returns a heap copy of this find-player result event (type 227).
  *
- * Allocates 44 bytes with the "NetEvent" tag and fills it like LobbyMan_onPlayerFound does: type 0xE3, vtable online_FindPlayerEvent_vtbl, copies
- * of the persona name (+0x8) and room name (+0xC) strings, the online flag (+0x10) and the ADDR number (+0x14), then
- * copies the 20-byte stats record at +0x18 (RANK and STAT fields, laid out like tLobbyStats).
+ * Allocates 44 bytes with the "NetEvent" tag and fills it like LobbyMan_onPlayerFound does: type 0xE3, vtable
+ * online_FindPlayerEvent_vtbl, copies of the persona name (+0x8) and room name (+0xC) strings, the online flag (+0x10)
+ * and the ADDR number (+0x14), then copies the 20-byte stats record at +0x18 (RANK and STAT fields, laid out like
+ * tLobbyStats).
  *
  * @param src  the event to copy
  * @return the new event
@@ -13937,9 +13959,9 @@ void operator_delete(int*);
 /**
  * Destroys the ping result event (an online::Event of type 229).
  *
- * Destroys the cBXString at +0x8 (the pinged user's name), restores the online::Event base vtable online_Event_vtbl at +0x4
- * and calls operator_delete when bit 0 of flags is set. LobbyMan's LobbyMan_onPingReceived posts this event with the reply's NAME
- * and PING (32656 when the reply carried an error).
+ * Destroys the cBXString at +0x8 (the pinged user's name), restores the online::Event base vtable online_Event_vtbl at
+ * +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's LobbyMan_onPingReceived posts this event with
+ * the reply's NAME and PING (32656 when the reply carried an error).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -13961,8 +13983,8 @@ extern void* online_PingEvent_vtbl[];
 /**
  * Returns a heap copy of this ping result event (type 229).
  *
- * Allocates 0x10 bytes with the "NetEvent" tag, stores type 229 and vtable online_PingEvent_vtbl, copies the name string at +0x8
- * with cBXString_cBXString2 and the ping value at +0xC.
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 229 and vtable online_PingEvent_vtbl, copies the name
+ * string at +0x8 with cBXString_cBXString2 and the ping value at +0xC.
  *
  * @return the new event
  */
@@ -14094,8 +14116,9 @@ void operator_delete(int*);
 /**
  * Destroys the user-record event (an online::Event of type 269, vtable D_00481110).
  *
- * Its names are inline char arrays, not cBXStrings, so this only restores the online::Event base vtable online_Event_vtbl at
- * +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's reply handler func_0025EB00 posts this event.
+ * Its names are inline char arrays, not cBXStrings, so this only restores the online::Event base vtable
+ * online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's reply handler
+ * func_0025EB00 posts this event.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */

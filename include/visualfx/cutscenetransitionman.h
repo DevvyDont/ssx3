@@ -34,6 +34,15 @@
 struct cObjNode;
 
 struct cCutSceneTransitionMan : public cObjNode {
+    // mCurrentState's values. [O] On Tour's enum cCutSceneTransitionMan::eCurrentState, names and values; [U] as
+    // mCurrentState's comment below.
+    enum eCurrentState {
+        kRegularMode = 0,
+        kCutSceneMode = 1,
+        kTransitionToRegularMode = 2,
+        kTransitionToCutSceneMode = 3
+    };
+
     // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
     //   [R] cCutSceneTransitionMan_vtbl (ctor)
     // --- cCutSceneTransitionMan

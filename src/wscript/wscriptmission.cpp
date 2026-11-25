@@ -89,11 +89,11 @@ static inline void setTab_3DE0(char* t, int c)
  * Fills the store's uber-trick screen with the tricks of the selected category; the name does not fit the
  * body.
  *
- * Shows each unlocked trick of the category (the selected menu item's misc data, default 1) in
- * "Trick00".."Trick08" with its check mark "ck00".., coloured as owned (+0x5C), current pick (+0x54) or
- * neither (+0x58). Then sets the button icons "InstBtn0".."InstBtn2" for the category (bsl1/bsl2/bsr1/bsr2,
- * "square NML") and lays out the instruction texts "inst0".."inst2" around them. Called by the store's
- * uber-trick states (fe/festatestore).
+ * Shows each unlocked trick of the category (a grab, eGrabButtons: the selected menu item's misc data, default
+ * kGrabButtons_L1) in "Trick00".."Trick08" with its check mark "ck00".., coloured as owned (+0x5C), current pick
+ * (+0x54) or neither (+0x58). Then sets the button icons "InstBtn0".."InstBtn2" for the category's buttons
+ * (bsl1/bsl2/bsr1/bsr2, "square NML") and lays out the instruction texts "inst0".."inst2" around them. Called by the
+ * store's uber-trick states (fe/festatestore).
  *
  */
 void cFEStateUberTrick::updateTrickMenu()
@@ -128,7 +128,7 @@ void cFEStateUberTrick::updateTrickMenu()
     t3Vector textSize0, textSize1, textSize2, spareVec, instPos0, instPos1, instPos2, btnPos0, btnPos1, btnPos2, btnSize0, btnSize1, btnSize2;
     int count;
     int cur;
-    int slot = 1;
+    int slot = kGrabButtons_L1;
     char* rider = *(char**)((char*)mpMainMenu + 0xA0);
     if (rider != 0)
         slot = *(signed char*)(rider + 0x18);
@@ -166,24 +166,24 @@ void cFEStateUberTrick::updateTrickMenu()
     int iconR2 = lookup_3DE0(((char*)this), str_bsr2);
     int iconSquare = lookup_3DE0(((char*)this), str_square_NML);
     switch (slot) {
-    case 1:
+    case kGrabButtons_L1:
         ca = iconL1;
         break;
-    case 3:
+    case kGrabButtons_R2:
         ca = iconR2;
         break;
-    case 0:
+    case kGrabButtons_L2:
         ca = iconL2;
         break;
-    case 4:
+    case kGrabButtons_L2L1:
         ca = iconL2;
         cb = iconL1;
         break;
-    case 9:
+    case kGrabButtons_R1R2:
         cb = iconR2;
         ca = iconR1;
         break;
-    case 2:
+    case kGrabButtons_R1:
         ca = iconR1;
         break;
     }

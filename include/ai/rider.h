@@ -497,6 +497,33 @@ struct cWorldIntersectType;
 // meter at rate 8 for 0, 17 for 1 and 34 for 2; the ctor stores 1.
 enum eWipeoutRecoveryMode { kWRM_Slower = 0, kWRM_Normal = 1, kWRM_Faster = 2 };
 
+// getMissionInt's query: [O] enum eMissionQuery, names and values (On Tour's cRider::getMissionInt(eMissionQuery)).
+// [U] retail's cRider_getMissionInt answers them the same way: 0 motion state 2 (wipeout), 1 control state 9, 2 air,
+// 3 ground, 4 rail, 5-7 grab / tweak / uber held, 8 TotalPoints, 9 / 10 PressMode 1 / 2, 11 mBoostStrength,
+// 15-17 the metrix totals NumPerfectLandingBonus, NumLastSecondLandingBonus, TotalStylePoints; 12-14 give 0.
+enum eMissionQuery {
+    kMQ_Wipeout = 0,
+    kMQ_Reset = 1,
+    kMQ_Air = 2,
+    kMQ_Ground = 3,
+    kMQ_Railslide = 4,
+    kMQ_GrabHeld = 5,
+    kMQ_TweakHeld = 6,
+    kMQ_UberHeld = 7,
+    kMQ_TotalPoints = 8,
+    kMQ_NosePress = 9,
+    kMQ_TailPress = 10,
+    kMQ_Boosting = 11,
+    kMQ_Stall = 12,
+    kMQ_OffAxis = 13,
+    kMQ_Inverted = 14,
+    kMQ_NumPerfectLanding = 15,
+    kMQ_NumLastSecondLanding = 16,
+    kMQ_TotalStylePoints = 17,
+    kMQ_Punching = 18,
+    kMQ_Num = 19
+};
+
 struct cRider : public cRiderState, public cBeing {
     // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
     // 0x6C4-0x6CF: alignment padding; the compiler starts the derived part on a 16-byte boundary (cScriptObjRider,

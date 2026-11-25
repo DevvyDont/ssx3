@@ -20,6 +20,68 @@
 #include "object/movenode.h"
 #include "ai/riderhandler.h"
 #include "main/gameviewman.h"
+#include "wscript/wscriptprocess.h"
+
+// The script functions' command and type arguments (names ours, from what each function does with the value; the On
+// Tour parameter blocks (tExpireData, tRailData, ...) type them int). Evidence: [U] the function each is used in.
+// tMakeDeadData::Type (makeDead): a cDeadNode, the node deleted and m_iFlags reset from the copy in their upper half,
+// or a cRestoreNode.
+enum eMakeDeadType { kMakeDead_Dead = 0, kMakeDead_ResetFlags = 1, kMakeDead_Restore = 3 };
+// tExpireData::Type (ExpireFunc): the node's expire(runscript) argument ([O] cInstanceNode::expire(const bool
+// runscript)).
+enum eExpireType { kExpire_Silent = 0, kExpire_RunScript = 1 };
+// tRailData::Cmd (RailFunc): cRailManNode_addRail's on flag.
+enum eRailCmd { kRailCmd_Off = 0, kRailCmd_On = 1 };
+// tNISData::Cmd (NISFunc): queue the NIS of a script hash or of a script category on list 0, or play list 0.
+enum eNISCmd { kNISCmd_QueueScript = 0, kNISCmd_QueueCategory = 1, kNISCmd_Play = 2 };
+// tSectionData::Cmd (SectionFunc): cSectionMan_load; nothing (1 is handled and ignored); cSectionMan_activate; game
+// state kGFSM_UserSelect with startup flag 2 and a scripted DJ line (func_002A49E8), or with flag 0; a sky swap.
+enum eSectionCmd {
+    kSectionCmd_Load = 0,
+    kSectionCmd_Ignored = 1,
+    kSectionCmd_Activate = 2,
+    kSectionCmd_UserSelectDJ = 3,
+    kSectionCmd_UserSelect = 4,
+    kSectionCmd_SkySwap = 5
+};
+// tRemoveModifierData::Type (RemoveModifierFunc): tModifierBlock_fadeEffectModifier or remHaloModifier.
+enum eRemoveModifierType { kRemoveModifier_Effect = 0, kRemoveModifier_Halo = 1 };
+// tRiderActionData::Type / tRiderMetricData::Cmd (RiderActionFunc, RiderMetricFunc): each names the eMissionQuery
+// (ai/rider.h) it is mapped to.
+enum eScriptRiderQuery {
+    kRiderQuery_Ground = 0,
+    kRiderQuery_Air = 1,
+    kRiderQuery_Railslide = 2,
+    kRiderQuery_Wipeout = 3,
+    kRiderQuery_Reset = 4,
+    kRiderQuery_GrabHeld = 5,
+    kRiderQuery_TweakHeld = 6,
+    kRiderQuery_UberHeld = 7,
+    kRiderQuery_TotalStylePoints = 8,
+    kRiderQuery_TotalPoints = 9,
+    kRiderQuery_NosePress = 10,
+    kRiderQuery_TailPress = 11,
+    kRiderQuery_Boosting = 12,
+    kRiderQuery_Stall = 13,
+    kRiderQuery_OffAxis = 14,
+    kRiderQuery_Inverted = 15,
+    kRiderQuery_NumPerfectLanding = 16,
+    kRiderQuery_NumLastSecondLanding = 17,
+    kRiderQuery_Punching = 18
+};
+// tCrowd3dData::Cmd (Crowd3dFunc): func_00343C60 joins the instance's crowd block, func_00343F38 leaves it.
+enum eCrowd3dCmd { kCrowd3dCmd_Join = 0, kCrowd3dCmd_Leave = 1 };
+// tCrowd2dData::Cmd (Crowd2dFunc): func_00229820 points a bone at the shared crowd record; 1 is handled and ignored;
+// func_00229788 takes a crowd quad slot, func_002297D8 releases it.
+enum eCrowd2dCmd {
+    kCrowd2dCmd_Attach = 0,
+    kCrowd2dCmd_Ignored = 1,
+    kCrowd2dCmd_AddQuad = 2,
+    kCrowd2dCmd_RemoveQuad = 3
+};
+// tIsIconEnabledData::Type (IsIconEnabledFunc): the custom race rule each tests, by the rule's name text
+// (D_00441018: rule 10 kT_11Multipliers, bit 6; rule 12 kT_11PowerUps, bit 8; rule 11 kT_OVRCMNNoPtIcons, bit 7).
+enum eIconType { kIconType_Multiplier = 0, kIconType_PowerUp = 1, kIconType_Points = 2 };
 
 // The world script manager (cWScriptMan::TheWScriptMan): its constructor stores itself here.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
@@ -40,11 +102,10 @@ extern "C" void cDeadFadeNode_cDeadFadeNode_AE38(void*, int, void*, void*, void*
 /**
  * Decides what to do with an object's existing node before a script attaches a node of the given type.
  *
- * Returns 1 (leave it) when the node is a dead-fade or another busy kind (9, 6, 22), or already of @p type
- * (it is
- * retriggered through slot 37). Particle (13), mesh-anim (11), debounce (0) and dead-fade (22) requests
- * replace it
- * with a new node built from @p buf and return -1; any other type deletes it and returns 0.
+ * Returns 1 (leave it) when the node is a dead-fade or another busy kind (ATYPE_FENCE, ATYPE_DEAD, ATYPE_DEADFADE),
+ * or already of @p type (it is retriggered through slot 37). Particle (ATYPE_PARTICLE), mesh-anim (ATYPE_MESHANIM),
+ * debounce (ATYPE_DEBOUNCE) and dead-fade (ATYPE_DEADFADE) requests replace it with a new node built from @p buf and
+ * return -1; any other type deletes it and returns 0.
  *
  * @param node  the object's current node
  * @param type  the node type being requested
@@ -53,7 +114,7 @@ extern "C" void cDeadFadeNode_cDeadFadeNode_AE38(void*, int, void*, void*, void*
  */
 extern "C" int checkActiveNode(void *node, int type, void *buf) {
     cInstanceNode *n = (cInstanceNode*)node;
-    if (n->isType(9) || n->isType(6) || n->isType(22))
+    if (n->isType(ATYPE_FENCE) || n->isType(ATYPE_DEAD) || n->isType(ATYPE_DEADFADE))
         return 1;
     if (n->isType(type)) {
         n->makeActive();
@@ -61,20 +122,20 @@ extern "C" int checkActiveNode(void *node, int type, void *buf) {
     }
     tInstanceRecord* inst = n->Instance;
     switch (type) {
-    case 13:
+    case ATYPE_PARTICLE:
         inst->m_pActiveNode = 0;
         cParticleNode_cParticleNode1_AE38(cMemMan_alloc(44, D_00489618_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
-    case 11:
+    case ATYPE_MESHANIM:
         inst->m_pActiveNode = 0;
         cMeshAnimNode_cMeshAnimNode1_AE38(cMemMan_alloc(1728, D_00489628_AE38, 0x20000000, 0), 1, inst, buf,
                                           cWScriptMan_TheWScriptMan->CollideInfo, n);
         return -1;
-    case 0:
+    case ATYPE_DEBOUNCE:
         inst->m_pActiveNode = 0;
         cDebounceNode_cDebounceNode1_AE38(cMemMan_alloc(52, D_00489638_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
-    case 22:
+    case ATYPE_DEADFADE:
         inst->m_pActiveNode = 0;
         cDeadFadeNode_cDeadFadeNode_AE38(cMemMan_alloc(0x3C, D_00489648_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
@@ -108,7 +169,7 @@ struct Ent_B060 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into a 44-byte parameter block (On Tour tMakeAnimDeltaData:
  * InstId, Type, Dir, FromTime, ToTime, Speed, SpeedRange, StartTime, RandomStart, ForceVisible) and lets each argument
  * override the field its index names, turning an int into a float where the field type table MakeAnimDeltaFunc_types
- * says 2. Defaults: InstId -1, Type 1, FromTime -1, ToTime -1, Speed 30, StartTime -1.
+ * says eLunoVar_Float. Defaults: InstId -1, Type 1, FromTime -1, ToTime -1, Speed 30, StartTime -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -146,7 +207,7 @@ extern "C" t3Vector MakeAnimDeltaFunc(int n, Ent_B060 *params) {
         int idx = x->idx;
         int expectedType = MakeAnimDeltaFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -171,7 +232,7 @@ extern "C" t3Vector MakeAnimDeltaFunc(int n, Ent_B060 *params) {
     if (obj == 0)
         return luno_gLunoNil_B060;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 2, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_ANIMDELTA, buf))
         return luno_gLunoNil_B060;
     cAnimDeltaNode_cAnimDeltaNode1_B060(cMemMan_alloc(0x70, D_00489658_B060, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_B060;
@@ -202,8 +263,8 @@ struct Ent_B270 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into a 60-byte parameter block (On Tour tMakeAnimComboData:
  * InstId, Type, Dir, FromTime, ToTime, Speed, SpeedRange, StartTime, RandomStart, ForceVisible, FromTime2, ToTime2,
  * Speed2, Stop) and lets each argument override the field its index names, turning an int into a float where the field
- * type table MakeAnimComboFunc_types says 2. Defaults: InstId -1, Type 1, FromTime -1, ToTime 30, Speed 30, StartTime
- * -1, FromTime2 31, ToTime2 -1, Speed2 30.
+ * type table MakeAnimComboFunc_types says eLunoVar_Float. Defaults: InstId -1, Type 1, FromTime -1, ToTime 30, Speed
+ * 30, StartTime -1, FromTime2 31, ToTime2 -1, Speed2 30.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -245,7 +306,7 @@ extern "C" t3Vector MakeAnimComboFunc(int n, Ent_B270 *params) {
         int idx = x->idx;
         int expectedType = MakeAnimComboFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -270,7 +331,7 @@ extern "C" t3Vector MakeAnimComboFunc(int n, Ent_B270 *params) {
     if (obj == 0)
         return luno_gLunoNil_B270;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 3, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_ANIMCOMBO, buf))
         return luno_gLunoNil_B270;
     cAnimComboNode_cAnimComboNode1_B270(cMemMan_alloc(136, D_00489668_B270, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_B270;
@@ -301,8 +362,8 @@ struct Ent_B498 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into a 44-byte parameter block (On Tour tMakeAnimTeeterData:
  * InstId, TorqueScale, BounceFactor, MaxSpeed, Spring, PivotTime, Damp, AnimSign, FromTime, ToTime) and lets each
  * argument override the field its index names, turning an int into a float where the field type table
- * MakeAnimTeeterFunc_types says 2. Defaults: InstId -1, TorqueScale 0.6, MaxSpeed 60, Spring 0.02, PivotTime -10, Damp
- * 0.6, FromTime -1, ToTime -1.
+ * MakeAnimTeeterFunc_types says eLunoVar_Float. Defaults: InstId -1, TorqueScale 0.6, MaxSpeed 60, Spring 0.02,
+ * PivotTime -10, Damp 0.6, FromTime -1, ToTime -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -340,7 +401,7 @@ extern "C" t3Vector MakeAnimTeeterFunc(int n, Ent_B498 *params) {
         int idx = x->idx;
         int expectedType = MakeAnimTeeterFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -365,7 +426,7 @@ extern "C" t3Vector MakeAnimTeeterFunc(int n, Ent_B498 *params) {
     if (obj == 0)
         return luno_gLunoNil_B498;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 4, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_ANIMTEETER, buf))
         return luno_gLunoNil_B498;
     cAnimTeeterNode_cAnimTeeterNode1_B498(cMemMan_alloc(0x80, D_00489678_B498, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_B498;
@@ -396,7 +457,7 @@ struct Ent_B6B8 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into a 52-byte parameter block (On Tour tMakeConveyorData:
  * InstId, Vel, UScroll, VScroll, Rotate0, Rotate1, Rotate2, Rotate3, Rotate4, Rotate5, Rotate6, Rotate7) and lets each
  * argument override the field its index names, turning an int into a float where the field type table
- * MakeConveyorFunc_types says 2. Defaults: InstId -1, Vel 100.
+ * MakeConveyorFunc_types says eLunoVar_Float. Defaults: InstId -1, Vel 100.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -437,7 +498,7 @@ extern "C" t3Vector MakeConveyorFunc(int n, Ent_B6B8 *params) {
         int idx = x->idx;
         int expectedType = MakeConveyorFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -462,7 +523,7 @@ extern "C" t3Vector MakeConveyorFunc(int n, Ent_B6B8 *params) {
     if (obj == 0)
         return luno_gLunoNil_B6B8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 15, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_CONVEYOR, buf))
         return luno_gLunoNil_B6B8;
     cConveyorNode_cConveyorNode_B6B8(cMemMan_alloc(72, D_00489688_B6B8, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_B6B8;
@@ -492,7 +553,7 @@ struct Ent_B8D0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMakeCounterData:
  * InstId, StartCount) and lets each argument override the field its index names, turning an int into a float where the
- * field type table MakeCounterFunc_types says 2. Defaults: InstId -1, StartCount 3.
+ * field type table MakeCounterFunc_types says eLunoVar_Float. Defaults: InstId -1, StartCount 3.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -522,7 +583,7 @@ extern "C" t3Vector MakeCounterFunc(int n, Ent_B8D0 *params) {
         int idx = x->idx;
         int expectedType = MakeCounterFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -547,7 +608,7 @@ extern "C" t3Vector MakeCounterFunc(int n, Ent_B8D0 *params) {
     if (obj == 0)
         return luno_gLunoNil_B8D0;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 7, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_COUNTER, buf))
         return luno_gLunoNil_B8D0;
     cCounterNode_cCounterNode1_B8D0(cMemMan_alloc(36, D_004A3BE8_B8D0, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_B8D0;
@@ -577,8 +638,8 @@ struct Ent_BAB0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 32-byte parameter block (On Tour tMakeFloatingData:
  * InstId, LSpring, LDamp, ASpring, ADamp, ForceScale, TorqueScale) and lets each argument override the field its index
- * names, turning an int into a float where the field type table MakeFloatingFunc_types says 2. Defaults: InstId -1,
- * LSpring 10, LDamp 10, ASpring 40, ADamp 10, ForceScale 0.2, TorqueScale 10.
+ * names, turning an int into a float where the field type table MakeFloatingFunc_types says eLunoVar_Float. Defaults:
+ * InstId -1, LSpring 10, LDamp 10, ASpring 40, ADamp 10, ForceScale 0.2, TorqueScale 10.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -613,7 +674,7 @@ extern "C" t3Vector MakeFloatingFunc(int n, Ent_BAB0 *params) {
         int idx = x->idx;
         int expectedType = MakeFloatingFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -638,7 +699,7 @@ extern "C" t3Vector MakeFloatingFunc(int n, Ent_BAB0 *params) {
     if (obj == 0)
         return luno_gLunoNil_BAB0;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 14, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_FLOATING, buf))
         return luno_gLunoNil_BAB0;
     cFloatingNode_cFloatingNode_BAB0(cMemMan_alloc(0x7C, D_00489698_BAB0, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_BAB0;
@@ -669,7 +730,7 @@ struct Ent_BCB8 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into a 44-byte parameter block (On Tour tMakeAnimObjectData:
  * InstId, Type, Dir, FromTime, ToTime, Speed, SpeedRange, StartTime, RandomStart, ForceVisible) and lets each argument
  * override the field its index names, turning an int into a float where the field type table MakeAnimObjectFunc_types
- * says 2. Defaults: InstId -1, Type 1, FromTime -1, ToTime -1, Speed 30, StartTime -1.
+ * says eLunoVar_Float. Defaults: InstId -1, Type 1, FromTime -1, ToTime -1, Speed 30, StartTime -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -707,7 +768,7 @@ extern "C" t3Vector MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
         int idx = x->idx;
         int expectedType = MakeAnimObjectFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -732,7 +793,7 @@ extern "C" t3Vector MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
     if (obj == 0)
         return luno_gLunoNil_BCB8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 1, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_ANIMOBJECT, buf))
         return luno_gLunoNil_BCB8;
     cAnimObjectNode_cAnimObjectNode1_BCB8(cMemMan_alloc(108, D_004896A8_BCB8, 0x20000000, 0), 1, 1, obj, buf);
     return luno_gLunoNil_BCB8;
@@ -762,8 +823,8 @@ struct Ent_BEC8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 36-byte parameter block (On Tour tMakeBoostData: InstId,
  * Type, BoostTime, Drag, MaxSpeed, BoostX, BoostY, BoostZ) and lets each argument override the field its index names,
- * turning an int into a float where the field type table MakeBoostFunc_types says 2. Defaults: InstId -1, BoostTime 1,
- * MaxSpeed 1, BoostY 1.
+ * turning an int into a float where the field type table MakeBoostFunc_types says eLunoVar_Float. Defaults: InstId -1,
+ * BoostTime 1, MaxSpeed 1, BoostY 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -800,7 +861,7 @@ extern "C" t3Vector MakeBoostFunc(int n, Ent_BEC8 *params) {
         int idx = x->idx;
         int expectedType = MakeBoostFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -825,7 +886,7 @@ extern "C" t3Vector MakeBoostFunc(int n, Ent_BEC8 *params) {
     if (obj == 0)
         return luno_gLunoNil_BEC8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 8, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_BOOST, buf))
         return luno_gLunoNil_BEC8;
     cBoostNode_cBoostNode1_BEC8(cMemMan_alloc(80, D_004A3BF0_BEC8, 0x20000000, 0), 1, 8, obj, buf);
     return luno_gLunoNil_BEC8;
@@ -855,7 +916,7 @@ struct Ent_C0D0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tMakeObjectData:
  * InstId, Solid, ForceVisible) and lets each argument override the field its index names, turning an int into a float
- * where the field type table MakeObjectFunc_types says 2. Defaults: InstId -1.
+ * where the field type table MakeObjectFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -886,7 +947,7 @@ extern "C" t3Vector MakeObjectFunc(int n, Ent_C0D0 *params) {
         int idx = x->idx;
         int expectedType = MakeObjectFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -911,7 +972,7 @@ extern "C" t3Vector MakeObjectFunc(int n, Ent_C0D0 *params) {
     if (obj == 0)
         return luno_gLunoNil_C0D0;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 17, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_OBJECT, buf))
         return luno_gLunoNil_C0D0;
     cObjectNode_cObjectNode_C0D0(cMemMan_alloc(44, D_004A3BF8_C0D0, 0x20000000, 0), 1, obj, buf[1], buf[2] != 0);
     return luno_gLunoNil_C0D0;
@@ -930,12 +991,12 @@ extern char str_RestoreNode[];
 /**
  * Applies a dead/restore request to a world instance by the request's Type.
  *
- * @p ev is a tMakeDeadData-style block (On Tour: InstId, Type). Type 0 replaces the instance's node (m_pActiveNode)
- * with a new cDeadNode (cMemMan_alloc 0x1C, "DeadNode"); type 3 replaces it with a new cRestoreNode (0x1C,
- * "RestoreNode"); type 1 deletes the node and rewrites the instance flags (m_iFlags) as (f & 0xFFFF0300) |
- * ((f & 0xFFFF0300) >> 16) | 2. An existing node is deleted through its virtual destructor first, except that a dead
- * node (ObjNodeType 6) is
- * never touched (and a restore node, type 19, is kept for type 3), which ends the request. Other types do nothing.
+ * @p ev is a tMakeDeadData-style block (On Tour: InstId, Type). Type kMakeDead_Dead replaces the instance's node
+ * (m_pActiveNode) with a new cDeadNode (cMemMan_alloc 0x1C, "DeadNode"); kMakeDead_Restore replaces it with a new
+ * cRestoreNode (0x1C, "RestoreNode"); kMakeDead_ResetFlags deletes the node and rewrites the instance flags (m_iFlags)
+ * as (f & 0xFFFF0300) | ((f & 0xFFFF0300) >> 16) | 2. An existing node is deleted through its virtual destructor
+ * first, except that a dead node (ATYPE_DEAD) is never touched (and a restore node, ATYPE_RESTORE, is kept for
+ * kMakeDead_Restore), which ends the request. Other types do nothing.
  *
  * MakeDeadFunc calls it for the script, cObjectInterface_makeDead for cDeadFadeNode when its fade ends.
  *
@@ -943,10 +1004,10 @@ extern char str_RestoreNode[];
  */
 extern "C" void makeDead(tInstanceRecord* self, char* ev) {
     switch (*(int*)(ev + 4)) {
-    case 1: {
+    case kMakeDead_ResetFlags: {
         cInstanceNode* curNode = self->m_pActiveNode;
         if (curNode) {
-            if (curNode->ObjNodeType == 6)
+            if (curNode->ObjNodeType == ATYPE_DEAD)
                 break;
             delete curNode;
         }
@@ -954,21 +1015,21 @@ extern "C" void makeDead(tInstanceRecord* self, char* ev) {
         self->m_iFlags = maskedFlags | (maskedFlags >> 16) | 2;
         break;
     }
-    case 0: {
+    case kMakeDead_Dead: {
         cInstanceNode* curNode = self->m_pActiveNode;
         if (curNode) {
-            if (curNode->ObjNodeType == 6)
+            if (curNode->ObjNodeType == ATYPE_DEAD)
                 break;
             delete curNode;
         }
         cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), self);
         break;
     }
-    case 3: {
+    case kMakeDead_Restore: {
         cInstanceNode* curNode = self->m_pActiveNode;
         if (curNode) {
             short ty = curNode->ObjNodeType;
-            if (ty == 6 || ty == 19)
+            if (ty == ATYPE_DEAD || ty == ATYPE_RESTORE)
                 break;
             delete curNode;
         }
@@ -999,7 +1060,7 @@ struct Ent_C420 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMakeDeadData: InstId,
  * Type) and lets each argument override the field its index names, turning an int into a float where the field type
- * table MakeDeadFunc_types says 2. Defaults: InstId -1.
+ * table MakeDeadFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found. When it has no
@@ -1026,7 +1087,7 @@ extern "C" t3Vector MakeDeadFunc(int n, Ent_C420 *params) {
         int idx = x->idx;
         int expectedType = MakeDeadFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1051,7 +1112,7 @@ extern "C" t3Vector MakeDeadFunc(int n, Ent_C420 *params) {
     if (obj == 0)
         return luno_gLunoNil_C420;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (!activeNode || !checkActiveNode(activeNode, 6, buf))
+    if (!activeNode || !checkActiveNode(activeNode, ATYPE_DEAD, buf))
         makeDead_C420(obj, buf);
     return luno_gLunoNil_C420;
 }
@@ -1106,7 +1167,7 @@ extern "C" t3Vector MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
         int idx = x->idx;
         int expectedType = MakeDeadFadeFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1131,7 +1192,7 @@ extern "C" t3Vector MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     if (obj == 0)
         return luno_gLunoNil_C5D8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 22, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_DEADFADE, buf))
         return luno_gLunoNil_C5D8;
     cDeadFadeNode_cDeadFadeNode_C5D8(cMemMan_alloc(0x3C, D_004896D8_C5D8, 0x20000000, 0), 1, obj, buf, 0);
     return luno_gLunoNil_C5D8;
@@ -1159,7 +1220,7 @@ struct Ent_C7D0 { int idx; int val; int pad; int type; };
  * Script command MakeDebounce: turns an instance into a debounce node.
  *
  * Copies the static defaults (D_004FB528, set once under D_004A55EC: instance -1, 1.0, 1, -1) and applies each keyword
- * argument by index, converting an int to float where the keyword table MakeDebounceFunc_types says float (2). The
+ * argument by index, converting an int to float where the keyword table MakeDebounceFunc_types says eLunoVar_Float. The
  * instance ID -1 means cWScriptMan_TheWScriptMan's current instance (Inst); otherwise it is looked up in
  * cWorld_m_pTheWorld's world cache (section = low byte, entry = the rest). Nothing happens if there is no instance, or
  * if it has an active node (m_pActiveNode) and checkActiveNode(node, 0, data) says it is already one; otherwise
@@ -1189,7 +1250,7 @@ extern "C" t3Vector MakeDebounceFunc(int n, Ent_C7D0 *params) {
         int idx = x->idx;
         int expectedType = MakeDebounceFunc_types[idx];
         unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)field = (float)x->val;
         else
             *field = x->val;
@@ -1214,7 +1275,7 @@ extern "C" t3Vector MakeDebounceFunc(int n, Ent_C7D0 *params) {
     if (obj == 0)
         return luno_gLunoNil_C7D0;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 0, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_DEBOUNCE, buf))
         return luno_gLunoNil_C7D0;
     cDebounceNode_cDebounceNode1_C7D0(cMemMan_alloc(52, D_004896E8_C7D0, 0x20000000, 0), 1, obj, buf, 0);
     return luno_gLunoNil_C7D0;
@@ -1246,8 +1307,9 @@ struct Ent_C9C8 { int idx; int val; int pad; int type; };
  * BaseSideHeld, OppositeSideHeld, PerpSideHeld, Speed1, Magnitude1, Frequency1, Speed2, Magnitude2, Frequency2, Speed3,
  * Magnitude3, Frequency3, Speed4, Magnitude4, Frequency4, LowWindX, LowWindY, LowWindZ, HighWindX, HighWindY,
  * HighWindZ, MinWindFactor, UScroll, VScroll, OverSaturate) and lets each argument override the field its index names,
- * turning an int into a float where the field type table MakeFlagFunc_types says 2. Defaults: InstId -1, BaseSideHeld
- * 1, Speed1 1, Magnitude1 25, Frequency1 1, Speed2 1, Frequency2 1, Speed3 1, Frequency3 1, Speed4 1, Frequency4 1.
+ * turning an int into a float where the field type table MakeFlagFunc_types says eLunoVar_Float. Defaults: InstId -1,
+ * BaseSideHeld 1, Speed1 1, Magnitude1 25, Frequency1 1, Speed2 1, Frequency2 1, Speed3 1, Frequency3 1, Speed4 1,
+ * Frequency4 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -1302,7 +1364,7 @@ extern "C" t3Vector MakeFlagFunc(int n, Ent_C9C8 *params) {
         int idx = x->idx;
         int expectedType = MakeFlagFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1327,7 +1389,7 @@ extern "C" t3Vector MakeFlagFunc(int n, Ent_C9C8 *params) {
     if (obj == 0)
         return luno_gLunoNil_C9C8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 10, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_FLAG, buf))
         return luno_gLunoNil_C9C8;
     cFlagNode_cFlagNode1_C9C8(cMemMan_alloc(0x1C, D_004A3C08_C9C8, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_C9C8;
@@ -1353,7 +1415,7 @@ extern "C" int checkActiveNode(void*, int, void*);
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tMakeFenceData: InstId,
  * Type, Flexibility) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_00446028 says 2. Defaults: InstId -1, Flexibility 0.5.
+ * field type table D_00446028 says eLunoVar_Float. Defaults: InstId -1, Flexibility 0.5.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance exists and has an active node (m_pActiveNode),
@@ -1384,7 +1446,7 @@ extern "C" t3Vector* MakeFenceFunc(t3Vector* ret, int n, Ent_CC20 *params) {
         int idx = x->idx;
         int keywordType = D_00446028[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1404,7 +1466,7 @@ extern "C" t3Vector* MakeFenceFunc(t3Vector* ret, int n, Ent_CC20 *params) {
     if (obj) {
         cInstanceNode* node = obj->m_pActiveNode;
         if (node)
-            checkActiveNode(node, 9, buf);
+            checkActiveNode(node, ATYPE_FENCE, buf);
     }
     // compiled-out debug macros around the return; they shape the register allocation here
     do {
@@ -1469,7 +1531,7 @@ extern "C" t3Vector MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
         int idx = x->idx;
         int expectedType = MakeFlexBridgeFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1494,7 +1556,7 @@ extern "C" t3Vector MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     if (obj == 0)
         return luno_gLunoNil_CDC8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 5, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_FLEXBRIDGE, buf))
         return luno_gLunoNil_CDC8;
     cFlexBridgeNode_cFlexBridgeNode_CDC8(cMemMan_alloc(176, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
     return luno_gLunoNil_CDC8;
@@ -1524,10 +1586,10 @@ struct Ent_CFF0 { int idx; int val; int pad; int type; };
  *
  * Copies the static 0x40-byte defaults (D_004FB5E8, set once under D_004A55FC: instance -1, 0, 0.1, 1.0, 2.0, 600, 600,
  * 300, 0, 0, 0, 360, -1, -1, -1) and applies the keyword arguments (types from MakeMeshAnimFunc_types; an int becomes a
- * float where the type is 2). The instance is resolved as in MakeDebounceFunc (-1 = the script's current instance).
- * Unless it is missing or checkActiveNode(node, 11, data) finds it already animated, cMeshAnimNode_cMeshAnimNode1
- * constructs a cMeshAnimNode (bucket 1, with cWScriptMan_TheWScriptMan->CollideInfo) in cMemMan_alloc(0x6C0,
- * "MeshAnim").
+ * float where the type is eLunoVar_Float). The instance is resolved as in MakeDebounceFunc (-1 = the script's current
+ * instance). Unless it is missing or checkActiveNode(node, 11, data) finds it already animated,
+ * cMeshAnimNode_cMeshAnimNode1 constructs a cMeshAnimNode (bucket 1, with cWScriptMan_TheWScriptMan->CollideInfo) in
+ * cMemMan_alloc(0x6C0, "MeshAnim").
  *
  * @param n  the number of keyword arguments
  * @param params  the keyword arguments (index, value, type)
@@ -1566,7 +1628,7 @@ extern "C" t3Vector MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
         int idx = x->idx;
         int expectedType = MakeMeshAnimFunc_types[idx];
         unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)field = (float)x->val;
         else
             *field = x->val;
@@ -1591,7 +1653,7 @@ extern "C" t3Vector MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
     if (obj == 0)
         return luno_gLunoNil_CFF0;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 11, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_MESHANIM, buf))
         return luno_gLunoNil_CFF0;
     cMeshAnimNode_cMeshAnimNode1_CFF0(cMemMan_alloc(1728, D_00489708_CFF0, 0x20000000, 0), 1, obj, buf,
                                       cWScriptMan_TheWScriptMan->CollideInfo, 0);
@@ -1642,7 +1704,7 @@ extern "C" t3Vector AddRollerFunc(int n, Ent_D250 *params) {
         int idx = x->idx;
         int keywordType = D_004460A0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1697,9 +1759,9 @@ struct Ent_D420 { int idx; int val; int pad; int type; };
  * R1Z, VelX, VelY, VelZ, R0VX, R0VY, R0VZ, R1VX, R1VY, R1VZ, R2VX, R2VY, R2VZ, ForceX, ForceY, ForceZ, StartColA,
  * StartColR, StartColG, StartColB, EndColA, EndColR, EndColG, EndColB, R0A, R0R, R0G, R0B, R1A, R1R, R1G, R1B,
  * TextureId, BlendMode, SizeFinal, NumFlipTextures, FlipTextureRate, InstId) and lets each argument override the field
- * its index names, turning an int into a float where the field type table D_004460B0 says 2. Defaults: NumParticles 1,
- * Duration -1, Damp 1, Size 4, StartColA 1, EndColA 1, EndColR 1, EndColG 1, EndColB 1, R0A 1, R1A 1, TextureId 16,
- * NumFlipTextures 1, FlipTextureRate 20, InstId -1.
+ * its index names, turning an int into a float where the field type table D_004460B0 says eLunoVar_Float. Defaults:
+ * NumParticles 1, Duration -1, Damp 1, Size 4, StartColA 1, EndColA 1, EndColR 1, EndColG 1, EndColB 1, R0A 1, R1A 1,
+ * TextureId 16, NumFlipTextures 1, FlipTextureRate 20, InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The block is heap-allocated (cMemMan_alloc 0xE0) because the node
@@ -1783,7 +1845,7 @@ extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
         int idx = x->idx;
         int expectedType = D_004460B0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1811,7 +1873,7 @@ extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
-        int r = checkActiveNode(activeNode, 13, buf);
+        int r = checkActiveNode(activeNode, ATYPE_PARTICLE, buf);
         if (r != 0) {
             if (r > 0)
                 operator_delete((int*)buf);
@@ -1885,7 +1947,7 @@ struct Ent_D758 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 24-byte parameter block (On Tour tAddRiderPositionData:
  * InstId, Being, OffsetX, OffsetY, OffsetZ) and lets each argument override the field its index names, turning an int
- * into a float where the field type table D_00446190 says 2. Defaults: InstId -1, Being -1.
+ * into a float where the field type table D_00446190 says eLunoVar_Float. Defaults: InstId -1, Being -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance's active node (m_pActiveNode) is a move node
@@ -1922,7 +1984,7 @@ extern "C" t3Vector AddRiderPositionFunc(int n, Ent_D758 *params) {
         int idx = x->idx;
         int keywordType = D_00446190[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1943,7 +2005,7 @@ extern "C" t3Vector AddRiderPositionFunc(int n, Ent_D758 *params) {
     if (activeNode) {
         if (activeNode->isMoveNode()) {
             int k = buf[1];
-            if (k != -1) {
+            if (k != kWScriptBeing_None) {
                 V4_D758 pos = *(V4_D758*)shape_D758(k)->getPosition();
                 M4_D758 *riderTransform = (M4_D758*)shape_D758(buf[1])->getTransform();
                 vAddTo_D758(pos, mtxApply_D758(riderTransform, V4_D758(*(float*)&buf[2], *(float*)&buf[3], *(float*)&buf[4], 0.0f)));
@@ -1975,7 +2037,7 @@ struct Ent_D9F8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 28-byte parameter block (On Tour tAddParentData: InstId,
  * ParentId, Mesh, OffsetX, OffsetY, OffsetZ) and lets each argument override the field its index names, turning an int
- * into a float where the field type table AddParentFunc_types says 2. Defaults: InstId -1, ParentId -1.
+ * into a float where the field type table AddParentFunc_types says eLunoVar_Float. Defaults: InstId -1, ParentId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when ParentId is -1, the parent is not found, has
@@ -2013,7 +2075,7 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
         int idx = x->idx;
         int expectedType = AddParentFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2079,7 +2141,7 @@ struct Ent_DC60 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 28-byte parameter block (On Tour tAddChildData: InstId,
  * ChildId, Mesh, OffsetX, OffsetY, OffsetZ) and lets each argument override the field its index names, turning an int
- * into a float where the field type table AddChildFunc_types says 2. Defaults: InstId -1, ChildId -1.
+ * into a float where the field type table AddChildFunc_types says eLunoVar_Float. Defaults: InstId -1, ChildId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when ChildId is -1, the instance has no active
@@ -2117,7 +2179,7 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
         int idx = x->idx;
         int expectedType = AddChildFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2216,7 +2278,7 @@ extern "C" t3Vector AddSplineFunc(int n, Ent_DED0 *params) {
         int idx = x->idx;
         int expectedType = AddSplineFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2304,7 +2366,7 @@ extern "C" t3Vector AddMultiSplineFunc(int n, Ent_E0C0 *params) {
         int idx = x->idx;
         int expectedType = AddMultiSplineFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2354,8 +2416,8 @@ struct Ent_E2C0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 52-byte parameter block (On Tour tAddUVScrollData:
  * InstId, Type, UStart, VStart, UScroll, VScroll, TimeOn, TimeOff, AngVel, AxisX, AxisY, AxisZ) and lets each argument
- * override the field its index names, turning an int into a float where the field type table D_00446238 says 2.
- * Defaults: InstId -1, Type 5, UScroll 0.0166667, VScroll 0.0166667, TimeOn 1, AxisZ 1.
+ * override the field its index names, turning an int into a float where the field type table D_00446238 says
+ * eLunoVar_Float. Defaults: InstId -1, Type 5, UScroll 0.0166667, VScroll 0.0166667, TimeOn 1, AxisZ 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance's active node (m_pActiveNode) is a move node
@@ -2396,7 +2458,7 @@ extern "C" t3Vector AddUVScrollFunc(int n, Ent_E2C0 *params) {
         int idx = x->idx;
         int keywordType = D_00446238[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2439,7 +2501,7 @@ struct Ent_E4A8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 24-byte parameter block (On Tour tAddTexFlipData:
  * InstId, Type, StartId, Dir, Speed) and lets each argument override the field its index names, turning an int into a
- * float where the field type table D_00446268 says 2. Defaults: InstId -1, Speed 2.
+ * float where the field type table D_00446268 says eLunoVar_Float. Defaults: InstId -1, Speed 2.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance's active node (m_pActiveNode) is a move node
@@ -2470,7 +2532,7 @@ extern "C" t3Vector AddTexFlipFunc(int n, Ent_E4A8 *params) {
         int idx = x->idx;
         int keywordType = D_00446268[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2513,8 +2575,8 @@ struct Ent_E668 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 36-byte parameter block (On Tour tAddBoostData: InstId,
  * Type, BoostTime, Drag, MaxSpeed, BoostX, BoostY, BoostZ) and lets each argument override the field its index names,
- * turning an int into a float where the field type table D_00446280 says 2. Defaults: InstId -1, Type 1, Drag 0.1,
- * MaxSpeed 20, BoostZ 1.
+ * turning an int into a float where the field type table D_00446280 says eLunoVar_Float. Defaults: InstId -1, Type 1,
+ * Drag 0.1, MaxSpeed 20, BoostZ 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance's active node (m_pActiveNode) is a move node
@@ -2551,7 +2613,7 @@ extern "C" t3Vector AddBoostFunc(int n, Ent_E668 *params) {
         int idx = x->idx;
         int keywordType = D_00446280[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2730,7 +2792,7 @@ extern "C" t3Vector AddParticleFunc(int n, Ent_E840 *params) {
         int idx = x->idx;
         int expectedType = D_004462A0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2803,8 +2865,8 @@ struct Ent_EE98 { int idx; int val; int pad; int type; };
  * ForceZ, StartColA, StartColR, StartColG, StartColB, EndColA, EndColR, EndColG, EndColB, R0A, R0R, R0G, R0B, R1A, R1R,
  * R1G, R1B, TextureId, BlendMode, SizeFinal, NumFlipTextures, FlipTextureRate, InstId, Mesh, OffsetX, OffsetY, OffsetZ)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_00446380 says 2. Defaults: NumParticles 1, Duration -1, Damp 1, Size 4, StartColA 1, EndColA 1, EndColR 1, EndColG
- * 1, EndColB 1, R0A 1, R1A 1, TextureId 16, NumFlipTextures 1, FlipTextureRate 20, InstId -1.
+ * D_00446380 says eLunoVar_Float. Defaults: NumParticles 1, Duration -1, Damp 1, Size 4, StartColA 1, EndColA 1,
+ * EndColR 1, EndColG 1, EndColB 1, R0A 1, R1A 1, TextureId 16, NumFlipTextures 1, FlipTextureRate 20, InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The block is heap-allocated (cMemMan_alloc 0xF0,
@@ -2893,7 +2955,7 @@ extern "C" t3Vector AddDynamicParticleFunc(int n, Ent_EE98 *params) {
         int idx = x->idx;
         int expectedType = D_00446380[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2965,7 +3027,7 @@ extern "C" t3Vector AddRailFunc(int n, Ent_F1C8 *params) {
         int idx = x->idx;
         int keywordType = D_00446470[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3019,9 +3081,9 @@ struct Ent_F390 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tMakeFloatRailData:
  * InstId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, Mesh1, Mesh2, Mesh3, Mesh4, Mesh5,
  * Mesh6, Mesh7, Mesh8, Flags, LSpring, LDamp, ForceScale) and lets each argument override the field its index names,
- * turning an int into a float where the field type table MakeFloatRailFunc_types says 2. Defaults: InstId -1, InstId1
- * -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1, Mesh1 -1, Mesh2 -1, Mesh3 -1,
- * Mesh4 -1, Mesh5 -1, Mesh6 -1, Mesh7 -1, Mesh8 -1, Flags 1, LSpring 0.5, LDamp 0.5, ForceScale 1.
+ * turning an int into a float where the field type table MakeFloatRailFunc_types says eLunoVar_Float. Defaults: InstId
+ * -1, InstId1 -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1, Mesh1 -1, Mesh2
+ * -1, Mesh3 -1, Mesh4 -1, Mesh5 -1, Mesh6 -1, Mesh7 -1, Mesh8 -1, Flags 1, LSpring 0.5, LDamp 0.5, ForceScale 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -3078,7 +3140,7 @@ extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
         int idx = x->idx;
         int expectedType = MakeFloatRailFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3103,7 +3165,7 @@ extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
     if (obj == 0)
         return luno_gLunoNil_F390;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 20, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_FLOATRAIL, buf))
         return luno_gLunoNil_F390;
     cFloatRailNode_cFloatRailNode_F390(cMemMan_alloc(0x80, D_00489768_F390, 0x20000000, 0), obj, buf);
     return luno_gLunoNil_F390;
@@ -3134,9 +3196,9 @@ struct Ent_F5E8 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tMakeSpringRailData:
  * InstId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, Mesh1, Mesh2, Mesh3, Mesh4, Mesh5,
  * Mesh6, Mesh7, Mesh8, Flags, ASpring, ADamp, TorqueScale) and lets each argument override the field its index names,
- * turning an int into a float where the field type table MakeSpringRailFunc_types says 2. Defaults: InstId -1, InstId1
- * -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1, Mesh1 -1, Mesh2 -1, Mesh3 -1,
- * Mesh4 -1, Mesh5 -1, Mesh6 -1, Mesh7 -1, Mesh8 -1, Flags 1, ASpring 0.5, ADamp 0.5, TorqueScale 1.
+ * turning an int into a float where the field type table MakeSpringRailFunc_types says eLunoVar_Float. Defaults: InstId
+ * -1, InstId1 -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1, Mesh1 -1, Mesh2
+ * -1, Mesh3 -1, Mesh4 -1, Mesh5 -1, Mesh6 -1, Mesh7 -1, Mesh8 -1, Flags 1, ASpring 0.5, ADamp 0.5, TorqueScale 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -3193,7 +3255,7 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
         int idx = x->idx;
         int expectedType = MakeSpringRailFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3218,7 +3280,7 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
     if (obj == 0)
         return luno_gLunoNil_F5E8;
     cInstanceNode *activeNode = obj->m_pActiveNode;
-    if (activeNode && checkActiveNode(activeNode, 21, buf))
+    if (activeNode && checkActiveNode(activeNode, ATYPE_SPRINGRAIL, buf))
         return luno_gLunoNil_F5E8;
     *(float*)&buf[20] *= 0.0010000000474974513f;
     cSpringRailNode_cSpringRailNode_F5E8(cMemMan_alloc(0x80, D_00489778_F5E8, 0x20000000, 0), obj, buf);
@@ -3247,7 +3309,7 @@ extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAIEventData: Being,
  * EventId, Arg) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_00446530 says 2. Defaults: Being -1, EventId 0, Arg 0.
+ * type table D_00446530 says eLunoVar_Float. Defaults: Being -1, EventId 0, Arg 0.
  *
  * Being -1 means the script's rider (cWScriptMan_TheWScriptMan->Being). Calls
  * cRider_flagEventWorld(SSXApp->Game->AI->Riders[Being], EventId, Arg); the rider slot is not checked.
@@ -3273,12 +3335,12 @@ extern "C" R12_F850 AIEventFunc(int n, Ent_F850* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_00446530_F850[k] && D_00446530_F850[k] == 2)
+        if (curArg->kind != D_00446530_F850[k] && D_00446530_F850[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
     }
-    if (vp[0] == -1)
+    if (vp[0] == kWScriptBeing_None)
         vp[0] = cWScriptMan_TheWScriptMan->Being;
     cGame* game = SSXApp->Game;
     cAI* ai = game->AI;
@@ -3313,7 +3375,7 @@ struct Ent_F9A8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tSignalData: InstId,
  * Signal, Arg) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_00446540 says 2. Defaults: InstId -1, Signal -1.
+ * type table D_00446540 says eLunoVar_Float. Defaults: InstId -1, Signal -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance has an active node (m_pActiveNode), its virtual
@@ -3342,7 +3404,7 @@ extern "C" t3Vector SignalFunc(int n, Ent_F9A8 *params) {
         int idx = x->idx;
         int keywordType = D_00446540[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3377,7 +3439,7 @@ struct Ent_FB50 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tHideInstanceData:
  * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table HideInstanceFunc_types says 2. Defaults: InstId -1.
+ * table HideInstanceFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
@@ -3404,7 +3466,7 @@ extern "C" t3Vector HideInstanceFunc(int n, Ent_FB50 *params) {
         int idx = x->idx;
         int expectedType = HideInstanceFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3466,7 +3528,7 @@ struct Ent_FD58 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tShowInstanceData:
  * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3C20 says 2. Defaults: InstId -1.
+ * table D_004A3C20 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance exists and its active node (m_pActiveNode) is
@@ -3491,7 +3553,7 @@ extern "C" t3Vector ShowInstanceFunc(int n, Ent_FD58 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3C20)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3528,7 +3590,7 @@ struct Ent_FF00 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tPlayAudioData: InstId,
  * SoundId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table PlayAudioFunc_types says 2. Defaults: InstId -1, SoundId -1.
+ * table PlayAudioFunc_types says eLunoVar_Float. Defaults: InstId -1, SoundId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found,
@@ -3554,7 +3616,7 @@ extern "C" t3Vector PlayAudioFunc(int n, Ent_FF00 *params) {
         int idx = x->idx;
         int expectedType = PlayAudioFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3604,7 +3666,7 @@ struct Ent_00A8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAttachAudioData:
  * InstId, SoundId, Mesh) and lets each argument override the field its index names, turning an int into a float where
- * the field type table AttachAudioFunc_types says 2. Defaults: InstId -1, SoundId -1, Mesh -1.
+ * the field type table AttachAudioFunc_types says eLunoVar_Float. Defaults: InstId -1, SoundId -1, Mesh -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found,
@@ -3631,7 +3693,7 @@ extern "C" t3Vector AttachAudioFunc(int n, Ent_00A8 *params) {
         int idx = x->idx;
         int expectedType = AttachAudioFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3682,7 +3744,7 @@ struct Ent_0260 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tDetachAudioData:
  * InstId, SoundId, Mesh) and lets each argument override the field its index names, turning an int into a float where
- * the field type table DetachAudioFunc_types says 2. Defaults: InstId -1, SoundId -1, Mesh -1.
+ * the field type table DetachAudioFunc_types says eLunoVar_Float. Defaults: InstId -1, SoundId -1, Mesh -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found,
@@ -3709,7 +3771,7 @@ extern "C" t3Vector DetachAudioFunc(int n, Ent_0260 *params) {
         int idx = x->idx;
         int expectedType = DetachAudioFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3756,11 +3818,12 @@ struct Ent_0418 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tExpireData: InstId,
  * Type) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3C30 says 2. Defaults: InstId -1, Type 0.
+ * table D_004A3C30 says eLunoVar_Float. Defaults: InstId -1, Type 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
- * world-cache section and the rest an instance in it. When the instance has an active node (m_pActiveNode), Type 0 or 1
- * is passed to its virtual expire (cInstanceNode_expire, slot 34); other types do nothing.
+ * world-cache section and the rest an instance in it. When the instance has an active node (m_pActiveNode), Type
+ * kExpire_Silent (0) or kExpire_RunScript (1) is passed to its virtual expire (cInstanceNode_expire, slot 34) as its
+ * runscript flag; other types do nothing.
  *
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
@@ -3784,7 +3847,7 @@ extern "C" t3Vector ExpireFunc(int n, Ent_0418 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3C30)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3804,10 +3867,10 @@ extern "C" t3Vector ExpireFunc(int n, Ent_0418 *params) {
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
         int expireType = buf[1];
-        if (expireType == 0)
-            activeNode->expire(0);
-        else if (expireType == 1)
-            activeNode->expire(1);
+        if (expireType == kExpire_Silent)
+            activeNode->expire(kExpire_Silent);
+        else if (expireType == kExpire_RunScript)
+            activeNode->expire(kExpire_RunScript);
     }
     return luno_gLunoNil_0418;
 }
@@ -3830,7 +3893,7 @@ struct Ent_05E8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tLoseFocusData: InstId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3C38 says 2. Defaults: InstId -1.
+ * D_004A3C38 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance has an active node (m_pActiveNode), its virtual
@@ -3857,7 +3920,7 @@ extern "C" t3Vector LoseFocusFunc(int n, Ent_05E8 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3C38)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3901,7 +3964,7 @@ struct Ent_0770 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tTransportData: InstId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * TransportFunc_types says 2. Defaults: InstId -1.
+ * TransportFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the script's rider index (cWScriptMan_TheWScriptMan->Being)
@@ -3929,7 +3992,7 @@ extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
         int idx = x->idx;
         int expectedType = TransportFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3983,7 +4046,7 @@ struct Ent_0948 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tSetupMissionRiderData:
  * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table SetupMissionRiderFunc_types says 2. Defaults: InstId -1.
+ * table SetupMissionRiderFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the script's rider index (cWScriptMan_TheWScriptMan->Being)
@@ -4011,7 +4074,7 @@ extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
         int idx = x->idx;
         int expectedType = SetupMissionRiderFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -4067,10 +4130,10 @@ extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tRailData: SplineId,
  * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3C50 says 2. Defaults: SplineId -1, Cmd 1.
+ * table D_004A3C50 says eLunoVar_Float. Defaults: SplineId -1, Cmd 1.
  *
- * When SplineId is not -1, Cmd 1 switches the rail on and Cmd 0 off through cRailManNode_addRail (the rail manager);
- * other values do nothing.
+ * When SplineId is not -1, Cmd kRailCmd_On switches the rail on and kRailCmd_Off off through cRailManNode_addRail (the
+ * rail manager); other values do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -4093,17 +4156,17 @@ extern "C" R12_0B20 RailFunc(int n, Ent_0B20* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C50_0B20[k] && D_004A3C50_0B20[k] == 2)
+        if (curArg->kind != D_004A3C50_0B20[k] && D_004A3C50_0B20[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
     }
     if (~vp[0] != 0) {
         int y = vp[1];
-        if (y == 1)
-            cRailManNode_addRail(vp[0], 1);
-        else if (y == 0)
-            cRailManNode_addRail(vp[0], 0);
+        if (y == kRailCmd_On)
+            cRailManNode_addRail(vp[0], kRailCmd_On);
+        else if (y == kRailCmd_Off)
+            cRailManNode_addRail(vp[0], kRailCmd_Off);
     }
     return luno_gLunoNil_0B20;
 }
@@ -4129,12 +4192,13 @@ struct Ent_0C78 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tNISData: ScriptId,
  * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3C58 says 2. Defaults: ScriptId -1.
+ * table D_004A3C58 says eLunoVar_Float. Defaults: ScriptId -1.
  *
- * Cmd 0 adds the NIS whose script hash is ScriptId to list 0 (cSSXScriptEngine_AddToNISListByScriptHashID, mode 3) and
- * readies the list (cSSXScriptEngine_ReadyNISList); Cmd 1 adds the NIS of script category ScriptId instead
- * (cSSXScriptEngine_AddToNISListByScriptCategory) and readies it; Cmd 2 plays list 0 (cSSXScriptEngine_PlayNISList).
- * Other values do nothing.
+ * Cmd kNISCmd_QueueScript adds the NIS whose script hash is ScriptId to list 0
+ * (cSSXScriptEngine_AddToNISListByScriptHashID, mode 3) and readies the list (cSSXScriptEngine_ReadyNISList);
+ * kNISCmd_QueueCategory adds the NIS of script category ScriptId instead
+ * (cSSXScriptEngine_AddToNISListByScriptCategory) and readies it; kNISCmd_Play plays list 0
+ * (cSSXScriptEngine_PlayNISList). Other values do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -4155,22 +4219,22 @@ extern "C" t3Vector NISFunc(int n, Ent_0C78 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3C58)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
     }
     unsigned id = buf[0];
     switch ((int)buf[1]) {
-    case 0:
+    case kNISCmd_QueueScript:
         cSSXScriptEngine_AddToNISListByScriptHashID_0C78((int)ScriptEngine, 0, id, 3, -1, -1, -1);
         cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
         break;
-    case 1:
+    case kNISCmd_QueueCategory:
         cSSXScriptEngine_AddToNISListByScriptCategory_0C78((int)ScriptEngine, 0, id, 3, 0, -1, -1, -1);
         cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
         break;
-    case 2:
+    case kNISCmd_Play:
         cSSXScriptEngine_PlayNISList_0C78((int)ScriptEngine, 0, 1, 0);
         break;
     }
@@ -4198,7 +4262,7 @@ extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tCollectPoolData:
  * PoolId, PoolSize) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004A3C60 says 2. Defaults: PoolId -1, PoolSize 1.
+ * field type table D_004A3C60 says eLunoVar_Float. Defaults: PoolId -1, PoolSize 1.
  *
  * When PoolId is not -1, cWScriptMan_collectPool(cWScriptMan_TheWScriptMan, PoolId, PoolSize) runs.
  *
@@ -4222,13 +4286,13 @@ extern "C" R12_0E28 CollectPoolFunc(int n, Ent_0E28* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C60_0E28[k] && D_004A3C60_0E28[k] == 2)
+        if (curArg->kind != D_004A3C60_0E28[k] && D_004A3C60_0E28[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
     }
     unsigned x = vp[0];
-    if (x != 0xFFFFFFFFu)
+    if (x != kWScriptId_None)
         cWScriptMan_collectPool(cWScriptMan_TheWScriptMan, x, vp[1]);
     return luno_gLunoNil_0E28;
 }
@@ -4252,10 +4316,10 @@ struct Ent_0F50 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tCollectInstData:
  * PoolId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, InstId9, InstId10, InstId11,
  * InstId12, InstId13, InstId14, InstId15, InstId16, InstId17, InstId18, InstId19, InstId20) and lets each argument
- * override the field its index names, turning an int into a float where the field type table D_00446570 says 2.
- * Defaults: PoolId -1, InstId1 -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1,
- * InstId9 -1, InstId10 -1, InstId11 -1, InstId12 -1, InstId13 -1, InstId14 -1, InstId15 -1, InstId16 -1, InstId17 -1,
- * InstId18 -1, InstId19 -1, InstId20 -1.
+ * override the field its index names, turning an int into a float where the field type table D_00446570 says
+ * eLunoVar_Float. Defaults: PoolId -1, InstId1 -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7
+ * -1, InstId8 -1, InstId9 -1, InstId10 -1, InstId11 -1, InstId12 -1, InstId13 -1, InstId14 -1, InstId15 -1, InstId16
+ * -1, InstId17 -1, InstId18 -1, InstId19 -1, InstId20 -1.
  *
  * When PoolId is not -1, cWScriptMan_collectInst(cWScriptMan_TheWScriptMan, PoolId, &InstId1, 20) runs.
  *
@@ -4319,12 +4383,12 @@ extern "C" t3Vector CollectInstFunc(int n, Ent_0F50 *params) {
         int idx = x->idx;
         int keywordType = D_00446570_0F50[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
     }
-    if (buf[0] != 0xFFFFFFFF)
+    if (buf[0] != kWScriptId_None)
         cWScriptMan_collectInst_0F50(cWScriptMan_TheWScriptMan, buf[0], buf + 1, 20);
     return luno_gLunoNil_0F50;
 }
@@ -4386,13 +4450,13 @@ extern "C" void* CollectFunc(luno_cLunoVar* self, int n, Ent_1120* params) {
         for (int i = 0; i < n; i++, keyArg++) {
             int k = keyArg->idx;
             unsigned* field = (unsigned*)((k << 2) + (int)vp);
-            if (keyArg->kind != D_004A3C68_1120[k] && D_004A3C68_1120[k] == 2)
+            if (keyArg->kind != D_004A3C68_1120[k] && D_004A3C68_1120[k] == eLunoVar_Float)
                 *(float*)field = (float)keyArg->val;
             else
                 *field = keyArg->val;
         }
         unsigned x = vp[0];
-        if (x != 0xFFFFFFFFu) {
+        if (x != kWScriptId_None) {
             if (~vp[1] == 0)
                 vp[1] = cWScriptMan_TheWScriptMan->Inst->m_RID;
             unsigned instanceId = vp[1];
@@ -4430,7 +4494,7 @@ extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMissionData:
  * MissionId, Cmd) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004A3C70 says 2. Defaults: MissionId -1, Cmd -1.
+ * field type table D_004A3C70 says eLunoVar_Float. Defaults: MissionId -1, Cmd -1.
  *
  * When MissionId is not -1, the result of cWScriptMan_doMissionCmd(cWScriptMan_TheWScriptMan, MissionId, Cmd, -1) is
  * returned as an int script value (type 1); otherwise nil. The value is built in the hidden result slot self.
@@ -4455,13 +4519,13 @@ extern "C" void* MissionFunc(luno_cLunoVar* self, int n, Ent_12F0* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C70_12F0[k] && D_004A3C70_12F0[k] == 2)
+        if (curArg->kind != D_004A3C70_12F0[k] && D_004A3C70_12F0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
     }
     unsigned x = vp[0];
-    if (x != 0xFFFFFFFFu) {
+    if (x != kWScriptId_None) {
         int cmdResult = cWScriptMan_doMissionCmd_12F0(cWScriptMan_TheWScriptMan, x, vp[1], -1);
         self->Type = 1;
         *luno_cLunoVar_castInt(self) = cmdResult;
@@ -4577,7 +4641,7 @@ extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tCollectCountData:
  * PoolId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3C80 says 2. Defaults: PoolId -1.
+ * table D_004A3C80 says eLunoVar_Float. Defaults: PoolId -1.
  *
  * Returns cWScriptMan_collectCount(cWScriptMan_TheWScriptMan, PoolId) as an int script value, or int 0 when PoolId is
  * -1. The value is built in the hidden result slot self.
@@ -4601,13 +4665,13 @@ extern "C" void* CollectCountFunc(luno_cLunoVar* self, int n, Ent_1560* params) 
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C80_1560[k] && D_004A3C80_1560[k] == 2)
+        if (curArg->kind != D_004A3C80_1560[k] && D_004A3C80_1560[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
     }
     unsigned x = vp[0];
-    if (x != 0xFFFFFFFFu) {
+    if (x != kWScriptId_None) {
         int collected = cWScriptMan_collectCount(cWScriptMan_TheWScriptMan, x);
         self->Type = 1;
         *luno_cLunoVar_castInt(self) = collected;
@@ -4647,12 +4711,12 @@ struct Ent_1680 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tAnimFrameData: InstId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3C88 says 2. Defaults: InstId -1.
+ * D_004A3C88 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The result is the active node's (m_pActiveNode) virtual
  * getAnimFrame (cInstanceNode_getAnimFrame, slot 30), or -1.0 when the instance or its node is missing; it is stored in
- * @p ret as a float script value (type 2).
+ * @p ret as a float script value (eLunoVar_Float).
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
@@ -4674,7 +4738,7 @@ extern "C" V3_1680* AnimFrameFunc(V3_1680 *ret, int n, Ent_1680 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3C88)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -4726,7 +4790,7 @@ struct Ent_1830 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tAnimDirData: InstId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3C90 says 2. Defaults: InstId -1.
+ * D_004A3C90 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The result is the active node's (m_pActiveNode) virtual
@@ -4753,7 +4817,7 @@ extern "C" V3_1830* AnimDirFunc(V3_1830 *ret, int n, Ent_1830 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3C90)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -4807,7 +4871,7 @@ struct Ent_19C8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tFrameUpdateEventData:
  * InstId, Frame) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3C98 says 2. Defaults: InstId -1, Frame -1.
+ * type table D_004A3C98 says eLunoVar_Float. Defaults: InstId -1, Frame -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The result is the active node's (m_pActiveNode) virtual
@@ -4835,7 +4899,7 @@ extern "C" V3_19C8* FrameUpdateEventFunc(V3_19C8 *ret, int n, Ent_19C8 *params) 
         int idx = x->idx;
         int keywordType = (&D_004A3C98)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -4890,7 +4954,7 @@ struct Ent_1B88 { int idx; int val; int pad; int kind; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tGotoTaskData: TaskId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3CA0 says 2. Defaults: TaskId -1.
+ * D_004A3CA0 says eLunoVar_Float. Defaults: TaskId -1.
  *
  * Calls cWScriptMan_gotoTask(cWScriptMan_TheWScriptMan, TaskId), even for the default -1, and returns int 0 in the
  * hidden result slot self.
@@ -4914,7 +4978,7 @@ extern "C" void* GotoTaskFunc(luno_cLunoVar* self, int n, Ent_1B88* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CA0_1B88[k] && D_004A3CA0_1B88[k] == 2)
+        if (curArg->kind != D_004A3CA0_1B88[k] && D_004A3CA0_1B88[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -4946,7 +5010,7 @@ struct Ent_1C80 { int idx; int val; int pad; int kind; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tAdvanceToTaskData:
  * TaskId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3CA8 says 2. Defaults: TaskId -1.
+ * table D_004A3CA8 says eLunoVar_Float. Defaults: TaskId -1.
  *
  * Calls cWScriptMan_advanceToTask(cWScriptMan_TheWScriptMan, TaskId), even for the default -1, and returns int 0 in the
  * hidden result slot self.
@@ -4970,7 +5034,7 @@ extern "C" void* AdvanceToTaskFunc(luno_cLunoVar* self, int n, Ent_1C80* params)
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CA8_1C80[k] && D_004A3CA8_1C80[k] == 2)
+        if (curArg->kind != D_004A3CA8_1C80[k] && D_004A3CA8_1C80[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5003,7 +5067,7 @@ struct Ent_1D78 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tRiderInVolumeData:
  * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table RiderInVolumeFunc_types says 2. Defaults: InstId -1.
+ * table RiderInVolumeFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, the script's rider
@@ -5033,7 +5097,7 @@ extern "C" void* RiderInVolumeFunc(luno_cLunoVar* self, int n, Ent_1D78 *params)
         int idx = x->idx;
         int expectedType = RiderInVolumeFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -5095,7 +5159,7 @@ extern R12_1F48 luno_gLunoNil_1F48 __asm__("luno_gLunoNil");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tSetGamePathData: Path)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3CB8 says 2. Defaults: Path -1.
+ * D_004A3CB8 says eLunoVar_Float. Defaults: Path -1.
  *
  * Calls setGamePath(Path), which has an empty body in this build, so the game path is not changed.
  *
@@ -5118,7 +5182,7 @@ extern "C" R12_1F48 SetGamePathFunc(int n, Ent_1F48* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CB8_1F48[k] && D_004A3CB8_1F48[k] == 2)
+        if (curArg->kind != D_004A3CB8_1F48[k] && D_004A3CB8_1F48[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5149,7 +5213,7 @@ struct Ent_2048 { int idx; int val; int pad; int type; };
  * Defaults (D_004FBC10, under D_004A572C: -1, -1) take the keyword arguments (types from D_004A3CC0). Only when the
  * script's rider is set and not a computer rider (cBeing virtual isComputer, slot 9): the mode index (< 8) selects the
  * eSectionManMode in D_00445E40;
- * if the second value is 0, cWScriptMan_failActiveLocalMission runs unless that mode is 1, then
+ * if the second value is 0, cWScriptMan_failActiveLocalMission runs unless that mode is kSMMode_Freeride, then
  * cSectionMan_eventbegin(SSXApp->Game->SectionMan, mode).
  *
  * @param n  the number of keyword arguments
@@ -5171,14 +5235,14 @@ extern "C" t3Vector SetGameModeFunc(int n, Ent_2048 *params) {
         int idx = x->idx;
         int argType = (&D_004A3CC0)[idx];
         unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != argType && argType == 2)
+        if (x->type != argType && argType == eLunoVar_Float)
             *(float*)field = (float)x->val;
         else
             *field = x->val;
     }
     int notBusy;
     int k = cWScriptMan_TheWScriptMan->Being;
-    if (k != -1) {
+    if (k != kWScriptBeing_None) {
         cAI *ai = SSXApp->Game->AI;
         cRider *tableRider = ai->Riders[k];
         cBeing *riderPart = tableRider;
@@ -5195,7 +5259,7 @@ extern "C" t3Vector SetGameModeFunc(int n, Ent_2048 *params) {
         if (id < 8)
             mode = D_00445E40_2048[id];
         if (secondValue == 0) {
-            if (mode != 1)
+            if (mode != kSMMode_Freeride)
                 cWScriptMan_failActiveLocalMission_2048(cWScriptMan_TheWScriptMan, id);
             cSectionMan_eventbegin_2048(w, mode);
         }
@@ -5234,9 +5298,10 @@ struct Ent_2210 { int idx; int val; int pad; int kind; };
  * Defaults (D_004FBC20, under D_004A5730: -1, -1, -1) take the keyword arguments (types from D_004465C8). Only when the
  * script's rider is set and not a computer rider (cBeing virtual isComputer): the location comes from the script ID
  * through cBENewRaceInterface_getLocationIDFromScript (BE interface 0) and the mode from D_00445E40 (index < 8). The
- * action: 0 cSectionMan_load, 2 cSectionMan_activate, 3 cGame_setState(game, 0xE, 2, 0) and
- * func_002A49E8(cAudioInterface_bxAudio()), 4 cGame_setState(game, 0xE, 0, 0), 5 sets SectionMan->m_bTriggerSkySwap; 1
- * does nothing (load and activate act on SSXApp->Game->SectionMan).
+ * action (eSectionCmd): kSectionCmd_Load cSectionMan_load, kSectionCmd_Activate cSectionMan_activate,
+ * kSectionCmd_UserSelectDJ cGame_setState(game, 0xE, 2, 0) and func_002A49E8(cAudioInterface_bxAudio()),
+ * kSectionCmd_UserSelect cGame_setState(game, 0xE, 0, 0), kSectionCmd_SkySwap sets SectionMan->m_bTriggerSkySwap;
+ * kSectionCmd_Ignored does nothing (load and activate act on SSXApp->Game->SectionMan).
  *
  * The view types D_00445E40 as strings (name) and the location as a hash, but the table is the eSectionManMode one that
  * SetGameModeFunc reads as ints, and the value is the location ID.
@@ -5263,14 +5328,14 @@ extern "C" t3Vector SectionFunc(int n, Ent_2210* params)
     for (int i = 0; i < n; i++, keyArg++) {
         int k = keyArg->idx;
         int* field = (int*)((k << 2) + (int)vp);
-        if (keyArg->kind != D_004465C8_2210[k] && D_004465C8_2210[k] == 2)
+        if (keyArg->kind != D_004465C8_2210[k] && D_004465C8_2210[k] == eLunoVar_Float)
             *(float*)field = (float)keyArg->val;
         else
             *field = keyArg->val;
     }
     int ok;
     int cur = cWScriptMan_TheWScriptMan->Being;
-    if (cur != -1) {
+    if (cur != kWScriptBeing_None) {
         cAI* ai = SSXApp->Game->AI;
         cRider* tableRider = ai->Riders[cur];
         cBeing* riderPart = tableRider;
@@ -5291,22 +5356,22 @@ extern "C" t3Vector SectionFunc(int n, Ent_2210* params)
         }
         int hash = cBENewRaceInterface_getLocationIDFromScript_2210(iface, id);
         switch ((unsigned int)action) {
-        case 0:
+        case kSectionCmd_Load:
             cSectionMan_load_2210(ui, hash, name);
             break;
-        case 1:
+        case kSectionCmd_Ignored:
             break;
-        case 2:
+        case kSectionCmd_Activate:
             cSectionMan_activate_2210(ui, hash, name);
             break;
-        case 3:
-            cGame_setState_2210(SSXApp->Game, 0xE, 2, 0);
+        case kSectionCmd_UserSelectDJ:
+            cGame_setState_2210(SSXApp->Game, kGFSM_UserSelect, 2, 0);
             func_002A49E8_2210(cAudioInterface_bxAudio_2210());
             break;
-        case 4:
-            cGame_setState_2210(SSXApp->Game, 0xE, 0, 0);
+        case kSectionCmd_UserSelect:
+            cGame_setState_2210(SSXApp->Game, kGFSM_UserSelect, 0, 0);
             break;
-        case 5:
+        case kSectionCmd_SkySwap:
             ui->m_bTriggerSkySwap = 1;
             break;
         }
@@ -5334,13 +5399,13 @@ struct Ent_2490 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tRemoveModifierData:
  * InstId, Type) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3CC8 says 2. Defaults: InstId -1, Type -1.
+ * type table D_004A3CC8 says eLunoVar_Float. Defaults: InstId -1, Type -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found and its active node (m_pActiveNode) is
- * a move node (virtual isMoveNode), Type 0 calls tModifierBlock_fadeEffectModifier and Type 1
- * tModifierBlock_remHaloModifier on the node's modifier block (cMoveNode::ModifierBlock) when it has one; other types
- * do nothing.
+ * a move node (virtual isMoveNode), Type kRemoveModifier_Effect calls tModifierBlock_fadeEffectModifier and
+ * kRemoveModifier_Halo tModifierBlock_remHaloModifier on the node's modifier block (cMoveNode::ModifierBlock) when it
+ * has one; other types do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -5364,7 +5429,7 @@ extern "C" t3Vector RemoveModifierFunc(int n, Ent_2490 *params) {
         int idx = x->idx;
         int keywordType = (&D_3CC8_2490)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -5390,13 +5455,13 @@ extern "C" t3Vector RemoveModifierFunc(int n, Ent_2490 *params) {
             if (activeNode->isMoveNode()) {
                 cMoveNode *moveNode = (cMoveNode*)obj->m_pActiveNode;
                 switch (mode) {
-                case 0: {
+                case kRemoveModifier_Effect: {
                     tModifierBlock *modBlock = moveNode->ModifierBlock;
                     if (modBlock)
                         tModifierBlock_fadeEffectModifier_2490(modBlock);
                     break;
                 }
-                case 1: {
+                case kRemoveModifier_Halo: {
                     tModifierBlock *modBlock = moveNode->ModifierBlock;
                     if (modBlock)
                         tModifierBlock_remHaloModifier_2490(modBlock);
@@ -5433,7 +5498,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -5447,7 +5512,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3CD0_2680[2] __asm__("D_004A3CD0");
-extern "C" int isGamePath(unsigned);
+extern "C" bool isGamePath(unsigned);
 extern int D_004A5740_2680 __asm__("D_004A5740");
 extern int D_004A5738_2680 __asm__("D_004A5738");
 extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
@@ -5456,7 +5521,7 @@ extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsGamePathData: Path)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3CD0 says 2. Defaults: Path -1.
+ * D_004A3CD0 says eLunoVar_Float. Defaults: Path -1.
  *
  * Stores isGamePath(Path) (1 when the race DB's cGamePath matches) in @p ret as an int script value.
  *
@@ -5496,7 +5561,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -5510,7 +5575,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3CD8_2778[2] __asm__("D_004A3CD8");
-extern "C" int isGameMode(unsigned);
+extern "C" bool isGameMode(unsigned);
 extern int D_004A5750_2778 __asm__("D_004A5750");
 extern int D_004A5748_2778 __asm__("D_004A5748");
 extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
@@ -5519,7 +5584,7 @@ extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsGameModeData: Mode)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3CD8 says 2. Defaults: Mode -1.
+ * D_004A3CD8 says eLunoVar_Float. Defaults: Mode -1.
  *
  * Stores isGameMode(Mode) (1 when the race DB's cGameMode matches) in @p ret as an int script value.
  *
@@ -5559,7 +5624,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -5573,7 +5638,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3CE0_2870[2] __asm__("D_004A3CE0");
-extern "C" int isGameEvent(unsigned);
+extern "C" bool isGameEvent(unsigned);
 extern int D_004A5760_2870 __asm__("D_004A5760");
 extern int D_004A5758_2870 __asm__("D_004A5758");
 extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
@@ -5582,7 +5647,7 @@ extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsGameEventData:
  * Event) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3CE0 says 2. Defaults: Event -1.
+ * table D_004A3CE0 says eLunoVar_Float. Defaults: Event -1.
  *
  * Stores isGameEvent(Event) (1 when the race DB's cGameEvent matches) in @p ret as an int script value. It sits at
  * table index 108, after the On Tour-era entries.
@@ -5627,7 +5692,7 @@ extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour
  * tSetCurrentInstanceData: InstId) and lets each argument override the field its index names, turning an int into a
- * float where the field type table D_004A3CE8 says 2. Defaults: InstId -1.
+ * float where the field type table D_004A3CE8 says eLunoVar_Float. Defaults: InstId -1.
  *
  * Sets cWScriptMan_TheWScriptMan->Inst to the instance InstId names (its low byte picks a world-cache section, the rest
  * an instance in it), or to 0 when it is not found. -1 is not special here: it looks in section 0xFF.
@@ -5652,7 +5717,7 @@ extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CE8_2968[k] && D_004A3CE8_2968[k] == 2)
+        if (curArg->kind != D_004A3CE8_2968[k] && D_004A3CE8_2968[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5693,7 +5758,7 @@ extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tProcessData:
  * ProcessId, Cmd) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004A3CF0 says 2. Defaults: ProcessId -1, Cmd 0.
+ * field type table D_004A3CF0 says eLunoVar_Float. Defaults: ProcessId -1, Cmd 0.
  *
  * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, Cmd): -1 is the current process; Cmd 1 starts
  * it, 0 stops it, 2 ends its task, 18 ends it.
@@ -5718,7 +5783,7 @@ extern "C" R12_2AC0 ProcessFunc(int n, Ent_2AC0* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CF0_2AC0[k] && D_004A3CF0_2AC0[k] == 2)
+        if (curArg->kind != D_004A3CF0_2AC0[k] && D_004A3CF0_2AC0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5749,7 +5814,7 @@ extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tEndMissionData:
  * MissionId) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3CF8 says 2. Defaults: MissionId -1.
+ * type table D_004A3CF8 says eLunoVar_Float. Defaults: MissionId -1.
  *
  * Calls cWScriptMan_doMissionCmd(cWScriptMan_TheWScriptMan, MissionId, 0, -1); -1 is the current mission.
  *
@@ -5772,7 +5837,7 @@ extern "C" R12_2BD8 EndMissionFunc(int n, Ent_2BD8* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CF8_2BD8[k] && D_004A3CF8_2BD8[k] == 2)
+        if (curArg->kind != D_004A3CF8_2BD8[k] && D_004A3CF8_2BD8[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5803,7 +5868,7 @@ extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tEndProcessData:
  * ProcessId) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3D00 says 2. Defaults: ProcessId -1.
+ * type table D_004A3D00 says eLunoVar_Float. Defaults: ProcessId -1.
  *
  * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, 0); -1 is the current process.
  *
@@ -5826,7 +5891,7 @@ extern "C" R12_2CE8 EndProcessFunc(int n, Ent_2CE8* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D00_2CE8[k] && D_004A3D00_2CE8[k] == 2)
+        if (curArg->kind != D_004A3D00_2CE8[k] && D_004A3D00_2CE8[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5857,7 +5922,7 @@ extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tEndTaskData:
  * ProcessId) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3D08 says 2. Defaults: ProcessId -1.
+ * type table D_004A3D08 says eLunoVar_Float. Defaults: ProcessId -1.
  *
  * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, 2); -1 is the current process.
  *
@@ -5880,7 +5945,7 @@ extern "C" R12_2DF0 EndTaskFunc(int n, Ent_2DF0* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D08_2DF0[k] && D_004A3D08_2DF0[k] == 2)
+        if (curArg->kind != D_004A3D08_2DF0[k] && D_004A3D08_2DF0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -5910,11 +5975,12 @@ extern "C" int cRider_getMissionInt_2EF8(cRider*, int) __asm__("cRider_getMissio
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tRiderActionData: Type)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D10 says 2. Defaults: Type 0.
+ * D_004A3D10 says eLunoVar_Float. Defaults: Type 0.
  *
- * Cmd/Type is mapped to a cRider_getMissionInt query (0 ground 3, 1 air 2, 2 railslide 4, 3 wipeout 0, 4 reset 1, 5-7
- * grab/tweak/uber 5-7, 8 query 17, 9 points 8, 10 and 11 PressMode 9 and 10, 12 boosting 11, 13-17 queries 12-16, 18
- * query 18); any other value gives 0. The answer for the script's rider
+ * Cmd/Type (eScriptRiderQuery) is mapped to the cRider_getMissionInt query (eMissionQuery) of the same name (0
+ * ground kMQ_Ground, 1 air, 2 railslide, 3 wipeout, 4 reset, 5-7 grab/tweak/uber held, 8 TotalStylePoints, 9
+ * TotalPoints, 10 and 11 nose and tail press, 12 boosting, 13-17 stall ... NumLastSecondLanding, 18 punching); any
+ * other value gives 0. The answer for the script's rider
  * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is returned as an int in the hidden result slot self.
  * RiderMetricFunc does the same.
  *
@@ -5940,7 +6006,7 @@ extern "C" void* RiderActionFunc(luno_cLunoVar* self, int n, Ent_2EF8* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* d = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D10_2EF8[k] && D_004A3D10_2EF8[k] == 2)
+        if (curArg->kind != D_004A3D10_2EF8[k] && D_004A3D10_2EF8[k] == eLunoVar_Float)
             *(float*)d = (float)curArg->val;
         else
             *d = curArg->val;
@@ -5950,25 +6016,25 @@ extern "C" void* RiderActionFunc(luno_cLunoVar* self, int n, Ent_2EF8* params) {
     cRider* d = (cRider*)riderIface;
     int res;
     switch (vp[0]) {
-    case 3: res = cRider_getMissionInt_2EF8(d, 0); break;
-    case 4: res = cRider_getMissionInt_2EF8(d, 1); break;
-    case 1: res = cRider_getMissionInt_2EF8(d, 2); break;
-    case 0: res = cRider_getMissionInt_2EF8(d, 3); break;
-    case 2: res = cRider_getMissionInt_2EF8(d, 4); break;
-    case 5: res = cRider_getMissionInt_2EF8(d, 5); break;
-    case 6: res = cRider_getMissionInt_2EF8(d, 6); break;
-    case 7: res = cRider_getMissionInt_2EF8(d, 7); break;
-    case 9: res = cRider_getMissionInt_2EF8(d, 8); break;
-    case 10: res = cRider_getMissionInt_2EF8(d, 9); break;
-    case 11: res = cRider_getMissionInt_2EF8(d, 10); break;
-    case 12: res = cRider_getMissionInt_2EF8(d, 11); break;
-    case 13: res = cRider_getMissionInt_2EF8(d, 12); break;
-    case 14: res = cRider_getMissionInt_2EF8(d, 13); break;
-    case 15: res = cRider_getMissionInt_2EF8(d, 14); break;
-    case 16: res = cRider_getMissionInt_2EF8(d, 15); break;
-    case 17: res = cRider_getMissionInt_2EF8(d, 16); break;
-    case 8: res = cRider_getMissionInt_2EF8(d, 17); break;
-    case 18: res = cRider_getMissionInt_2EF8(d, 18); break;
+    case kRiderQuery_Wipeout: res = cRider_getMissionInt_2EF8(d, kMQ_Wipeout); break;
+    case kRiderQuery_Reset: res = cRider_getMissionInt_2EF8(d, kMQ_Reset); break;
+    case kRiderQuery_Air: res = cRider_getMissionInt_2EF8(d, kMQ_Air); break;
+    case kRiderQuery_Ground: res = cRider_getMissionInt_2EF8(d, kMQ_Ground); break;
+    case kRiderQuery_Railslide: res = cRider_getMissionInt_2EF8(d, kMQ_Railslide); break;
+    case kRiderQuery_GrabHeld: res = cRider_getMissionInt_2EF8(d, kMQ_GrabHeld); break;
+    case kRiderQuery_TweakHeld: res = cRider_getMissionInt_2EF8(d, kMQ_TweakHeld); break;
+    case kRiderQuery_UberHeld: res = cRider_getMissionInt_2EF8(d, kMQ_UberHeld); break;
+    case kRiderQuery_TotalPoints: res = cRider_getMissionInt_2EF8(d, kMQ_TotalPoints); break;
+    case kRiderQuery_NosePress: res = cRider_getMissionInt_2EF8(d, kMQ_NosePress); break;
+    case kRiderQuery_TailPress: res = cRider_getMissionInt_2EF8(d, kMQ_TailPress); break;
+    case kRiderQuery_Boosting: res = cRider_getMissionInt_2EF8(d, kMQ_Boosting); break;
+    case kRiderQuery_Stall: res = cRider_getMissionInt_2EF8(d, kMQ_Stall); break;
+    case kRiderQuery_OffAxis: res = cRider_getMissionInt_2EF8(d, kMQ_OffAxis); break;
+    case kRiderQuery_Inverted: res = cRider_getMissionInt_2EF8(d, kMQ_Inverted); break;
+    case kRiderQuery_NumPerfectLanding: res = cRider_getMissionInt_2EF8(d, kMQ_NumPerfectLanding); break;
+    case kRiderQuery_NumLastSecondLanding: res = cRider_getMissionInt_2EF8(d, kMQ_NumLastSecondLanding); break;
+    case kRiderQuery_TotalStylePoints: res = cRider_getMissionInt_2EF8(d, kMQ_TotalStylePoints); break;
+    case kRiderQuery_Punching: res = cRider_getMissionInt_2EF8(d, kMQ_Punching); break;
     default: res = 0; break;
     }
     self->Type = 1;
@@ -6004,7 +6070,7 @@ struct Ent_3130 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (InstId -1, then 1; set up on the first call) into a 12-byte parameter block and lets each
  * argument override the field its index names, turning an int into a float where the field type table D_004A3D18 says
- * 2. Only InstId is used.
+ * eLunoVar_Float. Only InstId is used.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The int result stored in @p ret is 1 when the instance exists and
@@ -6031,7 +6097,7 @@ extern "C" V3_3130* HasActiveObjectFunc(V3_3130 *ret, int n, Ent_3130 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3D18)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -6250,7 +6316,7 @@ extern T12_3598 D_004FBC60_3598 __asm__("D_004FBC60");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tAIRandomData: Lo, Hi)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D20 says 2. Defaults: Lo 0, Hi 1.
+ * D_004A3D20 says eLunoVar_Float. Defaults: Lo 0, Hi 1.
  *
  * Returns AIrandf(Lo, Hi) as a float script value in the hidden result slot self.
  *
@@ -6274,7 +6340,7 @@ extern "C" void* AIRandomFunc(luno_cLunoVar* self, int n, Ent_3598* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D20_3598[k] && D_004A3D20_3598[k] == 2)
+        if (curArg->kind != D_004A3D20_3598[k] && D_004A3D20_3598[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -6306,7 +6372,7 @@ struct Ent_36B0 { int idx; int val; int pad; int kind; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tCurrentTrickData: Cmd)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D28 says 2. Defaults: Cmd -1.
+ * D_004A3D28 says eLunoVar_Float. Defaults: Cmd -1.
  *
  * Returns cWScriptMan_getCurrentTrick(cWScriptMan_TheWScriptMan, Being, Cmd), field Cmd of cWScriptMan::TrickDef (0 for
  * the default -1), as an int in the hidden result slot self.
@@ -6330,7 +6396,7 @@ extern "C" void* CurrentTrickFunc(luno_cLunoVar* self, int n, Ent_36B0* params) 
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D28_36B0[k] && D_004A3D28_36B0[k] == 2)
+        if (curArg->kind != D_004A3D28_36B0[k] && D_004A3D28_36B0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -6364,11 +6430,12 @@ struct Ent_37B0 { int idx; int val; int pad; int kind; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tRiderMetricData: Cmd)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D30 says 2. Defaults: Cmd -1.
+ * D_004A3D30 says eLunoVar_Float. Defaults: Cmd -1.
  *
- * Cmd/Type is mapped to a cRider_getMissionInt query (0 ground 3, 1 air 2, 2 railslide 4, 3 wipeout 0, 4 reset 1, 5-7
- * grab/tweak/uber 5-7, 8 query 17, 9 points 8, 10 and 11 PressMode 9 and 10, 12 boosting 11, 13-17 queries 12-16, 18
- * query 18); any other value gives 0. The answer for the script's rider
+ * Cmd/Type (eScriptRiderQuery) is mapped to the cRider_getMissionInt query (eMissionQuery) of the same name (0
+ * ground kMQ_Ground, 1 air, 2 railslide, 3 wipeout, 4 reset, 5-7 grab/tweak/uber held, 8 TotalStylePoints, 9
+ * TotalPoints, 10 and 11 nose and tail press, 12 boosting, 13-17 stall ... NumLastSecondLanding, 18 punching); any
+ * other value gives 0. The answer for the script's rider
  * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is returned as an int in the hidden result slot self.
  * Same body as RiderActionFunc.
  *
@@ -6394,7 +6461,7 @@ extern "C" void* RiderMetricFunc(luno_cLunoVar* self, int n, Ent_37B0* params)
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D30_37B0[k] && D_004A3D30_37B0[k] == 2)
+        if (curArg->kind != D_004A3D30_37B0[k] && D_004A3D30_37B0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -6405,25 +6472,25 @@ extern "C" void* RiderMetricFunc(luno_cLunoVar* self, int n, Ent_37B0* params)
     cRider* rider = (cRider*)riderPart;
     int res;
     switch (vp[0]) {
-    case 3: res = cRider_getMissionInt_37B0(rider, 0); break;
-    case 4: res = cRider_getMissionInt_37B0(rider, 1); break;
-    case 1: res = cRider_getMissionInt_37B0(rider, 2); break;
-    case 0: res = cRider_getMissionInt_37B0(rider, 3); break;
-    case 2: res = cRider_getMissionInt_37B0(rider, 4); break;
-    case 5: res = cRider_getMissionInt_37B0(rider, 5); break;
-    case 6: res = cRider_getMissionInt_37B0(rider, 6); break;
-    case 7: res = cRider_getMissionInt_37B0(rider, 7); break;
-    case 9: res = cRider_getMissionInt_37B0(rider, 8); break;
-    case 10: res = cRider_getMissionInt_37B0(rider, 9); break;
-    case 11: res = cRider_getMissionInt_37B0(rider, 10); break;
-    case 12: res = cRider_getMissionInt_37B0(rider, 11); break;
-    case 13: res = cRider_getMissionInt_37B0(rider, 12); break;
-    case 14: res = cRider_getMissionInt_37B0(rider, 13); break;
-    case 15: res = cRider_getMissionInt_37B0(rider, 14); break;
-    case 16: res = cRider_getMissionInt_37B0(rider, 15); break;
-    case 17: res = cRider_getMissionInt_37B0(rider, 16); break;
-    case 8: res = cRider_getMissionInt_37B0(rider, 17); break;
-    case 18: res = cRider_getMissionInt_37B0(rider, 18); break;
+    case kRiderQuery_Wipeout: res = cRider_getMissionInt_37B0(rider, kMQ_Wipeout); break;
+    case kRiderQuery_Reset: res = cRider_getMissionInt_37B0(rider, kMQ_Reset); break;
+    case kRiderQuery_Air: res = cRider_getMissionInt_37B0(rider, kMQ_Air); break;
+    case kRiderQuery_Ground: res = cRider_getMissionInt_37B0(rider, kMQ_Ground); break;
+    case kRiderQuery_Railslide: res = cRider_getMissionInt_37B0(rider, kMQ_Railslide); break;
+    case kRiderQuery_GrabHeld: res = cRider_getMissionInt_37B0(rider, kMQ_GrabHeld); break;
+    case kRiderQuery_TweakHeld: res = cRider_getMissionInt_37B0(rider, kMQ_TweakHeld); break;
+    case kRiderQuery_UberHeld: res = cRider_getMissionInt_37B0(rider, kMQ_UberHeld); break;
+    case kRiderQuery_TotalPoints: res = cRider_getMissionInt_37B0(rider, kMQ_TotalPoints); break;
+    case kRiderQuery_NosePress: res = cRider_getMissionInt_37B0(rider, kMQ_NosePress); break;
+    case kRiderQuery_TailPress: res = cRider_getMissionInt_37B0(rider, kMQ_TailPress); break;
+    case kRiderQuery_Boosting: res = cRider_getMissionInt_37B0(rider, kMQ_Boosting); break;
+    case kRiderQuery_Stall: res = cRider_getMissionInt_37B0(rider, kMQ_Stall); break;
+    case kRiderQuery_OffAxis: res = cRider_getMissionInt_37B0(rider, kMQ_OffAxis); break;
+    case kRiderQuery_Inverted: res = cRider_getMissionInt_37B0(rider, kMQ_Inverted); break;
+    case kRiderQuery_NumPerfectLanding: res = cRider_getMissionInt_37B0(rider, kMQ_NumPerfectLanding); break;
+    case kRiderQuery_NumLastSecondLanding: res = cRider_getMissionInt_37B0(rider, kMQ_NumLastSecondLanding); break;
+    case kRiderQuery_TotalStylePoints: res = cRider_getMissionInt_37B0(rider, kMQ_TotalStylePoints); break;
+    case kRiderQuery_Punching: res = cRider_getMissionInt_37B0(rider, kMQ_Punching); break;
     default: res = 0; break;
     }
     self->Type = 1;
@@ -6451,12 +6518,12 @@ struct Ent_39F0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tCrowd3dData: InstId,
  * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3D38 says 2. Defaults: InstId -1, Cmd -1.
+ * table D_004A3D38 says eLunoVar_Float. Defaults: InstId -1, Cmd -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
- * world-cache section and the rest an instance in it. When the instance is found, Cmd 0 passes its id (m_RID) to
- * func_00343C60 (joins the crowd block for its model) and Cmd 1 to func_00343F38 (leaves it), both on the 3D crowd
- * manager TheCrowdMan3d; other values do nothing.
+ * world-cache section and the rest an instance in it. When the instance is found, Cmd kCrowd3dCmd_Join passes its id
+ * (m_RID) to func_00343C60 (joins the crowd block for its model) and kCrowd3dCmd_Leave to func_00343F38 (leaves it),
+ * both on the 3D crowd manager TheCrowdMan3d; other values do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -6478,7 +6545,7 @@ extern "C" t3Vector Crowd3dFunc(int n, Ent_39F0 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3D38)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -6498,9 +6565,9 @@ extern "C" t3Vector Crowd3dFunc(int n, Ent_39F0 *params) {
     if (obj) {
         int crowdCmd = buf[1];
         int w = obj->m_RID;
-        if (crowdCmd == 0)
+        if (crowdCmd == kCrowd3dCmd_Join)
             func_00343C60_39F0(TheCrowdMan3d_39F0, w);
-        else if (crowdCmd == 1)
+        else if (crowdCmd == kCrowd3dCmd_Leave)
             func_00343F38_39F0(TheCrowdMan3d_39F0, w);
     }
     return luno_gLunoNil_39F0;
@@ -6528,13 +6595,13 @@ struct Ent_3BA0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 20-byte parameter block (On Tour tCrowd2dData: InstId,
  * Cmd, Mesh, Context) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004465D8 says 2. Defaults: InstId -1, Cmd -1, Mesh 0, Context 0.
+ * field type table D_004465D8 says eLunoVar_Float. Defaults: InstId -1, Cmd -1, Mesh 0, Context 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, its id (m_RID) goes to the 2D crowd
- * manager TheCrowdMan2d: Cmd 0 calls func_00229820 (points bone Context of part Mesh at the shared crowd record), Cmd 2
- * func_00229788 (takes a crowd quad slot for the instance) and Cmd 3 func_002297D8 (releases it); Cmd 1 and others do
- * nothing.
+ * manager TheCrowdMan2d: Cmd kCrowd2dCmd_Attach calls func_00229820 (points bone Context of part Mesh at the shared
+ * crowd record), kCrowd2dCmd_AddQuad func_00229788 (takes a crowd quad slot for the instance) and
+ * kCrowd2dCmd_RemoveQuad func_002297D8 (releases it); kCrowd2dCmd_Ignored and others do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -6560,7 +6627,7 @@ extern "C" t3Vector Crowd2dFunc(int n, Ent_3BA0 *params) {
         int idx = x->idx;
         int keywordType = D_004465D8_3BA0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -6582,12 +6649,12 @@ extern "C" t3Vector Crowd2dFunc(int n, Ent_3BA0 *params) {
         int meshIndex = buf[2];
         int contextIndex = buf[3];
         unsigned instId = obj->m_RID;
-        if (mode == 0)
+        if (mode == kCrowd2dCmd_Attach)
             func_00229820_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
-        else if (mode == 1) {
-        } else if (mode == 2)
+        else if (mode == kCrowd2dCmd_Ignored) {
+        } else if (mode == kCrowd2dCmd_AddQuad)
             func_00229788_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
-        else if (mode == 3)
+        else if (mode == kCrowd2dCmd_RemoveQuad)
             func_002297D8_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
     }
     return luno_gLunoNil_3BA0;
@@ -6614,17 +6681,17 @@ extern const int D_004465E8_3D90[] __asm__("D_004465E8");
  * Returns whether script game path @p i is the current game path.
  *
  * For @p i below 4 it maps @p i through D_004465E8 (0, 1, 2, 0) and compares it with the race DB's cGamePath
- * (newRace.cGamePath); 4 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ * (newRace.cGamePath); 4 and above give false. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game path (0-3)
- * @return 1 when it matches, else 0
+ * @return true when it matches
  */
-extern "C" int isGamePath(unsigned i) {
+extern "C" bool isGamePath(unsigned i) {
     if (i < 4) {
         cBE_getInterface_Fv_3D90(cBE_getBE_3D90(), 0);
         return D_004465E8_3D90[i] == cBENewRaceInterface_newRace.cGamePath;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6639,17 +6706,17 @@ extern const int D_004465F8_3DF8[] __asm__("D_004465F8");
  * Returns whether script game mode @p i is the current game mode.
  *
  * For @p i below 8 it maps @p i through D_004465F8 (0-6, then 0) and compares it with the race DB's cGameMode
- * (newRace.cGameMode); 8 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ * (newRace.cGameMode); 8 and above give false. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game mode (0-7)
- * @return 1 when it matches, else 0
+ * @return true when it matches
  */
-extern "C" int isGameMode(unsigned i) {
+extern "C" bool isGameMode(unsigned i) {
     if (i < 8) {
         cBE_getInterface_Fv_3DF8(cBE_getBE_3DF8(), 0);
         return D_004465F8_3DF8[i] == cBENewRaceInterface_newRace.cGameMode;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6664,17 +6731,17 @@ extern const int D_00446618_3E60[] __asm__("D_00446618");
  * Returns whether script game event @p i is the current game event.
  *
  * For @p i below 15 it maps @p i through D_00446618 (0-13, then 0) and compares it with the race DB's cGameEvent
- * (newRace.cGameEvent); 15 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ * (newRace.cGameEvent); 15 and above give false. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game event (0-14)
- * @return 1 when it matches, else 0
+ * @return true when it matches
  */
-extern "C" int isGameEvent(unsigned i) {
+extern "C" bool isGameEvent(unsigned i) {
     if (i < 0xF) {
         cBE_getInterface_Fv_3E60(cBE_getBE_3E60(), 0);
         return D_00446618_3E60[i] == cBENewRaceInterface_newRace.cGameEvent;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6728,7 +6795,7 @@ extern t3Vector luno_gLunoNil_3F80 __asm__("luno_gLunoNil");
  */
 extern "C" t3Vector RiderInTunnelFunc(void) {
     int slot = cWScriptMan_TheWScriptMan->Being;
-    if (slot != -1) {
+    if (slot != kWScriptBeing_None) {
         cRider *riderEntry = SSXApp->Game->AI->Riders[slot];
         cBeing *riderIface = riderEntry;
         cRider *rider = (cRider*)riderIface;
@@ -6759,7 +6826,7 @@ extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour
  * tUpdateDisplayPointsData: Points, Goal) and lets each argument override the field its index names, turning an int
- * into a float where the field type table D_004A3D40 says 2. Defaults: Points 0, Goal -1.
+ * into a float where the field type table D_004A3D40 says eLunoVar_Float. Defaults: Points 0, Goal -1.
  *
  * Calls cWScriptMan_updateMissionPoints(cWScriptMan_TheWScriptMan, Points, Goal), which sets MissionPointsEnable,
  * MissionPoints and MissionPointsGoal.
@@ -6784,7 +6851,7 @@ extern "C" R12_3FF0 UpdateDisplayPointsFunc(int n, Ent_3FF0* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D40_3FF0[k] && D_004A3D40_3FF0[k] == 2)
+        if (curArg->kind != D_004A3D40_3FF0[k] && D_004A3D40_3FF0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -6815,7 +6882,7 @@ extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour
  * tUpdateDisplayCountData: Count, Max) and lets each argument override the field its index names, turning an int into a
- * float where the field type table D_004A3D48 says 2. Defaults: Count 0, Max 0.
+ * float where the field type table D_004A3D48 says eLunoVar_Float. Defaults: Count 0, Max 0.
  *
  * Calls cWScriptMan_updateMissionCount(cWScriptMan_TheWScriptMan, Count, Max), which sets MissionCountEnable,
  * MissionCount and MissionCountMax.
@@ -6840,7 +6907,7 @@ extern "C" R12_4100 UpdateDisplayCountFunc(int n, Ent_4100* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D48_4100[k] && D_004A3D48_4100[k] == 2)
+        if (curArg->kind != D_004A3D48_4100[k] && D_004A3D48_4100[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -6871,7 +6938,7 @@ extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour
  * tUpdateDisplayTicksData: Ticks, Dir) and lets each argument override the field its index names, turning an int into a
- * float where the field type table D_004A3D50 says 2. Defaults: Ticks 0, Dir -1.
+ * float where the field type table D_004A3D50 says eLunoVar_Float. Defaults: Ticks 0, Dir -1.
  *
  * Calls cWScriptMan_updateMissionTicks(cWScriptMan_TheWScriptMan, Ticks, Dir), which sets MissionTicksEnable,
  * MissionTicks and MissionTicksDir.
@@ -6896,7 +6963,7 @@ extern "C" R12_4210 UpdateDisplayTicksFunc(int n, Ent_4210* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D50_4210[k] && D_004A3D50_4210[k] == 2)
+        if (curArg->kind != D_004A3D50_4210[k] && D_004A3D50_4210[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -6921,7 +6988,7 @@ int* luno_cLunoVar_castInt(void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -6952,7 +7019,7 @@ void cWScriptMan_updateMissionHeight(void*, int, void*);
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour
  * tUpdateDisplayHeightData: InstId) and lets each argument override the field its index names, turning an int into a
- * float where the field type table UpdateDisplayHeightFunc_types says 2. Defaults: InstId -1.
+ * float where the field type table UpdateDisplayHeightFunc_types says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found,
@@ -6980,7 +7047,7 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
         int idx = x->idx;
         int expectedType = UpdateDisplayHeightFunc_types[idx];
         unsigned* slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7030,7 +7097,7 @@ extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tPassthroughGateData:
  * GateId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3D60 says 2. Defaults: GateId -1.
+ * table D_004A3D60 says eLunoVar_Float. Defaults: GateId -1.
  *
  * Calls cGameModeMan_riderGateHit(SSXApp->GameModeMan, cWScriptMan_TheWScriptMan->Being, GateId), which forwards it to
  * the current game-mode handler.
@@ -7054,7 +7121,7 @@ extern "C" R12_44A8 PassthroughGateFunc(int n, Ent_44A8* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D60_44A8[k] && D_004A3D60_44A8[k] == 2)
+        if (curArg->kind != D_004A3D60_44A8[k] && D_004A3D60_44A8[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -7097,7 +7164,7 @@ struct Ent_45B8 { int idx; int val; int pad; int type; };
  * Copies the static defaults (set up on the first call) into a 68-byte parameter block (On Tour
  * tUpdateDisplayTrickData: Rail, RailSpin, TakeOff, Orient, Spin, Reps, Flip, Special, PostSpin, UberGrind, Grab,
  * ToLate, LateGrab, HandPlant, Land, Press) and lets each argument override the field its index names, turning an int
- * into a float where the field type table D_00446650 says 2. Defaults: all 0.
+ * into a float where the field type table D_00446650 says eLunoVar_Float. Defaults: all 0.
  *
  * Packs the 16 values into an 8-byte trick definition (bit fields; Land and Press are stored in the opposite order of
  * the block) and passes it to cWScriptMan_updateMissionTrick, which sets MissionTrickEnable and MissionTrick.
@@ -7138,7 +7205,7 @@ extern "C" t3Vector UpdateDisplayTrickFunc(int n, Ent_45B8 *params) {
         int idx = x->idx;
         int keywordType = D_00446650_45B8[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7182,7 +7249,7 @@ struct Ent_4980 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tAddFadeData: InstId,
  * Fade) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3D68 says 2. Defaults: InstId -1, Fade 1.
+ * table D_004A3D68 says eLunoVar_Float. Defaults: InstId -1, Fade 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance's active node (m_pActiveNode) is a move node
@@ -7210,7 +7277,7 @@ extern "C" t3Vector AddFadeFunc(int n, Ent_4980 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3D68)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7257,7 +7324,7 @@ extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tReplayData: Cmd) and
  * lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D70 says 2. Defaults: Cmd -1.
+ * D_004A3D70 says eLunoVar_Float. Defaults: Cmd -1.
  *
  * Calls cReplay_eventWScript(SSXApp->Game->Replay, cWScriptMan_TheWScriptMan->Being, Cmd).
  *
@@ -7280,7 +7347,7 @@ extern "C" R12_4B38 ReplayFunc(int n, Ent_4B38* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D70_4B38[k] && D_004A3D70_4B38[k] == 2)
+        if (curArg->kind != D_004A3D70_4B38[k] && D_004A3D70_4B38[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -7308,7 +7375,7 @@ static inline t4Vector pos_4C50(tInstanceRecord *o) { return *(t4Vector*)o->m_fm
  *
  * Copies the static defaults (InstId -1; set up on the first call) into an 8-byte parameter block and lets each
  * argument override the field its index names, turning an int into a float where the field type table D_004A3D78 says
- * 2.
+ * eLunoVar_Float.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. The float result in the hidden result slot self is the z of the
@@ -7336,7 +7403,7 @@ extern "C" void* RiderHeightFunc(luno_cLunoVar* self, int n, Ent_4C50 *params) {
         int idx = x->idx;
         int keywordType = (&D_3D78_4C50)[idx];
         unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)d = (float)x->val;
         else
             *d = x->val;
@@ -7394,7 +7461,7 @@ struct Ent_4E38 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tAddDebounceData:
  * InstId, Time) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3D80 says 2. Defaults: InstId -1, Time 1.
+ * type table D_004A3D80 says eLunoVar_Float. Defaults: InstId -1, Time 1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance's active node (m_pActiveNode) is a move node
@@ -7422,7 +7489,7 @@ extern "C" t3Vector AddDebounceFunc(int n, Ent_4E38 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3D80)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7468,7 +7535,7 @@ extern R12_4FF0 luno_gLunoNil_4FF0 __asm__("luno_gLunoNil");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tCameraData: Cmd, Type)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D88 says 2. Defaults: Cmd 0, Type 0.
+ * D_004A3D88 says eLunoVar_Float. Defaults: Cmd 0, Type 0.
  *
  * No camera call follows; the block is unused.
  *
@@ -7492,7 +7559,7 @@ extern "C" R12_4FF0 CameraFunc(int n, Ent_4FF0* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D88_4FF0[k] && D_004A3D88_4FF0[k] == 2)
+        if (curArg->kind != D_004A3D88_4FF0[k] && D_004A3D88_4FF0[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -7522,7 +7589,7 @@ int* luno_cLunoVar_castInt(void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -7582,7 +7649,7 @@ static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
  *
  * Copies the static defaults (set up on the first call) into a 20-byte parameter block (On Tour tCameraShakeData: Type,
  * Proximity, InstId, Scale) and lets each argument override the field its index names, turning an int into a float
- * where the field type table D_00446690 says 2. Defaults: Type 0, Proximity 1, InstId -1, Scale 1.
+ * where the field type table D_00446690 says eLunoVar_Float. Defaults: Type 0, Proximity 1, InstId -1, Scale 1.
  *
  * Only Type 0 does anything (shake type D_004A3BD8[Type]). With Proximity set the instance is looked up (InstId -1:
  * cWScriptMan_TheWScriptMan->Inst). With an instance, each race player's rider (SSXApp->Game->AI->Players[i]->mRider,
@@ -7615,7 +7682,7 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
         int idx = x->idx;
         int keywordType = D_00446690[idx];
         unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)d = (float)x->val;
         else
             *d = x->val;
@@ -7687,7 +7754,7 @@ struct Ent_5478 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAddMagnetData: InstId,
  * Radius, Speed) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004466A0 says 2. Defaults: InstId -1, Radius 400, Speed 30.
+ * type table D_004466A0 says eLunoVar_Float. Defaults: InstId -1, Radius 400, Speed 30.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found and its active node (m_pActiveNode) is
@@ -7717,7 +7784,7 @@ extern "C" t3Vector AddMagnetFunc(int n, Ent_5478 *params) {
         int idx = x->idx;
         int keywordType = D_004466A0_5478[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7763,7 +7830,7 @@ struct Ent_5660 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tLightningData: InstId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3D90 says 2. Defaults: InstId -1.
+ * D_004A3D90 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId is not used. When cWScriptMan_TheWScriptMan->Being is not -1 and that rider (SSXApp->Game->AI->Riders[Being])
  * is human (cRider virtual isHuman), DoLightningFlash(0) starts a flash at distance 0.
@@ -7789,13 +7856,13 @@ extern "C" t3Vector LightningFunc(int n, Ent_5660 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3D90)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
     }
     int k = cWScriptMan_TheWScriptMan->Being;
-    if (k != -1) {
+    if (k != kWScriptBeing_None) {
         cAI *ai = SSXApp->Game->AI;
         cRider *riderEntry = ai->Riders[k];
         cBeing *sh = riderEntry;
@@ -7824,8 +7891,8 @@ struct Ent_57C0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 40-byte parameter block (On Tour tAddHaloData: InstId,
  * Type, Mesh, ColourA, ColourR, ColourG, ColourB, Radius, Speed) and lets each argument override the field its index
- * names, turning an int into a float where the field type table D_004466B0 says 2. Defaults: InstId -1, Type 0, Mesh
- * -1, ColourA, ColourR, ColourG and ColourB 1, Radius 100, Speed 0.
+ * names, turning an int into a float where the field type table D_004466B0 says eLunoVar_Float. Defaults: InstId -1,
+ * Type 0, Mesh -1, ColourA, ColourR, ColourG and ColourB 1, Radius 100, Speed 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found and its active node (m_pActiveNode) is
@@ -7860,7 +7927,7 @@ extern "C" t3Vector AddHaloFunc(int n, Ent_57C0 *params) {
         int idx = x->idx;
         int keywordType = D_004466B0_57C0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7904,7 +7971,7 @@ int* luno_cLunoVar_castInt(void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -7926,9 +7993,9 @@ extern "C" void cAvalanche_addAvalancheNode(int, tInstanceRecord*, float, float,
  * Script function (gLunoCFunctions[93]): adds up to eight world instances as falling nodes of an avalanche.
  *
  * Copies the static defaults (set up on the first call) into a 200-byte parameter block and lets each argument override
- * the field its index names, turning an int into a float where the field type table D_004466D8 says 2. The block holds
- * the avalanche id (default 0) and eight sets of instance id (-1), type (0), life (10 s), fade-in (0 s), fade-out (3 s)
- * and speed (1).
+ * the field its index names, turning an int into a float where the field type table D_004466D8 says eLunoVar_Float. The
+ * block holds the avalanche id (default 0) and eight sets of instance id (-1), type (0), life (10 s), fade-in (0 s),
+ * fade-out (3 s) and speed (1).
  *
  * For each instance id that is not -1, the instance is looked up (a missing one passes 0) and
  * cAvalanche_addAvalancheNode(avalanche id, instance, type, life, fade-in, fade-out, speed) adds it.
@@ -7959,7 +8026,7 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
     for (int i = 0; i < n; i++, x++) {
         int k = x->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (x->type != D_004466D8_59A0[k] && D_004466D8_59A0[k] == 2)
+        if (x->type != D_004466D8_59A0[k] && D_004466D8_59A0[k] == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7972,7 +8039,7 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
     float* f0 = vp->f0;
     for (int i = 0; i < 8; i++) {
         unsigned id = vp->id[i];
-        if (id != 0xFFFFFFFF) {
+        if (id != tResourceID::kInvalidRID) {
             cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
             tInstanceRecord *inst;
             if (!section)
@@ -8011,7 +8078,7 @@ extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (the avalanche id) and lets each
  * argument override the field its index names, turning an int into a float where the field type table D_004A3D98 says
- * 2. Defaults: avalanche id 0.
+ * eLunoVar_Float. Defaults: avalanche id 0.
  *
  * Calls cAvalanche_triggerAvalanche with the avalanche id when cAvalanche_m_badCookie is 0.
  *
@@ -8034,7 +8101,7 @@ extern "C" R12_5C88 TriggerMiniAvalancheFunc(int n, Ent_5C88* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D98_5C88[k] && D_004A3D98_5C88[k] == 2)
+        if (curArg->kind != D_004A3D98_5C88[k] && D_004A3D98_5C88[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -8065,8 +8132,8 @@ struct Ent_5D90 { int idx; int val; int pad; int type; };
  * Script function (gLunoCFunctions[95]): puts a moving world instance on the avalanche spline.
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (InstId) and lets each argument
- * override the field its index names, turning an int into a float where the field type table D_004A3DA0 says 2.
- * Defaults: InstId -1.
+ * override the field its index names, turning an int into a float where the field type table D_004A3DA0 says
+ * eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found and its active node (m_pActiveNode) is
@@ -8091,7 +8158,7 @@ extern "C" t3Vector AddAvaSplineFunc(int n, Ent_5D90 *params) {
         int idx = x->idx;
         int expectedType = (&D_004A3DA0)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8151,9 +8218,9 @@ struct Ent_5F40 { int idx; int val; int pad; int type; };
  * instance.
  *
  * Copies the static defaults (set up on the first call) into a 224-byte parameter block and lets each argument override
- * the field its index names, turning an int into a float where the field type table D_004467A0 says 2. The first 0xD8
- * bytes are emitter parameters in the layout of On Tour's tAddDynamicParticleData (NumParticles 1, Duration -1, Damp 1,
- * Size 4, ...); InstId sits at +0xD8 (default -1).
+ * the field its index names, turning an int into a float where the field type table D_004467A0 says eLunoVar_Float. The
+ * first 0xD8 bytes are emitter parameters in the layout of On Tour's tAddDynamicParticleData (NumParticles 1, Duration
+ * -1, Damp 1, Size 4, ...); InstId sits at +0xD8 (default -1).
  *
  * When InstId is not -1 the instance is looked up (no current-instance shortcut; a missing one passes 0) and
  * cAvalanche_setAvalancheNodeEmitterData copies the parameters to its node.
@@ -8236,7 +8303,7 @@ extern "C" t3Vector SetAvalancheEmitterDataFunc(int n, Ent_5F40 *params) {
         int idx = x->idx;
         int keywordType = D_004467A0_5F40[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8270,7 +8337,7 @@ int* luno_cLunoVar_castInt(void*);
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
             int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
                 *(float*)d_ = (float)p_->val; \
             else \
                 *d_ = p_->val; \
@@ -8294,10 +8361,11 @@ extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsIconEnabledData:
  * Type) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3DA8 says 2. Defaults: Type 0.
+ * table D_004A3DA8 says eLunoVar_Float. Defaults: Type 0.
  *
- * Type 0, 1 and 2 test bits 6, 8 and 7 of the rule word D_005308D0 (rules 10, 12 and 11 of
- * cFEStateRuleSelect_updateBE): the int result in @p ret is 1 when the bit is clear, else 0. Other types give 1.
+ * Type kIconType_Multiplier, kIconType_PowerUp and kIconType_Points test bits 6, 8 and 7 of the rule word D_005308D0
+ * (rules 10, 12 and 11 of cFEStateRuleSelect_updateBE): the int result in @p ret is 1 when the bit is clear, else 0.
+ * Other types give 1.
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
@@ -8317,21 +8385,21 @@ extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, sBindArg_1FBE38
     BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5880_61B0, 8, D_004A3DA8_61B0, n, e);
     int r;
     switch (vp[0]) {
-    case 0: {
+    case kIconType_Multiplier: {
         int flags = D_005308D0_61B0[0] >> 6;
         r = 0;
         if ((flags & 1) == 0)
             r++;
         break;
     }
-    case 1: {
+    case kIconType_PowerUp: {
         int flags = D_005308D0_61B0[0] >> 8;
         r = 0;
         if ((flags & 1) == 0)
             r++;
         break;
     }
-    case 2: {
+    case kIconType_Points: {
         int flags = D_005308D0_61B0[0] >> 7;
         r = 0;
         if ((flags & 1) == 0)
@@ -8369,7 +8437,7 @@ extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMessageCenterData:
  * TitleId, MsgId) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004A3DB0 says 2. Defaults: TitleId 0, MsgId 0.
+ * field type table D_004A3DB0 says eLunoVar_Float. Defaults: TitleId 0, MsgId 0.
  *
  * Unless cBENetworkInterface_networkOpt.bIsNetworkGame is set, calls func_001E3510(TitleId, MsgId) (fe/fepopup3). The
  * cBE_getInterface call before it has no effect.
@@ -8394,7 +8462,7 @@ extern "C" R12_6300 MessageCenterFunc(int n, Ent_6300* params) {
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3DB0_6300[k] && D_004A3DB0_6300[k] == 2)
+        if (curArg->kind != D_004A3DB0_6300[k] && D_004A3DB0_6300[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -8425,7 +8493,7 @@ struct Ent_6438 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tDangerStartData:
  * InstId, Radius, Delay) and lets each argument override the field its index names, turning an int into a float where
- * the field type table D_00446880 says 2. Defaults: InstId -1, Radius 1000, Delay 0.
+ * the field type table D_00446880 says eLunoVar_Float. Defaults: InstId -1, Radius 1000, Delay 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_AddDangerElem on the AI's
@@ -8453,7 +8521,7 @@ extern "C" t3Vector DangerStartFunc(int n, Ent_6438 *params) {
         int idx = x->idx;
         int keywordType = D_00446880[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8509,7 +8577,7 @@ struct Ent_65E8 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tDangerEndData: InstId)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
- * D_004A3DB8 says 2. Defaults: InstId -1.
+ * D_004A3DB8 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_RemoveDangerElem on the
@@ -8535,7 +8603,7 @@ extern "C" t3Vector DangerEndFunc(int n, Ent_65E8 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3DB8)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8576,7 +8644,7 @@ struct Ent_6770 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tEnableDangerZoneData:
  * InstId, Level) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004A3DC0 says 2. Defaults: InstId -1, Level 0.
+ * type table D_004A3DC0 says eLunoVar_Float. Defaults: InstId -1, Level 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_AddDangerVolume on the
@@ -8603,7 +8671,7 @@ extern "C" t3Vector EnableDangerZoneFunc(int n, Ent_6770 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3DC0)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8649,7 +8717,7 @@ struct Ent_6908 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tDisableDangerZoneData:
  * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
- * table D_004A3DC8 says 2. Defaults: InstId -1.
+ * table D_004A3DC8 says eLunoVar_Float. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_RemoveDangerVolume on the
@@ -8674,7 +8742,7 @@ extern "C" t3Vector DisableDangerZoneFunc(int n, Ent_6908 *params) {
         int idx = x->idx;
         int keywordType = (&D_004A3DC8)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8723,8 +8791,8 @@ struct Ent_6A90 { int idx; int val; int pad; int type; };
  * Script command MultiParticle: adds a particle system to the multi-particle manager.
  *
  * Copies the static tParticleData defaults (D_004FBF68, set once under D_004A58B4: identity colour/vectors, 16, 20.0,
- * 0x80, ...) into a local, applies the keyword arguments (types from D_00446890; int to float where the type is 2), and
- * calls cMultiParticleMan_addParticle(TheMultiParticleMan, data +0xD8, data, data +0xDC).
+ * 0x80, ...) into a local, applies the keyword arguments (types from D_00446890; int to float where the type is
+ * eLunoVar_Float), and calls cMultiParticleMan_addParticle(TheMultiParticleMan, data +0xD8, data, data +0xDC).
  *
  * @param n  the number of keyword arguments
  * @param params  the keyword arguments (index, value, type)
@@ -8804,7 +8872,7 @@ extern "C" t3Vector MultiParticleFunc(int n, Ent_6A90 *params) {
         int idx = x->idx;
         int argType = D_00446890_6A90[idx];
         unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != argType && argType == 2)
+        if (x->type != argType && argType == eLunoVar_Float)
             *(float*)field = (float)x->val;
         else
             *field = x->val;
@@ -8833,7 +8901,7 @@ struct Ent_6CB0 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tMultiParticleInstData:
  * Id, InstId, Cmd) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_00446970 says 2. Defaults: Id 0, InstId -1, Cmd 0.
+ * field type table D_00446970 says eLunoVar_Float. Defaults: Id 0, InstId -1, Cmd 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, Cmd 0 calls
@@ -8861,7 +8929,7 @@ extern "C" t3Vector MultiParticleInstFunc(int n, Ent_6CB0 *params) {
         int idx = x->idx;
         int keywordType = D_00446970[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == 2)
+        if (x->type != keywordType && keywordType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8913,7 +8981,7 @@ struct Ent_6E68 { int idx; int val; int pad; int type; };
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tCheckGateData:
  * InstId1, InstId2, InstId3) and lets each argument override the field its index names, turning an int into a float
- * where the field type table CheckGateFunc_types says 2. Defaults: InstId1 -1, InstId2 -1, InstId3 -1.
+ * where the field type table CheckGateFunc_types says eLunoVar_Float. Defaults: InstId1 -1, InstId2 -1, InstId3 -1.
  *
  * Returns cWScriptMan_checkGate(cWScriptMan_TheWScriptMan, InstId1, InstId2, InstId3) (previous, gate, next: 1 passed,
  * 0 near, -1 missed) as an int in @p ret; on 1 it plays world sound 92 at the gate instance InstId2
@@ -8943,7 +9011,7 @@ extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
         int idx = x->idx;
         int expectedType = CheckGateFunc_types[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == 2)
+        if (x->type != expectedType && expectedType == eLunoVar_Float)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8951,7 +9019,7 @@ extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
     int gateId = buf[1];
     int nextGateId = buf[2];
     int gateResult = cWScriptMan_checkGate_6E68(cWScriptMan_TheWScriptMan, buf[0], gateId, nextGateId);
-    if (gateResult == 1) {
+    if (gateResult == kGate_Passed) {
         unsigned id = buf[1];
         char *obj;
         cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
@@ -8992,7 +9060,7 @@ extern T12_7020 D_004FC070_7020 __asm__("D_004FC070");
  *
  * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tShowMessageIconData:
  * TitleId, MsgId) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004A3DD0 says 2. Defaults: TitleId 0, MsgId 0.
+ * field type table D_004A3DD0 says eLunoVar_Float. Defaults: TitleId 0, MsgId 0.
  *
  * Returns 1 when func_001E3570(TitleId, MsgId) (fe/fepopup3) returns non-zero, else 0, as an int in the hidden result
  * slot self.
@@ -9017,7 +9085,7 @@ extern "C" void* ShowMessageIconFunc(luno_cLunoVar* self, int n, Ent_7020* param
     for (int i = 0; i < n; i++, curArg++) {
         int k = curArg->idx;
         int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3DD0_7020[k] && D_004A3DD0_7020[k] == 2)
+        if (curArg->kind != D_004A3DD0_7020[k] && D_004A3DD0_7020[k] == eLunoVar_Float)
             *(float*)slot = (float)curArg->val;
         else
             *slot = curArg->val;
@@ -9121,11 +9189,11 @@ struct P_72B0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(
 /**
  * Restarts a mission script: ends it if it is running, then starts it again.
  *
- * When the State is 2 (running) it calls the process's virtual processEnd (vtable +0x30,
+ * When the State is kTaskState_Update (running) it calls the process's virtual processEnd (vtable +0x30,
  * cWScriptProcess_processEnd), then processStart (vtable +0x20, cWScriptMission_processStart).
  */
 extern "C" void cWScriptMission_missionRestart(P_72B0* self) {
-    if (self->state == 2)
+    if (self->state == kTaskState_Update)
         self->v06();
     self->v04();
 }
@@ -9184,7 +9252,7 @@ void cWScriptMission::missionPass()
     cAI* ai = SSXApp->Game->AI;
     cRider_flagEventMissionSuccess(ai->Riders[Manager->Being], pl, money);
     unsigned int next = cBEMissionInterface_getNextMissionID(missions, (int)ProcessId);
-    if (next != 0xFFFFFFFF) {
+    if (next != kWScriptId_None) {
         cBEMissionInterface_setIsShowIcon(missions, (int)ProcessId, 0);
         if ((int)MissionScriptCode[1] != 0) {
             cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
@@ -9220,8 +9288,8 @@ struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(
  *
  * If the mission (ProcessId) is not available on BE interface 0xA, cBEMissionInterface_setIsAvailable sets it
  * available. The fail script (MissionScriptCode[2]) runs through cWScriptMan_runScriptCode if there is one; otherwise
- * the virtual at vtable +0xA0 (cWScriptMission_missionUpdateWorld, missionUpdateWorld) runs. A running process (state
- * 2) is then ended with cWScriptProcess_end.
+ * the virtual at vtable +0xA0 (cWScriptMission_missionUpdateWorld, missionUpdateWorld) runs. A running process (State
+ * kTaskState_Update) is then ended with cWScriptProcess_end.
  */
 void cWScriptMission::missionFail()
 {
@@ -9233,7 +9301,7 @@ void cWScriptMission::missionFail()
         cWScriptMan_runScriptCode(Manager, this, failScript);
     else
         ((P_74C0*)this)->v20();
-    if (State == 2)
+    if (State == kTaskState_Update)
         cWScriptProcess_end_74C0(this);
 }
 #endif

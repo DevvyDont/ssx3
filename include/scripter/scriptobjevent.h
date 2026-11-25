@@ -80,6 +80,9 @@ CHECK_SIZE(tWorldScriptEvent, 0x8);
 
 // A frame's music event (On Tour struct tMusicEvent, 0x8). [U] OnInSeqKeyEvent sends eventID (view sSeCmd_08E8).
 struct tMusicEvent {
+    // An eventID that sends nothing (name ours): [U] OnInSeqKeyEvent skips it.
+    enum { kMusicEventID_None = 0xFF };
+
     int eventID;                    // 0x0 [O]; [U] the music event sent
     void* unk_004;                  // 0x4 [O] void* pIgnore
 };
@@ -90,6 +93,13 @@ CHECK_SIZE(tMusicEvent, 0x8);
 
 // A frame's speech event (On Tour struct tSpeechEvent, 0x8). [U] OnInSeqKeyEvent sends eventID (view sSeCmd_08E8).
 struct tSpeechEvent {
+    // Speech eventIDs that are not sent (names ours): [U] OnInSeqKeyEvent sets mCheckForStopOnSpeechEnd for
+    // kSpeechEventID_StopOnSpeechEnd and skips kSpeechEventID_None.
+    enum {
+        kSpeechEventID_StopOnSpeechEnd = 16,
+        kSpeechEventID_None = 17
+    };
+
     int eventID;                    // 0x0 [O]; [U] the speech event sent
     tTagCustomSpeechEvent* pCustom; // 0x4 [O]; [U] OnInSeqKeyEvent reads the subject
 };

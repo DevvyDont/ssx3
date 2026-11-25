@@ -48,15 +48,7 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoVM_execute);
 // luno::cLunoVM::execute: the Luno script interpreter (lunovm.cpp), with the inline classes of lunovar.h,
 // lunofunc.h and lunovm.h. Out-of-line members are bound to their retail symbols.
 
-enum eLunoVarType {
-    eLunoVar_Nil,
-    eLunoVar_Int,
-    eLunoVar_Float,
-    eLunoVar_Index,
-    eLunoVar_Table,
-    eLunoVar_Func
-};
-
+// eLunoVarType: luno/lunovar.h.
 class cLunoVar;
 extern cLunoVar gLunoNil __asm__("luno_gLunoNil");
 
@@ -519,6 +511,55 @@ struct sLunoFuncEntry {
     int NumArgs;
 };
 
+// A Luno instruction's op code (tLunoOp's first byte; names ours, from what cLunoVM::execute below does with each:
+// [U]).
+// Three pairs run the same code in the VM (Move / Move2, LoadInt / LoadInt2, PushInt / PushInt2); why the compiler
+// emits both of each is not known. 26 is not handled.
+enum eLunoOpCode {
+    kLunoOp_Jump = 0,               // pc = the jump target
+    kLunoOp_JumpIfTrue = 1,         // jump when register A is true
+    kLunoOp_JumpIfFalse = 2,        // jump when register A is false
+    kLunoOp_Equal = 3,              // A = B == C
+    kLunoOp_NotEqual = 4,           // A = B != C
+    kLunoOp_GreaterEqual = 5,       // A = B >= C
+    kLunoOp_Greater = 6,            // A = B > C
+    kLunoOp_LessEqual = 7,          // A = B <= C
+    kLunoOp_Less = 8,               // A = B < C
+    kLunoOp_Or = 9,                 // A = B || C
+    kLunoOp_And = 10,               // A = B && C
+    kLunoOp_Move = 11,              // A = B
+    kLunoOp_Add = 12,               // A = B + C
+    kLunoOp_Sub = 13,               // A = B - C
+    kLunoOp_Mul = 14,               // A = B * C
+    kLunoOp_Div = 15,               // A = B / C
+    kLunoOp_Pow = 16,               // A = B ^ C (always nil)
+    kLunoOp_Mod = 17,               // A = B % C
+    kLunoOp_TableSet = 18,          // table A[B] = C
+    kLunoOp_Move2 = 19,             // A = B, as Move
+    kLunoOp_LoadIndex = 20,         // A = the next word as an index
+    kLunoOp_LoadInt2 = 21,          // A = the next word as an int, as LoadInt
+    kLunoOp_LoadInt = 22,           // A = the next word as an int
+    kLunoOp_LoadFloat = 23,         // A = the next word as a float
+    kLunoOp_TableGet = 24,          // A = table B[C]
+    kLunoOp_NewTable = 25,          // A = a new 32-slot table
+    kLunoOp_Call = 27,              // A = script function B(C), on a fresh cLunoVM
+    kLunoOp_TableAppend = 28,       // table A[B] = C, then B's index + 1
+    kLunoOp_LoadFunc = 29,          // A = function (the next word) of this chunk
+    kLunoOp_LoadNil = 30,           // A = nil
+    kLunoOp_Return = 31,            // return A
+    kLunoOp_PushArg = 32,           // push C-function argument (key A, register B)
+    kLunoOp_CallC = 33,             // A = gLunoCFunctions[B](the last C arguments)
+    kLunoOp_Not = 34,               // A = !B
+    kLunoOp_Neg = 35,               // A = -B
+    kLunoOp_ForStep = 36,           // numeric for-loop step: A += C and jump while A has not passed B
+    kLunoOp_PushInt = 37,           // push argument (key A, the next word as an int)
+    kLunoOp_PushFloat = 38,         // push argument (key A, the next word as a float)
+    kLunoOp_PushInt2 = 39,          // as PushInt
+    kLunoOp_PushSmallInt = 40,      // push argument (key A, byte B as an int)
+    kLunoOp_PushSmallFloat = 41,    // push argument (key A, byte B as a float)
+    kLunoOp_ReturnNil = 42          // return nil
+};
+
 // One instruction word.
 union tLunoOp {
     unsigned int Raw;
@@ -555,11 +596,11 @@ public:
 /**
  * Runs one compiled Luno script function to completion on this VM's registers.
  *
- * Starts at the function table entry's first instruction and interprets op-codes until a return op (31 stores
- * a register into @p result, 42 returns nil) or the end of the code: jumps, comparisons, arithmetic, table
- * get/set, numeric for-loop steps, script calls (each through a fresh cLunoVM) and C-function calls through
- * gLunoCFunctions with arguments pushed onto a local stack. On exit it frees the argument stack and also the
- * VM's register array (m_Regs).
+ * Starts at the function table entry's first instruction and interprets op-codes (eLunoOpCode) until a return op
+ * (kLunoOp_Return stores a register into @p result, kLunoOp_ReturnNil returns nil) or the end of the code: jumps,
+ * comparisons, arithmetic, table get/set, numeric for-loop steps, script calls (each through a fresh cLunoVM) and
+ * C-function calls through gLunoCFunctions with arguments pushed onto a local stack. On exit it frees the argument
+ * stack and also the VM's register array (m_Regs).
  *
  * @param func    the compiled function (code block and function index)
  * @param result  receives the returned value; left untouched if the code runs off the end
@@ -585,88 +626,88 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
         tLunoOp op;
         op.Raw = ops[pc++];
         switch (op.ABC.Op) {
-        case 32:
+        case kLunoOp_PushArg:
             args[argDepth].Index = op.ABC.A;
             args[argDepth].Value = m_Regs[op.ABC.B];
             argDepth++;
             break;
-        case 23: {
+        case kLunoOp_LoadFloat: {
             tLunoOp value;
             value.Int = ops[pc++];
             m_Regs[op.ABC.A] = value.Float;
             break;
         }
-        case 22: {
+        case kLunoOp_LoadInt: {
             tLunoOp value;
             value.Int = ops[pc++];
             m_Regs[op.ABC.A] = value.Int;
             break;
         }
-        case 1:
+        case kLunoOp_JumpIfTrue:
             if (m_Regs[op.ABC.A].isTrue()) {
                 pc = op.Jump.Target;
             }
             break;
-        case 2:
+        case kLunoOp_JumpIfFalse:
             if (m_Regs[op.ABC.A].isFalse()) {
                 pc = op.Jump.Target;
             }
             break;
-        case 0:
+        case kLunoOp_Jump:
             pc = op.Jump.Target;
             break;
-        case 34:
+        case kLunoOp_Not:
             m_Regs[op.ABC.A] = !m_Regs[op.ABC.B];
             break;
-        case 35:
+        case kLunoOp_Neg:
             m_Regs[op.ABC.A] = -m_Regs[op.ABC.B];
             break;
-        case 3:
+        case kLunoOp_Equal:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] == m_Regs[op.ABC.C];
             break;
-        case 4:
+        case kLunoOp_NotEqual:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] != m_Regs[op.ABC.C];
             break;
-        case 5:
+        case kLunoOp_GreaterEqual:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] >= m_Regs[op.ABC.C];
             break;
-        case 6:
+        case kLunoOp_Greater:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] > m_Regs[op.ABC.C];
             break;
-        case 7:
+        case kLunoOp_LessEqual:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] <= m_Regs[op.ABC.C];
             break;
-        case 8:
+        case kLunoOp_Less:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] < m_Regs[op.ABC.C];
             break;
-        case 9:
+        case kLunoOp_Or:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] || m_Regs[op.ABC.C];
             break;
-        case 10:
+        case kLunoOp_And:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B] && m_Regs[op.ABC.C];
             break;
-        case 11:
+        case kLunoOp_Move:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B];
             break;
-        case 12:
+        case kLunoOp_Add:
             m_Regs[op.ABC.A] = lunoAdd(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 13:
+        case kLunoOp_Sub:
             m_Regs[op.ABC.A] = lunoSub(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 14:
+        case kLunoOp_Mul:
             m_Regs[op.ABC.A] = lunoMul(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 15:
+        case kLunoOp_Div:
             m_Regs[op.ABC.A] = lunoDiv(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 17:
+        case kLunoOp_Mod:
             m_Regs[op.ABC.A] = lunoMod(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 16:
+        case kLunoOp_Pow:
             m_Regs[op.ABC.A] = lunoPow(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 27:
+        case kLunoOp_Call:
             if (m_Regs[op.ABC.B].Type != eLunoVar_Nil) {
                 cLunoVar& callArg = m_Regs[op.ABC.C];
                 cLunoVM vm;
@@ -675,38 +716,38 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
                 func_002224A0();
             }
             break;
-        case 33:
+        case kLunoOp_CallC:
             m_Regs[op.CCall.Ret] = gLunoCFunctions[op.CCall.CFunc](op.CCall.NumArgs, &args[argDepth - op.CCall.NumArgs]);
             argDepth -= op.CCall.NumArgs;
             break;
-        case 18:
+        case kLunoOp_TableSet:
             m_Regs[op.ABC.A].castTable().set(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             break;
-        case 28:
+        case kLunoOp_TableAppend:
             m_Regs[op.ABC.A].castTable().set(m_Regs[op.ABC.B], m_Regs[op.ABC.C]);
             m_Regs[op.ABC.B].Data.Index++;
             break;
-        case 19:
+        case kLunoOp_Move2:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B];
             break;
-        case 20: {
+        case kLunoOp_LoadIndex: {
             unsigned int value = ops[pc++];
             m_Regs[op.ABC.A] = value;
             break;
         }
-        case 21: {
+        case kLunoOp_LoadInt2: {
             tLunoOp value;
             value.Int = ops[pc++];
             m_Regs[op.ABC.A] = value.Int;
             break;
         }
-        case 29: {
+        case kLunoOp_LoadFunc: {
             cLunoFunc newFunc;
             newFunc.init(code, ops[pc++]);
             m_Regs[op.ABC.A] = newFunc;
             break;
         }
-        case 36: {
+        case kLunoOp_ForStep: {
             int target = ops[pc++];
             int down = m_Regs[op.ABC.C] < cLunoVar(0.0f);
             if (down) {
@@ -722,20 +763,20 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             }
             break;
         }
-        case 24:
+        case kLunoOp_TableGet:
             m_Regs[op.ABC.A] = m_Regs[op.ABC.B].castTable().get(m_Regs[op.ABC.C]);
             break;
-        case 25:
+        case kLunoOp_NewTable:
             m_Regs[op.ABC.A] = *lunoNewTable((cLunoTab*)operator new(sizeof(cLunoTab), str_cLunoTable, 0x20000000, 0), 0x20);
             break;
-        case 30:
+        case kLunoOp_LoadNil:
             m_Regs[op.ABC.A] = gLunoNil;
             break;
-        case 31:
+        case kLunoOp_Return:
             result = m_Regs[op.ABC.A];
             pc = numOps;
             break;
-        case 37: {
+        case kLunoOp_PushInt: {
             tLunoOp value;
             value.Int = ops[pc++];
             args[argDepth].Index = op.ABC.A;
@@ -743,7 +784,7 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             argDepth++;
             break;
         }
-        case 38: {
+        case kLunoOp_PushFloat: {
             tLunoOp value;
             value.Int = ops[pc++];
             args[argDepth].Index = op.ABC.A;
@@ -751,7 +792,7 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             argDepth++;
             break;
         }
-        case 39: {
+        case kLunoOp_PushInt2: {
             tLunoOp value;
             value.Int = ops[pc++];
             args[argDepth].Index = op.ABC.A;
@@ -759,17 +800,17 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
             argDepth++;
             break;
         }
-        case 40:
+        case kLunoOp_PushSmallInt:
             args[argDepth].Index = op.ABC.A;
             args[argDepth].Value = op.ABC.B;
             argDepth++;
             break;
-        case 41:
+        case kLunoOp_PushSmallFloat:
             args[argDepth].Index = op.ABC.A;
             args[argDepth].Value = (float)op.ABC.B;
             argDepth++;
             break;
-        case 42:
+        case kLunoOp_ReturnNil:
             result = gLunoNil;
             pc = numOps;
             break;
@@ -788,8 +829,8 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_writeToReplayFrame);
  * Writes a Luno function value (type 5) to a replay frame: its code-chunk pointer relative to @p base, then its index.
  *
  * Writes the first word (On Tour cLunoFunc Chunk) minus @p base and the second word (FuncNum), 4 bytes each, through
- * the frame's write virtual (slot 1). Called by luno_cLunoVar_writeToReplayFrame for type 5; luno_cLunoFunc_readFromReplayFrame is the
- * inverse.
+ * the frame's write virtual (slot 1). Called by luno_cLunoVar_writeToReplayFrame for type 5;
+ * luno_cLunoFunc_readFromReplayFrame is the inverse.
  *
  * @param stream  the replay frame to write to
  * @param base  the address the chunk pointer is stored relative to
@@ -837,8 +878,8 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTableData__cLunoTableData);
  *
  * When the entry array (+0x10, On Tour Entries) exists it runs each entry's virtual destructor (slot 1, flags 0) from
  * the last to the first (the count sits in the array's 0x10-byte allocation header) and frees the block with
- * cMemMan_free. It frees the object itself with operator_delete when bit 0 of @p flags is set. luno_cLunoTable_destroyTable calls it
- * with 3 once the last reference goes.
+ * cMemMan_free. It frees the object itself with operator_delete when bit 0 of @p flags is set.
+ * luno_cLunoTable_destroyTable calls it with 3 once the last reference goes.
  *
  * @param flags  destructor flags; bit 0 frees the object
  */
@@ -988,8 +1029,9 @@ extern "C" void luno_cLunoTableData__cLunoTableData(luno_cLunoTableData* table, 
 /**
  * Destroys the table data a Luno table handle points at and clears the handle.
  *
- * Runs luno_cLunoTableData__cLunoTableData on the data with flags 3 (destroy and free) when there is one, then sets the handle to null.
- * luno_cLunoTable_operatorE and luno_cLunoTable__cLunoTable call it when the reference count drops to 0.
+ * Runs luno_cLunoTableData__cLunoTableData on the data with flags 3 (destroy and free) when there is one, then sets the
+ * handle to null. luno_cLunoTable_operatorE and luno_cLunoTable__cLunoTable call it when the reference count drops to
+ * 0.
  *
  * @param ref  the table handle
  */
@@ -1082,13 +1124,13 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
     if (b->type == a->type) {
         return a->word0 == b->word0;
     }
-    if (a->type == 2 && b->type == 1) {
+    if (a->type == eLunoVar_Float && b->type == eLunoVar_Int) {
         return *(float*)&a->word0 == (float)b->word0;
     }
-    if (a->type == 1 && b->type == 2) {
+    if (a->type == eLunoVar_Int && b->type == eLunoVar_Float) {
         return a->word0 == (int)*(float*)&b->word0;
     }
-    if (a->type == 3 && b->type == 1) {
+    if (a->type == eLunoVar_Index && b->type == eLunoVar_Int) {
         return a->word0 == b->word0;
     }
     return 0;
@@ -1144,13 +1186,13 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
     if (b->type == a->type) {
         return a->word0 == b->word0;
     }
-    if (a->type == 2 && b->type == 1) {
+    if (a->type == eLunoVar_Float && b->type == eLunoVar_Int) {
         return *(float*)&a->word0 == (float)b->word0;
     }
-    if (a->type == 1 && b->type == 2) {
+    if (a->type == eLunoVar_Int && b->type == eLunoVar_Float) {
         return a->word0 == (int)*(float*)&b->word0;
     }
-    if (a->type == 3 && b->type == 1) {
+    if (a->type == eLunoVar_Index && b->type == eLunoVar_Int) {
         return a->word0 == b->word0;
     }
     return 0;
@@ -1212,14 +1254,14 @@ struct cLunoNode_set {
 #define LUNO_ASSIGN_SET(D, S)                                              \
     {                                                                      \
         cLunoValue* d = &(D);                                              \
-        if ((D).type == 4) {                                               \
+        if ((D).type == eLunoVar_Table) {                                  \
             luno_cLunoTable__cLunoTable((cLunoTableRef*)d, 2);                           \
         }                                                                  \
         d->type = 0;                                                       \
         (D).word0 = 0;                                                     \
-        if ((S)->type == 4) {                                              \
+        if ((S)->type == eLunoVar_Table) {                                 \
             luno_cLunoTable_operatorE((cLunoTableRef*)d, (cLunoTableRef*)(S));         \
-        } else if ((S)->type == 5) {                                       \
+        } else if ((S)->type == eLunoVar_Func) {                           \
             *(sLunoPair_set*)&(D) = *(sLunoPair_set*)(S);                  \
         } else {                                                           \
             (D).word0 = (S)->word0;                                        \
@@ -1232,13 +1274,13 @@ static inline int lunoKeyEquals_set(cLunoValue* a, cLunoValue* b)
     if (b->type == a->type) {
         return a->word0 == b->word0;
     }
-    if (a->type == 2 && b->type == 1) {
+    if (a->type == eLunoVar_Float && b->type == eLunoVar_Int) {
         return *(float*)&a->word0 == (float)b->word0;
     }
-    if (a->type == 1 && b->type == 2) {
+    if (a->type == eLunoVar_Int && b->type == eLunoVar_Float) {
         return a->word0 == (int)*(float*)&b->word0;
     }
-    if (a->type == 3 && b->type == 1) {
+    if (a->type == eLunoVar_Index && b->type == eLunoVar_Int) {
         return a->word0 == b->word0;
     }
     return 0;
@@ -1256,13 +1298,13 @@ static inline int lunoKeyEquals_set(cLunoValue* a, cLunoValue* b)
  */
 extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val)
 {
-    if (key->type == 0) {
+    if (key->type == eLunoVar_Nil) {
         return;
     }
     luno_cLunoTableData* lunoTable = self->table;
     // cLunoNode_set has luno_cLunoTableEntry's layout, with this unit's cLunoValue key and value
     cLunoNode_set* n = (cLunoNode_set*)&lunoTable->Entries[(unsigned int)key->word0 % (unsigned int)lunoTable->Modulus];
-    if (n->value.type == 0) {
+    if (n->value.type == eLunoVar_Nil) {
         LUNO_ASSIGN_SET(n->key, key)
         LUNO_ASSIGN_SET(n->value, val)
         return;
@@ -1276,7 +1318,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
         if (lunoKeyEquals_set(&n->key, key)) {
             {
                 cLunoValue* d = &n->value;
-                if (n->value.type == 4) {
+                if (n->value.type == eLunoVar_Table) {
                     luno_cLunoTable__cLunoTable((cLunoTableRef*)d, 2);
                 }
                 d->type = 0;
@@ -1284,16 +1326,16 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
                 do {
                     n->value.word0 = 0;
                 } while (0);
-                if (val->type == 4) {
+                if (val->type == eLunoVar_Table) {
                     luno_cLunoTable_operatorE((cLunoTableRef*)d, (cLunoTableRef*)val);
-                } else if (val->type == 5) {
+                } else if (val->type == eLunoVar_Func) {
                     *(sLunoPair_set*)&n->value = *(sLunoPair_set*)val;
                 } else {
                     n->value.word0 = val->word0;
                 }
                 d->type = val->type;
             }
-            if (n->value.type == 0) {
+            if (n->value.type == eLunoVar_Nil) {
                 prev->next = n->next;
                 if (n != 0) {
                     n->vtable[1].func(vthis(n, n->vtable[1]), 3);
@@ -1330,7 +1372,8 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, cBxReplayFram
  * Counts the entries whose value type is non-zero over all modulus + 1 array slots and their chains (+0x18), writes the
  * count (4 bytes, write virtual slot 1), then writes key and value of each used entry with
  * luno_cLunoVar_writeToReplayFrame (pointers relative to @p base). luno_cLunoTable_readFromReplayFrame reads it back.
- * Called by luno_cLunoVar_writeToReplayFrame for type 4, cWScriptProcess_writeToReplayFrame and cWScriptMan_writeToReplayFrame.
+ * Called by luno_cLunoVar_writeToReplayFrame for type 4, cWScriptProcess_writeToReplayFrame and
+ * cWScriptMan_writeToReplayFrame.
  *
  * @param vself  the table handle (this)
  * @param stream  the replay frame to write to
@@ -1409,8 +1452,8 @@ struct cLunoNode_9A8 {
  * Rebuilds a Luno table from a replay frame, replacing its current contents.
  *
  * Destroys and frees the old node array, reads the table header (8 bytes) through the frame's read method,
- * allocates modulus + 1 empty nodes, then reads an entry count and that many key/value pairs (luno_cLunoVar_readFromReplayFrame)
- * and stores each pair with luno_cLunoTable_set().
+ * allocates modulus + 1 empty nodes, then reads an entry count and that many key/value pairs
+ * (luno_cLunoVar_readFromReplayFrame) and stores each pair with luno_cLunoTable_set().
  *
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame*)
  * @param base    passed through to the value reader (On Tour: const char* base)
@@ -1456,16 +1499,17 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoVar__cLunoVar);
 /**
  * Destroys a Luno variable, releasing its table reference when it holds a table.
  *
- * A variable of type 4 (table) runs the table-reference destructor without freeing; the type is then reset to 0.
+ * A variable of type eLunoVar_Table runs the table-reference destructor without freeing; the type is then reset to
+ * eLunoVar_Nil.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the variable's memory
  */
 extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 {
-    if (self->type == 4) {
+    if (self->type == eLunoVar_Table) {
         luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
     }
-    self->type = 0;
+    self->type = eLunoVar_Nil;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1482,7 +1526,8 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, cBxReplayFrame* s
  * Saves a Luno value into a replay frame.
  *
  * Writes the 4-byte type through the stream's slot 1, then the payload: type 5 (eLunoVar_Func, a function value)
- * with luno_cLunoFunc_writeToReplayFrame, type 4 (table) with luno_cLunoTable_writeToReplayFrame, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
+ * with luno_cLunoFunc_writeToReplayFrame, type 4 (table) with luno_cLunoTable_writeToReplayFrame, anything else as one
+ * 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
  *
  * @param stream  the replay frame
  * @param base  the base address string pointers are stored relative to
@@ -1490,9 +1535,9 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, cBxReplayFrame* s
 extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, cBxReplayFrame* stream, int base)
 {
     stream->write((const char*)&self->type, 4);
-    if (self->type == 5) {
+    if (self->type == eLunoVar_Func) {
         ((luno_cLunoFunc*)self)->writeToReplayFrame(stream, base);
-    } else if (self->type == 4) {
+    } else if (self->type == eLunoVar_Table) {
         luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
         stream->write((const char*)self, 4);
@@ -1518,9 +1563,10 @@ static inline int lunoReadInt_225CA0(cBxReplayFrame* stream)
 /**
  * Restores a Luno value from a replay frame.
  *
- * Reads the type word. Type 5 (eLunoVar_Func) reads the function value (luno_cLunoFunc_readFromReplayFrame); type 4 reads a whole table into a temporary
- * (luno_cLunoTable_cLunoTable_sz + luno_cLunoTable_readFromReplayFrame) and copies it in (luno_cLunoTable_operatorE); otherwise it
- * reads one 4-byte word. A table this value held before is released first (luno_cLunoTable__cLunoTable with flags 2).
+ * Reads the type word. Type 5 (eLunoVar_Func) reads the function value (luno_cLunoFunc_readFromReplayFrame); type 4
+ * reads a whole table into a temporary (luno_cLunoTable_cLunoTable_sz + luno_cLunoTable_readFromReplayFrame) and copies
+ * it in (luno_cLunoTable_operatorE); otherwise it reads one 4-byte word. A table this value held before is released
+ * first (luno_cLunoTable__cLunoTable with flags 2).
  *
  * @param stream  the replay frame
  * @param base  the base address string pointers are relative to
@@ -1528,26 +1574,26 @@ static inline int lunoReadInt_225CA0(cBxReplayFrame* stream)
 extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, cBxReplayFrame* stream, int base)
 {
     int type = lunoReadInt_225CA0(stream);
-    if (type == 5) {
+    if (type == eLunoVar_Func) {
         luno_cLunoFunc pair;
         (*(int*)&pair.Chunk) = 0;
         pair.FuncNum = 0;
         pair.readFromReplayFrame(stream, (const char*)base);
-        if (self->type == 4) {
+        if (self->type == eLunoVar_Table) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
-        self->type = 0;
+        self->type = eLunoVar_Nil;
         self->word0 = 0;
         *(luno_cLunoFunc*)self = pair;
         self->type = type;
-    } else if (type == 4) {
+    } else if (type == eLunoVar_Table) {
         luno_cLunoTable ref;
         luno_cLunoTable_cLunoTable_sz((cLunoTableRef*)&ref, 0x20);
         luno_cLunoTable_readFromReplayFrame((cLunoTableRef*)&ref, stream, base);
         if (self->type == type) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
-        self->type = 0;
+        self->type = eLunoVar_Nil;
         self->word0 = 0;
         luno_cLunoTable_operatorE((cLunoTableRef*)self, (cLunoTableRef*)&ref);
         self->type = type;
@@ -1577,17 +1623,17 @@ extern "C" void func_00225DE8_impl(int initialize, int priority) __asm__("func_0
 /**
  * Constructs or destroys the unit's static objects: 56 colours and the Luno nil value luno_gLunoNil.
  *
- * Only for @p priority 0xFFFF. With @p initialize set it builds the colour table D_004C8D18..D_004C9088 (four floats
- * each, the table other units build too) and sets luno_gLunoNil to nil (type 0, word 0); otherwise it destroys
- * luno_gLunoNil with luno_cLunoVar__cLunoVar(.., 2). func_002267F0 and func_00226810 call it as the unit's constructor
- * and destructor (g++ __static_initialization_and_destruction_0).
+ * Only for @p priority DEFAULT_INIT_PRIORITY (65535). With @p initialize set it builds the colour table
+ * D_004C8D18..D_004C9088 (four floats each, the table other units build too) and sets luno_gLunoNil to nil (type 0,
+ * word 0); otherwise it destroys luno_gLunoNil with luno_cLunoVar__cLunoVar(.., 2). func_002267F0 and func_00226810
+ * call it as the unit's constructor and destructor (g++ __static_initialization_and_destruction_0).
  *
  * @param initialize  non-zero to construct, 0 to destroy
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_00225DE8_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF) {
+    if (priority == DEFAULT_INIT_PRIORITY) {
         if (initialize != 0) {
             new (D_004C8D18) sV4_5DE8(1.0f, 1.0f, 1.0f, 0.5f);
             new (D_004C8D28) sV4_5DE8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
@@ -1732,26 +1778,26 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoVar_operatorPlus);
 extern "C" cLunoValue* luno_cLunoVar_operatorPlus(cLunoValue* self, const cLunoValue& lhs, const cLunoValue& rhs)
 {
     if (rhs.type == lhs.type) {
-        if (lhs.type == 2) {
+        if (lhs.type == eLunoVar_Float) {
             float floatSum = *(float*)&lhs.word0 + *(float*)&rhs.word0;
             self->type = lhs.type;
             *(float*)luno_cLunoVar_castFloat(self) = floatSum;
-        } else if (lhs.type == 1) {
+        } else if (lhs.type == eLunoVar_Int) {
             int i = lhs.word0 + rhs.word0;
             self->type = lhs.type;
             *(int*)luno_cLunoVar_castInt(self) = i;
-        } else if (lhs.type == 3) {
+        } else if (lhs.type == eLunoVar_Index) {
             int i = lhs.word0 + rhs.word0;
             self->type = lhs.type;
             *(int*)luno_cLunoVar_castIndex(self) = i;
         } else {
             *self = luno_gLunoNil;
         }
-    } else if (lhs.type == 2 && rhs.type == 1) {
+    } else if (lhs.type == eLunoVar_Float && rhs.type == eLunoVar_Int) {
         float floatSum = *(float*)&lhs.word0 + (float)rhs.word0;
         self->type = lhs.type;
         *(float*)luno_cLunoVar_castFloat(self) = floatSum;
-    } else if (lhs.type == 1 && rhs.type == 2) {
+    } else if (lhs.type == eLunoVar_Int && rhs.type == eLunoVar_Float) {
         int i = lhs.word0 + (int)*(float*)&rhs.word0;
         self->type = lhs.type;
         *(int*)luno_cLunoVar_castInt(self) = i;

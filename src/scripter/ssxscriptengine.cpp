@@ -75,7 +75,8 @@ struct tNISListNew : tNISList
  *
  * Allocates the 10-entry setup-info free list ("SetupInfoHeap"), loads bank 0 synchronously from
  * data/scripts/scdat.big|data/scripts/scdat_main.big, initialises the four built-in script objects
- * (cScriptObject_InitScriptObject) and creates two NIS lists ("NISLists") and two idle lists ("IdleLists", one per viewport).
+ * (cScriptObject_InitScriptObject) and creates two NIS lists ("NISLists") and two idle lists ("IdleLists", one per
+ * viewport).
  */
 void cSSXScriptEngine::Load()
 {
@@ -209,8 +210,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DeInit__FPv);
 /**
  * Leaves the script engine's per-game state: clears the NIS no-skip countdown.
  *
- * Stores 0 in mNumFramesNoSkip (+0x554), exactly what cSSXScriptEngine_Init (On Tour Init, called from cGame_gainFocus) does
- * too. cGame_loseFocus calls it on ScriptEngine.
+ * Stores 0 in mNumFramesNoSkip (+0x554), exactly what cSSXScriptEngine_Init (On Tour Init, called from cGame_gainFocus)
+ * does too. cGame_loseFocus calls it on ScriptEngine.
  */
 void cSSXScriptEngine::DeInit()
 {
@@ -337,8 +338,8 @@ extern "C" void* cVidEngine_RenderVideo(void*);
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Render__FPv);
 #ifdef SKIP_ASM
 /**
- * Draws the script engine's video: calls cVidEngine_RenderVideo on its cVidEngine part (+0x500). cGame_render calls it each
- * frame.
+ * Draws the script engine's video: calls cVidEngine_RenderVideo on its cVidEngine part (+0x500). cGame_render calls it
+ * each frame.
  *
  * @return cVidEngine_RenderVideo's return register
  */
@@ -439,8 +440,8 @@ struct sScrSlot8AD0 {
 /**
  * Forces a script request to play now and refreshes the camera managers it uses.
  *
- * After cBXScriptEngine_ForcePlayUpdate() succeeds, each of the two object camera managers that the request's player uses
- * (engine vtable slot 4) is updated with cScriptObjCameraManager_Update().
+ * After cBXScriptEngine_ForcePlayUpdate() succeeds, each of the two object camera managers that the request's player
+ * uses (engine vtable slot 4) is updated with cScriptObjCameraManager_Update().
  *
  * @param key  request handle (On Tour requestHandle)
  * @return cBXScriptEngine_ForcePlayUpdate()'s result: nonzero when the request was played
@@ -668,7 +669,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToNISListByScriptInd
 extern "C" void tNISList_AddByScriptIndex(void* e, int a, int b, int c, int d, int f);
 
 /**
- * Adds a script, given by its master-table index, to a NIS list (the list's AddByScriptIndex, tNISList_AddByScriptIndex).
+ * Adds a script, given by its master-table index, to a NIS list (the list's AddByScriptIndex,
+ * tNISList_AddByScriptIndex).
  *
  * @param i  NIS list (eNISList)
  * @param scriptIndex  script index in the master table
@@ -885,7 +887,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListVideoCategory
 extern "C" void tNISList_GetVideoCategory(int, int);
 
 /**
- * Looks up the video category of entry @p listIndex of NIS list @p nisList: tNISList_GetVideoCategory on mpNISLists[@p nisList].
+ * Looks up the video category of entry @p listIndex of NIS list @p nisList: tNISList_GetVideoCategory on mpNISLists[@p
+ * nisList].
  *
  * The C declares no return value; tNISList_GetVideoCategory's answer is left in the return register.
  *
@@ -903,7 +906,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListScriptIndex);
 extern "C" void tNISList_GetScriptIndex(int, int);
 
 /**
- * Looks up the script index of entry @p listIndex of NIS list @p nisList: tNISList_GetScriptIndex on mpNISLists[@p nisList].
+ * Looks up the script index of entry @p listIndex of NIS list @p nisList: tNISList_GetScriptIndex on mpNISLists[@p
+ * nisList].
  *
  * The C declares no return value; tNISList_GetScriptIndex's answer is left in the return register.
  *
@@ -974,7 +978,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsNISListNextScriptRead
 extern "C" void tNISList_IsPendingScriptReady(int, int);
 
 /**
- * Asks whether the pending script of NIS list @p nisList is ready: tNISList_IsPendingScriptReady on mpNISLists[@p nisList].
+ * Asks whether the pending script of NIS list @p nisList is ready: tNISList_IsPendingScriptReady on mpNISLists[@p
+ * nisList].
  *
  * The list's byte offset is passed as an extra argument the callee ignores. The C declares no return value; the answer
  * is left in the return register.
@@ -1422,7 +1427,7 @@ extern char str_snd[];
  * @param ext  the data's name, compared by its first three characters
  * @param data  the attached data
  * @param dataSize  size of the data in bytes
- * @param kind  receives the data kind: 0 script, 1 animation, 2 sound
+ * @param kind  receives the data kind (eScriptBankDataKind)
  * @param bank  receives the bank number for animation and sound data
  */
 void cSSXScriptEngine::OnAttachData(const char* ext, void* data, int dataSize, int* kind, int* bank)
@@ -1430,14 +1435,14 @@ void cSSXScriptEngine::OnAttachData(const char* ext, void* data, int dataSize, i
     if (strncmp(str_scr, ext, 3) == 0) {
         tSSXScriptHeader* bankHeader = (tSSXScriptHeader*)GetSSXScriptHeader1(data);
         bankHeader->bankNum = mCurrAttachingBankNum;
-        *kind = 0;
+        *kind = keScriptBankData_Script;
         cBXScriptEngine_AttachScript(((char*)this), data, bankHeader->scriptIndex);
     } else if (strncmp(str_anm, ext, 3) == 0) {
-        *kind = 1;
+        *kind = keScriptBankData_Animation;
         *bank = mCurrAttachingBankNum;
         cScriptAnimBankManager_LinkBank(&mAnimationBankManager, mCurrAttachingBankNum, data);
     } else if (strncmp(str_snd, ext, 3) == 0) {
-        *kind = 2;
+        *kind = keScriptBankData_Sound;
         *bank = mCurrAttachingBankNum;
         cScriptSoundBankManager_LinkBank(mSoundBankManager, mCurrAttachingBankNum, data, dataSize);
     }
@@ -1457,19 +1462,19 @@ extern "C" void cScriptSoundBankManager_UnlinkBank1(void* list, int id);
  *
  * @param obj  the detached data
  * @param dataSize  size of the data (unused)
- * @param type  data kind stored by OnAttachData(): 0 script, 1 animation, 2 sound
+ * @param type  data kind stored by OnAttachData() (eScriptBankDataKind)
  * @param id  bank number stored by OnAttachData()
  */
 void cSSXScriptEngine::OnDetachData(void* obj, int dataSize, int type, int id)
 {
     switch (type) {
-    case 0:
+    case keScriptBankData_Script:
         cBXScriptEngine_DetachScript(this, GetSSXScriptHeader1(obj)->scriptIndex);
         break;
-    case 1:
+    case keScriptBankData_Animation:
         cScriptAnimBankManager_UnlinkBank(&mAnimationBankManager, id);
         break;
-    case 2:
+    case keScriptBankData_Sound:
         cScriptSoundBankManager_UnlinkBank1((char*)&mSoundBankManager, id);
         break;
     }
@@ -1499,7 +1504,7 @@ extern int kRoleToFilterEnumMappingTable[];
 /**
  * Picks a random variation for each entity of a script that is starting, then counts the play.
  *
- * Choice entities (type 5) only pick options whose character mask matches the cast (flags built from the
+ * Choice entities (keSSXEntityType_Actor) only pick options whose character mask matches the cast (flags built from the
  * three AI
  * indices), and a picked option tied to a cast slot uses that slot up; other entities pick any variation. The
  * script's play count in the master table is incremented.
@@ -1523,7 +1528,7 @@ void cSSXScriptEngine::OnStartScript(cScriptPlayerMain* script, int idx, int* pl
     }
     for (i = 0; i < (script->mpSystemHeader)->numEntities; i++) {
         void* ev = cScriptPlayerMain_GetEntity(script, i);
-        if (cScriptPlayerEntity_GetType(ev) == 5) {
+        if (cScriptPlayerEntity_GetType(ev) == keSSXEntityType_Actor) {
             int cnt = cScriptPlayerEntity_GetNumVariations(ev);
             if (cnt >= 2) {
                 int numCands = 0;
@@ -1586,7 +1591,8 @@ extern "C" int cScriptObjCameraManager_SetTransitionObject(cScriptObjCameraManag
 /**
  * Adds a script object to the database and hooks cameras and transitions up to their camera manager.
  *
- * A camera (type 1) joins the camera manager its word at +0x7C selects; a transition (type 2) is set on the
+ * A camera (keScriptObjectType_Camera) joins the camera manager its word at +0x7C selects; a transition
+ * (keScriptObjectType_Transition) is set on the
  * camera manager its virtual slot 9 names.
  *
  * @param obj  the script object
@@ -1651,8 +1657,8 @@ extern "C" void cScriptObjTransition_IsInUseByPlayer(void* obj, int val);
 /**
  * Asks whether a script object is in use by a player, through the check for the object's type.
  *
- * Cameras (type 1) and transitions (type 2) have their own checks, others use the database's. On Tour returns
- * the answer; this declaration is void.
+ * Cameras (keScriptObjectType_Camera) and transitions (keScriptObjectType_Transition) have their own checks, others use
+ * the database's. On Tour returns the answer; this declaration is void.
  *
  * @param i  the object's database ID
  * @param val  player ID
@@ -1662,9 +1668,9 @@ void cSSXScriptEngine::IsObjInUseByPlayer(int i, int val)
     // PORT: cScriptDatabaseObject_GetObject returns a table pointer as int
     int* obj = (int*)cScriptDatabaseObject_GetObject(this, i);
     int type = *obj;
-    if (type == 1) {
+    if (type == keScriptObjectType_Camera) {
         ((cScriptObjCamera*)obj)->IsInUseByPlayer(val);
-    } else if (type != 2) {
+    } else if (type != keScriptObjectType_Transition) {
         cScriptDatabaseObject_IsObjInUseByPlayer(this, i, val);
     } else {
         cScriptObjTransition_IsInUseByPlayer(obj, val);
@@ -1680,9 +1686,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__F
 /**
  * Returns the animation bank info of a script data bank.
  *
- * Forwards to cScriptAnimBankManager_GetBankInfo (On Tour cScriptAnimBankManager::GetBankInfo) on mAnimationBankManager (+0xA28). The C
- * declares only the engine: the bank number arrives in $a1 and passes through (cScriptObjRider_OnStartObjectUse binds a two-argument
- * alias). On Tour asserts the bank number is in range; retail does not.
+ * Forwards to cScriptAnimBankManager_GetBankInfo (On Tour cScriptAnimBankManager::GetBankInfo) on mAnimationBankManager
+ * (+0xA28). The C declares only the engine: the bank number arrives in $a1 and passes through
+ * (cScriptObjRider_OnStartObjectUse binds a two-argument alias). On Tour asserts the bank number is in range; retail
+ * does not.
  *
  * @return the bank's tScriptAnimBankInfo record, or 0 if none is linked
  */
@@ -1700,8 +1707,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetSoundBankInfo__FPv);
 /**
  * Returns the sound bank info of a script data bank.
  *
- * Forwards to cScriptSoundBankManager_GetBankInfo (On Tour cScriptSoundBankManager::GetBankInfo) on mSoundBankManager (+0xA38). The C
- * declares only the engine: the bank number arrives in $a1 and passes through (callers bind a two-argument alias).
+ * Forwards to cScriptSoundBankManager_GetBankInfo (On Tour cScriptSoundBankManager::GetBankInfo) on mSoundBankManager
+ * (+0xA38). The C declares only the engine: the bank number arrives in $a1 and passes through (callers bind a
+ * two-argument alias).
  *
  * @return the bank's tScriptSoundBankInfo record
  */
@@ -1739,7 +1747,7 @@ static inline void* computerRider(cComputer* computer)
  * Subjects 0-2 are the request's main and supporting characters (by AI index), 3-4 the human players, 5-9 the
  * computer riders then the actors, 10-14 the actors then the computer riders, and 15-20 the riders by index.
  *
- * @param slot  subject type
+ * @param slot  subject type (eSSXScriptSubject)
  * @param pPlayer  the script player whose request supplies the cast
  * @return the rider, or 0 when the subject has no rider
  */
@@ -1747,42 +1755,45 @@ void* cSSXScriptEngine::GetSubjectRider(int slot, int pPlayer)
 {
     int riderIndex;
     switch (slot) {
-    case 0: {
+    case keSSXSubject_MainChar: {
         tSSXScriptSetupInfo* setupInfo = (tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(this, pPlayer);
         if (setupInfo->mainCharAIIndex < 0) break;
         return subjectAI()->Riders[setupInfo->mainCharAIIndex];
     }
-    case 1:
+    case keSSXSubject_SupportChar0:
         riderIndex = ((tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(this, pPlayer))->supportChar0AIIndex;
         if (riderIndex < 0) break;
         return subjectAI()->Riders[riderIndex];
-    case 2:
+    case keSSXSubject_SupportChar1:
         riderIndex = ((tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(this, pPlayer))->supportChar1AIIndex;
         if (riderIndex < 0) break;
         return subjectAI()->Riders[riderIndex];
-    case 3: case 4: {
+    case keSSXSubject_Player0: case keSSXSubject_Player1: {
         cAI* ai = subjectAI();
-        int j = slot - 3;
+        int j = slot - keSSXSubject_Player0;
         if (j >= ai->NumberOfPlayersAllocated) break;
         return playerRider(ai->Players[j]);
     }
-    case 5: case 6: case 7: case 8: case 9: {
+    case keSSXSubject_Computer0: case keSSXSubject_Computer1: case keSSXSubject_Computer2: case keSSXSubject_Computer3:
+    case keSSXSubject_Computer4: {
         cAI* ai = subjectAI();
-        int j = slot - 5;
+        int j = slot - keSSXSubject_Computer0;
         if (j >= ai->NumberOfComputersAllocated + ai->NumberOfActorsAllocated) break;
         if (j < ai->NumberOfComputersAllocated) return computerRider(ai->Computers[j]);
         return computerRider(ai->Actors[j - ai->NumberOfComputersAllocated]);
     }
-    case 10: case 11: case 12: case 13: case 14: {
+    case keSSXSubject_Actor0: case keSSXSubject_Actor1: case keSSXSubject_Actor2: case keSSXSubject_Actor3:
+    case keSSXSubject_Actor4: {
         cAI* ai = subjectAI();
-        int j = slot - 10;
+        int j = slot - keSSXSubject_Actor0;
         if (j >= ai->NumberOfActorsAllocated + ai->NumberOfComputersAllocated) break;
         if (j < ai->NumberOfActorsAllocated) return computerRider(ai->Actors[j]);
         return computerRider(ai->Computers[j - ai->NumberOfActorsAllocated]);
     }
-    case 15: case 16: case 17: case 18: case 19: case 20: {
+    case keSSXSubject_Rider0: case keSSXSubject_Rider1: case keSSXSubject_Rider2: case keSSXSubject_Rider3:
+    case keSSXSubject_Rider4: case keSSXSubject_Rider5: {
         cAI* ai = subjectAI();
-        int j = slot - 15;
+        int j = slot - keSSXSubject_Rider0;
         if (j >= ai->NumberOfRidersAllocated) break;
         return ai->Riders[j];
     }
@@ -1826,8 +1837,8 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_impl(char* self, int id, v
  * (19), 8 (24), 9-11 (31-33) or 12-17 (34-39), category 50, or 43 for 29-30 when the player's script header
  * (GetSSXScriptHeader) starts with a nonzero byte. - 20-22 add a fixed offset from D_004D3770, filled once (guard
  * D_004A51D8): (-20, 0, 340), (-20, -275, 280), (-20, 275, 280). - 19, 23, 25-28, 31 and 34-36 drop the position onto
- * the ground: z becomes the hit point's z from cBXNash_getGroundHeight on the game's BXNash; 25 first lowers z by 1000. Other ids
- * leave the cleared values.
+ * the ground: z becomes the hit point's z from cBXNash_getGroundHeight on the game's BXNash; 25 first lowers z by 1000.
+ * Other ids leave the cleared values.
  *
  * @param id  the anchor type
  * @param obj  the script player (cScriptPlayerMain)
@@ -2005,25 +2016,25 @@ static inline cFade_TObj* initFx_27A4A0(cFade_TObj* p, const tARGB& col)
 /**
  * Creates a screen-transition effect object of the given type and colour.
  *
- * Types 1 and 7 are fades (7 always uses all-ones colour), 2-5 directional wipes and 6 another effect; 0 and
- * 8
- * make nothing. Colour 0 is (1, 0, 0, 0) and 1 is all ones, probably black and white.
+ * keScriptTransition_Fade and keScriptTransition_CrossFade are fades (CrossFade always uses white), WipeLeft,
+ * WipeRight, WipeUp and WipeDown directional wipes and WipeCircle a circle; CameraBlend and Cut make nothing. Colour
+ * keScriptTransitionColour_Black is (1, 0, 0, 0) and White all ones (tARGB's A, R, G, B).
  *
- * @param type  transition type
- * @param mode  transition colour, 0 or 1
+ * @param type  transition type (eScriptTransition)
+ * @param mode  transition colour (eScriptTransitionColour)
  * @return the new transition object, or 0
  */
 void* cSSXScriptEngine::MakeTransitionObject(int type, int mode)
 {
     tARGB color;
     switch (mode) {
-    case 0:
+    case keScriptTransitionColour_Black:
         color.A = 1.0f;
         color.R = 0.0f;
         color.G = 0.0f;
         color.B = 0.0f;
         break;
-    case 1:
+    case keScriptTransitionColour_White:
         color.A = 1.0f;
         color.R = 1.0f;
         color.G = 1.0f;
@@ -2031,22 +2042,22 @@ void* cSSXScriptEngine::MakeTransitionObject(int type, int mode)
         break;
     }
     switch (type) {
-    case 1: {
+    case keScriptTransition_Fade: {
         cFade_TObj* fxObj = (cFade_TObj*)cTransitionObj_operator_new_sz(20);
         tARGB fxColor = color;
         return initFx_27A4A0(fxObj, fxColor);
     }
-    case 2:
+    case keScriptTransition_WipeLeft:
         return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, -1, 0);
-    case 3:
+    case keScriptTransition_WipeRight:
         return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, 1, 0);
-    case 4:
+    case keScriptTransition_WipeUp:
         return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, 0, -1);
-    case 5:
+    case keScriptTransition_WipeDown:
         return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, 0, 1);
-    case 6:
+    case keScriptTransition_WipeCircle:
         return cCircle_TObj_cCircle_TObj(cTransitionObj_operator_new_sz(0x1C), &color);
-    case 7: {
+    case keScriptTransition_CrossFade: {
         cFade_TObj* fxObj = (cFade_TObj*)cTransitionObj_operator_new_sz(20);
         tARGB fxColor;
         fxColor.A = 1.0f;
@@ -2055,8 +2066,8 @@ void* cSSXScriptEngine::MakeTransitionObject(int type, int mode)
         fxColor.B = 1.0f;
         return initFx_27A4A0(fxObj, fxColor);
     }
-    case 0:
-    case 8:
+    case keScriptTransition_CameraBlend:
+    case keScriptTransition_Cut:
         break;
     }
     return 0;
@@ -2204,42 +2215,50 @@ static inline int sseWorldMode_A860()
 }
 
 /**
- * Queues and plays the transport cut-scene sequence in NIS list 1.
+ * Queues and plays the transport cut-scene sequence in NIS list keNISList_AuxTransition.
  *
- * Uses categories 18-21 when @p online is set and 12-15 otherwise, the last one picked by the world mode. On
- * Tour
- * names the parameters isGondolaSequence and doLeave, so @p online probably selects the gondola, not online
+ * Uses the gondola categories (keSSXScriptCategory_wctransportgondola*) when @p online is set and the heli ones
+ * otherwise: leave, in-transit start, then the in-transit loop, or its mp variant when more than one player is
+ * allocated. On Tour names the parameters isGondolaSequence and doLeave, so @p online selects the gondola, not online
  * play.
  *
- * @param online  selects the 18-21 sequence (On Tour isGondolaSequence)
- * @param intro  nonzero to start with the first script (category 18 or 12; On Tour doLeave)
+ * @param online  selects the gondola sequence (On Tour isGondolaSequence)
+ * @param intro  nonzero to start with the leave script (On Tour doLeave)
  */
 void cSSXScriptEngine::PlayTransportSequence(int online, int intro)
 {
     if (online) {
         if (intro) {
-            AddToNISListByScriptCategory(1, 18, 1, 1, -1, -1, -1);
+            AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransportgondolaleave, 1, 1,
+                -1, -1, -1);
         }
-        AddToNISListByScriptCategory(1, 19, 0, 0, -1, -1, -1);
+        AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransportgondolaintransitstart, 0,
+            0, -1, -1, -1);
         if (sseWorldMode_A860() == 1) {
-            AddToNISListByScriptCategory(1, 20, 8, 0, -1, -1, -1);
+            AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransportgondolaintransitloop,
+                8, 0, -1, -1, -1);
         } else {
-            AddToNISListByScriptCategory(1, 21, 8, 0, -1, -1, -1);
+            AddToNISListByScriptCategory(keNISList_AuxTransition,
+                keSSXScriptCategory_wctransportgondolaintransitloopmp, 8, 0, -1, -1, -1);
         }
     } else {
         if (intro) {
-            AddToNISListByScriptCategory(1, 0xC, 1, 1, -1, -1, -1);
+            AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransporthelileave, 1, 1, -1,
+                -1, -1);
         }
-        AddToNISListByScriptCategory(1, 13, 0, 1, -1, -1, -1);
+        AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransportheliintransitstart, 0, 1,
+            -1, -1, -1);
         GrMan->mSkipNextPageFlip = 1;
         if (sseWorldMode_A860() == 1) {
-            AddToNISListByScriptCategory(1, 0xE, 8, 1, -1, -1, -1);
+            AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransportheliintransitloop, 8,
+                1, -1, -1, -1);
         } else {
-            AddToNISListByScriptCategory(1, 0xF, 8, 0, -1, -1, -1);
+            AddToNISListByScriptCategory(keNISList_AuxTransition, keSSXScriptCategory_wctransportheliintransitloopmp,
+                8, 0, -1, -1, -1);
         }
     }
-    ReadyNISList(1);
-    PlayNISList(1, 0, 1);
+    ReadyNISList(keNISList_AuxTransition);
+    PlayNISList(keNISList_AuxTransition, 0, 1);
     func_0028E8C0(cAudioInterface_bxAudio(), 20, 1);
 }
 #endif
@@ -2253,31 +2272,31 @@ int cSSXScriptEngine_GetNISListScriptCategory_r(void* self, int a1, int a2) __as
 extern "C" void cSSXScriptEngine_SkipNISListScripts(cSSXScriptEngine* self, int a1, int a2, int a3);
 
 /**
- * Skips the rest of the transport sequence playing in NIS list 1.
+ * Skips the rest of the transport sequence playing in NIS list keNISList_AuxTransition.
  *
- * The number of scripts skipped depends on the category of the list's first entry: 3 for 12/18, 2 for 13/19,
- * 1
- * for 14/20, none otherwise.
+ * The number of scripts skipped depends on the category of the list's first entry: 3 for the heli or gondola leave, 2
+ * for the in-transit start, 1 for the in-transit loop, none otherwise.
  *
  * @return true when scripts were skipped
  */
 bool cSSXScriptEngine::EndTransportSequence()
 {
     int skipMode = 0;
-    switch (cSSXScriptEngine_GetNISListScriptCategory_r(this, 1, 0)) {
-    case 12: case 18:
+    switch (cSSXScriptEngine_GetNISListScriptCategory_r(this, keNISList_AuxTransition, 0)) {
+    case keSSXScriptCategory_wctransporthelileave: case keSSXScriptCategory_wctransportgondolaleave:
         skipMode = 3;
         break;
-    case 13: case 19:
+    case keSSXScriptCategory_wctransportheliintransitstart: case keSSXScriptCategory_wctransportgondolaintransitstart:
         skipMode = 2;
         break;
-    case 14: case 20:
+    case keSSXScriptCategory_wctransportheliintransitloop: case keSSXScriptCategory_wctransportgondolaintransitloop:
         skipMode = 1;
         break;
-    case 15: case 16: case 17:
+    case keSSXScriptCategory_wctransportheliintransitloopmp: case keSSXScriptCategory_wctransporthelibcarrive:
+    case keSSXScriptCategory_wctransporthelibcunload:
         break;
     }
-    SkipNISListScripts(1, skipMode, 1);
+    SkipNISListScripts(keNISList_AuxTransition, skipMode, 1);
     return skipMode != 0;
 }
 #endif
@@ -2290,19 +2309,24 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsInTransportSequence);
 int cSSXScriptEngine_GetNISListScriptCategory_int(void* self, int i, int a) __asm__("cSSXScriptEngine_GetNISListScriptCategory");
 
 /**
- * Tells whether NIS list 1 is playing one of the transport sequence's first three scripts.
+ * Tells whether NIS list keNISList_AuxTransition is playing one of the transport sequence's first three scripts.
  *
- * @return 1 when list 1 is playing and its first entry has category 12, 13, 14, 18, 19 or 20, otherwise 0
+ * @return true when that list is playing and its first entry is a heli or gondola leave, in-transit start or
+ *         in-transit loop
  */
-int cSSXScriptEngine::IsInTransportSequence()
+bool cSSXScriptEngine::IsInTransportSequence()
 {
-    if (mPlayingNISList != 1) {
-        return 0;
+    if (mPlayingNISList != keNISList_AuxTransition) {
+        return false;
     }
-    int category = cSSXScriptEngine_GetNISListScriptCategory_int(this, 1, 0);
-    int inTransport = 0;
-    if (category == 18 || category == 0xC || category == 19 || category == 13 || category == 20 || category == 0xE) {
-        inTransport = 1;
+    int category = cSSXScriptEngine_GetNISListScriptCategory_int(this, keNISList_AuxTransition, 0);
+    bool inTransport = false;
+    if (category == keSSXScriptCategory_wctransportgondolaleave || category == keSSXScriptCategory_wctransporthelileave
+        || category == keSSXScriptCategory_wctransportgondolaintransitstart
+        || category == keSSXScriptCategory_wctransportheliintransitstart
+        || category == keSSXScriptCategory_wctransportgondolaintransitloop
+        || category == keSSXScriptCategory_wctransportheliintransitloop) {
+        inTransport = true;
     }
     return inTransport;
 }
@@ -2319,17 +2343,18 @@ extern int* kpFlyInScriptSequenceTable[];
 extern int kTrackStartSequenceMPNet[];
 
 /**
- * Queues the race-start cut-scenes for a start situation in NIS list 0.
+ * Queues the race-start cut-scenes for a start situation in NIS list keNISList_Main.
  *
- * Situation 0 adds the intro scripts listed for the game path (or the online list); 1 and 2 add category 5;
- * 3 adds category 4 and then 5.
+ * keNISStartSituation_InitEvent adds the intro scripts listed for the game path (or the online list); RestartEvent and
+ * NextHeat add keSSXScriptCategory_wcracestartframe; LastHeat adds keSSXScriptCategory_wcracestartgate and then the
+ * frame.
  *
  * @param state  start situation (On Tour eNISStartSituation)
  */
 void cSSXScriptEngine::AppendStartSequence(int state)
 {
     switch (state) {
-    case 0: {
+    case keNISStartSituation_InitEvent: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int* tbl = kpFlyInScriptSequenceTable[cBENewRaceInterface_newRace.cGamePath];
         cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -2338,19 +2363,22 @@ void cSSXScriptEngine::AppendStartSequence(int state)
         }
         if (tbl != 0 && tbl[0] >= 0) {
             do {
-                ScriptEngine->AddToNISListByScriptCategory(0, tbl[0], tbl[1], 0, -1, -1, -1);
+                ScriptEngine->AddToNISListByScriptCategory(keNISList_Main, tbl[0], tbl[1], 0, -1, -1, -1);
                 tbl += 2;
             } while (tbl[0] >= 0);
         }
         break;
     }
-    case 1:
-    case 2:
-        ScriptEngine->AddToNISListByScriptCategory(0, 5, 0, 0, -1, -1, -1);
+    case keNISStartSituation_RestartEvent:
+    case keNISStartSituation_NextHeat:
+        ScriptEngine->AddToNISListByScriptCategory(keNISList_Main, keSSXScriptCategory_wcracestartframe, 0, 0, -1, -1,
+            -1);
         break;
-    case 3:
-        ScriptEngine->AddToNISListByScriptCategory(0, 4, 3, 0, -1, -1, -1);
-        ScriptEngine->AddToNISListByScriptCategory(0, 5, 0, 0, -1, -1, -1);
+    case keNISStartSituation_LastHeat:
+        ScriptEngine->AddToNISListByScriptCategory(keNISList_Main, keSSXScriptCategory_wcracestartgate, 3, 0, -1, -1,
+            -1);
+        ScriptEngine->AddToNISListByScriptCategory(keNISList_Main, keSSXScriptCategory_wcracestartframe, 0, 0, -1, -1,
+            -1);
         break;
     }
 }
@@ -2424,15 +2452,15 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
  * (category
  * by the best place; some cheat characters get category 10). Then, for race modes below 4, it probably queues
  * an
- * unlock scene (categories 24 and 25) depending on cBENewPlayerInterface_isRivalChallengePlayed() and cBENewPlayerInterface_isRivalEventLocked(). Mode 4 and unfinished
- * events queue nothing.
+ * unlock scene (categories 24 and 25) depending on cBENewPlayerInterface_isRivalChallengePlayed() and
+ * cBENewPlayerInterface_isRivalEventLocked(). Mode 4 and unfinished events queue nothing.
  */
 void cSSXScriptEngine::AppendEndEventSequence()
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     int mode = beRaceDB->cGameMode;
-    if (mode == 4) {
+    if (mode == kGAMEMODE_FREERIDE) {
         return;
     }
     if (SSXApp->GameModeMan->bIsLastHeat == 0) {
@@ -2468,10 +2496,10 @@ done:
         sScTbl_AC60 tbl = D_00481E90;
         int k = tbl.v[best];
         if (best == 0) {
-            k = 9;
+            k = keSSXScriptCategory_wcraceendpodiumchampion;
             int cheatCharID = cBELibrary_getCheatCharacterID(Call_AC60(list->riders[ids[0]], 7));
             if ((unsigned)(cheatCharID - 10) < 11 || cheatCharID == 0x1C) {
-                k = 10;
+                k = keSSXScriptCategory_wcraceendpodiumchampioncheat;
             }
         }
         ScriptEngine->AddToNISListByScriptCategory(0, k, 1, 0, ids[0], ids[1], ids[2]);
@@ -3120,8 +3148,8 @@ static inline char* Bone_27BB08(char* model, unsigned int code)
 /**
  * Gives the base position and rotation of a world object named in a section's anchor table.
  *
- * Section 50 means the current location's section. Leaves the outputs alone when the section has no anchor
- * table
+ * Section kAnchorSection_CurrentLocation means the current location's section. Leaves the outputs alone when the
+ * section has no anchor table
  * or the entry is -1. An optional offset is rotated by the object's matrix and added to the position.
  *
  * @param slot  object type, the index into the anchor table
@@ -3129,13 +3157,13 @@ static inline char* Bone_27BB08(char* model, unsigned int code)
  * @param flag  receives 0 (On Tour baseRotX)
  * @param pitch  receives the object's pitch
  * @param yaw  receives the object's heading
- * @param cat  section ID, or 50 for the current location's (On Tour overrideSectionID)
+ * @param cat  section ID, or kAnchorSection_CurrentLocation (On Tour overrideSectionID)
  * @param off  offset in the object's frame, or 0
  */
 extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXScriptEngine* self, int slot, sVec_27BB08* pos, int* flag, float* pitch, float* yaw, int cat,
                               const sVec_27BB08* off)
 {
-    if (cat == 50) {
+    if (cat == cSSXScriptEngine::kAnchorSection_CurrentLocation) {
         int k = cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))->locationID;
         cat = D_00482660[k];
     }
@@ -3233,10 +3261,11 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
 /**
  * Fills @p flags[0..20] with the character bit of the rider in each script role slot, 0 for an empty slot.
  *
- * Riders come from the game's AI rider set (SSXApp->Game->AI); a rider's bit is kCharacterMappingTable[cRider_getIdentity(rider)].
- * Slots 0-2 take the riders at @p mainCharAIIndex, @p supportChar0AIIndex and @p supportChar1AIIndex of the list at +0x28 (skipped when negative); slots 3-4 the first
- * two of the list at +0x40 (count +0x7C); 5-9 the list at +0x48 (count +0x80); 10-14 the list at +0x5C (count +0x84);
- * 15-20 the list at +0x28 in order (count +0x78). The last three lists hold objects whose rider is at +0x18.
+ * Riders come from the game's AI rider set (SSXApp->Game->AI); a rider's bit is
+ * kCharacterMappingTable[cRider_getIdentity(rider)]. Slots 0-2 take the riders at @p mainCharAIIndex, @p
+ * supportChar0AIIndex and @p supportChar1AIIndex of the list at +0x28 (skipped when negative); slots 3-4 the first two
+ * of the list at +0x40 (count +0x7C); 5-9 the list at +0x48 (count +0x80); 10-14 the list at +0x5C (count +0x84); 15-20
+ * the list at +0x28 in order (count +0x78). The last three lists hold objects whose rider is at +0x18.
  *
  * @param flags  receives 21 character bits
  * @param mainCharAIIndex  the main character's AI index
@@ -3250,50 +3279,50 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
     int numA = set->numA;
     int numB = set->numB;
     int i;
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < keSSXSubject_Num; i++) {
         flags[i] = 0;
         switch (i) {
-        case 0:
+        case keSSXSubject_MainChar:
             if (mainCharAIIndex >= 0)
                 flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[mainCharAIIndex])];
             break;
-        case 1:
+        case keSSXSubject_SupportChar0:
             if (supportChar0AIIndex >= 0)
                 flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[supportChar0AIIndex])];
             break;
-        case 2:
+        case keSSXSubject_SupportChar1:
             if (supportChar1AIIndex >= 0)
                 flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[supportChar1AIIndex])];
             break;
-        case 3:
-        case 4:
-            if (i - 3 < numA)
-                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupA[i - 3]->rider)];
+        case keSSXSubject_Player0:
+        case keSSXSubject_Player1:
+            if (i - keSSXSubject_Player0 < numA)
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupA[i - keSSXSubject_Player0]->rider)];
             break;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-            if (i - 5 < numB)
-                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupB[i - 5]->rider)];
+        case keSSXSubject_Computer0:
+        case keSSXSubject_Computer1:
+        case keSSXSubject_Computer2:
+        case keSSXSubject_Computer3:
+        case keSSXSubject_Computer4:
+            if (i - keSSXSubject_Computer0 < numB)
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupB[i - keSSXSubject_Computer0]->rider)];
             break;
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-        case 14:
-            if (i - 10 < set->numC)
-                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupC[i - 10]->rider)];
+        case keSSXSubject_Actor0:
+        case keSSXSubject_Actor1:
+        case keSSXSubject_Actor2:
+        case keSSXSubject_Actor3:
+        case keSSXSubject_Actor4:
+            if (i - keSSXSubject_Actor0 < set->numC)
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupC[i - keSSXSubject_Actor0]->rider)];
             break;
-        case 15:
-        case 16:
-        case 17:
-        case 18:
-        case 19:
-        case 20:
-            if (i - 15 < set->numPlayers)
-                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[i - 15])];
+        case keSSXSubject_Rider0:
+        case keSSXSubject_Rider1:
+        case keSSXSubject_Rider2:
+        case keSSXSubject_Rider3:
+        case keSSXSubject_Rider4:
+        case keSSXSubject_Rider5:
+            if (i - keSSXSubject_Rider0 < set->numPlayers)
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[i - keSSXSubject_Rider0])];
             break;
         default:
             break;
@@ -3311,9 +3340,9 @@ extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
  * Tells whether a script bank still has a load pending, polling the loads first.
  *
  * @param i  bank number
- * @return 1 while the bank's async load is pending, otherwise 0
+ * @return true while the bank's async load is pending
  */
-int cSSXScriptEngine::IsBankLoading(int i)
+bool cSSXScriptEngine::IsBankLoading(int i)
 {
     UpdateLoad();
     return (int)mScriptDataBanks[i].asyncHandle != 0;
@@ -3374,8 +3403,8 @@ void cScriptObject_OnEndObjectUse(void*);
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnEndObjectUse);
 #ifdef SKIP_ASM
 /**
- * Drops the game-state script object's use count: cScriptObject_OnEndObjectUse on its cScriptObject part (+0xC). The player ID
- * argument is not declared.
+ * Drops the game-state script object's use count: cScriptObject_OnEndObjectUse on its cScriptObject part (+0xC). The
+ * player ID argument is not declared.
  */
 void cScriptObjGS::OnEndObjectUse()
 {
@@ -3408,10 +3437,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnInSeqKeyEvent);
  * Handles an in-sequence key event for the game-state script object: fetches the entity's game-state frame and ignores
  * it.
  *
- * Calls GetSSXGameStateManagerFrame(@p entity, frame) with a 16-byte stack buffer and returns; nothing reads the result. On Tour's
- * version (GetSSXGameStateManagerFrame plus asserts on the event bits and frame count) does no more in a release build.
- * Virtual slot 3 of cScriptObjGS_vtbl (the cScriptEntity part); the event type, frame and event bits (On Tour type,
- * currFrame, eventBits) are not used.
+ * Calls GetSSXGameStateManagerFrame(@p entity, frame) with a 16-byte stack buffer and returns; nothing reads the
+ * result. On Tour's version (GetSSXGameStateManagerFrame plus asserts on the event bits and frame count) does no more
+ * in a release build. Virtual slot 3 of cScriptObjGS_vtbl (the cScriptEntity part); the event type, frame and event
+ * bits (On Tour type, currFrame, eventBits) are not used.
  *
  * @param entity  the script player entity the event is for (On Tour cScriptPlayerEntity* pEntity)
  */
@@ -3481,8 +3510,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManualHeader1);
 extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
- * passing through in the second argument register (the C declares only the entity).
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the
+ * variation index passing through in the second argument register (the C declares only the entity).
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @return the header, or 0 when the variation has none
@@ -3575,8 +3604,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraTargetHeader1);
 extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
- * passing through in the second argument register (the C declares only the entity).
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the
+ * variation index passing through in the second argument register (the C declares only the entity).
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @return the header, or 0 when the variation has none
@@ -3669,8 +3698,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraSubjectHeader1);
 extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
- * passing through in the second argument register (the C declares only the entity).
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the
+ * variation index passing through in the second argument register (the C declares only the entity).
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @return the header, or 0 when the variation has none
@@ -3762,8 +3791,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraAlgorithmicHeader1);
 extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
- * passing through in the second argument register (the C declares only the entity).
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the
+ * variation index passing through in the second argument register (the C declares only the entity).
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @return the header, or 0 when the variation has none
@@ -3855,8 +3884,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManagerHeader1);
 extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
- * passing through in the second argument register (the C declares only the entity).
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the
+ * variation index passing through in the second argument register (the C declares only the entity).
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @return the header, or 0 when the variation has none
@@ -3942,8 +3971,8 @@ extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 INCLUDE_ASM("scripter/ssxscriptengine", GetSSXActorHeader1__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the custom header of variation n of an actor script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
- * passing through in the second argument register (the C declares only the entity).
+ * Returns the custom header of variation n of an actor script entity's script: cScriptPlayerEntity_GetHeader, with the
+ * variation index passing through in the second argument register (the C declares only the entity).
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @return the header, or 0 when the variation has none
@@ -3997,10 +4026,10 @@ cScriptObjC9B0* cScriptPlayerEntity_GetChannel_C9B0(void* self, int a1) __asm__(
 /**
  * Samples an actor script entity's channels into an actor frame.
  *
- * For channels 0..2 (cScriptPlayerEntity_GetChannel__FPvi, On Tour cScriptPlayerEntity::GetChannel) it stores the first word of the channel's
- * virtual slot-4 value and the slot-5 result (numMainAnim..pSpeechEventArray); channels 3..8 each give one float
- * through slot 4 (posX..rotZ). cRider_OnStartObjectUse, cRider_OnInSeqUpdate and cRider_OnInSeqKeyEvent read the
- * rider's scripted pose this way.
+ * For channels 0..2 (cScriptPlayerEntity_GetChannel__FPvi, On Tour cScriptPlayerEntity::GetChannel) it stores the first
+ * word of the channel's virtual slot-4 value and the slot-5 result (numMainAnim..pSpeechEventArray); channels 3..8 each
+ * give one float through slot 4 (posX..rotZ). cRider_OnStartObjectUse, cRider_OnInSeqUpdate and cRider_OnInSeqKeyEvent
+ * read the rider's scripted pose this way.
  *
  * @param pPlayer  the script entity player (a cScriptPlayerEntity)
  * @param frame  the actor frame to fill (On Tour tSSXFrameActor* pFrame)
@@ -4091,8 +4120,8 @@ extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
 
 /**
  * Constructs the script database: installs cScriptDatabaseObject_vtbl (+0x2A8), makes it the current database
- * (cScriptDatabaseObject_mpDatabaseObject), clears the 20 object slots (mpObjectDatabase) and sets the 30 entity records (mEntityDatabase, 0x14
- * each) to no entity, object -1, player -1, relation 0, reserved player -1.
+ * (cScriptDatabaseObject_mpDatabaseObject), clears the 20 object slots (mpObjectDatabase) and sets the 30 entity
+ * records (mEntityDatabase, 0x14 each) to no entity, object -1, player -1, relation 0, reserved player -1.
  *
  * @param self_  the script database (the base of the script engine)
  * @return @p self_
@@ -4128,8 +4157,9 @@ extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
 /**
  * Destroys the script database: removes every registered object and clears the global database pointer.
  *
- * Restores the cScriptDatabaseObject vtable (cScriptDatabaseObject_vtbl) at +0x2A8, calls cScriptDatabaseObject_RemoveObjectAll() and
- * zeroes cScriptDatabaseObject_mpDatabaseObject (On Tour cScriptDatabaseObject::mpDatabaseObject, the object cScriptDatabaseObject_GetDatabaseObject returns), then frees the
+ * Restores the cScriptDatabaseObject vtable (cScriptDatabaseObject_vtbl) at +0x2A8, calls
+ * cScriptDatabaseObject_RemoveObjectAll() and zeroes cScriptDatabaseObject_mpDatabaseObject (On Tour
+ * cScriptDatabaseObject::mpDatabaseObject, the object cScriptDatabaseObject_GetDatabaseObject returns), then frees the
  * object when asked. cBXScriptEngine__cBXScriptEngine chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -4172,8 +4202,8 @@ struct sScrOwnersCEA8 {
 /**
  * Adds a script object to the database and registers its script entities; returns the object's ID.
  *
- * Stores @p scriptObject in the first free of the 20 mpObjectDatabase slots, then registers each of its script entities (its
- * virtual GetScriptEntity, slot 7, for 0 to its slot 6 count) with cScriptDatabaseObject_AddEntity under that ID.
+ * Stores @p scriptObject in the first free of the 20 mpObjectDatabase slots, then registers each of its script entities
+ * (its virtual GetScriptEntity, slot 7, for 0 to its slot 6 count) with cScriptDatabaseObject_AddEntity under that ID.
  *
  * Likely bug: with all 20 slots taken the object is not stored, yet its entities are registered under ID 20 and 20 is
  * returned.
@@ -4251,8 +4281,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_RemoveObjectAll);
  * Removes every object registered in the script object database.
  *
  * For each of the 20 mpObjectDatabase slots that holds an object it calls virtual slot 3 (vtable at +0x2A8) with
- * the slot index. cScriptDatabaseObject's own slot 3 (cScriptDatabaseObject_RemoveObject) unregisters the object's script entities
- * and clears the slot; cSSXScriptEngine overrides it with cSSXScriptEngine_RemoveObject.
+ * the slot index. cScriptDatabaseObject's own slot 3 (cScriptDatabaseObject_RemoveObject) unregisters the object's
+ * script entities and clears the slot; cSSXScriptEngine overrides it with cSSXScriptEngine_RemoveObject.
  */
 void cScriptDatabaseObject::RemoveObjectAll()
 {
@@ -4287,8 +4317,8 @@ public:
 };
 
 /**
- * Reserves every script entity of object @p idx for player @p val (cScriptDatabaseObject_MarkEntityAsReserved on each of the object's virtual
- * GetScriptEntity results).
+ * Reserves every script entity of object @p idx for player @p val (cScriptDatabaseObject_MarkEntityAsReserved on each
+ * of the object's virtual GetScriptEntity results).
  *
  * Quirk: an empty object slot is dereferenced unchecked.
  *
@@ -4312,8 +4342,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkObjectAsUnrese
 extern "C" void cScriptDatabaseObject_MarkEntityAsUnreserved(cScriptDatabaseObject* self, void* a1);
 
 /**
- * Clears the reservation of every script entity of object @p idx (cScriptDatabaseObject_MarkEntityAsUnreserved on each of the object's virtual
- * GetScriptEntity results).
+ * Clears the reservation of every script entity of object @p idx (cScriptDatabaseObject_MarkEntityAsUnreserved on each
+ * of the object's virtual GetScriptEntity results).
  *
  * @param idx  the object ID
  */
@@ -4334,18 +4364,19 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_IsObjInUseByPlayer
 extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject* self, int i, int val);
 
 // PORT: cSSXScriptEngine_IsObjInUseByPlayer declares cScriptDatabaseObject_IsObjInUseByPlayer as void; it really
-// returns 0/1.
-int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val) __asm__("cScriptDatabaseObject_IsObjInUseByPlayer");
+// returns a bool.
+bool cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val)
+    __asm__("cScriptDatabaseObject_IsObjInUseByPlayer");
 
 /**
- * Returns whether any script entity of object @p idx is in use by player @p val (cScriptDatabaseObject_IsEntityInUseByPlayer on each entity's
- * database ID, mDBID).
+ * Returns whether any script entity of object @p idx is in use by player @p val
+ * (cScriptDatabaseObject_IsEntityInUseByPlayer on each entity's database ID, mDBID).
  *
  * @param idx  the object ID
  * @param val  the player ID
- * @return 1 when one is, else 0
+ * @return true when one is
  */
-int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* vself, int idx, int val)
+bool cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* vself, int idx, int val)
 {
     cScriptDatabaseObject* self = (cScriptDatabaseObject*)vself;
     cScriptObject* obj = self->mpObjectDatabase[idx];
@@ -4354,10 +4385,10 @@ int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* vself, int idx, int val)
     for (; i < n; i++) {
         if (self->IsEntityInUseByPlayer(scriptObjEntity(obj, i)->mDBID,
                                                         val)) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -4384,7 +4415,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetDatabaseObject)
 extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
 
 /**
- * Returns the current script database object, cScriptDatabaseObject_mpDatabaseObject (set by its constructor cScriptDatabaseObject_cScriptDatabaseObject).
+ * Returns the current script database object, cScriptDatabaseObject_mpDatabaseObject (set by its constructor
+ * cScriptDatabaseObject_cScriptDatabaseObject).
  *
  * @return the database
  */
@@ -4470,8 +4502,8 @@ extern "C" void cScriptEntity_DetachEntity(void* self);
 /**
  * Unregisters a script entity: frees its record (mEntityDatabase[its database ID, +0x4]).
  *
- * An entity marked used (relation 1) is first cut off from its InSeq entity (cScriptEntity_DetachEntity). The entity's database ID
- * is set to -1 and the record cleared (no entity, object -1, player -1, relation 0, reserved -1).
+ * An entity marked used (relation 1) is first cut off from its InSeq entity (cScriptEntity_DetachEntity). The entity's
+ * database ID is set to -1 and the record cleared (no entity, object -1, player -1, relation 0, reserved -1).
  *
  * @param msg  the script entity
  * @return always 1
@@ -4503,8 +4535,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsUsed);
  * Marks a script entity as used by player @p value.
  *
  * When the entity's object is not yet in use by that player (the database's virtual slot 4, IsObjInUseByPlayer-style,
- * cScriptDatabaseObject_IsObjInUseByPlayer in the base), the object's own virtual slot 4 (OnStartObjectUse) is called with the player. Then the
- * record (mEntityDatabase[@p key's mDBID]) takes the player ID (playerID) and relation 1.
+ * cScriptDatabaseObject_IsObjInUseByPlayer in the base), the object's own virtual slot 4 (OnStartObjectUse) is called
+ * with the player. Then the record (mEntityDatabase[@p key's mDBID]) takes the player ID (playerID) and relation 1.
  *
  * @param key  the script entity
  * @param value  the player ID
@@ -4530,8 +4562,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsFree);
  * Marks a script entity as free again.
  *
  * Clears its record's player ID (-1) and relation (0); when the object is no longer in use by the old player (the
- * database's virtual slot 4, cScriptDatabaseObject_IsObjInUseByPlayer in the base), the object's virtual slot 5 (OnEndObjectUse) is called with
- * that player.
+ * database's virtual slot 4, cScriptDatabaseObject_IsObjInUseByPlayer in the base), the object's virtual slot 5
+ * (OnEndObjectUse) is called with that player.
  *
  * @param key  the script entity
  */
@@ -4684,11 +4716,11 @@ extern t4Matrix t4mat_Identity;
 /**
  * Binds a script camera object to camera entity @p anim, or unbinds it when @p anim is 0.
  *
- * Binding: the player using the entity (cScriptDatabaseObject_GetPlayerIDByEntity on the database) becomes the object's player (+0x20); an entity
- * already bound (+0x14) first ends its use with the object's virtual slot 5 (OnEndObjectUse) for the old player, and
- * the new use starts with slot 4 (OnStartObjectUse). Unbinding a bound object resets the base transform (+0x30) to
- * t4mat_Identity and the base rotations (+0x70-+0x78) to 0, ends the use (slot 5), and clears the entity and player
- * (-1).
+ * Binding: the player using the entity (cScriptDatabaseObject_GetPlayerIDByEntity on the database) becomes the object's
+ * player (+0x20); an entity already bound (+0x14) first ends its use with the object's virtual slot 5 (OnEndObjectUse)
+ * for the old player, and the new use starts with slot 4 (OnStartObjectUse). Unbinding a bound object resets the base
+ * transform (+0x30) to t4mat_Identity and the base rotations (+0x70-+0x78) to 0, ends the use (slot 5), and clears the
+ * entity and player (-1).
  *
  * @param anim  the camera entity (cScriptEntityCamera), or 0
  */
@@ -4753,8 +4785,8 @@ extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject* self, int i, int val);
 
 /**
- * Returns whether the camera entity bound to this object (+0x14) is in use by player @p val (cScriptDatabaseObject_IsEntityInUseByPlayer on the
- * database with the entity's database ID).
+ * Returns whether the camera entity bound to this object (+0x14) is in use by player @p val
+ * (cScriptDatabaseObject_IsEntityInUseByPlayer on the database with the entity's database ID).
  *
  * @param val  the player ID
  * @return 1 when it is, 0 otherwise or when no entity is bound
@@ -5124,13 +5156,15 @@ extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sSc
  * Builds a script camera object's base transform (+0x30) and base rotations (+0x70, +0x74, +0x78) from the header of
  * camera entity @p cam.
  *
- * Starts from t4mat_Identity and zero angles, then by the type of the entity's InSeq entity (+0x8, cScriptPlayerEntity_GetType): -
- * 0-2 (header from GetSSXCameraManualHeader, GetSSXCameraTargetHeader or GetSSXCameraSubjectHeader): the header's X, Y and Z angles in degrees (+0x1C,
- * +0x18, +0x14) and offset (+0x8-+0x10) form a local matrix (translate, then about Z by -z, Y, X). The anchor of type
- * header byte +0x20 (cSSXScriptEngine_GetAnchorOrientation for the entity's owner player) gives a position and angles; the transform becomes
- * the anchor's translate and rotations (Z by -angle, Y, X) times the local matrix, and the anchor angles are added. - 3
- * (header from GetSSXCameraAlgorithmicHeader): only the header's angles (baseRotX/Y/Z) as rotations about Z (negated),
- * Y, X. Other types keep the identity.
+ * Starts from t4mat_Identity and zero angles, then by the type (eSSXEntityType) of the entity's InSeq entity (+0x8,
+ * cScriptPlayerEntity_GetType): - keSSXEntityType_CameraManual, CameraTarget and CameraSubject (header from
+ * GetSSXCameraManualHeader, GetSSXCameraTargetHeader or GetSSXCameraSubjectHeader): the header's X, Y and Z angles in
+ * degrees (+0x1C, +0x18, +0x14) and offset (+0x8-+0x10) form a local matrix (translate, then about Z by -z, Y, X). The
+ * anchor of type header byte +0x20 (cSSXScriptEngine_GetAnchorOrientation for the entity's owner player) gives a
+ * position and angles; the transform becomes the anchor's translate and rotations (Z by -angle, Y, X) times the local
+ * matrix, and the anchor angles are added. - keSSXEntityType_CameraAlgorithmic (header from
+ * GetSSXCameraAlgorithmicHeader): only the header's angles (baseRotX/Y/Z) as rotations about Z (negated), Y, X. Other
+ * types keep the identity.
  *
  * @param cam  the camera entity (cScriptEntityCamera)
  */
@@ -5142,22 +5176,22 @@ extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sSc
     self->ry = 0.0f;
     self->rz = 0.0f;
     switch (cScriptPlayerEntity_GetType(owner)) {
-    case 0: {
+    case keSSXEntityType_CameraManual: {
         char* rec = GetSSXCameraManualHeader_D970(owner);
         CAMARM_SE(self, owner, rec);
         break;
     }
-    case 1: {
+    case keSSXEntityType_CameraTarget: {
         char* rec = GetSSXCameraTargetHeader_D970(owner);
         CAMARM_SE(self, owner, rec);
         break;
     }
-    case 2: {
+    case keSSXEntityType_CameraSubject: {
         char* rec = GetSSXCameraSubjectHeader_D970(owner);
         CAMARM_SE(self, owner, rec);
         break;
     }
-    case 3: {
+    case keSSXEntityType_CameraAlgorithmic: {
         sRotMat_SE* mat = &self->mat;
         tSSXHeaderCameraAlgorithmic* rec = (tSSXHeaderCameraAlgorithmic*)GetSSXCameraAlgorithmicHeader_D970(owner);
         self->rx = rec->baseRotX * 0.01745329424738884f;
@@ -5481,9 +5515,9 @@ extern t4Matrix t4mat_Identity;
 /**
  * Releases the rider's script object: drops one use and resets its base transform and bank bindings.
  *
- * Calls cScriptObject_OnEndObjectUse (On Tour cScriptObject::OnEndObjectUse) on the cScriptObject part (+0xC), copies t4mat_Identity
- * into the base transform (+0x30), zeroes the base rotations (+0x70..+0x78) and clears mpAnimBankInfo (+0x1C) and
- * mpSoundBankInfo (+0x20). The player ID argument is not declared (unused).
+ * Calls cScriptObject_OnEndObjectUse (On Tour cScriptObject::OnEndObjectUse) on the cScriptObject part (+0xC), copies
+ * t4mat_Identity into the base transform (+0x30), zeroes the base rotations (+0x70..+0x78) and clears mpAnimBankInfo
+ * (+0x1C) and mpSoundBankInfo (+0x20). The player ID argument is not declared (unused).
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
@@ -5523,19 +5557,19 @@ extern int kCharacterMappingTable[];
 /**
  * Tests whether a script player entity can be played by this rider script object.
  *
- * Only entity type 5 matches. Gets the attached rider (virtual slot 6, GetAttachedRider), which must be loaded
- * (cRider_isLoaded), and its identity bit from kCharacterMappingTable[cRider_getIdentity(rider)]. The entity's actor
- * header (GetSSXActorHeader) holds a role byte and a short character mask (character): a zero mask or one containing
- * the rider's bit passes, and the final answer comes from cScriptObjRider_IsSuitableRole(self, rider, role, the
- * entity's mpOwner) (On Tour IsSuitableRole(pRider, role, pPlayerMain)).
+ * Only entity type keSSXEntityType_Actor matches. Gets the attached rider (virtual slot 6, GetAttachedRider), which
+ * must be loaded (cRider_isLoaded), and its identity bit from kCharacterMappingTable[cRider_getIdentity(rider)]. The
+ * entity's actor header (GetSSXActorHeader) holds a role byte and a short character mask (character): a zero mask or
+ * one containing the rider's bit passes, and the final answer comes from cScriptObjRider_IsSuitableRole(self, rider,
+ * role, the entity's mpOwner) (On Tour IsSuitableRole(pRider, role, pPlayerMain)).
  *
  * @param msg  the script player entity (On Tour cScriptPlayerEntity* pEntity)
- * @param type  the entity type asked for; only 5 can match
+ * @param type  the entity type asked for; only keSSXEntityType_Actor can match
  * @return nonzero when the entity matches this rider
  */
 int cScriptObjRider::IsMatchingEntity(cScriptPlayerEntity* msg, int type)
 {
-    if (type != 5) return 0;
+    if (type != keSSXEntityType_Actor) return 0;
     sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)mVtbl;
     void* rider = vt[6].fn(vthis(this, vt[6]));  // GetAttachedRider
     if (cRider_isLoaded(rider) == 0) return 0;
@@ -5667,10 +5701,10 @@ extern "C" int func_002B0E28(void* p, int i);
  *
  * For each of the 4 sound slots (+0xBC; ID, count, target; On Tour mSounds) holding a sound ID (>= 0): a slot whose
  * count word is non-zero is stopped (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank monitor,
- * cAudioInterface_bxAudio() +0x118 then +0x1D8) and cleared; any other slot is cleared once cBankMonitor_BANKMONITOR_GetHandle no
- * longer finds the sound. If the flag at +0xF4 (On Tour mCheckForStopOnSpeechEnd) is set it is cleared, and when
- * func_002B0E28(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are skipped
- * (cSSXScriptEngine_SkipNISListScripts).
+ * cAudioInterface_bxAudio() +0x118 then +0x1D8) and cleared; any other slot is cleared once
+ * cBankMonitor_BANKMONITOR_GetHandle no longer finds the sound. If the flag at +0xF4 (On Tour mCheckForStopOnSpeechEnd)
+ * is set it is cleared, and when func_002B0E28(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are
+ * skipped (cSSXScriptEngine_SkipNISListScripts).
  */
 void cScriptObjEvent::Update()
 {
@@ -5710,10 +5744,11 @@ void* cSSXScriptEngine_GetSoundBankInfo_2(void* self, int key) __asm__("cSSXScri
 /**
  * Takes the script event object into use: resets its event state and binds the script's sound bank.
  *
- * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC), clears +0xEC, +0xF0 and +0xF4 (On Tour mNumAbortWorldScripts,
- * mHasTriggeredSpeechEvents, mCheckForStopOnSpeechEnd), binds the sound bank info (+0xF8, On Tour mpSoundBankInfo) with
- * cSSXScriptEngine_GetSoundBankInfo__FPv for the bank of the playing script (+0x1C of the GetSSXScriptHeader header) and empties the 4 sound slots at
- * +0xBC (ID -1, count 0, target -1). The player ID argument is not declared (unused).
+ * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC), clears +0xEC, +0xF0 and +0xF4 (On Tour
+ * mNumAbortWorldScripts, mHasTriggeredSpeechEvents, mCheckForStopOnSpeechEnd), binds the sound bank info (+0xF8, On
+ * Tour mpSoundBankInfo) with cSSXScriptEngine_GetSoundBankInfo__FPv for the bank of the playing script (+0x1C of the
+ * GetSSXScriptHeader header) and empties the 4 sound slots at +0xBC (ID -1, count 0, target -1). The player ID argument
+ * is not declared (unused).
  */
 void cScriptObjEvent::OnStartObjectUse()
 {
@@ -5750,13 +5785,13 @@ extern int cRenderStateMan_m_indoor;
 /**
  * Takes the script event object out of use: runs its abort world scripts, stops its sounds and clears its event state.
  *
- * After cScriptObject_OnEndObjectUse on the cScriptObject part (+0xC): runs each recorded abort world script (+0x1C, On Tour
- * mAbortWorldScripts: hash, world section; count +0xEC, mNumAbortWorldScripts) with cWScriptMan_runFunc; when speech
- * was triggered (+0xF0, mHasTriggeredSpeechEvents) calls func_002A1BD0 on the audio interface; stops each of the 4
- * sound slots (+0xBC, mSounds) holding a handle (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank
- * monitor) and resets all four (handle -1, end flag 0, sound ID -1). When the entity's game-event frame (GetSSXGameEventFrame)
- * has an enviro-state list (+0x24), the render-state flag cRenderStateMan_m_indoor is cleared. Finally clears +0xEC, +0xF0, +0xF4
- * (mCheckForStopOnSpeechEnd) and the sound bank info (+0xF8).
+ * After cScriptObject_OnEndObjectUse on the cScriptObject part (+0xC): runs each recorded abort world script (+0x1C, On
+ * Tour mAbortWorldScripts: hash, world section; count +0xEC, mNumAbortWorldScripts) with cWScriptMan_runFunc; when
+ * speech was triggered (+0xF0, mHasTriggeredSpeechEvents) calls func_002A1BD0 on the audio interface; stops each of the
+ * 4 sound slots (+0xBC, mSounds) holding a handle (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank
+ * monitor) and resets all four (handle -1, end flag 0, sound ID -1). When the entity's game-event frame
+ * (GetSSXGameEventFrame) has an enviro-state list (+0x24), the render-state flag cRenderStateMan_m_indoor is cleared.
+ * Finally clears +0xEC, +0xF0, +0xF4 (mCheckForStopOnSpeechEnd) and the sound bank info (+0xF8).
  */
 void cScriptObjEvent::OnEndObjectUse()
 {
@@ -5924,16 +5959,18 @@ struct sSeEngine_08E8 {
  * Handles an in-sequence key event for the script event object: runs the frame's world script events, music and speech
  * events, and starts or marks its sounds.
  *
- * Reads the entity's game-event frame (GetSSXGameEventFrame; On Tour tSSXFrameGameEvent). The world section is the transport
- * section (cSSXScriptEngine_GetTransportWorldSectionID) when the script header's first byte (GetSSXScriptHeader on the entity's player) is set, else the
- * section of the BE new-race location (cSectionMan_getWorldSectionIDFromBELocationID). Then: - each world script event
- * runs with cWScriptMan_runFunc(section, event ID); its abort-script hash, unless D_004A525C (no script), is recorded
- * once per (hash, section) in the abort list (+0x1C, count +0xEC); - event bit 8 clears and bit 4 sets the render-state
- * flag cRenderStateMan_m_indoor; - each music event (ID 0xFF skipped) goes to func_0028E8C0 on the audio interface; each speech event
- * goes to func_002A19D8 and sets +0xF0, except ID 17 (skipped) and ID 16, which sets +0xF4 (stop on speech end); - bit
- * 2: every sound slot holding a handle gets its end flag set, then the slots of the frame's sounds clear it; - bit 1:
- * walks the frame's sound list until a sound whose start frame is before @p when; a sound whose slot (track index) is
- * free, or holds a different sound (stopped first), is started: bank and index from cScriptObjEvent_ScriptSoundIDToGameSoundInfo, a new SFX record on
+ * Reads the entity's game-event frame (GetSSXGameEventFrame; On Tour tSSXFrameGameEvent). The world section is the
+ * transport section (cSSXScriptEngine_GetTransportWorldSectionID) when the script header's first byte
+ * (GetSSXScriptHeader on the entity's player) is set, else the section of the BE new-race location
+ * (cSectionMan_getWorldSectionIDFromBELocationID). Then: - each world script event runs with
+ * cWScriptMan_runFunc(section, event ID); its abort-script hash, unless D_004A525C (no script), is recorded once per
+ * (hash, section) in the abort list (+0x1C, count +0xEC); - event bit 8 clears and bit 4 sets the render-state flag
+ * cRenderStateMan_m_indoor; - each music event (kMusicEventID_None skipped) goes to func_0028E8C0 on the audio
+ * interface; each speech event goes to func_002A19D8 and sets +0xF0, except kSpeechEventID_None (skipped) and
+ * kSpeechEventID_StopOnSpeechEnd, which sets +0xF4 (stop on speech end); - bit 2: every sound slot holding a handle
+ * gets its end flag set, then the slots of the frame's sounds clear it; - bit 1: walks the frame's sound list until a
+ * sound whose start frame is before @p when; a sound whose slot (track index) is free, or holds a different sound
+ * (stopped first), is started: bank and index from cScriptObjEvent_ScriptSoundIDToGameSoundInfo, a new SFX record on
  * the audio system's bank monitor with default settings, the sound's volume (clamped to 0-127), the volume setting
  * cSSXAudio_GetCurrAppliedVolumePtr(4, 0), then cBankSys_SFX_End, whose handle goes into the slot.
  *
@@ -5987,15 +6024,15 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
     for (i = 0; i < info.numMusicEvent; i++) {
         sSeCmd_08E8* audioEvent = &((sSeCmd_08E8*)info.pMusicEventArray)[i];
         int id = audioEvent->id;
-        if (id != 0xFF) {
+        if (id != tMusicEvent::kMusicEventID_None) {
             func_0028E8C0(snd, id, 0);
         }
     }
     for (i = 0; i < info.numSpeechEvent; i++) {
         sSeCmd_08E8* audioEvent = &((sSeCmd_08E8*)info.pSpeechEventArray)[i];
         int id = audioEvent->id;
-        if (id != 17) {
-            if (id == 0x10) {
+        if (id != tSpeechEvent::kSpeechEventID_None) {
+            if (id == tSpeechEvent::kSpeechEventID_StopOnSpeechEnd) {
                 self->mCheckForStopOnSpeechEnd = 1;
             } else {
                 func_002A19D8(snd, id);
@@ -6108,9 +6145,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_cScriptObjCamera
  * Constructs a script camera manager: a cScriptObject of type 0 plus a script entity with nine entity slots.
  *
  * Builds the cScriptObject base (type 0) and the cScriptEntity base (+0x10), constructs nine 0x14-byte slots at +0x1C
- * (cScriptEntityCamera_cScriptEntityCamera) and points each one's owner word (+0x10) at the manager, clears the two camera object pointers
- * (+0xD0) and the transition object (+0xD8), sets the view index (+0xF8) to -1 and resets the script state with
- * cScriptObjCameraManager_ResetScriptManagementVars (On Tour ResetScriptManagementVars). The C++ view class here is named cScriptEngine_1018.
+ * (cScriptEntityCamera_cScriptEntityCamera) and points each one's owner word (+0x10) at the manager, clears the two
+ * camera object pointers (+0xD0) and the transition object (+0xD8), sets the view index (+0xF8) to -1 and resets the
+ * script state with cScriptObjCameraManager_ResetScriptManagementVars (On Tour ResetScriptManagementVars). The C++ view
+ * class here is named cScriptEngine_1018.
  */
 cScriptEngine_1018::cScriptEngine_1018() : cScriptObject_1018(0)
 {
@@ -6141,7 +6179,8 @@ extern "C" void cScriptObjCameraManager_SetupCameraObject(cScriptObjCameraManage
  *
  * Only while in use (mInUse > 0): copies the position (Pose.P) of the camera of view mViewIndex
  * (SSXApp->Game->ViewMan->PlayerCamera) into the focus box position (mFocusBox) and, while mpEntity is still 0, calls
- * cScriptObjCameraManager_SetupCameraObject(self, 0, 0) (On Tour SetupCameraObject). cSSXScriptEngine_Update runs it on both managers every frame.
+ * cScriptObjCameraManager_SetupCameraObject(self, 0, 0) (On Tour SetupCameraObject). cSSXScriptEngine_Update runs it on
+ * both managers every frame.
  */
 void cScriptObjCameraManager::Update()
 {
@@ -6212,19 +6251,19 @@ void cScriptObjCamera_SetCameraManager(void* self, int val);
  * sets its camera manager (cScriptObjCamera_SetCameraManager).
  *
  * @param obj  the script camera object
- * @return 1, or 0 when both slots are taken
+ * @return true, or false when both slots are taken
  */
-int cScriptObjCameraManager::AddCameraObject(cScriptObjCamera* obj)
+bool cScriptObjCameraManager::AddCameraObject(cScriptObjCamera* obj)
 {
     void** slots = (void**)&mpCameraObjects;
     for (int i = 0; i < 2; i++) {
         if (slots[i] == 0) {
             slots[i] = ((void*)obj);
             obj->SetCameraManager((int)this); // PORT: pointer passed as int (callee mangled __FPvi)
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6236,7 +6275,7 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
 
 // PORT: the unit declares cScriptObjCameraManager_RemoveCameraObject(void*, void*) returning void; it returns found/not
 // found.
-extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraManager* self, cScriptObjCamera* key)
+extern "C" bool cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraManager* self, cScriptObjCamera* key)
     __asm__("cScriptObjCameraManager_RemoveCameraObject");
 /**
  * Detaches a script camera object from the camera manager.
@@ -6247,9 +6286,9 @@ extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraM
  * Then clears the camera's manager (cScriptObjCamera_SetCameraManager with 0) and the slot.
  *
  * @param key  the script camera object
- * @return 1, or 0 when it was not attached
+ * @return true, or false when it was not attached
  */
-extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraManager* self, cScriptObjCamera* key)
+extern "C" bool cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraManager* self, cScriptObjCamera* key)
 {
     int k = key->mObjID;
     for (int i = 0; i < 2; i++) {
@@ -6266,10 +6305,10 @@ extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraM
             }
             self->mpCameraObjects[i]->SetCameraManager(0);
             self->mpCameraObjects[i] = 0;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6286,9 +6325,10 @@ void cScriptObjTransition_SetCameraManager_p(void* self, void* owner) __asm__("c
 /**
  * Sets or clears the camera manager's transition object (+0xD8).
  *
- * @p obj 0 clears it: a transition in use (+0x8) is stopped (cScriptObjTransition_SetTransition with player -1 and transition 9, none) and
- * +0xE8 (in transition) cleared, then the object's camera manager is cleared (cScriptObjTransition_SetCameraManager) and the slot emptied.
- * Otherwise @p obj is stored, when no object is set yet, and given this manager.
+ * @p obj 0 clears it: a transition in use (+0x8) is stopped (cScriptObjTransition_SetTransition with player -1 and
+ * transition 9, none) and +0xE8 (in transition) cleared, then the object's camera manager is cleared
+ * (cScriptObjTransition_SetCameraManager) and the slot emptied. Otherwise @p obj is stored, when no object is set yet,
+ * and given this manager.
  *
  * Likely bug: clearing when no transition object is set dereferences a null pointer.
  *
@@ -6330,11 +6370,12 @@ void cScriptObject_OnStartObjectUse_2(void* self, int val) __asm__("cScriptObjec
  * Takes a script camera manager into use for a player: reserves it, resets its state and adds its focus box when that
  * player is playing the NIS.
  *
- * Marks the object reserved for the player in the script database (cScriptDatabaseObject_MarkObjectAsReserved on cScriptDatabaseObject_GetDatabaseObject(), On Tour
- * MarkObjectAsReserved) and resets the management state (cScriptObjCameraManager_ResetScriptManagementVars). When cSSXScriptEngine_IsPlayingNISListPlayer
- * accepts the player's script player (cBXScriptEngine_GetRequestPlayerByPlayerID__FPv) it adds the focus box (+0x100) to the AI's focus manager
- * (cFocusMan_addbox, On Tour cFocusMan::addbox, on AI +0xA4) and sets the focus-box flag (+0x110). Ends with cScriptObject_OnStartObjectUse__FPv
- * (one more use).
+ * Marks the object reserved for the player in the script database (cScriptDatabaseObject_MarkObjectAsReserved on
+ * cScriptDatabaseObject_GetDatabaseObject(), On Tour MarkObjectAsReserved) and resets the management state
+ * (cScriptObjCameraManager_ResetScriptManagementVars). When cSSXScriptEngine_IsPlayingNISListPlayer accepts the
+ * player's script player (cBXScriptEngine_GetRequestPlayerByPlayerID__FPv) it adds the focus box (+0x100) to the AI's
+ * focus manager (cFocusMan_addbox, On Tour cFocusMan::addbox, on AI +0xA4) and sets the focus-box flag (+0x110). Ends
+ * with cScriptObject_OnStartObjectUse__FPv (one more use).
  *
  * @param val  the player ID
  */
@@ -6370,14 +6411,14 @@ void cScriptObject_OnEndObjectUse_2(void* self, int a1) __asm__("cScriptObject_O
 /**
  * Releases a script camera manager: unreserves it, detaches its cameras and transition and removes its focus box.
  *
- * Unreserves the object in the script database (cScriptDatabaseObject_MarkObjectAsUnreserved on cScriptDatabaseObject_GetDatabaseObject(), On Tour MarkObjectAsUnreserved),
- * clears the camera entity (cScriptObjCamera_SetCameraEntity, On Tour cScriptObjCamera::SetCameraEntity) of each
- * attached camera (indices in mAttachedCameraObject into mpCameraObjects) and sets its index to -1, resets the
- * transition object (mpTransitionObject) with
- * cScriptObjTransition_SetTransition(-1, 9, 0.0, 0.0, 0.0, 0.0) (On Tour cScriptObjTransition::SetTransition), removes the focus box
- * (mFocusBox) from the AI's focus manager when it was added (mUseFocusBox; cFocusMan_removebox, On Tour
- * cFocusMan::removebox), resets the state (cScriptObjCameraManager_ResetScriptManagementVars) and drops one use
- * (cScriptObject_OnEndObjectUse).
+ * Unreserves the object in the script database (cScriptDatabaseObject_MarkObjectAsUnreserved on
+ * cScriptDatabaseObject_GetDatabaseObject(), On Tour MarkObjectAsUnreserved), clears the camera entity
+ * (cScriptObjCamera_SetCameraEntity, On Tour cScriptObjCamera::SetCameraEntity) of each attached camera (indices in
+ * mAttachedCameraObject into mpCameraObjects) and sets its index to -1, resets the transition object
+ * (mpTransitionObject) with cScriptObjTransition_SetTransition(-1, 9, 0.0, 0.0, 0.0, 0.0) (On Tour
+ * cScriptObjTransition::SetTransition), removes the focus box (mFocusBox) from the AI's focus manager when it was added
+ * (mUseFocusBox; cFocusMan_removebox, On Tour cFocusMan::removebox), resets the state
+ * (cScriptObjCameraManager_ResetScriptManagementVars) and drops one use (cScriptObject_OnEndObjectUse).
  *
  * @param playerID  the player ID
  */
@@ -6419,13 +6460,13 @@ void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0,
 /**
  * Handles an in-sequence key event for the camera manager: starts camera transitions and releases unused tracks.
  *
- * Does nothing unless @p flags has bit 4 or 8. Reads the manager frame (GetSSXCameraManagerFrame: active camera count, list). -
- * Bit 4: starts the transition to the first active camera (cScriptObjCameraManager_DoCameraTransition), except that with music sync on (the header's
- * musicSync, GetSSXCameraManagerHeader), 2 or more active cameras, no beat yet (mBeatOccurred) and that camera's
- * transition-in 8, it only marks a cut as pending on the beat (mCutOnBeat). - Bit 8: with no active cameras, stops the
- * transition object (mpTransitionObject;
- * cScriptObjTransition_SetTransition, transition 9) and releases both tracks (cScriptObjCameraManager_SetupCameraObject with 9). Otherwise runs a pending cut and clears
- * it, then releases each track no active camera uses.
+ * Does nothing unless @p flags has bit 4 or 8. Reads the manager frame (GetSSXCameraManagerFrame: active camera count,
+ * list). - Bit 4: starts the transition to the first active camera (cScriptObjCameraManager_DoCameraTransition), except
+ * that with music sync on (the header's musicSync, GetSSXCameraManagerHeader), 2 or more active cameras, no beat yet
+ * (mBeatOccurred) and that camera's transition-in 8, it only marks a cut as pending on the beat (mCutOnBeat). - Bit 8:
+ * with no active cameras, stops the transition object (mpTransitionObject;
+ * cScriptObjTransition_SetTransition, transition 9) and releases both tracks (cScriptObjCameraManager_SetupCameraObject
+ * with 9). Otherwise runs a pending cut and clears it, then releases each track no active camera uses.
  *
  * @param obj  the InSeq player entity
  * @param type  the entity type (unused)
@@ -6503,12 +6544,14 @@ extern "C" float func_002B4920(void* p);
  * (cScriptObjCameraManager_DoCameraTransition). The value is stored in mLastBeatTimeLeft. Without a song the beat flag
  * is just set.
  *
- * Then, with active cameras and a transition running (mInTransition), by the first camera's transition-in: - 0 (blend):
+ * Then, with active cameras and a transition running (mInTransition), by the first camera's transition-in
+ * (eScriptTransition): - keScriptTransition_CameraBlend:
  * its track's camera gets weight (frame - start) / overlap frames and the other track's camera the rest; the transition
- * ends after start + overlap, or at once when the other track has no camera. - 1-6: advances the transition object
+ * ends after start + overlap, or at once when the other track has no camera. - Fade .. WipeCircle: advances the
+ * transition object
  * (cScriptObjTransition_Update) by @p dt, ending when it is no longer in use (mInUse); until then, and before start +
- * overlap, the other camera keeps weight 1 and this one 0; after, this one gets 1. - 7: advances the transition object
- * as above. 8: nothing.
+ * overlap, the other camera keeps weight 1 and this one 0; after, this one gets 1. - CrossFade: advances the transition
+ * object as above. Cut: nothing.
  *
  * @param obj  the InSeq player entity
  * @param currFrame  the current frame
@@ -6544,7 +6587,7 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
     }
     tActiveCamera* n = frame.pActiveCameraList;
     switch (n->pCustom->transitionIn) {
-    case 0: {
+    case keScriptTransition_CameraBlend: {
         if ((float)(n->data.overlapInFrames + n->data.scriptStartFrame) < currFrame) {
             mInTransition = 0;
         }
@@ -6564,12 +6607,12 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
         cScriptObjCamera_SetCameraWeight((void*)otherCamera, 1.0f - w);
         break;
     }
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6: {
+    case keScriptTransition_Fade:
+    case keScriptTransition_WipeLeft:
+    case keScriptTransition_WipeRight:
+    case keScriptTransition_WipeUp:
+    case keScriptTransition_WipeDown:
+    case keScriptTransition_WipeCircle: {
         int camera = GetCameraObjectByTrack(n->data.track);
         int otherCamera = GetCameraObjectByTrack(1 - n->data.track);
         cScriptObjTransition_Update(mpTransitionObject, dt);
@@ -6588,13 +6631,13 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
         }
         break;
     }
-    case 7:
+    case keScriptTransition_CrossFade:
         cScriptObjTransition_Update(mpTransitionObject, dt);
         if (mpTransitionObject->mInUse <= 0) {
             mInTransition = 0;
         }
         break;
-    case 8:
+    case keScriptTransition_Cut:
         break;
     }
 }
@@ -6607,8 +6650,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_IsMatchingEntity
 void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
 
 /**
- * Returns whether the camera manager takes an InSeq entity: entity type 4 whose script setup info (cSSXScriptEngine_GetScriptSetupInfo for
- * the entity's player, mpOwner) has this manager's view index (mViewIndex) as its viewIndex.
+ * Returns whether the camera manager takes an InSeq entity: entity type 4 whose script setup info
+ * (cSSXScriptEngine_GetScriptSetupInfo for the entity's player, mpOwner) has this manager's view index (mViewIndex) as
+ * its viewIndex.
  *
  * @param entity  the InSeq player entity
  * @param n  the entity type
@@ -6684,22 +6728,24 @@ struct sSseEngine1AC8 {
 };
 
 /**
- * Points the camera of track @p ch at the playing entity camera of subtype @p anim, or releases the track for 9.
+ * Points the camera of track @p ch at the playing entity camera of subtype @p anim, or releases the track for
+ * kCameraSubType_None.
  *
  * A track without a camera (+0xDC holds -1) takes the first camera object (+0xD0) not in use (+0x8); with none free, or
- * for 9, nothing happens. Subtype 9 unbinds the camera's entity (cScriptObjCamera_SetCameraEntity with 0) and frees the track. Otherwise,
- * unless the camera already shows that subtype (its entity's +0xC), the first of the 9 entity cameras (+0x1C) that is
- * playing (cScriptEntity_IsPlaying) with subtype @p anim is bound (cScriptObjCamera_SetCameraEntity); when none is, the track stays as it was.
+ * for kCameraSubType_None, nothing happens. kCameraSubType_None unbinds the camera's entity
+ * (cScriptObjCamera_SetCameraEntity with 0) and frees the track. Otherwise, unless the camera already shows that
+ * subtype (its entity's +0xC), the first of the 9 entity cameras (+0x1C) that is playing (cScriptEntity_IsPlaying) with
+ * subtype @p anim is bound (cScriptObjCamera_SetCameraEntity); when none is, the track stays as it was.
  *
  * @param ch  the track index (0 or 1)
- * @param anim  the camera subtype, or 9 for none
+ * @param anim  the camera subtype, or kCameraSubType_None
  */
 void cScriptObjCameraManager::SetupCameraObject(int ch, int anim)
 {
     sSseEngine1AC8* self = (sSseEngine1AC8*)this;
     int slot = self->chans[ch];
     if (slot < 0) {
-        if (anim == 9) {
+        if (anim == kCameraSubType_None) {
             return;
         }
         for (int i = 0; i < 2; i++) {
@@ -6713,7 +6759,7 @@ void cScriptObjCameraManager::SetupCameraObject(int ch, int anim)
             return;
         }
     }
-    if (anim == 9) {
+    if (anim == kCameraSubType_None) {
         ((cScriptObjCamera*)self->rigs[slot])->SetCameraEntity(0);
         self->chans[ch] = -1;
         return;
@@ -6773,13 +6819,13 @@ extern "C" void cScriptObjTransition_SetTransition1(void* self, int id, int a, i
 /**
  * Starts the camera transition to the first active camera of a camera-manager frame.
  *
- * For the other track: with a transition-in of 7 or more its camera is released (cScriptObjCameraManager_SetupCameraObject with 9), else its
- * camera's weight is set to 0. The camera's own track is set up for its value (cScriptObjCameraManager_SetupCameraObject). The in-transition flag
- * (mInTransition) is then set unless the transition-in is 8 (cut) or the overlap is 0 frames. For 7 and 9 the
- * transition object (mpTransitionObject) gets cScriptObjTransition_SetTransition, and for 1-6
- * cScriptObjTransition_SetTransition1 (with colour, out and hold frames), with the player using the manager's entity
- * (cScriptDatabaseObject_GetPlayerIDByEntity) and the frames since start; with no transition object the flag is
- * cleared. 0 (blend) needs no object.
+ * For the other track: with a transition-in of 7 or more its camera is released
+ * (cScriptObjCameraManager_SetupCameraObject with 9), else its camera's weight is set to 0. The camera's own track is
+ * set up for its value (cScriptObjCameraManager_SetupCameraObject). The in-transition flag (mInTransition) is then set
+ * unless the transition-in is 8 (cut) or the overlap is 0 frames. For 7 and 9 the transition object
+ * (mpTransitionObject) gets cScriptObjTransition_SetTransition, and for 1-6 cScriptObjTransition_SetTransition1 (with
+ * colour, out and hold frames), with the player using the manager's entity (cScriptDatabaseObject_GetPlayerIDByEntity)
+ * and the frames since start; with no transition object the flag is cleared. 0 (blend) needs no object.
  *
  * @param frame  the camera-manager frame (active camera count, active camera list)
  * @param currFrame  the current frame
@@ -6879,7 +6925,8 @@ extern void* cBXScriptEngine_mpScriptEngine;
 /**
  * Destroys the base script engine: restores its vtables, purges it and clears the global instance pointer.
  *
- * Then runs the database destructor (cScriptDatabaseObject__cScriptDatabaseObject), which frees the object when asked to.
+ * Then runs the database destructor (cScriptDatabaseObject__cScriptDatabaseObject), which frees the object when asked
+ * to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */

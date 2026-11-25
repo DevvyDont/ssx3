@@ -15,7 +15,11 @@
 struct tNISListEntry;
 
 struct cCircularBuffer {
-    char mBuffer[0x8C];             // 0x000 [O] tNISListEntry[5]
+    // The ring's size (name ours): [O] cCircularBuffer<5, tNISListEntry>; [U] IncBufferIndex wraps after
+    // kNumEntries - 1, GetNumEntries counts modulo kNumEntries.
+    enum { kNumEntries = 5 };
+
+    char mBuffer[0x8C];             // 0x000 [O] tNISListEntry[kNumEntries]
     int mHeadIndex;                 // 0x08C [O]
     int mTailIndex;                 // 0x090 [O]
     int mIsFull;                    // 0x094 [O] bool
@@ -24,7 +28,7 @@ struct cCircularBuffer {
     void Reset() __asm__("cCircularBuffer_Reset__FPv");
     int IsFull() __asm__("cCircularBuffer_IsFull__FPv");
     int IncBufferIndex(int index) __asm__("cCircularBuffer_IncBufferIndex");
-    int AddToTail(tNISListEntry* cmd) __asm__("cCircularBuffer_AddToTail");
+    bool AddToTail(tNISListEntry* cmd) __asm__("cCircularBuffer_AddToTail");
     int GetNumEntries() __asm__("cCircularBuffer_GetNumEntries");
     void* operatorIndex(int index) __asm__("cCircularBuffer_operatorIndex");
     int IsEmpty() __asm__("cCircularBuffer_IsEmpty");

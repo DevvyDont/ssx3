@@ -48,7 +48,7 @@ struct cVidEngine {
     // Methods bound to their retail symbols by asm labels.
     int IsVideoEnginePlaying() __asm__("cVidEngine_IsVideoEnginePlaying");
     void ResetVideoEngine() __asm__("cVidEngine_ResetVideoEngine");
-    int PlayVideo() __asm__("cVidEngine_PlayVideo");
+    bool PlayVideo() __asm__("cVidEngine_PlayVideo");
     void UpdateVideo() __asm__("cVidEngine_UpdateVideo");
     void RenderVideo() __asm__("cVidEngine_RenderVideo");
     void PauseVideo(int inc) __asm__("cVidEngine_PauseVideo");

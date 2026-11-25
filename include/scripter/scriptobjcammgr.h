@@ -38,6 +38,10 @@ struct cScriptObjTransition;
 struct tSSXFrameCameraManager;
 
 struct cScriptObjCameraManager {
+    // An entity camera's mSubType with no camera (name ours): [R] cScriptEntityCamera's ctor stores it; [U]
+    // SetupCameraObject unbinds the track's camera for it.
+    enum { kCameraSubType_None = 9 };
+
     // --- cScriptObject (ctor cScriptObject_cScriptObject__FPvi(self, 0))
     int mObjType;                               // 0x000 [O]; [R] cScriptObject_cScriptObject stores its objType (0
                                                 //       here)
@@ -85,7 +89,7 @@ struct cScriptObjCameraManager {
     void Update() __asm__("cScriptObjCameraManager_Update");
     void SetViewIndex(int val) __asm__("cScriptObjCameraManager_SetViewIndex__FPvi");
     void* GetScriptEntity(int index) __asm__("cScriptObjCameraManager_GetScriptEntity");
-    int AddCameraObject(cScriptObjCamera* obj) __asm__("cScriptObjCameraManager_AddCameraObject");
+    bool AddCameraObject(cScriptObjCamera* obj) __asm__("cScriptObjCameraManager_AddCameraObject");
     bool SetTransitionObject(void* obj) __asm__("cScriptObjCameraManager_SetTransitionObject");
     void OnStartObjectUse(int val) __asm__("cScriptObjCameraManager_OnStartObjectUse");
     void OnEndObjectUse(int playerID) __asm__("cScriptObjCameraManager_OnEndObjectUse");

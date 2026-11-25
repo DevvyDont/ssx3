@@ -23,6 +23,15 @@ struct NetGameUtilRefT;
 struct NetGameLinkRefT;
 
 struct cDSockChannel {
+    // mState's values (names ours, from the comment on mState below: [P] isConnected; [U] the update functions).
+    enum eState {
+        kState_Closed = 0,
+        kState_Connecting = 1,
+        kState_Connected = 2,
+        kState_TimedOut = 3,
+        kState_PacketError = 4
+    };
+
     // --- cCommChannel (0x0-0xB)
     int mChannelOpen;               // 0x00 [O] cCommChannel::mChannelOpen; [P] isChannelOpen; [R] base ctor 0;
                                     //      [U] connect/listen call channelOpen, disconnect calls channelClose
@@ -43,7 +52,7 @@ struct cDSockChannel {
                                     //      completes; read/writePacket and updateConnected use it; disconnect destroys it
 
     // Methods bound to their retail symbols by asm labels.
-    int isConnected() __asm__("cDSockChannel_isConnected");
+    bool isConnected() __asm__("cDSockChannel_isConnected");
     unsigned char readPacket(char *dst, int maxlen) __asm__("cDSockChannel_readPacket");
     int writePacket(int data, int len) __asm__("cDSockChannel_writePacket");
     void listen(int addr, int port) __asm__("cDSockChannel_listen");

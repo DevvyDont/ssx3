@@ -7,6 +7,7 @@
 #include "scripter/scriptobjrider.h"
 #include "scripter/scriptentity.h"
 #include "scripter/videngine.h"
+#include "scripter/nislist.h"
 #include "scripter/scriptobjcammgr.h"
 #include "scripter/bxscriptengine.h"
 #include "scripter/scriptobjcamera.h"
@@ -45,11 +46,11 @@ extern sSlot_3E60 D_004A51E0, D_004A51F0, D_004A51F8, D_004A5200, D_004A5208, D_
  * GetHashValue32("NoScript") in D_004A525C. Only acts for the construction pass at the default priority.
  *
  * @param init  nonzero for the construction pass
- * @param prio  initialisation priority; only 0xFFFF does anything
+ * @param prio  initialisation priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void __sti__all_in_one_scripter_cpp(int init, int prio)
 {
-    if (prio == 0xFFFF && init != 0) {
+    if (prio == DEFAULT_INIT_PRIORITY && init != 0) {
         new (&D_004A51E0) sSlot_3E60(-1);
         new (D_004D3798) sV4_3E60(1.0f, 1.0f, 1.0f, 0.5f);
         new (D_004D37A8) sV4_3E60(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
@@ -192,11 +193,11 @@ int cScriptObject::GetObjectID()
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_IsInUse);
 #ifdef SKIP_ASM
 /**
- * Returns whether a script object is in use: 1 when its use count (+0x8, On Tour's cScriptObject::mInUse) is above 0.
+ * Returns whether a script object is in use: its use count (+0x8, On Tour's cScriptObject::mInUse) is above 0.
  *
- * @return 1 if in use, else 0
+ * @return true if in use
  */
-int cScriptObject::IsInUse()
+bool cScriptObject::IsInUse()
 {
     return (mInUse) > 0;
 }
@@ -443,10 +444,10 @@ extern char cScriptObjCameraManager_vtbl[];
 /**
  * Destroys the script camera manager through the cScriptObject destructor.
  *
- * Stores the vtable of its cScriptEntity base part (cScriptObjCameraManager_cScriptEntity_vtbl; its overridden entries adjust this by -0x10) at +0x10
- * and its own vtable cScriptObjCameraManager_vtbl at +0xC, then calls cScriptObject__cScriptObject, which receives the
- * g++ delete flags untouched in the second argument register (this declaration leaves them out). Nothing of the
- * manager's own is torn down.
+ * Stores the vtable of its cScriptEntity base part (cScriptObjCameraManager_cScriptEntity_vtbl; its overridden entries
+ * adjust this by -0x10) at +0x10 and its own vtable cScriptObjCameraManager_vtbl at +0xC, then calls
+ * cScriptObject__cScriptObject, which receives the g++ delete flags untouched in the second argument register (this
+ * declaration leaves them out). Nothing of the manager's own is torn down.
  *
  * @param manager  the camera manager being destroyed (this)
  */
@@ -599,9 +600,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cVidEngine_IsVideoEngineBusy);
  * cVidEngine_ReadyVideo).
  *
  * @param vidEngine  the cVidEngine part of the script engine
- * @return 1 if mpPlayer is set, else 0
+ * @return true if mpPlayer is set
  */
-extern "C" int cVidEngine_IsVideoEngineBusy(int *vidEngine) {
+extern "C" bool cVidEngine_IsVideoEngineBusy(int *vidEngine) {
     return *vidEngine != 0;
 }
 #endif
@@ -624,13 +625,14 @@ int cVidEngine::IsVideoEnginePlaying()
 INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_IsNISActive);
 #ifdef SKIP_ASM
 /**
- * Returns whether an NIS list is playing: mPlayingNISList (+0x550) is not 2, the constructor's "none" value.
+ * Returns whether an NIS list is playing: mPlayingNISList (+0x550) is not keNISList_Num, the constructor's "none"
+ * value.
  *
- * @return 1 if an NIS list is active, else 0
+ * @return true if an NIS list is active
  */
-int cSSXScriptEngine::IsNISActive()
+bool cSSXScriptEngine::IsNISActive()
 {
-    return (mPlayingNISList) != 2;
+    return (mPlayingNISList) != keNISList_Num;
 }
 #endif
 
@@ -880,8 +882,8 @@ extern "C" void cScriptObject__cScriptObject();
 /**
  * Destroys a script transition object through the script-object destructor cScriptObject__cScriptObject().
  *
- * Declared without parameters: the object and the destructor flags reach cScriptObject__cScriptObject() unchanged in their
- * registers. That destructor de-initialises the script object if it holds a valid handle and frees it when bit 0
+ * Declared without parameters: the object and the destructor flags reach cScriptObject__cScriptObject() unchanged in
+ * their registers. That destructor de-initialises the script object if it holds a valid handle and frees it when bit 0
  * of the flags is set.
  */
 extern "C" void cScriptObjTransition__cScriptObjTransition(void) {
