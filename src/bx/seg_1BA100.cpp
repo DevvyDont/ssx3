@@ -130,8 +130,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVolControl);
  * @param opts  the play options
  * @return the volume control, or 0
  */
-extern "C" int cSndPlayOpts_OPTS_GetVolControl(cSndPlayOpts* opts) {
-    return ((int*)opts->mVolControl)[opts->mInst];
+extern "C" float* cSndPlayOpts_OPTS_GetVolControl(cSndPlayOpts* opts) {
+    return opts->mVolControl[opts->mInst];
 }
 #endif
 
@@ -139,41 +139,6 @@ extern "C" int cSndPlayOpts_OPTS_GetVolControl(cSndPlayOpts* opts) {
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetCallback);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-class cController;
-class cBankMonitorInstance;
-// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
-typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
-
-// One 0x18-byte option record of cSndPlayOpts' option stack.
-struct sSndOptsRec { signed char v; char pad[0x17]; };
-
-// Per-level four-int record at cSndPlayOpts+0x70 (reset to 100, 0, 90, 50).
-struct sSndOptsQuad { int a, b, c, d; };
-
-// cSndPlayOpts (prototype class name): the current option record plus per-level arrays indexed by the stack depth idx.
-struct sSndPlayOpts {
-    int pad0;
-    sSndOptsRec cur;                    // 0x04
-    volatile int idx;                   // 0x1C
-    sSndOptsRec* recs;                  // 0x20
-    int arr24[4];
-    int* p34;
-    int* vals;                          // 0x38
-    int* p3C;
-    sSndCallback callbacks[4];          // 0x40
-    int* p60;
-    int* p64;
-    int* p68;
-    int* p6C;
-    sSndOptsQuad* q70;
-    int* p74;
-    int* p78;
-    int* p7C;
-    int* p80;
-    int* p84;
-};
-
-
 /**
  * Returns mCallback[mInst], the current level's sound callback (an 8-byte cController member-function pointer).
  *
@@ -181,7 +146,7 @@ struct sSndPlayOpts {
  * @return the callback
  */
 // cSndPlayOpts::OPTS_GetCallback (prototype name)
-extern "C" sSndCallback cSndPlayOpts_OPTS_GetCallback(cSndPlayOpts* opts) {
+extern "C" tSndCallback cSndPlayOpts_OPTS_GetCallback(cSndPlayOpts* opts) {
     return opts->mCallback[opts->mInst];
 }
 #endif
@@ -237,8 +202,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPtr);
  * @param opts  the play options
  * @return the user pointer
  */
-extern "C" int cSndPlayOpts_OPTS_GetPtr(cSndPlayOpts* opts) {
-    return ((int*)opts->mPtr)[opts->mInst];
+extern "C" void* cSndPlayOpts_OPTS_GetPtr(cSndPlayOpts* opts) {
+    return opts->mPtr[opts->mInst];
 }
 #endif
 
@@ -383,8 +348,6 @@ extern "C" void cSndPlayOpts_OPTS_SetDefault(cSndPlayOpts* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Reset);
 #ifdef SKIP_ASM
-extern "C" void* memset(void*, int, unsigned int);
-
 /**
  * Resets the current play-option level (mInst) to the defaults.
  *
@@ -400,9 +363,8 @@ extern "C" void cSndPlayOpts_OPTS_Reset(cSndPlayOpts* playOpts) {
     playOpts->mPosStatic[playOpts->mInst] = 0;
     playOpts->mBaseVol[playOpts->mInst] = playOpts->mCurrent[playOpts->mInst].vol;
     playOpts->mVolControl[playOpts->mInst] = 0;
-    // &mCallback[mInst], spelled as retail computes it (base + mInst * 8, then + 0x40); the typed &mCallback[mInst]
-    // adds the 0x40 before the base
-    memset((char*)playOpts + playOpts->mInst * 8 + 0x40, 0, 8);
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[playOpts->mInst] = 0;
     playOpts->mPtr[playOpts->mInst] = 0;
     playOpts->mViewport[playOpts->mInst] = 0;
     playOpts->mVanish[playOpts->mInst] = 0;
@@ -422,8 +384,6 @@ extern "C" void cSndPlayOpts_OPTS_Reset(cSndPlayOpts* playOpts) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Open);
 #ifdef SKIP_ASM
-extern "C" void* memset(void*, int, unsigned int);
-
 /**
  * Pushes a new play-option level: increments mInst, then resets that level as cSndPlayOpts_OPTS_Reset does.
  *
@@ -442,9 +402,8 @@ extern "C" void cSndPlayOpts_OPTS_Open(cSndPlayOpts* playOpts) {
     playOpts->mPosStatic[playOpts->mInst] = 0;
     playOpts->mBaseVol[playOpts->mInst] = playOpts->mCurrent[playOpts->mInst].vol;
     playOpts->mVolControl[playOpts->mInst] = 0;
-    // &mCallback[mInst], spelled as retail computes it (base + mInst * 8, then + 0x40); the typed &mCallback[mInst]
-    // adds the 0x40 before the base
-    memset((char*)playOpts + playOpts->mInst * 8 + 0x40, 0, 8);
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[playOpts->mInst] = 0;
     playOpts->mPtr[playOpts->mInst] = 0;
     playOpts->mViewport[playOpts->mInst] = 0;
     playOpts->mVanish[playOpts->mInst] = 0;
@@ -607,7 +566,6 @@ extern "C" void cSndPlayOpts_OPTS_DelayCount(cSndPlayOpts* opts, int value) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayTime);
 #ifdef SKIP_ASM
-struct E_9BA0 { int v[4]; };
 /**
  * Sets the current level's delay time, mDelay[mInst].mTime, to @p value.
  *
@@ -615,7 +573,7 @@ struct E_9BA0 { int v[4]; };
  * @param value  the new time
  */
 extern "C" void cSndPlayOpts_OPTS_DelayTime(cSndPlayOpts* opts, int value) {
-    ((E_9BA0*)opts->mDelay)[opts->mInst].v[0] = value;
+    opts->mDelay[opts->mInst].mTime = value;
 }
 #endif
 
@@ -684,8 +642,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Position);
  * @param opts  the play options
  * @param position  the position vector pointer (kept, not copied)
  */
-extern "C" void cSndPlayOpts_OPTS_Position(cSndPlayOpts* opts, int position) {
-    *(int*)((char*)opts + (opts->mInst << 2) + 0x24) = position;
+extern "C" void cSndPlayOpts_OPTS_Position(cSndPlayOpts* opts, const t4Vector* position) {
+    opts->mPosition[opts->mInst] = position;
 }
 #endif
 
@@ -740,8 +698,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Ptr);
  * @param opts  the play options
  * @param userPtr  the user pointer
  */
-extern "C" void cSndPlayOpts_OPTS_Ptr(cSndPlayOpts* opts, int userPtr) {
-    ((int*)opts->mPtr)[opts->mInst] = userPtr;
+extern "C" void cSndPlayOpts_OPTS_Ptr(cSndPlayOpts* opts, void* userPtr) {
+    opts->mPtr[opts->mInst] = userPtr;
 }
 #endif
 
@@ -754,24 +712,22 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_VolControl);
  * @param opts  the play options
  * @param volControl  the float the sound's volume follows (a float pointer), or 0
  */
-extern "C" void cSndPlayOpts_OPTS_VolControl(cSndPlayOpts* opts, int volControl) {
-    ((int*)opts->mVolControl)[opts->mInst] = volControl;
+extern "C" void cSndPlayOpts_OPTS_VolControl(cSndPlayOpts* opts, float* volControl) {
+    opts->mVolControl[opts->mInst] = volControl;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Callback);
 #ifdef SKIP_ASM
-struct V8_9CE0 { int a, b; };
 /**
  * Sets the current level's sound callback, mCallback[mInst], to @p callback (an 8-byte member-function pointer).
  *
  * @param opts  the play options
  * @param callback  the cController member-function pointer
  */
-extern "C" void cSndPlayOpts_OPTS_Callback(cSndPlayOpts* opts, V8_9CE0 callback) {
-    V8_9CE0 *callbackBase = (V8_9CE0 *)(((char*)opts) + opts->mInst * 8);
-    callbackBase[8] = callback;
+extern "C" void cSndPlayOpts_OPTS_Callback(cSndPlayOpts* opts, tSndCallback callback) {
+    opts->mCallback[opts->mInst] = callback;
 }
 #endif
 
@@ -1211,132 +1167,81 @@ extern "C" void cBankSys_SFX_Patch(cBankSys* bankSys, int patch) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin);
 #ifdef SKIP_ASM
-struct Rec_9FF8 { signed char v; char pad[0x17]; };
-struct Q_9FF8 { int a, b, c, d; };
-struct Obj_9FF8 {
-    int pad0;
-    Rec_9FF8 cur;
-    volatile int idx;
-    Rec_9FF8* recs;
-    int arr24[4];
-    int* p34;
-    int* vals;
-    int* p3C;
-    int arr40[4][2];
-    int* p60;
-    int* p64;
-    int* p68;
-    int* p6C;
-    Q_9FF8* q70;
-    int* p74;
-    int* p78;
-    int* p7C;
-    int* p80;
-    int* p84;
-};
-extern "C" void* memset(void*, int, unsigned int);
-
-
-struct Outer_9FF8 { char pad[0x1D8]; Obj_9FF8 sub; };
 /**
  * Starts an SFX setup: pushes a play-option level.
  *
- * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults).
+ * Through mpVBankManager, the cBankManager's play options (its cBankMonitor BankMonitor, mpVBankManager + 0x1D8) get a
+ * new level exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the
+ * defaults).
  *
  * @param bankSys  the cBankSys
  */
-extern "C" void cBankSys_SFX_Begin(Outer_9FF8** bankSys) {
-    Outer_9FF8* bankManager = *bankSys;
-    Obj_9FF8* playOpts = &bankManager->sub;
-    bankManager->sub.idx++;
-    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
-    bankManager->sub.arr24[bankManager->sub.idx] = 0;
-    playOpts->p34[bankManager->sub.idx] = 0;
-    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
-    playOpts->p3C[bankManager->sub.idx] = 0;
-    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
-    playOpts->p60[bankManager->sub.idx] = 0;
-    playOpts->p64[bankManager->sub.idx] = 0;
-    playOpts->p68[bankManager->sub.idx] = 0;
-    playOpts->p6C[bankManager->sub.idx] = 0;
-    playOpts->q70[bankManager->sub.idx].b = 0;
-    playOpts->q70[bankManager->sub.idx].a = 100;
-    playOpts->q70[bankManager->sub.idx].c = 90;
-    playOpts->q70[bankManager->sub.idx].d = 50;
-    playOpts->p74[bankManager->sub.idx] = 0;
-    playOpts->p80[bankManager->sub.idx] = 0;
-    playOpts->p84[bankManager->sub.idx] = 0;
-    playOpts->p78[bankManager->sub.idx] = 127;
-    playOpts->p7C[bankManager->sub.idx] = 1;
+extern "C" void cBankSys_SFX_Begin(cBankSys* bankSys) {
+    cBankManager* bankManager = bankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankManager->BankMonitor;
+    bankManager->BankMonitor.mInst++;
+    playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
+    bankManager->BankMonitor.mPosition[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPosStatic[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mBaseVol[bankManager->BankMonitor.mInst] = playOpts->mCurrent[bankManager->BankMonitor.mInst].vol;
+    playOpts->mVolControl[bankManager->BankMonitor.mInst] = 0;
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPtr[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mViewport[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mVanish[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mRadius[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mCount = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mTime = 100;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mFeedback = 90;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mLevel = 50;
+    playOpts->mExternalVol[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerPan[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
+    playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin1);
 #ifdef SKIP_ASM
-struct Rec_A208 { signed char v; char pad[0x17]; };
-struct Q_A208 { int a, b, c, d; };
-struct Obj_A208 {
-    int pad0;
-    Rec_A208 cur;
-    volatile int idx;
-    Rec_A208* recs;
-    int arr24[4];
-    int* p34;
-    int* vals;
-    int* p3C;
-    int arr40[4][2];
-    int* p60;
-    int* p64;
-    int* p68;
-    int* p6C;
-    Q_A208* q70;
-    int* p74;
-    int* p78;
-    int* p7C;
-    int* p80;
-    int* p84;
-};
-extern "C" void* memset(void*, int, unsigned int);
-
-
-struct Outer_A208 { char pad[0x1D8]; Obj_A208 sub; };
-struct Arg_A208 { Outer_A208* o; int* vals; };
 /**
  * Starts an SFX setup for a bank: pushes a play-option level and sets its bank.
  *
- * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * Through mpVBankManager, the cBankManager's play options (its cBankMonitor BankMonitor, mpVBankManager + 0x1D8) get a
+ * new level exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the
+ * defaults), then
  * mBank[mInst] = @p bank.
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  */
-extern "C" void cBankSys_SFX_Begin1(Arg_A208* bankSys, int bank) {
-    Outer_A208* bankManager = bankSys->o;
-    Obj_A208* playOpts = &bankManager->sub;
-    bankManager->sub.idx++;
-    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
-    bankManager->sub.arr24[bankManager->sub.idx] = 0;
-    playOpts->p34[bankManager->sub.idx] = 0;
-    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
-    playOpts->p3C[bankManager->sub.idx] = 0;
-    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
-    playOpts->p60[bankManager->sub.idx] = 0;
-    playOpts->p64[bankManager->sub.idx] = 0;
-    playOpts->p68[bankManager->sub.idx] = 0;
-    playOpts->p6C[bankManager->sub.idx] = 0;
-    playOpts->q70[bankManager->sub.idx].b = 0;
-    playOpts->q70[bankManager->sub.idx].a = 100;
-    playOpts->q70[bankManager->sub.idx].c = 90;
-    playOpts->q70[bankManager->sub.idx].d = 50;
-    playOpts->p74[bankManager->sub.idx] = 0;
-    playOpts->p80[bankManager->sub.idx] = 0;
-    playOpts->p84[bankManager->sub.idx] = 0;
-    playOpts->p78[bankManager->sub.idx] = 127;
-    playOpts->p7C[bankManager->sub.idx] = 1;
-    bankSys->vals[bankSys->o->sub.idx] = bank;
+extern "C" void cBankSys_SFX_Begin1(cBankSys* bankSys, int bank) {
+    cBankManager* bankManager = bankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankManager->BankMonitor;
+    bankManager->BankMonitor.mInst++;
+    playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
+    bankManager->BankMonitor.mPosition[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPosStatic[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mBaseVol[bankManager->BankMonitor.mInst] = playOpts->mCurrent[bankManager->BankMonitor.mInst].vol;
+    playOpts->mVolControl[bankManager->BankMonitor.mInst] = 0;
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPtr[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mViewport[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mVanish[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mRadius[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mCount = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mTime = 100;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mFeedback = 90;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mLevel = 50;
+    playOpts->mExternalVol[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerPan[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
+    playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
+    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
 }
 #endif
 
@@ -1344,51 +1249,44 @@ extern "C" void cBankSys_SFX_Begin1(Arg_A208* bankSys, int bank) {
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// cSoundSys (its vtable is _vt$12cSndPlayOpts$9cSoundSys): the cSndPlayOpts part sits at 0x1D8.
-struct sSoundSysView { char pad[0x1D8]; sSndPlayOpts sub; };
-
-// The cBankSys as cBankSys_SFX_Begin2 sees it: `o` is its cBankManager (mpVBankManager; the play options' cBankMonitor
-// sits at +0x1D8), then two per-level int arrays.
-struct sSndOptsUser { sSoundSysView* o; int* vals; int* vals2; };
-
-extern "C" void* memset(void*, int, unsigned int);
-
 /**
  * Starts an SFX setup for a bank and patch: pushes a play-option level and sets both.
  *
- * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * Through mpVBankManager, the cBankManager's play options (its cBankMonitor BankMonitor, mpVBankManager + 0x1D8) get a
+ * new level exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the
+ * defaults), then
  * mBank[mInst] = @p bank and mPatch[mInst] = @p patch.
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  */
-extern "C" void cBankSys_SFX_Begin2(sSndOptsUser* bankSys, int bank, int patch) {
-    sSoundSysView* bankManager = bankSys->o;
-    sSndPlayOpts* playOpts = &bankManager->sub;
-    bankManager->sub.idx++;
-    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
-    bankManager->sub.arr24[bankManager->sub.idx] = 0;
-    playOpts->p34[bankManager->sub.idx] = 0;
-    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
-    playOpts->p3C[bankManager->sub.idx] = 0;
-    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
-    playOpts->p60[bankManager->sub.idx] = 0;
-    playOpts->p64[bankManager->sub.idx] = 0;
-    playOpts->p68[bankManager->sub.idx] = 0;
-    playOpts->p6C[bankManager->sub.idx] = 0;
-    playOpts->q70[bankManager->sub.idx].b = 0;
-    playOpts->q70[bankManager->sub.idx].a = 100;
-    playOpts->q70[bankManager->sub.idx].c = 90;
-    playOpts->q70[bankManager->sub.idx].d = 50;
-    playOpts->p74[bankManager->sub.idx] = 0;
-    playOpts->p80[bankManager->sub.idx] = 0;
-    playOpts->p84[bankManager->sub.idx] = 0;
-    playOpts->p78[bankManager->sub.idx] = 127;
-    playOpts->p7C[bankManager->sub.idx] = 1;
-    bankSys->vals[bankSys->o->sub.idx] = bank;
-    bankSys->vals2[bankSys->o->sub.idx] = patch;
+extern "C" void cBankSys_SFX_Begin2(cBankSys* bankSys, int bank, int patch) {
+    cBankManager* bankManager = bankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankManager->BankMonitor;
+    bankManager->BankMonitor.mInst++;
+    playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
+    bankManager->BankMonitor.mPosition[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPosStatic[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mBaseVol[bankManager->BankMonitor.mInst] = playOpts->mCurrent[bankManager->BankMonitor.mInst].vol;
+    playOpts->mVolControl[bankManager->BankMonitor.mInst] = 0;
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPtr[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mViewport[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mVanish[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mRadius[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mCount = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mTime = 100;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mFeedback = 90;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mLevel = 50;
+    playOpts->mExternalVol[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerPan[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
+    playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
+    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
+    bankSys->mPatch[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
 }
 #endif
 
@@ -1396,45 +1294,45 @@ extern "C" void cBankSys_SFX_Begin2(sSndOptsUser* bankSys, int bank, int patch) 
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Play2D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* memset(void*, int, unsigned int);
-
 extern "C" int cBankSys_SFX_End(void*);
 /**
  * Plays a bank patch with the default options: pushes a play-option level, sets its bank and patch, and plays it.
  *
- * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * Through mpVBankManager, the cBankManager's play options (its cBankMonitor BankMonitor, mpVBankManager + 0x1D8) get a
+ * new level exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the
+ * defaults), then
  * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, and cBankSys_SFX_End plays the patch (and pops the level).
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  */
-extern "C" void cBankSys_SFX_Play2D(sSndOptsUser* bankSys, int bank, int patch) {
-    sSoundSysView* bankManager = bankSys->o;
-    sSndPlayOpts* playOpts = &bankManager->sub;
-    bankManager->sub.idx++;
-    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
-    bankManager->sub.arr24[bankManager->sub.idx] = 0;
-    playOpts->p34[bankManager->sub.idx] = 0;
-    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
-    playOpts->p3C[bankManager->sub.idx] = 0;
-    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
-    playOpts->p60[bankManager->sub.idx] = 0;
-    playOpts->p64[bankManager->sub.idx] = 0;
-    playOpts->p68[bankManager->sub.idx] = 0;
-    playOpts->p6C[bankManager->sub.idx] = 0;
-    playOpts->q70[bankManager->sub.idx].b = 0;
-    playOpts->q70[bankManager->sub.idx].a = 100;
-    playOpts->q70[bankManager->sub.idx].c = 90;
-    playOpts->q70[bankManager->sub.idx].d = 50;
-    playOpts->p74[bankManager->sub.idx] = 0;
-    playOpts->p80[bankManager->sub.idx] = 0;
-    playOpts->p84[bankManager->sub.idx] = 0;
-    playOpts->p78[bankManager->sub.idx] = 127;
-    playOpts->p7C[bankManager->sub.idx] = 1;
-    bankSys->vals[bankSys->o->sub.idx] = bank;
-    bankSys->vals2[bankSys->o->sub.idx] = patch;
+extern "C" void cBankSys_SFX_Play2D(cBankSys* bankSys, int bank, int patch) {
+    cBankManager* bankManager = bankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankManager->BankMonitor;
+    bankManager->BankMonitor.mInst++;
+    playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
+    bankManager->BankMonitor.mPosition[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPosStatic[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mBaseVol[bankManager->BankMonitor.mInst] = playOpts->mCurrent[bankManager->BankMonitor.mInst].vol;
+    playOpts->mVolControl[bankManager->BankMonitor.mInst] = 0;
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPtr[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mViewport[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mVanish[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mRadius[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mCount = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mTime = 100;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mFeedback = 90;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mLevel = 50;
+    playOpts->mExternalVol[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerPan[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
+    playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
+    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
+    bankSys->mPatch[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
     cBankSys_SFX_End(bankSys);
 }
 #endif
@@ -1443,54 +1341,55 @@ extern "C" void cBankSys_SFX_Play2D(sSndOptsUser* bankSys, int bank, int patch) 
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Play2DVol);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* memset(void*, int, unsigned int);
-
 #define MIN_A920(a,b) ((a) < (b) ? (a) : (b))
 #define MAX_A920(a,b) ((a) < (b) ? (b) : (a))
 extern "C" int cBankSys_SFX_End(void*);
 /**
  * Plays a bank patch at a volume: pushes a play-option level, sets its bank, patch and volume, and plays it.
  *
- * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
- * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, the level's volume is set as cSndPlayOpts_OPTS_Vol does (mBaseVol = @p volume,
- * SNDPLAYOPTS volume clamped to 0..127), and cBankSys_SFX_End plays the patch.
+ * Through mpVBankManager, the cBankManager's play options (its cBankMonitor BankMonitor, mpVBankManager + 0x1D8) get a
+ * new level exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the
+ * defaults), then
+ * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, the level's volume is set as cSndPlayOpts_OPTS_Vol does
+ * (mBaseVol = @p volume, SNDPLAYOPTS volume clamped to 0..127), and cBankSys_SFX_End plays the patch.
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  * @param volume  the volume
  */
-extern "C" void cBankSys_SFX_Play2DVol(sSndOptsUser* bankSys, int bank, int patch, int volume) {
-    sSoundSysView* bankManager = bankSys->o;
-    sSndPlayOpts* playOpts = &bankManager->sub;
-    bankManager->sub.idx++;
-    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
-    bankManager->sub.arr24[bankManager->sub.idx] = 0;
-    playOpts->p34[bankManager->sub.idx] = 0;
-    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
-    playOpts->p3C[bankManager->sub.idx] = 0;
-    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
-    playOpts->p60[bankManager->sub.idx] = 0;
-    playOpts->p64[bankManager->sub.idx] = 0;
-    playOpts->p68[bankManager->sub.idx] = 0;
-    playOpts->p6C[bankManager->sub.idx] = 0;
-    playOpts->q70[bankManager->sub.idx].b = 0;
-    playOpts->q70[bankManager->sub.idx].a = 100;
-    playOpts->q70[bankManager->sub.idx].c = 90;
-    playOpts->q70[bankManager->sub.idx].d = 50;
-    playOpts->p74[bankManager->sub.idx] = 0;
-    playOpts->p80[bankManager->sub.idx] = 0;
-    playOpts->p84[bankManager->sub.idx] = 0;
-    playOpts->p78[bankManager->sub.idx] = 127;
-    playOpts->p7C[bankManager->sub.idx] = 1;
-    bankSys->vals[bankSys->o->sub.idx] = bank;
-    bankSys->vals2[bankSys->o->sub.idx] = patch;
+extern "C" void cBankSys_SFX_Play2DVol(cBankSys* bankSys, int bank, int patch, int volume) {
+    cBankManager* bankManager = bankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankManager->BankMonitor;
+    bankManager->BankMonitor.mInst++;
+    playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
+    bankManager->BankMonitor.mPosition[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPosStatic[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mBaseVol[bankManager->BankMonitor.mInst] = playOpts->mCurrent[bankManager->BankMonitor.mInst].vol;
+    playOpts->mVolControl[bankManager->BankMonitor.mInst] = 0;
+    // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
+    playOpts->mCallback[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mPtr[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mViewport[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mVanish[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mRadius[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mCount = 0;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mTime = 100;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mFeedback = 90;
+    playOpts->mDelay[bankManager->BankMonitor.mInst].mLevel = 50;
+    playOpts->mExternalVol[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerPan[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
+    playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
+    playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
+    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
+    bankSys->mPatch[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
     {
-        sSoundSysView* volBankManager = bankSys->o;
-        sSndPlayOpts* p2 = &volBankManager->sub;
-        p2->vals[volBankManager->sub.idx] = volume;
-        p2->recs[volBankManager->sub.idx].v = MAX_A920(MIN_A920(p2->vals[p2->idx], 127), 0);
+        cBankManager* volBankManager = bankSys->mpVBankManager;
+        cBankMonitor* volPlayOpts = &volBankManager->BankMonitor;
+        volPlayOpts->mBaseVol[volBankManager->BankMonitor.mInst] = volume;
+        volPlayOpts->mCurrent[volBankManager->BankMonitor.mInst].vol =
+            MAX_A920(MIN_A920(volPlayOpts->mBaseVol[volPlayOpts->mInst], 127), 0);
     }
     cBankSys_SFX_End(bankSys);
 }
@@ -1579,15 +1478,14 @@ extern "C" int cMusicSys_MUSIC_GetNumFESongs(cMusicSys* musicSys) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_SongName);
 #ifdef SKIP_ASM
-struct S78 { char x[0xB]; };
 /**
  * Returns the current song's section name, &mSongName[mCurrentSongNum] (11 bytes each).
  *
  * @param musicSys  the cMusicSys
  * @return the song name
  */
-extern "C" void *cMusicSys_MUSIC_SongName(cMusicSys* musicSys) {
-    return (S78 *)&musicSys->mSongName + musicSys->mCurrentSongNum;
+extern "C" char* cMusicSys_MUSIC_SongName(cMusicSys* musicSys) {
+    return musicSys->mSongName[musicSys->mCurrentSongNum];
 }
 #endif
 
@@ -1760,9 +1658,8 @@ INCLUDE_ASM("bx/seg_1BA100", cCrowdSys_CROWD_GetData);
  * @param i  the crowd intensity (three entries)
  * @return the tCrowdData
  */
-extern "C" char* cCrowdSys_CROWD_GetData(cCrowdSys* crowdSys, int i) {
-    int off = i * 84 + 0x1C;
-    return ((char*)crowdSys) + off;
+extern "C" tCrowdData* cCrowdSys_CROWD_GetData(cCrowdSys* crowdSys, int i) {
+    return &crowdSys->mCrowdData[i];
 }
 #endif
 
@@ -1891,8 +1788,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListName);
  * @return the playlist name
  */
 extern "C" char* cSSXAudio_GetPlayListName(cSSXAudio* audio, int i) {
-    int off = i * 20 + 24740;
-    return ((char*)audio) + off;
+    return audio->mPlayListName[i];
 }
 #endif
 
@@ -2050,7 +1946,6 @@ extern "C" void func_002BAEE8(void) {
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterLayer_resolve);
 #ifdef SKIP_ASM
 void cQuadTree_resolve(void *);
-struct E_AF08 { int a; int off; };
 /**
  * Relocates a loaded world-painter layer in place: turns its file offsets into pointers.
  *
@@ -2059,17 +1954,19 @@ struct E_AF08 { int a; int off; };
  * when the offset is -1.
  */
 extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
-    *(char**)self = ((char*)self) + *(int*)self;
-    cQuadTree_resolve(*(char**)self);
-    self->m_pRegions = (tWPRegion*)(((char*)self) + self->m_iRegionOffset);
-    E_AF08 *region = (E_AF08*)self->m_pRegions;
+    // ORIGINAL-PTR: a loaded file blob: the layer's quad tree, region table and region data sit at byte offsets from
+    // the layer ([P] "m_iQuadTreeOffset >= 0", "m_iRegionOffset >= 0")
+    self->m_pQuadTree = (cQuadTree*)((char*)self + self->m_iQuadTreeOffset);
+    cQuadTree_resolve(self->m_pQuadTree);
+    self->m_pRegions = (tWPRegion*)((char*)self + self->m_iRegionOffset);
+    tWPRegion* region = self->m_pRegions;
     int i;
     for (i = 0; i < self->m_iNumRegions; i++, region++) {
-        int off = region->off;
+        int off = region->m_iDataOffset;
         if (off != -1) {
-            region->off = (int)(((char*)self) + off);
+            region->m_pData = (const tWPData*)((char*)self + off);
         } else {
-            region->off = 0;
+            region->m_pData = 0;
         }
     }
 }
@@ -2231,6 +2128,22 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan__cWorldPainterMan);
 void cMemMan_free(void *);
 void operator_delete(int *);
 extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*, int);
+extern "C" void *cWorldPainterSection_cWorldPainterSection(cWorldPainterSection* arg0);
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
+
+// cWorldPainterSection's constructor and destructor as new[] / delete[] inline them per element (ctor and dtor only).
+// operator delete[] frees the block (the array cookie sits 0x10 bytes before the sections).
+struct cWorldPainterSectionArr : cWorldPainterSection {
+    cWorldPainterSectionArr() { cWorldPainterSection_cWorldPainterSection(this); }
+    ~cWorldPainterSectionArr() { cWorldPainterSection__cWorldPainterSection(this, 0); }
+    void* operator new[](unsigned int size, char* tag, int flags, int d)
+    {
+        return (void*)operator_new_B1D0(size, tag, flags, d);
+    }
+    void operator delete[](void* p) { cMemMan_free(p); }
+};
+
 /**
  * Destroys the world-painter manager: destroys and frees its section cache.
  *
@@ -2240,17 +2153,8 @@ extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*
  * @param flags  g++ destructor flags; bit 0 set frees the object itself (operator delete)
  */
 extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int flags) {
-    cWorldPainterSection *arr = self->m_pCache;
-    if (arr != 0) {
-        cWorldPainterSection *section = arr + *(int*)((char*)arr - 0x10);
-        if (arr != section) {
-            do {
-                section--;
-                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)section, 0);
-            } while (self->m_pCache != section);
-        }
-        cMemMan_free((char*)self->m_pCache - 0x10);
-    }
+    // Same-layout cast: cWorldPainterSectionArr only adds the constructor and destructor.
+    delete[] (cWorldPainterSectionArr*)self->m_pCache;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2260,11 +2164,7 @@ extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int f
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_init);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cWorldPainterSection_cWorldPainterSection(cWorldPainterSection* arg0);
-int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_cWorldPainterMan[];
-struct sArr_B1D0 { int n; cWorldPainterSection *arr; };
 
 /**
  * Sizes the section cache for a world: frees any old array and allocates @p n fresh sections.
@@ -2277,28 +2177,11 @@ struct sArr_B1D0 { int n; cWorldPainterSection *arr; };
  */
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
 extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
-    if (self->m_pCache != 0) {
-        cWorldPainterSection *oldSection = self->m_pCache + *(int*)((char*)self->m_pCache - 0x10);
-        if (self->m_pCache != oldSection) {
-            do {
-                oldSection--;
-                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)oldSection, 0);
-            } while (self->m_pCache != oldSection);
-        }
-        cMemMan_free((char*)self->m_pCache - 0x10);
-    }
+    // Same-layout cast: cWorldPainterSectionArr only adds the constructor and destructor.
+    delete[] (cWorldPainterSectionArr*)self->m_pCache;
     self->m_uiNumSections = (unsigned int)n;
-    cWorldPainterSection **dst = (cWorldPainterSection**)&self->m_pCache;
-    int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, str_cWorldPainterMan, 0x20000000, 0);
-    blk[0] = n;
-    cWorldPainterSection *sections = (cWorldPainterSection*)(blk + 4);
-    cWorldPainterSection *newSection = sections;
-    int i;
-    for (i = n - 1; i != -1; i--) {
-        cWorldPainterSection_cWorldPainterSection(newSection);
-        newSection++;
-    }
-    *dst = sections;
+    cWorldPainterSection*& cache = self->m_pCache;
+    cache = new (str_cWorldPainterMan, 0x20000000, 0) cWorldPainterSectionArr[n];
 }
 #endif
 
@@ -2682,31 +2565,6 @@ extern "C" void cWorldPainterMan_render_impl(cWorldPainterMan_B6E0* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_render1);
 #ifdef SKIP_ASM
-
-
-
-
-struct sQtVEntry_B928 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, tBxVertex*, int);
-};
-
-struct sQtCtx_B928 {
-    char pad_0x0[0x10D8];
-    sQtVEntry_B928* vtable;      // 0x10D8
-};
-
-class cQtCam_B928 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual t4Vector* getPosition();
-};
-
-
 // PORT: PS2-only VU0 inline asm (a + b).
 static inline t4Vector qtAdd_B928(const t4Vector& a, const t4Vector& b)
 {
@@ -2747,11 +2605,11 @@ static inline t4Vector qtDiv_B928(const t4Vector& v, float s)
  * An inner node (bit 0 of its first child word set) splits the rectangle (@p lo, @p hi) at its midpoint and recurses
  * into its four children (child index = word >> 1): lower-left (lo, mid), the left/top quarter, the bottom/right
  * quarter and upper-right (mid, hi). A leaf writes the rectangle's four corners plus the first again into @p verts at the
- * height (z) of a camera position read through virtual slot 5 of the object at +0x6C0 of the first AI rider
- * (SSXApp->Game->AI), and submits the five vertices through virtual slot 73 of cGraphicsMan_TheGraphicsMan.
+ * height (z) of the first AI rider's position (SSXApp->Game->AI; cBeing::getPosition, virtual slot 5 of its cBeing
+ * base at +0x6C0), and submits the five vertices through virtual slot 73 of cGraphicsMan_TheGraphicsMan.
  *
  * @param ctx  the world-painter manager (passed down, otherwise unused)
- * @param tree  the quad tree (its node array at +0x20)
+ * @param tree  the quad tree (its node array m_nodes)
  * @param node  the node to draw
  * @param verts  the five-vertex scratch array (positions at +0x20 of each vertex)
  * @param lo  the rectangle's minimum corner
@@ -2762,7 +2620,7 @@ static inline t4Vector qtDiv_B928(const t4Vector& v, float s)
 extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts,
                               t4Vector* lo, t4Vector* hi)
 {
-    if (*(unsigned short*)&node->m_leaf.m_data & 1) {
+    if (node->m_bits.m_flags[0] & 1) {
         t4Vector mid = qtDiv_B928(qtAdd_B928(*lo, *hi), 2.0f);
         t4Vector leftEdgeMid;
         leftEdgeMid.x = lo->x;
@@ -2784,14 +2642,17 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
         topEdgeMid.y = hi->y;
         topEdgeMid.z = 0.0f;
         topEdgeMid.w = 1.0f;
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (*(unsigned short*)&node->m_leaf.m_data >> 1), verts, lo, &mid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (*(unsigned short*)&node->m_leaf.m_key >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[3] >> 1), verts, &mid, hi);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[0] >> 1), verts, lo, &mid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[1] >> 1), verts, &leftEdgeMid,
+                                 &topEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[2] >> 1), verts, &bottomEdgeMid,
+                                 &rightEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         cRider* rider = SSXApp->Game->AI->Players[0]->mRider;
-        t4Vector cam = *((cQtCam_B928*)(&VPTR_AT(rider, sizeof(cRiderState))))->getPosition();
+        cBeing& being = *rider;
+        t4Vector cam = *being.getPosition();
         t4Vector corner;
         corner.x = lo->x;
         corner.y = lo->y;
@@ -4131,27 +3992,26 @@ extern char tWPInGameData_Sun_vtbl[];
  */
 extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
     float one = 1.0f, zeroF = 0.0f;
-    float *floats = (float*)self;
-    floats[0] = -99999.0f;
+    self->m_wpTravelDistance = -99999.0f;
     VPTR_OF(tWPInGameData, self) = (void**)tWPInGameData_Sun_vtbl;
-    floats[3] = zeroF;
-    floats[2] = zeroF;
-    floats[5] = zeroF;
-    floats[4] = zeroF;
-    floats[7] = one;
-    floats[6] = one;
-    floats[9] = one;
-    floats[8] = one;
-    floats[11] = one;
-    floats[10] = one;
-    floats[13] = one;
-    floats[12] = one;
-    ((int*)floats)[15] = 0;
-    ((int*)floats)[14] = 0;
-    floats[17] = one;
-    floats[16] = one;
-    floats[19] = one;
-    floats[18] = one;
+    self->m_lastSunPitchOffset = zeroF;
+    self->m_SunPitchOffset = zeroF;
+    self->m_lastSunYawOffset = zeroF;
+    self->m_SunYawOffset = zeroF;
+    self->m_lastSunColorR = one;
+    self->m_SunColorR = one;
+    self->m_lastSunColorG = one;
+    self->m_SunColorG = one;
+    self->m_lastSunColorB = one;
+    self->m_SunColorB = one;
+    self->m_lastSunIntensity = one;
+    self->m_SunIntensity = one;
+    self->m_lastSunType = 0;
+    self->m_SunType = 0;
+    self->m_lastLensIntensity = one;
+    self->m_LensIntensity = one;
+    self->m_lastSunRadius = one;
+    self->m_SunRadius = one;
     return ((void*)self);
 }
 #endif
@@ -4282,7 +4142,6 @@ extern "C" void *tWPInGameData_Danger_tWPInGameData_Danger(tWPInGameData_Danger*
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_blend);
 #ifdef SKIP_ASM
-class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the music-trigger values towards a region's data.
  *
@@ -4294,21 +4153,19 @@ class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, tWPData_MusicTrigger* rhs, float blendFactor) {
-    cCC00 *selfView = (cCC00*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_Type = (int)(blendFactor * (float)rhs->m_Type + (1.0f - blendFactor) * (float)self->m_Type);
     self->m_lastType = rhs->m_Type;
     self->m_Value = (int)(blendFactor * (float)rhs->m_Value + (1.0f - blendFactor) * (float)self->m_Value);
     self->m_lastValue = rhs->m_Value;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_blend);
 #ifdef SKIP_ASM
-class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the mix preset towards a region's data: with b = factor squared, m_MixPreset = b * target + (1 - b) *
  * current.
@@ -4320,19 +4177,17 @@ class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, tWPData_Mix* rhs, float blendFactor) {
-    cCCC8 *selfView = (cCCC8*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_MixPreset = (int)(blendFactor * (float)rhs->m_MixPreset + (1.0f - blendFactor) * (float)self->m_MixPreset);
     self->m_lastMixPreset = rhs->m_MixPreset;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_blend);
 #ifdef SKIP_ASM
-class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the ambience bank id towards a region's data: with b = factor squared, m_BankID = b * target + (1 - b) * it.
  *
@@ -4343,19 +4198,17 @@ class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, tWPData_Ambience* rhs, float blendFactor) {
-    cCD68 *selfView = (cCD68*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_BankID = (int)(blendFactor * (float)rhs->m_BankID + (1.0f - blendFactor) * (float)self->m_BankID);
     self->m_lastBankID = rhs->m_BankID;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_blend);
 #ifdef SKIP_ASM
-class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the speech id towards a region's data: with b = factor squared, m_SpeechID = b * target + (1 - b) * it.
  *
@@ -4366,19 +4219,17 @@ class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, tWPData_Speech* rhs, float blendFactor) {
-    cCE08 *selfView = (cCE08*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_SpeechID = (int)(blendFactor * (float)rhs->m_SpeechID + (1.0f - blendFactor) * (float)self->m_SpeechID);
     self->m_lastSpeechID = rhs->m_SpeechID;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_blend);
 #ifdef SKIP_ASM
-class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the camera draw distance towards a region's data: with b = factor squared, b * target + (1 - b) * current.
  *
@@ -4388,23 +4239,17 @@ class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, tWPData_Camera* rhs, float blendFactor) {
-    cCEA8 *selfView = (cCEA8*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_DrawDistance = blendFactor * rhs->m_DrawDistance + (1.0f - blendFactor) * self->m_DrawDistance;
     self->m_lastDrawDistance = rhs->m_DrawDistance;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_blend);
 #ifdef SKIP_ASM
-struct VEnt_CF38 { short delta; short idx; int (*fn)(void*); };
-struct Pair_CF38 { float cur; float tgt; };
-struct Obj_CF38 { int pad0; char* vt; Pair_CF38 p[6]; };
-struct Src_CF38 { int pad0; float v[6]; };
-
 /**
  * Blends the six fog values towards a region's data.
  *
@@ -4419,18 +4264,18 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* sr
     self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * ((float*)&src->m_FogDensity)[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[0].tgt = ((float*)&src->m_FogDensity)[0];
-    ((Pair_CF38*)&self->m_FogDensity)[1].cur = blendFactor * ((float*)&src->m_FogDensity)[1] + inv * ((Pair_CF38*)&self->m_FogDensity)[1].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[1].tgt = ((float*)&src->m_FogDensity)[1];
-    ((Pair_CF38*)&self->m_FogDensity)[2].cur = blendFactor * ((float*)&src->m_FogDensity)[2] + inv * ((Pair_CF38*)&self->m_FogDensity)[2].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[2].tgt = ((float*)&src->m_FogDensity)[2];
-    ((Pair_CF38*)&self->m_FogDensity)[3].cur = blendFactor * ((float*)&src->m_FogDensity)[3] + inv * ((Pair_CF38*)&self->m_FogDensity)[3].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[3].tgt = ((float*)&src->m_FogDensity)[3];
-    ((Pair_CF38*)&self->m_FogDensity)[4].cur = blendFactor * ((float*)&src->m_FogDensity)[4] + inv * ((Pair_CF38*)&self->m_FogDensity)[4].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[4].tgt = ((float*)&src->m_FogDensity)[4];
-    ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * ((float*)&src->m_FogDensity)[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[5].tgt = ((float*)&src->m_FogDensity)[5];
+    self->m_FogDensity = blendFactor * src->m_FogDensity + inv * self->m_FogDensity;
+    self->m_lastFogDensity = src->m_FogDensity;
+    self->m_FogNear = blendFactor * src->m_FogNear + inv * self->m_FogNear;
+    self->m_lastFogNear = src->m_FogNear;
+    self->m_FogFar = blendFactor * src->m_FogFar + inv * self->m_FogFar;
+    self->m_lastFogFar = src->m_FogFar;
+    self->m_FogColourR = blendFactor * src->m_FogColourR + inv * self->m_FogColourR;
+    self->m_lastFogColourR = src->m_FogColourR;
+    self->m_FogColourG = blendFactor * src->m_FogColourG + inv * self->m_FogColourG;
+    self->m_lastFogColourG = src->m_FogColourG;
+    self->m_FogColourB = blendFactor * src->m_FogColourB + inv * self->m_FogColourB;
+    self->m_lastFogColourB = src->m_FogColourB;
     self->debugBlend();
 }
 #endif
@@ -4438,10 +4283,6 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* sr
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_blend);
 #ifdef SKIP_ASM
-struct Pair_D068 { float cur; float tgt; };
-struct Obj_D068 { int pad0; char* vt; Pair_D068 p[7]; };
-struct Src_D068 { int pad0; float v[7]; };
-
 /**
  * Blends the seven light-glow values towards a region's data.
  *
@@ -4457,20 +4298,22 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWP
     self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[0].tgt = ((float*)&src->m_LightGlowCutoff)[0];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[1] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[1].tgt = ((float*)&src->m_LightGlowCutoff)[1];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[2] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[2].tgt = ((float*)&src->m_LightGlowCutoff)[2];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[3] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[3].tgt = ((float*)&src->m_LightGlowCutoff)[3];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[4] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[4].tgt = ((float*)&src->m_LightGlowCutoff)[4];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[5] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[5].tgt = ((float*)&src->m_LightGlowCutoff)[5];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = ((float*)&src->m_LightGlowCutoff)[6];
+    self->m_LightGlowCutoff = blendFactor * src->m_LightGlowCutoff + inv * self->m_LightGlowCutoff;
+    self->m_lastLightGlowCutoff = src->m_LightGlowCutoff;
+    self->m_LightGlowCutoffScale = blendFactor * src->m_LightGlowCutoffScale + inv * self->m_LightGlowCutoffScale;
+    self->m_lastLightGlowCutoffScale = src->m_LightGlowCutoffScale;
+    self->m_LightGlowCopyIntensity = blendFactor * src->m_LightGlowCopyIntensity + inv * self->m_LightGlowCopyIntensity;
+    self->m_lastLightGlowCopyIntensity = src->m_LightGlowCopyIntensity;
+    self->m_LightGlowSourceIntensity =
+        blendFactor * src->m_LightGlowSourceIntensity + inv * self->m_LightGlowSourceIntensity;
+    self->m_lastLightGlowSourceIntensity = src->m_LightGlowSourceIntensity;
+    self->m_LightGlowFrameIntensity =
+        blendFactor * src->m_LightGlowFrameIntensity + inv * self->m_LightGlowFrameIntensity;
+    self->m_lastLightGlowFrameIntensity = src->m_LightGlowFrameIntensity;
+    self->m_LightGlowBlend2 = blendFactor * src->m_LightGlowBlend2 + inv * self->m_LightGlowBlend2;
+    self->m_lastLightGlowBlend2 = src->m_LightGlowBlend2;
+    self->m_LightGlowBlend3 = blendFactor * src->m_LightGlowBlend3 + inv * self->m_LightGlowBlend3;
+    self->m_lastLightGlowBlend3 = src->m_LightGlowBlend3;
     {
         self->debugBlend();
     }
@@ -4480,11 +4323,6 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWP
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_blend);
 #ifdef SKIP_ASM
-struct VEnt_D1B8 { short delta; short idx; int (*fn)(void*); };
-struct Pair_D1B8 { float cur; float tgt; };
-struct Obj_D1B8 { int pad0; char* vt; Pair_D1B8 p[6]; };
-struct Src_D1B8 { int pad0; float v[6]; };
-
 /**
  * Blends the six screen-tint values (scale RGB, offset RGB) towards a region's data.
  *
@@ -4499,18 +4337,18 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, t
     self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].tgt = ((float*)&src->m_ScreenTintScaleR)[0];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[1] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].tgt = ((float*)&src->m_ScreenTintScaleR)[1];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[2] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].tgt = ((float*)&src->m_ScreenTintScaleR)[2];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[3] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].tgt = ((float*)&src->m_ScreenTintScaleR)[3];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[4] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = ((float*)&src->m_ScreenTintScaleR)[4];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = ((float*)&src->m_ScreenTintScaleR)[5];
+    self->m_ScreenTintScaleR = blendFactor * src->m_ScreenTintScaleR + inv * self->m_ScreenTintScaleR;
+    self->m_lastScreenTintScaleR = src->m_ScreenTintScaleR;
+    self->m_ScreenTintScaleG = blendFactor * src->m_ScreenTintScaleG + inv * self->m_ScreenTintScaleG;
+    self->m_lastScreenTintScaleG = src->m_ScreenTintScaleG;
+    self->m_ScreenTintScaleB = blendFactor * src->m_ScreenTintScaleB + inv * self->m_ScreenTintScaleB;
+    self->m_lastScreenTintScaleB = src->m_ScreenTintScaleB;
+    self->m_ScreenTintOffsetR = blendFactor * src->m_ScreenTintOffsetR + inv * self->m_ScreenTintOffsetR;
+    self->m_lastScreenTintOffsetR = src->m_ScreenTintOffsetR;
+    self->m_ScreenTintOffsetG = blendFactor * src->m_ScreenTintOffsetG + inv * self->m_ScreenTintOffsetG;
+    self->m_lastScreenTintOffsetG = src->m_ScreenTintOffsetG;
+    self->m_ScreenTintOffsetB = blendFactor * src->m_ScreenTintOffsetB + inv * self->m_ScreenTintOffsetB;
+    self->m_lastScreenTintOffsetB = src->m_ScreenTintOffsetB;
     self->debugBlend();
 }
 #endif
@@ -4518,7 +4356,6 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, t
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_blend);
 #ifdef SKIP_ASM
-class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the sky-box rotation towards a region's data: with b = factor squared, b * target + (1 - b) * current.
  *
@@ -4528,23 +4365,17 @@ class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, tWPData_SkyBox* rhs, float blendFactor) {
-    cD2E8 *selfView = (cD2E8*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_SkyBoxRotation = blendFactor * rhs->m_SkyBoxRotation + (1.0f - blendFactor) * self->m_SkyBoxRotation;
     self->m_lastSkyBoxRotation = rhs->m_SkyBoxRotation;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_blend);
 #ifdef SKIP_ASM
-struct Pair_D378 { float cur; float tgt; };
-struct IPair_D378 { int cur; int tgt; };
-struct Obj_D378 { int pad0; char* vt; Pair_D378 p[6]; IPair_D378 i6; Pair_D378 q[2]; };
-struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
-
 /**
  * Blends the sun values towards a region's data.
  *
@@ -4560,24 +4391,24 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* sr
     self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[0].tgt = ((float*)&src->m_SunPitchOffset)[0];
-    ((Pair_D378*)&self->m_SunPitchOffset)[1].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[1] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[1].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[1].tgt = ((float*)&src->m_SunPitchOffset)[1];
-    ((Pair_D378*)&self->m_SunPitchOffset)[2].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[2] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[2].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[2].tgt = ((float*)&src->m_SunPitchOffset)[2];
-    ((Pair_D378*)&self->m_SunPitchOffset)[3].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[3] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[3].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[3].tgt = ((float*)&src->m_SunPitchOffset)[3];
-    ((Pair_D378*)&self->m_SunPitchOffset)[4].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[4] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[4].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[4].tgt = ((float*)&src->m_SunPitchOffset)[4];
-    ((Pair_D378*)&self->m_SunPitchOffset)[5].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[5] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[5].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[5].tgt = ((float*)&src->m_SunPitchOffset)[5];
+    self->m_SunPitchOffset = blendFactor * src->m_SunPitchOffset + inv * self->m_SunPitchOffset;
+    self->m_lastSunPitchOffset = src->m_SunPitchOffset;
+    self->m_SunYawOffset = blendFactor * src->m_SunYawOffset + inv * self->m_SunYawOffset;
+    self->m_lastSunYawOffset = src->m_SunYawOffset;
+    self->m_SunColorR = blendFactor * src->m_SunColorR + inv * self->m_SunColorR;
+    self->m_lastSunColorR = src->m_SunColorR;
+    self->m_SunColorG = blendFactor * src->m_SunColorG + inv * self->m_SunColorG;
+    self->m_lastSunColorG = src->m_SunColorG;
+    self->m_SunColorB = blendFactor * src->m_SunColorB + inv * self->m_SunColorB;
+    self->m_lastSunColorB = src->m_SunColorB;
+    self->m_SunIntensity = blendFactor * src->m_SunIntensity + inv * self->m_SunIntensity;
+    self->m_lastSunIntensity = src->m_SunIntensity;
     self->m_SunType = (int)(blendFactor * src->m_SunType + inv * self->m_SunType);
     self->m_lastSunType = src->m_SunType;
-    ((Pair_D378*)&self->m_LensIntensity)[0].cur = blendFactor * ((float*)&src->m_LensIntensity)[0] + inv * ((Pair_D378*)&self->m_LensIntensity)[0].cur;
-    ((Pair_D378*)&self->m_LensIntensity)[0].tgt = ((float*)&src->m_LensIntensity)[0];
-    ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * ((float*)&src->m_LensIntensity)[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
-    ((Pair_D378*)&self->m_LensIntensity)[1].tgt = ((float*)&src->m_LensIntensity)[1];
+    self->m_LensIntensity = blendFactor * src->m_LensIntensity + inv * self->m_LensIntensity;
+    self->m_lastLensIntensity = src->m_LensIntensity;
+    self->m_SunRadius = blendFactor * src->m_SunRadius + inv * self->m_SunRadius;
+    self->m_lastSunRadius = src->m_SunRadius;
     self->debugBlend();
 }
 #endif
@@ -4585,7 +4416,6 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* sr
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_blend);
 #ifdef SKIP_ASM
-class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the snow sparkle density towards a region's data: with b = factor squared, b * target + (1 - b) * current.
  *
@@ -4595,12 +4425,11 @@ class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, tWPData_Surface* rhs, float blendFactor) {
-    cD518 *selfView = (cD518*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_SnowSparkleDensity = blendFactor * rhs->m_SnowSparkleDensity + (1.0f - blendFactor) * self->m_SnowSparkleDensity;
     self->m_lastSnowSparkleDensity = rhs->m_SnowSparkleDensity;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
@@ -4608,7 +4437,6 @@ extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, tWPData
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_blend);
 #ifdef SKIP_ASM
 struct sP_D5A8 { float x, y; };
-class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the lighting values towards a region's data.
  *
@@ -4621,8 +4449,7 @@ class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, tWPData_Lighting* rhs, float blendFactor) {
-    cD5A8 *selfView = (cD5A8*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)&rhs->m_LightIrradianceName;
     *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)&rhs->m_ShadowIrradianceName;
@@ -4632,7 +4459,7 @@ extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, tWPDa
     self->m_lastAmbientLightIntensityOffset = rhs->m_AmbientLightIntensityOffset;
     self->m_RimLightIntensityOffset = blendFactor * rhs->m_RimLightIntensityOffset + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
     self->m_lastRimLightIntensityOffset = rhs->m_RimLightIntensityOffset;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
@@ -4641,7 +4468,6 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_blend);
 #ifdef SKIP_ASM
 // Environment property blend: w^2 blend of all 19 current values toward the
 // incoming set, which is then stored as the target.
-class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the 19 weather values towards a region's data.
  *
@@ -4654,8 +4480,7 @@ class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, tWPData_Weather* rhs, float blendFactor) {
-    cD698 *selfView = (cD698*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_SnowIntensity = blendFactor * rhs->m_SnowIntensity + (1.0f - blendFactor) * self->m_SnowIntensity;
     self->m_lastSnowIntensity = rhs->m_SnowIntensity;
@@ -4695,14 +4520,13 @@ extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, tWPData
     self->m_lastSnowFluffColourG = rhs->m_SnowFluffColourG;
     self->m_SnowFluffColourB = blendFactor * rhs->m_SnowFluffColourB + (1.0f - blendFactor) * self->m_SnowFluffColourB;
     self->m_lastSnowFluffColourB = rhs->m_SnowFluffColourB;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_blend);
 #ifdef SKIP_ASM
-class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
 /**
  * Blends the danger values towards a region's data.
  *
@@ -4714,14 +4538,13 @@ class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, tWPData_Danger* rhs, float blendFactor) {
-    cD968 *selfView = (cD968*)self;
-    selfView->vt();
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     self->m_Level = (int)(blendFactor * (float)rhs->m_Level + (1.0f - blendFactor) * (float)self->m_Level);
     self->m_lastLevel = rhs->m_Level;
     self->m_PointRate = blendFactor * rhs->m_PointRate + (1.0f - blendFactor) * self->m_PointRate;
     self->m_lastPointRate = rhs->m_PointRate;
-    selfView->vt();
+    self->debugBlend();
 }
 #endif
 
@@ -5539,17 +5362,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_readFromReplayFrame);
  *
  * Slot 65 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; the order matches the class's writeToReplayFrame (tWPInGameData_Mix_writeToReplayFrame).
  *
- * @param mix  the in-game data (passed as an address)
+ * @param mix  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Mix_readFromReplayFrame(int mix, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3) + (0x10))), mix + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x10))), mix, 4);
+extern "C" void tWPInGameData_Mix_readFromReplayFrame(tWPInGameData_Mix* mix, cReplayFramePtr* frame) {
+    frame->read((char*)&mix->m_MixPreset, 4);
+    frame->read((char*)&mix->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5563,17 +5381,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Ambience_writeToReplayFrame).
  *
- * @param ambience  the in-game data (passed as an address)
+ * @param ambience  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Ambience_readFromReplayFrame(int ambience, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3) + (0x10))), ambience + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x10))), ambience, 4);
+extern "C" void tWPInGameData_Ambience_readFromReplayFrame(tWPInGameData_Ambience* ambience, cReplayFramePtr* frame) {
+    frame->read((char*)&ambience->m_BankID, 4);
+    frame->read((char*)&ambience->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5587,17 +5400,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Speech_writeToReplayFrame).
  *
- * @param speech  the in-game data (passed as an address)
+ * @param speech  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Speech_readFromReplayFrame(int speech, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3) + (0x10))), speech + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x10))), speech, 4);
+extern "C" void tWPInGameData_Speech_readFromReplayFrame(tWPInGameData_Speech* speech, cReplayFramePtr* frame) {
+    frame->read((char*)&speech->m_SpeechID, 4);
+    frame->read((char*)&speech->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5611,17 +5419,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Camera_writeToReplayFrame).
  *
- * @param camera  the in-game data (passed as an address)
+ * @param camera  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Camera_readFromReplayFrame(int camera, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3) + (0x10))), camera + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x10))), camera, 4);
+extern "C" void tWPInGameData_Camera_readFromReplayFrame(tWPInGameData_Camera* camera, cReplayFramePtr* frame) {
+    frame->read((char*)&camera->m_DrawDistance, 4);
+    frame->read((char*)&camera->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5730,17 +5533,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_readFromReplayFrame);
  * Slot 65 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_SkyBox_writeToReplayFrame).
  *
- * @param skyBox  the in-game data (passed as an address)
+ * @param skyBox  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_SkyBox_readFromReplayFrame(int skyBox, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3) + (0x10))), skyBox + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x10))), skyBox, 4);
+extern "C" void tWPInGameData_SkyBox_readFromReplayFrame(tWPInGameData_SkyBox* skyBox, cReplayFramePtr* frame) {
+    frame->read((char*)&skyBox->m_SkyBoxRotation, 4);
+    frame->read((char*)&skyBox->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5795,17 +5593,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Surface_writeToReplayFrame).
  *
- * @param surface  the in-game data (passed as an address)
+ * @param surface  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Surface_readFromReplayFrame(int surface, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3) + (0x10))), surface + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0x14)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x10))), surface, 4);
+extern "C" void tWPInGameData_Surface_readFromReplayFrame(tWPInGameData_Surface* surface, cReplayFramePtr* frame) {
+    frame->read((char*)&surface->m_SnowSparkleDensity, 4);
+    frame->read((char*)&surface->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5954,17 +5747,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; tWPInGameData_Mix_readFromReplayFrame reads them back in the same order.
  *
- * @param mix  the in-game data (passed as an address)
+ * @param mix  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Mix_writeToReplayFrame(int mix, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3) + (0x8))), mix + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x8))), mix, 4);
+extern "C" void tWPInGameData_Mix_writeToReplayFrame(tWPInGameData_Mix* mix, cReplayFramePtr* frame) {
+    frame->write((const char*)&mix->m_MixPreset, 4);
+    frame->write((const char*)&mix->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5977,17 +5765,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; tWPInGameData_Ambience_readFromReplayFrame reads them back in the same order.
  *
- * @param ambience  the in-game data (passed as an address)
+ * @param ambience  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Ambience_writeToReplayFrame(int ambience, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3) + (0x8))), ambience + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x8))), ambience, 4);
+extern "C" void tWPInGameData_Ambience_writeToReplayFrame(tWPInGameData_Ambience* ambience, cReplayFramePtr* frame) {
+    frame->write((const char*)&ambience->m_BankID, 4);
+    frame->write((const char*)&ambience->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -6000,17 +5783,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; tWPInGameData_Speech_readFromReplayFrame reads them back in the same order.
  *
- * @param speech  the in-game data (passed as an address)
+ * @param speech  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Speech_writeToReplayFrame(int speech, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3) + (0x8))), speech + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x8))), speech, 4);
+extern "C" void tWPInGameData_Speech_writeToReplayFrame(tWPInGameData_Speech* speech, cReplayFramePtr* frame) {
+    frame->write((const char*)&speech->m_SpeechID, 4);
+    frame->write((const char*)&speech->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -6023,17 +5801,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; tWPInGameData_Camera_readFromReplayFrame reads them back in the same order.
  *
- * @param camera  the in-game data (passed as an address)
+ * @param camera  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Camera_writeToReplayFrame(int camera, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3) + (0x8))), camera + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x8))), camera, 4);
+extern "C" void tWPInGameData_Camera_writeToReplayFrame(tWPInGameData_Camera* camera, cReplayFramePtr* frame) {
+    frame->write((const char*)&camera->m_DrawDistance, 4);
+    frame->write((const char*)&camera->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -6145,17 +5918,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; tWPInGameData_SkyBox_readFromReplayFrame reads them back in the same order.
  *
- * @param skyBox  the in-game data (passed as an address)
+ * @param skyBox  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_SkyBox_writeToReplayFrame(int skyBox, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3) + (0x8))), skyBox + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x8))), skyBox, 4);
+extern "C" void tWPInGameData_SkyBox_writeToReplayFrame(tWPInGameData_SkyBox* skyBox, cReplayFramePtr* frame) {
+    frame->write((const char*)&skyBox->m_SkyBoxRotation, 4);
+    frame->write((const char*)&skyBox->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -6209,17 +5977,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; tWPInGameData_Surface_readFromReplayFrame reads them back in the same order.
  *
- * @param surface  the in-game data (passed as an address)
+ * @param surface  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Surface_writeToReplayFrame(int surface, void **frame) {
-    void *temp_3;
-    void *temp_3_2;
-
-    temp_3 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3) + (0x8))), surface + 8, 4);
-    temp_3_2 = *frame;
-    (*(int (**)(void *, int, int))((char*)(temp_3_2) + (0xC)))((char*)frame + (*(short *)((char*)(temp_3_2) + (0x8))), surface, 4);
+extern "C" void tWPInGameData_Surface_writeToReplayFrame(tWPInGameData_Surface* surface, cReplayFramePtr* frame) {
+    frame->write((const char*)&surface->m_SnowSparkleDensity, 4);
+    frame->write((const char*)&surface->m_wpTravelDistance, 4);
 }
 #endif
 

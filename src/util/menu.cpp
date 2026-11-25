@@ -7,6 +7,8 @@
 #include "render/2drender.h"
 #include "ui/uithing.h"
 #include "util/menusys.h"
+#include "input/input.h"
+#include "input/inputpad.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "util/menu.h"
@@ -14,6 +16,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "ai/rider.h"
+#include "camera/camera.h"
 
 extern void* cMenuItem_vtbl[16];
 
@@ -420,12 +423,6 @@ INCLUDE_ASM("util/menu", cMenuItem_textRender);
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
-struct sVec2_2CA768 {
-    float x, y;
-    sVec2_2CA768(float ax, float ay) : x(ax), y(ay) {}
-};
-
-
 static inline cFont* font_2CA768(cMenuItem* item)
 {
     return item->Menu->MenuSys->Font;
@@ -460,8 +457,9 @@ extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const ch
     vt[8].fn(vthis(menu, vt[8]), rect, style);
     *(tARGB*)font_2CA768(item)->Color = *color;
     cFont* font = font_2CA768(item);
-    sVec2_2CA768 sc(2.0f, 2.0f);
-    *(sVec2_2CA768*)font->ShadowOffset = sc;
+    t2Vector sc(2.0f, 2.0f);
+    // Same-layout cast: cFont::ShadowOffset is On Tour's t2Vector, kept as float[2] in render/font.h.
+    *(t2Vector*)font->ShadowOffset = sc;
     if (left) {
         cFont_text(font_2CA768(item), rect->X + 16.0f, rect->Y + 6.0f - 1.0f, left);
     }
@@ -475,7 +473,7 @@ extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const ch
         float w = cFont_textExtent(measureFont, right, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
         cFont_text(font_2CA768(item), rect->X + (rect->W - w) - 16.0f, rect->Y + 6.0f - 1.0f, right);
     }
-    *(sVec2_2CA768*)font_2CA768(item)->ShadowOffset = sVec2_2CA768(0.0f, 0.0f);
+    *(t2Vector*)font_2CA768(item)->ShadowOffset = t2Vector(0.0f, 0.0f);
 }
 #endif
 
@@ -769,29 +767,10 @@ void cMenu_onChange(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenu_render);
 #ifdef SKIP_ASM
-struct sRect_2CAD58 {
-    float x, y, w, h;
-    sRect_2CAD58() {}
-    sRect_2CAD58(float ax, float ay, float aw, float ah) { x = ax; y = ay; w = aw; h = ah; }
-};
-
-class cItem_2CAD58 {
-public:
-    char pad[0x10];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual sRect_2CAD58 getRect();
-    virtual void render(sRect_2CAD58* r);
-};
-
-
-struct sMenu_2CAD58 {
-    int NumItems;                   // 0x0
-    int FocusItem;                  // 0x4
-    int TopItem;                    // 0x8
-    cItem_2CAD58* Items[70];        // 0xC
-    cMenuSys* MenuSys;       // 0x124
+// tRect with an empty default constructor: retail constructs the item[70] array (an empty loop over its elements),
+// so the original's rect type had one.
+struct tMenuRect : tRect {
+    tMenuRect() {}
 };
 
 static const float kScreenGapY = 53.0f;
@@ -802,8 +781,8 @@ static const float kArrowHeight = 15.0f;
 // PORT: these are declared later in the unit without the self/rect parameters.
 void cMenu_preRender_s(void* self) __asm__("cMenu_preRender");
 void cMenu_postRender_s(void* self) __asm__("cMenu_postRender");
-void cMenu_renderUpArrow_r(void* self, const sRect_2CAD58& r) __asm__("cMenu_renderUpArrow");
-void cMenu_renderDownArrow_r(void* self, const sRect_2CAD58& r) __asm__("cMenu_renderDownArrow");
+void cMenu_renderUpArrow_r(void* self, const tRect& r) __asm__("cMenu_renderUpArrow");
+void cMenu_renderDownArrow_r(void* self, const tRect& r) __asm__("cMenu_renderDownArrow");
 
 /**
  * Draws a menu: its background, scroll arrows and visible items.
@@ -811,68 +790,72 @@ void cMenu_renderDownArrow_r(void* self, const sRect_2CAD58& r) __asm__("cMenu_r
  * Asks each active item for its rect, fits as many as the display height (480 minus the menu system's offset) allows
  * from the top item, then renders them, with the up and down arrows when items are hidden above or below.
  */
-extern "C" void cMenu_render(sMenu_2CAD58* self)
+extern "C" void cMenu_render(cMenu* self)
 {
-    sRect_2CAD58 total;
-    sRect_2CAD58 item[70];
+    tMenuRect total;
+    tMenuRect item[70];
     int i;
-    total.x = total.y = total.w = total.h = 0.0f;
+    total.X = total.Y = total.W = total.H = 0.0f;
     for (i = 0; i < self->NumItems; i++) {
-        if (cMenuItem_isActive((cMenuItem*)self->Items[i])) {
-            item[i] = self->Items[i]->getRect();
-            total.h += item[i].h;
-            if (item[i].w > total.w) {
-                total.w = item[i].w;
+        if (cMenuItem_isActive(self->Items[i])) {
+            // cMenuItem entry 4: preRender, the row's rect (returned by value)
+            sVEntry<tRect(void*)>* vt = (sVEntry<tRect(void*)>*)self->Items[i]->mVtbl;
+            (tRect&)item[i] = vt[4].fn(vthis(self->Items[i], vt[4]));
+            total.H += item[i].H;
+            if (item[i].W > total.W) {
+                total.W = item[i].W;
             }
         } else {
-            item[i].w = item[i].h = 0.0f;
+            item[i].W = item[i].H = 0.0f;
         }
     }
-    total.x = (self->MenuSys->getDisplayWidth() - total.w) * 0.5f;
-    if (total.h > self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
+    total.X = (self->MenuSys->getDisplayWidth() - total.W) * 0.5f;
+    if (total.H > self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
         if (self->FocusItem < self->TopItem) {
             self->TopItem = self->FocusItem;
         }
         float th = 0.0f;
         for (int i = self->TopItem; i <= self->FocusItem; i++) {
-            th += item[i].h;
+            th += item[i].H;
         }
         while (self->TopItem < self->FocusItem && th > self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
-            th -= item[self->TopItem].h;
+            th -= item[self->TopItem].H;
             self->TopItem++;
         }
-        total.y = kScreenGapY;
+        total.Y = kScreenGapY;
     } else {
         self->TopItem = 0;
-        total.y = (self->MenuSys->getDisplayHeight() - total.h) * 0.5f;
+        total.Y = (self->MenuSys->getDisplayHeight() - total.H) * 0.5f;
     }
     cMenu_preRender_s(self);
     for (i = self->TopItem; i < self->NumItems; i++) {
-        if (cMenuItem_isActive((cMenuItem*)self->Items[i])) {
-            if (i != self->FocusItem && total.y + item[i].h > self->MenuSys->getDisplayHeight() - kScreenGapY) {
+        if (cMenuItem_isActive(self->Items[i])) {
+            if (i != self->FocusItem && total.Y + item[i].H > self->MenuSys->getDisplayHeight() - kScreenGapY) {
                 break;
             }
-            item[i].x = total.x;
-            item[i].y = self->MenuSys->MenuYOffset + total.y;
-            item[i].w = total.w;
-            total.y += item[i].h;
-            self->Items[i]->render(&item[i]);
+            item[i].X = total.X;
+            item[i].Y = self->MenuSys->MenuYOffset + total.Y;
+            item[i].W = total.W;
+            total.Y += item[i].H;
+            // cMenuItem entry 5: render in the rect
+            sVEntry<void(void*, tRect*)>* vt = (sVEntry<void(void*, tRect*)>*)self->Items[i]->mVtbl;
+            vt[5].fn(vthis(self->Items[i], vt[5]), &item[i]);
         }
     }
     if (self->TopItem) {
-        sRect_2CAD58 up;
-        up.y = self->MenuSys->MenuYOffset + kArrowEdgeOffset;
-        up.x = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
-        up.w = kArrowWidth;
-        up.h = kArrowHeight;
+        tMenuRect up;
+        up.Y = self->MenuSys->MenuYOffset + kArrowEdgeOffset;
+        up.X = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
+        up.W = kArrowWidth;
+        up.H = kArrowHeight;
         cMenu_renderUpArrow_r(self, up);
     }
     if (i != self->NumItems) {
-        sRect_2CAD58 down;
-        down.x = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
-        down.y = self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
-        down.w = kArrowWidth;
-        down.h = kArrowHeight;
+        tMenuRect down;
+        down.X = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
+        down.Y = self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
+        down.W = kArrowWidth;
+        down.H = kArrowHeight;
         cMenu_renderDownArrow_r(self, down);
     }
     cMenu_postRender_s(self);
@@ -997,19 +980,10 @@ extern "C" void cMenu_postRender()
 //100%
 INCLUDE_ASM("util/menu", func_002CB350);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct func_002CB350_sVec4 {
-    float x, y, z, w;
-    func_002CB350_sVec4(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-struct func_002CB350_sVtx {
-    float u, v;
-    char pad[0x18];
-    func_002CB350_sVec4 pos;
+// A t4Vector with EA's constructors (ours has none): a corner position (x, y, 0, 1).
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
-
-// Typed view of the render context (the unit declares GrMan with another class later).
 
 /**
  * Draws one textured screen quad: rect @p screenRect with texture window @p texRect, as a 4-vertex strip.
@@ -1022,62 +996,37 @@ struct func_002CB350_sVtx {
  * @param screenRect  screen rect (x, y, w, h)
  * @param texRect  texture rect (u, v, du, dv)
  */
-extern "C" void func_002CB350(func_002CB350_sVtx* quadVerts, float* screenRect, float* texRect)
+extern "C" void func_002CB350(tBxVertex* quadVerts, float* screenRect, float* texRect)
 {
-    quadVerts[0].pos = func_002CB350_sVec4(screenRect[0], screenRect[1], 0.0f, 1.0f);
+    quadVerts[0].p = t4VectorXYZW(screenRect[0], screenRect[1], 0.0f, 1.0f);
     quadVerts[0].u = texRect[0];
     quadVerts[0].v = texRect[1];
-    quadVerts[1].pos = func_002CB350_sVec4(screenRect[0] + screenRect[2], screenRect[1], 0.0f, 1.0f);
+    quadVerts[1].p = t4VectorXYZW(screenRect[0] + screenRect[2], screenRect[1], 0.0f, 1.0f);
     quadVerts[1].u = texRect[0] + texRect[2];
     quadVerts[1].v = texRect[1];
-    quadVerts[2].pos = func_002CB350_sVec4(screenRect[0], screenRect[1] + screenRect[3], 0.0f, 1.0f);
+    quadVerts[2].p = t4VectorXYZW(screenRect[0], screenRect[1] + screenRect[3], 0.0f, 1.0f);
     quadVerts[2].u = texRect[0];
     quadVerts[2].v = texRect[1] + texRect[3];
-    quadVerts[3].pos = func_002CB350_sVec4(screenRect[0] + screenRect[2], screenRect[1] + screenRect[3], 0.0f, 1.0f);
+    quadVerts[3].p = t4VectorXYZW(screenRect[0] + screenRect[2], screenRect[1] + screenRect[3], 0.0f, 1.0f);
     quadVerts[3].u = texRect[0] + texRect[2];
     quadVerts[3].v = texRect[1] + texRect[3];
-    GrMan->RenderTriStrip(4, (tBxVertex*)quadVerts, 0);
+    GrMan->RenderTriStrip(4, quadVerts, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", cMenu_drawBox);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVtx_2CB498 {
-    float u, v, q;
-    int pad;
-    int r, g, b, a;
-    float pos[4] __attribute__((aligned(16)));
-    sVtx_2CB498() {}
-};
-
-struct sRS_2CB498 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-    int f8;
-    int fC;
-    short f10;
-};
-
-class cCtx_2CB498 {
-public:
-    char pad0[0xE84];
-    sRS_2CB498* top;
-};
-
-
-static inline int cMenu_drawBox_getF8_5(sRS_2CB498* rs)
+// The 5-bit field at bits 5-9 of the draw state's third bit word (m_bitGroups[2]).
+static inline int cMenu_drawBox_getF8_5(sDrawState* state)
 {
-    return (unsigned int)(rs->f8 & 0x3E0) >> 5;
+    return (state->m_bitGroups[2] & 0x3E0) >> 5;
 }
 
-static inline void cMenu_drawBox_setF8_5(sRS_2CB498* rs, int v)
+static inline void cMenu_drawBox_setF8_5(sDrawState* state, int v)
 {
     if (v < 0) v = 0;
-    rs->f8 = (rs->f8 & ~0x3E0) | ((v << 5) & 0x3E0);
+    state->m_bitGroups[2] = ((int)state->m_bitGroups[2] & ~0x3E0) | ((v << 5) & 0x3E0);
 }
 
 /**
@@ -1094,20 +1043,21 @@ static inline void cMenu_drawBox_setF8_5(sRS_2CB498* rs, int v)
  */
 extern "C" void cMenu_drawBox(cMenu* self, float* rect, cMenuItem_textRender1_sColor* col)
 {
-    sVtx_2CB498 quadVerts[4];
+    tBxVertex quadVerts[4];
     int i;
     for (i = 0; i < 4; i++) {
         quadVerts[i].a = (int)(col->a * 128.0f);
         quadVerts[i].r = (int)(col->r * 128.0f);
         quadVerts[i].g = (int)(col->g * 128.0f);
         quadVerts[i].b = (int)(col->b * 128.0f);
-        quadVerts[i].q = 1.0f;
+        quadVerts[i].one = 1.0f;
     }
-    int old = cMenu_drawBox_getF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState));
-    cMenu_drawBox_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old - 2);
-    ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f4_2 = 5;
+    int old = cMenu_drawBox_getF8_5(GrMan->m_pCurrentDrawState);
+    cMenu_drawBox_setF8_5(GrMan->m_pCurrentDrawState, old - 2);
+    GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+        ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (5 << 2);
     int id = self->MenuSys->BoxTexture;
-    ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f10 = id;
+    GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = id;
     float pieceRect[4];
     float pieceUv[4];
     float left = rect[0] + 5.0f;
@@ -1118,32 +1068,32 @@ extern "C" void cMenu_drawBox(cMenu* self, float* rect, cMenuItem_textRender1_sC
     float innerHeight = rect[3] - 10.0f;
     pieceRect[0] = rect[0]; pieceRect[1] = rect[1]; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.0f; pieceUv[1] = 0.0f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = right; pieceRect[1] = rect[1]; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.75f; pieceUv[1] = 0.0f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = right; pieceRect[1] = bot; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.75f; pieceUv[1] = 0.75f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = rect[0]; pieceRect[1] = bot; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.0f; pieceUv[1] = 0.75f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = left; pieceRect[1] = rect[1]; pieceRect[2] = w; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.25f; pieceUv[1] = 0.0f; pieceUv[2] = 0.5f; pieceUv[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = left; pieceRect[1] = bot; pieceRect[2] = w; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.25f; pieceUv[1] = 0.75f; pieceUv[2] = 0.5f; pieceUv[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = rect[0]; pieceRect[1] = top; pieceRect[2] = 5.0f; pieceRect[3] = innerHeight;
     pieceUv[0] = 0.0f; pieceUv[1] = 0.25f; pieceUv[2] = 0.25f; pieceUv[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = right; pieceRect[1] = top; pieceRect[2] = 5.0f; pieceRect[3] = innerHeight;
     pieceUv[0] = 0.75f; pieceUv[1] = 0.25f; pieceUv[2] = 0.25f; pieceUv[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = left; pieceRect[1] = top; pieceRect[2] = w; pieceRect[3] = innerHeight;
     pieceUv[0] = 0.25f; pieceUv[1] = 0.25f; pieceUv[2] = 0.5f; pieceUv[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
-    cMenu_drawBox_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old);
+    func_002CB350(quadVerts, pieceRect, pieceUv);
+    cMenu_drawBox_setF8_5(GrMan->m_pCurrentDrawState, old);
 }
 #endif
 
@@ -1153,13 +1103,9 @@ INCLUDE_ASM("util/menu", cMenu_drawBox1);
 extern char kBoxSelectedColor[];
 extern char kBoxUnselectedColor[];
 
-typedef void (*fn2CB880)(void*, void*, char*);
-
-struct sVEntry2CB880 {
-    short delta;
-    short index;
-    fn2CB880 fn;
-};
+// cMenu's vtable entry 8: drawBox(rect, colour) (cMenu_drawBox for a cMenu).
+typedef void tMenuDrawBoxFn(void* self, void* rect, char* color);
+typedef sVEntry<tMenuDrawBoxFn> sMenuDrawBoxEntry;
 
 /**
  * Draws a menu box in the selected or normal colour: calls the menu's vtable slot 8 (cMenu_drawBox for cMenu) with
@@ -1172,8 +1118,8 @@ struct sVEntry2CB880 {
  */
 extern "C" void cMenu_drawBox1(cMenu* self, void* rect, int on)
 {
-    sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
-    fn2CB880* drawBoxFn = &vt[8].fn;
+    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)self->mVtbl;
+    tMenuDrawBoxFn** drawBoxFn = &vt[8].fn;
     (*drawBoxFn)(vthis(self, vt[8]), rect, on ? kBoxSelectedColor : kBoxUnselectedColor);
 }
 #endif
@@ -1181,110 +1127,6 @@ extern "C" void cMenu_drawBox1(cMenu* self, void* rect, int on)
 //100%
 INCLUDE_ASM("util/menu", cMenu_renderUpArrow);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVec4_2CB8C8 {
-    float x, y, z, w;
-    sVec4_2CB8C8() {}
-    sVec4_2CB8C8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-struct sVtx_2CB8C8 {
-    float u, v, q;
-    int pad;
-    int r, g, b, a;
-    sVec4_2CB8C8 pos;
-    sVtx_2CB8C8() {}
-};
-
-struct sRS_2CB8C8 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-    int f8;
-    int fC;
-    short f10;
-};
-
-class cCtx_2CB8C8 {
-public:
-    char pad0[0xE84];
-    sRS_2CB8C8* top;
-    char pad1[0x10D8 - 0xE88];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void RenderTriStrip(int n, void* verts, int flags);
-};
-
-
 /**
  * Draws the menu's "more above" arrow: a box in the selected colour with an upward chevron in it.
  *
@@ -1298,11 +1140,12 @@ public:
  */
 extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
 {
-    sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
+    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)self->mVtbl;
     vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
-    ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
-    sVtx_2CB8C8 arrowVerts[6];
+    GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+        ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
+    tBxVertex arrowVerts[6];
     int i;
     for (i = 0; i < 6; i++) {
         arrowVerts[i].a = 0x80;
@@ -1311,137 +1154,33 @@ extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
         arrowVerts[i].b = (int)(kTextSelectedColor.z * 128.0f);
         arrowVerts[i].u = 0;
         arrowVerts[i].v = 0;
-        arrowVerts[i].q = 1.0f;
+        arrowVerts[i].one = 1.0f;
     }
     float bot = rect[1] + rect[3] - 4.0f;
     float left = rect[0] + 6.0f;
     float right = rect[0] + rect[2] - 6.0f;
     float mid = rect[0] + rect[2] * 0.5f;
     float top = rect[1] + 3.0f;
-    sVec4_2CB8C8 vertexPos;
+    t4Vector vertexPos;
     vertexPos.x = left; vertexPos.y = bot; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[0].pos = vertexPos;
+    arrowVerts[0].p = vertexPos;
     vertexPos.x = left; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[1].pos = vertexPos;
+    arrowVerts[1].p = vertexPos;
     vertexPos.x = mid; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[2].pos = vertexPos;
+    arrowVerts[2].p = vertexPos;
     vertexPos.x = mid; vertexPos.y = top; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[3].pos = vertexPos;
+    arrowVerts[3].p = vertexPos;
     vertexPos.x = right; vertexPos.y = bot; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[4].pos = vertexPos;
+    arrowVerts[4].p = vertexPos;
     vertexPos.x = right; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[5].pos = vertexPos;
-    GrMan->RenderTriStrip(6, (tBxVertex*)arrowVerts, 0);
+    arrowVerts[5].p = vertexPos;
+    GrMan->RenderTriStrip(6, arrowVerts, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", cMenu_renderDownArrow);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVec4_2CBAC8 {
-    float x, y, z, w;
-    sVec4_2CBAC8() {}
-    sVec4_2CBAC8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-struct sVtx_2CBAC8 {
-    float u, v, q;
-    int pad;
-    int r, g, b, a;
-    sVec4_2CBAC8 pos;
-    sVtx_2CBAC8() {}
-};
-
-struct sRS_2CBAC8 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-    int f8;
-    int fC;
-    short f10;
-};
-
-class cCtx_2CBAC8 {
-public:
-    char pad0[0xE84];
-    sRS_2CBAC8* top;
-    char pad1[0x10D8 - 0xE88];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void RenderTriStrip(int n, void* verts, int flags);
-};
-
-
 /**
  * Draws the menu's "more below" arrow: a box in the selected colour with a downward chevron in it.
  *
@@ -1453,11 +1192,12 @@ public:
  */
 extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
 {
-    sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
+    sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)self->mVtbl;
     vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
-    ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
-    sVtx_2CBAC8 arrowVerts[6];
+    GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+        ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
+    tBxVertex arrowVerts[6];
     int i;
     for (i = 0; i < 6; i++) {
         arrowVerts[i].a = 0x80;
@@ -1466,27 +1206,27 @@ extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
         arrowVerts[i].b = (int)(kTextSelectedColor.z * 128.0f);
         arrowVerts[i].u = 0;
         arrowVerts[i].v = 0;
-        arrowVerts[i].q = 1.0f;
+        arrowVerts[i].one = 1.0f;
     }
     float top = rect[1] + 3.0f;
     float left = rect[0] + 6.0f;
     float right = rect[0] + rect[2] - 6.0f;
     float mid = rect[0] + rect[2] * 0.5f;
     float bot = rect[1] + rect[3] - 4.0f;
-    sVec4_2CBAC8 vertexPos;
+    t4Vector vertexPos;
     vertexPos.x = left; vertexPos.y = top; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[0].pos = vertexPos;
+    arrowVerts[0].p = vertexPos;
     vertexPos.x = left; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[1].pos = vertexPos;
+    arrowVerts[1].p = vertexPos;
     vertexPos.x = mid; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[2].pos = vertexPos;
+    arrowVerts[2].p = vertexPos;
     vertexPos.x = mid; vertexPos.y = bot; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[3].pos = vertexPos;
+    arrowVerts[3].p = vertexPos;
     vertexPos.x = right; vertexPos.y = top; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[4].pos = vertexPos;
+    arrowVerts[4].p = vertexPos;
     vertexPos.x = right; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
-    arrowVerts[5].pos = vertexPos;
-    GrMan->RenderTriStrip(6, (tBxVertex*)arrowVerts, 0);
+    arrowVerts[5].p = vertexPos;
+    GrMan->RenderTriStrip(6, arrowVerts, 0);
 }
 #endif
 
@@ -1869,75 +1609,61 @@ extern "C" int func_00266BA8(void* kb, int a1, int* key, int* chr);
 extern "C" void cMenuSys_popMenu(cMenuSys* p);
 extern void* Keyboard;
 
-struct sVE2CC0C0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
-struct sMenu2CC0C0 {
-    int depth;              // 0x00
-    char* items[17];        // 0x04
-    int input;              // 0x48
-    int key;                // 0x4C
-    int chr;                // 0x50
-    char pad54[0x8];
-    int** pad;              // 0x5C
-};
-
-static inline int PadValid2CC0C0(int** pad)
+// The menu system's input is usable: it has a pad, and the pad has buttons.
+static inline int padHasButtons(cInput* input)
 {
-    return *pad != 0 && **pad != 0;
+    return input->Pad != 0 && input->Pad->NumButtons != 0;
 }
 
 /**
  * Reads this frame's menu key and lets the top menu handle it; pops one menu or all of them as the menu asks.
  *
- * Does nothing with no menu open (MenuDepth +0x0 is 0) or no pad (the cInput at +0x5C, or its first word, is 0). Stores
- * the pad's menu key (cInput_getValue 61) in Key (+0x48) and sets VKey (+0x4C) and AsciiKey (+0x50) to -1. When the pad
+ * Does nothing with no menu open (MenuDepth is 0) or no pad (Input->Pad is 0 or has no buttons). Stores the pad's menu
+ * key (cInput_getValue 61) in Key and sets VKey and AsciiKey to -1. When the pad
  * has no key (-1) and a USB keyboard exists (Keyboard), func_00266BA8 reads its key into VKey and AsciiKey: an ASCII
  * value below 0x20 becomes -1, and the virtual keys up (38), down (40), left (37), right (39), insert (45), delete
  * (46), enter (13) and escape (27) become menu keys 0, 1, 2, 3, 9, 10, 6 and 7. Then calls the top menu's vtable slot 2
  * (input): result 1 pops one menu (cMenuSys_popMenu), 2 pops until none is left.
  */
-extern "C" void cMenuSys_input(sMenu2CC0C0* self)
+extern "C" void cMenuSys_input(cMenuSys* self)
 {
-    if (self->depth == 0) {
+    if (self->MenuDepth == 0) {
         return;
     }
-    if (!PadValid2CC0C0(self->pad)) {
+    if (!padHasButtons(self->Input)) {
         return;
     }
-    int input = (int)cInput_getValue_f(self->pad, 61);
-    int* key = &self->key;
-    int* chr = &self->chr;
+    int input = (int)cInput_getValue_f(self->Input, 61);
+    int* key = &self->VKey;
+    int* chr = &self->AsciiKey;
     *key = -1;
     *chr = -1;
-    self->input = input;
+    self->Key = input;
     if (input == -1 && Keyboard != 0 && func_00266BA8(Keyboard, 0, key, chr) != 0) {
-        if (self->chr < 0x20) {
-            self->chr = input;
+        if (self->AsciiKey < 0x20) {
+            self->AsciiKey = input;
         }
-        switch (self->key) {
-        case 38: self->input = 0; break;
-        case 40: self->input = 1; break;
-        case 37: self->input = 2; break;
-        case 39: self->input = 3; break;
-        case 45: self->input = 9; break;
-        case 46: self->input = 10; break;
-        case 13: self->input = 6; break;
-        case 27: self->input = 7; break;
+        switch (self->VKey) {
+        case 38: self->Key = 0; break;
+        case 40: self->Key = 1; break;
+        case 37: self->Key = 2; break;
+        case 39: self->Key = 3; break;
+        case 45: self->Key = 9; break;
+        case 46: self->Key = 10; break;
+        case 13: self->Key = 6; break;
+        case 27: self->Key = 7; break;
         }
     }
-    char* item = self->items[self->depth - 1];
-    sVE2CC0C0* vt = *(sVE2CC0C0**)(item + 0x12C);
-    switch (vt[2].fn(vthis(item, vt[2]))) {
+    cMenu* menu = self->MenuStack[self->MenuDepth - 1];
+    // cMenu entry 2: input
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)menu->mVtbl;
+    switch (vt[2].fn(vthis(menu, vt[2]))) {
     case 1:
-        cMenuSys_popMenu((cMenuSys*)self);
+        cMenuSys_popMenu(self);
         break;
     case 2:
-        while (self->depth != 0) {
-            cMenuSys_popMenu((cMenuSys*)self);
+        while (self->MenuDepth != 0) {
+            cMenuSys_popMenu(self);
         }
         break;
     }
@@ -2471,19 +2197,16 @@ extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_isLocked(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
-typedef int (*Pick_2CC8F0)(void*, void*, int);
-typedef void (*Notify_2CC8F0)(void*, void*);
+// cMenu entry 3: onCommand(item, arg)
+typedef sVEntry<int(void*, void*, int)> sMenuCommandEntry;
+// cMenu entry 4: onChange(item)
+typedef sVEntry<void(void*, void*)> sMenuChangeEntry;
 
-struct sEnt_2CC8F0 {
-    const char* name;
-    int value;
-};
-
-
-static inline void notify_2CC8F0(cEnumMenuItem* self)
+// Tells the item's menu that its value changed (cMenu entry 4, onChange).
+static inline void notifyChange(cEnumMenuItem* self)
 {
-    sVEntry<void>* vt = (sVEntry<void>*)self->Menu->mVtbl;
-    ((Notify_2CC8F0)vt[4].fn)(vthis(self->Menu, vt[4]), self);
+    sMenuChangeEntry* vt = (sMenuChangeEntry*)self->Menu->mVtbl;
+    vt[4].fn(vthis(self->Menu, vt[4]), self);
 }
 
 /**
@@ -2510,29 +2233,29 @@ extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
         return result;
     }
     if (cMenuItem_getKey((void**)self) == 6) {
-        sVEntry<void>* vt = (sVEntry<void>*)self->Menu->mVtbl;
-        result = ((Pick_2CC8F0)vt[3].fn)(vthis(self->Menu, vt[3]), self, 0);
+        sMenuCommandEntry* vt = (sMenuCommandEntry*)self->Menu->mVtbl;
+        result = vt[3].fn(vthis(self->Menu, vt[3]), self, 0);
     } else {
     int n = self->NumTags;
     int i = 0;
     for (;;) {
         if (i == n) {
             if (cMenuItem_getKey((void**)self) == 2 || cMenuItem_getKey((void**)self) == 0) {
-                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[0].value;
-                notify_2CC8F0(self);
+                *self->Enum = self->Tags[0].Value;
+                notifyChange(self);
             } else if (cMenuItem_getKey((void**)self) == 3 || cMenuItem_getKey((void**)self) == 1) {
-                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[self->NumTags - 1].value;
-                notify_2CC8F0(self);
+                *self->Enum = self->Tags[self->NumTags - 1].Value;
+                notifyChange(self);
             }
             goto done;
         }
-        if (*self->Enum == ((sEnt_2CC8F0*)self->Tags)[i].value) {
+        if (*self->Enum == self->Tags[i].Value) {
             if (cMenuItem_getKey((void**)self) == 2 || cMenuItem_getKey((void**)self) == 0) {
-                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[(i + self->NumTags - 1) % self->NumTags].value;
-                notify_2CC8F0(self);
+                *self->Enum = self->Tags[(i + self->NumTags - 1) % self->NumTags].Value;
+                notifyChange(self);
             } else if (cMenuItem_getKey((void**)self) == 3 || cMenuItem_getKey((void**)self) == 1) {
-                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[(i + 1) % self->NumTags].value;
-                notify_2CC8F0(self);
+                *self->Enum = self->Tags[(i + 1) % self->NumTags].Value;
+                notifyChange(self);
             }
             goto done;
         }
@@ -2551,9 +2274,6 @@ INCLUDE_ASM("util/menu", cEnumMenuItem_preRender);
 extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
 extern char str_Invalid_b[];
 
-struct sMenuRectCB18 { float x, y, z, w; };
-struct sMenuEntCB18 { void* name; int data; };
-
 /**
  * Measures a list-choice item: the caption on the left with the widest of "Invalid" (str_Invalid_b) and every entry
  * name on the right (cMenuItem_textPreRender for each).
@@ -2562,15 +2282,15 @@ struct sMenuEntCB18 { void* name; int data; };
  * @param item  the list-choice item
  * @return @p ret
  */
-extern "C" sMenuRectCB18* cEnumMenuItem_preRender(sMenuRectCB18* ret, cEnumMenuItem* item)
+extern "C" tRect* cEnumMenuItem_preRender(tRect* ret, cEnumMenuItem* item)
 {
-    sMenuRectCB18 best;
-    sMenuRectCB18 measured;
+    tRect best;
+    tRect measured;
     cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, str_Invalid_b);
     best = measured;
     for (int i = 0; i < item->NumTags; i++) {
-        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, ((sMenuEntCB18*)item->Tags)[i].name);
-        if (measured.z > best.z) {
+        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, (char*)item->Tags[i].Text);
+        if (measured.W > best.W) {
             best = measured;
         }
     }
@@ -3482,8 +3202,10 @@ extern "C" int cCharMenuItem_input(cCharMenuItem* self)
         }
         self->Fraction = step + (float)(cur - newValue);
         *valuePtr = newValue;
-        cMenu* menu = (cMenu*)(*(char**)self);
-        sVEntry<void(void*, void*)>* entry = &((sVEntry<void (void*, void*)>*)menu->mVtbl)[4];
+        cMenu* menu = self->Menu;
+        // cMenu entry 4: onChange(item)
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
+        sVEntry<void(void*, void*)>* entry = &vt[4];
         entry->fn(vthis(menu, *entry), self);
     }
     return result;
@@ -3759,8 +3481,10 @@ extern "C" int cIntMenuItem_input(cIntMenuItem* self)
         }
         self->Fraction = side + (float)(cur - newValue);
         *valuePtr = newValue;
-        cMenu* menu = (cMenu*)(*(char**)self);
-        sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void (void*, void*)>*)menu->mVtbl)[4];
+        cMenu* menu = self->Menu;
+        // cMenu entry 4: onChange(item)
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
+        sVEntry<void(void*, void*)>* vtEntry = &vt[4];
         vtEntry->fn(vthis(menu, *vtEntry), self);
     }
     return result;
@@ -4441,110 +4165,6 @@ INCLUDE_ASM("util/menu", cTextMenuItem_render);
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
-struct sVec2_2CE910 {
-    float x, y;
-    sVec2_2CE910(float ax, float ay) { x = ax; y = ay; }
-};
-
-struct sVec4_2CE910 {
-    float x, y, z, w;
-    sVec4_2CE910() {}
-    void Set(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-struct sVtx_2CE910 {
-    float u, v, q;
-    int pad;
-    int r, g, b, a;
-    sVec4_2CE910 pos;
-    sVtx_2CE910() {}
-};
-
-struct sRS_2CE910 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-};
-
-class cCtx_2CE910 {
-public:
-    char pad0[0xE84];
-    sRS_2CE910* top;
-    char pad1[0x10D8 - 0xE88];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void RenderTriStrip(int n, void* verts, int flags);
-};
-
 
 /**
  * Draws a text-entry item: box, caption, the text right-aligned and, when it has the focus, an underline cursor.
@@ -4571,8 +4191,8 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
     }
     {
         cMenu* menu = self->Menu;
-        sVEntry2CB880* vt = (sVEntry2CB880*)menu->mVtbl;
-        fn2CB880* drawBoxFn = &vt[8].fn;
+        sMenuDrawBoxEntry* vt = (sMenuDrawBoxEntry*)menu->mVtbl;
+        tMenuDrawBoxFn** drawBoxFn = &vt[8].fn;
         (*drawBoxFn)(vthis(menu, vt[8]), rect, focused ? kBoxSelectedColor : kBoxUnselectedColor);
     }
     cMenuItem_textRender1_sVec3* col =
@@ -4583,7 +4203,8 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
     textColor.g = col->y;
     textColor.b = col->z;
     *(cMenuItem_textRender1_sColor*)self->Menu->MenuSys->Font->Color = textColor;
-    *(sVec2_2CE910*)self->Menu->MenuSys->Font->ShadowOffset = sVec2_2CE910(2.0f, 2.0f);
+    // Same-layout cast: cFont::ShadowOffset is On Tour's t2Vector, kept as float[2] in render/font.h.
+    *(t2Vector*)self->Menu->MenuSys->Font->ShadowOffset = t2Vector(2.0f, 2.0f);
     char* label = (char*)self->Caption;
     if (label) {
         cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
@@ -4602,33 +4223,46 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
         float x2 = rect[0] + (rect[2] - w2) - 16.0f;
         float y1 = bot - 4.0f;
         float y2 = bot - 1.0f;
-        sVtx_2CE910 cursorVerts[4];
+        tBxVertex cursorVerts[4];
         float zero = 0.0f;
         float one = 1.0f;
-        sVec4_2CE910 vertexPos;
-        vertexPos.Set(x1, y1, zero, one);
+        t4Vector vertexPos;
+        vertexPos.x = x1;
+        vertexPos.y = y1;
+        vertexPos.z = zero;
+        vertexPos.w = one;
         cursorVerts[0].v = zero;
         cursorVerts[0].u = zero;
-        cursorVerts[0].q = one;
+        cursorVerts[0].one = one;
         cursorVerts[0].r = (int)(textColor.r * 127.0f);
         cursorVerts[0].g = (int)(textColor.g * 127.0f);
         cursorVerts[0].b = (int)(textColor.b * 127.0f);
         cursorVerts[0].a = 0x7F;
-        cursorVerts[0].pos = vertexPos;
-        vertexPos.Set(x1, y2, zero, one);
+        cursorVerts[0].p = vertexPos;
+        vertexPos.x = x1;
+        vertexPos.y = y2;
+        vertexPos.z = zero;
+        vertexPos.w = one;
         cursorVerts[1] = cursorVerts[0];
-        cursorVerts[1].pos = vertexPos;
-        vertexPos.Set(x2, y1, zero, one);
+        cursorVerts[1].p = vertexPos;
+        vertexPos.x = x2;
+        vertexPos.y = y1;
+        vertexPos.z = zero;
+        vertexPos.w = one;
         cursorVerts[2] = cursorVerts[0];
-        cursorVerts[2].pos = vertexPos;
-        vertexPos.Set(x2, y2, zero, one);
+        cursorVerts[2].p = vertexPos;
+        vertexPos.x = x2;
+        vertexPos.y = y2;
+        vertexPos.z = zero;
+        vertexPos.w = one;
         cursorVerts[3] = cursorVerts[0];
-        cursorVerts[3].pos = vertexPos;
-        ((cCtx_2CE910*)GrMan)->top->f4_2 = 1;
+        cursorVerts[3].p = vertexPos;
+        GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+            ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
         *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
-        GrMan->RenderTriStrip(4, (tBxVertex*)cursorVerts, 0);
+        GrMan->RenderTriStrip(4, cursorVerts, 0);
     }
-    *(sVec2_2CE910*)self->Menu->MenuSys->Font->ShadowOffset = sVec2_2CE910(0.0f, 0.0f);
+    *(t2Vector*)self->Menu->MenuSys->Font->ShadowOffset = t2Vector(0.0f, 0.0f);
 }
 #endif
 
@@ -4708,7 +4342,8 @@ extern "C" int cColorMenuItem_input(cColorMenuItem* self)
     if (dir != 0) {
         int n = self->AccelCount;
         int accel = (n * n / 288) >? 1;
-        float* chanPtr = (float*)((char*)self->Color + (self->Adjust << 2));
+        // channel Adjust of the colour (A, R, G, B in order)
+        float* chanPtr = &(&self->Color->A)[self->Adjust];
         float step = 0.0003906250058207661f;
         step = (float)accel * step;
         float value = *chanPtr;
@@ -4768,8 +4403,9 @@ extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, cColorMenuI
 {
     sRect_2CEEE8 rect;
     char buf[64];
-    // channel Adjust of *Color by byte stride (as in cColorMenuItem_render)
-    sprintf(buf, str_pct_3f_999, fptodp(*(float*)((char*)item->Color + (item->Adjust << 2))));
+    // channel Adjust of the colour (A, R, G, B in order)
+    float* channel = &(&item->Color->A)[item->Adjust];
+    sprintf(buf, str_pct_3f_999, fptodp(*channel));
     float z = 0.0f;
     rect.y = z;
     rect.x = z;
@@ -4795,114 +4431,11 @@ extern char* ColorNames[];
 extern char str_pct_3f_pct_03d[];
 
 
-struct sVec2_2CF1C8 {
-    float x, y;
-    sVec2_2CF1C8(float ax, float ay) { x = ax; y = ay; }
-};
-
-struct sRect_2CF1C8 {
-    float x, y, w, h;
-};
-
-struct sVec4_2CF1C8 {
-    float x, y, z, w;
-    sVec4_2CF1C8() {}
-    void Set(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-struct sVtx_2CF1C8 {
-    float u, v, q;
-    int pad;
-    int r, g, b, a;
-    sVec4_2CF1C8 pos;
-    sVtx_2CF1C8() {}
-};
-
-struct sRS_2CF1C8 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-};
-
-class cCtx_2CF1C8 {
-public:
-    char pad0[0xE84];
-    sRS_2CF1C8* top;
-    char pad1[0x10D8 - 0xE88];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void RenderTriStrip(int n, void* verts, int flags);
-};
-
+// Channel @p adjust of a colour (A, R, G, B in order).
+static inline float& colorChannel(tARGB* color, int adjust)
+{
+    return (&color->A)[adjust];
+}
 
 /**
  * Draws a colour-channel item: its channel name, its value and a gradient bar with a marker at the value.
@@ -4922,8 +4455,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     {
         cMenu* menu = self->Menu;
         sVEntry<void(void*, float*, int)>* vt = (sVEntry<void(void*, float*, int)>*)menu->mVtbl;
-        char* thisp = ((char*)menu) + vt[9].delta;
-        vt[9].fn(thisp, rect, ((void*)self) == cMenu_getFocusItem((cMenu*)menu));
+        vt[9].fn(vthis(menu, vt[9]), rect, ((void*)self) == cMenu_getFocusItem((cMenu*)menu));
     }
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;
     float textX = barX - 16.0f;
@@ -4935,92 +4467,106 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     textClr.g = col->y;
     textClr.b = col->z;
     *(cMenuItem_textRender1_sColor*)self->Menu->MenuSys->Font->Color = textClr;
-    *(sVec2_2CF1C8*)self->Menu->MenuSys->Font->ShadowOffset = sVec2_2CF1C8(2.0f, 2.0f);
+    // Same-layout cast: cFont::ShadowOffset is On Tour's t2Vector, kept as float[2] in render/font.h.
+    *(t2Vector*)self->Menu->MenuSys->Font->ShadowOffset = t2Vector(2.0f, 2.0f);
     cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
                   ColorNames[self->Adjust]);
     char buf[0x10];
-    // channel Adjust of *Color (A, R, G, B) by byte stride: a float subscript swaps retail's addu operands
     sprintf(buf, str_pct_3f_pct_03d,
-            fptodp(*(float*)((char*)self->Color + (self->Adjust << 2))),
-            (int)(*(float*)((char*)self->Color + (self->Adjust << 2)) * 255.99000549316406f));
+            fptodp(colorChannel(self->Color, self->Adjust)),
+            (int)(colorChannel(self->Color, self->Adjust) * 255.99000549316406f));
     cFont* font = self->Menu->MenuSys->Font;
     float w = cFont_textExtent(font, buf, 0, 0, font->Scale[0], font->Scale[1]);
     cFont_text(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
 
-    cMenuItem_textRender1_sColor rampStart = *(cMenuItem_textRender1_sColor*)self->Color;
-    cMenuItem_textRender1_sColor rampEnd = *(cMenuItem_textRender1_sColor*)self->Color;
-    *(float*)((char*)&rampStart + (self->Adjust << 2)) = 0.0f;
-    *(float*)((char*)&rampEnd + (self->Adjust << 2)) = 1.0f;
-    sRect_2CF1C8 barRect;
-    barRect.x = barX;
-    barRect.y = rect[1] + rect[3] - 6.0f - 10.0f;
-    barRect.w = 80.0f;
-    barRect.h = 10.0f;
-    sVtx_2CF1C8 verts[4];
+    tARGB rampStart = *self->Color;
+    tARGB rampEnd = *self->Color;
+    colorChannel(&rampStart, self->Adjust) = 0.0f;
+    colorChannel(&rampEnd, self->Adjust) = 1.0f;
+    tRect barRect;
+    barRect.X = barX;
+    barRect.Y = rect[1] + rect[3] - 6.0f - 10.0f;
+    barRect.W = 80.0f;
+    barRect.H = 10.0f;
+    tBxVertex verts[4];
     float zero = 0.0f;
     float one = 1.0f;
-    sVec4_2CF1C8 vertPos;
-    verts[0].r = (int)(rampStart.r * 128.0f);
-    verts[0].g = (int)(rampStart.g * 128.0f);
-    verts[0].b = (int)(rampStart.b * 128.0f);
+    t4Vector vertPos;
+    verts[0].r = (int)(rampStart.R * 128.0f);
+    verts[0].g = (int)(rampStart.G * 128.0f);
+    verts[0].b = (int)(rampStart.B * 128.0f);
     verts[0].a = 0x80;
     verts[0].v = zero;
     verts[0].u = zero;
-    verts[0].q = one;
-    vertPos.Set(barRect.x, barRect.y, zero, one);
-    verts[0].pos = vertPos;
-    verts[1].r = (int)(rampStart.r * 128.0f);
-    verts[1].g = (int)(rampStart.g * 128.0f);
-    verts[1].b = (int)(rampStart.b * 128.0f);
+    verts[0].one = one;
+    vertPos.x = barRect.X;
+    vertPos.y = barRect.Y;
+    vertPos.z = zero;
+    vertPos.w = one;
+    verts[0].p = vertPos;
+    verts[1].r = (int)(rampStart.R * 128.0f);
+    verts[1].g = (int)(rampStart.G * 128.0f);
+    verts[1].b = (int)(rampStart.B * 128.0f);
     verts[1].a = 0x80;
     verts[1].v = zero;
     verts[1].u = zero;
-    verts[1].q = one;
-    vertPos.Set(barRect.x, barRect.y + barRect.h, zero, one);
-    verts[1].pos = vertPos;
-    verts[2].r = (int)(rampEnd.r * 128.0f);
-    verts[2].g = (int)(rampEnd.g * 128.0f);
-    verts[2].b = (int)(rampEnd.b * 128.0f);
+    verts[1].one = one;
+    vertPos.x = barRect.X;
+    vertPos.y = barRect.Y + barRect.H;
+    vertPos.z = zero;
+    vertPos.w = one;
+    verts[1].p = vertPos;
+    verts[2].r = (int)(rampEnd.R * 128.0f);
+    verts[2].g = (int)(rampEnd.G * 128.0f);
+    verts[2].b = (int)(rampEnd.B * 128.0f);
     verts[2].a = 0x80;
     verts[2].v = zero;
     verts[2].u = zero;
-    verts[2].q = one;
-    vertPos.Set(barRect.x + barRect.w, barRect.y, zero, one);
-    verts[2].pos = vertPos;
-    verts[3].r = (int)(rampEnd.r * 128.0f);
-    verts[3].g = (int)(rampEnd.g * 128.0f);
-    verts[3].b = (int)(rampEnd.b * 128.0f);
+    verts[2].one = one;
+    vertPos.x = barRect.X + barRect.W;
+    vertPos.y = barRect.Y;
+    vertPos.z = zero;
+    vertPos.w = one;
+    verts[2].p = vertPos;
+    verts[3].r = (int)(rampEnd.R * 128.0f);
+    verts[3].g = (int)(rampEnd.G * 128.0f);
+    verts[3].b = (int)(rampEnd.B * 128.0f);
     verts[3].a = 0x80;
     verts[3].v = zero;
     verts[3].u = zero;
-    verts[3].q = one;
-    vertPos.Set(barRect.x + barRect.w, barRect.y + barRect.h, zero, one);
-    verts[3].pos = vertPos;
+    verts[3].one = one;
+    vertPos.x = barRect.X + barRect.W;
+    vertPos.y = barRect.Y + barRect.H;
+    vertPos.z = zero;
+    vertPos.w = one;
+    verts[3].p = vertPos;
     if (self->Color->A != 1.0f) {
-        ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 5;
+        GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+            ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (5 << 2);
     } else {
-        ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
+        GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+            ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
     }
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
-    GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
+    GrMan->RenderTriStrip(4, verts, 0);
 
-    float mx = barRect.x + barRect.w * *(float*)((char*)self->Color + (self->Adjust << 2));
+    float mx = barRect.X + barRect.W * colorChannel(self->Color, self->Adjust);
     verts[0].r = (int)(textClr.r * 128.0f);
     verts[0].g = (int)(textClr.g * 128.0f);
     verts[0].b = (int)(textClr.b * 128.0f);
-    vertPos.x = mx - 5.0f; vertPos.y = barRect.y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
-    verts[0].pos = vertPos;
+    vertPos.x = mx - 5.0f; vertPos.y = barRect.Y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
+    verts[0].p = vertPos;
     verts[1].r = (int)(textClr.r * 128.0f);
     verts[1].g = (int)(textClr.g * 128.0f);
     verts[1].b = (int)(textClr.b * 128.0f);
-    vertPos.x = mx; vertPos.y = barRect.y - 2.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
-    verts[1].pos = vertPos;
+    vertPos.x = mx; vertPos.y = barRect.Y - 2.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
+    verts[1].p = vertPos;
     verts[2].r = (int)(textClr.r * 128.0f);
     verts[2].g = (int)(textClr.g * 128.0f);
     verts[2].b = (int)(textClr.b * 128.0f);
-    vertPos.x = mx + 5.0f; vertPos.y = barRect.y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
-    verts[2].pos = vertPos;
-    GrMan->RenderTriStrip(3, (tBxVertex*)verts, 0);
+    vertPos.x = mx + 5.0f; vertPos.y = barRect.Y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
+    verts[2].p = vertPos;
+    GrMan->RenderTriStrip(3, verts, 0);
 }
 #endif
 
@@ -5143,12 +4689,6 @@ extern void* cExpandMenuItem_vtbl[];
 extern void* cExpandMenuItemMenu_vtbl[];
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
 
-// Element type of an inline-constructed array; its empty constructor leaves only the loop counters.
-struct sMenuSlot_F860 {
-    void* item;
-    sMenuSlot_F860() {}
-};
-
 /**
  * Constructs an expandable menu item: an item that holds its own inner menu of sub-items.
  *
@@ -5167,7 +4707,8 @@ extern "C" void* cExpandMenuItem_cExpandMenuItem(cExpandMenuItem* self, void* na
     self->mVtbl = cExpandMenuItem_vtbl;
     cMenu_cMenu(&self->ExpandMenu);
     self->ExpandMenu.mVtbl = cExpandMenuItemMenu_vtbl;
-    new ((char*)&self->ExpandMenu.Items[0]) sMenuSlot_F860[70];
+    // ItemRect's 70 rects (tMenuRect: tRect's empty constructor; the loop leaves only its counters)
+    new (self->ItemRect) tMenuRect[70];
     self->ExpandMenu.Item = (cExpandMenuItem*)((void*)self);
     if (self->Title != 0) {
         cExpandMenuItem_addItem3(self, self->Title, -1);
@@ -5398,27 +4939,6 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_preRender);
 extern "C" int cMenuItem_isActive(cMenuItem* self);
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 
-struct sMenuRect_2CFB58 { float x, y, z, w; };
-
-struct sVEnt_2CFB58 { short delta; short index; sMenuRect_2CFB58 (*fn)(void*); };
-
-struct sItem_2CFB58 {
-    char pad00[0x10];
-    sVEnt_2CFB58* vt;
-};
-
-struct sMenu_2CFB58 {
-    char* owner;
-    char pad04[0x10];
-    sItem_2CFB58* sel;
-    int count;
-    char pad1C[8];
-    sItem_2CFB58* items[70];
-    void* f13C;
-    char pad140[0xC];
-    sMenuRect_2CFB58 rects[1];
-};
-
 /**
  * Measures an expandable menu item, including its sub-items when it is expanded.
  *
@@ -5429,36 +4949,37 @@ struct sMenu_2CFB58 {
  * @param ret  where the total rect is returned (hidden struct-return pointer)
  * @return @p ret
  */
-extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sMenu_2CFB58* self)
+extern "C" tRect* cExpandMenuItem_preRender(tRect* ret, cExpandMenuItem* self)
 {
-    sMenuRect_2CFB58 total;
+    tRect total;
     float zero = 0.0f;
-    total.w = zero;
-    total.z = zero;
-    total.y = zero;
-    total.x = zero;
-    self->f13C = *(void**)(self->owner + 0x124);
-    for (int i = 0; i < self->count; i++) {
-        if (cMenuItem_isActive((cMenuItem*)self->items[i])) {
-            sVEnt_2CFB58* vt = self->items[i]->vt;
-            self->rects[i] = vt[4].fn(vthis(self->items[i], vt[4]));
-            if (self == cMenu_getFocusItem((cMenu*)self->owner) || self->items[i] == self->sel) {
-                total.w += self->rects[i].w;
+    total.H = zero;
+    total.W = zero;
+    total.Y = zero;
+    total.X = zero;
+    self->ExpandMenu.MenuSys = self->Menu->MenuSys;
+    for (int i = 0; i < self->ExpandMenu.NumItems; i++) {
+        if (cMenuItem_isActive(self->ExpandMenu.Items[i])) {
+            // cMenuItem entry 4: preRender, the row's rect (returned by value)
+            sVEntry<tRect(void*)>* vt = (sVEntry<tRect(void*)>*)self->ExpandMenu.Items[i]->mVtbl;
+            self->ItemRect[i] = vt[4].fn(vthis(self->ExpandMenu.Items[i], vt[4]));
+            if (self == cMenu_getFocusItem(self->Menu) || self->ExpandMenu.Items[i] == self->Title) {
+                total.H += self->ItemRect[i].H;
             }
-            float itemWidth = self->rects[i].z;
-            if (self->items[i] != self->sel) {
+            float itemWidth = self->ItemRect[i].W;
+            if (self->ExpandMenu.Items[i] != self->Title) {
                 itemWidth += 20.0f;
             }
-            if (total.z < itemWidth) {
-                total.z = itemWidth;
+            if (total.W < itemWidth) {
+                total.W = itemWidth;
             }
         } else {
-            sMenuRect_2CFB58 z;
-            z.x = 0;
-            z.y = 0;
-            z.z = 0;
-            z.w = 0;
-            self->rects[i] = z;
+            tRect z;
+            z.X = 0;
+            z.Y = 0;
+            z.W = 0;
+            z.H = 0;
+            self->ItemRect[i] = z;
         }
     }
     *ret = total;
@@ -5656,103 +5177,6 @@ INCLUDE_ASM("util/menu", cRGBTitleMenuItem_render);
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the body reads $8 (5th arg).
 void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
 
-
-
-struct sVec4_2D0008 {
-    float x, y, z, w;
-    sVec4_2D0008(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-
-struct sRS_2D0008 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-    int f8;
-    int fC;
-    short f10;
-};
-
-class cCtx_2D0008 {
-public:
-    char pad0[0xE84];
-    sRS_2D0008* top;
-    char pad1[0x10D8 - 0xE88];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void RenderTriStrip(int prim, void* verts, int n);
-};
-
-
 /**
  * Draws a colour title row: the title on the left and a 20 x 17 swatch of the colour at the right edge.
  *
@@ -5784,7 +5208,7 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     verts[0].v = zeroF;
     verts[0].u = zeroF;
     verts[0].one = one;
-    *(sVec4_2D0008*)((float*)&verts[0].p) = sVec4_2D0008(rc.X, rc.Y, zeroF, one);
+    verts[0].p = t4VectorXYZW(rc.X, rc.Y, zeroF, one);
     verts[1].r = (int)(colour->R * 128.0f);
     verts[1].g = (int)(colour->G * 128.0f);
     verts[1].b = (int)(colour->B * 128.0f);
@@ -5792,7 +5216,7 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     verts[1].v = zeroF;
     verts[1].u = zeroF;
     verts[1].one = one;
-    *(sVec4_2D0008*)((float*)&verts[1].p) = sVec4_2D0008(rc.X, y2, zeroF, one);
+    verts[1].p = t4VectorXYZW(rc.X, y2, zeroF, one);
     verts[2].r = (int)(colour->R * 128.0f);
     verts[2].g = (int)(colour->G * 128.0f);
     verts[2].b = (int)(colour->B * 128.0f);
@@ -5800,7 +5224,7 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     verts[2].v = zeroF;
     verts[2].u = zeroF;
     verts[2].one = one;
-    *(sVec4_2D0008*)((float*)&verts[2].p) = sVec4_2D0008(x2, rc.Y, zeroF, one);
+    verts[2].p = t4VectorXYZW(x2, rc.Y, zeroF, one);
     verts[3].r = (int)(colour->R * 128.0f);
     verts[3].g = (int)(colour->G * 128.0f);
     verts[3].b = (int)(colour->B * 128.0f);
@@ -5808,11 +5232,13 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     verts[3].v = zeroF;
     verts[3].u = zeroF;
     verts[3].one = one;
-    *(sVec4_2D0008*)((float*)&verts[3].p) = sVec4_2D0008(x2, y2, zeroF, one);
+    verts[3].p = t4VectorXYZW(x2, y2, zeroF, one);
     if (colour->A != 1.0f) {
-        ((cCtx_2D0008*)GrMan)->top->f4_2 = 5;
+        GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+            ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (5 << 2);
     } else {
-        ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
+        GrMan->m_pCurrentDrawState->m_bitGroups[1] =
+            ((int)GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x7C) | (1 << 2);
     }
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->RenderTriStrip(4, verts, 0);
@@ -6024,29 +5450,25 @@ INCLUDE_ASM("util/menu", cVectorMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" void* cExpandMenuItem_input(cExpandMenuItem* self);
 
-struct sMenuChanD6E8 {
-    char pad0[0x18];
-    float* target;              // 0x18
-    char pad1C[0x24 - 0x1C];
-    float scale;                // 0x24
-    float offset;               // 0x28
-    char pad2C[0x34 - 0x2C];
-    float get() { return *target; }
-    void set(float v) { *target = v; }
-};
-struct sMenuVecD6E8 {
-    float x, y, z;
-    sMenuVecD6E8() {}
-    sMenuVecD6E8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
-};
-struct sMenuColD6E8 {
-    char pad0[0x5B8];
-    sMenuChanD6E8 ch[3];        // 0x5B8
-    char pad654[0x670 - 0x654];
-    int linked;                 // 0x670
+// The float a cFloatMenuItem edits, read and written through the item (like its inline setValue(float), out of line in
+// seg/seg_1D3510 as cFloatMenuItem_setValue1); retail forms each item's address once and keeps it for the write back.
+static inline float itemValue(cFloatMenuItem* item)
+{
+    return *item->Value;
+}
+
+static inline void setItemValue(cFloatMenuItem* item, float value)
+{
+    *item->Value = value;
+}
+
+// A t3Vector with EA's constructors (ours has none).
+struct t3VectorXYZ : t3Vector {
+    t3VectorXYZ() {}
+    t3VectorXYZ(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 };
 
-static inline void menuNormalizeD6E8(sMenuVecD6E8& out, const sMenuVecD6E8& v)
+static inline void normalize(t3Vector& out, const t3Vector& v)
 {
     float d = v.x * v.x + v.y * v.y + v.z * v.z;
     float len;
@@ -6076,14 +5498,14 @@ extern "C" void* cVectorMenuItem_input(cVectorMenuItem* self)
 {
     void* ret = cExpandMenuItem_input((cExpandMenuItem*)self);
     if (self->Normalize != 0) {
-        sMenuVecD6E8 n;
-        sMenuVecD6E8 vec(((sMenuChanD6E8*)&self->X)[0].scale * ((sMenuChanD6E8*)&self->X)[0].get() + ((sMenuChanD6E8*)&self->X)[0].offset,
-                       ((sMenuChanD6E8*)&self->X)[1].scale * ((sMenuChanD6E8*)&self->X)[1].get() + ((sMenuChanD6E8*)&self->X)[1].offset,
-                       ((sMenuChanD6E8*)&self->X)[2].scale * ((sMenuChanD6E8*)&self->X)[2].get() + ((sMenuChanD6E8*)&self->X)[2].offset);
-        menuNormalizeD6E8(n, vec);
-        ((sMenuChanD6E8*)&self->X)[0].set(n.x);
-        ((sMenuChanD6E8*)&self->X)[1].set(n.y);
-        ((sMenuChanD6E8*)&self->X)[2].set(n.z);
+        t3VectorXYZ n;
+        t3VectorXYZ vec(self->X.ValueScale * itemValue(&self->X) + self->X.ValueOffset,
+                        self->Y.ValueScale * itemValue(&self->Y) + self->Y.ValueOffset,
+                        self->Z.ValueScale * itemValue(&self->Z) + self->Z.ValueOffset);
+        normalize(n, vec);
+        setItemValue(&self->X, n.x);
+        setItemValue(&self->Y, n.y);
+        setItemValue(&self->Z, n.z);
     }
     return ret;
 }
@@ -6119,7 +5541,7 @@ extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoin
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->NumPoints = numPoints;
-    self->Points = (float*)points;
+    self->Points = (t2Vector*)points;
     self->XLock = (unsigned int)xLockBits;
     self->YLock = (unsigned int)yLockBits;
     self->mVtbl = cGraphMenuItem_vtbl;
@@ -6159,13 +5581,6 @@ float cMenuItem_getRight_f(void* self) __asm__("cMenuItem_getRight__FPv");
 // PORT: the unit declares cMenuItem_getUp/cMenuItem_getDown as void*; these callers use the float result.
 float cMenuItem_getUp_f(void* self) __asm__("cMenuItem_getUp__FPv");
 float cMenuItem_getDown_f(void* self) __asm__("cMenuItem_getDown__FPv");
-
-
-struct sVE_D0908 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 
 /**
@@ -6210,47 +5625,47 @@ extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
             float step = (self->MaxPoint[0] - self->MinPoint[0]) / (float)(self->NumPoints * 2 > 49 ? self->NumPoints * 2 : 50);
             float dy = cMenuItem_getUp_f(self) - cMenuItem_getDown_f(self);
             if (dy != 0.0f && (self->YLock & (1 << self->OnPoint)) == 0) {
-                ((t2Vector*)self->Points)[self->OnPoint].y += dy * (self->MaxPoint[1] - self->MinPoint[1]) * 0.008333333767950535f;
+                self->Points[self->OnPoint].y += dy * (self->MaxPoint[1] - self->MinPoint[1]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->MaxPoint[1] < ((t2Vector*)self->Points)[self->OnPoint].y) {
-                    ((t2Vector*)self->Points)[self->OnPoint].y = self->MaxPoint[1];
+                if (self->MaxPoint[1] < self->Points[self->OnPoint].y) {
+                    self->Points[self->OnPoint].y = self->MaxPoint[1];
                 }
-                if (((t2Vector*)self->Points)[self->OnPoint].y < self->MinPoint[1]) {
-                    ((t2Vector*)self->Points)[self->OnPoint].y = self->MinPoint[1];
+                if (self->Points[self->OnPoint].y < self->MinPoint[1]) {
+                    self->Points[self->OnPoint].y = self->MinPoint[1];
                 }
                 if (self->OnPoint < self->NumPoints - 1) {
-                    if (self->Slope > 0 && ((t2Vector*)self->Points)[self->OnPoint + 1].y < ((t2Vector*)self->Points)[self->OnPoint].y) {
-                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint + 1].y;
-                    } else if (self->Slope < 0 && ((t2Vector*)self->Points)[self->OnPoint].y < ((t2Vector*)self->Points)[self->OnPoint + 1].y) {
-                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint + 1].y;
+                    if (self->Slope > 0 && self->Points[self->OnPoint + 1].y < self->Points[self->OnPoint].y) {
+                        self->Points[self->OnPoint].y = self->Points[self->OnPoint + 1].y;
+                    } else if (self->Slope < 0 && self->Points[self->OnPoint].y < self->Points[self->OnPoint + 1].y) {
+                        self->Points[self->OnPoint].y = self->Points[self->OnPoint + 1].y;
                     }
                 }
                 if (self->OnPoint > 0) {
-                    if (self->Slope > 0 && ((t2Vector*)self->Points)[self->OnPoint].y < ((t2Vector*)self->Points)[self->OnPoint - 1].y) {
-                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint - 1].y;
-                    } else if (self->Slope < 0 && ((t2Vector*)self->Points)[self->OnPoint - 1].y < ((t2Vector*)self->Points)[self->OnPoint].y) {
-                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint - 1].y;
+                    if (self->Slope > 0 && self->Points[self->OnPoint].y < self->Points[self->OnPoint - 1].y) {
+                        self->Points[self->OnPoint].y = self->Points[self->OnPoint - 1].y;
+                    } else if (self->Slope < 0 && self->Points[self->OnPoint - 1].y < self->Points[self->OnPoint].y) {
+                        self->Points[self->OnPoint].y = self->Points[self->OnPoint - 1].y;
                     }
                 }
             }
             float dx = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
             if (dx != 0.0f && (self->XLock & (1 << self->OnPoint)) == 0) {
-                ((t2Vector*)self->Points)[self->OnPoint].x += dx * (self->MaxPoint[0] - self->MinPoint[0]) * 0.008333333767950535f;
+                self->Points[self->OnPoint].x += dx * (self->MaxPoint[0] - self->MinPoint[0]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->MaxPoint[0] < ((t2Vector*)self->Points)[self->OnPoint].x) {
-                    ((t2Vector*)self->Points)[self->OnPoint].x = self->MaxPoint[0];
+                if (self->MaxPoint[0] < self->Points[self->OnPoint].x) {
+                    self->Points[self->OnPoint].x = self->MaxPoint[0];
                 }
-                if (((t2Vector*)self->Points)[self->OnPoint].x < self->MinPoint[0]) {
-                    ((t2Vector*)self->Points)[self->OnPoint].x = self->MinPoint[0];
+                if (self->Points[self->OnPoint].x < self->MinPoint[0]) {
+                    self->Points[self->OnPoint].x = self->MinPoint[0];
                 }
                 if (self->OnPoint < self->NumPoints - 1) {
-                    if (((t2Vector*)self->Points)[self->OnPoint + 1].x - step < ((t2Vector*)self->Points)[self->OnPoint].x) {
-                        ((t2Vector*)self->Points)[self->OnPoint].x = ((t2Vector*)self->Points)[self->OnPoint + 1].x - step;
+                    if (self->Points[self->OnPoint + 1].x - step < self->Points[self->OnPoint].x) {
+                        self->Points[self->OnPoint].x = self->Points[self->OnPoint + 1].x - step;
                     }
                 }
                 if (self->OnPoint > 0) {
-                    if (((t2Vector*)self->Points)[self->OnPoint].x < ((t2Vector*)self->Points)[self->OnPoint - 1].x + step) {
-                        ((t2Vector*)self->Points)[self->OnPoint].x = ((t2Vector*)self->Points)[self->OnPoint - 1].x + step;
+                    if (self->Points[self->OnPoint].x < self->Points[self->OnPoint - 1].x + step) {
+                        self->Points[self->OnPoint].x = self->Points[self->OnPoint - 1].x + step;
                     }
                 }
             }
@@ -6261,7 +5676,8 @@ extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
         result = cMenuItem_input((cMenuItem*)self);
     }
     if (changed) {
-        sVE_D0908* vt = (sVE_D0908*)self->Menu->mVtbl;
+        // cMenu entry 4: onChange(item)
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)self->Menu->mVtbl;
         vt[4].fn(vthis(self->Menu, vt[4]), self);
     }
     }
@@ -6466,7 +5882,7 @@ extern cMenuItem_textRender1_sVec3 kTextSelectedColor;
 extern cMenuItem_textRender1_sVec3 kTextUnselectedColor;
 
 // (prototype from their definition at line 858)
-extern "C" void func_002CB350_0EF8(func_002CB350_sVtx* v, float* r, float* t) __asm__("func_002CB350");
+extern "C" void func_002CB350_0EF8(tBxVertex* v, float* r, float* t) __asm__("func_002CB350");
 
 // A point of the graph (cGraphMenuItem's point list).
 struct sGraphPt_D0EF8 {
@@ -6592,7 +6008,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         fullUv[1] = 0.0f;
         fullUv[2] = 1.0f;
         fullUv[3] = 1.0f;
-        func_002CB350_0EF8((func_002CB350_sVtx*)quadVerts, &gr.x, fullUv);
+        func_002CB350_0EF8((tBxVertex*)quadVerts, &gr.x, fullUv);
     }
     float sx = gr.w / (self->MaxPoint[0] - self->MinPoint[0]);
     float sy = gr.h / (self->MinPoint[1] - self->MaxPoint[1]);
@@ -6664,7 +6080,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         tt[1] = 0.0f;
         tt[2] = 1.0f;
         tt[3] = 1.0f;
-        func_002CB350_0EF8((func_002CB350_sVtx*)quadVerts, markerRect, tt);
+        func_002CB350_0EF8((tBxVertex*)quadVerts, markerRect, tt);
     }
     // Restore the depth the item started with.
     ((cRenderCtx*)GrMan)->top->f8 = (((cRenderCtx*)GrMan)->top->f8 & ~0x3E0) | ((old << 5) & 0x3E0);
@@ -6984,19 +6400,9 @@ extern "C" void cObjectInterface_getAIIndex(cObjectInterface_getAIIndex_cObj* ob
 //100%
 INCLUDE_ASM("util/menu", cObjectInterface_getPosition);
 #ifdef SKIP_ASM
-class cObjectInterface_getPosition_cObj {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual int getPosition();
-};
-
-
 /**
- * Returns rider @p i's position: calls slot 5 of the being interface at Riders[@p i] + 0x6C0 (cAI::Riders, +0x28 of
- * SSXApp->Game->AI).
+ * Returns rider @p i's position: calls cBeing::getPosition (slot 5) on the cBeing base (+0x6C0) of
+ * SSXApp->Game->AI->Riders[@p i].
  *
  * Declared void here; cMoveNode reads the result as a pointer to a 4-float position. Unlike
  * cObjectInterface_getBeing it does not check for an empty rider slot.
@@ -7005,9 +6411,8 @@ public:
  */
 extern "C" void cObjectInterface_getPosition(int i)
 {
-    char* base = (char*)SSXApp->Game->AI;
-    char* rider = *(char**)(base + (i << 2) + 0x28);
-    ((cObjectInterface_getPosition_cObj*)(rider + 0x6C0))->getPosition();
+    cBeing& being = *SSXApp->Game->AI->Riders[i];
+    being.getPosition();
 }
 #endif
 
@@ -7088,17 +6493,16 @@ INCLUDE_ASM("util/menu", cObjectInterface_getCameraPosition);
 #ifdef SKIP_ASM
 
 /**
- * Returns the position of game camera @p i: the camera pointer at SSXApp->Game->ViewMan + 4 + 4 * @p i, plus 0x20.
+ * Returns the position of game camera @p i: SSXApp->Game->ViewMan->PlayerCamera[@p i]->Pose.P.
  *
  * cModifierBlock's render takes the current camera's (cObjectInterface_getCurrentCameraNum) position with it.
  *
  * @param i  camera (view) index
  * @return pointer to the camera's position vector
  */
-extern "C" void* cObjectInterface_getCameraPosition(int i)
+extern "C" t4Vector* cObjectInterface_getCameraPosition(int i)
 {
-    char* riders = (char*)SSXApp->Game->ViewMan;
-    return *(char**)(riders + (i << 2) + 4) + 0x20;
+    return &SSXApp->Game->ViewMan->PlayerCamera[i]->Pose.P;
 }
 #endif
 

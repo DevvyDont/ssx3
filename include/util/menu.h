@@ -569,7 +569,7 @@ struct cGraphMenuItem {
     unsigned int XLock;              // 0x1C [O]; [R] ctor; [U] input: bit i set = point i's x is fixed
     unsigned int YLock;              // 0x20 [O]; [R] ctor; [U] input: bit i set = point i's y is fixed
     int OnPoint;                     // 0x24 [O]; [R] ctor = 0; [U] input selects it (keys 4/5), render marks it
-    float* Points;                   // 0x28 [O] (t2Vector*: NumPoints {x, y} float pairs); [R] ctor; [U] input/render
+    t2Vector* Points;                // 0x28 [O] (NumPoints {x, y} pairs); [R] ctor; [U] input/render
     float MinPoint[2];               // 0x2C [O] t2Vector (x, y); [R] ctor copies *minPoint (sdl/sdr, 8 bytes); [U] input
                                      //       clamps, render scales by it (lwc1 0x2C/0x30)
     float MaxPoint[2];               // 0x34 [O] t2Vector (x, y); [R] ctor copies *maxPoint (sdl/sdr); [U] input, render

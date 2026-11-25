@@ -2,10 +2,12 @@
 #include "common.h"
 #include "ui/uithing.h"
 #include "ui/uimenu.h"
+#include "ui/uigroup.h"
 #include "ui/uistate.h"
 #include "main/gamemode.h"
 #include "util/locale.h"
 #include "be/beintreward.h"
+#include "be/berewarddb.h"
 #include "be/beintscore.h"
 #include "fe/ovstate.h"
 #include "sound/ssxaudio.h"
@@ -58,6 +60,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "ai/rider.h"
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupVideoCalibration_onCreateScreen);
@@ -73,20 +76,6 @@ extern char* D_004A1540;
 extern char str_Text0000[];
 extern char str_kT_THXBrightness[];
 
-class cUIObjK1DEB90 {
-public:
-    char pad_0x000[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int);
-};
-
 /**
  * Opens the THX video-calibration popup ("156thx") on its brightness page.
  *
@@ -100,7 +89,7 @@ extern "C" void cFEPopupVideoCalibration_onCreateScreen(cFEPopupVideoCalibration
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
+    cUIThing* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
     if (obj != 0) {
         obj->setVisible(1);
     }
@@ -164,11 +153,11 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
 {
     if (in->isNext() != 0) {
         if (*(signed char*)&self->mImage == 0) {
-            cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
+            cUIThing* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
             if (obj != 0) {
                 obj->setVisible(0);
             }
-            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540_DEC68[1]));
+            obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540_DEC68[1]));
             if (obj != 0) {
                 obj->setVisible(1);
             }
@@ -176,7 +165,7 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
             if (text != 0) {
                 cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_THXBars));
             }
-            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0001));
+            obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0001));
             if (obj != 0) {
                 obj->setVisible(0);
             }
@@ -521,18 +510,17 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern "C" void cBraggingRightsMenu_cBraggingRightsMenu(void* self);
 extern void* cFEStateBraggingRights_vtbl[];
 
-// Element type of an inline-constructed array (0x34 bytes, constructed by cBraggingRightsMenu_cBraggingRightsMenu).
-struct sElem_F470 {
-    char pad[0x34];
-    sElem_F470() { cBraggingRightsMenu_cBraggingRightsMenu(this); }
+// cBraggingRightsMenu with its constructor (cBraggingRightsMenu_cBraggingRightsMenu), for the mMenuCtrl[2] array.
+struct cBraggingRightsMenuArr : cBraggingRightsMenu {
+    cBraggingRightsMenuArr() { cBraggingRightsMenu_cBraggingRightsMenu(this); }
 };
 
 /**
  * Constructs a bragging-rights state with no engine (the default-constructor copy).
  *
  * Runs the cFEStateNet constructor cFEStateNet_cFEStateNet(self, 0, 0), stores cFEStateBraggingRights_vtbl and builds
- * the two rule-select elements at +0x6D0 (0x34 bytes each) with cBraggingRightsMenu_cBraggingRightsMenu. The full constructor cFEStateBraggingRights_cFEStateBraggingRights also
- * sets mHashName and clears +0x738.
+ * the two rule-select columns mMenuCtrl[2] (0x34 bytes each) with cBraggingRightsMenu_cBraggingRightsMenu. The full
+ * constructor cFEStateBraggingRights_cFEStateBraggingRights also sets mHashName and clears mpGameEventMapping.
  *
  * @return @p self
  */
@@ -540,7 +528,7 @@ extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(cFEStateBragging
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
-    new ((char*)&self->mMenuCtrl[0]) sElem_F470[2];
+    new (self->mMenuCtrl) cBraggingRightsMenuArr[2];
     return ((void*)self);
 }
 #endif
@@ -554,8 +542,8 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 
 
 /**
- * Destroys the bragging-rights front-end state: its two embedded 0x34-byte members (+0x6D0), then the base
- * state.
+ * Destroys the bragging-rights front-end state: its two rule-select columns (mMenuCtrl[2], each through its virtual
+ * destructor), then the base state.
  *
  * The base destructor cFEStateNet__cFEStateNet frees the object when asked to.
  *
@@ -564,12 +552,13 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingRights* self, int flags)
 {
     VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
-    if ((char*)&self->mMenuCtrl[0] != 0) {
-        char* panel = (char*)&self->mMenuCtrl[0] + 0x68;
-        while ((char*)&self->mMenuCtrl[0] != panel) {
-            panel -= 0x34;
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(panel + 0x30);
-            vt[1].fn(vthis(panel, vt[1]), 0);
+    // g++'s member-array destruction: each mMenuCtrl element's virtual destructor (entry 1, flags 0), last first
+    if (self->mMenuCtrl != 0) {
+        cBraggingRightsMenu* menu = self->mMenuCtrl + 2;
+        while (self->mMenuCtrl != menu) {
+            menu--;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)menu->mVtbl;
+            vt[1].fn(vthis(menu, vt[1]), 0);
         }
     }
     cFEStateNet__cFEStateNet_dtor(self, flags);
@@ -1512,16 +1501,17 @@ extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryP
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the store number of a posters gallery reward: its signed byte at +0xE.
+ * Returns the store number of a posters gallery reward: its tPosterInfo's mStoreNum (a signed byte).
  *
  * Vtable entry 36 (+0x124) of cFEStateRewardGalleryPosters_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tPosterInfo)
  * @return the store the reward is sold in
  */
 signed char cFEStateRewardGalleryPosters_getRewardStoreNum(void* self, void* other)
 {
-    return *(signed char*)((char*)other + 0xE);
+    tPosterInfo* poster = (tPosterInfo*)other;
+    return poster->mStoreNum;
 }
 #endif
 
@@ -1529,16 +1519,17 @@ signed char cFEStateRewardGalleryPosters_getRewardStoreNum(void* self, void* oth
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the name of a posters gallery reward: the record's first word (a string pointer).
+ * Returns the name of a posters gallery reward: its tPosterInfo's mNameStringID.
  *
  * Vtable entry 37 (+0x12C) of cFEStateRewardGalleryPosters_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tPosterInfo)
  * @return the reward's name
  */
-int cFEStateRewardGalleryPosters_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryPosters_getRewardName(void* self, void* other)
 {
-    return *(int*)((char*)other + 0x0);
+    tPosterInfo* poster = (tPosterInfo*)other;
+    return poster->mNameStringID;
 }
 #endif
 
@@ -1634,16 +1625,17 @@ extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGal
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the store number of a trading-card gallery reward: its signed byte at +0xE.
+ * Returns the store number of a trading-card gallery reward: its tTradingCardInfo's mStoreNum (a signed byte).
  *
  * Vtable entry 36 (+0x124) of cFEStateRewardGalleryTradingCards_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tTradingCardInfo)
  * @return the store the reward is sold in
  */
 signed char cFEStateRewardGalleryTradingCards_getRewardStoreNum(void* self, void* other)
 {
-    return *(signed char*)((char*)other + 0xE);
+    tTradingCardInfo* card = (tTradingCardInfo*)other;
+    return card->mStoreNum;
 }
 #endif
 
@@ -1651,16 +1643,17 @@ signed char cFEStateRewardGalleryTradingCards_getRewardStoreNum(void* self, void
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the name of a trading-card gallery reward: the record's first word (a string pointer).
+ * Returns the name of a trading-card gallery reward: its tTradingCardInfo's mNameStringID.
  *
  * Vtable entry 37 (+0x12C) of cFEStateRewardGalleryTradingCards_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tTradingCardInfo)
  * @return the reward's name
  */
-int cFEStateRewardGalleryTradingCards_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryTradingCards_getRewardName(void* self, void* other)
 {
-    return *(int*)((char*)other + 0x0);
+    tTradingCardInfo* card = (tTradingCardInfo*)other;
+    return card->mNameStringID;
 }
 #endif
 
@@ -1756,16 +1749,17 @@ extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGall
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the store number of a concept-art gallery reward: its signed byte at +0xE.
+ * Returns the store number of a concept-art gallery reward: its tConceptArtInfo's mStoreNum (a signed byte).
  *
  * Vtable entry 36 (+0x124) of cFEStateRewardGalleryConceptArts_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tConceptArtInfo)
  * @return the store the reward is sold in
  */
 signed char cFEStateRewardGalleryConceptArts_getRewardStoreNum(void* self, void* other)
 {
-    return *(signed char*)((char*)other + 0xE);
+    tConceptArtInfo* art = (tConceptArtInfo*)other;
+    return art->mStoreNum;
 }
 #endif
 
@@ -1773,16 +1767,17 @@ signed char cFEStateRewardGalleryConceptArts_getRewardStoreNum(void* self, void*
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the name of a concept-art gallery reward: the record's first word (a string pointer).
+ * Returns the name of a concept-art gallery reward: its tConceptArtInfo's mNameStringID.
  *
  * Vtable entry 37 (+0x12C) of cFEStateRewardGalleryConceptArts_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tConceptArtInfo)
  * @return the reward's name
  */
-int cFEStateRewardGalleryConceptArts_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryConceptArts_getRewardName(void* self, void* other)
 {
-    return *(int*)((char*)other + 0x0);
+    tConceptArtInfo* art = (tConceptArtInfo*)other;
+    return art->mNameStringID;
 }
 #endif
 
@@ -1878,16 +1873,17 @@ extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVi
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the store number of a video gallery reward: its signed byte at +0xE.
+ * Returns the store number of a video gallery reward: its tVideoInfo's mStoreNum (a signed byte).
  *
  * Vtable entry 36 (+0x124) of cFEStateRewardGalleryVideos_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tVideoInfo)
  * @return the store the reward is sold in
  */
 signed char cFEStateRewardGalleryVideos_getRewardStoreNum(void* self, void* other)
 {
-    return *(signed char*)((char*)other + 0xE);
+    tVideoInfo* video = (tVideoInfo*)other;
+    return video->mStoreNum;
 }
 #endif
 
@@ -1895,16 +1891,17 @@ signed char cFEStateRewardGalleryVideos_getRewardStoreNum(void* self, void* othe
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the name of a video gallery reward: the record's first word (a string pointer).
+ * Returns the name of a video gallery reward: its tVideoInfo's mNameStringID.
  *
  * Vtable entry 37 (+0x12C) of cFEStateRewardGalleryVideos_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tVideoInfo)
  * @return the reward's name
  */
-int cFEStateRewardGalleryVideos_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryVideos_getRewardName(void* self, void* other)
 {
-    return *(int*)((char*)other + 0x0);
+    tVideoInfo* video = (tVideoInfo*)other;
+    return video->mNameStringID;
 }
 #endif
 
@@ -2000,16 +1997,17 @@ extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the store number of a toy gallery reward: its signed byte at +0xE.
+ * Returns the store number of a toy gallery reward: its tToyInfo's mStoreNum (a signed byte).
  *
  * Vtable entry 36 (+0x124) of cFEStateRewardGalleryToys_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tToyInfo)
  * @return the store the reward is sold in
  */
 signed char cFEStateRewardGalleryToys_getRewardStoreNum(void* self, void* other)
 {
-    return *(signed char*)((char*)other + 0xE);
+    tToyInfo* toy = (tToyInfo*)other;
+    return toy->mStoreNum;
 }
 #endif
 
@@ -2017,16 +2015,17 @@ signed char cFEStateRewardGalleryToys_getRewardStoreNum(void* self, void* other)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the name of a toy gallery reward: the record's first word (a string pointer).
+ * Returns the name of a toy gallery reward: its tToyInfo's mNameStringID.
  *
  * Vtable entry 37 (+0x12C) of cFEStateRewardGalleryToys_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tToyInfo)
  * @return the reward's name
  */
-int cFEStateRewardGalleryToys_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryToys_getRewardName(void* self, void* other)
 {
-    return *(int*)((char*)other + 0x0);
+    tToyInfo* toy = (tToyInfo*)other;
+    return toy->mNameStringID;
 }
 #endif
 
@@ -2122,16 +2121,17 @@ extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalle
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the store number of a cheat-character gallery reward: its signed byte at +0xE.
+ * Returns the store number of a cheat-character gallery reward: its tCheatCharInfo's mStoreNum (a signed byte).
  *
  * Vtable entry 36 (+0x124) of cFEStateRewardGalleryCheatChars_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tCheatCharInfo)
  * @return the store the reward is sold in
  */
 signed char cFEStateRewardGalleryCheatChars_getRewardStoreNum(void* self, void* other)
 {
-    return *(signed char*)((char*)other + 0xE);
+    tCheatCharInfo* cheatChar = (tCheatCharInfo*)other;
+    return cheatChar->mStoreNum;
 }
 #endif
 
@@ -2139,16 +2139,17 @@ signed char cFEStateRewardGalleryCheatChars_getRewardStoreNum(void* self, void* 
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the name of a cheat-character gallery reward: the record's first word (a string pointer).
+ * Returns the name of a cheat-character gallery reward: its tCheatCharInfo's mNameStringID.
  *
  * Vtable entry 37 (+0x12C) of cFEStateRewardGalleryCheatChars_vtbl.
  *
- * @param other  the reward record
+ * @param other  the reward record (a tCheatCharInfo)
  * @return the reward's name
  */
-int cFEStateRewardGalleryCheatChars_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryCheatChars_getRewardName(void* self, void* other)
 {
-    return *(int*)((char*)other + 0x0);
+    tCheatCharInfo* cheatChar = (tCheatCharInfo*)other;
+    return cheatChar->mNameStringID;
 }
 #endif
 
@@ -2394,33 +2395,36 @@ extern "C" int cFEStateMountainRoom_isPassVisible(cFEStateMountainRoom* mountain
 INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassFrontVisible);
 #ifdef SKIP_ASM
 /**
- * Reports whether both the mountain room's peak-pass group (+0x48) and its pass picture (+0x4C) are visible.
+ * Reports whether both the mountain room's peak-pass group (mpPassGroup) and its pass picture (mpPassFrontGroup) are
+ * visible.
  *
- * Each check reads the widget's mVisible bit (bit 6 of mAttr) and is 0 for a missing widget. cFEStateMountainRoom_updateTextureLoad makes the
- * same test before showing the pass. An out-of-line inline accessor with no caller.
+ * Each check reads the widget's mVisible bit (bit 6 of mAttr) and is 0 for a missing widget.
+ * cFEStateMountainRoom_updateTextureLoad makes the same test before showing the pass. An out-of-line inline accessor
+ * with no caller.
  *
  * @param mountainRoom  the mountain-room state
  * @return 1 when both are shown, else 0
  */
 extern "C" int cFEStateMountainRoom_isPassFrontVisible(cFEStateMountainRoom* mountainRoom) {
-    int var_2;
-    int var_5;
-    void *temp_3;
-    void *temp_4;
+    int frontVisible;
+    int groupVisible;
+    cUIGroup* group;
+    cUIGroup* front;
 
-    temp_3 = ((void*)mountainRoom->mpPassGroup);
-    var_5 = 0;
-    var_2 = 0;
-    if (temp_3 != 0) {
-        var_2 = ((int) (*(int *)((char*)(temp_3) + 0x14)) >> 6) & 1;
+    // each group's isVisible(): tAttrThing's mVisible, bit 6 of the mAttr word
+    group = mountainRoom->mpPassGroup;
+    frontVisible = 0;
+    groupVisible = 0;
+    if (group != 0) {
+        groupVisible = (group->mAttr >> 6) & 1;
     }
-    if (var_2 != 0) {
-        temp_4 = ((void*)mountainRoom->mpPassFrontGroup);
-        if (temp_4 != 0) {
-            var_5 = ((int) (*(int *)((char*)(temp_4) + 0x14)) >> 6) & 1;
+    if (groupVisible != 0) {
+        front = mountainRoom->mpPassFrontGroup;
+        if (front != 0) {
+            frontVisible = (front->mAttr >> 6) & 1;
         }
     }
-    return var_5;
+    return frontVisible;
 }
 #endif
 //100%
@@ -4196,43 +4200,6 @@ int cFEStateNetMessenger_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onGainTransition);
 #ifdef SKIP_ASM
-class cFEStateNetMessenger_onGainTransition_cObj {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
-
 /**
  * Publishes the messenger presence through its own vtable slot 32 (func_001A3E30, which reports the player as "in the
  * messenger") and lets the transition proceed.
@@ -4241,7 +4208,9 @@ public:
  */
 extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
 {
-    ((cFEStateNetMessenger_onGainTransition_cObj*)self)->v32();
+    // cFEStateNetMessenger_vtbl entry 32: func_001A3E30 (publish the presence)
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     return 1;
 }
 #endif
@@ -4360,22 +4329,17 @@ void cUISoundInterface_soundShutdown(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cUILocaleInterface_setTextNumCharFlag);
 #ifdef SKIP_ASM
-struct sFlags_001E1090 {
-    unsigned int pad : 27;
-    unsigned int flag : 1;
-};
-
 /**
- * Sets or clears a locale interface's text-num-char flag (bit 27 of the word at +0x0, bit 3 of its attribute byte at
- * +0x3).
+ * Sets or clears a locale interface's text-num-char flag (mAttrLocale.mTextNumChar: bit 3 of the attribute byte,
+ * stored through the whole word at 0x0 as bit 27).
  *
  * cUILocaleInterface_setDisplayMode calls it with (mode == 2).
  *
  * @param enabled  nonzero to set the flag
  */
-extern "C" void cUILocaleInterface_setTextNumCharFlag(void* self, int enabled)
+extern "C" void cUILocaleInterface_setTextNumCharFlag(cUILocaleInterface* self, int enabled)
 {
-    ((sFlags_001E1090*)self)->flag = (enabled != 0);
+    self->mAttrLocale.mTextNumChar = (enabled != 0);
 }
 #endif
 
@@ -9925,18 +9889,18 @@ extern "C" void cOVState_FINAL_STANDINGS_onUpdate(cOVState_FINAL_STANDINGS* self
     if (cGameComm_mGameComm != 0) {
         if (cGameComm_mGameComm->mConnected != 0) {
             if (cOVState_onUpdate_HandleIncomingChat(self) != 0) {
-                cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
+                cUIThing* panelWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
                 if (panelWidget != 0) {
                     panelWidget->setVisible(0);
                 }
-                panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
+                panelWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
                 if (panelWidget != 0) {
                     panelWidget->setVisible(0);
                 }
             }
         }
         if (cAppMan_TheAppMan->TimerTick % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
-            cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
+            cUIThing* panelWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
             if (panelWidget != 0) {
                 panelWidget->setVisible(0);
             }
@@ -10185,15 +10149,15 @@ extern "C" void cGame_doNextState(void* self);
  * Moves the race finish overlay on after a delay (vtable entry 12, onUpdate).
  *
  * Runs cOVState_onUpdate and adds 1/60 to the timer (mElapsedTime); when mCanContinue is set and the timer reaches 3
- * seconds (1 second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
+ * seconds (1 second when the human rider's mDidNotFinish is set) purges the normal states and calls
+ * cGame_doNextState.
  */
 extern "C" void cOVState_RACE_FINISHOV_onUpdate(cOVState_RACE_FINISHOV* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    char* riders = (char*)SSXApp->Game->AI;
-    char* rider = *(char**)(riders + (idx << 2) + 0x28);
-    if (*(int*)(rider + 0x480) != 0) {
+    cRider* rider = SSXApp->Game->AI->Riders[idx];
+    if (rider->mDidNotFinish != 0) {
         limit = 1.0f;
     }
     cOVState_onUpdate(self);
@@ -10438,15 +10402,15 @@ extern "C" void cGame_doNextState(void* self);
  * Moves the event finish overlay on after a delay (vtable entry 12, onUpdate).
  *
  * Runs cOVState_onUpdate and adds 1/60 to the timer (mElapsedTime); when mCanContinue is set and the timer reaches 3
- * seconds (1 second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
+ * seconds (1 second when the human rider's mDidNotFinish is set) purges the normal states and calls
+ * cGame_doNextState.
  */
 extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onUpdate(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    char* riders = (char*)SSXApp->Game->AI;
-    char* rider = *(char**)(riders + (idx << 2) + 0x28);
-    if (*(int*)(rider + 0x480) != 0) {
+    cRider* rider = SSXApp->Game->AI->Riders[idx];
+    if (rider->mDidNotFinish != 0) {
         limit = 1.0f;
     }
     cOVState_onUpdate(self);
