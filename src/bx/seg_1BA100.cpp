@@ -383,29 +383,6 @@ extern "C" void cSndPlayOpts_OPTS_SetDefault(cSndPlayOpts* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Reset);
 #ifdef SKIP_ASM
-struct Rec_93B8 { signed char v; char pad[0x17]; };
-struct Q_93B8 { int a, b, c, d; };
-struct Obj_93B8 {
-    int pad0;
-    Rec_93B8 cur;
-    volatile int idx;
-    Rec_93B8* recs;
-    int arr24[4];
-    int* p34;
-    int* vals;
-    int* p3C;
-    int arr40[4][2];
-    int* p60;
-    int* p64;
-    int* p68;
-    int* p6C;
-    Q_93B8* q70;
-    int* p74;
-    int* p78;
-    int* p7C;
-    int* p80;
-    int* p84;
-};
 extern "C" void* memset(void*, int, unsigned int);
 
 /**
@@ -417,55 +394,34 @@ extern "C" void* memset(void*, int, unsigned int);
  *
  * @param playOpts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_Reset(Obj_93B8* playOpts) {
-    playOpts->recs[playOpts->idx] = playOpts->cur;
-    playOpts->arr24[playOpts->idx] = 0;
-    playOpts->p34[playOpts->idx] = 0;
-    playOpts->vals[playOpts->idx] = playOpts->recs[playOpts->idx].v;
-    playOpts->p3C[playOpts->idx] = 0;
-    memset((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
-    playOpts->p60[playOpts->idx] = 0;
-    playOpts->p64[playOpts->idx] = 0;
-    playOpts->p68[playOpts->idx] = 0;
-    playOpts->p6C[playOpts->idx] = 0;
-    playOpts->q70[playOpts->idx].b = 0;
-    playOpts->q70[playOpts->idx].a = 100;
-    playOpts->q70[playOpts->idx].c = 90;
-    playOpts->q70[playOpts->idx].d = 50;
-    playOpts->p74[playOpts->idx] = 0;
-    playOpts->p80[playOpts->idx] = 0;
-    playOpts->p84[playOpts->idx] = 0;
-    playOpts->p78[playOpts->idx] = 127;
-    playOpts->p7C[playOpts->idx] = 1;
+extern "C" void cSndPlayOpts_OPTS_Reset(cSndPlayOpts* playOpts) {
+    playOpts->mCurrent[playOpts->mInst] = playOpts->mDefault;
+    playOpts->mPosition[playOpts->mInst] = 0;
+    playOpts->mPosStatic[playOpts->mInst] = 0;
+    playOpts->mBaseVol[playOpts->mInst] = playOpts->mCurrent[playOpts->mInst].vol;
+    playOpts->mVolControl[playOpts->mInst] = 0;
+    // &mCallback[mInst], spelled as retail computes it (base + mInst * 8, then + 0x40); the typed &mCallback[mInst]
+    // adds the 0x40 before the base
+    memset((char*)playOpts + playOpts->mInst * 8 + 0x40, 0, 8);
+    playOpts->mPtr[playOpts->mInst] = 0;
+    playOpts->mViewport[playOpts->mInst] = 0;
+    playOpts->mVanish[playOpts->mInst] = 0;
+    playOpts->mRadius[playOpts->mInst] = 0;
+    playOpts->mDelay[playOpts->mInst].mCount = 0;
+    playOpts->mDelay[playOpts->mInst].mTime = 100;
+    playOpts->mDelay[playOpts->mInst].mFeedback = 90;
+    playOpts->mDelay[playOpts->mInst].mLevel = 50;
+    playOpts->mExternalVol[playOpts->mInst] = 0;
+    playOpts->mTwoPlayerPan[playOpts->mInst] = 0;
+    playOpts->mTwoPlayerSide[playOpts->mInst] = 0;
+    playOpts->mMapToMaxVol[playOpts->mInst] = 127;
+    playOpts->mCloseOnEnd[playOpts->mInst] = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Open);
 #ifdef SKIP_ASM
-struct Rec_95B0 { signed char v; char pad[0x17]; };
-struct Q_95B0 { int a, b, c, d; };
-struct Obj_95B0 {
-    int pad0;
-    Rec_95B0 cur;
-    volatile int idx;
-    Rec_95B0* recs;
-    int arr24[4];
-    int* p34;
-    int* vals;
-    int* p3C;
-    int arr40[4][2];
-    int* p60;
-    int* p64;
-    int* p68;
-    int* p6C;
-    Q_95B0* q70;
-    int* p74;
-    int* p78;
-    int* p7C;
-    int* p80;
-    int* p84;
-};
 extern "C" void* memset(void*, int, unsigned int);
 
 /**
@@ -479,27 +435,29 @@ extern "C" void* memset(void*, int, unsigned int);
  *
  * @param playOpts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_Open(Obj_95B0* playOpts) {
-    playOpts->idx++;
-    playOpts->recs[playOpts->idx] = playOpts->cur;
-    playOpts->arr24[playOpts->idx] = 0;
-    playOpts->p34[playOpts->idx] = 0;
-    playOpts->vals[playOpts->idx] = playOpts->recs[playOpts->idx].v;
-    playOpts->p3C[playOpts->idx] = 0;
-    memset((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
-    playOpts->p60[playOpts->idx] = 0;
-    playOpts->p64[playOpts->idx] = 0;
-    playOpts->p68[playOpts->idx] = 0;
-    playOpts->p6C[playOpts->idx] = 0;
-    playOpts->q70[playOpts->idx].b = 0;
-    playOpts->q70[playOpts->idx].a = 100;
-    playOpts->q70[playOpts->idx].c = 90;
-    playOpts->q70[playOpts->idx].d = 50;
-    playOpts->p74[playOpts->idx] = 0;
-    playOpts->p80[playOpts->idx] = 0;
-    playOpts->p84[playOpts->idx] = 0;
-    playOpts->p78[playOpts->idx] = 127;
-    playOpts->p7C[playOpts->idx] = 1;
+extern "C" void cSndPlayOpts_OPTS_Open(cSndPlayOpts* playOpts) {
+    playOpts->mInst++;
+    playOpts->mCurrent[playOpts->mInst] = playOpts->mDefault;
+    playOpts->mPosition[playOpts->mInst] = 0;
+    playOpts->mPosStatic[playOpts->mInst] = 0;
+    playOpts->mBaseVol[playOpts->mInst] = playOpts->mCurrent[playOpts->mInst].vol;
+    playOpts->mVolControl[playOpts->mInst] = 0;
+    // &mCallback[mInst], spelled as retail computes it (base + mInst * 8, then + 0x40); the typed &mCallback[mInst]
+    // adds the 0x40 before the base
+    memset((char*)playOpts + playOpts->mInst * 8 + 0x40, 0, 8);
+    playOpts->mPtr[playOpts->mInst] = 0;
+    playOpts->mViewport[playOpts->mInst] = 0;
+    playOpts->mVanish[playOpts->mInst] = 0;
+    playOpts->mRadius[playOpts->mInst] = 0;
+    playOpts->mDelay[playOpts->mInst].mCount = 0;
+    playOpts->mDelay[playOpts->mInst].mTime = 100;
+    playOpts->mDelay[playOpts->mInst].mFeedback = 90;
+    playOpts->mDelay[playOpts->mInst].mLevel = 50;
+    playOpts->mExternalVol[playOpts->mInst] = 0;
+    playOpts->mTwoPlayerPan[playOpts->mInst] = 0;
+    playOpts->mTwoPlayerSide[playOpts->mInst] = 0;
+    playOpts->mMapToMaxVol[playOpts->mInst] = 127;
+    playOpts->mCloseOnEnd[playOpts->mInst] = 1;
 }
 #endif
 
@@ -553,12 +511,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Vol);
 /**
  * Sets the current level's volume: mBaseVol[mInst] = @p vol and mCurrent[mInst].vol = @p vol clamped to 0..127.
  *
- * @param p  the play options
- * @param vol  the volume
+ * @param opts  the play options
+ * @param vol   the volume
  */
-extern "C" void cSndPlayOpts_OPTS_Vol(sSndPlayOpts *p, int vol) {
-    p->vals[p->idx] = vol;
-    p->recs[p->idx].v = MAX_9810(MIN_9810(p->vals[p->idx], 127), 0);
+extern "C" void cSndPlayOpts_OPTS_Vol(cSndPlayOpts *opts, int vol) {
+    opts->mBaseVol[opts->mInst] = vol;
+    opts->mCurrent[opts->mInst].vol = MAX_9810(MIN_9810(opts->mBaseVol[opts->mInst], 127), 0);
 }
 #endif
 
@@ -567,14 +525,6 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ScaleVol);
 #ifdef SKIP_ASM
 #define MIN_98A8(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_98A8(a, b) ((a) >= (b) ? (a) : (b))
-struct Rec_98A8 { unsigned char v; char pad[0x17]; };
-struct Obj_98A8 {
-    char pad0[0x1C];
-    volatile int idx;
-    Rec_98A8* recs;
-    char pad24[0x14];
-    int* vals;
-};
 
 /**
  * Scales the current level's volume by a float factor.
@@ -582,12 +532,12 @@ struct Obj_98A8 {
  * mBaseVol[mInst] becomes mBaseVol[mInst] * @p f clamped to 0..127 (truncated to int), and mCurrent[mInst].vol takes
  * that value.
  *
- * @param p  the play options
- * @param f  the scale factor
+ * @param opts   the play options
+ * @param scale  the scale factor
  */
-extern "C" void cSndPlayOpts_OPTS_ScaleVol(Obj_98A8* p, float f) {
-    p->vals[p->idx] = (int)MAX_98A8(MIN_98A8(p->vals[p->idx] * f, 127.0f), 0.0f);
-    p->recs[p->idx].v = MAX_98A8(MIN_98A8(p->vals[p->idx], 127), 0);
+extern "C" void cSndPlayOpts_OPTS_ScaleVol(cSndPlayOpts* opts, float scale) {
+    opts->mBaseVol[opts->mInst] = (int)MAX_98A8(MIN_98A8(opts->mBaseVol[opts->mInst] * scale, 127.0f), 0.0f);
+    opts->mCurrent[opts->mInst].vol = MAX_98A8(MIN_98A8(opts->mBaseVol[opts->mInst], 127), 0);
 }
 #endif
 
@@ -596,14 +546,6 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ScaleVol1);
 #ifdef SKIP_ASM
 #define MIN_99E8(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_99E8(a, b) ((a) >= (b) ? (a) : (b))
-struct Rec_99E8 { unsigned char v; char pad[0x17]; };
-struct Obj_99E8 {
-    char pad0[0x1C];
-    volatile int idx;
-    Rec_99E8* recs;
-    char pad24[0x14];
-    int* vals;
-};
 
 /**
  * Scales the current level's volume by @p n / 127.
@@ -611,12 +553,12 @@ struct Obj_99E8 {
  * mBaseVol[mInst] becomes mBaseVol[mInst] * @p n / 127 (integer division) clamped to 0..127, and mCurrent[mInst].vol
  * takes that value.
  *
- * @param p  the play options
- * @param n  the scale, 127 for unchanged
+ * @param opts  the play options
+ * @param n     the scale, 127 for unchanged
  */
-extern "C" void cSndPlayOpts_OPTS_ScaleVol1(Obj_99E8* p, int n) {
-    p->vals[p->idx] = MAX_99E8(MIN_99E8(p->vals[p->idx] * n / 127, 127), 0);
-    p->recs[p->idx].v = MAX_99E8(MIN_99E8(p->vals[p->idx], 127), 0);
+extern "C" void cSndPlayOpts_OPTS_ScaleVol1(cSndPlayOpts* opts, int n) {
+    opts->mBaseVol[opts->mInst] = MAX_99E8(MIN_99E8(opts->mBaseVol[opts->mInst] * n / 127, 127), 0);
+    opts->mCurrent[opts->mInst].vol = MAX_99E8(MIN_99E8(opts->mBaseVol[opts->mInst], 127), 0);
 }
 #endif
 

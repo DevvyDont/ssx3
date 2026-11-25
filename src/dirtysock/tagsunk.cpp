@@ -710,17 +710,18 @@ extern "C" sBXStr_9B10 func_00318630(const sBXStr_9B10& a, const char* b);
  *
  * Called through the functor thunk func_00268B30 (LobbyApi callback 1).
  *
- * @param msg  the LobbyApi message: code at +0x4, flags at +0x8, tag record pointer at +0xC
+ * @param msg  the LobbyApi message: code mKind, flags mStatus, tag record pointer mpTagText
  */
 extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
 {
     char name[0x100];
     char text[0x100];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A2F38), name, 0x100, str_empty_i);
-    cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A2F48), text, 0x100, str_empty_i);
-    switch (msg->unk_04) {
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A2F38), name, 0x100,
+                                      str_empty_i);
+    cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A2F48), text, 0x100, str_empty_i);
+    switch (msg->mKind) {
     case 0x70726976: { // 'priv'
-        int flags = msg->unk_08;
+        int flags = msg->mStatus;
         if (flags & 0x200000)
             break;
         if (!(flags & 0x40000000))
@@ -904,7 +905,7 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  * connection with func_00259098(..., mMatchType, 0) and posts a type-239 event. Called through the functor thunk
  * func_00268B80 (LobbyApi callback 4).
  *
- * @param msg  the LobbyApi message (tag record pointer at +0xC)
+ * @param msg  the LobbyApi message (tag record pointer mpTagText)
  */
 extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
 {
@@ -914,17 +915,22 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
     char oppoName[0x100];
     char auth[0x100];
     char p1Text[0x100];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_NAME), name, 0x100, str_empty_i);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_SELF), selfName, 0x100, str_empty_i);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_HOST), hostName, 0x100, str_empty_i);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_OPPO), oppoName, 0x100, str_empty_i);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_AUTH), auth, 0x100, str_empty_i);
-    self->mWhen = cDirtysock_tag_TagFieldGetTime(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_WHEN), 0);
-    int ev = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_P1), -1);
-    int kind = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_P2), -1);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_P1), p1Text, 0x100, str_empty_i);
-    self->mHostAddr = func_0025A730(self, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_FROM), 0));
-    self->mOppoAddr = func_0025A730(self, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_ADDR), 0));
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_NAME), name, 0x100, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SELF), selfName, 0x100,
+                                      str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_HOST), hostName, 0x100,
+                                      str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_OPPO), oppoName, 0x100,
+                                      str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_AUTH), auth, 0x100, str_empty_i);
+    self->mWhen = cDirtysock_tag_TagFieldGetTime(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_WHEN), 0);
+    int ev = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P1), -1);
+    int kind = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P2), -1);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P1), p1Text, 0x100, str_empty_i);
+    self->mHostAddr = func_0025A730(
+        self, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_FROM), 0));
+    self->mOppoAddr = func_0025A730(
+        self, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ADDR), 0));
     cBXString_operatorE1(&self->mGameName, name);
     cBXString_operatorE1(&self->mHostName, hostName);
     cBXString_operatorE1(&self->mOppoName, oppoName);
@@ -932,7 +938,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
     int same = strcmp(selfName, hostName) == 0;
     self->mIsHost = same;
     cBXString_operatorE1(&self->mOpponent, same ? oppoName : hostName);
-    self->mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_SEED), 0);
+    self->mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SEED), 0);
     if (*(int*)self != 0x18 && *(int*)self != 20)
     {
         *(int*)self = 25;
@@ -942,7 +948,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
     *(int*)self = 25;
     if (strlen(p1Text))
     {
-        char* ri = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+        cBEInterface* ri = cBE_getInterface_Fv(cBE_getBE(), 0);
         int mode = 0;
         switch (kind)
         {
@@ -981,15 +987,16 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
             tBERuleOptionDB* cfg = &cBERules_mRules;
             *(int*)&cfg->MyRules |= 0x1C0;
             cBENewRaceInterface_setNumberAI(ri, 0);
-            sVEntryA1D0* vt = *(sVEntryA1D0**)(ri + 0xC);
+            // slot 1: submit
+            sVEntryA1D0* vt = (sVEntryA1D0*)VPTR_OF(cBEInterface, ri);
             vt[1].fn(vthis(ri, vt[1]));
         }
     }
     int type = 239;
     func_00259098(func_002591D0(), self->mMatchType, 0);
-    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    event[0] = type;
-    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event->mType = type;
+    event->mVtbl = online_Event_vtbl;
     post_A1D0(((char*)self), event);
 }
 #endif
@@ -1868,7 +1875,7 @@ static inline void post_B848(char* self, void* msg)
  * online_ErrorEvent_vtbl, type 258) carrying the code and sets mDisconnected. Called through the functor thunk func_00268BA8, which
  * func_0025B6D8() and func_0025AC50() pass to func_003E8260().
  *
- * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
+ * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
 extern "C" void LobbyMan_onlobbyconnect(LobbyMan* self, char* msg)
 {
@@ -2008,7 +2015,7 @@ struct sDsNameListK2 {
  * Resets mNewAccount.mNumNameOptions and stores up to 4 names as cBXStrings. The create-account reply handler
  * LobbyMan_onaccountcreated() calls it when the name is taken ('dupl'), and LobbyMan_onpersonacreated() calls it too.
  *
- * @param msg  the LobbyApi reply (tag record pointer at +0xC)
+ * @param msg  the LobbyApi reply (tag record pointer mpTagText)
  */
 // Splits a comma-separated tag field into up to 4 strings.
 extern "C" void func_0025BC48(LobbyMan* self, LobbyApiMsgT* msg)
@@ -2016,7 +2023,7 @@ extern "C" void func_0025BC48(LobbyMan* self, LobbyApiMsgT* msg)
     char buf[256];
     char* cursor;
     char* start;
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_OPTS), buf, 256, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_OPTS), buf, 256, str_empty_i);
     self->mNewAccount.mNumNameOptions = 0;
     cursor = buf;
     while ((*cursor != 0) && (self->mNewAccount.mNumNameOptions < 4)) {
@@ -2084,7 +2091,7 @@ static inline void post_BD30(char* self, void* msg)
  * online_ErrorEvent_vtbl, type 258) with the code, after loading the suggested names (func_0025BC48) when the code is 'dupl'.
  * Called through the functor thunk func_00268BD0, the reply callback of func_0025B9C8().
  *
- * @param msg  the LobbyApi reply (error code at +0x8, tag record pointer at +0xC)
+ * @param msg  the LobbyApi reply (error code mStatus, tag record pointer mpTagText)
  */
 extern "C" void LobbyMan_onaccountcreated(LobbyMan* self, char* msg)
 {
@@ -2237,7 +2244,7 @@ static inline void post_C0C0(char* self, void* msg)
  *
  * Called through the functor thunk func_00268BF8, the reply callback of func_0025BF18().
  *
- * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
+ * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
 extern "C" void LobbyMan_onaccountedited(LobbyMan* self, char* msg)
 {
@@ -2360,7 +2367,7 @@ static inline void post_C2D8(char* self, void* msg)
  *
  * Called through the functor thunk func_00268C20, the reply callback of func_0025C1E0().
  *
- * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
+ * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
 extern "C" void LobbyMan_onlostaccountrequestsent(LobbyMan* self, char* msg)
 {
@@ -2483,7 +2490,7 @@ static inline void post_C4F0(char* self, void* msg)
  *
  * Called through the functor thunk func_00268C48, the reply callback of func_0025C3F8().
  *
- * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
+ * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
 extern "C" void LobbyMan_onlostpasswordrequestsent(LobbyMan* self, char* msg)
 {
@@ -2675,7 +2682,7 @@ struct sBXStrC8A8 { char* p; };
 /**
  * Handles the lobby server's reply to the login ('auth') request.
  *
- * Sets mState to 1. On success (status word +0x8 of @p msg is 0) it splits the comma list in "PERSONAS" into mPersonas
+ * Sets mState to 1. On success (mStatus of @p msg is 0) it splits the comma list in "PERSONAS" into mPersonas
  * (at most 4, counted in mNumPersonas), stores "MAIL" in mAccount.mMail and the two 'Y'/'N' letters of "SPAM" in
  * mAccount.mSpam, copies mUserName to mAccount.mName and mPassword to mAccount.mPassword and mAccount.mConfirmPassword,
  * decodes "CPAT" into mCPAT with func_003EFD30() (setting mHaveCPAT, or clearing it when the field is missing), sets
@@ -2684,18 +2691,19 @@ struct sBXStrC8A8 { char* p; };
  * error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
  * func_00268C70.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onauthentication(LobbyMan* self, LobbyApiMsgT* msg)
 {
   *((int *) self) = 1;
-  int status = msg->unk_08;
+  int status = msg->mStatus;
   if (status == 0)
   {
     char name[0x100];
     char mail[0x100];
     char spam[0x10];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_PERSONAS), name, 0x100, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_PERSONAS), name, 0x100,
+                                      str_empty_i);
     char *cursor = name;
     (self)->mNumPersonas = 0;
     while (((*cursor) != 0) && ((self)->mNumPersonas < 4))
@@ -2714,15 +2722,15 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, LobbyApiMsgT* msg)
       cBXString_operatorE1(&((sBXStrC8A8*)&(self)->mPersonas[0])[(self)->mNumPersonas++], start);
     }
 
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_MAIL), mail, 0x100, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_MAIL), mail, 0x100, str_empty_i);
     cBXString_operatorE1(&self->mAccount.mMail, mail);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_SPAM), spam, 3, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SPAM), spam, 3, str_empty_i);
     self->mAccount.mSpam[0] = spam[0] == 'Y';
     self->mAccount.mSpam[1] = spam[1] == 'Y';
     cBXString_operatorE(&self->mAccount, &self->mUserName);
     cBXString_operatorE(&self->mAccount.mPassword, &self->mPassword);
     cBXString_operatorE(&self->mAccount.mConfirmPassword, &self->mPassword);
-    const char *cpatField = cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A30F0);
+    const char *cpatField = cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A30F0);
     if (cpatField != 0)
     {
       char cpatText[0x100];
@@ -2754,8 +2762,10 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, LobbyApiMsgT* msg)
   {
     char lockDate[0x100];
     char intro[0x100];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_DATE), lockDate, 0x100, str_empty_i);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_INTRO), intro, 0x100, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_DATE), lockDate, 0x100,
+                                      str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_INTRO), intro, 0x100,
+                                      str_empty_i);
     int *event = (int *) operator new(20, str_NetEvent, 0x20000000, 0);
     event[0] = 258;
     *((void ***) (((char *) event) + 0x4)) = online_AcctLockedEvent_vtbl_C8A8;
@@ -2767,7 +2777,7 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, LobbyApiMsgT* msg)
   else
   {
     int *event = (int *) operator new(0xC, str_NetEvent, 0x20000000, 0);
-    event[2] = msg->unk_08;
+    event[2] = msg->mStatus;
     event[0] = 258;
     *((void ***) (((char *) event) + 0x4)) = online_ErrorEvent_vtbl;
     post_C8A8(((char*)self), event);
@@ -2921,7 +2931,7 @@ static inline void post_CEB0(char* self, void* msg)
  * 218 onto mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
  * from the LobbyApi callback thunk func_00268C98.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onpersonaselected(LobbyMan* self, char* msg)
 {
@@ -3026,27 +3036,29 @@ static inline void post_D048(char* self, void* msg)
  * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
  * callback thunk func_00268CC0.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void func_0025D048(LobbyMan* self, LobbyApiMsgT* msg)
 {
     *(int*)self = 1;
-    if (msg->unk_08 == 0) {
+    if (msg->mStatus == 0) {
         char buf[0x100];
         int st[16];
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_STAT), buf, 0x100, str_empty_i);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_STAT), buf, 0x100,
+                                          str_empty_i);
         cDirtysock_tag_TagFieldGetStructure(buf, st, 0x40, str_l);
         self->mStats.unk_04 = st[2];
         self->mStats.unk_08 = st[2] + st[3] + st[4];
         self->mStats.unk_0C = st[6];
-        self->mStats.mRank = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A3130), 0);
+        self->mStats.mRank =
+            cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A3130), 0);
         self->mStats.unk_10 = -1;
         func_0025E0C8(self, 0);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
-        event->mError = msg->unk_08;
+        event->mError = msg->mStatus;
         post_D048(((char*)self), event);
     }
 }
@@ -3170,7 +3182,7 @@ static inline void post_D2D8(char* self, void* msg)
  * the server's suggested names, then pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
  * from the LobbyApi callback thunk func_00268CE8.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onpersonacreated(LobbyMan* self, char* msg)
 {
@@ -3308,7 +3320,7 @@ static inline void post_D538(char* lst, void* msg)
  * a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
  * func_00268D10.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, char* msg)
 {
@@ -3532,14 +3544,15 @@ static inline void post_D8F8(char* self, void* msg)
  * mEventList; otherwise it empties mRoomName (cBXString_Reset) and pushes a type-258 error event (vtable online_ErrorEvent_vtbl)
  * carrying the status. Called only from the LobbyApi callback thunk func_00268D38.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onroomselected(LobbyMan* self, LobbyApiMsgT* msg)
 {
     *(int*)self = 1;
-    if (msg->unk_08 == 0) {
+    if (msg->mStatus == 0) {
         char buf[0x100];
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_NAME), buf, 0x100, str_empty_i);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_NAME), buf, 0x100,
+                                          str_empty_i);
         cBXString_operatorE1(&self->mRoomName, buf);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 220;
@@ -3550,7 +3563,7 @@ extern "C" void LobbyMan_onroomselected(LobbyMan* self, LobbyApiMsgT* msg)
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
-        event->mError = msg->unk_08;
+        event->mError = msg->mStatus;
         post_D8F8(((char*)self), event);
     }
 }
@@ -3671,7 +3684,7 @@ static inline void post_DB80(char* self, void* msg)
  * mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the
  * LobbyApi callback thunk func_00268D60.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onRoomCreated(LobbyMan* self, char* msg)
 {
@@ -3795,17 +3808,17 @@ static inline sMsgListIterDDE0 sMsgListDDE0_insert(sMsgListIterDDE0 pos, void* c
  * event is 0x10 bytes: type 229, vtable online_PingEvent_vtbl, the name as a cBXString at +0x8 and the ping at +0xC. mState is not
  * touched. Called only from the LobbyApi callback thunk func_00268D88.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onPingReceived(LobbyMan* self, LobbyApiMsgT* msg)
 {
     char name[0x20];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_NAME), name, 0x20, str_empty_i);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_NAME), name, 0x20, str_empty_i);
     int pingTime;
-    if (msg->unk_08 != 0)
+    if (msg->mStatus != 0)
         pingTime = 32656;
     else
-        pingTime = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_PING), 0);
+        pingTime = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_PING), 0);
     online_PingEvent* event = (online_PingEvent*)operator new(0x10, str_NetEvent, 0x20000000, 0);
     event->mType = 229;
     event->mVtbl = online_PingEvent_vtbl;
@@ -3891,7 +3904,7 @@ static inline void post_DF98(char* self, void* msg)
  * Sets mState to 1. On success it pushes an Event of type 232 onto mEventList; otherwise it pushes a type-258 error
  * event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268DB0.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onAbuseReportReceived(LobbyMan* self, char* msg)
 {
@@ -4010,29 +4023,32 @@ static inline void post_E138(char* self, void* msg)
  * using mPersona and mPassword; it then pushes an Event of type 273. Other statuses post nothing. Called only from the
  * LobbyApi callback thunk func_00268DD8.
  *
- * @param msg  the LobbyApi reply: status at +0x8 ('new0' or 'new1'), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus ('new0' or 'new1'), the tag record mpTagText
  */
 extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, LobbyApiMsgT* msg)
 {
     LobbyMan* st = self;
     st->mState = 1;
-    int type = msg->unk_08;
+    int type = msg->mStatus;
     if (type == 0x6E657731) {
         online_NewsEvent* event = (online_NewsEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 226;
         event->mVtbl = online_NewsEvent_vtbl;
-        cBXString_cBXString2(&event->mText, msg->unk_0C);
+        cBXString_cBXString2(&event->mText, msg->mpTagText);
         post_E138(((char*)self), event);
     } else if (type == 0x6E657730) {
         st->mLoggedIn = 1;
         if (func_00261460(BuddyMan_mBuddyMan) == 0) {
             char host[0x100];
             char name[0x100];
-            cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_BUDDYSERVERNAME), host,
+            cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BUDDYSERVERNAME), host,
                                               0x100, str_empty_i);
-            int port = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_BUDDYPORT), 13505);
-            cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_BUDDYRESOURCE), name, 0x100, str_SSX_PS2_2004);
-            BuddyMan_mBuddyMan->miMsgTimeout = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_BUDDYMSGTIMEOUT), 0xD2F00);
+            int port =
+                cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BUDDYPORT), 13505);
+            cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BUDDYRESOURCE), name,
+                                              0x100, str_SSX_PS2_2004);
+            BuddyMan_mBuddyMan->miMsgTimeout = cDirtysock_tag_TagFieldGetNumber(
+                cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BUDDYMSGTIMEOUT), 0xD2F00);
             // PORT: a pointer passed through func_00261248's int parameter.
             func_00261248(BuddyMan_mBuddyMan, host, port, self->mPersona, self->mPassword, (int)name);
         }
@@ -4204,7 +4220,7 @@ static inline sMsgListIterE590 sMsgListE590_insert(sMsgListIterE590 pos, void* c
  * range-checked); otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. mState is not
  * touched. Called only from the LobbyApi callback thunk func_00268E00.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onRanklistRetrieved(LobbyMan* self, char* msg)
 {
@@ -4371,29 +4387,32 @@ struct sMsgE7F0 {
  * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
  * callback thunk func_00268E28.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onPlayerFound(LobbyMan* self, LobbyApiMsgT* msg)
 {
     self->mFindingPlayer = 0;
-    int err = msg->unk_08;
+    int err = msg->mStatus;
     if (err == 0) {
         char name[0x100];
         char text[0x100];
         sRecE7F0 rec;
         char buf[0x100];
         int st[16];
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_PERS), name, 0x100, str_empty_i);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_STAT), buf, 0x100, str_empty_i);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_PERS), name, 0x100,
+                                          str_empty_i);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_STAT), buf, 0x100,
+                                          str_empty_i);
         cDirtysock_tag_TagFieldGetStructure(buf, st, 0x40, str_l);
         rec.start = st[2];
         rec.end = st[2] + st[3] + st[4];
         rec.len = st[6];
-        rec.id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_RANK), -1);
+        rec.id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_RANK), -1);
         rec.extra = -1;
-        int count = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_ADDR), 0);
+        int count = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ADDR), 0);
         int on = count > 0;
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_ROOM), text, 0x100, str_empty_i);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ROOM), text, 0x100,
+                                          str_empty_i);
         sMsgE7F0* event = (sMsgE7F0*)operator new(44, str_NetEvent, 0x20000000, 0);
         event->type = 227;
         event->vt = online_FindPlayerEvent_vtbl;
@@ -4502,27 +4521,28 @@ struct sUserMsg_25EB00 {
  * 0x20-byte fields with no length check. Status 'uusr' posts nothing; other statuses push a type-258 error event
  * (vtable online_ErrorEvent_vtbl). mState is not touched. Called only from the LobbyApi callback thunk func_00268E50.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void func_0025EB00(LobbyMan* self, LobbyApiMsgT* msg)
 {
-    int type = msg->unk_08;
+    int type = msg->mStatus;
     if (type == 0) {
         char name[0x100];
         char tagN[0x100];
         char tagA[0x100];
         char raw[0x20];
         int st[0x10];
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A31D8), name, 0x100,
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31D8), name, 0x100,
                                           str_empty_i);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A2F38), tagN, 0x100,
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A2F38), tagN, 0x100,
                                           str_empty_i);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A31E0), tagA, 0x100,
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31E0), tagA, 0x100,
                                           str_empty_i);
-        int tagF = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A31E8), -1);
-        int tagP = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A31F0), -1);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A31F8), raw, 20, str_empty_i);
-        int rank = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A3130), 0);
+        int tagF = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31E8), -1);
+        int tagP = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31F0), -1);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31F8), raw, 20,
+                                          str_empty_i);
+        int rank = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A3130), 0);
         cDirtysock_tag_TagFieldGetStructure(raw, st, 0x40, str_l);
         sUserStats_25EB00 info;
         info.a = rank;
@@ -4717,7 +4737,7 @@ extern void* online_ErrorEvent_vtbl[];
  * type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
  * func_00268E78.
  *
- * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
+ * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
 extern "C" void LobbyMan_onQuickMatchResponse(LobbyMan* self, char* msg)
 {
@@ -5358,25 +5378,25 @@ static inline sMsgListIterF8A0 sMsgListF8A0_insert(sMsgListIterF8A0 pos, void* c
  * Handles the lobby server's reply to a "chal" (challenge) request.
  *
  * The callback thunk func_00268EA0 calls it; func_0025FA48 and func_0025FAD0 register it. It reads the reply's "MODE"
- * field (up to 15 characters, default ""). A reply with an error code (the word at @p msg + 0x8) in state 21 sets
+ * field (up to 15 characters, default ""). A reply with an error code (mStatus of @p msg) in state 21 sets
  * mState to 1, sends "abortChal" to mOpponent (func_0025FC48) and posts an online error event of type 258 (vtable
  * online_ErrorEvent_vtbl) carrying the code. Otherwise, in state 21: MODE "chal" sends "lockChal" to mOpponent and enters state 24
  * (func_0025FC70); "play" sets mState to 24 and mTimeout and the countdown D_004A5154 to 20.0; "idle" does nothing.
  *
- * @param msg   the LobbyApi reply: error code at +0x8, tag record pointer at +0xC
+ * @param msg   the LobbyApi reply: error code mStatus, tag record pointer mpTagText
  */
 extern "C" void LobbyMan_onchallengeresponse(LobbyMan* self, LobbyApiMsgT* msg)
 {
     char buf[16];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_MODE), buf, 0x10, str_empty_i);
-    if (msg->unk_08 != 0) {
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_MODE), buf, 0x10, str_empty_i);
+    if (msg->mStatus != 0) {
         if (*(int*)self == 21) {
             *(int*)self = 1;
             func_0025FC48(((char*)self));
             online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
             event->mType = 258;
             event->mVtbl = online_ErrorEvent_vtbl;
-            event->mError = msg->unk_08;
+            event->mError = msg->mStatus;
             void* mp = event;
             sMsgListF8A0_insert((sMsgListNodeF8A0*)self->mEventList.mpHead, mp);
         }

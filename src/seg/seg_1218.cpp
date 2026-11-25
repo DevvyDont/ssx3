@@ -496,18 +496,10 @@ extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* crui
 INCLUDE_ASM("seg/seg_1218", cComputer_jumpSetupCruise);
 #ifdef SKIP_ASM
 
-struct sPad_09E0 {
-    unsigned int pad0 : 14;
-    unsigned int b14 : 2;
-    unsigned int pad16 : 4;
-    int b20 : 6;
-    unsigned int pad26 : 6;
-    int w0 : 6;
-};
-
-class cObj_8E88;
-typedef void (cObj_8E88::*Fn_8E88)();
-extern "C" Fn_8E88 cComputer_mCruiseLogic[4];
+// EA's cruise logic member-function pointer ([O] cComputer::mCruiseLogic, "void ::* cruiseLogic"); g++ 2.95 lays a
+// PMF out as tComputerCruiseLogic (delta, index, pfn), the type of the cruiseLogic member.
+typedef void (cComputer::*tCruiseLogicFn)(tCruiseCmd*);
+extern "C" tCruiseLogicFn cComputer_mCruiseLogic[4];
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
 extern "C" void cComputer_setupPrewindState_09E0(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
@@ -550,18 +542,17 @@ static inline float vAbs_09E0(float x)
  *
  * Without a jump event ahead (checkForJumpEvent(), which also sets mDesiredSpeed to the approach speed) it
  * switches to followPathCruise (logic 1, cComputer_followPathCruise) and runs it. Otherwise it steers at the path target
- * (bits 20-25). At the jump start, within 10000 of its path (+0x4C8) and with the turn under 1 (always:
- * calcTurn caps it at 0.98) it calls setupPrewindState() and sets the 2-bit field at bit 14 to 3; else it
- * crouches recklessly when 5 km/h too slow, or sets the low field of word 1 (probably brake) to 31 when 5
- * km/h too fast.
+ * (CruiseTurn). At the jump start, within 10000 of its path (PathDistXY) and with the turn under 1 (always:
+ * calcTurn caps it at 0.98) it calls setupPrewindState() and sets JumpPressed and JumpHeld; else it
+ * crouches recklessly when 5 km/h too slow, or sets CruiseBrake to 31 when 5 km/h too fast.
  *
  * @param cmd  the cruise command being built (On Tour tCruiseCmd)
  */
-extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
+extern "C" void cComputer_jumpSetupCruise(cComputer* self, tCruiseCmd* cmd)
 {
     int below, toPipe, toRail, isSpin, isFlip;
     if (!cComputer_checkForJumpEvent(self, (float*)(&self->mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
-        *(Fn_8E88*)&self->cruiseLogic = cComputer_mCruiseLogic[1];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout, see tCruiseLogicFn
         self->mCruiseLogicID = 1;
         cComputer_followPathCruise(((char*)self), cmd);
         return;
@@ -569,12 +560,13 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
     t4Vector targetPos;
     cComputer_calculateTargetPos_09E0(&targetPos, ((char*)self));
     float steer = cComputer_calcTurn_09E0(((char*)self), &targetPos);
-    cmd->b20 = (int)(steer * 31.0f);
+    cmd->CruiseTurn = (int)(steer * 31.0f);
     cRider* rider = self->RiderHandler.GroundMotion.mRider;
     float len = vLen_09E0(*(&rider->mVelocity));
     if (below && rider->PathDistXY < 10000.0f && vAbs_09E0(steer) < 1.0f) {
         cComputer_setupPrewindState_09E0(((char*)self), isSpin, isFlip, toRail, toPipe);
-        cmd->b14 = 3;
+        cmd->JumpPressed = 1;
+        cmd->JumpHeld = 1;
         return;
     }
     float sp = self->mDesiredSpeed;
@@ -583,7 +575,7 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
         return;
     }
     if (sp + 138.88890075683594f < len)
-        cmd->w0 = 0x1F;
+        cmd->CruiseBrake = 0x1F;
 }
 #endif
 
@@ -1235,67 +1227,32 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_Reset);
 #ifdef SKIP_ASM
-struct sSlotA_101688 {
-    int f0;
-    int f4;
-    int state;          // 0x8
-    char padC[0x10];
-};
-
-struct sPair_101688 {
-    int a;
-    int b;
-    int c;
-};
-
-struct sNode_101688 {
-    int f0;
-    int f4;
-    int f8;
-    sNode_101688* next; // 0xC
-};
-
-struct sTable_101688 {
-    void* owner;                // 0x000
-    sSlotA_101688 slots[64];    // 0x004
-    int count;                  // 0x704
-    int f708;                   // 0x708
-    sPair_101688 pairs[6];      // 0x70C
-    sNode_101688 nodes[64];     // 0x754
-    sNode_101688* freeList;     // 0xB54
-    int fB58;                   // 0xB58
-    int fB5C;                   // 0xB5C
-};
-
 /**
  * Empties the danger manager: frees every tracked element and danger zone and clears the riders' danger
  * levels.
  *
  * Sets the tracked count to 0 and all 64 element states to 2 (free), clears the danger level and the
- * cDangerMan_CalcAppliedDangerLevel value of each of the 6 rider records, chains the 64 zone nodes into the free list, empties
- * the active zone list, sets the zone-check rider index to 0 and clears +0x708.
- *
- * @param vself  the danger manager (cDangerMan)
+ * cDangerMan_CalcAppliedDangerLevel value of each of the 6 rider records, chains the 64 zone nodes into the free list,
+ * empties the active zone list, sets the zone-check rider index to 0 and clears the active avalanche count.
  */
-extern "C" void cDangerMan_Reset(cDangerMan* vself)
+extern "C" void cDangerMan_Reset(cDangerMan* self)
 {
-    sTable_101688* self = (sTable_101688*)vself;
     int i;
-    self->count = 0;
+    self->mTrackedDangerElemNum = 0;
     int j;
     for (j = 0; j < 64; j++)
-        self->slots[j].state = 2;
+        self->mTrackedDangerElems[j].state = 2;
     for (i = 0; i < 6; i++) {
-        self->pairs[i].a = 0;
-        self->pairs[i].b = 0;
+        self->mRiderDangerTrack[i].baseLevel = 0;
+        self->mRiderDangerTrack[i].appliedLevel = 0;
     }
     for (i = 0; i < 63; i++)
-        self->nodes[i].next = &self->nodes[i + 1];
-    self->freeList = self->nodes;
-    self->nodes[63].next = 0;
-    self->fB58 = 0;
-    self->fB5C = 0;
-    self->f708 = 0;
+        self->mDangerZoneTrackHeap[i].pNext = &self->mDangerZoneTrackHeap[i + 1];
+    self->mpInactiveList = self->mDangerZoneTrackHeap;
+    self->mDangerZoneTrackHeap[63].pNext = 0;
+    self->mpActiveList = 0;
+    self->mRiderIndexDangerZoneCheck = 0;
+    self->mNumActiveAvalanche = 0;
 }
 #endif
 
@@ -8002,13 +7959,6 @@ extern "C" void cComputer_setupPrewindState(cComputer* self, int isSpin, int isF
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_setupCrouch);
 #ifdef SKIP_ASM
-struct sPad_C0A8 {
-    unsigned int pad0 : 16;
-    unsigned int b16 : 1;
-    unsigned int b17 : 1;
-    unsigned int pad18 : 8;
-    int w0 : 6;
-};
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vLen_C0A8(const t4Vector& v)
 {
@@ -8030,7 +7980,7 @@ static inline float vLen_C0A8(const t4Vector& v)
     return r;
 }
 /**
- * Sets the cruise command's crouch field (bits 26-31) unless the rider is weak (mRiderDifficulty under 20).
+ * Sets the cruise command's crouch field (CruiseCrouch) unless the rider is weak (mRiderDifficulty under 20).
  *
  * The field gets 31 below 833.3 cm/s (30 km/h) and 0.97 * 31 above it, or 0 for a weak rider.
  *
@@ -8038,27 +7988,20 @@ static inline float vLen_C0A8(const t4Vector& v)
  */
 extern "C" void cComputer_setupCrouch(cComputer* self, void* cmd)
 {
-    sPad_C0A8* crouchCmd = (sPad_C0A8*)cmd;
+    tCruiseCmd* crouchCmd = (tCruiseCmd*)cmd;
     float len = vLen_C0A8(*(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mVelocity);
     float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
         pressAmount = 1.0f;
     if (self->mRiderDifficulty < 20.0f)
         pressAmount = 0.0f;
-    crouchCmd->w0 = (int)(pressAmount * 31.0f);
+    crouchCmd->CruiseCrouch = (int)(pressAmount * 31.0f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_setupRecklessCrouch);
 #ifdef SKIP_ASM
-struct sPad_C140 {
-    unsigned int pad0 : 16;
-    unsigned int b16 : 1;
-    unsigned int b17 : 1;
-    unsigned int pad18 : 8;
-    int w0 : 6;
-};
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vLen_C140(const t4Vector& v)
 {
@@ -8080,20 +8023,21 @@ static inline float vLen_C140(const t4Vector& v)
     return r;
 }
 /**
- * Sets the cruise command's crouch field as setupCrouch() does but for every rider, plus bits 16 and 17.
+ * Sets the cruise command's crouch field as setupCrouch() does but for every rider, and sets BoostPressed and
+ * BoostHeld.
  *
  * @param cmd  the cruise command (On Tour tCruiseCmd)
  */
 extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* cmd)
 {
-    sPad_C140* crouchCmd = (sPad_C140*)cmd;
+    tCruiseCmd* crouchCmd = (tCruiseCmd*)cmd;
     float len = vLen_C140(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
     float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
         pressAmount = 1.0f;
-    crouchCmd->w0 = (int)(pressAmount * 31.0f);
-    crouchCmd->b16 = 1;
-    crouchCmd->b17 = 1;
+    crouchCmd->CruiseCrouch = (int)(pressAmount * 31.0f);
+    crouchCmd->BoostPressed = 1;
+    crouchCmd->BoostHeld = 1;
 }
 #endif
 

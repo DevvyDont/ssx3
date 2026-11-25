@@ -148,16 +148,18 @@ typedef struct LobbyApiMsgT LobbyApiMsgT;
 
 struct LobbyApiMsgT {
     int unk_00;                         // 0x0 [R] func_003E7F70: 3 (the event type)
-    int unk_04;                         // 0x4 [R] the event kind, a FourCC ('disc'); [U] onchatmsg switches on it
-    int unk_08;                         // 0x8 [R] func_003E7F70: the reason code; [U] the handlers' status test
-    char* unk_0C;                       // 0xC [U] the reply's tag text (cDirtysock_tag_TagFieldFind's source); 0 in
-                                        //     func_003E7F70's event
+    int mKind;                          // 0x4 [R] the event kind, a FourCC ('disc'); [U] onchatmsg switches on it
+                                        //     (name ours)
+    int mStatus;                        // 0x8 [R] func_003E7F70: the reason code; [U] the handlers' status test (0 =
+                                        //     success) (name ours)
+    char* mpTagText;                    // 0xC [U] the reply's tag text (cDirtysock_tag_TagFieldFind's source); 0 in
+                                        //     func_003E7F70's event (name ours)
 };
 
 CHECK_OFFSET(LobbyApiMsgT, unk_00, 0x0);
-CHECK_OFFSET(LobbyApiMsgT, unk_04, 0x4);
-CHECK_OFFSET(LobbyApiMsgT, unk_08, 0x8);
-CHECK_OFFSET(LobbyApiMsgT, unk_0C, 0xC);
+CHECK_OFFSET(LobbyApiMsgT, mKind, 0x4);
+CHECK_OFFSET(LobbyApiMsgT, mStatus, 0x8);
+CHECK_OFFSET(LobbyApiMsgT, mpTagText, 0xC);
 CHECK_SIZE(LobbyApiMsgT, 0x10);
 
 #endif /* EALIB_LOBBYAPI_H */

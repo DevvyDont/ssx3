@@ -87,4 +87,36 @@ CHECK_OFFSET(tBEPictureDB, world_bottomright_x, 0x24);
 CHECK_OFFSET(tBEPictureDB, world_bottomright_y, 0x28);
 CHECK_SIZE(tBEPictureDB, 0x2C);
 
+// tBEMissionInfo: one mission's static record, the 88-entry table cBELibrary_missionInfo (retail D_0043EE10, 0xC60
+// bytes: 88 x 0x24). Type and member names ours; [U] be/beintmission.cpp's getters read one field each (index from
+// cBEMissionInterface_getMissionIdx), [R] cBECharProfileDB_init (be/beintecon.cpp) seeds the mission flags from it.
+struct tBEMissionInfo {
+    int id;                         // 0x00 [U] getMissionIdx / getAudioType match it against the mission id
+    int nameHash;                   // 0x04 [U] getMissionName: FELocale->getStringByHash(it), the mission's name
+    int shortDescHash;              // 0x08 [U] getMissionShortDesc: FELocale->getStringByHash(it)
+    int longDescHash;               // 0x0C [U] getMissionLongDesc: FELocale->getStringByHash(it)
+    int locationID;                 // 0x10 [U] getLocationID returns it; the per-track counts compare it with the
+                                    //       location (eBELocationID)
+    int points;                     // 0x14 [U] getPoints returns it
+    short diffLevel;                // 0x18 [U] getDiffLevel returns it (1-3)
+    signed char bStartLocked;       // 0x1A [R] cBECharProfileDB_init copies it to mMissions[i].bIsLocked
+    signed char bStartShowIcon;     // 0x1B [R] cBECharProfileDB_init copies it to mMissions[i].bIsShowIcon
+    int nextMissionID;              // 0x1C [U] getNextMissionID returns it
+    char pad_0x20[0x2];
+    short audioType;                // 0x22 [U] getAudioType returns it (the sound system's mission audio kind)
+};
+
+CHECK_OFFSET(tBEMissionInfo, id, 0x00);
+CHECK_OFFSET(tBEMissionInfo, nameHash, 0x04);
+CHECK_OFFSET(tBEMissionInfo, shortDescHash, 0x08);
+CHECK_OFFSET(tBEMissionInfo, longDescHash, 0x0C);
+CHECK_OFFSET(tBEMissionInfo, locationID, 0x10);
+CHECK_OFFSET(tBEMissionInfo, points, 0x14);
+CHECK_OFFSET(tBEMissionInfo, diffLevel, 0x18);
+CHECK_OFFSET(tBEMissionInfo, bStartLocked, 0x1A);
+CHECK_OFFSET(tBEMissionInfo, bStartShowIcon, 0x1B);
+CHECK_OFFSET(tBEMissionInfo, nextMissionID, 0x1C);
+CHECK_OFFSET(tBEMissionInfo, audioType, 0x22);
+CHECK_SIZE(tBEMissionInfo, 0x24);
+
 #endif /* BE_BEINTMISSION_H */

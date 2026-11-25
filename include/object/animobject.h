@@ -121,4 +121,35 @@ CHECK_OFFSET(cAnimObjectNode, AnimFrames, 0x64);
 CHECK_OFFSET(cAnimObjectNode, MeshVelocity, 0x68);
 CHECK_SIZE(cAnimObjectNode, 0x6C);
 
+// World-script data that makes an animated object node (On Tour tMakeAnimObjectData; the first 0x28 bytes of
+// tMakeAnimComboData, object/animcombonode.h, with the same names). [R] MakeAnimObjectFunc (seg/seg_1FBE38) fills a
+// 44-byte block of it from its static defaults and the script arguments; [U] cAnimObjectNode_cAnimObjectNode1 reads
+// Type .. ForceVisible.
+struct tMakeAnimObjectData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read here)
+    int Type;                       // 0x04 [O]; [U] cAnimObjectNode ctor: -> AnimType (lhu)
+    int Dir;                        // 0x08 [O]; [U] cAnimObjectNode ctor: 1 negates AnimSpeed
+    float FromTime;                 // 0x0C [O]; [U] cAnimObjectNode ctor: / 30 -> FromTime
+    float ToTime;                   // 0x10 [O]; [U] cAnimObjectNode ctor: / 30 -> ToTime
+    float Speed;                    // 0x14 [O]; [U] cAnimObjectNode ctor: AnimSpeed
+    float SpeedRange;               // 0x18 [O]; [U] cAnimObjectNode ctor: AnimSpeed's random range
+    float StartTime;                // 0x1C [O]; [U] cAnimObjectNode ctor: CurrTime
+    int RandomStart;                // 0x20 [O]; [U] cAnimObjectNode ctor: CurrTime = AIrandf(From, To)
+    int ForceVisible;               // 0x24 [O]; [U] cAnimObjectNode ctor: passed to cAnimNode_cAnimNode
+    char unk_028[0x4];              // 0x28 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeAnimObjectData, unk_000, 0x00);
+CHECK_OFFSET(tMakeAnimObjectData, Type, 0x04);
+CHECK_OFFSET(tMakeAnimObjectData, Dir, 0x08);
+CHECK_OFFSET(tMakeAnimObjectData, FromTime, 0x0C);
+CHECK_OFFSET(tMakeAnimObjectData, ToTime, 0x10);
+CHECK_OFFSET(tMakeAnimObjectData, Speed, 0x14);
+CHECK_OFFSET(tMakeAnimObjectData, SpeedRange, 0x18);
+CHECK_OFFSET(tMakeAnimObjectData, StartTime, 0x1C);
+CHECK_OFFSET(tMakeAnimObjectData, RandomStart, 0x20);
+CHECK_OFFSET(tMakeAnimObjectData, ForceVisible, 0x24);
+CHECK_OFFSET(tMakeAnimObjectData, unk_028, 0x28);
+CHECK_SIZE(tMakeAnimObjectData, 0x2C);
+
 #endif /* OBJECT_ANIMOBJECT_H */

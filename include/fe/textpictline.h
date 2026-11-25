@@ -20,18 +20,24 @@
 #include "layout.h"
 
 struct cFont;
+struct tHUDPictureDB;
 
-// tTextPictElemSpec (0x8): one segment. [O] float width + an anonymous union (On Tour does not list its members).
+// tTextPictElemSpec (0x8): one segment. [O] float width + an anonymous union (On Tour does not list its members; the
+// two below are ours). Even segments are text runs, odd ones pictures.
 
 struct tTextPictElemSpec {
     float width;                     // 0x000 [O]; [U] split sums the segment widths into tTextPictLine::width
-    void* unk_04;                    // 0x004 [O] anonymous union; [U] split stores the segment's start in text[]
-                                     //       (unsigned short*) or its icon record; draw prints / blits it (view
-                                     //       sSeg_1E92A8: unsigned short* str)
+    union {                          // 0x004 [O] anonymous union
+        unsigned short* pText;       //       [U] a text segment: split stores its start in text[], draw prints it
+                                     //       (name ours)
+        tHUDPictureDB* pPicture;     //       [U] a picture segment: split stores its gTextPictDB record, draw blits
+                                     //       it (name ours)
+    };
 };
 
 CHECK_OFFSET(tTextPictElemSpec, width, 0x000);
-CHECK_OFFSET(tTextPictElemSpec, unk_04, 0x004);
+CHECK_OFFSET(tTextPictElemSpec, pText, 0x004);
+CHECK_OFFSET(tTextPictElemSpec, pPicture, 0x004);
 CHECK_SIZE(tTextPictElemSpec, 0x8);
 
 struct tTextPictLine {

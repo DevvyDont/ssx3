@@ -1679,7 +1679,7 @@ struct tWtVector3 : t3Vector {
     tWtVector3(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 };
 
-extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, int* shape, tWtVector3* lo, tWtVector3* hi);
+extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, tAudioVolume* volume, tWtVector3* lo, tWtVector3* hi);
 
 /**
  * Computes an audio instance's world bounding box from its audio volumes (cWorldSound_CalcAudioVolumeBox) and its object position.
@@ -1703,7 +1703,7 @@ extern "C" void cWorldSound_CalcInstAudioBoundingBox(cWorldSound* self, tInstanc
     for (int i = 0; i < info->m_iNumVolumes; i++) {
         tWtVector3 recMin;
         tWtVector3 recMax;
-        cWorldSound_CalcAudioVolumeBox(self, (int*)cursor, &recMin, &recMax);
+        cWorldSound_CalcAudioVolumeBox(self, (tAudioVolume*)cursor, &recMin, &recMax);
         if (recMin.x < lo->x) lo->x = recMin.x;
         if (recMin.y < lo->y) lo->y = recMin.y;
         if (recMin.z < lo->z) lo->z = recMin.z;
@@ -1775,70 +1775,71 @@ static inline tWtVector3 Cross_2B6F40(const tWtVector3& a, const tWtVector3& b)
     return tWtVector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
-struct sShape_2B6F40 {
-    int type;
-    int id;
-    float cx, cy, cz;       // 0x08
-    float e0, e1, e2;       // 0x14
-    float ax, ay, az;       // 0x20
-};
-
 /**
  * Computes the local bounding box of one audio volume record by its type.
  *
- * Types 0, 2 and 3 (sphere-like) use centre +- radius; type 1 builds an orthonormal basis from its axis (+0x20) and the
- * z axis and extends the centre by the three half-extents along it.
+ * Spheres, cones and ambient volumes (types 0, 2 and 3) use centre +- radius; an ellipse (type 1) builds an
+ * orthonormal basis from its axis (m_f3dir) and the z axis and extends the centre by its three half-extents along it.
  *
- * @param shape  the volume record (type, id, centre, extents, axis)
+ * @param volume  the volume record (tAudioVolumeSphere / Ellipse / Cone / Ambient by m_eType)
  * @param lo  receives the minimum corner
  * @param hi  receives the maximum corner
  */
-extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, int* shape, tWtVector3* lo, tWtVector3* hi)
+extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, tAudioVolume* volume, tWtVector3* lo, tWtVector3* hi)
 {
-    sShape_2B6F40* shapeRec = (sShape_2B6F40*)shape;
-    switch (shapeRec->type)
+    switch (volume->m_eType)
     {
     case 0:
-        lo->x = shapeRec->cx - shapeRec->e0;
-        lo->y = shapeRec->cy - shapeRec->e0;
-        lo->z = shapeRec->cz - shapeRec->e0;
-        hi->x = shapeRec->cx + shapeRec->e0;
-        hi->y = shapeRec->cy + shapeRec->e0;
-        hi->z = shapeRec->cz + shapeRec->e0;
+    {
+        tAudioVolumeSphere* sphere = (tAudioVolumeSphere*)volume;
+        lo->x = sphere->m_f3pos[0] - sphere->m_fRadius;
+        lo->y = sphere->m_f3pos[1] - sphere->m_fRadius;
+        lo->z = sphere->m_f3pos[2] - sphere->m_fRadius;
+        hi->x = sphere->m_f3pos[0] + sphere->m_fRadius;
+        hi->y = sphere->m_f3pos[1] + sphere->m_fRadius;
+        hi->z = sphere->m_f3pos[2] + sphere->m_fRadius;
         break;
+    }
     case 1:
     {
+        tAudioVolumeEllipse* ellipse = (tAudioVolumeEllipse*)volume;
         tWtVector3 axisDir;
         tWtVector3 sideDir;
         tWtVector3 upDir;
         tWtVector3 z;
-        axisDir = tWtVector3(shapeRec->ax, shapeRec->ay, shapeRec->az);
+        axisDir = tWtVector3(ellipse->m_f3dir[0], ellipse->m_f3dir[1], ellipse->m_f3dir[2]);
         z = tWtVector3(0.0f, 0.0f, 1.0f);
         sideDir = Cross_2B6F40(z, axisDir);
         sideDir = sideDir * (1.0f / wtSqrt_2B6F40(sideDir.x * sideDir.x + sideDir.y * sideDir.y + sideDir.z * sideDir.z));
         upDir = Cross_2B6F40(axisDir, sideDir);
-        *lo = tWtVector3(shapeRec->cx, shapeRec->cy, shapeRec->cz);
-        *hi = tWtVector3(shapeRec->cx, shapeRec->cy, shapeRec->cz);
-        *lo -= axisDir * shapeRec->e0 + sideDir * shapeRec->e1 + upDir * shapeRec->e2;
-        *hi += axisDir * shapeRec->e0 + sideDir * shapeRec->e1 + upDir * shapeRec->e2;
+        *lo = tWtVector3(ellipse->m_f3pos[0], ellipse->m_f3pos[1], ellipse->m_f3pos[2]);
+        *hi = tWtVector3(ellipse->m_f3pos[0], ellipse->m_f3pos[1], ellipse->m_f3pos[2]);
+        *lo -= axisDir * ellipse->m_f3radius[0] + sideDir * ellipse->m_f3radius[1] + upDir * ellipse->m_f3radius[2];
+        *hi += axisDir * ellipse->m_f3radius[0] + sideDir * ellipse->m_f3radius[1] + upDir * ellipse->m_f3radius[2];
         break;
     }
     case 2:
-        lo->x = shapeRec->cx - shapeRec->e0;
-        lo->y = shapeRec->cy - shapeRec->e0;
-        lo->z = shapeRec->cz - shapeRec->e0;
-        hi->x = shapeRec->cx + shapeRec->e0;
-        hi->y = shapeRec->cy + shapeRec->e0;
-        hi->z = shapeRec->cz + shapeRec->e0;
+    {
+        tAudioVolumeCone* cone = (tAudioVolumeCone*)volume;
+        lo->x = cone->m_f3pos[0] - cone->m_fRadius;
+        lo->y = cone->m_f3pos[1] - cone->m_fRadius;
+        lo->z = cone->m_f3pos[2] - cone->m_fRadius;
+        hi->x = cone->m_f3pos[0] + cone->m_fRadius;
+        hi->y = cone->m_f3pos[1] + cone->m_fRadius;
+        hi->z = cone->m_f3pos[2] + cone->m_fRadius;
         break;
+    }
     case 3:
-        lo->x = shapeRec->cx - shapeRec->e0;
-        lo->y = shapeRec->cy - shapeRec->e0;
-        lo->z = shapeRec->cz - shapeRec->e0;
-        hi->x = shapeRec->cx + shapeRec->e0;
-        hi->y = shapeRec->cy + shapeRec->e0;
-        hi->z = shapeRec->cz + shapeRec->e0;
+    {
+        tAudioVolumeAmbient* ambient = (tAudioVolumeAmbient*)volume;
+        lo->x = ambient->m_f3pos[0] - ambient->m_fRadius;
+        lo->y = ambient->m_f3pos[1] - ambient->m_fRadius;
+        lo->z = ambient->m_f3pos[2] - ambient->m_fRadius;
+        hi->x = ambient->m_f3pos[0] + ambient->m_fRadius;
+        hi->y = ambient->m_f3pos[1] + ambient->m_fRadius;
+        hi->z = ambient->m_f3pos[2] + ambient->m_fRadius;
         break;
+    }
     }
 }
 #endif

@@ -15,8 +15,8 @@
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
 //   [R] the two allocations and inlined constructors above;
-//   [U] how retail code uses the field (src/intersect/worldsphtree.cpp: views sQuery_330BA8 / _331450 / _331E90 /
-//       _332DB8, sTree_333EF8, sList_334458, the raw offsets in cOverlapList_splineIntersect; the retail asm);
+//   [U] how retail code uses the field (src/intersect/worldsphtree.cpp: the cOverlapList_get* methods, sTree_333EF8,
+//       sList_334458, the raw offsets in cOverlapList_splineIntersect; the retail asm);
 //   [O] SSX On Tour's DWARF (class cOverlapList 0xA14): same names, types and offsets as retail.
 
 #include "layout.h"

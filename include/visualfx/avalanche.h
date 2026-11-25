@@ -105,8 +105,9 @@ CHECK_OFFSET(tAvalancheCollision, m_inst, 0x004);
 CHECK_SIZE(tAvalancheCollision, 0x008);
 
 struct tAvalancheGroundCollision {
-    unsigned short m_time;          // 0x000 [O]; [U] resolveDataPointers (the file's first half-word)
-    unsigned short m_nodeId;        // 0x002 [O]; [U] resolveDataPointers (the second)
+    unsigned short m_time;          // 0x000 [O]; [U] resolveDataPointers (the file's second half-word: sh 0x0 after
+                                    //       sh 0x2); readFromReplayFrame compares it with the time
+    unsigned short m_nodeId;        // 0x002 [O]; [U] resolveDataPointers (the file's first half-word)
 };
 
 CHECK_OFFSET(tAvalancheGroundCollision, m_time, 0x000);

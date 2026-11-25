@@ -1,5 +1,6 @@
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "util/consoleconfig.h"
 #include "intersect/bxnash.h"
 #include "main/game.h"
@@ -1223,18 +1224,6 @@ extern "C" void WORLDTRIGGERMANAGER_DeInit(void* self);
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void cAppMan_loadexecpurge(void* self);
 
-struct sExecPurgeVTable {
-    char pad_0x00[0x3B8];
-    short field_0x3B8;
-    char pad_0x3BA[2];
-    void (*fn)(void*);
-};
-
-struct sExecPurgeMgr {
-    char pad_0x00[0x10D8];
-    sExecPurgeVTable* vtable;
-};
-
 
 //99.95%
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
@@ -1243,15 +1232,14 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
  * Shuts down the world triggers, audio, the current module and the graphics, probably before a LoadExecPS2.
  *
  * Calls WORLDTRIGGERMANAGER_DeInit(), SSXAUDIO_DeInit() and cAppMan_loadexecpurge() (the current module's
- * slot 3, then its deletion), then the graphics manager's vtable slot 119.
+ * slot 3, then its deletion), then the graphics manager's loadexecpurge (vtable slot 119).
  */
 void cSSXApp_loadexecpurge(void* self)
 {
     WORLDTRIGGERMANAGER_DeInit(self);
     SSXAUDIO_DeInit();
     cAppMan_loadexecpurge(self);
-    sExecPurgeVTable* vt = (sExecPurgeVTable*)VPTR_OF(cGraphicsMan, cGraphicsMan_TheGraphicsMan);
-    vt->fn((char*)cGraphicsMan_TheGraphicsMan + vt->field_0x3B8);
+    cGraphicsMan_TheGraphicsMan->loadexecpurge();
 }
 #endif
 
@@ -1259,36 +1247,26 @@ void cSSXApp_loadexecpurge(void* self)
 INCLUDE_ASM("main/ssxapp", cSSXApp_activateBEOptions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sOptions_228C08 {
-    unsigned int pad0 : 20;
-    unsigned int mode : 2;          // bits 20..21
-    unsigned int pad22 : 10;
-    int pad_4 : 8;
-    int b5 : 8;
-    int b6 : 8;
-    int pad_7 : 8;
-    int data[(0x288 - 8) / 4];
-};
-extern sOptions_228C08 cBEOptionInterface_mOption_228C08 __asm__("cBEOptionInterface_mOption");
+extern tBEOptionDB cBEOptionInterface_mOption;
 
-static inline sOptions_228C08 GetOptions_228C08()
+// The option block by value, as be/bedbreward's getOptions returns it (retail copies all 0x288 bytes per read).
+static inline tBEOptionDB GetOptions_228C08()
 {
-    return cBEOptionInterface_mOption_228C08;
+    return cBEOptionInterface_mOption;
 }
-
-
 
 /**
  * Applies the saved display options to the graphics manager: the TV display format and the screen offset.
  *
- * Passes the options' 2-bit display format (bits 20-21 of cBEOptionInterface_mOption; values above 2 count as 0) to GrMan's
- * slot 40 (0 normal, 1 letterbox, 2 widescreen, by the scales cPS2GraphicsMan_SetTVDisplayFormat sets), then option bytes 6 and 5
- * to slot 12, the screen x and y offset. The C takes no arguments; initload passes the app anyway.
+ * Passes the options' 2-bit display format (iUseWidescreen of cBEOptionInterface_mOption; values above 2 count as 0) to
+ * GrMan's slot 40 (0 normal, 1 letterbox, 2 widescreen, by the scales cPS2GraphicsMan_SetTVDisplayFormat sets), then
+ * iHzDelta and iVtDelta to slot 12 (SetScreenOffset), the screen x and y offset. The C takes no arguments; initload
+ * passes the app anyway.
  */
 extern "C" void cSSXApp_activateBEOptions()
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    switch (GetOptions_228C08().mode) {
+    switch (GetOptions_228C08().iUseWidescreen) {
     case 0:
         cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(0);
         break;
@@ -1304,9 +1282,9 @@ extern "C" void cSSXApp_activateBEOptions()
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-    char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
+    void* thisp = vthis(ps2GraphicsMan, vt[12]); // slot 12: SetScreenOffset
     void (**pfn)(void*, int, int) = &vt[12].fn;
-    (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
+    (*pfn)(thisp, GetOptions_228C08().iHzDelta, GetOptions_228C08().iVtDelta);
 }
 #endif
 
@@ -2611,32 +2589,17 @@ extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, 
 INCLUDE_ASM("main/ssxapp", FrustumIntersector_crossingfogvolume);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sVisObj_A270 {
-    char pad0[0x50];
-    float sphere[4];  // 0x50
-    char pad60[8];
-    float boxMin[3];  // 0x68
-    float boxMax[3];  // 0x74
-};
-
-struct sVisOwner_A270 {
-    char pad0[0x78B4];
-    int countA;                  // 0x78B4
-    sVisObj_A270* nodesA[0x80];  // 0x78B8
-    sVisObj_A270* last;          // 0x7AB8
-    int countB;                  // 0x7ABC
-    sVisObj_A270* nodesB[1];     // 0x7AC0
-};
-
 // PORT: callers declare FrustumIntersector_crossingfogvolume with other pointer types; defined under an asm label.
-extern "C" void FrustumIntersector_crossingfogvolume_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum) __asm__("FrustumIntersector_crossingfogvolume");
+extern "C" void FrustumIntersector_crossingfogvolume_impl(FrustumIntersector* self, tParticleInstanceRecord* obj,
+                                                          int frustum) __asm__("FrustumIntersector_crossingfogvolume");
 
 /**
  * Files the previously tested object by its VU0 frustum result, then starts the test for @p obj.
  *
- * Same pipeline as FrustumIntersector_crossinginstance without the residency checks: the pending object is +0x7AB8, result 0 or 3 appends it
- * to the list at +0x78B8 (count +0x78B4), 4 to the list at +0x7AC0 (count +0x7ABC). The test uses the box at +0x68 /
- * +0x74 and the vector at +0x50. FrustumIntersector_AddAllTypedCrossing calls it for objects of type 7.
+ * Same pipeline as FrustumIntersector_crossinginstance without the residency checks: the pending object is
+ * lastfogvolume, result 0 or 3 appends it to fogvolumesinside, 4 to fogvolumescrossing. The test uses the box
+ * (m_fvMin / m_fvMax) and the bounding sphere (m_fvBSphere). FrustumIntersector_AddAllTypedCrossing calls it for
+ * objects of type 7.
  *
  * @param obj  the object to test, or null to file the pending object
  * @param frustum  the value put in vi14 for the microprogram
@@ -2644,22 +2607,23 @@ extern "C" void FrustumIntersector_crossingfogvolume_impl(sVisOwner_A270* self, 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
 // Files the previous object by the result of its test, then starts the test for this one.
-extern "C" void FrustumIntersector_crossingfogvolume_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum)
+extern "C" void FrustumIntersector_crossingfogvolume_impl(FrustumIntersector* self, tParticleInstanceRecord* obj,
+                                                          int frustum)
 {
-    unsigned int r;
+    unsigned int testResult;
     if (obj != 0) {
         float lo[4] __attribute__((aligned(16)));
         float hi[4] __attribute__((aligned(16)));
-        lo[0] = obj->boxMin[0];
-        lo[1] = obj->boxMin[1];
-        lo[2] = obj->boxMin[2];
-        hi[0] = obj->boxMax[0];
-        hi[1] = obj->boxMax[1];
-        hi[2] = obj->boxMax[2];
+        lo[0] = obj->m_fvMin.m[0];
+        lo[1] = obj->m_fvMin.m[1];
+        lo[2] = obj->m_fvMin.m[2];
+        hi[0] = obj->m_fvMax.m[0];
+        hi[1] = obj->m_fvMax.m[1];
+        hi[2] = obj->m_fvMax.m[2];
         lo[3] = 1.0f;
         hi[3] = 1.0f;
         __asm__ __volatile__("cfc2.i    %0, $vi1
-" : "=r"(r));
+" : "=r"(testResult));
         __asm__ __volatile__(
             "lqc2      $vf20, 0x0(%0)
 "
@@ -2672,28 +2636,28 @@ extern "C" void FrustumIntersector_crossingfogvolume_impl(sVisOwner_A270* self, 
             "vcallms   3512
 "
             :
-            : "r"(lo), "r"(hi), "r"(obj->sphere), "r"(frustum));
+            : "r"(lo), "r"(hi), "r"(obj->m_fvBSphere.m), "r"(frustum));
     } else {
         __asm__ __volatile__("cfc2.i    %0, $vi1
-" : "=r"(r));
+" : "=r"(testResult));
     }
-    switch (r) {
+    switch (testResult) {
     case 0:
     case 3:
-        if (self->last != 0) {
-            self->nodesA[self->countA++] = self->last;
+        if (self->lastfogvolume != 0) {
+            self->fogvolumesinside[self->numfogvolumesinside++] = self->lastfogvolume;
         }
         break;
     case 1:
     case 2:
         break;
     case 4:
-        if (self->last != 0) {
-            self->nodesB[self->countB++] = self->last;
+        if (self->lastfogvolume != 0) {
+            self->fogvolumescrossing[self->numfogvolumescrossing++] = self->lastfogvolume;
         }
         break;
     }
-    self->last = obj;
+    self->lastfogvolume = obj;
 }
 #endif
 
@@ -2763,37 +2727,31 @@ INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllTypedCrossing);
 
 extern "C" void FrustumIntersector_crossingfogvolume(void* self, cTypedSpaceNode* node, int arg);
 
-struct sWorld_22A4A8 {
-    char pad[0x7AB8];
-    int f7AB8;
-    char pad7ABC[0x7BC0 - 0x7ABC];
-    int count;
-    cTypedSpaceNode* nodes[1];
-};
-
 /**
- * Sorts the objects of each listed source: type 7 is frustum-tested (FrustumIntersector_crossingfogvolume), type 8 goes straight into the list
- * at +0x7BC4 (count +0x7BC0).
+ * Sorts the objects of each listed source: type 7 is frustum-tested (FrustumIntersector_crossingfogvolume), type 8
+ * goes straight into lighthalosinside (count numlighthalosinside).
  *
- * Walks the linked list at +0x28 of each of the @p n 8-byte entries (source, frustum value); the type is at +0x8 of
- * each object. Other types are skipped. Ends with FrustumIntersector_crossingfogvolume(self, 0, 0) when an object is pending (+0x7AB8).
+ * Walks the typed list (nodesinside[2]) of each of the @p n entries' cells (cell, frustum value), switching on each
+ * object's type. Other types are skipped. Ends with FrustumIntersector_crossingfogvolume(self, 0, 0) when an object
+ * is pending (lastfogvolume).
  * FrustumIntersector_FrustumIntersector calls it.
  *
  * @param items  the source entries
  * @param n  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllTypedCrossing(sWorld_22A4A8* self, CellClipT* items, int n)
+extern "C" void FrustumIntersector_AddAllTypedCrossing(FrustumIntersector* self, CellClipT* items, int n)
 {
     for (; n > 0; n--, items++) {
-        for (cTypedSpaceNode* object = *(cTypedSpaceNode**)(((char*)items->pCell) + 0x28); object != 0; object = ((cTypedSpaceNode*)object->next)) {
+        cTypedSpaceNode* object = (cTypedSpaceNode*)((nash_Cell*)items->pCell)->nodesinside[2].head;
+        for (; object != 0; object = ((cTypedSpaceNode*)object->next)) {
             if (object->type == 7) {
                 FrustumIntersector_crossingfogvolume(self, object, ((int)items->uVisMask));
             } else if (object->type == 8) {
-                self->nodes[self->count++] = object;
+                self->lighthalosinside[self->numlighthalosinside++] = (tHaloRecord*)object;
             }
         }
     }
-    if (self->f7AB8 != 0) {
+    if ((int)self->lastfogvolume != 0) {
         FrustumIntersector_crossingfogvolume(self, 0, 0);
     }
 }
@@ -3256,18 +3214,6 @@ extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* sel
 
 
 
-struct sCfg_22ADD8 {
-    char pad_0x00[0x10];
-    void* data;         // 0x10
-};
-
-struct sCtx_22ADD8 {
-    void* owner;        // 0x0
-    void* f4;           // 0x4
-    void* f8;           // 0x8
-    int fC;             // 0xC
-};
-
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through vf1..vf4).
 static inline void MatCopy_22ADD8(t4Matrix* dst, const t4Matrix* src)
 {
@@ -3285,109 +3231,83 @@ static inline void MatCopy_22ADD8(t4Matrix* dst, const t4Matrix* src)
         : "memory");
 }
 
-struct sWorldInit_22ADD8 {
-    void* f0;               // 0x0
-    void* f4;               // 0x4
-    char pad_0x8[0x88];
-    int f90;                // 0x90
-    int f94;                // 0x94
-    char pad_0x98[0x1098 - 0x98];
-    int f1098;              // 0x1098
-    char pad_0x109C[0x209C - 0x109C];
-    int f209C;              // 0x209C
-    char pad_0x20A0[0x40A0 - 0x20A0];
-    int f40A0;              // 0x40A0
-    char pad_0x40A4[0x50A4 - 0x40A4];
-    int f50A4;              // 0x50A4
-    int f50A8;              // 0x50A8
-    char pad_0x50AC[0x70AC - 0x50AC];
-    int f70AC;              // 0x70AC
-    char pad_0x70B0[0x78B0 - 0x70B0];
-    int f78B0;              // 0x78B0
-    int f78B4;              // 0x78B4
-    char pad_0x78B8[0x7AB8 - 0x78B8];
-    int f7AB8;              // 0x7AB8
-    int f7ABC;              // 0x7ABC
-    char pad_0x7AC0[0x7BC0 - 0x7AC0];
-    int f7BC0;              // 0x7BC0
-    char pad_0x7BC4[0x7FC4 - 0x7BC4];
-    int f7FC4;              // 0x7FC4
-};
-
-static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
+static inline void Load_22ADD8(FrustumCallback* callback, nash_Cell* root, nash_Octant* octant)
 {
-    if (data) {
-        FrustumCallback_operatorCall(ctx, data, c);
+    if (root) {
+        FrustumCallback_operatorCall(callback, root, octant);
     }
 }
 
 /**
  * Builds a camera view's visible world: culls the octree and fills the view's object lists.
  *
- * Stores @p visSource, @p viewBounds and @p cameraSlots at +0x0, +0x4 and +0x90 and zeroes every list count (+0x94, +0x1098, +0x209C, +0x40A0,
- * +0x50A8, +0x70AC, +0x78B4, +0x7ABC, +0x7BC0, +0x7FC4) and pending slot (+0x50A4, +0x78B0, +0x7AB8). Copies the matrix
- * returned by the graphics manager's vtable slot 43 to +0x10 and GrMan's matrix at +0x5800 to +0x50, calls
- * cOcclusionMan_updateView(@p visSource, @p viewBounds), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
- * runs FrustumCallback_operatorCall on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
- * plane mask *(@p visSource + 0x110), and sorts the culled cells' objects: FrustumIntersector_AddAllPatchesInside, FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllTypedInside over
- * the inside list (+0x98), FrustumIntersector_AddAllPatchesCrossing, FrustumIntersector_AddAllInstancesCrossing and FrustumIntersector_AddAllTypedCrossing over the partial list (+0x109C). cGame_render
- * calls it once per view with a stack-allocated view.
+ * Stores @p occlusionMan, @p cameraBox and @p world and zeroes every list count (numcellsinside ..
+ * numlighthaloscrossing) and pending object (lastinstance, lastpatch, lastfogvolume). Copies the matrix returned by
+ * the graphics manager's GetNetMatrix (vtable slot 43) to VFIntersect and GrMan's mGuardBandMatrix to GFIntersect,
+ * calls cOcclusionMan_updateView(@p occlusionMan, @p cameraBox), loads both matrices into VU0 with func_00229F30 and
+ * calls func_00229F80 (empty). Then runs FrustumCallback_operatorCall on the root cell of each of the Nash's eight
+ * octants that has one, with the occlusion man's m_uiVisMask as the plane mask, and sorts the culled cells' objects:
+ * FrustumIntersector_AddAllPatchesInside, FrustumIntersector_AddAllInstancesInside and
+ * FrustumIntersector_AddAllTypedInside over cellsinside, FrustumIntersector_AddAllPatchesCrossing,
+ * FrustumIntersector_AddAllInstancesCrossing and FrustumIntersector_AddAllTypedCrossing over cellscrossing.
+ * cGame_render calls it once per view with a stack-allocated view.
  *
- * @param cfg  the eight octree roots (cell entries whose node pointer is at +0x10)
- * @param visSource  the visibility source: holds the clip planes and the initial plane mask (+0x110)
- * @param viewBounds  the view's bounding box (passed to cOcclusionMan_updateView)
- * @param cameraSlots  the camera-slot table pointer stored at +0x90 (read by FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllPatchesInside)
+ * @param nash  the world's Nash grid (its eight octants, walked in flat order)
+ * @param occlusionMan  the occlusion manager: holds the clip planes and the initial plane mask (m_uiVisMask)
+ * @param cameraBox  the view's bounding box (passed to cOcclusionMan_updateView)
+ * @param world  the world (read by FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllPatchesInside)
  * @return @p self
  */
-extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* cfg, cOcclusionMan* visSource, void* viewBounds, int cameraSlots)
+extern "C" FrustumIntersector* FrustumIntersector_FrustumIntersector(FrustumIntersector* self, cBXNash* nash,
+                                                                     cOcclusionMan* occlusionMan,
+                                                                     const tBoundBox* cameraBox, cWorld* world)
 {
-    sWorldInit_22ADD8* w = (sWorldInit_22ADD8*)self;
-    w->f0 = ((void*)visSource);
-    w->f4 = viewBounds;
-    w->f90 = cameraSlots;
-    w->f94 = 0;
-    w->f1098 = 0;
-    w->f209C = 0;
-    w->f40A0 = 0;
-    w->f50A8 = 0;
-    w->f70AC = 0;
-    w->f78B4 = 0;
-    w->f7ABC = 0;
-    w->f7BC0 = 0;
-    w->f7FC4 = 0;
-    w->f50A4 = 0;
-    w->f78B0 = 0;
-    w->f7AB8 = 0;
+    self->occlusionman = occlusionMan;
+    self->camerabox = cameraBox;
+    self->world = world;
+    self->numcellsinside = 0;
+    self->numcellscrossing = 0;
+    self->numinstancesinside = 0;
+    self->numinstancescrossing = 0;
+    self->numpatchesinside = 0;
+    self->numpatchescrossing = 0;
+    self->numfogvolumesinside = 0;
+    self->numfogvolumescrossing = 0;
+    self->numlighthalosinside = 0;
+    self->numlighthaloscrossing = 0;
+    self->lastinstance = 0;
+    self->lastpatch = 0;
+    self->lastfogvolume = 0;
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         t4Matrix gfxMatrix = ps2GraphicsMan->GetNetMatrix();
-        MatCopy_22ADD8((t4Matrix*)(self + 0x10), &gfxMatrix);
+        MatCopy_22ADD8(&self->VFIntersect, &gfxMatrix);
     }
-    MatCopy_22ADD8((t4Matrix*)(self + 0x50), ((&GrMan->mGuardBandMatrix)));
-    cOcclusionMan_updateView(*(void**)(self + 0x0), *(void**)(self + 0x4));
-    func_00229F30(self + 0x10, self + 0x50);
-    func_00229F80(*(void**)(self + 0x4));
-    sCtx_22ADD8 ctx;
-    char* f0 = *(char**)(self + 0x0);
-    void* planeMask = *(void**)(f0 + 0x110);
-    ctx.owner = self;
-    ctx.f4 = f0;
-    ctx.f8 = planeMask;
-    ctx.fC = 0;
-    Load_22ADD8(&ctx, cfg[0].data, &cfg[0]);
-    Load_22ADD8(&ctx, cfg[1].data, &cfg[1]);
-    Load_22ADD8(&ctx, cfg[2].data, &cfg[2]);
-    Load_22ADD8(&ctx, cfg[3].data, &cfg[3]);
-    Load_22ADD8(&ctx, cfg[4].data, &cfg[4]);
-    Load_22ADD8(&ctx, cfg[5].data, &cfg[5]);
-    Load_22ADD8(&ctx, cfg[6].data, &cfg[6]);
-    Load_22ADD8(&ctx, cfg[7].data, &cfg[7]);
-    FrustumIntersector_AddAllPatchesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
-    FrustumIntersector_AddAllInstancesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
-    FrustumIntersector_AddAllTypedInside((FrustumIntersector*)self, (CellClipT*)(self + 0x98), *(int*)(self + 0x94));
-    FrustumIntersector_AddAllPatchesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
-    FrustumIntersector_AddAllInstancesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
-    FrustumIntersector_AddAllTypedCrossing((sWorld_22A4A8*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
+    MatCopy_22ADD8(&self->GFIntersect, ((&GrMan->mGuardBandMatrix)));
+    cOcclusionMan_updateView(self->occlusionman, (void*)self->camerabox);
+    func_00229F30(&self->VFIntersect, &self->GFIntersect);
+    func_00229F80((void*)self->camerabox);
+    FrustumCallback callback;
+    cOcclusionMan* om = self->occlusionman;
+    unsigned int visMask = om->m_uiVisMask;
+    callback.intersector = self;
+    callback.occlusionman = om;
+    callback.vismask_ = visMask;
+    callback.insidefrustum_ = 0;
+    Load_22ADD8(&callback, nash->octant[0][0][0].rootcell, &nash->octant[0][0][0]);
+    Load_22ADD8(&callback, nash->octant[0][0][1].rootcell, &nash->octant[0][0][1]);
+    Load_22ADD8(&callback, nash->octant[0][1][0].rootcell, &nash->octant[0][1][0]);
+    Load_22ADD8(&callback, nash->octant[0][1][1].rootcell, &nash->octant[0][1][1]);
+    Load_22ADD8(&callback, nash->octant[1][0][0].rootcell, &nash->octant[1][0][0]);
+    Load_22ADD8(&callback, nash->octant[1][0][1].rootcell, &nash->octant[1][0][1]);
+    Load_22ADD8(&callback, nash->octant[1][1][0].rootcell, &nash->octant[1][1][0]);
+    Load_22ADD8(&callback, nash->octant[1][1][1].rootcell, &nash->octant[1][1][1]);
+    FrustumIntersector_AddAllPatchesInside(self, self->cellsinside, self->numcellsinside);
+    FrustumIntersector_AddAllInstancesInside(self, self->cellsinside, self->numcellsinside);
+    FrustumIntersector_AddAllTypedInside(self, self->cellsinside, self->numcellsinside);
+    FrustumIntersector_AddAllPatchesCrossing(self, self->cellscrossing, self->numcellscrossing);
+    FrustumIntersector_AddAllInstancesCrossing(self, self->cellscrossing, self->numcellscrossing);
+    FrustumIntersector_AddAllTypedCrossing(self, self->cellscrossing, self->numcellscrossing);
     return self;
 }
 #endif
@@ -3785,7 +3705,9 @@ extern "C" int cGame_render(cGame* self)
         Grow_22B008(bounds, corner);
         sWorld_22B008 worldData;
         world = &worldData;
-        FrustumIntersector_FrustumIntersector((char*)world, ((sCfg_22ADD8*)self->BXNash), (cOcclusionMan*)((void*)self->OcclusionMan), &box, ((int)self->World));
+        // sBox_22B008 has tBoundBox's layout (MinPoint, MaxPoint)
+        FrustumIntersector_FrustumIntersector((FrustumIntersector*)world, self->BXNash, self->OcclusionMan,
+                                              (const tBoundBox*)&box, self->World);
         cGame_renderBuckets(self);
         func_00229BA8((cCrowdMan2d*)((void*)self->CrowdMan2d));
         func_00344138(((void*)self->CrowdMan3d));

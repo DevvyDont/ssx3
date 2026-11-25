@@ -10853,9 +10853,9 @@ void func_003E7C40(char *self) {
                                               str_empty_k);
         if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
             ev.unk_00 = 0;
-            ev.unk_04 = 0x70696E67;
-            ev.unk_08 = 0;
-            ev.unk_0C = evbuf;
+            ev.mKind = 0x70696E67;
+            ev.mStatus = 0;
+            ev.mpTagText = evbuf;
             evbuf[0] = 0;
             cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, str_NAME_b, name);
             cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_ADDR_b, rec.id);
@@ -10889,9 +10889,9 @@ void func_003E7C40(char *self) {
     while (func_003E7918_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
             ev.unk_00 = 0;
-            ev.unk_04 = 0x70696E67;
-            ev.unk_08 = -1;
-            ev.unk_0C = evbuf;
+            ev.mKind = 0x70696E67;
+            ev.mStatus = -1;
+            ev.mpTagText = evbuf;
             evbuf[0] = 0;
             cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, str_NAME_b, rec.name);
             cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_ADDR_b, rec.id);

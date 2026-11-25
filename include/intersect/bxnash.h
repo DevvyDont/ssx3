@@ -155,7 +155,7 @@ struct cBXNash {
                                     //       cBXNash_* query reads octant[i].rootcell (lw 0x10 + 0x14 * i) and passes
                                     //       &octant[i] (addiu 0x14 * i)
     unsigned int deletecount;       // 0x0A0 [O]; [R] cGame_load 0; [U] cOverlapList_get* copy it into the overlap
-                                    //       list's deletecount (sGrid_330BA8::unkA0)
+                                    //       list's deletecount
     // --- cBXNash
     cAIFwdDiffCache* TheAIFwdDiffCache; // 0x0A4 [O]; [R] cGame_load 0; [U] initTheAIFwdDiffCache stores a new
                                     //       cAIFwdDiffCache, purgeTheAIFwdDiffCache deletes and zeroes it;

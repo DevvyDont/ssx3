@@ -41,6 +41,70 @@ CHECK_OFFSET(tAudioData, m_iNumCollisionTriggers, 0x0);
 CHECK_OFFSET(tAudioData, m_iNumVolumes, 0x4);
 CHECK_SIZE(tAudioData, 0x8);
 
+// The head of each volume record after tAudioData (On Tour struct tAudioVolume, 0x4, and its four record types;
+// names from On Tour's DWARF). The type is On Tour's eAudioVolumeType: kAUDIO_VOLUME_SPHERE 0, kAUDIO_VOLUME_ELLIPSE 1,
+// kAUDIO_VOLUME_CONE 2, kAUDIO_VOLUME_AMBIENT 3; [U] the walks step 0x1C, 0x30, 0x30 and 0x18 by it, On Tour's sizes.
+struct tAudioVolume {
+    int m_eType;                    // 0x0 [O] eAudioVolumeType; [U] cWorldSound_CalcAudioVolumeBox switches on it
+};
+
+struct tAudioVolumeSphere : public tAudioVolume {
+    int m_eTrigger;                 // 0x04 [O] eAudioTrigger (the record's trigger number)
+    float m_f3pos[3];               // 0x08 [O]; [U] CalcAudioVolumeBox: the centre
+    float m_fRadius;                // 0x14 [O]; [U] CalcAudioVolumeBox: the box is the centre +- it
+    float m_fDecayRate;             // 0x18 [O]
+};
+
+struct tAudioVolumeEllipse : public tAudioVolume {
+    int m_eTrigger;                 // 0x04 [O] eAudioTrigger
+    float m_f3pos[3];               // 0x08 [O]; [U] CalcAudioVolumeBox: the centre
+    float m_f3radius[3];            // 0x14 [O]; [U] CalcAudioVolumeBox: the half-extents along the axis, side and up
+    float m_f3dir[3];               // 0x20 [O]; [U] CalcAudioVolumeBox: the axis its basis is built from
+    float m_fDecayRate;             // 0x2C [O]
+};
+
+struct tAudioVolumeCone : public tAudioVolume {
+    int m_eTrigger;                 // 0x04 [O] eAudioTrigger
+    float m_f3pos[3];               // 0x08 [O]; [U] CalcAudioVolumeBox: the centre
+    float m_fRadius;                // 0x14 [O]; [U] CalcAudioVolumeBox: the box is the centre +- it
+    float m_f3dir[3];               // 0x18 [O]
+    float m_fDecayRate;             // 0x24 [O]
+    float m_fcoscone;               // 0x28 [O]
+    float m_fDropOff;               // 0x2C [O]
+};
+
+struct tAudioVolumeAmbient : public tAudioVolume {
+    int m_eTrigger;                 // 0x04 [O] eAudioTrigger
+    float m_f3pos[3];               // 0x08 [O]; [U] CalcAudioVolumeBox: the centre
+    float m_fRadius;                // 0x14 [O]; [U] CalcAudioVolumeBox: the box is the centre +- it
+};
+
+CHECK_OFFSET(tAudioVolume, m_eType, 0x0);
+CHECK_SIZE(tAudioVolume, 0x4);
+CHECK_OFFSET(tAudioVolumeSphere, m_eTrigger, 0x04);
+CHECK_OFFSET(tAudioVolumeSphere, m_f3pos, 0x08);
+CHECK_OFFSET(tAudioVolumeSphere, m_fRadius, 0x14);
+CHECK_OFFSET(tAudioVolumeSphere, m_fDecayRate, 0x18);
+CHECK_SIZE(tAudioVolumeSphere, 0x1C);
+CHECK_OFFSET(tAudioVolumeEllipse, m_eTrigger, 0x04);
+CHECK_OFFSET(tAudioVolumeEllipse, m_f3pos, 0x08);
+CHECK_OFFSET(tAudioVolumeEllipse, m_f3radius, 0x14);
+CHECK_OFFSET(tAudioVolumeEllipse, m_f3dir, 0x20);
+CHECK_OFFSET(tAudioVolumeEllipse, m_fDecayRate, 0x2C);
+CHECK_SIZE(tAudioVolumeEllipse, 0x30);
+CHECK_OFFSET(tAudioVolumeCone, m_eTrigger, 0x04);
+CHECK_OFFSET(tAudioVolumeCone, m_f3pos, 0x08);
+CHECK_OFFSET(tAudioVolumeCone, m_fRadius, 0x14);
+CHECK_OFFSET(tAudioVolumeCone, m_f3dir, 0x18);
+CHECK_OFFSET(tAudioVolumeCone, m_fDecayRate, 0x24);
+CHECK_OFFSET(tAudioVolumeCone, m_fcoscone, 0x28);
+CHECK_OFFSET(tAudioVolumeCone, m_fDropOff, 0x2C);
+CHECK_SIZE(tAudioVolumeCone, 0x30);
+CHECK_OFFSET(tAudioVolumeAmbient, m_eTrigger, 0x04);
+CHECK_OFFSET(tAudioVolumeAmbient, m_f3pos, 0x08);
+CHECK_OFFSET(tAudioVolumeAmbient, m_fRadius, 0x14);
+CHECK_SIZE(tAudioVolumeAmbient, 0x18);
+
 // One placed instance's audio (On Tour struct tInstanceAudio, 0x18), filed in the world's nash as a typed space node.
 // On Tour declares the members inside two anonymous unions (at 0x0 and 0x10) whose members its dump does not list:
 // the names below are ours. [U] func_002B6B50 (the world audio file's resolve) walks the file's array of them (count

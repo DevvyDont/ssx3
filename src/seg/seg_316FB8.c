@@ -1507,11 +1507,7 @@ void lflush(void) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __srefill);
 #ifdef SKIP_ASM
-struct R7648 {
-    int err;
-    char pad[0x38 - 4];
-    int didinit;
-};
+/* the stdio FILE as __svfscanf's view (it calls __srefill_impl below); __srefill itself uses struct __sFILE */
 struct F7648 {
     unsigned char *p;
     int r;
@@ -1531,75 +1527,76 @@ struct F7648 {
     unsigned char *up;
     int ur;
     char pad40[0x54 - 0x40];
-    struct R7648 *data;
+    struct _reent *data;
 };
-extern struct R7648 *g7648_impure __asm__("_impure_ptr");
-extern void g7648_init(struct R7648 *) __asm__("__sinit");
-extern int g7648_fflush(struct F7648 *) __asm__("fflush");
-extern void g7648_smakebuf(struct F7648 *) __asm__("__smakebuf");
-extern int g7648_fwalk(struct R7648 *, void *) __asm__("_fwalk");
+extern struct _reent *g7648_impure __asm__("_impure_ptr");
+extern void g7648_init(struct _reent *) __asm__("__sinit");
+extern int g7648_fflush(struct __sFILE *) __asm__("fflush");
+extern void g7648_smakebuf(struct __sFILE *) __asm__("__smakebuf");
+extern int g7648_fwalk(struct _reent *, void *) __asm__("_fwalk");
 extern void g7648_lflush(void) __asm__("lflush");
 int __srefill_impl(struct F7648 *fp) __asm__("__srefill");
+int __srefill_(struct __sFILE *stream) __asm__("__srefill");
 /* newlib's CHECK_INIT (stdio/local.h), a do { } while (0) macro: make sure stdio is set up (98.89 without the macro's
    loop) */
 #define CHECK_INIT_7648(fp)                     \
   do {                                          \
-      if ((fp)->data == 0)                      \
-          (fp)->data = g7648_impure;            \
-      if ((fp)->data->didinit == 0)             \
-          g7648_init((fp)->data);               \
+      if ((fp)->_data == 0)                     \
+          (fp)->_data = g7648_impure;           \
+      if ((fp)->_data->__sdidinit == 0)         \
+          g7648_init((fp)->_data);              \
   } while (0)
 /* __srefill */
 /**
  * Refills a stdio stream's read buffer and returns 0, or -1 at end of file or on an error.
  *
- * Runs the stdio set-up check, clears the read count and fails at once when the EOF flag (0x20) is set. A stream not
- * yet reading must be read-write (0x10): a pending write is flushed with fflush and the write state cleared,
- * then the read flag (4) is set. When an ungetc buffer is in use, it switches back to the saved read pointer and count
- * instead. A missing buffer is made with __smakebuf; for an unbuffered or line-buffered stream (flags 3)
+ * Runs the stdio set-up check, clears the read count and fails at once when the EOF flag (__SEOF) is set. A stream not
+ * yet reading (__SRD) must be read-write (__SRW): a pending write (__SWR) is flushed with fflush and the write state
+ * cleared, then the read flag is set. When an ungetc buffer is in use, it switches back to the saved read pointer and
+ * count instead. A missing buffer is made with __smakebuf; for an unbuffered or line-buffered stream (__SLBF | __SNBF)
  * _fwalk first flushes all streams with lflush. Then it calls the read callback for a full buffer: 0
- * bytes sets the EOF flag, a negative result the error flag (0x40).
+ * bytes sets the EOF flag, a negative result the error flag (__SERR).
  *
- * @param fp  the stream
+ * @param stream  the stream
  * @return 0 when data was read, -1 at end of file or on an error
  */
-int __srefill_impl(struct F7648 *fp) {
+int __srefill_(struct __sFILE *stream) {
     int n;
-    CHECK_INIT_7648(fp);
-    fp->r = 0;
-    if (fp->flags & 0x20)
+    CHECK_INIT_7648(stream);
+    stream->_r = 0;
+    if (stream->_flags & __SEOF)
         return -1;
-    if ((fp->flags & 4) == 0) {
-        if ((fp->flags & 0x10) == 0)
+    if ((stream->_flags & __SRD) == 0) {
+        if ((stream->_flags & __SRW) == 0)
             return -1;
-        if (fp->flags & 8) {
-            if (g7648_fflush(fp))
+        if (stream->_flags & __SWR) {
+            if (g7648_fflush(stream))
                 return -1;
-            fp->flags &= ~8;
-            fp->w = 0;
-            fp->lbfsize = 0;
+            stream->_flags &= ~__SWR;
+            stream->_w = 0;
+            stream->_lbfsize = 0;
         }
-        fp->flags |= 4;
-    } else if (fp->ubbase != 0) {
-        if ((fp->r = fp->ur) != 0) {
-            fp->p = fp->up;
+        stream->_flags |= __SRD;
+    } else if (stream->_ub._base != 0) {
+        if ((stream->_r = stream->_ur) != 0) {
+            stream->_p = stream->_up;
             return 0;
         }
     }
-    if (fp->base == 0)
-        g7648_smakebuf(fp);
-    if (fp->flags & 3)
-        g7648_fwalk(fp->data, g7648_lflush);
-    fp->p = fp->base;
-    n = fp->rd(fp->cookie, fp->base, fp->size);
-    fp->r = n;
-    fp->flags &= ~0x2000;
+    if (stream->_bf._base == 0)
+        g7648_smakebuf(stream);
+    if (stream->_flags & (__SLBF | __SNBF))
+        g7648_fwalk(stream->_data, g7648_lflush);
+    stream->_p = stream->_bf._base;
+    n = (*stream->_read)(stream->_cookie, (char *)stream->_bf._base, stream->_bf._size);
+    stream->_r = n;
+    stream->_flags &= ~__SMOD;
     if (n <= 0) {
         if (n == 0) {
-            fp->flags |= 0x20;
+            stream->_flags |= __SEOF;
         } else {
-            fp->r = 0;
-            fp->flags |= 0x40;
+            stream->_r = 0;
+            stream->_flags |= __SERR;
         }
         return -1;
     }
@@ -3187,7 +3184,8 @@ int gcvt(int value, int prec, int buf_) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", qsort);
 #ifdef SKIP_ASM
-/* newlib 1.9 libc/stdlib/qsort.c (qsort), verbatim apart from the K&R wrappers:
+/* newlib 1.9 libc/stdlib/qsort.c (qsort), verbatim apart from the K&R wrappers and three renamed locals (a -> base,
+ * r -> result, t -> saved):
  *
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -3230,9 +3228,9 @@ static inline void swapqsort(char *, char *, int, int);
 	register TYPE *pi = (TYPE *) (parmi); 		\
 	register TYPE *pj = (TYPE *) (parmj); 		\
 	do { 						\
-		register TYPE	t = *pi;		\
+		register TYPE	saved = *pi;		\
 		*pi++ = *pj;				\
-		*pj++ = t;				\
+		*pj++ = saved;				\
         } while (--i > 0);				\
 }
 
@@ -3250,9 +3248,9 @@ swapqsort(char *a, char *b, int n, int swaptype)
 
 #define swap_00418EF8(a, b)					\
 	if (swaptype == 0) {				\
-		long t = *(long *)(a);			\
+		long saved = *(long *)(a);		\
 		*(long *)(a) = *(long *)(b);		\
-		*(long *)(b) = t;			\
+		*(long *)(b) = saved;			\
 	} else						\
 		swapqsort(a, b, es, swaptype)
 
@@ -3274,30 +3272,33 @@ med3_00418EF8(char *a, char *b, char *c, int (*cmp)())
  * one. When a pass makes no swaps it finishes with insertion sort. Elements are swapped as longs when the base and size
  * allow it.
  *
- * @param a    the array
- * @param n    the element count
- * @param es   the element size
- * @param cmp  the comparison function
+ * @param base  the array
+ * @param n     the element count
+ * @param es    the element size
+ * @param cmp   the comparison function
  */
 void
-qsort(void *a, unsigned int n, unsigned int es, int (*cmp)())
+qsort(void *base, unsigned int n, unsigned int es, int (*cmp)())
 {
 	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
-	int stride, r, swaptype, swap_cnt;
+	int stride, result, swaptype, swap_cnt;	/* result: a comparison result, then a byte count */
 
-loop:	SWAPINIT_00418EF8(a, es);
+	/* ORIGINAL-PTR: newlib's qsort walks the untyped array as bytes: each element is es bytes, known only at
+	   run time */
+
+loop:	SWAPINIT_00418EF8(base, es);
 	swap_cnt = 0;
 	if (n < 7) {
-		for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
-			for (pl = pm; pl > (char *) a && cmp(pl - es, pl) > 0;
+		for (pm = (char *) base + es; pm < (char *) base + n * es; pm += es)
+			for (pl = pm; pl > (char *) base && cmp(pl - es, pl) > 0;
 			     pl -= es)
 				swap_00418EF8(pl, pl - es);
 		return;
 	}
-	pm = (char *) a + (n / 2) * es;
+	pm = (char *) base + (n / 2) * es;
 	if (n > 7) {
-		pl = a;
-		pn = (char *) a + (n - 1) * es;
+		pl = base;
+		pn = (char *) base + (n - 1) * es;
 		if (n > 40) {
 			stride = (n / 8) * es;
 			pl = med3_00418EF8(pl, pl + stride, pl + 2 * stride, cmp);
@@ -3306,21 +3307,21 @@ loop:	SWAPINIT_00418EF8(a, es);
 		}
 		pm = med3_00418EF8(pl, pm, pn, cmp);
 	}
-	swap_00418EF8(a, pm);
-	pa = pb = (char *) a + es;
+	swap_00418EF8(base, pm);
+	pa = pb = (char *) base + es;
 
-	pc = pd = (char *) a + (n - 1) * es;
+	pc = pd = (char *) base + (n - 1) * es;
 	for (;;) {
-		while (pb <= pc && (r = cmp(pb, a)) <= 0) {
-			if (r == 0) {
+		while (pb <= pc && (result = cmp(pb, base)) <= 0) {
+			if (result == 0) {
 				swap_cnt = 1;
 				swap_00418EF8(pa, pb);
 				pa += es;
 			}
 			pb += es;
 		}
-		while (pb <= pc && (r = cmp(pc, a)) >= 0) {
-			if (r == 0) {
+		while (pb <= pc && (result = cmp(pc, base)) >= 0) {
+			if (result == 0) {
 				swap_cnt = 1;
 				swap_00418EF8(pc, pd);
 				pd -= es;
@@ -3335,24 +3336,24 @@ loop:	SWAPINIT_00418EF8(a, es);
 		pc -= es;
 	}
 	if (swap_cnt == 0) {  /* Switch to insertion sort */
-		for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
-			for (pl = pm; pl > (char *) a && cmp(pl - es, pl) > 0; 
+		for (pm = (char *) base + es; pm < (char *) base + n * es; pm += es)
+			for (pl = pm; pl > (char *) base && cmp(pl - es, pl) > 0; 
 			     pl -= es)
 				swap_00418EF8(pl, pl - es);
 		return;
 	}
 
-	pn = (char *) a + n * es;
-	r = min_00418EF8(pa - (char *)a, pb - pa);
-	vecswap_00418EF8(a, pb - r, r);
-	r = min_00418EF8(pd - pc, pn - pd - es);
-	vecswap_00418EF8(pb, pn - r, r);
-	if ((r = pb - pa) > es)
-		qsort(a, r / es, es, cmp);
-	if ((r = pd - pc) > es) { 
+	pn = (char *) base + n * es;
+	result = min_00418EF8(pa - (char *)base, pb - pa);
+	vecswap_00418EF8(base, pb - result, result);
+	result = min_00418EF8(pd - pc, pn - pd - es);
+	vecswap_00418EF8(pb, pn - result, result);
+	if ((result = pb - pa) > es)
+		qsort(base, result / es, es, cmp);
+	if ((result = pd - pc) > es) { 
 		/* Iterate rather than recurse to save stack space */
-		a = pn - r;
-		n = r / es;
+		base = pn - result;
+		n = result / es;
 		goto loop;
 	}
 }
@@ -6282,7 +6283,7 @@ extern int _fwalk_FE30(struct _reent_FE30 *, int (*)(struct __sFILE_FE30 *)) __a
     }					\
   while (0)
 
-int fflush_FE30(struct __sFILE_FE30 *fp) __asm__("fflush");
+int fflush_FE30(struct __sFILE_FE30 *stream) __asm__("fflush");
 /**
  * Writes out a stream's buffered output (or every stream's, for null) and returns 0 or -1.
  *
@@ -6291,43 +6292,43 @@ int fflush_FE30(struct __sFILE_FE30 *fp) __asm__("fflush");
  * calls the write callback until the pending bytes are out. A write that returns 0 or less sets the error flag 0x40 and
  * returns -1.
  *
- * @param fp  the stream, or null for all streams
+ * @param stream  the stream, or null for all streams
  * @return 0, or -1 when a write failed (for null, the OR of the per-stream results)
  */
 int
-fflush_FE30 (register struct __sFILE_FE30 * fp)
+fflush_FE30 (register struct __sFILE_FE30 * stream)
 {
   register unsigned char *cursor;
-  register int n, t;
+  register int n, status;	/* status: the stream's flags, then each write's result */
 
-  if (fp == 0)
+  if (stream == 0)
     return _fwalk_FE30 (_REENT_FE30, fflush_FE30);
 
-  CHECK_INIT_FE30 (fp);
+  CHECK_INIT_FE30 (stream);
 
-  t = fp->_flags;
-  if ((t & __SWR_FE30) == 0 || (cursor = fp->_bf._base) == 0)
+  status = stream->_flags;
+  if ((status & __SWR_FE30) == 0 || (cursor = stream->_bf._base) == 0)
     return 0;
-  n = fp->_p - cursor;		/* write this much */
+  n = stream->_p - cursor;		/* write this much */
 
   /*
    * Set these immediately to avoid problems with longjmp
    * and to allow exchange buffering (via setvbuf) in user
    * write function.
    */
-  fp->_p = cursor;
-  fp->_w = t & (__SLBF_FE30 | __SNBF_FE30) ? 0 : fp->_bf._size;
+  stream->_p = cursor;
+  stream->_w = status & (__SLBF_FE30 | __SNBF_FE30) ? 0 : stream->_bf._size;
 
   while (n > 0)
     {
-      t = (*fp->_write) (fp->_cookie, (char *) cursor, n);
-      if (t <= 0)
+      status = (*stream->_write) (stream->_cookie, (char *) cursor, n);
+      if (status <= 0)
 	{
-	  fp->_flags |= __SERR_FE30;
+	  stream->_flags |= __SERR_FE30;
 	  return -1;
 	}
-      cursor += t;
-      n -= t;
+      cursor += status;
+      n -= status;
     }
   return 0;
 }
@@ -6670,52 +6671,16 @@ INCLUDE_ASM("seg/seg_316FB8", ungetc);
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-struct _reent_0378 {
-  int _errno;
-  struct __sFILE_0378 *_stdin, *_stdout, *_stderr;
-  int  _inc;
-  char _emergency[25];
-  int _current_category;
-  const char *_current_locale;
-  int __sdidinit;
-};
-struct __sbuf_0378 {
-	unsigned char *_base;
-	int	_size;
-};
-struct __sFILE_0378 {
-  unsigned char *_p;	/* current position in (some) buffer */
-  int	_r;		/* read space left for getc() */
-  int	_w;		/* write space left for putc() */
-  short	_flags;		/* flags, below; this FILE is free if 0 */
-  short	_file;		/* fileno, if Unix descriptor, else -1 */
-  struct __sbuf_0378 _bf;	/* the buffer (at least 1 byte, if !NULL) */
-  int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
-  void *_cookie;	/* cookie passed to io functions */
-  int	(*_read)(void *_cookie, char *_buf, int _n);
-  int	(*_write)(void *_cookie, const char *_buf, int _n);
-  long	(*_seek)(void *_cookie, long _offset, int _whence);
-  int	(*_close)(void *_cookie);
-  struct __sbuf_0378 _ub;	/* ungetc buffer */
-  unsigned char *_up;	/* saved _p when _p is doing ungetc data */
-  int	_ur;		/* saved _r when _r is counting ungetc data */
-  unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
-  unsigned char _nbuf[1];	/* guarantee a getc() buffer */
-  struct __sbuf_0378 _lb;	/* buffer for fgetline() */
-  int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
-  int	_offset;	/* current lseek offset */
-  struct _reent_0378 *_data;
-};
 #define __SRD_0378	0x0004
 #define __SWR_0378	0x0008
 #define __SRW_0378	0x0010
 #define __SEOF_0378	0x0020
 #define EOF_0378	(-1)
 #define HASUB_0378(fp) ((fp)->_ub._base != 0)
-extern struct _reent_0378 *_impure_ptr_0378 __asm__("_impure_ptr");
+extern struct _reent *_impure_ptr_0378 __asm__("_impure_ptr");
 #define _REENT_0378 _impure_ptr_0378
-extern void __sinit_0378(struct _reent_0378 *) __asm__("__sinit");
-extern int fflush_0378(struct __sFILE_0378 *) __asm__("fflush");
+extern void __sinit_0378(struct _reent *) __asm__("__sinit");
+extern int fflush_0378(struct __sFILE *) __asm__("fflush");
 extern int write_0378(int, const char *, int) __asm__("_write");
 /* newlib's CHECK_INIT (stdio/local.h), verbatim: the do-while(0) is part of the library macro */
 #define CHECK_INIT_0378(fp) \
@@ -6738,11 +6703,11 @@ extern int write_0378(int, const char *, int) __asm__("_write");
  * pushback buffer on fd 1 instead of growing it.
  *
  * @param ch  the character to push back (converted to unsigned char)
- * @param fp  the stream
+ * @param stream  the stream
  * @return the pushed-back character, or EOF (-1) on failure
  */
 int
-ungetc (int ch, register struct __sFILE_0378 *fp)
+ungetc (int ch, register struct __sFILE *stream)
 {
   if (ch == EOF_0378)
     return (EOF_0378);
@@ -6751,28 +6716,28 @@ ungetc (int ch, register struct __sFILE_0378 *fp)
      ??? Might be able to remove this as some other stdio routine should
      have already been called to get the char we are un-getting.  */
 
-  CHECK_INIT_0378 (fp);
+  CHECK_INIT_0378 (stream);
 
   /* After ungetc, we won't be at eof anymore */
-  fp->_flags &= ~__SEOF_0378;
+  stream->_flags &= ~__SEOF_0378;
 
-  if ((fp->_flags & __SRD_0378) == 0)
+  if ((stream->_flags & __SRD_0378) == 0)
     {
       /*
        * Not already reading: no good unless reading-and-writing.
        * Otherwise, flush any current write stuff.
        */
-      if ((fp->_flags & __SRW_0378) == 0)
+      if ((stream->_flags & __SRW_0378) == 0)
 	return EOF_0378;
-      if (fp->_flags & __SWR_0378)
+      if (stream->_flags & __SWR_0378)
 	{
-	  if (fflush_0378 (fp))
+	  if (fflush_0378 (stream))
 	    return EOF_0378;
-	  fp->_flags &= ~__SWR_0378;
-	  fp->_w = 0;
-	  fp->_lbfsize = 0;
+	  stream->_flags &= ~__SWR_0378;
+	  stream->_w = 0;
+	  stream->_lbfsize = 0;
 	}
-      fp->_flags |= __SRD_0378;
+      stream->_flags |= __SRD_0378;
     }
   ch = (unsigned char) ch;
 
@@ -6780,15 +6745,15 @@ ungetc (int ch, register struct __sFILE_0378 *fp)
    * If we are in the middle of ungetc'ing, just continue.
    */
 
-  if (HASUB_0378 (fp))
+  if (HASUB_0378 (stream))
     {
-      if (fp->_r >= fp->_ub._size)
+      if (stream->_r >= stream->_ub._size)
 	{
 	  write_0378 (1, UNGETC_OVERFLOW_0378, sizeof (UNGETC_OVERFLOW_0378));
 	  return EOF_0378;
 	}
-      *--fp->_p = ch;
-      fp->_r++;
+      *--stream->_p = ch;
+      stream->_r++;
       return ch;
     }
 
@@ -6798,10 +6763,10 @@ ungetc (int ch, register struct __sFILE_0378 *fp)
    * (This makes sscanf() work when scanning `const' data.)
    */
 
-  if (fp->_bf._base != 0 && fp->_p > fp->_bf._base && fp->_p[-1] == ch)
+  if (stream->_bf._base != 0 && stream->_p > stream->_bf._base && stream->_p[-1] == ch)
     {
-      fp->_p--;
-      fp->_r++;
+      stream->_p--;
+      stream->_r++;
       return ch;
     }
 
@@ -6810,13 +6775,13 @@ ungetc (int ch, register struct __sFILE_0378 *fp)
    * Initially, we will use the `reserve' buffer.
    */
 
-  fp->_ur = fp->_r;
-  fp->_up = fp->_p;
-  fp->_ub._base = fp->_ubuf;
-  fp->_ub._size = sizeof (fp->_ubuf);
-  fp->_ubuf[sizeof (fp->_ubuf) - 1] = ch;
-  fp->_p = &fp->_ubuf[sizeof (fp->_ubuf) - 1];
-  fp->_r = 1;
+  stream->_ur = stream->_r;
+  stream->_up = stream->_p;
+  stream->_ub._base = stream->_ubuf;
+  stream->_ub._size = sizeof (stream->_ubuf);
+  stream->_ubuf[sizeof (stream->_ubuf) - 1] = ch;
+  stream->_p = &stream->_ubuf[sizeof (stream->_ubuf) - 1];
+  stream->_r = 1;
   return ch;
 }
 #endif
@@ -7230,26 +7195,26 @@ extern void _Bfree(int *, int *);
  * @return the shifted Bigint
  */
 struct Bigint *_lshift(int ptr, struct Bigint *bigint, int k) {
-    int i, k1, n, newWords;
+    int i, kOrShift, n, newWords;	/* kOrShift: the result's size class k, then 32 - k */
     struct Bigint *shifted;
     unsigned *x, *x1, *xe, z;
     n = k >> 5;
-    k1 = bigint->k;
+    kOrShift = bigint->k;
     newWords = n + bigint->wds + 1;
     for (i = bigint->maxwds; newWords > i; i <<= 1)
-        k1++;
-    shifted = (struct Bigint *)_Balloc(ptr, k1);
+        kOrShift++;
+    shifted = (struct Bigint *)_Balloc(ptr, kOrShift);
     x1 = shifted->x;
     for (i = 0; i < n; i++)
         *x1++ = 0;
     x = bigint->x;
     xe = x + bigint->wds;
     if (k &= 0x1f) {
-        k1 = 32 - k;
+        kOrShift = 32 - k;
         z = 0;
         do {
             *x1++ = *x << k | z;
-            z = *x++ >> k1;
+            z = *x++ >> kOrShift;
         } while (x < xe);
         if ((*x1 = z))
             ++newWords;
@@ -7393,25 +7358,25 @@ union double_union {
  * @return the ulp of x
  */
 double _ulp(double _x) {
-    union double_union x, a;
+    union double_union x, ulp;
     int ulpExp;
     x.d = _x;
     ulpExp = (word0(x) & 0x7ff00000) - 52 * 0x100000;
     if (ulpExp > 0) {
-        word0(a) = ulpExp;
-        word1(a) = 0;
+        word0(ulp) = ulpExp;
+        word1(ulp) = 0;
     } else {
         ulpExp = -ulpExp >> 20;
         if (ulpExp < 20) {
-            word0(a) = 0x80000 >> ulpExp;
-            word1(a) = 0;
+            word0(ulp) = 0x80000 >> ulpExp;
+            word1(ulp) = 0;
         } else {
-            word0(a) = 0;
+            word0(ulp) = 0;
             ulpExp -= 20;
-            word1(a) = ulpExp >= 31 ? 1 : 1 << (31 - ulpExp);
+            word1(ulp) = ulpExp >= 31 ? 1 : 1 << (31 - ulpExp);
         }
     }
-    return a.d;
+    return ulp.d;
 }
 #endif
 
@@ -8167,15 +8132,17 @@ void *_calloc_r_(int ptr, int n, int elem_size) __asm__("_calloc_r");
  * @return the block, or null
  */
 void *_calloc_r_(int ptr, int n, int elem_size) {
-    mchunkptr p;
+    mchunkptr chunk;
     unsigned csz;
     unsigned sz = n * elem_size;
     void *mem;
     mem = _malloc_r_malloc(ptr, sz);
     if (mem == 0)
         return 0;
-    p = (mchunkptr)((char *)mem - 8);
-    csz = chunksize(p);
+    // ORIGINAL-PTR: newlib malloc's mem2chunk: the chunk header (prev_size, size) sits 2 * SIZE_SZ bytes before the
+    // user block
+    chunk = (mchunkptr)((char *)mem - 8);
+    csz = chunksize(chunk);
     MALLOC_ZERO(mem, csz - 4);
     return mem;
 }

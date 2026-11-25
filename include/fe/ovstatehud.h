@@ -20,10 +20,11 @@
 //
 // Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
 // 4 bytes). On Tour's member order maps onto retail with these differences: the 0x3C
-// tracker inside each rider info, the three words at 0x160, no mEventStateAdditionalData (retail's mRenderFlags is
-// the word after mEventStateData: handleEvent's flag bits 0x10000 / 0x20000 / 0x40000 and the reset mask 0xFFBDC3FF
-// are On Tour's), 0x18-byte slope-style infos (no isTime), a second font (0x428) and a divider string (0x430), the
-// "switch" texture (0x470), 26 gen textures, 5x3 boost textures, the "Sphere" texture and two extra bar configs.
+// tracker inside each rider info, the three flash-icon words at 0x160, no mEventStateAdditionalData (retail's
+// mRenderFlags is the word after mEventStateData: handleEvent's flag bits 0x10000 / 0x20000 / 0x40000 and the reset
+// mask 0xFFBDC3FF are On Tour's), 0x18-byte slope-style infos (no isTime), a second font (mpFEFont) and a divider
+// string (mpTimeDivider), the "switch" texture (0x470), 26 gen textures, 5x3 boost textures, the "Sphere" texture
+// and two extra bar configs.
 // Evidence tags:
 //   [R] retail's constructors (cOVStateHUD1P_cOVStateHUD1P, func_0021CBA0), destructor and allocation size;
 //   [U] how retail code uses the field (C bodies in src/fe/ovstatehud.cpp and src/fe/all_in_one_fe.cpp; the asm of
@@ -138,10 +139,14 @@ struct cOVStateHUD1P : public cUIState {
     tHUDRiderInfo mRiderInfo[2];    // 0x048 [O] (On Tour 0x50, 0x60 each); [R] the ctors build two 0x8C-byte elements
                                     //       here, the dtor destroys them last to first; [U] onCreateScreen fills one per
                                     //       local rider
-    int unk_160;                    // 0x160 [U] handleEvent 8 sets it, 9 clears it; while set (and the HUD is shown)
-                                    //       onUpdate animates 0x164 / 0x168 and sets mRenderFlags 0x80000. Retail only
-    float unk_164;                  // 0x164 [U] onUpdate: frame counter += 1/60, wrapped to [0, 1]; onRender2D reads it
-    float unk_168;                  // 0x168 [U] onUpdate: += 1/60 up to 5.0, then -1.0; handleEvent 8 / 9 clear it
+    int mbFlashIcon;                // 0x160 [U] handleEvent 8 sets it, 9 clears it; while set (and the HUD is shown)
+                                    //       onUpdate animates mFlashIconPhase / mFlashIconTime and sets mRenderFlags
+                                    //       0x80000, for which onRender2D draws mpGenTexElem[4] (HUD def +0x894) in one
+                                    //       of two colours; onUpdate clears it after 5 s. Retail only (name ours)
+    float mFlashIconPhase;          // 0x164 [U] onUpdate: += 1/60, wrapped to [0, 1]; onRender2D picks the icon's
+                                    //       second colour while it is > 0.5 (name ours)
+    float mFlashIconTime;           // 0x168 [U] onUpdate: += 1/60 up to 5.0, then -1.0 and the icon stops; handleEvent
+                                    //       8 / 9 clear it (name ours)
     float mTimeSeparatorWidth;      // 0x16C [O]; [U] onCreateScreen: extent of the divider string (":" or "'");
                                     //       renderTime reads it
     float mTimeValueWidth;          // 0x170 [O]; [U] extent of "00"
@@ -178,11 +183,13 @@ struct cOVStateHUD1P : public cUIState {
     int mHideHUDOV;                 // 0x3D8 [O]; [R] ctor 0; [U] handleEvent 2 zeroes, 3 increments, 4 decrements it
     tSSPlaceInfo mSlopeStylePlaceInfo[3]; // 0x3DC [O]; [U] onCreateScreen / onUpdate / onRender2D, stride 0x18
     float mMaxScoreTextWidth;       // 0x424 [O]; [U] onUpdate zeroes it and keeps the widest score text
-    cFont* unk_428;                 // 0x428 [U] onCreateScreen: the "fefont" font; the text-and-picture lines and
-                                    //       func_002204A0 draw with it. Retail only
+    cFont* mpFEFont;                // 0x428 [U] onCreateScreen: the "fefont" font; the text-and-picture lines,
+                                    //       renderMultiText / renderMultiText1 and func_002204A0 draw with it. Retail
+                                    //       only (name ours)
     cFont* mpHUDFont;               // 0x42C [O]; [U] onCreateScreen: the "hudfont" font (On Tour asserts mpHUDFont)
-    char* unk_430;                  // 0x430 [U] onCreateScreen: the time divider string (":" for languages 0 / 2, "'" for
-                                    //       1 / 3); renderTime draws it (On Tour has five char dividers instead)
+    char* mpTimeDivider;            // 0x430 [U] onCreateScreen: the time divider string (":" for languages 0 / 2, "'"
+                                    //       for 1 / 3); renderTime draws it (On Tour has five char dividers instead;
+                                    //       name ours)
     cTextureElement* mpCountdownElements[4]; // 0x434 [O]; [U] "go", "nm1w", "nm2w", "nm3w"
     cTextureElement* mpNumWhite[6]; // 0x444 [O]; [U] "nm1w" ... "nm6w"; renderRank indexes it
     cTextureElement* mpNumOrdinal[4]; // 0x45C [O]; [U] "st_w", "nd_w", "rd_w", "th_w"
@@ -274,9 +281,9 @@ CHECK_OFFSET(tHUDDef, layer, 0x22);
 CHECK_SIZE(tHUDDef, 0x24);
 
 CHECK_OFFSET(cOVStateHUD1P, mRiderInfo, 0x048);
-CHECK_OFFSET(cOVStateHUD1P, unk_160, 0x160);
-CHECK_OFFSET(cOVStateHUD1P, unk_164, 0x164);
-CHECK_OFFSET(cOVStateHUD1P, unk_168, 0x168);
+CHECK_OFFSET(cOVStateHUD1P, mbFlashIcon, 0x160);
+CHECK_OFFSET(cOVStateHUD1P, mFlashIconPhase, 0x164);
+CHECK_OFFSET(cOVStateHUD1P, mFlashIconTime, 0x168);
 CHECK_OFFSET(cOVStateHUD1P, mTimeSeparatorWidth, 0x16C);
 CHECK_OFFSET(cOVStateHUD1P, mTimeValueWidth, 0x170);
 CHECK_OFFSET(cOVStateHUD1P, mTimePrefixWidth, 0x174);
@@ -305,9 +312,9 @@ CHECK_OFFSET(cOVStateHUD1P, mbHideHUD, 0x3D4);
 CHECK_OFFSET(cOVStateHUD1P, mHideHUDOV, 0x3D8);
 CHECK_OFFSET(cOVStateHUD1P, mSlopeStylePlaceInfo, 0x3DC);
 CHECK_OFFSET(cOVStateHUD1P, mMaxScoreTextWidth, 0x424);
-CHECK_OFFSET(cOVStateHUD1P, unk_428, 0x428);
+CHECK_OFFSET(cOVStateHUD1P, mpFEFont, 0x428);
 CHECK_OFFSET(cOVStateHUD1P, mpHUDFont, 0x42C);
-CHECK_OFFSET(cOVStateHUD1P, unk_430, 0x430);
+CHECK_OFFSET(cOVStateHUD1P, mpTimeDivider, 0x430);
 CHECK_OFFSET(cOVStateHUD1P, mpCountdownElements, 0x434);
 CHECK_OFFSET(cOVStateHUD1P, mpNumWhite, 0x444);
 CHECK_OFFSET(cOVStateHUD1P, mpNumOrdinal, 0x45C);

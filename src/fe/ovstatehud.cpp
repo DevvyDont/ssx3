@@ -276,15 +276,15 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
     ((&self->elems[0]))[0].width = 0;
     float maxh = ((&self->elems[0]))[0].width;
     self->numElems = 0;
-    (*(unsigned short**)&((&self->elems[0]))[0].unk_04) = ((unsigned short*)&self->text[0]);
-    cursor = ((unsigned short*)((&self->elems[0]))[0].unk_04);
+    ((&self->elems[0]))[0].pText = ((unsigned short*)&self->text[0]);
+    cursor = ((&self->elems[0]))[0].pText;
     float total = maxh;
     while (*cursor != 0) {
         if (*cursor == 0x40) {
             *cursor = 0;
             cursor++;
-            if (*((unsigned short*)segs[n].unk_04) != 0) {
-                float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 1, font->Scale[0], font->Scale[1]);
+            if (*segs[n].pText != 0) {
+                float w = cFont_textExtent1(font, segs[n].pText, buf, 1, font->Scale[0], font->Scale[1]);
                 total += w;
                 segs[n].width = w;
             }
@@ -297,38 +297,37 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
                 namePos++;
             } while (1);
             *namePos = 0;
-            int h = GetHashValue32(name);
+            int hash = GetHashValue32(name);
             tHUDPictureDB* picture = 0;
             for (tHUDPictureDB* candidate = gTextPictDB; ((int)candidate->ident) != 0; candidate++) {
-                if (((int)candidate->ident) == h) { picture = candidate; break; }
+                if (((int)candidate->ident) == hash) { picture = candidate; break; }
             }
-            // The icon entry is kept in the segment's string slot.
-            (*(unsigned short**)&segs[n].unk_04) = (unsigned short*)picture;
+            segs[n].pPicture = picture;
             float ew = picture->size[0];
             segs[n].width = ew;
             total += ew;
             n++;
             if (maxh < picture->size[1]) maxh = picture->size[1];
-            (*(unsigned short**)&segs[n].unk_04) = cursor;
+            segs[n].pText = cursor;
             segs[n].width = 0;
             if (*cursor != 0) cursor++;
         } else {
             cursor++;
         }
     }
-    if (*((unsigned short*)segs[n].unk_04) != 0) {
-        float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 0, font->Scale[0], font->Scale[1]);
+    if (*segs[n].pText != 0) {
+        float w = cFont_textExtent1(font, segs[n].pText, buf, 0, font->Scale[0], font->Scale[1]);
         total += w;
         segs[n].width = w;
         n++;
     }
     self->numElems = n;
-    float h = (float)font->MaxCharHeight * font->BaseScale[1] * self->fontScaleBase[1];
+    float textHeight = (float)font->MaxCharHeight * font->BaseScale[1] * self->fontScaleBase[1];
     self->width = total;
     // PORT: `>?` is the g++ maximum operator (EE max.s).
-    float lineHeight = h >? maxh;
+    float lineHeight = textHeight >? maxh;
     self->height = lineHeight;
-    self->fontOffsetY = (lineHeight - h) * 0.5f;
+    self->fontOffsetY = (lineHeight - textHeight) * 0.5f;
 }
 #endif
 
@@ -343,8 +342,8 @@ struct sVec2f { float x, y; };
  * Sets a HUD text line from an 8-bit string and lays it out.
  *
  * Widens @p str into the line's 16-bit text (+0x4C) with func_002C2540, stores @p font (+0x8) and @p scale (+0x10),
- * then runs splitTextPictLine. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's +0x428
- * font.
+ * then runs splitTextPictLine. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's
+ * mpFEFont font.
  *
  * @param str  the text; "@name" embeds a picture from gTextPictDB
  * @param font  the font (a cFont*) to measure and draw with
@@ -468,14 +467,14 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
     tTextPictElemSpec* entry = ((&self->elems[0]));
     for (int i = 0; i < self->numElems; i++, entry++) {
         if (!(i & 1)) {
-            unsigned short* str = (unsigned short*)entry->unk_04;
+            unsigned short* str = entry->pText;
             if (*str != 0) {
                 cFont_text1_95A0((self->pFont), pos[0], pos[1] + lineOff, str);
                 float sx = scale[0];
                 pos[0] += entry->width * sx;
             }
         } else {
-            tHUDPictureDB* img = (tHUDPictureDB*)entry->unk_04;
+            tHUDPictureDB* img = entry->pPicture;
             t2Vector wh;
             float w = img->size[0] * scale[0];
             float scaledHeight = img->size[1] * scale[1];
@@ -1082,8 +1081,8 @@ extern "C" void* func_002B40F0(void* self, int i);
  * 0 / 1 set and clear +0x3D4 (sent by the script data manager); 2 / 3 / 4 reset, raise and lower the
  * open-overlay count +0x3D8 (cOVState_onCreateScreen / onDestroyScreen send 3 / 4); 5 rechecks the current
  * song and restarts the Now Playing popup on a new title; 6 start gate opened; 7 restart reset; 8 / 9 start
- * and stop the mail icon (+0x160); 12 / 13 and 14 / 15 set and clear the message texts at +0x944 and +0xA48
- * (flags 0x20000 / 0x40000).
+ * and stop the flashing icon (mbFlashIcon; gen texture 4, likely the new-mail icon); 12 / 13 and 14 / 15 set
+ * and clear the message texts at +0x944 and +0xA48 (flags 0x20000 / 0x40000).
  *
  * @param msg  the notification code
  * @param str  the text for codes 12 and 14 (On Tour pParam)
@@ -1160,13 +1159,13 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
         self->mLastMissionID = 0xFFFFFFFF;
         break;
     case 8:
-        *(int*)&self->unk_168 = 0;
-        self->unk_160 = 1;
+        *(int*)&self->mFlashIconTime = 0;
+        self->mbFlashIcon = 1;
         break;
     case 9:
-        self->unk_160 = 0;
-        *(int*)&self->unk_168 = 0;
-        *(int*)&self->unk_164 = 0;
+        self->mbFlashIcon = 0;
+        *(int*)&self->mFlashIconTime = 0;
+        *(int*)&self->mFlashIconPhase = 0;
         break;
     }
     return 0;
@@ -1546,7 +1545,7 @@ extern "C" void cOVStateHUD1P_renderTime(cOVStateHUD1P* self_, int hour, int min
     cFont_text((self->mpHUDFont), out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
     out[0] += sepW;
     for (int i = 1; i < 3; i++) {
-        cFont_text((self->mpHUDFont), out[0], out[1], ((const char*)self->unk_430));
+        cFont_text((self->mpHUDFont), out[0], out[1], ((const char*)self->mpTimeDivider));
         out[0] += digW;
         char* fieldText = bufs[i];
         cFont_text((self->mpHUDFont), out[0] + oneAdj_001F1840(fieldText, oneW), out[1], fieldText);
@@ -2117,7 +2116,7 @@ static inline float alignPos_001F2AA0(float v, int a, float size)
 /**
  * Draws an 8-bit string word-wrapped to a HUD element's width, as lines stacked from the element's position.
  *
- * The wrapping uses the HUD state's font at +0x428 (cOVStateHUD1P's "fefont"; every caller also passes it as @p font),
+ * The wrapping uses the HUD state's font mpFEFont (cOVStateHUD1P's "fefont"; every caller also passes it as @p font),
  * scaled to the element's scale: cFont_textSmartLimit cuts lines of at most 50 characters to fit the element's width
  * (tHUDDef_getSize). The colour is the element's (no override) and its layer byte goes into the draw state as in
  * cOVStateHUD1P_renderText. The block's top is the element's y moved up by half (pivot 0) or all (pivot > 0) of the total height,
@@ -2148,12 +2147,12 @@ extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, cFont* font, 
     tHUDDef_getSize(hudDef, wrap, 0);
     tHUDDef_getPos(hudDef, pos);
     tHUDDef_getScale(hudDef, escale);
-    cFont* sf = self->unk_428;
+    cFont* sf = self->mpFEFont;
     sf->Scale[0] = sf->BaseScale[0] * escale[0];
     sf->Scale[1] = sf->BaseScale[1] * escale[1];
     const char* remaining = str;
     while (remaining != 0) {
-        remaining = cFont_textSmartLimit(self->unk_428, remaining, lines[n], 50, (self->unk_428)->Scale[0], wrap[0]);
+        remaining = cFont_textSmartLimit(self->mpFEFont, remaining, lines[n], 50, (self->mpFEFont)->Scale[0], wrap[0]);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);
@@ -2219,9 +2218,10 @@ static inline float alignPos_001F2DB0(float v, int a, float size)
 /**
  * Draws a 16-bit string word-wrapped to a HUD element's width, as lines stacked from the element's position.
  *
- * The same as cOVStateHUD1P_renderMultiText with 16-bit text: cFont_textSmartLimit1 wraps it (HUD state font at +0x428, scaled to the element),
- * cFont_textExtent1 measures and cFont_text1 draws each line, with the element's colour, layer, pivots, @p flags reflect
- * bits and the @p rect out. Up to five lines of 50 characters fit the stack buffer and nothing enforces it.
+ * The same as cOVStateHUD1P_renderMultiText with 16-bit text: cFont_textSmartLimit1 wraps it (HUD state font
+ * mpFEFont, scaled to the element), cFont_textExtent1 measures and cFont_text1 draws each line, with the element's
+ * colour, layer, pivots, @p flags reflect bits and the @p rect out. Up to five lines of 50 characters fit the stack
+ * buffer and nothing enforces it.
  *
  * Likely bug: the wrap width always comes from element 29 (tHUDDef_getSize on defs[29]), not from element @p idx.
  *
@@ -2245,12 +2245,12 @@ extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, cFont* font,
     tHUDDef* hudDef = &defs[idx];
     tHUDDef_getPos(hudDef, pos);
     tHUDDef_getScale(hudDef, escale);
-    cFont* sf = self->unk_428;
+    cFont* sf = self->mpFEFont;
     sf->Scale[0] = sf->BaseScale[0] * escale[0];
     sf->Scale[1] = sf->BaseScale[1] * escale[1];
     const unsigned short* remaining = str;
     while (remaining != 0) {
-        remaining = cFont_textSmartLimit1(self->unk_428, (self->unk_428)->Scale[0], wrap[0], remaining, lines[n], 50);
+        remaining = cFont_textSmartLimit1(self->mpFEFont, (self->mpFEFont)->Scale[0], wrap[0], remaining, lines[n], 50);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);

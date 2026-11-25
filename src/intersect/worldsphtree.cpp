@@ -600,27 +600,6 @@ extern "C" int nash_CellKey_proximitytest(void* cell, void* box);
 extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, nash_Cell* tree, void* cell);
 
 
-struct sCell_330BA8 {
-    int level;
-    int x, y, z;
-    nash_Cell* tree;
-};
-
-struct sGrid_330BA8 {
-    sCell_330BA8 cells[8];
-    int unkA0;
-};
-
-struct sQuery_330BA8 {
-    sGrid_330BA8* grid;             // 0x0
-    int unk04;                      // 0x4
-    int count;                      // 0x8
-    tInstanceRecord* items[0x40];      // 0xC
-    unsigned int ntris;             // 0x10C
-    void* tris[0x40];               // 0x110
-    unsigned int nobjs;             // 0x210
-};
-
 static inline void collect_330BA8(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
@@ -635,11 +614,11 @@ static inline void collect_330BA8(nash_Cell* node, OverlapInstancesCallback* ctx
 }
 
 // One top-level cell: test it, then either take the whole subtree or recurse into it.
-static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, OverlapInstancesCallback* ctx, char* flags)
+static inline void queryCell_330BA8(cBXNash* nash, int i, void* box, OverlapInstancesCallback* ctx, char* flags)
 {
-    sCell_330BA8* cell = &grid->cells[i];
-    if (grid->cells[i].tree != 0) {
-        nash_Cell* tree = cell->tree;
+    nash_Octant* cell = &nash->octant[i >> 2][(i >> 1) & 1][i & 1];
+    if (nash->octant[i >> 2][(i >> 1) & 1][i & 1].rootcell != 0) {
+        nash_Cell* tree = cell->rootcell;
         char* flag = &flags[i];
         int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
@@ -653,7 +632,7 @@ static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, Overla
 /**
  * Collects the instances whose bounds overlap @p box into the overlap list, walking the Nash's eight octants.
  *
- * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4 and clears the instance count (+0x8), then runs an instance
+ * Copies the Nash's deletecount to the list's deletecount and clears the instance count (+0x8), then runs an instance
  * collector (array +0xC, count +0x8, maximum 0x40, @p box) over every octant that has a root cell. When
  * nash_CellKey_proximitytest answers 0 (inside), the root goes to OverlapInstancesCallback_operatorCall and its
  * children to nash_Cell_descend (whole subtrees); when it answers 2 (crossing), the cell goes to nash_privy_QueryHelper_helpX1. Finally
@@ -666,22 +645,22 @@ extern "C" void cOverlapList_getinstances(cOverlapList* self, tBoundBox* box)
 {
     OverlapInstancesCallback ctx;
     char flags[8];
-    sGrid_330BA8* grid = (sGrid_330BA8*)self->nash;
+    cBXNash* nash = self->nash;
     OverlapInstancesCallback* pctx = &ctx;
-    self->deletecount = (unsigned int)grid->unkA0;
+    self->deletecount = nash->deletecount;
     (*(tInstanceRecord***)&ctx.instances) = ((tInstanceRecord**)&self->instances[0]);
     (*(int**)&ctx.number) = (int*)&self->numinstances;
     ctx.maximum = 0x40;
     (*(tBoundBox**)&ctx.box) = box;
     self->numinstances = (unsigned int)0;
-    queryCell_330BA8(grid, 0, box, pctx, flags);
-    queryCell_330BA8(grid, 1, box, pctx, flags);
-    queryCell_330BA8(grid, 2, box, pctx, flags);
-    queryCell_330BA8(grid, 3, box, pctx, flags);
-    queryCell_330BA8(grid, 4, box, pctx, flags);
-    queryCell_330BA8(grid, 5, box, pctx, flags);
-    queryCell_330BA8(grid, 6, box, pctx, flags);
-    queryCell_330BA8(grid, 7, box, pctx, flags);
+    queryCell_330BA8(nash, 0, box, pctx, flags);
+    queryCell_330BA8(nash, 1, box, pctx, flags);
+    queryCell_330BA8(nash, 2, box, pctx, flags);
+    queryCell_330BA8(nash, 3, box, pctx, flags);
+    queryCell_330BA8(nash, 4, box, pctx, flags);
+    queryCell_330BA8(nash, 5, box, pctx, flags);
+    queryCell_330BA8(nash, 6, box, pctx, flags);
+    queryCell_330BA8(nash, 7, box, pctx, flags);
     self->numpatches = 0xFFFFFFFF;
     self->numtyped = 0xFFFFFFFF;
 }
@@ -697,28 +676,6 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
 struct sTag_331450 {
 };
 
-
-struct sCell_331450 {
-    int level;
-    int x, y, z;
-    nash_Cell* tree;
-};
-
-struct sGrid_331450 {
-    sCell_331450 cells[8];
-    int unkA0;
-};
-
-struct sQuery_331450 {
-    sGrid_331450* grid;             // 0x0
-    int unk04;                      // 0x4
-    unsigned int count;             // 0x8
-    void* items[0x40];              // 0xC
-    unsigned int ntris;             // 0x10C
-    void* tris[0x40];               // 0x110
-    unsigned int nobjs;             // 0x210
-    void* objs[0x200];              // 0x214
-};
 
 static inline void collect_331450(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
@@ -736,15 +693,15 @@ static inline void collect_331450(nash_Cell* node, OverlapInstancesCallback* ctx
     if (node->children[1][1][1] != 0) nash_Cell_descend1(node->children[1][1][1], (sOctCollect*)ctx);
 }
 
-static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, OverlapInstancesCallback* ctx)
+static inline int queryCell_331450(cBXNash* nash, int i, void* box, OverlapInstancesCallback* ctx)
 {
-    sCell_331450* cell = &grid->cells[i];
+    nash_Octant* cell = &nash->octant[i >> 2][(i >> 1) & 1][i & 1];
     nash_Cell* tree;
     sTag_331450 tag;
     char* flag;
     int r = 1;
-    if (grid->cells[i].tree != 0) {
-        tree = cell->tree;
+    if (nash->octant[i >> 2][(i >> 1) & 1][i & 1].rootcell != 0) {
+        tree = cell->rootcell;
         flag = (char*)&tag;
         r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
@@ -759,7 +716,7 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, Overlap
 /**
  * Collects every typed node of the octree cells that overlap @p box into the overlap list's typed list.
  *
- * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4, clears the typed count (+0x210) and walks the eight octants
+ * Copies the Nash's deletecount to the list's deletecount, clears the typed count (+0x210) and walks the eight octants
  * with a typed collector (array +0x214, count +0x210, maximum 0x200, @p box). An inside cell
  * (nash_CellKey_proximitytest 0) has its typed list (cell +0x28) appended and its children walked whole by
  * nash_Cell_descend1; a crossing cell (2) goes to nash_privy_QueryHelper_helpX2. The nodes themselves are not box-tested and the maximum is
@@ -771,22 +728,22 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, Overlap
 extern "C" void cOverlapList_gettyped(cOverlapList* self, tBoundBox* box)
 {
     OverlapInstancesCallback ctx;
-    sGrid_331450* grid = (sGrid_331450*)self->nash;
+    cBXNash* nash = self->nash;
     OverlapInstancesCallback* pctx = &ctx;
-    self->deletecount = (unsigned int)grid->unkA0;
+    self->deletecount = nash->deletecount;
     (*(tInstanceRecord***)&ctx.instances) = (tInstanceRecord**)((void**)&self->typed[0]);
     (*(int**)&ctx.number) = (int*)&self->numtyped;
     ctx.maximum = 0x200;
     (*(tBoundBox**)&ctx.box) = box;
     self->numtyped = 0;
-    queryCell_331450(grid, 0, box, pctx);
-    queryCell_331450(grid, 1, box, pctx);
-    queryCell_331450(grid, 2, box, pctx);
-    queryCell_331450(grid, 3, box, pctx);
-    queryCell_331450(grid, 4, box, pctx);
-    queryCell_331450(grid, 5, box, pctx);
-    queryCell_331450(grid, 6, box, pctx);
-    queryCell_331450(grid, 7, box, pctx);
+    queryCell_331450(nash, 0, box, pctx);
+    queryCell_331450(nash, 1, box, pctx);
+    queryCell_331450(nash, 2, box, pctx);
+    queryCell_331450(nash, 3, box, pctx);
+    queryCell_331450(nash, 4, box, pctx);
+    queryCell_331450(nash, 5, box, pctx);
+    queryCell_331450(nash, 6, box, pctx);
+    queryCell_331450(nash, 7, box, pctx);
     self->numpatches = 0xFFFFFFFF;
     self->numinstances = 0xFFFFFFFF;
 }
@@ -810,17 +767,6 @@ struct sTree_331E90 {
     sTree_331E90* child[8];
     int pad20;
     sObj_331E90* objs;          // 0x24
-};
-
-struct sCell_331E90 {
-    int level;
-    int x, y, z;
-    sTree_331E90* tree;
-};
-
-struct sGrid_331E90 {
-    sCell_331E90 cells[8];
-    int unkA0;
 };
 
 
@@ -861,11 +807,11 @@ static inline void collect_331E90(sTree_331E90* tree, OverlapInstancesCallback* 
 struct sTag_331E90 {
 };
 
-static inline void queryCell_331E90(sGrid_331E90* grid, int i, tBoundBox* box, OverlapInstancesCallback* ctx)
+static inline void queryCell_331E90(cBXNash* nash, int i, tBoundBox* box, OverlapInstancesCallback* ctx)
 {
-    sCell_331E90* cell = &grid->cells[i];
-    if (grid->cells[i].tree != 0) {
-        sTree_331E90* tree = cell->tree;
+    nash_Octant* cell = &nash->octant[i >> 2][(i >> 1) & 1][i & 1];
+    if (nash->octant[i >> 2][(i >> 1) & 1][i & 1].rootcell != 0) {
+        sTree_331E90* tree = (sTree_331E90*)cell->rootcell;
         sTag_331E90 tag;
         char* flag = (char*)&tag;
         int r = nash_CellKey_proximitytest(cell, box);
@@ -880,7 +826,7 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, tBoundBox* box, O
 /**
  * Collects the instances and the patches whose bounds overlap @p box into the overlap list.
  *
- * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4 and clears the instance count (+0x8) and the patch count
+ * Copies the Nash's deletecount to the list's deletecount and clears the instance count (+0x8) and the patch count
  * (+0x10C). For each of the eight octants with a root cell, nash_CellKey_proximitytest 0 (inside) runs
  * OverlapInstancesCallback_operatorCall on the cell, appends each patch of its patch list (+0x24) whose box (+0x158
  * min, +0x164 max) overlaps @p box to the patch array (+0x110), and walks the children whole through nash_Cell_descend2; 2
@@ -892,7 +838,7 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, tBoundBox* box, O
 extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBox* box)
 {
     OverlapPatchesAndInstancesCallback ctx;
-    self->deletecount = ((sGrid_331E90*)self->nash)->unkA0;
+    self->deletecount = self->nash->deletecount;
     (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&self->instances[0]);
     (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
     ctx.instancecallback.maximum = 0x40;
@@ -904,16 +850,16 @@ extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBo
     OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
     self->numinstances = 0;
     *((int*)objs->number) = 0;
-    sGrid_331E90* grid = ((sGrid_331E90*)self->nash);
+    cBXNash* nash = self->nash;
     OverlapInstancesCallback* pctx = &ctx.instancecallback;
-    queryCell_331E90(grid, 0, box, pctx);
-    queryCell_331E90(grid, 1, box, pctx);
-    queryCell_331E90(grid, 2, box, pctx);
-    queryCell_331E90(grid, 3, box, pctx);
-    queryCell_331E90(grid, 4, box, pctx);
-    queryCell_331E90(grid, 5, box, pctx);
-    queryCell_331E90(grid, 6, box, pctx);
-    queryCell_331E90(grid, 7, box, pctx);
+    queryCell_331E90(nash, 0, box, pctx);
+    queryCell_331E90(nash, 1, box, pctx);
+    queryCell_331E90(nash, 2, box, pctx);
+    queryCell_331E90(nash, 3, box, pctx);
+    queryCell_331E90(nash, 4, box, pctx);
+    queryCell_331E90(nash, 5, box, pctx);
+    queryCell_331E90(nash, 6, box, pctx);
+    queryCell_331E90(nash, 7, box, pctx);
     self->numtyped = 0xFFFFFFFF;
 }
 #endif
@@ -938,17 +884,6 @@ struct sTree_332DB8 {
     void* nodes;                // 0x20
     sObj_332DB8* objs;          // 0x24
     void** all;                 // 0x28
-};
-
-struct sCell_332DB8 {
-    int level;
-    int x, y, z;
-    sTree_332DB8* tree;
-};
-
-struct sGrid_332DB8 {
-    sCell_332DB8 cells[8];
-    int unkA0;
 };
 
 
@@ -998,11 +933,13 @@ static inline void collect_332DB8(sTree_332DB8* tree, OverlapEverythingCallback*
     if (tree->child[7]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[7]), (OverlapEverythingCallback*)ctx);
 }
 
-static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, OverlapEverythingCallback* ctx)
+static inline void queryCell_332DB8(cBXNash* nash, int i, tBoundBox* box, OverlapEverythingCallback* ctx)
 {
-    sCell_332DB8* cell = &grid->cells[i];
-    if (grid->cells[i].tree != 0) {
-        sTree_332DB8* tree = cell->tree;
+    // octant[2][2][2] walked flat (i = 0-7) through the last index: the [i >> 2][(i >> 1) & 1][i & 1] form of the
+    // other queries reorders geteverything's stack slots for the octant addresses
+    nash_Octant* cell = &nash->octant[0][0][i];
+    if (nash->octant[0][0][i].rootcell != 0) {
+        sTree_332DB8* tree = (sTree_332DB8*)cell->rootcell;
         sTag_332DB8 tag;
         char* flag = (char*)&tag;
         int r = nash_CellKey_proximitytest(cell, box);
@@ -1018,7 +955,7 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, O
  * Collects the instances, the patches and the typed nodes of the octree cells that overlap @p box into the overlap
  * list.
  *
- * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4 and clears all three counts. Instances go through
+ * Copies the Nash's deletecount to the list's deletecount and clears all three counts. Instances go through
  * OverlapInstancesCallback_operatorCall into +0xC (count +0x8), patches whose box (+0x158 min, +0x164 max) overlaps
  * @p box into +0x110 (count +0x10C), and every typed node of a visited cell (cell +0x28) into +0x214 (count +0x210)
  * with no box test and no maximum check. Inside octants (nash_CellKey_proximitytest 0) are walked whole, the children
@@ -1030,7 +967,7 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, O
 extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
 {
     OverlapEverythingCallback ctx;
-    self->deletecount = ((sGrid_332DB8*)self->nash)->unkA0;
+    self->deletecount = self->nash->deletecount;
     (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&self->instances[0]);
     (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
     ctx.instancecallback.maximum = 0x40;
@@ -1048,16 +985,16 @@ extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).box) = box;
     OverlapInstancesCallback* all = &(*(OverlapInstancesCallback*)&ctx.typedcallback);
     *((int*)all->number) = 0;
-    sGrid_332DB8* grid = ((sGrid_332DB8*)self->nash);
+    cBXNash* nash = self->nash;
     OverlapEverythingCallback* pctx = &ctx;
-    queryCell_332DB8(grid, 0, box, pctx);
-    queryCell_332DB8(grid, 1, box, pctx);
-    queryCell_332DB8(grid, 2, box, pctx);
-    queryCell_332DB8(grid, 3, box, pctx);
-    queryCell_332DB8(grid, 4, box, pctx);
-    queryCell_332DB8(grid, 5, box, pctx);
-    queryCell_332DB8(grid, 6, box, pctx);
-    queryCell_332DB8(grid, 7, box, pctx);
+    queryCell_332DB8(nash, 0, box, pctx);
+    queryCell_332DB8(nash, 1, box, pctx);
+    queryCell_332DB8(nash, 2, box, pctx);
+    queryCell_332DB8(nash, 3, box, pctx);
+    queryCell_332DB8(nash, 4, box, pctx);
+    queryCell_332DB8(nash, 5, box, pctx);
+    queryCell_332DB8(nash, 6, box, pctx);
+    queryCell_332DB8(nash, 7, box, pctx);
 }
 #endif
 
@@ -5279,20 +5216,6 @@ float AIrandf(float lo, float hi);
 float AIrangernd(float a, float b);
 
 
-struct sSphFloatDef_1AA0 {
-    int f0;
-    unsigned short id;  // 0x04
-    char pad06[0x2];
-    int dir;            // 0x08
-    float min;          // 0x0C
-    float max;          // 0x10
-    float speed;        // 0x14
-    float speedVar;     // 0x18
-    float value;        // 0x1C
-    int random;         // 0x20
-    int f24;            // 0x24
-};
-
 struct sFloat_1AA0 {
     float v;
 };
@@ -5334,7 +5257,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* vinfo)
  * The per-frame speed (+0x10) is Speed (+0x14) / 30 / the frame rate (cAppMan_TheAppMan +0x10), randomised by
  * AIrangernd with SpeedRange (+0x18) when that is non-zero, and negated for Dir (+0x8) 1. It then copies the frame
  * to +0x20, sets active (+0x4) and the dirty flag (bit 0 of +0x42), and clears +0xC (the start delay) and atLimit
- * (+0x8). The struct calls the play type at +0x0 "id"; cAnimObjectNode_updateNode switches on it.
+ * (+0x8). cAnimObjectNode_updateNode switches on the play type (AnimType).
  *
  * @param bucket  the bucket list the node joins
  * @param nodeType  the object-node type
@@ -5343,19 +5266,20 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* vinfo)
  * @return @p self
  */
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
-extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, tInstanceRecord* obj, sSphFloatDef_1AA0* def)
+extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, tInstanceRecord* obj,
+                                                 tMakeAnimObjectData* def)
 {
-    cAnimNode_cAnimNode((char*)&self->CurrTime, bucket, nodeType, obj, def->f24 != 0);
+    cAnimNode_cAnimNode((char*)&self->CurrTime, bucket, nodeType, obj, def->ForceVisible != 0);
     self->mVtbl = cAnimObjectNode_vtbl;
     float frameTime = 0.0f;
     char* info = (char*)obj->m_Model;
     if (self->AnimFrames != 0) {
         frameTime = cAnimFrame_getStartTime(self->AnimFrames);
     }
-    *(unsigned short*)&self->AnimType = def->id;
-    setRate_1AA0((sFloat_1AA0*)&self->FromTime, def->min, frameTime);
-    setRateMax_1AA0((sFloat_1AA0*)&self->ToTime, def->max, info);
-    frameTime = def->value;
+    *(unsigned short*)&self->AnimType = (unsigned short)def->Type;
+    setRate_1AA0((sFloat_1AA0*)&self->FromTime, def->FromTime, frameTime);
+    setRateMax_1AA0((sFloat_1AA0*)&self->ToTime, def->ToTime, info);
+    frameTime = def->StartTime;
     if (frameTime < 0.0f) {
         frameTime = self->FromTime;
     } else {
@@ -5367,16 +5291,17 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int buc
     if (self->ToTime < frameTime) {
         frameTime = self->ToTime;
     }
-    if (def->random != 0) {
+    if (def->RandomStart != 0) {
         frameTime = AIrandf(self->FromTime, self->ToTime);
     }
     self->CurrTime = frameTime;
-    if (def->speedVar != 0.0f) {
-        self->AnimSpeed = AIrangernd(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)cAppMan_TheAppMan->TimerHz;
+    if (def->SpeedRange != 0.0f) {
+        self->AnimSpeed = AIrangernd(def->Speed * 0.03333333507180214f, def->SpeedRange * 0.03333333507180214f)
+                          / (float)cAppMan_TheAppMan->TimerHz;
     } else {
-        self->AnimSpeed = def->speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
+        self->AnimSpeed = def->Speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
     }
-    if (def->dir == 1) {
+    if (def->Dir == 1) {
         self->AnimSpeed = -self->AnimSpeed;
     }
     self->CacheTime = self->CurrTime;
@@ -5986,10 +5911,6 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_applyForce);
 // ---- Shared declarations: one type per real thing, used by the functions below ----
 
 
-typedef char* (*GetMat_342538)(void*, int);
-
-struct sBodyTbl_342538 { char pad00[8]; char* ents; };
-
 struct sSelf_342538 {
     float sum;                      // 0x00
     char pad04[4];
@@ -6053,7 +5974,7 @@ static inline void vu0Scale_342538(t4Vector& r, const t4Vector& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix times vector).
-static inline void vu0Xform_342538(t4Vector& r, const t4Vector& v, const char* m)
+static inline void vu0Xform_342538(t4Vector& r, const t4Vector& v, const t4Matrix* m)
 {
     __asm__(
         "lqc2      $vf8, %2\n"
@@ -6109,9 +6030,9 @@ static inline float vu0Dot_342538(const t4Vector& a, const t4Vector& b)
 /**
  * Adds the torque a force applied at a hit point exerts about the teeter's pivot axis.
  *
- * Only for a hit on a mesh (@p intInfo +0x5C >= 0) whose entry in the instance's mesh table (instance info +0x80, table +0x8,
- * 16-byte entries, word +0x8) is non-zero, and only when |@p force| > 100. It fetches the mesh's animation matrix (slot 29
- * of the move-node part at +0x44, cAnimNode_getAnimMat), takes the lever arm from the matrix's translation (+0x30) to
+ * Only for a hit on a mesh (@p intInfo +0x5C >= 0) whose entry in the instance model's m_MeshHeirarchy has a non-zero
+ * m_MeshAnim, and only when |@p force| > 100. It fetches the mesh's animation matrix (slot 29
+ * of the move-node part at +0x44, cAnimNode_getAnimMat), takes the lever arm from the matrix's translation (row[3]) to
  * the hit position (@p intInfo +0x0), negates it when TorqueScale (+0x8) is negative and again when the mesh's bit in
  * AnimSign (+0x2C) is set, and adds dot(matrix * Y axis, cross(arm, force)) to the torque (+0x0).
  *
@@ -6126,34 +6047,35 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo
     int idx = intInfo->Mesh;
     if (idx >= 0) {
         cMoveNode* sub = (cMoveNode*)(&self->MoveNodeBase);
-        tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)((sBodyTbl_342538*)(sub->Instance)->m_Model)->ents;
+        tMeshHeirarchyRecord* ents = sub->Instance->m_Model->m_MeshHeirarchy;
         if ((int)ents[idx].m_MeshAnim != 0) {
-            sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
-            char* animMat = ((GetMat_342538)vt[29].fn)(vthis(sub, vt[29]), idx);
-            char* pivotMat = animMat;
+            // slot 29: cAnimNode_getAnimMat
+            sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)self->mVtbl;
+            t4Matrix* animMat = vt[29].fn(vthis(sub, vt[29]), idx);
+            t4Matrix* pivotMat = animMat;
             if (vu0Length_342538(*force) > 100.0f) {
                 t4Vector leverArm;
-                t4Vector a;
+                t4Vector scratch;
                 t4Vector vuResult;
                 t4Vector torqueVec;
-                a = *(t4Vector*)(animMat + 0x30);
-                vu0Sub_342538(vuResult, (*(&intInfo->Ipos)), a);
+                scratch = animMat->row[3];
+                vu0Sub_342538(vuResult, (*(&intInfo->Ipos)), scratch);
                 leverArm = vuResult;
                 if (self->TorqueScale < 0.0f) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
-                    a = vuResult;
+                    scratch = vuResult;
                     leverArm = vuResult;
                 }
                 if ((self->AnimSign >> intInfo->Mesh) & 1) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
-                    a = vuResult;
+                    scratch = vuResult;
                     leverArm = vuResult;
                 }
                 vu0Xform_342538(vuResult, t4vect_YAxis_342538[0], pivotMat);
-                a = vuResult;
+                scratch = vuResult;
                 vu0Cross_342538(torqueVec, leverArm, *force);
                 vuResult = torqueVec;
-                self->TorqueSum += vu0Dot_342538(a, vuResult);
+                self->TorqueSum += vu0Dot_342538(scratch, vuResult);
             }
         }
     }

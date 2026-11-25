@@ -495,13 +495,7 @@ extern "C" void cBEMissionInterface_setBit(cBEMissionInterface* self, int rider,
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMissionDefView_00153C88
-{
-    int id;
-    int f4;
-    char pad_0x08[0x1C];
-};
-extern sMissionDefView_00153C88 cBELibrary_missionInfo_v00153C88[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
@@ -510,12 +504,12 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * Returns the locale's string (unsigned short*, as in On Tour).
  *
  * @param id  mission ID (On Tour uiMissionId)
- * @return the name string from FELocale->getStringByHash, keyed by the hash at +0x4 of the mission record
+ * @return the name string from FELocale->getStringByHash, keyed by the mission record's nameHash
  */
 extern "C" unsigned short* cBEMissionInterface_getMissionName(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo_v00153C88[i].f4);
+    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo[i].nameHash);
 }
 #endif
 
@@ -523,29 +517,22 @@ extern "C" unsigned short* cBEMissionInterface_getMissionName(cBEMissionInterfac
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionShortDesc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMissionDefView_00153CD8
-{
-    int id;
-    int f4;
-    int f8;
-    char pad_0x0C[0x18];
-};
-extern sMissionDefView_00153CD8 cBELibrary_missionInfo_v00153CD8[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Looks up a mission's short description in the front-end locale: SSXApp->FELocale's vtable slot 4 with the text id at
- * +0x8 of the mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
+ * Looks up a mission's short description in the front-end locale: SSXApp->FELocale's vtable slot 4 with the text id
+ * shortDescHash of the mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
  *
  * Returns the locale's string, as cBEMissionInterface_getMissionName does.
  *
  * @param id  the mission id
- * @return the short-description string from FELocale->getStringByHash, keyed by the hash at +0x8
+ * @return the short-description string from FELocale->getStringByHash, keyed by shortDescHash
  */
 extern "C" unsigned short* cBEMissionInterface_getMissionShortDesc(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo_v00153CD8[i].f8);
+    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo[i].shortDescHash);
 }
 #endif
 
@@ -553,15 +540,7 @@ extern "C" unsigned short* cBEMissionInterface_getMissionShortDesc(cBEMissionInt
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionLongDesc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMissionDefView_00153D28
-{
-    int id;
-    int f4;
-    int f8;
-    int fC;
-    char pad_0x10[0x14];
-};
-extern sMissionDefView_00153D28 cBELibrary_missionInfo_v00153D28[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
@@ -570,12 +549,12 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * Returns the locale's string (unsigned short*, as in On Tour).
  *
  * @param id  mission ID (On Tour uiMissionId)
- * @return the long-description string from FELocale->getStringByHash, keyed by the hash at +0xC
+ * @return the long-description string from FELocale->getStringByHash, keyed by longDescHash
  */
 extern "C" unsigned short* cBEMissionInterface_getMissionLongDesc(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo_v00153D28[i].fC);
+    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo[i].longDescHash);
 }
 #endif
 
@@ -688,19 +667,12 @@ extern "C" int cBEMissionInterface_isMissionShowIcon(cBEMissionInterface* self, 
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getLocationID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMissionDefView_00153F30
-{
-    int id;
-    char pad_0x04[0xC];
-    int f10;
-    int f14;
-    char pad_0x18[0xC];
-};
-extern sMissionDefView_00153F30 cBELibrary_missionInfo_v00153F30[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Returns the word at +0x10 of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx), its location.
+ * Returns the location (locationID) of a mission's cBELibrary_missionInfo record (index from
+ * cBEMissionInterface_getMissionIdx).
  *
  * @param id  the mission id
  * @return the location
@@ -708,26 +680,18 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" int cBEMissionInterface_getLocationID(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return cBELibrary_missionInfo_v00153F30[i].f10;
+    return cBELibrary_missionInfo[i].locationID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPoints);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMissionDefView_00153F68
-{
-    int id;
-    char pad_0x04[0xC];
-    int f10;
-    int f14;
-    char pad_0x18[0xC];
-};
-extern sMissionDefView_00153F68 cBELibrary_missionInfo_v00153F68[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Returns the word at +0x14 of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
+ * Returns the points of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
  *
  * @param id  the mission id
  * @return the value
@@ -735,7 +699,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" int cBEMissionInterface_getPoints(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return cBELibrary_missionInfo_v00153F68[i].f14;
+    return cBELibrary_missionInfo[i].points;
 }
 #endif
 
@@ -743,27 +707,13 @@ extern "C" int cBEMissionInterface_getPoints(cBEMissionInterface* self, int id)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getDiffLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit's sMissionDef_0043EE10 is defined later (with cBEMissionInterface_getMissionIdx) and lacks
-// the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
-struct sMissionDefView_0043EE10
-{
-    int id;             // 0x00
-    char pad_0x04[0xC];
-    int group;          // 0x10
-    char pad_0x14[0x4];
-    short field_0x18;   // 0x18
-    char pad_0x1A[0x2];
-    int field_0x1C;     // 0x1C
-    char pad_0x20[0x2];
-    short value;        // 0x22
-};
-extern sMissionDefView_0043EE10 cBELibrary_missionInfo_view[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Returns the halfword at +0x18 of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx), its
- * difficulty level.
+ * Returns the difficulty level (diffLevel) of a mission's cBELibrary_missionInfo record (index from
+ * cBEMissionInterface_getMissionIdx).
  *
  * @param id  the mission id
  * @return the level, 1-3
@@ -771,7 +721,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" short cBEMissionInterface_getDiffLevel(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return cBELibrary_missionInfo_view[i].field_0x18;
+    return cBELibrary_missionInfo[i].diffLevel;
 }
 #endif
 
@@ -779,9 +729,7 @@ extern "C" short cBEMissionInterface_getDiffLevel(cBEMissionInterface* self, int
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNextMissionID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit's sMissionDef_0043EE10 is defined later (with cBEMissionInterface_getMissionIdx) and lacks
-// the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
-extern sMissionDefView_0043EE10 cBELibrary_missionInfo_view[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
@@ -789,7 +737,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * Returns the ID of the mission that follows a given one.
  *
  * Finds the mission's index with cBEMissionInterface_getMissionIdx() (On Tour getMissionIdx, which asserts "Mission id not found")
- * and reads the next-mission field (+0x1C) of its mission table entry (cBELibrary_missionInfo, On Tour
+ * and reads the next-mission field (nextMissionID) of its mission table entry (cBELibrary_missionInfo, On Tour
  * cBELibrary::missionInfo).
  *
  * @param id  the current mission's ID
@@ -798,7 +746,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" int cBEMissionInterface_getNextMissionID(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return cBELibrary_missionInfo_view[i].field_0x1C;
+    return cBELibrary_missionInfo[i].nextMissionID;
 }
 #endif
 
@@ -910,16 +858,7 @@ extern "C" void cBEMissionInterface_setIsShowIcon(cBEMissionInterface* self, int
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionIdx);
 #ifdef SKIP_ASM
-struct sMissionDef_0043EE10
-{
-    int id;             // 0x00
-    char pad_0x04[0xC];
-    int group;          // 0x10
-    char pad_0x14[0xE];
-    short value;        // 0x22
-};
-
-extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 /**
  * Returns the index of mission @p id in cBELibrary_missionInfo (88 entries), or -1 when it is not there.
@@ -959,7 +898,7 @@ extern "C" int cBEMissionInterface_getNumberMissions(cBEMissionInterface* self)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnTrack);
 #ifdef SKIP_ASM
-extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 /**
  * Counts the missions set on one location (track).
@@ -971,7 +910,7 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(cBEMissionInterface*
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
-        if (cBELibrary_missionInfo[i].group == group) {
+        if (cBELibrary_missionInfo[i].locationID == group) {
             n++;
         }
     }
@@ -996,7 +935,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(cBEMissionI
     int n = 0;
     for (int i = 0; i < 88; i++)
     {
-        if (cBELibrary_missionInfo[i].group == group)
+        if (cBELibrary_missionInfo[i].locationID == group)
         {
             if (cBEMissionInterface_isMissionCompleted(self, cBELibrary_missionInfo[i].id))
                 n++;
@@ -1009,17 +948,8 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(cBEMissionI
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnPeak);
 #ifdef SKIP_ASM
-// One 0x24-byte entry of the mission table at cBELibrary_missionInfo.
-struct sMissionDef_00154368
-{
-    int id;             // 0x00
-    char pad_0x04[0xC];
-    int group;          // 0x10
-    char pad_0x14[0x10];
-};
-
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
-extern sMissionDef_00154368 cBELibrary_missionInfo_00154368[] __asm__("cBELibrary_missionInfo");
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 /**
  * Counts the missions set on any location of one peak.
@@ -1036,7 +966,7 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(cBEMissionInterface* 
         {
             if (cBELibrary_locationDB[j].owner == owner)
             {
-                if (cBELibrary_missionInfo_00154368[i].group == j)
+                if (cBELibrary_missionInfo[i].locationID == j)
                 {
                     n++;
                 }
@@ -1068,7 +998,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBEMissionIn
     {
         for (int j = 0; j < 22; j++)
         {
-            if (cBELibrary_missionInfo[i].group == j)
+            if (cBELibrary_missionInfo[i].locationID == j)
             {
                 if (cBELibrary_locationDB[j].owner == owner)
                 {
@@ -1117,7 +1047,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBEMis
     int n = 0;
     for (int i = 0; i < 88; i++)
     {
-        if (D_0043D9A4[cBELibrary_missionInfo[i].group].owner == owner)
+        if (D_0043D9A4[cBELibrary_missionInfo[i].locationID].owner == owner)
         {
             n += cBELibrary_profileLib[profile][character].mMissions[i].bIsCompleted;
         }
@@ -1149,7 +1079,7 @@ extern "C" int cBEMissionInterface_getMissionID(cBEMissionInterface* self, int i
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionIDOnTrack);
 #ifdef SKIP_ASM
-extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 /**
  * Returns the id of the n-th mission at a given location.
@@ -1165,7 +1095,7 @@ extern "C" int cBEMissionInterface_getMissionIDOnTrack(cBEMissionInterface* self
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
-        if (cBELibrary_missionInfo[i].group == group) {
+        if (cBELibrary_missionInfo[i].locationID == group) {
             if (n == index) {
                 return cBELibrary_missionInfo[i].id;
             }
@@ -1179,14 +1109,7 @@ extern "C" int cBEMissionInterface_getMissionIDOnTrack(cBEMissionInterface* self
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberSessionsOnTrack);
 #ifdef SKIP_ASM
-struct sMissionEntry {
-    int id;              // 0x00
-    char pad_0x04[0x14];
-    int value;           // 0x18
-    char pad_0x1c[0x10];
-};
-
-extern sMissionEntry cBELibrary_pictureDB[];
+extern tBEPictureDB cBELibrary_pictureDB[];
 
 /**
  * Looks up the number of sessions for a track id in the 22-entry cBELibrary_pictureDB table.
@@ -1199,8 +1122,8 @@ extern sMissionEntry cBELibrary_pictureDB[];
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(cBEMissionInterface* self, int id)
 {
     for (int i = 0; i < 22; i++) {
-        if (cBELibrary_pictureDB[i].id == id) {
-            return cBELibrary_pictureDB[i].value;
+        if (cBELibrary_pictureDB[i].iLocationID == id) {
+            return cBELibrary_pictureDB[i].numSessionPoints;
         }
     }
     return 0;
@@ -1222,7 +1145,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isSessionPoint);
 extern "C" int cBEMissionInterface_isSessionPoint(cBEMissionInterface* self, int value, int id)
 {
     for (int i = 0; i < 22; i++) {
-        if (cBELibrary_pictureDB[i].id == id && cBELibrary_pictureDB[i].value >= value) {
+        if (cBELibrary_pictureDB[i].iLocationID == id && cBELibrary_pictureDB[i].numSessionPoints >= value) {
             return 1;
         }
     }
@@ -1241,11 +1164,11 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureDBRecord);
  * @param id  the location (On Tour eBELocationID locID)
  * @return the record (by value)
  */
-extern "C" sMissionEntry cBEMissionInterface_getPictureDBRecord(cBEMissionInterface* self, int id)
+extern "C" tBEPictureDB cBEMissionInterface_getPictureDBRecord(cBEMissionInterface* self, int id)
 {
     for (int i = 0; i < 22; i++)
     {
-        if (cBELibrary_pictureDB[i].id == id)
+        if (cBELibrary_pictureDB[i].iLocationID == id)
         {
             return cBELibrary_pictureDB[i];
         }
@@ -1266,8 +1189,8 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureFileName);
 extern "C" void* cBEMissionInterface_getPictureFileName(cBEMissionInterface* self, int id)
 {
     for (int i = 0; i < 22; i++) {
-        if (cBELibrary_pictureDB[i].id == id) {
-            return cBELibrary_pictureDB[i].pad_0x04;
+        if (cBELibrary_pictureDB[i].iLocationID == id) {
+            return cBELibrary_pictureDB[i].strFileName;
         }
     }
     return 0;
@@ -1277,10 +1200,10 @@ extern "C" void* cBEMissionInterface_getPictureFileName(cBEMissionInterface* sel
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getAudioType);
 #ifdef SKIP_ASM
-extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
+extern tBEMissionInfo cBELibrary_missionInfo[];
 
 /**
- * Returns the halfword at +0x22 of mission @p id's cBELibrary_missionInfo record, or 0 when the id is unknown.
+ * Returns the audioType of mission @p id's cBELibrary_missionInfo record, or 0 when the id is unknown.
  *
  * @param id  the mission id
  * @return the value (the sound system uses it as the mission's audio kind)
@@ -1289,7 +1212,7 @@ extern "C" int cBEMissionInterface_getAudioType(cBEMissionInterface* self, int i
 {
     for (int i = 0; i < 88; i++) {
         if (cBELibrary_missionInfo[i].id == id) {
-            return cBELibrary_missionInfo[i].value;
+            return cBELibrary_missionInfo[i].audioType;
         }
     }
     return 0;
