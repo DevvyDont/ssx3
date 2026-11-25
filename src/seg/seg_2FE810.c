@@ -12505,6 +12505,19 @@ unsigned short func_0040D3C0(int ledState, unsigned char rawCode) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetReadMode);
 #ifdef SKIP_ASM
+/* Sets a keyboard's read mode, clearing its key repeat and the previous report's key count when it changes.
+ * (sceUsbKbSetReadMode passes &port[kbIndex]: an inline function's argument keeps retail's index-first add.) */
+static inline void kbPortSetReadMode(sKbPort *kbPort, unsigned readMode) {
+    if (readMode != kbPort->f0C) {
+        kbPort->rep.count = 0;
+        kbPort->rep.wr = 0;
+        kbPort->rep.rd = 0;
+        D_00529000.prev.n = 0;
+        kbPort->rep.last = 0;
+    }
+    kbPort->f0C = readMode;
+}
+
 /**
  * Switches a keyboard between converted key codes and raw reports.
  *
@@ -12516,21 +12529,11 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetReadMode);
  * @return 0, -11 for a bad keyboard or -12 for a bad mode
  */
 int sceUsbKbSetReadMode(int kbIndex, unsigned readMode) {
-    sKbPort *kbPort;
     if (kbIndex >= D_00529000.n)
         return -11;
     if (readMode >= 2)
         return -12;
-    /* int-arithmetic address (the typed &D_00529000.port[a] swaps the addu operands) */
-    kbPort = (sKbPort *)((char *)(kbIndex * 0x38) + (int)D_00529000.port);
-    if (readMode != kbPort->f0C) {
-        kbPort->rep.count = 0;
-        kbPort->rep.wr = 0;
-        kbPort->rep.rd = 0;
-        D_00529000.prev.n = 0;
-        kbPort->rep.last = 0;
-    }
-    kbPort->f0C = readMode;
+    kbPortSetReadMode(&D_00529000.port[kbIndex], readMode);
     return 0;
 }
 #endif

@@ -3726,6 +3726,25 @@ static inline int Facing_4E70(cRider* self, const sHit_4E70& h)
     return r;
 }
 
+// Whether hit h wins a distance tie against the current pick: the lower surface id, a surface over none, or (neither
+// has one) the lower owner order. (Passing hits[i] to an inline function keeps retail's index-first address add.)
+static inline int WinsTie_4E70(const sHit_4E70& h, const sHit_4E70& pick)
+{
+    int take;
+    if (h.surf) {
+        if (!pick.surf)
+            take = 1;
+        else
+            take = h.surf->id < pick.surf->id;
+    } else {
+        if (pick.surf)
+            take = 0;
+        else
+            take = h.owner->order < pick.owner->order;
+    }
+    return take;
+}
+
 /**
  * Tests the rider against static objects and returns the distance of the contact it picks.
  *
@@ -3793,22 +3812,7 @@ extern "C" float cRider_objectIntersect(cRider* self, cScope_4E70* sc, sHit_4E70
             continue;
         }
         if (dd == bestD) {
-            // PORT: index-first address arithmetic through int
-            sHit_4E70* tieHit = (sHit_4E70*)((i << 7) + (int)hits);
-            sHit_4E70* bestHit = (sHit_4E70*)((best << 7) + (int)hits);
-            int take;
-            if (tieHit->surf) {
-                if (!bestHit->surf)
-                    take = 1;
-                else
-                    take = tieHit->surf->id < bestHit->surf->id;
-            } else {
-                if (bestHit->surf)
-                    take = 0;
-                else
-                    take = tieHit->owner->order < bestHit->owner->order;
-            }
-            if (take)
+            if (WinsTie_4E70(hits[i], hits[best]))
                 best = i;
         }
     }

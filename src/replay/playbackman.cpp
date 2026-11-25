@@ -129,6 +129,13 @@ extern const char str_PlaybackFile[];
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
+// Gives a playback-file entry a new "PlaybackFile" buffer of size bytes. (The entry passed to an inline function is
+// addressed before the call, index first, as retail does; a store straight into PlaybackFiles[i] calls first.)
+static inline void allocPackData(tPlaybackFile& entry, int size)
+{
+    entry.PackData = (char*)operator_new_tag(size, str_PlaybackFile, 0x20000000, 0);
+}
+
 /**
  * Finishes a pending playback-file load by copying the file into the current entry.
  *
@@ -143,10 +150,7 @@ extern "C" void cPlaybackMan_update(cPlaybackMan* self)
         int size = 0;
         ASYNCFILE_release(self->AsyncHandle, &data, &size);
         if (data != 0 && size > 0) {
-            // PORT: pointer held in int for the entry address (index-first addu); not 64-bit safe. A typed
-            // &PlaybackFiles[AsyncFileNum] in a local adds base-first.
-            tPlaybackFile* curEntry = (tPlaybackFile*)(self->AsyncFileNum * 12 + (int)self->PlaybackFiles);
-            curEntry->PackData = (char*)operator_new_tag(size, str_PlaybackFile, 0x20000000, 0);
+            allocPackData(self->PlaybackFiles[self->AsyncFileNum], size);
             self->PlaybackFiles[self->AsyncFileNum].Size = size;
             MEM_copy(self->PlaybackFiles[self->AsyncFileNum].PackData, data, size);
             MEM_free(data);

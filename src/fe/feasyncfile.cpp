@@ -1711,8 +1711,9 @@ extern "C" int func_001A56D0(cFEStateNetMessenger* self, const char* name)
 {
     unsigned int i;
     for (i = 0; i < Count1A56D0((self)); i++) {
-        // mpStart[i]->Str; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-        if (strcasecmp((*(cBXString**)((char*)self->mNames.mpStart + (i << 2)))->Str, name) == 0) {
+        // through a pointer to the entry: retail adds base first (mpStart[i]->Str puts the index first)
+        cBXString** entry = &self->mNames.mpStart[i];
+        if (strcasecmp((*entry)->Str, name) == 0) {
             return 1;
         }
     }
@@ -1739,8 +1740,9 @@ extern "C" int func_001A5768(cFEStateNetMessenger* self, const char* name)
 {
     unsigned int i;
     for (i = 0; i < Count1A5768((self)); i++) {
-        // mpStart[i]->Str; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-        if (strcasecmp((*(cBXString**)((char*)self->mNames.mpStart + (i << 2)))->Str, name) == 0) {
+        // through a pointer to the entry: retail adds base first (mpStart[i]->Str puts the index first)
+        cBXString** entry = &self->mNames.mpStart[i];
+        if (strcasecmp((*entry)->Str, name) == 0) {
             return i;
         }
     }
@@ -1771,8 +1773,9 @@ extern "C" int func_001A5800(cFEStateNetMessenger* self, char** name)
 {
     unsigned int i;
     for (i = 0; i < Count1A5800((self)); i++) {
-        // mpStart[i]->Str; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-        if (strcasecmp((*(cBXString**)((char*)self->mNames.mpStart + (i << 2)))->Str, *name) == 0) {
+        // through a pointer to the entry: retail adds base first (mpStart[i]->Str puts the index first)
+        cBXString** entry = &self->mNames.mpStart[i];
+        if (strcasecmp((*entry)->Str, *name) == 0) {
             return i;
         }
     }
@@ -2013,8 +2016,9 @@ extern "C" int func_001A6070(cFEStateNetMessenger* self, int idx)
     if (idx >= n) {
         return 0;
     }
-    // mpStart[idx]; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-    int buddyName = *(int*)((char*)self->mNames.mpStart + (idx << 2));
+    // through a pointer to the entry: retail adds base first (mpStart[idx] puts the index first)
+    cBXString** entry = &self->mNames.mpStart[idx];
+    int buddyName = (int)*entry;
     int id = func_002624F8(GetSession_001A6070(), buddyName);
     const char* str = func_002625C8(GetSession_001A6070(), id);
     if (str == 0) {
@@ -2313,8 +2317,9 @@ extern "C" void func_001A6978(cFEStateNetMessenger* vself)
     int count = 0;
     int row = 0;
     while (row < 15 && first < Size_001A6978(self)) {
-        // mpStart[first]; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-        int id = *(int*)((char*)self->mNames.mpStart + (first << 2));
+        // through a pointer to the entry: retail adds base first (mpStart[first] puts the index first)
+        cBXString** entry = &self->mNames.mpStart[first];
+        int id = (int)*entry;
         int idx = func_002624F8(GetSession_001A6978(), id);
         if (idx < 0) {
             func_001A71B0((cFEStateNetMessenger*)self, row, 0, -1);
@@ -2491,26 +2496,33 @@ static inline cBXString** Copy1A6E70(cBXString** first, cBXString** last, cBXStr
 }
 
 
+// mNames.erase(pos): closes the gap at pos. names is &self->mNames (retail reads the end through both). Passing pos
+// to an inline function keeps retail's index-first address add.
+static inline void Erase1A6E70(cFEStateNetMessenger* self, tFEStringPtrVector* names, cBXString** pos)
+{
+    if (pos + 1 != self->mNames.mpFinish) {
+        Copy1A6E70(pos + 1, names->mpFinish, pos);
+    }
+    self->mNames.mpFinish--;
+}
+
+
 /**
  * Removes from mNames every name the BuddyMan roster no longer has (func_002624F8 < 0).
  *
- * Walks backwards and closes the gap with Copy1A6E70. The removed cBXStrings are neither destroyed nor freed (likely
- * leak).
+ * Walks backwards and closes each gap with Erase1A6E70 (Copy1A6E70). The removed cBXStrings are neither destroyed nor
+ * freed (likely leak).
  */
 extern "C" void func_001A6E70(cFEStateNetMessenger* self)
 {
     int i;
     for (i = (self->mNames.mpFinish - self->mNames.mpStart) - 1; i >= 0; i--) {
         tFEStringPtrVector* feStringPtrVector = &self->mNames;
-        // mpStart[i]; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-        int id = *(int*)((char*)self->mNames.mpStart + (i << 2));
+        // through a pointer to the entry: retail adds base first (mpStart[i] puts the index first)
+        cBXString** entry = &self->mNames.mpStart[i];
+        int id = (int)*entry;
         if (func_002624F8(GetSession_001A6E70(), id) < 0) {
-            // PORT: pointer arithmetic through int (&mpStart[i] puts the base first in the addu)
-            cBXString** pos = (cBXString**)(i * 4 + (int)self->mNames.mpStart);
-            if (pos + 1 != self->mNames.mpFinish) {
-                Copy1A6E70(pos + 1, feStringPtrVector->mpFinish, pos);
-            }
-            self->mNames.mpFinish--;
+            Erase1A6E70(self, feStringPtrVector, &self->mNames.mpStart[i]);
         }
     }
 }
@@ -3435,8 +3447,9 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     cUITextScroll_clearBuffer(list);
     unsigned int i;
     for (i = 0; i < Count1A81F0(self); i++) {
-        // mpStart[i]; the byte stride keeps retail's base-first addu (a subscript puts the index first)
-        cPrivateMessage* msgEntry = *(cPrivateMessage**)((char*)self->mMessages.mpStart + (i << 2));
+        // through a pointer to the entry: retail adds base first (mpStart[i] puts the index first)
+        cPrivateMessage** entry = &self->mMessages.mpStart[i];
+        cPrivateMessage* msgEntry = *entry;
         strcpy(buf, msgEntry->mSender.Str);
         strcat(buf, str_colon_sp);
         strcat(buf, msgEntry->mText.Str);

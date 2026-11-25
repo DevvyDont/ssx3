@@ -443,8 +443,9 @@ extern "C" void cPunchFX_update(sFx_1150* self)
         self->active = 0;
     }
     if (self->active) {
-        // SkelMatrices[bone].row[3] (the bone's position), by byte offset: the typed subscript swaps the addu operands
-        t4Vector base = *(t4Vector*)((char*)self->owner->mAnimModel->SkelMatrices + (bone << 6) + 0x30);
+        // the bone position through a pointer to its matrix: retail adds base first (a subscript puts the index first)
+        t4Matrix* boneSkel = &self->owner->mAnimModel->SkelMatrices[bone];
+        t4Vector base = boneSkel->row[3];
         sMat_1150 boneMat;
         CopyMat_1150(&boneMat, (sMat_1150*)&self->owner->mAnimModel->SkelMatrices[bone]);
         boneMat.r[3] = t4vect_Zero;

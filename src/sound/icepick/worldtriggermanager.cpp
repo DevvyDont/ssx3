@@ -798,6 +798,13 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* t);
 extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* t);
 extern unsigned char str_empty_j[];
 
+// Tells the audio system the instance's swap bank stopped (cSSXAudio_SwapBankStopped with its swap string). An inline
+// function's argument keeps retail's index-first address add for &m_aWorldTriggerInstances[i].
+static inline void swapBankStopped(cSSXAudio* audio, cWorldTriggerInstance* inst)
+{
+    cSSXAudio_SwapBankStopped_2(audio, inst->m_iSwapString);
+}
+
 /**
  * Per-frame update of the world triggers: stops untouched instances, updates touched ones, clears the touches.
  *
@@ -812,9 +819,7 @@ extern "C" void cWorldTriggerManager_Update(cWorldTriggerManager* self)
         if (self->m_aWorldTriggerInstances[i].m_bInUse == 1) {
             if (self->m_aWorldTriggerInstances[i].m_bTouch == 0) {
                 if (strcmp((&self->m_aWorldTriggerInstances[i])->m_iSwapString, str_empty_j)) {
-                    // PORT: pointer arithmetic through int. Kept as bytes: indexing m_aWorldTriggerInstances[i] puts
-                    // the base first in this addu (retail: index first)
-                    cSSXAudio_SwapBankStopped_2(cAudioInterface_bxAudio(), (char*)(i * 0x70 + *(int*)self) + 0x40);
+                    swapBankStopped(cAudioInterface_bxAudio(), &self->m_aWorldTriggerInstances[i]);
                 }
                 self->m_aWorldTriggerInstances[i].m_bInUse = 0;
                 cWorldTriggerInstance_Stop((cWorldTriggerInstance*)(&self->m_aWorldTriggerInstances[i]));

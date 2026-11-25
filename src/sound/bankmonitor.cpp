@@ -4468,9 +4468,9 @@ extern "C" int func_002B1780(SNDPLAYOPTS* entry, int n, int maxChunks, char* mem
     st->mCloseOnEnd[mg->BankMonitor.mInst] = 1;
     {
         cBankManager* bankManager = gMusicSys->mpVStreamSys->mpVBankManager;
-        // the level's byte offset first: indexing mCurrent directly swaps the addu operands
-        int off = bankManager->BankMonitor.mInst * (int)sizeof(SNDPLAYOPTS);
-        *(SNDPLAYOPTS*)((char*)bankManager->BankMonitor.mCurrent + off) = *entry;
+        // through a pointer to the entry: retail adds base first (mCurrent[i] = *entry puts the index first)
+        SNDPLAYOPTS* level = &bankManager->BankMonitor.mCurrent[bankManager->BankMonitor.mInst];
+        *level = *entry;
     }
     cStreamSys_STREAM_CreateInstance1(gMusicSys->mpVStreamSys, 2, 0, mem, size, n, maxChunks);
     gMusicSys->mpVStreamSys->mpVBankManager->BankMonitor.mInst--;

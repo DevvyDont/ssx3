@@ -237,9 +237,9 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
         scl.z = modelScale;
         scl.w = 1.0f;
         t4Matrix* selfMat = &self->XForm;
-        // PORT: the link addresses are formed in an int (index-first addu; a typed &links[Mesh] adds base-first).
-        sLink_C0E8* link = (sLink_C0E8*)(self->Mesh * 16 + (int)links);
-        vu0CopyMat_C0E8(selfMat, link->mat);
+        // links[k].mat / .next read straight off the subscript, k in a local: retail's index-first add, formed once
+        int mesh = self->Mesh;
+        vu0CopyMat_C0E8(selfMat, links[mesh].mat);
         xform = selfMat;
         {
         t4Vector rr;
@@ -249,15 +249,14 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
         rr.z = origin.z * scl.z;
         rr.w = origin.w * scl.w;
         self->XForm.row[3] = rr;
-        int i = link->next;
+        int i = links[mesh].next;
         while (i != -1) {
-            sLink_C0E8* nextLink = (sLink_C0E8*)(i * 16 + (int)links);
             t4Matrix* mm = xform;
             t4Matrix productCopy;
             t4Matrix linkMat;
             t4Vector res;
             t4Vector r3b;
-            t4Matrix* lm = nextLink->mat;
+            t4Matrix* lm = links[i].mat;
             res = lm->row[0];
             linkMat.row[0] = res;
             res = lm->row[1];
@@ -276,7 +275,7 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
             vu0MulMat_C0E8(pt, &linkMat, mm);
             vu0CopyMat_C0E8(pt2, pt);
             vu0CopyMat_C0E8(mm, pt2);
-            i = nextLink->next;
+            i = links[i].next;
         }
         }
         t4Matrix worldCopy;

@@ -2584,14 +2584,9 @@ INCLUDE_ASM("util/menu", cEnumMenuItem_render);
 #ifdef SKIP_ASM
 extern char str_Invalid_b[];
 
-struct cEnumMenuItem_render_sEntry {
-    char* name;  // 0x0
-    int value;   // 0x4
-};
-
 /**
- * Draws a list-choice item: the caption on the left and, on the right, the name of the entry whose value equals the int
- * at +0x20, or "Invalid" (str_Invalid_b) when none does (cMenuItem_textRender1).
+ * Draws a list-choice item: the caption on the left and, on the right, the Text of the Tags entry whose Value equals
+ * *Enum, or "Invalid" (str_Invalid_b) when none does (cMenuItem_textRender1).
  *
  * @param rect  the row's rect
  */
@@ -2603,10 +2598,8 @@ extern "C" void cEnumMenuItem_render(cEnumMenuItem* self, int rect)
             cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, str_Invalid_b);
             break;
         }
-        // PORT: pointer held in int (index-first address arithmetic)
-        cEnumMenuItem_render_sEntry* entry = (cEnumMenuItem_render_sEntry*)((i << 3) + (int)self->Tags);
-        if (*self->Enum == entry->value) {
-            cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, entry->name);
+        if (*self->Enum == self->Tags[i].Value) {
+            cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, (char*)self->Tags[i].Text);
             return;
         }
         i++;
@@ -4313,6 +4306,15 @@ static inline int validChar_E488(char c)
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '!';
 }
 
+// Steps *c by step until it is a valid name character. (cTextMenuItem_input passes &Text[CursorPos]: an inline
+// function's argument keeps retail's address order, index + this, then + 0x18.)
+static inline void stepChar_E488(char* c, int step)
+{
+    do {
+        *c += step;
+    } while (!validChar_E488(*c));
+}
+
 /**
  * Handles input for a text-entry item: moves the cursor, cycles, inserts and deletes characters, and takes typed keys.
  *
@@ -4342,19 +4344,9 @@ extern "C" int cTextMenuItem_input(cTextMenuItem* self)
     } else if (key == 3) {
         self->CursorPos = (self->CursorPos + 1) % mod;
     } else if (key == 4) {
-        // PORT: pointer in int (index-first address).
-        char* cursorChar = (char*)(self->CursorPos + (int)self);
-        cursorChar += 0x18;
-        do {
-            (*cursorChar)--;
-        } while (!validChar_E488(*cursorChar));
+        stepChar_E488(&self->Text[self->CursorPos], -1);
     } else if (key == 5) {
-        // PORT: pointer in int (index-first address).
-        char* cursorChar = (char*)(self->CursorPos + (int)self);
-        cursorChar += 0x18;
-        do {
-            (*cursorChar)++;
-        } while (!validChar_E488(*cursorChar));
+        stepChar_E488(&self->Text[self->CursorPos], 1);
     } else if (key == 9) {
         if (len < 14) {
             for (int i = self->CursorPos; i < len; i++) {

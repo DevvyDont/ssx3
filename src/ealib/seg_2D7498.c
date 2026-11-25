@@ -3779,14 +3779,13 @@ void func_003DB040(unsigned char *ctx, unsigned char *data, int idx, int *tbl) {
         track = data + ((struct Hdr_B040 *)data)->offs[idx] * 4;
         events = data + (((data[6] * 2 + 3) & 0x3FC) + 0xC);
         for (i = 0; i < count; i++) {
-            /* PORT: pointer arithmetic through int (index-first addu); use uintptr_t off-PS2. */
-            unsigned char *tagEntry = (unsigned char *)(i * 3 + (int)events);
             int type;
             int tagId;
             int argIndex;
-            ev.a = tagEntry[0];
-            ev.b = tagEntry[1];
-            ev.type = tagEntry[2];
+            /* 3-byte tag entries (id, argument index, type) read straight off the subscript: retail adds index first */
+            ev.a = events[i * 3];
+            ev.b = events[i * 3 + 1];
+            ev.type = events[i * 3 + 2];
             type = ev.type;
             tagId = ev.a;
             argIndex = ev.b;

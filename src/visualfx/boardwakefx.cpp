@@ -1969,10 +1969,8 @@ extern "C" void func_002DF448(func_002DF448_sFx* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        // PORT: pointer held in int (index-first address arithmetic)
-        cDynamicColourEmitter* emitter = (cDynamicColourEmitter*)(i * 0x210 + (int)self->elems);
-        sVEntry<void(void*, void*, float)>* vt = ((sVEntry<void (void*, void*, float)>*)emitter->mVtbl);
-        vt[3].fn((char*)emitter + vt[3].delta, self->data + i * 232, emitter->m_emitter.SeedX0);
+        sVEntry<void(void*, void*, float)>* vt = ((sVEntry<void (void*, void*, float)>*)self->elems[i].mVtbl);
+        vt[3].fn(vthis(&self->elems[i], vt[3]), self->data + i * 232, self->elems[i].m_emitter.SeedX0);
     }
     self->f60 = 0;
 }
@@ -2182,8 +2180,9 @@ static inline t4Vector wakeAddF920(const t4Vector& a, const t4Vector& b)
 
 static inline t4Vector wakeRowF920(cRider* o, int k)
 {
-    // The matrix stride is spelled as bytes: indexing SkelMatrices[] swaps the addu operands.
-    return ((t4Vector*)((char*)o->mAnimModel->SkelMatrices + (o->mBoneBoardChild << 6)))[k];
+    // through a pointer to the bone's matrix: retail adds base first (SkelMatrices[b].row[k] puts the index first)
+    t4Matrix* bone = &o->mAnimModel->SkelMatrices[o->mBoneBoardChild];
+    return bone->row[k];
 }
 
 /**

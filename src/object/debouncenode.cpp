@@ -1702,7 +1702,6 @@ extern "C" void func_00344AA0(sDebounceOwner49F0* self);
  *
  * @param elem  the crowd block (0x1F4 bytes)
  */
-// PORT: pointer held in int for the element address (index-first addu); not 64-bit safe.
 extern "C" void func_003449F0(void* elem)
 {
     sDebounceOwner49F0* self = (sDebounceOwner49F0*)elem;
@@ -1712,8 +1711,8 @@ extern "C" void func_003449F0(void* elem)
         self->time = newTime - self->period;
     }
     for (int i = 0; i < self->count; i++) {
-        cMeshAnimFrame* item = (cMeshAnimFrame*)(i * 0xD0 + (int)self->items);
-        ((sDebounceVEntry49F0*)item->mVtbl)[2].fn(vthis(item, ((sDebounceVEntry49F0*)item->mVtbl)[2]), self->time);
+        sDebounceVEntry49F0* vt = (sDebounceVEntry49F0*)self->items[i].mVtbl;
+        vt[2].fn(vthis(&self->items[i], vt[2]), self->time);
     }
     func_00344AA0(self);
 }

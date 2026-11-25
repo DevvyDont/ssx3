@@ -325,13 +325,7 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* vself, t4Vector*
     (self->m_positions)[self->m_subEmitterId] = *pos;
     (self->m_positions)[self->m_subEmitterId].w = 0.0f;
     (self->m_velocities)[self->m_subEmitterId] = *vel;
-    // PORT: pointer held in int (index-first addu)
-    t4Vector* velSlot = (t4Vector*)((self->m_subEmitterId << 4) + (int)self->m_velocities);
-    if (rnd) {
-        velSlot->w = randUnit10D0() + 1.0f;
-    } else {
-        velSlot->w = 0.0f;
-    }
+    (self->m_velocities)[self->m_subEmitterId].w = rnd ? randUnit10D0() + 1.0f : 0.0f;
     int idx = self->m_subEmitterId - 1;
     self->m_subEmitterId = idx;
     if (idx < 0) {
