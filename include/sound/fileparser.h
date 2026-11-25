@@ -24,20 +24,20 @@ struct FileParser {
     char mTempStr[2048]; // 0x00C [O]; [U] FindNextSection / GetString / GetName copy the token here and return it; GetFloat/GetInt sscanf it; Assign* compare the key in it
 
     // Methods bound to their retail symbols by asm labels.
-    int SkipComment() __asm__("FileParser_SkipComment");
+    bool SkipComment() __asm__("FileParser_SkipComment");
     void SkipSectionNames() __asm__("FileParser_SkipSectionNames");
-    int FindEOL() __asm__("FileParser_FindEOL");
+    bool FindEOL() __asm__("FileParser_FindEOL");
     char* FindNextSection() __asm__("FileParser_FindNextSection");
-    int FindSection(const char* name) __asm__("FileParser_FindSection");
-    int FindPartialSection(char* name) __asm__("FileParser_FindPartialSection");
+    bool FindSection(const char* name) __asm__("FileParser_FindSection");
+    bool FindPartialSection(char* name) __asm__("FileParser_FindPartialSection");
     char* GetString() __asm__("FileParser_GetString");
     float GetFloat() __asm__("FileParser_GetFloat");
     int GetInt() __asm__("FileParser_GetInt");
     int ExpectToken(const char* name) __asm__("FileParser_ExpectToken");
     int IsEOF() __asm__("FileParser_IsEOF");
-    int AssignString(const char* name, char* out) __asm__("FileParser_AssignString");
-    int AssignFloat(const char* name, float* out) __asm__("FileParser_AssignFloat");
-    int AssignInt(const char* name, int* out) __asm__("FileParser_AssignInt");
+    bool AssignString(const char* name, char* out) __asm__("FileParser_AssignString");
+    bool AssignFloat(const char* name, float* out) __asm__("FileParser_AssignFloat");
+    bool AssignInt(const char* name, int* out) __asm__("FileParser_AssignInt");
 };
 
 CHECK_OFFSET(FileParser, mFileSize, 0x000);

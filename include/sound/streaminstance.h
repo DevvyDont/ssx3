@@ -37,9 +37,9 @@ struct cStreamInstance {
     void Update() __asm__("cStreamInstance_Update");
     float GetTime() __asm__("cStreamInstance_GetTime");
     float GetTimeRemaining() __asm__("cStreamInstance_GetTimeRemaining");
-    int IsBufferFilled(int minVal) __asm__("cStreamInstance_IsBufferFilled");
-    int IsCurrRequestedRead() __asm__("cStreamInstance_IsCurrRequestedRead");
-    int Playing() __asm__("cStreamInstance_Playing");
+    bool IsBufferFilled(int minVal) __asm__("cStreamInstance_IsBufferFilled");
+    bool IsCurrRequestedRead() __asm__("cStreamInstance_IsCurrRequestedRead");
+    bool Playing() __asm__("cStreamInstance_Playing");
     void ReleaseHold() __asm__("cStreamInstance_ReleaseHold");
     int GetCurrActiveSampleHandle() __asm__("cStreamInstance_GetCurrActiveSampleHandle");
     void ReleaseHold1(int requestHandle) __asm__("cStreamInstance_ReleaseHold1");

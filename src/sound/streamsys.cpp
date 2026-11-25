@@ -328,7 +328,7 @@ struct cStreamInstance_GetTime_sStatus {
 void cStreamInstance_GetRequestStatus_status(void* self, cStreamInstance_GetTime_sStatus* out, int flags) __asm__("cStreamInstance_GetRequestStatus");
 
 /**
- * Returns the played time of the current request while it plays (request state 2), else 0.
+ * Returns the played time of the current request while it plays (request state kSNDREQUEST_Playing), else 0.
  *
  * @return the time
  */
@@ -336,7 +336,7 @@ float cStreamInstance::GetTime()
 {
     cStreamInstance_GetTime_sStatus st;
     cStreamInstance_GetRequestStatus_status(this, &st, 0);
-    if (st.state == 2) {
+    if (st.state == kSNDREQUEST_Playing) {
         return (float)st.a;
     }
     return 0.0f;
@@ -357,7 +357,7 @@ struct cStreamInstance_GetTimeRemaining_sStatus {
 };
 
 /**
- * Returns the remaining time of the current request while it plays (request state 2), else 0.
+ * Returns the remaining time of the current request while it plays (request state kSNDREQUEST_Playing), else 0.
  *
  * @return the time
  */
@@ -365,7 +365,7 @@ float cStreamInstance::GetTimeRemaining()
 {
     cStreamInstance_GetTimeRemaining_sStatus st;
     cStreamInstance_GetRequestStatus(this, (cStreamInstance_Playing_sStatus*)&st, 0);
-    if (st.state == 2) {
+    if (st.state == kSNDREQUEST_Playing) {
         return (float)st.b;
     }
     return 0.0f;
@@ -386,9 +386,9 @@ struct cStreamInstance_IsBufferFilled_sStatus {
  * Tells whether a stream has at least the given amount buffered (status word 1 >= @p minVal).
  *
  * @param minVal  the amount (milliseconds)
- * @return 1 or 0
+ * @return true when that much is buffered
  */
-int cStreamInstance::IsBufferFilled(int minVal)
+bool cStreamInstance::IsBufferFilled(int minVal)
 {
     cStreamInstance_IsBufferFilled_sStatus st;
     cStreamInstance_GetStatus(this, &st);
@@ -406,15 +406,15 @@ struct cStreamInstance_IsCurrRequestedRead_sStatus {
 };
 
 /**
- * Tells whether the current request has been read (request state 1).
+ * Tells whether the current request has been read (request state kSNDREQUEST_Queued).
  *
- * @return 1 or 0
+ * @return true when it has been read
  */
-int cStreamInstance::IsCurrRequestedRead()
+bool cStreamInstance::IsCurrRequestedRead()
 {
     cStreamInstance_IsCurrRequestedRead_sStatus st;
     cStreamInstance_GetRequestStatus(this, (cStreamInstance_Playing_sStatus*)&st, 0);
-    return st.state == 1;
+    return st.state == kSNDREQUEST_Queued;
 }
 #endif
 
@@ -431,15 +431,15 @@ struct cStreamInstance_Playing_sStatus {
 extern "C" void cStreamInstance_GetRequestStatus(void* self, cStreamInstance_Playing_sStatus* out, int flags);
 
 /**
- * Tells whether the current request is playing (request state 2).
+ * Tells whether the current request is playing (request state kSNDREQUEST_Playing).
  *
- * @return 1 or 0
+ * @return true while it plays
  */
-int cStreamInstance::Playing()
+bool cStreamInstance::Playing()
 {
     cStreamInstance_Playing_sStatus st;
     cStreamInstance_GetRequestStatus(this, &st, 0);
-    return st.state == 2;
+    return st.state == kSNDREQUEST_Playing;
 }
 #endif
 
@@ -519,7 +519,7 @@ float cStreamInstance::GetRequestLength()
 {
     cStreamInstance_GetRequestLength_sStatus st;
     cStreamInstance_GetRequestStatus_status(this, &st, 0);
-    if (st.state == 2) {
+    if (st.state == kSNDREQUEST_Playing) {
         return (float)(st.a + st.b);
     }
     return 0.0f;
@@ -1138,16 +1138,17 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsBufferFilled);
 extern "C" int cStreamInstance_IsBufferFilled(cStreamInstance*, int);
 
 /**
- * Tells whether stream @p idx has at least @p minVal buffered (cStreamInstance_IsBufferFilled); 0 without the stream.
+ * Tells whether stream @p idx has at least @p minVal buffered (cStreamInstance_IsBufferFilled); false without the
+ * stream.
  *
  * @param idx  the stream index
  * @param minVal  the amount (milliseconds)
- * @return 1 or 0
+ * @return true when that much is buffered
  */
-int cStreamSys::STREAM_IsBufferFilled(int idx, int minVal)
+bool cStreamSys::STREAM_IsBufferFilled(int idx, int minVal)
 {
     cStreamInstance* stream = mStreamInstance[idx];
-    return stream != 0 ? stream->IsBufferFilled(minVal) : 0;
+    return stream != 0 ? stream->IsBufferFilled(minVal) : false;
 }
 #endif
 //100%
@@ -1156,15 +1157,16 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsCurrRequestedRead);
 extern "C" int cStreamInstance_IsCurrRequestedRead(cStreamInstance*);
 
 /**
- * Tells whether stream @p idx's current request has been read (cStreamInstance_IsCurrRequestedRead); 0 without the stream.
+ * Tells whether stream @p idx's current request has been read (cStreamInstance_IsCurrRequestedRead); false without the
+ * stream.
  *
  * @param idx  the stream index
- * @return 1 or 0
+ * @return true when it has been read
  */
-int cStreamSys::STREAM_IsCurrRequestedRead(int idx)
+bool cStreamSys::STREAM_IsCurrRequestedRead(int idx)
 {
     cStreamInstance* stream = mStreamInstance[idx];
-    return stream != 0 ? stream->IsCurrRequestedRead() : 0;
+    return stream != 0 ? stream->IsCurrRequestedRead() : false;
 }
 #endif
 //100%
@@ -1174,19 +1176,19 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsRequestedDequeued);
 int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus");
 
 /**
- * Tells whether a stream request is finished: its request status is 3 (dequeued) or the query fails.
+ * Tells whether a stream request is finished: its request status is kSNDREQUEST_Done or the query fails.
  *
  * @param handle  the request handle
- * @return 1 or 0
+ * @return true when finished
  */
-int cStreamSys::STREAM_IsRequestedDequeued(int handle)
+bool cStreamSys::STREAM_IsRequestedDequeued(int handle)
 {
     int st[4];
     int result;
     SNDSYS_entercritical();
     result = SNDSTRM_requeststatus_pbuf(handle, st);
     SNDSYS_leavecritical();
-    return st[0] == 3 || result < 0;
+    return st[0] == kSNDREQUEST_Done || result < 0;
 }
 #endif
 //100%
@@ -1196,19 +1198,19 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsRequestedPlaying);
 int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus");
 
 /**
- * Tells whether a stream request is playing: its request status is 2 and the query succeeds.
+ * Tells whether a stream request is playing: its request status is kSNDREQUEST_Playing and the query succeeds.
  *
  * @param handle  the request handle
- * @return 1 or 0
+ * @return true while it plays
  */
-int cStreamSys::STREAM_IsRequestedPlaying(int handle)
+bool cStreamSys::STREAM_IsRequestedPlaying(int handle)
 {
     int st[4];
     int result;
     SNDSYS_entercritical();
     result = SNDSTRM_requeststatus_pbuf(handle, st);
     SNDSYS_leavecritical();
-    return st[0] == 2 && !(result < 0);
+    return st[0] == kSNDREQUEST_Playing && !(result < 0);
 }
 #endif
 
@@ -1218,18 +1220,18 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Playing);
 extern "C" int cStreamInstance_Playing(cStreamInstance*);
 
 /**
- * Tells whether stream @p i is playing (cStreamInstance_Playing); 0 without the stream.
+ * Tells whether stream @p i is playing (cStreamInstance_Playing); false without the stream.
  *
  * @param i  the stream index
- * @return 1 or 0
+ * @return true while it plays
  */
-int cStreamSys::STREAM_Playing(int i)
+bool cStreamSys::STREAM_Playing(int i)
 {
     cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
         return stream->Playing();
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1798,9 +1800,10 @@ int SNDSTRM_requeststatus_st(int h, int* st) __asm__("SNDSTRM_requeststatus");
 /**
  * Returns whether the instance's sound has finished playing.
  *
- * By the type at +0: 1 (sample) asks SNDover under the sound critical section; 2 (sequence) checks SNDseqstatus
- * for status 2 or an error; 3 (stream) reads the request status (SNDSTRM_requeststatus) and reports done when it is 3 or cannot
- * be read. Any other type counts as done.
+ * By the type at +0: MONITOR_BANK (sample) asks SNDover under the sound critical section; MONITOR_MIDI (sequence)
+ * checks SNDseqstatus for kSNDSEQ_Stopped or an error; MONITOR_STREAM (stream) reads the request status
+ * (SNDSTRM_requeststatus) and reports done when it is kSNDREQUEST_Done or cannot be read. Any other type counts as
+ * done.
  *
  * @return nonzero when done
  */
@@ -1808,24 +1811,24 @@ int cBankMonitorInstance::DonePlaying()
 {
     int type = *(int*)this;
     switch (type) {
-    case 1: {
+    case MONITOR_BANK: {
         SNDSYS_entercritical();
         int result = SNDover(mHandle) != 0;
         SNDSYS_leavecritical();
         return result;
     }
-    case 2: {
+    case MONITOR_MIDI: {
         SNDSYS_entercritical();
         int result = SNDseqstatus(mHandle);
         SNDSYS_leavecritical();
-        return result == 2 || result < 0;
+        return result == kSNDSEQ_Stopped || result < 0;
     }
-    case 3: {
+    case MONITOR_STREAM: {
         int st[4];
         SNDSYS_entercritical();
         if (SNDSTRM_requeststatus_st(mHandle, st) >= 0) {
             SNDSYS_leavecritical();
-            return st[0] == 3;
+            return st[0] == kSNDREQUEST_Done;
         }
         SNDSYS_leavecritical();
         return 1;
@@ -1870,21 +1873,21 @@ extern "C" void cBankMonitorInstance_Reset(cBankMonitorInstance* self);
  * An instance with no type (+0) is free. One without the auto-release flag (+0x9C) is never free. Otherwise it is free
  * once cBankMonitorInstance_DonePlaying says the sound is done, after cBankMonitorInstance_Reset resets it.
  *
- * @return nonzero when free
+ * @return true when free
  */
-int cBankMonitorInstance::IsFree()
+bool cBankMonitorInstance::IsFree()
 {
-    if (*(int*)this == 0) {
-        return 1;
+    if (mMonitorType == MONITOR_NONE) {
+        return true;
     }
     if (mCloseOnEnd == 0) {
-        return 0;
+        return false;
     }
     if (DonePlaying() == 0) {
-        return 0;
+        return false;
     }
     Reset();
-    return 1;
+    return true;
 }
 #endif
 
@@ -2093,17 +2096,17 @@ void cBankMonitorInstance::PosUpdate(int pos, int elevation)
     }
     mLastAzimuth = pos;
     switch (*(int*)this) {
-    case 1:
+    case MONITOR_BANK:
         SNDSYS_entercritical();
         SND3dpos(mHandle, pos, elevation);
         SNDSYS_leavecritical();
         break;
-    case 2:
+    case MONITOR_MIDI:
         SNDSYS_entercritical();
         SNDMIDI_azimuth(mHandle, pos);
         SNDSYS_leavecritical();
         break;
-    case 3:
+    case MONITOR_STREAM:
         ((cStreamInstance*)(*(void**)&mRestartInfo))->Set3DPosition(pos, elevation);
         break;
     }
@@ -2142,17 +2145,17 @@ void cBankMonitorInstance::PitchUpdate(int vol)
     }
     mLastPitch = vol;
     switch (*(int*)this) {
-    case 1:
+    case MONITOR_BANK:
         SNDSYS_entercritical();
         SNDpitchmult(mHandle, vol);
         SNDSYS_leavecritical();
         break;
-    case 2:
+    case MONITOR_MIDI:
         SNDSYS_entercritical();
         SNDMIDI_pitchmult(mHandle, vol);
         SNDSYS_leavecritical();
         break;
-    case 3:
+    case MONITOR_STREAM:
         ((cStreamInstance*)(*(void**)&mRestartInfo))->SetPitch(vol);
         break;
     }
@@ -2184,7 +2187,7 @@ void cBankMonitorInstance::VolUpdate(int vol)
 {
     int orig = vol;
     switch (*(int*)this) {
-    case 1: {
+    case MONITOR_BANK: {
         if (mVolMultiplier >= 0.0f)
             vol = (int)(mVolMultiplier * (float)vol);
         if (vol > 127)
@@ -2206,7 +2209,7 @@ void cBankMonitorInstance::VolUpdate(int vol)
         SNDSYS_leavecritical();
         break;
     }
-    case 2: {
+    case MONITOR_MIDI: {
         if (mVolMultiplier >= 0.0f)
             vol = (int)(mVolMultiplier * (float)vol);
         if (vol > 127)
@@ -2228,7 +2231,7 @@ void cBankMonitorInstance::VolUpdate(int vol)
         SNDSYS_leavecritical();
         break;
     }
-    case 3: {
+    case MONITOR_STREAM: {
         if (mVolMultiplier >= 0.0f)
             vol = (int)(mVolMultiplier * (float)vol);
         if (vol > 127)
@@ -2274,12 +2277,12 @@ void cBankMonitorInstance::StopSound()
     mActive = 0;
     mFading = 1;
     switch (*(int*)this) {
-    case 1:
+    case MONITOR_BANK:
         SNDSYS_entercritical();
         SNDautovol(mHandle, 25, -1);
         SNDSYS_leavecritical();
         break;
-    case 2:
+    case MONITOR_MIDI:
         SNDSYS_entercritical();
         SNDseqautovol(mHandle, 25, -1);
         SNDSYS_leavecritical();
@@ -2355,7 +2358,7 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* vself, sSndPlayOpts
     self->mActive = 1;
     self->mFading = 0;
     switch (*(int*)self) {
-    case 1:
+    case MONITOR_BANK:
         opts->depth++;
         opts->descs[opts->depth] = opts->cur;
         opts->f24[opts->depth] = 0;
@@ -2384,7 +2387,7 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* vself, sSndPlayOpts
         SNDSYS_leavecritical();
         opts->depth--;
         break;
-    case 2:
+    case MONITOR_MIDI:
         opts->depth++;
         opts->descs[opts->depth] = opts->cur;
         opts->f24[opts->depth] = 0;
@@ -2413,7 +2416,7 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* vself, sSndPlayOpts
         SNDSYS_leavecritical();
         opts->depth--;
         break;
-    case 3:
+    case MONITOR_STREAM:
         break;
     }
 }
@@ -2429,29 +2432,30 @@ extern "C" void cBankMonitorInstance_RestartSound(void*);
  * Starts or stops an instance's sound as it crosses its audible distance.
  *
  * With no limit (+0x8C == 0) the sound is always active. A playing sound (+0x8 set) farther than the limit is stopped
- * (cBankMonitorInstance_StopSound, returns 0); a silent one within it is restarted (cBankMonitorInstance_RestartSound, returns 1).
+ * (cBankMonitorInstance_StopSound, returns false); a silent one within it is restarted
+ * (cBankMonitorInstance_RestartSound, returns true).
  *
  * @param radius  the current distance (On Tour Radius)
- * @return nonzero while the sound should play
+ * @return true while the sound should play
  */
-int cBankMonitorInstance::CheckActive(float radius)
+bool cBankMonitorInstance::CheckActive(float radius)
 {
     float th = mRadius;
     if (th == 0.0f) {
-        return 1;
+        return true;
     }
     if (mActive != 0) {
         if (th < radius) {
             StopSound();
-            return 0;
+            return false;
         }
-        return 1;
+        return true;
     }
     if (radius < th) {
         cBankMonitorInstance_RestartSound(this);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2500,14 +2504,15 @@ static inline float Sqrt_C868(float x)
 /**
  * Updates the 3D audio of an instance: Doppler pitch, position and distance volume.
  *
- * A free instance (type +0x0 is 0) is skipped, and so is a stream (type 3) when SNDSTRM_requeststatus returns 0 or less and the
- * status word is not 2. For a positioned instance (+0x68) while the monitor has 3D on (+0x8E4), the distance is the
- * square root of the monitor's virtual slot 6. When the instance is held active (+0x94) or
- * cBankMonitorInstance_CheckActive says so, the Doppler factor (cBankMonitorInstance_Doppler, from the previous
+ * A free instance (type +0x0 is 0) is skipped, and so is a stream (MONITOR_STREAM) when SNDSTRM_requeststatus returns 0
+ * or less and the status word is not kSNDREQUEST_Playing. For a positioned instance (+0x68) while the monitor has 3D on
+ * (+0x8E4), the distance is the square root of the monitor's virtual slot 6. When the instance is held active (+0x94)
+ * or cBankMonitorInstance_CheckActive says so, the Doppler factor (cBankMonitorInstance_Doppler, from the previous
  * distance at +0x5C, when +0x8E0 enables it), azimuth and elevation (cBankMonitorInstance_PosUpdate), pitch
  * (cBankMonitorInstance_PitchUpdate, factor * 4096) and volume (the fixed +0x64 when held, else
- * cBankMonitorInstance_Dist2Vol__FPvi over the range at +0x88, default 30, rescaled by 127 / the maximum at +0x98) are
- * applied; an inactive one gets volume 0. The distance is kept at +0x5C. Otherwise the fixed volume at +0x64 is used.
+ * cBankMonitorInstance_Dist2Vol__FPvi over the range at +0x88, default 30, rescaled by kSNDMaxVol / the maximum at
+ * +0x98) are applied; an inactive one gets volume 0. The distance is kept at +0x5C. Otherwise the fixed volume at +0x64
+ * is used.
  *
  * Unless the instance is stopping (+0x54), the volume is multiplied by the optional factor at +0x60 and set with
  * cBankMonitorInstance_VolUpdate; a stopping instance whose sound is done (cBankMonitorInstance_DonePlaying) is cleared
@@ -2525,11 +2530,11 @@ extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBank
     int st[4];
     sPos_C868 pos;
     int vol = 0;
-    if (*(int*)voice == 3) {
+    if (voice->mMonitorType == MONITOR_STREAM) {
         SNDSYS_entercritical();
         int result = SNDSTRM_requeststatus_st(voice->mHandle, st);
         SNDSYS_leavecritical();
-        if (result <= 0 && st[0] != 2) {
+        if (result <= 0 && st[0] != kSNDREQUEST_Playing) {
             return;
         }
     }
@@ -2554,7 +2559,7 @@ extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBank
                     vol = cBankMonitorInstance_Dist2Vol_4(voice, voice->mBaseVol, dist, range);
                 }
                 int maxVol = voice->mMapToMaxVol;
-                if (maxVol != 0x7F) {
+                if (maxVol != kSNDMaxVol) {
                     vol = vol * 0x7F / maxVol;
                     if (vol > 0x7F) {
                         vol = 0x7F;
@@ -2602,15 +2607,15 @@ extern "C" void SNDseqpause(int h);
 /**
  * Pauses an instance's sound.
  *
- * For a non-free instance that is not stopping: sets pitch and volume to 0 and, for a sequence (type 2), pauses it with
- * SNDseqpause.
+ * For a non-free instance that is not stopping: sets pitch and volume to 0 and, for a sequence (MONITOR_MIDI), pauses
+ * it with SNDseqpause.
  */
 extern "C" void cBankMonitorInstance_Pause(cBankMonitorInstance* self)
 {
     if (self->IsFree() == 0 && self->mFading == 0) {
         self->PitchUpdate(0);
         self->VolUpdate(0);
-        if (self->mMonitorType == 2) {
+        if (self->mMonitorType == MONITOR_MIDI) {
             SNDseqpause(self->mHandle);
         }
     }
@@ -2627,8 +2632,8 @@ extern "C" void SNDseqresume(int h);
 /**
  * Resumes an instance's sound after a pause.
  *
- * For a non-free instance (cBankMonitorInstance_IsFree) it restores normal pitch (cBankMonitorInstance_PitchUpdate
- * with 0x1000) and, for a MIDI sequence (type 2), resumes it with SNDseqresume on its handle (+4). The volume that
+ * For a non-free instance (cBankMonitorInstance_IsFree) it restores normal pitch (cBankMonitorInstance_PitchUpdate with
+ * 0x1000) and, for a MIDI sequence (MONITOR_MIDI), resumes it with SNDseqresume on its handle (+4). The volume that
  * cBankMonitorInstance_Pause set to 0 is not restored here. cBankMonitor_BANKMONITOR_Resume calls it for all 64
  * instances.
  */
@@ -2636,7 +2641,7 @@ extern "C" void cBankMonitorInstance_Resume(cBankMonitorInstance* self)
 {
     if (self->IsFree() == 0) {
         self->PitchUpdate(0x1000);
-        if (*(int*)self == 2) {
+        if (self->mMonitorType == MONITOR_MIDI) {
             SNDseqresume(self->mHandle);
         }
     }
@@ -2658,12 +2663,12 @@ void cStreamInstance_SetBaseVolume(void* self, int val);
 /**
  * Fades an instance's sound to a volume level over a duration, or out and stopped for level -1.
  *
- * When @p resetMonitor is set the instance is flagged for release (+0x58, +0x9C). A stopping instance is left alone. Level -1
- * marks it stopping; other levels are clamped to 0..127. Samples and sequences ramp over duration * 100 ticks
- * (SNDautovol, SNDseqautovol) or jump at once when the duration is 0 (SNDvol, SNDseqvol); streams are
+ * When @p resetMonitor is set the instance is flagged for release (+0x58, +0x9C). A stopping instance is left alone.
+ * Level kFadeStop (-1) marks it stopping; other levels are clamped to 0..127. Samples and sequences ramp over duration
+ * * 100 ticks (SNDautovol, SNDseqautovol) or jump at once when the duration is 0 (SNDvol, SNDseqvol); streams are
  * purged when stopping or get the level as base volume.
  *
- * @param n  the target volume 0..127, or -1 to stop (On Tour Level)
+ * @param n  the target volume 0..127, or kFadeStop to stop (On Tour Level)
  * @param resetMonitor  nonzero to release the instance afterwards (On Tour ResetMonitor)
  * @param duration  the fade time in seconds (On Tour Duration)
  */
@@ -2676,7 +2681,7 @@ void cBankMonitorInstance::Fade(int n, int resetMonitor, float duration)
     if (mFading != 0) {
         return;
     }
-    if (n == -1) {
+    if (n == kFadeStop) {
         mFading = 1;
     } else {
         if (n > 127) {
@@ -2687,7 +2692,7 @@ void cBankMonitorInstance::Fade(int n, int resetMonitor, float duration)
         }
     }
     switch (*(int*)this) {
-    case 1:
+    case MONITOR_BANK:
         SNDSYS_entercritical();
         if (duration != 0.0f) {
             SNDautovol(mHandle, (int)(duration * 100.0f), n);
@@ -2696,7 +2701,7 @@ void cBankMonitorInstance::Fade(int n, int resetMonitor, float duration)
         }
         SNDSYS_leavecritical();
         break;
-    case 2:
+    case MONITOR_MIDI:
         SNDSYS_entercritical();
         if (duration != 0.0f) {
             SNDseqautovol(mHandle, (int)(duration * 100.0f), n);
@@ -2705,7 +2710,7 @@ void cBankMonitorInstance::Fade(int n, int resetMonitor, float duration)
         }
         SNDSYS_leavecritical();
         break;
-    case 3:
+    case MONITOR_STREAM:
         if (mFading != 0) {
             cStreamInstance_Purge(*(void**)&mRestartInfo);
         } else {

@@ -9,6 +9,7 @@
 #include "ai/ai.h"
 #include "sound/streamsys.h"
 #include "ai/rider.h"
+#include "ai/riderhandler.h"
 #include "ai/airpredictor.h"
 #include "main/game.h"
 #include "ui/uiengine.h"
@@ -30,11 +31,9 @@ public:
 /**
  * Allocates a sound bank's memory: optional sound (SPU) memory and a main-memory block ("StaticSoundMem").
  *
- * Sound memory comes from the bank manager's stream allocator; if that reports -3 the sound part is added to
- * the
- * main block instead. The state word (+0x8) becomes 1, or 2 when sound memory was obtained. Nothing happens
- * when
- * both sizes are 0. The unit declares it void*, but it returns no value.
+ * Sound memory comes from the bank manager's stream allocator; if that reports -3 the sound part is added to the main
+ * block instead. mAllocLocation becomes keSoundMemLocation_Main, or keSoundMemLocation_Sound when sound memory was
+ * obtained. Nothing happens when both sizes are 0. The unit declares it void*, but it returns no value.
  *
  * @param size  main-memory size in bytes (On Tour mainMemSize)
  * @param extra  sound-memory size in bytes (On Tour soundMemSize)
@@ -45,12 +44,12 @@ public:
 void* cBankInstance::AllocMem(int size, int extra, int tag)
 {
     if (size != 0 || extra != 0) {
-        mAllocLocation = 1;
+        mAllocLocation = keSoundMemLocation_Main;
         if (extra != 0) {
             int id = ((cSndStream_B588*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->alloc(extra);
             if (id >= 0) {
                 mSoundMemHandle = id;
-                mAllocLocation = 2;
+                mAllocLocation = keSoundMemLocation_Sound;
             } else if (id == -3) {
                 size += extra;
             }
@@ -80,7 +79,7 @@ public:
 /**
  * Unloads the bank and frees the memory it was given.
  *
- * Calls cBankInstance_Unload; then, when the allocation location at +0x8 is non-zero: for location 2 (sound memory) it
+ * Calls cBankInstance_Unload; then, when the allocation location at +0x8 is non-zero: for keSoundMemLocation_Sound it
  * frees the sound-memory handle at +0xC through cPS2SoundManager_DeallocSoundMem (the virtual of the shared cSoundSys's
  * pManager, reached from gpBankManager's cBankMonitor) and sets the handle to -1; it then MEM_frees the main-memory
  * data at +0x10 and zeroes the data pointer, the size at +0x14 and the location. Called by cBankInstance__cBankInstance
@@ -91,7 +90,7 @@ void cBankInstance::DeallocMem()
     cBankInstance_Unload(this);
     int state = mAllocLocation;
     if (state != 0) {
-        if (state == 2) {
+        if (state == keSoundMemLocation_Sound) {
             ((cSndStream_B650*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->stop(mSoundMemHandle);
             mSoundMemHandle = -1;
         }
@@ -207,16 +206,16 @@ extern "C" int SNDbankremove(int id);
 /**
  * Detaches the bank attached by cBankInstance_Attach.
  *
- * Sets the status word at +0x0 to 0; when the bank handle at +0x4 is not -1 it removes the bank with SNDbankremove and
- * sets the handle to -1; then it zeroes the main-memory data (+0x10) and size (+0x14) without freeing them. Called by
+ * Sets mBankStatus to EMPTY; when mBankHandle is not kNoBankHandle it removes the bank with SNDbankremove and sets the
+ * handle to kNoBankHandle; then it zeroes the main-memory data (+0x10) and size (+0x14) without freeing them. Called by
  * cBankInstance_Attach and, by bank index, by cBankManager_BANK_UnAttach.
  */
 extern "C" void cBankInstance_UnAttach(cBankInstance* self)
 {
-    *(int*)self = 0;
-    if (self->mBankHandle != -1) {
+    self->mBankStatus = EMPTY;
+    if (self->mBankHandle != cBankInstance::kNoBankHandle) {
         SNDbankremove(self->mBankHandle);
-        self->mBankHandle = -1;
+        self->mBankHandle = cBankInstance::kNoBankHandle;
     }
     self->mpMainMemData = 0;
     self->mMainMemDataSize = 0;
@@ -231,16 +230,16 @@ extern "C" int strcmp(void*, void*);
 /**
  * Returns whether the bank holds the loaded file @p name.
  *
- * True only when the status word at +0x0 is 1 (loaded) and strcmp (strcmp) finds @p name equal to the bank's
- * filename at +0x20. cBankManager_BANK_SyncLoad and cBankManager_BANK_AsyncLoad use it to skip reloading a bank that is already loaded.
+ * True only when mBankStatus is USED (loaded) and strcmp (strcmp) finds @p name equal to the bank's filename at +0x20.
+ * cBankManager_BANK_SyncLoad and cBankManager_BANK_AsyncLoad use it to skip reloading a bank that is already loaded.
  *
  * @param name  file name to compare
  * @return 1 when the bank is loaded from @p name, else 0
  */
 int cBankInstance::IsBankLoaded(void* name)
 {
-    int status = *(int*)this;
-    if (status != 1) {
+    int status = mBankStatus;
+    if (status != USED) {
         return 0;
     }
     if (strcmp(name, (char*)&mBankFilename) != 0) {
@@ -270,18 +269,18 @@ public:
 /**
  * Prepares a bank slot for an asynchronous load: unloads whatever it holds and marks it loading.
  *
- * Calls cBankInstance_Unload and cBankInstance_SharedUnload (On Tour Unload and SharedUnload), sets the status (+0x0, mBankStatus) to 2
- * (loading) and, for a bank held in sound memory (mAllocLocation +0x8 == 2), passes its sound memory handle (+0xC) to
- * virtual slot 6 (SetSoundMemLoadLimits) of the sound manager, the pManager of the cSoundSys virtual base reached
- * through gpBankManager->BankMonitor.mpVSoundSys.
- * On Tour asserts the bank was not already loading and that the handle is valid; retail checks neither.
+ * Calls cBankInstance_Unload and cBankInstance_SharedUnload (On Tour Unload and SharedUnload), sets mBankStatus to
+ * LOADING and, for a bank held in sound memory (mAllocLocation keSoundMemLocation_Sound), passes its sound memory
+ * handle (+0xC) to virtual slot 6 (SetSoundMemLoadLimits) of the sound manager, the pManager of the cSoundSys virtual
+ * base reached through gpBankManager->BankMonitor.mpVSoundSys. On Tour asserts the bank was not already loading and
+ * that the handle is valid; retail checks neither.
  */
 extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance* self)
 {
     cBankInstance_Unload(self);
     cBankInstance_SharedUnload(self);
-    *(int*)self = 2;
-    if (self->mAllocLocation == 2) {
+    self->mBankStatus = LOADING;
+    if (self->mAllocLocation == keSoundMemLocation_Sound) {
         ((cSndStream_B878*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->v6(self->mSoundMemHandle);
     }
 }
@@ -438,7 +437,7 @@ extern "C" cBankManager* cBankManager_cBankManager(cBankManager* self, int embed
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtbl vt = D_00483AB8;
         *(sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &vt;
-        int base = (int)self->BankMonitor.mpVSoundSys - 0xAD0;
+        int base = (int)self->BankMonitor.mpVSoundSys - sizeof(cBankManager);
         int thisDelta = (int)self - base;
         vt.e[1].delta = D_00483AB8.e[1].delta + thisDelta;
     }
@@ -498,7 +497,7 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtblBB10 vt = D_00483AB8_BB10;
         self->BankMonitor.mpVSoundSys->mVtbl = (void**)&vt;
-        char* base = (char*)self->BankMonitor.mpVSoundSys - 0xAD0;
+        char* base = (char*)self->BankMonitor.mpVSoundSys - sizeof(cBankManager);
         int soundSysAdjust = (char*)self - base;
         vt.e[1].delta = D_00483AB8_BB10.e[1].delta + soundSysAdjust;
     }
@@ -814,19 +813,20 @@ struct sCfg_BF78 {
 extern sCfg_BF78 cBEOptionInterface_mOption_BF78 __asm__("cBEOptionInterface_mOption");
 
 /**
- * Switches the radio mode (unk_608C) to @p state and restarts the music when the current song no longer fits it.
+ * Switches the radio mode (mRadioModeID) to @p state and restarts the music when the current song no longer fits it.
  *
- * Does nothing when unk_608C already equals @p state; otherwise stores it. cSSXAudio_InGameInit passes
- * cBERewardInterface_getRadioMode's result, whose On Tour type eRadioModeID has 0 radio, 1 request line, 2 mountain, 3
- * playlist; the audio options menu passes its selection.
+ * Does nothing when mRadioModeID already equals @p state; otherwise stores it. cSSXAudio_InGameInit passes
+ * cBERewardInterface_getRadioMode's result (eRadioModeID); the audio options menu passes its selection.
  *
- * Mode 0 activates the songs of MusicSys.mDefaultActiveMap (func_002B4070), re-applies the arcade SFX setting from bit
- * 17 of cBEOptionInterface_mOption's flags (cSSXAudio_SetDJSpeech), and, in game with MusicSys.mSongPlaying set and a
- * current song id (func_002B49E0) of 101-103 (a peak ambience), picks a new song (func_0028D488) and restarts with
- * func_0028CF98(self, 0, 0, -1, 0). Modes 1 and 3 do the same with mRadioPlayList, returning early when that is 0, when
- * the song id is 1-3, or when the current song is still active (func_002B4AF0) and its id is not 301. Mode 2 turns the
- * arcade SFX off and, in game unless the song id is already 101-103, calls func_0028CF98(self, 0, 0, -1, 0) (which
- * starts the peak ambience in this mode) and clears mInBigChallenge and mCurBigChallengeType.
+ * kRADIOMODE_RADIO activates the songs of MusicSys.mDefaultActiveMap (func_002B4070), re-applies the arcade SFX setting
+ * from bit 17 of cBEOptionInterface_mOption's flags (cSSXAudio_SetDJSpeech), and, in game with MusicSys.mSongPlaying
+ * set and a current song tag (func_002B49E0) of kSONGTAG_Peak1Amb-Peak3Amb (a peak ambience), picks a new song
+ * (func_0028D488) and restarts with func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0). kRADIOMODE_REQUESTLINE and
+ * kRADIOMODE_PLAYLIST do the same with mRadioPlayList, returning early when that is 0, when the song tag is a peak
+ * theme (kSONGTAG_Peak1-Peak3), or when the current song is still active (func_002B4AF0) and its tag is not
+ * kSONGTAG_CharSel. kRADIOMODE_MOUNTAIN turns the arcade SFX off and, in game unless the song is already a peak
+ * ambience, calls func_0028CF98 the same way (which starts the peak ambience in this mode) and clears mInBigChallenge
+ * and mCurBigChallengeType.
  *
  * The option block is copied whole (0x288 bytes) to the stack just to read its flags.
  *
@@ -838,7 +838,7 @@ extern "C" void func_0028BF78(cSSXAudio* self, int state)
         return;
     self->mRadioModeID = state;
     switch (state) {
-    case 0: {
+    case kRADIOMODE_RADIO: {
         func_002B4070_BF78(&self->MusicSys, *(long*)&self->MusicSys.mDefaultActiveMap);
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = cBEOptionInterface_mOption_BF78;
@@ -847,14 +847,14 @@ extern "C" void func_0028BF78(cSSXAudio* self, int state)
             return;
         if (self->MusicSys.mSongPlaying == 0)
             return;
-        if ((unsigned int)(func_002B49E0(&self->MusicSys) - 101) >= 3)
+        if ((unsigned int)(func_002B49E0(&self->MusicSys) - kSONGTAG_Peak1Amb) >= 3)
             return;
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
         break;
     }
-    case 1:
-    case 3: {
+    case kRADIOMODE_REQUESTLINE:
+    case kRADIOMODE_PLAYLIST: {
         func_002B4070_BF78(&self->MusicSys, *(long*)&self->mRadioPlayList);
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = cBEOptionInterface_mOption_BF78;
@@ -866,21 +866,21 @@ extern "C" void func_0028BF78(cSSXAudio* self, int state)
         if (self->MusicSys.mSongPlaying == 0)
             return;
         int st = func_002B49E0(&self->MusicSys);
-        if ((unsigned int)(st - 1) < 3)
+        if ((unsigned int)(st - kSONGTAG_Peak1) < 3)
             return;
-        if (func_002B4AF0(&self->MusicSys) != 0 && st != 301)
+        if (func_002B4AF0(&self->MusicSys) != 0 && st != kSONGTAG_CharSel)
             return;
         func_0028D488(self);
-        func_0028CF98(self, 0, 0, -1, 0);
+        func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0);
         break;
     }
-    case 2:
+    case kRADIOMODE_MOUNTAIN:
         cSSXAudio_SetDJSpeech(self, 0);
         if (cAudioInterface_isInGame() == 0)
             return;
-        if ((unsigned int)(func_002B49E0(&self->MusicSys) - 101) < 3)
+        if ((unsigned int)(func_002B49E0(&self->MusicSys) - kSONGTAG_Peak1Amb) < 3)
             return;
-        func_0028CF98(self, 0, 0, -1, 0);
+        func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0);
         self->mInBigChallenge = 0;
         self->mCurBigChallengeType = 0;
         break;
@@ -908,25 +908,27 @@ static inline void bmRestartC2D0(cSSXAudio* self)
     }
     cMusicSys* mon = &self->MusicSys;
     int st = func_002B49E0(mon);
-    if ((unsigned int)(st - 1) < 3) {
+    if ((unsigned int)(st - kSONGTAG_Peak1) < 3) {
         return;
     }
-    if (func_002B4AF0(mon) != 0 && st != 0x12D) {
+    if (func_002B4AF0(mon) != 0 && st != kSONGTAG_CharSel) {
         return;
     }
     func_0028D488(self);
-    func_0028CF98(self, 0, 0, -1, 0);
+    func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0);
 }
 
 /**
- * Sets the radio playlist mask mRadioPlayList to @p key and, in radio modes 1 and 3, restarts the music from it.
+ * Sets the radio playlist mask mRadioPlayList to @p key and, in the request-line and playlist radio modes, restarts the
+ * music from it.
  *
- * When @p key differs from mRadioPlayList it is stored, and in modes 1 and 3 (unk_608C) func_002B4070 rebuilds the
- * active songs from it (the mask reaches it in the second argument register; the call is declared with one argument).
- * In modes 1 and 3, changed or not, it then does what func_0028BF78 does for those modes: in game with
- * MusicSys.mSongPlaying set, unless the current song id (func_002B49E0) is 1-3 or the current song is still active
- * (func_002B4AF0) with an id other than 301 (0x12D), it picks a new song (func_0028D488) and calls func_0028CF98(self,
- * 0, 0, -1, 0). Called by cSSXAudio_InGameInit and cFEStateRequestLine_onWidgetEvent.
+ * When @p key differs from mRadioPlayList it is stored, and in kRADIOMODE_REQUESTLINE and kRADIOMODE_PLAYLIST
+ * (mRadioModeID) func_002B4070 rebuilds the active songs from it (the mask reaches it in the second argument register;
+ * the call is declared with one argument). In those modes, changed or not, it then does what func_0028BF78 does for
+ * those modes: in game with MusicSys.mSongPlaying set, unless the current song tag (func_002B49E0) is a peak theme
+ * (kSONGTAG_Peak1-Peak3) or the current song is still active (func_002B4AF0) with a tag other than kSONGTAG_CharSel, it
+ * picks a new song (func_0028D488) and calls func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0). Called by
+ * cSSXAudio_InGameInit and cFEStateRequestLine_onWidgetEvent.
  *
  * @param key  the new playlist mask, one bit per song (64-bit)
  */
@@ -936,13 +938,13 @@ extern "C" void func_0028C2D0(cSSXAudio* self, long key)
     if (*(long*)&self->mRadioPlayList != key) {
         *(long*)&self->mRadioPlayList = key;
         int state = self->mRadioModeID;
-        if (state == 1 || state == 3) {
+        if (state == kRADIOMODE_REQUESTLINE || state == kRADIOMODE_PLAYLIST) {
             func_002B4070(&self->MusicSys);
             bmRestartC2D0(self);
         }
     } else {
         int state = self->mRadioModeID;
-        if (state == 1 || state == 3) {
+        if (state == kRADIOMODE_REQUESTLINE || state == kRADIOMODE_PLAYLIST) {
             bmRestartC2D0(self);
         }
     }
@@ -1095,7 +1097,7 @@ int cRider_getMotionState(void* rider);
 int func_0028D898(void* self);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_0028D960(cSSXAudio* self);
+extern "C" bool func_0028D960(cSSXAudio* self);
 extern "C" void cSSXAudio_BeginWind(void* self);
 extern "C" void cSSXAudio_EndWind(void* self);
 extern "C" int func_002A4168(void* self);
@@ -1115,17 +1117,17 @@ static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
 {
     int s = rider->mAirPredictor->SimState;
     int air = 0;
-    if (s == 1 || s == 3)
+    if (s == cAirPredictor::kSS_SimDone || s == cAirPredictor::kSS_SimCheckObjectsDone)
         air = 1;
     if (air) {
-        if (D_004A361C == 1)
+        if (D_004A361C == true)
             return self->unk_6244;
         float v = rider->mAirPredictor->TotalAirTime;
         self->unk_6248 = 0.0f;
         self->unk_6244 = v;
         return v;
     }
-    if (D_004A361C == 1)
+    if (D_004A361C == true)
         return self->unk_6244;
     return 0.0f;
 }
@@ -1133,21 +1135,20 @@ static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
 /**
  * Updates the wind sound and the music volume for the focus rider's air time; called every frame from cSSXAudio_Update.
  *
- * Counts unk_6250 down. For the focus rider (cSSXAudio_GetFocusRider(-1)) in motion state 1 with its mAirPredictor's
- * SimState 1 or 3, the air time is the predictor's TotalAirTime, cached in
- * unk_6244 on the first frame (unk_6248 cleared); while D_004A361C is 1 the cached value is reused; otherwise it is 0.
- * unk_60A0 is set to the music volume (cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0)), and
- * D_004A3620 takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
- * (func_002B4878) is 1, func_002A4168 and func_002A41D8 are false and no rider event runs (func_0028D898), the song is
- * driven too (local play). Outside replays, above 2 s: D_004A361C = 1; unk_6248 keeps the largest current air time
- * (CurAirTime), and unk_624C, set on the first frame, is that plus max((ApexTime - CurAirTime) / 2, 0.5). From their
- * ratio and a
- * volume falling with the air time (20..127) it sets mWindVolume (then scaled by the SFX volume, control 5) and, with
- * play, the song's base volume (func_002B3C98) and overlay level (unk_60A0 via func_002B3D10). On the first such frame
- * it starts the wind (cSSXAudio_BeginWind) and, with play, func_002B4620 true and the radio on (func_0028D960), sends music
- * event 7 through MusicSys.mVtbl slot 3. Otherwise, after an airborne frame, it ends the wind (cSSXAudio_EndWind),
- * sends event 8 when func_002B46E8 reports the song's unk_4C set (and the radio is on) and clears it with
- * func_002B4708; then it restores base volume 127 and the overlay level.
+ * Counts unk_6250 down. For the focus rider (cSSXAudio_GetFocusRider(-1)) in motion state MS_Air with its
+ * mAirPredictor's SimState kSS_SimDone or kSS_SimCheckObjectsDone, the air time is the predictor's TotalAirTime, cached
+ * in unk_6244 on the first frame (unk_6248 cleared); while D_004A361C is set the cached value is reused; otherwise it
+ * is 0. unk_60A0 is set to the music volume (cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0)), and D_004A3620 takes last
+ * frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops (func_002B4878) is set,
+ * func_002A4168 and func_002A41D8 are false and no rider event runs (func_0028D898), the song is driven too (local
+ * play). Outside replays, above 2 s: D_004A361C = 1; unk_6248 keeps the largest current air time (CurAirTime), and
+ * unk_624C, set on the first frame, is that plus max((ApexTime - CurAirTime) / 2, 0.5). From their ratio and a volume
+ * falling with the air time (20..127) it sets mWindVolume (then scaled by the SFX volume, control 5) and, with play,
+ * the song's base volume (func_002B3C98) and overlay level (unk_60A0 via func_002B3D10). On the first such frame it
+ * starts the wind (cSSXAudio_BeginWind) and, with play, func_002B4620 true and the radio on (func_0028D960), sends
+ * music event 7 through MusicSys.mVtbl slot 3. Otherwise, after an airborne frame, it ends the wind
+ * (cSSXAudio_EndWind), sends event 8 when func_002B46E8 reports the song's unk_4C set (and the radio is on) and clears
+ * it with func_002B4708; then it restores base volume 127 and the overlay level.
  */
 extern "C" void func_0028C8C8(cSSXAudio* self)
 {
@@ -1155,13 +1156,13 @@ extern "C" void func_0028C8C8(cSSXAudio* self)
         self->unk_6250--;
     cRider* rider = cSSXAudio_GetFocusRider_p(self, -1);
     float airTime;
-    if (cRider_getMotionState(rider) == 1) {
+    if (cRider_getMotionState(rider) == MS_Air) {
         int simState = rider->mAirPredictor->SimState;
         int air = 0;
-        if (simState == 1 || simState == 3)
+        if (simState == cAirPredictor::kSS_SimDone || simState == cAirPredictor::kSS_SimCheckObjectsDone)
             air = 1;
         if (air) {
-            if (D_004A361C == 1) {
+            if (D_004A361C == true) {
                 airTime = self->unk_6244;
             } else {
                 airTime = rider->mAirPredictor->TotalAirTime;
@@ -1170,7 +1171,7 @@ extern "C" void func_0028C8C8(cSSXAudio* self)
             }
             goto have;
         }
-        if (D_004A361C == 1) {
+        if (D_004A361C == true) {
             airTime = self->unk_6244;
             goto have;
         }
@@ -1183,7 +1184,7 @@ have:
     D_004A361C = 0;
     if (3.9994986057281494f < airTime) {
         int duckToLoops = func_002B4878(&self->MusicSys);
-        if (duckToLoops == 1 && !func_002A4168(self) && !func_002A41D8(self)) {
+        if (duckToLoops == true && !func_002A4168(self) && !func_002A41D8(self)) {
             if (!func_0028D898(self))
                 play = duckToLoops;
         }
@@ -1249,7 +1250,7 @@ have:
         }
     }
     char* mon = (char*)&self->MusicSys;
-    if (D_004A3620 == 1) {
+    if (D_004A3620 == true) {
         cSSXAudio_EndWind(self);
         if (func_002B46E8(mon)) {
             if (func_0028D960((cSSXAudio*)self)) {
@@ -1293,7 +1294,7 @@ extern "C" void func_0028CD48(cSSXAudio* self)
     char* mon = (char*)&self->MusicSys;
     sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
-    func_002B49C0(mon, 401);
+    func_002B49C0(mon, kSONGTAG_PkTrans);
     sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), 1);
     func_002B3C28(mon, 0x7F);
@@ -1318,19 +1319,19 @@ struct sRace_28CDF8 {
 /**
  * Starts the character tune for the podium (cGFPodiumState_gainFocus).
  *
- * Does nothing in a replay (cSSXAudio_ReplayMode), in radio mode 2 (unk_608C), unless SSXApp's GameModeMan is in heat 3
- * (iHeatNum), or when the first entry of the rank table cGameModeMan_iRanking is 3 or more. The character
+ * Does nothing in a replay (cSSXAudio_ReplayMode), in kRADIOMODE_MOUNTAIN (mRadioModeID), unless SSXApp's GameModeMan
+ * is in heat 3 (iHeatNum), or when the first entry of the rank table cGameModeMan_iRanking is 3 or more. The character
  * iCharacters[cGameModeMan_iCharRank[0]] (0-9) selects music event 10, 2, 8, 1, 5, 9, 3, 7, 4 or 6; other values do
  * nothing. It stores MusicSys.mCurrentSongNum in mSavedSongNum, starts the song "chartune" through MusicSys.mVtbl slot
- * 2 (12, the music volume control, 0), tags it 201 (func_002B49C0), sends the event through slot 4, sets the song's
- * unk_5C (func_002B4A08) so that only forced events apply, and starts it with func_002B3C28.
+ * 2 (12, the music volume control, 0), tags it kSONGTAG_CharTune (func_002B49C0), sends the event through slot 4, sets
+ * the song's unk_5C (func_002B4A08) so that only forced events apply, and starts it with func_002B3C28.
  */
 extern "C" void func_0028CDF8(cSSXAudio* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    if (self->mRadioModeID == 2) {
+    if (self->mRadioModeID == kRADIOMODE_MOUNTAIN) {
         return;
     }
     sRace_28CDF8* race = (sRace_28CDF8*)SSXApp->GameModeMan;
@@ -1360,7 +1361,7 @@ extern "C" void func_0028CDF8(cSSXAudio* self)
     self->mSavedSongNum = self->MusicSys.mCurrentSongNum;
     sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_chartune, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
-    func_002B49C0(mon, 201);
+    func_002B49C0(mon, kSONGTAG_CharTune);
     sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), track);
     func_002B4A08(mon, 1);
@@ -1403,22 +1404,23 @@ static inline void bmLoad_CF98(cSSXAudio* self, char* name, int bank, int id)
  * Starts the music for the current radio mode and race location.
  *
  * Returns at once in a replay (cSSXAudio_ReplayMode) unless unk_6294 is set. Clears unk_6280 and the rider-event words
- * at 0x623C and 0x6240 (func_0028D630) and sets mMusicEventOwner to -1. Songs are started through MusicSys.mVtbl slot 2
- * with 12, a volume control (cSSXAudio_GetCurrAppliedVolumePtr) and 0, tagged with func_002B49C0, and given events
- * through slot 4.
+ * at 0x623C and 0x6240 (func_0028D630) and sets mMusicEventOwner to kNoMusicEventOwner. Songs are started through
+ * MusicSys.mVtbl slot 2 with 12, a volume control (cSSXAudio_GetCurrAppliedVolumePtr) and 0, tagged with func_002B49C0,
+ * and given events through slot 4.
  *
- * In radio mode 2 (unk_608C) it starts the ambience "Peak1Amb", "Peak2Amb" or "Peak3Amb" by @p type, or, when that is
- * -1, by func_002A1E20 of the race location (1, 2, anything else), on the ambient control (8) and tagged 101-103; then
- * func_002B46D0, sets unk_6280 to 1 and calls func_002B3CC0(0) and func_002B3C28. Else, at location 17 or above with @p
- * a2 and @p requestLine zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location)
- * on the music control, tagged 1-3, func_002B3CC0(1), event 12 and func_002B3C28. Otherwise it starts the current song
- * of the active list (null name), with MusicSys.mCurrentSongNum saved in unk_62A4 and the song's SEDVALUE
- * (func_002B4908) in mSongAnnounceNum, func_002B3CC0(1), event @p startEvent (36 when @p requestLine is set at location
- * 17 or above), then func_0028F108 with the focus rider (cSSXAudio_GetFocusRider(-1)).
+ * In kRADIOMODE_MOUNTAIN (mRadioModeID) it starts the ambience "Peak1Amb", "Peak2Amb" or "Peak3Amb" by @p type, or,
+ * when that is kPEAKBIT_FromLocation, by func_002A1E20 of the race location (kPEAKBIT_Peak1, kPEAKBIT_Peak2, anything
+ * else), on the ambient control (8) and tagged kSONGTAG_Peak1Amb-Peak3Amb; then func_002B46D0, sets unk_6280 to 1 and
+ * calls func_002B3CC0(0) and func_002B3C28. Else, at a station (kLOCATION_HUB_A or above) with @p a2 and @p requestLine
+ * zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location) on the music control,
+ * tagged kSONGTAG_Peak1-Peak3, func_002B3CC0(1), event 12 and func_002B3C28. Otherwise it starts the current song of
+ * the active list (null name), with MusicSys.mCurrentSongNum saved in unk_62A4 and the song's SEDVALUE (func_002B4908)
+ * in mSongAnnounceNum, func_002B3CC0(1), event @p startEvent (36 when @p requestLine is set at a station), then
+ * func_0028F108 with the focus rider (cSSXAudio_GetFocusRider(-1)).
  *
  * @param startEvent  music event sent to the playlist song (callers pass 0 or 36)
  * @param skipPeakTheme  non-zero skips the peak theme (func_0028E100 passes 1)
- * @param type  peak for radio mode 2 (1, 2, else 3), or -1 to take it from the location
+ * @param type  peak for kRADIOMODE_MOUNTAIN (an ePeakBit), or kPEAKBIT_FromLocation to take it from the location
  * @param requestLine  non-zero skips the peak theme and selects event 36 on the peaks; cFEStateRequestLine_onWidgetMenu passes 1
  */
 extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme, int type, int requestLine)
@@ -1427,17 +1429,19 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
         return;
     }
     self->mPathfinderCanChangeVolume = 0;
-    self->mMusicEventOwner = -1;
+    self->mMusicEventOwner = kNoMusicEventOwner;
     self->unk_623C = 0;
     self->unk_6240 = 0;
-    if (self->mRadioModeID == 2) {
-        int peakNumber = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) : type;
-        if (peakNumber == 1) {
-            bmLoad_CF98(self, str_Peak1Amb, 8, 101);
-        } else if (peakNumber == 2) {
-            bmLoad_CF98(self, str_Peak2Amb, 8, 102);
+    if (self->mRadioModeID == kRADIOMODE_MOUNTAIN) {
+        int peakNumber = type == kPEAKBIT_FromLocation
+            ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)))
+            : type;
+        if (peakNumber == kPEAKBIT_Peak1) {
+            bmLoad_CF98(self, str_Peak1Amb, 8, kSONGTAG_Peak1Amb);
+        } else if (peakNumber == kPEAKBIT_Peak2) {
+            bmLoad_CF98(self, str_Peak2Amb, 8, kSONGTAG_Peak2Amb);
         } else {
-            bmLoad_CF98(self, str_Peak3Amb, 8, 103);
+            bmLoad_CF98(self, str_Peak3Amb, 8, kSONGTAG_Peak3Amb);
         }
         char* mon = (char*)&self->MusicSys;
         func_002B46D0(mon);
@@ -1448,14 +1452,14 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
     }
     tBELocationDB info = *(tBELocationDB*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     char* mon = (char*)&self->MusicSys;
-    if (info.locationID >= 17 && skipPeakTheme == 0 && requestLine == 0 && func_002A42C8(self) == 0) {
+    if (info.locationID >= kLOCATION_HUB_A && skipPeakTheme == 0 && requestLine == 0 && func_002A42C8(self) == 0) {
         int peakNumber = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-        if (peakNumber == 1) {
-            bmLoad_CF98(self, str_Peak1_b, 1, 1);
-        } else if (peakNumber == 2) {
-            bmLoad_CF98(self, str_Peak2_b, 1, 2);
+        if (peakNumber == kPEAKBIT_Peak1) {
+            bmLoad_CF98(self, str_Peak1_b, 1, kSONGTAG_Peak1);
+        } else if (peakNumber == kPEAKBIT_Peak2) {
+            bmLoad_CF98(self, str_Peak2_b, 1, kSONGTAG_Peak2);
         } else {
-            bmLoad_CF98(self, str_Peak3_b, 1, 3);
+            bmLoad_CF98(self, str_Peak3_b, 1, kSONGTAG_Peak3);
         }
         func_002B3CC0(mon, 1);
         sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
@@ -1521,28 +1525,29 @@ extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 /**
  * Restarts the music when the playing peak ambience does not belong to location @p id.
  *
- * Does nothing while unk_6284 is 23 (its idle value). Otherwise func_002A1E20 maps @p id to its peak (1, 2, else 3,
- * expecting song id 101, 102 or 103) and, when the current song id (func_002B49E0) differs, calls func_0028CF98(self,
- * 0, 0, peak, 0). The only caller, func_0028E8C0, passes unk_6284.
+ * Does nothing while mTransportTrack is kMAX_LOCATIONS (no location). Otherwise func_002A1E20 maps @p id to its peak
+ * (kPEAKBIT_Peak1, kPEAKBIT_Peak2, else peak 3, expecting the song tag kSONGTAG_Peak1Amb, Peak2Amb or Peak3Amb) and,
+ * when the current song tag (func_002B49E0) differs, calls func_0028CF98(self, 0, 0, peak, 0). The only caller,
+ * func_0028E8C0, passes mTransportTrack.
  *
- * @param id  a race location id
+ * @param id  a race location (eBELocationID)
  */
 extern "C" void func_0028D5A0(cSSXAudio* self, int id)
 {
     int cur;
     int type;
     int want;
-    if (self->mTransportTrack == 23) {
+    if (self->mTransportTrack == kMAX_LOCATIONS) {
         return;
     }
     cur = func_002B49E0(&self->MusicSys);
     type = func_002A1E20(self, id);
-    if (type == 1) {
-        want = 101;
-    } else if (type == 2) {
-        want = 102;
+    if (type == kPEAKBIT_Peak1) {
+        want = kSONGTAG_Peak1Amb;
+    } else if (type == kPEAKBIT_Peak2) {
+        want = kSONGTAG_Peak2Amb;
     } else {
-        want = 103;
+        want = kSONGTAG_Peak3Amb;
     }
     if (want != cur) {
         func_0028CF98((cSSXAudio*)self, 0, 0, type, 0);
@@ -1561,10 +1566,11 @@ struct sBmVt630b { short delta; short index; int (*fn)(void*, int); };
  * Starts rider music event @p id for the rider @p obj, which then owns the rider-event slot.
  *
  * Does nothing during a big challenge (mInBigChallenge or mBigChallengeStarting) or when the event in unk_623C is
- * already @p id. With no owner (mMusicEventOwner == -1) only the focus rider (cSSXAudio_GetFocusRider(-1)) can start
- * one, and its AI index (getAIIndex, cRider virtual slot 7) becomes mMusicEventOwner; otherwise @p obj must have the
- * owner's AI index. It then sends the previous event + 1 (if one was running) and @p id through MusicSys.mVtbl slot 4,
- * stores @p id in unk_623C and clears unk_6240. Called by func_0028D988.
+ * already @p id. With no owner (mMusicEventOwner == kNoMusicEventOwner) only the focus rider
+ * (cSSXAudio_GetFocusRider(-1)) can start one, and its AI index (getAIIndex, cRider virtual slot 7) becomes
+ * mMusicEventOwner; otherwise @p obj must have the owner's AI index. It then sends the previous event + 1 (if one was
+ * running) and @p id through MusicSys.mVtbl slot 4, stores @p id in unk_623C and clears unk_6240. Called by
+ * func_0028D988.
  *
  * @param id  the music event
  * @param obj  the rider (cRider*)
@@ -1576,7 +1582,7 @@ extern "C" void func_0028D630(cSSXAudio* self, int id, cRider* obj)
     if (self->mBigChallengeStarting != 0) return;
     if (self->unk_623C == id) return;
     ok = 0;
-    if (self->mMusicEventOwner == -1) {
+    if (self->mMusicEventOwner == kNoMusicEventOwner) {
         // PORT: cSSXAudio_GetFocusRider returns an object pointer as int
         if ((int)obj == cSSXAudio_GetFocusRider(self, -1)) {
             ok = 1;
@@ -1624,7 +1630,7 @@ extern "C" void func_0028D740(cSSXAudio* self, int id, cRider* obj)
         return;
     }
     ok = 0;
-    if (self->mMusicEventOwner != -1) {
+    if (self->mMusicEventOwner != kNoMusicEventOwner) {
         ok = obj->getAIIndex() == self->mMusicEventOwner;
     }
     if (ok) {
@@ -1753,17 +1759,18 @@ extern "C" int func_0028D8A0(cSSXAudio* self)
 INCLUDE_ASM("sound/bankmanager", func_0028D960);
 #ifdef SKIP_ASM
 /**
- * Returns whether the radio plays music: 1 when the radio mode unk_608C is 0, 1 or 3, 0 for 2 (mountain) and above 3.
+ * Returns whether the radio plays music: true when mRadioModeID is kRADIOMODE_RADIO, kRADIOMODE_REQUESTLINE or
+ * kRADIOMODE_PLAYLIST, false for kRADIOMODE_MOUNTAIN and above kRADIOMODE_PLAYLIST.
  *
- * @return 1 or 0
+ * @return true when the radio plays music
  */
-extern "C" int func_0028D960(cSSXAudio* self)
+extern "C" bool func_0028D960(cSSXAudio* self)
 {
     unsigned int state = (unsigned int)self->mRadioModeID;
-    if (state < 2 || state == 3) {
-        return 1;
+    if (state < kRADIOMODE_MOUNTAIN || state == kRADIOMODE_PLAYLIST) {
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1778,9 +1785,9 @@ INCLUDE_ASM("sound/bankmanager", func_0028DEF0);
  * Callers pass 11, 13 and 18; func_0028DF08 resets the field to -1.
  *
  * @param newValue  the new value
- * @return 1 when the value changed, else 0
+ * @return true when the value changed, else false
  */
-extern "C" int func_0028DEF0(cSSXAudio* self, int newValue)
+extern "C" bool func_0028DEF0(cSSXAudio* self, int newValue)
 {
     int old = self->mLastMusicState;
     self->mLastMusicState = newValue;
@@ -1870,9 +1877,9 @@ INCLUDE_ASM("sound/bankmanager", func_0028E068);
 /**
  * Retries func_0028DF18 quietly: the timed callback func_0028DF18 schedules when it cannot switch songs yet.
  *
- * @return 1 when func_0028DF18 started the switch, else 0
+ * @return true when func_0028DF18 started the switch, else false
  */
-extern "C" int func_0028E068(void* self)
+extern "C" bool func_0028E068(void* self)
 {
     return func_0028DF18((cSSXAudio*)self, 1) != 0;
 }
@@ -1886,13 +1893,13 @@ extern "C" int func_002B2550(int);
  * Timed callback that asks func_0028E100 to act once the old song has stopped.
  *
  * When there is no current song (MusicSys.mSongInstance) or func_002B2550 of it returns -1, or when @p event's mData2
- * is 1, it sets mMusicRequestPending to 1 and mMusicRequest to @p event's mData1 and returns 1; otherwise it returns 0.
- * func_0028DF18 schedules it with data 1, 1.
+ * is set, it sets mMusicRequestPending to 1 and mMusicRequest to @p event's mData1 and returns true; otherwise it
+ * returns false. func_0028DF18 schedules it with data 1, 1.
  *
  * @param event  the cMonitorInstance that fired
- * @return 1 when the request was posted, else 0
+ * @return true when the request was posted, else false
  */
-extern "C" int func_0028E088(cSSXAudio* self, cMonitorInstance* event) {
+extern "C" bool func_0028E088(cSSXAudio* self, cMonitorInstance* event) {
     int obj;
     int eventValue;
 
@@ -1900,15 +1907,15 @@ extern "C" int func_0028E088(cSSXAudio* self, cMonitorInstance* event) {
     if (obj == 0 || func_002B2550(obj) == -1) {
         self->mMusicRequestPending = 1;
         self->mMusicRequest = event->mData1;
-        return 1;
+        return true;
     }
     eventValue = event->mData2;
-    if (eventValue == 1) {
+    if (eventValue == true) {
         self->mMusicRequestPending = eventValue;
         self->mMusicRequest = event->mData1;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1922,7 +1929,7 @@ extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" void* cAudioInterface_getBE();
 extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(cSSXAudio* self);
-extern "C" int func_0028D960(cSSXAudio* self);
+extern "C" bool func_0028D960(cSSXAudio* self);
 extern "C" int func_002A1E20(void* self, int id);
 extern "C" int func_002A4030(void* self);
 extern "C" void func_002B3C28(void* self, int a1);
@@ -1950,12 +1957,12 @@ static inline void bmLoad_E100(cSSXAudio* self, char* bank, int n)
 
 static inline void bmLoadBank_E100(cSSXAudio* self, int t)
 {
-    if (t == 1) {
-        bmLoad_E100(self, str_Peak1_b, 1);
-    } else if (t == 2) {
-        bmLoad_E100(self, str_Peak2_b, 2);
+    if (t == kPEAKBIT_Peak1) {
+        bmLoad_E100(self, str_Peak1_b, kSONGTAG_Peak1);
+    } else if (t == kPEAKBIT_Peak2) {
+        bmLoad_E100(self, str_Peak2_b, kSONGTAG_Peak2);
     } else {
-        bmLoad_E100(self, str_Peak3_b, 3);
+        bmLoad_E100(self, str_Peak3_b, kSONGTAG_Peak3);
     }
     char* mon = (char*)&self->MusicSys;
     sBmVtE100* vt2 = (sBmVtE100*)self->MusicSys.mVtbl;
@@ -1968,12 +1975,14 @@ static inline void bmLoadBank_E100(cSSXAudio* self, int t)
  * mAudioUpdateState is 6.
  *
  * Does nothing unless mMusicRequestPending is set; it is cleared at the end. Request 0 (mMusicRequest): when the radio
- * plays music (func_0028D960), starts the peak theme for unk_6284's location (resetting unk_6284 to 23), or for the
- * race location when unk_6284 is already 23: "Peak1", "Peak2" or "Peak3" by func_002A1E20 (1, 2, else 3), on the music
- * control, tagged 1-3, event 12 and func_002B3C28. Request 2: when the radio plays music and unk_6284 is not 23: at
- * locations 14-16 (func_002A4030) a new song (func_0028D488) and func_0028CF98(self, 36, 1, -1, 0), otherwise the peak
- * theme for unk_6284; unk_6284 is reset to 23. Request 4: func_0028CF98(self, 0, 0, -1, 0). Other requests: when the
- * radio plays music, func_0028CF98 with event 36 for request 3, else 0.
+ * plays music (func_0028D960), starts the peak theme for mTransportTrack's location (resetting mTransportTrack to
+ * kMAX_LOCATIONS), or for the race location when mTransportTrack is already kMAX_LOCATIONS: "Peak1", "Peak2" or "Peak3"
+ * by func_002A1E20 (kPEAKBIT_Peak1, kPEAKBIT_Peak2, else peak 3), on the music control, tagged kSONGTAG_Peak1-Peak3,
+ * event 12 and func_002B3C28. Request 2: when the radio plays music and mTransportTrack is not kMAX_LOCATIONS: at the
+ * back-country locations kLOCATION_ABC1-EBC3 (func_002A4030) a new song (func_0028D488) and func_0028CF98(self, 36, 1,
+ * kPEAKBIT_FromLocation, 0), otherwise the peak theme for mTransportTrack; mTransportTrack is reset to kMAX_LOCATIONS.
+ * Request 4: func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0). Other requests: when the radio plays music,
+ * func_0028CF98 with event 36 for request 3, else 0.
  */
 extern "C" void func_0028E100(cSSXAudio* self)
 {
@@ -1985,36 +1994,36 @@ extern "C" void func_0028E100(cSSXAudio* self)
         if (func_0028D960(self)) {
             int locGroup;
             id = self->mTransportTrack;
-            if (id == 23) {
+            if (id == kMAX_LOCATIONS) {
                 locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
                 locGroup = func_002A1E20(self, id);
-                self->mTransportTrack = 23;
+                self->mTransportTrack = kMAX_LOCATIONS;
             }
             bmLoadBank_E100(self, locGroup);
         }
     } else if (st == 2) {
         if (func_0028D960(self)) {
             id = self->mTransportTrack;
-            if (id != 23) {
+            if (id != kMAX_LOCATIONS) {
                 if (func_002A4030(self)) {
                     func_0028D488(self);
-                    func_0028CF98(self, 36, 1, -1, 0);
+                    func_0028CF98(self, 36, 1, kPEAKBIT_FromLocation, 0);
                 } else {
                     id = self->mTransportTrack;
                     bmLoadBank_E100(self, func_002A1E20(self, id));
                 }
-                self->mTransportTrack = 23;
+                self->mTransportTrack = kMAX_LOCATIONS;
             }
         }
     } else if (st == 4) {
-        func_0028CF98(self, 0, 0, -1, 0);
+        func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0);
     } else {
         if (func_0028D960(self)) {
             if (self->mMusicRequest == 3)
-                func_0028CF98(self, 36, 0, -1, 0);
+                func_0028CF98(self, 36, 0, kPEAKBIT_FromLocation, 0);
             else
-                func_0028CF98(self, 0, 0, -1, 0);
+                func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0);
         }
     }
     self->mMusicRequestPending = 0;
@@ -2069,14 +2078,15 @@ struct sLocks_E548 {
  * The kind is mData1 and the argument mData2 (armed through D_004A3650 by func_0028E8C0, func_0028FAE0 and others).
  * Kinds 0, 1, 2, 3, 4 and 7 purge speech instance 0 (func_002B11B0), queue speech cue 8421 with func_002A26F0(self, a,
  * b) ((1, 0) for 0, 3 and 7; (1, 1) for 1; (0, 1) for 2; (0, 0) for 4) and restart speech (func_002B1758). Outside
- * newRace.cGameEvent modes 6-11 (func_002A42C8): kind 0 sets unk_576C and, in a location of group 1 (func_002A1E20), unk_577C =
- * 1, unk_5780 = 2 and +0x57D4 = 0; kinds 1 and 2 set unk_574C.
+ * newRace.cGameEvent modes 6-11 (func_002A42C8): kind 0 sets unk_576C and, in a peak-1 location (func_002A1E20
+ * kPEAKBIT_Peak1), unk_577C = 1, unk_5780 = 2 and mFirstTimeOnTrack[kLOCATION_ABC1] = 0; kinds 1 and 2 set unk_574C.
  *
- * Kinds 3, 4 and 5 act only when mData2 != -1: with the peak locked (cBENewPlayerInterface_isPeakLocked1) in a group-1
- * location whose mFirstTimeOnTrack entry is 1, they set unk_5770 when func_002A40E0 or func_002A4158 accept the
- * location and clear the entry; then mSongAnnouncePending = 1 and mSongAnnounceNum = mData2. Kind 7 sets unk_5784 and
- * mSongAnnouncePending, stores the current song's mSedValue (func_002B4908) in mSongAnnounceNum and clears +0x57D8
- * (group 2) or +0x57DC. Other kinds do nothing.
+ * Kinds 3, 4 and 5 act only when mData2 (a song's SEDVALUE) is not kNoSedValue: with the peak locked
+ * (cBENewPlayerInterface_isPeakLocked1) in a peak-1 location whose mFirstTimeOnTrack entry is 1, they set unk_5770 when
+ * func_002A40E0 or func_002A4158 accept the location and clear the entry; then mSongAnnouncePending = 1 and
+ * mSongAnnounceNum = mData2. Kind 7 sets unk_5784 and mSongAnnouncePending, stores the current song's mSedValue
+ * (func_002B4908) in mSongAnnounceNum and clears mFirstTimeOnTrack[kLOCATION_DBC2] (a peak-2 location) or
+ * mFirstTimeOnTrack[kLOCATION_EBC3]. Other kinds do nothing.
  *
  * @param ev  the cMonitorInstance (mData1 = event kind, mData2 = its argument)
  * @return 1
@@ -2092,10 +2102,10 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
         if (func_002A42C8(self) == 0) {
             self->unk_576C = 1;
             int locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            if (locGroup == 1) {
+            if (locGroup == kPEAKBIT_Peak1) {
                 self->unk_577C = locGroup;
                 self->unk_5780 = 2;
-                self->mFirstTimeOnTrack[14] = 0;
+                self->mFirstTimeOnTrack[kLOCATION_ABC1] = 0;
             }
         }
     } else if (st == 1 || st == 2) {
@@ -2108,7 +2118,7 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
         if (func_002A42C8(self) == 0)
             self->unk_574C = 1;
     } else if (st == 3 || st == 5 || st == 4) {
-        if (ev->mData2 != -1) {
+        if (ev->mData2 != kNoSedValue) {
         if (ev->mData1 == 3 || ev->mData1 == 4) {
             func_002B11B0(&self->SpeechSys, 0);
             if (ev->mData1 == 4)
@@ -2120,7 +2130,7 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
         if (func_002A42C8(self) == 0 && cBENewPlayerInterface_isPeakLocked1(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1) != 0) {
             int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
             int locGroup = func_002A1E20(self, id);
-            if (locGroup == 1) {
+            if (locGroup == kPEAKBIT_Peak1) {
                 int lock = ((sLocks_E548*)(&self->mFirstTimeOnTrack[0]))->v[id];
                 if (lock == locGroup) {
                     if (func_002A40E0(self, id) != 0 || func_002A4158(self, id) != 0)
@@ -2140,10 +2150,11 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
         self->unk_5784 = 1;
         self->mSongAnnouncePending = 1;
         self->mSongAnnounceNum = func_002B4908(&self->MusicSys);
-        if (func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) == 2)
-            self->mFirstTimeOnTrack[15] = 0;
+        if (func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)))
+            == kPEAKBIT_Peak2)
+            self->mFirstTimeOnTrack[kLOCATION_DBC2] = 0;
         else
-            self->mFirstTimeOnTrack[16] = 0;
+            self->mFirstTimeOnTrack[kLOCATION_EBC3] = 0;
     }
     return 1;
 }
@@ -2211,20 +2222,22 @@ typedef int (*tBmSetE8C0)(void*, int);
  * Handles a music event id: 19 and 20 end and start the transport sequence, 21-25 fade, others set the state.
  *
  * Id 19 with a2 set and mRaceMusicOn set: when the location qualifies (func_002A3FE8) and unk_578C is 0, in a music
- * mode accepted by func_0028D960 and a newRace.cGameMode mode other than 5 and 6, it arms the D_004A3650 event
- * (func_0028E548) with kind 4 (unk_6258 clear) or 5 and the song's mSedValue, and sets music state 0. With unk_578C set
- * it fades the song out over 2 s (unless mDJSpeech), then in a group-1 location arms events 0 and 1 (3000 / 2500 ms)
- * once (func_0028DEF0(self, 11)), or else picks a new song (func_0028D488) and arms kinds 1 and 7. Otherwise, for
- * locations 17-21 (func_002A3F90) without unk_6258, it queues DJ speech (func_002A26F0(self, 0, 1)) and sets unk_574C.
- * Clears unk_6258 at the end.
+ * mode accepted by func_0028D960 and a newRace.cGameMode other than kGAMEMODE_TIMECHALLENGE and
+ * kGAMEMODE_PNTSCHALLENGE, it arms the D_004A3650 event (func_0028E548) with kind 4 (unk_6258 clear) or 5 and the
+ * song's mSedValue, and sets music state 0. With unk_578C set it fades the song out over 2 s (unless mDJSpeech), then
+ * in a peak-1 location (kPEAKBIT_Peak1) arms events 0 and 1 (3000 / 2500 ms) once (func_0028DEF0(self, 11)), or else
+ * picks a new song (func_0028D488) and arms kinds 1 and 7. Otherwise, for the stations kLOCATION_HUB_A-HUB_E
+ * (func_002A3F90) without unk_6258, it queues DJ speech (func_002A26F0(self, 0, 1)) and sets unk_574C. Clears unk_6258
+ * at the end.
  *
  * Id 20 with a2 set: stores the location (unk_6284) in unk_5814, sets unk_6254, clears the speech-cue flags
  * (func_002A4550) and the three pending callbacks D_004A3648..D_004A3658 (cMonitor_MONITOR_DestroyAll1), stops the
  * tone, cSSXAudio_WipeoutSlideEnd / cSSXAudio_WipeoutTumbleEnd on rider 0 and cSSXAudio_EndUberSpin. In a qualifying
- * music mode it either plays the "pktrans" song (cMusicSys slot 2, tagged 401, state 2 or 3 by location group, volume
- * 127, paused) for an unlocked 14-16 location, or arms D_004A3648 kinds 3 / 2 and may queue speech; otherwise it calls
- * func_0028D5A0(unk_6284) and sets state 30. Then sets mRaceMusicOn. Ids 21-25 pick a new song, fade out over 1 s and
- * arm kind 3 after 3000 ms. Any other id (and 19 / 20 with a2 == 0) sets the music state through slot 4.
+ * music mode it either plays the "pktrans" song (cMusicSys slot 2, tagged kSONGTAG_PkTrans, state 2 for a peak-2
+ * location else 3, volume 127, paused) for a back-country location (kLOCATION_ABC1-EBC3) ridden for the first time
+ * (mFirstTimeOnTrack), or arms D_004A3648 kinds 3 / 2 and may queue speech; otherwise it calls
+ * func_0028D5A0(mTransportTrack) and sets state 30. Then sets mRaceMusicOn. Ids 21-25 pick a new song, fade out over 1
+ * s and arm kind 3 after 3000 ms. Any other id (and 19 / 20 with a2 == 0) sets the music state through slot 4.
  *
  * The NIS script engine passes its audio events here with a2 = 0; the transport-sequence starter passes 20 and
  * func_0028E888 passes 19, both with 1.
@@ -2241,7 +2254,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
             if (func_0028D960((cSSXAudio*)vself)) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 int mode = cBENewRaceInterface_newRace.cGameMode;
-                if (mode != 5 && mode != 6) {
+                if (mode != kGAMEMODE_TIMECHALLENGE && mode != kGAMEMODE_PNTSCHALLENGE) {
                     if (vself->unk_6258 == 0) {
                         cBankMonitor* monitor = &vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
@@ -2261,7 +2274,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
         } else if (vself->unk_578C != 0) {
             if (func_0028D960((cSSXAudio*)vself)) {
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
-                int wantType = 1;
+                int wantType = kPEAKBIT_Peak1;
                 int locationGroup = func_002A1E20(((char*)vself), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
                 if (vself->mDJSpeech == 0) {
                     func_002B3D48(&vself->MusicSys, 2.0f);
@@ -2322,9 +2335,10 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                         }
                     }
                 }
-                if (vself->mTransportTrack == 23 || func_002A4030_id(((char*)vself), vself->mTransportTrack) == 0
-                    || vself->mFirstTimeOnTrack[vself->mTransportTrack] != 1) {
-                    if (flag && vself->mTransportTrack != 23) {
+                if (vself->mTransportTrack == kMAX_LOCATIONS
+                    || func_002A4030_id(((char*)vself), vself->mTransportTrack) == 0
+                    || vself->mFirstTimeOnTrack[vself->mTransportTrack] != true) {
+                    if (flag && vself->mTransportTrack != kMAX_LOCATIONS) {
                         func_0028D488(vself);
                         cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                                 10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
@@ -2342,8 +2356,8 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     }
                     sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
                     ((tBmLoadE8C0)vt[2].fn)(vthis(mon2, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(((char*)vself), 1, 0), 1);
-                    func_002B49C0(mon2, 401);
-                    if (func_002A1E20(((char*)vself), vself->mTransportTrack) == 2) {
+                    func_002B49C0(mon2, kSONGTAG_PkTrans);
+                    if (func_002A1E20(((char*)vself), vself->mTransportTrack) == kPEAKBIT_Peak2) {
                         sBmVtE8C0* vt2 = (sBmVtE8C0*)vself->MusicSys.mVtbl;
                         ((tBmSetE8C0)vt2[4].fn)(vthis(mon2, vt2[4]), 2);
                     } else {
@@ -2414,20 +2428,21 @@ extern "C" int cSSXAudio_GetCharacterLevel(void* self, int rider);
 /**
  * Ramps the music volume up over 800, 1000 or 1200 updates depending on the focus rider's tier (cSSXAudio_GetCharacterLevel).
  *
- * When the current song's tag (func_002B49E0) is 1-3 it sets full volume (func_002B3C28(127)). Otherwise it starts a
- * new ramp when mMusicRampState is not 2 (mMusicRampState = 2, counter mMusicRampCounter = 0), advances the counter up
- * to the tier's maximum and sets the volume to 127 x counter / maximum, clamped to 0..1. Called by cSSXAudio_Update.
+ * When the current song's tag (func_002B49E0) is a peak theme (kSONGTAG_Peak1-Peak3) it sets full volume
+ * (func_002B3C28(127)). Otherwise it starts a new ramp when mMusicRampState is not kMUSICRAMP_Ramping (it then becomes
+ * kMUSICRAMP_Ramping, counter mMusicRampCounter = 0), advances the counter up to the tier's maximum and sets the volume
+ * to 127 x counter / maximum, clamped to 0..1. Called by cSSXAudio_Update.
  */
 extern "C" void func_0028F000(cSSXAudio* self)
 {
     char* mon = (char*)&self->MusicSys;
     int st = func_002B49E0(mon);
-    if (st >= 1 && st <= 3) {
+    if (st >= kSONGTAG_Peak1 && st <= kSONGTAG_Peak3) {
         func_002B3C28(mon, 0x7F);
         return;
     }
-    if (self->mMusicRampState != 2) {
-        self->mMusicRampState = 2;
+    if (self->mMusicRampState != kMUSICRAMP_Ramping) {
+        self->mMusicRampState = kMUSICRAMP_Ramping;
         self->mMusicRampCounter = 0;
     }
     int max = 800;
@@ -2505,7 +2520,7 @@ extern "C" void func_0028F140(cSSXAudio* self, int mode)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F200);
 #ifdef SKIP_ASM
-extern "C" int func_0028D960(cSSXAudio* self);
+extern "C" bool func_0028D960(cSSXAudio* self);
 extern "C" int func_002B49E0(void* monitor);
 extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, int);
 
@@ -2515,12 +2530,12 @@ struct sSndKeyF200 {
 extern const sSndKeyF200 D_004A3648[];
 
 /**
- * Prepares the music for a replay: with no song (or a 201-tagged one) arms a delayed change, else marks a resume.
+ * Prepares the music for a replay: with no song (or the podium tune) arms a delayed change, else marks a resume.
  *
- * Clears unk_6294 and mReplaySongPlaying. When no song is playing (mSongPlaying 0) or the current song's tag is 201: in
- * a music mode accepted by func_0028D960 it restores mCurrentSongNum from mSavedSongNum for a 201 song and arms
- * D_004A3648 (func_0028E088) after 10 ms with data (3, 1); then sets unk_6294. Otherwise sets mReplaySongPlaying.
- * Called from the replay code; func_0028F2C0 undoes it.
+ * Clears unk_6294 and mReplaySongPlaying. When no song is playing (mSongPlaying 0) or the current song's tag is
+ * kSONGTAG_CharTune: in a music mode accepted by func_0028D960 it restores mCurrentSongNum from mSavedSongNum for that
+ * song and arms D_004A3648 (func_0028E088) after 10 ms with data (3, 1); then sets unk_6294. Otherwise sets
+ * mReplaySongPlaying. Called from the replay code; func_0028F2C0 undoes it.
  */
 // PORT: 64-bit long sound key
 extern "C" void func_0028F200(cSSXAudio* self)
@@ -2528,9 +2543,9 @@ extern "C" void func_0028F200(cSSXAudio* self)
     char* mon = (char*)&self->MusicSys;
     self->unk_6294 = 0;
     self->mReplaySongPlaying = 0;
-    if (self->MusicSys.mSongPlaying == 0 || func_002B49E0(mon) == 201) {
+    if (self->MusicSys.mSongPlaying == 0 || func_002B49E0(mon) == kSONGTAG_CharTune) {
         if (func_0028D960((cSSXAudio*)self)) {
-            if (func_002B49E0(mon) == 201) {
+            if (func_002B49E0(mon) == kSONGTAG_CharTune) {
                 self->MusicSys.mCurrentSongNum = self->mSavedSongNum;
             }
             cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
@@ -2592,8 +2607,8 @@ public:
 /**
  * cSSXAudio's override of cMusicSys virtual slot 3: calls func_002B3B88, then handles codes 10, 11 and 18.
  *
- * When the current song has no tag (func_002B49E0 == -1) and code is 10, 11 or 18 it calls cMusicSys's virtual slot 3
- * with 8 (only while D_004A3620 is 1) and clears mSongPlaying. Slot 3 of D_00483688.
+ * When the current song has no tag (func_002B49E0 == kSONGTAG_None) and code is 10, 11 or 18 it calls cMusicSys's
+ * virtual slot 3 with 8 (only while D_004A3620 is set) and clears mSongPlaying. Slot 3 of D_00483688.
  *
  * @param code  the music state
  */
@@ -2601,9 +2616,9 @@ extern "C" void func_0028F328(cSSXAudio* self, int code)
 {
     void* monitor = (char*)&self->MusicSys;
     func_002B3B88(monitor, code);
-    if (func_002B49E0(monitor) == -1) {
+    if (func_002B49E0(monitor) == kSONGTAG_None) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
-            if (D_004A3620 == 1) {
+            if (D_004A3620 == true) {
                 ((cBankMonitor_F328*)(&self->MusicSys))->v3(8);
             }
             self->MusicSys.mSongPlaying = 0;
@@ -2620,8 +2635,8 @@ extern "C" int func_002B3BC0(void* self, int v);
 /**
  * cSSXAudio's override of cMusicSys virtual slot 4: sets the music state (func_002B3BC0), then as func_0028F328.
  *
- * When the current song has no tag and code is 10, 11 or 18 it calls virtual slot 3 with 8 (only while D_004A3620 is 1)
- * and clears mSongPlaying. Slot 4 of D_00483688; the music code calls it to change state.
+ * When the current song has no tag (kSONGTAG_None) and code is 10, 11 or 18 it calls virtual slot 3 with 8 (only while
+ * D_004A3620 is set) and clears mSongPlaying. Slot 4 of D_00483688; the music code calls it to change state.
  *
  * @param code  the new music state
  * @return func_002B3BC0's result (whether the state changed)
@@ -2630,9 +2645,9 @@ extern "C" int func_0028F3C8(cSSXAudio* self, int code)
 {
     void* monitor = (char*)&self->MusicSys;
     int changed = func_002B3BC0(monitor, code);
-    if (func_002B49E0(monitor) == -1) {
+    if (func_002B49E0(monitor) == kSONGTAG_None) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
-            if (D_004A3620 == 1) {
+            if (D_004A3620 == true) {
                 ((cBankMonitor_F328*)(&self->MusicSys))->v3(8);
             }
             self->MusicSys.mSongPlaying = 0;
@@ -2711,7 +2726,7 @@ extern "C" void func_0028F478(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F520);
 #ifdef SKIP_ASM
-extern "C" int func_0028D960(cSSXAudio* self);
+extern "C" bool func_0028D960(cSSXAudio* self);
 extern "C" void* func_002B3AC0(void*);
 
 /**
@@ -2773,9 +2788,9 @@ struct sBmVtF5B8 {
  * Switches the audio to the map screen: pauses the sound effects and starts the loading-screen loop at state 0.
  *
  * Clears unk_6088 and returns when the audio is paused (mAudioPaused) or not in game. Without unk_5818 it pauses the
- * sound effects (cSSXAudio_PauseSFX) and sets unk_6088 so func_0028F678 resumes them. Plays menu sound 9; outside music
- * mode 2 it fades the song out over 1 s, starts the loading-screen sound (func_0028F768), sets music state 0 and full
- * volume. Called when the map screen opens.
+ * sound effects (cSSXAudio_PauseSFX) and sets unk_6088 so func_0028F678 resumes them. Plays menu sound 9; outside
+ * kRADIOMODE_MOUNTAIN it fades the song out over 1 s, starts the loading-screen sound (func_0028F768), sets music state
+ * 0 and full volume. Called when the map screen opens.
  */
 extern "C" void func_0028F5B8(cSSXAudio* self)
 {
@@ -2787,7 +2802,7 @@ extern "C" void func_0028F5B8(cSSXAudio* self)
         self->mPausedSFXForMapScreen = 1;
     }
     cSSXAudio_MenuSound(self, 9);
-    if (self->mRadioModeID != 2) {
+    if (self->mRadioModeID != kRADIOMODE_MOUNTAIN) {
         char* mon = (char*)&self->MusicSys;
         func_002B3D48(mon, 1.0f);
         func_0028F768(self);
@@ -2955,8 +2970,8 @@ INCLUDE_ASM("sound/bankmanager", func_0028FAE0);
 #ifdef SKIP_ASM
 extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(cSSXAudio* self);
-extern "C" int func_0028D960(cSSXAudio* self);
-extern "C" int func_0028DEF0(cSSXAudio* self, int a1);
+extern "C" bool func_0028D960(cSSXAudio* self);
+extern "C" bool func_0028DEF0(cSSXAudio* self, int a1);
 extern int cMonitor_MONITOR_Create_FAE0(void*, int, long, int, int, int, int, int) __asm__("cMonitor_MONITOR_Create");
 extern "C" void cMonitor_MONITOR_DestroyAll1(void* mon, long key);
 extern "C" void* func_002B3AC0(void*);
@@ -2974,10 +2989,10 @@ extern const sBmKeyFAE0 D_004A3658_FAE0[] __asm__("D_004A3658");
  * Restarts the in-game music after the map screen: cancels pending events, stops the song and arms a new one.
  *
  * Only in a music mode accepted by func_0028D960. Cancels D_004A3648..D_004A3658 (cMonitor_MONITOR_DestroyAll1). When
- * the current song's tag is 1-3 or 401, or no song is playing, it records event 18 (func_0028DEF0), sets
- * mStopSpeechOnResume, stops the song, picks the next one (func_0028D488), starts the location music (func_0028CF98)
- * and arms the D_004A3650 event (func_0028E548) after 3000 ms with kind 4 and the song's mSedValue. Called by the map
- * state.
+ * the current song's tag is a peak theme (kSONGTAG_Peak1-Peak3) or kSONGTAG_PkTrans, or no song is playing, it records
+ * event 18 (func_0028DEF0), sets mStopSpeechOnResume, stops the song, picks the next one (func_0028D488), starts the
+ * location music (func_0028CF98) and arms the D_004A3650 event (func_0028E548) after 3000 ms with kind 4 and the song's
+ * mSedValue. Called by the map state.
  */
 // PORT: 64-bit long sound keys.
 extern "C" void func_0028FAE0(cSSXAudio* self)
@@ -2989,12 +3004,12 @@ extern "C" void func_0028FAE0(cSSXAudio* self)
     cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3650_FAE0[0].v);
     cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3658_FAE0[0].v);
     int st = func_002B49E0(&self->MusicSys);
-    if ((unsigned int)(st - 1) < 3 || st == 401 || self->MusicSys.mSongPlaying == 0) {
+    if ((unsigned int)(st - kSONGTAG_Peak1) < 3 || st == kSONGTAG_PkTrans || self->MusicSys.mSongPlaying == 0) {
         func_0028DEF0((cSSXAudio*)self, 18);
         self->mStopSpeechOnResume = 1;
         func_002B3AC0(&self->MusicSys);
         func_0028D488(self);
-        func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
+        func_0028CF98((cSSXAudio*)self, 0, 0, kPEAKBIT_FromLocation, 0);
         cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
         const sBmKeyFAE0* key = D_004A3650_FAE0;
         int sedValue = func_002B4908(&self->MusicSys);
@@ -3039,7 +3054,8 @@ typedef void (*tBmLoadFC58)(void*, void*, int, void*, int);
 typedef int (*tBmSetFC58)(void*, int);
 
 /**
- * Plays the "charsel" song (cMusicSys slot 2, tagged 301) and restores the front-end music state (mFrontEndMusicMode).
+ * Plays the "charsel" song (cMusicSys slot 2, tagged kSONGTAG_CharSel) and restores the front-end music state
+ * (mFrontEndMusicMode).
  *
  * Uses music volume control 1 and loads synchronously. Called when the network-configuration screen closes.
  */
@@ -3048,7 +3064,7 @@ extern "C" void func_0028FC58(cSSXAudio* self)
     char* mon = (char*)&self->MusicSys;
     sBmVtFC58* vt = (sBmVtFC58*)self->MusicSys.mVtbl;
     ((tBmLoadFC58)vt[2].fn)(vthis(mon, vt[2]), str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
-    func_002B49C0(mon, 301);
+    func_002B49C0(mon, kSONGTAG_CharSel);
     sBmVtFC58* vt2 = (sBmVtFC58*)self->MusicSys.mVtbl;
     ((tBmSetFC58)vt2[4].fn)(vthis(mon, vt2[4]), self->mFrontEndMusicMode);
 }

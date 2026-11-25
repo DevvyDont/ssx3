@@ -60,11 +60,11 @@ struct cStreamSys {
     void STREAM_Purge(int i) __asm__("cStreamSys_STREAM_Purge");
     float STREAM_TimeRemaining(int i) __asm__("cStreamSys_STREAM_TimeRemaining");
     float STREAM_RequestLength(int idx) __asm__("cStreamSys_STREAM_RequestLength");
-    int STREAM_IsBufferFilled(int idx, int minVal) __asm__("cStreamSys_STREAM_IsBufferFilled");
-    int STREAM_IsCurrRequestedRead(int idx) __asm__("cStreamSys_STREAM_IsCurrRequestedRead");
-    int STREAM_IsRequestedDequeued(int handle) __asm__("cStreamSys_STREAM_IsRequestedDequeued");
-    int STREAM_IsRequestedPlaying(int handle) __asm__("cStreamSys_STREAM_IsRequestedPlaying");
-    int STREAM_Playing(int i) __asm__("cStreamSys_STREAM_Playing");
+    bool STREAM_IsBufferFilled(int idx, int minVal) __asm__("cStreamSys_STREAM_IsBufferFilled");
+    bool STREAM_IsCurrRequestedRead(int idx) __asm__("cStreamSys_STREAM_IsCurrRequestedRead");
+    bool STREAM_IsRequestedDequeued(int handle) __asm__("cStreamSys_STREAM_IsRequestedDequeued");
+    bool STREAM_IsRequestedPlaying(int handle) __asm__("cStreamSys_STREAM_IsRequestedPlaying");
+    bool STREAM_Playing(int i) __asm__("cStreamSys_STREAM_Playing");
     void STREAM_ReleaseHold(int idx) __asm__("cStreamSys_STREAM_ReleaseHold");
     void STREAM_ReleaseHold1(int idx, int requestHandle) __asm__("cStreamSys_STREAM_ReleaseHold1");
     void STREAM_SetVolControl(int i, int val) __asm__("cStreamSys_STREAM_SetVolControl");

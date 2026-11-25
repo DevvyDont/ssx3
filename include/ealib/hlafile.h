@@ -21,6 +21,11 @@ typedef struct REQUESTSTRUCTtag REQUESTSTRUCTtag;
 typedef struct REQUESTQUEUE REQUESTQUEUE;
 #endif
 
+// The ASYNCFILE_* results (names ours). [U] ASYNCFILE_getstatus returns 1 once the request has no file-system
+// command pending, 0 while one is and -1 for an invalid handle; ASYNCFILE_cancel returns 1 when it cancelled the
+// request and -1 for a bad handle or a request already cancelled or completed (ASYNCFILE_release likewise 1 / -1).
+enum eAsyncFileResult { kASYNCFILE_Invalid = -1, kASYNCFILE_Pending = 0, kASYNCFILE_Done = 1, kASYNCFILE_Ok = 1 };
+
 struct REQUESTSTRUCTtag {
     int id;                             // 0x00 [O]; [U] finishrequest passes it to the callback; locaterequest
                                         //      matches it

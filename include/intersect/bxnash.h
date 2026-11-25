@@ -60,6 +60,12 @@ CHECK_SIZE(nash_Node, 0x8);
 // with the same three words (cRailSpaceNode / cFlexRailSpaceNode in object/railspacenode.h, tSplineSegmentRecord's
 // m_iIntersect[3] in world/worldrecords.h), so a query casts by type to reach their members (+0xC Rail / FlexNode,
 // +0x68 m_Parent).
+// cTypedSpaceNode::type. [O] On Tour's enum eSpaceNodeType, names and values; [U] as listed above.
+enum eSpaceNodeType {
+    kSNT_Error = 0, kSNT_SplineSegment = 1, kSNT_Rail = 2, kSNT_FlexRail = 3, kSNT_CameraTrigger = 4,
+    kSNT_AudioVolume = 5, kSNT_Light = 6, kSNT_FogVol = 7, kSNT_Halo = 8, kSNT_Num = 9
+};
+
 struct cTypedSpaceNode {
     nash_Node* next;                // 0x000 [O] Node::next; [U] the nash cell walks (as nash_Node)
     nash_Node* prev;                // 0x004 [O] Node::prev

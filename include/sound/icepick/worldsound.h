@@ -44,6 +44,10 @@ CHECK_SIZE(tAudioData, 0x8);
 // The head of each volume record after tAudioData (On Tour struct tAudioVolume, 0x4, and its four record types;
 // names from On Tour's DWARF). The type is On Tour's eAudioVolumeType: kAUDIO_VOLUME_SPHERE 0, kAUDIO_VOLUME_ELLIPSE 1,
 // kAUDIO_VOLUME_CONE 2, kAUDIO_VOLUME_AMBIENT 3; [U] the walks step 0x1C, 0x30, 0x30 and 0x18 by it, On Tour's sizes.
+enum eAudioVolumeType {
+    kAUDIO_VOLUME_SPHERE = 0, kAUDIO_VOLUME_ELLIPSE = 1, kAUDIO_VOLUME_CONE = 2, kAUDIO_VOLUME_AMBIENT = 3
+};
+
 struct tAudioVolume {
     int m_eType;                    // 0x0 [O] eAudioVolumeType; [U] cWorldSound_CalcAudioVolumeBox switches on it
 };

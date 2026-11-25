@@ -21,6 +21,29 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+// A trigger record's type (tTriggerType::m_TriggerType, tTriggerTypePointer::m_TriggerType). [O] On Tour's enum
+// eTriggerType, names and values; [U] LoadTriggerInfo steps 6, 14, 12 and 4 words over types 1-4, and TriggerToPatch
+// reads one bank and patch for 1, picks a weighted patch for 2 and gives swap triggers (3) their bank.
+enum eTriggerType {
+    eTRIGGERTYPE_None = 0, eTRIGGERTYPE_Banked = 1, eTRIGGERTYPE_Random = 2, eTRIGGERTYPE_Swap = 3,
+    eTRIGGERTYPE_Advanced = 4, eTRIGGERTYPE_Max = 5
+};
+
+// TriggerToPatch's check argument. [O] On Tour's enum eTriggerToPatchCheck, names and values; [U] CrowdTrigger asks
+// with 1, SwapTrigger with 2, the play path with 0 (only 0 lets an advanced trigger through).
+enum eTriggerToPatchCheck {
+    eTriggerToPatchCheck_General = 0, eTriggerToPatchCheck_Crowd = 1, eTriggerToPatchCheck_Swap = 2
+};
+
+// The sound banks TriggerToPatch hands out that mark a trigger's kind (names ours). [U] TriggerToPatch gives every swap
+// trigger bank 3 (cWorldTriggerInstance_Update then plays its swap string, SwapTrigger tests 3); CrowdTrigger tests 5
+// for a trigger the crowd system plays.
+enum { kSwapTriggerBank = 3, kCrowdTriggerBank = 5 };
+
+// The one advanced trigger retail knows. [O] On Tour's eAudioTrigger member kAUDIO_TRIGGER_PA_Trigger = 77;
+// [U] AdvancedTriggerToPatch sends trigger 77 to the PA's place announcement (func_002A34D0).
+enum { kAUDIO_TRIGGER_PA_Trigger = 77 };
+
 // The fixed head of every trigger record in the trigger file (views group D: sTrigObj_6A38). [O] On Tour struct
 // tTriggerType (0x10): m_TriggerType, m_HitObjectTrigger, m_SyncToAnimation, m_DuckAmbientAudio; the specific trigger
 // structs derive from it. [U] tTriggerTypePointer::m_pTriggerTypeStruct points at one; cWorldTriggerManager's
@@ -67,6 +90,10 @@ struct cWorldTriggerInstance {
                                         //      &m_vPosition to the 3D sound
     int m_iAudioHandle;                 // 0x30 [O]; [R] ctor -1, Reset / Stop -1; [U] Update stores the voice / crowd
                                         //      handle (-9999 for no audio), Stop stops it with a 0.25 s fade
+    // m_iAudioHandle's two markers (names ours). [R] ctor / Reset / Stop store -1, so Update starts the sound only
+    // then; [U] Update stores -9999 for a trigger that plays no bank sound (TriggerToPatch's noAudio, or a
+    // sync-to-animation trigger off its first frame), and Stop / Update leave such a handle alone.
+    enum { kAudioNotStarted = -1, kAudioNone = -9999 };
     int m_bTouch;                       // 0x34 [O] (a 1-byte bool in On Tour; retail sw); [R] ctor 0, Reset 0; [U] the
                                         //      manager's TouchAllUsed / Update (view sWorldTrigger70.unk34)
     int m_bCrowdTrigger;                // 0x38 [O] (a 1-byte bool at 0x35 in On Tour; retail sw); [R] ctor 0; [U] Update
@@ -83,13 +110,13 @@ struct cWorldTriggerInstance {
     int m_bLastAnimFrameDecrease;       // 0x6C [O] (On Tour bool at 0x68; retail word); [R] ctor / Reset / Stop 0
 
     // Methods bound to their retail symbols by asm labels.
-    int SameTriggerInstance(int objectRef, int volNum, int viewPort)
+    bool SameTriggerInstance(int objectRef, int volNum, int viewPort)
         __asm__("cWorldTriggerInstance_SameTriggerInstance");
     void Update() __asm__("cWorldTriggerInstance_Update");
     void Stop() __asm__("cWorldTriggerInstance_Stop");
     int TriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
         __asm__("cWorldTriggerInstance_TriggerToPatch");
-    int CrowdTrigger(int trigger) __asm__("cWorldTriggerInstance_CrowdTrigger");
+    bool CrowdTrigger(int trigger) __asm__("cWorldTriggerInstance_CrowdTrigger");
     int SwapTriggerToString(int idx, char* dst) __asm__("cWorldTriggerInstance_SwapTriggerToString");
     void Reset() __asm__("cWorldTriggerInstance_Reset");
 };
@@ -193,18 +220,18 @@ struct cWorldTriggerManager {
     int AdvancedTriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort)
         __asm__("cWorldTriggerManager_AdvancedTriggerToPatch");
     int SwapTriggerToString(int idx, char* out) __asm__("cWorldTriggerManager_SwapTriggerToString");
-    int HasAfterCollisionTrigger(void* obj) __asm__("cWorldTriggerManager_HasAfterCollisionTrigger");
-    int AfterCollisionTrigger(unsigned int i) __asm__("cWorldTriggerManager_AfterCollisionTrigger");
+    bool HasAfterCollisionTrigger(void* obj) __asm__("cWorldTriggerManager_HasAfterCollisionTrigger");
+    bool AfterCollisionTrigger(unsigned int i) __asm__("cWorldTriggerManager_AfterCollisionTrigger");
     int ObjectHit(int id) __asm__("cWorldTriggerManager_ObjectHit");
     void AddHitObject(int id) __asm__("cWorldTriggerManager_AddHitObject");
     void Reset() __asm__("cWorldTriggerManager_Reset");
     void ResetStates() __asm__("cWorldTriggerManager_ResetStates__FPv");
-    int SwapTrigger(int trigger) __asm__("cWorldTriggerManager_SwapTrigger");
+    bool SwapTrigger(int trigger) __asm__("cWorldTriggerManager_SwapTrigger");
     void MonitorTriggers(int enable, int delay) __asm__("cWorldTriggerManager_MonitorTriggers");
-    int SyncToAnimationTrigger(unsigned int i) __asm__("cWorldTriggerManager_SyncToAnimationTrigger");
+    bool SyncToAnimationTrigger(unsigned int i) __asm__("cWorldTriggerManager_SyncToAnimationTrigger");
     int ObjectRefFirstFrame(tInstanceRecord* src, cWorldTriggerInstance* state)
         __asm__("cWorldTriggerManager_ObjectRefFirstFrame");
-    int DuckAmbientAudioTrigger(unsigned int idx) __asm__("cWorldTriggerManager_DuckAmbientAudioTrigger");
+    bool DuckAmbientAudioTrigger(unsigned int idx) __asm__("cWorldTriggerManager_DuckAmbientAudioTrigger");
 };
 
 CHECK_OFFSET(cWorldTriggerManager, m_aWorldTriggerInstances, 0x000);

@@ -44,6 +44,17 @@
 
 #include "layout.h"
 
+// A game-flow state id (cGameState::mNextState; cGame::mCurrentStateID, mPendingStateID, mPrevStateID). [O] On Tour's
+// enum eGFState, names and values; [R] retail's ids are the same: cGame_updateState / cGame_readFromReplayFrame map
+// 1-16 to the states cGame_cGame builds in this order (cGame's mStates, below), and each state's ctor stores the id
+// of the state that follows it (cGFEventStartState 2, cGFPreEventState 3, cGFGateState 4, cGFRidingState 5).
+enum eGFState {
+    kGFSM_Null = 0, kGFSM_EventStart = 1, kGFSM_PreEvent = 2, kGFSM_Gate = 3, kGFSM_Riding = 4, kGFSM_Finishline = 5,
+    kGFSM_End = 6, kGFSM_PostEvent = 7, kGFSM_EndWait = 8, kGFSM_TransportWait = 9, kGFSM_TrackStart = 10,
+    kGFSM_SectionLoad = 11, kGFSM_Podium = 12, kGFSM_NextHeat = 13, kGFSM_UserSelect = 14, kGFSM_SessionTeleport = 15,
+    kGFSM_ReplayStart = 16, kGFSM_NumStates = 17
+};
+
 struct cGameState {
     int mNextState;                 // 0x00 [O] eGFState; [U] gotoNextState passes it to cGame_setState (with
                                     //      mStartupFlag) when non-zero; writeToReplayFrame / readFromReplayFrame copy

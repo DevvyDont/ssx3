@@ -19,6 +19,19 @@
 
 struct cPS2SoundManager;
 
+// The sound output mode (SetMode's argument, cSSXAudio::mAudioMode). [O] On Tour's enum eSOUNDDEF_MODE, names and
+// values. Retail also has a fourth mode, 3 (cPS2SoundManager_SetMode: four output channels and S/PDIF mode 2; the
+// cSSXAudio mode converters pass it through), that On Tour does not name, so it stays a number.
+enum eSOUNDDEF_MODE {
+    keSOUNDDEF_MODE_MONO = 0, keSOUNDDEF_MODE_STEREO = 1, keSOUNDDEF_MODE_DOLBYSURROUND = 2
+};
+
+// SetMode's result. [O] On Tour's enum eSOUNDMANAGER_SETMODE, names and values; [U] cSSXAudio_SetMode keeps the new
+// mode only on SUCCESS, and cPS2SoundManager_SetMode returns 2 once it applied a configuration, 1 when it refused.
+enum eSOUNDMANAGER_SETMODE {
+    keSOUNDMANAGER_SETMODE_FAIL = 0, keSOUNDMANAGER_SETMODE_RESTART = 1, keSOUNDMANAGER_SETMODE_SUCCESS = 2
+};
+
 struct cSoundSys {
     cPS2SoundManager* pManager; // 0x0 [O] cSoundSys::pManager (On Tour type cSoundManager*); [R] ctor = cSoundManager::Construct() (cSoundManager_Construct, a cPS2SoundManager) and calls its Init; dtor calls its Shutdown and deletes it; [U] SetMode (cSoundSys_SetMode) calls its slot 2
     void** mVtbl;               // 0x4 [R] cSoundSys_vtbl (ctor/dtor); the classes that have it as a virtual base point it at their own copies (e.g. D_00483A60 in cBankSys)

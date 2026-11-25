@@ -42,9 +42,13 @@
 #include "sound/asyncsys.h"
 #include "sound/bankmonitor.h"
 
+// cBankInstance::mBankStatus: [O] On Tour's enum eBankStatus, names and values (the preview asserts "mBankStatus !=
+// LOADING"). [U] SyncLoad / OnEndAsyncLoad set 1 for a loaded bank, OnBeginAsyncLoad 2 while it loads, Unload 0;
+// IsBankLoaded tests 1.
+enum eBankStatus { EMPTY = 0, USED = 1, LOADING = 2 };
+
 // cBankInstance (0x60 [R] operator new[](count x 0x60, "BankInstances"); [O] same size and offsets): one bank slot.
-// On Tour enums, kept as ints: eBankStatus (EMPTY 0, USED 1, LOADING 2), eSoundMemLocation
-// (keSoundMemLocation_Dynamic 0, _Main 1, _Sound 2).
+// Its On Tour enums are kept as ints: eBankStatus (above), eSoundMemLocation (sound/asyncsys.h).
 struct cBankInstance {
     int mBankStatus;            // 0x00 [O] eBankStatus; [R] ctor 0; [P] BANK_Status / BANK_Used (== 1) / BANK_Loading
                                 //       (== 2) / BANK_Handle; [U] SyncLoad / OnEndAsyncLoad set 1 or 0,
@@ -52,6 +56,9 @@ struct cBankInstance {
     int mBankHandle;            // 0x04 [O]; [R] ctor -1; [P] BANK_Handle returns it when used; [U]
                                 //       SNDbankadd(&mBankHandle) in SyncLoad / Attach, OnEndAsyncLoad stores it, Unload
                                 //       / UnAttach SNDbankremove it and set -1
+    // mBankHandle when no bank is added (name ours). [R] ctor -1; [U] Unload / UnAttach reset it and remove the bank
+    // only when it differs.
+    enum { kNoBankHandle = -1 };
     int mAllocLocation;         // 0x08 [O] eSoundMemLocation; [R] ctor 0; [U] AllocMem 1 or 2, DeallocMem 0 (frees
                                 //       sound memory when 2), SyncLoad switches on it, BANK_AsyncLoad passes it to
                                 //       ASYNCSYS_QueueLoad, ShareBank copies it

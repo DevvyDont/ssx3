@@ -126,7 +126,8 @@ struct cGame {
     int mPendingPreloadStateID;                  // 0x208 [O]
     int mPreloadStateID;                         // 0x20C [O]
     int mPendingStateID;                         // 0x210 [O]
-    int mCurrentStateID;                         // 0x214 [P] getCurrentState; [U] compared with game-state numbers
+    int mCurrentStateID;                         // 0x214 [P] getCurrentState; [U] compared with game-state ids
+                                                 //       (eGFState, main/gamestate.h)
     int mPrevStateID;                            // 0x218 [P] getPreviousState
     int mPendingStateStartupFlag;                // 0x21C [O]
     int mBoxTextureID;                           // 0x220 [O]; [R] cGame_load loads a texture from data/fonts/menu.ssh

@@ -29,6 +29,7 @@
 
 #include "layout.h"
 #include "sound/asyncsys.h" // cCircBuffer
+#include "sound/soundsys.h" // eSOUNDDEF_MODE, eSOUNDMANAGER_SETMODE
 #include "bx/math3d.h"
 #include "sound/musicsys.h"
 #include "sound/speechsys.h"
@@ -57,6 +58,9 @@ CHECK_SIZE(AudioTable, 0x28);
 
 // On Tour's tAttachSoundStruct (0x30), a sound attached to a world instance mesh.
 struct tAttachSoundStruct {
+    // mesh when the sound follows the instance's model instead of one mesh (name ours). [U] cSSXAudio_AttachSound
+    // takes the model's root transform for -1, cSSXAudio_UpdateAttachedSounds tests it the same way.
+    enum { kModelMesh = -1 };
     int used;       // 0x00 [O] (On Tour bool); [U] == 1 tests (cSSXAudio_DetachSound)
     tInstanceRecord* inst; // 0x04 [O]; [U] cSSXAudio_AttachSound stores it, cSSXAudio_UpdateAttachedSounds follows
                            //      its m_pActiveNode
@@ -87,6 +91,10 @@ struct tSoundVolume {
 
 // On Tour's tAudioMix (0x28), one mix preset read by cSSXAudio_LoadMixes.
 struct tAudioMix {
+    // A level that keeps the control where it is (name ours). [U] cSSXAudio_MixIntToFloat returns the control's current
+    // level for a negative value, and cSSXAudio_MixVolume fades only the controls whose level is not -1.
+    enum { kKeepLevel = -1 };
+
     int musicLevel;         // 0x00 [O]
     int djLevel;            // 0x04 [O]
     int paLevel;            // 0x08 [O]
@@ -115,6 +123,118 @@ struct SNDPLAYOPTS;
 struct t4Vector;
 struct tWPInGameData;
 
+// A volume control (the index into cSSXAudio::mSoundVolume, mDuckLevel, mMixLevel). [O] On Tour's enum eVolumeControl,
+// names and values; [U] cSSXAudio_SetCurrVolume scales 1..10 by gMusicScaling, gDJSpchScaling, gPASpchScaling,
+// gCharSpchScaling, gSFXScaling, gBoardScaling, gCollisionScaling, gAmbientScaling, gArcadeSFXScaling and
+// gArcadeSpeechScaling, sets the library master volume for 0 and the per-character levels for 4.
+enum eVolumeControl {
+    keVolumeControl_All = -1, keVolumeControl_Master = 0, keVolumeControl_Music = 1, keVolumeControl_DJ = 2,
+    keVolumeControl_PA = 3, keVolumeControl_Character = 4, keVolumeControl_SFX = 5, keVolumeControl_Board = 6,
+    keVolumeControl_Collision = 7, keVolumeControl_Ambient = 8, keVolumeControl_ArcadeSFX = 9,
+    keVolumeControl_ArcadeSpeech = 10, keVolumeControl_Num = 11
+};
+
+// What the audio system updates each frame (cSSXAudio::mAudioUpdateState). [O] On Tour's enum eUpdateState, names and
+// values; [U] cSSXAudio_FrontEndLoad sets 1, FrontEndPurge / InGameDeInit 0, StartEvent 6, and cSSXAudio_Update runs
+// the in-game updates only in 6.
+enum eUpdateState {
+    DEFAULT_UPDATE = 0, FE_UPDATE = 1, MUSIC_UPDATE = 2, PREGAME_UPDATE = 3, PRERACE_UPDATE = 4, PRECOUNT_UPDATE = 5,
+    INGAME_UPDATE = 6
+};
+
+// cSSXAudio::mDuckStream with no stream ducking the others (name ours). [R] ctor 3; [U] cSSXAudio_DuckToStream(3)
+// restores the ducked controls and stores 3, cSSXAudio_Update watches the stream only while it is not 3.
+enum { kNoDuckStream = 3 };
+
+// cSSXAudio_GetFocusRider's two special arguments (names ours). [U] -1 picks the local human rider with the best
+// RaceRanking, -2 the first local human; any other value is a viewport.
+enum { kFocusLeadingHuman = -1, kFocusFirstHuman = -2 };
+
+// The sound bank of the loading-screen loop (name ours). [U] func_0028F768 plays patch 0 of bank 13, and
+// cSSXAudio_InGamePurge unloads every bank below 17 except 13.
+enum { kLoadingLoopBank = 13 };
+
+// A sound preset (cSSXAudio::mPreset; names ours, after what cSSXAudio_SetPreset does with it). [U] 0 sets every
+// control 1..10 to 10/11, 1 silences the speech controls (DJ, PA, Character, ArcadeSFX, ArcadeSpeech), 2 the music,
+// 3 keeps only the effects (SFX, Board, Collision, Ambient), 4 keeps only the music, 5 silences everything; 4 and 5
+// also turn the arcade sounds off. cSSXAudio_NextPreset / PrevPreset wrap between 0 and 5.
+enum eSoundPreset {
+    kSOUNDPRESET_All = 0, kSOUNDPRESET_NoSpeech = 1, kSOUNDPRESET_NoMusic = 2, kSOUNDPRESET_EffectsOnly = 3,
+    kSOUNDPRESET_MusicOnly = 4, kSOUNDPRESET_Silent = 5, kSOUNDPRESET_Num = 6
+};
+
+// What cSSXAudio_InitSoundLevels sets the level scales for. [O] On Tour's enum eGameAudioStates, names and values; [U]
+// cSSXAudio_FrontEndLoad passes 0 (all scales 1), cSSXAudio_InGameLoad 1 (the in-game balance).
+enum eGameAudioStates { eGameAudioState_FE = 0, eGameAudioState_Mountain = 1 };
+
+// The animation sound tags cSSXAudio_PlayAniTag handles (names ours, after the call each makes): [U] 80
+// cSSXAudio_BindingsOff, 81 cSSXAudio_BindingsOn, 82 cSSXAudio_UndoBindings.
+enum { kANITAG_BindingsOff = 80, kANITAG_BindingsOn = 81, kANITAG_UndoBindings = 82 };
+
+// Which glide / carve program a surface uses (cSSXAudio_GetSurfaceProgramType's result). [O] On Tour's enum
+// eSurfaceProgramType, names and values; [U] cSSXAudio_GlideProgram, AIGlideProgram and CarveProgram run their Hard*,
+// Soft* and Rail* programs for 0, 1 and 2.
+enum eSurfaceProgramType { keSurfaceProgram_Hard = 0, keSurfaceProgram_Soft = 1, keSurfaceProgram_Rail = 2 };
+
+// A menu sound cue (cSSXAudio_MenuSound's argument). [O] On Tour's enum eMenuSoundType, names and values; [U] retail's
+// cSSXAudio_MenuSound plays the same sound for each front-end cue and its in-game twin (0 / 9 .. 4 / 13), nothing for
+// 5 and 6, and its own sounds for 7, 8, 14 and 15.
+enum eMenuSoundType {
+    keMenuSoundType_FEForward = 0, keMenuSoundType_FEBack = 1, keMenuSoundType_FELeftRight = 2,
+    keMenuSoundType_FEUpDown = 3, keMenuSoundType_FEError = 4, keMenuSoundType_FEScrollText = 5,
+    keMenuSoundType_FESelectText = 6, keMenuSoundType_FEChallenge = 7, keMenuSoundType_FEMail = 8,
+    keMenuSoundType_IGForward = 9, keMenuSoundType_IGBack = 10, keMenuSoundType_IGLeftRight = 11,
+    keMenuSoundType_IGUpDown = 12, keMenuSoundType_IGError = 13, keMenuSoundType_IGOverlayPopup = 14,
+    keMenuSoundType_SnowSwoosh = 15, keMenuSoundType_Num = 16
+};
+// cSSXAudio_MenuSound's sound id for a cue without a sound (name ours). [U] it starts at -1, keeps it for
+// keMenuSoundType_FEScrollText / FESelectText and plays nothing when it is still -1.
+enum { kNoMenuSoundID = -1 };
+
+// A pickup icon (cSSXAudio_PlayIconSound's kind). [O] On Tour's enum eIconType, names and values; [U] retail plays a
+// sound per kind 0..3 and, for 2, a trick-multiplier line by the icon's multiplier (2, 3, 5 or 10).
+enum eIconType {
+    keIcon_SpeedBoost = 0, keIcon_TrickBoost = 1, keIcon_TrickMultiplier = 2, keIcon_Points = 3, keIcon_Mission = 4,
+    keIcon_Collectable = 5
+};
+
+// The speech language as a bit (func_0029F198's result, cSSXAudio::unk_572C; names ours). [U] func_0029ED90 opens
+// data/audio/french.big for 2, german.big for 4, spanish.big for 8 and english.big otherwise; the speech hooks get it
+// as the request's language bit.
+enum eSpeechLanguageBit {
+    kSPEECHLANG_English = 1, kSPEECHLANG_French = 2, kSPEECHLANG_German = 4, kSPEECHLANG_Spanish = 8
+};
+
+// The options' speech language index (bits 22..24 of cBEOptionInterface_mOption's first word; names ours). [U]
+// func_0029F198 maps 0..3 to kSPEECHLANG_English, French, German and Spanish (anything else to English).
+enum eOptionSpeechLanguage {
+    kOPTLANG_English = 0, kOPTLANG_French = 1, kOPTLANG_German = 2, kOPTLANG_Spanish = 3
+};
+
+// The radio mode (cSSXAudio::mRadioModeID). [O] On Tour's enum eRadioModeID, names and values. [U] func_0028BF78 plays
+// the default song map in 0, the radio playlist (mRadioPlayList) in 1 and 3, and the peak ambience in 2
+// (cSSXAudio_NeedWPAmbience tests 2); func_0028D960 lets the music system pick songs in 0, 1 and 3.
+enum eRadioModeID {
+    kRADIOMODE_RADIO = 0, kRADIOMODE_REQUESTLINE = 1, kRADIOMODE_MOUNTAIN = 2, kRADIOMODE_PLAYLIST = 3,
+    kRADIOMODE_NUM = 4
+};
+
+// The peak of a race location as func_002A1E20 returns it, one bit per peak (names ours). [U] func_002A1E20 maps
+// locations 0, 1, 5, 8, 11, 14, 17, 18 to 1, locations 2, 3, 6, 9, 12, 15, 19, 20 to 2, and 4, 7, 10, 13, 16, 21 to 4
+// (0 for any other id); its callers pick "Peak1" for 1, "Peak2" for 2 and "Peak3" otherwise. func_0028CF98 takes one
+// as its peak argument, or -1 to look it up from the race location.
+enum ePeakBit {
+    kPEAKBIT_FromLocation = -1, kPEAKBIT_None = 0, kPEAKBIT_Peak1 = 1, kPEAKBIT_Peak2 = 2, kPEAKBIT_Peak3 = 4
+};
+
+// cSSXAudio::mMusicRampState (names ours). [U] cSSXAudio_InGameInit stores 0; func_0028F000 starts a volume ramp
+// (mMusicRampCounter = 0) whenever it is not 2 and sets it to 2.
+enum eMusicRampState { kMUSICRAMP_Idle = 0, kMUSICRAMP_Ramping = 2 };
+
+// cSSXAudio::mMusicEventOwner with no owner (name ours). [U] func_0028CF98 and func_0028D7D8 store -1;
+// func_0028D630 lets only the focus rider claim the event then, func_0028D740 treats it as nobody.
+enum { kNoMusicEventOwner = -1 };
+
 struct cSSXAudio {
     // --- cBankSys (non-virtual part 0x10; ctor cBankSys_cBankSys 0x28FD00, dtor cBankSys__cBankSys; vtable cBankSys_vtbl)
     cBankManager* mpVBankManager;       // 0x000 [R] g++ 2.95 virtual-base pointer to the shared cBankManager (= this + 0x6C98); every ctor in the chain stores it; [U] the inlined SFX_Begin/SFX_Play2D path loads it (39 methods)
@@ -142,9 +262,14 @@ struct cSSXAudio {
                                         //        play at 1.0
     int mGruntPatchCycle;               // 0x5734 (name ours) [R] ctor 0; [U] cSSXAudio_PlayGrunt: the patch of a
                                         //        cycling grunt, advanced after each use and wrapped to 0 at 6
+    // mSpeechVolumeID's class for a front-end DJ line, one past the eVolumeControl values (name ours). [U]
+    // cSSXAudio_GetSpeechVolumeIdentifier stores 11 for those files; cSSXAudio_UpdateSpeechVolume answers it with
+    // mFrontEndDJVolume.
+    enum { kFrontEndDJVolumeClass = 11 };
     int mSpeechVolumeID;                // 0x5738 (name ours) [U] cSSXAudio_GetSpeechVolumeIdentifier stores speech
                                         //        instance 0's volume class from the file name prefix (DJ_ 2/11, PA_ 3,
-                                        //        Arcade 10, else 4); func_0029F088 returns it
+                                        //        Arcade 10, else 4: eVolumeControl, 11 past it for the front-end DJ);
+                                        //        func_0029F088 returns it
     int unk_573C;                       // 0x573C [U] func_002A2E50
     int unk_5740;                       // 0x5740 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
     int unk_5744;                       // 0x5744 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
@@ -206,6 +331,10 @@ struct cSSXAudio {
     int mNextUsedBank;                  // 0x5878 [O]; [U] cSSXAudio_InGameLoad zeroes it
     char mSwapBasePath[128];            // 0x587C [O]; [U] cSSXAudio_InGameLoad builds it
     char mAemsSysName[128];             // 0x58FC [O]; placed by order and the cCircBuffer at 0x597C
+    // A play-history record's time when it has none (name ours). [U] cSSXAudio_RestartEvent / PartialRestart add
+    // event 0 with -1 (cSSXAudio_PlayHistoryAdd), and cSSXAudio_PlayHistoryUpdate keeps such a record until its sound
+    // ends.
+    enum { kPlayHistoryNoTimeout = -1 };
     cCircBuffer mPlayHistory;           // 0x597C [O]; [R] ctor: ArraySize 200, Array = operator new(800, "CircFIFOBuff"), Head/Tail 0; dtor frees Array; [U] cSSXAudio_PlayHistoryExists..cSSXAudio_PlayHistoryTimeout (PlayHistory*)
     int mRailType;                      // 0x598C [O]; [P] SetRailSurface(int) (preview 0x5A68; retail accessor 0x2BAD58 sw 0x598C); [U] cSSXAudio_Surface reads it for a rider on a rail
     float mLastCarveEdging[10];         // 0x5990 [O]; [U] cSSXAudio_HardCarveProgram/cSSXAudio_SoftCarveProgram (carve programs) index it
@@ -231,6 +360,9 @@ struct cSSXAudio {
                                         //        completion) clears it
     int mInBigChallenge;                // 0x5FD4 [O] (On Tour bool); [R] ctor 0; [U] cSSXAudio_BigChallengeComplete, cSSXAudio_BigChallengeFailed
     int mBigChallengeStarting;          // 0x5FD8 [O] (On Tour bool); [R] ctor 0; [U] cSSXAudio_SetBigChallengeStarting, cSSXAudio_BigChallengeBegin
+    // mUberSpinHandle with no spin sound playing (name ours). [R] ctor -1; [U] cSSXAudio_StartUberSpin /
+    // cSSXAudio_EndUberSpin stop the sound only when it differs.
+    enum { kNoUberSpinHandle = -1 };
     int mUberSpinHandle;                // 0x5FDC [O]; [R] ctor -1; [U] cSSXAudio_StartUberSpin/cSSXAudio_EndUberSpin (Start/EndUberSpin)
     int mBoostBarPreviousValue[2];      // 0x5FE0 [O]; [R] ctor zeroes both; [U] cSSXAudio_UpdateBoostBar (the per-frame boost-bar
                                         //        update)
@@ -434,7 +566,7 @@ struct cSSXAudio {
     void Land(cRider* rider, float powerupGained) __asm__("cSSXAudio_Land");
     int PlayPauseSound() __asm__("cSSXAudio_PlayPauseSound");
     void MenuSound(int cue) __asm__("cSSXAudio_MenuSound");
-    int PlayHistoryExists(int Ptr, int Hull) __asm__("cSSXAudio_PlayHistoryExists");
+    bool PlayHistoryExists(int Ptr, int Hull) __asm__("cSSXAudio_PlayHistoryExists");
     void PlayHistoryUpdate() __asm__("cSSXAudio_PlayHistoryUpdate");
     void PlayHistoryAdd(void* evt, int Handle, int Time, int Looping, int idx) __asm__("cSSXAudio_PlayHistoryAdd");
     void PlayHistoryUpdateTime(int evt, int NewTime, int idx) __asm__("cSSXAudio_PlayHistoryUpdateTime");
@@ -542,9 +674,9 @@ struct cSSXAudio {
         __asm__("cSSXAudio_ChangeMixFinalAndStepValues");
     void UpdateMix() __asm__("cSSXAudio_UpdateMix");
     int GetClosestCamera1(cRider* obj) __asm__("cSSXAudio_GetClosestCamera1");
-    int ReplayMode() __asm__("cSSXAudio_ReplayMode");
+    bool ReplayMode() __asm__("cSSXAudio_ReplayMode");
     int CameraInRange(t4Vector* pos, float radius) __asm__("cSSXAudio_CameraInRange");
-    int InCameraView(t4Vector* pos, float radius) __asm__("cSSXAudio_InCameraView");
+    bool InCameraView(t4Vector* pos, float radius) __asm__("cSSXAudio_InCameraView");
     void InitSoundLevels(int mode) __asm__("cSSXAudio_InitSoundLevels");
     void SetPreset(int mode) __asm__("cSSXAudio_SetPreset");
     void PrevPreset() __asm__("cSSXAudio_PrevPreset");
@@ -554,7 +686,7 @@ struct cSSXAudio {
     void DuckByRMS(float duckLevel) __asm__("cSSXAudio_DuckByRMS");
     void CancelRMSData() __asm__("cSSXAudio_CancelRMSData");
     void UpdateAudioWorldPainter(cRider* rider) __asm__("cSSXAudio_UpdateAudioWorldPainter");
-    int NeedWPAmbience() __asm__("cSSXAudio_NeedWPAmbience");
+    bool NeedWPAmbience() __asm__("cSSXAudio_NeedWPAmbience");
     void ReactToWPAmbienceEvent(cRider* rider, tWPInGameData* obj) __asm__("cSSXAudio_ReactToWPAmbienceEvent");
     void PlayAniTag(cRider* rider, int type) __asm__("cSSXAudio_PlayAniTag");
     void PauseAudio() __asm__("cSSXAudio_PauseAudio");

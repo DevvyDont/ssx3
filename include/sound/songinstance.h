@@ -43,6 +43,9 @@ struct cSongConfiguration {
     int mLowPass;            // 0x9C [R] music.inf LOWPASS (ctor 0xFFFF); [U] func_002B21E0 -> func_002B2160 (low-pass cutoff, 0..0xFFFF)
     int mPreview;            // 0xA0 [R] music.inf PREVIEW (ctor -1)
     int mSongBig;            // 0xA4 [R] music.inf SONGBIG (ctor 1); [U] cSongInstance ctor: 1 = "audio/music.big", else "audio/music2.big"
+    // mSongBig for a song in "audio/music.big" (name ours); [U] the cSongInstance ctor opens "audio/music2.big"
+    // otherwise.
+    enum { kMusicBig = 1 };
     void** mVtbl;            // 0xA8 [R] cSongConfiguration_vtbl (_vt$18cSongConfiguration: slot 1 = the dtor cSongConfiguration__cSongConfiguration)
 };
 
@@ -56,6 +59,9 @@ struct cSongInstance {
     void* unk_28;                 // 0x28 [R] ctor operator new(func_003D3058(1, 0), "PathfinderOverlay"); dtor cMemMan_free; [U] overlay stream buffer (0x6A400)
     int unk_2C;                   // 0x2C [R] ctor 0; [U] func_002B21E0 sets 1 once the streams are open; func_002B20C8 tests it
     int unk_30;                   // 0x30 [R] ctor -1; [U] func_002B20C8 parks a value here until the streams open; func_002B21E0 applies and resets it
+    // unk_30 with no music event parked (name ours). [R] ctor -1; [U] func_002B20C8 parks one only while it is -1,
+    // func_002B21E0 sends a parked one and stores -1 again.
+    enum { kNoPendingEvent = -1 };
     int unk_34;                   // 0x34 [R] ctor arg 7; [U] a cBankManager bank index: func_002B27C0 checks BANK_Used / BANK_Handle of it, the dtor unloads it (cAsyncSys_ASYNCSYS_Cancel)
     int unk_38;                   // 0x38 [R] ctor 0
     float* unk_3C;                // 0x3C [R] ctor arg 6; [U] func_002B21E0: optional volume control (*unk_3C scales the volume)

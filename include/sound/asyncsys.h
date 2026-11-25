@@ -28,6 +28,20 @@
 
 #include "layout.h"
 
+// Where a sound bank's data lives (cAsyncSys::mMemType's entries, cBankInstance::mAllocLocation). [O] On Tour's enum
+// eSoundMemLocation, names and values (ASYNCSYS_QueueLoad's memType; the preview asserts "mMemType.Peek() ==
+// keSoundMemLocation_Dynamic"). [U] ASYNCSYS_StartLoad loads 0 and 2 into the shared buffer and asks the owner for
+// main memory for 1; cBankInstance_SyncLoad loads 2 with sound-memory flags 0x100, 1 into the instance's main memory.
+enum eSoundMemLocation {
+    keSoundMemLocation_Dynamic = 0, keSoundMemLocation_Main = 1, keSoundMemLocation_Sound = 2
+};
+
+// How an asynchronous bank load ended (OnEndAsyncLoad's endState). [O] On Tour's enum eAsyncSysEndState, names and
+// values. [U] ASYNCSYS_Update reports 0 for a loaded bank and 2 (with handle -1) for an empty file.
+enum eAsyncSysEndState {
+    keAsyncSysEndState_Complete = 0, keAsyncSysEndState_Cancelled = 1, keAsyncSysEndState_Error = 2
+};
+
 // cCircBuffer (On Tour class, 0x10): a FIFO of ints.
 struct cCircBuffer {
     int ArraySize; // 0x0 [O]; [R] cAsyncSys ctor stores 6 into each queue's, cSSXAudio ctor 200 into mPlayHistory's

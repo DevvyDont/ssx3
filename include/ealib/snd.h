@@ -50,6 +50,9 @@ typedef struct SNDPACKET SNDPACKET;
 // from sound/bankmonitor.h so the C library unit can use it. [U] retail SNDplaysetdef stores On Tour's defaults in
 // every member: vol / drylevel / fxlevel0 / velocity 0x7F, bend 0x40, keynum 0x3C, pitchmult / timemult / tempomult
 // 0x1000, lowpasscutoff 0xFFFF, the rest 0.
+// kSNDMaxVol (name ours): the loudest volume, SNDPLAYOPTS::vol's default ([U] SNDplaysetdef 0x7F; the bank monitor
+// clamps every volume to 0..127, cBankMonitorInstance_Fade / _Update3D).
+enum { kSNDMaxVol = 127 };
 struct SNDPLAYOPTS {
     signed char vol;               // 0x00 [O]; [U] SNDplaysetdef 0x7F; BANKMONITOR/MUSIC code seeds mBaseVol[mInst] from it
     signed char bend;              // 0x01 [O]; [U] SNDplaysetdef 0x40; SNDPKTPLAY_start -> CHANPUB::pitchbend
@@ -675,6 +678,24 @@ CHECK_OFFSET(SNDREQUESTSTATUS, timetoend, 0x8);
 CHECK_OFFSET(SNDREQUESTSTATUS, timebuffered, 0xC);
 CHECK_SIZE(SNDREQUESTSTATUS, 0x10);
 
+// SNDREQUESTSTATUS::state (names ours). [R] SNDSTRM_requeststatus: 0 until the request's header has been parsed (and
+// for an invalid handle), 1 while it is queued behind the request at the head, 2 while it is the head request (the one
+// playing), 3 once it has left the queue (finished). [U] cStreamInstance_Playing tests 2, STREAM_IsRequestedDequeued 3.
+enum eSndRequestState {
+    kSNDREQUEST_NotParsed = 0, kSNDREQUEST_Queued = 1, kSNDREQUEST_Playing = 2, kSNDREQUEST_Done = 3
+};
+
+// A MIDI sequence's state, SNDseqstatus's result (names ours). [R] SNDseqstatus returns the sequence's state byte: 2
+// stopped, 3 playing (6 when a fade step is set), 5 paused (SNDseqpause moves 3 to 5); negative for an invalid handle.
+// [U] cBankMonitorInstance_DonePlaying counts 2 as done.
+enum eSndSeqStatus { kSNDSEQ_Stopped = 2, kSNDSEQ_Playing = 3, kSNDSEQ_Paused = 5, kSNDSEQ_Fading = 6 };
+
+// SNDbankadd's results (names ours). [R] SNDbankadd returns 7 when it uploaded sample data to sound memory, so only
+// the bank's header has to stay in main memory, 8 for a bank with nothing to upload (it plays from where it was
+// loaded), -6 when sound memory runs out. [U] cBankInstance_SyncLoad keeps just the header for 7 and the whole file
+// for 8; cAsyncSys_ASYNCSYS_Update does the same.
+enum eSndBankAddResult { kSNDBANKADD_Uploaded = 7, kSNDBANKADD_Resident = 8 };
+
 // BANKLIST, retail version (0x10 [R]: SNDSYSI_init allocates maxbanks * 16 bytes for sndgs.banklist; On Tour 0x8): one
 // slot of the loaded-bank table, indexed by the bank handle. [O] SNDGLOBALSTATE::banklist is BANKLIST* and BANKLIST is
 // {BANKVER5* phdr; signed char locked; char pad[3];}; retail keeps two more words between them ([U] SNDbankadd, view
@@ -718,8 +739,14 @@ CHECK_SIZE(SNDTIMERCLIENT, 0x10);
 // block and its size from a parsed patch's puserdata[] / userdatasize[]; SNDSTRMI_parseheader fills type 3, a stream
 // header's block and size and the request handle; the game's client cSSXAudio_HandleUserChunk (sound/ssxAudio) acts
 // on type 3. The words at 0xC and 0x14..0x1F are never written.
+// SNDUSERDATAMSG::type, what the block came with (names ours). [U] SNDBANKI_userdatacallback's callers pass 0
+// (func_003B6788, which SNDbankadd calls once it resolved a patch's samples), 1 (SNDBANKI_playpatch, a timbre started)
+// and 2 (SNDbankremove); SNDSTRMI_parseheader sends 3 for a stream header.
+enum eSndUserDataType {
+    kSNDUSERDATA_BankAdd = 0, kSNDUSERDATA_Play = 1, kSNDUSERDATA_BankRemove = 2, kSNDUSERDATA_StreamHeader = 3
+};
 struct SNDUSERDATAMSG {
-    int type;                      // 0x00 [U] 2 bank removed, 3 stream header
+    int type;                      // 0x00 [U] eSndUserDataType: 2 bank removed, 3 stream header
     void* pdata;                   // 0x04 [U] the user-data block
     int size;                      // 0x08 [U] its size
     int unk_0C;                    // 0x0C

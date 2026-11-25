@@ -3,6 +3,7 @@
 #include "main/gameviewman.h"
 #include "sound/bankmanager.h"
 #include "sound/asyncsys.h"
+#include "ealib/hlafile.h"
 #include "sound/ssxaudio.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -86,9 +87,10 @@ public:
  *
  * Field names are On Tour's cAsyncSys (same offsets): sets mBusy (+0x4) and tells the owner through virtual slot 2
  * (cBankManager_ASYNCSYS_OnBeginAsyncLoad; vtable at +0x1D4) with the front user handle (queue mUserHandle, +0x18C).
- * Then by the front memory type (queue mMemType, +0x1AC; On Tour eSoundMemLocation 0 dynamic, 1 main, 2 sound): 0 and 2
- * load the front file name (mFilename slot from queue mFilenameIndex, +0x19C) into the shared buffer mpBuffer (+0x1CC)
- * of mBufferSize (+0x1D0) bytes with ASYNCFILE_loadat; 1 asks the owner for main memory through slots 3
+ * Then by the front memory type (queue mMemType, +0x1AC, an eSoundMemLocation): keSoundMemLocation_Dynamic and
+ * keSoundMemLocation_Sound load the front file name (mFilename slot from queue mFilenameIndex, +0x19C) into the shared
+ * buffer mpBuffer (+0x1CC) of mBufferSize (+0x1D0) bytes with ASYNCFILE_loadat; keSoundMemLocation_Main asks the owner
+ * for main memory through slots 3
  * (cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, size -1 and the front flags of queue mMainMemFlags, +0x1BC) and 4
  * (cBankManager_ASYNCSYS_OnAsyncMainMemSize) and loads there with ASYNCFILE_loadat, or with ASYNCFILE_load and those flags
  * when no memory came back. The file handle goes to mHandle (+0x0). Any other memory type starts nothing but leaves
@@ -118,7 +120,7 @@ void cAsyncSys::ASYNCSYS_StartLoad()
         }
     }
     switch (kind) {
-    case 0: {
+    case keSoundMemLocation_Dynamic: {
         int idx;
         cCircBuffer* peekQueue = (&asyncSys->mFilenameIndex);
         if ((*(&asyncSys->mFilenameIndex)).Head == (*(&asyncSys->mFilenameIndex)).Tail) {
@@ -129,7 +131,7 @@ void cAsyncSys::ASYNCSYS_StartLoad()
         asyncSys->mHandle = ASYNCFILE_loadat(asyncSys->mFilename[idx], (int)((void*)asyncSys->mpBuffer), asyncSys->mBufferSize);
         break;
     }
-    case 2: {
+    case keSoundMemLocation_Sound: {
         int idx;
         cCircBuffer* peekQueue = (&asyncSys->mFilenameIndex);
         if ((*(&asyncSys->mFilenameIndex)).Head == (*(&asyncSys->mFilenameIndex)).Tail) {
@@ -140,7 +142,7 @@ void cAsyncSys::ASYNCSYS_StartLoad()
         asyncSys->mHandle = ASYNCFILE_loadat(asyncSys->mFilename[idx], (int)((void*)asyncSys->mpBuffer), asyncSys->mBufferSize);
         break;
     }
-    case 1: {
+    case keSoundMemLocation_Main: {
         int idx;
         {
             cCircBuffer* peekQueue = (&asyncSys->mFilenameIndex);
@@ -516,17 +518,18 @@ struct sAsync_AAF8 {
  * Polls the sound-bank load in progress and, once it has finished, registers the bank, hands it to the owner and starts
  * the next load.
  *
- * Only while busy (+0x4). By the front memory type (+0x1AC): for 0 and 2 (loaded into the shared buffer) and for 1
- * (main memory) it checks ASYNCFILE_getstatus on the file handle (+0x0): 0 is still loading; 1 is done:
+ * Only while busy (+0x4). By the front memory type (+0x1AC, an eSoundMemLocation): for keSoundMemLocation_Dynamic and
+ * keSoundMemLocation_Sound (loaded into the shared buffer) and for keSoundMemLocation_Main it checks
+ * ASYNCFILE_getstatus on the file handle (+0x0): kASYNCFILE_Pending is still loading; kASYNCFILE_Done is done:
  * ASYNCFILE_release gives the data and size. Shared buffer: SNDbankadd adds the bank and writes its handle to +0x0;
- * unless it returns 7 the bank is removed again (SNDbankremove), the owner provides main memory of the full size
- * (virtual slot 3, cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, with the front user handle and flags), the data is copied
- * there (MEM_copy) and added from there; on 7 only the header is kept: SNDbankheadersize gives its size, the owner provides
- * that much and SNDbankheadercopy copies it. Main memory: the data is added where it is. The owner then gets virtual slot 5
- * (cBankManager_ASYNCSYS_OnEndAsyncLoad) with the user handle, the bank handle, end state 0 (complete), the file name,
- * the memory and the size; an empty file reports handle -1 and end state 2 (error). Then mBusy is cleared, all four
- * queues are popped and cAsyncSys_ASYNCSYS_StartLoad starts the next load. Any status other than 0 or 1 cancels through
- * cAsyncSys_DoCancel(this, 0).
+ * unless it returns kSNDBANKADD_Uploaded the bank is removed again (SNDbankremove), the owner provides main memory of
+ * the full size (virtual slot 3, cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, with the front user handle and flags), the
+ * data is copied there (MEM_copy) and added from there; on kSNDBANKADD_Uploaded only the header is kept:
+ * SNDbankheadersize gives its size, the owner provides that much and SNDbankheadercopy copies it. Main memory: the data
+ * is added where it is. The owner then gets virtual slot 5 (cBankManager_ASYNCSYS_OnEndAsyncLoad) with the user handle,
+ * the bank handle, end state 0 (complete), the file name, the memory and the size; an empty file reports handle -1 and
+ * end state 2 (error). Then mBusy is cleared, all four queues are popped and cAsyncSys_ASYNCSYS_StartLoad starts the
+ * next load. Any other status (kASYNCFILE_Invalid) cancels through cAsyncSys_DoCancel(this, 0).
  *
  * cController_Update (the stream system's update) calls it.
  */
@@ -546,17 +549,17 @@ void cAsyncSys::ASYNCSYS_Update()
         }
     }
     switch (kind) {
-    case 0:
-    case 2:
+    case keSoundMemLocation_Dynamic:
+    case keSoundMemLocation_Sound:
         switch (ASYNCFILE_getstatus(asyncSys->result)) {
-        case 0:
+        case kASYNCFILE_Pending:
             break;
-        case 1: {
+        case kASYNCFILE_Done: {
             int buf = 0;
             int size = 0;
             ASYNCFILE_release(asyncSys->result, &buf, &size);
             if (size > 0) {
-                if (SNDbankadd(asyncSys, buf) != 7) {
+                if (SNDbankadd(asyncSys, buf) != kSNDBANKADD_Uploaded) {
                     SNDbankremove(asyncSys->result);
                     sRing_AAF8* userHandleQueue = &asyncSys->q18C;
                     sVE_AAF8* vt = asyncSys->vt;
@@ -690,17 +693,17 @@ void cAsyncSys::ASYNCSYS_Update()
             ((cAsyncSys*)asyncSys)->ASYNCSYS_StartLoad();
             break;
         }
-        case -1:
+        case kASYNCFILE_Invalid:
         default:
             cAsyncSys_DoCancel(asyncSys, 0);
             break;
         }
         break;
-    case 1:
+    case keSoundMemLocation_Main:
         switch (ASYNCFILE_getstatus(asyncSys->result)) {
-        case 0:
+        case kASYNCFILE_Pending:
             break;
-        case 1: {
+        case kASYNCFILE_Done: {
             int buf = 0;
             int size = 0;
             ASYNCFILE_release(asyncSys->result, &buf, &size);
@@ -772,7 +775,7 @@ void cAsyncSys::ASYNCSYS_Update()
             ((cAsyncSys*)asyncSys)->ASYNCSYS_StartLoad();
             break;
         }
-        case -1:
+        case kASYNCFILE_Invalid:
         default:
             cAsyncSys_DoCancel(asyncSys, 0);
             break;
@@ -870,9 +873,9 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_isInGame);
  * One of the audio code's static accessors (On Tour cAudioInterface): tests SSXApp->Game (+0x84). The sound code
  * (cSSXAudio_GetClosestCamera1, cSSXAudio_GetSpeechVolumeIdentifier, func_0028BF78, bmRestartC2D0, ...) uses it to skip in-game work in the front end.
  *
- * @return 1 if SSXApp->Game is set, else 0
+ * @return true if SSXApp->Game is set
  */
-extern "C" int cAudioInterface_isInGame()
+extern "C" bool cAudioInterface_isInGame()
 {
     return (void*)SSXApp->Game != 0;
 }
@@ -1115,18 +1118,19 @@ public:
  * Loads a sound-bank file synchronously into this bank instance and registers it with the sound library.
  *
  * First unloads the instance (cBankInstance_Unload) and the instances sharing it (cBankInstance_SharedUnload). By +0x8 (On Tour
- * mAllocLocation: 0 dynamic, 1 main, 2 sound memory): 0 loads the whole file with FILE_loadsizez using @p align as its
- * flags, 2 the same with flags 0x100, 1 loads into the instance's main memory (+0x10 mpMainMemData, +0x14
- * mMainMemDataSize bytes) with FILE_loadatz; a missing file returns at once. For sound memory, virtual slot 6 of the
+ * mAllocLocation, an eSoundMemLocation): keSoundMemLocation_Dynamic loads the whole file with FILE_loadsizez using
+ * @p align as its flags, keSoundMemLocation_Sound the same with flags 0x100, keSoundMemLocation_Main loads into the
+ * instance's main memory (+0x10 mpMainMemData, +0x14 mMainMemDataSize bytes) with FILE_loadatz; a missing file returns
+ * at once. For sound memory, virtual slot 6 of the
  * sound system reached through gpBankManager + 0x1D8 gets +0xC (mSoundMemHandle) first.
  *
- * SNDbankadd adds the bank and writes its handle to +0x4 (mBankHandle). Result 7 keeps only the header
- * (SNDbankheadersize sizes it, SNDbankheadercopy copies it): into mpMainMemData for sound memory, otherwise into a new
- * MEM_alloc block tagged with the file name, which becomes mpMainMemData / mMainMemDataSize while the loaded file is
- * freed (MEM_free). Result 8 keeps the loaded data (recorded as mpMainMemData and its size for a dynamic bank). Both
- * set +0x0 (mBankStatus) to 1; any other result frees the loaded data (unless it is the instance's main memory) and
- * sets it to 0. Finally calls slot 7 of the same sound-system object and copies @p file into +0x20 (mBankFilename).
- * cBankManager_BANK_SyncLoad calls it.
+ * SNDbankadd adds the bank and writes its handle to +0x4 (mBankHandle). Result kSNDBANKADD_Uploaded (7) keeps only the
+ * header (SNDbankheadersize sizes it, SNDbankheadercopy copies it): into mpMainMemData for sound memory, otherwise into
+ * a new MEM_alloc block tagged with the file name, which becomes mpMainMemData / mMainMemDataSize while the loaded file
+ * is freed (MEM_free). kSNDBANKADD_Resident (8) keeps the loaded data (recorded as mpMainMemData and its size for a
+ * dynamic bank). Both set +0x0 (mBankStatus) to USED; any other result frees the loaded data (unless it is the
+ * instance's main memory) and sets it to EMPTY. Finally calls slot 7 of the same sound-system object and copies @p file
+ * into +0x20 (mBankFilename). cBankManager_BANK_SyncLoad calls it.
  *
  * @param file  the bank file name
  * @param align  allocation flags for FILE_loadsizez when the bank is dynamic (On Tour mainMemFlag); despite the name,
@@ -1140,19 +1144,19 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
     self->SharedUnload();
     int size = 0;
     switch (self->mAllocLocation) {
-    case 0:
+    case keSoundMemLocation_Dynamic:
         data = FILE_loadsizez(file, &size, align);
         if (data == 0) {
             return;
         }
         break;
-    case 2:
+    case keSoundMemLocation_Sound:
         data = FILE_loadsizez(file, &size, 0x100);
         if (data == 0) {
             return;
         }
         break;
-    case 1:
+    case keSoundMemLocation_Main:
         if (FILE_loadatz(file, self->mpMainMemData, self->mMainMemDataSize) == 0) {
             return;
         }
@@ -1160,13 +1164,13 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
         data = (void*)self->mpMainMemData;
         break;
     }
-    if (self->mAllocLocation == 2) {
+    if (self->mAllocLocation == keSoundMemLocation_Sound) {
         (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(self->mSoundMemHandle);
     }
     switch (SNDbankadd((char*)&self->mBankHandle, (int)data)) {
-    case 7: {
+    case kSNDBANKADD_Uploaded: {
         int headerSize = SNDbankheadersize(self->mBankHandle);
-        if (self->mAllocLocation == 2) {
+        if (self->mAllocLocation == keSoundMemLocation_Sound) {
             SNDbankheadercopy(self->mpMainMemData, self->mBankHandle);
         } else {
             void* headerMem = MEM_alloc((void*)file, headerSize, 0);
@@ -1175,21 +1179,21 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
             MEM_free(data);
             self->mMainMemDataSize = headerSize;
         }
-        *(int*)self = 1;
+        self->mBankStatus = USED;
         break;
     }
-    case 8:
-        if (self->mAllocLocation == 0) {
+    case kSNDBANKADD_Resident:
+        if (self->mAllocLocation == keSoundMemLocation_Dynamic) {
             self->mpMainMemData = (char*)data;
             self->mMainMemDataSize = size;
         }
-        *(int*)self = 1;
+        self->mBankStatus = USED;
         break;
     default:
-        if (self->mAllocLocation != 1) {
+        if (self->mAllocLocation != keSoundMemLocation_Main) {
             MEM_free(data);
         }
-        *(int*)self = 0;
+        self->mBankStatus = EMPTY;
         break;
     }
     (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v7();
@@ -1206,17 +1210,17 @@ extern "C" void* MEM_free(void* self);
 /**
  * Unloads this sound-bank instance when it holds a bank.
  *
- * When +0x0 (On Tour mBankStatus) is 1: sets it to 0, removes the bank from the sound library (SNDbankremove on +0x4,
- * mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation 0), frees +0x10 (mpMainMemData) with
- * MEM_free and clears it and +0x14 (mMainMemDataSize).
+ * When +0x0 (On Tour mBankStatus) is USED: sets it to EMPTY, removes the bank from the sound library (SNDbankremove on
+ * +0x4, mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation keSoundMemLocation_Dynamic),
+ * frees +0x10 (mpMainMemData) with MEM_free and clears it and +0x14 (mMainMemDataSize).
  */
 extern "C" void cBankInstance_Unload(cBankInstance* self)
 {
-    if (*(int*)self == 1) {
-        *(int*)self = 0;
+    if (self->mBankStatus == USED) {
+        self->mBankStatus = EMPTY;
         SNDbankremove(self->mBankHandle);
         self->mBankHandle = -1;
-        if (self->mAllocLocation == 0) {
+        if (self->mAllocLocation == keSoundMemLocation_Dynamic) {
             MEM_free(self->mpMainMemData);
             self->mpMainMemData = 0;
             self->mMainMemDataSize = 0;

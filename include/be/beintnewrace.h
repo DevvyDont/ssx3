@@ -158,6 +158,24 @@ CHECK_OFFSET(tBEPathDB, cModes, 0x00);
 CHECK_OFFSET(tBEPathDB, strPathName, 0x07);
 CHECK_SIZE(tBEPathDB, 0x43);
 
+// A game path (cBERaceDB::cGamePath). [O] On Tour's enum eBEGamePath, names and values; [R]
+// cBENewRaceInterface_setGamePath stores 0, 1 or 2, and the main menu's online item sets 2.
+enum eBEGamePath {
+    kGAMEPATH_NONE = -1, kGAMEPATH_WORLDCIRCUIT = 0, kGAMEPATH_SINGLEEVENT = 1, kGAMEPATH_MULTIPLAYER = 2,
+    kGAMEPATH_NUM = 3
+};
+
+// A game event (cBERaceDB::cGameEvent, the index into cBELibrary_gameEventDB). Names [O] from On Tour's enum
+// eBEGameEvent, values [R] from retail's gameEventDB order ("Race", "Slope Style", "Half Pipe", "Big Air", "Rival Time
+// Chall.", "Rival Points Chall.", "Time Chall. Peak 1" .. 3, "Points Chall. Peak 1" .. 3, "Free Ride", "Mission"):
+// retail has no kGAMEEVENT_TIMETRIAL (On Tour's 4), so the events after it are one lower.
+enum eBEGameEvent {
+    kGAMEEVENT_RACE = 0, kGAMEEVENT_SLOPESTYLE = 1, kGAMEEVENT_SUPERPIPE = 2, kGAMEEVENT_BIGAIR = 3,
+    kGAMEEVENT_RIVALTIME = 4, kGAMEEVENT_RIVALPOINTS = 5, kGAMEEVENT_TIME_PEAK1 = 6, kGAMEEVENT_TIME_PEAK2 = 7,
+    kGAMEEVENT_TIME_PEAK3 = 8, kGAMEEVENT_POINTS_PEAK1 = 9, kGAMEEVENT_POINTS_PEAK2 = 10, kGAMEEVENT_POINTS_PEAK3 = 11,
+    kGAMEEVENT_FREERIDE = 12, kGAMEEVENT_MISSION = 13, kGAMEEVENT_NUM = 14
+};
+
 // tBEEventDB: one game event. [O] On Tour struct tBEEventDB {int iValidMode; char strEventName[80];} (0x54) and the
 // static cBELibrary::gameEventDB; [R] retail's cBELibrary_gameEventDB (0x0043E978) has 0x54-byte records;
 // [U] cBENewRaceInterface_setGameEvent copies record [event] and reads iValidMode.
@@ -170,6 +188,15 @@ CHECK_OFFSET(tBEEventDB, iValidMode, 0x00);
 CHECK_OFFSET(tBEEventDB, strEventName, 0x04);
 CHECK_SIZE(tBEEventDB, 0x54);
 
+// A game mode (cBERaceDB::cGameMode, the index into cBELibrary_gameModeDB). Names [O] from On Tour's enum eBEGameMode,
+// values [R] from retail's gameModeDB order ("Race", "Slope Style", "Big Air", "Half Pipe", "Free Ride", "Time
+// Challenge", "Points Challenge"): retail has no kGAMEMODE_TIMETRIAL (On Tour's 3), so the modes after it are one
+// lower.
+enum eBEGameMode {
+    kGAMEMODE_RACE = 0, kGAMEMODE_SLOPESTYLE = 1, kGAMEMODE_BIGAIR = 2, kGAMEMODE_HALFPIPE = 3, kGAMEMODE_FREERIDE = 4,
+    kGAMEMODE_TIMECHALLENGE = 5, kGAMEMODE_PNTSCHALLENGE = 6, kGAMEMODE_NUM = 7
+};
+
 // tBEModeDB: one game mode's record (name ours): its display name. [R] retail's cBELibrary_gameModeDB (0x0043E7D0)
 // holds seven 0x3C-byte records, one per mode ("Race", "Slope Style", "Big Air", "Half Pipe", "Free Ride", "Time
 // Challenge", "Points Challenge"; seven, as tBEPathDB's mode flags); [U] cBENewRaceInterface_getModeName /
@@ -180,6 +207,18 @@ struct tBEModeDB {
 
 CHECK_OFFSET(tBEModeDB, strModeName, 0x00);
 CHECK_SIZE(tBEModeDB, 0x3C);
+
+// A race location (tBELocationDB::locationID, cBERaceDB::iLocationIdx, cSSXAudio::mTransportTrack). [O] On Tour's
+// enum eBELocationID, names and values; [R] retail's cBELibrary_locationDB holds the same 23 records in this order
+// (file names "ARA1", "BRA2", "CRA3", "DRA4", "ERA5", "ASS1" ... "EBC3", the stations "A" .. "E", "dbg"); [P] the
+// preview's cSSXAudio::SetTransportTrack(eBELocationID), whose ctors store 23 (kMAX_LOCATIONS) for no location.
+enum eBELocationID {
+    kLOCATION_ARA1 = 0, kLOCATION_BRA2 = 1, kLOCATION_CRA3 = 2, kLOCATION_DRA4 = 3, kLOCATION_ERA5 = 4,
+    kLOCATION_ASS1 = 5, kLOCATION_DSS2 = 6, kLOCATION_ESS3 = 7, kLOCATION_ABA1 = 8, kLOCATION_CBA2 = 9,
+    kLOCATION_EBA3 = 10, kLOCATION_BHP1 = 11, kLOCATION_CHP2 = 12, kLOCATION_EHP3 = 13, kLOCATION_ABC1 = 14,
+    kLOCATION_DBC2 = 15, kLOCATION_EBC3 = 16, kLOCATION_HUB_A = 17, kLOCATION_HUB_B = 18, kLOCATION_HUB_C = 19,
+    kLOCATION_HUB_D = 20, kLOCATION_HUB_E = 21, kLOCATION_DEBUG = 22, kMAX_LOCATIONS = 23
+};
 
 // tBELocationDB: one race location (17 tracks, 5 stations and the debug track). [O] On Tour struct tBELocationDB
 // {eBELocationID locationID; char locationName[32]; char shortName[16]; char fileName[16]; char bigfileName[32];

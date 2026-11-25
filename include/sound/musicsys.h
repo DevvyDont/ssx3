@@ -29,6 +29,24 @@ struct cStreamSys;
 struct cSongConfiguration;
 struct cSongInstance;  // sound/songinstance.h
 
+// The tag the audio code puts on the song it starts (cSongInstance::unk_58; func_002B49C0 sets it, func_002B49E0
+// returns it). Names ours, after the song each tag marks: [U] func_0028CF98 tags the peak themes "Peak1" .. "Peak3" 1-3
+// and the peak ambiences "Peak1Amb" .. "Peak3Amb" 101-103, func_0028CDF8 the podium tune "chartune" 201, func_0028FC58
+// and cSSXAudio_FrontEndLoad "charsel" 301, func_0028CD48 and func_0028E8C0 the peak transition "pktrans" 401; [R] the
+// cSongInstance ctor stores -1, and func_002B49E0 returns -1 with no song playing.
+enum eSongTag {
+    kSONGTAG_None = -1,
+    kSONGTAG_Peak1 = 1, kSONGTAG_Peak2 = 2, kSONGTAG_Peak3 = 3,
+    kSONGTAG_Peak1Amb = 101, kSONGTAG_Peak2Amb = 102, kSONGTAG_Peak3Amb = 103,
+    kSONGTAG_CharTune = 201,
+    kSONGTAG_CharSel = 301,
+    kSONGTAG_PkTrans = 401
+};
+
+// A song without a SEDVALUE (cSongConfiguration::mSedValue; func_002B4908 returns the current song's). Name ours.
+// [R] the cSongConfiguration ctor stores -1 and only a music.inf SEDVALUE key replaces it.
+enum { kNoSedValue = -1 };
+
 struct cMusicSys {
     cStreamSys* mpVStreamSys;                 // 0x0000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0x5F20 in a complete object; cSSXAudio + 0x7768); [U] every method reaches cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
     cSongConfiguration* mSongConfig[64];      // 0x0004 [R] one cMemMan_alloc(0xAC, "cSongConfiguration") + ctor cSongConfiguration_cSongConfiguration per song (PATHDATA/MUSDATA/LOOPDATA/BeatsPerMeasure.. go into it); dtor deletes each through its vtable (+0xA8); [U] func_002B3838, func_002B4908__FPv, func_002B4978

@@ -77,6 +77,8 @@ struct cDelayOpts {
 struct cMonitorInstance {
     int mEnabled;           // 0x00 [O]; [U] Enable stores 1, Disable 0
     int mCountReset;        // 0x04 [O]; [R] ctor -1; [U] CountReset stores it and mCountdown; IsFree tests == -1
+    // mCountReset of an unused instance (name ours). [R] ctor -1; [U] Reset passes it to CountReset, IsFree tests it.
+    enum { kFree = -1 };
     int mCountdown;         // 0x08 [O]; [U] CountReset
     tSndCallback mCallback; // 0x0C [O] (On Tour: a member-function pointer); [U] Create copies 8 bytes (sdl/sdr);
                             //       cMonitor_MONITOR_DestroyAll1 compares its index (0xE) and function (0x10)
@@ -90,7 +92,7 @@ struct cMonitorInstance {
     // Methods bound to their retail symbols by asm labels.
     void Create(int Freq, long key, int Ptr, int Data1, int Data2, int Data3, int Data4)
         __asm__("cMonitorInstance_Create");
-    int IsFree() __asm__("cMonitorInstance_IsFree");
+    bool IsFree() __asm__("cMonitorInstance_IsFree");
     void Reset() __asm__("cMonitorInstance_Reset");
     void CountReset(int periodMs) __asm__("cMonitorInstance_CountReset__FPvi");
     void Disable() __asm__("cMonitorInstance_Disable__FPv");
@@ -119,8 +121,14 @@ union tRestartInfo {                // On Tour __C1 (0x48)
     tMIDIRestartInfo midi;          // 0x0 [O]
 };
 
-// One of cBankMonitor's 64 monitored sounds (On Tour class cBankMonitorInstance, 0xC0). mMonitorType is On Tour's
-// eMonitorType (MONITOR_NONE 0 = free, MONITOR_BANK 1, MONITOR_MIDI 2, MONITOR_STREAM 3), kept as an int.
+// cBankMonitorInstance::mMonitorType: what the monitored sound is. [O] On Tour's enum eMonitorType, names and values
+// (the preview's asserts "mMonitorType == MONITOR_BANK" / "MONITOR_STREAM" / "MONITOR_MIDI"). [U] DonePlaying,
+// PosUpdate, VolUpdate, StopSound ... call SND* for 1 (a bank sample), SNDseq* / SNDMIDI_* for 2 (a MIDI sequence) and
+// cStreamInstance_* for 3 (a stream); 0 is a free instance (Reset stores it, IsFree tests it).
+enum eMonitorType { MONITOR_NONE = 0, MONITOR_BANK = 1, MONITOR_MIDI = 2, MONITOR_STREAM = 3 };
+
+// One of cBankMonitor's 64 monitored sounds (On Tour class cBankMonitorInstance, 0xC0). mMonitorType is an
+// eMonitorType kept as an int.
 struct cController;
 
 struct cBankMonitorInstance {
@@ -180,7 +188,7 @@ struct cBankMonitorInstance {
     void Update(cController* controller, float time) __asm__("cBankMonitorInstance_Update");
     int DonePlaying() __asm__("cBankMonitorInstance_DonePlaying");
     void Reset() __asm__("cBankMonitorInstance_Reset");
-    int IsFree() __asm__("cBankMonitorInstance_IsFree");
+    bool IsFree() __asm__("cBankMonitorInstance_IsFree");
     float DistSq(float* posA, float* posB) __asm__("cBankMonitorInstance_DistSq");
     void SetBank(int bank, int patch) __asm__("cBankMonitorInstance_SetBank__FPvii");
     void SetStream(int streamInst, const char* name, int fileOffset) __asm__("cBankMonitorInstance_SetStream");
@@ -189,8 +197,12 @@ struct cBankMonitorInstance {
     void PitchUpdate(int vol) __asm__("cBankMonitorInstance_PitchUpdate");
     void VolUpdate(int vol) __asm__("cBankMonitorInstance_VolUpdate");
     void StopSound() __asm__("cBankMonitorInstance_StopSound");
-    int CheckActive(float radius) __asm__("cBankMonitorInstance_CheckActive");
+    bool CheckActive(float radius) __asm__("cBankMonitorInstance_CheckActive");
     void Fade(int n, int resetMonitor, float duration) __asm__("cBankMonitorInstance_Fade");
+
+    // Fade's level that fades the sound out and stops it (name ours). [U] Fade sets mFading for -1 (a stream is
+    // purged) and clamps any other level to 0..127; cBankMonitor's BANKMONITOR_FadeOut / StopHandle pass it.
+    enum { kFadeStop = -1 };
 };
 
 CHECK_OFFSET(tBankRestartInfo, mBank, 0x0);
