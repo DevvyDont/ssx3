@@ -71,14 +71,14 @@ struct cRiderAnim {
     void updateRule(void* x, int* anim, float dt) __asm__("cRiderAnim_updateRule");
     void expireRule(cAnimSequencer* ev, int* data) __asm__("cRiderAnim_expireRule");
     void checkForSoundEvents(cAnimSequence* sequence) __asm__("cRiderAnim_checkForSoundEvents");
-    int updatePosNegSlider(void* x, cAnimSequence* anim, int posAnim, int negAnim, float dt, float weight)
+    bool updatePosNegSlider(void* x, cAnimSequence* anim, int posAnim, int negAnim, float dt, float weight)
         __asm__("cRiderAnim_updatePosNegSlider");
-    int update3Cycle(void* x, cAnimSequence* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
+    bool update3Cycle(void* x, cAnimSequence* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
         __asm__("cRiderAnim_update3Cycle");
-    int update5Cycle(void* x, cAnimSequence* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim,
-                     int posEndAnim, float dt, float weight)
+    bool update5Cycle(void* x, cAnimSequence* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim,
+                      int posEndAnim, float dt, float weight)
         __asm__("cRiderAnim_update5Cycle");
-    int updateIntoCycle(void* x, cAnimSequence* anim, int intoAnim, float dt, int cycleAnim)
+    bool updateIntoCycle(void* x, cAnimSequence* anim, int intoAnim, float dt, int cycleAnim)
         __asm__("cRiderAnim_updateIntoCycle");
     int onUpdateASYNC_CRUISE3(void *sequencer, int *sequence, float deltaTime)
         __asm__("cRiderAnim_onUpdateASYNC_CRUISE3");
@@ -87,17 +87,17 @@ struct cRiderAnim {
     void onUpdateASYNC_BRAKE(void *sequencer, char *sequence, float dt) __asm__("cRiderAnim_onUpdateASYNC_BRAKE");
     int onUpdateASYNC_UBERGRIND(void *sequencer, int *sequence, float deltaTime)
         __asm__("cRiderAnim_onUpdateASYNC_UBERGRIND");
-    int onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_PREWIND");
-    int onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_ADJ");
-    int onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_GATEROCK");
+    bool onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_PREWIND");
+    bool onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_ADJ");
+    bool onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_GATEROCK");
     int onUpdateASYNC_HANDPLANT(void *sequencer, int *sequence, float deltaTime)
         __asm__("cRiderAnim_onUpdateASYNC_HANDPLANT");
     int onUpdateASYNC_BP_BAL(void* x, int* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_BAL");
-    int onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_INTO");
-    int onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_PIVOT");
-    int onUpdateFWD(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateFWD");
-    int onUpdateHOLD_LAST(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateHOLD_LAST");
-    int onUpdateCYCLE(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateCYCLE");
+    bool onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_INTO");
+    bool onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_PIVOT");
+    bool onUpdateFWD(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateFWD");
+    bool onUpdateHOLD_LAST(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateHOLD_LAST");
+    bool onUpdateCYCLE(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateCYCLE");
     int onExpireINTO_SPIN_CYC(void* sequencer, int* sequence) __asm__("cRiderAnim_onExpireINTO_SPIN_CYC");
     int onExpireBLENDTO_AIR(int sequencer, int sequence) __asm__("cRiderAnim_onExpireBLENDTO_AIR");
     int onExpireINTO_PRESS(int sequencer, int sequence) __asm__("cRiderAnim_onExpireINTO_PRESS");

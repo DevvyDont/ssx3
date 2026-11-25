@@ -108,6 +108,17 @@ struct cRiderSphereTree;      // intersect/riderspheretree.h
 struct tPathIntersectInfo;    // path/basepath.h
 struct cOverlapList;          // intersect/overlaplist.h
 
+// A path event's type (tPathEventNode::Type). [O] On Tour's enum tPathEventType, names and values. [U]
+// cRider_flagEventPathEvent finishes the race on 1 and marks a replay chapter on 11 (cReplay_eventChapter); the
+// computer's look-ahead finds 15, 16, 17 and 19 in cComputer_checkForRail, checkForJumpEvent, checkForSpeedZone and
+// checkForBoardPress.
+enum tPathEventType {
+    PE_Null = 0, PE_FinishLine = 1, PE_Lap = 2, PE_Start = 3, PE_Shortcut = 4, PE_ShortcutOut = 5, PE_NearlyDone = 6,
+    PE_OutOfGate = 7, PE_Tunnel = 8, PE_HalfWayPoint = 9, PE_End = 10, PE_Chapter = 11, PE_ResetZoneStart = 12,
+    PE_DisableReset = 13, PE_ResetZoneEnd = 14, PE_Railslide = 15, PE_Jump = 16, PE_SpeedZone = 17, PE_UserFork = 18,
+    PE_BoardPress = 19, PE_Fork = 20, PE_Num = 21
+};
+
 // One path event in range (On Tour struct tPathEventNode, size 0x10; path/basepath.h only forward-declares it). cRider
 // keeps 12 of them at 0x4DC (PathEventsCur). Layout [O]; [U] cPath_getEventsInRange copies these 16-byte entries
 // out of cPath::Events, and cRider_updateTrackPath copies count << 4 bytes.
@@ -297,6 +308,49 @@ CHECK_OFFSET(tRiderLoadList, MdlLoadNum, 0x2940);
 CHECK_OFFSET(tRiderLoadList, TexLoadNum, 0x2944);
 CHECK_SIZE(tRiderLoadList, 0x2948);
 
+// The enums of cRiderState's members, from On Tour's cRiderState (the member's type there).
+// mGlueStrengthLevel: [O] enum eGlueStrengthLevel, names and values; [U] cComputer_setupWarp catches up for 2 / 3 and
+// slows down for 1 / 3.
+enum eGlueStrengthLevel {
+    AI_GLUE_NONE = 0, AI_GLUE_SLOWDOWN = 1, AI_GLUE_SPEEDUP = 2, AI_GLUE_ALL = 3, AI_GLUE_MaxNum = 4
+};
+// mUberLevel: [O] On Tour's cRiderState::UberState, enum eUberState, names and values. [U] each landed uber trick
+// raises it by one up to 10 (cUberGrindControl_update), where mUberTimer starts; cRider drops it back to 5 when the
+// timer runs out; super-uber tricks start at 6 (ridermetrix); the cheat sets 11 (cCheatFX_update).
+enum eUberState {
+    eUS_None = 0, eUS_UberCapable = 1, eUS_Uber = 2, eUS_UberTwo = 3, eUS_UberThree = 4, eUS_SuperUberCapable = 5,
+    eUS_SuperUber = 6, eUS_SuperUberTwo = 7, eUS_SuperUberThree = 8, eUS_SuperUberFour = 9, eUS_SuperUberMax = 10,
+    eUS_UltraUber = 11
+};
+// mBoostMode: [O] enum eBoostMode, names and values. [U] the meter does not burn in 0 (cRider_setupBoostWarp) and gains
+// nothing in 3 (cRider_flagEventBoostPowerUp).
+enum eBoostMode { kBOOST_Unlimited = 0, kBOOST_Normal = 1, kBOOST_ExtraLeaky = 2, kBOOST_Off = 3 };
+// PissedOffType: [O] enum eBEAggLevel (On Tour's cBEAggressionInterface::getAggression returns it), names and values.
+// [U] cAI_UpdateAggression starts a chase at 4; cComputer_checkForPunching punches from 3.
+enum eBEAggLevel { kAGG_NONE = 0, kAGG_MILD = 1, kAGG_MOD = 2, kAGG_HARD = 3, kAGG_CHASE = 4, kAGG_NUMLEVELS = 5 };
+// RailslideMode: [O] enum eRailslideMode, names and values. [U] changeFakieBoardPress swaps 1 and 2 (riding, fakie);
+// 3 and 4 turn the rider 90 degrees one way or the other (cRider_flagEventWipeout).
+enum eRailslideMode { kRSM_None = 0, kRSM_Riding = 1, kRSM_Fakie = 2, kRSM_FS = 3, kRSM_BS = 4, kRSM_Num = 5 };
+// HandplantMode: [O] enum eHandplantMode, names and values. [U] the first index of the handplant anim table
+// (kHandplantAnim[7][2], riderhandler.h).
+enum eHandplantMode {
+    kHM_None = 0, kHM_Enter = 1, kHM_Balance = 2, kHM_TransitionReflect = 3, kHM_ExitBalanceThrough = 4,
+    kHM_ExitBalanceReflect = 5, kHM_ExitBalanceCenter = 6, kHM_Num = 7
+};
+// PressMode: [O] enum ePressMode, names and values (On Tour adds kPM_SkiPivot 3). [U] cRider_checkRailBoardCollisions
+// lands with kAID_NoseLand for 1 and kAID_TailLand for 2.
+enum ePressMode { kPM_None = 0, kPM_Nose = 1, kPM_Tail = 2 };
+// mSurfaceType: [O] On Tour's cRiderState::SurfaceType, enum eSurfaceType, names and values. [P] eST_Num 19 rows in
+// cSurfPropCache (util/surfprop.h); [U] ice (4) plays kAID_CruiseIce (cCruiseControl_update); a wipeout on rock (18)
+// ends in a reset (cWipeoutControl_updateGround); the air predictor's give-up landing is 13.
+enum eSurfaceType {
+    eST_Undefined = -1, eST_Snow_Packed = 0, eST_Default = 0, eST_Snow_Loose = 1, eST_Snow_Powder = 2,
+    eST_Snow_DeepPowder = 3, eST_Ice_Surface = 4, eST_Water_Surface = 5, eST_Slush_Surface = 6, eST_Rock_Surface = 7,
+    eST_Gravel_Surface = 8, eST_Wood_Surface = 9, eST_Metal_Surface = 10, eST_Glass_Surface = 11,
+    eST_Sand_Surface = 12, eST_Impassable = 13, eST_BlackIce = 14, eST_Grass = 15, eST_Pavement = 16,
+    eST_Concrete = 17, eST_Rock_WipeOut = 18, eST_Num = 19
+};
+
 // cRiderState: the first 0x6C0 bytes of a cRider, its race and motion state. [O] On Tour's cRider : cRiderState
 // (size 0x12D0 there, at +0x0), starting with tOpponentInfo Opponents[4] (here sRiderPair mRelations[6]).
 struct cRiderState {
@@ -419,8 +473,11 @@ struct cRiderState {
     /* 0x5AC */ int RidingFlexRail; // cleared on reset (cRider_initAlways)
     /* 0x5B0 */ int DangerLevel;
     /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (cRider_updateSplit12)
+    // The end marker of mVisitedIds (name ours): [O] the ids are instance tResourceIDs (tInstanceRecord::m_RID), and
+    // tResourceID::Invalid() is 0xFFFFFFFF; [U] the ctor fills mVisitedIds with it, cRider_isIntersecting stops at it.
+    enum { kInvalidRID = 0xFFFFFFFF };
     /* 0x5B8 */ unsigned int mVisitedIds[64]; // [X] [U] the instance ids of the last static-object hits, ended by
-                                    //   0xFFFFFFFF: the ctor (cRiderState_cRiderState) fills all 64,
+                                    //   kInvalidRID (0xFFFFFFFF): the ctor (cRiderState_cRiderState) fills all 64,
                                     //   cRider_objectIntersect writes them (its end marker lands in unk_6B8 when
                                     //   all 64 hits differ), cRider_isIntersecting searches them
     /* 0x6B8 */ char unk_6B8[0x8];
@@ -435,6 +492,10 @@ struct t4Vector;
 union tControlCmd;
 
 struct cWorldIntersectType;
+
+// mWipeoutRecoveryMode: [O] enum eWipeoutRecoveryMode, names and values. [U] cWipeoutControl_update fills the recovery
+// meter at rate 8 for 0, 17 for 1 and 34 for 2; the ctor stores 1.
+enum eWipeoutRecoveryMode { kWRM_Slower = 0, kWRM_Normal = 1, kWRM_Faster = 2 };
 
 struct cRider : public cRiderState, public cBeing {
     // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
@@ -485,7 +546,9 @@ struct cRider : public cRiderState, public cBeing {
     /* 0x87C */ int mIsLocal; // [P] isLocal (bracketed +0x114)
     /* 0x880 */ int mLoadStep; // [X] init state; 7 = initialised (cRider_initOnce)
     /* 0x884 */ int mRenderFlag; // [P] getRenderFlag (bracketed +0x114)
-    /* 0x888 */ int mSafeRenderTick; // [P] getSafeRenderTick (bracketed +0x114); -1 = unset (cRider_isSafeToDelete)
+    enum { kSafeRenderTickUnset = -1 }; // mSafeRenderTick's "unset" (name ours): [U] cRider_isSafeToDelete, cAI_render
+    /* 0x888 */ int mSafeRenderTick; // [P] getSafeRenderTick (bracketed +0x114); kSafeRenderTickUnset (-1) = unset
+                // (cRider_isSafeToDelete)
     /* 0x88C */ void* mAttachedEmitterFX; // [X] object with its vptr at +0xA4
     /* 0x890 */ void* mBoltOnFX; // [X] object with its vptr at +0xC4
     /* 0x894 */ void* mLoadList; // [X] anim name table; two different views in func_0011BD60 / func_0011BE88
@@ -544,7 +607,7 @@ struct cRider : public cRiderState, public cBeing {
     /* 0xB08 */ int mSoundHandles[4]; // sound ids, -1 = none (cRider_OnEndObjectUse)
     /* 0xB18 */ int mIsOnScreen; // [P] IsRiderOnScreen, preview 0x9F8 (+0x120 assumed); [U] frustum test result (cRider_renderClip)
     /* 0xB1C */ int mUpdateMinAnimOnly;
-    /* 0xB20 */ int mWipeoutRecoveryMode; // = 1 (ctor)
+    /* 0xB20 */ int mWipeoutRecoveryMode; // = 1 (ctor); eWipeoutRecoveryMode
     /* 0xB24 */ float mBoostMeterStart; // [X]
     /* 0xB28 */ int mBoostSourceMask; // [X] = 31 (ctor)
     /* 0xB2C */ int mUberFlags; // [X]
@@ -732,8 +795,8 @@ struct cRider : public cRiderState, public cBeing {
     void doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tIntersectInfo* hit, float depth)
         __asm__("cRider_doObjectCollision");
     void updateCollideInfo() __asm__("cRider_updateCollideInfo");
-    int checkRailBoardCollisions() __asm__("cRider_checkRailBoardCollisions");
-    int checkHandplantCollisions() __asm__("cRider_checkHandplantCollisions");
+    bool checkRailBoardCollisions() __asm__("cRider_checkRailBoardCollisions");
+    bool checkHandplantCollisions() __asm__("cRider_checkHandplantCollisions");
     void checkOpponentCollisions() __asm__("cRider_checkOpponentCollisions");
     void doOpponentCollision(cRider* other, t4Vector* n, int flag, float speed) __asm__("cRider_doOpponentCollision");
     void doBump(tCollideInfo* info, int flag) __asm__("cRider_doBump");

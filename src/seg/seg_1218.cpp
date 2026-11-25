@@ -1047,9 +1047,10 @@ static inline sObj_13A8* lookup_13A8(unsigned int id)
  * zone's instance (the rider's virtual isIntersecting). The highest zone level found goes into that rider's record
  * (+0x70C, 12 bytes per rider) with a 60-tick countdown, then the record's applied level is recomputed
  * (cDangerMan_CalcAppliedDangerLevel). Each of the 6 records with a level counts down and is cleared at 0. Then each
- * used element of the 64 tracked ones (+4, 0x1C bytes, state 2 = free): in state 1 its delay (+4) drops by 1/60 and it
- * is deleted (cDangerMan_DeleteTrackedDangerElemRecord) at 0; when its instance is gone or dead it enters state 1,
- * otherwise its position is copied from the instance. It ends with an empty loop over the riders. cAI_update calls it.
+ * used element of the 64 tracked ones (+4, 0x1C bytes, keDangerElemState_Dead = free): while dying its delay (+4) drops
+ * by 1/60 and it is deleted (cDangerMan_DeleteTrackedDangerElemRecord) at 0; when its instance is gone or dead it
+ * starts dying (keDangerElemState_Dying), otherwise its position is copied from the instance. It ends with an empty
+ * loop over the riders. cAI_update calls it.
  */
 // cDangerMan::Update(void) (SSX On Tour symbols; riders are cAI::getRider/getNumRiders, the zone lookup is
 // cWorld::getTheWorld()->getInstanceResource(id)).
@@ -1096,10 +1097,10 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
             if (!numTrackedProcessed)
                 break;
             tDangerElemInfo* pCurrElem = &((&self->mTrackedDangerElems[0]))[currElem];
-            if (pCurrElem->state == 2)
+            if (pCurrElem->state == cDangerMan::keDangerElemState_Dead)
                 continue;
             numTrackedProcessed--;
-            if (pCurrElem->state == 1) {
+            if (pCurrElem->state == cDangerMan::keDangerElemState_Dying) {
                 pCurrElem->endDelaySecsLeft -= 0.01666666753590107f;
                 if (pCurrElem->endDelaySecsLeft <= 0.0f) {
                     cDangerMan_DeleteTrackedDangerElemRecord(self, pCurrElem);
@@ -1108,7 +1109,7 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
             }
             cComp_13A8* pInstNode = lookup_13A8(pCurrElem->rID)->comp;
             if (pInstNode == 0 || pInstNode->IsDead()) {
-                pCurrElem->state = 1;
+                pCurrElem->state = cDangerMan::keDangerElemState_Dying;
             } else {
                 t4Vector instPos = pInstNode->GetXform()->pos;
                 pCurrElem->pos[0] = instPos.x;
@@ -1176,7 +1177,8 @@ static inline tInstanceRecord* GetInstanceResource(unsigned int id)
  * Starts tracking a world instance as a danger element.
  *
  * Does nothing when the instance (looked up by id in the world cache) is missing or dead. Otherwise drops any element
- * with the same id (cDangerMan_RemoveDangerElem), takes the first free element (state 2) of the 64 and fills it: state 0, the id,
+ * with the same id (cDangerMan_RemoveDangerElem), takes the first free element (keDangerElemState_Dead) of the 64 and
+ * fills it: keDangerElemState_Active, the id,
  * @p x and @p y, and the instance's position; the element count +0x704 goes up. Nothing happens when all are in use.
  * DangerStartFunc calls it.
  *
@@ -1194,8 +1196,8 @@ void cDangerMan::AddDangerElem(unsigned int* idp, float x, float y)
     RemoveDangerElem(idp);
     for (int i = 0; i < 64; i++) {
         tDangerElemInfo* elemInfo = &((&mTrackedDangerElems[0]))[i];
-        if (elemInfo->state == 2) {
-            elemInfo->state = 0;
+        if (elemInfo->state == keDangerElemState_Dead) {
+            elemInfo->state = keDangerElemState_Active;
             elemInfo->rID = *idp;
             elemInfo->radius = x;
             elemInfo->endDelaySecsLeft = y;
@@ -1230,7 +1232,7 @@ void cDangerMan::RemoveDangerElem(unsigned int* idp)
         int remaining = n;
         for (int i = 0; i < 64 && remaining != 0; i++) {
             tDangerElemInfo* elemInfo = &((&mTrackedDangerElems[0]))[i];
-            if (elemInfo->state != 2) {
+            if (elemInfo->state != keDangerElemState_Dead) {
                 remaining--;
                 if (elemInfo->rID == *idp) {
                     cDangerMan_DeleteTrackedDangerElemRecord((this), elemInfo);
@@ -1895,10 +1897,11 @@ extern "C" void cRiderAnim_checkForSoundEvents_36A0(void* self, void* anim) __as
 /**
  * Runs the per-frame update rule of the animation playing in one of the rider's sequencers.
  *
- * Looks up the animation's play attributes (cAIAnimEventMap_getAnimPlayAttr(*anim): a 0x1C-byte record of cAIAnimEventMap_AnimPlayAttr; On
- * Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4) to one of 16 handlers, cRiderAnim_onUpdateFWD
- * .. cRiderAnim_onUpdateASYNC_BP_BAL (On Tour onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a
- * human (mIsHuman) local (mIsLocal) rider, it then runs cRiderAnim_checkForSoundEvents (On Tour checkForSoundEvents). Virtual: slot 2 of
+ * Looks up the animation's play attributes (cAIAnimEventMap_getAnimPlayAttr(*anim): a 0x1C-byte record of
+ * cAIAnimEventMap_AnimPlayAttr; On Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4, a
+ * tAIAnimUpdateRuleID) to one of 16 handlers, cRiderAnim_onUpdateFWD .. cRiderAnim_onUpdateASYNC_BP_BAL (On Tour
+ * onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a human (mIsHuman) local
+ * (mIsLocal) rider, it then runs cRiderAnim_checkForSoundEvents (On Tour checkForSoundEvents). Virtual: slot 2 of
  * cRiderAnim_vtbl.
  *
  * @param x  the animation sequencer (cAnimSequencer) being updated
@@ -1909,52 +1912,52 @@ void cRiderAnim::updateRule(void* x, int* anim, float dt)
 {
     int done = 0;
     switch (cAIAnimEventMap_getAnimPlayAttr(*anim)->UpdateRule) {
-    case 0:
+    case kAAU_FWD:
         done = f_001048C0_36A0(((char*)this), x, anim, dt);
         break;
-    case 1:
+    case kAAU_HOLD_LAST:
         done = f_00104940_36A0(((char*)this), x, anim, dt);
         break;
-    case 2:
+    case kAAU_CYCLE:
         done = f_001049C0_36A0(((char*)this), x, anim, dt);
         break;
-    case 3:
+    case kAAU_ASYNC_CRUISE3:
         done = f_00104110_36A0(((char*)this), x, anim, dt);
         break;
-    case 4:
+    case kAAU_ASYNC_CRUISE5:
         done = f_00104178_36A0(((char*)this), x, anim, dt);
         break;
-    case 5:
+    case kAAU_ASYNC_RAIL:
         done = f_00104238_36A0(((char*)this), x, anim, dt);
         break;
-    case 6:
+    case kAAU_ASYNC_BRAKE:
         done = f_001042A8_36A0(((char*)this), x, anim, dt);
         break;
-    case 7:
+    case kAAU_ASYNC_PREWIND:
         done = f_00104358_36A0(((char*)this), x, anim, dt);
         break;
-    case 8:
+    case kAAU_ASYNC_GATEROCK:
         done = f_001045D8_36A0(((char*)this), x, anim, dt);
         break;
-    case 9:
+    case kAAU_ASYNC_HANDPLANT:
         done = f_00104660_36A0(((char*)this), x, anim, dt);
         break;
-    case 10:
+    case kAAU_ASYNC_UBERGRIND:
         done = f_001042E0_36A0(((char*)this), x, anim, dt);
         break;
-    case 11:
+    case kAAU_ASYNC_AIR_ADJ:
         done = f_001043F8_36A0(((char*)this), x, anim, dt);
         break;
-    case 12:
+    case kAAU_ASYNC_AIR_CYC:
         done = f_001045B8_36A0(((char*)this), x, anim, dt);
         break;
-    case 13:
+    case kAAU_ASYNC_BP_PIVOT:
         done = f_001047F0_36A0(((char*)this), x, anim, dt);
         break;
-    case 14:
+    case kAAU_ASYNC_BP_INTO:
         done = f_00104728_36A0(((char*)this), x, anim, dt);
         break;
-    case 15:
+    case kAAU_ASYNC_BP_BAL:
         done = f_001046B0_36A0(((char*)this), x, anim, dt);
         break;
     }
@@ -1998,9 +2001,10 @@ extern "C" int cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(void* self, void* ev, vo
  *
  * The sequencer index is @p ev's position in the 8-byte sequencer array at +0x50. It looks up the play attributes of
  * the sequence's animation (cAIAnimEventMap_getAnimPlayAttr(*data); On Tour getAnimPlayAttr) and dispatches on the
- * expire rule (+0x8) to one of 11 handlers, cRiderAnim_onExpireNOP .. cRiderAnim_onExpireBLENDTO_GEAR_CYC (On Tour onExpireNOP, onExpireINTO_AIR, ...;
- * On Tour adds SK_ skier variants). The handler's result, the next tAIAnimID, goes into the word at +index*4; a rule
- * outside 0..10 stores nothing. Virtual: slot 3 of cRiderAnim_vtbl.
+ * expire rule (+0x8, a tAIAnimExpireRuleID) to one of 11 handlers, cRiderAnim_onExpireNOP ..
+ * cRiderAnim_onExpireBLENDTO_GEAR_CYC (On Tour onExpireNOP, onExpireINTO_AIR, ...; On Tour adds SK_ skier variants).
+ * The handler's result, the next tAIAnimID, goes into the word at +index*4; a rule outside 0..10 stores nothing.
+ * Virtual: slot 3 of cRiderAnim_vtbl.
  *
  * @param ev  the sequencer whose animation expired (an element of the array at +0x50)
  * @param data  the expiring sequence; its first word is the tAIAnimID
@@ -2011,37 +2015,37 @@ void cRiderAnim::expireRule(cAnimSequencer* ev, int* data)
     int idx = ev - Sequencer;
     tAIAnimPlayAttr* info = cAIAnimEventMap_getAnimPlayAttr(*data);
     switch (info->ExpireRule) {
-    case 0:
+    case kAAE_NOP:
         CurrentAnimID[idx] = cRiderAnim_onExpireNOP_3918((this), ev, data);
         break;
-    case 1:
+    case kAAE_INTO_AIR:
         CurrentAnimID[idx] = cRiderAnim_onExpireINTO_AIR_3918((this), ev, data);
         break;
-    case 2:
+    case kAAE_INTO_SPIN_CYC:
         CurrentAnimID[idx] = cRiderAnim_onExpireINTO_SPIN_CYC_3918((this), ev, data);
         break;
-    case 3:
+    case kAAE_INTO_CRUISE:
         CurrentAnimID[idx] = cRiderAnim_onExpireINTO_CRUISE_3918((this), ev, data);
         break;
-    case 4:
+    case kAAE_BLENDTO_CRUISE:
         CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_CRUISE_3918((this), ev, data);
         break;
-    case 5:
+    case kAAE_BLENDTO_AIR:
         CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_AIR_3918((this), ev, data);
         break;
-    case 6:
+    case kAAE_BLENDTO_RAIL:
         CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_RAIL_3918((this), ev, data);
         break;
-    case 7:
+    case kAAE_INTO_FL_STAND:
         CurrentAnimID[idx] = cRiderAnim_onExpireINTO_FL_STAND_3918((this), ev, data);
         break;
-    case 8:
+    case kAAE_INTO_RSFS:
         CurrentAnimID[idx] = cRiderAnim_onExpireINTO_RSFS_3918((this), ev, data);
         break;
-    case 9:
+    case kAAE_INTO_PRESS:
         CurrentAnimID[idx] = cRiderAnim_onExpireINTO_PRESS_3918((this), ev, data);
         break;
-    case 10:
+    case kAAE_BLENDTO_GEAR_CYC:
         CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918((this), ev, data);
         break;
     }
@@ -2133,9 +2137,9 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param negAnim  the game animation for negative weights
  * @param dt  the time step, multiplied by 1/60
  * @param weight  the slider position, -1 to 1
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::updatePosNegSlider(void* x, cAnimSequence* anim, int posAnim, int negAnim, float dt, float weight)
+bool cRiderAnim::updatePosNegSlider(void* x, cAnimSequence* anim, int posAnim, int negAnim, float dt, float weight)
 {
     if (weight < 0.0f) {
         cAnimSequence_setSubAnim(anim, 0, *(cGameAnimMap_TheGameAnimMap->GameAnimMap + negAnim));
@@ -2146,9 +2150,9 @@ int cRiderAnim::updatePosNegSlider(void* x, cAnimSequence* anim, int posAnim, in
     }
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2180,9 +2184,9 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param dt  the time step, multiplied by 1/60
  * @param w  the weight, -1 to 1
  * @param posAnim  the game animation for positive weights
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::update3Cycle(void* x, cAnimSequence* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
+bool cRiderAnim::update3Cycle(void* x, cAnimSequence* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
 {
     cAnimSequence_setSubAnim(anim, 0, *(cGameAnimMap_TheGameAnimMap->GameAnimMap + cenAnim));
     if (0.0f < w) {
@@ -2200,9 +2204,9 @@ int cRiderAnim::update3Cycle(void* x, cAnimSequence* anim, int negAnim, int cenA
                                  anim->SubAnims[0].Time / anim->SubAnims[0].TotalTime * anim->SubAnims[1].TotalTime);
     if (cAnimSequence_updateWeight(anim, stepTime)) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2237,9 +2241,9 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param posEndAnim  the game animation at weight 1
  * @param dt  the time step, multiplied by 1/60
  * @param weight  the weight, -1 to 1
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::update5Cycle(void* x, cAnimSequence* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim,
+bool cRiderAnim::update5Cycle(void* x, cAnimSequence* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim,
                              int posEndAnim, float dt, float weight)
 {
     int from, to;
@@ -2276,9 +2280,9 @@ int cRiderAnim::update5Cycle(void* x, cAnimSequence* anim, int negEndAnim, int n
                                  anim->SubAnims[0].Time / anim->SubAnims[0].TotalTime * anim->SubAnims[1].TotalTime);
     if (cAnimSequence_updateWeight(anim, stepTime)) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2305,9 +2309,9 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param intoAnim  the game animation played first
  * @param dt  the time step, multiplied by 1/60
  * @param cycleAnim  the looping game animation that follows
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::updateIntoCycle(void* x, cAnimSequence* anim, int intoAnim, float dt, int cycleAnim)
+bool cRiderAnim::updateIntoCycle(void* x, cAnimSequence* anim, int intoAnim, float dt, int cycleAnim)
 {
     if (anim->SubAnims[0].AnimID == *(cGameAnimMap_TheGameAnimMap->GameAnimMap + intoAnim)) {
         cAnimSequence_setSubAnimType(anim, 0, 0);
@@ -2322,9 +2326,9 @@ int cRiderAnim::updateIntoCycle(void* x, cAnimSequence* anim, int intoAnim, floa
     }
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f)) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2337,8 +2341,9 @@ extern "C" int cRiderAnim_update3Cycle_4110(void*, void*, int*, int, int, int, f
 /**
  * Update rule 3 of cRiderAnim_updateRule: a three-way cruise blend.
  *
- * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. Sequence 7 blends game animations
- * 17 / 15 / 16, sequence 10 26 / 23 / 25, any other 26 / 24 / 25 (negative / centre / positive) with cRiderAnim_update3Cycle.
+ * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. Sequence kAID_CruiseCrouchSlow (7)
+ * blends game animations 17 / 15 / 16, kAID_CruiseAirCrouch (10) 26 / 23 / 25, any other 26 / 24 / 25 (negative /
+ * centre / positive) with cRiderAnim_update3Cycle.
  *
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
@@ -2355,10 +2360,10 @@ int cRiderAnim::onUpdateASYNC_CRUISE3(void *sequencer, int *sequence, float delt
     if (temp_3->IsRidingFakie != 0) {
         var_f13 = -var_f13;
     }
-    if (*sequence == 7) {
+    if (*sequence == kAID_CruiseCrouchSlow) {
         return cRiderAnim_update3Cycle_4110(this, sequencer, sequence, 17, 0xF, 0x10, deltaTime, var_f13);
     }
-    if (*sequence == 10) {
+    if (*sequence == kAID_CruiseAirCrouch) {
         return cRiderAnim_update3Cycle_4110(this, sequencer, sequence, 26, 23, 25, deltaTime, var_f13);
     }
     return cRiderAnim_update3Cycle_4110(this, sequencer, sequence, 26, 0x18, 25, deltaTime, var_f13);
@@ -2374,8 +2379,9 @@ extern "C" int cRiderAnim_update5Cycle(cRiderAnim* self, void* x, cAnimSequence*
  * Update rule 4 of cRiderAnim_updateRule: a five-way cruise blend.
  *
  * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. The sequence picks the five game
- * animations (negative end, negative middle, centre, positive middle, positive end): 6 gives 14 13 10 11 12, 8 gives 22
- * 21 18 19 20, 14 gives 32 31 27 29 30, 15 gives 32 31 28 29 30, any other 9 8 5 6 7. They go to cRiderAnim_update5Cycle.
+ * animations (negative end, negative middle, centre, positive middle, positive end): kAID_CruiseCrouch (6) gives 14 13
+ * 10 11 12, kAID_CruiseFast (8) 22 21 18 19 20, kAID_CruiseIce (14) 32 31 27 29 30, kAID_CruiseCrouchIce (15) 32 31 28
+ * 29 30, any other 9 8 5 6 7. They go to cRiderAnim_update5Cycle.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
@@ -2390,13 +2396,13 @@ int cRiderAnim::onUpdateASYNC_CRUISE5(void* x, int* anim, float dt)
         weight = -weight;
     int negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim;
     int animId = *anim;
-    if (animId == 6) {
+    if (animId == kAID_CruiseCrouch) {
         negEndAnim = 0xE; negMidAnim = 13; cenAnim = 10; posMidAnim = 11; posEndAnim = 0xC;
-    } else if (animId == 8) {
+    } else if (animId == kAID_CruiseFast) {
         negEndAnim = 22; negMidAnim = 21; cenAnim = 18; posMidAnim = 19; posEndAnim = 20;
-    } else if (animId == 14) {
+    } else if (animId == kAID_CruiseIce) {
         negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 27; posMidAnim = 29; posEndAnim = 0x1E;
-    } else if (animId != 15) {
+    } else if (animId != kAID_CruiseCrouchIce) {
         negEndAnim = 9; negMidAnim = 8; cenAnim = 5; posMidAnim = 6; posEndAnim = 7;
     } else {
         negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1C; posMidAnim = 29; posEndAnim = 0x1E;
@@ -2415,9 +2421,10 @@ extern "C" int cRiderAnim_update3Cycle_4238(void*, void*, int*, int, int, int, f
 /**
  * Update rule 5 of cRiderAnim_updateRule: a three-way rail blend.
  *
- * The weight is the rider's (+0x60) +0x238, negated when the rider's +0x320 is set. Sequence 18 blends game animations
- * 65 / 63 / 64, sequence 19 68 / 66 / 67, any other 71 / 69 / 70 (negative / centre / positive) with cRiderAnim_update3Cycle. The
- * C declares no result, but cRiderAnim_update3Cycle's is left in the return register.
+ * The weight is the rider's (+0x60) +0x238, negated when the rider's +0x320 is set. Sequence kAID_RSBalance (18) blends
+ * game animations 65 / 63 / 64, kAID_RSFSBalance (19) 68 / 66 / 67, any other 71 / 69 / 70 (negative / centre /
+ * positive) with cRiderAnim_update3Cycle. The C declares no result, but cRiderAnim_update3Cycle's is left in the return
+ * register.
  *
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
@@ -2437,7 +2444,7 @@ void cRiderAnim::onUpdateASYNC_RAIL(void *sequencer, int *sequence, float deltaT
         var_f13 = -var_f13;
     }
     switch (*sequence) {
-    case 18:
+    case kAID_RSBalance:
         var_7 = 65;
         var_8 = 0x3F;
         var_9 = 0x40;
@@ -2447,7 +2454,7 @@ void cRiderAnim::onUpdateASYNC_RAIL(void *sequencer, int *sequence, float deltaT
         var_8 = 69;
         var_9 = 70;
         break;
-    case 19:
+    case kAID_RSFSBalance:
         var_7 = 68;
         var_8 = 66;
         var_9 = 67;
@@ -2497,8 +2504,9 @@ extern "C" int cRiderAnim_updatePosNegSlider_42E0(void *, void *, int *, int, in
 /**
  * Update rule 10 of cRiderAnim_updateRule: a positive / negative slider.
  *
- * Sequence 218 uses game animations 362 / 363, 226 371 / 372, 234 380 / 381, any other 389 / 390 (positive / negative),
- * with the rider's (+0x60) +0x238 as the weight, through cRiderAnim_updatePosNegSlider.
+ * Sequence kAID_RSFSGrind1Bal (218) uses game animations 362 / 363, kAID_RSFSGrind2Bal (226) 371 / 372,
+ * kAID_RSFSGrind3Bal (234) 380 / 381, any other 389 / 390 (positive / negative), with the rider's (+0x60) +0x238 as the
+ * weight, through cRiderAnim_updatePosNegSlider.
  *
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
@@ -2508,15 +2516,15 @@ extern "C" int cRiderAnim_updatePosNegSlider_42E0(void *, void *, int *, int, in
 int cRiderAnim::onUpdateASYNC_UBERGRIND(void *sequencer, int *sequence, float deltaTime)
 {
     int x = *sequence;
-    if (x == 218) {
+    if (x == kAID_RSFSGrind1Bal) {
         return cRiderAnim_updatePosNegSlider_42E0(this, sequencer, sequence, 362, 363, deltaTime,
                 Rider->mSlewed[6].cur);
     }
-    if (x == 226) {
+    if (x == kAID_RSFSGrind2Bal) {
         return cRiderAnim_updatePosNegSlider_42E0(this, sequencer, sequence, 371, 372, deltaTime,
                 Rider->mSlewed[6].cur);
     }
-    if (x == 234) {
+    if (x == kAID_RSFSGrind3Bal) {
         return cRiderAnim_updatePosNegSlider_42E0(this, sequencer, sequence, 380, 381, deltaTime,
                 Rider->mSlewed[6].cur);
     }
@@ -2543,9 +2551,9 @@ static inline float vAbs_4358(float x)
  * @param x  the sequencer
  * @param anim  the sequence
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt)
 {
     cRider* rider = Rider;
     float absSlew15 = vAbs_4358(rider->mSlewed[15].cur);
@@ -2554,9 +2562,9 @@ int cRiderAnim::onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt)
     cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)&anim->CurrentAnimID[4]);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2580,28 +2588,29 @@ static inline float clamp_43F8(float v, float lo, float hi)
 /**
  * Update rule 11 of cRiderAnim_updateRule: adjusts an air animation by the rider's control amounts.
  *
- * Sequences 297-304 select a looping sub-animation 1 (game animations 165-172; 165 for others). The amount is the
- * larger of |rider +0x298| and |rider +0x28C| (rider at +0x60), clamped to 0..1: sub-animation 1 gets weight 0.25 +
- * 0.75 * amount and sub-animation 0 the rest, sub-animation 0's time is the amount times the length, and sub-animation
- * 1 advances by @p dt / 60. Then the blend weight advances, expiring the sequence at its end.
+ * Sequences kAID_IntoAirAdjL .. kAID_IntoAirAdjBwdL (297-304) select a looping sub-animation 1 (game animations
+ * 165-172; 165 for others). The amount is the larger of |rider +0x298| and |rider +0x28C| (rider at +0x60), clamped to
+ * 0..1: sub-animation 1 gets weight 0.25 + 0.75 * amount and sub-animation 0 the rest, sub-animation 0's time is the
+ * amount times the length, and sub-animation 1 advances by @p dt / 60. Then the blend weight advances, expiring the
+ * sequence at its end.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt)
 {
     int slot = 165;
     switch (*(int*)anim) {
-    case 297: slot = 165; break;
-    case 298: slot = 171; break;
-    case 299: slot = 168; break;
-    case 300: slot = 172; break;
-    case 301: slot = 166; break;
-    case 302: slot = 170; break;
-    case 303: slot = 167; break;
-    case 304: slot = 169; break;
+    case kAID_IntoAirAdjL: slot = 165; break;
+    case kAID_IntoAirAdjFwdL: slot = 171; break;
+    case kAID_IntoAirAdjFwd: slot = 168; break;
+    case kAID_IntoAirAdjFwdR: slot = 172; break;
+    case kAID_IntoAirAdjR: slot = 166; break;
+    case kAID_IntoAirAdjBwdR: slot = 170; break;
+    case kAID_IntoAirAdjBwd: slot = 167; break;
+    case kAID_IntoAirAdjBwdL: slot = 169; break;
     }
     cAnimSequence_setSubAnim(anim, 1, *(cGameAnimMap_TheGameAnimMap->GameAnimMap + slot));
     cAnimSequence_setSubAnimType(anim, 1, 1);
@@ -2618,9 +2627,9 @@ int cRiderAnim::onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt)
     cAnimSequence_updateSubAnim(anim, 1, stepTime);
     if (cAnimSequence_updateWeight(anim, stepTime)) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2657,17 +2666,17 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_GATEROCK);
  * @param x  the sequencer
  * @param anim  the sequence
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt)
 {
     cAnimSequence_setSubAnimTime(anim, 0,
             *(float*)&anim->CurrentAnimID[4] * Rider->mRiderHandler->GateControl.GateAnticipate);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2680,8 +2689,8 @@ extern "C" int cRiderAnim_updatePosNegSlider_4660(void *, void *, int *, int, in
 /**
  * Update rule 9 of cRiderAnim_updateRule: a positive / negative slider for handplants.
  *
- * Sequence 45 uses game animations 353 / 352, any other 347 / 346 (positive / negative), with the rider's (+0x60)
- * +0x244 as the weight, through cRiderAnim_updatePosNegSlider.
+ * Sequence kAID_HPHS_Balance (45) uses game animations 353 / 352, any other 347 / 346 (positive / negative), with the
+ * rider's (+0x60) +0x244 as the weight, through cRiderAnim_updatePosNegSlider.
  *
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
@@ -2692,7 +2701,7 @@ int cRiderAnim::onUpdateASYNC_HANDPLANT(void *sequencer, int *sequence, float de
 {
     float w = Rider->mSlewed[7].cur;
 
-    if (*sequence == 45) {
+    if (*sequence == kAID_HPHS_Balance) {
         return cRiderAnim_updatePosNegSlider_4660(this, sequencer, sequence, 353, 352, deltaTime, w);
     }
     return cRiderAnim_updatePosNegSlider_4660(this, sequencer, sequence, 347, 346, deltaTime, w);
@@ -2708,8 +2717,8 @@ extern "C" int cRiderAnim_update3Cycle(cRiderAnim* self, void* x, cAnimSequence*
 /**
  * Update rule 15 of cRiderAnim_updateRule: a three-way board-press balance blend.
  *
- * The weight is 2 * (rider +0x274) - 1 (rider at +0x60), clamped to -1..1. Sequence 28 blends game animations 49 / 48 /
- * 50, any other 60 / 58 / 59 (negative / centre / positive) with cRiderAnim_update3Cycle.
+ * The weight is 2 * (rider +0x274) - 1 (rider at +0x60), clamped to -1..1. Sequence kAID_NoseBalance (28) blends game
+ * animations 49 / 48 / 50, any other 60 / 58 / 59 (negative / centre / positive) with cRiderAnim_update3Cycle.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
@@ -2728,7 +2737,7 @@ int cRiderAnim::onUpdateASYNC_BP_BAL(void* x, int* anim, float dt)
     }
     int negAnim, cenAnim, posAnim;
     negAnim = 0x3C;
-    if (*anim != 0x1C) {
+    if (*anim != kAID_NoseBalance) {
         cenAnim = 58; posAnim = 59;
     } else {
         negAnim = 49; cenAnim = 0x30; posAnim = 50;
@@ -2748,19 +2757,20 @@ static inline float clamp_4728(float v, float lo, float hi)
 /**
  * Update rule 14 of cRiderAnim_updateRule: sets the board-press animation's frame from the rider's press amount.
  *
- * The amount is the rider's (+0x60) +0x268; sequences 25 and 33 use 1 minus it, clamped to 0..1. Sub-animation 0's time
- * is the amount times the length. Then the blend weight advances by @p dt / 60, expiring the sequence at its end.
+ * The amount is the rider's (+0x60) +0x268; kAID_NoseOutof (25) and kAID_TailOutof (33) use 1 minus it, clamped to
+ * 0..1. Sub-animation 0's time is the amount times the length. Then the blend weight advances by @p dt / 60, expiring
+ * the sequence at its end.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt)
 {
     float framePercent;
     int animId = *(int*)anim;
-    if (animId == 25 || animId == 33) {
+    if (animId == kAID_NoseOutof || animId == kAID_TailOutof) {
         framePercent = clamp_4728(1.0f - Rider->mSlewed[10].cur, 0.0f, 1.0f);
     } else {
         framePercent = Rider->mSlewed[10].cur;
@@ -2768,9 +2778,9 @@ int cRiderAnim::onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt)
     cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)&anim->CurrentAnimID[4]);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2792,21 +2802,22 @@ static inline float clamp_47F0(float v, float lo, float hi)
 /**
  * Update rule 13 of cRiderAnim_updateRule: sets the board-press pivot animation's frame from the rider's pivot amount.
  *
- * The amount is |rider +0x280| (rider at +0x60); sequences 37 and 38 use 1 minus it. Clamped to 0..1, times the length,
- * it sets sub-animation 0's time. Then the blend weight advances by @p dt / 60, expiring the sequence at its end.
+ * The amount is |rider +0x280| (rider at +0x60); kAID_TailPivotL (37) and kAID_TailPivotR (38) use 1 minus it. Clamped
+ * to 0..1, times the length, it sets sub-animation 0's time. Then the blend weight advances by @p dt / 60, expiring the
+ * sequence at its end.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt)
 {
     float framePercent;
     int animId = *(int*)anim;
-    if (animId == 37) {
+    if (animId == kAID_TailPivotL) {
         framePercent = 1.0f - vAbs_47F0(Rider->mSlewed[12].cur);
-    } else if (animId == 38) {
+    } else if (animId == kAID_TailPivotR) {
         framePercent = 1.0f - vAbs_47F0(Rider->mSlewed[12].cur);
     } else {
         framePercent = vAbs_47F0(Rider->mSlewed[12].cur);
@@ -2814,9 +2825,9 @@ int cRiderAnim::onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt)
     cAnimSequence_setSubAnimTime(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * *(float*)&anim->CurrentAnimID[4]);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2835,9 +2846,9 @@ extern "C" int cAnimSequence_updateSubAnim_48C0(void*, int, float) __asm__("cAni
  * @param x  the sequencer
  * @param anim  the sequence
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateFWD(void* x, void* anim, float dt)
+bool cRiderAnim::onUpdateFWD(void* x, void* anim, float dt)
 {
     float stepTime = dt * 0.01666666753590107f;
     int done;
@@ -2847,10 +2858,10 @@ int cRiderAnim::onUpdateFWD(void* x, void* anim, float dt)
         done = cAnimSequence_updateWeight(anim, stepTime);
     }
     if (done == 0) {
-        return 0;
+        return false;
     }
     cAnimSequencer_expire(x, anim);
-    return 1;
+    return true;
 }
 #endif
 
@@ -2868,9 +2879,9 @@ extern "C" int cAnimSequence_updateSubAnim_4940(void*, int, float) __asm__("cAni
  * @param x  the sequencer
  * @param anim  the sequence
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateHOLD_LAST(void* x, void* anim, float dt)
+bool cRiderAnim::onUpdateHOLD_LAST(void* x, void* anim, float dt)
 {
     float stepTime = dt * 0.01666666753590107f;
     int done;
@@ -2880,10 +2891,10 @@ int cRiderAnim::onUpdateHOLD_LAST(void* x, void* anim, float dt)
         done = cAnimSequence_updateWeight(anim, stepTime);
     }
     if (done == 0) {
-        return 0;
+        return false;
     }
     cAnimSequencer_expire(x, anim);
-    return 1;
+    return true;
 }
 #endif
 
@@ -2901,9 +2912,9 @@ extern "C" int cAnimSequence_updateSubAnim_49C0(void*, int, float) __asm__("cAni
  * @param x  the sequencer
  * @param anim  the sequence
  * @param dt  the time step
- * @return 1 when the sequence was expired, else 0
+ * @return true when the sequence was expired, else false
  */
-int cRiderAnim::onUpdateCYCLE(void* x, void* anim, float dt)
+bool cRiderAnim::onUpdateCYCLE(void* x, void* anim, float dt)
 {
     float stepTime = dt * 0.01666666753590107f;
     int done;
@@ -2913,10 +2924,10 @@ int cRiderAnim::onUpdateCYCLE(void* x, void* anim, float dt)
         done = cAnimSequence_updateWeight(anim, stepTime);
     }
     if (done == 0) {
-        return 0;
+        return false;
     }
     cAnimSequencer_expire(x, anim);
-    return 1;
+    return true;
 }
 #endif
 
@@ -2951,36 +2962,37 @@ extern "C" int cRiderAnimBase_playInto_4A60(void*, void*, int*, int) __asm__("cR
 /**
  * Expire rule 2 of cRiderAnim_expireRule: plays the follow-on animation matching the expired one.
  *
- * Sequences 271 / 285 play 291; 272, 280, 281, 286 play 292; 269, 278, 283 play 289; 270, 279, 284 play 290; 273-276
- * play 293-296 (cRiderAnimBase_playInto). Any other returns 438 without playing.
+ * An into-spin or into-flip anim (straight, or off a rail's BS / FS side) plays its spin or flip cycle (the misty and
+ * rodeo intos 273-276 play 293-296) with cRiderAnimBase_playInto. kAID_RSBSIntoFlipBwd goes to kAID_FlipFwdCycle (in
+ * retail too). Any other returns kAID_Invalid (438) without playing.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence (first word: its animation id)
- * @return cRiderAnimBase_playInto's result, or 438
+ * @return cRiderAnimBase_playInto's result, or kAID_Invalid
  */
 // Plays the landing animation that matches the current trick state.
 int cRiderAnim::onExpireINTO_SPIN_CYC(void* sequencer, int* sequence)
 {
     switch (*sequence) {
-    case 271: case 285:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 291);
-    case 272: case 280: case 281: case 286:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 292);
-    case 269: case 278: case 283:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 289);
-    case 270: case 279: case 284:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 290);
-    case 273:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 293);
-    case 274:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 294);
-    case 275:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 295);
-    case 276:
-        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, 296);
+    case kAID_IntoFlipBwd: case kAID_RSFSIntoFlipBwd:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_FlipBwdCycle);
+    case kAID_IntoFlipFwd: case kAID_RSBSIntoFlipBwd: case kAID_RSBSIntoFlipFwd: case kAID_RSFSIntoFlipFwd:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_FlipFwdCycle);
+    case kAID_IntoSpinBS: case kAID_RSBSIntoSpinBS: case kAID_RSFSIntoSpinBS:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_SpinBSCycle);
+    case kAID_IntoSpinFS: case kAID_RSBSIntoSpinFS: case kAID_RSFSIntoSpinFS:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_SpinFSCycle);
+    case kAID_IntoMistyBS:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_MistyBSCycle);
+    case kAID_IntoMistyFS:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_MistyFSCycle);
+    case kAID_IntoRodeoBS:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_RodeoBSCycle);
+    case kAID_IntoRodeoFS:
+        return cRiderAnimBase_playInto_4A60(this, sequencer, sequence, kAID_RodeoFSCycle);
     }
-    return 438;
+    return kAID_Invalid;
 }
 #endif
 
@@ -3081,7 +3093,8 @@ extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("c
 /**
  * Expire rule 9 of cRiderAnim_expireRule: blends into a board-press animation.
  *
- * Plays animation 28 (cRiderAnimBase_playBlendIn) when the rider's (+0x60) +0x330 is 1, otherwise 36.
+ * Plays kAID_NoseBalance (cRiderAnimBase_playBlendIn) when the rider's (+0x60) PressMode is kPM_Nose, otherwise
+ * kAID_TailBalance.
  *
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
@@ -3089,10 +3102,10 @@ extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("c
  */
 int cRiderAnim::onExpireINTO_PRESS(int sequencer, int sequence)
 {
-    if (Rider->PressMode == 1) {
-        return cRiderAnimBase_playBlendIn_4BD8(this, sequencer, sequence, 0x1C);
+    if (Rider->PressMode == kPM_Nose) {
+        return cRiderAnimBase_playBlendIn_4BD8(this, sequencer, sequence, kAID_NoseBalance);
     }
-    return cRiderAnimBase_playBlendIn_4BD8(this, sequencer, sequence, 36);
+    return cRiderAnimBase_playBlendIn_4BD8(this, sequencer, sequence, kAID_TailBalance);
 }
 #endif
 
@@ -3126,8 +3139,9 @@ extern "C" void cRiderAnimBase_playBlendIn_4C38(int, int, int*, int) __asm__("cR
 /**
  * Expire rule 6 of cRiderAnim_expireRule: blends into a rail animation.
  *
- * Sequence 69 blends into animation 20, 70 into 19, any other into 18 (cRiderAnimBase_playBlendIn). Its result is left
- * in the return register (cRiderAnim_expireRule stores it) although the C declares none.
+ * kAID_RSBSLandNormal (69) blends into kAID_RSBSBalance, kAID_RSFSLandNormal (70) into kAID_RSFSBalance, any other into
+ * kAID_RSBalance (cRiderAnimBase_playBlendIn). Its result is left in the return register (cRiderAnim_expireRule stores
+ * it) although the C declares none.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
@@ -3136,14 +3150,14 @@ extern "C" void cRiderAnimBase_playBlendIn_4C38(int, int, int*, int) __asm__("cR
 extern "C" void cRiderAnim_onExpireBLENDTO_RAIL(int riderAnim, int sequencer, int *sequence) {
     int var_7;
     switch (*sequence) {
-    case 69:
-        var_7 = 20;
+    case kAID_RSBSLandNormal:
+        var_7 = kAID_RSBSBalance;
         break;
-    case 70:
-        var_7 = 19;
+    case kAID_RSFSLandNormal:
+        var_7 = kAID_RSFSBalance;
         break;
     default:
-        var_7 = 18;
+        var_7 = kAID_RSBalance;
         break;
     }
     cRiderAnimBase_playBlendIn_4C38(riderAnim, sequencer, sequence, var_7);
@@ -3722,13 +3736,13 @@ static inline unsigned short TriFlags_5398(tInstanceRecord* s, int i)
 /**
  * Tests the rider against world objects and resolves the deepest contact.
  *
- * Skipped in control state 9. Runs cRider_checkRailBodyCollisions (rail body collisions) first, then queries a cWorldRider
- * (cWorldRider_cWorldRider) built on mSphereTree (+0xAA0) for the deepest hit (cRider_objectIntersect, On Tour objectIntersect). With a
- * hit, the contact normal is flattened against mGroundNormal (when cRider_isGroundNormalValid) or @p norm, or in motion
- * state 4 snapped to the handler's up vector (+0xB0); the impact speed is the closing speed along it. A triangle with
- * flag 2 on an object without flag 0x2000 caches the contact at +0x9E0 and +0xA60; flag 1 runs cRider_doObjectCollision
- * (doObjectCollision); objects without 0x2000 play cSSXAudio_CollisionSound. Always ends with the camera trigger check
- * (cCameraTriggerMan_checkCollisions on gCamTriggerMan) and cWorldRider__cWorldRider.
+ * Skipped in CS_Reset. Runs cRider_checkRailBodyCollisions (rail body collisions) first, then queries a cWorldRider
+ * (cWorldRider_cWorldRider) built on mSphereTree (+0xAA0) for the deepest hit (cRider_objectIntersect, On Tour
+ * objectIntersect). With a hit, the contact normal is flattened against mGroundNormal (when cRider_isGroundNormalValid)
+ * or @p norm, or in MS_Railslide snapped to the handler's up vector (+0xB0); the impact speed is the closing speed
+ * along it. A triangle with flag 2 on an object without flag 0x2000 caches the contact at +0x9E0 and +0xA60; flag 1
+ * runs cRider_doObjectCollision (doObjectCollision); objects without 0x2000 play cSSXAudio_CollisionSound. Always ends
+ * with the camera trigger check (cCameraTriggerMan_checkCollisions on gCamTriggerMan) and cWorldRider__cWorldRider.
  *
  * @param norm  a ground normal to project the contact normal onto, or 0 (cAirMotion_resolve passes one)
  */
@@ -3736,7 +3750,7 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, t4Vector* norm)
 {
     tIntersectInfo contact;
     tCollideInfo info;
-    if (cRider_getControlState_5398((char*)self) == 9)
+    if (cRider_getControlState_5398((char*)self) == CS_Reset)
         return;
     float zero = 0.0f;
     cRider_checkRailBodyCollisions((char*)self);
@@ -3753,7 +3767,7 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, t4Vector* norm)
                 (*(t4Vector*)&contact.Inorm) = *norm;
             else
                 (*(t4Vector*)&contact.Inorm) = Div_5398(flatNormal, len);
-        } else if (cRider_getMotionState((char*)self) == 4) {
+        } else if (cRider_getMotionState((char*)self) == MS_Railslide) {
             t4Vector* up = (t4Vector*)(&self->mRiderHandler->RailslideMotion);
             if (Dot_5398((*(t4Vector*)&contact.Inorm), *up) > zero)
                 (*(t4Vector*)&contact.Inorm) = *up;
@@ -3951,17 +3965,18 @@ static inline float Sqrt_57B8(float x)
 /**
  * Responds to the rider hitting a world object: pushes it out, rebounds it and picks a reaction.
  *
- * Skipped in control state 9. The hit surface's Bounce and Grip come from the object's m_pCollideRecord (its
- * Surfaces entry for the hit mesh); with no bounce it only bumps (cRider_doBump). A solid object (no
- * m_pActiveNode, or one whose shouldRebound is true) moves the rider out by 1.1 x @p depth (cRider_moveFromCollision),
- * rebounds by the closing speed plus clamp(grip x speed, 55.6, 1388.9) and, on the ground, turns the rider along it
- * (cRider_turnFromCollision, cRider_updateOrientationImplicit); other objects get a softer rebound. Airborne below
- * 833.3 the hit adds to mImpactAccum2.
+ * Skipped in CS_Reset. The hit surface's Bounce and Grip come from the object's m_pCollideRecord (its Surfaces entry
+ * for the hit mesh); with no bounce it only bumps (cRider_doBump). A solid object (no m_pActiveNode, or one whose
+ * shouldRebound is true) moves the rider out by 1.1 x @p depth (cRider_moveFromCollision), rebounds by the closing
+ * speed plus clamp(grip x speed, 55.6, 1388.9) and, on the ground, turns the rider along it (cRider_turnFromCollision,
+ * cRider_updateOrientationImplicit); other objects get a softer rebound. Airborne below 833.3 the hit adds to
+ * mImpactAccum2.
  *
- * In the air with channel 2 in animation category 1, 2, 9 or 0xB and unk_180 facing the surface (> 0.3), the hit
- * becomes a takeoff: mVelocity is rebuilt along the surface, then cRider_flagEventLand, cRiderMetrix_evTakeoff
- * (evTakeoff), control states 0xD and 5, animation 0x10C and cAirPredictor_startLaunchIntoAir. Otherwise the rebound is
- * added to mVelocity and cRider_reactToCollision picks the reaction.
+ * In the air with channel 2 in animation category kANCAT_AirAdj (the motion state's value, reused), kANCAT_AirCycle,
+ * kANCAT_IntoAir or kANCAT_OutOfAir and unk_180 facing the surface (> 0.3), the hit becomes a takeoff: mVelocity is
+ * rebuilt along the surface, then cRider_flagEventLand, cRiderMetrix_evTakeoff (evTakeoff), control states CS_Void and
+ * CS_Spin, animation kAID_IntoAir (unless already in its first 20%) and cAirPredictor_startLaunchIntoAir. Otherwise the
+ * rebound is added to mVelocity and cRider_reactToCollision picks the reaction.
  *
  * @param obj  the hit object's instance record (tInstanceRecord)
  * @param info  the collide info (tCollideInfo) passed on to the bump or reaction
@@ -3970,7 +3985,7 @@ static inline float Sqrt_57B8(float x)
  */
 void cRider::doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tIntersectInfo* hit, float depth)
 {
-    if (cRider_getControlState_57B8(this) == 9)
+    if (cRider_getControlState_57B8(this) == CS_Reset)
         return;
     tCollideSurface* surf = &obj->m_pCollideRecord->Surfaces[hit->Mesh];
     float grip = Clamp_57B8(surf->Grip, 0.0f, 1.0f);
@@ -3987,7 +4002,7 @@ void cRider::doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tInters
         if (vn < 0.0f)
             vn = 0.0f;
         bounce = vn + Clamp_57B8(grip * vn, 55.55555725097656f, 1388.888916015625f);
-        if (cRider_getMotionState(this) == 0)
+        if (cRider_getMotionState(this) == MS_Ground)
             cRider_turnFromCollision(this, hit);
         cRider_updateOrientationImplicit(this);
     } else {
@@ -3997,8 +4012,9 @@ void cRider::doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tInters
         bounce = Sqrt_57B8((linearTerm * linearTerm - constTerm) >? 0.0f) - linearTerm; // PORT: g++ maximum operator
     }
     float facing = DotV_57B8(RiderRoot.row[2], hit->Inorm);
-    if (cRider_getMotionState(this) == 1
-        || (cRider_getMotionState(this) == 2 && mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
+    if (cRider_getMotionState(this) == MS_Air
+        || (cRider_getMotionState(this) == MS_Wipeout
+            && mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Air)) {
         if (Len_57B8(mVelocity) < 833.3333740234375f) {
             float* acc = &mImpactAccum2;
             *acc = *acc + (2.5f - facing) * (hit->Inorm.z >= 0.20000000298023224f ? hit->Inorm.z : 0.20000000298023224f);
@@ -4006,7 +4022,9 @@ void cRider::doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tInters
     }
     int anim = cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2);
     int state = cRider_getMotionState(this);
-    if (state == 1 && (anim == 9 || anim == 2 || anim == 11 || anim == state) && facing > 0.30000001192092896f) {
+    if (state == MS_Air
+        && (anim == kANCAT_IntoAir || anim == kANCAT_AirCycle || anim == kANCAT_OutOfAir || anim == state)
+        && facing > 0.30000001192092896f) {
         t4Vector w = Add_57B8(Sub_57B8(mVelocity, hit->Ivel), Scale_57B8(hit->Inorm, vn));
         float speed = Len_57B8(w);
         float out = Max_57B8(bounce - vn, 277.77777099609375f);
@@ -4020,13 +4038,13 @@ void cRider::doObjectCollision(tInstanceRecord* obj, tCollideInfo* info, tInters
         sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(this, sizeof(cRiderState));
         vt[kRiderVt_vibrationBump].fn(vthis(this, vt[kRiderVt_vibrationBump]), vn);
         if (cRiderAnimBase_getCurrentAnimID(mRiderAnim,
-                2) != 268 || cRiderAnimBase_getCurrentAnimFramePercent(mRiderAnim, 2) > 0.20000000298023224f) {
+                2) != kAID_IntoAir || cRiderAnimBase_getCurrentAnimFramePercent(mRiderAnim, 2) > 0.20000000298023224f) {
             mSurfaceType = 0;
             cRider_flagEventLand(this, 0, 0, 0, hit, speed);
             cRiderMetrix_evTakeoff(mMetrix, IsRidingFakie != IsGoofyStance, 0);
-            cRider_setControlState_57B8(this, 13);
-            cRider_setControlState_57B8(this, 5);
-            cRiderAnimBase_play(mRiderAnim, 268, 1, -1.0f);
+            cRider_setControlState_57B8(this, CS_Void);
+            cRider_setControlState_57B8(this, CS_Spin);
+            cRiderAnimBase_play(mRiderAnim, kAID_IntoAir, 1, -1.0f);
         }
         t4Vector* pos = getPosition();
         t4Vector* vel = getVelocity();
@@ -4150,26 +4168,27 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
 /**
  * Chooses the rider's reaction to a collision: a reset on a fatal surface, a wipeout animation, or a bump.
  *
- * Skipped in control state 9. Adds 1 - max(0, contact . mImpulse) to mImpactAccum and stores the contact direction in
+ * Skipped in CS_Reset. Adds 1 - max(0, contact . mImpulse) to mImpactAccum and stores the contact direction in
  * mImpulse. If the surface material's record (SSXApp's material list at +0x84, flag +0x44) is fatal it resets the rider
- * (cRider_checkForReset(self, 0, 1)). Otherwise it sends the vibrationBump virtual; in motion state 2 it may relaunch
- * the air predictor, flags the handler's WipeoutControl (IsNewImpact = 1, LatestImpact = mVelocity) and stops; in the
- * air it relaunches the air predictor.
+ * (cRider_checkForReset(self, 0, 1)). Otherwise it sends the vibrationBump virtual; in MS_Wipeout it may relaunch the
+ * air predictor, flags the handler's WipeoutControl (IsNewImpact = 1, LatestImpact = mVelocity) and stops; in the air
+ * it relaunches the air predictor.
  *
- * It then compares the contact direction with the rider's axes (RiderRoot rows 0-2) and, from the dominant axis,
- * the normal speed and channel 2's animation category, picks a wipeout animation (0x148 .. 0x169, random variants by
- * AIrand) for cRider_flagEventWipeout; when none applies it bumps (cRider_doBump).
+ * It then compares the contact direction with the rider's axes (RiderRoot rows 0-2) and, from the dominant axis, the
+ * normal speed and channel 2's animation category, picks a wipeout hit animation (kAID_WH_GrndFromLeft2RollRight ..
+ * kAID_WH_NB_LandOnFace2FwdFaceDown, kAID_Invalid for none; random variants by AIrand) for cRider_flagEventWipeout;
+ * when none applies it bumps (cRider_doBump).
  *
  * @param info  the collide info: contact position (Pos), direction, normal (Reflect) and normal speed (Vel)
- * @param id  the surface material id, or -1
+ * @param id  the surface type (On Tour eSurfaceType surf), or eST_Undefined
  */
 extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, int id)
 {
-    if (cRider_getControlState_5D98(self) == 9)
+    if (cRider_getControlState_5D98(self) == CS_Reset)
         return;
     self->mImpactAccum += 1.0f - (Dot_5D98(info->Reflect, self->mImpulse) >? 0.0f); // PORT: g++ maximum operator
     self->mImpulse = info->Reflect;
-    if (id != -1) {
+    if (id != eST_Undefined) {
         if (SSXApp_5D98->matList->getMat(id)->fatal != 0) {
             cRider_checkForReset(self, 0, 1);
             return;
@@ -4178,8 +4197,8 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
     sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(self, sizeof(cRiderState));
     vt[kRiderVt_vibrationBump].fn(vthis(self, vt[kRiderVt_vibrationBump]), info->Vel);
     char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
-    if (cRider_getMotionState(self) == 2) {
-        if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1) {
+    if (cRider_getMotionState(self) == MS_Wipeout) {
+        if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Air) {
             sVEntry<t4Vector*(void*)>* vt2 = *(sVEntry<t4Vector*(void*)>**)sub;
             t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
             sVEntry<t4Vector*(void*)>* vt3 = *(sVEntry<t4Vector*(void*)>**)sub;
@@ -4191,7 +4210,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
         handler->WipeoutControl.LatestImpact = self->mVelocity;
         return;
     }
-    if (cRider_getMotionState(self) == 1) {
+    if (cRider_getMotionState(self) == MS_Air) {
         sVEntry<t4Vector*(void*)>* vt2 = *(sVEntry<t4Vector*(void*)>**)sub;
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
         sVEntry<t4Vector*(void*)>* vt3 = *(sVEntry<t4Vector*(void*)>**)sub;
@@ -4205,29 +4224,29 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
     t4Vector rel = Sub_5D98(info->Pos, origin);
     float contactHeight = Dot_5D98(rel, Get_5D98((char*)&self->RiderRoot.row[2]));
     int cur = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
-    int anim = 438;
-    if (cRider_getControlState_5D98(self) != 11) {
-        if (cRider_getMotionState(self) == 1 && info->Reflect.z > 0.800000011920929f) {
-            if (cur == 20 || cur == 21) {
-                anim = 361;
+    int anim = kAID_Invalid;
+    if (cRider_getControlState_5D98(self) != CS_Handplant) {
+        if (cRider_getMotionState(self) == MS_Air && info->Reflect.z > 0.800000011920929f) {
+            if (cur == kANCAT_Uber || cur == kANCAT_UberGrind) {
+                anim = kAID_WH_NB_LandOnFace2FwdFaceDown;
             } else if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
-                anim = frontDot < 0.0f ? 354 : 355;
+                anim = frontDot < 0.0f ? kAID_WH_LandOnFace2FwdFaceDown : kAID_WH_LandOnBack2FwdFaceUp;
             } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
                 if (upDot < 0.0f)
-                    anim = 350;
-                else if (cur == 18 || cur == 19)
-                    anim = 351;
+                    anim = kAID_WH_LandOnHead2RollFwd;
+                else if (cur == kANCAT_Grab || cur == kANCAT_Tweak)
+                    anim = kAID_WH_LandOnFeet2CartFwd;
             } else {
-                anim = sideDot < 0.0f ? 357 : 356;
+                anim = sideDot < 0.0f ? kAID_WH_LandOnRight2RollRight : kAID_WH_LandOnLeft2RollLeft;
             }
-        } else if (cRider_getMotionState(self) == 1) {
+        } else if (cRider_getMotionState(self) == MS_Air) {
             if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
                 float minSpeed = 416.5320129394531f;
                 if (minSpeed < info->Vel) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (contactHeight < 60.0f && len > kHighSpeedCollideThresh) {
-                            anim = 342;
+                            anim = kAID_WH_AirFromFrontLow2CartFwd;
                         } else {
                             unsigned int k;
                             if (len > kHighSpeedCollideThresh)
@@ -4235,32 +4254,32 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
                             else
                                 k = (unsigned int)AIrand() % 3;
                             if (k == 0)
-                                anim = 347;
+                                anim = kAID_WH_AirFromFront2FwdFaceUp;
                             else if (k == 1)
-                                anim = 343;
+                                anim = kAID_WH_AirFromFront2BwdFaceUp;
                             else if (k == 2)
-                                anim = 344;
+                                anim = kAID_WH_AirFromFront2BwdFaceDown;
                             else if (k == 3)
-                                anim = 346;
+                                anim = kAID_WH_AirFromFront2CartBwd;
                             else
-                                anim = 345;
+                                anim = kAID_WH_AirFromFront2RollBwd;
                         }
                     } else {
-                        anim = (AIrand() & 1) == 0 ? 340 : 341;
+                        anim = (AIrand() & 1) == 0 ? kAID_WH_AirFromBack2RollFwd : kAID_WH_AirFromBack2FwdFaceDown;
                     }
                 }
             } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
                 if (upDot < 0.0f)
-                    anim = 350;
-                else if (cur >= 18 && cur <= 21)
-                    anim = 351;
+                    anim = kAID_WH_LandOnHead2RollFwd;
+                else if (cur >= kANCAT_Grab && cur <= kANCAT_UberGrind)
+                    anim = kAID_WH_LandOnFeet2CartFwd;
             } else {
                 float minSpeed = 833.337646484375f;
                 if (minSpeed < info->Vel)
-                    anim = sideDot < 0.0f ? 339 : 338;
+                    anim = sideDot < 0.0f ? kAID_WH_AirFromRight2RollLeft : kAID_WH_AirFromLeft2RollRight;
             }
-            if (anim != 438 && (cur == 20 || cur == 21))
-                anim = 361;
+            if (anim != kAID_Invalid && (cur == kANCAT_Uber || cur == kANCAT_UberGrind))
+                anim = kAID_WH_NB_LandOnFace2FwdFaceDown;
         } else {
             float k = Clamp_5D98(Get_5D98((char*)&self->mMatrix.row[2]).z + 1.0f - Abs_5D98(info->Reflect.z),
                                  0.20000000298023224f, 1.399999976158142f);
@@ -4269,7 +4288,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (contactHeight < 60.0f && len > kHighSpeedCollideThresh) {
-                            anim = 332;
+                            anim = kAID_WH_GrndFromFrontLow2CartFwd;
                         } else {
                             unsigned int n;
                             if (len > kHighSpeedCollideThresh)
@@ -4277,27 +4296,27 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, i
                             else
                                 n = (unsigned int)AIrand() % 3;
                             if (n == 0)
-                                anim = 334;
+                                anim = kAID_WH_GrndFromFront2FwdFaceUp;
                             else if (n == 1)
-                                anim = 335;
+                                anim = kAID_WH_GrndFromFront2BwdFaceUp;
                             else if (n == 2)
-                                anim = 337;
+                                anim = kAID_WH_GrndFromFront2BwdFaceDown;
                             else if (n == 3)
-                                anim = 333;
+                                anim = kAID_WH_GrndFromFront2CartBwd;
                             else
-                                anim = 336;
+                                anim = kAID_WH_GrndFromFront2RollBwd;
                         }
                     } else {
-                        anim = (AIrand() & 1) == 0 ? 330 : 331;
+                        anim = (AIrand() & 1) == 0 ? kAID_WH_GrndFromBack2RollFwd : kAID_WH_GrndFromBack2FwdFaceDown;
                     }
                 }
             } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
             } else if (info->Vel > k * 2083.227294921875f) {
-                anim = sideDot < 0.0f ? 329 : 328;
+                anim = sideDot < 0.0f ? kAID_WH_GrndFromRight2RollLeft : kAID_WH_GrndFromLeft2RollRight;
             }
         }
     }
-    if (anim != 438)
+    if (anim != kAID_Invalid)
         cRider_flagEventWipeout(self, anim, 0, id, info);
     else
         self->doBump(info, 1);
@@ -4737,20 +4756,20 @@ static inline t4VectorInitW AxisAngle_6848(const t4Vector& axis, float angle)
  * Checks for the board touching a rail and, on contact, puts the rider into the railslide motion.
  *
  * cRider_isRailLandSuccess finds the contact. The velocity is turned along its direction at the along-rail speed, at
- * least 20 km/h and at most the old speed, with z cut to a tenth; the hit object's handler gets the opposite
- * change (applyForce). RailslideMode (1-4) comes from the control state and the board root bone's angle to
+ * least 20 km/h and at most the old speed, with z cut to a tenth; the hit object's handler gets the opposite change
+ * (applyForce). RailslideMode (kRSM_Riding .. kRSM_BS) comes from the control state and the board root bone's angle to
  * the rail. The trick is then awarded (cRider_flagEventLand from the air, else the score commit fed to
- * cRider_flagEventBoostPowerUp()) and motion 4 set. From cruise, natural air, spin or handplant the rider
- * starts the board-press (press landing) or railslide control; otherwise a style change away from 3 or 4
- * turns the rider back by 90 degrees.
+ * cRider_flagEventBoostPowerUp()) and MS_Railslide set. From cruise, natural air, spin or handplant the rider starts
+ * the board-press (press landing) or railslide control; otherwise a style change away from kRSM_FS or kRSM_BS turns the
+ * rider back by 90 degrees.
  *
- * @return 1 when the rider touched a rail, otherwise 0
+ * @return true when the rider touched a rail, otherwise false
  */
-int cRider::checkRailBoardCollisions()
+bool cRider::checkRailBoardCollisions()
 {
     tIntersectInfo land;
     if (!cRider_isRailLandSuccess_6848(this, &land))
-        return 0;
+        return false;
     float vn = Dot_6848(mVelocity, land.Inorm);
     if (vn < 0.0f) {
         vn = -vn;
@@ -4775,71 +4794,73 @@ int cRider::checkRailBoardCollisions()
     float upDot = Dot_6848(*(t4Vector*)&up, land.Inorm);
     float angle = Atan2_6848(upDot, sideDot);
     int prev = RAIL_STYLE(this);
-    if (cRider_getControlState_57B8(this) == 1) {
+    if (cRider_getControlState_57B8(this) == CS_BoardPress) {
         if (IsRidingFakie == 0)
-            RAIL_STYLE(this) = 1;
+            RAIL_STYLE(this) = kRSM_Riding;
         else
-            RAIL_STYLE(this) = 2;
+            RAIL_STYLE(this) = kRSM_Fakie;
     } else if (PRESS_TYPE(this) != 0) {
         if (Abs_6848(angle) > 1.5707964897155762f)
-            RAIL_STYLE(this) = 2;
+            RAIL_STYLE(this) = kRSM_Fakie;
         else
-            RAIL_STYLE(this) = 1;
-    } else if (cRider_getControlState_57B8(this) == 0xC) {
-        RAIL_STYLE(this) = 3;
+            RAIL_STYLE(this) = kRSM_Riding;
+    } else if (cRider_getControlState_57B8(this) == CS_UberGrind) {
+        RAIL_STYLE(this) = kRSM_FS;
     } else {
         t4VectorInit front = Front_6848(bone);
         if (front.z < 0.0f) {
             if (upDot < 0.0f)
-                RAIL_STYLE(this) = 4;
+                RAIL_STYLE(this) = kRSM_BS;
             else
-                RAIL_STYLE(this) = 3;
+                RAIL_STYLE(this) = kRSM_FS;
         } else if (Abs_6848(angle) > 2.6179940700531006f) {
-            RAIL_STYLE(this) = 2;
+            RAIL_STYLE(this) = kRSM_Fakie;
         } else if (Abs_6848(angle) < 0.523598849773407f) {
-            RAIL_STYLE(this) = 1;
+            RAIL_STYLE(this) = kRSM_Riding;
         } else if (angle < -0.523598849773407f) {
-            RAIL_STYLE(this) = 4;
+            RAIL_STYLE(this) = kRSM_BS;
         } else {
-            RAIL_STYLE(this) = 3;
+            RAIL_STYLE(this) = kRSM_FS;
         }
     }
     mSurfaceType = land.Stype;
-    if (cRider_getMotionState(this) == 1) {
+    if (cRider_getMotionState(this) == MS_Air) {
         cRider_flagEventLand(this, 0, RAIL_STYLE(this), PRESS_TYPE(this), &land, imp);
     } else {
         cRider_flagEventBoostPowerUp(this, 1, cRiderMetrix_evLand(mMetrix, IsRidingFakie != IsGoofyStance, 0,
                 RAIL_STYLE(this), PRESS_TYPE(this)));
     }
     gSSXAudio->mRailType = land.Stype;
-    cRider_setMotionState_6848(this, 4);
+    cRider_setMotionState_6848(this, MS_Railslide);
     int st = cRider_getControlState_57B8(this);
-    if (st == 0 || cRider_getControlState_57B8(this) == 4 || cRider_getControlState_57B8(this) == 5 || cRider_getControlState_57B8(this) == 11) {
+    if (st == CS_Cruise || cRider_getControlState_57B8(this) == CS_NaturalAir
+        || cRider_getControlState_57B8(this) == CS_Spin
+        || cRider_getControlState_57B8(this) == CS_Handplant) {
         int fall = 0;
-        if (cRider_getControlState_57B8(this) == 5 || cRider_getControlState_57B8(this) == 4)
+        if (cRider_getControlState_57B8(this) == CS_Spin || cRider_getControlState_57B8(this) == CS_NaturalAir)
             fall = 1;
-        cRider_setControlState_57B8(this, 13);
+        cRider_setControlState_57B8(this, CS_Void);
         cRider_doRailslideModeOrientation(this);
         int kind = PRESS_TYPE(this);
         if (kind != 0) {
-            if (kind == 1)
-                cRiderAnimBase_play(mRiderAnim, 26, 0, -1.0f);
+            if (kind == kPM_Nose)
+                cRiderAnimBase_play(mRiderAnim, kAID_NoseLand, 0, -1.0f);
             else
-                cRiderAnimBase_play(mRiderAnim, 34, 0, -1.0f);
-            cRider_setControlState_57B8(this, 1);
+                cRiderAnimBase_play(mRiderAnim, kAID_TailLand, 0, -1.0f);
+            cRider_setControlState_57B8(this, CS_BoardPress);
         } else {
             cRailslideControl_playGainFocusAnim(&mRiderHandler->RailslideControl, fall);
-            cRider_setControlState_57B8(this, 7);
+            cRider_setControlState_57B8(this, CS_Railslide);
         }
     } else if (prev != RAIL_STYLE(this)) {
-        if (prev == 3) {
+        if (prev == kRSM_FS) {
             cRider_rotateOrientation(this, GetUp_6848(this), 1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(mRiderAnim, 1.5707963705062866f);
             float yaw = 0.0f;
             cRiderAnim* riderAnim = mRiderAnim;
             riderAnim->OrientationOffset.P = t4vect_Origin_6848;
             riderAnim->OrientationOffset.Q = AxisAngle_6848(t4vect_ZAxis_6848, -yaw);
-        } else if (prev == 4) {
+        } else if (prev == kRSM_BS) {
             cRider_rotateOrientation(this, GetUp_6848(this), -1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(mRiderAnim, -1.5707963705062866f);
             float yaw = 0.0f;
@@ -4850,7 +4871,7 @@ int cRider::checkRailBoardCollisions()
         cRider_doRailslideModeOrientation(this);
     }
     cRailslideMotion_setCrookedAngle(&mRiderHandler->RailslideMotion, &land.Inorm);
-    return 1;
+    return true;
 }
 
 #undef RAIL_STYLE
@@ -5054,50 +5075,50 @@ static inline t4VectorInit Front_6F78(const sAnimModelBone* animModelBone)
                     0.0f);
 }
 
-// Snaps the rider onto the rail found ahead of its current bone; returns 1 when it lands on it.
-// PORT: the unit declares cRider_checkRailBodyCollisions as void(void*); it returns 0/1.
-extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self) __asm__("cRider_checkRailBodyCollisions");
+// Snaps the rider onto the rail found ahead of its current bone; returns true when it lands on it.
+// PORT: the unit declares cRider_checkRailBodyCollisions as void(void*); it returns a bool.
+extern "C" bool cRider_checkRailBodyCollisions_impl(cRider* self) __asm__("cRider_checkRailBodyCollisions");
 /**
  * Pushes the rider's body off a rail it runs into without landing on it.
  *
- * Not in motion state 4. Looks for a rail spline within 300 of the hip bone (cOverlapList_splineIntersect on
+ * Not in MS_Railslide. Looks for a rail spline within 300 of the hip bone (cOverlapList_splineIntersect on
  * mOverlapList); rails behind the motion, more than 50 off the hips' forward line, or that the board can land on
  * (cRider_isRailLandSuccess, isRailLandSuccess) are ignored. For a body hit it notifies the rail's handler
  * (updateIntersectInfo), moves the rider out to 50 from the rail (cRider_moveFromCollision), pushes mVelocity away
- * along the contact normal by the closing speed + 55.6, reports the impulse (applyForce), on the ground turns the
- * rider (cRider_turnFromCollision, cRider_updateOrientationImplicit) and runs cRider_reactToCollision.
+ * along the contact normal by the closing speed + 55.6, reports the impulse (applyForce), on the ground turns the rider
+ * (cRider_turnFromCollision, cRider_updateOrientationImplicit) and runs cRider_reactToCollision.
  *
- * The // note above the definition says it snaps the rider onto the rail, but a landable rail returns 0 here; landing
- * is cRider_checkRailBoardCollisions's job.
+ * The // note above the definition says it snaps the rider onto the rail, but a landable rail returns false here;
+ * landing is cRider_checkRailBoardCollisions's job.
  *
- * @return 1 when the body was pushed off a rail, else 0
+ * @return true when the body was pushed off a rail, else false
  */
-extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
+extern "C" bool cRider_checkRailBodyCollisions_impl(cRider* self)
 {
-    if (cRider_getMotionState(self) == 4) {
-        return 0;
+    if (cRider_getMotionState(self) == MS_Railslide) {
+        return false;
     }
     sAnimModelBone* animModelBone = &self->mAnimModel->bones[self->mBoneHips];
     const t4Vector& dir = Front_6F78(animModelBone);
     tIntersectInfo hit;
     if (!cOverlapList_splineIntersect_6F78(self->mOverlapList, &animModelBone->pos, &hit.Ipos, 1, 300.0f)) {
-        return 0;
+        return false;
     }
     float speed = Len_6F78(self->mVelocity);
     if (speed > 0.0010000000474974513f) {
         float back = Dot_6F78(Sub_6F78(hit.Ipos, animModelBone->pos), self->mVelocity);
         if (back < speed * -0.20000000298023224f) {
-            return 0;
+            return false;
         }
     }
     float along = Clamp_6F78(Dot_6F78(dir, Sub_6F78(hit.Ipos, animModelBone->pos)), -50.0f, 50.0f);
     t4Vector delta = Sub_6F78(Add_6F78(animModelBone->pos, Scale_6F78(dir, along)), hit.Ipos);
     if (Len_6F78(delta) > 50.0f) {
-        return 0;
+        return false;
     }
     tIntersectInfo land;
     if (cRider_isRailLandSuccess_6F78(self, &land)) {
-        return 0;
+        return false;
     }
     float vn = Dot_6F78(self->mVelocity, hit.Inorm);
     if (vn < 0.0f) {
@@ -5140,13 +5161,13 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
             handler->applyForce(hit, imp);
         }
     }
-    if (cRider_getMotionState(self) == 0) {
+    if (cRider_getMotionState(self) == MS_Ground) {
         hit.Inorm = off;
         cRider_turnFromCollision(self, &hit);
         cRider_updateOrientationImplicit(self);
     }
     cRider_reactToCollision(self, &info, hit.Stype);
-    return 1;
+    return true;
 }
 #endif
 
@@ -5326,27 +5347,27 @@ static inline float Kph_7578(float kph) { return kph / 3.6f; }
 /**
  * Starts a handplant when the rider reaches a near-vertical rail surface ahead.
  *
- * Sends cheat input 2 (cCheatFX_setCheatInput on the handler's +0xD20). In the air (motion state 1) it gives up when
- * falling faster than 2000 km/h, upside down, or in channel 2 animation categories 0x12 .. 0x14. It probes 300 ahead
- * along the velocity (the front axis below 100 km/h) for a spline (cOverlapList_splineIntersect, type 2); the hit must be within 300,
- * steep (|normal.z| <= 0.9) and ahead of the motion. Then control state 0xD, cHandplantMotion_init and cHandplantControl_init
- * (cHandplantControl init) with clamp(5000 km/h / max(speed, 1000 km/h), 0.5, 1.5) / 2, control state 0xB and
- * cRider_setMotionState(5).
+ * Sends cheat input 2 (cCheatFX_setCheatInput on the handler's +0xD20). In the air (MS_Air) it gives up when falling
+ * faster than 2000 km/h, upside down, or in channel 2 animation categories kANCAT_Grab .. kANCAT_Uber. It probes 300
+ * ahead along the velocity (the front axis below 100 km/h) for a spline (cOverlapList_splineIntersect, type 2); the hit
+ * must be within 300, steep (|normal.z| <= 0.9) and ahead of the motion. Then CS_Void, cHandplantMotion_init and
+ * cHandplantControl_init (cHandplantControl init) with clamp(5000 km/h / max(speed, 1000 km/h), 0.5, 1.5) / 2,
+ * CS_Handplant and cRider_setMotionState(MS_Handplant).
  *
  * Callers pass a second bool (On Tour isTransThrough); this version takes and reads only the rider.
  *
- * @return 1 when a handplant started
+ * @return true when a handplant started, else false
  */
-int cRider::checkHandplantCollisions()
+bool cRider::checkHandplantCollisions()
 {
     cCheatFX_setCheatInput(&mRiderHandler->CheatFX, 2);
-    if (cRider_getMotionState((char*)this) == 1) {
+    if (cRider_getMotionState((char*)this) == MS_Air) {
         if (mVelocity.z < Kph_7578(-2000.0f))
-            return 0;
+            return false;
         if (Up_7578(this).z < 0.0f)
-            return 0;
+            return false;
         if ((unsigned int)(cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) - 18) < 3)
-            return 0;
+            return false;
     }
     float spd = Len(*(sVec4*)&mVelocity);
     sVec4 dir;
@@ -5357,26 +5378,26 @@ int cRider::checkHandplantCollisions()
         dir = Front_7578(this);
     sVec4 probePos = AddV_7578(*(sVec4*)&mPosition, ScaleV_7578(dir, 300.0f));
     if (!cOverlapList_splineIntersect_7578(mOverlapList, &probePos, &hit, 2, 300.0f))
-        return 0;
+        return false;
     if (Abs((*(sVec4*)&hit.Inorm).z) > 0.8999999761581421f)
-        return 0;
+        return false;
     sVec4 toHit = SubV((*(sVec4*)&hit.Ipos), probePos);
     if (Len(toHit) > 300.0f)
-        return 0;
+        return false;
     toHit = SubV((*(sVec4*)&hit.Ipos), *(sVec4*)&mPosition);
     if (Dot(*(sVec4*)&mVelocity, toHit) < 0.0f)
-        return 0;
+        return false;
     spd = Max_7578(spd, Kph_7578(1000.0f));
     float speedRatio = Clamp(Kph_7578(5000.0f) / spd, 0.5f, 1.5f);
     float enterSec = speedRatio * 0.5f;
     if (Dot((*(sVec4*)&hit.Inorm), *(sVec4*)&mVelocity) < 0.0f)
         ScaleEq((*(sVec4*)&hit.Inorm), -1.0f);
-    cRider_setControlState_2(((char*)this), 13);
+    cRider_setControlState_2(((char*)this), CS_Void);
     cHandplantMotion_init(enterSec, &mRiderHandler->HandplantMotion, &hit);
     cHandplantControl_init(enterSec, &mRiderHandler->HandplantControl, &hit, mRiderHandler->HandplantMotion.IsToeside);
-    cRider_setControlState_2(((char*)this), 11);
-    cRider_setMotionState_7578(((char*)this), 5);
-    return 1;
+    cRider_setControlState_2(((char*)this), CS_Handplant);
+    cRider_setMotionState_7578(((char*)this), MS_Handplant);
+    return true;
 }
 #endif
 
@@ -5552,17 +5573,17 @@ static inline t4Vector operator*(const t4Vector& v, float s) { return Scale_7888
 /**
  * Handles this rider's contacts with the other riders: pushes overlapping bodies apart and lands shoves.
  *
- * Once per tick per pair, overlapping sphere trees (cRiderSphereTree_IsRiderCollision) push both riders 0.55 of the contact
- * vector apart along their ground planes and, at most every 3 ticks, exchange momentum along the contact
- * (cRider_doOpponentCollision). While this rider's channel-1 animation (class 13, probably the punch) is in its hit
- * window, a rider within 150 in front of PunchVect that is not blocking is shoved with a strength from the
- * collision stat and PunchStrength, at most every 3 ticks per pair. Actors (mIsActor) are skipped.
+ * Once per tick per pair, overlapping sphere trees (cRiderSphereTree_IsRiderCollision) push both riders 0.55 of the
+ * contact vector apart along their ground planes and, at most every 3 ticks, exchange momentum along the contact
+ * (cRider_doOpponentCollision). While this rider's channel-1 animation (kANCAT_Punch) is in its hit window, a rider
+ * within 150 in front of PunchVect that is not blocking (kANCAT_Block) is shoved with a strength from the collision
+ * stat and PunchStrength, at most every 3 ticks per pair. Actors (mIsActor) are skipped.
  */
 void cRider::checkOpponentCollisions()
 {
     int busy = 0;
     float mass = cRider_getMass(this);
-    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) != 13 ||
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) != kANCAT_Punch ||
         tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 1) ||
         !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 0))
         busy = 1;
@@ -5603,7 +5624,7 @@ void cRider::checkOpponentCollisions()
             continue;
         if (orec->PunchTick >= AITick() - 3)
             continue;
-        if (cRiderAnimBase_getCurrentAnimCategory(other->mRiderAnim, 1) == 3 &&
+        if (cRiderAnimBase_getCurrentAnimCategory(other->mRiderAnim, 1) == kANCAT_Block &&
             tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1)->Events, 0) &&
             !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1)->Events, 1))
             continue;
@@ -5802,15 +5823,15 @@ static inline t4Vector Get_7E70(char* p) { return *(t4Vector*)p; }
 /**
  * Applies a rider-vs-rider shove or punch to this rider and picks a bump or a knockdown.
  *
- * Ignored in control state 10. Adds @p n x clamp(@p speed, +-555.6) to mVelocity (flattened onto mGroundNormal when it
- * is valid); in the air it relaunches the air predictor and ignores a push along the up axis. No reaction follows in
- * motion state 2, control state 9 or below 40 speed.
+ * Ignored in CS_FinishLine. Adds @p n x clamp(@p speed, +-555.6) to mVelocity (flattened onto mGroundNormal when it is
+ * valid); in the air it relaunches the air predictor and ignores a push along the up axis. No reaction follows in
+ * MS_Wipeout, CS_Reset or below 40 speed.
  *
- * Above 599.97 it picks a knockdown animation from the push direction against the rider's axes for cRider_flagEventWipeout
- * (flagEventWipeout) and flags cRider_flagEventPunchKnockdown (punch knockdown) or cRider_flagEventBumpKnockdown (bump knockdown); otherwise it bumps
- * (cRider_doBump) and flags cRider_flagEventPunch (punch) or cRider_flagEventBump (bump). Rules bit 5 (D_005308D0) sets the speed to
- * exactly 599.97 and the test is strict, so that rule turns every knockdown into a bump. Called by
- * cRider_checkOpponentCollisions.
+ * Above 599.97 it picks a knockdown animation (kAID_WH_Grnd*) from the push direction against the rider's axes for
+ * cRider_flagEventWipeout (flagEventWipeout) and flags cRider_flagEventPunchKnockdown (punch knockdown) or
+ * cRider_flagEventBumpKnockdown (bump knockdown); otherwise it bumps (cRider_doBump) and flags cRider_flagEventPunch
+ * (punch) or cRider_flagEventBump (bump). Rules bit 5 (D_005308D0) sets the speed to exactly 599.97 and the test is
+ * strict, so that rule turns every knockdown into a bump. Called by cRider_checkOpponentCollisions.
  *
  * @param other  the other rider
  * @param n  the unit push direction
@@ -5819,7 +5840,7 @@ static inline t4Vector Get_7E70(char* p) { return *(t4Vector*)p; }
  */
 void cRider::doOpponentCollision(cRider* other, t4Vector* n, int flag, float speed)
 {
-    if (cRider_getControlState_7E70((char*)this) == 10)
+    if (cRider_getControlState_7E70((char*)this) == CS_FinishLine)
         return;
     float absSpd = Abs_7E70(speed);
     float lim = 555.5555419921875f;
@@ -5830,7 +5851,8 @@ void cRider::doOpponentCollision(cRider* other, t4Vector* n, int flag, float spe
                    Sub_7E70(imp, Scale_7E70(*(&mGroundNormal), Dot_7E70(imp, *(&mGroundNormal)))));
     } else {
         AddEq_7E70(*(&mVelocity), imp);
-        if (cRider_getMotionState((char*)this) == 1 || (cRider_getMotionState((char*)this) == 2 && mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
+        if (cRider_getMotionState((char*)this) == MS_Air || (cRider_getMotionState((char*)this) == MS_Wipeout
+            && mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Air)) {
             cAI_7E70* ai = (cAI_7E70*)(&VPTR_AT(this, sizeof(cRiderState)));
             t4Vector* pos = ai->GetPos();
             cAirPredictor_startLaunchIntoAir(mAirPredictor, pos, ai->GetDir(), TerminalVelocity);
@@ -5838,9 +5860,9 @@ void cRider::doOpponentCollision(cRider* other, t4Vector* n, int flag, float spe
                 absSpd = 0.0f;
         }
     }
-    if (cRider_getMotionState((char*)this) == 2)
+    if (cRider_getMotionState((char*)this) == MS_Wipeout)
         return;
-    if (cRider_getControlState_7E70((char*)this) == 9)
+    if (cRider_getControlState_7E70((char*)this) == CS_Reset)
         return;
     if (absSpd < 39.99532699584961f)
         return;
@@ -5865,24 +5887,24 @@ void cRider::doOpponentCollision(cRider* other, t4Vector* n, int flag, float spe
                 else
                     k = (unsigned int)AIrand() % 3;
                 if (k == 0)
-                    anim = 334;
+                    anim = kAID_WH_GrndFromFront2FwdFaceUp;
                 else if (k == 1)
-                    anim = 335;
+                    anim = kAID_WH_GrndFromFront2BwdFaceUp;
                 else if (k == 2)
-                    anim = 337;
+                    anim = kAID_WH_GrndFromFront2BwdFaceDown;
                 else if (k == 3)
-                    anim = 333;
+                    anim = kAID_WH_GrndFromFront2CartBwd;
                 else
-                    anim = 336;
+                    anim = kAID_WH_GrndFromFront2RollBwd;
             } else {
-                anim = (AIrand() & 1) == 0 ? 330 : 331;
+                anim = (AIrand() & 1) == 0 ? kAID_WH_GrndFromBack2RollFwd : kAID_WH_GrndFromBack2FwdFaceDown;
             }
         } else if (Abs_7E70(dz) < Abs_7E70(dx) && Abs_7E70(dy) < Abs_7E70(dx)) {
-            anim = 331;
+            anim = kAID_WH_GrndFromBack2FwdFaceDown;
         } else if (dz < 0.0f) {
-            anim = 329;
+            anim = kAID_WH_GrndFromRight2RollLeft;
         } else {
-            anim = 328;
+            anim = kAID_WH_GrndFromLeft2RollRight;
         }
         cRider_flagEventWipeout_7E70(((char*)this), anim, flag, 0, &info);
         if (flag)
@@ -5966,37 +5988,39 @@ static inline t4Vector Get_8388(char* p) { return *(t4Vector*)p; }
 /**
  * Plays a stumble (bump) animation for a glancing collision.
  *
- * Only on the ground or in motion state 4, and only in control states 0, 1 (a board press, ended by
- * cBoardPressControl_forceExit on the handler's +0x1D0), 2 or 7. A contact normal (info +0x20) along the front axis
- * (+0x1B0) plays 0x37 (front) or 0x38 (back). Sideways (side axis +0x1A0, mirrored when riding fakie, +0x320) a slow
- * contact (normal speed < 1111.1) at over 1388.9 speed off motion state 4 adds a random number of half turns to
- * mSpinRate and plays 0x3A/0x3C; otherwise 0x39/0x3B. With @p flag it plays the bump sound (func_002A0E70). Ends in
- * control state 3.
+ * Only in MS_Ground or MS_Railslide, and only in CS_Cruise, CS_BoardPress (ended by cBoardPressControl_forceExit on the
+ * handler's +0x1D0), CS_Prewind or CS_Railslide. A contact normal (info +0x20) along the front axis (+0x1B0) plays
+ * kAID_BumpFromBehind or kAID_BumpFromFront. Sideways (side axis +0x1A0, mirrored when riding fakie, +0x320) a slow
+ * contact (normal speed < 1111.1) at over 1388.9 speed off MS_Railslide adds a random number of half turns to mSpinRate
+ * and plays kAID_BumpHardFromTS / kAID_BumpHardFromHS; otherwise kAID_BumpFromTS / kAID_BumpFromHS. With @p flag it
+ * plays the bump sound (func_002A0E70). Ends in CS_Bump.
  *
  * @param info  the collide info (contact normal at +0x20, normal speed at +0x30)
  * @param flag  nonzero to play the bump sound (On Tour isObject)
  */
 void cRider::doBump(tCollideInfo* info, int flag)
 {
-    if (cRider_getMotionState((char*)this) != 0 && cRider_getMotionState((char*)this) != 4)
+    if (cRider_getMotionState((char*)this) != MS_Ground && cRider_getMotionState((char*)this) != MS_Railslide)
         return;
-    if (cRider_getControlState_8388((char*)this) == 1) {
+    if (cRider_getControlState_8388((char*)this) == CS_BoardPress) {
         cBoardPressControl_forceExit(&mRiderHandler->BoardPressControl);
-    } else if (cRider_getControlState_8388((char*)this) != 0 && cRider_getControlState_8388((char*)this) != 2 && cRider_getControlState_8388((char*)this) != 7) {
+    } else if (cRider_getControlState_8388((char*)this) != CS_Cruise
+               && cRider_getControlState_8388((char*)this) != CS_Prewind
+               && cRider_getControlState_8388((char*)this) != CS_Railslide) {
         return;
     }
     int played = 0;
     float frontDot = Dot_8388(Get_8388((char*)&mMatrix.row[1]), ((const tCollideInfo*)info)->Reflect);
     if (frontDot > 0.7071067690849304f) {
-        cRiderAnimBase_play(mRiderAnim, 55, 0, -1.0f);
+        cRiderAnimBase_play(mRiderAnim, kAID_BumpFromBehind, 0, -1.0f);
     } else if (frontDot < -0.7071067690849304f) {
-        cRiderAnimBase_play(mRiderAnim, 0x38, 0, -1.0f);
+        cRiderAnimBase_play(mRiderAnim, kAID_BumpFromFront, 0, -1.0f);
     } else {
         float side = Dot_8388(Get_8388((char*)&mMatrix), ((const tCollideInfo*)info)->Reflect);
         if (IsRidingFakie)
             side = -side;
         if (((const tCollideInfo*)info)->Vel < 1111.111083984375f && Len_8388(*(&mVelocity)) > 1388.888916015625f &&
-            cRider_getMotionState((char*)this) != 4) {
+            cRider_getMotionState((char*)this) != MS_Railslide) {
             float spinRate = mSpinRate;
             if (Abs_8388(spinRate) < 6.2831854820251465f) {
                 if (spinRate < 0.0f)
@@ -6006,15 +6030,15 @@ void cRider::doBump(tCollideInfo* info, int flag)
                 else
                     mSpinRate += ((int)((unsigned int)AIrand() % 5) - 2) * 3.1415927410125732f;
             }
-            cRiderAnimBase_play(mRiderAnim, side < 0.0f ? 58 : 0x3C, 0, -1.0f);
+            cRiderAnimBase_play(mRiderAnim, side < 0.0f ? kAID_BumpHardFromTS : kAID_BumpHardFromHS, 0, -1.0f);
             played = 1;
         } else {
-            cRiderAnimBase_play(mRiderAnim, side < 0.0f ? 57 : 59, 0, -1.0f);
+            cRiderAnimBase_play(mRiderAnim, side < 0.0f ? kAID_BumpFromTS : kAID_BumpFromHS, 0, -1.0f);
         }
     }
     if (flag)
         func_002A0E70(cAudioInterface_bxAudio(), ((char*)this), played);
-    cRider_setControlState_8388(((char*)this), 3);
+    cRider_setControlState_8388(((char*)this), CS_Bump);
 }
 #endif
 
@@ -6148,23 +6172,23 @@ static inline t4VectorInit Fwd_86B8(const sAnimModelBone* n)
                     0.0f);
 }
 
-extern "C" int cRider_isRailBoardIntersect_86B8(char* self, t4Vector* tgt, t4Vector* dir)
+extern "C" bool cRider_isRailBoardIntersect_86B8(char* self, t4Vector* tgt, t4Vector* dir)
     __asm__("cRider_isRailBoardIntersect");
 /**
  * Tells whether the rider's board reaches a rail.
  *
- * The board's axis and position come from the animation model's board-root bone (mAnimModel, mBoneBoardRoot; axis
- * from the bone's quaternion, position plus mModelOffset). With the blend mSlewed[9].cur, the reach is lerp(30, 50)
- * and the half length lerp(100, 170) (lerp(50, 170) when PressMode is set), less the reach. It returns 1 when the board
- * segment's point nearest @p tgt is within reach. Otherwise, unless @p dir is almost parallel to the board
- * (1 - d * d < 0.001), it takes the board point nearest the rail line, finds the spline nearest it
- * (cOverlapList_splineIntersect, mOverlapList, range 300) and returns 1 when that point is within reach.
+ * The board's axis and position come from the animation model's board-root bone (mAnimModel, mBoneBoardRoot; axis from
+ * the bone's quaternion, position plus mModelOffset). With the blend mSlewed[9].cur, the reach is lerp(30, 50) and the
+ * half length lerp(100, 170) (lerp(50, 170) when PressMode is set), less the reach. It returns true when the board
+ * segment's point nearest @p tgt is within reach. Otherwise, unless @p dir is almost parallel to the board (1 - d * d <
+ * 0.001), it takes the board point nearest the rail line, finds the spline nearest it (cOverlapList_splineIntersect,
+ * mOverlapList, range 300) and returns true when that point is within reach.
  *
  * @param tgt  the rail point
  * @param dir  the rail direction
- * @return 1 when the board reaches the rail, else 0
+ * @return true when the board reaches the rail, else false
  */
-extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, t4Vector* tgt, t4Vector* dir)
+extern "C" bool cRider_isRailBoardIntersect_86B8(char* vself, t4Vector* tgt, t4Vector* dir)
 {
     cRider* self = (cRider*)vself;
     sAnimModelBone* n = &(self->mAnimModel->bones)[self->mBoneBoardRoot];
@@ -6182,17 +6206,17 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, t4Vector* tgt, t4Ve
     float hi = farR - nearR;
     t4VectorInit diff = Sub_86B8(Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(proj, lo, hi))), *tgt);
     if (Len_86B8(diff) <= nearR)
-        return 1;
+        return true;
     float dd = Dot_86B8(*dir, fwd);
     float den = 1.0f - dd * dd;
     if (den < 0.0010000000474974513f)
-        return 0;
+        return false;
     t4VectorInit relScaled = Div_86B8(Sub_86B8(pos, *tgt), den);
     float along = Dot_86B8(relScaled, Sub_86B8(Scale_86B8(*dir, dd), fwd));
     t4VectorInit probePos = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(along, lo, hi)));
     tIntersectInfo hit;
     if (!cOverlapList_splineIntersect_86B8(self->mOverlapList, &probePos, &hit.Ipos, 1, 300.0f))
-        return 0;
+        return false;
     diff = Sub_86B8(probePos, hit.Ipos);
     return Len_86B8(diff) <= nearR;
 }
@@ -6284,18 +6308,18 @@ extern "C" int cRider_isRailBoardIntersect(void*, t4Vector*, t4Vector*);
 /**
  * Tests whether the rider's board can land on a nearby rail.
  *
- * Only on the ground or in the air (motion states 0 and 1). It probes for a rail (cOverlapList_splineIntersect, type 1, radius 300)
- * from the board root bone (mAnimModel bone mBoneBoardRoot + mModelOffset) and rejects rails behind the motion. In
- * channel 2 animation categories 0x12 .. 0x14 the current sequence's flags (tEventFlags_isSet1 on cRiderAnimBase_getCurrentAnimSequence + 0xB0) must
- * allow it. The answer is cRider_isRailBoardIntersect (On Tour isRailBoardIntersect) on the hit. Callers:
- * cRider_checkRailBoardCollisions and cRider_checkRailBodyCollisions.
+ * Only on the ground or in the air (MS_Ground and MS_Air). It probes for a rail (cOverlapList_splineIntersect, type 1,
+ * radius 300) from the board root bone (mAnimModel bone mBoneBoardRoot + mModelOffset) and rejects rails behind the
+ * motion. In channel 2 animation categories kANCAT_Grab .. kANCAT_Uber the current sequence's flags (tEventFlags_isSet1
+ * on cRiderAnimBase_getCurrentAnimSequence + 0xB0) must allow it. The answer is cRider_isRailBoardIntersect (On Tour
+ * isRailBoardIntersect) on the hit. Callers: cRider_checkRailBoardCollisions and cRider_checkRailBodyCollisions.
  *
  * @param hit  receives the rail intersection (Ipos; Inorm is the rail direction)
  * @return nonzero when the board lands on the rail
  */
 int cRider::isRailLandSuccess(tIntersectInfo* hit)
 {
-    if (cRider_getMotionState((char*)this) != 0 && cRider_getMotionState((char*)this) != 1)
+    if (cRider_getMotionState((char*)this) != MS_Ground && cRider_getMotionState((char*)this) != MS_Air)
         return 0;
     sAnimModelBone* boardRoot = &mAnimModel->bones[mBoneBoardRoot];
     t4Vector boardCenter = vAdd_8A48(boardRoot->pos, *(&mModelOffset));
@@ -6307,12 +6331,12 @@ int cRider::isRailLandSuccess(tIntersectInfo* hit)
         if (vDot_8A48(toRail, *(&mVelocity)) < spd * -0.20000000298023224f)
             return 0;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == 18) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == kANCAT_Grab) {
         if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 2)->Events, 2) &&
             tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 2)->Events, 0))
             return 0;
-    } else if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == 19 ||
-               cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == 20) {
+    } else if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == kANCAT_Tweak ||
+               cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) == kANCAT_Uber) {
         if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 2)->Events, 2))
             return 0;
     }
@@ -6326,24 +6350,24 @@ INCLUDE_ASM("seg/seg_1218", cRider_isIntersecting);
 /**
  * Tells whether the rider's last static-object test hit an instance.
  *
- * Compares the instance's id (m_RID) with the ids in mVisitedIds that cRider_objectIntersect records (at most 64,
- * ended by 0xFFFFFFFF). Virtual slot 3 (word 7) of the rider vtables.
+ * Compares the instance's id (m_RID) with the ids in mVisitedIds that cRider_objectIntersect records (at most 64, ended
+ * by kInvalidRID). Virtual slot 3 (word 7) of the rider vtables.
  *
  * @param rider  the rider
  * @param instance  the instance
- * @return 1 when the id is listed, else 0
+ * @return true when the id is listed, else false
  */
-extern "C" int cRider_isIntersecting(cRider* rider, tInstanceRecord* instance) {
+extern "C" bool cRider_isIntersecting(cRider* rider, tInstanceRecord* instance) {
     int i = 0;
     if (~rider->mVisitedIds[0]) {
         do {
             if (rider->mVisitedIds[i] == instance->m_RID) {
-                return 1;
+                return true;
             }
             i++;
-        } while (i < 64 && rider->mVisitedIds[i] != 0xFFFFFFFF);
+        } while (i < 64 && rider->mVisitedIds[i] != cRiderState::kInvalidRID);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6628,7 +6652,7 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, tBoardPressCmd* cmd)
  * Zeroes the 8-byte command, applies the rubber-band time warp (cRider_updateTimeWarp() with cComputer_setupWarp's
  * factor), then fills it with the get*Cmd for the rider's control state: cruise (cComputer_getCruiseCmd), board press,
  * prewind, natural air, spin, gate, railslide or wipeout (cComputer_getWipeoutCmd); other states leave it empty.
- * Outside the spin state it clears mGrabEndTime.
+ * Outside CS_Spin it clears mGrabEndTime.
  *
  * @param _cmd  the command to fill (On Tour tControlCmd&)
  */
@@ -6639,34 +6663,34 @@ void cComputer::getControlCmd(tControlCmd* _cmd)
     cRider_updateTimeWarp(RiderHandler.GroundMotion.mRider, cComputer_setupWarp((char*)this));
     int state = cRider_getControlState_A768(RiderHandler.GroundMotion.mRider);
     switch (state) {
-    case 0:
+    case CS_Cruise:
         cComputer_getCruiseCmd_A768(this, &_cmd->CruiseCmd);
         break;
-    case 2:
+    case CS_Prewind:
         getPrewindCmd(&_cmd->PrewindCmd);
         break;
-    case 6:
+    case CS_Gate:
         getGateCmd(&_cmd->GateCmd);
         break;
-    case 4:
+    case CS_NaturalAir:
         getNaturalAirCmd(&_cmd->NaturalAirCmd);
         break;
-    case 7:
+    case CS_Railslide:
         getRailslideCmd(&_cmd->RailslideCmd);
         break;
-    case 5:
+    case CS_Spin:
         getSpinCmd(&_cmd->SpinCmd);
         break;
-    case 8:
+    case CS_Wipeout:
         getWipeoutCmd(&_cmd->WipeoutCmd);
         break;
-    case 1:
+    case CS_BoardPress:
         getBoardPressCmd(&_cmd->BoardPressCmd);
         break;
-    case 3: case 9: case 10: case 11: case 12: case 13:
+    case CS_Bump: case CS_Reset: case CS_FinishLine: case CS_Handplant: case CS_UberGrind: case CS_Void:
         break;
     }
-    if (state != 5) {
+    if (state != CS_Spin) {
         *(int*)&mGrabEndTime = 0;
     }
 }
@@ -6847,10 +6871,10 @@ static inline sV4_AA70 Scale_AA70(const sV4_AA70& v, float s)
 /**
  * Builds the prewind command: speed crouch, jump timing at the lip, steering at the jump and the trick axes.
  *
- * Sets bit 14 when 5 km/h under mDesiredSpeed. For a pipe jump (mToPipe) it sets bit 13 until the rider is
- * within 50 of the jump's length from mStartJumpPos, and returns. Otherwise a jump event within 50 ahead sets
- * bit 13 and steers (low field of word 1) at the jump's end point minus half of the rider's +0x490 point
- * minus its position. The fields at bits 15-20 and 21-26 get mSpinAxis and mFlipAxis.
+ * Sets bit 14 when 5 km/h under mDesiredSpeed. For a pipe jump (mToPipe) it sets bit 13 until the rider is within 50 of
+ * the jump's length from mStartJumpPos, and returns. Otherwise a jump event (PE_Jump) within 50 ahead sets bit 13 and
+ * steers (low field of word 1) at the jump's end point minus half of the rider's +0x490 point minus its position. The
+ * fields at bits 15-20 and 21-26 get mSpinAxis and mFlipAxis.
  *
  * @param cmd  the prewind command (On Tour tPrewindCmd)
  */
@@ -6860,7 +6884,8 @@ void cComputer::getPrewindCmd(tPrewindCmd* cmd)
     cRider* rider = RiderHandler.GroundMotion.mRider;
     cTrack_AA70* trk = (cTrack_AA70*)rider->AIPath;
     int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 50.0f);
-    int sel = -1;
+    const int kNoJumpEvent = -1; // sel: no jump event in range
+    int sel = kNoJumpEvent;
     if (Len_AA70(*(sV4_AA70*)&RiderHandler.GroundMotion.mRider->mVelocity) < mDesiredSpeed - 138.88890075683594f)
         cmd->BoostHeld = 1;
     if (mToPipe) {
@@ -6872,14 +6897,14 @@ void cComputer::getPrewindCmd(tPrewindCmd* cmd)
         return;
     }
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 0x10) {
+        if (buf[i].type == PE_Jump) {
             sel = i;
             cmd->JumpHeld = 1;
             break;
         }
     }
     float* ctl = (float*)(&mDesiredSpeed);
-    if (sel != -1) {
+    if (sel != kNoJumpEvent) {
         cRider* riderBytes = RiderHandler.GroundMotion.mRider;
         sV4_AA70 half = Sub_AA70(*(sV4_AA70*)&riderBytes->PathPos, *(sV4_AA70*)&riderBytes->mPosition);
         half = Scale_AA70(half, 0.5f);
@@ -6996,11 +7021,11 @@ static inline float clamp_AED8(float v, float lo, float hi)
 /**
  * Builds the railslide command: jumping off at a jump event, balance, rail spins and speed pumping.
  *
- * Copies the jump event's toRail flag into mToRail (uninitialised stack data when there is no event) and
- * always sets bits 17-24. At a jump the rider has reached it sets bits 13-14 and calls setupPrewindState().
- * Otherwise the field at bits 25-30 gets twice the side vector's z (clamped, when over 0.1), the low field of
- * word 1 gets +31 for a negative mSpinAxis and -31 otherwise (not for RailslideMode 3 or 4, or channel-2
- * animation class 14), and bit 16 is set in a reached speed zone (cComputer_checkForSpeedZone) when 5 km/h too slow.
+ * Copies the jump event's toRail flag into mToRail (uninitialised stack data when there is no event) and always sets
+ * bits 17-24. At a jump the rider has reached it sets bits 13-14 and calls setupPrewindState(). Otherwise the field at
+ * bits 25-30 gets twice the side vector's z (clamped, when over 0.1), the low field of word 1 gets +31 for a negative
+ * mSpinAxis and -31 otherwise (not for RailslideMode kRSM_FS or kRSM_BS, or channel-2 animation category
+ * kANCAT_RailSpin), and bit 16 is set in a reached speed zone (cComputer_checkForSpeedZone) when 5 km/h too slow.
  *
  * @param cmd  the railslide command (On Tour tRailslideCmd)
  */
@@ -7021,8 +7046,8 @@ void cComputer::getRailslideCmd(tRailslideCmd* cmd)
     if (vAbs_AED8(y) > 0.1f)
         cmd->RailBalance = (int)(y * 31.0f);
     cRider* rider = RiderHandler.GroundMotion.mRider;
-    if ((unsigned int)(rider->RailslideMode - 3) >= 2 &&
-        cRiderAnimBase_getCurrentAnimCategory(rider->mRiderAnim, 2) != 0xE) {
+    if ((unsigned int)(rider->RailslideMode - kRSM_FS) >= 2 &&
+        cRiderAnimBase_getCurrentAnimCategory(rider->mRiderAnim, 2) != kANCAT_RailSpin) {
         float spinSign = (mSpinAxis < 0.0f) ? 1.0f : -1.0f;
         cmd->RailSpin = (int)(spinSign * 31.0f);
     }
@@ -7101,15 +7126,16 @@ extern "C" int cComputer_chooseGrabMain(char*, float);
 /**
  * Builds the in-air trick command: spin and flip axes, the grab to hold, and when the grab starts and ends.
  *
- * Takes the air time left from the air predictor (100 when it has no landing) and counts frames with over 15
- * s of air at rider +0x484; at 31 it sets bit 12 instead (probably a reset). A rider not set to mess up runs
- * setupEndSpin(), picks a grab with chooseGrabMain() when there is time and none is held, and drops it near
- * the landing (mHoldToLandTime + 0.3 s), 2 s into a non-uber grab or before a rail; a messing-up rider picks
- * a random grab once it is not flipping. The command gets mSpinAxis, mFlipAxis, mGrabID (bits 16-23), the
- * tweak/uber bit 14 and, toward a rail, -31 at word 1 bits 12-17.
+ * Takes the air time left from the air predictor (100 when it has no landing) and counts frames with over 15 s of air
+ * at rider +0x484; at 31 it sets bit 12 instead (probably a reset). A rider not set to mess up runs setupEndSpin(),
+ * picks a grab with chooseGrabMain() when there is time and none is held, and drops it near the landing
+ * (mHoldToLandTime + 0.3 s), 2 s into a non-uber (kANCAT_Uber) grab or before a rail; a messing-up rider picks a random
+ * grab once it is not flipping. The command gets mSpinAxis, mFlipAxis, mGrabID (bits 16-23), the tweak/uber bit 14 and,
+ * toward a rail, -31 at word 1 bits 12-17.
  *
  * @param cmd  the spin command (On Tour tSpinCmd)
- * @return -1 when no grab is chosen; otherwise no value is set (On Tour's getSpinCmd returns nothing)
+ * @return -1 when no grab is chosen (mGrabID is kNoGrab); otherwise no value is set (On Tour's getSpinCmd
+ *         returns nothing)
  */
 // Returns -1 only when no trick is queued, and has no value otherwise (the caller ignores it): the retail
 // tail keeps `lw E0C; li v0,-1` with no branch. The noop `v0 = -1` return arm survives reload as a USE,
@@ -7119,7 +7145,7 @@ int cComputer::getSpinCmd(tSpinCmd* cmd)
     cAirPredictor* obj = RiderHandler.GroundMotion.mRider->mAirPredictor;
     int simState = obj->SimState;
     int ok = 0;
-    if (simState == 1 || simState == 3)
+    if (simState == cAirPredictor::kSS_SimDone || simState == cAirPredictor::kSS_SimCheckObjectsDone)
         ok = 1;
     float gap;
     if (ok) {
@@ -7143,8 +7169,9 @@ int cComputer::getSpinCmd(tSpinCmd* cmd)
             if (mIsNaturalAir) {
                 mGrabEndTime = gap;
                 mIsNaturalAir = 0;
-            } else if (mGrabID == -1 && gap > 0.5f && gap < mGrabEndTime &&
-                       cRiderAnimBase_getCurrentAnimCategory(RiderHandler.GroundMotion.mRider->mRiderAnim, 2) != 20) {
+            } else if (mGrabID == kNoGrab && gap > 0.5f && gap < mGrabEndTime &&
+                       cRiderAnimBase_getCurrentAnimCategory(RiderHandler.GroundMotion.mRider->mRiderAnim, 2)
+                           != kANCAT_Uber) {
                 mGrabID = cComputer_chooseGrabMain(((char*)this), gap);
             } else {
                 int stop = 0;
@@ -7152,15 +7179,15 @@ int cComputer::getSpinCmd(tSpinCmd* cmd)
                     stop = 1;
                 if (stop) {
                     mIsTweak = 0;
-                    mGrabID = -1;
+                    mGrabID = kNoGrab;
                 } else if (gap <= mHoldToLandTime + 0.30000001192092896f ||
                            (mGrabStartTime - gap > 2.0f && mIsUber == 0)) {
                     mIsTweak = 0;
-                    mGrabID = -1;
+                    mGrabID = kNoGrab;
                     mIsUber = 0;
                 }
             }
-        } else if (mFlipAxis == 0.0f && mGrabID == -1) {
+        } else if (mFlipAxis == 0.0f && mGrabID == kNoGrab) {
             mGrabID = (unsigned int)AIrand() % 15;
             if (AIrand() & 1)
                 mIsTweak = 1;
@@ -7175,9 +7202,9 @@ int cComputer::getSpinCmd(tSpinCmd* cmd)
             cmd->Tweak = 1;
         else
             cmd->Tweak = 0;
-        if (mToRail == 1)
+        if (mToRail == true)
             SetW12_B250(cmd, -0x1F);
-        if (mGrabID == -1)
+        if (mGrabID == kNoGrab)
             return -1;
     }
 }
@@ -7195,10 +7222,10 @@ extern "C" float cComputer_calcTurn_B590(void*, t4Vector*) __asm__("cComputer_ca
 /**
  * Builds the command for natural (unplanned) air: random spins and flips sized to the air time.
  *
- * Takes the air time from the air predictor (0 without a landing), sets mIsNaturalAir and clears
- * mIsGonnaMessUp, mToRail and the grab. Over 1 s it spins in a random direction and over 3 s it also flips
- * (either sets mIsSpinTrick). Under 0.5 s with neither it steers at the path target (bits 24-29, negated
- * calcTurn). Byte 2 gets mGrabID, which is always -1 here.
+ * Takes the air time from the air predictor (0 without a landing), sets mIsNaturalAir and clears mIsGonnaMessUp,
+ * mToRail and the grab. Over 1 s it spins in a random direction and over 3 s it also flips (either sets mIsSpinTrick).
+ * Under 0.5 s with neither it steers at the path target (bits 24-29, negated calcTurn). Byte 2 gets mGrabID, which is
+ * always kNoGrab here.
  *
  * @param cmd  the natural-air command (On Tour tNaturalAirCmd)
  */
@@ -7207,7 +7234,7 @@ void cComputer::getNaturalAirCmd(tNaturalAirCmd* cmd)
     cAirPredictor* airPredictor = RiderHandler.GroundMotion.mRider->mAirPredictor;
     int st = airPredictor->SimState;
     int ok = 0;
-    if (st == 1 || st == 3)
+    if (st == cAirPredictor::kSS_SimDone || st == cAirPredictor::kSS_SimCheckObjectsDone)
         ok = 1;
     float airTimeLeft;
     if (ok)
@@ -7218,7 +7245,7 @@ void cComputer::getNaturalAirCmd(tNaturalAirCmd* cmd)
     mIsGonnaMessUp = 0;
     mIsNaturalAir = 1;
     mToRail = 0;
-    mGrabID = -1;
+    mGrabID = kNoGrab;
     if (airTimeLeft > 1.0f) {
         mIsSpinTrick = 1;
         mSpinAxis = 1.0f;
@@ -7239,7 +7266,7 @@ void cComputer::getNaturalAirCmd(tNaturalAirCmd* cmd)
         t4Vector targetPos;
         cComputer_calculateTargetPos_B590(&targetPos, ((char*)this));
         cmd->CruiseTurn = (int)(-cComputer_calcTurn_B590(((char*)this), &targetPos) * 31.0f);
-        mGrabID = -1;
+        mGrabID = kNoGrab;
     }
     cmd->GrabID = mGrabID;
 }
@@ -7313,7 +7340,7 @@ extern "C" t4Vector cPath_getPathPos(cAIPath*, int, float);
  * Looks for a jump event on the rider's path just ahead and returns its settings and end points.
  *
  * Queries the rider's AIPath (cPath_getEventsInRange, vtable slot 1) for events from its PrevPathParam to 300 past its
- * PathParam and takes the first of type 0x10. Its flag word gives the approach speed (bits 4 up, km/h, returned in
+ * PathParam and takes the first of type PE_Jump. Its flag word gives the approach speed (bits 4 up, km/h, returned in
  * cm/s) and the pipe, rail, spin and flip bits (3 down to 0); mStartJumpPos and mEndJumpPos are set from the event's
  * two path distances. The outputs are untouched when there is no event.
  *
@@ -7323,9 +7350,9 @@ extern "C" t4Vector cPath_getPathPos(cAIPath*, int, float);
  * @param toRail  receives the jump-onto-rail flag
  * @param isSpin  receives the spin flag
  * @param isFlip  receives the flip flag
- * @return 1 when a jump event was found, otherwise 0
+ * @return true when a jump event was found, otherwise false
  */
-int cComputer::checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
+bool cComputer::checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
 {
     tPathEventNode buf[12];
     cRider* rider = RiderHandler.GroundMotion.mRider;
@@ -7334,7 +7361,7 @@ int cComputer::checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, 
         (sVEntry<int(void*, tPathEventNode*, int, float, float)>*)trk->mVtbl;
     int n = vt[1].fn(vthis(trk, vt[1]), buf, 12, rider->PrevPathParam, rider->PathParam + 300.0f); // getEventsInRange
     for (int i = 0; i < n; i++) {
-        if (buf[i].Type == 0x10) {
+        if (buf[i].Type == PE_Jump) {
             int fl = buf[i].Arg;
             *approachSpeed = (float)(fl >> 4) * 27.777780532836914f;
             *toPipe = (fl >> 3) & 1;
@@ -7344,10 +7371,10 @@ int cComputer::checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, 
             *below = (buf[i].ParamStart <= RiderHandler.GroundMotion.mRider->PathParam) ? 1 : 0;
             *(&mStartJumpPos) = cPath_getPathPos(trk, 0, buf[i].ParamStart);
             *(&mEndJumpPos) = cPath_getPathPos(trk, 0, buf[i].ParamEnd);
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7359,14 +7386,14 @@ struct sHit_BB18 { int type; int val; float lim; int d; };
  * Looks for a speed marker on the computer rider's path just ahead.
  *
  * Asks the rider's AIPath (cPath_getEventsInRange, vtable slot 1) for up to 12 markers between the rider's
- * PrevPathParam and PathParam plus 600. For the first marker of type 17 it stores the marker's value times
- * 27.77778 in @p out and in @p ok whether the marker's limit is at most PathParam, and returns 1.
+ * PrevPathParam and PathParam plus 600. For the first marker of type PE_SpeedZone it stores the marker's value times
+ * 27.77778 in @p out and in @p ok whether the marker's limit is at most PathParam, and returns true.
  *
  * @param out  receives the speed
  * @param ok  receives 1 when the rider is inside the zone
- * @return 1 when a speed marker was found, else 0
+ * @return true when a speed marker was found, else false
  */
-int cComputer::checkForSpeedZone(float* out, int* ok)
+bool cComputer::checkForSpeedZone(float* out, int* ok)
 {
     sHit_BB18 buf[12];
     cRider* rider = RiderHandler.GroundMotion.mRider;
@@ -7375,13 +7402,13 @@ int cComputer::checkForSpeedZone(float* out, int* ok)
         (sVEntry<int(void*, sHit_BB18*, int, float, float)>*)track->mVtbl;
     int n = vt[1].fn(vthis(track, vt[1]), buf, 12, rider->PrevPathParam, rider->PathParam + 600.0f);
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 17) {
+        if (buf[i].type == PE_SpeedZone) {
             *out = (float)buf[i].val * 27.777780532836914f;
             *ok = buf[i].lim <= RiderHandler.GroundMotion.mRider->PathParam;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7393,13 +7420,13 @@ struct sHit_BBF8 { int type; int val; int d[2]; };
  * Looks for a board-press marker on the computer rider's path just ahead.
  *
  * Asks the rider's AIPath (cPath_getEventsInRange) for up to 12 markers between PrevPathParam and PathParam plus 50.
- * For the first marker of type 19 it stores in @p out whether its value is positive and returns 1; @p out is 0
- * otherwise.
+ * For the first marker of type PE_BoardPress it stores in @p out whether its value is positive and returns true; @p out
+ * is 0 otherwise.
  *
  * @param out  receives 1 for a positive marker value
- * @return 1 when a marker was found, else 0
+ * @return true when a marker was found, else false
  */
-int cComputer::checkForBoardPress(int* out)
+bool cComputer::checkForBoardPress(int* out)
 {
     sHit_BBF8 buf[12];
     cRider* rider = RiderHandler.GroundMotion.mRider;
@@ -7409,12 +7436,12 @@ int cComputer::checkForBoardPress(int* out)
     int n = vt[1].fn(vthis(track, vt[1]), buf, 12, rider->PrevPathParam, rider->PathParam + 50.0f);
     *out = 0;
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 19) {
+        if (buf[i].type == PE_BoardPress) {
             *out = buf[i].val > 0;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7423,14 +7450,14 @@ INCLUDE_ASM("seg/seg_1218", cComputer_checkForRail);
 #ifdef SKIP_ASM
 struct sHit_BC98 { int type; int d[3]; };
 /**
- * Tells whether the computer rider's path has a marker of type 15 at its current position.
+ * Tells whether the computer rider's path has a marker of type PE_Railslide at its current position.
  *
  * Asks the rider's AIPath (cPath_getEventsInRange) for up to 12 markers between PrevPathParam and PathParam. Nothing
  * in the build references it.
  *
- * @return 1 when such a marker was found, else 0
+ * @return true when such a marker was found, else false
  */
-int cComputer::checkForRail()
+bool cComputer::checkForRail()
 {
     sHit_BC98 buf[12];
     cRider* rider = RiderHandler.GroundMotion.mRider;
@@ -7439,9 +7466,9 @@ int cComputer::checkForRail()
         (sVEntry<int(void*, sHit_BC98*, int, float, float)>*)track->mVtbl;
     int n = vt[1].fn(vthis(track, vt[1]), buf, 12, rider->PrevPathParam, rider->PathParam);
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 0xF) return 1;
+        if (buf[i].type == PE_Railslide) return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7531,17 +7558,17 @@ static inline sV4_BD10 Fwd_BD10(sRiderT_BD10* o) { return o->fwd; }
  * (1 - cos) for the others, and takes the lowest.
  *
  * @param isAttack  receives whether the new target is the rival to attack; written only when one is picked
- * @return 1 when the rider has a target, otherwise 0
+ * @return true when the rider has a target, otherwise false
  */
 // On Tour: bool cComputer::checkForTargets(bool& isAttack); retail stores a word through isAttack.
-int cComputer::checkForTargets(int* isAttack)
+bool cComputer::checkForTargets(int* isAttack)
 {
     const float kAIMaxTargetDist = 700.0f;
     const float kAIMaxPathWanderDist = 600.0f;
     if (mTargetID >= 0) {
         if (((sRiderT_BD10*)RiderHandler.GroundMotion.mRider)->targets[mTargetID].dist > kAIMaxTargetDist * 1.5f
             || ((sRiderT_BD10*)RiderHandler.GroundMotion.mRider)->pathDist > kAIMaxPathWanderDist)
-            mTargetID = -1;
+            mTargetID = kNoTarget;
     }
     if (mTargetID < 0 && ((sRiderT_BD10*)RiderHandler.GroundMotion.mRider)->pathDist < kAIMaxPathWanderDist * 0.9f
         && AITick() % 12 == 0) {
@@ -7715,9 +7742,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderWipeout);
 /**
  * Rolls whether this computer rider will mess up its next trick, more often for a low mTrickDifficulty.
  *
- * @return 1 when AIrand() % 100 is at least mTrickDifficulty * 100 (a 1 - mTrickDifficulty chance), else 0
+ * @return true when AIrand() % 100 is at least mTrickDifficulty * 100 (a 1 - mTrickDifficulty chance), else false
  */
-int cComputer::shouldRiderWipeout()
+bool cComputer::shouldRiderWipeout()
 {
     unsigned int roll = AIrand();
     float thr = mTrickDifficulty * 100.0f;
@@ -7737,9 +7764,9 @@ extern "C" int cBENewRaceInterface_getLocationID(void* iface);
  *
  * Requires mUberFlags bit 0 and a location ID other than 14; the chance is then mTrickDifficulty.
  *
- * @return 1 when the roll (AIrand() % 100 under mTrickDifficulty * 100) passes, otherwise 0
+ * @return true when the roll (AIrand() % 100 under mTrickDifficulty * 100) passes, otherwise false
  */
-int cComputer::shouldRiderUber()
+bool cComputer::shouldRiderUber()
 {
     if ((unsigned int)RiderHandler.GroundMotion.mRider->mUberFlags & 1) {
         if (cBENewRaceInterface_getLocationID(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
@@ -7748,7 +7775,7 @@ int cComputer::shouldRiderUber()
             return (float)(roll % 100U) < thr;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -7758,9 +7785,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderTweak);
 /**
  * Rolls whether this computer rider tweaks its grab: a 30 + 70 * mTrickDifficulty percent chance.
  *
- * @return 1 when AIrand() % 100 is under 30 + 70 * mTrickDifficulty, otherwise 0
+ * @return true when AIrand() % 100 is under 30 + 70 * mTrickDifficulty, otherwise false
  */
-int cComputer::shouldRiderTweak()
+bool cComputer::shouldRiderTweak()
 {
     unsigned int roll = AIrand();
     float thr = mTrickDifficulty * 70.0f + 30.0f;
@@ -7774,9 +7801,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderGrab);
 /**
  * Rolls whether this computer rider grabs at all: a 60 + 40 * mTrickDifficulty percent chance.
  *
- * @return 1 when AIrand() % 100 is under 60 + 40 * mTrickDifficulty, otherwise 0
+ * @return true when AIrand() % 100 is under 60 + 40 * mTrickDifficulty, otherwise false
  */
-int cComputer::shouldRiderGrab()
+bool cComputer::shouldRiderGrab()
 {
     unsigned int roll = AIrand();
     float thr = mTrickDifficulty * 40.0f + 60.0f;

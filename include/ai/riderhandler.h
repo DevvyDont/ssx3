@@ -133,8 +133,12 @@ CHECK_SIZE(cAirMotion, 0x10);
 // cWipeoutMotion (cRiderHandler + 0x030, 0x70 bytes): motion state 2 (MS_Wipeout). Base cWipeoutMotionState
 // (0x00-0x40, [O] size 0x40).
 struct cWipeoutMotion {
+    // [O] On Tour's enum cWipeoutMotionState::eWMotionState, names and values. [U] an airborne wipeout motion (1) sends
+    // the wipeout control to its air state (cWipeoutControl_updateGround), a grounded one to the ground state.
+    enum eWMotionState { kWMS_Ground = 0, kWMS_Air = 1 };
+
     int WipeoutMotionState;            // 0x00 [P] getWipeoutMotionState (retail cWipeoutMotion_getWipeoutMotionState lw 0x0); [O]
-                                       //      eWMotionState (WMS_Ground 0, WMS_Air 1)
+                                       //      eWMotionState (kWMS_Ground 0, kWMS_Air 1)
     int ForceNaturalAir;               // 0x04 [O] bool (word); [U] lw/sw
     char pad_08[0x8];                  // 0x08
     t4Vector BoardVelocity;            // 0x10 [O]; [U] lq/sq/lqc2 (cWipeoutMotion_throwItem, func_00136F30, func_00137138)
@@ -289,7 +293,7 @@ struct cCruiseControl {
     void gainFocus() __asm__("cCruiseControl_gainFocus__FPv");
     void update(tCruiseCmd* in) __asm__("cCruiseControl_update");
     void loseFocus(int next) __asm__("cCruiseControl_loseFocus");
-    int checkAirMotion() __asm__("cCruiseControl_checkAirMotion");
+    bool checkAirMotion() __asm__("cCruiseControl_checkAirMotion");
 };
 
 CHECK_OFFSET(cCruiseControl, mRider, 0x00);
@@ -301,7 +305,11 @@ CHECK_SIZE(cCruiseControl, 0x10);
 struct tBoardPressCmd;
 
 struct cBoardPressControl {
-    int State;           // 0x00 [O] eBoardPressState (BP_Into 0, BP_Balance 1, BP_IntoAir 2, BP_Exit 3); [U] lw/sw
+    // [O] On Tour's enum cBoardPressControlState::eBoardPressState, names and values. [U] update runs handleIntoState
+    // for 0, handleBalanceState for 1, handleIntoAirState for 2 and handleExitState for 3.
+    enum eBoardPressState { kBP_Into = 0, kBP_Balance = 1, kBP_IntoAir = 2, kBP_Exit = 3 };
+
+    int State;           // 0x00 [O] eBoardPressState (kBP_Into 0, kBP_Balance 1, kBP_IntoAir 2, kBP_Exit 3); [U] lw/sw
     float BalanceSec;    // 0x04 [O]; [U] float
     float OffBalanceSec; // 0x08 [O]; [U] float
     float PressTimer;    // 0x0C [O]; [U] float
@@ -314,11 +322,11 @@ struct cBoardPressControl {
     void update(tBoardPressCmd* in) __asm__("cBoardPressControl_update");
     void loseFocus() __asm__("cBoardPressControl_loseFocus");
     void changeFakieBoardPress() __asm__("cBoardPressControl_changeFakieBoardPress");
-    int checkForFakie() __asm__("cBoardPressControl_checkForFakie");
-    int checkForOllie(tBoardPressCmd* cmd) __asm__("cBoardPressControl_checkForOllie");
-    int checkForPivot(tBoardPressCmd* in) __asm__("cBoardPressControl_checkForPivot");
-    int checkForWipeout(tBoardPressCmd* in) __asm__("cBoardPressControl_checkForWipeout");
-    int checkForExit(tBoardPressCmd* cmd) __asm__("cBoardPressControl_checkForExit");
+    bool checkForFakie() __asm__("cBoardPressControl_checkForFakie");
+    bool checkForOllie(tBoardPressCmd* cmd) __asm__("cBoardPressControl_checkForOllie");
+    bool checkForPivot(tBoardPressCmd* in) __asm__("cBoardPressControl_checkForPivot");
+    bool checkForWipeout(tBoardPressCmd* in) __asm__("cBoardPressControl_checkForWipeout");
+    bool checkForExit(tBoardPressCmd* cmd) __asm__("cBoardPressControl_checkForExit");
     void forceExit() __asm__("cBoardPressControl_forceExit");
     void autoCompletePivot() __asm__("cBoardPressControl_autoCompletePivot");
     void blendOutOfPivot() __asm__("cBoardPressControl_blendOutOfPivot");
@@ -375,7 +383,10 @@ struct cNaturalAirControl {
     float LimitMag;   // 0x04 [O]; [U] float
     int IsPunchHeld;  // 0x08 [O] bool (word); [U] lw/sw
     int IsGrabHeld;   // 0x0C [O] bool (word); [U] lw/sw
-    int InitGrabHeld; // 0x10 [O]; [U] lw/sw
+    // InitGrabHeld's "no grab" (name ours): [U] update latches a held grab only while it is -1 and treats a command
+    // GrabID of -1 as released.
+    enum { kNoGrab = -1 };
+    int InitGrabHeld; // 0x10 [O]; [U] lw/sw; a grab id or kNoGrab
     cRider* mRider;   // 0x14 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x20 (D_00459130)
     char pad_18[0x8]; // 0x18
 
@@ -397,13 +408,25 @@ CHECK_SIZE(cNaturalAirControl, 0x20);
 // cSpinControl (cRiderHandler + 0x230, 0x60 bytes): control state 5 (CS_Spin). Base cSpinControlState (0x00-0x58; On
 // Tour 0x5C: it adds CurrentUberVar at 0xC).
 struct cSpinControl {
-    int AirAdjState;            // 0x00 [O] eAirAdjState (AS_AirAdj 0, AS_Spin 1, AS_LateSpin 2, AS_None 3); [U] lw/sw
-                                //      (update stores 3)
-    int GrabState;              // 0x04 [O] eGrabState (GS_Start 0 .. GS_Over 5); [U] isGrabHeld/isTweakHeld/isUberHeld
-                                //      (cSpinControl_isGrabHeld/EF0/F30) test 2 and 4
-    int CurrentGrab;            // 0x08 [O]; [U] gainFocus = -1
-    int SpinState;              // 0x0C [O] eSpinState (SS_Into 0, SS_Cycle 1, SS_OutOf 2, SS_None 3); [U] update stores
-                                //      1/2/3 (On Tour has CurrentUberVar here)
+    // [O] On Tour's enums cSpinControlState::eAirAdjState, eGrabState and eSpinState, names and values. [U] isGrabHeld
+    // tests kGS_Hold, isTweakHeld / isUberHeld kGS_TweakHold; update moves a spin kSS_Into -> kSS_Cycle -> kSS_OutOf ->
+    // kSS_None as its anims play out (cSpinControl_update).
+    enum eAirAdjState { kAS_AirAdj = 0, kAS_Spin = 1, kAS_LateSpin = 2, kAS_None = 3 };
+    enum eGrabState {
+        kGS_Start = 0, kGS_Locked = 1, kGS_Hold = 2, kGS_TweakLocked = 3, kGS_TweakHold = 4, kGS_Over = 5
+    };
+    enum eSpinState { kSS_Into = 0, kSS_Cycle = 1, kSS_OutOf = 2, kSS_None = 3 };
+
+    int AirAdjState;            // 0x00 [O] eAirAdjState (kAS_AirAdj 0, kAS_Spin 1, kAS_LateSpin 2, kAS_None 3); [U]
+                                //      lw/sw (update stores 3)
+    int GrabState;              // 0x04 [O] eGrabState (kGS_Start 0 .. kGS_Over 5); [U] isGrabHeld/isTweakHeld/
+                                //      isUberHeld (cSpinControl_isGrabHeld/EF0/F30) test 2 and 4
+    // CurrentGrab's "no grab" (name ours): [U] gainFocus stores -1; isGrabPlaying takes a grab id of -1 as none and
+    // stores -1 when a grab ends; cSpinControl_update passes -1 while an air adjust runs.
+    enum { kNoGrab = -1 };
+    int CurrentGrab;            // 0x08 [O]; [U] gainFocus = kNoGrab
+    int SpinState;              // 0x0C [O] eSpinState (kSS_Into 0, kSS_Cycle 1, kSS_OutOf 2, kSS_None 3); [U] update
+                                //      stores 1/2/3 (On Tour has CurrentUberVar here)
     float DesFlip;              // 0x10 [O]; [U] predictFlipSec (cSpinControl_predictFlipSec: DesFlip, CurFlip, MaxFlipAngVel)
     float DesSpin;              // 0x14 [O]; [U] predictSpinSec (cSpinControl_predictSpinSec: DesSpin, CurSpin, MaxSpinAngVel)
     float CurFlip;              // 0x18 [O]; [U] float
@@ -429,9 +452,9 @@ struct cSpinControl {
     // Methods bound to their retail symbols by asm labels.
     void loseFocus() __asm__("cSpinControl_loseFocus");
     float calcFlipAxisWeight() __asm__("cSpinControl_calcFlipAxisWeight");
-    int isGrabPlaying(int trick, int held) __asm__("cSpinControl_isGrabPlaying");
+    bool isGrabPlaying(int trick, int held) __asm__("cSpinControl_isGrabPlaying");
     void initDesSpin(float flip, float spin) __asm__("cSpinControl_initDesSpin");
-    int checkChangeFakieAir() __asm__("cSpinControl_checkChangeFakieAir");
+    bool checkChangeFakieAir() __asm__("cSpinControl_checkChangeFakieAir");
     void predictSpinSec(float* cur, float* next) __asm__("cSpinControl_predictSpinSec");
     void predictFlipSec(float* cur, float* next) __asm__("cSpinControl_predictFlipSec");
     int isGrabHeld() __asm__("cSpinControl_isGrabHeld");
@@ -473,8 +496,12 @@ CHECK_SIZE(cSpinControl, 0x60);
 struct tGateCmd;
 
 struct cGateControl {
-    int GateState;          // 0x00 [O] eGateState (GS_GateRock 0, GS_GateLaunch 1, GS_Sit 2, GS_GetupFromSit 3); [R]
-                            //      cRiderHandler ctor = 0; [U] set via handler+0x290
+    // [O] On Tour's enum cGateControlState::eGateState, names and values. [U] update runs doGateRock for 0,
+    // doGateLaunch for 1, doSit for 2 and doGetupFromSit for 3.
+    enum eGateState { kGS_GateRock = 0, kGS_GateLaunch = 1, kGS_Sit = 2, kGS_GetupFromSit = 3 };
+
+    int GateState;          // 0x00 [O] eGateState (kGS_GateRock 0, kGS_GateLaunch 1, kGS_Sit 2, kGS_GetupFromSit
+                            //      3); [R] cRiderHandler ctor = 0; [U] set via handler+0x290
     float HeldAtExtremeSec; // 0x04 [O]; [U] float
     float CurThrustMin;     // 0x08 [O]; [U] float
     float CurThrustMax;     // 0x0C [O]; [U] float
@@ -484,7 +511,7 @@ struct cGateControl {
     char pad_18[0x8];       // 0x18
 
     // Methods bound to their retail symbols by asm labels.
-    int isForceLaunch() __asm__("cGateControl_isForceLaunch");
+    bool isForceLaunch() __asm__("cGateControl_isForceLaunch");
     void doGateLaunch(tGateCmd* cmd) __asm__("cGateControl_doGateLaunch");
     void update(tGateCmd* cmd) __asm__("cGateControl_update");
     int isLaunchAllowed() __asm__("cGateControl_isLaunchAllowed");
@@ -505,7 +532,10 @@ struct tRailslideCmd;
 
 struct cRailslideControl {
     float RSpinAngle;  // 0x00 [O]; [U] float
-    int PrevGrindHeld; // 0x04 [O]; [U] lw/sw
+    // PrevGrindHeld's "no grind" (name ours): [U] gainFocus stores -1; checkForUberGrind gets -1 when no grind
+    // button is held and then only remembers it.
+    enum { kNoGrind = -1 };
+    int PrevGrindHeld; // 0x04 [O]; [U] lw/sw; a grind id or kNoGrind
     cRider* mRider;    // 0x08 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10
                        //      (D_00458E48)
     char pad_0C[0x4];  // 0x0C
@@ -515,9 +545,9 @@ struct cRailslideControl {
     void update(tRailslideCmd* in) __asm__("cRailslideControl_update");
     void loseFocus() __asm__("cRailslideControl_loseFocus");
     void chooseRailSpin(int dir) __asm__("cRailslideControl_chooseRailSpin");
-    int checkForUberGrind(int id) __asm__("cRailslideControl_checkForUberGrind");
+    bool checkForUberGrind(int id) __asm__("cRailslideControl_checkForUberGrind");
     void playGainFocusAnim(int alt) __asm__("cRailslideControl_playGainFocusAnim");
-    int checkAirMotion(tRailslideCmd* cmd) __asm__("cRailslideControl_checkAirMotion");
+    bool checkAirMotion(tRailslideCmd* cmd) __asm__("cRailslideControl_checkAirMotion");
 };
 
 CHECK_OFFSET(cRailslideControl, RSpinAngle, 0x00);
@@ -531,8 +561,12 @@ CHECK_SIZE(cRailslideControl, 0x10);
 struct tWipeoutCmd;
 
 struct cWipeoutControl {
-    int RiderState;         // 0x00 [O] eWRiderState (RS_Launch 0, RS_Air 1, RS_Ground 2, RS_Recover 3, RS_Stuck 4); [U]
-                            //      lw/sw
+    // [O] On Tour's enum cWipeoutControlState::eWRiderState, names and values. [U] update runs updateLaunch for 0,
+    // updateAir for 1, updateGround for 2, updateRecover for 3 and updateStuck for 4.
+    enum eWRiderState { kRS_Launch = 0, kRS_Air = 1, kRS_Ground = 2, kRS_Recover = 3, kRS_Stuck = 4 };
+
+    int RiderState;         // 0x00 [O] eWRiderState (kRS_Launch 0, kRS_Air 1, kRS_Ground 2, kRS_Recover 3,
+                            //      kRS_Stuck 4); [U] lw/sw
     char pad_04[0xC];       // 0x04
     tPose RiderPrevPose;    // 0x10 [O]; [U] lq/sq of both vectors
     tPose BoardPrevPose;    // 0x30 [O] (On Tour [2]: one per ski); [U] lq/sq at 0x30/0x40
@@ -590,7 +624,7 @@ struct cResetControl {
     // Methods bound to their retail symbols by asm labels.
     void gainFocus() __asm__("cResetControl_gainFocus");
     void update(tResetCmd* cmd) __asm__("cResetControl_update");
-    int shouldTransition() __asm__("cResetControl_shouldTransition");
+    bool shouldTransition() __asm__("cResetControl_shouldTransition");
 };
 
 CHECK_OFFSET(cResetControl, IsAutoReset, 0x00);
@@ -604,7 +638,12 @@ CHECK_SIZE(cResetControl, 0x10);
 struct tFinishLineCmd;
 
 struct cFinishLineControl {
-    int FinishState;  // 0x00 [O] eFinishState (Brake 0, IntoStance 1, Reaction 2, Done 3); [U] lw/sw
+    // [O] On Tour's enum cFinishLineControlState::eFinishState, names and values. [U] update brakes in 0, plays the
+    // stance anim in 1, the reaction in 2 and holds in 3 (cFinishLineControl_update).
+    enum eFinishState { kFINISH_Brake = 0, kFINISH_IntoStance = 1, kFINISH_Reaction = 2, kFINISH_Done = 3 };
+
+    int FinishState;  // 0x00 [O] eFinishState (kFINISH_Brake 0, kFINISH_IntoStance 1, kFINISH_Reaction 2,
+                      //      kFINISH_Done 3); [U] lw/sw
     cRider* mRider;   // 0x04 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00458B60)
     char pad_08[0x8]; // 0x08
 
@@ -623,11 +662,15 @@ CHECK_SIZE(cFinishLineControl, 0x10);
 struct tHandplantCmd;
 
 struct cHandplantControl {
+    // [O] On Tour's enum cHandplantControlState::eHandplantType, names and values (heel side, toe side). [U] it is the
+    // second index of the handplant anim table (kHandplantAnim[mode][type]), and update mirrors the balance for kHT_TS.
+    enum eHandplantType { kHT_HS = 0, kHT_TS = 1, kHT_Num = 2 };
+
     float EnterSec;        // 0x00 [O]; [U] float
     float CurBalance;      // 0x04 [O]; [U] float
     int IsMissedHandplant; // 0x08 [O] bool (word); [U] lw/sw
     int IsRailSpline;      // 0x0C [O] bool (word); [U] lw/sw
-    int HandplantType;     // 0x10 [O] eHandplantType (HT_HS 0, HT_TS 1); [U] lw/sw
+    int HandplantType;     // 0x10 [O] eHandplantType (kHT_HS 0, kHT_TS 1); [U] lw/sw
     cRider* mRider;        // 0x14 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x20
                            //      (D_00458878)
     char pad_18[0x8];      // 0x18
@@ -666,7 +709,10 @@ CHECK_SIZE(tHandplantAnimInfo, 0x8);
 struct tUberGrindCmd;
 
 struct cUberGrindControl {
-    int GrindState;   // 0x00 [O] eGrindState (GS_Locked 0, GS_Hold 1, GS_Over 2); [U] lw/sw
+    // [O] On Tour's enum cUberGrindControlState::eGrindState, names and values. [U] update (cUberGrindControl_update).
+    enum eGrindState { kGS_Locked = 0, kGS_Hold = 1, kGS_Over = 2 };
+
+    int GrindState;   // 0x00 [O] eGrindState (kGS_Locked 0, kGS_Hold 1, kGS_Over 2); [U] lw/sw
     int CurrentGrind; // 0x04 [O]; [U] lw; read/written via handler+0x394 (get/setCurrentGrind)
     cRider* mRider;   // 0x08 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10 (D_00458D50)
     char pad_0C[0x4]; // 0x0C

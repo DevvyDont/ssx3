@@ -30,8 +30,9 @@ struct tDangerElemInfo {
     float radius;            // 0x00 [O]; [U] cDangerMan_AddDangerElem stores its radius argument; CalcAppliedDangerLevel
                              //      tests the rider against a sphere of this radius
     float endDelaySecsLeft;  // 0x04 [O]; [U] AddDangerElem stores onEndDelaySecs; Update counts it down by 1/60 in state 1
-    int state;               // 0x08 [O] eDangerElemState (0 active, 1 ending, 2 free); [R] Reset sets 2; [U] AddDangerElem 0,
-                             //      Update 1 when the instance is gone or dead; CalcAppliedDangerLevel skips state 2
+    int state;               // 0x08 [O] cDangerMan::eDangerElemState (0 active, 1 dying, 2 dead); [R] Reset sets 2;
+                             //      [U] AddDangerElem 0, Update 1 when the instance is gone or dead;
+                             //      CalcAppliedDangerLevel skips state 2
     float pos[3];            // 0x0C [O] t3vect; [U] AddDangerElem / Update copy the instance's position
     unsigned int rID;        // 0x18 [O] tResourceID; [R] the member ctor sets -1; [U] AddDangerElem stores the instance id,
                              //      RemoveDangerElem / Update look the instance up by it
@@ -72,6 +73,11 @@ CHECK_OFFSET(tDangerZoneTrack, pNext, 0xC);
 CHECK_SIZE(tDangerZoneTrack, 0x10);
 
 struct cDangerMan {
+    // tDangerElemInfo::state. [O] On Tour's enum cDangerMan::eDangerElemState, names and values. [U] AddDangerElem
+    // takes a dead (free) slot and makes it active; Update counts a dying one's endDelaySecsLeft down and skips dead
+    // ones.
+    enum eDangerElemState { keDangerElemState_Active = 0, keDangerElemState_Dying = 1, keDangerElemState_Dead = 2 };
+
     cAI* mpAI;                                   // 0x000 [O]; [R] the ctor's argument (cAI_cAI passes itself); [U] Update and
                                                  //       CalcAppliedDangerLevel read its riders (cAI +0x28) and count
     tDangerElemInfo mTrackedDangerElems[64];     // 0x004 [O]; [R] ctor (rID = -1), Reset (state = 2)

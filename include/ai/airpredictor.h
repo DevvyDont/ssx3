@@ -29,6 +29,11 @@ struct cBxReplayFrame;
 struct t4Vector;
 
 struct cAirPredictor {
+    // SimState. [O] On Tour's enum cAirPredictorState::eSimState, names and values. [U] simStep hits the terrain in 0
+    // and the static objects otherwise; a hit ends 0 in 1; 60 s of air without a landing re-simulates in 2 against the
+    // objects (updateFlightPath), and a hit or a second timeout there ends in 3. Callers treat 1 and 3 as done.
+    enum eSimState { kSS_Sim = 0, kSS_SimDone = 1, kSS_SimCheckObjects = 2, kSS_SimCheckObjectsDone = 3 };
+
     t4Vector GuessLandPosition;     // 0x00 [O]; [U] simStep stores the hit point (sq); updateFlightPath stores t4vect_Origin
                                     //      when it gives up (state 3); reset leaves it
     t4Vector GuessLandVelocity;     // 0x10 [O]; [R] reset: t4vect_Zero; [U] simStep (sq); handplantcontrol reads it

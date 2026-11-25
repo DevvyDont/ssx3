@@ -83,11 +83,17 @@ struct cComputer {
     float mRiderDifficulty;    // 0xDF8 [O]; [U] set by setIndividualRiderDifficulty / updateRiderDifficulty
     float mTrickDifficulty;    // 0xDFC [O]; [U] set by the same; read by the four shouldRider* tests
                                //       (cComputer_shouldRiderWipeout, cComputer_shouldRiderUber, cComputer_shouldRiderTweak, cComputer_shouldRiderGrab)
+    // mPathDifficulty's levels (names ours): [U] calculateDifficultyScore accepts a path for 0, 1 and 2 only when its
+    // IsEasy, IsMedium and IsHard flag (On Tour's parameter names) is set.
+    enum ePathDifficulty { kPD_Easy = 0, kPD_Medium = 1, kPD_Hard = 2 };
     short mPathDifficulty;     // 0xE00 [O] short; [U] sh in updateRiderDifficulty, lh in calculateDifficultyScore
     char pad_E02[0x2];
     int mShouldTakeShortcuts;  // 0xE04 [O] (bool); [U] set by updateRiderDifficulty, read by scorePath
     int mShouldBeRandom;       // 0xE08 [O] (bool); [U] set by updateRiderDifficulty
-    int mGrabID;               // 0xE0C [O]; [R] Init = -1; [U] a grab 0..14 (AIrand() % 15) or -1
+    // mGrabID's "no grab" (name ours): [R] Init stores -1; [U] cComputer_getSpinCmd picks a grab only while it is -1
+    // and drops one by storing -1; cComputer_getNaturalAirCmd stores it.
+    enum { kNoGrab = -1 };
+    int mGrabID;               // 0xE0C [O]; [R] Init = kNoGrab; [U] a grab 0..14 (AIrand() % 15) or kNoGrab
     int mIsSpinTrick;          // 0xE10 [O] (bool); [R] Init = 0
     int mIsGonnaMessUp;        // 0xE14 [O] (bool); [R] Init = 0
     int mIsNaturalAir;         // 0xE18 [O] (bool); [R] Init = 0
@@ -104,7 +110,11 @@ struct cComputer {
     char pad_E44[0xC];         // 0xE44 t4Vector alignment
     t4Vector mStartJumpPos;    // 0xE50 [O]; [R] Init (sq); [U] checkForJumpEvent (cComputer_checkForJumpEvent) stores it
     t4Vector mEndJumpPos;      // 0xE60 [O]; [R] Init (sq); [U] same
-    int mTargetID;             // 0xE70 [P] getCurrentTarget (preview 0xE20); [R] Init = -1, cComputer_getCurrentTarget
+    // mTargetID's "no target" (name ours): [R] Init stores -1; [U] cComputer_checkForTargets drops a target by
+    // storing -1 and treats any negative id as none.
+    enum { kNoTarget = -1 };
+    int mTargetID;             // 0xE70 [P] getCurrentTarget (preview 0xE20); [R] Init = kNoTarget,
+                               //       cComputer_getCurrentTarget
     int mWanderTime;           // 0xE74 [O]; [R] Init = 0; [U] cComputer_checkForReset
     int mBadHeadingTime;       // 0xE78 [O]; [R] Init = 0; [U] cComputer_checkForReset
     int GrabHistoryCounter[15]; // 0xE7C [O] (On Tour [7]); [R] Init/resetCounters clear 0x3C bytes; [U] cComputer_chooseRandomGrab
@@ -135,11 +145,11 @@ struct cComputer {
     float scorePath(cAIPath* tgt) __asm__("cComputer_scorePath");
     float calculateDifficultyScore(int IsEasy, int IsMedium, int IsHard) __asm__("cComputer_calculateDifficultyScore");
     int myOpponentIndex() __asm__("cComputer_myOpponentIndex");
-    int isFarBehind() __asm__("cComputer_isFarBehind");
-    int isFarAhead() __asm__("cComputer_isFarAhead");
+    bool isFarBehind() __asm__("cComputer_isFarBehind");
+    bool isFarAhead() __asm__("cComputer_isFarAhead");
     int checkForAttack(int oppID) __asm__("cComputer_checkForAttack");
     int checkForBlock() __asm__("cComputer_checkForBlock");
-    int checkForPunching(int* side) __asm__("cComputer_checkForPunching");
+    bool checkForPunching(int* side) __asm__("cComputer_checkForPunching");
     int getRival() __asm__("cComputer_getRival");
     float setupWarp() __asm__("cComputer_setupWarp");
     void setInput(int input) __asm__("cComputer_setInput");
@@ -159,19 +169,19 @@ struct cComputer {
     void getNaturalAirCmd(tNaturalAirCmd* cmd) __asm__("cComputer_getNaturalAirCmd");
     void getWipeoutCmd(tWipeoutCmd* controlCmd) __asm__("cComputer_getWipeoutCmd");
     void getGateCmd(tGateCmd* cmd) __asm__("cComputer_getGateCmd");
-    int checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
+    bool checkForJumpEvent(float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
         __asm__("cComputer_checkForJumpEvent");
-    int checkForSpeedZone(float* out, int* ok) __asm__("cComputer_checkForSpeedZone");
-    int checkForBoardPress(int* out) __asm__("cComputer_checkForBoardPress");
-    int checkForRail() __asm__("cComputer_checkForRail");
-    int checkForTargets(int* isAttack) __asm__("cComputer_checkForTargets");
+    bool checkForSpeedZone(float* out, int* ok) __asm__("cComputer_checkForSpeedZone");
+    bool checkForBoardPress(int* out) __asm__("cComputer_checkForBoardPress");
+    bool checkForRail() __asm__("cComputer_checkForRail");
+    bool checkForTargets(int* isAttack) __asm__("cComputer_checkForTargets");
     void setupPrewindState(int isSpin, int isFlip, int toRail, int toPipe) __asm__("cComputer_setupPrewindState");
     void setupCrouch(void* cmd) __asm__("cComputer_setupCrouch");
     void setupRecklessCrouch(void* cmd) __asm__("cComputer_setupRecklessCrouch");
-    int shouldRiderWipeout() __asm__("cComputer_shouldRiderWipeout");
-    int shouldRiderUber() __asm__("cComputer_shouldRiderUber");
-    int shouldRiderTweak() __asm__("cComputer_shouldRiderTweak");
-    int shouldRiderGrab() __asm__("cComputer_shouldRiderGrab");
+    bool shouldRiderWipeout() __asm__("cComputer_shouldRiderWipeout");
+    bool shouldRiderUber() __asm__("cComputer_shouldRiderUber");
+    bool shouldRiderTweak() __asm__("cComputer_shouldRiderTweak");
+    bool shouldRiderGrab() __asm__("cComputer_shouldRiderGrab");
     int updateRiderPathDifficulty(int RiderID, int Heat) __asm__("cComputer_updateRiderPathDifficulty");
 };
 

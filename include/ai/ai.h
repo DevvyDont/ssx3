@@ -62,6 +62,17 @@ struct cBxReplayFrame;
 
 struct cAIPath;
 
+// The AI's state (cAI::CurrentAIState / PreviousAIState). [O] On Tour's enum tAIState, names and values. [U]
+// cAI_forceAIState installs mGameInitHandler for 1 .. mShutdownHandler for 7, in this order; cAI_cAI starts in 1; the
+// start gate opens in 5 (cGateControl_isLaunchAllowed).
+enum tAIState {
+    AIS_Null = 0, AIS_GameInit = 1, AIS_Freeride = 2, AIS_PreRace = 3, AIS_Countdown = 4, AIS_Race = 5, AIS_EndRace = 6,
+    AIS_Shutdown = 7, AIS_NumStates = 8
+};
+// How the AI ranks the riders (cAI::RaceRankType). [O] On Tour's enum tRaceRankType, names and values. [U]
+// cAI_UpdateRankingPlacement does nothing for 0, ranks by distance left for 1 and by the metrix points for 2.
+enum tRaceRankType { AI_RR_None = 0, AI_RR_DistToFinish = 1, AI_RR_TotalPoints = 2 };
+
 struct cAI {
     // ---- base cAIState (0x00-0x28) ----
     int CurrentAIState;             // 0x00 [P] getAIState; [O] tAIState; [U] setAIState/forceAIState
@@ -75,11 +86,14 @@ struct cAI {
     int PodiumActorList[2];         // 0x20 [P] get/setPodiumActor (eBECharacters, "Index < kMaxNumberOfAIActors")
     // ---- cAI ----
     cRider* Riders[6];              // 0x28 [P] getRider; [R] init clears 6; [U] the init functions fill it
+    // The two human slots in an online race (names ours): [U] cAI_InitPlayers gives the host's player 1 and the
+    // guest's player 0 the remote input (cInputSync_createremoteinput), so the host is player 0, the guest player 1.
+    enum { kHostPlayer = 0, kGuestPlayer = 1 };
     cPlayer* Players[2];            // 0x40 [P] getPlayer; [R] InitPlayers
     cComputer* Computers[5];        // 0x48 [P] getComputer; [R] initComputerRiders ("ComputerRider", 0x1A90)
     cComputer* Actors[5];           // 0x5C [P] getActor; [R] initComputerActors
     cMissionRider* MissionRiders[1]; // 0x70 [P] getMissionRider; [R] initMissionRiders
-    int RaceRankType;               // 0x74 [O] tRaceRankType; [R] cAI_cAI = 0; [U] setRaceRankType (cAI_setRaceRankType)
+    int RaceRankType;               // 0x74 [O] tRaceRankType (above); [R] cAI_cAI = 0; [U] cAI_setRaceRankType
     int NumberOfRidersAllocated;    // 0x78 [P] getNumRiders; [U] the init functions' next rider index
     int NumberOfPlayersAllocated;   // 0x7C [P] getNumPlayers
     int NumberOfComputersAllocated; // 0x80 [P] getNumComputers; [U] initComputerRiders
@@ -120,7 +134,7 @@ struct cAI {
     void initComputerRiders() __asm__("cAI_initComputerRiders");
     void initComputerActors() __asm__("cAI_initComputerActors");
     int isAILoadedAndReady() __asm__("cAI_isAILoadedAndReady");
-    int isRaceFinished() __asm__("cAI_isRaceFinished");
+    bool isRaceFinished() __asm__("cAI_isRaceFinished");
     void swaploadPathFile(int filename) __asm__("cAI_swaploadPathFile");
     int swaploadInjectedPathFile(int uiSectionID, int mode, int data) __asm__("cAI_swaploadInjectedPathFile");
     void prepareToPurgeComputerRiders() __asm__("cAI_prepareToPurgeComputerRiders");

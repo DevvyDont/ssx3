@@ -241,13 +241,13 @@ extern "C" void cAI_setRaceRankType(cAI* self, int mode);
 /**
  * Prepares the AI for free ride: the shared init without the human riders, then no race ranking.
  *
- * Calls cAI_commonInit(self, 0) (resets the computer riders, keeps EventTimerTick) and
- * cAI_setRaceRankType(self, 0).
+ * Calls cAI_commonInit(self, 0) (resets the computer riders, keeps EventTimerTick) and cAI_setRaceRankType(self,
+ * AI_RR_None).
  */
 void cAI::initFreeride()
 {
     commonInit(0);
-    setRaceRankType(0);
+    setRaceRankType(AI_RR_None);
 }
 #endif
 
@@ -257,15 +257,15 @@ INCLUDE_ASM("ai/ai", cAI_setRaceRankType);
 /**
  * Sets the race rank type and seeds every rider's place to match it.
  *
- * Stores @p mode in RaceRankType. Type 0 sets each rider's place word (+0xEC, which the ranking pass writes)
- * to 0; any other type sets it to the rider's slot index.
+ * Stores @p mode in RaceRankType. AI_RR_None sets each rider's place word (+0xEC, which the ranking pass writes) to 0;
+ * any other type sets it to the rider's slot index.
  *
- * @param mode  the rank type (On Tour tRaceRankType type); 0 puts every rider at place 0
+ * @param mode  the rank type (On Tour tRaceRankType type); AI_RR_None puts every rider at place 0
  */
 void cAI::setRaceRankType(int mode)
 {
     RaceRankType = mode;
-    if (mode == 0)
+    if (mode == AI_RR_None)
     {
         for (int i = 0; i < NumberOfRidersAllocated; i++)
         {
@@ -498,7 +498,7 @@ void cAI::render()
 
     for (n = 0; n < NumberOfRidersAllocated; n++) {
         cRider* curRider = Riders[n];
-        if (curRider->mRenderFlag == 0 && curRider->mSafeRenderTick == -1) {
+        if (curRider->mRenderFlag == 0 && curRider->mSafeRenderTick == cRider::kSafeRenderTickUnset) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             int frameTick = ps2GraphicsMan->getCurrentFrameCount();
             Riders[n]->mSafeRenderTick = frameTick + 4;
@@ -723,12 +723,12 @@ extern "C" void* cMemMan_alloc_IP(unsigned int size, const char* tag, int flags,
 /**
  * Creates the human players' riders from slot 0 and connects their input, pad, focus box and rules.
  *
- * Per human (newRace.iNumberHumans) allocates a "Player" (0x1950): Players[i] = it, Riders[i] = its cRider
- * with mAIIndex = mViewIndex = i. Its Input is SSXApp->Inputs[c] (c = the player's controller ID), bound to
- * the input map that cBENewPlayerInterface_getControllerMapping names, and its Pad the PadCache pad c. Online the remote player (host: 1,
- * guest: 0) gets a remote InputSync input (cInputSync_createremoteinput), no pad, mIsLocal = 0 and finally mViewIndex -2;
- * the local one a synced input. Also applies the custom rules, cRider_initOnce() and assignPlayer(i, i); both
- * counts become the player count.
+ * Per human (newRace.iNumberHumans) allocates a "Player" (0x1950): Players[i] = it, Riders[i] = its cRider with
+ * mAIIndex = mViewIndex = i. Its Input is SSXApp->Inputs[c] (c = the player's controller ID), bound to the input map
+ * that cBENewPlayerInterface_getControllerMapping names, and its Pad the PadCache pad c. Online the remote player (on
+ * the host kGuestPlayer, on the guest kHostPlayer) gets a remote InputSync input (cInputSync_createremoteinput), no
+ * pad, mIsLocal = 0 and finally mViewIndex -2; the local one a synced input. Also applies the custom rules,
+ * cRider_initOnce() and assignPlayer(i, i); both counts become the player count.
  *
  */
 // Creates the human players' riders and hooks them up to their input and HUD slots.
@@ -751,7 +751,8 @@ void cAI::InitPlayers()
         Riders[i]->mViewIndex = idx;
         int ctrl = cBENewPlayerInterface_getControllerMapping(iface, idx);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-            if ((cBENetworkInterface_networkOpt.bIsHost != 0 && i != 1) || (cBENetworkInterface_networkOpt.bIsHost == 0 && i != 0)) {
+            if ((cBENetworkInterface_networkOpt.bIsHost != 0 && i != kGuestPlayer)
+                || (cBENetworkInterface_networkOpt.bIsHost == 0 && i != kHostPlayer)) {
                 cSSXApp* app = SSXApp;
                 cInput** box = &app->Inputs[0];
                 box += ch;
@@ -1107,15 +1108,15 @@ extern "C" int func_0012A1F0(cAI* self, int idx)
 INCLUDE_ASM("ai/ai", cAI_hasRaceStarted);
 #ifdef SKIP_ASM
 /**
- * Returns whether the AI's CurrentAIState (the first word of @p aiMan) is 5, On Tour's AIS_Race.
+ * Returns whether the AI's CurrentAIState (the first word of @p aiMan) is AIS_Race.
  *
  * Nothing in the source calls it.
  *
  * @param aiMan  the cAI
- * @return 1 while racing, else 0
+ * @return true while racing, else false
  */
-extern "C" int cAI_hasRaceStarted(int *aiMan) {
-    return *aiMan == 5;
+extern "C" bool cAI_hasRaceStarted(int *aiMan) {
+    return *aiMan == AIS_Race;
 }
 #endif
 
@@ -1140,19 +1141,19 @@ static inline bool aiRiderOk12A250(char* vrider)
  *
  * A player counts as finished once its rider's mFinishTime is >= 0; computer riders are not checked.
  *
- * @return 1 when all players have finished (or there are none), otherwise 0
+ * @return true when all players have finished (or there are none), otherwise false
  */
-int cAI::isRaceFinished()
+bool cAI::isRaceFinished()
 {
     for (int i = 0; i < NumberOfPlayersAllocated; i++)
     {
         bool ok = aiRiderOk12A250(((char*)Players[i]));
         if (!ok)
         {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1395,17 +1396,18 @@ static inline t4Vector Front_A560(cRider* rider)
 /**
  * Puts all riders, or one, back at the start of the first AI path that has a marker distance, facing along the path.
  *
- * Walks gPaths' nodes (count at gPaths + 0x10, cPathSys_getTrackPath) to the first whose cTrackPath_getFinishLineParam distance is not -1. The
- * position is the path point 1000 units before that distance (at least 0), the facing is the normalised vector from
- * there to the point at the distance (the rider's current front row when that is shorter than 1). Each chosen rider
- * (all when @p which is -1) gets cRider_setControlState and cRider_setMotionState with 0 and is placed with
- * cRider_putAt (mode 5). Only the first such node is used. Nothing in the source calls it.
+ * Walks gPaths' nodes (count at gPaths + 0x10, cPathSys_getTrackPath) to the first whose cTrackPath_getFinishLineParam
+ * distance is not -1. The position is the path point 1000 units before that distance (at least 0), the facing is the
+ * normalised vector from there to the point at the distance (the rider's current front row when that is shorter than
+ * 1). Each chosen rider (all when @p which is kAllRiders) gets cRider_setControlState and cRider_setMotionState with 0
+ * and is placed with cRider_putAt (mode 5). Only the first such node is used. Nothing in the source calls it.
  *
- * @param which  the rider index to move, or -1 for all riders
+ * @param which  the rider index to move, or -1 (kAllRiders) for all riders
  */
 // Puts the riders (all, or only rider `which`) back on the first path node that has a distance, facing along the path.
 extern "C" void func_0012A560(sAiObj12A340* self, int which)
 {
+    const int kAllRiders = -1; // @p which: move every rider
     int n = NodeCount_A560(gPaths);
     for (int i = 0; i < n; i++) {
         void* node = cPathSys_getTrackPath(gPaths, i);
@@ -1417,7 +1419,7 @@ extern "C" void func_0012A560(sAiObj12A340* self, int which)
             t4Vector ahead = cPath_getPathPos_A560(node, 0, markerDist);
             t4Vector pos = cPath_getPathPos_A560(node, 0, back);
             for (int j = 0; j < self->mCount; j++) {
-                if (which == -1 || which == j) {
+                if (which == kAllRiders || which == j) {
                     cRider_setControlState_impl(self->mRiders[j], 0);
                     cRider_setMotionState_impl(self->mRiders[j], 0);
                     t4Vector dir = vSub_A560(ahead, pos);
@@ -2101,13 +2103,13 @@ static inline bool aiRiderFar12B340(char* vr)
 /**
  * Ends an online race for the remote player: the link races alone and an unfinished remote rider gets a DNF.
  *
- * Only in the Race state: sets the game link's mAlone (cGameComm_setFinishRaceAlone), then for each non-local player
+ * Only in AIS_Race: sets the game link's mAlone (cGameComm_setFinishRaceAlone), then for each non-local player
  * (mIsLocal 0) returns at once if its mFinishTime is >= 10; otherwise ends the replay (cReplay_endReplay), sets
  * mDidNotFinish and calls cRider_doFinishEvent().
  */
 void cAI::finishRemotePlayer()
 {
-    if (CurrentAIState == 5)
+    if (CurrentAIState == AIS_Race)
     {
         cGameComm_setFinishRaceAlone((char*)cGameComm_mGameComm);
         for (int i = 0; i < NumberOfPlayersAllocated; i++)
@@ -2447,10 +2449,10 @@ static inline bool riderOk_12BB20(cPlayer* player)
  * Keeps an online race in step: checksums the AI, ends the race on a timer and sends the periodic sync packet.
  *
  * Does nothing unless cBENetworkInterface_networkOpt.bIsNetworkGame. Every 60 AITicks it takes cAI_syncCheckSum. In the
- * race state (5), or state 3 while the game is in state 3, and only for game event 0 or 4 (newRace.cGameEvent,
- * cBENewRaceInterface::cGameEvent): while EndOfRaceTimer is positive it counts down, and at 0 every player whose
- * rider has not passed the finish line (mFinishTime < 0) is marked did-not-finish (mDidNotFinish = 1) and finished
- * with cRider_doFinishEvent, the replay is ended and the timer goes back to -1.
+ * race state (AIS_Race), or AIS_PreRace while the game's state ID has the same value (3), and only for game event 0 or
+ * 4 (newRace.cGameEvent, cBENewRaceInterface::cGameEvent): while EndOfRaceTimer is positive it counts down, and at 0
+ * every player whose rider has not passed the finish line (mFinishTime < 0) is marked did-not-finish (mDidNotFinish =
+ * 1) and finished with cRider_doFinishEvent, the replay is ended and the timer goes back to -1.
  *
  * With no timer running, once a player has finished (and the game is neither ended remotely nor alone) before tick
  * 0xD32B, the timer starts at min(0xD3A4 - AITick, 7200); past tick 0xD3A3 the unfinished players are force-finished at
@@ -2466,8 +2468,8 @@ void cAI::onlineAICheck()
     if (AITick % 60 == 0)
         seed = syncCheckSum();
     int st = CurrentAIState;
-    if (st != 5) {
-        if (st != 3)
+    if (st != AIS_Race) {
+        if (st != AIS_PreRace)
             return;
         if (SSXApp->Game->mCurrentStateID != st)
             return;
@@ -2554,10 +2556,9 @@ static inline t4VectorInit AxisAngle_12BE20(const t4VectorInit& axis, float angl
 /**
  * Enters the start-gate control: faces the rider by its stance and starts the gate rock (or sit) animation.
  *
- * Copies IsGoofyStance into the rider's stance word (+0x320) and the anim's (+0x18), resets mRiderAnim with
- * its root at the origin, turned half a circle about Z when the stance is nonzero. GateState 2 (sit) plays
- * anim 1; anything else plays anim 0 and becomes 0 (rock). Clears GateAnticipate, HeldAtExtremeSec and both
- * thrusts.
+ * Copies IsGoofyStance into the rider's stance word (+0x320) and the anim's (+0x18), resets mRiderAnim with its root at
+ * the origin, turned half a circle about Z when the stance is nonzero. GateState kGS_Sit plays kAID_SitCycle; anything
+ * else plays kAID_GateRock and becomes kGS_GateRock. Clears GateAnticipate, HeldAtExtremeSec and both thrusts.
  */
 extern "C" void cGateControl_gainFocus(cGateControl* self)
 {
@@ -2572,14 +2573,14 @@ extern "C" void cGateControl_gainFocus(cGateControl* self)
     cRiderAnim* anim = rider->mRiderAnim;
     anim->OrientationOffset.P = t4vect_Origin_12BE20;
     anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
-    if (*(int*)self == 2)
+    if (*(int*)self == cGateControl::kGS_Sit)
     {
-        cRiderAnimBase_play(self->mRider->mRiderAnim, 1, 0, -1.0f);
+        cRiderAnimBase_play(self->mRider->mRiderAnim, kAID_SitCycle, 0, -1.0f);
     }
     else
     {
-        cRiderAnimBase_play(self->mRider->mRiderAnim, 0, 0, -1.0f);
-        *(int*)self = 0;
+        cRiderAnimBase_play(self->mRider->mRiderAnim, kAID_GateRock, 0, -1.0f);
+        *(int*)self = cGateControl::kGS_GateRock;
     }
     *(int*)&self->GateAnticipate = 0;
     *(int*)&self->HeldAtExtremeSec = 0;
@@ -2600,8 +2601,8 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, tGateCmd* cmd);
 /**
  * Runs the start gate for one tick: stops any boost, then runs the handler of the current gate state.
  *
- * Calls cRider_setupBoostWarp(rider, 0, 0), then by GateState: 0 doGateRock, 1 doGateLaunch, 2 doSit, 3
- * doGetupFromSit.
+ * Calls cRider_setupBoostWarp(rider, 0, 0), then by GateState: kGS_GateRock doGateRock, kGS_GateLaunch doGateLaunch,
+ * kGS_Sit doSit, kGS_GetupFromSit doGetupFromSit.
  *
  * @param cmd  the gate command (On Tour tGateCmd), passed on to the state handler
  */
@@ -2610,16 +2611,16 @@ void cGateControl::update(tGateCmd* cmd)
     cRider_setupBoostWarp(mRider, 0, 0);
     switch (*(int*)this)
     {
-    case 0:
+    case kGS_GateRock:
         cGateControl_doGateRock(this, cmd);
         break;
-    case 1:
+    case kGS_GateLaunch:
         doGateLaunch(cmd);
         break;
-    case 2:
+    case kGS_Sit:
         cGateControl_doSit(this, cmd);
         break;
-    case 3:
+    case kGS_GetupFromSit:
         cGateControl_doGetupFromSit(this, cmd);
         break;
     }
@@ -2633,7 +2634,7 @@ INCLUDE_ASM("ai/ai", cGateControl_isLaunchAllowed);
 /**
  * Tells whether the rider may leave the gate: the race is running and its start handicap has elapsed.
  *
- * True in AI state Race (5) once the race time in whole seconds (EventTimerTick / 60) reaches mStartHandicap.
+ * True in AI state AIS_Race once the race time in whole seconds (EventTimerTick / 60) reaches mStartHandicap.
  *
  * @return 1 when the launch is allowed, otherwise 0
  */
@@ -2641,7 +2642,7 @@ int cGateControl::isLaunchAllowed()
 {
     int allowed = 0;
     cAI* gameAi = SSXApp->Game->AI;
-    if (*(int*)gameAi == 5)
+    if (*(int*)gameAi == AIS_Race)
     {
         allowed = mRider->mStartHandicap <= (int)(gameAi->EventTimerTick * 0.01666666753590107f);
     }
@@ -2656,18 +2657,17 @@ INCLUDE_ASM("ai/ai", cGateControl_isForceLaunch);
 /**
  * Tells whether the rider has to launch: the AI is in the Race state or the rider has already finished.
  *
- * doGateRock calls it only after isLaunchAllowed(), which already requires the Race state, so there it is
- * always 1.
+ * doGateRock calls it only after isLaunchAllowed(), which already requires the Race state, so there it is always true.
  *
- * @return 1 when the AI state is Race (5) or mFinishTime >= 0, otherwise 0
+ * @return true when the AI state is AIS_Race or mFinishTime >= 0, otherwise false
  */
-int cGateControl::isForceLaunch()
+bool cGateControl::isForceLaunch()
 {
-    if (SSXApp->Game->AI->CurrentAIState == 5)
-        return 1;
+    if (SSXApp->Game->AI->CurrentAIState == AIS_Race)
+        return true;
     if (mRider->mFinishTime >= 0.0f)
-        return 1;
-    return 0;
+        return true;
+    return false;
 }
 #endif
 
@@ -2727,38 +2727,38 @@ static inline t4Vector vu0Scale_12C130(const t4Vector& in, float s)
 /**
  * Getup-from-sit gate state: launches the rider at a fixed speed once the get-up animation is half done.
  *
- * Holds cRider_setupCrouchBrake(rider, 1, 0). While anim slot 2 still plays anim 2: if Static (motion state 3) and past
- * 50%, sets mVelocity = the matrix's front row * 555.56 and switches to motion state Ground. Once that anim
- * is over: control state NaturalAir (4) if airborne, else Cruise (0), and GateState 0.
+ * Holds cRider_setupCrouchBrake(rider, 1, 0). While anim slot 2 still plays kAID_SitToCruiseFwd: if MS_Static and past
+ * 50%, sets mVelocity = the matrix's front row * 555.56 and switches to MS_Ground. Once that anim is over:
+ * CS_NaturalAir if airborne, else CS_Cruise, and GateState kGS_GateRock.
  *
  * @param cmd  the gate command (On Tour tGateCmd); not read
  */
 extern "C" void cGateControl_doGetupFromSit(cGateControl* self, tGateCmd* cmd)
 {
     cRider_setupCrouchBrake(self->mRider, 1.0f, 0.0f);
-    if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 2)
+    if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == kAID_SitToCruiseFwd)
     {
-        if (cRider_getMotionState(self->mRider) == 3)
+        if (cRider_getMotionState(self->mRider) == MS_Static)
         {
             if (cRiderAnimBase_getCurrentAnimFramePercent(self->mRider->mRiderAnim, 2) > 0.5f)
             {
                 cRider* rider = self->mRider;
                 *(&rider->mVelocity) = vu0Scale_12C130(*(&rider->mMatrix.row[1]), 555.5555419921875f);
-                cRider_setMotionState_impl(self->mRider, 0);
+                cRider_setMotionState_impl(self->mRider, MS_Ground);
             }
         }
     }
     else
     {
-        if (cRider_getMotionState(self->mRider) == 1)
+        if (cRider_getMotionState(self->mRider) == MS_Air)
         {
-            cRider_setControlState_impl(self->mRider, 4);
+            cRider_setControlState_impl(self->mRider, CS_NaturalAir);
         }
         else
         {
-            cRider_setControlState_impl(self->mRider, 0);
+            cRider_setControlState_impl(self->mRider, CS_Cruise);
         }
-        *(int*)self = 0;
+        *(int*)self = cGateControl::kGS_GateRock;
     }
 }
 #endif
@@ -2851,8 +2851,8 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * Gate launch state: pushes the rider out of the gate at the launch speed chosen by doGateRock.
  *
  * Moves GateAnticipate toward 1.0 by 0.015 per tick and holds cRider_setupCrouchBrake(rider, 1, 0). While Static
- * (motion state 3) with GateAnticipate >= 0.62, sets mVelocity = the front row * CurThrustMax and switches to
- * Ground. At 1.0 plays anim 6 and leaves the gate: control state NaturalAir (4) if airborne, else Cruise (0).
+ * (MS_Static) with GateAnticipate >= 0.62, sets mVelocity = the front row * CurThrustMax and switches to Ground. At 1.0
+ * plays kAID_CruiseCrouch and leaves the gate: CS_NaturalAir if airborne, else CS_Cruise.
  *
  * @param cmd  the gate command (On Tour tGateCmd); not read
  */
@@ -2878,22 +2878,22 @@ void cGateControl::doGateLaunch(tGateCmd* cmd)
     }
     GateAnticipate = n;
     cRider_setupCrouchBrake(mRider, 1.0f, 0.0f);
-    if (cRider_getMotionState(mRider) == 3 && GateAnticipate >= 0.6200000047683716f)
+    if (cRider_getMotionState(mRider) == MS_Static && GateAnticipate >= 0.6200000047683716f)
     {
         cRider* rider = mRider;
         *(&rider->mVelocity) = vu0Scale_12C130(*(&rider->mMatrix.row[1]), CurThrustMax);
-        cRider_setMotionState_impl(mRider, 0);
+        cRider_setMotionState_impl(mRider, MS_Ground);
     }
     if (GateAnticipate == 1.0f)
     {
-        cRiderAnimBase_play(mRider->mRiderAnim, 6, 0, -1.0f);
-        if (cRider_getMotionState(mRider) == 1)
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_CruiseCrouch, 0, -1.0f);
+        if (cRider_getMotionState(mRider) == MS_Air)
         {
-            cRider_setControlState_impl(mRider, 4);
+            cRider_setControlState_impl(mRider, CS_NaturalAir);
         }
         else
         {
-            cRider_setControlState_impl(mRider, 0);
+            cRider_setControlState_impl(mRider, CS_Cruise);
         }
     }
 }
@@ -3062,12 +3062,13 @@ struct sAiObj12C678
 /**
  * Runs the finish-line control for one tick: brakes the rider, turns it into stance, plays its reaction.
  *
- * Brake (0): plays the reverse turn (anim 0x15) when it runs or can start; else, on the ground, anim 0xB with
- * a small lean and no boost or spin, and on flat ground velocity * 0.97 until the speed drops under 277.78 or
- * channel 3 (+0x214) reaches +-1 (then 1). IntoStance (1): velocity * 0.93 until lean and channel 3 settle,
- * then 2 with anim 4 and a queued reaction (kind 1 when rider +0x100 is 1, else 4). Reaction (2): holds the
- * rider still and plays it (cRider_checkForReaction) at anim speed 0.75; once cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) is 0
- * (probably the reaction is over), mFinishTime = max(mFinishTime, 10) and state 3 (Done).
+ * kFINISH_Brake: plays the change-fakie turn (kAID_ChangeFakie) when it runs or can start; else, on the ground,
+ * kAID_CruiseBrake with a small lean and no boost or spin, and on flat ground velocity * 0.97 until the speed drops
+ * under 277.78 or channel 3 (+0x214) reaches +-1 (then kFINISH_IntoStance). kFINISH_IntoStance: velocity * 0.93 until
+ * lean and channel 3 settle, then kFINISH_Reaction with kAID_FinishCruiseToStand and a queued reaction (kind 1 when
+ * ShouldCelebrateAtFinish, else 4). kFINISH_Reaction: holds the rider still and plays it (cRider_checkForReaction) at
+ * anim speed 0.75; once cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) is kANCAT_None (probably the reaction is
+ * over), mFinishTime = max(mFinishTime, 10) and kFINISH_Done.
  *
  * @param cmd  the command (On Tour const tFinishLineCmd&); not read here
  */
@@ -3080,21 +3081,21 @@ void cFinishLineControl::update(tFinishLineCmd* cmd)
     rider->mSlewed[1].target = rider->mSlewed[0].cur;
     switch (FinishState)
     {
-    case 0:
-        if (anim == 21 || (mRider->mSpinRate == 0.0f && cRider_isChangeFakieGround((char*)mRider)))
+    case kFINISH_Brake:
+        if (anim == kAID_ChangeFakie || (mRider->mSpinRate == 0.0f && cRider_isChangeFakieGround((char*)mRider)))
         {
-            anim = 21;
+            anim = kAID_ChangeFakie;
             cRider_setupCrouchBrake((char*)mRider, 0.0f, 0.0f);
         }
         else
         {
-            if (cRider_getMotionState((char*)mRider) != 0)
+            if (cRider_getMotionState((char*)mRider) != MS_Ground)
                 break;
             float floatZero = 0.0f;
             float turn = -0.10000000149011612f;
             if (floatZero < mRider->mSlewed[0].cur)
                 turn = 0.10000000149011612f;
-            anim = 11;
+            anim = kAID_CruiseBrake;
             cRider_setupLean((char*)mRider, turn);
             cRider_setupBoostWarp((char*)mRider, 0, 0);
             mRider->mSpinRate = floatZero;
@@ -3108,7 +3109,7 @@ void cFinishLineControl::update(tFinishLineCmd* cmd)
                 if (aiAbs_12C678(mRider->mSlewed[3].cur) == 1.0f ||
                     aiLength_12C678(*(&mRider->mVelocity)) < nFinishLineControl_kFinishStopThreshCPS)
                 {
-                    FinishState = 1;
+                    FinishState = kFINISH_IntoStance;
                 }
                 else
                 {
@@ -3117,7 +3118,7 @@ void cFinishLineControl::update(tFinishLineCmd* cmd)
             }
         }
         break;
-    case 1:
+    case kFINISH_IntoStance:
     {
         float floatZero = 0.0f;
         cRider_setupCrouchBrake((char*)mRider, floatZero, floatZero);
@@ -3126,27 +3127,27 @@ void cFinishLineControl::update(tFinishLineCmd* cmd)
         if (aiAbs_12C678(mRider->mSlewed[3].cur) < 0.20000000298023224f &&
             mRider->mSlewed[0].cur == floatZero)
         {
-            FinishState = 2;
-            anim = 4;
-            if (mRider->ShouldCelebrateAtFinish == 1)
+            FinishState = kFINISH_Reaction;
+            anim = kAID_FinishCruiseToStand;
+            if (mRider->ShouldCelebrateAtFinish == true)
                 cRider_flagEventReaction((char*)mRider, 1, floatZero);
             else
                 cRider_flagEventReaction((char*)mRider, 4, floatZero);
         }
         break;
     }
-    case 2:
+    case kFINISH_Reaction:
         *(&mRider->mVelocity) = *(t4Vector*)t4vect_Zero;
         mRider->mRiderAnim->FrameRateFactor = 0.75f;
         cRider_checkForReaction((char*)mRider);
         mRider->mRiderAnim->FrameRateFactor = 1.0f;
-        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == kANCAT_None)
         {
             mRider->mFinishTime = mRider->mFinishTime >? 10.0f;
-            FinishState = 3;
+            FinishState = kFINISH_Done;
         }
         break;
-    case 3:
+    case kFINISH_Done:
         *(&mRider->mVelocity) = *(t4Vector*)t4vect_Zero;
         break;
     }
@@ -3215,11 +3216,12 @@ static inline void vu0AddEq_12CA30(t4Vector& dst, const t4Vector& b)
 /**
  * Enters the wipeout control: clears the power-up timers and recovery, and snapshots the hip and board poses.
  *
- * Zeroes mPowerUpBoostTimer, mPowerUpTrickTimer, IsNewImpact and RecoverPercent, clears the audio word of the
- * rider's view (cSSXAudio_ResetWipeoutRecoverHit), copies the hip and board-child bone poses (plus mModelOffset) into
- * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) is 0x16
- * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears LegIK. Then
- * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (cWScriptMan_eventWipeout).
+ * Zeroes mPowerUpBoostTimer, mPowerUpTrickTimer, IsNewImpact and RecoverPercent, clears the audio word of the rider's
+ * view (cSSXAudio_ResetWipeoutRecoverHit), copies the hip and board-child bone poses (plus mModelOffset) into
+ * RiderPrevPose and BoardPrevPose, and sets RiderState kRS_Launch. When
+ * cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) is kANCAT_WHitNoBoard it calls cWipeoutMotion_throwItem (rider
+ * velocity, no spin, BoardPrevPose) and clears LegIK. Then notifies the replay (cReplay_eventWipeout) and queues
+ * world-script op 0x70004 (cWScriptMan_eventWipeout).
  */
 void cWipeoutControl::gainFocus()
 {
@@ -3235,8 +3237,8 @@ void cWipeoutControl::gainFocus()
     BoardPrevPose = *(tPose*)&rider->mAnimModel->bones[rider->mBoneBoardChild];
     vu0AddEq_12CA30(*(t4Vector*)&RiderPrevPose, *(&mRider->mModelOffset));
     vu0AddEq_12CA30(*(t4Vector*)&BoardPrevPose, *(&mRider->mModelOffset));
-    RiderState = 0;
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 22)
+    RiderState = kRS_Launch;
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WHitNoBoard)
     {
         cWipeoutMotion_throwItem((char*)&mRider->mRiderHandler->WipeoutMotion, ((&mRider->mVelocity)),
                 (t4Vector*)t4vect_Zero, boardPrevPose);
@@ -3267,10 +3269,10 @@ extern "C" void cWipeoutControl_updateStuck(cWipeoutControl* self);
 /**
  * Runs the wipeout control for one tick: reset check, the recovery button meter, then the wipeout state.
  *
- * Stops any boost; returns early when cRider_checkForReset() (command bit 12 = reset input) starts a reset.
- * Unless recovering (RiderState 3), RecoverPercent decays toward 0 by 0.00417 per tick and each tick with bit
- * 13 set adds 17/60 (8/60 when rider unk_B20 is 0, 34/60 when 2) with a recover-hit or, at 1.0, recover-full
- * sound. Then by RiderState: updateLaunch, updateAir, updateGround, updateRecover or updateStuck.
+ * Stops any boost; returns early when cRider_checkForReset() (command bit 12 = reset input) starts a reset. Unless
+ * recovering (RiderState kRS_Recover), RecoverPercent decays toward 0 by 0.00417 per tick and each tick with bit 13 set
+ * adds 17/60 (8/60 for mWipeoutRecoveryMode kWRM_Slower, 34/60 for kWRM_Faster) with a recover-hit or, at 1.0,
+ * recover-full sound. Then by RiderState: updateLaunch, updateAir, updateGround, updateRecover or updateStuck.
  *
  * @param input  the wipeout command word (On Tour tWipeoutCmd)
  */
@@ -3281,7 +3283,7 @@ void cWipeoutControl::update(tWipeoutCmd* input)
     if (cRider_checkForReset_CB68((char*)mRider, (*(int*)input >> 12) & 1, 0)) {
         return;
     }
-    bool isRecovering = RiderState == 3;
+    bool isRecovering = RiderState == kRS_Recover;
     if (!isRecovering) {
         float prevRecover = RecoverPercent;
         float newRecover;
@@ -3297,10 +3299,10 @@ void cWipeoutControl::update(tWipeoutCmd* input)
         if (input->Recover) {
             float rate = 17.00261688232422f;
             switch (mRider->mWipeoutRecoveryMode) {
-            case 0:
+            case kWRM_Slower:
                 rate = 8.001495361328125f;
                 break;
-            case 2:
+            case kWRM_Faster:
                 rate = 34.00276565551758f;
                 break;
             }
@@ -3313,19 +3315,19 @@ void cWipeoutControl::update(tWipeoutCmd* input)
         }
     }
     switch (RiderState) {
-    case 0:
+    case kRS_Launch:
         cWipeoutControl_updateLaunch_CB68((this));
         break;
-    case 1:
+    case kRS_Air:
         cWipeoutControl_updateAir(this);
         break;
-    case 2:
+    case kRS_Ground:
         cWipeoutControl_updateGround(this);
         break;
-    case 3:
+    case kRS_Recover:
         updateRecover();
         break;
-    case 4:
+    case kRS_Stuck:
         updateStuck();
         break;
     }
@@ -3420,13 +3422,14 @@ static inline t4VectorInit Conj_12CD20(const tPose& p)
  * Runs the launch phase of a wipeout (RS_Launch): when the crash clip ends, throws the body and switches to
  * the air or ground tumble.
  *
- * When the main-channel (2) clip completes, an angular velocity from the last two poses of the hips bone
- * (mBoneHips) goes to cWipeoutMotion_throwRider() with the rider's unchanged mVelocity; a class-0x17 clip
- * also throws the board from the mBoneBoardChild poses (cWipeoutMotion_throwItem). RiderState then becomes
- * RS_Air or RS_Ground from the wipeout motion's state, the hit-transition clip plays, and on the ground the
- * slide sound (cSSXAudio_WipeoutSlideStart, classes 0x1D/0x19) or the tumble sound (cSSXAudio_WipeoutTumbleStart) starts. Before that, the
- * two poses and the clip progress are recorded each tick while the progress is below 0.95. A linear hip
- * velocity is also computed but never used (On Tour's calcVelFromAnim, inlined).
+ * When the main-channel (2) clip completes, an angular velocity from the last two poses of the hips bone (mBoneHips)
+ * goes to cWipeoutMotion_throwRider() with the rider's unchanged mVelocity; a kANCAT_WHitLoseBoard clip also throws the
+ * board from the mBoneBoardChild poses (cWipeoutMotion_throwItem). RiderState then becomes RS_Air or RS_Ground from the
+ * wipeout motion's state, the hit-transition clip plays, and on the ground the slide sound
+ * (cSSXAudio_WipeoutSlideStart, categories kANCAT_WSlide / kANCAT_WSlideNoBoard) or the tumble sound
+ * (cSSXAudio_WipeoutTumbleStart) starts. Before that, the two poses and the clip progress are recorded each tick while
+ * the progress is below 0.95. A linear hip velocity is also computed but never used (On Tour's calcVelFromAnim,
+ * inlined).
  */
 void cWipeoutControl::updateLaunch()
 {
@@ -3448,7 +3451,7 @@ void cWipeoutControl::updateLaunch()
         t4VectorInit angvel = Scale_12CD20(t4VectorInit(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f),
                                            doubleInvDeltaTime);
         cWipeoutMotion_throwRider((char*)&mRider->mRiderHandler->WipeoutMotion, &mRider->mVelocity, &angvel);
-        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 23)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WHitLoseBoard)
         {
             vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(boardPose->P, BoardPrevPose.P),
                                             mRider->mRiderAnim->FrameRateFactor), invDeltaTime);
@@ -3457,17 +3460,17 @@ void cWipeoutControl::updateLaunch()
             angvel = Scale_12CD20(t4VectorInit(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
             cWipeoutMotion_throwItem((char*)&mRider->mRiderHandler->WipeoutMotion, &vel, &angvel, boardPose);
         }
-        if (mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)
+        if (mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Air)
         {
-            RiderState = 1;
+            RiderState = kRS_Air;
             playWipeoutHitTransitionAnim();
         }
         else
         {
-            RiderState = 2;
+            RiderState = kRS_Ground;
             playWipeoutHitTransitionAnim();
-            if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 29 ||
-                cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 25)
+            if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WSlide ||
+                cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WSlideNoBoard)
                 cSSXAudio_WipeoutSlideStart(cAudioInterface_bxAudio(), (this));
             else
                 cSSXAudio_WipeoutTumbleStart(cAudioInterface_bxAudio(), (this));
@@ -3537,15 +3540,15 @@ static inline void aiTail_12D160(void* vself)
  * Runs the ground phase of a wipeout (RS_Ground): slides or tumbles until the rider can get up, sticks, or is
  * airborne again.
  *
- * Every tick: camera shake for a local rider with a view (eCST_Wipeout, km/h / 100 capped at 1), rumble at
- * half the tumble rate, and a new impact becomes a vibration bump that ends the tick. A detached board
- * (mUseRootPoseOverride == 1) under 1 km/h goes to RS_Stuck. After the clip ends (at once for classes 0x1D
- * and 0x19), a full recovery meter or finished race, or an attached board under 25 km/h (60 km/h for class
- * 0x1C), gets the rider up (RS_Recover, the recover event cRider_flagEventWipeoutRecover, a long grunt for 0x1C); on
- * eST_Rock_WipeOut it instead resets (eAR_UberWipeout) when recovery is allowed or goes to RS_Stuck under 10
- * km/h, and a detached board resets once recovery is allowed. An airborne wipeout motion goes to RS_Air;
- * otherwise a finished clip re-runs playWipeoutGroundAnim(). These changes stop the slide and tumble sounds,
- * which also stop on rock between 10 km/h and the get-up limit although the state stays RS_Ground.
+ * Every tick: camera shake for a local rider with a view (eCST_Wipeout, km/h / 100 capped at 1), rumble at half the
+ * tumble rate, and a new impact becomes a vibration bump that ends the tick. A detached board (mUseRootPoseOverride ==
+ * 1) under 1 km/h goes to RS_Stuck. After the clip ends (at once for kANCAT_WSlide / kANCAT_WSlideNoBoard), a full
+ * recovery meter or finished race, or an attached board under 25 km/h (60 km/h for kANCAT_WTumble), gets the rider up
+ * (RS_Recover, the recover event cRider_flagEventWipeoutRecover, a long grunt for kANCAT_WTumble); on eST_Rock_WipeOut
+ * it instead resets (eAR_UberWipeout) when recovery is allowed or goes to RS_Stuck under 10 km/h, and a detached board
+ * resets once recovery is allowed. An airborne wipeout motion goes to RS_Air; otherwise a finished clip re-runs
+ * playWipeoutGroundAnim(). These changes stop the slide and tumble sounds, which also stop on rock between 10 km/h and
+ * the get-up limit although the state stays RS_Ground.
  */
 extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
 {
@@ -3578,21 +3581,21 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
     if (aiIsOne_12D160((char*)self->mRider) && speed < 27.77777862548828f)
     {
         self->playWipeoutStuckAnim();
-        *(int*)self = 4;
+        *(int*)self = cWipeoutControl::kRS_Stuck;
         aiTail_12D160(self);
         return;
     }
     if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) == 0 &&
-        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) != 29 &&
-        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) != 25)
+        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) != kANCAT_WSlide &&
+        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) != kANCAT_WSlideNoBoard)
         return;
     float lim = 694.4444580078125f;
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0x1C)
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_WTumble)
         lim = 1666.666748046875f;
     int fast = self->RecoverPercent >= 1.0f || aiOk_12D160(self);
     if ((!aiIsOne_12D160((char*)self->mRider) && speed < lim) || fast)
     {
-        if (self->mRider->mSurfaceType == 18 || aiIsOne_12D160((char*)self->mRider))
+        if (self->mRider->mSurfaceType == eST_Rock_WipeOut || aiIsOne_12D160((char*)self->mRider))
         {
             if (fast)
             {
@@ -3602,23 +3605,23 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
             else if (speed < 277.77777099609375f)
             {
                 self->playWipeoutStuckAnim();
-                *(int*)self = 4;
+                *(int*)self = cWipeoutControl::kRS_Stuck;
             }
         }
         else
         {
             cRider_flagEventWipeoutRecover((char*)self->mRider, fast);
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0x1C)
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_WTumble)
                 cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), (char*)self->mRider, 1, 0);
             self->playWipeoutGroundRecoverAnim();
-            *(int*)self = 3;
+            *(int*)self = cWipeoutControl::kRS_Recover;
         }
         aiTail_12D160(self);
     }
-    else if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)
+    else if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Air)
     {
         self->playWipeoutAirAnim();
-        *(int*)self = 1;
+        *(int*)self = cWipeoutControl::kRS_Air;
         aiTail_12D160(self);
     }
     else
@@ -3704,21 +3707,21 @@ static inline int aiIsOne_12D4E8(char* vr)
  * Runs the airborne phase of a wipeout (RS_Air): handles the body's landing impacts and starts the recovery
  * once it is allowed.
  *
- * Updates the tumble rate first (result unused). A new impact becomes a vibration bump; if the wipeout motion
- * is on the ground, a head-on hit on flat ground (mGroundNormal z > 0.9, impact within about 25 degrees of
- * straight down into it) goes to RS_Stuck and keeps only the normal part of mVelocity, else RS_Ground starts
- * with the ground-impact clip and slide sound (classes 0x1D/0x19) or the ground tumble at the same progress
- * and the tumble sound; both play the wipeout-hit sound (cSSXAudio_WipeoutHit). Without an impact, once the clip
- * ends (at once for 0x1D/0x19): a full meter or finished race recovers (RS_Recover) or, with the board
- * detached, resets (eAR_UberWipeout); else a grounded wipeout motion goes to RS_Ground and a finished air
- * clip is re-picked.
+ * Updates the tumble rate first (result unused). A new impact becomes a vibration bump; if the wipeout motion is on the
+ * ground, a head-on hit on flat ground (mGroundNormal z > 0.9, impact within about 25 degrees of straight down into it)
+ * goes to RS_Stuck and keeps only the normal part of mVelocity, else RS_Ground starts with the ground-impact clip and
+ * slide sound (categories kANCAT_WSlide / kANCAT_WSlideNoBoard) or the ground tumble at the same progress and the
+ * tumble sound; both play the wipeout-hit sound (cSSXAudio_WipeoutHit). Without an impact, once the clip ends (at once
+ * for kANCAT_WSlide / kANCAT_WSlideNoBoard): a full meter or finished race recovers (RS_Recover) or, with the board
+ * detached, resets (eAR_UberWipeout); else a grounded wipeout motion goes to RS_Ground and a finished air clip is
+ * re-picked.
  */
 extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
 {
     self->chooseTumbleAnimRate();
     if (self->IsNewImpact != 0)
     {
-        if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
+        if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Ground)
         {
             if (self->mRider->mGroundNormal.z > 0.8999999761581421f &&
                 aiDot_12D4E8(*(&self->LatestImpact), *(&self->mRider->mGroundNormal)) <
@@ -3729,12 +3732,12 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                 t4Vector normalVel = aiScale_12D4E8(*(&rider2->mGroundNormal),
                     aiDot_12D4E8(*(&rider2->mGroundNormal), *(&rider2->mVelocity)));
                 *(&rider2->mVelocity) = normalVel;
-                *(int*)self = 4;
+                *(int*)self = cWipeoutControl::kRS_Stuck;
             }
             else
             {
-                if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29 ||
-                    cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)
+                if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_WSlide ||
+                    cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_WSlideNoBoard)
                 {
                     self->playWipeoutGroundImpactAnim();
                     cSSXAudio_WipeoutSlideStart(cAudioInterface_bxAudio(), self);
@@ -3747,7 +3750,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                     cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2), 0, animDuration * framePercent);
                     cSSXAudio_WipeoutTumbleStart(cAudioInterface_bxAudio(), self);
                 }
-                *(int*)self = 2;
+                *(int*)self = cWipeoutControl::kRS_Ground;
             }
             cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), self->mRider);
         }
@@ -3758,8 +3761,8 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         return;
     }
     if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) != 0 ||
-        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29 ||
-        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)
+        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_WSlide ||
+        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_WSlideNoBoard)
     {
         int fast = self->RecoverPercent >= 1.0f || aiOk_12D4E8(self);
         if (fast)
@@ -3768,7 +3771,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
             {
                 cRider_flagEventWipeoutRecover((char*)self->mRider, fast);
                 self->playWipeoutAirRecoverAnim();
-                *(int*)self = 3;
+                *(int*)self = cWipeoutControl::kRS_Recover;
             }
             else
             {
@@ -3776,10 +3779,10 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                 cRider_flagEventWipeoutRecover(self->mRider, 1);
             }
         }
-        else if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
+        else if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == cWipeoutMotion::kWMS_Ground)
         {
             self->playWipeoutGroundAnim();
-            *(int*)self = 2;
+            *(int*)self = cWipeoutControl::kRS_Ground;
         }
         else if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) != 0)
         {
@@ -3891,115 +3894,116 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Swaps the crash clip on the main channel for the matching tumble clip, the air or the ground variant.
  *
- * Crash semantics 0x148-0x169 map to air tumbles 0x175-0x17F when RiderState is RS_Air, else to ground
- * tumbles 0x16A-0x174 (several crash clips share a tumble). A changed clip is played (blend -1) and its rate
- * set with cWipeoutControl_chooseTumbleAnimRate().
+ * Crash semantics kAID_WH_GrndFromLeft2RollRight .. kAID_WH_NB_LandOnFace2FwdFaceDown map to air tumbles
+ * kAID_WA_RollRight .. kAID_WA_NB_FwdFaceDown when RiderState is RS_Air, else to ground tumbles kAID_WG_RollRight ..
+ * kAID_WG_NB_FwdFaceDown (several crash clips share a tumble). A changed clip is played (blend -1) and its rate set
+ * with cWipeoutControl_chooseTumbleAnimRate().
  */
 // Maps the rider's layer-2 animation to its base (or alternate) variant and replays it.
 void cWipeoutControl::playWipeoutHitTransitionAnim()
 {
-    bool isAir = *(int*)this == 1;
+    bool isAir = *(int*)this == kRS_Air;
     int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int next = cur;
     switch (cur) {
-    case 328:
-        next = isAir ? 373 : 362;
+    case kAID_WH_GrndFromLeft2RollRight:
+        next = isAir ? kAID_WA_RollRight : kAID_WG_RollRight;
         break;
-    case 329:
-        next = isAir ? 374 : 363;
+    case kAID_WH_GrndFromRight2RollLeft:
+        next = isAir ? kAID_WA_RollLeft : kAID_WG_RollLeft;
         break;
-    case 330:
-        next = isAir ? 375 : 364;
+    case kAID_WH_GrndFromBack2RollFwd:
+        next = isAir ? kAID_WA_RollFwd : kAID_WG_RollFwd;
         break;
-    case 331:
-        next = isAir ? 379 : 368;
+    case kAID_WH_GrndFromBack2FwdFaceDown:
+        next = isAir ? kAID_WA_FwdFaceDown : kAID_WG_FwdFaceDown;
         break;
-    case 332:
-        next = isAir ? 377 : 366;
+    case kAID_WH_GrndFromFrontLow2CartFwd:
+        next = isAir ? kAID_WA_CartFwd : kAID_WG_CartFwd;
         break;
-    case 333:
-        next = isAir ? 378 : 367;
+    case kAID_WH_GrndFromFront2CartBwd:
+        next = isAir ? kAID_WA_CartBwd : kAID_WG_CartBwd;
         break;
-    case 334:
-        next = isAir ? 381 : 370;
+    case kAID_WH_GrndFromFront2FwdFaceUp:
+        next = isAir ? kAID_WA_FwdFaceUp : kAID_WG_FwdFaceUp;
         break;
-    case 335:
-        next = isAir ? 382 : 371;
+    case kAID_WH_GrndFromFront2BwdFaceUp:
+        next = isAir ? kAID_WA_BwdFaceUp : kAID_WG_BwdFaceUp;
         break;
-    case 336:
-        next = isAir ? 376 : 365;
+    case kAID_WH_GrndFromFront2RollBwd:
+        next = isAir ? kAID_WA_RollBwd : kAID_WG_RollBwd;
         break;
-    case 337:
-        next = isAir ? 380 : 369;
+    case kAID_WH_GrndFromFront2BwdFaceDown:
+        next = isAir ? kAID_WA_BwdFaceDown : kAID_WG_BwdFaceDown;
         break;
-    case 338:
-        next = isAir ? 373 : 362;
+    case kAID_WH_AirFromLeft2RollRight:
+        next = isAir ? kAID_WA_RollRight : kAID_WG_RollRight;
         break;
-    case 339:
-        next = isAir ? 374 : 363;
+    case kAID_WH_AirFromRight2RollLeft:
+        next = isAir ? kAID_WA_RollLeft : kAID_WG_RollLeft;
         break;
-    case 340:
-        next = isAir ? 375 : 364;
+    case kAID_WH_AirFromBack2RollFwd:
+        next = isAir ? kAID_WA_RollFwd : kAID_WG_RollFwd;
         break;
-    case 341:
-        next = isAir ? 379 : 368;
+    case kAID_WH_AirFromBack2FwdFaceDown:
+        next = isAir ? kAID_WA_FwdFaceDown : kAID_WG_FwdFaceDown;
         break;
-    case 342:
-        next = isAir ? 377 : 366;
+    case kAID_WH_AirFromFrontLow2CartFwd:
+        next = isAir ? kAID_WA_CartFwd : kAID_WG_CartFwd;
         break;
-    case 343:
-        next = isAir ? 382 : 371;
+    case kAID_WH_AirFromFront2BwdFaceUp:
+        next = isAir ? kAID_WA_BwdFaceUp : kAID_WG_BwdFaceUp;
         break;
-    case 344:
-        next = isAir ? 380 : 369;
+    case kAID_WH_AirFromFront2BwdFaceDown:
+        next = isAir ? kAID_WA_BwdFaceDown : kAID_WG_BwdFaceDown;
         break;
-    case 345:
-        next = isAir ? 376 : 365;
+    case kAID_WH_AirFromFront2RollBwd:
+        next = isAir ? kAID_WA_RollBwd : kAID_WG_RollBwd;
         break;
-    case 346:
-        next = isAir ? 378 : 367;
+    case kAID_WH_AirFromFront2CartBwd:
+        next = isAir ? kAID_WA_CartBwd : kAID_WG_CartBwd;
         break;
-    case 347:
-        next = isAir ? 381 : 370;
+    case kAID_WH_AirFromFront2FwdFaceUp:
+        next = isAir ? kAID_WA_FwdFaceUp : kAID_WG_FwdFaceUp;
         break;
-    case 348:
-        next = isAir ? 379 : 368;
+    case kAID_WH_LandTiltFwd2FwdFaceDown:
+        next = isAir ? kAID_WA_FwdFaceDown : kAID_WG_FwdFaceDown;
         break;
-    case 349:
-        next = isAir ? 380 : 369;
+    case kAID_WH_LandTiltBwd2BwdFaceDown:
+        next = isAir ? kAID_WA_BwdFaceDown : kAID_WG_BwdFaceDown;
         break;
-    case 350:
-        next = isAir ? 375 : 364;
+    case kAID_WH_LandOnHead2RollFwd:
+        next = isAir ? kAID_WA_RollFwd : kAID_WG_RollFwd;
         break;
-    case 351:
-        next = isAir ? 377 : 366;
+    case kAID_WH_LandOnFeet2CartFwd:
+        next = isAir ? kAID_WA_CartFwd : kAID_WG_CartFwd;
         break;
-    case 352:
-        next = isAir ? 382 : 371;
+    case kAID_WH_LandOnFeet2BwdFaceUp:
+        next = isAir ? kAID_WA_BwdFaceUp : kAID_WG_BwdFaceUp;
         break;
-    case 353:
-        next = isAir ? 379 : 368;
+    case kAID_WH_LandOnFeet2FwdFaceDown:
+        next = isAir ? kAID_WA_FwdFaceDown : kAID_WG_FwdFaceDown;
         break;
-    case 354:
-        next = isAir ? 379 : 368;
+    case kAID_WH_LandOnFace2FwdFaceDown:
+        next = isAir ? kAID_WA_FwdFaceDown : kAID_WG_FwdFaceDown;
         break;
-    case 355:
-        next = isAir ? 381 : 370;
+    case kAID_WH_LandOnBack2FwdFaceUp:
+        next = isAir ? kAID_WA_FwdFaceUp : kAID_WG_FwdFaceUp;
         break;
-    case 356:
-        next = isAir ? 374 : 363;
+    case kAID_WH_LandOnLeft2RollLeft:
+        next = isAir ? kAID_WA_RollLeft : kAID_WG_RollLeft;
         break;
-    case 357:
-        next = isAir ? 373 : 362;
+    case kAID_WH_LandOnRight2RollRight:
+        next = isAir ? kAID_WA_RollRight : kAID_WG_RollRight;
         break;
-    case 358:
-        next = isAir ? 379 : 368;
+    case kAID_WH_NoseFwd2FwdFaceDown:
+        next = isAir ? kAID_WA_FwdFaceDown : kAID_WG_FwdFaceDown;
         break;
-    case 359:
-        next = isAir ? 381 : 370;
+    case kAID_WH_TailBwd2FwdFaceUp:
+        next = isAir ? kAID_WA_FwdFaceUp : kAID_WG_FwdFaceUp;
         break;
-    case 360: case 361:
-        next = isAir ? 383 : 372;
+    case kAID_WH_LB_FromFront2FwdFaceDown: case kAID_WH_NB_LandOnFace2FwdFaceDown:
+        next = isAir ? kAID_WA_NB_FwdFaceDown : kAID_WG_NB_FwdFaceDown;
         break;
     }
     if (next != cur) {
@@ -4018,34 +4022,37 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Switches the main channel to the airborne tumble clip that matches the current ground clip.
  *
- * With the board detached (mUseRootPoseOverride == 1) the clip is always 0x17F. Otherwise ground tumbles
- * 0x16A-0x173 and ground impacts 0x180-0x183 map to air tumbles 0x175-0x17E; other clips stay. A changed clip
- * is played (blend -1) and its rate set with cWipeoutControl_chooseTumbleAnimRate().
+ * With the board detached (mUseRootPoseOverride == 1) the clip is always kAID_WA_NB_FwdFaceDown. Otherwise ground
+ * tumbles kAID_WG_RollRight .. kAID_WG_BwdFaceUp and ground impacts kAID_WGI_FwdFaceDown .. kAID_WGI_BwdFaceUp map to
+ * air tumbles kAID_WA_RollRight .. kAID_WA_BwdFaceUp; other clips stay. A changed clip is played (blend -1) and its
+ * rate set with cWipeoutControl_chooseTumbleAnimRate().
  */
 // Picks the rider's layer-2 follow-up animation and replays it.
 void cWipeoutControl::playWipeoutAirAnim()
 {
     int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int next = cur;
-    bool useRootPose = mRider->mUseRootPoseOverride == 1;
+    bool useRootPose = mRider->mUseRootPoseOverride == true;
     if (!useRootPose) {
         switch (cur) {
-        case 362: next = 373; break;
-        case 363: next = 374; break;
-        case 364: next = 375; break;
-        case 365: next = 376; break;
-        case 366: next = 377; break;
-        case 367: next = 378; break;
-        case 368: case 0x180: next = 379; break;
-        case 369: case 385: next = 380; break;
-        case 370: case 386: next = 381; break;
-        case 371: case 387: next = 382; break;
-        case 372: case 373: case 374: case 375: case 376: case 377:
-        case 378: case 379: case 380: case 381: case 382: case 383:
+        case kAID_WG_RollRight: next = kAID_WA_RollRight; break;
+        case kAID_WG_RollLeft: next = kAID_WA_RollLeft; break;
+        case kAID_WG_RollFwd: next = kAID_WA_RollFwd; break;
+        case kAID_WG_RollBwd: next = kAID_WA_RollBwd; break;
+        case kAID_WG_CartFwd: next = kAID_WA_CartFwd; break;
+        case kAID_WG_CartBwd: next = kAID_WA_CartBwd; break;
+        case kAID_WG_FwdFaceDown: case kAID_WGI_FwdFaceDown: next = kAID_WA_FwdFaceDown; break;
+        case kAID_WG_BwdFaceDown: case kAID_WGI_BwdFaceDown: next = kAID_WA_BwdFaceDown; break;
+        case kAID_WG_FwdFaceUp: case kAID_WGI_FwdFaceUp: next = kAID_WA_FwdFaceUp; break;
+        case kAID_WG_BwdFaceUp: case kAID_WGI_BwdFaceUp: next = kAID_WA_BwdFaceUp; break;
+        case kAID_WG_NB_FwdFaceDown: case kAID_WA_RollRight: case kAID_WA_RollLeft: case kAID_WA_RollFwd:
+        case kAID_WA_RollBwd: case kAID_WA_CartFwd:
+        case kAID_WA_CartBwd: case kAID_WA_FwdFaceDown: case kAID_WA_BwdFaceDown: case kAID_WA_FwdFaceUp:
+        case kAID_WA_BwdFaceUp: case kAID_WA_NB_FwdFaceDown:
             break;
         }
     } else {
-        next = 383;
+        next = kAID_WA_NB_FwdFaceDown;
     }
     if (next != cur) {
         cRiderAnimBase_play(mRider->mRiderAnim, next, 0, -1.0f);
@@ -4060,9 +4067,10 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutGroundAnim);
 /**
  * Switches the main channel to the ground tumble clip that matches the current air clip.
  *
- * The reverse of cWipeoutControl_playWipeoutAirAnim(): a detached board gives 0x174; otherwise air tumbles
- * 0x175-0x17E and ground impacts 0x180-0x183 map to ground tumbles 0x16A-0x173. A changed clip is played
- * (blend -1) and its rate set with cWipeoutControl_chooseTumbleAnimRate().
+ * The reverse of cWipeoutControl_playWipeoutAirAnim(): a detached board gives kAID_WG_NB_FwdFaceDown; otherwise air
+ * tumbles kAID_WA_RollRight .. kAID_WA_BwdFaceUp and ground impacts kAID_WGI_FwdFaceDown .. kAID_WGI_BwdFaceUp map to
+ * ground tumbles kAID_WG_RollRight .. kAID_WG_BwdFaceUp. A changed clip is played (blend -1) and its rate set with
+ * cWipeoutControl_chooseTumbleAnimRate().
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Reverse of cWipeoutControl_playWipeoutAirAnim: maps follow-up animations back to their base.
@@ -4070,24 +4078,24 @@ void cWipeoutControl::playWipeoutGroundAnim()
 {
     int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int next = cur;
-    bool useRootPose = mRider->mUseRootPoseOverride == 1;
+    bool useRootPose = mRider->mUseRootPoseOverride == true;
     if (!useRootPose) {
         switch (cur) {
-        case 373: next = 362; break;
-        case 374: next = 363; break;
-        case 375: next = 364; break;
-        case 376: next = 365; break;
-        case 377: next = 366; break;
-        case 378: next = 367; break;
-        case 379: case 0x180: next = 368; break;
-        case 380: case 385: next = 369; break;
-        case 381: case 386: next = 370; break;
-        case 382: case 387: next = 371; break;
-        case 383:
+        case kAID_WA_RollRight: next = kAID_WG_RollRight; break;
+        case kAID_WA_RollLeft: next = kAID_WG_RollLeft; break;
+        case kAID_WA_RollFwd: next = kAID_WG_RollFwd; break;
+        case kAID_WA_RollBwd: next = kAID_WG_RollBwd; break;
+        case kAID_WA_CartFwd: next = kAID_WG_CartFwd; break;
+        case kAID_WA_CartBwd: next = kAID_WG_CartBwd; break;
+        case kAID_WA_FwdFaceDown: case kAID_WGI_FwdFaceDown: next = kAID_WG_FwdFaceDown; break;
+        case kAID_WA_BwdFaceDown: case kAID_WGI_BwdFaceDown: next = kAID_WG_BwdFaceDown; break;
+        case kAID_WA_FwdFaceUp: case kAID_WGI_FwdFaceUp: next = kAID_WG_FwdFaceUp; break;
+        case kAID_WA_BwdFaceUp: case kAID_WGI_BwdFaceUp: next = kAID_WG_BwdFaceUp; break;
+        case kAID_WA_NB_FwdFaceDown:
             break;
         }
     } else {
-        next = 372;
+        next = kAID_WG_NB_FwdFaceDown;
     }
     if (next != cur) {
         cRiderAnimBase_play(mRider->mRiderAnim, next, 0, -1.0f);
@@ -4105,8 +4113,8 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Plays the in-air recovery clip that matches the current air tumble.
  *
- * Maps air tumbles 0x175-0x17E to recovery clips 0x18F-0x198 on the main channel (blend -1); any other clip
- * is left playing.
+ * Maps air tumbles kAID_WA_RollRight .. kAID_WA_BwdFaceUp to recovery clips kAID_WAR_FromRollRight ..
+ * kAID_WAR_FromBwdFaceUp on the main channel (blend -1); any other clip is left playing.
  */
 // Remaps the rider's current layer-2 animation to its follow-up and plays it.
 void cWipeoutControl::playWipeoutAirRecoverAnim()
@@ -4114,35 +4122,35 @@ void cWipeoutControl::playWipeoutAirRecoverAnim()
     int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int next = cur;
     switch (cur) {
-    case 373:
-        next = 399;
+    case kAID_WA_RollRight:
+        next = kAID_WAR_FromRollRight;
         break;
-    case 374:
-        next = 400;
+    case kAID_WA_RollLeft:
+        next = kAID_WAR_FromRollLeft;
         break;
-    case 375:
-        next = 401;
+    case kAID_WA_RollFwd:
+        next = kAID_WAR_FromRollFwd;
         break;
-    case 376:
-        next = 402;
+    case kAID_WA_RollBwd:
+        next = kAID_WAR_FromRollBwd;
         break;
-    case 377:
-        next = 403;
+    case kAID_WA_CartFwd:
+        next = kAID_WAR_FromCartFwd;
         break;
-    case 378:
-        next = 404;
+    case kAID_WA_CartBwd:
+        next = kAID_WAR_FromCartBwd;
         break;
-    case 379:
-        next = 405;
+    case kAID_WA_FwdFaceDown:
+        next = kAID_WAR_FromFwdFaceDown;
         break;
-    case 380:
-        next = 406;
+    case kAID_WA_BwdFaceDown:
+        next = kAID_WAR_FromBwdFaceDown;
         break;
-    case 381:
-        next = 407;
+    case kAID_WA_FwdFaceUp:
+        next = kAID_WAR_FromFwdFaceUp;
         break;
-    case 382:
-        next = 408;
+    case kAID_WA_BwdFaceUp:
+        next = kAID_WAR_FromBwdFaceUp;
         break;
     }
     if (next != cur) {
@@ -4160,8 +4168,10 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Plays the get-up clip that matches the current ground tumble.
  *
- * Maps ground tumbles 0x16A-0x173 and ground impacts 0x180-0x183 to get-up clips 0x185-0x18E on the main
- * channel (blend -1); other clips, including the detached-board tumbles 0x174 and 0x17F, are left playing.
+ * Maps ground tumbles kAID_WG_RollRight .. kAID_WG_BwdFaceUp and ground impacts kAID_WGI_FwdFaceDown ..
+ * kAID_WGI_BwdFaceUp to get-up clips kAID_WGR_FromRollRight .. kAID_WGR_FromBwdFaceUp on the main channel (blend -1);
+ * other clips, including the detached-board tumbles kAID_WG_NB_FwdFaceDown and kAID_WA_NB_FwdFaceDown, are left
+ * playing.
  */
 // Remaps the rider's current layer-2 animation to its follow-up and plays it.
 void cWipeoutControl::playWipeoutGroundRecoverAnim()
@@ -4169,37 +4179,39 @@ void cWipeoutControl::playWipeoutGroundRecoverAnim()
     int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int next = cur;
     switch (cur) {
-    case 362:
-        next = 389;
+    case kAID_WG_RollRight:
+        next = kAID_WGR_FromRollRight;
         break;
-    case 363:
-        next = 390;
+    case kAID_WG_RollLeft:
+        next = kAID_WGR_FromRollLeft;
         break;
-    case 364:
-        next = 391;
+    case kAID_WG_RollFwd:
+        next = kAID_WGR_FromRollFwd;
         break;
-    case 365:
-        next = 392;
+    case kAID_WG_RollBwd:
+        next = kAID_WGR_FromRollBwd;
         break;
-    case 366:
-        next = 393;
+    case kAID_WG_CartFwd:
+        next = kAID_WGR_FromCartFwd;
         break;
-    case 367:
-        next = 394;
+    case kAID_WG_CartBwd:
+        next = kAID_WGR_FromCartBwd;
         break;
-    case 368: case 0x180:
-        next = 395;
+    case kAID_WG_FwdFaceDown: case kAID_WGI_FwdFaceDown:
+        next = kAID_WGR_FromFwdFaceDown;
         break;
-    case 369: case 385:
-        next = 396;
+    case kAID_WG_BwdFaceDown: case kAID_WGI_BwdFaceDown:
+        next = kAID_WGR_FromBwdFaceDown;
         break;
-    case 370: case 386:
-        next = 397;
+    case kAID_WG_FwdFaceUp: case kAID_WGI_FwdFaceUp:
+        next = kAID_WGR_FromFwdFaceUp;
         break;
-    case 371: case 387:
-        next = 398;
+    case kAID_WG_BwdFaceUp: case kAID_WGI_BwdFaceUp:
+        next = kAID_WGR_FromBwdFaceUp;
         break;
-    case 372: case 373: case 374: case 375: case 376: case 377: case 378: case 379: case 380: case 381: case 382: case 383:
+    case kAID_WG_NB_FwdFaceDown: case kAID_WA_RollRight: case kAID_WA_RollLeft: case kAID_WA_RollFwd:
+    case kAID_WA_RollBwd: case kAID_WA_CartFwd: case kAID_WA_CartBwd: case kAID_WA_FwdFaceDown:
+    case kAID_WA_BwdFaceDown: case kAID_WA_FwdFaceUp: case kAID_WA_BwdFaceUp: case kAID_WA_NB_FwdFaceDown:
         break;
     }
     if (next != cur) {
@@ -4350,8 +4362,8 @@ static inline tPose Combine_12E010(const tPose& a, const tPose& b)
 }
 
 /**
- * Plays the stuck clip (0x199 with the board detached, else 0x19A) with its root re-based so the body does
- * not jump.
+ * Plays the stuck clip (kAID_WS_NB_FwdFaceDown with the board detached, else kAID_WS_FwdFaceDown) with its root
+ * re-based so the body does not jump.
  *
  * Samples the clip's first frame (cRiderAnimBase_getAIAnimFrame, func_0030ECD8), composes the hips bone's
  * current scaled local root with the inverse of that frame's root, applies the result to the rider's
@@ -4361,9 +4373,9 @@ static inline tPose Combine_12E010(const tPose& a, const tPose& b)
 void cWipeoutControl::playWipeoutStuckAnim()
 {
     cRider* rider = mRider;
-    int anim = 409;
-    if (rider->mUseRootPoseOverride != 1)
-        anim = 410;
+    int anim = kAID_WS_NB_FwdFaceDown;
+    if (rider->mUseRootPoseOverride != true)
+        anim = kAID_WS_FwdFaceDown;
     char buf[80];
     cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, D_004A4C08_E010.a, 0.0f);
     tPose newPose;
@@ -4396,26 +4408,26 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Plays the ground-impact clip that follows the current air tumble.
  *
- * Maps air tumbles 0x17B-0x17F to impact clips 0x180-0x184 on the main channel (blend -1); for any other clip
- * nothing is played.
+ * Maps air tumbles kAID_WA_FwdFaceDown .. kAID_WA_NB_FwdFaceDown to impact clips kAID_WGI_FwdFaceDown ..
+ * kAID_WGI_NB_FwdFaceDown on the main channel (blend -1); for any other clip nothing is played.
  */
 void cWipeoutControl::playWipeoutGroundImpactAnim()
 {
     switch (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2)) {
-    case 379:
-        cRiderAnimBase_play(mRider->mRiderAnim, 0x180, 0, -1.0f);
+    case kAID_WA_FwdFaceDown:
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_WGI_FwdFaceDown, 0, -1.0f);
         break;
-    case 380:
-        cRiderAnimBase_play(mRider->mRiderAnim, 385, 0, -1.0f);
+    case kAID_WA_BwdFaceDown:
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_WGI_BwdFaceDown, 0, -1.0f);
         break;
-    case 381:
-        cRiderAnimBase_play(mRider->mRiderAnim, 386, 0, -1.0f);
+    case kAID_WA_FwdFaceUp:
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_WGI_FwdFaceUp, 0, -1.0f);
         break;
-    case 382:
-        cRiderAnimBase_play(mRider->mRiderAnim, 387, 0, -1.0f);
+    case kAID_WA_BwdFaceUp:
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_WGI_BwdFaceUp, 0, -1.0f);
         break;
-    case 383:
-        cRiderAnimBase_play(mRider->mRiderAnim, 388, 0, -1.0f);
+    case kAID_WA_NB_FwdFaceDown:
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_WGI_NB_FwdFaceDown, 0, -1.0f);
         break;
     }
 }
@@ -4443,10 +4455,10 @@ static inline float aiClamp_12E528(float v, float lo, float hi)
 /**
  * Sets the tumble clip's playback rate from how fast the body spins, and returns that rate.
  *
- * rate = |RiderAngVelocity| (the wipeout motion's, rider handler + 0x60) * clip duration / 2pi, the turns per
- * clip length, clamped to 0.5..2. The main sequence's rate (+0x90) becomes 1 for classes 0x1D/0x19, max(rate,
- * 2) when recovery is allowed (meter full or race finished), else rate; as rate is at most 2, the recovery
- * case is always 2.
+ * rate = |RiderAngVelocity| (the wipeout motion's, rider handler + 0x60) * clip duration / 2pi, the turns per clip
+ * length, clamped to 0.5..2. The main sequence's rate (+0x90) becomes 1 for categories kANCAT_WSlide /
+ * kANCAT_WSlideNoBoard, max(rate, 2) when recovery is allowed (meter full or race finished), else rate; as rate is at
+ * most 2, the recovery case is always 2.
  *
  * @return the clamped rate (0.5..2), before the class and recovery adjustments
  */
@@ -4457,8 +4469,8 @@ float cWipeoutControl::chooseTumbleAnimRate()
     cAnimSequence* animSeq = cRiderAnimBase_getCurrentAnimSequence(rider->mRiderAnim, 2);
     float rawRate = aiLength_12C5C8(*(&handler->WipeoutMotion.RiderAngVelocity)) * animSeq->SubAnims[0].TotalTime * 0.15915493667125702f;
     float res = aiClamp_12E528(rawRate, 0.5f, 2.0f);
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 29 ||
-        cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 25)
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WSlide ||
+        cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WSlideNoBoard)
     {
         cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->TimeScale = 1.0f;
     }
@@ -4600,7 +4612,7 @@ void cBumpControl::update(tBumpCmd* in)
         return;
     if (cRider_checkRailBoardCollisions(mRider))
         return;
-    if (cRider_getMotionState(mRider) == 1)
+    if (cRider_getMotionState(mRider) == MS_Air)
     {
         cRider_setupBoostWarp(mRider, 0, 0);
         cRider_setupLean(mRider, 0.0f);
@@ -4609,7 +4621,7 @@ void cBumpControl::update(tBumpCmd* in)
     {
         int w = *(int*)in;
         cRider_setupBoostWarp(mRider, (w >> 14) & 1, (w >> 13) & 1);
-        if (cRider_getMotionState(mRider) == 4)
+        if (cRider_getMotionState(mRider) == MS_Railslide)
         {
             cRider_setupRailBalance(mRider, in->RailBalance * 0.032258063554763794f);
         }
@@ -4629,18 +4641,18 @@ void cBumpControl::update(tBumpCmd* in)
     rider2->mSlewed[1].rate = 0.03333333507180214f;
     if (cRiderAnimBase_isCurrentAnimEndFlag(mRider->mRiderAnim, 2) == 0)
         return;
-    if (cRider_getMotionState(mRider) == 4)
+    if (cRider_getMotionState(mRider) == MS_Railslide)
     {
         mRider->mRiderHandler->RailslideControl.playGainFocusAnim(0);
-        cRider_setControlState_impl(mRider, 7);
+        cRider_setControlState_impl(mRider, CS_Railslide);
     }
     else
     {
         cRider_undoRailslideModeOrientation(mRider);
-        if (cRider_getMotionState(mRider) == 1)
-            cRider_setControlState_impl(mRider, 4);
+        if (cRider_getMotionState(mRider) == MS_Air)
+            cRider_setControlState_impl(mRider, CS_NaturalAir);
         else
-            cRider_setControlState_impl(mRider, 0);
+            cRider_setControlState_impl(mRider, CS_Cruise);
     }
 }
 #endif
@@ -4730,18 +4742,18 @@ static inline float aiAbs_12E9B8(float x)
  * Updates the prewind (charged jump) control: winds up while jump is held and takes off into the air control
  * on release.
  *
- * The finish, reset (ResetPath) and rail-attach checks may end the tick. On release (JumpHeld, bit 13, clear)
- * it snaps the prewind pair to pi/4 steps (cRider_snapAxisIncrement), resets the orientation offset for rail styles 3/4,
- * plays the release clip from kAnimIntoAirTable, clears the rail style, takes off unless airborne (cRider_applyJumpPop
- * with the crouch value, MS_Air, cSSXAudio_Lift), zeroes the turn, crouch and brake targets and requests
- * CS_Spin.
+ * The finish, reset (ResetPath) and rail-attach checks may end the tick. On release (JumpHeld, bit 13, clear) it snaps
+ * the prewind pair to pi/4 steps (cRider_snapAxisIncrement), resets the orientation offset for rail styles kRSM_FS /
+ * kRSM_BS, plays the release clip from kAnimIntoAirTable, clears the rail style, takes off unless airborne
+ * (cRider_applyJumpPop with the crouch value, MS_Air, cSSXAudio_Lift), zeroes the turn, crouch and brake targets and
+ * requests CS_Spin.
  *
- * While held: boost from BoostHeld and a full crouch target. A class-10 (landing) clip sets the turn
- * (PrewindTurn) or rail balance (word 1, clamped to +-0.5) and zeroes the prewind targets; semantic 0x15
- * zeroes the turn and prewind targets. Else, with no rail style and no spin, cRider_isChangeFakieGround may start a
- * reverse turn (semantic 0x15). Otherwise PrewindSpin and PrewindFlip (bits 15-20, 21-26), snapped to -1, 0
- * or 1, become the targets of the prewind channels (rider + 0x2A4, + 0x2B0), the turn or rail balance is set,
- * and the prewind clip is picked from kAnimPrewindTable.
+ * While held: boost from BoostHeld and a full crouch target. A kANCAT_Land clip sets the turn (PrewindTurn) or rail
+ * balance (word 1, clamped to +-0.5) and zeroes the prewind targets; kAID_ChangeFakie zeroes the turn and prewind
+ * targets. Else, with no rail style and no spin, cRider_isChangeFakieGround may start a reverse turn
+ * (kAID_ChangeFakie). Otherwise PrewindSpin and PrewindFlip (bits 15-20, 21-26), snapped to -1, 0 or 1, become the
+ * targets of the prewind channels (rider + 0x2A4, + 0x2B0), the turn or rail balance is set, and the prewind clip is
+ * picked from kAnimPrewindTable.
  *
  * @param in  the command words (On Tour tPrewindCmd)
  */
@@ -4759,7 +4771,7 @@ void cPrewindControl::update(tPrewindCmd* in)
         cRider* rider0 = mRider;
         cRider_snapAxisIncrement(rider0, &rider0->mSlewed[16], &rider0->mSlewed[15], 0.7853982448577881f, 0.20000000298023224f);
         cRider* rider = mRider;
-        if (rider->RailslideMode == 3 || rider->RailslideMode == 4)
+        if (rider->RailslideMode == kRSM_FS || rider->RailslideMode == kRSM_BS)
         {
             float fakieAngle = 0.0f;
             cRiderAnim* anim = (cRiderAnim*)rider->mRiderAnim;
@@ -4767,18 +4779,18 @@ void cPrewindControl::update(tPrewindCmd* in)
             anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
         }
         playFromTable(kAnimIntoAirTable);
-        mRider->RailslideMode = 0;
+        mRider->RailslideMode = kRSM_None;
         cRider_verifyRailslideModeDEBUG(mRider);
-        if (cRider_getMotionState(mRider) != 1)
+        if (cRider_getMotionState(mRider) != MS_Air)
         {
             cRider_applyJumpPop(mRider, mRider->mSlewed[4].cur);
-            cRider_setMotionState_impl(mRider, 1);
+            cRider_setMotionState_impl(mRider, MS_Air);
             cSSXAudio_Lift(gSSXAudio, mRider);
         }
         float z = 0.0f;
         cRider_setupLean(mRider, z);
         cRider_setupCrouchBrake(mRider, z, z);
-        cRider_setControlState_impl(mRider, 5);
+        cRider_setControlState_impl(mRider, CS_Spin);
         return;
     }
     cRider_setupBoostWarp(mRider, (w >> 14) & 1, 0);
@@ -4786,10 +4798,10 @@ void cPrewindControl::update(tPrewindCmd* in)
     cRider_setupCrouchBrake(mRider, 1.0f, zero);
     float sx = aiClamp_12E9B8(in->PrewindTurn * 0.032258063554763794f, -0.5f, 0.5f);
     float sy = aiClamp_12E9B8(in->RailBalance * 0.032258063554763794f, -0.5f, 0.5f);
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 10)
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Land)
     {
         cRider* rider = mRider;
-        if (rider->RailslideMode == 0)
+        if (rider->RailslideMode == kRSM_None)
             cRider_setupLean(rider, sx);
         else
             cRider_setupRailBalance(rider, sy);
@@ -4801,7 +4813,7 @@ void cPrewindControl::update(tPrewindCmd* in)
         rider2->mSlewed[16].target = 0.0f;
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) == 21)
+    if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) == kAID_ChangeFakie)
     {
         cRider_setupLean(mRider, zero);
         cRider* rider1 = mRider;
@@ -4813,9 +4825,9 @@ void cPrewindControl::update(tPrewindCmd* in)
         return;
     }
     cRider* rider = mRider;
-    if (rider->RailslideMode == 0 && rider->mSpinRate == zero && cRider_isChangeFakieGround(rider))
+    if (rider->RailslideMode == kRSM_None && rider->mSpinRate == zero && cRider_isChangeFakieGround(rider))
     {
-        cRiderAnimBase_play(mRider->mRiderAnim, 21, 0, -1.0f);
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_ChangeFakie, 0, -1.0f);
         return;
     }
     float rate = 5.0000901222229f;
@@ -5074,12 +5086,11 @@ extern "C" void cRider_putAt_12F398(void* self, void* a, t4Vector* b, int n, flo
  * air at the end.
  *
  * FadePercent approaches 1 by mTimeScale * 0.025 per tick. On crossing 0.5 it picks a reset route
- * (cRider_switchToResetPath), places the rider along the path direction (cPath_getPathHeading, cRider_putAt with semantic
- * 0x11F and 200 cm clearance, 1000 when cGameEvent (newRace.cGameEvent) is 2), calls cRider_cleanupAfterPutAt() and
- * takes boost through cRiderMetrix_evReset (which also counts the reset): 10% of the boost meter (rider + 0x2F8) for
- * an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when shouldTransition), starts a
- * new score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and requests CS_NaturalAir and
- * MS_Air.
+ * (cRider_switchToResetPath), places the rider along the path direction (cPath_getPathHeading, cRider_putAt with
+ * kAID_AirCycle and 200 cm clearance, 1000 when cGameEvent (newRace.cGameEvent) is 2), calls cRider_cleanupAfterPutAt()
+ * and takes boost through cRiderMetrix_evReset (which also counts the reset): 10% of the boost meter (rider + 0x2F8)
+ * for an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when shouldTransition), starts a new
+ * score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and requests CS_NaturalAir and MS_Air.
  *
  * @param cmd  the command (On Tour const tResetCmd&); not read here
  */
@@ -5103,7 +5114,7 @@ void cResetControl::update(tResetCmd* cmd)
         const t4Vector& dir = cPath_getPathHeading(rider->AIPath, rider->PathParam);
         if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == 2)
             range = 1000.0f;
-        cRider_putAt_12F398(mRider, &mRider->PathPos, (t4Vector*)&dir, 287, range);
+        cRider_putAt_12F398(mRider, &mRider->PathPos, (t4Vector*)&dir, kAID_AirCycle, range);
         cRider_cleanupAfterPutAt(mRider, 1);
         if (*(int*)this != 0)
             cRider_flagEventBoostPowerUp(mRider, 1, cRiderMetrix_evReset(mRider->mMetrix, 0));
@@ -5116,8 +5127,8 @@ void cResetControl::update(tResetCmd* cmd)
             cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, mRider->mViewIndex));
         cRiderMetrix_evTakeoff(mRider->mMetrix, 0, 0);
         cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->TimeScale = 1.0f;
-        cRider_setControlState_impl(mRider, 4);
-        cRider_setMotionState_impl(mRider, 1);
+        cRider_setControlState_impl(mRider, CS_NaturalAir);
+        cRider_setMotionState_impl(mRider, MS_Air);
     }
 }
 #endif
@@ -5128,9 +5139,9 @@ INCLUDE_ASM("ai/ai", cResetControl_shouldTransition);
 /**
  * Tells whether the reset shows a screen transition, which is only for a local rider with a view.
  *
- * @return 1 when mIsLocal is set and mViewIndex >= 0, otherwise 0
+ * @return true when mIsLocal is set and mViewIndex >= 0, otherwise false
  */
-int cResetControl::shouldTransition()
+bool cResetControl::shouldTransition()
 {
     cRider* rider = mRider;
     return rider->mIsLocal != 0 && rider->mViewIndex >= 0;
@@ -5300,17 +5311,17 @@ struct sAiObj12F730
  * Updates the natural air control (CS_NaturalAir): keeps the input held from take-off and hands over to the
  * air control once it is released.
  *
- * The reset check (bit 12) may end the tick. Attacks (bits 14/15) go to cRider_checkForPunch(), whose result
- * ends the tick only while IsPunchHeld (still held from entry); a handplant (bit 13) may end it or else
- * forces a crouch of 1; rail attach may end it; boost is turned off. A grab held at entry (bits 16-23) is
- * latched in InitGrabHeld; when it changes, IsGrabHeld drops and LimitMag becomes -1.
+ * The reset check (bit 12) may end the tick. Attacks (bits 14/15) go to cRider_checkForPunch(), whose result ends the
+ * tick only while IsPunchHeld (still held from entry); a handplant (bit 13) may end it or else forces a crouch of 1;
+ * rail attach may end it; boost is turned off. A grab held at entry (bits 16-23; kNoGrab for none) is latched in
+ * InitGrabHeld; when it changes, IsGrabHeld drops and LimitMag becomes -1.
  *
- * CruiseTurn/CruiseCrouch is kept only while it matches the take-off input: when LimitMag is negative, the
- * input's size max(|turn|, crouch) is at most max(LimitMag - 0.5, 0), or its angle is over 90 degrees from
- * LimitAng, LimitMag becomes -1 and the input is zeroed. The result sets the turn and crouch targets (brake
- * 0, animation turn = current turn, all at rate 0.05). With turn, brake and crouch all 0 and no grab, it
- * plays the air cycle 0x11F (unless a class-9 clip runs) and requests CS_Spin; otherwise, unless a class-9
- * clip runs, it plays semantic 9 or 10 by crouch against (1 - |turn|) / 2.
+ * CruiseTurn/CruiseCrouch is kept only while it matches the take-off input: when LimitMag is negative, the input's size
+ * max(|turn|, crouch) is at most max(LimitMag - 0.5, 0), or its angle is over 90 degrees from LimitAng, LimitMag
+ * becomes -1 and the input is zeroed. The result sets the turn and crouch targets (brake 0, animation turn = current
+ * turn, all at rate 0.05). With turn, brake and crouch all 0 and no grab, it plays the air cycle kAID_AirCycle (unless
+ * a kANCAT_IntoAir clip runs) and requests CS_Spin; otherwise, unless a kANCAT_IntoAir clip runs, it plays
+ * kAID_CruiseAirFwd or kAID_CruiseAirCrouch by crouch against (1 - |turn|) / 2.
  *
  * @param in  the command words (On Tour tNaturalAirCmd)
  */
@@ -5340,11 +5351,11 @@ void cNaturalAirControl::update(tNaturalAirCmd* in)
     if (cRider_checkRailBoardCollisions((char*)mRider))
         return;
     cRider_setupBoostWarp((char*)mRider, 0, 0);
-    if (IsGrabHeld != 0 && InitGrabHeld == -1)
+    if (IsGrabHeld != 0 && InitGrabHeld == kNoGrab)
         InitGrabHeld = in->GrabID;
-    if (in->GrabID != InitGrabHeld || in->GrabID == -1)
+    if (in->GrabID != InitGrabHeld || in->GrabID == kNoGrab)
         IsGrabHeld = 0;
-    if (IsGrabHeld == 0 && InitGrabHeld != -1)
+    if (IsGrabHeld == 0 && InitGrabHeld != kNoGrab)
         LimitMag = -1.0f;
     float ax = aiAbs_12F730(x);
     float lim = y;
@@ -5374,20 +5385,20 @@ void cNaturalAirControl::update(tNaturalAirCmd* in)
     cRider* rider5 = mRider;
     if (rider5->mSlewed[4].cur == 0.0f && rider5->mSlewed[3].cur == 0.0f && rider5->mSlewed[0].cur == 0.0f && IsGrabHeld == 0)
     {
-        if (anim != 287)
+        if (anim != kAID_AirCycle)
         {
-            if (cRiderAnimBase_getCurrentAnimCategory(rider5->mRiderAnim, 2) != 9)
-                cRiderAnimBase_play(mRider->mRiderAnim, 287, 0, -1.0f);
+            if (cRiderAnimBase_getCurrentAnimCategory(rider5->mRiderAnim, 2) != kANCAT_IntoAir)
+                cRiderAnimBase_play(mRider->mRiderAnim, kAID_AirCycle, 0, -1.0f);
         }
-        cRider_setControlState_impl((char*)mRider, 5);
+        cRider_setControlState_impl((char*)mRider, CS_Spin);
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 9)
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_IntoAir)
         return;
-    int desAnim = 10;
+    int desAnim = kAID_CruiseAirCrouch;
     cRider* rider6 = mRider;
     if (rider6->mSlewed[4].cur <= (1.0f - aiAbs_12F730(rider6->mSlewed[0].cur)) * 0.5f)
-        desAnim = 9;
+        desAnim = kAID_CruiseAirFwd;
     if (desAnim != anim)
         cRiderAnimBase_play(rider6->mRiderAnim, desAnim, 0, -1.0f);
 }
@@ -5404,9 +5415,9 @@ extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
  * Leaves the natural air control: when going anywhere but cruise, ends an attack still playing on the upper
  * body.
  *
- * If @p next is not CS_Cruise and the channel-1 clip is a block or punch (class 3 or 13), fades channel 0
- * (the attack's held cycle) out over 0.1 s (cRiderAnimBase_blendOutAll) and restores channel 1's sequence rate to 1, so an
- * attack survives a landing only.
+ * If @p next is not CS_Cruise and the channel-1 clip is a block or punch (kANCAT_Block or kANCAT_Punch), fades channel
+ * 0 (the attack's held cycle) out over 0.1 s (cRiderAnimBase_blendOutAll) and restores channel 1's sequence rate to 1,
+ * so an attack survives a landing only.
  *
  * @param next  control state being entered (eControlState)
  */
@@ -5414,8 +5425,8 @@ void cNaturalAirControl::loseFocus(int next)
 {
     if (next)
     {
-        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == 3 ||
-            cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == 13)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == kANCAT_Block ||
+            cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == kANCAT_Punch)
         {
             cRiderAnimBase_blendOutAll(mRider->mRiderAnim, 0, 0.10000000149011612f);
             cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 1)->TimeScale = 1.0f;
@@ -5486,7 +5497,7 @@ extern "C" int cRider_checkForFinishLine(void*);
 // The unit declares cRider_checkForReset as void, but this caller tests its result: bind an int view by asm label.
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cRider_checkRailBoardCollisions(void*);
-extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl*);
+extern "C" bool cBoardPressControl_checkAirMotion(cBoardPressControl*);
 extern "C" int cRider_checkForPrewind(void*, int, int);
 extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 extern "C" void cRider_setupLean(void*, float);
@@ -5546,7 +5557,7 @@ void cBoardPressControl::update(tBoardPressCmd* in)
     cRider_setupBoostWarp(mRider, (w2 >> 14) & 1, (w2 >> 13) & 1);
     cRider_setupCrouchBrake(mRider, 0.0f, 0.0f);
     cRider* rider = mRider;
-    if (rider->RailslideMode != 0)
+    if (rider->RailslideMode != kRSM_None)
     {
         cRider_setupRailBalance(rider, aiClamp_12FC80(in->RailBalance * 0.032258063554763794f, -0.5f, 0.5f));
     }
@@ -5564,16 +5575,16 @@ void cBoardPressControl::update(tBoardPressCmd* in)
     cRider_checkForProximityAction(mRider);
     switch (*(int*)this)
     {
-    case 0:
+    case kBP_Into:
         cBoardPressControl_handleIntoState(this, in);
         break;
-    case 1:
+    case kBP_Balance:
         cBoardPressControl_handleBalanceState(this, in);
         break;
-    case 2:
+    case kBP_IntoAir:
         cBoardPressControl_handleIntoAirState_2(this, in);
         break;
-    case 3:
+    case kBP_Exit:
         cBoardPressControl_handleExitState(this, in);
         break;
     }
@@ -5622,8 +5633,8 @@ static inline t4VectorInit AxisAngle_12FEC8(const t4Vector& axis, float angle)
  * Flips the rider's stance for a board pivot: toggles switch stance and swaps the nose and tail sides.
  *
  * Toggles the switch flag (IsRidingFakie), sets the animation orientation offset to a turn of 0 or pi about Z
- * (t4vect_Origin, t4vect_ZAxis) and copies the flag to the animator's IsFlipped; swaps rail styles 1 and 2
- * (RailslideMode) and negates the pivot value and target (mSlewed[12]).
+ * (t4vect_Origin, t4vect_ZAxis) and copies the flag to the animator's IsFlipped; swaps rail styles kRSM_Riding and
+ * kRSM_Fakie (RailslideMode) and negates the pivot value and target (mSlewed[12]).
  */
 void cBoardPressControl::changeFakieBoardPress()
 {
@@ -5637,13 +5648,13 @@ void cBoardPressControl::changeFakieBoardPress()
     cRider* rider2 = mRider;
     rider2->mRiderAnim->IsFlipped = rider2->IsRidingFakie;
     cRider* rider3 = mRider;
-    if (rider3->RailslideMode == 1)
+    if (rider3->RailslideMode == kRSM_Riding)
     {
-        rider3->RailslideMode = 2;
+        rider3->RailslideMode = kRSM_Fakie;
     }
-    else if (rider3->RailslideMode == 2)
+    else if (rider3->RailslideMode == kRSM_Fakie)
     {
-        rider3->RailslideMode = 1;
+        rider3->RailslideMode = kRSM_Riding;
     }
     mRider->mSlewed[12].cur = -mRider->mSlewed[12].cur;
     mRider->mSlewed[12].target = -mRider->mSlewed[12].target;
@@ -5675,35 +5686,36 @@ static inline float aiAbs_12FFF8(float x)
  * Handles a board press that has left the ground: finishes a pivot, then switches to the air control.
  *
  * Acts only in MS_Air and clears any rail style. In BP_IntoAir it sends the pivot (rider + 0x280) to 0 (clips
- * 0x25/0x26) or to +-1 (clips 0x1D/0x1E) and waits until it is within 0.15 of that; then it scores the pivot
- * and the press (cRiderMetrix_evPressPivot, cRiderMetrix_evPressEnd), plays 0x11F and requests CS_Spin. Otherwise a playing pivot
- * clip first sets BP_IntoAir, and any other clip gives the ollie clip 0x1B (nose) or 0x23 and CS_Spin.
+ * kAID_TailPivotL / kAID_TailPivotR) or to +-1 (clips kAID_NosePivotL / kAID_NosePivotR) and waits until it is within
+ * 0.15 of that; then it scores the pivot and the press (cRiderMetrix_evPressPivot, cRiderMetrix_evPressEnd), plays
+ * kAID_AirCycle and requests CS_Spin. Otherwise a playing pivot clip first sets BP_IntoAir, and any other clip gives
+ * the ollie clip kAID_NoseOllie (nose) or kAID_TailOllie and CS_Spin.
  *
- * @return 1 when the rider is airborne (the caller's tick ends), 0 on the ground
+ * @return true when the rider is airborne (the caller's tick ends), false on the ground
  */
-extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl* self)
+extern "C" bool cBoardPressControl_checkAirMotion(cBoardPressControl* self)
 {
     int k = cRider_getMotionState(self->mRider);
-    if (k != 1)
-        return 0;
+    if (k != MS_Air)
+        return false;
     cRider* rider = self->mRider;
-    if (rider->RailslideMode != 0)
+    if (rider->RailslideMode != kRSM_None)
     {
-        rider->RailslideMode = 0;
+        rider->RailslideMode = kRSM_None;
         cRider_verifyRailslideModeDEBUG(self->mRider);
     }
     int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
-    if (*(int*)self == 2)
+    if (*(int*)self == cBoardPressControl::kBP_IntoAir)
     {
         int ok = 0;
-        if (anim == 37 || anim == 38)
+        if (anim == kAID_TailPivotL || anim == kAID_TailPivotR)
         {
             cRider* rider2 = self->mRider;
             rider2->mSlewed[12].target = 0.0f;
             rider2->mSlewed[12].rate = rider2->mTimeScale * 0.02500000223517418f;
             ok = aiAbs_12FFF8(self->mRider->mSlewed[12].cur) <= 0.15000000596046448f;
         }
-        else if (anim == 29 || anim == 0x1E)
+        else if (anim == kAID_NosePivotL || anim == kAID_NosePivotR)
         {
             cRider* rider2 = self->mRider;
             if (rider2->mSlewed[12].cur < 0.0f)
@@ -5719,28 +5731,28 @@ extern "C" int cBoardPressControl_checkAirMotion(cBoardPressControl* self)
             ok = 0.8500000238418579f <= aiAbs_12FFF8(self->mRider->mSlewed[12].cur);
         }
         if (ok == 0)
-            return 1;
+            return true;
         cRider* rider3 = self->mRider;
         cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressPivot(rider3->mMetrix, rider3->PressMode));
         cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(self->mRider->mMetrix));
-        cRiderAnimBase_play(self->mRider->mRiderAnim, 287, 0, -1.0f);
-        cRider_setControlState_impl(self->mRider, 5);
-        return 1;
+        cRiderAnimBase_play(self->mRider->mRiderAnim, kAID_AirCycle, 0, -1.0f);
+        cRider_setControlState_impl(self->mRider, CS_Spin);
+        return true;
     }
-    if (anim == 37 || anim == 38 || anim == 29 || anim == 0x1E)
+    if (anim == kAID_TailPivotL || anim == kAID_TailPivotR || anim == kAID_NosePivotL || anim == kAID_NosePivotR)
     {
-        *(int*)self = 2;
+        *(int*)self = cBoardPressControl::kBP_IntoAir;
     }
     else
     {
         cRider* rider4 = self->mRider;
-        if (rider4->PressMode == 1)
-            cRiderAnimBase_play(rider4->mRiderAnim, 27, 0, -1.0f);
+        if (rider4->PressMode == kPM_Nose)
+            cRiderAnimBase_play(rider4->mRiderAnim, kAID_NoseOllie, 0, -1.0f);
         else
-            cRiderAnimBase_play(rider4->mRiderAnim, 35, 0, -1.0f);
-        cRider_setControlState_impl(self->mRider, 5);
+            cRiderAnimBase_play(rider4->mRiderAnim, kAID_TailOllie, 0, -1.0f);
+        cRider_setControlState_impl(self->mRider, CS_Spin);
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -5763,11 +5775,11 @@ static inline float Abs_130228(float x)
  * Runs the press-in phase (BP_Into): pushes the press and board depth in, and enters the balance phase at
  * full depth.
  *
- * Letting go (BoardPress exactly 0 and |BoardPivot| < 0.5, word 1 bits 0-5 and 6-11) sends the press depth
- * (rider + 0x268) to 0 at 2 * mTimeScale / 60, plays the release clip 0x21 (tail) or 0x19 and enters BP_Exit.
- * Otherwise the board depth (rider + 0x274) approaches 0.5 at mTimeScale / 60 and the press depth 1 at twice
- * that; at exactly 1 it scores the press (cRiderMetrix_evPressStart), enters BP_Balance and plays 0x24 with the pivot at
- * 1 (tail) or 0x1C with it at 0.
+ * Letting go (BoardPress exactly 0 and |BoardPivot| < 0.5, word 1 bits 0-5 and 6-11) sends the press depth (rider +
+ * 0x268) to 0 at 2 * mTimeScale / 60, plays the release clip kAID_TailOutof (tail) or kAID_NoseOutof and enters
+ * BP_Exit. Otherwise the board depth (rider + 0x274) approaches 0.5 at mTimeScale / 60 and the press depth 1 at twice
+ * that; at exactly 1 it scores the press (cRiderMetrix_evPressStart), enters BP_Balance and plays kAID_TailBalance with
+ * the pivot at 1 (tail) or kAID_NoseBalance with it at 0.
  *
  * @param in  the command (On Tour tBoardPressCmd)
  */
@@ -5780,15 +5792,15 @@ extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, tBo
         cRider* rider = self->mRider;
         rider->mSlewed[10].target = 0.0f;
         rider->mSlewed[10].rate = rider->mTimeScale * 2.0f * 0.01666666753590107f;
-        *(int*)self = 3;
+        *(int*)self = cBoardPressControl::kBP_Exit;
         cRider* rider2 = self->mRider;
-        if (rider2->PressMode == 2)
+        if (rider2->PressMode == kPM_Tail)
         {
-            cRiderAnimBase_play_i(rider2->mRiderAnim, 33, 0, -1.0f);
+            cRiderAnimBase_play_i(rider2->mRiderAnim, kAID_TailOutof, 0, -1.0f);
         }
         else
         {
-            cRiderAnimBase_play_i(rider2->mRiderAnim, 25, 0, -1.0f);
+            cRiderAnimBase_play_i(rider2->mRiderAnim, kAID_NoseOutof, 0, -1.0f);
         }
         return;
     }
@@ -5802,11 +5814,11 @@ extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, tBo
     if (rider3->mSlewed[10].cur == 1.0f)
     {
         cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressStart(rider3->mMetrix, rider3->PressMode));
-        *(int*)self = 1;
+        *(int*)self = cBoardPressControl::kBP_Balance;
         cRider* rider4 = self->mRider;
-        if (rider4->PressMode == 2)
+        if (rider4->PressMode == kPM_Tail)
         {
-            cRiderAnimBase_play_i(rider4->mRiderAnim, 36, 0, -1.0f);
+            cRiderAnimBase_play_i(rider4->mRiderAnim, kAID_TailBalance, 0, -1.0f);
             cRider* rider5 = self->mRider;
             rider5->mSlewed[12].rate = 0.0f;
             rider5->mSlewed[12].target = 1.0f;
@@ -5814,7 +5826,7 @@ extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, tBo
         }
         else
         {
-            cRiderAnimBase_play_i(rider4->mRiderAnim, 0x1C, 0, -1.0f);
+            cRiderAnimBase_play_i(rider4->mRiderAnim, kAID_NoseBalance, 0, -1.0f);
             cRider* rider5 = self->mRider;
             rider5->mSlewed[12].target = 0.0f;
             rider5->mSlewed[12].cur = 0.0f;
@@ -5838,9 +5850,9 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * Runs the balance phase (BP_Balance): tries a reverse, an ollie, a pivot, the over-press crash and the exit,
  * in that order.
  *
- * The first of checkForFakie, checkForOllie, checkForPivot, checkForWipeout and checkForExit that returns
- * nonzero ends the tick. When it is checkForExit, the press depth (rider + 0x268) goes to 0 at 2 * mTimeScale
- * / 60, the release clip 0x21 (tail) or 0x19 plays and State becomes BP_Exit.
+ * The first of checkForFakie, checkForOllie, checkForPivot, checkForWipeout and checkForExit that returns nonzero ends
+ * the tick. When it is checkForExit, the press depth (rider + 0x268) goes to 0 at 2 * mTimeScale / 60, the release clip
+ * kAID_TailOutof (tail) or kAID_NoseOutof plays and State becomes BP_Exit.
  *
  * @param cmd  the command (On Tour tBoardPressCmd)
  */
@@ -5856,15 +5868,15 @@ extern "C" void cBoardPressControl_handleBalanceState(cBoardPressControl* self, 
         *(int*)&rider->mSlewed[10].target = 0;
         rider->mSlewed[10].rate = rider->mTimeScale * 2.0f * 0.01666666753590107f;
         cRider* rider2 = self->mRider;
-        if (rider2->PressMode == 2)
+        if (rider2->PressMode == kPM_Tail)
         {
-            cRiderAnimBase_play(rider2->mRiderAnim, 33, 0, -1.0f);
+            cRiderAnimBase_play(rider2->mRiderAnim, kAID_TailOutof, 0, -1.0f);
         }
         else
         {
-            cRiderAnimBase_play(rider2->mRiderAnim, 25, 0, -1.0f);
+            cRiderAnimBase_play(rider2->mRiderAnim, kAID_NoseOutof, 0, -1.0f);
         }
-        *(int*)self = 3;
+        *(int*)self = cBoardPressControl::kBP_Exit;
     }
 }
 #endif
@@ -5900,11 +5912,11 @@ extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
  * Runs the release phase (BP_Exit): allows a re-press while the press depth drains, then leaves the board
  * press.
  *
- * While a release clip (0x21 or 0x19) plays and the press depth (mSlewed[10].cur) is above 0, pushing
- * BoardPress past 0.5 the same way again re-presses: clip 0x20 (tail) or 0x18 (nose), PressMode to match,
- * depth target 1 and BP_Into. Otherwise it scores the end of a nose or tail press (cRiderMetrix_evPressEnd) and goes
- * back to the rail (rail cycle clip, CS_Railslide) in rail motion, else to CS_Cruise after restoring the
- * stance (cRider_undoRailslideModeOrientation).
+ * While a release clip (kAID_TailOutof or kAID_NoseOutof) plays and the press depth (mSlewed[10].cur) is above 0,
+ * pushing BoardPress past 0.5 the same way again re-presses: clip kAID_TailInto (tail) or kAID_NoseInto (nose),
+ * PressMode to match, depth target 1 and BP_Into. Otherwise it scores the end of a nose or tail press
+ * (cRiderMetrix_evPressEnd) and goes back to the rail (rail cycle clip, CS_Railslide) in rail motion, else to CS_Cruise
+ * after restoring the stance (cRider_undoRailslideModeOrientation).
  *
  * @param in  the command (On Tour tBoardPressCmd)
  */
@@ -5912,42 +5924,42 @@ extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, tBo
 {
     int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
     cRider* rider;
-    if ((anim == 33 || anim == 25) && 0.0f < (rider = self->mRider)->mSlewed[10].cur)
+    if ((anim == kAID_TailOutof || anim == kAID_NoseOutof) && 0.0f < (rider = self->mRider)->mSlewed[10].cur)
     {
         float fx = in->BoardPress * 0.032258063554763794f;
-        if ((fx < -0.5f && anim == 33) || (0.5f < fx && anim == 25))
+        if ((fx < -0.5f && anim == kAID_TailOutof) || (0.5f < fx && anim == kAID_NoseOutof))
         {
             if (fx < 0.0f)
             {
-                cRiderAnimBase_play(self->mRider->mRiderAnim, 0x20, 0, -1.0f);
-                self->mRider->PressMode = 2;
+                cRiderAnimBase_play(self->mRider->mRiderAnim, kAID_TailInto, 0, -1.0f);
+                self->mRider->PressMode = kPM_Tail;
             }
             else
             {
-                cRiderAnimBase_play(self->mRider->mRiderAnim, 0x18, 0, -1.0f);
-                self->mRider->PressMode = 1;
+                cRiderAnimBase_play(self->mRider->mRiderAnim, kAID_NoseInto, 0, -1.0f);
+                self->mRider->PressMode = kPM_Nose;
             }
             cRider* rider2 = self->mRider;
             rider2->mSlewed[10].target = 1.0f;
             rider2->mSlewed[10].rate = rider2->mTimeScale * 2.0f * 0.01666666753590107f;
-            *(int*)self = 0;
+            *(int*)self = cBoardPressControl::kBP_Into;
         }
         return;
     }
     rider = self->mRider;
-    if (rider->PressMode == 1 || rider->PressMode == 2)
+    if (rider->PressMode == kPM_Nose || rider->PressMode == kPM_Tail)
     {
         cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(rider->mMetrix));
     }
-    if (cRider_getMotionState(self->mRider) == 4)
+    if (cRider_getMotionState(self->mRider) == MS_Railslide)
     {
         self->mRider->mRiderHandler->RailslideControl.playGainFocusAnim(0);
-        cRider_setControlState_impl(self->mRider, 7);
+        cRider_setControlState_impl(self->mRider, CS_Railslide);
     }
     else
     {
         cRider_undoRailslideModeOrientation(self->mRider);
-        cRider_setControlState_impl(self->mRider, 0);
+        cRider_setControlState_impl(self->mRider, CS_Cruise);
     }
 }
 #endif
@@ -5964,36 +5976,38 @@ extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blen
 /**
  * Tries a reverse turn during a balanced board press, which swaps the press between nose and tail.
  *
- * Returns 1 at once while a reverse clip (0x17 or 0x1F) plays. Nothing is tried while a pivot clip plays, off
- * the ground (motion not MS_Ground) or with a spin rate (mSpinRate) set; otherwise, when cRider_isChangeFakieGround starts
- * a reverse turn, it plays 0x17 and makes a nose press a tail press, or plays 0x1F and makes it a nose press.
+ * Returns true at once while a reverse clip (kAID_NoseChangeFakie or kAID_TailChangeFakie) plays. Nothing is tried
+ * while a pivot clip plays, off the ground (motion not MS_Ground) or with a spin rate (mSpinRate) set; otherwise, when
+ * cRider_isChangeFakieGround starts a reverse turn, it plays kAID_NoseChangeFakie and makes a nose press a tail press,
+ * or plays kAID_TailChangeFakie and makes it a nose press.
  *
- * @return 1 when a reverse is playing or was started, otherwise 0
+ * @return true when a reverse is playing or was started, otherwise false
  */
-int cBoardPressControl::checkForFakie()
+bool cBoardPressControl::checkForFakie()
 {
     int curAnimId = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
-    if (curAnimId == 23 || curAnimId == 0x1F) return 1;
-    if (curAnimId == 37 || curAnimId == 38 || curAnimId == 29 || curAnimId == 0x1E) return 0;
-    if (cRider_getMotionState(mRider) != 0) return 0;
+    if (curAnimId == kAID_NoseChangeFakie || curAnimId == kAID_TailChangeFakie) return true;
+    if (curAnimId == kAID_TailPivotL || curAnimId == kAID_TailPivotR || curAnimId == kAID_NosePivotL
+        || curAnimId == kAID_NosePivotR) return false;
+    if (cRider_getMotionState(mRider) != MS_Ground) return false;
     cRider* rider = mRider;
-    if (rider->mSpinRate != 0.0f) return 0;
+    if (rider->mSpinRate != 0.0f) return false;
     if (cRider_isChangeFakieGround(rider) != 0)
     {
         cRider* rider2 = mRider;
-        if (rider2->PressMode == 1)
+        if (rider2->PressMode == kPM_Nose)
         {
-            cRiderAnimBase_play_i(rider2->mRiderAnim, 23, 0, -1.0f);
-            mRider->PressMode = 2;
+            cRiderAnimBase_play_i(rider2->mRiderAnim, kAID_NoseChangeFakie, 0, -1.0f);
+            mRider->PressMode = kPM_Tail;
         }
         else
         {
-            cRiderAnimBase_play_i(rider2->mRiderAnim, 0x1F, 0, -1.0f);
-            mRider->PressMode = 1;
+            cRiderAnimBase_play_i(rider2->mRiderAnim, kAID_TailChangeFakie, 0, -1.0f);
+            mRider->PressMode = kPM_Nose;
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6021,39 +6035,39 @@ static inline float aiAbs_1307B8(float x)
  * Pops an ollie out of the board press when the ollie button (R3) is let go after being held.
  *
  * OllieHeld (bit 17) sets IsOllieHeld; once the bit is clear again, the pivot is finalised
- * (cBoardPressControl_blendOutOfPivot), clip 0x23 (|pivot| > 0.5) or 0x1B plays, any rail style is cleared,
- * and the rider takes off (cRider_applyJumpPop with 1.0, MS_Air, CS_Spin, cSSXAudio_Lift).
+ * (cBoardPressControl_blendOutOfPivot), clip kAID_TailOllie (|pivot| > 0.5) or kAID_NoseOllie plays, any rail style is
+ * cleared, and the rider takes off (cRider_applyJumpPop with 1.0, MS_Air, CS_Spin, cSSXAudio_Lift).
  *
  * @param cmd  the command (On Tour tBoardPressCmd)
- * @return 1 when the ollie was started, otherwise 0
+ * @return true when the ollie was started, otherwise false
  */
-int cBoardPressControl::checkForOllie(tBoardPressCmd* cmd)
+bool cBoardPressControl::checkForOllie(tBoardPressCmd* cmd)
 {
     int mask = 0x20000;
     if (*(int*)cmd & mask) IsOllieHeld = 1;
     int ok = IsOllieHeld != 0 && (*(int*)cmd & mask) == 0;
     float speed = aiAbs_1307B8(mRider->mSlewed[12].cur);
-    if (!ok) return 0;
+    if (!ok) return false;
     blendOutOfPivot();
     if (speed > 0.5f)
     {
-        cRiderAnimBase_play(mRider->mRiderAnim, 35, 0, -1.0f);
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_TailOllie, 0, -1.0f);
     }
     else
     {
-        cRiderAnimBase_play(mRider->mRiderAnim, 27, 0, -1.0f);
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_NoseOllie, 0, -1.0f);
     }
     cRider* rider = mRider;
-    if (rider->RailslideMode != 0)
+    if (rider->RailslideMode != kRSM_None)
     {
-        rider->RailslideMode = 0;
+        rider->RailslideMode = kRSM_None;
         cRider_verifyRailslideModeDEBUG(mRider);
     }
     cRider_applyJumpPop(mRider, 1.0f);
-    cRider_setMotionState_impl(mRider, 1);
-    cRider_setControlState_impl(mRider, 5);
+    cRider_setMotionState_impl(mRider, MS_Air);
+    cRider_setControlState_impl(mRider, CS_Spin);
     cSSXAudio_Lift(gSSXAudio, mRider);
-    return 1;
+    return true;
 }
 #endif
 
@@ -6142,17 +6156,17 @@ static inline void aiSetLean_08D8(char* vr, float v)
  * Drives the board pivot from the stick: turns the pivot toward the stick angle and plays the pivot clips.
  *
  * With both sticks under 0.1, when moving against mGroundForward, or with IsOllieHeld, the pivot springs back
- * (autoCompletePivot); once |pivot| is within 0.2 of 0 or 1 it is finalised (blendOutOfPivot; PressTimer = 1
- * when idle) and 0 is returned. Otherwise atan2(BoardPivot, BoardPress) (pivot negated in switch stance) is
- * compared with pivot * pi: outside a pivot clip a gap of 27 degrees or more kicks the pivot to +-0.15 or
- * +-0.85, else it turns by gap * 2 * mTimeScale / 60. Between 0.15 and 0.85 the board depth targets 0.5 and
- * the pivot clip plays (0x1D/0x1E nose, 0x25/0x26 tail, by sign), flipping the stance (changeFakieBoardPress)
- * as a pivot starts.
+ * (autoCompletePivot); once |pivot| is within 0.2 of 0 or 1 it is finalised (blendOutOfPivot; PressTimer = 1 when idle)
+ * and false is returned. Otherwise atan2(BoardPivot, BoardPress) (pivot negated in switch stance) is compared with
+ * pivot * pi: outside a pivot clip a gap of 27 degrees or more kicks the pivot to +-0.15 or +-0.85, else it turns by
+ * gap * 2 * mTimeScale / 60. Between 0.15 and 0.85 the board depth targets 0.5 and the pivot clip plays
+ * (kAID_NosePivotL / kAID_NosePivotR nose, kAID_TailPivotL / kAID_TailPivotR tail, by sign), flipping the stance
+ * (changeFakieBoardPress) as a pivot starts.
  *
  * @param in  the command (On Tour tBoardPressCmd)
- * @return 1 while a pivot is in progress, 0 when there is none
+ * @return true while a pivot is in progress, false when there is none
  */
-int cBoardPressControl::checkForPivot(tBoardPressCmd* in)
+bool cBoardPressControl::checkForPivot(tBoardPressCmd* in)
 {
     cBoardPressControl* self = this;
     float stickX = in->BoardPress * 0.032258063554763794f;
@@ -6171,9 +6185,9 @@ int cBoardPressControl::checkForPivot(tBoardPressCmd* in)
             if (stickMag < 0.1f)
                 self->PressTimer = 1.0f;
             self->blendOutOfPivot();
-            return 0;
+            return false;
         }
-        return 1;
+        return true;
     }
     if (rider0->IsRidingFakie != 0)
         stickY = -stickY;
@@ -6181,7 +6195,8 @@ int cBoardPressControl::checkForPivot(tBoardPressCmd* in)
     float curAngle = self->mRider->mSlewed[12].cur * 3.1415927410125732f;
     float deltaAngle = aiWrap_08D8(ang - curAngle);
     int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
-    int special = anim == 37 || anim == 38 || anim == 29 || anim == 0x1E;
+    int special = anim == kAID_TailPivotL || anim == kAID_TailPivotR || anim == kAID_NosePivotL
+        || anim == kAID_NosePivotR;
     if (!special && aiAbs_08D8(deltaAngle) >= 0.4712389409542084f)
     {
         cRider* rider = self->mRider;
@@ -6221,19 +6236,19 @@ int cBoardPressControl::checkForPivot(tBoardPressCmd* in)
         rider3->mSlewed[11].rate = rider3->mTimeScale * 0.01666666753590107f;
         cRider* rider2 = self->mRider;
         int na;
-        if (rider2->PressMode == 1)
-            na = rider2->mSlewed[12].cur > 0.0f ? 29 : 0x1E;
+        if (rider2->PressMode == kPM_Nose)
+            na = rider2->mSlewed[12].cur > 0.0f ? kAID_NosePivotL : kAID_NosePivotR;
         else
-            na = rider2->mSlewed[12].cur > 0.0f ? 37 : 38;
+            na = rider2->mSlewed[12].cur > 0.0f ? kAID_TailPivotL : kAID_TailPivotR;
         if (anim == na)
-            return 1;
+            return true;
         if (!special)
             self->changeFakieBoardPress();
         cRiderAnimBase_play(self->mRider->mRiderAnim, na, 0, -1.0f);
-        return 1;
+        return true;
     }
     self->blendOutOfPivot();
-    return 0;
+    return false;
 }
 #endif
 
@@ -6327,17 +6342,17 @@ static inline float Curve_130DD0(const sCurve_130DD0* c, float x)
  * Sets the board-depth target from the press input, and crashes the rider when the board stays at full depth
  * for over a second.
  *
- * BalanceSec counts the time in the press and OffBalanceSec the time at full depth (rider + 0x274 == 1). The
- * target is the press (word 1 bits 0-5, negated for a tail press, at least 0), capped at 0.5 + BalanceSec / 2
- * in the first second and then snapped to 0 or 1 (1 when it or |BoardPivot| exceeds 0.5). The rate is 1 when
- * crossing 0.5, else a blend over 5 s of the curves kBPEasyBalanceRate and kBPHardBalanceRate, with the Whooh speech
- * (func_002A1560) above depth 0.8. After 1 s at full depth it calls the hard crash cRider_flagEventWipeout with
- * semantic 0x167 (tail) or 0x166 (nose).
+ * BalanceSec counts the time in the press and OffBalanceSec the time at full depth (rider + 0x274 == 1). The target is
+ * the press (word 1 bits 0-5, negated for a tail press, at least 0), capped at 0.5 + BalanceSec / 2 in the first second
+ * and then snapped to 0 or 1 (1 when it or |BoardPivot| exceeds 0.5). The rate is 1 when crossing 0.5, else a blend
+ * over 5 s of the curves kBPEasyBalanceRate and kBPHardBalanceRate, with the Whooh speech (func_002A1560) above depth
+ * 0.8. After 1 s at full depth it calls the hard crash cRider_flagEventWipeout with kAID_WH_TailBwd2FwdFaceUp (tail) or
+ * kAID_WH_NoseFwd2FwdFaceDown (nose).
  *
  * @param in  the command (On Tour tBoardPressCmd)
- * @return 1 when the crash was started, otherwise 0
+ * @return true when the crash was started, otherwise false
  */
-int cBoardPressControl::checkForWipeout(tBoardPressCmd* in)
+bool cBoardPressControl::checkForWipeout(tBoardPressCmd* in)
 {
     cRider* rider = mRider;
     float k = rider->mTimeScale * 0.01666666753590107f;
@@ -6347,7 +6362,7 @@ int cBoardPressControl::checkForWipeout(tBoardPressCmd* in)
     else
         OffBalanceSec = 0.0f;
     float desPress = in->BoardPress * 0.032258063554763794f;
-    if (mRider->PressMode == 2)
+    if (mRider->PressMode == kPM_Tail)
         desPress = -desPress >? 0.0f;
     else
         desPress = desPress >? 0.0f;
@@ -6393,13 +6408,13 @@ int cBoardPressControl::checkForWipeout(tBoardPressCmd* in)
         else
             info.Direct = t4vect_ZAxis;
         cRider* rider5 = mRider;
-        if (rider5->PressMode == 2)
-            cRider_flagEventWipeout(rider5, 359, 0, rider5->mSurfaceType, &info);
+        if (rider5->PressMode == kPM_Tail)
+            cRider_flagEventWipeout(rider5, kAID_WH_TailBwd2FwdFaceUp, 0, rider5->mSurfaceType, &info);
         else
-            cRider_flagEventWipeout(rider5, 358, 0, rider5->mSurfaceType, &info);
-        return 1;
+            cRider_flagEventWipeout(rider5, kAID_WH_NoseFwd2FwdFaceDown, 0, rider5->mSurfaceType, &info);
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6423,9 +6438,9 @@ static inline float aiAbs_131200(float x)
  * 0x27C) becomes 0 at 2 * mTimeScale / 60.
  *
  * @param cmd  the command (On Tour tBoardPressCmd)
- * @return 1 when the board depth (rider + 0x274) is 0, or under 0.5 on a tick that asks to exit; else 0
+ * @return true when the board depth (rider + 0x274) is 0, or under 0.5 on a tick that asks to exit; else false
  */
-int cBoardPressControl::checkForExit(tBoardPressCmd* cmd)
+bool cBoardPressControl::checkForExit(tBoardPressCmd* cmd)
 {
     float x = cmd->BoardPress * 0.032258063554763794f;
     float y = cmd->BoardPivot * 0.032258063554763794f;
@@ -6439,15 +6454,15 @@ int cBoardPressControl::checkForExit(tBoardPressCmd* cmd)
     }
     cRider* rider = mRider;
     if (PressTimer > 0.5f ||
-        (rider->PressMode == 2 && x > 0.8f) ||
-        (rider->PressMode == 1 && x < -0.8f))
+        (rider->PressMode == kPM_Tail && x > 0.8f) ||
+        (rider->PressMode == kPM_Nose && x < -0.8f))
     {
         *(int*)&rider->mSlewed[11].target = 0;
         rider->mSlewed[11].rate = rider->mTimeScale * 2.0f * 0.01666666753590107f;
-        if (mRider->mSlewed[11].cur < 0.5f) return 1;
+        if (mRider->mSlewed[11].cur < 0.5f) return true;
     }
-    if (mRider->mSlewed[11].cur == 0.0f) return 1;
-    return 0;
+    if (mRider->mSlewed[11].cur == 0.0f) return true;
+    return false;
 }
 #endif
 
@@ -6694,10 +6709,11 @@ static inline float aiClamp_1620(float v, float lo, float hi)
  * Runs one frame of cruising (riding on the ground): checks the ways out of cruise, applies the stick and
  * buttons, and keeps the riding anim in step with speed, lean and braking.
  *
- * Leaves early at the finish line (cRider_checkForFinishLine), on a reset (bit 12), in the air, on a handplant (bit 13),
- * a rail or board collision, a prewind (bits 14-15) or a board press (word 1 bits 6-11). It then sets boost,
- * steering, crouch and brake (mSlewed[0], [4], [3]) and picks push-off 0x16, turnaround 0x15, carves 5-8 and
- * 0xE-0x11 or brake slides 0xB-0xD.
+ * Leaves early at the finish line (cRider_checkForFinishLine), on a reset (bit 12), in the air, on a handplant (bit
+ * 13), a rail or board collision, a prewind (bits 14-15) or a board press (word 1 bits 6-11). It then sets boost,
+ * steering, crouch and brake (mSlewed[0], [4], [3]) and picks push-off kAID_GetGoing, turnaround kAID_ChangeFakie,
+ * carves kAID_CruiseFwd .. kAID_CruiseFast and kAID_CruiseIce .. kAID_CruiseBobbleTS or brake slides kAID_CruiseBrake
+ * .. kAID_CruiseBrakeStopHS.
  *
  * @param in  the cruise command (On Tour tCruiseCmd): button bits and 6-bit stick values scaled by 1/31
  */
@@ -6750,7 +6766,7 @@ void cCruiseControl::update(tCruiseCmd* in)
     cRider_checkForProximityAction(mRider);
     int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int anim = cur;
-    if (cur == 22)
+    if (cur == kAID_GetGoing)
     {
         cRider* rider1 = mRider;
         *(int*)&rider1->mSlewed[1].target = 0;
@@ -6762,9 +6778,9 @@ void cCruiseControl::update(tCruiseCmd* in)
         rider3->mSlewed[4].rate = 0.03333333507180214f;
         *(int*)&rider3->mSlewed[4].target = 0;
     }
-    else if (cur == 21 || (mRider->mSpinRate == 0.0f && cRider_isChangeFakieGround(mRider)))
+    else if (cur == kAID_ChangeFakie || (mRider->mSpinRate == 0.0f && cRider_isChangeFakieGround(mRider)))
     {
-        anim = 21;
+        anim = kAID_ChangeFakie;
         cRider* rider1 = mRider;
         *(int*)&rider1->mSlewed[1].target = 0;
         rider1->mSlewed[1].rate = 0.03333333507180214f;
@@ -6772,13 +6788,13 @@ void cCruiseControl::update(tCruiseCmd* in)
         rider2->mSlewed[3].rate = 0.03333333507180214f;
         *(int*)&rider2->mSlewed[3].target = 0;
     }
-    else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 10)
+    else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Land)
     {
         cRider* rider1 = mRider;
         *(int*)&rider1->mSlewed[1].target = 0;
         rider1->mSlewed[1].rate = 0.03333333507180214f;
     }
-    else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 5)
+    else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Bobble)
     {
         cRider* rider1 = mRider;
         rider1->mSlewed[1].rate = 0.03333333507180214f;
@@ -6797,20 +6813,20 @@ void cCruiseControl::update(tCruiseCmd* in)
             rider1->mSlewed[1].rate = 0.03333333507180214f;
             if (spd < 833.3333740234375f && (y > 0.0f || aiAbs_1620(x) > 0.2f))
             {
-                anim = 22;
+                anim = kAID_GetGoing;
             }
             else
             {
                 cRider* rider2 = mRider;
-                if (rider2->mSurfaceType == 4)
+                if (rider2->mSurfaceType == eST_Ice_Surface)
                 {
                     float absTurn = aiAbs_1620(rider2->mSlewed[0].cur);
                     if (rider2->mSlewed[4].cur <= (1.0f - absTurn) * 0.5f)
-                        anim = 0xE;
+                        anim = kAID_CruiseIce;
                     else if (rider2->mBoostStrength > 0.0f && absTurn < 0.30000001192092896f)
-                        anim = 8;
+                        anim = kAID_CruiseFast;
                     else
-                        anim = 0xF;
+                        anim = kAID_CruiseCrouchIce;
                 }
                 else if (aiAbs_1620(rider2->mSlewed[1].cur) > 0.6000000238418579f &&
                          aiAbs_1620(rider2->mGroundSide.z) > 0.699999988079071f &&
@@ -6820,19 +6836,19 @@ void cCruiseControl::update(tCruiseCmd* in)
                     float animTurn = rider3->mSlewed[1].cur;
                     if (rider3->IsRidingFakie != 0)
                         animTurn = -animTurn;
-                    anim = animTurn < 0.0f ? 0x10 : 17;
+                    anim = animTurn < 0.0f ? kAID_CruiseBobbleHS : kAID_CruiseBobbleTS;
                 }
                 else
                 {
                     cRider* rider3 = mRider;
                     if (rider3->mSlewed[4].cur <= (1.0f - aiAbs_1620(rider3->mSlewed[0].cur)) * 0.5f)
-                        anim = 5;
+                        anim = kAID_CruiseFwd;
                     else if (rider3->mBoostStrength > 0.0f)
-                        anim = 8;
-                    else if (spd < 1666.666748046875f || (unsigned int)(rider3->mSurfaceType - 2) < 2)
-                        anim = 7;
+                        anim = kAID_CruiseFast;
+                    else if (spd < 1666.666748046875f || (unsigned int)(rider3->mSurfaceType - eST_Snow_Powder) < 2)
+                        anim = kAID_CruiseCrouchSlow;
                     else
-                        anim = 6;
+                        anim = kAID_CruiseCrouch;
                 }
             }
         }
@@ -6841,22 +6857,22 @@ void cCruiseControl::update(tCruiseCmd* in)
             rider1->mSlewed[1].target = 0.0f;
             rider1->mSlewed[1].rate = 0.03333333507180214f;
             float lim = 694.4444580078125f;
-            if (cur == 0xC || cur == 13)
+            if (cur == kAID_CruiseBrakeStopTS || cur == kAID_CruiseBrakeStopHS)
                 lim = 972.2222290039062f;
             if (lim < spd)
             {
-                anim = 11;
+                anim = kAID_CruiseBrake;
             }
             else
             {
                 cRider* rider2 = mRider;
                 float brake = rider2->mSlewed[3].cur;
                 if (aiAbs_1620(brake) < 0.800000011920929f)
-                    anim = 11;
+                    anim = kAID_CruiseBrake;
                 else if (brake > 0.0f)
-                    anim = rider2->IsRidingFakie ? 0xC : 13;
+                    anim = rider2->IsRidingFakie ? kAID_CruiseBrakeStopTS : kAID_CruiseBrakeStopHS;
                 else
-                    anim = rider2->IsRidingFakie ? 13 : 0xC;
+                    anim = rider2->IsRidingFakie ? kAID_CruiseBrakeStopHS : kAID_CruiseBrakeStopTS;
             }
         }
     }
@@ -6875,17 +6891,17 @@ extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 /**
  * Leaves cruising; unless natural air follows, it fades out anim layer 0 while a punch plays on layer 1.
  *
- * A punch is a layer-1 anim of type 3 or 0xD (see cRider_checkForPunch); layer 0 fades over 0.1 s
- * (cRiderAnimBase_blendOutAll) and layer 1's playback rate (+0x90) is set back to 1.
+ * A punch is a layer-1 anim of category kANCAT_Block or kANCAT_Punch (see cRider_checkForPunch); layer 0 fades over 0.1
+ * s (cRiderAnimBase_blendOutAll) and layer 1's playback rate (+0x90) is set back to 1.
  *
- * @param next  the control state being entered (eControlState; CS_NaturalAir, 4, skips this)
+ * @param next  the control state being entered (eControlState; CS_NaturalAir skips this)
  */
 void cCruiseControl::loseFocus(int next)
 {
-    if (next != 4)
+    if (next != CS_NaturalAir)
     {
-        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == 3 ||
-            cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == 13)
+        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == kANCAT_Block ||
+            cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 1) == kANCAT_Punch)
         {
             cRiderAnimBase_blendOutAll(mRider->mRiderAnim, 0, 0.10000000149011612f);
             cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 1)->TimeScale = 1.0f;
@@ -6904,16 +6920,16 @@ void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlSt
 /**
  * Switches to natural-air control once the rider has left the ground.
  *
- * @return 1 when the motion state is MS_Air and the control state was set to CS_NaturalAir, otherwise 0
+ * @return true when the motion state is MS_Air and the control state was set to CS_NaturalAir, otherwise false
  */
-int cCruiseControl::checkAirMotion()
+bool cCruiseControl::checkAirMotion()
 {
-    if (cRider_getMotionState(*(void**)this) == 1)
+    if (cRider_getMotionState(*(void**)this) == MS_Air)
     {
-        cRider_setControlState_impl(*(void**)this, 4);
-        return 1;
+        cRider_setControlState_impl(*(void**)this, CS_NaturalAir);
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6923,14 +6939,14 @@ INCLUDE_ASM("ai/ai", cRailslideControl_gainFocus);
 /**
  * Prepares rail sliding: clears the rail spin angle, the prewind gate and the remembered grind button.
  *
- * Sets RSpinAngle 0, the rider word at +0x360 0 (see cCruiseControl_gainFocus) and PrevGrindHeld -1, and
- * lets the lean channel mSlewed[1] return to 0 (rate 1/15).
+ * Sets RSpinAngle 0, the rider word at +0x360 0 (see cCruiseControl_gainFocus) and PrevGrindHeld kNoGrind, and lets the
+ * lean channel mSlewed[1] return to 0 (rate 1/15).
  */
 void cRailslideControl::gainFocus()
 {
     *(int*)&RSpinAngle = 0;
     *(int*)&mRider->JumpHeldSec = 0;
-    PrevGrindHeld = -1;
+    PrevGrindHeld = kNoGrind;
     cRider* rider = mRider;
     rider->mSlewed[1].rate = 0.06666667014360428f;
     *(int*)&rider->mSlewed[1].target = 0;
@@ -6986,7 +7002,7 @@ void cRailslideControl::update(tRailslideCmd* in)
     cRider_setupCrouchBrake(mRider, floatZero, floatZero);
     cRider_checkForReaction(mRider);
     cRider_checkForProximityAction(mRider);
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 0xE) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_RailSpin) {
         if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 0))
             return;
         if (cRider_checkForBoardPress(mRider, in->BoardPress * k))
@@ -7011,7 +7027,7 @@ void cRailslideControl::update(tRailslideCmd* in)
         chooseRailSpin(desRailSpin < 0.0f);
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 10) {
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Land) {
         cRider* rider = mRider;
         rider->mSlewed[6].target = 0.0f;
         rider->mSlewed[6].rate = 0.06666667014360428f;
@@ -7024,11 +7040,11 @@ void cRailslideControl::update(tRailslideCmd* in)
     cRider* rider2 = mRider;
     int railStyle = rider2->RailslideMode;
     int anim;
-    if (railStyle == 4)
-        anim = 20;
+    if (railStyle == kRSM_BS)
+        anim = kAID_RSBSBalance;
     else {
-        anim = 18;
-        if (railStyle == 3) anim = 19;
+        anim = kAID_RSBalance;
+        if (railStyle == kRSM_FS) anim = kAID_RSFSBalance;
     }
     if (cur != anim)
         cRiderAnimBase_play(rider2->mRiderAnim, anim, 0, -1.0f);
@@ -7094,9 +7110,10 @@ static inline void flip_2060(cRailslideControl* self, int f)
 /**
  * Turns the rider a quarter turn on the rail, switching the rail stance (RailslideMode) and playing its anim.
  *
- * With @p dir set RSpinAngle drops by pi/2 and the stance goes 1->3->2->4->1, else it grows by pi/2 and goes
- * 1->4->2->3->1. Entering stance 2 sets the switch flag IsRidingFakie and the anim mirror, leaving it clears them;
- * the anim heading offset follows the stance (anims 0x31-0x36). The spin is scored with cRiderMetrix_evRailSpin().
+ * With @p dir set RSpinAngle drops by pi/2 and the stance goes kRSM_Riding -> kRSM_FS -> kRSM_Fakie -> kRSM_BS ->
+ * kRSM_Riding, else it grows by pi/2 and goes kRSM_Riding -> kRSM_BS -> kRSM_Fakie -> kRSM_FS -> kRSM_Riding. Entering
+ * kRSM_Fakie sets the switch flag IsRidingFakie and the anim mirror, leaving it clears them; the anim heading offset
+ * follows the stance (anims kAID_RSReg2FS .. kAID_RSBS2Reg). The spin is scored with cRiderMetrix_evRailSpin().
  *
  * @param dir  nonzero for one direction (On Tour isCCW), zero for the other
  */
@@ -7105,53 +7122,53 @@ void cRailslideControl::chooseRailSpin(int dir)
     if (dir != 0) {
         *(float*)this -= 1.5707964897155762f;
         switch (mRider->RailslideMode) {
-    case 1:
+    case kRSM_Riding:
         setRot_2060((char*)mRider->mRiderAnim, -1.5707963705062866f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 49, 0, -1.0f);
-        mRider->RailslideMode = 3;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSReg2FS, 0, -1.0f);
+        mRider->RailslideMode = kRSM_FS;
         break;
-    case 2:
+    case kRSM_Fakie:
         flip_2060(this, 0);
         setRot_2060((char*)mRider->mRiderAnim, 1.5707963705062866f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 53, 0, -1.0f);
-        mRider->RailslideMode = 4;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSFakie2BS, 0, -1.0f);
+        mRider->RailslideMode = kRSM_BS;
         break;
-    case 3:
+    case kRSM_FS:
         flip_2060(this, 1);
         setRot_2060((char*)mRider->mRiderAnim, 3.1415927410125732f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 51, 0, -1.0f);
-        mRider->RailslideMode = 2;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSFS2Reg, 0, -1.0f);
+        mRider->RailslideMode = kRSM_Fakie;
         break;
-    case 4:
+    case kRSM_BS:
         setRot_2060((char*)mRider->mRiderAnim, 0.0f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 54, 0, -1.0f);
-        mRider->RailslideMode = 1;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSBS2Reg, 0, -1.0f);
+        mRider->RailslideMode = kRSM_Riding;
         break;
         }
     } else {
         *(float*)this += 1.5707964897155762f;
         switch (mRider->RailslideMode) {
-    case 1:
+    case kRSM_Riding:
         setRot_2060((char*)mRider->mRiderAnim, 1.5707963705062866f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 50, 0, -1.0f);
-        mRider->RailslideMode = 4;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSReg2BS, 0, -1.0f);
+        mRider->RailslideMode = kRSM_BS;
         break;
-    case 2:
+    case kRSM_Fakie:
         flip_2060(this, 0);
         setRot_2060((char*)mRider->mRiderAnim, -1.5707963705062866f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 52, 0, -1.0f);
-        mRider->RailslideMode = 3;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSFakie2FS, 0, -1.0f);
+        mRider->RailslideMode = kRSM_FS;
         break;
-    case 3:
+    case kRSM_FS:
         setRot_2060((char*)mRider->mRiderAnim, 0.0f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 51, 0, -1.0f);
-        mRider->RailslideMode = 1;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSFS2Reg, 0, -1.0f);
+        mRider->RailslideMode = kRSM_Riding;
         break;
-    case 4:
+    case kRSM_BS:
         flip_2060(this, 1);
         setRot_2060((char*)mRider->mRiderAnim, 3.1415927410125732f);
-        cRiderAnimBase_play_2060(mRider->mRiderAnim, 54, 0, -1.0f);
-        mRider->RailslideMode = 2;
+        cRiderAnimBase_play_2060(mRider->mRiderAnim, kAID_RSBS2Reg, 0, -1.0f);
+        mRider->RailslideMode = kRSM_Fakie;
         break;
         }
     }
@@ -7177,19 +7194,19 @@ extern "C" void cSSXAudio_UberRailDeny(void* snd, void* rider);
  * (handler + 0x394) and switches to CS_UberGrind. A refused id plays cSSXAudio_UberRailDeny() once per new
  * press; PrevGrindHeld remembers the id.
  *
- * @param id  the grind held this frame (-1 for none; On Tour grindHeld)
- * @return 1 when the uber grind started, otherwise 0
+ * @param id  the grind held this frame (kNoGrind for none; On Tour grindHeld)
+ * @return true when the uber grind started, otherwise false
  */
-int cRailslideControl::checkForUberGrind(int id)
+bool cRailslideControl::checkForUberGrind(int id)
 {
-    if (id != -1)
+    if (id != kNoGrind)
     {
         cRider* rider = mRider;
         if (rider->mUberTimer > 0.0f && ((rider->mUberFlags >> 1) & 1))
         {
             rider->mRiderHandler->UberGrindControl.CurrentGrind = id;
-            cRider_setControlState_impl(mRider, 0xC);
-            return 1;
+            cRider_setControlState_impl(mRider, CS_UberGrind);
+            return true;
         }
         if (id != PrevGrindHeld)
         {
@@ -7197,7 +7214,7 @@ int cRailslideControl::checkForUberGrind(int id)
         }
     }
     PrevGrindHeld = id;
-    return 0;
+    return false;
 }
 #endif
 
@@ -7209,8 +7226,9 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 /**
  * Plays the anim for getting onto a rail in the current rail stance.
  *
- * Stance 4 plays 0x14, stance 3 0x13, any other 0x12; with @p alt set the variants 0x45, 0x46 and 0x44.
- * cRider_checkRailBoardCollisions passes 1 when the rider lands on the rail from natural air or spin control.
+ * kRSM_BS plays kAID_RSBSBalance, kRSM_FS kAID_RSFSBalance, any other kAID_RSBalance; with @p alt set the variants
+ * kAID_RSBSLandNormal, kAID_RSFSLandNormal and kAID_RSLandNormal. cRider_checkRailBoardCollisions passes 1 when the
+ * rider lands on the rail from natural air or spin control.
  *
  * @param alt  nonzero for the landing variants (On Tour isLanding)
  */
@@ -7218,26 +7236,26 @@ void cRailslideControl::playGainFocusAnim(int alt)
 {
     cRider* rider = mRider;
     int railStyle = rider->RailslideMode;
-    if (railStyle == 4)
+    if (railStyle == kRSM_BS)
     {
         if (alt)
-            cRiderAnimBase_play(rider->mRiderAnim, 69, 0, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, kAID_RSBSLandNormal, 0, -1.0f);
         else
-            cRiderAnimBase_play(rider->mRiderAnim, 20, 0, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, kAID_RSBSBalance, 0, -1.0f);
     }
-    else if (railStyle == 3)
+    else if (railStyle == kRSM_FS)
     {
         if (alt)
-            cRiderAnimBase_play(rider->mRiderAnim, 70, 0, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, kAID_RSFSLandNormal, 0, -1.0f);
         else
-            cRiderAnimBase_play(rider->mRiderAnim, 19, 0, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, kAID_RSFSBalance, 0, -1.0f);
     }
     else
     {
         if (alt)
-            cRiderAnimBase_play(rider->mRiderAnim, 68, 0, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, kAID_RSLandNormal, 0, -1.0f);
         else
-            cRiderAnimBase_play(rider->mRiderAnim, 18, 0, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, kAID_RSBalance, 0, -1.0f);
     }
 }
 #endif
@@ -7257,36 +7275,36 @@ extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 /**
  * Hands control to the air states when the rider has come off the rail into the air.
  *
- * Waits while a rail spin anim (type 0xE) has not reached its event 0, then leaves the rail stance
- * (cRider_undoRailslideModeOrientation) and switches to CS_Spin when the rail spin input (word 1 bits 0-5) is nonzero, else to
- * CS_NaturalAir.
+ * Waits while a rail spin anim (kANCAT_RailSpin) has not reached its event 0, then leaves the rail stance
+ * (cRider_undoRailslideModeOrientation) and switches to CS_Spin when the rail spin input (word 1 bits 0-5) is nonzero,
+ * else to CS_NaturalAir.
  *
  * @param cmd  the rail slide command (On Tour tRailslideCmd)
- * @return 1 when the control state was changed, 0 when not in the air or still waiting
+ * @return true when the control state was changed, false when not in the air or still waiting
  */
-int cRailslideControl::checkAirMotion(tRailslideCmd* cmd)
+bool cRailslideControl::checkAirMotion(tRailslideCmd* cmd)
 {
-    if (cRider_getMotionState(mRider) != 1)
+    if (cRider_getMotionState(mRider) != MS_Air)
     {
-        return 0;
+        return false;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 0xE)
+    if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_RailSpin)
     {
         if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 0))
         {
-            return 0;
+            return false;
         }
     }
     cRider_undoRailslideModeOrientation(mRider);
     if (cmd->RailSpin * 0.032258063554763794f != 0.0f)
     {
-        cRider_setControlState_impl(mRider, 5);
+        cRider_setControlState_impl(mRider, CS_Spin);
     }
     else
     {
-        cRider_setControlState_impl(mRider, 4);
+        cRider_setControlState_impl(mRider, CS_NaturalAir);
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -7463,10 +7481,11 @@ struct sAi_2A30 {
 /**
  * Runs one frame of a handplant: the entry, the balanced hold on the wall and the exit to riding or air.
  *
- * Mode 1 (HandplantMode) waits for the entry anim, then holds (mode 2) if bit 13 is down and the plant was not
- * missed, else drops out (mode 3). Holding moves CurBalance toward the balance input (bits 14-19) and tilts
- * mSlewed[8]; on release it picks exit mode 4, 5 or 6 (rail spline). Exits switch to MS_Air and, when the
- * anim ends or reaches event 1, to CS_NaturalAir (anim 0x11F) or CS_Cruise (0x3D).
+ * kHM_Enter (HandplantMode) waits for the entry anim, then holds (kHM_Balance) if bit 13 is down and the plant was not
+ * missed, else drops out (kHM_TransitionReflect). Holding moves CurBalance toward the balance input (bits 14-19) and
+ * tilts mSlewed[8]; on release it picks exit mode kHM_ExitBalanceThrough, kHM_ExitBalanceReflect or
+ * kHM_ExitBalanceCenter (rail spline). Exits switch to MS_Air and, when the anim ends or reaches event 1, to
+ * CS_NaturalAir (kAID_AirCycle) or CS_Cruise (kAID_LandNormal).
  *
  * @param in  the handplant command (On Tour tHandplantCmd): button bits and the 6-bit balance value
  */
@@ -7477,28 +7496,28 @@ void cHandplantControl::update(tHandplantCmd* in)
     }
     cRider* rider = mRider;
     int st = rider->HandplantMode;
-    if (st == 1) {
+    if (st == kHM_Enter) {
         if (cRiderAnimBase_isCurrentAnimEndFlag(rider->mRiderAnim, 2) == 0) {
             return;
         }
         if (in->Handplant && IsMissedHandplant == 0) {
-            mRider->HandplantMode = 2;
+            mRider->HandplantMode = kHM_Balance;
             cRider_flagEventBoostPowerUp(mRider, 1, cRiderMetrix_evHandplantStart(mRider->mMetrix, 1));
         } else {
-            mRider->HandplantMode = 3;
+            mRider->HandplantMode = kHM_TransitionReflect;
             cRider_flagEventBoostPowerUp(mRider, 1, cRiderMetrix_evHandplantStart(mRider->mMetrix, 2));
         }
         playHandplantAnim(mRider->HandplantMode, HandplantType);
         EnterSec = 0.0f;
         return;
     }
-    if (st == 2) {
+    if (st == kHM_Balance) {
         float dt = rider->mTimeScale * 0.01666666753590107f;
         EnterSec += dt;
         if (in->Handplant && __builtin_fabsf(rider->mSlewed[8].cur) < 1.0f) {
             float desBal = in->HandplantBalance * 0.032258063554763794f;
             if (rider->IsRidingFakie != 0) desBal = -desBal;
-            if (HandplantType == 1) desBal = -desBal;
+            if (HandplantType == kHT_TS) desBal = -desBal;
             rider->mSlewed[7].target = desBal;
             rider->mSlewed[7].rate = dt * 5.0f;
             float k = dt * 3.0f;
@@ -7532,11 +7551,11 @@ void cHandplantControl::update(tHandplantCmd* in)
             return;
         }
         if (IsRailSpline != 0 && __builtin_fabsf(mRider->mSlewed[8].cur) < 0.25f) {
-            mRider->HandplantMode = 6;
+            mRider->HandplantMode = kHM_ExitBalanceCenter;
         } else if (mRider->mSlewed[8].cur < -0.05000000074505806f) {
-            mRider->HandplantMode = 4;
+            mRider->HandplantMode = kHM_ExitBalanceThrough;
         } else {
-            mRider->HandplantMode = 5;
+            mRider->HandplantMode = kHM_ExitBalanceReflect;
         }
         cRider_doLeanPoseAdjust(mRider, &mRider->mPosition);
         cRider_updateOrientationImplicit(mRider);
@@ -7555,23 +7574,24 @@ void cHandplantControl::update(tHandplantCmd* in)
         playHandplantAnim(mRider->HandplantMode, HandplantType);
         return;
     }
-    if (cRider_getMotionState(rider) == 5) {
+    if (cRider_getMotionState(rider) == MS_Handplant) {
         cRider_flagEventBoostPowerUp(mRider, 1, cRiderMetrix_evHandplantEnd(mRider->mMetrix));
-        cRider_setMotionState_impl(mRider, 1);
+        cRider_setMotionState_impl(mRider, MS_Air);
     }
     if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 1)) {
         if (cRider_checkRailBoardCollisions(mRider)) {
             return;
         }
-        if (cRider_getMotionState(mRider) == 0) {
-            cRiderAnimBase_play(mRider->mRiderAnim, 61, 0, -1.0f);
-            cRider_setControlState_impl(mRider, 0);
+        if (cRider_getMotionState(mRider) == MS_Ground) {
+            cRiderAnimBase_play(mRider->mRiderAnim, kAID_LandNormal, 0, -1.0f);
+            cRider_setControlState_impl(mRider, CS_Cruise);
             return;
         }
     } else {
         int motionState = cRider_getMotionState(mRider);
-        if (motionState == 1) {
-            int ok = mRider->mAirPredictor->SimState == 1 || mRider->mAirPredictor->SimState == 3;
+        if (motionState == MS_Air) {
+            int ok = mRider->mAirPredictor->SimState == cAirPredictor::kSS_SimDone
+                || mRider->mAirPredictor->SimState == cAirPredictor::kSS_SimCheckObjectsDone;
             if (ok) {
                 cAirPredictor* airPredictor = mRider->mAirPredictor;
                 float airTimeLeft = airPredictor->TotalAirTime - airPredictor->CurAirTime;
@@ -7586,12 +7606,12 @@ void cHandplantControl::update(tHandplantCmd* in)
     if (cRiderAnimBase_isCurrentAnimEndFlag(mRider->mRiderAnim, 2) == 0) {
         return;
     }
-    if (cRider_getMotionState(mRider) == 1) {
-        cRiderAnimBase_play(mRider->mRiderAnim, 287, 0, -1.0f);
-        cRider_setControlState_impl(mRider, 4);
+    if (cRider_getMotionState(mRider) == MS_Air) {
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_AirCycle, 0, -1.0f);
+        cRider_setControlState_impl(mRider, CS_NaturalAir);
     } else {
-        cRiderAnimBase_play(mRider->mRiderAnim, 61, 0, -1.0f);
-        cRider_setControlState_impl(mRider, 0);
+        cRiderAnimBase_play(mRider->mRiderAnim, kAID_LandNormal, 0, -1.0f);
+        cRider_setControlState_impl(mRider, CS_Cruise);
     }
 }
 #endif
@@ -7991,7 +8011,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
 {
     if (cRider_checkForReset_3308(self->rider, (*(int*)input >> 12) & 1, 0))
         return;
-    if ((input->Handplant) && self->state == 3 &&
+    if ((input->Handplant) && self->state == cSpinControl::kSS_None &&
         cRider_checkHandplantCollisions(self->rider, input->AirAdjRotFB * 0.032258063554763794f > 0.5f))
         return;
     if (cRider_checkRailBoardCollisions(self->rider))
@@ -8003,29 +8023,29 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
     float flipAdj = input->AirAdjRotFB * 0.032258063554763794f;
     float spinAdj = input->AirAdjRotLR * 0.032258063554763794f;
 
-    if (self->mode == 0)
+    if (self->mode == cSpinControl::kAS_AirAdj)
     {
         if (input->LateSpin)
         {
             if (spinAdj != 0.0f || flipAdj != 0.0f)
-                self->mode = 2;
+                self->mode = cSpinControl::kAS_LateSpin;
         }
     }
     else if (spin != 0.0f || flip != 0.0f)
     {
-        self->mode = 0;
+        self->mode = cSpinControl::kAS_AirAdj;
     }
-    if (self->mode == 2)
+    if (self->mode == cSpinControl::kAS_LateSpin)
     {
         if (input->LateSpin)
-            trick = -1;
+            trick = cSpinControl::kNoGrab;
         else
-            self->mode = 1;
+            self->mode = cSpinControl::kAS_Spin;
     }
-    if (self->mode == 1 || self->mode == 2)
+    if (self->mode == cSpinControl::kAS_Spin || self->mode == cSpinControl::kAS_LateSpin)
     {
         if (spinAdj == 0.0f && flipAdj == 0.0f && self->idle > 0.30000001192092896f)
-            self->mode = 0;
+            self->mode = cSpinControl::kAS_AirAdj;
         if (spin == 0.0f)
             spin = spinAdj;
         if (flip == 0.0f)
@@ -8034,10 +8054,10 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
     }
 
     int busy = ((cSpinControl*)self)->isGrabPlaying(trick, (*(int*)input >> 14) & 1);
-    if (!busy && self->mode == 3)
-        self->mode = 0;
+    if (!busy && self->mode == cSpinControl::kAS_None)
+        self->mode = cSpinControl::kAS_AirAdj;
 
-    self->rider->PressMode = 0;
+    self->rider->PressMode = kPM_None;
     float maxFlip = kMaxAdjFlipAng;
     int dir = input->BoardPress;
     float flipInput;
@@ -8058,9 +8078,9 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
         flipAdj = flipInput;
         maxFlip = kMaxPressFlipAng;
         if (self->flipVel < 0.0f || (self->flipVel == 0.0f && flipAdj < 0.0f))
-            self->rider->PressMode = 2;
+            self->rider->PressMode = kPM_Tail;
         else
-            self->rider->PressMode = 1;
+            self->rider->PressMode = kPM_Nose;
     }
     cRider_setupBoostWarp(self->rider, 0, 0);
 
@@ -8068,13 +8088,13 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
     if (busy)
     {
         spinAdj = flipAdj = 0.0f;
-        if (self->mode == 0)
-            self->mode = 3;
+        if (self->mode == cSpinControl::kAS_AirAdj)
+            self->mode = cSpinControl::kAS_None;
     }
-    else if (state0 == 3)
+    else if (state0 == cSpinControl::kSS_None)
     {
         if (cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim,
-                2) != 288 && !((cSpinControl*)self)->checkChangeFakieAir() &&
+                2) != kAID_ChangeFakieAir && !((cSpinControl*)self)->checkChangeFakieAir() &&
             (spin != 0.0f || flip != 0.0f))
         {
             cRider_snapAxisIncrement(self->rider, &flip, &spin, 0.7853982448577881f, 0.0f);
@@ -8085,25 +8105,25 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
             SPINRATE_133308(self->rider) = 4.499661445617676f;
             self->flipSpeed = 2.99977445602417f;
             FLIPRATE_133308(self->rider) = 2.99977445602417f;
-            self->state = 0;
+            self->state = cSpinControl::kSS_Into;
             cRider_flagEventBoostPowerUp(self->rider, 1,
                           cRiderMetrix_evLateSpin(self->rider->mMetrix, self->rider->IsRidingFakie != self->rider->IsGoofyStance));
         }
     }
 
-    if (self->state == 0)
+    if (self->state == cSpinControl::kSS_Into)
     {
         if (self->desSpin == 0.0f && self->desFlip == 0.0f)
         {
             spin = 0.0f;
             flip = 0.0f;
             if (self->curSpin == 0.0f && self->curFlip == 0.0f)
-                self->state = 3;
+                self->state = cSpinControl::kSS_None;
         }
         else if (aiAbs_133308(self->curSpin - self->desSpin) < aiTurnLimit_133308(3.1415929794311523f) &&
                  aiAbs_133308(self->curFlip - self->desFlip) < aiTurnLimit_133308(6.283185958862305f))
         {
-            self->state = 1;
+            self->state = cSpinControl::kSS_Cycle;
         }
         else if (spin == 0.0f && flip == 0.0f)
         {
@@ -8111,7 +8131,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
             self->desFlip = 0.0f;
         }
     }
-    else if (self->state == 1)
+    else if (self->state == cSpinControl::kSS_Cycle)
     {
         if (spin == 0.0f && flip == 0.0f)
         {
@@ -8140,7 +8160,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
                 tol = kSpinOutOfAng;
             }
             if (aiAbs_133308(ds - self->curSpin) <= tol && aiAbs_133308(df - self->curFlip) <= tol)
-                self->state = 2;
+                self->state = cSpinControl::kSS_OutOf;
         }
         else
         {
@@ -8200,21 +8220,21 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
                 self->f44 = 1;
         }
     }
-    else if (self->state == 2)
+    else if (self->state == cSpinControl::kSS_OutOf)
     {
-        self->mode = 0;
+        self->mode = cSpinControl::kAS_AirAdj;
         spin = 0.0f;
         flip = 0.0f;
         if (self->curSpin == self->desSpin && self->curFlip == self->desFlip)
         {
             self->curSpin = 0.0f;
-            self->state = 3;
+            self->state = cSpinControl::kSS_None;
             self->desSpin = 0.0f;
             self->curFlip = 0.0f;
             self->desFlip = 0.0f;
             self->f44 = 0;
         }
-        else if (!busy && cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != 288)
+        else if (!busy && cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != kAID_ChangeFakieAir)
         {
             ((cSpinControl*)self)->checkChangeFakieAir();
         }
@@ -8346,11 +8366,11 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
     aiSetChannel_133308(self->rider, 14, 0.1666666716337204f, self->spinVel * (1.0f / kMaxAdjSpinAng));
     aiSetChannel_133308(self->rider, 13, 0.1666666716337204f, self->flipVel * (1.0f / kMaxAdjFlipAng));
 
-    if (!busy && cur != 288)
+    if (!busy && cur != kAID_ChangeFakieAir)
     {
         if (self->spinVel != 0.0f || self->flipVel != 0.0f)
         {
-            if (cRiderAnimBase_getCurrentAnimCategory(self->rider->mRiderAnim, 2) != 9)
+            if (cRiderAnimBase_getCurrentAnimCategory(self->rider->mRiderAnim, 2) != kANCAT_IntoAir)
             {
                 cRider* rd = self->rider;
                 float x = rd->mSlewed[14].cur;
@@ -8360,7 +8380,8 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
                 anim = aiDir8_133308(ang, 297, 298, 299, 300, 304, 303, 302, 301);
             }
         }
-        else if (state0 == 3 && (self->state == 0 || self->state == 1))
+        else if (state0 == cSpinControl::kSS_None
+                 && (self->state == cSpinControl::kSS_Into || self->state == cSpinControl::kSS_Cycle))
         {
             float ang;
             if (self->rider->IsRidingFakie)
@@ -8375,15 +8396,15 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
                       0.14284929633140564f;
             rd->mRiderAnim->FrameRateFactor = t;
         }
-        else if (self->state == 0 && self->desSpin == 0.0f && self->desFlip == 0.0f)
+        else if (self->state == cSpinControl::kSS_Into && self->desSpin == 0.0f && self->desFlip == 0.0f)
         {
-            anim = 287;
+            anim = kAID_AirCycle;
         }
-        else if (self->state == 1)
+        else if (self->state == cSpinControl::kSS_Cycle)
         {
-            if (self->f44 && cRiderAnimBase_getCurrentAnimCategory(self->rider->mRiderAnim, 2) == 2 &&
+            if (self->f44 && cRiderAnimBase_getCurrentAnimCategory(self->rider->mRiderAnim, 2) == kANCAT_AirCycle &&
                 !(self->curSpin == self->desSpin && self->curFlip == self->desFlip) &&
-                (cRiderAnimBase_isCurrentAnimEndFlag(self->rider->mRiderAnim, 2) || anim == 287))
+                (cRiderAnimBase_isCurrentAnimEndFlag(self->rider->mRiderAnim, 2) || anim == kAID_AirCycle))
             {
                 float y = aiSign_133308(self->desFlip, self->curFlip);
                 float x = aiSign_133308(self->desSpin, self->curSpin);
@@ -8395,52 +8416,52 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
                 anim = aiDir8_133308(ang, 294, 294, 293, 293, 296, 296, 295, 295);
             }
         }
-        else if (state0 != 2 && self->state == 2)
+        else if (state0 != cSpinControl::kSS_OutOf && self->state == cSpinControl::kSS_OutOf)
         {
             switch (anim)
             {
-            case 269:
-            case 278:
-            case 283:
-            case 289:
-                anim = 306;
+            case kAID_IntoSpinBS:
+            case kAID_RSBSIntoSpinBS:
+            case kAID_RSFSIntoSpinBS:
+            case kAID_SpinBSCycle:
+                anim = kAID_OutOfSpinBS;
                 break;
-            case 270:
-            case 279:
-            case 284:
-            case 290:
-                anim = 307;
+            case kAID_IntoSpinFS:
+            case kAID_RSBSIntoSpinFS:
+            case kAID_RSFSIntoSpinFS:
+            case kAID_SpinFSCycle:
+                anim = kAID_OutOfSpinFS;
                 break;
-            case 271:
-            case 285:
-            case 291:
-                anim = 308;
+            case kAID_IntoFlipBwd:
+            case kAID_RSFSIntoFlipBwd:
+            case kAID_FlipBwdCycle:
+                anim = kAID_OutOfFlipBwd;
                 break;
-            case 272:
-            case 280:
-            case 281:
-            case 286:
-            case 292:
-                anim = 309;
+            case kAID_IntoFlipFwd:
+            case kAID_RSBSIntoFlipBwd:
+            case kAID_RSBSIntoFlipFwd:
+            case kAID_RSFSIntoFlipFwd:
+            case kAID_FlipFwdCycle:
+                anim = kAID_OutOfFlipFwd;
                 break;
-            case 273:
-            case 293:
-                anim = 310;
+            case kAID_IntoMistyBS:
+            case kAID_MistyBSCycle:
+                anim = kAID_OutOfMistyBS;
                 break;
-            case 274:
-            case 294:
-                anim = 311;
+            case kAID_IntoMistyFS:
+            case kAID_MistyFSCycle:
+                anim = kAID_OutOfMistyFS;
                 break;
-            case 275:
-            case 295:
-                anim = 312;
+            case kAID_IntoRodeoBS:
+            case kAID_RodeoBSCycle:
+                anim = kAID_OutOfRodeoBS;
                 break;
-            case 276:
-            case 296:
-                anim = 313;
+            case kAID_IntoRodeoFS:
+            case kAID_RodeoFSCycle:
+                anim = kAID_OutOfRodeoFS;
                 break;
             default:
-                anim = 287;
+                anim = kAID_AirCycle;
                 break;
             }
             if (anim == cur)
@@ -8467,17 +8488,17 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
             {
                 float dur = self->rider->mAirPredictor->TotalAirTime - self->rider->mAirPredictor->CurAirTime;
                 float len = cRiderAnimBase_getAIAnimDuration((char*)self->rider->mRiderAnim, 305);
-                if (anim == 287 && len >= dur)
+                if (anim == kAID_AirCycle && len >= dur)
                 {
                     float ratio = 1.0f;
                     if (dur > 0.0010000000474974513f)
                         ratio = len / dur;
-                    anim = 305;
+                    anim = kAID_OutOfAir;
                     self->rider->mRiderAnim->FrameRateFactor = ratio <? 2.0f;
                 }
-                else if (anim == 305 && len < dur)
+                else if (anim == kAID_OutOfAir && len < dur)
                 {
-                    anim = 287;
+                    anim = kAID_AirCycle;
                 }
             }
         }
@@ -8939,11 +8960,11 @@ extern "C" void cSSXAudio_Tweak(void* self, void* obj);
  * grab; anim events 0 and 1 reach the held pose (scored by cRiderMetrix_evGrabHold); @p held plays the tweak, or the
  * uber variant while the uber timer runs; letting go ends the trick (cRiderMetrix_evReleaseGrab) and returns to GS_Start.
  *
- * @param trick  the grab held this frame (-1 for none; On Tour grabHeld)
+ * @param trick  the grab held this frame (kNoGrab for none; On Tour grabHeld)
  * @param held  nonzero while the tweak button is held (On Tour isTweaked)
- * @return 1 while layer 2 plays a grab, tweak or uber anim (anim type 0x12-0x14), otherwise 0
+ * @return true while layer 2 plays a grab, tweak or uber anim (kANCAT_Grab .. kANCAT_Uber), otherwise false
  */
-int cSpinControl::isGrabPlaying(int trick, int held)
+bool cSpinControl::isGrabPlaying(int trick, int held)
 {
     cSpinControl* self = this;
     float speed = cRider_getGrabAnimSpeedScale(self->mRider);
@@ -8951,16 +8972,16 @@ int cSpinControl::isGrabPlaying(int trick, int held)
     int hi = self->mRider->mUberLevel >= 5;
     int anim;
 
-    if (self->GrabState == 0) {
-        if (trick == -1) {
+    if (self->GrabState == kGS_Start) {
+        if (trick == kNoGrab) {
             if (self->CurrentGrab != trick) {
                 cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = -1.0f;
-                cRiderAnimBase_play(self->mRider->mRiderAnim, 287, 0, -1.0f);
+                cRiderAnimBase_play(self->mRider->mRiderAnim, kAID_AirCycle, 0, -1.0f);
                 self->CurrentGrab = trick;
             }
         } else if (self->CurrentGrab != trick) {
             self->CurrentGrab = trick;
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 18) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_Grab) {
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getGrabAnim(iface, rider->mAIIndex, self->CurrentGrab), 1, -1.0f);
             } else {
@@ -8969,34 +8990,34 @@ int cSpinControl::isGrabPlaying(int trick, int held)
             }
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
         } else if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0)) {
-            self->GrabState = 1;
+            self->GrabState = kGS_Locked;
         }
     }
-    if (self->GrabState == 1) {
+    if (self->GrabState == kGS_Locked) {
         if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
             cRider* rider = self->mRider;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 0.0f;
-            if (cBEBAGTInterface_getGrabCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
+            if (cBEBAGTInterface_getGrabCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != kAID_Invalid) {
                 cRider* rider2 = self->mRider;
                 cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getGrabCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
                 cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = speed;
             }
-            self->GrabState = 2;
+            self->GrabState = kGS_Hold;
         }
     }
-    if (self->GrabState == 2) {
+    if (self->GrabState == kGS_Hold) {
         if (trick != self->CurrentGrab) {
             cRider* rider = self->mRider;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
-            self->GrabState = 5;
+            self->GrabState = kGS_Over;
         } else if (held != 0) {
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.10000000149011612f);
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 2, 0.10000000149011612f);
             if (self->mRider->mUberTimer == 0.0f || (self->mRider->mUberFlags & 1) == 0
-                || cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == 438) {
+                || cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == kAID_Invalid) {
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getTweakAnim(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             } else {
@@ -9005,17 +9026,18 @@ int cSpinControl::isGrabPlaying(int trick, int held)
             }
             cSSXAudio_Tweak(cAudioInterface_bxAudio(), self->mRider);
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
-            self->GrabState = 3;
+            self->GrabState = kGS_TweakLocked;
         }
     }
-    if (self->GrabState == 3) {
+    if (self->GrabState == kGS_TweakLocked) {
         if (trick == self->CurrentGrab && held != 0
             && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 0.0f;
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_Tweak) {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
-                if (cBEBAGTInterface_getTweakCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
+                if (cBEBAGTInterface_getTweakCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab)
+                    != kAID_Invalid) {
                     cRider* rider2 = self->mRider;
                     cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getTweakCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
                     cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = speed;
@@ -9023,17 +9045,18 @@ int cSpinControl::isGrabPlaying(int trick, int held)
             } else {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getUberName(iface, rider->mAIIndex, self->CurrentGrab, hi)));
-                if (cBEBAGTInterface_getUberCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 438) {
+                if (cBEBAGTInterface_getUberCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi)
+                    != kAID_Invalid) {
                     cRider* rider2 = self->mRider;
                     cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getUberCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
                     cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = speed;
                 }
             }
-            self->GrabState = 4;
+            self->GrabState = kGS_TweakHold;
         } else if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)
                    || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 3)
                    || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 2)) {
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_Tweak) {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
                 cRider* rider2 = self->mRider;
@@ -9044,12 +9067,12 @@ int cSpinControl::isGrabPlaying(int trick, int held)
                 cRider* rider2 = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, cBEBAGTInterface_getUberName(iface, rider2->mAIIndex, self->CurrentGrab, hi)));
             }
-            self->GrabState = 5;
+            self->GrabState = kGS_Over;
         }
     }
-    if (self->GrabState == 4) {
+    if (self->GrabState == kGS_TweakHold) {
         if (trick != self->CurrentGrab || held == 0) {
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_Tweak) {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
             } else {
@@ -9058,27 +9081,28 @@ int cSpinControl::isGrabPlaying(int trick, int held)
             }
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
-            self->GrabState = 5;
+            self->GrabState = kGS_Over;
         }
     }
     anim = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
-    if (self->GrabState == 5) {
-        if (anim == 2 || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 3)) {
-            if (anim == 20 && held != 0 && trick != -1
-                && cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, trick, hi) != 438) {
+    if (self->GrabState == kGS_Over) {
+        if (anim == kANCAT_AirCycle
+            || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 3)) {
+            if (anim == kANCAT_Uber && held != 0 && trick != kNoGrab
+                && cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, trick, hi) != kAID_Invalid) {
                 self->CurrentGrab = trick;
                 cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play_i(rider->mRiderAnim, cBEBAGTInterface_getUberAnim(iface, rider->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
                 cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
-                self->GrabState = 3;
+                self->GrabState = kGS_TweakLocked;
             } else {
-                self->GrabState = 0;
-                self->CurrentGrab = -1;
+                self->GrabState = kGS_Start;
+                self->CurrentGrab = kNoGrab;
             }
         }
     }
-    return anim >= 18 && anim <= 20;
+    return anim >= kANCAT_Grab && anim <= kANCAT_Uber;
 }
 #endif
 
@@ -9143,13 +9167,13 @@ static inline float aiWrap_135BE0(float x)
 /**
  * Switches the spin state to fakie when the rider changes stance in the air.
  *
- * If cRider_isChangeFakieAir (On Tour cRider::isChangeFakieAir) says the rider (+0x58) switched, the angle at +0x20 gets half a
- * turn added (wrapped to -pi..pi), the values at +0x24, +0x2C, +0x18 and +0x10 are negated, and the rider's animation
- * base plays AI anim 0x120 with blend -1.
+ * If cRider_isChangeFakieAir (On Tour cRider::isChangeFakieAir) says the rider (+0x58) switched, the angle at +0x20
+ * gets half a turn added (wrapped to -pi..pi), the values at +0x24, +0x2C, +0x18 and +0x10 are negated, and the rider's
+ * animation base plays kAID_ChangeFakieAir with blend -1.
  *
- * @return 1 when the rider changed to fakie, else 0
+ * @return true when the rider changed to fakie, else false
  */
-int cSpinControl::checkChangeFakieAir()
+bool cSpinControl::checkChangeFakieAir()
 {
     cSpinControl* spinCtl = (cSpinControl*)this;
     if (cRider_isChangeFakieAir(spinCtl->mRider) != 0)
@@ -9159,10 +9183,10 @@ int cSpinControl::checkChangeFakieAir()
     spinCtl->AirAdjFlip = -spinCtl->AirAdjFlip;
     spinCtl->CurFlip = -spinCtl->CurFlip;
     spinCtl->DesFlip = -spinCtl->DesFlip;
-    cRiderAnimBase_play(spinCtl->mRider->mRiderAnim, 288, 0, -1.0f);
-    return 1;
+    cRiderAnimBase_play(spinCtl->mRider->mRiderAnim, kAID_ChangeFakieAir, 0, -1.0f);
+    return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -9262,16 +9286,16 @@ INCLUDE_ASM("ai/ai", cSpinControl_isGrabHeld);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 
 /**
- * Tells whether the rider is holding a grab: GrabState 2 with a grab anim (type 0x12) on layer 2.
+ * Tells whether the rider is holding a grab: GrabState kGS_Hold with a grab anim (kANCAT_Grab) on layer 2.
  *
  * @return 1 while the grab is held, otherwise 0
  */
 int cSpinControl::isGrabHeld()
 {
     int held = 0;
-    if (GrabState == 2)
+    if (GrabState == kGS_Hold)
     {
-        held = cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 18;
+        held = cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Grab;
     }
     return held;
 }
@@ -9283,16 +9307,16 @@ INCLUDE_ASM("ai/ai", cSpinControl_isTweakHeld);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 
 /**
- * Tells whether the rider is holding a tweak: GrabState 4 with a tweak anim (type 0x13) on layer 2.
+ * Tells whether the rider is holding a tweak: GrabState kGS_TweakHold with a tweak anim (kANCAT_Tweak) on layer 2.
  *
  * @return 1 while the tweak is held, otherwise 0
  */
 int cSpinControl::isTweakHeld()
 {
     int held = 0;
-    if (GrabState == 4)
+    if (GrabState == kGS_TweakHold)
     {
-        held = cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 19;
+        held = cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Tweak;
     }
     return held;
 }
@@ -9304,16 +9328,16 @@ INCLUDE_ASM("ai/ai", cSpinControl_isUberHeld);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 
 /**
- * Tells whether the rider is holding an uber trick: GrabState 4 with an uber anim (type 0x14) on layer 2.
+ * Tells whether the rider is holding an uber trick: GrabState kGS_TweakHold with an uber anim (kANCAT_Uber) on layer 2.
  *
  * @return 1 while the uber is held, otherwise 0
  */
 int cSpinControl::isUberHeld()
 {
     int held = 0;
-    if (GrabState == 4)
+    if (GrabState == kGS_TweakHold)
     {
-        held = cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 20;
+        held = cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Uber;
     }
     return held;
 }
@@ -9454,23 +9478,24 @@ float cRiderMetrix_evUberGrindStart(void* self, int a1, int a2);
 /**
  * Starts an uber grind: plays the entry anim of grind CurrentGrind for the rail stance and scores the trick.
  *
- * Picks the entry anim from kUberGrindAnim[CurrentGrind] (0x24 bytes each) by RailslideMode (4, 3, 2, other), turns
- * the anim heading offset a quarter turn (not from stance 3; stance 2 also clears the switch flag), reports
- * the grind (cRiderMetrix_evUberGrindStart) for boost, then sets RailslideMode 3, GrindState 0 and fades anim layers 1 and 0.
+ * Picks the entry anim from kUberGrindAnim[CurrentGrind] (0x24 bytes each) by RailslideMode (kRSM_BS, kRSM_FS,
+ * kRSM_Fakie, other), turns the anim heading offset a quarter turn (not from kRSM_FS; kRSM_Fakie also clears the switch
+ * flag), reports the grind (cRiderMetrix_evUberGrindStart) for boost, then sets RailslideMode kRSM_FS, GrindState
+ * kGS_Locked and fades anim layers 1 and 0.
  */
 extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
 {
     tBEUberGrindAnim* grind = &kUberGrindAnim[self->CurrentGrind];
     cRider* rider = self->mRider;
     int railStyle = rider->RailslideMode;
-    if (railStyle == 4) {
+    if (railStyle == kRSM_BS) {
         cRiderAnim* anim = rider->mRiderAnim;
         anim->OrientationOffset.P = t4vect_Origin;
         anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(self->mRider->mRiderAnim, grind->BSIntoAnim, 0, -1.0f);
-    } else if (railStyle == 3) {
+    } else if (railStyle == kRSM_FS) {
         cRiderAnimBase_play(rider->mRiderAnim, grind->FSIntoAnim, 0, -1.0f);
-    } else if (railStyle == 2) {
+    } else if (railStyle == kRSM_Fakie) {
         rider->IsRidingFakie = 0;
         self->mRider->mRiderAnim->IsFlipped = 0;
         cRiderAnim* anim = self->mRider->mRiderAnim;
@@ -9485,8 +9510,8 @@ extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
     }
     float k = 0.33000001311302185f;
     cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evUberGrindStart(self->mRider->mMetrix, grind->GrindName, self->mRider->RailslideMode));
-    self->mRider->RailslideMode = 3;
-    *(int*)self = 0;
+    self->mRider->RailslideMode = kRSM_FS;
+    *(int*)self = cUberGrindControl::kGS_Locked;
     cRider_verifyRailslideModeDEBUG(self->mRider);
     cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, k);
     cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 0, k);
@@ -9527,10 +9552,10 @@ static inline float aiAbs_136508(float x)
 /**
  * Runs one frame of an uber grind: the locked-in entry, the hold while the grind button stays down, the exit.
  *
- * GrindState 0 waits for the entry anim, then plays the hold anim (state 1). State 1 ends when the held grind
- * id (UberGrindID) changes or the rider is on the ground, else leans with RailOffCenter and swaps hold anims.
- * State 2 waits out the exit anim, returns to CS_Railslide, CS_Spin or CS_Cruise, scores the grind and counts
- * mUberLevel up to 10 (reaching 10 sets mUberTimer to 60).
+ * GrindState kGS_Locked waits for the entry anim, then plays the hold anim (kGS_Hold). kGS_Hold ends when the held
+ * grind id (UberGrindID) changes or the rider is on the ground, else leans with RailOffCenter and swaps hold anims.
+ * kGS_Over waits out the exit anim, returns to CS_Railslide, CS_Spin or CS_Cruise, scores the grind and counts
+ * mUberLevel up to eUS_SuperUberMax (reaching it sets mUberTimer to 60).
  *
  * @param in  the uber grind command (On Tour tUberGrindCmd): button bits, grind id and the rail balance value
  */
@@ -9541,7 +9566,7 @@ void cUberGrindControl::update(tUberGrindCmd* in)
     tBEUberGrindAnim* tbl = &kUberGrindAnim[CurrentGrind];
     if (cRider_checkRailBoardCollisions((char*)mRider))
     {
-        if (GrindState == 1)
+        if (GrindState == kGS_Hold)
             cRiderAnimBase_play_i136508(mRider->mRiderAnim, tbl->LandAnim, 0, -1.0f);
         return;
     }
@@ -9550,7 +9575,7 @@ void cUberGrindControl::update(tUberGrindCmd* in)
     cRider_setupBoostWarp((char*)mRider, (w >> 14) & 1, (w >> 13) & 1);
     cRider_setupRailBalance((char*)mRider, in->RailBalance * 0.032258063554763794f);
     cRider_setupCrouchBrake((char*)mRider, floatZero, floatZero);
-    if (GrindState == 0)
+    if (GrindState == kGS_Locked)
     {
         cRider* rider0 = mRider;
         rider0->mSlewed[6].target = floatZero;
@@ -9559,21 +9584,21 @@ void cUberGrindControl::update(tUberGrindCmd* in)
         {
             cRiderAnimBase_play_i136508(mRider->mRiderAnim, tbl->CycleAnim, 0, -1.0f);
             cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->TimeScale = 1.0f;
-            GrindState = 1;
+            GrindState = kGS_Hold;
         }
     }
-    if (GrindState == 1)
+    if (GrindState == kGS_Hold)
     {
-        if (in->UberGrindID != CurrentGrind || cRider_getMotionState((char*)mRider) == 0)
+        if (in->UberGrindID != CurrentGrind || cRider_getMotionState((char*)mRider) == MS_Ground)
         {
             cRiderAnimBase_play_i136508(mRider->mRiderAnim, tbl->OutOfAnim, 0, -1.0f);
             cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->TimeScale = 1.0f;
-            GrindState = 2;
+            GrindState = kGS_Over;
         }
         else if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) != tbl->LandAnim ||
                  cRiderAnimBase_isCurrentAnimEndFlag(mRider->mRiderAnim, 2))
         {
-            if (cRider_getMotionState((char*)mRider) != 4)
+            if (cRider_getMotionState((char*)mRider) != MS_Railslide)
             {
                 cRider* rider = mRider;
                 rider->mSlewed[6].target = 0.0f;
@@ -9595,35 +9620,35 @@ void cUberGrindControl::update(tUberGrindCmd* in)
                 cRiderAnimBase_play_i136508(mRider->mRiderAnim, desAnim, 0, -1.0f);
         }
     }
-    if (GrindState == 2)
+    if (GrindState == kGS_Over)
     {
         cRider* rider2 = mRider;
         rider2->mSlewed[6].target = 0.0f;
         rider2->mSlewed[6].rate = 0.05833333730697632f;
-        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 21 &&
+        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_UberGrind &&
             !cRiderAnimBase_isCurrentAnimEndFlag(mRider->mRiderAnim, 2) &&
             !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 0))
             return;
-        if (cRider_getMotionState((char*)mRider) == 4)
+        if (cRider_getMotionState((char*)mRider) == MS_Railslide)
         {
             mRider->mRiderHandler->RailslideControl.playGainFocusAnim(0);
-            cRider_setControlState_impl((char*)mRider, 7);
+            cRider_setControlState_impl((char*)mRider, CS_Railslide);
         }
         else
         {
             cRider_undoRailslideModeOrientation((char*)mRider);
-            if (cRider_getMotionState((char*)mRider) == 1)
-                cRider_setControlState_impl((char*)mRider, 5);
+            if (cRider_getMotionState((char*)mRider) == MS_Air)
+                cRider_setControlState_impl((char*)mRider, CS_Spin);
             else
-                cRider_setControlState_impl((char*)mRider, 0);
+                cRider_setControlState_impl((char*)mRider, CS_Cruise);
         }
         cRider_flagEventBoostPowerUp((char*)mRider, 1, cRiderMetrix_evUberGrindEnd(mRider->mMetrix,
                 mRider->RailslideMode));
         cRider* rider = mRider;
-        if (rider->mUberLevel < 10)
+        if (rider->mUberLevel < eUS_SuperUberMax)
         {
             rider->mUberLevel = rider->mUberLevel + 1;
-            if (mRider->mUberLevel == 10)
+            if (mRider->mUberLevel == eUS_SuperUberMax)
                 mRider->mUberTimer = 60.0f;
         }
     }

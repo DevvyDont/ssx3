@@ -222,12 +222,13 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_upd
  * Sets this computer rider's difficulty values for the race from its AI index (1-5) and the heat number.
  *
  * The level is the rider's getAIIndex() (1 if negative), the heat SSXApp->GameModeMan->iHeatNum. It sets
- * mPathDifficulty by updateRiderPathDifficulty(), mShouldTakeShortcuts for level 1 in heat 3 and
- * mShouldBeRandom in game modes 1, 5 and 6, then calls setIndividualRiderDifficulty() with a profile
- * difficulty setting (cBENewPlayerInterface_getDifficultyLevel). Game events 4 and 5 force mPathDifficulty to 0 and 2. The Super AI race
- * rule (D_005308D0 bit 2, "kT_11SuperAI") then maxes both skills, enables shortcuts, sets the rider's
- * rubber-band thresholds to -100/100 with mode 2 (+0xE4), mPathDifficulty to 2 (levels 1-2) or 1 and returns;
- * otherwise locations 4 (+25%) and 2-3 (+10%) raise mTrickDifficulty, capped at 1.
+ * mPathDifficulty by updateRiderPathDifficulty(), mShouldTakeShortcuts for level 1 in heat 3 and mShouldBeRandom in
+ * game modes 1, 5 and 6, then calls setIndividualRiderDifficulty() with a profile difficulty setting
+ * (cBENewPlayerInterface_getDifficultyLevel). Game events 4 and 5 force mPathDifficulty to kPD_Easy and kPD_Hard. The
+ * Super AI race rule (D_005308D0 bit 2, "kT_11SuperAI") then maxes both skills, enables shortcuts, sets the rider's
+ * rubber-band thresholds to -100/100 with glue level AI_GLUE_SPEEDUP (+0xE4, mGlueStrengthLevel), mPathDifficulty to
+ * kPD_Hard (levels 1-2) or kPD_Medium and returns; otherwise locations 4 (+25%) and 2-3 (+10%) raise mTrickDifficulty,
+ * capped at 1.
  */
 void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
 {
@@ -250,9 +251,9 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
     cComputer_setIndividualRiderDifficulty_UR(self, level, cBENewPlayerInterface_getDifficultyLevel(cBE_getInterface_Fv(cBE_getBE(), 1), cBENewRaceInterface_newRace.cGameMode == 0));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameEvent == 4) {
-        self->diff = 0;
+        self->diff = cComputer::kPD_Easy;
     } else if (cBENewRaceInterface_newRace.cGameEvent == 5) {
-        self->diff = 2;
+        self->diff = cComputer::kPD_Hard;
     }
     if ((D_005308D0[0] >> 2) & 1) {
         self->skillB = 1.0f;
@@ -262,9 +263,9 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
         self->tune->speed = 100.0f;
         self->tune->boost = 2;
         if (level == 1 || level == 2) {
-            self->diff = 2;
+            self->diff = cComputer::kPD_Hard;
         } else {
-            self->diff = 1;
+            self->diff = cComputer::kPD_Medium;
         }
         return;
     }
@@ -344,24 +345,24 @@ extern "C" int cComputer_chooseRandomGrab(cComputer* self, float t);
 /**
  * Picks the grab for a jump with the given air time: an uber, a tweak or a plain grab, tried in that order.
  *
- * Returns -1 when the air time is 0.75 s or less, exactly 100 (getSpinCmd's value when the air predictor has
- * no landing), or under 1 s while the rider is heading for a rail (mToRail). Each kind is tried only when its
+ * Returns kNoGrab when the air time is 0.75 s or less, exactly 100 (getSpinCmd's value when the air predictor has no
+ * landing), or under 1 s while the rider is heading for a rail (mToRail). Each kind is tried only when its
  * shouldRider*() roll passes and the kind before it found nothing.
  *
  * @param airTime  predicted air time left, in seconds (On Tour airTime)
- * @return the chosen grab slot (0-14), or -1 for none
+ * @return the chosen grab slot (0-14), or kNoGrab for none
  */
 int cComputer::chooseGrabMain(float airTime)
 {
-    int currentGrab = -1;
+    int currentGrab = kNoGrab;
     int skip = mToRail != 0 && airTime < 1.0f;
     if (!skip && airTime > 0.75f && airTime != 100.0f)
     {
         if (cComputer_shouldRiderUber(this)) currentGrab = chooseRandomUberGrab(airTime);
-        if (currentGrab == -1)
+        if (currentGrab == kNoGrab)
         {
             if (cComputer_shouldRiderTweak(this)) currentGrab = chooseRandomTweakGrab(airTime);
-            if (currentGrab == -1)
+            if (currentGrab == kNoGrab)
             {
                 if (cComputer_shouldRiderGrab(this)) currentGrab = chooseRandomGrab(airTime);
             }
@@ -394,7 +395,7 @@ struct sVEntry10CBE0 { short delta; short index; int (*fn)(void*); };
  * never reads: the pick is purely random.
  *
  * @param time  air time available, in seconds (On Tour time)
- * @return the grab slot, or -1 when its animation does not fit in the air time
+ * @return the grab slot, or kNoGrab when its animation does not fit in the air time
  */
 int cComputer::chooseRandomGrab(float time)
 {
@@ -408,10 +409,10 @@ int cComputer::chooseRandomGrab(float time)
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->RiderHandler.GroundMotion.mRider));
     float grabTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 2) / spd;
     float holdTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 1) / spd;
-    if (time < grabTime) return -1;
+    if (time < grabTime) return kNoGrab;
     self->mGrabEndTime = time - grabTime;
     self->mHoldToLandTime = grabTime - holdTime;
-    if (idx != -1 && idx < 15)
+    if (idx != kNoGrab && idx < 15)
     {
         self->GrabHistoryCounter[idx]++;
     }
@@ -437,21 +438,20 @@ struct sVEntry10CD20 { short delta; short index; int (*fn)(void*); };
 /**
  * Picks the least-used tweak grab (slots 1-14) whose animation fits in the air time and sets mIsTweak.
  *
- * Skips slots with no tweak animation (0x1B6) and, while the rider's uber timer runs, slots that also have an
- * uber variant (only checked when mUberFlags bit 0 is set). A slot fits when its tweak's key-2 time plus the
- * plain grab's key-1 time is under @p time; the lowest TweakHistoryCounter wins (the first one on ties), gets
- * mGrabEndTime and mHoldToLandTime and is counted. Clears mIsUber; mIsTweak is left as it was when nothing
- * fits.
+ * Skips slots with no tweak animation (kAID_Invalid) and, while the rider's uber timer runs, slots that also have an
+ * uber variant (only checked when mUberFlags bit 0 is set). A slot fits when its tweak's key-2 time plus the plain
+ * grab's key-1 time is under @p time; the lowest TweakHistoryCounter wins (the first one on ties), gets mGrabEndTime
+ * and mHoldToLandTime and is counted. Clears mIsUber; mIsTweak is left as it was when nothing fits.
  *
  * @param time  air time available, in seconds (On Tour time)
- * @return the tweak slot, or -1 when none fits
+ * @return the tweak slot, or kNoGrab when none fits
  */
 int cComputer::chooseRandomTweakGrab(float time)
 {
     cComputer* self = this;
     self->mIsUber = 0;
     self->mGrabStartTime = time;
-    int found = -1;
+    int found = kNoGrab;
     int best = 10000;
     int i = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
@@ -459,10 +459,13 @@ int cComputer::chooseRandomTweakGrab(float time)
     for (; i < 15; i++)
     {
         int anim = cBEBAGTInterface_getTweakAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i);
-        if (anim == 438)
+        if (anim == kAID_Invalid)
             continue;
-        int alt = (self->RiderHandler.GroundMotion.mRider->mUberFlags & 1) ? cBEBAGTInterface_getUberAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i, self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5) : 438;
-        if (0.0f < self->RiderHandler.GroundMotion.mRider->mUberTimer && alt != 438)
+        int alt = (self->RiderHandler.GroundMotion.mRider->mUberFlags & 1)
+            ? cBEBAGTInterface_getUberAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i,
+                                           self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5)
+            : kAID_Invalid;
+        if (0.0f < self->RiderHandler.GroundMotion.mRider->mUberTimer && alt != kAID_Invalid)
             continue;
         int anim2 = cBEBAGTInterface_getGrabAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i);
         float normalTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim2, 1) / spd;
@@ -478,7 +481,7 @@ int cComputer::chooseRandomTweakGrab(float time)
             best = self->TweakHistoryCounter[i];
         }
     }
-    if (found != -1 && found < 15)
+    if (found != kNoGrab && found < 15)
     {
         self->TweakHistoryCounter[found]++;
     }
@@ -503,22 +506,22 @@ struct sVEntry10CF68 { short delta; short index; int (*fn)(void*); };
 /**
  * Picks the least-used uber grab (slots 0-14) whose animation fits in the air time and sets mIsUber.
  *
- * Fails at once unless the rider's uber timer (mUberTimer) is running. The animation is the slot's uber
- * variant (cBEBAGTInterface_getUberAnim, with a flag for mUberLevel >= 5) and slots without one (0x1B6) are skipped; the fit
- * test, timing fields and counting are as in chooseRandomTweakGrab(), on UberHistoryCounter. Clears mIsTweak
- * but never clears mIsUber, so a failed call can leave an older value.
+ * Fails at once unless the rider's uber timer (mUberTimer) is running. The animation is the slot's uber variant
+ * (cBEBAGTInterface_getUberAnim, with a flag for mUberLevel >= 5) and slots without one (kAID_Invalid) are skipped; the
+ * fit test, timing fields and counting are as in chooseRandomTweakGrab(), on UberHistoryCounter. Clears mIsTweak but
+ * never clears mIsUber, so a failed call can leave an older value.
  *
  * @param time  air time available, in seconds (On Tour time)
- * @return the uber slot, or -1 when none fits or no uber is available
+ * @return the uber slot, or kNoGrab when none fits or no uber is available
  */
 int cComputer::chooseRandomUberGrab(float time)
 {
     cComputer* self = this;
     self->mIsTweak = 0;
     if (self->RiderHandler.GroundMotion.mRider->mUberTimer <= 0.0f)
-        return -1;
+        return kNoGrab;
     self->mGrabStartTime = time;
-    int found = -1;
+    int found = kNoGrab;
     int best = 10000;
     int i = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
@@ -526,7 +529,7 @@ int cComputer::chooseRandomUberGrab(float time)
     for (; i < 15; i++)
     {
         int anim = cBEBAGTInterface_getUberAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i, self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5);
-        if (anim == 438)
+        if (anim == kAID_Invalid)
             continue;
         int anim2 = cBEBAGTInterface_getGrabAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i);
         float normalTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim2, 1) / spd;
@@ -542,7 +545,7 @@ int cComputer::chooseRandomUberGrab(float time)
             best = self->UberHistoryCounter[i];
         }
     }
-    if (found != -1 && found < 15)
+    if (found != kNoGrab && found < 15)
     {
         self->UberHistoryCounter[found]++;
     }
@@ -628,12 +631,12 @@ static inline float wrap_0010D1A0(float x)
 /**
  * Returns whether the computer rider should reset: it has been going the wrong way or has been stuck for too long.
  *
- * When the rider's mTargetID is negative (no target), mBadHeadingTime counts the calls in which the rider's
- * PathHeading is more than 60 degrees off its facing (mMatrix front row), else it is zeroed; 61 or more means wrong
- * way. Motion state 2 (cRider_getMotionState) counts mWanderTime up and cancels wrong way; state 4 with any bad-heading
- * count returns 1 at once; state 1 or a PathDistXY under 1000 zeroes mWanderTime and, in state 1, returns 1 once the
- * air predictor's CurAirTime passes 30 s; anything else counts mWanderTime up. The result is wrong
- * way or mWanderTime >= 223, and outside control state 8 (cRider_getControlState) only while mTargetID is negative.
+ * When the rider's mTargetID is negative (no target), mBadHeadingTime counts the calls in which the rider's PathHeading
+ * is more than 60 degrees off its facing (mMatrix front row), else it is zeroed; 61 or more means wrong way. MS_Wipeout
+ * (cRider_getMotionState) counts mWanderTime up and cancels wrong way; MS_Railslide with any bad-heading count returns
+ * 1 at once; MS_Air or a PathDistXY under 1000 zeroes mWanderTime and, in MS_Air, returns 1 once the air predictor's
+ * CurAirTime passes 30 s; anything else counts mWanderTime up. The result is wrong way or mWanderTime >= 223, and
+ * outside CS_Wipeout (cRider_getControlState) only while mTargetID is negative.
  *
  * @return 1 when the rider should reset, else 0
  */
@@ -652,16 +655,16 @@ int cComputer::checkForReset()
         mBadHeadingTime = 0;
     }
     int wrong = mBadHeadingTime >= 61;
-    if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == 2) {
+    if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == MS_Wipeout) {
         wrong = 0;
         mWanderTime++;
-    } else if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == 4 && mBadHeadingTime > 0) {
+    } else if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == MS_Railslide && mBadHeadingTime > 0) {
         return 1;
-    } else if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == 1 ||
+    } else if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == MS_Air ||
                RiderHandler.GroundMotion.mRider->PathDistXY < 1000.0f) {
         mWanderTime = 0;
         wrong = 0;
-        if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == 1 &&
+        if (cRider_getMotionState(RiderHandler.GroundMotion.mRider) == MS_Air &&
             RiderHandler.GroundMotion.mRider->mAirPredictor->CurAirTime > 30.0f) {
             return 1;
         }
@@ -669,7 +672,7 @@ int cComputer::checkForReset()
         mWanderTime++;
     }
     int stuck = wrong || mWanderTime >= 223;
-    if (cRider_getControlState(RiderHandler.GroundMotion.mRider) != 8) {
+    if (cRider_getControlState(RiderHandler.GroundMotion.mRider) != CS_Wipeout) {
         stuck = stuck && mTargetID < 0;
     }
     return stuck;
@@ -871,10 +874,10 @@ INCLUDE_ASM("ai/computer", cComputer_calculateDifficultyScore);
 /**
  * Rates how well a path's difficulty flags suit this rider's mPathDifficulty; 0 means unsuitable.
  *
- * Path difficulty 0, 1 and 2 require @p IsEasy, @p IsMedium and @p IsHard respectively. Any other value
- * passes only when (IsEasy == IsMedium) equals IsHard, an odd test that is unused in practice since
- * mPathDifficulty is always 0-2. A passing path scores (4 - number of flags set) * 33.3, so a path meant for
- * fewer levels scores higher.
+ * Path difficulty kPD_Easy, kPD_Medium and kPD_Hard require @p IsEasy, @p IsMedium and @p IsHard respectively. Any
+ * other value passes only when (IsEasy == IsMedium) equals IsHard, an odd test that is unused in practice since
+ * mPathDifficulty is always one of the three. A passing path scores (4 - number of flags set) * 33.3, so a path meant
+ * for fewer levels scores higher.
  *
  * @param IsEasy  the path suits easy riders
  * @param IsMedium  the path suits medium riders
@@ -884,17 +887,17 @@ INCLUDE_ASM("ai/computer", cComputer_calculateDifficultyScore);
 float cComputer::calculateDifficultyScore(int IsEasy, int IsMedium, int IsHard)
 {
     short pathDifficulty = mPathDifficulty;
-    if (pathDifficulty == 0)
+    if (pathDifficulty == kPD_Easy)
     {
         if (!IsEasy)
             return 0.0f;
     }
-    else if (pathDifficulty == 1)
+    else if (pathDifficulty == kPD_Medium)
     {
         if (!IsMedium)
             return 0.0f;
     }
-    else if (pathDifficulty == 2)
+    else if (pathDifficulty == kPD_Hard)
     {
         if (!IsHard)
             return 0.0f;
@@ -949,18 +952,18 @@ float cRider_getDistanceLeft(void* self);
  * distance set by the difficulty code). Without an opponent (cComputer_getRival, the rider at myOpponentIndex())
  * it is not behind.
  *
- * @return 1 when the difference is below mRubberBandBehind, otherwise 0
+ * @return true when the difference is below mRubberBandBehind, otherwise false
  */
-int cComputer::isFarBehind()
+bool cComputer::isFarBehind()
 {
     // PORT: cComputer_getRival returns a pointer as int (unit declaration).
     int opponent = getRival();
     if (opponent == 0)
-        return 0;
+        return false;
     float relDist = cRider_getDistanceLeft((void*)opponent) - (RiderHandler.GroundMotion.mRider)->mDistToFinish;
     if (relDist < RiderHandler.GroundMotion.mRider->mRubberBandBehind)
-        return 1;
-    return 0;
+        return true;
+    return false;
 }
 #endif
 //100%
@@ -975,18 +978,18 @@ float cRider_getDistanceLeft(void* self);
  * Compares the opponent's mDistToFinish minus this rider's with the rider's mRubberBandAhead. Without an
  * opponent (cComputer_getRival, the rider at myOpponentIndex()) it is not ahead.
  *
- * @return 1 when the difference is above mRubberBandAhead, otherwise 0
+ * @return true when the difference is above mRubberBandAhead, otherwise false
  */
-int cComputer::isFarAhead()
+bool cComputer::isFarAhead()
 {
     // PORT: cComputer_getRival returns a pointer as int (unit declaration).
     int opponent = getRival();
     if (opponent == 0)
-        return 0;
+        return false;
     float relDist = cRider_getDistanceLeft((void*)opponent) - (RiderHandler.GroundMotion.mRider)->mDistToFinish;
     if (RiderHandler.GroundMotion.mRider->mRubberBandAhead < relDist)
-        return 1;
-    return 0;
+        return true;
+    return false;
 }
 #endif
 
@@ -1020,9 +1023,9 @@ unsigned int AIrand();
 /**
  * Decides whether this computer rider should block an attack, keeping each decision for two seconds.
  *
- * While mBlockTimer runs it counts down by 1/60 and returns mShouldIBlock; a negative timer is reset to 0.
- * Otherwise, on every sixth AI tick, it looks for another human rider within 200 whose channel-1 animation
- * class is 13 (probably a punch); the first one found starts a 2 s timer with a 25% chance of blocking.
+ * While mBlockTimer runs it counts down by 1/60 and returns mShouldIBlock; a negative timer is reset to 0. Otherwise,
+ * on every sixth AI tick, it looks for another human rider within 200 whose channel-1 animation category is
+ * kANCAT_Punch; the first one found starts a 2 s timer with a 25% chance of blocking.
  *
  * @return nonzero when the rider should block now, otherwise 0
  */
@@ -1051,7 +1054,7 @@ int cComputer::checkForBlock()
             continue;
         if (!(RiderHandler.GroundMotion.mRider->mRelations[i].mDistance < 200.0f))
             continue;
-        if (cRiderAnimBase_getCurrentAnimCategory(ai->Riders[i]->mRiderAnim, 1) != 13)
+        if (cRiderAnimBase_getCurrentAnimCategory(ai->Riders[i]->mRiderAnim, 1) != kANCAT_Punch)
             continue;
         unsigned int randomRoll = AIrand() % 100;
         int* pf = (int*)(&mShouldIBlock);
@@ -1116,27 +1119,27 @@ static inline float wrap_0010DBF0(float x)
 
 static inline bool isAggr_0010DBF0(void* agg, int a, int b)
 {
-    return cBEAggressionInterface_getAggression(agg, a, b) >= 3;
+    return cBEAggressionInterface_getAggression(agg, a, b) >= kAGG_HARD;
 }
 
 /**
- * Picks a rider beside the computer to punch: returns 1 and the side when one is close, at the side and disliked.
+ * Picks a rider beside the computer to punch: returns true and the side when one is close, at the side and disliked.
  *
  * Runs only every 6th AI tick. For each other rider i (by rider index, skipping its own getAIIndex) whose
  * mRelations[i].mDistance is under 200 and whose bearing (mRelations[i].mAngle) is 30 to 150 degrees off the rider's
  * facing (mMatrix front row), and towards whom the aggression interface (cBEAggressionInterface_getAggression on
- * cBEAggressionInterface_getThis) gives 3 or more, it takes the first one when LastPunchTick + 120 is before the
- * current AI tick, sets @p side and stores the tick in LastPunchTick.
+ * cBEAggressionInterface_getThis) gives kAGG_HARD or more, it takes the first one when LastPunchTick + 120 is before
+ * the current AI tick, sets @p side and stores the tick in LastPunchTick.
  *
  * @param side  receives 1 when the rider is on the side of a positive angle difference, else 0
- * @return 1 when a target was found, else 0
+ * @return true when a target was found, else false
  */
 // Taunt check: finds a close rider beside us (30..150 degrees off our heading) that we're aggressive towards,
 // at most every 120 frames; *side tells which side it is on.
-int cComputer::checkForPunching(int* side)
+bool cComputer::checkForPunching(int* side)
 {
     if (AITick() % 6 != 0)
-        return 0;
+        return false;
     cAI* ai = SSXApp->Game->AI;
     int i;
     for (i = 0; i < ai->NumberOfRidersAllocated; i++)
@@ -1165,9 +1168,9 @@ int cComputer::checkForPunching(int* side)
             continue;
         *side = 0.0f < angleDiff;
         RiderHandler.GroundMotion.mRider->LastPunchTick = AITick();
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1203,11 +1206,11 @@ float cRider_getDistanceLeft(void* self);
  * Returns the rubber-band time warp for the computer rider: above 1 when it is too far behind its opponent, below 1
  * when too far ahead.
  *
- * Returns 1.0 without an opponent (cComputer_getRival), when the rider's +0xE4 mode is 0, in an online race (newRace.cGamePath ==
- * 2) or within 50000 of the finish (mDistToFinish). Otherwise d = the opponent's distance left minus the rider's. When
- * d < mRubberBandBehind (modes 2 and 3) it returns (d - k) / k + 1 times 1.1, with k = mRubberBandBehind; when d >
- * mRubberBandAhead (modes 1 and 3) it returns 0.909 / ((d - k2) / k2 + 1), with k2 = mRubberBandAhead; else 1.0. The
- * new-race interface is fetched and not used.
+ * Returns 1.0 without an opponent (cComputer_getRival), when the rider's mGlueStrengthLevel is AI_GLUE_NONE, in an
+ * online race (newRace.cGamePath == 2) or within 50000 of the finish (mDistToFinish). Otherwise d = the opponent's
+ * distance left minus the rider's. When d < mRubberBandBehind (AI_GLUE_SPEEDUP and AI_GLUE_ALL) it returns (d - k) / k
+ * + 1 times 1.1, with k = mRubberBandBehind; when d > mRubberBandAhead (AI_GLUE_SLOWDOWN and AI_GLUE_ALL) it returns
+ * 0.909 / ((d - k2) / k2 + 1), with k2 = mRubberBandAhead; else 1.0. The new-race interface is fetched and not used.
  *
  * @return the desired time scale for cRider_updateTimeWarp
  */
@@ -1218,14 +1221,14 @@ float cComputer::setupWarp()
     int rival = getRival();
     if (rival == 0) return 1.0f;
     cRider* rider = RiderHandler.GroundMotion.mRider;
-    if (rider->mGlueStrengthLevel == 0) return 1.0f;
+    if (rider->mGlueStrengthLevel == AI_GLUE_NONE) return 1.0f;
     if (cBENewRaceInterface_newRace.cGamePath == 2) return 1.0f;
     if (rider->mDistToFinish < 50000.0f) return 1.0f;
     float warpVal;
     float relDist = cRider_getDistanceLeft((void*)rival) - RiderHandler.GroundMotion.mRider->mDistToFinish;
     cRider* rider2 = RiderHandler.GroundMotion.mRider;
     float k = rider2->mRubberBandBehind;
-    if (relDist < k && (rider2->mGlueStrengthLevel == 2 || rider2->mGlueStrengthLevel == 3))
+    if (relDist < k && (rider2->mGlueStrengthLevel == AI_GLUE_SPEEDUP || rider2->mGlueStrengthLevel == AI_GLUE_ALL))
     {
         warpVal = ((relDist - k) / k + 1.0f) * 1.100000023841858f;
     }
@@ -1233,7 +1236,8 @@ float cComputer::setupWarp()
     {
         cRider* rider3 = RiderHandler.GroundMotion.mRider;
         float rubberAhead = rider3->mRubberBandAhead;
-        if (rubberAhead < relDist && (rider3->mGlueStrengthLevel == 1 || rider3->mGlueStrengthLevel == 3))
+        if (rubberAhead < relDist
+            && (rider3->mGlueStrengthLevel == AI_GLUE_SLOWDOWN || rider3->mGlueStrengthLevel == AI_GLUE_ALL))
         {
             warpVal = 1.0f / ((relDist - rubberAhead) / rubberAhead + 1.0f);
             warpVal *= 0.9090908765792847f;
@@ -1300,18 +1304,18 @@ static inline float clamp_10E098(float v, float lo, float hi)
  * Adds an amount to the rider's boost meter (+0x2F8, kept in 0-1) and handles the uber unlock at a full
  * meter.
  *
- * Does nothing in boost mode 3 (mBoostMode) or for a zero amount. A gain first calls a BE stat getter
+ * Does nothing in kBOOST_Off (mBoostMode) or for a zero amount. A gain first calls a BE stat getter
  * (cBEStatInterface_getTrickAttrib, result unused) and is dropped unless @p mask shares a bit with mBoostSourceMask. It
  * notifies the audio system (cSSXAudio_BoostBar), then clamps. A gain that fills the meter with uber enabled
- * (mUberFlags) shows HUD message 5 when mUberTimer is 0, raises an mUberLevel of 0 or less by one and, at
- * levels 1-9, makes mUberTimer at least 20; a loss below level 10 stops mUberTimer.
+ * (mUberFlags) shows HUD message 5 when mUberTimer is 0, raises an mUberLevel of 0 or less by one and, at levels 1-9,
+ * makes mUberTimer at least 20; a loss below eUS_SuperUberMax stops mUberTimer.
  *
  * @param mask  boost source flags (On Tour powerSourceFlags), tested against mBoostSourceMask for a gain
  * @param amt  amount to add, negative to drain (On Tour powerUp)
  */
 void cRider::flagEventBoostPowerUp(int mask, float amt)
 {
-    if (mBoostMode == 3)
+    if (mBoostMode == kBOOST_Off)
         return;
     float floatZero = 0.0f;
     if (amt == floatZero)
@@ -1336,7 +1340,7 @@ void cRider::flagEventBoostPowerUp(int mask, float amt)
             mUberTimer = mUberTimer >? 20.0f;
         }
     }
-    else if (amt < 0.0f && mUberLevel < 10)
+    else if (amt < 0.0f && mUberLevel < eUS_SuperUberMax)
     {
         mUberTimer = 0.0f;
     }
@@ -1516,9 +1520,9 @@ static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMod
 /**
  * Handles a track-path event the rider reached: the finish line ends its race, a chapter marker tags the replay.
  *
- * A finish event (type 1) counts when the game mode (cBENewRaceInterface_newRace.cGameMode) is 0-3, or 5/6 with the
- * game-mode manager's +0x98 set (On Tour isLastHeat), or the location is 1 or 5-13, or a game path is set; then a rider
- * not yet past the line (mFinishTime < 0) gets cRider_doFinishEvent. A chapter event (type 11) calls
+ * A finish event (PE_FinishLine) counts when the game mode (cBENewRaceInterface_newRace.cGameMode) is 0-3, or 5/6 with
+ * the game-mode manager's +0x98 set (On Tour isLastHeat), or the location is 1 or 5-13, or a game path is set; then a
+ * rider not yet past the line (mFinishTime < 0) gets cRider_doFinishEvent. A chapter event (PE_Chapter) calls
  * cReplay_eventChapter on the game's replay with the rider's id (cBeing vtable slot 7) and the event's Arg.
  *
  * @p isPrev and @p isCur (On Tour isPrev/isCur) are not read.
@@ -1540,13 +1544,13 @@ void cRider::flagEventPathEvent(tPathEventNode* pathEvent, int isPrev, int isCur
         || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
         || cBENewRaceInterface_newRace.cGamePath != 0)
         shouldTriggerFinishLine = 1;
-    if (pathEvent->Type == 1 && shouldTriggerFinishLine != 0)
+    if (pathEvent->Type == PE_FinishLine && shouldTriggerFinishLine != 0)
     {
         int ok = mFinishTime >= 0.0f;
         if (!ok)
             cRider_doFinishEvent(this);
     }
-    if (pathEvent->Type == 11)
+    if (pathEvent->Type == PE_Chapter)
     {
         void* tgt = SSXApp->Game->Replay;
         cReplay_eventChapter(tgt, getAIIndex(), pathEvent->Arg);
@@ -1610,7 +1614,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
 /**
- * Handles a collected multiplier icon: in motion states 1 and 4 hands it to the rider metrix and plays its sound.
+ * Handles a collected multiplier icon: in MS_Air and MS_Railslide hands it to the rider metrix and plays its sound.
  *
  * In those states it calls cRider_flagEventBoostPowerUp with source mask 4 and the boost returned by cRiderMetrix_evCollectMultiplier (the
  * metrix's multiplier handler, which returns 0), then cSSXAudio_PlayIconSound with type 2 (multiplier) and @p value. A
@@ -1620,7 +1624,7 @@ extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
  */
 extern "C" void cRider_flagEventTrickMultiplier(cRider* self, float value)
 {
-    if (cRider_getMotionState(self) == 1 || cRider_getMotionState(self) == 4)
+    if (cRider_getMotionState(self) == MS_Air || cRider_getMotionState(self) == MS_Railslide)
     {
         self->flagEventBoostPowerUp(4, cRiderMetrix_evCollectMultiplier((char*)self->mMetrix, value));
         cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 2, self, value);
@@ -1667,10 +1671,11 @@ extern "C" void cSSXAudio_Land(void* mgr, void* rider, float v);
 /**
  * Handles the rider landing: scores the trick, updates the uber meter, reacts, boosts and plays the landing sound.
  *
- * Takes the metrix totals before and after cRiderMetrix_evLand (On Tour cRiderMetrix::evLand(riding switch = IsRidingFakie !=
- * IsGoofyStance, @p isPipe, @p rsm, @p pressMode)), whose result is the boost earned, and logs the landing to the replay
- * (cReplay_eventLand with mAIIndex and the metrix stats at +0xFC). Uber tricks landed (Totals.NumUberTricks, metrix
- * +0x114, grew) raise mUberLevel by that many, capped at 10; reaching 10 sets mUberTimer to 60.
+ * Takes the metrix totals before and after cRiderMetrix_evLand (On Tour cRiderMetrix::evLand(riding switch =
+ * IsRidingFakie != IsGoofyStance, @p isPipe, @p rsm, @p pressMode)), whose result is the boost earned, and logs the
+ * landing to the replay (cReplay_eventLand with mAIIndex and the metrix stats at +0xFC). Uber tricks landed
+ * (Totals.NumUberTricks, metrix +0x114, grew) raise mUberLevel by that many, capped at eUS_SuperUberMax; reaching it
+ * sets mUberTimer to 60.
  *
  * func_00111AA0 (rider-handler landing effect) gets the intersection's position/normal, its surface (+0x4C) and @p speed. A
  * local rider (cBeing vtable slot 8, isHuman) gets a reaction through cRider_flagEventReaction: 3 (EarnComboPos) when the
@@ -1700,13 +1705,13 @@ void cRider::flagEventLand(int isPipe, int rsm, int pressMode, tIntersectInfo* e
     if (prevNumUber < curNumUber)
     {
         int uberLevel = mUberLevel;
-        if (uberLevel < 10)
+        if (uberLevel < eUS_SuperUberMax)
         {
             int numUber = curNumUber - prevNumUber;
-            int lim = 10 - uberLevel;
+            int lim = eUS_SuperUberMax - uberLevel;
             int nv = uberLevel + (numUber < lim ? numUber : lim);
             mUberLevel = nv;
-            if (nv == 10)
+            if (nv == eUS_SuperUberMax)
                 mUberTimer = 60.0f;
         }
     }
@@ -1916,14 +1921,15 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  * Puts the rider into a wipeout: rumble, scoring, sounds, impact effect, then the wipeout animation and states.
  *
  * Rumbles (cBeing vtable slot 17, vibrationBump) with the hit strength (+0x30 of @p evt) * 5, takes the boost from
- * cRiderMetrix_evWipeout (On Tour cRiderMetrix::evWipeout(@p isPunch)) and passes it to cRider_flagEventBoostPowerUp(1), plays the
- * hit (cSSXAudio_WipeoutHit), a grunt and the wipeout sound (cSSXAudio_Wipeout), and spawns the impact effect (func_00111AA0) with
- * surface @p surf. Control state 13 is set first; a rider sliding sideways on a rail (RailslideMode 3 or 4) is turned +/-90
- * degrees about its up axis and its anim heading offset follows.
+ * cRiderMetrix_evWipeout (On Tour cRiderMetrix::evWipeout(@p isPunch)) and passes it to
+ * cRider_flagEventBoostPowerUp(1), plays the hit (cSSXAudio_WipeoutHit), a grunt and the wipeout sound
+ * (cSSXAudio_Wipeout), and spawns the impact effect (func_00111AA0) with surface @p surf. CS_Void is set first; a rider
+ * sliding sideways on a rail (RailslideMode kRSM_FS or kRSM_BS) is turned +/-90 degrees about its up axis and its anim
+ * heading offset follows.
  *
  * It then clears RailslideMode, channels 0, 2 and 8 and PressMode, poses the first frame of @p anim
  * (cRiderAnimBase_getAIAnimFrame, func_0030ECD8), moves the rider so that pose's hip bone (mBoneHips) stays where it
- * is, stores the inverse as the anim orientation offset, plays @p anim and sets control state 8 and motion state 2.
+ * is, stores the inverse as the anim orientation offset, plays @p anim and sets CS_Wipeout and MS_Wipeout.
  *
  * @param anim  the wipeout animation (On Tour tAIAnimID wipeoutAnim)
  * @param isPunch  On Tour isPunch: the wipeout came from a punch
@@ -1940,19 +1946,19 @@ void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt
     cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), this, 0, 0);
     cSSXAudio_Wipeout(cAudioInterface_bxAudio(), this, amt);
     func_00111AA0_impl(mRiderHandler, evt, &evt->Reflect, surf, evt->Vel);
-    cRider_setControlState_EB30(this, 13);
-    if (RailslideMode == 3) {
+    cRider_setControlState_EB30(this, CS_Void);
+    if (RailslideMode == kRSM_FS) {
         float ang = 1.5707963705062866f;
         cRider_rotateOrientation(this, GetUp_EB30(this), ang);
         cRiderAnimBase_changeHeadingOffset(mRiderAnim, ang);
         ResetAnimOrientation_EB30((char*)mRiderAnim, 0.0f);
-    } else if (RailslideMode == 4) {
+    } else if (RailslideMode == kRSM_BS) {
         float ang = -1.5707963705062866f;
         cRider_rotateOrientation(this, GetUp_EB30(this), ang);
         cRiderAnimBase_changeHeadingOffset(mRiderAnim, ang);
         ResetAnimOrientation_EB30((char*)mRiderAnim, 0.0f);
     }
-    RailslideMode = 0;
+    RailslideMode = kRSM_None;
     cRider_verifyRailslideModeDEBUG(this);
     cRider_doLeanPoseAdjust(this, &mPosition);
     cRider_updateOrientationImplicit(this);
@@ -1965,7 +1971,7 @@ void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt
     mSlewed[8].target = 0.0f;
     mSlewed[8].cur = 0.0f;
     mSlewed[8].rate = 0.0f;
-    PressMode = 0;
+    PressMode = kPM_None;
     char buf[80];
     cRiderAnimBase_getAIAnimFrame(buf, mRiderAnim, anim, D_004A4C08.a, mSlewed[0].target);
     sXf_EB30 animPose;
@@ -1982,8 +1988,8 @@ void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt
     sXf_EB30 w = Invert_EB30(y);
     cRiderAnimBase_changeOrientationOffset(mRiderAnim, &w);
     cRiderAnimBase_play(mRiderAnim, anim, 0, -1.0f);
-    cRider_setControlState_EB30(this, 8);
-    cRider_setMotionState_EB30(this, 2);
+    cRider_setControlState_EB30(this, CS_Wipeout);
+    cRider_setMotionState_EB30(this, MS_Wipeout);
 }
 #endif
 
@@ -2325,8 +2331,8 @@ extern "C" int cBEAggressionInterface_getAggression(void* self, int a, int b);
  *
  * Skipped when NumberOfComputersAllocated is 0. For each rider i of NumberOfRidersAllocated: clears its chase flag
  * (PissedOff) and target (PissedAIIndex = -1), then for every other rider j stores cBEAggressionInterface_getAggression
- * (On Tour cBEAggressionInterface::getAggression(i, j)) in PissedOffType and, at level 4 (kAGG_CHASE), sets the chase
- * flag and target j. Only the last j's level survives in PissedOffType (likely an oversight).
+ * (On Tour cBEAggressionInterface::getAggression(i, j)) in PissedOffType and, at kAGG_CHASE, sets the chase flag and
+ * target j. Only the last j's level survives in PissedOffType (likely an oversight).
  */
 void cAI::UpdateAggression()
 {
@@ -2339,7 +2345,7 @@ void cAI::UpdateAggression()
         {
             if (i == j) continue;
             int curAgg = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), i, j);
-            if (curAgg == 4)
+            if (curAgg == kAGG_CHASE)
             {
                 Riders[i]->PissedOff = 1;
                 Riders[i]->PissedAIIndex = j;
@@ -2362,18 +2368,18 @@ float cRider_getDistanceLeft(void* self);
 /**
  * Re-ranks the riders by the AI's RaceRankType and tells the audio system about each change of place.
  *
- * Does nothing for rank type 0 or before cAI_isAILoadedAndReady. Type 1 ranks racers by -(distance left + 20 x their
- * current place RaceRanking), so a rider must gain 20 units to pass; type 2 ranks by the metrix's +0x198 points. Keys are
- * sorted largest first (SORT_shell). For each new place that differs from RaceRanking, cSSXAudio_ChangePosition gets the
- * rider, the riders after and before it and the old and new place; the place is stored in RaceRanking. Actors get key
- * 0xFFFF in type 1, which sorts them ahead of every racer, but -0xFFFF in type 2. The two branches on mFinishTime >= 10
- * compute the same key.
+ * Does nothing for AI_RR_None or before cAI_isAILoadedAndReady. AI_RR_DistToFinish ranks racers by -(distance left + 20
+ * x their current place RaceRanking), so a rider must gain 20 units to pass; AI_RR_TotalPoints ranks by the metrix's
+ * +0x198 points. Keys are sorted largest first (SORT_shell). For each new place that differs from RaceRanking,
+ * cSSXAudio_ChangePosition gets the rider, the riders after and before it and the old and new place; the place is
+ * stored in RaceRanking. Actors get key 0xFFFF in AI_RR_DistToFinish, which sorts them ahead of every racer, but
+ * -0xFFFF in AI_RR_TotalPoints. The two branches on mFinishTime >= 10 compute the same key.
  *
  */
 void cAI::UpdateRankingPlacement()
 {
     cAI* self = this;
-    if (self->RaceRankType == 0)
+    if (self->RaceRankType == AI_RR_None)
         return;
     if (cAI_isAILoadedAndReady(self) == 0)
         return;
@@ -2386,7 +2392,7 @@ void cAI::UpdateRankingPlacement()
         cRider* rider = self->Riders[i];
         switch (self->RaceRankType)
         {
-        case 1:
+        case AI_RR_DistToFinish:
             if (rider->mIsActor)
                 keys[i] = 0xFFFF;
             else
@@ -2398,7 +2404,7 @@ void cAI::UpdateRankingPlacement()
                     keys[i] = -(int)(rider->getDistanceLeft() + (float)(rider->RaceRanking * 20));
             }
             break;
-        case 2:
+        case AI_RR_TotalPoints:
             if (rider->mIsActor)
                 keys[i] = -0xFFFF;
             else
@@ -2606,26 +2612,26 @@ extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 /**
  * Tells the current motion part (by MotionState) that it is losing focus, through its loseFocus function.
  *
- * Ground, air, wipeout, railslide and handplant have one; the static motion (3) and other values do nothing.
+ * Ground, air, wipeout, railslide and handplant have one; the static motion (MS_Static) and other values do nothing.
  *
  * @param a1  the motion state being switched to, passed on to loseFocus (On Tour next)
  */
 void cRiderHandler::loseMotionState(int a1)
 {
     switch (MotionState) {
-    case 0:
+    case MS_Ground:
         cGroundMotion_loseFocus(this, a1);
         break;
-    case 1:
+    case MS_Air:
         cAirMotion_loseFocus_a1((char*)&AirMotion, a1);
         break;
-    case 2:
+    case MS_Wipeout:
         cWipeoutMotion_loseFocus_a1((char*)&WipeoutMotion, a1);
         break;
-    case 4:
+    case MS_Railslide:
         cRailslideMotion_loseFocus((char*)&RailslideMotion, a1);
         break;
-    case 5:
+    case MS_Handplant:
         cHandplantMotion_loseFocus((char*)&HandplantMotion, a1);
         break;
     }
@@ -2652,26 +2658,26 @@ extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
  * Tells the new current motion part (by MotionState) that it has gained focus, through its gainFocus
  * function.
  *
- * Ground, air, wipeout, railslide and handplant have one; the static motion (3) and other values do nothing.
+ * Ground, air, wipeout, railslide and handplant have one; the static motion (MS_Static) and other values do nothing.
  *
  * @param prev  the motion state being left, passed on to gainFocus
  */
 void cRiderHandler::gainMotionState(int prev)
 {
     switch (MotionState) {
-    case 0:
+    case MS_Ground:
         cGroundMotion_gainFocus(this, prev);
         break;
-    case 1:
+    case MS_Air:
         cAirMotion_gainFocus((char*)&AirMotion, prev);
         break;
-    case 2:
+    case MS_Wipeout:
         cWipeoutMotion_gainFocus((char*)&WipeoutMotion, prev);
         break;
-    case 4:
+    case MS_Railslide:
         cRailslideMotion_gainFocus((char*)&RailslideMotion, prev);
         break;
-    case 5:
+    case MS_Handplant:
         cHandplantMotion_gainFocus((char*)&HandplantMotion, prev);
         break;
     }
@@ -2695,22 +2701,22 @@ extern "C" void cHandplantMotion_step(void* motion);
 void cRiderHandler::stepMotion()
 {
     switch (MotionState) {
-    case 0:
+    case MS_Ground:
         cGroundMotion_step(this);
         break;
-    case 1:
+    case MS_Air:
         cAirMotion_step((char*)&AirMotion);
         break;
-    case 2:
+    case MS_Wipeout:
         cWipeoutMotion_step((char*)&WipeoutMotion);
         break;
-    case 3:
+    case MS_Static:
         cStaticMotion_step((char*)&StaticMotion);
         break;
-    case 4:
+    case MS_Railslide:
         cRailslideMotion_step((char*)&RailslideMotion);
         break;
-    case 5:
+    case MS_Handplant:
         cHandplantMotion_step((char*)&HandplantMotion);
         break;
     }
@@ -2734,22 +2740,22 @@ void cHandplantMotion_resolve(void* motion);
 void cRiderHandler::resolveMotion()
 {
     switch (MotionState) {
-    case 0:
+    case MS_Ground:
         cGroundMotion_resolve(this);
         break;
-    case 1:
+    case MS_Air:
         cAirMotion_resolve((char*)&AirMotion);
         break;
-    case 2:
+    case MS_Wipeout:
         cWipeoutMotion_resolve((char*)&WipeoutMotion);
         break;
-    case 3:
+    case MS_Static:
         cStaticMotion_resolve((char*)&StaticMotion);
         break;
-    case 4:
+    case MS_Railslide:
         cRailslideMotion_resolve((char*)&RailslideMotion);
         break;
-    case 5:
+    case MS_Handplant:
         cHandplantMotion_resolve((char*)&HandplantMotion);
         break;
     }
@@ -2806,31 +2812,31 @@ extern "C" void cHandplantControl_loseFocus(void* m, int a1);
 void cRiderHandler::loseControlState(int a1)
 {
     switch (ControlState) {
-    case 0:
+    case CS_Cruise:
         cCruiseControl_loseFocus((char*)&CruiseControl, a1);
         break;
-    case 1:
+    case CS_BoardPress:
         cBoardPressControl_loseFocus((char*)&BoardPressControl, a1);
         break;
-    case 2:
+    case CS_Prewind:
         cPrewindControl_loseFocus_a1((char*)&PrewindControl, a1);
         break;
-    case 4:
+    case CS_NaturalAir:
         cNaturalAirControl_loseFocus((char*)&NaturalAirControl, a1);
         break;
-    case 5:
+    case CS_Spin:
         cSpinControl_loseFocus((char*)&SpinControl, a1);
         break;
-    case 7:
+    case CS_Railslide:
         cRailslideControl_loseFocus((char*)&RailslideControl, a1);
         break;
-    case 8:
+    case CS_Wipeout:
         cWipeoutControl_loseFocus((char*)&WipeoutControl, a1);
         break;
-    case 11:
+    case CS_Handplant:
         cHandplantControl_loseFocus((char*)&HandplantControl, a1);
         break;
-    case 3: case 6: case 9: case 10: case 12: case 13:
+    case CS_Bump: case CS_Gate: case CS_Reset: case CS_FinishLine: case CS_UberGrind: case CS_Void:
         break;
     }
 }
@@ -2856,7 +2862,7 @@ extern "C" void cUberGrindControl_gainFocus(void* p, int a1);
  * Tells the new current control part (by ControlState) that it has gained focus, through its gainFocus
  * function.
  *
- * Every control state but bump (3) and void (13) has one.
+ * Every control state but bump (CS_Bump) and void (CS_Void) has one.
  *
  * @param prev  the control state being left, passed on to gainFocus
  */
@@ -2864,44 +2870,44 @@ extern "C" void cUberGrindControl_gainFocus(void* p, int a1);
 void cRiderHandler::gainControlState(int prev)
 {
     switch (ControlState) {
-    case 0:
+    case CS_Cruise:
         cCruiseControl_gainFocus((char*)&CruiseControl);
         break;
-    case 1:
+    case CS_BoardPress:
         cBoardPressControl_gainFocus((char*)&BoardPressControl);
         break;
-    case 2:
+    case CS_Prewind:
         cPrewindControl_gainFocus((char*)&PrewindControl, prev);
         break;
-    case 4:
+    case CS_NaturalAir:
         cNaturalAirControl_gainFocus((char*)&NaturalAirControl, prev);
         break;
-    case 5:
+    case CS_Spin:
         cSpinControl_gainFocus((char*)&SpinControl, prev);
         break;
-    case 6:
+    case CS_Gate:
         cGateControl_gainFocus((char*)&GateControl, prev);
         break;
-    case 7:
+    case CS_Railslide:
         cRailslideControl_gainFocus((char*)&RailslideControl, prev);
         break;
-    case 8:
+    case CS_Wipeout:
         cWipeoutControl_gainFocus((char*)&WipeoutControl, prev);
         break;
-    case 9:
+    case CS_Reset:
         cResetControl_gainFocus((char*)&ResetControl, prev);
         break;
-    case 10:
+    case CS_FinishLine:
         cFinishLineControl_gainFocus((char*)&FinishLineControl, prev);
         break;
-    case 11:
+    case CS_Handplant:
         cHandplantControl_gainFocus((char*)&HandplantControl, prev);
         break;
-    case 12:
+    case CS_UberGrind:
         cUberGrindControl_gainFocus((char*)&UberGrindControl, prev);
         break;
-    case 3:
-    case 13:
+    case CS_Bump:
+    case CS_Void:
         break;
     }
 }
@@ -2928,7 +2934,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
  * Feeds this frame's control command to the current control part (by ControlState) through its update
  * function.
  *
- * States 0-12 each have one; the void state (13) does nothing.
+ * States CS_Cruise .. CS_UberGrind each have one; the void state (CS_Void) does nothing.
  *
  * @param cmd  the control command (On Tour const tControlCmd&), passed on to the part's update
  */
@@ -2936,46 +2942,46 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
 void cRiderHandler::updateControl(tControlCmd* cmd)
 {
     switch (ControlState) {
-    case 0:
+    case CS_Cruise:
         cCruiseControl_update(&CruiseControl, &cmd->CruiseCmd);
         break;
-    case 1:
+    case CS_BoardPress:
         cBoardPressControl_update(&BoardPressControl, &cmd->BoardPressCmd);
         break;
-    case 2:
+    case CS_Prewind:
         cPrewindControl_update(&PrewindControl, &cmd->PrewindCmd);
         break;
-    case 3:
+    case CS_Bump:
         cBumpControl_update(&BumpControl, &cmd->BumpCmd);
         break;
-    case 4:
+    case CS_NaturalAir:
         cNaturalAirControl_update(&NaturalAirControl, &cmd->NaturalAirCmd);
         break;
-    case 5:
+    case CS_Spin:
         cSpinControl_update(&SpinControl, &cmd->SpinCmd);
         break;
-    case 6:
+    case CS_Gate:
         cGateControl_update(&GateControl, &cmd->GateCmd);
         break;
-    case 7:
+    case CS_Railslide:
         cRailslideControl_update(&RailslideControl, &cmd->RailslideCmd);
         break;
-    case 8:
+    case CS_Wipeout:
         cWipeoutControl_update(&WipeoutControl, &cmd->WipeoutCmd);
         break;
-    case 9:
+    case CS_Reset:
         cResetControl_update(&ResetControl, &cmd->ResetCmd);
         break;
-    case 10:
+    case CS_FinishLine:
         cFinishLineControl_update(&FinishLineControl, &cmd->FinishLineCmd);
         break;
-    case 11:
+    case CS_Handplant:
         cHandplantControl_update(&HandplantControl, &cmd->HandplantCmd);
         break;
-    case 12:
+    case CS_UberGrind:
         cUberGrindControl_update(&UberGrindControl, &cmd->UberGrindCmd);
         break;
-    case 13:
+    case CS_Void:
         break;
     }
 }
@@ -4002,10 +4008,10 @@ static inline float vu0Dot_112A50(const t4Vector& a, const t4Vector& b)
  * Picks a better AI path near the rider and moves the rider onto it.
  *
  * The probe point is the rider's position moved 796 along its velocity (or the position when still). Up to 6 nearby AI
- * paths come from cPathSys_getNearAIPaths (On Tour cPathSys::getNearAIPaths); a path is skipped when it is the current one and @p
- * keep is set, or when the rider is within 200 of its end. A rider whose vtable slot 9 (isComputer) returns 1 picks the
- * path with the highest slot-20 score (cComputer_scorePath; cPlayer_scorePath returns 0), others the one whose near and
- * look-ahead points are closest. A winner equal to the current path counts as no change.
+ * paths come from cPathSys_getNearAIPaths (On Tour cPathSys::getNearAIPaths); a path is skipped when it is the current
+ * one and @p keep is set, or when the rider is within 200 of its end. A rider whose vtable slot 9 (isComputer) returns
+ * true picks the path with the highest slot-20 score (cComputer_scorePath; cPlayer_scorePath returns 0), others the one
+ * whose near and look-ahead points are closest. A winner equal to the current path counts as no change.
  *
  * On a change: the AI path (+0xAB8) is replaced, mAIPathHint reset, and the path position (+0x4C4 and +0x4C0), closest
  * point (+0x490), distance off the path (+0x4C8) and aim point (+0x4A0, 796 ahead) are recomputed.
@@ -4039,7 +4045,7 @@ void cRider::checkAIPathSwitch(int keep)
         t4Vector aheadDelta = vu0Sub_112A50(pos, cPath_getPathPos_112A50(paths[i], 0, nearParam + 796.0f));
         t4Vector nearDelta = vu0Sub_112A50(*(&mPosition), out);
         float dist = vu0Dot_112A50(nearDelta, nearDelta) + vu0Dot_112A50(aheadDelta, aheadDelta);
-        if (isComputer() == 1) {
+        if (isComputer() == true) {
             sVEntry<float(void*, void*)>* vtable = (sVEntry<float(void*, void*)>*)VPTR_AT(this, sizeof(cRiderState));
             sVEntry<float(void*, void*)>* vf = &vtable[20];
             dist = vf->fn(vthis(this, *vf), paths[i]);
