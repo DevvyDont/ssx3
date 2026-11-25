@@ -4169,6 +4169,8 @@ void cRider::switchToResetPath()
 }
 #endif
 
+extern "C" void cRider_flagEventPathCheckpoint(cRider* self, int* checkpoint);
+
 //100%
 INCLUDE_ASM("ai/computer", cRider_checkTrackPathEvents);
 #ifdef SKIP_ASM
@@ -4196,9 +4198,9 @@ extern char gPaths[];
  * @param pathPos  receives the nearest point on the path
  */
 // cRider::checkTrackPathEvents(float& pathDistXY, float& pathParam, t4Vector& pathPos) (On Tour name)
-void cRider::checkTrackPathEvents(float* pathDistXY, float* pathParam, t4Vector* pathPos)
+extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, float* pathParam, t4Vector* pathPos)
 {
-    cRider* self = (cRider*)this;
+    cRider* self = (cRider*)vself;
     float trackParam = cPath_intersectPath1_2FB0(self->TrackPath, &self->mPosition, pathPos, pathDistXY, self->mTrackPathHint, 1);
     *pathParam = trackParam;
     cTrackPath* track = self->TrackPath;
@@ -4215,7 +4217,7 @@ void cRider::checkTrackPathEvents(float* pathDistXY, float* pathParam, t4Vector*
             if (dist == 0.0f || dist < self->mDistToFinish)
                 break;
             if (cp->DistanceLeft < self->MinDistanceLeft)
-                self->flagEventPathCheckpoint((int*)cp);
+                cRider_flagEventPathCheckpoint(self, (int*)cp);
         }
         cTrackPath* curTrack = self->TrackPath;
         sVEntry<int(void*, float, float, void*, int)>* vt = (sVEntry<int (void*, float, float, void*, int)>*)curTrack->mVtbl;

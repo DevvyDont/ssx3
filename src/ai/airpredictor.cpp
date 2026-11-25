@@ -43,6 +43,8 @@ void cAirPredictor::reset()
 }
 #endif
 
+extern "C" void cAirPredictor_simStep(cAirPredictor* vself);
+
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_simStep);
 #ifdef SKIP_ASM
@@ -200,9 +202,9 @@ static inline void vu0AddEq_3200(t4Vector& a, const t4Vector& b)
  * @param vself  the cAirPredictor (this)
  */
 // cAirPredictor::simStep (On Tour names; the loop is a do-while in SSX 3).
-void cAirPredictor::simStep()
+extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
 {
-    cAirPredictor* self = this;
+    cAirPredictor* self = vself;
     t4Vector prevPos = *(&self->CurSimPos);
     t4Vector prevVel = *(&self->CurSimVel);
     t4Vector uPrevVel = vu0Normalize_3200(*(&self->CurSimVel));
