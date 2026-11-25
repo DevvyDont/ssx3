@@ -35,6 +35,17 @@ struct cScriptEntity {
     cScriptPlayerEntity* mpEntity; // 0x8 [O]; [P] GetPlayer (lw); [R] ctor 0; [U] OnInSeqLock stores the entity,
                                    //      OnInSeqRelease clears it; IsPlaying tests it; DetachEntity / PauseEntityScript /
                                    //      ResumeEntityScript / cScriptEntity_GetPlayer read it
+
+    // Methods ([O] On Tour's names), each bound to its retail symbol by an asm label. The virtual ones (OnInSeqLock,
+    // OnInSeqRelease) are declared as plain members, since the layout above is flat; retail's C declares only the
+    // parameters they use.
+    cScriptEntity() __asm__("cScriptEntity_cScriptEntity__FPv");
+    bool IsPlaying() __asm__("cScriptEntity_IsPlaying__FPv");
+    void DetachEntity() __asm__("cScriptEntity_DetachEntity");
+    void OnInSeqLock(cScriptPlayerEntity* pEntity) __asm__("cScriptEntity_OnInSeqLock");
+    void OnInSeqRelease() __asm__("cScriptEntity_OnInSeqRelease");
+    void PauseEntityScript() __asm__("cScriptEntity_PauseEntityScript");
+    void ResumeEntityScript() __asm__("cScriptEntity_ResumeEntityScript");
 };
 
 CHECK_OFFSET(cScriptEntity, mVtbl, 0x0);

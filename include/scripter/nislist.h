@@ -69,6 +69,31 @@ CHECK_OFFSET(tVideoDB, unk_014, 0x14);
 CHECK_OFFSET(tVideoDB, unk_018, 0x18);
 CHECK_SIZE(tVideoDB, 0x1C);
 
+// The script engine's NIS lists (cSSXScriptEngine::mPlayingNISList; keNISList_Num: none playing). [O] eNISList.
+enum eNISList {
+    keNISList_Main = 0,
+    keNISList_AuxTransition = 1,
+    keNISList_Num = 2
+};
+
+// A NIS list's load / play state (tNISList::mState, tNISList_GetState). [O] eNISListState.
+enum eNISListState {
+    keNISListState_Idle = 0,
+    keNISListState_Loading = 1,
+    keNISListState_Ready = 2,
+    keNISListState_Playing = 3
+};
+
+// A playing NIS list's playback state (tNISList_GetPlayState). [O] eNISListStatePlay.
+enum eNISListStatePlay {
+    keNISListStatePlay_Stopped = 0,
+    keNISListStatePlay_PlayOnce = 1,
+    keNISListStatePlay_PlayLoop = 2,
+    keNISListStatePlay_Paused = 3,
+    keNISListStatePlay_GoingToNext = 4,
+    keNISListStatePlay_GoingToStop = 5
+};
+
 struct tNISList {
     cSSXScriptEngine* mpNISEngine;      // 0x000 [O]; [R] the ctor zeroes it, cSSXScriptEngine_Load stores the engine;
                                         //       [U] read by every method that calls the engine (e.g. DoSkip)

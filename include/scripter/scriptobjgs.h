@@ -46,6 +46,11 @@ struct cScriptObjGS {
                                         //      cScriptObject_OnEndObjectUse on self + 0xC
     void** mScriptObjectVtbl;           // 0x18 [R] D_00482318 (ctor and dtor); [P] the paired dtor stores it at 0x18 in
                                         //      both builds; the dtor runs cScriptObject__cScriptObject on +0xC
+
+    // Methods bound to their retail symbols by asm labels.
+    void OnEndObjectUse() __asm__("cScriptObjGS_OnEndObjectUse");
+    bool IsMatchingEntity(cScriptPlayerEntity* entity, int type) __asm__("cScriptObjGS_IsMatchingEntity");
+    void OnInSeqKeyEvent(void* entity) __asm__("cScriptObjGS_OnInSeqKeyEvent");
 };
 
 CHECK_OFFSET(cScriptObjGS, mVtbl, 0x00);

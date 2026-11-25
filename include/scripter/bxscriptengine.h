@@ -34,7 +34,32 @@
 
 struct cScriptObject;
 struct cScriptPlayerMain;
+struct cScriptPlayerEntity;
+struct cScriptEntity;
 struct cInSeq;
+
+// A play request's state (tScriptRequestInfo::state). [O] On Tour's enum eScriptRequestState, names and values.
+// [U] RequestAnimationScript: DataPending while the script data is missing, else Ready; PlayScript: Ready ->
+// PlayPending; OnInSeqPlay -> Playing; PauseScript -> Paused; ReleaseRequest returns Released; Reset just before
+// ResetRequest clears the record (to Invalid).
+enum eScriptRequestState {
+    keScriptRequestState_Invalid = 0,
+    keScriptRequestState_DataPending = 1,
+    keScriptRequestState_Ready = 2,
+    keScriptRequestState_PlayPending = 3,
+    keScriptRequestState_Playing = 4,
+    keScriptRequestState_Paused = 5,
+    keScriptRequestState_Released = 6,
+    keScriptRequestState_Reset = 7
+};
+
+// A play request's type (tScriptRequestInfo::requestType). [O] On Tour's enum eScriptRequestType (also
+// keScriptRequestType_Num = 2). [U] CreateNewRequest takes the first Unused request; every retail request is an
+// Animation one.
+enum eScriptRequestType {
+    keScriptRequestType_Unused = 0,
+    keScriptRequestType_Animation = 1
+};
 
 // One attached script (On Tour tBXScriptState, 8 bytes; mpScriptDatabase is an array of mScriptDatabaseSize of them).
 struct tBXScriptState {
@@ -64,7 +89,7 @@ union uScriptRequestData {
 struct tScriptRequestInfo {
     cScriptPlayerMain* pPlayer;     // 0x00 [O]; [R] ResetInstVars / ResetRequest zero it; [U] the cInSeq player
                                     //      (ForcePlayUpdate: cScriptPlayerMain_UpdateFrame(pPlayer))
-    int state;                      // 0x04 [O] eScriptRequestState: 0 Invalid, 1 DataPending, 2 Ready, 3 PlayPending,
+    eScriptRequestState state;      // 0x04 [O] eScriptRequestState: 0 Invalid, 1 DataPending, 2 Ready, 3 PlayPending,
                                     //      4 Playing, 5 Paused, 6 Released, 7 Reset; [U] PauseScript, ForcePlayUpdate
                                     //       ...
     uScriptRequestData data;        // 0x08 [O]; [R] CreateNewRequest sets -1 for an animation request
@@ -76,7 +101,7 @@ struct tScriptRequestInfo {
     float playSpeedRequest;         // 0x18 [O]; [U] SetScriptPlayRate keeps the rate here (swc1) while state is 1;
                                     //      [R] ResetInstVars / ResetRequest clear it (sw $0)
     int requestHandle;              // 0x1C [O]; [R] ResetInstVars sets it to the request's index
-    int requestType;                // 0x20 [O] eScriptRequestType: 0 Unused, 1 Animation; [U] CreateNewRequest takes
+    eScriptRequestType requestType; // 0x20 [O] eScriptRequestType: 0 Unused, 1 Animation; [U] CreateNewRequest takes
                                     //       the
                                     //      first request with 0 and stores the type; GetRequest returns 0 for 0
 };
@@ -121,6 +146,53 @@ struct cBXScriptEngine {
     char* mpInSeqHeap;                      // 0x2BC [O]; [R] SetupBXEngine: new (heapSize, "InSeqHeap"), handed to
                                             //       cInSeq
     tScriptRequestInfo mScriptRequests[16]; // 0x2C0 [O]; [R] ResetInstVars: 16 x 0x24
+
+    // Methods ([O] On Tour's names and parameters). Each keeps its retail symbol through an asm label; the virtual
+    // ones (the cInSeqComm hooks) are declared as plain members, since the layout above is flat.
+    void SetupBXEngine(int scriptDatabaseSize, int maxUniqueAnimPlayers, int heapSize)
+        __asm__("cBXScriptEngine_SetupBXEngine");
+    void PurgeBXEngine() __asm__("cBXScriptEngine_PurgeBXEngine");
+    void Update() __asm__("cBXScriptEngine_Update");
+    bool AttachScript(void* pScriptData, int scriptIndex) __asm__("cBXScriptEngine_AttachScript");
+    void* DetachScript(int scriptIndex) __asm__("cBXScriptEngine_DetachScript");
+    int RequestAnimationScript(int scriptIndex, void* pUserData) __asm__("cBXScriptEngine_RequestAnimationScript");
+    eScriptRequestState PlayScript(int requestHandle, int autoRecycle, int loop) __asm__("cBXScriptEngine_PlayScript");
+    void StopScript(int requestHandle) __asm__("cBXScriptEngine_StopScript");
+    void StopScriptAll() __asm__("cBXScriptEngine_StopScriptAll");
+    eScriptRequestState ReleaseRequest(int requestHandle) __asm__("cBXScriptEngine_ReleaseRequest");
+    void ReleaseRequestAll() __asm__("cBXScriptEngine_ReleaseRequestAll");
+    bool ForcePlayUpdate(int requestHandle) __asm__("cBXScriptEngine_ForcePlayUpdate");
+    bool SetScriptPlayRate(int requestHandle, float playRate) __asm__("cBXScriptEngine_SetScriptPlayRate");
+    void* SetRequestUserData(cScriptPlayerMain* pPlayer, void* pUserData) __asm__("cBXScriptEngine_SetRequestUserData");
+    void* SetRequestUserData(int requestHandle, void* pUserData) __asm__("cBXScriptEngine_SetRequestUserData1");
+    void PauseAll() __asm__("cBXScriptEngine_PauseAll");
+    void ResumeAll() __asm__("cBXScriptEngine_ResumeAll");
+    void PauseScript(int requestHandle) __asm__("cBXScriptEngine_PauseScript");
+    void ResumeScript(int requestHandle) __asm__("cBXScriptEngine_ResumeScript");
+    eScriptRequestState GetRequestState(int requestHandle) __asm__("cBXScriptEngine_GetRequestState");
+    int GetRequestScriptIndex(int requestHandle) __asm__("cBXScriptEngine_GetRequestScriptIndex");
+    bool IsRequestPlaybackEnding(int requestHandle) __asm__("cBXScriptEngine_IsRequestPlaybackEnding");
+    void* GetRequestUserData(cScriptPlayerMain* pPlayer) __asm__("cBXScriptEngine_GetRequestUserData__FPvT0");
+    void* GetRequestUserData(int requestHandle) __asm__("cBXScriptEngine_GetRequestUserData1");
+    int GetRequestHandleFromPlayer(cScriptPlayerMain* pPlayer)
+        __asm__("cBXScriptEngine_GetRequestHandleFromPlayer__FPvT0");
+    cScriptPlayerMain* GetRequestPlayerByReqHandle(int requestHandle)
+        __asm__("cBXScriptEngine_GetRequestPlayerByReqHandle");
+    cScriptPlayerMain* GetRequestPlayerByPlayerID(int playerID)
+        __asm__("cBXScriptEngine_GetRequestPlayerByPlayerID__FPv");
+    void OnInSeqPlay(cScriptPlayerMain* pPlayer) __asm__("cBXScriptEngine_OnInSeqPlay");
+    void OnInSeqStop(cScriptPlayerMain* pPlayer) __asm__("cBXScriptEngine_OnInSeqStop");
+    cScriptEntity* OnInSeqRequestEntityCommInterface(cScriptPlayerEntity* pEntity, int type)
+        __asm__("cBXScriptEngine_OnInSeqRequestEntityCommInterface");
+    void OnInSeqRemoteScriptPlayerReady(cScriptPlayerMain* pPlayer)
+        __asm__("cBXScriptEngine_OnInSeqRemoteScriptPlayerReady");
+    void OnInSeqRemoteScriptPlayerDiscard(cScriptPlayerMain* pPlayer)
+        __asm__("cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard");
+    void ResetInstVars() __asm__("cBXScriptEngine_ResetInstVars");
+    void UpdatePendingRequestState(tScriptRequestInfo* pRequest) __asm__("cBXScriptEngine_UpdatePendingRequestState");
+    tScriptRequestInfo* CreateNewRequest(eScriptRequestType requestType) __asm__("cBXScriptEngine_CreateNewRequest");
+    void ResetRequest(tScriptRequestInfo* pRequest) __asm__("cBXScriptEngine_ResetRequest__FPvT0");
+    tScriptRequestInfo* GetRequest(int requestHandle) __asm__("cBXScriptEngine_GetRequest");
 };
 
 CHECK_OFFSET(cBXScriptEngine, mpObjectDatabase, 0x000);

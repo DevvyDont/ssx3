@@ -23,24 +23,24 @@ extern char str_InSeq[];
 /**
  * Sets up the BX script engine: allocates the InSeq sequencer with its heap and an empty script database.
  *
- * Allocates @p size bytes of "InSeqHeap" (mpInSeqHeap), creates the 0x20-byte "InSeq" sequencer (mpInSeq)
- * over that heap with this engine's cInSeqComm interface (+0x2AC), and allocates and zeroes @p count 8-byte
- * "BXScriptDatabase" entries (mpScriptDatabase, count in mScriptDatabaseSize).
+ * Allocates @p heapSize bytes of "InSeqHeap" (mpInSeqHeap), creates the 0x20-byte "InSeq" sequencer (mpInSeq)
+ * over that heap with this engine's cInSeqComm interface (+0x2AC), and allocates and zeroes @p scriptDatabaseSize
+ * 8-byte "BXScriptDatabase" entries (mpScriptDatabase, count in mScriptDatabaseSize).
  *
- * @param count  number of script database entries (On Tour scriptDatabaseSize)
+ * @param scriptDatabaseSize  number of script database entries
  * @param maxUniqueAnimPlayers  passed to cInSeq_cInSeq() as its script limit (cInSeq's maxScripts)
- * @param size  InSeq heap size in bytes (On Tour heapSize)
+ * @param heapSize  InSeq heap size in bytes
  */
-extern "C" void cBXScriptEngine_SetupBXEngine(cBXScriptEngine* self, int count, int maxUniqueAnimPlayers, int size)
+void cBXScriptEngine::SetupBXEngine(int scriptDatabaseSize, int maxUniqueAnimPlayers, int heapSize)
 {
-    self->mpInSeqHeap = (char*)operator_new_tag(size, str_InSeqHeap, 0, 0);
-    self->mpInSeq = (cInSeq*)cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
-        self->mpInSeqHeap, size, maxUniqueAnimPlayers, (char*)&self->mInSeqCommVtbl);
-    self->mScriptDatabaseSize = count;
-    self->mpScriptDatabase = (tBXScriptState*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0);
-    for (int i = 0; i < self->mScriptDatabaseSize; i++) {
-        self->mpScriptDatabase[i].pScriptData = 0;
-        self->mpScriptDatabase[i].numLocks = 0;
+    mpInSeqHeap = (char*)operator_new_tag(heapSize, str_InSeqHeap, 0, 0);
+    mpInSeq = (cInSeq*)cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
+        mpInSeqHeap, heapSize, maxUniqueAnimPlayers, (char*)&mInSeqCommVtbl);
+    mScriptDatabaseSize = scriptDatabaseSize;
+    mpScriptDatabase = (tBXScriptState*)operator_new_tag(scriptDatabaseSize * 8, str_BXScriptDatabase, 0, 0);
+    for (int i = 0; i < mScriptDatabaseSize; i++) {
+        mpScriptDatabase[i].pScriptData = 0;
+        mpScriptDatabase[i].numLocks = 0;
     }
 }
 #endif
@@ -48,12 +48,6 @@ extern "C" void cBXScriptEngine_SetupBXEngine(cBXScriptEngine* self, int count, 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PurgeBXEngine);
 #ifdef SKIP_ASM
-struct sScriptEngine282390;
-struct sScriptEngine2823F0;
-struct sScriptEngine2B8;
-extern "C" void cBXScriptEngine_StopScriptAll(cBXScriptEngine* self);
-extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self);
-extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self);
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
 extern "C" void cInSeq__cInSeq(void* obj, int flags);
 void cMemMan_free(void*);
@@ -61,30 +55,30 @@ void cMemMan_free(void*);
 /**
  * Tears down the BX script engine's script database, InSeq sequencer and InSeq heap.
  *
- * Does nothing unless mpScriptDatabase was allocated (cBXScriptEngine_SetupBXEngine). Otherwise it stops every
- * script, releases every script request, removes every database object, frees the database and zeroes its size,
- * destroys mpInSeq (destructor flags 3), frees mpInSeqHeap, and finally calls cBXScriptEngine_ResetInstVars().
+ * Does nothing unless mpScriptDatabase was allocated (SetupBXEngine). Otherwise it stops every script, releases every
+ * script request, removes every database object, frees the database and zeroes its size, destroys mpInSeq
+ * (destructor flags 3), frees mpInSeqHeap, and finally calls ResetInstVars().
  */
-extern "C" void cBXScriptEngine_PurgeBXEngine(cBXScriptEngine* self)
+void cBXScriptEngine::PurgeBXEngine()
 {
-    if (self->mpScriptDatabase != 0) {
-        cBXScriptEngine_StopScriptAll(self);
-        cBXScriptEngine_ReleaseRequestAll(self);
-        cScriptDatabaseObject_RemoveObjectAll(self);
-        if (self->mpScriptDatabase != 0) {
-            cMemMan_free(self->mpScriptDatabase);
+    if (mpScriptDatabase != 0) {
+        StopScriptAll();
+        ReleaseRequestAll();
+        cScriptDatabaseObject_RemoveObjectAll(this);
+        if (mpScriptDatabase != 0) {
+            cMemMan_free(mpScriptDatabase);
         }
-        self->mpScriptDatabase = 0;
-        self->mScriptDatabaseSize = 0;
-        if (self->mpInSeq != 0) {
-            cInSeq__cInSeq(self->mpInSeq, 3);
+        mpScriptDatabase = 0;
+        mScriptDatabaseSize = 0;
+        if (mpInSeq != 0) {
+            cInSeq__cInSeq(mpInSeq, 3);
         }
-        self->mpInSeq = 0;
-        if (self->mpInSeqHeap != 0) {
-            cMemMan_free(self->mpInSeqHeap);
+        mpInSeq = 0;
+        if (mpInSeqHeap != 0) {
+            cMemMan_free(mpInSeqHeap);
         }
-        self->mpInSeqHeap = 0;
-        cBXScriptEngine_ResetInstVars((sScriptEngine2B8*)self);
+        mpInSeqHeap = 0;
+        ResetInstVars();
     }
 }
 #endif
@@ -93,8 +87,7 @@ extern "C" void cBXScriptEngine_PurgeBXEngine(cBXScriptEngine* self)
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_Update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cInSeq_UpdateFrame(void* obj);
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, tScriptRequestInfo* script);
+extern "C" void cInSeq_UpdateFrame(cInSeq* inSeq);
 
 
 
@@ -103,27 +96,27 @@ static inline void slotNop_2820B0(void* self, void* slot) {}
 /**
  * Per-frame update of the script engine.
  *
- * Calls cInSeq_UpdateFrame() on the sequencer at +0x2B8, then for each of the 16 requests in state 1 runs its
- * pending-state handler by request type: type 1 goes to cBXScriptEngine_UpdatePendingRequestState, the others to slotNop_2820B0 (On Tour does this
- * in UpdatePendingRequestState).
+ * Calls cInSeq_UpdateFrame() on the sequencer (mpInSeq), then for each of the 16 requests that is data pending runs its
+ * pending-state handler by request type: an animation request goes to UpdatePendingRequestState, the other states to
+ * slotNop_2820B0 (On Tour does this in UpdatePendingRequestState).
  */
-extern "C" void cBXScriptEngine_Update(cBXScriptEngine* self)
+void cBXScriptEngine::Update()
 {
     int i;
-    cInSeq_UpdateFrame(self->mpInSeq);
+    cInSeq_UpdateFrame(mpInSeq);
     for (i = 0; i < 16; i++) {
-        tScriptRequestInfo* request = &((&self->mScriptRequests[0]))[i];
-        if (request->requestType == 0) {
+        tScriptRequestInfo* request = &((&mScriptRequests[0]))[i];
+        if (request->requestType == keScriptRequestType_Unused) {
             continue;
         }
-        if (request->requestType == 1) {
+        if (request->requestType == keScriptRequestType_Animation) {
             switch (request->state) {
-            case 0: slotNop_2820B0((self), request); break;
-            case 1: cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request); break;
-            case 2: slotNop_2820B0((self), request); break;
-            case 3: slotNop_2820B0((self), request); break;
-            case 4: slotNop_2820B0((self), request); break;
-            case 5: slotNop_2820B0((self), request); break;
+            case keScriptRequestState_Invalid: slotNop_2820B0(this, request); break;
+            case keScriptRequestState_DataPending: UpdatePendingRequestState(request); break;
+            case keScriptRequestState_Ready: slotNop_2820B0(this, request); break;
+            case keScriptRequestState_PlayPending: slotNop_2820B0(this, request); break;
+            case keScriptRequestState_Playing: slotNop_2820B0(this, request); break;
+            case keScriptRequestState_Paused: slotNop_2820B0(this, request); break;
             }
         }
     }
@@ -134,23 +127,22 @@ extern "C" void cBXScriptEngine_Update(cBXScriptEngine* self)
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_AttachScript);
 #ifdef SKIP_ASM
 /**
- * Attaches script data to script database slot @p index, unless the slot already holds data.
+ * Attaches script data to script database slot @p scriptIndex, unless the slot already holds data.
  *
- * Writes @p value into mpScriptDatabase[@p index] (+0x2B0, 8-byte entries; first word = the script data).
- * cSSXScriptEngine_OnAttachData calls it for each loaded bank.
+ * Stores @p pScriptData in mpScriptDatabase[@p scriptIndex]. cSSXScriptEngine_OnAttachData calls it for each loaded
+ * bank.
  *
- * @param value  the script data
- * @param index  the script index
- * @return 1 when attached, 0 when the slot was taken
+ * @param pScriptData  the script data
+ * @param scriptIndex  the script index
+ * @return true when attached, false when the slot was taken
  */
-extern "C" int cBXScriptEngine_AttachScript(cBXScriptEngine* self, int value, int index)
+bool cBXScriptEngine::AttachScript(void* pScriptData, int scriptIndex)
 {
-    tBXScriptState* slots = self->mpScriptDatabase;
-    if (((int)slots[index].pScriptData) != 0) {
-        return 0;
+    if (mpScriptDatabase[scriptIndex].pScriptData != 0) {
+        return false;
     }
-    *(int*)&slots[index].pScriptData = value;
-    return 1;
+    mpScriptDatabase[scriptIndex].pScriptData = (const char*)pScriptData;
+    return true;
 }
 #endif
 
@@ -158,82 +150,79 @@ extern "C" int cBXScriptEngine_AttachScript(cBXScriptEngine* self, int value, in
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_DetachScript);
 #ifdef SKIP_ASM
 /**
- * Detaches the script data from script database slot @p index and returns it.
+ * Detaches the script data from script database slot @p scriptIndex and returns it.
  *
- * Clears the data word of mpScriptDatabase[@p index] (+0x2B0). cSSXScriptEngine_OnDetachData calls it.
+ * Clears the data of mpScriptDatabase[@p scriptIndex]. cSSXScriptEngine_OnDetachData calls it.
  *
- * @param index  the script index
+ * @param scriptIndex  the script index
  * @return the detached script data, or 0 when the slot was empty
  */
-extern "C" int cBXScriptEngine_DetachScript(cBXScriptEngine* self, int index)
+void* cBXScriptEngine::DetachScript(int scriptIndex)
 {
-    tBXScriptState* slots = self->mpScriptDatabase;
-    int old = ((int)slots[index].pScriptData);
-    if (old == 0) {
+    tBXScriptState* slots = mpScriptDatabase;
+    void* pScriptData = (void*)slots[scriptIndex].pScriptData;
+    if (pScriptData == 0) {
         return 0;
     }
-    *(int*)&slots[index].pScriptData = 0;
-    return old;
+    slots[scriptIndex].pScriptData = 0;
+    return pScriptData;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_RequestAnimationScript);
 #ifdef SKIP_ASM
-struct sBxsThreadHdr;
-extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(cBXScriptEngine* self, int a1);
-extern "C" int cInSeq_ReadyPlayer(void* self, void* src);
-// PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
-void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
-// PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
-int cScriptPlayerMain_SetUserData(void* self, int a1);
-void cBXScriptEngine_ResetRequest(void* self, void* v);
+extern "C" int cInSeq_ReadyPlayer(cInSeq* inSeq, const char* pScriptData);
+extern "C" cScriptPlayerMain* cInSeq_GetPlayer(cInSeq* inSeq, int playerID);
+// cScriptPlayerMain::SetUserData (unit replay/replaycache, declared (void*, int) there), bound to its retail symbol.
+void* cScriptPlayerMain_SetUserData(cScriptPlayerMain* player, void* pUserData)
+    __asm__("cScriptPlayerMain_SetUserData__FPvi");
 
 
 
 
 /**
- * Creates an animation script request (request type 1) for script @p idx and returns its handle.
+ * Creates an animation script request for script @p scriptIndex and returns its handle.
  *
- * Takes a free request from mScriptRequests with cBXScriptEngine_CreateNewRequest. When mpScriptDatabase[@p idx] (+0x2B0) holds no data
- * yet, the request waits for it: state 1 (data pending), the index at +0x14 and the pending flag at +0x12; the engine's
- * virtual at vtable slot 7 (cSSXScriptEngine_OnDataUnavailable) is asked to fetch it, and on refusal the request goes
- * to state 7, is reset with cBXScriptEngine_ResetRequest, and -1 is returned. Otherwise the request is ready (state 2, index at +0x8):
- * an InSeq player is readied (cInSeq_ReadyPlayer, cInSeq_GetPlayer on mpInSeq), stored at +0x0 and given the request as
- * user data (cScriptPlayerMain_SetUserData), and the script's lock count (+0x4) goes up. @p userData is stored at +0xC.
+ * Takes a free request from mScriptRequests with CreateNewRequest. When mpScriptDatabase[@p scriptIndex] holds no data
+ * yet, the request waits for it (data pending, with loadingScriptIndex and loadPending set); the engine's virtual at
+ * vtable slot 7 (cSSXScriptEngine_OnDataUnavailable) is asked to fetch it, and on refusal the request is reset with
+ * ResetRequest and -1 is returned. Otherwise the request is ready: an InSeq player is readied (cInSeq_ReadyPlayer,
+ * cInSeq_GetPlayer on mpInSeq), stored in pPlayer and given the request as user data (cScriptPlayerMain_SetUserData),
+ * and the script's lock count goes up. @p pUserData is stored in the request.
  *
- * Likely bug: cBXScriptEngine_CreateNewRequest returns 0 when all 16 requests are in use, and the result is used unchecked.
+ * Likely bug: CreateNewRequest returns 0 when all 16 requests are in use, and the result is used unchecked.
  *
- * @param idx  the script index
- * @param userData  user data stored with the request
- * @return the request handle (+0x1C), or -1 when the data cannot be had
+ * @param scriptIndex  the script index
+ * @param pUserData  user data stored with the request
+ * @return the request handle, or -1 when the data cannot be had
  */
-extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int idx, int userData)
+int cBXScriptEngine::RequestAnimationScript(int scriptIndex, void* pUserData)
 {
-    tBXScriptState* scriptState = &(self->mpScriptDatabase)[idx];
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_CreateNewRequest(self, 1);
-    if (((void*)scriptState->pScriptData) == 0) {
-        int one = 1;
-        request->loadingScriptIndex = idx;
-        request->state = one;
-        request->loadPending = one;
-        sVEntry<int(void*, int)>* vtable = (sVEntry<int(void*, int)>*)self->mVtbl;
+    tBXScriptState* scriptState = &mpScriptDatabase[scriptIndex];
+    tScriptRequestInfo* request = CreateNewRequest(keScriptRequestType_Animation);
+    if (scriptState->pScriptData == 0) {
+        request->loadingScriptIndex = scriptIndex;
+        request->state = keScriptRequestState_DataPending;
+        request->loadPending = 1;
+        // vtable slot 7: OnDataUnavailable
+        sVEntry<int(void*, int)>* vtable = (sVEntry<int(void*, int)>*)mVtbl;
         sVEntry<int(void*, int)>* vtableEntry = &vtable[7];
-        if (vtableEntry->fn(vthis(self, *vtableEntry), idx) == 0) {
-            request->state = 7;
-            cBXScriptEngine_ResetRequest(self, request);
+        if (vtableEntry->fn(vthis(this, *vtableEntry), scriptIndex) == 0) {
+            request->state = keScriptRequestState_Reset;
+            ResetRequest(request);
             return -1;
         }
     } else {
-        request->data.animFields.animScriptIndex = idx;
-        request->state = 2;
-        int id = cInSeq_ReadyPlayer(self->mpInSeq, ((void*)scriptState->pScriptData));
-        void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
-        (*(void**)&request->pPlayer) = obj;
-        cScriptPlayerMain_SetUserData(obj, (int)request);
+        request->data.animFields.animScriptIndex = scriptIndex;
+        request->state = keScriptRequestState_Ready;
+        int playerID = cInSeq_ReadyPlayer(mpInSeq, scriptState->pScriptData);
+        cScriptPlayerMain* player = cInSeq_GetPlayer(mpInSeq, playerID);
+        request->pPlayer = player;
+        cScriptPlayerMain_SetUserData(player, request);
         scriptState->numLocks++;
     }
-    (*(int*)&request->pUserData) = userData;
+    request->pUserData = pUserData;
     return request->requestHandle;
 }
 #endif
@@ -241,35 +230,34 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PlayScript);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-extern "C" void cInSeq_Play(void* cache, void* data, int a2);
+extern "C" void cInSeq_Play(cInSeq* inSeq, int playerID, int loop);
 
 /**
  * Starts playing a ready script request and returns its state.
  *
- * Looks the request up with cBXScriptEngine_GetRequest (0 for a free handle). Only a request in state 2 (ready) is started: @p value
- * goes to +0x10 (released after play), and an animation request (type 1) moves to state 3 (play pending) and its player
- * is started with cInSeq_Play on mpInSeq. Any other state is returned unchanged.
+ * Looks the request up with GetRequest (0 for a free handle). Only a ready request is started: @p autoRecycle goes to
+ * purgeAfterPlay, and an animation request becomes play pending and its player is started with cInSeq_Play on
+ * mpInSeq. Any other state is returned unchanged.
  *
- * @param id  the request handle
- * @param value  nonzero to release the request when it finishes playing
+ * @param requestHandle  the request handle
+ * @param autoRecycle  nonzero to release the request when it finishes playing
  * @param loop  passed to cInSeq_Play
- * @return the request state afterwards, or 0 for a free handle
+ * @return the request state afterwards, or keScriptRequestState_Invalid for a free handle
  */
-extern "C" int cBXScriptEngine_PlayScript(cBXScriptEngine* self, int id, int value, int loop)
+eScriptRequestState cBXScriptEngine::PlayScript(int requestHandle, int autoRecycle, int loop)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, id);
-    if (((char*)request) == 0) {
-        return 0;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0) {
+        return keScriptRequestState_Invalid;
     }
-    int state = request->state;
-    if (state != 2) {
+    eScriptRequestState state = request->state;
+    if (state != keScriptRequestState_Ready) {
         return state;
     }
-    request->purgeAfterPlay = value;
-    if (request->requestType == 1) {
-        request->state = 3;
-        cInSeq_Play(self->mpInSeq, **(void***)request, loop);
+    request->purgeAfterPlay = autoRecycle;
+    if (request->requestType == keScriptRequestType_Animation) {
+        request->state = keScriptRequestState_PlayPending;
+        cInSeq_Play(mpInSeq, request->pPlayer->mID, loop);
     }
     return request->state;
 }
@@ -278,25 +266,24 @@ extern "C" int cBXScriptEngine_PlayScript(cBXScriptEngine* self, int id, int val
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScript);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-extern "C" void cInSeq_Stop(void* cache, int playerID);
+extern "C" void cInSeq_Stop(cInSeq* inSeq, int playerID);
 
 /**
  * Stops a script request's InSeq player if it is running.
  *
- * Looks the request up with cBXScriptEngine_GetRequest and calls cInSeq_Stop on mpInSeq for its player's mID when the
- * player (pPlayer) exists, its mPlayState is not 0 (stopped), and the request is an animation request (requestType 1).
+ * Looks the request up with GetRequest and calls cInSeq_Stop on mpInSeq for its player's mID when the player (pPlayer)
+ * exists, its mPlayState is not 0 (stopped), and the request is an animation request.
  *
  * Quirk: the lookup result is not checked, so a free handle would be dereferenced; the callers only pass live requests.
  *
  * @param requestHandle  the request handle
  */
-extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int requestHandle)
+void cBXScriptEngine::StopScript(int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
+    tScriptRequestInfo* request = GetRequest(requestHandle);
     cScriptPlayerMain* player = request->pPlayer;
-    if (player != 0 && player->mPlayState != 0 && request->requestType == 1) {
-        cInSeq_Stop(self->mpInSeq, player->mID);
+    if (player != 0 && player->mPlayState != 0 && request->requestType == keScriptRequestType_Animation) {
+        cInSeq_Stop(mpInSeq, player->mID);
     }
 }
 #endif
@@ -304,27 +291,18 @@ extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int requestHan
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScriptAll);
 #ifdef SKIP_ASM
-extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int id);
-
-
-struct sScriptEngine282390 {
-    char pad_0x000[0x2C0];
-    tScriptRequestInfo slots[16];
-};
-
 /**
- * Stops the script of every script request that has a script object.
+ * Stops the script of every script request that has a player.
  *
- * Walks the 16 mScriptRequests (0x24 bytes each) and, for each whose first word (its script object) is set,
- * calls cBXScriptEngine_StopScript() with the request's id (+0x1C), which stops that script in the InSeq sequencer when it
- * is running.
+ * Walks the 16 mScriptRequests and, for each whose pPlayer is set, calls StopScript() with the request's handle, which
+ * stops that script in the InSeq sequencer when it is running.
  */
-extern "C" void cBXScriptEngine_StopScriptAll(cBXScriptEngine* self)
+void cBXScriptEngine::StopScriptAll()
 {
     for (int i = 0; i < 16; i++) {
-        tScriptRequestInfo* slot = &((&self->mScriptRequests[0]))[i];
-        if (((int)slot->pPlayer) != 0) {
-            cBXScriptEngine_StopScript(self, slot->requestHandle);
+        tScriptRequestInfo* slot = &((&mScriptRequests[0]))[i];
+        if (slot->pPlayer != 0) {
+            StopScript(slot->requestHandle);
         }
     }
 }
@@ -333,23 +311,19 @@ extern "C" void cBXScriptEngine_StopScriptAll(cBXScriptEngine* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ReleaseRequestAll);
 #ifdef SKIP_ASM
-extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
-
-
-
 /**
  * Releases every script request that is still in use.
  *
- * Walks the 16 mScriptRequests and calls cBXScriptEngine_ReleaseRequest() with the id (+0x1C) of each whose word at +0x20 is
- * set; that runs the request type's cleanup, releases its script object and database reference and returns
- * the slot to the free list.
+ * Walks the 16 mScriptRequests and calls ReleaseRequest() with the handle of each whose requestType is not Unused;
+ * that runs the request type's cleanup, releases its player and database reference and returns the slot to the free
+ * list.
  */
-extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self)
+void cBXScriptEngine::ReleaseRequestAll()
 {
     for (int i = 0; i < 16; i++) {
-        tScriptRequestInfo* slot = &((&self->mScriptRequests[0]))[i];
-        if (slot->requestType != 0) {
-            cBXScriptEngine_ReleaseRequest((self), slot->requestHandle);
+        tScriptRequestInfo* slot = &((&mScriptRequests[0]))[i];
+        if (slot->requestType != keScriptRequestType_Unused) {
+            ReleaseRequest(slot->requestHandle);
         }
     }
 }
@@ -358,102 +332,99 @@ extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ForcePlayUpdate);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
+extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* player);
 
 /**
  * Forces an immediate frame update of a playing script request.
  *
- * Finds the request record with cBXScriptEngine_GetRequest (On Tour GetRequest). When it exists and its state (+0x4) is 3 or 4 (play
- * pending or playing; cBXScriptEngine_OnInSeqPlay moves 3 to 4), runs cScriptPlayerMain_UpdateFrame (On Tour cScriptPlayerMain::UpdateFrame) on the
- * request's player (+0x0). cSSXScriptEngine_ForcePlayUpdate calls it before updating its camera managers.
+ * Finds the request record with GetRequest. When it exists and is play pending or playing (OnInSeqPlay moves the
+ * first to the second), runs cScriptPlayerMain_UpdateFrame (On Tour cScriptPlayerMain::UpdateFrame) on the request's
+ * player. cSSXScriptEngine_ForcePlayUpdate calls it before updating its camera managers.
  *
  * @param requestHandle  the request handle
- * @return 1 if the player was updated, 0 for an unknown or idle request
+ * @return true if the player was updated, false for an unknown or idle request
  */
-extern "C" int cBXScriptEngine_ForcePlayUpdate(cBXScriptEngine* self, int requestHandle)
+bool cBXScriptEngine::ForcePlayUpdate(int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (((void*)request) == 0) {
-        return 0;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0) {
+        return false;
     }
-    int type = request->state;
-    if (type == 3 || type == 4) {
-        cScriptPlayerMain_UpdateFrame(*(void**)request);
-        return 1;
+    eScriptRequestState state = request->state;
+    if (state == keScriptRequestState_PlayPending || state == keScriptRequestState_Playing) {
+        cScriptPlayerMain_UpdateFrame(request->pPlayer);
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetScriptPlayRate);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cBXScriptEngine_GetRequest_v(void) __asm__("cBXScriptEngine_GetRequest");
 void cScriptPlayerMain_SetPlaySpeed(void* self, float t);
 
 /**
  * Sets the play rate of a script request, or remembers it until the request's data arrives.
  *
- * The engine and the request handle arrive untouched in the first two argument registers and go straight to
- * cBXScriptEngine_GetRequest. Rates below 0.01 are refused. A request in state 1 (data pending) keeps the rate at +0x18 for
- * cBXScriptEngine_UpdatePendingRequestState to apply; otherwise the rate goes to its player with cScriptPlayerMain_SetPlaySpeed.
+ * Rates below 0.01 are refused. A data-pending request keeps the rate in playSpeedRequest for
+ * UpdatePendingRequestState to apply; otherwise the rate goes to its player with cScriptPlayerMain_SetPlaySpeed.
  *
+ * @param requestHandle  the request handle
  * @param playRate  the new play rate
- * @return 1 when set or stored, 0 for a rate below 0.01 or a free handle
+ * @return true when set or stored, false for a rate below 0.01 or a free handle
  */
-extern "C" int cBXScriptEngine_SetScriptPlayRate(float playRate)
+bool cBXScriptEngine::SetScriptPlayRate(int requestHandle, float playRate)
 {
-    if (playRate < 0.01f) return 0;
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest_v();
-    if (((char*)request) == 0) return 0;
-    if (request->state == 1) {
+    if (playRate < 0.01f) return false;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0) return false;
+    if (request->state == keScriptRequestState_DataPending) {
         request->playSpeedRequest = playRate;
-        return 1;
+        return true;
     }
-    cScriptPlayerMain_SetPlaySpeed(*(void**)request, playRate);
-    return 1;
+    cScriptPlayerMain_SetPlaySpeed(request->pPlayer, playRate);
+    return true;
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData);
 #ifdef SKIP_ASM
 /**
- * Replaces the user data of the request bound to InSeq player @p obj and returns the old value.
+ * Replaces the user data of the request bound to InSeq player @p pPlayer and returns the old value.
  *
- * The request is the player's mpUserData (+0xC, set by cScriptPlayerMain_SetUserData); its user data word is at +0xC.
+ * The request is the player's mpUserData (set by cScriptPlayerMain_SetUserData).
  *
- * @param obj  the InSeq player (cScriptPlayerMain)
- * @param val  the new user data
+ * @param pPlayer  the InSeq player
+ * @param pUserData  the new user data
  * @return the previous user data
  */
-extern "C" int cBXScriptEngine_SetRequestUserData(cBXScriptEngine* self, cScriptPlayerMain* obj, int val)
+void* cBXScriptEngine::SetRequestUserData(cScriptPlayerMain* pPlayer, void* pUserData)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)((char*)obj->mpUserData);
-    int old = (int)request->pUserData;
-    request->pUserData = (void*)val;
-    return old;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
+    void* previous = request->pUserData;
+    request->pUserData = pUserData;
+    return previous;
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData1);
 #ifdef SKIP_ASM
 /**
- * Replaces the user data (+0xC) of script request @p requestHandle and returns the old value.
+ * Replaces the user data of script request @p requestHandle and returns the old value.
  *
- * Quirk: the cBXScriptEngine_GetRequest result is not checked, so a free handle would be dereferenced.
+ * Quirk: the GetRequest result is not checked, so a free handle would be dereferenced.
  *
  * @param requestHandle  the request handle
- * @param val  the new user data
+ * @param pUserData  the new user data
  * @return the previous user data
  */
-extern "C" int cBXScriptEngine_SetRequestUserData1(cBXScriptEngine* self, int requestHandle, int val)
+void* cBXScriptEngine::SetRequestUserData(int requestHandle, void* pUserData)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
-    int old = (int)request->pUserData;
-    request->pUserData = (void*)val;
-    return old;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    void* previous = request->pUserData;
+    request->pUserData = pUserData;
+    return previous;
 }
 #endif
 
@@ -461,135 +432,94 @@ extern "C" int cBXScriptEngine_SetRequestUserData1(cBXScriptEngine* self, int re
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ReleaseRequest);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int id);
-int cScriptPlayerMain_SetUserData(void* obj, int a);
-extern "C" void cInSeq_RecyclePlayer(void* mgr, int handle);
-void cBXScriptEngine_ResetRequest(void* self, void* slot);
+extern "C" void cInSeq_RecyclePlayer(cInSeq* inSeq, int playerID);
 
-struct sVEnt_282540 {
-    short delta;
-    short index;
-    void* fn;
-};
-typedef void (*tVFn1_282540)(void*, int);
-typedef void (*tVFn2_282540)(void*, int, int);
-
-
-struct sScriptSlot_282540 {
-    int* obj;               // 0x00
-    int state;               // 0x04
-    int tblIdx;             // 0x08
-    int fC;                 // 0x0C
-    short f10;              // 0x10
-    short pad12;
-    int f14;                // 0x14
-    char pad18[8];
-    int type;              // 0x20
-};
-
-struct sScriptEngine_282540 {
-    char pad0[0x2A8];
-    sVEnt_282540* vt;       // 0x2A8
-    char pad2AC[4];
-    tBXScriptState* tbl;    // 0x2B0
-    char pad2B4[4];
-    void* mgr;              // 0x2B8
-};
-
-sScriptSlot_282540* cBXScriptEngine_GetRequest_282540(sScriptEngine_282540* self, int id) __asm__("cBXScriptEngine_GetRequest");
-
-#define VCALL1(SELF, SLOT, A) ((tVFn1_282540)(SELF)->vt[SLOT].fn)((char*)(SELF) + (SELF)->vt[SLOT].delta, A)
-#define VCALL2(SELF, SLOT, A, B) ((tVFn2_282540)(SELF)->vt[SLOT].fn)((char*)(SELF) + (SELF)->vt[SLOT].delta, A, B)
-
-// Finishes a script slot: per-type cleanup, release of its object and
-// table reference, then returns the slot to the free list.
-// PORT: the unit declares this as void(void*, int); defined under an asm label with its real type
-extern "C" int cBXScriptEngine_ReleaseRequest_impl(sScriptEngine_282540* self, int id) __asm__("cBXScriptEngine_ReleaseRequest");
 /**
  * Releases a script request: stops it, unbinds and recycles its player, drops its script lock, and frees the record.
  *
- * Does nothing but return 6 for a free handle. Clears the release-after-play flag (+0x10), then by state (+0x4): a
- * request still waiting for data (1) calls the engine's virtual at vtable slot 8
- * (cSSXScriptEngine_OnPendingDataCancelled) with the pending index (+0x14) while that script has no data; a request
- * that is starting, playing or paused (3-5) is stopped with cBXScriptEngine_StopScript. It then calls the virtual at slot 12
- * (cSSXScriptEngine_OnReleaseRequest) with the handle and the user data (+0xC). A player (+0x0) gets its user data
- * cleared (cScriptPlayerMain_SetUserData) and goes back to the InSeq pool (cInSeq_RecyclePlayer with its ID). The lock count of the
- * request's script (index at +0x8) in mpScriptDatabase drops, and at zero the virtual at slot 9
- * (cSSXScriptEngine_OnScriptDataReleased) is called. Last, the record is cleared with cBXScriptEngine_ResetRequest (its state 7 store
- * is overwritten there).
+ * Does nothing but return Released for a free handle. Clears purgeAfterPlay, then by state: a request still waiting
+ * for data calls the engine's virtual at vtable slot 8 (cSSXScriptEngine_OnPendingDataCancelled) with the pending
+ * index while that script has no data; a request that is starting, playing or paused is stopped with StopScript. It
+ * then calls the virtual at slot 12 (cSSXScriptEngine_OnReleaseRequest) with the handle and the user data. A player
+ * gets its user data cleared (cScriptPlayerMain_SetUserData) and goes back to the InSeq pool (cInSeq_RecyclePlayer
+ * with its ID). The lock count of the request's script in mpScriptDatabase drops, and at zero the virtual at slot 9
+ * (cSSXScriptEngine_OnScriptDataReleased) is called. Last, the record is cleared with ResetRequest (its Reset state
+ * store is overwritten there).
  *
- * @param id  the request handle
- * @return always 6 (released)
+ * @param requestHandle  the request handle
+ * @return always keScriptRequestState_Released
  */
-extern "C" int cBXScriptEngine_ReleaseRequest_impl(sScriptEngine_282540* self, int id)
+eScriptRequestState cBXScriptEngine::ReleaseRequest(int requestHandle)
 {
-    sScriptSlot_282540* s = cBXScriptEngine_GetRequest_282540(self, id);
-    if (s == 0 || s->type == 0) {
-        return 6;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0 || request->requestType == keScriptRequestType_Unused) {
+        return keScriptRequestState_Released;
     }
-    s->f10 = 0;
-    switch (s->state) {
-    case 1:
+    request->purgeAfterPlay = 0;
+    switch (request->state) {
+    case keScriptRequestState_DataPending:
         {
-            tBXScriptState* loadingState = self->tbl + s->f14;
-            if (((int)loadingState->pScriptData) == 0) {
-                VCALL1(self, 8, s->f14);
+            tBXScriptState* loadingState = mpScriptDatabase + request->loadingScriptIndex;
+            if (loadingState->pScriptData == 0) {
+                // vtable slot 8: OnPendingDataCancelled
+                sVEntry<void(void*, int)>* cancelVtable = (sVEntry<void(void*, int)>*)mVtbl;
+                cancelVtable[8].fn(vthis(this, cancelVtable[8]), request->loadingScriptIndex);
             }
         }
         break;
-    case 3:
-    case 4:
-    case 5:
-        cBXScriptEngine_StopScript((cBXScriptEngine*)self, id);
+    case keScriptRequestState_PlayPending:
+    case keScriptRequestState_Playing:
+    case keScriptRequestState_Paused:
+        StopScript(requestHandle);
         break;
-    case 0:
-    case 2:
-    case 6:
+    case keScriptRequestState_Invalid:
+    case keScriptRequestState_Ready:
+    case keScriptRequestState_Released:
         break;
     }
-    VCALL2(self, 12, id, s->fC);
-    if (s->obj != 0) {
-        cScriptPlayerMain_SetUserData(s->obj, 0);
-        cInSeq_RecyclePlayer(self->mgr, *s->obj);
+    // vtable slot 12: OnReleaseRequest
+    sVEntry<void(void*, int, void*)>* releaseVtable = (sVEntry<void(void*, int, void*)>*)mVtbl;
+    releaseVtable[12].fn(vthis(this, releaseVtable[12]), requestHandle, request->pUserData);
+    if (request->pPlayer != 0) {
+        cScriptPlayerMain_SetUserData(request->pPlayer, 0);
+        cInSeq_RecyclePlayer(mpInSeq, request->pPlayer->mID);
     }
-    if (s->tblIdx >= 0) {
-        tBXScriptState* scriptState = self->tbl + s->tblIdx;
+    if (request->data.animFields.animScriptIndex >= 0) {
+        tBXScriptState* scriptState = mpScriptDatabase + request->data.animFields.animScriptIndex;
         if (--scriptState->numLocks == 0) {
-            VCALL1(self, 9, s->tblIdx);
+            // vtable slot 9: OnScriptDataReleased
+            sVEntry<void(void*, int)>* releasedVtable = (sVEntry<void(void*, int)>*)mVtbl;
+            releasedVtable[9].fn(vthis(this, releasedVtable[9]), request->data.animFields.animScriptIndex);
         }
     }
-    s->state = 7;
-    cBXScriptEngine_ResetRequest(self, s);
-    return 6;
+    request->state = keScriptRequestState_Reset;
+    ResetRequest(request);
+    return keScriptRequestState_Released;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PauseAll);
 #ifdef SKIP_ASM
-extern "C" void cInSeq_PauseAll(int);
+extern "C" void cInSeq_PauseAll(cInSeq* inSeq);
 
 /**
- * Pauses every InSeq script player: cInSeq_PauseAll on mpInSeq (+0x2B8).
- *
- * @param engine  the script engine
+ * Pauses every InSeq script player: cInSeq_PauseAll on mpInSeq.
  */
-extern "C" void cBXScriptEngine_PauseAll(cBXScriptEngine* engine) {
-    cInSeq_PauseAll(((int)engine->mpInSeq));
+void cBXScriptEngine::PauseAll() {
+    cInSeq_PauseAll(mpInSeq);
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ResumeAll);
 #ifdef SKIP_ASM
-extern "C" void cInSeq_ResumeAll(int);
+extern "C" void cInSeq_ResumeAll(cInSeq* inSeq);
 
 /**
- * Resumes every InSeq script player: cInSeq_ResumeAll on mpInSeq (+0x2B8).
- *
- * @param engine  the script engine
+ * Resumes every InSeq script player: cInSeq_ResumeAll on mpInSeq.
  */
-extern "C" void cBXScriptEngine_ResumeAll(cBXScriptEngine* engine) {
-    cInSeq_ResumeAll(((int)engine->mpInSeq));
+void cBXScriptEngine::ResumeAll() {
+    cInSeq_ResumeAll(mpInSeq);
 }
 #endif
 
@@ -601,18 +531,17 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
 /**
  * Pauses script request @p requestHandle.
  *
- * Calls cScriptPlayerMain_Pause on the request's player (pPlayer) and sets the request state to 5 (paused) when the
- * player's mNumPaused is above 0. The request is indexed directly in mScriptRequests (+0x2C0, 0x24 each)
- * without checking that it is live.
+ * Calls cScriptPlayerMain_Pause on the request's player (pPlayer) and marks the request paused when the player's
+ * mNumPaused is above 0. The request is indexed directly in mScriptRequests without checking that it is live.
  *
  * @param requestHandle  the request handle (0-15)
  */
-extern "C" void cBXScriptEngine_PauseScript(cBXScriptEngine* self, int requestHandle)
+void cBXScriptEngine::PauseScript(int requestHandle)
 {
-    tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
+    tScriptRequestInfo* request = &mScriptRequests[requestHandle];
     cScriptPlayerMain_Pause(request->pPlayer);
     if (request->pPlayer->mNumPaused > 0) {
-        request->state = 5;
+        request->state = keScriptRequestState_Paused;
     }
 }
 #endif
@@ -625,24 +554,24 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
 /**
  * Resumes script request @p requestHandle.
  *
- * Calls cScriptPlayerMain_Resume on the request's player (+0x0). A paused request (state 5) whose player is no longer
- * paused (mNumPaused, +0x2C, at or below 0) goes back to state 4 (playing) when the player's mPlayState (+0x20) is 3 or
- * 4 (playing or ending), else to state 3 (play pending). The request is indexed directly in mScriptRequests.
+ * Calls cScriptPlayerMain_Resume on the request's player. A paused request whose player is no longer paused
+ * (mNumPaused at or below 0) goes back to playing when the player's mPlayState is Playing or PlayEnding, else to
+ * play pending. The request is indexed directly in mScriptRequests.
  *
  * @param requestHandle  the request handle (0-15)
  */
-extern "C" void cBXScriptEngine_ResumeScript(cBXScriptEngine* self, int requestHandle)
+void cBXScriptEngine::ResumeScript(int requestHandle)
 {
-    tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
-    cScriptPlayerMain_Resume(*(void**)request);
-    if (request->state == 5) {
-        cScriptPlayerMain* player = (cScriptPlayerMain*)(*(char**)request);
+    tScriptRequestInfo* request = &mScriptRequests[requestHandle];
+    cScriptPlayerMain_Resume(request->pPlayer);
+    if (request->state == keScriptRequestState_Paused) {
+        cScriptPlayerMain* player = request->pPlayer;
         if (player->mNumPaused <= 0) {
             int playState = player->mPlayState;
-            if (playState == 3 || playState == 4) {
-                request->state = 4;
+            if (playState == keScriptPlayState_Playing || playState == keScriptPlayState_PlayEnding) {
+                request->state = keScriptRequestState_Playing;
             } else {
-                request->state = 3;
+                request->state = keScriptRequestState_PlayPending;
             }
         }
     }
@@ -668,26 +597,23 @@ extern "C" int cBXScriptEngine_GetScriptEngine(void) {
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestState);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, tScriptRequestInfo* script);
-
 /**
  * Returns the state of script request @p requestHandle, first promoting it if its data has arrived.
  *
- * A request in state 1 (data pending) is passed to cBXScriptEngine_UpdatePendingRequestState, which makes it ready (state 2) when its script data
- * is attached.
+ * A data-pending request is passed to UpdatePendingRequestState, which makes it ready when its script data is
+ * attached.
  *
  * @param requestHandle  the request handle
- * @return the request state (+0x4), or 0 for a free handle
+ * @return the request state, or keScriptRequestState_Invalid for a free handle
  */
-extern "C" int cBXScriptEngine_GetRequestState(cBXScriptEngine* self, int requestHandle)
+eScriptRequestState cBXScriptEngine::GetRequestState(int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (((char*)request) == 0) {
-        return 0;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0) {
+        return keScriptRequestState_Invalid;
     }
-    if (request->state == 1) {
-        cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request);
+    if (request->state == keScriptRequestState_DataPending) {
+        UpdatePendingRequestState(request);
     }
     return request->state;
 }
@@ -699,16 +625,16 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestScriptIndex);
 /**
  * Returns the script index of script request @p requestHandle.
  *
- * While the request waits for data (state 1) that is the pending index (+0x14); otherwise the bound index (+0x8).
+ * While the request waits for data that is the pending index (loadingScriptIndex); otherwise the bound index.
  *
  * @param requestHandle  the request handle
  * @return the script index, or -1 for a free handle
  */
-extern "C" int cBXScriptEngine_GetRequestScriptIndex(cBXScriptEngine* self, int requestHandle)
+int cBXScriptEngine::GetRequestScriptIndex(int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (((char*)request) == 0) return -1;
-    if (request->state == 1) return request->loadingScriptIndex;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0) return -1;
+    if (request->state == keScriptRequestState_DataPending) return request->loadingScriptIndex;
     return request->data.animFields.animScriptIndex;
 }
 #endif
@@ -716,77 +642,55 @@ extern "C" int cBXScriptEngine_GetRequestScriptIndex(cBXScriptEngine* self, int 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_IsRequestPlaybackEnding);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, tScriptRequestInfo* script);
-
 /**
  * Returns whether script request @p requestHandle is playing its end.
  *
- * A data-pending request is first updated with cBXScriptEngine_UpdatePendingRequestState. Only a playing or paused request (state 4 or 5) can be
- * ending: then the result is whether its player's mPlayState (+0x20) is 4.
+ * A data-pending request is first updated with UpdatePendingRequestState. Only a playing or paused request can be
+ * ending: then the result is whether its player's mPlayState is PlayEnding.
  *
  * @param requestHandle  the request handle
- * @return 1 when ending, else 0 (also for a free handle)
+ * @return true when ending, else false (also for a free handle)
  */
-extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(cBXScriptEngine* self, int requestHandle)
+bool cBXScriptEngine::IsRequestPlaybackEnding(int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (((char*)request) == 0) {
-        return 0;
+    tScriptRequestInfo* request = GetRequest(requestHandle);
+    if (request == 0) {
+        return false;
     }
-    if (request->state == 1) {
-        cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request);
+    if (request->state == keScriptRequestState_DataPending) {
+        UpdatePendingRequestState(request);
     }
-    if (request->state != 4 && request->state != 5) {
-        return 0;
+    if (request->state != keScriptRequestState_Playing && request->state != keScriptRequestState_Paused) {
+        return false;
     }
-    return request->pPlayer->mPlayState == 4;
+    return request->pPlayer->mPlayState == keScriptPlayState_PlayEnding;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ResetInstVars);
 #ifdef SKIP_ASM
-struct sScriptThread2C0 {
-    int a;          // 0x00
-    int b;          // 0x04
-    int c;          // 0x08
-    int d;          // 0x0C
-    short e;        // 0x10
-    short f;        // 0x12
-    int g;          // 0x14
-    int h;          // 0x18
-    int id;         // 0x1C
-    int k;          // 0x20
-};
-struct sScriptEngine2B8 {
-    char pad[0x2b8];
-    int mpInSeq;                      // 0x2B8
-    int mpInSeqHeap;                     // 0x2BC
-    sScriptThread2C0 threads[16];   // 0x2C0
-};
 /**
  * Resets the BX script engine's instance variables: the InSeq pointers and the 16 script request records.
  *
- * Zeroes mpInSeq and mpInSeqHeap without freeing them (cBXScriptEngine_PurgeBXEngine frees them first). Each
- * 0x24-byte request record gets its index at +0x1C, -1 at +0x14, and 0 in the words at +0x0, +0x4, +0x18 and
- * +0x20 and the halfwords at +0x10 and +0x12; +0x8 and +0xC are left as they were. +0x0 and +0x20 are the flags
- * cBXScriptEngine_StopScriptAll() and cBXScriptEngine_ReleaseRequestAll() test.
+ * Zeroes mpInSeq and mpInSeqHeap without freeing them (PurgeBXEngine frees them first). Each request record gets its
+ * index as its handle, no pending index (-1), and no player, state, type, flags or stored play rate; the script index
+ * and the user data are left as they were.
  */
-extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
+void cBXScriptEngine::ResetInstVars()
 {
     int i;
-    self->mpInSeq = 0;
-    self->mpInSeqHeap = 0;
+    mpInSeq = 0;
+    mpInSeqHeap = 0;
     for (i = 0; i < 16; i++) {
-        self->threads[i].id = i;
-        self->threads[i].k = 0;
-        self->threads[i].a = 0;
-        self->threads[i].b = 0;
-        self->threads[i].e = 0;
-        self->threads[i].f = 0;
-        self->threads[i].h = 0;
-        self->threads[i].g = -1;
+        mScriptRequests[i].requestHandle = i;
+        mScriptRequests[i].requestType = keScriptRequestType_Unused;
+        mScriptRequests[i].pPlayer = 0;
+        mScriptRequests[i].state = keScriptRequestState_Invalid;
+        mScriptRequests[i].purgeAfterPlay = 0;
+        mScriptRequests[i].loadPending = 0;
+        mScriptRequests[i].playSpeedRequest = 0.0f;
+        mScriptRequests[i].loadingScriptIndex = -1;
     }
 }
 #endif
@@ -794,41 +698,35 @@ extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_UpdatePendingRequestState);
 #ifdef SKIP_ASM
-extern "C" int cInSeq_ReadyPlayer(void* self, void* src);
-// PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
-void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
-// PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
-int cScriptPlayerMain_SetUserData(void* self, int a1);
-void cScriptPlayerMain_SetPlaySpeed(void* self, float t);
 
 
 
 /**
  * Makes a data-pending script request ready once its script data has been attached.
  *
- * Does nothing while mpScriptDatabase[pending index (+0x14)] has no data. Otherwise binds the index (+0x8), clears the
- * pending index (-1) and flag (+0x12), sets state 2 (ready), readies an InSeq player for the data (cInSeq_ReadyPlayer,
- * cInSeq_GetPlayer on mpInSeq), stores it at +0x0 with the request as its user data (cScriptPlayerMain_SetUserData), applies and clears
- * a stored play rate (+0x18, cScriptPlayerMain_SetPlaySpeed) and raises the script's lock count.
+ * Does nothing while mpScriptDatabase[pending index] has no data. Otherwise binds the index, clears the pending index
+ * (-1) and flag, marks the request ready, readies an InSeq player for the data (cInSeq_ReadyPlayer, cInSeq_GetPlayer
+ * on mpInSeq), stores it in pPlayer with the request as its user data (cScriptPlayerMain_SetUserData), applies and
+ * clears a stored play rate (cScriptPlayerMain_SetPlaySpeed) and raises the script's lock count.
  *
- * @param script  the request record (an mScriptRequests entry)
+ * @param pRequest  the request record (an mScriptRequests entry)
  */
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, tScriptRequestInfo* script)
+void cBXScriptEngine::UpdatePendingRequestState(tScriptRequestInfo* pRequest)
 {
-    tScriptRequestInfo* request = script;
-    int idx = request->loadingScriptIndex;
-    tBXScriptState* scriptState = &(self->mpScriptDatabase)[idx];
-    if (((void*)scriptState->pScriptData) == 0) return;
-    request->data.animFields.animScriptIndex = idx;
+    tScriptRequestInfo* request = pRequest;
+    int scriptIndex = request->loadingScriptIndex;
+    tBXScriptState* scriptState = &mpScriptDatabase[scriptIndex];
+    if (scriptState->pScriptData == 0) return;
+    request->data.animFields.animScriptIndex = scriptIndex;
     request->loadingScriptIndex = -1;
-    request->state = 2;
+    request->state = keScriptRequestState_Ready;
     request->loadPending = 0;
-    int id = cInSeq_ReadyPlayer(self->mpInSeq, ((void*)scriptState->pScriptData));
-    void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
-    *(void**)&request->pPlayer = obj;
-    cScriptPlayerMain_SetUserData(obj, (int)request);
+    int playerID = cInSeq_ReadyPlayer(mpInSeq, scriptState->pScriptData);
+    cScriptPlayerMain* player = cInSeq_GetPlayer(mpInSeq, playerID);
+    request->pPlayer = player;
+    cScriptPlayerMain_SetUserData(player, request);
     if (request->playSpeedRequest > 0.0f) {
-        cScriptPlayerMain_SetPlaySpeed(((void*)request->pPlayer), request->playSpeedRequest);
+        cScriptPlayerMain_SetPlaySpeed(request->pPlayer, request->playSpeedRequest);
         request->playSpeedRequest = 0.0f;
     }
     scriptState->numLocks++;
@@ -838,55 +736,49 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqPlay);
 #ifdef SKIP_ASM
-struct sBxsVEntry10 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int, int);
-};
-
 /**
  * Sequencer callback for a script player that starts: notifies the owner and marks its request playing.
  *
- * The player's request record is at player+0xC. Calls virtual slot 10 of the engine's vtable at +0x2A8 with the player
- * and the request's +0x8 and +0xC words, then sets the request state (+0x4) to 4 (playing). On Tour asserts the
- * sequencer exists and the request was play-pending (3); retail does not. cSSXScriptEngine_OnInSeqPlay forwards here.
+ * The player's request record is its mpUserData. Calls virtual slot 10 of the engine's vtable (OnStartScript) with
+ * the player and the request's script index and user data, then marks the request playing. On Tour asserts the
+ * sequencer exists and the request was play pending; retail does not. cSSXScriptEngine_OnInSeqPlay forwards here.
  *
  * @param pPlayer  the cScriptPlayerMain that started
  */
-extern "C" void cBXScriptEngine_OnInSeqPlay(cBXScriptEngine* self, cScriptPlayerMain* pPlayer)
+void cBXScriptEngine::OnInSeqPlay(cScriptPlayerMain* pPlayer)
 {
     tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
-    sBxsVEntry10* vt = (sBxsVEntry10*)self->mVtbl;
-    vt[10].fn(vthis(self, vt[10]), pPlayer, request->data.animFields.animScriptIndex, (int)request->pUserData);
-    request->state = 4;
+    // vtable slot 10: OnStartScript
+    sVEntry<void(void*, cScriptPlayerMain*, int, void*)>* vt =
+        (sVEntry<void(void*, cScriptPlayerMain*, int, void*)>*)mVtbl;
+    vt[10].fn(vthis(this, vt[10]), pPlayer, request->data.animFields.animScriptIndex, request->pUserData);
+    request->state = keScriptRequestState_Playing;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqStop);
 #ifdef SKIP_ASM
-
-extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
-
 /**
  * Sequencer callback for a script player that stops: notifies the owner, marks the request stopped and recycles it if
  * asked.
  *
- * Calls virtual slot 11 of the engine's vtable at +0x2A8 with the player and its request's +0x8 / +0xC words, sets the
- * request state (+0x4) to 2 and, when the request's short at +0x10 is set (probably PlayScript's autoRecycle), releases
- * the request by its handle (+0x1C) with cBXScriptEngine_ReleaseRequest (On Tour ReleaseRequest). cSSXScriptEngine_OnInSeqStop forwards
- * here.
+ * Calls virtual slot 11 of the engine's vtable (OnStopScript) with the player and its request's script index and user
+ * data, marks the request ready again and, when the request's purgeAfterPlay is set (PlayScript's autoRecycle),
+ * releases the request by its handle with ReleaseRequest. cSSXScriptEngine_OnInSeqStop forwards here.
  *
- * @param msg  the cScriptPlayerMain that stopped
+ * @param pPlayer  the cScriptPlayerMain that stopped
  */
-extern "C" void cBXScriptEngine_OnInSeqStop(cBXScriptEngine* self, cScriptPlayerMain* msg)
+void cBXScriptEngine::OnInSeqStop(cScriptPlayerMain* pPlayer)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)msg->mpUserData;
-    sVEntry<void(void*, void*, int, int)>* vt = (sVEntry<void(void*, void*, int, int)>*)self->mVtbl;
-    vt[11].fn(vthis(self, vt[11]), msg, request->data.animFields.animScriptIndex, (int)request->pUserData);
-    request->state = 2;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
+    // vtable slot 11: OnStopScript
+    sVEntry<void(void*, cScriptPlayerMain*, int, void*)>* vt =
+        (sVEntry<void(void*, cScriptPlayerMain*, int, void*)>*)mVtbl;
+    vt[11].fn(vthis(this, vt[11]), pPlayer, request->data.animFields.animScriptIndex, request->pUserData);
+    request->state = keScriptRequestState_Ready;
     if (request->purgeAfterPlay != 0) {
-        cBXScriptEngine_ReleaseRequest(self, request->requestHandle);
+        ReleaseRequest(request->requestHandle);
     }
 }
 #endif
@@ -897,28 +789,27 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqRequestEntityCommI
 extern "C" int cScriptDatabaseObject_GetAvailableEntities(void* self, int key, void** out, int max);
 
 /**
- * Finds the script entity that should drive InSeq player entity @p ctx.
+ * Finds the script entity that should drive InSeq player entity @p pEntity.
  *
- * Lists up to 30 candidate entities for the entity's owner player (its mpOwner's mID) with cScriptDatabaseObject_GetAvailableEntities and returns
- * the first whose virtual at slot 5 (the entity match test, e.g. cScriptObjRider_IsMatchingEntity) accepts (@p ctx,
- * @p entityType).
+ * Lists up to 30 candidate entities for the entity's owner player (its mpOwner's mID) with
+ * cScriptDatabaseObject_GetAvailableEntities and returns the first whose virtual at slot 5 (the entity match test,
+ * e.g. cScriptObjRider_IsMatchingEntity) accepts (@p pEntity, @p type).
  *
- * @param ctx  the InSeq player entity (cScriptPlayerEntity)
- * @param entityType  the entity type passed to the match test
+ * @param pEntity  the InSeq player entity
+ * @param type  the entity type passed to the match test
  * @return the matching script entity, or 0
  */
-extern "C" cScriptEntity* cBXScriptEngine_OnInSeqRequestEntityCommInterface(cBXScriptEngine* self,
-                                                                            cScriptPlayerEntity* ctx, int entityType)
+cScriptEntity* cBXScriptEngine::OnInSeqRequestEntityCommInterface(cScriptPlayerEntity* pEntity, int type)
 {
     cScriptEntity* buf[30];
     cScriptEntity* found = 0;
-    int n = cScriptDatabaseObject_GetAvailableEntities(self, ctx->mpOwner->mID, (void**)buf, 30);
+    int n = cScriptDatabaseObject_GetAvailableEntities(this, pEntity->mpOwner->mID, (void**)buf, 30);
     for (int i = 0; i < n; i++) {
         cScriptEntity* candidate = buf[i];
         // vtable slot 5: IsMatchingEntity
         sVEntry<int(void*, cScriptPlayerEntity*, int)>* vtable =
             (sVEntry<int(void*, cScriptPlayerEntity*, int)>*)candidate->mVtbl;
-        if (vtable[5].fn(vthis(candidate, vtable[5]), ctx, entityType)) {
+        if (vtable[5].fn(vthis(candidate, vtable[5]), pEntity, type)) {
             found = candidate;
             break;
         }
@@ -930,53 +821,41 @@ extern "C" cScriptEntity* cBXScriptEngine_OnInSeqRequestEntityCommInterface(cBXS
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqRemoteScriptPlayerReady);
 #ifdef SKIP_ASM
-struct sBxsThreadHdr {
-    void* owner;    // 0x0
-    int state;      // 0x4
-    int handle;     // 0x8
-};
-
-extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(cBXScriptEngine* self, int a1);
-// PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
-int cScriptPlayerMain_SetUserData(void* self, int a1);
-
 /**
  * Wraps a remotely started InSeq player in a new ready script request.
  *
- * Takes a request of type 1 (cBXScriptEngine_CreateNewRequest), sets state 2 (ready), no script index (-1 at +0x8) and @p obj as its
+ * Takes an animation request (CreateNewRequest), marks it ready with no script index (-1) and @p pPlayer as its
  * player, and binds the request as the player's user data (cScriptPlayerMain_SetUserData).
  *
  * Likely bug: the request is used unchecked when all 16 are in use.
  *
- * @param obj  the InSeq player (cScriptPlayerMain)
+ * @param pPlayer  the InSeq player
  */
-extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerReady(cBXScriptEngine* self, cScriptPlayerMain* obj)
+void cBXScriptEngine::OnInSeqRemoteScriptPlayerReady(cScriptPlayerMain* pPlayer)
 {
-    sBxsThreadHdr* request = cBXScriptEngine_CreateNewRequest(self, 1);
-    request->state = 2;
-    request->handle = -1;
-    request->owner = ((void*)obj);
-    cScriptPlayerMain_SetUserData(obj, (int)request);
+    tScriptRequestInfo* request = CreateNewRequest(keScriptRequestType_Animation);
+    request->state = keScriptRequestState_Ready;
+    request->data.animFields.animScriptIndex = -1;
+    request->pPlayer = pPlayer;
+    cScriptPlayerMain_SetUserData(pPlayer, request);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard);
 #ifdef SKIP_ASM
-void cBXScriptEngine_ResetRequest(void* self, void* v);
-
 /**
  * Frees the script request bound to a discarded InSeq player.
  *
- * Takes the request from the player's mpUserData (+0xC), sets its state to 7 and resets it with cBXScriptEngine_ResetRequest.
+ * Takes the request from the player's mpUserData, marks it Reset and clears it with ResetRequest.
  *
- * @param ctx  the InSeq player (cScriptPlayerMain)
+ * @param pPlayer  the InSeq player
  */
-extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard(cBXScriptEngine* self, cScriptPlayerMain* ctx)
+void cBXScriptEngine::OnInSeqRemoteScriptPlayerDiscard(cScriptPlayerMain* pPlayer)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)ctx->mpUserData;
-    request->state = 7;
-    cBXScriptEngine_ResetRequest(self, request);
+    tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
+    request->state = keScriptRequestState_Reset;
+    ResetRequest(request);
 }
 #endif
 
@@ -984,15 +863,15 @@ extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard(cBXScriptEngine
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestUserData__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the user data (pUserData) of the script request bound to InSeq player @p player (its mpUserData).
+ * Returns the user data of the script request bound to InSeq player @p pPlayer (its mpUserData).
  *
- * @param player  the InSeq player (cScriptPlayerMain)
+ * @param pPlayer  the InSeq player
  * @return the request's user data
  */
-int cBXScriptEngine_GetRequestUserData(void* self, void* player)
+void* cBXScriptEngine::GetRequestUserData(cScriptPlayerMain* pPlayer)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)((cScriptPlayerMain*)player)->mpUserData;
-    return (int)request->pUserData;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
+    return request->pUserData;
 }
 #endif
 
@@ -1000,16 +879,16 @@ int cBXScriptEngine_GetRequestUserData(void* self, void* player)
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestUserData1);
 #ifdef SKIP_ASM
 /**
- * Returns the user data (+0xC) of script request @p requestHandle.
+ * Returns the user data of script request @p requestHandle.
  *
- * Quirk: the cBXScriptEngine_GetRequest result is not checked, so a free handle would be dereferenced.
+ * Quirk: the GetRequest result is not checked, so a free handle would be dereferenced.
  *
  * @param requestHandle  the request handle
  * @return the request's user data
  */
-extern "C" int cBXScriptEngine_GetRequestUserData1(cBXScriptEngine* self, int requestHandle)
+void* cBXScriptEngine::GetRequestUserData(int requestHandle)
 {
-    return (int)((tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle))->pUserData;
+    return GetRequest(requestHandle)->pUserData;
 }
 #endif
 
@@ -1017,16 +896,16 @@ extern "C" int cBXScriptEngine_GetRequestUserData1(cBXScriptEngine* self, int re
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestHandleFromPlayer__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the handle (requestHandle) of the script request bound to InSeq player @p player (its mpUserData).
+ * Returns the handle (requestHandle) of the script request bound to InSeq player @p pPlayer (its mpUserData).
  *
  * cSSXScriptEngine's InSeq hooks (cSSXScriptEngine_OnInSeqPlay and others) use it to find the NIS list entry.
  *
- * @param player  the InSeq player (cScriptPlayerMain)
+ * @param pPlayer  the InSeq player
  * @return the request handle
  */
-int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* player)
+int cBXScriptEngine::GetRequestHandleFromPlayer(cScriptPlayerMain* pPlayer)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)((cScriptPlayerMain*)player)->mpUserData;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
     return request->requestHandle;
 }
 #endif
@@ -1034,88 +913,63 @@ int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* player)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByReqHandle);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-
 /**
  * Returns the script player of a request handle.
  *
- * cBXScriptEngine_GetRequest (On Tour GetRequest) finds the request record; its first word is the cScriptPlayerMain. The tNISList
- * code and cSSXScriptEngine_ForcePlayUpdate use it to reach a request's script header.
+ * GetRequest finds the request record. The tNISList code and cSSXScriptEngine_ForcePlayUpdate use it to reach a
+ * request's script header.
  *
  * @param requestHandle  the request handle
- * @return the request's player (an int in this view), or 0 for an unknown handle
+ * @return the request's player, or 0 for an unknown handle
  */
-extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(cBXScriptEngine* self, int requestHandle)
+cScriptPlayerMain* cBXScriptEngine::GetRequestPlayerByReqHandle(int requestHandle)
 {
-    int* request = (int*)cBXScriptEngine_GetRequest(self, requestHandle);
+    tScriptRequestInfo* request = GetRequest(requestHandle);
     if (request == 0) {
         return 0;
     }
-    return *request;
+    return request->pPlayer;
 }
 #endif
-
-extern "C" void* cInSeq_GetPlayer(int);
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByPlayerID__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the sequencer's script player for a player ID.
+ * Returns the sequencer's script player for a player ID: cInSeq_GetPlayer on mpInSeq.
  *
- * Calls cInSeq_GetPlayer on the engine's sequencer (+0x2B8, On Tour mpInSeq). The C declares only the engine: the
- * player ID arrives in $a1 and passes through to cInSeq_GetPlayer untouched (cScriptObjCameraManager_OnStartObjectUse binds a two-argument alias
- * to call it).
- *
+ * @param playerID  the InSeq player ID
  * @return the cScriptPlayerMain cInSeq_GetPlayer returns
  */
-void* cBXScriptEngine_GetRequestPlayerByPlayerID(void* vself)
+cScriptPlayerMain* cBXScriptEngine::GetRequestPlayerByPlayerID(int playerID)
 {
-    cBXScriptEngine* self = (cBXScriptEngine*)vself;
-    return cInSeq_GetPlayer((int)self->mpInSeq);
+    return cInSeq_GetPlayer(mpInSeq, playerID);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_CreateNewRequest);
 #ifdef SKIP_ASM
-struct sBxsThreadSlot2C0 {
-    sBxsThreadHdr hdr; // 0x00
-    int unk0C;         // 0x0C
-    short unk10;       // 0x10
-    short unk12;       // 0x12
-    int unk14;         // 0x14
-    int unk18;         // 0x18
-    int id;            // 0x1C
-    int type;          // 0x20
-};
-
-struct sBxsEngineThreads {
-    char pad[0x2C0];
-    sBxsThreadSlot2C0 threads[16]; // 0x2C0
-};
-
 /**
- * Claims the first free script request record (request type 0 at +0x20) of the 16 in mScriptRequests.
+ * Claims the first free script request record (requestType Unused) of the 16 in mScriptRequests.
  *
- * Stores @p requestType; an animation request (type 1) also gets no script index (-1 at +0x8).
+ * Stores @p requestType; an animation request also gets no script index (-1).
  *
- * @param requestType  the request type (1 = animation)
+ * @param requestType  the request type
  * @return the record, or 0 when all 16 are in use
  */
-extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(cBXScriptEngine* self, int requestType)
+tScriptRequestInfo* cBXScriptEngine::CreateNewRequest(eScriptRequestType requestType)
 {
-    sBxsEngineThreads* engine = (sBxsEngineThreads*)self;
     int i = 0;
     do {
-        if (engine->threads[i].type == 0) {
-            engine->threads[i].type = requestType;
+        if (mScriptRequests[i].requestType == keScriptRequestType_Unused) {
+            mScriptRequests[i].requestType = requestType;
             switch (requestType) {
-            case 1:
-                engine->threads[i].hdr.handle = -1;
+            case keScriptRequestType_Animation:
+                mScriptRequests[i].data.animFields.animScriptIndex = -1;
                 break;
             }
-            return &engine->threads[i].hdr;
+            return &mScriptRequests[i];
         }
         i++;
     } while (i < 16);
@@ -1129,23 +983,21 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ResetRequest__FPvT0);
 /**
  * Clears a script request record so it is free again.
  *
- * Zeroes the player (+0x0), state (+0x4), type (+0x20), release and pending flags (+0x10, +0x12), stored play rate
- * (+0x18) and user data (+0xC), and sets the pending index (+0x14) to -1. The script index (+0x8) and handle (+0x1C)
- * stay.
+ * Zeroes the player, state, type, release and pending flags, stored play rate and user data, and sets the pending
+ * index to -1. The script index and the handle stay.
  *
- * @param vrequest  the request record
+ * @param pRequest  the request record
  */
-void cBXScriptEngine_ResetRequest(void* self, void* vrequest)
+void cBXScriptEngine::ResetRequest(tScriptRequestInfo* pRequest)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)vrequest;
-    request->pPlayer = 0;
-    request->state = 0;
-    request->requestType = 0;
-    request->purgeAfterPlay = 0;
-    request->loadPending = 0;
-    request->loadingScriptIndex = -1;
-    *(int*)&request->playSpeedRequest = 0;
-    request->pUserData = 0;
+    pRequest->pPlayer = 0;
+    pRequest->state = keScriptRequestState_Invalid;
+    pRequest->requestType = keScriptRequestType_Unused;
+    pRequest->purgeAfterPlay = 0;
+    pRequest->loadPending = 0;
+    pRequest->loadingScriptIndex = -1;
+    pRequest->playSpeedRequest = 0.0f;
+    pRequest->pUserData = 0;
 }
 #endif
 
@@ -1153,74 +1005,68 @@ void cBXScriptEngine_ResetRequest(void* self, void* vrequest)
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequest);
 #ifdef SKIP_ASM
 /**
- * Returns script request record @p requestHandle (mScriptRequests, +0x2C0, 0x24 each) when it is in use (type at +0x20
- * nonzero).
+ * Returns script request record @p requestHandle (in mScriptRequests) when it is in use (requestType not Unused).
  *
  * The handle is not range-checked.
  *
  * @param requestHandle  the request handle (0-15)
  * @return the record, or 0 when it is free
  */
-extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int requestHandle)
+tScriptRequestInfo* cBXScriptEngine::GetRequest(int requestHandle)
 {
-    tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
-    return request->requestType != 0 ? ((char*)request) : 0;
+    tScriptRequestInfo* request = &mScriptRequests[requestHandle];
+    return request->requestType != keScriptRequestType_Unused ? request : 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_cScriptObjTransition);
 #ifdef SKIP_ASM
-void* cScriptObject_cScriptObject(void* self, int type);
+// cScriptObject's constructor (below), called as the base-class part: the flat layout has no C++ base class.
+void* cScriptObject_cScriptObject(void* self, int objType);
 extern void* cScriptObjTransition_vtbl[];
 
 /**
  * Constructs a script transition object with no transition running.
  *
- * Runs cScriptObject_cScriptObject with object type 2, installs cScriptObjTransition_vtbl (+0xC), clears the camera
- * manager (+0x10), sets the player ID (+0x14) to -1 and the transition (+0x18) to 9 (none), and zeroes the in, hold and
- * out times (+0x1C-+0x24), the colour (+0x28) and the clock (+0x2C).
- *
- * @return @p self
+ * Runs the cScriptObject constructor with object type 2 (transition), installs cScriptObjTransition_vtbl, clears the
+ * camera manager, sets the player ID to -1 and the transition to Num (none), and zeroes the in, hold and out times,
+ * the colour and the clock.
  */
-extern "C" void* cScriptObjTransition_cScriptObjTransition(cScriptObjTransition* self)
+cScriptObjTransition::cScriptObjTransition()
 {
-    cScriptObject_cScriptObject(self, 2);
-    self->mVtbl = cScriptObjTransition_vtbl;
-    self->mpCameraManager = 0;
-    *(int*)&self->mInfo.currTime = 0;
-    self->mPlayerID = -1;
-    self->mInfo.transition = 9;
-    *(int*)&self->mInfo.inTime = 0;
-    *(int*)&self->mInfo.holdTime = 0;
-    *(int*)&self->mInfo.outTime = 0;
-    self->mInfo.transitionColour = 0;
-    return ((void*)self);
+    cScriptObject_cScriptObject(this, keScriptObjectType_Transition);
+    mVtbl = cScriptObjTransition_vtbl;
+    mpCameraManager = 0;
+    mInfo.currTime = 0.0f;
+    mPlayerID = -1;
+    mInfo.transition = keScriptTransition_Num;
+    mInfo.inTime = 0.0f;
+    mInfo.holdTime = 0.0f;
+    mInfo.outTime = 0.0f;
+    mInfo.transitionColour = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_Update);
 #ifdef SKIP_ASM
-// PORT: the callee also forwards four float args ($f12-$f15); bound to its (void*, int, int) symbol.
-void* cScriptObjTransition_SetTransition_f4(void* self, int a1, int a2, float f0, float f1, float f2, float f3) __asm__("cScriptObjTransition_SetTransition__FPvii");
-
 /**
  * Advances a running transition and ends it once its time is up.
  *
- * While a player owns the transition (ID at +0x14 >= 0), adds @p dt / 60 to the clock (+0x2C); once the clock reaches
- * the sum of the in, hold and out times (+0x1C, +0x20, +0x24) less 0.01, calls cScriptObjTransition_SetTransition with transition 9 (none).
+ * While a player owns the transition (mPlayerID >= 0), adds @p frameDelta / 60 to the clock (mInfo.currTime); once
+ * the clock reaches the sum of the in, hold and out times less 0.01, calls SetTransition with transition Num (none).
  *
- * @param dt  the frame delta in frames
+ * @param frameDelta  the frame delta in frames
  */
-extern "C" void cScriptObjTransition_Update(cScriptObjTransition* self, float dt)
+void cScriptObjTransition::Update(float frameDelta)
 {
-    int id = self->mPlayerID;
-    if (id >= 0) {
-        float currTime = self->mInfo.currTime + dt * 0.01666666753590107f;
-        self->mInfo.currTime = currTime;
-        if (self->mInfo.inTime + self->mInfo.holdTime + self->mInfo.outTime - 0.009999999776482582f <= currTime) {
-            cScriptObjTransition_SetTransition_f4(self, id, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+    int playerID = mPlayerID;
+    if (playerID >= 0) {
+        float currTime = mInfo.currTime + frameDelta * 0.01666666753590107f;
+        mInfo.currTime = currTime;
+        if (mInfo.inTime + mInfo.holdTime + mInfo.outTime - 0.009999999776482582f <= currTime) {
+            SetTransition(playerID, keScriptTransition_Num, 0.0f, 0.0f, 0.0f, 0.0f);
         }
     }
 }
@@ -1230,92 +1076,82 @@ extern "C" void cScriptObjTransition_Update(cScriptObjTransition* self, float dt
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_SetCameraManager__FPvi);
 #ifdef SKIP_ASM
 /**
- * Sets a script transition object's camera manager (+0x10).
+ * Sets a script transition object's camera manager (mpCameraManager).
  *
- * @param val  the camera manager (cScriptObjCameraManager)
+ * @param pManager  the camera manager
  */
-void cScriptObjTransition_SetCameraManager(void* vself, int val)
+void cScriptObjTransition::SetCameraManager(cScriptObjCameraManager* pManager)
 {
-    cScriptObjTransition* self = (cScriptObjTransition*)vself;
-    self->mpCameraManager = (cScriptObjCameraManager*)val;
+    mpCameraManager = pManager;
 }
 #endif
-
-extern "C" void* cScriptObjTransition_SetTransition1(void*, int, int, int);
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_SetTransition__FPvii);
 #ifdef SKIP_ASM
 /**
- * Starts or ends a transition, keeping the current colour: calls cScriptObjTransition_SetTransition1 with the colour at +0x28.
- *
- * The four float arguments (current frame, out, in and hold frames) are not declared here; they pass through untouched
- * in their registers.
+ * Starts or ends a transition, keeping the current colour: the full SetTransition with mInfo.transitionColour.
  *
  * @param playerID  the player that owns the transition
- * @param transition  the transition kind (9 = none)
- * @return whatever cScriptObjTransition_SetTransition1 leaves in the return register (it returns nothing)
+ * @param transition  the transition kind (Num = none)
+ * @param currFrame  the current frame within the transition
+ * @param outFrames  the fade-out length in frames
+ * @param inFrames  the fade-in length in frames
+ * @param holdFrames  the hold length in frames
  */
-void* cScriptObjTransition_SetTransition(void* vself, int playerID, int transition)
+void cScriptObjTransition::SetTransition(int playerID, eScriptTransition transition, float currFrame, float outFrames,
+                                         float inFrames, float holdFrames)
 {
-    cScriptObjTransition* self = (cScriptObjTransition*)vself;
-    return cScriptObjTransition_SetTransition1(self, playerID, transition, self->mInfo.transitionColour);
+    SetTransition(playerID, transition, mInfo.transitionColour, currFrame, outFrames, inFrames, holdFrames);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_SetTransition1);
 #ifdef SKIP_ASM
-struct sBxsVEntry2DD0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-
-// PORT: the unit declares cScriptObjTransition_SetTransition1(void*, int, int, int) returning void*; the body also takes four floats and returns nothing.
-extern "C" void cScriptObjTransition_SetTransition1_impl(cScriptObjTransition* self, int id, int kind, int arg, float t, float c, float a, float b) __asm__("cScriptObjTransition_SetTransition1");
 /**
  * Ends the running transition and starts a new one, or just ends it.
  *
- * When a transition is running (kind at +0x18 not 9) the object's virtual at slot 5 (cScriptObject_OnEndObjectUse in
- * cScriptObjTransition_vtbl) is called with the owning player (+0x14). When @p kind is 9, or the in, hold and out
- * frames together do not exceed @p currFrame, everything is cleared: kind 9, player -1, times and clock 0. Otherwise
- * the new kind, colour (+0x28) and player are stored, the clock restarts at 0, the in, hold and out frames are stored
- * as seconds (/ 60, at +0x1C, +0x20, +0x24), and the virtual at slot 4 (cScriptObject_OnStartObjectUse__FPv) is called
- * with the player.
+ * When a transition is running (not Num) the object's virtual at slot 5 (cScriptObject_OnEndObjectUse in
+ * cScriptObjTransition_vtbl) is called with the owning player. When @p transition is Num, or the in, hold and out
+ * frames together do not exceed @p currFrame, everything is cleared: transition Num, player -1, times and clock 0.
+ * Otherwise the new transition, colour and player are stored, the clock restarts at 0, the in, hold and out frames are
+ * stored as seconds (/ 60), and the virtual at slot 4 (cScriptObject_OnStartObjectUse__FPv) is called with the player.
  *
- * @param id  the player that owns the transition
- * @param kind  the transition kind (9 = none)
+ * @param playerID  the player that owns the transition
+ * @param transition  the transition kind (Num = none)
  * @param transitionColour  the transition colour
  * @param currFrame  the current frame within the transition; only decides whether it is already over
  * @param outFrames  the fade-out length in frames
  * @param inFrames  the fade-in length in frames
  * @param holdFrames  the hold length in frames
  */
-extern "C" void cScriptObjTransition_SetTransition1_impl(cScriptObjTransition* self, int id, int kind, int transitionColour, float currFrame, float outFrames, float inFrames, float holdFrames)
+void cScriptObjTransition::SetTransition(int playerID, eScriptTransition transition, int transitionColour,
+                                         float currFrame, float outFrames, float inFrames, float holdFrames)
 {
-    if (self->mInfo.transition != 9) {
-        sBxsVEntry2DD0* vt = ((sBxsVEntry2DD0*)self->mVtbl);
-        vt[5].fn(vthis(self, vt[5]), self->mPlayerID);
+    if (mInfo.transition != keScriptTransition_Num) {
+        // vtable slot 5: OnEndObjectUse
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mVtbl;
+        vt[5].fn(vthis(this, vt[5]), mPlayerID);
     }
-    if (kind == 9 || inFrames + holdFrames + outFrames <= currFrame) {
-        self->mInfo.transition = 9;
-        self->mInfo.inTime = 0.0f;
-        self->mInfo.holdTime = 0.0f;
-        self->mPlayerID = -1;
-        self->mInfo.outTime = 0.0f;
-        (*(int*)&self->mInfo.currTime) = 0;
+    if (transition == keScriptTransition_Num || inFrames + holdFrames + outFrames <= currFrame) {
+        mInfo.transition = keScriptTransition_Num;
+        mInfo.inTime = 0.0f;
+        mInfo.holdTime = 0.0f;
+        mPlayerID = -1;
+        mInfo.outTime = 0.0f;
+        mInfo.currTime = 0.0f;
     } else {
-        self->mInfo.transition = kind;
-        self->mInfo.transitionColour = transitionColour;
-        (*(int*)&self->mInfo.currTime) = 0;
-        self->mPlayerID = id;
-        self->mInfo.inTime = inFrames * 0.01666666753590107f;
-        self->mInfo.holdTime = holdFrames * 0.01666666753590107f;
-        self->mInfo.outTime = outFrames * 0.01666666753590107f;
-        sBxsVEntry2DD0* vt = ((sBxsVEntry2DD0*)self->mVtbl);
-        vt[4].fn(vthis(self, vt[4]), self->mPlayerID);
+        mInfo.transition = transition;
+        mInfo.transitionColour = transitionColour;
+        mInfo.currTime = 0.0f;
+        mPlayerID = playerID;
+        mInfo.inTime = inFrames * 0.01666666753590107f;
+        mInfo.holdTime = holdFrames * 0.01666666753590107f;
+        mInfo.outTime = outFrames * 0.01666666753590107f;
+        // vtable slot 4: OnStartObjectUse
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mVtbl;
+        vt[4].fn(vthis(this, vt[4]), mPlayerID);
     }
 }
 #endif
@@ -1324,16 +1160,16 @@ extern "C" void cScriptObjTransition_SetTransition1_impl(cScriptObjTransition* s
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_IsInUseByPlayer);
 #ifdef SKIP_ASM
 /**
- * Returns whether the transition is owned by player @p playerID (ID at +0x14).
+ * Returns whether the transition is owned by player @p playerID (mPlayerID).
  *
  * cSSXScriptEngine_IsObjInUseByPlayer calls it.
  *
  * @param playerID  the player ID
- * @return 1 when owned by that player, else 0
+ * @return true when owned by that player
  */
-extern "C" int cScriptObjTransition_IsInUseByPlayer(cScriptObjTransition* self, int playerID)
+bool cScriptObjTransition::IsInUseByPlayer(int playerID)
 {
-    return self->mPlayerID == playerID;
+    return mPlayerID == playerID;
 }
 #endif
 
@@ -1354,9 +1190,9 @@ public:
  * Pauses the transition object's script: calls the second virtual of the object at +0x10 (On Tour mpCameraManager,
  * a cScriptEntity; presumably PauseEntityScript).
  */
-extern "C" void cScriptObjTransition_PauseObjScript(cScriptObjTransition* self)
+void cScriptObjTransition::PauseObjScript()
 {
-    ((cBxScriptVirt*)self->mpCameraManager)->PauseObjScript();
+    ((cBxScriptVirt*)mpCameraManager)->PauseObjScript();
 }
 #endif
 
@@ -1367,9 +1203,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_ResumeObjScript);
  * Resumes the transition object's script: calls the third virtual of the object at +0x10 (On Tour mpCameraManager,
  * a cScriptEntity; presumably ResumeEntityScript).
  */
-extern "C" void cScriptObjTransition_ResumeObjScript(cScriptObjTransition* self)
+void cScriptObjTransition::ResumeObjScript()
 {
-    ((cBxScriptVirt*)self->mpCameraManager)->ResumeObjScript();
+    ((cBxScriptVirt*)mpCameraManager)->ResumeObjScript();
 }
 #endif
 
@@ -1379,19 +1215,13 @@ extern void* cScriptEntity_vtbl[];
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_cScriptEntity__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs a script entity: installs cScriptEntity's vtable and initialises its two fields.
- *
- * The word at +0x4 is set to -1 and the word at +0x8 to 0.
- *
- * @return @p self
+ * Constructs a script entity: installs cScriptEntity's vtable, no database ID (-1) and no bound InSeq entity.
  */
-void* cScriptEntity_cScriptEntity(void* vself)
+cScriptEntity::cScriptEntity()
 {
-    cScriptEntity* self = (cScriptEntity*)vself;
-    *(void***)self = cScriptEntity_vtbl;
-    self->mDBID = -1;
-    self->mpEntity = 0;
-    return ((void*)self);
+    mVtbl = cScriptEntity_vtbl;
+    mDBID = -1;
+    mpEntity = 0;
 }
 #endif
 
@@ -1399,30 +1229,30 @@ void* cScriptEntity_cScriptEntity(void* vself)
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_IsPlaying__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns whether a script entity is bound to an InSeq player entity (+0x8, set while a script has it locked).
+ * Returns whether a script entity is bound to an InSeq player entity (mpEntity, set while a script has it locked).
  *
- * @return 1 when bound, else 0
+ * @return true when bound
  */
-int cScriptEntity_IsPlaying(void* vself)
+bool cScriptEntity::IsPlaying()
 {
-    cScriptEntity* self = (cScriptEntity*)vself;
-    return ((int)self->mpEntity != 0);
+    return mpEntity != 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_DetachEntity);
 #ifdef SKIP_ASM
-extern "C" void cScriptPlayerEntity_SetEntityComm(void* p, int a1);
+extern "C" void cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntity* entity, cScriptEntity* comm);
 
 /**
- * Cuts the bound InSeq player entity (+0x8) off from this script entity: cScriptPlayerEntity_SetEntityComm(entity, 0).
+ * Cuts the bound InSeq player entity (mpEntity) off from this script entity: cScriptPlayerEntity_SetEntityComm(entity,
+ * 0).
  *
  * Does nothing when no entity is bound.
  */
-extern "C" void cScriptEntity_DetachEntity(cScriptEntity* self)
+void cScriptEntity::DetachEntity()
 {
-    void* entity = self->mpEntity;
+    cScriptPlayerEntity* entity = mpEntity;
     if (entity != 0) {
         cScriptPlayerEntity_SetEntityComm(entity, 0);
     }
@@ -1433,54 +1263,52 @@ extern "C" void cScriptEntity_DetachEntity(cScriptEntity* self)
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_OnInSeqLock);
 #ifdef SKIP_ASM
 extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
-extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(void* mgr, void* self, int a2);
+extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(void* database, cScriptEntity* entity, int playerID);
 
 /**
- * Locks this script entity to InSeq player entity @p entity.
+ * Locks this script entity to InSeq player entity @p pEntity.
  *
- * Stores @p entity at +0x8 and registers the lock with the script database object (cScriptDatabaseObject_GetDatabaseObject, cScriptDatabaseObject_mpDatabaseObject) through
- * cScriptDatabaseObject_MarkEntityAsUsed, under the ID (mID) of the entity's owner player (mpOwner, +0x8).
+ * Stores @p pEntity in mpEntity and registers the lock with the script database object
+ * (cScriptDatabaseObject_GetDatabaseObject) through cScriptDatabaseObject_MarkEntityAsUsed, under the ID (mID) of the
+ * entity's owner player (mpOwner).
  *
- * @param entity  the InSeq player entity (cScriptPlayerEntity)
+ * @param pEntity  the InSeq player entity
  */
-extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, cScriptEntity* entity)
+void cScriptEntity::OnInSeqLock(cScriptPlayerEntity* pEntity)
 {
-    self->mpEntity = (cScriptPlayerEntity*)entity;
-    cScriptDatabaseObject_MarkEntityAsUsed(cScriptDatabaseObject_GetDatabaseObject(), self, *(int*)entity->mpEntity);
+    mpEntity = pEntity;
+    cScriptDatabaseObject_MarkEntityAsUsed(cScriptDatabaseObject_GetDatabaseObject(), this, pEntity->mpOwner->mID);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_OnInSeqRelease);
 #ifdef SKIP_ASM
-extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
-extern "C" void cScriptDatabaseObject_MarkEntityAsFree(void* mgr, void* obj);
+extern "C" void cScriptDatabaseObject_MarkEntityAsFree(void* database, cScriptEntity* entity);
 
 /**
- * Releases this script entity's InSeq lock: unregisters it from the script database object (cScriptDatabaseObject_MarkEntityAsFree on
- * cScriptDatabaseObject_GetDatabaseObject()) and clears the bound entity (+0x8).
+ * Releases this script entity's InSeq lock: unregisters it from the script database object
+ * (cScriptDatabaseObject_MarkEntityAsFree on cScriptDatabaseObject_GetDatabaseObject()) and clears the bound entity.
  */
-extern "C" void cScriptEntity_OnInSeqRelease(cScriptEntity* self)
+void cScriptEntity::OnInSeqRelease()
 {
-    cScriptDatabaseObject_MarkEntityAsFree(cScriptDatabaseObject_GetDatabaseObject(), self);
-    self->mpEntity = 0;
+    cScriptDatabaseObject_MarkEntityAsFree(cScriptDatabaseObject_GetDatabaseObject(), this);
+    mpEntity = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_PauseEntityScript);
 #ifdef SKIP_ASM
-extern "C" void cScriptPlayerMain_Pause(void* self);
-
 /**
- * Pauses the script driving this entity: cScriptPlayerMain_Pause on the bound entity's owner player (mpOwner, +0x8).
+ * Pauses the script driving this entity: cScriptPlayerMain_Pause on the bound entity's owner player (mpOwner).
  *
- * Does nothing when no entity is bound (+0x8).
+ * Does nothing when no entity is bound.
  */
-extern "C" void cScriptEntity_PauseEntityScript(cScriptEntity* self)
+void cScriptEntity::PauseEntityScript()
 {
-    cScriptPlayerEntity* entity = self->mpEntity;
-    if (((void*)entity) != 0) {
+    cScriptPlayerEntity* entity = mpEntity;
+    if (entity != 0) {
         cScriptPlayerMain_Pause(entity->mpOwner);
     }
 }
@@ -1489,78 +1317,82 @@ extern "C" void cScriptEntity_PauseEntityScript(cScriptEntity* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_ResumeEntityScript);
 #ifdef SKIP_ASM
-extern "C" void cScriptPlayerMain_Resume(void* self);
-
 /**
- * Resumes the script driving this entity: cScriptPlayerMain_Resume on the bound entity's owner player (mpOwner, +0x8).
+ * Resumes the script driving this entity: cScriptPlayerMain_Resume on the bound entity's owner player (mpOwner).
  *
- * Does nothing when no entity is bound (+0x8).
+ * Does nothing when no entity is bound.
  */
-extern "C" void cScriptEntity_ResumeEntityScript(cScriptEntity* self)
+void cScriptEntity::ResumeEntityScript()
 {
-    cScriptPlayerEntity* entity = self->mpEntity;
-    if (((void*)entity) != 0) {
+    cScriptPlayerEntity* entity = mpEntity;
+    if (entity != 0) {
         cScriptPlayerMain_Resume(entity->mpOwner);
     }
 }
 #endif
 
+// EA's scriptentitycam.cpp starts here: this retail unit is several EA source files in a row (bxscriptengine.cpp,
+// scriptobjtransition.cpp, scriptentity.cpp, scriptentitycam.cpp, scriptobj.cpp; see scripter/scriptentitycam.h).
+// The camera entity needs scripter/ssxscriptengine.h (the camera headers, tSSXScriptSetupInfo, ScriptEngine and
+// cScriptObjCameraManager), and it can only be included here: when it comes first, the inline t2Vector methods it
+// reaches through bx/math3d.h make g++ 2.95 compile cBXScriptEngine::Update and ReleaseRequest differently.
+#include "scripter/ssxscriptengine.h"
+
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_cScriptEntityCamera);
 #ifdef SKIP_ASM
 extern void* cScriptEntityCamera_vtbl[];
+// cScriptEntity's constructor (above), called as the base-class part: the flat layout has no C++ base class.
 void* cScriptEntity_cScriptEntity(void* self);
 
 /**
- * Constructs a camera script entity: cScriptEntity_cScriptEntity, then the vtable cScriptEntityCamera_vtbl, sub-type (+0xC) 9 and no
- * camera manager (+0x10).
- *
- * @return @p self
+ * Constructs a camera script entity: the cScriptEntity constructor, then the vtable cScriptEntityCamera_vtbl, sub-type
+ * 9 (none) and no camera manager.
  */
-extern "C" void* cScriptEntityCamera_cScriptEntityCamera(cScriptEntityCamera* self)
+cScriptEntityCamera::cScriptEntityCamera()
 {
-    cScriptEntity_cScriptEntity(self);
-    *(void***)self = cScriptEntityCamera_vtbl;
-    self->mSubType = 9;
-    self->mpCamManager = 0;
-    return ((void*)self);
+    cScriptEntity_cScriptEntity(this);
+    mVtbl = cScriptEntityCamera_vtbl;
+    mSubType = 9;
+    mpCamManager = 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_OnInSeqLock);
 #ifdef SKIP_ASM
-extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, cScriptEntity* a1);
 int cScriptPlayerEntity_GetType(void* self);
-char* GetSSXCameraManualHeader(void* self);
-char* GetSSXCameraTargetHeader(void* self);
-char* GetSSXCameraSubjectHeader(void* self);
-char* GetSSXCameraAlgorithmicHeader(void* self);
+tSSXHeaderCameraManual* GetSSXCameraManualHeader(void* self);
+tSSXHeaderCameraTarget* GetSSXCameraTargetHeader(void* self);
+tSSXHeaderCameraSubject* GetSSXCameraSubjectHeader(void* self);
+tSSXHeaderCameraAlgorithmic* GetSSXCameraAlgorithmicHeader(void* self);
 
 /**
- * Locks this camera script entity to InSeq player entity @p obj and takes its camera sub-type from the entity's data.
+ * Locks this camera script entity to InSeq player entity @p pEntity and takes its camera sub-type from the entity's
+ * data.
  *
- * Runs the base lock (cScriptEntity_OnInSeqLock), then reads the signed sub-type byte into +0xC by the entity's type
- * (cScriptPlayerEntity_GetType): types 0-2 from +0x21 of the header from GetSSXCameraManualHeader, GetSSXCameraTargetHeader or GetSSXCameraSubjectHeader, type 3 from
- * +0x1C of GetSSXCameraAlgorithmicHeader's. Other types leave it unchanged.
+ * Runs the base lock (cScriptEntity::OnInSeqLock), then copies the sub-type byte of the entity's camera header into
+ * mSubType, picking the header by the entity's type (cScriptPlayerEntity_GetType): GetSSXCameraManualHeader,
+ * GetSSXCameraTargetHeader, GetSSXCameraSubjectHeader or GetSSXCameraAlgorithmicHeader. Other types leave it
+ * unchanged.
  *
- * @param obj  the InSeq player entity (cScriptPlayerEntity)
+ * @param pEntity  the InSeq player entity
  */
-extern "C" void cScriptEntityCamera_OnInSeqLock(cScriptEntityCamera* self, void* obj)
+void cScriptEntityCamera::OnInSeqLock(cScriptPlayerEntity* pEntity)
 {
-    cScriptEntity_OnInSeqLock((cScriptEntity*)self, (cScriptEntity*)obj);
-    switch (cScriptPlayerEntity_GetType(obj)) {
-    case 0:
-        self->mSubType = *(signed char*)(GetSSXCameraManualHeader(obj) + 0x21);
+    ((cScriptEntity*)this)->OnInSeqLock(pEntity);
+    switch (cScriptPlayerEntity_GetType(pEntity)) {
+    case keSSXEntityType_CameraManual:
+        mSubType = GetSSXCameraManualHeader(pEntity)->subType;
         break;
-    case 1:
-        self->mSubType = *(signed char*)(GetSSXCameraTargetHeader(obj) + 0x21);
+    case keSSXEntityType_CameraTarget:
+        mSubType = GetSSXCameraTargetHeader(pEntity)->subType;
         break;
-    case 2:
-        self->mSubType = *(signed char*)(GetSSXCameraSubjectHeader(obj) + 0x21);
+    case keSSXEntityType_CameraSubject:
+        mSubType = GetSSXCameraSubjectHeader(pEntity)->subType;
         break;
-    case 3:
-        self->mSubType = *(signed char*)(GetSSXCameraAlgorithmicHeader(obj) + 0x1C);
+    case keSSXEntityType_CameraAlgorithmic:
+        mSubType = GetSSXCameraAlgorithmicHeader(pEntity)->subType;
         break;
     }
 }
@@ -1569,46 +1401,36 @@ extern "C" void cScriptEntityCamera_OnInSeqLock(cScriptEntityCamera* self, void*
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_OnInSeqRelease);
 #ifdef SKIP_ASM
-extern "C" void cScriptEntity_OnInSeqRelease(cScriptEntity* self);
-
 /**
- * Releases this camera script entity's InSeq lock (cScriptEntity_OnInSeqRelease) and resets its sub-type (+0xC) to 9.
+ * Releases this camera script entity's InSeq lock (cScriptEntity::OnInSeqRelease) and resets its sub-type to 9
+ * (none).
  */
-extern "C" void cScriptEntityCamera_OnInSeqRelease(cScriptEntityCamera* self)
+void cScriptEntityCamera::OnInSeqRelease()
 {
-    cScriptEntity_OnInSeqRelease((cScriptEntity*)self);
-    self->mSubType = 9;
+    ((cScriptEntity*)this)->OnInSeqRelease();
+    mSubType = 9;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_IsMatchingEntity);
 #ifdef SKIP_ASM
-// PORT: cSSXScriptEngine_GetScriptSetupInfo is declared (void*) but takes (self, idx).
-// ScriptEngine as scripter/ssxscriptengine.h declares it. The unit does not include that header: it reaches
-// bx/math3d.h, and t2Vector's inline methods there make g++ 2.95 compile cBXScriptEngine_Update differently
-// (a strength-reduced loop without its jump table).
-struct cSSXScriptEngine;
-extern cSSXScriptEngine* ScriptEngine;
-void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
-
 /**
- * Returns whether InSeq player entity @p entity belongs to this camera's view.
+ * Returns whether InSeq player entity @p pEntity belongs to this camera's view.
  *
- * Types 4 and above never match. Otherwise compares word +0xC of the request user data of the entity's owner player
- * (cSSXScriptEngine_GetScriptSetupInfo on ScriptEngine) with the view index (+0xF8) of the camera manager (+0x10).
+ * Only camera entities (manual, target, subject, algorithmic) can match: then the view index of the script setup info
+ * of the entity's owner player (ScriptEngine's GetScriptSetupInfo) must be the camera manager's mViewIndex.
  *
- * @param entity  the InSeq player entity (cScriptPlayerEntity)
- * @param n  the entity type
- * @return 1 on a match, else 0
+ * @param pEntity  the InSeq player entity
+ * @param type  the entity type (eSSXEntityType)
+ * @return true on a match
  */
-extern "C" int cScriptEntityCamera_IsMatchingEntity(cScriptEntityCamera* self, cScriptPlayerEntity* entity, int n)
+bool cScriptEntityCamera::IsMatchingEntity(cScriptPlayerEntity* pEntity, int type)
 {
-    if (n >= 4) {
-        return 0;
+    if (type > keSSXEntityType_CameraAlgorithmic) {
+        return false;
     }
-    return *(int*)((char*)cSSXScriptEngine_GetScriptSetupInfo_2(ScriptEngine, (int)entity->mpOwner) + 0xC) ==
-           *(int*)((char*)self->mpCamManager + 0xF8);
+    return ScriptEngine->GetScriptSetupInfo(pEntity->mpOwner)->viewIndex == mpCamManager->mViewIndex;
 }
 #endif
 
@@ -1620,43 +1442,39 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 /**
  * Constructs a script object of a given type that is not yet registered in the script database.
  *
- * Stores cScriptObject's vtable (mVtbl), @p objType (mObjType), -1 (no database handle, mObjID) and a use count
- * (mInUse) of 0.
+ * Stores cScriptObject's vtable (mVtbl), @p objType (mObjType), no database handle (kScriptObjectID_None) and a use
+ * count (mInUse) of 0.
  *
  * @param objType  the object's script type
- * @return @p self
  */
-void* cScriptObject_cScriptObject(void* self, int objType)
+cScriptObject::cScriptObject(int objType)
 {
-    cScriptObject* object = (cScriptObject*)self;
-    object->mVtbl = cScriptObject_vtbl;
-    object->mObjType = objType;
-    object->mObjID = -1;
-    object->mInUse = 0;
-    return self;
+    mVtbl = cScriptObject_vtbl;
+    mObjType = objType;
+    mObjID = kScriptObjectID_None;
+    mInUse = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject__cScriptObject);
 #ifdef SKIP_ASM
-extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self);
 void operator_delete(int* ptr);
 
 /**
  * Destroys a script object, first removing it from the script database if it is still registered.
  *
- * Restores cScriptObject's vtable (at +0xC). When the database handle at +0x4 is neither -1 nor 0 it calls
- * cScriptObject_DeInitScriptObject() and sets the handle to -1.
+ * Restores cScriptObject's vtable. When the database handle (mObjID) is neither -1 nor 0 it calls
+ * DeInitScriptObject() and sets the handle to -1.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cScriptObject__cScriptObject(cScriptObject* self, int flags)
 {
     self->mVtbl = cScriptObject_vtbl;
-    if (self->mObjID != -1 && self->mObjID != 0) {
-        cScriptObject_DeInitScriptObject(self);
-        self->mObjID = -1;
+    if (self->mObjID != kScriptObjectID_None && self->mObjID != 0) {
+        self->DeInitScriptObject();
+        self->mObjID = kScriptObjectID_None;
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1667,51 +1485,40 @@ extern "C" void cScriptObject__cScriptObject(cScriptObject* self, int flags)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_InitScriptObject);
 #ifdef SKIP_ASM
-struct sBxsVEntryA {
-    short delta;
-    short index;
-    int (*fn)(void*, void*);
-};
-
 /**
  * Registers a script object with the script database and stores the handle it gets.
  *
- * Calls virtual slot 2 of the database object returned by cScriptDatabaseObject_GetDatabaseObject (On Tour
- * cScriptDatabaseObject::GetDatabaseObject) through its vtable at +0x2A8, passing the object, and stores the result in
- * the object's database handle (+0x4, On Tour mObjID); cScriptObject_DeInitScriptObject undoes it with slot 3. On Tour
- * asserts the handle is >= 0 afterwards; retail does not. cSSXScriptEngine_Load registers its script objects with it,
- * and cRider_cRider the rider's.
+ * Calls virtual slot 2 (AddObject) of the database object returned by cScriptDatabaseObject_GetDatabaseObject (On
+ * Tour cScriptDatabaseObject::GetDatabaseObject), passing the object, and stores the result in the object's database
+ * handle (mObjID); DeInitScriptObject undoes it with slot 3. On Tour asserts the handle is >= 0 afterwards; retail
+ * does not. cSSXScriptEngine_Load registers its script objects with it, and cRider_cRider the rider's.
  */
-extern "C" void cScriptObject_InitScriptObject(cScriptObject* self)
+void cScriptObject::InitScriptObject()
 {
-    cScriptDatabaseObject* mgr = (cScriptDatabaseObject*)((char*)cScriptDatabaseObject_GetDatabaseObject());
-    sBxsVEntryA* vt = (sBxsVEntryA*)mgr->mVtbl;
-    self->mObjID = vt[2].fn(vthis(mgr, vt[2]), self);
+    cScriptDatabaseObject* database = (cScriptDatabaseObject*)cScriptDatabaseObject_GetDatabaseObject();
+    // vtable slot 2: AddObject
+    sVEntry<int(void*, cScriptObject*)>* vt = (sVEntry<int(void*, cScriptObject*)>*)database->mVtbl;
+    mObjID = vt[2].fn(vthis(database, vt[2]), this);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_DeInitScriptObject);
 #ifdef SKIP_ASM
-struct sBxsVEntryB {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
-
 /**
  * Removes the script object from the script engine's object database and marks it unregistered.
  *
- * Calls virtual slot 3 of the global script engine (cScriptDatabaseObject_GetDatabaseObject()) through its cScriptDatabaseObject vtable at
- * +0x2A8, passing the object's database handle (+0x4); cScriptDatabaseObject_RemoveObjectAll() uses the same
- * slot to remove each entry. The handle is then set to -1.
+ * Calls virtual slot 3 (RemoveObject) of the script database object (cScriptDatabaseObject_GetDatabaseObject()),
+ * passing the object's database handle (mObjID); cScriptDatabaseObject_RemoveObjectAll() uses the same slot to remove
+ * each entry. The handle is then set to -1.
  */
-extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self)
+void cScriptObject::DeInitScriptObject()
 {
-    cScriptDatabaseObject* mgr = (cScriptDatabaseObject*)((char*)cScriptDatabaseObject_GetDatabaseObject());
-    sBxsVEntryB* vt = (sBxsVEntryB*)mgr->mVtbl;
-    vt[3].fn(vthis(mgr, vt[3]), self->mObjID);
-    self->mObjID = -1;
+    cScriptDatabaseObject* database = (cScriptDatabaseObject*)cScriptDatabaseObject_GetDatabaseObject();
+    // vtable slot 3: RemoveObject
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)database->mVtbl;
+    vt[3].fn(vthis(database, vt[3]), mObjID);
+    mObjID = kScriptObjectID_None;
 }
 #endif
 
@@ -1721,21 +1528,20 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_PauseObjScript);
 /**
  * Pauses the scripts of every script entity the object owns.
  *
- * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls cScriptEntity_PauseEntityScript (On Tour
- * cScriptEntity::PauseEntityScript) on each virtual GetScriptEntity(i) (slot 7). It is the base implementation that
- * classes without their own PauseObjScript inherit (cScriptObjRider's vtable D_00482018). On Tour asserts each entity
- * is non-null; retail does not.
+ * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls cScriptEntity::PauseEntityScript on each
+ * virtual GetScriptEntity(i) (slot 7). It is the base implementation that classes without their own PauseObjScript
+ * inherit (cScriptObjRider's vtable D_00482018). On Tour asserts each entity is non-null; retail does not.
  */
-extern "C" void cScriptObject_PauseObjScript(cScriptObject* self)
+void cScriptObject::PauseObjScript()
 {
     int i = 0;
     // vtable slot 6: GetNumScriptEntities
-    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)self->mVtbl;
-    int n = countVtable[6].fn(vthis(self, countVtable[6]));
+    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)mVtbl;
+    int n = countVtable[6].fn(vthis(this, countVtable[6]));
     for (; i < n; i++) {
         // vtable slot 7: GetScriptEntity
-        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)self->mVtbl;
-        cScriptEntity_PauseEntityScript(entityVtable[7].fn(vthis(self, entityVtable[7]), i));
+        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)mVtbl;
+        entityVtable[7].fn(vthis(this, entityVtable[7]), i)->PauseEntityScript();
     }
 }
 #endif
@@ -1746,20 +1552,20 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_ResumeObjScript);
 /**
  * Resumes the scripts of every script entity the object owns.
  *
- * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls cScriptEntity_ResumeEntityScript (On Tour
- * cScriptEntity::ResumeEntityScript) on each virtual GetScriptEntity(i) (slot 7); the base implementation that
- * cScriptObjRider (vtable D_00482018) inherits. The counterpart of cScriptObject_PauseObjScript.
+ * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls cScriptEntity::ResumeEntityScript on each
+ * virtual GetScriptEntity(i) (slot 7); the base implementation that cScriptObjRider (vtable D_00482018) inherits. The
+ * counterpart of PauseObjScript.
  */
-extern "C" void cScriptObject_ResumeObjScript(cScriptObject* self)
+void cScriptObject::ResumeObjScript()
 {
     int i = 0;
     // vtable slot 6: GetNumScriptEntities
-    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)self->mVtbl;
-    int n = countVtable[6].fn(vthis(self, countVtable[6]));
+    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)mVtbl;
+    int n = countVtable[6].fn(vthis(this, countVtable[6]));
     for (; i < n; i++) {
         // vtable slot 7: GetScriptEntity
-        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)self->mVtbl;
-        cScriptEntity_ResumeEntityScript(entityVtable[7].fn(vthis(self, entityVtable[7]), i));
+        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)mVtbl;
+        entityVtable[7].fn(vthis(this, entityVtable[7]), i)->ResumeEntityScript();
     }
 }
 #endif
@@ -1770,17 +1576,16 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnStartObjectUse__FPv);
 /**
  * Marks a script object as taken by one more user: increments its use count.
  *
- * Adds 1 to the in-use count at +0x8 (On Tour mInUse). The player ID argument is ignored, so the C declares only the
- * object. The subclass overrides (cScriptObjCamera_OnStartObjectUse, cScriptObjRider_OnStartObjectUse, cScriptObjEvent_OnStartObjectUse, cScriptObjCameraManager_OnStartObjectUse) call
- * it on their cScriptObject part.
+ * Adds 1 to the in-use count (mInUse). The player ID argument is ignored, so the C declares only the object. The
+ * subclass overrides (cScriptObjCamera_OnStartObjectUse, cScriptObjRider_OnStartObjectUse,
+ * cScriptObjEvent_OnStartObjectUse, cScriptObjCameraManager_OnStartObjectUse) call it on their cScriptObject part.
  *
  * @return the new use count (left in $v0 by the code; On Tour's method is void)
  */
-int cScriptObject_OnStartObjectUse(void* vself)
+int cScriptObject::OnStartObjectUse()
 {
-    cScriptObject* self = (cScriptObject*)vself;
-    int useCount = self->mInUse + 0x1;
-    self->mInUse = useCount;
+    int useCount = mInUse + 1;
+    mInUse = useCount;
     return useCount;
 }
 #endif
@@ -1793,12 +1598,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnEndObjectUse__FPv);
  *
  * @return the new use count
  */
-int cScriptObject_OnEndObjectUse(void* vself)
+int cScriptObject::OnEndObjectUse()
 {
-    cScriptObject* self = (cScriptObject*)vself;
-    int useCount = self->mInUse - 0x1;
-    self->mInUse = useCount;
+    int useCount = mInUse - 1;
+    mInUse = useCount;
     return useCount;
 }
 #endif
-

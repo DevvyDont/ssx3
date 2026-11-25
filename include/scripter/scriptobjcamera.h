@@ -36,6 +36,16 @@ struct cScriptObjCamera {
     float mBaseRotY;                          // 0x074 [O]
     float mBaseRotZ;                          // 0x078 [O]
     int mViewIndex;                           // 0x07C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void SetCameraManager(int val) __asm__("cScriptObjCamera_SetCameraManager__FPvi");
+    void SetCameraEntity(void* anim) __asm__("cScriptObjCamera_SetCameraEntity");
+    void SetCameraWeight(float val) __asm__("cScriptObjCamera_SetCameraWeight__FPvf");
+    int IsInUseByPlayer(int val) __asm__("cScriptObjCamera_IsInUseByPlayer");
+    void PauseObjScript() __asm__("cScriptObjCamera_PauseObjScript");
+    void ResumeObjScript() __asm__("cScriptObjCamera_ResumeObjScript");
+    void OnStartObjectUse() __asm__("cScriptObjCamera_OnStartObjectUse");
+    void OnEndObjectUse() __asm__("cScriptObjCamera_OnEndObjectUse");
 };
 
 CHECK_OFFSET(cScriptObjCamera, mObjType, 0x000);

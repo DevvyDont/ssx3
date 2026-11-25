@@ -34,6 +34,21 @@ struct cObjNode;
 struct cScriptObjCameraManager;
 struct cTransitionObj;
 
+// A script transition's kind (tScriptObjTransitionInfo::transition). [O] On Tour's enum eScriptTransition, names and
+// values. [R] cScriptObjTransition's ctor stores Num (9), and SetTransition treats Num as "no transition".
+enum eScriptTransition {
+    keScriptTransition_CameraBlend = 0,
+    keScriptTransition_Fade = 1,
+    keScriptTransition_WipeLeft = 2,
+    keScriptTransition_WipeRight = 3,
+    keScriptTransition_WipeUp = 4,
+    keScriptTransition_WipeDown = 5,
+    keScriptTransition_WipeCircle = 6,
+    keScriptTransition_CrossFade = 7,
+    keScriptTransition_Cut = 8,
+    keScriptTransition_Num = 9
+};
+
 // The script's transition request (On Tour tScriptObjTransitionInfo, 0x18). [R] cScriptObjTransition's ctor stores
 // transition = 9 and zeroes the rest; [U] cTransitionMan_OnStartObjectUse reads all six (it passes outTime (+0xC) as
 // StartTransition's inTime and inTime (+0x4) as its outTime).

@@ -38,6 +38,7 @@
 
 struct cScriptObject;
 struct cInSeq;
+struct cScriptPlayerMain;
 struct cMoviePlayer;
 struct tBXScriptState;
 struct tDataInstanceInfo;
@@ -422,6 +423,83 @@ CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, areAnglesWorldRelative, 0x1E);
 CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01F, 0x1F);
 CHECK_SIZE(tSSXHeaderCameraAlgorithmic, 0x20);
 
+// The SSX headers of manual, target and subject camera entities' script data (GetSSXCameraManualHeader,
+// GetSSXCameraTargetHeader, GetSSXCameraSubjectHeader). [O] On Tour's tSSXHeaderCameraManual / Target / Subject
+// (0x24 each, the same first 0x22 bytes), same offsets as retail's reads.
+struct tSSXHeaderCameraManual {
+    float nearPlane;                // 0x00 [O]; [U] cScriptManualAlgorithm_update: Near (manual)
+    float farPlane;                 // 0x04 [O]; [U] ditto: Far
+    float basePosX;                 // 0x08 [O]; [U] cScriptObjCamera_CalculateBaseTransform_SE: base translation
+    float basePosY;                 // 0x0C [O]
+    float basePosZ;                 // 0x10 [O]
+    float baseRotZ;                 // 0x14 [O]; [U] ditto: rz (degrees)
+    float baseRotY;                 // 0x18 [O]; [U] ditto: ry
+    float baseRotX;                 // 0x1C [O]; [U] ditto: rx
+    signed char anchorPos;          // 0x20 [O]; [U] ditto: the anchor (cSSXScriptEngine_GetAnchorOrientation)
+    signed char subType;            // 0x21 [O]; [U] cScriptEntityCamera_OnInSeqLock: mSubType = this byte
+    signed char padding[2];         // 0x22 [O]
+};
+
+CHECK_OFFSET(tSSXHeaderCameraManual, anchorPos, 0x20);
+CHECK_OFFSET(tSSXHeaderCameraManual, subType, 0x21);
+CHECK_SIZE(tSSXHeaderCameraManual, 0x24);
+
+struct tSSXHeaderCameraTarget {
+    float nearPlane;                // 0x00 [O]; [U] cScriptManualAlgorithm_update: Near (manual)
+    float farPlane;                 // 0x04 [O]; [U] ditto: Far
+    float basePosX;                 // 0x08 [O]; [U] cScriptObjCamera_CalculateBaseTransform_SE: base translation
+    float basePosY;                 // 0x0C [O]
+    float basePosZ;                 // 0x10 [O]
+    float baseRotZ;                 // 0x14 [O]; [U] ditto: rz (degrees)
+    float baseRotY;                 // 0x18 [O]; [U] ditto: ry
+    float baseRotX;                 // 0x1C [O]; [U] ditto: rx
+    signed char anchorPos;          // 0x20 [O]; [U] ditto: the anchor (cSSXScriptEngine_GetAnchorOrientation)
+    signed char subType;            // 0x21 [O]; [U] cScriptEntityCamera_OnInSeqLock: mSubType = this byte
+    signed char areAnglesWorldRelative; // 0x22 [O]
+    signed char padding;            // 0x23 [O]
+};
+
+CHECK_OFFSET(tSSXHeaderCameraTarget, anchorPos, 0x20);
+CHECK_OFFSET(tSSXHeaderCameraTarget, subType, 0x21);
+CHECK_SIZE(tSSXHeaderCameraTarget, 0x24);
+
+struct tSSXHeaderCameraSubject {
+    float nearPlane;                // 0x00 [O]; [U] cScriptManualAlgorithm_update: Near (manual)
+    float farPlane;                 // 0x04 [O]; [U] ditto: Far
+    float basePosX;                 // 0x08 [O]; [U] cScriptObjCamera_CalculateBaseTransform_SE: base translation
+    float basePosY;                 // 0x0C [O]
+    float basePosZ;                 // 0x10 [O]
+    float baseRotZ;                 // 0x14 [O]; [U] ditto: rz (degrees)
+    float baseRotY;                 // 0x18 [O]; [U] ditto: ry
+    float baseRotX;                 // 0x1C [O]; [U] ditto: rx
+    signed char anchorPos;          // 0x20 [O]; [U] ditto: the anchor (cSSXScriptEngine_GetAnchorOrientation)
+    signed char subType;            // 0x21 [O]; [U] cScriptEntityCamera_OnInSeqLock: mSubType = this byte
+    signed char subject;            // 0x22 [O]
+    signed char padding;            // 0x23 [O]
+};
+
+CHECK_OFFSET(tSSXHeaderCameraSubject, anchorPos, 0x20);
+CHECK_OFFSET(tSSXHeaderCameraSubject, subType, 0x21);
+CHECK_SIZE(tSSXHeaderCameraSubject, 0x24);
+
+// An SSX script entity's type (tInSeqEntityHeader::type, cScriptPlayerEntity_GetType). Names ours (On Tour's DWARF has
+// no such enum). [U] the camera code picks the header getter by it: 0 GetSSXCameraManualHeader, 1 ...TargetHeader,
+// 2 ...SubjectHeader, 3 ...AlgorithmicHeader (cScriptEntityCamera_OnInSeqLock, cScriptCameraController_addCamera,
+// cScriptObjCamera_CalculateBaseTransform_SE); cScriptObjCameraManager_IsMatchingEntity takes only type 4; the role
+// filter reads type 5 with GetSSXActorHeader1; cScriptObjGS_IsMatchingEntity takes 6 and
+// cScriptObjEvent_IsMatchingEntity 7. The header getters' retail order (camera manual, target, subject,
+// algorithmic, manager, actor, then the game state manager and game event frames) agrees.
+enum eSSXEntityType {
+    keSSXEntityType_CameraManual = 0,
+    keSSXEntityType_CameraTarget = 1,
+    keSSXEntityType_CameraSubject = 2,
+    keSSXEntityType_CameraAlgorithmic = 3,
+    keSSXEntityType_CameraManager = 4,
+    keSSXEntityType_Actor = 5,
+    keSSXEntityType_GameStateManager = 6,
+    keSSXEntityType_GameEvent = 7
+};
+
 struct tSSXScriptBankInfo {
     void* dataBankHandle; // 0x0 [O]; [R] cDataManager attach handle (SyncLoadScriptBank); [U] detached by PurgeScriptBank
     int dataIdentifier;   // 0x4 [O]; [R] the bank's key (SyncLoadScriptBank, cSSXScriptEngine_AsyncLoadScriptBank); Clear sets -1
@@ -435,6 +513,9 @@ CHECK_OFFSET(tSSXScriptBankInfo, dataIdentifier, 0x4);
 CHECK_OFFSET(tSSXScriptBankInfo, asyncHandle, 0x8);
 CHECK_OFFSET(tSSXScriptBankInfo, dynamicMem, 0xC);
 CHECK_SIZE(tSSXScriptBankInfo, 0x10);
+
+struct cRider;
+struct t4Vector;
 
 struct cSSXScriptEngine {
     // --- cScriptDatabaseObject (base of cBXScriptEngine; ctor cScriptDatabaseObject_cScriptDatabaseObject, vtable _vt$21cScriptDatabaseObject)
@@ -514,6 +595,116 @@ struct cSSXScriptEngine {
                                                  //       ProcessAsyncLoadScriptBankComplete set it around the cDataManager
                                                  //       attach, OnAttachData reads it
     char unk_A4C[0x4];                           // 0xA4C untouched; tail padding (On Tour also pads 0xCA8 -> 0xCB0)
+
+    // Methods (retail / [O] On Tour names), each bound to its retail symbol by an asm label.
+    tSSXScriptSetupInfo* GetScriptSetupInfo(cScriptPlayerMain* pPlayer)
+        __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
+    void Load() __asm__("cSSXScriptEngine_Load");
+    void Purge() __asm__("cSSXScriptEngine_Purge");
+    void Init() __asm__("cSSXScriptEngine_Init__FPv");
+    void DeInit() __asm__("cSSXScriptEngine_DeInit__FPv");
+    void Update() __asm__("cSSXScriptEngine_Update");
+    void UpdateLoad() __asm__("cSSXScriptEngine_UpdateLoad");
+    void* Render() __asm__("cSSXScriptEngine_Render__FPv");
+    void Restart() __asm__("cSSXScriptEngine_Restart");
+    void AttachAnchorDataTable(int key, unsigned int* val) __asm__("cSSXScriptEngine_AttachAnchorDataTable");
+    void DetachAnchorDataTable(int key) __asm__("cSSXScriptEngine_DetachAnchorDataTable");
+    void ForceEndScriptsAll() __asm__("cSSXScriptEngine_ForceEndScriptsAll");
+    int ForcePlayUpdate(int key) __asm__("cSSXScriptEngine_ForcePlayUpdate");
+    void AsyncLoadTrack() __asm__("cSSXScriptEngine_AsyncLoadTrack");
+    void PurgeTrack() __asm__("cSSXScriptEngine_PurgeTrack");
+    int IsLoadTrackComplete() __asm__("cSSXScriptEngine_IsLoadTrackComplete");
+    int IsPauseMenuAllowed() __asm__("cSSXScriptEngine_IsPauseMenuAllowed");
+    void DisallowNISListSkip(int val) __asm__("cSSXScriptEngine_DisallowNISListSkip__FPvi");
+    void SetNISListViewIndex(int viewIndex) __asm__("cSSXScriptEngine_SetNISListViewIndex");
+    void AddToNISListByVideoCategory(int i, int category, int scriptControlBits)
+        __asm__("cSSXScriptEngine_AddToNISListByVideoCategory");
+    void AddToNISListByScriptCategory(int i, int scriptCategory, int scriptControlBits, int selectScriptNow,
+                                      int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_AddToNISListByScriptCategory");
+    void AddToNISListByScriptIndex(int i, int scriptIndex, int scriptControlBits, int mainCharAIIndex,
+                                   int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_AddToNISListByScriptIndex");
+    void AddToNISListByScriptHashID(int nisList, int key, int scriptControlBits, int mainCharAIIndex,
+                                    int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_AddToNISListByScriptHashID");
+    void ReadyNISList(int i) __asm__("cSSXScriptEngine_ReadyNISList");
+    int PlayNISList(int i, int startWithTransitionIn, int forceUpdate) __asm__("cSSXScriptEngine_PlayNISList");
+    int TransferNISList(int destNISList, int sourceNISList) __asm__("cSSXScriptEngine_TransferNISList");
+    void PauseNISList(int i, int isPaused) __asm__("cSSXScriptEngine_PauseNISList");
+    void SkipNISListScripts(int i, int numScriptsToSkip, int doTransition)
+        __asm__("cSSXScriptEngine_SkipNISListScripts");
+    void ResetNISList(int i) __asm__("cSSXScriptEngine_ResetNISList");
+    void ResetNISListAll() __asm__("cSSXScriptEngine_ResetNISListAll");
+    void GetNISListScriptCategory(int i, int listIndex) __asm__("cSSXScriptEngine_GetNISListScriptCategory");
+    void GetNISListVideoCategory(int nisList, int listIndex) __asm__("cSSXScriptEngine_GetNISListVideoCategory");
+    void GetNISListScriptIndex(int nisList, int listIndex) __asm__("cSSXScriptEngine_GetNISListScriptIndex");
+    void GetNISListState(int i) __asm__("cSSXScriptEngine_GetNISListState");
+    void GetNISListPlayState(int i) __asm__("cSSXScriptEngine_GetNISListPlayState");
+    void GetNISListLength(int i) __asm__("cSSXScriptEngine_GetNISListLength");
+    void IsNISListNextScriptReady(int nisList) __asm__("cSSXScriptEngine_IsNISListNextScriptReady");
+    int IsActiveNISInTransition() __asm__("cSSXScriptEngine_IsActiveNISInTransition");
+    int IsActiveNISSkippable() __asm__("cSSXScriptEngine_IsActiveNISSkippable");
+    int IsPlayingNISListPlayer(int pScriptPlayerMain) __asm__("cSSXScriptEngine_IsPlayingNISListPlayer");
+    void AddToIdleListByScriptCategory(int i, int scriptCategory, int flag, int mainCharAIIndex,
+                                       int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_AddToIdleListByScriptCategory");
+    void ReadyIdleList(int i, int flag) __asm__("cSSXScriptEngine_ReadyIdleList");
+    void PlayIdleList(int i) __asm__("cSSXScriptEngine_PlayIdleList");
+    void ResetIdleList(int i) __asm__("cSSXScriptEngine_ResetIdleList");
+    void ResetIdleListAll() __asm__("cSSXScriptEngine_ResetIdleListAll");
+    void GetIdleListState(int i) __asm__("cSSXScriptEngine_GetIdleListState");
+    int RequestScriptByCategory(int category, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_RequestScriptByCategory");
+    int RequestScriptByIndex(int key, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_RequestScriptByIndex");
+    int RequestScriptByHashID(int id, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_RequestScriptByHashID");
+    void PlayRequestScript(int val, int key, int autoRecycle, int loop) __asm__("cSSXScriptEngine_PlayRequestScript");
+    int SelectScriptFromCategory(int category) __asm__("cSSXScriptEngine_SelectScriptFromCategory");
+    int OnDataUnavailable(int key) __asm__("cSSXScriptEngine_OnDataUnavailable");
+    void OnPendingDataCancelled(int scriptDataIndex) __asm__("cSSXScriptEngine_OnPendingDataCancelled");
+    void OnScriptDataReleased(int scriptDataIndex) __asm__("cSSXScriptEngine_OnScriptDataReleased");
+    void OnAttachData(const char* ext, void* data, int dataSize, int* kind, int* bank)
+        __asm__("cSSXScriptEngine_OnAttachData");
+    void OnDetachData(void* obj, int dataSize, int type, int id) __asm__("cSSXScriptEngine_OnDetachData");
+    void OnStartScript(cScriptPlayerMain* script, int idx, int* players) __asm__("cSSXScriptEngine_OnStartScript");
+    void OnReleaseRequest(int requestHandle, void* pUserData) __asm__("cSSXScriptEngine_OnReleaseRequest");
+    int AddObject(cScriptObject* obj) __asm__("cSSXScriptEngine_AddObject");
+    void RemoveObject(int idx) __asm__("cSSXScriptEngine_RemoveObject");
+    void IsObjInUseByPlayer(int i, int val) __asm__("cSSXScriptEngine_IsObjInUseByPlayer");
+    void* GetAnimationBankInfo() __asm__("cSSXScriptEngine_GetAnimationBankInfo__FPv");
+    void* GetSoundBankInfo() __asm__("cSSXScriptEngine_GetSoundBankInfo__FPv");
+    void* GetSubjectRider(int slot, int pPlayer) __asm__("cSSXScriptEngine_GetSubjectRider");
+    void* MakeTransitionObject(int type, int mode) __asm__("cSSXScriptEngine_MakeTransitionObject");
+    void OnInSeqPlay(cScriptPlayerMain* pPlayer) __asm__("cSSXScriptEngine_OnInSeqPlay");
+    void OnInSeqUpdate(cScriptPlayerMain* pPlayer, float x, float y) __asm__("cSSXScriptEngine_OnInSeqUpdate");
+    void OnInSeqPlayStopping(cScriptPlayerMain* pPlayer) __asm__("cSSXScriptEngine_OnInSeqPlayStopping");
+    void OnInSeqStop(cScriptPlayerMain* pPlayer) __asm__("cSSXScriptEngine_OnInSeqStop");
+    void PlayTransportSequence(int online, int intro) __asm__("cSSXScriptEngine_PlayTransportSequence");
+    bool EndTransportSequence() __asm__("cSSXScriptEngine_EndTransportSequence");
+    int IsInTransportSequence() __asm__("cSSXScriptEngine_IsInTransportSequence");
+    void AppendStartSequence(int state) __asm__("cSSXScriptEngine_AppendStartSequence");
+    void AppendEndEventSequence() __asm__("cSSXScriptEngine_AppendEndEventSequence");
+    int* GetScriptFromCategory(int cat) __asm__("cSSXScriptEngine_GetScriptFromCategory");
+    void SyncLoadScriptBank(int i, const char* name, int flags, int key, int* buf)
+        __asm__("cSSXScriptEngine_SyncLoadScriptBank");
+    void AsyncLoadScriptBank(int i, const char* name, int flags, int key, int pMem, int memSize)
+        __asm__("cSSXScriptEngine_AsyncLoadScriptBank");
+    void PurgeScriptBank(int i) __asm__("cSSXScriptEngine_PurgeScriptBank");
+    void CancelAsyncLoadScriptBank(int i, int dataIdentifier) __asm__("cSSXScriptEngine_CancelAsyncLoadScriptBank");
+    int GetNextAvailableAsyncBankID() __asm__("cSSXScriptEngine_GetNextAvailableAsyncBankID");
+    int GetBankNumberByDataIdentifier(int key, int start) __asm__("cSSXScriptEngine_GetBankNumberByDataIdentifier");
+    void ProcessAsyncLoadScriptBankComplete(void* file) __asm__("cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete");
+    void ProcessAsyncLoadTrackTableComplete(void* file) __asm__("cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete");
+    void FillOrientationFromStartPointInfo(cRider* obj, t4Vector* pos, int* roll, float* pitch, float* yaw)
+        __asm__("cSSXScriptEngine_FillOrientationFromStartPointInfo");
+    void FillOrientationFromRiderOrientationInfo(cRider* obj, t4Vector* pos, int* roll, float* pitch, float* yaw)
+        __asm__("cSSXScriptEngine_FillOrientationFromRiderOrientationInfo");
+    void* AllocScriptSetupInfo() __asm__("cSSXScriptEngine_AllocScriptSetupInfo__FPv");
+    void ReleaseScriptSetupInfo(void* vsetupInfo) __asm__("cSSXScriptEngine_ReleaseScriptSetupInfo__FPvT0");
+    int IsBankLoading(int i) __asm__("cSSXScriptEngine_IsBankLoading");
+    void ClearNISPlayListState() __asm__("cSSXScriptEngine_ClearNISPlayListState");
 };
 
 CHECK_OFFSET(cSSXScriptEngine, mpObjectDatabase, 0x000);

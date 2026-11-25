@@ -21,11 +21,18 @@ struct cScriptObject;
 // sScrEnt27D390).
 struct cScriptEntity;
 
+// Whether a player uses a script entity (tScriptEntityRecord::relation). [O] eScriptEntityRelation.
+enum eScriptEntityRelation {
+    keScriptEntityRelation_None = 0,
+    keScriptEntityRelation_InUse = 1,
+    keScriptEntityRelation_Num = 2
+};
+
 struct tScriptEntityRecord {
     cScriptEntity* pEntity;         // 0x00 [O]; [U] RemoveEntity clears it, GetAvailableEntities returns it
     int objID;                      // 0x04 [O]
     int playerID;                   // 0x08 [O]; [U] MarkEntityAsUsed stores it, GetPlayerIDByEntity returns it
-    int relation;                   // 0x0C [O] eScriptEntityRelation; [U] MarkEntityAsUsed stores 1
+    eScriptEntityRelation relation; // 0x0C [O]; [U] MarkEntityAsUsed stores 1 (in use)
     int reservedPlayerID;           // 0x10 [O]
 };
 
@@ -41,6 +48,23 @@ struct cScriptDatabaseObject {
     tScriptEntityRecord mEntityDatabase[30]; // 0x050 [O] tScriptEntityRecord[30] {pEntity, objID, playerID, relation,
                                          //       reservedPlayerID}
     void** mVtbl;                        // 0x2A8 [R] cScriptDatabaseObject_vtbl
+
+    // Methods bound to their retail symbols by asm labels.
+    int AddObject(void* scriptObject) __asm__("cScriptDatabaseObject_AddObject");
+    bool RemoveObject(int idx) __asm__("cScriptDatabaseObject_RemoveObject");
+    void RemoveObjectAll() __asm__("cScriptDatabaseObject_RemoveObjectAll");
+    void MarkObjectAsReserved(int idx, int val) __asm__("cScriptDatabaseObject_MarkObjectAsReserved");
+    void MarkObjectAsUnreserved(int idx) __asm__("cScriptDatabaseObject_MarkObjectAsUnreserved");
+    bool IsEntityInUseByPlayer(int i, int val) __asm__("cScriptDatabaseObject_IsEntityInUseByPlayer");
+    int GetPlayerIDByEntity(cScriptEntity* entity) __asm__("cScriptDatabaseObject_GetPlayerIDByEntity");
+    int GetObject(int i) __asm__("cScriptDatabaseObject_GetObject__FPvi");
+    int AddEntity(int idx, void* item) __asm__("cScriptDatabaseObject_AddEntity");
+    int RemoveEntity(void* msg) __asm__("cScriptDatabaseObject_RemoveEntity");
+    void MarkEntityAsUsed(cScriptEntity* key, int value) __asm__("cScriptDatabaseObject_MarkEntityAsUsed");
+    void MarkEntityAsFree(cScriptEntity* key) __asm__("cScriptDatabaseObject_MarkEntityAsFree");
+    void MarkEntityAsReserved(void* entity, int playerId) __asm__("cScriptDatabaseObject_MarkEntityAsReserved");
+    void MarkEntityAsUnreserved(void* entity) __asm__("cScriptDatabaseObject_MarkEntityAsUnreserved");
+    int GetAvailableEntities(int key, int* out, int max) __asm__("cScriptDatabaseObject_GetAvailableEntities");
 };
 
 CHECK_OFFSET(cScriptDatabaseObject, mpObjectDatabase, 0x000);

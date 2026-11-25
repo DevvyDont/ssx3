@@ -33,6 +33,21 @@
 
 #include "layout.h"
 
+// mObjID of an object the script database has not registered (name ours). [R] the ctor and DeInitScriptObject store
+// it; the dtor deinitialises an object whose mObjID is neither this nor 0.
+enum { kScriptObjectID_None = -1 };
+
+// cScriptObject::mObjType: which kind of script object this is (names ours; On Tour keeps a plain int). [R] the
+// values the derived ctors pass to cScriptObject's ctor (see the comment at the top).
+enum eScriptObjectType {
+    keScriptObjectType_CameraManager = 0,
+    keScriptObjectType_Camera = 1,
+    keScriptObjectType_Transition = 2,
+    keScriptObjectType_Rider = 3,
+    keScriptObjectType_GameState = 4,
+    keScriptObjectType_Event = 5
+};
+
 struct cScriptObject {
     int mObjType;    // 0x0 [O] (int there); [P] GetObjectType (lw 0x0); [R] the ctor stores its objType argument;
                      //     [U] cScriptObject_GetObjectType
@@ -43,6 +58,17 @@ struct cScriptObject {
                      //     cScriptObject_IsInUse (> 0)
     void** mVtbl;    // 0xC [R] cScriptObject_vtbl (ctor and dtor); [P] the paired dtor stores it at 0xC in both builds;
                      //     [U] PauseObjScript / ResumeObjScript call slots 6 and 7 through it
+
+    // Methods ([O] On Tour's names), each bound to its retail symbol by an asm label. The virtual ones are declared as
+    // plain members, since the layout above is flat. OnStartObjectUse / OnEndObjectUse return the new use count (On
+    // Tour: void, with an unused playerID).
+    cScriptObject(int objType) __asm__("cScriptObject_cScriptObject__FPvi");
+    void InitScriptObject() __asm__("cScriptObject_InitScriptObject");
+    void DeInitScriptObject() __asm__("cScriptObject_DeInitScriptObject");
+    void PauseObjScript() __asm__("cScriptObject_PauseObjScript");
+    void ResumeObjScript() __asm__("cScriptObject_ResumeObjScript");
+    int OnStartObjectUse() __asm__("cScriptObject_OnStartObjectUse__FPv");
+    int OnEndObjectUse() __asm__("cScriptObject_OnEndObjectUse__FPv");
 };
 
 CHECK_OFFSET(cScriptObject, mObjType, 0x0);

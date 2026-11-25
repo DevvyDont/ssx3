@@ -35,6 +35,8 @@ struct cScriptPlayerEntity;
 struct cScriptObjCamera;
 struct cScriptObjTransition;
 
+struct tSSXFrameCameraManager;
+
 struct cScriptObjCameraManager {
     // --- cScriptObject (ctor cScriptObject_cScriptObject__FPvi(self, 0))
     int mObjType;                               // 0x000 [O]; [R] cScriptObject_cScriptObject stores its objType (0
@@ -78,6 +80,24 @@ struct cScriptObjCameraManager {
     int mUseFocusBox;                           // 0x110 [O] bool; [U] ResetScriptManagementVars 0;
                                                 //       OnStartObjectUse / OnEndObjectUse
     char unk_114[0xC];                          // 0x114 untouched: tail padding to 16 bytes
+
+    // Methods bound to their retail symbols by asm labels.
+    void Update() __asm__("cScriptObjCameraManager_Update");
+    void SetViewIndex(int val) __asm__("cScriptObjCameraManager_SetViewIndex__FPvi");
+    void* GetScriptEntity(int index) __asm__("cScriptObjCameraManager_GetScriptEntity");
+    int AddCameraObject(cScriptObjCamera* obj) __asm__("cScriptObjCameraManager_AddCameraObject");
+    bool SetTransitionObject(void* obj) __asm__("cScriptObjCameraManager_SetTransitionObject");
+    void OnStartObjectUse(int val) __asm__("cScriptObjCameraManager_OnStartObjectUse");
+    void OnEndObjectUse(int playerID) __asm__("cScriptObjCameraManager_OnEndObjectUse");
+    void OnInSeqKeyEvent(cScriptPlayerEntity* obj, int type, int flags, float currFrame)
+        __asm__("cScriptObjCameraManager_OnInSeqKeyEvent");
+    void OnInSeqUpdate(void* obj, float currFrame, float dt) __asm__("cScriptObjCameraManager_OnInSeqUpdate");
+    bool IsMatchingEntity(cScriptPlayerEntity* entity, int n) __asm__("cScriptObjCameraManager_IsMatchingEntity");
+    void ResetScriptManagementVars() __asm__("cScriptObjCameraManager_ResetScriptManagementVars");
+    void SetupCameraObject(int ch, int anim) __asm__("cScriptObjCameraManager_SetupCameraObject");
+    int GetCameraObjectByTrack(int i) __asm__("cScriptObjCameraManager_GetCameraObjectByTrack");
+    void DoCameraTransition(tSSXFrameCameraManager* frame, float currFrame)
+        __asm__("cScriptObjCameraManager_DoCameraTransition");
 };
 
 CHECK_OFFSET(cScriptObjCameraManager, mObjType, 0x000);

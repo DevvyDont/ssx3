@@ -183,6 +183,14 @@ struct cScriptObjEvent {
     tScriptSoundBankInfo* mpSoundBankInfo;       // 0xF8 [O] (On Tour 0xF4); [R] ctor 0; [U] OnStartObjectUse binds the
                                                  //      script's bank (cSSXScriptEngine_GetSoundBankInfo__FPv), OnEndObjectUse
                                                  //      clears it, ScriptSoundIDToGameSoundInfo reads its bankNum (+0x4)
+
+    // Methods bound to their retail symbols by asm labels.
+    void Update() __asm__("cScriptObjEvent_Update");
+    void OnStartObjectUse() __asm__("cScriptObjEvent_OnStartObjectUse");
+    void OnEndObjectUse() __asm__("cScriptObjEvent_OnEndObjectUse");
+    bool IsMatchingEntity(cScriptPlayerEntity* entity, int type) __asm__("cScriptObjEvent_IsMatchingEntity");
+    void ScriptSoundIDToGameSoundInfo(int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
+        __asm__("cScriptObjEvent_ScriptSoundIDToGameSoundInfo__FPviT0T0");
 };
 
 CHECK_OFFSET(cScriptObjEvent, mVtbl, 0x00);

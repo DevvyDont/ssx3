@@ -43,6 +43,13 @@ struct cScriptEntityCamera {
                                            //      cScriptEntityCamera_SetCameraManager (declared int), the camera
                                            //      manager's ctor sets it to itself; IsMatchingEntity reads its
                                            //      mViewIndex (+0xF8)
+
+    // Methods ([O] On Tour's names), each bound to its retail symbol by an asm label. The virtual ones are declared as
+    // plain members, since the layout above is flat; retail's C declares only the parameters they use.
+    cScriptEntityCamera() __asm__("cScriptEntityCamera_cScriptEntityCamera");
+    void OnInSeqLock(cScriptPlayerEntity* pEntity) __asm__("cScriptEntityCamera_OnInSeqLock");
+    void OnInSeqRelease() __asm__("cScriptEntityCamera_OnInSeqRelease");
+    bool IsMatchingEntity(cScriptPlayerEntity* pEntity, int type) __asm__("cScriptEntityCamera_IsMatchingEntity");
 };
 
 CHECK_OFFSET(cScriptEntityCamera, mVtbl, 0x00);

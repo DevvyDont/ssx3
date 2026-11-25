@@ -34,6 +34,8 @@ struct cScriptPlayerEntity;
 struct tScriptAnimBankInfo;
 struct tScriptSoundBankInfo;
 
+struct cRider;
+
 struct cScriptObjRider {
     // --- cScriptEntity (scripter/scriptentity.h, 0xC)
     void** mVtbl;                         // 0x00 [R] cScriptObjRider_vtbl (ctor and dtor); [U] IsMatchingEntity calls slot 6
@@ -60,6 +62,16 @@ struct cScriptObjRider {
     float mBaseRotY;                      // 0x74 [O]; [P] GetBaseRotY (lwc1); [R] ctor 0; [U] OnStartObjectUse
     float mBaseRotZ;                      // 0x78 [O]; [P] GetBaseRotZ (lwc1); [R] ctor 0; [U] OnStartObjectUse
     char unk_7C[0x4];                     // 0x7C padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    void OnStartObjectUse() __asm__("cScriptObjRider_OnStartObjectUse");
+    void OnEndObjectUse() __asm__("cScriptObjRider_OnEndObjectUse");
+    int IsMatchingEntity(cScriptPlayerEntity* msg, int type) __asm__("cScriptObjRider_IsMatchingEntity");
+    void ScriptAnimIDToGameAnimInfo(int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
+        __asm__("cScriptObjRider_ScriptAnimIDToGameAnimInfo__FPviT0T0");
+    void ScriptSoundIDToGameSoundInfo(int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
+        __asm__("cScriptObjRider_ScriptSoundIDToGameSoundInfo__FPviT0T0");
+    bool IsSuitableRole(cRider* rider, int id, int playerMain) __asm__("cScriptObjRider_IsSuitableRole");
 };
 
 CHECK_OFFSET(cScriptObjRider, mVtbl, 0x00);

@@ -53,6 +53,20 @@ struct cScriptObjTransition {
                                               //      SetTransition__FPvii reads transitionColour (0x28); Update reads the
                                               //      three times (lwc1) and advances currTime (0x2C); GetTransitionInfo
                                               //      returns &mInfo
+
+    // Methods ([O] On Tour's names and parameters), each bound to its retail symbol by an asm label. The virtual ones
+    // are declared as plain members, since the layout above is flat.
+    cScriptObjTransition() __asm__("cScriptObjTransition_cScriptObjTransition");
+    void Update(float frameDelta) __asm__("cScriptObjTransition_Update");
+    void SetCameraManager(cScriptObjCameraManager* pManager) __asm__("cScriptObjTransition_SetCameraManager__FPvi");
+    void SetTransition(int playerID, eScriptTransition transition, float currFrame, float outFrames, float inFrames,
+                       float holdFrames) __asm__("cScriptObjTransition_SetTransition__FPvii");
+    void SetTransition(int playerID, eScriptTransition transition, int transitionColour, float currFrame,
+                       float outFrames, float inFrames, float holdFrames)
+        __asm__("cScriptObjTransition_SetTransition1");
+    bool IsInUseByPlayer(int playerID) __asm__("cScriptObjTransition_IsInUseByPlayer");
+    void PauseObjScript() __asm__("cScriptObjTransition_PauseObjScript");
+    void ResumeObjScript() __asm__("cScriptObjTransition_ResumeObjScript");
 };
 
 CHECK_OFFSET(cScriptObjTransition, mObjType, 0x00);
