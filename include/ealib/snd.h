@@ -37,6 +37,8 @@ typedef struct SNDMEMSTATE SNDMEMSTATE;
 typedef struct SNDIPACKETCALLBACK SNDIPACKETCALLBACK;
 typedef struct SNDREQUESTSTATUS SNDREQUESTSTATUS;
 typedef struct BANKLIST BANKLIST;
+typedef struct SNDTIMERCLIENT SNDTIMERCLIENT;
+typedef struct SNDUSERDATAMSG SNDUSERDATAMSG;
 typedef struct SNDGLOBALSTATE SNDGLOBALSTATE;
 typedef struct SNDPACKETENTRY SNDPACKETENTRY;
 typedef struct SNDPACKETCHAN SNDPACKETCHAN;
@@ -695,6 +697,44 @@ CHECK_OFFSET(BANKLIST, locked, 0xC);
 CHECK_OFFSET(BANKLIST, pad, 0xD);
 CHECK_SIZE(BANKLIST, 0x10);
 
+// SNDTIMERCLIENT (0x10, name ours; retail-only): a node of sndgs.variabletimerclients. [U] SNDSYSI_variabletimerservice
+// walks the list by next and calls func(arg) for each node when sndgs.updatetick has moved; nothing in retail adds a
+// node (the list stays empty). The word at 0x4 is never read.
+struct SNDTIMERCLIENT {
+    struct SNDTIMERCLIENT* next;   // 0x0 [U]
+    int unk_4;                     // 0x4
+    void (*func)(int);             // 0x8 [U] called with arg
+    int arg;                       // 0xC [U]
+};
+
+CHECK_OFFSET(SNDTIMERCLIENT, next, 0x0);
+CHECK_OFFSET(SNDTIMERCLIENT, unk_4, 0x4);
+CHECK_OFFSET(SNDTIMERCLIENT, func, 0x8);
+CHECK_OFFSET(SNDTIMERCLIENT, arg, 0xC);
+CHECK_SIZE(SNDTIMERCLIENT, 0x10);
+
+// SNDUSERDATAMSG (0x20, name ours): what SND hands its user-data clients (sndgs.userdataclient[i](&msg)). [U] both
+// builders keep a 0x20-byte local: SNDBANKI_userdatacallback fills type (its argument: 2 from SNDbankremove), the
+// block and its size from a parsed patch's puserdata[] / userdatasize[]; SNDSTRMI_parseheader fills type 3, a stream
+// header's block and size and the request handle; the game's client cSSXAudio_HandleUserChunk (sound/ssxAudio) acts
+// on type 3. The words at 0xC and 0x14..0x1F are never written.
+struct SNDUSERDATAMSG {
+    int type;                      // 0x00 [U] 2 bank removed, 3 stream header
+    void* pdata;                   // 0x04 [U] the user-data block
+    int size;                      // 0x08 [U] its size
+    int unk_0C;                    // 0x0C
+    int handle;                    // 0x10 [U] SNDSTRMI_parseheader: the stream request's handle
+    int unk_14[3];                 // 0x14
+};
+
+CHECK_OFFSET(SNDUSERDATAMSG, type, 0x00);
+CHECK_OFFSET(SNDUSERDATAMSG, pdata, 0x04);
+// (size at 0x08: CHECK_OFFSET(SNDUSERDATAMSG, size, ...) would clash with the CHECK_SIZE typedef in a C unit.)
+CHECK_OFFSET(SNDUSERDATAMSG, unk_0C, 0x0C);
+CHECK_OFFSET(SNDUSERDATAMSG, handle, 0x10);
+CHECK_OFFSET(SNDUSERDATAMSG, unk_14, 0x14);
+CHECK_SIZE(SNDUSERDATAMSG, 0x20);
+
 // SNDGLOBALSTATE, retail version (0x338 [R]: sndgs 0x0050A8E8 .. the next object D_0050AC20, a separate voice table;
 // On Tour 0x240): the sound system's global state, sndgs [O] (On Tour `SNDGLOBALSTATE sndgs`). [O] member names, order
 // and kinds; retail places them later than On Tour because its SNDSYSOPTS / SNDSYSSET are bigger (0xD4 / 0xA0, see
@@ -730,10 +770,11 @@ struct SNDGLOBALSTATE {
                                    //       runs SNDSYSI_100hzserver until it catches up
     void (*serverclient100hz[6])(void); // 0x184 [O]; [U] SNDSYS_add100hzclient appends, SNDSYSI_100hzserver calls
     void (*serverclient[6])(void); // 0x19C [O]; [U] iSNDserveraddclient appends
-    void* unk_1B4;                 // 0x1B4 [U] a list of {next, ?, fn, arg} nodes SNDSYSI_variabletimerservice calls
-                                   //       when unk_1C0 changes; retail-only
+    struct SNDTIMERCLIENT* variabletimerclients; // 0x1B4 (name ours) [U] the nodes SNDSYSI_variabletimerservice
+                                   //       calls when updatetick changes; retail-only
     int unk_1B8[2];                // 0x1B8
-    int unk_1C0;                   // 0x1C0 [U] SNDDRV_thread counts it; SNDSYSI_variabletimerservice compares it
+    int updatetick;                // 0x1C0 (name ours) [U] counts sound updates: the VBlank handler func_003C1980, or
+                                   //       SNDDRV_thread when there is none; SNDSYSI_variabletimerservice compares it
     float unk_1C4;                 // 0x1C4 [U] SNDPLATFORM_init stores the update period in ms (16.68 / 20 / 10.67)
     void (*userdataclient[4])(void*); // 0x1C8 [O]; [U] SNDSYS_adduserdataclient appends
     void (*restorehook1)(void);    // 0x1D8 (names ours) [U] SNDSYS_restore calls each when set, first of all the
@@ -776,9 +817,9 @@ CHECK_OFFSET(SNDGLOBALSTATE, voicestotal, 0x17E);
 CHECK_OFFSET(SNDGLOBALSTATE, audiotick, 0x180);
 CHECK_OFFSET(SNDGLOBALSTATE, serverclient100hz, 0x184);
 CHECK_OFFSET(SNDGLOBALSTATE, serverclient, 0x19C);
-CHECK_OFFSET(SNDGLOBALSTATE, unk_1B4, 0x1B4);
+CHECK_OFFSET(SNDGLOBALSTATE, variabletimerclients, 0x1B4);
 CHECK_OFFSET(SNDGLOBALSTATE, unk_1B8, 0x1B8);
-CHECK_OFFSET(SNDGLOBALSTATE, unk_1C0, 0x1C0);
+CHECK_OFFSET(SNDGLOBALSTATE, updatetick, 0x1C0);
 CHECK_OFFSET(SNDGLOBALSTATE, unk_1C4, 0x1C4);
 CHECK_OFFSET(SNDGLOBALSTATE, userdataclient, 0x1C8);
 CHECK_OFFSET(SNDGLOBALSTATE, restorehook1, 0x1D8);

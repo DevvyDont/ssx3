@@ -66,6 +66,56 @@ struct PS2_SONY_CODEC_INTERNAL {
                                         //      each chunk there and hands it to sceMpegAddBs
 };
 
+// layer_data: mpeg2decode's per-layer state (the MSSG reference decoder's struct layer_data, EA's memory-buffer
+// variant: no file, read buffer or end pointer before the bit reader). The unit's copy of the mpeg2decode header parser
+// reads through the global ld (D_0050A088), which PS2_SONY_CODEC_INTERNAL_Init points at the base layer D_00509648.
+// Member names are mpeg2decode's (global.h), in its order; tags: [U] retail use. Size not known (block[] etc. unused).
+struct layer_data {
+    unsigned char* Rdptr;                       // 0x000 [U] Initialize_Buffer sets it to the data; Flush_Buffer /
+                                                //       Flush_Buffer32 read a byte at a time from it
+    unsigned int Bfr;                           // 0x004 [U] the 32-bit bit buffer (next bit in the top bit): Show_Bits
+                                                //       reads it, Flush_Buffer shifts and refills it
+    int Incnt;                                  // 0x008 [U] the valid bits in Bfr: Flush_Buffer counts it down / up,
+                                                //       next_start_code aligns with Incnt & 7
+    int Bitcnt;                                 // 0x00C [U] sequence_header reads it
+    int intra_quantizer_matrix[64];             // 0x010 [U] sequence_header
+    int non_intra_quantizer_matrix[64];         // 0x110 [U] sequence_header
+    int chroma_intra_quantizer_matrix[64];      // 0x210 [U] sequence_header copies the intra matrix
+    int chroma_non_intra_quantizer_matrix[64];  // 0x310 [U] sequence_header copies the non-intra matrix
+    void* load_intra_quantizer_matrix;          // 0x410 [U] sequence_header (the unit's Get_Bits returns void*)
+    void* load_non_intra_quantizer_matrix;      // 0x414 [U] sequence_header
+    int load_chroma_intra_quantizer_matrix;     // 0x418 [U] sequence_header clears it
+    int load_chroma_non_intra_quantizer_matrix; // 0x41C [U] sequence_header clears it
+    int MPEG2_Flag;                             // 0x420 [U] slice_header tests it; PS2_SONY_CODEC_INTERNAL_Init
+                                                //       reads it
+    int scalable_mode;                          // 0x424 [U] slice_header: == 1 (data partitioning) reads 7 bits
+    int q_scale_type;                           // 0x428 [U] the picture coding extension sets it; slice_header maps
+                                                //       the quantiser scale code with it
+    int alternate_scan;                         // 0x42C [U] the picture coding extension stores 1 bit
+    int pict_scal;                              // 0x430 [U] picture_header clears it
+    int priority_breakpoint;                    // 0x434 [U] slice_header (data partitioning)
+    int quantizer_scale;                        // 0x438 [U] slice_header
+    int intra_slice;                            // 0x43C [U] slice_header
+};
+
+CHECK_OFFSET(layer_data, Rdptr, 0x000);
+CHECK_OFFSET(layer_data, Bfr, 0x004);
+CHECK_OFFSET(layer_data, Incnt, 0x008);
+CHECK_OFFSET(layer_data, Bitcnt, 0x00C);
+CHECK_OFFSET(layer_data, intra_quantizer_matrix, 0x010);
+CHECK_OFFSET(layer_data, non_intra_quantizer_matrix, 0x110);
+CHECK_OFFSET(layer_data, chroma_intra_quantizer_matrix, 0x210);
+CHECK_OFFSET(layer_data, chroma_non_intra_quantizer_matrix, 0x310);
+CHECK_OFFSET(layer_data, load_intra_quantizer_matrix, 0x410);
+CHECK_OFFSET(layer_data, MPEG2_Flag, 0x420);
+CHECK_OFFSET(layer_data, scalable_mode, 0x424);
+CHECK_OFFSET(layer_data, q_scale_type, 0x428);
+CHECK_OFFSET(layer_data, alternate_scan, 0x42C);
+CHECK_OFFSET(layer_data, pict_scal, 0x430);
+CHECK_OFFSET(layer_data, priority_breakpoint, 0x434);
+CHECK_OFFSET(layer_data, quantizer_scale, 0x438);
+CHECK_OFFSET(layer_data, intra_slice, 0x43C);
+
 CHECK_OFFSET(RCON_DLNode, Next, 0x0);
 CHECK_OFFSET(RCON_DLNode, Prev, 0x4);
 CHECK_SIZE(RCON_DLNode, 0x8);

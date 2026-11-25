@@ -17,6 +17,8 @@
 // C units (ealib/seg_2B4578.c, ealib/seg_2DCAE8.c) name these types without the struct keyword (views group D).
 #ifndef __cplusplus
 typedef struct SHAPE SHAPE;
+typedef struct SHAPEIMAGE SHAPEIMAGE;
+typedef struct SHAPERGBA SHAPERGBA;
 typedef struct SHAPETABLEENTRY SHAPETABLEENTRY;
 typedef struct SHAPEFILE SHAPEFILE;
 #endif
@@ -50,6 +52,48 @@ CHECK_OFFSET(SHAPE, height, 0x6);
 CHECK_OFFSET(SHAPE, centerx, 0x8);
 CHECK_OFFSET(SHAPE, centery, 0xA);
 CHECK_SIZE(SHAPE, 0x10);
+
+// SHAPEIMAGE (0x14, name ours): a SHAPE header the way retail's realgraph code reads it, followed by the word a
+// referenced shape keeps after the header. Same layout as SHAPE up to 0xF, but retail tests the word at 0xC whole
+// (masks 0x1000 / 0x2000, >> 28; SHAPE's bitfields compile to shift + mask instead), so the readers that do take this
+// type. [U] SHAPE_getpixeloffset (flags & 0x2000), SHAPE_getpixeladr (flags & 0x1000 / 0x2000, dataoffset),
+// SHAPE_size (flags & 0x1000, >> 28, >> 13), SHAPE_unpack (flags >> 28) in ealib/seg_2B4578; SHAPE_createat in
+// ealib/seg_2AEDC0 (flags & 0x1000, dataoffset); cFont_downloadTexture (render/font: flags & 0x1000, offset 0x10).
+struct SHAPEIMAGE {
+    unsigned int type : 8;          // 0x0 bits 0..7: SHAPE::type
+    int next : 24;                  // 0x0 bits 8..31: SHAPE::next
+    short width;                    // 0x4 SHAPE::width
+    short height;                   // 0x6 SHAPE::height
+    short centerx;                  // 0x8 SHAPE::centerx
+    short centery;                  // 0xA SHAPE::centery
+    int flags;                      // 0xC SHAPE's shapex .. mipmaps word: 0x1000 referenced, 0x2000 swizzled,
+                                    //     bits 28..31 the mipmap count
+    int dataoffset;                 // 0x10 a referenced shape's pixel data offset from the header (flag 0x1000);
+                                    //      otherwise its first pixels
+};
+
+CHECK_OFFSET(SHAPEIMAGE, width, 0x4);
+CHECK_OFFSET(SHAPEIMAGE, height, 0x6);
+CHECK_OFFSET(SHAPEIMAGE, centerx, 0x8);
+CHECK_OFFSET(SHAPEIMAGE, centery, 0xA);
+CHECK_OFFSET(SHAPEIMAGE, flags, 0xC);
+CHECK_OFFSET(SHAPEIMAGE, dataoffset, 0x10);
+CHECK_SIZE(SHAPEIMAGE, 0x14);
+
+// SHAPERGBA (0x4, name ours): one entry of a 32-bit shape palette (palette block type 0x21). [U] SHAPE_createat
+// (ealib/seg_2AEDC0) starts a new 32-bit palette as a grey ramp: entry i gets r = g = b = i, a = 0xFF.
+struct SHAPERGBA {
+    unsigned char r;                // 0x0 [U]
+    unsigned char g;                // 0x1 [U]
+    unsigned char b;                // 0x2 [U]
+    unsigned char a;                // 0x3 [U] 0xFF
+};
+
+CHECK_OFFSET(SHAPERGBA, r, 0x0);
+CHECK_OFFSET(SHAPERGBA, g, 0x1);
+CHECK_OFFSET(SHAPERGBA, b, 0x2);
+CHECK_OFFSET(SHAPERGBA, a, 0x3);
+CHECK_SIZE(SHAPERGBA, 0x4);
 
 struct SHAPETABLEENTRY {
     char id[4];                     // 0x0 [O] the entry's 4-character name (SHAPE_locatez looks entries up by name)

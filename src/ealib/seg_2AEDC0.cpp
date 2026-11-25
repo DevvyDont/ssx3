@@ -1158,15 +1158,7 @@ extern "C" void *RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY(RCMP_AV_SUBTITLE_ARRAY
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY__AV_SUBTITLE_ARRAY);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char D_00495260[];
-struct sElem_AF020 {
-    char pad[0x34];
-    // PORT: the constructor is RCMP_AV_SUBTITLE_AV_SUBTITLE, defined later in this unit as a C function.
-    sElem_AF020() __asm__("RCMP_AV_SUBTITLE_AV_SUBTITLE");
-    ~sElem_AF020() {}
-    void* operator new[](unsigned int size) { return RCMP_rcmp_sys_ADEC8.alloc(D_00495260, size, 0, 0, RCMP_rcmp_sys_ADEC8.flags); }
-    void operator delete[](void* p) { RCMP_rcmp_sys_ADEC8.free(p); }
-};
+inline void RCMP_AV_SUBTITLE::operator delete[](void* p) { RCMP_rcmp_sys.FreeMemFunc(p); }
 
 /**
  * Destroys a subtitle array: deletes its entries and clears the count.
@@ -1178,9 +1170,9 @@ struct sElem_AF020 {
  */
 extern "C" void RCMP_AV_SUBTITLE_ARRAY__AV_SUBTITLE_ARRAY(RCMP_AV_SUBTITLE_ARRAY* self, int flags)
 {
-    if (((sElem_AF020*)self->mSubTitle)) {
-        delete[] ((sElem_AF020*)self->mSubTitle);
-        (*(sElem_AF020**)&self->mSubTitle) = 0;
+    if (self->mSubTitle) {
+        delete[] self->mSubTitle;
+        self->mSubTitle = 0;
     }
     self->mNumberOfSubtitle = 0;
     if (flags & 1) RCMP_rcmp_sys.FreeMemFunc(self);
@@ -1284,29 +1276,30 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_FindSubtitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(void* self, unsigned int key) __asm__("RCMP_AV_SUBTITLE_ARRAY_FindSubtitle");
+extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int key)
+    __asm__("RCMP_AV_SUBTITLE_ARRAY_FindSubtitle");
 /**
  * Finds the subtitle shown at a frame: the last entry whose frame number is below it.
  *
- * Binary-searches the entries by their frame number (+0x14), which must be ascending, and clamps the result to the
- * array. Called by func_003AE718 with the movie player's current frame.
+ * Binary-searches the entries by their frame number (mFrameNumber), which must be ascending, and clamps the result to
+ * the array. Called by func_003AE718 with the movie player's current frame.
  *
+ * @param subtitleArray  the subtitle array
  * @param key  the frame number
  * @return the entry, or 0 for an empty array
  */
-extern "C" void* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(void* self, unsigned int key)
+extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(RCMP_AV_SUBTITLE_ARRAY* subtitleArray,
+                                                                       unsigned int key)
 {
-    struct S { char* arr; int n; };
-    S* subtitleArray = (S*)self;
-    if (subtitleArray->n == 0) {
+    if (subtitleArray->mNumberOfSubtitle == 0) {
         return 0;
     }
-    int hi = subtitleArray->n;
-    char* arr = subtitleArray->arr;
+    int hi = subtitleArray->mNumberOfSubtitle;
+    RCMP_AV_SUBTITLE* arr = subtitleArray->mSubTitle;
     int lo = -1;
     while (hi - lo >= 2) {
         int mid = (hi + lo) / 2;
-        if (key <= *(unsigned int*)(arr + mid * 0x34 + 0x14)) {
+        if (key <= arr[mid].mFrameNumber) {
             hi = mid;
         } else {
             lo = mid;
@@ -1314,8 +1307,8 @@ extern "C" void* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(void* self, unsigned i
     }
     int i = hi - 1;
     if (i < 0) i = 0;
-    i = (i < subtitleArray->n - 1) ? i : subtitleArray->n - 1;
-    return arr + i * 52;
+    i = (i < (int)subtitleArray->mNumberOfSubtitle - 1) ? i : (int)subtitleArray->mNumberOfSubtitle - 1;
+    return &arr[i];
 }
 #endif
 //100%
@@ -2315,33 +2308,35 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* RCMP_CODEC_vtbl[];
 
-struct sWSList_09A0 {
-    sWSNode2* next;
-    sWSNode2* prev;
-    int empty() { return next == (sWSNode2*)this; }
-    sWSNode2* front() { return next; }
-    void kill() { next = (sWSNode2*)7; prev = (sWSNode2*)7; }
-};
-
-
-static inline void wsUnlink_09A0(sWSNode2* n)
+// RCON::DLList inlines, as retail has them: empty (the head points at itself), front, and the destroyed head (both
+// links 7).
+static inline int wsEmpty_09A0(RCON_DLList* list) { return list->HeadNode.Next == &list->HeadNode; }
+static inline void wsKill_09A0(RCON_DLList* list)
 {
+    list->HeadNode.Next = (RCON_DLNode*)7;
+    list->HeadNode.Prev = (RCON_DLNode*)7;
+}
+
+// Unlinks a frame's node (RCON::DLNode::Remove marks the links 0xB) and destroys the frame, whose node sits at +0x8.
+static inline void wsUnlink_09A0(RCON_DLNode* n)
+{
+    // the frame class has no struct (see ealib/ps2sonycodec.h); its DLNode is at +0x8
     void* obj = n ? (char*)n - 8 : 0;
-    sWSNode2* next = n->next;
-    sWSNode2* prev = n->prev;
-    prev->next = next;
-    next->prev = prev;
-    n->prev = (sWSNode2*)0xB;
-    n->next = (sWSNode2*)0xB;
+    RCON_DLNode* next = n->Next;
+    RCON_DLNode* prev = n->Prev;
+    prev->Next = next;
+    next->Prev = prev;
+    n->Prev = (RCON_DLNode*)0xB;
+    n->Next = (RCON_DLNode*)0xB;
     if (obj) func_003B08E0((RCMP_FRAME*)obj, 3);
 }
 
 /**
  * Destroys the Sony MPEG codec object: buffers, frames and lists.
  *
- * Frees the work area (+0x2C) and chunk buffer (+0x78), unlinks and destroys every frame on the used (+0x18) and free
- * (+0x20) lists with func_003B08E0, marks the list heads with 7, ends with the base CODEC vtable RCMP_CODEC_vtbl and frees
- * the object when flags bit 0 is set. Slot 1 of PS2_SONY_CODEC_INTERNAL_vtbl.
+ * Frees the work area (mpWorkBuffer) and chunk buffer (mpChunkBuffer), unlinks and destroys every frame on the used
+ * (mUsedFrames) and free (mFreeFrames) lists with func_003B08E0, marks the list heads with 7, ends with the base CODEC
+ * vtable RCMP_CODEC_vtbl and frees the object when flags bit 0 is set. Slot 1 of PS2_SONY_CODEC_INTERNAL_vtbl.
  *
  * @param flags  bit 0 frees the object itself
  */
@@ -2356,10 +2351,10 @@ extern "C" void PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_
         RCMP_rcmp_sys.FreeMemFunc(self->mpChunkBuffer);
         self->mpChunkBuffer = 0;
     }
-    while (!(*(sWSList_09A0*)&self->mUsedFrames).empty()) wsUnlink_09A0((*(sWSList_09A0*)&self->mUsedFrames).front());
-    while (!(*(sWSList_09A0*)&self->mFreeFrames).empty()) wsUnlink_09A0((*(sWSList_09A0*)&self->mFreeFrames).front());
-    (*(sWSList_09A0*)&self->mFreeFrames).kill();
-    (*(sWSList_09A0*)&self->mUsedFrames).kill();
+    while (!wsEmpty_09A0(&self->mUsedFrames)) wsUnlink_09A0(self->mUsedFrames.HeadNode.Next);
+    while (!wsEmpty_09A0(&self->mFreeFrames)) wsUnlink_09A0(self->mFreeFrames.HeadNode.Next);
+    wsKill_09A0(&self->mFreeFrames);
+    wsKill_09A0(&self->mUsedFrames);
     self->mVtbl = RCMP_CODEC_vtbl;
     if (flags & 1) RCMP_rcmp_sys.FreeMemFunc(self);
 }
@@ -2634,25 +2629,29 @@ extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
  * Decodes the next picture into a free frame and returns it.
  *
  * Takes a frame from the free list (func_003B10D0), finds its SHAPE pixel data (after the 16-byte header, or at the
- * header's offset when flag 0x1000 is set), has the MPEG decoder (+0x30) write the picture there with sceMpegGetPicture for
- * (width/16) * (height/16) macroblocks, and increments the frame number (+0x10). Likely bug: it does not check for an
- * empty free list before reading the frame. Called by PS2_SONY_CODEC_INTERNAL_GetFrame.
+ * header's dataoffset when flag 0x1000 is set), has the MPEG decoder (mMpeg) write the picture there with
+ * sceMpegGetPicture for (width/16) * (height/16) macroblocks, and increments the frame number (mCurrentFrameNumber).
+ * Likely bug: it does not check for an empty free list before reading the frame. Called by
+ * PS2_SONY_CODEC_INTERNAL_GetFrame.
  *
  * @return the decoded frame
  */
 extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(PS2_SONY_CODEC_INTERNAL* self)
 {
-    sWSItem* item = func_003B10D0(self);
-    char* hdr = *(char**)((char*)item + 0x4);
+    // func_003B10D0's sWSItem is the frame; it starts with its RCMP::FRAME (m_FrameType, m_Shp)
+    RCMP_FRAME* frame = (RCMP_FRAME*)func_003B10D0(self);
+    // the frame's SHAPE, read as SHAPEIMAGE (same layout; retail tests the 0xC word whole)
+    SHAPEIMAGE* shp = (SHAPEIMAGE*)frame->m_Shp;
     char* data;
-    if (*(int*)(hdr + 0xC) & 0x1000) {
-        data = hdr + *(int*)(hdr + 0x10);
+    if (shp->flags & 0x1000) {
+        // ORIGINAL-PTR: a referenced SHAPE's pixel data lies dataoffset bytes from its header
+        data = (char*)shp + shp->dataoffset;
     } else {
-        data = hdr + 0x10;
+        data = (char*)&shp->dataoffset;
     }
     sceMpegGetPicture(self->mMpeg, data, self->mWidth / 16 * self->mHeight / 16);
-    *(int*)&self->mCurrentFrameNumber += 1;
-    return item;
+    self->mCurrentFrameNumber += 1;
+    return frame;
 }
 #endif
 
@@ -2854,18 +2853,18 @@ extern "C" void Flush_Buffer(int n);
 /**
  * Points the MPEG bit reader at new data and fills its bit buffer.
  *
- * Sets the read pointer of the bit reader at ld: +0x0 read pointer, +0x4 32-bit bit buffer (next bit in the top bit),
- * +0x8 count of valid bits to the data, clears the buffer and count and fills them with Flush_Buffer(0). Called by the
+ * Sets the read pointer (Rdptr) of the bit reader at ld to the data, clears the bit buffer (Bfr, next bit in the top
+ * bit) and its count of valid bits (Incnt) and fills them with Flush_Buffer(0). Called by the
  * Sony codec's Init PS2_SONY_CODEC_INTERNAL_Init.
  *
  * @param data  the MPEG data
  */
 extern "C" void Initialize_Buffer(void* data)
 {
-    char* reader = (char*)ld;
-    *(void**)(reader + 0x0) = data;
-    *(int*)(reader + 0x8) = 0;
-    *(int*)(reader + 0x4) = 0;
+    layer_data* reader = ld;
+    reader->Rdptr = (unsigned char*)data;
+    reader->Incnt = 0;
+    reader->Bfr = 0;
     Flush_Buffer(0);
 }
 #endif
@@ -2879,14 +2878,14 @@ INCLUDE_ASM("ealib/seg_2AEDC0", Show_Bits);
 /**
  * Returns the next bits of the MPEG bit reader without consuming them.
  *
- * Shifts the bit buffer (ld +0x4) right by 32 - n.
+ * Shifts the bit buffer (ld->Bfr) right by 32 - n.
  *
  * @param numBits  how many bits (1..32)
  * @return the bits, right-aligned
  */
 extern "C" unsigned int Show_Bits(int numBits)
 {
-    return *(unsigned int*)((char*)ld + 0x4) >> (unsigned int)(-numBits);
+    return ld->Bfr >> (unsigned int)(-numBits);
 }
 #endif
 
@@ -2911,16 +2910,10 @@ void* Get_Bits1(void* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", Flush_Buffer);
 #ifdef SKIP_ASM
-struct sBitReader_1290 {
-    unsigned char* p;   // 0x0
-    unsigned int bits;  // 0x4
-    int count;          // 0x8
-};
-
 // Reads the next byte into the bit buffer; taking the reader by reference matches the target's register copy.
-static inline void FillByte_1290(sBitReader_1290*& r, int c)
+static inline void FillByte_1290(layer_data*& r, int c)
 {
-    r->bits |= *r->p++ << (24 - c);
+    r->Bfr |= *r->Rdptr++ << (24 - c);
 }
 
 /**
@@ -2934,14 +2927,14 @@ static inline void FillByte_1290(sBitReader_1290*& r, int c)
 // Drops n bits from the bit buffer and refills it a byte at a time.
 extern "C" void Flush_Buffer(int n)
 {
-    sBitReader_1290* reader = (sBitReader_1290*)ld;
-    reader->bits <<= n;
-    int bitCount = reader->count - n;
+    layer_data* reader = ld;
+    reader->Bfr <<= n;
+    int bitCount = reader->Incnt - n;
     while (bitCount < 25) {
         FillByte_1290(reader, bitCount);
         bitCount += 8;
     }
-    ((sBitReader_1290*)ld)->count = bitCount;
+    ld->Incnt = bitCount;
 }
 #endif
 
@@ -2971,16 +2964,10 @@ extern "C" void* Get_Bits(int n)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", Flush_Buffer32);
 #ifdef SKIP_ASM
-struct sBitReader_1340 {
-    unsigned char* p;   // 0x0
-    unsigned int bits;  // 0x4
-    int count;          // 0x8
-};
-
 // Reads the next byte into the bit buffer; taking the reader by reference matches the target's register copy.
-static inline void FillByte_1340(sBitReader_1340*& r, int c)
+static inline void FillByte_1340(layer_data*& r, int c)
 {
-    r->bits |= *r->p++ << (24 - c);
+    r->Bfr |= *r->Rdptr++ << (24 - c);
 }
 
 /**
@@ -2992,14 +2979,14 @@ static inline void FillByte_1340(sBitReader_1340*& r, int c)
 // Drops the whole 32-bit buffer and refills it a byte at a time.
 extern "C" void Flush_Buffer32(void)
 {
-    sBitReader_1340* reader = (sBitReader_1340*)ld;
-    reader->bits = 0;
-    int bitCount = reader->count - 32;
+    layer_data* reader = ld;
+    reader->Bfr = 0;
+    int bitCount = reader->Incnt - 32;
     while (bitCount < 25) {
         FillByte_1340(reader, bitCount);
         bitCount += 8;
     }
-    ((sBitReader_1340*)ld)->count = bitCount;
+    ld->Incnt = bitCount;
 }
 #endif
 
@@ -3073,12 +3060,12 @@ void next_start_code_impl(void* self) __asm__("next_start_code");
 /**
  * Advances the MPEG bit reader to the next start code (00 00 01).
  *
- * Drops bits up to a byte boundary (count & 7) then whole bytes until the next 24 bits are 0x000001. Has no end check.
+ * Drops bits up to a byte boundary (Incnt & 7) then whole bytes until the next 24 bits are 0x000001. Has no end check.
  * The declaration takes an unused argument.
  */
 void next_start_code_impl(void* self)
 {
-    Flush_Buffer(*(int*)((char*)ld + 0x8) & 7);
+    Flush_Buffer(ld->Incnt & 7);
     while (Show_Bits(0x18) != 1) {
         Flush_Buffer(8);
     }
@@ -3101,21 +3088,7 @@ extern char str_sequence_header[];
 void* marker_bit(void* self);
 extern "C" void extension_and_user_data(void);
 
-// mpeg2decode's struct layer_data (EA's memory-buffer variant); the unit declares `ld` (D_0050A088).
-struct layer_data {
-    char pad0[0xC];
-    int Bitcnt;                                 // 0x00C
-    int intra_quantizer_matrix[64];             // 0x010
-    int non_intra_quantizer_matrix[64];         // 0x110
-    int chroma_intra_quantizer_matrix[64];      // 0x210
-    int chroma_non_intra_quantizer_matrix[64];  // 0x310
-    void* load_intra_quantizer_matrix;          // 0x410 (the unit's Get_Bits returns void*)
-    void* load_non_intra_quantizer_matrix;      // 0x414
-    int load_chroma_intra_quantizer_matrix;     // 0x418
-    int load_chroma_non_intra_quantizer_matrix; // 0x41C
-    int MPEG2_Flag;                             // 0x420
-    int scalable_mode;                          // 0x424 (sequence scalable extension)
-};
+// mpeg2decode's struct layer_data: ealib/ps2sonycodec.h; the unit declares `ld` (D_0050A088).
 
 /**
  * Parses an MPEG sequence header and loads its quantiser matrices.
@@ -4065,25 +4038,10 @@ extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
 extern "C" int GetNumberOfColours(int v);
 extern "C" unsigned char SHAPE_cluttype(int clut);
 
-struct sTexHdr_27C8 {
-    unsigned type : 8;          // 0x0
-    unsigned next : 24;
-    short w;                    // 0x4
-    short h;                    // 0x6
-    int f8;                     // 0x8
-    unsigned flags : 28;        // 0xC
-    unsigned levels : 4;
-    int dataOff;                // 0x10
-};
-
-struct sRGBA_27C8 {
-    unsigned char r, g, b, a;
-};
-
-static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
+static inline unsigned char* texData_27C8(SHAPEIMAGE* t)
 {
-    if (*(int*)((char*)t + 0xC) & 0x1000) {
-        return (unsigned char*)t + t->dataOff;
+    if (t->flags & 0x1000) {
+        return (unsigned char*)t + t->dataoffset;
     }
     return (unsigned char*)t + 0x10;
 }
@@ -4105,16 +4063,18 @@ static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
  */
 extern "C" void SHAPE_createat(void* tex, int w, int height, int fmt, int clut, int levels, int extra1, int extra2)
 {
-    sTexHdr_27C8* texHeader = (sTexHdr_27C8*)tex;
+    SHAPE* texHeader = (SHAPE*)tex;
     int bpp = 0x20;
     if (fmt != 0) bpp = fmt;
     char shapeType = SHAPE_type(bpp);
     MEM_fill(texHeader, 0, 0x10);
     texHeader->type = shapeType;
-    texHeader->w = w;
-    texHeader->h = height;
-    texHeader->levels = levels;
-    sTexHdr_27C8* hdr = texHeader;
+    texHeader->width = w;
+    texHeader->height = height;
+    texHeader->mipmaps = levels;
+    SHAPE* hdr = texHeader;
+    // ORIGINAL-PTR: the shape's block chain is laid out in raw memory: the palette, comment (0x6F, length at +4) and
+    // metal-bin (0x69, flags at +6, data at +0x10) blocks follow the image at byte offsets, linked by next
     unsigned char* cursor = (unsigned char*)hdr + (SHAPE_imagesize(w, height, bpp, levels) + 0x10);
     if (bpp < 9 && clut != 0) {
         int n = GetNumberOfColours(bpp);
@@ -4125,11 +4085,11 @@ extern "C" void SHAPE_createat(void* tex, int w, int height, int fmt, int clut, 
         if (clut != 0xF) cbits = clut;
         hdr->next = off;
         MEM_fill(cursor, 0, 0x10);
-        ((sTexHdr_27C8*)cursor)->type = cfmt;
-        ((sTexHdr_27C8*)cursor)->h = 1;
-        ((sTexHdr_27C8*)cursor)->w = n;
+        ((SHAPE*)cursor)->type = cfmt;
+        ((SHAPE*)cursor)->height = 1;
+        ((SHAPE*)cursor)->width = n;
         if (clut >= 0x20) {
-            sRGBA_27C8* pal = (sRGBA_27C8*)texData_27C8((sTexHdr_27C8*)cursor);
+            SHAPERGBA* pal = (SHAPERGBA*)texData_27C8((SHAPEIMAGE*)cursor);
             for (int i = 0; i < n; i++) {
                 pal[i].b = i;
                 pal[i].g = i;
@@ -4137,14 +4097,14 @@ extern "C" void SHAPE_createat(void* tex, int w, int height, int fmt, int clut, 
                 pal[i].a = 0xFF;
             }
         } else {
-            MEM_fill_u(texData_27C8((sTexHdr_27C8*)cursor), 0xFFFFFFFF, n * cbits / 8);
+            MEM_fill_u(texData_27C8((SHAPEIMAGE*)cursor), 0xFFFFFFFF, n * cbits / 8);
         }
-        hdr = (sTexHdr_27C8*)cursor;
+        hdr = (SHAPE*)cursor;
         cursor += n * cbits / 8 + 0x10;
     }
     if (extra1 != 0) {
         hdr->next = cursor - (unsigned char*)hdr;
-        hdr = (sTexHdr_27C8*)cursor;
+        hdr = (SHAPE*)cursor;
         MEM_fill(cursor, 0, extra1 + 8);
         *(int*)(cursor + 4) = extra1;
         cursor[0] = 111;
@@ -4255,12 +4215,14 @@ extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* 
                 *dst = (*dst & 0xFFFFFF) | (int)((hi | (hi >> 4)) << 24);
                 dst++;
             }
+            // ORIGINAL-PTR: the output is a bitmap whose rows lie stride bytes apart
             dst = (unsigned long*)((char*)dst + stride - 0x20);
         }
         return;
     }
     unsigned char* curPtr = src;
-    unsigned char* dstAlpha = (unsigned char*)dst + 3;
+    // DXT5 writes the alpha byte of each 32-bit RGBA texel
+    unsigned char* dstAlpha = &((SHAPERGBA*)dst)->a;
     unsigned char alpha0 = *curPtr++;
     unsigned char alpha1 = *curPtr++;
     unsigned char alpha2, alpha3, alpha4, alpha5, alpha6, alpha7;
@@ -4366,30 +4328,35 @@ extern "C" void decodeRGB(char* src, int pitch, char* dst)
     pal[1] = dxtTo1555_2E78(pal[1]);
     pal[2] = dxtTo1555_2E78(pal[2]);
     pal[3] = dxtTo1555_2E78(pal[3]);
+    unsigned char* block = (unsigned char*)dst;  // the compressed block: endpoints, then one index byte per row
     unsigned int rowIndices;
-    rowIndices = ((unsigned char*)dst)[4];
-    ((ulong*)src)[0] = pal[rowIndices & 3];
-    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
-    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
-    ((ulong*)src)[3] = pal[rowIndices >> 6];
+    ulong* texel = (ulong*)src;                  // the current output row's texels
+    rowIndices = block[4];
+    texel[0] = pal[rowIndices & 3];
+    texel[1] = pal[(rowIndices >> 2) & 3];
+    texel[2] = pal[(rowIndices >> 4) & 3];
+    texel[3] = pal[rowIndices >> 6];
     src += pitch;
-    rowIndices = ((unsigned char*)dst)[5];
-    ((ulong*)src)[0] = pal[rowIndices & 3];
-    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
-    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
-    ((ulong*)src)[3] = pal[rowIndices >> 6];
+    texel = (ulong*)src;
+    rowIndices = block[5];
+    texel[0] = pal[rowIndices & 3];
+    texel[1] = pal[(rowIndices >> 2) & 3];
+    texel[2] = pal[(rowIndices >> 4) & 3];
+    texel[3] = pal[rowIndices >> 6];
     src += pitch;
-    rowIndices = ((unsigned char*)dst)[6];
-    ((ulong*)src)[0] = pal[rowIndices & 3];
-    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
-    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
-    ((ulong*)src)[3] = pal[rowIndices >> 6];
+    texel = (ulong*)src;
+    rowIndices = block[6];
+    texel[0] = pal[rowIndices & 3];
+    texel[1] = pal[(rowIndices >> 2) & 3];
+    texel[2] = pal[(rowIndices >> 4) & 3];
+    texel[3] = pal[rowIndices >> 6];
     src += pitch;
-    rowIndices = ((unsigned char*)dst)[7];
-    ((ulong*)src)[0] = pal[rowIndices & 3];
-    ((ulong*)src)[1] = pal[(rowIndices >> 2) & 3];
-    ((ulong*)src)[2] = pal[(rowIndices >> 4) & 3];
-    ((ulong*)src)[3] = pal[rowIndices >> 6];
+    texel = (ulong*)src;
+    rowIndices = block[7];
+    texel[0] = pal[rowIndices & 3];
+    texel[1] = pal[(rowIndices >> 2) & 3];
+    texel[2] = pal[(rowIndices >> 4) & 3];
+    texel[3] = pal[rowIndices >> 6];
 }
 #endif
 

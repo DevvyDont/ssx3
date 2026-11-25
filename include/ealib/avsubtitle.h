@@ -35,6 +35,12 @@ struct RCMP_AV_SUBTITLE {
     void* mTexturePtr;                  // 0x28 [O]; [R] ctor 0
     void* mStringPtr;                   // 0x2C [O]; [R] ctor 0
     void* mWrapStringPtr;               // 0x30 [O]; [R] ctor 0
+#ifdef __cplusplus
+    ~RCMP_AV_SUBTITLE() {}              // [R] RCMP_AV_SUBTITLE_ARRAY__AV_SUBTITLE_ARRAY's delete[] reads the count
+                                        //     cookie and runs an empty per-element destructor loop
+    void operator delete[](void* p);    // [R] that delete[] frees through RCMP_rcmp_sys.FreeMemFunc (defined in the
+                                        //     unit)
+#endif
 };
 
 struct RCMP_AV_SUBTITLE_ARRAY {

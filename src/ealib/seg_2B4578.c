@@ -168,10 +168,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locatez);
 extern char *f_3A10_3900(char *) __asm__("SHAPE_longname");
 extern void f_3D00_3900(char *, int, void *) __asm__("SHAPE_name");
 extern int f_65A8_3900(void *, int) __asm__("strcmp");
-struct B_3900 { int pad; char c; };
-struct H_3900 { char pad[8]; int n; char pad2[8]; struct { int off; int x; } t[1]; };
 
-char *SHAPE_locatez_3900(struct H_3900 *, int) __asm__("SHAPE_locatez");
+char *SHAPE_locatez_3900(SHAPEFILE *, int) __asm__("SHAPE_locatez");
 /**
  * Finds a shape in a shape file (FSH) by name: its long name when it has one, else its directory name.
  *
@@ -179,20 +177,21 @@ char *SHAPE_locatez_3900(struct H_3900 *, int) __asm__("SHAPE_locatez");
  * @param name  the name to find (const char*, passed as int)
  * @return the shape, or 0 when not found
  */
-char *SHAPE_locatez_3900(struct H_3900 *shpfile, int name) {
+char *SHAPE_locatez_3900(SHAPEFILE *shpfile, int name) {
     int i;
-    int n = shpfile->n;
-    struct B_3900 buf;
+    int n = shpfile->num;
+    char namebuf[8];
     char *shapeName;
+    // ORIGINAL-PTR: a shape file blob: each shape sits at its table entry's byte offset from the file's start
     for (i = 0; i < n; i++) {
-        shapeName = f_3A10_3900((char *)shpfile + shpfile->t[i].off);
+        shapeName = f_3A10_3900((char *)shpfile + shpfile->tbl[i].offset);
         if (shapeName == 0) {
-            buf.c = 0;
-            f_3D00_3900((char *)shpfile, i, &buf);
-            shapeName = (char *)&buf;
+            namebuf[4] = 0;
+            f_3D00_3900((char *)shpfile, i, namebuf);
+            shapeName = namebuf;
         }
         if (f_65A8_3900(shapeName, name) == 0)
-            return (char *)shpfile + shpfile->t[i].off;
+            return (char *)shpfile + shpfile->tbl[i].offset;
     }
     return 0;
 }
@@ -283,12 +282,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_size1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // SHAPE_size (On Tour realgraph shpsize.cpp; this build has no swizzlesize helpers): byte size of a
 // shape of the given type, dimensions and mip count, plus the 16-byte header (0 if empty).
-typedef struct SHAPE_3A50 {
-    unsigned char type;
-    char rest[15];
-} SHAPE_3A50;
-
-extern int SHAPE_depth_3A50(SHAPE_3A50 *) __asm__("SHAPE_depth");
+extern int SHAPE_depth_3A50(SHAPE *) __asm__("SHAPE_depth");
 
 /**
  * Computes the byte size of a shape of a given type, size and mip count, header included.
@@ -309,7 +303,7 @@ extern int SHAPE_depth_3A50(SHAPE_3A50 *) __asm__("SHAPE_depth");
 int SHAPE_size1(int shptype, int width, int height, unsigned int mipmaps, int swizzled) {
     unsigned int i;
     int shpsize;
-    SHAPE_3A50 shp;
+    SHAPE shp;
     int bpp;
     int mipwidth;
     int mipheight;
@@ -371,7 +365,7 @@ extern int strlen_3BB0(char *) __asm__("strlen");
  * @param shp  the block
  * @return the size, or 0 when it cannot be worked out
  */
-int SHAPE_size(SHAPE* shp) {
+int SHAPE_size(SHAPEIMAGE* shp) {
     int metalBinSize;
     int shapeSize = 0;
     int w;
@@ -395,8 +389,10 @@ int SHAPE_size(SHAPE* shp) {
     default:
         if (*(unsigned char *)shp & 0x80) {
             metalBinSize = 0;
-            if (*(int *)(((char*)shp) + 0xC) & 0x1000) {
-                metalData = ((char*)shp) + *(int *)(((char*)shp) + 0x10);
+            // ORIGINAL-PTR: a packed shape's data sits dataoffset bytes from a referenced header, else right after
+            // the 16-byte header (a shape file blob)
+            if (shp->flags & 0x1000) {
+                metalData = ((char*)shp) + shp->dataoffset;
             } else {
                 metalData = ((char*)shp) + 0x10;
             }
@@ -404,7 +400,7 @@ int SHAPE_size(SHAPE* shp) {
                 shapeSize = metalBinSize + 0x10;
             }
         } else {
-            w = *(int *)(((char*)shp) + 0xC);
+            w = shp->flags;
             shapeSize = SHAPE_size1_3BB0(*(unsigned char *)shp, shp->width, shp->height, (unsigned int)w >> 28, (w >> 13) & 1);
         }
         return shapeSize;
@@ -565,8 +561,7 @@ int SHAPE_type(int bpp) {
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_getpixeloffset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { unsigned int fmt : 8; unsigned int size : 24; short w; short h; char pad8[4]; int flags; } SH_3E40;
-extern int SHAPE_depth_3E40(SH_3E40 *) __asm__("SHAPE_depth");
+extern int SHAPE_depth_3E40(SHAPEIMAGE *) __asm__("SHAPE_depth");
 extern int GetSwizzledPixelOffset_3E40(int, int, int, int, int) __asm__("GetSwizzledPixelOffset");
 
 /**
@@ -583,22 +578,22 @@ extern int GetSwizzledPixelOffset_3E40(int, int, int, int, int) __asm__("GetSwiz
  * @param level  mip level
  * @return the offset in bits from the start of the image data
  */
-int SHAPE_getpixeloffset(SH_3E40 *shp, int x, int y, int level) {
+int SHAPE_getpixeloffset(SHAPEIMAGE *shp, int x, int y, int level) {
     int w, height, bpp, off, i, bitOffset, px, py;
 
     px = x;
     py = y;
     off = 0;
-    w = shp->w;
-    height = shp->h;
+    w = shp->width;
+    height = shp->height;
     bpp = SHAPE_depth_3E40(shp);
     if (bpp == 15) {
         bpp = 16;
     }
-    if (shp->fmt == 0x60) {
+    if (shp->type == 0x60) {
         bpp = 64;
     }
-    if (shp->fmt == 0x60) {
+    if (shp->type == 0x60) {
         w = (w + 3) >> 2;
         height = (height + 3) >> 2;
     }
@@ -612,18 +607,18 @@ int SHAPE_getpixeloffset(SH_3E40 *shp, int x, int y, int level) {
             height >>= 1;
         }
     }
-    if (shp->fmt == 0x60) {
+    if (shp->type == 0x60) {
         px = x / 4;
         py = y / 4;
     }
-    if ((shp->fmt == 0x20 || shp->fmt == 33) && (shp->flags & 0x2000)) {
+    if ((shp->type == 0x20 || shp->type == 33) && (shp->flags & 0x2000)) {
         bitOffset = px;
         if ((unsigned int)((px & 0x1F) - 8) <= 15) {
             bitOffset = px ^ 0x18;
         }
-        if (shp->fmt == 33) {
+        if (shp->type == 33) {
             bitOffset <<= 5;
-        } else if (shp->fmt == 0x20) {
+        } else if (shp->type == 0x20) {
             bitOffset <<= 4;
         }
         return bitOffset;
@@ -640,16 +635,7 @@ int SHAPE_getpixeloffset(SH_3E40 *shp, int x, int y, int level) {
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_getpixeladr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Img_4010 {
-    unsigned char fmt;
-    char pad01[3];
-    short w;
-    short h;
-    char pad08[4];
-    int flags;
-    int off;
-};
-extern int SHAPE_depth_4010(struct Img_4010 *img) __asm__("SHAPE_depth");
+extern int SHAPE_depth_4010(SHAPEIMAGE *img) __asm__("SHAPE_depth");
 extern int GetSwizzledPixelOffset_4010(int x, int y, int w, int h, int bpp) __asm__("GetSwizzledPixelOffset");
 
 /**
@@ -664,7 +650,7 @@ extern int GetSwizzledPixelOffset_4010(int x, int y, int w, int h, int bpp) __as
  * @param mip  mip level
  * @return the address of the byte holding the pixel
  */
-char *SHAPE_getpixeladr(struct Img_4010 *img, int x, int y, int mip) {
+char *SHAPE_getpixeladr(SHAPEIMAGE *img, int x, int y, int mip) {
     char *data;
     int w;
     int height;
@@ -676,13 +662,15 @@ char *SHAPE_getpixeladr(struct Img_4010 *img, int x, int y, int mip) {
     int pos;
     int ofs;
 
+    // ORIGINAL-PTR: a shape's pixel data sits dataoffset bytes from a referenced header, else right after the
+    // 16-byte header (a shape file blob)
     if (img->flags & 0x1000) {
-        data = (char *)img + img->off;
+        data = (char *)img + img->dataoffset;
     } else {
         data = (char *)img + 0x10;
     }
-    w = img->w;
-    height = img->h;
+    w = img->width;
+    height = img->height;
     px = x;
     py = y;
     bpp = SHAPE_depth_4010(img);
@@ -690,10 +678,10 @@ char *SHAPE_getpixeladr(struct Img_4010 *img, int x, int y, int mip) {
         bpp = 16;
     }
     off = 0;
-    if (img->fmt == 0x60) {
+    if (img->type == 0x60) {
         bpp = 64;
     }
-    if (img->fmt == 0x60) {
+    if (img->type == 0x60) {
         w = (w + 3) >> 2;
         height = (height + 3) >> 2;
     }
@@ -707,18 +695,18 @@ char *SHAPE_getpixeladr(struct Img_4010 *img, int x, int y, int mip) {
             height >>= 1;
         }
     }
-    if (img->fmt == 0x60) {
+    if (img->type == 0x60) {
         px = x / 4;
         py = y / 4;
     }
-    if ((img->fmt == 0x20 || img->fmt == 33) && (img->flags & 0x2000)) {
+    if ((img->type == 0x20 || img->type == 33) && (img->flags & 0x2000)) {
         pos = px;
         if ((unsigned int)((pos & 0x1F) - 8) < 16) {
             pos ^= 0x18;
         }
-        if (img->fmt == 33) {
+        if (img->type == 33) {
             pos <<= 5;
-        } else if (img->fmt == 0x20) {
+        } else if (img->type == 0x20) {
             pos <<= 4;
         }
         ofs = pos;
@@ -974,7 +962,7 @@ void SHAPE_cloneat(char *dst, char *src) {
             if (size != 0) {
                 MEM_move_neat(prev, curShape, size);
                 if (*(unsigned char *)prev == 105 && size >= 21) {
-                    sprintf_neat(prev + 0x10, str_EAGLpct_d_neat, *(short *)(prev + 4));
+                    sprintf_neat(prev + 0x10, str_EAGLpct_d_neat, ((SHAPE *)prev)->width);
                 }
             }
             n = *(int *)curShape >> 8;
@@ -1753,26 +1741,24 @@ int System_VectorToReal5(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_variabletimerservice);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct N_54E0 { struct N_54E0 *next; int pad; void (*fn)(int); int arg; } N_54E0;
-typedef struct { char pad[0x1B4]; N_54E0 *list; int pad2[2]; int cnt; } G_54E0;
 extern int lastTick_C468[] __asm__("lastTick");
 
 /**
  * Runs the registered notify callbacks when the change counter has moved.
  *
- * Compares the counter at the sound driver state sndgs +0x1C0 with the copy in lastTick; when they differ it
- * updates the copy and calls every node of the list at +0x1B4 as fn(arg). Called by SNDDRV_thread.
+ * Compares the counter sndgs.updatetick with the copy in lastTick; when they differ it updates the copy and calls
+ * every node of sndgs.variabletimerclients as func(arg). Called by SNDDRV_thread.
  */
 void SNDSYSI_variabletimerservice(void) {
-    N_54E0 *n;
-    G_54E0 *sndState = (G_54E0 *)((int*)&sndgs);
+    SNDTIMERCLIENT *n;
+    SNDGLOBALSTATE *sndState = &sndgs;
 
-    if (sndState->cnt != lastTick_C468[0]) {
-        n = sndState->list;
-        lastTick_C468[0] = sndState->cnt;
+    if (sndState->updatetick != lastTick_C468[0]) {
+        n = sndState->variabletimerclients;
+        lastTick_C468[0] = sndState->updatetick;
         if (n != 0) {
             do {
-                n->fn(n->arg);
+                n->func(n->arg);
                 n = n->next;
             } while (n != 0);
         }
@@ -2211,15 +2197,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_alloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* SNDMEMI_alloc (EA snd library, smemman.c; On Tour's SNDMEMI_allocz minus its debug checks) */
-struct SNDMEMSTATE_5C60 {
-    char *pheap;
-    struct SNDMEMREC *r;   /* grows down from endaddr; indexed 0, -1, -2, ... */
-    int heapsize;
-    unsigned int endaddr;
-    int lowmark;
-    int nummallocs;             /* counts down */
-};
-struct sndgs_5C60 { char pad[0x234]; struct SNDMEMSTATE_5C60 *pmem; };
 extern void SNDMEMI_constrain_5C60(unsigned int *pfreeaddr, int *pfreespace) __asm__("SNDMEMI_constrain");
 
 void *SNDMEMI_alloc_5C60(int size) __asm__("SNDMEMI_alloc");
@@ -2228,7 +2205,7 @@ void *SNDMEMI_alloc_5C60(int size) __asm__("SNDMEMI_alloc");
  *
  * First fit over the gaps between the allocation records (sorted, stored downward from the end of the heap), each gap
  * clamped with SNDMEMI_constrain; the new record is inserted in order, the free end shrinks by 8 for it and the low-water
- * mark (+0x10) is updated. Used by SNDSYSI_init and the driver's table and voice setup.
+ * mark (lowmark) is updated. Used by SNDSYSI_init and the driver's table and voice setup.
  *
  * @param size  bytes wanted (rounded up to 16)
  * @return the block, or 0 when nothing fits
@@ -2245,49 +2222,49 @@ void *SNDMEMI_alloc_5C60(int size) {
 
     size += 15;
     size &= ~15;
-    if (((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs == 0) {
+    if (sndgs.mm->nummallocs == 0) {
         freeaddr = 0;
-        freespace = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr;
+        freespace = sndgs.mm->endaddr;
         SNDMEMI_constrain_5C60(&freeaddr, &freespace);
         if (freespace >= size) goto alloc;
         else goto fail;
     } else {
-        for (i = 0; ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs < i; i--) {
-            pcurrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i];
+        for (i = 0; sndgs.mm->nummallocs < i; i--) {
+            pcurrec = &sndgs.mm->r[i];
             if (i == 0) {
                 freeaddr = 0;
                 freespace = pcurrec->addr;
             } else {
-                pprevrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i + 1];
+                pprevrec = &sndgs.mm->r[i + 1];
                 freeaddr = pprevrec->addr + pprevrec->size;
                 freespace = pcurrec->addr - freeaddr;
             }
             SNDMEMI_constrain_5C60(&freeaddr, &freespace);
             if (freespace >= size) {
-                for (j = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs; j < i; j++) {
-                    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[j] = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[j + 1];
+                for (j = sndgs.mm->nummallocs; j < i; j++) {
+                    sndgs.mm->r[j] = sndgs.mm->r[j + 1];
                 }
                 goto alloc;
             }
         }
-        pprevrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i + 1];
+        pprevrec = &sndgs.mm->r[i + 1];
         freeaddr = pprevrec->addr + pprevrec->size;
-        freespace = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr - freeaddr;
+        freespace = sndgs.mm->endaddr - freeaddr;
         SNDMEMI_constrain_5C60(&freeaddr, &freespace);
         if (freespace < size) {
             goto fail;
         }
     }
 alloc:
-    pcurrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i];
+    pcurrec = &sndgs.mm->r[i];
     pcurrec->addr = freeaddr;
     pcurrec->size = size;
-    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs--;
-    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr -= sizeof(struct SNDMEMREC);
-    allocated = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->pheap + freeaddr;
-    lowmark = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr - (freeaddr + size);
-    if (lowmark < ((struct SNDMEMSTATE_5C60*)sndgs.mm)->lowmark) {
-        ((struct SNDMEMSTATE_5C60*)sndgs.mm)->lowmark = lowmark;
+    sndgs.mm->nummallocs--;
+    sndgs.mm->endaddr -= sizeof(struct SNDMEMREC);
+    allocated = sndgs.mm->pheap + freeaddr;
+    lowmark = sndgs.mm->endaddr - (freeaddr + size);
+    if (lowmark < sndgs.mm->lowmark) {
+        sndgs.mm->lowmark = lowmark;
     }
     return allocated;
 fail:
@@ -2299,8 +2276,7 @@ fail:
 INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_free);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void SNDMEMI_free_5E98(int) __asm__("SNDMEMI_free");
-struct G_5E98 { char pad[0x234]; struct SNDMEMSTATE *s; };
+void SNDMEMI_free_5E98(char *) __asm__("SNDMEMI_free");
 
 /**
  * Frees a block from the sound heap.
@@ -2310,20 +2286,21 @@ struct G_5E98 { char pad[0x234]; struct SNDMEMSTATE *s; };
  *
  * @param address  the block's address
  */
-void SNDMEMI_free_5E98(int address) {
+void SNDMEMI_free_5E98(char *address) {
     int i = 0;
-    int heapOffset = address - ((int)((struct SNDMEMSTATE*)sndgs.mm)->pheap);
-    if (((struct SNDMEMSTATE*)sndgs.mm)->nummallocs >= 0) return;
+    int heapOffset = address - sndgs.mm->pheap;
+    if (sndgs.mm->nummallocs >= 0) return;
     while (1) {
-        struct SNDMEMSTATE *memState = (struct SNDMEMSTATE*)sndgs.mm;
-        if (((int)((struct SNDMEMREC *)((char *)((struct SNDMEMREC*)memState->r) + (i << 3)))->addr) == heapOffset) {
+        struct SNDMEMSTATE *memState = sndgs.mm;
+        struct SNDMEMREC *rec = &memState->r[i];
+        if (rec->addr == heapOffset) {
             memState->nummallocs++;
-            (*(int*)&((struct SNDMEMSTATE*)sndgs.mm)->endaddr) += 8;
-            if (!(((struct SNDMEMSTATE*)sndgs.mm)->nummallocs < i)) return;
+            sndgs.mm->endaddr += 8;
+            if (!(sndgs.mm->nummallocs < i)) return;
             do {
-                ((struct SNDMEMREC*)((struct SNDMEMSTATE*)sndgs.mm)->r)[i] = ((struct SNDMEMREC*)((struct SNDMEMSTATE*)sndgs.mm)->r)[i - 1];
+                sndgs.mm->r[i] = sndgs.mm->r[i - 1];
                 i--;
-            } while (((struct SNDMEMSTATE*)sndgs.mm)->nummallocs < i);
+            } while (sndgs.mm->nummallocs < i);
             return;
         }
         i--;
@@ -2360,31 +2337,26 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_userdatacallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct S_5F98 { char pad[0x17]; signed char n; char pad2[0x1C]; int a[4]; int b[4]; };
-struct M_5F98 { int arg; int a; int b; int pad[5]; };
-struct G_5F98 { char pad[0x179]; signed char cnt; char pad2[0x1C8 - 0x17A]; void (*fn[1])(struct M_5F98 *); };
-
-extern struct G_5F98 sndgs_5F98 __asm__("sndgs");
 /**
- * Hands a channel's pending user-data events to the user-data clients.
+ * Hands a parsed patch's pending user-data blocks to the user-data clients.
  *
- * Pops the pending pairs (count at +0x17, values at +0x34 and +0x44) last first and calls every client of the sound
- * driver state sndgs +0x1C8 with a record {arg, first value, second value}.
+ * Pops the blocks (count numuserdata, puserdata[] / userdatasize[]) last first and calls every client in
+ * sndgs.userdataclient with a SNDUSERDATAMSG {type, block, size}.
  *
- * @param source  the source holding the pending events
- * @param eventArg  passed as the record's first word
+ * @param source  the parsed patch header holding the blocks
+ * @param eventArg  the message type
  */
-void SNDBANKI_userdatacallback(struct S_5F98 *source, int eventArg) {
-    struct M_5F98 eventRec;
+void SNDBANKI_userdatacallback(SNDIPATCHHEADER *source, int eventArg) {
+    SNDUSERDATAMSG eventRec;
     int i;
 
-    while (source->n > 0) {
-        source->n--;
-        eventRec.arg = eventArg;
-        eventRec.a = source->a[source->n];
-        eventRec.b = source->b[source->n];
-        for (i = 0; i < sndgs_5F98.cnt; i++) {
-            sndgs_5F98.fn[i](&eventRec);
+    while (source->numuserdata > 0) {
+        source->numuserdata--;
+        eventRec.type = eventArg;
+        eventRec.pdata = source->puserdata[source->numuserdata];
+        eventRec.size = source->userdatasize[source->numuserdata];
+        for (i = 0; i < sndgs.numuserdataclients; i++) {
+            sndgs.userdataclient[i](&eventRec);
         }
     }
 }
@@ -2393,8 +2365,6 @@ void SNDBANKI_userdatacallback(struct S_5F98 *source, int eventArg) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDbankadd);
 #ifdef SKIP_ASM
-struct Ent_6098 { struct BANKVER5 *hdr; char *buf1; char *buf2; char busy; };
-struct G_6098 { char pad[0x1E4]; void (*cb)(); char pad2[0x1F4 - 0x1E8]; struct Ent_6098 *ents; };
 extern void SNDbankremove_6098() __asm__("SNDbankremove");
 extern int f_6500_6098(void) __asm__("SNDBANKI_alloc");
 extern char *f_4B70_6098(int, int) __asm__("SNDPLATFORM_memalloc");
@@ -2402,72 +2372,75 @@ extern int f_42D8_6098(int, char *, char *, int) __asm__("SNDPLATFORM_download")
 extern int f_42F8_6098(int) __asm__("SNDPLATFORM_downloadcomplete");
 extern int f_6788_6098(int, char *, char *, int *) __asm__("func_003B6788");
 
-extern struct G_6098 sndgs_6098 __asm__("sndgs");
 /**
  * Adds a sound bank: takes a bank slot and uploads its sample data to sound memory.
  *
- * Installs SNDbankremove as the bank-removal hook (+0x1E4), takes a slot with SNDBANKI_alloc and records the header.
- * Each of the two sample sections (sizes at +0x10 for memory kind 0x100 and +0x0C for kind 8, data at the header's
- * offset +0x08) gets memory from SNDPLATFORM_memalloc (plus 0x40 / 0x30 bytes) and is copied in 4 KB pieces with
- * SNDPLATFORM_download, polling SNDPLATFORM_downloadcomplete until each piece is done; then every patch (self-relative offsets at +0x14,
- * count +0x06) is resolved against it with func_003B6788.
+ * Installs SNDbankremove as the bank-removal hook (sndgs.bankremove), takes a slot with SNDBANKI_alloc and records the
+ * header. Each of the two sample sections (iopcpusize for memory kind 0x100 and spusize for kind 8, data hdrsize bytes
+ * into the bank) gets memory from SNDPLATFORM_memalloc (plus 0x40 / 0x30 bytes) and is copied in 4 KB pieces with
+ * SNDPLATFORM_download, polling SNDPLATFORM_downloadcomplete until each piece is done; then every patch (self-relative
+ * offsets in patch[], numpatches of them) is resolved against it with func_003B6788.
  *
  * @param out  receives the bank handle
  * @param hdr  the bank in main memory
  * @return 7 when sample data was uploaded, 8 for a bank without any, -6 when memory runs out
  */
 int SNDbankadd(int *out, struct BANKVER5 *hdr) {
-    struct Ent_6098 *ent;
+    BANKLIST *ent;
     int i, n, xferHandle;
     int firstOffset;
 
-    sndgs_6098.cb = SNDbankremove_6098;
+    sndgs.bankremove = SNDbankremove_6098;
     *out = f_6500_6098();
-    ent = &sndgs_6098.ents[*out];
-    ent->busy = 1;
-    ent->hdr = hdr;
-    ent->buf1 = 0;
+    ent = &sndgs.banklist[*out];
+    ent->locked = 1;
+    ent->phdr = hdr;
+    ent->iopcpudata = 0;
     if (hdr->iopcpusize != 0) {
-        ent->buf1 = f_4B70_6098(0x100, hdr->iopcpusize + 0x40);
-        if (ent->buf1 == 0) {
+        ent->iopcpudata = f_4B70_6098(0x100, hdr->iopcpusize + 0x40);
+        if (ent->iopcpudata == 0) {
             goto fail;
         }
+        // ORIGINAL-PTR: a bank file blob: the sample sections follow the header (hdrsize bytes in), the patch table
+        // holds self-relative offsets, and the copies go to byte offsets of the sound memory
         for (i = 0; i < hdr->iopcpusize; i += 0x1000) {
             n = hdr->iopcpusize - i;
-            xferHandle = f_42D8_6098(0x100, (char *)hdr + hdr->hdrsize + i, ent->buf1 + i, n < 4097 ? n : 0x1000);
+            xferHandle = f_42D8_6098(0x100, (char *)hdr + hdr->hdrsize + i, (char *)ent->iopcpudata + i,
+                                     n < 4097 ? n : 0x1000);
             while (f_42F8_6098(xferHandle) == 0) {
             }
         }
         firstOffset = 0;
         for (i = 0; i < hdr->numpatches; i++) {
-            if (((int*)&hdr->patch[0])[i] != 0) {
-                f_6788_6098(0x100, (char *)&((int*)&hdr->patch[0])[i] + ((int*)&hdr->patch[0])[i], ent->buf1, &firstOffset);
+            if (hdr->patch[i] != 0) {
+                f_6788_6098(0x100, (char *)&hdr->patch[i] + (int)hdr->patch[i], ent->iopcpudata, &firstOffset);
             }
         }
     }
-    ent->buf2 = 0;
+    ent->spudata = 0;
     if (hdr->spusize != 0) {
-        ent->buf2 = f_4B70_6098(8, hdr->spusize + 0x30);
-        if (ent->buf2 == 0) {
+        ent->spudata = f_4B70_6098(8, hdr->spusize + 0x30);
+        if (ent->spudata == 0) {
 fail:
-            ent->hdr = 0;
-            ent->busy = 0;
+            ent->phdr = 0;
+            ent->locked = 0;
             return -6;
         }
         for (i = 0; i < hdr->spusize; i += 0x1000) {
             n = hdr->spusize - i;
-            xferHandle = f_42D8_6098(8, (char *)hdr + hdr->hdrsize + hdr->iopcpusize + i, ent->buf2 + i, n < 4097 ? n : 0x1000);
+            xferHandle = f_42D8_6098(8, (char *)hdr + hdr->hdrsize + hdr->iopcpusize + i, (char *)ent->spudata + i,
+                                     n < 4097 ? n : 0x1000);
             while (f_42F8_6098(xferHandle) == 0) {
             }
         }
         firstOffset = 0;
         for (i = 0; i < hdr->numpatches; i++) {
-            if (((int*)&hdr->patch[0])[i] != 0) {
-                f_6788_6098(8, (char *)&((int*)&hdr->patch[0])[i] + ((int*)&hdr->patch[0])[i], ent->buf2, &firstOffset);
+            if (hdr->patch[i] != 0) {
+                f_6788_6098(8, (char *)&hdr->patch[i] + (int)hdr->patch[i], ent->spudata, &firstOffset);
             }
         }
     }
-    ent->busy = 0;
+    ent->locked = 0;
     if (hdr->spusize != 0 || hdr->iopcpusize != 0) {
         return 7;
     }
@@ -2555,19 +2528,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_valid);
 /**
  * Checks a bank handle: in range, loaded and not busy.
  *
- * Looks at the slot in the sound driver state sndgs +0x1F4 (count at +0x08 of the options).
+ * Looks at the slot in the sound driver state's bank list (sndgs.banklist, sso.set.maxbanks entries).
  *
  * @param bankHandle  the bank handle
  * @return 0 when usable, -18 when the slot is busy, -8 otherwise
  */
 int SNDBANKI_valid(int bankHandle) {
-    struct BANKLIST *slot;
     if (bankHandle < 0 || bankHandle >= sndgs.sso.set.maxbanks) {
         return -8;
     }
-    slot = (struct BANKLIST *)(bankHandle * 16 + (int)(struct BANKLIST*)sndgs.banklist);
-    if (((struct sA8E8Bank*)slot->phdr) != 0) {
-        return slot->locked ? -18 : 0;
+    if (sndgs.banklist[bankHandle].phdr != 0) {
+        return sndgs.banklist[bankHandle].locked ? -18 : 0;
     }
     return -8;
 }
@@ -2777,26 +2748,23 @@ extern int SNDPKTPLAY_start(int, int, int, int);
 /**
  * Starts a stream's voice with its current format and header.
  *
- * Gets a voice from SNDPKTPLAY_start (queue +0x8, format +0x14, header +0x1C, parameters +0xEC) into +0x4, adds the first
- * track's setting with SNDCTRL_filteradd when its word (+0x114) is set, and sets the state (+0x10) to 1. Quirk: the track
- * loop runs exactly once.
+ * Gets a voice from SNDPKTPLAY_start (packetinstancehandle, cursf, cursa, po) into shandle, adds the first filter
+ * definition with SNDCTRL_filteradd when its filter function is set, and sets the state to 1 (playing). Quirk: the
+ * filter loop runs exactly once.
  *
- * @param stream  the stream (0x138 bytes)
+ * @param stream  the stream
  */
-void SNDSTRMI_startstream(char *stream) {
+void SNDSTRMI_startstream(SNDSTREAMCHANNEL *stream) {
     int i = 0;
-    char *trackEntry = stream + 0x104;
-    int *trackFlag = (int*)(stream + 0x114);
-    *(volatile int *)(stream + 4) = SNDPKTPLAY_start(*(volatile int *)(stream + 8), (int)(stream + 0x14), (int)(stream + 0x1C), (int)(stream + 0xEC));
+    stream->shandle = SNDPKTPLAY_start(stream->packetinstancehandle, (int)&stream->cursf, (int)&stream->cursa,
+                                       (int)&stream->po);
     do {
-        if (*trackFlag != 0) {
-            SNDCTRL_filteradd(*(volatile int *)(stream + 4), (int)trackEntry);
+        if (stream->filter[i].filter != 0) {
+            SNDCTRL_filteradd(stream->shandle, (int)&stream->filter[i]);
         }
-        trackEntry += 0x18;
         i++;
-        trackFlag += 6;
     } while (i == 0);
-    *(volatile char *)(stream + 0x10) = 1;
+    stream->state = 1;
 }
 #endif
 
@@ -2885,24 +2853,25 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_removerequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char *sndss_6A70[] __asm__("sndss");
-extern int SNDSTRMI_getrequestptr_6A70(int) __asm__("SNDSTRMI_getrequestptr");
-extern void SNDLINKI_remove_6A70(void *, int) __asm__("SNDLINKI_remove");
-extern void SNDLINKI_push_6A70(void *, int) __asm__("SNDLINKI_push");
+extern SNDSTREAMCHANNEL *sndss_6A70[] __asm__("sndss");
+extern SNDSTREAMREQUEST *SNDSTRMI_getrequestptr_6A70(int) __asm__("SNDSTRMI_getrequestptr");
+extern void SNDLINKI_remove_6A70(SNDLINKLIST *, SNDSTREAMREQUEST *) __asm__("SNDLINKI_remove");
+extern void SNDLINKI_push_6A70(SNDLINKLIST *, SNDSTREAMREQUEST *) __asm__("SNDLINKI_push");
 /**
  * Retires a stream request: unlinks it from the queue and returns it to the free list.
  *
  * The stream is chosen by the handle's low byte; the request comes from SNDSTRMI_getrequestptr. It is removed from the queued
- * list (+0x11C, SNDLINKI_remove), added to the free list (+0x128, SNDLINKI_push) and cleared as current (+0x134).
+ * list (allocatedrequests, SNDLINKI_remove), added to the free list (freerequests, SNDLINKI_push) and cleared as the
+ * current one (parsingrequest).
  *
  * @param requestHandle  the request handle
  */
 void SNDSTRMI_removerequest(int requestHandle) {
-    char *stream = sndss_6A70[requestHandle & 0xFF];
-    int request = SNDSTRMI_getrequestptr_6A70(requestHandle);
-    SNDLINKI_remove_6A70(stream + 0x11C, request);
-    SNDLINKI_push_6A70(stream + 0x128, request);
-    if (*(int *)(stream + 0x134) == request) *(int *)(stream + 0x134) = 0;
+    SNDSTREAMCHANNEL *stream = sndss_6A70[requestHandle & 0xFF];
+    SNDSTREAMREQUEST *request = SNDSTRMI_getrequestptr_6A70(requestHandle);
+    SNDLINKI_remove_6A70(&stream->allocatedrequests, request);
+    SNDLINKI_push_6A70(&stream->freerequests, request);
+    if (stream->parsingrequest == request) stream->parsingrequest = 0;
 }
 #endif
 
@@ -2911,19 +2880,20 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_releasecallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void STREAM_release_6AD8(int, unsigned char *) __asm__("STREAM_release");
-extern int *sndss_6AD8[] __asm__("sndss");
+extern SNDSTREAMCHANNEL *sndss_6AD8[] __asm__("sndss");
 
 /**
  * Gives a played stream data block back to its stream's file queue.
  *
  * The block's header pointer sits just before the samples; its first byte is the stream slot. Calls STREAM_release with
- * that stream's queue (first word).
+ * that stream's file queue (streamhandle).
  *
  * @param samples  the sample data pointer
  */
 void SNDSTRMI_releasecallback(void *samples) {
+    // ORIGINAL-PTR: stream chunk data: the chunk's header pointer is stored in the word just before its samples
     unsigned char *chunkHdr = ((unsigned char **)samples)[-1];
-    STREAM_release_6AD8(*sndss_6AD8[*chunkHdr], chunkHdr);
+    STREAM_release_6AD8(sndss_6AD8[*chunkHdr]->streamhandle, chunkHdr);
 }
 #endif
 
@@ -3039,7 +3009,6 @@ void SNDSTRMI_startstream_6BD0(struct SNDSTREAMCHANNEL *p) __asm__("SNDSTRMI_sta
 // (prototype from their definition at line 2257)
 int SNDSTRMI_calcdatarate_6BD0(unsigned char *p) __asm__("SNDSTRMI_calcdatarate");
 
-struct Ev_6BD0 { int a; int b; int c; int d; int e; int rest[3]; };
 extern void SNDI_patchtohdr_6BD0(int, int *, SNDSAMPLEFORMAT *, SNDSAMPLEATTR *, SNDSAMPLEDESC *, unsigned char *)
     __asm__("SNDI_patchtohdr");
 extern void STREAM_release_6BD0(int, int *) __asm__("STREAM_release");
@@ -3066,7 +3035,7 @@ int SNDSTRMI_parseheader(int streamSlot, int *chunk) {
     struct SNDSTREAMCHANNEL *stream = sndss_6BD0[streamSlot];
     SNDSTREAMREQUEST *n;
     SNDSAMPLEDESC desc;
-    struct Ev_6BD0 ev;
+    SNDUSERDATAMSG ev;
     int i = 0;
     int j;
 
@@ -3080,10 +3049,10 @@ int SNDSTRMI_parseheader(int streamSlot, int *chunk) {
     n->totalframes = desc.totalframes;
     n->continuation = 0;
     while (stream->newsa.puserdata[i] != 0) {
-        ev.a = 3;
-        ev.b = (int)stream->newsa.puserdata[i];
-        ev.c = stream->newsa.userdatasize[i];
-        ev.e = n->sndrequesthandle;
+        ev.type = 3;
+        ev.pdata = stream->newsa.puserdata[i];
+        ev.size = stream->newsa.userdatasize[i];
+        ev.handle = n->sndrequesthandle;
         stream->newsa.puserdata[i] = 0;
         stream->newsa.userdatasize[i++] = 0;
         for (j = 0; j < sndgs.numuserdataclients; j++) {
@@ -3719,24 +3688,26 @@ int SNDSTRM_purge(int streamHandle) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_getrequestptr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-char *SNDSTRMI_getstreamptr_7A70(int) __asm__("SNDSTRMI_getstreamptr");
+SNDSTREAMCHANNEL *SNDSTRMI_getstreamptr_7A70(int) __asm__("SNDSTRMI_getstreamptr");
 
 /**
  * Finds a queued stream request by its handle.
  *
- * The stream is the handle's low byte; the request is searched on its queued list (+0x11C) by handle (+0xC).
+ * The stream is the handle's low byte; the request is searched on its queued list (allocatedrequests) by
+ * sndrequesthandle.
  *
  * @param requestHandle  the request handle
  * @return the request, or 0
  */
-char *SNDSTRMI_getrequestptr(int requestHandle) {
-    char *stream;
-    char *request;
+SNDSTREAMREQUEST *SNDSTRMI_getrequestptr(int requestHandle) {
+    SNDSTREAMCHANNEL *stream;
+    SNDSTREAMREQUEST *request;
     if (requestHandle < 0) return 0;
     stream = SNDSTRMI_getstreamptr_7A70(requestHandle & 0xFF);
     if (stream == 0) return 0;
-    for (request = *(char **)(stream + 0x11C); request != 0; request = *(char **)request) {
-        if (*(volatile int *)(request + 0xC) == requestHandle) break;
+    for (request = (SNDSTREAMREQUEST *)stream->allocatedrequests.phead; request != 0;
+         request = (SNDSTREAMREQUEST *)request->node.pnext) {
+        if (request->sndrequesthandle == requestHandle) break;
     }
     return request;
 }
@@ -4321,12 +4292,11 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDmastervol);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_A7B0_8160(int) __asm__("func_003BA7B0");
 extern void f_2A50_8160(int) __asm__("func_003C2A50");
-struct G_8160 { char pad[0x175]; char c; char pad2[8]; short n; char pad3[0x6F]; struct CHANPUB *tab; };
 
 /**
  * Sets the sound system's master volume and reapplies it to every playing channel.
  *
- * Stores the volume at the sound driver state sndgs +0x175 in the critical section, then recomputes each active
+ * Stores the volume in sndgs.mastervol in the critical section, then recomputes each active
  * channel's volume (func_003BA7B0, func_003C2A50). cSSXAudio's volume control passes out * 127.
  *
  * @param masterVol  the master volume (0..127)
@@ -4338,7 +4308,7 @@ int SNDmastervol(int masterVol) {
     SNDSYS_entercritical();
     sndgs.mastervol = masterVol;
     for (i = 0; i < sndgs.voicestotal; i++) {
-        channel = &((struct CHANPUB*)sndgs.chan)[i];
+        channel = &sndgs.chan[i];
         if ((*(char*)&channel->status) == 1 && channel->handle >= 0) {
             f_A7B0_8160(i);
             f_2A50_8160(i);
@@ -4689,8 +4659,8 @@ int SNDpitchmult_8790(int a0, int arg1) __asm__("SNDpitchmult");
 /**
  * Sets a sound's pitch multiplier and recomputes its pitch.
  *
- * Stores it in each grouped channel's +0x88 and recomputes with iSNDcalcpitch and SNDPLATFORM_setpitch. Quirk: a channel
- * already at that value makes it return 0 at once, skipping the rest of the group.
+ * Stores it in each grouped channel's progpitch and recomputes with iSNDcalcpitch and SNDPLATFORM_setpitch. Quirk: a
+ * channel already at that value makes it return 0 at once, skipping the rest of the group.
  *
  * @param soundHandle  the sound handle
  * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
@@ -4699,20 +4669,20 @@ int SNDpitchmult_8790(int a0, int arg1) __asm__("SNDpitchmult");
 int SNDpitchmult_8790(int soundHandle, int pitchMult) {
     int setChan;
     int chanIndex;
-    char *channel;
-    char *sndState;
+    CHANPUB *channel;
+    SNDGLOBALSTATE *sndState;
     int i;
     chanIndex = SNDVOICEI_get_8790();
     if (chanIndex >= 0) {
         setChan = -1;
-        sndState = ((char*)&sndgs);
+        sndState = &sndgs;
         while (iSNDpatchkey_8790(chanIndex, &setChan) != 0) {
             i = setChan;
-            channel = *(char **)(sndState + 0x1F0) + i * 140;
-            if (*(unsigned short *)(channel + 0x88) == pitchMult) {
+            channel = &sndState->chan[i];
+            if (channel->progpitch == pitchMult) {
                 return 0;
             }
-            *(unsigned short *)(channel + 0x88) = pitchMult;
+            channel->progpitch = pitchMult;
             iSNDcalcpitch_8790(i, i);
             SNDPLATFORM_setpitch_8790(setChan);
         }
@@ -6365,24 +6335,25 @@ int SNDVOICEI_get_A6E8(int arg0) __asm__("SNDVOICEI_get");
 /**
  * Resolves a sound handle to its channel.
  *
- * The channel is the handle's low byte; it must be in range, busy (+0x69) and hold the same handle.
+ * The channel is the handle's low byte; it must be in range (voicestotal), busy (status) and hold the same handle.
  *
  * @param soundHandle  the sound handle
  * @return the channel index, or -8
  */
 int SNDVOICEI_get_A6E8(int soundHandle) {
-    int var_5;
-    char *temp_2;
-    char *sndState;
+    int chanIndex;
+    CHANPUB *channel;
+    SNDGLOBALSTATE *sndState;
 
-    if ((soundHandle < 0) || (sndState = ((char*)&sndgs), var_5 = soundHandle & 0xFF, (var_5 < *(short *)(sndState + 0x17E)) == 0)) {
+    if ((soundHandle < 0)
+        || (sndState = &sndgs, chanIndex = soundHandle & 0xFF, (chanIndex < sndState->voicestotal) == 0)) {
         return -8;
     }
-    temp_2 = *(char **)(sndState + 0x1F0) + (var_5 * 140);
-    if ((*(signed char *)(temp_2 + 0x69) == 0) || (*(int *)temp_2 != soundHandle)) {
-        var_5 = -8;
+    channel = &sndState->chan[chanIndex];
+    if ((channel->status == 0) || (channel->handle != soundHandle)) {
+        chanIndex = -8;
     }
-    return var_5;
+    return chanIndex;
 }
 #endif
 
@@ -6529,67 +6500,11 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_parsetimbre);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* SNDI_parsetimbre (EA snd library, stpparse.c): PATS tag stream into stc/pstc (0x00-0x2A) and stp/pstp (0x80-0xAD) */
-struct SNDIPATCHHEADER_AAC0 {
-    short masterranddetune;
-    signed char platformver;
-    signed char numchan;
-    short detune;
-    short randdetune;
-    signed char velmin;
-    signed char velmax;
-    signed char keymin;
-    signed char keymax;
-    signed char priority;
-    signed char basekey;
-    signed char releaseenvelope;
-    signed char numenvelopes;
-    signed char bendrange;
-    signed char pan;
-    signed char randpan;
-    unsigned char samplerep;
-    signed char vol;
-    signed char randvol;
-    signed char fxlevel0;
-    signed char numuserdata;
-    unsigned short rendermode;
-    signed char initialenvvol;
-    unsigned char lfovollength;
-    signed char lfovolrand;
-    unsigned char lfopitchlength;
-    unsigned char lfopitchrand;
-    signed char panmult;
-    void *pvoltable;
-    void *pbendtable;
-    void *penvelope;
-    void *plfovol;
-    void *plfopitch;
-    void *puserdata[4];
-    int userdatasize[4];
-    short lfopitchdepth;
-    unsigned short samplerate;
-    int totalframes;
-    int sustainstart;
-    int sustainend;
-    int *paudioramaddr;
-    int sampleoffset[6];
-    int loopoffset[6];
-    void *ptimestretchdata[6];
-    unsigned short timestretchsize[6];
-    unsigned short azimuth[6];
-    void *ptimbre;
-};
-struct SNDTAGINFO_AAC0 {
-    unsigned char *ptag;
-    int tagtype;
-    int tagval;
-    void *tagptr;
-    unsigned int tagsize;
-};
 extern char snddefaultenvelope_AAC0[] __asm__("D_0044C580");
 extern void memset_AAC0(void *, int, int) __asm__("memset");
-extern int SNDI_gettag_AAC0(struct SNDTAGINFO_AAC0 *psti) __asm__("SNDI_gettag");
+extern int SNDI_gettag_AAC0(SNDTAGINFO *psti) __asm__("SNDI_gettag");
 
-int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) __asm__("SNDI_parsetimbre");
+int SNDI_parsetimbre_AAC0(void **pptp, SNDIPATCHHEADER *pph) __asm__("SNDI_parsetimbre");
 /**
  * Parses one timbre of a tagged patch into a patch header.
  *
@@ -6597,21 +6512,21 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) __asm__
  * end or a 0xFE tag says another timbre follows. Tag 20 adds a user-data block, tags 152-155, 164 and 165 give
  * per-channel time-stretch data. The header gets key and velocity ranges, priority, base key, envelopes (default
  * D_0044C580), pan, volume, detune, LFOs, sample rate (default 22050), frames, sustain points, codec, render mode,
- * sample offsets, and per-channel azimuths from the angle table (+0x2E0) plus the patch's offsets (offsets ignored for
- * stereo when the speaker count option is 2). Advances *pptp past the parsed tags. Quirk: user-data blocks are not
- * bounded by the 4 header slots.
+ * sample offsets, and per-channel azimuths from the angle table (sndgs.srcchancfg3d) plus the patch's offsets (offsets
+ * ignored for stereo when the speaker count option is 2). Advances *pptp past the parsed tags. Quirk: user-data blocks
+ * are not bounded by the 4 header slots.
  *
  * @param pptp  in/out: the read position in the patch
  * @param pph  receives the patch header
  * @return 1 when another timbre follows, else 0
  */
-int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
+int SNDI_parsetimbre_AAC0(void **pptp, SNDIPATCHHEADER *pph) {
     int stc[43];
     void *pstc[43];
     int stp[46];
     void *pstp[46];
     int azoffsets[6];
-    struct SNDTAGINFO_AAC0 sti;
+    SNDTAGINFO sti;
     int moretags;
     int i;
 
@@ -6736,6 +6651,7 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
     pph->randvol = stc[15];
     pph->detune = stc[16];
     pph->randdetune = stc[17];
+    // ORIGINAL-PTR: patch header tags: a table tag's value is the table's byte offset from the tag's data
     pph->pvoltable = (char *)pstc[18] + stc[18];
     pph->fxlevel0 = stc[19];
     pph->pbendtable = (char *)pstc[23] + stc[23];
@@ -7520,12 +7436,12 @@ extern int f_A6E8_C6B8() __asm__("SNDVOICEI_get");
 extern void f_A938_C6B8(int) __asm__("iSNDcalcpitch");
 extern int f_AA00_C6B8(int, int *) __asm__("iSNDpatchkey");
 extern void f_25E0_C6B8(int) __asm__("SNDPLATFORM_setpitch");
-struct G_C6B8 { char pad[0x1F0]; char *tab; };
 
 /**
  * Sets a sound's pitch bend and recomputes its pitch.
  *
- * For each grouped channel with a bend range (+0x82): stores the bend (+0x64), clears the cached pitch (+0x86) and
+ * For each grouped channel with a bend range (bendrange): stores the bend (pitchbend), clears the cached pitch
+ * (detunepitch) and
  * recomputes it (iSNDcalcpitch, SNDPLATFORM_setpitch). Quirk: a channel already at that bend, or one without a bend range,
  * makes it return 0 at once, skipping the rest of the group.
  *
@@ -7536,16 +7452,16 @@ struct G_C6B8 { char pad[0x1F0]; char *tab; };
 int SNDpitchbend(int soundHandle, int bend) {
     int setChan;
     int chanIndex = f_A6E8_C6B8();
-    char *channel;
+    CHANPUB *channel;
     if (chanIndex >= 0) {
         setChan = -1;
         while (f_AA00_C6B8(chanIndex, &setChan) != 0) {
-            channel = (char*)&sndgs.chan[setChan];
-            if (*(char *)(channel + 0x64) == bend)
+            channel = &sndgs.chan[setChan];
+            if (channel->pitchbend == bend)
                 return 0;
-            if (*(short *)(channel + 0x82) != 0) {
-                *(short *)(channel + 0x86) = 0;
-                *(char *)(channel + 0x64) = bend;
+            if (channel->bendrange != 0) {
+                channel->detunepitch = 0;
+                channel->pitchbend = bend;
                 f_A938_C6B8(setChan);
                 f_25E0_C6B8(setChan);
             } else
@@ -11853,7 +11769,7 @@ struct S_1980 { char pad[0x1C0]; int cnt; };
  * @return 0
  */
 int func_003C1980(void) {
-    sndgs.unk_1C0 = sndgs.unk_1C0 + 1;
+    sndgs.updatetick = sndgs.updatetick + 1;
     // PORT: MIPS sync + EE ei (no C equivalent)
     __asm__ volatile("sync\n\tei");
     return 0;
@@ -12041,7 +11957,7 @@ void SNDDRV_thread(void) {
         gMutexLockFn_19A8();
         if ((void (*)(void))sndgs.profileenter != 0) ((void (*)(void))sndgs.profileenter)();
         SNDSYSI_timerservice_19A8(94);
-        if (D_0050AD00_19A8.f1AA8 < 0) sndgs.unk_1C0++;
+        if (D_0050AD00_19A8.f1AA8 < 0) sndgs.updatetick++;
         SNDSYSI_variabletimerservice_19A8();
         Util_MemCpy(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 576);
         SNDDRV_getEndedVoices_19A8();
@@ -12903,14 +12819,15 @@ extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
 /**
  * Sets the low-pass cutoff of a channel's software-mixer voices.
  *
- * Only render kind 4 (mixer) channels: the cutoff is divided by half the mixer rate (+0x2A of sndgs) and passed
- * with each voice's mixer index to func_003C8D00. Called by func_003B8978, SNDPLATFORM_playtimbre and SNDPLATFORM_packetplay.
+ * Only render kind 4 (mixer) channels: the cutoff is divided by half the mixer rate (sndgs.sso.set.outputrate) and
+ * passed with each voice's mixer index to func_003C8D00. Called by func_003B8978, SNDPLATFORM_playtimbre and
+ * SNDPLATFORM_packetplay.
  *
  * @param idx  the channel index
  * @param cutoff  the cutoff frequency in Hz
  */
 void SNDPLATFORM_lowpass(int idx, int cutoff) {
-    CHANPUB* channel = &((struct CHANPUB*)sndgs.chan)[idx];
+    CHANPUB* channel = &sndgs.chan[idx];
     int i;
     short *voiceList;
     float normCutoff;
@@ -13456,19 +13373,19 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_asyncresolvetimbre);
 /**
  * Points a patch header's sample at its place in uploaded sample data.
  *
- * The first call (*@p firstOffset == 0) records the header's sample offset (+0x68); the address @p sampleData + (offset
- * - first offset) is stored through the header's pointer +0x64. Called by func_003B6788.
+ * The first call (*@p firstOffset == 0) records the header's sample offset (sampleoffset[0]); the address
+ * @p sampleData + (offset - first offset) is stored through the header's paudioramaddr. Called by func_003B6788.
  *
  * @param patchHeader  the parsed patch header
  * @param sampleData  where the samples were uploaded
  * @param firstOffset  in/out: the offset of the first sample
  * @return 0
  */
-int SNDPLATFORM_asyncresolvetimbre(void *patchHeader, int sampleData, int *firstOffset) {
+int SNDPLATFORM_asyncresolvetimbre(SNDIPATCHHEADER *patchHeader, int sampleData, int *firstOffset) {
     if (*firstOffset == 0) {
-        *firstOffset = (*(int *)((char*)(patchHeader) + 0x68));
+        *firstOffset = patchHeader->sampleoffset[0];
     }
-    *(*(int **)((char*)(patchHeader) + 0x64)) = sampleData + ((*(int *)((char*)(patchHeader) + 0x68)) - *firstOffset);
+    *patchHeader->paudioramaddr = sampleData + (patchHeader->sampleoffset[0] - *firstOffset);
     return 0;
 }
 #endif
@@ -14540,7 +14457,7 @@ extern void SNDSYS_getopts_52F8(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_52F8(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets the number of bank slots in the sound options (+0x28) and applies them.
+ * Sets the number of bank slots in the sound options (set.maxbanks) and applies them.
  *
  * Reads the options with SNDSYS_getopts, changes the field and writes them back with SNDSYS_setopts. No callers in the
  * game.
@@ -14549,10 +14466,10 @@ extern void SNDSYS_setopts_52F8(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetMaxBanks(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_52F8(sp);
-    *(short *)(sp + 0x28) = value;
-    SNDSYS_setopts_52F8(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_52F8(&opts);
+    opts.set.maxbanks = value;
+    SNDSYS_setopts_52F8(&opts);
     return 0;
 }
 #endif
@@ -14563,15 +14480,15 @@ INCLUDE_ASM("ealib/seg_2B4578", System_GetMaxBanks);
 extern void SNDSYS_getopts(void *);
 
 /**
- * Reads the number of bank slots (+0x28) from the sound options (SNDSYS_getopts). No callers in the game.
+ * Reads the number of bank slots (set.maxbanks) from the sound options (SNDSYS_getopts). No callers in the game.
  *
  * @param outValue  receives the count
  * @return 0
  */
 int System_GetMaxBanks(int *outValue) {
-    char sp[0xE0];
-    SNDSYS_getopts(sp);
-    *outValue = *(unsigned short *)(sp + 0x28);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts(&opts);
+    *outValue = opts.set.maxbanks;
     return 0;
 }
 #endif
@@ -14584,7 +14501,7 @@ extern void SNDSYS_getopts_5368(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5368(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets the maximum number of streams in the sound options (+0x46) and applies them.
+ * Sets the maximum number of streams in the sound options (set.maxstreams) and applies them.
  *
  * SNDPLATFORM_outputset caps the value at 32. No callers in the game.
  *
@@ -14592,10 +14509,10 @@ extern void SNDSYS_setopts_5368(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetMaxStreams(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5368(sp);
-    *(signed char *)(sp + 0x46) = value;
-    SNDSYS_setopts_5368(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5368(&opts);
+    opts.set.maxstreams = value;
+    SNDSYS_setopts_5368(&opts);
     return 0;
 }
 #endif
@@ -14608,7 +14525,7 @@ extern void SNDSYS_getopts_53A0(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_53A0(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets whether a new sound may steal a voice of equal priority (option byte +0x3C) and applies the options.
+ * Sets whether a new sound may steal a voice of equal priority (set.stealequalpriorityvoices) and applies the options.
  *
  * SNDVOICEI_alloc only steals lower priorities when it is 0; SNDSYS_getopts defaults it to 1. No callers in the game.
  *
@@ -14616,10 +14533,10 @@ extern void SNDSYS_setopts_53A0(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetStealEqualPriorityVoices(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_53A0(sp);
-    *(signed char *)(sp + 0x3C) = value;
-    SNDSYS_setopts_53A0(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_53A0(&opts);
+    opts.set.stealequalpriorityvoices = value;
+    SNDSYS_setopts_53A0(&opts);
     return 0;
 }
 #endif
@@ -14632,7 +14549,7 @@ extern void SNDSYS_getopts_53D8(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_53D8(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets the random seed in the sound options (+0x24) and applies them.
+ * Sets the random seed in the sound options (set.randomseed) and applies them.
  *
  * The start-up SNDSYSI_init seeds the generator with it (SNDI_randomseed). No callers in the game.
  *
@@ -14640,10 +14557,10 @@ extern void SNDSYS_setopts_53D8(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetRandomSeed(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_53D8(sp);
-    *(int *)(sp + 0x24) = value;
-    SNDSYS_setopts_53D8(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_53D8(&opts);
+    opts.set.randomseed = value;
+    SNDSYS_setopts_53D8(&opts);
     return 0;
 }
 #endif
@@ -14654,7 +14571,7 @@ INCLUDE_ASM("ealib/seg_2B4578", System_SetUpdateRate);
 extern void SNDSYS_setopts(void *);
 
 /**
- * Sets the sound update rate: stores the period 1000 / rate ms in the options (+0x34) and applies them.
+ * Sets the sound update rate: stores the period 1000 / rate ms in the options (set.updateperiod) and applies them.
  *
  * A negative rate is stored as is (the -1.0f default makes SNDPLATFORM_init drive the sound thread from VBlank). No
  * callers in the game.
@@ -14663,14 +14580,14 @@ extern void SNDSYS_setopts(void *);
  * @return 0
  */
 int System_SetUpdateRate(float rate) {
-    char buf[0xE0];
+    SNDSYSOPTS opts;
 
     if (rate >= 0.0f) {
         rate = 1000.0f / rate;
     }
-    SNDSYS_getopts(buf);
-    *(float *)(buf + 0x34) = rate;
-    SNDSYS_setopts(buf);
+    SNDSYS_getopts(&opts);
+    opts.set.updateperiod = rate;
+    SNDSYS_setopts(&opts);
     return 0;
 }
 #endif
@@ -14679,7 +14596,7 @@ int System_SetUpdateRate(float rate) {
 INCLUDE_ASM("ealib/seg_2B4578", System_GetUpdateRate);
 #ifdef SKIP_ASM
 /**
- * Reads the sound update rate: 1000 / the period in the options (+0x34), or the negative default as is.
+ * Reads the sound update rate: 1000 / the period in the options (set.updateperiod), or the negative default as is.
  *
  * No callers in the game.
  *
@@ -14687,11 +14604,11 @@ INCLUDE_ASM("ealib/seg_2B4578", System_GetUpdateRate);
  * @return 0
  */
 int System_GetUpdateRate(float *outRate) {
-    char buf[0xE0];
+    SNDSYSOPTS opts;
     float period;
 
-    SNDSYS_getopts(buf);
-    period = *(float *)(buf + 0x34);
+    SNDSYS_getopts(&opts);
+    period = opts.set.updateperiod;
     *outRate = period;
     if (period >= 0.0f) {
         *outRate = 1000.0f / period;
@@ -14888,29 +14805,29 @@ extern int SNDSYS_getopts_5710(void *) __asm__("SNDSYS_getopts");
 /**
  * Sets a device's output rate in the sound options and applies them.
  *
- * The value is capped at 0xFFFF; device 0 sets +0x2A (the mixer rate), device 1 +0x2C. A stray store first puts the low
- * byte into +0x2A, which device 1 leaves behind (likely bug). No callers in the game.
+ * The value is capped at 0xFFFF; device 0 sets set.outputrate (the mixer rate), device 1 set.outputrateiopcpu. A stray
+ * store first puts the low byte into outputrate, which device 1 leaves behind (likely bug). No callers in the game.
  *
  * @param index  the device (0 or 1)
  * @param value  the rate in Hz
  * @return 0, or -5 for an unknown device
  */
 int System_SetOutputSampleRate(int index, int value) {
-    char buf[0xE0];
-    SNDSYS_getopts_5710(buf);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5710(&opts);
     { int lim = 0xFFFF; value = value > lim ? lim : value; }
-    *(short *)(buf + 0x2A) = value & 0xFF;
+    opts.set.outputrate = value & 0xFF;
     switch (index) {
     case 0:
-        *(short *)(buf + 0x2A) = value;
+        opts.set.outputrate = value;
         break;
     case 1:
-        *(short *)(buf + 0x2C) = value;
+        opts.set.outputrateiopcpu = value;
         break;
     default:
         return -5;
     }
-    SNDSYS_setopts(buf);
+    SNDSYS_setopts(&opts);
     return 0;
 }
 #endif
@@ -14919,27 +14836,27 @@ int System_SetOutputSampleRate(int index, int value) {
 INCLUDE_ASM("ealib/seg_2B4578", System_GetOutputSampleRate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct Buf_5788 { char pad[0x2A]; unsigned short a; unsigned short b; char rest[0xE0 - 0x2E]; } Buf_5788;
-extern void SNDSYS_getopts_5788(Buf_5788 *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_getopts_5788(SNDSYSOPTS *) __asm__("SNDSYS_getopts");
 
 /**
- * Reads a device's output rate from the sound options (+0x2A for 0, +0x2C for 1). No callers in the game.
+ * Reads a device's output rate from the sound options (set.outputrate for 0, set.outputrateiopcpu for 1). No callers in
+ * the game.
  *
  * @param index  the device
  * @param outValue  receives the rate (0 for an unknown device)
  * @return 0, or -5 for an unknown device
  */
 int System_GetOutputSampleRate(int index, int *outValue) {
-    Buf_5788 sp;
+    SNDSYSOPTS opts;
 
     *outValue = 0;
-    SNDSYS_getopts_5788(&sp);
+    SNDSYS_getopts_5788(&opts);
     switch (index) {
     case 0:
-        *outValue = sp.a;
+        *outValue = opts.set.outputrate;
         break;
     case 1:
-        *outValue = sp.b;
+        *outValue = opts.set.outputrateiopcpu;
         break;
     default:
         return -5;
@@ -15047,7 +14964,8 @@ extern void SNDSYS_getopts_5998(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5998(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets a device's resampling quality: quality * 100 into options byte +0x40 (device 0) or +0x41 (device 1).
+ * Sets a device's resampling quality: quality * 100 into set.resamplequality (device 0) or
+ * set.iopcpuresamplequality (device 1).
  *
  * No callers in the game.
  *
@@ -15056,19 +14974,19 @@ extern void SNDSYS_setopts_5998(void *) __asm__("SNDSYS_setopts");
  * @return 0, or -5 for an unknown device
  */
 int System_SetResampleQuality(int index, float value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5998(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5998(&opts);
     switch (index) {
     case 0:
-        *(signed char *)(sp + 0x40) = (int)(value * 100.0f);
+        opts.set.resamplequality = (int)(value * 100.0f);
         break;
     case 1:
-        *(signed char *)(sp + 0x41) = (int)(value * 100.0f);
+        opts.set.iopcpuresamplequality = (int)(value * 100.0f);
         break;
     default:
         return -5;
     }
-    SNDSYS_setopts_5998(sp);
+    SNDSYS_setopts_5998(&opts);
     return 0;
 }
 #endif
@@ -15165,7 +15083,7 @@ extern void SNDSYS_getopts_5AC0(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5AC0(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets whether the sound system loads its own IOP modules (options byte +0x3F) and applies the options.
+ * Sets whether the sound system loads its own IOP modules (set.loadiopmodules) and applies the options.
  *
  * SNDPLATFORM_init loads them at the first start when it is set. No callers in the game.
  *
@@ -15173,10 +15091,10 @@ extern void SNDSYS_setopts_5AC0(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetSndLoadsIopModules(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5AC0(sp);
-    *(signed char *)(sp + 0x3F) = value;
-    SNDSYS_setopts_5AC0(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5AC0(&opts);
+    opts.set.loadiopmodules = value;
+    SNDSYS_setopts_5AC0(&opts);
     return 0;
 }
 #endif
@@ -15189,18 +15107,18 @@ extern void SNDSYS_getopts_5AF8(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5AF8(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets the directory the IOP sound modules are loaded from (options word +0x6C) and applies the options.
+ * Sets the directory the IOP sound modules are loaded from (set.iopmodulepath) and applies the options.
  *
  * SNDPLATFORM_init builds the module paths from it. No callers in the game.
  *
  * @param value  the directory string
  * @return 0
  */
-int System_SetIopModulePath(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5AF8(sp);
-    *(int *)(sp + 0x6C) = value;
-    SNDSYS_setopts_5AF8(sp);
+int System_SetIopModulePath(char *value) {
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5AF8(&opts);
+    opts.set.iopmodulepath = value;
+    SNDSYS_setopts_5AF8(&opts);
     return 0;
 }
 #endif
@@ -15208,11 +15126,10 @@ int System_SetIopModulePath(int value) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", System_SetDtsQuality);
 #ifdef SKIP_ASM
-typedef struct { char pad[0x4A]; signed char v; char pad2[0xE0 - 0x4B]; } S_5B30;
 extern void SNDSYS_setopts(void *);
 
 /**
- * Sets the DTS encoder quality: quality * 100 into options byte +0x4A, then applies the options.
+ * Sets the DTS encoder quality: quality * 100 into set.dtsquality, then applies the options.
  *
  * SNDPLATFORM_outputset caps it at 100 and SNDPLATFORM_init hands it to the encoder's size and setup hooks. No callers in the
  * game.
@@ -15221,9 +15138,9 @@ extern void SNDSYS_setopts(void *);
  * @return 0
  */
 int System_SetDtsQuality(float value) {
-    S_5B30 sysOpts;
+    SNDSYSOPTS sysOpts;
     SNDSYS_getopts(&sysOpts);
-    sysOpts.v = (int)(value * 100.0f);
+    sysOpts.set.dtsquality = (int)(value * 100.0f);
     SNDSYS_setopts(&sysOpts);
     return 0;
 }
@@ -15237,7 +15154,7 @@ extern void SNDSYS_getopts_5B80(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5B80(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets options byte +0x42 and applies the options.
+ * Sets set.routemaincpufxtoiopcpu and applies the options.
  *
  * When set, func_003C1638 adds the extra tagged block to the IOP command buffer and func_003C3450 / func_003C35F8 route
  * the mixer's effect to the IOP (func_003CC878). No callers in the game.
@@ -15246,10 +15163,10 @@ extern void SNDSYS_setopts_5B80(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetRouteMainFxToIop(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5B80(sp);
-    *(signed char *)(sp + 0x42) = value;
-    SNDSYS_setopts_5B80(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5B80(&opts);
+    opts.set.routemaincpufxtoiopcpu = value;
+    SNDSYS_setopts_5B80(&opts);
     return 0;
 }
 #endif
@@ -15262,7 +15179,7 @@ extern void SNDSYS_getopts_5BB8(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5BB8(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets options byte +0x43 and applies the options.
+ * Sets set.routespufxtoiopcpu and applies the options.
  *
  * SNDPLATFORM_init passes it in the IOP init command when there are at least four output channels. No callers in the game.
  *
@@ -15270,10 +15187,10 @@ extern void SNDSYS_setopts_5BB8(void *) __asm__("SNDSYS_setopts");
  * @return 0
  */
 int System_SetRouteHardwareFxToIop(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5BB8(sp);
-    *(signed char *)(sp + 0x43) = value;
-    SNDSYS_setopts_5BB8(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5BB8(&opts);
+    opts.set.routespufxtoiopcpu = value;
+    SNDSYS_setopts_5BB8(&opts);
     return 0;
 }
 #endif
@@ -15307,11 +15224,11 @@ extern void SNDSYS_setopts_5BF8(void *) __asm__("SNDSYS_setopts");
  * @param value  the abort-message routine
  * @return 0
  */
-int System_SetAbortHandler(int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5BF8(sp);
-    *(int *)(sp + 0xC8) = value;
-    SNDSYS_setopts_5BF8(sp);
+int System_SetAbortHandler(void (*value)(void)) {
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5BF8(&opts);
+    opts.vec.abortmsg = value;
+    SNDSYS_setopts_5BF8(&opts);
     return 0;
 }
 #endif
@@ -15767,17 +15684,18 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_push);
  * @param node  the node
  */
 void SNDLINKI_push(SNDLINKLIST* list, void *node) {
-    void *temp_2;
+    SNDLINKNODE *link = (SNDLINKNODE *)node;
+    SNDLINKNODE *head;
 
-    (*(void **)((char*)(node) + 0)) = (void *) (list->phead);
-    (*(int *)((char*)(node) + 4)) = 0;
-    temp_2 = ((void*)list->phead);
-    if (temp_2 != 0) {
-        (*(void **)((char*)(temp_2) + 4)) = node;
+    link->pnext = list->phead;
+    link->pprev = 0;
+    head = list->phead;
+    if (head != 0) {
+        head->pprev = link;
     } else {
-        ((void*)list->ptail) = node;
+        list->ptail = link;
     }
-    ((void*)list->phead) = node;
+    list->phead = link;
     list->items = (int) (list->items + 1);
 }
 #endif
@@ -15979,7 +15897,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_getppatch);
 /**
  * Returns a bank's patch by number.
  *
- * The bank holds +0x06 patches and a table of 32-bit offsets at +0x14, each relative to its own entry. Called by
+ * The bank holds numpatches patches and a table of 32-bit offsets (patch[]), each relative to its own entry. Called by
  * SNDBANK_play, SNDbankremove and func_003B6670.
  *
  * @param bank  the bank
@@ -15987,16 +15905,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_getppatch);
  * @return the patch, or 0 when the number is out of range or the entry is empty
  */
 void *SNDBANKI_getppatch(BANKVER5* bank, int patchNum) {
-    int temp_3;
+    int patchOffset;
 
     if (patchNum >= bank->numpatches) {
         return 0;
     }
-    temp_3 = (int)bank->patch[patchNum];
-    if (temp_3 == 0) {
+    patchOffset = (int)bank->patch[patchNum];
+    if (patchOffset == 0) {
         return 0;
     }
-    return (char*)&bank->patch[patchNum] + temp_3;
+    // ORIGINAL-PTR: a bank file blob: each patch table entry holds the patch's byte offset from the entry itself
+    return (char*)&bank->patch[patchNum] + patchOffset;
 }
 #endif
 
@@ -16347,11 +16266,10 @@ int SNDPKTPLAY_submitspace(int instanceHandle) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAY_framesoutstanding);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Inner_6C98 { char pad[0x48]; volatile int a; volatile int b; };
-struct S_6C98 { char pad[0x304]; struct Inner_6C98 *p[1]; };
-extern struct S_6C98 sndpps_6C98 __asm__("sndpps");
+extern struct SNDPACKETSTATE sndpps;
 /**
- * Returns the frames a packet player instance still has to play: those queued (+0x48) plus those on the voices (+0x4C).
+ * Returns the frames a packet player instance still has to play: those queued (totalframes) plus those on the voices
+ * (outstandingframes).
  *
  * Called by SNDSTRMI_service, SNDSTRM_status and SFILTER_timestretch.
  *
@@ -16359,8 +16277,8 @@ extern struct S_6C98 sndpps_6C98 __asm__("sndpps");
  * @return the frame count
  */
 int SNDPKTPLAY_framesoutstanding(int i) {
-    struct Inner_6C98 *instance = (&sndpps_6C98)[0].p[i];
-    return instance->a + instance->b;
+    SNDPACKETCHAN *instance = sndpps.ppc[i];
+    return instance->totalframes + instance->outstandingframes;
 }
 #endif
 
@@ -16635,9 +16553,9 @@ extern void f2440_7138(int) __asm__("SNDPLATFORM_stop");
  * Releases a sound: moves each of its voices into the release part of its volume envelope.
  *
  * Looks the sound up (SNDVOICEI_get, same argument) and walks its voices with iSNDpatchkey. A voice whose release
- * segment (+0x5E) is negative is stopped (SNDPLATFORM_stop); otherwise, if it has not reached that segment yet (+0x5D), it
- * jumps there: the segment's duration goes to +0x44 and the slope from the current level (+0x40) to the segment's
- * target to +0x3C. Called by SNDI_midiparsenoteoff.
+ * segment (releaseenvelope) is negative is stopped (SNDPLATFORM_stop); otherwise, if it has not reached that segment
+ * yet (curenvelope), it jumps there: the segment's duration goes to envduration and the slope from the current level
+ * (envvol) to the segment's target to envpertick. Called by SNDI_midiparsenoteoff.
  *
  * @return the voice found, or a negative value when the sound is gone
  */
@@ -16645,22 +16563,20 @@ int SNDrelease(void) {
     int setVoice;
     int voice = fA6E8_7138();
     if (voice >= 0) {
-        char *sndGlobals;
+        SNDGLOBALSTATE *sndGlobals;
         setVoice = -1;
-        sndGlobals = ((char*)&sndgs);
+        sndGlobals = &sndgs;
         while (fAA00_7138(voice, &setVoice) != 0) {
-            char *chanPub = *(char **)(sndGlobals + 0x1F0) + setVoice * 140;
-            signed char nextSegment = *(signed char *)(chanPub + 0x5E);
+            CHANPUB *channel = &sndGlobals->chan[setVoice];
+            signed char nextSegment = channel->releaseenvelope;
             if (nextSegment < 0) {
                 f2440_7138(setVoice);
-            } else if (*(signed char *)(chanPub + 0x5D) < nextSegment) {
-                char *segment;
+            } else if (channel->curenvelope < nextSegment) {
                 int duration;
-                *(signed char *)(chanPub + 0x5D) = (unsigned char)*(signed char *)(chanPub + 0x5E);
-                segment = (char *)(nextSegment * 8 + *(int *)(chanPub + 0x6C));
-                duration = *(int *)segment;
-                *(int *)(chanPub + 0x44) = duration;
-                *(int *)(chanPub + 0x3C) = ((*(int *)(segment + 4) << 16) - *(int *)(chanPub + 0x40)) / duration;
+                channel->curenvelope = (unsigned char)channel->releaseenvelope;
+                duration = channel->paenvelope[nextSegment].duration;
+                channel->envduration = duration;
+                channel->envpertick = ((channel->paenvelope[nextSegment].targetvol << 16) - channel->envvol) / duration;
             }
         }
     }
@@ -16675,8 +16591,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SND_attrsetdef);
 /**
  * Fills sample attributes with their defaults.
  *
- * Volume +0x03 = 0x7F, pan +0x04 = 0x40, +0x08 = 8, the other bytes and +0x00 zero; clears the four words at +0x48 and
- * +0x58 and the six 16-bit levels (+0x0C) and words (+0x18). Called by SNDI_patchtohdr and SNDI_patchtohdrgen.
+ * vol = 0x7F, pan = 0x40, rendermode = 8, the other bytes and detune zero; clears the four puserdata /
+ * userdatasize entries and the six azimuth / ptsdata entries. Called by SNDI_patchtohdr and SNDI_patchtohdrgen.
  *
  * @param sampleAttr  the attributes
  * @return 0
@@ -16692,12 +16608,12 @@ int SND_attrsetdef(struct SNDSAMPLEATTR *sampleAttr) {
     sampleAttr->bendrange = 0;
     sampleAttr->platformver = 0;
     for (i = 0; i < 4; i++) {
-        ((int*)&sampleAttr->puserdata[0])[i] = 0;
+        sampleAttr->puserdata[i] = 0;
         sampleAttr->userdatasize[i] = 0;
     }
     for (i = 0; i < 6; i++) {
-        ((short*)&sampleAttr->azimuth[0])[i] = 0;
-        ((int*)&sampleAttr->ptsdata[0])[i] = 0;
+        sampleAttr->azimuth[i] = 0;
+        sampleAttr->ptsdata[i] = 0;
     }
     return 0;
 }
@@ -16860,23 +16776,23 @@ INCLUDE_ASM("ealib/seg_2B4578", MIXI_interpolateto0);
  * @param amount  in/out: the level, cleared afterwards
  * @param buckets  the 16 float samples
  */
-void MIXI_interpolateto0(float *amount, void *buckets) {
-    (*(float *)((char*)(buckets) + 0)) = (float) ((*(float *)((char*)(buckets) + 0)) + (*amount * 0.9411765f));
-    (*(float *)((char*)(buckets) + 4)) = (float) ((*(float *)((char*)(buckets) + 4)) + (*amount * 0.88235295f));
-    (*(float *)((char*)(buckets) + 8)) = (float) ((*(float *)((char*)(buckets) + 8)) + (*amount * 0.8235294f));
-    (*(float *)((char*)(buckets) + 0xC)) = (float) ((*(float *)((char*)(buckets) + 0xC)) + (*amount * 0.7647059f));
-    (*(float *)((char*)(buckets) + 0x10)) = (float) ((*(float *)((char*)(buckets) + 0x10)) + (*amount * 0.7058824f));
-    (*(float *)((char*)(buckets) + 0x14)) = (float) ((*(float *)((char*)(buckets) + 0x14)) + (*amount * 0.64705884f));
-    (*(float *)((char*)(buckets) + 0x18)) = (float) ((*(float *)((char*)(buckets) + 0x18)) + (*amount * 0.5882353f));
-    (*(float *)((char*)(buckets) + 0x1C)) = (float) ((*(float *)((char*)(buckets) + 0x1C)) + (*amount * 0.5294118f));
-    (*(float *)((char*)(buckets) + 0x20)) = (float) ((*(float *)((char*)(buckets) + 0x20)) + (*amount * 0.47058824f));
-    (*(float *)((char*)(buckets) + 0x24)) = (float) ((*(float *)((char*)(buckets) + 0x24)) + (*amount * 0.4117647f));
-    (*(float *)((char*)(buckets) + 0x28)) = (float) ((*(float *)((char*)(buckets) + 0x28)) + (*amount * 0.3529412f));
-    (*(float *)((char*)(buckets) + 0x2C)) = (float) ((*(float *)((char*)(buckets) + 0x2C)) + (*amount * 0.29411766f));
-    (*(float *)((char*)(buckets) + 0x30)) = (float) ((*(float *)((char*)(buckets) + 0x30)) + (*amount * 0.23529412f));
-    (*(float *)((char*)(buckets) + 0x34)) = (float) ((*(float *)((char*)(buckets) + 0x34)) + (*amount * 0.1764706f));
-    (*(float *)((char*)(buckets) + 0x38)) = (float) ((*(float *)((char*)(buckets) + 0x38)) + (*amount * 0.11764706f));
-    (*(float *)((char*)(buckets) + 0x3C)) = (float) ((*(float *)((char*)(buckets) + 0x3C)) + (*amount * 0.05882353f));
+void MIXI_interpolateto0(float *amount, float *buckets) {
+    buckets[0] = (float) (buckets[0] + (*amount * 0.9411765f));
+    buckets[1] = (float) (buckets[1] + (*amount * 0.88235295f));
+    buckets[2] = (float) (buckets[2] + (*amount * 0.8235294f));
+    buckets[3] = (float) (buckets[3] + (*amount * 0.7647059f));
+    buckets[4] = (float) (buckets[4] + (*amount * 0.7058824f));
+    buckets[5] = (float) (buckets[5] + (*amount * 0.64705884f));
+    buckets[6] = (float) (buckets[6] + (*amount * 0.5882353f));
+    buckets[7] = (float) (buckets[7] + (*amount * 0.5294118f));
+    buckets[8] = (float) (buckets[8] + (*amount * 0.47058824f));
+    buckets[9] = (float) (buckets[9] + (*amount * 0.4117647f));
+    buckets[10] = (float) (buckets[10] + (*amount * 0.3529412f));
+    buckets[11] = (float) (buckets[11] + (*amount * 0.29411766f));
+    buckets[12] = (float) (buckets[12] + (*amount * 0.23529412f));
+    buckets[13] = (float) (buckets[13] + (*amount * 0.1764706f));
+    buckets[14] = (float) (buckets[14] + (*amount * 0.11764706f));
+    buckets[15] = (float) (buckets[15] + (*amount * 0.05882353f));
     *amount = 0.0f;
 }
 #endif
@@ -16895,26 +16811,26 @@ INCLUDE_ASM("ealib/seg_2B4578", MIXI_interpolatemix);
  * @param fparg0  the gain to start from
  * @param fparg1  the gain to ramp to
  */
-void MIXI_interpolatemix(void *input, void *accum, float fparg0, float fparg1) {
+void MIXI_interpolatemix(float *input, float *accum, float fparg0, float fparg1) {
     float temp_f13;
 
     temp_f13 = (fparg1 - fparg0) * 0.05882353f;
-    (*(float *)((char*)(accum) + 0)) = (float) ((*(float *)((char*)(accum) + 0)) + ((*(float *)((char*)(input) + 0)) * (fparg0 + temp_f13)));
-    (*(float *)((char*)(accum) + 4)) = (float) ((*(float *)((char*)(accum) + 4)) + ((*(float *)((char*)(input) + 4)) * (fparg0 + (2.0f * temp_f13))));
-    (*(float *)((char*)(accum) + 8)) = (float) ((*(float *)((char*)(accum) + 8)) + ((*(float *)((char*)(input) + 8)) * (fparg0 + (temp_f13 * 3.0f))));
-    (*(float *)((char*)(accum) + 0xC)) = (float) ((*(float *)((char*)(accum) + 0xC)) + ((*(float *)((char*)(input) + 0xC)) * (fparg0 + (temp_f13 * 4.0f))));
-    (*(float *)((char*)(accum) + 0x10)) = (float) ((*(float *)((char*)(accum) + 0x10)) + ((*(float *)((char*)(input) + 0x10)) * (fparg0 + (temp_f13 * 5.0f))));
-    (*(float *)((char*)(accum) + 0x14)) = (float) ((*(float *)((char*)(accum) + 0x14)) + ((*(float *)((char*)(input) + 0x14)) * (fparg0 + (temp_f13 * 6.0f))));
-    (*(float *)((char*)(accum) + 0x18)) = (float) ((*(float *)((char*)(accum) + 0x18)) + ((*(float *)((char*)(input) + 0x18)) * (fparg0 + (temp_f13 * 7.0f))));
-    (*(float *)((char*)(accum) + 0x1C)) = (float) ((*(float *)((char*)(accum) + 0x1C)) + ((*(float *)((char*)(input) + 0x1C)) * (fparg0 + (temp_f13 * 8.0f))));
-    (*(float *)((char*)(accum) + 0x20)) = (float) ((*(float *)((char*)(accum) + 0x20)) + ((*(float *)((char*)(input) + 0x20)) * (fparg0 + (temp_f13 * 9.0f))));
-    (*(float *)((char*)(accum) + 0x24)) = (float) ((*(float *)((char*)(accum) + 0x24)) + ((*(float *)((char*)(input) + 0x24)) * (fparg0 + (temp_f13 * 10.0f))));
-    (*(float *)((char*)(accum) + 0x28)) = (float) ((*(float *)((char*)(accum) + 0x28)) + ((*(float *)((char*)(input) + 0x28)) * (fparg0 + (temp_f13 * 11.0f))));
-    (*(float *)((char*)(accum) + 0x2C)) = (float) ((*(float *)((char*)(accum) + 0x2C)) + ((*(float *)((char*)(input) + 0x2C)) * (fparg0 + (temp_f13 * 12.0f))));
-    (*(float *)((char*)(accum) + 0x30)) = (float) ((*(float *)((char*)(accum) + 0x30)) + ((*(float *)((char*)(input) + 0x30)) * (fparg0 + (temp_f13 * 13.0f))));
-    (*(float *)((char*)(accum) + 0x34)) = (float) ((*(float *)((char*)(accum) + 0x34)) + ((*(float *)((char*)(input) + 0x34)) * (fparg0 + (temp_f13 * 14.0f))));
-    (*(float *)((char*)(accum) + 0x38)) = (float) ((*(float *)((char*)(accum) + 0x38)) + ((*(float *)((char*)(input) + 0x38)) * (fparg0 + (temp_f13 * 15.0f))));
-    (*(float *)((char*)(accum) + 0x3C)) = (float) ((*(float *)((char*)(accum) + 0x3C)) + ((*(float *)((char*)(input) + 0x3C)) * (fparg0 + (temp_f13 * 16.0f))));
+    accum[0] = (float) (accum[0] + (input[0] * (fparg0 + temp_f13)));
+    accum[1] = (float) (accum[1] + (input[1] * (fparg0 + (2.0f * temp_f13))));
+    accum[2] = (float) (accum[2] + (input[2] * (fparg0 + (temp_f13 * 3.0f))));
+    accum[3] = (float) (accum[3] + (input[3] * (fparg0 + (temp_f13 * 4.0f))));
+    accum[4] = (float) (accum[4] + (input[4] * (fparg0 + (temp_f13 * 5.0f))));
+    accum[5] = (float) (accum[5] + (input[5] * (fparg0 + (temp_f13 * 6.0f))));
+    accum[6] = (float) (accum[6] + (input[6] * (fparg0 + (temp_f13 * 7.0f))));
+    accum[7] = (float) (accum[7] + (input[7] * (fparg0 + (temp_f13 * 8.0f))));
+    accum[8] = (float) (accum[8] + (input[8] * (fparg0 + (temp_f13 * 9.0f))));
+    accum[9] = (float) (accum[9] + (input[9] * (fparg0 + (temp_f13 * 10.0f))));
+    accum[10] = (float) (accum[10] + (input[10] * (fparg0 + (temp_f13 * 11.0f))));
+    accum[11] = (float) (accum[11] + (input[11] * (fparg0 + (temp_f13 * 12.0f))));
+    accum[12] = (float) (accum[12] + (input[12] * (fparg0 + (temp_f13 * 13.0f))));
+    accum[13] = (float) (accum[13] + (input[13] * (fparg0 + (temp_f13 * 14.0f))));
+    accum[14] = (float) (accum[14] + (input[14] * (fparg0 + (temp_f13 * 15.0f))));
+    accum[15] = (float) (accum[15] + (input[15] * (fparg0 + (temp_f13 * 16.0f))));
 }
 #endif
 
@@ -17404,8 +17320,9 @@ extern void SNDMEMI_free_8468(struct SFILTERNODE *) __asm__("SNDMEMI_free");
 /**
  * Stops a mixer voice.
  *
- * Adds the voice's last sample (+0x3C) times its effect send and channel gains to the leftover levels of the mixer, so
- * MIXI_interpolateto0 fades them out; then runs each filter node's clean-up (+0x04), frees the node and sets the state to 0.
+ * Adds the voice's last sample (lastmixed) times its effect send and channel gains to the leftover levels of the mixer,
+ * so MIXI_interpolateto0 fades them out; then runs each filter node's clean-up (restorefn), frees the node and sets the
+ * state to 0.
  * Called by MIXI_stop and SNDPLATFORM_stop.
  *
  * @param idx  the mixer voice
@@ -17422,13 +17339,13 @@ void MIX_stop(int idx) {
         sndmix.stoppedvoiceaccdry[i] += voiceState->drybusgainprev[i] * voiceState->lastmixed;
     }
     do {
-        if (((void (*)(struct Node_8468*))((struct SFILTERNODE*)voiceState->filterhead)->restorefn) != 0) {
-            ((void (*)(struct Node_8468*))((struct SFILTERNODE*)voiceState->filterhead)->restorefn)(((struct SFILTERNODE*)voiceState->filterhead));
+        if (voiceState->filterhead->restorefn != 0) {
+            voiceState->filterhead->restorefn(voiceState->filterhead);
         }
-        nd = ((struct SFILTERNODE*)voiceState->filterhead);
-        next = ((struct Node_8468*)nd->pfnnext);
+        nd = voiceState->filterhead;
+        next = nd->pfnnext;
         SNDMEMI_free_8468(nd);
-        (*(struct SFILTERNODE**)&voiceState->filterhead) = next;
+        voiceState->filterhead = next;
     } while (next != 0);
     voiceState->status = 0;
 }
@@ -17737,12 +17654,10 @@ void MIX_setpitch(int idx, int n) {
 INCLUDE_ASM("ealib/seg_2B4578", MIX_settimemult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { char pad[0x4C]; int f; char pad2[0x10]; } E_8B40;
-typedef struct { E_8B40 arr[100]; } W_8B40;
-void SFILTER_timestretchsetratio_8B40(int, int) __asm__("SFILTER_timestretchsetratio");
+void SFILTER_timestretchsetratio_8B40(TIMESTRETCHSTATE *, int) __asm__("SFILTER_timestretchsetratio");
 
 /**
- * Sets a mixer voice's time multiplier: passes it to the voice's time-stretch node (+0x4C), if it has one, through
+ * Sets a mixer voice's time multiplier: passes it to the voice's time-stretch node (ptss), if it has one, through
  * SFILTER_timestretchsetratio.
  *
  * Called by SNDPLATFORM_timemult.
@@ -17751,11 +17666,12 @@ void SFILTER_timestretchsetratio_8B40(int, int) __asm__("SFILTER_timestretchsetr
  * @param timeMult  the time multiplier
  */
 void MIX_settimemult(int voice, int timeMult) {
-    int temp_4;
+    TIMESTRETCHSTATE *stretcher;
+    SNDMIXVOICE *mixVoice = &sndmix.smv[voice];
 
-    temp_4 = ((W_8B40*)sndmix.smv)->arr[voice].f;
-    if (temp_4 != 0) {
-        SFILTER_timestretchsetratio_8B40(temp_4, timeMult);
+    stretcher = mixVoice->ptss;
+    if (stretcher != 0) {
+        SFILTER_timestretchsetratio_8B40(stretcher, timeMult);
     }
 }
 #endif
@@ -18025,31 +17941,31 @@ int SFILTER_destroy(SFILTERNODE* node) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_cleanup);
 #ifdef SKIP_ASM
 /**
- * Releases a filter graph: walks the nodes feeding this one (+0x08, +0x0C) depth first, then runs this node's release
- * function (+0x04) and marks it done (+0x1B), so shared nodes are released once.
+ * Releases a filter graph: walks the nodes feeding this one (pfnnext, pfnnext2) depth first, then runs this node's
+ * release function (restorefn) and marks it done (clean), so shared nodes are released once.
  *
  * Calls itself; no other callers.
  *
  * @param node  the node to start from
  */
 void SFILTER_cleanup(SFILTERNODE* node) {
-    int (*temp_2)(void *);
-    void *temp_4;
-    void *temp_4_2;
+    void (*restore)(void *);
+    SFILTERNODE *input;
+    SFILTERNODE *input2;
 
-    temp_4 = ((void*)node->pfnnext);
-    if ((temp_4 != 0) && ((*(unsigned char *)((char*)(temp_4) + 0x1B)) == 0)) {
-        SFILTER_cleanup((SFILTERNODE*)temp_4);
+    input = node->pfnnext;
+    if ((input != 0) && (input->clean == 0)) {
+        SFILTER_cleanup(input);
     }
-    temp_4_2 = ((void*)node->pfnnext2);
-    if ((temp_4_2 != 0) && ((*(unsigned char *)((char*)(temp_4_2) + 0x1B)) == 0)) {
-        SFILTER_cleanup((SFILTERNODE*)temp_4_2);
+    input2 = node->pfnnext2;
+    if ((input2 != 0) && (input2->clean == 0)) {
+        SFILTER_cleanup(input2);
     }
-    temp_2 = ((int (*)(void*))node->restorefn);
-    if (temp_2 != 0) {
-        temp_2(node);
+    restore = node->restorefn;
+    if (restore != 0) {
+        restore(node);
     }
-    (*(signed char*)&node->clean) = 1;
+    node->clean = 1;
 }
 #endif
 
@@ -18353,7 +18269,6 @@ int SFILTER_unpackgetframemtlf(UNPACKMTLFSTATE* node) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtlf);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { int a, b, c; } Q_9520;
 extern int CMTBLKDecf_Decode_9520(int, int *, int) __asm__("CMTBLKDecf_Decode");
 extern void CMTBLKDecf_SetState_9520(int, void *, int) __asm__("CMTBLKDecf_SetState");
 extern void CMTBLKDecf_Feed_9520(int, int, int, int) __asm__("CMTBLKDecf_Feed");
@@ -18372,7 +18287,7 @@ extern void CMTBLKDecf_Feed_9520(int, int, int, int) __asm__("CMTBLKDecf_Feed");
  * @return 1
  */
 int SFILTER_unpackmtlf(UNPACKMTLFSTATE* node, int count, int srcBuffer, int buffer) {
-    Q_9520 state;
+    MTFSTATE state;
     int cursor;
     int n, loopLength;
 
@@ -18385,9 +18300,9 @@ int SFILTER_unpackmtlf(UNPACKMTLFSTATE* node, int count, int srcBuffer, int buff
             node->curframe = node->curframe + n;
             if (n < count) {
                 node->curframe = node->loopstart;
-                state.b = 0;
-                state.a = 0;
-                state.c = 1;
+                state.bufframes = 0;
+                state.shiftreg = 0;
+                state.doWholeInit = 1;
                 CMTBLKDecf_SetState_9520((int)node->pDecoder, &state, 0);
                 loopLength = (node->loopend - node->loopstart) + 1;
                 CMTBLKDecf_Feed_9520((int)node->pDecoder, (int)node->ploop, loopLength * 4, loopLength);
@@ -18462,12 +18377,11 @@ void SFILTER_unpackmtlfinit(struct UNPACKMTLFSTATE *self, struct UNPACKINITPARAM
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtpf);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { int a, b, c; } Q_96F0;
 extern void f_7010_96F0(int, int, int) __asm__("SNDPKTPLAYI_freeframes");
 extern int f_6DE0_96F0(int, int, char *, int *) __asm__("SNDPKTPLAYI_get");
 extern int f_DE68_96F0(int, int *, int) __asm__("CMTBLKDecf_Decode");
-extern Q_96F0 f_E078_96F0(int) __asm__("CMTBLKDecf_GetState");
-extern void f_E0B8_96F0(int, Q_96F0 *, int) __asm__("CMTBLKDecf_SetState");
+extern MTFSTATE f_E078_96F0(int) __asm__("CMTBLKDecf_GetState");
+extern void f_E0B8_96F0(int, MTFSTATE *, int) __asm__("CMTBLKDecf_SetState");
 extern void f_E0D8_96F0(int, int) __asm__("CMTBLKDecf_SetCodecVersion");
 extern void f_DDE8_96F0(int, int, int, int) __asm__("CMTBLKDecf_Feed");
 extern void f_6210_96F0(int, int, int) __asm__("memset");
@@ -18487,8 +18401,8 @@ extern void f_6210_96F0(int, int, int) __asm__("memset");
  * @return the frames decoded
  */
 int SFILTER_unpackmtpf(UNPACKMTPFSTATE* self, int n, int srcBuffer, int buf) {
-    Q_96F0 newState;
-    Q_96F0 curState;
+    MTFSTATE newState;
+    MTFSTATE curState;
     int last;
     int total;
     int got;
@@ -18513,12 +18427,12 @@ int SFILTER_unpackmtpf(UNPACKMTPFSTATE* self, int n, int srcBuffer, int buf) {
                     if (last == 0) {
                         curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
-                        newState.c = 1;
+                        newState.doWholeInit = 1;
                         f_E0B8_96F0((int)self->pDecoder, &newState, 0);
                     } else {
                         curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
-                        newState.c = 0;
+                        newState.doWholeInit = 0;
                         f_E0B8_96F0((int)self->pDecoder, &newState, 0);
                     }
                     f_E0D8_96F0((int)self->pDecoder, 0);
@@ -18526,12 +18440,12 @@ int SFILTER_unpackmtpf(UNPACKMTPFSTATE* self, int n, int srcBuffer, int buf) {
                     if (last == 0) {
                         curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
-                        newState.b = 0;
-                        newState.c = 1;
+                        newState.bufframes = 0;
+                        newState.doWholeInit = 1;
                     } else {
                         curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
-                        newState.c = 0;
+                        newState.doWholeInit = 0;
                     }
                     f_E0B8_96F0((int)self->pDecoder, &newState, 0);
                     f_E0D8_96F0((int)self->pDecoder, 1);
@@ -18631,8 +18545,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackf);
 /**
  * Converts frames of a one-shot 16-bit PCM sample to floats (a filter node's process function).
  *
- * Returns -1 once the position (+0x20) has reached the frame count (+0x24). Otherwise it advances the position and
- * converts the samples (+0x1C data; func_003C9E50, when +0x28 is set), zero-filling anything past the end.
+ * Returns -1 once the position (curframe) has reached the frame count (totalframes). Otherwise it advances the position
+ * and converts the samples (psample; func_003C9E50, when bits16 is set), zero-filling anything past the end.
  *
  * @param reader  the decoder node
  * @param n  the frames wanted
@@ -18645,6 +18559,7 @@ int SFILTER_unpackf(struct UNPACKFSTATE *reader, unsigned int n, int srcBuffer, 
     unsigned int cap = reader->totalframes;
     if (pos >= cap) return -1;
     reader->curframe = pos + n;
+    // ORIGINAL-PTR: sample data: psample is a byte pointer read as 16-bit samples when bits16 is set
     if (pos + n < cap) {
         if (reader->bits16) {
             func_003C9E50(n, ((short*)reader->psample) + pos, buf);
@@ -18712,8 +18627,8 @@ extern void f_9E50_9B10(int, void *, void *) __asm__("func_003C9E50");
 /**
  * Converts frames of a looped 16-bit PCM sample to floats (a filter node's process function).
  *
- * Converts runs from the position (+0x20) up to the sustain end (+0x28), wrapping back to the sustain start (+0x24)
- * (func_003C9E50, when +0x2C is set). Never ends on its own.
+ * Converts runs from the position (curframe) up to the sustain end (sustainend), wrapping back to the sustain start
+ * (sustainstart) (func_003C9E50, when bits16 is set). Never ends on its own.
  *
  * @param n  the frames wanted
  * @param srcBuffer  unused (the source)
@@ -18726,6 +18641,7 @@ int SFILTER_unpacklf(struct UNPACKLFSTATE *self, int n, int srcBuffer, int *dst)
         runLength = self->sustainend - self->curframe + 1;
         if (n < runLength)
             runLength = n;
+        // ORIGINAL-PTR: sample data: psample is a byte pointer read as 16-bit samples when bits16 is set
         if (self->bits16 != 0)
             f_9E50_9B10(runLength, ((short*)self->psample) + self->curframe, dst);
         dst += runLength;
@@ -19553,21 +19469,21 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_modifyLPFRC);
 /**
  * Sets a one-pole low-pass node's coefficients from its parameters.
  *
- * With k = 2 * cutoff / rate: input gain +0x24 = k * gain / 256 and feedback +0x20 = (1 - k) * gain / 256.
+ * With k = 2 * cutoff / rate: input gain lpf.inverse = k * gain / 256 and feedback lpf.leakage = (1 - k) * gain / 256.
  *
  * @param node  the node
- * @param params  {cutoff, rate (both in the same fixed point), gain (256 = 1.0)}
+ * @param params  [0] cutoff, [1] rate (both in the same fixed point), [2] gain (256 = 1.0)
  */
-void SFILTER_modifyLPFRC(LPFRCSTATE* node, void *params) {
+void SFILTER_modifyLPFRC(LPFRCSTATE* node, int *params) {
     float temp_f1;
     float temp_f2;
 
-    temp_f1 = (2.0f * (float) (*(int *)((char*)(params) + 0))) / (float) (*(int *)((char*)(params) + 4));
+    temp_f1 = (2.0f * (float) params[0]) / (float) params[1];
     temp_f2 = 1.0f - temp_f1;
     node->lpf.inverse = temp_f1;
     node->lpf.leakage = temp_f2;
-    node->lpf.inverse = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + 8)) * 0.00390625f));
-    node->lpf.leakage = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + 8)) * 0.00390625f));
+    node->lpf.inverse = (float) (temp_f1 * ((float) params[2] * 0.00390625f));
+    node->lpf.leakage = (float) (temp_f2 * ((float) params[2] * 0.00390625f));
 }
 #endif
 
@@ -19750,10 +19666,10 @@ extern void crossfade_AC88(void *, void *, void *, int, int) __asm__("crossfade"
 /**
  * Applies the time-stretcher's action to the next window of input.
  *
- * With no shift the window is copied to the output buffer (+0x838); a positive shift copies part of it and cross-fades
- * the rest with the next window (crossfade); a negative shift cross-fades and then copies the extra frames. The
- * input left (+0x30), the output frames ready (+0x38) and the input cursor are updated; the pending-window count +0x34
- * and the output read index +0x3C are reset.
+ * With no shift the window is copied to the output buffer (output[]); a positive shift copies part of it and
+ * cross-fades the rest with the next window (crossfade); a negative shift cross-fades and then copies the extra frames.
+ * The input left (framesleft), the output frames ready (outputsamples) and the input cursor are updated; the
+ * pending-window count inputsamples and the output read index outputstart are reset.
  *
  * @param stretcher  the time-stretch state
  * @param cursor  in/out: the input samples
@@ -19778,7 +19694,7 @@ void applyaction(TIMESTRETCHSTATE* stretcher, char **cursor, int shift) {
         if (shift > 0) {
             int shiftBytes = shift * 4;
             Util_MemCpy_AC88(&stretcher->output[0], prevBlock, shiftBytes);
-            crossfade_AC88(prevBlock, nextBlock, ((char*)stretcher) + (shiftBytes + 2104), stretcher->windowsize, shift);
+            crossfade_AC88(prevBlock, nextBlock, &stretcher->output[shift], stretcher->windowsize, shift);
             stretcher->framesleft = stretcher->framesleft - stretcher->windowsize;
             stretcher->outputsamples = stretcher->windowsize + shift;
             *cursor = nextBlock;
@@ -20022,7 +19938,7 @@ extern char SFILTER_timestretch_B280[] __asm__("SFILTER_timestretch");
  * @param voice  the voice, or -1
  * @return 0
  */
-int SFILTER_timestretchinit(TIMESTRETCHSTATE* node, void *header, int voice) {
+int SFILTER_timestretchinit(TIMESTRETCHSTATE* node, unsigned char *header, int voice) {
     (*(char**)&node->sfn) = SFILTER_timestretch_B280;
     ((int)node->sfn.restorefn) = 0;
     if (voice >= 0) {
@@ -20030,10 +19946,10 @@ int SFILTER_timestretchinit(TIMESTRETCHSTATE* node, void *header, int voice) {
     } else {
         node->packetinstancehandle = -1;
     }
-    ((int)node->psideband) = (int) (header + 6);
+    node->psideband = header + 6;
     node->stretchratio = 1.0f;
     (*(int*)&node->sampleerror) = 0;
-    node->windowsize = (int) ((*(unsigned char *)((char*)(header) + 1)) * 2);
+    node->windowsize = (int) (header[1] * 2);
     node->framesleft = SNDI_getb(header + 2, 4);
     node->inputsamples = 0;
     node->outputsamples = 0;
@@ -20166,22 +20082,23 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CB540);
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_rsfinit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void f_BB28_vt(void) __asm__("func_003CB540");
+extern int f_BB28_vt(void *, int, void *, void *, int) __asm__("func_003CB540");
 
 /**
- * Sets up a resampling filter node: process function func_003CB540, no release, position and history cleared.
+ * Sets up a resampling filter node: process function func_003CB540, no release, position (acc16_16), firstdone,
+ * centersample and history cleared.
  *
  * Called by MIX_setpitch (which passes byte D_0050AA62 and the quality flag; neither is stored here).
  */
-void SFILTER_rsfinit(int *self) {
+void SFILTER_rsfinit(RSFSTATE *self) {
     int i;
-    self[1] = 0;
-    self[8] = 0;
-    self[0] = (int)f_BB28_vt;
-    ((short *)self)[0x24 / 2] = 0;
-    ((short *)self)[0x26 / 2] = 0;
+    self->sfn.restorefn = 0;
+    self->acc16_16 = 0;
+    self->sfn.filterfn = f_BB28_vt;
+    self->firstdone = 0;
+    self->centersample = 0;
     for (i = 3; i >= 0; i--)
-        self[10 + i] = 0;
+        self->history[i] = 0;
 }
 #endif
 
@@ -20751,37 +20668,35 @@ void CODASetDelete(int freeFunc) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", process_raw_block);
 #ifdef SKIP_ASM
-typedef struct { int pad0; float x; float y; unsigned char *src; float *dst; } S_C938;
-typedef union { short s; unsigned char c[2]; } U_C938;
 
 /**
  * Decodes an uncompressed EA-XA block, one whose first byte is 0xEE.
  *
- * Reads two big-endian 16-bit history values (+0x04, +0x08) and 28 big-endian 16-bit samples into the float output,
- * advancing the source (+0x0C) and destination (+0x10). Other blocks are left alone. Called by func_003CCA38.
+ * Reads two big-endian 16-bit history values (sample1, sample2) and 28 big-endian 16-bit samples into the float
+ * output, advancing the source (psrc) and destination (pdst). Other blocks are left alone. Called by func_003CCA38.
  *
  * @param decoder  the block decoder state
  */
-void process_raw_block(S_C938 *decoder) {
+void process_raw_block(MXAPACKETF *decoder) {
     unsigned char swapped[2];
     unsigned int i;
 
-    if (*decoder->src == 238) {
-        decoder->src++;
-        swapped[0] = decoder->src[1];
-        swapped[1] = decoder->src[0];
-        decoder->src += 2;
-        decoder->x = (float)*(short*)swapped;
-        swapped[0] = decoder->src[1];
-        swapped[1] = decoder->src[0];
-        decoder->src += 2;
-        decoder->y = (float)*(short*)swapped;
+    if (*decoder->psrc == 238) {
+        decoder->psrc++;
+        swapped[0] = decoder->psrc[1];
+        swapped[1] = decoder->psrc[0];
+        decoder->psrc += 2;
+        decoder->sample1 = (float)*(short*)swapped;
+        swapped[0] = decoder->psrc[1];
+        swapped[1] = decoder->psrc[0];
+        decoder->psrc += 2;
+        decoder->sample2 = (float)*(short*)swapped;
         for (i = 0; i < 0x1C; i++) {
-            swapped[0] = decoder->src[1];
-            swapped[1] = decoder->src[0];
-            *decoder->dst = (float)*(short*)swapped;
-            decoder->dst++;
-            decoder->src += 2;
+            swapped[0] = decoder->psrc[1];
+            swapped[1] = decoder->psrc[0];
+            *decoder->pdst = (float)*(short*)swapped;
+            decoder->pdst++;
+            decoder->psrc += 2;
         }
     }
 }
@@ -21305,20 +21220,20 @@ int CEAXABLKDecf_Decode(struct S_CF90 *decoder, float **pout, int n) {
 INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_GetState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { float x; float y; } V2_D138;
-V2_D138 CEAXABLKDecf_GetState_D138(char *p) __asm__("CEAXABLKDecf_GetState");
+XAFSTATE CEAXABLKDecf_GetState_D138(CEAXABLKDecf *p) __asm__("CEAXABLKDecf_GetState");
 
 /**
- * Returns an EA-XA decoder's predictor history (+0x98, +0x9C). Called by SFILTER_unpackxalf to save it at a loop point.
+ * Returns an EA-XA decoder's predictor history (xap.sample1, xap.sample2). Called by SFILTER_unpackxalf to save it at a
+ * loop point.
  *
  * @param decoder  the decoder
  * @return the two history values
  */
-V2_D138 CEAXABLKDecf_GetState_D138(char *decoder) {
-    V2_D138 history;
-    V2_D138 w;
-    history.x = *(float *)(decoder + 0x98);
-    history.y = *(float *)(decoder + 0x9C);
+XAFSTATE CEAXABLKDecf_GetState_D138(CEAXABLKDecf *decoder) {
+    XAFSTATE history;
+    XAFSTATE w;
+    history.sample1 = decoder->xap.sample1;
+    history.sample2 = decoder->xap.sample2;
     w = history;
     return w;
 }
@@ -21328,16 +21243,16 @@ V2_D138 CEAXABLKDecf_GetState_D138(char *decoder) {
 INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_SetState);
 #ifdef SKIP_ASM
 /**
- * Sets an EA-XA decoder's predictor history (+0x98, +0x9C) from two floats.
+ * Sets an EA-XA decoder's predictor history (xap.sample1, xap.sample2) from two floats.
  *
  * Called by SFILTER_unpackxalf and SFILTER_unpackxapf.
  *
  * @param decoder  the decoder
  * @param history  the two history values
  */
-void CEAXABLKDecf_SetState(void *decoder, void *history) {
-    (*(float *)((char*)(decoder) + 0x98)) = (float) (*(float *)((char*)(history) + 0));
-    (*(float *)((char*)(decoder) + 0x9C)) = (float) (*(float *)((char*)(history) + 4));
+void CEAXABLKDecf_SetState(CEAXABLKDecf *decoder, XAFSTATE *history) {
+    decoder->xap.sample1 = history->sample1;
+    decoder->xap.sample2 = history->sample2;
 }
 #endif
 
@@ -21411,8 +21326,6 @@ int getbits(UTALKSTATE_CODA *bitReader, int n) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", discardbits);
 #ifdef SKIP_ASM
-typedef struct { unsigned char *p; unsigned int bits; int n; } B_D260;
-
 /**
  * Drops bits from a MicroTalk bit stream: shifts out k bits and appends the next byte when fewer than 8 remain.
  *
@@ -21421,17 +21334,17 @@ typedef struct { unsigned char *p; unsigned int bits; int n; } B_D260;
  * @param reader  the stream state
  * @param k  the number of bits
  */
-void discardbits(B_D260 *reader, int k) {
-    unsigned int shifted = reader->bits >> k;
-    int n = reader->n - k;
-    reader->bits = shifted;
-    reader->n = n;
+void discardbits(UTALKSTATE_CODA *reader, int k) {
+    unsigned int shifted = reader->shiftreg >> k;
+    int n = reader->bitcount - k;
+    reader->shiftreg = shifted;
+    reader->bitcount = n;
     if (n < 8) {
-        unsigned char *cursor = reader->p;
+        unsigned char *cursor = reader->dataptr;
         unsigned int nextByte = *cursor;
-        reader->n = n + 8;
-        reader->p = cursor + 1;
-        reader->bits = shifted | (nextByte << n);
+        reader->bitcount = n + 8;
+        reader->dataptr = cursor + 1;
+        reader->shiftreg = shifted | (nextByte << n);
     }
 }
 #endif
@@ -21523,17 +21436,18 @@ INCLUDE_ASM("ealib/seg_2B4578", interpolate);
  *
  * @param samples  the first sample to fill
  */
-void interpolate(void *samples) {
-    int var_2;
-    void *var_4;
+void interpolate(float *samples) {
+    int count;
+    float *sample;
 
-    var_4 = samples;
-    var_2 = 106;
+    sample = samples;
+    count = 106;
     do {
-        var_2 -= 2;
-        (*(float *)((char*)(var_4) + 0)) = (float) ((((*(float *)((char*)(var_4) + (-4))) + (*(float *)((char*)(var_4) + 4))) * 0.59738594f) + (((*(float *)((char*)(var_4) + (-0xC))) + (*(float *)((char*)(var_4) + 0xC))) * -0.11459156f) + (((*(float *)((char*)(var_4) + (-0x14))) + (*(float *)((char*)(var_4) + 0x14))) * 0.01803268f));
-        var_4 += 8;
-    } while (var_2 >= 0);
+        count -= 2;
+        sample[0] = (float) (((sample[-1] + sample[1]) * 0.59738594f) + ((sample[-3] + sample[3]) * -0.11459156f)
+                             + ((sample[-5] + sample[5]) * 0.01803268f));
+        sample += 2;
+    } while (count >= 0);
 }
 #endif
 
@@ -21651,21 +21565,8 @@ INCLUDE_ASM("ealib/seg_2B4578", decodemut);
 #ifdef SKIP_ASM
 /* EA MicroTalk (UTK) frame decoder: reflection-coefficient deltas, 4 subframes
    of 108 samples, adaptive codebook shift and per-subframe synthesis. */
-typedef struct sUTK_D878 {
-    unsigned char *ptr;
-    unsigned int bits;
-    int cnt;
-    int reducedBw;
-    int voicedThreshold;
-    float fixedGains[64];
-    float rc[12];
-    float synth[12];
-    float adaptCb[324];
-    float decoded[432];
-} sUTK_D878;
-typedef struct { float f[324]; } sF324_D878;
 extern float coeff_table[];
-void readsamples(sUTK_D878 *ctx, int voiced, float *out, int stride);
+void readsamples(UTALKSTATE_CODA *ctx, int voiced, float *out, int stride);
 
 /**
  * Decodes one MicroTalk frame (432 samples) into the decoder's output buffer.
@@ -21678,7 +21579,7 @@ void readsamples(sUTK_D878 *ctx, int voiced, float *out, int stride);
  *
  * @param ctx  the decoder state
  */
-void decodemut(sUTK_D878 *ctx) {
+void decodemut(UTALKSTATE_CODA *ctx) {
     float exc[118];
     float delta[12];
     int i;
@@ -21693,18 +21594,18 @@ void decodemut(sUTK_D878 *ctx) {
     int base;
 
     idx = getbits(ctx, 6);
-    voiced = idx < ctx->voicedThreshold;
-    delta[0] = (coeff_table[idx] - ctx->rc[0]) * 0.25f;
+    voiced = idx < ctx->voicing_threshold;
+    delta[0] = (coeff_table[idx] - ctx->coeff[0]) * 0.25f;
     for (j = 1; j < 4; j++)
-        delta[j] = (coeff_table[getbits(ctx, 6)] - ctx->rc[j]) * 0.25f;
+        delta[j] = (coeff_table[getbits(ctx, 6)] - ctx->coeff[j]) * 0.25f;
     for (j = 4; j < 12; j++)
-        delta[j] = (coeff_table[getbits(ctx, 5) + 16] - ctx->rc[j]) * 0.25f;
+        delta[j] = (coeff_table[getbits(ctx, 5) + 16] - ctx->coeff[j]) * 0.25f;
 
     for (i = 0; i < 4; i++) {
         pos = (i + 2) * 108 - getbits(ctx, 8);
         pitchGain = (float)(unsigned int)getbits(ctx, 4) * 0.06666667014360428f;
-        fixedGain = ctx->fixedGains[getbits(ctx, 6)];
-        if (ctx->reducedBw == 0) {
+        fixedGain = ctx->stepval[getbits(ctx, 6)];
+        if (ctx->mode == 0) {
             readsamples(ctx, voiced, &exc[5], 1);
         } else {
             align = getbits(ctx, 1);
@@ -21724,23 +21625,23 @@ void decodemut(sUTK_D878 *ctx) {
         }
         base = i * 108;
         for (j = 0; j < 108; j++)
-            ctx->decoded[base + j] = pitchGain * ctx->adaptCb[pos + j] + fixedGain * exc[5 + j];
+            ctx->data[base + j] = pitchGain * ctx->history[pos + j] + fixedGain * exc[5 + j];
     }
 
-    *(sF324_D878 *)ctx->adaptCb = *(sF324_D878 *)&ctx->decoded[108];
+    __builtin_memcpy(ctx->history, &ctx->data[108], sizeof(ctx->history));
 
     for (j = 0; j < 12; j++)
-        ctx->rc[j] += delta[j];
-    filter((UTALKSTATE_CODA*)ctx, 0, 1);
+        ctx->coeff[j] += delta[j];
+    filter(ctx, 0, 1);
     for (j = 0; j < 12; j++)
-        ctx->rc[j] += delta[j];
-    filter((UTALKSTATE_CODA*)ctx, 12, 1);
+        ctx->coeff[j] += delta[j];
+    filter(ctx, 12, 1);
     for (j = 0; j < 12; j++)
-        ctx->rc[j] += delta[j];
-    filter((UTALKSTATE_CODA*)ctx, 24, 1);
+        ctx->coeff[j] += delta[j];
+    filter(ctx, 24, 1);
     for (j = 0; j < 12; j++)
-        ctx->rc[j] += delta[j];
-    filter((UTALKSTATE_CODA*)ctx, 36, 33);
+        ctx->coeff[j] += delta[j];
+    filter(ctx, 36, 33);
 }
 #endif
 
@@ -21981,35 +21882,35 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_getsamplechan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
-struct R_E118 { struct CHANPUB e[1]; };
-
 int SNDDRV_getsamplechan_impl(int arg0) __asm__("SNDDRV_getsamplechan");
 /**
  * Returns which sample channel (1-5) of its master voice a voice is, or 0 when it has no master.
  *
- * Looks up the voice's channel entry (index @p voice + sndgs +0x2F + +0x30 in the table at sndgs +0x1F0); when
- * its master link (+0x28) is set, scans the master's member list (shorts at +0x6..+0xE) for this channel and returns
+ * Looks up the voice's channel entry (index @p voice + sso.set.voicesspu + sso.set.voicesiopcpu in sndgs.chan); when
+ * its master link (masterchan) is set, scans the master's member list (voices[1..5]) for this channel and returns
  * the 1-based slot. Quirk: the master's own channel (slot 0) also returns 0.
  *
  * @param voice  the voice number
  * @return the sample channel within the group, 0 for the master or an unlinked voice
  */
 int SNDDRV_getsamplechan_impl(int voice) {
-    short *var_3;
-    int temp_2;
-    int temp_4;
-    int var_5;
+    short *member;
+    int master;
+    int chanIndex;
+    int slot;
     SNDGLOBALSTATE* driverState = &sndgs;
+    CHANPUB *channel;
 
-    temp_4 = voice + driverState->sso.set.voicesspu + driverState->sso.set.voicesiopcpu;
-    temp_2 = ((struct R_E118 *)(char*)driverState->chan)->e[temp_4].masterchan;
-    if (temp_2 == -1) {
+    chanIndex = voice + driverState->sso.set.voicesspu + driverState->sso.set.voicesiopcpu;
+    channel = &driverState->chan[chanIndex];
+    master = channel->masterchan;
+    if (master == -1) {
         return 0;
     }
-    var_3 = (short *)(temp_2 * 0x8C + (int)driverState->chan + 6);
-    for (var_5 = 1; var_5 < 6; var_5++, var_3++) {
-        if (*var_3 == temp_4) {
-            return var_5;
+    member = &driverState->chan[master].voices[1];
+    for (slot = 1; slot < 6; slot++, member++) {
+        if (*member == chanIndex) {
+            return slot;
         }
     }
     return 0;
@@ -22515,34 +22416,34 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_fir8init);
 /**
  * Resets an FIR filter state: clears its 8-sample history and the always-zero entries of its coefficient matrix.
  *
- * The state (16-byte aligned, +0x20 inside a filter node) holds a 12x4 float matrix at +0x0 that SNDI_fir8 fills
- * from the 5 coefficients, and the last 8 input samples at +0xC0..+0xDC. This zeroes the history and the matrix cells
- * outside the band (+0x4..+0xC, +0x18, +0x1C, +0x2C, +0x90, +0xA0, +0xA4, +0xB0..+0xB8). Called by the FIR node
+ * The state (16-byte aligned, +0x20 inside a filter node) holds a 12x4 float matrix that SNDI_fir8 fills from the 5
+ * coefficients, and the last 8 input samples (history). This zeroes the history and the matrix cells outside the band
+ * (matrix[1..3], [6], [7], [11], [36], [40], [41], [44..46]). Called by the FIR node
  * constructors SFILTER_createHPFFIR8, SFILTER_createLPFFIR8 and SFILTER_createBPFFIR8.
  *
  * @param firState  the FIR state
  */
 void SNDI_fir8init(SNDFIRSTATE* firState) {
-    (*(int *)((char*)(firState) + 0xC0)) = 0;
-    (*(int *)((char*)(firState) + 0xC4)) = 0;
-    (*(int *)((char*)(firState) + 0xC8)) = 0;
-    (*(int *)((char*)(firState) + 0xCC)) = 0;
-    (*(int *)((char*)(firState) + 0xD0)) = 0;
-    (*(int *)((char*)(firState) + 0xD4)) = 0;
-    (*(int *)((char*)(firState) + 0xD8)) = 0;
-    (*(int *)((char*)(firState) + 0xDC)) = 0;
-    (*(int *)((char*)(firState) + 4)) = 0;
-    (*(int *)((char*)(firState) + 8)) = 0;
-    (*(int *)((char*)(firState) + 0xC)) = 0;
-    (*(int *)((char*)(firState) + 0x18)) = 0;
-    (*(int *)((char*)(firState) + 0x1C)) = 0;
-    (*(int *)((char*)(firState) + 0x2C)) = 0;
-    (*(int *)((char*)(firState) + 0x90)) = 0;
-    (*(int *)((char*)(firState) + 0xA0)) = 0;
-    (*(int *)((char*)(firState) + 0xA4)) = 0;
-    (*(int *)((char*)(firState) + 0xB0)) = 0;
-    (*(int *)((char*)(firState) + 0xB4)) = 0;
-    (*(int *)((char*)(firState) + 0xB8)) = 0;
+    firState->history[0] = 0;
+    firState->history[1] = 0;
+    firState->history[2] = 0;
+    firState->history[3] = 0;
+    firState->history[4] = 0;
+    firState->history[5] = 0;
+    firState->history[6] = 0;
+    firState->history[7] = 0;
+    firState->matrix[1] = 0;
+    firState->matrix[2] = 0;
+    firState->matrix[3] = 0;
+    firState->matrix[6] = 0;
+    firState->matrix[7] = 0;
+    firState->matrix[11] = 0;
+    firState->matrix[36] = 0;
+    firState->matrix[40] = 0;
+    firState->matrix[41] = 0;
+    firState->matrix[44] = 0;
+    firState->matrix[45] = 0;
+    firState->matrix[46] = 0;
 }
 #endif
 
@@ -23592,14 +23493,15 @@ extern void f_6210_F9D8(char *, int, int) __asm__("memset");
 /**
  * Configures an echo node: sets its feedback and allocates a zeroed delay line of a prime multiple of 16 samples.
  *
- * Frees any old line (SFILTER_echorestore). The feedback (params[0] >> 1) / 127 goes to +0x30 and its negation to +0x34. The
- * length SNDI_findmult16(rate, delay ms) is stored at +0x28; SNDMEMI_alloc allocates length * 4 + 16 bytes (+0x20), the
- * 16-byte aligned start goes to +0x1C and is cleared (memset); the position (+0x24) restarts at 0.
+ * Frees any old line (SFILTER_echorestore). The feedback (params[0] >> 1) / 127 goes to fblevels and its negation to
+ * fbneglevels. The length SNDI_findmult16(rate, delay ms) is stored in bufsamples; SNDMEMI_alloc allocates length * 4 +
+ * 16 bytes (punaligneddelaybuf), the 16-byte aligned start goes to pdelaybuf and is cleared (memset); the position
+ * (sampleindex) restarts at 0.
  *
  * @param effect  the echo node
  * @param params  [0] feedback level (0..254), [1] sample rate << 8, [2] delay in ms << 8
  */
-void SFILTER_modifyECHO(ECHOSTATE* effect, void *params) {
+void SFILTER_modifyECHO(ECHOSTATE* effect, int *params) {
     float temp_f0;
     int gain;
     int temp_16_2;
@@ -23609,9 +23511,9 @@ void SFILTER_modifyECHO(ECHOSTATE* effect, void *params) {
     char *temp_2_2;
     int temp_3;
 
-    gain = (*(int *)((char*)(params) + 0)) >> 1;
-    rate = (*(int *)((char*)(params) + 4)) >> 8;
-    delayMs = (*(int *)((char*)(params) + 8)) >> 8;
+    gain = params[0] >> 1;
+    rate = params[1] >> 8;
+    delayMs = params[2] >> 8;
     f_F958_F9D8();
     temp_f0 = (float) gain * 0.007874016f;
     effect->fblevels = temp_f0;
