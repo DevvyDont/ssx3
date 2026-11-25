@@ -45,10 +45,15 @@ CHECK_OFFSET(HANDLE_def, name, 0x010);
 CHECK_SIZE(HANDLE_def, 0x110);
 
 // The operation's id word. [O] union OP_def {<anonymous struct> sep; int id;} (0x4): the bit-field view `sep` has no
-// member names in On Tour's dump, so only `id` is placed. [U] retail splits the word as bits 0..19 a serial number,
-// 20..23 the operation type (FILESYS_read stores 4), 24..31 the operation's index in the pool (the unit's sFsCmdId).
-// Blocking: code that stores the type field (view C_D648's f:4) needs sep's bit fields, which have no EA names.
+// member names in On Tour's dump, so its bit-field names are ours. [U] retail splits the word as bits 0..19 a serial
+// number, 20..23 the operation type (FILESYS_read stores 4, FILESYS_delbig 10), 24..31 the operation's index in the
+// pool (the unit's sFsCmdId; FILESYS_waitop reads it as the handle's top byte).
 union OP_def {
+    struct {
+        unsigned int serial : 20;   // bits 0..19 (name ours); [U] compared (& 0xFFFFF) to validate a handle
+        unsigned int type : 4;      // bits 20..23 (name ours); [U] the operation type
+        unsigned int index : 8;     // bits 24..31 (name ours); [U] the record's index in gFileDevice.oplist
+    } sep;                          // 0x0 [O]
     int id;                         // 0x0 [O]
 };
 

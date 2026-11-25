@@ -23,6 +23,8 @@
 #include "animation/mdfarchive.h"
 #include "world/worldview.h"
 #include "sound/ssxaudio.h"
+#include "sound/streamsys.h"
+#include "sound/bankmanager.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
 #include "ai/player.h"
@@ -154,7 +156,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     int invalidHandle = -1;
     self->mShadow = cPlayerShadow_cPlayerShadow(cMemMan_alloc(416, str_BoaderShadow, 0, 0));
     self->unk_450 = invalidHandle;
-    self->unk_AA4 = 0;
+    self->mShadowRendered = 0;
     self->mIsOnScreen = 0;
     self->mUpdateMinAnimOnly = 0;
     cScriptObject_InitScriptObject(self->unk_6DC);
@@ -668,7 +670,7 @@ void cRider_initAlways_impl(cRider* self)
         self->mRiderHandler->ControlState = 13;
         self->mRubberBandBehind = 0;
         self->mRubberBandAhead = 0;
-        self->unk_0D8 = -1;
+        self->CheckID = -1;
         cRiderMetrix_reset(self->mMetrix);
         cRiderAnimBase_reset(self->mRiderAnim);
         self->IsGoofyStance = cBECharacterInterface_getIsGoofyFoot(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
@@ -749,7 +751,7 @@ void cRider_initAlways_impl(cRider* self)
         self->PissedOff = 0;
         self->LastPunchTick = 0;
         self->PissedAIIndex = -1;
-        self->unk_100 = 1;
+        self->ShouldCelebrateAtFinish = 1;
         cRider_cancelRiderTransitions(self);
         self->DangerLevel = 0;
     }
@@ -1671,6 +1673,8 @@ extern "C" float func_0031C128(float x);
 extern "C" void fSinCos(float* s, float* c, float angle);
 int cRider_getControlState(void* self);
 
+// A bone transform with sVec4W members: the same layout as sAnimModelBone (pos 0x00, rot 0x10), so the bones are
+// viewed through it.
 struct sXf_EB98 {
     sVec4W pos;
     sVec4W rot;
@@ -2002,12 +2006,12 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
         self->mAnimModel->localPos[self->mBoneBoardChild] = t4vect_Origin;
         self->mAnimModel->localRot[self->mBoneBoardChild] = tquat_Identity;
         ab[1].pos = *(sVec4W*)&self->mRootPoseOverridePos;
-        ab[1].rot = *(sVec4W*)&self->unk_140[0];
+        ab[1].rot = *(sVec4W*)&self->mRootPoseOverrideRot;
     }
     cAnimModel_transform(self->mAnimModel, ab);
     if (self->mSlewed[17].cur != 0.0f)
     {
-        sXf_EB98* boardRoot = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardRoot);
+        sXf_EB98* boardRoot = (sXf_EB98*)&self->mAnimModel->bones[self->mBoneBoardRoot];
         float qx = boardRoot->rot.x, qy = boardRoot->rot.y, qz = boardRoot->rot.z, qw = boardRoot->rot.w;
         sVec4W ax;
         ax.w = 0.0f;
@@ -2041,7 +2045,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
     }
     if (cRider_getControlState(self) != 13 && self->LegIK != 0.0f)
     {
-        sXf_EB98* bb = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardChild);
+        sXf_EB98* bb = (sXf_EB98*)&self->mAnimModel->bones[self->mBoneBoardChild];
         {
             sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->RightLeg.BoardRelativePose);
             cRider_doLegIK(self, &self->RightLeg, &xx, self->LegIK);
@@ -2104,7 +2108,7 @@ extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, 
  * @p chain holds the leg's three bone indices (On Tour tLegInfo): [0] the root (hip), [1] the middle joint (knee), [2]
  * the end (foot). The end bone is set to @p target when @p blend is 1.0f, otherwise moved toward it: position lerp,
  * rotation through tquat_slerp (a quaternion slerp). The two segment lengths are the x of the middle and end bones'
- * local offsets scaled by the model's unk_140 (its length scale).
+ * local offsets scaled by the model's ScaleVect (its length scale).
  *
  * The knee angle follows from the law of cosines (func_0031C128 is an arcsine; its argument is clamped to [-1, 1]); the
  * middle bone's local transform is the upper length along x with a rotation about Z. The root is then turned about the
@@ -3076,7 +3080,7 @@ static inline int IsState1_120F20(void* obj)
 /**
  * First step of the rider's frame update: overlap list, NIS ground probe and per-frame resets.
  *
- * Clears InTunnel and unk_AA4 (shadow drawn). The overlap list and active lights are refreshed on the AI ticks
+ * Clears InTunnel and mShadowRendered. The overlap list and active lights are refreshed on the AI ticks
  * where AITick % 3 equals mAIIndex % 3, and on other ticks too unless the list's word +4 equals the Nash
  * grid's word +0xA0 while the playback manager's state (+0x70) is neither 1 nor 3.
  *
@@ -3088,7 +3092,7 @@ static inline int IsState1_120F20(void* obj)
 extern "C" void cRider_updateSplit1(cRider* self)
 {
     self->InTunnel = 0;
-    self->unk_AA4 = 0;
+    self->mShadowRendered = 0;
     int frameSlot = AITick() % 3;
     if (frameSlot != self->mAIIndex % 3)
     {
@@ -3804,17 +3808,14 @@ extern "C" void cRider_updateActiveLights(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_SetRiderLights);
 #ifdef SKIP_ASM
-struct sV3_20D8 {
-    float x, y, z;
-    sV3_20D8() {}
-    sV3_20D8(float a, float b, float c) : x(a), y(b), z(c) {}
-};
-struct sPath_20D8 {
-    float x, y, z;
-    int n;
-    t3Vector pts[5];
-    int pad;
-    t4Vector q[5];
+// tRGB with the constructor the light calls build their colour argument with.
+struct tRGBColour : tRGB {
+    tRGBColour(float r, float g, float b)
+    {
+        R = r;
+        G = g;
+        B = b;
+    }
 };
 extern "C" void cIrradiance_Clear(void* p);
 extern "C" void* cRenderStateMan_getIrradiance(void* p);
@@ -3822,11 +3823,11 @@ extern "C" float cRenderStateMan_RimLightIntensityOffset(void* p);
 extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
 extern "C" void func_00389CB8(void* m, void* q, float f);
 extern "C" void func_0038A6A8(void* m, void* q, void* p);
-extern "C" void func_00389558(void* m, sV3_20D8* v);
-extern "C" void func_00389520(void* m, t4Vector* q, sV3_20D8* v);
+extern "C" void func_00389558(void* m, tRGB* v);
+extern "C" void func_00389520(void* m, t4Vector* q, tRGB* v);
 
 /**
- * Builds the rider's light block (unk_7C0) from its environment, active world lights and handler lights.
+ * Builds the rider's light block (PlayerIrradiance) from its environment, active world lights and handler lights.
  *
  * Clears the 10-quadword block, copies the rider's lens-table entry (cRenderStateMan_getIrradiance) to its start, adds
  * func_00389CB8's term at the hip position with cRenderStateMan_RimLightIntensityOffset's value, adds each active light of unk_794
@@ -3836,31 +3837,34 @@ extern "C" void func_00389520(void* m, t4Vector* q, sV3_20D8* v);
 extern "C" void cRider_SetRiderLights(cRider* self)
 {
     t4Vector hipPos;
-    cIrradiance_Clear(self->unk_7C0);
+    cIrradiance_Clear(&self->PlayerIrradiance);
     {
-        *(cIrradiance*)&self->unk_7C0[0] = *(cIrradiance*)cRenderStateMan_getIrradiance((void*)self->getAIIndex());
+        (cIrradiance&)self->PlayerIrradiance = *(cIrradiance*)cRenderStateMan_getIrradiance((void*)self->getAIIndex());
     }
     cRider_getHipPosition(&hipPos, self);
-    char* lightState = self->unk_7C0;
+    tIrradianceInfo* lightState = &self->PlayerIrradiance;
     {
         func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset((void*)self->getAIIndex()));
     }
     for (int i = 0; i < 8; i++) {
         void* light = self->ActiveLights[i];
         if (light != 0)
-            func_0038A6A8(self->unk_7C0, &hipPos, light);
+            func_0038A6A8(&self->PlayerIrradiance, &hipPos, light);
     }
     cRiderHandler* x = self->mRiderHandler;
-    sPath_20D8* playerLights = x ? (sPath_20D8*)(&x->PlayerLights) : 0;
+    cPlayerLights* playerLights = x ? &x->PlayerLights : 0;
     if (playerLights != 0) {
         {
-            sV3_20D8 lightColour(playerLights->x, playerLights->y, playerLights->z);
-            func_00389558(self->unk_7C0, &lightColour);
+            tRGBColour lightColour(playerLights->mExtraAmbientLight.R, playerLights->mExtraAmbientLight.G,
+                                   playerLights->mExtraAmbientLight.B);
+            func_00389558(&self->PlayerIrradiance, &lightColour);
         }
-        for (int j = 0; j < playerLights->n; j++) {
-            t4Vector* qq = &playerLights->q[j];
-            sV3_20D8 lightColour(playerLights->pts[j].x, playerLights->pts[j].y, playerLights->pts[j].z);
-            func_00389520(self->unk_7C0, qq, &lightColour);
+        for (int j = 0; j < playerLights->mNumDirectionalLights; j++) {
+            t4Vector* qq = &playerLights->mDirectionalLightDirections[j];
+            tRGBColour lightColour(playerLights->mDirectionalLightColours[j].R,
+                                   playerLights->mDirectionalLightColours[j].G,
+                                   playerLights->mDirectionalLightColours[j].B);
+            func_00389520(&self->PlayerIrradiance, qq, &lightColour);
         }
     }
 }
@@ -3970,7 +3974,7 @@ extern sVec4_122448 t4vect_Zero_v122448 __asm__("t4vect_Zero");
 /**
  * Draws the rider's model when it is on screen, then updates the low-detail flag unk_B1C.
  *
- * Picks mLOD (func_00121F30), loads the rider's lights (graphics slot 69 with unk_7C0), sets bits 2-6 of the
+ * Picks mLOD (func_00121F30), loads the rider's lights (graphics slot 69 with PlayerIrradiance), sets bits 2-6 of the
  * draw state's word 1 to 5 and draws mAnimModel between two graphics slot-27 calls (with mPosition, then the
  * zero vector). The board and player additive flags come from the handler's cPlayerLights, or uber level 11
  * and up. When the view manager's word +0x14 is 0 or unk_B1C is set, unk_B1C becomes 1 if the rider is off
@@ -3991,7 +3995,7 @@ extern "C" void cRider_renderBody(cRider* self)
         func_00121F30(self);
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-        vt[69].fn(vthis(ps2GraphicsMan, vt[69]), self->unk_7C0, 1);
+        vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &self->PlayerIrradiance, 1);
         cPS2GraphicsMan* graphicsMan = GrMan;
         int* rs = (int*)graphicsMan->m_pCurrentDrawState;
         rs[1] = (rs[1] & ~0x7C) | 0x14;
@@ -4309,7 +4313,7 @@ static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE
 /**
  * Renders the rider's projected shadow texture once per frame, and draws the shadow.
  *
- * On the frame's first call (unk_AA4 clear): pushes a draw state, sets up the projection (func_00374D00)
+ * On the frame's first call (mShadowRendered clear): pushes a draw state, sets up the projection (func_00374D00)
  * centred between bones unk_918 and unk_8E8, lit straight down, with the rider's up axis, renders the model's
  * shadow pass (cAnimModel_rendershadow at LOD 3; board colour grey 0.3, black on the ground; shadow colour grey 0.3)
  * through graphics slots 31, 53, 55, 101, 54 and 32, and pops the state. The shadow itself is drawn on every
@@ -4317,8 +4321,8 @@ static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE
  */
 extern "C" void cRider_RenderShadow(cRider* self)
 {
-    if (self->unk_AA4 == 0) {
-        self->unk_AA4 = 1;
+    if (self->mShadowRendered == 0) {
+        self->mShadowRendered = 1;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         top_2898(ps2GraphicsMan)[1] = top_2898(ps2GraphicsMan)[0];
         top_2898(ps2GraphicsMan)++;
@@ -6246,7 +6250,7 @@ static inline void* getC0_125108()
  * finish (cRiderMetrix_evFinishRace), sets mFinishTick to the race clock plus mPenaltyTicks and mFinishTime to at least
  * 0, reports cGameModeMan_raceFinish(AI index, the metrix's stats at +0xFC), switches a split-screen rider's
  * chase camera to the end-race camera and calls cSSXAudio_OnFinishEvent on the audio system. A rider who did not finish
- * also gets unk_100 cleared.
+ * also gets ShouldCelebrateAtFinish cleared.
  */
 extern "C" void cRider_doFinishEvent(cRider* self)
 {
@@ -6269,7 +6273,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
         cChaseCameraController_switchCamera_EndRace(tbl->PlayerCamera[k]->ChaseController);
     }
     cSSXAudio_OnFinishEvent(cAudioInterface_bxAudio(), self);
-    if (self->mDidNotFinish == 1) self->unk_100 = 0;
+    if (self->mDidNotFinish == 1) self->ShouldCelebrateAtFinish = 0;
 }
 #endif
 
@@ -6361,58 +6365,10 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
-extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
+extern "C" float* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int volumeClass, int index);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* rider);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* memset(void* dst, int c, int n);
-
-struct sWtEnt_5448 {
-    signed char b0;
-    char pad1[3];
-    int f4[5];
-};
-
-struct sWtPair_5448 {
-    int a;
-    int b;
-};
-
-struct sWtV16_5448 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-};
-
-struct sWtSub_5448 {
-    int f0;
-    sWtEnt_5448 cfg;         // 0x04
-    volatile int cur;        // 0x1C
-    sWtEnt_5448* ents;       // 0x20
-    int arr24[4];            // 0x24
-    int* p34;                // 0x34
-    int* p38;                // 0x38
-    int* p3C;                // 0x3C
-    sWtPair_5448 arr40[4];   // 0x40
-    int* p60;                // 0x60
-    int* p64;                // 0x64
-    int* p68;                // 0x68
-    int* p6C;                // 0x6C
-    sWtV16_5448* p70;        // 0x70
-    int* p74;                // 0x74
-    int* p78;                // 0x78
-    int* p7C;                // 0x7C
-    int* p80;                // 0x80
-    int* p84;                // 0x84
-};
-
-struct sWtTrack_5448 {
-    char pad0[0x1D8];
-    sWtSub_5448 sub;         // 0x1D8
-};
-
-
-
 
 #define MIN_5448(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_5448(a, b) ((a) < (b) ? (b) : (a))
@@ -6420,15 +6376,15 @@ struct sWtTrack_5448 {
 /**
  * Plays and stops the rider's sounds for an in-game scripted sequence (NIS) frame.
  *
- * First forgets any of the rider's 4 sequence sound handles (+0xB08) the bank monitor no longer has. On a key event
- * (bit 0 of @p flags) it walks the frame's sound list (+0xC of @p vobj) while each entry's frame equals @p when, maps
+ * First forgets any of the rider's 4 sequence sound handles (mSoundHandles) the bank monitor no longer has. On a key
+ * event (bit 0 of @p flags) it walks the frame's sound list while each entry's frame equals @p when, maps
  * the script sound id (cScriptObjRider_ScriptSoundIDToGameSoundInfo), fills a new sound-play slot in the audio system with defaults, the entry's
  * volume (clamped 0..127), the volume control (cSSXAudio_GetCurrAppliedVolumePtr) and the rider's position and closest camera
  * (cSSXAudio_GetClosestCamera1), starts it (cBankSys_SFX_End) and keeps the handle in the entry's slot. At the end of the sequence
  * (bit 1) every slot no longer in the list is stopped.
  *
  * @param vself  the rider (this)
- * @param vobj  the script actor's frame data (On Tour tSSXFrameActor *pFrameInfo); its sound list is at +0xC
+ * @param vobj  the script actor's frame data (a tSSXFrameActor, On Tour pFrameInfo); walks its pSoundList
  * @param when  the sequence's current frame (On Tour currFrame)
  * @param frameDelta  frames advanced (On Tour frameDelta); unused
  * @param flags  On Tour eventBits: bit 0 key event, bit 1 sequence ended
@@ -6436,20 +6392,21 @@ struct sWtTrack_5448 {
 extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when, float frameDelta, int flags)
 {
     cRider* self = (cRider*)vself;
-    char* obj = (char*)vobj;
+    tSSXFrameActor* frame = (tSSXFrameActor*)vobj;
     int* ids = self->mSoundHandles;
     cSSXAudio* snd = cAudioInterface_bxAudio();
     int i;
     for (i = 0; i < 4; i++) {
         if (ids[i] >= 0) {
-            if (cBankMonitor_BANKMONITOR_GetHandle((char*)*(*(sWtTrack_5448***)&snd->MusicSys) + 0x1D8, ids[i], 1) == 0)
+            if (cBankMonitor_BANKMONITOR_GetHandle(&snd->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, ids[i],
+                                                   1) == 0)
                 ids[i] = -1;
         }
     }
     if (flags & 1) {
-        tSound* curSound = *(tSound**)(obj + 0xC);
+        tSound* curSound = frame->pSoundList;
         if (curSound != 0) {
-        char* rp = (char*)&self->mPosition;
+        const t4Vector* riderPos = &self->mPosition;
         do {
             if ((float)curSound->data.scriptStartFrame != when)
                 return;
@@ -6457,49 +6414,53 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             cScriptObjRider_ScriptSoundIDToGameSoundInfo(&self->mScriptObjRiderVtbl, curSound->data.objectID, &gameSoundIndex, &type);
             int tp = type;
             int ar = gameSoundIndex;
-            sWtTrack_5448* curTrack = ((sWtTrack_5448*)snd->mpVBankManager);
-            sWtSub_5448* trackSub = &curTrack->sub;
-            curTrack->sub.cur++;
-            trackSub->ents[curTrack->sub.cur] = trackSub->cfg;
-            curTrack->sub.arr24[curTrack->sub.cur] = 0;
-            trackSub->p34[curTrack->sub.cur] = 0;
-            trackSub->p38[curTrack->sub.cur] = trackSub->ents[curTrack->sub.cur].b0;
-            trackSub->p3C[curTrack->sub.cur] = 0;
-            memset((char*)trackSub + curTrack->sub.cur * 8 + 0x40, 0, 8);
-            trackSub->p60[curTrack->sub.cur] = 0;
-            trackSub->p64[curTrack->sub.cur] = 0;
-            trackSub->p68[curTrack->sub.cur] = 0;
-            trackSub->p6C[curTrack->sub.cur] = 0;
-            trackSub->p70[curTrack->sub.cur].f4 = 0;
-            trackSub->p70[curTrack->sub.cur].f0 = 100;
-            trackSub->p70[curTrack->sub.cur].f8 = 90;
-            trackSub->p70[curTrack->sub.cur].fC = 50;
-            trackSub->p74[curTrack->sub.cur] = 0;
-            trackSub->p80[curTrack->sub.cur] = 0;
-            trackSub->p84[curTrack->sub.cur] = 0;
-            trackSub->p78[curTrack->sub.cur] = 0x7F;
-            trackSub->p7C[curTrack->sub.cur] = 1;
-            snd->mBank[((sWtTrack_5448*)snd->mpVBankManager)->sub.cur] = tp;
-            snd->mPatch[((sWtTrack_5448*)snd->mpVBankManager)->sub.cur] = ar;
+            // the play-option push (cSndPlayOpts_OPTS_Open) inlined on the bank manager's cBankMonitor
+            cBankManager* curTrack = snd->mpVBankManager;
+            cBankMonitor* trackSub = &curTrack->BankMonitor;
+            curTrack->BankMonitor.mInst++;
+            trackSub->mCurrent[curTrack->BankMonitor.mInst] = trackSub->mDefault;
+            curTrack->BankMonitor.mPosition[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mPosStatic[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mBaseVol[curTrack->BankMonitor.mInst] = trackSub->mCurrent[curTrack->BankMonitor.mInst].vol;
+            trackSub->mVolControl[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mCallback[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mPtr[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mViewport[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mVanish[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mRadius[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mDelay[curTrack->BankMonitor.mInst].mCount = 0;
+            trackSub->mDelay[curTrack->BankMonitor.mInst].mTime = 100;
+            trackSub->mDelay[curTrack->BankMonitor.mInst].mFeedback = 90;
+            trackSub->mDelay[curTrack->BankMonitor.mInst].mLevel = 50;
+            trackSub->mExternalVol[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mTwoPlayerPan[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mTwoPlayerSide[curTrack->BankMonitor.mInst] = 0;
+            trackSub->mMapToMaxVol[curTrack->BankMonitor.mInst] = 0x7F;
+            trackSub->mCloseOnEnd[curTrack->BankMonitor.mInst] = 1;
+            snd->mBank[snd->mpVBankManager->BankMonitor.mInst] = tp;
+            snd->mPatch[snd->mpVBankManager->BankMonitor.mInst] = ar;
             {
-                sWtTrack_5448* volTrack = *(*(sWtTrack_5448***)&snd->MusicSys);
-                sWtSub_5448* s2 = &volTrack->sub;
-                s2->p38[volTrack->sub.cur] = *((signed char*)curSound->pCustom);
-                s2->ents[volTrack->sub.cur].b0 = MAX_5448(MIN_5448(s2->p38[s2->cur], 0x7F), 0);
+                cBankManager* volTrack = snd->MusicSys.mpVStreamSys->mpVBankManager;
+                cBankMonitor* volOpts = &volTrack->BankMonitor;
+                volOpts->mBaseVol[volTrack->BankMonitor.mInst] = curSound->pCustom->volume;
+                volOpts->mCurrent[volTrack->BankMonitor.mInst].vol =
+                    MAX_5448(MIN_5448(volOpts->mBaseVol[volOpts->mInst], 0x7F), 0);
             }
             {
-                sWtTrack_5448** pt = (*(sWtTrack_5448***)&snd->MusicSys);
-                int h = cSSXAudio_GetCurrAppliedVolumePtr(snd, 4, 0);
-                (*pt)->sub.p3C[(*pt)->sub.cur] = h;
+                cBankManager** pt = &snd->MusicSys.mpVStreamSys->mpVBankManager;
+                float* volControl = cSSXAudio_GetCurrAppliedVolumePtr(snd, 4, 0);
+                (*pt)->BankMonitor.mVolControl[(*pt)->BankMonitor.mInst] = volControl;
             }
             {
-                sWtTrack_5448* posTrack = *(*(sWtTrack_5448***)&snd->MusicSys);
-                posTrack->sub.arr24[posTrack->sub.cur] = (int)rp;
-                sWtTrack_5448** pt = (*(sWtTrack_5448***)&snd->MusicSys);
-                int h = cSSXAudio_GetClosestCamera1(snd, self);
-                (*pt)->sub.p64[(*pt)->sub.cur] = h;
+                cBankManager* posTrack = snd->MusicSys.mpVStreamSys->mpVBankManager;
+                posTrack->BankMonitor.mPosition[posTrack->BankMonitor.mInst] = riderPos;
+                cBankManager** pt = &snd->MusicSys.mpVStreamSys->mpVBankManager;
+                int camera = cSSXAudio_GetClosestCamera1(snd, self);
+                (*pt)->BankMonitor.mViewport[(*pt)->BankMonitor.mInst] = camera;
             }
-            *(int*)((char*)ids + (curSound->data.trackIndex << 2)) = cBankSys_SFX_End(snd);
+            int handle = cBankSys_SFX_End(snd);
+            int& handleSlot = ids[curSound->data.trackIndex];
+            handleSlot = handle;
             curSound = curSound->pNext;
         } while (curSound != 0);
         }
@@ -6509,12 +6470,13 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
         for (i = 3; i >= 0; i--)
             keep[i] = on;
         tSound* curSound;
-        for (curSound = *(tSound**)(obj + 0xC); curSound != 0; curSound = curSound->pNext)
+        for (curSound = frame->pSoundList; curSound != 0; curSound = curSound->pNext)
             keep[curSound->data.trackIndex] = 0;
         for (i = 0; i < 4; i++) {
             if (keep[i] != 0) {
                 if (ids[i] >= 0) {
-                    cBankMonitor_BANKMONITOR_StopHandle((char*)*(*(sWtTrack_5448***)&snd->MusicSys) + 0x1D8, ids[i], 1, 0.0f);
+                    cBankMonitor_BANKMONITOR_StopHandle(&snd->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                        ids[i], 1, 0.0f);
                     ids[i] = -1;
                 }
             }

@@ -15,13 +15,23 @@
 // TAPSTRUCTtag (0x10), STREAMCHUNKHDR (0x8), MUTEX (0x10), whose members sit at every retail offset. The 0x124 request
 // is stream.cpp's own REQUESTSTRUCTtag, not in the DWARF (only asyncfile's 0x30 REQUESTSTRUCTtag and streamplus.cpp's
 // 0x12C REQUESTSTRUCT are): its members follow REQUESTSTRUCT, which has the same layout up to 0x11C, and the API's
-// parameter names (STREAM_queuefile(handle, fname, offset, endchunkid)). NOTE: asyncfile.c (same splat unit) has its
-// own, different REQUESTSTRUCTtag (0x30); if it ever gets a header one of the two needs another C name.
+// parameter names (STREAM_queuefile(handle, fname, offset, endchunkid)). Its C name here is STREAMREQUESTtag (ours):
+// hlafile.cpp's own, different 0x30 REQUESTSTRUCTtag (ealib/hlafile.h) shares the C unit ealib/seg_2DCAE8.
 //
 // C structs, flat. Evidence tags: [R] STREAM_create (stores every header field) and STREAM_overhead's sizes; [O] On
 // Tour's DWARF; [U] retail use.
 
 #include "layout.h"
+
+// C units (ealib/seg_2DCAE8.c) name these types without the struct keyword.
+#ifndef __cplusplus
+typedef struct MUTEX MUTEX;
+typedef struct STREAMCHUNKHDR STREAMCHUNKHDR;
+typedef struct STREAMREQUESTtag STREAMREQUESTtag;
+typedef struct FILTERSTRUCTtag FILTERSTRUCTtag;
+typedef struct TAPSTRUCTtag TAPSTRUCTtag;
+typedef struct STREAMHEADERtag STREAMHEADERtag;
+#endif
 
 // MUTEX (0x10 [O]): REAL's opaque mutex (MUTEX_create / _lock / _unlock / _destroy).
 struct MUTEX {
@@ -34,14 +44,14 @@ struct STREAMCHUNKHDR {
     int size;                           // 0x4 [O]; [U] parsechunks: top byte = tap number once filtered
 };
 
-// One stream request (0x124 [R] STREAM_overhead / STREAM_create).
-struct REQUESTSTRUCTtag {
+// One stream request (0x124 [R] STREAM_overhead / STREAM_create); EA's REQUESTSTRUCTtag (see the note above).
+struct STREAMREQUESTtag {
     int id;                             // 0x000 [O]; [R] STREAM_create: the slot index; [U] getfreerequest ORs a serial
                                         //       (step 0x100) above the slot byte; locaterequest1 compares it
     int state;                          // 0x004 [O] STREAMREQUESTSTATE (FREE 0, PENDING 1, EXECUTING 2, COMPLETED 3,
                                         //       CANCELED 4); [R] 0; [U] queuerequest 1, startnextrequest 2, readcallback 3
-    REQUESTSTRUCTtag* prev;             // 0x008 [O]; [U] queuerequest / freerequest
-    REQUESTSTRUCTtag* next;             // 0x00C [O]; [R] STREAM_create chains the free list through it
+    STREAMREQUESTtag* prev;             // 0x008 [O]; [U] queuerequest / freerequest
+    STREAMREQUESTtag* next;             // 0x00C [O]; [R] STREAM_create chains the free list through it
     int type;                           // 0x010 [O] READTYPE; [U] STREAM_queuefile 0 (file), STREAM_queuemem 1 (memory)
     char fname[255];                    // 0x014 [O]; [U] STREAM_queuefile strncpy's the name; startnextrequest compares /
                                         //       copies it to the header's fname
@@ -74,7 +84,7 @@ struct TAPSTRUCTtag {
 struct STREAMHEADERtag {
     int id;                             // 0x000 [O]; [R] 'STRM' (0x4D525453); [U] validatehandle
     MUTEX mutex;                        // 0x004 [O]; [R] MUTEX_create; [U] locked around queue / usage changes
-    REQUESTSTRUCTtag* request;          // 0x014 [O]; [R] the request array (after the header); [U] locaterequest1
+    STREAMREQUESTtag* request;          // 0x014 [O]; [R] the request array (after the header); [U] locaterequest1
     int requests;                       // 0x018 [O]; [R]; [U] locaterequest1
     FILTERSTRUCTtag* filter;            // 0x01C [O]; [R]; [U] filterchunk
     int filters;                        // 0x020 [O]; [R]; [U] filterchunk
@@ -93,10 +103,10 @@ struct STREAMHEADERtag {
     char* datastart;                    // 0x050 [O]; [R]; [U] restartstream skips consumed chunks
     char* datatail;                     // 0x054 [O]; [R]; [U] parsechunks walks it; startnextrequest
     char* dataend;                      // 0x058 [O]; [R]; [U] readcallback adds the bytes read; parsechunks
-    REQUESTSTRUCTtag* firstreq;         // 0x05C [O]; [R] 0; [U] queuerequest / freerequest / restartstream
-    REQUESTSTRUCTtag* curreq;           // 0x060 [O]; [R] 0; [U] parsechunks, startnextrequest, readcallback
-    REQUESTSTRUCTtag* lastreq;          // 0x064 [O]; [R] 0; [U] queuerequest / freerequest
-    REQUESTSTRUCTtag* freereq;          // 0x068 [O]; [R] the first request; [U] getfreerequest pops, freerequest pushes
+    STREAMREQUESTtag* firstreq;         // 0x05C [O]; [R] 0; [U] queuerequest / freerequest / restartstream
+    STREAMREQUESTtag* curreq;           // 0x060 [O]; [R] 0; [U] parsechunks, startnextrequest, readcallback
+    STREAMREQUESTtag* lastreq;          // 0x064 [O]; [R] 0; [U] queuerequest / freerequest
+    STREAMREQUESTtag* freereq;          // 0x068 [O]; [R] the first request; [U] getfreerequest pops, freerequest pushes
     char fname[255];                    // 0x06C [O]; [R] MEM_clear 0x100; [U] startnextrequest / closecallback (the open
                                         //       file's name)
     char unk_16B;                       // 0x16B padding (cleared with fname)
@@ -111,21 +121,21 @@ CHECK_OFFSET(MUTEX, reserved, 0x0);
 CHECK_SIZE(MUTEX, 0x10);
 
 CHECK_OFFSET(STREAMCHUNKHDR, type, 0x0);
-CHECK_OFFSET(STREAMCHUNKHDR, size, 0x4);
+// (size at 0x4 follows from type and the 0x8 size; CHECK_OFFSET(.., size, ..) would clash with CHECK_SIZE in C)
 CHECK_SIZE(STREAMCHUNKHDR, 0x8);
 
-CHECK_OFFSET(REQUESTSTRUCTtag, id, 0x000);
-CHECK_OFFSET(REQUESTSTRUCTtag, state, 0x004);
-CHECK_OFFSET(REQUESTSTRUCTtag, prev, 0x008);
-CHECK_OFFSET(REQUESTSTRUCTtag, next, 0x00C);
-CHECK_OFFSET(REQUESTSTRUCTtag, type, 0x010);
-CHECK_OFFSET(REQUESTSTRUCTtag, fname, 0x014);
-CHECK_OFFSET(REQUESTSTRUCTtag, unk_113, 0x113);
-CHECK_OFFSET(REQUESTSTRUCTtag, address, 0x114);
-CHECK_OFFSET(REQUESTSTRUCTtag, parm, 0x118);
-CHECK_OFFSET(REQUESTSTRUCTtag, endchunkid, 0x11C);
-CHECK_OFFSET(REQUESTSTRUCTtag, datastart, 0x120);
-CHECK_SIZE(REQUESTSTRUCTtag, 0x124);
+CHECK_OFFSET(STREAMREQUESTtag, id, 0x000);
+CHECK_OFFSET(STREAMREQUESTtag, state, 0x004);
+CHECK_OFFSET(STREAMREQUESTtag, prev, 0x008);
+CHECK_OFFSET(STREAMREQUESTtag, next, 0x00C);
+CHECK_OFFSET(STREAMREQUESTtag, type, 0x010);
+CHECK_OFFSET(STREAMREQUESTtag, fname, 0x014);
+CHECK_OFFSET(STREAMREQUESTtag, unk_113, 0x113);
+CHECK_OFFSET(STREAMREQUESTtag, address, 0x114);
+CHECK_OFFSET(STREAMREQUESTtag, parm, 0x118);
+CHECK_OFFSET(STREAMREQUESTtag, endchunkid, 0x11C);
+CHECK_OFFSET(STREAMREQUESTtag, datastart, 0x120);
+CHECK_SIZE(STREAMREQUESTtag, 0x124);
 
 CHECK_OFFSET(FILTERSTRUCTtag, mask, 0x0);
 CHECK_OFFSET(FILTERSTRUCTtag, value, 0x4);

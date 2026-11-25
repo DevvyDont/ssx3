@@ -41,6 +41,7 @@ typedef struct SNDGLOBALSTATE SNDGLOBALSTATE;
 typedef struct SNDPACKETENTRY SNDPACKETENTRY;
 typedef struct SNDPACKETCHAN SNDPACKETCHAN;
 typedef struct SNDPACKETSTATE SNDPACKETSTATE;
+typedef struct SNDPACKET SNDPACKET;
 #endif
 
 // SNDPLAYOPTS (0x18 [O]): how to play a sound (SNDBANK_play(int bhandle, int patnum, SNDPLAYOPTS* pspo) [O]). Moved here
@@ -53,16 +54,17 @@ struct SNDPLAYOPTS {
     signed char keynum;            // 0x02 [O]; [U] SNDplaysetdef 0x3C
     signed char velocity;          // 0x03 [O]; [U] SNDplaysetdef 0x7F
     signed char drylevel;          // 0x04 [O]; [U] SNDplaysetdef 0x7F; SNDPKTPLAY_start -> CHANPUB::drylevel
-    signed char fxlevel0;          // 0x05 [O]; [U] SNDplaysetdef 0x7F; SNDPKTPLAY_start -> CHANPUB::unk_61[0]
+    signed char fxlevel0;          // 0x05 [O]; [U] SNDplaysetdef 0x7F; SNDPKTPLAY_start -> CHANPUB::fxsendlevel[0]
     char pad[2];                   // 0x06 [O]
     unsigned short azimuth;        // 0x08 [O]; [U] -> CHANPUB::azimuth
     short elevation;               // 0x0A [O]
     unsigned short pitchmult;      // 0x0C [O]; [U] SNDplaysetdef 0x1000; -> CHANPUB::progpitch
     unsigned short timemult;       // 0x0E [O]; [U] SNDplaysetdef 0x1000; passed to SNDPLATFORM_playtimbre
     unsigned short tempomult;      // 0x10 [O]; [U] SNDplaysetdef 0x1000
-    unsigned short pad2;           // 0x12 [O] (a pad there); [U] retail SNDplaysetdef clears it and SNDBANKI_playtimbre /
-                                   //      SNDPKTPLAY_start pass it to SNDPLATFORM_playtimbre between timemult and
-                                   //      lowpasscutoff (On Tour's playtimbre has no such argument)
+    unsigned short filteramount;   // 0x12 (name ours; On Tour: pad2, a pad there); [U] retail SNDplaysetdef clears it
+                                   //      and SNDBANKI_playtimbre / SNDPKTPLAY_start pass it to SNDPLATFORM_playtimbre
+                                   //      between timemult and lowpasscutoff (its filterAmount, the clip level for
+                                   //      func_003C30C8; On Tour's playtimbre has no such argument)
     unsigned short lowpasscutoff;  // 0x14 [O]; [U] SNDplaysetdef 0xFFFF
     unsigned short highpasscutoff; // 0x16 [O]; [U] SNDplaysetdef 0
 };
@@ -79,7 +81,7 @@ CHECK_OFFSET(SNDPLAYOPTS, elevation, 0x0A);
 CHECK_OFFSET(SNDPLAYOPTS, pitchmult, 0x0C);
 CHECK_OFFSET(SNDPLAYOPTS, timemult, 0x0E);
 CHECK_OFFSET(SNDPLAYOPTS, tempomult, 0x10);
-CHECK_OFFSET(SNDPLAYOPTS, pad2, 0x12);
+CHECK_OFFSET(SNDPLAYOPTS, filteramount, 0x12);
 CHECK_OFFSET(SNDPLAYOPTS, lowpasscutoff, 0x14);
 CHECK_OFFSET(SNDPLAYOPTS, highpasscutoff, 0x16);
 CHECK_SIZE(SNDPLAYOPTS, 0x18);
@@ -99,7 +101,7 @@ CHECK_OFFSET(SNDSAMPLEFORMAT, samplerep, 0x3);
 CHECK_SIZE(SNDSAMPLEFORMAT, 0x4);
 
 // SNDSAMPLEDESC (0x1C [O]): SNDI_patchtohdr's pssd; [U] retail fills the frame count and one data pointer per channel
-// (view Extra_B820 {f0, offs[6]}).
+// (tag offsets first, made bank- or sample-relative at the end).
 struct SNDSAMPLEDESC {
     unsigned int totalframes;      // 0x00 [O]; [U]
     void* psamples[6];             // 0x04 [O]; [U] one per channel
@@ -182,7 +184,7 @@ CHECK_SIZE(TAGGEDPATCH, 0x8);
 // SNDI_validrendermode(int*, SNDIPATCHHEADER* pph), SNDPLATFORM_playtimbre(SNDIPATCHHEADER* pph, ...); [U] retail
 // SNDBANKI_playtimbre reads numchan 0x3 .. sustainend 0x60 and azimuth[] 0xBC with On Tour's widths (view D_B140),
 // SNDBANKI_playpatch tests velmin / velmax / keymin / keymax 0x8..0xB (view Rec_B588), SNDI_validrendermode numchan and
-// rendermode 0x18 (view E_6158). Retail's on-stack copies are 0xD0 bytes (views Rec_B588, SNDIPATCHHEADER_6760): the
+// rendermode 0x18 (view E_6158). Retail's on-stack copies are 0xD0 bytes (view Rec_B588; SNDPKTPLAY_start's ph): the
 // last word may be stack padding or a retail-only member (no access seen).
 struct SNDIPATCHHEADER {
     short masterranddetune;        // 0x00 [O]
@@ -338,10 +340,12 @@ struct CHANPUB {
     signed char drylevel;          // 0x5F [O]; [U] SNDPKTPLAY_start (pspo->drylevel), func_003B8700, func_003C2A50
     signed char progfxlevel[1];    // 0x60 [O] (a byte there); [U] SNDPKTPLAY_start stores pssa->fxlevel0 in [0]; indexed by
                                    //      effect bus in func_003BA740
-    signed char unk_61[1];         // 0x61 [U] the send level per effect bus: SNDPKTPLAY_start stores pspo->fxlevel0 in
-                                   //      [0], func_003B88C8 stores its level argument (0..127) (On Tour: pad1)
-    short unk_62[1];               // 0x62 [U] the computed send per bus: func_003BA740 stores progfxlevel[bus] *
-                                   //      unk_61[bus] * the bus level >> 6; SNDvol / SNDPLATFORM_setfxlevel read it
+    signed char fxsendlevel[1];    // 0x61 (name ours; On Tour: pad1) [U] the send level per effect bus:
+                                   //      SNDPKTPLAY_start stores pspo->fxlevel0 in [0], func_003B88C8 stores its level
+                                   //      argument (0..127)
+    short fxsend[1];               // 0x62 (name ours) [U] the computed send per bus: func_003BA740 stores
+                                   //      progfxlevel[bus] * fxsendlevel[bus] * the bus level >> 6; SNDvol /
+                                   //      SNDPLATFORM_setfxlevel read it
     signed char pitchbend;         // 0x64 [O] (0x68 there); [U] SNDPKTPLAY_start (pspo->bend)
     unsigned char vollfolength;    // 0x65 [O]
     unsigned char pitchlfolength;  // 0x66 [O]
@@ -396,8 +400,8 @@ CHECK_OFFSET(CHANPUB, curenvelope, 0x5D);
 CHECK_OFFSET(CHANPUB, releaseenvelope, 0x5E);
 CHECK_OFFSET(CHANPUB, drylevel, 0x5F);
 CHECK_OFFSET(CHANPUB, progfxlevel, 0x60);
-CHECK_OFFSET(CHANPUB, unk_61, 0x61);
-CHECK_OFFSET(CHANPUB, unk_62, 0x62);
+CHECK_OFFSET(CHANPUB, fxsendlevel, 0x61);
+CHECK_OFFSET(CHANPUB, fxsend, 0x62);
 CHECK_OFFSET(CHANPUB, pitchbend, 0x64);
 CHECK_OFFSET(CHANPUB, vollfolength, 0x65);
 CHECK_OFFSET(CHANPUB, pitchlfolength, 0x66);
@@ -675,15 +679,18 @@ CHECK_SIZE(SNDREQUESTSTATUS, 0x10);
 // Ent_6098 {hdr, buf1, buf2, busy}: the header pointer the SNDBANKI_* functions read, two buffers, the busy byte).
 struct BANKLIST {
     struct BANKVER5* phdr;         // 0x0 [O]; [U] SNDbankadd stores the bank header; SNDBANKI_getppatch's bank
-    void* unk_04;                  // 0x4 [U] SNDbankadd (a buffer of the bank); retail-only
-    void* unk_08;                  // 0x8 [U] SNDbankadd (a buffer of the bank); retail-only
+    void* iopcpudata;              // 0x4 (name ours) [U] SNDbankadd allocates it with SNDPLATFORM_memalloc(0x100,
+                                   //      iopcpusize + 0x40) and copies the bank's IOP / CPU sample section into it;
+                                   //      SNDbankremove frees it (kind 0x100); retail-only
+    void* spudata;                 // 0x8 (name ours) [U] the same for the SPU section (kind 8, spusize + 0x30);
+                                   //      retail-only
     signed char locked;            // 0xC [O] (0x4 there); [U] the slot's busy byte (sA8E8Slot::f0C)
     char pad[3];                   // 0xD [O]
 };
 
 CHECK_OFFSET(BANKLIST, phdr, 0x0);
-CHECK_OFFSET(BANKLIST, unk_04, 0x4);
-CHECK_OFFSET(BANKLIST, unk_08, 0x8);
+CHECK_OFFSET(BANKLIST, iopcpudata, 0x4);
+CHECK_OFFSET(BANKLIST, spudata, 0x8);
 CHECK_OFFSET(BANKLIST, locked, 0xC);
 CHECK_OFFSET(BANKLIST, pad, 0xD);
 CHECK_SIZE(BANKLIST, 0x10);
@@ -729,9 +736,10 @@ struct SNDGLOBALSTATE {
     int unk_1C0;                   // 0x1C0 [U] SNDDRV_thread counts it; SNDSYSI_variabletimerservice compares it
     float unk_1C4;                 // 0x1C4 [U] SNDPLATFORM_init stores the update period in ms (16.68 / 20 / 10.67)
     void (*userdataclient[4])(void*); // 0x1C8 [O]; [U] SNDSYS_adduserdataclient appends
-    void (*unk_1D8)(void);         // 0x1D8 [U] SNDSYS_restore calls it when set; nothing in retail sets it. On Tour
-    void (*unk_1DC)(void);         // 0x1DC     has four hooks before bankremove (aemsrestore, aemsstopmodulebanks,
-    void (*unk_1E0)(void);         // 0x1E0     aemsstreamrestore, eventrestore) where retail has these three
+    void (*restorehook1)(void);    // 0x1D8 (names ours) [U] SNDSYS_restore calls each when set, first of all the
+    void (*restorehook2)(void);    // 0x1DC     restore hooks; nothing in retail sets them. On Tour has four hooks
+    void (*restorehook3)(void);    // 0x1E0     before bankremove (aemsrestore, aemsstopmodulebanks,
+                                   //           aemsstreamrestore, eventrestore) where retail has these three
     void (*bankremove)(int);       // 0x1E4 [O]; [U] SNDbankadd installs SNDbankremove; SNDSYS_restore calls it with -1
     void (*midirestore)(void);     // 0x1E8 [O]; [U] SNDmidiinit installs SNDmidirestore, which clears it again
                                    //       (D_0050AAD0); SNDSYS_restore calls it
@@ -773,9 +781,9 @@ CHECK_OFFSET(SNDGLOBALSTATE, unk_1B8, 0x1B8);
 CHECK_OFFSET(SNDGLOBALSTATE, unk_1C0, 0x1C0);
 CHECK_OFFSET(SNDGLOBALSTATE, unk_1C4, 0x1C4);
 CHECK_OFFSET(SNDGLOBALSTATE, userdataclient, 0x1C8);
-CHECK_OFFSET(SNDGLOBALSTATE, unk_1D8, 0x1D8);
-CHECK_OFFSET(SNDGLOBALSTATE, unk_1DC, 0x1DC);
-CHECK_OFFSET(SNDGLOBALSTATE, unk_1E0, 0x1E0);
+CHECK_OFFSET(SNDGLOBALSTATE, restorehook1, 0x1D8);
+CHECK_OFFSET(SNDGLOBALSTATE, restorehook2, 0x1DC);
+CHECK_OFFSET(SNDGLOBALSTATE, restorehook3, 0x1E0);
 CHECK_OFFSET(SNDGLOBALSTATE, bankremove, 0x1E4);
 CHECK_OFFSET(SNDGLOBALSTATE, midirestore, 0x1E8);
 CHECK_OFFSET(SNDGLOBALSTATE, streamrestore, 0x1EC);
@@ -810,13 +818,29 @@ CHECK_OFFSET(SNDPACKETENTRY, handle, 0x00);
 CHECK_OFFSET(SNDPACKETENTRY, psamples, 0x08);
 CHECK_SIZE(SNDPACKETENTRY, 0x20);
 
+// SNDPACKET (0x24 [O]): a packet handed to SNDPKTPLAY_submit(int packetinstancehandle, SNDPACKET* psp) [O]; [U] retail
+// SNDPKTPLAY_submit reads numframes, continuation and psamples[] (one per channel) into the channel's next
+// SNDPACKETENTRY.
+struct SNDPACKET {
+    struct SNDSAMPLEFORMAT ssf;    // 0x00 [O]
+    unsigned int numframes : 31;   // 0x04 [O]; [U] submit: the entry's numframes, added to totalframes
+    unsigned int continuation : 1; // 0x04 [O]; [U] submit: the entry's continuation
+    int sizeofsamples;             // 0x08 [O]
+    void* psamples[6];             // 0x0C [O]; [U] submit: one sample pointer per channel
+};
+
+CHECK_OFFSET(SNDPACKET, ssf, 0x00);
+CHECK_OFFSET(SNDPACKET, sizeofsamples, 0x08);
+CHECK_OFFSET(SNDPACKET, psamples, 0x0C);
+CHECK_SIZE(SNDPACKET, 0x24);
+
 // SNDPACKETCHAN, retail version (0x9C with one entry [R]: SNDPKTPLAY_create sets maxpackets = (memsize - 156) >> 5; On
 // Tour 0xA0): one packet-player channel (a stream's packet queue), sndpps.ppc[i]. [O] member names, order and volatile
 // qualifiers; retail has no outstandingplatformframes (On Tour 0x50), so pplatformmem and every later member sit 4
 // bytes lower: [R] SNDPKTPLAY_create(preleasefunc, pframesfunc, pclientdata, pmem, memsize) [O] stores pplatformmem
 // 0x50, preleasefunc 0x54, pframesfunc 0x58, pclientdata 0x5C and shandle -1; [U] SNDPKTPLAYI_flushcallbackdata calls
 // pframesfunc(chan, numframes, pclientdata) for a type-0 callback and preleasefunc(chan, pclientdata) otherwise (view
-// Q_7080); the channel count of sampleformat (0x62) bounds the per-channel arrays (view Q_6DE0, s7B8Queue).
+// Q_7080); the channel count of sampleformat (0x62) bounds the per-channel arrays (view Q_6DE0; SNDPKTPLAY_submit).
 struct SNDPACKETCHAN {
     volatile int shandle;          // 0x00 [O]; [R] SNDPKTPLAY_create -1
     volatile int lastpackethandle; // 0x04 [O]
@@ -866,7 +890,7 @@ CHECK_SIZE(SNDPACKETCHAN, 0x9C);
 
 // SNDPACKETSTATE (0x384 [O]): the packet player's state, sndpps [O] (0x005157B8; retail symbol size 8, a splat
 // artefact). [U] SNDPKTPLAYI_flushcallbackdata walks spcb[0..callbackindex) and calls into ppc[chan] (view G_7080:
-// {count, ev[0x60], q[]}, the same layout); SNDPKTPLAY_create takes the first free ppc[] slot (s7B8).
+// {count, ev[0x60], q[]}, the same layout); SNDPKTPLAY_create takes the first free ppc[] slot.
 struct SNDPACKETSTATE {
     int callbackindex;             // 0x000 [O]; [U] the queued callbacks
     struct SNDIPACKETCALLBACK spcb[96]; // 0x004 [O]

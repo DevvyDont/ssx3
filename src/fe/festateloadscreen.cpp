@@ -555,7 +555,7 @@ void cGameComm_stopSyncInput(void* self);
  * Calls cReplay_endReplay() on the game's Replay, cUIStateStack_purgeNormalStates() on the game UI's state stack and
  * cSSXScriptEngine_ResetNISList() for list 0, sets the sub-state (+0x10) to 0 and the delay (+0x14) to 180, shows load
  * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls cGameComm_stopSyncInput() on it and sets its
- * unk_090 to 1. gainFocus slot of vtable cGFFinishlineState_vtbl.
+ * mAtFinishLine to 1. gainFocus slot of vtable cGFFinishlineState_vtbl.
  */
 extern "C" void cGFFinishlineState_gainFocus(cGFFinishlineState* self)
 {
@@ -568,7 +568,7 @@ extern "C" void cGFFinishlineState_gainFocus(cGFFinishlineState* self)
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         cGameComm_stopSyncInput(gameComm);
-        gameComm->unk_090 = 1;
+        gameComm->mAtFinishLine = 1;
     }
 }
 #endif

@@ -29,7 +29,7 @@ CHECK_SIZE(cIrradiance, 0xA0);
 
 // tIrradianceInfo: the irradiance block the graphics manager is handed. [P] SetIrradiance__15cPS2GraphicsManRC15
 // tIrradianceInfob takes one; [O] class tIrradianceInfo : cIrradiance adds no members; [R] cPS2GraphicsMan_SetIrradiance
-// copies the 0xA0 block into mIrradianceInfo, and cRider passes its unk_7C0 (one 0xA0 block).
+// copies the 0xA0 block into mIrradianceInfo, and cRider passes its PlayerIrradiance (one 0xA0 block).
 struct tIrradianceInfo : public cIrradiance {
 };
 

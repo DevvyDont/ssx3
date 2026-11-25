@@ -829,8 +829,8 @@ extern char str_TextInfo[];
 /**
  * Per-frame update of the online error overlay: reports the result of the connection ping once it is known.
  *
- * Calls cOVState_onUpdate(). While a ping is pending (+0x9C) and cGameComm_mGameComm exists: if its timer (unk_138)
- * has run out with no reply (unk_13C == 0), it clears the comm's unk_09C and shows the timed-out message
+ * Calls cOVState_onUpdate(). While a ping is pending (+0x9C) and cGameComm_mGameComm exists: if its timer (mPingTimer)
+ * has run out with no reply (mPingReceived == 0), it clears the comm's mPingResult and shows the timed-out message
  * (cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut()). If a reply came, it shows the received message
  * (cOVState_PAUSE_ONLINE_ERROR_displayPingReceived()) when a race is in progress, the local rider has not finished and
  * mCheating[0] is clear, else it hides the "TextInfo" object. In both cases it then calls cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1)
@@ -841,12 +841,12 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(cOVState_PAUSE_ONLINE_ERROR
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0 && (int)self->miStartPingTick != 0) {
-        int timedOut = gameComm->unk_138 <= 0 && gameComm->unk_13C == 0;
+        int timedOut = gameComm->mPingTimer <= 0 && gameComm->mPingReceived == 0;
         if (timedOut) {
-            gameComm->unk_09C = 0;
+            gameComm->mPingResult = 0;
             cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(self);
         } else {
-            if (gameComm->unk_13C == 0) {
+            if (gameComm->mPingReceived == 0) {
                 return;
             }
             int received = gameComm->mRaceInProgress != 0 && gameComm->mLocalFinishedRace == 0 && gameComm->mCheating[0] == 0;

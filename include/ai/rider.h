@@ -34,6 +34,7 @@
 #include "object/being.h"
 #include "bx/math3d.h"
 #include "animation/animmodel.h"
+#include "render/irradiance.h"
 
 class cRiderAnim;
 struct cAirPredictor;
@@ -300,7 +301,8 @@ CHECK_SIZE(tRiderLoadList, 0x2948);
 // (size 0x12D0 there, at +0x0), starting with tOpponentInfo Opponents[4] (here sRiderPair mRelations[6]).
 struct cRiderState {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
-    /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)
+    /* 0x0D8 */ int CheckID; // [O] cRiderState::CheckID (+0x80 there, after Opponents); [U] set to -1 just before
+                // cRiderMetrix_reset (cRider_initAlways), as On Tour's initAlways stores -1 to +0x80 there
     /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, cComputer_setupWarp
     /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarAhead
     /* 0x0E4 */ int mGlueStrengthLevel; // [O] cRiderState::mGlueStrengthLevel (+0x8C there); [U] cComputer_setupWarp: 0 = no warp, 2/3 = catch-up, 1/3 = slow-down, as On Tour's setupWarp tests rider+0x8C
@@ -310,12 +312,18 @@ struct cRiderState {
     /* 0x0F4 */ int LastPunchTick; // [O] cRiderState::LastPunchTick (+0x9C there); [U] cleared on reset; the shove check stores the AI tick here and waits 120 ticks
     /* 0x0F8 */ int PissedAIIndex; // [O] cRiderState::PissedAIIndex (+0xA0 there); [U] set to -1 on reset; indexes the AI's riders (the opponent this rider is after)
     /* 0x0FC */ int PissedOffType; // [O] cRiderState::PissedOffType (eBEAggLevel; +0xA4 there, right after PissedAIIndex); [U] cAI_UpdateAggression stores cBEAggressionInterface_getAggression's level here
-    /* 0x100 */ int unk_100; // cleared when the rider quits (cRider_doFinishEvent)
+    /* 0x100 */ int ShouldCelebrateAtFinish; // [O] cRiderState::ShouldCelebrateAtFinish (+0xA8 there, after
+                // PissedOffType); [U] set 1 on reset (cRider_initAlways, as On Tour's stores 1 to +0xA8), cleared
+                // when the rider quits (cRider_doFinishEvent) or loses a heat (gamemode.cpp); cFinishLineControl_update
+                // picks reaction 1 when it is 1, else 4
     /* 0x104 */ char unk_104[0xC];
     /* 0x110 */ t4Vector mPosition; // [R] getPosition (cRider_getPosition)
     /* 0x120 */ t4Vector mRotation; // [P] getRotation (unshifted); quaternion, normalised by updateOrientationImplicit
     /* 0x130 */ t4Vector mRootPoseOverridePos; // [X] moved by AddEq by the wall-hit displacement (func_00137138)
-    /* 0x140 */ char unk_140[0x10];
+    /* 0x140 */ t4Vector mRootPoseOverrideRot; // [O] On Tour's BoardOrientation (tPose {P, Q}) sits where
+                // mRootPoseOverridePos / this field do (Q, the rotation quaternion; name ours, after [X]'s Pos);
+                // [U] cRider_updateSkeleton copies it into the board root bone's rotation when
+                // mUseRootPoseOverride is set
     /* 0x150 */ int mUseRootPoseOverride; // [X]
     /* 0x154 */ char unk_154[0xC];
     /* 0x160 */ t4Matrix RiderRoot; // [O] cRiderState::RiderRoot (+0x100, between BoardOrientation/UseBoardOrientation and Transform, as here);
@@ -455,7 +463,9 @@ struct cRider : public cRiderState, public cBeing {
     /* 0x790 */ cRiderMetrix* mMetrix; // [P] getMetrix (seen); set by cRider_addRiderMetrix
     /* 0x794 */ void* ActiveLights[8]; // cleared as 0x20 bytes (cRider_flushActiveLights)
     /* 0x7B4 */ char unk_7B4[0xC];
-    /* 0x7C0 */ char unk_7C0[0xA0] __attribute__((aligned(16))); // copied as one 0xA0-byte block (cRider_SetRiderLights)
+    /* 0x7C0 */ tIrradianceInfo PlayerIrradiance; // [O] cRider::PlayerIrradiance (tIrradianceInfo, right after
+                // ActiveLights[8] there too); [U] cRider_SetRiderLights builds it (one 0xA0-byte block),
+                // cRider_renderBody hands it to the graphics manager (slot 69)
     /* 0x860 */ cOverlapList* mOverlapList; // [O] cRider::OverlapList (cOverlapList*); [R] ctor: new ("OverlapList")
                                             //      cOverlapList; [U] cRider_updateSplit1 reads its deletecount (+0x4)
     /* 0x864 */ tIntHint* mLineHint; // [O] cRider::LineHint (tIntHint*); [R] ctor: cMemMan_alloc(0x10, "Line Intersect Hint")
@@ -499,7 +509,9 @@ struct cRider : public cRiderState, public cBeing {
                 // [U] cRider_checkObjectCollisions stores the object hit here (On Tour: assert, then this+0x1500); cRider_updateSplit10 passes it to doOnCollideScript
     /* 0xA60 */ tCollideInfo CollideInfo; // [O] cRider::CollideInfo (+0x1580, before SphereTree = mSphereTree); [U] cRider_checkObjectCollisions stores the collision response here with the hit (On Tour: this+0x1580); cRider_updateSplit10 passes it to doOnCollideScript
     /* 0xAA0 */ cRiderSphereTree* mSphereTree; // [P] getSphereTree (seen); [O] cRider::SphereTree (cRiderSphereTree*); [U] the motions set its sphMask (+0x28, kInAirSphereMask)
-    /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
+    /* 0xAA4 */ int mShadowRendered; // [U] the shadow texture was rendered this frame (name ours): cRider_RenderShadow
+                // renders it only while clear and sets it, cRider_updateSplit1 clears it each frame and the ctor
+                // clears it; On Tour has no member between SphereTree and mBoarderShadow
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
     /* 0xAAC */ t2Vector PatchUV; // [O]; [U] cRider_getPatchUV returns its address; the hit's u / v (cRider_SetNISGroundVectors,
                                  //   the wipeout motion); the ctor copies t2vect_Zero
@@ -532,7 +544,7 @@ struct cRider : public cRiderState, public cBeing {
     /* 0xB34 */ int mStatsIndex; // [X] stat column for cBEStatInterface_getCollisionAttrib
 };
 
-CHECK_OFFSET(cRiderState, unk_0D8, 0xD8);
+CHECK_OFFSET(cRiderState, CheckID, 0xD8);
 CHECK_OFFSET(cRiderState, mRubberBandBehind, 0xDC);
 CHECK_OFFSET(cRiderState, mRubberBandAhead, 0xE0);
 CHECK_OFFSET(cRiderState, mGlueStrengthLevel, 0xE4);
@@ -542,7 +554,7 @@ CHECK_OFFSET(cRiderState, PissedOff, 0xF0);
 CHECK_OFFSET(cRiderState, LastPunchTick, 0xF4);
 CHECK_OFFSET(cRiderState, PissedAIIndex, 0xF8);
 CHECK_OFFSET(cRiderState, PissedOffType, 0xFC);
-CHECK_OFFSET(cRiderState, unk_100, 0x100);
+CHECK_OFFSET(cRiderState, ShouldCelebrateAtFinish, 0x100);
 CHECK_OFFSET(cRiderState, mPosition, 0x110);
 CHECK_OFFSET(cRiderState, mRotation, 0x120);
 CHECK_OFFSET(cRiderState, mUseRootPoseOverride, 0x150);
@@ -650,7 +662,7 @@ CHECK_OFFSET(cRider, mAirPredictor, 0x788);
 CHECK_OFFSET(cRider, mFocusBox, 0x78C);
 CHECK_OFFSET(cRider, mMetrix, 0x790);
 CHECK_OFFSET(cRider, ActiveLights, 0x794);
-CHECK_OFFSET(cRider, unk_7C0, 0x7C0);
+CHECK_OFFSET(cRider, PlayerIrradiance, 0x7C0);
 CHECK_OFFSET(cRider, mOverlapList, 0x860);
 CHECK_OFFSET(cRider, mLineHint, 0x864);
 CHECK_OFFSET(cRider, mWallHint, 0x868);
@@ -680,7 +692,7 @@ CHECK_OFFSET(cRider, mModelOffset, 0x9D0);
 CHECK_OFFSET(cRider, CollideIntersectInfo, 0x9E0);
 CHECK_OFFSET(cRider, CollideInfo, 0xA60);
 CHECK_OFFSET(cRider, mSphereTree, 0xAA0);
-CHECK_OFFSET(cRider, unk_AA4, 0xAA4);
+CHECK_OFFSET(cRider, mShadowRendered, 0xAA4);
 CHECK_OFFSET(cRider, mShadow, 0xAA8);
 CHECK_OFFSET(cRider, PatchUV, 0xAAC);
 CHECK_OFFSET(cRider, TrackPath, 0xAB4);

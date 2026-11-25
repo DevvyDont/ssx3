@@ -964,11 +964,11 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
         if (cGameModeMan_iRanking[idx] >= 3) {
             cGameModeMan_sortScores((cGameModeMan*)((char*)cGameModeHandler_pManager), cGameModeHandler_pManager->iNumberAI + 1);
             if (cGameModeMan_iRanking[idx] >= 3) {
-                Rider_239230(idx)->unk_100 = 0;
+                Rider_239230(idx)->ShouldCelebrateAtFinish = 0;
                 break;
             }
         }
-        Rider_239230(idx)->unk_100 = 1;
+        Rider_239230(idx)->ShouldCelebrateAtFinish = 1;
         break;
     case 2:
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
@@ -980,12 +980,12 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
         gm->iRestoreHeat = gm->iNextHeat;
         if (cGameModeMan_iRanking[idx] < 3) {
             gm->iNextHeat = 3;
-            Rider_239230(idx)->unk_100 = 1;
+            Rider_239230(idx)->ShouldCelebrateAtFinish = 1;
             if (quick == 0 && cGameModeMan_iRanking[idx] == 0)
                 func_00147D20(player, 0);
         } else {
             gm->iNextHeat = 1;
-            Rider_239230(idx)->unk_100 = 0;
+            Rider_239230(idx)->ShouldCelebrateAtFinish = 0;
             if (quick == 0)
                 func_00147E18(player, 0);
         }
@@ -1012,11 +1012,11 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
             gm->iNextHeat = 3;
         }
         if (lost) {
-            Rider_239230(idx)->unk_100 = 0;
+            Rider_239230(idx)->ShouldCelebrateAtFinish = 0;
             if (quick == 0)
                 func_00147E18(player, 0);
         } else {
-            Rider_239230(idx)->unk_100 = 1;
+            Rider_239230(idx)->ShouldCelebrateAtFinish = 1;
             if (quick == 0)
                 func_00147D20(player, 0);
         }
@@ -1354,7 +1354,7 @@ extern "C" void cGMMPSlopeHandler_raceFinish(cGMMPSlopeHandler* self, int idx)
         gm->bAreResultsLocked = 1;
         cGameModeMan_sortScores(gm, 2);
         if (cGameModeMan_iRanking[idx] > 0) {
-            Rider_239230(idx)->unk_100 = 0;
+            Rider_239230(idx)->ShouldCelebrateAtFinish = 0;
         }
     }
 }
@@ -1834,7 +1834,7 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     gm->iRestoreHeat = gm->iNextHeat;
     if (cGameModeMan_iRanking[n] < 3) {
         gm->iNextHeat = gm->iHeatNum + 1;
-        GetRace()->riders[idx]->unk_100 = 1;
+        GetRace()->riders[idx]->ShouldCelebrateAtFinish = 1;
         if (gm->iHeatNum == 3) {
             gm->bIsEventDone = 1;
             gm->iNextHeat = 3;
@@ -1856,7 +1856,7 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
         gm->iNextHeat = gm->iHeatNum;
         self->mHeat2Ready = 1;
         self->mHeat3Ready = 1;
-        GetRace()->riders[idx]->unk_100 = 0;
+        GetRace()->riders[idx]->ShouldCelebrateAtFinish = 0;
         if (cBENewRaceInterface_newRace.cGamePath == 0) {
             if (cGameModeHandler_pManager->iHeatNum < 2 ||
                 (cGameModeHandler_pManager->iHeatNum == 2 && cGameModeMan_iRanking[n] >= 4) ||
@@ -2387,11 +2387,11 @@ extern "C" void cGMTimeHandler_raceFinish(cGMTimeHandler* self, int riderIndex)
         gm->iNextHeat = one;
         D_005366A8[riderIndex] = one;
     } else if (self->uiTimeToBeat < *timeSlot) {
-        rider->unk_100 = 0;
+        rider->ShouldCelebrateAtFinish = 0;
         gm->iNextHeat = one;
         D_005366A8[riderIndex] = 0;
     } else {
-        rider->unk_100 = one;
+        rider->ShouldCelebrateAtFinish = one;
         gm->bIsEventDone = one;
         unsigned int tier2Time = cBENewRaceInterface_getPeakGoal(race, gm->iCurrentGameEvent, 2) * 60;
         unsigned int tier1Time = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 60;
@@ -2984,7 +2984,7 @@ extern "C" void cGMPointHandler_raceFinish(cGMPointHandler* self, int idx)
     } else {
         cGameModeMan* gm = cGameModeHandler_pManager;
         if (st.TotalPoints < (int)gm->uiPointTarget) {
-            rider->unk_100 = 0;
+            rider->ShouldCelebrateAtFinish = 0;
             D_00536640[idx] = st.TotalPoints;
             gm->iNextHeat = 1;
             D_005366A8[idx] = 0;

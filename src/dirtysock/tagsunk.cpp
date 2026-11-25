@@ -5856,7 +5856,7 @@ static inline int RaceTime(int end)
 {
     int t = 0;
     if (end != 0)
-        t = end - Race()->unk_034;
+        t = end - Race()->mRaceStartTime;
     return t;
 }
 
@@ -5865,18 +5865,19 @@ static inline int RaceTime(int end)
  *
  * Does nothing when mState is 0. Builds a 0x800-byte tag record from cGameComm_mGameComm, the network options
  * cBENetworkInterface_networkOpt and both riders' stats. The *0 fields describe the host and the *1 fields the other
- * rider: bIsHost picks whether the host is this machine's side A (mLocalFinishedRace, mLocalDisconnected, unk_038,
- * mCheating[0], @p statsA, @p idxA) or the peer's side B (the remote flags, unk_03C, mCheating[1], @p statsB, @p idxB).
+ * rider: bIsHost picks whether the host is this machine's side A (mLocalFinishedRace, mLocalDisconnected,
+ * mLocalEndTime, mCheating[0], @p statsA, @p idxA) or the peer's side B (the remote flags, mRemoteEndTime,
+ * mCheating[1], @p statsB, @p idxB).
  * Fields: WHEN (mWhen), REPT (the reporter: mHostName on the host, else mOppoName), AUTH (mAuth, only with @p
  * sendName), COMMERR, SCOMERR, PINGRSLT, STALLCNT, CERRSTAT, CERRFLGS, DIDQUIT0/1, FINISH0/1, DNF0/1 (D_005366A8),
- * RSLTSLCK (game-mode manager +0x9C), RACETRA0 (the location id), RACEEVE0 (cBENewRaceInterface_newRace.cGameEvent; for locations 14..16 it
- * becomes 0 when that is 4, else 1), DESYNC, then per rider NAME (mHostName / mOppoName), QUIT (race time from unk_034
- * to the end time when the rider did not finish), CHEAT (mCheating), DISC (the same time when a significant comm error
- * is put on that side), CHARACTER, RACETIM or SCORE (D_00536640; SCORE when RACEEVE0 is nonzero) and the trick and
- * speed totals (SPINDEG .. PLOSTRE, floats converted with fptoui). It sends the record with func_0025B608 (state
- * unchanged, callback func_00268EF0, which runs LobbyMan_onresultsreportresponse, timeout 20.0) and posts an online::Event of type 0x100
- * on mEventList. Likely bug: CHARACTER0 is always MyCharacterID, so on the non-host side both CHARACTER0 and CHARACTER1
- * are this player's character.
+ * RSLTSLCK (game-mode manager +0x9C), RACETRA0 (the location id), RACEEVE0 (cBENewRaceInterface_newRace.cGameEvent; for
+ * locations 14..16 it becomes 0 when that is 4, else 1), DESYNC, then per rider NAME (mHostName / mOppoName), QUIT
+ * (race time from mRaceStartTime to the end time when the rider did not finish), CHEAT (mCheating), DISC (the same time
+ * when a significant comm error is put on that side), CHARACTER, RACETIM or SCORE (D_00536640; SCORE when RACEEVE0 is
+ * nonzero) and the trick and speed totals (SPINDEG .. PLOSTRE, floats converted with fptoui). It sends the record with
+ * func_0025B608 (state unchanged, callback func_00268EF0, which runs LobbyMan_onresultsreportresponse, timeout 20.0)
+ * and posts an online::Event of type 0x100 on mEventList. Likely bug: CHARACTER0 is always MyCharacterID, so on the
+ * non-host side both CHARACTER0 and CHARACTER1 are this player's character.
  *
  * @param sendName  nonzero to include the AUTH field (the trophy-room caller passes bIsRankedGame)
  * @param idxA      this machine's rider index into D_005366A8 / D_00536640 (the caller passes !bIsHost)
@@ -5896,7 +5897,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     int quitA = 0;
     int quitB = 0;
     if (Race()->mCommErrorWasSignificant != 0) {
-        if (Race()->unk_09C == 0)
+        if (Race()->mPingResult == 0)
             quitA = 1;
         else
             quitB = 1;
@@ -5926,8 +5927,8 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     if (cBENetworkInterface_networkOpt.bIsHost != 0) {
         myIdx = idxA;
         myName = *(char**)(self + 0x90);
-        myTime = finA ? RaceTime(Race()->unk_038) : 0;
-        myQuitTime = quitA ? RaceTime(Race()->unk_038) : 0;
+        myTime = finA ? RaceTime(Race()->mLocalEndTime) : 0;
+        myQuitTime = quitA ? RaceTime(Race()->mLocalEndTime) : 0;
         myDone = 0;
         if (Race()->mLocalDisconnected != 0)
             myDone = 1;
@@ -5938,8 +5939,8 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
         myScore = Race()->mCheating[0];
         oppIdx = idxB;
         oppChar = cBENetworkInterface_networkOpt.OpponentCharacterID;
-        oppTime = finB ? RaceTime(Race()->unk_03C) : 0;
-        oppQuitTime = quitB ? RaceTime(Race()->unk_03C) : 0;
+        oppTime = finB ? RaceTime(Race()->mRemoteEndTime) : 0;
+        oppQuitTime = quitB ? RaceTime(Race()->mRemoteEndTime) : 0;
         oppDone = 0;
         if (Race()->mRemoteDisconnected != 0)
             oppDone = 1;
@@ -5951,8 +5952,8 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     } else {
         myIdx = idxB;
         myName = *(char**)(self + 0x94);
-        myTime = finB ? RaceTime(Race()->unk_03C) : 0;
-        myQuitTime = quitB ? RaceTime(Race()->unk_03C) : 0;
+        myTime = finB ? RaceTime(Race()->mRemoteEndTime) : 0;
+        myQuitTime = quitB ? RaceTime(Race()->mRemoteEndTime) : 0;
         myDone = 0;
         if (Race()->mRemoteDisconnected != 0)
             myDone = 1;
@@ -5963,8 +5964,8 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
         myScore = Race()->mCheating[1];
         oppIdx = idxA;
         oppChar = cBENetworkInterface_networkOpt.MyCharacterID;
-        oppTime = finA ? RaceTime(Race()->unk_038) : 0;
-        oppQuitTime = quitA ? RaceTime(Race()->unk_038) : 0;
+        oppTime = finA ? RaceTime(Race()->mLocalEndTime) : 0;
+        oppQuitTime = quitA ? RaceTime(Race()->mLocalEndTime) : 0;
         oppDone = 0;
         if (Race()->mLocalDisconnected != 0)
             oppDone = 1;
@@ -5981,7 +5982,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
         cDirtysock_tag_TagFieldSetString(buf, 0x800, str_AUTH, *(const char**)(self + 0x9C));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_COMMERR, Race()->mCommError);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SCOMERR, Race()->mCommErrorWasSignificant);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PINGRSLT, Race()->unk_09C);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PINGRSLT, Race()->mPingResult);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_STALLCNT, Race()->mStallCount);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CERRSTAT, Race()->mStateOnCommError);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CERRFLGS, ((int)Race()->mFlagsOnCommError));

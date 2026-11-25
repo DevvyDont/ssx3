@@ -7,9 +7,8 @@
 // has this 0x30 struct). Retail code: unit ealib/seg_2DCAE8 (ASYNCFILE_*, finishrequest, releaserequest,
 // locaterequest, the FILESYS callbacks).
 //
-// NAME CLASH: ealib/stream.h defines stream.cpp's own 0x124 REQUESTSTRUCTtag, and both modules sit in the same C unit
-// (ealib/seg_2DCAE8.c), so this header and ealib/stream.h cannot be included together as they stand. One of the two
-// needs another C name before either is used in that unit (stream.h's own note says the same); the name here is EA's.
+// NAME CLASH: stream.cpp has its own 0x124 REQUESTSTRUCTtag, and both modules sit in the same C unit
+// (ealib/seg_2DCAE8.c), so ealib/stream.h gives that one the C name STREAMREQUESTtag; the name here is EA's.
 //
 // Names, member order and offsets: [O] On Tour struct REQUESTSTRUCTtag (0x30); [U] retail use as noted.
 // C struct. Tags: [O] SSX On Tour's DWARF; [U] retail use.

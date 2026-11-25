@@ -1857,12 +1857,12 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_ChooseCodec);
 #ifdef SKIP_ASM
 class RCMP_DECODER_ChooseCodec_cObj {
 public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual int v02(void* a, int b);
-    virtual void v03();
-    virtual int v04();
-    virtual float v05();
+    // vptr at 0x0; slot N at vtable offset N*8; RCMP::CODEC's virtuals ([O] names, rcmpbase.h)
+    virtual ~RCMP_DECODER_ChooseCodec_cObj();
+    virtual int Init(void* decoder, int firstChunk);
+    virtual void GetFrame();
+    virtual int GetCurrentFrameNumber();
+    virtual float GetFrameRate();
 };
 
 /**
@@ -1878,7 +1878,7 @@ extern "C" void RCMP_DECODER_ChooseCodec(RCMP_DECODER* self, RCMP_DECODER_Choose
 {
     self->m_codec = (RCMP_CODEC*)obj;
     *(int*)self = firstChunk;
-    obj->v02(self, firstChunk);
+    obj->Init(self, firstChunk);
 }
 #endif
 
@@ -1918,7 +1918,7 @@ extern "C" int RCMP_DECODER_GetCurrentFrameNumber(RCMP_DECODER* self)
     if (obj == 0) {
         return 0;
     }
-    return obj->v04();
+    return obj->GetCurrentFrameNumber();
 }
 #endif
 
@@ -1938,7 +1938,7 @@ extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER* self)
     if (obj == 0) {
         return 0.0f;
     }
-    return obj->v05();
+    return obj->GetFrameRate();
 }
 #endif
 
@@ -1947,10 +1947,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_GetFrame);
 #ifdef SKIP_ASM
 class RCMP_DECODER_GetFrame_cVirt {
 public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual int v03(int);
+    // vptr at 0x0; slot N at vtable offset N*8; RCMP::CODEC's virtuals ([O] names, rcmpbase.h)
+    virtual ~RCMP_DECODER_GetFrame_cVirt();
+    virtual void Init();
+    virtual int GetFrame(int);
 };
 
 struct RCMP_DECODER_GetFrame_sObj {
@@ -1982,7 +1982,7 @@ extern "C" int RCMP_DECODER_GetFrame(void* decoder, int goalFrame)
     }
     int frame;
     if (self->obj != 0) {
-        frame = self->obj->v03(goalFrame);
+        frame = self->obj->GetFrame(goalFrame);
     } else {
         frame = 0;
     }
@@ -1995,13 +1995,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_ReleaseFrame);
 #ifdef SKIP_ASM
 class RCMP_DECODER_ReleaseFrame_cObj {
 public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06(int a);
+    // vptr at 0x0; slot N at vtable offset N*8; RCMP::CODEC's virtuals ([O] names, rcmpbase.h)
+    virtual ~RCMP_DECODER_ReleaseFrame_cObj();
+    virtual void Init();
+    virtual void GetFrame();
+    virtual void GetCurrentFrameNumber();
+    virtual void GetFrameRate();
+    virtual void ReleaseFrame(int frame);
 };
 
 /**
@@ -2014,7 +2014,7 @@ public:
  */
 extern "C" void RCMP_DECODER_ReleaseFrame(RCMP_DECODER* self, int frame)
 {
-    ((RCMP_DECODER_ReleaseFrame_cObj*)self->m_codec)->v06(frame);
+    ((RCMP_DECODER_ReleaseFrame_cObj*)self->m_codec)->ReleaseFrame(frame);
 }
 #endif
 
@@ -2664,13 +2664,13 @@ extern "C" int sceMpegIsEnd(void* sema);
 
 class PS2_SONY_CODEC_INTERNAL_GetFrame_cCache {
 public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06(void*);
+    // vptr at 0x0; slot N at vtable offset N*8; RCMP::CODEC's virtuals ([O] names, rcmpbase.h)
+    virtual ~PS2_SONY_CODEC_INTERNAL_GetFrame_cCache();
+    virtual void Init();
+    virtual void GetFrame();
+    virtual void GetCurrentFrameNumber();
+    virtual void GetFrameRate();
+    virtual void ReleaseFrame(void*);
 };
 
 /**
@@ -2687,7 +2687,7 @@ extern "C" void* PS2_SONY_CODEC_INTERNAL_GetFrame(PS2_SONY_CODEC_INTERNAL* self,
     void* item = 0;
     do {
         if (item != 0) {
-            ((PS2_SONY_CODEC_INTERNAL_GetFrame_cCache*)self)->v06(item);
+            ((PS2_SONY_CODEC_INTERNAL_GetFrame_cCache*)self)->ReleaseFrame(item);
         }
         if (sceMpegIsEnd(self->mMpeg) != 0) {
             return 0;

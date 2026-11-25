@@ -132,13 +132,18 @@ struct UNPACKMTPFSTATE {
 // SNDFIRSTATE, retail PS2 version (0x100 [R]: node 0x120 - 0x20). SNDI_fir8init sets it up, calcFIRCoeffs computes the
 // coefficients from the cut-offs, SNDI_fir8 runs it.
 struct SNDFIRSTATE {
-    char unk_00[0xF4];                  // 0x00 history / coefficients in the SIMD layout (SNDI_fir8init writes 0x4..0xDC;
-                                        //      On Tour: history float[8], coef float[5]); not mapped
+    float matrix[48];                   // 0x00 (name ours) [U] the banded 12x4 coefficient matrix SNDI_fir8 builds from
+                                        //      coef and loads into VU0; SNDI_fir8init zeroes the cells outside the band
+    float history[8];                   // 0xC0 [O] (On Tour: float[8]); [U] the last 8 input samples: SNDI_fir8init
+                                        //      zeroes them, SNDI_fir8 reads and writes them back
+    float coef[5];                      // 0xE0 [O] (On Tour: float[5]); [U] calcFIRCoeffs computes them, SNDI_fir8
+                                        //      expands them into matrix
     float cutLow;                       // 0xF4 [O]; [U] SFILTER_modifyHPFFIR8 / modifyBPFFIR8 store the low cut-off ratio;
                                         //      calcFIRCoeffs reads / writes it
     float cutHigh;                      // 0xF8 [O]; [U] SFILTER_modifyLPFFIR8 / modifyBPFFIR8 store the high cut-off ratio;
                                         //      calcFIRCoeffs reads it
-    unsigned char unk_FC;               // 0xFC [U] calcFIRCoeffs writes it (sb)
+    signed char coefdirty;              // 0xFC (name ours) [U] calcFIRCoeffs sets it to 1; SNDI_fir8 rebuilds matrix
+                                        //      while it is set (lb) and clears it
     char unk_FD[3];                     // 0xFD padding
 };
 
@@ -222,10 +227,12 @@ CHECK_OFFSET(UNPACKMTPFSTATE, samplechan, 0x38);
 CHECK_OFFSET(UNPACKMTPFSTATE, pad, 0x39);
 CHECK_SIZE(UNPACKMTPFSTATE, 0x3C);
 
-CHECK_OFFSET(SNDFIRSTATE, unk_00, 0x00);
+CHECK_OFFSET(SNDFIRSTATE, matrix, 0x00);
+CHECK_OFFSET(SNDFIRSTATE, history, 0xC0);
+CHECK_OFFSET(SNDFIRSTATE, coef, 0xE0);
 CHECK_OFFSET(SNDFIRSTATE, cutLow, 0xF4);
 CHECK_OFFSET(SNDFIRSTATE, cutHigh, 0xF8);
-CHECK_OFFSET(SNDFIRSTATE, unk_FC, 0xFC);
+CHECK_OFFSET(SNDFIRSTATE, coefdirty, 0xFC);
 CHECK_OFFSET(SNDFIRSTATE, unk_FD, 0xFD);
 CHECK_SIZE(SNDFIRSTATE, 0x100);
 

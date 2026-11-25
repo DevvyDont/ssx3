@@ -3130,7 +3130,7 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self, tFinishLineC
         {
             self->FinishState = 2;
             anim = 4;
-            if (self->mRider->unk_100 == 1)
+            if (self->mRider->ShouldCelebrateAtFinish == 1)
                 cRider_flagEventReaction((char*)self->mRider, 1, floatZero);
             else
                 cRider_flagEventReaction((char*)self->mRider, 4, floatZero);

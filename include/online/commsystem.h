@@ -31,8 +31,8 @@ struct cCommChannel;
 // 0xFC00-byte "Comm pool" block and links them into the free list). On Tour: tCommMsgElem (0xFC), mSize/mOffset/mData
 // after a 4-byte base its dump does not show.
 struct tCommMsgElem {
-    tCommMsgElem* unk_00;        // 0x00 [R] the free-list link (the constructor stores the next element; alloc/free
-                                 //      pop and push through it)
+    tCommMsgElem* mNext;         // 0x00 (name ours) [R] the free-list link (the constructor stores the next element;
+                                 //      alloc/free pop and push through it)
     int mSize;                   // 0x04 [O]; [U] freeCommMsgElem (cCommSystem_freeCommMsgElem) clears it
     int mOffset;                 // 0x08 [O]; [U] freeCommMsgElem clears it
     char mData[240];             // 0x0C [O]
@@ -61,7 +61,7 @@ struct cCommSystem {
 };
 
 CHECK_SIZE(tCommMsgElem, 0xFC);
-CHECK_OFFSET(tCommMsgElem, unk_00, 0x00);
+CHECK_OFFSET(tCommMsgElem, mNext, 0x00);
 CHECK_OFFSET(tCommMsgElem, mSize, 0x04);
 CHECK_OFFSET(tCommMsgElem, mOffset, 0x08);
 CHECK_OFFSET(tCommMsgElem, mData, 0x0C);
