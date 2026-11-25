@@ -48,6 +48,8 @@ CHECK_OFFSET(tCameraSwitchRecord, LatestReplayType, 0x08);
 CHECK_OFFSET(tCameraSwitchRecord, TriggerAction, 0x10);
 CHECK_SIZE(tCameraSwitchRecord, 0x14);
 
+struct cCameraAlgorithm;
+
 struct cChaseCameraController {
     // --- cCameraController (On Tour: 0x18)
     int Type;                       // 0x00 [O] eCamControllerType; [R] base ctor 0, then 2 (chase)
@@ -67,6 +69,31 @@ struct cChaseCameraController {
     float TimeSinceLastSuggestedVolumeTrigger; // 0x38 [O]; [R] HardReset: 0; [U] update (lwc1/swc1)
     int GoingSlow;                  // 0x3C [O] bool (a word in retail); [R] HardReset: 0; [U] cChaseCameraController_processInput
     int NumFramesSlowGround;        // 0x40 [O]; [R] HardReset: 0; [U] cChaseCameraController_switchCamera_SoftReset
+
+    // Methods bound to their retail symbols by asm labels.
+    void switchCamera_HardReset(int i) __asm__("cChaseCameraController_switchCamera_HardReset");
+    void setTarget(int* target) __asm__("cChaseCameraController_setTarget");
+    int getRider() __asm__("cChaseCameraController_getRider");
+    void processInput() __asm__("cChaseCameraController_processInput");
+    void update() __asm__("cChaseCameraController_update");
+    void addAlgorithm(cCameraAlgorithm* algo, float w) __asm__("cChaseCameraController_addAlgorithm");
+    void switchCamera_UserChange(int type) __asm__("cChaseCameraController_switchCamera_UserChange");
+    void switchCamera_EndReplay() __asm__("cChaseCameraController_switchCamera_EndReplay");
+    void switchCamera_ReplayToggle(int mode) __asm__("cChaseCameraController_switchCamera_ReplayToggle");
+    void switchCamera_Volume(int mode, int action, float blend) __asm__("cChaseCameraController_switchCamera_Volume");
+    void switchCamera_Chapter() __asm__("cChaseCameraController_switchCamera_Chapter");
+    void switchCamera_SoftReset() __asm__("cChaseCameraController_switchCamera_SoftReset");
+    void* switchCamera_Restart() __asm__("cChaseCameraController_switchCamera_Restart");
+    void switchCamera_Slow() __asm__("cChaseCameraController_switchCamera_Slow");
+    void switchCamera_EndSlow() __asm__("cChaseCameraController_switchCamera_EndSlow");
+    void switchCamera_EndRace() __asm__("cChaseCameraController_switchCamera_EndRace");
+    void* switchCamera_EndPostRace() __asm__("cChaseCameraController_switchCamera_EndPostRace__FPv");
+    int getLatestAlgoType() __asm__("cChaseCameraController_getLatestAlgoType");
+    int getTarget() __asm__("cChaseCameraController_getTarget");
+    void createChaseAlgorithmBlend(int kind, char* ctx, float blend)
+        __asm__("cChaseCameraController_createChaseAlgorithmBlend");
+    int shouldDoExtraGroundTest() __asm__("cChaseCameraController_shouldDoExtraGroundTest");
+    void* createChaseAlgorithmCut(int type, int action) __asm__("cChaseCameraController_createChaseAlgorithmCut");
 };
 
 CHECK_OFFSET(cChaseCameraController, Type, 0x00);

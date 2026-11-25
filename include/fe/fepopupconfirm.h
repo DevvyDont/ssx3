@@ -56,6 +56,9 @@ struct cFEPopupConfirm : public cScreenPopup {
     unsigned short mAltText[100];   // 0xB30 [O]; [U] setButtonText(text, other): makes it a 3-button popup
     int mNumButtons;                // 0xBF8 [O]; [U] initPopup stores 0 (no buttons), 1 (yes only) or 2;
                                     //       setButtonText stores 3 for a third button and tests >= 2
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEPopupConfirm1() __asm__("cFEPopupConfirm_cFEPopupConfirm1");
 };
 
 CHECK_OFFSET(cFEPopupConfirm, mDisplayText, 0x360);

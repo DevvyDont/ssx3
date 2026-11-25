@@ -25,6 +25,9 @@ struct cFEStateMainMenu : public cUIState {
     char mHackCheatTotal;              // 0x054 [O]
     char mNumOfCtrl;                   // 0x055 [O]
     char unk_056[0x2];                 // 0x056 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateMainMenu1() __asm__("cFEStateMainMenu_cFEStateMainMenu1");
 };
 
 CHECK_OFFSET(cFEStateMainMenu, mGoToNextState, 0x048);

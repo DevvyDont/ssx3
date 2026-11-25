@@ -161,6 +161,10 @@ struct cScriptAlgorithm : public cCameraAlgorithm {
     char unk_1C[0x4];           // 0x1C alignment gap before the 16-byte-aligned t4Vector
     t4Vector Target;            // 0x20 [O]; [R] = t4vect_Origin (sq); [U] cScriptAlgorithm_getTargetPos (lq; this in a1),
                                 //      the updates store the look-at point (sq) and read it back (lqc2)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setScriptObj(int val) __asm__("cScriptAlgorithm_setScriptObj__FPvi");
+    int getScriptObj() __asm__("cScriptAlgorithm_getScriptObj__FPv");
 };
 
 CHECK_OFFSET(cScriptAlgorithm, ScriptObj, 0x14);

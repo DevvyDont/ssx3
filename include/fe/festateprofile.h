@@ -88,6 +88,16 @@ struct cFEStateProfileLoad : public cFEMemCard {
     int mTypeOfQuit;                // 0x27C [O]; [R] the ctor clears it; [U] the setter cFEStateProfileLoad_setQuitPath (0, 1 or 2);
                                     //       updateDone: 0 pushes the parent factory's next state, 1 starts a pre-game
                                     //       load, 2 returns to the title screen
+
+    // Methods bound to their retail symbols by asm labels.
+    void displayOn() __asm__("cFEStateProfileLoad_displayOn");
+    void displayOff() __asm__("cFEStateProfileLoad_displayOff");
+    void startSave() __asm__("cFEStateProfileLoad_startSave");
+    void initGeneral() __asm__("cFEStateProfileLoad_initGeneral");
+    void initCreateScreen() __asm__("cFEStateProfileLoad_initCreateScreen");
+    void initLoadScreen() __asm__("cFEStateProfileLoad_initLoadScreen");
+    void initSaveScreen() __asm__("cFEStateProfileLoad_initSaveScreen");
+    void setQuitPath(int action) __asm__("cFEStateProfileLoad_setQuitPath");
 };
 
 CHECK_OFFSET(cFEStateProfileLoad, miCntrlID, 0x22C);
@@ -123,6 +133,9 @@ struct cFEStateProfileSelect : public cUIState {
     //   mpEngine: [U] onCreateScreen adds "05sel_prof" through it; onWidgetEvent asks its custom interface (+0x0) for
     //       the next / previous state and pushes it on its stack (+0x18)
     //   mpScreen: [U] onCreateScreen stores the screen
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateProfileSelect1() __asm__("cFEStateProfileSelect_cFEStateProfileSelect1");
 };
 
 CHECK_SIZE(cFEStateProfileSelect, 0x48);

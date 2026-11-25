@@ -122,7 +122,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(cFEStateTrophyRoom* self, cUIT
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_bitmap)) {
         self->mpBigIcon = (cUIIcon*)((void*)w);
-        cFEStateTrophyRoom_updateBigArt(self, self->mCurSelection);
+        self->updateBigArt(self->mCurSelection);
         return;
     }
     if (hashName == GetHashValue32(str_stats)) {
@@ -235,8 +235,8 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
     }
     case 1:
         self->mCurSelection = item->mMiscData;
-        cFEStateTrophyRoom_updateBigArt(self, item->mMiscData);
-        cFEStateTrophyRoom_updateStats(self, item->mMiscData);
+        self->updateBigArt(item->mMiscData);
+        self->updateStats(item->mMiscData);
         break;
     }
 }
@@ -258,7 +258,7 @@ extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void cFEStateTrophyRoom_onUpdate(cFEStateTrophyRoom* self)
 {
     if (self->mNumLoadingFiles > 0) {
-        cFEStateTrophyRoom_updateTexturesLoad(self);
+        self->updateTexturesLoad();
     }
     cUIState_onUpdate(self);
 }
@@ -284,7 +284,7 @@ extern "C" int getChallengeMedal(int rider, int a, int b, int c, int index);
  *
  * @param index  the selected row (0 trophy, 1-4 challenges), or negative to hide
  */
-extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index)
+void cFEStateTrophyRoom::updateBigArt(int index)
 {
     int textureId;
     if (index < 0) {
@@ -293,26 +293,26 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int in
     textureId = -1;
     {
         if (index == 0) {
-            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
-                              self->mCharID, self->mPeakNum,
-                              self->mTrophyType) != 0) {
-                textureId = self->mTextureIDs[0];
+            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum,
+                              mCharID, mPeakNum,
+                              mTrophyType) != 0) {
+                textureId = mTextureIDs[0];
             }
         } else {
-            int medal = getChallengeMedal(self->mUserNum,
-                                  self->mCharID, self->mPeakNum,
-                                  self->mTrophyType, index - 1);
+            int medal = getChallengeMedal(mUserNum,
+                                  mCharID, mPeakNum,
+                                  mTrophyType, index - 1);
             if (medal != -1) {
-                textureId = self->mTextureIDs[medal + 1];
+                textureId = mTextureIDs[medal + 1];
             }
         }
     }
     if (textureId < 0) {
     hide:
-        self->mpBigIcon->setVisible(0);
+        mpBigIcon->setVisible(0);
     } else {
-        self->mpBigIcon->setVisible(1);
-        cUIIcon* icon = self->mpBigIcon;
+        mpBigIcon->setVisible(1);
+        cUIIcon* icon = mpBigIcon;
         icon->mTextureID = textureId;
         icon->mpTextureElem = 0;
     }
@@ -332,17 +332,17 @@ extern "C" void setChallengeStats(void* widget, signed char rider, int a2, int a
  *
  * @param index  the selected row
  */
-extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int index)
+void cFEStateTrophyRoom::updateStats(int index)
 {
-    cUIText* widget = self->mpStats;
+    cUIText* widget = mpStats;
     if (widget != 0) {
         if (index == 0) {
             widget->setVisible(0);
         } else {
             widget->setVisible(1);
-            setChallengeStats(self->mpStats, self->mUserNum,
-                              self->mCharID, self->mPeakNum,
-                              self->mTrophyType, index - 1);
+            setChallengeStats(mpStats, mUserNum,
+                              mCharID, mPeakNum,
+                              mTrophyType, index - 1);
         }
     }
 }
@@ -376,18 +376,18 @@ struct sTrophyRoom_4918 {
  * image of each of the trophy's four medals that has a name (cBERewardInterface_getMedal) into +0x74[1-4]. +0x5C counts
  * the requests. Called by the trophy room's constructor cFEStateTrophyRoom_cFEStateTrophyRoom.
  */
-extern "C" void cFEStateTrophyRoom_loadTextures(cFEStateTrophyRoom* self)
+void cFEStateTrophyRoom::loadTextures()
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = SSXApp->RealFE->mBoltFileManager;
-    self->mTextureFileIndex[0] = func_0019DA10(snd, self->mCharID,
-        cBERewardInterface_getTrophy(pi, self->mPeakNum, self->mTrophyType)->mpTextureFileName, 10, 1, 0);
-    self->mNumLoadingFiles = 1;
+    mTextureFileIndex[0] = func_0019DA10(snd, mCharID,
+        cBERewardInterface_getTrophy(pi, mPeakNum, mTrophyType)->mpTextureFileName, 10, 1, 0);
+    mNumLoadingFiles = 1;
     for (int i = 0; i < 4; i++) {
-        const char* name = cBERewardInterface_getMedal(pi, self->mTrophyType, i)->mpTextureFileName;
+        const char* name = cBERewardInterface_getMedal(pi, mTrophyType, i)->mpTextureFileName;
         if (name != 0) {
-            self->mTextureFileIndex[i + 1] = func_0019DA10(snd, self->mCharID, name, 10, 1, 0);
-            self->mNumLoadingFiles++;
+            mTextureFileIndex[i + 1] = func_0019DA10(snd, mCharID, name, 10, 1, 0);
+            mNumLoadingFiles++;
         }
     }
 }
@@ -412,11 +412,10 @@ extern char str_trph[];
  * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
  * (cFEStateTrophyRoom_updateBigArt with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
  *
- * @param trophyRoom  the trophy room state
  */
-extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophyRoom)
+void cFEStateTrophyRoom::updateTexturesLoad()
 {
-    cFEStateTrophyRoom* self = trophyRoom;
+    cFEStateTrophyRoom* self = this;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     int i;
     for (i = 0; i < 5; i++) {
@@ -429,7 +428,7 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophy
             func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
             self->mTextureFileIndex[i] = -1;
             self->mNumLoadingFiles--;
-            cFEStateTrophyRoom_updateBigArt((cFEStateTrophyRoom*)self, self->mCurSelection);
+            self->updateBigArt(self->mCurSelection);
         }
     }
 }
@@ -454,19 +453,19 @@ struct sSelf001D4B20 {
  * (+0x74) released with func_0019DC20 (RealFE + 0x1A70, bank +0x50); both are set to -1. Called by
  * cFEStateTrophyRoom__cFEStateTrophyRoom.
  */
-extern "C" void cFEStateTrophyRoom_purgeTextures(cFEStateTrophyRoom* self)
+void cFEStateTrophyRoom::purgeTextures()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->mTextureIDs[i] >= 0) {
-            GrMan->RemoveTexture(self->mTextureIDs[i]);
+        if (mTextureIDs[i] >= 0) {
+            GrMan->RemoveTexture(mTextureIDs[i]);
         }
-        self->mTextureIDs[i] = -1;
-        if (self->mTextureFileIndex[i] >= 0) {
-            func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
+        mTextureIDs[i] = -1;
+        if (mTextureFileIndex[i] >= 0) {
+            func_0019DC20(mgr, mCharID, mTextureFileIndex[i]);
         }
-        self->mTextureFileIndex[i] = -1;
+        mTextureFileIndex[i] = -1;
     }
 }
 #endif
@@ -576,17 +575,17 @@ extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, cU
     } else if (id == GetHashValue32(str_cheat_character)) {
         w->mMiscData = 8;
     } else if (id == GetHashValue32(str_txtmdl_0)) {
-        cFEStateRewardsRoom_setRewardsWidgetText(self, 5, (cUIText*)w);
+        self->setRewardsWidgetText(5, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_1)) {
-        cFEStateRewardsRoom_setRewardsWidgetText(self, 3, (cUIText*)w);
+        self->setRewardsWidgetText(3, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_2)) {
-        cFEStateRewardsRoom_setRewardsWidgetText(self, 7, (cUIText*)w);
+        self->setRewardsWidgetText(7, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_3)) {
-        cFEStateRewardsRoom_setRewardsWidgetText(self, 4, (cUIText*)w);
+        self->setRewardsWidgetText(4, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_4)) {
-        cFEStateRewardsRoom_setRewardsWidgetText(self, 8, (cUIText*)w);
+        self->setRewardsWidgetText(8, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_5)) {
-        cFEStateRewardsRoom_setRewardsWidgetText(self, 6, (cUIText*)w);
+        self->setRewardsWidgetText(6, (cUIText*)w);
     }
 }
 #endif
@@ -681,12 +680,12 @@ extern char str_pct_d_pct_d[];
  * @param index  the reward kind
  * @param text  the text to set
  */
-extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(cFEStateRewardsRoom* self, int index, cUIText* text)
+void cFEStateRewardsRoom::setRewardsWidgetText(int index, cUIText* text)
 {
     char buf[256];
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     int total = cBERewardInterface_getTotalNumRewards(iface, index);
-    int got = cBERewardInterface_getNumOwnedRewards(iface, self->mUserNum, self->mCharID, index);
+    int got = cBERewardInterface_getNumOwnedRewards(iface, mUserNum, mCharID, index);
     sprintf(buf, str_pct_d_pct_d, got, total);
     cUIText_setAsciiString(text, buf);
 }
@@ -914,7 +913,7 @@ extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int engine, int memCard
     self->mRemovePDA = 0;
     *(unsigned short*)self->mszChatBuff = str_sp[0];
     VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
-    cFEMemCard_initFEMemCard(self, memCardType);
+    self->initFEMemCard(memCardType);
     return ((void*)self);
 }
 #endif
@@ -939,18 +938,18 @@ extern unsigned short str_sp[];
  * @param iType  what the screen is for (On Tour iType)
  * @return @p self
  */
-extern "C" void* cFEMemCard_cFEMemCard2(cFEMemCard* self, int pEngine, int iType)
+void* cFEMemCard::cFEMemCard2(int pEngine, int iType)
 {
-    cUIState_cUIState(self);
-    self->mOVID = 0;
-    VPTR_OF(cListNode, self) = cOVState_vtbl;
-    self->mDoneTransition = 0;
-    self->mAllowPauseMenu = 0;
-    self->mRemovePDA = 0;
-    *(unsigned short*)self->mszChatBuff = str_sp[0];
-    VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
-    cFEMemCard_initFEMemCard(self, iType);
-    return ((void*)self);
+    cUIState_cUIState(this);
+    mOVID = 0;
+    VPTR_OF(cListNode, this) = cOVState_vtbl;
+    mDoneTransition = 0;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
+    *(unsigned short*)mszChatBuff = str_sp[0];
+    VPTR_OF(cListNode, this) = cFEMemCard_vtbl;
+    initFEMemCard(iType);
+    return ((void*)this);
 }
 #endif
 
@@ -1087,15 +1086,14 @@ extern char cFEMemCard_callbackCardChanged_a5488[] __asm__("cFEMemCard_callbackC
  * cBESaveInterface_getSaveProfileSize bytes, file type 1 ("GAM"). Last it builds the 16-bit file-name wildcard
  * "<product code>-<type>*" ("%s-%s*" with cMCOverlayManager_getProductCode and cMCOverlayManager_getFileName for mFileType) at +0x11C.
  *
- * @param self_  the memory-card screen (this)
  * @param mode  the save kind: 0 profile, 1 replay, 2 settings (On Tour iType)
  */
-extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
+void cFEMemCard::initFEMemCard(int mode)
 {
     void* gapp = SSXApp;
-    cFEMemCard_mInstance = self_;
-    self_->mState = 0;
-    self_->mScreenStatus = 0;
+    cFEMemCard_mInstance = this;
+    mState = 0;
+    mScreenStatus = 0;
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(gapp);
     app->callbackWriteStart = (void (*)())cFEMemCard_writeStart_a5488;
     app->callbackReadStart = (void (*)())cFEMemCard_readStart_a5488;
@@ -1137,51 +1135,51 @@ extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
     app->callbackConfirmNoFreeBlocks = (void (*)())cFEMemCard_callbackConfirmNoFreeBlocks_a5488;
     app->callbackFileExists = (void (*)())cFEMemCard_callbackFileExists_a5488;
     app->callbackCardChanged = (void (*)())cFEMemCard_callbackCardChanged_a5488;
-    self_->mPopupType = 25;
-    self_->mType = mode;
-    self_->mIsProcessing = 0;
-    self_->mIsDone = 0;
-    self_->mIsLoadWait = 0;
-    self_->mIsLoadDoneOK = 0;
-    self_->mIsInvalidConfirmed = 0;
-    self_->mSlot = 0;
-    self_->mPlayerIdx = 0;
-    self_->mIsManagerStarted = 0;
-    self_->mIsSavePressed = 0;
-    self_->mIsDeletePressed = 0;
-    self_->mIsCancelPressed = 0;
-    self_->mIsFormatPressed = 0;
-    self_->mIsRetryPressed = 0;
-    self_->mIsOverwriteOK = 0;
-    self_->mIsLoadPressed = 0;
-    self_->mDoNextMemCard = 0;
-    self_->mDoPrevMemCard = 0;
-    self_->mLoadBEData = 0;
-    self_->mAutoLoadOn = 0;
-    self_->mAutoSaveOn = 0;
-    self_->mFirstCheck = 0;
-    self_->mIsStatusPopupOn = 0;
-    self_->mStatusPopup = 0;
-    self_->mLastSelectedDevice = 0;
-    self_->mProcessingKeyboard = 0;
-    self_->mpKeyboard = 0;
-    self_->mDeleteButtonActive = 0;
-    self_->mMainButtonActive = 0;
-    self_->mBufferState = 0;
-    self_->mpStartReadBuffer = 0;
-    self_->mpReadBuffer = 0;
-    self_->mIsReplayAlloc = 0;
-    *(short*)&self_->mLastLoadFileName[0] = 0;
+    mPopupType = 25;
+    mType = mode;
+    mIsProcessing = 0;
+    mIsDone = 0;
+    mIsLoadWait = 0;
+    mIsLoadDoneOK = 0;
+    mIsInvalidConfirmed = 0;
+    mSlot = 0;
+    mPlayerIdx = 0;
+    mIsManagerStarted = 0;
+    mIsSavePressed = 0;
+    mIsDeletePressed = 0;
+    mIsCancelPressed = 0;
+    mIsFormatPressed = 0;
+    mIsRetryPressed = 0;
+    mIsOverwriteOK = 0;
+    mIsLoadPressed = 0;
+    mDoNextMemCard = 0;
+    mDoPrevMemCard = 0;
+    mLoadBEData = 0;
+    mAutoLoadOn = 0;
+    mAutoSaveOn = 0;
+    mFirstCheck = 0;
+    mIsStatusPopupOn = 0;
+    mStatusPopup = 0;
+    mLastSelectedDevice = 0;
+    mProcessingKeyboard = 0;
+    mpKeyboard = 0;
+    mDeleteButtonActive = 0;
+    mMainButtonActive = 0;
+    mBufferState = 0;
+    mpStartReadBuffer = 0;
+    mpReadBuffer = 0;
+    mIsReplayAlloc = 0;
+    *(short*)&mLastLoadFileName[0] = 0;
     cMCOverlayManager_ManagerGainState(app);
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    if (self_->mType == 2)
+    if (mType == 2)
     {
         int n = cBESaveInterface_getSaveGameSize_r();
         cMCOverlayManager_writeSetSize_2(app, n);
         cMCOverlayManager_readSetSize(app, n);
         cMCOverlayManager_readSetFileType(app, 2);
     }
-    else if (self_->mType == 1)
+    else if (mType == 1)
     {
         cMCOverlayManager_writeSetSize_2(app, 0x80000);
         cMCOverlayManager_readSetSize(app, 0x80000);
@@ -1200,7 +1198,7 @@ extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
     cMCOverlayManager_getFileName(app, app->mFileType, saveType, 0x100);
     func_002C2540(format, str_pct_s_pct_s_c);
     cMCOverlayManager_getProductCode(productCode, 0x100);
-    sprintf1(&self_->mFileName[0], format, productCode, saveType);
+    sprintf1(&mFileName[0], format, productCode, saveType);
 }
 #endif
 

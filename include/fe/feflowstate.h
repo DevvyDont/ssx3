@@ -14,6 +14,10 @@ struct cFEFlowState {
     char mNumStates;                // 0x000 [O]
     char unk_001[0x3];              // 0x001 padding
     char* mpValues;                 // 0x004 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    signed char getValue(int index) __asm__("cFEFlowState_getValue");
+    void setValue(int index, int value) __asm__("cFEFlowState_setValue");
 };
 
 CHECK_OFFSET(cFEFlowState, mNumStates, 0x000);

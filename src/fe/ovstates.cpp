@@ -221,14 +221,14 @@ extern void* cFEStateMainMenu_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(cFEStateMainMenu* self)
+void* cFEStateMainMenu::cFEStateMainMenu1()
 {
-    cUIState_cUIState(self);
-    self->mHashName = 2;
-    VPTR_OF(cListNode, self) = cFEStateMainMenu_vtbl;
-    self->mGoToNextState = 0;
-    self->mpSelectMultiModeWidget = 0;
-    return ((void*)self);
+    cUIState_cUIState(this);
+    mHashName = 2;
+    VPTR_OF(cListNode, this) = cFEStateMainMenu_vtbl;
+    mGoToNextState = 0;
+    mpSelectMultiModeWidget = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -679,12 +679,12 @@ extern char cFEStateBonusMaterial_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(cFEStateBonusMaterial* self)
+void* cFEStateBonusMaterial::cFEStateBonusMaterial1()
 {
-    cUIState_cUIState(self);
-    VPTR_OF(cListNode, self) = (void**)cFEStateBonusMaterial_vtbl;
-    self->mHashName = 5;
-    return ((void*)self);
+    cUIState_cUIState(this);
+    VPTR_OF(cListNode, this) = (void**)cFEStateBonusMaterial_vtbl;
+    mHashName = 5;
+    return ((void*)this);
 }
 #endif
 

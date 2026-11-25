@@ -52,7 +52,7 @@ public:
  *
  * @param screen  the screen holding the keyboard (On Tour mpScreen)
  */
-extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScreen* screen)
+void cScreenKeyboard::initScreenKeyboard(cUIScreen* screen)
 {
     cUIObjK180B60* textObj;
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrLeft));
@@ -88,11 +88,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScr
     ch[0] = 'A';
     for (int i = 0; i < 26; i++)
     {
-        cScreenKeyboard_getKeyObjName(((char*)self), i + 10, name);
+        cScreenKeyboard_getKeyObjName(((char*)this), i + 10, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
-        cScreenKeyboard_getCursorObjName(((char*)self), i + 10, name);
+        cScreenKeyboard_getCursorObjName(((char*)this), i + 10, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
@@ -101,11 +101,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScr
     ch[0] = '0';
     for (int j = 0; j < 10; j++)
     {
-        cScreenKeyboard_getKeyObjName(((char*)self), j, name);
+        cScreenKeyboard_getKeyObjName(((char*)this), j, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
-        cScreenKeyboard_getCursorObjName(((char*)self), j, name);
+        cScreenKeyboard_getCursorObjName(((char*)this), j, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
@@ -114,10 +114,10 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScr
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_A));
     if (textObj != 0)
         textObj->setVisible(1);
-    cScreenKeyboard_setInputText(((char*)self), str_mypro1);
+    cScreenKeyboard_setInputText(((char*)this), str_mypro1);
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
     if (textObj != 0)
-        cUIText_setAsciiString((cUIText*)textObj, self->mHiScoreName);
+        cUIText_setAsciiString((cUIText*)textObj, mHiScoreName);
 }
 #endif
 

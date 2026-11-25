@@ -70,6 +70,10 @@ struct cFEStateAudioOptions : public cFEState {
                                     //       [U] onWidgetCreate / onWidgetEvent: the selected mode
     int mCreatedRequestList;        // 0x07C [O] (bool); [R] cBERewardInterface_getNumSongsInPlayList(..) > 0; [U]
                                     //       onGainFocus / onGainTransition / onWidgetEvent / onWidgetMenu test it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateAudioOptions1() __asm__("cFEStateAudioOptions_cFEStateAudioOptions1");
+    int isInStore() __asm__("cFEStateAudioOptions_isInStore");
 };
 
 CHECK_OFFSET(cFEStateAudioOptions, mpHelpText, 0x048);

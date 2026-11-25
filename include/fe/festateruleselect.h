@@ -25,6 +25,14 @@ struct cFEStateRuleSelect : public cUIState {
     char mcArraySize;                // 0x050 [O]
     char mcRuleConflictRefTable[15]; // 0x051 [O]
     cUIPair* mpMenuItemTable[15];    // 0x060 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRuleSelect1() __asm__("cFEStateRuleSelect_cFEStateRuleSelect1");
+    void setupMenu(signed char first) __asm__("cFEStateRuleSelect_setupMenu");
+    void updateBE(int idx, int ruleValue) __asm__("cFEStateRuleSelect_updateBE");
+    int getBEData(int rule) __asm__("cFEStateRuleSelect_getBEData");
+    void checkConflictForMenu(cUIListBox* item) __asm__("cFEStateRuleSelect_checkConflictForMenu");
+    void updateMenuColor() __asm__("cFEStateRuleSelect_updateMenuColor");
 };
 
 CHECK_OFFSET(cFEStateRuleSelect, mpGameEventMapping, 0x048);
@@ -58,6 +66,13 @@ struct cBraggingRightsMenu {
     int mcItemEnableFlag;           // 0x02C [O]; [R] 0; [U] setEnableFlag stores it, isItemEnable / setEnableItem test its
                                     //       bits
     void** mVtbl;                   // 0x030 [R] cBraggingRightsMenu_vtbl (ctor); the dtor cBraggingRightsMenu__cBraggingRightsMenu stores it again
+
+    // Methods bound to their retail symbols by asm labels.
+    void setConfirmed(int enabled) __asm__("cBraggingRightsMenu_setConfirmed");
+    void setMenuItemColor() __asm__("cBraggingRightsMenu_setMenuItemColor");
+    int findListBoxP(cUIListBox* val) __asm__("cBraggingRightsMenu_findListBoxP");
+    int isItemEnable(int itemIndex) __asm__("cBraggingRightsMenu_isItemEnable");
+    void setEnableFlag(int val) __asm__("cBraggingRightsMenu_setEnableFlag__FPvi");
 };
 
 CHECK_OFFSET(cBraggingRightsMenu, mpPlayerMenu, 0x000);
@@ -110,6 +125,11 @@ struct cFEStateBraggingRights : public cFEStateNet {
     char* mpGameEventMapping;       // 0x738 [O]; [R] 0; [U] onCreateScreen picks one of six rule-id byte tables
                                     //       (D_004A1710 ... D_004A1738) by game mode; onCreateScreen / onWidgetEvent /
                                     //       func_001941B0 read rule ids from it (lb; EE char is signed)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateBraggingRights1() __asm__("cFEStateBraggingRights_cFEStateBraggingRights1");
+    void updateBE(int player, int which, int value) __asm__("cFEStateBraggingRights_updateBE");
+    void updateConfirmedState() __asm__("cFEStateBraggingRights_updateConfirmedState");
 };
 
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);

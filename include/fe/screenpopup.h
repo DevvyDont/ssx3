@@ -40,6 +40,11 @@ struct cKeyboardPopup;
 // One option's confirmation request (On Tour: tConfirmElement, 0xC bytes, a tPopupElement + iDefaultOption).
 // tConfirmElement: fe/popupinfo.h
 
+struct cPopupInfo;
+struct cUIThing;
+struct t3Vector;
+struct tRect;
+
 struct cScreenPopup : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cScreenPopup vtable cScreenPopup_vtbl
@@ -127,6 +132,60 @@ struct cScreenPopup : public cUIState {
     tARGB mtUnhighlightColor;       // 0x33C [O]; [U] the other entries
     tARGB mtIndicatorColor;         // 0x34C [O]; no retail access seen (placed by the 0x360 size)
     float mfIndicatorAlpha;         // 0x35C [O]; no retail access seen (placed by the 0x360 size)
+
+    // Methods bound to their retail symbols by asm labels.
+    void redrawPopup() __asm__("cScreenPopup_redrawPopup");
+    void SetTextObjectsVisibility(int visible) __asm__("cScreenPopup_SetTextObjectsVisibility");
+    void SetTextObjectsAlpha(float fAlpha) __asm__("cScreenPopup_SetTextObjectsAlpha");
+    void FillObjectPointers() __asm__("cScreenPopup_FillObjectPointers");
+    void initScreenPopup(cPopupInfo* info) __asm__("cScreenPopup_initScreenPopup");
+    int handleEntryBox(cPopupInfo* infop) __asm__("cScreenPopup_handleEntryBox");
+    void handlePostPending(cPopupInfo* pInfo) __asm__("cScreenPopup_handlePostPending");
+    void setTextObjectSize(t3Vector* vp) __asm__("cScreenPopup_setTextObjectSize");
+    void setPopupMessage(cPopupInfo* pInfo) __asm__("cScreenPopup_setPopupMessage");
+    void FillOptions(cPopupInfo* infop) __asm__("cScreenPopup_FillOptions");
+    void setPrivateDefaultOption(cUIMenu* menu, int idx, int max) __asm__("cScreenPopup_setPrivateDefaultOption");
+    void scaleBackground(t3Vector* color) __asm__("cScreenPopup_scaleBackground");
+    float centerOffset() __asm__("cScreenPopup_centerOffset");
+    void centerPopup() __asm__("cScreenPopup_centerPopup");
+    void FillTextEntryBox() __asm__("cScreenPopup_FillTextEntryBox");
+    void setTextString2(cUIText* text, int* info) __asm__("cScreenPopup_setTextString2");
+    void setTextString1(void* dst, int* info) __asm__("cScreenPopup_setTextString1");
+    void setTextString(void* dst, cUIText* text) __asm__("cScreenPopup_setTextString");
+    void getStringSize(cUIText* text, int* info, float* out) __asm__("cScreenPopup_getStringSize");
+    void getStringSize1(cUIText* text, const char* str, tRect* out) __asm__("cScreenPopup_getStringSize1");
+    void getStringSize2(cUIText* text, const char* str, tRect* out) __asm__("cScreenPopup_getStringSize2");
+    void getStringSize3(void* obj, tRect* out) __asm__("cScreenPopup_getStringSize3");
+    void createTitleBar(cPopupInfo* pInfo) __asm__("cScreenPopup_createTitleBar");
+    void adjustMenuPosition() __asm__("cScreenPopup_adjustMenuPosition");
+    void adjustButtonPosition() __asm__("cScreenPopup_adjustButtonPosition");
+    void changePivot(cUIThing* obj, unsigned char state, float fOffset) __asm__("cScreenPopup_changePivot");
+    void restoreElements() __asm__("cScreenPopup_restoreElements");
+    void getTextBoxSize(int* item, float* size, int flag, float extra) __asm__("cScreenPopup_getTextBoxSize");
+    void getTextBoxSize1(void* text, unsigned short* str, float* size) __asm__("cScreenPopup_getTextBoxSize1");
+    void getTextBoxSize2(cUIText* text, const char* str, int sizePtr) __asm__("cScreenPopup_getTextBoxSize2");
+    void getMessageLineWrapSize1(int* msg, t3Vector* out) __asm__("cScreenPopup_getMessageLineWrapSize1");
+    void getMessageLineWrapSize2(cUIText* text, void* strp, t3Vector* outp)
+        __asm__("cScreenPopup_getMessageLineWrapSize2");
+    void getMessageLineWrapSize(cUIText* pText, const char* pString, t3Vector* pvSize)
+        __asm__("cScreenPopup_getMessageLineWrapSize");
+    void getTextBoxWrapSize(void* ptElement, void* vSize, int which, float bMessage)
+        __asm__("cScreenPopup_getTextBoxWrapSize");
+    void getTextBoxWrapSize1(cUIText* text, void* strp, float* out) __asm__("cScreenPopup_getTextBoxWrapSize1");
+    void getTextBoxWrapSize2(cUIText* text, const char* str, int sizePtr) __asm__("cScreenPopup_getTextBoxWrapSize2");
+    void increaseBoxSize(float* size, float* item) __asm__("cScreenPopup_increaseBoxSize");
+    void createConfirmationPopup(int idx) __asm__("cScreenPopup_createConfirmationPopup");
+    void adjustLayer(int layerOffset) __asm__("cScreenPopup_adjustLayer");
+    void setStatic(int idx, int bStatic) __asm__("cScreenPopup_setStatic");
+    int getCurrentlySelected() __asm__("cScreenPopup_getCurrentlySelected");
+    void hideWidgetSafe(cUIThing* obj) __asm__("cScreenPopup_hideWidgetSafe");
+    void showWidgetSafe(cUIThing* obj) __asm__("cScreenPopup_showWidgetSafe");
+    void checkAndFixTextEntry(cUIText* text, const char* str) __asm__("cScreenPopup_checkAndFixTextEntry");
+    cScreenPopup * cScreenPopup1() __asm__("cScreenPopup_cScreenPopup1");
+    void setPassUpdate(int passUpdate) __asm__("cScreenPopup_setPassUpdate");
+    int getPassUpdate() __asm__("cScreenPopup_getPassUpdate");
+    int getEntryBoxText() __asm__("cScreenPopup_getEntryBoxText");
+    int isShowing() __asm__("cScreenPopup_isShowing");
 };
 
 CHECK_OFFSET(cScreenPopup, mpBackGroundWhite, 0x48);

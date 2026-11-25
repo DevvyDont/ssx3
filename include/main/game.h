@@ -56,6 +56,10 @@ struct cMenuSys;
 struct cBigFile;
 struct cGameState;
 
+struct FrustumIntersector;
+
+struct cBxReplayFrame;
+
 struct cGame {
     void** mVtbl;                                // 0x000 [R] _vt$5cGame, stored after the base ctor cFadeScreen_cFadeScreen
     int unk_04;                                  // 0x004 base class data
@@ -128,6 +132,81 @@ struct cGame {
     int mBoxTextureID;                           // 0x220 [O]; [R] cGame_load loads a texture from data/fonts/menu.ssh
     int ControllerUnplugged;                     // 0x224 [P] getControllerUnplugged
     int PauseOwner;                              // 0x228 [O]; [R] the constructor sets it to -1
+
+    // Methods bound to their retail symbols by asm labels.
+    void renderModels(FrustumIntersector* world) __asm__("cGame_renderModels");
+    void renderPatches(FrustumIntersector* world) __asm__("cGame_renderPatches");
+    void renderFogVolumes(FrustumIntersector* world) __asm__("cGame_renderFogVolumes");
+    void renderLightHalos(FrustumIntersector* world, int ViewID) __asm__("cGame_renderLightHalos");
+    void load() __asm__("cGame_load");
+    void loadTrack() __asm__("cGame_loadTrack");
+    void purge() __asm__("cGame_purge");
+    void gainFocus() __asm__("cGame_gainFocus");
+    void resetWorld() __asm__("cGame_resetWorld");
+    void partialRestart() __asm__("cGame_partialRestart");
+    void restart() __asm__("cGame_restart");
+    void sectionLoaded() __asm__("cGame_sectionLoaded");
+    void sectionUnloading(int id) __asm__("cGame_sectionUnloading");
+    void loadWScriptManSection(int sectionId) __asm__("cGame_loadWScriptManSection");
+    void exit(int toFrontEnd) __asm__("cGame_exit");
+    void startReplay() __asm__("cGame_startReplay");
+    void stopReplay() __asm__("cGame_stopReplay");
+    int getTransitionMan(int i) __asm__("cGame_getTransitionMan__FPvi");
+    int getSplashManager(int i) __asm__("cGame_getSplashManager__FPvi");
+    void update() __asm__("cGame_update");
+    int loseFocus() __asm__("cGame_loseFocus");
+    void updateState() __asm__("cGame_updateState");
+    void setState(int iNextState, int startupFlag, int refresh) __asm__("cGame_setState");
+    void setPreloadState(int val) __asm__("cGame_setPreloadState__FPvi");
+    void cancelPreloadingState() __asm__("cGame_cancelPreloadingState");
+    int isPreloadedStateReady() __asm__("cGame_isPreloadedStateReady");
+    void doNextState() __asm__("cGame_doNextState");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGame_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGame_readFromReplayFrame");
+    int activatePauseMenu() __asm__("cGame_activatePauseMenu");
+    int canUserActivatePauseMenu() __asm__("cGame_canUserActivatePauseMenu");
+    int render() __asm__("cGame_render");
+    int getCurrentState() __asm__("cGame_getCurrentState");
+    int getPreviousState() __asm__("cGame_getPreviousState");
+    int getCurrentStateInstance() __asm__("cGame_getCurrentStateInstance");
+    int getNash() __asm__("cGame_getNash");
+    int getWorld() __asm__("cGame_getWorld");
+    int getDebugFont() __asm__("cGame_getDebugFont");
+    int getMenuSys() __asm__("cGame_getMenuSys");
+    int getAI() __asm__("cGame_getAI");
+    int getUI() __asm__("cGame_getUI");
+    int getReplay() __asm__("cGame_getReplay");
+    int getFXLoader() __asm__("cGame_getFXLoader");
+    int getSurfPropCache() __asm__("cGame_getSurfPropCache");
+    int getWorldSound() __asm__("cGame_getWorldSound");
+    int getAIVisualEffectsObjNode() __asm__("cGame_getAIVisualEffectsObjNode");
+    int getVisualEffectsObjNode() __asm__("cGame_getVisualEffectsObjNode");
+    int getCutSceneTransitionman() __asm__("cGame_getCutSceneTransitionman");
+    int getFlagManager() __asm__("cGame_getFlagManager");
+    int getSnowFall() __asm__("cGame_getSnowFall");
+    int getPlaybackMan() __asm__("cGame_getPlaybackMan");
+    int getSectionMan() __asm__("cGame_getSectionMan");
+    int getInputSync() __asm__("cGame_getInputSync");
+    int getSkyBox() __asm__("cGame_getSkyBox");
+    int getCrowdMan2d() __asm__("cGame_getCrowdMan2d");
+    int getCrowdMan3d() __asm__("cGame_getCrowdMan3d");
+    int getMultiParticleMan() __asm__("cGame_getMultiParticleMan");
+    int getInstanceMan() __asm__("cGame_getInstanceMan");
+    int getOcclusionMan() __asm__("cGame_getOcclusionMan");
+    int getWorldLightMan() __asm__("cGame_getWorldLightMan");
+    int getLoadIndicator() __asm__("cGame_getLoadIndicator");
+    int getControllerUnplugged() __asm__("cGame_getControllerUnplugged");
+    int getViewMan() __asm__("cGame_getViewMan");
+    int getGameView(int index) __asm__("cGame_getGameView");
+    int getNumGameView() __asm__("cGame_getNumGameView");
+    int getCurrentRenderView() __asm__("cGame_getCurrentRenderView");
+    int getCurrentRenderViewNum() __asm__("cGame_getCurrentRenderViewNum");
+    int updateStreamFocus() __asm__("cGame_updateStreamFocus");
+    int updateStreamLoading() __asm__("cGame_updateStreamLoading");
+    bool updateUI() __asm__("cGame_updateUI");
+    void updateAI() __asm__("cGame_updateAI");
+    int updateScreenFade() __asm__("cGame_updateScreenFade");
+    void updateVibration() __asm__("cGame_updateVibration");
 };
 
 CHECK_OFFSET(cGame, AI, 0x0C);

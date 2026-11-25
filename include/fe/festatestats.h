@@ -53,6 +53,9 @@ struct cFEStateStats : public cFEStateNet {
                                     //       func_001C3310 shows rows miFirstResult..+9, func_001C4B78 resets it
     int mbShowTime;                 // 0x6EC [R] 1 (cFEStateStats_cFEStateStats); [U] func_001C3EE8 sets it for mode 1, clears it for 0 and 2;
                                     //       func_001C3310 prints the score as a time (func_001C4F58) when set, else as points
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateStats1() __asm__("cFEStateStats_cFEStateStats1");
 };
 
 CHECK_OFFSET(cFEStateStats, mpMenus, 0x6D0);

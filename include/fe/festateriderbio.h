@@ -20,6 +20,15 @@ struct cFEStateRiderBio : public cUIState {
     // --- cFEStateRiderBio
     int mCharID;                    // 0x048 [O]
     int mScreen;                    // 0x04C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRiderBio1() __asm__("cFEStateRiderBio_cFEStateRiderBio1");
+    void setupBioScreen() __asm__("cFEStateRiderBio_setupBioScreen");
+    void setupCharPics() __asm__("cFEStateRiderBio_setupCharPics");
+    void fillDNAInfo() __asm__("cFEStateRiderBio_fillDNAInfo");
+    void fillFavesInfo() __asm__("cFEStateRiderBio_fillFavesInfo");
+    void fillQnAInfo() __asm__("cFEStateRiderBio_fillQnAInfo");
+    void fillBioInfo() __asm__("cFEStateRiderBio_fillBioInfo");
 };
 
 CHECK_OFFSET(cFEStateRiderBio, mCharID, 0x048);

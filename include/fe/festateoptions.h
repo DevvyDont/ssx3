@@ -53,6 +53,11 @@ struct cFEStateOptionsController : public cFEState {
                                     //       buzzing
                                     //       (onWidgetEvent sets, onUpdate clears)
     char unk_051[0x3];              // 0x051 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateWidget() __asm__("cFEStateOptionsController_updateWidget");
+    void displayPadConfig(int on) __asm__("cFEStateOptionsController_displayPadConfig");
+    void vibratePad(int idx, float x, float y) __asm__("cFEStateOptionsController_vibratePad");
 };
 
 CHECK_OFFSET(cFEStateOptionsController, mTimer, 0x048);
@@ -119,6 +124,10 @@ struct cFEStateOptionsDeviceSelect : public cFEMemCard {
     int mIsHidden;                  // 0x234 [O] (bool); [R] 0; [U] hideActionButtons compares and stores the new state
     int mbChoseToSave;              // 0x238 [O] (bool); [R] 0; [U] onWidgetEvent sets it on a slot pick (event 5),
                                     //       clears it on back (event 6)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateOptionsDeviceSelect1(int engine, int cardMode, int isSave, int isOnline)
+        __asm__("cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1");
 };
 
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsSaveScreen, 0x22C);
@@ -171,6 +180,9 @@ struct cFEStateOptions : public cFEState {
     cKeyboardPopup* mpKeyboard;     // 0x050 [O] (On Tour 0x4C); [U] onWidgetEvent: entry "6" allocates the
                                     //       cKeyboardPopup (0x444, "cKeyboardPopup") into it and pushes it as a popup;
                                     //       event 13 (keyboard done) reads its text (+0x74) and clears it
+
+    // Methods bound to their retail symbols by asm labels.
+    void saveOptionPrompt() __asm__("cFEStateOptions_saveOptionPrompt");
 };
 
 CHECK_OFFSET(cFEStateOptions, mbToSaveOptionScreen, 0x048);
@@ -213,6 +225,9 @@ struct cFEStateOptionsSaveLoad : public cFEState {
                                     //       sb 0; [U] onWidgetEvent stores mCurrentCtrl before the "new game"
                                     //       popup; onPopupEvent's yes pushes the state for (1 << it) | 0x100 (lb)
     char unk_049[0x3];              // 0x049 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateOptionsSaveLoad1() __asm__("cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1");
 };
 
 CHECK_OFFSET(cFEStateOptionsSaveLoad, mSaveLoadCurrentCtrl, 0x048);

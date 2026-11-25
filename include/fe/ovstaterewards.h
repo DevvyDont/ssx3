@@ -39,6 +39,9 @@ struct cOVState_REWARDS : public cOVState {
                                     //       checkRewardList(self, 0, -1) stores the count; onCreateScreen /
                                     //       updateMenu / onWidgetMenu compare it with the visible rows (one lbu
                                     //       passes its low byte to cUIMenu_setScrollableMenu)
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateMenu(int base) __asm__("cOVState_REWARDS_updateMenu");
 };
 
 CHECK_OFFSET(cOVState_REWARDS, mItemSize, 0x9C);

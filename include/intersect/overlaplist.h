@@ -26,6 +26,11 @@ struct tInstanceRecord;
 struct tPatchRecord;
 struct cTypedSpaceNode;
 
+struct cWorldIntersectType;
+struct t4Vector;
+struct tBoundBox;
+struct tIntersectInfo;
+
 struct cOverlapList {
     cBXNash* nash;                  // 0x000 [O]; [R] ctor = the game's Nash (cRider_cRider) / the light manager's
                                     //       m_pNash (initLightCache); [U] the get* walk its octants;
@@ -41,6 +46,19 @@ struct cOverlapList {
     unsigned int numtyped;          // 0x210 [O]; [R] ctor -1; [U] gettyped / geteverything count into it (max 512);
                                     //       splineIntersect walks it; the other get* set -1
     cTypedSpaceNode* typed[512];    // 0x214 [O]; [U] gettyped / geteverything fill it; splineIntersect reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    void getinstances(tBoundBox* box) __asm__("cOverlapList_getinstances");
+    void gettyped(tBoundBox* box) __asm__("cOverlapList_gettyped");
+    void getpatchesandinstances(tBoundBox* box) __asm__("cOverlapList_getpatchesandinstances");
+    void geteverything(tBoundBox* box) __asm__("cOverlapList_geteverything");
+    int terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int hitCache)
+        __asm__("cOverlapList_terrainIntersect");
+    float terrainIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int hitCache)
+        __asm__("cOverlapList_terrainIntersect1");
+    int staticObjectIntersect(cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
+        __asm__("cOverlapList_staticObjectIntersect");
+    int splineIntersect(t4Vector* pos, int intInfo, int mask, float testRadius) __asm__("cOverlapList_splineIntersect");
 };
 
 CHECK_OFFSET(cOverlapList, nash, 0x000);
@@ -60,11 +78,16 @@ CHECK_SIZE(cOverlapList, 0xA14);
 // ([P] assert "number < maximum", d:/ssx/code/source/intersect/overlaplist.cpp). Reference members are pointers here.
 struct tBoundBox;               // world/worldview.h
 
+struct nash_Cell;
+
 struct OverlapInstancesCallback {
     tInstanceRecord** instances;    // 0x0 [O]; [U] the output array (view sCtx_3309D8 list)
     unsigned int* number;           // 0x4 [O] unsigned int&; [P] assert number < maximum; [U] the count
     unsigned int maximum;           // 0x8 [O]; [P] ditto
     const tBoundBox* box;           // 0xC [O] const tBoundBox&; [U] the overlap test (view sCtx_3309D8 box)
+
+    // Methods bound to their retail symbols by asm labels.
+    void operatorCall(nash_Cell* tree) __asm__("OverlapInstancesCallback_operatorCall");
 };
 
 CHECK_OFFSET(OverlapInstancesCallback, instances, 0x0);

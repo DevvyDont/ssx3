@@ -276,24 +276,24 @@ extern char str_No_users_in_room[];
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void RoomMenu_updateusers(RoomMenu* self, LobbyMan* src)
+void RoomMenu::updateusers(LobbyMan* src)
 {
     int i = 0;
     int n = func_0025F1B0(src);
     for (; i < n; i++) {
-        cCommandMenuItem* it = &((&self->mUserItems[0]))[i];
+        cCommandMenuItem* it = &((&mUserItems[0]))[i];
         (*(void**)&it->Caption) = func_0025F1E0(src, i, 0);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     if (i == 0) {
-        (*(void**)&((&self->mUserItems[0]))[0].Caption) = str_No_users_in_room;
+        (*(void**)&((&mUserItems[0]))[0].Caption) = str_No_users_in_room;
         i = 1;
-        cMenuItem_activate(&((&self->mUserItems[0]))[0], 1);
-        ((&self->mUserItems[0]))[0].ID = -1;
+        cMenuItem_activate(&((&mUserItems[0]))[0], 1);
+        ((&mUserItems[0]))[0].ID = -1;
     }
     for (; i < 24; i++) {
-        cMenuItem_activate(&((&self->mUserItems[0]))[i], 0);
+        cMenuItem_activate(&((&mUserItems[0]))[i], 0);
     }
 }
 #endif
@@ -519,11 +519,11 @@ extern "C" void func_0017E558(int);
  * It is the onCommand slot of the Abort menu's vtable AbortMenu_vtbl. func_0017E558 pushes the Room Occupants menu, sets
  * the debug front end's state to 0xC and calls func_0025F628 on the lobby manager.
  *
- * @param menu  the Abort menu; the debug front end is at +0x130
  * @return 0
  */
-extern "C" int AbortMenu_onCommand(AbortMenu* menu) {
-    func_0017E558(((int)menu->mScreen));
+int AbortMenu::onCommand()
+{
+    func_0017E558(((int)mScreen));
     return 0;
 }
 #endif
@@ -541,18 +541,18 @@ extern "C" void func_0017E4F0(int);
  * (Accept) calls func_0017E490 with the owner at +0x130, which answers the challenge through func_0025FB58; ID 1
  * (Decline) calls func_0017E4F0 with the owner at +0x134, which declines through func_0025FC28.
  *
- * @param menu  the challenge menu
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int ChallengeResponseMenu_onCommand(ChallengeResponseMenu* menu, cMenuItem* item) {
+int ChallengeResponseMenu::onCommand(cMenuItem* item)
+{
     int temp_3;
 
     temp_3 = item->ID;
     if (temp_3 == 0) {
-        func_0017E490(((int)menu->mAcceptScreen));
+        func_0017E490(((int)mAcceptScreen));
     } else if (temp_3 == 1) {
-        func_0017E4F0(((int)menu->mDeclineScreen));
+        func_0017E4F0(((int)mDeclineScreen));
     }
     return 0;
 }
@@ -570,12 +570,12 @@ extern "C" void func_0017E418(int, int);
  * (+0x14, one of the canned lines in D_00467D70) to func_0017E418 with the debug front end at +0x130, which returns to
  * the Room Occupants menu and sends the text with func_0025AAE0 ("mesg").
  *
- * @param menu  the chat menu
  * @param item  the chosen command item
  * @return 0
  */
-extern "C" int ChatMenu_onCommand(ChatMenu* menu, cCommandMenuItem* item) {
-    func_0017E418(((int)menu->mScreen), ((int)item->Caption));
+int ChatMenu::onCommand(cCommandMenuItem* item)
+{
+    func_0017E418(((int)mScreen), ((int)item->Caption));
     return 0;
 }
 #endif
@@ -594,16 +594,16 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
  * with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls func_0017E368 with the owner at
  * +0x130 and the occupant's index; the placeholder line (ID -1) does nothing.
  *
- * @param menu  the Room Occupants menu
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int RoomMenu_onCommand(RoomMenu* menu, cMenuItem* item) {
+int RoomMenu::onCommand(cMenuItem* item)
+{
     int itemValue = item->ID;
     if (itemValue == -2) {
-        func_0017E3B8_BB48((int)menu->mChatScreen);
+        func_0017E3B8_BB48((int)mChatScreen);
     } else if (itemValue != -1) {
-        func_0017E368_BB48((int)menu->mSelectUserScreen, itemValue);
+        func_0017E368_BB48((int)mSelectUserScreen, itemValue);
     }
     return 0;
 }
@@ -671,11 +671,11 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
  * end at +0x130 and the persona name buffer at +0x180 (the text-entry item at +0x168), which sets state 8 and calls
  * func_0025D1B8 on the lobby manager. It ignores which item was chosen.
  *
- * @param menu  the Create Persona menu
  * @return 0
  */
-extern "C" int CreatePersonaMenu_onCommand(CreatePersonaMenu* menu) {
-    func_0017E1C0_BBE8((int)menu->mScreen, &menu->mPersonaNameItem.Text[0]);
+int CreatePersonaMenu::onCommand()
+{
+    func_0017E1C0_BBE8((int)mScreen, &mPersonaNameItem.Text[0]);
     return 0;
 }
 #endif
@@ -692,12 +692,12 @@ extern "C" void func_0017E228(int, int);
  * end at +0x130 and the item's ID (the persona index set by DeletePersonaMenu_setpersonas), which sets state 9 and calls func_0025D428
  * on the lobby manager.
  *
- * @param menu  the Delete Persona menu
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int DeletePersonaMenu_onCommand(DeletePersonaMenu* menu, cMenuItem* item) {
-    func_0017E228(((int)menu->mScreen), item->ID);
+int DeletePersonaMenu::onCommand(cMenuItem* item)
+{
+    func_0017E228(((int)mScreen), item->ID);
     return 0;
 }
 #endif
@@ -719,8 +719,9 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
  *
  * @return 0
  */
-extern "C" int AccountDetailsMenu_onCommand(AccountDetailsMenu* self) {
-    func_0017E030_BC38((int)self->mScreen, (char*)&self->mLoginNameItem.Text[0], (char*)&self->mPasswordItem.Text[0]);
+int AccountDetailsMenu::onCommand()
+{
+    func_0017E030_BC38((int)mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -742,8 +743,9 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
  *
  * @return 0
  */
-extern "C" int AccountDetailsMenu_onCommand1(AccountDetailsMenu* self) {
-    func_0017E118_BC68((int)self->mScreen, (char*)&self->mLoginNameItem.Text[0], (char*)&self->mPasswordItem.Text[0]);
+int AccountDetailsMenu::onCommand1()
+{
+    func_0017E118_BC68((int)mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -1292,11 +1294,11 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_getFont);
 /**
  * Returns the word at +0x18 of the debug front end, the font cDebugMenuScreen_draw reads from SSXApp's DebugFE.
  *
- * @param self  the debug front end
  * @return the word at +0x18
  */
-extern "C" int cDebugFE_getFont(cDebugFE* self) {
-    return ((int)self->Font);
+int cDebugFE::getFont()
+{
+    return ((int)Font);
 }
 #endif
 
@@ -1306,11 +1308,11 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_getBoxTID);
 /**
  * Returns the word at +0x20 of the debug front end, 8 bytes after its font word (cDebugFE_getFont).
  *
- * @param debugFE  the debug front end
  * @return the word at +0x20
  */
-extern "C" int cDebugFE_getBoxTID(cDebugFE* debugFE) {
-    return (debugFE->BoxTID);
+int cDebugFE::getBoxTID()
+{
+    return (BoxTID);
 }
 #endif
 
@@ -1320,10 +1322,10 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_startlobby);
 /**
  * Copies the word at +0x10 of the debug front end into +0x14, the word just before its font (+0x18).
  *
- * @param debugFE  the debug front end
  */
-extern "C" void cDebugFE_startlobby(cDebugFE* debugFE) {
-    debugFE->ActiveScreen = (cDebugScreen*)((int) ((int)debugFE->Screens[1]));
+void cDebugFE::startlobby()
+{
+    ActiveScreen = (cDebugScreen*)((int) ((int)Screens[1]));
 }
 #endif
 
@@ -1630,11 +1632,11 @@ INCLUDE_ASM("main/all_in_one_main", cFE_getUI);
 /**
  * Returns the front end's UI engine, the pointer at +0xC.
  *
- * @param frontEnd  the front end (cFE)
  * @return the UI engine pointer cFE_cFE allocates ("UIEngine") and stores at +0xC
  */
-extern "C" int cFE_getUI(cFE* frontEnd) {
-    return ((int)frontEnd->mpUI);
+int cFE::getUI()
+{
+    return ((int)mpUI);
 }
 #endif
 
@@ -1739,13 +1741,13 @@ extern void* cFECustom_vtbl_CC60[] __asm__("cFECustom_vtbl");
  *
  * No other field is set. No caller in the code; it is an out-of-line copy of an inline constructor.
  *
- * @param feCustom  the object
  * @return @p feCustom
  */
-extern "C" void *cFECustom_cFECustom1(cFECustom* feCustom) {
-    feCustom->mpEngine = 0;
-    VPTR_OF(cUICustomInterface, feCustom) = cFECustom_vtbl_CC60;
-    return ((void*)feCustom);
+void * cFECustom::cFECustom1()
+{
+    mpEngine = 0;
+    VPTR_OF(cUICustomInterface, this) = cFECustom_vtbl_CC60;
+    return ((void*)this);
 }
 #endif
 
@@ -1784,11 +1786,11 @@ INCLUDE_ASM("main/all_in_one_main", cFECustom_setProfileLaunchScreen);
  *
  * No caller or vtable references it; it sits with the cFECustom helpers.
  *
- * @param self  the object
  * @param launchScreen  the value to store
  */
-extern "C" void cFECustom_setProfileLaunchScreen(cFECustom* self, int launchScreen) {
-    ((int)self->mProfileLaunchScreen) = launchScreen;
+void cFECustom::setProfileLaunchScreen(int launchScreen)
+{
+    ((int)mProfileLaunchScreen) = launchScreen;
 }
 #endif
 
@@ -2396,11 +2398,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getInput);
  *
  * It follows cFEInput's out-of-line getters (cFEInput_getKeyReady, getVKey, getAsciiKey).
  *
- * @param object  the object
  * @return the word at +0x18
  */
-extern "C" int cFEInput_getInput(cFEInput* object) {
-    return ((int)object->mpInput);
+int cFEInput::getInput()
+{
+    return ((int)mpInput);
 }
 #endif
 
@@ -2497,11 +2499,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_getCurrentKey);
 /**
  * Returns the on-screen keyboard's current key, the word at +0x170 (func_00180508 starts it at 10).
  *
- * @param screen  the keyboard
  * @return the word at +0x170
  */
-extern "C" int cScreenKeyboard_getCurrentKey(cScreenKeyboard* screen) {
-    return (screen->mCurrentKey);
+int cScreenKeyboard::getCurrentKey()
+{
+    return (mCurrentKey);
 }
 #endif
 
@@ -2511,11 +2513,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeNumbers);
 /**
  * Sets the on-screen keyboard's word at +0xD8 (func_00180508 starts it at 0).
  *
- * @param screen  the keyboard
  * @param includeNumbers  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeNumbers(cScreenKeyboard* screen, int includeNumbers) {
-    screen->mIncludeNumbers = includeNumbers;
+void cScreenKeyboard::setIncludeNumbers(int includeNumbers)
+{
+    mIncludeNumbers = includeNumbers;
 }
 #endif
 
@@ -2525,11 +2527,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeShift);
 /**
  * Sets the on-screen keyboard's word at +0xDC (func_00180508 starts it at 0).
  *
- * @param screen  the keyboard
  * @param includeShift  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeShift(cScreenKeyboard* screen, int includeShift) {
-    screen->mIncludeShift = includeShift;
+void cScreenKeyboard::setIncludeShift(int includeShift)
+{
+    mIncludeShift = includeShift;
 }
 #endif
 
@@ -2539,11 +2541,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeSpace);
 /**
  * Sets the on-screen keyboard's word at +0xE0 (func_00180508 starts it at 0).
  *
- * @param screen  the keyboard
  * @param includeSpace  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeSpace(cScreenKeyboard* screen, int includeSpace) {
-    screen->mIncludeSpace = includeSpace;
+void cScreenKeyboard::setIncludeSpace(int includeSpace)
+{
+    mIncludeSpace = includeSpace;
 }
 #endif
 
@@ -2556,14 +2558,14 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorRight);
  * Increments the cursor position at +0x16C only while the result stays below the limit at +0xD4 (func_00180508 sets
  * 45).
  *
- * @param screen  the keyboard
  */
-extern "C" void cScreenKeyboard_cursorRight(cScreenKeyboard* screen) {
+void cScreenKeyboard::cursorRight()
+{
     int temp_3;
 
-    temp_3 = screen->mCursorPos + 1;
-    if (temp_3 < (screen->mMaxChars)) {
-        screen->mCursorPos = temp_3;
+    temp_3 = mCursorPos + 1;
+    if (temp_3 < (mMaxChars)) {
+        mCursorPos = temp_3;
     }
 }
 #endif
@@ -2576,14 +2578,14 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorLeft);
  *
  * Decrements the cursor position at +0x16C when it is above 0.
  *
- * @param screen  the keyboard
  */
-extern "C" void cScreenKeyboard_cursorLeft(cScreenKeyboard* screen) {
+void cScreenKeyboard::cursorLeft()
+{
     int temp_2;
 
-    temp_2 = screen->mCursorPos;
+    temp_2 = mCursorPos;
     if (temp_2 > 0) {
-        screen->mCursorPos = (int) (temp_2 - 1);
+        mCursorPos = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -2686,17 +2688,18 @@ extern "C" int cFECustom_getPlayerCtrlMask(int, signed char);
  *
  * @param n  number of users whose masks to remove
  */
-extern "C" void cFEState_setControllerFilter(cFEState* self, signed char n) {
+void cFEState::setControllerFilter(signed char n)
+{
     int i = 0;
     int mask = 0xFF;
-    int realFe = *(int*)self->mpEngine;
+    int realFe = *(int*)mpEngine;
     if (n > 0) {
         do {
             mask &= ~cFECustom_getPlayerCtrlMask(realFe, i);
             i++;
         } while (i < n);
     }
-    *(char*)&self->mCtrlBits = mask;
+    *(char*)&mCtrlBits = mask;
 }
 #endif
 
@@ -2711,12 +2714,12 @@ extern "C" void cFECustom_setPlayerCtrlMask(int, signed char, int);
  * Calls cFECustom_setPlayerCtrlMask on the front-end handler (the first word of the UI engine at +0x10) with @p userNum and 1
  * << @p controllerNum.
  *
- * @param feState  the front-end state
  * @param userNum  the user
  * @param controllerNum  the controller port
  */
-extern "C" void cFEState_setControllerMask(cFEState* feState, signed char userNum, signed char controllerNum) {
-    cFECustom_setPlayerCtrlMask(*((int*)feState->mpEngine), userNum, (1 << controllerNum) & 0xFF);
+void cFEState::setControllerMask(signed char userNum, signed char controllerNum)
+{
+    cFECustom_setPlayerCtrlMask(*((int*)mpEngine), userNum, (1 << controllerNum) & 0xFF);
 }
 #endif
 
@@ -2766,11 +2769,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect_isDone);
 /**
  * Tells whether the cheat character select has finished: returns the word at +0x74 (On Tour's mDone).
  *
- * @param cheatCharSelect  the cheat character select state
  * @return non-zero once a choice has been made
  */
-extern "C" int cFEStateCheatCharSelect_isDone(cFEStateCheatCharSelect* cheatCharSelect) {
-    return (cheatCharSelect->mDone);
+int cFEStateCheatCharSelect::isDone()
+{
+    return (mDone);
 }
 #endif
 
@@ -2780,11 +2783,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect_getCheatCharID);
 /**
  * Returns the cheat character select's chosen character, the word at +0x70 (On Tour's mCheatCharID).
  *
- * @param cheatCharSelect  the cheat character select state
  * @return the chosen character id
  */
-extern "C" int cFEStateCheatCharSelect_getCheatCharID(cFEStateCheatCharSelect* cheatCharSelect) {
-    return (cheatCharSelect->mCheatCharID);
+int cFEStateCheatCharSelect::getCheatCharID()
+{
+    return (mCheatCharID);
 }
 #endif
 
@@ -2888,11 +2891,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMiscData);
 /**
  * Sets the id a popup reports back to its owner, miMiscData (+0x94).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param miscData  the value to report back
  */
-extern "C" void cPopupInfo_setMiscData(cPopupInfo* popupInfo, int miscData) {
-    popupInfo->miMiscData = miscData;
+void cPopupInfo::setMiscData(int miscData)
+{
+    miMiscData = miscData;
 }
 #endif
 
@@ -2902,11 +2905,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMiscData);
 /**
  * Returns the id a popup reports back to its owner, miMiscData (+0x94).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return miMiscData
  */
-extern "C" int cPopupInfo_getMiscData(cPopupInfo* popupInfo) {
-    return (popupInfo->miMiscData);
+int cPopupInfo::getMiscData()
+{
+    return (miMiscData);
 }
 #endif
 
@@ -2916,11 +2919,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPassUpdate);
 /**
  * Sets whether the popup lets the state below it keep updating, mbPassUpdate (+0x98).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param passUpdate  non-zero to keep updating the parent state
  */
-extern "C" void cPopupInfo_setPassUpdate(cPopupInfo* popupInfo, int passUpdate) {
-    popupInfo->mbPassUpdate = passUpdate;
+void cPopupInfo::setPassUpdate(int passUpdate)
+{
+    mbPassUpdate = passUpdate;
 }
 #endif
 
@@ -2930,11 +2933,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPassUpdate);
 /**
  * Returns whether the popup lets the state below it keep updating, mbPassUpdate (+0x98).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return mbPassUpdate
  */
-extern "C" int cPopupInfo_getPassUpdate(cPopupInfo* popupInfo) {
-    return (popupInfo->mbPassUpdate);
+int cPopupInfo::getPassUpdate()
+{
+    return (mbPassUpdate);
 }
 #endif
 
@@ -2975,11 +2978,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDefaultOption);
 /**
  * Sets the option a popup starts on, miDefaultOption (+0xAC).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param defaultOption  the option index (clear() sets -1)
  */
-extern "C" void cPopupInfo_setDefaultOption(cPopupInfo* popupInfo, int defaultOption) {
-    popupInfo->miDefaultOption = defaultOption;
+void cPopupInfo::setDefaultOption(int defaultOption)
+{
+    miDefaultOption = defaultOption;
 }
 #endif
 
@@ -2989,11 +2992,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getDefaultOption);
 /**
  * Returns the option a popup starts on, miDefaultOption (+0xAC).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return miDefaultOption
  */
-extern "C" int cPopupInfo_getDefaultOption(cPopupInfo* popupInfo) {
-    return (popupInfo->miDefaultOption);
+int cPopupInfo::getDefaultOption()
+{
+    return (miDefaultOption);
 }
 #endif
 
@@ -3003,11 +3006,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setReceivePrevCommand);
 /**
  * Sets whether the popup reacts to the back command, mbReceivePrev (+0xA8).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param receivePrev  non-zero to receive the back command (clear() sets 1)
  */
-extern "C" void cPopupInfo_setReceivePrevCommand(cPopupInfo* popupInfo, int receivePrev) {
-    popupInfo->mbReceivePrev = receivePrev;
+void cPopupInfo::setReceivePrevCommand(int receivePrev)
+{
+    mbReceivePrev = receivePrev;
 }
 #endif
 
@@ -3017,11 +3020,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getReceivePrevCommand);
 /**
  * Returns whether the popup reacts to the back command, mbReceivePrev (+0xA8).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return mbReceivePrev
  */
-extern "C" int cPopupInfo_getReceivePrevCommand(cPopupInfo* popupInfo) {
-    return (popupInfo->mbReceivePrev);
+int cPopupInfo::getReceivePrevCommand()
+{
+    return (mbReceivePrev);
 }
 #endif
 
@@ -3031,11 +3034,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setLayerOffset);
 /**
  * Sets a popup's draw-layer offset, miLayerOffset (+0x90).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param layerOffset  the layer offset
  */
-extern "C" void cPopupInfo_setLayerOffset(cPopupInfo* popupInfo, int layerOffset) {
-    popupInfo->miLayerOffset = layerOffset;
+void cPopupInfo::setLayerOffset(int layerOffset)
+{
+    miLayerOffset = layerOffset;
 }
 #endif
 
@@ -3045,11 +3048,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getLayerOffset);
 /**
  * Returns a popup's draw-layer offset, miLayerOffset (+0x90).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return miLayerOffset
  */
-extern "C" int cPopupInfo_getLayerOffset(cPopupInfo* popupInfo) {
-    return (popupInfo->miLayerOffset);
+int cPopupInfo::getLayerOffset()
+{
+    return (miLayerOffset);
 }
 #endif
 
@@ -3059,11 +3062,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setBackgroundType);
 /**
  * Sets a popup's background style, meBackgroundType (+0xC0).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param backgroundType  the background (0 online, 1 blue, 2 black)
  */
-extern "C" void cPopupInfo_setBackgroundType(cPopupInfo* popupInfo, int backgroundType) {
-    popupInfo->meBackgroundType = backgroundType;
+void cPopupInfo::setBackgroundType(int backgroundType)
+{
+    meBackgroundType = backgroundType;
 }
 #endif
 
@@ -3073,11 +3076,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getBackgroundType);
 /**
  * Returns a popup's background style, meBackgroundType (+0xC0).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return meBackgroundType
  */
-extern "C" int cPopupInfo_getBackgroundType(cPopupInfo* popupInfo) {
-    return (popupInfo->meBackgroundType);
+int cPopupInfo::getBackgroundType()
+{
+    return (meBackgroundType);
 }
 #endif
 
@@ -3087,11 +3090,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMaxCharacters);
 /**
  * Sets the most characters a popup's entry box takes, miMaxChars (+0xC4).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param maxChars  the character limit
  */
-extern "C" void cPopupInfo_setMaxCharacters(cPopupInfo* popupInfo, int maxChars) {
-    popupInfo->miMaxChars = maxChars;
+void cPopupInfo::setMaxCharacters(int maxChars)
+{
+    miMaxChars = maxChars;
 }
 #endif
 
@@ -3101,11 +3104,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMaxCharacters);
 /**
  * Returns the most characters a popup's entry box takes, miMaxChars (+0xC4).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return miMaxChars
  */
-extern "C" int cPopupInfo_getMaxCharacters(cPopupInfo* popupInfo) {
-    return (popupInfo->miMaxChars);
+int cPopupInfo::getMaxCharacters()
+{
+    return (miMaxChars);
 }
 #endif
 
@@ -3115,11 +3118,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMinBackgroundSize);
 /**
  * Sets a popup's minimum background size, mfMinSize (+0xB0).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param fparg0  the minimum size
  */
-extern "C" void cPopupInfo_setMinBackgroundSize(cPopupInfo* popupInfo, float fparg0) {
-    popupInfo->mfMinSize = fparg0;
+void cPopupInfo::setMinBackgroundSize(float fparg0)
+{
+    mfMinSize = fparg0;
 }
 #endif
 
@@ -3129,11 +3132,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMinBackgroundSize);
 /**
  * Returns a popup's minimum background size, mfMinSize (+0xB0).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return mfMinSize
  */
-extern "C" float cPopupInfo_getMinBackgroundSize(cPopupInfo* popupInfo) {
-    return (popupInfo->mfMinSize);
+float cPopupInfo::getMinBackgroundSize()
+{
+    return (mfMinSize);
 }
 #endif
 
@@ -3143,11 +3146,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedOptions);
 /**
  * Sets whether a popup centres its options, mbCenterOptions (+0xB8).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param centerOptions  non-zero to centre the options
  */
-extern "C" void cPopupInfo_setUseCenterAlignedOptions(cPopupInfo* popupInfo, int centerOptions) {
-    popupInfo->mbCenterOptions = centerOptions;
+void cPopupInfo::setUseCenterAlignedOptions(int centerOptions)
+{
+    mbCenterOptions = centerOptions;
 }
 #endif
 
@@ -3157,11 +3160,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getUseCenterAlignedOptions);
 /**
  * Returns whether a popup centres its options, mbCenterOptions (+0xB8).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return mbCenterOptions
  */
-extern "C" int cPopupInfo_getUseCenterAlignedOptions(cPopupInfo* popupInfo) {
-    return (popupInfo->mbCenterOptions);
+int cPopupInfo::getUseCenterAlignedOptions()
+{
+    return (mbCenterOptions);
 }
 #endif
 
@@ -3171,11 +3174,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedText);
 /**
  * Sets whether a popup centres its text, mbCenterText (+0xBC).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param centerText  non-zero to centre the text (clear() sets 1)
  */
-extern "C" void cPopupInfo_setUseCenterAlignedText(cPopupInfo* popupInfo, int centerText) {
-    popupInfo->mbCenterText = centerText;
+void cPopupInfo::setUseCenterAlignedText(int centerText)
+{
+    mbCenterText = centerText;
 }
 #endif
 
@@ -3185,11 +3188,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getUseCenterAlignedText);
 /**
  * Returns whether a popup centres its text, mbCenterText (+0xBC).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return mbCenterText
  */
-extern "C" int cPopupInfo_getUseCenterAlignedText(cPopupInfo* popupInfo) {
-    return (popupInfo->mbCenterText);
+int cPopupInfo::getUseCenterAlignedText()
+{
+    return (mbCenterText);
 }
 #endif
 
@@ -3575,11 +3578,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDeferEventsFlag);
 /**
  * Sets a popup description's mbDeferEventsFlag (+0xB4); the online states set it to 1.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param deferEvents  the new flag value
  */
-extern "C" void cPopupInfo_setDeferEventsFlag(cPopupInfo* popupInfo, int deferEvents) {
-    popupInfo->mbDeferEventsFlag = deferEvents;
+void cPopupInfo::setDeferEventsFlag(int deferEvents)
+{
+    mbDeferEventsFlag = deferEvents;
 }
 #endif
 
@@ -3589,11 +3592,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getDeferEventsFlag);
 /**
  * Returns a popup description's mbDeferEventsFlag (+0xB4).
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @return mbDeferEventsFlag
  */
-extern "C" int cPopupInfo_getDeferEventsFlag(cPopupInfo* popupInfo) {
-    return (popupInfo->mbDeferEventsFlag);
+int cPopupInfo::getDeferEventsFlag()
+{
+    return (mbDeferEventsFlag);
 }
 #endif
 
@@ -3615,13 +3618,14 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" cScreenPopup *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
-    cUIState_cUIState1_DBD0((self), 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cScreenPopup_vtbl;
-    cPopupInfo_cPopupInfo_DBD0((char*)&self->info);
-    self->mszInputText.Str = (char*)cBXString_EmptyString;
-    self->mszStaticText.Str = (char*)cBXString_EmptyString;
-    return (self);
+cScreenPopup * cScreenPopup::cScreenPopup1()
+{
+    cUIState_cUIState1_DBD0((this), 0, 0);
+    VPTR_OF(cListNode, this) = (void**)cScreenPopup_vtbl;
+    cPopupInfo_cPopupInfo_DBD0((char*)&info);
+    mszInputText.Str = (char*)cBXString_EmptyString;
+    mszStaticText.Str = (char*)cBXString_EmptyString;
+    return (this);
 }
 #endif
 
@@ -3645,11 +3649,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_setPassUpdate);
 /**
  * Sets whether a screen popup lets the state below it keep updating, mbPassUpdate (+0x2C0).
  *
- * @param screenPopup  the popup (cScreenPopup)
  * @param passUpdate  non-zero to keep updating the parent state
  */
-extern "C" void cScreenPopup_setPassUpdate(cScreenPopup* screenPopup, int passUpdate) {
-    screenPopup->mbPassUpdate = passUpdate;
+void cScreenPopup::setPassUpdate(int passUpdate)
+{
+    mbPassUpdate = passUpdate;
 }
 #endif
 
@@ -3659,11 +3663,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getPassUpdate);
 /**
  * Returns whether a screen popup lets the state below it keep updating, mbPassUpdate (+0x2C0).
  *
- * @param screenPopup  the popup (cScreenPopup)
  * @return mbPassUpdate
  */
-extern "C" int cScreenPopup_getPassUpdate(cScreenPopup* screenPopup) {
-    return (screenPopup->mbPassUpdate);
+int cScreenPopup::getPassUpdate()
+{
+    return (mbPassUpdate);
 }
 #endif
 
@@ -3673,11 +3677,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getEntryBoxText);
 /**
  * Returns the text typed into a screen popup's entry box, the string mszInputText (+0x2B0).
  *
- * @param screenPopup  the popup (cScreenPopup)
  * @return the input text
  */
-extern "C" int cScreenPopup_getEntryBoxText(cScreenPopup* screenPopup) {
-    return ((int)screenPopup->mszInputText.Str);
+int cScreenPopup::getEntryBoxText()
+{
+    return ((int)mszInputText.Str);
 }
 #endif
 
@@ -3688,11 +3692,11 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_isShowing);
  * Tells whether a screen popup is on screen: returns mbShowing (+0x2B8), which onCreateScreen sets and onDestroyScreen
  * clears.
  *
- * @param screenPopup  the popup (cScreenPopup)
  * @return mbShowing
  */
-extern "C" int cScreenPopup_isShowing(cScreenPopup* screenPopup) {
-    return (screenPopup->mbShowing);
+int cScreenPopup::isShowing()
+{
+    return (mbShowing);
 }
 #endif
 
@@ -3712,11 +3716,12 @@ extern int cUIStateBuyPopup_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cUIStateBuyPopup_cUIStateBuyPopup1(cUIStateBuyPopup* self) {
-    cUIState_cUIState1_DC48(self, 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cUIStateBuyPopup_vtbl;
-    cBuyPopupInfo_clear_DC48((char*)&self->mInfo);
-    return ((void*)self);
+void * cUIStateBuyPopup::cUIStateBuyPopup1()
+{
+    cUIState_cUIState1_DC48(this, 0, 0);
+    VPTR_OF(cListNode, this) = (void**)cUIStateBuyPopup_vtbl;
+    cBuyPopupInfo_clear_DC48((char*)&mInfo);
+    return ((void*)this);
 }
 #endif
 
@@ -3760,11 +3765,11 @@ INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_isAccept);
 /**
  * Tells whether the player accepted the purchase: returns mbAccept.
  *
- * @param uiStateBuyPopup  the popup
  * @return mbAccept
  */
-extern "C" int cUIStateBuyPopup_isAccept(cUIStateBuyPopup* uiStateBuyPopup) {
-    return (uiStateBuyPopup->mbAccept);
+int cUIStateBuyPopup::isAccept()
+{
+    return (mbAccept);
 }
 #endif
 
@@ -4107,17 +4112,18 @@ extern unsigned short str_sp[];
  *
  * @return @p self
  */
-extern "C" void *cFEMemCard_cFEMemCard1(cFEMemCard* self) {
-    cUIState_cUIState_DE18(self, 0);
-    self->mOVID = 0;
-    self->mDoneTransition = 0;
-    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
-    self->mAllowPauseMenu = 0;
-    self->mRemovePDA = 0;
+void * cFEMemCard::cFEMemCard1()
+{
+    cUIState_cUIState_DE18(this, 0);
+    mOVID = 0;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short emptyChar = str_sp[0];
-    VPTR_OF(cListNode, self) = (void**)cFEMemCard_vtbl;
-    *(unsigned short*)self->mszChatBuff = emptyChar;
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = (void**)cFEMemCard_vtbl;
+    *(unsigned short*)mszChatBuff = emptyChar;
+    return ((void*)this);
 }
 #endif
 
@@ -4135,10 +4141,11 @@ extern int cFEPopupConfirm_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEPopupConfirm_cFEPopupConfirm1(cFEPopupConfirm* self) {
-    cScreenPopup_cScreenPopup_DE78(self, 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cFEPopupConfirm_vtbl;
-    return ((void*)self);
+void * cFEPopupConfirm::cFEPopupConfirm1()
+{
+    cScreenPopup_cScreenPopup_DE78(this, 0, 0);
+    VPTR_OF(cListNode, this) = (void**)cFEPopupConfirm_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -4580,11 +4587,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad_setQuitPath);
  * pre-game load (cPreGameLoadScreen), 2 returns to the title screen. The constructor clears it; cFEStateLodge's callers
  * set 1 or 2 directly.
  *
- * @param profileLoadState  the profile load state (cFEStateProfileLoad)
  * @param action  the action: 0, 1 or 2
  */
-extern "C" void cFEStateProfileLoad_setQuitPath(cFEStateProfileLoad* profileLoadState, int action) {
-    profileLoadState->mTypeOfQuit = action;
+void cFEStateProfileLoad::setQuitPath(int action)
+{
+    mTypeOfQuit = action;
 }
 #endif
 
@@ -4604,12 +4611,13 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" cKeyboardPopup *cKeyboardPopup_cKeyboardPopup1(cKeyboardPopup* self) {
-    cUIState_cUIState1_E288((self), 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cKeyboardPopup_vtbl;
-    self->miMaxCharacters = 0x3F;
-    self->mszStatic.Str = (char*)cBXString_EmptyString;
-    return (self);
+cKeyboardPopup * cKeyboardPopup::cKeyboardPopup1()
+{
+    cUIState_cUIState1_E288((this), 0, 0);
+    VPTR_OF(cListNode, this) = (void**)cKeyboardPopup_vtbl;
+    miMaxCharacters = 0x3F;
+    mszStatic.Str = (char*)cBXString_EmptyString;
+    return (this);
 }
 #endif
 
@@ -4662,11 +4670,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getCurrentKey);
 /**
  * Returns the keyboard popup's selected key, miCurrentKey (+0x140; 0..83).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miCurrentKey
  */
-extern "C" int cKeyboardPopup_getCurrentKey(cKeyboardPopup* keyboard) {
-    return (keyboard->miCurrentKey);
+int cKeyboardPopup::getCurrentKey()
+{
+    return (miCurrentKey);
 }
 #endif
 
@@ -4676,11 +4684,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCurrentKey);
 /**
  * Sets the keyboard popup's selected key, miCurrentKey (+0x140).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param currentKey  the key index (0..83)
  */
-extern "C" void cKeyboardPopup_setCurrentKey(cKeyboardPopup* keyboard, int currentKey) {
-    keyboard->miCurrentKey = currentKey;
+void cKeyboardPopup::setCurrentKey(int currentKey)
+{
+    miCurrentKey = currentKey;
 }
 #endif
 
@@ -4690,11 +4698,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setKeyboardType);
 /**
  * Sets the keyboard popup's layout, meType (+0x43C): 0 regular, 1 compact, 2 expanded.
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param keyboardType  the layout
  */
-extern "C" void cKeyboardPopup_setKeyboardType(cKeyboardPopup* keyboard, int keyboardType) {
-    keyboard->meType = keyboardType;
+void cKeyboardPopup::setKeyboardType(int keyboardType)
+{
+    meType = keyboardType;
 }
 #endif
 
@@ -4704,11 +4712,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getKeyboardType);
 /**
  * Returns the keyboard popup's layout, meType (+0x43C).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return meType
  */
-extern "C" int cKeyboardPopup_getKeyboardType(cKeyboardPopup* keyboard) {
-    return (keyboard->meType);
+int cKeyboardPopup::getKeyboardType()
+{
+    return (meType);
 }
 #endif
 
@@ -4718,11 +4726,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getPopOnEnd);
 /**
  * Returns whether accepting the text pops the keyboard popup, mbPopOnEnd (+0x420).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbPopOnEnd
  */
-extern "C" int cKeyboardPopup_getPopOnEnd(cKeyboardPopup* keyboard) {
-    return (keyboard->mbPopOnEnd);
+int cKeyboardPopup::getPopOnEnd()
+{
+    return (mbPopOnEnd);
 }
 #endif
 
@@ -4732,11 +4740,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPopOnEnd);
 /**
  * Sets whether accepting the text pops the keyboard popup, mbPopOnEnd (+0x420).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param popOnEnd  non-zero to pop on accept
  */
-extern "C" void cKeyboardPopup_setPopOnEnd(cKeyboardPopup* keyboard, int popOnEnd) {
-    keyboard->mbPopOnEnd = popOnEnd;
+void cKeyboardPopup::setPopOnEnd(int popOnEnd)
+{
+    mbPopOnEnd = popOnEnd;
 }
 #endif
 
@@ -4746,11 +4754,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPassword);
 /**
  * Sets whether the keyboard popup masks its text, mbPassword (+0x70).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param password  non-zero to show '*' characters
  */
-extern "C" void cKeyboardPopup_setPassword(cKeyboardPopup* keyboard, int password) {
-    keyboard->mbPassword = password;
+void cKeyboardPopup::setPassword(int password)
+{
+    mbPassword = password;
 }
 #endif
 
@@ -4760,11 +4768,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setClearOnFirstCharacter);
 /**
  * Sets whether the first key press clears the text, mbClearOnFirst (+0x54).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param clearOnFirst  non-zero to clear on the first key
  */
-extern "C" void cKeyboardPopup_setClearOnFirstCharacter(cKeyboardPopup* keyboard, int clearOnFirst) {
-    keyboard->mbClearOnFirst = clearOnFirst;
+void cKeyboardPopup::setClearOnFirstCharacter(int clearOnFirst)
+{
+    mbClearOnFirst = clearOnFirst;
 }
 #endif
 
@@ -4774,11 +4782,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setDisableSpaceForFirst);
 /**
  * Sets whether the space key stays disabled while the text is empty, mbDisableForFirst (+0x58).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param disableForFirst  non-zero to disable space for the first character
  */
-extern "C" void cKeyboardPopup_setDisableSpaceForFirst(cKeyboardPopup* keyboard, int disableForFirst) {
-    keyboard->mbDisableForFirst = disableForFirst;
+void cKeyboardPopup::setDisableSpaceForFirst(int disableForFirst)
+{
+    mbDisableForFirst = disableForFirst;
 }
 #endif
 
@@ -4893,11 +4901,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getMinCharacters);
 /**
  * Returns the keyboard popup's minimum text length, miMinCharacters (+0x64).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miMinCharacters
  */
-extern "C" int cKeyboardPopup_getMinCharacters(cKeyboardPopup* keyboard) {
-    return (keyboard->miMinCharacters);
+int cKeyboardPopup::getMinCharacters()
+{
+    return (miMinCharacters);
 }
 #endif
 
@@ -4907,11 +4915,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getMaxCharacters);
 /**
  * Returns the keyboard popup's maximum text length, miMaxCharacters (+0x60).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miMaxCharacters
  */
-extern "C" int cKeyboardPopup_getMaxCharacters(cKeyboardPopup* keyboard) {
-    return (keyboard->miMaxCharacters);
+int cKeyboardPopup::getMaxCharacters()
+{
+    return (miMaxCharacters);
 }
 #endif
 
@@ -4921,11 +4929,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setReferEventsToParent);
 /**
  * Sets whether the keyboard popup forwards its events to the parent state, mbReferEventsToParent (+0x438).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param referEvents  non-zero to forward events (cKeyboardPopup_handleEvent)
  */
-extern "C" void cKeyboardPopup_setReferEventsToParent(cKeyboardPopup* keyboard, int referEvents) {
-    keyboard->mbReferEventsToParent = referEvents;
+void cKeyboardPopup::setReferEventsToParent(int referEvents)
+{
+    mbReferEventsToParent = referEvents;
 }
 #endif
 
@@ -4935,11 +4943,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getReferEventsToParent);
 /**
  * Returns whether the keyboard popup forwards its events to the parent state, mbReferEventsToParent (+0x438).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbReferEventsToParent
  */
-extern "C" int cKeyboardPopup_getReferEventsToParent(cKeyboardPopup* keyboard) {
-    return (keyboard->mbReferEventsToParent);
+int cKeyboardPopup::getReferEventsToParent()
+{
+    return (mbReferEventsToParent);
 }
 #endif
 
@@ -4949,11 +4957,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCallParentsUpdate);
 /**
  * Sets whether the keyboard popup runs its parent's onUpdate each frame, mbCallParentsUpdate (+0x440).
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param callParentUpdate  non-zero to update the parent too (cKeyboardPopup_onUpdate)
  */
-extern "C" void cKeyboardPopup_setCallParentsUpdate(cKeyboardPopup* keyboard, int callParentUpdate) {
-    keyboard->mbCallParentsUpdate = callParentUpdate;
+void cKeyboardPopup::setCallParentsUpdate(int callParentUpdate)
+{
+    mbCallParentsUpdate = callParentUpdate;
 }
 #endif
 
@@ -4963,11 +4971,11 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_isAcceptText);
 /**
  * Tells whether the player accepted the keyboard popup's text: returns mbAcceptText (+0x5C), which the accept key sets.
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbAcceptText
  */
-extern "C" int cKeyboardPopup_isAcceptText(cKeyboardPopup* keyboard) {
-    return (keyboard->mbAcceptText);
+int cKeyboardPopup::isAcceptText()
+{
+    return (mbAcceptText);
 }
 #endif
 
@@ -4979,14 +4987,14 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorRight);
  *
  * Increments miCursorPos (+0x134) only when it is below miMaxCharacters (+0x60) minus one.
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void cKeyboardPopup_cursorRight(cKeyboardPopup* keyboard) {
+void cKeyboardPopup::cursorRight()
+{
     int temp_3;
 
-    temp_3 = keyboard->miCursorPos;
-    if (temp_3 < (keyboard->miMaxCharacters - 1)) {
-        keyboard->miCursorPos = (int) (temp_3 + 1);
+    temp_3 = miCursorPos;
+    if (temp_3 < (miMaxCharacters - 1)) {
+        miCursorPos = (int) (temp_3 + 1);
     }
 }
 #endif
@@ -4999,14 +5007,14 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorLeft);
  *
  * Decrements miCursorPos (+0x134) when it is above 0.
  *
- * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void cKeyboardPopup_cursorLeft(cKeyboardPopup* keyboard) {
+void cKeyboardPopup::cursorLeft()
+{
     int temp_2;
 
-    temp_2 = keyboard->miCursorPos;
+    temp_2 = miCursorPos;
     if (temp_2 > 0) {
-        keyboard->miCursorPos = (int) (temp_2 - 1);
+        miCursorPos = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -5371,26 +5379,26 @@ struct sList_E7B0 {
  *
  * @return @p self
  */
-extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
+void* cFEStateNet::cFEStateNet1()
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int framePad[4];
-    cUIState_cUIState1_E7B0(self, 0, 0);
-    sList_E7B0* msgList = (sList_E7B0*)(&self->mMsgList);
-    self->mHasFocus = 0;
-    self->mBlockInput = 0;
-    self->mpKeyboard = 0;
-    self->mpKeyboardText = 0;
-    self->mDisconnectPopupOpen = 0;
-    self->mLeavingOnline = 0;
-    self->mpPopupTextBuf = 0;
-    self->mPopupResult = 2;
-    VPTR_OF(cListNode, self) = cFEStateNet_vtbl;
-    cBXString_cBXString2(&self->mszTargetUser, str_sp_E7B0);
-    self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
-    msgList->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
-    msgList->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
-    return ((void*)self);
+    cUIState_cUIState1_E7B0(this, 0, 0);
+    sList_E7B0* msgList = (sList_E7B0*)(&mMsgList);
+    mHasFocus = 0;
+    mBlockInput = 0;
+    mpKeyboard = 0;
+    mpKeyboardText = 0;
+    mDisconnectPopupOpen = 0;
+    mLeavingOnline = 0;
+    mpPopupTextBuf = 0;
+    mPopupResult = 2;
+    VPTR_OF(cListNode, this) = cFEStateNet_vtbl;
+    cBXString_cBXString2(&mszTargetUser, str_sp_E7B0);
+    mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
+    msgList->head->next = (sListNode_E7B0*)mMsgList.mpNode;
+    msgList->head->prev = (sListNode_E7B0*)mMsgList.mpNode;
+    return ((void*)this);
 }
 #endif
 
@@ -5500,15 +5508,15 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateNet_isProcessingEvents);
  * Slot +0xF4 of the cFEStateNet vtable cFEStateNet_vtbl and of most online states' vtables; cFEStateNet_onGainFocus calls it,
  * and sets mHasFocus to 1.
  *
- * @param netState  the online state (cFEStateNet)
  * @return 1 when both are set, otherwise 0
  */
-extern "C" int cFEStateNet_isProcessingEvents(cFEStateNet* netState) {
+int cFEStateNet::isProcessingEvents()
+{
     int var_3;
 
     var_3 = 0;
-    if (((int)netState->mpScreen) != 0) {
-        var_3 = netState->mHasFocus != 0;
+    if (((int)mpScreen) != 0) {
+        var_3 = mHasFocus != 0;
     }
     return var_3;
 }

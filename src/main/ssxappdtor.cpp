@@ -58,11 +58,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getBE);
 /**
  * Returns the application's back end (BE).
  *
- * @param ssxApp  the application object
  * @return BE (+0x78)
  */
-extern "C" int cSSXApp_getBE(cSSXApp* ssxApp) {
-    return ((int)ssxApp->BE);
+int cSSXApp::getBE()
+{
+    return ((int)BE);
 }
 #endif
 //100%
@@ -71,11 +71,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getRealFE);
 /**
  * Returns the application's real front end (RealFE).
  *
- * @param ssxApp  the application object
  * @return RealFE (+0x7C)
  */
-extern "C" int cSSXApp_getRealFE(cSSXApp* ssxApp) {
-    return ((int)ssxApp->RealFE);
+int cSSXApp::getRealFE()
+{
+    return ((int)RealFE);
 }
 #endif
 //100%
@@ -84,11 +84,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getDebugFE);
 /**
  * Returns the application's debug front end (DebugFE).
  *
- * @param ssxApp  the application object
  * @return DebugFE (+0x80)
  */
-extern "C" int cSSXApp_getDebugFE(cSSXApp* ssxApp) {
-    return ((int)ssxApp->DebugFE);
+int cSSXApp::getDebugFE()
+{
+    return ((int)DebugFE);
 }
 #endif
 //100%
@@ -97,11 +97,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGame);
 /**
  * Returns the application's game object (Game).
  *
- * @param ssxApp  the application object
  * @return Game (+0x84); 0 outside a game
  */
-extern "C" int cSSXApp_getGame(cSSXApp* ssxApp) {
-    return ((int)ssxApp->Game);
+int cSSXApp::getGame()
+{
+    return ((int)Game);
 }
 #endif
 //100%
@@ -110,11 +110,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFonts);
 /**
  * Returns the application's UI font interface (Fonts).
  *
- * @param ssxApp  the application object
  * @return Fonts (+0x88)
  */
-extern "C" int cSSXApp_getFonts(cSSXApp* ssxApp) {
-    return ((int)ssxApp->Fonts);
+int cSSXApp::getFonts()
+{
+    return ((int)Fonts);
 }
 #endif
 //100%
@@ -123,11 +123,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFELocale);
 /**
  * Returns the application's front-end locale (FELocale).
  *
- * @param ssxApp  the application object
  * @return FELocale (+0x8C)
  */
-extern "C" int cSSXApp_getFELocale(cSSXApp* ssxApp) {
-    return ((int)ssxApp->FELocale);
+int cSSXApp::getFELocale()
+{
+    return ((int)FELocale);
 }
 #endif
 //100%
@@ -139,8 +139,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInput);
  * @param index  the player (0 or 1; not range-checked)
  * @return Inputs[@p index] (+0xB0)
  */
-extern "C" int cSSXApp_getInput(cSSXApp* self, int index) {
-    return (int)self->Inputs[index];
+int cSSXApp::getInput(int index)
+{
+    return (int)Inputs[index];
 }
 #endif
 //100%
@@ -152,8 +153,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInputMap);
  * @param index  the player (0 or 1; not range-checked)
  * @return InputMaps[@p index] (+0xB8)
  */
-extern "C" int cSSXApp_getInputMap(cSSXApp* self, int index) {
-    return (int)self->InputMaps[index];
+int cSSXApp::getInputMap(int index)
+{
+    return (int)InputMaps[index];
 }
 #endif
 //100%
@@ -162,11 +164,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGameManager);
 /**
  * Returns the application's game mode manager (GameModeMan).
  *
- * @param ssxApp  the application object
  * @return GameModeMan (+0xC0)
  */
-extern "C" int cSSXApp_getGameManager(cSSXApp* ssxApp) {
-    return ((int)ssxApp->GameModeMan);
+int cSSXApp::getGameManager()
+{
+    return ((int)GameModeMan);
 }
 #endif
 //100%
@@ -201,11 +203,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getNetMan);
 /**
  * Returns the application's network manager (NetMan).
  *
- * @param ssxApp  the application object
  * @return NetMan (+0xD0)
  */
-extern "C" int cSSXApp_getNetMan(cSSXApp* ssxApp) {
-    return ((int)ssxApp->NetMan);
+int cSSXApp::getNetMan()
+{
+    return ((int)NetMan);
 }
 #endif
 //100%
@@ -214,11 +216,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getConsoleConfig);
 /**
  * Returns the application's console configuration (ConsoleConfig).
  *
- * @param ssxApp  the application object
  * @return ConsoleConfig (+0x9C)
  */
-extern "C" int cSSXApp_getConsoleConfig(cSSXApp* ssxApp) {
-    return ((int)ssxApp->ConsoleConfig);
+int cSSXApp::getConsoleConfig()
+{
+    return ((int)ConsoleConfig);
 }
 #endif
 //100%
@@ -227,11 +229,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIndicator);
 /**
  * Returns the application's load indicator (LoadIndicator).
  *
- * @param ssxApp  the application object
  * @return LoadIndicator (+0xA4)
  */
-extern "C" int cSSXApp_getLoadIndicator(cSSXApp* ssxApp) {
-    return ((int)ssxApp->LoadIndicator);
+int cSSXApp::getLoadIndicator()
+{
+    return ((int)LoadIndicator);
 }
 #endif
 //100%
@@ -252,11 +254,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIconTextureID);
 /**
  * Returns the texture id of the loading icon (LoadIconTextureID).
  *
- * @param ssxApp  the application object
  * @return LoadIconTextureID (+0xA0)
  */
-extern "C" int cSSXApp_getLoadIconTextureID(cSSXApp* ssxApp) {
-    return (ssxApp->LoadIconTextureID);
+int cSSXApp::getLoadIconTextureID()
+{
+    return (LoadIconTextureID);
 }
 #endif
 //100%
@@ -265,11 +267,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_setLoadIconTextureID);
 /**
  * Sets the texture id of the loading icon (LoadIconTextureID).
  *
- * @param ssxApp  the application object
  * @param textureId  the new texture id
  */
-extern "C" void cSSXApp_setLoadIconTextureID(cSSXApp* ssxApp, int textureId) {
-    ssxApp->LoadIconTextureID = textureId;
+void cSSXApp::setLoadIconTextureID(int textureId)
+{
+    LoadIconTextureID = textureId;
 }
 #endif
 //100%
@@ -278,9 +280,10 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_endFE);
 /**
  * Clears both front-end pointers, RealFE and DebugFE, marking the front end as ended.
  */
-extern "C" void cSSXApp_endFE(cSSXApp* self) {
-    self->RealFE = 0;
-    self->DebugFE = 0;
+void cSSXApp::endFE()
+{
+    RealFE = 0;
+    DebugFE = 0;
 }
 #endif
 //100%
@@ -289,10 +292,10 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_endGame);
 /**
  * Clears the Game pointer, marking the game as ended.
  *
- * @param ssxApp  the application object
  */
-extern "C" void cSSXApp_endGame(cSSXApp* ssxApp) {
-    ssxApp->Game = 0;
+void cSSXApp::endGame()
+{
+    Game = 0;
 }
 #endif
 //100%
@@ -301,11 +304,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_InGame);
 /**
  * Returns whether a game is running (Game is set).
  *
- * @param ssxApp  the application object
  * @return 1 when Game (+0x84) is non-null, else 0
  */
-extern "C" int cSSXApp_InGame(cSSXApp* ssxApp) {
-    return ((int)ssxApp->Game) != 0;
+int cSSXApp::InGame()
+{
+    return ((int)Game) != 0;
 }
 #endif
 //100%
@@ -314,14 +317,14 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_InFE);
 /**
  * Returns whether the front end is running (RealFE or DebugFE is set).
  *
- * @param ssxApp  the application object
  * @return 1 when RealFE (+0x7C) or DebugFE (+0x80) is non-null, else 0
  */
-extern "C" int cSSXApp_InFE(cSSXApp* ssxApp) {
+int cSSXApp::InFE()
+{
     int var_3;
 
     var_3 = 0;
-    if ((((int)ssxApp->RealFE) != 0) || (((int)ssxApp->DebugFE) != 0)) {
+    if ((((int)RealFE) != 0) || (((int)DebugFE) != 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -333,11 +336,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_GetFEAsyncManager);
 /**
  * Returns the application's front-end async manager (mFEAsyncManager).
  *
- * @param ssxApp  the application object
  * @return mFEAsyncManager (+0x11C)
  */
-extern "C" int cSSXApp_GetFEAsyncManager(cSSXApp* ssxApp) {
-    return ((int)ssxApp->mFEAsyncManager);
+int cSSXApp::GetFEAsyncManager()
+{
+    return ((int)mFEAsyncManager);
 }
 #endif
 
@@ -372,10 +375,10 @@ INCLUDE_ASM("main/ssxappdtor", cFadeScreen_allowFade);
  *
  * cFadeScreen_cFadeScreen (the fade constructor) clears this flag; cFadeScreen_loseFocus starts the fade-out.
  *
- * @param fadeScreen  the screen fade
  */
-extern "C" void cFadeScreen_allowFade(cFadeScreen* fadeScreen) {
-    fadeScreen->IsEnding = 1;
+void cFadeScreen::allowFade()
+{
+    IsEnding = 1;
 }
 #endif
 
@@ -438,10 +441,10 @@ INCLUDE_ASM("main/ssxappdtor", cInitLoadScreen_activateProgressiveMode);
  *
  * cInitLoadScreen_loseFocus uses the other flag (+0x8) as the ending flag.
  *
- * @param initLoadScreen  the initial load screen
  */
-extern "C" void cInitLoadScreen_activateProgressiveMode(cInitLoadScreen* initLoadScreen) {
-    initLoadScreen->progressive = 1;
+void cInitLoadScreen::activateProgressiveMode()
+{
+    progressive = 1;
 }
 #endif
 
@@ -626,8 +629,9 @@ INCLUDE_ASM("main/ssxappdtor", cFELoadScreen_getTexttureID);
  * @param index  which texture (0 or 1; not range-checked)
  * @return the texture id at +0x10 + 4 * @p index
  */
-extern "C" int cFELoadScreen_getTexttureID(cFELoadScreen* self, int index) {
-    return self->mTexID[index];
+int cFELoadScreen::getTexttureID(int index)
+{
+    return mTexID[index];
 }
 #endif
 
@@ -1162,11 +1166,11 @@ INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState_setNextLocation);
 /**
  * Sets the user-select state's next location (+0x18).
  *
- * @param userSelectState  the user-select game-flow state
  * @param location  the location to go to next
  */
-extern "C" void cGFUserSelectState_setNextLocation(cGFUserSelectState* userSelectState, int location) {
-    userSelectState->mNextLocation = location;
+void cGFUserSelectState::setNextLocation(int location)
+{
+    mNextLocation = location;
 }
 #endif
 
@@ -1431,11 +1435,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentState);
 /**
  * Returns the current game-flow state number (mCurrentStateID).
  *
- * @param game  the game
  * @return mCurrentStateID (+0x214)
  */
-extern "C" int cGame_getCurrentState(cGame* game) {
-    return (game->mCurrentStateID);
+int cGame::getCurrentState()
+{
+    return (mCurrentStateID);
 }
 #endif
 //100%
@@ -1444,11 +1448,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getPreviousState);
 /**
  * Returns the previous game-flow state number (mPrevStateID).
  *
- * @param game  the game
  * @return mPrevStateID (+0x218)
  */
-extern "C" int cGame_getPreviousState(cGame* game) {
-    return (game->mPrevStateID);
+int cGame::getPreviousState()
+{
+    return (mPrevStateID);
 }
 #endif
 //100%
@@ -1457,11 +1461,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentStateInstance);
 /**
  * Returns the current game-flow state object (mCurrentState).
  *
- * @param game  the game
  * @return mCurrentState (+0x200)
  */
-extern "C" int cGame_getCurrentStateInstance(cGame* game) {
-    return ((int)game->mCurrentState);
+int cGame::getCurrentStateInstance()
+{
+    return ((int)mCurrentState);
 }
 #endif
 //100%
@@ -1470,11 +1474,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getNash);
 /**
  * Returns the game's Nash ray-query object (BXNash).
  *
- * @param game  the game
  * @return BXNash (+0x20)
  */
-extern "C" int cGame_getNash(cGame* game) {
-    return ((int)game->BXNash);
+int cGame::getNash()
+{
+    return ((int)BXNash);
 }
 #endif
 //100%
@@ -1483,11 +1487,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorld);
 /**
  * Returns the game's world (World).
  *
- * @param game  the game
  * @return World (+0x10)
  */
-extern "C" int cGame_getWorld(cGame* game) {
-    return ((int)game->World);
+int cGame::getWorld()
+{
+    return ((int)World);
 }
 #endif
 //100%
@@ -1496,11 +1500,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getDebugFont);
 /**
  * Returns the game's debug font (DebugFont).
  *
- * @param game  the game
  * @return DebugFont (+0x24)
  */
-extern "C" int cGame_getDebugFont(cGame* game) {
-    return ((int)game->DebugFont);
+int cGame::getDebugFont()
+{
+    return ((int)DebugFont);
 }
 #endif
 //100%
@@ -1509,11 +1513,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getMenuSys);
 /**
  * Returns the game's menu system (MenuSys).
  *
- * @param game  the game
  * @return MenuSys (+0xA4)
  */
-extern "C" int cGame_getMenuSys(cGame* game) {
-    return ((int)game->MenuSys);
+int cGame::getMenuSys()
+{
+    return ((int)MenuSys);
 }
 #endif
 //100%
@@ -1522,11 +1526,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getAI);
 /**
  * Returns the game's AI (AI).
  *
- * @param game  the game
  * @return AI (+0xC)
  */
-extern "C" int cGame_getAI(cGame* game) {
-    return ((int)game->AI);
+int cGame::getAI()
+{
+    return ((int)AI);
 }
 #endif
 //100%
@@ -1535,11 +1539,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getUI);
 /**
  * Returns the game's UI engine (UI).
  *
- * @param game  the game
  * @return UI (+0x48)
  */
-extern "C" int cGame_getUI(cGame* game) {
-    return ((int)game->UI);
+int cGame::getUI()
+{
+    return ((int)UI);
 }
 #endif
 //100%
@@ -1548,11 +1552,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getReplay);
 /**
  * Returns the game's replay (Replay).
  *
- * @param game  the game
  * @return Replay (+0x28)
  */
-extern "C" int cGame_getReplay(cGame* game) {
-    return ((int)game->Replay);
+int cGame::getReplay()
+{
+    return ((int)Replay);
 }
 #endif
 //100%
@@ -1561,11 +1565,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getFXLoader);
 /**
  * Returns the game's effects loader (FXLoader).
  *
- * @param game  the game
  * @return FXLoader (+0x2C)
  */
-extern "C" int cGame_getFXLoader(cGame* game) {
-    return ((int)game->FXLoader);
+int cGame::getFXLoader()
+{
+    return ((int)FXLoader);
 }
 #endif
 //100%
@@ -1574,11 +1578,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSurfPropCache);
 /**
  * Returns the game's surface property cache (SurfPropCache).
  *
- * @param game  the game
  * @return SurfPropCache (+0x44)
  */
-extern "C" int cGame_getSurfPropCache(cGame* game) {
-    return ((int)game->SurfPropCache);
+int cGame::getSurfPropCache()
+{
+    return ((int)SurfPropCache);
 }
 #endif
 //100%
@@ -1587,11 +1591,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorldSound);
 /**
  * Returns the game's world sound (WorldSound).
  *
- * @param game  the game
  * @return WorldSound (+0x4C)
  */
-extern "C" int cGame_getWorldSound(cGame* game) {
-    return ((int)game->WorldSound);
+int cGame::getWorldSound()
+{
+    return ((int)WorldSound);
 }
 #endif
 //100%
@@ -1600,11 +1604,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getAIVisualEffectsObjNode);
 /**
  * Returns the game's AI visual-effects object node (AIVisualEffectsMan).
  *
- * @param game  the game
  * @return AIVisualEffectsMan (+0x50)
  */
-extern "C" int cGame_getAIVisualEffectsObjNode(cGame* game) {
-    return ((int)game->AIVisualEffectsMan);
+int cGame::getAIVisualEffectsObjNode()
+{
+    return ((int)AIVisualEffectsMan);
 }
 #endif
 //100%
@@ -1613,11 +1617,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getVisualEffectsObjNode);
 /**
  * Returns the game's visual-effects object node (VisualEffectsMan).
  *
- * @param game  the game
  * @return VisualEffectsMan (+0x54)
  */
-extern "C" int cGame_getVisualEffectsObjNode(cGame* game) {
-    return ((int)game->VisualEffectsMan);
+int cGame::getVisualEffectsObjNode()
+{
+    return ((int)VisualEffectsMan);
 }
 #endif
 //100%
@@ -1626,11 +1630,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCutSceneTransitionman);
 /**
  * Returns the game's cut-scene transition manager (CutSceneTransitionMan).
  *
- * @param game  the game
  * @return CutSceneTransitionMan (+0x64)
  */
-extern "C" int cGame_getCutSceneTransitionman(cGame* game) {
-    return ((int)game->CutSceneTransitionMan);
+int cGame::getCutSceneTransitionman()
+{
+    return ((int)CutSceneTransitionMan);
 }
 #endif
 //100%
@@ -1639,11 +1643,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getFlagManager);
 /**
  * Returns the game's flag manager (FlagManager).
  *
- * @param game  the game
  * @return FlagManager (+0x70)
  */
-extern "C" int cGame_getFlagManager(cGame* game) {
-    return ((int)game->FlagManager);
+int cGame::getFlagManager()
+{
+    return ((int)FlagManager);
 }
 #endif
 //100%
@@ -1652,11 +1656,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSnowFall);
 /**
  * Returns the game's snowfall effect (SnowFall).
  *
- * @param game  the game
  * @return SnowFall (+0x74)
  */
-extern "C" int cGame_getSnowFall(cGame* game) {
-    return ((int)game->SnowFall);
+int cGame::getSnowFall()
+{
+    return ((int)SnowFall);
 }
 #endif
 //100%
@@ -1665,11 +1669,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getPlaybackMan);
 /**
  * Returns the game's replay playback manager (PlaybackMan).
  *
- * @param game  the game
  * @return PlaybackMan (+0x34)
  */
-extern "C" int cGame_getPlaybackMan(cGame* game) {
-    return ((int)game->PlaybackMan);
+int cGame::getPlaybackMan()
+{
+    return ((int)PlaybackMan);
 }
 #endif
 //100%
@@ -1678,11 +1682,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSectionMan);
 /**
  * Returns the game's section manager (SectionMan).
  *
- * @param game  the game
  * @return SectionMan (+0x78)
  */
-extern "C" int cGame_getSectionMan(cGame* game) {
-    return ((int)game->SectionMan);
+int cGame::getSectionMan()
+{
+    return ((int)SectionMan);
 }
 #endif
 //100%
@@ -1691,11 +1695,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getInputSync);
 /**
  * Returns the game's input synchroniser (InputSync).
  *
- * @param game  the game
  * @return InputSync (+0x7C)
  */
-extern "C" int cGame_getInputSync(cGame* game) {
-    return ((int)game->InputSync);
+int cGame::getInputSync()
+{
+    return ((int)InputSync);
 }
 #endif
 //100%
@@ -1704,11 +1708,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSkyBox);
 /**
  * Returns the game's sky box (SkyBox).
  *
- * @param game  the game
  * @return SkyBox (+0x14)
  */
-extern "C" int cGame_getSkyBox(cGame* game) {
-    return ((int)game->SkyBox);
+int cGame::getSkyBox()
+{
+    return ((int)SkyBox);
 }
 #endif
 //100%
@@ -1717,11 +1721,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan2d);
 /**
  * Returns the game's 2D crowd manager (CrowdMan2d).
  *
- * @param game  the game
  * @return CrowdMan2d (+0x38)
  */
-extern "C" int cGame_getCrowdMan2d(cGame* game) {
-    return ((int)game->CrowdMan2d);
+int cGame::getCrowdMan2d()
+{
+    return ((int)CrowdMan2d);
 }
 #endif
 //100%
@@ -1730,11 +1734,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan3d);
 /**
  * Returns the game's 3D crowd manager (CrowdMan3d).
  *
- * @param game  the game
  * @return CrowdMan3d (+0x3C)
  */
-extern "C" int cGame_getCrowdMan3d(cGame* game) {
-    return ((int)game->CrowdMan3d);
+int cGame::getCrowdMan3d()
+{
+    return ((int)CrowdMan3d);
 }
 #endif
 //100%
@@ -1743,11 +1747,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getMultiParticleMan);
 /**
  * Returns the game's multi-particle manager (MultiParticleMan).
  *
- * @param game  the game
  * @return MultiParticleMan (+0x40)
  */
-extern "C" int cGame_getMultiParticleMan(cGame* game) {
-    return ((int)game->MultiParticleMan);
+int cGame::getMultiParticleMan()
+{
+    return ((int)MultiParticleMan);
 }
 #endif
 //100%
@@ -1756,11 +1760,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getInstanceMan);
 /**
  * Returns the game's instance manager (InstanceMan).
  *
- * @param game  the game
  * @return InstanceMan (+0x88)
  */
-extern "C" int cGame_getInstanceMan(cGame* game) {
-    return ((int)game->InstanceMan);
+int cGame::getInstanceMan()
+{
+    return ((int)InstanceMan);
 }
 #endif
 //100%
@@ -1769,11 +1773,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getOcclusionMan);
 /**
  * Returns the game's occlusion manager (OcclusionMan).
  *
- * @param game  the game
  * @return OcclusionMan (+0x8C)
  */
-extern "C" int cGame_getOcclusionMan(cGame* game) {
-    return ((int)game->OcclusionMan);
+int cGame::getOcclusionMan()
+{
+    return ((int)OcclusionMan);
 }
 #endif
 //100%
@@ -1782,11 +1786,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorldLightMan);
 /**
  * Returns the game's world light manager (WorldLightMan).
  *
- * @param game  the game
  * @return WorldLightMan (+0x90)
  */
-extern "C" int cGame_getWorldLightMan(cGame* game) {
-    return ((int)game->WorldLightMan);
+int cGame::getWorldLightMan()
+{
+    return ((int)WorldLightMan);
 }
 #endif
 //100%
@@ -1795,11 +1799,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getLoadIndicator);
 /**
  * Returns the game's load indicator (LoadIndicator).
  *
- * @param game  the game
  * @return LoadIndicator (+0x94)
  */
-extern "C" int cGame_getLoadIndicator(cGame* game) {
-    return ((int)game->LoadIndicator);
+int cGame::getLoadIndicator()
+{
+    return ((int)LoadIndicator);
 }
 #endif
 //100%
@@ -1808,11 +1812,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getControllerUnplugged);
 /**
  * Returns the game's controller-unplugged flag (ControllerUnplugged).
  *
- * @param game  the game
  * @return ControllerUnplugged (+0x224)
  */
-extern "C" int cGame_getControllerUnplugged(cGame* game) {
-    return (game->ControllerUnplugged);
+int cGame::getControllerUnplugged()
+{
+    return (ControllerUnplugged);
 }
 #endif
 //100%
@@ -1821,11 +1825,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getViewMan);
 /**
  * Returns the game's game view manager (ViewMan).
  *
- * @param game  the game
  * @return ViewMan (+0x84)
  */
-extern "C" int cGame_getViewMan(cGame* game) {
-    return ((int)game->ViewMan);
+int cGame::getViewMan()
+{
+    return ((int)ViewMan);
 }
 #endif
 //100%
@@ -1837,8 +1841,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getGameView);
  * @param index  the view number (not range-checked)
  * @return the view's camera
  */
-extern "C" int cGame_getGameView(cGame* self, int index) {
-    return *(int *)((char *)((int)self->ViewMan) + (index << 2) + 4);
+int cGame::getGameView(int index)
+{
+    return *(int *)((char *)((int)ViewMan) + (index << 2) + 4);
 }
 #endif
 //100%
@@ -1847,11 +1852,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getNumGameView);
 /**
  * Returns the number of camera views in the game's view manager (ViewMan +0x10).
  *
- * @param game  the game
  * @return the view count
  */
-extern "C" int cGame_getNumGameView(cGame* game) {
-    return ((int)game->ViewMan->m_uiNumView);
+int cGame::getNumGameView()
+{
+    return ((int)ViewMan->m_uiNumView);
 }
 #endif
 //100%
@@ -1862,8 +1867,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderView);
  *
  * @return the current render view's camera
  */
-extern "C" int cGame_getCurrentRenderView(cGame* self) {
-    cGameViewMan* list = self->ViewMan;
+int cGame::getCurrentRenderView()
+{
+    cGameViewMan* list = ViewMan;
     return (int)list->PlayerCamera[(int)list->m_uiCurrentView];
 }
 #endif
@@ -1873,11 +1879,11 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderViewNum);
 /**
  * Returns the number of the view being rendered (ViewMan +0x14).
  *
- * @param game  the game
  * @return the current render view number
  */
-extern "C" int cGame_getCurrentRenderViewNum(cGame* game) {
-    return ((int)game->ViewMan->m_uiCurrentView);
+int cGame::getCurrentRenderViewNum()
+{
+    return ((int)ViewMan->m_uiCurrentView);
 }
 #endif
 
@@ -1949,10 +1955,9 @@ INCLUDE_ASM("main/ssxappdtor", cInput_setPad__FPvi);
  *
  * @param val  the pad (a pointer passed as an int)
  */
-void cInput_setPad(void* vself, int val)
+void cInput::setPad(int val)
 {
-    cInput* self = (cInput*)vself;
-    self->Pad = (cInputPad*)val;
+    Pad = (cInputPad*)val;
 }
 #endif
 
@@ -1966,10 +1971,9 @@ INCLUDE_ASM("main/ssxappdtor", cInput_setMap__FPvi);
  *
  * @param val  the input map (passed as an int)
  */
-void cInput_setMap(void* vself, int val)
+void cInput::setMap(int val)
 {
-    cInput* self = (cInput*)vself;
-    self->Map = (cInputMap*)val;
+    Map = (cInputMap*)val;
 }
 #endif
 
@@ -2458,11 +2462,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getMemCard);
 /**
  * Returns the memory-card overlay manager's card interface (mpMemCard).
  *
- * @param overlayManager  the cMCOverlayManager
  * @return mpMemCard (+0x434)
  */
-extern "C" int cMCOverlayManager_getMemCard(cMCOverlayManager* overlayManager) {
-    return ((int)overlayManager->mpMemCard);
+int cMCOverlayManager::getMemCard()
+{
+    return ((int)mpMemCard);
 }
 #endif
 //100%
@@ -2471,11 +2475,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_GetState);
 /**
  * Returns the memory-card overlay manager's current state (mState).
  *
- * @param overlayManager  the cMCOverlayManager
  * @return mState (+0x130)
  */
-extern "C" int cMCOverlayManager_GetState(cMCOverlayManager* overlayManager) {
-    return (overlayManager->mState);
+int cMCOverlayManager::GetState()
+{
+    return (mState);
 }
 #endif
 //100%
@@ -2484,11 +2488,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInSaveOperation);
 /**
  * Returns whether the overlay manager is running a save (mSave).
  *
- * @param overlayManager  the cMCOverlayManager
  * @return mSave (+0xBC)
  */
-extern "C" int cMCOverlayManager_isInSaveOperation(cMCOverlayManager* overlayManager) {
-    return (overlayManager->mSave);
+int cMCOverlayManager::isInSaveOperation()
+{
+    return (mSave);
 }
 #endif
 //100%
@@ -2497,11 +2501,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInDeleteOperation);
 /**
  * Returns whether the overlay manager is running a delete (mDelete).
  *
- * @param overlayManager  the cMCOverlayManager
  * @return mDelete (+0xC0)
  */
-extern "C" int cMCOverlayManager_isInDeleteOperation(cMCOverlayManager* overlayManager) {
-    return (overlayManager->mDelete);
+int cMCOverlayManager::isInDeleteOperation()
+{
+    return (mDelete);
 }
 #endif
 //100%
@@ -2512,10 +2516,10 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInLoadOperation);
  *
  * Declared void here, but the callback's result is left in the return register.
  *
- * @param overlayManager  the cMCOverlayManager
  */
-extern "C" void cMCOverlayManager_isInLoadOperation(cMCOverlayManager* overlayManager) {
-    (overlayManager->callbackIsLoadPressed)();
+void cMCOverlayManager::isInLoadOperation()
+{
+    (callbackIsLoadPressed)();
 }
 #endif
 //100%
@@ -2524,15 +2528,15 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isCardStatusErrorUnacknowledged
 /**
  * Returns whether a card status error is pending acknowledgement.
  *
- * @param overlayManager  the cMCOverlayManager
  * @return 1 when mCurrDeviceStateAck (+0x440) is clear and mCurrDeviceStateLast (+0x43C) is non-zero, else 0
  */
-extern "C" int cMCOverlayManager_isCardStatusErrorUnacknowledged(cMCOverlayManager* overlayManager) {
+int cMCOverlayManager::isCardStatusErrorUnacknowledged()
+{
     int var_3;
 
     var_3 = 0;
-    if (overlayManager->mCurrDeviceStateAck == 0) {
-        var_3 = overlayManager->mCurrDeviceStateLast != 0;
+    if (mCurrDeviceStateAck == 0) {
+        var_3 = mCurrDeviceStateLast != 0;
     }
     return var_3;
 }
@@ -2543,11 +2547,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_hasCardStatusError);
 /**
  * Returns whether the last card status is an error (mCurrDeviceStateLast is non-zero).
  *
- * @param overlayManager  the cMCOverlayManager
  * @return 1 when mCurrDeviceStateLast (+0x43C) is non-zero, else 0
  */
-extern "C" int cMCOverlayManager_hasCardStatusError(cMCOverlayManager* overlayManager) {
-    return (overlayManager->mCurrDeviceStateLast) != 0;
+int cMCOverlayManager::hasCardStatusError()
+{
+    return (mCurrDeviceStateLast) != 0;
 }
 #endif
 //100%
@@ -2556,11 +2560,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getCardLastState);
 /**
  * Returns the last card status word (mCurrDeviceStateLast; bits: 4 full, 8 no card, 0x10 unformatted).
  *
- * @param overlayManager  the cMCOverlayManager
  * @return mCurrDeviceStateLast (+0x43C)
  */
-extern "C" int cMCOverlayManager_getCardLastState(cMCOverlayManager* overlayManager) {
-    return (overlayManager->mCurrDeviceStateLast);
+int cMCOverlayManager::getCardLastState()
+{
+    return (mCurrDeviceStateLast);
 }
 #endif
 //100%
@@ -2569,10 +2573,10 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_forceCardStatusAck);
 /**
  * Acknowledges the current card status: sets mCurrDeviceStateAck (+0x440) to 1.
  *
- * @param overlayManager  the cMCOverlayManager
  */
-extern "C" void cMCOverlayManager_forceCardStatusAck(cMCOverlayManager* overlayManager) {
-    overlayManager->mCurrDeviceStateAck = 1;
+void cMCOverlayManager::forceCardStatusAck()
+{
+    mCurrDeviceStateAck = 1;
 }
 #endif
 //100%
@@ -2581,11 +2585,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getFirstCorruptFile);
 /**
  * Returns the first corrupt file's index, from bits 5..8 of mCurrDeviceStateLast (+0x43C), minus 1.
  *
- * @param overlayManager  the cMCOverlayManager
  * @return the 4-bit field minus 1 (-1 when it is 0)
  */
-extern "C" int cMCOverlayManager_getFirstCorruptFile(cMCOverlayManager* overlayManager) {
-    return (((unsigned int) ((unsigned int)overlayManager->mCurrDeviceStateLast) >> 5) & 0xF) - 1;
+int cMCOverlayManager::getFirstCorruptFile()
+{
+    return (((unsigned int) ((unsigned int)mCurrDeviceStateLast) >> 5) & 0xF) - 1;
 }
 #endif
 //100%
@@ -2639,11 +2643,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForFullCard);
 /**
  * Sets whether the overlay manager polls for a full card (mPollForFullCard, +0x11C).
  *
- * @param overlayManager  the cMCOverlayManager
  * @param pollFullCard  non-zero to poll
  */
-extern "C" void cMCOverlayManager_PollForFullCard(cMCOverlayManager* overlayManager, int pollFullCard) {
-    overlayManager->mPollForFullCard = pollFullCard;
+void cMCOverlayManager::PollForFullCard(int pollFullCard)
+{
+    mPollForFullCard = pollFullCard;
 }
 #endif
 //100%
@@ -2652,11 +2656,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForUnformatted);
 /**
  * Sets whether the overlay manager polls for an unformatted card (mPollForUnformatted, +0x120).
  *
- * @param overlayManager  the cMCOverlayManager
  * @param pollUnformatted  non-zero to poll
  */
-extern "C" void cMCOverlayManager_PollForUnformatted(cMCOverlayManager* overlayManager, int pollUnformatted) {
-    overlayManager->mPollForUnformatted = pollUnformatted;
+void cMCOverlayManager::PollForUnformatted(int pollUnformatted)
+{
+    mPollForUnformatted = pollUnformatted;
 }
 #endif
 //100%
@@ -2665,11 +2669,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForNoCard);
 /**
  * Sets whether the overlay manager polls for a missing card (mPollForNoCard, +0x124).
  *
- * @param overlayManager  the cMCOverlayManager
  * @param pollNoCard  non-zero to poll
  */
-extern "C" void cMCOverlayManager_PollForNoCard(cMCOverlayManager* overlayManager, int pollNoCard) {
-    overlayManager->mPollForNoCard = pollNoCard;
+void cMCOverlayManager::PollForNoCard(int pollNoCard)
+{
+    mPollForNoCard = pollNoCard;
 }
 #endif
 //100%
@@ -2678,11 +2682,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_ShowCardChangeNotify);
 /**
  * Sets whether the overlay manager shows the card-changed notice (mShowCardChangeNotify, +0x128).
  *
- * @param overlayManager  the cMCOverlayManager
  * @param showCardChange  non-zero to show it
  */
-extern "C" void cMCOverlayManager_ShowCardChangeNotify(cMCOverlayManager* overlayManager, int showCardChange) {
-    overlayManager->mShowCardChangeNotify = showCardChange;
+void cMCOverlayManager::ShowCardChangeNotify(int showCardChange)
+{
+    mShowCardChangeNotify = showCardChange;
 }
 #endif
 //100%
@@ -2691,11 +2695,11 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_RetryToInit);
 /**
  * Sets the overlay manager's retry-to-init flag (mRetryToInit, +0x12C).
  *
- * @param overlayManager  the cMCOverlayManager
  * @param retryToInit  the new flag value
  */
-extern "C" void cMCOverlayManager_RetryToInit(cMCOverlayManager* overlayManager, int retryToInit) {
-    overlayManager->mRetryToInit = retryToInit;
+void cMCOverlayManager::RetryToInit(int retryToInit)
+{
+    mRetryToInit = retryToInit;
 }
 #endif
 
@@ -2766,10 +2770,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameComm_stopSyncInput__FPv);
  *
  * cGFFinishlineState_gainFocus calls it on cGameComm_mGameComm before the race-end flow.
  */
-void cGameComm_stopSyncInput(void* vself)
+void cGameComm::stopSyncInput()
 {
-    cGameComm* self = (cGameComm*)vself;
-    self->mSyncInput = 0;
+    mSyncInput = 0;
 }
 #endif
 
@@ -2788,14 +2791,15 @@ extern "C" int cGameViewMan_isStreamReady(int);
  *
  * @return 1 when the stream is ready and not paused, else 0
  */
-extern "C" int cGame_updateStreamFocus(cGame* self) {
-    cGameViewMan_updateStreamFocus((int)self->ViewMan);
-    if (self->IsStreamPaused != 0) {
+int cGame::updateStreamFocus()
+{
+    cGameViewMan_updateStreamFocus((int)ViewMan);
+    if (IsStreamPaused != 0) {
         return 0;
     }
-    if (cGameViewMan_isStreamReady((int)self->ViewMan) == 0) {
-        self->IsStreamPaused = 1;
-        self->m_bFlushStreamer = 1;
+    if (cGameViewMan_isStreamReady((int)ViewMan) == 0) {
+        IsStreamPaused = 1;
+        m_bFlushStreamer = 1;
         return 0;
     }
     return 1;
@@ -2961,35 +2965,36 @@ extern "C" void cWorldCache_flushInActivePages(void *);
  *
  * @return 0 while waiting on the stream, 1 when the game can update
  */
-extern "C" int cGame_updateStreamLoading(cGame* self) {
+int cGame::updateStreamLoading()
+{
     void *vtbl;
 
-    if ((cGameViewMan_isStreamReady((int)self->ViewMan) == 0) || (self->SectionMan->m_bStreamReady == 0)) {
-        *(int *)(*(char**)self->World + 0x3D4) = 0;
-        cWorld_update(self->World);
-        cGameViewMan_updateAll((int)self->ViewMan);
-        if (self->SectionMan->m_bStreamReady == 0) {
-            cGame_updateState(self);
-            cSectionMan_update(self->SectionMan);
+    if ((cGameViewMan_isStreamReady((int)ViewMan) == 0) || (SectionMan->m_bStreamReady == 0)) {
+        *(int *)(*(char**)World + 0x3D4) = 0;
+        cWorld_update(World);
+        cGameViewMan_updateAll((int)ViewMan);
+        if (SectionMan->m_bStreamReady == 0) {
+            cGame_updateState(this);
+            cSectionMan_update(SectionMan);
         }
-        if ((self->IsStreamPaused == 0) && (cGameViewMan_isStreamReady((int)self->ViewMan) == 0)) {
-            self->m_bFlushStreamer = 1;
+        if ((IsStreamPaused == 0) && (cGameViewMan_isStreamReady((int)ViewMan) == 0)) {
+            m_bFlushStreamer = 1;
         }
-        self->IsStreamPaused = 1;
-        if (self->m_bFlushStreamer != 0) {
+        IsStreamPaused = 1;
+        if (m_bFlushStreamer != 0) {
             vtbl = (void*)VPTR_OF(cGraphicsMan, GrMan);
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
-            cGameViewMan_updateStreamFocus((int)self->ViewMan);
-            cWorldCache_flushInActivePages(*(void**)self->World);
-            self->m_bFlushStreamer = 0;
+            cGameViewMan_updateStreamFocus((int)ViewMan);
+            cWorldCache_flushInActivePages(*(void**)World);
+            m_bFlushStreamer = 0;
         }
         return 0;
     }
-    *(int *)(*(char**)self->World + 0x3D4) = 1;
-    self->IsStreamPaused = 0;
-    self->m_bFlushStreamer = 0;
-    cWorld_update(self->World);
-    cSectionMan_update(self->SectionMan);
+    *(int *)(*(char**)World + 0x3D4) = 1;
+    IsStreamPaused = 0;
+    m_bFlushStreamer = 0;
+    cWorld_update(World);
+    cSectionMan_update(SectionMan);
     return 1;
 }
 #endif
@@ -3089,11 +3094,11 @@ static inline bool playing_4B48(char* pb)
  * @return true when the race should update this frame (no menu, no new pause, not just unpaused), else false
  */
 // Handles script messages and pause requests; returns true when the race should run this frame.
-extern "C" bool cGame_updateUI(cGame* self)
+bool cGame::updateUI()
 {
     cOVStateManager_update();
-    if (cMenuSys_isActive(((void*)self->MenuSys)) == 0) {
-        sScript_4B48* sm = ((sScript_4B48*)self->WScriptMan);
+    if (cMenuSys_isActive(((void*)MenuSys)) == 0) {
+        sScript_4B48* sm = ((sScript_4B48*)WScriptMan);
         tMissionMenuQueue* msgQueue = &sm->queue;
         if (sm->hasMessage()) {
             tMissionMenuQueueEntry* msg = tMissionMenuQueue_getEntry(msgQueue);
@@ -3105,12 +3110,13 @@ extern "C" bool cGame_updateUI(cGame* self)
                 return false;
             }
             if (msg->Cmd == 9) {
-                cWScriptMan_doMissionCmd(((sScript_4B48*)self->WScriptMan), ((int)msg->MissionId), 5, msg->Being);
-                if (cUIStateStack_findState(&(*(sStateStack_4B48*)&self->UI->mStateStack), GetHashValue32(str_90bc_fail_b)) == 0) {
+                cWScriptMan_doMissionCmd(((sScript_4B48*)WScriptMan), ((int)msg->MissionId), 5, msg->Being);
+                if (cUIStateStack_findState(&(*(sStateStack_4B48*)&UI->mStateStack),
+                        GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     cPauseState_Stack[++cPauseState_StackIdx] = 3;
                     cPauseState_Flags = D_004428FC[0];
-                    cUIEngine_update(self->UI);
+                    cUIEngine_update(UI);
                 } else {
                     ((sScript_4B48*)cWScriptMan_TheWScriptMan)->popMessage();
                 }
@@ -3126,29 +3132,30 @@ extern "C" bool cGame_updateUI(cGame* self)
         func_0029ED18(cAudioInterface_bxAudio());
         return false;
     }
-    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
-        cUIEngine_update(self->UI);
-        cMenuSys_input(((void*)self->MenuSys));
+    if (cMenuSys_isActive(((void*)MenuSys)) != 0) {
+        cUIEngine_update(UI);
+        cMenuSys_input(((void*)MenuSys));
         return false;
     }
-    if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*((int*)self->Replay)) && !playing_4B48(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
+    if (cGame_activatePauseMenu((char*)this, 0) != 0 && !racing_4B48(*((int*)Replay))
+        && !playing_4B48(((char*)PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         cPadCache_clearAllVibrations(PadCache);
         cOVStateManager_triggerPauseMenu();
         cPauseState_Stack[++cPauseState_StackIdx] = 2;
         cPauseState_Flags = D_004428F8[0];
-        sUIObj_4B48* uiObject = ((sUIObj_4B48*)(self->UI)->mpInput);
-        uiObject->vt[44].fn(vthis(uiObject, uiObject->vt[44]), *(unsigned char*)&self->PauseOwner);
+        sUIObj_4B48* uiObject = ((sUIObj_4B48*)(UI)->mpInput);
+        uiObject->vt[44].fn(vthis(uiObject, uiObject->vt[44]), *(unsigned char*)&PauseOwner);
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
         cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;
-    cUIEngine_update(self->UI);
+    cUIEngine_update(UI);
     if (cOVStateManager_pauseOverlayActive() != 0) {
         return false;
     }
-    cPlaybackMan_update(((char*)self->PlaybackMan));
-    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
+    cPlaybackMan_update(((char*)PlaybackMan));
+    if (cMenuSys_isActive(((void*)MenuSys)) != 0) {
         return false;
     }
     if (wasPaused && (cPauseState_Flags & 1) == 0) {
@@ -3192,33 +3199,33 @@ struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
  * bucket 4, cGameViewMan_updateAll (except in replay mode 3), mUpdateTick (+0xAC) is counted and
  * cWorldSound_TriggerWorldAudio runs for each view camera (+0x20 of it). cGame_update has the same code inline.
  */
-extern "C" void cGame_updateAI(cGame* self)
+void cGame::updateAI()
 {
     char* obj;
     int skip;
-    if ((int)self->InputSync == 0 || cInputSync_aiinputready((int)self->InputSync) != 0) {
-        if (self->mCurrentStateID == 3) {
+    if ((int)InputSync == 0 || cInputSync_aiinputready((int)InputSync) != 0) {
+        if (mCurrentStateID == 3) {
             obj = gBucketMan;
-            cGame_updateState(self);
+            cGame_updateState(this);
             cBucketMan_mergeBucket(obj, 1);
         } else {
             obj = gBucketMan;
-            cGame_updateState(self);
+            cGame_updateState(this);
         }
         if ((cPauseState_Flags & 1) == 0)
-            cReplay_update((int)self->Replay);
-        if (cReplay_isPauseAI((int)self->Replay) == 0 && (cPauseState_Flags & 8) == 0) {
+            cReplay_update((int)Replay);
+        if (cReplay_isPauseAI((int)Replay) == 0 && (cPauseState_Flags & 8) == 0) {
             sVEntry<void>* vt = (sVEntry<void>*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)(vthis(ScriptEngine, vt[5]));
         }
     }
     obj = gBucketMan;
     skip = 0;
-    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI((int)self->Replay) != 0)
+    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI((int)Replay) != 0)
         skip = 1;
     if (skip == 0) {
-        if ((int)self->InputSync == 0 || cInputSync_aiupdate((int)self->InputSync) != 0) {
-            if (cPlaybackMan_isPauseAI((int)self->PlaybackMan) != 0)
+        if ((int)InputSync == 0 || cInputSync_aiupdate((int)InputSync) != 0) {
+            if (cPlaybackMan_isPauseAI((int)PlaybackMan) != 0)
                 goto setskip;
         } else {
             setskip:
@@ -3233,7 +3240,7 @@ extern "C" void cGame_updateAI(cGame* self)
         if ((cPauseState_Flags & 2) == 0)
             cBucketMan_applyBucket(obj, 1);
         {
-            cAI* aiMan = self->AI;
+            cAI* aiMan = AI;
             sVEntry<void>* vt = (sVEntry<void>*)aiMan->mVtbl;
             ((void (*)(void*))vt[3].fn)(vthis(aiMan, vt[3]));
         }
@@ -3241,10 +3248,10 @@ extern "C" void cGame_updateAI(cGame* self)
             cBucketMan_updateBucket(obj, 2);
         if ((cPauseState_Flags & 4) == 0)
             cBucketMan_updateBucket(obj, 3);
-        cWScriptMan_update((int)self->WScriptMan);
-        func_002294C8((int)self->CrowdMan2d);
-        func_003440C8((int)self->CrowdMan3d);
-        cMultiParticleMan_update((int)self->MultiParticleMan);
+        cWScriptMan_update((int)WScriptMan);
+        func_002294C8((int)CrowdMan2d);
+        func_003440C8((int)CrowdMan3d);
+        cMultiParticleMan_update((int)MultiParticleMan);
         cBucketMan_mergeBucket(obj, 1);
     } else {
         cBucketMan_updateBucket(obj, 5);
@@ -3253,21 +3260,21 @@ extern "C" void cGame_updateAI(cGame* self)
     }
     cBucketMan_updateBucket(obj, 4);
     {
-        int replayMode = *(int*)self->Replay;
+        int replayMode = *(int*)Replay;
         int ok = replayMode != 0 && replayMode < 10;
         int x3 = replayMode ^ 3;
         if (!ok || x3 != 0)
-            cGameViewMan_updateAll((int)self->ViewMan);
+            cGameViewMan_updateAll((int)ViewMan);
     }
-    self->mUpdateTick = self->mUpdateTick + 1;
+    mUpdateTick = mUpdateTick + 1;
     {
-        sList_244E60* viewMan = (sList_244E60*)self->ViewMan;
+        sList_244E60* viewMan = (sList_244E60*)ViewMan;
         if (viewMan->count != 0) {
             unsigned int i = 0;
             do {
-                cWorldSound_TriggerWorldAudio((int)self->WorldSound, ((sList_244E60*)(self)->ViewMan)->items[i] + 0x20, i);
+                cWorldSound_TriggerWorldAudio((int)WorldSound, ((sList_244E60*)ViewMan)->items[i] + 0x20, i);
                 i++;
-            } while (i < ((sList_244E60*)(char*)self->ViewMan)->count);
+            } while (i < ((sList_244E60*)(char*)ViewMan)->count);
         }
     }
 }
@@ -3313,10 +3320,11 @@ extern "C" void cFadeScreen_update(void *);
  *
  * @return 1 when the game may update, 0 when it is ending
  */
-extern "C" int cGame_updateScreenFade(cGame* self) {
-    cFadeScreen_update(self);
+int cGame::updateScreenFade()
+{
+    cFadeScreen_update(this);
     if ((int)SSXApp->LoadingModule != 0) {
-        self->unk_08 = 1;
+        unk_08 = 1;
         return 0;
     }
     return 1;
@@ -3330,19 +3338,20 @@ INCLUDE_ASM("main/ssxappdtor", cGame_updateVibration);
  *
  * cGame_update ends its update with the same loop.
  */
-extern "C" void cGame_updateVibration(cGame* self) {
+void cGame::updateVibration()
+{
     int i;
     cRider* obj;
     char *vtbl;
 
     i = 0;
-    if (self->AI->NumberOfRidersAllocated > 0) {
+    if (AI->NumberOfRidersAllocated > 0) {
         do {
-            obj = (cRider*)self->AI->Riders[i];
+            obj = (cRider*)AI->Riders[i];
             i++;
             vtbl = (char*)VPTR_AT(obj, sizeof(cRiderState));
             (*(void (**)(void *))(vtbl + 0x9C))(((char*)obj) + *(short *)(vtbl + 0x98));
-        } while (i < self->AI->NumberOfRidersAllocated);
+        } while (i < AI->NumberOfRidersAllocated);
     }
 }
 #endif

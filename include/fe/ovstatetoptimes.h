@@ -28,6 +28,8 @@ struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
+struct cUIThing;
+
 struct cOVState_TOPTIMES : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_TOPTIMES_vtbl, stored after cOVState_vtbl by the constructor; [U] onWidgetEvent calls slot 25
@@ -42,6 +44,9 @@ struct cOVState_TOPTIMES : public cOVState {
     int mIsNextScreenPending;       // 0x0A0 [O] bool; [U] onCreateScreen clears it; handleNext acts only while it is
                                     //       clear and sets it (continue: cOVStateManager_mStatus = 1; save: overlay
                                     //       19)
+
+    // Methods bound to their retail symbols by asm labels.
+    void handleNext(cUIThing* pWidget) __asm__("cOVState_TOPTIMES_handleNext");
 };
 
 CHECK_OFFSET(cOVState_TOPTIMES, mTopTimesFlow, 0x9C);

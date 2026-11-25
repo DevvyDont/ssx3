@@ -60,6 +60,9 @@ struct cWorldPainterLayer {
         tWPRegion* m_pRegions;      // 0x8 name ours ([O] getRegions()); [R] resolve stores this + offset;
                                     //       [U] lookupRegion returns &m_pRegions[getQuadTreeContents(x, y)]
     };
+
+    // Methods bound to their retail symbols by asm labels.
+    void resolve() __asm__("cWorldPainterLayer_resolve");
 };
 
 CHECK_OFFSET(cWorldPainterLayer, m_iQuadTreeOffset, 0x0);

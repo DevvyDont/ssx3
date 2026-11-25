@@ -83,6 +83,11 @@ struct cFEStateMemCard : public cFEMemCard {
     int mCard1Available;            // 0x23C [O] (bool); [R] 1 (no other retail access)
     int mCard1Full;                 // 0x240 [O] (bool); [R] 0 (no other retail access)
     int mCard1Error;                // 0x244 [O] (bool); [R] 0 (no other retail access)
+
+    // Methods bound to their retail symbols by asm labels.
+    void terminateFreeSpaceCheck() __asm__("cFEStateMemCard_terminateFreeSpaceCheck");
+    void exitScreen() __asm__("cFEStateMemCard_exitScreen");
+    void updateFreeSpaceCheckState() __asm__("cFEStateMemCard_updateFreeSpaceCheckState");
 };
 
 CHECK_OFFSET(cFEStateMemCard, mMissingSavedFileTypeFlags, 0x22C);

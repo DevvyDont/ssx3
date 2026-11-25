@@ -25,12 +25,25 @@
 #include "layout.h"
 #include "fe/ferider.h"
 
+struct cFERider;
+
 struct cFERiderManager {
     cFERider mHumans[2];            // 0x0000 [O] (On Tour [4]); [R] ctor / dtor build and destroy 2, 0xCE0 apart;
                                     //       [U] getHuman / getHuman1 return &mHumans[i]; init sets each
                                     //       mProfileIndex to i; setHumanCharacter / setHumanVisible forward to
                                     //       cFERider_setCharID / setVisible; isHumanVisible / render read mVisible;
                                     //       purge / update / render run over both
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cFERiderManager_init");
+    void purge() __asm__("cFERiderManager_purge");
+    void setHumanCharacter(int idx, int charId, int loadAll) __asm__("cFERiderManager_setHumanCharacter");
+    void* getHuman(int index) __asm__("cFERiderManager_getHuman");
+    cFERider* getHuman1(int index) __asm__("cFERiderManager_getHuman1");
+    int isHumanVisible(int index) __asm__("cFERiderManager_isHumanVisible");
+    void setHumanVisible(int i, int visible) __asm__("cFERiderManager_setHumanVisible");
+    void render() __asm__("cFERiderManager_render");
+    void update() __asm__("cFERiderManager_update");
 };
 
 CHECK_OFFSET(cFERiderManager, mHumans, 0x0000);

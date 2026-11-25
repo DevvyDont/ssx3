@@ -67,6 +67,8 @@ CHECK_OFFSET(tMakeBoostData, BoostZ, 0x1C);
 CHECK_OFFSET(tMakeBoostData, unk_020, 0x20);
 CHECK_SIZE(tMakeBoostData, 0x24);
 
+struct cBeing;
+
 struct cBoostNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cBoostNode_vtbl (0x004914E0) in both ctors and the dtor; [P] 0xC; [U] update calls slots 49 / 47 / 48 / 50
@@ -89,6 +91,12 @@ struct cBoostNode : public cInstanceNode {
     int Type;                       // 0x40 [O]; [P] 0x40; [R] ctor1 data Type (lh +0x4, sw); [U] update / applyBoost /
                                     //      ctor1 test 1 / 2 (lw)
     char unk_044[0xC];              // 0x44 the state's tail padding (On Tour cBoostNodeState is 0x30; no access)
+
+    // Methods bound to their retail symbols by asm labels.
+    cBoostNode* cBoostNode1(void* bucket, int nodeType, void* instance, tMakeBoostData* def)
+        __asm__("cBoostNode_cBoostNode1");
+    void applyDrag(cBeing* obj) __asm__("cBoostNode_applyDrag");
+    void applyBoost(cBeing* obj) __asm__("cBoostNode_applyBoost");
 };
 
 CHECK_OFFSET(cBoostNode, unk_01C, 0x1C);

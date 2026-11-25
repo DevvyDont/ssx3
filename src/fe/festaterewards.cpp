@@ -60,9 +60,9 @@ extern "C" void cFEStateRewardGalleryBase_onCreateScreen(cFEStateRewardGalleryBa
         ((sRewardGallery_F0B0*)self)->entries[i].id = -1;
     }
     self->mNumIcons = 0;
-    cFEStateRewardGalleryBase_loadRewards(self);
+    self->loadRewards();
     if (((self->mLoadingState >> 3) & 1) == 0) {
-        cFEStateRewardGalleryBase_loadIcons(self);
+        self->loadIcons();
     }
 }
 #endif
@@ -124,8 +124,8 @@ extern "C" void* cUIState_onUpdate(void* self);
  */
 extern "C" void cFEStateRewardGalleryBase_onUpdate(cFEStateRewardGalleryBase* self)
 {
-    cFEStateRewardGalleryBase_updateRewardsLoad(self);
-    cFEStateRewardGalleryBase_updateIconsLoad(self);
+    self->updateRewardsLoad();
+    self->updateIconsLoad();
     cUIState_onUpdate(self);
 }
 #endif
@@ -650,14 +650,14 @@ struct sVE_FE60 {
  * otherwise bit 3 is set and bit 2 cleared. Slot 25 is called twice, once to test and once for the name. Called by
  * cFEStateRewardGalleryBase_onCreateScreen while bit 3 is clear.
  */
-extern "C" void cFEStateRewardGalleryBase_loadIcons(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::loadIcons()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    if (self->getIconsFileName() != 0) {
-        self->mIconsFileIndex = func_0019DA10(mgr, self->mCharID, self->getIconsFileName(), 9, 1, 0);
-        self->mLoadingState = (self->mLoadingState & ~8) | 4;
+    if (getIconsFileName() != 0) {
+        mIconsFileIndex = func_0019DA10(mgr, mCharID, getIconsFileName(), 9, 1, 0);
+        mLoadingState = (mLoadingState & ~8) | 4;
     } else {
-        self->mLoadingState = (self->mLoadingState | 8) & ~4;
+        mLoadingState = (mLoadingState | 8) & ~4;
     }
 }
 #endif
@@ -691,19 +691,19 @@ struct sVE_FF10i {
  * 1), the first cell (+0x924) becomes the current cell (+0x8FC) and vtable slots 40 (cFEStateRewardGalleryBase_updateList, grid refresh) and
  * 33 (cFEStateRewardGalleryBase_updateHelpText, reward 0) run.
  */
-extern "C" void cFEStateRewardGalleryBase_updateIconsLoad(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateIconsLoad()
 {
-    if (((self->mLoadingState >> 3) & 1) == 0) {
+    if (((mLoadingState >> 3) & 1) == 0) {
         char* mgr = SSXApp->RealFE->mBoltFileManager;
-        if (func_0019E238(mgr, self->mCharID, self->mIconsFileIndex) != 0) {
-            cFEStateRewardGalleryBase_allocIcons(self, func_0019E2B0(mgr, self->mCharID, self->mIconsFileIndex));
-            func_0019DC20(mgr, self->mCharID, self->mIconsFileIndex);
-            self->mIconsFileIndex = -1;
-            self->mLoadingState = (self->mLoadingState & ~4) | 8;
-            if ((self->mLoadingState >> 1) & 1) {
-                self->mpSelected = (cUIIcon*)(*(int*)&self->mpIcons[0]);
-                self->updateList();
-                self->updateHelpText(0);
+        if (func_0019E238(mgr, mCharID, mIconsFileIndex) != 0) {
+            allocIcons(func_0019E2B0(mgr, mCharID, mIconsFileIndex));
+            func_0019DC20(mgr, mCharID, mIconsFileIndex);
+            mIconsFileIndex = -1;
+            mLoadingState = (mLoadingState & ~4) | 8;
+            if ((mLoadingState >> 1) & 1) {
+                mpSelected = (cUIIcon*)(*(int*)&mpIcons[0]);
+                updateList();
+                updateHelpText(0);
             }
         }
     }
@@ -735,20 +735,20 @@ struct sSelf001CFFF8 {
  *
  * @param data  the loaded icon file, or 0
  */
-extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* self, SHAPEFILE* data)
+void cFEStateRewardGalleryBase::allocIcons(SHAPEFILE* data)
 {
     if (data == 0) {
-        self->mNumIcons = 0;
+        mNumIcons = 0;
         return;
     }
-    self->mNumIcons = data->num;
+    mNumIcons = data->num;
     int i;
-    for (i = 0; i < self->mNumIcons; i++) {
-        SHAPE_name(data, i, &self->mIcons[i]);
-        self->mIcons[i].mName[4] = 0;
+    for (i = 0; i < mNumIcons; i++) {
+        SHAPE_name(data, i, &mIcons[i]);
+        mIcons[i].mName[4] = 0;
         // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
         const SHAPE* shape = (const SHAPE*)((char*)data + data->tbl[i].offset);
-        self->mIcons[i].mID = GrMan->AddTexture(shape, self->mIcons[i].mName, 0, 1, -1);
+        mIcons[i].mID = GrMan->AddTexture(shape, mIcons[i].mName, 0, 1, -1);
     }
 }
 #endif
@@ -765,22 +765,22 @@ extern "C" void func_0019DC20(void* self, int bank, int i);
  * bank +0x50) and set to -1. Clears bit 3 (icons loaded) of flags +0x48. The callers are in fe/fepopupmisc.cpp, among
  * them the gallery vtables' slot-1 destructors (cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts, cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos, cFEStateRewardGalleryToys__cFEStateRewardGalleryToys, cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars).
  */
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::purgeIcons()
 {
     int i;
-    for (i = 0; i < self->mNumIcons; i++) {
-        if (self->mIcons[i].mID >= 0) {
-            GrMan->RemoveTexture(self->mIcons[i].mID);
+    for (i = 0; i < mNumIcons; i++) {
+        if (mIcons[i].mID >= 0) {
+            GrMan->RemoveTexture(mIcons[i].mID);
         }
-        self->mIcons[i].mID = -1;
-        self->mIcons[i].mName[0] = 0;
+        mIcons[i].mID = -1;
+        mIcons[i].mName[0] = 0;
     }
-    int iconSlot = self->mIconsFileIndex;
+    int iconSlot = mIconsFileIndex;
     if (iconSlot >= 0) {
-        func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, iconSlot);
-        self->mIconsFileIndex = -1;
+        func_0019DC20(SSXApp->RealFE->mBoltFileManager, mCharID, iconSlot);
+        mIconsFileIndex = -1;
     }
-    self->mLoadingState &= ~8;
+    mLoadingState &= ~8;
 }
 #endif
 
@@ -802,17 +802,17 @@ extern "C" void cBERewardInterface_loadRewards(void* iface);
  * builder, e.g. cFEStateRewardGalleryPosters_allocRewards) and sets the total row count +0x60 to the reward count (+0x68) divided by the columns
  * (+0x5C), rounded up. Called by cFEStateRewardGalleryBase_onCreateScreen.
  */
-extern "C" void cFEStateRewardGalleryBase_loadRewards(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::loadRewards()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     if (cBERewardInterface_isRewardsLoaded(iface) == 0) {
-        self->mLoadingState = (self->mLoadingState & ~2) | 1;
+        mLoadingState = (mLoadingState & ~2) | 1;
         cBERewardInterface_loadRewards(iface);
     } else {
-        self->mLoadingState = (self->mLoadingState & ~1) | 2;
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, self);
-        vt[28].fn(vthis(self, vt[28]));
-        self->mNumRows = (self->mNumTotalRewards + self->mMaxRewardColumns - 1) / self->mMaxRewardColumns;
+        mLoadingState = (mLoadingState & ~1) | 2;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, this);
+        vt[28].fn(vthis(this, vt[28]));
+        mNumRows = (mNumTotalRewards + mMaxRewardColumns - 1) / mMaxRewardColumns;
     }
 }
 #endif
@@ -835,20 +835,20 @@ extern "C" int cBERewardInterface_isRewardsLoaded(void* iface);
  * (+0x924) becomes the current cell (+0x8FC) and slots 40 (cFEStateRewardGalleryBase_updateList) and 33
  * (cFEStateRewardGalleryBase_updateHelpText, reward 0) run.
  */
-extern "C" void cFEStateRewardGalleryBase_updateRewardsLoad(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateRewardsLoad()
 {
-    if (((self->mLoadingState >> 1) & 1) == 0) {
+    if (((mLoadingState >> 1) & 1) == 0) {
         if (cBERewardInterface_isRewardsLoaded(cBE_getInterface_Fv(cBE_getBE(), 13)) != 0) {
-            self->mLoadingState = (self->mLoadingState & ~1) | 2;
-            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, self);
-            vt[28].fn(vthis(self, vt[28]));
-            self->mNumRows = (self->mNumTotalRewards + self->mMaxRewardColumns - 1) / self->mMaxRewardColumns;
-            if ((self->mLoadingState >> 3) & 1) {
-                self->mpSelected = (cUIIcon*)(*(int*)&self->mpIcons[0]);
-                sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-                vt2[40].fn(vthis(self, vt2[40]));
-                sVEntry<void(void*, int)>* vt3 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-                vt3[33].fn(vthis(self, vt3[33]), 0);
+            mLoadingState = (mLoadingState & ~1) | 2;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, this);
+            vt[28].fn(vthis(this, vt[28]));
+            mNumRows = (mNumTotalRewards + mMaxRewardColumns - 1) / mMaxRewardColumns;
+            if ((mLoadingState >> 3) & 1) {
+                mpSelected = (cUIIcon*)(*(int*)&mpIcons[0]);
+                sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+                vt2[40].fn(vthis(this, vt2[40]));
+                sVEntry<void(void*, int)>* vt3 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, this);
+                vt3[33].fn(vthis(this, vt3[33]), 0);
             }
         }
     }
@@ -921,12 +921,12 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
     case 7:
         nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
-        cFEStatePreviewReward_setReward((cFEStatePreviewReward*)nextState, self->mRewardType, data);
+        ((cFEStatePreviewReward*)nextState)->setReward(self->mRewardType, data);
         break;
     case 6:
         nextState = cFEStateVideoPlayer_cFEStateVideoPlayer((cFEStateVideoPlayer*)cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
-        cFEStateVideoPlayer_setVideoSourceFiles((cFEStateVideoPlayer*)nextState, ((const tVideoInfo*)data)->mpVideoFileName, 0);
+        ((cFEStateVideoPlayer*)nextState)->setVideoSourceFiles(((const tVideoInfo*)data)->mpVideoFileName, 0);
         break;
     }
     if (nextState != 0) {
@@ -2424,7 +2424,7 @@ extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void cFEStatePreviewReward_onUpdate(cFEStatePreviewReward* self)
 {
     if (self->mTextureFileIndex >= 0) {
-        cFEStatePreviewReward_updateTextureLoad(self);
+        self->updateTextureLoad();
     }
     cUIState_onUpdate(self);
 }
@@ -2502,22 +2502,22 @@ extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, c
  * @param kind  the reward type (3 posters, 4 trading cards, 5 art, 6 videos, 7 toys)
  * @param data  the 16-byte reward record
  */
-extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int kind, void* data)
+void cFEStatePreviewReward::setReward(int kind, void* data)
 {
-    self->mRewardType = kind;
-    self->mpReward = data;
+    mRewardType = kind;
+    mpReward = data;
     switch (kind) {
     case 3:
-        cFEStatePreviewReward_loadTexture(self, ((tPosterInfo*)data)->mpTextureFileName);
+        loadTexture(((tPosterInfo*)data)->mpTextureFileName);
         break;
     case 4:
-        cFEStatePreviewReward_loadTexture(self, ((tTradingCardInfo*)data)->mpTextureFileName);
+        loadTexture(((tTradingCardInfo*)data)->mpTextureFileName);
         break;
     case 5:
-        cFEStatePreviewReward_loadTexture(self, ((tConceptArtInfo*)data)->mpTextureFileName);
+        loadTexture(((tConceptArtInfo*)data)->mpTextureFileName);
         break;
     case 7:
-        cFEStatePreviewReward_loadTexture(self, ((tToyInfo*)data)->mpTextureFileName);
+        loadTexture(((tToyInfo*)data)->mpTextureFileName);
         break;
     }
 }
@@ -2536,9 +2536,9 @@ extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int
  *
  * @param fileName  the picture file name (the reward record's mpTextureFileName)
  */
-extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, const char* fileName)
+void cFEStatePreviewReward::loadTexture(const char* fileName)
 {
-    self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, fileName, 9, 1, 0);
+    mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, mCharID, fileName, 9, 1, 0);
 }
 #endif
 
@@ -2577,28 +2577,28 @@ struct sVEK1D2198 {
  * mpTextureElem 0 and the frame is shown (setVisible 1). Called by cFEStatePreviewReward_onUpdate while the slot is >=
  * 0.
  */
-extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* self)
+void cFEStatePreviewReward::updateTextureLoad()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    if (func_0019E238(mgr, self->mCharID, self->mTextureFileIndex) == 0)
+    if (func_0019E238(mgr, mCharID, mTextureFileIndex) == 0)
         return;
-    SHAPEFILE* data = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex);
+    SHAPEFILE* data = func_0019E2B0(mgr, mCharID, mTextureFileIndex);
     char* shapeHeader = (char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[0].off;
     short shapeWidth = *(short*)(shapeHeader + 4);
     short shapeHeight = *(short*)(shapeHeader + 6);
     if (shapeHeight < shapeWidth)
-        self->mOrientation = 1;
+        mOrientation = 1;
     else if (shapeWidth < shapeHeight)
-        self->mOrientation = 2;
+        mOrientation = 2;
     else
-        self->mOrientation = 0;
+        mOrientation = 0;
     tIconInfo ent;
     SHAPE_name(data, 0, &ent);
     ent.mName[4] = 0;
-    self->mTextureID = GrMan->AddTexture((const SHAPE*)shapeHeader, (const char*)&ent, 0, 1, -1);
-    func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex);
-    self->mTextureFileIndex = -1;
-    sSelfK1D2198* previewState = (sSelfK1D2198*)self;
+    mTextureID = GrMan->AddTexture((const SHAPE*)shapeHeader, (const char*)&ent, 0, 1, -1);
+    func_0019DC20(mgr, mCharID, mTextureFileIndex);
+    mTextureFileIndex = -1;
+    sSelfK1D2198* previewState = (sSelfK1D2198*)this;
     char* bitmapWidget = previewState->a48[previewState->kind];
     if (bitmapWidget != 0 && previewState->a54[previewState->kind] != 0) {
         *(int*)(bitmapWidget + 0x78) = previewState->handle;
@@ -2699,7 +2699,7 @@ extern char str_MoviePlayer[];
 extern "C" void cFEStateVideoPlayer_onCreateScreen(cFEStateVideoPlayer* self)
 {
     self->mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
-    cFEStateVideoPlayer_Start(self);
+    self->Start();
 }
 #endif
 
@@ -2770,7 +2770,7 @@ extern "C" void cFEStateVideoPlayer_onUpdate(cFEStateVideoPlayer* self)
         cMoviePlayer_asyncUpdate(moviePlayer);
         if ((self->mStopPending != 0 && self->mRenderOnce != 0)
             || *(int*)self->mpMoviePlayer != 0) {
-            cFEStateVideoPlayer_Stop(self);
+            self->Stop();
         }
     }
     cUIState_onUpdate(self);
@@ -2828,13 +2828,13 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param videoFile  the video file name
  * @param audioFile  the audio file name, or 0 for none
  */
-extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(cFEStateVideoPlayer* self, const char* videoFile, const char* audioFile)
+void cFEStateVideoPlayer::setVideoSourceFiles(const char* videoFile, const char* audioFile)
 {
-    strcpy((char*)&self->mVideoFileName, videoFile);
+    strcpy((char*)&mVideoFileName, videoFile);
     if (audioFile != 0) {
-        strcpy((char*)&self->mAudioFileName, audioFile);
+        strcpy((char*)&mAudioFileName, audioFile);
     } else {
-        *((char*)&self->mAudioFileName) = 0;
+        *((char*)&mAudioFileName) = 0;
     }
 }
 #endif
@@ -2854,14 +2854,14 @@ extern "C" void cMoviePlayer_asyncPlay(void* p);
  * the settings block to 1, opens the movie with cMoviePlayer_init() and the settings block (+0x24C), starts it with
  * cMoviePlayer_asyncPlay(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by cFEStateVideoPlayer_onCreateScreen.
  */
-extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self)
+void cFEStateVideoPlayer::Start()
 {
     func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
-    self->mOptions.bSoundOn = 1;
-    cMoviePlayer_init(self->mpMoviePlayer, (char*)&self->mOptions);
-    cMoviePlayer_asyncPlay(self->mpMoviePlayer);
-    self->mRenderOnce = 0;
-    self->mUpdatedOnce = 0;
+    mOptions.bSoundOn = 1;
+    cMoviePlayer_init(mpMoviePlayer, (char*)&mOptions);
+    cMoviePlayer_asyncPlay(mpMoviePlayer);
+    mRenderOnce = 0;
+    mUpdatedOnce = 0;
 }
 #endif
 
@@ -2879,11 +2879,11 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  * request (+0x27C), and marks the front state on the engine's state stack (mpEngine + 0x18) pending delete in mode 6
  * with cUIStateStack_pop(stack, 1). Called by cFEStateVideoPlayer_onUpdate.
  */
-extern "C" void cFEStateVideoPlayer_Stop(cFEStateVideoPlayer* self)
+void cFEStateVideoPlayer::Stop()
 {
     func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
-    self->mStopPending = 0;
-    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+    mStopPending = 0;
+    cUIStateStack_pop(&mpEngine->mStateStack, 1);
 }
 #endif
 

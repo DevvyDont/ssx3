@@ -37,6 +37,9 @@ struct tSphTreeInfo;
 // EA's sphere tree of one mesh, placed in world space (On Tour: bxSphereTree 0x140 = SphereTree 0xC0 + staticInfo).
 // Retail methods in src/intersect/riderspheretree.cpp: SphereTree_SphereTree (ctor), SphereTree_init (reset), SphereTree_GetResolution
 // (radius), SphereTree_MoveOffset (translate), SphereTree_TransformAbs (set transform); bxSphereTree_operatorE is operator=.
+struct cRiderSphereTree;
+struct t4Vector;
+
 struct bxSphereTree {
     // --- SphereTree (On Tour 0xC0)
     t4Vector axis[8];      // 0x000 [O]; [U] SphereTree_init fills 8 qwords from gSphTreeAlignAxis, operator= copies them
@@ -49,6 +52,16 @@ struct bxSphereTree {
     char unk_0BC[0x4];     // 0x0BC padding
     // --- bxSphereTree
     tSphTreeInfo staticInfo; // 0x0C0 [O] tSphTreeInfo staticInfo (intersect/spheretree.h); [U] operator= copies 0xC0-0x140
+
+    // Methods bound to their retail symbols by asm labels.
+    bxSphereTree* operatorE(bxSphereTree* src) __asm__("bxSphereTree_operatorE");
+    int Load(char* buf, int aTreeID) __asm__("bxSphereTree_Load");
+    int IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int outContact)
+        __asm__("bxSphereTree_IsRiderTreeCollision");
+    int Is2SidedTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* dir, t4Vector* overlap,
+                             t4Vector* loc)
+        __asm__("bxSphereTree_Is2SidedTriCollision");
+    void Draw() __asm__("bxSphereTree_Draw");
 };
 
 CHECK_OFFSET(bxSphereTree, axis, 0x000);

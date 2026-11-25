@@ -34,6 +34,11 @@ struct cFEStatePeakRoom : public cUIState {
     cTextureElement* mpNoCheckElem;      // 0x0D8 [O]
     int mCharID;                         // 0x0DC [O]
     int mPeakNum;                        // 0x0E0 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStatePeakRoom1() __asm__("cFEStatePeakRoom_cFEStatePeakRoom1");
+    void updateHelpText(int index) __asm__("cFEStatePeakRoom_updateHelpText");
+    void updateMedalsList(int peak) __asm__("cFEStatePeakRoom_updateMedalsList");
 };
 
 CHECK_OFFSET(cFEStatePeakRoom, mpTrophyIcons, 0x048);

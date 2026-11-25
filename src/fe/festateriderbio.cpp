@@ -366,21 +366,21 @@ extern char str_helptext_custom[];
  * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateTrickMenu does the opposite. Called when the
  * state gains focus (cFEStateUberTrick_onGainFocus) and when the trick menu is left (event 6 in cFEStateUberTrick_onWidgetEvent).
  */
-extern "C" void cFEStateUberTrick_activateMainMenu(cFEStateUberTrick* self)
+void cFEStateUberTrick::activateMainMenu()
 {
-    cUIThing* hiliteRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
+    cUIThing* hiliteRight = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
         hiliteRight->setVisible(0);
     }
-    cUIThing* hiliteLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
+    cUIThing* hiliteLeft = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hilite_left));
     if (hiliteLeft != 0) {
         hiliteLeft->setVisible(1);
     }
-    cUIThing* helpChoose = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
+    cUIThing* helpChoose = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_choose));
     if (helpChoose != 0) {
         helpChoose->setVisible(1);
     }
-    cUIThing* helpCustom = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
+    cUIThing* helpCustom = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_custom));
     if (helpCustom != 0) {
         helpCustom->setVisible(0);
     }
@@ -404,21 +404,21 @@ extern char str_helptext_custom[];
  * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateMainMenu does the opposite. Called when a
  * category is accepted (event 5 in cFEStateUberTrick_onWidgetEvent).
  */
-extern "C" void cFEStateUberTrick_activateTrickMenu(cFEStateUberTrick* self)
+void cFEStateUberTrick::activateTrickMenu()
 {
-    cUIThing* hiliteRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
+    cUIThing* hiliteRight = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
         hiliteRight->setVisible(1);
     }
-    cUIThing* hiliteLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
+    cUIThing* hiliteLeft = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hilite_left));
     if (hiliteLeft != 0) {
         hiliteLeft->setVisible(0);
     }
-    cUIThing* helpChoose = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
+    cUIThing* helpChoose = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_choose));
     if (helpChoose != 0) {
         helpChoose->setVisible(0);
     }
-    cUIThing* helpCustom = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
+    cUIThing* helpCustom = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_custom));
     if (helpCustom != 0) {
         helpCustom->setVisible(1);
     }

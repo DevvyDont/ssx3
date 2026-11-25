@@ -67,11 +67,11 @@ static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
  * @param blend  blend rate; bit 1 of the controller's flags (+0x30) forces an instant switch (1.0)
  */
 // Creates the chase-camera algorithm for the given kind and blends it in.
-extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraController* self, int kind, char* ctx, float blend)
+void cChaseCameraController::createChaseAlgorithmBlend(int kind, char* ctx, float blend)
 {
     cCamAlgo_D0A0* algo = 0;
     float blendRate = blend;
-    if (self->CamSwitchRecord.IsInReplay) {
+    if (CamSwitchRecord.IsInReplay) {
         blendRate = 1.0f;
     }
     switch (kind) {
@@ -179,7 +179,8 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
         algo = 0;
         break;
     case 68:
-        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(944, str_POST_RACE_1_Chase_Camera_Algorithm, 0x20000000, 0), self->Target);
+        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(944,
+                str_POST_RACE_1_Chase_Camera_Algorithm, 0x20000000, 0), Target);
         break;
     case 94:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
@@ -198,8 +199,8 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
         *(int*)((char*)algo + 0xC) = kind;
         break;
     }
-    algo->setTarget(self->Target);
-    cChaseCameraController_addAlgorithm(((char*)self), algo, blendRate);
+    algo->setTarget(Target);
+    cChaseCameraController_addAlgorithm(((char*)this), algo, blendRate);
     algo->activate();
 }
 #endif
@@ -251,24 +252,24 @@ extern "C" void* cSimpleCamera_updateCamMat(void* self);
  * @param y  the near distance, also its minimum
  * @param z  the far distance, also its maximum
  */
-extern "C" void cSimpleCamera_init(cSimpleCamera* self, float x, float y, float z)
+void cSimpleCamera::init(float x, float y, float z)
 {
     t4Vector poseVec;
-    self->MaxView = x;
-    self->MinNear = y;
-    self->MaxFar = z;
-    self->View = x;
-    self->Near = y;
-    self->Far = z;
+    MaxView = x;
+    MinNear = y;
+    MaxFar = z;
+    View = x;
+    Near = y;
+    Far = z;
     poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
-    *(t4Vector*)&self->Pose = poseVec;
+    *(t4Vector*)&Pose = poseVec;
     poseVec.w = 1.0f;
     poseVec.x = 0;
     poseVec.y = 1.0f;
     poseVec.z = 0;
-    *(t4Vector*)&self->Pose.Q = poseVec;
-    *(t4Vector*)&self->Direction = t4vect_XAxis;
-    cSimpleCamera_updateCamMat(self);
+    *(t4Vector*)&Pose.Q = poseVec;
+    *(t4Vector*)&Direction = t4vect_XAxis;
+    cSimpleCamera_updateCamMat(this);
 }
 #endif
 
@@ -301,12 +302,12 @@ static inline float atan2_15D780(float y, float x, float zero)
  *
  * @return the heading (radians)
  */
-extern "C" float cSimpleCamera_getHeading(cSimpleCamera* self)
+float cSimpleCamera::getHeading()
 {
     t4Vector look;
-    float x = 2.0f * (self->Pose.Q.y * self->Pose.Q.x - self->Pose.Q.w * self->Pose.Q.z);
-    float y = 1.0f - 2.0f * (self->Pose.Q.z * self->Pose.Q.z + self->Pose.Q.x * self->Pose.Q.x);
-    float z = 2.0f * (self->Pose.Q.y * self->Pose.Q.z + self->Pose.Q.w * self->Pose.Q.x);
+    float x = 2.0f * (Pose.Q.y * Pose.Q.x - Pose.Q.w * Pose.Q.z);
+    float y = 1.0f - 2.0f * (Pose.Q.z * Pose.Q.z + Pose.Q.x * Pose.Q.x);
+    float z = 2.0f * (Pose.Q.y * Pose.Q.z + Pose.Q.w * Pose.Q.x);
     look.x = x;
     look.y = y;
     look.z = z;
@@ -348,12 +349,12 @@ static inline float cSimpleCamera_getPitch_Length(const t4Vector& v)
  *
  * @return the pitch (radians)
  */
-extern "C" float cSimpleCamera_getPitch(cSimpleCamera* self)
+float cSimpleCamera::getPitch()
 {
     t4Vector look;
-    look.x = 2.0f * (self->Pose.Q.y * self->Pose.Q.x - self->Pose.Q.w * self->Pose.Q.z);
-    look.y = 1.0f - 2.0f * (self->Pose.Q.z * self->Pose.Q.z + self->Pose.Q.x * self->Pose.Q.x);
-    look.z = 2.0f * (self->Pose.Q.y * self->Pose.Q.z + self->Pose.Q.w * self->Pose.Q.x);
+    look.x = 2.0f * (Pose.Q.y * Pose.Q.x - Pose.Q.w * Pose.Q.z);
+    look.y = 1.0f - 2.0f * (Pose.Q.z * Pose.Q.z + Pose.Q.x * Pose.Q.x);
+    look.z = 2.0f * (Pose.Q.y * Pose.Q.z + Pose.Q.w * Pose.Q.x);
     look.w = 0;
     return func_0031C128(look.z / cSimpleCamera_getPitch_Length(look));
 }

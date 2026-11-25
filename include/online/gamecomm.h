@@ -204,6 +204,9 @@ struct cGameComm {
                                  //       peer [1]
     unsigned int mCheckSumBuffer[2][60]; // 0x410 [O] (On Tour [60][4]: frame-major); [U] [0] this machine's checksums,
                                  //       [1] the peer's, at [(frame / 60) % 60]; [R] both cleared (MEM_fill 0xF0)
+
+    // Methods bound to their retail symbols by asm labels.
+    void stopSyncInput() __asm__("cGameComm_stopSyncInput__FPv");
 };
 
 CHECK_SIZE(tGameCommPacket, 0xF0);

@@ -64,6 +64,10 @@ struct PS2_SONY_CODEC_INTERNAL {
                                         //      frees it
     char* mpChunkBufferUncached;        // 0x7C [U] Init: mpChunkBuffer | 0x30000000 (uncached alias); func_003B0B40 copies
                                         //      each chunk there and hands it to sceMpegAddBs
+
+    // Methods bound to their retail symbols by asm labels.
+    void* DecodeFrame() __asm__("PS2_SONY_CODEC_INTERNAL_DecodeFrame");
+    void* GetFrame(unsigned int limit) __asm__("PS2_SONY_CODEC_INTERNAL_GetFrame");
 };
 
 // layer_data: mpeg2decode's per-layer state (the MSSG reference decoder's struct layer_data, EA's memory-buffer

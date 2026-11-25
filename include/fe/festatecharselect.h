@@ -32,6 +32,9 @@ struct cFEStateCharSelect : public cUIState {
     char mCharPos[0x10];            // 0x070 [O] t4Vector
     int mbDraw3D;                   // 0x080 [O] bool
     char unk_084[0xC];              // 0x084 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateCharacter3DPos() __asm__("cFEStateCharSelect_updateCharacter3DPos");
 };
 
 CHECK_OFFSET(cFEStateCharSelect, mpSelectedCharWidget, 0x048);
@@ -97,6 +100,11 @@ struct cFEStateCheatCharSelect : public cFEState {
                                     //       each picture; [U] onWidgetCreate / updateCharWidgets copy it to the slots
     const char* mpCharNames[30];    // 0x16C [O] (On Tour [82]); [R] ctor: the base character's short name, then each
                                     //       reward entry's name; [U] onWidgetEvent shows it
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateCharWidgets() __asm__("cFEStateCheatCharSelect_updateCharWidgets");
+    int isDone() __asm__("cFEStateCheatCharSelect_isDone");
+    int getCheatCharID() __asm__("cFEStateCheatCharSelect_getCheatCharID");
 };
 
 CHECK_OFFSET(cFEStateCheatCharSelect, mpArrowPrev, 0x048);

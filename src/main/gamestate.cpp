@@ -60,7 +60,7 @@ extern char str_StartlightBegin[];
  *
  * An online game first resets the world. Game modes 4-6 skip the gate and go straight to the next state.
  */
-extern "C" void cGFGateState_gainFocus(cGFGateState* self)
+void cGFGateState::gainFocus()
 {
     cGameState_mpGame->AI->ComputerActorsActive = 0;
     if (cGameComm_mGameComm != 0) {
@@ -76,13 +76,13 @@ extern "C" void cGFGateState_gainFocus(cGFGateState* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = cBENewRaceInterface_newRace.cGameMode;
     if (mode >= 4 && mode <= 6) {
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState(this);
         return;
     }
     cAI_setAIState(cGameState_mpGame->AI, 4);
     cSSXAudio_CountdownStart(cAudioInterface_bxAudio());
     cSSXAudio_CountdownBeep(cAudioInterface_bxAudio(), 3);
-    cGFGateState_runScript(self, GetHashValue32(str_StartlightBegin));
+    runScript(GetHashValue32(str_StartlightBegin));
     cUIStateStack_purgeNormalStates(&cGameState_mpGame->UI->mStateStack);
 }
 #endif
@@ -107,7 +107,7 @@ extern void* cWScriptMan_TheWScriptMan;
  *
  * @param hashID  the script's hash (On Tour HashID)
  */
-extern "C" void cGFGateState_runScript(cGFGateState* self, int hashID)
+void cGFGateState::runScript(int hashID)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* world = SSXApp->Game->SectionMan;
@@ -157,7 +157,7 @@ static inline float ffloor_00234C68(float x)
  * while
  * a replay plays or in game mode 4.
  */
-extern "C" void cGFGateState_update(cGFGateState* self)
+void cGFGateState::update()
 {
     if (cReplay_isPauseAI(cGameState_mpGame->Replay) != 0) {
         return;
@@ -167,14 +167,14 @@ extern "C" void cGFGateState_update(cGFGateState* self)
         return;
     }
     if (cGameState_mpGame->AI->CountdownTicksLeft <= 0) {
-        cGFGateState_runScript(self, GetHashValue32(str_StartgateOpen));
+        runScript(GetHashValue32(str_StartgateOpen));
         cUIState* obj = cUIStateStack_findState(&cGameState_mpGame->UI->mStateStack, GetHashValue32(str_hud_c));
         if (obj != 0) {
             obj->handleEvent(6, 0);
         }
         cSSXAudio_CountdownGateDrop(cAudioInterface_bxAudio());
         func_0028C8C0(cAudioInterface_bxAudio(), 0x78);
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState(this);
     }
     int frames = cGameState_mpGame->AI->CountdownTicksLeft;
     float secs = frames / 60;
@@ -358,15 +358,15 @@ struct sState_234F40 {
  * Offline at locations 14-16 a first visit (by player 1's rider, getAIIndex) plays the location's intro (sets the
  * audio flags and mPlayFirstTimeBCVideo); otherwise the start sequence is appended to the NIS list.
  */
-extern "C" void cGFTrackStartState_preloadInit(cGFTrackStartState* self)
+void cGFTrackStartState::preloadInit()
 {
-    self->mPreLoadTicks = 0;
+    mPreLoadTicks = 0;
     cReplay_reset(cGameState_mpGame->Replay);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     cSSXScriptEngine_PurgeTrack(ScriptEngine);
     cSSXScriptEngine_AsyncLoadTrack(ScriptEngine);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    self->mPlayFirstTimeBCVideo = 0;
+    mPlayFirstTimeBCVideo = 0;
     int gamePath = cBENewRaceInterface_newRace.cGamePath;
     cAI_prepareToPurgeComputerRiders(cGameState_mpGame->AI);
     cAI_prepareToPurgeComputerActors(cGameState_mpGame->AI);
@@ -380,15 +380,17 @@ extern "C" void cGFTrackStartState_preloadInit(cGFTrackStartState* self)
                 audio->unk_5790 = 0;
                 audio->unk_578C = 1;
                 audio->unk_6254 = 1;
-                self->mPlayFirstTimeBCVideo = 1;
+                mPlayFirstTimeBCVideo = 1;
             }
         }
     } else {
         cSSXScriptEngine_AppendStartSequence(ScriptEngine, 0);
     }
-    self->mPreLoadState = 0;
+    mPreLoadState = 0;
 }
 #endif
+
+extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self);
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadUpdate);
@@ -646,11 +648,11 @@ extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
  * Calls cSSXScriptEngine_PurgeTrack() and cSSXScriptEngine_ResetNISList(ScriptEngine, 1), then sets the preload
  * state (+0x10, On Tour mPreLoadState) to 5, the value cGFTrackStartState_isPreloadComplete() tests.
  */
-extern "C" void cGFTrackStartState_preloadCancel(cGFTrackStartState* self)
+void cGFTrackStartState::preloadCancel()
 {
     cSSXScriptEngine_PurgeTrack(ScriptEngine);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
-    self->mPreLoadState = 5;
+    mPreLoadState = 5;
 }
 #endif
 
@@ -662,9 +664,9 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_isPreloadComplete);
  *
  * @return 1 when the preload is complete, otherwise 0
  */
-extern "C" int cGFTrackStartState_isPreloadComplete(cGFTrackStartState* self)
+int cGFTrackStartState::isPreloadComplete()
 {
-    return self->mPreLoadState == 5;
+    return mPreLoadState == 5;
 }
 #endif
 
@@ -709,22 +711,22 @@ static inline int isMode2_2355C0(cSSXScriptEngine* s)
  * state 3
  * and disables its countdown flag. A location visited for the first time is recorded for player 1.
  */
-extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
+void cGFTrackStartState::gainFocus()
 {
-    self->mCheckTransportEnd = 0;
+    mCheckTransportEnd = 0;
     if (cSSXScriptEngine_IsInTransportSequence(ScriptEngine))
-        self->mCheckTransportEnd = 1;
+        mCheckTransportEnd = 1;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 13));
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     int flag = beRaceDB->cGamePath;
     int mode = beRaceDB->cGameMode;
     if (flag == 0 && !inRange_2355C0(SSXApp->Game->SectionMan->mBELocationID)) {
-        self->mStartupFlag = 0;
-        self->mNextState = 4;
+        mStartupFlag = 0;
+        mNextState = 4;
     } else {
-        self->mNextState = 1;
-        self->mStartupFlag = flag == 0;
+        mNextState = 1;
+        mStartupFlag = flag == 0;
     }
     if (mode == 4)
         cAI_setAIState(cGameState_mpGame->AI, 3);
@@ -739,14 +741,14 @@ extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
     cGameState_mpGame->AI->ComputerRidersActive = mode != 4;
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     if (flag) {
-        self->mNextState = 1;
-        self->mStartupFlag = 0;
+        mNextState = 1;
+        mStartupFlag = 0;
         if (isMode2_2355C0(ScriptEngine)) {
             cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 0, 1);
             if (isMode2_2355C0(ScriptEngine))
                 cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 0, 1);
         }
-    } else if (self->mPlayFirstTimeBCVideo) {
+    } else if (mPlayFirstTimeBCVideo) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     }
     func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
@@ -768,14 +770,14 @@ extern "C" void cGameState_gotoNextState(void* self);
  * its transport sequence, sets the word at SectionMan + 0x1A4 and clears the flag. Calls
  * cGameState_gotoNextState() once NIS list 1 reports play state 0.
  */
-extern "C" void cGFTrackStartState_update(cGFTrackStartState* self)
+void cGFTrackStartState::update()
 {
-    if (self->mCheckTransportEnd != 0 && cSSXScriptEngine_IsInTransportSequence(ScriptEngine) == 0) {
+    if (mCheckTransportEnd != 0 && cSSXScriptEngine_IsInTransportSequence(ScriptEngine) == 0) {
         SSXApp->Game->SectionMan->m_bTriggerSkySwap = 1;
-        self->mCheckTransportEnd = 0;
+        mCheckTransportEnd = 0;
     }
     if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) == 0) {
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState(this);
     }
 }
 #endif
@@ -802,14 +804,14 @@ static inline int otherSide_235868(cCamera* camera)
  * Offline it records the location as visited for player 1; game modes 5 and 6 reset the heat in the game mode
  * manager; a split-screen game clears the other view's cache flag.
  */
-extern "C" void cGFTrackStartState_loseFocus(cGFTrackStartState* self)
+void cGFTrackStartState::loseFocus()
 {
     cWScriptMan_purgeMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cReplay_reset(cGameState_mpGame->Replay);
     cReplay_startRace(cGameState_mpGame->Replay);
-    self->mPlayFirstTimeBCVideo = 0;
+    mPlayFirstTimeBCVideo = 0;
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     if (beRaceDB->cGamePath == 0) {
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -908,7 +910,7 @@ extern void* cWScriptMan_TheWScriptMan;
  *
  * Game modes 5 and 6, and online games, skip straight to step 3. Race mode also plays the transport sequence.
  */
-extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
+void cGFNextHeatState::gainFocus()
 {
     cBE_setState(0);
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
@@ -925,7 +927,7 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
         goto bail;
     if (beRaceDB->cGamePath != 0) {
     bail:
-        self->CurrentNextHeatState = 3;
+        CurrentNextHeatState = 3;
         return;
     }
     int n = gm->iNumberAI - gm->iSimAI;
@@ -945,19 +947,19 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
     cAI_prepareToPurgeComputerRiders(SSXApp->Game->AI);
     if (n >= 2)
         cAI_prepareToPurgeComputerActors(SSXApp->Game->AI);
-    self->PlayTransport = 0;
+    PlayTransport = 0;
     cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
     if (raceDB->cGameMode == 0) {
         void* sc = ScriptEngine;
-        self->PlayTransport = 1;
+        PlayTransport = 1;
         cSSXScriptEngine_PlayTransportSequence(sc, 1, 0);
     }
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     cSSXScriptEngine_AppendStartSequence(ScriptEngine, gm->bIsLastHeat ? 3 : 2);
     cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
     cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 3);
-    self->WaitTicks = 0;
-    self->CurrentNextHeatState = 0;
+    WaitTicks = 0;
+    CurrentNextHeatState = 0;
 }
 #endif
 
@@ -994,12 +996,12 @@ extern cGame* cGameState_mpGame;
  * Step 2 waits until the focus is 20000 units away, 120 frames have passed and the transport NIS and rider
  * are idle.
  */
-extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
+void cGFNextHeatState::update()
 {
-    self->WaitTicks += 1;
+    WaitTicks += 1;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cGame* game = SSXApp->Game;
-    int state = self->CurrentNextHeatState;
+    int state = CurrentNextHeatState;
     cWorld* world = game->World;
     int idx = game->ViewMan->PlayerCamera[0]->StreamFocusID == 0;
     switch (state) {
@@ -1009,7 +1011,7 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
             if (cBENewRaceInterface_newRace.iNumberAI >= 2)
                 cAI_cleanupActors(SSXApp->Game->AI);
             cAI_initAIRiders(SSXApp->Game->AI);
-            self->CurrentNextHeatState = 1;
+            CurrentNextHeatState = 1;
         }
         break;
     case 1:
@@ -1020,19 +1022,19 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
             cPlayer* player = SSXApp->Game->AI->Players[0];
             t4Vector pos = cRider_getEventStartPos(player->mRider);
             cWorldView_setFocus(&world->m_pWorldCache->m_WorldView, idx, (const t4Vector*)&pos, 45000.0f);
-            self->CurrentNextHeatState = 2;
+            CurrentNextHeatState = 2;
         } else {
             cAI_loadRiders(SSXApp->Game->AI);
         }
         break;
     case 2:
-        if (self->PlayTransport != 0) {
+        if (PlayTransport != 0) {
             t4Vector focusPos;
             float dist;
             cWorldView_getTestFocus(&world->m_pWorldCache->m_WorldView, idx, (t4Vector*)&focusPos, &dist);
             if (dist < 20000.0f)
                 break;
-            if (self->WaitTicks < 120)
+            if (WaitTicks < 120)
                 break;
             if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1)
                 break;
@@ -1047,10 +1049,10 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
                 break;
             cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         }
-        self->CurrentNextHeatState = 3;
+        CurrentNextHeatState = 3;
         break;
     case 3:
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState(this);
         break;
     }
 }
@@ -1086,12 +1088,12 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFNextHeatState_writeToReplayFrame(cGFNextHeatState* self, cBxReplayFrame* stream)
+void cGFNextHeatState::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_writeToReplayFrame_2(self, stream);
-    stream->write((const char*)&self->CurrentNextHeatState, 4);
-    stream->write((const char*)&self->WaitTicks, 4);
-    stream->write((const char*)&self->PlayTransport, 4);
+    cGameState_writeToReplayFrame_2(this, stream);
+    stream->write((const char*)&CurrentNextHeatState, 4);
+    stream->write((const char*)&WaitTicks, 4);
+    stream->write((const char*)&PlayTransport, 4);
 }
 #endif
 
@@ -1109,12 +1111,12 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFNextHeatState_readFromReplayFrame(cGFNextHeatState* self, cBxReplayFrame* stream)
+void cGFNextHeatState::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_readFromReplayFrame_2(self, stream);
-    stream->read((char*)&self->CurrentNextHeatState, 4);
-    stream->read((char*)&self->WaitTicks, 4);
-    stream->read((char*)&self->PlayTransport, 4);
+    cGameState_readFromReplayFrame_2(this, stream);
+    stream->read((char*)&CurrentNextHeatState, 4);
+    stream->read((char*)&WaitTicks, 4);
+    stream->read((char*)&PlayTransport, 4);
 }
 #endif
 
@@ -1138,7 +1140,7 @@ extern void* cFade_TObj_vtbl[];
  * Teleports the rider for a new session: free-ride event 12, a partial restart at the mission start point, a
  * white fade.
  */
-extern "C" void cGFSessionTeleportState_gainFocus(cGFSessionTeleportState* self)
+void cGFSessionTeleportState::gainFocus()
 {
     void* gm = SSXApp->GameModeMan;
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
@@ -1275,25 +1277,25 @@ static inline int isOne_6250(int m)
  *              3 the
  *              transport map
  */
-extern "C" void cGFUserSelectState_gainFocus(cGFUserSelectState* self, int mode)
+void cGFUserSelectState::gainFocus(int mode)
 {
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cAI_setAIState(cGameState_mpGame->AI, 3);
     cGameState_mpGame->AI->Players[0]->mRider->BoostPowerBar = 0.0f;
-    self->mNextLocation = 23;
-    self->mCurrState = 0;
-    self->mMode = mode;
-    self->mOverlayDone = 0;
-    self->mWaitingForOverlay = 0;
+    mNextLocation = 23;
+    mCurrState = 0;
+    mMode = mode;
+    mOverlayDone = 0;
+    mWaitingForOverlay = 0;
     if (mode == 1) {
-        self->mOverlayDone = mode;
+        mOverlayDone = mode;
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        self->mNextLocation = cBENewRaceInterface_mNextLocation;
+        mNextLocation = cBENewRaceInterface_mNextLocation;
     }
-    if (self->mNextLocation == *cBENewRaceInterface_getLocation(iface))
+    if (mNextLocation == *cBENewRaceInterface_getLocation(iface))
         cGame_partialRestart(SSXApp->Game);
-    int curMode = self->mMode;
+    int curMode = mMode;
     if (curMode == 0) {
         cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 22, 3, 0, -1, -1, -1);
         cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 23, 1, 0, -1, -1, -1);
@@ -1305,7 +1307,7 @@ extern "C" void cGFUserSelectState_gainFocus(cGFUserSelectState* self, int mode)
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 11, 3, 0, -1, -1, -1);
             cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
             cRider_initAlways(SSXApp->Game->AI->Players[0]->mRider);
-            cSSXScriptEngine_PlayNISList(ScriptEngine, 1, self->mMode == 2, 0);
+            cSSXScriptEngine_PlayNISList(ScriptEngine, 1, mMode == 2, 0);
         }
     }
 }
@@ -1379,7 +1381,7 @@ static inline void pop_6418()
  * Choosing the current location (outside 14-16) asks the game flow to teleport (0xF); otherwise it plays the
  * transport sequence, then loads the target location (cSectionMan load, mode 7) during it.
  */
-extern "C" void cGFUserSelectState_update(cGFUserSelectState* self)
+void cGFUserSelectState::update()
 {
     // Retail builds `flag` as a copy of a register holding 1, then `movn flag, zero, (D != 4)`: a condition the
     //       compiler
@@ -1387,16 +1389,16 @@ extern "C" void cGFUserSelectState_update(cGFUserSelectState* self)
     //       (96.81).
     int one = 1;
     int ns;
-    switch (self->mCurrState) {
+    switch (mCurrState) {
     case 0: {
         int nisListInfo = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1);
         if (!(nisListInfo == 4 || nisListInfo == 5 || nisListInfo == 0))
             return;
-        int curMode = self->mMode;
+        int curMode = mMode;
         if (curMode == 0) {
             cOVStateManager_triggerOverlay(0x1F);
             push2_6418();
-            self->mOverlayDone = 0;
+            mOverlayDone = 0;
         } else if (curMode == 2) {
             int flag = 0;
             if (atLeast_6418(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))))
@@ -1407,18 +1409,18 @@ extern "C" void cGFUserSelectState_update(cGFUserSelectState* self)
                 cUITemplate_MAP_mMapStyle = 4;
             cOVStateManager_triggerOverlay(33);
             push2_6418();
-            self->mOverlayDone = 0;
+            mOverlayDone = 0;
         }
         ns = 1;
         break;
     }
     case 1: {
-        if (self->mOverlayDone == 0)
+        if (mOverlayDone == 0)
             return;
         cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 0x1E);
         // Read through a plain int pointer: retail reloads the mode after pop_6418's stores (ee-gcc 2.95 lets a
         // direct member load survive stores to scalar globals).
-        int* mode = &self->mMode;
+        int* mode = &mMode;
         if (!isOne_6418(*mode))
             pop_6418();
         if (*mode == 0) {
@@ -1427,36 +1429,36 @@ extern "C" void cGFUserSelectState_update(cGFUserSelectState* self)
         }
         {
             int curLocation = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
-            int destLocation = self->mNextLocation;
+            int destLocation = mNextLocation;
             int curInBackcountry = (unsigned)(curLocation - 0xE) < 3;
             int destInBackcountry = (unsigned)(destLocation - 0xE) < 3;
             if (destLocation == curLocation && !destInBackcountry) {
-                self->mCurrState = 3;
+                mCurrState = 3;
                 ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 10))->f10 = one;
                 cGame_setState(SSXApp->Game, 0xF, 0, 0);
                 return;
             }
             if (destInBackcountry && cBENewRaceInterface_newRace.cGamePath == 0)
-                self->mOverlayDone = 0;
+                mOverlayDone = 0;
             cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !destInBackcountry && !curInBackcountry, 1);
             ns = 2;
         }
         break;
     }
     case 2:
-        if (self->mMode != 0) {
+        if (mMode != 0) {
             int nisListInfo = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
             if (nisListInfo == 0xE || nisListInfo == 20) {
-                if (self->mOverlayDone == 0) {
-                    if (self->mWaitingForOverlay != 0)
+                if (mOverlayDone == 0) {
+                    if (mWaitingForOverlay != 0)
                         return;
-                    self->mWaitingForOverlay = one;
-                    self->mOverlayDone = one;
+                    mWaitingForOverlay = one;
+                    mOverlayDone = one;
                     return;
                 }
-                self->mWaitingForOverlay = 0;
+                mWaitingForOverlay = 0;
                 ((cSectionMan*)(void*)SSXApp->Game->SectionMan)->mWaitTransport = one;
-                cSectionMan_load(SSXApp->Game->SectionMan, self->mNextLocation, 7);
+                cSectionMan_load(SSXApp->Game->SectionMan, mNextLocation, 7);
                 ns = 3;
                 break;
             }
@@ -1464,13 +1466,13 @@ extern "C" void cGFUserSelectState_update(cGFUserSelectState* self)
                 cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 0);
             return;
         }
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState(this);
         ns = 3;
         break;
     default:
         return;
     }
-    self->mCurrState = ns;
+    mCurrState = ns;
 }
 #endif
 
@@ -1488,13 +1490,13 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFUserSelectState_writeToReplayFrame(cGFUserSelectState* self, cBxReplayFrame* stream)
+void cGFUserSelectState::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_writeToReplayFrame_2(self, stream);
-    stream->write((const char*)&self->mCurrState, 4);
-    stream->write((const char*)&self->mMode, 4);
-    stream->write((const char*)&self->mOverlayDone, 4);
-    stream->write((const char*)&self->mNextLocation, 4);
+    cGameState_writeToReplayFrame_2(this, stream);
+    stream->write((const char*)&mCurrState, 4);
+    stream->write((const char*)&mMode, 4);
+    stream->write((const char*)&mOverlayDone, 4);
+    stream->write((const char*)&mNextLocation, 4);
 }
 #endif
 
@@ -1512,13 +1514,13 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFUserSelectState_readFromReplayFrame(cGFUserSelectState* self, cBxReplayFrame* stream)
+void cGFUserSelectState::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_readFromReplayFrame_2(self, stream);
-    stream->read((char*)&self->mCurrState, 4);
-    stream->read((char*)&self->mMode, 4);
-    stream->read((char*)&self->mOverlayDone, 4);
-    stream->read((char*)&self->mNextLocation, 4);
+    cGameState_readFromReplayFrame_2(this, stream);
+    stream->read((char*)&mCurrState, 4);
+    stream->read((char*)&mMode, 4);
+    stream->read((char*)&mOverlayDone, 4);
+    stream->read((char*)&mNextLocation, 4);
 }
 #endif
 
@@ -1574,7 +1576,7 @@ struct sRace002368A0 {
  * cBENewPlayerInterface_setIsFirstTimeWC(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
  * (gainFocus) of cGFSectionLoadState_vtbl.
  */
-extern "C" void cGFSectionLoadState_gainFocus(cGFSectionLoadState* self)
+void cGFSectionLoadState::gainFocus()
 {
     cBE_setState(0);
     cReplay_reset(cGameState_mpGame->Replay);
@@ -1586,7 +1588,7 @@ extern "C" void cGFSectionLoadState_gainFocus(cGFSectionLoadState* self)
             cBENewPlayerInterface_setIsFirstTimeWC(iface, i, 0);
         }
     }
-    self->mSubState = 0;
+    mSubState = 0;
 }
 #endif
 
@@ -1613,14 +1615,14 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
  * sequence (cSSXScriptEngine_EndTransportSequence), clears mWaitTransport, activates the location in mode 7
  * (cSectionMan_activate) and goes to 2. Slot +0x34 (update) of cGFSectionLoadState_vtbl.
  */
-extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
+void cGFSectionLoadState::update()
 {
     cGame* appGame = SSXApp->Game;
     cSectionMan* sectionMan = appGame->SectionMan;
     if (sectionMan->mWaitTransport == 0) {
         return;
     }
-    int state = self->mSubState;
+    int state = mSubState;
     cWorld* world = appGame->World;
     int idx = appGame->ViewMan->PlayerCamera[0]->StreamFocusID == 0;
     switch (state) {
@@ -1630,7 +1632,7 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
             t4Vector pos = cRider_GetNISEndPosition(aiPlayer->mRider);
             world->m_pWorldCache->m_WorldView.m_StreamFocus[idx].m_bActive = 1;
             cWorldView_setFocus(&world->m_pWorldCache->m_WorldView, idx, &pos, 45000.0f);
-            self->mSubState = 1;
+            mSubState = 1;
         }
         break;
     case 1: {
@@ -1655,7 +1657,7 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
         cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         sectionMan->mWaitTransport = 0;
         cSectionMan_activate(sectionMan, sectionMan->mBELocationID, 7);
-        self->mSubState = 2;
+        mSubState = 2;
         break;
     }
     case 2:
@@ -1795,9 +1797,9 @@ struct sGameState_6BB0 {
  * pushes pause state 1 (cPauseState_Stack[++cPauseState_StackIdx] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
  * cGFPreEventState_vtbl.
  */
-extern "C" void cGFPreEventState_gainFocus(cGFPreEventState* self)
+void cGFPreEventState::gainFocus()
 {
-    self->mOverlayDone = 0;
+    mOverlayDone = 0;
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mError != 0) {
         cCutSceneTransitionMan_ForceToRegularMode(SSXApp_s->mgr->world);
         cBE_setState(0);
@@ -1822,11 +1824,11 @@ extern "C" void cGameState_gotoNextState(void* self);
  *
  * Calls cGameState_gotoNextState. Slot +0x34 (update) of cGFPreEventState_vtbl.
  */
-extern "C" void cGFPreEventState_update(cGFPreEventState* self)
+void cGFPreEventState::update()
 {
     if (cGameComm_mGameComm == 0 || cGameComm_mGameComm->mError == 0) {
-        if (self->mOverlayDone == 1) {
-            cGameState_gotoNextState(self);
+        if (mOverlayDone == 1) {
+            cGameState_gotoNextState(this);
         }
     }
 }
@@ -1847,10 +1849,10 @@ extern int cPauseState_FlagsTable[];
  *
  * Slot +0x3C (loseFocus) of cGFPreEventState_vtbl. The pause stack index is not checked.
  */
-extern "C" void cGFPreEventState_loseFocus(cGFPreEventState* self)
+void cGFPreEventState::loseFocus()
 {
     cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
-    cGFPreEventState_ResetGameState(self);
+    ResetGameState();
 }
 #endif
 
@@ -1877,7 +1879,7 @@ static inline int isMode4_236CD8()
  * the AI's virtual restart (slot 5, cAI_restart) with state 3 and sets its ComputerRidersActive to 1; then
  * cSSXAudio_ResetAudioVariables on the audio (cAudioInterface_bxAudio).
  */
-extern "C" void cGFPreEventState_ResetGameState(cGFPreEventState* self)
+void cGFPreEventState::ResetGameState()
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1950,7 +1952,7 @@ struct sRace00236DA0 {
  * cSSXScriptEngine_ResetNISList(ScriptEngine, 0), clears the overlay-done flag (+0x8) and calls
  * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of cGFPostEventState_vtbl.
  */
-extern "C" void cGFPostEventState_gainFocus(cGFPostEventState* self)
+void cGFPostEventState::gainFocus()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
@@ -1961,7 +1963,7 @@ extern "C" void cGFPostEventState_gainFocus(cGFPostEventState* self)
         }
     }
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
-    self->mOverlayDone = 0;
+    mOverlayDone = 0;
     cOVStateManager_gotoOverlay(7);
 }
 #endif
@@ -1977,9 +1979,9 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
  *
  * Slot +0x34 (update) of cGFPostEventState_vtbl.
  */
-extern "C" void cGFPostEventState_update(cGFPostEventState* self)
+void cGFPostEventState::update()
 {
-    if (self->mOverlayDone == 1) {
+    if (mOverlayDone == 1) {
         cGame_setState(SSXApp->Game, 0xE, 2, 0);
     }
 }
@@ -2067,12 +2069,12 @@ extern "C" void cGameState_gotoNextState(void* self);
  *
  * Calls cGameState_gotoNextState() once NIS list 0 reports play state 0 or 5.
  */
-extern "C" void cGFPodiumState_update(cGFPodiumState* self)
+void cGFPodiumState::update()
 {
     int playState = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
     int busy = playState != 0 && playState != 5;
     if (!busy) {
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState(this);
     }
 }
 #endif
@@ -2278,16 +2280,17 @@ static inline void* initObj_237140(void* o, int a, int b)
  * @param realinput  the real input (On Tour realinput)
  * @return the synced input that replaces it
  */
-extern "C" void* cInputSync_createlocalinput(cInputSync* self, int* realinput)
+void* cInputSync::createlocalinput(int* realinput)
 {
-    cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
-    *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill(syncedPad->samples, 0, self->latency * 100);
-    for (int i = 0; i < self->latency; i++) {
+    cInputSync_SyncedPad* syncedPad = &((&syncedpads[0]))[numsyncedpads++];
+    *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(latency * 100,
+            str_InputSamples, 0, 0);
+    MEM_fill(syncedPad->samples, 0, latency * 100);
+    for (int i = 0; i < latency; i++) {
         (syncedPad->samples)[i].NumButtons = 0x18;
     }
     syncedPad->readpos = 0;
-    syncedPad->writepos = self->sendlimit;
+    syncedPad->writepos = sendlimit;
     *(int*)&syncedPad->sourcepad = realinput[0];
     *(int**)&syncedPad->destinationpad = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
     *((int*)syncedPad->destinationpad) = 0;
@@ -2337,16 +2340,17 @@ static inline void* initObj_237280(void* o, int a, int b)
  * @param realinputmap  the input map (On Tour realinputmap)
  * @return the synced input
  */
-extern "C" void* cInputSync_createremoteinput(cInputSync* self, int realinputmap)
+void* cInputSync::createremoteinput(int realinputmap)
 {
-    cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
-    *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill(syncedPad->samples, 0, self->latency * 100);
-    for (int i = 0; i < self->latency; i++) {
+    cInputSync_SyncedPad* syncedPad = &((&syncedpads[0]))[numsyncedpads++];
+    *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(latency * 100,
+            str_InputSamples, 0, 0);
+    MEM_fill(syncedPad->samples, 0, latency * 100);
+    for (int i = 0; i < latency; i++) {
         (syncedPad->samples)[i].NumButtons = 0x18;
     }
     syncedPad->readpos = 0;
-    syncedPad->writepos = self->sendlimit;
+    syncedPad->writepos = sendlimit;
     *(int*)&syncedPad->sourcepad = 0;
     *(int**)&syncedPad->destinationpad = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
     *((int*)syncedPad->destinationpad) = 0;
@@ -2355,6 +2359,8 @@ extern "C" void* cInputSync_createremoteinput(cInputSync* self, int realinputmap
     return syncedInput;
 }
 #endif
+
+extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* out, char* buf);
 
 //100%
 INCLUDE_ASM("main/gamestate", cInputSync_preupdate);
@@ -2496,7 +2502,7 @@ struct sOwner237950 {
  *
  * @return 1 when input is ready, otherwise 0
  */
-extern "C" int cInputSync_aiinputready(cInputSync* self)
+int cInputSync::aiinputready()
 {
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm->mState < 14) {
@@ -2507,8 +2513,8 @@ extern "C" int cInputSync_aiinputready(cInputSync* self)
         return 0;
     }
     int i;
-    for (i = 0; i < self->numsyncedpads; i++) {
-        cInputSync_SyncedPad* slot = &((&self->syncedpads[0]))[i];
+    for (i = 0; i < numsyncedpads; i++) {
+        cInputSync_SyncedPad* slot = &((&syncedpads[0]))[i];
         if (slot->readpos == slot->writepos) {
             return 0;
         }
@@ -2539,18 +2545,18 @@ struct sPlayer002379C8 {
  *
  * @return 1 when the pads were updated
  */
-extern "C" int cInputSync_aiupdate(cInputSync* self)
+int cInputSync::aiupdate()
 {
     if (cGameComm_mGameComm->mState < 14) {
         return 0;
     }
-    if (cInputSync_aiinputready(self) == 0) {
+    if (aiinputready() == 0) {
         return 0;
     }
     int i;
-    for (i = 0; i < self->numsyncedpads; i++) {
-        cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[i];
-        cInputSync_PadSample* inputSample = &(syncedPad->samples)[syncedPad->readpos % self->latency];
+    for (i = 0; i < numsyncedpads; i++) {
+        cInputSync_SyncedPad* syncedPad = &((&syncedpads[0]))[i];
+        cInputSync_PadSample* inputSample = &(syncedPad->samples)[syncedPad->readpos % latency];
         cInputPad_update(((void*)syncedPad->destinationpad), inputSample->NumButtons, ((char*)&inputSample->Buttons[0]));
         syncedPad->readpos++;
     }
@@ -2576,11 +2582,11 @@ extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
  *
  * @param src  the pad sample (button count and values)
  */
-extern "C" void cInputSync_sendClientInput(cInputSync* self, cInputSync_PadSample* src)
+void cInputSync::sendClientInput(cInputSync_PadSample* src)
 {
     char buf[32];
-    int len = cInputSync_compressinput(self, src, (cInputSync_CompressedSample*)buf);
-    cInputSync_decompressinput(self, src, buf);
+    int len = compressinput(src, (cInputSync_CompressedSample*)buf);
+    decompressinput(src, buf);
     cGameComm* gameComm = cGameComm_mGameComm;
     int ok = gameComm->mSyncInput != 0 && gameComm->mError == 0 && gameComm->mConnected != 0;
     if (ok) {
@@ -2604,7 +2610,7 @@ INCLUDE_ASM("main/gamestate", cInputSync_compressinput);
  * @param dst  the compressed sample
  * @return the compressed size in bytes (4 + the kept bytes)
  */
-extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, cInputSync_CompressedSample* dst)
+int cInputSync::compressinput(cInputSync_PadSample* src, cInputSync_CompressedSample* dst)
 {
     int i;
     int j;
@@ -2638,7 +2644,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * @param out  the pad sample written
  * @param buf  the compressed sample
  */
-extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* out, char* buf)
+void cInputSync::decompressinput(cInputSync_PadSample* out, char* buf)
 {
     cInputSync_CompressedSample* in = (cInputSync_CompressedSample*)buf;
     out->NumButtons = in->NumButtons;

@@ -46,6 +46,11 @@ struct cWorldPainterSection {
                                     //       update polls and releases it
     tWPHeader* m_pWPHeader;         // 0x8 [O]; [P] "m_pWPHeader", "!m_pWPHeader"; [R] ctor 0; [U] update allocates it,
                                     //       load(pData) stores pData, resolve relocates it, queryPosition/render read it
+
+    // Methods bound to their retail symbols by asm labels.
+    void load1(int sectionId, int wpData) __asm__("cWorldPainterSection_load1");
+    void unload() __asm__("cWorldPainterSection_unload");
+    void resolve() __asm__("cWorldPainterSection_resolve");
 };
 
 CHECK_OFFSET(cWorldPainterSection, m_iState, 0x0);
@@ -54,11 +59,24 @@ CHECK_OFFSET(cWorldPainterSection, m_iAsyncHandle, 0x4);
 CHECK_OFFSET(cWorldPainterSection, m_pWPHeader, 0x8);
 CHECK_SIZE(cWorldPainterSection, 0xC);
 
+struct cQuadTree;
+struct t4Vector;
+struct tBxVertex;
+struct tQuadTreeNode;
+
 struct cWorldPainterMan {
     unsigned int m_uiNumSections;   // 0x0 [O]; [P] "( uiSectionID >= 0 ) && ( uiSectionID < m_uiNumSections )";
                                     //       [R] init stores iNumSections; [U] update's loop bound (unsigned compare)
     cWorldPainterSection* m_pCache; // 0x4 [O]; [P] "m_pCache"; [R] ctor 0, init new[] (count cookie at m_pCache[-0x10 bytes]);
                                     //       [U] load/unload index it by section id; queryPosition/render use m_pCache[m_iCurrSection]
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int n) __asm__("cWorldPainterMan_init");
+    void update() __asm__("cWorldPainterMan_update");
+    void load(int sectionId, int fileName) __asm__("cWorldPainterMan_load");
+    void load1(int sectionId, int wpData) __asm__("cWorldPainterMan_load1");
+    void render1(cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts, t4Vector* lo, t4Vector* hi)
+        __asm__("cWorldPainterMan_render1");
 };
 
 CHECK_OFFSET(cWorldPainterMan, m_uiNumSections, 0x0);

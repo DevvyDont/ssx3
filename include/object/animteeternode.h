@@ -72,6 +72,9 @@ CHECK_OFFSET(tMakeAnimTeeterData, ToTime, 0x24);
 CHECK_OFFSET(tMakeAnimTeeterData, unk_028, 0x28);
 CHECK_SIZE(tMakeAnimTeeterData, 0x2C);
 
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cAnimTeeterNode {
     // --- cAnimTeeterNodeState (On Tour 0x30, same offsets; [R] the replay ctor reads 0x30 bytes at +0x0)
     float TorqueSum;                // 0x00 [O]; [P]; [R] ctor1 0 (sw $0); [U] applyForce adds each push's torque,
@@ -126,6 +129,14 @@ struct cAnimTeeterNode {
     cMeshAnimFrame* AnimFrames;     // 0x78 [O]; [U] ctor1 tests it and reads the first frame's start time
                                     //      (cAnimFrame_getStartTime, lw 0x78)
     tMeshVelocity* MeshVelocity;    // 0x7C [O]; [U] cAnimNode_updateMeshVelocity / updateIntersectInfo (this + 0x4C)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cAnimTeeterNode1(int bucket, tInstanceRecord* obj, tMakeAnimTeeterData* def)
+        __asm__("cAnimTeeterNode_cAnimTeeterNode1");
+    int updateNode() __asm__("cAnimTeeterNode_updateNode");
+    float getAnimSpeed() __asm__("cAnimTeeterNode_getAnimSpeed");
+    void applyForce(tIntersectInfo* intInfo, t4Vector* force) __asm__("cAnimTeeterNode_applyForce");
+    void writeToReplayFrame(void* stream) __asm__("cAnimTeeterNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cAnimTeeterNode, TorqueSum, 0x00);

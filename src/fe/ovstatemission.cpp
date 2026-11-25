@@ -284,19 +284,19 @@ extern unsigned char str_empty_d[];
  * Each 0x11C-byte slot gets an empty name, a null data pointer, handle -1, 1 at 0x108, size 0, id -1, status 0
  * (idle) and -1 at 0x118.
  */
-extern "C" void cFEAsyncManager_Init(cFEAsyncManager* self)
+void cFEAsyncManager::Init()
 {
     int i;
     for (i = 0; i < 5; i++) {
         unsigned char nulChar = str_empty_d[0];
-        ((sMissionSlot*)self)[i].f100 = 0;
-        ((sMissionSlot*)self)[i].name[0] = nulChar;
-        ((sMissionSlot*)self)[i].f104 = -1;
-        ((sMissionSlot*)self)[i].f108 = 1;
-        ((sMissionSlot*)self)[i].f10C = 0;
-        ((sMissionSlot*)self)[i].f110 = -1;
-        ((sMissionSlot*)self)[i].f114 = 0;
-        ((sMissionSlot*)self)[i].f118 = -1;
+        ((sMissionSlot*)this)[i].f100 = 0;
+        ((sMissionSlot*)this)[i].name[0] = nulChar;
+        ((sMissionSlot*)this)[i].f104 = -1;
+        ((sMissionSlot*)this)[i].f108 = 1;
+        ((sMissionSlot*)this)[i].f10C = 0;
+        ((sMissionSlot*)this)[i].f110 = -1;
+        ((sMissionSlot*)this)[i].f114 = 0;
+        ((sMissionSlot*)this)[i].f118 = -1;
     }
 }
 #endif
@@ -312,12 +312,11 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int slot);
  *
  * Nothing in the program calls it.
  *
- * @param mgr  the front-end async manager (this)
  */
-extern "C" void cFEAsyncManager_UnloadAll(cFEAsyncManager* mgr)
+void cFEAsyncManager::UnloadAll()
 {
     for (int i = 0; i < 5; i++) {
-        cFEAsyncManager_UnloadFEAsyncFile(mgr, i);
+        cFEAsyncManager_UnloadFEAsyncFile(this, i);
     }
 }
 #endif

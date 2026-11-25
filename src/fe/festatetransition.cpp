@@ -127,13 +127,13 @@ extern void* cFEStateTitle_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateTitle_cFEStateTitle1(cFEStateTitle* self)
+void* cFEStateTitle::cFEStateTitle1()
 {
-    cUIState_cUIState(self);
-    VPTR_OF(cListNode, self) = cFEStateTitle_vtbl;
-    self->mNumTicksIdle = 0;
-    self->mHashName = 0;
-    return ((void*)self);
+    cUIState_cUIState(this);
+    VPTR_OF(cListNode, this) = cFEStateTitle_vtbl;
+    mNumTicksIdle = 0;
+    mHashName = 0;
+    return ((void*)this);
 }
 #endif
 

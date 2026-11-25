@@ -57,6 +57,12 @@ struct cAsyncSys {
     int mBufferSize;            // 0x1D0 [O]; [R] ctor 0; [U] ASYNCSYS_Init stores the size, DeInit clears it
     void** mVtbl;               // 0x1D4 [R] cAsyncSys_vtbl (ctor / dtor); cBankManager_vtbl (0x483AD8) in the
                                 //       cBankManager; DoCancel / ASYNCSYS_Update call slots 2..5 through it
+
+    // Methods bound to their retail symbols by asm labels.
+    int ASYNCSYS_Busy() __asm__("cAsyncSys_ASYNCSYS_Busy");
+    int ASYNCSYS_GetCurrOperationUserHandle() __asm__("cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle");
+    void ASYNCSYS_CancelCurrent() __asm__("cAsyncSys_ASYNCSYS_CancelCurrent");
+    void ASYNCSYS_CancelAll() __asm__("cAsyncSys_ASYNCSYS_CancelAll");
 };
 
 CHECK_OFFSET(cCircBuffer, ArraySize, 0x0);

@@ -35,6 +35,9 @@ struct cFEStateSelectMultiplayerMode : public cUIState {
     //   mpEngine: [U] onCreateScreen adds "86sel_multi" through it; onWidgetEvent asks its custom interface (+0x0) for
     //       the next state and pushes it on its stack (+0x18)
     //   mpScreen: [U] onCreateScreen stores the screen
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateSelectMultiplayerMode1() __asm__("cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1");
 };
 
 CHECK_SIZE(cFEStateSelectMultiplayerMode, 0x48);

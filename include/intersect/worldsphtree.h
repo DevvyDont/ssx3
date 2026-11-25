@@ -26,6 +26,10 @@
 
 struct bxSphereTree;
 
+struct t4Matrix;
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cWorldSphTree {
     // --- cWorldIntersectType (On Tour 0x60; data 0x00-0x50, then the vptr)
     int mPrecision;                 // 0x000 [O] tIntPrecision; [R] ctor: 0 when isLow, else 1;
@@ -49,6 +53,18 @@ struct cWorldSphTree {
                                     //       dtor operator_delete's it; [U] Transform copies st into it
                                     //       (bxSphereTree_operatorE)
     char unk_06C[0x4];              // 0x06C padding (16-byte aligned class)
+
+    // Methods bound to their retail symbols by asm labels.
+    int IsInBoxTransformed(float* lo, float* hi) __asm__("cWorldSphTree_IsInBoxTransformed");
+    float GetIdealParam() __asm__("cWorldSphTree_GetIdealParam");
+    void Transform(t4Matrix* mat, float scale) __asm__("cWorldSphTree_Transform");
+    int UnTransform() __asm__("cWorldSphTree_UnTransform__FPv");
+    int IsTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
+        __asm__("cWorldSphTree_IsTriInt");
+    int Is2SidedTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
+        __asm__("cWorldSphTree_Is2SidedTriInt");
+    int IsSphTreeInt(void* tree, tIntersectInfo* hit) __asm__("cWorldSphTree_IsSphTreeInt");
+    int IsBoxInt(void* bMin, void* bMax, tIntersectInfo* hit) __asm__("cWorldSphTree_IsBoxInt");
 };
 
 CHECK_OFFSET(cWorldSphTree, mPrecision, 0x000);

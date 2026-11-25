@@ -43,11 +43,29 @@ CHECK_OFFSET(tBucketHeader, AddHead, 0x024);
 CHECK_OFFSET(tBucketHeader, AddTail, 0x034);
 CHECK_SIZE(tBucketHeader, 0x044);
 
+struct cObjNode;
+
 struct cBucketMan {
     int NumBuckets;                 // 0x000 [O]; [R] ctor zeroes it, init stores numBuckets, purge zeroes it; [U] the
                                     //       purge loop bound
     tBucketHeader* Buckets;         // 0x004 [O]; [R] ctor zeroes it; init: new tBucketHeader[n] ("Buckets"); purge
                                     //       destroys and frees it; [U] every bucket method indexes it (index * 0x44)
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int n) __asm__("cBucketMan_init");
+    void purge() __asm__("cBucketMan_purge");
+    void mergeBucket(int index) __asm__("cBucketMan_mergeBucket");
+    void* first(int index) __asm__("cBucketMan_first__FP10cBucketMani");
+    void* last(int index) __asm__("cBucketMan_last");
+    void* prev(cObjNode* node, int index) __asm__("cBucketMan_prev");
+    void* addfirst(int index) __asm__("cBucketMan_addfirst__FP10cBucketMani");
+    void* addnext(cObjNode* node, int index) __asm__("cBucketMan_addnext");
+    void updateBucket(int index) __asm__("cBucketMan_updateBucket");
+    void applyBucket(int index) __asm__("cBucketMan_applyBucket");
+    void renderBucket(int index) __asm__("cBucketMan_renderBucket");
+    void purgeBucket(int index) __asm__("cBucketMan_purgeBucket");
+    void purgeBucket1(int index, int key) __asm__("cBucketMan_purgeBucket1");
+    void setsortflag(int bucket) __asm__("cBucketMan_setsortflag");
 };
 
 CHECK_OFFSET(cBucketMan, NumBuckets, 0x000);

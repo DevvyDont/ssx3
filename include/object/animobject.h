@@ -88,6 +88,13 @@ struct cAnimObjectNode {
     cMeshAnimFrame* AnimFrames;     // 0x64 [O]; [U] ctor1 tests it and reads the first frame's start time
                                     //      (cAnimFrame_getStartTime)
     tMeshVelocity* MeshVelocity;    // 0x68 [O]; [U] cAnimNode_updateMeshVelocity / updateIntersectInfo (this + 0x4C)
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateCycle() __asm__("cAnimObjectNode_updateCycle");
+    void updateOscillate() __asm__("cAnimObjectNode_updateOscillate");
+    void updateOnce() __asm__("cAnimObjectNode_updateOnce");
+    void expire(int runscript) __asm__("cAnimObjectNode_expire");
+    void writeToReplayFrame(void* stream) __asm__("cAnimObjectNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cAnimObjectNode, AnimType, 0x00);

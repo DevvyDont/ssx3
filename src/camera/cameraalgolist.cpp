@@ -176,18 +176,17 @@ static inline void sAlgoNode_delete(sAlgoNode* n)
  * when the node's owned flag (+0x18) is set, clears both fields and frees the node with operator_delete. Finally
  * zeroes the count (+0x4) and head (+0x0).
  *
- * @param list  the algorithm list (this)
  */
-extern "C" void cCameraAlgoList_removeAll(cCameraAlgoList* list)
+void cCameraAlgoList::removeAll()
 {
-    sAlgoNode* n = (sAlgoNode*)list->Head;
+    sAlgoNode* n = (sAlgoNode*)Head;
     while (n != 0) {
         sAlgoNode* next = n->next;
         sAlgoNode_delete(n);
         n = next;
     }
-    list->Length = 0;
-    list->Head = 0;
+    Length = 0;
+    Head = 0;
 }
 #endif
 

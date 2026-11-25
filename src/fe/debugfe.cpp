@@ -254,12 +254,12 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
  *
  * @param idx  the game path to switch to (On Tour eBEGamePath)
  */
-extern "C" void cDebugMenuScreen_setGamePath(cDebugMenuScreen* self, int idx)
+void cDebugMenuScreen::setGamePath(int idx)
 {
     cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 0);
-    (self)->LastGamePathGameMode[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
+    LastGamePathGameMode[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
     cBENewRaceInterface_setGamePath(iface, idx);
-    cBENewRaceInterface_setGameMode(iface, (self)->LastGamePathGameMode[idx]);
+    cBENewRaceInterface_setGameMode(iface, LastGamePathGameMode[idx]);
     iface->submit();
 }
 #endif
@@ -350,7 +350,7 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
  * @return the maximum number of AI riders
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cDebugMenuScreen_getMaxAIRiders(cDebugMenuScreen* self, int path, int mode)
+int cDebugMenuScreen::getMaxAIRiders(int path, int mode)
 {
     int maxAIRiders = (path == 2) ? 4 : 5;
     switch (mode) {
@@ -639,13 +639,13 @@ static inline cMenu* menuSysTop(cMenuSys* menuSys)
  * mMenuSys has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
-extern "C" void cDebugLobbyScreen_update(cDebugLobbyScreen* self)
+void cDebugLobbyScreen::update()
 {
     cCommSystem_update(cCommSystem_mCommSystem);
     func_0025AC50(LobbyMan_mLobbyMan);
-    if (menuSysTop(&self->mMenuSys) != 0)
-        cMenuSys_input(&self->mMenuSys);
-    func_0017DB18((cDebugLobbyScreen*)self);
+    if (menuSysTop(&mMenuSys) != 0)
+        cMenuSys_input(&mMenuSys);
+    func_0017DB18((cDebugLobbyScreen*)this);
 }
 #endif
 
@@ -1582,10 +1582,10 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * open, and while the comm system is connected (mNetConnState 5) this console's address (cCommSystem_netConnLocalAddr) is centred in
  * yellow at (320, 420), scale 0.8. cDebugFE_render calls it through the active screen's virtual slot 3.
  */
-extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
+void cDebugLobbyScreen::draw()
 {
     cFont* font = SSXApp->DebugFE->Font;
-    switch (self->mState) {
+    switch (mState) {
     case 0:
     case 1:
         scale17E5C8(font, 1.5f);
@@ -1643,7 +1643,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Connecting);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 19: {
@@ -1652,7 +1652,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Disconnected_from_server);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 20: {
@@ -1661,7 +1661,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Creating_Account);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 22: {
@@ -1670,7 +1670,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Persona_Error);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 21: {
@@ -1679,7 +1679,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Authenticating_Account);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 23: {
@@ -1688,7 +1688,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Entering_room);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 24: {
@@ -1697,7 +1697,7 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Issueing_Challenge);
         scale17E5C8(font, 0.8f);
         (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, mErrorCode).p);
         break;
     }
     case 16: {
@@ -1730,8 +1730,8 @@ extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
     }
     }
     scale17E5C8(font, 0.9f);
-    if (top17E5C8(&self->mMenuSys) != 0)
-        cMenuSys_render(&self->mMenuSys);
+    if (top17E5C8(&mMenuSys) != 0)
+        cMenuSys_render(&mMenuSys);
     if (isEq17E5C8(cCommSystem_mCommSystem->mNetConnState, 5)) {
         unsigned int ip;
         cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, (int*)&ip);
@@ -1796,11 +1796,10 @@ static inline float wrap_17F2D0(float x)
  * wraps phases and position with the unit's wrap helper, and stores (sin(pos) * 20 + (550, 420)) as the next of
  * 64 trail points (head index mod 64).
  *
- * @param heartBeat  the heartbeat (this)
  */
-extern "C" void cHeartBeat_update(cHeartBeat* heartBeat)
+void cHeartBeat::update()
 {
-    cHeartBeat* self = heartBeat;
+    cHeartBeat* self = this;
     for (int i = 0; i < 2; i++) {
         sVec2_17F2D0 posStep(fSin((*(sVec2_17F2D0*)&self->Phase[0]).x), fSin((*(sVec2_17F2D0*)&self->Phase[0]).y));
         posStep += 1.899999976158142f;
@@ -1866,12 +1865,11 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
  * gets a 12x12 quad in (0.5, 0.25, 0.25, 0.5). cDebugFE_render calls it on the heartbeat at +0x24 with the particle
  * texture (+0x1C).
  *
- * @param p_  the heartbeat (cHeartBeat_update advances it)
  * @param tex  texture id to draw with
  */
-extern "C" void cHeartBeat_draw(cHeartBeat* p_, int tex)
+void cHeartBeat::draw(int tex)
 {
-    cHeartBeat* self = p_;
+    cHeartBeat* self = this;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     set1_17F500((char*)ps2GraphicsMan, 0x1800000, 23, 2);
     set1_17F500((char*)ps2GraphicsMan, 0x300000, 20, 3);
@@ -1975,44 +1973,44 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self);
  *
  * Starts on the lobby menu when SSXApp->AutoLobby is set, otherwise on the debug menu screen.
  */
-extern "C" void cDebugFE_load(cDebugFE* self)
+void cDebugFE::load()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ps2GraphicsMan->InitTextures(0);
-    self->Font = (cFont*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
+    Font = (cFont*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     t2Vector sc(1.600000023841858f, 1.600000023841858f);
     // cFont keeps its t2Vectors (BaseScale, Scale) as float[2]: the same two floats.
-    *(t2Vector*)&self->Font->BaseScale[0] = sc;
-    *(t2Vector*)&self->Font->Scale[0] = *(t2Vector*)&self->Font->BaseScale[0];
-    self->ParticleTID = -1;
+    *(t2Vector*)&Font->BaseScale[0] = sc;
+    *(t2Vector*)&Font->Scale[0] = *(t2Vector*)&Font->BaseScale[0];
+    ParticleTID = -1;
     SHAPEFILE* data = (SHAPEFILE*)FILE_loadz(str_data_textures_dot_ssh, 0x100);
     // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
     if (data) {
         char* payload = (char*)data + data->tbl[0].offset;
         if (payload) {
             cPS2GraphicsMan* theGraphicsMan = cGraphicsMan_TheGraphicsMan;
-            self->ParticleTID = theGraphicsMan->AddTexture((const SHAPE*)payload, str_part, 0, 1, -1);
+            ParticleTID = theGraphicsMan->AddTexture((const SHAPE*)payload, str_part, 0, 1, -1);
         }
         cMemMan_free(data);
     }
     data = (SHAPEFILE*)FILE_load(str_data_fonts_menu_ssh, 0x100);
     cPS2GraphicsMan* graphicsMan = GrMan;
-    self->BoxTID = graphicsMan->AddTexture((const SHAPE*)((char*)data + data->tbl[0].offset), str_menu, 0, 1, -1);
+    BoxTID = graphicsMan->AddTexture((const SHAPE*)((char*)data + data->tbl[0].offset), str_menu, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
     }
     for (int i = 0; i < 2; i++) {
-        self->Screens[i] = 0;
+        Screens[i] = 0;
     }
-    self->ActiveScreen = self->Screens[0] =
+    ActiveScreen = Screens[0] =
         (cDebugScreen*)cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
-    self->Screens[1] =
+    Screens[1] =
         (cDebugScreen*)cDebugLobbyScreen_cDebugLobbyScreen(
             (cDebugLobbyScreen*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
     if (SSXApp->AutoLobby) {
-        self->ActiveScreen = self->Screens[1];
+        ActiveScreen = Screens[1];
     } else {
-        self->ActiveScreen = self->Screens[0];
+        ActiveScreen = Screens[0];
     }
 }
 #endif
@@ -2034,7 +2032,7 @@ struct tRGBInit : tRGB {
  * Calls cGraphicsMan_UploadTextures (On Tour cGraphicsMan::UploadTextures), then GrMan's SetScreenClearColour with
  * (0, 0, 0).
  */
-extern "C" void cDebugFE_gainFocus(cDebugFE* self)
+void cDebugFE::gainFocus()
 {
     cGraphicsMan_UploadTextures((char*)GrMan);
     cDepthFog_m_Enable = 0;
@@ -2087,11 +2085,11 @@ struct sDebugFE_0017FAD0 {
  * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with cFont__cFont(font, 3). The local view calls
  * the texture ids snd1C/snd20; they are On Tour's ParticleTID and BoxTID.
  */
-extern "C" void cDebugFE_purge(cDebugFE* self)
+void cDebugFE::purge()
 {
     for (int i = 0; i < 2; i++)
     {
-        char* screen = ((char*)self->Screens[i]);
+        char* screen = ((char*)Screens[i]);
         if (screen != 0)
         {
             sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)screen;
@@ -2101,18 +2099,18 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
     cSSXApp* app = SSXApp;
     app->RealFE = 0;
     app->DebugFE = 0;
-    if (self->BoxTID >= 0)
+    if (BoxTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->RemoveTexture(self->BoxTID);
+        ps2GraphicsMan->RemoveTexture(BoxTID);
     }
-    if (self->ParticleTID >= 0)
+    if (ParticleTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->RemoveTexture(self->ParticleTID);
+        ps2GraphicsMan->RemoveTexture(ParticleTID);
     }
-    if (self->Font != 0)
-        cFont__cFont(self->Font, 3);
+    if (Font != 0)
+        cFont__cFont(Font, 3);
 }
 #endif
 
@@ -2133,12 +2131,12 @@ extern "C" void cHeartBeat_update(cHeartBeat* p);
  * Calls cFadeScreen_update (On Tour cFadeScreen::update); while the app's word +0x4 is 0 it updates the active screen
  * (+0x14, virtual slot 2); then cHeartBeat_update (On Tour cHeartBeat::update) on the heartbeat at +0x24.
  */
-extern "C" void cDebugFE_update(cDebugFE* self)
+void cDebugFE::update()
 {
-    cFadeScreen_update(self);
+    cFadeScreen_update(this);
     if ((int)SSXApp->LoadingModule == 0)
-        ((cFEObjK17FB98*)self->ActiveScreen)->v02();
-    cHeartBeat_update((cHeartBeat*)(&self->HeartBeat));
+        ((cFEObjK17FB98*)ActiveScreen)->v02();
+    HeartBeat.update();
 }
 #endif
 
@@ -2194,14 +2192,14 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
  *
  * @return 0 when GrMan's slot 17 returns 0, otherwise 1
  */
-extern "C" int cDebugFE_render(cDebugFE* self)
+int cDebugFE::render()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
-    if (cFadeScreen_drawFade(((char*)self)) == 0) {
+    if (cFadeScreen_drawFade(((char*)this)) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
         sVEntry<void>* vt1 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan1);
         char* this1 = (char*)graphicsMan1 + vt1[15].delta;
@@ -2225,9 +2223,9 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 13);
         setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
-        cHeartBeat_draw((cHeartBeat*)(&self->HeartBeat), self->ParticleTID);
+        HeartBeat.draw(ParticleTID);
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
-        void* menu = self->ActiveScreen;
+        void* menu = ActiveScreen;
         sVEntry<void>* mvt = *(sVEntry<void>**)menu;
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }
@@ -2979,11 +2977,11 @@ extern "C" int strlen(const char* s);
  *
  * @param text  the new text
  */
-extern "C" void cScreenKeyboard_setInputText(cScreenKeyboard* self, const char* text)
+void cScreenKeyboard::setInputText(const char* text)
 {
-    char* buf = self->mHiScoreName;
+    char* buf = mHiScoreName;
     strcpy(buf, text);
-    self->mCursorPos = strlen(buf);
+    mCursorPos = strlen(buf);
 }
 #endif
 
@@ -2997,15 +2995,15 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveLeft);
  * first key of a row (0, 10, 20, 30) wraps to the last (+9); from 39 it jumps to 37 when mIncludeSpace (+0xE0) is 0,
  * skipping the space key; otherwise it steps back one. Called by the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveLeft(cScreenKeyboard* self)
+void cScreenKeyboard::kbMoveLeft()
 {
-    int keyIndex = self->mCurrentKey;
+    int keyIndex = mCurrentKey;
     if (keyIndex == 0 || keyIndex == 10 || keyIndex == 20 || keyIndex == 30) {
-        self->mCurrentKey += 9;
-    } else if (keyIndex == 39 && self->mIncludeSpace == 0) {
-        self->mCurrentKey = 37;
+        mCurrentKey += 9;
+    } else if (keyIndex == 39 && mIncludeSpace == 0) {
+        mCurrentKey = 37;
     } else {
-        self->mCurrentKey -= 1;
+        mCurrentKey -= 1;
     }
 }
 #endif
@@ -3020,15 +3018,15 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveRight);
  * 0, skipping the space key; otherwise mCurrentKey (+0x170) steps forward one. Called by the keyboard's input handler
  * cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveRight(cScreenKeyboard* self)
+void cScreenKeyboard::kbMoveRight()
 {
-    int keyIndex = self->mCurrentKey;
+    int keyIndex = mCurrentKey;
     if (keyIndex == 9 || keyIndex == 19 || keyIndex == 29 || keyIndex == 39) {
-        self->mCurrentKey -= 9;
-    } else if (keyIndex == 37 && self->mIncludeSpace == 0) {
-        self->mCurrentKey = 39;
+        mCurrentKey -= 9;
+    } else if (keyIndex == 37 && mIncludeSpace == 0) {
+        mCurrentKey = 39;
     } else {
-        self->mCurrentKey += 1;
+        mCurrentKey += 1;
     }
 }
 #endif
@@ -3044,23 +3042,23 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveUp);
  * bottom row (+20), again 39 from key 18 without space. Otherwise mCurrentKey (+0x170) goes up one row (-10). Called by
  * the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveUp(cScreenKeyboard* self)
+void cScreenKeyboard::kbMoveUp()
 {
-    int keyIndex = self->mCurrentKey;
+    int keyIndex = mCurrentKey;
     if (keyIndex >= 0 && keyIndex < 10) {
-        if (keyIndex == 8 && self->mIncludeSpace == 0) {
-            self->mCurrentKey = 39;
+        if (keyIndex == 8 && mIncludeSpace == 0) {
+            mCurrentKey = 39;
         } else {
-            self->mCurrentKey += 30;
+            mCurrentKey += 30;
         }
-    } else if (keyIndex >= 10 && keyIndex < 20 && self->mIncludeNumbers == 0) {
-        if (keyIndex == 18 && self->mIncludeSpace == 0) {
-            self->mCurrentKey = 39;
+    } else if (keyIndex >= 10 && keyIndex < 20 && mIncludeNumbers == 0) {
+        if (keyIndex == 18 && mIncludeSpace == 0) {
+            mCurrentKey = 39;
         } else {
-            self->mCurrentKey += 20;
+            mCurrentKey += 20;
         }
     } else {
-        self->mCurrentKey -= 10;
+        mCurrentKey -= 10;
     }
 }
 #endif
@@ -3075,19 +3073,19 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveDown);
  * (-20). From key 28 with mIncludeSpace (+0xE0) 0 it goes to 39 (skipping the space key 38). Otherwise mCurrentKey
  * (+0x170) goes down one row (+10). Called by the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveDown(cScreenKeyboard* self)
+void cScreenKeyboard::kbMoveDown()
 {
-    int keyIndex = self->mCurrentKey;
+    int keyIndex = mCurrentKey;
     if (keyIndex >= 30 && keyIndex < 40) {
-        if (self->mIncludeNumbers != 0) {
-            self->mCurrentKey = keyIndex - 30;
+        if (mIncludeNumbers != 0) {
+            mCurrentKey = keyIndex - 30;
         } else {
-            self->mCurrentKey = keyIndex - 20;
+            mCurrentKey = keyIndex - 20;
         }
-    } else if (keyIndex == 28 && self->mIncludeSpace == 0) {
-        self->mCurrentKey = 39;
+    } else if (keyIndex == 28 && mIncludeSpace == 0) {
+        mCurrentKey = 39;
     } else {
-        self->mCurrentKey += 10;
+        mCurrentKey += 10;
     }
 }
 #endif
@@ -3100,10 +3098,10 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_toggleShift);
  *
  * @return the new mShiftOn value
  */
-extern "C" int cScreenKeyboard_toggleShift(cScreenKeyboard* self)
+int cScreenKeyboard::toggleShift()
 {
-    int toggled = self->mShiftOn ^ 1;
-    self->mShiftOn = toggled;
+    int toggled = mShiftOn ^ 1;
+    mShiftOn = toggled;
     return toggled;
 }
 #endif
@@ -3117,15 +3115,15 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_getPasswordText);
  *
  * @return the masked text (+0x12C)
  */
-extern "C" char* cScreenKeyboard_getPasswordText(cScreenKeyboard* self)
+char* cScreenKeyboard::getPasswordText()
 {
-    int n = strlen(self->mHiScoreName);
+    int n = strlen(mHiScoreName);
     int i;
     for (i = 0; i < n; i++) {
-        self->mPasswordText[i] = '*';
+        mPasswordText[i] = '*';
     }
-    self->mPasswordText[n] = 0;
-    return self->mPasswordText;
+    mPasswordText[n] = 0;
+    return mPasswordText;
 }
 #endif
 
@@ -3236,7 +3234,7 @@ extern "C" char* strcat(char*, const char*);
  * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 18 bytes)
  */
-extern "C" void cScreenKeyboard_getKeyObjName(cScreenKeyboard* self, int keyIndex, char* dst)
+void cScreenKeyboard::getKeyObjName(int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr10*)dst = D_0045D550;
@@ -3281,7 +3279,7 @@ extern "C" char* strcat(char*, const char*);
  * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 16 bytes)
  */
-extern "C" void cScreenKeyboard_getCursorObjName(cScreenKeyboard* self, int keyIndex, char* dst)
+void cScreenKeyboard::getCursorObjName(int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr8*)dst = *(sStr8*)str_cursor;

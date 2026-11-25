@@ -99,6 +99,35 @@ struct cSSXApp {
                                          //       riders), then "othertxp.big" = [O] On Tour's mTextureBigFileOthers
     int mRewardsBigFile;                 // 0x118 [O]; [U] "data/char/rwrdps2.big"
     cFEAsyncManager* mFEAsyncManager;    // 0x11C [P] GetFEAsyncManager; [R] init: new ("FEAsyncManager")
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int argc, char** argv) __asm__("cSSXApp_init");
+    int loadInputMap(const char* path) __asm__("cSSXApp_loadInputMap");
+    void parseCommandLine(int argc, char** argv) __asm__("cSSXApp_parseCommandLine");
+    int preUpdate() __asm__("cSSXApp_preUpdate");
+    void purge() __asm__("cSSXApp_purge");
+    void startGameLoad() __asm__("cSSXApp_startGameLoad");
+    void startFELoad() __asm__("cSSXApp_startFELoad");
+    void initLocale() __asm__("cSSXApp_initLocale");
+    int getBE() __asm__("cSSXApp_getBE");
+    int getRealFE() __asm__("cSSXApp_getRealFE");
+    int getDebugFE() __asm__("cSSXApp_getDebugFE");
+    int getGame() __asm__("cSSXApp_getGame");
+    int getFonts() __asm__("cSSXApp_getFonts");
+    int getFELocale() __asm__("cSSXApp_getFELocale");
+    int getInput(int index) __asm__("cSSXApp_getInput");
+    int getInputMap(int index) __asm__("cSSXApp_getInputMap");
+    int getGameManager() __asm__("cSSXApp_getGameManager");
+    int getNetMan() __asm__("cSSXApp_getNetMan");
+    int getConsoleConfig() __asm__("cSSXApp_getConsoleConfig");
+    int getLoadIndicator() __asm__("cSSXApp_getLoadIndicator");
+    int getLoadIconTextureID() __asm__("cSSXApp_getLoadIconTextureID");
+    void setLoadIconTextureID(int textureId) __asm__("cSSXApp_setLoadIconTextureID");
+    void endFE() __asm__("cSSXApp_endFE");
+    void endGame() __asm__("cSSXApp_endGame");
+    int InGame() __asm__("cSSXApp_InGame");
+    int InFE() __asm__("cSSXApp_InFE");
+    int GetFEAsyncManager() __asm__("cSSXApp_GetFEAsyncManager");
 };
 
 CHECK_OFFSET(cSSXApp, LoadingModule, 0x04);

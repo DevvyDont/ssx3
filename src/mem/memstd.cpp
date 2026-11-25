@@ -1788,7 +1788,7 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self);
  */
 extern "C" void cMoviePlayer__cMoviePlayer(cMoviePlayer* self, int flags)
 {
-    cMoviePlayer_purge(self);
+    self->purge();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1811,13 +1811,13 @@ extern "C" void cMoviePlayer_init(void* self, void* info);
  *
  * @param videoFile  the video file name
  */
-extern "C" void cMoviePlayer_init1(cMoviePlayer* self, int videoFile)
+void cMoviePlayer::init1(int videoFile)
 {
     cMoviePlayer_init1_sInfo info;
-    cMoviePlayer_purge(self);
+    purge();
     tMoviePlayOptions_SetDefaults((cMoviePlayer*)(&info));
     info.f0 = videoFile;
-    cMoviePlayer_init(self, &info);
+    cMoviePlayer_init(this, &info);
 }
 #endif
 
@@ -1853,7 +1853,7 @@ extern "C" int cMoviePlayer_init_impl(void* self, tMoviePlayOptions* cfg) __asm_
 extern "C" int cMoviePlayer_init_impl(void* vself, tMoviePlayOptions* cfg)
 {
     cMoviePlayer* self = (cMoviePlayer*)vself;
-    cMoviePlayer_purge((cMoviePlayer*)self);
+    self->purge();
     int soundOff = 1;
     *(&self->m_PlayOp) = *cfg;
     int optionSet = 0;
@@ -1896,9 +1896,9 @@ extern int cMoviePlayer_m_isPlaying;
  * driver is deleted (vtable slot 1, flags 3) and the active-player count cMoviePlayer_m_isPlaying decremented, the decoder is deleted
  * (func_003AE300, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
  */
-extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
+void cMoviePlayer::purge()
 {
-    cMoviePlayer* moviePlayer = self;
+    cMoviePlayer* moviePlayer = this;
     if (moviePlayer->m_pPlayer != 0 && moviePlayer->m_pVd != 0) {
         cGraphicsMan_TheGraphicsMan->FlushRenderer();
     }
@@ -1944,17 +1944,17 @@ int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
  *
  * Clears the finished (+0x0) and redraw (+0x4) words first.
  */
-extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self)
+void cMoviePlayer::startPlay()
 {
-    self->mbMovieFinished = 0;
-    self->mbReDraw = 0;
-    self->mpCurrFrame = 0;
-    self->mpCurrFrame = (void*)func_003AE450(self->m_pPlayer, 1, 33);
-    self->mbNewFrame = 1;
-    func_003AE938(self->m_pPlayer);
-    self->m_pVd = (RCMP_VIDEO_DRIVER*)SSX_VD_create(self->m_pPlayer->mpDecoder, (int)self->mpCurrFrame,
-                                                    (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
-    func_003AE958_i(self->m_pPlayer);
+    mbMovieFinished = 0;
+    mbReDraw = 0;
+    mpCurrFrame = 0;
+    mpCurrFrame = (void*)func_003AE450(m_pPlayer, 1, 33);
+    mbNewFrame = 1;
+    func_003AE938(m_pPlayer);
+    m_pVd = (RCMP_VIDEO_DRIVER*)SSX_VD_create(m_pPlayer->mpDecoder, (int)mpCurrFrame,
+                                                    (int)cGraphicsMan_TheGraphicsMan, m_PlayOp.iDrawLayer);
+    func_003AE958_i(m_pPlayer);
     cMoviePlayer_m_isPlaying++;
 }
 #endif
@@ -1985,11 +1985,11 @@ struct sWorld_253748 {
  * and fetches the next frame for the decoder's time (+0x48, func_003AE6C8). Without a frame it asks func_003AE860
  * whether the movie has finished. Clears the new-frame flag (+0x40) at the end.
  */
-extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
+void cMoviePlayer::syncPlay()
 {
-    cMoviePlayer* moviePlayer = self;
+    cMoviePlayer* moviePlayer = this;
     if (moviePlayer->m_pPlayer != 0) {
-        cMoviePlayer_startPlay((cMoviePlayer*)moviePlayer);
+        moviePlayer->startPlay();
         do {
             if (moviePlayer->mbReDraw != 0) {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
@@ -2036,12 +2036,12 @@ extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self);
  *
  * @return 1 when started, 0 without a decoder
  */
-extern "C" int cMoviePlayer_asyncPlay(cMoviePlayer* self)
+int cMoviePlayer::asyncPlay()
 {
-    if (self->m_pPlayer == 0) {
+    if (m_pPlayer == 0) {
         return 0;
     }
-    cMoviePlayer_startPlay(self);
+    startPlay();
     return 1;
 }
 #endif
@@ -2069,22 +2069,22 @@ public:
  *
  * @param force  nonzero to redraw the previous image
  */
-extern "C" void cMoviePlayer_asyncRender(cMoviePlayer* self, int force)
+void cMoviePlayer::asyncRender(int force)
 {
-    if (self->m_pPlayer == 0) {
+    if (m_pPlayer == 0) {
         return;
     }
-    cMemObj_253890* obj = (cMemObj_253890*)self->m_pVd;
+    cMemObj_253890* obj = (cMemObj_253890*)m_pVd;
     if (obj == 0) {
         return;
     }
-    if (force != 0 || self->mbPaused != 0
-        || (self->mbNewFrame == 0 && self->mbReDraw != 0)
-        || self->mbMovieFinished != 0) {
-        ((cMemObj_253890*)self->m_pVd)->v05();
+    if (force != 0 || mbPaused != 0
+        || (mbNewFrame == 0 && mbReDraw != 0)
+        || mbMovieFinished != 0) {
+        ((cMemObj_253890*)m_pVd)->v05();
     } else {
-        obj->v04((int)self->mpCurrFrame);
-        self->mbNewFrame = 0;
+        obj->v04((int)mpCurrFrame);
+        mbNewFrame = 0;
     }
 }
 #endif
@@ -2116,21 +2116,21 @@ public:
  * +0x4. When there is no frame and the movie is not finished (+0x0), clears the waiting flag and stores
  * func_003AE860's answer (audio finished) in +0x0.
  */
-extern "C" void cMoviePlayer_asyncUpdate(cMoviePlayer* self)
+void cMoviePlayer::asyncUpdate()
 {
-    if (self->mbNewFrame == 0 && func_003AE780(self->m_pPlayer) != 0) {
-        ((cMemObj_253938*)self->m_pVd)->v06();
-        RCMP_AV_PLAYER* player = self->m_pPlayer;
-        self->mpCurrFrame = (void*)func_003AE6C8(player, player->mGoalFrame);
-        self->mbNewFrame = 1;
-        self->mbReDraw = 0;
+    if (mbNewFrame == 0 && func_003AE780(m_pPlayer) != 0) {
+        ((cMemObj_253938*)m_pVd)->v06();
+        RCMP_AV_PLAYER* player = m_pPlayer;
+        mpCurrFrame = (void*)func_003AE6C8(player, player->mGoalFrame);
+        mbNewFrame = 1;
+        mbReDraw = 0;
     } else {
-        self->mbReDraw = 1;
+        mbReDraw = 1;
     }
-    if ((int)self->mpCurrFrame == 0 && self->mbMovieFinished == 0) {
-        self->mbNewFrame = 0;
-        self->mbReDraw = 1;
-        self->mbMovieFinished = func_003AE860(self->m_pPlayer);
+    if ((int)mpCurrFrame == 0 && mbMovieFinished == 0) {
+        mbNewFrame = 0;
+        mbReDraw = 1;
+        mbMovieFinished = func_003AE860(m_pPlayer);
     }
 }
 #endif
@@ -2144,13 +2144,13 @@ int func_003AE938(void*);
  * Pauses the movie: when a decoder (+0x38) and a driver (+0x3C) exist and it is neither finished (+0x0) nor already
  * paused (+0x8), pauses the decoder (func_003AE938) and sets the paused word.
  */
-extern "C" void cMoviePlayer_asyncPause(cMoviePlayer* self)
+void cMoviePlayer::asyncPause()
 {
-    void* handle = self->m_pPlayer;
-    if (handle != 0 && (int)self->m_pVd != 0 && self->mbMovieFinished == 0
-        && self->mbPaused == 0) {
+    void* handle = m_pPlayer;
+    if (handle != 0 && (int)m_pVd != 0 && mbMovieFinished == 0
+        && mbPaused == 0) {
         func_003AE938(handle);
-        self->mbPaused = 1;
+        mbPaused = 1;
     }
 }
 #endif
@@ -2164,13 +2164,13 @@ void func_003AE958(void*);
  * Resumes a paused movie: when a decoder (+0x38) and a driver (+0x3C) exist, it has not finished (+0x0) and it is
  * paused (+0x8), resumes the decoder (func_003AE958) and clears the paused word.
  */
-extern "C" void cMoviePlayer_asyncResume(cMoviePlayer* self)
+void cMoviePlayer::asyncResume()
 {
-    void* handle = self->m_pPlayer;
-    if (handle != 0 && (int)self->m_pVd != 0 && self->mbMovieFinished == 0
-        && self->mbPaused != 0) {
+    void* handle = m_pPlayer;
+    if (handle != 0 && (int)m_pVd != 0 && mbMovieFinished == 0
+        && mbPaused != 0) {
         func_003AE958(handle);
-        self->mbPaused = 0;
+        mbPaused = 0;
     }
 }
 #endif
@@ -2414,11 +2414,11 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_SetPosition);
  * @param posY  top edge
  * @param posZ  depth
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_SetPosition(SSX_VD_PS2_SINGLE_BUFFERD* self, float posX, float posY, float posZ)
+void SSX_VD_PS2_SINGLE_BUFFERD::SetPosition(float posX, float posY, float posZ)
 {
-    self->mPosX = posX;
-    self->mPosY = posY;
-    self->mPosZ = posZ;
+    mPosX = posX;
+    mPosY = posY;
+    mPosZ = posZ;
 }
 #endif
 
@@ -2570,7 +2570,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
     (*(int*)&self->mpCurrentFrame) = 0;
     float sw = (float)((cRend_4410*)self->m_pGrMan)->width();
     float sh = (float)((cRend_4410*)self->m_pGrMan)->height() - fh;
-    SSX_VD_PS2_SINGLE_BUFFERD_SetPosition((SSX_VD_PS2_SINGLE_BUFFERD*)self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
+    self->SetPosition((sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
     SSX_VD_PS2_SINGLE_BUFFERD_SetScale(self, 1.0f, 1.0f);
     self->mDrawLayer = drawLayer;
     return self;
@@ -2844,13 +2844,13 @@ extern "C" void* func_002548D0(void* self);
  *
  * @param frame  the frame
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, RCMP_FRAME* frame)
+void SSX_VD_PS2_SINGLE_BUFFERD::Draw(RCMP_FRAME* frame)
 {
     if (frame != 0) {
-        self->mpCurrentFrame = frame;
+        mpCurrentFrame = frame;
     }
     SHAPE* shape = frame->m_Shp;
-    self->mpImageHeader = shape;
+    mpImageHeader = shape;
     // ORIGINAL-PTR: a SHAPE file blob: a referenced shape (flag 0x1000) keeps its pixels' byte offset in the word after
     // the 0x10-byte header, otherwise the pixels follow the header.
     char* data;
@@ -2860,17 +2860,17 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, 
         data = (char*)(shape + 1);
     }
     int k = 0;
-    short stride = self->mpImageHeader->height;
-    for (int i = 0; i < self->mNumColumns; i++) {
+    short stride = mpImageHeader->height;
+    for (int i = 0; i < mNumColumns; i++) {
         int off = 0;
-        for (int j = 0; j < self->mNumRows; j++) {
-            int* tileEntry = ((int*)self->mppTiles[k]);
+        for (int j = 0; j < mNumRows; j++) {
+            int* tileEntry = ((int*)mppTiles[k]);
             cGraphicsMan_TheGraphicsMan->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
-            off += self->mRowHeights[j];
+            off += mRowHeights[j];
         }
     }
-    func_002548D0(self);
+    func_002548D0(this);
 }
 #endif
 
@@ -2901,16 +2901,16 @@ extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
  *
  * Vtable slot 6 of D_00480270.
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw(SSX_VD_PS2_SINGLE_BUFFERD* self)
+void SSX_VD_PS2_SINGLE_BUFFERD::CompleteDraw()
 {
     cPS2GraphicsMan* rend;
     do {
-        rend = self->m_pGrMan;
+        rend = m_pGrMan;
     } while (rend->IsRenderIdle() == 0);
-    void* resource = self->mpCurrentFrame;
+    void* resource = mpCurrentFrame;
     if (resource != 0) {
-        RCMP_DECODER_ReleaseFrame(self->m_pdecoder, resource);
-        self->mpCurrentFrame = 0;
+        RCMP_DECODER_ReleaseFrame(m_pdecoder, resource);
+        mpCurrentFrame = 0;
     }
 }
 #endif

@@ -30,6 +30,12 @@ CHECK_OFFSET(tSphereList, rad, 0x10);
 CHECK_OFFSET(tSphereList, bone, 0x14);
 CHECK_SIZE(tSphereList, 0x20);
 
+struct t3Vector;
+struct t4Matrix;
+struct t4Vector;
+struct tBoundBox;
+struct tIntersectInfo;
+
 struct cRiderSphereTree {
     tPose* bonePoses;               // 0x000 [O]
     char unk_004[0xC];              // 0x004 padding
@@ -39,6 +45,22 @@ struct cRiderSphereTree {
     unsigned int sphMask;           // 0x028 [O]
     int listLen;                    // 0x02C [O]
     tSphereList sphList[20];        // 0x030 [O] tSphereList[20] (0x280 bytes)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cRiderSphereTree1() __asm__("cRiderSphereTree_cRiderSphereTree1");
+    void Init1(float radius) __asm__("cRiderSphereTree_Init1");
+    void Init(int type, int n, int* ids, float* radii, int user, float radius) __asm__("cRiderSphereTree_Init");
+    cRiderSphereTree* operatorE(cRiderSphereTree* src) __asm__("cRiderSphereTree_operatorE");
+    void Update(int n, t4Vector* pos, float* radii, t4Vector* center, float radius) __asm__("cRiderSphereTree_Update");
+    void Update1() __asm__("cRiderSphereTree_Update1");
+    void ApplyOffset(t4Vector* offset) __asm__("cRiderSphereTree_ApplyOffset");
+    void ApplyTransform(t4Matrix* mat, float scale) __asm__("cRiderSphereTree_ApplyTransform");
+    void GetBoundBox(tBoundBox* box) __asm__("cRiderSphereTree_GetBoundBox");
+    void GetMaskBoundBox(t4Vector* mnp, t4Vector* mxp) __asm__("cRiderSphereTree_GetMaskBoundBox");
+    int IsRiderCollision(cRiderSphereTree* nodeB, t4Vector* outA, t4Vector* outB)
+        __asm__("cRiderSphereTree_IsRiderCollision");
+    int IsBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, tIntersectInfo* hit)
+        __asm__("cRiderSphereTree_IsBoxCollision");
 };
 
 CHECK_OFFSET(cRiderSphereTree, bonePoses, 0x000);

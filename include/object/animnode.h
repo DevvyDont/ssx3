@@ -55,6 +55,9 @@ CHECK_OFFSET(tMeshVelocity, Vel, 0x00);
 CHECK_OFFSET(tMeshVelocity, AngVel, 0x10);
 CHECK_SIZE(tMeshVelocity, 0x20);
 
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cAnimNode {
     // --- cAnimNodeState (On Tour 0x14; [R] the replay ctor reads these 0x14 bytes, writeToReplayFrame writes them)
     float CurrTime;                 // 0x00 [O]; [R] ctor: the first frame's start time; [U] getAnimFrame returns it *
@@ -97,6 +100,14 @@ struct cAnimNode {
     tMeshVelocity* MeshVelocity;    // 0x4C [O]; [U] setAnimMeshCache: new 0x20-byte entries[model mesh count]
                                     //      ("MeshVelocity"); updateMeshVelocity fills it, updateIntersectInfo reads it;
                                     //      the dtor frees it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setAnimMeshCache() __asm__("cAnimNode_setAnimMeshCache");
+    void calcPosition(int id, int idx, t4Vector* out) __asm__("cAnimNode_calcPosition");
+    void updateIntersectInfo(tIntersectInfo* body) __asm__("cAnimNode_updateIntersectInfo");
+    void updateMeshVelocity() __asm__("cAnimNode_updateMeshVelocity");
+    int frameUpdate() __asm__("cAnimNode_frameUpdate");
+    int frameUpdateEvent(float frame) __asm__("cAnimNode_frameUpdateEvent");
 };
 
 CHECK_OFFSET(cAnimNode, CurrTime, 0x00);

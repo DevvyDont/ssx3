@@ -60,9 +60,9 @@ INCLUDE_ASM("fe/feflowstate", cFEFlowState_getValue);
  * @param index  state index (used as a signed char)
  * @return the stored value
  */
-extern "C" signed char cFEFlowState_getValue(cFEFlowState* self, int index)
+signed char cFEFlowState::getValue(int index)
 {
-    return *(signed char*)((int)self->mpValues + (signed char)index);
+    return *(signed char*)((int)mpValues + (signed char)index);
 }
 #endif
 
@@ -77,9 +77,9 @@ INCLUDE_ASM("fe/feflowstate", cFEFlowState_setValue);
  * @param index  state index (used as a signed char)
  * @param value  value to store (its low byte)
  */
-extern "C" void cFEFlowState_setValue(cFEFlowState* self, int index, int value)
+void cFEFlowState::setValue(int index, int value)
 {
-    *(char*)((int)self->mpValues + (signed char)index) = value;
+    *(char*)((int)mpValues + (signed char)index) = value;
 }
 #endif
 

@@ -49,6 +49,11 @@ struct cFEStateCharSetup : public cFEState {
                                     //       updateCharacter3DPos plays the intro animation once and clears it
     int mbDraw3D;                   // 0x04C [O] (bool); [R] ctor 0; [U] show3DCharacter stores its argument,
                                     //       updateCharacter3DPos poses the rider only while it is set
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateWidget() __asm__("cFEStateCharSetup_updateWidget");
+    void updateCharacter3DPos() __asm__("cFEStateCharSetup_updateCharacter3DPos");
+    void show3DCharacter(int on) __asm__("cFEStateCharSetup_show3DCharacter");
 };
 
 CHECK_OFFSET(cFEStateCharSetup, mbIsFirst, 0x048);

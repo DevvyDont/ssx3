@@ -13,6 +13,8 @@
 struct cInputMapParser;
 union tInputOpCode;                 // a union (input/inputparse.h, [O]); views group D
 
+struct cInputPad;
+
 struct cInputMap {
     int MaxMaps;                    // 0x000 [O]
     int* MapOffset;                 // 0x004 [O]
@@ -20,6 +22,22 @@ struct cInputMap {
     int OpCodeLen;                  // 0x00C [O]
     int OpCodeTop;                  // 0x010 [O]
     tInputOpCode* OpCodeBuf;        // 0x014 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(int count) __asm__("cInputMap_init");
+    void purge() __asm__("cInputMap_purge");
+    void loadMapFile1(const char* path) __asm__("cInputMap_loadMapFile1");
+    void loadMapFile(void* mem, void* len) __asm__("cInputMap_loadMapFile");
+    void compileMap(int idx, char* src) __asm__("cInputMap_compileMap");
+    void purgeMapFile() __asm__("cInputMap_purgeMapFile");
+    float getValue(cInputPad* inputPad, int id) __asm__("cInputMap_getValue");
+    float getValue1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
+                    float config3, float config4, float config5, float config6, float config7)
+        __asm__("cInputMap_getValue1");
+    int getState(cInputPad* inputPad, int id) __asm__("cInputMap_getState");
+    int getState1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
+                  float config3, float config4, float config5, float config6, float config7)
+        __asm__("cInputMap_getState1");
 };
 
 CHECK_OFFSET(cInputMap, MaxMaps, 0x000);

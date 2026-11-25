@@ -71,9 +71,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerDone);
  *
  * @return 1 when done, otherwise 0
  */
-extern "C" int cMCOverlayManager_isManagerDone(cMCOverlayManager* self)
+int cMCOverlayManager::isManagerDone()
 {
-    return self->mState == 1;
+    return mState == 1;
 }
 #endif
 
@@ -83,11 +83,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerLoaded);
 /**
  * Tells whether the manager's load has finished: mState is 35 (On Tour's kMCOverlay_LoadDone).
  *
- * @param manager  the overlay manager
  * @return 1 when loaded, else 0
  */
-extern "C" int cMCOverlayManager_isManagerLoaded(cMCOverlayManager* manager) {
-    return (manager->mState) == 35;
+int cMCOverlayManager::isManagerLoaded()
+{
+    return (mState) == 35;
 }
 #endif
 //100%
@@ -96,11 +96,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerSaved);
 /**
  * Returns mSaved, set when the manager's last save completed.
  *
- * @param manager  the overlay manager
  * @return mSaved
  */
-extern "C" int cMCOverlayManager_isManagerSaved(cMCOverlayManager* manager) {
-    return (manager->mSaved);
+int cMCOverlayManager::isManagerSaved()
+{
+    return (mSaved);
 }
 #endif
 //100%
@@ -128,11 +128,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasCardStatusCriticalError);
  *
  * @return 1 when another bit is set, otherwise 0
  */
-extern "C" int cMCOverlayManager_hasCardStatusCriticalError(cMCOverlayManager* self)
+int cMCOverlayManager::hasCardStatusCriticalError()
 {
     // masks applied as separate statements; folding them into one
     // expression collapses the two `and` instructions into one
-    int stateTest = self->mCurrDeviceStateLast;
+    int stateTest = mCurrDeviceStateLast;
     stateTest &= -5;
     stateTest &= -481;
     return stateTest != 0;
@@ -167,37 +167,37 @@ extern char str_pct_s_pct_s_e[];
  *
  * @param mode  the file type
  */
-extern "C" void cMCOverlayManager_readSetFileType(cMCOverlayManager* self, int mode)
+void cMCOverlayManager::readSetFileType(int mode)
 {
     char desc[0x200];
     char name[0x200];
     char fmt[0x200];
-    self->mFileType = mode;
-    cMCOverlayManager_SetAction((cMCOverlayManager*)self, 1);
-    self->mSaveProfileID = -1;
-    self->mSave = 0;
-    int fileType = self->mFileType;
+    mFileType = mode;
+    SetAction(1);
+    mSaveProfileID = -1;
+    mSave = 0;
+    int fileType = mFileType;
     if (fileType == 0) {
-        self->mMaxFiles = 4;
-        cMemCard* memCard = self->mpMemCard;
+        mMaxFiles = 4;
+        cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(0x80000);
     } else if (fileType == 1) {
-        self->mMaxFiles = 6;
+        mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
-        cMemCard* memCard = self->mpMemCard;
+        cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(fileSize);
     } else {
-        self->mMaxFiles = 1;
+        mMaxFiles = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveGameSize_r();
-        cMemCard* memCard = self->mpMemCard;
+        cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
-    cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x100);
-    sprintf1_v(&self->mMatch[0], fmt, desc, name);
+    cMCOverlayManager_getFileName_r(this, mFileType, name, 0x100);
+    sprintf1_v(&mMatch[0], fmt, desc, name);
 }
 #endif
 
@@ -213,11 +213,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readFile);
  * @param data  destination buffer
  * @param size  bytes to read
  */
-extern "C" void cMCOverlayManager_readFile(cMCOverlayManager* self, int file, int data, int size)
+void cMCOverlayManager::readFile(int file, int data, int size)
 {
-    cMemCard* obj = self->mpMemCard;
+    cMemCard* obj = mpMemCard;
     obj->StartFileSlotRead(file, data, size);
-    self->mLoadedSize = size;
+    mLoadedSize = size;
 }
 #endif
 
@@ -228,9 +228,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readClose);
  * Closes the current card read: calls mpMemCard's vtable slot 32 (On Tour's cMemCard::SetReadClose by declaration
  * order).
  */
-extern "C" void cMCOverlayManager_readClose(cMCOverlayManager* self)
+void cMCOverlayManager::readClose()
 {
-    cMemCard* obj = self->mpMemCard;
+    cMemCard* obj = mpMemCard;
     obj->SetReadClose();
 }
 #endif
@@ -284,37 +284,37 @@ extern char str_pct_s_pct_s_e[];
  * @param mode  the file type (0 replay, 1 profile, 2 settings)
  * @param profileId  the profile to save, or -1
  */
-extern "C" void cMCOverlayManager_writeSetFileType(cMCOverlayManager* self, int mode, int profileId)
+void cMCOverlayManager::writeSetFileType(int mode, int profileId)
 {
     char desc[0x200];
     char name[0x200];
     char fmt[0x200];
-    self->mFileType = mode;
-    cMCOverlayManager_SetAction((cMCOverlayManager*)self, 1);
-    self->mSaveProfileID = profileId;
-    self->mSave = 1;
-    int fileType = self->mFileType;
+    mFileType = mode;
+    SetAction(1);
+    mSaveProfileID = profileId;
+    mSave = 1;
+    int fileType = mFileType;
     if (fileType == 0) {
-        self->mMaxFiles = 4;
-        cMemCard* memCard = self->mpMemCard;
+        mMaxFiles = 4;
+        cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(0x80000);
     } else if (fileType == 1) {
-        self->mMaxFiles = 6;
+        mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
-        cMemCard* memCard = self->mpMemCard;
+        cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(fileSize);
     } else {
-        self->mMaxFiles = 1;
+        mMaxFiles = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveGameSize_r();
-        cMemCard* memCard = self->mpMemCard;
+        cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
-    cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x100);
-    sprintf1_v(&self->mMatch[0], fmt, desc, name);
+    cMCOverlayManager_getFileName_r(this, mFileType, name, 0x100);
+    sprintf1_v(&mMatch[0], fmt, desc, name);
 }
 #endif
 
@@ -325,10 +325,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_writeClose);
  * Closes the current card write when one was started (mWriteInProgress): calls mpMemCard's slot 43 (SetWriteClose by On
  * Tour's cMemCard order).
  */
-extern "C" void cMCOverlayManager_writeClose(cMCOverlayManager* self)
+void cMCOverlayManager::writeClose()
 {
-    if (self->mWriteInProgress != 0) {
-        cMemCard* obj = self->mpMemCard;
+    if (mWriteInProgress != 0) {
+        cMemCard* obj = mpMemCard;
         obj->SetWriteClose();
     }
 }
@@ -372,14 +372,14 @@ extern char str_kT_OVGameOptions[];
  * @param n  the file slot
  * @param dst  16-bit destination buffer
  */
-extern "C" void cMCOverlayManager_GetTitleString(cMCOverlayManager* self, int n, char* dst)
+void cMCOverlayManager::GetTitleString(int n, char* dst)
 {
     char name[0x100];
     char fmt[0x200];
-    switch (self->mFileType) {
+    switch (mFileType) {
     case 0:
         func_002C2540(fmt, str_pct_spct_d_b);
-        cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x80);
+        cMCOverlayManager_getFileName_r(this, mFileType, name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
     case 2: {
@@ -391,7 +391,7 @@ extern "C" void cMCOverlayManager_GetTitleString(cMCOverlayManager* self, int n,
     }
     case 1:
         func_002C2540(fmt, str_pct_spct_d_b);
-        cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x80);
+        cMCOverlayManager_getFileName_r(this, mFileType, name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
     }
@@ -427,15 +427,15 @@ extern char str_kT_MEMFileNameReplay[];
  *
  * @param n  file slot number (On Tour calls it file)
  */
-extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
+void cMCOverlayManager::setTitleString(int n)
 {
     char out[0x200];
     char title[0x200];
     char fmt[0x200];
     char name[0x200];
-    cMCOverlayManager_GetTitleString(self, n, title);
+    GetTitleString(n, title);
     func_002C2540(fmt, str_SSX_3_pct_s);
-    switch (self->mFileType) {
+    switch (mFileType) {
     case 0: {
         cFELocale* loc = SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
@@ -446,7 +446,7 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
     }
     case 1: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_002C2540(name, cBENewPlayerInterface_getPlayerName(iface, self->mSaveProfileID));
+        func_002C2540(name, cBENewPlayerInterface_getPlayerName(iface, mSaveProfileID));
         sprintf1_v(out, fmt, name);
         break;
     }
@@ -459,10 +459,10 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
         break;
     }
     }
-    char* memCard = (char*)self->mpMemCard;
+    char* memCard = (char*)mpMemCard;
     sVEntry<void(void*, char*)>* mvt = *(sVEntry<void(void*, char*)>**)memCard;
     mvt[45].fn(memCard + mvt[45].delta, out);
-    strcpy1((char*)&self->mActiveTitleString, out);
+    strcpy1((char*)&mActiveTitleString, out);
 }
 #endif
 
@@ -480,16 +480,16 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_SetAction);
  * @param mode  new action: 0 runs the load/save state machine, 1 the initial card and file checks
  * @return nothing meaningful; the body has no return statement
  */
-extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode)
+void* cMCOverlayManager::SetAction(int mode)
 {
-    self->mAction = mode;
+    mAction = mode;
     switch (mode) {
     case 0:
         break;
     case 1:
-        self->mFlash = 1.0f;
-        self->mFlashStep = 0.016669999808073044f;
-        self->mDisplayWaitTicks = 0x3C;
+        mFlash = 1.0f;
+        mFlashStep = 0.016669999808073044f;
+        mDisplayWaitTicks = 0x3C;
         break;
     }
 }
@@ -504,14 +504,14 @@ extern "C" void* cMemCard_CreateInstance(void);
  * Creates the manager's memory card (cMemCard_CreateInstance into mpMemCard), zeroes mStackDepth and sets mFlash to 1.0
  * and mFlashStep to 1/60.
  */
-extern "C" void cMCOverlayManager_ManagerGainState(cMCOverlayManager* self)
+void cMCOverlayManager::ManagerGainState()
 {
     void* memCard = cMemCard_CreateInstance();
 //START
-    self->mpMemCard = (cMemCard*)memCard;
-    self->mStackDepth = 0;
-    self->mFlash = 1.0f;
-    self->mFlashStep = 0.016669999808073044f;
+    mpMemCard = (cMemCard*)memCard;
+    mStackDepth = 0;
+    mFlash = 1.0f;
+    mFlashStep = 0.016669999808073044f;
 //END
 }
 #endif
@@ -526,10 +526,10 @@ extern "C" void cMemCard_DeleteInstance(void*);
  *
  * Deletes +0x434 with cMemCard_DeleteInstance (On Tour cMemCard::DeleteInstance) and clears it.
  */
-extern "C" void cMCOverlayManager_ManagerLoseState(cMCOverlayManager* self)
+void cMCOverlayManager::ManagerLoseState()
 {
-    cMemCard_DeleteInstance(self->mpMemCard);
-    self->mpMemCard = 0;
+    cMemCard_DeleteInstance(mpMemCard);
+    mpMemCard = 0;
 }
 #endif
 
@@ -546,14 +546,14 @@ extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* s
  * initial card and file checks (UpdateInitCardsCheck, UpdateInitFileCheck, UpdateInitFileCheckDevice) and can
  * switch back to action 0. Other actions do nothing.
  */
-extern "C" void cMCOverlayManager_update(cMCOverlayManager* self)
+void cMCOverlayManager::update()
 {
-    switch (self->mAction) {
+    switch (mAction) {
     case 0:
-        cMCOverlayManager_ManagerLoadSaveUpdate(self);
+        ManagerLoadSaveUpdate();
         break;
     case 1:
-        cMCOverlayManager_managerDeviceSelectUpdate(self);
+        managerDeviceSelectUpdate();
         break;
     }
 }
@@ -583,35 +583,37 @@ static inline bool isState_23D660(char* s, int k)
  * cMCOverlayManager_UpdateInitCardsCheck (49), cMCOverlayManager_UpdateInitFileCheck (51) or
  * cMCOverlayManager_UpdateInitFileCheckDevice (54).
  */
-extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* self)
+void cMCOverlayManager::managerDeviceSelectUpdate()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     memCard->Update();
-    if (self->mCheckCard != 0) {
-        memCard = self->mpMemCard;
+    if (mCheckCard != 0) {
+        memCard = mpMemCard;
         if (memCard->IsBusy() != 0) {
             return;
         }
-        self->mCheckCard = 0;
+        mCheckCard = 0;
     }
-    if (self->mMaxDevices == -1) {
-        self->mMaxDevices = cMCOverlayManager_getMaxDevicesSupported((cMCOverlayManager*)self);
+    if (mMaxDevices == -1) {
+        mMaxDevices = getMaxDevicesSupported();
     }
-    memCard = self->mpMemCard;
+    memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        cMCOverlayManager_SetAction((cMCOverlayManager*)self, 0);
-        int ok = !(isState_23D660(((char*)self), 49) || isState_23D660(((char*)self), 50) || isState_23D660(((char*)self), 51) || isState_23D660(((char*)self), 52) || isState_23D660(((char*)self), 54));
+        SetAction(0);
+        int ok = !(isState_23D660(((char*)this), 49) || isState_23D660(((char*)this),
+                50) || isState_23D660(((char*)this), 51) || isState_23D660(((char*)this),
+                52) || isState_23D660(((char*)this), 54));
         if (ok) {
-            self->SetState(3);
+            SetState(3);
         }
     }
-    int st = self->mState;
+    int st = mState;
     if (st == 49) {
-        cMCOverlayManager_UpdateInitCardsCheck((cMCOverlayManager*)self);
+        UpdateInitCardsCheck();
     } else if (st == 51) {
-        cMCOverlayManager_UpdateInitFileCheck((cMCOverlayManager*)self);
+        UpdateInitFileCheck();
     } else if (st == 54) {
-        cMCOverlayManager_UpdateInitFileCheckDevice((cMCOverlayManager*)self);
+        UpdateInitFileCheckDevice();
     }
 }
 #endif
@@ -625,14 +627,30 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isLoadCardStatusErrorUnacknow
  *
  * @return 1 for an unacknowledged error, else 0
  */
-extern "C" int cMCOverlayManager_isLoadCardStatusErrorUnacknowledged(cMCOverlayManager* self)
+int cMCOverlayManager::isLoadCardStatusErrorUnacknowledged()
 {
-    int deviceState = self->mCurrDeviceStateLast;
+    int deviceState = mCurrDeviceStateLast;
     deviceState &= ~4;
     deviceState &= ~0x10;
-    return self->mCurrDeviceStateAck == 0 && deviceState != 0;
+    return mCurrDeviceStateAck == 0 && deviceState != 0;
 }
 #endif
+
+extern "C" void cMCOverlayManager_OnHighlightNextDevice(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateCardDamaged(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateDeleteFailed(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateFormatConfirm(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateInitDeleteConfirm(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateLoadCorrupt(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateLoadDoneWait(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateNoCardsError(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateNoFreeBlocks(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateSaveClosing(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateSaveCorrupt(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateSaveFailed(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateSaveProgress(cMCOverlayManager* self);
+extern "C" void cMCOverlayManager_UpdateSaveTooBig(cMCOverlayManager* self);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerLoadSaveUpdate);
@@ -1020,11 +1038,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitCardsCheck);
  * SetState
  * (vtable slot 1).
  */
-extern "C" void cMCOverlayManager_UpdateInitCardsCheck(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitCardsCheck()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        self->SetState(50);
+        SetState(50);
     }
 }
 #endif
@@ -1046,11 +1064,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFileCheckWait);
 /**
  * Waits for the card to go idle, then moves to InitFileCheck (state 51).
  */
-extern "C" void cMCOverlayManager_UpdateInitFileCheckWait(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFileCheckWait()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        self->SetState(51);
+        SetState(51);
     }
 }
 #endif
@@ -1068,17 +1086,17 @@ extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self);
  * If the card says the selected device is not present (card slot 52), moves to CheckCardsWait (2) and calls
  * callbackDisplayNoCards; otherwise starts InitiateFileCheck() and calls callbackDisplayNoFiles.
  */
-extern "C" void cMCOverlayManager_UpdateInitFileCheckDevice(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFileCheckDevice()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        cMemCard* card = self->mpMemCard;
-        if (card->IsAvailable(self->mSelectedDevice) == 0) {
-            self->SetState(2);
-            (self->callbackDisplayNoCards)();
+        cMemCard* card = mpMemCard;
+        if (card->IsAvailable(mSelectedDevice) == 0) {
+            SetState(2);
+            (callbackDisplayNoCards)();
         } else {
-            cMCOverlayManager_InitiateFileCheck(self);
-            (self->callbackDisplayNoFiles)();
+            InitiateFileCheck();
+            (callbackDisplayNoFiles)();
         }
     }
 }
@@ -1090,12 +1108,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateFileExists);
 /**
  * Waits on the "file exists" message: once the card is idle, cancelling returns to CheckCards (state 3).
  */
-extern "C" void cMCOverlayManager_UpdateFileExists(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateFileExists()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            self->SetState(3);
+        if ((callbackIsCancelPressed)() != 0) {
+            SetState(3);
         }
     }
 }
@@ -1114,14 +1132,14 @@ extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
  *
  * Calls CancelCardOp(0), clears mCardChanged and calls RecheckCard().
  */
-extern "C" void cMCOverlayManager_UpdateCardChanged(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateCardChanged()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 0);
-            self->mCardChanged = 0;
-            cMCOverlayManager_RecheckCard(self);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(0);
+            mCardChanged = 0;
+            RecheckCard();
         }
     }
 }
@@ -1135,11 +1153,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFileCheck);
 /**
  * Waits for the initial file check to finish, then moves to InitFileCheckDone (state 52).
  */
-extern "C" void cMCOverlayManager_UpdateInitFileCheck(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFileCheck()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        self->SetState(52);
+        SetState(52);
     }
 }
 #endif
@@ -1164,10 +1182,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCheckCardsWait);
  * Decrements mDisplayWaitTicks (SetAction(1) sets it to 60); once it was already 0 or less, passes code 3 to
  * the manager's virtual state handler (vtable slot 1, cMCOverlayManager_SetState).
  */
-extern "C" void cMCOverlayManager_UpdateCheckCardsWait(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateCheckCardsWait()
 {
-    if ((self->mDisplayWaitTicks)-- <= 0) {
-        self->SetState(3);
+    if ((mDisplayWaitTicks)-- <= 0) {
+        SetState(3);
     }
 }
 #endif
@@ -1192,60 +1210,60 @@ extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
  * Without a pending action it rechecks a changed card or posts 0x31 for no card. Otherwise it posts 6 when the
  * card object's slots 55 and 58 report true and 51 and 59 false, else 7 when saving or 0x1D when not.
  */
-extern "C" void cMCOverlayManager_UpdateCheckCards(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateCheckCards()
 {
-    if (self->mpMemCard->IsBusy())
+    if (mpMemCard->IsBusy())
         return;
     int quit = 0;
-    if (self->mSave || self->mDelete || (self->callbackIsLoadPressed)())
+    if (mSave || mDelete || (callbackIsLoadPressed)())
         quit = 1;
-    if (self->mShowCardChangeNotify && self->mCardChanged && quit) {
-        self->SetState(0x38);
+    if (mShowCardChangeNotify && mCardChanged && quit) {
+        SetState(0x38);
         return;
     }
-    int held = self->mCurrDeviceStateLast;
-    if (cMCOverlayManager_updateDeviceStateMonitor(self)) {
-        if ((self->mPollForNoCard || quit) && (self->mCurrDeviceStateLast & 8)) {
-            cMCOverlayManager_TriggerPollNoCardError(self);
+    int held = mCurrDeviceStateLast;
+    if (updateDeviceStateMonitor()) {
+        if ((mPollForNoCard || quit) && (mCurrDeviceStateLast & 8)) {
+            TriggerPollNoCardError();
             return;
         }
-        if (!(self->mCurrDeviceStateLast & 8)) {
-            if (self->mCurrDeviceStateLast & 1) {
-                self->SetState(5);
+        if (!(mCurrDeviceStateLast & 8)) {
+            if (mCurrDeviceStateLast & 1) {
+                SetState(5);
                 return;
             }
-            if (self->mPollForUnformatted && (self->mCurrDeviceStateLast & 0x10)) {
-                self->SetState(39);
+            if (mPollForUnformatted && (mCurrDeviceStateLast & 0x10)) {
+                SetState(39);
                 return;
             }
         }
         int rel;
-        if ((!(self->mCurrDeviceStateLast & 8) && (held & 8)) || (rel = held & ~4, self->mCurrDeviceStateLast == 0 && rel)) {
-            cMCOverlayManager_InitiateFileCheck(self);
+        if ((!(mCurrDeviceStateLast & 8) && (held & 8)) || (rel = held & ~4, mCurrDeviceStateLast == 0 && rel)) {
+            InitiateFileCheck();
             return;
         }
     }
     if (!quit) {
-        if (self->mCardChanged) {
-            self->mCardChanged = 0;
-            cMCOverlayManager_RecheckCard(self);
+        if (mCardChanged) {
+            mCardChanged = 0;
+            RecheckCard();
             return;
         }
-        if (self->mCurrDeviceStateLast & 8) {
-            self->SetState(49);
+        if (mCurrDeviceStateLast & 8) {
+            SetState(49);
             return;
         }
     }
-    if (self->mSave) {
-        if (self->mpMemCard->IsFormatted() && self->mpMemCard->IsEncodingCorrect1() && !self->mpMemCard->IsDamaged1() && !self->mpMemCard->IsWrongDevice())
-            self->SetState(6);
+    if (mSave) {
+        if (mpMemCard->IsFormatted() && mpMemCard->IsEncodingCorrect1() && !mpMemCard->IsDamaged1() && !mpMemCard->IsWrongDevice())
+            SetState(6);
         else
-            self->SetState(7);
+            SetState(7);
     } else {
-        if (self->mpMemCard->IsFormatted() && self->mpMemCard->IsEncodingCorrect1() && !self->mpMemCard->IsDamaged1() && !self->mpMemCard->IsWrongDevice())
-            self->SetState(6);
+        if (mpMemCard->IsFormatted() && mpMemCard->IsEncodingCorrect1() && !mpMemCard->IsDamaged1() && !mpMemCard->IsWrongDevice())
+            SetState(6);
         else
-            self->SetState(29);
+            SetState(29);
     }
 }
 #undef S_E540
@@ -1262,14 +1280,14 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  * Handles the "no memory card" error: once the card is idle, cancel aborts the operation and retry retries
  * it.
  */
-extern "C" void cMCOverlayManager_UpdateNoCardsError(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateNoCardsError()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 0);
-        } else if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(0);
+        } else if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
         }
     }
 }
@@ -1289,9 +1307,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_CheckForCard);
  *
  * @param flag  nonzero to go to state 6 (reading the card) when the card is good
  */
-extern "C" void cMCOverlayManager_CheckForCard(cMCOverlayManager* self, int flag)
+void cMCOverlayManager::CheckForCard(int flag)
 {
-    cMCOverlayManager* manager = (cMCOverlayManager*)((char*)self);
+    cMCOverlayManager* manager = (cMCOverlayManager*)((char*)this);
 
     if (manager->mpMemCard->IsAvailable1() == 0) {
         if (manager->mpMemCard->IsInvalid1() != 0 || manager->mpMemCard->IsDamaged1() != 0 || manager->mpMemCard->IsWrongDevice() != 0) {
@@ -1331,18 +1349,18 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1);
  *
  * @param showFailMessage  passed to WriteFailed() when a save is being abandoned: show the write-failed popup
  */
-extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int showFailMessage)
+void cMCOverlayManager::CancelCardOp(int showFailMessage)
 {
-    int on = self->mSave;
+    int on = mSave;
     cMCOverlayManager_mSaveInProgress = 0;
     if (on != 0) {
-        self->mSave = 0;
-        cMCOverlayManager_WriteFailed(self, showFailMessage);
+        mSave = 0;
+        WriteFailed(showFailMessage);
     }
-    self->mDelete = 0;
-    self->mCurrDeviceStateAck = 1;
-    self->mFormatPressedBuffered = 0;
-    self->SetState(1);
+    mDelete = 0;
+    mCurrDeviceStateAck = 1;
+    mFormatPressedBuffered = 0;
+    SetState(1);
 }
 #endif
 
@@ -1365,26 +1383,26 @@ extern int cMCOverlayManager_mSaveInProgress;
  * state
  * shows no problem besides a full card (cMCOverlayManager_hasCardStatusCriticalError()), or rechecks the card.
  */
-extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self)
+void cMCOverlayManager::RetryCardOp()
 {
-    if (self->mSave != 0) {
-        int playing = self->mWriteInProgress;
+    if (mSave != 0) {
+        int playing = mWriteInProgress;
         cMCOverlayManager_mSaveInProgress = 0;
         if (playing != 0) {
-            cMemCard* memCard = self->mpMemCard;
+            cMemCard* memCard = mpMemCard;
             memCard->SetWriteFailed();
         }
-        self->SetState(2);
+        SetState(2);
     } else {
-        self->mCurrDeviceStateAck = 0;
-        if (self->mRetryToInit != 0) {
-            cMCOverlayManager_selectDevice(self, 0);
-            cMCOverlayManager_setSelectedDevice(self);
-            self->SetState(49);
-        } else if (cMCOverlayManager_hasCardStatusCriticalError(self) == 0) {
-            cMCOverlayManager_InitiateFileCheck(self);
+        mCurrDeviceStateAck = 0;
+        if (mRetryToInit != 0) {
+            selectDevice(0);
+            setSelectedDevice();
+            SetState(49);
+        } else if (hasCardStatusCriticalError() == 0) {
+            InitiateFileCheck();
         } else {
-            cMCOverlayManager_RecheckCard(self);
+            RecheckCard();
         }
     }
 }
@@ -1396,9 +1414,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_TriggerPollNoCardError);
 /**
  * Reports a missing memory card by passing code 4 to the manager's virtual state handler (vtable slot 1).
  */
-extern "C" void cMCOverlayManager_TriggerPollNoCardError(cMCOverlayManager* self)
+void cMCOverlayManager::TriggerPollNoCardError()
 {
-    self->SetState(4);
+    SetState(4);
 }
 #endif
 
@@ -1412,14 +1430,14 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  * Handles the "invalid card" error: once the card is idle, cancel aborts (with the fail message) and retry
  * retries.
  */
-extern "C" void cMCOverlayManager_UpdateCardInvalid(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateCardInvalid()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 1);
-        } else if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(1);
+        } else if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
         }
     }
 }
@@ -1443,70 +1461,70 @@ void cMCOverlayManager_GatherDeviceInfo_v(void* self) __asm__("cMCOverlayManager
  * error, LoadFailed (36), CardInvalid (5) or Load (29). Device status bits come from mCurrDeviceStateLast
  * (1 error, 8 no card).
  */
-extern "C" void cMCOverlayManager_UpdateReadingCard(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateReadingCard()
 {
-    int ready = cMCOverlayManager_updateDeviceStateMonitor(self);
-    if ((self->mDisplayWaitTicks)-- > 0)
+    int ready = updateDeviceStateMonitor();
+    if ((mDisplayWaitTicks)-- > 0)
         return;
-    if (self->mpMemCard->IsBusy())
+    if (mpMemCard->IsBusy())
         return;
-    if (self->mCardChanged) {
+    if (mCardChanged) {
         int busy = 0;
-        if (self->mSave || self->mDelete || (self->callbackIsLoadPressed)())
+        if (mSave || mDelete || (callbackIsLoadPressed)())
             busy = 1;
-        if (self->mShowCardChangeNotify && busy) {
-            self->SetState(0x38);
+        if (mShowCardChangeNotify && busy) {
+            SetState(0x38);
             return;
         }
-        if (self->mpMemCard->IsFormatted() && self->mpMemCard->IsEncodingCorrect1() && !self->mpMemCard->IsDamaged1() && !self->mpMemCard->IsWrongDevice()) {
-            self->SetState(6);
+        if (mpMemCard->IsFormatted() && mpMemCard->IsEncodingCorrect1() && !mpMemCard->IsDamaged1() && !mpMemCard->IsWrongDevice()) {
+            SetState(6);
             return;
         }
     }
-    if (self->mSave) {
-        int deviceState = self->mCurrDeviceStateLast;
+    if (mSave) {
+        int deviceState = mCurrDeviceStateLast;
         if (!(deviceState & 8)) {
             if (deviceState & 1) {
-                self->SetState(20);
+                SetState(20);
                 return;
             }
-            if (self->mpMemCard->IsFormatted() && self->mpMemCard->IsEncodingCorrect1() && !self->mpMemCard->IsDamaged1() && !self->mpMemCard->IsWrongDevice() && !self->mpMemCard->GetNumFiles()) {
-                int neededSpace = self->mpMemCard->SpaceRequired1();
-                if (self->mpMemCard->GetFreeSpace() < neededSpace || !self->mpMemCard->GetFreeDirEntries()) {
-                    self->SetState(21);
+            if (mpMemCard->IsFormatted() && mpMemCard->IsEncodingCorrect1() && !mpMemCard->IsDamaged1() && !mpMemCard->IsWrongDevice() && !mpMemCard->GetNumFiles()) {
+                int neededSpace = mpMemCard->SpaceRequired1();
+                if (mpMemCard->GetFreeSpace() < neededSpace || !mpMemCard->GetFreeDirEntries()) {
+                    SetState(21);
                     return;
                 }
             }
         } else if (ready) {
-            cMCOverlayManager_TriggerPollNoCardError(self);
+            TriggerPollNoCardError();
             return;
         }
-        cMCOverlayManager_GatherDeviceInfo_v(self);
-        self->SetState(7);
+        cMCOverlayManager_GatherDeviceInfo_v(this);
+        SetState(7);
         return;
     }
     {
         int busy = 0;
-        if (self->mDelete || (self->callbackIsLoadPressed)())
+        if (mDelete || (callbackIsLoadPressed)())
             busy = 1;
-        if (self->mPollForNoCard || busy) {
-            if (self->mCurrDeviceStateLast & 8) {
-                cMCOverlayManager_TriggerPollNoCardError(self);
+        if (mPollForNoCard || busy) {
+            if (mCurrDeviceStateLast & 8) {
+                TriggerPollNoCardError();
                 return;
             }
-        } else if (self->mCurrDeviceStateLast & 8) {
+        } else if (mCurrDeviceStateLast & 8) {
             goto fail;
         }
-        if (self->mCurrDeviceStateLast & 1) {
-            if ((self->callbackIsLoadPressed)())
-                self->SetState(36);
+        if (mCurrDeviceStateLast & 1) {
+            if ((callbackIsLoadPressed)())
+                SetState(36);
             else
-                self->SetState(5);
+                SetState(5);
             return;
         }
     fail:
-        cMCOverlayManager_GatherDeviceInfo_v(self);
-        self->SetState(29);
+        cMCOverlayManager_GatherDeviceInfo_v(this);
+        SetState(29);
     }
 }
 #endif
@@ -1531,30 +1549,30 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
  * buffered format press to FormatProgress (11). Cancel aborts; the format button is buffered in
  * mFormatPressedBuffered for the next frame.
  */
-extern "C" void cMCOverlayManager_UpdateFormatConfirm(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateFormatConfirm()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mCheckCard == 0) {
-        if (self->mpMemCard->IsAvailable1() == 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mCheckCard == 0) {
+        if (mpMemCard->IsAvailable1() == 0) {
             me->SetState(4);
             return;
         }
-        if (self->mpMemCard->DidFormatFail() != 0) {
+        if (mpMemCard->DidFormatFail() != 0) {
             me->SetState(0xC);
             return;
         }
-        if (self->mFormatPressedBuffered != 0) {
-            self->mFormatPressedBuffered = 0;
+        if (mFormatPressedBuffered != 0) {
+            mFormatPressedBuffered = 0;
             me->SetState(11);
             return;
         }
     }
-    if ((self->callbackIsCancelPressed)() != 0) {
-        cMCOverlayManager_CancelCardOp(self, 0);
+    if ((callbackIsCancelPressed)() != 0) {
+        CancelCardOp(0);
         return;
     }
-    if ((self->callbackIsFormatPressed)() != 0) {
-        self->mFormatPressedBuffered = 1;
+    if ((callbackIsFormatPressed)() != 0) {
+        mFormatPressedBuffered = 1;
     }
 }
 #endif
@@ -1565,13 +1583,13 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateFormatProgress);
 /**
  * Waits for a card format to finish, then moves to FormatFailed (12) on error or PreSaveFile (13) on success.
  */
-extern "C" void cMCOverlayManager_UpdateFormatProgress(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateFormatProgress()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    int waitTicks = (self->mDisplayWaitTicks)--;
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    int waitTicks = (mDisplayWaitTicks)--;
     if (waitTicks <= 0) {
-        if (self->mpMemCard->IsBusy() == 0) {
-            if (self->mpMemCard->DidFormatFail() != 0) {
+        if (mpMemCard->IsBusy() == 0) {
+            if (mpMemCard->DidFormatFail() != 0) {
                 me->SetState(0xC);
             } else {
                 me->SetState(13);
@@ -1593,12 +1611,12 @@ extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
  * When callbackIsCancelPressed() returns nonzero: cMCOverlayManager_CancelCardOp(self, 0),
  * cMCOverlayManager_checkDevice() on mSelectedDevice, and mCheckCard = 1. Otherwise it keeps waiting.
  */
-extern "C" void cMCOverlayManager_UpdateFormatFailed(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateFormatFailed()
 {
-    if ((self->callbackIsCancelPressed)() != 0) {
-        cMCOverlayManager_CancelCardOp(self, 0);
-        cMCOverlayManager_checkDevice(self, self->mSelectedDevice);
-        self->mCheckCard = 1;
+    if ((callbackIsCancelPressed)() != 0) {
+        CancelCardOp(0);
+        checkDevice(mSelectedDevice);
+        mCheckCard = 1;
     }
 }
 #endif
@@ -1613,16 +1631,16 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 /**
  * Handles the "save failed" message: once the card is idle, cancel aborts and retry restarts the save.
  */
-extern "C" void cMCOverlayManager_UpdateSaveFailed(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveFailed()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 0);
-        } else if ((self->callbackIsRetryPressed)() != 0) {
-            self->mSave = 1;
-            cMCOverlayManager_RetryCardOp(self);
-            self->mCurrDeviceStateAck = 0;
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(0);
+        } else if ((callbackIsRetryPressed)() != 0) {
+            mSave = 1;
+            RetryCardOp();
+            mCurrDeviceStateAck = 0;
         }
     }
 }
@@ -1638,14 +1656,14 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  * Handles the "not enough space" message: once the card is idle, cancel aborts and retry retries the
  * operation.
  */
-extern "C" void cMCOverlayManager_UpdateSaveTooBig(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveTooBig()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 0);
-        } else if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(0);
+        } else if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
         }
     }
 }
@@ -1661,14 +1679,14 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 /**
  * Handles the "no free blocks" message: once the card is idle, retry retries and cancel aborts.
  */
-extern "C" void cMCOverlayManager_UpdateNoFreeBlocks(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateNoFreeBlocks()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
-        } else if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 0);
+        if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
+        } else if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(0);
         }
     }
 }
@@ -1680,9 +1698,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSaveDone);
 /**
  * Finishes a completed save by passing code 1 to the manager's virtual state handler (vtable slot 1).
  */
-extern "C" void cMCOverlayManager_UpdateSaveDone(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveDone()
 {
-    self->SetState(1);
+    SetState(1);
 }
 #endif
 
@@ -1697,17 +1715,17 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdatePreSaveFile);
  * If the card reports the slot in use (card slots 67 or 65 for mFileCursor), moves to PreSaveFileDelete (14),
  * otherwise straight to CreateFile (15).
  */
-extern "C" void cMCOverlayManager_UpdatePreSaveFile(cMCOverlayManager* self)
+void cMCOverlayManager::UpdatePreSaveFile()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     cMemCard* card;
     sVEntry<int(void*, int)>* vtb;
-    if (memCard->HasFileName(self->mFileCursor) != 0
-        || (card = self->mpMemCard, vtb = *(sVEntry<int(void*, int)>**)card,
-            card->IsFileSlotBroken(self->mFileCursor) != 0)) {
-        self->SetState(0xE);
+    if (memCard->HasFileName(mFileCursor) != 0
+        || (card = mpMemCard, vtb = *(sVEntry<int(void*, int)>**)card,
+            card->IsFileSlotBroken(mFileCursor) != 0)) {
+        SetState(0xE);
     } else {
-        self->SetState(0xF);
+        SetState(0xF);
     }
 }
 #endif
@@ -1719,15 +1737,15 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdatePreSaveFileDelete);
  * Waits for the old save file to be deleted, then moves to CreateFile (15), or SaveFailed (20) on a card
  * error.
  */
-extern "C" void cMCOverlayManager_UpdatePreSaveFileDelete(cMCOverlayManager* self)
+void cMCOverlayManager::UpdatePreSaveFileDelete()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        cMemCard* card = self->mpMemCard;
+        cMemCard* card = mpMemCard;
         if (card->DidErrorOccur() != 0) {
-            self->SetState(20);
+            SetState(20);
         } else {
-            self->SetState(0xF);
+            SetState(0xF);
         }
     }
 }
@@ -1741,12 +1759,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCreateFile);
  *
  * A card error goes to FileExists (55) when card slot 74 says so, otherwise to SaveFailed (20).
  */
-extern "C" void cMCOverlayManager_UpdateCreateFile(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateCreateFile()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->DidErrorOccur() != 0) {
-            if (self->mpMemCard->FileExistsError() != 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->DidErrorOccur() != 0) {
+            if (mpMemCard->FileExistsError() != 0) {
                 me->SetState(55);
             } else {
                 me->SetState(20);
@@ -1767,15 +1785,15 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1);
  * Updates the save progress and moves to SaveProgress (17), or fails the write when the card reports an
  * error.
  */
-extern "C" void cMCOverlayManager_UpdateSaveFile(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveFile()
 {
     cMemCard* memCard;
-    self->mProgress = (float)self->mSavedSize / (float)self->mSize;
-    memCard = self->mpMemCard;
+    mProgress = (float)mSavedSize / (float)mSize;
+    memCard = mpMemCard;
     if (memCard->DidErrorOccur() != 0) {
-        cMCOverlayManager_WriteFailed(self, 1);
+        WriteFailed(1);
     } else {
-        self->SetState(17);
+        SetState(17);
     }
 }
 #endif
@@ -1794,29 +1812,29 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1);
  * count
  * and a 0 result fails the write, as does a card error.
  */
-extern "C" void cMCOverlayManager_UpdateSaveProgress(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveProgress()
 {
-    self->mDisplayWaitTicks -= 1;
-    self->mProgress = (float)self->mSavedSize / (float)self->mSize;
-    if (self->mpMemCard->DidErrorOccur() != 0) {
-        cMCOverlayManager_WriteFailed(self, 1);
+    mDisplayWaitTicks -= 1;
+    mProgress = (float)mSavedSize / (float)mSize;
+    if (mpMemCard->DidErrorOccur() != 0) {
+        WriteFailed(1);
         return;
     }
-    if (self->mpMemCard->IsWriteWaiting() == 1) {
-        int savedSize = self->mSavedSize;
-        int totalSize = self->mSize;
+    if (mpMemCard->IsWriteWaiting() == 1) {
+        int savedSize = mSavedSize;
+        int totalSize = mSize;
         if (savedSize < totalSize) {
-            if ((self->callbackWriteUpdate)(totalSize - savedSize) == 0) {
-                cMCOverlayManager_WriteFailed(self, 1);
+            if ((callbackWriteUpdate)(totalSize - savedSize) == 0) {
+                WriteFailed(1);
             }
         } else {
-            cMCOverlayManager_writeClose(self);
-            (self->callbackWriteEnd)();
-            self->SetState(18);
+            writeClose();
+            (callbackWriteEnd)();
+            SetState(18);
         }
     } else {
-        if (self->mpMemCard->DidErrorOccur() != 0) {
-            cMCOverlayManager_WriteFailed(self, 1);
+        if (mpMemCard->DidErrorOccur() != 0) {
+            WriteFailed(1);
         }
     }
 }
@@ -1840,90 +1858,90 @@ extern "C" int USTR_compare(void* a, void* b);
  * slot
  * or PreSaveFile (13) for an empty one; delete goes to DeleteConfirm (24) and cancel to Done (1).
  */
-extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSave()
 {
-    if (self->mCheckCard)
+    if (mCheckCard)
         return;
-    if (self->mShowCardChangeNotify && self->mCardChanged) {
-        self->SetState(0x38);
+    if (mShowCardChangeNotify && mCardChanged) {
+        SetState(0x38);
         return;
     }
-    int ready = cMCOverlayManager_updateDeviceStateMonitor(self);
-    if (!(self->callbackIsSavePressed)() && ready) {
-        int deviceState = self->mCurrDeviceStateLast;
+    int ready = updateDeviceStateMonitor();
+    if (!(callbackIsSavePressed)() && ready) {
+        int deviceState = mCurrDeviceStateLast;
         if (deviceState & 8) {
-            cMCOverlayManager_TriggerPollNoCardError(self);
+            TriggerPollNoCardError();
             return;
         }
         if (deviceState & 0x10) {
-            self->SetState(39);
+            SetState(39);
             return;
         }
         if (deviceState & 2) {
-            self->SetState(0x30);
+            SetState(0x30);
             return;
         }
         if (deviceState & 1) {
-            self->SetState(5);
+            SetState(5);
             return;
         }
         if (deviceState & 4) {
-            self->SetState(23);
+            SetState(23);
             return;
         }
     }
-    if (self->mCardChanged) {
-        self->mCardChanged = 0;
-        cMCOverlayManager_RecheckCard(self);
+    if (mCardChanged) {
+        mCardChanged = 0;
+        RecheckCard();
         return;
     }
-    if ((self->callbackIsCancelPressed)()) {
-        self->SetState(1);
+    if ((callbackIsCancelPressed)()) {
+        SetState(1);
         return;
     }
-    if ((self->callbackIsSavePressed)()) {
-        self->mFlash = 1.0f;
-        self->mFlashStep = 0.016669999808073044f;
-        if (self->mSaveOk) {
-            if (self->mpMemCard->IsFormatted() && self->mpMemCard->IsEncodingCorrect1() && !self->mpMemCard->IsDamaged1() && !self->mpMemCard->IsWrongDevice()) {
-                if (!self->mpMemCard->HasFileName(self->mFileCursor)) {
-                    int neededSpace = self->mpMemCard->SpaceRequired1();
-                    if (self->mpMemCard->GetFreeSpace() < neededSpace || !self->mpMemCard->GetFreeDirEntries()) {
-                        self->SetState(21);
+    if ((callbackIsSavePressed)()) {
+        mFlash = 1.0f;
+        mFlashStep = 0.016669999808073044f;
+        if (mSaveOk) {
+            if (mpMemCard->IsFormatted() && mpMemCard->IsEncodingCorrect1() && !mpMemCard->IsDamaged1() && !mpMemCard->IsWrongDevice()) {
+                if (!mpMemCard->HasFileName(mFileCursor)) {
+                    int neededSpace = mpMemCard->SpaceRequired1();
+                    if (mpMemCard->GetFreeSpace() < neededSpace || !mpMemCard->GetFreeDirEntries()) {
+                        SetState(21);
                         return;
                     }
                 }
                 for (int i = 0; i < 6; i++) {
-                    if (self->mpMemCard->HasFileName(i)) {
+                    if (mpMemCard->HasFileName(i)) {
                         unsigned short buf[0x100];
-                        self->mpMemCard->GetTitleString(i, buf);
-                        if (USTR_compare(&self->mNewFileName[0], buf) == 0 && i != self->mFileCursor) {
-                            self->SetState(55);
+                        mpMemCard->GetTitleString(i, buf);
+                        if (USTR_compare(&mNewFileName[0], buf) == 0 && i != mFileCursor) {
+                            SetState(55);
                             return;
                         }
                     }
                 }
-                if (self->mpMemCard->HasFileName(self->mFileCursor)) {
-                    self->mpMemCard->GetTitleString(self->mFileCursor, &self->mActiveTitleString[0]);
-                    self->SetState(9);
+                if (mpMemCard->HasFileName(mFileCursor)) {
+                    mpMemCard->GetTitleString(mFileCursor, &mActiveTitleString[0]);
+                    SetState(9);
                     return;
                 }
-                self->SetState(13);
+                SetState(13);
             } else {
-                self->SetState(10);
+                SetState(10);
                 return;
             }
-        } else if (self->mpMemCard->IsFileSlotBroken(self->mFileCursor)) {
-            self->SetState(22);
-        } else if (self->mpMemCard->IsFileSlotDisabled(self->mFileCursor)) {
-            self->SetState(23);
-        } else if (!self->mpMemCard->IsAvailable1()) {
-            self->SetState(20);
+        } else if (mpMemCard->IsFileSlotBroken(mFileCursor)) {
+            SetState(22);
+        } else if (mpMemCard->IsFileSlotDisabled(mFileCursor)) {
+            SetState(23);
+        } else if (!mpMemCard->IsAvailable1()) {
+            SetState(20);
         }
     }
-    if ((self->callbackIsDeletePressed)() && self->mDeleteOk) {
-        self->mpMemCard->GetTitleString(self->mFileCursor, &self->mActiveTitleString[0]);
-        self->SetState(0x18);
+    if ((callbackIsDeletePressed)() && mDeleteOk) {
+        mpMemCard->GetTitleString(mFileCursor, &mActiveTitleString[0]);
+        SetState(0x18);
     }
 }
 #endif
@@ -1939,15 +1957,15 @@ extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
  * When the device index (+0x428) differs from the last selected one (+0x444), stores it there and clears the
  * card status words (+0x43C, +0x440); then calls cMCOverlayManager_checkDevice for it.
  */
-extern "C" void cMCOverlayManager_setSelectedDevice(cMCOverlayManager* self)
+void cMCOverlayManager::setSelectedDevice()
 {
-    int cur = self->mSelectedDevice;
-    if (self->mLastMountedDevice != cur) {
-        self->mLastMountedDevice = cur;
-        self->mCurrDeviceStateLast = 0;
-        self->mCurrDeviceStateAck = 0;
+    int cur = mSelectedDevice;
+    if (mLastMountedDevice != cur) {
+        mLastMountedDevice = cur;
+        mCurrDeviceStateLast = 0;
+        mCurrDeviceStateAck = 0;
     }
-    cMCOverlayManager_checkDevice((cMCOverlayManager*)self, self->mSelectedDevice);
+    checkDevice(mSelectedDevice);
 }
 #endif
 
@@ -1959,10 +1977,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_selectDevice__FPvi);
  *
  * @param val  the device index
  */
-void cMCOverlayManager_selectDevice(void* vself, int val)
+void cMCOverlayManager::selectDevice(int val)
 {
-    cMCOverlayManager* self = (cMCOverlayManager*)vself;
-    self->mSelectedDevice = val;
+    mSelectedDevice = val;
 }
 #endif
 
@@ -1975,10 +1992,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_checkDevice);
  *
  * @param iSlot  device (card slot) to check
  */
-extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int iSlot)
+void cMCOverlayManager::checkDevice(int iSlot)
 {
-    self->mCurrCheckDevice = iSlot;
-    cMemCard* obj = self->mpMemCard;
+    mCurrCheckDevice = iSlot;
+    cMemCard* obj = mpMemCard;
     obj->CheckDevice(iSlot);
 }
 #endif
@@ -1996,15 +2013,15 @@ extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int v);
  *
  * @return no meaningful value (cMCOverlayManager_SetAction returns nothing)
  */
-extern "C" void* cMCOverlayManager_ReturnToDevSelectScreen(cMCOverlayManager* self)
+void* cMCOverlayManager::ReturnToDevSelectScreen()
 {
-    self->mLastCheckDevice = -1;
-    self->mCurrCheckDevice = 0;
-    self->mSave = 0;
-    self->mDelete = 0;
-    self->mFormatPressedBuffered = 0;
-    self->SetState(0);
-    return cMCOverlayManager_SetAction(self, 1);
+    mLastCheckDevice = -1;
+    mCurrCheckDevice = 0;
+    mSave = 0;
+    mDelete = 0;
+    mFormatPressedBuffered = 0;
+    SetState(0);
+    return SetAction(1);
 }
 #endif
 
@@ -2016,17 +2033,17 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSaveClosing);
  *
  * A card error goes to SaveFailed (20) instead; the display delay (mDisplayWaitTicks) must also have run out.
  */
-extern "C" void cMCOverlayManager_UpdateSaveClosing(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveClosing()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    (self->mDisplayWaitTicks)--;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->DidErrorOccur() != 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    (mDisplayWaitTicks)--;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->DidErrorOccur() != 0) {
             me->SetState(20);
             return;
         }
-        if (self->mDisplayWaitTicks <= 0) {
-            (self->callbackSaveSuccess)();
+        if (mDisplayWaitTicks <= 0) {
+            (callbackSaveSuccess)();
             me->SetState(19);
         }
     }
@@ -2040,14 +2057,14 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadFailed);
  * Handles the "load failed" message: once the card is idle, cancel goes to CheckCards (3), retry to
  * ReadingCard (6).
  */
-extern "C" void cMCOverlayManager_UpdateLoadFailed(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadFailed()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            self->SetState(3);
-        } else if ((self->callbackIsRetryPressed)() != 0) {
-            self->SetState(6);
+        if ((callbackIsCancelPressed)() != 0) {
+            SetState(3);
+        } else if ((callbackIsRetryPressed)() != 0) {
+            SetState(6);
         }
     }
 }
@@ -2063,10 +2080,10 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
  *
  * Calls cMCOverlayManager_CancelCardOp(self, 1), then the callbackFileNotFound handler.
  */
-extern "C" void cMCOverlayManager_UpdateLoadFileNotFound(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadFileNotFound()
 {
-    cMCOverlayManager_CancelCardOp(self, 1);
-    (self->callbackFileNotFound)();
+    CancelCardOp(1);
+    (callbackFileNotFound)();
 }
 #endif
 
@@ -2083,30 +2100,30 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  * file
  * (mFileCursor) and moves to DeleteProgress (25); overwrite goes to PreSaveFile (13).
  */
-extern "C" void cMCOverlayManager_UpdateSaveCorrupt(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateSaveCorrupt()
 {
-    if (self->mpMemCard->IsBusy() != 0) {
+    if (mpMemCard->IsBusy() != 0) {
         return;
     }
-    if (self->mCheckCard == 0 && self->mpMemCard->IsAvailable1() == 0) {
-        self->SetState(4);
+    if (mCheckCard == 0 && mpMemCard->IsAvailable1() == 0) {
+        SetState(4);
         return;
     }
-    if ((self->callbackIsCancelPressed)() != 0) {
-        cMCOverlayManager_CancelCardOp(self, 0);
+    if ((callbackIsCancelPressed)() != 0) {
+        CancelCardOp(0);
         return;
     }
-    if ((self->callbackIsRetryPressed)() != 0) {
-        cMCOverlayManager_RetryCardOp(self);
+    if ((callbackIsRetryPressed)() != 0) {
+        RetryCardOp();
         return;
     }
-    if ((self->callbackIsDeletePressed)() != 0) {
-        self->mpMemCard->GetTitleString(self->mFileCursor, &self->mActiveTitleString[0]);
-        self->SetState(25);
+    if ((callbackIsDeletePressed)() != 0) {
+        mpMemCard->GetTitleString(mFileCursor, &mActiveTitleString[0]);
+        SetState(25);
         return;
     }
-    if ((self->callbackIsOverwritePressed)() != 0) {
-        self->SetState(13);
+    if ((callbackIsOverwritePressed)() != 0) {
+        SetState(13);
     }
 }
 #endif
@@ -2122,16 +2139,16 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  *
  * Otherwise it calls callbackIsDeletePressed and ignores the result.
  */
-extern "C" void cMCOverlayManager_UpdateLoadCorrupt(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadCorrupt()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 1);
-        } else if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(1);
+        } else if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
         } else {
-            ((void (*)())self->callbackIsDeletePressed)();
+            ((void (*)())callbackIsDeletePressed)();
         }
     }
 }
@@ -2147,21 +2164,21 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadDoneWait);
  * calls
  * callbackReadSuccess.
  */
-extern "C" void cMCOverlayManager_UpdateLoadDoneWait(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadDoneWait()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    int n = self->mDisplayWaitTicks;
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    int n = mDisplayWaitTicks;
     if (n > 0) {
-        self->mDisplayWaitTicks = n - 1;
+        mDisplayWaitTicks = n - 1;
         return;
     }
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->DidErrorOccur() != 0) {
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->DidErrorOccur() != 0) {
             me->SetState(36);
-            (self->callbackReadFailed)();
+            (callbackReadFailed)();
         } else {
             me->SetState(35);
-            (self->callbackReadSuccess)();
+            (callbackReadSuccess)();
         }
     }
 }
@@ -2173,9 +2190,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadDone);
 /**
  * Finishes a completed load by passing code 1 to the manager's virtual state handler (vtable slot 1).
  */
-extern "C" void cMCOverlayManager_UpdateLoadDone(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadDone()
 {
-    self->SetState(1);
+    SetState(1);
 }
 #endif
 
@@ -2187,19 +2204,19 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadConfirm);
  *
  * A missing card goes to NoCardsError (4).
  */
-extern "C" void cMCOverlayManager_UpdateLoadConfirm(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadConfirm()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->IsAvailable1() == 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->IsAvailable1() == 0) {
             me->SetState(4);
             return;
         }
-        if ((self->callbackIsLoadPressed)() != 0) {
+        if ((callbackIsLoadPressed)() != 0) {
             me->SetState(0x1F);
             return;
         }
-        if ((self->callbackIsCancelPressed)() != 0) {
+        if ((callbackIsCancelPressed)() != 0) {
             me->SetState(29);
         }
     }
@@ -2214,14 +2231,14 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadStart);
 /**
  * Starts the load: moves to LoadProgress (32), or to LoadFailed (36) with callbackReadFailed on a card error.
  */
-extern "C" void cMCOverlayManager_UpdateLoadStart(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadStart()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->DidErrorOccur() != 0) {
-        self->SetState(36);
-        (self->callbackReadFailed)();
+        SetState(36);
+        (callbackReadFailed)();
     } else {
-        self->SetState(0x20);
+        SetState(0x20);
     }
 }
 #endif
@@ -2240,34 +2257,34 @@ extern "C" void cMCOverlayManager_ReadFailed(cMCOverlayManager* self);
  * callbackReadUpdate with the remaining size, then callbackReadEnd; a 0 from either fails the load through
  * cMCOverlayManager_ReadFailed(), otherwise the manager moves to LoadClosing (33). A card error goes to LoadFailed (36).
  */
-extern "C" void cMCOverlayManager_UpdateLoadProgress(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadProgress()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    self->mDisplayWaitTicks -= 1;
-    int n = self->mpMemCard->GetDataSize();
-    self->mProgress = (float)n / (float)self->mSize;
-    if (self->mpMemCard->DidErrorOccur() != 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    mDisplayWaitTicks -= 1;
+    int n = mpMemCard->GetDataSize();
+    mProgress = (float)n / (float)mSize;
+    if (mpMemCard->DidErrorOccur() != 0) {
         me->SetState(36);
-        (self->callbackReadFailed)();
+        (callbackReadFailed)();
         return;
     }
-    if (self->mpMemCard->IsReadWaiting() == 1) {
-        int loadedSize = self->mLoadedSize;
-        int totalSize = self->mSize;
+    if (mpMemCard->IsReadWaiting() == 1) {
+        int loadedSize = mLoadedSize;
+        int totalSize = mSize;
         if (loadedSize < totalSize) {
-            if ((self->callbackReadUpdate)(totalSize - loadedSize) == 0)
-                cMCOverlayManager_ReadFailed(self);
-        } else if ((self->callbackReadEnd)() == 0) {
-            self->mpMemCard->SetBrokenFile(self->mFileCursor);
-            cMCOverlayManager_ReadFailed(self);
+            if ((callbackReadUpdate)(totalSize - loadedSize) == 0)
+                ReadFailed();
+        } else if ((callbackReadEnd)() == 0) {
+            mpMemCard->SetBrokenFile(mFileCursor);
+            ReadFailed();
         } else {
-            cMCOverlayManager_readClose(self);
+            readClose();
             me->SetState(33);
         }
         return;
     }
-    if (self->mpMemCard->DidErrorOccur() != 0) {
-        (self->callbackReadFailed)();
+    if (mpMemCard->DidErrorOccur() != 0) {
+        (callbackReadFailed)();
         me->SetState(36);
     }
 }
@@ -2303,12 +2320,12 @@ extern "C" void cMCOverlayManager_UpdateLoad(cMCOverlayManager* self)
     if (self->mSave || self->mDelete || CB_02D0(0x78))
         quit = 1;
     int held = self->mCurrDeviceStateLast;
-    int ready = cMCOverlayManager_updateDeviceStateMonitor(self);
+    int ready = self->updateDeviceStateMonitor();
     if (!CB_02D0(0x78) && ready) {
 
         if (self->mCurrDeviceStateLast & 8) {
             if (self->mPollForNoCard || CB_02D0(0x78) || CB_02D0(104) || quit) {
-                cMCOverlayManager_TriggerPollNoCardError(self);
+                self->TriggerPollNoCardError();
                 return;
             }
         } else {
@@ -2326,19 +2343,19 @@ extern "C" void cMCOverlayManager_UpdateLoad(cMCOverlayManager* self)
             }
         }
         if (!(self->mCurrDeviceStateLast & 8) && (held & 8)) {
-            cMCOverlayManager_InitiateFileCheck(self);
+            self->InitiateFileCheck();
             return;
         }
         int rel = held & ~4;
         if (self->mCurrDeviceStateLast == 0 && rel) {
-            cMCOverlayManager_InitiateFileCheck(self);
+            self->InitiateFileCheck();
             return;
         }
     }
     if (!quit) {
         if (self->mCardChanged) {
             self->mCardChanged = 0;
-            cMCOverlayManager_RecheckCard(self);
+            self->RecheckCard();
         }
         if (self->mCurrDeviceStateLast & 8) {
             self->SetState(49);
@@ -2386,17 +2403,17 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadClosing);
 /**
  * Waits for the loaded file to close, then moves to LoadDoneWait (34), or to LoadFailed (36) on a card error.
  */
-extern "C" void cMCOverlayManager_UpdateLoadClosing(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoadClosing()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    (self->mDisplayWaitTicks)--;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->DidErrorOccur() != 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    (mDisplayWaitTicks)--;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->DidErrorOccur() != 0) {
             me->SetState(36);
-            (self->callbackReadFailed)();
+            (callbackReadFailed)();
             return;
         }
-        if (self->mDisplayWaitTicks <= 0) {
+        if (mDisplayWaitTicks <= 0) {
             me->SetState(34);
         }
     }
@@ -2414,24 +2431,24 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
  *
  * Once the card is idle, a missing card goes to NoCardsError (4) and a card error to DeleteFailed (28).
  */
-extern "C" void cMCOverlayManager_UpdateDeleteConfirm(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateDeleteConfirm()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->IsAvailable1() == 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->IsAvailable1() == 0) {
             me->SetState(4);
             return;
         }
-        if (self->mpMemCard->DidErrorOccur() != 0) {
+        if (mpMemCard->DidErrorOccur() != 0) {
             me->SetState(0x1C);
             return;
         }
-        if ((self->callbackIsDeletePressed)() != 0) {
+        if ((callbackIsDeletePressed)() != 0) {
             me->SetState(25);
             return;
         }
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 1);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(1);
         }
     }
 }
@@ -2445,15 +2462,15 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteProgress);
 /**
  * Waits for a file delete to finish, then moves to DeleteDoneWait (26), or DeleteFailed (28) on a card error.
  */
-extern "C" void cMCOverlayManager_UpdateDeleteProgress(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateDeleteProgress()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        cMemCard* card = self->mpMemCard;
+        cMemCard* card = mpMemCard;
         if (card->DidErrorOccur() != 0) {
-            self->SetState(0x1C);
+            SetState(0x1C);
         } else {
-            self->SetState(26);
+            SetState(26);
         }
     }
 }
@@ -2468,12 +2485,12 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 /**
  * Handles the "delete failed" message: once the card is idle, cancel aborts the operation.
  */
-extern "C" void cMCOverlayManager_UpdateDeleteFailed(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateDeleteFailed()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 0);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(0);
         }
     }
 }
@@ -2488,26 +2505,26 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteDoneWait);
  *
  * While the delay runs, each idle frame asks the card to recheck the selected device.
  */
-extern "C" void cMCOverlayManager_UpdateDeleteDoneWait(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateDeleteDoneWait()
 {
-    cMemCard* memCard = self->mpMemCard;
-    if (self->mDisplayWaitTicks > 0) {
+    cMemCard* memCard = mpMemCard;
+    if (mDisplayWaitTicks > 0) {
         if (memCard->IsBusy() == 0) {
-            if (self->mpMemCard->DidErrorOccur() != 0) {
-                self->SetState(0x1C);
+            if (mpMemCard->DidErrorOccur() != 0) {
+                SetState(0x1C);
                 return;
             }
-            self->mpMemCard->CheckDevice(self->mSelectedDevice);
+            mpMemCard->CheckDevice(mSelectedDevice);
         }
-        self->mDisplayWaitTicks -= 1;
+        mDisplayWaitTicks -= 1;
     } else {
         if (memCard->IsBusy() != 0) {
             return;
         }
-        if (self->mpMemCard->DidErrorOccur() != 0) {
-            self->SetState(0x1C);
+        if (mpMemCard->DidErrorOccur() != 0) {
+            SetState(0x1C);
         } else {
-            self->SetState(27);
+            SetState(27);
         }
     }
 }
@@ -2521,12 +2538,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteDone);
 /**
  * Finishes a delete: once the card is idle and callbackDeleteDone accepts, rereads the card (ReadingCard, 6).
  */
-extern "C" void cMCOverlayManager_UpdateDeleteDone(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateDeleteDone()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackDeleteDone)() != 0) {
-            self->SetState(6);
+        if ((callbackDeleteDone)() != 0) {
+            SetState(6);
         }
     }
 }
@@ -2540,23 +2557,23 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateOverwriteConfirm);
  *
  * Once the card is idle, a missing card goes to NoCardsError (4) and a card error to SaveFailed (20).
  */
-extern "C" void cMCOverlayManager_UpdateOverwriteConfirm(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateOverwriteConfirm()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->IsAvailable1() == 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->IsAvailable1() == 0) {
             me->SetState(4);
             return;
         }
-        if (self->mpMemCard->DidErrorOccur() != 0) {
+        if (mpMemCard->DidErrorOccur() != 0) {
             me->SetState(20);
             return;
         }
-        if ((self->callbackIsOverwritePressed)() != 0) {
+        if ((callbackIsOverwritePressed)() != 0) {
             me->SetState(13);
             return;
         }
-        if ((self->callbackIsCancelPressed)() != 0) {
+        if ((callbackIsCancelPressed)() != 0) {
             me->SetState(1);
         }
     }
@@ -2575,24 +2592,24 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  * Once the card is idle: a missing card goes to NoCardsError (4), cancel aborts with the fail message, retry
  * retries.
  */
-extern "C" void cMCOverlayManager_UpdateInitFormatConfirm(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFormatConfirm()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->IsAvailable1() == 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->IsAvailable1() == 0) {
             me->SetState(4);
             return;
         }
-        if ((self->callbackIsFormatPressed)() != 0) {
+        if ((callbackIsFormatPressed)() != 0) {
             me->SetState(40);
             return;
         }
-        if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 1);
+        if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(1);
             return;
         }
-        if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
+        if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
         }
     }
 }
@@ -2604,13 +2621,13 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFormatProgress);
 /**
  * Waits for the card format to finish, then moves to InitFormatFailed (41) or InitFormatDone (42).
  */
-extern "C" void cMCOverlayManager_UpdateInitFormatProgress(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFormatProgress()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    int waitTicks = (self->mDisplayWaitTicks)--;
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    int waitTicks = (mDisplayWaitTicks)--;
     if (waitTicks <= 0) {
-        if (self->mpMemCard->IsBusy() == 0) {
-            if (self->mpMemCard->DidFormatFail() != 0) {
+        if (mpMemCard->IsBusy() == 0) {
+            if (mpMemCard->DidFormatFail() != 0) {
                 me->SetState(41);
             } else {
                 me->SetState(42);
@@ -2632,12 +2649,12 @@ extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
  * When callbackIsCancelPressed() returns nonzero: passes code 1 to the virtual state handler (vtable slot 1),
  * calls cMCOverlayManager_checkDevice() on mSelectedDevice and sets mCheckCard. Otherwise it keeps waiting.
  */
-extern "C" void cMCOverlayManager_UpdateInitFormatFailed(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFormatFailed()
 {
-    if ((self->callbackIsCancelPressed)() != 0) {
-        self->SetState(1);
-        cMCOverlayManager_checkDevice(self, self->mSelectedDevice);
-        self->mCheckCard = 1;
+    if ((callbackIsCancelPressed)() != 0) {
+        SetState(1);
+        checkDevice(mSelectedDevice);
+        mCheckCard = 1;
     }
 }
 #endif
@@ -2649,9 +2666,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFormatDone);
  * Finishes a format during the initial card check by passing code 6 to the virtual state handler (vtable slot
  * 1).
  */
-extern "C" void cMCOverlayManager_UpdateInitFormatDone(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitFormatDone()
 {
-    self->SetState(6);
+    SetState(6);
 }
 #endif
 
@@ -2666,23 +2683,23 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteConfirm);
  * recheck
  * the selected device.
  */
-extern "C" void cMCOverlayManager_UpdateInitDeleteConfirm(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitDeleteConfirm()
 {
-    cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (self->mpMemCard->IsBusy() == 0) {
-        if (self->mpMemCard->IsAvailable1() == 0) {
+    cMoviePlayerVt* me = (cMoviePlayerVt*)this;
+    if (mpMemCard->IsBusy() == 0) {
+        if (mpMemCard->IsAvailable1() == 0) {
             me->SetState(4);
             return;
         }
-        if ((self->callbackIsDeletePressed)() != 0) {
+        if ((callbackIsDeletePressed)() != 0) {
             me->SetState(44);
             return;
         }
-        if ((self->callbackIsCancelPressed)() != 0) {
+        if ((callbackIsCancelPressed)() != 0) {
             me->SetState(6);
             return;
         }
-        self->mpMemCard->CheckDevice(self->mSelectedDevice);
+        mpMemCard->CheckDevice(mSelectedDevice);
     }
 }
 #endif
@@ -2698,26 +2715,26 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteProgress);
  * view
  * calls these card methods getCount, canSeek and seek (names copied from the movie-decoder views).
  */
-extern "C" void cMCOverlayManager_UpdateInitDeleteProgress(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitDeleteProgress()
 {
-    self->mDisplayWaitTicks -= 1;
-    if (self->mpMemCard->IsBusy() != 0) {
+    mDisplayWaitTicks -= 1;
+    if (mpMemCard->IsBusy() != 0) {
         return;
     }
-    if (self->mDisplayWaitTicks > 0) {
+    if (mDisplayWaitTicks > 0) {
         return;
     }
-    if (self->mpMemCard->DidErrorOccur() != 0) {
-        self->SetState(45);
+    if (mpMemCard->DidErrorOccur() != 0) {
+        SetState(45);
         return;
     }
-    if (self->mCurrDeleteFile < self->mpMemCard->GetNumFiles()) {
-        if (self->mpMemCard->IsFileSlotBroken(self->mCurrDeleteFile) != 0) {
-            self->mpMemCard->DeleteFileSlot(self->mCurrDeleteFile);
+    if (mCurrDeleteFile < mpMemCard->GetNumFiles()) {
+        if (mpMemCard->IsFileSlotBroken(mCurrDeleteFile) != 0) {
+            mpMemCard->DeleteFileSlot(mCurrDeleteFile);
         }
-        self->mCurrDeleteFile += 1;
+        mCurrDeleteFile += 1;
     } else {
-        self->SetState(46);
+        SetState(46);
     }
 }
 #endif
@@ -2729,9 +2746,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteFailed);
  * Handles a failed delete during the initial check by passing code 1 to the virtual state handler (vtable slot
  * 1).
  */
-extern "C" void cMCOverlayManager_UpdateInitDeleteFailed(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitDeleteFailed()
 {
-    self->SetState(1);
+    SetState(1);
 }
 #endif
 
@@ -2741,9 +2758,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteDone);
 /**
  * Finishes a delete during the initial check by passing code 6 to the virtual state handler (vtable slot 1).
  */
-extern "C" void cMCOverlayManager_UpdateInitDeleteDone(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateInitDeleteDone()
 {
-    self->SetState(6);
+    SetState(6);
 }
 #endif
 
@@ -2759,7 +2776,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCardUnusable__FPv);
  */
 void* cMCOverlayManager_UpdateCardUnusable(void* self)
 {
-    return cMCOverlayManager_ReturnToDevSelectScreen((cMCOverlayManager*)self);
+    return ((cMCOverlayManager*)self)->ReturnToDevSelectScreen();
 }
 #endif
 
@@ -2774,14 +2791,14 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  * Handles the "damaged card" message: once the card is idle, retry retries and cancel aborts with the fail
  * message.
  */
-extern "C" void cMCOverlayManager_UpdateCardDamaged(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateCardDamaged()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        if ((self->callbackIsRetryPressed)() != 0) {
-            cMCOverlayManager_RetryCardOp(self);
-        } else if ((self->callbackIsCancelPressed)() != 0) {
-            cMCOverlayManager_CancelCardOp(self, 1);
+        if ((callbackIsRetryPressed)() != 0) {
+            RetryCardOp();
+        } else if ((callbackIsCancelPressed)() != 0) {
+            CancelCardOp(1);
         }
     }
 }
@@ -2799,12 +2816,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_WriteFile1);
  * @param data  the data
  * @param size  the data size
  */
-extern "C" void cMCOverlayManager_WriteFile1(cMCOverlayManager* self, const char* filename, int data, int size)
+void cMCOverlayManager::WriteFile1(const char* filename, int data, int size)
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     cMCOverlayManager_mSaveInProgress = 1;
     memCard->StartFileSlotWrite(filename, data, size);
-    self->mSavedSize = size;
+    mSavedSize = size;
 }
 #endif
 
@@ -2822,12 +2839,12 @@ extern int cMCOverlayManager_mSaveInProgress;
  * @param data  the data
  * @param size  the data size
  */
-extern "C" void cMCOverlayManager_WriteFile(cMCOverlayManager* self, unsigned short* filename, int data, int size)
+void cMCOverlayManager::WriteFile(unsigned short* filename, int data, int size)
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     cMCOverlayManager_mSaveInProgress = 1;
     memCard->StartFileSlotWrite1(filename, data, size);
-    self->mSavedSize = size;
+    mSavedSize = size;
 }
 #endif
 
@@ -2843,12 +2860,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_WriteFile2);
  * @param data  the data
  * @param size  the data size
  */
-extern "C" void cMCOverlayManager_WriteFile2(cMCOverlayManager* self, int file, int data, int size)
+void cMCOverlayManager::WriteFile2(int file, int data, int size)
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     cMCOverlayManager_mSaveInProgress = 1;
     memCard->StartFileSlotWrite2(file, data, size);
-    self->mSavedSize = size;
+    mSavedSize = size;
 }
 #endif
 
@@ -2858,9 +2875,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_cleanUp);
 /**
  * Tells the memory card object (+0x434) to clean up, through its virtual slot 12.
  */
-extern "C" void cMCOverlayManager_cleanUp(cMCOverlayManager* self)
+void cMCOverlayManager::cleanUp()
 {
-    cMemCard* obj = self->mpMemCard;
+    cMemCard* obj = mpMemCard;
     obj->CleanUp();
 }
 #endif
@@ -2875,13 +2892,13 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetMaxFiles);
  *
  * @return the usable file count
  */
-extern "C" int cMCOverlayManager_GetMaxFiles(cMCOverlayManager* self)
+int cMCOverlayManager::GetMaxFiles()
 {
-    cMemCard* memCard = self->mpMemCard;
-    if (self->mMaxFiles < memCard->GetMaxFiles()) {
-        return self->mMaxFiles;
+    cMemCard* memCard = mpMemCard;
+    if (mMaxFiles < memCard->GetMaxFiles()) {
+        return mMaxFiles;
     }
-    cMemCard* memCardAgain = self->mpMemCard;
+    cMemCard* memCardAgain = mpMemCard;
     return memCardAgain->GetMaxFiles();
 }
 #endif
@@ -2899,11 +2916,11 @@ extern int cMCOverlayManager_mSaveInProgress;
  * @param data  the block
  * @param size  its size
  */
-extern "C" void cMCOverlayManager_WriteData(cMCOverlayManager* self, int data, int size)
+void cMCOverlayManager::WriteData(int data, int size)
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     int one = 1;
-    self->mSavedSize += size;
+    mSavedSize += size;
     cMCOverlayManager_mSaveInProgress = one;
     memCard->WriteData(data, size);
 }
@@ -2926,17 +2943,17 @@ extern "C" void cMCOverlayManager_SetAction_v(void* self, int v) __asm__("cMCOve
  *
  * @param showWriteFailPopup  nonzero to show the save-failed state
  */
-extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int showWriteFailPopup)
+void cMCOverlayManager::WriteFailed(int showWriteFailPopup)
 {
-    int on = self->mWriteInProgress;
+    int on = mWriteInProgress;
     cMCOverlayManager_mSaveInProgress = 0;
     if (on != 0) {
-        cMemCard* memCard = self->mpMemCard;
+        cMemCard* memCard = mpMemCard;
         memCard->SetWriteFailed();
     }
     if (showWriteFailPopup != 0) {
-        cMCOverlayManager_SetAction_v(self, 0);
-        self->SetState(20);
+        cMCOverlayManager_SetAction_v(this, 0);
+        SetState(20);
     }
 }
 #endif
@@ -2952,10 +2969,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ReadData);
  * @param data  destination buffer
  * @param n  bytes to read
  */
-extern "C" void cMCOverlayManager_ReadData(cMCOverlayManager* self, int data, int n)
+void cMCOverlayManager::ReadData(int data, int n)
 {
-    self->mLoadedSize += n;
-    cMemCard* obj = self->mpMemCard;
+    mLoadedSize += n;
+    cMemCard* obj = mpMemCard;
     obj->ReadData(data, n);
 }
 #endif
@@ -2969,12 +2986,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ReadFailed);
  * Fails the current read: tells the card (mpMemCard slot 33, SetReadFailed by On Tour's cMemCard order), sets state 36
  * through vtable slot 1 (cMCOverlayManager_SetState) and calls callbackReadFailed.
  */
-extern "C" void cMCOverlayManager_ReadFailed(cMCOverlayManager* self)
+void cMCOverlayManager::ReadFailed()
 {
-    cMemCard* memCard = self->mpMemCard;
+    cMemCard* memCard = mpMemCard;
     memCard->SetReadFailed();
-    self->SetState(36);
-    (self->callbackReadFailed)();
+    SetState(36);
+    (callbackReadFailed)();
 }
 #endif
 
@@ -3001,7 +3018,7 @@ extern char str_pct_s_pct_spct_04d_b[];
  * (cBESaveInterface_generateSaveGame) and its size, and starts writing it (cMCOverlayManager_WriteFile) under the title "<product
  * code>-<type name><file cursor + 1>" (str_pct_s_pct_spct_04d_b; type name of file type 2).
  */
-extern "C" void cMCOverlayManager_SettingsWriteStart(cMCOverlayManager* self)
+void cMCOverlayManager::SettingsWriteStart()
 {
     char text[130];
     char name[130];
@@ -3011,10 +3028,10 @@ extern "C" void cMCOverlayManager_SettingsWriteStart(cMCOverlayManager* self)
     int saveData = cBESaveInterface_generateSaveGame(cBE_getInterface_Fv(cBE_getBE(), 5));
     int saveSize = cBESaveInterface_getSaveGameSize_r();
     func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
-    cMCOverlayManager_getFileName_r(self, 2, name, 130);
+    cMCOverlayManager_getFileName_r(this, 2, name, 130);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
-    sprintf1_v(text, fmt, desc, name, self->mFileCursor + 1);
-    cMCOverlayManager_WriteFile_r(self, text, saveData, saveSize);
+    sprintf1_v(text, fmt, desc, name, mFileCursor + 1);
+    cMCOverlayManager_WriteFile_r(this, text, saveData, saveSize);
 }
 #endif
 
@@ -3029,22 +3046,22 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerStart);
  * mLastMountedDevice to -1, selects device 0 (cMCOverlayManager_selectDevice, cMCOverlayManager_setSelectedDevice), sets mCheckCard,
  * puts mState to 2 (On Tour's kMCOverlay_CheckCardsWait) and updates the card (mpMemCard slot 3).
  */
-extern "C" void cMCOverlayManager_ManagerStart(cMCOverlayManager* self)
+void cMCOverlayManager::ManagerStart()
 {
     int one = 1;
     cMemCard* memCard;
-    self->mCheckAllowed = one;
-    self->mSaved = 0;
-    self->mCurrCheckDevice = 0;
-    self->mFileCursor = 0;
-    self->mLastCheckDevice = -1;
-    self->mSaveProfileID = -1;
-    self->mLastMountedDevice = -1;
-    cMCOverlayManager_selectDevice(self, 0);
-    cMCOverlayManager_setSelectedDevice((cMCOverlayManager*)self);
-    self->mCheckCard = one;
-    self->mState = 2;
-    memCard = self->mpMemCard;
+    mCheckAllowed = one;
+    mSaved = 0;
+    mCurrCheckDevice = 0;
+    mFileCursor = 0;
+    mLastCheckDevice = -1;
+    mSaveProfileID = -1;
+    mLastMountedDevice = -1;
+    selectDevice(0);
+    setSelectedDevice();
+    mCheckCard = one;
+    mState = 2;
+    memCard = mpMemCard;
     memCard->Update();
 }
 #endif
@@ -3131,33 +3148,33 @@ static inline int nextChapter_241400(char* self, int i)
  * cMCOverlayManager_setSelectedDevice; +0xE0 is cleared. (The C's helper type names, cMovieDecoder_241400/hasChapter, are leftovers:
  * this is the memory card device list.)
  */
-extern "C" void cMCOverlayManager_OnHighlightNextDevice(cMCOverlayManager* self)
+void cMCOverlayManager::OnHighlightNextDevice()
 {
-    int i = self->mSelectedDevice;
-    if (self->mMaxDevices == -1) {
+    int i = mSelectedDevice;
+    if (mMaxDevices == -1) {
         return;
     }
-    while (i = nextChapter_241400(((char*)self), i), self->mpMemCard->IsAvailable(i) == 0) {
-        if (i == self->mMaxDevices - 1 || self->mWrapItems != 0) {
-            if (i == self->mSelectedDevice) {
+    while (i = nextChapter_241400(((char*)this), i), mpMemCard->IsAvailable(i) == 0) {
+        if (i == mMaxDevices - 1 || mWrapItems != 0) {
+            if (i == mSelectedDevice) {
                 break;
             }
-            if (self->mWrapItems != 1) {
+            if (mWrapItems != 1) {
                 break;
             }
         }
     }
-    if (self->mWrapItems == 0 && i == self->mMaxDevices - 1 && self->mpMemCard->IsAvailable(i) == 0) {
-        i = self->mSelectedDevice;
-        if (self->mpMemCard->IsAvailable(i) == 0) {
+    if (mWrapItems == 0 && i == mMaxDevices - 1 && mpMemCard->IsAvailable(i) == 0) {
+        i = mSelectedDevice;
+        if (mpMemCard->IsAvailable(i) == 0) {
             i = 0;
         }
     }
-    if (self->mSelectedDevice != i) {
-        cMCOverlayManager_selectDevice(((char*)self), i);
-        cMCOverlayManager_setSelectedDevice(self);
+    if (mSelectedDevice != i) {
+        cMCOverlayManager_selectDevice(((char*)this), i);
+        setSelectedDevice();
     }
-    self->mGetDir = 0;
+    mGetDir = 0;
 }
 #endif
 
@@ -3186,33 +3203,33 @@ static inline int prevChapter_241540(char* self, int i)
  * an unavailable device 0 keeps the current device (or 0 if that one is unavailable too). A new selection goes
  * through cMCOverlayManager_selectDevice() and cMCOverlayManager_setSelectedDevice(), which resets the device state monitor. Always clears mGetDir.
  */
-extern "C" void cMCOverlayManager_OnHighlightPrevDevice(cMCOverlayManager* self)
+void cMCOverlayManager::OnHighlightPrevDevice()
 {
-    int i = self->mSelectedDevice;
-    if (self->mMaxDevices == -1) {
+    int i = mSelectedDevice;
+    if (mMaxDevices == -1) {
         return;
     }
-    while (i = prevChapter_241540(((char*)self), i), self->mpMemCard->IsAvailable(i) == 0) {
-        if (i == 0 || self->mWrapItems != 0) {
-            if (i == self->mSelectedDevice) {
+    while (i = prevChapter_241540(((char*)this), i), mpMemCard->IsAvailable(i) == 0) {
+        if (i == 0 || mWrapItems != 0) {
+            if (i == mSelectedDevice) {
                 break;
             }
-            if (self->mWrapItems != 1) {
+            if (mWrapItems != 1) {
                 break;
             }
         }
     }
-    if (self->mWrapItems == 0 && i == 0 && self->mpMemCard->IsAvailable(0) == 0) {
-        i = self->mSelectedDevice;
-        if (self->mpMemCard->IsAvailable(i) == 0) {
+    if (mWrapItems == 0 && i == 0 && mpMemCard->IsAvailable(0) == 0) {
+        i = mSelectedDevice;
+        if (mpMemCard->IsAvailable(i) == 0) {
             i = 0;
         }
     }
-    if (self->mSelectedDevice != i) {
-        cMCOverlayManager_selectDevice(((char*)self), i);
-        cMCOverlayManager_setSelectedDevice(self);
+    if (mSelectedDevice != i) {
+        cMCOverlayManager_selectDevice(((char*)this), i);
+        setSelectedDevice();
     }
-    self->mGetDir = 0;
+    mGetDir = 0;
 }
 #endif
 
@@ -3223,13 +3240,13 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_OnHighlightPrevFile);
  * Moves the file cursor (mFileCursor) back one slot; at slot 0 it wraps to the last slot (cMCOverlayManager_GetMaxFiles - 1) when
  * mWrapItems is set.
  */
-extern "C" void cMCOverlayManager_OnHighlightPrevFile(cMCOverlayManager* self)
+void cMCOverlayManager::OnHighlightPrevFile()
 {
-    int n = self->mFileCursor;
+    int n = mFileCursor;
     if (n > 0) {
-        self->mFileCursor = n - 1;
-    } else if (self->mWrapItems != 0) {
-        self->mFileCursor = cMCOverlayManager_GetMaxFiles(self) - 1;
+        mFileCursor = n - 1;
+    } else if (mWrapItems != 0) {
+        mFileCursor = GetMaxFiles() - 1;
     }
 }
 #endif
@@ -3240,14 +3257,14 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_OnHighlightNextFile);
  * Moves the file cursor (mFileCursor) forward one slot; at the last slot (cMCOverlayManager_GetMaxFiles - 1) it wraps to 0 when
  * mWrapItems is set.
  */
-extern "C" void cMCOverlayManager_OnHighlightNextFile(cMCOverlayManager* self)
+void cMCOverlayManager::OnHighlightNextFile()
 {
-    int n = cMCOverlayManager_GetMaxFiles(self) - 1;
-    int cur = self->mFileCursor;
+    int n = GetMaxFiles() - 1;
+    int cur = mFileCursor;
     if (cur < n) {
-        self->mFileCursor = cur + 1;
-    } else if (self->mWrapItems != 0) {
-        self->mFileCursor = 0;
+        mFileCursor = cur + 1;
+    } else if (mWrapItems != 0) {
+        mFileCursor = 0;
     }
 }
 #endif
@@ -3293,25 +3310,25 @@ static inline void* Loc_241710(char* key)
  * @param idx  device index
  * @param dst  receives the label (16-bit string)
  */
-extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self, int idx, char* dst)
+void cMCOverlayManager::GetDeviceDisplayString(int idx, char* dst)
 {
     char buf[0x200];
-    if (self->mpMemCard->IsAvailable(idx))
+    if (mpMemCard->IsAvailable(idx))
     {
-        if (self->mpMemCard->IsInvalid(idx) || self->mpMemCard->IsDamaged(idx) || self->mpMemCard->IsWrongDevice1(idx))
+        if (mpMemCard->IsInvalid(idx) || mpMemCard->IsDamaged(idx) || mpMemCard->IsWrongDevice1(idx))
         {
-            cMCOverlayManager_getDeviceNumberString(self, buf, idx);
+            getDeviceNumberString(buf, idx);
             sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
         }
-        else if (!self->mpMemCard->IsFormatted1(idx))
+        else if (!mpMemCard->IsFormatted1(idx))
         {
-            cMCOverlayManager_getDeviceNumberString(self, buf, idx);
+            getDeviceNumberString(buf, idx);
             sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotFormattedPS2_b), buf);
         }
-        else if (self->mpMemCard->IsEncodingCorrect(idx))
+        else if (mpMemCard->IsEncodingCorrect(idx))
         {
-            cMCOverlayManager_getDeviceNumberString(self, buf, idx);
-            char* name = ((char*)&((&(self)->mDevices[0]))[idx].szName[0]);
+            getDeviceNumberString(buf, idx);
+            char* name = ((char*)&((&mDevices[0]))[idx].szName[0]);
             if (strlen1(name) == 0)
                 sprintf1_v(dst, Loc_241710(str_kT_MEMMemDevicePS2), buf);
             else
@@ -3320,7 +3337,7 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self
     }
     else
     {
-        cMCOverlayManager_getDeviceNumberString(self, buf, idx);
+        getDeviceNumberString(buf, idx);
         sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
     }
 }
@@ -3343,15 +3360,15 @@ extern char str_pct_d_pct_s[];
  * @param i  the device
  * @param out  16-bit destination buffer
  */
-extern "C" void cMCOverlayManager_GetDeviceFreeString(cMCOverlayManager* self, int i, void* out)
+void cMCOverlayManager::GetDeviceFreeString(int i, void* out)
 {
-    if (self->mDevices[i].bPluggedIn != 0 && self->mDevices[i].bValid != 0 && self->mDevices[i].bFormatted != 0
-        && self->mDevices[i].bCorrectEncoding != 0) {
+    if (mDevices[i].bPluggedIn != 0 && mDevices[i].bValid != 0 && mDevices[i].bFormatted != 0
+        && mDevices[i].bCorrectEncoding != 0) {
         char name[0x200];
         char path[0x200];
         func_002C2540_r(name, str_Free);
         func_002C2540_r(path, str_pct_d_pct_s);
-        sprintf1_v(out, path, self->mDevices[i].iFreeSpace, name);
+        sprintf1_v(out, path, mDevices[i].iFreeSpace, name);
     }
 }
 #endif
@@ -3365,9 +3382,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetFreeSpace);
  * @param device  the device
  * @return its free space
  */
-extern "C" int cMCOverlayManager_GetFreeSpace(cMCOverlayManager* self, int device)
+int cMCOverlayManager::GetFreeSpace(int device)
 {
-    return self->mDevices[device].iFreeSpace;
+    return mDevices[device].iFreeSpace;
 }
 #endif
 
@@ -3419,9 +3436,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getProductCode);
  *
  * Callers pass a buffer size as well, which is ignored.
  */
-extern "C" void cMCOverlayManager_getProductCode(cMCOverlayManager* self)
+void cMCOverlayManager::getProductCode()
 {
-    func_002C2540(self, &D_0047C3A8);
+    func_002C2540(this, &D_0047C3A8);
 }
 #endif
 
@@ -3435,17 +3452,17 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getMaxDevicesSupported);
  *
  * @return the number of devices (cached in mMaxDevices)
  */
-extern "C" int cMCOverlayManager_getMaxDevicesSupported(cMCOverlayManager* self)
+int cMCOverlayManager::getMaxDevicesSupported()
 {
-    if (self->mMaxDevices < 0) {
-        cMemCard* memCard = self->mpMemCard;
+    if (mMaxDevices < 0) {
+        cMemCard* memCard = mpMemCard;
         int n = memCard->GetMaxDevices();
-        self->mMaxDevices = n;
+        mMaxDevices = n;
         if (n >= 2) {
-            self->mMaxDevices = 1;
+            mMaxDevices = 1;
         }
     }
-    return self->mMaxDevices;
+    return mMaxDevices;
 }
 #endif
 
@@ -3509,16 +3526,16 @@ extern "C" int cMCOverlayManager_getDeviceState(void* self);
  *
  * @return 1 when the current state is not acknowledged, otherwise 0
  */
-extern "C" int cMCOverlayManager_updateDeviceStateMonitor(cMCOverlayManager* self)
+int cMCOverlayManager::updateDeviceStateMonitor()
 {
-    int newState = cMCOverlayManager_getDeviceState(self);
-    int changed = self->mCurrDeviceStateLast != newState;
-    if (self->mCurrDeviceStateAck == 0 || changed) {
-        self->mCurrDeviceStateLast = newState;
+    int newState = cMCOverlayManager_getDeviceState(this);
+    int changed = mCurrDeviceStateLast != newState;
+    if (mCurrDeviceStateAck == 0 || changed) {
+        mCurrDeviceStateLast = newState;
         if (changed) {
-            self->mCurrDeviceStateAck = (self->callbackAcknowledgeCardStatusChange)(newState);
+            mCurrDeviceStateAck = (callbackAcknowledgeCardStatusChange)(newState);
         }
-        return self->mCurrDeviceStateAck ^ 1;
+        return mCurrDeviceStateAck ^ 1;
     }
     return 0;
 }
@@ -3539,7 +3556,7 @@ extern char str_SET[];
  * @param mode  the file type
  * @param buf  16-bit destination buffer
  */
-extern "C" void cMCOverlayManager_getFileName(cMCOverlayManager* self, int mode, void* buf)
+void cMCOverlayManager::getFileName(int mode, void* buf)
 {
     switch (mode) {
     case 0:
@@ -3580,7 +3597,7 @@ extern char str_pct_d_g[];
  * @param dst  the destination wide-string buffer
  * @param n    the zero-based device index; the text shows @p n + 1
  */
-extern "C" void cMCOverlayManager_getDeviceNumberString(cMCOverlayManager* self, void* dst, int n)
+void cMCOverlayManager::getDeviceNumberString(void* dst, int n)
 {
     unsigned short buf[256];
     func_002C2540(buf, str_pct_d_g);
@@ -3631,19 +3648,19 @@ static inline void SetText_00241E18(void* out, char* key, void* arg)
  *
  * @param out  the destination wide-string buffer
  */
-extern "C" void cMCOverlayManager_GetMessage(cMCOverlayManager* self, void* out)
+void cMCOverlayManager::GetMessage(void* out)
 {
     unsigned short num[256];
     unsigned short num2[256];
     func_002C2540(out, D_004A29E8);
-    cMCOverlayManager_getDeviceNumberString(self, num, self->mSelectedDevice);
-    switch (self->mState) {
+    getDeviceNumberString(num, mSelectedDevice);
+    switch (mState) {
     case 0: case 2: case 3: case 6: case 7: case 13: case 29:
     case 49: case 50: case 51: case 52: case 53: case 54:
         SetText_00241E18(out, str_kT_MEMFECheckingCardPS2_b, num);
         break;
     case 4:
-        cMCOverlayManager_getDeviceNumberString(self, num2, self->mSelectedDevice);
+        getDeviceNumberString(num2, mSelectedDevice);
         SetText_00241E18(out, str_kT_MEMOVNotDetectedPS2_b, num2);
         break;
     case 10: case 11: case 39: case 40:
@@ -3674,10 +3691,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GatherDeviceInfo__FPv);
  *
  * @return no meaningful value (cMCOverlayManager_GatherDeviceInfo1 returns nothing)
  */
-void* cMCOverlayManager_GatherDeviceInfo(void* vself)
+void* cMCOverlayManager::GatherDeviceInfo()
 {
-    cMCOverlayManager* self = (cMCOverlayManager*)vself;
-    return cMCOverlayManager_GatherDeviceInfo1(self, self->mCurrCheckDevice);
+    return cMCOverlayManager_GatherDeviceInfo1(this, mCurrCheckDevice);
 }
 #endif
 
@@ -3690,15 +3706,15 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_InitiateFileCheck);
  *
  * Goes to InitFileCheck (51) when the card is idle, otherwise InitFileCheckWait (53).
  */
-extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self)
+void cMCOverlayManager::InitiateFileCheck()
 {
     cMemCard* memCard;
-    (self->callbackSysRecheckFile)();
-    memCard = self->mpMemCard;
+    (callbackSysRecheckFile)();
+    memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        self->SetState(51);
+        SetState(51);
     } else {
-        self->SetState(53);
+        SetState(53);
     }
 }
 #endif
@@ -3712,15 +3728,15 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_RecheckCard);
  * Starts a fresh card check: clears mCheckCard and moves to CheckCardsWait (2), or CheckCards (3) if the card
  * is busy.
  */
-extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self)
+void cMCOverlayManager::RecheckCard()
 {
     cMemCard* memCard;
-    self->mCheckCard = 0;
-    memCard = self->mpMemCard;
+    mCheckCard = 0;
+    memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        self->SetState(2);
+        SetState(2);
     } else {
-        self->SetState(3);
+        SetState(3);
     }
 }
 #endif
@@ -3829,7 +3845,7 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
     w[0x30] = 0;
     w[49] = 0;
     w[466] = (int)cMCOverlayManager_vtbl;
-    cMCOverlayManager_SetAction(self, 1);
+    self->SetAction(1);
     w[76] = 0;
     w[0x3E] = 0;
     w[0x3F] = -1;
@@ -3990,18 +4006,17 @@ INCLUDE_ASM("movie/movieplayer", cOcclusionMan_addVisCurtain);
 /**
  * Adds an occlusion curtain to the front of the manager's plane list and increments the count.
  *
- * @param occlusionMan  the occlusion manager
  * @param curtain  the curtain record
  */
-extern "C" void cOcclusionMan_addVisCurtain(cOcclusionMan* occlusionMan, tVisCurtainRecord* curtain)
+void cOcclusionMan::addVisCurtain(tVisCurtainRecord* curtain)
 {
-    curtain->next = occlusionMan->m_pPlanes;
+    curtain->next = m_pPlanes;
     curtain->prev = 0;
-    if (occlusionMan->m_pPlanes != 0) {
-        occlusionMan->m_pPlanes->prev = curtain;
+    if (m_pPlanes != 0) {
+        m_pPlanes->prev = curtain;
     }
-    occlusionMan->m_pPlanes = curtain;
-    occlusionMan->m_iNumPlanes++;
+    m_pPlanes = curtain;
+    m_iNumPlanes++;
 }
 #endif
 
@@ -4012,10 +4027,9 @@ INCLUDE_ASM("movie/movieplayer", cOcclusionMan_removeVisCurtain);
  * Unlinks an occlusion curtain from the manager's plane list (updating the head when it was first) and decrements the
  * count.
  *
- * @param occlusionMan  the occlusion manager
  * @param curtain  the curtain record
  */
-extern "C" void cOcclusionMan_removeVisCurtain(cOcclusionMan* occlusionMan, tVisCurtainRecord* curtain)
+void cOcclusionMan::removeVisCurtain(tVisCurtainRecord* curtain)
 {
     if (curtain->prev != 0) {
         curtain->prev->next = curtain->next;
@@ -4023,10 +4037,10 @@ extern "C" void cOcclusionMan_removeVisCurtain(cOcclusionMan* occlusionMan, tVis
     if (curtain->next != 0) {
         curtain->next->prev = curtain->prev;
     }
-    if (curtain == occlusionMan->m_pPlanes) {
-        occlusionMan->m_pPlanes = curtain->next;
+    if (curtain == m_pPlanes) {
+        m_pPlanes = curtain->next;
     }
-    occlusionMan->m_iNumPlanes--;
+    m_iNumPlanes--;
 }
 #endif
 
@@ -4139,19 +4153,19 @@ static inline t4Matrix* camMtx_25C0()
  *
  * @param bb  the camera's bounding box
  */
-extern "C" void cOcclusionMan_updateView(cOcclusionMan* self, tBoundBox* bb)
+void cOcclusionMan::updateView(tBoundBox* bb)
 {
-    self->m_iNumActive = 0;
-    self->m_uiVisMask = 0;
-    if (self->m_iNumPlanes == 0)
+    m_iNumActive = 0;
+    m_uiVisMask = 0;
+    if (m_iNumPlanes == 0)
         return;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     t4Matrix mtx = ps2GraphicsMan->GetNetMatrix();
     t4VectorInit eye = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
     eye = mulT_25C0(camMtx_25C0(), eye);
-    self->m_iNumInView = 0;
+    m_iNumInView = 0;
     eye.w = 1.0f;
-    tVisCurtainRecord* it = self->m_pPlanes;
+    tVisCurtainRecord* it = m_pPlanes;
     while (it != 0) {
         tVisCurtainRecord* candidate = it;
         it = it->next;
@@ -4174,24 +4188,24 @@ extern "C" void cOcclusionMan_updateView(cOcclusionMan* self, tBoundBox* bb)
             if (vis) {
                 if (!(0.0f < vu0Dot_25C0(eye, candidate->m_fvPlaneCoeffs))) {
                     float distSq = vu0DistSq_25C0(eye, candidate->m_fvBSphere);
-                    self->m_InView[self->m_iNumInView].pVis = candidate;
-                    self->m_InView[self->m_iNumInView].fDist = distSq;
-                    self->m_iNumInView++;
+                    m_InView[m_iNumInView].pVis = candidate;
+                    m_InView[m_iNumInView].fDist = distSq;
+                    m_iNumInView++;
                 }
             }
         }
     }
-    if (self->m_iNumInView == 0)
+    if (m_iNumInView == 0)
         return;
-    qsort(self->m_InView, self->m_iNumInView, 8, cOcclusionMan__VisSortFunc);
-    int n = self->m_iNumInView;
+    qsort(m_InView, m_iNumInView, 8, cOcclusionMan__VisSortFunc);
+    int n = m_iNumInView;
     if (n > 2)
         n = 2;
-    self->m_iNumActive = n;
-    for (int i = 0; i < self->m_iNumActive; i++) {
-        self->m_uiVisMask |= 1 << i;
-        cOcclusionMan_updateVisPlane(self, &eye, self->m_InView[i].pVis);
-        func_00229F88(i, &self->m_InView[i].pVis->m_fvPlaneCoeffs, &self->m_InView[i].pVis->m_fvVisFrustum);
+    m_iNumActive = n;
+    for (int i = 0; i < m_iNumActive; i++) {
+        m_uiVisMask |= 1 << i;
+        updateVisPlane(&eye, m_InView[i].pVis);
+        func_00229F88(i, &m_InView[i].pVis->m_fvPlaneCoeffs, &m_InView[i].pVis->m_fvVisFrustum);
     }
 }
 #endif
@@ -4321,7 +4335,7 @@ static inline void makePlane_29B0(tVisCurtainRecord* f, int i, const t4Vector& e
  * @param eyep  the eye position
  * @param frustumPtr  the curtain record
  */
-extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, t4Vector* eyep, tVisCurtainRecord* frustumPtr)
+void cOcclusionMan::updateVisPlane(t4Vector* eyep, tVisCurtainRecord* frustumPtr)
 {
     const t4Vector& eye = *eyep;
     tVisCurtainRecord* frustum = frustumPtr;

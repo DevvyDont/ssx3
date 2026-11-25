@@ -115,10 +115,10 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
         self->c[i] = 0;
         self->d[i] = 0;
     }
-    cOVState_MAP_setupMapPic((cOVState_MAP*)self);
-    cOVState_MAP_setupPopup((cOVState_MAP*)self);
-    cOVState_MAP_setupPlayerIndicator((cOVState_MAP*)self);
-    cOVState_MAP_setupLocalSessionList((cOVState_MAP*)self);
+    ((cOVState_MAP*)self)->setupMapPic();
+    ((cOVState_MAP*)self)->setupPopup();
+    ((cOVState_MAP*)self)->setupPlayerIndicator();
+    ((cOVState_MAP*)self)->setupLocalSessionList();
 }
 #endif
 
@@ -239,7 +239,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             }
             cUIMenu_setSelectedByIndex(menu, idx);
         }
-        cOVState_MAP_showIndicators(selfp);
+        selfp->showIndicators();
         menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
         if (menuItem != 0) {
             menuItem->mMiscData = 0;
@@ -300,7 +300,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self);
 extern "C" void cOVState_MAP_onDestroyScreen(cOVState_MAP* self)
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, self->mFEAsyncMapFileIndex);
-    cOVState_MAP_cleanupIndicators(self);
+    self->cleanupIndicators();
     cOVState_onDestroyScreen((cOVState*)self);
 }
 #endif
@@ -316,16 +316,16 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupScreenExit);
  * Sets +0xDC to 1 and +0xC8 to 0, then calls virtual slot 9 with 0 on the widgets at +0xD0 and +0xE0 when they
  * exist.
  */
-extern "C" void cOVState_MAP_setupScreenExit(cOVState_MAP* self)
+void cOVState_MAP::setupScreenExit()
 {
     cUIThing* popupWidget;
-    self->mScreenExiting = 1;
-    self->mMapTextureSet = 0;
-    popupWidget = (cUIThing*)self->mpMap;
+    mScreenExiting = 1;
+    mMapTextureSet = 0;
+    popupWidget = (cUIThing*)mpMap;
     if (popupWidget != 0) {
         popupWidget->setVisible(0);
     }
-    popupWidget = (cUIThing*)self->mpPlayerIcon;
+    popupWidget = (cUIThing*)mpPlayerIcon;
     if (popupWidget != 0) {
         popupWidget->setVisible(0);
     }
@@ -392,7 +392,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
         if (selfp->mSessionPopupActive != 0) {
             if (pWidget->mMiscData != 0) {
                 selfp->mSessionPopupActive = 0;
-                cOVState_MAP_setupPopup(selfp);
+                selfp->setupPopup();
                 break;
             }
             cBEMissionInterface* iface = (cBEMissionInterface*)cBE_getInterface_Fv(cBE_getBE(), 10);
@@ -402,12 +402,12 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cGame_setState(game, 0xF, 0, 0);
-            cOVState_MAP_cleanupIndicators(selfp);
-            cOVState_MAP_setupScreenExit(selfp);
+            selfp->cleanupIndicators();
+            selfp->setupScreenExit();
         } else {
             selfp->mSessionPopupActive = 1;
             selfp->mSelectedSessionPoint = pWidget->mMiscData;
-            cOVState_MAP_setupPopup(selfp);
+            selfp->setupPopup();
             cUIThing* confirmNo = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
             tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, confirmNo);
             vt[11].fn(vthis(confirmNo, vt[11]), tMapColour(1.0f, 0.0f, 0.0f, 0.0f));
@@ -416,17 +416,17 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
     case 6:
         if (selfp->mSessionPopupActive != 0) {
             selfp->mSessionPopupActive = 0;
-            cOVState_MAP_setupPopup(selfp);
+            selfp->setupPopup();
         } else {
-            cOVState_MAP_cleanupIndicators(selfp);
-            cOVState_MAP_setupScreenExit(selfp);
+            selfp->cleanupIndicators();
+            selfp->setupScreenExit();
             cUIStateStack_pop_8C28(&selfp->mpEngine->mStateStack, 1);
             selfp->mAttrState = (selfp->mAttrState & ~0x3F00) | 0x780;
         }
         break;
     case 1:
         if (selfp->mSessionPopupActive != 0) {
-            cOVState_MAP_setWidgetHiliteColor(selfp, (cUIText*)pWidget, 1);
+            selfp->setWidgetHiliteColor((cUIText*)pWidget, 1);
             if (pWidget->mMiscData == 0) {
                 cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_Yes_x);
                 cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_x);
@@ -446,7 +446,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
         break;
     case 2:
         if (selfp->mSessionPopupActive != 0) {
-            cOVState_MAP_setWidgetUnHiliteColor(selfp, (cUIText*)pWidget, 1);
+            selfp->setWidgetUnHiliteColor((cUIText*)pWidget, 1);
         }
         break;
     case 7:
@@ -490,13 +490,13 @@ extern "C" void cFEAsyncManager_LoadLocationPic(void* mgr, int a1, int file, int
  * interface's location into the same slot, and clears the loaded flag at 0xC8 so the map's update fades the new
  * picture in once it has loaded.
  */
-extern "C" void cOVState_MAP_setupMapPic(cOVState_MAP* self)
+void cOVState_MAP::setupMapPic()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* mgr = SSXApp->mFEAsyncManager;
-    cFEAsyncManager_UnloadFEAsyncFile(mgr, self->mFEAsyncMapFileIndex);
-    cFEAsyncManager_LoadLocationPic(mgr, *cBENewRaceInterface_getLocation(iface), self->mFEAsyncMapFileIndex, 1);
-    self->mMapTextureSet = 0;
+    cFEAsyncManager_UnloadFEAsyncFile(mgr, mFEAsyncMapFileIndex);
+    cFEAsyncManager_LoadLocationPic(mgr, *cBENewRaceInterface_getLocation(iface), mFEAsyncMapFileIndex, 1);
+    mMapTextureSet = 0;
 }
 #endif
 
@@ -549,22 +549,21 @@ extern char str_kT_CMNYes_b[];
  * "<kT_MAPSessionPt>: n" for the selected point, the player's money as "$%d", a cost of $500 and
  * kT_OVRCMNSessArea. When closed: hides the popup, re-enables the list and disables the menu.
  *
- * @param selfp  the cOVState_MAP
  */
-extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
+void cOVState_MAP::setupPopup()
 {
-    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu));
-    cUIMenu* list = (cUIMenu*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
-    if (selfp->mSessionPopupActive != 0) {
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu));
+    cUIMenu* list = (cUIMenu*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_SessionViewPoints));
+    if (mSessionPopupActive != 0) {
         unsigned short text[40];
         char buf[0x10];
-        cUIState_showObjSafe(((char*)selfp), str_ConfirmPopup);
+        cUIState_showObjSafe(((char*)this), str_ConfirmPopup);
         if (menu != 0) {
             cUIMenu_setSelectedByIndex(menu, 0);
         }
         unsigned char n = 0;
-        cUIState_showObjSafe(((char*)selfp), str_Popup1);
-        cUIState_hideObjSafe(((char*)selfp), str_Popup2);
+        cUIState_showObjSafe(((char*)this), str_Popup1);
+        cUIState_hideObjSafe(((char*)this), str_Popup2);
         if (list != 0) {
             list->setFocus(0);
             n = list->mScrollItemCurrent;
@@ -580,29 +579,29 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
         unsigned short* str = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
         if (str != 0) {
             sprintf2(text, str_pct_s_pct_d_d, str, n + 1);
-            void* label = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_PopupTitle));
+            void* label = cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_PopupTitle));
             if (label != 0) {
                 cUIText_setUnicodeString(label, text);
             }
         }
         int id = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), 0, cBELibrary_getCharacterID(0));
         sprintf(buf, str_pct_d_f, id);
-        cUIText* label = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_P1_CashAvailable));
+        cUIText* label = (cUIText*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_P1_CashAvailable));
         if (label != 0) {
             cUIText_setAsciiString(label, buf);
         }
         sprintf(buf, str_pct_d_f, 500);
-        label = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_P1_SessionCost));
+        label = (cUIText*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_P1_SessionCost));
         if (label != 0) {
             cUIText_setAsciiString(label, buf);
         }
-        label = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_P1_ExtraText));
+        label = (cUIText*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_P1_ExtraText));
         if (label != 0) {
             cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_OVRCMNSessArea));
         }
-        cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_x);
-        cUIText* confirmYes = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
-        cUIMenu* confirmNo = (cUIMenu*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
+        cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_No_x);
+        cUIText* confirmYes = (cUIText*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
+        cUIMenu* confirmNo = (cUIMenu*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
         if (confirmYes != 0) {
             cUIText_setUnicodeStringByID(confirmYes, GetHashValue32(str_kT_CMNYes_b));
         }
@@ -610,9 +609,9 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
             confirmNo->setVisible(1);
             confirmNo->setStatic(0);
         }
-        cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No);
+        cUIState_showObjSafe(((char*)this), str_ConfirmMenu_No);
     } else {
-        cUIState_hideObjSafe(((char*)selfp), str_ConfirmPopup);
+        cUIState_hideObjSafe(((char*)this), str_ConfirmPopup);
         if (list != 0) {
             list->setFocus(1);
         }
@@ -640,7 +639,7 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
 extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, const cUIInput* pInput)
 {
     if (pInput->isUp() || pInput->isDown()) {
-        cOVState_MAP_showIndicators(self);
+        self->showIndicators();
     }
 }
 #endif
@@ -746,7 +745,7 @@ extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
  * @param obj  the text widget
  * @param on   nonzero when the entry is unlocked
  */
-extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
+void cOVState_MAP::setWidgetHiliteColor(cUIText* obj, int on)
 {
     if (on != 0) {
         obj->setColour((const tARGB*)kMAPCOLOR_HIGHLIGHTED);
@@ -770,7 +769,7 @@ extern char kMAPCOLOR_REGULAR_LOCKED[];
  * @param obj  text widget to colour (On Tour: pText)
  * @param on   nonzero for an unlocked entry (On Tour: unlocked)
  */
-extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
+void cOVState_MAP::setWidgetUnHiliteColor(cUIText* obj, int on)
 {
     if (on != 0) {
         obj->setColour((const tARGB*)kMAPCOLOR_REGULAR);
@@ -810,11 +809,10 @@ static inline float Absf_96A8(float v)
  * then adds a cUIIcon ("location" texture, 17 x 17, offset to the map at 252, 97) to the screen's object
  * list.
  *
- * @param selfp  the cOVState_MAP
  */
-extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
+void cOVState_MAP::setupPlayerIndicator()
 {
-    cOVState_MAP* self = selfp;
+    cOVState_MAP* self = this;
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     t3Vector mapPos = self->mpMap->mPosition;
@@ -893,11 +891,10 @@ static inline void setThingPosition(cUIThing* thing, const t3Vector& pos)
  * 266 picture and adds two cUIIcons: a "dot_visited" dot and an "indicator" highlight (18 x 18), keeping the
  * highlight's position too.
  *
- * @param selfp  the cOVState_MAP
  */
-extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
+void cOVState_MAP::setupLocalSessionList()
 {
-    cOVState_MAP* self = selfp;
+    cOVState_MAP* self = this;
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     self->mSessionPointsOnPic =
@@ -964,11 +961,10 @@ extern char str_SessionViewPoints[];
  * The selected point is the misc data of "SessionViewPoints"'s current item (default 1); it gets its
  * highlight icon and every other point its dot. The object lookup is not null-checked.
  *
- * @param mapState  the cOVState_MAP (raw pointer)
  */
-extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* mapState)
+void cOVState_MAP::showIndicators()
 {
-    cOVState_MAP* self = mapState;
+    cOVState_MAP* self = this;
     if (self->mpPlayerIcon != 0) {
         self->mpPlayerIcon->setVisible(1);
     }
@@ -1009,11 +1005,10 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_hideIndicators);
  * Each present widget gets setVisible(0) (virtual slot 9). cOVState_MAP_showIndicators shows the same widgets and
  * cOVState_MAP_cleanupIndicators deletes them; nothing in the program calls this one.
  *
- * @param vself  the map overlay state (this)
  */
-extern "C" void cOVState_MAP_hideIndicators(cOVState_MAP* vself)
+void cOVState_MAP::hideIndicators()
 {
-    cOVState_MAP* self = vself;
+    cOVState_MAP* self = this;
     if (self->mpPlayerIcon != 0) {
         self->mpPlayerIcon->setVisible(0);
     }
@@ -1037,11 +1032,10 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_cleanupIndicators);
  * For mpPlayerIcon and each of the two eight-entry icon arrays (mpSessionIcons, mpSessionHighlights) it hides a
  * present widget (setVisible(0)), deletes it and clears the pointer.
  *
- * @param mapOverlay  the map overlay state (this)
  */
-extern "C" void cOVState_MAP_cleanupIndicators(cOVState_MAP* mapOverlay)
+void cOVState_MAP::cleanupIndicators()
 {
-    cOVState_MAP* self = mapOverlay;
+    cOVState_MAP* self = this;
     if (self->mpPlayerIcon != 0) {
         self->mpPlayerIcon->setVisible(0);
         delete self->mpPlayerIcon;
@@ -1221,24 +1215,25 @@ struct sBXString_A4E0 {
  * @return 1 when a chat message was shown, else 0 (On Tour returns bool)
  */
 // PORT: the session pointer is passed through cGameComm_getQueuedChat's int parameter.
-extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
+int cOVState::onUpdate_HandleIncomingChat()
 {
     int ret = 0;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     tBENetworkDB* net = &cBENetworkInterface_networkOpt;
-    if (net->bIsNetworkGame != 0 && self->mpScreen != 0) {
+    if (net->bIsNetworkGame != 0 && mpScreen != 0) {
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
-            char* name = self->mszChatBuff;
+            char* name = mszChatBuff;
             if (cGameComm_getQueuedChat((int)sess, name, 65) != 0) {
-                cUIThing* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
+                cUIThing* helpText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_b));
                 if (helpText != 0)
                     helpText->setVisible(0);
-                cUIThing* helpTexts = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
+                cUIThing* helpTexts = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptexts));
                 if (helpTexts != 0)
                     helpTexts->setVisible(0);
                 ret = 1;
-                cUITextScroll* obj = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
+                cUITextScroll* obj = (cUITextScroll*)cUIScreen_getObjectByHashName(mpScreen,
+                        GetHashValue32(str_textScrollChat_b));
                 unsigned short origNumLines = obj->mLineSize;
                 unsigned short selectedIndex = obj->mSelectedIndex;
                 unsigned short linesOffset = obj->mLinesOffset;
@@ -1299,11 +1294,11 @@ extern "C" void cUIThing_playAnimation(void* self, void* anim, int mode, int v, 
  * @param objName  name of the screen object
  * @param animName  name of the animation
  */
-extern "C" void cOVState_triggerTextFade(cOVState* self, char* objName, char* animName)
+void cOVState::triggerTextFade(char* objName, char* animName)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = &self->mpEngine->mAnimBank;
+        void* bank = &mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 0);

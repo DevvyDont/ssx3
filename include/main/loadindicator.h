@@ -18,6 +18,9 @@ struct cLoadIndicator {
                                     //      (cInitLoadScreen_update ...; loseFocus waits for 0); render copies it to colour.A
     int locale;                     // 0x08 [O] (unsigned int); [R] ctor 0; no retail use seen
     tARGB colour;                   // 0x0C [O]; [R] ctor (1, 1, 1, 1); [U] render passes it to DrawSprite
+
+    // Methods bound to their retail symbols by asm labels.
+    void render() __asm__("cLoadIndicator_render");
 };
 
 CHECK_OFFSET(cLoadIndicator, phase, 0x00);

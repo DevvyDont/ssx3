@@ -88,6 +88,9 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     cUIThing* mpBigAirPair;         // 0x728 [R] 0; [U] widget "BigAirPair"
     cUIThing* mpSuperpipePair;      // 0x72C [R] 0; [U] widget "SuperpipePair"
     cUIThing* mpSlopestylePair;     // 0x730 [R] 0; [U] widget "SlopestylePair"
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEStateNetQuickPlayPopup1() __asm__("cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1");
 };
 
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, miSearchOptions, 0x6D0);

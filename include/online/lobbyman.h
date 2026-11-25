@@ -139,6 +139,8 @@ struct tLobbyEventList {
 };
 CHECK_SIZE(tLobbyEventList, 0x8);
 
+struct LobbyApiMsgT;
+
 struct LobbyMan {
     int mState;                     // 0x000 [P] "state == ..." asserts (preview offset 0x4); [R] ctor 0;
                                     //       [U] func_0025B608 (send request) stores the new state; values above
@@ -223,6 +225,30 @@ struct LobbyMan {
                                     //       (func_003E85B0(api, 4, ..)); func_0025A850 frees them
     tLobbyAccount mNewAccount;      // 0x260 [R] ctor builds it, func_00260F10 resets it; [U] createaccount's form
     tLobbyAccount mAccount;         // 0x2B0 [R] ctor builds it; [U] onauthentication fills it
+
+    // Methods bound to their retail symbols by asm labels.
+    void onconnectionmsg(int* msg) __asm__("LobbyMan_onconnectionmsg");
+    void onuserlistupdate() __asm__("LobbyMan_onuserlistupdate");
+    void onranklistupdate(int message) __asm__("LobbyMan_onranklistupdate");
+    void onlobbyconnect(LobbyApiMsgT* msg) __asm__("LobbyMan_onlobbyconnect");
+    void onaccountcreated(LobbyApiMsgT* msg) __asm__("LobbyMan_onaccountcreated");
+    void onaccountedited(LobbyApiMsgT* msg) __asm__("LobbyMan_onaccountedited");
+    void onlostaccountrequestsent(LobbyApiMsgT* msg) __asm__("LobbyMan_onlostaccountrequestsent");
+    void onlostpasswordrequestsent(LobbyApiMsgT* msg) __asm__("LobbyMan_onlostpasswordrequestsent");
+    void onauthentication(LobbyApiMsgT* msg) __asm__("LobbyMan_onauthentication");
+    void onpersonaselected(LobbyApiMsgT* msg) __asm__("LobbyMan_onpersonaselected");
+    void onpersonacreated(LobbyApiMsgT* msg) __asm__("LobbyMan_onpersonacreated");
+    void onpersonadeleted(LobbyApiMsgT* msg) __asm__("LobbyMan_onpersonadeleted");
+    void onroomlistupdate() __asm__("LobbyMan_onroomlistupdate");
+    void onRoomCreated(LobbyApiMsgT* msg) __asm__("LobbyMan_onRoomCreated");
+    void onPingReceived(LobbyApiMsgT* msg) __asm__("LobbyMan_onPingReceived");
+    void onAbuseReportReceived(LobbyApiMsgT* msg) __asm__("LobbyMan_onAbuseReportReceived");
+    void onNewsRetrieved(LobbyApiMsgT* msg) __asm__("LobbyMan_onNewsRetrieved");
+    void onRanklistRetrieved(LobbyApiMsgT* msg) __asm__("LobbyMan_onRanklistRetrieved");
+    void onPlayerFound(LobbyApiMsgT* msg) __asm__("LobbyMan_onPlayerFound");
+    void onQuickMatchResponse(LobbyApiMsgT* msg) __asm__("LobbyMan_onQuickMatchResponse");
+    int getnumrooms() __asm__("LobbyMan_getnumrooms");
+    void onresultsreportresponse(LobbyApiMsgT* msg) __asm__("LobbyMan_onresultsreportresponse");
 };
 
 CHECK_OFFSET(LobbyMan, mState, 0x000);

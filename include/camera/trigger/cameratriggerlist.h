@@ -60,6 +60,16 @@ struct cCameraTriggerList {
     unsigned int NextID;            // 0x08 [O]; [U] readHeader reads it
     int Cookie;                     // 0x0C [O]; [U] readCookie reads it; loadFromBuffer requires 7 and stores 7
     int Time;                       // 0x10 [O]; [U] readHeader reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cCameraTriggerList_init__FP18cCameraTriggerList");
+    void reset() __asm__("cCameraTriggerList_reset");
+    int* findTrigger(int key) __asm__("cCameraTriggerList_findTrigger");
+    int loadFromFile(const char* name) __asm__("cCameraTriggerList_loadFromFile");
+    int loadFromBuffer(void* buf) __asm__("cCameraTriggerList_loadFromBuffer");
+    void initHeader() __asm__("cCameraTriggerList_initHeader__FP18cCameraTriggerList");
+    void readCookie(void* buffer) __asm__("cCameraTriggerList_readCookie__FP18cCameraTriggerListPv");
+    int readHeader(void* buffer) __asm__("cCameraTriggerList_readHeader");
 };
 
 CHECK_OFFSET(cCameraTriggerList, Triggers, 0x00);

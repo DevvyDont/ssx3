@@ -39,6 +39,13 @@ struct cCTObject {
     t3Vector Scale;             // 0x18 [O]; [R] (1, 1, 1) (sdl/sdr + sw); [U] cCTObject_scale returns &Scale
     void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then the derived vtable (both sw); [U] get_cCTVolumeEllipse
                                 //      calls slots 1-5 through it (lw +0x24)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* pos() __asm__("cCTObject_pos__FPv");
+    void* heading() __asm__("cCTObject_heading__FPv");
+    void* pitch() __asm__("cCTObject_pitch__FPv");
+    void* roll() __asm__("cCTObject_roll__FPv");
+    void* scale() __asm__("cCTObject_scale__FPv");
 };
 
 CHECK_OFFSET(cCTObject, Pos, 0x00);
@@ -78,6 +85,8 @@ CHECK_SIZE(cCTVolume, 0x2C);
 // sphere scaled by Scale, turned by Heading/Roll/Pitch and moved to Pos. No members of its own.
 // [R] get_camvolume case 0: cMemMan_alloc(0x2C, "Camera Sphere Trigger"), the cCTObject defaults,
 // cCTVolumeEllipse_vtbl and Type 0.
+struct t4Vector;
+
 struct cCTVolumeEllipse {
     // --- cCTObject (0x28)
     t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero; [U] get_cCTVolumeEllipse reads it through slot 1;
@@ -92,6 +101,9 @@ struct cCTVolumeEllipse {
     // --- cCTVolume (0x2C)
     int Type;                   // 0x28 [O] eCTVolumeType; [R] 0 = eCTVolumeEllipse (sw $0); [U] get_cCTVolumeEllipse
                                 //      stores 0 again
+
+    // Methods bound to their retail symbols by asm labels.
+    int containsPoint(t4Vector* point) __asm__("cCTVolumeEllipse_containsPoint");
 };
 
 CHECK_OFFSET(cCTVolumeEllipse, Pos, 0x00);
@@ -143,6 +155,9 @@ struct cCTBoundObjEllipse {
     void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then the derived vtable
     // --- cCTBoundObj (0x2C)
     int Type;                   // 0x28 [O] eCTBoundObjType; [R] 0 (sw $0)
+
+    // Methods bound to their retail symbols by asm labels.
+    void limitPoint(t4Vector* point) __asm__("cCTBoundObjEllipse_limitPoint");
 };
 
 CHECK_OFFSET(cCTBoundObjEllipse, Pos, 0x00);

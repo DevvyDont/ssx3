@@ -623,7 +623,7 @@ extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void cFEStateMountainRoom_onUpdate(cFEStateMountainRoom* self)
 {
     if (~self->mTextureFileIndex != 0) {
-        cFEStateMountainRoom_updateTextureLoad(self);
+        self->updateTextureLoad();
     }
     cUIState_onUpdate(self);
 }
@@ -642,12 +642,13 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  * arguments 10, 1, 0, and keeps the returned slot at +0xBC. cFEStateMountainRoom_onUpdate finishes the load through
  * cFEStateMountainRoom_updateTextureLoad.
  */
-extern "C" void cFEStateMountainRoom_loadPeakPass(cFEStateMountainRoom* self)
+void cFEStateMountainRoom::loadPeakPass()
 {
-    if (self->mTextureFileIndex < 0) {
-        tPeakPassInfo* item = self->mpPeakPassInfo;
+    if (mTextureFileIndex < 0) {
+        tPeakPassInfo* item = mpPeakPassInfo;
         if (item != 0) {
-            self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, (int)item->mpTextureFileName, 10, 1, 0);
+            mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, mCharID, (int)item->mpTextureFileName,
+                    10, 1, 0);
         }
     }
 }
@@ -679,40 +680,39 @@ static inline int isActive_31C0(cUIGroup* w)
  * is visible (widget flag bit 6) and the pass-front group (+0x4C) is not, shows them
  * (cFEStateMountainRoom_showPassFront). Finally frees the loader slot (func_0019DC20) and sets +0xBC to -1.
  *
- * @param vself  the mountain-room state (this)
  */
-extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vself)
+void cFEStateMountainRoom::updateTextureLoad()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    if (vself->mpPassIcon == 0) {
+    if (mpPassIcon == 0) {
         return;
     }
-    if (func_0019E238(mgr, vself->mCharID, vself->mTextureFileIndex) == 0) {
+    if (func_0019E238(mgr, mCharID, mTextureFileIndex) == 0) {
         return;
     }
-    SHAPEFILE* fileData = (SHAPEFILE*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
+    SHAPEFILE* fileData = (SHAPEFILE*)func_0019E2B0(mgr, mCharID, mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
     int id = ps2GraphicsMan->AddTexture((const SHAPE*)((char*)fileData + fileData->tbl[0].offset), str_pass, 0, 1, -1);
-    cUIIcon* passIcon = vself->mpPassIcon;
-    vself->mFrontTextureID = id;
+    cUIIcon* passIcon = mpPassIcon;
+    mFrontTextureID = id;
     passIcon->mTextureID = id;
     passIcon->mpTextureElem = 0;
-    cUIGroup* passGroup = vself->mpPassGroup;
+    cUIGroup* passGroup = mpPassGroup;
     if (isActive_31C0(passGroup)) {
         int both = 0;
         if (isActive_31C0(passGroup)) {
-            cUIGroup* passFrontGroup = vself->mpPassFrontGroup;
+            cUIGroup* passFrontGroup = mpPassFrontGroup;
             if (passFrontGroup != 0) {
                 both = (passFrontGroup->mAttr >> 6) & 1;
             }
         }
         if (!both) {
-            cFEStateMountainRoom_showPassFront(vself);
+            showPassFront();
         }
     }
-    func_0019DC20(mgr, vself->mCharID, vself->mTextureFileIndex);
-    vself->mTextureFileIndex = -1;
+    func_0019DC20(mgr, mCharID, mTextureFileIndex);
+    mTextureFileIndex = -1;
 }
 #endif
 
@@ -725,14 +725,14 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_showPassFront);
  *
  * Both through virtual slot 9 (show) of the widget's vtable at +0x8 with 1.
  */
-extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
+void cFEStateMountainRoom::showPassFront()
 {
     {
-        cUIGroup* obj = self->mpPassGroup;
+        cUIGroup* obj = mpPassGroup;
         obj->setVisible(1);
     }
-    if (self->mFrontTextureID >= 0) {
-        cUIGroup* obj = self->mpPassFrontGroup;
+    if (mFrontTextureID >= 0) {
+        cUIGroup* obj = mpPassFrontGroup;
         obj->setVisible(1);
     }
 }
@@ -1126,8 +1126,8 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         break;
     }
     case 1:
-        cFEStatePeakRoom_updateHelpText(self, item->mMiscData);
-        cFEStatePeakRoom_updateMedalsList(self, item->mMiscData);
+        self->updateHelpText(item->mMiscData);
+        self->updateMedalsList(item->mMiscData);
         break;
     }
 }
@@ -1204,16 +1204,16 @@ public:
  *
  * @param index  the trophy (On Tour trophyType)
  */
-extern "C" void cFEStatePeakRoom_updateHelpText(cFEStatePeakRoom* self, int index)
+void cFEStatePeakRoom::updateHelpText(int index)
 {
-    if (self->mpHelpText != 0) {
-        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
-                          self->mCharID, self->mPeakNum, index) != 0) {
-            cUIText_setUnicodeStringByID(self->mpHelpText, GetHashValue32(str_kT_HELPSelectGoal));
+    if (mpHelpText != 0) {
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum,
+                          mCharID, mPeakNum, index) != 0) {
+            cUIText_setUnicodeStringByID(mpHelpText, GetHashValue32(str_kT_HELPSelectGoal));
         } else {
-            cUIText_setUnicodeStringByID(self->mpHelpText, GetHashValue32(str_kT_HELP_LockedGoal));
+            cUIText_setUnicodeStringByID(mpHelpText, GetHashValue32(str_kT_HELP_LockedGoal));
         }
-        ((cPeakWidget_3EC8*)self->mpHelpText)->show(1);
+        ((cPeakWidget_3EC8*)mpHelpText)->show(1);
     }
 }
 #endif
@@ -1243,12 +1243,11 @@ extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
  * texture-bank element (mpEngine->mTextureBank) named by the medal record's mpIconName (cBERewardInterface_getMedal on
  * back-end interface 13) and is shown with the check mark; without one the cross mark is shown.
  *
- * @param vself  the peak-room state (this)
  * @param peak  the trophy group, 0-3 (On Tour trophyType): despite its name not a peak; the peak is mPeakNum
  */
-extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* vself, int peak)
+void cFEStatePeakRoom::updateMedalsList(int peak)
 {
-    cFEStatePeakRoom* self = vself;
+    cFEStatePeakRoom* self = this;
     int n;
     void* iface;
     int i;

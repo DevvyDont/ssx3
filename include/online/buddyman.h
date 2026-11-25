@@ -53,6 +53,8 @@ typedef char check_vector_cChallenger_M_finish[(DECOMP_OFFSETOF(vector<const cCh
 typedef char check_vector_cChallenger_M_end_of_storage[(DECOMP_OFFSETOF(vector<const cChallenger*>, _M_end_of_storage) == 0xC) ? 1 : -1];
 #endif
 
+struct BuddyApiMsgT;
+
 struct BuddyMan {
     char mServerName[0x40];             // 0x000 [U] connect (func_00261248) strcpy's its host argument (LobbyMan
                                         //       passes the "BUDDYSERVERNAME" tag); func_00261058 clears byte 0
@@ -99,6 +101,11 @@ struct BuddyMan {
                                         //       'endr' message, onconnect / disconnect clear it; FE states read it
     char* mResource;                    // 0x0EC [R] ctor stores the empty cBXString rep; a cBXString: [U] connect
                                         //       assigns the "BUDDYRESOURCE" string, setPresence / addBuddy read it
+
+    // Methods bound to their retail symbols by asm labels.
+    void onconnect(int* msg) __asm__("BuddyMan_onconnect");
+    void onrosterupdate(int* msg) __asm__("BuddyMan_onrosterupdate");
+    void onReceiveMessage(BuddyApiMsgT* msg) __asm__("BuddyMan_onReceiveMessage");
 };
 
 CHECK_OFFSET(BuddyMan, mServerName, 0x000);

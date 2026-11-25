@@ -24,7 +24,7 @@ extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
  * @param sky  BE location ID (callers pass the section manager's or the new race's location)
  */
 // Picks the default rider irradiance bank for the given course.
-extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
+void cSectionMan::setSky(int sky)
 {
     switch (sky) {
     case 1:
@@ -86,18 +86,18 @@ struct sSectionMan {
  *
  * Every pooled entry gets section ID 49 (probably "none"); the last of the 51 entries ends the free list.
  */
-extern "C" void cSectionMan_initEventPool(cSectionMan* self)
+void cSectionMan::initEventPool()
 {
     int i;
-    self->m_pFreeEventList = (tSectionManEvent*)((sSectionNode*)&self->m_EventPool[0]);
+    m_pFreeEventList = (tSectionManEvent*)((sSectionNode*)&m_EventPool[0]);
     for (i = 0; i < 50; i++) {
-        ((sSectionNode*)&self->m_EventPool[0])[i].SectionID = 49;
-        ((sSectionNode*)&self->m_EventPool[0])[i].pNext = &((sSectionNode*)&self->m_EventPool[0])[i + 1];
+        ((sSectionNode*)&m_EventPool[0])[i].SectionID = 49;
+        ((sSectionNode*)&m_EventPool[0])[i].pNext = &((sSectionNode*)&m_EventPool[0])[i + 1];
     }
-    self->m_EventPool[50].SectionID = 49;
-    self->m_EventPool[50].pNext = 0;
-    self->m_pActiveEventList = 0;
-    self->m_iNumActiveEvent = 0;
+    m_EventPool[50].SectionID = 49;
+    m_EventPool[50].pNext = 0;
+    m_pActiveEventList = 0;
+    m_iNumActiveEvent = 0;
 }
 #endif
 
@@ -117,11 +117,10 @@ struct sSectionLink {
  *
  * @return the event
  */
-void* cSectionMan_allocEvent(void* vself)
+void* cSectionMan::allocEvent()
 {
-    cSectionMan* self = (cSectionMan*)vself;
-    sSectionLink* node = (sSectionLink*)self->m_pFreeEventList;
-    self->m_pFreeEventList = (tSectionManEvent*)node->next;
+    sSectionLink* node = (sSectionLink*)m_pFreeEventList;
+    m_pFreeEventList = (tSectionManEvent*)node->next;
     return node;
 }
 #endif
@@ -137,12 +136,11 @@ INCLUDE_ASM("main/sectionman", cSectionMan_freeEvent__FPvT0);
  * @param node  the event to free
  * @return the previous head of the free list
  */
-int cSectionMan_freeEvent(void* vself, void* node)
+int cSectionMan::freeEvent(void* node)
 {
-    cSectionMan* self = (cSectionMan*)vself;
-    int prevHead = (int)self->m_pFreeEventList;
+    int prevHead = (int)m_pFreeEventList;
     *(int*)((char*)node + 0x4) = prevHead;
-    self->m_pFreeEventList = (tSectionManEvent*)((int)node);
+    m_pFreeEventList = (tSectionManEvent*)((int)node);
     return prevHead;
 }
 #endif
@@ -161,29 +159,29 @@ extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, tSectionManEven
  *
  * @param id  section ID to activate (On Tour eBESectionID)
  */
-extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
+void cSectionMan::addActiveEvent(int id)
 {
-    tSectionManEvent* n = self->m_pActiveEventList;
+    tSectionManEvent* n = m_pActiveEventList;
     tSectionManEvent* prev = 0;
     while (n != 0) {
         if (n->SectionID == id) {
             tSectionManEvent* cur = n;
             n = n->pNext;
-            cSectionMan_removeActiveEvent(self, (tSectionManEvent*)prev, (tSectionManEvent*)cur);
+            removeActiveEvent((tSectionManEvent*)prev, (tSectionManEvent*)cur);
         } else {
             prev = n;
             n = n->pNext;
         }
     }
-    n = (tSectionManEvent*)cSectionMan_allocEvent(self);
+    n = (tSectionManEvent*)allocEvent();
     n->SectionID = id;
     n->pNext = 0;
     if (prev != 0) {
         prev->pNext = n;
     } else {
-        self->m_pActiveEventList = (tSectionManEvent*)n;
+        m_pActiveEventList = (tSectionManEvent*)n;
     }
-    self->m_iNumActiveEvent += 1;
+    m_iNumActiveEvent += 1;
 }
 #endif
 
@@ -196,12 +194,12 @@ INCLUDE_ASM("main/sectionman", cSectionMan_getNextActiveEvent);
  * @param pPrevEvent  the previous event, or 0 to start at the head of the list
  * @return the event after @p pPrevEvent, the first event when it is 0, or 0 at the end of the list
  */
-extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, tSectionManEvent* pPrevEvent)
+int cSectionMan::getNextActiveEvent(tSectionManEvent* pPrevEvent)
 {
     if (((void*)pPrevEvent) != 0) {
         return (int)pPrevEvent->pNext;
     }
-    return (int)self->m_pActiveEventList;
+    return (int)m_pActiveEventList;
 }
 #endif
 
@@ -217,15 +215,15 @@ void cSectionMan_freeEvent_v(void* self, void* node) __asm__("cSectionMan_freeEv
  * @param prev  the event before @p node in the active list, or 0 when @p node is the head
  * @param node  the event to remove
  */
-extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, tSectionManEvent* prev, tSectionManEvent* node)
+void cSectionMan::removeActiveEvent(tSectionManEvent* prev, tSectionManEvent* node)
 {
     if (((void*)prev) == 0) {
-        self->m_pActiveEventList = (tSectionManEvent*)((int)node->pNext);
+        m_pActiveEventList = (tSectionManEvent*)((int)node->pNext);
     } else {
         prev->pNext = (tSectionManEvent*)((int)node->pNext);
     }
-    cSectionMan_freeEvent_v(self, node);
-    self->m_iNumActiveEvent = self->m_iNumActiveEvent - 1;
+    cSectionMan_freeEvent_v(this, node);
+    m_iNumActiveEvent = m_iNumActiveEvent - 1;
 }
 #endif
 

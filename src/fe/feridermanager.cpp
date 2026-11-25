@@ -40,22 +40,22 @@ extern char str_board_childg[];
  * Looks up the front-end rider model's bone indices by name: head, hips, the limbs, and the board root and
  * child.
  */
-extern "C" void cFERider_initBoneMap(cFERider* self)
+void cFERider::initBoneMap()
 {
-    self->mBoneMap[0] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_head);
-    self->mBoneMap[1] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_hips);
-    self->mBoneMap[2] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_handleft);
-    self->mBoneMap[3] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_forearmleft);
-    self->mBoneMap[4] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_thighleft);
-    self->mBoneMap[5] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_shinleft);
-    self->mBoneMap[6] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_footleft);
-    self->mBoneMap[7] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_handright);
-    self->mBoneMap[8] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_forearmright);
-    self->mBoneMap[9] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_thighright);
-    self->mBoneMap[10] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_shinright);
-    self->mBoneMap[11] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 0, str_footright);
-    self->mBoneMap[12] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 1, str_board_rootg);
-    self->mBoneMap[13] = cAnimModel_getBoneSkelIndex(self->mpAnimModel, 1, str_board_childg);
+    mBoneMap[0] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_head);
+    mBoneMap[1] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_hips);
+    mBoneMap[2] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_handleft);
+    mBoneMap[3] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_forearmleft);
+    mBoneMap[4] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_thighleft);
+    mBoneMap[5] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_shinleft);
+    mBoneMap[6] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_footleft);
+    mBoneMap[7] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_handright);
+    mBoneMap[8] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_forearmright);
+    mBoneMap[9] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_thighright);
+    mBoneMap[10] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_shinright);
+    mBoneMap[11] = cAnimModel_getBoneSkelIndex(mpAnimModel, 0, str_footright);
+    mBoneMap[12] = cAnimModel_getBoneSkelIndex(mpAnimModel, 1, str_board_rootg);
+    mBoneMap[13] = cAnimModel_getBoneSkelIndex(mpAnimModel, 1, str_board_childg);
 }
 #endif
 
@@ -100,24 +100,24 @@ static inline tBEProfileBolt* getItemK19E7F0(cBECharProfileDB* list, int i)
  * (func_0014B988) and, when there is one, queues it in the front end's file manager (func_0019DA10 at RealFE + 0x1A70,
  * kind 11) and records the file slot (func_0019CD38).
  */
-extern "C" void cFERider_queueLoadExtraTextures(cFERider* self)
+void cFERider::queueLoadExtraTextures()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
-    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, self->mCharID);
-    int n = func_0014D988(db, self->mCharID);
-    self->mDoneLoadingTextures = 0;
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, mProfileIndex, mCharID);
+    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, mCharID);
+    int n = func_0014D988(db, mCharID);
+    mDoneLoadingTextures = 0;
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         if (partEntry->type == 6) {
             tBEProfileBolt* it = getItemK19E7F0(list, list->mpBoltsMap[partEntry->slot]);
-            if (func_0019CCE8(D_004A1968, self->mProfileIndex, it->id) < 0) {
+            if (func_0019CCE8(D_004A1968, mProfileIndex, it->id) < 0) {
                 char buf[0x100];
-                if (func_0014B988(iface, self->mProfileIndex, self->mCharID, partEntry, buf)) {
-                    int fileSlot = func_0019DA10(mgr, self->mCharID, buf, 11, 1, 1);
-                    func_0019CD38(D_004A1968, self->mProfileIndex, it->id, fileSlot);
+                if (func_0014B988(iface, mProfileIndex, mCharID, partEntry, buf)) {
+                    int fileSlot = func_0019DA10(mgr, mCharID, buf, 11, 1, 1);
+                    func_0019CD38(D_004A1968, mProfileIndex, it->id, fileSlot);
                 }
             }
         }
@@ -171,7 +171,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
         return 1;
     }
     if (self[0] >= 0) {
-        cFERider_purge((cFERider*)self);
+        ((cFERider*)self)->purge();
     }
     int dirty = (self[3268 / 4] != 0) | (self[3272 / 4] != 0);
     self[4] = slot;
@@ -194,7 +194,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     void* list = func_0014AD28(iface, profile, character);
     cFERider_loadModels_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
-        cFERider_queueLoadExtraTextures((cFERider*)self);
+        ((cFERider*)self)->queueLoadExtraTextures();
     }
     cFERider_loadTextures_E980(self, list, 0, 1);
     cFERider_update_E980(self);
@@ -230,37 +230,37 @@ extern "C" void cFERider_cancelAllFiles(cFERider* self);
  * flags 3), clears those pointers, cancels the rider's files (cFERider_cancelAllFiles), sets mCharID, mProfileIndex and
  * mSafeRenderCount to -1 and zeroes mVisible and mBoltPoints.
  */
-extern "C" void cFERider_purge(cFERider* self)
+void cFERider::purge()
 {
-    void* animModel = self->mpAnimModel;
+    void* animModel = mpAnimModel;
     if (animModel != 0) {
         cAnimModel__cAnimModel(animModel, 3);
     }
-    cRiderAnim* riderAnim = self->mpRiderAnim;
+    cRiderAnim* riderAnim = mpRiderAnim;
     if (riderAnim != 0) {
         tDtorSlot* vt = (tDtorSlot*)riderAnim->mVtbl;
         vt[1].fn(vthis(riderAnim, vt[1]), 3);
     }
-    cBoltOnFXInterface* boltOnFX = (cBoltOnFXInterface*)self->mpBoltOnFX;
+    cBoltOnFXInterface* boltOnFX = (cBoltOnFXInterface*)mpBoltOnFX;
     if (boltOnFX != 0) {
         tDtorSlot* vt = (tDtorSlot*)boltOnFX->mVtbl;
         vt[1].fn(vthis(boltOnFX, vt[1]), 3);
     }
-    cAttachedEmitterFX* emitterFX = (cAttachedEmitterFX*)self->mpAttachedEmitterFX;
+    cAttachedEmitterFX* emitterFX = (cAttachedEmitterFX*)mpAttachedEmitterFX;
     if (emitterFX != 0) {
         tDtorSlot* vt = (tDtorSlot*)emitterFX->mVtbl;
         vt[1].fn(vthis(emitterFX, vt[1]), 3);
     }
-    self->mpAnimModel = 0;
-    self->mpRiderAnim = 0;
-    self->mpAttachedEmitterFX = 0;
-    self->mpBoltOnFX = 0;
-    cFERider_cancelAllFiles(self);
-    self->mCharID = -1;
-    self->mProfileIndex = -1;
-    self->mVisible = 0;
-    self->mBoltPoints = 0;
-    self->mSafeRenderCount = -1;
+    mpAnimModel = 0;
+    mpRiderAnim = 0;
+    mpAttachedEmitterFX = 0;
+    mpBoltOnFX = 0;
+    cancelAllFiles();
+    mCharID = -1;
+    mProfileIndex = -1;
+    mVisible = 0;
+    mBoltPoints = 0;
+    mSafeRenderCount = -1;
 }
 #endif
 
@@ -286,11 +286,10 @@ extern void* D_004A1968;
  * queued texture file (func_0019CCE8 / func_0019DC20, slot reset with func_0019CD38) and a queued model-part file
  * (func_0019CBE0 / func_0019DC20, reset with func_0019CC30).
  *
- * @param rider  the front-end rider
  */
-extern "C" void cFERider_cancelAllFiles(cFERider* rider)
+void cFERider::cancelAllFiles()
 {
-    int* self = (int*)rider;
+    int* self = (int*)this;
     if (self[1] < 0)
         return;
     if (self[0] < 0)
@@ -354,26 +353,26 @@ extern "C" void cAnimModel_transform(void* model, void* pose);
  * to the rider (cRiderAnim_linkToFERider), plays animation 434, applies the identity pose (cAnimModel_transform with
  * tPose_Identity) and builds the bone map (cFERider_initBoneMap).
  */
-extern "C" void cFERider_compileModel(cFERider* self)
+void cFERider::compileModel()
 {
-    self->mCompiledModel = 1;
+    mCompiledModel = 1;
     cGraphicsMan_InitTextureFiles(GrMan, 0, 0);
-    cGraphicsMan_SetTextureRefs(GrMan, self->mNumTextureRefs, ((char*)&self->mTextureRefs[0]));
-    cAnimModel_compile(self->mpAnimModel, 1);
+    cGraphicsMan_SetTextureRefs(GrMan, mNumTextureRefs, ((char*)&mTextureRefs[0]));
+    cAnimModel_compile(mpAnimModel, 1);
     cRiderAnim* anim = new (str_RiderAnim, 0, 0) cRiderAnim;
     cRiderAnimBase_cRiderAnimBase(anim);
     anim->mVtbl = cRiderAnim_vtbl;
     anim->Rider = 0;
-    self->mpRiderAnim = anim;
+    mpRiderAnim = anim;
     anim->FERider = 0;
-    cRiderAnim_linkToFERider(anim, (self));
-    cRiderAnimBase_play(self->mpRiderAnim, 434, 0, -1.0f);
-    cRiderAnimBase_setupAnimation(self->mpRiderAnim, 0);
+    cRiderAnim_linkToFERider(anim, (this));
+    cRiderAnimBase_play(mpRiderAnim, 434, 0, -1.0f);
+    cRiderAnimBase_setupAnimation(mpRiderAnim, 0);
     tPoseCtor identityPose[2];
     identityPose[1] = tPose_Identity;
     identityPose[0] = tPose_Identity;
-    cAnimModel_transform(self->mpAnimModel, identityPose);
-    cFERider_initBoneMap(self);
+    cAnimModel_transform(mpAnimModel, identityPose);
+    initBoneMap();
 }
 #endif
 
@@ -428,11 +427,10 @@ struct sVE_EE88 {
  * not negative while the model (cAnimModel_render) and the attached-emitter FX (func_002F2088) render, then are put
  * back.
  *
- * @param selfp  the front-end rider
  */
-extern "C" void cFERider_render(cFERider* selfp)
+void cFERider::render()
 {
-    cFERider* self = selfp;
+    cFERider* self = this;
     sMtx_EE88 worldMatrix;
     t4Vector pos;
     if (self->mSafeRenderCount >= 0)
@@ -536,11 +534,10 @@ extern "C" void func_002ECF78(void* p);
  * +0xCC0) and folds the pending show request (+0xCC4) into the shown flag (+0xCC8). While shown, advances the animation
  * (cRiderAnimBase_updateAnimation, expireAnimation), rebuilds the pose (cFERider_updateModelPose) and updates both FX objects.
  *
- * @param selfp  the front-end rider
  */
-extern "C" void cFERider_update(cFERider* selfp)
+void cFERider::update()
 {
-    cFERider* self = selfp;
+    cFERider* self = this;
     if (self->mSafeRenderCount >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         if (self->mSafeRenderCount < ps2GraphicsMan->getCurrentFrameCount()) {
@@ -554,10 +551,10 @@ extern "C" void cFERider_update(cFERider* selfp)
         if (self->mDoneLoadingModels == 0 && cFERider_isDoneLoadingModels((int*)self)) {
             self->mDoneLoadingModels = 1;
         } else if (self->mDoneLoadingModels != 0) {
-            if (self->mDoneLoadingTextures == 0 && cFERider_isDoneLoadingTextures((cFERider*)((int*)self))) {
+            if (self->mDoneLoadingTextures == 0 && self->isDoneLoadingTextures()) {
                 self->mDoneLoadingTextures = 1;
                 if (self->mCompiledModel == 0) {
-                    cFERider_compileModel((cFERider*)(self));
+                    self->compileModel();
                 }
             } else if (self->mDoneLoadingModels != 0 && self->mDoneLoadingTextures != 0 && self->mCompiledModel != 0 && self->mDoneUpdatingModelParts == 0) {
                 cFERider_updateAnimModelParts((int*)self);
@@ -573,7 +570,7 @@ extern "C" void cFERider_update(cFERider* selfp)
             cRiderAnimBase_updateAnimation(((void*)self->mpRiderAnim), 0, 1.0f);
             cRiderAnimBase_expireAnimation(((void*)self->mpRiderAnim));
         }
-        cFERider_updateModelPose((cFERider*)self);
+        self->updateModelPose();
         func_002F1A08(self->mpAttachedEmitterFX);
         func_002ECF78(self->mpBoltOnFX);
     }
@@ -596,25 +593,25 @@ extern "C" void cAnimModel_buildSkelMatrices(void* model);
  * two board bones (mBoneMap[12], mBoneMap[13]) to the origin and tquat_Identity. Then cAnimModel_transform and
  * cAnimModel_buildSkelMatrices.
  */
-extern "C" void cFERider_updateModelPose(cFERider* self)
+void cFERider::updateModelPose()
 {
     tPose poses[2];
-    if (self->mAnimateBoard != 0) {
-        poses[0] = self->mPose;
-        poses[1] = self->mPose;
-        cAnimModel_transform(self->mpAnimModel, poses);
-        cAnimModel_buildSkelMatrices(self->mpAnimModel);
+    if (mAnimateBoard != 0) {
+        poses[0] = mPose;
+        poses[1] = mPose;
+        cAnimModel_transform(mpAnimModel, poses);
+        cAnimModel_buildSkelMatrices(mpAnimModel);
     } else {
-        poses[0] = self->mPose;
-        poses[1] = self->mBoardPose;
-        self->mpAnimModel->localPos[self->mBoneMap[12]] = t4vect_Origin;
-        self->mpAnimModel->localRot[self->mBoneMap[12]] = tquat_Identity;
-        self->mpAnimModel->localPos[self->mBoneMap[13]] = t4vect_Origin;
-        self->mpAnimModel->localRot[self->mBoneMap[13]] = tquat_Identity;
-        cAnimModel_transform(self->mpAnimModel, poses);
-        cAnimModel_buildSkelMatrices(self->mpAnimModel);
+        poses[0] = mPose;
+        poses[1] = mBoardPose;
+        mpAnimModel->localPos[mBoneMap[12]] = t4vect_Origin;
+        mpAnimModel->localRot[mBoneMap[12]] = tquat_Identity;
+        mpAnimModel->localPos[mBoneMap[13]] = t4vect_Origin;
+        mpAnimModel->localRot[mBoneMap[13]] = tquat_Identity;
+        cAnimModel_transform(mpAnimModel, poses);
+        cAnimModel_buildSkelMatrices(mpAnimModel);
     }
-    self->mRiderIsPosed = 1;
+    mRiderIsPosed = 1;
 }
 #endif
 
@@ -633,7 +630,7 @@ extern "C" void cFERider_setPose(cFERider* self, sQuadRM* src)
 {
     *(sQuadRM*)&self->mPose = src[0];
     *(sQuadRM*)&self->mPose.Q = src[1];
-    cFERider_updateModelPose(self);
+    self->updateModelPose();
 }
 #endif
 
@@ -688,12 +685,12 @@ static inline void AddTo_F418(t4Vector& dst, const t4Vector& b)
  *
  * @param delta  the move, in the rider's frame
  */
-extern "C" void cFERider_translate(cFERider* self, t4Vector* delta)
+void cFERider::translate(t4Vector* delta)
 {
-    t4Vector* pos = (t4Vector*)&self->mPose;
-    t4Vector* rot = ((&self->mPose.Q));
+    t4Vector* pos = (t4Vector*)&mPose;
+    t4Vector* rot = ((&mPose.Q));
     AddTo_F418(*pos, Rot_F418(*rot, *delta));
-    cFERider_updateModelPose(self);
+    updateModelPose();
 }
 #endif
 //100%
@@ -733,9 +730,9 @@ static inline t4Vector QuatMul_F488(const t4Vector& a, const t4Vector& b)
  * @param axis   the axis (x, y, z used)
  * @param angle  the angle in radians
  */
-extern "C" void cFERider_rotate(cFERider* self, t4Vector* axis, float angle)
+void cFERider::rotate(t4Vector* axis, float angle)
 {
-    t4Vector* rot = ((&self->mPose.Q));
+    t4Vector* rot = ((&mPose.Q));
     t4Vector turn;
     float sinHalf, cosHalf;
     fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
@@ -746,7 +743,7 @@ extern "C" void cFERider_rotate(cFERider* self, t4Vector* axis, float angle)
     rotQuat.z = sinHalf * axis->z;
     turn = rotQuat;
     *rot = QuatMul_F488(*rot, turn);
-    cFERider_updateModelPose(self);
+    updateModelPose();
 }
 #endif
 
@@ -764,7 +761,7 @@ extern "C" void cFERider_setBoardPose(cFERider* self, sQuadRM* src)
 {
     *(sQuadRM*)&self->mBoardPose = src[0];
     *(sQuadRM*)&self->mBoardPose.Q = src[1];
-    cFERider_updateModelPose(self);
+    self->updateModelPose();
 }
 #endif
 
@@ -819,12 +816,12 @@ static inline void AddTo_F578(t4Vector& dst, const t4Vector& b)
  *
  * @param delta  the move, in the board's frame
  */
-extern "C" void cFERider_translateBoard(cFERider* self, t4Vector* delta)
+void cFERider::translateBoard(t4Vector* delta)
 {
-    t4Vector* pos = (t4Vector*)&self->mBoardPose;
-    t4Vector* rot = ((&self->mBoardPose.Q));
+    t4Vector* pos = (t4Vector*)&mBoardPose;
+    t4Vector* rot = ((&mBoardPose.Q));
     AddTo_F578(*pos, Rot_F578(*rot, *delta));
-    cFERider_updateModelPose(self);
+    updateModelPose();
 }
 #endif
 //100%
@@ -863,9 +860,9 @@ static inline t4Vector QuatMul_F5E8(const t4Vector& a, const t4Vector& b)
  * @param axis   the axis (x, y, z used)
  * @param angle  the angle in radians
  */
-extern "C" void cFERider_rotateBoard(cFERider* self, t4Vector* axis, float angle)
+void cFERider::rotateBoard(t4Vector* axis, float angle)
 {
-    t4Vector* rot = ((&self->mBoardPose.Q));
+    t4Vector* rot = ((&mBoardPose.Q));
     t4Vector turn;
     float sinHalf, cosHalf;
     fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
@@ -876,7 +873,7 @@ extern "C" void cFERider_rotateBoard(cFERider* self, t4Vector* axis, float angle
     rotQuat.z = sinHalf * axis->z;
     turn = rotQuat;
     *rot = QuatMul_F5E8(*rot, turn);
-    cFERider_updateModelPose(self);
+    updateModelPose();
 }
 #endif
 //100%
@@ -887,12 +884,12 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBonePosition);
  *
  * The bone comes from the rider's bone map (+0xC7C + 4 x index) and indexes the model's 0x20-byte bone records (+0x2C).
  *
- * @param riderSlot  the front-end rider
  * @param index      the bone id
  * @return the address of the bone's position (first quadword)
  */
-extern "C" int cFERider_getBonePosition(cFERider* riderSlot, int index) {
-    return ((int)riderSlot->mpAnimModel->bones) + (riderSlot->mBoneMap[index] << 5);
+int cFERider::getBonePosition(int index)
+{
+    return ((int)mpAnimModel->bones) + (mBoneMap[index] << 5);
 }
 #endif
 //100%
@@ -1055,12 +1052,12 @@ extern "C" int strcmp(const void* a, const void* b);
  * @param name  the texture name
  * @return its texture id, or -1 when the table has no such name
  */
-extern "C" int cFERider_getTextureID(cFERider* self, const char* name)
+int cFERider::getTextureID(const char* name)
 {
     int i;
-    for (i = 0; i < self->mNumTextureRefs; i++) {
-        if (strcmp(name, ((&self->mTextureRefs[0]))[i].Name) == 0) {
-            return ((&self->mTextureRefs[0]))[i].TextureID;
+    for (i = 0; i < mNumTextureRefs; i++) {
+        if (strcmp(name, ((&mTextureRefs[0]))[i].Name) == 0) {
+            return ((&mTextureRefs[0]))[i].TextureID;
         }
     }
     return -1;
@@ -1091,7 +1088,7 @@ struct sName2_F908 { char c[2]; };
  * @param pkg      the loaded shape package
  * @param replace  nonzero to refresh textures already in the table
  */
-extern "C" void cFERider_addTextureFile(cFERider* self, SHAPEFILE* pkg, int replace)
+void cFERider::addTextureFile(SHAPEFILE* pkg, int replace)
 {
     int n = pkg->num;
     int i;
@@ -1102,17 +1099,18 @@ extern "C" void cFERider_addTextureFile(cFERider* self, SHAPEFILE* pkg, int repl
         *(sName2_F908*)name = *(sName2_F908*)D_004A19A8;
         memset(name + 2, 0, 6);
         SHAPE_name(pkg, i, name);
-        int id = cFERider_getTextureID(self, name);
+        int id = getTextureID(name);
         if (id >= 0) {
             if (replace) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 ps2GraphicsMan->SetNewTextureData(id, (const SHAPE*)data, 1);
             }
         } else {
-            strcpy(((&self->mTextureRefs[0]))[self->mNumTextureRefs].Name, name);
+            strcpy(((&mTextureRefs[0]))[mNumTextureRefs].Name, name);
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = ps2GraphicsMan->AddTexture((const SHAPE*)data, str_charshp, 0, 1, -1);
-            self->mNumTextureRefs++;
+            ((&mTextureRefs[0]))[mNumTextureRefs].TextureID = ps2GraphicsMan->AddTexture((const SHAPE*)data,
+                    str_charshp, 0, 1, -1);
+            mNumTextureRefs++;
         }
     }
 }
@@ -1235,30 +1233,30 @@ static inline tBEProfileBolt* getItemK19FBE0(cBECharProfileDB* list, int i)
  * @param ignored    not used
  * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
-extern "C" void cFERider_loadTextures(cFERider* self, cBECharProfileDB* list, int ignored, int keepLoaded)
+void cFERider::loadTextures(cBECharProfileDB* list, int ignored, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    func_0019FA78(self, (cBECharProfileDB*)list);
-    self->mDoneLoadingTextures = 0;
-    self->mDoneUpdatingModelParts = 0;
-    int n = func_0014D988(db, self->mCharID);
-    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, self->mCharID);
+    func_0019FA78(this, (cBECharProfileDB*)list);
+    mDoneLoadingTextures = 0;
+    mDoneUpdatingModelParts = 0;
+    int n = func_0014D988(db, mCharID);
+    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         tBEProfileBolt* it = getItemK19FBE0(list, list->mpBoltsMap[partEntry->slot]);
-        if (func_0019CCE8(D_004A1968, self->mProfileIndex, it->id) < 0) {
+        if (func_0019CCE8(D_004A1968, mProfileIndex, it->id) < 0) {
             if (it->flags & 0x10) {
                 char buf[0x100];
-                if (func_0014B988(iface, self->mProfileIndex, self->mCharID, partEntry, buf)) {
-                    int fileSlot = func_0019DA10(mgr, self->mCharID, buf, 11, keepLoaded, 1);
-                    func_0019CD38(D_004A1968, self->mProfileIndex, it->id, fileSlot);
+                if (func_0014B988(iface, mProfileIndex, mCharID, partEntry, buf)) {
+                    int fileSlot = func_0019DA10(mgr, mCharID, buf, 11, keepLoaded, 1);
+                    func_0019CD38(D_004A1968, mProfileIndex, it->id, fileSlot);
                 }
             }
         }
     }
-    func_0019E070(mgr, self->mCharID);
+    func_0019E070(mgr, mCharID);
 }
 #endif
 
@@ -1286,21 +1284,21 @@ extern void* D_004A1968;
  *
  * @return 1 when every texture is loaded, else 0
  */
-extern "C" int cFERider_isDoneLoadingTextures(cFERider* self)
+int cFERider::isDoneLoadingTextures()
 {
-    if (self->mDoneLoadingTextures != 0) {
+    if (mDoneLoadingTextures != 0) {
         return 1;
     }
     int ok = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, mProfileIndex, mCharID);
     int n = list->mNumBolts;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
-        int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
+        int fileSlot = func_0019CCE8(D_004A1968, mProfileIndex, it->id);
         if (fileSlot >= 0) {
-            if (func_0019E238(mgr, self->mCharID, fileSlot) == 0) {
+            if (func_0019E238(mgr, mCharID, fileSlot) == 0) {
                 ok = 0;
             }
         }
@@ -1310,16 +1308,16 @@ extern "C" int cFERider_isDoneLoadingTextures(cFERider* self)
         MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
             tBEProfileBolt* it = &list->mBolts[i];
-            int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
+            int fileSlot = func_0019CCE8(D_004A1968, mProfileIndex, it->id);
             if (fileSlot >= 0) {
-                if (func_0019E2B0(mgr, self->mCharID, fileSlot) && used[fileSlot] == 0) {
-                    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0(mgr, self->mCharID, fileSlot);
+                if (func_0019E2B0(mgr, mCharID, fileSlot) && used[fileSlot] == 0) {
+                    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0(mgr, mCharID, fileSlot);
                     int fl = it->flags & 0x10;
-                    cFERider_addTextureFile((cFERider*)((cFERider*)self), pkg, fl != 0);
+                    addTextureFile(pkg, fl != 0);
                 }
                 used[fileSlot] = 1;
-                func_0019DC20(mgr, self->mCharID, fileSlot);
-                func_0019CD38(D_004A1968, self->mProfileIndex, it->id, -1);
+                func_0019DC20(mgr, mCharID, fileSlot);
+                func_0019CD38(D_004A1968, mProfileIndex, it->id, -1);
             }
         }
     }
@@ -1370,7 +1368,7 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
  * @param force  nonzero to queue every item's part
  * @param keepLoaded     passed to func_0019DA10 as its keep-existing argument
  */
-extern "C" void cFERider_loadModels(cFERider* self, cBECharProfileDB* list, tBEProfileBolt* prev, int force, int keepLoaded)
+void cFERider::loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int force, int keepLoaded)
 {
     int n = list->mNumBolts;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
@@ -1378,24 +1376,24 @@ extern "C" void cFERider_loadModels(cFERider* self, cBECharProfileDB* list, tBEP
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
-            if (func_0019CBE0(D_004A1968, self->mProfileIndex, it->id) >= 0) {
-                func_0019DC20(mgr, self->mCharID, func_0019CBE0(D_004A1968, self->mProfileIndex, it->id));
-                func_0019CC30(D_004A1968, self->mProfileIndex, it->id, -1);
+            if (func_0019CBE0(D_004A1968, mProfileIndex, it->id) >= 0) {
+                func_0019DC20(mgr, mCharID, func_0019CBE0(D_004A1968, mProfileIndex, it->id));
+                func_0019CC30(D_004A1968, mProfileIndex, it->id, -1);
             }
         }
     }
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
-        if (func_0019CBE0(D_004A1968, self->mProfileIndex, it->id) < 0) {
+        if (func_0019CBE0(D_004A1968, mProfileIndex, it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
-                sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, self->mCharID, it->id));
+                sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, mCharID, it->id));
                 if (partEntry->file) {
-                    int fileSlot = func_0019DA10(mgr, self->mCharID, partEntry->file, 8, keepLoaded, 1);
-                    func_0019CC30(D_004A1968, self->mProfileIndex, it->id, fileSlot);
-                    self->mDoneLoadingModels = 0;
-                    self->mCompiledModel = 0;
+                    int fileSlot = func_0019DA10(mgr, mCharID, partEntry->file, 8, keepLoaded, 1);
+                    func_0019CC30(D_004A1968, mProfileIndex, it->id, fileSlot);
+                    mDoneLoadingModels = 0;
+                    mCompiledModel = 0;
                 } else {
-                    func_0019CC30(D_004A1968, self->mProfileIndex, it->id, -1);
+                    func_0019CC30(D_004A1968, mProfileIndex, it->id, -1);
                 }
             }
             if (prev) {
@@ -1403,7 +1401,7 @@ extern "C" void cFERider_loadModels(cFERider* self, cBECharProfileDB* list, tBEP
             }
         }
     }
-    func_0019DF20(mgr, self->mCharID);
+    func_0019DF20(mgr, mCharID);
 }
 #endif
 
@@ -1543,14 +1541,14 @@ extern "C" void func_002A1778(void* mgr, int id);
  * The customize request (+0xC1C, set by the equip screen) plays through func_002A1778 (sound 8381); otherwise the
  * character-select request (+0xC20) through func_002A16B0 (sound 8380); both on cAudioInterface_bxAudio() with the character id.
  */
-extern "C" void cFERider_speak(cFERider* self)
+void cFERider::speak()
 {
-    if (self->mCustomized != 0) {
-        func_002A1778(cAudioInterface_bxAudio(), *(int*)self);
-        self->mCustomized = 0;
-    } else if (self->mSelected != 0) {
-        func_002A16B0(cAudioInterface_bxAudio(), *(int*)self);
-        self->mSelected = 0;
+    if (mCustomized != 0) {
+        func_002A1778(cAudioInterface_bxAudio(), *(int*)this);
+        mCustomized = 0;
+    } else if (mSelected != 0) {
+        func_002A16B0(cAudioInterface_bxAudio(), *(int*)this);
+        mSelected = 0;
     }
 }
 #endif
@@ -1593,7 +1591,7 @@ void operator_delete(int* p);
  */
 extern "C" void cFERiderManager__cFERiderManager(cFERiderManager* self, int flags)
 {
-    cFERiderManager_purge(self);
+    self->purge();
     if (self != 0) {
         cFERider* slot = self->mHumans + 2;
         while (self->mHumans != slot) {
@@ -1616,10 +1614,10 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_init);
  *
  * cRealFE_load calls it on the rider manager.
  */
-extern "C" void cFERiderManager_init(cFERiderManager* self)
+void cFERiderManager::init()
 {
     int i;
-    cFERider* slot = ((cFERider*)self);
+    cFERider* slot = ((cFERider*)this);
     for (i = 0; i < 2; i++) {
         slot->mProfileIndex = i;
         slot++;
@@ -1637,11 +1635,11 @@ extern "C" void cFERider_purge(cFERider* slot);
  *
  * cRealFE_purge calls it on the rider manager.
  */
-extern "C" void cFERiderManager_purge(cFERiderManager* self)
+void cFERiderManager::purge()
 {
     int i;
     for (i = 0; i < 2; i++) {
-        cFERider_purge(&self->mHumans[i]);
+        mHumans[i].purge();
     }
 }
 #endif
@@ -1658,9 +1656,9 @@ extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
  * @param charId   the character id
  * @param loadAll   nonzero to load everything
  */
-extern "C" void cFERiderManager_setHumanCharacter(cFERiderManager* self, int idx, int charId, int loadAll)
+void cFERiderManager::setHumanCharacter(int idx, int charId, int loadAll)
 {
-    cFERider_setCharID(&self->mHumans[idx], charId, loadAll);
+    cFERider_setCharID(&mHumans[idx], charId, loadAll);
 }
 #endif
 
@@ -1673,9 +1671,9 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman);
  * @param index  the rider
  * @return the rider
  */
-extern "C" void* cFERiderManager_getHuman(cFERiderManager* self, int index)
+void* cFERiderManager::getHuman(int index)
 {
-    return (char*)&self->mHumans[index];
+    return (char*)&mHumans[index];
 }
 #endif
 
@@ -1688,9 +1686,9 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman1);
  * @param index  the rider
  * @return the rider
  */
-extern "C" cFERider* cFERiderManager_getHuman1(cFERiderManager* self, int index)
+cFERider* cFERiderManager::getHuman1(int index)
 {
-    return (cFERider*)(char*)&self->mHumans[index];
+    return (cFERider*)(char*)&mHumans[index];
 }
 #endif
 
@@ -1700,12 +1698,12 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_isHumanVisible);
 /**
  * Reports whether front-end rider @p index is shown (its +0xCC8).
  *
- * @param slots  the rider manager
  * @param index  the rider
  * @return the shown flag
  */
-extern "C" int cFERiderManager_isHumanVisible(cFERiderManager* slots, int index) {
-    return slots->mHumans[index].mVisible;
+int cFERiderManager::isHumanVisible(int index)
+{
+    return mHumans[index].mVisible;
 }
 #endif
 
@@ -1720,9 +1718,9 @@ extern "C" void cFERider_setVisible(void* slot, int v);
  * @param i  the rider
  * @param visible  nonzero to show it
  */
-extern "C" void cFERiderManager_setHumanVisible(cFERiderManager* self, int i, int visible)
+void cFERiderManager::setHumanVisible(int i, int visible)
 {
-    cFERider_setVisible(&self->mHumans[i], visible);
+    cFERider_setVisible(&mHumans[i], visible);
 }
 #endif
 
@@ -1737,16 +1735,16 @@ extern "C" void cFERider_render(cFERider* rider);
  * Sets the graphics manager's words +0x24 to 46, +0x84 to 47 and +0x10A8 to its +0x1008, then renders each rider whose
  * shown flag (+0xCC8) is set (cFERider_render).
  */
-extern "C" void cFERiderManager_render(cFERiderManager* self)
+void cFERiderManager::render()
 {
     char* riderBase = (char*)GrMan;
     *(int*)(riderBase + 0x24) = 46;
     *(int*)(riderBase + 0x84) = 47;
     *(int*)(riderBase + 0x10A8) = *(int*)(riderBase + 0x1008);
     for (int i = 0; i < 2; i++) {
-        riderBase = (char*)&self->mHumans[i];
+        riderBase = (char*)&mHumans[i];
         if (*(int*)(riderBase + 0xCC8) != 0)
-            cFERider_render((cFERider*)riderBase);
+            ((cFERider*)riderBase)->render();
     }
 }
 #endif
@@ -1759,11 +1757,11 @@ extern "C" void cFERider_update(cFERider* slot);
 /**
  * Updates both front-end riders (cFERider_update).
  */
-extern "C" void cFERiderManager_update(cFERiderManager* self)
+void cFERiderManager::update()
 {
     int i;
     for (i = 0; i < 2; i++) {
-        cFERider_update(&self->mHumans[i]);
+        mHumans[i].update();
     }
 }
 #endif

@@ -42,6 +42,9 @@ CHECK_SIZE(cCameraAlgoListNode, 0x1C);
 struct cCameraAlgoList {
     cCameraAlgoListNode* Head;      // 0x000 [O]
     int Length;                     // 0x004 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void removeAll() __asm__("cCameraAlgoList_removeAll");
 };
 
 CHECK_OFFSET(cCameraAlgoList, Head, 0x000);

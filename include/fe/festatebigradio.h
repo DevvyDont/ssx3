@@ -91,6 +91,36 @@ struct cFEStateRequestLine : public cFEState {
     cTextureElement* mpCheckBox;    // 0x204 [O]; [R] the texture bank's "checkbox" element
     cTextureElement* mpEmptyBox;    // 0x208 [O]; [R] "empty_box"
     cTextureElement* mpDollarSign;  // 0x20C [O]; [R] "yell_dollar_sign"
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRequestLine1() __asm__("cFEStateRequestLine_cFEStateRequestLine1");
+    int isInStore() __asm__("cFEStateRequestLine_isInStore");
+    int countBits(unsigned long bits) __asm__("cFEStateRequestLine_countBits");
+    void selectSong(int bit) __asm__("cFEStateRequestLine_selectSong");
+    void unselectSong(int bit) __asm__("cFEStateRequestLine_unselectSong");
+    int isEmptyPlaylist() __asm__("cFEStateRequestLine_isEmptyPlaylist");
+    int isOnlySongInPlaylist(int bit) __asm__("cFEStateRequestLine_isOnlySongInPlaylist");
+    int isSongSelected(int bit) __asm__("cFEStateRequestLine_isSongSelected");
+    int getNumSongsInPlaylist() __asm__("cFEStateRequestLine_getNumSongsInPlaylist");
+    int isSongOwned(int bit) __asm__("cFEStateRequestLine_isSongOwned");
+    void ownSong(int bit) __asm__("cFEStateRequestLine_ownSong");
+    int getNumOwnedSongs() __asm__("cFEStateRequestLine_getNumOwnedSongs");
+    void generatePlayList() __asm__("cFEStateRequestLine_generatePlayList");
+    void updatePlayList() __asm__("cFEStateRequestLine_updatePlayList");
+    void updatePlayListSongTitles() __asm__("cFEStateRequestLine_updatePlayListSongTitles");
+    void updatePlayListCheckMarks() __asm__("cFEStateRequestLine_updatePlayListCheckMarks");
+    void updatePlayListArrows() __asm__("cFEStateRequestLine_updatePlayListArrows");
+    void updateCurrentlyPlaying() __asm__("cFEStateRequestLine_updateCurrentlyPlaying");
+    void updatePlayListCounter() __asm__("cFEStateRequestLine_updatePlayListCounter");
+    void updateHelpText(int idx) __asm__("cFEStateRequestLine_updateHelpText");
+    void updateButtonsText(int idx) __asm__("cFEStateRequestLine_updateButtonsText");
+    void updateCash() __asm__("cFEStateRequestLine_updateCash");
+    void updateFreeSongMarkers() __asm__("cFEStateRequestLine_updateFreeSongMarkers");
+    void updateHilightedSongInfo(int idx) __asm__("cFEStateRequestLine_updateHilightedSongInfo");
+    void buySong(int idx) __asm__("cFEStateRequestLine_buySong");
+    void showBuyPopup(int idx) __asm__("cFEStateRequestLine_showBuyPopup");
+    void* getSongTitle(int i) __asm__("cFEStateRequestLine_getSongTitle");
+    void* getSongArtist(int i) __asm__("cFEStateRequestLine_getSongArtist");
 };
 
 CHECK_OFFSET(cFEStateRequestLine, mCharID, 0x048);

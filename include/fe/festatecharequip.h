@@ -128,6 +128,27 @@ struct cFEStateCharEquip : public cFEState {
                                     //       setCanSwitchEquipMode cFEStateCharEquip_setCanSwitchEquipMode (sw); onWidgetCreate hides the button
                                     //       when 0
     char unk_AE8[0x8];              // 0xAE8 tail padding (16-byte class alignment)
+
+    // Methods bound to their retail symbols by asm labels.
+    int isInStore() __asm__("cFEStateCharEquip_isInStore");
+    int isIconsLoaded() __asm__("cFEStateCharEquip_isIconsLoaded");
+    void setCanSwitchEquipMode(int value) __asm__("cFEStateCharEquip_setCanSwitchEquipMode");
+    int canSwitchEquipMode() __asm__("cFEStateCharEquip_canSwitchEquipMode");
+    int getIconID(const char* name) __asm__("cFEStateCharEquip_getIconID");
+    void updateIconTexturesLoad() __asm__("cFEStateCharEquip_updateIconTexturesLoad");
+    void initInventoryPreview() __asm__("cFEStateCharEquip_initInventoryPreview");
+    void initStorePreview() __asm__("cFEStateCharEquip_initStorePreview");
+    void switchEquipMode() __asm__("cFEStateCharEquip_switchEquipMode");
+    void cancelLargePreviewLoad() __asm__("cFEStateCharEquip_cancelLargePreviewLoad");
+    void startLargePreviewLoad(int flag) __asm__("cFEStateCharEquip_startLargePreviewLoad");
+    void cancelPreviewLoad() __asm__("cFEStateCharEquip_cancelPreviewLoad");
+    void updateHelpText() __asm__("cFEStateCharEquip_updateHelpText");
+    void updateCharacterModel() __asm__("cFEStateCharEquip_updateCharacterModel");
+    void updateBankWidget() __asm__("cFEStateCharEquip_updateBankWidget");
+    void updateHeading(int id) __asm__("cFEStateCharEquip_updateHeading");
+    void updatePolyBar() __asm__("cFEStateCharEquip_updatePolyBar");
+    void updatePolyEquipPreviewBar(int delta) __asm__("cFEStateCharEquip_updatePolyEquipPreviewBar");
+    void update3DPositions() __asm__("cFEStateCharEquip_update3DPositions");
 };
 
 CHECK_OFFSET(cFEStateCharEquip, mpTitleText, 0x048);

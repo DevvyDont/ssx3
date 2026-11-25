@@ -49,6 +49,9 @@ struct cFEStateEventSelect : public cFEState {
     // --- cFEStateEventSelect
     cUITemplate_MAP mMap;           // 0x048 [O]; [R] the ctors run cUITemplate_MAP_init on it; [U] every method passes
                                     //       &mMap (addiu 0x48) to the same-named cUITemplate_MAP_* method
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateEventSelect1() __asm__("cFEStateEventSelect_cFEStateEventSelect1");
 };
 
 CHECK_OFFSET(cFEStateEventSelect, mMap, 0x048);

@@ -231,7 +231,7 @@ extern "C" void cFELoadState_onWidgetCreate(cFELoadState* self, cUIThing* widget
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath != 2) {
-        cFELoadState_widgetCreateQP(self, widget);
+        self->widgetCreateQP(widget);
     }
 }
 #endif
@@ -675,7 +675,7 @@ static inline bool IsId_246278(char* obj, char* key)
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
-extern "C" void cGameLoadState_widgetCreateMultiP(cGameLoadState* self, char* obj)
+void cGameLoadState::widgetCreateMultiP(char* obj)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (IsId_246278(obj, str_Location_Text)) {
@@ -824,7 +824,7 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
-extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, char* obj)
+void cGameLoadState::widgetCreateQP(char* obj)
 {
     sTable17_2464E8 tA = D_0047BAE0;
     sTable17_2464E8 tB = D_0047BB28;
@@ -926,7 +926,7 @@ extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, char* obj)
         sprintf1((unsigned short*)buf, fmtA, cBERules_mRules[idx].b1 ? 1 : v);
         cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, str_map_box)) {
-        cGameLoadScreen* loadScreen = self->mpParentModule;
+        cGameLoadScreen* loadScreen = mpParentModule;
         if (((char*)loadScreen) != 0) {
             int v = loadScreen->mTexID[0];
             if (v != 0) {
@@ -1380,7 +1380,7 @@ struct sVEnt_7AB0 { short delta; short index; void* (*fn)(void*, int); };
  *
  * @param widget  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget)
+void cFELoadState::widgetCreateQP(cUIThing* widget)
 {
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);

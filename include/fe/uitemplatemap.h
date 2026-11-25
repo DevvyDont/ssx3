@@ -61,6 +61,8 @@ CHECK_OFFSET(tMapLocation, pathName, 0x55);
 CHECK_OFFSET(tMapLocation, unk_69, 0x69);
 CHECK_SIZE(tMapLocation, 0x6C);
 
+struct cUIText;
+
 struct cUITemplate_MAP {
     int mShowInfo;                  // 0x000 [O] (bool); [U] setShowInfo stores it; onGainTransition / onUpdate /
                                     //       onWidgetEvent / setupLayout test it
@@ -87,6 +89,28 @@ struct cUITemplate_MAP {
     cUIState* mpUIState;            // 0x2EC [O]; [U] onCreateScreen's state argument (the embedding screen); its
                                     //       engine / state stack are reached through it
     int mScreenExiting;             // 0x2F0 [O] (bool); [U] onCreateScreen 0, setupScreenExit sets it, onUpdate
+
+    // Methods bound to their retail symbols by asm labels.
+    void onCreateScreen(void* screen, cUIState* owner) __asm__("cUITemplate_MAP_onCreateScreen");
+    void onGainFocus() __asm__("cUITemplate_MAP_onGainFocus");
+    void onDestroyScreen() __asm__("cUITemplate_MAP_onDestroyScreen");
+    int isMapEventLocked(int kind, int x) __asm__("cUITemplate_MAP_isMapEventLocked");
+    void setupMenus() __asm__("cUITemplate_MAP_setupMenus");
+    void setupEventUnlock() __asm__("cUITemplate_MAP_setupEventUnlock__FP15cUITemplate_MAP");
+    void setupPeakUnlock() __asm__("cUITemplate_MAP_setupPeakUnlock");
+    void setupScreenExit() __asm__("cUITemplate_MAP_setupScreenExit");
+    int onWidgetMenu(int menu, int event) __asm__("cUITemplate_MAP_onWidgetMenu");
+    void onUpdate() __asm__("cUITemplate_MAP_onUpdate");
+    void setupLayout() __asm__("cUITemplate_MAP_setupLayout");
+    void setupMenuFocus(int focus) __asm__("cUITemplate_MAP_setupMenuFocus");
+    void setupMapPic() __asm__("cUITemplate_MAP_setupMapPic");
+    void setupPopup() __asm__("cUITemplate_MAP_setupPopup");
+    void setupPeakInfo() __asm__("cUITemplate_MAP_setupPeakInfo");
+    int getMedalStr(int peak) __asm__("cUITemplate_MAP_getMedalStr");
+    void setupPeakGoals() __asm__("cUITemplate_MAP_setupPeakGoals");
+    void showEventPath(char* name) __asm__("cUITemplate_MAP_showEventPath");
+    void setWidgetHiliteColor(cUIText* obj, int on) __asm__("cUITemplate_MAP_setWidgetHiliteColor");
+    void setWidgetUnHiliteColor(cUIText* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
 };
 
 CHECK_OFFSET(cUITemplate_MAP, mShowInfo, 0x000);

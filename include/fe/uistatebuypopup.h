@@ -51,6 +51,12 @@ struct cUIStateBuyPopup : public cUIState {
                                     //       inline initBuySong* (cUIStateBuyPopup_initBuySongByCredit/DCE8/DD08) fill it; onWidgetCreate shows it
     int mbAccept;                   // 0x06C [O] bool mAccept (1 byte in On Tour; retail lw/sw the word);
                                     //       [U] onWidgetEvent stores 1 for "yes", else 0; isAccept cUIStateBuyPopup_isAccept returns it
+
+    // Methods bound to their retail symbols by asm labels.
+    void initBuyTrick(int trick, int cost, int money) __asm__("cUIStateBuyPopup_initBuyTrick");
+    void initBuyAttributes(int pAttrName, int cost, int money) __asm__("cUIStateBuyPopup_initBuyAttributes");
+    void * cUIStateBuyPopup1() __asm__("cUIStateBuyPopup_cUIStateBuyPopup1");
+    int isAccept() __asm__("cUIStateBuyPopup_isAccept");
 };
 
 CHECK_OFFSET(cUIStateBuyPopup, mInfo, 0x048);

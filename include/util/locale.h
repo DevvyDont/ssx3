@@ -64,6 +64,9 @@ public:
     virtual void setDisplayMode(signed char mode);                   // slot 2 cUILocaleInterface_setDisplayMode
     virtual void setLanguage(signed char language);                  // slot 3 cUILocaleInterface_setLanguage
     virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cUILocaleInterface_getStringByHash
+
+    // Methods bound to their retail symbols by asm labels.
+    void setTextNumCharFlag(int enabled) __asm__("cUILocaleInterface_setTextNumCharFlag");
 };
 CHECK_OFFSET(cUILocaleInterface, mDisplayMode, 0x000);
 CHECK_OFFSET(cUILocaleInterface, mLanguage, 0x001);
@@ -88,6 +91,9 @@ public:
     virtual void setLanguage(signed char language);                  // slot 3 cFELocale_setLanguage
     virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cFELocale_getStringByHash
     virtual unsigned short* getStringByIndex(unsigned int index);    // slot 5 cFELocale_getStringByIndex
+
+    // Methods bound to their retail symbols by asm labels.
+    void deleteAllFiles() __asm__("cFELocale_deleteAllFiles");
 };
 
 CHECK_SIZE(tAttrLocale, 0x1);

@@ -50,6 +50,13 @@ struct cScriptCameraController {
                                     //      cScriptObjCamera_cScriptObjCamera(cMemMan_alloc(0x80, "ScriptObjCam"),
                                     //      viewIndex) + cScriptObject_InitScriptObject; [U] the dtor deinitialises and
                                     //      deletes both, then frees the array
+
+    // Methods bound to their retail symbols by asm labels.
+    void addCamera(cScriptObjCamera* cam) __asm__("cScriptCameraController_addCamera");
+    void removeCamera(cScriptObjCamera* algo) __asm__("cScriptCameraController_removeCamera");
+    void addAlgorithm(void* algo) __asm__("cScriptCameraController_addAlgorithm");
+    void update() __asm__("cScriptCameraController_update");
+    int IsControllerActive() __asm__("cScriptCameraController_IsControllerActive");
 };
 
 CHECK_OFFSET(cScriptCameraController, Type, 0x00);

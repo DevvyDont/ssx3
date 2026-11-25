@@ -574,7 +574,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
                 if (isOn_38F8() && i == 0)
                     func_00265688(cSetupMan_mSetupMan);
                 cBraggingRightsMenu_setConfirmed_38F8(&self->mMenuCtrl[i], 1);
-                cFEStateBraggingRights_updateConfirmedState(self);
+                self->updateConfirmedState();
                 break;
             }
             i++;
@@ -628,7 +628,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[panel], w);
             int which = ((signed char*)self->mpGameEventMapping)[slot];
             if (which != -1)
-                cFEStateBraggingRights_updateBE(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
+                self->updateBE(panel, which, cUIListBox_getCurrentEntryData_38F8(w));
         }
         break;
     }
@@ -761,7 +761,7 @@ static inline int other_193DE0(int p)
  * @param which   the rule (0-7)
  * @param value   the chosen value
  */
-extern "C" void cFEStateBraggingRights_updateBE(cFEStateBraggingRights* self, int player, int which, int value)
+void cFEStateBraggingRights::updateBE(int player, int which, int value)
 {
     switch (which) {
     case 0: cBERules_mRules_193DE0[other_193DE0(player)].f8 = value; break;
@@ -845,17 +845,17 @@ static inline int get6F8_4080(void* p) { return *(int*)((char*)p + 0x6F8); }
  * "wait 1" when the first panel's flag (+0x6F8) is set and the second's (+0x72C) clear, "wait 2" the other way round;
  * nothing when both or neither are locked.
  */
-extern "C" void cFEStateBraggingRights_updateConfirmedState(cFEStateBraggingRights* self)
+void cFEStateBraggingRights::updateConfirmedState()
 {
-    if (self->mMenuCtrl[0].mbConfirmed != 0 && self->mMenuCtrl[1].mbConfirmed == 0) {
-        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_1));
+    if (mMenuCtrl[0].mbConfirmed != 0 && mMenuCtrl[1].mbConfirmed == 0) {
+        int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_wait_1));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(self->mpScreen, frame, 1);
+            cUIScreen_playFrame(mpScreen, frame, 1);
         }
-    } else if (get6F8_4080(self) == 0 && self->mMenuCtrl[1].mbConfirmed != 0) {
-        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_2));
+    } else if (get6F8_4080(this) == 0 && mMenuCtrl[1].mbConfirmed != 0) {
+        int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_wait_2));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(self->mpScreen, frame, 1);
+            cUIScreen_playFrame(mpScreen, frame, 1);
         }
     }
 }
@@ -988,12 +988,12 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
             break;
         }
         int panel = data->panel;
-        cFEStateBraggingRights_updateBE(self, panel, which, cUIListBox_getCurrentEntryData_41B0(item));
+        self->updateBE(panel, which, cUIListBox_getCurrentEntryData_41B0(item));
         break;
     }
     case 253:
         cBraggingRightsMenu_setConfirmed_41B0(&(((&self->mMenuCtrl[0])))[data->panel], 1);
-        cFEStateBraggingRights_updateConfirmedState(self);
+        self->updateConfirmedState();
         break;
     case 238: case 241: case 248: case 250: case 274: case 275:
         func_001AB288_41B0(((char*)self));

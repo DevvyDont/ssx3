@@ -88,6 +88,9 @@ struct cMoveNode : public cInstanceNode {
     float Fade;                     // 0x24 [O]; [U] addFade cMoveNode_addFade stores data +0x4, render/renderModel read it
                                     //      (lwc1); [R] replay ctor
     int TransferHack;               // 0x28 [O] bool (4 bytes); [U] render tests it (lw); [R] replay ctor
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cMoveNode1(void* bucket, int type, void* instRecord) __asm__("cMoveNode_cMoveNode1");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

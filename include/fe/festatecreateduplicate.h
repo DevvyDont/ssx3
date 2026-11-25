@@ -64,6 +64,9 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
                                     //       assigns the chosen option or the typed name to its mName; func_001BC818 /
                                     //       func_001BC990 pass mName / mPassword on
     int unk_6DC;                    // 0x6DC no access seen (inside the 0x6E0 allocation)
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEStateCreateDuplicate1() __asm__("cFEStateCreateDuplicate_cFEStateCreateDuplicate1");
 };
 
 CHECK_OFFSET(cFEStateCreateDuplicate, mbAccount, 0x6D0);

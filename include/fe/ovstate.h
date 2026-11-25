@@ -45,6 +45,10 @@ struct cOVState : public cUIState {
     char mszChatBuff[0x40];     // 0x058 [O] (On Tour: char[63]); [R] cOVState_cOVState copies " " into it (sh);
                                 //       [U] cOVState_onUpdate_HandleIncomingChat fills it with the incoming chat name and prints it
     int mOVID;                  // 0x098 [O] tOVStateEnum; [R] cOVState_cOVState stores its id argument
+
+    // Methods bound to their retail symbols by asm labels.
+    int onUpdate_HandleIncomingChat() __asm__("cOVState_onUpdate_HandleIncomingChat");
+    void triggerTextFade(char* objName, char* animName) __asm__("cOVState_triggerTextFade");
 };
 
 CHECK_OFFSET(cOVState, mDoneTransition, 0x48);

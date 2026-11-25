@@ -87,6 +87,9 @@ struct cFEStateAuthDNAS : public cFEStateNet {
     unsigned short* mpustrText;     // 0x6FC [R] 0, then operator_new_tag((USTR_length("kT_205Authenticating") + 5) *
                                     //       2, "cFEStateAuthDNAS") (cFEStateAuthDNAS_cFEStateAuthDNAS); freed by the destructor; no other
                                     //       access seen
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateAuthDNAS1() __asm__("cFEStateAuthDNAS_cFEStateAuthDNAS1");
 };
 
 CHECK_OFFSET(cFEStateAuthDNAS, mpAuth, 0x6D0);
@@ -128,6 +131,9 @@ struct cFEStateAuthDNASError : public cFEStateNet {
     cUIText* mpFooter;              // 0x6DC [U] onWidgetCreate cFEStateAuthDNASError_onWidgetCreate: widget "Footer"
     cUIText* mpBody;                // 0x6E0 [U] onWidgetCreate: widget "Body"
     cUIText* mpTitle;               // 0x6E4 [U] onWidgetCreate: widget "Title"
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateAuthDNASError1() __asm__("cFEStateAuthDNASError_cFEStateAuthDNASError1");
 };
 
 CHECK_OFFSET(cFEStateAuthDNASError, mpustrBody, 0x6D0);

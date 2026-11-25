@@ -115,15 +115,15 @@ extern "C" void cSplashManager_CameraSnapped(void* p);
  * Calls each algorithm's snapCurrent virtual (slot 4), walking AlgorithmList (+0x8), then cCamera_snapResultAlgorithm__FPv
  * (On Tour cCamera::snapResultAlgorithm) and cSplashManager_CameraSnapped (On Tour cSplashManager::CameraSnapped) on Camera (+0x10).
  */
-extern "C" void cCameraController_snapCurrent(cCameraController* self)
+void cCameraController::snapCurrent()
 {
-    for (sCamCtrlNodeB* n = *(sCamCtrlNodeB**)self->AlgorithmList; n != 0; n = n->next)
+    for (sCamCtrlNodeB* n = *(sCamCtrlNodeB**)AlgorithmList; n != 0; n = n->next)
     {
         cCameraAlgorithm* obj = (cCameraAlgorithm*)n->obj;
         obj->snapCurrent();
     }
-    cCamera_snapResultAlgorithm(self->Camera);
-    cSplashManager_CameraSnapped(self->Camera);
+    cCamera_snapResultAlgorithm(Camera);
+    cSplashManager_CameraSnapped(Camera);
 }
 #endif
 
@@ -132,6 +132,8 @@ extern "C" void* cCameraAlgoList_removeAll(int);
 //100%
 INCLUDE_ASM("camera/cameracontroller", cCameraController_clearAlgorithms__FPv);
 #ifdef SKIP_ASM
+void* cCameraController_clearAlgorithms(void* vself);
+
 /**
  * Removes every algorithm from the controller's algorithm list, deleting the ones the list owns.
  *
@@ -139,10 +141,9 @@ INCLUDE_ASM("camera/cameracontroller", cCameraController_clearAlgorithms__FPv);
  *
  * @return no meaningful value (cCameraAlgoList_removeAll returns nothing)
  */
-void* cCameraController_clearAlgorithms(void* vself)
+void* cCameraController::clearAlgorithms()
 {
-    cCameraController* self = (cCameraController*)vself;
-    return cCameraAlgoList_removeAll((int)self->AlgorithmList);
+    return cCameraAlgoList_removeAll((int)AlgorithmList);
 }
 #endif
 
@@ -176,7 +177,7 @@ extern "C" void* cManualCameraController_cManualCameraController(cManualCameraCo
     self->Type = 1;
     self->ManualAlgo = (cManualCameraAlgorithm*)cManualCameraAlgorithm_cManualCameraAlgorithm(cMemMan_alloc(0x40, str_Manual_Cam_Algo, 0x20000000, 0));
     self->EditorAlgo = (cEditorCameraAlgorithm*)cEditorCameraAlgorithm_cEditorCameraAlgorithm(cMemMan_alloc(0x40, str_Editor_Cam_Algo, 0x20000000, 0));
-    cManualCameraController_setCurrentAlgorithmType(self, 81);
+    self->setCurrentAlgorithmType(81);
     return ((void*)self);
 }
 #endif
@@ -222,10 +223,10 @@ extern "C" void cCameraController_snap(void* self);
  *
  * @param subjectID  the subject to snap to (On Tour subjectID), passed only to the manual algorithm
  */
-extern "C" void cManualCameraController_snap(cManualCameraController* self, int subjectID)
+void cManualCameraController::snap(int subjectID)
 {
-    cCameraController_snap(self);
-    self->ManualAlgo->snap(subjectID);
+    cCameraController_snap(this);
+    ManualAlgo->snap(subjectID);
 }
 #endif
 
@@ -251,10 +252,10 @@ extern "C" void cCameraController_snapCurrent(cCameraController* self);
  * Calls cCameraController_snapCurrent (On Tour cCameraController::snapCurrent) and the snapCurrent virtual (slot 4) of ManualAlgo
  * (+0x18).
  */
-extern "C" void cManualCameraController_snapCurrent(cManualCameraController* self)
+void cManualCameraController::snapCurrent()
 {
-    cCameraController_snapCurrent((cCameraController*)self);
-    ((cCamCtrlVObj*)self->ManualAlgo)->snapCurrent();
+    ((cCameraController*)this)->snapCurrent();
+    ((cCamCtrlVObj*)ManualAlgo)->snapCurrent();
 }
 #endif
 
@@ -271,10 +272,10 @@ extern "C" void cCameraAlgoList_insert(void* list, int a, int b, float w);
  * @param algo  the camera algorithm to use
  * @param deleteAlgorithmOnDestruction  nonzero when the list should delete the algorithm when it removes it
  */
-extern "C" void cManualCameraController_addAlgorithm(cManualCameraController* self, int algo, int deleteAlgorithmOnDestruction)
+void cManualCameraController::addAlgorithm(int algo, int deleteAlgorithmOnDestruction)
 {
-    cCameraController_clearAlgorithms(self);
-    cCameraAlgoList_insert(self->AlgorithmList, algo, deleteAlgorithmOnDestruction, 1.0f);
+    cCameraController_clearAlgorithms(this);
+    cCameraAlgoList_insert(AlgorithmList, algo, deleteAlgorithmOnDestruction, 1.0f);
 }
 #endif
 
@@ -291,14 +292,14 @@ extern "C" void cManualCameraController_addAlgorithm(cManualCameraController* se
  *
  * @param msg  the eCamAlgoType to select (On Tour type): 0x50 editor, 0x51 manual
  */
-extern "C" void cManualCameraController_setCurrentAlgorithmType(cManualCameraController* self, int msg)
+void cManualCameraController::setCurrentAlgorithmType(int msg)
 {
     switch (msg) {
     case 80:
-        cManualCameraController_addAlgorithm(self, (int)self->EditorAlgo, 0);
+        addAlgorithm((int)EditorAlgo, 0);
         break;
     case 81:
-        cManualCameraController_addAlgorithm(self, (int)self->ManualAlgo, 0);
+        addAlgorithm((int)ManualAlgo, 0);
         break;
     }
 }
@@ -310,11 +311,11 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_getCurrentAlgorit
 /**
  * Returns the AlgorithmType of the first algorithm in the controller's AlgorithmList.
  *
- * @param manualController  the controller (a cManualCameraController)
  * @return the algorithm type (an eCamAlgoType)
  */
-extern "C" int cManualCameraController_getCurrentAlgorithmType(cManualCameraController* manualController) {
-    return manualController->AlgorithmList->Head->Algorithm->AlgorithmType;
+int cManualCameraController::getCurrentAlgorithmType()
+{
+    return AlgorithmList->Head->Algorithm->AlgorithmType;
 }
 #endif
 
@@ -324,9 +325,9 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_update);
 /**
  * Updates the manual camera: runs the update virtual (slot 5) of the first algorithm in its AlgorithmList (+0x8).
  */
-extern "C" void cManualCameraController_update(cManualCameraController* self)
+void cManualCameraController::update()
 {
-    void** algoList = (void**)self->AlgorithmList;
+    void** algoList = (void**)AlgorithmList;
     cCamCtrlVObj* obj = *(cCamCtrlVObj**)*algoList;
     obj->update();
 }
@@ -342,11 +343,11 @@ INCLUDE_ASM("camera/cameracontroller", cChaseCameraController_shouldDoExtraGroun
  *
  * @return 1 or 0
  */
-extern "C" int cChaseCameraController_shouldDoExtraGroundTest(cChaseCameraController* self)
+int cChaseCameraController::shouldDoExtraGroundTest()
 {
     int replayCamActive = 0;
-    if (self->CamSwitchRecord.IsInReplay) {
-        int replayType = self->CamSwitchRecord.LatestReplayType;
+    if (CamSwitchRecord.IsInReplay) {
+        int replayType = CamSwitchRecord.LatestReplayType;
         if (replayType != 93) {
             replayCamActive = replayType != 0x3C;
         }
@@ -370,9 +371,9 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
  * @param action  the camera-trigger action that asked for the switch, if any (On Tour cCTAction*)
  * @return no meaningful value (cChaseCameraController_createChaseAlgorithmBlend returns nothing)
  */
-extern "C" void* cChaseCameraController_createChaseAlgorithmCut(cChaseCameraController* self, int type, int action)
+void* cChaseCameraController::createChaseAlgorithmCut(int type, int action)
 {
-    return cChaseCameraController_createChaseAlgorithmBlend(self, type, action, 1.0f);
+    return cChaseCameraController_createChaseAlgorithmBlend(this, type, action, 1.0f);
 }
 #endif
 

@@ -30,6 +30,8 @@ struct cUIState;
 struct cUIScreen;
 struct cUIVector;
 
+struct cUIText;
+
 struct cKeyboardPopup : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (cKeyboardPopup_cKeyboardPopup, destructor)
@@ -86,6 +88,65 @@ struct cKeyboardPopup : public cUIState {
     int meType;                     // 0x43C [O] eKeyboardType; [R] ctor 1; [U] onGainTransition: 0 "regular", 1 "compact",
                                     //       2 "expanded"
     int mbCallParentsUpdate;        // 0x440 [O]; [R] ctor zeroes; [U] onUpdate (cKeyboardPopup_onUpdate) calls the parent's onUpdate
+
+    // Methods bound to their retail symbols by asm labels.
+    void setInputText(const char* str) __asm__("cKeyboardPopup_setInputText");
+    void kbMoveLeft(int bControllerInput) __asm__("cKeyboardPopup_kbMoveLeft");
+    void kbMoveRight(int bControllerInput) __asm__("cKeyboardPopup_kbMoveRight");
+    void kbMoveUp(int bControllerInput) __asm__("cKeyboardPopup_kbMoveUp");
+    void kbMoveDown(int bControllerInput) __asm__("cKeyboardPopup_kbMoveDown");
+    int handleMovementUpFromQuickKeyRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromQuickKeyRow");
+    int handleMovementDownFromQuickKeyRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownFromQuickKeyRow");
+    int handleMovementDownFromLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownFromLast");
+    int handleMovementUpFromNumberRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromNumberRow");
+    int handleMovementUpFromLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromLast");
+    int handleMovementDownToLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownToLast");
+    void skipRowToTop() __asm__("cKeyboardPopup_skipRowToTop");
+    void skipRowToBottom(int start) __asm__("cKeyboardPopup_skipRowToBottom");
+    void moveUpRows() __asm__("cKeyboardPopup_moveUpRows");
+    void moveDownRows() __asm__("cKeyboardPopup_moveDownRows");
+    void pressKey(int flag) __asm__("cKeyboardPopup_pressKey");
+    void AddAsciiEdit(int value) __asm__("cKeyboardPopup_AddAsciiEdit");
+    int updateToAscii(int value) __asm__("cKeyboardPopup_updateToAscii");
+    void AddCharacterEdit() __asm__("cKeyboardPopup_AddCharacterEdit");
+    void updateEdit(int bDropFromRight) __asm__("cKeyboardPopup_updateEdit");
+    void updateViewable(int bDropFromRight) __asm__("cKeyboardPopup_updateViewable");
+    void updateCursor() __asm__("cKeyboardPopup_updateCursor");
+    void setPasswordText(char* str) __asm__("cKeyboardPopup_setPasswordText");
+    void setStatic2(const char* str) __asm__("cKeyboardPopup_setStatic2");
+    void setStatic(unsigned short* str) __asm__("cKeyboardPopup_setStatic");
+    void setStatic1(int id) __asm__("cKeyboardPopup_setStatic1");
+    void setMaxCharacters(int iMaxCharacters) __asm__("cKeyboardPopup_setMaxCharacters");
+    void setMinCharacters(int iMinCharacters) __asm__("cKeyboardPopup_setMinCharacters");
+    int getObjName(int key, char* out, int shifted) __asm__("cKeyboardPopup_getObjName");
+    void redrawScreen() __asm__("cKeyboardPopup_redrawScreen");
+    void SetNameForKey(cUIText* text, int key) __asm__("cKeyboardPopup_SetNameForKey");
+    void fillSelectableKeys() __asm__("cKeyboardPopup_fillSelectableKeys");
+    void setIncludeKey(int i, int bIncludeKey, int mode) __asm__("cKeyboardPopup_setIncludeKey");
+    void setDisableShiftNumbers(bool on) __asm__("cKeyboardPopup_setDisableShiftNumbers");
+    void setIncludeQuickKeyRow(int included) __asm__("cKeyboardPopup_setIncludeQuickKeyRow");
+    void setScale(cUIText* obj) __asm__("cKeyboardPopup_setScale");
+    void checkAndFixConflict() __asm__("cKeyboardPopup_checkAndFixConflict");
+    int allowSelection(int idx, int out) __asm__("cKeyboardPopup_allowSelection");
+    void handleQuickKeyPress(int key) __asm__("cKeyboardPopup_handleQuickKeyPress");
+    cKeyboardPopup * cKeyboardPopup1() __asm__("cKeyboardPopup_cKeyboardPopup1");
+    int getCurrentKey() __asm__("cKeyboardPopup_getCurrentKey");
+    void setCurrentKey(int currentKey) __asm__("cKeyboardPopup_setCurrentKey");
+    void setKeyboardType(int keyboardType) __asm__("cKeyboardPopup_setKeyboardType");
+    int getKeyboardType() __asm__("cKeyboardPopup_getKeyboardType");
+    int getPopOnEnd() __asm__("cKeyboardPopup_getPopOnEnd");
+    void setPopOnEnd(int popOnEnd) __asm__("cKeyboardPopup_setPopOnEnd");
+    void setPassword(int password) __asm__("cKeyboardPopup_setPassword");
+    void setClearOnFirstCharacter(int clearOnFirst) __asm__("cKeyboardPopup_setClearOnFirstCharacter");
+    void setDisableSpaceForFirst(int disableForFirst) __asm__("cKeyboardPopup_setDisableSpaceForFirst");
+    int getMinCharacters() __asm__("cKeyboardPopup_getMinCharacters");
+    int getMaxCharacters() __asm__("cKeyboardPopup_getMaxCharacters");
+    void setReferEventsToParent(int referEvents) __asm__("cKeyboardPopup_setReferEventsToParent");
+    int getReferEventsToParent() __asm__("cKeyboardPopup_getReferEventsToParent");
+    void setCallParentsUpdate(int callParentUpdate) __asm__("cKeyboardPopup_setCallParentsUpdate");
+    int isAcceptText() __asm__("cKeyboardPopup_isAcceptText");
+    void cursorRight() __asm__("cKeyboardPopup_cursorRight");
+    void cursorLeft() __asm__("cKeyboardPopup_cursorLeft");
 };
 
 CHECK_OFFSET(cKeyboardPopup, mpBackCompact, 0x48);

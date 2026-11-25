@@ -57,11 +57,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Instance);
 /**
  * Returns mInst, the play-option stack's current level (read as volatile).
  *
- * @param opts  the play options
  * @return mInst
  */
-extern "C" int cSndPlayOpts_OPTS_Instance(cSndPlayOpts* opts) {
-    return opts->mInst;
+int cSndPlayOpts::OPTS_Instance()
+{
+    return mInst;
 }
 #endif
 
@@ -71,11 +71,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Current);
 /**
  * Returns the current level's SNDPLAYOPTS record, &mCurrent[mInst].
  *
- * @param opts  the play options
  * @return the current level's play options
  */
-extern "C" int cSndPlayOpts_OPTS_Current(cSndPlayOpts* opts) {
-    return ((int)opts->mCurrent) + ((opts->mInst) * 0x18);
+int cSndPlayOpts::OPTS_Current()
+{
+    return ((int)mCurrent) + ((mInst) * 0x18);
 }
 #endif
 
@@ -85,11 +85,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPos);
 /**
  * Returns mPosition[mInst], the current level's sound position.
  *
- * @param opts  the play options
  * @return the position vector pointer, or 0
  */
-extern "C" int cSndPlayOpts_OPTS_GetPos(cSndPlayOpts* opts) {
-    return (int)opts->mPosition[opts->mInst];
+int cSndPlayOpts::OPTS_GetPos()
+{
+    return (int)mPosition[mInst];
 }
 #endif
 
@@ -99,11 +99,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetStaticPos);
 /**
  * Returns mPosStatic[mInst], the current level's static-position flag.
  *
- * @param opts  the play options
  * @return nonzero when the position is static
  */
-extern "C" int cSndPlayOpts_OPTS_GetStaticPos(cSndPlayOpts* opts) {
-    return (opts->mPosStatic)[opts->mInst];
+int cSndPlayOpts::OPTS_GetStaticPos()
+{
+    return mPosStatic[mInst];
 }
 #endif
 
@@ -113,11 +113,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVol);
 /**
  * Returns mBaseVol[mInst], the current level's unclamped base volume.
  *
- * @param opts  the play options
  * @return the base volume
  */
-extern "C" int cSndPlayOpts_OPTS_GetVol(cSndPlayOpts* opts) {
-    return (opts->mBaseVol)[opts->mInst];
+int cSndPlayOpts::OPTS_GetVol()
+{
+    return mBaseVol[mInst];
 }
 #endif
 
@@ -127,11 +127,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVolControl);
 /**
  * Returns mVolControl[mInst], the current level's volume-control float pointer.
  *
- * @param opts  the play options
  * @return the volume control, or 0
  */
-extern "C" float* cSndPlayOpts_OPTS_GetVolControl(cSndPlayOpts* opts) {
-    return opts->mVolControl[opts->mInst];
+float* cSndPlayOpts::OPTS_GetVolControl()
+{
+    return mVolControl[mInst];
 }
 #endif
 
@@ -146,8 +146,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetCallback);
  * @return the callback
  */
 // cSndPlayOpts::OPTS_GetCallback (prototype name)
-extern "C" tSndCallback cSndPlayOpts_OPTS_GetCallback(cSndPlayOpts* opts) {
-    return opts->mCallback[opts->mInst];
+tSndCallback cSndPlayOpts::OPTS_GetCallback()
+{
+    return mCallback[mInst];
 }
 #endif
 
@@ -157,11 +158,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetAzimuth);
 /**
  * Returns the current level's azimuth, mCurrent[mInst].azimuth.
  *
- * @param opts  the play options
  * @return the azimuth
  */
-extern "C" unsigned short cSndPlayOpts_OPTS_GetAzimuth(cSndPlayOpts* opts) {
-    return opts->mCurrent[opts->mInst].azimuth;
+unsigned short cSndPlayOpts::OPTS_GetAzimuth()
+{
+    return mCurrent[mInst].azimuth;
 }
 #endif
 
@@ -171,11 +172,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetElevation);
 /**
  * Returns the current level's elevation, mCurrent[mInst].elevation.
  *
- * @param opts  the play options
  * @return the elevation
  */
-extern "C" short cSndPlayOpts_OPTS_GetElevation(cSndPlayOpts* opts) {
-    return opts->mCurrent[opts->mInst].elevation;
+short cSndPlayOpts::OPTS_GetElevation()
+{
+    return mCurrent[mInst].elevation;
 }
 #endif
 
@@ -185,11 +186,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetDelay);
 /**
  * Returns the current level's delay settings, &mDelay[mInst].
  *
- * @param opts  the play options
  * @return the cDelayOpts record
  */
-extern "C" int cSndPlayOpts_OPTS_GetDelay(cSndPlayOpts* opts) {
-    return ((int)opts->mDelay) + ((opts->mInst) * 0x10);
+int cSndPlayOpts::OPTS_GetDelay()
+{
+    return ((int)mDelay) + ((mInst) * 0x10);
 }
 #endif
 
@@ -199,11 +200,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPtr);
 /**
  * Returns mPtr[mInst], the current level's user pointer.
  *
- * @param opts  the play options
  * @return the user pointer
  */
-extern "C" void* cSndPlayOpts_OPTS_GetPtr(cSndPlayOpts* opts) {
-    return opts->mPtr[opts->mInst];
+void* cSndPlayOpts::OPTS_GetPtr()
+{
+    return mPtr[mInst];
 }
 #endif
 
@@ -213,11 +214,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetViewport);
 /**
  * Returns mViewport[mInst], the current level's viewport.
  *
- * @param opts  the play options
  * @return the viewport
  */
-extern "C" int cSndPlayOpts_OPTS_GetViewport(cSndPlayOpts* opts) {
-    return (opts->mViewport)[opts->mInst];
+int cSndPlayOpts::OPTS_GetViewport()
+{
+    return mViewport[mInst];
 }
 #endif
 
@@ -227,11 +228,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVanish);
 /**
  * Returns mVanish[mInst], the current level's vanish distance.
  *
- * @param opts  the play options
  * @return the vanish distance
  */
-extern "C" float cSndPlayOpts_OPTS_GetVanish(cSndPlayOpts* opts) {
-    return (opts->mVanish)[opts->mInst];
+float cSndPlayOpts::OPTS_GetVanish()
+{
+    return mVanish[mInst];
 }
 #endif
 
@@ -241,11 +242,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetRadius);
 /**
  * Returns mRadius[mInst], the current level's radius.
  *
- * @param opts  the play options
  * @return the radius
  */
-extern "C" float cSndPlayOpts_OPTS_GetRadius(cSndPlayOpts* opts) {
-    return (opts->mRadius)[opts->mInst];
+float cSndPlayOpts::OPTS_GetRadius()
+{
+    return mRadius[mInst];
 }
 #endif
 
@@ -255,11 +256,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetExternalVol);
 /**
  * Returns mExternalVol[mInst], the current level's external-volume flag.
  *
- * @param opts  the play options
  * @return the flag
  */
-extern "C" int cSndPlayOpts_OPTS_GetExternalVol(cSndPlayOpts* opts) {
-    return (opts->mExternalVol)[opts->mInst];
+int cSndPlayOpts::OPTS_GetExternalVol()
+{
+    return mExternalVol[mInst];
 }
 #endif
 
@@ -269,11 +270,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetMapToMaxVol);
 /**
  * Returns mMapToMaxVol[mInst], the current level's map-to-max-volume value.
  *
- * @param opts  the play options
  * @return the value
  */
-extern "C" int cSndPlayOpts_OPTS_GetMapToMaxVol(cSndPlayOpts* opts) {
-    return (opts->mMapToMaxVol)[opts->mInst];
+int cSndPlayOpts::OPTS_GetMapToMaxVol()
+{
+    return mMapToMaxVol[mInst];
 }
 #endif
 
@@ -283,11 +284,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetCloseOnEnd);
 /**
  * Returns mCloseOnEnd[mInst], the current level's close-on-end flag.
  *
- * @param opts  the play options
  * @return the flag
  */
-extern "C" int cSndPlayOpts_OPTS_GetCloseOnEnd(cSndPlayOpts* opts) {
-    return (opts->mCloseOnEnd)[opts->mInst];
+int cSndPlayOpts::OPTS_GetCloseOnEnd()
+{
+    return mCloseOnEnd[mInst];
 }
 #endif
 
@@ -297,11 +298,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetTwoPlayerPan);
 /**
  * Returns mTwoPlayerPan[mInst], the current level's two-player pan flag.
  *
- * @param opts  the play options
  * @return the flag
  */
-extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerPan(cSndPlayOpts* opts) {
-    return (opts->mTwoPlayerPan)[opts->mInst];
+int cSndPlayOpts::OPTS_GetTwoPlayerPan()
+{
+    return mTwoPlayerPan[mInst];
 }
 #endif
 
@@ -311,11 +312,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetTwoPlayerSide);
 /**
  * Returns mTwoPlayerSide[mInst], the current level's two-player side.
  *
- * @param opts  the play options
  * @return the side
  */
-extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerSide(cSndPlayOpts* opts) {
-    return (opts->mTwoPlayerSide)[opts->mInst];
+int cSndPlayOpts::OPTS_GetTwoPlayerSide()
+{
+    return mTwoPlayerSide[mInst];
 }
 #endif
 
@@ -327,10 +328,10 @@ extern "C" void SNDplaysetdef(int);
 /**
  * Fills the current level's SNDPLAYOPTS (mCurrent[mInst]) with the audio library's defaults via SNDplaysetdef.
  *
- * @param opts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_LibDefault(cSndPlayOpts* opts) {
-    SNDplaysetdef(((int)opts->mCurrent) + ((opts->mInst) * 0x18));
+void cSndPlayOpts::OPTS_LibDefault()
+{
+    SNDplaysetdef(((int)mCurrent) + ((mInst) * 0x18));
 }
 #endif
 
@@ -340,8 +341,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_SetDefault);
 /**
  * Copies the current level's SNDPLAYOPTS (mCurrent[mInst]) into mDefault, the record each push starts from.
  */
-extern "C" void cSndPlayOpts_OPTS_SetDefault(cSndPlayOpts* self) {
-    self->mDefault = self->mCurrent[self->mInst];
+void cSndPlayOpts::OPTS_SetDefault()
+{
+    mDefault = mCurrent[mInst];
 }
 #endif
 
@@ -355,29 +357,29 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Reset);
  * mPtr, mViewport, mVanish, mRadius, mExternalVol, mTwoPlayerPan and mTwoPlayerSide are cleared; mDelay[mInst] becomes
  * time 100, count 0, feedback 90, level 50; mMapToMaxVol becomes 127 and mCloseOnEnd 1.
  *
- * @param playOpts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_Reset(cSndPlayOpts* playOpts) {
-    playOpts->mCurrent[playOpts->mInst] = playOpts->mDefault;
-    playOpts->mPosition[playOpts->mInst] = 0;
-    playOpts->mPosStatic[playOpts->mInst] = 0;
-    playOpts->mBaseVol[playOpts->mInst] = playOpts->mCurrent[playOpts->mInst].vol;
-    playOpts->mVolControl[playOpts->mInst] = 0;
+void cSndPlayOpts::OPTS_Reset()
+{
+    mCurrent[mInst] = mDefault;
+    mPosition[mInst] = 0;
+    mPosStatic[mInst] = 0;
+    mBaseVol[mInst] = mCurrent[mInst].vol;
+    mVolControl[mInst] = 0;
     // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
-    playOpts->mCallback[playOpts->mInst] = 0;
-    playOpts->mPtr[playOpts->mInst] = 0;
-    playOpts->mViewport[playOpts->mInst] = 0;
-    playOpts->mVanish[playOpts->mInst] = 0;
-    playOpts->mRadius[playOpts->mInst] = 0;
-    playOpts->mDelay[playOpts->mInst].mCount = 0;
-    playOpts->mDelay[playOpts->mInst].mTime = 100;
-    playOpts->mDelay[playOpts->mInst].mFeedback = 90;
-    playOpts->mDelay[playOpts->mInst].mLevel = 50;
-    playOpts->mExternalVol[playOpts->mInst] = 0;
-    playOpts->mTwoPlayerPan[playOpts->mInst] = 0;
-    playOpts->mTwoPlayerSide[playOpts->mInst] = 0;
-    playOpts->mMapToMaxVol[playOpts->mInst] = 127;
-    playOpts->mCloseOnEnd[playOpts->mInst] = 1;
+    mCallback[mInst] = 0;
+    mPtr[mInst] = 0;
+    mViewport[mInst] = 0;
+    mVanish[mInst] = 0;
+    mRadius[mInst] = 0;
+    mDelay[mInst].mCount = 0;
+    mDelay[mInst].mTime = 100;
+    mDelay[mInst].mFeedback = 90;
+    mDelay[mInst].mLevel = 50;
+    mExternalVol[mInst] = 0;
+    mTwoPlayerPan[mInst] = 0;
+    mTwoPlayerSide[mInst] = 0;
+    mMapToMaxVol[mInst] = 127;
+    mCloseOnEnd[mInst] = 1;
 }
 #endif
 
@@ -393,30 +395,30 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Open);
  *
  * There is no check against the four levels the arrays hold.
  *
- * @param playOpts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_Open(cSndPlayOpts* playOpts) {
-    playOpts->mInst++;
-    playOpts->mCurrent[playOpts->mInst] = playOpts->mDefault;
-    playOpts->mPosition[playOpts->mInst] = 0;
-    playOpts->mPosStatic[playOpts->mInst] = 0;
-    playOpts->mBaseVol[playOpts->mInst] = playOpts->mCurrent[playOpts->mInst].vol;
-    playOpts->mVolControl[playOpts->mInst] = 0;
+void cSndPlayOpts::OPTS_Open()
+{
+    mInst++;
+    mCurrent[mInst] = mDefault;
+    mPosition[mInst] = 0;
+    mPosStatic[mInst] = 0;
+    mBaseVol[mInst] = mCurrent[mInst].vol;
+    mVolControl[mInst] = 0;
     // a null member-function pointer: g++ 2.95 clears the 8 bytes with memset(&mCallback[mInst], 0, 8)
-    playOpts->mCallback[playOpts->mInst] = 0;
-    playOpts->mPtr[playOpts->mInst] = 0;
-    playOpts->mViewport[playOpts->mInst] = 0;
-    playOpts->mVanish[playOpts->mInst] = 0;
-    playOpts->mRadius[playOpts->mInst] = 0;
-    playOpts->mDelay[playOpts->mInst].mCount = 0;
-    playOpts->mDelay[playOpts->mInst].mTime = 100;
-    playOpts->mDelay[playOpts->mInst].mFeedback = 90;
-    playOpts->mDelay[playOpts->mInst].mLevel = 50;
-    playOpts->mExternalVol[playOpts->mInst] = 0;
-    playOpts->mTwoPlayerPan[playOpts->mInst] = 0;
-    playOpts->mTwoPlayerSide[playOpts->mInst] = 0;
-    playOpts->mMapToMaxVol[playOpts->mInst] = 127;
-    playOpts->mCloseOnEnd[playOpts->mInst] = 1;
+    mCallback[mInst] = 0;
+    mPtr[mInst] = 0;
+    mViewport[mInst] = 0;
+    mVanish[mInst] = 0;
+    mRadius[mInst] = 0;
+    mDelay[mInst].mCount = 0;
+    mDelay[mInst].mTime = 100;
+    mDelay[mInst].mFeedback = 90;
+    mDelay[mInst].mLevel = 50;
+    mExternalVol[mInst] = 0;
+    mTwoPlayerPan[mInst] = 0;
+    mTwoPlayerSide[mInst] = 0;
+    mMapToMaxVol[mInst] = 127;
+    mCloseOnEnd[mInst] = 1;
 }
 #endif
 
@@ -426,10 +428,10 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Close);
 /**
  * Pops the current play-option level: decrements mInst (no check against 0).
  *
- * @param opts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_Close(cSndPlayOpts* opts) {
-    opts->mInst = opts->mInst - 1;
+void cSndPlayOpts::OPTS_Close()
+{
+    mInst = mInst - 1;
 }
 #endif
 
@@ -439,11 +441,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Key);
 /**
  * Sets the current level's key number, mCurrent[mInst].keynum, to @p value.
  *
- * @param opts  the play options
  * @param value  the key number
  */
-extern "C" void cSndPlayOpts_OPTS_Key(cSndPlayOpts* opts, signed char value) {
-    opts->mCurrent[opts->mInst].keynum = value;
+void cSndPlayOpts::OPTS_Key(signed char value)
+{
+    mCurrent[mInst].keynum = value;
 }
 #endif
 
@@ -453,11 +455,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Velocity);
 /**
  * Sets the current level's velocity, mCurrent[mInst].velocity, to @p value.
  *
- * @param opts  the play options
  * @param value  the velocity
  */
-extern "C" void cSndPlayOpts_OPTS_Velocity(cSndPlayOpts* opts, signed char value) {
-    opts->mCurrent[opts->mInst].velocity = value;
+void cSndPlayOpts::OPTS_Velocity(signed char value)
+{
+    mCurrent[mInst].velocity = value;
 }
 #endif
 
@@ -470,12 +472,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Vol);
 /**
  * Sets the current level's volume: mBaseVol[mInst] = @p vol and mCurrent[mInst].vol = @p vol clamped to 0..127.
  *
- * @param opts  the play options
  * @param vol   the volume
  */
-extern "C" void cSndPlayOpts_OPTS_Vol(cSndPlayOpts *opts, int vol) {
-    opts->mBaseVol[opts->mInst] = vol;
-    opts->mCurrent[opts->mInst].vol = MAX_9810(MIN_9810(opts->mBaseVol[opts->mInst], 127), 0);
+void cSndPlayOpts::OPTS_Vol(int vol)
+{
+    mBaseVol[mInst] = vol;
+    mCurrent[mInst].vol = MAX_9810(MIN_9810(mBaseVol[mInst], 127), 0);
 }
 #endif
 
@@ -491,12 +493,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ScaleVol);
  * mBaseVol[mInst] becomes mBaseVol[mInst] * @p f clamped to 0..127 (truncated to int), and mCurrent[mInst].vol takes
  * that value.
  *
- * @param opts   the play options
  * @param scale  the scale factor
  */
-extern "C" void cSndPlayOpts_OPTS_ScaleVol(cSndPlayOpts* opts, float scale) {
-    opts->mBaseVol[opts->mInst] = (int)MAX_98A8(MIN_98A8(opts->mBaseVol[opts->mInst] * scale, 127.0f), 0.0f);
-    opts->mCurrent[opts->mInst].vol = MAX_98A8(MIN_98A8(opts->mBaseVol[opts->mInst], 127), 0);
+void cSndPlayOpts::OPTS_ScaleVol(float scale)
+{
+    mBaseVol[mInst] = (int)MAX_98A8(MIN_98A8(mBaseVol[mInst] * scale, 127.0f), 0.0f);
+    mCurrent[mInst].vol = MAX_98A8(MIN_98A8(mBaseVol[mInst], 127), 0);
 }
 #endif
 
@@ -512,12 +514,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ScaleVol1);
  * mBaseVol[mInst] becomes mBaseVol[mInst] * @p n / 127 (integer division) clamped to 0..127, and mCurrent[mInst].vol
  * takes that value.
  *
- * @param opts  the play options
  * @param n     the scale, 127 for unchanged
  */
-extern "C" void cSndPlayOpts_OPTS_ScaleVol1(cSndPlayOpts* opts, int n) {
-    opts->mBaseVol[opts->mInst] = MAX_99E8(MIN_99E8(opts->mBaseVol[opts->mInst] * n / 127, 127), 0);
-    opts->mCurrent[opts->mInst].vol = MAX_99E8(MIN_99E8(opts->mBaseVol[opts->mInst], 127), 0);
+void cSndPlayOpts::OPTS_ScaleVol1(int n)
+{
+    mBaseVol[mInst] = MAX_99E8(MIN_99E8(mBaseVol[mInst] * n / 127, 127), 0);
+    mCurrent[mInst].vol = MAX_99E8(MIN_99E8(mBaseVol[mInst], 127), 0);
 }
 #endif
 
@@ -527,11 +529,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Bend);
 /**
  * Sets the current level's pitch bend, mCurrent[mInst].bend, to @p value.
  *
- * @param opts  the play options
  * @param value  the bend
  */
-extern "C" void cSndPlayOpts_OPTS_Bend(cSndPlayOpts* opts, signed char value) {
-    opts->mCurrent[opts->mInst].bend = value;
+void cSndPlayOpts::OPTS_Bend(signed char value)
+{
+    mCurrent[mInst].bend = value;
 }
 #endif
 
@@ -541,11 +543,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_PitchMult);
 /**
  * Sets the current level's pitch multiplier, mCurrent[mInst].pitchmult, to @p value.
  *
- * @param opts  the play options
  * @param value  the pitch multiplier
  */
-extern "C" void cSndPlayOpts_OPTS_PitchMult(cSndPlayOpts* opts, short value) {
-    opts->mCurrent[opts->mInst].pitchmult = value;
+void cSndPlayOpts::OPTS_PitchMult(short value)
+{
+    mCurrent[mInst].pitchmult = value;
 }
 #endif
 
@@ -555,11 +557,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayCount);
 /**
  * Sets the current level's delay count, mDelay[mInst].mCount, to @p value.
  *
- * @param opts  the play options
  * @param value  the new count
  */
-extern "C" void cSndPlayOpts_OPTS_DelayCount(cSndPlayOpts* opts, int value) {
-    opts->mDelay[opts->mInst].mCount = value;
+void cSndPlayOpts::OPTS_DelayCount(int value)
+{
+    mDelay[mInst].mCount = value;
 }
 #endif
 
@@ -569,11 +571,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayTime);
 /**
  * Sets the current level's delay time, mDelay[mInst].mTime, to @p value.
  *
- * @param opts  the play options
  * @param value  the new time
  */
-extern "C" void cSndPlayOpts_OPTS_DelayTime(cSndPlayOpts* opts, int value) {
-    opts->mDelay[opts->mInst].mTime = value;
+void cSndPlayOpts::OPTS_DelayTime(int value)
+{
+    mDelay[mInst].mTime = value;
 }
 #endif
 
@@ -583,11 +585,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayFeedback);
 /**
  * Sets the current level's delay feedback, mDelay[mInst].mFeedback, to @p value.
  *
- * @param opts  the play options
  * @param value  the new feedback
  */
-extern "C" void cSndPlayOpts_OPTS_DelayFeedback(cSndPlayOpts* opts, int value) {
-    opts->mDelay[opts->mInst].mFeedback = value;
+void cSndPlayOpts::OPTS_DelayFeedback(int value)
+{
+    mDelay[mInst].mFeedback = value;
 }
 #endif
 
@@ -597,11 +599,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayLevel);
 /**
  * Sets the current level's delay level, mDelay[mInst].mLevel, to @p value.
  *
- * @param opts  the play options
  * @param value  the new level
  */
-extern "C" void cSndPlayOpts_OPTS_DelayLevel(cSndPlayOpts* opts, int value) {
-    opts->mDelay[opts->mInst].mLevel = value;
+void cSndPlayOpts::OPTS_DelayLevel(int value)
+{
+    mDelay[mInst].mLevel = value;
 }
 #endif
 
@@ -611,11 +613,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Azimuth);
 /**
  * Sets the current level's azimuth, mCurrent[mInst].azimuth, to @p value.
  *
- * @param opts  the play options
  * @param value  the azimuth
  */
-extern "C" void cSndPlayOpts_OPTS_Azimuth(cSndPlayOpts* opts, short value) {
-    opts->mCurrent[opts->mInst].azimuth = value;
+void cSndPlayOpts::OPTS_Azimuth(short value)
+{
+    mCurrent[mInst].azimuth = value;
 }
 #endif
 
@@ -625,11 +627,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Elevation);
 /**
  * Sets the current level's elevation, mCurrent[mInst].elevation, to @p value.
  *
- * @param opts  the play options
  * @param value  the elevation
  */
-extern "C" void cSndPlayOpts_OPTS_Elevation(cSndPlayOpts* opts, short value) {
-    opts->mCurrent[opts->mInst].elevation = value;
+void cSndPlayOpts::OPTS_Elevation(short value)
+{
+    mCurrent[mInst].elevation = value;
 }
 #endif
 
@@ -639,11 +641,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Position);
 /**
  * Sets the current level's sound position, mPosition[mInst], to @p position.
  *
- * @param opts  the play options
  * @param position  the position vector pointer (kept, not copied)
  */
-extern "C" void cSndPlayOpts_OPTS_Position(cSndPlayOpts* opts, const t4Vector* position) {
-    opts->mPosition[opts->mInst] = position;
+void cSndPlayOpts::OPTS_Position(const t4Vector* position)
+{
+    mPosition[mInst] = position;
 }
 #endif
 
@@ -653,11 +655,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_StaticPos);
 /**
  * Marks the current level's position as static: sets mPosStatic[mInst] to 1.
  *
- * @param opts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_StaticPos(cSndPlayOpts* opts) {
-    int *base = opts->mPosStatic;
-    base[opts->mInst] = 1;
+void cSndPlayOpts::OPTS_StaticPos()
+{
+    int *base = mPosStatic;
+    base[mInst] = 1;
 }
 #endif
 
@@ -667,11 +669,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Viewport);
 /**
  * Sets the current level's viewport, mViewport[mInst], to @p viewport.
  *
- * @param opts  the play options
  * @param viewport  the viewport
  */
-extern "C" void cSndPlayOpts_OPTS_Viewport(cSndPlayOpts* opts, int viewport) {
-    (opts->mViewport)[opts->mInst] = viewport;
+void cSndPlayOpts::OPTS_Viewport(int viewport)
+{
+    mViewport[mInst] = viewport;
 }
 #endif
 
@@ -683,9 +685,10 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LowPassCutOffFrequency);
  *
  * @param value  the cutoff frequency
  */
-extern "C" void cSndPlayOpts_OPTS_LowPassCutOffFrequency(cSndPlayOpts* self, int value) {
+void cSndPlayOpts::OPTS_LowPassCutOffFrequency(int value)
+{
     int clamped = (value <= 0xFFFF) ? value : 0xFFFF;
-    self->mCurrent[self->mInst].lowpasscutoff = (clamped <= -1) ? 0 : clamped;
+    mCurrent[mInst].lowpasscutoff = (clamped <= -1) ? 0 : clamped;
 }
 #endif
 
@@ -695,11 +698,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Ptr);
 /**
  * Sets the current level's user pointer, mPtr[mInst], to @p userPtr.
  *
- * @param opts  the play options
  * @param userPtr  the user pointer
  */
-extern "C" void cSndPlayOpts_OPTS_Ptr(cSndPlayOpts* opts, void* userPtr) {
-    opts->mPtr[opts->mInst] = userPtr;
+void cSndPlayOpts::OPTS_Ptr(void* userPtr)
+{
+    mPtr[mInst] = userPtr;
 }
 #endif
 
@@ -709,11 +712,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_VolControl);
 /**
  * Sets the current level's volume control, mVolControl[mInst], to @p volControl.
  *
- * @param opts  the play options
  * @param volControl  the float the sound's volume follows (a float pointer), or 0
  */
-extern "C" void cSndPlayOpts_OPTS_VolControl(cSndPlayOpts* opts, float* volControl) {
-    opts->mVolControl[opts->mInst] = volControl;
+void cSndPlayOpts::OPTS_VolControl(float* volControl)
+{
+    mVolControl[mInst] = volControl;
 }
 #endif
 
@@ -723,11 +726,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Callback);
 /**
  * Sets the current level's sound callback, mCallback[mInst], to @p callback (an 8-byte member-function pointer).
  *
- * @param opts  the play options
  * @param callback  the cController member-function pointer
  */
-extern "C" void cSndPlayOpts_OPTS_Callback(cSndPlayOpts* opts, tSndCallback callback) {
-    opts->mCallback[opts->mInst] = callback;
+void cSndPlayOpts::OPTS_Callback(tSndCallback callback)
+{
+    mCallback[mInst] = callback;
 }
 #endif
 
@@ -737,11 +740,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ExternalVol);
 /**
  * Sets the current level's external-volume flag, mExternalVol[mInst], to @p externalVol.
  *
- * @param opts  the play options
  * @param externalVol  the flag
  */
-extern "C" void cSndPlayOpts_OPTS_ExternalVol(cSndPlayOpts* opts, int externalVol) {
-    (opts->mExternalVol)[opts->mInst] = externalVol;
+void cSndPlayOpts::OPTS_ExternalVol(int externalVol)
+{
+    mExternalVol[mInst] = externalVol;
 }
 #endif
 
@@ -751,11 +754,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_MapToMaxVol);
 /**
  * Sets the current level's map-to-max-volume value, mMapToMaxVol[mInst], to @p mapToMaxVol.
  *
- * @param opts  the play options
  * @param mapToMaxVol  the value (cSndPlayOpts_OPTS_Reset resets it to 127)
  */
-extern "C" void cSndPlayOpts_OPTS_MapToMaxVol(cSndPlayOpts* opts, int mapToMaxVol) {
-    (opts->mMapToMaxVol)[opts->mInst] = mapToMaxVol;
+void cSndPlayOpts::OPTS_MapToMaxVol(int mapToMaxVol)
+{
+    mMapToMaxVol[mInst] = mapToMaxVol;
 }
 #endif
 
@@ -765,12 +768,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_CloseOnEnd);
 /**
  * Sets the current level's close-on-end flag, mCloseOnEnd[mInst], to @p closeOnEnd.
  *
- * @param opts  the play options
  * @param closeOnEnd  the flag (cSndPlayOpts_OPTS_Reset resets it to 1)
  */
-extern "C" void cSndPlayOpts_OPTS_CloseOnEnd(cSndPlayOpts* opts, int closeOnEnd) {
-    int *base = opts->mCloseOnEnd;
-    base[opts->mInst] = closeOnEnd;
+void cSndPlayOpts::OPTS_CloseOnEnd(int closeOnEnd)
+{
+    int *base = mCloseOnEnd;
+    base[mInst] = closeOnEnd;
 }
 #endif
 
@@ -780,12 +783,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_TwoPlayerPan);
 /**
  * Sets the current level's two-player pan flag, mTwoPlayerPan[mInst], to @p twoPlayerPan.
  *
- * @param opts  the play options
  * @param twoPlayerPan  the flag
  */
-extern "C" void cSndPlayOpts_OPTS_TwoPlayerPan(cSndPlayOpts* opts, int twoPlayerPan) {
-    int *base = opts->mTwoPlayerPan;
-    base[opts->mInst] = twoPlayerPan;
+void cSndPlayOpts::OPTS_TwoPlayerPan(int twoPlayerPan)
+{
+    int *base = mTwoPlayerPan;
+    base[mInst] = twoPlayerPan;
 }
 #endif
 
@@ -795,12 +798,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_TwoPlayerSide);
 /**
  * Sets the current level's two-player side, mTwoPlayerSide[mInst], to @p twoPlayerSide.
  *
- * @param opts  the play options
  * @param twoPlayerSide  the side
  */
-extern "C" void cSndPlayOpts_OPTS_TwoPlayerSide(cSndPlayOpts* opts, int twoPlayerSide) {
-    int *base = opts->mTwoPlayerSide;
-    base[opts->mInst] = twoPlayerSide;
+void cSndPlayOpts::OPTS_TwoPlayerSide(int twoPlayerSide)
+{
+    int *base = mTwoPlayerSide;
+    base[mInst] = twoPlayerSide;
 }
 #endif
 
@@ -810,10 +813,10 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Pause);
 /**
  * Pauses the monitor: sets mPaused to 1.
  *
- * @param monitor  the cMonitor
  */
-extern "C" void cMonitor_MONITOR_Pause(cMonitor* monitor) {
-    monitor->mPaused = 1;
+void cMonitor::MONITOR_Pause()
+{
+    mPaused = 1;
 }
 #endif
 
@@ -823,10 +826,10 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Resume);
 /**
  * Resumes the monitor: clears mPaused.
  *
- * @param monitor  the cMonitor
  */
-extern "C" void cMonitor_MONITOR_Resume(cMonitor* monitor) {
-    monitor->mPaused = 0;
+void cMonitor::MONITOR_Resume()
+{
+    mPaused = 0;
 }
 #endif
 
@@ -836,11 +839,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Paused);
 /**
  * Returns the monitor's mPaused flag.
  *
- * @param monitor  the cMonitor
  * @return mPaused
  */
-extern "C" int cMonitor_MONITOR_Paused(cMonitor* monitor) {
-    return (monitor->mPaused);
+int cMonitor::MONITOR_Paused()
+{
+    return (mPaused);
 }
 #endif
 
@@ -855,8 +858,9 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Counter);
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // volatile keeps the load out of the jr delay slot, as in the target.
-extern "C" int cMonitor_MONITOR_Counter(cMonitor* monitor) {
-    return (monitor->mCounter);
+int cMonitor::MONITOR_Counter()
+{
+    return (mCounter);
 }
 #endif
 
@@ -868,16 +872,16 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Delta);
  *
  * Stores mCounter in mLastCounter for the next call.
  *
- * @param monitor  the cMonitor
  * @return the elapsed ticks times 0.01
  */
-extern "C" float cMonitor_MONITOR_Delta(cMonitor* monitor) {
+float cMonitor::MONITOR_Delta()
+{
     int temp_2;
     int temp_3;
 
-    temp_2 = (monitor->mCounter);
-    temp_3 = ((int)monitor->mLastCounter);
-    ((int)monitor->mLastCounter) = temp_2;
+    temp_2 = (mCounter);
+    temp_3 = ((int)mLastCounter);
+    ((int)mLastCounter) = temp_2;
     return (float) (temp_2 - temp_3) * 0.01f;
 }
 #endif
@@ -888,12 +892,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_GetInstance);
 /**
  * Returns monitored sound @p instance's record, &mBankMonitorInstance[instance] (0xC0 bytes each).
  *
- * @param bankMonitor  the cBankMonitor
  * @param instance  the instance index (64 records)
  * @return the cBankMonitorInstance
  */
-extern "C" int cBankMonitor_BANKMONITOR_GetInstance(cBankMonitor* bankMonitor, int instance) {
-    return ((int)bankMonitor->mBankMonitorInstance) + (instance * 0xC0);
+int cBankMonitor::BANKMONITOR_GetInstance(int instance)
+{
+    return ((int)mBankMonitorInstance) + (instance * 0xC0);
 }
 #endif
 
@@ -903,11 +907,11 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_Paused);
 /**
  * Returns the bank monitor's pause flag, mBankMonitorPaused.
  *
- * @param bankMonitor  the cBankMonitor
  * @return mBankMonitorPaused
  */
-extern "C" int cBankMonitor_BANKMONITOR_Paused(cBankMonitor* bankMonitor) {
-    return (bankMonitor->mBankMonitorPaused);
+int cBankMonitor::BANKMONITOR_Paused()
+{
+    return (mBankMonitorPaused);
 }
 #endif
 
@@ -917,11 +921,11 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetDoppler);
 /**
  * Sets the bank monitor's Doppler switch, mDopplerEnable, to @p enable.
  *
- * @param bankMonitor  the cBankMonitor
  * @param enable  nonzero to enable Doppler
  */
-extern "C" void cBankMonitor_BANKMONITOR_SetDoppler(cBankMonitor* bankMonitor, int enable) {
-    bankMonitor->mDopplerEnable = enable;
+void cBankMonitor::BANKMONITOR_SetDoppler(int enable)
+{
+    mDopplerEnable = enable;
 }
 #endif
 
@@ -931,11 +935,11 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetPositional);
 /**
  * Sets the bank monitor's positional switch, mPositionalEnable, to @p enable.
  *
- * @param bankMonitor  the cBankMonitor
  * @param enable  nonzero to enable positional sound
  */
-extern "C" void cBankMonitor_BANKMONITOR_SetPositional(cBankMonitor* bankMonitor, int enable) {
-    bankMonitor->mPositionalEnable = enable;
+void cBankMonitor::BANKMONITOR_SetPositional(int enable)
+{
+    mPositionalEnable = enable;
 }
 #endif
 
@@ -945,11 +949,11 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_DopplerEnabled);
 /**
  * Returns the bank monitor's Doppler switch, mDopplerEnable.
  *
- * @param bankMonitor  the cBankMonitor
  * @return mDopplerEnable
  */
-extern "C" int cBankMonitor_BANKMONITOR_DopplerEnabled(cBankMonitor* bankMonitor) {
-    return (bankMonitor->mDopplerEnable);
+int cBankMonitor::BANKMONITOR_DopplerEnabled()
+{
+    return (mDopplerEnable);
 }
 #endif
 
@@ -959,11 +963,11 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_PositionalEnabled);
 /**
  * Returns the bank monitor's positional switch, mPositionalEnable.
  *
- * @param bankMonitor  the cBankMonitor
  * @return mPositionalEnable
  */
-extern "C" int cBankMonitor_BANKMONITOR_PositionalEnabled(cBankMonitor* bankMonitor) {
-    return (bankMonitor->mPositionalEnable);
+int cBankMonitor::BANKMONITOR_PositionalEnabled()
+{
+    return (mPositionalEnable);
 }
 #endif
 
@@ -973,11 +977,11 @@ INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_Busy);
 /**
  * Returns the async loader's busy flag (+0x4, On Tour cAsyncSys::mBusy).
  *
- * @param asyncSys  the cAsyncSys
  * @return nonzero while a load is in progress
  */
-extern "C" int cAsyncSys_ASYNCSYS_Busy(cAsyncSys* asyncSys) {
-    return (asyncSys->mBusy);
+int cAsyncSys::ASYNCSYS_Busy()
+{
+    return (mBusy);
 }
 #endif
 
@@ -992,11 +996,12 @@ INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle);
  *
  * @return the user handle, or -1
  */
-extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(cAsyncSys* self) {
+int cAsyncSys::ASYNCSYS_GetCurrOperationUserHandle()
+{
     int userHandle;
-    if (self->mBusy != 0) {
-        cCircBuffer *handleQueue = ((&self->mUserHandle));
-        if (self->mUserHandle.Head == self->mUserHandle.Tail) userHandle = -1;
+    if (mBusy != 0) {
+        cCircBuffer *handleQueue = ((&mUserHandle));
+        if (mUserHandle.Head == mUserHandle.Tail) userHandle = -1;
         else userHandle = handleQueue->Array[handleQueue->Tail];
     } else userHandle = -1;
     return userHandle;
@@ -1010,10 +1015,10 @@ extern "C" void cAsyncSys_DoCancel(void*, int);
 /**
  * Cancels the async loader's current operation: cAsyncSys_DoCancel(@p asyncSys, 0).
  *
- * @param asyncSys  the cAsyncSys
  */
-extern "C" void cAsyncSys_ASYNCSYS_CancelCurrent(cAsyncSys* asyncSys) {
-    cAsyncSys_DoCancel(asyncSys, 0);
+void cAsyncSys::ASYNCSYS_CancelCurrent()
+{
+    cAsyncSys_DoCancel(this, 0);
 }
 #endif
 
@@ -1024,10 +1029,10 @@ extern "C" void cAsyncSys_DoCancel(void*, int);
 /**
  * Cancels every queued async load: cAsyncSys_DoCancel(@p asyncSys, 1).
  *
- * @param asyncSys  the cAsyncSys
  */
-extern "C" void cAsyncSys_ASYNCSYS_CancelAll(cAsyncSys* asyncSys) {
-    cAsyncSys_DoCancel(asyncSys, 1);
+void cAsyncSys::ASYNCSYS_CancelAll()
+{
+    cAsyncSys_DoCancel(this, 1);
 }
 #endif
 
@@ -1039,12 +1044,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Status);
  *
  * On Tour's eBankStatus: 0 empty, 1 used, 2 loading.
  *
- * @param bankManager  the cBankManager
  * @param bankId  the bank index
  * @return the bank status
  */
-extern "C" int cBankManager_BANK_Status(cBankManager* bankManager, int bankId) {
-    cBankInstance *base = bankManager->mBank;
+int cBankManager::BANK_Status(int bankId)
+{
+    cBankInstance *base = mBank;
     return base[bankId].mBankStatus;
 }
 #endif
@@ -1055,12 +1060,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Used);
 /**
  * Returns whether bank @p bankId is loaded: its status (cBankManager +0xACC record) is 1.
  *
- * @param bankManager  the cBankManager
  * @param bankId  the bank index
  * @return 1 when the bank's status is 1 (used), else 0
  */
-extern "C" int cBankManager_BANK_Used(cBankManager* bankManager, int bankId) {
-    cBankInstance *base = bankManager->mBank;
+int cBankManager::BANK_Used(int bankId)
+{
+    cBankInstance *base = mBank;
     return base[bankId].mBankStatus == 1;
 }
 #endif
@@ -1071,12 +1076,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Loading);
 /**
  * Returns whether bank @p bankId is loading: its status (cBankManager +0xACC record) is 2.
  *
- * @param bankManager  the cBankManager
  * @param bankId  the bank index
  * @return 1 when the bank's status is 2 (loading), else 0
  */
-extern "C" int cBankManager_BANK_Loading(cBankManager* bankManager, int bankId) {
-    cBankInstance *base = bankManager->mBank;
+int cBankManager::BANK_Loading(int bankId)
+{
+    cBankInstance *base = mBank;
     return base[bankId].mBankStatus == 2;
 }
 #endif
@@ -1098,12 +1103,13 @@ extern "C" int SNDbankinuse(int);
  * @param idx  the bank index
  * @return 1 when the bank is loaded and SNDbankinuse reports 1, else 0
  */
-extern "C" int cBankManager_BANK_InUse(cBankManager* self, int idx) {
+int cBankManager::BANK_InUse(int idx)
+{
     int ready = 0;
     SNDSYS_entercritical();
-    bool ok = self->mBank[idx].mBankStatus != 1;
+    bool ok = mBank[idx].mBankStatus != 1;
     if (!ok) {
-        ready = SNDbankinuse(cBankManager_BANK_Handle(self, idx)) == 1;
+        ready = SNDbankinuse(BANK_Handle(idx)) == 1;
     }
     SNDSYS_leavecritical();
     return ready;
@@ -1116,12 +1122,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Handle);
 /**
  * Returns bank @p bankId's library handle (the second word of its record) when the bank is loaded, else -1.
  *
- * @param bankManager  the cBankManager
  * @param bankId  the bank index
  * @return the bank handle, or -1 when its status is not 1 (used)
  */
-extern "C" int cBankManager_BANK_Handle(cBankManager* bankManager, int bankId) {
-    cBankInstance *base = bankManager->mBank;
+int cBankManager::BANK_Handle(int bankId)
+{
+    cBankInstance *base = mBank;
     bool ne = base[bankId].mBankStatus != 1;
     if (!ne) {
         return base[bankId].mBankHandle;
@@ -1138,12 +1144,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Bank);
  *
  * mInst is read from the cBankManager's cBankMonitor (mpVBankManager + 0x1D8).
  *
- * @param bankSys  the cBankSys
  * @param bank  the bank index
  */
-extern "C" void cBankSys_SFX_Bank(cBankSys* bankSys, int bank) {
-    int *base = bankSys->mBank;
-    base[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
+void cBankSys::SFX_Bank(int bank)
+{
+    int *base = mBank;
+    base[mpVBankManager->BankMonitor.mInst] = bank;
 }
 #endif
 
@@ -1155,12 +1161,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Patch);
  *
  * mInst is read from the cBankManager's cBankMonitor (mpVBankManager + 0x1D8).
  *
- * @param bankSys  the cBankSys
  * @param patch  the patch index
  */
-extern "C" void cBankSys_SFX_Patch(cBankSys* bankSys, int patch) {
-    int *base = bankSys->mPatch;
-    base[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
+void cBankSys::SFX_Patch(int patch)
+{
+    int *base = mPatch;
+    base[mpVBankManager->BankMonitor.mInst] = patch;
 }
 #endif
 
@@ -1174,10 +1180,10 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin);
  * new level exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the
  * defaults).
  *
- * @param bankSys  the cBankSys
  */
-extern "C" void cBankSys_SFX_Begin(cBankSys* bankSys) {
-    cBankManager* bankManager = bankSys->mpVBankManager;
+void cBankSys::SFX_Begin()
+{
+    cBankManager* bankManager = mpVBankManager;
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -1214,11 +1220,11 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin1);
  * defaults), then
  * mBank[mInst] = @p bank.
  *
- * @param bankSys  the cBankSys
  * @param bank  the bank index
  */
-extern "C" void cBankSys_SFX_Begin1(cBankSys* bankSys, int bank) {
-    cBankManager* bankManager = bankSys->mpVBankManager;
+void cBankSys::SFX_Begin1(int bank)
+{
+    cBankManager* bankManager = mpVBankManager;
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -1241,7 +1247,7 @@ extern "C" void cBankSys_SFX_Begin1(cBankSys* bankSys, int bank) {
     playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
-    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
+    mBank[mpVBankManager->BankMonitor.mInst] = bank;
 }
 #endif
 
@@ -1257,12 +1263,12 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin2);
  * defaults), then
  * mBank[mInst] = @p bank and mPatch[mInst] = @p patch.
  *
- * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  */
-extern "C" void cBankSys_SFX_Begin2(cBankSys* bankSys, int bank, int patch) {
-    cBankManager* bankManager = bankSys->mpVBankManager;
+void cBankSys::SFX_Begin2(int bank, int patch)
+{
+    cBankManager* bankManager = mpVBankManager;
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -1285,8 +1291,8 @@ extern "C" void cBankSys_SFX_Begin2(cBankSys* bankSys, int bank, int patch) {
     playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
-    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
-    bankSys->mPatch[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
+    mBank[mpVBankManager->BankMonitor.mInst] = bank;
+    mPatch[mpVBankManager->BankMonitor.mInst] = patch;
 }
 #endif
 
@@ -1303,12 +1309,12 @@ extern "C" int cBankSys_SFX_End(void*);
  * defaults), then
  * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, and cBankSys_SFX_End plays the patch (and pops the level).
  *
- * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  */
-extern "C" void cBankSys_SFX_Play2D(cBankSys* bankSys, int bank, int patch) {
-    cBankManager* bankManager = bankSys->mpVBankManager;
+void cBankSys::SFX_Play2D(int bank, int patch)
+{
+    cBankManager* bankManager = mpVBankManager;
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -1331,9 +1337,9 @@ extern "C" void cBankSys_SFX_Play2D(cBankSys* bankSys, int bank, int patch) {
     playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
-    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
-    bankSys->mPatch[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
-    cBankSys_SFX_End(bankSys);
+    mBank[mpVBankManager->BankMonitor.mInst] = bank;
+    mPatch[mpVBankManager->BankMonitor.mInst] = patch;
+    cBankSys_SFX_End(this);
 }
 #endif
 
@@ -1353,13 +1359,13 @@ extern "C" int cBankSys_SFX_End(void*);
  * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, the level's volume is set as cSndPlayOpts_OPTS_Vol does
  * (mBaseVol = @p volume, SNDPLAYOPTS volume clamped to 0..127), and cBankSys_SFX_End plays the patch.
  *
- * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  * @param volume  the volume
  */
-extern "C" void cBankSys_SFX_Play2DVol(cBankSys* bankSys, int bank, int patch, int volume) {
-    cBankManager* bankManager = bankSys->mpVBankManager;
+void cBankSys::SFX_Play2DVol(int bank, int patch, int volume)
+{
+    cBankManager* bankManager = mpVBankManager;
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -1382,16 +1388,16 @@ extern "C" void cBankSys_SFX_Play2DVol(cBankSys* bankSys, int bank, int patch, i
     playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 127;
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
-    bankSys->mBank[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
-    bankSys->mPatch[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
+    mBank[mpVBankManager->BankMonitor.mInst] = bank;
+    mPatch[mpVBankManager->BankMonitor.mInst] = patch;
     {
-        cBankManager* volBankManager = bankSys->mpVBankManager;
+        cBankManager* volBankManager = mpVBankManager;
         cBankMonitor* volPlayOpts = &volBankManager->BankMonitor;
         volPlayOpts->mBaseVol[volBankManager->BankMonitor.mInst] = volume;
         volPlayOpts->mCurrent[volBankManager->BankMonitor.mInst].vol =
             MAX_A920(MIN_A920(volPlayOpts->mBaseVol[volPlayOpts->mInst], 127), 0);
     }
-    cBankSys_SFX_End(bankSys);
+    cBankSys_SFX_End(this);
 }
 #endif
 
@@ -1401,11 +1407,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_Current);
 /**
  * Returns the music system's current song instance, mCurrent.
  *
- * @param musicSys  the cMusicSys
  * @return mCurrent, or 0 when no song is set up
  */
-extern "C" int cMusicSys_MUSIC_Current(cMusicSys* musicSys) {
-    return ((int)musicSys->mSongInstance);
+int cMusicSys::MUSIC_Current()
+{
+    return ((int)mSongInstance);
 }
 #endif
 
@@ -1417,14 +1423,14 @@ extern "C" int func_002B2488(int);
 /**
  * Returns the current song's stream handle: func_002B2488(mCurrent), or -1 when there is no current song.
  *
- * @param musicSys  the cMusicSys
  * @return the stream handle, or -1
  */
-extern "C" int cMusicSys_MUSIC_GetStreamHandle(cMusicSys* musicSys) {
+int cMusicSys::MUSIC_GetStreamHandle()
+{
     int temp_4;
     int var_2;
 
-    temp_4 = ((int)musicSys->mSongInstance);
+    temp_4 = ((int)mSongInstance);
     var_2 = -1;
     if (temp_4 != 0) {
         var_2 = func_002B2488(temp_4);
@@ -1439,11 +1445,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetNumSongs);
 /**
  * Returns mNumSongs, the number of songs in the music .ini.
  *
- * @param musicSys  the cMusicSys
  * @return mNumSongs
  */
-extern "C" int cMusicSys_MUSIC_GetNumSongs(cMusicSys* musicSys) {
-    return (musicSys->mNumSongs);
+int cMusicSys::MUSIC_GetNumSongs()
+{
+    return (mNumSongs);
 }
 #endif
 
@@ -1453,11 +1459,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetNumActiveSongs);
 /**
  * Returns mNumActiveSongs, the number of songs in the active playlist.
  *
- * @param musicSys  the cMusicSys
  * @return mNumActiveSongs
  */
-extern "C" int cMusicSys_MUSIC_GetNumActiveSongs(cMusicSys* musicSys) {
-    return (musicSys->mNumActiveSongs);
+int cMusicSys::MUSIC_GetNumActiveSongs()
+{
+    return (mNumActiveSongs);
 }
 #endif
 
@@ -1467,11 +1473,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetNumFESongs);
 /**
  * Returns mNumFESongs, the number of songs flagged for the front end (ADDTOFE).
  *
- * @param musicSys  the cMusicSys
  * @return mNumFESongs
  */
-extern "C" int cMusicSys_MUSIC_GetNumFESongs(cMusicSys* musicSys) {
-    return (musicSys->mNumFESongs);
+int cMusicSys::MUSIC_GetNumFESongs()
+{
+    return (mNumFESongs);
 }
 #endif
 
@@ -1481,11 +1487,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_SongName);
 /**
  * Returns the current song's section name, &mSongName[mCurrentSongNum] (11 bytes each).
  *
- * @param musicSys  the cMusicSys
  * @return the song name
  */
-extern "C" char* cMusicSys_MUSIC_SongName(cMusicSys* musicSys) {
-    return musicSys->mSongName[musicSys->mCurrentSongNum];
+char* cMusicSys::MUSIC_SongName()
+{
+    return mSongName[mCurrentSongNum];
 }
 #endif
 
@@ -1495,11 +1501,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetCurrentSongNum);
 /**
  * Returns mCurrentSongNum, the current song's index.
  *
- * @param musicSys  the cMusicSys
  * @return mCurrentSongNum
  */
-extern "C" int cMusicSys_MUSIC_GetCurrentSongNum(cMusicSys* musicSys) {
-    return (musicSys->mCurrentSongNum);
+int cMusicSys::MUSIC_GetCurrentSongNum()
+{
+    return (mCurrentSongNum);
 }
 #endif
 
@@ -1511,10 +1517,10 @@ extern "C" void func_002B2850(int, void *);
 /**
  * Applies the delay settings to the current song: func_002B2850(mCurrent, @p musicSys).
  *
- * @param musicSys  the cMusicSys
  */
-extern "C" void cMusicSys_MUSIC_SetDelay(cMusicSys* musicSys) {
-    func_002B2850(((int)musicSys->mSongInstance), musicSys);
+void cMusicSys::MUSIC_SetDelay()
+{
+    func_002B2850(((int)mSongInstance), this);
 }
 #endif
 
@@ -1524,11 +1530,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_IsSongPlaying);
 /**
  * Returns whether a song is playing, mSongPlaying.
  *
- * @param musicSys  the cMusicSys
  * @return mSongPlaying
  */
-extern "C" int cMusicSys_IsSongPlaying(cMusicSys* musicSys) {
-    return (musicSys->mSongPlaying);
+int cMusicSys::IsSongPlaying()
+{
+    return (mSongPlaying);
 }
 #endif
 
@@ -1554,8 +1560,9 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_StoreDefaultActiveMap);
  * @param musicSys  the cMusicSys
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cMusicSys_MUSIC_StoreDefaultActiveMap(cMusicSys* musicSys) {
-    (*(long*)&musicSys->mDefaultActiveMap) = (long) (*(long*)&musicSys->mActiveMap);
+void cMusicSys::MUSIC_StoreDefaultActiveMap()
+{
+    (*(long*)&mDefaultActiveMap) = (long) (*(long*)&mActiveMap);
 }
 #endif
 
@@ -1569,8 +1576,9 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetDefaultActiveMap);
  * @return mDefaultActiveMap
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long cMusicSys_MUSIC_GetDefaultActiveMap(cMusicSys* musicSys) {
-    return (*(long*)&musicSys->mDefaultActiveMap);
+long cMusicSys::MUSIC_GetDefaultActiveMap()
+{
+    return (*(long*)&mDefaultActiveMap);
 }
 #endif
 
@@ -1580,11 +1588,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_setCurrentSongNum);
 /**
  * Sets the current song index, mCurrentSongNum, to @p songNum.
  *
- * @param musicSys  the cMusicSys
  * @param songNum  the song index
  */
-extern "C" void cMusicSys_setCurrentSongNum(cMusicSys* musicSys, int songNum) {
-    musicSys->mCurrentSongNum = songNum;
+void cMusicSys::setCurrentSongNum(int songNum)
+{
+    mCurrentSongNum = songNum;
 }
 #endif
 
@@ -1654,12 +1662,12 @@ INCLUDE_ASM("bx/seg_1BA100", cCrowdSys_CROWD_GetData);
 /**
  * Returns the crowd system's cheer data for intensity @p i, &mCrowdData[i] (0x54 bytes each).
  *
- * @param crowdSys  the cCrowdSys
  * @param i  the crowd intensity (three entries)
  * @return the tCrowdData
  */
-extern "C" tCrowdData* cCrowdSys_CROWD_GetData(cCrowdSys* crowdSys, int i) {
-    return &crowdSys->mCrowdData[i];
+tCrowdData* cCrowdSys::CROWD_GetData(int i)
+{
+    return &mCrowdData[i];
 }
 #endif
 
@@ -1712,11 +1720,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_SetRailSurface);
 /**
  * Sets the rail surface type the audio uses for a rider on a rail, mRailType.
  *
- * @param audio  the cSSXAudio
  * @param railType  the rail surface type
  */
-extern "C" void cSSXAudio_SetRailSurface(cSSXAudio* audio, int railType) {
-    audio->mRailType = railType;
+void cSSXAudio::SetRailSurface(int railType)
+{
+    mRailType = railType;
 }
 #endif
 
@@ -1726,11 +1734,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetSFXPaused);
 /**
  * Returns cSSXAudio's mSFXPaused flag.
  *
- * @param audio  the cSSXAudio
  * @return mSFXPaused
  */
-extern "C" int cSSXAudio_GetSFXPaused(cSSXAudio* audio) {
-    return (audio->mSFXPaused);
+int cSSXAudio::GetSFXPaused()
+{
+    return (mSFXPaused);
 }
 #endif
 
@@ -1740,11 +1748,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioModeID);
 /**
  * Returns cSSXAudio's unk_608C (2 selects a radio path in several methods).
  *
- * @param audio  the cSSXAudio
  * @return unk_608C
  */
-extern "C" int cSSXAudio_GetRadioModeID(cSSXAudio* audio) {
-    return (audio->mRadioModeID);
+int cSSXAudio::GetRadioModeID()
+{
+    return (mRadioModeID);
 }
 #endif
 
@@ -1758,8 +1766,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioPlayList);
  * @return mRadioPlayList
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long cSSXAudio_GetRadioPlayList(cSSXAudio* audio) {
-    return ((long)audio->mRadioPlayList);
+long cSSXAudio::GetRadioPlayList()
+{
+    return ((long)mRadioPlayList);
 }
 #endif
 
@@ -1769,11 +1778,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetNumPlayLists);
 /**
  * Returns the number of radio playlists, mNumPlayLists.
  *
- * @param audio  the cSSXAudio
  * @return mNumPlayLists
  */
-extern "C" int cSSXAudio_GetNumPlayLists(cSSXAudio* audio) {
-    return (audio->mNumPlayLists);
+int cSSXAudio::GetNumPlayLists()
+{
+    return (mNumPlayLists);
 }
 #endif
 
@@ -1783,12 +1792,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListName);
 /**
  * Returns the name of radio playlist @p i, &mPlayListName[i] (20 bytes each).
  *
- * @param audio  the cSSXAudio
  * @param i  the playlist index
  * @return the playlist name
  */
-extern "C" char* cSSXAudio_GetPlayListName(cSSXAudio* audio, int i) {
-    return audio->mPlayListName[i];
+char* cSSXAudio::GetPlayListName(int i)
+{
+    return mPlayListName[i];
 }
 #endif
 
@@ -1798,11 +1807,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListIndex);
 /**
  * Returns the current radio playlist index, mPlayListIndex.
  *
- * @param audio  the cSSXAudio
  * @return mPlayListIndex
  */
-extern "C" int cSSXAudio_GetPlayListIndex(cSSXAudio* audio) {
-    return (audio->mPlayListIndex);
+int cSSXAudio::GetPlayListIndex()
+{
+    return (mPlayListIndex);
 }
 #endif
 
@@ -1826,11 +1835,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetMode);
 /**
  * Returns cSSXAudio's audio mode, mAudioMode (eSOUNDDEF_MODE).
  *
- * @param audio  the cSSXAudio
  * @return mAudioMode
  */
-extern "C" int cSSXAudio_GetMode(cSSXAudio* audio) {
-    return (audio->mAudioMode);
+int cSSXAudio::GetMode()
+{
+    return (mAudioMode);
 }
 #endif
 
@@ -1854,11 +1863,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetArcadeSFX);
 /**
  * Returns cSSXAudio's mArcadeSFX flag.
  *
- * @param audio  the cSSXAudio
  * @return mArcadeSFX
  */
-extern "C" int cSSXAudio_GetArcadeSFX(cSSXAudio* audio) {
-    return (audio->mArcadeSFX);
+int cSSXAudio::GetArcadeSFX()
+{
+    return (mArcadeSFX);
 }
 #endif
 
@@ -1868,11 +1877,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPreset);
 /**
  * Returns the audio preset, mPreset.
  *
- * @param audio  the cSSXAudio
  * @return mPreset
  */
-extern "C" int cSSXAudio_GetPreset(cSSXAudio* audio) {
-    return (audio->mPreset);
+int cSSXAudio::GetPreset()
+{
+    return (mPreset);
 }
 #endif
 
@@ -1882,11 +1891,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetAudioUpdateState);
 /**
  * Returns the audio update state, mAudioUpdateState.
  *
- * @param audio  the cSSXAudio
  * @return mAudioUpdateState
  */
-extern "C" int cSSXAudio_GetAudioUpdateState(cSSXAudio* audio) {
-    return (audio->mAudioUpdateState);
+int cSSXAudio::GetAudioUpdateState()
+{
+    return (mAudioUpdateState);
 }
 #endif
 
@@ -1953,18 +1962,19 @@ void cQuadTree_resolve(void *);
  * the region array pointer; each of the m_iNumRegions regions' m_iDataOffset becomes m_pData (this + offset), or 0
  * when the offset is -1.
  */
-extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
+void cWorldPainterLayer::resolve()
+{
     // ORIGINAL-PTR: a loaded file blob: the layer's quad tree, region table and region data sit at byte offsets from
     // the layer ([P] "m_iQuadTreeOffset >= 0", "m_iRegionOffset >= 0")
-    self->m_pQuadTree = (cQuadTree*)((char*)self + self->m_iQuadTreeOffset);
-    cQuadTree_resolve(self->m_pQuadTree);
-    self->m_pRegions = (tWPRegion*)((char*)self + self->m_iRegionOffset);
-    tWPRegion* region = self->m_pRegions;
+    m_pQuadTree = (cQuadTree*)((char*)this + m_iQuadTreeOffset);
+    cQuadTree_resolve(m_pQuadTree);
+    m_pRegions = (tWPRegion*)((char*)this + m_iRegionOffset);
+    tWPRegion* region = m_pRegions;
     int i;
-    for (i = 0; i < self->m_iNumRegions; i++, region++) {
+    for (i = 0; i < m_iNumRegions; i++, region++) {
         int off = region->m_iDataOffset;
         if (off != -1) {
-            region->m_pData = (const tWPData*)((char*)self + off);
+            region->m_pData = (const tWPData*)((char*)this + off);
         } else {
             region->m_pData = 0;
         }
@@ -2176,11 +2186,12 @@ extern char str_cWorldPainterMan[];
  * @param n  the number of sections (On Tour iNumSections)
  */
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
-extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
+void cWorldPainterMan::init(int n)
+{
     // Same-layout cast: cWorldPainterSectionArr only adds the constructor and destructor.
-    delete[] (cWorldPainterSectionArr*)self->m_pCache;
-    self->m_uiNumSections = (unsigned int)n;
-    cWorldPainterSection*& cache = self->m_pCache;
+    delete[] (cWorldPainterSectionArr*)m_pCache;
+    m_uiNumSections = (unsigned int)n;
+    cWorldPainterSection*& cache = m_pCache;
     cache = new (str_cWorldPainterMan, 0x20000000, 0) cWorldPainterSectionArr[n];
 }
 #endif
@@ -2192,10 +2203,11 @@ extern "C" void cWorldPainterSection_update(cWorldPainterSection*);
 /**
  * Updates every world-painter section: calls cWorldPainterSection_update on each of the m_uiNumSections entries of m_pCache.
  */
-extern "C" void cWorldPainterMan_update(cWorldPainterMan* self) {
+void cWorldPainterMan::update()
+{
     unsigned i;
-    for (i = 0; i < *(unsigned*)self; i++) {
-        cWorldPainterSection_update(&self->m_pCache[i]);
+    for (i = 0; i < *(unsigned*)this; i++) {
+        cWorldPainterSection_update(&m_pCache[i]);
     }
 }
 #endif
@@ -2208,12 +2220,12 @@ extern "C" void cWorldPainterSection_load(int, int);
 /**
  * Starts loading a section's world-painter file: m_pCache[@p sectionId].load(@p fileName) via cWorldPainterSection_load.
  *
- * @param worldPainterMan  the manager
  * @param sectionId  the section index into m_pCache (12-byte cWorldPainterSection entries)
  * @param fileName  the file name (a cBXString, passed through to cWorldPainterSection_load)
  */
-extern "C" void cWorldPainterMan_load(cWorldPainterMan* worldPainterMan, int sectionId, int fileName) {
-    cWorldPainterSection_load(((int)worldPainterMan->m_pCache) + (sectionId * 0xC), fileName);
+void cWorldPainterMan::load(int sectionId, int fileName)
+{
+    cWorldPainterSection_load(((int)m_pCache) + (sectionId * 0xC), fileName);
 }
 #endif
 
@@ -2224,12 +2236,12 @@ extern "C" void cWorldPainterSection_load1(cWorldPainterSection*, int, int);
 /**
  * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through cWorldPainterSection_load1.
  *
- * @param worldPainterMan  the manager
  * @param sectionId  the section index into m_pCache
  * @param wpData  the section's world-painter data (a tWPHeader), kept in place (streamed)
  */
-extern "C" void cWorldPainterMan_load1(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
-    cWorldPainterSection_load1(&worldPainterMan->m_pCache[sectionId], sectionId, wpData);
+void cWorldPainterMan::load1(int sectionId, int wpData)
+{
+    m_pCache[sectionId].load1(sectionId, wpData);
 }
 #endif
 
@@ -2370,15 +2382,15 @@ extern "C" void cWorldPainterSection_resolve(cWorldPainterSection*);
  * Sets m_iStreamed (the section does not own the data), m_iState to 2 (kWPSection_Loaded) and m_pWPHeader to
  * @p wpData, then relocates it with cWorldPainterSection_resolve. @p sectionId is not used.
  *
- * @param section  the section
  * @param sectionId  the section index (unused)
  * @param wpData  the world-painter data (a tWPHeader)
  */
-extern "C" void cWorldPainterSection_load1(cWorldPainterSection* section, int sectionId, int wpData) {
-    section->m_iStreamed = 1;
-    section->m_iState = 2;
-    section->m_pWPHeader = (tWPHeader*)wpData;
-    cWorldPainterSection_resolve((cWorldPainterSection*)section);
+void cWorldPainterSection::load1(int sectionId, int wpData)
+{
+    m_iStreamed = 1;
+    m_iState = 2;
+    m_pWPHeader = (tWPHeader*)wpData;
+    resolve();
 }
 #endif
 
@@ -2390,19 +2402,19 @@ extern "C" void cMemMan_free__FPv(int);
 /**
  * Unloads a section: frees m_pWPHeader with cMemMan_free unless m_iStreamed is set, clears it, and sets m_iState to 0.
  *
- * @param section  the section
  */
-extern "C" void cWorldPainterSection_unload(cWorldPainterSection* section) {
+void cWorldPainterSection::unload()
+{
     int temp_4;
 
-    temp_4 = ((int)section->m_pWPHeader);
+    temp_4 = ((int)m_pWPHeader);
     if (temp_4 != 0) {
-        if ((section->m_iStreamed) == 0) {
+        if ((m_iStreamed) == 0) {
             cMemMan_free__FPv(temp_4);
         }
-        section->m_pWPHeader = 0;
+        m_pWPHeader = 0;
     }
-    section->m_iState = 0;
+    m_iState = 0;
 }
 #endif
 
@@ -2429,9 +2441,9 @@ struct sReloc_B5F0 {
  * @param vself  the section
  */
 // Relocates the loaded block's offset table (dropping it if it has the wrong magic) and marks it ready.
-extern "C" void cWorldPainterSection_resolve(cWorldPainterSection* vself)
+void cWorldPainterSection::resolve()
 {
-    cWorldPainterSection* self = vself;
+    cWorldPainterSection* self = this;
     if (((sReloc_B5F0*)self->m_pWPHeader) == 0) {
         self->m_iState = 3;
         return;
@@ -2617,8 +2629,7 @@ static inline t4Vector qtDiv_B928(const t4Vector& v, float s)
  */
 // Walks a quadtree: inner nodes split the rect (lo, hi) at its midpoint into four children;
 // leaves submit the rect's outline as a 5-vertex strip at the camera's height.
-extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts,
-                              t4Vector* lo, t4Vector* hi)
+void cWorldPainterMan::render1(cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts, t4Vector* lo, t4Vector* hi)
 {
     if (node->m_bits.m_flags[0] & 1) {
         t4Vector mid = qtDiv_B928(qtAdd_B928(*lo, *hi), 2.0f);
@@ -2642,12 +2653,12 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
         topEdgeMid.y = hi->y;
         topEdgeMid.z = 0.0f;
         topEdgeMid.w = 1.0f;
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[0] >> 1), verts, lo, &mid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[1] >> 1), verts, &leftEdgeMid,
+        render1(tree, (tree->m_nodes) + (node->m_sub.m_children[0] >> 1), verts, lo, &mid);
+        render1(tree, (tree->m_nodes) + (node->m_sub.m_children[1] >> 1), verts, &leftEdgeMid,
                                  &topEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[2] >> 1), verts, &bottomEdgeMid,
+        render1(tree, (tree->m_nodes) + (node->m_sub.m_children[2] >> 1), verts, &bottomEdgeMid,
                                  &rightEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (node->m_sub.m_children[3] >> 1), verts, &mid, hi);
+        render1(tree, (tree->m_nodes) + (node->m_sub.m_children[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         cRider* rider = SSXApp->Game->AI->Players[0]->mRider;

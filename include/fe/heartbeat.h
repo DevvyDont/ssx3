@@ -21,6 +21,10 @@ struct cHeartBeat {
     float History[64][2];           // 0x010 [O] t2Vector History[64]; [R] MEM_fill(.., 0, 0x200); [U] cHeartBeat_update stores
                                     //       the next trail point, cHeartBeat_draw draws the 64 points
     int HistoryIdx;                 // 0x210 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cHeartBeat_update");
+    void draw(int tex) __asm__("cHeartBeat_draw");
 };
 
 CHECK_OFFSET(cHeartBeat, Angle, 0x000);

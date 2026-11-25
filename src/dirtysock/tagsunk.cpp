@@ -449,15 +449,15 @@ static inline sMsgListIterK2 sMsgListK2_insert(sMsgListIterK2 pos, void* const& 
  *
  * @param msg  the LobbyApi message (word +0x4 is its code)
  */
-extern "C" void LobbyMan_onconnectionmsg(LobbyMan* self, int* msg)
+void LobbyMan::onconnectionmsg(int* msg)
 {
     if (msg[1] == 0x64697363) {
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 277;
         event->mVtbl = online_Event_vtbl;
         void* mp = event;
-        sMsgListK2_insert((sMsgListNodeK2*)self->mEventList.mpHead, mp);
-        self->mDisconnected = 1;
+        sMsgListK2_insert((sMsgListNodeK2*)mEventList.mpHead, mp);
+        mDisconnected = 1;
         if (*func_002591D0() != 0)
             func_00263BA8((cGameConnMan*)func_002591D0(), 2);
     }
@@ -505,13 +505,13 @@ static inline sMsgListIterK2b sMsgListK2b_insert(sMsgListIterK2b pos, void* cons
  * Called through the functor thunk func_00268AB8, which func_0025A778() registers as the user list's (mpUserList)
  * update callback.
  */
-extern "C" void LobbyMan_onuserlistupdate(LobbyMan* self)
+void LobbyMan::onuserlistupdate()
 {
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = 0xE0;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListK2b_insert((sMsgListNodeK2b*)self->mEventList.mpHead, mp);
+    sMsgListK2b_insert((sMsgListNodeK2b*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -558,13 +558,13 @@ static inline sMsgListIterK2c sMsgListK2c_insert(sMsgListIterK2c pos, void* cons
  *
  * @param message  not read
  */
-extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int message)
+void LobbyMan::onranklistupdate(int message)
 {
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = 225;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListK2c_insert((sMsgListNodeK2c*)self->mEventList.mpHead, mp);
+    sMsgListK2c_insert((sMsgListNodeK2c*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -1859,22 +1859,22 @@ static inline void post_B848(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
-extern "C" void LobbyMan_onlobbyconnect(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onlobbyconnect(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
-        func_003E8B10(self->mpLobbyApi, 0x73656C65, str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
+        func_003E8B10(mpLobbyApi, 0x73656C65, str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 201;
         event->mVtbl = online_Event_vtbl;
-        post_B848(((char*)self), event);
+        post_B848(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_B848(((char*)self), event);
-        self->mDisconnected = 1;
+        post_B848(((char*)this), event);
+        mDisconnected = 1;
     }
 }
 #endif
@@ -2075,15 +2075,15 @@ static inline void post_BD30(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply (error code mStatus, tag record pointer mpTagText)
  */
-extern "C" void LobbyMan_onaccountcreated(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onaccountcreated(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     int err = msg->mStatus;
     if (err == 0) {
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 203;
         event->mVtbl = online_Event_vtbl;
-        post_BD30(((char*)self), event);
+        post_BD30(((char*)this), event);
     } else if (err == 0x746F6F79) {
         int n = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_AGE), 0);
         online_AcctTooYoungEvent* event = (online_AcctTooYoungEvent*)operator new(0x10, str_NetEvent, 0x20000000, 0);
@@ -2091,15 +2091,15 @@ extern "C" void LobbyMan_onaccountcreated(LobbyMan* self, LobbyApiMsgT* msg)
         event->mError = err;
         event->mVtbl = online_AcctTooYoungEvent_vtbl;
         event->mAge = n;
-        post_BD30(((char*)self), event);
+        post_BD30(((char*)this), event);
     } else {
         if (err == 0x6475706C)
-            func_0025BC48(self, msg);
+            func_0025BC48(this, msg);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_BD30(((char*)self), event);
+        post_BD30(((char*)this), event);
     }
 }
 #endif
@@ -2228,20 +2228,20 @@ static inline void post_C0C0(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
-extern "C" void LobbyMan_onaccountedited(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onaccountedited(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 206;
         event->mVtbl = online_Event_vtbl;
-        post_C0C0(((char*)self), event);
+        post_C0C0(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_C0C0(((char*)self), event);
+        post_C0C0(((char*)this), event);
     }
 }
 #endif
@@ -2351,20 +2351,20 @@ static inline void post_C2D8(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
-extern "C" void LobbyMan_onlostaccountrequestsent(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onlostaccountrequestsent(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 207;
         event->mVtbl = online_Event_vtbl;
-        post_C2D8(((char*)self), event);
+        post_C2D8(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_C2D8(((char*)self), event);
+        post_C2D8(((char*)this), event);
     }
 }
 #endif
@@ -2474,20 +2474,20 @@ static inline void post_C4F0(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
-extern "C" void LobbyMan_onlostpasswordrequestsent(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onlostpasswordrequestsent(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 210;
         event->mVtbl = online_Event_vtbl;
-        post_C4F0(((char*)self), event);
+        post_C4F0(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_C4F0(((char*)self), event);
+        post_C4F0(((char*)this), event);
     }
 }
 #endif
@@ -2915,21 +2915,21 @@ static inline void post_CEB0(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onpersonaselected(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onpersonaselected(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
-        func_0025CFE0(self);
+        func_0025CFE0(this);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 218;
         event->mVtbl = online_Event_vtbl;
-        post_CEB0(((char*)self), event);
+        post_CEB0(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_CEB0(((char*)self), event);
+        post_CEB0(((char*)this), event);
     }
 }
 #endif
@@ -3166,23 +3166,23 @@ static inline void post_D2D8(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onpersonacreated(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onpersonacreated(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
-        (self->mNumPersonas)++;
+        (mNumPersonas)++;
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 214;
         event->mVtbl = online_Event_vtbl;
-        post_D2D8(((char*)self), event);
+        post_D2D8(((char*)this), event);
     } else {
         if (msg->mStatus == 0x6475706C)
-            func_0025BC48(self, msg);
+            func_0025BC48(this, msg);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_D2D8(((char*)self), event);
+        post_D2D8(((char*)this), event);
     }
 }
 #endif
@@ -3304,12 +3304,12 @@ static inline void post_D538(char* lst, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onpersonadeleted(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     if (msg->mStatus == 0) {
-        LobbyMan* lobbyMan = self;
-        char* lst = (char*)&self->mEventList;
+        LobbyMan* lobbyMan = this;
+        char* lst = (char*)&mEventList;
         lobbyMan->mNumPersonas--;
         for (int i = lobbyMan->mDeletePersonaIdx; i < lobbyMan->mNumPersonas; i++)
             cBXString_operatorE(&lobbyMan->mPersonas[i], &lobbyMan->mPersonas[i + 1]);
@@ -3322,7 +3322,7 @@ extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, LobbyApiMsgT* msg)
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_D538((char*)&self->mEventList, event);
+        post_D538((char*)&mEventList, event);
     }
 }
 #endif
@@ -3369,10 +3369,10 @@ static inline sMsgListIterK6c0 sMsgListK6c0_insert(sMsgListIterK6c0 pos, void* c
  * It ignores the update message. Called through thunk func_00268A90, which func_0025A778 registers as the callback of
  * LobbyApi list channel 0 (mpRoomList).
  */
-extern "C" void LobbyMan_onroomlistupdate(LobbyMan* self)
+void LobbyMan::onroomlistupdate()
 {
     online_Event* event = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    sMsgListNodeK6c0* list = (sMsgListNodeK6c0*)self->mEventList.mpHead;
+    sMsgListNodeK6c0* list = (sMsgListNodeK6c0*)mEventList.mpHead;
     event->mType = 223;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
@@ -3668,26 +3668,26 @@ static inline void post_DB80(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onRoomCreated(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onRoomCreated(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     int status = msg->mStatus;
     if (status == 0) {
         int type = 228;
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_NAME), buf, 0x100,
                                           str_empty_i);
-        cBXString_operatorE1(&self->mRoomName, buf);
+        cBXString_operatorE1(&mRoomName, buf);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = type;
         event->mVtbl = online_Event_vtbl;
-        post_DB80(((char*)self), event);
+        post_DB80(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = status;
-        post_DB80(((char*)self), event);
+        post_DB80(((char*)this), event);
     }
 }
 #endif
@@ -3792,7 +3792,7 @@ static inline sMsgListIterDDE0 sMsgListDDE0_insert(sMsgListIterDDE0 pos, void* c
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onPingReceived(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onPingReceived(LobbyApiMsgT* msg)
 {
     char name[0x20];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_NAME), name, 0x20, str_empty_i);
@@ -3807,7 +3807,7 @@ extern "C" void LobbyMan_onPingReceived(LobbyMan* self, LobbyApiMsgT* msg)
     cBXString_cBXString2(&event->mName, name);
     event->mPing = pingTime;
     void* mp = event;
-    sMsgListDDE0_insert((sMsgListNodeDDE0*)self->mEventList.mpHead, mp);
+    sMsgListDDE0_insert((sMsgListNodeDDE0*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -3888,22 +3888,22 @@ static inline void post_DF98(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onAbuseReportReceived(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onAbuseReportReceived(LobbyApiMsgT* msg)
 {
-    self->mState = 1;
+    mState = 1;
     int status = msg->mStatus;
     if (status == 0) {
         int type = 232;
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = type;
         event->mVtbl = online_Event_vtbl;
-        post_DF98(((char*)self), event);
+        post_DF98(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = status;
-        post_DF98(((char*)self), event);
+        post_DF98(((char*)this), event);
     }
 }
 #endif
@@ -4007,9 +4007,9 @@ static inline void post_E138(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus ('new0' or 'new1'), the tag record mpTagText
  */
-extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onNewsRetrieved(LobbyApiMsgT* msg)
 {
-    LobbyMan* st = self;
+    LobbyMan* st = this;
     st->mState = 1;
     int type = msg->mStatus;
     if (type == 0x6E657731) {
@@ -4017,7 +4017,7 @@ extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, LobbyApiMsgT* msg)
         event->mType = 226;
         event->mVtbl = online_NewsEvent_vtbl;
         cBXString_cBXString2(&event->mText, msg->mpTagText);
-        post_E138(((char*)self), event);
+        post_E138(((char*)this), event);
     } else if (type == 0x6E657730) {
         st->mLoggedIn = 1;
         if (func_00261460(BuddyMan_mBuddyMan) == 0) {
@@ -4032,12 +4032,12 @@ extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, LobbyApiMsgT* msg)
             BuddyMan_mBuddyMan->miMsgTimeout = cDirtysock_tag_TagFieldGetNumber(
                 cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BUDDYMSGTIMEOUT), 0xD2F00);
             // PORT: a pointer passed through func_00261248's int parameter.
-            func_00261248(BuddyMan_mBuddyMan, host, port, self->mPersona, self->mPassword, (int)name);
+            func_00261248(BuddyMan_mBuddyMan, host, port, mPersona, mPassword, (int)name);
         }
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 273;
         event->mVtbl = online_Event_vtbl;
-        post_E138(((char*)self), event);
+        post_E138(((char*)this), event);
     }
 }
 #endif
@@ -4086,7 +4086,7 @@ extern "C" void func_0025E348(sDsSlotSessK2* self, int slot)
             }
             func_0025E420((LobbyMan*)self, 0, 100, old);
         } else {
-            LobbyMan_onranklistupdate((LobbyMan*)self, 0);
+            ((LobbyMan*)self)->onranklistupdate(0);
         }
     }
 }
@@ -4199,21 +4199,21 @@ static inline sMsgListIterE590 sMsgListE590_insert(sMsgListIterE590 pos, online_
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onRanklistRetrieved(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onRanklistRetrieved(LobbyApiMsgT* msg)
 {
     int status = msg->mStatus;
     if (status == 0) {
         int start = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_START), 0);
         int idx = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SEQN), 0);
         int range = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_RANGE), 0);
-        self->mRankCount[idx] = start + range;
+        mRankCount[idx] = start + range;
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = status;
         online_Event* mp = (online_Event*)event; // same layout: an ErrorEvent starts with its Event base
-        sMsgListE590_insert((_List_node<online_Event*>*)self->mEventList.mpHead, mp);
+        sMsgListE590_insert((_List_node<online_Event*>*)mEventList.mpHead, mp);
     }
 }
 #endif
@@ -4366,9 +4366,9 @@ struct sMsgE7F0 {
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onPlayerFound(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onPlayerFound(LobbyApiMsgT* msg)
 {
-    self->mFindingPlayer = 0;
+    mFindingPlayer = 0;
     int err = msg->mStatus;
     if (err == 0) {
         char name[0x100];
@@ -4398,13 +4398,13 @@ extern "C" void LobbyMan_onPlayerFound(LobbyMan* self, LobbyApiMsgT* msg)
         event->on = on;
         event->count = count;
         event->rec = rec;
-        post_E7F0(((char*)self), event);
+        post_E7F0(((char*)this), event);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = err;
-        post_E7F0(((char*)self), event);
+        post_E7F0(((char*)this), event);
     }
 }
 #endif
@@ -4716,20 +4716,20 @@ extern void* online_ErrorEvent_vtbl[];
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onQuickMatchResponse(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onQuickMatchResponse(LobbyApiMsgT* msg)
 {
     if (msg->mStatus == 0) {
-        if (self->mState == 18)
-            self->mState = 20;
+        if (mState == 18)
+            mState = 20;
     } else {
-        self->mState = 1;
+        mState = 1;
         int status = msg->mStatus;
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = status;
         void* mp = event;
-        sMsgListK2e_insert((sMsgListNodeK2e*)self->mEventList.mpHead, mp);
+        sMsgListK2e_insert((sMsgListNodeK2e*)mEventList.mpHead, mp);
     }
 }
 #endif
@@ -4744,12 +4744,12 @@ extern "C" int func_003EE558(void*);
  *
  * @return func_003EE558()'s count for mpRoomList, or 0 when mState is 0
  */
-extern "C" int LobbyMan_getnumrooms(LobbyMan* self)
+int LobbyMan::getnumrooms()
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 0;
     }
-    return func_003EE558(self->mpRoomList);
+    return func_003EE558(mpRoomList);
 }
 #endif
 
@@ -6146,7 +6146,7 @@ static inline void post_0C68(char* lst, void* msg)
  *
  * @param msg   the LobbyApi reply: error code mStatus
  */
-extern "C" void LobbyMan_onresultsreportresponse(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onresultsreportresponse(LobbyApiMsgT* msg)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (msg->mStatus == 0 || (msg->mStatus == 0x72616E6B && cBENetworkInterface_networkOpt.bIsRankedGame == 0)) {
@@ -6154,10 +6154,10 @@ extern "C" void LobbyMan_onresultsreportresponse(LobbyMan* self, LobbyApiMsgT* m
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = type;
         event->mVtbl = online_Event_vtbl;
-        post_0C68((char*)&self->mEventList, event);
+        post_0C68((char*)&mEventList, event);
     } else {
         int err = msg->mStatus;
-        char* lst = (char*)&self->mEventList;
+        char* lst = (char*)&mEventList;
         online_ErrorEvent* event = (online_ErrorEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_Event_vtbl;
@@ -6730,40 +6730,40 @@ static inline void post_15C8(char* owner, void* msg)
  *
  * @param msg   the BuddyApi message: kind at [0] ('conn' / 'auth'), status at [1], error at [2]
  */
-extern "C" void BuddyMan_onconnect(BuddyMan* self, int* msg)
+void BuddyMan::onconnect(int* msg)
 {
     switch (msg[0]) {
     case 0x636F6E6E:
         {
             int status = msg[1];
             if (status == 2) {
-                self->mbDisconnected = 1;
-                if (self->miError == 0)
-                    self->miError = 1;
+                mbDisconnected = 1;
+                if (miError == 0)
+                    miError = 1;
             } else if (status == 6) {
-                self->mbRosterDone = 0;
-                self->mbDisconnected = 1;
-                if (self->miError == 0)
-                    self->miError = 1;
+                mbRosterDone = 0;
+                mbDisconnected = 1;
+                if (miError == 0)
+                    miError = 1;
             } else if (status == 4) {
-                self->mbDisconnected = 1;
-                if (self->miError == 0)
-                    self->miError = 1;
+                mbDisconnected = 1;
+                if (miError == 0)
+                    miError = 1;
             } else if (status == 3) {
-                self->mbDisconnected = 1;
-                if (self->miError == 0)
-                    self->miError = 1;
+                mbDisconnected = 1;
+                if (miError == 0)
+                    miError = 1;
             }
         }
         break;
     case 0x61757468:
         if (msg[2] == 0) {
             // PORT: function pointers passed as callbacks.
-            self->mpRoster = func_003F0C90(self->mpBuddyApi, (void*)func_00268F68, ((char*)self));
-            func_003EE5A0(self->mpRoster, 0, 0, (void*)func_002634C0);
-            func_00262768(self, 1, 0, 0, 0, 0);
-            self->mState = 0;
-            self->mbLoggedIn = 1;
+            mpRoster = func_003F0C90(mpBuddyApi, (void*)func_00268F68, ((char*)this));
+            func_003EE5A0(mpRoster, 0, 0, (void*)func_002634C0);
+            func_00262768(this, 1, 0, 0, 0, 0);
+            mState = 0;
+            mbLoggedIn = 1;
         } else {
             LobbyMan* owner = LobbyMan_mLobbyMan;
             online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -6771,13 +6771,15 @@ extern "C" void BuddyMan_onconnect(BuddyMan* self, int* msg)
             event->mType = 260;
             post_15C8((char*)owner, event);
             int error = msg[2];
-            self->mbDisconnected = 1;
-            self->miError = error;
+            mbDisconnected = 1;
+            miError = error;
         }
         break;
     }
 }
 #endif
+
+extern "C" void BuddyMan_onrosterupdate(BuddyMan* self, int* msg);
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onrosterupdate);
@@ -7043,7 +7045,7 @@ struct online_EventCtor : online_Event {
  *
  * @param msg   the BuddyApi message; its tag text is mpTagText
  */
-extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, BuddyApiMsgT* msg)
+void BuddyMan::onReceiveMessage(BuddyApiMsgT* msg)
 {
     char raw[0x800];
     char text[2256];
@@ -7054,16 +7056,16 @@ extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, BuddyApiMsgT* msg)
 
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_TYPE), flag, 2, str_Not_Present);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_USER), name, 0x40, str_Not_Present);
-    if (func_002623B0(self, (int)name))
+    if (func_002623B0(this, (int)name))
         return;
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SUBJ), text, 2255, str_sp_c);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BODY), raw, 0x800, str_Not_Present);
     strcat(text, raw);
     func_003EDD70(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_TIME), &year, &month, &day, &hour, &minute, &second, 0);
     sprintf(date, str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d, month, day, year, hour, minute);
-    func_00261CD0(self, name, text, date);
-    if (func_00262A08(self, (int)name) >= 0x1F) {
-        sTagVec_00261A28_remove(((char*)self), name);
+    func_00261CD0(this, name, text, date);
+    if (func_00262A08(this, (int)name) >= 0x1F) {
+        sTagVec_00261A28_remove(((char*)this), name);
     }
     int kind = 265;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -13223,10 +13225,10 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_setError);
 /**
  * Flags an error on a comm channel: sets mError (+0x4) to 1.
  *
- * @param channel  the cCommChannel
  */
-extern "C" void cCommChannel_setError(cCommChannel* channel) {
-    channel->mError = 1;
+void cCommChannel::setError()
+{
+    mError = 1;
 }
 #endif
 //100%
@@ -13235,11 +13237,11 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_getError);
 /**
  * Tells whether a comm channel has an error: returns mError (+0x4).
  *
- * @param channel  the cCommChannel
  * @return mError
  */
-extern "C" int cCommChannel_getError(cCommChannel* channel) {
-    return (channel->mError);
+int cCommChannel::getError()
+{
+    return (mError);
 }
 #endif
 
@@ -13346,9 +13348,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cDSockChannel_isConnected);
  *
  * @return 1 when mState is 2 (connected), otherwise 0
  */
-extern "C" int cDSockChannel_isConnected(cDSockChannel* self)
+int cDSockChannel::isConnected()
 {
-    return self->mState == 2;
+    return mState == 2;
 }
 #endif
 
@@ -13455,10 +13457,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_ErrorEvent_clone(online_ErrorEvent* self)
+void* online_ErrorEvent::clone()
 {
     online_ErrorEvent* copy = (online_ErrorEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int errorCode = self->mError;
+    int errorCode = mError;
     copy->mType = 258;
     copy->mVtbl = online_ErrorEvent_vtbl;
     copy->mError = errorCode;
@@ -13507,10 +13509,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_BuddyErrorEvent_clone(online_BuddyErrorEvent* self)
+void* online_BuddyErrorEvent::clone()
 {
     online_ErrorEvent* copy = (online_ErrorEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int errorCode = self->mError;
+    int errorCode = mError;
     copy->mType = 258;
     copy->mVtbl = online_ErrorEvent_vtbl;
     copy->mError = errorCode;
@@ -13558,10 +13560,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_NetErrorEvent_clone(online_NetErrorEvent* self)
+void* online_NetErrorEvent::clone()
 {
     online_NetErrorEvent* copy = (online_NetErrorEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int errorValue = self->mError;
+    int errorValue = mError;
     copy->mType = 278;
     copy->mVtbl = online_NetErrorEvent_vtbl;
     copy->mError = errorValue;
@@ -13679,10 +13681,10 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
  *
  * @return the new event
  */
-extern "C" void* online_NewsEvent_clone(online_NewsEvent* self)
+void* online_NewsEvent::clone()
 {
     online_NewsEvent* copy = (online_NewsEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    const char* newsText = (const char*)self->mText;
+    const char* newsText = (const char*)mText;
     copy->mVtbl = online_NewsEvent_vtbl;
     copy->mType = 226;
     cBXString_cBXString2(&copy->mText, newsText);
@@ -13730,10 +13732,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_AcctTooYoungEvent_clone(online_AcctTooYoungEvent* self)
+void* online_AcctTooYoungEvent::clone()
 {
     online_AcctTooYoungEvent* copy = (online_AcctTooYoungEvent*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int age = self->mAge;
+    int age = mAge;
     copy->mType = 258;
     copy->mError = 0x746F6F79;
     copy->mVtbl = online_AcctTooYoungEvent_vtbl;
@@ -13798,10 +13800,10 @@ static inline void Init268308(online_AcctLockedEvent* m, const char* a, const ch
  * @return the new event
  */
 // Builds a "lock" message carrying the two name strings of this request.
-extern "C" void* online_AcctLockedEvent_clone(online_AcctLockedEvent* self)
+void* online_AcctLockedEvent::clone()
 {
     online_AcctLockedEvent* lockMsg = (online_AcctLockedEvent*)operator new(20, str_NetEvent, 0x20000000, 0);
-    Init268308(lockMsg, (const char*)self->mDate, (const char*)self->mIntro);
+    Init268308(lockMsg, (const char*)mDate, (const char*)mIntro);
     return lockMsg;
 }
 #endif
@@ -13916,11 +13918,11 @@ static inline void Init2684C0(online_FindPlayerEvent* m, const char* a, const ch
  * @return the new event
  */
 // Clones a 0xE3 message (strings, ids and trailing data block).
-extern "C" void* online_FindPlayerEvent_clone(online_FindPlayerEvent* src)
+void* online_FindPlayerEvent::clone()
 {
     online_FindPlayerEvent* copy = (online_FindPlayerEvent*)operator new(44, str_NetEvent, 0x20000000, 0);
-    Init2684C0(copy, *(const char**)((char*)&src->mName), *(const char**)((char*)&src->mRoom), src->mOnline, src->mAddr);
-    copy->mStats = (*(&src->mStats));
+    Init2684C0(copy, *(const char**)((char*)&mName), *(const char**)((char*)&mRoom), mOnline, mAddr);
+    copy->mStats = (*(&mStats));
     return copy;
 }
 #endif
@@ -13964,11 +13966,11 @@ extern void* online_PingEvent_vtbl[];
  *
  * @return the new event
  */
-extern "C" void* online_PingEvent_clone(online_PingEvent* self)
+void* online_PingEvent::clone()
 {
     online_PingEvent* copy = (online_PingEvent*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int ping = self->mPing;
-    const char* name = (const char*)self->mName;
+    int ping = mPing;
+    const char* name = (const char*)mName;
     copy->mVtbl = online_PingEvent_vtbl;
     copy->mType = 229;
     cBXString_cBXString2(&copy->mName, name);

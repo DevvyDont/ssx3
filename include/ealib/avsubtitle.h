@@ -41,6 +41,21 @@ struct RCMP_AV_SUBTITLE {
     void operator delete[](void* p);    // [R] that delete[] frees through RCMP_rcmp_sys.FreeMemFunc (defined in the
                                         //     unit)
 #endif
+
+    // Methods bound to their retail symbols by asm labels.
+    void * AV_SUBTITLE() __asm__("RCMP_AV_SUBTITLE_AV_SUBTITLE");
+    void SetPosY(int value) __asm__("RCMP_AV_SUBTITLE_SetPosY");
+    void SetWidth(int value) __asm__("RCMP_AV_SUBTITLE_SetWidth");
+    void SetHeight(int value) __asm__("RCMP_AV_SUBTITLE_SetHeight");
+    void SetStrID(int index) __asm__("RCMP_AV_SUBTITLE_SetStrID");
+    void SetFrameNumber(int value) __asm__("RCMP_AV_SUBTITLE_SetFrameNumber");
+    void SetJustifyX(int value) __asm__("RCMP_AV_SUBTITLE_SetJustifyX");
+    void SetJustifyY(int value) __asm__("RCMP_AV_SUBTITLE_SetJustifyY");
+    void SetShapeIndex(int value) __asm__("RCMP_AV_SUBTITLE_SetShapeIndex");
+    void SetA(signed char value) __asm__("RCMP_AV_SUBTITLE_SetA");
+    void SetR(signed char value) __asm__("RCMP_AV_SUBTITLE_SetR");
+    void SetG(signed char value) __asm__("RCMP_AV_SUBTITLE_SetG");
+    void SetB(signed char value) __asm__("RCMP_AV_SUBTITLE_SetB");
 };
 
 struct RCMP_AV_SUBTITLE_ARRAY {
@@ -49,6 +64,11 @@ struct RCMP_AV_SUBTITLE_ARRAY {
                                         //     FindSubtitle index it
     unsigned int mNumberOfSubtitle;     // 0x4 [O]; [R] ctor 0;
                                         //     [U] Init stores the count, GetNumberOfSubtitle returns it
+
+    // Methods bound to their retail symbols by asm labels.
+    void * AV_SUBTITLE_ARRAY() __asm__("RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY");
+    RCMP_AV_SUBTITLE* GetSubtitle(unsigned int i) __asm__("RCMP_AV_SUBTITLE_ARRAY_GetSubtitle");
+    int GetNumberOfSubtitle() __asm__("RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle");
 };
 
 CHECK_OFFSET(RCMP_AV_SUBTITLE, mPosX, 0x00);

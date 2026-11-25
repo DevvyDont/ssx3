@@ -31,6 +31,9 @@ struct cFEStateCredits : public cUIState {
     cUITextScroll* mpTextScroll;    // 0x05C [O]
     int mPixelOffset;               // 0x060 [O]
     int mPixelDelta;                // 0x064 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateCredits1() __asm__("cFEStateCredits_cFEStateCredits1");
 };
 
 CHECK_OFFSET(cFEStateCredits, mpWidget, 0x048);

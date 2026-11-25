@@ -18,6 +18,10 @@ struct cUIState;
 struct cFEStateOptionsSound : public cUIState {
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateOptionsSound
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateWidget() __asm__("cFEStateOptionsSound_updateWidget");
+    void setSoundMode(unsigned int mode) __asm__("cFEStateOptionsSound_setSoundMode");
 };
 
 CHECK_SIZE(cFEStateOptionsSound, 0x48);

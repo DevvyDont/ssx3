@@ -33,6 +33,10 @@ struct cBuyPopupInfo {
                                     //      "kT_OVRCMNPosterColon" ...); widget "item type"
     tPopupElement mQuestion;        // 0x1C [O]; [R] memset 8; [U] eType 3 + "kT_16BuyMusicTrack" /
                                     //      "kT_OVRCMNBuySongCredit" / "kT_OVRCMNBuyItem"; widget "question"
+
+    // Methods bound to their retail symbols by asm labels.
+    void clear() __asm__("cBuyPopupInfo_clear");
+    void initBuySongByCredit(int song, int credit) __asm__("cBuyPopupInfo_initBuySongByCredit");
 };
 
 CHECK_OFFSET(cBuyPopupInfo, mCost, 0x00);

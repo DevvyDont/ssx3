@@ -86,6 +86,9 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
     tARGB mTextColour;              // 0x6EC [R] 1.0, 1.0, 1.0, 1.0 (an unaligned 16-byte copy: sdl/sdr); [U]
                                     //       onCreateScreen cFEStateReadMessagePopup_onCreateScreen copies it to "textScrollChat" + 0xA8
                                     //       (ldl/ldr)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateReadMessagePopup1() __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup1");
 };
 
 CHECK_OFFSET(cFEStateReadMessagePopup, mszSender, 0x6D0);

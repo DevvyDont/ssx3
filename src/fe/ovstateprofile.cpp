@@ -39,7 +39,7 @@ extern "C" void cOVState_PROFILE_onCreateScreen(cOVState_PROFILE* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVStateManager_addPDATemplate();
-    cOVState_PROFILE_initGeneral(self);
+    self->initGeneral();
     cOVState_onCreateScreen(self);
 }
 #endif
@@ -64,9 +64,9 @@ extern "C" void cOVState_PROFILE_displayStatus(cOVState_PROFILE* self)
         self->mIsOn = 1;
     }
     if (self->mScreenStatus == 3) {
-        cOVState_PROFILE_displayOn(self);
+        self->displayOn();
     } else {
-        cOVState_PROFILE_displayOff(self);
+        self->displayOff();
     }
 }
 #endif
@@ -90,21 +90,20 @@ extern char str_playerpct_d_b[];
  * cFEMemCard_triggerDisplayState (virtual slot 35) and runs cOVState_PROFILE_displayOn. Otherwise resets the six
  * profile buttons "player1" ... "player6" of mpScreen: setUseStaticColour(0) (slot 25) and setStatic(1) (slot 8).
  *
- * @param vself  the profile overlay state (this)
  */
-extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* vself)
+void cOVState_PROFILE::displayOff()
 {
-    if (vself->displayFileOK() != 0) {
+    if (displayFileOK() != 0) {
         if (((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mpMemCard->IsAvailable1() != 0) {
-            vself->triggerDisplayState(3);
-            cOVState_PROFILE_displayOn(vself);
+            triggerDisplayState(3);
+            displayOn();
             return;
         }
     }
     for (int i = 1; i < 7; i++) {
         char buf[64];
         sprintf(buf, str_playerpct_d_b, i);
-        cUIText* playerButton = (cUIText*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(buf));
+        cUIText* playerButton = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         playerButton->setUseStaticColour(0);
         playerButton->setStatic(1);
     }
@@ -163,16 +162,16 @@ static inline cUIText* getObj_1380(cOVState_PROFILE* self, char* name)
  * @param profileState  the profile overlay state (this)
  */
 // Refreshes the memory-card profile list: device name, then the six profile slots and the arrow hints.
-extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
+void cOVState_PROFILE::displayOn()
 {
-    cOVState_PROFILE* self = profileState;
+    cOVState_PROFILE* self = this;
     unsigned short buf[800];
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->displayFileOK()) {
         if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
-            cOVState_PROFILE_displayOff(self);
+            self->displayOff();
             return;
         }
         if (self->mScreenStatus != 3)
@@ -584,15 +583,15 @@ extern char str_playerpct_d_b[];
  * Sets the texts "1".."6" to their own number and gives "player1".."player6" misc data 0..5; the lookups are
  * not null-checked.
  */
-extern "C" void cOVState_PROFILE_initGeneral(cOVState_PROFILE* self)
+void cOVState_PROFILE::initGeneral()
 {
     char buf[16];
     int i;
     for (i = 1; i < 7; i++) {
         sprintf(buf, D_004A2138, i);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)), buf);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf)), buf);
         sprintf(buf, str_playerpct_d_b, i);
-        ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)))->mMiscData = i - 1;
+        ((cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf)))->mMiscData = i - 1;
     }
 }
 #endif
@@ -727,7 +726,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
 {
     int status = self->mState;
     if (status != 0 && status != 6) {
-        cOVState_AUTOSAVE_displayOn(self);
+        self->displayOn();
     } else {
         cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
         autosaveText->setVisible(0);
@@ -757,30 +756,30 @@ extern char str_kT_MEMAutosaving[];
  * cMCOverlayManager_isManagerDone(memory card manager) 0 and state not 6, it pulses "exclam" ("@pulsingicon") and shows
  * kT_MEMAutosaving; otherwise it stops the animation and hides the text.
  */
-extern "C" void cOVState_AUTOSAVE_displayOn(cOVState_AUTOSAVE* self)
+void cOVState_AUTOSAVE::displayOn()
 {
     void* mp = cSSXApp_getMCManager(SSXApp);
-    int processState = self->mIsProcessing;
-    if (processState == self->mLastProcessState) {
+    int processState = mIsProcessing;
+    if (processState == mLastProcessState) {
         return;
     }
-    self->mLastProcessState = processState;
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_exclam_b));
+    mLastProcessState = processState;
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_exclam_b));
     if (obj == 0) {
         return;
     }
-    if (self->mIsProcessing != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && self->mState != 6) {
-        void* bank = &self->mpEngine->mAnimBank;
+    if (mIsProcessing != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && mState != 6) {
+        void* bank = &mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_pulsingicon));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
         }
-        cUIThing* autosaveText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
+        cUIThing* autosaveText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_autosave_text));
         autosaveText->setVisible(1);
         cUIText_setUnicodeStringByID((cUIText*)autosaveText, GetHashValue32(str_kT_MEMAutosaving));
     } else {
         cUIThing_deleteAnimation(obj);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text))->setVisible(0);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_autosave_text))->setVisible(0);
     }
 }
 #endif

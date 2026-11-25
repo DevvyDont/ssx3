@@ -26,24 +26,25 @@ extern char str_AIFwdDiffHash[];
  *
  * @param n  number of cache entries (On Tour num)
  */
-extern "C" void cAIFwdDiffCache_Init(cAIFwdDiffCache* self, int n)
+void cAIFwdDiffCache::Init(int n)
 {
     tAIFwdDiff* mem = (tAIFwdDiff*)operator_new_tag(n * sizeof(tAIFwdDiff), str_AIFwdDiffCache, 0, 0);
     tAIFwdDiff* entry = mem;
     for (int k = n - 1; k != -1; k--, entry++) {
         tAIFwdDiff_tAIFwdDiff(entry);
     }
-    *(tAIFwdDiff**)&self->mCache = mem;
+    *(tAIFwdDiff**)&mCache = mem;
     for (int i = 0; i < n; i++) {
-        (self->mCache)[i].mNext = &(self->mCache)[i] + 1;
-        (self->mCache)[i].mPrev = &(self->mCache)[i] - 1;
-        (self->mCache)[i].mKey = 0xFFFFFFFF;
+        mCache[i].mNext = &mCache[i] + 1;
+        mCache[i].mPrev = &mCache[i] - 1;
+        mCache[i].mKey = 0xFFFFFFFF;
     }
-    (self->mCache)[0].mPrev = (self->mCache) + n - 1;
-    (self->mCache)[n - 1].mNext = (self->mCache);
-    self->mHashSize = n * 2 + 13;
-    *(tAIFwdDiff**)&self->mAgeQueue = (self->mCache);
-    *(tAIFwdDiff***)&self->mPatchHash = (tAIFwdDiff**)operator_new_tag(((int)self->mHashSize) * 4, str_AIFwdDiffHash, 0x80000000, 0);
+    mCache[0].mPrev = (mCache) + n - 1;
+    mCache[n - 1].mNext = (mCache);
+    mHashSize = n * 2 + 13;
+    *(tAIFwdDiff**)&mAgeQueue = (mCache);
+    *(tAIFwdDiff***)&mPatchHash = (tAIFwdDiff**)operator_new_tag(((int)mHashSize) * 4, str_AIFwdDiffHash, 0x80000000,
+            0);
 }
 #endif
 
@@ -74,24 +75,24 @@ static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b
  * @param src  the terrain patch record (On Tour const tPatchRecord&)
  * @param out  receives the cache node (On Tour ppFwdDiff)
  */
-extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, tPatchRecord* src, tAIFwdDiff** out)
+void cAIFwdDiffCache::GetFwdDiff(tPatchRecord* src, tAIFwdDiff** out)
 {
     unsigned int key = src->m_RID;
-    tAIFwdDiff* n = self->mPatchHash[key % self->mHashSize];
+    tAIFwdDiff* n = mPatchHash[key % mHashSize];
     while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->mKey)) {
         if (n->mKey == key) {
-            cAIFwdDiffCache_MoveToAgeQueueTail(self, (sFwdDiffLink*)n);
+            cAIFwdDiffCache_MoveToAgeQueueTail(this, (sFwdDiffLink*)n);
             *out = n;
             return;
         }
         n = n->mHashLink;
     }
-    n = (self->mAgeQueue);
-    cAIFwdDiffCache_RemoveFromHash(self, n);
+    n = (mAgeQueue);
+    cAIFwdDiffCache_RemoveFromHash(this, n);
     n->mKey = key;
-    cAIFwdDiffCache_AddToHash(self, n);
-    *(tAIFwdDiff**)&self->mAgeQueue = n->mNext;
-    cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, (cAIFwdDiffCache*)n);
+    AddToHash(n);
+    *(tAIFwdDiff**)&mAgeQueue = n->mNext;
+    TesselatePatch(src, (cAIFwdDiffCache*)n);
     *out = n;
 }
 #endif
@@ -177,13 +178,12 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_AddToHash);
  *
  * The bucket is the node's key modulo the bucket count (mHashSize); the node goes before the first entry with a larger key.
  *
- * @param table  the cache (this)
  * @param node  the node (On Tour anode)
  */
-extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, tAIFwdDiff* node)
+void cAIFwdDiffCache::AddToHash(tAIFwdDiff* node)
 {
     unsigned int key = node->mKey;
-    tAIFwdDiff** link = &table->mPatchHash[key % table->mHashSize];
+    tAIFwdDiff** link = &mPatchHash[key % mHashSize];
     for (;;) {
         tAIFwdDiff* cur = *link;
         if (cur == 0 || key < cur->mKey) {
@@ -217,11 +217,11 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  * @param patch  the terrain patch record (On Tour const tPatchRecord&)
  * @param fwdDiff  the cache node to fill (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* patch, cAIFwdDiffCache* fwdDiff)
+void cAIFwdDiffCache::TesselatePatch(void* patch, cAIFwdDiffCache* fwdDiff)
 {
     sGp2930* patchEval = &D_004A5A20;
     func_00391418(patchEval, (char*)patch + 0x40);
-    cAIFwdDiffCache_InitializeCache(self, (tAIFwdDiff*)fwdDiff);
+    InitializeCache((tAIFwdDiff*)fwdDiff);
     func_003914F8(patchEval);
     func_00391480(patchEval, (char*)fwdDiff + 0x10);
 }
@@ -238,7 +238,7 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_InitializeCache);
  *
  * @param patch  the cache node (On Tour node; despite the name not a patch)
  */
-extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, tAIFwdDiff* patch)
+void cAIFwdDiffCache::InitializeCache(tAIFwdDiff* patch)
 {
     float* cell = (float*)(&patch->mInfo[0][0]);
     int n = 80;
@@ -275,16 +275,16 @@ INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_operatorE);
  * @param src  the tree to copy (On Tour aTree)
  * @return @p self
  */
-extern "C" bxSphereTree* bxSphereTree_operatorE(bxSphereTree* self, bxSphereTree* src)
+bxSphereTree* bxSphereTree::operatorE(bxSphereTree* src)
 {
     int i;
     for (i = 0; i < 8; i++) {
-        ((&self->axis[0]))[i] = ((&src->axis[0]))[i];
+        ((&axis[0]))[i] = ((&src->axis[0]))[i];
     }
-    (*(&self->transCenter)) = (*(&src->transCenter));
-    (*(&self->staticInfo)) = (*(&src->staticInfo));
-    (*(tSphTreeInfo**)&self->treeInfo) = &(*(&self->staticInfo));
-    return self;
+    (*(&transCenter)) = (*(&src->transCenter));
+    (*(&staticInfo)) = (*(&src->staticInfo));
+    (*(tSphTreeInfo**)&treeInfo) = &(*(&staticInfo));
+    return this;
 }
 #endif
 
@@ -305,44 +305,44 @@ extern "C" void MEM_copy(void* dst, void* src, int n);
  * @param aTreeID   the tree's id (On Tour aTreeID)
  * @return the number of bytes of @p buf the tree uses
  */
-extern "C" int bxSphereTree_Load(bxSphereTree* self, char* buf, int aTreeID)
+int bxSphereTree::Load(char* buf, int aTreeID)
 {
     if (buf == 0) {
         return 0;
     }
-    self->staticInfo.treeID = aTreeID;
-    self->staticInfo.lastBufID = 0;
-    (*(tSphTreeInfo**)&self->treeInfo) = &(*(&self->staticInfo));
-    self->staticInfo.refCount = 1;
+    staticInfo.treeID = aTreeID;
+    staticInfo.lastBufID = 0;
+    (*(tSphTreeInfo**)&this->treeInfo) = &(*(&staticInfo));
+    staticInfo.refCount = 1;
     int len0;
     int len1;
     MEM_copy(&len0, buf, 4);
     MEM_copy(&len1, buf + 4, 4);
-    MEM_copy(&self->treeInfo->isCompressed, buf + 0x8, 4);
-    MEM_copy(&self->treeInfo->depth, buf + 0xC, 4);
-    MEM_copy(&self->treeInfo->rootCenter[0], buf + 0x10, 0xC);
-    MEM_copy(&self->treeInfo->centerOfMass[0], buf + 0x1C, 0xC);
-    MEM_copy(&self->treeInfo->momentOfInertia[0][0], buf + 0x28, 36);
-    MEM_copy(&self->treeInfo->invMomentOfInertia[0][0], buf + 0x4C, 36);
+    MEM_copy(&this->treeInfo->isCompressed, buf + 0x8, 4);
+    MEM_copy(&this->treeInfo->depth, buf + 0xC, 4);
+    MEM_copy(&this->treeInfo->rootCenter[0], buf + 0x10, 0xC);
+    MEM_copy(&this->treeInfo->centerOfMass[0], buf + 0x1C, 0xC);
+    MEM_copy(&this->treeInfo->momentOfInertia[0][0], buf + 0x28, 36);
+    MEM_copy(&this->treeInfo->invMomentOfInertia[0][0], buf + 0x4C, 36);
     char* cursor = buf + 0x70;
-    self->treeInfo->levels = (tLevel*)cursor;
-    cursor += (self->treeInfo->depth + 1) * 0xC;
-    self->treeInfo->cmpTree = (unsigned char*)cursor;
+    this->treeInfo->levels = (tLevel*)cursor;
+    cursor += (this->treeInfo->depth + 1) * 0xC;
+    this->treeInfo->cmpTree = (unsigned char*)cursor;
     cursor += len1;
     cursor += len0;
-    tSphTreeInfo* treeInfo = (tSphTreeInfo*)((char*)(self->treeInfo));
+    tSphTreeInfo* treeInfo = (tSphTreeInfo*)((char*)(this->treeInfo));
     if (treeInfo->isCompressed != 0) {
         treeInfo->bitTree = 0;
     } else {
         treeInfo->bitTree = (unsigned char*)((char*)treeInfo->cmpTree);
     }
     t4Vector centre;
-    tSphTreeInfo* infoBlock = (tSphTreeInfo*)((char*)(self->treeInfo));
+    tSphTreeInfo* infoBlock = (tSphTreeInfo*)((char*)(this->treeInfo));
     centre.x = infoBlock->rootCenter[0];
     centre.y = infoBlock->rootCenter[1];
     centre.z = infoBlock->rootCenter[2];
     centre.w = 1.0f;
-    (*(&self->transCenter)) = centre;
+    (*(&transCenter)) = centre;
     return cursor - buf;
 }
 #endif
@@ -368,20 +368,22 @@ extern "C" int SphereTree_isSphereCollision(void* self, void* pos, void* out, in
  * @param outContact  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int bxSphereTree_IsRiderTreeCollision(bxSphereTree* self, cRiderSphereTree* shape, int outPush, int outContact)
+int bxSphereTree::IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int outContact)
 {
-    tSphTreeInfo* tree = self->treeInfo;
+    tSphTreeInfo* tree = treeInfo;
     if (tree->isCompressed != 0) {
-        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
-    if (SphereTree_isSphereCollision(self, ((float*)&shape->boundCen), &self->transCenter, 0, 0, outPush, outContact, shape->boundRad) == 0) {
+    if (SphereTree_isSphereCollision(this, ((float*)&shape->boundCen), &transCenter, 0, 0, outPush, outContact,
+            shape->boundRad) == 0) {
         return 0;
     }
     if (shape->listLen == 0) {
         return 1;
     }
     for (int i = 0; i < shape->listLen; i++) {
-        if (SphereTree_isSphereCollision(self, ((float*)&((&shape->sphList[0]))[i].cen), &self->transCenter, 0, 0, outPush, outContact, ((&shape->sphList[0]))[i].rad) != 0) {
+        if (SphereTree_isSphereCollision(this, ((float*)&((&shape->sphList[0]))[i].cen), &transCenter, 0, 0, outPush,
+                outContact, ((&shape->sphList[0]))[i].rad) != 0) {
             return 1;
         }
     }
@@ -461,21 +463,22 @@ static inline t4Vector vu0Scale_28030(const t4Vector& v, float s)
  * @param loc   out: the contact point (On Tour loc)
  * @return 1 on contact
  */
-extern "C" int bxSphereTree_Is2SidedTriCollision(bxSphereTree* self, t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* dir, t4Vector* overlap, t4Vector* loc)
+int bxSphereTree::Is2SidedTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* dir,
+                                       t4Vector* overlap, t4Vector* loc)
 {
     float dot;
     {
-        t4Vector toCentre = vu0Sub_28030(*(&self->transCenter), *point1);
+        t4Vector toCentre = vu0Sub_28030(*(&transCenter), *point1);
         dot = vu0Dot_28030(*dir, toCentre);
     }
-    if (SphereTree_GetRadius(self) < __builtin_fabsf(dot)) {
+    if (SphereTree_GetRadius(this) < __builtin_fabsf(dot)) {
         return 0;
     }
     if (dot < 0.0f) {
         t4Vector nd = vu0Scale_28030(*dir, -1.0f);
-        return SphereTree_IsTriCollision(self, point1, point2, point3, &nd, overlap, loc);
+        return SphereTree_IsTriCollision(this, point1, point2, point3, &nd, overlap, loc);
     }
-    return SphereTree_IsTriCollision(self, point1, point2, point3, dir, overlap, loc);
+    return SphereTree_IsTriCollision(this, point1, point2, point3, dir, overlap, loc);
 }
 #endif
 
@@ -490,16 +493,16 @@ extern "C" void bxSphereTree_drawLeaves(void *, int, void *, int, int);
  * Makes sure the tree's data buffer is loaded (as bxSphereTree_IsRiderTreeCollision does) and calls bxSphereTree_drawLeaves from the root: centre
  * +0x80, level 0, index 0, down to the depth stored at info +0xC. Nothing calls it.
  *
- * @param octree  the sphere tree (this)
  */
-extern "C" void bxSphereTree_Draw(bxSphereTree* octree) {
+void bxSphereTree::Draw()
+{
     tSphTreeInfo* temp_4;
 
-    temp_4 = (tSphTreeInfo*)((void*)octree->treeInfo);
+    temp_4 = (tSphTreeInfo*)((void*)treeInfo);
     if ((temp_4->isCompressed) != 0) {
-        octree->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(temp_4);
+        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(temp_4);
     }
-    bxSphereTree_drawLeaves(octree, (octree->treeInfo->depth), &octree->transCenter, 0, 0);
+    bxSphereTree_drawLeaves(this, (treeInfo->depth), &transCenter, 0, 0);
 }
 #endif
 //100%
@@ -669,18 +672,16 @@ void operator_delete(int* p);
  * When this cell is at the key's level, unlinks @p item from the list for its type. Otherwise picks the child octant
  * from the key's coordinate bits, recurses into it and deletes the child when it no longer holds anything.
  *
- * @param node    this cell (On Tour Cell)
  * @param idx     the node type (On Tour NodeType)
  * @param item    the node to remove
  * @param target  the node's cell key
  * @param cur     this cell's key
  */
-extern "C" void nash_Cell_remnode(nash_Cell* node, int idx, nash_Node* item, const nash_CellKey* target,
-                              const nash_CellKey* cur)
+void nash_Cell::remnode(int idx, nash_Node* item, const nash_CellKey* target, const nash_CellKey* cur)
 {
     int lv = cur->level;
     if (target->level == lv) {
-        node->nodesinside[idx].remove(item);
+        nodesinside[idx].remove(item);
         return;
     }
     int sh = lv - target->level - 1;
@@ -692,8 +693,8 @@ extern "C" void nash_Cell_remnode(nash_Cell* node, int idx, nash_Node* item, con
     childKey.level = --lv;
     childKey.y = cur->y * 2 + dy;
     childKey.z = cur->z * 2 + dz;
-    nash_Cell** ch = &node->children[dx][dy][dz];
-    nash_Cell_remnode(*ch, idx, item, target, &childKey);
+    nash_Cell** ch = &children[dx][dy][dz];
+    (*ch)->remnode(idx, item, target, &childKey);
     if ((*ch)->empty()) {
         operator_delete((int*)*ch);
         *ch = 0;
@@ -762,24 +763,22 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
  * child (deleting that child when it becomes empty) and adds it through the new child, allocating the new child if
  * needed.
  *
- * @param node    this cell (On Tour Cell)
  * @param type    the node type (On Tour NodeType)
  * @param item    the node to move
  * @param oldkey  the cell key it was in
  * @param newkey  the cell key it moves to
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_movenode(nash_Cell* node, int type, nash_Node* item, nash_CellKey* oldkey,
-                              nash_CellKey* newkey, nash_CellKey* mykey)
+void nash_Cell::movenode(int type, nash_Node* item, nash_CellKey* oldkey, nash_CellKey* newkey, nash_CellKey* mykey)
 {
     if (newkey->level == mykey->level) {
-        nash_Cell_remnode(node, type, (nash_Node*)item, oldkey, mykey);
-        node->nodesinside[type].prepend(item);
+        remnode(type, (nash_Node*)item, oldkey, mykey);
+        nodesinside[type].prepend(item);
         return;
     }
     if (oldkey->level == mykey->level) {
-        node->nodesinside[type].remove((nash_Node*)item);
-        nash_Cell_addnode(node, type, item, newkey, mykey);
+        nodesinside[type].remove((nash_Node*)item);
+        nash_Cell_addnode(this, type, item, newkey, mykey);
         return;
     }
     int olds = mykey->level - oldkey->level - 1;
@@ -796,8 +795,8 @@ extern "C" void nash_Cell_movenode(nash_Cell* node, int type, nash_Node* item, n
         childkey.x = mykey->x * 2 + newcx;
         childkey.y = mykey->y * 2 + newcy;
         childkey.z = mykey->z * 2 + newcz;
-        nash_Cell*& child = node->children[newcx][newcy][newcz];
-        nash_Cell_movenode(child, type, item, oldkey, newkey, &childkey);
+        nash_Cell*& child = children[newcx][newcy][newcz];
+        child->movenode(type, item, oldkey, newkey, &childkey);
         return;
     }
     nash_CellKey oldchildkey;
@@ -805,8 +804,8 @@ extern "C" void nash_Cell_movenode(nash_Cell* node, int type, nash_Node* item, n
     oldchildkey.x = mykey->x * 2 + oldcx;
     oldchildkey.y = mykey->y * 2 + oldcy;
     oldchildkey.z = mykey->z * 2 + oldcz;
-    nash_Cell*& oldchild = node->children[oldcx][oldcy][oldcz];
-    nash_Cell_remnode(oldchild, type, (nash_Node*)item, oldkey, (&oldchildkey));
+    nash_Cell*& oldchild = children[oldcx][oldcy][oldcz];
+    oldchild->remnode(type, (nash_Node*)item, oldkey, (&oldchildkey));
     if (oldchild->empty()) {
         operator_delete((int*)oldchild);
         oldchild = 0;
@@ -816,7 +815,7 @@ extern "C" void nash_Cell_movenode(nash_Cell* node, int type, nash_Node* item, n
     newchildkey.x = mykey->x * 2 + newcx;
     newchildkey.y = mykey->y * 2 + newcy;
     newchildkey.z = mykey->z * 2 + newcz;
-    nash_Cell*& newchild = node->children[newcx][newcy][newcz];
+    nash_Cell*& newchild = children[newcx][newcy][newcz];
     if (newchild == 0) {
         newchild = new (str_Cell, 0x20000000, 0) tCellNew;
     }
@@ -870,28 +869,27 @@ static inline nash_CellKey Parent_8C20(const nash_CellKey& c)
  * while the root's key does not contain the node's key, wraps the root in a new parent cell one level up (coordinates
  * halved) with the old root as its matching child; then adds the node below the root with nash_Cell_addnode.
  *
- * @param root  the octant (On Tour Octant): its root cell key and root cell
  * @param idx   the node type (On Tour NodeType)
  * @param item  the node to add
  * @param cell  the node's cell key
  */
-extern "C" void nash_Octant_addnode(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* cell)
+void nash_Octant::addnode(int idx, nash_Node* item, nash_CellKey* cell)
 {
-    nash_Cell** pn = &root->rootcell;
-    if (root->rootcell == 0) {
-        root->rootkey = *cell;
+    nash_Cell** pn = &rootcell;
+    if (rootcell == 0) {
+        rootkey = *cell;
         nash_Cell* n = new (str_Cell, 0x20000000, 0) tCellNew;
         *pn = n;
-        root->rootcell->nodesinside[idx].prepend(item);
+        rootcell->nodesinside[idx].prepend(item);
         return;
     }
-    while (!Contains_8C20(root->rootkey, *cell)) {
-        nash_CellKey nc = Parent_8C20(root->rootkey);
-        nash_Cell* n = new (str_Cell, 0x20000000, 0) tCellWrap(root->rootkey, root->rootcell, nc);
-        root->rootkey = nc;
-        root->rootcell = n;
+    while (!Contains_8C20(rootkey, *cell)) {
+        nash_CellKey nc = Parent_8C20(rootkey);
+        nash_Cell* n = new (str_Cell, 0x20000000, 0) tCellWrap(rootkey, rootcell, nc);
+        rootkey = nc;
+        rootcell = n;
     }
-    nash_Cell_addnode(root->rootcell, idx, item, cell, &root->rootkey);
+    nash_Cell_addnode(rootcell, idx, item, cell, &rootkey);
 }
 #endif
 
@@ -1035,7 +1033,7 @@ static inline int Equal_91E0(const nash_CellKey& a, const nash_CellKey& b)
 
 static inline void Remove_91E0(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* from)
 {
-    nash_Cell_remnode(root->rootcell, idx, (nash_Node*)item, from, (nash_CellKey*)root);
+    root->rootcell->remnode(idx, (nash_Node*)item, from, (nash_CellKey*)root);
     if (root->rootcell->empty()) {
         operator_delete((int*)root->rootcell);
         root->rootcell = 0;
@@ -1046,7 +1044,7 @@ static inline void Move_91E0(nash_Octant* root, int idx, nash_Node* item, nash_C
 {
     if (!Contains_8C20(root->rootkey, *(nash_CellKey*)to)) {
         Remove_91E0(root, idx, item, from);
-        nash_Octant_addnode(root, idx, item, (nash_CellKey*)to);
+        root->addnode(idx, item, (nash_CellKey*)to);
     } else {
         nash_Cell_movenode_91E0(root->rootcell, idx, item, (nash_CellKey*)from, (nash_CellKey*)to, root);
     }
@@ -1083,7 +1081,7 @@ extern "C" void nash_Nash_movenode(nash_Octant (*roots)[2][2], int idx, nash_Nod
     unsigned int oz = (unsigned int)oc.z >> 31;
     if (nx != ox || ny != oy || nz != oz) {
         Remove_91E0(&roots[ox][oy][oz], idx, item, &oc);
-        nash_Octant_addnode(&roots[nx][ny][nz], idx, item, (nash_CellKey*)&nc);
+        roots[nx][ny][nz].addnode(idx, item, (nash_CellKey*)&nc);
     } else {
         Move_91E0(&roots[nx][ny][nz], idx, item, &oc, &nc);
     }

@@ -44,7 +44,7 @@ extern void* cInitLoadScreen_vtbl[];
  * NumPadDevices). When pad 0's sample has 11 or more values with values 8 and 10 nonzero, it sets the init load
  * screen's progressive flag, which probably makes the start screen it creates open in mode 2.
  */
-extern "C" void cPreStartScreen_update(cPreStartScreen* self)
+void cPreStartScreen::update()
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
     float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
@@ -58,16 +58,16 @@ extern "C" void cPreStartScreen_update(cPreStartScreen* self)
         loadScreen->mVtbl = cInitLoadScreen_vtbl;
         loadScreen->progressive = 0;
         loadScreen->ending = 0;
-        *(cInitLoadScreen**)&self->nextscreen = loadScreen;
+        *(cInitLoadScreen**)&nextscreen = loadScreen;
         // PORT: setNextModule takes the module pointer as an unsigned int
         cAppMan_setNextModule(app, (unsigned int)loadScreen);
     }
-    self->progressivetimer += 0.01666666753590107f;
+    progressivetimer += 0.01666666753590107f;
     if (PadCache->NumPadDevices > 0) {
-        self->progressivetimer += 0.15000000596046448f;
+        progressivetimer += 0.15000000596046448f;
         if (cPadCache_numButtons(PadCache, 0) >= 11) {
             if (cPadCache_buttonValues(PadCache, 0)[8] != 0.0f && cPadCache_buttonValues(PadCache, 0)[10] != 0.0f) {
-                (self->nextscreen)->progressive = 1;
+                nextscreen->progressive = 1;
             }
         }
     }
@@ -110,9 +110,9 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_loseFocus);
  *
  * @return 1 when the timer is at least 0.75, otherwise 0
  */
-extern "C" int cPreStartScreen_loseFocus(cPreStartScreen* self)
+int cPreStartScreen::loseFocus()
 {
-    if (self->progressivetimer < 0.75f) {
+    if (progressivetimer < 0.75f) {
         return 0;
     }
     return 1;
@@ -175,10 +175,10 @@ extern char str_StartScreen[];
  * progressive flag (+0x4) is set, otherwise 0, and queues it with cAppMan_setNextModule. Update slot (+0x34) of
  * cInitLoadScreen_vtbl.
  */
-extern "C" void cInitLoadScreen_update(cInitLoadScreen* self)
+void cInitLoadScreen::update()
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    if (self->ending != 0) {
+    if (ending != 0) {
         float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade -= 0.0833333358168602f;
         if (*fade < 0.0f) {
@@ -193,7 +193,8 @@ extern "C" void cInitLoadScreen_update(cInitLoadScreen* self)
     }
     if ((int)SSXApp->LoadingModule == 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp,
-            (unsigned int)cStartScreen_cStartScreen((cStartScreen*)cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), self->progressive ? 2 : 0));
+            (unsigned int)cStartScreen_cStartScreen((cStartScreen*)cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0),
+                    progressive ? 2 : 0));
     }
 }
 #endif
@@ -240,9 +241,9 @@ struct sLoadScreen2326D8 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int cInitLoadScreen_loseFocus(cInitLoadScreen* self)
+int cInitLoadScreen::loseFocus()
 {
-    self->ending = 1;
+    ending = 1;
     return SSXApp->LoadIndicator->alpha == 0.0f;
 }
 #endif
@@ -371,9 +372,9 @@ struct sLoadScreen2327B0 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int cPreGameLoadScreen_loseFocus(cPreGameLoadScreen* self)
+int cPreGameLoadScreen::loseFocus()
 {
-    self->ending = 1;
+    ending = 1;
     return SSXApp->LoadIndicator->alpha == 0.0f;
 }
 #endif
@@ -394,9 +395,9 @@ struct sLoadScreen2327E8 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int cPreFELoadScreen_loseFocus(cPreFELoadScreen* self)
+int cPreFELoadScreen::loseFocus()
 {
-    self->ending = 1;
+    ending = 1;
     return SSXApp->LoadIndicator->alpha == 0.0f;
 }
 #endif
@@ -475,11 +476,11 @@ extern void* cGameLoadScreen_vtbl[];
 // Matches only with exceptions enabled for this unit (UNIT_CFLAGS "-fexceptions" in configure.py).
 // `endingThenModule` is reused for the fade direction and the module handle: one variable spanning both blocks is
 // what gives the retail register allocation (the handle is taken before the fields are filled in).
-extern "C" void cPreGameLoadScreen_update(cPreGameLoadScreen* self)
+void cPreGameLoadScreen::update()
 {
     int endingThenModule;
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    endingThenModule = self->ending != 0;
+    endingThenModule = ending != 0;
     if (endingThenModule) {
         float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade -= 0.0833333358168602f;
@@ -532,11 +533,11 @@ extern void* cFELoadScreen_vtbl[];
  */
 // Same shape as cPreGameLoadScreen_update (see the note there): exceptions enabled for this unit, `endingThenModule`
 // reused.
-extern "C" void cPreFELoadScreen_update(cPreFELoadScreen* self)
+void cPreFELoadScreen::update()
 {
     int endingThenModule;
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    endingThenModule = self->ending != 0;
+    endingThenModule = ending != 0;
     if (endingThenModule) {
         float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade -= 0.0833333358168602f;
@@ -619,13 +620,13 @@ extern void* D_0047CA18[];
  * func_00186A08); type 2 pushes a 72-byte "cFEStateProgressive" (cUIState base cUIState_cUIState, vtable D_0047CA18);
  * any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_load(cStartScreen* self)
+void cStartScreen::load()
 {
     GrMan->InitTextures(0x100);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
-    self->mpUI = (cUIEngine*)ui;
+    mpUI = (cUIEngine*)ui;
     cUIEngine_loadFile(ui, str_data_ui_su);
-    self->mpUI->mpLocaleInterface = SSXApp->FELocale;
+    mpUI->mpLocaleInterface = SSXApp->FELocale;
     cFEInput* input = (cFEInput*)operator new(0x1C, str_GLUIInput, 0x100, 0);
     input->mPadNum = 0;
     VPTR_OF(cUIInput, input) = cFEInput_vtbl;
@@ -633,17 +634,17 @@ extern "C" void cStartScreen_load(cStartScreen* self)
     input->mbKeyReady = 0;
     input->miVKey = 0;
     input->miAsciiKey = 0;
-    self->mpUI->mpInput = input;
-    self->mpUI->mpFontInterface = SSXApp->Fonts;
-    int mode = self->meStartScreen_type;
+    mpUI->mpInput = input;
+    mpUI->mpFontInterface = SSXApp->Fonts;
+    int mode = meStartScreen_type;
     if (mode == 0) {
-        void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), self->mpUI);
-        cUIStateStack_push(&self->mpUI->mStateStack, item);
+        void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), mpUI);
+        cUIStateStack_push(&mpUI->mStateStack, item);
     } else if (mode == 2) {
         cUIState* progressiveState = (cUIState*)operator new(72, str_cFEStateProgressive, 0, 0);
-        cUIState_cUIState(progressiveState, self->mpUI);
+        cUIState_cUIState(progressiveState, mpUI);
         VPTR_OF(cListNode, progressiveState) = D_0047CA18;
-        cUIStateStack_push(&self->mpUI->mStateStack, progressiveState);
+        cUIStateStack_push(&mpUI->mStateStack, progressiveState);
     }
 }
 #endif
@@ -670,10 +671,10 @@ static inline void clear_2C98(int* p)
  * Calls cGraphicsMan_UploadTextures, clears cDepthFog_m_Enable, cScreenTint_m_Enable and cLightGlow_m_Enable and sets
  * the clear colour to (0, 0, 0) (SetScreenClearColour, slot 15). GainFocus slot (+0x2C) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_gainFocus(cStartScreen* self)
+void cStartScreen::gainFocus()
 {
     cGraphicsMan_UploadTextures(GrMan);
-    self->DisplayTicks = 0;
+    DisplayTicks = 0;
     clear_2C98(&cDepthFog_m_Enable);
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&cLightGlow_m_Enable);
@@ -711,11 +712,11 @@ extern "C" void cUIEngine_update(void*);
  *
  * Update slot (+0x34) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_update(cStartScreen* self)
+void cStartScreen::update()
 {
-    cLoadScreen_update(self);
-    cUIEngine_update(self->mpUI);
-    (self->DisplayTicks)++;
+    cLoadScreen_update(this);
+    cUIEngine_update(mpUI);
+    (DisplayTicks)++;
 }
 #endif
 
@@ -731,14 +732,14 @@ extern "C" void cGraphicsMan_PurgeTextures(void* world);
  * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with cUIEngine__cUIEngine(engine, 3) when set, clears the
  * pointer and calls cGraphicsMan_PurgeTextures. Purge slot (+0x1C) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_purge(cStartScreen* self)
+void cStartScreen::purge()
 {
     GrMan->FlushRenderer();
-    void* uiEngine = self->mpUI;
+    void* uiEngine = mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
     }
-    self->mpUI = 0;
+    mpUI = 0;
     cGraphicsMan_PurgeTextures(GrMan);
 }
 #endif
@@ -757,13 +758,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int cStartScreen_render(cStartScreen* self)
+int cStartScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
         return 0;
     }
-    if (cFadeScreen_drawFade(self) == 0) {
-        cUIEngine_render2D(self->mpUI);
+    if (cFadeScreen_drawFade(this) == 0) {
+        cUIEngine_render2D(mpUI);
     }
     GrMan->DrawFrame();
     return 1;
@@ -864,16 +865,16 @@ struct cLoadItemC_2E20 {
  *
  * Load slot (+0x14) of cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
+void cGameLoadScreen::load()
 {
     cPS2GraphicsMan* w = GrMan;
     w->InitTextures(0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
-    self->mpUI = (cUIEngine*)ui;
+    mpUI = (cUIEngine*)ui;
     cUIEngine_loadFile(ui, str_data_ui_gl);
-    ((sUI_2E20*)self->mpUI)->f8 = (int)SSXApp->Fonts;
-    ((sUI_2E20*)self->mpUI)->f10 = (int)SSXApp->FELocale;
+    ((sUI_2E20*)mpUI)->f8 = (int)SSXApp->Fonts;
+    ((sUI_2E20*)mpUI)->f10 = (int)SSXApp->FELocale;
     sNode_2E20* n = (sNode_2E20*)operator new(0x1C, str_GLUIInput, 0x100, 0);
     n->f4 = 0;
     n->f8 = cFEInput_vtbl;
@@ -881,7 +882,7 @@ extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
     n->fC = 0;
     n->f10 = 0;
     n->f14 = 0;
-    ((sUI_2E20*)self->mpUI)->fC = n;
+    ((sUI_2E20*)mpUI)->fC = n;
     void* item;
     if (gInLodge == 0) {
         signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
@@ -893,7 +894,7 @@ extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
             goto other;
     }
 makeA:
-    item = new (str_cGameLoadStateOutLodge, 0, 0) cLoadItemA_2E20(self->mpUI);
+    item = new (str_cGameLoadStateOutLodge, 0, 0) cLoadItemA_2E20(mpUI);
     goto done;
 other:
     {
@@ -905,16 +906,16 @@ other:
                 x = raceDbBytes[0x48] != 6;
         }
         if (x) {
-            item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(self->mpUI);
+            item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(mpUI);
         } else {
-            cLoadItemC_2E20* loadState = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(self->mpUI);
+            cLoadItemC_2E20* loadState = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(mpUI);
             item = loadState;
-            loadState->owner = ((void*)self);
-            cGameLoadScreen_loadTexture_2E20(self, 0);
+            loadState->owner = ((void*)this);
+            cGameLoadScreen_loadTexture_2E20(this, 0);
         }
     }
 done:
-    cUIStateStack_push(&self->mpUI->mStateStack, item);
+    cUIStateStack_push(&mpUI->mStateStack, item);
 }
 #endif
 
@@ -960,7 +961,7 @@ static inline int loadTex_3048(char* data, const char* name)
  * Textures go through GrMan's slot 46, the file data is freed and the big file closed. On Tour's version also
  * takes a state argument.
  */
-extern "C" void cGameLoadScreen_loadTexture(cGameLoadScreen* self)
+void cGameLoadScreen::loadTexture()
 {
     char name[0x70];
     cBigFile bf;
@@ -968,7 +969,7 @@ extern "C" void cGameLoadScreen_loadTexture(cGameLoadScreen* self)
     void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
-        int* slot = (int*)(&self->mTexID[0]);
+        int* slot = (int*)(&mTexID[0]);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
             char* data = FILE_loadpackz(name, 0x3000100);
@@ -985,7 +986,7 @@ extern "C" void cGameLoadScreen_loadTexture(cGameLoadScreen* self)
             n = 0;
         sprintf(name, str_pct_s_ssh, str_at_plus_J[n]);
         char* data = FILE_loadpackz(name, 0x3000100);
-        self->mTexID[0] = loadTex_3048(data, str_coursePics);
+        mTexID[0] = loadTex_3048(data, str_coursePics);
         if (data != 0)
             cMemMan_free(data);
         cBigFile__cBigFile(&bf, 2);
@@ -1057,16 +1058,16 @@ extern "C" void func_0028FA98(void* self, float v);
  * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (cAudioInterface_bxAudio). Purge slot (+0x1C) of
  * cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
+void cGameLoadScreen::purge()
 {
     GrMan->FlushRenderer();
-    void* uiEngine = self->mpUI;
+    void* uiEngine = mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
     }
     int i;
     for (i = 0; i < 2; i++) {
-        int textureId = self->mTexID[i];
+        int textureId = mTexID[i];
         if (textureId != 0) {
             GrMan->RemoveTexture(textureId);
         }
@@ -1091,13 +1092,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int cGameLoadScreen_render(cGameLoadScreen* self)
+int cGameLoadScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
         return 0;
     }
-    if (cFadeScreen_drawFade(self) == 0) {
-        cUIEngine_render2D(self->mpUI);
+    if (cFadeScreen_drawFade(this) == 0) {
+        cUIEngine_render2D(mpUI);
     }
     GrMan->DrawFrame();
     return 1;
@@ -1116,10 +1117,10 @@ void cLoadScreen_update(void*);
  *
  * Update slot (+0x34) of cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_update(cGameLoadScreen* self)
+void cGameLoadScreen::update()
 {
-    cUIEngine_update(self->mpUI);
-    cLoadScreen_update(self);
+    cUIEngine_update(mpUI);
+    cLoadScreen_update(this);
 }
 #endif
 

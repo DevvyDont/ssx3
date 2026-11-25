@@ -25,6 +25,9 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cWorldSphere {
     // --- cWorldIntersectType (On Tour 0x60; data 0x00-0x50, then the vptr)
     int mPrecision;                 // 0x000 [O] tIntPrecision; [R] ctor: 0 when isLow, else 1;
@@ -52,6 +55,23 @@ struct cWorldSphere {
     t4Vector origCen;               // 0x080 [O]; [R] ctor = acen; [U] Transform/UnTransform read it
     float origRad;                  // 0x090 [O]; [R] ctor = arad; [U] Transform/UnTransform read it
     char unk_094[0xC];              // 0x094 padding (16-byte aligned class)
+
+    // Methods bound to their retail symbols by asm labels.
+    int IsInBoxTransformed(t4Vector* mn, t4Vector* mx) __asm__("cWorldSphere_IsInBoxTransformed");
+    void Transform(t4Vector* mat, float scale) __asm__("cWorldSphere_Transform");
+    void UnTransform() __asm__("cWorldSphere_UnTransform");
+    int IsSphTreeInt(void* tree, tIntersectInfo* hit) __asm__("cWorldSphere_IsSphTreeInt");
+    int IsBoxInt(void* bMin, void* bMax, tIntersectInfo* box) __asm__("cWorldSphere_IsBoxInt");
+    int IsTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* plane, t4Vector* outPos,
+                 t4Vector* outDir, float* outDist)
+        __asm__("cWorldSphere_IsTriInt");
+    int Is2SidedTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* plane, t4Vector* outPos,
+                       t4Vector* outDir, float* outDist)
+        __asm__("cWorldSphere_Is2SidedTriInt");
+    int edgeSphereCollision(t4Vector* vert0, t4Vector* vert1, t4Vector* vert2)
+        __asm__("cWorldSphere_edgeSphereCollision");
+    int isIntersectingPlane(t4Vector* plane, t4Vector* point, float* out) __asm__("cWorldSphere_isIntersectingPlane");
+    float GetIdealParam() __asm__("cWorldSphere_GetIdealParam");
 };
 
 CHECK_OFFSET(cWorldSphere, mPrecision, 0x000);

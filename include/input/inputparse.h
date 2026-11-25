@@ -106,6 +106,31 @@ struct cInputMapParser {
                                     //       cInputMapParser_compileBinaryNode / cInputMapParser_compileUnaryNode pop
                                     //       and push output registers
     int NumFreeRegisters;           // 0x109E8 [O]; [P] same assert; [R] = 0, then counts the 63 pushes; [U] as above
+
+    // Methods bound to their retail symbols by asm labels.
+    void skipPastSemicolon() __asm__("cInputMapParser_skipPastSemicolon");
+    void* newParseNode() __asm__("cInputMapParser_newParseNode");
+    void freeParseNode(tParseNode* node) __asm__("cInputMapParser_freeParseNode");
+    int lookupButtonName(char* name) __asm__("cInputMapParser_lookupButtonName");
+    int lookupModifierName(const char* name) __asm__("cInputMapParser_lookupModifierName");
+    int lookupConfigName(char* name) __asm__("cInputMapParser_lookupConfigName");
+    tIdentifier* lookupIdentifierName(const char* name) __asm__("cInputMapParser_lookupIdentifierName");
+    int configToRegister(int varIndex) __asm__("cInputMapParser_configToRegister");
+    int buttonToRegister(int inputIndex, int modifier) __asm__("cInputMapParser_buttonToRegister");
+    void readToken() __asm__("cInputMapParser_readToken");
+    void parseFile() __asm__("cInputMapParser_parseFile");
+    void parseStatement() __asm__("cInputMapParser_parseStatement");
+    void* parseExpression() __asm__("cInputMapParser_parseExpression");
+    void* parseOr() __asm__("cInputMapParser_parseOr");
+    void* parseAnd() __asm__("cInputMapParser_parseAnd");
+    void* parseCompare() __asm__("cInputMapParser_parseCompare");
+    void* parseSum() __asm__("cInputMapParser_parseSum");
+    void* parseProduct() __asm__("cInputMapParser_parseProduct");
+    void* parseTerm() __asm__("cInputMapParser_parseTerm");
+    void* parseBinaryFunc(int op) __asm__("cInputMapParser_parseBinaryFunc");
+    void* parseUnaryFunc(int op) __asm__("cInputMapParser_parseUnaryFunc");
+    int compileStatement(const char* name, int* out, int max, int defaultModifier)
+        __asm__("cInputMapParser_compileStatement");
 };
 
 CHECK_OFFSET(cInputMapParser, File, 0x00000);
@@ -167,6 +192,19 @@ struct cInputPreProcessor {
     int CurrentChar;                // 0xC [O]; [U] readChar stores the next byte or -1 at the end of the source; every
                                     //      reader compares it ('\n', '/', '*', '#'); copyLine / skipCComment /
                                     //      skipCppComment / readCmdLine pass its low byte to writeChar (lb 0xC)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* loadFileSize(char* path, int* outSize) __asm__("cInputPreProcessor_loadFileSize");
+    void readFile(int path, int fn) __asm__("cInputPreProcessor_readFile");
+    int copyLine(tInputSource* isrc, int path, int fn) __asm__("cInputPreProcessor_copyLine");
+    void writeString(char* str) __asm__("cInputPreProcessor_writeString");
+    void writeChar(char ch) __asm__("cInputPreProcessor_writeChar");
+    void writeTagLine(int line, int name) __asm__("cInputPreProcessor_writeTagLine");
+    void readChar(tInputSource* isrc) __asm__("cInputPreProcessor_readChar");
+    void skipCComment(tInputSource* isrc, int path, int fileName) __asm__("cInputPreProcessor_skipCComment");
+    void skipCppComment(tInputSource* isrc, int path, int fileName) __asm__("cInputPreProcessor_skipCppComment");
+    void skipToEOL(tInputSource* isrc) __asm__("cInputPreProcessor_skipToEOL");
+    void readCmdLine(tInputSource* isrc, int path, int fn) __asm__("cInputPreProcessor_readCmdLine");
 };
 
 CHECK_OFFSET(cInputPreProcessor, OutputTop, 0x0);
@@ -203,6 +241,11 @@ struct cInputExec {
                                     //       returns &Temp[i], getRegister reads Temp[id] for id < 0x40
     float Config[32];               // 0x108 [O]; [P] kNumConfigRegisters asserts; [U] getConfig reads Config[i] (i != 0);
                                     //       cInputMap_getValue1 / getState1 store configs 1..8 (0x10C..0x128)
+
+    // Methods bound to their retail symbols by asm labels.
+    float getRegister(unsigned int id) __asm__("cInputExec_getRegister");
+    void* getTempReg(int i) __asm__("cInputExec_getTempReg");
+    float getConfig(int varIndex) __asm__("cInputExec_getConfig");
 };
 
 CHECK_OFFSET(cInputExec, DefaultButtonModifier, 0x000);

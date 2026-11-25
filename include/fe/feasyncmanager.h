@@ -29,6 +29,20 @@ CHECK_SIZE(tFEAsyncFile, 0x11C);
 struct cFEAsyncManager {
     tFEAsyncFile fileList[5];       // 0x000 [O]
     int mMapGfxBigFile;             // 0x58C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void Load3PeakPic(int slot, int useAsync) __asm__("cFEAsyncManager_Load3PeakPic");
+    void Load1PeakPic(int pic, int slot, int useAsync) __asm__("cFEAsyncManager_Load1PeakPic");
+    void LoadLocationPic(int id, int slot, int useAsync) __asm__("cFEAsyncManager_LoadLocationPic");
+    void UnloadFEAsyncFile(int idx) __asm__("cFEAsyncManager_UnloadFEAsyncFile");
+    int GetFileStatus(int index) __asm__("cFEAsyncManager_GetFileStatus__FP15cFEAsyncManageri");
+    void SetFileStatus(int index, int status) __asm__("cFEAsyncManager_SetFileStatus__FP15cFEAsyncManagerii");
+    void Update() __asm__("cFEAsyncManager_Update");
+    int GetFreeAsyncFile() __asm__("cFEAsyncManager_GetFreeAsyncFile");
+    void FlushFEAsyncTextures() __asm__("cFEAsyncManager_FlushFEAsyncTextures");
+    void LoadDataFile(int idx) __asm__("cFEAsyncManager_LoadDataFile");
+    void Init() __asm__("cFEAsyncManager_Init");
+    void UnloadAll() __asm__("cFEAsyncManager_UnloadAll");
 };
 
 CHECK_OFFSET(cFEAsyncManager, fileList, 0x000);

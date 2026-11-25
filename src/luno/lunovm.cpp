@@ -794,13 +794,13 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_writeToReplayFrame);
  * @param stream  the replay frame to write to
  * @param base  the address the chunk pointer is stored relative to
  */
-extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, int base)
+void luno_cLunoFunc::writeToReplayFrame(cBxReplayFrame* stream, int base)
 {
     int off;
     int secondWord;
-    off = (int)self->Chunk - base;
+    off = (int)Chunk - base;
     stream->write((const char*)&off, 4);
-    secondWord = self->FuncNum;
+    secondWord = FuncNum;
     stream->write((const char*)&secondWord, 4);
 }
 #endif
@@ -819,13 +819,13 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_readFromReplayFrame);
  * @param stream  the replay frame to read from
  * @param base  the address the chunk pointer was stored relative to
  */
-extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, const char* base)
+void luno_cLunoFunc::readFromReplayFrame(cBxReplayFrame* stream, const char* base)
 {
     int buf[2];
     stream->read((char*)&buf[0], 4);
-    self->Chunk = base + buf[0];
+    Chunk = base + buf[0];
     stream->read((char*)&buf[1], 4);
-    self->FuncNum = buf[1];
+    FuncNum = buf[1];
 }
 #endif
 
@@ -1491,7 +1491,7 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, cBxReplayFram
 {
     stream->write((const char*)&self->type, 4);
     if (self->type == 5) {
-        luno_cLunoFunc_writeToReplayFrame((luno_cLunoFunc*)self, stream, base);
+        ((luno_cLunoFunc*)self)->writeToReplayFrame(stream, base);
     } else if (self->type == 4) {
         luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
@@ -1532,7 +1532,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, cBxReplayFra
         luno_cLunoFunc pair;
         (*(int*)&pair.Chunk) = 0;
         pair.FuncNum = 0;
-        luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), stream, (const char*)base);
+        pair.readFromReplayFrame(stream, (const char*)base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }

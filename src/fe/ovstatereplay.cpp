@@ -345,8 +345,8 @@ extern "C" void cOVState_REPLAY_onUpdate(cOVState_REPLAY* vself)
     if (self->mShowPopupMenu == 0) {
         cReplay_updateCameraSelect(SSXApp->Game->Replay);
     }
-    cOVState_REPLAY_setupCameraName((cOVState_REPLAY*)self);
-    cOVState_REPLAY_setupTicker((cOVState_REPLAY*)self);
+    self->setupCameraName();
+    self->setupTicker();
 }
 #endif
 
@@ -391,10 +391,10 @@ extern char D_004A2138[];
  * reaches.
  */
 // Shows the name of the current replay camera.
-extern "C" void cOVState_REPLAY_setupCameraName(cOVState_REPLAY* self)
+void cOVState_REPLAY::setupCameraName()
 {
     long buf[2];
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_camera));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_camera));
     if (text == 0)
         return;
     unsigned int cam = (unsigned int)SSXApp->Game->Replay->CurrentReplayCamIndex;
@@ -428,9 +428,9 @@ extern char str_percentcomplete[];
  *
  * x = 170 + 315 * PlaybackTick / EndRecordTick (0 when nothing was recorded).
  */
-extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self)
+void cOVState_REPLAY::setupTicker()
 {
-    char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_percentcomplete));
+    char* obj = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_percentcomplete));
     if (obj != 0) {
         t3Vector pos = *(t3Vector*)(obj + 0x44);
         cReplay* replay = SSXApp->Game->Replay;

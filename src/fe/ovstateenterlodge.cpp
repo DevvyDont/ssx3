@@ -274,13 +274,13 @@ extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
  * Reads the queue at cWScriptMan_TheWScriptMan + 0x1C4 with tMissionMenuQueue_getNextEntry; its entry's first word, or
  * else the local mission id at +0x2A0, is stored as the overlay's mission id (+0x9C).
  */
-extern "C" void cOVState_BIGCHALLENGE_START_getChallengeData(cOVState_BIGCHALLENGE_START* self)
+void cOVState_BIGCHALLENGE_START::getChallengeData()
 {
     int* queueEntry = tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
     if (queueEntry != 0) {
-        self->mMissionId = *queueEntry;
+        mMissionId = *queueEntry;
     } else {
-        self->mMissionId = *(int*)((char*)cWScriptMan_TheWScriptMan + 0x2A0);
+        mMissionId = *(int*)((char*)cWScriptMan_TheWScriptMan + 0x2A0);
     }
 }
 #endif
@@ -404,9 +404,9 @@ extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
  * Stores the first word of tMissionMenuQueue_getNextEntry(cWScriptMan_TheWScriptMan + 0x1C4) as the mission id (+0x9C).
  * Unlike cOVState_BIGCHALLENGE_START_getChallengeData it does not check for an empty queue (likely bug if the queue can be empty: a null dereference).
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_getChallengeData(cOVState_BIGCHALLENGE_FAIL* self)
+void cOVState_BIGCHALLENGE_FAIL::getChallengeData()
 {
-    self->mMissionId = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+    mMissionId = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
 }
 #endif
 
@@ -854,17 +854,17 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
  *
  * @param pWidget  the chosen item (On Tour: cUIThing *pWidget)
  */
-extern "C" void cOVState_TOPTIMES_handleNext(cOVState_TOPTIMES* self, cUIThing* pWidget)
+void cOVState_TOPTIMES::handleNext(cUIThing* pWidget)
 {
-    if (self->mIsNextScreenPending == 0) {
+    if (mIsNextScreenPending == 0) {
         int choice = pWidget->mMiscData;
         switch (choice) {
         case 0:
-            self->mIsNextScreenPending = 1;
+            mIsNextScreenPending = 1;
             cOVStateManager_mStatus = 1;
             break;
         case 1:
-            self->mIsNextScreenPending = choice;
+            mIsNextScreenPending = choice;
             cOVStateManager_triggerOverlay(19);
             break;
         }

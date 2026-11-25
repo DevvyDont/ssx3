@@ -212,6 +212,8 @@ CHECK_SIZE(cBankMonitorInstance, 0xC0);
 // part
 // that opens cMonitor below (0x88 bytes; the virtual base cSoundSys follows it in a complete object, so only the
 // non-virtual size is checked).
+struct t4Vector;
+
 struct cSndPlayOpts {
     cSoundSys* mpVSoundSys;          // 0x000 [R] g++ 2.95 virtual-base pointer to cSoundSys (placed after the 0x88-byte
                                      //       non-virtual part in a complete object); every ctor/dtor in the chain loads
@@ -236,6 +238,57 @@ struct cSndPlayOpts {
     int* mCloseOnEnd;                // 0x07C [R] operator new[](0x10, "mCloseOnEnd") (On Tour bool*)
     int* mTwoPlayerPan;              // 0x080 [R] operator new[](0x10, "mTwoPlayerPan") (On Tour bool*)
     int* mTwoPlayerSide;             // 0x084 [R] operator new[](0x10, "mTwoPlayerSide")
+
+    // Methods bound to their retail symbols by asm labels.
+    int OPTS_Instance() __asm__("cSndPlayOpts_OPTS_Instance");
+    int OPTS_Current() __asm__("cSndPlayOpts_OPTS_Current");
+    int OPTS_GetPos() __asm__("cSndPlayOpts_OPTS_GetPos");
+    int OPTS_GetStaticPos() __asm__("cSndPlayOpts_OPTS_GetStaticPos");
+    int OPTS_GetVol() __asm__("cSndPlayOpts_OPTS_GetVol");
+    float* OPTS_GetVolControl() __asm__("cSndPlayOpts_OPTS_GetVolControl");
+    tSndCallback OPTS_GetCallback() __asm__("cSndPlayOpts_OPTS_GetCallback");
+    unsigned short OPTS_GetAzimuth() __asm__("cSndPlayOpts_OPTS_GetAzimuth");
+    short OPTS_GetElevation() __asm__("cSndPlayOpts_OPTS_GetElevation");
+    int OPTS_GetDelay() __asm__("cSndPlayOpts_OPTS_GetDelay");
+    void* OPTS_GetPtr() __asm__("cSndPlayOpts_OPTS_GetPtr");
+    int OPTS_GetViewport() __asm__("cSndPlayOpts_OPTS_GetViewport");
+    float OPTS_GetVanish() __asm__("cSndPlayOpts_OPTS_GetVanish");
+    float OPTS_GetRadius() __asm__("cSndPlayOpts_OPTS_GetRadius");
+    int OPTS_GetExternalVol() __asm__("cSndPlayOpts_OPTS_GetExternalVol");
+    int OPTS_GetMapToMaxVol() __asm__("cSndPlayOpts_OPTS_GetMapToMaxVol");
+    int OPTS_GetCloseOnEnd() __asm__("cSndPlayOpts_OPTS_GetCloseOnEnd");
+    int OPTS_GetTwoPlayerPan() __asm__("cSndPlayOpts_OPTS_GetTwoPlayerPan");
+    int OPTS_GetTwoPlayerSide() __asm__("cSndPlayOpts_OPTS_GetTwoPlayerSide");
+    void OPTS_LibDefault() __asm__("cSndPlayOpts_OPTS_LibDefault");
+    void OPTS_SetDefault() __asm__("cSndPlayOpts_OPTS_SetDefault");
+    void OPTS_Reset() __asm__("cSndPlayOpts_OPTS_Reset");
+    void OPTS_Open() __asm__("cSndPlayOpts_OPTS_Open");
+    void OPTS_Close() __asm__("cSndPlayOpts_OPTS_Close");
+    void OPTS_Key(signed char value) __asm__("cSndPlayOpts_OPTS_Key");
+    void OPTS_Velocity(signed char value) __asm__("cSndPlayOpts_OPTS_Velocity");
+    void OPTS_Vol(int vol) __asm__("cSndPlayOpts_OPTS_Vol");
+    void OPTS_ScaleVol(float scale) __asm__("cSndPlayOpts_OPTS_ScaleVol");
+    void OPTS_ScaleVol1(int n) __asm__("cSndPlayOpts_OPTS_ScaleVol1");
+    void OPTS_Bend(signed char value) __asm__("cSndPlayOpts_OPTS_Bend");
+    void OPTS_PitchMult(short value) __asm__("cSndPlayOpts_OPTS_PitchMult");
+    void OPTS_DelayCount(int value) __asm__("cSndPlayOpts_OPTS_DelayCount");
+    void OPTS_DelayTime(int value) __asm__("cSndPlayOpts_OPTS_DelayTime");
+    void OPTS_DelayFeedback(int value) __asm__("cSndPlayOpts_OPTS_DelayFeedback");
+    void OPTS_DelayLevel(int value) __asm__("cSndPlayOpts_OPTS_DelayLevel");
+    void OPTS_Azimuth(short value) __asm__("cSndPlayOpts_OPTS_Azimuth");
+    void OPTS_Elevation(short value) __asm__("cSndPlayOpts_OPTS_Elevation");
+    void OPTS_Position(const t4Vector* position) __asm__("cSndPlayOpts_OPTS_Position");
+    void OPTS_StaticPos() __asm__("cSndPlayOpts_OPTS_StaticPos");
+    void OPTS_Viewport(int viewport) __asm__("cSndPlayOpts_OPTS_Viewport");
+    void OPTS_LowPassCutOffFrequency(int value) __asm__("cSndPlayOpts_OPTS_LowPassCutOffFrequency");
+    void OPTS_Ptr(void* userPtr) __asm__("cSndPlayOpts_OPTS_Ptr");
+    void OPTS_VolControl(float* volControl) __asm__("cSndPlayOpts_OPTS_VolControl");
+    void OPTS_Callback(tSndCallback callback) __asm__("cSndPlayOpts_OPTS_Callback");
+    void OPTS_ExternalVol(int externalVol) __asm__("cSndPlayOpts_OPTS_ExternalVol");
+    void OPTS_MapToMaxVol(int mapToMaxVol) __asm__("cSndPlayOpts_OPTS_MapToMaxVol");
+    void OPTS_CloseOnEnd(int closeOnEnd) __asm__("cSndPlayOpts_OPTS_CloseOnEnd");
+    void OPTS_TwoPlayerPan(int twoPlayerPan) __asm__("cSndPlayOpts_OPTS_TwoPlayerPan");
+    void OPTS_TwoPlayerSide(int twoPlayerSide) __asm__("cSndPlayOpts_OPTS_TwoPlayerSide");
 };
 
 CHECK_OFFSET(cSndPlayOpts, mDefault, 0x004);
@@ -282,6 +335,13 @@ struct cMonitor {
                                            //       cMonitor_MONITOR_GetFreeInstance/cMonitor_MONITOR_Create/cMonitor_MONITOR_Destroy/cMonitor_MONITOR_DestroyAll/cMonitor_MONITOR_DestroyAll1
     void** mVtbl;                    // 0x8D8 [R] cMonitor_vtbl (cMonitor ctor/dtor); cBankMonitor_vtbl in a
                                      //       cBankMonitor (shared primary vptr)
+
+    // Methods bound to their retail symbols by asm labels.
+    void MONITOR_Pause() __asm__("cMonitor_MONITOR_Pause");
+    void MONITOR_Resume() __asm__("cMonitor_MONITOR_Resume");
+    int MONITOR_Paused() __asm__("cMonitor_MONITOR_Paused");
+    int MONITOR_Counter() __asm__("cMonitor_MONITOR_Counter");
+    float MONITOR_Delta() __asm__("cMonitor_MONITOR_Delta");
 };
 
 struct cBankMonitor {
@@ -327,6 +387,14 @@ struct cBankMonitor {
                                      //       (cBankMonitor_BANKMONITOR_Resume) 0
     cBankMonitorInstance* mBankMonitorInstance; // 0x8EC [O]; [R] operator new[](64 x 0xC0, "mBankMonitorInstance"); [P]
                                                 //       BANKMONITOR_GetInstance (preview 0x8E0 -> 0x8EC, seen)
+
+    // Methods bound to their retail symbols by asm labels.
+    int BANKMONITOR_GetInstance(int instance) __asm__("cBankMonitor_BANKMONITOR_GetInstance");
+    int BANKMONITOR_Paused() __asm__("cBankMonitor_BANKMONITOR_Paused");
+    void BANKMONITOR_SetDoppler(int enable) __asm__("cBankMonitor_BANKMONITOR_SetDoppler");
+    void BANKMONITOR_SetPositional(int enable) __asm__("cBankMonitor_BANKMONITOR_SetPositional");
+    int BANKMONITOR_DopplerEnabled() __asm__("cBankMonitor_BANKMONITOR_DopplerEnabled");
+    int BANKMONITOR_PositionalEnabled() __asm__("cBankMonitor_BANKMONITOR_PositionalEnabled");
 };
 
 CHECK_SIZE(cDelayOpts, 0x10);

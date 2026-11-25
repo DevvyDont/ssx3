@@ -21,6 +21,8 @@ struct tInstanceRecord;
 struct tModifierBlock;
 struct tFloatBoundBoxInfo;
 
+struct cBxReplayFrame;
+
 struct cFloatingNode : public cMoveNode {
     // cMoveNode (object/movenode.h, 0x2C): the vptr at 0x0C:
     //   [R] each ctor stores its vtable; [U] every virtual call (cMoveNode_apply, update, render, ...)
@@ -48,6 +50,9 @@ struct cFloatingNode : public cMoveNode {
                                     //      dtor
     tFloatBoundBoxInfo* Info;       // 0x78 [O]; [R] cFloatingNode_initInfo: cMemMan_alloc(0x30, "FloatingBoundBox"); [U]
                                     //      getBoundBox, purgeInfo, update/restoreOverlapSystem
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFloatingNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFloatingNode_cFloatingNode1");
 };
 
 CHECK_OFFSET(cFloatingNode, ZSpring, 0x2C);

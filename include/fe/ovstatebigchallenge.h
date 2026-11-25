@@ -48,6 +48,9 @@ struct cOVState_BIGCHALLENGE_START : public cOVState {
     int mMissionId;                 // 0x09C [O] (On Tour unsigned int); [U] getChallengeData stores the next
                                     //       mission-queue entry's id (or cWScriptMan's current mission, +0x2A0);
                                     //       onGainTransition / onWidgetEvent read it
+
+    // Methods bound to their retail symbols by asm labels.
+    void getChallengeData() __asm__("cOVState_BIGCHALLENGE_START_getChallengeData");
 };
 
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mMissionId, 0x9C);
@@ -66,6 +69,13 @@ struct cOVState_BIGCHALLENGE_FAIL : public cOVState {
                                     //       onWidgetEvent reads it
     int mRider;                     // 0x0A0 [O]; [R] placed by the allocation size (0xA4) and On Tour's order only:
                                     //       no retail code reads or writes it
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cOVState_BIGCHALLENGE_FAIL_2(int engine, int overlayId)
+        __asm__("cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2");
+
+    // Methods bound to their retail symbols by asm labels.
+    void getChallengeData() __asm__("cOVState_BIGCHALLENGE_FAIL_getChallengeData");
 };
 
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mMissionId, 0x9C);

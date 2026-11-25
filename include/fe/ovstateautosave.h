@@ -68,6 +68,9 @@ struct cOVState_AUTOSAVE : public cFEMemCard {
                                     //       cFEStateLodge, 0 set up a new race and cPreGameLoadScreen
     int mLastProcessState;          // 0x230 [O] (bool); [R] the ctor clears it; [U] displayOn compares mIsProcessing
                                     //       with it, returns when equal, else stores it and refreshes the icon / text
+
+    // Methods bound to their retail symbols by asm labels.
+    void displayOn() __asm__("cOVState_AUTOSAVE_displayOn");
 };
 
 CHECK_OFFSET(cOVState_AUTOSAVE, mParentScreen, 0x22C);

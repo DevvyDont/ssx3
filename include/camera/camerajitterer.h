@@ -31,6 +31,11 @@ struct cCameraJitterer {
     float CurrRollJitterTime;       // 0x24 [O]; [R] 1.05f; [U] updateRollJitter (one sw zero); getRollJitter
     float FocusJitterTime;          // 0x28 [O]; [R] 0.05f; [U] updatePositionalJitter, getPositionalJitter
     float RollJitterTime;           // 0x2C [O]; [R] 0.05f; [U] updateRollJitter, getRollJitter
+
+    // Methods bound to their retail symbols by asm labels.
+    void updatePositionalJitter(float amount) __asm__("cCameraJitterer_updatePositionalJitter");
+    void updateRollJitter(float amount) __asm__("cCameraJitterer_updateRollJitter");
+    float getRollJitter() __asm__("cCameraJitterer_getRollJitter");
 };
 
 CHECK_OFFSET(cCameraJitterer, OldRandomSideJitter, 0x00);

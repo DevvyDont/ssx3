@@ -77,6 +77,16 @@ struct cRealFE {
                                     //       the movie on a button press while set; gainFocus / loseFocus clear it
     int mWaitRenderNum;             // 0xB5ADC [O]; [R] 0; [U] update does nothing while it is set and sets 1 after a
                                     //       movie; render counts it down; gainFocus / loseFocus clear it
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cRealFE_gainFocus");
+    void load() __asm__("cRealFE_load");
+    int loseFocus() __asm__("cRealFE_loseFocus");
+    void purge() __asm__("cRealFE_purge");
+    int render() __asm__("cRealFE_render");
+    void update() __asm__("cRealFE_update");
+    void purgeCharAnimations() __asm__("cRealFE_purgeCharAnimations");
+    void loadStartState() __asm__("cRealFE_loadStartState");
 };
 
 CHECK_OFFSET(cRealFE, mVtbl, 0x000);
@@ -140,6 +150,9 @@ struct cFE {
     cFXLoader* mFXLoader;           // 0xB5AA0 [O]; [R] cFE_cFE: cMemMan_alloc(1, "FXLoader_FE") + cFXLoader_cFXLoader;
                                     //       cFE__cFE destroys it when set
     char unk_B5AA4[0xC];            // 0xB5AA4 tail padding (16-byte alignment; no access)
+
+    // Methods bound to their retail symbols by asm labels.
+    int getUI() __asm__("cFE_getUI");
 };
 
 CHECK_OFFSET(cFE, mVtbl, 0x000);

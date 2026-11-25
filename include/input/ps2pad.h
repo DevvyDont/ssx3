@@ -38,6 +38,9 @@
 // include this header; a unit that includes both would have to drop its local class.
 struct cPadDevice {
     void** mVtbl;                   // 0x000 [R] cPadDevice_vtbl / the derived device's vtable
+
+    // Methods bound to their retail symbols by asm labels.
+    void clearAllVibrations() __asm__("cPadDevice_clearAllVibrations");
 };
 
 CHECK_OFFSET(cPadDevice, mVtbl, 0x000);
@@ -79,6 +82,10 @@ struct cPS2PadDevice {
     char unk_060[0x20];             // 0x060 never accessed (likely padding that aligns the DMA buffer below)
     unsigned char mPadBuf[0x100];   // 0x080 [U] sampleButtons passes this + 0x80 to the port-open call func_003FF708
                                     //       (libpad's 256-byte DMA buffer); the 0x180 allocation ends with it
+
+    // Methods bound to their retail symbols by asm labels.
+    int numActuators() __asm__("cPS2PadDevice_numActuators__FPv");
+    void setActuator(int mode, float level) __asm__("cPS2PadDevice_setActuator");
 };
 
 CHECK_OFFSET(cPS2PadDevice, mVtbl, 0x000);

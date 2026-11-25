@@ -51,6 +51,9 @@ struct cOVState_TRANSPORT : public cOVState {
                                     //       bool[3][3][8] tables, are words); [R] the ctors run cUITemplate_MAP_init
                                     //       on it; [U] every method passes &mMap to the same-named cUITemplate_MAP_*
                                     //       method
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cOVState_TRANSPORT_2(int engine, int overlayId) __asm__("cOVState_TRANSPORT_cOVState_TRANSPORT_2");
 };
 
 CHECK_OFFSET(cOVState_TRANSPORT, mMap, 0x9C);

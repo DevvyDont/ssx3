@@ -18,6 +18,9 @@ struct cUIState;
 struct cFEStateBonusMaterial : public cUIState {
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateBonusMaterial
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateBonusMaterial1() __asm__("cFEStateBonusMaterial_cFEStateBonusMaterial1");
 };
 
 CHECK_SIZE(cFEStateBonusMaterial, 0x48);

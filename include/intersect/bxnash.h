@@ -109,6 +109,9 @@ CHECK_SIZE(nash_NodeList, 0x4);
 // deleted by nash_Cell_remnode / movenode when it becomes empty. No vtable. Methods: nash_Cell_addnode / remnode /
 // movenode (intersect/aifwddiff), nash_Cell_descend .. descend6 (intersect/worldsphtree: the whole-subtree walkers of
 // the queries); the nash_privy_QueryHelper_helpX* walkers take a Cell as their fifth argument.
+struct OverlapEverythingCallback;
+struct OverlapInstancesCallback;
+
 struct nash_Cell {
     nash_Cell* children[2][2][2];   // 0x000 [O] Cell* children[2][2][2]; [R] cleared by the allocating code (MEM_fill
                                     //       0x20); [U] descend* recurse into each non-null child (lw 0x0..0x1C);
@@ -129,6 +132,19 @@ struct nash_Cell {
         }
         return true;
     }
+
+    // Methods bound to their retail symbols by asm labels.
+    void remnode(int idx, nash_Node* item, const nash_CellKey* target, const nash_CellKey* cur)
+        __asm__("nash_Cell_remnode");
+    void movenode(int type, nash_Node* item, nash_CellKey* oldkey, nash_CellKey* newkey, nash_CellKey* mykey)
+        __asm__("nash_Cell_movenode");
+
+    // Methods bound to their retail symbols by asm labels.
+    void descend(OverlapInstancesCallback* ctx) __asm__("nash_Cell_descend");
+    void descend2(OverlapInstancesCallback* ctx) __asm__("nash_Cell_descend2");
+    void descend3(OverlapEverythingCallback* ctx) __asm__("nash_Cell_descend3");
+    void descend4(void* ctx) __asm__("nash_Cell_descend4");
+    void descend5(void* ctx) __asm__("nash_Cell_descend5");
 };
 
 CHECK_OFFSET(nash_Cell, children, 0x000);
@@ -142,11 +158,17 @@ struct nash_Octant {
                                     //       nash_CellKey_proximitytest and the helpX walkers
     nash_Cell* rootcell;            // 0x010 [O]; [R] cGame_load zeroes it (sCellGL ctor); [U] the queries skip octants
                                     //       whose rootcell is 0
+
+    // Methods bound to their retail symbols by asm labels.
+    void addnode(int idx, nash_Node* item, nash_CellKey* cell) __asm__("nash_Octant_addnode");
 };
 
 CHECK_OFFSET(nash_Octant, rootkey, 0x000);
 CHECK_OFFSET(nash_Octant, rootcell, 0x010);
 CHECK_SIZE(nash_Octant, 0x14);
+
+struct cWorldIntersectType;
+struct tIntersectInfo;
 
 struct cBXNash {
     // --- nash::Nash (On Tour 0xA4)
@@ -161,6 +183,16 @@ struct cBXNash {
                                     //       cAIFwdDiffCache, purgeTheAIFwdDiffCache deletes and zeroes it;
                                     //       terrainIntersect / getGroundHeight / cOverlapList_terrainIntersect pass it
                                     //       to the patch callbacks (cAIFwdDiffCache_GetFwdDiff)
+
+    // Methods bound to their retail symbols by asm labels.
+    void initTheAIFwdDiffCache() __asm__("cBXNash_initTheAIFwdDiffCache");
+    void purgeTheAIFwdDiffCache() __asm__("cBXNash_purgeTheAIFwdDiffCache");
+    int terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, int hitCache)
+        __asm__("cBXNash_terrainIntersect");
+    float terrainIntersect1(cWorldIntersectType* intersectType, tIntersectInfo* out, int hint)
+        __asm__("cBXNash_terrainIntersect1");
+    float staticObjectIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int full)
+        __asm__("cBXNash_staticObjectIntersect1");
 };
 
 CHECK_OFFSET(cBXNash, octant, 0x000);
@@ -247,6 +279,11 @@ CHECK_SIZE(VerticalLineProximityTest, 0x4);
 // cameratriggerfactory) and calls them with the address of an empty helper as `this` (func_002B83F8 in
 // sound/icepick/worldtriggermanager). Flat stand-in for every instance: an empty struct (size 1 in g++).
 struct nash_privy_QueryHelper {
+
+    // Methods bound to their retail symbols by asm labels.
+    void help(TerrainCallback* query, TerrainCallback* insideQuery, VerticalLineProximityTest* test, nash_Cell* node,
+              nash_CellKey* cell)
+        __asm__("nash_privy_QueryHelper_help");
 };
 
 CHECK_SIZE(nash_privy_QueryHelper, 0x1);

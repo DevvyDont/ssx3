@@ -18,6 +18,9 @@ struct cUIState;
 struct cFEStateOptionsHUD : public cUIState {
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateOptionsHUD
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateWidget() __asm__("cFEStateOptionsHUD_updateWidget");
 };
 
 CHECK_SIZE(cFEStateOptionsHUD, 0x48);

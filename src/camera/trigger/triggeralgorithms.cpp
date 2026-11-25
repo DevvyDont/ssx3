@@ -7,12 +7,14 @@ void operator_delete(int* ptr);
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cActiveTriggerList);
 #ifdef SKIP_ASM
+void cActiveTriggerList_purge(cActiveTriggerList* self);
+
 /**
  * Frees every node of the active trigger list and leaves the list empty.
  */
-void cActiveTriggerList_purge(cActiveTriggerList* self)
+void cActiveTriggerList::purge()
 {
-    cActiveTriggerNode* node = self->Head;
+    cActiveTriggerNode* node = Head;
     if (node != 0) {
         do {
             cActiveTriggerNode* next = node->Next;
@@ -20,7 +22,7 @@ void cActiveTriggerList_purge(cActiveTriggerList* self)
             node = next;
         } while (node != 0);
     }
-    self->Head = 0;
+    Head = 0;
 }
 #endif
 
@@ -30,9 +32,9 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_clearFlags);
 /**
  * Clears the two flags (IsNewFlag and IsActiveFlag) of every node in the active trigger list.
  */
-extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
+void cActiveTriggerList::clearFlags()
 {
-    cActiveTriggerNode* node = self->Head;
+    cActiveTriggerNode* node = Head;
     if (node != 0) {
         do {
             node->IsActiveFlag = 0;
@@ -54,9 +56,9 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find);
  * @param key  the camera trigger to look for (On Tour tCameraTrigger*)
  * @return the node, or 0 when the trigger is not listed
  */
-extern "C" cActiveTriggerNode* cActiveTriggerList_find(cActiveTriggerList* self, void* key)
+cActiveTriggerNode* cActiveTriggerList::find(void* key)
 {
-    cActiveTriggerNode* node = self->Head;
+    cActiveTriggerNode* node = Head;
     if (node != 0) {
         do {
             if (node->Trigger == key) {
@@ -80,9 +82,9 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find1);
  * @param key  the trigger id to look for (On Tour triggerID)
  * @return the trigger, or 0 when none is listed with that id
  */
-extern "C" void* cActiveTriggerList_find1(cActiveTriggerList* self, void* key)
+void* cActiveTriggerList::find1(void* key)
 {
-    cActiveTriggerNode* node = self->Head;
+    cActiveTriggerNode* node = Head;
     if (node != 0) {
         do {
             void* item = node->Trigger;
@@ -110,11 +112,11 @@ extern char str_Active_Camera_Trigger[];
  *
  * @param item  the trigger to add (On Tour tCameraTrigger*)
  */
-extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, tCameraTrigger* item)
+void cActiveTriggerList::add(tCameraTrigger* item)
 {
     cActiveTriggerNode* n = (cActiveTriggerNode*)cMemMan_alloc(0x10, str_Active_Camera_Trigger, 0x20000000, 0);
-    cActiveTriggerNode* old = self->Head;
-    self->Head = n;
+    cActiveTriggerNode* old = Head;
+    Head = n;
     n->Trigger = item;
     n->Next = old;
     n->IsActiveFlag = 1;
@@ -131,13 +133,13 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_remove);
  * @param target  the node to remove
  * @return the node that followed it (the new head when it was the head), or 0 when it was last or not in the list
  */
-extern "C" cActiveTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, cActiveTriggerNode* target)
+cActiveTriggerNode* cActiveTriggerList::remove(cActiveTriggerNode* target)
 {
-    cActiveTriggerNode* head = self->Head;
+    cActiveTriggerNode* head = Head;
     if (target == head) {
         cActiveTriggerNode* next = target->Next;
         operator_delete((int*)target);
-        self->Head = next;
+        Head = next;
         return next;
     }
     cActiveTriggerNode* prev = head;
@@ -234,13 +236,13 @@ extern "C" void cCamera_resetChaseControllerSwitches(void);
  * Initialises the trigger list (cCameraTriggerList_init), purges both active trigger lists (+0x14, +0x18), resets
  * both trigger stacks (+0x1C, +0x3C) with cCameraTriggerStack_init and calls cCamera_resetChaseControllerSwitches.
  */
-extern "C" void cCameraTriggerMan_init(cCameraTriggerMan* self)
+void cCameraTriggerMan::init()
 {
-    cCameraTriggerList_init((cCameraTriggerList*)self);
-    cActiveTriggerList_purge((cActiveTriggerList*)&self->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)(&self->ActiveTriggerList[1]));
-    cCameraTriggerStack_init((cCameraTriggerStack*)&self->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)(&self->CameraTriggerStack[1]));
+    cCameraTriggerList_init((cCameraTriggerList*)this);
+    cActiveTriggerList_purge((cActiveTriggerList*)&ActiveTriggerList);
+    ActiveTriggerList[1].purge();
+    cCameraTriggerStack_init((cCameraTriggerStack*)&CameraTriggerStack);
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&CameraTriggerStack[1]));
     cCamera_resetChaseControllerSwitches();
 }
 #endif
@@ -258,12 +260,12 @@ extern "C" void cCamera_resetChaseControllerSwitches(void);
  * Purges both active trigger lists (+0x14, +0x18), resets both trigger stacks (+0x1C, +0x3C) and calls
  * cCamera_resetChaseControllerSwitches.
  */
-extern "C" void cCameraTriggerMan_initOnRestart(cCameraTriggerMan* self)
+void cCameraTriggerMan::initOnRestart()
 {
-    cActiveTriggerList_purge((cActiveTriggerList*)&self->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)(&self->ActiveTriggerList[1]));
-    cCameraTriggerStack_init((cCameraTriggerStack*)&self->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)(&self->CameraTriggerStack[1]));
+    cActiveTriggerList_purge((cActiveTriggerList*)&ActiveTriggerList);
+    ActiveTriggerList[1].purge();
+    cCameraTriggerStack_init((cCameraTriggerStack*)&CameraTriggerStack);
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&CameraTriggerStack[1]));
     cCamera_resetChaseControllerSwitches();
 }
 #endif

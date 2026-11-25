@@ -96,6 +96,10 @@ struct cBoundedAlgorithm : public cTriggerAlgorithm {
                                 //      TargetType/TargetPoint and its BoundObj (+0x8); cBoundedAlgorithm_setBoundAction (sw) /
                                 //      cBoundedAlgorithm_getBoundAction (lw)
     char unk_84[0xC];           // 0x84 padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    void setBoundAction(int boundAction) __asm__("cBoundedAlgorithm_setBoundAction");
+    int getBoundAction() __asm__("cBoundedAlgorithm_getBoundAction");
 };
 
 CHECK_OFFSET(cBoundedAlgorithm, BoundAction, 0x80);

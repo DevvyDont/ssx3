@@ -382,6 +382,19 @@ struct cSSXAudio {
     int mNumStreams;                    // 0x776C [O]; [R] cStreamSys ctor stores its count
     void** mStreamInstance;             // 0x7770 [O] cStreamInstance**; [R] operator new[](count x 4, "StreamArray")
     char unk_7774[0xC];                 // 0x7774 tail padding (the class is 16-aligned: t4Vector members)
+
+    // Methods bound to their retail symbols by asm labels.
+    void SetRailSurface(int railType) __asm__("cSSXAudio_SetRailSurface");
+    int GetSFXPaused() __asm__("cSSXAudio_GetSFXPaused");
+    int GetRadioModeID() __asm__("cSSXAudio_GetRadioModeID");
+    long GetRadioPlayList() __asm__("cSSXAudio_GetRadioPlayList");
+    int GetNumPlayLists() __asm__("cSSXAudio_GetNumPlayLists");
+    char* GetPlayListName(int i) __asm__("cSSXAudio_GetPlayListName");
+    int GetPlayListIndex() __asm__("cSSXAudio_GetPlayListIndex");
+    int GetMode() __asm__("cSSXAudio_GetMode");
+    int GetArcadeSFX() __asm__("cSSXAudio_GetArcadeSFX");
+    int GetPreset() __asm__("cSSXAudio_GetPreset");
+    int GetAudioUpdateState() __asm__("cSSXAudio_GetAudioUpdateState");
 };
 
 CHECK_OFFSET(cSSXAudio, mpVBankManager, 0x0);

@@ -36,6 +36,8 @@
 
 #include "layout.h"
 
+struct cBxReplayFrame;
+
 struct cGameModeMan {
     int iHeatNum;               // 0x00 [R] getGM = 0, purge = 0, freeride init = 1, big air init = iNextHeat;
                                 //      [U] the current heat (1..3); [O] On Tour getCurrentHeat
@@ -66,6 +68,19 @@ struct cGameModeMan {
     int unk_94;                 // 0x94 [R] purge = 0; big air: 1 unless iCurrentGameEvent == 2
     int bIsLastHeat;            // 0x98 [R] freeride init = 1 (On Tour: bIsLastHeat = 1), heat 3 = 1; [U] script engine
     int bAreResultsLocked;      // 0x9C [R] freeride init = 1 (On Tour: bAreResultsLocked = 1); [U] raceFinish reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    void initGameMode(unsigned int type) __asm__("cGameModeMan_initGameMode");
+    void restartHeat() __asm__("cGameModeMan_restartHeat");
+    int restorePreviousHeat() __asm__("cGameModeMan_restorePreviousHeat__FPv");
+    void raceFinish(int idx, int pRiderStats) __asm__("cGameModeMan_raceFinish");
+    void riderCheckpointHit(int iRider, int iSecsAdded) __asm__("cGameModeMan_riderCheckpointHit");
+    void riderGateHit(int iRider, int iGateID) __asm__("cGameModeMan_riderGateHit");
+    void getHeatScore(int iRider, int iHeat) __asm__("cGameModeMan_getHeatScore");
+    void writeToReplayFrame(cBxReplayFrame* data) __asm__("cGameModeMan_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* data) __asm__("cGameModeMan_readFromReplayFrame");
+    void sortScores(int n) __asm__("cGameModeMan_sortScores");
+    void sortTimes(int n) __asm__("cGameModeMan_sortTimes");
 };
 
 CHECK_OFFSET(cGameModeMan, iHeatNum, 0x00);

@@ -50,6 +50,9 @@ struct online_ErrorEvent {
     // --- online::ErrorEvent
     int mError;                     // 0x8 [R] clone copies it; [U] a four-character code ('time', 'dnsf' from
                                     //     func_0025AC50) or the LobbyApi reply's error (LobbyMan_onPlayerFound ...)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_ErrorEvent_clone");
 };
 
 CHECK_OFFSET(online_ErrorEvent, mType, 0x0);
@@ -65,6 +68,9 @@ struct online_BuddyErrorEvent {
     void** mVtbl;                   // 0x4 [R] online_BuddyErrorEvent_vtbl
     // --- online::BuddyErrorEvent
     int mError;                     // 0x8 [R] func_0025AC50 stores BuddyMan's miError; clone copies it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_BuddyErrorEvent_clone");
 };
 
 CHECK_OFFSET(online_BuddyErrorEvent, mType, 0x0);
@@ -80,6 +86,9 @@ struct online_NetErrorEvent {
     void** mVtbl;                   // 0x4 [R] online_NetErrorEvent_vtbl
     // --- online::NetErrorEvent
     int mError;                     // 0x8 [R] func_002636F0 stores its argument (the disconnect reason); clone copies it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_NetErrorEvent_clone");
 };
 
 CHECK_OFFSET(online_NetErrorEvent, mType, 0x0);
@@ -96,6 +105,9 @@ struct online_NewsEvent {
     // --- online::NewsEvent
     char* mText;                    // 0x8 [R] cBXString: clone builds it from the source's text, the destructor
                                     //     destroys it; [U] LobbyMan_onNewsRetrieved posts the news text
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_NewsEvent_clone");
 };
 
 CHECK_OFFSET(online_NewsEvent, mType, 0x0);
@@ -113,6 +125,9 @@ struct online_AcctTooYoungEvent {
     int mError;                     // 0x8 [R] clone stores the constant 'tooy' (0x746F6F79)
     // --- online::AcctTooYoungEvent
     int mAge;                       // 0xC [R] clone copies it; [U] LobbyMan_onaccountcreated stores the reply's "AGE"
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_AcctTooYoungEvent_clone");
 };
 
 CHECK_OFFSET(online_AcctTooYoungEvent, mType, 0x0);
@@ -133,6 +148,9 @@ struct online_AcctLockedEvent {
     char* mDate;                    // 0x0C [R] cBXString (clone builds it, the destructor destroys it second);
                                     //      [U] LobbyMan_onauthentication: the reply's "DATE"
     char* mIntro;                   // 0x10 [R] cBXString (destroyed first); [U] the reply's "INTRO" text
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_AcctLockedEvent_clone");
 };
 
 CHECK_OFFSET(online_AcctLockedEvent, mType, 0x00);
@@ -154,6 +172,9 @@ struct online_FindPlayerEvent {
     int mOnline;                    // 0x10 [U] onPlayerFound: "ADDR" > 0
     int mAddr;                      // 0x14 [U] onPlayerFound: the "ADDR" number
     tLobbyStats mStats;             // 0x18 [R] clone block-copies 20 bytes; [U] "RANK" and "STAT" fields, -1 last
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_FindPlayerEvent_clone");
 };
 
 CHECK_OFFSET(online_FindPlayerEvent, mType, 0x00);
@@ -173,6 +194,9 @@ struct online_PingEvent {
     // --- online::PingEvent
     char* mName;                    // 0x8 [R] cBXString (clone, destructor); [U] LobbyMan_onPingReceived: "NAME"
     int mPing;                      // 0xC [R] clone copies it; [U] "PING", 32656 when the reply carried an error
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_PingEvent_clone");
 };
 
 CHECK_OFFSET(online_PingEvent, mType, 0x0);

@@ -26,6 +26,13 @@ struct cFEStateUberTrick : public cUIState {
     cTextureElement* mpCheckmark;   // 0x054 [O]
     cTextureElement* mpCheckbox;    // 0x058 [O]
     cTextureElement* mpDollarSign;  // 0x05C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void activateMainMenu() __asm__("cFEStateUberTrick_activateMainMenu");
+    void activateTrickMenu() __asm__("cFEStateUberTrick_activateTrickMenu");
+    void costVisible(int on) __asm__("cFEStateUberTrick_costVisible");
+    void previewVisible(int on) __asm__("cFEStateUberTrick_previewVisible");
+    void trickVisible(int on) __asm__("cFEStateUberTrick_trickVisible");
 };
 
 CHECK_OFFSET(cFEStateUberTrick, mbModelVisible, 0x048);

@@ -514,13 +514,13 @@ extern void* cFEStateEventSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(cFEStateEventSelect* self)
+void* cFEStateEventSelect::cFEStateEventSelect1()
 {
-    cUIState_cUIState(self);
-    self->mHashName = 19;
-    VPTR_OF(cListNode, self) = cFEStateEventSelect_vtbl;
-    cUITemplate_MAP_init((char*)&self->mMap);
-    return ((void*)self);
+    cUIState_cUIState(this);
+    mHashName = 19;
+    VPTR_OF(cListNode, this) = cFEStateEventSelect_vtbl;
+    cUITemplate_MAP_init((char*)&mMap);
+    return ((void*)this);
 }
 #endif
 

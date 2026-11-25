@@ -54,11 +54,11 @@ extern "C" void cFEStateBuyAttrib_onCreateScreen(cFEStateBuyAttrib* self)
     self->mBank = cBEEconInterface_getMoney(iface, 0, cBELibrary_getCharacterID(0));
     self->mBuyPrompt = 0;
     self->mTotalCost = 0;
-    cFEStateBuyAttrib_updateTotalCost(self);
-    cFEStateBuyAttrib_updateLevels(self);
-    cFEStateBuyAttrib_updateCostPerLevel(self);
-    cFEStateBuyAttrib_updateExperienceDisplay(self);
-    cFEStateBuyAttrib_updateBank(self);
+    self->updateTotalCost();
+    self->updateLevels();
+    self->updateCostPerLevel();
+    self->updateExperienceDisplay();
+    self->updateBank();
     func_0028F140(cAudioInterface_bxAudio(), 3);
 }
 #endif
@@ -116,7 +116,7 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* sel
 extern "C" int cFEStateBuyAttrib_onGainTransition(cFEStateBuyAttrib* self, int on)
 {
     if (on != 0) {
-        cFEStateBuyAttrib_updateExperienceDisplay(self);
+        self->updateExperienceDisplay();
     }
     return 0;
 }
@@ -189,7 +189,7 @@ extern "C" void cFEStateBuyAttrib_onPopupEvent(cFEStateBuyAttrib* self, cUIState
 {
     if (msg == 22) {
         if (((cUIStateBuyPopup*)sender)->mbAccept != 0) {
-            cFEStateBuyAttrib_buyExperience(self);
+            self->buyExperience();
         }
     }
 }
@@ -324,7 +324,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
             if (*cnt > 0) {
                 (*cnt)--;
                 self->mTotalCost -= cBEEconInterface_getAttribCost(iface, self->mExperienceLevel[idx] - 1);
-                cFEStateBuyAttrib_updateTotalCost(self);
+                self->updateTotalCost();
                 playFrame_4C30((self), str_hl_left_b);
             } else {
                 defaultMsg_4C30((self), 4);
@@ -341,7 +341,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
                     if (self->mExperience[idx] + *cnt < (*lvl + 1) * 5) {
                         (*cnt)++;
                         self->mTotalCost += cBEEconInterface_getAttribCost(iface, *lvl - 1);
-                        cFEStateBuyAttrib_updateTotalCost(self);
+                        self->updateTotalCost();
                         playFrame_4C30((self), str_hl_right_b);
                     }
                 } else {
@@ -351,7 +351,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
         }
     }
     if (changed) {
-        cFEStateBuyAttrib_updateExperienceDisplay(self);
+        self->updateExperienceDisplay();
     }
 }
 #endif
@@ -374,11 +374,10 @@ extern char str_pct_d_pct_d_c[];
  * The level is the attribute's points (0x4C) / 5 and raises the stored level (0x68) when higher; the text is
  * "%d.%d" of the level and the leftover points times 2 (each point is 0.2 of a level).
  *
- * @param buyAttribState  the buy-attributes state (this)
  */
-extern "C" void cFEStateBuyAttrib_updateLevels(cFEStateBuyAttrib* buyAttribState)
+void cFEStateBuyAttrib::updateLevels()
 {
-    cFEStateBuyAttrib* self = buyAttribState;
+    cFEStateBuyAttrib* self = this;
     char name[0x20];
     char text[0x10];
     int i;
@@ -423,15 +422,15 @@ struct sVE4FC0 {
  * The price is cBEEconInterface_getAttribCost(level - 1) for the attribute's level (0x68), formatted by getDollarString(); at
  * level 11 or more the text is hidden instead (setVisible(0), vtable slot 9).
  */
-extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
+void cFEStateBuyAttrib::updateCostPerLevel()
 {
     char buf[32];
     int i;
-    int* levels = (int*)&self->mExperienceLevel;
+    int* levels = (int*)&mExperienceLevel;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     for (i = 0; i < 7; i++, levels++) {
         sprintf(buf, str_costpct_d, i);
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(buf));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpAttribScreen, GetHashValue32(buf));
         if (text != 0) {
             cUIText_setAsciiString(text, getDollarString(cBEEconInterface_getAttribCost(iface, *levels - 1)));
             if (*levels >= 11) {
@@ -457,11 +456,10 @@ extern char str_underpct_d[];
  * Each bar is set (setSize, vtable slot 21) to 37/11 pixels per point and 12 high, so 55 points fill 185
  * pixels, then shown (setVisible(1)).
  *
- * @param buyAttribState  the buy-attributes state (this)
  */
-extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buyAttribState)
+void cFEStateBuyAttrib::updateExperienceDisplay()
 {
-    cFEStateBuyAttrib* self = buyAttribState;
+    cFEStateBuyAttrib* self = this;
     char name[0x20];
     int i;
     for (i = 0; i < 7; i++) {
@@ -502,11 +500,11 @@ extern char str_AttributeCost[];
 /**
  * Shows the total cost of the chosen points (0xA0) as dollars in the "AttributeCost" text, if it exists.
  */
-extern "C" void cFEStateBuyAttrib_updateTotalCost(cFEStateBuyAttrib* self)
+void cFEStateBuyAttrib::updateTotalCost()
 {
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttributeCost));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpAttribScreen, GetHashValue32(str_AttributeCost));
     if (text != 0) {
-        cUIText_setAsciiString(text, getDollarString(self->mTotalCost));
+        cUIText_setAsciiString(text, getDollarString(mTotalCost));
     }
 }
 #endif
@@ -524,11 +522,11 @@ extern char str_CurrentMoney[];
 /**
  * Shows the bank (0xA4) as dollars in the "CurrentMoney" text, if it exists.
  */
-extern "C" void cFEStateBuyAttrib_updateBank(cFEStateBuyAttrib* self)
+void cFEStateBuyAttrib::updateBank()
 {
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_CurrentMoney));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpAttribScreen, GetHashValue32(str_CurrentMoney));
     if (text != 0) {
-        cUIText_setAsciiString(text, getDollarString(self->mBank));
+        cUIText_setAsciiString(text, getDollarString(mBank));
     }
 }
 #endif
@@ -564,14 +562,13 @@ extern const int D_004780B0[];
  * them, and refreshes the levels, cost per level, experience display and bank. cFEStateBuyAttrib_onPopupEvent calls it
  * when the confirm popup closes with a yes.
  *
- * @param buyState  the buy-attributes state
  */
-extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
+void cFEStateBuyAttrib::buyExperience()
 {
-    cFEStateBuyAttrib* self = buyState;
+    cFEStateBuyAttrib* self = this;
     self->mBank -= self->mTotalCost;
     self->mTotalCost = 0;
-    cFEStateBuyAttrib_updateTotalCost((cFEStateBuyAttrib*)self);
+    self->updateTotalCost();
     self->mBuyPrompt = 0;
     cUIState_hideObjSafe(self, str_PopupGroup);
     cUIMenu* attribMenu = (self->pAttribMenu);
@@ -589,10 +586,10 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
         max[i] += added[i];
         added[i] = 0;
     }
-    cFEStateBuyAttrib_updateLevels((cFEStateBuyAttrib*)self);
-    cFEStateBuyAttrib_updateCostPerLevel((cFEStateBuyAttrib*)self);
-    cFEStateBuyAttrib_updateExperienceDisplay((cFEStateBuyAttrib*)self);
-    cFEStateBuyAttrib_updateBank((cFEStateBuyAttrib*)self);
+    self->updateLevels();
+    self->updateCostPerLevel();
+    self->updateExperienceDisplay();
+    self->updateBank();
 }
 #endif
 
@@ -673,8 +670,8 @@ extern "C" void cFEStateCareerStats_onCreateScreen(cFEStateCareerStats* self)
     self->mTotalOwnedFSEvent = 0;
     self->mbitOpenedFS = (unsigned int)0;
     self->mStatsState = 0;
-    cFEStateCareerStats_initTotalEventMedal(self);
-    cFEStateCareerStats_setupLayout(self);
+    self->initTotalEventMedal();
+    self->setupLayout();
     func_0028F140(cAudioInterface_bxAudio(), 8);
 }
 #endif
@@ -696,7 +693,7 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(cFEStateCareerStats* sel
 extern "C" int cFEStateCareerStats_onGainTransition(cFEStateCareerStats* self, int on)
 {
     if (on != 0) {
-        cFEStateCareerStats_setupHighlightsList(self);
+        self->setupHighlightsList();
     }
     return 0;
 }
@@ -717,7 +714,7 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(cFEStateCareerStats* self, in
 extern "C" void cFEStateCareerStats_onGainFocus(cFEStateCareerStats* self)
 {
     cFEState_onGainFocus(self);
-    cFEStateCareerStats_setupMenuFocus(self, self->mStatsState);
+    self->setupMenuFocus(self->mStatsState);
 }
 #endif
 
@@ -850,14 +847,14 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
         }
     }
     if (handled) {
-        cFEStateCareerStats_setupMenuFocus(self, self->mStatsState);
-        cFEStateCareerStats_setupLayout(self);
+        self->setupMenuFocus(self->mStatsState);
+        self->setupLayout();
     }
     if (self->mStatsState == 0) {
         if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopHighlightNumber > 0) {
                 self->mTopHighlightNumber--;
-                cFEStateCareerStats_setupHighlightsList(self);
+                self->setupHighlightsList();
                 handled = 1;
                 playFrame_56C8((self), str_high_up);
                 msg = 2;
@@ -867,7 +864,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
         } else if (wantCall_56C8(((char*)w), 18)) {
             if (self->mTopHighlightNumber + 3 < 0x18) {
                 self->mTopHighlightNumber++;
-                cFEStateCareerStats_setupHighlightsList(self);
+                self->setupHighlightsList();
                 handled = 1;
                 playFrame_56C8((self), str_high_down);
                 msg = 2;
@@ -879,7 +876,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
         if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopRaceEvent > 0) {
                 self->mTopRaceEvent--;
-                cFEStateCareerStats_setupRacePlatinumMedalsList(self);
+                self->setupRacePlatinumMedalsList();
                 handled = 1;
                 playFrame_56C8((self), str_race_up);
                 msg = 2;
@@ -890,7 +887,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
             if (self->mTopRaceEvent + 5 < self->mTotalRaceEvent) {
                 handled = 1;
                 self->mTopRaceEvent++;
-                cFEStateCareerStats_setupRacePlatinumMedalsList(self);
+                self->setupRacePlatinumMedalsList();
                 playFrame_56C8((self), str_race_down);
                 msg = 2;
             } else {
@@ -901,7 +898,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
         if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopFreestyleEvent > 0) {
                 self->mTopFreestyleEvent--;
-                cFEStateCareerStats_setupFSPlatinumMedalsList(self);
+                self->setupFSPlatinumMedalsList();
                 handled = 1;
                 playFrame_56C8((self), str_free_up);
                 msg = 2;
@@ -912,7 +909,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
             if (self->mTopFreestyleEvent + 5 < self->mTotalFreestyleEvent) {
                 handled = 1;
                 self->mTopFreestyleEvent++;
-                cFEStateCareerStats_setupFSPlatinumMedalsList(self);
+                self->setupFSPlatinumMedalsList();
                 playFrame_56C8((self), str_free_down);
                 msg = 2;
             } else {
@@ -950,34 +947,34 @@ extern char str_vertical_dash_b[];
  * Hides "highlights", "race_platinum", "freestyle_platinum" and "ridersbest", then shows page 0, 1, 2 or 3 of those.
  * The "horizontal_dash_b" and "vertical_dash_b" lines are shown (vtable entry 9) except on pages 0 and 3.
  */
-extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self)
+void cFEStateCareerStats::setupLayout()
 {
-    cUIState_hideObjSafe(self, str_highlights);
-    cUIState_hideObjSafe(self, str_race_platinum);
-    cUIState_hideObjSafe(self, str_freestyle_platinum);
-    cUIState_hideObjSafe(self, str_ridersbest);
+    cUIState_hideObjSafe(this, str_highlights);
+    cUIState_hideObjSafe(this, str_race_platinum);
+    cUIState_hideObjSafe(this, str_freestyle_platinum);
+    cUIState_hideObjSafe(this, str_ridersbest);
     int show = 1;
-    switch (self->mStatsState) {
+    switch (mStatsState) {
     case 0:
-        cUIState_showObjSafe(self, str_highlights);
+        cUIState_showObjSafe(this, str_highlights);
         show = 0;
         break;
     case 1:
-        cUIState_showObjSafe(self, str_race_platinum);
+        cUIState_showObjSafe(this, str_race_platinum);
         break;
     case 2:
-        cUIState_showObjSafe(self, str_freestyle_platinum);
+        cUIState_showObjSafe(this, str_freestyle_platinum);
         break;
     case 3:
-        cUIState_showObjSafe(self, str_ridersbest);
+        cUIState_showObjSafe(this, str_ridersbest);
         show = 0;
         break;
     }
-    cUIThing* dashObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_horizontal_dash_b));
+    cUIThing* dashObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_horizontal_dash_b));
     if (((char*)dashObj) != 0) {
         dashObj->setVisible(show);
     }
-    dashObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vertical_dash_b));
+    dashObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_vertical_dash_b));
     if (((char*)dashObj) != 0) {
         dashObj->setVisible(show);
     }
@@ -1005,40 +1002,39 @@ extern char str_ridersbestDummyMenu[];
  * without a null check and runs setupHighlightsList(), cFEStateCareerStats_setupRacePlatinumMedalsList() or cFEStateCareerStats_setupFSPlatinumMedalsList() (probably the race
  * and freestyle platinum-medal lists) or setupRidersBest().
  *
- * @param self_  the career-stats state (this)
  * @param menu  the page: 0 highlights, 1 race platinum, 2 freestyle platinum, 3 rider's best
  */
-extern "C" void cFEStateCareerStats_setupMenuFocus(cFEStateCareerStats* self_, int menu)
+void cFEStateCareerStats::setupMenuFocus(int menu)
 {
-    self_->mStatsState = menu;
-    cUIThing* menuTab0 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_highlightsMenu));
+    mStatsState = menu;
+    cUIThing* menuTab0 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_highlightsMenu));
     if (menuTab0 != 0)
         menuTab0->setFocus(0);
-    cUIThing* menuTab1 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_race_platinumdummyMenu));
+    cUIThing* menuTab1 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_race_platinumdummyMenu));
     if (menuTab1 != 0)
         menuTab1->setFocus(0);
-    cUIThing* menuTab2 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_fs_platinumdummyMenu));
+    cUIThing* menuTab2 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_fs_platinumdummyMenu));
     if (menuTab2 != 0)
         menuTab2->setFocus(0);
-    cUIThing* menuTab3 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ridersbestDummyMenu));
+    cUIThing* menuTab3 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ridersbestDummyMenu));
     if (menuTab3 != 0)
         menuTab3->setFocus(0);
-    switch (self_->mStatsState) {
+    switch (mStatsState) {
     case 0:
         menuTab0->setFocus(1);
-        cFEStateCareerStats_setupHighlightsList(self_);
+        setupHighlightsList();
         break;
     case 1:
         menuTab1->setFocus(1);
-        cFEStateCareerStats_setupRacePlatinumMedalsList(self_);
+        setupRacePlatinumMedalsList();
         break;
     case 2:
         menuTab2->setFocus(1);
-        cFEStateCareerStats_setupFSPlatinumMedalsList(self_);
+        setupFSPlatinumMedalsList();
         break;
     case 3:
         menuTab3->setFocus(1);
-        cFEStateCareerStats_setupRidersBest(self_);
+        setupRidersBest();
         break;
     }
 }
@@ -1096,11 +1092,10 @@ union uTrickBuf5DA0 {
  * from the score interface's current highlight level, "<trick> Monster Trick", and the monster-trick requirement
  * once the tier is reached ("kT_FEUnlockMonsterTrick" before that).
  *
- * @param vself  the career-stats state; its scroll position is the word at 0x4C
  */
-extern "C" void cFEStateCareerStats_setupHighlightsList(cFEStateCareerStats* vself)
+void cFEStateCareerStats::setupHighlightsList()
 {
-    cFEStateCareerStats* self = vself;
+    cFEStateCareerStats* self = this;
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
     if (self->mTopHighlightNumber > 0) {
         cUIState_showObjSafe(self, str_HL_arrowup);
@@ -1201,11 +1196,10 @@ extern int D_004780F0[];
  * mode-0 time), the best time formatted by func_0020A1A8 (cBENewRaceInterface_getPlatinumGoal) and the "race_medal%d" icon when bit idx of
  * +0x60 is set; rows past the total are hidden.
  *
- * @param vself  the career-stats state
  */
-extern "C" void cFEStateCareerStats_setupRacePlatinumMedalsList(cFEStateCareerStats* vself)
+void cFEStateCareerStats::setupRacePlatinumMedalsList()
 {
-    cFEStateCareerStats* self = vself;
+    cFEStateCareerStats* self = this;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (self->mTopRaceEvent > 0) {
         cUIState_showObjSafe(self, str_race_arrowup);
@@ -1307,11 +1301,10 @@ extern int D_00478110[];
  * with the mode-5 score for every fourth event, else the score of the location's mode from cBENewRaceInterface_getLocationDefaultGameEvent), the points
  * as "%d" and the medal icon by bit idx of +0x70; the counter reads +0x6C of +0x68.
  *
- * @param vself  the career-stats state
  */
-extern "C" void cFEStateCareerStats_setupFSPlatinumMedalsList(cFEStateCareerStats* vself)
+void cFEStateCareerStats::setupFSPlatinumMedalsList()
 {
-    cFEStateCareerStats* self = vself;
+    cFEStateCareerStats* self = this;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (self->mTopFreestyleEvent > 0) {
         cUIState_showObjSafe(self, str_fs_arrowup);
@@ -1395,9 +1388,9 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
  * @param name  the object's name
  * @param str   the ASCII text
  */
-extern "C" void cFEStateCareerStats_setTextSafe(cFEStateCareerStats* self, char* name, const char* str)
+void cFEStateCareerStats::setTextSafe(char* name, const char* str)
 {
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
     if (text != 0) {
         cUIText_setAsciiString(text, str);
     }
@@ -1461,11 +1454,10 @@ extern "C" tRiderBest* cBEScoreInterface_getPlayerBestStats(void* iface, int a, 
  * "favoriteEvent" shows the best combo (record 4) under the label kT_ovrcmnBestCombo, whose text widget is
  * not null-checked. Texts are set through cFEStateCareerStats_setTextSafe() (On Tour setTextSafe).
  *
- * @param vself  the career-stats state (this)
  */
-extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
+void cFEStateCareerStats::setupRidersBest()
 {
-    cFEStateCareerStats* self = vself;
+    cFEStateCareerStats* self = this;
     char buf[112];
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
@@ -1478,12 +1470,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[0].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko, buf);
+            self->setTextSafe(str_ko, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko_event, buf);
+            self->setTextSafe(str_ko_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_ko, str_dash);
+            self->setTextSafe(str_ko_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1491,12 +1483,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[5].track;
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants, buf);
+            self->setTextSafe(str_handplants, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants_event, buf);
+            self->setTextSafe(str_handplants_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_handplants, str_dash);
+            self->setTextSafe(str_handplants_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1504,12 +1496,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[1].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers, buf);
+            self->setTextSafe(str_ubers, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers_event, buf);
+            self->setTextSafe(str_ubers_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_ubers, str_dash);
+            self->setTextSafe(str_ubers_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1517,12 +1509,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[2].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers, buf);
+            self->setTextSafe(str_superubers, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers_event, buf);
+            self->setTextSafe(str_superubers_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_superubers, str_dash);
+            self->setTextSafe(str_superubers_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1530,12 +1522,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[3].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds, buf);
+            self->setTextSafe(str_ubergrinds, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds_event, buf);
+            self->setTextSafe(str_ubergrinds_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_ubergrinds, str_dash);
+            self->setTextSafe(str_ubergrinds_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1543,12 +1535,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[6].track;
         if (value > 0) {
             sprintf(buf, str_pct_0_1f_m, fptodp((float)value * 0.009999999776482582f));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail, buf);
+            self->setTextSafe(str_longrail, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail_event, buf);
+            self->setTextSafe(str_longrail_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_longrail, str_dash);
+            self->setTextSafe(str_longrail_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1556,12 +1548,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[7].track;
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime, buf);
+            self->setTextSafe(str_airtime, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime_event, buf);
+            self->setTextSafe(str_airtime_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime, str_dash);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime_event, str_dash_sp_dash_sp_dash);
+            self->setTextSafe(str_airtime, str_dash);
+            self->setTextSafe(str_airtime_event, str_dash_sp_dash_sp_dash);
         }
     }
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_favoriteEvent_label));
@@ -1572,7 +1564,7 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         // strcpy(buf, "-"): gcc's inline strcpy of a literal is a 2-byte aligned copy
         __builtin_memcpy(buf, str_dash, 2);
     }
-    cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_favoriteEvent, buf);
+    self->setTextSafe(str_favoriteEvent, buf);
 }
 #endif
 
@@ -1587,7 +1579,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_getOwnedMedalByith);
  * @param count  how many bits to look at
  * @return the bit number, or -1 when there are not that many
  */
-extern "C" int cFEStateCareerStats_getOwnedMedalByith(cFEStateCareerStats* self, unsigned int mask, int n, int count)
+int cFEStateCareerStats::getOwnedMedalByith(unsigned int mask, int n, int count)
 {
     int seen = -1;
     for (int i = 0; i < count; i++) {
@@ -1622,33 +1614,32 @@ extern int D_00478110[];
  * cBERewardInterface_getTrackMedal is 0, sets bit i of +0x60 / +0x70 and counts +0x5C / +0x6C. All events are checked
  * whether or not their peak is counted.
  *
- * @param vself  the career-stats state
  */
-extern "C" void cFEStateCareerStats_initTotalEventMedal(cFEStateCareerStats* vself)
+void cFEStateCareerStats::initTotalEventMedal()
 {
     void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* game = cBE_getInterface_Fv(cBE_getBE(), 0);
     char charID = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
     if (cBERewardInterface_isPeakLocked(reward, cBENewPlayerInterface_getHumanRider(player, 0), 0) == 0) {
-        vself->mTotalRaceEvent += 3;
-        vself->mTotalFreestyleEvent += 4;
+        mTotalRaceEvent += 3;
+        mTotalFreestyleEvent += 4;
     }
     if (cBERewardInterface_isPeakLocked(reward, cBENewPlayerInterface_getHumanRider(player, 0), 1) == 0) {
-        vself->mTotalRaceEvent += 3;
-        vself->mTotalFreestyleEvent += 4;
+        mTotalRaceEvent += 3;
+        mTotalFreestyleEvent += 4;
     }
     if (cBERewardInterface_isPeakLocked(reward, cBENewPlayerInterface_getHumanRider(player, 0), 2) == 0) {
-        vself->mTotalRaceEvent += 2;
-        vself->mTotalFreestyleEvent += 4;
+        mTotalRaceEvent += 2;
+        mTotalFreestyleEvent += 4;
     }
     for (int i = 0; i < 8; i++) {
         int mode = 0;
         if (i % 3 == 0) mode = 4;
         char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_004780D0[i]);
         if (medal == 0) {
-            *(int*)&vself->mbitOwnedRaceMedal |= 1 << i;
-            vself->mTotalOwnedRaceEvent += 1;
+            *(int*)&mbitOwnedRaceMedal |= 1 << i;
+            mTotalOwnedRaceEvent += 1;
         }
     }
     for (int i = 0; i < 12; i++) {
@@ -1660,8 +1651,8 @@ extern "C" void cFEStateCareerStats_initTotalEventMedal(cFEStateCareerStats* vse
         }
         char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_00478110[i]);
         if (medal == 0) {
-            *(int*)&vself->mbitOwnedFSMedal |= 1 << i;
-            vself->mTotalOwnedFSEvent += 1;
+            *(int*)&mbitOwnedFSMedal |= 1 << i;
+            mTotalOwnedFSEvent += 1;
         }
     }
 }

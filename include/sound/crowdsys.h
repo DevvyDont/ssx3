@@ -101,6 +101,9 @@ struct cCrowdSys {
     int mNumInstances;                 // 0x014 [P] "viewport >= 0 && viewport < mNumInstances" (preview lw 0x14); [R] ctor 0; Init (func_002A6D78) stores n; [U] func_002A6D18 / func_002A7718 / func_002A77C8 loop to it
     cCrowdInstance* mpCrowdInstances;  // 0x018 [P] "mpCrowdInstances == NULL" (preview lw 0x18); [R] ctor 0; Init: operator new[](n x 0x190, "CrowdInstances"); DeInit func_002A6F38 destroys and frees them
     tCrowdData mCrowdData[3];          // 0x01C [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54; [R] ctor constructs 3 (each list by func_002A4BA8); Init/DeInit clear them
+
+    // Methods bound to their retail symbols by asm labels.
+    tCrowdData* CROWD_GetData(int i) __asm__("cCrowdSys_CROWD_GetData");
 };
 
 CHECK_OFFSET(tCrowdEventData, mNumEventData, 0x00);

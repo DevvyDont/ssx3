@@ -44,6 +44,8 @@ struct tUIScreenHeader;
 struct tUIKeyframeBlock;
 struct tUIObjectBlock;
 
+struct cUIScreen;
+
 struct cScreenKeyboard {
     // --- cUIScreen (ui/uiscreen.h, 0xD4)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the ctors self-link it
@@ -77,6 +79,24 @@ struct cScreenKeyboard {
     int mCurrentKey;                 // 0x170 [O][P] getCurrentKey (preview 0x168); [R] 10 (the "A" key); [U] the kbMove*
                                      //       functions and onInput move it; pressKey indexes the key table with it
                                      //       (also reads its low byte with lbu)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setInputText(const char* text) __asm__("cScreenKeyboard_setInputText");
+    void kbMoveLeft() __asm__("cScreenKeyboard_kbMoveLeft");
+    void kbMoveRight() __asm__("cScreenKeyboard_kbMoveRight");
+    void kbMoveUp() __asm__("cScreenKeyboard_kbMoveUp");
+    void kbMoveDown() __asm__("cScreenKeyboard_kbMoveDown");
+    int toggleShift() __asm__("cScreenKeyboard_toggleShift");
+    char* getPasswordText() __asm__("cScreenKeyboard_getPasswordText");
+    void getKeyObjName(int keyIndex, char* dst) __asm__("cScreenKeyboard_getKeyObjName");
+    void getCursorObjName(int keyIndex, char* dst) __asm__("cScreenKeyboard_getCursorObjName");
+    void initScreenKeyboard(cUIScreen* screen) __asm__("cScreenKeyboard_initScreenKeyboard");
+    int getCurrentKey() __asm__("cScreenKeyboard_getCurrentKey");
+    void setIncludeNumbers(int includeNumbers) __asm__("cScreenKeyboard_setIncludeNumbers");
+    void setIncludeShift(int includeShift) __asm__("cScreenKeyboard_setIncludeShift");
+    void setIncludeSpace(int includeSpace) __asm__("cScreenKeyboard_setIncludeSpace");
+    void cursorRight() __asm__("cScreenKeyboard_cursorRight");
+    void cursorLeft() __asm__("cScreenKeyboard_cursorLeft");
 };
 
 CHECK_OFFSET(cScreenKeyboard, mpPrev, 0x000);

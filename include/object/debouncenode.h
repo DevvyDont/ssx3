@@ -71,6 +71,10 @@ struct cDebounceNode : public cMoveNode {
     int Type;                       // 0x30 [O]; [P] preview 0x2C; [R] ctor1 = data Type (+0x8); the replay ctor reads 4
                                     //      bytes; [U] expire: 0 -> cDeadNode, 3 -> cRestoreNode, else just delete;
                                     //      loseFocus: 0 -> cDeadNode, else delete
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cDebounceNode1(void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
+        __asm__("cDebounceNode_cDebounceNode1");
 };
 
 CHECK_OFFSET(cDebounceNode, Life, 0x2C);

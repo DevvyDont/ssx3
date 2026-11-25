@@ -75,6 +75,17 @@ struct cFEStateNetHelpPopup : public cUIState {
                                     //       actrl (0xF0); onGainTransition hides all 9, shows and moves the used ones
     char unk_0F4[0x4C];             // 0x0F4 not accessed in retail (On Tour: t3Vector mtObjectInitialPos[7], 0x54,
                                     //       which does not fit; see the header comment)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateNetHelpPopup1() __asm__("cFEStateNetHelpPopup_cFEStateNetHelpPopup1");
+    void setScreenName(int value) __asm__("cFEStateNetHelpPopup_setScreenName");
+    void setBottomText(int value) __asm__("cFEStateNetHelpPopup_setBottomText");
+    void setReferEventsToParent(int value) __asm__("cFEStateNetHelpPopup_setReferEventsToParent");
+    int getReferEventsToParent() __asm__("cFEStateNetHelpPopup_getReferEventsToParent");
+    void createAndSetDescriptionString() __asm__("cFEStateNetHelpPopup_createAndSetDescriptionString");
+    void clear() __asm__("cFEStateNetHelpPopup_clear");
+    void setNumHelpOptions(int numOptions) __asm__("cFEStateNetHelpPopup_setNumHelpOptions__FPvi");
+    void setDescription(int descriptionNum, int description) __asm__("cFEStateNetHelpPopup_setDescription__FPvii");
 };
 
 CHECK_OFFSET(cFEStateNetHelpPopup, miNumOptions, 0x048);

@@ -38,6 +38,10 @@ struct cCommChannel {
     int mError;         // 0x4 [O]; [P] getError = lw 0x4, setError = sw 1 at 0x4; [R] ctor 0; [U] channelOpen /
                         //     channelClose clear it; cCommSystem getError (cCommSystem_getError) returns it
     void** mVtbl;       // 0x8 [R] D_00481320 (cCommChannel), D_004812D0 (cDSockChannel)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setError() __asm__("cCommChannel_setError");
+    int getError() __asm__("cCommChannel_getError");
 };
 
 CHECK_OFFSET(cCommChannel, mChannelOpen, 0x0);

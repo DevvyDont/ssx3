@@ -14,11 +14,20 @@
 
 struct tAIFwdDiff;
 
+struct tPatchRecord;
+
 struct cAIFwdDiffCache {
     tAIFwdDiff* mCache;             // 0x000 [O]
     tAIFwdDiff* mAgeQueue;          // 0x004 [O]
     tAIFwdDiff** mPatchHash;        // 0x008 [O]
     unsigned int mHashSize;         // 0x00C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void Init(int n) __asm__("cAIFwdDiffCache_Init");
+    void GetFwdDiff(tPatchRecord* src, tAIFwdDiff** out) __asm__("cAIFwdDiffCache_GetFwdDiff");
+    void AddToHash(tAIFwdDiff* node) __asm__("cAIFwdDiffCache_AddToHash");
+    void TesselatePatch(void* patch, cAIFwdDiffCache* fwdDiff) __asm__("cAIFwdDiffCache_TesselatePatch");
+    void InitializeCache(tAIFwdDiff* patch) __asm__("cAIFwdDiffCache_InitializeCache");
 };
 
 CHECK_OFFSET(cAIFwdDiffCache, mCache, 0x000);

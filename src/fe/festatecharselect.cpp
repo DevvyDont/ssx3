@@ -160,7 +160,7 @@ extern "C" void cFEStateCharSelect_onGainFocus(cFEStateCharSelect* self, int pPr
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, D_00440F68[0], 0);
     cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
     feRider->mAnimateBoard = 0;
-    cFEStateCharSelect_updateCharacter3DPos(self);
+    self->updateCharacter3DPos();
     cUIState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -196,7 +196,7 @@ extern "C" void* cUIState_onUpdate(void* self);
  */
 extern "C" void cFEStateCharSelect_onUpdate(cFEStateCharSelect* self)
 {
-    cFEStateCharSelect_updateCharacter3DPos(self);
+    self->updateCharacter3DPos();
     cUIState_onUpdate(self);
 }
 #endif
@@ -716,19 +716,18 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
  * animation (+0xC) and plays animation 434, clears the rider's +0xCCC and +0x54; moves the board out of view to (0,
  * 10000, 0) (cFERider_setBoardPose) and makes the rider visible (cFERider_setVisible).
  *
- * @param vself  the character-select state
  */
-extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vself)
+void cFEStateCharSelect::updateCharacter3DPos()
 {
-    cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
+    cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && rider->mDoneLoadingTextures != 0) {
         ok = rider->mCompiledModel != 0;
     }
-    if (ok && vself->mbDraw3D != 0) {
+    if (ok && mbDraw3D != 0) {
         sQuat_181EF0 pos;
         tPose xf;
-        float ang = vself->mPlayerRotation;
+        float ang = mPlayerRotation;
         {
             sQuat_181EF0 position;
             position.x = 136.0f;
@@ -748,14 +747,14 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vsel
         ang *= 0.01745329424738884f;
         (*(sQuat_181EF0*)&xf.Q) = QuatMul_181EF0((*(sQuat_181EF0*)&xf.Q), AxisAngle_181EF0(t4vect_ZAxis, ang));
         cFERider_setPose(rider, &xf);
-        if (vself->mbIsFirst != 0) {
+        if (mbIsFirst != 0) {
             void* anim = rider->mpRiderAnim;
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 434, 0, -1.0f);
             }
             rider->mAnimateBoard = 0;
-            vself->mbIsFirst = 0;
+            mbIsFirst = 0;
         }
         {
             sQuat_181EF0 position;
@@ -1058,7 +1057,7 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(cFEStateCheatCharSelect* sel
     case 1:
         return value < self->mNumCharacters;
     case 5:
-        cFEStateCheatCharSelect_updateCharWidgets(self);
+        self->updateCharWidgets();
         break;
     }
     return 257;
@@ -1075,14 +1074,14 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_updateCharWidgets);
  * texture element of entry first + i (+0xF4) at +0x7C, with +0x78 set to -1. cFEStateCheatCharSelect_onWidgetMenu calls
  * it for menu event 5.
  */
-extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelect* self)
+void cFEStateCheatCharSelect::updateCharWidgets()
 {
     int i;
-    int idx = self->mpMenu->mScrollItemOffset;
+    int idx = mpMenu->mScrollItemOffset;
     for (i = 0; i < 6; i++) {
-        cUIIcon* it = (cUIIcon*)self->mpCharWidget[i];
+        cUIIcon* it = (cUIIcon*)mpCharWidget[i];
         if (((void*)it) != 0) {
-            int textureElem = ((int*)(&self->mpCharElem[0]))[idx + i];
+            int textureElem = ((int*)(&mpCharElem[0]))[idx + i];
             it->mTextureID = -1;
             it->mpTextureElem = (const cTextureElement*)textureElem;
         }

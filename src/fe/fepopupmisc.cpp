@@ -406,11 +406,11 @@ extern void* cFEStateRiderBio_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRiderBio_cFEStateRiderBio1(cFEStateRiderBio* self)
+void* cFEStateRiderBio::cFEStateRiderBio1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRiderBio_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRiderBio_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -450,11 +450,11 @@ extern void* cFEStateRuleSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect1(cFEStateRuleSelect* self)
+void* cFEStateRuleSelect::cFEStateRuleSelect1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRuleSelect_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRuleSelect_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -524,12 +524,12 @@ struct cBraggingRightsMenuArr : cBraggingRightsMenu {
  *
  * @return @p self
  */
-extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(cFEStateBraggingRights* self)
+void* cFEStateBraggingRights::cFEStateBraggingRights1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
-    new (self->mMenuCtrl) cBraggingRightsMenuArr[2];
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateBraggingRights_vtbl;
+    new (mMenuCtrl) cBraggingRightsMenuArr[2];
+    return ((void*)this);
 }
 #endif
 
@@ -591,12 +591,12 @@ extern void* cFEStateChatRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateChatRoom_cFEStateChatRoom1(cFEStateChatRoom* self)
+void* cFEStateChatRoom::cFEStateChatRoom1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mbExiting = 0;
-    VPTR_OF(cListNode, self) = cFEStateChatRoom_vtbl;
-    return self;
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    mbExiting = 0;
+    VPTR_OF(cListNode, this) = cFEStateChatRoom_vtbl;
+    return this;
 }
 #endif
 
@@ -681,11 +681,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNetQuickPlayPopup* self) {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mbSearching = 0;
-    VPTR_OF(cListNode, self) = cFEStateNetQuickPlayPopup_vtbl;
-    return ((void*)self);
+void * cFEStateNetQuickPlayPopup::cFEStateNetQuickPlayPopup1()
+{
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    mbSearching = 0;
+    VPTR_OF(cListNode, this) = cFEStateNetQuickPlayPopup_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -776,10 +777,11 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQuickMessages* self) {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateNetQuickMessages_vtbl;
-    return ((void*)self);
+void * cFEStateNetQuickMessages::cFEStateNetQuickMessages1()
+{
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateNetQuickMessages_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -831,14 +833,14 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu1(cFEStateLobbyMenu* self)
+void* cFEStateLobbyMenu::cFEStateLobbyMenu1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateLobbyMenu_vtbl;
-    self->mszChannelName = (char*)emptyStr;
-    self->mszRoomName = (char*)emptyStr;
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = cFEStateLobbyMenu_vtbl;
+    mszChannelName = (char*)emptyStr;
+    mszRoomName = (char*)emptyStr;
+    return ((void*)this);
 }
 #endif
 
@@ -880,15 +882,15 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1(cFEStateNetCreateRoomPopup* self)
+void* cFEStateNetCreateRoomPopup::cFEStateNetCreateRoomPopup1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateNetCreateRoomPopup_vtbl;
-    self->mszRoomName = (char*)emptyStr;
-    self->mszChannelName = (char*)emptyStr;
-    self->mszPassword = (char*)emptyStr;
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = cFEStateNetCreateRoomPopup_vtbl;
+    mszRoomName = (char*)emptyStr;
+    mszChannelName = (char*)emptyStr;
+    mszPassword = (char*)emptyStr;
+    return ((void*)this);
 }
 #endif
 
@@ -939,11 +941,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
 /**
  * Returns the room name entered in the popup, mszRoomName (+0x6DC).
  *
- * @param roomPopup  the create-room popup
  * @return the room name string
  */
-extern "C" int cFEStateNetCreateRoomPopup_getRoomName(cFEStateNetCreateRoomPopup* roomPopup) {
-    return ((int)roomPopup->mszRoomName);
+int cFEStateNetCreateRoomPopup::getRoomName()
+{
+    return ((int)mszRoomName);
 }
 #endif
 //100%
@@ -952,11 +954,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getChannelName);
 /**
  * Returns the popup's channel name, mszChannelName (+0x6E0).
  *
- * @param roomPopup  the create-room popup
  * @return the channel name string
  */
-extern "C" int cFEStateNetCreateRoomPopup_getChannelName(cFEStateNetCreateRoomPopup* roomPopup) {
-    return ((int)roomPopup->mszChannelName);
+int cFEStateNetCreateRoomPopup::getChannelName()
+{
+    return ((int)mszChannelName);
 }
 #endif
 //100%
@@ -965,11 +967,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getPassword);
 /**
  * Returns the password entered in the popup, mszPassword (+0x6E4).
  *
- * @param roomPopup  the create-room popup
  * @return the password string
  */
-extern "C" int cFEStateNetCreateRoomPopup_getPassword(cFEStateNetCreateRoomPopup* roomPopup) {
-    return ((int)roomPopup->mszPassword);
+int cFEStateNetCreateRoomPopup::getPassword()
+{
+    return ((int)mszPassword);
 }
 #endif
 //100%
@@ -993,12 +995,12 @@ struct sSlot_F900 {
  *
  * @return @p self
  */
-extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(cFEStateNetHelpPopup* self)
+void* cFEStateNetHelpPopup::cFEStateNetHelpPopup1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateNetHelpPopup_vtbl;
-    new ((char*)&self->mpParentState) sSlot_F900[7];
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateNetHelpPopup_vtbl;
+    new ((char*)&mpParentState) sSlot_F900[7];
+    return ((void*)this);
 }
 #endif
 
@@ -1046,11 +1048,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setScreenName);
  * cFEStateNetHelpPopup_onGainTransition shows the title from this id (an empty title when 0). An out-of-line inline
  * setter with no caller.
  *
- * @param helpPopup   the help popup
  * @param value  the title's text id
  */
-extern "C" void cFEStateNetHelpPopup_setScreenName(cFEStateNetHelpPopup* helpPopup, int value) {
-    ((int)helpPopup->muiScreenName) = value;
+void cFEStateNetHelpPopup::setScreenName(int value)
+{
+    ((int)muiScreenName) = value;
 }
 #endif
 //100%
@@ -1062,11 +1064,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setBottomText);
  * cFEStateNetHelpPopup_onGainTransition shows it in the third text widget (+0xB0). An out-of-line inline setter with no
  * caller.
  *
- * @param helpPopup   the help popup
  * @param value  the bottom note's text id
  */
-extern "C" void cFEStateNetHelpPopup_setBottomText(cFEStateNetHelpPopup* helpPopup, int value) {
-    ((int)helpPopup->muiBottomText) = value;
+void cFEStateNetHelpPopup::setBottomText(int value)
+{
+    ((int)muiBottomText) = value;
 }
 #endif
 //100%
@@ -1078,11 +1080,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setReferEventsToParent);
  * When it is nonzero, cFEStateNetHelpPopup_handleEvent forwards events to mpParentState. An out-of-line inline setter
  * with no caller.
  *
- * @param helpPopup   the help popup
  * @param value  nonzero to forward events to the parent
  */
-extern "C" void cFEStateNetHelpPopup_setReferEventsToParent(cFEStateNetHelpPopup* helpPopup, int value) {
-    helpPopup->mbReferEventsToParent = value;
+void cFEStateNetHelpPopup::setReferEventsToParent(int value)
+{
+    mbReferEventsToParent = value;
 }
 #endif
 //100%
@@ -1093,11 +1095,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_getReferEventsToParent);
  *
  * An out-of-line inline getter with no caller (see cFEStateNetHelpPopup_setReferEventsToParent).
  *
- * @param helpPopup  the help popup
  * @return the forwarding flag
  */
-extern "C" int cFEStateNetHelpPopup_getReferEventsToParent(cFEStateNetHelpPopup* helpPopup) {
-    return (helpPopup->mbReferEventsToParent);
+int cFEStateNetHelpPopup::getReferEventsToParent()
+{
+    return (mbReferEventsToParent);
 }
 #endif
 //100%
@@ -1108,11 +1110,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_isInStore);
  *
  * An out-of-line inline accessor with no caller; cFEStateCharEquip_cFEStateCharEquip stores 1 there in the store.
  *
- * @param charEquip  the equip-gear state
  * @return 1 in store mode, else 0
  */
-extern "C" int cFEStateCharEquip_isInStore(cFEStateCharEquip* charEquip) {
-    return (charEquip->mEquipMode) == 1;
+int cFEStateCharEquip::isInStore()
+{
+    return (mEquipMode) == 1;
 }
 #endif
 //100%
@@ -1124,11 +1126,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_isIconsLoaded);
  * cFEStateCharEquip_onUpdate sets it to 1 once the character's icon file has arrived in the FE file cache. An
  * out-of-line inline getter with no caller.
  *
- * @param charEquip  the equip-gear state
  * @return nonzero once the icons are loaded
  */
-extern "C" int cFEStateCharEquip_isIconsLoaded(cFEStateCharEquip* charEquip) {
-    return (charEquip->mIconsLoaded);
+int cFEStateCharEquip::isIconsLoaded()
+{
+    return (mIconsLoaded);
 }
 #endif
 //100%
@@ -1140,11 +1142,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_setCanSwitchEquipMode);
  * The constructor cFEStateCharEquip_cFEStateCharEquip stores its canSwitchMode argument there. An out-of-line inline
  * setter with no caller.
  *
- * @param charEquip   the equip-gear state
  * @param value  nonzero to allow switching
  */
-extern "C" void cFEStateCharEquip_setCanSwitchEquipMode(cFEStateCharEquip* charEquip, int value) {
-    charEquip->mCanSwitchMode = value;
+void cFEStateCharEquip::setCanSwitchEquipMode(int value)
+{
+    mCanSwitchMode = value;
 }
 #endif
 //100%
@@ -1155,11 +1157,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_canSwitchEquipMode);
  *
  * An out-of-line inline getter with no caller.
  *
- * @param charEquip  the equip-gear state
  * @return the stored flag
  */
-extern "C" int cFEStateCharEquip_canSwitchEquipMode(cFEStateCharEquip* charEquip) {
-    return (charEquip->mCanSwitchMode);
+int cFEStateCharEquip::canSwitchEquipMode()
+{
+    return (mCanSwitchMode);
 }
 #endif
 //100%
@@ -1175,11 +1177,11 @@ extern void* cFEStateRewardGalleryBase_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1(cFEStateRewardGalleryBase* self)
+void* cFEStateRewardGalleryBase::cFEStateRewardGalleryBase1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryBase_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -1220,11 +1222,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getStoreNum);
  *
  * An out-of-line inline getter with no caller.
  *
- * @param gallery  the gallery state
  * @return the store number, or a negative value outside a store
  */
-extern "C" int cFEStateRewardGalleryBase_getStoreNum(cFEStateRewardGalleryBase* gallery) {
-    return (gallery->mStoreNum);
+int cFEStateRewardGalleryBase::getStoreNum()
+{
+    return (mStoreNum);
 }
 #endif
 //100%
@@ -1235,11 +1237,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isInStore);
  *
  * An out-of-line inline accessor with no caller.
  *
- * @param gallery  the gallery state
  * @return 1 when the store number is 0 or more, else 0
  */
-extern "C" unsigned int cFEStateRewardGalleryBase_isInStore(cFEStateRewardGalleryBase* gallery) {
-    return (unsigned int) ~(gallery->mStoreNum) >> 0x1F;
+unsigned int cFEStateRewardGalleryBase::isInStore()
+{
+    return (unsigned int) ~(mStoreNum) >> 0x1F;
 }
 #endif
 
@@ -1269,11 +1271,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isIconsLoaded);
  * cFEStateRewardGalleryBase_updateIconsLoad sets the bit when the icon file has arrived; cFEStateRewardGalleryBase_loadIcons sets it right away when there is no icon
  * file. An out-of-line inline accessor with no caller.
  *
- * @param gallery  the gallery state
  * @return 1 when the icons are loaded, else 0
  */
-extern "C" int cFEStateRewardGalleryBase_isIconsLoaded(cFEStateRewardGalleryBase* gallery) {
-    return ((int) (gallery->mLoadingState) >> 3) & 1;
+int cFEStateRewardGalleryBase::isIconsLoaded()
+{
+    return ((int) (mLoadingState) >> 3) & 1;
 }
 #endif
 
@@ -1318,11 +1320,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isRewardsLoaded);
  * The gallery code sets bit 1 (clearing bit 0, loading) once the rewards are allocated. An out-of-line inline accessor
  * with no caller.
  *
- * @param gallery  the gallery state
  * @return 1 when the rewards are loaded, else 0
  */
-extern "C" int cFEStateRewardGalleryBase_isRewardsLoaded(cFEStateRewardGalleryBase* gallery) {
-    return ((int) (gallery->mLoadingState) >> 1) & 1;
+int cFEStateRewardGalleryBase::isRewardsLoaded()
+{
+    return ((int) (mLoadingState) >> 1) & 1;
 }
 #endif
 
@@ -1423,11 +1425,11 @@ extern void* cFEStateRewardGalleryPosters_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1(cFEStateRewardGalleryPosters* self)
+void* cFEStateRewardGalleryPosters::cFEStateRewardGalleryPosters1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryPosters_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryPosters_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -1547,11 +1549,11 @@ extern void* cFEStateRewardGalleryTradingCards_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1(cFEStateRewardGalleryTradingCards* self)
+void* cFEStateRewardGalleryTradingCards::cFEStateRewardGalleryTradingCards1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryTradingCards_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryTradingCards_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -1671,11 +1673,11 @@ extern void* cFEStateRewardGalleryConceptArts_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1(cFEStateRewardGalleryConceptArts* self)
+void* cFEStateRewardGalleryConceptArts::cFEStateRewardGalleryConceptArts1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryConceptArts_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryConceptArts_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -1795,11 +1797,11 @@ extern void* cFEStateRewardGalleryVideos_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1(cFEStateRewardGalleryVideos* self)
+void* cFEStateRewardGalleryVideos::cFEStateRewardGalleryVideos1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryVideos_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryVideos_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -1919,11 +1921,11 @@ extern void* cFEStateRewardGalleryToys_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1(cFEStateRewardGalleryToys* self)
+void* cFEStateRewardGalleryToys::cFEStateRewardGalleryToys1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryToys_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryToys_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2043,11 +2045,11 @@ extern void* cFEStateRewardGalleryCheatChars_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1(cFEStateRewardGalleryCheatChars* self)
+void* cFEStateRewardGalleryCheatChars::cFEStateRewardGalleryCheatChars1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryCheatChars_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardGalleryCheatChars_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2167,11 +2169,11 @@ extern void* cFEStatePreviewReward_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(cFEStatePreviewReward* self)
+void* cFEStatePreviewReward::cFEStatePreviewReward1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStatePreviewReward_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStatePreviewReward_vtbl;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -2259,11 +2261,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setInterruptible);
  * The constructor cFEStateVideoPlayer_cFEStateVideoPlayer sets it to 1; while it is set, the input handler cFEStateVideoPlayer_onInputBegin stops the movie when the
  * input's entry 5 or 6 answers nonzero. An out-of-line inline setter with no caller.
  *
- * @param videoPlayer   the video-player state
  * @param value  nonzero to let input stop the movie
  */
-extern "C" void cFEStateVideoPlayer_setInterruptible(cFEStateVideoPlayer* videoPlayer, int value) {
-    videoPlayer->mInterruptible = value;
+void cFEStateVideoPlayer::setInterruptible(int value)
+{
+    mInterruptible = value;
 }
 #endif
 //100%
@@ -2274,11 +2276,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setFullScreen);
  *
  * An out-of-line inline setter with no caller.
  *
- * @param videoPlayer   the video-player state
  * @param value  nonzero for full screen
  */
-extern "C" void cFEStateVideoPlayer_setFullScreen(cFEStateVideoPlayer* videoPlayer, int value) {
-    videoPlayer->mOptions.bFullScreen = value;
+void cFEStateVideoPlayer::setFullScreen(int value)
+{
+    mOptions.bFullScreen = value;
 }
 #endif
 //100%
@@ -2289,11 +2291,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setSound);
  *
  * An out-of-line inline setter with no caller. The start routine cFEStateVideoPlayer_Start also sets the word to 1.
  *
- * @param videoPlayer   the video-player state
  * @param value  nonzero to play the movie's sound
  */
-extern "C" void cFEStateVideoPlayer_setSound(cFEStateVideoPlayer* videoPlayer, int value) {
-    videoPlayer->mOptions.bSoundOn = value;
+void cFEStateVideoPlayer::setSound(int value)
+{
+    mOptions.bSoundOn = value;
 }
 #endif
 //100%
@@ -2311,9 +2313,9 @@ struct sBlock24 {
  *
  * @param src  the options to copy (nine words)
  */
-extern "C" void cFEStateVideoPlayer_setOptions(cFEStateVideoPlayer* self, void* src)
+void cFEStateVideoPlayer::setOptions(void* src)
 {
-    *(sBlock24*)&self->mOptions = *(sBlock24*)src;
+    *(sBlock24*)&mOptions = *(sBlock24*)src;
 }
 #endif
 //100%
@@ -2330,11 +2332,11 @@ extern void* cFEStateMountainRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(cFEStateMountainRoom* self)
+void* cFEStateMountainRoom::cFEStateMountainRoom1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateMountainRoom_vtbl;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -2346,11 +2348,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPeakPassLoaded);
  * The room starts the pass image load in its constructor and resets the slot to -1 once the image is taken
  * (cFEStateMountainRoom_updateTextureLoad). An out-of-line inline accessor with no caller.
  *
- * @param mountainRoom  the mountain-room state
  * @return 1 when the slot is -1, else 0
  */
-extern "C" int cFEStateMountainRoom_isPeakPassLoaded(cFEStateMountainRoom* mountainRoom) {
-    return ~(mountainRoom->mTextureFileIndex) == 0;
+int cFEStateMountainRoom::isPeakPassLoaded()
+{
+    return ~(mTextureFileIndex) == 0;
 }
 #endif
 //100%
@@ -2362,9 +2364,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_hidePass);
  *
  * Calls its setVisible with 0, as cFEStateMountainRoom_onInputBegin does to close the pass view. No null check.
  */
-extern "C" void cFEStateMountainRoom_hidePass(cFEStateMountainRoom* self)
+void cFEStateMountainRoom::hidePass()
 {
-    ((cUIThing*)self->mpPassGroup)->setVisible(0);
+    ((cUIThing*)mpPassGroup)->setVisible(0);
 }
 #endif
 //100%
@@ -2376,14 +2378,14 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassVisible);
  * Reads the mVisible bit (bit 6) of the widget's mAttr; 0 when there is no widget. An out-of-line inline accessor with
  * no caller.
  *
- * @param mountainRoom  the mountain-room state
  * @return 1 when the pass is shown, else 0
  */
-extern "C" int cFEStateMountainRoom_isPassVisible(cFEStateMountainRoom* mountainRoom) {
+int cFEStateMountainRoom::isPassVisible()
+{
     int var_2;
     cUIGroup* temp_3;
 
-    temp_3 = mountainRoom->mpPassGroup;
+    temp_3 = mpPassGroup;
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = (temp_3->mAttr >> 6) & 1;
@@ -2402,24 +2404,24 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassFrontVisible);
  * cFEStateMountainRoom_updateTextureLoad makes the same test before showing the pass. An out-of-line inline accessor
  * with no caller.
  *
- * @param mountainRoom  the mountain-room state
  * @return 1 when both are shown, else 0
  */
-extern "C" int cFEStateMountainRoom_isPassFrontVisible(cFEStateMountainRoom* mountainRoom) {
+int cFEStateMountainRoom::isPassFrontVisible()
+{
     int frontVisible;
     int groupVisible;
     cUIGroup* group;
     cUIGroup* front;
 
     // each group's isVisible(): tAttrThing's mVisible, bit 6 of the mAttr word
-    group = mountainRoom->mpPassGroup;
+    group = mpPassGroup;
     frontVisible = 0;
     groupVisible = 0;
     if (group != 0) {
         groupVisible = (group->mAttr >> 6) & 1;
     }
     if (groupVisible != 0) {
-        front = mountainRoom->mpPassFrontGroup;
+        front = mpPassFrontGroup;
         if (front != 0) {
             frontVisible = (front->mAttr >> 6) & 1;
         }
@@ -2440,11 +2442,11 @@ extern void* cFEStatePeakRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom1(cFEStatePeakRoom* self)
+void* cFEStatePeakRoom::cFEStatePeakRoom1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStatePeakRoom_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStatePeakRoom_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2481,11 +2483,11 @@ extern void* cFEStateTrophyRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom1(cFEStateTrophyRoom* self)
+void* cFEStateTrophyRoom::cFEStateTrophyRoom1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateTrophyRoom_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateTrophyRoom_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2527,11 +2529,11 @@ extern void* cFEStateRewardsRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom1(cFEStateRewardsRoom* self)
+void* cFEStateRewardsRoom::cFEStateRewardsRoom1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRewardsRoom_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRewardsRoom_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2566,11 +2568,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_isInStore);
  *
  * The constructor cFEStateRewardsRoom_cFEStateRewardsRoom stores its inStore argument there. An out-of-line inline accessor with no caller.
  *
- * @param rewardsRoom  the rewards-room state
  * @return the in-store flag
  */
-extern "C" int cFEStateRewardsRoom_isInStore(cFEStateRewardsRoom* rewardsRoom) {
-    return (rewardsRoom->mInStore);
+int cFEStateRewardsRoom::isInStore()
+{
+    return (mInStore);
 }
 #endif
 
@@ -2788,11 +2790,11 @@ extern void* cFEStateAudioOptions_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions1(cFEStateAudioOptions* self)
+void* cFEStateAudioOptions::cFEStateAudioOptions1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateAudioOptions_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateAudioOptions_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2824,11 +2826,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions_isInStore);
  *
  * An out-of-line inline accessor with no caller.
  *
- * @param audioOptions  the audio-options state
  * @return the in-store flag
  */
-extern "C" int cFEStateAudioOptions_isInStore(cFEStateAudioOptions* audioOptions) {
-    return (audioOptions->mInStore);
+int cFEStateAudioOptions::isInStore()
+{
+    return (mInStore);
 }
 #endif
 //100%
@@ -2844,11 +2846,11 @@ extern void* cFEStateRequestLine_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRequestLine_cFEStateRequestLine1(cFEStateRequestLine* self)
+void* cFEStateRequestLine::cFEStateRequestLine1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateRequestLine_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateRequestLine_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -2880,11 +2882,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isInStore);
  *
  * An out-of-line inline accessor with no caller.
  *
- * @param requestLine  the request-line state
  * @return the in-store flag
  */
-extern "C" int cFEStateRequestLine_isInStore(cFEStateRequestLine* requestLine) {
-    return (requestLine->mInStore);
+int cFEStateRequestLine::isInStore()
+{
+    return (mInStore);
 }
 #endif
 //100%
@@ -2898,7 +2900,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_countBits);
  * @return the number of bits set (0..64)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_countBits(cFEStateRequestLine* requestLine, unsigned long bits) {
+int cFEStateRequestLine::countBits(unsigned long bits)
+{
     int count;
     int i;
     int bit;
@@ -2922,9 +2925,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_selectSong);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cFEStateRequestLine_selectSong(cFEStateRequestLine* self, int bit)
+void cFEStateRequestLine::selectSong(int bit)
 {
-    *(long*)&self->mPlaylist |= 1L << bit;
+    *(long*)&mPlaylist |= 1L << bit;
 }
 #endif
 //100%
@@ -2936,9 +2939,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_unselectSong);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cFEStateRequestLine_unselectSong(cFEStateRequestLine* self, int bit)
+void cFEStateRequestLine::unselectSong(int bit)
 {
-    *(long*)&self->mPlaylist &= ~(1L << bit);
+    *(long*)&mPlaylist &= ~(1L << bit);
 }
 #endif
 //100%
@@ -2951,8 +2954,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isEmptyPlaylist);
  * @return 1 when no song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isEmptyPlaylist(cFEStateRequestLine* requestLine) {
-    return ((long)requestLine->mPlaylist) == 0;
+int cFEStateRequestLine::isEmptyPlaylist()
+{
+    return ((long)mPlaylist) == 0;
 }
 #endif
 //100%
@@ -2967,9 +2971,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isOnlySongInPlaylist);
  * @return 1 when no other song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isOnlySongInPlaylist(cFEStateRequestLine* self, int bit)
+int cFEStateRequestLine::isOnlySongInPlaylist(int bit)
 {
-    return ((long)self->mPlaylist & ~(1L << bit)) == 0;
+    return ((long)mPlaylist & ~(1L << bit)) == 0;
 }
 #endif
 //100%
@@ -2982,9 +2986,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongSelected);
  * @return 1 when selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isSongSelected(cFEStateRequestLine* self, int bit)
+int cFEStateRequestLine::isSongSelected(int bit)
 {
-    return (self->mPlaylist >> bit) & 1;
+    return (mPlaylist >> bit) & 1;
 }
 #endif
 //100%
@@ -2997,7 +3001,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_getNumSongsInPlaylist);
  * @return the number of selected songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_getNumSongsInPlaylist(cFEStateRequestLine* requestLine) {
+int cFEStateRequestLine::getNumSongsInPlaylist()
+{
     int temp_2;
     int var_4;
     int var_5;
@@ -3005,7 +3010,7 @@ extern "C" int cFEStateRequestLine_getNumSongsInPlaylist(cFEStateRequestLine* re
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (requestLine->mPlaylist) >> var_4) & 1;
+        temp_2 = ((unsigned long) (mPlaylist) >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);
@@ -3022,9 +3027,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongOwned);
  * @return 1 when owned, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isSongOwned(cFEStateRequestLine* self, int bit)
+int cFEStateRequestLine::isSongOwned(int bit)
 {
-    return (*(unsigned long*)&self->mOwnedSong >> bit) & 1;
+    return (*(unsigned long*)&mOwnedSong >> bit) & 1;
 }
 #endif
 //100%
@@ -3036,9 +3041,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_ownSong);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cFEStateRequestLine_ownSong(cFEStateRequestLine* self, int bit)
+void cFEStateRequestLine::ownSong(int bit)
 {
-    *(long*)&self->mOwnedSong |= 1L << bit;
+    *(long*)&mOwnedSong |= 1L << bit;
 }
 #endif
 //100%
@@ -3051,7 +3056,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_getNumOwnedSongs);
  * @return the number of owned songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_getNumOwnedSongs(cFEStateRequestLine* requestLine) {
+int cFEStateRequestLine::getNumOwnedSongs()
+{
     int temp_2;
     int var_4;
     int var_5;
@@ -3059,7 +3065,7 @@ extern "C" int cFEStateRequestLine_getNumOwnedSongs(cFEStateRequestLine* request
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (*(unsigned long*)&requestLine->mOwnedSong) >> var_4) & 1;
+        temp_2 = ((unsigned long) (*(unsigned long*)&mOwnedSong) >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);
@@ -3180,11 +3186,11 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1(cFEStateSelectMultiplayerMode* self)
+void* cFEStateSelectMultiplayerMode::cFEStateSelectMultiplayerMode1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateSelectMultiplayerMode_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateSelectMultiplayerMode_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -3221,11 +3227,11 @@ extern void* cFEStateMPCircuit_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit1(cFEStateMPCircuit* self)
+void* cFEStateMPCircuit::cFEStateMPCircuit1()
 {
-    cUIState_cUIState(self, 0);
-    VPTR_OF(cListNode, self) = cFEStateMPCircuit_vtbl;
-    return ((void*)self);
+    cUIState_cUIState(this, 0);
+    VPTR_OF(cListNode, this) = cFEStateMPCircuit_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -3263,15 +3269,15 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAccount* self)
+void* cFEUseExistingAccount::cFEUseExistingAccount1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyString = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEUseExistingAccount_vtbl;
-    self->mszEmail = (char*)emptyString;
-    self->unk_6D0 = 0;
-    self->mpTextForgotPassword = 0;
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = cFEUseExistingAccount_vtbl;
+    mszEmail = (char*)emptyString;
+    unk_6D0 = 0;
+    mpTextForgotPassword = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3306,10 +3312,11 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPersona* self) {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateSelectPersona_vtbl;
-    return ((void*)self);
+void * cFEStateSelectPersona::cFEStateSelectPersona1()
+{
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateSelectPersona_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -3376,13 +3383,13 @@ extern int D_00441268[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup1(cFEStateChallengePopup* self)
+void* cFEStateChallengePopup::cFEStateChallengePopup1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateChallengePopup_vtbl;
-    self->mpEventOptions = D_00441268;
-    self->mbChallengeSent = 0;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateChallengePopup_vtbl;
+    mpEventOptions = D_00441268;
+    mbChallengeSent = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3439,13 +3446,13 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1(cFEStateChallengeReceivedPopup* self)
+void* cFEStateChallengeReceivedPopup::cFEStateChallengeReceivedPopup1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateChallengeReceivedPopup_vtbl;
-    self->mszChallenger = (char*)emptyStr;
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = cFEStateChallengeReceivedPopup_vtbl;
+    mszChallenger = (char*)emptyStr;
+    return ((void*)this);
 }
 #endif
 
@@ -3502,11 +3509,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1(cFEStateOnlineCharacterSelect* self) {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mbConfirmed = 0;
-    VPTR_OF(cListNode, self) = cFEStateOnlineCharacterSelect_vtbl;
-    return ((void*)self);
+void * cFEStateOnlineCharacterSelect::cFEStateOnlineCharacterSelect1()
+{
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    mbConfirmed = 0;
+    VPTR_OF(cListNode, this) = cFEStateOnlineCharacterSelect_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -3544,26 +3552,26 @@ extern void* cFEStateNetConfig_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateNetConfig_cFEStateNetConfig1(cFEStateNetConfig* self)
+void* cFEStateNetConfig::cFEStateNetConfig1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    self->miSelectedSetting = 0;
-    VPTR_OF(cListNode, self) = cFEStateNetConfig_vtbl;
-    self->miNumSettings = 0;
-    self->unk_6D8 = 0;
-    self->unk_6DC = 0;
-    self->mpLBAdapters = 0;
-    self->mpLBSettings = 0;
-    self->unk_6F0 = 0;
-    self->mpMenuConfig = 0;
-    self->mpConfigRectangle = 0;
-    self->mpNoConfiguration = 0;
-    self->unk_700 = 0;
-    self->mpustrPopupText = 0;
-    self->mpustrAuthError[0] = 0;
-    self->mpustrAuthError[1] = 0;
-    self->mpustrAuthError[2] = 0;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    miSelectedSetting = 0;
+    VPTR_OF(cListNode, this) = cFEStateNetConfig_vtbl;
+    miNumSettings = 0;
+    unk_6D8 = 0;
+    unk_6DC = 0;
+    mpLBAdapters = 0;
+    mpLBSettings = 0;
+    unk_6F0 = 0;
+    mpMenuConfig = 0;
+    mpConfigRectangle = 0;
+    mpNoConfiguration = 0;
+    unk_700 = 0;
+    mpustrPopupText = 0;
+    mpustrAuthError[0] = 0;
+    mpustrAuthError[1] = 0;
+    mpustrAuthError[2] = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3610,17 +3618,17 @@ extern void* cFEStateAuthDNAS_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateAuthDNAS_cFEStateAuthDNAS1(cFEStateAuthDNAS* self)
+void* cFEStateAuthDNAS::cFEStateAuthDNAS1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateAuthDNAS_vtbl;
-    self->mpAuth = 0;
-    self->mpTextAuth = 0;
-    self->miState = 0;
-    self->unk_6F4 = 2;
-    self->unk_6F8 = 0x1E;
-    self->mpustrText = 0;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateAuthDNAS_vtbl;
+    mpAuth = 0;
+    mpTextAuth = 0;
+    miState = 0;
+    unk_6F4 = 2;
+    unk_6F8 = 0x1E;
+    mpustrText = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3694,14 +3702,14 @@ extern void* cFEStateAuthDNASError_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError1(cFEStateAuthDNASError* self)
+void* cFEStateAuthDNASError::cFEStateAuthDNASError1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mpustrBody = 0;
-    VPTR_OF(cListNode, self) = cFEStateAuthDNASError_vtbl;
-    self->mpustrFooter = 0;
-    self->mpustrTitle = 0;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    mpustrBody = 0;
+    VPTR_OF(cListNode, this) = cFEStateAuthDNASError_vtbl;
+    mpustrFooter = 0;
+    mpustrTitle = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3792,17 +3800,17 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" void* cFEStateCreateStep1_cFEStateCreateStep11(cFEStateCreateStep1* self)
+void* cFEStateCreateStep1::cFEStateCreateStep11()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateCreateStep1_vtbl;
-    self->mszSavedPassword = (char*)emptyStr;
-    self->mszSavedConfirm = (char*)emptyStr;
-    self->mszSavedMail = (char*)emptyStr;
-    self->mbEditAccount = 1;
-    self->mpStaticContinue = 0;
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = cFEStateCreateStep1_vtbl;
+    mszSavedPassword = (char*)emptyStr;
+    mszSavedConfirm = (char*)emptyStr;
+    mszSavedMail = (char*)emptyStr;
+    mbEditAccount = 1;
+    mpStaticContinue = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -3864,10 +3872,11 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *cFEStateCreateStep2_cFEStateCreateStep21(cFEStateCreateStep2* self) {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateCreateStep2_vtbl;
-    return ((void*)self);
+void * cFEStateCreateStep2::cFEStateCreateStep21()
+{
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateCreateStep2_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -3920,10 +3929,11 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreateDuplicate* self) {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    VPTR_OF(cListNode, self) = cFEStateCreateDuplicate_vtbl;
-    return ((void*)self);
+void * cFEStateCreateDuplicate::cFEStateCreateDuplicate1()
+{
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    VPTR_OF(cListNode, this) = cFEStateCreateDuplicate_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -3974,12 +3984,12 @@ extern void* cFEStateLogin_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateLogin_cFEStateLogin1(cFEStateLogin* self)
+void* cFEStateLogin::cFEStateLogin1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mpustrDisconnect = 0;
-    VPTR_OF(cListNode, self) = cFEStateLogin_vtbl;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this, 0, 0);
+    mpustrDisconnect = 0;
+    VPTR_OF(cListNode, this) = cFEStateLogin_vtbl;
+    return ((void*)this);
 }
 #endif
 
@@ -4170,16 +4180,16 @@ static inline void InitVec_E0F60(void* vvself, const sAlloc_E0F60& a = sAlloc_E0
  *
  * @return @p self
  */
-extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger* self)
+void* cFEStateNetMessenger::cFEStateNetMessenger1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyString = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateNetMessenger_vtbl;
-    self->mszFoundName = (char*)emptyString;
-    self->mszSearchName = (char*)emptyString;
-    self->mszShownName = (char*)emptyString;
-    InitVec_E0F60(self);
-    return ((void*)self);
+    VPTR_OF(cListNode, this) = cFEStateNetMessenger_vtbl;
+    mszFoundName = (char*)emptyString;
+    mszSearchName = (char*)emptyString;
+    mszShownName = (char*)emptyString;
+    InitVec_E0F60(this);
+    return ((void*)this);
 }
 #endif
 
@@ -4245,14 +4255,14 @@ static inline void InitVec_E0FF0(cFEStateReadMessagePopup* self, const sAlloc_E0
  *
  * @return @p self
  */
-extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup1(cFEStateReadMessagePopup* self)
+void* cFEStateReadMessagePopup::cFEStateReadMessagePopup1()
 {
-    cFEStateNet_cFEStateNet(self, 0, 0);
+    cFEStateNet_cFEStateNet(this, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateReadMessagePopup_vtbl;
-    self->mszSender = (char*)emptyStr;
-    InitVec_E0FF0(self);
-    return self;
+    VPTR_OF(cListNode, this) = cFEStateReadMessagePopup_vtbl;
+    mszSender = (char*)emptyStr;
+    InitVec_E0FF0(this);
+    return this;
 }
 #endif
 
@@ -4337,9 +4347,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUILocaleInterface_setTextNumCharFlag);
  *
  * @param enabled  nonzero to set the flag
  */
-extern "C" void cUILocaleInterface_setTextNumCharFlag(cUILocaleInterface* self, int enabled)
+void cUILocaleInterface::setTextNumCharFlag(int enabled)
 {
-    self->mAttrLocale.mTextNumChar = (enabled != 0);
+    mAttrLocale.mTextNumChar = (enabled != 0);
 }
 #endif
 

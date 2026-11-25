@@ -27,6 +27,9 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cWorldLine {
     // --- cWorldIntersectType (On Tour 0x60; data 0x00-0x50, then the vptr)
     int mPrecision;                 // 0x000 [O] tIntPrecision; [R] ctor stores the precision argument (0..2)
@@ -50,6 +53,19 @@ struct cWorldLine {
     t4Vector origDp;                // 0x090 [O]; [R] ctor = ap1 - ap0; [U] Transform / UnTransform read it
     float idealParam;               // 0x0A0 [O]; [R] ctor = aIdealParam; [U] GetIdealParam returns it (lwc1)
     char unk_0A4[0xC];              // 0x0A4 padding (16-byte aligned class)
+
+    // Methods bound to their retail symbols by asm labels.
+    int IsInBoxTransformed(t4Vector* mn, t4Vector* mx) __asm__("cWorldLine_IsInBoxTransformed");
+    void Transform(t4Vector* mat, float scale) __asm__("cWorldLine_Transform");
+    void UnTransform() __asm__("cWorldLine_UnTransform");
+    int IsTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* n, t4Vector* hit, t4Vector* outN,
+                 float* outT)
+        __asm__("cWorldLine_IsTriInt");
+    int Is2SidedTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* normal, t4Vector* ipos,
+                       t4Vector* inorm, void* hitParam)
+        __asm__("cWorldLine_Is2SidedTriInt");
+    int IsBoxInt(float* bmin, float* bmax, tIntersectInfo* hits) __asm__("cWorldLine_IsBoxInt");
+    float GetIdealParam() __asm__("cWorldLine_GetIdealParam__FPv");
 };
 
 CHECK_OFFSET(cWorldLine, mPrecision, 0x000);

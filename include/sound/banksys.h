@@ -31,6 +31,15 @@ struct cBankSys {
     int* mBank;                   // 0x004 [O]; [R] operator new(0x10, "mBank") (one per play-option level); [U] SFX_Bank (cBankSys_SFX_Bank) / SFX_Begin store mBank[mInst], SFX_End (cBankSys_SFX_End) reads it
     int* mPatch;                  // 0x008 [O]; [R] operator new(0x10, "mPath") (EA's tag spelling); [U] SFX_Patch (cBankSys_SFX_Patch) / SFX_Begin store mPatch[mInst], SFX_End reads it
     void** mVtbl;                 // 0x00C [R] cBankSys vptr: cBankSys_vtbl (cBankSys / cMidiSys ctors and dtors), cCrowdSys_vtbl (cCrowdSys / cController), cSSXAudio_vtbl
+
+    // Methods bound to their retail symbols by asm labels.
+    void SFX_Bank(int bank) __asm__("cBankSys_SFX_Bank");
+    void SFX_Patch(int patch) __asm__("cBankSys_SFX_Patch");
+    void SFX_Begin() __asm__("cBankSys_SFX_Begin");
+    void SFX_Begin1(int bank) __asm__("cBankSys_SFX_Begin1");
+    void SFX_Begin2(int bank, int patch) __asm__("cBankSys_SFX_Begin2");
+    void SFX_Play2D(int bank, int patch) __asm__("cBankSys_SFX_Play2D");
+    void SFX_Play2DVol(int bank, int patch, int volume) __asm__("cBankSys_SFX_Play2DVol");
 };
 
 CHECK_OFFSET(cBankSys, mpVBankManager, 0x000);

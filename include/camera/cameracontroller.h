@@ -56,6 +56,13 @@ struct cCameraController {
     cCamera* Camera;                // 0x10 [O]; [R] the ctor's camera argument (sw); [U] snap / snapCurrent pass it to
                                     //      cCamera_snapResultAlgorithm and cSplashManager_CameraSnapped (lw)
     void** mVtbl;                   // 0x14 [R] cCameraController_vtbl (ctor and dtor); [P] vptr at 0x14 in both builds
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cCameraController_update__FPv");
+    int getBlendType() __asm__("cCameraController_getBlendType");
+    int getAlgorithmList() __asm__("cCameraController_getAlgorithmList");
+    void snapCurrent() __asm__("cCameraController_snapCurrent");
+    void* clearAlgorithms() __asm__("cCameraController_clearAlgorithms__FPv");
 };
 
 CHECK_OFFSET(cCameraController, Type, 0x00);
@@ -83,6 +90,16 @@ struct cManualCameraController {
     cEditorCameraAlgorithm* EditorAlgo; // 0x1C [O]; [P] getEditorAlgo (lw); [R] ctor: cMemMan_alloc(0x40, "Editor Cam Algo") +
                                     //      cEditorCameraAlgorithm ctor; [U] the dtor deletes it, setCurrentAlgorithmType(0x50)
                                     //      inserts it
+
+    // Methods bound to their retail symbols by asm labels.
+    int getManualAlgo() __asm__("cManualCameraController_getManualAlgo");
+    int getEditorAlgo() __asm__("cManualCameraController_getEditorAlgo");
+    void snap(int subjectID) __asm__("cManualCameraController_snap");
+    void snapCurrent() __asm__("cManualCameraController_snapCurrent");
+    void addAlgorithm(int algo, int deleteAlgorithmOnDestruction) __asm__("cManualCameraController_addAlgorithm");
+    void setCurrentAlgorithmType(int msg) __asm__("cManualCameraController_setCurrentAlgorithmType");
+    int getCurrentAlgorithmType() __asm__("cManualCameraController_getCurrentAlgorithmType");
+    void update() __asm__("cManualCameraController_update");
 };
 
 CHECK_OFFSET(cManualCameraController, Type, 0x00);

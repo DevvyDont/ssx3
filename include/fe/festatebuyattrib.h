@@ -27,6 +27,14 @@ struct cFEStateBuyAttrib : public cUIState {
     int mBank;                      // 0x0A4 [O]
     int mBuyPrompt;                 // 0x0A8 [O] bool
     cUIMenu* pAttribMenu;           // 0x0AC [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateLevels() __asm__("cFEStateBuyAttrib_updateLevels");
+    void updateCostPerLevel() __asm__("cFEStateBuyAttrib_updateCostPerLevel");
+    void updateExperienceDisplay() __asm__("cFEStateBuyAttrib_updateExperienceDisplay");
+    void updateTotalCost() __asm__("cFEStateBuyAttrib_updateTotalCost");
+    void updateBank() __asm__("cFEStateBuyAttrib_updateBank");
+    void buyExperience() __asm__("cFEStateBuyAttrib_buyExperience");
 };
 
 CHECK_OFFSET(cFEStateBuyAttrib, mpAttribScreen, 0x048);

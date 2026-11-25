@@ -48,6 +48,8 @@ CHECK_OFFSET(tAddBoostData, BoostZ, 0x1C);
 CHECK_OFFSET(tAddBoostData, unk_020, 0x20);
 CHECK_SIZE(tAddBoostData, 0x24);
 
+struct cBxReplayFrame;
+
 struct cBoostModifier : public cPhysicsModifier {
     // cPhysicsModifier (object/physicsmodifier.h, 0x8): the vptr at 0x04:
     //   [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl (0x00490898)
@@ -68,6 +70,9 @@ struct cBoostModifier : public cPhysicsModifier {
     // --- cBoostModifier
     tInstanceRecord* Instance;      // 0x40 [O]; [R] both ctors; [U] update
     char unk_44[0xc];               // 0x44 padding to the 0x50 allocation
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cBoostModifier1(cBxReplayFrame* stream) __asm__("cBoostModifier_cBoostModifier1");
 };
 
 CHECK_OFFSET(cBoostModifier, unk_08, 0x08);

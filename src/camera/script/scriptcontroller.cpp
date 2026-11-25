@@ -132,7 +132,7 @@ extern char str_Algorithmic_Script_Camera_Algo[];
  *
  * @param cam  the script camera object (cScriptObjCamera)
  */
-extern "C" void cScriptCameraController_addCamera(cScriptCameraController* self, cScriptObjCamera* cam)
+void cScriptCameraController::addCamera(cScriptObjCamera* cam)
 {
     void* ctl;
     switch (cScriptPlayerEntity_GetType(cam->mpCameraEntity->mpEntity))
@@ -155,8 +155,8 @@ extern "C" void cScriptCameraController_addCamera(cScriptCameraController* self,
     // PORT: the camera pointer is passed through an int parameter.
     cScriptAlgorithm_setScriptObj(ctl, (int)cam);
     cam->mpCameraAlgorithm = (cScriptAlgorithm*)ctl;
-    cScriptCameraController_addAlgorithm_3(((char*)self), ctl, 1);
-    self->IsActive = 1;
+    cScriptCameraController_addAlgorithm_3(((char*)this), ctl, 1);
+    IsActive = 1;
 }
 #endif
 
@@ -185,10 +185,10 @@ extern "C" void cCameraAlgoList_remove(sScrAlgoList* list, sScrAlgoNode* node);
  *
  * @param algo  the script camera object (On Tour's cScriptObjCamera)
  */
-extern "C" void cScriptCameraController_removeCamera(cScriptCameraController* self, cScriptObjCamera* algo)
+void cScriptCameraController::removeCamera(cScriptObjCamera* algo)
 {
-    if (self->IsActive != 0) {
-        sScrAlgoList* list = (sScrAlgoList*)self->AlgorithmList;
+    if (IsActive != 0) {
+        sScrAlgoList* list = (sScrAlgoList*)AlgorithmList;
         for (sScrAlgoNode* n = list->head; n != 0; n = n->next) {
             int k = (int)algo->mpCameraAlgorithm;
             if (n->key == k) {
@@ -197,7 +197,7 @@ extern "C" void cScriptCameraController_removeCamera(cScriptCameraController* se
             }
         }
         if (list->count <= 0)
-            self->IsActive = 0;
+            IsActive = 0;
     }
 }
 #endif
@@ -215,9 +215,9 @@ extern "C" void cCameraAlgoList_insert(void*, void*, float);
  *
  * @param algo  the camera algorithm to add
  */
-extern "C" void cScriptCameraController_addAlgorithm(cScriptCameraController* self, void* algo)
+void cScriptCameraController::addAlgorithm(void* algo)
 {
-    cCameraAlgoList_insert(self->AlgorithmList, algo, 1.0f);
+    cCameraAlgoList_insert(AlgorithmList, algo, 1.0f);
 }
 #endif
 
@@ -254,9 +254,9 @@ struct sScrAlgoNodeK2 {
  * For each node the weight is smoothstep(t) = 3t^2 - 2t^3 (capped at 1) of the time at +0x18 of the object
  * cScriptAlgorithm_getScriptObj returns for the algorithm; then virtual slot 5 runs the algorithm.
  */
-extern "C" void cScriptCameraController_update(cScriptCameraController* self)
+void cScriptCameraController::update()
 {
-    sScrAlgoNodeK2* n = *(sScrAlgoNodeK2**)self->AlgorithmList;
+    sScrAlgoNodeK2* n = *(sScrAlgoNodeK2**)AlgorithmList;
     while (n != 0) {
         float progress = cScriptAlgorithm_getScriptObj_K2(n->algo)->mWeight;
         float progressSq = progress * progress;
@@ -333,10 +333,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_setScriptObj__FPv
  *
  * @param val  the script camera object (On Tour cScriptObjCamera*)
  */
-void cScriptAlgorithm_setScriptObj(void* vself, int val)
+void cScriptAlgorithm::setScriptObj(int val)
 {
-    cScriptAlgorithm* self = (cScriptAlgorithm*)vself;
-    self->ScriptObj = (cScriptObjCamera*)val;
+    ScriptObj = (cScriptObjCamera*)val;
 }
 #endif
 
@@ -348,10 +347,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_getScriptObj__FPv
  *
  * @return the script object (On Tour's cScriptObjCamera*); cScriptCameraController_update reads its time at +0x18
  */
-int cScriptAlgorithm_getScriptObj(void* vself)
+int cScriptAlgorithm::getScriptObj()
 {
-    cScriptAlgorithm* self = (cScriptAlgorithm*)vself;
-    return (int)self->ScriptObj;
+    return (int)ScriptObj;
 }
 #endif
 

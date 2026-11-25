@@ -36,9 +36,9 @@ extern char str_have_text[];
  *
  * @param on  nonzero to show, zero to hide (On Tour v)
  */
-extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on)
+void cFEStateUberTrick::costVisible(int on)
 {
-    void* screen = cList_first((cList*)&self->mScreens);
+    void* screen = cList_first((cList*)&mScreens);
     cUIThing* costNum = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costNum) {
         costNum->setVisible(on);
@@ -78,9 +78,9 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
  *
  * @param on  1 to show, 0 to hide
  */
-extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on)
+void cFEStateUberTrick::previewVisible(int on)
 {
-    void* screen = cList_first((cList*)&self->mScreens);
+    void* screen = cList_first((cList*)&mScreens);
     cUIThing* w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
     if (w) {
         w->setVisible(on);
@@ -112,9 +112,9 @@ extern char str_InstBtn2[];
  *
  * @param on  nonzero to show, zero to hide (On Tour v)
  */
-extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on)
+void cFEStateUberTrick::trickVisible(int on)
 {
-    void* screen = cList_first((cList*)&self->mScreens);
+    void* screen = cList_first((cList*)&mScreens);
     cUIThing* w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
     if (w) {
         w->setVisible(on);
@@ -224,8 +224,8 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
         self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     func_0028F140(cAudioInterface_bxAudio(), 5);
-    cFEStateUberTrick_costVisible(self, 0);
-    cFEStateUberTrick_previewVisible(self, 0);
+    self->costVisible(0);
+    self->previewVisible(0);
 }
 #endif
 
@@ -671,8 +671,8 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                 cUIMenu_setSelectedByIndex(self->mpTrickMenu, 0);
                 SetActive_185268(self->mpTrickMenu, 1);
                 cFEStateUberTrick_activateTrickMenu(((char*)self));
-                cFEStateUberTrick_costVisible(self, 1);
-                cFEStateUberTrick_previewVisible(self, 1);
+                self->costVisible(1);
+                self->previewVisible(1);
             }
         } else if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
             cUIThing* categoryItem = (cUIThing*)self->mpMainMenu->mpSelected;
@@ -724,8 +724,8 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             }
             cUIMenu_setSelectedByIndex(self->mpTrickMenu, 0xFF);
             cFEStateUberTrick_activateMainMenu(((char*)self));
-            cFEStateUberTrick_costVisible(self, 0);
-            cFEStateUberTrick_previewVisible(self, 0);
+            self->costVisible(0);
+            self->previewVisible(0);
         } else {
             Back_185268(self);
         }
@@ -751,13 +751,13 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
         cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum)->mUberIrradiance = 1;
         if ((char*)item->mpParent == (char*)self->mpMainMenu) {
             if (self->mpTrickMenu != 0 && item->mMiscData != -1) {
-                cFEStateUberTrick_trickVisible(self, 1);
+                self->trickVisible(1);
                 cFEStateUberTrick_updateTrickMenu(((char*)self));
                 cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
                 if (helpText != 0)
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPChooseCat));
             } else {
-                cFEStateUberTrick_trickVisible(self, 0);
+                self->trickVisible(0);
                 cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
                 if (helpText != 0)
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPAcceptTrick));
@@ -846,17 +846,17 @@ extern void* cFEStateCredits_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateCredits_cFEStateCredits1(cFEStateCredits* self)
+void* cFEStateCredits::cFEStateCredits1()
 {
-    cUIState_cUIState(self);
-    VPTR_OF(cListNode, self) = cFEStateCredits_vtbl;
-    self->mPixelOffset = -100;
-    self->mPixelDelta = 1;
-    self->mHashName = 36;
-    self->mpDolbyIcon = 0;
-    self->mpTextScroll = 0;
-    self->mpWidget = 0;
-    return ((void*)self);
+    cUIState_cUIState(this);
+    VPTR_OF(cListNode, this) = cFEStateCredits_vtbl;
+    mPixelOffset = -100;
+    mPixelDelta = 1;
+    mHashName = 36;
+    mpDolbyIcon = 0;
+    mpTextScroll = 0;
+    mpWidget = 0;
+    return ((void*)this);
 }
 #endif
 

@@ -85,6 +85,9 @@ struct cCTActionBoundedCam {
                                 //      (get_uint); update / snap compare it with 1 (lw)
     t3Vector TargetPoint;       // 0x28 [O]; [R] = t3vect_Zero (sdl/sdr + sw); [U] get (get_t3Vector); update / snap
                                 //      look at it when TargetType is 1 (lwc1 0x28/0x2C/0x30)
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cCTActionBoundedCam_purge");
 };
 
 CHECK_OFFSET(cCTActionBoundedCam, Type, 0x00);
@@ -115,6 +118,9 @@ struct cCTActionSpline {
     float LeadDistance;         // 0x14 [O]; [R] 0 (sw $0); [U] get; the ctor's leadDistance
     float Time;                 // 0x18 [O]; [R] 4.0f; [U] get; the ctor's time
     float HeightOffset;         // 0x1C [O]; [R] 0 (sw $0); [U] get; the ctor's heightOffset
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cCTActionSpline_purge");
 };
 
 CHECK_OFFSET(cCTActionSpline, Type, 0x00);

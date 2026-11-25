@@ -80,6 +80,9 @@ struct cOVTemplate_PauseMenu : public cOVState {
                                     //       onWidgetEvent index it by option id
     int mPauseMenuType;             // 0x110 [O] tOVStateEnum; [U] the subclasses' onCreateScreen store their overlay
                                     //       id (1-6); onUpdate pulses the mail icon for 1, 2 and 4
+
+    // Methods bound to their retail symbols by asm labels.
+    void setPDAIconColor(int idx, int on) __asm__("cOVTemplate_PauseMenu_setPDAIconColor");
 };
 
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuOptions, 0x9C);
@@ -106,6 +109,8 @@ struct cOVState_PAUSE_OPTIONS : public cOVState {
 
 CHECK_SIZE(cOVState_PAUSE_OPTIONS, 0x9C);
 
+struct cUIThing;
+
 struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_PAUSE_ONLINE_ERROR_vtbl, stored after cOVState_vtbl by the constructors
@@ -120,6 +125,15 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     int mbShouldDisplayAuxInfo;     // 0x0A0 [O] bool; [R] the constructor stores 1; [U] onCreateScreen clears it for
                                     //       every error but the local cheat/delay ones; displayPingTimedOut /
                                     //       displayPingReceived test it
+
+    // Methods bound to their retail symbols by asm labels.
+    void enableCancelButton(bool on) __asm__("cOVState_PAUSE_ONLINE_ERROR_enableCancelButton");
+    void displayPingTimedOut() __asm__("cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut");
+    void displayPingReceived() __asm__("cOVState_PAUSE_ONLINE_ERROR_displayPingReceived");
+    void doContinueCancel(cUIThing* item, int msg) __asm__("cOVState_PAUSE_ONLINE_ERROR_doContinueCancel");
+    void setContinueOptionVisible(int visible) __asm__("cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible");
+    void setContinueHighLight(int on) __asm__("cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight");
+    void setCancelHighLight(int on) __asm__("cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight");
 };
 
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, miStartPingTick, 0x9C);

@@ -30,6 +30,17 @@ struct cFEStateCareerStats : public cUIState {
     int mTotalOwnedFSEvent;          // 0x06C [O]
     unsigned int mbitOwnedFSMedal;   // 0x070 [O]
     unsigned int mbitOpenedFS;       // 0x074 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void setupLayout() __asm__("cFEStateCareerStats_setupLayout");
+    void setupMenuFocus(int menu) __asm__("cFEStateCareerStats_setupMenuFocus");
+    void setupHighlightsList() __asm__("cFEStateCareerStats_setupHighlightsList");
+    void setupRacePlatinumMedalsList() __asm__("cFEStateCareerStats_setupRacePlatinumMedalsList");
+    void setupFSPlatinumMedalsList() __asm__("cFEStateCareerStats_setupFSPlatinumMedalsList");
+    void setTextSafe(char* name, const char* str) __asm__("cFEStateCareerStats_setTextSafe");
+    void setupRidersBest() __asm__("cFEStateCareerStats_setupRidersBest");
+    int getOwnedMedalByith(unsigned int mask, int n, int count) __asm__("cFEStateCareerStats_getOwnedMedalByith");
+    void initTotalEventMedal() __asm__("cFEStateCareerStats_initTotalEventMedal");
 };
 
 CHECK_OFFSET(cFEStateCareerStats, mStatsState, 0x048);

@@ -65,6 +65,14 @@ struct cFEStateTrophyRoom : public cFEState {
     const char* mpMedalStats[5];    // 0x088 [O]; no retail access
     int mCurSelection;              // 0x09C [O][P] (preview 0x98); [R] ctor -1; [U] onWidgetEvent stores the focused
                                     //       row's misc data; updateTexturesLoad redraws it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateTrophyRoom1() __asm__("cFEStateTrophyRoom_cFEStateTrophyRoom1");
+    void updateBigArt(int index) __asm__("cFEStateTrophyRoom_updateBigArt");
+    void updateStats(int index) __asm__("cFEStateTrophyRoom_updateStats");
+    void loadTextures() __asm__("cFEStateTrophyRoom_loadTextures");
+    void updateTexturesLoad() __asm__("cFEStateTrophyRoom_updateTexturesLoad");
+    void purgeTextures() __asm__("cFEStateTrophyRoom_purgeTextures");
 };
 
 CHECK_OFFSET(cFEStateTrophyRoom, mpBigIcon, 0x048);

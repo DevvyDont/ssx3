@@ -15,6 +15,11 @@ struct cBackgroundMan {
     int* mpiImageTID;               // 0x000 [O]
     int miNumImage;                 // 0x004 [O]
     int miActiveImage;              // 0x008 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    int setActiveImage(int i) __asm__("cBackgroundMan_setActiveImage");
+    int loadImages() __asm__("cBackgroundMan_loadImages");
+    void renderImage() __asm__("cBackgroundMan_renderImage");
 };
 
 CHECK_OFFSET(cBackgroundMan, mpiImageTID, 0x000);

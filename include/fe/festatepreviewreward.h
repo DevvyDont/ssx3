@@ -29,6 +29,12 @@ struct cFEStatePreviewReward : public cUIState {
     int mTextureFileIndex;          // 0x06C [O]
     int mTextureID;                 // 0x070 [O]
     int mOrientation;               // 0x074 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStatePreviewReward1() __asm__("cFEStatePreviewReward_cFEStatePreviewReward1");
+    void setReward(int kind, void* data) __asm__("cFEStatePreviewReward_setReward");
+    void loadTexture(const char* fileName) __asm__("cFEStatePreviewReward_loadTexture");
+    void updateTextureLoad() __asm__("cFEStatePreviewReward_updateTextureLoad");
 };
 
 CHECK_OFFSET(cFEStatePreviewReward, mpIcon, 0x048);

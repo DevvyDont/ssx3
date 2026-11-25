@@ -46,6 +46,11 @@ struct cPIDFilter {
     float ProportionFactor;     // 0x40 [O]; [R] cLookAtChaseAlgorithm ctor (+0x380)
     float ErrorHistoryFactor;   // 0x44 [O]; [R] ditto (+0x384)
     float DerrivativeFactor;    // 0x48 [O] (EA's spelling); [R] ditto (+0x388)
+
+    // Methods bound to their retail symbols by asm labels.
+    float getDefaultErrorHistoryFactor() __asm__("cPIDFilter_getDefaultErrorHistoryFactor");
+    float getDefaultDerrivativeFactor() __asm__("cPIDFilter_getDefaultDerrivativeFactor");
+    void reset(float value) __asm__("cPIDFilter_reset");
 };
 
 CHECK_OFFSET(cPIDFilter, InputHistory, 0x00);
@@ -146,6 +151,11 @@ struct cCameraAlgorithm {
     virtual void updateAlgorithm(int ignoreCollisions);                             // 9 (bool)
     virtual void notifyMoveZ(int didMoveZ);                                         // 10 (bool)
     virtual bool shouldSnapOnUpdate();                                              // 11
+
+    // Methods bound to their retail symbols by asm labels.
+    float getDefaultView() __asm__("cCameraAlgorithm_getDefaultView");
+    void setAlgorithmType(int algoType) __asm__("cCameraAlgorithm_setAlgorithmType");
+    int getType() __asm__("cCameraAlgorithm_getType");
 };
 
 CHECK_OFFSET(cCameraAlgorithm, View, 0x00);
@@ -168,6 +178,13 @@ struct cBasicCameraAlgorithm : public cCameraAlgorithm {
     float Heading;              // 0x34 [O]; [P] getHeading/setHeading (preview 0x34); [R] 0; [U] cBasicCameraAlgorithm_setHeading,
                                 //      cBasicCameraAlgorithm_getHeading
     char unk_38[0x8];           // 0x38 padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    void setPosition(long long *position) __asm__("cBasicCameraAlgorithm_setPosition");
+    void setPitch(float fparg0) __asm__("cBasicCameraAlgorithm_setPitch");
+    void setHeading(float fparg0) __asm__("cBasicCameraAlgorithm_setHeading");
+    float getPitch() __asm__("cBasicCameraAlgorithm_getPitch");
+    float getHeading() __asm__("cBasicCameraAlgorithm_getHeading");
 };
 
 CHECK_OFFSET(cBasicCameraAlgorithm, Position, 0x20);
@@ -334,6 +351,23 @@ struct cLookAtChaseAlgorithm : public cChaseAlgorithm {
     cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset;
                                     //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    void setupHandplantBlend(cChaseSetup* obj) __asm__("cLookAtChaseAlgorithm_setupHandplantBlend");
+    void setupHalfPipeCam(cChaseSetup* trig) __asm__("cLookAtChaseAlgorithm_setupHalfPipeCam");
+    void updateHandplant(cChaseSetup* trig, float distanceAlongTangent, float distanceAboveTangent,
+                         float speedToTarget, float exitDelay, float rise, float riseEnterSmoothness,
+                         float riseExitSmoothness)
+        __asm__("cLookAtChaseAlgorithm_updateHandplant");
+    void updateSlowSpeedCam(cChaseSetup* info, float slowSpeed, float blendInTime, float blendOutTime)
+        __asm__("cLookAtChaseAlgorithm_updateSlowSpeedCam");
+    void updateRotation(float ang) __asm__("cLookAtChaseAlgorithm_updateRotation");
+    void setupCameraShake(float base, float spread, float spatialVariance)
+        __asm__("cLookAtChaseAlgorithm_setupCameraShake");
+    void updateCameraShake(int flag, int sel, float base, float spread, float spatialVariance)
+        __asm__("cLookAtChaseAlgorithm_updateCameraShake");
+    void updatePitchBlending(float x, float y, float z, float w) __asm__("cLookAtChaseAlgorithm_updatePitchBlending");
+    void setupInitialCamDir(float backDist, float height) __asm__("cLookAtChaseAlgorithm_setupInitialCamDir");
 };
 
 CHECK_OFFSET(cLookAtChaseAlgorithm, Position, 0x040);

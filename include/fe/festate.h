@@ -42,6 +42,10 @@ struct cFEState : public cUIState {
     //       cFECustom)
     //   mCtrlBits: [U] setControllerFilter stores the mask of the controllers not taken by users 0 .. n-1 (sb)
     //   mScreens: [U] onGainFocus / onLoseFocus look "Menu" up on cList_first(&mScreens)
+
+    // Methods bound to their retail symbols by asm labels.
+    void setControllerFilter(signed char n) __asm__("cFEState_setControllerFilter");
+    void setControllerMask(signed char userNum, signed char controllerNum) __asm__("cFEState_setControllerMask");
 };
 
 CHECK_SIZE(cFEState, 0x48);

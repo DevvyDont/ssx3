@@ -56,6 +56,10 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
                                     //       (sltu)
     unsigned int miNextTOSLine;     // 0x6D8 [R] 0 (all three ctors); [U] onUpdate cFEStateOnlineAgreement_onUpdate post-increments it
                                     //       per line added
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateOnlineAgreement1() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement1");
+    void* cFEStateOnlineAgreement2() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement2");
 };
 
 CHECK_OFFSET(cFEStateOnlineAgreement, mpTOSLines, 0x6D0);

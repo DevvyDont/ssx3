@@ -111,6 +111,9 @@ struct cFEStateChallengePopup : public cFEStateNet {
                                     //       cBERules_mRules
     cUIListBox* mpLBPointIcons;     // 0x6EC [U] onWidgetCreate: widget "ListBoxPointicons"; race-option bit 7 of
                                     //       cBERules_mRules
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateChallengePopup1() __asm__("cFEStateChallengePopup_cFEStateChallengePopup1");
 };
 
 CHECK_OFFSET(cFEStateChallengePopup, mbChallengeSent, 0x6D0);
@@ -155,6 +158,9 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
                                     //       cFEStateChallengeReceivedPopup_onWidgetEvent
                                     //       accepts (row 0xB) only while it is 0; func_001B0E10 (decline) cancels the
                                     //       accepted game (func_0025F740) when it is set
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateChallengeReceivedPopup1() __asm__("cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1");
 };
 
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mszChallenger, 0x6D0);

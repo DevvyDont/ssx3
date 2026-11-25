@@ -95,6 +95,18 @@ struct cPS2ExecutionMan {
                                     //       with
                                     //         func_0031ABD0); purge RemoveIntcHandler
     char unk_14294[0x2C];           // 0x14294 never accessed by retail code
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cPS2ExecutionMan_purge");
+    void prepause() __asm__("cPS2ExecutionMan_prepause");
+    void postpause() __asm__("cPS2ExecutionMan_postpause");
+    void wait() __asm__("cPS2ExecutionMan_wait");
+    void sync() __asm__("cPS2ExecutionMan_sync");
+    void* waitHalt() __asm__("cPS2ExecutionMan_waitHalt__FPv");
+    void signalHalt() __asm__("cPS2ExecutionMan_signalHalt");
+    void halt() __asm__("cPS2ExecutionMan_halt");
+    void load(int module) __asm__("cPS2ExecutionMan_load");
+    int isLoadDone() __asm__("cPS2ExecutionMan_isLoadDone");
 };
 
 CHECK_OFFSET(cPS2ExecutionMan, HaltCallback, 0x00000);

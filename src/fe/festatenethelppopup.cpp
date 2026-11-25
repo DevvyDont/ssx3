@@ -210,15 +210,14 @@ extern char str_cFEStateNetHelpPopup[];
  * hands it to cUIText_setUnicodeStringWrap() on the text at +0xAC and frees it again. With no description the text gets
  * a null string. cFEStateNetHelpPopup_onGainTransition() calls it.
  *
- * @param helpPopup  the help popup state
  */
-extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHelpPopup* helpPopup)
+void cFEStateNetHelpPopup::createAndSetDescriptionString()
 {
     unsigned short* strs[3];
     unsigned short* buf = 0;
     int total = 0;
     int count = 0;
-    int* ids = (int*)(&helpPopup->muiDescription[0]);
+    int* ids = (int*)(&muiDescription[0]);
     int i = 0;
     do {
         if (ids[i] == 0) {
@@ -237,7 +236,7 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHe
             func_002C2688(buf, strs[i]);
         }
     }
-    cUIText_setUnicodeStringWrap(helpPopup->mpDescription, buf);
+    cUIText_setUnicodeStringWrap(mpDescription, buf);
     if (buf != 0) {
         cMemMan_free__FPv(buf);
     }
@@ -304,7 +303,7 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
             cUIText_setAsciiString((cUIText*)self->wA8, str_empty_d);
         }
         if (self->c[0]) {
-            cFEStateNetHelpPopup_createAndSetDescriptionString((cFEStateNetHelpPopup*)self);
+            ((cFEStateNetHelpPopup*)self)->createAndSetDescriptionString();
         } else {
             cUIText_setAsciiString((cUIText*)self->wAC, str_empty_d);
         }
@@ -367,9 +366,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_clear);
  * and +0x64 to 0, and the seven option text ids (+0x68) to 0 and icons (+0x84) to -1 (see
  * cFEStateNetHelpPopup_setOption()). The help popup's constructor cFEStateNetHelpPopup_cFEStateNetHelpPopup() calls it.
  */
-extern "C" void cFEStateNetHelpPopup_clear(cFEStateNetHelpPopup* self)
+void cFEStateNetHelpPopup::clear()
 {
-    cFEStateNetHelpPopup* helpPopup = self;
+    cFEStateNetHelpPopup* helpPopup = this;
     int i;
     helpPopup->miNumOptions = 0;
     helpPopup->muiScreenName = 0;
@@ -416,10 +415,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setNumHelpOptions__FP
  *
  * @param numOptions  the number of rows set with cFEStateNetHelpPopup_setOption (up to 7)
  */
-void cFEStateNetHelpPopup_setNumHelpOptions(void* vself, int numOptions)
+void cFEStateNetHelpPopup::setNumHelpOptions(int numOptions)
 {
-    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    self->miNumOptions = numOptions;
+    miNumOptions = numOptions;
 }
 #endif
 
@@ -436,10 +434,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setDescription__FPvii
  * @param descriptionNum  the line, 0-2
  * @param description  the text id (hash)
  */
-void cFEStateNetHelpPopup_setDescription(void* vself, int descriptionNum, int description)
+void cFEStateNetHelpPopup::setDescription(int descriptionNum, int description)
 {
-    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    *(int*)((char*)self + (descriptionNum << 2) + 0x58) = description;
+    *(int*)((char*)this + (descriptionNum << 2) + 0x58) = description;
 }
 #endif
 
@@ -611,26 +608,26 @@ static inline void copyName_1DA7E8(char* dst, const char* src)
  * @param actionLabel  the action item's label
  * @return @p self
  */
-extern "C" void* AccountDetailsMenu_AccountDetailsMenu1(AccountDetailsMenu* self, void* vinfo, void* actionLabel)
+void* AccountDetailsMenu::AccountDetailsMenu1(void* vinfo, void* actionLabel)
 {
-    cMenu_cMenu(self);
-    self->mVtbl = AccountDetailsMenu1_vtbl;
-    self->mScreen = (cDebugLobbyScreen*)(*(int*)vinfo);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Create_Account);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)10);
-    cTextMenuItem_cTextMenuItem(&self->mLoginNameItem, str_Login_Name, str_empty_d);
-    cTextMenuItem_cTextMenuItem(&self->mPasswordItem, str_Password, str_empty_d);
-    cCommandMenuItem_cCommandMenuItem2(&self->mActionItem, 0, actionLabel, 0);
-    cPopMenuItem_cPopMenuItem(&self->mCancelItem, str_Cancel);
-    cMenu_addItem(self, &self->mTitleItem, -1);
-    cMenu_addItem(self, &self->mSpaceItem, -1);
-    cMenu_addItem(self, &self->mLoginNameItem, -1);
-    cMenu_addItem(self, &self->mPasswordItem, -1);
-    cMenu_addItem(self, &self->mActionItem, -1);
-    cMenu_addItem(self, &self->mCancelItem, -1);
-    copyName_1DA7E8((char*)&self->mLoginNameItem.Text[0], SSXApp->UserName);
-    copyName_1DA7E8((char*)&self->mPasswordItem.Text[0], SSXApp->Password);
-    return ((void*)self);
+    cMenu_cMenu(this);
+    mVtbl = AccountDetailsMenu1_vtbl;
+    mScreen = (cDebugLobbyScreen*)(*(int*)vinfo);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&mTitleItem), str_Create_Account);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&mSpaceItem), (void*)10);
+    cTextMenuItem_cTextMenuItem(&mLoginNameItem, str_Login_Name, str_empty_d);
+    cTextMenuItem_cTextMenuItem(&mPasswordItem, str_Password, str_empty_d);
+    cCommandMenuItem_cCommandMenuItem2(&mActionItem, 0, actionLabel, 0);
+    cPopMenuItem_cPopMenuItem(&mCancelItem, str_Cancel);
+    cMenu_addItem(this, &mTitleItem, -1);
+    cMenu_addItem(this, &mSpaceItem, -1);
+    cMenu_addItem(this, &mLoginNameItem, -1);
+    cMenu_addItem(this, &mPasswordItem, -1);
+    cMenu_addItem(this, &mActionItem, -1);
+    cMenu_addItem(this, &mCancelItem, -1);
+    copyName_1DA7E8((char*)&mLoginNameItem.Text[0], SSXApp->UserName);
+    copyName_1DA7E8((char*)&mPasswordItem.Text[0], SSXApp->Password);
+    return ((void*)this);
 }
 #endif
 
@@ -668,7 +665,7 @@ extern "C" void* AccountMenu_AccountMenu(AccountMenu* self, void* createOwner, v
     cMenu_cMenu(self);
     self->mVtbl = AccountMenu_vtbl;
     AccountDetailsMenu_AccountDetailsMenu((AccountDetailsMenu*)(&self->mCreateAccountMenu), createOwner, str_Create_Account);
-    AccountDetailsMenu_AccountDetailsMenu1((AccountDetailsMenu*)(&self->mLoginMenu), loginOwner, str_Login);
+    self->mLoginMenu.AccountDetailsMenu1(loginOwner, str_Login);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Login_Method);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)10);
     cSubMenuItem_cSubMenuItem(&self->mCreateAccountItem, &self->mCreateAccountMenu, str_Create_Account);

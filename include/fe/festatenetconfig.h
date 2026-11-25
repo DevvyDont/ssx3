@@ -91,6 +91,9 @@ struct cFEStateNetConfig : public cFEStateNet {
                                     //       cFEStateAuthDNASError's constructor cFEStateAuthDNASError_cFEStateAuthDNASError; the destructor frees them
     unsigned short mustrPopupText[0x100]; // 0x71C [U] sprintf1 (unicode) target of func_001B45E8 / func_001B47C0 /
                                     //       func_001B4888 that becomes the popup's message (+ 0xC4); extent: to the end of the object
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateNetConfig1() __asm__("cFEStateNetConfig_cFEStateNetConfig1");
 };
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);

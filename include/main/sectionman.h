@@ -107,6 +107,35 @@ struct cSectionMan {
                                            //       it and calls the AI's vtable slot 5
     int m_bStreamReady;                    // 0x1D0 [O] (a bool); [R] init = 1; [U] update stores 0/1; isStreamReady()
                                            //       in cGame_update, cGame_updateStreamLoading
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cSectionMan_init");
+    void activate(int idx, int mode) __asm__("cSectionMan_activate");
+    int isActive() __asm__("cSectionMan_isActive");
+    void loadSection(int idx) __asm__("cSectionMan_loadSection");
+    void activateSection(int i) __asm__("cSectionMan_activateSection");
+    void unloadSection(int idx) __asm__("cSectionMan_unloadSection");
+    void loadMode(int Mode) __asm__("cSectionMan_loadMode");
+    void activateMode(int flag) __asm__("cSectionMan_activateMode");
+    void eventbegin(int mode) __asm__("cSectionMan_eventbegin");
+    void update() __asm__("cSectionMan_update");
+    void skyLoadComplete(int SectionID) __asm__("cSectionMan_skyLoadComplete");
+    void skySwap() __asm__("cSectionMan_skySwap");
+    void preLoadMode() __asm__("cSectionMan_preLoadMode");
+    void* isPreLoadModeDone() __asm__("cSectionMan_isPreLoadModeDone__FPv");
+    void changeMode() __asm__("cSectionMan_changeMode");
+    int isSectionLoaded(int SectionID) __asm__("cSectionMan_isSectionLoaded");
+    int getWorldSectionIDFromBELocationID(int LocationID) __asm__("cSectionMan_getWorldSectionIDFromBELocationID");
+    int getWorldSectionIDFromBESectionID(int SectionID) __asm__("cSectionMan_getWorldSectionIDFromBESectionID");
+    int getBESectionIDFromWorldSectionID(int WorldSectionID) __asm__("cSectionMan_getBESectionIDFromWorldSectionID");
+    void gotoLocation(int location) __asm__("cSectionMan_gotoLocation");
+    void setSky(int sky) __asm__("cSectionMan_setSky");
+    void initEventPool() __asm__("cSectionMan_initEventPool");
+    void* allocEvent() __asm__("cSectionMan_allocEvent__FPv");
+    int freeEvent(void* node) __asm__("cSectionMan_freeEvent__FPvT0");
+    void addActiveEvent(int id) __asm__("cSectionMan_addActiveEvent");
+    int getNextActiveEvent(tSectionManEvent* pPrevEvent) __asm__("cSectionMan_getNextActiveEvent");
+    void removeActiveEvent(tSectionManEvent* prev, tSectionManEvent* node) __asm__("cSectionMan_removeActiveEvent");
 };
 
 CHECK_OFFSET(cSectionMan, m_EventPool, 0x000);

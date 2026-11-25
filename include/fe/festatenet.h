@@ -127,6 +127,10 @@ struct cFEStateNet : public cUIState {
                                     //       func_001ABB30 / func_001AB3D0 rebuild that popup only when it and mpPopup
                                     //       are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateNet1() __asm__("cFEStateNet_cFEStateNet1");
+    int isProcessingEvents() __asm__("cFEStateNet_isProcessingEvents");
 };
 
 CHECK_OFFSET(cFEStateNet, mHasFocus, 0x048);

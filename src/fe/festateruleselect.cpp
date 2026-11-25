@@ -86,9 +86,9 @@ static inline cUIThing* find_1388(cFEStateRuleSelect* self, char* name)
  * @param first  first rule shown (On Tour MenuOffset)
  */
 // Fills the 11 rule rows (name text plus the option list box) starting at the given scroll row.
-extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed char first)
+void cFEStateRuleSelect::setupMenu(signed char first)
 {
-    cFEStateRuleSelect* self = self_;
+    cFEStateRuleSelect* self = this;
     signed char i = 0;
     sStr3_1388 name;
     sStr3_1388 label;
@@ -150,7 +150,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
             }
             if (rule != 0) {
                 unsigned char out;
-                cUIListBox_getEntryByData(lb, cFEStateRuleSelect_getBEData((cFEStateRuleSelect*)self, rule), &out);
+                cUIListBox_getEntryByData(lb, self->getBEData(rule), &out);
                 cUIListBox_setCurrentEntryByIndex(lb, out);
             } else {
                 lb->setVisible(0);
@@ -180,7 +180,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
     int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)((void*)self->mpScreen), GetHashValue32(frame));
     if (frameIndex != 0xFFFF)
         cUIScreen_playFrame(((void*)self->mpScreen), frameIndex, 1);
-    cFEStateRuleSelect_updateMenuColor(self);
+    self->updateMenuColor();
 }
 #endif
 
@@ -289,7 +289,7 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
         *disableCounter-- = 0;
     self->count = count;
     MEM_fill(cBERules_mRules, 0, 0x20);
-    cFEStateRuleSelect_setupMenu((cFEStateRuleSelect*)self, 0);
+    ((cFEStateRuleSelect*)self)->setupMenu(0);
     cUIThing* menu = (cUIThing*)find_19188(self, str_Menu);
     if (menu != 0) {
         menu->mAttr |= 0x80;
@@ -388,8 +388,8 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUITh
     }
     case 9: {
         int id = msg->mMiscData;
-        cFEStateRuleSelect_updateBE(self, id, cUIListBox_getCurrentEntryData(msg));
-        cFEStateRuleSelect_checkConflictForMenu(self, (cUIListBox*)msg);
+        self->updateBE(id, cUIListBox_getCurrentEntryData(msg));
+        self->checkConflictForMenu((cUIListBox*)msg);
         break;
     }
     case 7: {
@@ -491,7 +491,7 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu
         return locked;
     }
     case 4:
-        cFEStateRuleSelect_setupMenu(self, idx);
+        self->setupMenu(idx);
         return 257;
     }
     return 257;
@@ -516,7 +516,7 @@ extern int D_005308D4_2088[] __asm__("D_005308D4");
  * @param idx  the rule id (1-14)
  * @param ruleValue  the new value: the list box's entry data
  */
-extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int ruleValue)
+void cFEStateRuleSelect::updateBE(int idx, int ruleValue)
 {
     switch (idx) {
     case 4:
@@ -584,7 +584,7 @@ extern int D_005308D4[];
  * @param rule  the rule id (1-14)
  * @return the rule's flag (0 or 1) or rule 2's value, or -1 for an unknown rule
  */
-extern "C" int cFEStateRuleSelect_getBEData(cFEStateRuleSelect* self, int rule)
+int cFEStateRuleSelect::getBEData(int rule)
 {
     switch (rule) {
     case 4:
@@ -641,17 +641,17 @@ extern int D_004410C8[];
  *
  * @param item  the rule's list box that changed
  */
-extern "C" void cFEStateRuleSelect_checkConflictForMenu(cFEStateRuleSelect* self, cUIListBox* item)
+void cFEStateRuleSelect::checkConflictForMenu(cUIListBox* item)
 {
     int mask = D_004410C8[item->mMiscData] << 1;
     if (cUIListBox_getCurrentEntryData(item) == 0) {
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
             if ((bit & mask) == 0) {
-                int newCount = (unsigned char)self->mcRuleConflictRefTable[i] - 1;
-                self->mcRuleConflictRefTable[i] = newCount;
+                int newCount = (unsigned char)mcRuleConflictRefTable[i] - 1;
+                mcRuleConflictRefTable[i] = newCount;
                 if ((signed char)newCount <= 0) {
-                    self->mcRuleConflictRefTable[i] = 0;
+                    mcRuleConflictRefTable[i] = 0;
                 }
             }
         }
@@ -659,12 +659,12 @@ extern "C" void cFEStateRuleSelect_checkConflictForMenu(cFEStateRuleSelect* self
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
             if ((bit & mask) == 0) {
-                self->mcRuleConflictRefTable[i] += 1;
-                cFEStateRuleSelect_updateBE(self, i, 0);
+                mcRuleConflictRefTable[i] += 1;
+                updateBE(i, 0);
             }
         }
     }
-    cFEStateRuleSelect_updateMenuColor(self);
+    updateMenuColor();
 }
 #endif
 
@@ -684,21 +684,20 @@ extern char str_0t[];
 /**
  * Greys out the visible rule rows whose rule is disabled by another rule's setting and restores the others.
  *
- * @param selfp  the rule select state
  */
-extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
+void cFEStateRuleSelect::updateMenuColor()
 {
     char name0[16];
     char name1[16];
     __builtin_memcpy(name0, str_0b, 3);
     __builtin_memcpy(name1, str_0t, 3);
-    signed char n = *(signed char*)&selfp->mcArraySize < 12 ? *(signed char*)&selfp->mcArraySize : 11;
+    signed char n = *(signed char*)&mcArraySize < 12 ? *(signed char*)&mcArraySize : 11;
     for (signed char i = 0; i < n; i++) {
-        cUIText* listBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name0));
-        cUIText* textBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
+        cUIText* listBox = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name0));
+        cUIText* textBox = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name1));
         if (listBox && textBox) {
             int rule = listBox->mMiscData;
-            if (selfp->mcRuleConflictRefTable[rule] > 0) {
+            if (mcRuleConflictRefTable[rule] > 0) {
                 textBox->setUseStaticColour(1);
                 textBox->mStaticColour = gStaticColour;
                 textBox->setStatic(1);
@@ -764,12 +763,12 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setConfirmed);
  *
  * @param enabled  the new flag: 1 confirms (locks), 0 unlocks
  */
-extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int enabled)
+void cBraggingRightsMenu::setConfirmed(int enabled)
 {
     int i;
-    self->mbConfirmed = enabled;
+    mbConfirmed = enabled;
     for (i = 0; i < 8; i++) {
-        cUIThing* item = ((cUIThing*)self->mpListBox[i]);
+        cUIThing* item = ((cUIThing*)mpListBox[i]);
         if (item != 0) {
             item->setStatic(enabled);
         }
@@ -798,32 +797,32 @@ typedef sVEntry<void(void*, const tARGB&)> tSetColourEntry;
  * a row whose current entry data (cUIListBox_getCurrentEntryData) is non-zero gets (1, 0.592, 0.043, 0) and the rest
  * (1, 0.145, 0.027, 0.020), through setColour (vtable slot 11).
  */
-extern "C" void cBraggingRightsMenu_setMenuItemColor(cBraggingRightsMenu* self)
+void cBraggingRightsMenu::setMenuItemColor()
 {
-    cUIMenu* menu = self->mpPlayerMenu;
+    cUIMenu* menu = mpPlayerMenu;
     if (menu == 0) {
         return;
     }
     int sel = (signed char)menu->mScrollItemCurrent;
     for (int i = 0; i < 8; i++) {
-        if (self->mpListBox[i] == 0) {
+        if (mpListBox[i] == 0) {
             continue;
         }
-        if (cBraggingRightsMenu_isItemEnable(self, i) == 0) {
+        if (isItemEnable(i) == 0) {
             continue;
         }
         if (i == sel) {
-            cUIThing* item = self->mpListBox[i];
+            cUIThing* item = mpListBox[i];
             tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, item);
             tSetColourEntry* colorEntry = &vt[11];
             colorEntry->fn(vthis(item, *colorEntry), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
-        } else if (cUIListBox_getCurrentEntryData(self->mpListBox[i])) {
-            cUIThing* item = self->mpListBox[i];
+        } else if (cUIListBox_getCurrentEntryData(mpListBox[i])) {
+            cUIThing* item = mpListBox[i];
             tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, item);
             tSetColourEntry* colorEntry = &vt[11];
             colorEntry->fn(vthis(item, *colorEntry), tARGBInit(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
         } else {
-            cUIThing* item = self->mpListBox[i];
+            cUIThing* item = mpListBox[i];
             tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, item);
             tSetColourEntry* colorEntry = &vt[11];
             colorEntry->fn(vthis(item, *colorEntry),
@@ -842,11 +841,11 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_findListBoxP);
  * @param val  the list box to look for
  * @return its index, or -1 when the panel does not hold it
  */
-extern "C" int cBraggingRightsMenu_findListBoxP(cBraggingRightsMenu* self, cUIListBox* val)
+int cBraggingRightsMenu::findListBoxP(cUIListBox* val)
 {
     int i;
     for (i = 0; i < 8; i++) {
-        if (self->mpListBox[i] == val) {
+        if (mpListBox[i] == val) {
             return i;
         }
     }
@@ -866,10 +865,10 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_isItemEnable);
  * @param itemIndex  the row (0-7)
  * @return 1 when the row's bit is set, else 0
  */
-extern "C" int cBraggingRightsMenu_isItemEnable(cBraggingRightsMenu* self, int itemIndex)
+int cBraggingRightsMenu::isItemEnable(int itemIndex)
 {
     int mask = (int)(0x1000000 << itemIndex) >> 24;
-    return (self->mcItemEnableFlag & mask) != 0;
+    return (mcItemEnableFlag & mask) != 0;
 }
 #endif
 
@@ -883,10 +882,9 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setEnableFlag__FPvi);
  *
  * @param val  the mask, bit i for row i
  */
-void cBraggingRightsMenu_setEnableFlag(void* vself, int val)
+void cBraggingRightsMenu::setEnableFlag(int val)
 {
-    cBraggingRightsMenu* self = (cBraggingRightsMenu*)vself;
-    self->mcItemEnableFlag = val;
+    mcItemEnableFlag = val;
 }
 #endif
 

@@ -17,6 +17,13 @@ struct cBXLoadIndicator {
     unsigned int mLoadIndicators;   // 0x004 [O]
     float mAnimFrame;               // 0x008 [O]
     cFont* mpFont;                  // 0x00C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void Init() __asm__("cBXLoadIndicator_Init");
+    void Update() __asm__("cBXLoadIndicator_Update");
+    void Render() __asm__("cBXLoadIndicator_Render");
+    void Show(int bit) __asm__("cBXLoadIndicator_Show");
+    void Hide(int bit) __asm__("cBXLoadIndicator_Hide");
 };
 
 CHECK_OFFSET(cBXLoadIndicator, mpLoadText, 0x000);

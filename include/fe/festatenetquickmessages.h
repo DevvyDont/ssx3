@@ -53,6 +53,9 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
     cUIText* mpMessage[10];         // 0x6D4 [U] onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate: widgets "message00".."message09"
                                     //       (miMiscData = i); func_001C2468 writes "Q<i+1>: " + message i into
                                     //       mpMessage[i] (func_001C2578)
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEStateNetQuickMessages1() __asm__("cFEStateNetQuickMessages_cFEStateNetQuickMessages1");
 };
 
 CHECK_OFFSET(cFEStateNetQuickMessages, mbChanged, 0x6D0);

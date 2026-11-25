@@ -783,18 +783,18 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
         if (widget != 0) {
             widget->setVisible(0);
         }
-        cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 0);
+        self->setContinueOptionVisible(0);
     }
     if (cGameComm_mGameComm != 0) {
         func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
         self->miStartPingTick = (unsigned int)(cAppMan_TheAppMan->TimerTick);
-        cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 0);
+        self->enableCancelButton(0);
         cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
         if (infoText != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorCheckingServer));
         }
     } else {
-        cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1);
+        self->enableCancelButton(1);
     }
 }
 #endif
@@ -844,19 +844,19 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(cOVState_PAUSE_ONLINE_ERROR
         int timedOut = gameComm->mPingTimer <= 0 && gameComm->mPingReceived == 0;
         if (timedOut) {
             gameComm->mPingResult = 0;
-            cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(self);
+            self->displayPingTimedOut();
         } else {
             if (gameComm->mPingReceived == 0) {
                 return;
             }
             int received = gameComm->mRaceInProgress != 0 && gameComm->mLocalFinishedRace == 0 && gameComm->mCheating[0] == 0;
             if (received) {
-                cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(self);
+                self->displayPingReceived();
             } else {
                 cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo))->setVisible(0);
             }
         }
-        cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1);
+        self->enableCancelButton(1);
         self->miStartPingTick = (unsigned int)0;
     }
 }
@@ -894,13 +894,14 @@ public:
  *
  * @param on  true to show and select the option, false to hide it and make it static
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on)
+void cOVState_PAUSE_ONLINE_ERROR::enableCancelButton(bool on)
 {
-    cUIObj_1FAFF8* cancelText = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
+    cUIObj_1FAFF8* cancelText = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(mpScreen,
+            GetHashValue32(str_Text_CancelGame));
     cancelText->setVisible(on);
     cancelText->setStatic(!on);
     if (on) {
-        cUIObj_1FAFF8* menuWidget = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu_b));
+        cUIObj_1FAFF8* menuWidget = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu_b));
         menuWidget->setFocus(1);
         cUIMenu_setSelectedByIndex(menuWidget, 1);
     }
@@ -934,18 +935,18 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(cOVState_PAUSE_ONLINE_
     }
     switch (msg) {
     case 5:
-        cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(self, item, msg);
+        self->doContinueCancel(item, msg);
         break;
     case 1: {
         int id = item->mHashName;
         if (id == GetHashValue32(str_Text_CancelGame)) {
-            cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(self, 1);
-            cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(self, 0);
+            self->setCancelHighLight(1);
+            self->setContinueHighLight(0);
         } else {
             int id2 = item->mHashName;
             if (id2 == GetHashValue32(str_Text_ContinueGame)) {
-                cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(self, 1);
-                cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(self, 0);
+                self->setContinueHighLight(1);
+                self->setCancelHighLight(0);
             }
         }
         break;
@@ -970,14 +971,14 @@ extern char str_kT_PauseErrorServerCheckTimedOut[];
  * Called by the overlay update (cOVState_PAUSE_ONLINE_ERROR_onUpdate) when the ping runs out with no reply. The text is set only
  * while +0xA0 is set, and TextInfo's visibility is set to +0xA0 without a null check on the object.
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_ONLINE_ERROR* self)
+void cOVState_PAUSE_ONLINE_ERROR::displayPingTimedOut()
 {
-    if (self->mpScreen != 0) {
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
-        if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
+    if (mpScreen != 0) {
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextInfo));
+        if (infoText != 0 && mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorServerCheckTimedOut));
         }
-        infoText->setVisible(self->mbShouldDisplayAuxInfo);
+        infoText->setVisible(mbShouldDisplayAuxInfo);
     }
 }
 #endif
@@ -1001,15 +1002,15 @@ extern char str_kT_PauseErrorOpponentDisconnected[];
  * machine is not flagged. The text is set only while +0xA0 is set; TextInfo's visibility becomes +0xA0 (no
  * null check), then setContinueOptionVisible(self, 1).
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(cOVState_PAUSE_ONLINE_ERROR* self)
+void cOVState_PAUSE_ONLINE_ERROR::displayPingReceived()
 {
-    if (self->mpScreen != 0) {
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
-        if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
+    if (mpScreen != 0) {
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextInfo));
+        if (infoText != 0 && mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorOpponentDisconnected));
         }
-        infoText->setVisible(self->mbShouldDisplayAuxInfo);
-        cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 1);
+        infoText->setVisible(mbShouldDisplayAuxInfo);
+        setContinueOptionVisible(1);
     }
 }
 #endif
@@ -1037,10 +1038,10 @@ extern int cPauseState_FlagsTable[];
  * @param item  the widget that was selected
  * @param msg   the event (not read)
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(cOVState_PAUSE_ONLINE_ERROR* self, cUIThing* item, int msg)
+void cOVState_PAUSE_ONLINE_ERROR::doContinueCancel(cUIThing* item, int msg)
 {
-    cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
-    self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
+    cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
+    mAttrState = (mAttrState & ~0x3F00) | 0x780;
     switch (item->mMiscData) {
     case 4:
         cAI_finishRemotePlayer(SSXApp->Game->AI);
@@ -1071,16 +1072,16 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
  *
  * @param visible  nonzero to show the option (On Tour bVisible)
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible)
+void cOVState_PAUSE_ONLINE_ERROR::setContinueOptionVisible(int visible)
 {
-    cUIThing* continueText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_ContinueGame));
+    cUIThing* continueText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Text_ContinueGame));
     if (continueText != 0) {
         cUIText_setUnicodeStringByID((cUIText*)continueText, GetHashValue32(str_kT_OVRContinueRacing));
         continueText->setStatic(visible ^ 1);
         continueText->setVisible(visible);
         continueText->mMiscData = 4;
     }
-    continueText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu_b));
+    continueText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu_b));
     if (continueText != 0 && visible) {
         cUIMenu_setSelectedByIndex(continueText, 0);
     }
@@ -1113,11 +1114,11 @@ typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
  *
  * @param on  nonzero to highlight
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on)
+void cOVState_PAUSE_ONLINE_ERROR::setContinueHighLight(int on)
 {
-    cUIThing* continueText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_ContinueGame));
-    cUIThing* buttonIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Continueps2X));
-    cUIThing* buttonBack = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ContinueButtonBack));
+    cUIThing* continueText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Text_ContinueGame));
+    cUIThing* buttonIcon = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Continueps2X));
+    cUIThing* buttonBack = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ContinueButtonBack));
     if (on) {
         tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, continueText);
         vt[11].fn(vthis(continueText, vt[11]), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
@@ -1147,11 +1148,11 @@ extern char str_CancelButtonBack[];
  *
  * @param on  nonzero to highlight
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on)
+void cOVState_PAUSE_ONLINE_ERROR::setCancelHighLight(int on)
 {
-    cUIThing* cancelText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
-    cUIThing* buttonIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Cancelps2X));
-    cUIThing* buttonBack = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CancelButtonBack));
+    cUIThing* cancelText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Text_CancelGame));
+    cUIThing* buttonIcon = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Cancelps2X));
+    cUIThing* buttonBack = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_CancelButtonBack));
     if (on) {
         tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, cancelText);
         vt[11].fn(vthis(cancelText, vt[11]), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
@@ -3338,7 +3339,7 @@ extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* self, int a1);
 extern "C" void cOVState_REWARDS_onGainFocus(cOVState_REWARDS* self)
 {
     cUIState_onGainFocus(self);
-    cOVState_REWARDS_updateMenu(self, 0);
+    self->updateMenu(0);
 }
 #endif
 
@@ -3393,7 +3394,7 @@ extern "C" int cOVState_REWARDS_onWidgetMenu(cOVState_REWARDS* self, int id, int
 {
     switch (event) {
     case 4:
-        cOVState_REWARDS_updateMenu(self, index);
+        self->updateMenu(index);
         return 1;
     case 7: case 8: case 9:
         return 0;
@@ -3431,22 +3432,21 @@ extern char D_004A2580[];
  * without a null check on the row. "up" is shown when @p base is not 0, "down" while rewards remain past base
  * + 9.
  *
- * @param vself  the rewards overlay state (this)
  * @param base  index of the reward in the top row (On Tour offset)
  */
-extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* vself, int base)
+void cOVState_REWARDS::updateMenu(int base)
 {
     sName_1FFD08 name = *(sName_1FFD08*)D_004A2580;
     unsigned short text[200];
     int i;
     for (i = 0; i < 9; i++) {
         name.c[0] = '0' + i;
-        cOVState_REWARDS_checkRewardList_1FFD08(((char*)vself), text, i + base);
-        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(name.c));
+        cOVState_REWARDS_checkRewardList_1FFD08(((char*)this), text, i + base);
+        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name.c));
         if (textObj != 0) {
             cUIText_setUnicodeString(textObj, text);
         }
-        if (vself->mItemSize < 10) {
+        if (mItemSize < 10) {
             tARGB color;
             color.A = 1.0f;
             color.R = 0.3960784673690796f;
@@ -3458,23 +3458,23 @@ extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* vself, int base)
         }
     }
     if (base == 0) {
-        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_up));
+        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_up));
         if (textObj != 0) {
             textObj->setVisible(0);
         }
     } else {
-        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_up));
+        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_up));
         if (textObj != 0) {
             textObj->setVisible(1);
         }
     }
-    if (vself->mItemSize <= base + 9) {
-        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_down));
+    if (mItemSize <= base + 9) {
+        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_down));
         if (textObj != 0) {
             textObj->setVisible(0);
         }
     } else {
-        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_down));
+        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_down));
         if (textObj != 0) {
             textObj->setVisible(1);
         }

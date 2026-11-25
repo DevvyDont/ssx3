@@ -46,21 +46,21 @@ struct tBucketHeaderNew {
  *
  * @param n  number of buckets (On Tour numBuckets)
  */
-extern "C" void cBucketMan_init(cBucketMan* self, int n)
+void cBucketMan::init(int n)
 {
-    tBucketHeader** slot = &self->Buckets;
+    tBucketHeader** slot = &Buckets;
     *slot = (tBucketHeader*)new (str_Buckets, 0, 0) tBucketHeaderNew[n];
-    self->NumBuckets = n;
-    for (int i = 0; i < self->NumBuckets; i++) {
-        self->Buckets[i].Head.Next = &self->Buckets[i].Tail;
-        self->Buckets[i].Head.Prev = 0;
-        self->Buckets[i].Tail.Next = 0;
-        self->Buckets[i].Tail.Prev = &self->Buckets[i].Head;
-        self->Buckets[i].AddHead.Next = &self->Buckets[i].AddTail;
-        self->Buckets[i].AddHead.Prev = 0;
-        self->Buckets[i].AddTail.Next = 0;
-        self->Buckets[i].AddTail.Prev = &self->Buckets[i].AddHead;
-        self->Buckets[i].Flags = 0;
+    NumBuckets = n;
+    for (int i = 0; i < NumBuckets; i++) {
+        Buckets[i].Head.Next = &Buckets[i].Tail;
+        Buckets[i].Head.Prev = 0;
+        Buckets[i].Tail.Next = 0;
+        Buckets[i].Tail.Prev = &Buckets[i].Head;
+        Buckets[i].AddHead.Next = &Buckets[i].AddTail;
+        Buckets[i].AddHead.Prev = 0;
+        Buckets[i].AddTail.Next = 0;
+        Buckets[i].AddTail.Prev = &Buckets[i].AddHead;
+        Buckets[i].Flags = 0;
     }
 }
 #endif
@@ -78,28 +78,28 @@ void cMemMan_free(void*);
  * Purges buckets 0 .. count - 1 (cBucketMan_purgeBucket), then destroys the 0x44-byte buckets in reverse (their four
  * cObjNode list heads), frees the array (with its new[] header) and clears mBuckets and the count.
  */
-extern "C" void cBucketMan_purge(cBucketMan* self)
+void cBucketMan::purge()
 {
     int i;
-    for (i = 0; i < self->NumBuckets; i++) {
-        cBucketMan_purgeBucket(self, i);
+    for (i = 0; i < NumBuckets; i++) {
+        purgeBucket(i);
     }
     // ORIGINAL-PTR: delete[] Buckets as g++ 2.95 inlines it: the element count sits in the 16-byte new[] cookie
     // before the array (a heap block header), and the block itself starts at the cookie
-    tBucketHeader* buckets = self->Buckets;
+    tBucketHeader* buckets = Buckets;
     if (buckets != 0) {
         tBucketHeader* bucket = buckets + ((int*)buckets)[-4];
-        while (self->Buckets != bucket) {
+        while (Buckets != bucket) {
             bucket--;
             cObjNode__cObjNode(&bucket->AddTail, 2);
             cObjNode__cObjNode(&bucket->AddHead, 2);
             cObjNode__cObjNode(&bucket->Tail, 2);
             cObjNode__cObjNode(&bucket->Head, 2);
         }
-        cMemMan_free((char*)self->Buckets - 0x10);
+        cMemMan_free((char*)Buckets - 0x10);
     }
-    self->Buckets = 0;
-    self->NumBuckets = 0;
+    Buckets = 0;
+    NumBuckets = 0;
 }
 #endif
 
@@ -161,16 +161,16 @@ extern "C" void* cBucketMan_addnext(cBucketMan* self, cObjNode* node, int index)
  * @param index  bucket index
  */
 // Moves every node of the bucket's pending list into its sorted list.
-extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
+void cBucketMan::mergeBucket(int index)
 {
-    cObjNode* n = (cObjNode*)cBucketMan_addfirst(self, index);
+    cObjNode* n = (cObjNode*)addfirst(index);
     while (n) {
-        cObjNode* nextN = (cObjNode*)cBucketMan_addnext(self, (cObjNode*)n, index);
+        cObjNode* nextN = (cObjNode*)addnext((cObjNode*)n, index);
         n->Prev->Next = n->Next;
         n->Next->Prev = n->Prev;
         cObjNode* other;
-        for (other = (cObjNode*)cBucketMan_last(self, index); other;
-             other = (cObjNode*)cBucketMan_prev(self, (cObjNode*)other, index)) {
+        for (other = (cObjNode*)last(index); other;
+             other = (cObjNode*)prev((cObjNode*)other, index)) {
             if (n->compare(other)) {
                 if (n->equal(other)) {
                     n->Next = other->Next;
@@ -190,10 +190,10 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
             }
         }
         if (other == 0) {
-            n->Next = self->Buckets[index].Head.Next;
-            self->Buckets[index].Head.Next->Prev = n;
-            n->Prev = &self->Buckets[index].Head;
-            self->Buckets[index].Head.Next = n;
+            n->Next = Buckets[index].Head.Next;
+            Buckets[index].Head.Next->Prev = n;
+            n->Prev = &Buckets[index].Head;
+            Buckets[index].Head.Next = n;
         }
         n = nextN;
     }
@@ -253,10 +253,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
  * @param index  bucket index
  * @return the first node, or 0
  */
-void* cBucketMan_first(cBucketMan* self, int index)
+void* cBucketMan::first(int index)
 {
-    cObjNode* head = self->Buckets[index].Head.Next;
-    return (head == &self->Buckets[index].Tail) ? 0 : head;
+    cObjNode* head = Buckets[index].Head.Next;
+    return (head == &Buckets[index].Tail) ? 0 : head;
 }
 #endif
 
@@ -272,10 +272,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_last);
  * @param index  the bucket (On Tour bucket)
  * @return the last node (On Tour cObjNode*), or 0
  */
-extern "C" void* cBucketMan_last(cBucketMan* self, int index)
+void* cBucketMan::last(int index)
 {
-    cObjNode* tail = self->Buckets[index].Tail.Prev;
-    return (tail == &self->Buckets[index].Head) ? 0 : tail;
+    cObjNode* tail = Buckets[index].Tail.Prev;
+    return (tail == &Buckets[index].Head) ? 0 : tail;
 }
 #endif
 
@@ -310,10 +310,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_prev);
  * @param index  the bucket (On Tour bucket)
  * @return the previous node, or 0 when it is the bucket's Head sentinel
  */
-extern "C" void* cBucketMan_prev(cBucketMan* self, cObjNode* node, int index)
+void* cBucketMan::prev(cObjNode* node, int index)
 {
     void* next = node->Prev;
-    return (next == (void*)&self->Buckets[index].Head) ? 0 : next;
+    return (next == (void*)&Buckets[index].Head) ? 0 : next;
 }
 #endif
 
@@ -328,10 +328,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
  * @param index  bucket index
  * @return the first pending node, or 0
  */
-void* cBucketMan_addfirst(cBucketMan* self, int index)
+void* cBucketMan::addfirst(int index)
 {
-    cObjNode* head = self->Buckets[index].AddHead.Next;
-    return (head == &self->Buckets[index].AddTail) ? 0 : head;
+    cObjNode* head = Buckets[index].AddHead.Next;
+    return (head == &Buckets[index].AddTail) ? 0 : head;
 }
 #endif
 
@@ -345,10 +345,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addnext);
  * @param index  the bucket (On Tour bucket)
  * @return the next node, or 0 when it is the add list's tail sentinel (bucket + 0x34)
  */
-extern "C" void* cBucketMan_addnext(cBucketMan* self, cObjNode* node, int index)
+void* cBucketMan::addnext(cObjNode* node, int index)
 {
     void* next = node->Next;
-    return (next == (void*)&self->Buckets[index].AddTail) ? 0 : next;
+    return (next == (void*)&Buckets[index].AddTail) ? 0 : next;
 }
 #endif
 
@@ -364,15 +364,15 @@ INCLUDE_ASM("object/bucketman", cBucketMan_updateBucket);
  *
  * @param index  the bucket (On Tour bucket)
  */
-extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
+void cBucketMan::updateBucket(int index)
 {
-    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    cObjNode* node = (cObjNode*)first(index);
     while (((void*)node) != 0) {
-        void* next = cBucketMan_next(self, node, index);
+        void* next = cBucketMan_next(this, node, index);
         node->update();
         node = (cObjNode*)next;
     }
-    cBucketMan_first(self, index);
+    first(index);
 }
 #endif
 
@@ -385,12 +385,12 @@ INCLUDE_ASM("object/bucketman", cBucketMan_applyBucket);
  *
  * @param index  the bucket (On Tour bucket)
  */
-extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
+void cBucketMan::applyBucket(int index)
 {
-    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    cObjNode* node = (cObjNode*)first(index);
     while (((void*)node) != 0) {
         node->apply();
-        node = (cObjNode*)cBucketMan_next(self, node, index);
+        node = (cObjNode*)cBucketMan_next(this, node, index);
     }
 }
 #endif
@@ -404,12 +404,12 @@ INCLUDE_ASM("object/bucketman", cBucketMan_renderBucket);
  *
  * @param index  the bucket (On Tour const int bucket)
  */
-extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
+void cBucketMan::renderBucket(int index)
 {
-    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    cObjNode* node = (cObjNode*)first(index);
     while (((void*)node) != 0) {
         node->render();
-        node = (cObjNode*)cBucketMan_next(self, node, index);
+        node = (cObjNode*)cBucketMan_next(this, node, index);
     }
 }
 #endif
@@ -422,11 +422,11 @@ INCLUDE_ASM("object/bucketman", cBucketMan_purgeBucket);
  *
  * @param index  the bucket index
  */
-extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
+void cBucketMan::purgeBucket(int index)
 {
-    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    cObjNode* node = (cObjNode*)first(index);
     while (((void*)node) != 0) {
-        void* next = cBucketMan_next(self, node, index);
+        void* next = cBucketMan_next(this, node, index);
         delete node;
         node = (cObjNode*)next;
     }
@@ -452,11 +452,11 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index);
  * @param index  the bucket number
  * @param key  the section id whose nodes are deleted
  */
-extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
+void cBucketMan::purgeBucket1(int index, int key)
 {
-    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    cObjNode* node = (cObjNode*)first(index);
     while (((void*)node) != 0) {
-        void* next = cBucketMan_next(self, node, index);
+        void* next = cBucketMan_next(this, node, index);
         if (node->getSectionId() == key) {
             delete node;
         }
@@ -477,9 +477,9 @@ INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
  *
  * @param bucket  the bucket index
  */
-extern "C" void cBucketMan_setsortflag(cBucketMan* self, int bucket)
+void cBucketMan::setsortflag(int bucket)
 {
-    tBucketHeader* buckets = self->Buckets;
+    tBucketHeader* buckets = Buckets;
     buckets[bucket].Flags |= 1;
 }
 #endif
@@ -502,16 +502,16 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
  * @param instRecord  the instance record the node belongs to
  * @return @p self
  */
-extern "C" void* cMoveNode_cMoveNode1(cMoveNode* self, void* bucket, int type, void* instRecord)
+void* cMoveNode::cMoveNode1(void* bucket, int type, void* instRecord)
 {
-    cInstanceNode_cInstanceNode1(self, bucket, type, instRecord);
-    VPTR_OF(cObjNode, self) = cMoveNode_vtbl;
-    self->Fade = 1.0f;
-    self->Flags |= 1;
-    self->ModifierBlock = 0;
-    self->Debounce = 0;
-    self->TransferHack = 0;
-    return ((void*)self);
+    cInstanceNode_cInstanceNode1(this, bucket, type, instRecord);
+    VPTR_OF(cObjNode, this) = cMoveNode_vtbl;
+    Fade = 1.0f;
+    Flags |= 1;
+    ModifierBlock = 0;
+    Debounce = 0;
+    TransferHack = 0;
+    return ((void*)this);
 }
 #endif
 

@@ -42,6 +42,12 @@ struct cFECustom : public cUICustomInterface {
     cFEStateTransition* mpTransitionState; // 0x010 [O]; [R] ctor: the "cFEStateTransition" state it allocates and
                                     //       pushes; [U] onScreenEvent sends it handleEvent on "whitefade",
                                     //       getNextState reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setPlayerCtrlMask(int index, int val) __asm__("cFECustom_setPlayerCtrlMask");
+    unsigned char getPlayerCtrlMask(int index) __asm__("cFECustom_getPlayerCtrlMask");
+    void * cFECustom1() __asm__("cFECustom_cFECustom1");
+    void setProfileLaunchScreen(int launchScreen) __asm__("cFECustom_setProfileLaunchScreen");
 };
 
 CHECK_OFFSET(cFECustom, mCtrlMask, 0x008);

@@ -68,6 +68,11 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
     float mPosZ;                        // 0x48 [R] ctor D_004A2EB0; [U] SetPosition; func_002548D0
     float mScaleX;                      // 0x4C [R] ctor 1.0f (SSX_VD_PS2_SINGLE_BUFFERD_SetScale); [U] SetScale; func_002548D0
     float mScaleY;                      // 0x50 [R] ctor 1.0f; [U] SetScale; func_002548D0
+
+    // Methods bound to their retail symbols by asm labels.
+    void SetPosition(float posX, float posY, float posZ) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_SetPosition");
+    void Draw(RCMP_FRAME* frame) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_Draw");
+    void CompleteDraw() __asm__("SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw");
 };
 
 CHECK_OFFSET(RCMP_VIDEO_DRIVER, m_pdecoder, 0x0);

@@ -19,14 +19,14 @@ extern char str_InputMapTable[];
  *
  * @param count  number of statement slots (input state ids)
  */
-extern "C" void cInputMap_init(cInputMap* self, int count)
+void cInputMap::init(int count)
 {
-    self->MaxMaps = count;
-    self->MapOffset = (int*)operator_new_tag(count * 4, str_InputMapTable, 0, 0);
-    MEM_fill(self->MapOffset, 0xFFFFFFFF, self->MaxMaps * 4);
-    self->OpCodeBuf = 0;
-    self->OpCodeLen = 0;
-    self->OpCodeTop = 0;
+    MaxMaps = count;
+    MapOffset = (int*)operator_new_tag(count * 4, str_InputMapTable, 0, 0);
+    MEM_fill(MapOffset, 0xFFFFFFFF, MaxMaps * 4);
+    OpCodeBuf = 0;
+    OpCodeLen = 0;
+    OpCodeTop = 0;
 }
 #endif
 
@@ -41,13 +41,13 @@ void cMemMan_free(void* p);
  * Frees MapOffset (+0x4) and the op-code buffer (+0x14) with cMemMan_free when they are set. The pointers are not
  * cleared afterwards. Nothing calls it.
  */
-extern "C" void cInputMap_purge(cInputMap* self)
+void cInputMap::purge()
 {
-    void *buffer = self->MapOffset;
+    void *buffer = MapOffset;
     if (buffer != 0) {
         cMemMan_free(buffer);
     }
-    buffer = (void*)self->OpCodeBuf;
+    buffer = (void*)OpCodeBuf;
     if (buffer != 0) {
         cMemMan_free(buffer);
     }
@@ -69,11 +69,11 @@ extern "C" void* FILE_loadsize(const char* path, int* size, int a2);
  *
  * @param path  the map file's path (On Tour fn)
  */
-extern "C" void cInputMap_loadMapFile1(cInputMap* self, const char* path)
+void cInputMap::loadMapFile1(const char* path)
 {
     int size;
     void* data = FILE_loadsize(path, &size, 0x100);
-    cInputMap_loadMapFile_vvi(self, data, size);
+    cInputMap_loadMapFile_vvi(this, data, size);
     if (data != 0) {
         cMemMan_free(data);
     }
@@ -96,9 +96,10 @@ extern char str_InputParser[];
  * @param mem  the map file's text
  * @param len  the text's length in bytes
  */
-extern "C" void cInputMap_loadMapFile(cInputMap* self, void* mem, void* len)
+void cInputMap::loadMapFile(void* mem, void* len)
 {
-    self->Parser = (cInputMapParser*)cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, str_InputParser, 0x100, 0), mem, len);
+    Parser = (cInputMapParser*)cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC,
+            str_InputParser, 0x100, 0), mem, len);
 }
 #endif
 
@@ -131,23 +132,23 @@ struct sInputMap_0E18 {
  * @param idx  statement slot (input state id) that receives the code
  * @param src  name of the statement in the map file
  */
-extern "C" void cInputMap_compileMap(cInputMap* self, int idx, char* src)
+void cInputMap::compileMap(int idx, char* src)
 {
-    if (self->OpCodeLen - self->OpCodeTop < 0x100) {
-        int newCap = self->OpCodeLen + 0x400;
+    if (OpCodeLen - OpCodeTop < 0x100) {
+        int newCap = OpCodeLen + 0x400;
         int* buf = (int*)operator_new_tag(newCap * 4, str_TempOpCodes, 0x100, 0);
-        if ((int*)self->OpCodeBuf != 0) {
-            MEM_copy(buf, (int*)self->OpCodeBuf, self->OpCodeLen * 4);
-            if ((int*)self->OpCodeBuf != 0) {
-                cMemMan_free((int*)self->OpCodeBuf);
+        if ((int*)OpCodeBuf != 0) {
+            MEM_copy(buf, (int*)OpCodeBuf, OpCodeLen * 4);
+            if ((int*)OpCodeBuf != 0) {
+                cMemMan_free((int*)OpCodeBuf);
             }
         }
-        self->OpCodeBuf = (tInputOpCode*)buf;
-        self->OpCodeLen = newCap;
+        OpCodeBuf = (tInputOpCode*)buf;
+        OpCodeLen = newCap;
     }
-    self->MapOffset[idx] = self->OpCodeTop;
-    self->OpCodeTop += cInputMapParser_compileStatement(self->Parser, src, &self->OpCodeBuf[self->OpCodeTop],
-                                                       self->OpCodeLen - self->OpCodeTop, 5);
+    MapOffset[idx] = OpCodeTop;
+    OpCodeTop += cInputMapParser_compileStatement(Parser, src, &OpCodeBuf[OpCodeTop],
+                                                       OpCodeLen - OpCodeTop, 5);
 }
 #endif
 
@@ -167,19 +168,19 @@ extern char str_InputOpCodes[];
  * Deletes the parser (+0x8), copies the used words into a new buffer of exactly that size ("InputOpCodes"),
  * frees the old one and sets the capacity to the used size.
  */
-extern "C" void cInputMap_purgeMapFile(cInputMap* self)
+void cInputMap::purgeMapFile()
 {
-    if ((int*)self->Parser != 0) {
-        operator_delete((int*)self->Parser);
+    if ((int*)Parser != 0) {
+        operator_delete((int*)Parser);
     }
-    self->Parser = 0;
-    void* copy = operator_new_tag(self->OpCodeTop << 2, str_InputOpCodes, 0, 0);
-    MEM_copy(copy, self->OpCodeBuf, self->OpCodeTop << 2);
-    if (self->OpCodeBuf != 0) {
-        cMemMan_free(self->OpCodeBuf);
+    Parser = 0;
+    void* copy = operator_new_tag(OpCodeTop << 2, str_InputOpCodes, 0, 0);
+    MEM_copy(copy, OpCodeBuf, OpCodeTop << 2);
+    if (OpCodeBuf != 0) {
+        cMemMan_free(OpCodeBuf);
     }
-    self->OpCodeBuf = (tInputOpCode*)copy;
-    self->OpCodeLen = self->OpCodeTop;
+    OpCodeBuf = (tInputOpCode*)copy;
+    OpCodeLen = OpCodeTop;
 }
 #endif
 
@@ -199,11 +200,11 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param id  statement slot (input state id) to evaluate
  * @return the statement's value
  */
-extern "C" float cInputMap_getValue(cInputMap* self, cInputPad* inputPad, int id)
+float cInputMap::getValue(cInputPad* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
-    return cInputExec_execute(parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[id]]);
+    return cInputExec_execute(parser, inputPad, &OpCodeBuf[MapOffset[id]]);
 }
 #endif
 
@@ -235,7 +236,8 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param config7  config value 8 (On Tour c7)
  * @return the statement's value
  */
-extern "C" float cInputMap_getValue1(cInputMap* self, cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+float cInputMap::getValue1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
+                           float config3, float config4, float config5, float config6, float config7)
 {
     cInputExec parser;
     cInputExec_cInputExec(&parser);
@@ -248,7 +250,7 @@ extern "C" float cInputMap_getValue1(cInputMap* self, cInputPad* inputPad, int s
     parser.Config[6] = config5;
     parser.Config[7] = config6;
     parser.Config[8] = config7;
-    return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]);
+    return cInputExec_execute(&parser, inputPad, &OpCodeBuf[MapOffset[stateId]]);
 }
 #endif
 
@@ -267,11 +269,11 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param id  statement slot (input state id) to evaluate
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int cInputMap_getState(cInputMap* self, cInputPad* inputPad, int id)
+int cInputMap::getState(cInputPad* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
-    return cInputExec_execute(parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[id]]) != 0.0f;
+    return cInputExec_execute(parser, inputPad, &OpCodeBuf[MapOffset[id]]) != 0.0f;
 }
 #endif
 
@@ -303,7 +305,8 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param config7  config value 8 (On Tour c7)
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int cInputMap_getState1(cInputMap* self, cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+int cInputMap::getState1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
+                         float config3, float config4, float config5, float config6, float config7)
 {
     cInputExec parser;
     cInputExec_cInputExec(&parser);
@@ -316,7 +319,7 @@ extern "C" int cInputMap_getState1(cInputMap* self, cInputPad* inputPad, int sta
     parser.Config[6] = config5;
     parser.Config[7] = config6;
     parser.Config[8] = config7;
-    return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]) != 0.0f;
+    return cInputExec_execute(&parser, inputPad, &OpCodeBuf[MapOffset[stateId]]) != 0.0f;
 }
 #endif
 
@@ -334,51 +337,51 @@ INCLUDE_ASM("input/inputmap", cInputPad_update);
  * @param n     the number of buttons (On Tour numbuttons)
  * @param vals  one value per button
  */
-extern "C" void cInputPad_update(cInputPad* self, int n, float* vals)
+void cInputPad::update(int n, float* vals)
 {
-    if (self->NumButtons < n) {
-        MEM_fill(&self->Buttons[self->NumButtons], 0, (n - self->NumButtons) * sizeof(tButton));
+    if (NumButtons < n) {
+        MEM_fill(&Buttons[NumButtons], 0, (n - NumButtons) * sizeof(tButton));
     }
-    self->NumButtons = n;
+    NumButtons = n;
     for (int i = 0; i < n; i++) {
-        self->Buttons[i].Value = vals[i];
-        if (self->Buttons[i].DebounceCount < 3) {
-            self->Buttons[i].IsPressed = 0;
-            self->Buttons[i].DebounceCount++;
-            self->Buttons[i].IsReleased = 0;
+        Buttons[i].Value = vals[i];
+        if (Buttons[i].DebounceCount < 3) {
+            Buttons[i].IsPressed = 0;
+            Buttons[i].DebounceCount++;
+            Buttons[i].IsReleased = 0;
         } else {
-            int on = self->Buttons[i].Value > 0.0f;
-            if (on == self->Buttons[i].IsHeld) {
-                self->Buttons[i].IsPressed = 0;
-                self->Buttons[i].IsReleased = 0;
+            int on = Buttons[i].Value > 0.0f;
+            if (on == Buttons[i].IsHeld) {
+                Buttons[i].IsPressed = 0;
+                Buttons[i].IsReleased = 0;
             } else {
-                self->Buttons[i].IsHeld = on;
+                Buttons[i].IsHeld = on;
                 if (on) {
-                    self->Buttons[i].IsPressed = 1;
-                    self->Buttons[i].IsReleased = 0;
+                    Buttons[i].IsPressed = 1;
+                    Buttons[i].IsReleased = 0;
                 } else {
-                    self->Buttons[i].IsPressed = 0;
-                    self->Buttons[i].IsReleased = 1;
+                    Buttons[i].IsPressed = 0;
+                    Buttons[i].IsReleased = 1;
                 }
-                self->Buttons[i].DebounceCount = 0;
+                Buttons[i].DebounceCount = 0;
             }
         }
-        if (self->Buttons[i].IsHeld) {
-            if (self->Buttons[i].RepeatCount == 0) {
-                self->Buttons[i].IsRepeated = 1;
-                self->Buttons[i].RepeatCount = 0x18;
+        if (Buttons[i].IsHeld) {
+            if (Buttons[i].RepeatCount == 0) {
+                Buttons[i].IsRepeated = 1;
+                Buttons[i].RepeatCount = 0x18;
             } else {
-                self->Buttons[i].RepeatCount--;
-                if (self->Buttons[i].RepeatCount <= 0) {
-                    self->Buttons[i].IsRepeated = 1;
-                    self->Buttons[i].RepeatCount = 0xC;
+                Buttons[i].RepeatCount--;
+                if (Buttons[i].RepeatCount <= 0) {
+                    Buttons[i].IsRepeated = 1;
+                    Buttons[i].RepeatCount = 0xC;
                 } else {
-                    self->Buttons[i].IsRepeated = 0;
+                    Buttons[i].IsRepeated = 0;
                 }
             }
         } else {
-            self->Buttons[i].IsRepeated = 0;
-            self->Buttons[i].RepeatCount = 0;
+            Buttons[i].IsRepeated = 0;
+            Buttons[i].RepeatCount = 0;
         }
     }
 }
@@ -471,12 +474,12 @@ extern "C" void cInputMapParser_readToken(void* self);
  * Reads tokens until the current token is a semicolon (5) or end of file (0), then reads one more.
  * cInputMapParser_parseStatement() calls it after each error it reports.
  */
-extern "C" void cInputMapParser_skipPastSemicolon(cInputMapParser* self)
+void cInputMapParser::skipPastSemicolon()
 {
-    while (self->CurrentToken != 5 && self->CurrentToken != 0) {
-        cInputMapParser_readToken(self);
+    while (CurrentToken != 5 && CurrentToken != 0) {
+        cInputMapParser_readToken(this);
     }
-    cInputMapParser_readToken(self);
+    cInputMapParser_readToken(this);
 }
 #endif
 
@@ -494,10 +497,10 @@ extern "C" void* memset(void* dst, int c, int n);
  *
  * @return the new node
  */
-extern "C" void* cInputMapParser_newParseNode(cInputMapParser* self)
+void* cInputMapParser::newParseNode()
 {
-    tParseNode* freeNode = self->FreeParseNodes;
-    self->FreeParseNodes = (tParseNode*)(freeNode->Operand1);
+    tParseNode* freeNode = FreeParseNodes;
+    FreeParseNodes = (tParseNode*)(freeNode->Operand1);
     memset(freeNode, 0, 0x10);
     return freeNode;
 }
@@ -517,7 +520,7 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_freeParseNode);
  * @param node  the node to free, or 0
  */
 // Frees an expression node and its children back onto the map's node free list.
-extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, tParseNode* node)
+void cInputMapParser::freeParseNode(tParseNode* node)
 {
     if (node == 0) {
         return;
@@ -526,25 +529,25 @@ extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, tParseNode*
     case 18: case 19:
     case 24: case 25: case 26: case 27: case 28:
     case 29: case 30: case 31: case 32: case 33:
-        cInputMapParser_freeParseNode(self, node->Operand1);
+        freeParseNode(node->Operand1);
         break;
     case 6: case 7: case 8: case 9: case 10: case 11:
     case 12: case 13: case 14: case 15: case 16: case 17:
     case 20: case 21:
-        cInputMapParser_freeParseNode(self, node->Operand1);
-        cInputMapParser_freeParseNode(self, node->Operand2);
+        freeParseNode(node->Operand1);
+        freeParseNode(node->Operand2);
         break;
     case 5:
-        cInputMapParser_freeParseNode(self, node->Operand1);
-        cInputMapParser_freeParseNode(self, node->Operand2);
-        cInputMapParser_freeParseNode(self, node->Operand3);
+        freeParseNode(node->Operand1);
+        freeParseNode(node->Operand2);
+        freeParseNode(node->Operand3);
         break;
     case 0: case 1: case 2: case 3: case 4:
     case 22: case 23:
         break;
     }
-    node->Operand1 = self->FreeParseNodes;
-    self->FreeParseNodes = (tParseNode*)node;
+    node->Operand1 = FreeParseNodes;
+    FreeParseNodes = (tParseNode*)node;
 }
 #endif
 
@@ -563,7 +566,7 @@ extern char str_button[];
  * @param name  identifier text from the map script
  * @return the button number, or -1 if the name is not a button name
  */
-extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* name)
+int cInputMapParser::lookupButtonName(char* name)
 {
     if (strncasecmp(name, str_button, 6) != 0) {
         return -1;

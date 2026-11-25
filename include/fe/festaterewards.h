@@ -32,6 +32,8 @@ struct tIconInfo {
     int mID;                        // 0x8 [O]
 };
 
+struct SHAPEFILE;
+
 struct cFEStateRewardGalleryBase : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [U] the subclasses' constructors install their vtables
@@ -95,6 +97,19 @@ struct cFEStateRewardGalleryBase : public cUIState {
     cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
                                     //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
     cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryBase1() __asm__("cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1");
+    int getStoreNum() __asm__("cFEStateRewardGalleryBase_getStoreNum");
+    unsigned int isInStore() __asm__("cFEStateRewardGalleryBase_isInStore");
+    int isIconsLoaded() __asm__("cFEStateRewardGalleryBase_isIconsLoaded");
+    int isRewardsLoaded() __asm__("cFEStateRewardGalleryBase_isRewardsLoaded");
+    void loadIcons() __asm__("cFEStateRewardGalleryBase_loadIcons");
+    void updateIconsLoad() __asm__("cFEStateRewardGalleryBase_updateIconsLoad");
+    void allocIcons(SHAPEFILE* data) __asm__("cFEStateRewardGalleryBase_allocIcons");
+    void purgeIcons() __asm__("cFEStateRewardGalleryBase_purgeIcons");
+    void loadRewards() __asm__("cFEStateRewardGalleryBase_loadRewards");
+    void updateRewardsLoad() __asm__("cFEStateRewardGalleryBase_updateRewardsLoad");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryBase, mLoadingState, 0x048);
@@ -174,6 +189,9 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
     const tPosterInfo* mpPosters[43];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
                                     //       (database + i * entry size), purgeRewards clears them, getReward
                                     //       returns one, getIconID reads its icon name
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryPosters1() __asm__("cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mpDBPosters, 0xA24);
@@ -194,6 +212,10 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
     const tTradingCardInfo* mpTradingCards[116];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
                                     //       (database + i * entry size), purgeRewards clears them, getReward
                                     //       returns one, getIconID reads its icon name
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryTradingCards1()
+        __asm__("cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpDBTradingCards, 0xA24);
@@ -214,6 +236,10 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
     const tConceptArtInfo* mpConceptArts[100];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
                                     //       (database + i * entry size), purgeRewards clears them, getReward
                                     //       returns one, getIconID reads its icon name
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryConceptArts1()
+        __asm__("cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpDBConceptArts, 0xA24);
@@ -234,6 +260,9 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
     const tVideoInfo* mpVideos[2];  // 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
                                     //       (database + i * entry size), purgeRewards clears them, getReward
                                     //       returns one, getIconID reads its icon name
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryVideos1() __asm__("cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mpDBVideos, 0xA24);
@@ -254,6 +283,9 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
     const tToyInfo* mpToys[28];     // 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
                                     //       (database + i * entry size), purgeRewards clears them, getReward
                                     //       returns one, getIconID reads its icon name
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryToys1() __asm__("cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryToys, mpDBToys, 0xA24);
@@ -274,6 +306,10 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
     const tCheatCharInfo* mpCheatChars[28];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
                                     //       (database + i * entry size), purgeRewards clears them, getReward
                                     //       returns one; getTextureElement looks up its texture
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateRewardGalleryCheatChars1()
+        __asm__("cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpDBCheatChars, 0xA24);

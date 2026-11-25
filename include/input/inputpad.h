@@ -36,6 +36,9 @@ CHECK_SIZE(tButton, 0x1C);
 struct cInputPad {
     int NumButtons;                 // 0x000 [O]; [U] cInputPad_update stores its count; isPauseAI loops to it
     tButton Buttons[24];            // 0x004 [O] MaxButtons = 24; [U] cInputPad_update, isPauseAI
+
+    // Methods bound to their retail symbols by asm labels.
+    void update(int n, float* vals) __asm__("cInputPad_update");
 };
 
 CHECK_OFFSET(cInputPad, NumButtons, 0x000);

@@ -38,6 +38,12 @@ struct cFadeScreen {
     int IsEnding;                   // 0x008 [O][P] (bool; preview 0x14); [R] ctor 0; [U] loseFocus sets it, update
                                     //       picks
                                     //       the fade direction by it
+
+    // Methods bound to their retail symbols by asm labels.
+    int loseFocus() __asm__("cFadeScreen_loseFocus");
+    void* update() __asm__("cFadeScreen_update");
+    int drawFade() __asm__("cFadeScreen_drawFade");
+    void allowFade() __asm__("cFadeScreen_allowFade");
 };
 
 CHECK_OFFSET(cFadeScreen, mVtbl, 0x000);

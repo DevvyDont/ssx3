@@ -83,10 +83,16 @@ struct cRiderCameraTarget : public cCameraTarget {
     // 0x0: the vptr: [R] cRiderCameraTarget_vtbl (cCamera_init)
     cRider* Rider;              // 0x4 [O]; [P] getRider (lw) / setRider (sw); [R] cCamera_init stores the view's rider;
                                 //     [U] all 26 slots lw 0x4; cRiderCameraTarget_setRider setRider, cRiderCameraTarget_getRider getRider
+
+    // Methods bound to their retail symbols by asm labels.
+    void setRider(int rider) __asm__("cRiderCameraTarget_setRider");
+    int getRider() __asm__("cRiderCameraTarget_getRider");
 };
 
 CHECK_OFFSET(cRiderCameraTarget, Rider, 0x4);
 CHECK_SIZE(cRiderCameraTarget, 0x8);
+
+struct tPose;
 
 struct cSimpleCamera {
     float View;                 // 0x00 [O]; [P] getFOV (lwc1); [U] cSimpleCamera_getFOV getFOV, cSimpleCamera_setFOV setFOV
@@ -104,6 +110,19 @@ struct cSimpleCamera {
     t4Vector Direction;         // 0x80 [O]; [R] = t4vect_XAxis; [U] cSimpleCamera_getDirection returns this + 0x80
     void** mVtbl;               // 0x90 [R] cSimpleCamera_vtbl (D_0045B8B0)
     char unk_94[0xC];           // 0x94 padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    float getNear() __asm__("cSimpleCamera_getNear");
+    float getFar() __asm__("cSimpleCamera_getFar");
+    void setPosition(long long *position) __asm__("cSimpleCamera_setPosition");
+    void setOrientation(long long *orientation) __asm__("cSimpleCamera_setOrientation");
+    void setPose(tPose* pose) __asm__("cSimpleCamera_setPose");
+    void setMaxFar(float fparg0) __asm__("cSimpleCamera_setMaxFar");
+    void setMinNear(float fparg0) __asm__("cSimpleCamera_setMinNear");
+    void setMaxFOV(float fparg0) __asm__("cSimpleCamera_setMaxFOV");
+    void init(float x, float y, float z) __asm__("cSimpleCamera_init");
+    float getHeading() __asm__("cSimpleCamera_getHeading");
+    float getPitch() __asm__("cSimpleCamera_getPitch");
 };
 
 CHECK_OFFSET(cSimpleCamera, View, 0x00);
@@ -162,6 +181,21 @@ struct cCamera {
     int UsingSafePositionLastFrame; // 0x4A0 [O] bool; [R] 0; [U] cCamera_avoidGround
     int LastSafePositionInvalid;    // 0x4A4 [O] bool; [R] 1; [U] cCamera_avoidGround
     char unk_4A8[0x8];              // 0x4A8 padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cCamera_update");
+    void setCurrentController(int mode) __asm__("cCamera_setCurrentController");
+    void* snapResultAlgorithm() __asm__("cCamera_snapResultAlgorithm__FPv");
+    void shakeCamera(int type, float amount, float dist) __asm__("cCamera_shakeCamera");
+    void applyCameraShake() __asm__("cCamera_applyCameraShake");
+    void updateStreamFocus() __asm__("cCamera_updateStreamFocus");
+    void switchChaseControllerTargetRider(int value) __asm__("cCamera_switchChaseControllerTargetRider");
+    int getCurrentController() __asm__("cCamera_getCurrentController");
+    int getManualController() __asm__("cCamera_getManualController");
+    int getChaseController() __asm__("cCamera_getChaseController");
+    int getScriptController() __asm__("cCamera_getScriptController");
+    int isStreamReady() __asm__("cCamera_isStreamReady");
+    int getStreamFocusID() __asm__("cCamera_getStreamFocusID");
 };
 
 CHECK_OFFSET(cCamera, View, 0x000);

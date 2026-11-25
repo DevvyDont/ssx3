@@ -91,17 +91,17 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
  * the lodge), cFELoadHintState when results are not locked or the game path is 0, else cFELoadState; the last
  * two get this screen as parent and a texture (cFELoadScreen_loadTexture with 1 or 2). SplashTexID (+0x18) becomes -1.
  */
-extern "C" void cFELoadScreen_load(cFELoadScreen* self)
+void cFELoadScreen::load()
 {
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ps2GraphicsMan->InitTextures(0x100);
     }
     void* eng = cUIEngine_cUIEngine(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
-    self->mpUI = (cUIEngine*)eng;
+    mpUI = (cUIEngine*)eng;
     cUIEngine_loadFile(eng, str_data_ui_fl);
-    ((sEngine_233438*)self->mpUI)->f8 = (int)SSXApp->Fonts;
-    ((sEngine_233438*)self->mpUI)->f10 = (int)SSXApp->FELocale;
+    ((sEngine_233438*)mpUI)->f8 = (int)SSXApp->Fonts;
+    ((sEngine_233438*)mpUI)->f10 = (int)SSXApp->FELocale;
     {
         cFEInput* feInput = (cFEInput*)operator new(sizeof(cFEInput), str_FLUIInput, 0x100, 0);
         feInput->mPadNum = 0;
@@ -110,24 +110,24 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
         feInput->mbKeyReady = 0;
         feInput->miVKey = 0;
         feInput->miAsciiKey = 0;
-        ((sEngine_233438*)self->mpUI)->fC = feInput;
+        ((sEngine_233438*)mpUI)->fC = feInput;
     }
     cGameModeMan* gm = SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
     char* screen;
     if (cRealFE_mStartState == 39) {
-        screen = newScreenA_233438(self);
+        screen = newScreenA_233438(this);
     } else if (gm->bAreResultsLocked == 0 || cBENewRaceInterface_newRace.cGamePath == 0) {
-        screen = newScreenB_233438(self);
-        *(void**)(screen + 0x48) = ((void*)self);
-        cFELoadScreen_loadTexture(self, 1);
+        screen = newScreenB_233438(this);
+        *(void**)(screen + 0x48) = ((void*)this);
+        loadTexture(1);
     } else {
-        screen = newScreenC_233438(self);
-        *(void**)(screen + 0x48) = ((void*)self);
-        cFELoadScreen_loadTexture(self, 2);
+        screen = newScreenC_233438(this);
+        *(void**)(screen + 0x48) = ((void*)this);
+        loadTexture(2);
     }
-    cUIStateStack_push(&self->mpUI->mStateStack, screen);
-    self->SplashTexID = -1;
+    cUIStateStack_push(&mpUI->mStateStack, screen);
+    SplashTexID = -1;
 }
 #endif
 
@@ -173,7 +173,7 @@ static inline int loadTex_3640(char* data, const char* name)
  *
  * @param type  1 for the single-player portrait, 2 for the two online players' portraits
  */
-extern "C" void cFELoadScreen_loadTexture(cFELoadScreen* self, int type)
+void cFELoadScreen::loadTexture(int type)
 {
     char name[0x70];
     cBigFile bf;
@@ -194,11 +194,11 @@ extern "C" void cFELoadScreen_loadTexture(cFELoadScreen* self, int type)
             sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, cBENewPlayerInterface_getHumanRider(plr, 0))], D_004A2B38);
         }
         char* data = FILE_loadpackz(name, 0x3000100);
-        self->mTexID[0] = loadTex_3640(data, str_CharaPics);
+        mTexID[0] = loadTex_3640(data, str_CharaPics);
         if (data != 0)
             cMemMan_free(data);
     } else if (type == 2 && cBENewRaceInterface_newRace.cGamePath == 2) {
-        int* slot = (int*)(&self->mTexID[0]);
+        int* slot = (int*)(&mTexID[0]);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
             char* data = FILE_loadpackz(name, 0x3000100);
@@ -261,20 +261,20 @@ extern "C" void func_0028FA98(void* self, float f);
  * destroys mpUI (cUIEngine__cUIEngine with flags 3), removes the two mTexID ids when non-zero, purges the textures
  * (cGraphicsMan_PurgeTextures()) and calls func_0028FA98 on the audio object with 1.0.
  */
-extern "C" void cFELoadScreen_purge(cFELoadScreen* self)
+void cFELoadScreen::purge()
 {
     GrMan->FlushRenderer();
-    int id = self->SplashTexID;
+    int id = SplashTexID;
     if (id >= 0) {
         GrMan->RemoveTexture(id);
     }
-    void* uiObject = self->mpUI;
+    void* uiObject = mpUI;
     if (uiObject != 0) {
         cUIEngine__cUIEngine(uiObject, 3);
     }
     int i;
     for (i = 0; i < 2; i++) {
-        int textureId = self->mTexID[i];
+        int textureId = mTexID[i];
         if (textureId != 0) {
             GrMan->RemoveTexture(textureId);
         }
@@ -299,14 +299,14 @@ extern "C" void cUIEngine_render2D(void* engine);
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
  */
-extern "C" int cFELoadScreen_render(cFELoadScreen* self)
+int cFELoadScreen::render()
 {
     cPS2GraphicsMan* graphicsMan = GrMan;
     if (graphicsMan->IsRenderReady() == 0) {
         return 0;
     }
-    if (cFadeScreen_drawFade(self) == 0) {
-        cUIEngine_render2D(self->mpUI);
+    if (cFadeScreen_drawFade(this) == 0) {
+        cUIEngine_render2D(mpUI);
     }
     graphicsMan = (cPS2GraphicsMan*)GrMan;
     graphicsMan->DrawFrame();
@@ -324,10 +324,10 @@ void cLoadScreen_update(void*);
  * Per-frame update of the front-end load screen: updates its UI object (+0xC, cUIEngine_update), then runs the base
  * update cLoadScreen_update (which calls cFadeScreen_update()).
  */
-extern "C" void cFELoadScreen_update(cFELoadScreen* self)
+void cFELoadScreen::update()
 {
-    cUIEngine_update(self->mpUI);
-    cLoadScreen_update(self);
+    cUIEngine_update(mpUI);
+    cLoadScreen_update(this);
 }
 #endif
 
@@ -340,11 +340,11 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 /**
  * Switches the game to the state's next state (mNextState) with its startup flag, when one is set.
  */
-extern "C" void cGameState_gotoNextState(cGameState* self)
+void cGameState::gotoNextState()
 {
-    int nextState = *(int*)self;
+    int nextState = *(int*)this;
     if (nextState != 0) {
-        cGame_setState(cGameState_mpGame, nextState, self->mStartupFlag, 0);
+        cGame_setState(cGameState_mpGame, nextState, mStartupFlag, 0);
     }
 }
 #endif
@@ -557,13 +557,13 @@ void cGameComm_stopSyncInput(void* self);
  * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls cGameComm_stopSyncInput() on it and sets its
  * mAtFinishLine to 1. gainFocus slot of vtable cGFFinishlineState_vtbl.
  */
-extern "C" void cGFFinishlineState_gainFocus(cGFFinishlineState* self)
+void cGFFinishlineState::gainFocus()
 {
     cReplay_endReplay(*(void**)((char*)cGameState_mpGame + 0x28));
     cUIStateStack_purgeNormalStates(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
-    self->mSubState = 0;
-    self->mShowEventResultsDelay = 180;
+    mSubState = 0;
+    mShowEventResultsDelay = 180;
     cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 4);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
@@ -758,7 +758,7 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
     case 2: {
         sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc->flag49 == 0 && rc->mode48 == 4) {
-            cGameState_gotoNextState((cGameState*)self);
+            ((cGameState*)self)->gotoNextState();
         }
         break;
     }
@@ -787,7 +787,7 @@ void cSSXScriptEngine_DisallowNISListSkip(void* self, int val);
  * cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 1), and stores mNextState 7. loseFocus slot of vtable
  * cGFFinishlineState_vtbl.
  */
-extern "C" void cGFFinishlineState_loseFocus(cGFFinishlineState* self)
+void cGFFinishlineState::loseFocus()
 {
     int n = (int)SSXApp->Game->ViewMan->m_uiNumView;
     int i;
@@ -796,10 +796,10 @@ extern "C" void cGFFinishlineState_loseFocus(cGFFinishlineState* self)
         cCamera* item = list->PlayerCamera[i];
         cChaseCameraController_switchCamera_EndPostRace_v(item->ChaseController);
     }
-    self->mSubState = 2;
+    mSubState = 2;
     cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0);
     cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 1);
-    self->mNextState = 7;
+    mNextState = 7;
 }
 #endif
 
@@ -814,11 +814,11 @@ INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_writeToReplayFrame);
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFFinishlineState_writeToReplayFrame(cGFFinishlineState* self, cBxReplayFrame* stream)
+void cGFFinishlineState::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_writeToReplayFrame_2(self, stream);
-    stream->write((const char*)&self->mSubState, 4);
-    stream->write((const char*)&self->mShowEventResultsDelay, 4);
+    cGameState_writeToReplayFrame_2(this, stream);
+    stream->write((const char*)&mSubState, 4);
+    stream->write((const char*)&mShowEventResultsDelay, 4);
 }
 #endif
 
@@ -833,11 +833,11 @@ INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_readFromReplayFrame);
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFFinishlineState_readFromReplayFrame(cGFFinishlineState* self, cBxReplayFrame* stream)
+void cGFFinishlineState::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_readFromReplayFrame_2(self, stream);
-    stream->read((char*)&self->mSubState, 4);
-    stream->read((char*)&self->mShowEventResultsDelay, 4);
+    cGameState_readFromReplayFrame_2(this, stream);
+    stream->read((char*)&mSubState, 4);
+    stream->read((char*)&mShowEventResultsDelay, 4);
 }
 #endif
 
@@ -912,7 +912,7 @@ static inline int isMode4_2341D0()
  *
  * @param mode  startup flag (On Tour: startupFlag): 0 no start sequence, 1 or 2 as above
  */
-extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
+void cGFEventStartState::gainFocus(int mode)
 {
     int i = 0;
     cBEInterface* race = cBE_getInterface_41D0(cBE_getBE(), 0);
@@ -951,7 +951,7 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
         }
         break;
     }
-    self->mSubState = 0;
+    mSubState = 0;
 }
 #endif
 
@@ -1002,9 +1002,9 @@ static inline void* hud_43B0()
  * NIS lists, activates the computers, purges if pending and goes to the next game state (sub-state 4).
  */
 // Load screen update: drives the loading state machine (stream start, track setup, wait for load, finish).
-extern "C" void cGFEventStartState_update(cGFEventStartState* self)
+void cGFEventStartState::update()
 {
-    if (self->mSubState < 3) {
+    if (mSubState < 3) {
         cBXLoadIndicator_Show(hud_43B0(), 2);
         if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0) == 4)
             cSSXScriptEngine_PauseNISList(ScriptEngine, 0, 1);
@@ -1013,14 +1013,14 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
             cSSXScriptEngine_PauseNISList(ScriptEngine, 0, 0);
         cBXLoadIndicator_Hide(hud_43B0(), 2);
     }
-    switch (self->mSubState) {
+    switch (mSubState) {
     case 0:
         if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) == 0)
-            self->mSubState = 1;
+            mSubState = 1;
         break;
     case 1: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        cGFEventStartState_ReadyEvent(self);
+        ReadyEvent();
         signed char* cfg = ((signed char*)&cBENewRaceInterface_newRace);
         int mode = cfg[0x48];
         int skip = cfg[0x49];
@@ -1028,7 +1028,7 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
         if (mode == 4 || (mode == 5 && sub != 4) || (mode == 6 && sub != 5)) {
             cAI_prepareToPurgeComputerRiders(cGameState_mpGame->AI);
             cAI_prepareToPurgeComputerActors(cGameState_mpGame->AI);
-            self->mPurgeCPURiders = 1;
+            mPurgeCPURiders = 1;
         } else if (skip == 0) {
             cAI_initAIRiders(cGameState_mpGame->AI);
             cAI* aiObj = cGameState_mpGame->AI;
@@ -1045,14 +1045,14 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
             cAI_setRaceRankType(cGameState_mpGame->AI, 1);
         else if (mode != 4)
             cAI_setRaceRankType(cGameState_mpGame->AI, 2);
-        self->mSubState = 2;
+        mSubState = 2;
         break;
     }
     case 2:
         if (!cAI_isAILoadedAndReady(cGameState_mpGame->AI))
             cAI_loadRiders(cGameState_mpGame->AI);
         else
-            self->mSubState = 3;
+            mSubState = 3;
         break;
     case 3: {
         if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) != 0)
@@ -1062,7 +1062,7 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
         if (cGameState_mpGame->AI->NumberOfComputersAllocated > 0)
             cGameState_mpGame->AI->ComputerRidersActive = 1;
         if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 2) {
-            cSSXScriptEngine_PlayNISList(ScriptEngine, 0, self->mHasTransitionNIS == 0, 1);
+            cSSXScriptEngine_PlayNISList(ScriptEngine, 0, mHasTransitionNIS == 0, 1);
             break;
         }
         int nisState = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
@@ -1076,17 +1076,17 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
             if (cGameState_mpGame->AI->NumberOfComputersAllocated > 0)
                 cGameState_mpGame->AI->ComputerRidersActive = 1;
         }
-        if (self->mPurgeCPURiders) {
+        if (mPurgeCPURiders) {
             if (!cAI_isReadyToPurgeComputerRiders(cGameState_mpGame->AI))
                 break;
             if (!cAI_isReadyToPurgeComputerActors(cGameState_mpGame->AI))
                 break;
             cAI_cleanupAfterRace(cGameState_mpGame->AI);
             cAI_cleanupActors(cGameState_mpGame->AI);
-            self->mPurgeCPURiders = 0;
+            mPurgeCPURiders = 0;
         }
-        self->mSubState = 4;
-        cGameState_gotoNextState((cGameState*)self);
+        mSubState = 4;
+        ((cGameState*)this)->gotoNextState();
         break;
     }
     case 4:
@@ -1148,7 +1148,7 @@ static inline int otherSide_234750(char* p)
  * aggression on game paths other than 0 and clears mHasTransitionNIS (+0x14). When the view manager's word at
  * +0x10 is 1 it also clears a word in the world's slot for the other view.
  */
-extern "C" void cGFEventStartState_loseFocus(cGFEventStartState* self)
+void cGFEventStartState::loseFocus()
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
     cBE_getInterface_4750(cBE_getBE(), 0);
@@ -1181,7 +1181,7 @@ extern "C" void cGFEventStartState_loseFocus(cGFEventStartState* self)
     cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
     if (raceDB->cGamePath != 0)
         cBEAggressionInterface_regressAggression(cBEAggressionInterface_getThis());
-    self->mHasTransitionNIS = 0;
+    mHasTransitionNIS = 0;
     cGame* game = SSXApp->Game;
     cGameViewMan* x = game->ViewMan;
     if ((int)x->m_uiNumView == 1) {
@@ -1208,7 +1208,7 @@ static inline int isState00234910(void* e, int s)
  * Each call is cSSXScriptEngine_PlayNISList(ScriptEngine, list, 1, 1), made only while the engine's +0x550
  * (mPlayingNISList) is 2. Then +0x14 is 1 when mPlayingNISList is 1, else 0. cGFEventStartState_update() calls it.
  */
-extern "C" void cGFEventStartState_ReadyEvent(cGFEventStartState* self)
+void cGFEventStartState::ReadyEvent()
 {
     if (isState00234910(ScriptEngine, 2)) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 1);
@@ -1216,9 +1216,9 @@ extern "C" void cGFEventStartState_ReadyEvent(cGFEventStartState* self)
     if (isState00234910(ScriptEngine, 2)) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 1);
     }
-    self->mHasTransitionNIS = 0;
+    mHasTransitionNIS = 0;
     if (ScriptEngine->mPlayingNISList == 1) {
-        self->mHasTransitionNIS = 1;
+        mHasTransitionNIS = 1;
     }
 }
 #endif

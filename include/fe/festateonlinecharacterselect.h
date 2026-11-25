@@ -65,6 +65,9 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
     int miCharID;                   // 0x6E0 [U] onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen clears it; onWidgetCreate stores the
                                     //       player's rider (cBENewPlayerInterface_getPlayerCharID); onWidgetEvent
                                     //       resets the player interface (cBENewPlayerInterface_setPlayerCheatCharID) when the pick differs from it
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEStateOnlineCharacterSelect1() __asm__("cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1");
 };
 
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpLBChallengerSelect, 0x6D0);

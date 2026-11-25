@@ -32,6 +32,11 @@
 struct cAnimModel;
 struct cRiderAnim;
 
+struct SHAPEFILE;
+struct cBECharProfileDB;
+struct t4Vector;
+struct tBEProfileBolt;
+
 struct cFERider {
     int mCharID;                    // 0x000 [O]; [R] -1; init stores the character, purge -1; [U] below 10 = a real
                                     //       character (setCharID / update)
@@ -76,6 +81,30 @@ struct cFERider {
     unsigned int mAnimFilter;       // 0xCD8 [O] (On Tour: unsigned long long; retail sw); [U] init: one bit per
                                     //       character (1, 4, 0x20, 2, ...)
     char unk_CDC[0x4];              // 0xCDC tail padding (16-byte class alignment)
+
+    // Methods bound to their retail symbols by asm labels.
+    void initBoneMap() __asm__("cFERider_initBoneMap");
+    void queueLoadExtraTextures() __asm__("cFERider_queueLoadExtraTextures");
+    void purge() __asm__("cFERider_purge");
+    void cancelAllFiles() __asm__("cFERider_cancelAllFiles");
+    void compileModel() __asm__("cFERider_compileModel");
+    void render() __asm__("cFERider_render");
+    void update() __asm__("cFERider_update");
+    void updateModelPose() __asm__("cFERider_updateModelPose");
+    void translate(t4Vector* delta) __asm__("cFERider_translate");
+    void rotate(t4Vector* axis, float angle) __asm__("cFERider_rotate");
+    void translateBoard(t4Vector* delta) __asm__("cFERider_translateBoard");
+    void rotateBoard(t4Vector* axis, float angle) __asm__("cFERider_rotateBoard");
+    int getBonePosition(int index) __asm__("cFERider_getBonePosition");
+    int getTextureID(const char* name) __asm__("cFERider_getTextureID");
+    void addTextureFile(SHAPEFILE* pkg, int replace) __asm__("cFERider_addTextureFile");
+    void loadTextures(cBECharProfileDB* list, int ignored, int keepLoaded) __asm__("cFERider_loadTextures");
+    int isDoneLoadingTextures() __asm__("cFERider_isDoneLoadingTextures");
+    void loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int force, int keepLoaded)
+        __asm__("cFERider_loadModels");
+    void speak() __asm__("cFERider_speak");
+    void setVisible(int enable) __asm__("cFERider_setVisible");
+    void setCharID(unsigned int item, int flag) __asm__("cFERider_setCharID");
 };
 
 CHECK_OFFSET(cFERider, mCharID, 0x000);

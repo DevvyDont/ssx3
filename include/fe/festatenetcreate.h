@@ -75,6 +75,9 @@ struct cFEStateCreateStep1 : public cFEStateNet {
                                     //       ctor; [U] onCreateScreen picks the form from it, onWidgetCreate/onWidgetEvent/func_001BA178 test it
     cUIText* mpStaticContinue;      // 0x6F0 [R] 0; [U] onWidgetCreate cFEStateCreateStep1_onWidgetCreate: widget "StaticContinue"; onGainTransition
                                     //       cFEStateCreateStep1_onGainTransition enables it (its slot 8) only when all four strings are set (func_001B9558)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateCreateStep11() __asm__("cFEStateCreateStep1_cFEStateCreateStep11");
 };
 
 CHECK_OFFSET(cFEStateCreateStep1, mpAccount, 0x6D0);
@@ -109,6 +112,9 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     int unk_6D8;                    // 0x6D8 [U] func_001BAED8 (popup events): 1 on 0x11 (option 2), 0 on 0xF/0x10/0x14; on 0x16 it opens
                                     //       "kT_POPUP204SaveAccount" when set, else "kT_POPUP201Verify" and submits the account (func_0025C610)
     int unk_6DC;                    // 0x6DC [U] onCreateScreen cFEStateCreateStep2_onCreateScreen stores 0; no read seen
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEStateCreateStep21() __asm__("cFEStateCreateStep2_cFEStateCreateStep21");
 };
 
 CHECK_OFFSET(cFEStateCreateStep2, mpAccount, 0x6D0);

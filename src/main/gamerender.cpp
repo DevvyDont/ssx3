@@ -118,11 +118,11 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_updateViewState);
  * clears the world view's stream-focus active flags for the unused view (one view) or for both (two views).
  * cGame_updateState calls it.
  */
-extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
+void cGameViewMan::updateViewState()
 {
     cGame* game = SSXApp->Game;
     int mode = game->mCurrentStateID;
-    if (self->m_GFState == mode) {
+    if (m_GFState == mode) {
         return;
     }
     int n = *(int*)game->Replay;
@@ -130,43 +130,43 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
     if (busy) {
         return;
     }
-    self->m_GFState = mode;
-    if (self->m_uiNumPlayers == 1) {
+    m_GFState = mode;
+    if (m_uiNumPlayers == 1) {
         return;
     }
     float w = (float)(unsigned int)GrMan->GetScreenWidth();
     float screenHeight = (float)(unsigned int)GrMan->GetScreenHeight();
-    switch (self->m_GFState) {
+    switch (m_GFState) {
     case 3:
     case 4:
     case 5: {
         float hw = w * 0.5f;
-        self->m_uiNumView = 2;
-        self->m_uiCurrentView = 0;
-        ((&self->m_ViewRect[0]))[0].X = 0.0f;
-        ((&self->m_ViewRect[0]))[0].Y = 0.0f;
-        ((&self->m_ViewRect[0]))[0].W = hw;
-        ((&self->m_ViewRect[0]))[0].H = screenHeight;
-        ((&self->m_ViewRect[0]))[1].X = hw;
-        ((&self->m_ViewRect[0]))[1].Y = 0.0f;
-        ((&self->m_ViewRect[0]))[1].W = hw;
-        ((&self->m_ViewRect[0]))[1].H = screenHeight;
-        self->PlayerCamera[0]->MaxFar = 20000.0f;
-        self->PlayerCamera[1]->MaxFar = 20000.0f;
+        m_uiNumView = 2;
+        m_uiCurrentView = 0;
+        ((&m_ViewRect[0]))[0].X = 0.0f;
+        ((&m_ViewRect[0]))[0].Y = 0.0f;
+        ((&m_ViewRect[0]))[0].W = hw;
+        ((&m_ViewRect[0]))[0].H = screenHeight;
+        ((&m_ViewRect[0]))[1].X = hw;
+        ((&m_ViewRect[0]))[1].Y = 0.0f;
+        ((&m_ViewRect[0]))[1].W = hw;
+        ((&m_ViewRect[0]))[1].H = screenHeight;
+        PlayerCamera[0]->MaxFar = 20000.0f;
+        PlayerCamera[1]->MaxFar = 20000.0f;
         break;
     }
     default:
-        self->m_uiNumView = 1;
-        ((&self->m_ViewRect[0]))[0].W = w;
-        ((&self->m_ViewRect[0]))[0].H = screenHeight;
-        self->m_uiCurrentView = 0;
-        ((&self->m_ViewRect[0]))[0].X = 0.0f;
-        ((&self->m_ViewRect[0]))[0].Y = 0.0f;
-        self->PlayerCamera[0]->MaxFar = 30000.0f;
+        m_uiNumView = 1;
+        ((&m_ViewRect[0]))[0].W = w;
+        ((&m_ViewRect[0]))[0].H = screenHeight;
+        m_uiCurrentView = 0;
+        ((&m_ViewRect[0]))[0].X = 0.0f;
+        ((&m_ViewRect[0]))[0].Y = 0.0f;
+        PlayerCamera[0]->MaxFar = 30000.0f;
         break;
     }
-    if (((int)self->m_uiNumView) == 1) {
-        int idx = self->PlayerCamera[1]->StreamFocusID;
+    if (((int)m_uiNumView) == 1) {
+        int idx = PlayerCamera[1]->StreamFocusID;
         SSXApp->Game->World->m_pWorldCache->m_WorldView.m_StreamFocus[idx].m_bActive = 0;
     } else {
         SSXApp->Game->World->m_pWorldCache->m_WorldView.m_StreamFocus[0].m_bActive = 0;
@@ -215,11 +215,11 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_snapAll);
  * Loops over the active view count (m_uiNumView), not the camera count (m_uiNumPlayers); the controller is the
  * camera's Controller.
  */
-extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
+void cGameViewMan::snapAll()
 {
     unsigned int i;
-    for (i = 0; i < self->m_uiNumView; i++) {
-        cCamera* camera = self->PlayerCamera[i];
+    for (i = 0; i < m_uiNumView; i++) {
+        cCamera* camera = PlayerCamera[i];
         cCameraController* controller = camera->Controller;
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
         vt[4].fn(vthis(controller, vt[4]));
@@ -236,11 +236,11 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_updateAll);
  *
  * Loops over the active view count (+0x10), not the camera count (+0x0).
  */
-extern "C" void cGameViewMan_updateAll(cGameViewMan* self)
+void cGameViewMan::updateAll()
 {
     unsigned int i;
-    for (i = 0; i < self->m_uiNumView; i++) {
-        cCamera* camera = self->PlayerCamera[i];
+    for (i = 0; i < m_uiNumView; i++) {
+        cCamera* camera = PlayerCamera[i];
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)camera->mVtbl;
         vt[3].fn(vthis(camera, vt[3]));
     }
@@ -258,11 +258,11 @@ extern "C" void cCamera_updateStreamFocus(void* p);
  *
  * cGame_update and cGame_render call it.
  */
-extern "C" void cGameViewMan_updateStreamFocus(cGameViewMan* self)
+void cGameViewMan::updateStreamFocus()
 {
     unsigned int i;
-    for (i = 0; i < self->m_uiNumView; i++) {
-        cCamera_updateStreamFocus(self->PlayerCamera[i]);
+    for (i = 0; i < m_uiNumView; i++) {
+        cCamera_updateStreamFocus(PlayerCamera[i]);
     }
 }
 #endif
@@ -283,11 +283,11 @@ struct sRenderList {
  *
  * @return 1 when every view is ready, otherwise 0
  */
-extern "C" int cGameViewMan_isStreamReady(cGameViewMan* self)
+int cGameViewMan::isStreamReady()
 {
     unsigned int i;
-    for (i = 0; i < self->m_uiNumView; i++) {
-        if (self->PlayerCamera[i]->bStreamIsReady == 0) {
+    for (i = 0; i < m_uiNumView; i++) {
+        if (PlayerCamera[i]->bStreamIsReady == 0) {
             return 0;
         }
     }

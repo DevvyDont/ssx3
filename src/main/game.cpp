@@ -43,14 +43,14 @@ static inline int curLayer_C078(cPS2GraphicsMan* c)
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
-extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
+void cGame::renderModels(FrustumIntersector* world)
 {
     *(GrMan->m_pCurrentDrawState->m_textureState.m_texid + 1) = curLayer_C078(GrMan);
     cPS2GraphicsMan* ctx = GrMan;
     (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0xF80) | 0x880;
     (*(int*)&(ctx->m_pCurrentDrawState)->m_bitGroups[0]) |= 0x30;
     int flag = 0xC00;
-    if (self->ViewMan->m_uiNumView >= 2) {
+    if (ViewMan->m_uiNumView >= 2) {
         flag = 0x400;
     }
     int n = world->numinstancesinside;
@@ -322,7 +322,7 @@ extern void* cBezierMan_TheBezierMan;
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
-extern "C" void cGame_renderPatches(cGame* self, FrustumIntersector* world)
+void cGame::renderPatches(FrustumIntersector* world)
 {
     char ctx[0x30];
     func_0022C1B0(ctx);
@@ -336,7 +336,7 @@ extern "C" void cGame_renderPatches(cGame* self, FrustumIntersector* world)
     for (int i = 0; i < n; i++) {
         func_0022C410(ctx, items[i], 1);
     }
-    if ((int)self->ViewMan->m_uiCurrentView == 0) {
+    if ((int)ViewMan->m_uiCurrentView == 0) {
         cPS2BezierMan* obj = (cPS2BezierMan*)cBezierMan_TheBezierMan;
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
         vt[5].fn(vthis(obj, vt[5]));
@@ -360,23 +360,23 @@ extern "C" void cFogParticleMan_render(void* r);
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
-extern "C" void cGame_renderFogVolumes(cGame* self, FrustumIntersector* world)
+void cGame::renderFogVolumes(FrustumIntersector* world)
 {
     void* fog = (char*)&world->fogvolumesinside[0];
     int n = world->numfogvolumesinside;
     if (n != 0) {
-        cFogParticleMan* fogMan = self->FogMan;
+        cFogParticleMan* fogMan = FogMan;
         sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
         vt[2].fn(vthis(fogMan, vt[2]), fog, n, 0);
     }
     fog = (char*)&world->fogvolumescrossing[0];
     n = world->numfogvolumescrossing;
     if (n != 0) {
-        cFogParticleMan* fogMan = self->FogMan;
+        cFogParticleMan* fogMan = FogMan;
         sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
         vt[2].fn(vthis(fogMan, vt[2]), fog, n, 2);
     }
-    cFogParticleMan_render(self->FogMan);
+    cFogParticleMan_render(FogMan);
 }
 #endif
 
@@ -394,22 +394,22 @@ extern "C" void cLensFxMan_render(void* self, int a1);
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  * @param ViewID  the view being drawn
  */
-extern "C" void cGame_renderLightHalos(cGame* self, FrustumIntersector* world, int ViewID)
+void cGame::renderLightHalos(FrustumIntersector* world, int ViewID)
 {
-    self->LensFxMan->mbLocked = 1;
-    cLensFxMan_Reset(self->LensFxMan, ViewID);
+    LensFxMan->mbLocked = 1;
+    cLensFxMan_Reset(LensFxMan, ViewID);
     void* halos = (char*)&world->lighthalosinside[0];
     int n = world->numlighthalosinside;
     if (n != 0) {
-        cLensFxMan_AddLightHalos(self->LensFxMan, halos, n, 0, ViewID);
+        cLensFxMan_AddLightHalos(LensFxMan, halos, n, 0, ViewID);
     }
     halos = (char*)&world->lighthaloscrossing[0];
     n = world->numlighthaloscrossing;
     if (n != 0) {
-        cLensFxMan_AddLightHalos(self->LensFxMan, halos, n, 2, ViewID);
+        cLensFxMan_AddLightHalos(LensFxMan, halos, n, 2, ViewID);
     }
-    cLensFxMan_render(self->LensFxMan, ViewID);
-    self->LensFxMan->mbLocked = 0;
+    cLensFxMan_render(LensFxMan, ViewID);
+    LensFxMan->mbLocked = 0;
 }
 #endif
 
@@ -611,7 +611,7 @@ extern "C" void cSectionMan_init(cSectionMan* self);
 extern "C" void* cSectionMan_cSectionMan(cSectionMan* self, int Game)
 {
     self->mpGame = (cGame*)Game;
-    cSectionMan_init(self);
+    self->init();
     return ((void*)self);
 }
 #endif
@@ -659,7 +659,7 @@ static inline cWorldView* gameWorldView_22CD40(void* self)
  * at
  * 0x16, streaming is ready and the event pool is rebuilt.
  */
-extern "C" void cSectionMan_init(cSectionMan* self)
+void cSectionMan::init()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     int i;
@@ -671,25 +671,25 @@ extern "C" void cSectionMan_init(cSectionMan* self)
     }
     cSectionMan_mSectionMap[49].iWorldSectionID = 0;
     for (i = 0; i < 50; i++) {
-        for (j = 0; j < (unsigned int)cWorldView_getNumSections(gameWorldView_22CD40(self)); j++) {
+        for (j = 0; j < (unsigned int)cWorldView_getNumSections(gameWorldView_22CD40(this)); j++) {
             void* name = cBENewRaceInterface_getSectionFile(iface, i);
-            if (strcmp(name, cWorldView_getSectionName(gameWorldView_22CD40(self), j)) == 0) {
+            if (strcmp(name, cWorldView_getSectionName(gameWorldView_22CD40(this), j)) == 0) {
                 cSectionMan_mSectionMap[i].iWorldSectionID = j;
             }
         }
     }
-    self->mMode = 0;
-    self->mModeState = 0;
-    self->mbLocationIsActivated = 0;
-    self->mWaitTransport = 0;
-    self->mModeReset = 0;
-    self->mBELocationID = 22;
-    self->m_bStreamReady = 1;
-    cSectionMan_initEventPool(self);
-    self->m_iNextSkySectionID = -1;
-    self->m_bTriggerSkySwap = 0;
-    self->m_bSkySwapPending = 0;
-    self->mStreamRate = 0;
+    mMode = 0;
+    mModeState = 0;
+    mbLocationIsActivated = 0;
+    mWaitTransport = 0;
+    mModeReset = 0;
+    mBELocationID = 22;
+    m_bStreamReady = 1;
+    cSectionMan_initEventPool(this);
+    m_iNextSkySectionID = -1;
+    m_bTriggerSkySwap = 0;
+    m_bSkySwapPending = 0;
+    mStreamRate = 0;
 }
 #endif
 
@@ -763,23 +763,23 @@ extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
             found = 0;
         }
         if (found) {
-            cSectionMan_unloadSection((cSectionMan*)self, i);
+            self->unloadSection(i);
         }
     }
     self->mBELocationID = idx;
     self->mbLocationIsActivated = 0;
     for (int k = 0; k < cSectionMan_mLocationMap_CEA8[idx].iNumSection; k++) {
-        cSectionMan_loadSection((cSectionMan*)self, cSectionMan_mLocationMap_CEA8[idx].iBESectionID[k]);
+        self->loadSection(cSectionMan_mLocationMap_CEA8[idx].iBESectionID[k]);
     }
     if (IsSection(skySection)) {
         self->m_bTriggerSkySwap = 0;
-        cSectionMan_loadSection((cSectionMan*)self, skySection);
+        self->loadSection(skySection);
     }
     int transportSection = cSectionMan_mLocationMap_CEA8[idx].iBETransportSectionID;
     if (transportSection >= 0) {
-        cSectionMan_loadSection((cSectionMan*)self, transportSection);
+        self->loadSection(transportSection);
     }
-    cSectionMan_loadMode((cSectionMan*)self, resolvedMode);
+    self->loadMode(resolvedMode);
 }
 #endif
 
@@ -817,7 +817,7 @@ extern "C" void cSectionMan_setSky(void* self, int sky);
  * @param idx  the location (On Tour eBELocationID LocationID)
  * @param mode  the event mode (On Tour eSectionManMode Mode)
  */
-extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
+void cSectionMan::activate(int idx, int mode)
 {
     int sectionMode;
     if (mode == 7) {
@@ -844,23 +844,23 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
             found = 0;
         }
         if (found) {
-            cSectionMan_unloadSection_D088(self, i);
+            cSectionMan_unloadSection_D088(this, i);
         }
     }
-    self->mbLocationIsActivated = 1;
-    self->mBELocationID = idx;
+    mbLocationIsActivated = 1;
+    mBELocationID = idx;
     for (int k = 0; k < cSectionMan_mLocationMap_D088[idx].iNumSection; k++) {
-        cSectionMan_activateSection_D088(self, cSectionMan_mLocationMap_D088[idx].iBESectionID[k]);
+        cSectionMan_activateSection_D088(this, cSectionMan_mLocationMap_D088[idx].iBESectionID[k]);
     }
-    cSectionMan_setSky(self, idx);
+    cSectionMan_setSky(this, idx);
     if (IsSection(skySection)) {
-        cSectionMan_activateSection_D088(self, skySection);
+        cSectionMan_activateSection_D088(this, skySection);
     }
     int transportSection = cSectionMan_mLocationMap_D088[idx].iBETransportSectionID;
     if (transportSection >= 0) {
-        cSectionMan_activateSection_D088(self, transportSection);
+        cSectionMan_activateSection_D088(this, transportSection);
     }
-    cSectionMan_activateMode_D088(self, sectionMode);
+    cSectionMan_activateMode_D088(this, sectionMode);
 }
 #endif
 
@@ -893,20 +893,20 @@ int cSectionMan_isLoaded_impl(void* self, int idx)
 {
     int ok = 1;
     for (int i = 0; i < cSectionMan_mLocationMap_D278[idx].iNumSection; i++) {
-        if (cSectionMan_isSectionLoaded((cSectionMan*)self, cSectionMan_mLocationMap_D278[idx].iBESectionID[i]) == 0) {
+        if (((cSectionMan*)self)->isSectionLoaded(cSectionMan_mLocationMap_D278[idx].iBESectionID[i]) == 0) {
             ok = 0;
             break;
         }
     }
     int skySection = cSectionMan_mLocationMap_D278[idx].iBESkySectionID;
     if (skySection >= 0 && cSectionMan_mSectionMap[skySection].iWorldSectionID >= 0) {
-        if (cSectionMan_isSectionLoaded((cSectionMan*)self, skySection) == 0) {
+        if (((cSectionMan*)self)->isSectionLoaded(skySection) == 0) {
             ok = 0;
         }
     }
     int transportSection = cSectionMan_mLocationMap_D278[idx].iBETransportSectionID;
     if (transportSection >= 0 && cSectionMan_mSectionMap[transportSection].iWorldSectionID >= 0) {
-        if (cSectionMan_isSectionLoaded((cSectionMan*)self, transportSection) == 0) {
+        if (((cSectionMan*)self)->isSectionLoaded(transportSection) == 0) {
             ok = 0;
         }
     }
@@ -927,11 +927,11 @@ extern "C" int cSectionMan_isLoaded(void* self);
  *
  * @return 1 when the location's sections are loaded and mbLocationIsActivated is set, else 0
  */
-extern "C" int cSectionMan_isActive(cSectionMan* self)
+int cSectionMan::isActive()
 {
     int active = 0;
-    if (cSectionMan_isLoaded(self) != 0) {
-        active = self->mbLocationIsActivated != 0;
+    if (cSectionMan_isLoaded(this) != 0) {
+        active = mbLocationIsActivated != 0;
     }
     return active;
 }
@@ -951,7 +951,7 @@ extern "C" void cSectionMan_addActiveEvent(void* self);
  *
  * @param idx  the back-end section (On Tour eBESectionID SectionID)
  */
-extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx)
+void cSectionMan::loadSection(int idx)
 {
     if (cSectionMan_mSectionMap[idx].iWorldSectionID >= 0) {
         int changed = 0;
@@ -968,7 +968,7 @@ extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx)
             break;
         }
         if (changed) {
-            cSectionMan_addActiveEvent(self);
+            cSectionMan_addActiveEvent(this);
         }
     }
 }
@@ -989,10 +989,9 @@ void cWorldView_activateSection_478(void* mgr, int handle) __asm__("cWorldView_a
  * become
  * load-and-activate queued (4), and one loading (6) is marked to activate when loaded (8).
  *
- * @param self_  the section manager
  * @param i  the back-end section (On Tour eBESectionID SectionID)
  */
-extern "C" void cSectionMan_activateSection(cSectionMan* self_, int i)
+void cSectionMan::activateSection(int i)
 {
     int changed;
     if (cSectionMan_mSectionMap[i].iWorldSectionID < 0)
@@ -1018,14 +1017,15 @@ extern "C" void cSectionMan_activateSection(cSectionMan* self_, int i)
     case 1:
     case 5:
         cSectionMan_mSectionMap[i].State = 2;
-        cWorldView_activateSection_478(*(char**)(char*)self_->mpGame->World + 0x10, cSectionMan_mSectionMap[i].iWorldSectionID);
+        cWorldView_activateSection_478(*(char**)(char*)mpGame->World + 0x10,
+                cSectionMan_mSectionMap[i].iWorldSectionID);
         changed = 1;
         break;
     case 8:
         break;
     }
     if (changed)
-        cSectionMan_addActiveEvent_478(((char*)self_), i);
+        cSectionMan_addActiveEvent_478(((char*)this), i);
 }
 #endif
 
@@ -1041,7 +1041,7 @@ extern "C" void cSectionMan_addActiveEvent(void* self);
  *
  * @param idx  the back-end section (On Tour eBESectionID SectionID)
  */
-extern "C" void cSectionMan_unloadSection(cSectionMan* self, int idx)
+void cSectionMan::unloadSection(int idx)
 {
     if (cSectionMan_mSectionMap[idx].iWorldSectionID >= 0) {
         int changed = 0;
@@ -1058,7 +1058,7 @@ extern "C" void cSectionMan_unloadSection(cSectionMan* self, int idx)
             break;
         }
         if (changed) {
-            cSectionMan_addActiveEvent(self);
+            cSectionMan_addActiveEvent(this);
         }
     }
 }
@@ -1072,11 +1072,11 @@ INCLUDE_ASM("main/game", cSectionMan_loadMode);
  *
  * @param Mode  the event mode (On Tour eSectionManMode Mode); 0 does nothing
  */
-extern "C" void cSectionMan_loadMode(cSectionMan* self, int Mode)
+void cSectionMan::loadMode(int Mode)
 {
-    if (Mode != 0 && self->mModeState == 0) {
-        self->mModeState = 1;
-        self->mMode = Mode;
+    if (Mode != 0 && mModeState == 0) {
+        mModeState = 1;
+        mMode = Mode;
     }
 }
 #endif
@@ -1090,21 +1090,21 @@ INCLUDE_ASM("main/game", cSectionMan_activateMode);
  * @param flag  the event mode (On Tour eSectionManMode Mode); 0 does nothing
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cSectionMan_activateMode(cSectionMan* self, int flag)
+void cSectionMan::activateMode(int flag)
 {
     if (flag == 0) {
         return;
     }
-    switch (self->mModeState) {
+    switch (mModeState) {
     case 0:
-        self->mMode = flag;
-        self->mModeState = 3;
+        mMode = flag;
+        mModeState = 3;
         break;
     case 1:
-        self->mModeState = 3;
+        mModeState = 3;
         break;
     case 2:
-        self->mModeState = 4;
+        mModeState = 4;
         break;
     case 3:
     case 4:
@@ -1141,10 +1141,11 @@ static inline bool Is_22D6C8(int m, int v)
  *
  * @param mode  the event mode (On Tour eSectionManMode Mode)
  */
-extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
+void cSectionMan::eventbegin(int mode)
 {
     cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    int skip = cBENewRaceInterface_newRace.cGamePath != 0 || !Is_22D6C8(cBENewRaceInterface_newRace.cGameMode, 4) || (unsigned int)(self->mBELocationID - 14) < 3 || mode == 1;
+    int skip = cBENewRaceInterface_newRace.cGamePath != 0 || !Is_22D6C8(cBENewRaceInterface_newRace.cGameMode,
+            4) || (unsigned int)(mBELocationID - 14) < 3 || mode == 1;
     if (skip) {
         return;
     }
@@ -1187,7 +1188,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
     }
     race->submit();
     cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace.cGameEvent);
-    cGame_setState(self->mpGame, 1, 1, 0);
+    cGame_setState(mpGame, 1, 1, 0);
 }
 #endif
 
@@ -1236,15 +1237,15 @@ static inline cWorldView* gameWorldView_22D8D8(void* self)
  * the
  * stream bandwidth (fastest while loading, 4 while a mode switch holds the stream) and sets m_bStreamReady.
  */
-extern "C" void cSectionMan_update(cSectionMan* self)
+void cSectionMan::update()
 {
     char buf[0x100];
-    if (self->m_bSkySwapPending != 0) {
-        cSectionMan_skySwap(self);
+    if (m_bSkySwapPending != 0) {
+        skySwap();
     }
-    int* node = cSectionMan_getNextActiveEvent(self, 0);
+    int* node = cSectionMan_getNextActiveEvent(this, 0);
     int* prev = 0;
-    if (node == 0 && self->mModeState == 0) {
+    if (node == 0 && mModeState == 0) {
         return;
     }
     int busy = 0;
@@ -1258,32 +1259,32 @@ extern "C" void cSectionMan_update(cSectionMan* self)
         int section = cSectionMan_mSectionMap[idx].iWorldSectionID;
         switch (cSectionMan_mSectionMap[idx].State) {
         case 7:
-            if (cWorldView_isSectionUnLoaded(gameWorldView_22D8D8(self), section)) {
+            if (cWorldView_isSectionUnLoaded(gameWorldView_22D8D8(this), section)) {
                 cSectionMan_mSectionMap[idx].State = 0;
             } else {
                 busy = 1;
             }
             break;
         case 5:
-            if (cWorldView_unloadSection(gameWorldView_22D8D8(self), section)) {
+            if (cWorldView_unloadSection(gameWorldView_22D8D8(this), section)) {
                 cSectionMan_mSectionMap[idx].State = 7;
-                cGame_sectionUnloading(self->mpGame, section);
+                cGame_sectionUnloading(mpGame, section);
             }
             busy = 1;
             break;
         case 6:
-            if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
+            if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(this), section)) {
                 cSectionMan_mSectionMap[idx].State = 1;
-                cGame_sectionLoaded(self->mpGame, section);
+                cGame_sectionLoaded(mpGame, section);
             } else {
                 changed = 1;
             }
             break;
         case 8:
-            if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
+            if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(this), section)) {
                 cSectionMan_mSectionMap[idx].State = 2;
-                cGame_sectionLoaded(self->mpGame, section);
-                cWorldView_activateSection(gameWorldView_22D8D8(self), section);
+                cGame_sectionLoaded(mpGame, section);
+                cWorldView_activateSection(gameWorldView_22D8D8(this), section);
             } else {
                 changed = 1;
                 forceOff = 1;
@@ -1298,16 +1299,16 @@ extern "C" void cSectionMan_update(cSectionMan* self)
             break;
         case 1:
             if (cBENewRaceInterface_getSectionType(iface, idx) == 4) {
-                cSectionMan_skyLoadComplete(self, idx);
+                skyLoadComplete(idx);
             }
             remove = 1;
             break;
         case 2:
             if (cBENewRaceInterface_getSectionType(iface, idx) == 4) {
-                cSectionMan_skyLoadComplete(self, idx);
+                skyLoadComplete(idx);
             }
-            if (self->m_bSkySwapPending != 0) {
-                cSectionMan_skySwap(self);
+            if (m_bSkySwapPending != 0) {
+                skySwap();
             }
             remove = 1;
             break;
@@ -1316,27 +1317,29 @@ extern "C" void cSectionMan_update(cSectionMan* self)
             break;
         }
         if (remove) {
-            cSectionMan_removeActiveEvent(self, prev, node);
+            cSectionMan_removeActiveEvent(this, prev, node);
             node = prev;
         }
         prev = node;
-        node = cSectionMan_getNextActiveEvent(self, prev);
+        node = cSectionMan_getNextActiveEvent(this, prev);
     }
     if (!busy && pending) {
-        int* n = cSectionMan_getNextActiveEvent(self, 0);
-        char* fmt = cWorldView_getNumSections_u(gameWorldView_22D8D8(self)) >= 2 ? str_data_worlds_b : str_data_worlds_c;
-        for (; n != 0; n = cSectionMan_getNextActiveEvent(self, n)) {
+        int* n = cSectionMan_getNextActiveEvent(this, 0);
+        char* fmt = cWorldView_getNumSections_u(gameWorldView_22D8D8(this)) >= 2 ? str_data_worlds_b : str_data_worlds_c;
+        for (; n != 0; n = cSectionMan_getNextActiveEvent(this, n)) {
             int idx = *n;
             int section = cSectionMan_mSectionMap[idx].iWorldSectionID;
             sprintf(buf, str_pct_spct_s_b, fmt, cBENewRaceInterface_getSectionFile(iface, idx));
             int* state = &cSectionMan_mSectionMap[idx].State;
             if (*state == 3) {
-                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
+                if (cWorldView_loadSection(gameWorldView_22D8D8(this), section,
+                        D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
                     changed = 1;
                     *state = 6;
                 }
             } else if (*state == 4) {
-                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
+                if (cWorldView_loadSection(gameWorldView_22D8D8(this), section,
+                        D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
                     *state = 8;
                     changed = 1;
                     forceOff = 1;
@@ -1345,51 +1348,51 @@ extern "C" void cSectionMan_update(cSectionMan* self)
         }
     }
     if (changed) {
-        self->mStreamRate = 2;
-    } else if (self->mbLocationIsActivated == 0) {
-        self->mStreamRate = 3;
+        mStreamRate = 2;
+    } else if (mbLocationIsActivated == 0) {
+        mStreamRate = 3;
     } else {
-        cWorldCache* w = (cWorldCache*)(*(char**)(char*)self->mpGame->World);
+        cWorldCache* w = (cWorldCache*)(*(char**)(char*)mpGame->World);
         if (w->m_WorldView.m_StreamFocus[0].m_bActive != 0 && w->m_WorldView.m_StreamFocus[1].m_bActive != 0) {
-            self->mStreamRate = 1;
+            mStreamRate = 1;
         } else {
-            self->mStreamRate = 0;
+            mStreamRate = 0;
         }
     }
     int hold = 0;
-    switch ((unsigned int)self->mModeState) {
+    switch ((unsigned int)mModeState) {
     case 0:
         break;
     case 1:
-        cSectionMan_preLoadMode(self);
-        self->mModeState = 2;
+        preLoadMode();
+        mModeState = 2;
         break;
     case 2:
         break;
     case 3:
         hold = 1;
-        cSectionMan_preLoadMode(self);
-        self->mModeState = 4;
+        preLoadMode();
+        mModeState = 4;
         break;
     case 4:
         if (forceOff) {
             hold = 1;
-        } else if (cSectionMan_isPreLoadModeDone(self) != 0) {
-            cSectionMan_changeMode(self);
-            self->mModeState = 0;
-            self->mMode = 0;
+        } else if (isPreLoadModeDone() != 0) {
+            changeMode();
+            mModeState = 0;
+            mMode = 0;
         } else {
             hold = 1;
         }
         break;
     }
     if (forceOff || hold) {
-        self->m_bStreamReady = 0;
-        self->mStreamRate = 4;
+        m_bStreamReady = 0;
+        mStreamRate = 4;
     } else {
-        self->m_bStreamReady = 1;
+        m_bStreamReady = 1;
     }
-    cStreamMan_setBandWidthLimit(*(char**)(char*)self->mpGame->World + 0x300, cSectionMan_mStreamBandWidthRates[self->mStreamRate]);
+    cStreamMan_setBandWidthLimit(*(char**)(char*)mpGame->World + 0x300, cSectionMan_mStreamBandWidthRates[mStreamRate]);
 }
 #endif
 
@@ -1403,12 +1406,12 @@ extern "C" void cSectionMan_activateSection(cSectionMan* self, int v);
  *
  * @param SectionID  the sky's back-end section
  */
-extern "C" void cSectionMan_skyLoadComplete(cSectionMan* self, int SectionID)
+void cSectionMan::skyLoadComplete(int SectionID)
 {
-    if (self->m_iNextSkySectionID != SectionID) {
-        self->m_iNextSkySectionID = SectionID;
-        cSectionMan_activateSection(self, SectionID);
-        self->m_bSkySwapPending = 1;
+    if (m_iNextSkySectionID != SectionID) {
+        m_iNextSkySectionID = SectionID;
+        activateSection(SectionID);
+        m_bSkySwapPending = 1;
     }
 }
 #endif
@@ -1424,29 +1427,29 @@ extern "C" void cSkyBox_setSection(void* self, int id);
  * Swaps to the pending sky once triggered: unloads the other sky sections and switches the sky object's
  * section.
  */
-extern "C" void cSectionMan_skySwap(cSectionMan* self)
+void cSectionMan::skySwap()
 {
-    if (self->m_bSkySwapPending == 0) {
+    if (m_bSkySwapPending == 0) {
         return;
     }
-    if (self->m_bTriggerSkySwap == 0) {
+    if (m_bTriggerSkySwap == 0) {
         return;
     }
     int i;
     for (i = 44; i < 49; i++) {
-        if (i != self->m_iNextSkySectionID) {
-            cSectionMan_unloadSection(self, i);
+        if (i != m_iNextSkySectionID) {
+            unloadSection(i);
         }
     }
-    int id = cSectionMan_mSectionMap[self->m_iNextSkySectionID].iWorldSectionID;
-    cSkyBox* skyBox = self->mpGame->SkyBox;
+    int id = cSectionMan_mSectionMap[m_iNextSkySectionID].iWorldSectionID;
+    cSkyBox* skyBox = mpGame->SkyBox;
     if (skyBox->m_iSectionID != id) {
         cSkyBox_reset(skyBox);
-        cSkyBox_setSection(self->mpGame->SkyBox, id);
+        cSkyBox_setSection(mpGame->SkyBox, id);
     }
-    self->m_bTriggerSkySwap = 0;
-    self->m_bSkySwapPending = 0;
-    self->m_iNextSkySectionID = -1;
+    m_bTriggerSkySwap = 0;
+    m_bSkySwapPending = 0;
+    m_iNextSkySectionID = -1;
 }
 #endif
 
@@ -1464,14 +1467,14 @@ extern int cBENewRaceInterface_bIsBamLocation;
  * Starts preloading the next event: stores the location in the race setup and notifies the game flow (0xB,
  * then 0xA).
  */
-extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
+void cSectionMan::preLoadMode()
 {
-    cGame_setState(self->mpGame, 11, 0, 1);
+    cGame_setState(mpGame, 11, 0, 1);
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    cBENewRaceInterface_newRace.iLocationIdx = self->mBELocationID;
+    cBENewRaceInterface_newRace.iLocationIdx = mBELocationID;
     cBENewRaceInterface_bIsBamLocation = 1;
     iface->submit();
-    cGame_setPreloadState(self->mpGame, 10);
+    cGame_setPreloadState(mpGame, 10);
 }
 #endif
 
@@ -1485,10 +1488,9 @@ INCLUDE_ASM("main/game", cSectionMan_isPreLoadModeDone__FPv);
  *
  * @return cGame_isPreloadedStateReady's answer (nonzero when ready)
  */
-void* cSectionMan_isPreLoadModeDone(void* vself)
+void* cSectionMan::isPreLoadModeDone()
 {
-    cSectionMan* self = (cSectionMan*)vself;
-    return cGame_isPreloadedStateReady((int)self->mpGame);
+    return cGame_isPreloadedStateReady((int)mpGame);
 }
 #endif
 
@@ -1506,16 +1508,16 @@ extern "C" void cGame_setState(void* gm, int state, int a, int b);
  * Finishes an event-mode switch: sets the location's sky, resets the AI if requested (mModeReset), notifies
  * the game flow.
  */
-extern "C" void cSectionMan_changeMode(cSectionMan* self)
+void cSectionMan::changeMode()
 {
-    cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
-    if (self->mModeReset != 0) {
-        self->mModeReset = 0;
+    cSectionMan_setSky(this, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    if (mModeReset != 0) {
+        mModeReset = 0;
         cAI* ai = SSXApp->Game->AI;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ai->mVtbl;
         vt[5].fn(vthis(ai, vt[5]), 3); // the AI's restart
     }
-    cGame_setState(self->mpGame, 10, 0, 0);
+    cGame_setState(mpGame, 10, 0, 0);
 }
 #endif
 
@@ -1528,7 +1530,7 @@ INCLUDE_ASM("main/game", cSectionMan_isSectionLoaded);
  * @param SectionID  the back-end section (On Tour eBESectionID SectionID)
  * @return 1 when the section's state is 1 or 2, otherwise 0
  */
-extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int SectionID)
+int cSectionMan::isSectionLoaded(int SectionID)
 {
     int loadState = cSectionMan_mSectionMap[SectionID].State;
     return (unsigned int)(loadState - 1) < 2;
@@ -1558,7 +1560,7 @@ extern sGameEntry2 cSectionMan_mLocationMap[];
  * @param LocationID  the location (On Tour eBELocationID LocationID)
  * @return the world section ID, or -1 when it is not in the world
  */
-extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(cSectionMan* self, int LocationID)
+int cSectionMan::getWorldSectionIDFromBELocationID(int LocationID)
 {
     return cSectionMan_mSectionMap[cSectionMan_mLocationMap[LocationID].field_0x10].iWorldSectionID;
 }
@@ -1573,7 +1575,7 @@ INCLUDE_ASM("main/game", cSectionMan_getWorldSectionIDFromBESectionID);
  * @param SectionID  the back-end section (On Tour eBESectionID SectionID)
  * @return the world section ID, or -1 when it is not in the world
  */
-extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(cSectionMan* self, int SectionID)
+int cSectionMan::getWorldSectionIDFromBESectionID(int SectionID)
 {
     return cSectionMan_mSectionMap[SectionID].iWorldSectionID;
 }
@@ -1588,7 +1590,7 @@ INCLUDE_ASM("main/game", cSectionMan_getBESectionIDFromWorldSectionID);
  * @param WorldSectionID  the world section (On Tour WorldSectionID)
  * @return the back-end section, or 50 when none maps to it
  */
-extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(cSectionMan* self, int WorldSectionID)
+int cSectionMan::getBESectionIDFromWorldSectionID(int WorldSectionID)
 {
     int i;
     for (i = 0; i < 50; i++) {
@@ -1616,12 +1618,12 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int a1, int a2);
  *
  * @param location  the location id (On Tour eBELocationID location)
  */
-extern "C" void cSectionMan_gotoLocation(cSectionMan* self, int location)
+void cSectionMan::gotoLocation(int location)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
-        cSectionMan_activate(self, location, 1);
-        self->mModeReset = 1;
+        activate(location, 1);
+        mModeReset = 1;
     }
 }
 #endif

@@ -336,7 +336,7 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
             return;
         }
     }
-    cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard_mInstance_86F90);
+    cFEStateMemCard_mInstance_86F90->terminateFreeSpaceCheck();
 }
 #endif
 
@@ -422,7 +422,7 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* self)
 extern "C" void cFEStateMemCard_callbackFileChecked(void)
 {
     cFEMemCard_callbackFileChecked();
-    cFEStateMemCard_updateFreeSpaceCheckState((cFEStateMemCard*)cFEStateMemCard_mInstance);
+    ((cFEStateMemCard*)cFEStateMemCard_mInstance)->updateFreeSpaceCheckState();
 }
 #endif
 
@@ -529,11 +529,11 @@ struct sFEMemCardK187270 {
  * 1 clear) selects device 0 (cMCOverlayManager_selectDevice, cMCOverlayManager_setSelectedDevice) and runs cFEStateMemCard_startSettingsRead; else profile
  * present (bit 0 clear) selects device 0 and runs cFEStateMemCard_startProfileRead; else cFEStateMemCard_exitScreen leaves the screen.
  */
-extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self)
+void cFEStateMemCard::terminateFreeSpaceCheck()
 {
-    self->mFreespaceCheckDone = 1;
+    mFreespaceCheckDone = 1;
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    int flags = self->mCard1MissingSavedFileTypeFlags;
+    int flags = mCard1MissingSavedFileTypeFlags;
     if (!(flags & 2)) {
         cMCOverlayManager_selectDevice(mp, 0);
         cMCOverlayManager_setSelectedDevice(mp);
@@ -543,7 +543,7 @@ extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self)
         cMCOverlayManager_setSelectedDevice(mp);
         cFEStateMemCard_startProfileRead();
     } else {
-        cFEStateMemCard_exitScreen(self);
+        exitScreen();
     }
 }
 #endif
@@ -558,12 +558,12 @@ extern "C" void cSSXApp_startFELoad(void* p);
  *
  * Calls cSSXApp_startFELoad(SSXApp) only while the done flag (+0x1AC) is clear, then sets it.
  */
-extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self)
+void cFEStateMemCard::exitScreen()
 {
-    self->mState = 6;
-    if (self->mIsDone == 0)
+    mState = 6;
+    if (mIsDone == 0)
         cSSXApp_startFELoad(SSXApp);
-    self->mIsDone = 1;
+    mIsDone = 1;
 }
 #endif
 
@@ -680,7 +680,7 @@ extern "C" void cFEStateMemCard_updateDone(cFEStateMemCard* self)
         cFEStateMemCard_startProfileRead();
         return;
     }
-    cFEStateMemCard_exitScreen(self);
+    self->exitScreen();
 }
 #endif
 
@@ -965,11 +965,10 @@ static inline void mpNotify_87A38(char* mp, int msg)
  * - 2: file type 0 present clears bit 2; stage 3, then as 3.
  * - 3: on device 0 the flags are copied into +0x238 (the first card's flags); +0x234 is cleared.
  *
- * @param memCardState  the memory-card state (cFEStateMemCard_mInstance)
  */
-extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCardState)
+void cFEStateMemCard::updateFreeSpaceCheckState()
 {
-    cFEStateMemCard* self = memCardState;
+    cFEStateMemCard* self = this;
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     char* card = (char*)mp->mpMemCard;
     if (cMCOverlayManager_hasCardStatusCriticalError(mp))

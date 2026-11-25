@@ -41,6 +41,9 @@ struct cDSockChannel {
                                     //      start it (NetGameUtilConnect, 0x101 listen / 0x102 connect); disconnect destroys it
     NetGameLinkRefT* mGameLink;     // 0x1C [O]; [R] 0; [U] updateConnecting creates it (NetGameLinkCreate) once the util
                                     //      completes; read/writePacket and updateConnected use it; disconnect destroys it
+
+    // Methods bound to their retail symbols by asm labels.
+    int isConnected() __asm__("cDSockChannel_isConnected");
 };
 
 CHECK_OFFSET(cDSockChannel, mChannelOpen, 0x00);

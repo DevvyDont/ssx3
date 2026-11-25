@@ -41,6 +41,16 @@ struct cFEStateMountainRoom : public cUIState {
     int mTextureFileIndex;                     // 0x0BC [O]
     tPeakPassInfo* mpPeakPassInfo;             // 0x0C0 [O]
     int mFrontTextureID;                       // 0x0C4 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateMountainRoom1() __asm__("cFEStateMountainRoom_cFEStateMountainRoom1");
+    int isPeakPassLoaded() __asm__("cFEStateMountainRoom_isPeakPassLoaded");
+    void hidePass() __asm__("cFEStateMountainRoom_hidePass");
+    int isPassVisible() __asm__("cFEStateMountainRoom_isPassVisible");
+    int isPassFrontVisible() __asm__("cFEStateMountainRoom_isPassFrontVisible");
+    void loadPeakPass() __asm__("cFEStateMountainRoom_loadPeakPass");
+    void updateTextureLoad() __asm__("cFEStateMountainRoom_updateTextureLoad");
+    void showPassFront() __asm__("cFEStateMountainRoom_showPassFront");
 };
 
 CHECK_OFFSET(cFEStateMountainRoom, mpPassGroup, 0x048);

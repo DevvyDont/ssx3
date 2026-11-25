@@ -43,6 +43,8 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
+struct cMCOverlayManager;
+
 struct cFEMemCard : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEMemCard_vtbl (_vt$10cFEMemCard), stored over cOVState_vtbl by the ctors; [U] the screen's virtual calls
@@ -159,6 +161,16 @@ struct cFEMemCard : public cOVState {
                                     //       (freed by readDone / onDestroyScreen), 2 = the save interface's replay
                                     //       buffer
                                     //       (readStart), 0 = none
+
+    // Methods bound to their retail symbols by asm labels.
+    void exitSave() __asm__("cFEMemCard_exitSave__FPv");
+    void SetLoadPressed(int on) __asm__("cFEMemCard_SetLoadPressed");
+    int checkNextAvailableDevice(cMCOverlayManager* list, int idx, int back)
+        __asm__("cFEMemCard_checkNextAvailableDevice");
+    void createReadBuffer(unsigned int size) __asm__("cFEMemCard_createReadBuffer");
+    void* cFEMemCard2(int pEngine, int iType) __asm__("cFEMemCard_cFEMemCard2");
+    void initFEMemCard(int mode) __asm__("cFEMemCard_initFEMemCard");
+    void * cFEMemCard1() __asm__("cFEMemCard_cFEMemCard1");
 };
 
 CHECK_OFFSET(cFEMemCard, mLastLoadFileName, 0x9C);

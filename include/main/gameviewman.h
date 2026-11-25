@@ -37,6 +37,13 @@ struct cGameViewMan {
     tRect m_ViewRect[2];            // 0x018 [O] (On Tour [4]); [R] ctor: rect 0 = {0, 0, screen width, screen height}
                                     //       (X / Y stored as integer 0); [U] updateViewState splits it into two halves;
                                     //       avalanche.cpp reads m_ViewRect[m_uiCurrentView]
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateViewState() __asm__("cGameViewMan_updateViewState");
+    void snapAll() __asm__("cGameViewMan_snapAll");
+    void updateAll() __asm__("cGameViewMan_updateAll");
+    void updateStreamFocus() __asm__("cGameViewMan_updateStreamFocus");
+    int isStreamReady() __asm__("cGameViewMan_isStreamReady");
 };
 CHECK_OFFSET(cGameViewMan, m_uiNumPlayers, 0x0);
 CHECK_OFFSET(cGameViewMan, PlayerCamera, 0x4);

@@ -87,12 +87,12 @@ struct sFE3PeakPicFiles {
  * @param slot   index of the async file slot
  * @param useAsync  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
  */
-extern "C" void cFEAsyncManager_Load3PeakPic(cFEAsyncManager* self, int slot, int useAsync)
+void cFEAsyncManager::Load3PeakPic(int slot, int useAsync)
 {
-    sFE3PeakPicFiles* files = (sFE3PeakPicFiles*)self;
+    sFE3PeakPicFiles* files = (sFE3PeakPicFiles*)this;
     sprintf(files->mFiles[slot].mName, str_pct_spct_s, gMap_3PeakFilename, str_ssh);
     files->mFiles[slot].mParam = useAsync;
-    cFEAsyncManager_SetFileStatus(self, slot, 1);
+    SetFileStatus(slot, 1);
 }
 #endif
 
@@ -125,12 +125,12 @@ struct sFEPeakPicFiles {
  * @param slot   index of the async file slot
  * @param useAsync  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
  */
-extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int slot, int useAsync)
+void cFEAsyncManager::Load1PeakPic(int pic, int slot, int useAsync)
 {
-    sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
+    sFEPeakPicFiles* files = (sFEPeakPicFiles*)this;
     sprintf(files->mFiles[slot].mName, str_pct_spct_s, gMap_1PeakFilenames[pic], str_ssh);
     files->mFiles[slot].mParam = useAsync;
-    cFEAsyncManager_SetFileStatus(self, slot, 1);
+    SetFileStatus(slot, 1);
 }
 #endif
 
@@ -153,14 +153,14 @@ extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id);
  * @param slot   index of the async file slot (On Tour pos)
  * @param useAsync  value stored with the request (On Tour useAsync)
  */
-extern "C" void cFEAsyncManager_LoadLocationPic(cFEAsyncManager* self, int id, int slot, int useAsync)
+void cFEAsyncManager::LoadLocationPic(int id, int slot, int useAsync)
 {
     if (id >= 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
-        sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
+        sFEPeakPicFiles* files = (sFEPeakPicFiles*)this;
         sprintf(files->mFiles[slot].mName, str_pct_spct_spct_s, str_bar, cBEMissionInterface_getPictureFileName(iface, id), str_ssh);
         files->mFiles[slot].mParam = useAsync;
-        cFEAsyncManager_SetFileStatus(self, slot, 1);
+        SetFileStatus(slot, 1);
     }
 }
 #endif
@@ -188,21 +188,21 @@ struct sVEUnload {
  *
  * @param idx  index of the file slot (On Tour fileNum)
  */
-extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx)
+void cFEAsyncManager::UnloadFEAsyncFile(int idx)
 {
-    if (cFEAsyncManager_GetFileStatus(self, idx) == 1) {
-        cFEAsyncManager_SetFileStatus(self, idx, 0);
-    } else if (cFEAsyncManager_GetFileStatus(self, idx) == 2) {
-        ASYNCFILE_release(self->fileList[idx].asyncFileHandle, 0, 0);
-        if (self->fileList[idx].dataPtr != 0) {
-            cMemMan_free(self->fileList[idx].dataPtr);
+    if (GetFileStatus(idx) == 1) {
+        SetFileStatus(idx, 0);
+    } else if (GetFileStatus(idx) == 2) {
+        ASYNCFILE_release(fileList[idx].asyncFileHandle, 0, 0);
+        if (fileList[idx].dataPtr != 0) {
+            cMemMan_free(fileList[idx].dataPtr);
         }
-        self->fileList[idx].dataPtr = 0;
-        cFEAsyncManager_SetFileStatus(self, idx, 0);
-    } else if (cFEAsyncManager_GetFileStatus(self, idx) == 3) {
+        fileList[idx].dataPtr = 0;
+        SetFileStatus(idx, 0);
+    } else if (GetFileStatus(idx) == 3) {
         cPS2GraphicsMan* obj = GrMan;
-        self->fileList[idx].safeToDeleteTick = obj->getCurrentFrameCount() + 0xE;
-        cFEAsyncManager_SetFileStatus(self, idx, 0);
+        fileList[idx].safeToDeleteTick = obj->getCurrentFrameCount() + 0xE;
+        SetFileStatus(idx, 0);
     }
 }
 #endif
@@ -216,9 +216,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_GetFileStatus__FP15cFEAsyncManager
  * @param index  file slot, not range-checked
  * @return fileList[index].fileStatus
  */
-int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index)
+int cFEAsyncManager::GetFileStatus(int index)
 {
-    return self->fileList[index].fileStatus;
+    return fileList[index].fileStatus;
 }
 #endif
 
@@ -231,9 +231,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_SetFileStatus__FP15cFEAsyncManager
  * @param index   file slot, not range-checked
  * @param status  value stored in fileList[index].fileStatus
  */
-void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
+void cFEAsyncManager::SetFileStatus(int index, int status)
 {
-    self->fileList[index].fileStatus = status;
+    fileList[index].fileStatus = status;
 }
 #endif
 
@@ -261,39 +261,39 @@ extern char str_map[];
  * loaded (3): its handle is released and the image (file + its word at +0x14) becomes a texture named "map"
  * (GrMan slot 46), whose ID goes to texID.
  */
-extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
+void cFEAsyncManager::Update()
 {
     int i;
     for (i = 0; i < 5; i++) {
-        if (cFEAsyncManager_GetFileStatus(self, i) == 0 || cFEAsyncManager_GetFileStatus(self, i) == 1) {
+        if (GetFileStatus(i) == 0 || GetFileStatus(i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            if (self->fileList[i].safeToDeleteTick < obj->getCurrentFrameCount()) {
-                if (self->fileList[i].dataPtr != 0) {
+            if (fileList[i].safeToDeleteTick < obj->getCurrentFrameCount()) {
+                if (fileList[i].dataPtr != 0) {
                     cPS2GraphicsMan* obj2 = GrMan;
-                    obj2->RemoveTexture(self->fileList[i].texID);
-                    if (self->fileList[i].dataPtr != 0) {
-                        cMemMan_free(self->fileList[i].dataPtr);
+                    obj2->RemoveTexture(fileList[i].texID);
+                    if (fileList[i].dataPtr != 0) {
+                        cMemMan_free(fileList[i].dataPtr);
                     }
-                    self->fileList[i].dataPtr = 0;
-                    self->fileList[i].safeToDeleteTick = 0;
-                    self->fileList[i].texID = -1;
+                    fileList[i].dataPtr = 0;
+                    fileList[i].safeToDeleteTick = 0;
+                    fileList[i].texID = -1;
                 }
             }
         }
-        if (cFEAsyncManager_GetFileStatus(self, i) == 1) {
+        if (GetFileStatus(i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            if (self->fileList[i].safeToDeleteTick < obj->getCurrentFrameCount()) {
-                cFEAsyncManager_LoadDataFile(self, i);
+            if (fileList[i].safeToDeleteTick < obj->getCurrentFrameCount()) {
+                LoadDataFile(i);
             }
         }
-        if (cFEAsyncManager_GetFileStatus(self, i) == 2) {
-            if (ASYNCFILE_getstatus(self->fileList[i].asyncFileHandle) == 1) {
-                cFEAsyncManager_SetFileStatus(self, i, 3);
-                ASYNCFILE_release(self->fileList[i].asyncFileHandle, 0, 0);
+        if (GetFileStatus(i) == 2) {
+            if (ASYNCFILE_getstatus(fileList[i].asyncFileHandle) == 1) {
+                SetFileStatus(i, 3);
+                ASYNCFILE_release(fileList[i].asyncFileHandle, 0, 0);
                 cPS2GraphicsMan* obj = GrMan;
                 // ORIGINAL-PTR: the loaded file is a texture file blob; its word at +0x14 is its SHAPE's byte offset.
-                char* data = (char*)self->fileList[i].dataPtr;
-                self->fileList[i].texID =
+                char* data = (char*)fileList[i].dataPtr;
+                fileList[i].texID =
                     obj->AddTexture((const SHAPE*)(data + *(int*)(data + 0x14)), str_map, 0, 0, -1);
             }
         }
@@ -311,11 +311,11 @@ int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
  *
  * @return the slot index whose cFEAsyncManager_GetFileStatus() is 0, or -1 when all 5 are busy
  */
-extern "C" int cFEAsyncManager_GetFreeAsyncFile(cFEAsyncManager* self)
+int cFEAsyncManager::GetFreeAsyncFile()
 {
     int i;
     for (i = 0; i < 5; i++) {
-        if (cFEAsyncManager_GetFileStatus(self, i) == 0) {
+        if (GetFileStatus(i) == 0) {
             return i;
         }
     }
@@ -336,19 +336,19 @@ void cMemMan_free(void* p);
  * For each slot with data: unloads its texture id through graphics manager slot 50, frees the data (cMemMan_free),
  * then clears dataPtr and safeToDeleteTick and sets texID to -1.
  */
-extern "C" void cFEAsyncManager_FlushFEAsyncTextures(cFEAsyncManager* self)
+void cFEAsyncManager::FlushFEAsyncTextures()
 {
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->fileList[i].dataPtr != 0) {
+        if (fileList[i].dataPtr != 0) {
             cPS2GraphicsMan* obj = GrMan;
-            obj->RemoveTexture(self->fileList[i].texID);
-            if (self->fileList[i].dataPtr != 0) {
-                cMemMan_free(self->fileList[i].dataPtr);
+            obj->RemoveTexture(fileList[i].texID);
+            if (fileList[i].dataPtr != 0) {
+                cMemMan_free(fileList[i].dataPtr);
             }
-            self->fileList[i].dataPtr = 0;
-            self->fileList[i].safeToDeleteTick = 0;
-            self->fileList[i].texID = -1;
+            fileList[i].dataPtr = 0;
+            fileList[i].safeToDeleteTick = 0;
+            fileList[i].texID = -1;
         }
     }
 }
@@ -388,9 +388,9 @@ extern "C" void FILE_loadatz(void* file, void* data, int size);
  *
  * @param idx  index of the file slot (On Tour fileNum)
  */
-extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
+void cFEAsyncManager::LoadDataFile(int idx)
 {
-    sFEAsyncFiles* asyncMan = (sFEAsyncFiles*)self;
+    sFEAsyncFiles* asyncMan = (sFEAsyncFiles*)this;
     void** pData;
     void** dataField;
     asyncMan->files[idx].size = 0x109A0;
@@ -398,13 +398,13 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
     dataField = &asyncMan->files[0].data;
     pData = dataField + idx * (sizeof(sFEAsyncFile) / sizeof(void*));
     *pData = operator_new_tag(0x109A0, str_FE_Async_Texture, 0x25000000, 0);
-    cFEAsyncManager_SetFileStatus(self, idx, 2);
+    SetFileStatus(idx, 2);
     if (asyncMan->files[idx].async != 0) {
-        cFEAsyncManager_SetFileStatus(self, idx, 2);
+        SetFileStatus(idx, 2);
         asyncMan->files[idx].handle = ASYNCFILE_loadat(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
     } else {
         FILE_loadatz(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
-        cFEAsyncManager_SetFileStatus(self, idx, 3);
+        SetFileStatus(idx, 3);
     }
 }
 #endif
@@ -4988,7 +4988,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self)
         self->mpPopup = popup;
         popup->info.mbCenterText = 0;
     } else {
-        cPopupInfo_clear(&cur->info);
+        cur->info.clear();
         self->mpPopup->info.mbCenterText = 0;
     }
     return self->mpPopup;
@@ -6133,7 +6133,7 @@ extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int namePt
     if (fiveOptions) {
         popupData->info.meType = 5;
         popupData->info.miMiscData = 2059;
-        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
+        sub->clearPopupConfirmation(n);
         if (func_00263128(GetSession_001AB478(), name)) {
             func_001C57C0(sub, n, GetHashValue32(str_kT_TITLEChallengeReceived));
         } else {
@@ -6142,7 +6142,7 @@ extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int namePt
         n++;
     } else if (stateB != 0 && (stateA != 0 || func_00263128(GetSession_001AB478(), name))) {
         *(int*)sub = 4;
-        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
+        sub->clearPopupConfirmation(n);
         if (func_00263128(GetSession_001AB478(), name)) {
             func_001C57C0(sub, n, GetHashValue32(str_kT_TITLEChallengeReceived));
         } else {
@@ -6155,10 +6155,10 @@ extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int namePt
         sub->miMiscData = 2060;
     }
     if (func_00262A38(GetSession_001AB478(), namePtr)) {
-        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
+        sub->clearPopupConfirmation(n);
         func_001C57C0(sub, n++, GetHashValue32(str_kT_POPUP235ReadMessage));
     } else {
-        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
+        sub->clearPopupConfirmation(n);
         func_001C57C0(sub, n++, GetHashValue32(str_kT_POPUP235SendMessage));
     }
     if (func_00262360(GetSession_001AB478(), name)) {
@@ -6188,7 +6188,7 @@ extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int namePt
         n++;
     }
     if (fiveOptions) {
-        cPopupInfo_clearPopupConfirmation((cPopupInfo*)sub, n);
+        sub->clearPopupConfirmation(n);
         func_001C57C0(sub, n, GetHashValue32(str_kT_235ReportAbuse));
     }
     sub->miDefaultOption = selectedOption;
@@ -22591,14 +22591,14 @@ extern "C" void* cFEStateNet_cFEStateNet(void* self);
  *
  * @return @p self
  */
-extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement1(cFEStateOnlineAgreement* self)
+void* cFEStateOnlineAgreement::cFEStateOnlineAgreement1()
 {
-    cFEStateNet_cFEStateNet(self);
-    self->mHashName = 67;
-    VPTR_OF(cListNode, self) = cFEStateOnlineAgreement_vtbl;
-    self->mpTOSLines = 0;
-    self->miNextTOSLine = (unsigned int)0;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet(this);
+    mHashName = 67;
+    VPTR_OF(cListNode, this) = cFEStateOnlineAgreement_vtbl;
+    mpTOSLines = 0;
+    miNextTOSLine = (unsigned int)0;
+    return ((void*)this);
 }
 #endif
 
@@ -22641,13 +22641,13 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
  *
  * @return @p self
  */
-extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement2(cFEStateOnlineAgreement* self)
+void* cFEStateOnlineAgreement::cFEStateOnlineAgreement2()
 {
-    cFEStateNet_cFEStateNet_3(self, 0, 0);
-    self->mpTOSLines = 0;
-    VPTR_OF(cListNode, self) = cFEStateOnlineAgreement_vtbl;
-    self->miNextTOSLine = (unsigned int)0;
-    return ((void*)self);
+    cFEStateNet_cFEStateNet_3(this, 0, 0);
+    mpTOSLines = 0;
+    VPTR_OF(cListNode, this) = cFEStateOnlineAgreement_vtbl;
+    miNextTOSLine = (unsigned int)0;
+    return ((void*)this);
 }
 #endif
 
@@ -24527,16 +24527,16 @@ extern void* cFEStateStats_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateStats_cFEStateStats1(cFEStateStats* self)
+void* cFEStateStats::cFEStateStats1()
 {
-    cFEStateNet_cFEStateNet_3(self, 0, 0);
-    self->miMode = 0;
-    self->miFocusMenu = (unsigned int)0;
-    VPTR_OF(cListNode, self) = cFEStateStats_vtbl;
-    self->miFirstResult = 0;
+    cFEStateNet_cFEStateNet_3(this, 0, 0);
+    miMode = 0;
+    miFocusMenu = (unsigned int)0;
+    VPTR_OF(cListNode, this) = cFEStateStats_vtbl;
+    miFirstResult = 0;
     for (int i = 0; i < 4; i++)
-        self->mpMenus[i] = 0;
-    return ((void*)self);
+        mpMenus[i] = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -26117,7 +26117,7 @@ extern void* cPopupInfo_vtbl[];
 extern "C" void* cPopupInfo_cPopupInfo(cPopupInfo* self)
 {
     self->mVtbl = cPopupInfo_vtbl;
-    cPopupInfo_clear(self);
+    self->clear();
     return ((void*)self);
 }
 #endif
@@ -26138,14 +26138,14 @@ extern t3Vector t3vect_Zero;
  * 0, mfMinSize 0, meType 0 (no buttons), miLayerOffset 0, mvOffset zero, miDefaultOption -1, meBackgroundType 0
  * (online) and mbDeferEventsFlag 0. miMaxChars is left as it was.
  */
-extern "C" void cPopupInfo_clear(cPopupInfo* self)
+void cPopupInfo::clear()
 {
-    char* confirmEntry = (char*)&self->mtConfirmation;
-    char* optionName = (char*)&self->mtOptionNames;
-    memset((char*)&self->mtMessage, 0, 8);
-    memset((char*)&self->mtTitle, 0, 8);
-    memset((char*)&self->mtEntryBoxTitle, 0, 8);
-    memset((char*)&self->mtEntryBoxInitial, 0, 8);
+    char* confirmEntry = (char*)&mtConfirmation;
+    char* optionName = (char*)&mtOptionNames;
+    memset((char*)&mtMessage, 0, 8);
+    memset((char*)&mtTitle, 0, 8);
+    memset((char*)&mtEntryBoxTitle, 0, 8);
+    memset((char*)&mtEntryBoxInitial, 0, 8);
     int i;
     for (i = 4; i >= 0; i--) {
         memset(optionName, 0, 8);
@@ -26153,19 +26153,19 @@ extern "C" void cPopupInfo_clear(cPopupInfo* self)
         memset(confirmEntry, 0, 0xC);
         confirmEntry += 0xC;
     }
-    memset((char*)&self->mtPostPending, 0, 8);
-    self->mbPassUpdate = 0;
-    self->mbReceivePrev = 1;
-    self->mbCenterText = 1;
-    self->miMiscData = 0;
-    self->mbCenterOptions = 0;
-    *(int*)&self->mfMinSize = 0;
-    self->meType = 0;
-    self->miLayerOffset = 0;
-    self->mvOffset = t3vect_Zero;
-    self->miDefaultOption = -1;
-    self->meBackgroundType = 0;
-    self->mbDeferEventsFlag = 0;
+    memset((char*)&mtPostPending, 0, 8);
+    mbPassUpdate = 0;
+    mbReceivePrev = 1;
+    mbCenterText = 1;
+    miMiscData = 0;
+    mbCenterOptions = 0;
+    *(int*)&mfMinSize = 0;
+    meType = 0;
+    miLayerOffset = 0;
+    mvOffset = t3vect_Zero;
+    miDefaultOption = -1;
+    meBackgroundType = 0;
+    mbDeferEventsFlag = 0;
 }
 #endif
 
@@ -26284,9 +26284,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_getPopupOptionNames);
  * @param iEntryNum  the option index, 0-4
  * @return the option's tPopupElement (declared void* here)
  */
-extern "C" void* cPopupInfo_getPopupOptionNames(cPopupInfo* self, int iEntryNum)
+void* cPopupInfo::getPopupOptionNames(int iEntryNum)
 {
-    return (char*)&self->mtOptionNames[iEntryNum];
+    return (char*)&mtOptionNames[iEntryNum];
 }
 #endif
 
@@ -26363,9 +26363,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_clearPopupConfirmation);
  *
  * @param iEntryNum  the option index, 0-4
  */
-extern "C" void cPopupInfo_clearPopupConfirmation(cPopupInfo* self, int iEntryNum)
+void cPopupInfo::clearPopupConfirmation(int iEntryNum)
 {
-    self->mtConfirmation[iEntryNum].eType = 0;
+    mtConfirmation[iEntryNum].eType = 0;
 }
 #endif
 
@@ -26418,9 +26418,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_getPopupConfirmation);
  * @param iEntryNum  the option index, 0-4
  * @return the option's tConfirmElement (declared void* here)
  */
-extern "C" void* cPopupInfo_getPopupConfirmation(cPopupInfo* self, int iEntryNum)
+void* cPopupInfo::getPopupConfirmation(int iEntryNum)
 {
-    return (char*)&self->mtConfirmation[iEntryNum];
+    return (char*)&mtConfirmation[iEntryNum];
 }
 #endif
 

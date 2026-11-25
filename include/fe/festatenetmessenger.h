@@ -76,6 +76,9 @@ struct cFEStateNetMessenger : public cFEStateNet {
                                     //       the selected row
     int miSelectedIndex;            // 0x6F8 [R] -1; [U] func_001A52B0 stores the index of the session's first pending
                                     //       name (func_001A5800) or -1; cFEStateNetMessenger_onInputBegin passes it to func_001A6C40
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateNetMessenger1() __asm__("cFEStateNetMessenger_cFEStateNetMessenger1");
 };
 
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);

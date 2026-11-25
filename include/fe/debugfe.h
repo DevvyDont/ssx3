@@ -67,6 +67,16 @@ struct cDebugFE {
     cHeartBeat HeartBeat;           // 0x024 [O] (fe/heartbeat.h, 0x214); [R] ctor zeroes Angle / Phase (+0x24..+0x30),
                                     //       History (MEM_fill 0x200 at +0x34) and HistoryIdx (+0x234); [U] update
                                     //       (cHeartBeat_update) and render (cHeartBeat_draw) pass &HeartBeat
+
+    // Methods bound to their retail symbols by asm labels.
+    void load() __asm__("cDebugFE_load");
+    void gainFocus() __asm__("cDebugFE_gainFocus");
+    void purge() __asm__("cDebugFE_purge");
+    void update() __asm__("cDebugFE_update");
+    int render() __asm__("cDebugFE_render");
+    int getFont() __asm__("cDebugFE_getFont");
+    int getBoxTID() __asm__("cDebugFE_getBoxTID");
+    void startlobby() __asm__("cDebugFE_startlobby");
 };
 
 CHECK_OFFSET(cDebugFE, mVtbl, 0x000);
@@ -142,6 +152,15 @@ struct cTrackFileMan {
     int NumBAMLocations;            // 0x8C04 [O]; [R] scanLocations: 0, then +1 per BAM location added
     int NumWCBAMStartLocations;     // 0x8C08 [O]; [R] scanLocations: 0, then +1 per world-circuit start; [U]
                                     //        getNext/PrevWCBAMStartLocation return -1 while it is 0; the debug menu reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    int testWCBAMStartLocation(int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
+    int getNextWCBAMStartLocation(int i) __asm__("cTrackFileMan_getNextWCBAMStartLocation");
+    int getPrevWCBAMStartLocation(int i) __asm__("cTrackFileMan_getPrevWCBAMStartLocation");
+    void scanTrackIndex(const char* file) __asm__("cTrackFileMan_scanTrackIndex");
+    void scanLocations() __asm__("cTrackFileMan_scanLocations");
+    int checkLocation(char* name, char* tag) __asm__("cTrackFileMan_checkLocation");
+    int checkLocation1(int n, void* namesp, char* tag) __asm__("cTrackFileMan_checkLocation1");
 };
 CHECK_OFFSET(cTrackFileMan, NumLocations, 0x0);
 CHECK_OFFSET(cTrackFileMan, LocationInfo, 0x4);
@@ -210,6 +229,12 @@ struct cDebugMenuScreen {
                                     //       cycles 0 ... 4 (1 / 2 only with a net connection) and sets
                                     //       networkOpt.bIsNetworkGame / bIsHost (1 = host) from it; draw prints
                                     //       D_0045CFB8's name for it
+
+    // Methods bound to their retail symbols by asm labels.
+    void draw() __asm__("cDebugMenuScreen_draw");
+    void setGamePath(int idx) __asm__("cDebugMenuScreen_setGamePath");
+    int getMaxAIRiders(int path, int mode) __asm__("cDebugMenuScreen_getMaxAIRiders");
+    void update() __asm__("cDebugMenuScreen_update");
 };
 
 CHECK_OFFSET(cDebugMenuScreen, mVtbl, 0x0000);
@@ -316,6 +341,10 @@ struct cDebugLobbyScreen {
     struct OnDeclineChallenge { cDebugLobbyScreen* unk_0; };
     struct OnAbortChallenge { cDebugLobbyScreen* unk_0; };
 #endif
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cDebugLobbyScreen_update");
+    void draw() __asm__("cDebugLobbyScreen_draw");
 };
 
 CHECK_OFFSET(cDebugLobbyScreen, mVtbl, 0x0000);

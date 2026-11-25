@@ -19,6 +19,9 @@ struct cFEStateTitle : public cUIState {
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateTitle
     int mNumTicksIdle;              // 0x048 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateTitle1() __asm__("cFEStateTitle_cFEStateTitle1");
 };
 
 CHECK_OFFSET(cFEStateTitle, mNumTicksIdle, 0x048);

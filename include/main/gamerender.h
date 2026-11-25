@@ -82,6 +82,14 @@ struct FrustumIntersector {
     int numlighthaloscrossing;      // 0x7FC4 [O] [P]; [R] ctor 0
     tHaloRecord* lighthaloscrossing[128]; // 0x7FC8 [O] [P]
     char unk_81C8[0x8];             // 0x81C8 no access (tail padding to the 16-byte alignment)
+
+    // Methods bound to their retail symbols by asm labels.
+    void AddAllInstancesCrossing(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllInstancesCrossing");
+    void AddAllPatchesCrossing(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllPatchesCrossing");
+    void AddAllTypedCrossing(CellClipT* items, int n) __asm__("FrustumIntersector_AddAllTypedCrossing");
+    void AddAllInstancesInside(void* list_, int count) __asm__("FrustumIntersector_AddAllInstancesInside");
+    void AddAllPatchesInside(void* list_, int count) __asm__("FrustumIntersector_AddAllPatchesInside");
+    void AddAllTypedInside(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllTypedInside");
 };
 
 CHECK_OFFSET(FrustumIntersector, occlusionman, 0x0000);

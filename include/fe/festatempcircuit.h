@@ -18,6 +18,9 @@ struct cUIState;
 struct cFEStateMPCircuit : public cUIState {
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateMPCircuit
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateMPCircuit1() __asm__("cFEStateMPCircuit_cFEStateMPCircuit1");
 };
 
 CHECK_SIZE(cFEStateMPCircuit, 0x48);

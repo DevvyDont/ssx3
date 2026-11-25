@@ -81,6 +81,11 @@ struct cOVState_PROFILE : public cFEMemCard {
     int mParentOV;                  // 0x278 [O] tOVStateEnum; [R] the ctor's last argument (42 from
                                     //       cOVStateManager_triggerOverlay and cOVState_PAUSE_OPTIONS_onWidgetEvent,
                                     //       0x18 from cOVTemplate_Dialog_onWidgetEvent); [U] updateDone tests 0x18
+
+    // Methods bound to their retail symbols by asm labels.
+    void displayOff() __asm__("cOVState_PROFILE_displayOff");
+    void displayOn() __asm__("cOVState_PROFILE_displayOn");
+    void initGeneral() __asm__("cOVState_PROFILE_initGeneral");
 };
 
 CHECK_OFFSET(cOVState_PROFILE, mIsOn, 0x22C);

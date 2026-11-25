@@ -38,7 +38,7 @@ void cFEMemCard_exitSave(void* self);
  */
 extern "C" void cFEMemCard_callbackSaveSuccess(void)
 {
-    cFEMemCard_exitSave(cFEMemCard_mInstance);
+    cFEMemCard_mInstance->exitSave();
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mIsOverwriteOK = 0;
     if (fe->mAutoSaveOn == 0) {
@@ -82,7 +82,7 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
  */
 extern "C" void cFEMemCard_callbackReadSuccess(void)
 {
-    cFEMemCard_SetLoadPressed((cFEMemCard*)cFEMemCard_mInstance, 0);
+    cFEMemCard_mInstance->SetLoadPressed(0);
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mIsLoadDoneOK = 1;
     fe->mIsProcessing = 0;
@@ -1233,7 +1233,7 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
  */
 extern "C" void cFEMemCard_startLoad(cFEMemCard* self)
 {
-    cFEMemCard_SetLoadPressed(self, 1);
+    self->SetLoadPressed(1);
     self->mIsProcessing = 1;
     self->mState = 5;
     self->displayStatusPopup();
@@ -1404,7 +1404,7 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
             break;
         case 16:
             self->mIsFormatPressed = 0;
-            cFEMemCard_SetLoadPressed((cFEMemCard*)self, 0);
+            self->SetLoadPressed(0);
             if (self->mIsSavePressed != 0) {
                 self->mIsProcessing = 1;
             } else {
@@ -1474,7 +1474,7 @@ extern "C" void cFEMemCard_cancel(cFEMemCard* self)
     self->mIsRetryPressed = 0;
     self->mIsLoadWait = 0;
     self->mIsCancelPressed = 1;
-    cFEMemCard_SetLoadPressed(self, 0);
+    self->SetLoadPressed(0);
     self->mState = 2;
     self->mIsDeletePressed = 0;
     self->mIsFormatPressed = 0;
@@ -1490,12 +1490,11 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitSave__FPv);
  *
  * Clears the flags at +0x1A8 and +0x1DC and sets +0x1C0 to 1.
  */
-void cFEMemCard_exitSave(void* vself)
+void cFEMemCard::exitSave()
 {
-    cFEMemCard* self = (cFEMemCard*)vself;
-    self->mIsProcessing = 0;
-    self->mState = 1;
-    self->mIsSavePressed = 0;
+    mIsProcessing = 0;
+    mState = 1;
+    mIsSavePressed = 0;
 }
 #endif
 
@@ -1746,15 +1745,15 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  *
  * @param on  nonzero when load was pressed
  */
-extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard* self, int on)
+void cFEMemCard::SetLoadPressed(int on)
 {
-    self->mIsLoadPressed = on;
+    mIsLoadPressed = on;
     if (on) {
         cMCOverlayManager* mcManager = (cMCOverlayManager*)((char*)cSSXApp_getMCManager(SSXApp));
         cMemCard* obj = mcManager->mpMemCard;
-        obj->GetTitleString(mcManager->mFileCursor, (unsigned short*)&self->mLastLoadFileName);
+        obj->GetTitleString(mcManager->mFileCursor, (unsigned short*)&mLastLoadFileName);
     } else {
-        *(short*)&self->mLastLoadFileName[0] = 0;
+        *(short*)&mLastLoadFileName[0] = 0;
     }
 }
 #endif
@@ -2004,7 +2003,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_checkNextAvailableDevice);
  * @param back  nonzero to step backwards
  * @return 1 when idx + 1 (or idx - 1) is a valid device index, otherwise -1
  */
-extern "C" int cFEMemCard_checkNextAvailableDevice(cFEMemCard* self, cMCOverlayManager* list, int idx, int back)
+int cFEMemCard::checkNextAvailableDevice(cMCOverlayManager* list, int idx, int back)
 {
     int step = 1;
     if (back) {
@@ -2102,20 +2101,20 @@ extern char str_read_buffer[];
  *
  * @param size  size of the buffer in bytes (On Tour iSize)
  */
-extern "C" void cFEMemCard_createReadBuffer(cFEMemCard* self, unsigned int size)
+void cFEMemCard::createReadBuffer(unsigned int size)
 {
-    if (self->mBufferState == 1) {
-        void* buf = self->mpStartReadBuffer;
+    if (mBufferState == 1) {
+        void* buf = mpStartReadBuffer;
         if (buf != 0) {
             cMemMan_free(buf);
         }
-        self->mpStartReadBuffer = 0;
-        self->mBufferState = 0;
+        mpStartReadBuffer = 0;
+        mBufferState = 0;
     }
     void* readBuffer = operator_new_tag(size, str_read_buffer, 0x100, 0);
-    self->mpReadBuffer = (char*)readBuffer;
-    self->mpStartReadBuffer = (char*)readBuffer;
-    self->mBufferState = 1;
+    mpReadBuffer = (char*)readBuffer;
+    mpStartReadBuffer = (char*)readBuffer;
+    mBufferState = 1;
 }
 #endif
 

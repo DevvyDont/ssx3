@@ -151,7 +151,7 @@ void operator_delete(int* p);
 extern "C" void cFELocale__cFELocale(cFELocale* self, int flags)
 {
     VPTR_OF(cUILocaleInterface, self) = cFELocale_vtbl;
-    cFELocale_deleteAllFiles(self);
+    self->deleteAllFiles();
     VPTR_OF(cUILocaleInterface, self) = cUILocaleInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -167,11 +167,11 @@ extern "C" void cFELocale_deleteFile(void* self, int i);
 /**
  * Deletes all 20 string files of the front-end locale (cFELocale_deleteFile for each index).
  */
-extern "C" void cFELocale_deleteAllFiles(cFELocale* self)
+void cFELocale::deleteAllFiles()
 {
     signed char i;
     for (i = 0; i < 20; i++) {
-        cFELocale_deleteFile(self, i);
+        cFELocale_deleteFile(this, i);
     }
 }
 #endif

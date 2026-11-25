@@ -57,6 +57,20 @@ struct cMusicSys {
     int mShortcut;                            // 0x543C [R] ctor 0; [P] SetShortcut / GetOnShortcut (preview 0x5540, bracketed 0x5434..0x5440)
     void** mVtbl;                             // 0x5440 [R] cMusicSys vptr: cMusicSys_vtbl (cMusicSys ctor/dtor), D_00483688 in cSSXAudio; [U] func_002B3BC0/func_002B4540/func_002B4978 call through it
     char unk_5444[0x4];                       // 0x5444 padding (the class is 8-aligned: unsigned long members)
+
+    // Methods bound to their retail symbols by asm labels.
+    int MUSIC_Current() __asm__("cMusicSys_MUSIC_Current");
+    int MUSIC_GetStreamHandle() __asm__("cMusicSys_MUSIC_GetStreamHandle");
+    int MUSIC_GetNumSongs() __asm__("cMusicSys_MUSIC_GetNumSongs");
+    int MUSIC_GetNumActiveSongs() __asm__("cMusicSys_MUSIC_GetNumActiveSongs");
+    int MUSIC_GetNumFESongs() __asm__("cMusicSys_MUSIC_GetNumFESongs");
+    char* MUSIC_SongName() __asm__("cMusicSys_MUSIC_SongName");
+    int MUSIC_GetCurrentSongNum() __asm__("cMusicSys_MUSIC_GetCurrentSongNum");
+    void MUSIC_SetDelay() __asm__("cMusicSys_MUSIC_SetDelay");
+    int IsSongPlaying() __asm__("cMusicSys_IsSongPlaying");
+    void MUSIC_StoreDefaultActiveMap() __asm__("cMusicSys_MUSIC_StoreDefaultActiveMap");
+    long MUSIC_GetDefaultActiveMap() __asm__("cMusicSys_MUSIC_GetDefaultActiveMap");
+    void setCurrentSongNum(int songNum) __asm__("cMusicSys_setCurrentSongNum");
 };
 
 CHECK_OFFSET(cMusicSys, mpVStreamSys, 0x0000);

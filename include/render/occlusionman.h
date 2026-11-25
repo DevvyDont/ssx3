@@ -42,6 +42,9 @@ struct tVisInView {
     float fDist;                    // 0x4 [O]
 };
 
+struct t4Vector;
+struct tBoundBox;
+
 struct cOcclusionMan {
     tVisCurtainRecord* m_pPlanes;   // 0x000 [O]
     int m_iNumPlanes;               // 0x004 [O]
@@ -49,6 +52,12 @@ struct cOcclusionMan {
     int m_iNumInView;               // 0x108 [O]
     int m_iNumActive;               // 0x10C [O]
     unsigned int m_uiVisMask;       // 0x110 [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void addVisCurtain(tVisCurtainRecord* curtain) __asm__("cOcclusionMan_addVisCurtain");
+    void removeVisCurtain(tVisCurtainRecord* curtain) __asm__("cOcclusionMan_removeVisCurtain");
+    void updateView(tBoundBox* bb) __asm__("cOcclusionMan_updateView");
+    void updateVisPlane(t4Vector* eyep, tVisCurtainRecord* frustumPtr) __asm__("cOcclusionMan_updateVisPlane");
 };
 
 CHECK_OFFSET(cOcclusionMan, m_pPlanes, 0x000);

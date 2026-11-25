@@ -95,6 +95,34 @@ struct cPopupInfo {
                                     //       [U] cScreenPopup::meBackgroundType copies it
     int miMaxChars;                 // 0x0C4 [O]; [U] cScreenPopup::miMaxChars copies it (not touched by clear)
     void** mVtbl;                   // 0x0C8 [R] _vt$10cPopupInfo cPopupInfo_vtbl, stored by cPopupInfo_cPopupInfo and cPopupInfo__cPopupInfo
+
+    // Methods bound to their retail symbols by asm labels.
+    void clear() __asm__("cPopupInfo_clear");
+    void* getPopupOptionNames(int iEntryNum) __asm__("cPopupInfo_getPopupOptionNames");
+    void clearPopupConfirmation(int iEntryNum) __asm__("cPopupInfo_clearPopupConfirmation");
+    void* getPopupConfirmation(int iEntryNum) __asm__("cPopupInfo_getPopupConfirmation");
+    void setMiscData(int miscData) __asm__("cPopupInfo_setMiscData");
+    int getMiscData() __asm__("cPopupInfo_getMiscData");
+    void setPassUpdate(int passUpdate) __asm__("cPopupInfo_setPassUpdate");
+    int getPassUpdate() __asm__("cPopupInfo_getPassUpdate");
+    void setDefaultOption(int defaultOption) __asm__("cPopupInfo_setDefaultOption");
+    int getDefaultOption() __asm__("cPopupInfo_getDefaultOption");
+    void setReceivePrevCommand(int receivePrev) __asm__("cPopupInfo_setReceivePrevCommand");
+    int getReceivePrevCommand() __asm__("cPopupInfo_getReceivePrevCommand");
+    void setLayerOffset(int layerOffset) __asm__("cPopupInfo_setLayerOffset");
+    int getLayerOffset() __asm__("cPopupInfo_getLayerOffset");
+    void setBackgroundType(int backgroundType) __asm__("cPopupInfo_setBackgroundType");
+    int getBackgroundType() __asm__("cPopupInfo_getBackgroundType");
+    void setMaxCharacters(int maxChars) __asm__("cPopupInfo_setMaxCharacters");
+    int getMaxCharacters() __asm__("cPopupInfo_getMaxCharacters");
+    void setMinBackgroundSize(float fparg0) __asm__("cPopupInfo_setMinBackgroundSize");
+    float getMinBackgroundSize() __asm__("cPopupInfo_getMinBackgroundSize");
+    void setUseCenterAlignedOptions(int centerOptions) __asm__("cPopupInfo_setUseCenterAlignedOptions");
+    int getUseCenterAlignedOptions() __asm__("cPopupInfo_getUseCenterAlignedOptions");
+    void setUseCenterAlignedText(int centerText) __asm__("cPopupInfo_setUseCenterAlignedText");
+    int getUseCenterAlignedText() __asm__("cPopupInfo_getUseCenterAlignedText");
+    void setDeferEventsFlag(int deferEvents) __asm__("cPopupInfo_setDeferEventsFlag");
+    int getDeferEventsFlag() __asm__("cPopupInfo_getDeferEventsFlag");
 };
 
 CHECK_OFFSET(cPopupInfo, meType, 0x000);

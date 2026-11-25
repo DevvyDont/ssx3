@@ -79,6 +79,9 @@ struct cFEUseExistingAccount : public cFEStateNet {
                                     //       "TextForgotPassword"
                                     //       (miMiscData 2), then its slots 25 and 8 with 1; func_001ACDD0 calls its
                                     //       slot 8 with 0 once an account name is entered, 1 when the name is empty
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEUseExistingAccount1() __asm__("cFEUseExistingAccount_cFEUseExistingAccount1");
 };
 
 CHECK_OFFSET(cFEUseExistingAccount, unk_6D0, 0x6D0);
@@ -113,6 +116,9 @@ struct cFEStateSelectPersona : public cFEStateNet {
                                     //       persona row and opens "kT_POPUP220DeleteInitial"; func_001AD9C8 (popup
                                     //       0x816, option 0xF) deletes it: func_0025D428(LobbyMan, it) (the C body
                                     //       reads it as a void*)
+
+    // Methods bound to their retail symbols by asm labels.
+    void * cFEStateSelectPersona1() __asm__("cFEStateSelectPersona_cFEStateSelectPersona1");
 };
 
 CHECK_OFFSET(cFEStateSelectPersona, mbExistingPersona, 0x6D0);

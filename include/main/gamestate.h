@@ -53,6 +53,9 @@ struct cGameState {
                                     //      cGFUserSelectState gainFocus clear it, their update tests it
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl (inline ctor in cGame_cGame; the dtor
                                     //      cGameState__cGameState); [P] (preview 0x8)
+
+    // Methods bound to their retail symbols by asm labels.
+    void gotoNextState() __asm__("cGameState_gotoNextState");
 };
 
 CHECK_OFFSET(cGameState, mNextState, 0x00);
@@ -80,6 +83,15 @@ struct cGFTrackStartState {
     int mPreLoadTicks;              // 0x18 [O]; [R] ctor 0; [U] preloadInit 0, preloadUpdate counts it; in the replay
                                     //      frame
     int mCheckTransportEnd;         // 0x1C [O] bool; [R] ctor 0; [U] gainFocus sets it, update tests and clears it
+
+    // Methods bound to their retail symbols by asm labels.
+    void preloadInit() __asm__("cGFTrackStartState_preloadInit");
+    void preloadUpdate() __asm__("cGFTrackStartState_preloadUpdate");
+    void preloadCancel() __asm__("cGFTrackStartState_preloadCancel");
+    int isPreloadComplete() __asm__("cGFTrackStartState_isPreloadComplete");
+    void gainFocus() __asm__("cGFTrackStartState_gainFocus");
+    void update() __asm__("cGFTrackStartState_update");
+    void loseFocus() __asm__("cGFTrackStartState_loseFocus");
 };
 
 CHECK_OFFSET(cGFTrackStartState, mNextState, 0x00);
@@ -145,6 +157,12 @@ struct cGFEventStartState {
     int mSubState;                  // 0x1C [O] eEventStartSubState (0 WaitNISTransition, 1 SetupEvent, 2 WaitLoading,
                                     //      3 WaitNIS, 4 Complete); [R] ctor 4; [U] gainFocus 0, update's switch; in
                                     //      the replay frame
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus(int mode) __asm__("cGFEventStartState_gainFocus");
+    void update() __asm__("cGFEventStartState_update");
+    void loseFocus() __asm__("cGFEventStartState_loseFocus");
+    void ReadyEvent() __asm__("cGFEventStartState_ReadyEvent");
 };
 
 CHECK_OFFSET(cGFEventStartState, mNextState, 0x00);
@@ -172,6 +190,12 @@ struct cGFPreEventState {
                                     //      overlay sets Game->mCurrentState's word 0x8)
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFPreEventState_vtbl (ctor); cGameState_vtbl
                                     //      (dtor)
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFPreEventState_gainFocus");
+    void update() __asm__("cGFPreEventState_update");
+    void loseFocus() __asm__("cGFPreEventState_loseFocus");
+    void ResetGameState() __asm__("cGFPreEventState_ResetGameState");
 };
 
 CHECK_OFFSET(cGFPreEventState, mNextState, 0x00);
@@ -193,6 +217,11 @@ struct cGFGateState {
     int mStartupFlag;               // 0x04 [O]; [R] ctor 0
     int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFGateState_vtbl (ctor); cGameState_vtbl (dtor)
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFGateState_gainFocus");
+    void runScript(int hashID) __asm__("cGFGateState_runScript");
+    void update() __asm__("cGFGateState_update");
 };
 
 CHECK_OFFSET(cGFGateState, mNextState, 0x00);
@@ -226,6 +255,8 @@ CHECK_SIZE(cGFRidingState, 0x10);
 // Size 0x18: [R] cGame + 0x100 .. 0x118 (cGFEndState); the ctor (fe/festateloadscreen 0x00233C10) writes up to 0x14.
 //   [O] 0x18, same offsets.
 // Vtable cGFFinishlineState_vtbl (0x0047D5E0): 1 dtor (0x00243D88), 5 gainFocus, 6 update, 7 loseFocus.
+struct cBxReplayFrame;
+
 struct cGFFinishlineState {
     // --- cGameState
     int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 7 (kGFSM_PostEvent); [U] update stores 12
@@ -240,6 +271,12 @@ struct cGFFinishlineState {
                                     //      loseFocus 2; in the replay frame
     int mShowEventResultsDelay;     // 0x14 [O]; [R] ctor 0; [U] gainFocus 180, update counts it down; in the replay
                                     //      frame
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFFinishlineState_gainFocus");
+    void loseFocus() __asm__("cGFFinishlineState_loseFocus");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFFinishlineState_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFFinishlineState_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGFFinishlineState, mNextState, 0x00);
@@ -283,6 +320,10 @@ struct cGFPostEventState {
     int mOverlayDone;               // 0x08 [O] bool; [U] gainFocus clears it, update waits for it to be 1
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFPostEventState_vtbl (ctor); cGameState_vtbl
                                     //      (dtor)
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFPostEventState_gainFocus");
+    void update() __asm__("cGFPostEventState_update");
 };
 
 CHECK_OFFSET(cGFPostEventState, mNextState, 0x00);
@@ -350,6 +391,10 @@ struct cGFSectionLoadState {
     // --- cGFSectionLoadState
     int mSubState;                  // 0x10 [O]; [U] gainFocus 0, update's switch (0 wait for the section, 1 wait for
                                     //      the focus / transition, 2 done); not in the replay frame
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFSectionLoadState_gainFocus");
+    void update() __asm__("cGFSectionLoadState_update");
 };
 
 CHECK_OFFSET(cGFSectionLoadState, mNextState, 0x00);
@@ -371,6 +416,9 @@ struct cGFPodiumState {
     int mStartupFlag;               // 0x04 [O]; [R] ctor 0
     int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFPodiumState_vtbl (ctor); cGameState_vtbl (dtor)
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cGFPodiumState_update");
 };
 
 CHECK_OFFSET(cGFPodiumState, mNextState, 0x00);
@@ -403,6 +451,12 @@ struct cGFNextHeatState {
     int PlayTransport;              // 0x18 [O] bool; [R] ctor 0; [U] gainFocus sets it (game mode 0, with
                                     //      PlayTransportSequence), update waits for the transport only when set; in the
                                     //      replay frame
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFNextHeatState_gainFocus");
+    void update() __asm__("cGFNextHeatState_update");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFNextHeatState_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFNextHeatState_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGFNextHeatState, mNextState, 0x00);
@@ -447,6 +501,13 @@ struct cGFUserSelectState {
                                     //      and clears it before the load
     int mShowLoadMessage;           // 0x20 [O] bool (On Tour 0x1D; placed by On Tour's order and the 0x24 size); no
                                     //      retail access
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus(int mode) __asm__("cGFUserSelectState_gainFocus");
+    void update() __asm__("cGFUserSelectState_update");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFUserSelectState_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFUserSelectState_readFromReplayFrame");
+    void setNextLocation(int location) __asm__("cGFUserSelectState_setNextLocation");
 };
 
 CHECK_OFFSET(cGFUserSelectState, mNextState, 0x00);
@@ -473,6 +534,9 @@ struct cGFSessionTeleportState {
     int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFSessionTeleportState_vtbl (ctor);
                                     //      cGameState_vtbl (dtor)
+
+    // Methods bound to their retail symbols by asm labels.
+    void gainFocus() __asm__("cGFSessionTeleportState_gainFocus");
 };
 
 CHECK_OFFSET(cGFSessionTeleportState, mNextState, 0x00);

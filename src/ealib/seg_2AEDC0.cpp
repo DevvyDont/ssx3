@@ -501,7 +501,7 @@ extern "C" int func_003AE6C8(void* self, float position)
 {
     *(float*)((char*)self + 0x48) = position;
     *(int*)((char*)self + 0x74) = RCMP_DECODER_GetFrame(*(void**)((char*)self + 0x64), fptoui(position));
-    *(int*)((char*)self + 0x44) = RCMP_DECODER_GetCurrentFrameNumber((RCMP_DECODER*)(*(void**)((char*)self + 0x64)));
+    *(int*)((char*)self + 0x44) = ((RCMP_DECODER*)(*(void**)((char*)self + 0x64)))->GetCurrentFrameNumber();
     return *(int*)((char*)self + 0x74);
 }
 #endif
@@ -549,7 +549,7 @@ extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER*);
 extern "C" int func_003AE780(char* self)
 {
     unsigned int elapsed = func_003AE9A0_E780(self);
-    float rate = RCMP_DECODER_GetFrameRate((RCMP_DECODER*)(*(void**)(self + 0x64)));
+    float rate = ((RCMP_DECODER*)(*(void**)(self + 0x64)))->GetFrameRate();
     *(float*)(self + 0x48) = (float)(elapsed + *(unsigned int*)(self + 0x40)) * 0.001f * rate;
     if (*(float*)(self + 0x48) < (float)*(unsigned int*)(self + 0x44) + 1.0f)
         return 0;
@@ -856,7 +856,7 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
                 if (kind != 3)
                     return;
                 if (RCMP_DECODER_ChooseCodec_i(ctx, func_003B11A0(), newChunk) != 2)
-                    RCMP_DECODER_FreeChosenCodec((RCMP_DECODER*)ctx);
+                    ((RCMP_DECODER*)ctx)->FreeChosenCodec();
                 return;
             }
             char name[8];
@@ -1145,13 +1145,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY);
  *
  * Nothing in the code or data calls it.
  *
- * @param table  the array
  * @return table
  */
-extern "C" void *RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY(RCMP_AV_SUBTITLE_ARRAY* table) {
-    table->mSubTitle = 0;
-    table->mNumberOfSubtitle = 0;
-    return ((void*)table);
+void * RCMP_AV_SUBTITLE_ARRAY::AV_SUBTITLE_ARRAY()
+{
+    mSubTitle = 0;
+    mNumberOfSubtitle = 0;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -1232,7 +1232,7 @@ extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(void* vself, unsigned int count, int
     if (count != 0) {
         do {
             i--;
-            RCMP_AV_SUBTITLE_AV_SUBTITLE((RCMP_AV_SUBTITLE*)subtitle);
+            ((RCMP_AV_SUBTITLE*)subtitle)->AV_SUBTITLE();
             subtitle += 0x34;
         } while (i != -1);
     }
@@ -1263,12 +1263,12 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_GetSubtitle);
  * @param i  the entry index
  * @return the entry (0x34-byte stride), or 0 when index > count
  */
-extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_GetSubtitle(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int i)
+RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY::GetSubtitle(unsigned int i)
 {
-    if (self->mNumberOfSubtitle < i) {
+    if (mNumberOfSubtitle < i) {
         return 0;
     }
-    return &(self->mSubTitle)[i];
+    return &mSubTitle[i];
 }
 #endif
 //100%
@@ -1319,11 +1319,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle);
  *
  * Nothing in the code or data calls it.
  *
- * @param table  the array
  * @return the count (+0x4)
  */
-extern "C" int RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle(RCMP_AV_SUBTITLE_ARRAY* table) {
-    return ((int)table->mNumberOfSubtitle);
+int RCMP_AV_SUBTITLE_ARRAY::GetNumberOfSubtitle()
+{
+    return ((int)mNumberOfSubtitle);
 }
 #endif
 //100%
@@ -1540,24 +1540,25 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_AV_SUBTITLE);
  *
  * @return self
  */
-extern "C" void *RCMP_AV_SUBTITLE_AV_SUBTITLE(RCMP_AV_SUBTITLE* self) {
-    self->mPosX = 0x20;
-    self->mPosY = 350;
-    self->mWidth = 600;
-    self->mHeight = 50;
-    self->mStrID = 0xFFFFFFFFu;
-    self->mA = 0xFF;
-    self->mR = 0xFF;
-    self->mG = 0xFF;
-    self->mJustifyX = 2;
-    self->mFrameNumber = 0xFFFFFFFFu;
-    self->mB = 0xFF;
-    self->mJustifyY = 2;
-    self->mShapeIndex = 0;
-    self->mTexturePtr = 0;
-    self->mStringPtr = 0;
-    self->mWrapStringPtr = 0;
-    return ((void*)self);
+void * RCMP_AV_SUBTITLE::AV_SUBTITLE()
+{
+    mPosX = 0x20;
+    mPosY = 350;
+    mWidth = 600;
+    mHeight = 50;
+    mStrID = 0xFFFFFFFFu;
+    mA = 0xFF;
+    mR = 0xFF;
+    mG = 0xFF;
+    mJustifyX = 2;
+    mFrameNumber = 0xFFFFFFFFu;
+    mB = 0xFF;
+    mJustifyY = 2;
+    mShapeIndex = 0;
+    mTexturePtr = 0;
+    mStringPtr = 0;
+    mWrapStringPtr = 0;
+    return ((void*)this);
 }
 #endif
 //100%
@@ -1585,11 +1586,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetPosY);
  * Stores the value at +0x4 (mPosY). Called by the subtitle-file parser func_003AF7F0 for the keyword Y, and by
  * RCMP_AV_SUBTITLE_ARRAY_Init.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the y position
  */
-extern "C" void RCMP_AV_SUBTITLE_SetPosY(RCMP_AV_SUBTITLE* entry, int value) {
-    entry->mPosY = value;
+void RCMP_AV_SUBTITLE::SetPosY(int value)
+{
+    mPosY = value;
 }
 #endif
 //100%
@@ -1601,11 +1602,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetWidth);
  * Stores the value at +0x8 (mWidth). Called by the subtitle-file parser func_003AF7F0 for the keyword WIDTH, and by
  * RCMP_AV_SUBTITLE_ARRAY_Init.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the width
  */
-extern "C" void RCMP_AV_SUBTITLE_SetWidth(RCMP_AV_SUBTITLE* entry, int value) {
-    ((int)entry->mWidth) = value;
+void RCMP_AV_SUBTITLE::SetWidth(int value)
+{
+    ((int)mWidth) = value;
 }
 #endif
 //100%
@@ -1617,11 +1618,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetHeight);
  * Stores the value at +0xC (mHeight). Called by the subtitle-file parser func_003AF7F0 for the keyword HEIGHT, and by
  * RCMP_AV_SUBTITLE_ARRAY_Init.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the height
  */
-extern "C" void RCMP_AV_SUBTITLE_SetHeight(RCMP_AV_SUBTITLE* entry, int value) {
-    ((int)entry->mHeight) = value;
+void RCMP_AV_SUBTITLE::SetHeight(int value)
+{
+    ((int)mHeight) = value;
 }
 #endif
 //100%
@@ -1633,11 +1634,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetStrID);
  * Stores the value at +0x10 (mStrID). Called by the subtitle-file parser func_003AF7F0 for the keyword STRINGID, and by
  * RCMP_AV_SUBTITLE_ARRAY_Init.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param index  the string id (RCMP_AV_SUBTITLE_ARRAY_Init passes the entry index)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetStrID(RCMP_AV_SUBTITLE* entry, int index) {
-    ((int)entry->mStrID) = index;
+void RCMP_AV_SUBTITLE::SetStrID(int index)
+{
+    ((int)mStrID) = index;
 }
 #endif
 //100%
@@ -1649,11 +1650,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetFrameNumber);
  * Stores the value at +0x14 (mFrameNumber). Called by the subtitle-file parser func_003AF7F0 for the keyword FRAME, and
  * by RCMP_AV_SUBTITLE_ARRAY_Init.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the frame number from which it shows
  */
-extern "C" void RCMP_AV_SUBTITLE_SetFrameNumber(RCMP_AV_SUBTITLE* entry, int value) {
-    ((int)entry->mFrameNumber) = value;
+void RCMP_AV_SUBTITLE::SetFrameNumber(int value)
+{
+    ((int)mFrameNumber) = value;
 }
 #endif
 //100%
@@ -1665,11 +1666,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyX);
  * Stores the value at +0x18 (mJustifyX). Called by the subtitle-file parser func_003AF7F0 for the keyword JUSTIFY_X
  * (value parsed by FindJust).
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetJustifyX(RCMP_AV_SUBTITLE* entry, int value) {
-    entry->mJustifyX = value;
+void RCMP_AV_SUBTITLE::SetJustifyX(int value)
+{
+    mJustifyX = value;
 }
 #endif
 //100%
@@ -1681,11 +1682,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyY);
  * Stores the value at +0x1C (mJustifyY). Called by the subtitle-file parser func_003AF7F0 for the keyword JUSTIFY_Y
  * (value parsed by FindJust).
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetJustifyY(RCMP_AV_SUBTITLE* entry, int value) {
-    entry->mJustifyY = value;
+void RCMP_AV_SUBTITLE::SetJustifyY(int value)
+{
+    mJustifyY = value;
 }
 #endif
 //100%
@@ -1696,11 +1697,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetShapeIndex);
  *
  * Stores the value at +0x20 (mShapeIndex). Called by the subtitle-file parser func_003AF7F0 for the keyword SHAPE.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the shape index
  */
-extern "C" void RCMP_AV_SUBTITLE_SetShapeIndex(RCMP_AV_SUBTITLE* entry, int value) {
-    ((int)entry->mShapeIndex) = value;
+void RCMP_AV_SUBTITLE::SetShapeIndex(int value)
+{
+    ((int)mShapeIndex) = value;
 }
 #endif
 //100%
@@ -1711,11 +1712,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetA);
  *
  * Stores the value at +0x24 (mA). Called by the subtitle-file parser func_003AF7F0 for the keyword A.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the alpha value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetA(RCMP_AV_SUBTITLE* entry, signed char value) {
-    (*(signed char*)&entry->mA) = value;
+void RCMP_AV_SUBTITLE::SetA(signed char value)
+{
+    (*(signed char*)&mA) = value;
 }
 #endif
 //100%
@@ -1726,11 +1727,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetR);
  *
  * Stores the value at +0x25 (mR). Called by the subtitle-file parser func_003AF7F0 for the keyword R.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the red value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetR(RCMP_AV_SUBTITLE* entry, signed char value) {
-    (*(signed char*)&entry->mR) = value;
+void RCMP_AV_SUBTITLE::SetR(signed char value)
+{
+    (*(signed char*)&mR) = value;
 }
 #endif
 //100%
@@ -1741,11 +1742,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetG);
  *
  * Stores the value at +0x26 (mG). Called by the subtitle-file parser func_003AF7F0 for the keyword G.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the green value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetG(RCMP_AV_SUBTITLE* entry, signed char value) {
-    (*(signed char*)&entry->mG) = value;
+void RCMP_AV_SUBTITLE::SetG(signed char value)
+{
+    (*(signed char*)&mG) = value;
 }
 #endif
 //100%
@@ -1756,11 +1757,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetB);
  *
  * Stores the value at +0x27 (mB). Called by the subtitle-file parser func_003AF7F0 for the keyword B.
  *
- * @param entry  the AV_SUBTITLE entry
  * @param value  the blue value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetB(RCMP_AV_SUBTITLE* entry, signed char value) {
-    (*(signed char*)&entry->mB) = value;
+void RCMP_AV_SUBTITLE::SetB(signed char value)
+{
+    (*(signed char*)&mB) = value;
 }
 #endif
 
@@ -1838,7 +1839,7 @@ extern void* RCMP_DECODER_vtbl[];
 extern "C" void RCMP_DECODER__DECODER(RCMP_DECODER* self, int flags)
 {
     self->mVtbl = RCMP_DECODER_vtbl;
-    RCMP_DECODER_FreeChosenCodec(self);
+    self->FreeChosenCodec();
     if (flags & 1) {
         RCMP_rcmp_sys.FreeMemFunc(self);
     }
@@ -1884,13 +1885,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_FreeChosenCodec);
  *
  * Calls the codec's slot-1 destructor with flags 3 and clears +0x14. Called by RCMP_DECODER__DECODER and func_003AEAD0.
  */
-extern "C" void RCMP_DECODER_FreeChosenCodec(RCMP_DECODER* self)
+void RCMP_DECODER::FreeChosenCodec()
 {
-    void* obj = self->m_codec;
+    void* obj = m_codec;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
         vt[1].fn(vthis(obj, vt[1]), 3);
-        self->m_codec = 0;
+        m_codec = 0;
     }
 }
 #endif
@@ -1905,9 +1906,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_GetCurrentFrameNumber);
  *
  * @return the frame number, or 0 without a codec
  */
-extern "C" int RCMP_DECODER_GetCurrentFrameNumber(RCMP_DECODER* self)
+int RCMP_DECODER::GetCurrentFrameNumber()
 {
-    RCMP_DECODER_ChooseCodec_cObj* obj = (RCMP_DECODER_ChooseCodec_cObj*)self->m_codec;
+    RCMP_DECODER_ChooseCodec_cObj* obj = (RCMP_DECODER_ChooseCodec_cObj*)m_codec;
     if (obj == 0) {
         return 0;
     }
@@ -1925,9 +1926,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_GetFrameRate);
  *
  * @return frames per second, or 0.0f without a codec
  */
-extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER* self)
+float RCMP_DECODER::GetFrameRate()
 {
-    RCMP_DECODER_ChooseCodec_cObj* obj = (RCMP_DECODER_ChooseCodec_cObj*)self->m_codec;
+    RCMP_DECODER_ChooseCodec_cObj* obj = (RCMP_DECODER_ChooseCodec_cObj*)m_codec;
     if (obj == 0) {
         return 0.0f;
     }
@@ -2005,9 +2006,9 @@ public:
  *
  * @param frame  the frame
  */
-extern "C" void RCMP_DECODER_ReleaseFrame(RCMP_DECODER* self, int frame)
+void RCMP_DECODER::ReleaseFrame(int frame)
 {
-    ((RCMP_DECODER_ReleaseFrame_cObj*)self->m_codec)->ReleaseFrame(frame);
+    ((RCMP_DECODER_ReleaseFrame_cObj*)m_codec)->ReleaseFrame(frame);
 }
 #endif
 
@@ -2023,16 +2024,16 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_GetChunk);
  *
  * @return the CHUNK, or 0 when there is no more data
  */
-extern "C" int RCMP_DECODER_GetChunk(RCMP_DECODER* self)
+int RCMP_DECODER::GetChunk()
 {
     int chunk;
-    int pendingChunk = ((int)self->m_FirstChunk);
+    int pendingChunk = ((int)m_FirstChunk);
     if (pendingChunk != 0) {
-        (*(int*)&self->m_FirstChunk) = 0;
+        (*(int*)&m_FirstChunk) = 0;
         chunk = pendingChunk;
         return pendingChunk;
     }
-    ((void (*)(RCMP_DECODER*, int, int*))self->m_IData.m_GetDataFunc)(self, (*(int*)&self->m_IData), &chunk);
+    ((void (*)(RCMP_DECODER*, int, int*))m_IData.m_GetDataFunc)(this, (*(int*)&m_IData), &chunk);
     return chunk;
 }
 #endif
@@ -2422,7 +2423,7 @@ extern "C" void func_003B0B40(void* source, void* consumer, void* callbackArg)
 {
     func_003B0B40_sScript* self = (func_003B0B40_sScript*)source;
     void* data = 0;
-    func_003B0B40_sBlock* blk = (func_003B0B40_sBlock*)RCMP_DECODER_GetChunk(self->req);
+    func_003B0B40_sBlock* blk = (func_003B0B40_sBlock*)self->req->GetChunk();
     if (blk != 0) {
         data = blk->data;
     }
@@ -2636,10 +2637,10 @@ extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
  *
  * @return the decoded frame
  */
-extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(PS2_SONY_CODEC_INTERNAL* self)
+void* PS2_SONY_CODEC_INTERNAL::DecodeFrame()
 {
     // func_003B10D0's sWSItem is the frame; it starts with its RCMP::FRAME (m_FrameType, m_Shp)
-    RCMP_FRAME* frame = (RCMP_FRAME*)func_003B10D0(self);
+    RCMP_FRAME* frame = (RCMP_FRAME*)func_003B10D0(this);
     // the frame's SHAPE, read as SHAPEIMAGE (same layout; retail tests the 0xC word whole)
     SHAPEIMAGE* shp = (SHAPEIMAGE*)frame->m_Shp;
     char* data;
@@ -2649,8 +2650,8 @@ extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(PS2_SONY_CODEC_INTERNAL* se
     } else {
         data = (char*)&shp->dataoffset;
     }
-    sceMpegGetPicture(self->mMpeg, data, self->mWidth / 16 * self->mHeight / 16);
-    self->mCurrentFrameNumber += 1;
+    sceMpegGetPicture(mMpeg, data, mWidth / 16 * mHeight / 16);
+    mCurrentFrameNumber += 1;
     return frame;
 }
 #endif
@@ -2681,18 +2682,18 @@ public:
  * @param limit  the goal frame number
  * @return the frame for the goal, or 0 at the end of the stream
  */
-extern "C" void* PS2_SONY_CODEC_INTERNAL_GetFrame(PS2_SONY_CODEC_INTERNAL* self, unsigned int limit)
+void* PS2_SONY_CODEC_INTERNAL::GetFrame(unsigned int limit)
 {
     void* item = 0;
     do {
         if (item != 0) {
-            ((PS2_SONY_CODEC_INTERNAL_GetFrame_cCache*)self)->ReleaseFrame(item);
+            ((PS2_SONY_CODEC_INTERNAL_GetFrame_cCache*)this)->ReleaseFrame(item);
         }
-        if (sceMpegIsEnd(self->mMpeg) != 0) {
+        if (sceMpegIsEnd(mMpeg) != 0) {
             return 0;
         }
-        item = PS2_SONY_CODEC_INTERNAL_DecodeFrame(self);
-    } while (self->mCurrentFrameNumber < limit);
+        item = DecodeFrame();
+    } while (mCurrentFrameNumber < limit);
     return item;
 }
 #endif

@@ -97,6 +97,13 @@ struct cBankManager {
                                 //       cookie, cBankInstance__cBankInstance) and frees it; [P] BANK_Status / Used /
                                 //       Loading / Handle (preview 0xAC0, seen); [U] every BANK_* / ASYNCSYS_On* method
                                 //       indexes it by bank number
+
+    // Methods bound to their retail symbols by asm labels.
+    int BANK_Status(int bankId) __asm__("cBankManager_BANK_Status");
+    int BANK_Used(int bankId) __asm__("cBankManager_BANK_Used");
+    int BANK_Loading(int bankId) __asm__("cBankManager_BANK_Loading");
+    int BANK_InUse(int idx) __asm__("cBankManager_BANK_InUse");
+    int BANK_Handle(int bankId) __asm__("cBankManager_BANK_Handle");
 };
 
 CHECK_OFFSET(cBankInstance, mBankStatus, 0x00);

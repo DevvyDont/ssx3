@@ -25,6 +25,9 @@ struct cFEInput : public cUIInput {
     int miVKey;                     // 0x10 [O]; [R] ctor = 0; [U] getVKey, update
     int miAsciiKey;                 // 0x14 [O]; [R] ctor = 0; [U] getAsciiKey, update
     cInput* mpInput;                // 0x18 [O]; [R] ctor = 0; [U] update, the camera queries
+
+    // Methods bound to their retail symbols by asm labels.
+    int getInput() __asm__("cFEInput_getInput");
 };
 
 CHECK_OFFSET(cFEInput, mbKeyReady, 0x0C);

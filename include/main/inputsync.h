@@ -81,6 +81,16 @@ struct cInputSync {
     int numsyncedpads;              // 0x010 [O]; [R] ctor zeroes it; [U] createlocal/remoteinput take syncedpads[numsyncedpads++];
                                     //       preupdate / aiinputready / aiupdate / the destructor loop over it
     cInputSync_SyncedPad syncedpads[2]; // 0x014 [O] (On Tour: 4); [R] 0x44 - 0x14 = 2 * 0x18
+
+    // Methods bound to their retail symbols by asm labels.
+    void* createlocalinput(int* realinput) __asm__("cInputSync_createlocalinput");
+    void* createremoteinput(int realinputmap) __asm__("cInputSync_createremoteinput");
+    void preupdate() __asm__("cInputSync_preupdate");
+    int aiinputready() __asm__("cInputSync_aiinputready");
+    int aiupdate() __asm__("cInputSync_aiupdate");
+    void sendClientInput(cInputSync_PadSample* src) __asm__("cInputSync_sendClientInput");
+    int compressinput(cInputSync_PadSample* src, cInputSync_CompressedSample* dst) __asm__("cInputSync_compressinput");
+    void decompressinput(cInputSync_PadSample* out, char* buf) __asm__("cInputSync_decompressinput");
 };
 CHECK_OFFSET(cInputSync, sendlimit, 0x0);
 CHECK_OFFSET(cInputSync, latency, 0x4);

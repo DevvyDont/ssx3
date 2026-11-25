@@ -22,6 +22,9 @@ struct cFEStateOptionsGame : public cUIState {
     char mSpeedSlot;                // 0x049 [O]
     char mScreenSlot;               // 0x04A [O]
     char unk_04B[0x1];              // 0x04B padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateWidget() __asm__("cFEStateOptionsGame_updateWidget");
 };
 
 CHECK_OFFSET(cFEStateOptionsGame, mLanguageSlot, 0x048);

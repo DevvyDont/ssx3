@@ -37,6 +37,8 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 
+extern "C" void cGame_load(cGame* self);
+
 //100%
 INCLUDE_ASM("main/gameload", cGame_load);
 #ifdef SKIP_ASM
@@ -509,7 +511,7 @@ struct sElemFF_F6B0 {
  * section is in. It also passes the track's ".cam" file to cCameraTriggerMan_loadTriggersIfNotStreaming, and creates the fog particle
  * manager ("cPS2FogParticleMan") and the lens effects manager.
  */
-extern "C" void cGame_loadTrack(cGame* self)
+void cGame::loadTrack()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBXString name;
@@ -532,21 +534,21 @@ extern "C" void cGame_loadTrack(cGame* self)
     {
         cBXString path;
         func_00318630(&path, &name, str_big_b);
-        cBigFile_open(self->mpTrackBigFile, path.Str, 0);
+        cBigFile_open(mpTrackBigFile, path.Str, 0);
         cBXString__cBXString(&path, 2);
     }
-    sTbl_F6B0*& tbl = (sTbl_F6B0*)self->SurfPropCache;
-    char*& ent = (char*)self->FogMan;
-    cWorld_load(self->World, name.Str, self->BXNash);
-    *(void**)&self->SkyBox = cSkyBox_cSkyBox(cMemMan_alloc(0x18, str_SkyBox, 0, 0));
-    *(void**)&self->SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)self));
+    sTbl_F6B0*& tbl = (sTbl_F6B0*)SurfPropCache;
+    char*& ent = (char*)FogMan;
+    cWorld_load(World, name.Str, BXNash);
+    *(void**)&SkyBox = cSkyBox_cSkyBox(cMemMan_alloc(0x18, str_SkyBox, 0, 0));
+    *(void**)&SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)this));
     tbl = new (str_SurfPropCache, 0, 0) sTbl_F6B0;
-    func_002C2F18(self->SurfPropCache);
-    *(void**)&self->WorldSound = cWorldSound_cWorldSound(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
-    cBXNash_initTheAIFwdDiffCache(self->BXNash);
+    func_002C2F18(SurfPropCache);
+    *(void**)&WorldSound = cWorldSound_cWorldSound(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
+    cBXNash_initTheAIFwdDiffCache(BXNash);
     cBXString dir;
     dir.Str = cBXString_EmptyString;
-    self->World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 0;
+    World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 0;
     {
         cBXString worldPath;
         cBXString locName;
@@ -556,14 +558,14 @@ extern "C" void cGame_loadTrack(cGame* self)
         cBXString__cBXString(&locName, 2);
     }
     int id = *(int*)cBENewRaceInterface_getLocation(iface);
-    cSectionMan_activate(self->SectionMan, id, 0);
-    self->SectionMan->m_bTriggerSkySwap = 1;
-    while (!cSectionMan_isLoaded(self->SectionMan, id)) {
-        cSectionMan_update(self->SectionMan);
-        cWorld_update(self->World);
+    cSectionMan_activate(SectionMan, id, 0);
+    SectionMan->m_bTriggerSkySwap = 1;
+    while (!cSectionMan_isLoaded(SectionMan, id)) {
+        cSectionMan_update(SectionMan);
+        cWorld_update(World);
         THREAD_yield(0);
     }
-    self->World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 1;
+    World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 1;
     {
         cBXString worldPath;
         cBXString camBasePath;
@@ -576,7 +578,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     obj->mVtbl = cPS2FogParticleMan_vtbl;
     new ((char*)&obj->mSprites[0]) sElemFF_F6B0[256];
     ent = ((char*)obj);
-    *(void**)&self->LensFxMan = cLensFxMan_construct();
+    *(void**)&LensFxMan = cLensFxMan_construct();
     cRenderStateMan_init();
     cBXString__cBXString(&dir, 2);
     cBXString__cBXString(&name, 2);
@@ -706,7 +708,7 @@ struct sObj20_FA98 {
  * audio de-initialised and purged, the script engine purged, and cPauseState_StackIdx and the word at cAppMan_TheAppMan + 0x34
  * cleared.
  */
-extern "C" void cGame_purge(cGame* self)
+void cGame::purge()
 {
     cBE_setState(0);
     cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -724,42 +726,42 @@ extern "C" void cGame_purge(cGame* self)
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
-    if (self->UI != 0) cUIEngine__cUIEngine(self->UI, 3);
-    if (self->InputSync != 0) cInputSync__cInputSync(self->InputSync, 3);
-    cCutSceneTransitionMan_ForceToRegularMode(self->CutSceneTransitionMan);
-    cSurfPropCache_purge(self->SurfPropCache);
-    operator_delete((int*)self->SurfPropCache);
-    VDelete_FA98((char*)self->SkyBox, 0xC, 8);
-    VDelete_FA98((char*)self->FogMan, 0x4, 8);
-    VDelete_FA98((char*)self->LensFxMan, 25756, 8);
+    if (UI != 0) cUIEngine__cUIEngine(UI, 3);
+    if (InputSync != 0) cInputSync__cInputSync(InputSync, 3);
+    cCutSceneTransitionMan_ForceToRegularMode(CutSceneTransitionMan);
+    cSurfPropCache_purge(SurfPropCache);
+    operator_delete((int*)SurfPropCache);
+    VDelete_FA98((char*)SkyBox, 0xC, 8);
+    VDelete_FA98((char*)FogMan, 0x4, 8);
+    VDelete_FA98((char*)LensFxMan, 25756, 8);
     cPathSys_purgePaths(gPaths);
-    cBXNash_purgeTheAIFwdDiffCache(self->BXNash);
-    if (self->MenuSys != 0) cMenuSys__cMenuSys(self->MenuSys, 3);
+    cBXNash_purgeTheAIFwdDiffCache(BXNash);
+    if (MenuSys != 0) cMenuSys__cMenuSys(MenuSys, 3);
     void* bm = &gBucketMan_gl;
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purge(bm);
-    VDelete_FA98((char*)self->WScriptMan, 1172, 8);
-    if (self->CrowdMan2d != 0) cCrowdMan2d__cCrowdMan2d(self->CrowdMan2d, 3);
-    if (self->CrowdMan3d != 0) cCrowdMan3d__cCrowdMan3d(self->CrowdMan3d, 3);
-    if (self->MultiParticleMan != 0) cMultiParticleMan__cMultiParticleMan(self->MultiParticleMan, 3);
-    if (self->PlaybackMan != 0) cPlaybackMan__cPlaybackMan(self->PlaybackMan, 3);
-    if (self->InstanceMan != 0) cInstanceMan__cInstanceMan(self->InstanceMan, 3);
+    VDelete_FA98((char*)WScriptMan, 1172, 8);
+    if (CrowdMan2d != 0) cCrowdMan2d__cCrowdMan2d(CrowdMan2d, 3);
+    if (CrowdMan3d != 0) cCrowdMan3d__cCrowdMan3d(CrowdMan3d, 3);
+    if (MultiParticleMan != 0) cMultiParticleMan__cMultiParticleMan(MultiParticleMan, 3);
+    if (PlaybackMan != 0) cPlaybackMan__cPlaybackMan(PlaybackMan, 3);
+    if (InstanceMan != 0) cInstanceMan__cInstanceMan(InstanceMan, 3);
     cCameraTriggerMan_purge(((char*)&gCamTriggerMan));
     cRenderStateMan_purge();
-    if (self->ViewMan != 0) cGameViewMan__cGameViewMan(self->ViewMan, 3);
-    VDelete_FA98((char*)self->AI, 204, 8);
-    if (self->Replay != 0) cReplay__cReplay(self->Replay, 3);
-    VDelete_FA98((char*)self->StreamPause, 0x0, 8);
-    if (self->SectionMan != 0) cSectionMan__cSectionMan(self->SectionMan, 3);
-    if (self->FXLoader != 0) cFXLoader__cFXLoader(self->FXLoader, 3);
-    if (self->WorldLightMan != 0) cWorldLightMan__cWorldLightMan(self->WorldLightMan, 3);
-    if (self->World != 0) cWorld__cWorld(self->World, 3);
-    if (self->OcclusionMan != 0) cOcclusionMan__cOcclusionMan(self->OcclusionMan, 3);
-    if (self->mpTrackBigFile != 0) cBigFile__cBigFile(self->mpTrackBigFile, 3);
-    operator_delete((int*)self->LoadIndicator);
-    if (self->DebugFont != 0) cFont__cFont(self->DebugFont, 3);
+    if (ViewMan != 0) cGameViewMan__cGameViewMan(ViewMan, 3);
+    VDelete_FA98((char*)AI, 204, 8);
+    if (Replay != 0) cReplay__cReplay(Replay, 3);
+    VDelete_FA98((char*)StreamPause, 0x0, 8);
+    if (SectionMan != 0) cSectionMan__cSectionMan(SectionMan, 3);
+    if (FXLoader != 0) cFXLoader__cFXLoader(FXLoader, 3);
+    if (WorldLightMan != 0) cWorldLightMan__cWorldLightMan(WorldLightMan, 3);
+    if (World != 0) cWorld__cWorld(World, 3);
+    if (OcclusionMan != 0) cOcclusionMan__cOcclusionMan(OcclusionMan, 3);
+    if (mpTrackBigFile != 0) cBigFile__cBigFile(mpTrackBigFile, 3);
+    operator_delete((int*)LoadIndicator);
+    if (DebugFont != 0) cFont__cFont(DebugFont, 3);
     {
-        sObj20_FA98* nash = (sObj20_FA98*)self->BXNash;
+        sObj20_FA98* nash = (sObj20_FA98*)BXNash;
         if (nash != 0) {
             nash->~sObj20_FA98();
             operator_delete((int*)nash);
@@ -771,12 +773,12 @@ extern "C" void cGame_purge(cGame* self)
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        be->RemoveTexture((int)(void*)self->mBoxTextureID);
+        be->RemoveTexture((int)(void*)mBoxTextureID);
     }
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
     *(void**)&SSXApp->Game = 0;
-    if (self->WorldSound != 0) cWorldSound__cWorldSound(self->WorldSound, 3);
+    if (WorldSound != 0) cWorldSound__cWorldSound(WorldSound, 3);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameDeInit(gSSXAudio);
     cSSXAudio_InGamePurge(gSSXAudio);
@@ -831,17 +833,17 @@ extern int cScreenTint_m_Enable;
  * It also clears the PDA overlay template, calls helpers on the graphics manager, the world trigger manager
  * and the audio system, and turns the screen effects back on (cDepthFog_m_Enable, the screen tint, cLightGlow_m_Enable).
  */
-extern "C" void cGame_gainFocus(cGame* self)
+void cGame::gainFocus()
 {
     cFELocale_unloadFE(SSXApp->FELocale);
-    void* loadIndicator = self->LoadIndicator;
+    void* loadIndicator = LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
     cBXLoadIndicator_Init(loadIndicator);
     cSSXScriptEngine_Init(ScriptEngine);
     cBezierMan_TheBezierMan->ClearPatches();
     cBezierMan_TheBezierMan->Reset();
     cGraphicsMan_UploadTextures(GrMan);
-    cWorld_init(self->World);
+    cWorld_init(World);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameInit(gSSXAudio);
     cDepthFog_m_Enable = 1;
@@ -873,19 +875,19 @@ extern char gBucketMan_bm __asm__("gBucketMan");
  *
  * It then reruns the global world scripts and sets the missions up again.
  */
-extern "C" void cGame_resetWorld(cGame* self)
+void cGame::resetWorld()
 {
     void* bm = &gBucketMan_bm;
-    cPlaybackMan_restart(self->PlaybackMan);
-    cWScriptMan_initMissions(self->WScriptMan);
+    cPlaybackMan_restart(PlaybackMan);
+    cWScriptMan_initMissions(WScriptMan);
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
-    cFocusMan_reset(self->AI->FocusMan);
+    cFocusMan_reset(AI->FocusMan);
     cAvalanche_reset();
-    cWorld_resetMap(self->World);
+    cWorld_resetMap(World);
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
-    cWScriptMan_setupMissions(self->WScriptMan);
+    cWScriptMan_setupMissions(WScriptMan);
 }
 #endif
 
@@ -914,33 +916,33 @@ extern char str_hud_c[];
  * tells the UI state found by str_hud_c's hash about it (slot 24 with 7), and reruns the global world
  * scripts and the mission setup. Last, it calls cSSXAudio_PartialRestart on the audio system (On Tour PartialRestart).
  */
-extern "C" void cGame_partialRestart(cGame* self)
+void cGame::partialRestart()
 {
     void* bm = &gBucketMan_bm;
-    cPlaybackMan_restart(self->PlaybackMan);
-    cWScriptMan_initMissions(self->WScriptMan);
+    cPlaybackMan_restart(PlaybackMan);
+    cWScriptMan_initMissions(WScriptMan);
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
-    cAI* gameAI = self->AI;
+    cAI* gameAI = AI;
     sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)gameAI->mVtbl;
     vt[5].fn(vthis(gameAI, vt[5]), 3);
     cAvalanche_reset();
-    cGameViewMan_snapAll(self->ViewMan);
-    cWorld_resetMap(self->World);
-    cReplay_reset(self->Replay);
+    cGameViewMan_snapAll(ViewMan);
+    cWorld_resetMap(World);
+    cReplay_reset(Replay);
     cSSXScriptEngine_Restart(ScriptEngine);
     cCamera_onRestart();
-    func_00229498(self->CrowdMan2d);
-    func_00343BC0(self->CrowdMan3d);
-    cMultiParticleMan_reset(self->MultiParticleMan);
-    void* list = (char*)&self->UI->mStateStack;
+    func_00229498(CrowdMan2d);
+    func_00343BC0(CrowdMan3d);
+    cMultiParticleMan_reset(MultiParticleMan);
+    void* list = (char*)&UI->mStateStack;
     cUIState* hudState = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c)));
     if (((char*)hudState) != 0) {
         hudState->handleEvent(7, 0);
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
-    cWScriptMan_setupMissions(self->WScriptMan);
+    cWScriptMan_setupMissions(WScriptMan);
     cSSXAudio_PartialRestart(cAudioInterface_bxAudio());
 }
 #endif
@@ -971,15 +973,15 @@ static inline cRider* rider_2302A8(void* game, int i)
  * game-mode code sets to 0.7, 0.35 or 0 by the player's place), switches the game to state 1 at once
  * (cGame_setState(self, 1, 2, 1)), and calls cSSXAudio_RestartEvent() on the audio system.
  */
-extern "C" void cGame_restart(cGame* self)
+void cGame::restart()
 {
-    cGame_partialRestart(self);
+    partialRestart();
     cGameModeMan_restartHeat(SSXApp->GameModeMan);
     int i;
-    for (i = 0; i < numRiders_2302A8(self); i++) {
-        *(int*)&rider_2302A8(self, i)->BoostPowerBar = 0;
+    for (i = 0; i < numRiders_2302A8(this); i++) {
+        *(int*)&rider_2302A8(this, i)->BoostPowerBar = 0;
     }
-    cGame_setState(self, 1, 2, 1);
+    setState(1, 2, 1);
     cSSXAudio_RestartEvent(cAudioInterface_bxAudio());
 }
 #endif
@@ -993,9 +995,9 @@ INCLUDE_ASM("main/gameload", cGame_sectionLoaded);
  * When the AI (+0xC) and its focus manager (+0xA4, On Tour FocusMan) exist, sets the manager's +0xD0 to -1. The
  * loaded section's id, passed by cSectionMan_update, is not used.
  */
-extern "C" void cGame_sectionLoaded(cGame* self)
+void cGame::sectionLoaded()
 {
-    cAI* gameAI = self->AI;
+    cAI* gameAI = AI;
     if (gameAI != 0) {
         cFocusMan* focusMan = gameAI->FocusMan;
         if (((void*)focusMan) != 0) {
@@ -1027,7 +1029,7 @@ extern void* cMultiParticleMan_TheMultiParticleMan;
  *
  * @param id  the section id (On Tour sectionId)
  */
-extern "C" void cGame_sectionUnloading(cGame* self, int id)
+void cGame::sectionUnloading(int id)
 {
     void* bm = &gBucketMan_bm;
     cRailManNode_unloadSection(id);
@@ -1037,15 +1039,15 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket1(bm, 1, id);
     cBucketMan_purgeBucket1(bm, 8, id);
-    cAI* gameAI = self->AI;
+    cAI* gameAI = AI;
     if (gameAI != 0) {
         void* focusMan = gameAI->FocusMan;
         if (focusMan != 0) {
             cFocusMan_purgesection(focusMan, id);
-            cFocusMan_purgesection(self->AI->FocusMan, 0x80);
+            cFocusMan_purgesection(AI->FocusMan, 0x80);
         }
     }
-    cWScriptMan_unloadSection(self->WScriptMan, id);
+    cWScriptMan_unloadSection(WScriptMan, id);
 }
 #endif
 
@@ -1079,7 +1081,7 @@ static inline bool isSectionLoaded_0430(cWScriptCache* c, int sectionId)
  *
  * @param sectionId  the world section
  */
-extern "C" void cGame_loadWScriptManSection(cGame* self, int sectionId)
+void cGame::loadWScriptManSection(int sectionId)
 {
     if (isSectionLoaded_0430(cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
         cWScriptMan_loadSection_2(cWScriptMan_TheWScriptMan, sectionId);
@@ -1112,10 +1114,10 @@ extern char str_PreFELoad[];
  *
  * @param toFrontEnd  nonzero for the pre-game load screen, 0 for the "PreFELoad" module
  */
-extern "C" void cGame_exit(cGame* self, int toFrontEnd)
+void cGame::exit(int toFrontEnd)
 {
-    cReplay_stopAutoReplay(self->Replay);
-    cGame_setState(self, 6, 0, 0);
+    cReplay_stopAutoReplay(Replay);
+    setState(6, 0, 0);
     if (cGameComm_mGameComm != 0) {
         cGameComm_gameExit(cGameComm_mGameComm);
     }
@@ -1149,12 +1151,12 @@ extern int D_00442910[];
  * entry 8 of the table cPauseState_FlagsTable), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
  * cMenuSys_activate (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
  */
-extern "C" void cGame_startReplay(cGame* self)
+void cGame::startReplay()
 {
     cPauseState_Stack[++cPauseState_StackIdx] = 8;
     cPauseState_Flags = D_00442910[0];
-    cReplay_startReplay(((void*)self->Replay), 0, 0, 0);
-    cMenuSys_activate(((void*)self->MenuSys), 0);
+    cReplay_startReplay(((void*)Replay), 0, 0, 0);
+    cMenuSys_activate(((void*)MenuSys), 0);
 }
 #endif
 
@@ -1176,11 +1178,11 @@ extern int cPauseState_FlagsTable[];
  * (cMenuSys::popMenu) on the menu system (+0xA4), then pops the pause stack (cPauseState_StackIdx index into cPauseState_Stack)
  * and restores cPauseState_Flags from cPauseState_FlagsTable. The stack index is not checked (On Tour asserts it is > 0).
  */
-extern "C" void cGame_stopReplay(cGame* self)
+void cGame::stopReplay()
 {
-    cReplay_stopReplay(self->Replay);
-    cMenuSys_activate(self->MenuSys, 1);
-    cMenuSys_popMenu(self->MenuSys);
+    cReplay_stopReplay(Replay);
+    cMenuSys_activate(MenuSys, 1);
+    cMenuSys_popMenu(MenuSys);
     cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
@@ -1216,10 +1218,9 @@ INCLUDE_ASM("main/gameload", cGame_getTransitionMan__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cTransitionMan
  */
-int cGame_getTransitionMan(void* vself, int i)
+int cGame::getTransitionMan(int i)
 {
-    cGame* self = (cGame*)vself;
-    return (int)self->TransitionMan[i];
+    return (int)TransitionMan[i];
 }
 #endif
 
@@ -1232,10 +1233,9 @@ INCLUDE_ASM("main/gameload", cGame_getSplashManager__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cSplashManager
  */
-int cGame_getSplashManager(void* vself, int i)
+int cGame::getSplashManager(int i)
 {
-    cGame* self = (cGame*)vself;
-    return (int)self->SplashManager[i];
+    return (int)SplashManager[i];
 }
 #endif
 
@@ -1381,7 +1381,7 @@ static inline int updatePause_2306B8(cGame* self)
         cWorld_update(((char*)self->World));
         cGameViewMan_updateAll(((char*)self->ViewMan));
         if (self->SectionMan->m_bStreamReady == 0) {
-            cGame_updateState(self);
+            self->updateState();
             cSectionMan_update(((char*)self->SectionMan));
         }
         if (self->IsStreamPaused == 0 && cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0) {
@@ -1483,9 +1483,9 @@ static inline int updateState_2306B8(cGame* self)
  * flags (cPauseState_Flags), the replay and the playback can skip the simulation buckets; then only buckets 5, 3 and
  * 4 run. Every frame also updates the network, the front-end async manager and the load indicator.
  */
-extern "C" void cGame_update(cGame* self)
+void cGame::update()
 {
-    if (self->ViewMan->m_uiNumView >= 2) {
+    if (ViewMan->m_uiNumView >= 2) {
         cAppMan_TheAppMan->mLock30Fps = 1;
     } else {
         cAppMan_TheAppMan->mLock30Fps = cRenderStateMan_SkyBoxRotation(6) > 0.9f;
@@ -1494,37 +1494,37 @@ extern "C" void cGame_update(cGame* self)
         cGameComm_update(cGameComm_mGameComm);
     }
     cSSXScriptEngine_UpdateLoad(ScriptEngine);
-    cFadeScreen_update_v((self));
-    if (canUpdate_2306B8((self)) && updatePause_2306B8((self))) {
-        if ((char*)self->InputSync != 0) {
-            cInputSync_preupdate((char*)self->InputSync);
+    cFadeScreen_update_v((this));
+    if (canUpdate_2306B8((this)) && updatePause_2306B8((this))) {
+        if ((char*)InputSync != 0) {
+            cInputSync_preupdate((char*)InputSync);
         }
         cOVStateManager_update();
-        if (updateState_2306B8((self))) {
+        if (updateState_2306B8((this))) {
             int skip;
-            if ((char*)self->InputSync == 0 || cInputSync_aiinputready((char*)self->InputSync) != 0) {
-                if (self->mCurrentStateID == 3) {
-                    cGame_updateState((self));
+            if ((char*)InputSync == 0 || cInputSync_aiinputready((char*)InputSync) != 0) {
+                if (mCurrentStateID == 3) {
+                    updateState();
                     cBucketMan_mergeBucket(&gBucketMan, 1);
                 } else {
-                    cGame_updateState((self));
+                    updateState();
                 }
                 if (!paused_2306B8()) {
-                    cReplay_update((char*)self->Replay);
+                    cReplay_update((char*)Replay);
                 }
-                if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(cPauseState_Flags & 8)) {
+                if (cReplay_isPauseAI((char*)Replay) == 0 && !(cPauseState_Flags & 8)) {
                     cSSXScriptEngine* w = ScriptEngine;
                     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)w->mVtbl;
                     vt[5].fn(vthis(w, vt[5]));
                 }
             }
             skip = 0;
-            if ((cPauseState_Flags & 1) || cReplay_isPauseAI((char*)self->Replay) != 0) {
+            if ((cPauseState_Flags & 1) || cReplay_isPauseAI((char*)Replay) != 0) {
                 skip = 1;
             }
             if (!skip) {
-                if (((char*)self->InputSync != 0 && cInputSync_aiupdate((char*)self->InputSync) == 0)
-                    || cPlaybackMan_isPauseAI((char*)self->PlaybackMan) != 0) {
+                if (((char*)InputSync != 0 && cInputSync_aiupdate((char*)InputSync) == 0)
+                    || cPlaybackMan_isPauseAI((char*)PlaybackMan) != 0) {
                     skip = 1;
                 }
             }
@@ -1538,7 +1538,7 @@ extern "C" void cGame_update(cGame* self)
                     cBucketMan_applyBucket(&gBucketMan, 1);
                 }
                 {
-                    cAI* gameAI = self->AI;
+                    cAI* gameAI = AI;
                     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)gameAI->mVtbl;
                     vt[3].fn(vthis(gameAI, vt[3]));
                 }
@@ -1548,10 +1548,10 @@ extern "C" void cGame_update(cGame* self)
                 if (!(cPauseState_Flags & 4)) {
                     cBucketMan_updateBucket(&gBucketMan, 3);
                 }
-                cWScriptMan_update((char*)self->WScriptMan);
-                func_002294C8((char*)self->CrowdMan2d);
-                func_003440C8((char*)self->CrowdMan3d);
-                cMultiParticleMan_update((char*)self->MultiParticleMan);
+                cWScriptMan_update((char*)WScriptMan);
+                func_002294C8((char*)CrowdMan2d);
+                func_003440C8((char*)CrowdMan3d);
+                cMultiParticleMan_update((char*)MultiParticleMan);
                 cBucketMan_mergeBucket(&gBucketMan, 1);
             } else {
                 cBucketMan_updateBucket(&gBucketMan, 5);
@@ -1561,30 +1561,30 @@ extern "C" void cGame_update(cGame* self)
             }
             cBucketMan_updateBucket(&gBucketMan, 4);
             {
-                int replayState = *((int*)(char*)self->Replay);
+                int replayState = *((int*)(char*)Replay);
                 if (!inRace_2306B8(replayState) || notMode3_2306B8(replayState)) {
-                    cGameViewMan_updateAll((char*)self->ViewMan);
+                    cGameViewMan_updateAll((char*)ViewMan);
                 }
             }
-            (self->mUpdateTick)++;
+            (mUpdateTick)++;
             {
                 unsigned int i;
-                for (i = 0; i < NumViews_2306B8(self->ViewMan); i++) {
-                    cWorldSound_TriggerWorldAudio((char*)self->WorldSound, &View_2306B8(self->ViewMan, i)->Pose, i);
+                for (i = 0; i < NumViews_2306B8(ViewMan); i++) {
+                    cWorldSound_TriggerWorldAudio((char*)WorldSound, &View_2306B8(ViewMan, i)->Pose, i);
                 }
             }
             {
                 int i;
-                for (i = 0; i < NumRiders_2306B8(self->AI); i++) {
-                    cRider* rider = Rider_2306B8(self->AI, i);
+                for (i = 0; i < NumRiders_2306B8(AI); i++) {
+                    cRider* rider = Rider_2306B8(AI, i);
                     // cBeing slot 19: vibrationUpdate
                     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_AT(rider, sizeof(cRiderState));
                     vt[19].fn(vthis(rider, vt[19]));
                 }
             }
         }
-        if ((char*)self->InputSync != 0) {
-            cInputSync_postupdate((char*)self->InputSync);
+        if ((char*)InputSync != 0) {
+            cInputSync_postupdate((char*)InputSync);
         }
     }
     if (cCommSystem_mCommSystem != 0) {
@@ -1594,7 +1594,7 @@ extern "C" void cGame_update(cGame* self)
         cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
     }
     func_001E1458();
-    cBXLoadIndicator_Update((char*)self->LoadIndicator);
+    cBXLoadIndicator_Update((char*)LoadIndicator);
 }
 #endif
 
@@ -1649,14 +1649,14 @@ struct cMgr00230E98 {
  *
  * @return 1 when focus was given up, 0 while the stream pause or the fade is still busy
  */
-extern "C" int cGame_loseFocus(cGame* self)
+int cGame::loseFocus()
 {
-    void* obj = self->StreamPause;
+    void* obj = StreamPause;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[3].fn(vthis(obj, vt[3])) == 0) {
         return 0;
     }
-    if (cFadeScreen_loseFocus((cFadeScreen*)self) == 0) {
+    if (((cFadeScreen*)this)->loseFocus() == 0) {
         return 0;
     }
     cPS2GraphicsMan* mgr = GrMan;
@@ -1666,7 +1666,7 @@ extern "C" int cGame_loseFocus(cGame* self)
     cScreenTint_m_Enable = 0;
     cLightGlow_m_Enable = 0;
     cSSXScriptEngine_DeInit(ScriptEngine);
-    cBXLoadIndicator_DeInit(self->LoadIndicator);
+    cBXLoadIndicator_DeInit(LoadIndicator);
     return 1;
 }
 #endif
@@ -1714,9 +1714,9 @@ static inline void StateGainFocus_0F40(cGameState* state, int startupFlag)
  * @param self_  the game (cGame, this)
  */
 // Game load state machine: runs the current state and switches to the requested one.
-extern "C" void cGame_updateState(cGame* self_)
+void cGame::updateState()
 {
-    cGame* self = self_;
+    cGame* self = this;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0 && self->ControllerUnplugged != 0)
         return;
@@ -1882,12 +1882,12 @@ extern "C" void cGame_updateState(cGame* self);
  * @param startupFlag        the state's startup flag
  * @param refresh  nonzero to switch now (On Tour bForce)
  */
-extern "C" void cGame_setState(cGame* self, int iNextState, int startupFlag, int refresh)
+void cGame::setState(int iNextState, int startupFlag, int refresh)
 {
-    self->mPendingStateID = iNextState;
-    self->mPendingStateStartupFlag = startupFlag;
+    mPendingStateID = iNextState;
+    mPendingStateStartupFlag = startupFlag;
     if (refresh != 0) {
-        cGame_updateState(self);
+        updateState();
     }
 }
 #endif
@@ -1902,10 +1902,9 @@ INCLUDE_ASM("main/gameload", cGame_setPreloadState__FPvi);
  *
  * @param val  the state id to preload
  */
-void cGame_setPreloadState(void* vself, int val)
+void cGame::setPreloadState(int val)
 {
-    cGame* self = (cGame*)vself;
-    self->mPendingPreloadStateID = val;
+    mPendingPreloadStateID = val;
 }
 #endif
 
@@ -1919,19 +1918,20 @@ INCLUDE_ASM("main/gameload", cGame_cancelPreloadingState);
  * state's preloadCancel (vtable slot 4 of mPreloadingState, +0x204) and clears mPreloadStateID and
  * mPreloadingState.
  */
-extern "C" void cGame_cancelPreloadingState(cGame* self) {
+void cGame::cancelPreloadingState()
+{
     cGameState* obj;
     sVEntry<void(void*)>* vt;
 
-    if (self->mPendingPreloadStateID != 0) {
-        self->mPendingPreloadStateID = 0;
+    if (mPendingPreloadStateID != 0) {
+        mPendingPreloadStateID = 0;
     }
-    if (self->mPreloadStateID != 0) {
-        obj = self->mPreloadingState;
+    if (mPreloadStateID != 0) {
+        obj = mPreloadingState;
         vt = (sVEntry<void(void*)>*)obj->mVtbl;
         vt[4].fn(vthis(obj, vt[4])); // slot 4: preloadCancel
-        self->mPreloadStateID = 0;
-        self->mPreloadingState = 0;
+        mPreloadStateID = 0;
+        mPreloadingState = 0;
     }
 }
 #endif
@@ -1948,12 +1948,12 @@ INCLUDE_ASM("main/gameload", cGame_isPreloadedStateReady);
  *
  * @return nonzero when ready
  */
-extern "C" int cGame_isPreloadedStateReady(cGame* self)
+int cGame::isPreloadedStateReady()
 {
-    if (self->mPendingPreloadStateID != 0) {
+    if (mPendingPreloadStateID != 0) {
         return 0;
     }
-    cGameState* preloadingState = self->mPreloadingState;
+    cGameState* preloadingState = mPreloadingState;
     if (((void*)preloadingState) == 0) {
         return 1;
     }
@@ -1971,9 +1971,9 @@ extern "C" void cGameState_gotoNextState(void* p);
  * Moves the game to its next state: calls cGameState_gotoNextState on the current state (mCurrentState, +0x200) when
  * there is one.
  */
-extern "C" void cGame_doNextState(cGame* self)
+void cGame::doNextState()
 {
-    void* gameState = self->mCurrentState;
+    void* gameState = mCurrentState;
     if (gameState != 0) {
         cGameState_gotoNextState(gameState);
     }
@@ -2008,29 +2008,29 @@ extern "C" void cGFUserSelectState_writeToReplayFrame(void* p, void* s);
  *
  * @param stream  the replay frame (On Tour cReplayFramePtr*)
  */
-extern "C" void cGame_writeToReplayFrame(cGame* self, cBxReplayFrame* stream)
+void cGame::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    self->FlagManager->writeToReplayFrame(stream);
-    self->SnowFall->writeToReplayFrame(stream);
-    stream->write((const char*)&self->mCurrentStateID, 4);
-    stream->write((const char*)&self->mPrevStateID, 4);
-    stream->write((const char*)&self->mPendingStateID, 4);
-    stream->write((const char*)&self->mPendingStateStartupFlag, 4);
-    cGFEventStartState_writeToReplayFrame((char*)&self->mEventStartState, stream);
-    cGFPreEventState_writeToReplayFrame_s((char*)&self->mPreEventState, stream);
-    cGFGateState_writeToReplayFrame_s((char*)&self->mGateState, stream);
-    cGFRidingState_writeToReplayFrame_s((char*)&self->mRidingState, stream);
-    cGFFinishlineState_writeToReplayFrame((char*)&self->mFinishlineState, stream);
-    cGFEndState_writeToReplayFrame_s((char*)&self->mEndState, stream);
-    cGFPostEventState_writeToReplayFrame_s((char*)&self->mPostEventState, stream);
-    cGFEndWaitState_writeToReplayFrame_s((char*)&self->mEndWaitState, stream);
-    cGFTransportWaitState_writeToReplayFrame_s((char*)&self->mTransportWaitState, stream);
-    cGFTrackStartState_writeToReplayFrame((char*)&self->mTrackStartState, stream);
-    cGFSectionLoadState_writeToReplayFrame_s((char*)&self->mSectionLoadState, stream);
-    cGFPodiumState_writeToReplayFrame_s((char*)&self->mPodiumState, stream);
-    cGFNextHeatState_writeToReplayFrame((char*)&self->mNextHeatState, stream);
-    cGFUserSelectState_writeToReplayFrame((char*)&self->mUserSelectState, stream);
-    cGFSessionTeleportState_writeToReplayFrame_s((char*)&self->mSessionTeleportState, stream);
+    FlagManager->writeToReplayFrame(stream);
+    SnowFall->writeToReplayFrame(stream);
+    stream->write((const char*)&mCurrentStateID, 4);
+    stream->write((const char*)&mPrevStateID, 4);
+    stream->write((const char*)&mPendingStateID, 4);
+    stream->write((const char*)&mPendingStateStartupFlag, 4);
+    cGFEventStartState_writeToReplayFrame((char*)&mEventStartState, stream);
+    cGFPreEventState_writeToReplayFrame_s((char*)&mPreEventState, stream);
+    cGFGateState_writeToReplayFrame_s((char*)&mGateState, stream);
+    cGFRidingState_writeToReplayFrame_s((char*)&mRidingState, stream);
+    cGFFinishlineState_writeToReplayFrame((char*)&mFinishlineState, stream);
+    cGFEndState_writeToReplayFrame_s((char*)&mEndState, stream);
+    cGFPostEventState_writeToReplayFrame_s((char*)&mPostEventState, stream);
+    cGFEndWaitState_writeToReplayFrame_s((char*)&mEndWaitState, stream);
+    cGFTransportWaitState_writeToReplayFrame_s((char*)&mTransportWaitState, stream);
+    cGFTrackStartState_writeToReplayFrame((char*)&mTrackStartState, stream);
+    cGFSectionLoadState_writeToReplayFrame_s((char*)&mSectionLoadState, stream);
+    cGFPodiumState_writeToReplayFrame_s((char*)&mPodiumState, stream);
+    cGFNextHeatState_writeToReplayFrame((char*)&mNextHeatState, stream);
+    cGFUserSelectState_writeToReplayFrame((char*)&mUserSelectState, stream);
+    cGFSessionTeleportState_writeToReplayFrame_s((char*)&mSessionTeleportState, stream);
 }
 #endif
 
@@ -2070,9 +2070,9 @@ void cGFSessionTeleportState_readFromReplayFrame_14D0(void* state, void* stream)
  * @param stream  the replay frame to read from (On Tour cReplayFramePtr*)
  */
 // Game load state machine: restores the state ids and every state from a save stream.
-extern "C" void cGame_readFromReplayFrame(cGame* self_, cBxReplayFrame* stream)
+void cGame::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cGame* self = self_;
+    cGame* self = this;
     self->FlagManager->readFromReplayFrame(stream);
     self->SnowFall->readFromReplayFrame(stream);
     stream->read((char*)&self->mCurrentStateID, 4);
@@ -2252,14 +2252,14 @@ static inline char* At_1840(char* self, int i)
  *
  * @return 1 when the pause menu should open
  */
-extern "C" int cGame_activatePauseMenu(cGame* self)
+int cGame::activatePauseMenu()
 {
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mDisplayError > 0) {
         return 0;
     }
     int mask = 0;
     void* bi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    cReplay* replay = self->Replay;
+    cReplay* replay = Replay;
     int sel = -1;
     if (replay->Loaded) {
         int ctrlId = replay->PadNum;
@@ -2273,8 +2273,8 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
         }
     } else {
         int i;
-        for (i = 0; i < Count_1840(((char*)self)); i++) {
-            cPlayer* rider = (cPlayer*)At_1840(((char*)self), i);
+        for (i = 0; i < Count_1840(((char*)this)); i++) {
+            cPlayer* rider = (cPlayer*)At_1840(((char*)this), i);
             if (rider->mRider->mIsLocal) {
                 int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
                 void** controller = PlayerObj_1840(ctrlId);
@@ -2288,13 +2288,13 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
             }
         }
     }
-    self->ControllerUnplugged = mask;
+    ControllerUnplugged = mask;
     if (mask) {
         if (sel < 0) {
             int i;
             sel = 0;
-            for (i = 0; i < Count_1840(((char*)self)); i++) {
-                cPlayer* rider = (cPlayer*)At_1840(((char*)self), i);
+            for (i = 0; i < Count_1840(((char*)this)); i++) {
+                cPlayer* rider = (cPlayer*)At_1840(((char*)this), i);
                 if (rider->mRider->mIsLocal) {
                     int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
                     if (IsReady_1840(PlayerObj_1840(ctrlId))) {
@@ -2304,13 +2304,13 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
                 }
             }
         }
-        self->PauseOwner = sel;
+        PauseOwner = sel;
         return 1;
     }
     if (sel >= 0) {
         cBE_getInterface_Fv(cBE_getBE(), 7);
-        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || cGame_canUserActivatePauseMenu(self)) {
-            self->PauseOwner = sel;
+        if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || canUserActivatePauseMenu()) {
+            PauseOwner = sel;
             return 1;
         }
     }
@@ -2331,9 +2331,9 @@ extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(void* a);
  *
  * @return 1 when the pause menu may open, otherwise 0
  */
-extern "C" int cGame_canUserActivatePauseMenu(cGame* self)
+int cGame::canUserActivatePauseMenu()
 {
-    int mode = self->mPendingStateID;
+    int mode = mPendingStateID;
     if (mode != 0) {
         if (mode == 5 || mode == 14 || mode == 1 || mode == 10) {
             return 0;
@@ -2341,7 +2341,7 @@ extern "C" int cGame_canUserActivatePauseMenu(cGame* self)
     }
     int allowed = 0;
     if (cSSXScriptEngine_IsPauseMenuAllowed(ScriptEngine) != 0) {
-        int currentStateId = self->mCurrentStateID;
+        int currentStateId = mCurrentStateID;
         allowed = currentStateId != 5 && currentStateId != 14 && currentStateId != 1 && currentStateId != 10;
     }
     return allowed;
@@ -2371,7 +2371,8 @@ struct sQuadVtx {
  *
  * @param value  the texture id
  */
-extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
+void cLoadScreen::drawSplash(int value)
+{
     sQuadVtx verts[4];
     t4Vector cornerPos;
     int i;
@@ -2413,10 +2414,10 @@ extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
  *
  * @return cFadeScreen_loseFocus's result, or 0
  */
-extern "C" int cLoadScreen_loseFocus(cLoadScreen* self)
+int cLoadScreen::loseFocus()
 {
     if (cAppMan_TheAppMan->LoadTimer.loadpercent == 100.0f) {
-        return cFadeScreen_loseFocus((cFadeScreen*)self);
+        return ((cFadeScreen*)this)->loseFocus();
     }
     return 0;
 }
@@ -2437,7 +2438,7 @@ INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
  */
 void* cLoadScreen_update(void* self)
 {
-    return cFadeScreen_update((cFadeScreen*)self);
+    return ((cFadeScreen*)self)->update();
 }
 #endif
 
@@ -2473,10 +2474,10 @@ INCLUDE_ASM("main/gameload", cFadeScreen_loseFocus);
  *
  * @return 1 once the fade level (offset 4) is at least 0.2, otherwise 0
  */
-extern "C" int cFadeScreen_loseFocus(cFadeScreen* self)
+int cFadeScreen::loseFocus()
 {
-    self->IsEnding = 1;
-    return self->FadeTimer >= 0.20000000298023224f;
+    IsEnding = 1;
+    return FadeTimer >= 0.20000000298023224f;
 }
 #endif
 
@@ -2492,14 +2493,14 @@ INCLUDE_ASM("main/gameload", cFadeScreen_update);
  * @return no meaningful value (the body returns nothing)
  */
 // PORT: the unit declares this void*-returning; the body returns nothing meaningful.
-extern "C" void* cFadeScreen_update(cFadeScreen* self)
+void* cFadeScreen::update()
 {
-    if (self->IsEnding != 0) {
-        self->FadeTimer += 0.01666666753590107f;
+    if (IsEnding != 0) {
+        FadeTimer += 0.01666666753590107f;
     } else {
-        self->FadeTimer -= 0.01666666753590107f;
-        if (self->FadeTimer < 0.0f) {
-            self->FadeTimer = 0.0f;
+        FadeTimer -= 0.01666666753590107f;
+        if (FadeTimer < 0.0f) {
+            FadeTimer = 0.0f;
         }
     }
 }
@@ -2534,9 +2535,9 @@ static inline float Clamp231D60(float v, float lo, float hi)
  *
  * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
  */
-extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
+int cFadeScreen::drawFade()
 {
-    if (self->FadeTimer > 0.0f) {
+    if (FadeTimer > 0.0f) {
     cPS2GraphicsMan* ctx = GrMan;
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
@@ -2547,7 +2548,7 @@ extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
     GrMan->m_pCurrentDrawState->m_bitGroups[1] = (GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x1800000) | 0x1000000;
     GrMan->m_pCurrentDrawState->m_bitGroups[1] &= ~0x300000;
     GrMan->m_pCurrentDrawState->m_bitGroups[1] &= ~0xFF000;
-    float alpha = Clamp231D60(self->FadeTimer * 5.0f, 0.0f, 1.0f);
+    float alpha = Clamp231D60(FadeTimer * 5.0f, 0.0f, 1.0f);
     float minCorner[2];
     float maxCorner[2];
     float col[4];
@@ -2691,7 +2692,7 @@ extern cSSXApp* SSXApp_1FC0 __asm__("SSXApp");
  * by cLoadIndicator_update); its colour (+0xC) takes the field at +0x4 as its first component. Then ends 2D mode and
  * the scene and pops the draw state. The pre-start load screens call it.
  */
-extern "C" void cLoadIndicator_render(cLoadIndicator* self)
+void cLoadIndicator::render()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[0];
@@ -2712,17 +2713,17 @@ extern "C" void cLoadIndicator_render(cLoadIndicator* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_1FC0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    float pulse = fCos(self->phase * 6.2831854820251465f);
+    float pulse = fCos(phase * 6.2831854820251465f);
     sV2_1FC0 size((pulse + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
     int f10v = SSXApp_1FC0->LoadIconTextureID;
     // stored through a plain pointer: an in-struct store would let GrMan's later reload be dropped
     short* textureId = &GrMan->m_pCurrentDrawState->m_textureState.m_texid[0];
     *textureId = f10v;
-    (*(sCol_1FC0*)&self->colour).r = self->alpha;
+    (*(sCol_1FC0*)&colour).r = alpha;
     sV2_1FC0 uv0(0.0f, 0.0f);
     sV2_1FC0 uv1(1.0f, 1.0f);
-    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, (*(sCol_1FC0*)&self->colour));
+    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, (*(sCol_1FC0*)&colour));
     ((cGfx_1FC0*)GrMan)->PopView();
     ((cGfx_1FC0*)GrMan)->PopViewport();
     ((cGfx_1FC0*)GrMan)->stateTop--;

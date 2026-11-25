@@ -71,6 +71,12 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     char* mszPassword;              // 0x6E4 [P] getPassword (preview 0xC0); [R] cBXString_EmptyString, destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 2)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateNetCreateRoomPopup1() __asm__("cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1");
+    int getRoomName() __asm__("cFEStateNetCreateRoomPopup_getRoomName");
+    int getChannelName() __asm__("cFEStateNetCreateRoomPopup_getChannelName");
+    int getPassword() __asm__("cFEStateNetCreateRoomPopup_getPassword");
 };
 
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mpTextRoomName, 0x6D0);

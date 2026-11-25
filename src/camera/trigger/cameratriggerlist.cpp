@@ -13,10 +13,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_init__FP18cCa
  *
  * Clears the trigger array pointer, then resets the header fields with cCameraTriggerList_initHeader().
  */
-void cCameraTriggerList_init(cCameraTriggerList* self)
+void cCameraTriggerList::init()
 {
-    self->Triggers = 0;
-    cCameraTriggerList_initHeader(self);
+    Triggers = 0;
+    initHeader();
 }
 #endif
 
@@ -42,11 +42,10 @@ struct sTrigPart_16BF40
  * For each trigger: frees the buffer at +0x8, destroys and deletes the parts at +0xC and +0x10 (virtual slot
  * 1), then destroys and deletes the trigger itself.
  *
- * @param self_  the cCameraTriggerList
  */
-extern "C" void cCameraTriggerList_reset(cCameraTriggerList* self_)
+void cCameraTriggerList::reset()
 {
-    cCameraTriggerList* self = self_;
+    cCameraTriggerList* self = this;
     for (int i = 0; i < self->NumTriggers; i++)
     {
         if (((int*)((tCameraTrigger**)self->Triggers)[i]->Volume))
@@ -72,7 +71,7 @@ extern "C" void cCameraTriggerList_reset(cCameraTriggerList* self_)
             tCameraTrigger__tCameraTrigger(((tCameraTrigger**)self->Triggers)[i], 3);
         ((tCameraTrigger**)self->Triggers)[i] = 0;
     }
-    cCameraTriggerList_initHeader((cCameraTriggerList*)self);
+    self->initHeader();
 }
 #endif
 
@@ -90,7 +89,7 @@ void cMemMan_free(void*);
  */
 extern "C" void cCameraTriggerList_purge(void** self)
 {
-    cCameraTriggerList_reset((cCameraTriggerList*)self);
+    ((cCameraTriggerList*)self)->reset();
     if (*self != 0) {
         cMemMan_free(*self);
         *self = 0;
@@ -115,10 +114,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_findTrigger);
  * @param key  the trigger ID to look for
  * @return the matching trigger, or 0
  */
-extern "C" int* cCameraTriggerList_findTrigger(cCameraTriggerList* self, int key)
+int* cCameraTriggerList::findTrigger(int key)
 {
-    for (int i = 0; i < self->NumTriggers; i++) {
-        int* entry = (int*)(void**)self->Triggers[i];
+    for (int i = 0; i < NumTriggers; i++) {
+        int* entry = (int*)(void**)Triggers[i];
         if (*entry == key)
             return entry;
     }
@@ -178,16 +177,16 @@ extern char str_Read_Buffer[];
  * @return 0 on success, 1 if the file is missing, 2 if the buffer could not be allocated, otherwise the
  *         error from cCameraTriggerList_loadFromBuffer()
  */
-extern "C" int cCameraTriggerList_loadFromFile(cCameraTriggerList* self, const char* name)
+int cCameraTriggerList::loadFromFile(const char* name)
 {
     if (!BXFILE_exists(name))
         return 1;
-    cCameraTriggerList_reset(self);
+    reset();
     int size = BXFILE_size(name);
     void* buf = operator_new_K2(size, str_Read_Buffer, 0x100, 0);
     FILE_loadpackat(name, buf, size);
     if (buf != 0) {
-        int status = cCameraTriggerList_loadFromBuffer(self, buf);
+        int status = loadFromBuffer(buf);
         cMemMan_free(buf);
         return status;
     }
@@ -229,16 +228,15 @@ struct tCameraTrigger_K3 {
  * the "Camera Trigger Array" and reads each trigger with readTrigger(). A failed trigger is destroyed and its
  * error returned, leaving the triggers before it in place.
  *
- * @param self_  the cCameraTriggerList, untyped
  * @param buf    start of the file image
  * @return 0 on success, 3 for a wrong version, otherwise readTrigger's error
  */
-extern "C" int cCameraTriggerList_loadFromBuffer(cCameraTriggerList* self_, void* buf)
+int cCameraTriggerList::loadFromBuffer(void* buf)
 {
-    cCameraTriggerList* self = (cCameraTriggerList*)self_;
+    cCameraTriggerList* self = (cCameraTriggerList*)this;
     void* cur = buf;
-    cCameraTriggerList_initHeader(self);
-    cCameraTriggerList_readCookie(self, &cur);
+    self->initHeader();
+    self->readCookie(&cur);
     if (self->Cookie != 7) {
         self->Cookie = 7;
         return 3;
@@ -287,12 +285,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_initHeader__F
  * Sets the trigger count and the words at +0x08 and +0x10 to 0, and the version to 7. The array pointer at
  * +0x00 is left alone.
  */
-void cCameraTriggerList_initHeader(cCameraTriggerList* self)
+void cCameraTriggerList::initHeader()
 {
-    self->NumTriggers = 0;
-    self->Cookie = 7;
-    self->NextID = 0;
-    self->Time = 0;
+    NumTriggers = 0;
+    Cookie = 7;
+    NextID = 0;
+    Time = 0;
 }
 #endif
 
@@ -309,9 +307,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readCookie__F
  *
  * @param buffer  pointer to the stream's read cursor
  */
-void cCameraTriggerList_readCookie(cCameraTriggerList* self, void* buffer)
+void cCameraTriggerList::readCookie(void* buffer)
 {
-    get_uint(buffer, &self->Cookie);
+    get_uint(buffer, &Cookie);
 }
 #endif
 
@@ -330,11 +328,11 @@ int get_uint_c(void* buffer, void* dest) __asm__("get_uint");
  * @param buffer  pointer to the stream's read cursor
  * @return always 0
  */
-extern "C" int cCameraTriggerList_readHeader(cCameraTriggerList* self, void* buffer)
+int cCameraTriggerList::readHeader(void* buffer)
 {
-    get_uint_c(buffer, &self->Time);
-    get_uint_c(buffer, &self->NumTriggers);
-    get_uint_c(buffer, &self->NextID);
+    get_uint_c(buffer, &Time);
+    get_uint_c(buffer, &NumTriggers);
+    get_uint_c(buffer, &NextID);
     return 0;
 }
 #endif

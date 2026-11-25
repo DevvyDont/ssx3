@@ -101,6 +101,13 @@ struct RCMP_DECODER {
                                         //     ReleaseFrame call its slots 3 / 4 / 5 / 6; func_003AEAD0 tests it
     void** mVtbl;                       // 0x18 [R] ctor and dtor RCMP_DECODER_vtbl; func_003AE300 deletes the decoder through
                                         //     slot 1
+
+    // Methods bound to their retail symbols by asm labels.
+    void FreeChosenCodec() __asm__("RCMP_DECODER_FreeChosenCodec");
+    int GetCurrentFrameNumber() __asm__("RCMP_DECODER_GetCurrentFrameNumber");
+    float GetFrameRate() __asm__("RCMP_DECODER_GetFrameRate");
+    void ReleaseFrame(int frame) __asm__("RCMP_DECODER_ReleaseFrame");
+    int GetChunk() __asm__("RCMP_DECODER_GetChunk");
 };
 
 CHECK_OFFSET(RCMP_RCMP_SYSTEM, AllocMemFunc, 0x0);

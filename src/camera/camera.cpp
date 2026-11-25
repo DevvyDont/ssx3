@@ -37,9 +37,9 @@ extern "C" void cCamera_resetChaseControllerSwitches(void)
     cGame* cam = SSXApp->Game;
     cGameViewMan* viewMan = cam->ViewMan;
     if (viewMan != 0) {
-        cChaseCameraController_switchCamera_SoftReset(viewMan->PlayerCamera[0]->ChaseController);
+        viewMan->PlayerCamera[0]->ChaseController->switchCamera_SoftReset();
         if ((int)viewMan->m_uiNumPlayers >= 2) {
-            cChaseCameraController_switchCamera_SoftReset(viewMan->PlayerCamera[1]->ChaseController);
+            viewMan->PlayerCamera[1]->ChaseController->switchCamera_SoftReset();
         }
     }
 }
@@ -222,8 +222,8 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     cRiderCameraTarget* riderRef = (cRiderCameraTarget*)operator new(8, str_RiderCameraTarget, 0, 0);
     VPTR_AT(riderRef, 0) = cRiderCameraTarget_vtbl;
     (*(int*)&riderRef->Rider) = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
-    cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
-    cChaseCameraController_switchCamera_Volume((cChaseCameraController*)self->chase, 76, 0, 1.0f);
+    ((cChaseCameraController*)self->chase)->setTarget((int*)riderRef);
+    ((cChaseCameraController*)self->chase)->switchCamera_Volume(76, 0, 1.0f);
     cChaseAlgorithm_setTarget((char*)self + 0xC0, (int)riderRef);
     cCamera_snapResultAlgorithm(self);
     self->f454 = 0;
@@ -252,12 +252,12 @@ extern "C" void* cCamera_updateCamMat(void* self);
  *
  * Calls the current controller's virtual slot 2 (update), then cCamera_updateCamMat (unknown).
  */
-extern "C" void cCamera_update(cCamera* self)
+void cCamera::update()
 {
-    cCameraController* controller = self->Controller;
+    cCameraController* controller = Controller;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
     vt[2].fn(vthis(controller, vt[2]));
-    cCamera_updateCamMat(self);
+    cCamera_updateCamMat(this);
 }
 #endif
 
@@ -271,17 +271,17 @@ INCLUDE_ASM("camera/camera", cCamera_setCurrentController);
  *
  * @param mode  controller type (On Tour eCamControllerType)
  */
-extern "C" void cCamera_setCurrentController(cCamera* self, int mode)
+void cCamera::setCurrentController(int mode)
 {
     switch (mode) {
     case 1:
-        self->Controller = (cCameraController*)((int)self->ManualController);
+        Controller = (cCameraController*)((int)ManualController);
         break;
     case 2:
-        self->Controller = (cCameraController*)((int)self->ChaseController);
+        Controller = (cCameraController*)((int)ChaseController);
         break;
     case 3:
-        self->Controller = (cCameraController*)((int)self->ScriptController);
+        Controller = (cCameraController*)((int)ScriptController);
         break;
     }
 }
@@ -299,10 +299,9 @@ INCLUDE_ASM("camera/camera", cCamera_snapResultAlgorithm__FPv);
  *
  * @return cLookAtChaseAlgorithm_snapCurrent's result
  */
-void* cCamera_snapResultAlgorithm(void* vself)
+void* cCamera::snapResultAlgorithm()
 {
-    cCamera* self = (cCamera*)vself;
-    return cLookAtChaseAlgorithm_snapCurrent((cLookAtChaseAlgorithm*)(&self->ResultAlgorithm));
+    return cLookAtChaseAlgorithm_snapCurrent((cLookAtChaseAlgorithm*)(&ResultAlgorithm));
 }
 #endif
 
@@ -587,7 +586,7 @@ extern sCamShake_E360 kCamShakeValues_E360[] __asm__("kCamShakeValues");
  */
 // Requests a camera shake of 'type' with strength 'amount' at 'dist' from the camera; keeps the strongest request.
 // Replays ignore types 1-4.
-extern "C" void cCamera_shakeCamera(cCamera* self, int type, float amount, float dist)
+void cCamera::shakeCamera(int type, float amount, float dist)
 {
     int state = *(int*)SSXApp->Game->Replay;
     int replay = state != 0 && state < 10;
@@ -603,11 +602,11 @@ extern "C" void cCamera_shakeCamera(cCamera* self, int type, float amount, float
         scale = 1.0f;
     }
     float variance = amount * scale * kCamShakeValues_E360[type].weight;
-    if (self->MaxShakeVariance < variance) {
-        self->DominantCamShakeType = type;
-        self->MaxShakeVariance = variance;
+    if (MaxShakeVariance < variance) {
+        DominantCamShakeType = type;
+        MaxShakeVariance = variance;
     }
-    self->DoingCamShake = 1;
+    DoingCamShake = 1;
 }
 #endif
 
@@ -667,9 +666,9 @@ extern "C" void cCamera_shakeCamera_E460(char* self, int type, float amount, flo
  * Starts the shake (cLookAtChaseAlgorithm_setupCameraShake) on the first frame, runs cLookAtChaseAlgorithm_updateCameraShake with the dominant type's table
  * values, then clears the per-frame request.
  */
-extern "C" void cCamera_applyCameraShake(cCamera* self)
+void cCamera::applyCameraShake()
 {
-    cCameraTarget* tgt = self->ChaseController->Target;
+    cCameraTarget* tgt = ChaseController->Target;
     float spd = tgt->getBoostWarp();
     if (((cPauseState_Flags & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
         t4Vector velocity = tgt->getVelocity();
@@ -684,24 +683,25 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
             k = 0.0f;
         }
         if (spd > 0.699999988079071f)
-            cCamera_shakeCamera_E460(((char*)self), 3, k, 0.0f);
+            cCamera_shakeCamera_E460(((char*)this), 3, k, 0.0f);
         else if (spd > 0.4000000059604645f)
-            cCamera_shakeCamera_E460(((char*)self), 2, k, 0.0f);
+            cCamera_shakeCamera_E460(((char*)this), 2, k, 0.0f);
         else
-            cCamera_shakeCamera_E460(((char*)self), 1, k, 0.0f);
+            cCamera_shakeCamera_E460(((char*)this), 1, k, 0.0f);
     }
-    int idx = self->DominantCamShakeType;
+    int idx = DominantCamShakeType;
     float shakeBase = kCamShakeValues_E460[idx].base;
     float timeVariance = kCamShakeValues_E460[idx].spread;
     int sel = kCamShakeDependsOnDistance[idx];
-    char* resultAlgorithm = (char*)&self->ResultAlgorithm;
-    float spatialVariance = self->MaxShakeVariance;
-    if (self->DoingCamShake != 0 && self->DoingCamShakeLastFrame == 0)
+    char* resultAlgorithm = (char*)&ResultAlgorithm;
+    float spatialVariance = MaxShakeVariance;
+    if (DoingCamShake != 0 && DoingCamShakeLastFrame == 0)
         cLookAtChaseAlgorithm_setupCameraShake_E460(resultAlgorithm, shakeBase, timeVariance, spatialVariance);
-    cLookAtChaseAlgorithm_updateCameraShake((cLookAtChaseAlgorithm*)resultAlgorithm, self->DoingCamShake, sel, shakeBase, timeVariance, spatialVariance);
-    self->DoingCamShakeLastFrame = self->DoingCamShake;
-    self->DoingCamShake = 0;
-    *(int*)&self->MaxShakeVariance = 0;
+    ((cLookAtChaseAlgorithm*)resultAlgorithm)->updateCameraShake(DoingCamShake, sel, shakeBase, timeVariance,
+            spatialVariance);
+    DoingCamShakeLastFrame = DoingCamShake;
+    DoingCamShake = 0;
+    *(int*)&MaxShakeVariance = 0;
 }
 #endif
 
@@ -1027,24 +1027,24 @@ static inline float clamp_15EC98(float v, float lo, float hi)
  * camera position with 1.5 x radius and marked active. bStreamIsReady becomes 1 when the world cache's focus distance
  * reaches the radius or 2/3 of it clamped to 15000-30000.
  */
-extern "C" void cCamera_updateStreamFocus(cCamera* self)
+void cCamera::updateStreamFocus()
 {
     float viewDist;
     if ((int)SSXApp->Game->ViewMan->m_uiNumView == 1)
-        viewDist = self->Far;
+        viewDist = Far;
     else
-        viewDist = clamp_15EC98(self->Far, 0.0f, 15000.0f);
+        viewDist = clamp_15EC98(Far, 0.0f, 15000.0f);
     float streamRadius = viewDist * 1.5f;
     float far = clamp_15EC98(viewDist * 0.6666666865348816f, 15000.0f, 30000.0f);
     cWorld* sys = cWorld_m_pTheWorld;
-    sys->m_pWorldCache->m_WorldView.m_StreamFocus[self->StreamFocusID].m_bActive = 1;
-    cWorldView_setFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, (t4Vector*)(&self->Pose), streamRadius);
-    self->bStreamIsReady = 0;
+    sys->m_pWorldCache->m_WorldView.m_StreamFocus[StreamFocusID].m_bActive = 1;
+    cWorldView_setFocus(&sys->m_pWorldCache->m_WorldView, StreamFocusID, (t4Vector*)(&Pose), streamRadius);
+    bStreamIsReady = 0;
     t4Vector pos;
     float focusDist;
-    if (cWorldView_getFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, &pos, &focusDist)) {
+    if (cWorldView_getFocus(&sys->m_pWorldCache->m_WorldView, StreamFocusID, &pos, &focusDist)) {
         if (far <= focusDist || viewDist <= focusDist)
-            self->bStreamIsReady = 1;
+            bStreamIsReady = 1;
     }
 }
 #endif
@@ -1059,11 +1059,11 @@ INCLUDE_ASM("camera/camera", cCamera_switchChaseControllerTargetRider);
  *
  * @param value  the rider to follow (On Tour: cRider *)
  */
-extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int value)
+void cCamera::switchChaseControllerTargetRider(int value)
 {
-    cChaseCameraController* obj = self->ChaseController;
+    cChaseCameraController* obj = ChaseController;
     obj->Target->Rider = (cRider*)value;
-    cChaseCameraController* controller = self->ChaseController;
+    cChaseCameraController* controller = ChaseController;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
     vt[4].fn(vthis(controller, vt[4]));
 }
@@ -1923,7 +1923,7 @@ extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorithm* self)
 {
     VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
+    *(float*)self = self->getDefaultView();
     self->AlgorithmType = 78;
     self->Near = 10.0f;
     self->Far = 30000.0f;
@@ -2323,25 +2323,25 @@ static inline float randf_160028()
  *
  * @param amount  the jitter strength, stored in FocusJitterFactor; 0 turns the jitter off (On Tour posJitter)
  */
-extern "C" void cCameraJitterer_updatePositionalJitter(cCameraJitterer* self, float amount)
+void cCameraJitterer::updatePositionalJitter(float amount)
 {
-    self->FocusJitterFactor = amount;
+    FocusJitterFactor = amount;
     if (amount != 0.0f) {
-        if (self->CurrFocusJitterTime > self->FocusJitterTime) {
-            self->OldRandomSideJitter = self->RandomSideJitter;
-            self->OldRandomUpJitter = self->RandomUpJitter;
-            self->RandomSideJitter = (randf_160028() - 0.5f) * 2.0f;
-            self->RandomUpJitter = (randf_160028() - 0.5f) * 2.0f;
-            self->CurrFocusJitterTime = 0.0f;
+        if (CurrFocusJitterTime > FocusJitterTime) {
+            OldRandomSideJitter = RandomSideJitter;
+            OldRandomUpJitter = RandomUpJitter;
+            RandomSideJitter = (randf_160028() - 0.5f) * 2.0f;
+            RandomUpJitter = (randf_160028() - 0.5f) * 2.0f;
+            CurrFocusJitterTime = 0.0f;
         } else {
-            self->CurrFocusJitterTime = self->CurrFocusJitterTime + 0.01666666753590107f;
+            CurrFocusJitterTime = CurrFocusJitterTime + 0.01666666753590107f;
         }
     } else {
-        self->OldRandomSideJitter = 0.0f;
-        self->OldRandomUpJitter = 0.0f;
-        self->RandomSideJitter = 0.0f;
-        self->RandomUpJitter = 0.0f;
-        self->CurrFocusJitterTime = 0.0f;
+        OldRandomSideJitter = 0.0f;
+        OldRandomUpJitter = 0.0f;
+        RandomSideJitter = 0.0f;
+        RandomUpJitter = 0.0f;
+        CurrFocusJitterTime = 0.0f;
     }
 }
 #endif
@@ -2393,22 +2393,22 @@ static inline float fabs_160130(float x)
  *
  * @param amount  the roll jitter strength, stored in RollJitterFactor; 0 turns it off (On Tour rollJitter)
  */
-extern "C" void cCameraJitterer_updateRollJitter(cCameraJitterer* self, float amount)
+void cCameraJitterer::updateRollJitter(float amount)
 {
-    self->RollJitterFactor = amount;
+    RollJitterFactor = amount;
     if (amount != 0.0f) {
-        if (self->CurrRollJitterTime > self->RollJitterTime) {
-            self->OldRandomRollJitter = self->RandomRollJitter;
-            while (fabs_160130(self->OldRandomRollJitter - self->RandomRollJitter) < 0.5f)
-                self->RandomRollJitter = (randf_160130() - 0.5f) * 2.0f;
-            self->CurrRollJitterTime = 0.0f;
+        if (CurrRollJitterTime > RollJitterTime) {
+            OldRandomRollJitter = RandomRollJitter;
+            while (fabs_160130(OldRandomRollJitter - RandomRollJitter) < 0.5f)
+                RandomRollJitter = (randf_160130() - 0.5f) * 2.0f;
+            CurrRollJitterTime = 0.0f;
         } else {
-            self->CurrRollJitterTime = self->CurrRollJitterTime + 0.01666666753590107f;
+            CurrRollJitterTime = CurrRollJitterTime + 0.01666666753590107f;
         }
     } else {
-        self->CurrRollJitterTime = 0.0f;
-        self->RandomRollJitter = 0.0f;
-        self->OldRandomRollJitter = 0.0f;
+        CurrRollJitterTime = 0.0f;
+        RandomRollJitter = 0.0f;
+        OldRandomRollJitter = 0.0f;
     }
 }
 #endif
@@ -2516,13 +2516,13 @@ INCLUDE_ASM("camera/camera", cCameraJitterer_getRollJitter);
  *
  * @return the roll offset in radians
  */
-extern "C" float cCameraJitterer_getRollJitter(cCameraJitterer* self)
+float cCameraJitterer::getRollJitter()
 {
-    float jitterFactor = self->RollJitterFactor;
+    float jitterFactor = RollJitterFactor;
     if (jitterFactor == 0.0f)
         return 0.0f;
-    return jitterFactor * (self->CurrRollJitterTime / self->RollJitterTime * 0.007853982038795948f)
-             * (self->RandomRollJitter - self->OldRandomRollJitter);
+    return jitterFactor * (CurrRollJitterTime / RollJitterTime * 0.007853982038795948f)
+             * (RandomRollJitter - OldRandomRollJitter);
 }
 #endif
 
@@ -2773,7 +2773,7 @@ extern "C" void cManualChaseAlgorithm_snap(cManualChaseAlgorithm* self, int id)
     if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(((cLookAtChaseAlgorithm*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 100.0f, 100.0f);
+        self->setupInitialCamDir(100.0f, 100.0f);
         self->update();
     }
 }
@@ -3040,7 +3040,7 @@ extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
     if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
+        self->setupInitialCamDir(100.0f, 100.0f);
         self->update();
     }
 }
@@ -3214,7 +3214,7 @@ extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int 
     if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
+        self->setupInitialCamDir(100.0f, 100.0f);
         self->Initialized = 0;
         self->update();
     }
@@ -3836,7 +3836,7 @@ extern "C" void cIdleChaseAlgorithm_snap_v(char* vself, int id)
     {
         self->Position = cmAddP_1848(cmAdd_001607E0_1848(self->Target->getPosition(), cmScaleP_1848b(&t4vect_ZAxis_1848, 100.05000305175781f)), &t4vect_XAxis);
         cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 559.7440185546875f, 300.0f);
+        self->setupInitialCamDir(559.7440185546875f, 300.0f);
         self->update();
     }
 }
@@ -3856,19 +3856,19 @@ extern int persistentPlayerChoiceType[2];
  *
  * @param i  view index into persistentPlayerChoiceType
  */
-extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraController* self, int i)
+void cChaseCameraController::switchCamera_HardReset(int i)
 {
-    self->PreferredChaseAlgoLastFrame = 61;
-    *(int*)&self->TimeSinceLastSuggestedVolumeTrigger = 0;
-    self->CamSwitchRecord.IsInReplay = 0;
-    self->CamSwitchRecord.IsInVolume = 0;
-    self->CamSwitchRecord.IsSlow = 0;
-    self->GoingSlow = 0;
-    self->NumFramesSlowGround = 0;
-    self->CamSwitchRecord.LatestReplayType = 61;
-    self->CamSwitchRecord.PlayerChoiceType = persistentPlayerChoiceType[i];
-    self->CamSwitchRecord.VolumeType = 61;
-    self->CamSwitchRecord.TriggerAction = 0;
+    PreferredChaseAlgoLastFrame = 61;
+    *(int*)&TimeSinceLastSuggestedVolumeTrigger = 0;
+    CamSwitchRecord.IsInReplay = 0;
+    CamSwitchRecord.IsInVolume = 0;
+    CamSwitchRecord.IsSlow = 0;
+    GoingSlow = 0;
+    NumFramesSlowGround = 0;
+    CamSwitchRecord.LatestReplayType = 61;
+    CamSwitchRecord.PlayerChoiceType = persistentPlayerChoiceType[i];
+    CamSwitchRecord.VolumeType = 61;
+    CamSwitchRecord.TriggerAction = 0;
 }
 #endif
 
@@ -3897,7 +3897,7 @@ extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraContr
     self->Type = 2;
     self->BlendType = 1;
     self->Target = 0;
-    cChaseCameraController_switchCamera_HardReset(self, idx);
+    self->switchCamera_HardReset(idx);
     return ((void*)self);
 }
 #endif
@@ -3935,13 +3935,13 @@ void operator_delete(int* ptr);
  *
  * @param target  the new cRiderCameraTarget (owned by the controller)
  */
-extern "C" void cChaseCameraController_setTarget(cChaseCameraController* self, int* target)
+void cChaseCameraController::setTarget(int* target)
 {
-    int* old = (int*)self->Target;
+    int* old = (int*)Target;
     if (old != 0) {
         operator_delete(old);
     }
-    self->Target = (cRiderCameraTarget*)target;
+    Target = (cRiderCameraTarget*)target;
 }
 #endif
 
@@ -3951,11 +3951,11 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_getRider);
 /**
  * Returns the rider the chase camera follows: Target's Rider (Target is not checked for 0).
  *
- * @param chaseCameraController  the controller
  * @return the rider (a cRider*)
  */
-extern "C" int cChaseCameraController_getRider(cChaseCameraController* chaseCameraController) {
-    return ((int)chaseCameraController->Target->Rider);
+int cChaseCameraController::getRider()
+{
+    return ((int)Target->Rider);
 }
 #endif
 
@@ -3995,22 +3995,22 @@ static inline float vlength_161AB0(const t4Vector& v)
  * was preferred (and not while the latest algorithm is 0x4A). The slow camera starts when the rider's motion
  * state is 5 (MS_Handplant) and ends once the speed (velocity x 0.036) is over 35.
  */
-extern "C" void cChaseCameraController_processInput(cChaseCameraController* self)
+void cChaseCameraController::processInput()
 {
     int mode = 61;
-    if (self->PreferredChaseAlgoLastFrame != mode && self->LatestAlgoType != 74)
-        cChaseCameraController_switchCamera_UserChange(self, mode);
-    self->PreferredChaseAlgoLastFrame = mode;
-    float speed = vlength_161AB0(self->Target->getVelocity()) * 0.035999998450279236f;
-    int boarding = cRider_getMotionState(self->Target->Rider) == 5;
-    if (self->GoingSlow == 0) {
+    if (PreferredChaseAlgoLastFrame != mode && LatestAlgoType != 74)
+        switchCamera_UserChange(mode);
+    PreferredChaseAlgoLastFrame = mode;
+    float speed = vlength_161AB0(Target->getVelocity()) * 0.035999998450279236f;
+    int boarding = cRider_getMotionState(Target->Rider) == 5;
+    if (GoingSlow == 0) {
         if (boarding) {
-            self->GoingSlow = 1;
-            cChaseCameraController_switchCamera_Slow(self);
+            GoingSlow = 1;
+            switchCamera_Slow();
         }
     } else if (speed > 35.0f) {
-        self->GoingSlow = 0;
-        cChaseCameraController_switchCamera_EndSlow(self);
+        GoingSlow = 0;
+        switchCamera_EndSlow();
     }
 }
 #endif
@@ -4065,11 +4065,11 @@ static inline int InRace_161BB8(int* st)
  * During a replay (replay state 1-9) of type 0x5D showing another camera than the player's choice, switches
  * back to the player's choice after 10 s; the timer is held at 0 while the replay's word at +0x484 is 0.
  */
-extern "C" void cChaseCameraController_update(cChaseCameraController* self)
+void cChaseCameraController::update()
 {
     if ((cPauseState_Flags & 1) == 0) {
-        cChaseCameraController_processInput(self);
-        cCameraAlgoListNode* n = ((self->AlgorithmList)->Head);
+        processInput();
+        cCameraAlgoListNode* n = (AlgorithmList->Head);
         n->Algorithm->updateAlgorithm(0);
         float rate = n->BlendRate;
         Smooth_161BB8(n, Approach_161BB8(n->Weight, 1.0f, rate));
@@ -4079,7 +4079,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
             if (n->Algorithm->AlgorithmType == 74)
                 n->Weight = 0.0f;
             if (n->Weight <= 0.0f || n->SmoothWeight <= 0.0f) {
-                n = cCameraAlgoList_remove(self->AlgorithmList, n);
+                n = cCameraAlgoList_remove(AlgorithmList, n);
             } else {
                 n->Algorithm->updateAlgorithm(1);
                 n = n->Next;
@@ -4089,15 +4089,15 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
     int* st = (int*)SSXApp->Game->Replay;
     int idle = InRace_161BB8(st) && st[1156 / 4] == 0;
     if (idle)
-        self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
-    if (InRace_161BB8(st) && self->CamSwitchRecord.LatestReplayType == 93 && self->LatestAlgoType != self->CamSwitchRecord.PlayerChoiceType) {
-        self->TimeSinceLastSuggestedVolumeTrigger += 0.01666666753590107f;
-        if (self->TimeSinceLastSuggestedVolumeTrigger > 10.0f) {
-            self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
-            cChaseCameraController_switchCamera_Volume(self, self->CamSwitchRecord.PlayerChoiceType, 0, 1.0f);
+        TimeSinceLastSuggestedVolumeTrigger = 0.0f;
+    if (InRace_161BB8(st) && CamSwitchRecord.LatestReplayType == 93 && LatestAlgoType != CamSwitchRecord.PlayerChoiceType) {
+        TimeSinceLastSuggestedVolumeTrigger += 0.01666666753590107f;
+        if (TimeSinceLastSuggestedVolumeTrigger > 10.0f) {
+            TimeSinceLastSuggestedVolumeTrigger = 0.0f;
+            switchCamera_Volume(CamSwitchRecord.PlayerChoiceType, 0, 1.0f);
         }
     } else {
-        self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
+        TimeSinceLastSuggestedVolumeTrigger = 0.0f;
     }
 }
 #endif
@@ -4117,18 +4117,18 @@ extern "C" void cCameraAlgoList_removeAll(void* list);
  * @param algo  the algorithm to add
  * @param w  blend rate (1.0 = cut)
  */
-extern "C" void cChaseCameraController_addAlgorithm(cChaseCameraController* self, cCameraAlgorithm* algo, float w)
+void cChaseCameraController::addAlgorithm(cCameraAlgorithm* algo, float w)
 {
-    self->LatestAlgoType = algo->AlgorithmType;
-    cCameraAlgoList* list = self->AlgorithmList;
+    LatestAlgoType = algo->AlgorithmType;
+    cCameraAlgoList* list = AlgorithmList;
     if (list->Length == 0) {
         cCameraAlgoList_insert(list, algo, 1, 1.0f);
         return;
     }
     if (w == 1.0f) {
-        cCameraAlgoList_removeAll(self->AlgorithmList);
+        cCameraAlgoList_removeAll(AlgorithmList);
     }
-    cCameraAlgoList_insert(self->AlgorithmList, algo, 1, w);
+    cCameraAlgoList_insert(AlgorithmList, algo, 1, w);
 }
 #endif
 
@@ -4146,12 +4146,12 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int)
  *
  * @param type  the chosen algorithm type
  */
-extern "C" void cChaseCameraController_switchCamera_UserChange(cChaseCameraController* self, int type)
+void cChaseCameraController::switchCamera_UserChange(int type)
 {
-    self->CamSwitchRecord.PlayerChoiceType = type;
-    persistentPlayerChoiceType[self->Target->Rider->mViewIndex] = type;
-    if (!self->CamSwitchRecord.IsInVolume && !self->CamSwitchRecord.IsInReplay && !self->CamSwitchRecord.IsSlow) {
-        cChaseCameraController_createChaseAlgorithmCut(self, type, 0);
+    CamSwitchRecord.PlayerChoiceType = type;
+    persistentPlayerChoiceType[Target->Rider->mViewIndex] = type;
+    if (!CamSwitchRecord.IsInVolume && !CamSwitchRecord.IsInReplay && !CamSwitchRecord.IsSlow) {
+        cChaseCameraController_createChaseAlgorithmCut(this, type, 0);
     }
 }
 #endif
@@ -4167,16 +4167,16 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int)
  * Clears the volume and replay flags and cuts (cChaseCameraController_createChaseAlgorithmCut) to the slow camera 0x42 when slow, else the
  * player's choice, keeping the trigger action.
  */
-extern "C" void cChaseCameraController_switchCamera_EndReplay(cChaseCameraController* self)
+void cChaseCameraController::switchCamera_EndReplay()
 {
     int mode;
-    self->CamSwitchRecord.IsInReplay = 0;
-    self->CamSwitchRecord.IsInVolume = 0;
+    CamSwitchRecord.IsInReplay = 0;
+    CamSwitchRecord.IsInVolume = 0;
     mode = 66;
-    if (!self->CamSwitchRecord.IsSlow) {
-        mode = self->CamSwitchRecord.PlayerChoiceType;
+    if (!CamSwitchRecord.IsSlow) {
+        mode = CamSwitchRecord.PlayerChoiceType;
     }
-    cChaseCameraController_createChaseAlgorithmCut(self, mode, (int)self->CamSwitchRecord.TriggerAction);
+    cChaseCameraController_createChaseAlgorithmCut(this, mode, (int)CamSwitchRecord.TriggerAction);
 }
 #endif
 
@@ -4192,23 +4192,24 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_ReplayToggle);
  *
  * @param mode  replay camera type
  */
-extern "C" void cChaseCameraController_switchCamera_ReplayToggle(cChaseCameraController* self, int mode)
+void cChaseCameraController::switchCamera_ReplayToggle(int mode)
 {
-    self->CamSwitchRecord.IsInReplay = 1;
+    CamSwitchRecord.IsInReplay = 1;
     if (mode == 76) {
-        mode = self->CamSwitchRecord.PlayerChoiceType;
-        cChaseCameraController_createChaseAlgorithmCut(self, mode, 0);
+        mode = CamSwitchRecord.PlayerChoiceType;
+        cChaseCameraController_createChaseAlgorithmCut(this, mode, 0);
     } else if (mode == 93) {
-        if (self->CamSwitchRecord.IsInVolume)
-            cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.VolumeType, (int)self->CamSwitchRecord.TriggerAction);
-        else if (self->CamSwitchRecord.IsSlow)
-            cChaseCameraController_createChaseAlgorithmCut(self, 66, 0);
+        if (CamSwitchRecord.IsInVolume)
+            cChaseCameraController_createChaseAlgorithmCut(this, CamSwitchRecord.VolumeType,
+                    (int)CamSwitchRecord.TriggerAction);
+        else if (CamSwitchRecord.IsSlow)
+            cChaseCameraController_createChaseAlgorithmCut(this, 66, 0);
         else
-            cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.PlayerChoiceType, 0);
+            cChaseCameraController_createChaseAlgorithmCut(this, CamSwitchRecord.PlayerChoiceType, 0);
     } else {
-        cChaseCameraController_createChaseAlgorithmCut(self, mode, 0);
+        cChaseCameraController_createChaseAlgorithmCut(this, mode, 0);
     }
-    self->CamSwitchRecord.LatestReplayType = mode;
+    CamSwitchRecord.LatestReplayType = mode;
 }
 #endif
 
@@ -4227,19 +4228,19 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
  * @param action  the trigger's action (cCTAction *)
  * @param blend  blend rate
  */
-extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int action, float blend)
+void cChaseCameraController::switchCamera_Volume(int mode, int action, float blend)
 {
     if (mode == 76) {
-        self->CamSwitchRecord.IsInVolume = 0;
-        mode = self->CamSwitchRecord.PlayerChoiceType;
+        CamSwitchRecord.IsInVolume = 0;
+        mode = CamSwitchRecord.PlayerChoiceType;
     } else {
-        self->CamSwitchRecord.VolumeType = mode;
-        self->CamSwitchRecord.IsInVolume = 1;
-        self->CamSwitchRecord.TriggerAction = (cCTAction*)action;
+        CamSwitchRecord.VolumeType = mode;
+        CamSwitchRecord.IsInVolume = 1;
+        CamSwitchRecord.TriggerAction = (cCTAction*)action;
     }
-    int ok = !self->CamSwitchRecord.IsInReplay ? 1 : self->CamSwitchRecord.LatestReplayType == 93;
+    int ok = !CamSwitchRecord.IsInReplay ? 1 : CamSwitchRecord.LatestReplayType == 93;
     if (ok) {
-        cChaseCameraController_createChaseAlgorithmBlend(self, mode, action, blend);
+        cChaseCameraController_createChaseAlgorithmBlend(this, mode, action, blend);
     }
 }
 #endif
@@ -4256,14 +4257,14 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
  * Clears the volume flag, marks view 0's camera safe position invalid (cCamera_invalidateSafePosition sets its
  * LastSafePositionInvalid) and cuts to the latest replay type, or the player's choice when that is 0x5D.
  */
-extern "C" void cChaseCameraController_switchCamera_Chapter(cChaseCameraController* self)
+void cChaseCameraController::switchCamera_Chapter()
 {
-    int mode = self->CamSwitchRecord.LatestReplayType;
-    self->CamSwitchRecord.IsInVolume = 0;
+    int mode = CamSwitchRecord.LatestReplayType;
+    CamSwitchRecord.IsInVolume = 0;
     if (mode == 93)
-        mode = self->CamSwitchRecord.PlayerChoiceType;
+        mode = CamSwitchRecord.PlayerChoiceType;
     cCamera_invalidateSafePosition();
-    cChaseCameraController_createChaseAlgorithmBlend(self, mode, 0, 1.0f);
+    cChaseCameraController_createChaseAlgorithmBlend(this, mode, 0, 1.0f);
 }
 #endif
 
@@ -4276,15 +4277,15 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_SoftReset);
  * Clears the volume, replay and slow flags, the slow state and the trigger action and sets the volume type to
  * the player's choice.
  */
-extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraController* self)
+void cChaseCameraController::switchCamera_SoftReset()
 {
-    self->CamSwitchRecord.IsInReplay = 0;
-    self->CamSwitchRecord.IsInVolume = 0;
-    self->CamSwitchRecord.IsSlow = 0;
-    self->CamSwitchRecord.VolumeType = self->CamSwitchRecord.PlayerChoiceType;
-    self->GoingSlow = 0;
-    self->NumFramesSlowGround = 0;
-    self->CamSwitchRecord.TriggerAction = 0;
+    CamSwitchRecord.IsInReplay = 0;
+    CamSwitchRecord.IsInVolume = 0;
+    CamSwitchRecord.IsSlow = 0;
+    CamSwitchRecord.VolumeType = CamSwitchRecord.PlayerChoiceType;
+    GoingSlow = 0;
+    NumFramesSlowGround = 0;
+    CamSwitchRecord.TriggerAction = 0;
 }
 #endif
 
@@ -4298,10 +4299,10 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int)
  *
  * @return whatever cChaseCameraController_createChaseAlgorithmCut returns (callers ignore it)
  */
-extern "C" void* cChaseCameraController_switchCamera_Restart(cChaseCameraController* self)
+void* cChaseCameraController::switchCamera_Restart()
 {
-    cChaseCameraController_switchCamera_SoftReset(self);
-    return cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.PlayerChoiceType, 0);
+    switchCamera_SoftReset();
+    return cChaseCameraController_createChaseAlgorithmCut(this, CamSwitchRecord.PlayerChoiceType, 0);
 }
 #endif
 
@@ -4316,12 +4317,12 @@ int cRider_getMotionState(void*);
  * Sets the slow flag; unless a volume or replay is active, blends to 0x42 at 1.2/60 per frame in motion state
  * 5 (handplant), else 0.6/60.
  */
-extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController* self)
+void cChaseCameraController::switchCamera_Slow()
 {
-    self->CamSwitchRecord.IsSlow = 1;
-    if (!self->CamSwitchRecord.IsInVolume && !self->CamSwitchRecord.IsInReplay) {
-        float blendTime = cRider_getMotionState(self->Target->Rider) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
-        cChaseCameraController_createChaseAlgorithmBlend(self, 66, 0, blendTime * 0.01666666753590107f);
+    CamSwitchRecord.IsSlow = 1;
+    if (!CamSwitchRecord.IsInVolume && !CamSwitchRecord.IsInReplay) {
+        float blendTime = cRider_getMotionState(Target->Rider) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
+        cChaseCameraController_createChaseAlgorithmBlend(this, 66, 0, blendTime * 0.01666666753590107f);
     }
 }
 #endif
@@ -4335,11 +4336,11 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndSlow);
  * Clears the slow flag; unless a volume or replay is active, blends back to the player's choice at about
  * 1/150 per frame.
  */
-extern "C" void cChaseCameraController_switchCamera_EndSlow(cChaseCameraController* self)
+void cChaseCameraController::switchCamera_EndSlow()
 {
-    self->CamSwitchRecord.IsSlow = 0;
-    if (!self->CamSwitchRecord.IsInVolume && !self->CamSwitchRecord.IsInReplay) {
-        cChaseCameraController_createChaseAlgorithmBlend(self, self->CamSwitchRecord.PlayerChoiceType, 0,
+    CamSwitchRecord.IsSlow = 0;
+    if (!CamSwitchRecord.IsInVolume && !CamSwitchRecord.IsInReplay) {
+        cChaseCameraController_createChaseAlgorithmBlend(this, CamSwitchRecord.PlayerChoiceType, 0,
                                                          0.0066666672937572f);
     }
 }
@@ -4351,10 +4352,10 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndRace);
 /**
  * Blends to the end-of-race camera (0x44) unless a volume camera is active.
  */
-extern "C" void cChaseCameraController_switchCamera_EndRace(cChaseCameraController* self)
+void cChaseCameraController::switchCamera_EndRace()
 {
-    if (!self->CamSwitchRecord.IsInVolume) {
-        cChaseCameraController_createChaseAlgorithmBlend(self, 68, 0, 0.016793444752693176f);
+    if (!CamSwitchRecord.IsInVolume) {
+        cChaseCameraController_createChaseAlgorithmBlend(this, 68, 0, 0.016793444752693176f);
     }
 }
 #endif
@@ -4371,10 +4372,9 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndPostRace__FP
  *
  * @return cChaseCameraController_createChaseAlgorithmCut's result (declared void*)
  */
-void* cChaseCameraController_switchCamera_EndPostRace(void* vself)
+void* cChaseCameraController::switchCamera_EndPostRace()
 {
-    cChaseCameraController* self = (cChaseCameraController*)vself;
-    return cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.PlayerChoiceType, 0);
+    return cChaseCameraController_createChaseAlgorithmCut(this, CamSwitchRecord.PlayerChoiceType, 0);
 }
 #endif
 
@@ -4396,7 +4396,7 @@ extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
 {
     VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
+    *(float*)self = self->getDefaultView();
     self->AlgorithmType = 78;
     self->Near = 10.0f;
     self->Far = 30000.0f;
@@ -4460,7 +4460,7 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     self->TurningPIDFilter.ProportionFactor = cPIDFilter_getDefaultProportionFactor();
     self->TurningPIDFilter.ErrorHistoryFactor = cPIDFilter_getDefaultErrorHistoryFactor_0();
     self->TurningPIDFilter.DerrivativeFactor = cPIDFilter_getDefaultDerrivativeFactor_0();
-    cPIDFilter_reset(filter, 0.0f);
+    filter->reset(0.0f);
     *(cQuad128*)&self->Position = t4vect_Origin;
     *(int*)&self->Pitch = 0;
     self->AlgorithmType = 84;
@@ -4748,20 +4748,20 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupHandplantBlend);
  *
  * @param obj  the frame's chase setup (On Tour cChaseSetup& chaseSetup_outArg)
  */
-extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(cLookAtChaseAlgorithm* self, cChaseSetup* obj)
+void cLookAtChaseAlgorithm::setupHandplantBlend(cChaseSetup* obj)
 {
     float handplantBlendOut;
     if (obj->Handplanting == 0) {
-        if (self->FramesSinceHandplant < 820)
-            self->FramesSinceHandplant = self->FramesSinceHandplant + 1;
-        int elapsedFrames = self->FramesSinceHandplant;
+        if (FramesSinceHandplant < 820)
+            FramesSinceHandplant = FramesSinceHandplant + 1;
+        int elapsedFrames = FramesSinceHandplant;
         handplantBlendOut = 1.0f;
         if (elapsedFrames >= 0x78)
             handplantBlendOut = 1.0f - ((float)elapsedFrames - 120.0f) * 0.0014285714132711291f;
         if (handplantBlendOut < 0.0f)
             handplantBlendOut = 0.0f;
     } else {
-        self->FramesSinceHandplant = 0;
+        FramesSinceHandplant = 0;
         handplantBlendOut = 1.0f;
     }
     obj->HandplantBlendOut = handplantBlendOut;
@@ -4830,11 +4830,11 @@ static inline void Normalize_162A20(t4Vector& v)
  *
  * @param trig  the frame's chase setup, not a trigger (On Tour cChaseSetup& setup_outArg)
  */
-extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* self, cChaseSetup* trig)
+void cLookAtChaseAlgorithm::setupHalfPipeCam(cChaseSetup* trig)
 {
     if (trig->Airborne)
     {
-        if (self->AirborneLastFrame == 0)
+        if (AirborneLastFrame == 0)
         {
             t4Vector dir = trig->TVel;
             if (trig->TargetSpeed > 0.0f)
@@ -4842,34 +4842,34 @@ extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* se
                 Normalize_162A20(dir);
                 if (dir.z > 0.8500000238418579f)
                 {
-                    cRiderCameraTarget* obj = self->Target;
+                    cRiderCameraTarget* obj = Target;
                     t4Vector groundNormal = obj->getLastGroundNormal();
                     if (groundNormal.z < 0.10000000149011612f)
                     {
-                        self->HalfPipeInitWait = 0.0f;
-                        self->DoingHalfPipeCam = 1;
+                        HalfPipeInitWait = 0.0f;
+                        DoingHalfPipeCam = 1;
                     }
                 }
             }
-            self->AirborneLastFrame = 1;
-            int late = AITick() - self->LastAirFrame >= 31;
-            if (self->ApplyingAirFunc == 0 && late)
-                self->AirCamSetupCountdown = 15;
+            AirborneLastFrame = 1;
+            int late = AITick() - LastAirFrame >= 31;
+            if (ApplyingAirFunc == 0 && late)
+                AirCamSetupCountdown = 15;
         }
         else
         {
-            self->LastAirFrame = AITick();
+            LastAirFrame = AITick();
             return;
         }
     }
-    else if (self->AirborneLastFrame)
+    else if (AirborneLastFrame)
     {
-        self->AirborneLastFrame = 0;
-        self->DoingHalfPipeCam = 0;
-        self->HalfPipeCamInitialized = 0;
+        AirborneLastFrame = 0;
+        DoingHalfPipeCam = 0;
+        HalfPipeCamInitialized = 0;
     }
     if (trig->Airborne)
-        self->LastAirFrame = AITick();
+        LastAirFrame = AITick();
 }
 #endif
 
@@ -5630,38 +5630,41 @@ static inline t4Vector Scale_163450(const t4Vector& v, float s)
  * @param riseEnterSmoothness  smoothing of the rise while planted (On Tour riseEnterSmoothness)
  * @param riseExitSmoothness  per-frame decay of the rise after the handplant (On Tour riseExitSmoothness)
  */
-extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* self, cChaseSetup* trig, float distanceAlongTangent, float distanceAboveTangent, float speedToTarget, float exitDelay, float rise, float riseEnterSmoothness, float riseExitSmoothness)
+void cLookAtChaseAlgorithm::updateHandplant(cChaseSetup* trig, float distanceAlongTangent, float distanceAboveTangent,
+                                            float speedToTarget, float exitDelay, float rise,
+                                            float riseEnterSmoothness, float riseExitSmoothness)
 {
     if (trig->Handplanting)
     {
-        t4Vector look = Sub_163450(*(&self->CamTargetPos), *(&self->Position));
-        self->SecondsSinceLastHandplant = 0.0f;
-        *(&self->LastHandplantLook) = look;
+        t4Vector look = Sub_163450(*(&CamTargetPos), *(&Position));
+        SecondsSinceLastHandplant = 0.0f;
+        *(&LastHandplantLook) = look;
     }
-    else if (self->SecondsSinceLastHandplant < 5.0f)
+    else if (SecondsSinceLastHandplant < 5.0f)
     {
-        self->SecondsSinceLastHandplant += 0.01666666753590107f;
-        if (self->SecondsSinceLastHandplant < exitDelay)
+        SecondsSinceLastHandplant += 0.01666666753590107f;
+        if (SecondsSinceLastHandplant < exitDelay)
         {
-            float fractionDone = self->SecondsSinceLastHandplant / exitDelay;
+            float fractionDone = SecondsSinceLastHandplant / exitDelay;
             float fractionSquared = fractionDone * fractionDone;
             float smoothFraction = fractionSquared * 3.0f - (fractionSquared + fractionSquared) * fractionDone;
             if (smoothFraction > 1.0f)
                 smoothFraction = 1.0f;
-            t4Vector blendedPos = Add_163450(Scale_163450(Sub_163450(*(&self->CamTargetPos), *(&self->LastHandplantLook)), 1.0f - smoothFraction),
-                                             Scale_163450(*(&self->Position), smoothFraction));
-            *(&self->Position) = blendedPos;
+            t4Vector blendedPos = Add_163450(Scale_163450(Sub_163450(*(&CamTargetPos), *(&LastHandplantLook)),
+                    1.0f - smoothFraction),
+                                             Scale_163450(*(&Position), smoothFraction));
+            *(&Position) = blendedPos;
         }
     }
-    *(&self->LastRiderPos) = trig->TPos;
+    *(&LastRiderPos) = trig->TPos;
     float z;
     if (trig->Handplanting)
-        z = riseEnterSmoothness * self->LastHandplantRise + (1.0f - riseEnterSmoothness) * rise;
+        z = riseEnterSmoothness * LastHandplantRise + (1.0f - riseEnterSmoothness) * rise;
     else
-        z = riseExitSmoothness * self->LastHandplantRise;
-    self->LastHandplantRise = z;
-    self->Position.z += z;
-    cLookAtChaseAlgorithm_verify(((char*)self));
+        z = riseExitSmoothness * LastHandplantRise;
+    LastHandplantRise = z;
+    Position.z += z;
+    cLookAtChaseAlgorithm_verify(((char*)this));
 }
 #endif
 
@@ -6399,47 +6402,49 @@ static inline float Length_1643A8(const t4Vector& v)
  * @param blendInTime  seconds to blend in
  * @param blendOutTime  seconds to blend out
  */
-extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float slowSpeed, float blendInTime, float blendOutTime)
+void cLookAtChaseAlgorithm::updateSlowSpeedCam(cChaseSetup* info, float slowSpeed, float blendInTime,
+                                               float blendOutTime)
 {
     int trig = info->TargetSpeed * 0.035999998450279236f < slowSpeed && info->Airborne == 0 &&
                info->Handplanting == 0;
-    if (self->SlowCamState == 3 && trig) {
-        self->SlowCamState = 0;
-        self->SlowCamBlend = 0.0f;
-        *(&self->SlowCamEnterLook) = Sub_1643A8(*(&self->CamTargetPos), *(&self->Position));
-    } else if (self->SlowCamState == 2 && !trig) {
-        self->SlowCamState = 1;
-        self->SlowCamBlend = 1.0f;
-    } else if (self->SlowCamState == 0 && !trig) {
-        self->SlowCamState = 1;
-    } else if (self->SlowCamState == 1 && trig) {
-        self->SlowCamState = 0;
+    if (SlowCamState == 3 && trig) {
+        SlowCamState = 0;
+        SlowCamBlend = 0.0f;
+        *(&SlowCamEnterLook) = Sub_1643A8(*(&CamTargetPos), *(&Position));
+    } else if (SlowCamState == 2 && !trig) {
+        SlowCamState = 1;
+        SlowCamBlend = 1.0f;
+    } else if (SlowCamState == 0 && !trig) {
+        SlowCamState = 1;
+    } else if (SlowCamState == 1 && trig) {
+        SlowCamState = 0;
     }
-    if (self->SlowCamState == 0) {
-        self->SlowCamBlend = (self->SlowCamBlend + 0.01666666753590107f / blendInTime) <? 1.0f;
-        if (self->SlowCamBlend == 1.0f)
-            self->SlowCamState = 2;
-    } else if (self->SlowCamState == 1) {
-        self->SlowCamBlend = (self->SlowCamBlend - 0.01666666753590107f / blendOutTime) >? 0.0f;
-        if (self->SlowCamBlend == 0.0f)
-            self->SlowCamState = 3;
+    if (SlowCamState == 0) {
+        SlowCamBlend = (SlowCamBlend + 0.01666666753590107f / blendInTime) <? 1.0f;
+        if (SlowCamBlend == 1.0f)
+            SlowCamState = 2;
+    } else if (SlowCamState == 1) {
+        SlowCamBlend = (SlowCamBlend - 0.01666666753590107f / blendOutTime) >? 0.0f;
+        if (SlowCamBlend == 0.0f)
+            SlowCamState = 3;
     }
-    if (self->SlowCamState != 3) {
-        float fractionIn = self->SlowCamBlend;
+    if (SlowCamState != 3) {
+        float fractionIn = SlowCamBlend;
         float fractionSquared = fractionIn * fractionIn;
         float smoothFraction = fractionSquared * 3.0f - (fractionSquared + fractionSquared) * fractionIn;
         if (smoothFraction > 1.0f)
             smoothFraction = 1.0f;
-        t4Vector look = Sub_1643A8(*(&self->CamTargetPos), *(&self->Position));
-        t4Vector newLook = Add_1643A8(Scale_1643A8(look, 1.0f - smoothFraction), Scale_1643A8(*(&self->SlowCamEnterLook), smoothFraction));
+        t4Vector look = Sub_1643A8(*(&CamTargetPos), *(&Position));
+        t4Vector newLook = Add_1643A8(Scale_1643A8(look, 1.0f - smoothFraction), Scale_1643A8(*(&SlowCamEnterLook),
+                smoothFraction));
         float lookLen = Length_1643A8(look);
         float newLookLen = Length_1643A8(newLook);
         ScaleEq_1643A8(newLook, (lookLen * 0.5f + newLookLen * 0.5f) / newLookLen);
-        *(&self->CamTargetPos) =
-            Add_1643A8(Scale_1643A8(*(&self->CamTargetPos), 1.0f - smoothFraction), Scale_1643A8(info->TPos, smoothFraction));
-        *(&self->Position) = Sub_1643A8(*(&self->CamTargetPos), newLook);
+        *(&CamTargetPos) =
+            Add_1643A8(Scale_1643A8(*(&CamTargetPos), 1.0f - smoothFraction), Scale_1643A8(info->TPos, smoothFraction));
+        *(&Position) = Sub_1643A8(*(&CamTargetPos), newLook);
     }
-    cLookAtChaseAlgorithm_verify(self);
+    cLookAtChaseAlgorithm_verify(this);
 }
 #undef S_1643A8
 #undef I_1643A8
@@ -7232,9 +7237,9 @@ static inline t4VectorRot AxisAngle_165540(const t4Vector& axis, float ang)
  *
  * @param ang  the heading in radians (cDirectionChaseAlgorithm passes its Angle; On Tour angle)
  */
-extern "C" void cLookAtChaseAlgorithm_updateRotation(cLookAtChaseAlgorithm* self, float ang)
+void cLookAtChaseAlgorithm::updateRotation(float ang)
 {
-    t4VectorRot off = Sub_165540(self->CamTargetPos, self->Position);
+    t4VectorRot off = Sub_165540(CamTargetPos, Position);
     t4VectorRot dir = t4vect_XAxis_v165540;
     float z = off.z;
     off.z = 0.0f;
@@ -7245,10 +7250,10 @@ extern "C" void cLookAtChaseAlgorithm_updateRotation(cLookAtChaseAlgorithm* self
         dir.z = z;
         t4VectorRot rotator = AxisAngle_165540(t4vect_ZAxis_v165540, ang);
         t4VectorRot rd = Rot_165540(rotator, dir);
-        t4VectorRot newPos = Sub_165540(self->CamTargetPos, rd);
-        self->Position = newPos;
+        t4VectorRot newPos = Sub_165540(CamTargetPos, rd);
+        Position = newPos;
     }
-    cLookAtChaseAlgorithm_verify(((char*)self));
+    cLookAtChaseAlgorithm_verify(((char*)this));
 }
 #endif
 
@@ -7282,39 +7287,39 @@ static inline float RandRange_1656B0(float lo, float hi)
  * @param spread  the random extra seconds (On Tour timeVariance)
  * @param spatialVariance  the largest x/y offset (On Tour spatialVariance)
  */
-extern "C" void cLookAtChaseAlgorithm_setupCameraShake(cLookAtChaseAlgorithm* self, float base, float spread, float spatialVariance)
+void cLookAtChaseAlgorithm::setupCameraShake(float base, float spread, float spatialVariance)
 {
-    self->ShakeNextXTime = base + spread * randf_1656B0();
-    self->ShakeNextYTime = base + spread * randf_1656B0();
-    self->ShakeNextZTime = base + spread * randf_1656B0();
+    ShakeNextXTime = base + spread * randf_1656B0();
+    ShakeNextYTime = base + spread * randf_1656B0();
+    ShakeNextZTime = base + spread * randf_1656B0();
     float rz = spatialVariance * 1.600000023841858f;
-    self->ShakeXTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
-    self->ShakeYTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
-    self->ShakeZTarget = RandRange_1656B0(-rz, rz);
-    self->ShakeLastXTarget = 0.0f;
-    self->ShakeLastYTarget = 0.0f;
-    self->ShakeLastZTarget = 0.0f;
-    self->ShakeXCounter = 0.0f;
-    self->ShakeYCounter = 0.0f;
-    self->ShakeZCounter = 0.0f;
+    ShakeXTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
+    ShakeYTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
+    ShakeZTarget = RandRange_1656B0(-rz, rz);
+    ShakeLastXTarget = 0.0f;
+    ShakeLastYTarget = 0.0f;
+    ShakeLastZTarget = 0.0f;
+    ShakeXCounter = 0.0f;
+    ShakeYCounter = 0.0f;
+    ShakeZCounter = 0.0f;
     base *= 0.5f;
     spread *= 0.5f;
     spatialVariance *= 0.5f;
     rz *= 0.5f;
-    self->SecondaryShakeNextXTime = base + spread * randf_1656B0();
-    self->SecondaryShakeNextYTime = base + spread * randf_1656B0();
-    self->SecondaryShakeNextZTime = base + spread * randf_1656B0();
-    self->SecondaryShakeXTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
-    self->SecondaryShakeYTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
-    self->SecondaryShakeZTarget = RandRange_1656B0(-rz, rz);
-    self->SecondaryShakeLastXTarget = 0.0f;
-    self->SecondaryShakeLastYTarget = 0.0f;
-    self->SecondaryShakeLastZTarget = 0.0f;
-    self->SecondaryShakeXCounter = 0.0f;
-    self->SecondaryShakeYCounter = 0.0f;
-    self->SecondaryShakeZCounter = 0.0f;
-    self->ShakingLastFrame = 0;
-    self->ShakeBlendOutTime = 0.0f;
+    SecondaryShakeNextXTime = base + spread * randf_1656B0();
+    SecondaryShakeNextYTime = base + spread * randf_1656B0();
+    SecondaryShakeNextZTime = base + spread * randf_1656B0();
+    SecondaryShakeXTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
+    SecondaryShakeYTarget = RandRange_1656B0(-spatialVariance, spatialVariance);
+    SecondaryShakeZTarget = RandRange_1656B0(-rz, rz);
+    SecondaryShakeLastXTarget = 0.0f;
+    SecondaryShakeLastYTarget = 0.0f;
+    SecondaryShakeLastZTarget = 0.0f;
+    SecondaryShakeXCounter = 0.0f;
+    SecondaryShakeYCounter = 0.0f;
+    SecondaryShakeZCounter = 0.0f;
+    ShakingLastFrame = 0;
+    ShakeBlendOutTime = 0.0f;
 }
 #endif
 
@@ -7459,90 +7464,90 @@ static inline sVec4 Scale_165938(const sVec4& v, float s)
  */
 // Camera shake update: re-rolls each axis's target when its timer runs out, eases between the
 // previous and new targets and adds the result (scaled by the fade-out and distance) to the position.
-extern "C" void cLookAtChaseAlgorithm_updateCameraShake(cLookAtChaseAlgorithm* self, int flag, int sel, float base, float spread, float spatialVariance)
+void cLookAtChaseAlgorithm::updateCameraShake(int flag, int sel, float base, float spread, float spatialVariance)
 {
     if (flag) {
-        self->ShakeBlendOutTime = 0.0f;
-    } else if (self->ShakingLastFrame) {
-        self->ShakeBlendOutTime = 2.0f;
+        ShakeBlendOutTime = 0.0f;
+    } else if (ShakingLastFrame) {
+        ShakeBlendOutTime = 2.0f;
     }
-    self->ShakingLastFrame = flag;
-    if (self->ShakeBlendOutTime > 0.0f) {
+    ShakingLastFrame = flag;
+    if (ShakeBlendOutTime > 0.0f) {
         // PORT: g++ `>?` (max) operator.
-        self->ShakeBlendOutTime = (self->ShakeBlendOutTime - 0.01666666753590107f) >? 0.0f;
+        ShakeBlendOutTime = (ShakeBlendOutTime - 0.01666666753590107f) >? 0.0f;
     }
     float scale;
-    if (self->ShakeBlendOutTime > 0.0f) {
-        scale = self->ShakeBlendOutTime * 0.5f;
+    if (ShakeBlendOutTime > 0.0f) {
+        scale = ShakeBlendOutTime * 0.5f;
     } else {
         scale = 1.0f;
     }
-    if (!flag && !(self->ShakeBlendOutTime > 0.0f)) {
+    if (!flag && !(ShakeBlendOutTime > 0.0f)) {
         return;
     }
-    self->ShakeXCounter += 0.01666666753590107f;
-    self->ShakeYCounter += 0.01666666753590107f;
-    self->ShakeZCounter += 0.01666666753590107f;
-    if (self->ShakeXCounter > self->ShakeNextXTime) {
-        self->ShakeNextXTime = base + spread * randf_165938();
-        self->ShakeLastXTarget = self->ShakeXTarget;
-        self->ShakeXTarget = RandRange_165938(-spatialVariance, spatialVariance);
-        self->ShakeXCounter -= self->ShakeNextXTime;
+    ShakeXCounter += 0.01666666753590107f;
+    ShakeYCounter += 0.01666666753590107f;
+    ShakeZCounter += 0.01666666753590107f;
+    if (ShakeXCounter > ShakeNextXTime) {
+        ShakeNextXTime = base + spread * randf_165938();
+        ShakeLastXTarget = ShakeXTarget;
+        ShakeXTarget = RandRange_165938(-spatialVariance, spatialVariance);
+        ShakeXCounter -= ShakeNextXTime;
     }
-    if (self->ShakeYCounter > self->ShakeNextYTime) {
-        self->ShakeNextYTime = base + spread * randf_165938();
-        self->ShakeLastYTarget = self->ShakeYTarget;
-        self->ShakeYTarget = RandRange_165938(-spatialVariance, spatialVariance);
-        self->ShakeYCounter -= self->ShakeNextYTime;
+    if (ShakeYCounter > ShakeNextYTime) {
+        ShakeNextYTime = base + spread * randf_165938();
+        ShakeLastYTarget = ShakeYTarget;
+        ShakeYTarget = RandRange_165938(-spatialVariance, spatialVariance);
+        ShakeYCounter -= ShakeNextYTime;
     }
     float rz = spatialVariance * 1.600000023841858f;
-    if (self->ShakeZCounter > self->ShakeNextZTime) {
-        self->ShakeNextZTime = base + spread * randf_165938();
-        self->ShakeLastZTarget = self->ShakeZTarget;
-        self->ShakeZTarget = RandRange_165938(-rz, rz);
-        self->ShakeZCounter -= self->ShakeNextZTime;
+    if (ShakeZCounter > ShakeNextZTime) {
+        ShakeNextZTime = base + spread * randf_165938();
+        ShakeLastZTarget = ShakeZTarget;
+        ShakeZTarget = RandRange_165938(-rz, rz);
+        ShakeZCounter -= ShakeNextZTime;
     }
     rz *= 0.5f;
     float base2 = base * 0.5f;
     float spread2 = spread * 0.5f;
     float secondaryVariance = spatialVariance * 0.5f;
-    if (self->SecondaryShakeXCounter > self->SecondaryShakeNextXTime) {
-        self->SecondaryShakeNextXTime = base2 + spread2 * randf_165938();
-        self->SecondaryShakeLastXTarget = self->SecondaryShakeXTarget;
-        self->SecondaryShakeXTarget = RandRange_165938(-secondaryVariance, secondaryVariance);
-        self->SecondaryShakeXCounter -= self->SecondaryShakeNextXTime;
+    if (SecondaryShakeXCounter > SecondaryShakeNextXTime) {
+        SecondaryShakeNextXTime = base2 + spread2 * randf_165938();
+        SecondaryShakeLastXTarget = SecondaryShakeXTarget;
+        SecondaryShakeXTarget = RandRange_165938(-secondaryVariance, secondaryVariance);
+        SecondaryShakeXCounter -= SecondaryShakeNextXTime;
     }
-    if (self->SecondaryShakeYCounter > self->SecondaryShakeNextYTime) {
-        self->SecondaryShakeNextYTime = base2 + spread2 * randf_165938();
-        self->SecondaryShakeLastYTarget = self->SecondaryShakeYTarget;
-        self->SecondaryShakeYTarget = RandRange_165938(-secondaryVariance, secondaryVariance);
-        self->SecondaryShakeYCounter -= self->SecondaryShakeNextYTime;
+    if (SecondaryShakeYCounter > SecondaryShakeNextYTime) {
+        SecondaryShakeNextYTime = base2 + spread2 * randf_165938();
+        SecondaryShakeLastYTarget = SecondaryShakeYTarget;
+        SecondaryShakeYTarget = RandRange_165938(-secondaryVariance, secondaryVariance);
+        SecondaryShakeYCounter -= SecondaryShakeNextYTime;
     }
-    if (self->SecondaryShakeZCounter > self->SecondaryShakeNextZTime) {
-        self->SecondaryShakeNextZTime = base2 + spread2 * randf_165938();
-        self->SecondaryShakeLastZTarget = self->SecondaryShakeZTarget;
-        self->SecondaryShakeZTarget = RandRange_165938(-rz, rz);
-        self->SecondaryShakeZCounter -= self->SecondaryShakeNextZTime;
+    if (SecondaryShakeZCounter > SecondaryShakeNextZTime) {
+        SecondaryShakeNextZTime = base2 + spread2 * randf_165938();
+        SecondaryShakeLastZTarget = SecondaryShakeZTarget;
+        SecondaryShakeZTarget = RandRange_165938(-rz, rz);
+        SecondaryShakeZCounter -= SecondaryShakeNextZTime;
     }
-    float xFraction = SmoothStep_165938(0.0f, self->ShakeNextXTime, self->ShakeXCounter);
-    float yFraction = SmoothStep_165938(0.0f, self->ShakeNextYTime, self->ShakeYCounter);
-    float zFraction = SmoothStep_165938(0.0f, self->ShakeNextZTime, self->ShakeZCounter);
-    float xSecondaryFraction = SmoothStep_165938(0.0f, self->SecondaryShakeNextXTime, self->SecondaryShakeXCounter);
-    float ySecondaryFraction = SmoothStep_165938(0.0f, self->SecondaryShakeNextYTime, self->SecondaryShakeYCounter);
-    float zSecondaryFraction = SmoothStep_165938(0.0f, self->SecondaryShakeNextZTime, self->SecondaryShakeZCounter);
-    float x = Lerp_165938(self->ShakeLastXTarget, self->ShakeXTarget, xFraction);
-    float y = Lerp_165938(self->ShakeLastYTarget, self->ShakeYTarget, yFraction);
-    float z = Lerp_165938(self->ShakeLastZTarget, self->ShakeZTarget, zFraction);
-    x += Lerp_165938(self->SecondaryShakeLastXTarget, self->SecondaryShakeXTarget, xSecondaryFraction);
-    y += Lerp_165938(self->SecondaryShakeLastYTarget, self->SecondaryShakeYTarget, ySecondaryFraction);
-    z += Lerp_165938(self->SecondaryShakeLastZTarget, self->SecondaryShakeZTarget, zSecondaryFraction);
+    float xFraction = SmoothStep_165938(0.0f, ShakeNextXTime, ShakeXCounter);
+    float yFraction = SmoothStep_165938(0.0f, ShakeNextYTime, ShakeYCounter);
+    float zFraction = SmoothStep_165938(0.0f, ShakeNextZTime, ShakeZCounter);
+    float xSecondaryFraction = SmoothStep_165938(0.0f, SecondaryShakeNextXTime, SecondaryShakeXCounter);
+    float ySecondaryFraction = SmoothStep_165938(0.0f, SecondaryShakeNextYTime, SecondaryShakeYCounter);
+    float zSecondaryFraction = SmoothStep_165938(0.0f, SecondaryShakeNextZTime, SecondaryShakeZCounter);
+    float x = Lerp_165938(ShakeLastXTarget, ShakeXTarget, xFraction);
+    float y = Lerp_165938(ShakeLastYTarget, ShakeYTarget, yFraction);
+    float z = Lerp_165938(ShakeLastZTarget, ShakeZTarget, zFraction);
+    x += Lerp_165938(SecondaryShakeLastXTarget, SecondaryShakeXTarget, xSecondaryFraction);
+    y += Lerp_165938(SecondaryShakeLastYTarget, SecondaryShakeYTarget, ySecondaryFraction);
+    z += Lerp_165938(SecondaryShakeLastZTarget, SecondaryShakeZTarget, zSecondaryFraction);
     float amp;
-    if (sel && Length_165938(Sub_165938(*(sVec4*)&self->CamTargetPos, *(sVec4*)&self->Position)) <= 150.0f) {
-        amp = Length_165938(Sub_165938(*(sVec4*)&self->CamTargetPos, *(sVec4*)&self->Position)) * 0.1f;
+    if (sel && Length_165938(Sub_165938(*(sVec4*)&CamTargetPos, *(sVec4*)&Position)) <= 150.0f) {
+        amp = Length_165938(Sub_165938(*(sVec4*)&CamTargetPos, *(sVec4*)&Position)) * 0.1f;
     } else {
         amp = 15.0f;
     }
-    *(sVec4*)&self->CamTargetPos += Scale_165938(sVec4(x, y, z, 0.0f), scale * amp);
+    *(sVec4*)&CamTargetPos += Scale_165938(sVec4(x, y, z, 0.0f), scale * amp);
 }
 #endif
 
@@ -7569,7 +7574,8 @@ extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm*
     self->getRaceCamFinalPhaseData(&finalPhaseData);
     cLookAtChaseAlgorithm_calcPitchHeading(self, 0);
     if (finalPhaseData.DoPitchBlending != 0)
-        cLookAtChaseAlgorithm_updatePitchBlending(self, finalPhaseData.PitchBlendingMaxAngleUp, finalPhaseData.PitchBlendingMaxAngleDown, finalPhaseData.PitchBlendingSmoothnessUp, finalPhaseData.PitchBlendingSmoothnessDown);
+        self->updatePitchBlending(finalPhaseData.PitchBlendingMaxAngleUp, finalPhaseData.PitchBlendingMaxAngleDown,
+                finalPhaseData.PitchBlendingSmoothnessUp, finalPhaseData.PitchBlendingSmoothnessDown);
     cLookAtChaseAlgorithm_updateDebugCam(self);
     cLookAtChaseAlgorithm_calcPose(self);
 }
@@ -7686,10 +7692,10 @@ static inline float Angle_1662A0(const t4Vector& a, const t4Vector& b)
  * @param z  the smoothing while pitch falls (On Tour smoothnessUp)
  * @param w  the smoothing while pitch rises (On Tour smoothnessDown)
  */
-extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm* self, float x, float y, float z, float w)
+void cLookAtChaseAlgorithm::updatePitchBlending(float x, float y, float z, float w)
 {
     float k, ang;
-    int up = self->LastPitch < self->Pitch;
+    int up = LastPitch < Pitch;
     if (up) {
         k = w;
         ang = y;
@@ -7697,11 +7703,11 @@ extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm*
         k = z;
         ang = x;
     }
-    float old = self->Pitch;
-    self->Pitch = k * self->LastPitch + (1.0f - k) * old;
-    t4Vector toTarget = Sub_1662A0(*(&self->CamTargetPos), *(&self->Position));
+    float old = Pitch;
+    Pitch = k * LastPitch + (1.0f - k) * old;
+    t4Vector toTarget = Sub_1662A0(*(&CamTargetPos), *(&Position));
     t4Vector look;
-    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(self, &look);
+    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(this, &look);
     float bearing = Angle_1662A0(toTarget, look);
     float lim = ang * 0.01745329424738884f;
     float historyFactor;
@@ -7709,14 +7715,14 @@ extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm*
         historyFactor = k / (bearing / lim);
     else
         historyFactor = k;
-    self->LastPitch = self->Pitch = historyFactor * self->LastPitch + (1.0f - historyFactor) * old;
+    LastPitch = Pitch = historyFactor * LastPitch + (1.0f - historyFactor) * old;
     t4Vector newLook;
-    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(self, &newLook);
-    t4Vector off = Sub_1662A0(self->Target->getPosition(), *(&self->Position));
+    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(this, &newLook);
+    t4Vector off = Sub_1662A0(Target->getPosition(), *(&Position));
     float alongLook = Dot_1662A0(off, newLook) / Dot_1662A0(newLook, newLook);
     t4Vector sc = Scale_1662A0(newLook, alongLook);
-    *(&self->CamTargetPos) = Add_1662A0(*(&self->Position), sc);
-    cLookAtChaseAlgorithm_verify(self);
+    *(&CamTargetPos) = Add_1662A0(*(&Position), sc);
+    cLookAtChaseAlgorithm_verify(this);
 }
 #undef S_1662A0
 #endif
@@ -7836,14 +7842,13 @@ static inline void SubTo_166550(t4Vector& r, const t4Vector& a, const t4Vector& 
 /**
  * Seeds LastCamDir for a snap: the target's front (slot 4) times @p backDist, minus Z times @p height, normalised.
  *
- * @param self_  the chase algorithm (this)
  * @param backDist  the horizontal part of the starting look direction
  * @param height  the downward part of the starting look direction
  */
-extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* self_, float backDist, float height)
+void cLookAtChaseAlgorithm::setupInitialCamDir(float backDist, float height)
 {
-    t4Vector& camDir = self_->LastCamDir;
-    camDir = Scale_166550(self_->Target->getFront(), backDist);
+    t4Vector& camDir = LastCamDir;
+    camDir = Scale_166550(Target->getFront(), backDist);
     SubTo_166550(camDir, camDir, Scale_166550(t4vect_ZAxis_6550, height));
     DivEq_166550(camDir, Length_166550(camDir));
 }
@@ -8849,7 +8854,7 @@ INCLUDE_ASM("camera/camera", cPIDFilter_getDefaultErrorHistoryFactor);
  *
  * @return 0.1f
  */
-extern "C" float cPIDFilter_getDefaultErrorHistoryFactor(cPIDFilter* self)
+float cPIDFilter::getDefaultErrorHistoryFactor()
 {
     return 0.10000000149011612f;
 }
@@ -8864,7 +8869,7 @@ INCLUDE_ASM("camera/camera", cPIDFilter_getDefaultDerrivativeFactor);
  *
  * @return 0.1f
  */
-extern "C" float cPIDFilter_getDefaultDerrivativeFactor(cPIDFilter* self)
+float cPIDFilter::getDefaultDerrivativeFactor()
 {
     return 0.10000000149011612f;
 }
@@ -8878,14 +8883,14 @@ INCLUDE_ASM("camera/camera", cPIDFilter_reset);
  *
  * @param value  the starting input and result
  */
-extern "C" void cPIDFilter_reset(cPIDFilter* self, float value)
+void cPIDFilter::reset(float value)
 {
     int i;
-    self->NextFreeIndex = 0;
+    NextFreeIndex = 0;
     for (i = 0; i < 5; i++) {
-        self->InputHistory[i] = value;
-        self->ResultHistory[i] = value;
-        self->Difference[i] = 0.0f;
+        InputHistory[i] = value;
+        ResultHistory[i] = value;
+        Difference[i] = 0.0f;
     }
 }
 #endif
@@ -8954,7 +8959,7 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_getDefaultView);
  *
  * @return pi/4 (45 degrees)
  */
-extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self)
+float cCameraAlgorithm::getDefaultView()
 {
     return 0.7853981852531433f;
 }
@@ -9083,8 +9088,9 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPosition);
  * @param position  the new position
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cBasicCameraAlgorithm_setPosition(cBasicCameraAlgorithm* basicCameraAlgorithm, long long *position) {
-    *(long long*)&basicCameraAlgorithm->Position = (long long) *position;
+void cBasicCameraAlgorithm::setPosition(long long *position)
+{
+    *(long long*)&Position = (long long) *position;
 }
 #endif
 //100%
@@ -9093,11 +9099,11 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPitch);
 /**
  * Sets the camera algorithm's pitch (Pitch).
  *
- * @param basicCameraAlgorithm  the algorithm
  * @param fparg0  the new pitch (radians)
  */
-extern "C" void cBasicCameraAlgorithm_setPitch(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
-    basicCameraAlgorithm->Pitch = fparg0;
+void cBasicCameraAlgorithm::setPitch(float fparg0)
+{
+    Pitch = fparg0;
 }
 #endif
 //100%
@@ -9106,11 +9112,11 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setHeading);
 /**
  * Sets the camera algorithm's heading (Heading).
  *
- * @param basicCameraAlgorithm  the algorithm
  * @param fparg0  the new heading (radians)
  */
-extern "C" void cBasicCameraAlgorithm_setHeading(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
-    basicCameraAlgorithm->Heading = fparg0;
+void cBasicCameraAlgorithm::setHeading(float fparg0)
+{
+    Heading = fparg0;
 }
 #endif
 //100%
@@ -9135,11 +9141,11 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPitch);
 /**
  * Returns the camera algorithm's pitch (Pitch).
  *
- * @param basicCameraAlgorithm  the algorithm
  * @return the pitch (radians)
  */
-extern "C" float cBasicCameraAlgorithm_getPitch(cBasicCameraAlgorithm* basicCameraAlgorithm) {
-    return (basicCameraAlgorithm->Pitch);
+float cBasicCameraAlgorithm::getPitch()
+{
+    return (Pitch);
 }
 #endif
 //100%
@@ -9148,11 +9154,11 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getHeading);
 /**
  * Returns the camera algorithm's heading (Heading).
  *
- * @param basicCameraAlgorithm  the algorithm
  * @return the heading (radians)
  */
-extern "C" float cBasicCameraAlgorithm_getHeading(cBasicCameraAlgorithm* basicCameraAlgorithm) {
-    return (basicCameraAlgorithm->Heading);
+float cBasicCameraAlgorithm::getHeading()
+{
+    return (Heading);
 }
 #endif
 
@@ -9258,9 +9264,8 @@ INCLUDE_ASM("camera/camera", cCameraController_update__FPv);
 /**
  * Does nothing: the camera controller's update has an empty body.
  */
-void cCameraController_update(void* vself)
+void cCameraController::update()
 {
-    cCameraController* self = (cCameraController*)vself;
 }
 #endif
 
@@ -9270,11 +9275,11 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_setAlgorithmType);
 /**
  * Sets the camera algorithm's type (AlgorithmType).
  *
- * @param cameraAlgorithm  the algorithm
  * @param algoType  the new type (an eCamAlgoType)
  */
-extern "C" void cCameraAlgorithm_setAlgorithmType(cCameraAlgorithm* cameraAlgorithm, int algoType) {
-    cameraAlgorithm->AlgorithmType = algoType;
+void cCameraAlgorithm::setAlgorithmType(int algoType)
+{
+    AlgorithmType = algoType;
 }
 #endif
 //100%
@@ -9283,11 +9288,11 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_getType);
 /**
  * Returns the camera algorithm's type (AlgorithmType).
  *
- * @param cameraAlgorithm  the algorithm
  * @return the type (an eCamAlgoType)
  */
-extern "C" int cCameraAlgorithm_getType(cCameraAlgorithm* cameraAlgorithm) {
-    return (cameraAlgorithm->AlgorithmType);
+int cCameraAlgorithm::getType()
+{
+    return (AlgorithmType);
 }
 #endif
 //100%
@@ -9311,11 +9316,11 @@ INCLUDE_ASM("camera/camera", cCameraController_getBlendType);
  *
  * Declared on cChaseCameraController but reads the field every cCameraController has.
  *
- * @param chaseCameraController  the controller
  * @return BlendType (an eCamBlendType)
  */
-extern "C" int cCameraController_getBlendType(cCameraController* chaseCameraController) {
-    return (chaseCameraController->BlendType);
+int cCameraController::getBlendType()
+{
+    return (BlendType);
 }
 #endif
 //100%
@@ -9326,11 +9331,11 @@ INCLUDE_ASM("camera/camera", cCameraController_getAlgorithmList);
  *
  * Declared on cChaseCameraController but reads the field every cCameraController has.
  *
- * @param chaseCameraController  the controller
  * @return AlgorithmList (a cCameraAlgoList pointer, returned as int)
  */
-extern "C" int cCameraController_getAlgorithmList(cCameraController* chaseCameraController) {
-    return ((int)chaseCameraController->AlgorithmList);
+int cCameraController::getAlgorithmList()
+{
+    return ((int)AlgorithmList);
 }
 #endif
 //100%
@@ -9339,11 +9344,11 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_getLatestAlgoType);
 /**
  * Returns LatestAlgoType, the type of the algorithm cChaseCameraController_addAlgorithm added last.
  *
- * @param chaseCameraController  the controller
  * @return the algorithm type (an eCamAlgoType)
  */
-extern "C" int cChaseCameraController_getLatestAlgoType(cChaseCameraController* chaseCameraController) {
-    return (chaseCameraController->LatestAlgoType);
+int cChaseCameraController::getLatestAlgoType()
+{
+    return (LatestAlgoType);
 }
 #endif
 //100%
@@ -9352,11 +9357,11 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_getTarget);
 /**
  * Returns Target, the camera target the chase controller follows.
  *
- * @param chaseCameraController  the controller
  * @return the target (a cRiderCameraTarget*)
  */
-extern "C" int cChaseCameraController_getTarget(cChaseCameraController* chaseCameraController) {
-    return ((int)chaseCameraController->Target);
+int cChaseCameraController::getTarget()
+{
+    return ((int)Target);
 }
 #endif
 //100%
@@ -9417,11 +9422,11 @@ INCLUDE_ASM("camera/camera", cManualCameraController_getManualAlgo);
 /**
  * Returns the manual camera controller's manual algorithm (+0x18, the "Manual Cam Algo" its constructor creates).
  *
- * @param manualController  the controller
  * @return the algorithm (a cManualCameraAlgorithm*)
  */
-extern "C" int cManualCameraController_getManualAlgo(cManualCameraController* manualController) {
-    return ((int)manualController->ManualAlgo);
+int cManualCameraController::getManualAlgo()
+{
+    return ((int)ManualAlgo);
 }
 #endif
 //100%
@@ -9430,11 +9435,11 @@ INCLUDE_ASM("camera/camera", cManualCameraController_getEditorAlgo);
 /**
  * Returns the manual camera controller's editor algorithm (+0x1C, the "Editor Cam Algo" its constructor creates).
  *
- * @param manualController  the controller
  * @return the algorithm (a cEditorCameraAlgorithm*)
  */
-extern "C" int cManualCameraController_getEditorAlgo(cManualCameraController* manualController) {
-    return ((int)manualController->EditorAlgo);
+int cManualCameraController::getEditorAlgo()
+{
+    return ((int)EditorAlgo);
 }
 #endif
 
@@ -9494,11 +9499,11 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_getNear);
 /**
  * Returns Near, the near plane distance.
  *
- * @param simpleCamera  the camera
  * @return the near distance
  */
-extern "C" float cSimpleCamera_getNear(cSimpleCamera* simpleCamera) {
-    return (simpleCamera->Near);
+float cSimpleCamera::getNear()
+{
+    return (Near);
 }
 #endif
 //100%
@@ -9507,11 +9512,11 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_getFar);
 /**
  * Returns Far, the far plane distance.
  *
- * @param simpleCamera  the camera
  * @return the far distance
  */
-extern "C" float cSimpleCamera_getFar(cSimpleCamera* simpleCamera) {
-    return (simpleCamera->Far);
+float cSimpleCamera::getFar()
+{
+    return (Far);
 }
 #endif
 //100%
@@ -9576,8 +9581,9 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setPosition);
  * @param position  the new position
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cSimpleCamera_setPosition(cSimpleCamera* simpleCamera, long long *position) {
-    *(long long*)&simpleCamera->Pose = (long long) *position;
+void cSimpleCamera::setPosition(long long *position)
+{
+    *(long long*)&Pose = (long long) *position;
 }
 #endif
 //100%
@@ -9590,8 +9596,9 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setOrientation);
  * @param orientation  the new quaternion
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cSimpleCamera_setOrientation(cSimpleCamera* simpleCamera, long long *orientation) {
-    *(long long*)&simpleCamera->Pose.Q = (long long) *orientation;
+void cSimpleCamera::setOrientation(long long *orientation)
+{
+    *(long long*)&Pose.Q = (long long) *orientation;
 }
 #endif
 //100%
@@ -9604,9 +9611,10 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setPose);
  * @param pose  the new pose (a tPose)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cSimpleCamera_setPose(cSimpleCamera* simpleCamera, tPose* pose) {
-    *(long long*)&simpleCamera->Pose = (long long) *(long long*)&pose->P;
-    *(long long*)&simpleCamera->Pose.Q = (long long) *(long long*)&pose->Q;
+void cSimpleCamera::setPose(tPose* pose)
+{
+    *(long long*)&Pose = (long long) *(long long*)&pose->P;
+    *(long long*)&Pose.Q = (long long) *(long long*)&pose->Q;
 }
 #endif
 //100%
@@ -9628,11 +9636,11 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setMaxFar);
 /**
  * Sets MaxFar, the upper limit for Near and Far.
  *
- * @param simpleCamera  the camera
  * @param fparg0  the new limit
  */
-extern "C" void cSimpleCamera_setMaxFar(cSimpleCamera* simpleCamera, float fparg0) {
-    simpleCamera->MaxFar = fparg0;
+void cSimpleCamera::setMaxFar(float fparg0)
+{
+    MaxFar = fparg0;
 }
 #endif
 //100%
@@ -9641,11 +9649,11 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setMinNear);
 /**
  * Sets MinNear, the lower limit for Near and Far.
  *
- * @param simpleCamera  the camera
  * @param fparg0  the new limit
  */
-extern "C" void cSimpleCamera_setMinNear(cSimpleCamera* simpleCamera, float fparg0) {
-    simpleCamera->MinNear = fparg0;
+void cSimpleCamera::setMinNear(float fparg0)
+{
+    MinNear = fparg0;
 }
 #endif
 //100%
@@ -9654,11 +9662,11 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setMaxFOV);
 /**
  * Sets MaxView, the upper limit for the field of view.
  *
- * @param simpleCamera  the camera
  * @param fparg0  the new limit (radians)
  */
-extern "C" void cSimpleCamera_setMaxFOV(cSimpleCamera* simpleCamera, float fparg0) {
-    simpleCamera->MaxView = fparg0;
+void cSimpleCamera::setMaxFOV(float fparg0)
+{
+    MaxView = fparg0;
 }
 #endif
 //100%
@@ -9667,11 +9675,11 @@ INCLUDE_ASM("camera/camera", cCamera_getCurrentController);
 /**
  * Returns Controller, the controller currently driving the camera.
  *
- * @param camera  the camera
  * @return the controller (a cCameraController*)
  */
-extern "C" int cCamera_getCurrentController(cCamera* camera) {
-    return ((int)camera->Controller);
+int cCamera::getCurrentController()
+{
+    return ((int)Controller);
 }
 #endif
 //100%
@@ -9680,11 +9688,11 @@ INCLUDE_ASM("camera/camera", cCamera_getManualController);
 /**
  * Returns the camera's manual controller (ManualController).
  *
- * @param camera  the camera
  * @return the manual controller
  */
-extern "C" int cCamera_getManualController(cCamera* camera) {
-    return ((int)camera->ManualController);
+int cCamera::getManualController()
+{
+    return ((int)ManualController);
 }
 #endif
 //100%
@@ -9693,11 +9701,11 @@ INCLUDE_ASM("camera/camera", cCamera_getChaseController);
 /**
  * Returns the camera's chase controller (ChaseController).
  *
- * @param camera  the camera
  * @return the chase controller
  */
-extern "C" int cCamera_getChaseController(cCamera* camera) {
-    return ((int)camera->ChaseController);
+int cCamera::getChaseController()
+{
+    return ((int)ChaseController);
 }
 #endif
 //100%
@@ -9706,11 +9714,11 @@ INCLUDE_ASM("camera/camera", cCamera_getScriptController);
 /**
  * Returns the camera's script controller (ScriptController).
  *
- * @param camera  the camera
  * @return the script controller
  */
-extern "C" int cCamera_getScriptController(cCamera* camera) {
-    return ((int)camera->ScriptController);
+int cCamera::getScriptController()
+{
+    return ((int)ScriptController);
 }
 #endif
 //100%
@@ -9719,11 +9727,11 @@ INCLUDE_ASM("camera/camera", cCamera_isStreamReady);
 /**
  * Returns bStreamIsReady, which cCamera_updateStreamFocus sets.
  *
- * @param camera  the camera
  * @return nonzero when the camera's stream is ready
  */
-extern "C" int cCamera_isStreamReady(cCamera* camera) {
-    return (camera->bStreamIsReady);
+int cCamera::isStreamReady()
+{
+    return (bStreamIsReady);
 }
 #endif
 //100%
@@ -9732,11 +9740,11 @@ INCLUDE_ASM("camera/camera", cCamera_getStreamFocusID);
 /**
  * Returns StreamFocusID (0 for view 0, 1 for view 1, -1 before cCamera_init).
  *
- * @param camera  the camera
  * @return the stream focus id (an eStreamFocusID)
  */
-extern "C" int cCamera_getStreamFocusID(cCamera* camera) {
-    return (camera->StreamFocusID);
+int cCamera::getStreamFocusID()
+{
+    return (StreamFocusID);
 }
 #endif
 //100%
@@ -9745,11 +9753,11 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_setRider);
 /**
  * Sets the camera target's Rider (+0x4).
  *
- * @param cameraTarget  the target (a cRiderCameraTarget)
  * @param rider  the rider (a cRider*)
  */
-extern "C" void cRiderCameraTarget_setRider(cRiderCameraTarget* cameraTarget, int rider) {
-    cameraTarget->Rider = (cRider*)rider;
+void cRiderCameraTarget::setRider(int rider)
+{
+    Rider = (cRider*)rider;
 }
 #endif
 //100%
@@ -9758,11 +9766,11 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRider);
 /**
  * Returns the camera target's Rider.
  *
- * @param riderCameraTarget  the target
  * @return the rider (a cRider*)
  */
-extern "C" int cRiderCameraTarget_getRider(cRiderCameraTarget* riderCameraTarget) {
-    return ((int)riderCameraTarget->Rider);
+int cRiderCameraTarget::getRider()
+{
+    return ((int)Rider);
 }
 #endif
 
@@ -10223,7 +10231,7 @@ extern "C" void cLazyChaseAlgorithm_snap_v(char* vself, long id)
         t4Vector nv = cmSub_168150(cmAdd_001607E0_8508(self->Target->getPosition(), cmScaleP_1848(&t4vect_ZAxis_8508, 100.0f)), cmScale_001607E0_8508(self->Target->getFront(), 200.0f));
         self->Position = nv;
         f_6C60_8508(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
+        self->setupInitialCamDir(100.0f, 100.0f);
         self->update();
     }
 }
@@ -10434,7 +10442,7 @@ extern "C" void cLookBackChaseAlgorithm_update(cLookBackChaseAlgorithm* self)
     cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (cChaseSetup*)((char*)&info));
+    self->setupHalfPipeCam((cChaseSetup*)((char*)&info));
     cLookAtChaseAlgorithm_updateCamTarget(((cLookAtChaseAlgorithm*)self), &info);
     cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
     cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 193.1998291015625f, zero, 76.68663024902344f, zero, 1.7668397426605225f,
@@ -10443,7 +10451,7 @@ extern "C" void cLookBackChaseAlgorithm_update(cLookBackChaseAlgorithm* self)
     cLookAtChaseAlgorithm_updateFOVWithSpeed(((cLookAtChaseAlgorithm*)self), &info, zero, 0.9927757978439331f, 1.0f, 0.949999988079071f);
     cLookAtChaseAlgorithm_updateCamTargetLate(((char*)self), &info, 0.721226155757904f, 0.01082259975373745f, 0.22186216711997986f, 0.5425665378570557f,
                   0.9241908192634583f);
-    cLookAtChaseAlgorithm_updateSlowSpeedCam(((cLookAtChaseAlgorithm*)self), &info, 15.0f, 1.5f, 1.5f);
+    self->updateSlowSpeedCam(&info, 15.0f, 1.5f, 1.5f);
     cLookAtChaseAlgorithm_updateLateralShift(((cLookAtChaseAlgorithm*)self), &info, 0.13458502292633057f, 1.7663990259170532f);
 
     t4Vector look = Sub_1686D0(*(&self->CamTargetPos), *(&self->Position));
@@ -10474,7 +10482,7 @@ extern "C" void cLookBackChaseAlgorithm_snap(cLookBackChaseAlgorithm* self, int 
     cRider* rider = self->Target->Rider;
     if (id == rider->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
+        self->setupInitialCamDir(559.7440185546875f, 300.0f);
         self->update();
     }
 }
@@ -10594,8 +10602,8 @@ extern "C" void cMidRightChaseAlgorithm_update(cMidRightChaseAlgorithm* self)
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     float k = 0.9800000190734863f;
-    cLookAtChaseAlgorithm_setupHandplantBlend(((cLookAtChaseAlgorithm*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (cChaseSetup*)((char*)&info));
+    self->setupHandplantBlend(&info);
+    self->setupHalfPipeCam((cChaseSetup*)((char*)&info));
     cLookAtChaseAlgorithm_updateCamTarget(((cLookAtChaseAlgorithm*)self), &info);
     cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
     cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
@@ -10611,7 +10619,7 @@ extern "C" void cMidRightChaseAlgorithm_update(cMidRightChaseAlgorithm* self)
     cLookAtChaseAlgorithm_updateHalfPipeCam(((cLookAtChaseAlgorithm*)self), &info, 1.5269116163253784f);
     cLookAtChaseAlgorithm_updateRailCam(((char*)self), (char*)&info, 200.33114624023438f, 0.9706981778144836f);
     cLookAtChaseAlgorithm_updateViewCam(((char*)self), (char*)&info, 600.0f, 300.0f, 100.0f, k);
-    cLookAtChaseAlgorithm_updateSlowSpeedCam(((cLookAtChaseAlgorithm*)self), &info, 15.0f, 1.5f, 1.5f);
+    self->updateSlowSpeedCam(&info, 15.0f, 1.5f, 1.5f);
     cLookAtChaseAlgorithm_updateLateralShift(((cLookAtChaseAlgorithm*)self), &info, -0.2944446802139282f, 0.6521888375282288f);
 }
 #endif
@@ -10632,7 +10640,7 @@ extern "C" void cMidRightChaseAlgorithm_snap(cMidRightChaseAlgorithm* self, int 
     cRider* rider = self->Target->Rider;
     if (id == rider->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
+        self->setupInitialCamDir(559.7440185546875f, 300.0f);
         self->update();
     }
 }
@@ -10751,8 +10759,8 @@ extern "C" void cMidLeftChaseAlgorithm_update(cMidLeftChaseAlgorithm* self)
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     float k = 0.9800000190734863f;
-    cLookAtChaseAlgorithm_setupHandplantBlend(((cLookAtChaseAlgorithm*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (cChaseSetup*)((char*)&info));
+    self->setupHandplantBlend(&info);
+    self->setupHalfPipeCam((cChaseSetup*)((char*)&info));
     cLookAtChaseAlgorithm_updateCamTarget(((cLookAtChaseAlgorithm*)self), &info);
     cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
     cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
@@ -10768,7 +10776,7 @@ extern "C" void cMidLeftChaseAlgorithm_update(cMidLeftChaseAlgorithm* self)
     cLookAtChaseAlgorithm_updateHalfPipeCam(((cLookAtChaseAlgorithm*)self), &info, 1.5269116163253784f);
     cLookAtChaseAlgorithm_updateRailCam(((char*)self), (char*)&info, 200.33114624023438f, 0.9706981778144836f);
     cLookAtChaseAlgorithm_updateViewCam(((char*)self), (char*)&info, 600.0f, 300.0f, 100.0f, k);
-    cLookAtChaseAlgorithm_updateSlowSpeedCam(((cLookAtChaseAlgorithm*)self), &info, 15.0f, 1.5f, 1.5f);
+    self->updateSlowSpeedCam(&info, 15.0f, 1.5f, 1.5f);
     cLookAtChaseAlgorithm_updateLateralShift(((cLookAtChaseAlgorithm*)self), &info, 0.2944446802139282f, 0.6521888375282288f);
 }
 #endif
@@ -10789,7 +10797,7 @@ extern "C" void cMidLeftChaseAlgorithm_snap(cMidLeftChaseAlgorithm* self, int id
     cRider* rider = self->Target->Rider;
     if (id == rider->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
+        self->setupInitialCamDir(559.7440185546875f, 300.0f);
         self->update();
     }
 }

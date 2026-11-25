@@ -543,7 +543,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
             else
                 setColor_PMWE(w, D_004C8AE8);
             if (self->mScreenExiting == 0)
-                cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 1);
+                self->setPDAIconColor(w->idx, 1);
         }
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_help0));
         if (text != 0)
@@ -558,7 +558,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
         else
             setColor_PMWE(w, D_004C8B08);
         if (self->mScreenExiting == 0)
-            cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 0);
+            self->setPDAIconColor(w->idx, 0);
         break;
     case 3:
     case 4:
@@ -602,22 +602,22 @@ extern char str_pct_s_R[];
  * @param idx  the option (On Tour type), indexing the icon names
  * @param on  nonzero for focus (On Tour focus)
  */
-extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* self, int idx, int on)
+void cOVTemplate_PauseMenu::setPDAIconColor(int idx, int on)
 {
     char buf[64];
     if (on) {
         sprintf(buf, str_pct_s_S, gMenuItemIcons[idx]);
-        unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
-        if (frame != 0xFFFF && self->mpThread == 0) {
-            self->mpThread = (cUIThread*)cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
+        unsigned short frame = cUIScreen_getFrameByLabel(mpPauseScreen, GetHashValue32(buf));
+        if (frame != 0xFFFF && mpThread == 0) {
+            mpThread = (cUIThread*)cUIScreen_playFrame(mpPauseScreen, frame, 1);
         }
     } else {
         sprintf(buf, str_pct_s_R, gMenuItemIcons[idx]);
-        unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
+        unsigned short frame = cUIScreen_getFrameByLabel(mpPauseScreen, GetHashValue32(buf));
         if (frame != 0xFFFF) {
-            self->mpThread->mCurrentFrameNumber = frame;
-            self->mpThread->mLastFrameNumber = 0xFFFF;
-            self->mpThread = 0;
+            mpThread->mCurrentFrameNumber = frame;
+            mpThread->mLastFrameNumber = 0xFFFF;
+            mpThread = 0;
         }
     }
 }

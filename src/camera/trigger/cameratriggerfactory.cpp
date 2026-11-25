@@ -985,16 +985,16 @@ static inline void RotAxis_172278(t4Matrix* m, const t4Vector& axis, float angle
  * @return 1 when the point is inside (or on) the ellipsoid, else 0
  */
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
-extern "C" int cCTVolumeEllipse_containsPoint(cCTVolumeEllipse* self, t4Vector* point)
+int cCTVolumeEllipse::containsPoint(t4Vector* point)
 {
     t4MatrixVU0 toLocal(t4mat_Identity_v172278);
     float one = 1.0f;
     toLocal = vu0ScaleMtx_172278(toLocal,
-                                 t4VectorXYZW(one / self->Scale.x, one / self->Scale.y, one / self->Scale.z, one));
-    RotAxis_172278(&toLocal, t4vect_ZAxis_v172278, -self->Heading);
-    RotAxis_172278(&toLocal, t4vect_YAxis_v172278, -self->Roll);
-    RotAxis_172278(&toLocal, t4vect_XAxis_v172278, -self->Pitch);
-    vu0TransMtx_172278(&toLocal, t4VectorXYZW(-self->Pos, one));
+                                 t4VectorXYZW(one / Scale.x, one / Scale.y, one / Scale.z, one));
+    RotAxis_172278(&toLocal, t4vect_ZAxis_v172278, -Heading);
+    RotAxis_172278(&toLocal, t4vect_YAxis_v172278, -Roll);
+    RotAxis_172278(&toLocal, t4vect_XAxis_v172278, -Pitch);
+    vu0TransMtx_172278(&toLocal, t4VectorXYZW(-Pos, one));
     t4Vector localPt = vu0MulVec_172278(toLocal, *point);
     return localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z <= one;
 }
@@ -3417,11 +3417,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_setBoundAct
  * Stores @p boundAction at +0x80 (On Tour cBoundedAlgorithm::BoundAction). Nothing calls it;
  * cChaseCameraController_createChaseAlgorithmBlend writes the field directly.
  *
- * @param boundedAlgo  the bounded camera algorithm (this)
  * @param boundAction  the cCTActionBoundedCam to follow
  */
-extern "C" void cBoundedAlgorithm_setBoundAction(cBoundedAlgorithm* boundedAlgo, int boundAction) {
-    boundedAlgo->BoundAction = (cCTActionBoundedCam*)boundAction;
+void cBoundedAlgorithm::setBoundAction(int boundAction)
+{
+    BoundAction = (cCTActionBoundedCam*)boundAction;
 }
 #endif
 //100%
@@ -3432,11 +3432,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_getBoundAct
  *
  * Loads +0x80 (On Tour cBoundedAlgorithm::BoundAction). Nothing calls it.
  *
- * @param boundedAlgo  the bounded camera algorithm (this)
  * @return the cCTActionBoundedCam pointer at +0x80
  */
-extern "C" int cBoundedAlgorithm_getBoundAction(cBoundedAlgorithm* boundedAlgo) {
-    return ((int)boundedAlgo->BoundAction);
+int cBoundedAlgorithm::getBoundAction()
+{
+    return ((int)BoundAction);
 }
 #endif
 //100%
@@ -3447,11 +3447,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptCameraController_IsCon
  *
  * An inline accessor emitted with this unit's other copies; nothing calls it or stores its address.
  *
- * @param object  the object to read
  * @return the 32-bit word at +0x18
  */
-extern "C" int cScriptCameraController_IsControllerActive(cScriptCameraController* object) {
-    return (object->IsActive);
+int cScriptCameraController::IsControllerActive()
+{
+    return (IsActive);
 }
 #endif
 
@@ -3463,10 +3463,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pos__FPv);
  *
  * @return self
  */
-void* cCTObject_pos(void* vself)
+void* cCTObject::pos()
 {
-    cCTObject* self = (cCTObject*)vself;
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 
@@ -3478,10 +3477,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_heading__FPv);
  *
  * @return a pointer to the heading, the float at +0x0C
  */
-void* cCTObject_heading(void* vself)
+void* cCTObject::heading()
 {
-    cCTObject* self = (cCTObject*)vself;
-    return (char*)&self->Heading;
+    return (char*)&Heading;
 }
 #endif
 
@@ -3493,10 +3491,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pitch__FPv);
  *
  * @return a pointer to the pitch, the float at +0x10
  */
-void* cCTObject_pitch(void* vself)
+void* cCTObject::pitch()
 {
-    cCTObject* self = (cCTObject*)vself;
-    return (char*)&self->Pitch;
+    return (char*)&Pitch;
 }
 #endif
 
@@ -3508,10 +3505,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_roll__FPv);
  *
  * @return a pointer to the roll, the float at +0x14
  */
-void* cCTObject_roll(void* vself)
+void* cCTObject::roll()
 {
-    cCTObject* self = (cCTObject*)vself;
-    return (char*)&self->Roll;
+    return (char*)&Roll;
 }
 #endif
 
@@ -3523,10 +3519,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_scale__FPv);
  *
  * @return a pointer to the scale, the vector at +0x18 (the factory constructors set it to 1, 1, 1)
  */
-void* cCTObject_scale(void* vself)
+void* cCTObject::scale()
 {
-    cCTObject* self = (cCTObject*)vself;
-    return (char*)&self->Scale;
+    return (char*)&Scale;
 }
 #endif
 
@@ -3726,9 +3721,9 @@ void operator_delete(int* ptr);
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionBoundedCam::BoundObj) when it is set; the pointer
  * itself is not cleared. Slot 1 of the bounded action vtable cCTActionBoundedCam_vtbl.
  */
-extern "C" void cCTActionBoundedCam_purge(cCTActionBoundedCam* self)
+void cCTActionBoundedCam::purge()
 {
-    int* buffer = (int*)self->BoundObj;
+    int* buffer = (int*)BoundObj;
     if (buffer != 0) {
         operator_delete(buffer);
     }
@@ -3746,9 +3741,9 @@ void operator_delete(int* ptr);
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionSpline::Spline) when it is set; the pointer itself is
  * not cleared. Slot 1 of the spline action vtable cCTActionSpline_vtbl.
  */
-extern "C" void cCTActionSpline_purge(cCTActionSpline* self)
+void cCTActionSpline::purge()
 {
-    int* buffer = (int*)self->Spline;
+    int* buffer = (int*)Spline;
     if (buffer != 0) {
         operator_delete(buffer);
     }
@@ -6481,7 +6476,7 @@ extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
  * @param id  the location (On Tour eBELocationID)
  * @return 1 for a WC BAM start location, otherwise 0
  */
-extern "C" int cTrackFileMan_testWCBAMStartLocation(cTrackFileMan* self, int id)
+int cTrackFileMan::testWCBAMStartLocation(int id)
 {
     if (cBENewRaceInterface_getLocationType(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
         return 1;
@@ -6506,14 +6501,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getNextWCBAMSta
  * @param i  the current location index
  * @return the next WC BAM start location index, or -1
  */
-extern "C" int cTrackFileMan_getNextWCBAMStartLocation(cTrackFileMan* self, int i)
+int cTrackFileMan::getNextWCBAMStartLocation(int i)
 {
-    if (self->NumWCBAMStartLocations == 0) {
+    if (NumWCBAMStartLocations == 0) {
         return -1;
     }
-    i = (i + 1) % self->NumLocations;
-    while (self->LocationInfo[i].bIsWCBAMStart == 0) {
-        i = (i + 1) % self->NumLocations;
+    i = (i + 1) % NumLocations;
+    while (LocationInfo[i].bIsWCBAMStart == 0) {
+        i = (i + 1) % NumLocations;
     }
     return i;
 }
@@ -6531,14 +6526,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevWCBAMSta
  * @param i  the current location index
  * @return the previous WC BAM start location index, or -1
  */
-extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(cTrackFileMan* self, int i)
+int cTrackFileMan::getPrevWCBAMStartLocation(int i)
 {
-    if (self->NumWCBAMStartLocations == 0) {
+    if (NumWCBAMStartLocations == 0) {
         return -1;
     }
-    i = (i + self->NumLocations - 1) % self->NumLocations;
-    while (self->LocationInfo[i].bIsWCBAMStart == 0) {
-        i = (i + self->NumLocations - 1) % self->NumLocations;
+    i = (i + NumLocations - 1) % NumLocations;
+    while (LocationInfo[i].bIsWCBAMStart == 0) {
+        i = (i + NumLocations - 1) % NumLocations;
     }
     return i;
 }
@@ -6681,12 +6676,11 @@ extern "C" char* strcpy(char* d, const char* s);
  *
  * Nothing in the ELF calls it.
  *
- * @param selfp  the track file manager (this, On Tour cTrackFileMan)
  * @param file  path of the index file
  */
-extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* file)
+void cTrackFileMan::scanTrackIndex(const char* file)
 {
-    cTrackFileMan* self = selfp;
+    cTrackFileMan* self = this;
     int size;
     char* buf = (char*)FILE_loadsizez(file, &size, 0x100);
     if (buf == 0)
@@ -6781,33 +6775,33 @@ extern char* str_BAM_b[];
  * exist, and for each one found copies its file name, records its location id, marks it a BAM location and,
  * when cTrackFileMan_testWCBAMStartLocation says so, a WC BAM start. On Tour's second pass for separate "%sBAM" files is not here.
  */
-extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
+void cTrackFileMan::scanLocations()
 {
     sCamName names[0x18];
     int i;
-    self->NumLocations = 0;
-    self->NumBAMLocations = 0;
-    self->NumWCBAMStartLocations = 0;
-    MEM_fill(((&self->LocationInfo[0])), 0, 35840);
+    NumLocations = 0;
+    NumBAMLocations = 0;
+    NumWCBAMStartLocations = 0;
+    MEM_fill(((&LocationInfo[0])), 0, 35840);
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
     for (i = 0; i < 22; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
-    if (cTrackFileMan_checkLocation1_A638((self), 22, names, (char*)str_BAM_b)) {
+    if (cTrackFileMan_checkLocation1_A638((this), 22, names, (char*)str_BAM_b)) {
         int j;
-        for (j = 0; j < 22 && self->NumLocations < 0x100; j++) {
+        for (j = 0; j < 22 && NumLocations < 0x100; j++) {
             if (names[j].ok) {
-                int* ip = &((&self->LocationInfo[0]))[0].locationID;
-                int* ap = &((&self->LocationInfo[0]))[0].bIsBAM;
-                strcpy(((&self->LocationInfo[0]))[self->NumLocations].File, cBENewRaceInterface_getLocationFile(iface, j));
-                *(char**)&self->LocationInfo[self->NumLocations].BigFile[0] = str_BAM_b[0];
-                ip[self->NumLocations * 35] = j;
-                ap[self->NumLocations * 35] = 1;
-                self->NumBAMLocations++;
-                if (cTrackFileMan_testWCBAMStartLocation_A638((self), ip[self->NumLocations * 35])) {
-                    (&self->LocationInfo[0].bIsWCBAMStart)[self->NumLocations * 35] = 1;
-                    self->NumWCBAMStartLocations++;
+                int* ip = &((&LocationInfo[0]))[0].locationID;
+                int* ap = &((&LocationInfo[0]))[0].bIsBAM;
+                strcpy(((&LocationInfo[0]))[NumLocations].File, cBENewRaceInterface_getLocationFile(iface, j));
+                *(char**)&LocationInfo[NumLocations].BigFile[0] = str_BAM_b[0];
+                ip[NumLocations * 35] = j;
+                ap[NumLocations * 35] = 1;
+                NumBAMLocations++;
+                if (cTrackFileMan_testWCBAMStartLocation_A638((this), ip[NumLocations * 35])) {
+                    (&LocationInfo[0].bIsWCBAMStart)[NumLocations * 35] = 1;
+                    NumWCBAMStartLocations++;
                 }
-                self->NumLocations++;
+                NumLocations++;
             }
         }
     }
@@ -6846,11 +6840,11 @@ extern char str_big[];
  * @param tag  the big file name (On Tour sBigFile)
  * @return 1 when the section exists and is not in the table yet, else 0
  */
-extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char* tag)
+int cTrackFileMan::checkLocation(char* name, char* tag)
 {
     int i;
-    for (i = 0; i < self->NumLocations; i++) {
-        if (strcasecmp(name, self->LocationInfo[i].File) == 0 && strcasecmp(tag, self->LocationInfo[i].BigFile) == 0) {
+    for (i = 0; i < NumLocations; i++) {
+        if (strcasecmp(name, LocationInfo[i].File) == 0 && strcasecmp(tag, LocationInfo[i].BigFile) == 0) {
             return 0;
         }
     }
@@ -6904,15 +6898,14 @@ extern char str_big[];
  *
  * Quirk: it still returns 1 when every found name was already listed (all flags cleared).
  *
- * @param selfp  the track file manager (this, On Tour cTrackFileMan)
  * @param n  how many names to check (On Tour iNumSectionScan)
  * @param namesp  the names, each with a found flag (On Tour tWorldSectionScan: sectionName, bFound)
  * @param tag  the big file name (On Tour sBigFile)
  * @return 1 when at least one name was found in the big file, else 0
  */
-extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* namesp, char* tag)
+int cTrackFileMan::checkLocation1(int n, void* namesp, char* tag)
 {
-    cTrackFileMan* self = selfp;
+    cTrackFileMan* self = this;
     tWorldSectionScan* names = (tWorldSectionScan*)namesp;
     int fail = 0;
     int i;
@@ -7042,12 +7035,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_setActiveImage
  * @param i  the image index
  * @return 1, always
  */
-extern "C" int cBackgroundMan_setActiveImage(cBackgroundMan* self, int i)
+int cBackgroundMan::setActiveImage(int i)
 {
-    if (i >= 0 && i < self->miNumImage) {
-        self->miActiveImage = i;
+    if (i >= 0 && i < miNumImage) {
+        miActiveImage = i;
     } else {
-        self->miActiveImage = -1;
+        miActiveImage = -1;
     }
     return 1;
 }

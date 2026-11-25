@@ -71,6 +71,9 @@ CHECK_OFFSET(tSphTreeInfo, momentOfInertia, 0x38);
 CHECK_OFFSET(tSphTreeInfo, invMomentOfInertia, 0x5C);
 CHECK_SIZE(tSphTreeInfo, 0x80);
 
+struct t3Vector;
+struct t4Vector;
+
 struct SphereTree {
     t4Vector axis[8];               // 0x000 [O]; [R] SphereTree_init copies the 8 default axes gSphTreeAlignAxis;
                                     //       [U] TransformAbs/TransformRel write axis[i] and axis[7 - i] = -axis[i];
@@ -88,6 +91,35 @@ struct SphereTree {
     int sortAxis[8];                // 0x09C [O]; [U] populateSortAxis sorts the 8 child indices into it (BXSORT_shell);
                                     //       checkPlaneCollision/checkTriCollision visit children in this order
     char unk_0BC[0x4];              // 0x0BC padding (16-byte aligned class)
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("SphereTree_init");
+    float GetRadius() __asm__("SphereTree_GetRadius");
+    float GetResolution() __asm__("SphereTree_GetResolution");
+    void MoveOffset(t4Vector* offset) __asm__("SphereTree_MoveOffset");
+    void TransformAbs(t4Vector* transMat, float scale) __asm__("SphereTree_TransformAbs");
+    int IsSphereCollision(t4Vector* spherePos, float sphereRadius, t4Vector* outPush, t4Vector* outContact)
+        __asm__("SphereTree_IsSphereCollision");
+    int IsBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, t4Vector* outNormal)
+        __asm__("SphereTree_IsBoxCollision");
+    int IsTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* uNorm, t4Vector* overlap,
+                       t4Vector* loc)
+        __asm__("SphereTree_IsTriCollision");
+    int IsTreeCollision(SphereTree* other, t4Vector* outPush, t4Vector* outContact)
+        __asm__("SphereTree_IsTreeCollision");
+    int isTreeCollision(SphereTree* other, t4Vector* posp, int depth, int base, t4Vector* outPush, t4Vector* outContact)
+        __asm__("SphereTree_isTreeCollision");
+    int isSphereCollision(t4Vector* spherePos, float sphereRadius, t4Vector* pos, int depth, int base, t4Vector* outA,
+                          t4Vector* outB)
+        __asm__("SphereTree_isSphereCollision");
+    int isBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* pos, int depth, int base, t4Vector* outPos,
+                       t4Vector* outNormal)
+        __asm__("SphereTree_isBoxCollision");
+    void checkPlaneCollision(void* plane, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB)
+        __asm__("SphereTree_checkPlaneCollision");
+    int isSphereInsideTri(t4Vector* corner1, t4Vector* corner2, t4Vector* corner3, t4Vector* sphereCenter)
+        __asm__("SphereTree_isSphereInsideTri");
+    void populateSortAxis(t4Vector* vdir) __asm__("SphereTree_populateSortAxis");
 };
 
 CHECK_OFFSET(SphereTree, axis, 0x000);

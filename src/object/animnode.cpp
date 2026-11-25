@@ -50,29 +50,29 @@ struct cMeshAnimFrameCtor : cMeshAnimFrame {
  * none) and MeshVelocity one 0x20-byte entry per mesh ("MeshVelocity"); each animated mesh's frame is then pointed
  * at its record (cAnimFrame_setAnimRecord).
  */
-extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
+void cAnimNode::setAnimMeshCache()
 {
-    tModelRecord* def = self->Instance->m_Model;
+    tModelRecord* def = Instance->m_Model;
     tMeshHeirarchyRecord* entry = (def->m_MeshHeirarchy);
     int i;
-    self->NumAnimMeshes = 0;
+    NumAnimMeshes = 0;
     for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
         if (((void*)entry->m_MeshAnim) != 0)
-            self->NumAnimMeshes++;
+            NumAnimMeshes++;
     }
-    if (self->NumAnimMeshes != 0) {
-        cMeshAnimFrame*& frames = self->AnimFrames;
-        frames = new (str_IntersectInfo, 0x20000000, 0) cMeshAnimFrameCtor[self->NumAnimMeshes];
+    if (NumAnimMeshes != 0) {
+        cMeshAnimFrame*& frames = AnimFrames;
+        frames = new (str_IntersectInfo, 0x20000000, 0) cMeshAnimFrameCtor[NumAnimMeshes];
     } else {
-        self->AnimFrames = 0;
+        AnimFrames = 0;
     }
-    tMeshVelocity*& refs = (self->MeshVelocity);
+    tMeshVelocity*& refs = (MeshVelocity);
     refs = new (str_MeshVelocity, 0x20000000, 0) tMeshVelocity[def->m_iNumMeshes];
     entry = (def->m_MeshHeirarchy);
     int k = 0;
     for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
         if (((void*)entry->m_MeshAnim) != 0) {
-            cAnimFrame_setAnimRecord(&self->AnimFrames[k++], ((void*)entry->m_MeshAnim));
+            cAnimFrame_setAnimRecord(&AnimFrames[k++], ((void*)entry->m_MeshAnim));
         }
     }
 }
@@ -99,17 +99,17 @@ struct t4MatrixCtor : t4Matrix {
  * @param idx  the mesh index (On Tour mesh)
  * @param out  receives the position (x, y, z, w)
  */
-extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, t4Vector* out)
+void cAnimNode::calcPosition(int id, int idx, t4Vector* out)
 {
-    void* obj = (char*)&self->MoveNodeBase;
-    if (id == (int)self->Instance) {
-        sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)self->mVtbl;
+    void* obj = (char*)&MoveNodeBase;
+    if (id == (int)Instance) {
+        sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)mVtbl;
         t4Vector position = vt[29].fn(vthis(obj, vt[29]), idx)->row[3];
         *out = position;
         return;
     }
     t4MatrixCtor buf[24];
-    sVEntry<void(void*, int, t4Matrix*)>* vt = (sVEntry<void(void*, int, t4Matrix*)>*)self->mVtbl;
+    sVEntry<void(void*, int, t4Matrix*)>* vt = (sVEntry<void(void*, int, t4Matrix*)>*)mVtbl;
     vt[33].fn(vthis(obj, vt[33]), id + 0x10, buf);
     t4Vector position = buf[idx].row[3];
     *out = position;
@@ -199,20 +199,20 @@ static inline void vu0AddEq_E698(t4Vector& a, const t4Vector& b)
  *              velocity +0x30, instance +0x50, mesh index +0x5C
  */
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
-extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, tIntersectInfo* body)
+void cAnimNode::updateIntersectInfo(tIntersectInfo* body)
 {
-    cMoveNode_updateIntersectInfo(&self->MoveNodeBase, body);
+    cMoveNode_updateIntersectInfo(&MoveNodeBase, body);
     int bone = body->Mesh;
     if (bone < 0)
         return;
-    if (self->MeshVelocityDirty != 0)
-        cAnimNode_updateMeshVelocity(self);
+    if (MeshVelocityDirty != 0)
+        updateMeshVelocity();
     t4Vector meshPos;
-    cAnimNode_calcPosition_E698(((char*)self), ((int)body->Inst), bone, &meshPos);
+    cAnimNode_calcPosition_E698(((char*)this), ((int)body->Inst), bone, &meshPos);
     t4Vector offset = vu0Sub_E698((*(&body->Ipos)), meshPos);
-    t4Vector rot = self->MeshVelocity[bone].AngVel;
-    vu0AddEq_E698((*(&body->Ivel)), vu0Add_E698(self->MeshVelocity[bone].Vel,
-                                                vu0Cross_E698(offset, self->MeshVelocity[bone].AngVel)));
+    t4Vector rot = MeshVelocity[bone].AngVel;
+    vu0AddEq_E698((*(&body->Ivel)), vu0Add_E698(MeshVelocity[bone].Vel,
+                                                vu0Cross_E698(offset, MeshVelocity[bone].AngVel)));
     vu0AddEq_E698((*(&body->Iangvel)), rot);
 }
 #endif
@@ -352,28 +352,28 @@ static inline t4VectorXYZW boneE798Pos(cAnimNode* self, int i)
  * mesh with a parent adds the parent's velocity plus (offset x parent angular velocity) and the parent's angular
  * velocity. Clears MeshVelocityDirty at the end.
  */
-extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
+void cAnimNode::updateMeshVelocity()
 {
-    cMoveNode* obj = (cMoveNode*)&self->MoveNodeBase;
-    if (self->Flags & 1) {
-        sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
+    cMoveNode* obj = (cMoveNode*)&MoveNodeBase;
+    if (Flags & 1) {
+        sVEntry<void>* vt = (sVEntry<void>*)mVtbl;
         ((void (*)(void*))vt[51].fn)(vthis(obj, vt[51]));
     }
     tModelRecord* info = (tModelRecord*)obj->Instance->m_Model;
     int k = 0;
     tMeshHeirarchyRecord* ent = info->m_MeshHeirarchy;
     for (int i = 0; i < info->m_iNumMeshes; i++, ent++) {
-        self->MeshVelocity[i].Vel = t4vect_Zero;
-        self->MeshVelocity[i].AngVel = t4vect_Zero;
+        MeshVelocity[i].Vel = t4vect_Zero;
+        MeshVelocity[i].AngVel = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (((int)ent->m_MeshAnim) == 0) continue;
-        cMeshAnimFrame* node = &self->AnimFrames[k];
+        cMeshAnimFrame* node = &AnimFrames[k];
         k++;
-        sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
-        float animSpeed = ((float (*)(void*))vt[53].fn)(vthis(self, vt[53]));
+        sVEntry<void>* vt = (sVEntry<void>*)mVtbl;
+        float animSpeed = ((float (*)(void*))vt[53].fn)(vthis(this, vt[53]));
         t4VectorXYZW pos;
         t4VectorXYZW rotv;
-        cAnimFrame_getDeriv(node, &pos, &rotv, self->CacheTime);
+        cAnimFrame_getDeriv(node, &pos, &rotv, CacheTime);
         t4VectorXYZW rot;
         rot = t4VectorXYZW(-node->Vals[3], -node->Vals[4], -node->Vals[5], 0.0f);
         vu0ScaleEq_E798(pos, animSpeed * (float)cAppMan_TheAppMan->TimerHz);
@@ -405,18 +405,18 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
             ((&eulerMat.row[0]))[3].w = 1.0f;
         }
         rotv = vu0MulMat_E798(&eulerMat, rotv);
-        pos = vu0MulMat_E798(&(self->AnimMats)[i], pos);
-        rotv = vu0MulMat_E798(&(self->AnimMats)[i], rotv);
+        pos = vu0MulMat_E798(&AnimMats[i], pos);
+        rotv = vu0MulMat_E798(&AnimMats[i], rotv);
         if (ent->m_iParentID >= 0) {
-            t4VectorXYZW parentOffset = vu0Sub_E798(boneE798Pos(self, i), boneE798Pos(self, ent->m_iParentID));
-            vu0AddEq_E798(rotv, self->MeshVelocity[ent->m_iParentID].AngVel);
-            vu0AddEq_E798(pos, vu0Add_E798(self->MeshVelocity[ent->m_iParentID].Vel,
-                                           vu0Cross_E798(parentOffset, self->MeshVelocity[ent->m_iParentID].AngVel)));
+            t4VectorXYZW parentOffset = vu0Sub_E798(boneE798Pos(this, i), boneE798Pos(this, ent->m_iParentID));
+            vu0AddEq_E798(rotv, MeshVelocity[ent->m_iParentID].AngVel);
+            vu0AddEq_E798(pos, vu0Add_E798(MeshVelocity[ent->m_iParentID].Vel,
+                                           vu0Cross_E798(parentOffset, MeshVelocity[ent->m_iParentID].AngVel)));
         }
-        self->MeshVelocity[i].Vel = pos;
-        vu0AddEq_E798(self->MeshVelocity[i].AngVel, rotv);
+        MeshVelocity[i].Vel = pos;
+        vu0AddEq_E798(MeshVelocity[i].AngVel, rotv);
     }
-    self->MeshVelocityDirty = 0;
+    MeshVelocityDirty = 0;
 }
 #endif
 
@@ -450,10 +450,10 @@ struct sAnimNode_EBA0 {
  * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
  */
 // is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
-extern "C" int cAnimNode_frameUpdate(cAnimNode* self)
+int cAnimNode::frameUpdate()
 {
-    sAnimLink_EBA0* link = (sAnimLink_EBA0*)&self->MoveNodeBase;
-    cObjectInterface_runFrameUpdateScript(self->Instance);
+    sAnimLink_EBA0* link = (sAnimLink_EBA0*)&MoveNodeBase;
+    cObjectInterface_runFrameUpdateScript(Instance);
     return ((sAnimLink_EBA0*)link->list->m_pActiveNode) == link;
 }
 #endif
@@ -477,15 +477,15 @@ struct sRange_EBE0 {
  * @return 1 if @p frame is inside the range, otherwise 0
  */
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
-extern "C" int cAnimNode_frameUpdateEvent(cAnimNode* self, float frame)
+int cAnimNode::frameUpdateEvent(float frame)
 {
     int inRange = 0;
-    if (self->FrameStart != 1e10f) {
-        if (self->FrameStart < self->FrameEnd) {
-            if (self->FrameStart <= frame && frame < self->FrameEnd) inRange = 1;
+    if (FrameStart != 1e10f) {
+        if (FrameStart < FrameEnd) {
+            if (FrameStart <= frame && frame < FrameEnd) inRange = 1;
         } else {
-            if (!(self->FrameEnd <= frame)) return 0;
-            inRange = frame < self->FrameStart;
+            if (!(FrameEnd <= frame)) return 0;
+            inRange = frame < FrameStart;
         }
     }
     return inRange;
@@ -591,21 +591,21 @@ struct sAnimFrame_ED88 {
  * @param stream  the replay frame to read from
  * @return @p self
  */
-extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket, cBxReplayFrame* stream)
+void* cFloatingNode::cFloatingNode1(void* bucket, cBxReplayFrame* stream)
 {
     int hasInfo;
-    cMoveNode_cMoveNode(self, bucket, stream);
-    self->Info = 0;
-    VPTR_OF(cObjNode, self) = cFloatingNode_vtbl;
+    cMoveNode_cMoveNode(this, bucket, stream);
+    Info = 0;
+    VPTR_OF(cObjNode, this) = cFloatingNode_vtbl;
     stream->read((char*)&hasInfo, 4);
     if (hasInfo != 0) {
-        cFloatingNode_initInfo((cFloatingNode*)self);
+        cFloatingNode_initInfo((cFloatingNode*)this);
     }
-    stream->read((char*)&self->ZSpring, 72);
-    sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(&self->AnimMats);
-    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[self->Instance->m_Model->m_iNumMeshes];
-    self->Flags |= 1;
-    return ((void*)self);
+    stream->read((char*)&ZSpring, 72);
+    sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(&AnimMats);
+    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[Instance->m_Model->m_iNumMeshes];
+    Flags |= 1;
+    return ((void*)this);
 }
 #endif
 

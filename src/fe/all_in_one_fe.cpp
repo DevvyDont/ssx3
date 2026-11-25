@@ -1873,7 +1873,7 @@ extern "C" void cOVStateHUD1P_renderGlow_E1B0(char* self, sColour* colp, t2Vecto
  *               +0x48 / +0x4C
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  */
-extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* rider, int x)
+void cOVStateHUD1P::renderRank(char* obj, int* rider, int x)
 {
     t2Vector scale;
     sColour col;
@@ -1903,7 +1903,7 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
         }
     }
     tHUDDef_getScale(obj + 0x360, &sc);
-    int* tex = (int*)(&self->mpNumWhite[0]);
+    int* tex = (int*)(&mpNumWhite[0]);
     tHUDDef_getPos(obj + 0x360, &elemPos);
     tHUDDef_getSize(D_00477F30 + 0xD8, &size1, 0);
     size1.x *= sc.x;
@@ -1914,7 +1914,7 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
     dim.y = size2.y;
-    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
+    cOVStateHUD1P_calcElemPos(((char*)this), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     drawPos.x += size2.x;
     drawPos.y += size1.y;
     int* w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
@@ -1923,13 +1923,13 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     tHUDDef_getSize(D_00477F30 + 0xFC, &size3, 0);
     size3.x *= sc.x;
     size3.y *= sc.y;
-    cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpNumSlash, &drawPos, &size3, &scale, &totalColour);
+    cOVStateHUD1P_renderBitmap(((char*)this), (int)mpNumSlash, &drawPos, &size3, &scale, &totalColour);
     drawPos.x += size3.x;
     tHUDDef_getColour(D_00477F30 + 0x120, &totalColour);
     tHUDDef_getSize(D_00477F30 + 0x120, &size3, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int off3 = (cBENewRaceInterface_newRace.iNumberRiders - 1) << 2;
-    cOVStateHUD1P_renderBitmap(((char*)self), *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
+    cOVStateHUD1P_renderBitmap(((char*)this), *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
     if (k != 1.0f) {
         size2.x *= k;
         size2.y *= k;
@@ -1938,26 +1938,28 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
         dim.x *= k;
         dim.y *= k;
     }
-    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
+    cOVStateHUD1P_calcElemPos(((char*)this), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
     int off4 = panelRider->RaceRanking << 2;
-    cOVStateHUD1P_renderBitmap(((char*)self), *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
+    cOVStateHUD1P_renderBitmap(((char*)this), *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
     signed char n = panelRider->RaceRanking < 4 ? panelRider->RaceRanking : 3;
     suffixPos = drawPos;
     int off5 = n * 4;
-    int tx = *(int*)(((char*)self) + off5 + 0x45C);
+    int tx = *(int*)(((char*)this) + off5 + 0x45C);
     suffixPos.x += size2.x;
-    cOVStateHUD1P_renderBitmap(((char*)self), tx, &suffixPos, &size1, &scale, &col);
+    cOVStateHUD1P_renderBitmap(((char*)this), tx, &suffixPos, &size1, &scale, &col);
     if (((float*)rider)[0x13] >= 0.0f) {
         w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
         *w = (*w & ~0x3E0) | (((obj[0x382] - 1) << 5) & 0x3E0);
         pa = drawPos;
         sa = size2;
-        cOVStateHUD1P_renderGlow_E1B0(((char*)self), &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
+        cOVStateHUD1P_renderGlow_E1B0(((char*)this), &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f,
+                1.8101750612258911f, 0.5f, 1.0f);
         pa = suffixPos;
         sb = size1;
-        cOVStateHUD1P_renderGlow_E1B0(((char*)self), &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
+        cOVStateHUD1P_renderGlow_E1B0(((char*)this), &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f,
+                1.8101750612258911f, 0.5f, 1.0f);
     }
 }
 #endif
@@ -2366,7 +2368,8 @@ extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void
  * @param scale  optional x / y scale multiplier
  * @param alpha  opacity multiplier
  */
-extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, int n, int x, t2Vector* pos, t2Vector* scale, float alpha) {
+void cOVStateHUD1P::renderTrickLevel(char* obj, int n, int x, t2Vector* pos, t2Vector* scale, float alpha)
+{
     if (n > 0) {
         tARGB cols[5];
         tARGB elemPos;
@@ -2383,7 +2386,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, i
         cols[3] = D_004C85C8;
         cols[4] = D_004C85E8;
         tHUDDef_getPos(obj + 0x240, &elemPos);
-        tHUDDef_getSize(obj + 0x240, &size, (int)self->mpGenTexElem[3]);
+        tHUDDef_getSize(obj + 0x240, &size, (int)mpGenTexElem[3]);
         tHUDDef_getScale(obj + 0x240, &sc);
         if (scale) {
             sc.x *= scale->x;
@@ -2392,7 +2395,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, i
         if (pos == 0) {
             dim.x = size.x * n + (n - 1) * 2.0f;
             dim.y = size.y;
-            cOVStateHUD1P_calcElemPos(((char*)self), &starPos, &elemPos, &dim, &sc, obj[0x260], obj[0x261], x);
+            cOVStateHUD1P_calcElemPos(((char*)this), &starPos, &elemPos, &dim, &sc, obj[0x260], obj[0x261], x);
         } else {
             starPos = *pos;
             starPos.x -= (size.x * n + (n - 1) * 2.0f) * sc.x * 0.5f;
@@ -2404,7 +2407,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, i
         col = cols[n - 1];
         col.A *= alpha;
         for (i = 0; i < n; i++) {
-            cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[3], &starPos, &size, &sc, &col);
+            cOVStateHUD1P_renderBitmap(((char*)this), (int)mpGenTexElem[3], &starPos, &size, &sc, &col);
             starPos.x += step;
         }
     }
@@ -2457,7 +2460,8 @@ extern "C" void cFont_centertext(void*, float, float, char*);
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  * @param flag  nonzero: out of time, draw "timeup" and no value
  */
-extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems, int* rider, int x, int flag) {
+void cOVStateHUD1P::renderFinishMessage(int elems, int* rider, int x, int flag)
+{
     t2Vector scale;
     t2Vector drawPos;
     tARGB elemPos;
@@ -2468,9 +2472,9 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
     tARGB col;
     int idx = 66;
     cRider* panelRider = SSXApp->Game->AI->Riders[*rider];
-    int sz = (int)self->mpGenTexElem[8];
+    int sz = (int)mpGenTexElem[8];
     if (flag) {
-        sz = (int)self->mpGenTexElem[2];
+        sz = (int)mpGenTexElem[2];
         idx = 27;
     }
     char* msgDef = (char*)(idx * 0x24 + elems); // PORT: pointer passed as int
@@ -2481,11 +2485,11 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
     tHUDDef_getScale(msgDef, &sc);
     size.x *= sc.x;
     size.y *= sc.y;
-    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &size, &scale, msgDef[0x20], msgDef[0x21], x);
+    cOVStateHUD1P_calcElemPos(((char*)this), &drawPos, &elemPos, &size, &scale, msgDef[0x20], msgDef[0x21], x);
     tHUDDef_getColour(msgDef, &spriteColour);
     int* w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *w = (*w & ~0x3E0) | ((msgDef[0x22] << 5) & 0x3E0);
-    cOVStateHUD1P_renderBitmap(((char*)self), sz, &drawPos, &size, &scale, &spriteColour);
+    cOVStateHUD1P_renderBitmap(((char*)this), sz, &drawPos, &size, &scale, &spriteColour);
     if (flag == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         signed char mode = cBENewRaceInterface_newRace.cGameMode;
@@ -2499,7 +2503,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
         } else {
             sprintf(buf, D_004A2138, val + rider[0x7C / 4]);
         }
-        cFont* t = self->mpHUDFont;
+        cFont* t = mpHUDFont;
         drawPos.x += size.x * 0.5f;
         drawPos.y += size.y;
         sc.x *= 1.907578468322754f;
@@ -2507,9 +2511,9 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
         t->Scale[0] = t->BaseScale[0] * sc.x;
         t->Scale[1] = t->BaseScale[1] * sc.y;
         col = D_004C8808;
-        *(tARGB*)&self->mpHUDFont->Color[0] = col;
-        cFont_centertext((char*)self->mpHUDFont, drawPos.x, drawPos.y, buf);
-        t = (cFont*)((char*)self->mpHUDFont);
+        *(tARGB*)&mpHUDFont->Color[0] = col;
+        cFont_centertext((char*)mpHUDFont, drawPos.x, drawPos.y, buf);
+        t = (cFont*)((char*)mpHUDFont);
         t->Scale[0] = t->BaseScale[0] * scale.x;
         t->Scale[1] = t->BaseScale[1] * scale.y;
     }
@@ -2738,6 +2742,8 @@ extern "C" void func_0021FD38(cOVStateHUD1P* self, char* obj) {
 }
 #endif
 
+extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider* rider, int x);
+
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderSpeed);
 #ifdef SKIP_ASM
@@ -2928,7 +2934,8 @@ extern "C" void drawTextPictLine(void*, void*, void*, void*, int, int);
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
  * @param progress  animation progress, 0..1; the prompt is fully opaque at 0.5
  */
-extern "C" void cOVStateHUD1P_renderNISSkipMessage(cOVStateHUD1P* self, char* obj, float progress) {
+void cOVStateHUD1P::renderNISSkipMessage(char* obj, float progress)
+{
     V2_0AD0 pos;
     V4_0AD0 scale;
     Big_0AD0 big;
@@ -2952,11 +2959,11 @@ extern "C" void cOVStateHUD1P_renderNISSkipMessage(cOVStateHUD1P* self, char* ob
     }
     spriteScale.x = 2.0f;
     spriteScale.y = 2.0f;
-    *(V2_0AD0*)&self->mSkipMessage.pFont->ShadowOffset[0] = spriteScale;
+    *(V2_0AD0*)&mSkipMessage.pFont->ShadowOffset[0] = spriteScale;
     int* w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
     drawPos = pos;
-    drawTextPictLine(&self->mSkipMessage, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
+    drawTextPictLine(&mSkipMessage, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
 }
 #endif
 
@@ -3332,23 +3339,23 @@ extern unsigned short str_sp_b[];
  * the same steps; this out-of-line copy has no callers. cOVState_BIGCHALLENGE_FAIL_getChallengeData lives next to cOVState_BIGCHALLENGE_START_getChallengeData, which the
  * cOVState_BIGCHALLENGE_START constructor calls the same way.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2(cOVState_BIGCHALLENGE_FAIL* ovState, int engine, int overlayId) {
-    cUIState_cUIState_10A0(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState_BIGCHALLENGE_FAIL::cOVState_BIGCHALLENGE_FAIL_2(int engine, int overlayId)
+{
+    cUIState_cUIState_10A0(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
-    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    cOVState_BIGCHALLENGE_FAIL_getChallengeData(ovState);
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+    (*(unsigned short *)mszChatBuff) = chatInit;
+    cOVState_BIGCHALLENGE_FAIL_getChallengeData(this);
+    return ((void*)this);
 }
 #endif
 
@@ -3487,23 +3494,23 @@ extern unsigned short str_sp_b[];
  * the same steps; this out-of-line copy has no callers. cUITemplate_MAP_init (declared without arguments) refreshes
  * cUITemplate_MAP_mPeak from the race location when cUITemplate_MAP_mMapStyle is 2 or more.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT_2(cOVState_TRANSPORT* ovState, int engine, int overlayId) {
-    cUIState_cUIState_1228(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState_TRANSPORT::cOVState_TRANSPORT_2(int engine, int overlayId)
+{
+    cUIState_cUIState_1228(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_TRANSPORT_vtbl;
-    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    cUITemplate_MAP_init((char*)&ovState->mMap);
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)cOVState_TRANSPORT_vtbl;
+    (*(unsigned short *)mszChatBuff) = chatInit;
+    cUITemplate_MAP_init((char*)&mMap);
+    return ((void*)this);
 }
 #endif
 

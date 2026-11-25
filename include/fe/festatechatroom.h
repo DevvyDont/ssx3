@@ -87,6 +87,9 @@ struct cFEStateChatRoom : public cFEStateNet {
                                     //       again (func_001B3978); extent: up to mChatColour
     tARGB mChatColour;              // 0x72C [R] 1.0, 1.0, 1.0, 1.0 (an unaligned 16-byte copy: sdl/sdr); [U]
                                     //       onCreateScreen copies it to mpTextScrollChat + 0xA8 (ldl/ldr)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateChatRoom1() __asm__("cFEStateChatRoom_cFEStateChatRoom1");
 };
 
 CHECK_OFFSET(cFEStateChatRoom, mpQualityIcon, 0x6D0);

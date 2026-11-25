@@ -171,7 +171,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
             break;
         } else if (Is_00188980(widget->mHashName, D_004A1530)) {
             if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
-                cFEStateOptions_saveOptionPrompt(self);
+                self->saveOptionPrompt();
                 break;
             }
             D_004A14E0 = 0;
@@ -195,7 +195,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
         break;
     case 6: {
         if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
-            cFEStateOptions_saveOptionPrompt(self);
+            self->saveOptionPrompt();
             break;
         }
         D_004A14E0 = 0;
@@ -376,19 +376,19 @@ extern int D_004A14E0;
  * sets D_004A14E0 to 1 (cFEStateOptions_onWidgetEvent only prompts while it is 0 and clears it when the menu is left)
  * and clears +0x4C, which cFEStateOptions_onPopupEvent sets to 1 once the popup is answered.
  */
-extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self)
+void cFEStateOptions::saveOptionPrompt()
 {
     cFEPopupOptionReset* savePopup = (cFEPopupOptionReset*)((char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0));
-    cUIState_cUIState1(savePopup, self->mpEngine, self);
+    cUIState_cUIState1(savePopup, mpEngine, this);
     VPTR_OF(cListNode, savePopup) = cFEPopupOptionReset_vtbl;
     savePopup->mAccept = 0;
-    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, savePopup);
+    cUIStateStack_pushPopup(&mpEngine->mStateStack, savePopup);
     D_004A14D8 = 0;
     D_004A14E0 = 1;
     D_004A14DC = 0;
     D_004A14D4 = 0;
     D_004A14D0 = 0;
-    self->mbLetFrameGo = 0;
+    mbLetFrameGo = 0;
 }
 #endif
 
@@ -677,7 +677,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
             if (GetOpt_189610(((char*)popup), 2)) {
                 cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
-                cFEStateOptionsGame_updateWidget(self);
+                self->updateWidget();
                 func_0029ED90(cAudioInterface_bxAudio(), 1);
             }
         } else if (Is_189610(popup->mHashName, str_24screen_position)) {
@@ -699,7 +699,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
             if (GetOpt_189610(((char*)popup), 2)) {
                 cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
-                cFEStateOptionsGame_updateWidget(self);
+                self->updateWidget();
             }
         }
         {
@@ -965,11 +965,10 @@ static inline void* find_189D60(cFEStateOptionsGame* self, int i)
  * It then sends the screen offsets f6 and f5 to GrMan's virtual slot 12 and calls cSSXApp_activateBEOptions.
  * cFEStateOptionsGame_onPopupEvent calls it after resetting the options to their defaults.
  *
- * @param self_  the cFEStateOptionsGame state
  */
-extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
+void cFEStateOptionsGame::updateWidget()
 {
-    cFEStateOptionsGame* self = self_;
+    cFEStateOptionsGame* self = this;
     sOptionIface_189D60* iface = (sOptionIface_189D60*)cBE_getInterface_Fv(cBE_getBE(), 4);
     if (((signed char*)&self->mLanguageSlot)[0] >= 0) {
         void* w = find_189D60(self, 0);
@@ -1059,7 +1058,7 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(cFEStateOptionsSound* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFEStateOptionsSound_updateWidget(self);
+    self->updateWidget();
     int on = D_004A1A70 == 1;
     cUIThing* onObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ongroup));
     if (onObj != 0) {
@@ -1156,13 +1155,13 @@ extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, cU
         if (Is_18A3D8(popup->mHashName, str_111resetopts)) {
             if (GetOpt_18A3D8(((char*)popup), 2)) {
                 cBEOptionInterface_defaultSound(iface);
-                cFEStateOptionsSound_setSoundMode(self, cBEOptionInterface_mOption_18A3D8.output);
+                self->setSoundMode(cBEOptionInterface_mOption_18A3D8.output);
                 func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
                 cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
                 func_00287520(cAudioInterface_bxAudio(), Cfg_18A3D8().musicVol);
                 cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_18A3D8().iUseDJSpeech != 0);
                 cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A3D8().iUseArcadeSFX != 0);
-                cFEStateOptionsSound_updateWidget(self);
+                self->updateWidget();
             }
             D_004A14D4 = 1;
         }
@@ -1337,7 +1336,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
     case 9:
         if (Is_18A8D0(widget->mHashName, str_1lb)) {
             cBEOptionInterface_mOption_18A8D0.output = cUIListBox_getCurrentEntryData(((char*)widget));
-            cFEStateOptionsSound_setSoundMode(self, cUIListBox_getCurrentEntryData(((char*)widget)));
+            self->setSoundMode(cUIListBox_getCurrentEntryData(((char*)widget)));
         }
         else if (Is_18A8D0(widget->mHashName, str_2sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
@@ -1460,9 +1459,9 @@ static inline void* Find_18B380(cFEStateOptionsSound* self, char* name)
  * @param vself  the cFEStateOptionsSound state
  */
 // Sound options screen: fills the option widgets from the current sound settings.
-extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
+void cFEStateOptionsSound::updateWidget()
 {
-    cFEStateOptionsSound* self = vself;
+    cFEStateOptionsSound* self = this;
     sOptionIface_18B380* iface = (sOptionIface_18B380*)cBE_getInterface_Fv(cBE_getBE(), 4);
     {
     char* w = (char*)Find_18B380(self, str_1lb);
@@ -1575,7 +1574,7 @@ extern "C" void cSSXAudio_FrontEndLoad(void* snd);
  *
  * @param mode  the speaker list choice ("1lb" entry data): 0 stereo, 1 surround, 2 mono, 3 DTS
  */
-extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode)
+void cFEStateOptionsSound::setSoundMode(unsigned int mode)
 {
     int audioMode;
     switch (mode) {
@@ -1670,7 +1669,7 @@ extern "C" void cFEStateOptionsHUD_onCreateScreen(cFEStateOptionsHUD* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFEStateOptionsHUD_updateWidget(self);
+    self->updateWidget();
 }
 #endif
 
@@ -1721,7 +1720,7 @@ extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUISta
         if (popupHash == GetHashValue32(str_111resetopts)) {
             if ((int)widget->getData(2) != 0) {
                 cBEOptionInterface_defaultHUD(iface);
-                cFEStateOptionsHUD_updateWidget(self);
+                self->updateWidget();
                 D_004A14D8 = 1;
             }
         }
@@ -1871,13 +1870,12 @@ static inline int optMode_C478(sOptions_C478 o)
  * (cUIMenu_setSelectedByIndex), the others are hidden. Finally it clears bit 0 of the menu's mAttr (+0x14; mOrientation
  * in On Tour's tAttrThing). The option interface (cBE interface 4) is fetched but not used.
  *
- * @param vself  the HUD options state
  */
-extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
+void cFEStateOptionsHUD::updateWidget()
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sName_C478 name = *(sName_C478*)D_004A14F8;
-    char* menu = (char*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_Menu));
+    char* menu = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu));
     if (menu != 0) {
         int i;
         for (i = 0; i < 3; i++) {
@@ -1984,9 +1982,9 @@ extern "C" void cFEStateOptionsController_onCreateScreen(cFEStateOptionsControll
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_OVRCMNPro), 1);
     }
     float zero = 0.0f;
-    cFEStateOptionsController_vibratePad(self, 0, zero, zero);
-    cFEStateOptionsController_vibratePad(self, 1, zero, zero);
-    cFEStateOptionsController_updateWidget(self);
+    self->vibratePad(0, zero, zero);
+    self->vibratePad(1, zero, zero);
+    self->updateWidget();
 }
 #endif
 
@@ -2007,8 +2005,8 @@ void* cUIState_onDestroyScreen(void* self);
  */
 extern "C" void* cFEStateOptionsController_onDestroyScreen(cFEStateOptionsController* self)
 {
-    cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
-    cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
+    self->vibratePad(0, 0.0f, 0.0f);
+    self->vibratePad(1, 0.0f, 0.0f);
     return cUIState_onDestroyScreen(self);
 }
 #endif
@@ -2074,15 +2072,15 @@ extern "C" void cFEStateOptionsController_onPopupEvent(cFEStateOptionsController
     switch (msg) {
     case 21: {
         float zero = 0.0f;
-        cFEStateOptionsController_vibratePad(self, 0, zero, zero);
-        cFEStateOptionsController_vibratePad(self, 1, zero, zero);
+        self->vibratePad(0, zero, zero);
+        self->vibratePad(1, zero, zero);
         break;
     }
     case 22:
         if (Is_0018C910(*(int*)((char*)obj + 0xC), str_111resetopts)) {
             if (obj->getData(2) != 0) {
                 cBENewPlayerInterface_defaultCtrl(pi);
-                cFEStateOptionsController_updateWidget(self);
+                self->updateWidget();
                 D_004A14DC = 1;
             }
         }
@@ -2164,27 +2162,27 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         if (Is_0018CA10(widget->mHashName, str_1lb)) {
             cBENewPlayerInterface_setUseDualShock(iface, 0, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 0)) {
-                cFEStateOptionsController_vibratePad(self, 0, 10.0f, 10.0f);
+                self->vibratePad(0, 10.0f, 10.0f);
                 self->mTimer[0] = 0x3C;
                 *(unsigned char*)&self->mVibrateOn |= 1;
             } else {
-                cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
+                self->vibratePad(0, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(widget->mHashName, str_2lb)) {
             cBENewPlayerInterface_setUseDualShock(iface, 1, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 1)) {
-                cFEStateOptionsController_vibratePad(self, 1, 10.0f, 10.0f);
+                self->vibratePad(1, 10.0f, 10.0f);
                 self->mTimer[1] = 0x3C;
                 *(unsigned char*)&self->mVibrateOn |= 2;
             } else {
-                cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
+                self->vibratePad(1, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(widget->mHashName, str_3lb)) {
             cBENewPlayerInterface_setControllerMapping(iface, 0, cUIListBox_getCurrentEntryData(((char*)widget)));
-            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(((char*)widget)) == 0);
+            self->displayPadConfig(cUIListBox_getCurrentEntryData(((char*)widget)) == 0);
         } else if (Is_0018CA10(widget->mHashName, str_4lb)) {
             cBENewPlayerInterface_setControllerMapping(iface, 1, cUIListBox_getCurrentEntryData(((char*)widget)));
-            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(((char*)widget)) == 0);
+            self->displayPadConfig(cUIListBox_getCurrentEntryData(((char*)widget)) == 0);
         }
         D_004A14DC = 1;
         break;
@@ -2286,27 +2284,27 @@ extern char str_4lb[];
  * Likely bug: the result of cUIListBox_getEntryByData is not checked, so a value no entry matches selects an
  * uninitialised index.
  */
-extern "C" void cFEStateOptionsController_updateWidget(cFEStateOptionsController* self)
+void cFEStateOptionsController::updateWidget()
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     unsigned char vals[4];
-    void* listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1lb));
+    void* listBox = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_1lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getUseDualShock(np, 0), &vals[0]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[0]);
     }
-    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_2lb));
+    listBox = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_2lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getUseDualShock(np, 1), &vals[1]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[1]);
     }
-    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_3lb));
+    listBox = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_3lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 0), &vals[2]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[2]);
-        cFEStateOptionsController_displayPadConfig(self, cBENewPlayerInterface_getControllerMapping(np, 0) == 0);
+        displayPadConfig(cBENewPlayerInterface_getControllerMapping(np, 0) == 0);
     }
-    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_4lb));
+    listBox = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_4lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 1), &vals[3]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[3]);
@@ -2333,21 +2331,21 @@ extern char str_pro_text[];
  *
  * @param on  nonzero for the default layout, zero for the pro layout
  */
-extern "C" void cFEStateOptionsController_displayPadConfig(cFEStateOptionsController* self, int on)
+void cFEStateOptionsController::displayPadConfig(int on)
 {
-    cUIThing* defaultPicture = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15BC));
+    cUIThing* defaultPicture = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A15BC));
     if (defaultPicture != 0) {
         defaultPicture->setVisible(on);
     }
-    cUIThing* proPicture = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15C0));
+    cUIThing* proPicture = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A15C0));
     if (proPicture != 0) {
         proPicture->setVisible(on ^ 1);
     }
-    cUIThing* defaultText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_default_text));
+    cUIThing* defaultText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_default_text));
     if (defaultText != 0) {
         defaultText->setVisible(on);
     }
-    cUIThing* proText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pro_text));
+    cUIThing* proText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pro_text));
     if (proText != 0) {
         proText->setVisible(on ^ 1);
     }
@@ -2376,7 +2374,7 @@ extern "C" void cFEStateOptionsController_onUpdate(cFEStateOptionsController* se
         } else {
             self->mTimer[0] = 0;
             *(unsigned char*)&self->mVibrateOn &= ~1;
-            cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
+            self->vibratePad(0, 0.0f, 0.0f);
         }
     }
     if (*(unsigned char*)&self->mVibrateOn & 2) {
@@ -2385,7 +2383,7 @@ extern "C" void cFEStateOptionsController_onUpdate(cFEStateOptionsController* se
         } else {
             self->mTimer[1] = 0;
             *(unsigned char*)&self->mVibrateOn &= ~2;
-            cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
+            self->vibratePad(1, 0.0f, 0.0f);
         }
     }
 }
@@ -2421,7 +2419,7 @@ public:
  * @param y  second strength input (feeds both motors' first terms)
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y)
+void cFEStateOptionsController::vibratePad(int idx, float x, float y)
 {
     signed char i = idx;
     float scaledX = x * 0.9133333563804626f - 18.518518447875977f;
@@ -2456,13 +2454,13 @@ extern void* cFEStateOptionsSaveLoad_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cFEStateOptionsSaveLoad* self)
+void* cFEStateOptionsSaveLoad::cFEStateOptionsSaveLoad1()
 {
-    cUIState_cUIState(self);
-    self->mHashName = 0x20;
-    VPTR_OF(cListNode, self) = cFEStateOptionsSaveLoad_vtbl;
-    *(char*)&self->mSaveLoadCurrentCtrl = 0;
-    return ((void*)self);
+    cUIState_cUIState(this);
+    mHashName = 0x20;
+    VPTR_OF(cListNode, this) = cFEStateOptionsSaveLoad_vtbl;
+    *(char*)&mSaveLoadCurrentCtrl = 0;
+    return ((void*)this);
 }
 #endif
 
@@ -2754,19 +2752,19 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  *            choice 2
  * @return @p self
  */
-extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cFEStateOptionsDeviceSelect* self, int engine, int cardMode, int isSave, int isOnline)
+void* cFEStateOptionsDeviceSelect::cFEStateOptionsDeviceSelect1(int engine, int cardMode, int isSave, int isOnline)
 {
-    cFEMemCard_cFEMemCard2(self, engine, cardMode);
-    self->mbOnline = isOnline;
-    VPTR_OF(cListNode, self) = cFEStateOptionsDeviceSelect_vtbl;
-    self->mHashName = 33;
-    self->mIsSaveScreen = isSave;
-    self->mIsHidden = 0;
-    self->mbChoseToSave = 0;
+    cFEMemCard_cFEMemCard2(this, engine, cardMode);
+    mbOnline = isOnline;
+    VPTR_OF(cListNode, this) = cFEStateOptionsDeviceSelect_vtbl;
+    mHashName = 33;
+    mIsSaveScreen = isSave;
+    mIsHidden = 0;
+    mbChoseToSave = 0;
     if (isSave == 0) {
         ((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mPollForFullCard = 0;
     }
-    return ((void*)self);
+    return ((void*)this);
 }
 #endif
 
@@ -3326,11 +3324,11 @@ extern void* cFEStateProfileSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateProfileSelect_cFEStateProfileSelect1(cFEStateProfileSelect* self)
+void* cFEStateProfileSelect::cFEStateProfileSelect1()
 {
-    cUIState_cUIState(self);
-    VPTR_OF(cListNode, self) = cFEStateProfileSelect_vtbl;
-    self->mHashName = 8;
-    return ((void*)self);
+    cUIState_cUIState(this);
+    VPTR_OF(cListNode, this) = cFEStateProfileSelect_vtbl;
+    mHashName = 8;
+    return ((void*)this);
 }
 #endif

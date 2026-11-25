@@ -51,6 +51,9 @@ struct cFEStateLogin : public cFEStateNet {
                                     //       "kT_POPUPCMNDisconnecting" + "kT_POPUPCMNDisconnect" (sprintf2), then
                                     //       hands it to the question popup (popup + 0xC4, text type 1); the
                                     //       destructor cFEStateLogin__cFEStateLogin frees it
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateLogin1() __asm__("cFEStateLogin_cFEStateLogin1");
 };
 
 CHECK_OFFSET(cFEStateLogin, mpustrDisconnect, 0x6D0);

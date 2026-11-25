@@ -25,7 +25,7 @@ extern char str_repeat[];
  * @param name  modifier name
  * @return the modifier code, or 6 for an unknown name
  */
-extern "C" int cInputMapParser_lookupModifierName(cInputMapParser* self, const char* name)
+int cInputMapParser::lookupModifierName(const char* name)
 {
     if (strcasecmp(name, str_value) == 0) {
         return 0;
@@ -67,7 +67,7 @@ extern char str_config[];
  * @param name  identifier text to look up
  * @return the config index (0 to 31), or -1 if @p name is not a config name
  */
-extern "C" int cInputMapParser_lookupConfigName(cInputMapParser* self, char* name)
+int cInputMapParser::lookupConfigName(char* name)
 {
     if (strcasecmp(name, str_padtype) == 0)
         return 0;
@@ -130,12 +130,12 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * @param name  identifier name to look for
  * @return the matching identifier, or 0 if none has that name
  */
-extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* self, const char* name)
+tIdentifier* cInputMapParser::lookupIdentifierName(const char* name)
 {
     int i;
-    for (i = 0; i < self->NumIdentifiers; i++) {
-        if (strcasecmp(name, self->Identifiers[i].Name) == 0) {
-            return &self->Identifiers[i];
+    for (i = 0; i < NumIdentifiers; i++) {
+        if (strcasecmp(name, Identifiers[i].Name) == 0) {
+            return &Identifiers[i];
         }
     }
     return 0;
@@ -154,7 +154,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_configToRegister);
  * @param varIndex  the config index (On Tour config)
  * @return the register number
  */
-extern "C" int cInputMapParser_configToRegister(cInputMapParser* self, int varIndex)
+int cInputMapParser::configToRegister(int varIndex)
 {
     return varIndex + 0x40;
 }
@@ -173,7 +173,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_buttonToRegister);
  * @param modifier  the button modifier, 0..5 (On Tour eButtonModifiers)
  * @return the register number
  */
-extern "C" int cInputMapParser_buttonToRegister(cInputMapParser* self, int inputIndex, int modifier)
+int cInputMapParser::buttonToRegister(int inputIndex, int modifier)
 {
     return inputIndex * 6 + modifier + 0x60;
 }
@@ -282,9 +282,9 @@ static inline void blanks_321AF0(sTok_321AF0* s)
  * case tests the next character for '+', copied from the "++" check: "-+" is rejected as "Operator '++' not
  * defined." while "--" passes.
  */
-extern "C" void cInputMapParser_readToken(cInputMapParser* self)
+void cInputMapParser::readToken()
 {
-    sTok_321AF0* s = (sTok_321AF0*)self;
+    sTok_321AF0* s = (sTok_321AF0*)this;
     int c;
     char* text;
     char* p;
@@ -594,11 +594,11 @@ extern "C" void cInputMapParser_parseStatement(cInputMapParser* self);
 /**
  * Parses the whole input-map script: reads the first token, then parses statements until end of file.
  */
-extern "C" void cInputMapParser_parseFile(cInputMapParser* self)
+void cInputMapParser::parseFile()
 {
-    cInputMapParser_readToken(self);
-    while (self->CurrentToken != 0) {
-        cInputMapParser_parseStatement(self);
+    readToken();
+    while (CurrentToken != 0) {
+        parseStatement();
     }
 }
 #endif
@@ -627,50 +627,50 @@ extern char str_Expected_to_end_statement[];
  * any error it reports through cInputMapParser_error() (for example "Expected '=' in statement.") and skips past
  * the next semicolon; NumIdentifiers only grows when the whole statement parsed.
  */
-extern "C" void cInputMapParser_parseStatement(cInputMapParser* self)
+void cInputMapParser::parseStatement()
 {
-    if (self->CurrentToken != 2) {
-        cInputMapParser_error(self, str_Expected_identifier_in_statement);
-        cInputMapParser_skipPastSemicolon(self);
+    if (CurrentToken != 2) {
+        cInputMapParser_error(this, str_Expected_identifier_in_statement);
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    char* name = self->TokenText;
-    if (cInputMapParser_lookupButtonName(self, name) >= 0) {
-        cInputMapParser_error(self, str_Button_name_used_as_identifier_pct_s, name);
-        cInputMapParser_skipPastSemicolon(self);
+    char* name = TokenText;
+    if (cInputMapParser_lookupButtonName(this, name) >= 0) {
+        cInputMapParser_error(this, str_Button_name_used_as_identifier_pct_s, name);
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    if (cInputMapParser_lookupConfigName(self, name) >= 0) {
-        cInputMapParser_error(self, str_Config_name_used_as_identifier_pct_s, name);
-        cInputMapParser_skipPastSemicolon(self);
+    if (lookupConfigName(name) >= 0) {
+        cInputMapParser_error(this, str_Config_name_used_as_identifier_pct_s, name);
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    if (cInputMapParser_lookupIdentifierName(self, name) != 0) {
-        cInputMapParser_error(self, str_Duplicate_identifier_name_pct_s, name);
-        cInputMapParser_skipPastSemicolon(self);
+    if (lookupIdentifierName(name) != 0) {
+        cInputMapParser_error(this, str_Duplicate_identifier_name_pct_s, name);
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    tIdentifier* identifier = &self->Identifiers[self->NumIdentifiers];
-    self->CurrentIdentifier = identifier;
+    tIdentifier* identifier = &Identifiers[NumIdentifiers];
+    CurrentIdentifier = identifier;
     strcpy(identifier->Name, name);
-    cInputMapParser_readToken(self);
-    if (self->CurrentToken != 3) {
-        cInputMapParser_error(self, str_Expected_in_statement);
-        cInputMapParser_skipPastSemicolon(self);
+    readToken();
+    if (CurrentToken != 3) {
+        cInputMapParser_error(this, str_Expected_in_statement);
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    cInputMapParser_readToken(self);
-    if ((identifier->Expression = (tParseNode*)cInputMapParser_parseExpression(self)) == 0) {
-        cInputMapParser_skipPastSemicolon(self);
+    readToken();
+    if ((identifier->Expression = (tParseNode*)parseExpression()) == 0) {
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    if (self->CurrentToken != 5) {
-        cInputMapParser_error(self, str_Expected_to_end_statement);
-        cInputMapParser_skipPastSemicolon(self);
+    if (CurrentToken != 5) {
+        cInputMapParser_error(this, str_Expected_to_end_statement);
+        cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    cInputMapParser_readToken(self);
-    self->NumIdentifiers++;
+    readToken();
+    NumIdentifiers++;
 }
 #endif
 
@@ -699,43 +699,43 @@ struct sExprNode_00323268 {
  *
  * @return the expression tree, or 0 after an error
  */
-extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self)
+void* cInputMapParser::parseExpression()
 {
-    sExprNode_00323268* cond = (sExprNode_00323268*)cInputMapParser_parseOr(self);
+    sExprNode_00323268* cond = (sExprNode_00323268*)parseOr();
     if (cond == 0) {
         return 0;
     }
-    if (self->CurrentToken != 6) {
+    if (CurrentToken != 6) {
         return cond;
     }
-    cInputMapParser_readToken(self);
-    sExprNode_00323268* thenExpr = (sExprNode_00323268*)cInputMapParser_parseExpression(self);
+    readToken();
+    sExprNode_00323268* thenExpr = (sExprNode_00323268*)parseExpression();
     if (thenExpr == 0) {
-        cInputMapParser_freeParseNode(self, cond);
+        cInputMapParser_freeParseNode(this, cond);
         return 0;
     }
-    if (self->CurrentToken != 7) {
-        cInputMapParser_error(self, D_0048DFA8);
-        cInputMapParser_freeParseNode(self, cond);
-        cInputMapParser_freeParseNode(self, thenExpr);
+    if (CurrentToken != 7) {
+        cInputMapParser_error(this, D_0048DFA8);
+        cInputMapParser_freeParseNode(this, cond);
+        cInputMapParser_freeParseNode(this, thenExpr);
         return 0;
     }
-    cInputMapParser_readToken(self);
-    sExprNode_00323268* elseExpr = (sExprNode_00323268*)cInputMapParser_parseExpression(self);
+    readToken();
+    sExprNode_00323268* elseExpr = (sExprNode_00323268*)parseExpression();
     if (elseExpr == 0) {
-        cInputMapParser_freeParseNode(self, cond);
-        cInputMapParser_freeParseNode(self, thenExpr);
+        cInputMapParser_freeParseNode(this, cond);
+        cInputMapParser_freeParseNode(this, thenExpr);
         return 0;
     }
     if (cond->type == 4) {
         if (cond->value != 0.0f) {
-            cInputMapParser_freeParseNode(self, elseExpr);
+            cInputMapParser_freeParseNode(this, elseExpr);
             return thenExpr;
         }
-        cInputMapParser_freeParseNode(self, thenExpr);
+        cInputMapParser_freeParseNode(this, thenExpr);
         return elseExpr;
     }
-    sExprNode_00323268* n = (sExprNode_00323268*)cInputMapParser_newParseNode(self);
+    sExprNode_00323268* n = (sExprNode_00323268*)cInputMapParser_newParseNode(this);
     n->type = 5;
     n->cond = cond;
     n->a = thenExpr;
@@ -761,9 +761,9 @@ extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self);
  *
  * @return the expression's parse node, or 0 on a parse error
  */
-extern "C" void* cInputMapParser_parseOr(cInputMapParser* self)
+void* cInputMapParser::parseOr()
 {
-    tParseNode* left = (tParseNode*)cInputMapParser_parseAnd(self);
+    tParseNode* left = (tParseNode*)parseAnd();
     if (left == 0) {
         return 0;
     }
@@ -771,30 +771,30 @@ extern "C" void* cInputMapParser_parseOr(cInputMapParser* self)
     if (left->Type == 4 && left->Value != 0.0f) {
         isTrue = 1;
     }
-    while (self->CurrentToken == 0xC) {
-        cInputMapParser_readToken(self);
-        tParseNode* right = (tParseNode*)cInputMapParser_parseAnd(self);
+    while (CurrentToken == 0xC) {
+        readToken();
+        tParseNode* right = (tParseNode*)parseAnd();
         if (right == 0) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             return 0;
         }
         if (isTrue) {
             left->Value = 1.0f;
-            cInputMapParser_freeParseNode(self, right);
+            cInputMapParser_freeParseNode(this, right);
         } else if (right->Type == 4) {
             if (right->Value != 0.0f) {
                 right->Value = 1.0f;
-                cInputMapParser_freeParseNode(self, left);
+                cInputMapParser_freeParseNode(this, left);
                 left = right;
                 isTrue = 1;
             } else {
-                cInputMapParser_freeParseNode(self, right);
+                cInputMapParser_freeParseNode(this, right);
             }
         } else if (left->Type == 4) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             left = right;
         } else {
-            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Operand2 = right;
             n->Type = 6;
@@ -818,9 +818,9 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self);
  *
  * @return the expression tree, or 0 after an error
  */
-extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
+void* cInputMapParser::parseAnd()
 {
-    tParseNode* left = (tParseNode*)cInputMapParser_parseCompare(self);
+    tParseNode* left = (tParseNode*)parseCompare();
     if (left == 0) {
         return 0;
     }
@@ -828,30 +828,30 @@ extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
     if (left->Type == 4 && left->Value == 0.0f) {
         isFalse = 1;
     }
-    while (self->CurrentToken == 13) {
-        cInputMapParser_readToken(self);
-        tParseNode* right = (tParseNode*)cInputMapParser_parseCompare(self);
+    while (CurrentToken == 13) {
+        readToken();
+        tParseNode* right = (tParseNode*)parseCompare();
         if (right == 0) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             return 0;
         }
         if (isFalse) {
-            cInputMapParser_freeParseNode(self, right);
+            cInputMapParser_freeParseNode(this, right);
         } else if (right->Type == 4) {
             if (right->Value == 0.0f) {
-                cInputMapParser_freeParseNode(self, left);
+                cInputMapParser_freeParseNode(this, left);
                 left = right;
                 isFalse = 1;
             } else {
-                cInputMapParser_freeParseNode(self, right);
+                cInputMapParser_freeParseNode(this, right);
                 if (left->Type == 4)
                     left->Value = 1.0f;
             }
         } else if (left->Type == 4) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             left = right;
         } else {
-            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Operand2 = right;
             n->Type = 7;
@@ -874,15 +874,15 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self);
  * @return the expression tree, or 0 after an error
  */
 // Parses a chain of comparison operators; comparisons of two constants are folded to 1.0/0.0.
-extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
+void* cInputMapParser::parseCompare()
 {
-    tParseNode* left = (tParseNode*)cInputMapParser_parseSum(self);
+    tParseNode* left = (tParseNode*)parseSum();
     if (left == 0) {
         return 0;
     }
     for (;;) {
         int op;
-        switch (self->CurrentToken) {
+        switch (CurrentToken) {
         case 0x10:
             op = 10;
             break;
@@ -904,10 +904,10 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
         default:
             return left;
         }
-        cInputMapParser_readToken(self);
-        tParseNode* right = (tParseNode*)cInputMapParser_parseSum(self);
+        readToken();
+        tParseNode* right = (tParseNode*)parseSum();
         if (right == 0) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             return 0;
         }
         if (left->Type == 4 && right->Type == 4) {
@@ -931,9 +931,9 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
                 left->Value = left->Value != right->Value ? 1.0f : 0.0f;
                 break;
             }
-            cInputMapParser_freeParseNode(self, right);
+            cInputMapParser_freeParseNode(this, right);
         } else {
-            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Type = op;
             n->Operand2 = right;
@@ -958,9 +958,9 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self);
  *
  * @return the expression tree, or 0 after an error
  */
-extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
+void* cInputMapParser::parseSum()
 {
-    tParseNode* left = (tParseNode*)cInputMapParser_parseProduct(self);
+    tParseNode* left = (tParseNode*)parseProduct();
     if (left == 0) {
         return 0;
     }
@@ -970,7 +970,7 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
     }
     for (;;) {
         int op;
-        switch (self->CurrentToken) {
+        switch (CurrentToken) {
         case 20:
             op = 0xE;
             break;
@@ -980,10 +980,10 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
         default:
             return left;
         }
-        cInputMapParser_readToken(self);
-        tParseNode* right = (tParseNode*)cInputMapParser_parseProduct(self);
+        readToken();
+        tParseNode* right = (tParseNode*)parseProduct();
         if (right == 0) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             return 0;
         }
         if (right->Type == 4) {
@@ -996,20 +996,20 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
                     konst->Value = konst->Value - right->Value;
                     break;
                 }
-                cInputMapParser_freeParseNode(self, right);
+                cInputMapParser_freeParseNode(this, right);
             } else {
                 konst = right;
                 if (op == 0xF) {
                     right->Value = -right->Value;
                 }
-                tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+                tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
                 n->Operand1 = left;
                 n->Type = 0xE;
                 n->Operand2 = right;
                 left = n;
             }
         } else {
-            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Type = op;
             n->Operand2 = right;
@@ -1034,9 +1034,9 @@ extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self);
  *
  * @return the expression tree, or 0 after an error
  */
-extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
+void* cInputMapParser::parseProduct()
 {
-    tParseNode* left = (tParseNode*)cInputMapParser_parseTerm(self);
+    tParseNode* left = (tParseNode*)parseTerm();
     if (left == 0) {
         return 0;
     }
@@ -1046,7 +1046,7 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
     }
     for (;;) {
         int op;
-        switch (self->CurrentToken) {
+        switch (CurrentToken) {
         case 22:
             op = 0x10;
             break;
@@ -1056,10 +1056,10 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
         default:
             return left;
         }
-        cInputMapParser_readToken(self);
-        tParseNode* right = (tParseNode*)cInputMapParser_parseTerm(self);
+        readToken();
+        tParseNode* right = (tParseNode*)parseTerm();
         if (right == 0) {
-            cInputMapParser_freeParseNode(self, left);
+            cInputMapParser_freeParseNode(this, left);
             return 0;
         }
         if (right->Type == 4) {
@@ -1072,20 +1072,20 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
                     konst->Value = konst->Value / right->Value;
                     break;
                 }
-                cInputMapParser_freeParseNode(self, right);
+                cInputMapParser_freeParseNode(this, right);
             } else {
                 konst = right;
                 if (op == 17) {
                     right->Value = 1.0f / right->Value;
                 }
-                tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+                tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
                 n->Operand1 = left;
                 n->Type = 0x10;
                 n->Operand2 = right;
                 left = n;
             }
         } else {
-            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Type = op;
             n->Operand2 = right;
@@ -1129,7 +1129,7 @@ struct sTermNode_3BD8 {
  *
  * @return the term's tree, or 0 after an error
  */
-extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
+void* cInputMapParser::parseTerm()
 {
     sTermNode_3BD8* node;
     sTermNode_3BD8* operand;
@@ -1141,166 +1141,166 @@ extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
     int type;
 
 again:
-    switch (self->CurrentToken) {
+    switch (CurrentToken) {
     case 2:
-        name = self->TokenText;
-        input = cInputMapParser_lookupButtonName(self, name);
+        name = TokenText;
+        input = cInputMapParser_lookupButtonName(this, name);
         if (input >= 0) {
             mod = 5;
-            cInputMapParser_readToken(self);
-            if (self->CurrentToken == 4) {
-                cInputMapParser_readToken(self);
-                if (self->CurrentToken != 2) {
-                    cInputMapParser_error(self, str_Expected_modifier_after_button);
+            readToken();
+            if (CurrentToken == 4) {
+                readToken();
+                if (CurrentToken != 2) {
+                    cInputMapParser_error(this, str_Expected_modifier_after_button);
                     return 0;
                 }
-                mod = cInputMapParser_lookupModifierName(self, name);
+                mod = lookupModifierName(name);
                 if (mod == 6) {
-                    cInputMapParser_error(self, str_Illegal_modifier_on_button_pct_s, name);
+                    cInputMapParser_error(this, str_Illegal_modifier_on_button_pct_s, name);
                     return 0;
                 }
-                cInputMapParser_readToken(self);
+                readToken();
             }
-            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
             node->type = 2;
             node->index = input;
             node->b = mod;
             return node;
         }
-        cfg = cInputMapParser_lookupConfigName(self, name);
+        cfg = lookupConfigName(name);
         if (cfg >= 0) {
-            cInputMapParser_readToken(self);
-            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+            readToken();
+            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
             node->type = 3;
             node->index = cfg;
             return node;
         }
-        identifier = cInputMapParser_lookupIdentifierName(self, name);
+        identifier = lookupIdentifierName(name);
         if (identifier != 0) {
             int mod2;
-            cInputMapParser_readToken(self);
-            if ((tIdentifier*)identifier == self->CurrentIdentifier) {
-                cInputMapParser_error(self, str_Recursive_identifier_definition);
+            readToken();
+            if ((tIdentifier*)identifier == CurrentIdentifier) {
+                cInputMapParser_error(this, str_Recursive_identifier_definition);
                 return 0;
             }
             mod2 = 5;
-            if (self->CurrentToken == 4) {
-                cInputMapParser_readToken(self);
-                if (self->CurrentToken != 2) {
-                    cInputMapParser_error(self, str_Expected_modifier_after_button);
+            if (CurrentToken == 4) {
+                readToken();
+                if (CurrentToken != 2) {
+                    cInputMapParser_error(this, str_Expected_modifier_after_button);
                     return 0;
                 }
-                mod2 = cInputMapParser_lookupModifierName(self, name);
+                mod2 = lookupModifierName(name);
                 if (mod2 == 6) {
-                    cInputMapParser_error(self, str_Illegal_modifier_on_reference_pct_s, name);
+                    cInputMapParser_error(this, str_Illegal_modifier_on_reference_pct_s, name);
                     return 0;
                 }
-                cInputMapParser_readToken(self);
+                readToken();
             }
             type = ((sTermNode_3BD8*)identifier->Expression)->type;
             if (type == 4) {
-                node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+                node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
                 node->type = type;
                 node->value = ((sTermNode_3BD8*)identifier->Expression)->value;
                 return node;
             }
-            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
             node->type = 1;
             node->a = identifier;
             node->b = mod2;
             return node;
         }
-        cInputMapParser_error(self, str_Unexpected_identifier_pct_s, name);
+        cInputMapParser_error(this, str_Unexpected_identifier_pct_s, name);
         return 0;
     case 11:
-        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
         node->type = 4;
-        node->value = self->TokenValue;
-        cInputMapParser_readToken(self);
+        node->value = TokenValue;
+        readToken();
         return node;
     case 20:
-        cInputMapParser_readToken(self);
+        readToken();
         goto again;
     case 21:
-        cInputMapParser_readToken(self);
-        operand = (sTermNode_3BD8*)cInputMapParser_parseTerm(self);
+        readToken();
+        operand = (sTermNode_3BD8*)parseTerm();
         if (operand == 0)
             return 0;
         if (operand->type == 4) {
             operand->value = -operand->value;
             return operand;
         }
-        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
         node->type = 18;
         node->a = operand;
         return node;
     case 24:
-        cInputMapParser_readToken(self);
-        operand = (sTermNode_3BD8*)cInputMapParser_parseTerm(self);
+        readToken();
+        operand = (sTermNode_3BD8*)parseTerm();
         if (operand == 0)
             return 0;
         if (operand->type == 4) {
             operand->value = operand->value == 0.0f ? 1.0f : 0.0f;
             return operand;
         }
-        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
+        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
         node->type = 19;
         node->a = operand;
         return node;
     case 9:
-        cInputMapParser_readToken(self);
-        node = (sTermNode_3BD8*)cInputMapParser_parseExpression(self);
-        if (self->CurrentToken != 10) {
-            cInputMapParser_error(self, str_Expected_in_expression);
-            cInputMapParser_freeParseNode(self, node);
+        readToken();
+        node = (sTermNode_3BD8*)parseExpression();
+        if (CurrentToken != 10) {
+            cInputMapParser_error(this, str_Expected_in_expression);
+            cInputMapParser_freeParseNode(this, node);
             return 0;
         }
-        cInputMapParser_readToken(self);
+        readToken();
         return node;
     case 25:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 20);
+        readToken();
+        return parseBinaryFunc(20);
     case 26:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 21);
+        readToken();
+        return parseBinaryFunc(21);
     case 27:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 22);
+        readToken();
+        return parseBinaryFunc(22);
     case 28:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 23);
+        readToken();
+        return parseBinaryFunc(23);
     case 29:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x18);
+        readToken();
+        return parseUnaryFunc(0x18);
     case 30:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 25);
+        readToken();
+        return parseUnaryFunc(25);
     case 31:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 26);
+        readToken();
+        return parseUnaryFunc(26);
     case 32:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 27);
+        readToken();
+        return parseUnaryFunc(27);
     case 33:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x1C);
+        readToken();
+        return parseUnaryFunc(0x1C);
     case 34:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 29);
+        readToken();
+        return parseUnaryFunc(29);
     case 35:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x1E);
+        readToken();
+        return parseUnaryFunc(0x1E);
     case 36:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x1F);
+        readToken();
+        return parseUnaryFunc(0x1F);
     case 37:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x20);
+        readToken();
+        return parseUnaryFunc(0x20);
     case 38:
-        cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 33);
+        readToken();
+        return parseUnaryFunc(33);
     default:
-        cInputMapParser_error(self, str_Expected_term_in_expression);
+        cInputMapParser_error(this, str_Expected_term_in_expression);
         return 0;
     }
 }
@@ -1357,34 +1357,34 @@ static inline float atan2_4138(float y, float x)
  * @return the call's tree, or 0 after an error
  */
 // PORT: uses g++ min/max operators (<? >?).
-extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
+void* cInputMapParser::parseBinaryFunc(int op)
 {
-    if (self->CurrentToken != 9) {
-        cInputMapParser_error(self, str_Expected_in_expression_b);
+    if (CurrentToken != 9) {
+        cInputMapParser_error(this, str_Expected_in_expression_b);
         return 0;
     }
-    cInputMapParser_readToken(self);
-    tParseNode* firstArg = (tParseNode*)cInputMapParser_parseExpression(self);
+    readToken();
+    tParseNode* firstArg = (tParseNode*)parseExpression();
     if (firstArg == 0) {
         return 0;
     }
-    if (self->CurrentToken != 8) {
-        cInputMapParser_error(self, str_Expected_in_expression_c);
-        cInputMapParser_freeParseNode(self, firstArg);
+    if (CurrentToken != 8) {
+        cInputMapParser_error(this, str_Expected_in_expression_c);
+        cInputMapParser_freeParseNode(this, firstArg);
         return 0;
     }
-    cInputMapParser_readToken(self);
-    tParseNode* secondArg = (tParseNode*)cInputMapParser_parseExpression(self);
+    readToken();
+    tParseNode* secondArg = (tParseNode*)parseExpression();
     if (secondArg == 0) {
         return 0;
     }
-    if (self->CurrentToken != 10) {
-        cInputMapParser_error(self, str_Expected_in_expression);
-        cInputMapParser_freeParseNode(self, firstArg);
-        cInputMapParser_freeParseNode(self, secondArg);
+    if (CurrentToken != 10) {
+        cInputMapParser_error(this, str_Expected_in_expression);
+        cInputMapParser_freeParseNode(this, firstArg);
+        cInputMapParser_freeParseNode(this, secondArg);
         return 0;
     }
-    cInputMapParser_readToken(self);
+    readToken();
     if (firstArg->Type == 4 && secondArg->Type == 4) {
         switch (op) {
         case 21:
@@ -1400,10 +1400,10 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
             firstArg->Value = atan2_4138(firstArg->Value, secondArg->Value);
             break;
         }
-        cInputMapParser_freeParseNode(self, secondArg);
+        cInputMapParser_freeParseNode(this, secondArg);
         return firstArg;
     }
-    tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+    tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
     n->Type = op;
     n->Operand1 = firstArg;
     n->Operand2 = secondArg;
@@ -1470,23 +1470,23 @@ static inline float abs_43A0(float x)
  * @return the call's tree, or 0 after an error
  */
 // Parses "(expr)" after a unary function name; constant arguments are folded immediately.
-extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
+void* cInputMapParser::parseUnaryFunc(int op)
 {
-    if (self->CurrentToken != 9) {
-        cInputMapParser_error(self, str_Expected_in_expression_b);
+    if (CurrentToken != 9) {
+        cInputMapParser_error(this, str_Expected_in_expression_b);
         return 0;
     }
-    cInputMapParser_readToken(self);
-    tParseNode* operand = (tParseNode*)cInputMapParser_parseExpression(self);
+    readToken();
+    tParseNode* operand = (tParseNode*)parseExpression();
     if (operand == 0) {
         return 0;
     }
-    if (self->CurrentToken != 10) {
-        cInputMapParser_error(self, str_Expected_in_expression);
-        cInputMapParser_freeParseNode(self, operand);
+    if (CurrentToken != 10) {
+        cInputMapParser_error(this, str_Expected_in_expression);
+        cInputMapParser_freeParseNode(this, operand);
         return 0;
     }
-    cInputMapParser_readToken(self);
+    readToken();
     if (operand->Type == 4) {
         switch (op) {
         case 0x18:
@@ -1524,7 +1524,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         }
         return operand;
     }
-    tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+    tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
     n->Type = op;
     n->Operand1 = operand;
     return n;
@@ -1549,20 +1549,21 @@ extern char str_opcode_buffer_overflow[];
  * @return the number of op-codes written including the terminator, or -1 on an unknown name or a full buffer
  */
 // Compiles one named statement into out (space-terminated); returns the new length or -1.
-extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const char* name, int* out, int max, int defaultModifier)
+int cInputMapParser::compileStatement(const char* name, int* out, int max, int defaultModifier)
 {
-    tIdentifier* ident = cInputMapParser_lookupIdentifierName_K(self, name);
+    tIdentifier* ident = cInputMapParser_lookupIdentifierName_K(this, name);
     if (ident == 0) {
-        cInputMapParser_error(self, D_0048E208, name);
+        cInputMapParser_error(this, D_0048E208, name);
         return -1;
     }
     int sep = ' ';
     int state = 0;
-    int n = cInputMapParser_compileParseNode(self, (tParseNode*)((void*)ident->Expression), &state, out, max, defaultModifier);
+    int n = cInputMapParser_compileParseNode(this, (tParseNode*)((void*)ident->Expression), &state, out, max,
+            defaultModifier);
     max -= n;
     out += n;
     if (max <= 0) {
-        cInputMapParser_error(self, str_opcode_buffer_overflow);
+        cInputMapParser_error(this, str_opcode_buffer_overflow);
         return -1;
     }
     *out = sep;
@@ -1628,7 +1629,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
         return cInputMapParser_compileParseNode(self, node->Identifier->Expression, dst, code, cap,
                                                 node->Modifier != 5 ? node->Modifier : defaultModifier);
     case 2: {
-        int idx = cInputMapParser_buttonToRegister(self, node->Index,
+        int idx = self->buttonToRegister(node->Index,
                                                    node->Modifier == 5 ? defaultModifier : node->Modifier);
         if (*dst == -1) {
             *dst = idx;
@@ -1892,17 +1893,17 @@ extern "C" float cInputExec_getConfig(cInputExec* self, int a1);
  * @param id  the register number
  * @return the register's value
  */
-extern "C" float cInputExec_getRegister(cInputExec* self, unsigned int id)
+float cInputExec::getRegister(unsigned int id)
 {
     if (id < 0x40) {
-        return self->Temp[id];
+        return Temp[id];
     }
     if (id - 0x40 < 0x20) {
-        return cInputExec_getConfig(self, id - 0x40);
+        return getConfig(id - 0x40);
     }
     id -= 0x60;
     if (id < 924) {
-        return cInputExec_getButton(self, (int)id / 6, (int)id % 6);
+        return cInputExec_getButton(this, (int)id / 6, (int)id % 6);
     }
     return 0.0f;
 }
@@ -1920,9 +1921,9 @@ INCLUDE_ASM("input/inputparse", cInputExec_getTempReg);
  * @param i  the temporary register index
  * @return the register's address
  */
-extern "C" void* cInputExec_getTempReg(cInputExec* self, int i)
+void* cInputExec::getTempReg(int i)
 {
-    return &self->Temp[i];
+    return &Temp[i];
 }
 #endif
 
@@ -2013,12 +2014,12 @@ INCLUDE_ASM("input/inputparse", cInputExec_getConfig);
  * @param varIndex  the config index
  * @return the value, or 0.0 for config 0
  */
-extern "C" float cInputExec_getConfig(cInputExec* self, int varIndex)
+float cInputExec::getConfig(int varIndex)
 {
     if (varIndex == 0) {
         return 0.0f;
     }
-    return self->Config[varIndex];
+    return Config[varIndex];
 }
 #endif
 
@@ -2055,12 +2056,12 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
         pc++;
         switch (ins->Base.opcode) {
         case 0: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Load.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Load.dest);
             *destSlot = code[pc++].Float.value;
             break;
         }
         case 1: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = cInputExec_getRegister_vm((self), ins->Unary.operand);
             break;
         }
@@ -2073,7 +2074,7 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             break;
         case 4: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
                 || cInputExec_getRegister_vm((self), ins->Binary.operand2) != 0.0f) {
                 boolResult = 1;
@@ -2083,7 +2084,7 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
         }
         case 5: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
                 && cInputExec_getRegister_vm((self), ins->Binary.operand2) != 0.0f) {
                 boolResult = 1;
@@ -2092,67 +2093,67 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             break;
         }
         case 6: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs > cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 7: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs >= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 8: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs < cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 9: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs <= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 10: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs == cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 11: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs != cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 12: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs + cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 13: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs - cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 14: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs * cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 15: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs / cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 16: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
                          > cInputExec_getRegister_vm((self), ins->Binary.operand2))
                 ? cInputExec_getRegister_vm((self), ins->Binary.operand1)
@@ -2160,7 +2161,7 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             break;
         }
         case 17: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
                          < cInputExec_getRegister_vm((self), ins->Binary.operand2))
                 ? cInputExec_getRegister_vm((self), ins->Binary.operand1)
@@ -2168,75 +2169,75 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             break;
         }
         case 18: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
             break;
         }
         case 19: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
             break;
         }
         case 20: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = func_0031C228(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 21: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = fSin(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 22: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = fCos(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 23: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = expf(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 24: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = logf(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 25: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = floor_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 26: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = ceil_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 27: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = abs_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 28: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = sqrt_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 29: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             float x = cInputExec_getRegister_vm((self), ins->Unary.operand);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case 30: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = -cInputExec_getRegister_vm((self), ins->Unary.operand);
             break;
         }
         case 31: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = (cInputExec_getRegister_vm((self), ins->Unary.operand) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
@@ -2275,13 +2276,13 @@ extern char str_PreProcBuf[];
  * @param outSize  receives the text's size in bytes
  * @return the preprocessed text (not null-terminated)
  */
-extern "C" void* cInputPreProcessor_loadFileSize(cInputPreProcessor* self, char* path, int* outSize)
+void* cInputPreProcessor::loadFileSize(char* path, int* outSize)
 {
     char dir[128];
     char file[32];
-    self->OutputTop = 0;
-    self->OutputLen = 0x800;
-    self->OutputBuf = (char*)operator_new_tag(0x800, str_PreProcBuf, 0, 0);
+    OutputTop = 0;
+    OutputLen = 0x800;
+    OutputBuf = (char*)operator_new_tag(0x800, str_PreProcBuf, 0, 0);
     char* lastSlash = strrchr(path, '/');
     if (lastSlash != 0) {
         lastSlash++;
@@ -2293,13 +2294,13 @@ extern "C" void* cInputPreProcessor_loadFileSize(cInputPreProcessor* self, char*
         dir[0] = 0;
         strcpy(file, path);
     }
-    cInputPreProcessor_readFile_s((self), dir, file);
-    void* out = operator_new_tag(self->OutputTop, path, 0x100, 0);
-    func_0041605C(out, self->OutputBuf, self->OutputTop);
-    if (self->OutputBuf != 0) {
-        cMemMan_free(self->OutputBuf);
+    cInputPreProcessor_readFile_s((this), dir, file);
+    void* out = operator_new_tag(OutputTop, path, 0x100, 0);
+    func_0041605C(out, OutputBuf, OutputTop);
+    if (OutputBuf != 0) {
+        cMemMan_free(OutputBuf);
     }
-    *outSize = self->OutputTop;
+    *outSize = OutputTop;
     return out;
 }
 #endif
@@ -2322,7 +2323,7 @@ extern char D_004A3FA0[];
  * @param path  directory of the file, also used for its includes
  * @param fn  file name within @p path
  */
-extern "C" void cInputPreProcessor_readFile(cInputPreProcessor* self, int path, int fn)
+void cInputPreProcessor::readFile(int path, int fn)
 {
     char name[160];
     tInputSource st;
@@ -2330,10 +2331,10 @@ extern "C" void cInputPreProcessor_readFile(cInputPreProcessor* self, int path, 
     unsigned char* fileData = FILE_loadsize(name, &st.DataLen, 0);
     (*(unsigned char**)&st.ReadPtr) = (*(unsigned char**)&st.Data) = fileData;
     st.LineNumber = 1;
-    cInputPreProcessor_readChar(self, &st);
+    readChar(&st);
     // PORT: the unit declares cInputPreProcessor_writeTagLine's third parameter as int; it receives a char*.
-    cInputPreProcessor_writeTagLine(self, st.LineNumber, (int)name);
-    while (cInputPreProcessor_copyLine(self, &st, path, fn)) {
+    writeTagLine(st.LineNumber, (int)name);
+    while (copyLine(&st, path, fn)) {
     }
     if (st.Data) {
         cMemMan_free(((unsigned char*)st.Data));
@@ -2365,47 +2366,47 @@ static inline int isWS_326150(int c)
  * @param fn  file name, for messages
  * @return nonzero while the source has more characters
  */
-extern "C" int cInputPreProcessor_copyLine(cInputPreProcessor* self, tInputSource* isrc, int path, int fn)
+int cInputPreProcessor::copyLine(tInputSource* isrc, int path, int fn)
 {
     int ch;
     for (;;) {
-        ch = self->CurrentChar;
+        ch = CurrentChar;
         if (!isWS_326150(ch))
             break;
-        cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
-        cInputPreProcessor_readChar(self, isrc);
-        if (self->CurrentChar < 0)
+        writeChar((char)CurrentChar);
+        readChar(isrc);
+        if (CurrentChar < 0)
             return 0;
     }
     if (ch == '#') {
-        cInputPreProcessor_readChar(self, isrc);
-        cInputPreProcessor_readCmdLine(self, isrc, path, fn);
-        return self->CurrentChar >= 0;
+        readChar(isrc);
+        readCmdLine(isrc, path, fn);
+        return CurrentChar >= 0;
     }
     if (ch == '/') {
-        cInputPreProcessor_readChar(self, isrc);
-        int nextChar = self->CurrentChar;
+        readChar(isrc);
+        int nextChar = CurrentChar;
         if (nextChar == '/') {
-            cInputPreProcessor_skipCppComment(self, isrc, path, fn);
-            return self->CurrentChar >= 0;
+            skipCppComment(isrc, path, fn);
+            return CurrentChar >= 0;
         }
         if (nextChar == '*') {
-            cInputPreProcessor_readChar(self, isrc);
-            cInputPreProcessor_skipCComment(self, isrc, path, fn);
-            return self->CurrentChar >= 0;
+            readChar(isrc);
+            skipCComment(isrc, path, fn);
+            return CurrentChar >= 0;
         }
-        cInputPreProcessor_writeChar(self, '/');
+        writeChar('/');
     }
-    while (self->CurrentChar >= 0) {
-        cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
-        if (self->CurrentChar == '\n') {
+    while (CurrentChar >= 0) {
+        writeChar((char)CurrentChar);
+        if (CurrentChar == '\n') {
             isrc->LineNumber += 1;
-            cInputPreProcessor_readChar(self, isrc);
+            readChar(isrc);
             break;
         }
-        cInputPreProcessor_readChar(self, isrc);
+        readChar(isrc);
     }
-    return self->CurrentChar >= 0;
+    return CurrentChar >= 0;
 }
 #endif
 
@@ -2419,10 +2420,10 @@ extern "C" void cInputPreProcessor_writeChar(cInputPreProcessor* self, char c);
  *
  * @param str  the string to write
  */
-extern "C" void cInputPreProcessor_writeString(cInputPreProcessor* self, char* str)
+void cInputPreProcessor::writeString(char* str)
 {
     while (*str != 0) {
-        cInputPreProcessor_writeChar(self, *str++);
+        writeChar(*str++);
     }
 }
 #endif
@@ -2442,9 +2443,9 @@ extern char str_PreProcBuf[];
  *
  * @param ch  the character
  */
-extern "C" void cInputPreProcessor_writeChar(cInputPreProcessor* self, char ch)
+void cInputPreProcessor::writeChar(char ch)
 {
-    cInputPreProcessor* outBuf = self;
+    cInputPreProcessor* outBuf = this;
     if (outBuf->OutputTop == outBuf->OutputLen) {
         int newCap = outBuf->OutputTop + 0x400;
         int grow = outBuf->OutputTop * 3 / 2;
@@ -2476,11 +2477,11 @@ extern char D_0048E3C8[];
  * @param line  line number in the source
  * @param name  file name (passed as an int in this unit)
  */
-extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int line, int name)
+void cInputPreProcessor::writeTagLine(int line, int name)
 {
     char buf[176];
     sprintf(buf, D_0048E3C8, line, name);
-    cInputPreProcessor_writeString(self, buf);
+    writeString(buf);
 }
 #endif
 
@@ -2492,12 +2493,12 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_readChar);
  *
  * @param isrc  the input source (On Tour tInputSource&)
  */
-extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, tInputSource* isrc)
+void cInputPreProcessor::readChar(tInputSource* isrc)
 {
     if (isrc->ReadPtr == isrc->Data + isrc->DataLen) {
-        self->CurrentChar = -1;
+        CurrentChar = -1;
     } else {
-        self->CurrentChar = *isrc->ReadPtr++;
+        CurrentChar = *isrc->ReadPtr++;
     }
 }
 #endif
@@ -2522,32 +2523,32 @@ extern char str_unexpected_EOF_in_comment[];
  * @param fileName  file name, for the error message
  */
 // Skips a /* */ comment; newlines inside it are kept, otherwise it becomes one space.
-extern "C" void cInputPreProcessor_skipCComment(cInputPreProcessor* self, tInputSource* isrc, int path, int fileName)
+void cInputPreProcessor::skipCComment(tInputSource* isrc, int path, int fileName)
 {
     int single = 1;
     int run = 1;
     while (run) {
-        int ch = self->CurrentChar;
+        int ch = CurrentChar;
         if (ch == '\n') {
             single = 0;
             isrc->LineNumber += 1;
-            cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
+            writeChar((char)CurrentChar);
         } else if (ch == '*') {
-            cInputPreProcessor_readChar(self, isrc);
-            if (self->CurrentChar != '/')
+            readChar(isrc);
+            if (CurrentChar != '/')
                 continue;
-            cInputPreProcessor_readChar(self, isrc);
+            readChar(isrc);
             if (single) {
-                cInputPreProcessor_writeChar(self, ' ');
+                writeChar(' ');
             }
             return;
         } else if (ch < 0) {
             goto error;
         }
-        cInputPreProcessor_readChar(self, isrc);
+        readChar(isrc);
     }
 error:
-    cInputPreProcessor_error_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
+    cInputPreProcessor_error_5(this, isrc, path, fileName, str_unexpected_EOF_in_comment);
 }
 #endif
 
@@ -2569,23 +2570,23 @@ extern char str_unexpected_EOF_in_comment[];
  * @param path  the file path, for the error message
  * @param fileName  the file name, for the error message
  */
-extern "C" void cInputPreProcessor_skipCppComment(cInputPreProcessor* self, tInputSource* isrc, int path, int fileName)
+void cInputPreProcessor::skipCppComment(tInputSource* isrc, int path, int fileName)
 {
     for (;;) {
-        int ch = self->CurrentChar;
+        int ch = CurrentChar;
         if (ch == '\n') {
             isrc->LineNumber += 1;
-            cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
-            cInputPreProcessor_readChar(self, isrc);
+            writeChar((char)CurrentChar);
+            readChar(isrc);
             return;
         }
         if (ch < 0) {
             goto error;
         }
-        cInputPreProcessor_readChar(self, isrc);
+        readChar(isrc);
     }
 error:
-    cInputPreProcessor_error_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
+    cInputPreProcessor_error_5(this, isrc, path, fileName, str_unexpected_EOF_in_comment);
 }
 #endif
 
@@ -2597,12 +2598,12 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipToEOL);
  *
  * @param isrc  the input source (On Tour tInputSource&)
  */
-extern "C" void cInputPreProcessor_skipToEOL(cInputPreProcessor* self, tInputSource* isrc)
+void cInputPreProcessor::skipToEOL(tInputSource* isrc)
 {
-    while (self->CurrentChar >= 0) {
-        cInputPreProcessor_readChar(self, isrc);
-        if (self->CurrentChar == 10) {
-            cInputPreProcessor_readChar(self, isrc);
+    while (CurrentChar >= 0) {
+        readChar(isrc);
+        if (CurrentChar == 10) {
+            readChar(isrc);
             isrc->LineNumber += 1;
             break;
         }
@@ -2644,66 +2645,66 @@ static inline int isAlpha_3266E8(int c)
  * @param path  directory of the current file
  * @param fn  name of the current file
  */
-extern "C" void cInputPreProcessor_readCmdLine(cInputPreProcessor* self, tInputSource* isrc, int path, int fn)
+void cInputPreProcessor::readCmdLine(tInputSource* isrc, int path, int fn)
 {
     char word[16];
     char name[160];
     char buf[160];
     int ch;
-    while (isWS_3266E8(ch = self->CurrentChar))
-        cInputPreProcessor_readChar(self, isrc);
+    while (isWS_3266E8(ch = CurrentChar))
+        readChar(isrc);
     if (ch <= 0) {
-        cInputPreProcessor_error_5(self, isrc, path, fn, "unexpected EOF in pre-processor command");
+        cInputPreProcessor_error_5(this, isrc, path, fn, "unexpected EOF in pre-processor command");
         return;
     }
     char* wordPtr = word;
     do {
-        if (!isAlpha_3266E8(self->CurrentChar))
+        if (!isAlpha_3266E8(CurrentChar))
             break;
-        *wordPtr = self->CurrentChar;
-        cInputPreProcessor_readChar(self, isrc);
+        *wordPtr = CurrentChar;
+        readChar(isrc);
         wordPtr++;
     } while (wordPtr - word < 15);
     *wordPtr = 0;
     if (strcmp(word, "include") == 0) {
-        while (isWS_3266E8(ch = self->CurrentChar))
-            cInputPreProcessor_readChar(self, isrc);
+        while (isWS_3266E8(ch = CurrentChar))
+            readChar(isrc);
         if (ch != '"') {
-            cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
-            cInputPreProcessor_skipToEOL(self, isrc);
+            cInputPreProcessor_error_5(this, isrc, path, fn, "illegal 'include' directive");
+            skipToEOL(isrc);
             return;
         }
-        cInputPreProcessor_readChar(self, isrc);
+        readChar(isrc);
         int n = 0;
-        while (self->CurrentChar != '"') {
-            int nameChar = self->CurrentChar;
+        while (CurrentChar != '"') {
+            int nameChar = CurrentChar;
             if (nameChar < 0 || nameChar == '\n') {
-                cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
-                cInputPreProcessor_skipToEOL(self, isrc);
+                cInputPreProcessor_error_5(this, isrc, path, fn, "illegal 'include' directive");
+                skipToEOL(isrc);
                 return;
             }
-            name[n++] = self->CurrentChar;
-            cInputPreProcessor_readChar(self, isrc);
+            name[n++] = CurrentChar;
+            readChar(isrc);
         }
         name[n] = 0;
-        cInputPreProcessor_readChar(self, isrc);
-        while (isWS_3266E8(ch = self->CurrentChar))
-            cInputPreProcessor_readChar(self, isrc);
+        readChar(isrc);
+        while (isWS_3266E8(ch = CurrentChar))
+            readChar(isrc);
         if (ch >= 0 && ch != '\n') {
-            cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
-            cInputPreProcessor_skipToEOL(self, isrc);
+            cInputPreProcessor_error_5(this, isrc, path, fn, "illegal 'include' directive");
+            skipToEOL(isrc);
             return;
         }
         if (ch == '\n')
             isrc->LineNumber += 1;
         // PORT: the unit declares cInputPreProcessor_readFile's third parameter as int; it receives a char*.
-        cInputPreProcessor_readFile(self, path, (int)name);
+        readFile(path, (int)name);
         sprintf(buf, "%s%s", path, fn);
-        cInputPreProcessor_writeTagLine(self, isrc->LineNumber, (int)buf);
-        cInputPreProcessor_readChar(self, isrc);
+        writeTagLine(isrc->LineNumber, (int)buf);
+        readChar(isrc);
     } else {
-        cInputPreProcessor_error_5(self, isrc, path, fn, "illegal pre-processor directive");
-        cInputPreProcessor_skipToEOL(self, isrc);
+        cInputPreProcessor_error_5(this, isrc, path, fn, "illegal pre-processor directive");
+        skipToEOL(isrc);
     }
 }
 #endif
@@ -2733,11 +2734,11 @@ extern "C" int cPadDevice_construct(void* p, int n);
  * Stores the count cPadDevice_construct returns for the device array (+0x2EEC, up to 4) in +0x2EE8, sets the read position
  * (+0x2EE0) to 29 and the write position (+0x2EE4) to 0. Called by cSSXApp_init.
  */
-extern "C" void cPadCache_init(cPadCache* self)
+void cPadCache::init()
 {
-    self->NumPadDevices = cPadDevice_construct(&self->PadDevices[0], 4);
-    self->CacheReadPos = (unsigned int)29;
-    self->CacheWritePos = (unsigned int)0;
+    NumPadDevices = cPadDevice_construct(&PadDevices[0], 4);
+    CacheReadPos = (unsigned int)29;
+    CacheWritePos = (unsigned int)0;
 }
 #endif
 
@@ -2750,11 +2751,11 @@ INCLUDE_ASM("input/inputparse", cPadCache_purge);
  * Calls each non-null device's virtual destructor (slot 1) with flags 3, which frees it. The array entries and the
  * count (NumPadDevices) are left as they were. Called by cSSXApp_purge.
  */
-extern "C" void cPadCache_purge(cPadCache* self)
+void cPadCache::purge()
 {
     int i;
-    for (i = 0; i < self->NumPadDevices; i++) {
-        cPadDevice* inputPad = self->PadDevices[i];
+    for (i = 0; i < NumPadDevices; i++) {
+        cPadDevice* inputPad = PadDevices[i];
         if (inputPad != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)inputPad->mVtbl;
             vt[1].fn(vthis(inputPad, vt[1]), 3);
@@ -2773,11 +2774,11 @@ extern "C" void cPadDevice_clearAllVibrations(cPadDevice* inputPad);
  *
  * Calls cPadDevice_clearAllVibrations on each device. Called by cGame_update and cGame_updateUI.
  */
-extern "C" void cPadCache_clearAllVibrations(cPadCache* self)
+void cPadCache::clearAllVibrations()
 {
     int i;
-    for (i = 0; i < self->NumPadDevices; i++) {
-        cPadDevice_clearAllVibrations(self->PadDevices[i]);
+    for (i = 0; i < NumPadDevices; i++) {
+        PadDevices[i]->clearAllVibrations();
     }
 }
 #endif
@@ -2802,16 +2803,15 @@ struct sInputParse_00326B48 {
  * Moves the read position (+0x2EE0) one step round the 30-line ring unless that would reach the write position
  * (+0x2EE4). Called once per game tick by cSSXApp_preUpdate.
  *
- * @param controllerCache  the pad cache (this)
  * @return 1 when it advanced, 0 when no newer frame is cached
  */
-extern "C" int cPadCache_nextInput(cPadCache* controllerCache)
+int cPadCache::nextInput()
 {
-    unsigned int next = (controllerCache->CacheReadPos + 1) % 30;
-    if (next == controllerCache->CacheWritePos) {
+    unsigned int next = (CacheReadPos + 1) % 30;
+    if (next == CacheWritePos) {
         return 0;
     }
-    controllerCache->CacheReadPos = next;
+    CacheReadPos = next;
     return 1;
 }
 #endif
@@ -2822,16 +2822,16 @@ INCLUDE_ASM("input/inputparse", cPadCache_cacheInput);
 /**
  * Reads every pad device into the next slot of the 30-entry input ring buffer.
  */
-extern "C" void cPadCache_cacheInput(cPadCache* self)
+void cPadCache::cacheInput()
 {
     int i;
-    for (i = 0; i < self->NumPadDevices; i++) {
-        cPadDevice* device = self->PadDevices[i];
+    for (i = 0; i < NumPadDevices; i++) {
+        cPadDevice* device = PadDevices[i];
         sVEntry<int(void*, float*, int)>* vt = (sVEntry<int(void*, float*, int)>*)device->mVtbl;
-        self->InputCache[self->CacheWritePos][i].NumButtons =
-            vt[2].fn(vthis(device, vt[2]), self->InputCache[self->CacheWritePos][i].Buttons, 0x18);
+        InputCache[CacheWritePos][i].NumButtons =
+            vt[2].fn(vthis(device, vt[2]), InputCache[CacheWritePos][i].Buttons, 0x18);
     }
-    self->CacheWritePos = (self->CacheWritePos + 1) % 30;
+    CacheWritePos = (CacheWritePos + 1) % 30;
 }
 #endif
 
@@ -2854,11 +2854,11 @@ struct sInputParse_00326C60 {
  *
  * @return the number of cached frames
  */
-extern "C" int cPadCache_flush(cPadCache* self)
+int cPadCache::flush()
 {
-    int tail = (int)self->CacheWritePos;
-    int head = (int)self->CacheReadPos;
-    self->CacheReadPos = (unsigned int)((tail + 29) % 30);
+    int tail = (int)CacheWritePos;
+    int head = (int)CacheReadPos;
+    CacheReadPos = (unsigned int)((tail + 29) % 30);
     return (tail - head + 30) % 30;
 }
 #endif
@@ -2875,9 +2875,9 @@ INCLUDE_ASM("input/inputparse", cPadCache_numButtons);
  * @param i  the pad index (On Tour pad)
  * @return the number of button values
  */
-extern "C" int cPadCache_numButtons(cPadCache* self, int i)
+int cPadCache::numButtons(int i)
 {
-    return self->InputCache[(int)self->CacheReadPos][i].NumButtons;
+    return InputCache[(int)CacheReadPos][i].NumButtons;
 }
 #endif
 
@@ -2892,9 +2892,9 @@ INCLUDE_ASM("input/inputparse", cPadCache_buttonValues);
  * @param i  the pad index (On Tour pad)
  * @return the address of the values
  */
-extern "C" void* cPadCache_buttonValues(cPadCache* self, int i)
+void* cPadCache::buttonValues(int i)
 {
-    return self->InputCache[(int)self->CacheReadPos][i].Buttons;
+    return InputCache[(int)CacheReadPos][i].Buttons;
 }
 #endif
 
@@ -2921,13 +2921,12 @@ static inline void padSetActuator(cPadDevice* pad, int act, float level)
  * Calls the device's virtual setActuator (slot 4) with level 0.0 for each actuator it reports through slot 3. Called by
  * cPadCache_clearAllVibrations and func_00125B18.
  *
- * @param inputPad  the pad device (this)
  */
-extern "C" void cPadDevice_clearAllVibrations(cPadDevice* inputPad)
+void cPadDevice::clearAllVibrations()
 {
     int i;
-    for (i = 0; i < padNumActuators(inputPad); i++) {
-        padSetActuator(inputPad, i, 0.0f);
+    for (i = 0; i < padNumActuators(this); i++) {
+        padSetActuator(this, i, 0.0f);
     }
 }
 #endif
@@ -3263,9 +3262,8 @@ INCLUDE_ASM("input/inputparse", cPS2PadDevice_numActuators__FPv);
  *
  * @return 2
  */
-int cPS2PadDevice_numActuators(void* vself)
+int cPS2PadDevice::numActuators()
 {
-    cPS2PadDevice* self = (cPS2PadDevice*)vself;
     return 0x2;
 }
 #endif
@@ -3295,13 +3293,13 @@ static inline int clamp_327740(int v, int lo, int hi)
  * @param mode  the actuator index (On Tour act)
  * @param level  the strength, 0..1 (On Tour frequency)
  */
-extern "C" void cPS2PadDevice_setActuator(cPS2PadDevice* self, int mode, float level)
+void cPS2PadDevice::setActuator(int mode, float level)
 {
     if (mode == 1) {
-        self->mActSmall = level != 0.0f;
+        mActSmall = level != 0.0f;
         return;
     }
-    int* motorOut = (int*)(&self->mActBig);
+    int* motorOut = (int*)(&mActBig);
     int speed;
     if (level != 0.0f) {
         int rawSpeed = (int)(level * 205.0f + 50.0f);

@@ -36,6 +36,8 @@ struct cUIState;
 struct cUIScreen;
 struct cUIIcon;
 
+struct cUIText;
+
 struct cOVState_MAP : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_MAP_vtbl (0x00473320, 25 slots), stored by cOVState_MAP_cOVState_MAP / func_002212C8 / the
@@ -84,6 +86,18 @@ struct cOVState_MAP : public cOVState {
     float mIndicatorSize;           // 0x1CC [O]; [U] onCreateScreen sets 1.0; onUpdate swings it between 18 and 21.5
                                     //       (swc1/lwc1)
     float mIndicatorSizeDiff;       // 0x1D0 [O]; [U] onCreateScreen sets 0.16; onUpdate flips its sign at the limits
+
+    // Methods bound to their retail symbols by asm labels.
+    void setupScreenExit() __asm__("cOVState_MAP_setupScreenExit");
+    void setupMapPic() __asm__("cOVState_MAP_setupMapPic");
+    void setupPopup() __asm__("cOVState_MAP_setupPopup");
+    void setWidgetHiliteColor(cUIText* obj, int on) __asm__("cOVState_MAP_setWidgetHiliteColor");
+    void setWidgetUnHiliteColor(cUIText* obj, int on) __asm__("cOVState_MAP_setWidgetUnHiliteColor");
+    void setupPlayerIndicator() __asm__("cOVState_MAP_setupPlayerIndicator");
+    void setupLocalSessionList() __asm__("cOVState_MAP_setupLocalSessionList");
+    void showIndicators() __asm__("cOVState_MAP_showIndicators");
+    void hideIndicators() __asm__("cOVState_MAP_hideIndicators");
+    void cleanupIndicators() __asm__("cOVState_MAP_cleanupIndicators");
 };
 
 CHECK_OFFSET(cOVState_MAP, mbSessionUnlocked, 0x9C);

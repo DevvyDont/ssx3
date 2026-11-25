@@ -53,6 +53,10 @@ struct cOVState_REPLAY : public cOVState {
     int mLoaded;                    // 0x0B4 [O] bool; [U] onCreateScreen copies the replay's loaded flag
                                     //       (Game->Replay + 0x608) and, when set, hides "option_savereplay";
                                     //       onInputBegin's Save / Exit test it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setupCameraName() __asm__("cOVState_REPLAY_setupCameraName");
+    void setupTicker() __asm__("cOVState_REPLAY_setupTicker");
 };
 
 CHECK_OFFSET(cOVState_REPLAY, mShowPopupMenu, 0x9C);

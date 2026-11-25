@@ -46,6 +46,16 @@ struct cPadCache {
     cPadDevice* PadDevices[4];      // 0x2EEC [O] (On Tour [1]); [R] cPadDevice_construct(self + 0x2EEC, 4) fills it;
                                     //        [U] purge deletes each (slot 1, flags 3); fepopupmisc / festateoptions read
                                     //        PadCache + 0x2EEC + 4 * i
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cPadCache_init");
+    void purge() __asm__("cPadCache_purge");
+    void clearAllVibrations() __asm__("cPadCache_clearAllVibrations");
+    int nextInput() __asm__("cPadCache_nextInput");
+    void cacheInput() __asm__("cPadCache_cacheInput");
+    int flush() __asm__("cPadCache_flush");
+    int numButtons(int i) __asm__("cPadCache_numButtons");
+    void* buttonValues(int i) __asm__("cPadCache_buttonValues");
 };
 CHECK_OFFSET(cPadCache, InputCache, 0x0);
 CHECK_OFFSET(cPadCache, CacheReadPos, 0x2EE0);

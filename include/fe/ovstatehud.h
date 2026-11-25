@@ -129,6 +129,11 @@ struct tHUDDef {
     char unk_23[0x1];               // 0x23 tail padding
 };
 
+struct cRider;
+struct t2Vector;
+
+struct tARGB;
+
 struct cOVStateHUD1P : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVStateHUD1P_vtbl (both ctors and the dtor)
@@ -219,6 +224,43 @@ struct cOVStateHUD1P : public cUIState {
     tTextPictLine mSkipMessage;       // 0xB48 [O] tTextPictLine; [U] makeTextPictLine builds "%s @skip %s";
                                     //       renderNISSkipMessage draws it (reads its font pointer at +0x8)
     float mNISSkipMessageFrame;     // 0xC94 [O]; [U] -1.0 (onCreateScreen); onUpdate / onRender2D
+
+    // Methods bound to their retail symbols by asm labels.
+    void renderRank(char* obj, int* rider, int x) __asm__("cOVStateHUD1P_renderRank");
+    void renderTrickLevel(char* obj, int n, int x, t2Vector* pos, t2Vector* scale, float alpha)
+        __asm__("cOVStateHUD1P_renderTrickLevel");
+    void renderFinishMessage(int elems, int* rider, int x, int flag) __asm__("cOVStateHUD1P_renderFinishMessage");
+    void renderSpeed(char* obj, cRider* rider, int x) __asm__("cOVStateHUD1P_renderSpeed");
+    void renderNISSkipMessage(char* obj, float progress) __asm__("cOVStateHUD1P_renderNISSkipMessage");
+    void calcElemPos(float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags)
+        __asm__("cOVStateHUD1P_calcElemPos");
+    void renderBitmap(cTextureElement* elem, float* pos, float* size, float* scale, float* color)
+        __asm__("cOVStateHUD1P_renderBitmap");
+    void renderQuad(float* pos, float* size, float* scale, float* color) __asm__("cOVStateHUD1P_renderQuad");
+    void renderExplodeText(const char* str, cFont* font, float amp, float x, float y)
+        __asm__("cOVStateHUD1P_renderExplodeText");
+    void renderTime1(int hour, int minute, int sec, int secFrac, int timeRenderFlags, tHUDDef* defs, int idx,
+                     int reflect, float* scaleMul, float* posOff, tARGB* color)
+        __asm__("cOVStateHUD1P_renderTime1");
+    void renderTime(int hour, int minute, int sec, int secFrac, int timeRenderFlags, float* pos, float* scale,
+                    tARGB* color, int align, int flags, int reflect)
+        __asm__("cOVStateHUD1P_renderTime");
+    void renderText(cFont* font, tHUDDef* defs, int idx, const char* str, int reflect, float* scaleMul, float* posOff,
+                    tARGB* color, float* rect, int align, int flags)
+        __asm__("cOVStateHUD1P_renderText");
+    void renderText1(float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const char* str, int reflect,
+                     float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+        __asm__("cOVStateHUD1P_renderText1");
+    void renderText2(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int reflect, float* scaleMul,
+                     float* posOff, tARGB* color, float* rect, int align, int flags)
+        __asm__("cOVStateHUD1P_renderText2");
+    void renderText3(float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str,
+                     int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+        __asm__("cOVStateHUD1P_renderText3");
+    void renderMultiText(cFont* font, tHUDDef* defs, int idx, const char* str, int flags, float* rect)
+        __asm__("cOVStateHUD1P_renderMultiText");
+    void renderMultiText1(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int flags, float* rect)
+        __asm__("cOVStateHUD1P_renderMultiText1");
 };
 
 CHECK_OFFSET(cTextureElement, mSourceShape, 0x00);

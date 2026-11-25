@@ -73,6 +73,17 @@ struct cMoviePlayer {
     int mbNewFrame;             // 0x40 [O] (On Tour bool); [R] ctor 0; [U] startPlay / asyncUpdate set it, asyncRender
                                 //       clears it after drawing, syncPlay / purge clear it; purge releases mpCurrFrame
                                 //       only while it is set
+
+    // Methods bound to their retail symbols by asm labels.
+    void init1(int videoFile) __asm__("cMoviePlayer_init1");
+    void purge() __asm__("cMoviePlayer_purge");
+    void startPlay() __asm__("cMoviePlayer_startPlay");
+    void syncPlay() __asm__("cMoviePlayer_syncPlay");
+    int asyncPlay() __asm__("cMoviePlayer_asyncPlay");
+    void asyncRender(int force) __asm__("cMoviePlayer_asyncRender");
+    void asyncUpdate() __asm__("cMoviePlayer_asyncUpdate");
+    void asyncPause() __asm__("cMoviePlayer_asyncPause");
+    void asyncResume() __asm__("cMoviePlayer_asyncResume");
 };
 
 CHECK_OFFSET(tMoviePlayOptions, sVideoFileName, 0x00);

@@ -21,6 +21,11 @@ struct cInitLoadScreen {
     void** mVtbl;                   // 0x00 [R] ctor = cInitLoadScreen_vtbl
     int progressive;                // 0x04 [O] (On Tour bool); [U] activateProgressiveMode sets it
     int ending;                     // 0x08 [O] (On Tour bool, +0x5 there); [U] loseFocus sets it, update reads it
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cInitLoadScreen_update");
+    int loseFocus() __asm__("cInitLoadScreen_loseFocus");
+    void activateProgressiveMode() __asm__("cInitLoadScreen_activateProgressiveMode");
 };
 
 CHECK_OFFSET(cInitLoadScreen, ending, 0x08);
@@ -30,6 +35,10 @@ struct cLoadScreen {
     void** mVtbl;                   // 0x00 [R] ctor = its vtable (cLoadScreen_vtbl)
     char unk_004[0x8];              // 0x04 On Tour's base part; no retail access
     cUIEngine* mpUI;                // 0x0C [O]; [R] ctor
+
+    // Methods bound to their retail symbols by asm labels.
+    void drawSplash(int value) __asm__("cLoadScreen_drawSplash");
+    int loseFocus() __asm__("cLoadScreen_loseFocus");
 };
 
 CHECK_OFFSET(cLoadScreen, mpUI, 0x0C);
@@ -39,6 +48,10 @@ struct cPreStartScreen {
     void** mVtbl;                   // 0x00 [R] ctor = cPreStartScreen_vtbl
     float progressivetimer;         // 0x04 [O]; [U] update counts it, loseFocus
     cInitLoadScreen* nextscreen;    // 0x08 [O]; [U] update
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cPreStartScreen_update");
+    int loseFocus() __asm__("cPreStartScreen_loseFocus");
 };
 
 CHECK_OFFSET(cPreStartScreen, nextscreen, 0x08);
@@ -47,6 +60,10 @@ CHECK_SIZE(cPreStartScreen, 0xC);
 struct cPreGameLoadScreen {
     void** mVtbl;                   // 0x00 [R] ctor = cPreGameLoadScreen_vtbl
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
+
+    // Methods bound to their retail symbols by asm labels.
+    int loseFocus() __asm__("cPreGameLoadScreen_loseFocus");
+    void update() __asm__("cPreGameLoadScreen_update");
 };
 
 CHECK_OFFSET(cPreGameLoadScreen, ending, 0x04);
@@ -55,6 +72,10 @@ CHECK_SIZE(cPreGameLoadScreen, 0x8);
 struct cPreFELoadScreen {
     void** mVtbl;                   // 0x00 [R] ctor = its vtable (cPreFELoadScreen_vtbl)
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
+
+    // Methods bound to their retail symbols by asm labels.
+    int loseFocus() __asm__("cPreFELoadScreen_loseFocus");
+    void update() __asm__("cPreFELoadScreen_update");
 };
 
 CHECK_OFFSET(cPreFELoadScreen, ending, 0x04);
@@ -69,6 +90,13 @@ struct cStartScreen {
     int SplashTexID;                // 0x10 [O]
     int DisplayTicks;               // 0x14 [O]; [U] gainFocus, update
     int meStartScreen_type;         // 0x18 [O] eStartScreenType; [R] ctor; [U] load
+
+    // Methods bound to their retail symbols by asm labels.
+    void load() __asm__("cStartScreen_load");
+    void gainFocus() __asm__("cStartScreen_gainFocus");
+    void update() __asm__("cStartScreen_update");
+    void purge() __asm__("cStartScreen_purge");
+    int render() __asm__("cStartScreen_render");
 };
 
 CHECK_OFFSET(cStartScreen, mpUI, 0x0C);
@@ -83,6 +111,13 @@ struct cGameLoadScreen {
     cUIEngine* mpUI;                // 0x0C [O]; [U] load, purge, render
     // --- cGameLoadScreen
     int mTexID[2];                  // 0x10 [O]; [R] ctor
+
+    // Methods bound to their retail symbols by asm labels.
+    void load() __asm__("cGameLoadScreen_load");
+    void loadTexture() __asm__("cGameLoadScreen_loadTexture");
+    void purge() __asm__("cGameLoadScreen_purge");
+    int render() __asm__("cGameLoadScreen_render");
+    void update() __asm__("cGameLoadScreen_update");
 };
 
 CHECK_OFFSET(cGameLoadScreen, mpUI, 0x0C);
@@ -133,6 +168,14 @@ struct cFELoadScreen {
                                     //       the non-zero ones; getTexttureID returns [index]; the load states read them
                                     //       through mpParentModule
     int SplashTexID;                // 0x018 [O]; [U] load sets -1; purge frees it when >= 0
+
+    // Methods bound to their retail symbols by asm labels.
+    void load() __asm__("cFELoadScreen_load");
+    void loadTexture(int type) __asm__("cFELoadScreen_loadTexture");
+    void purge() __asm__("cFELoadScreen_purge");
+    int render() __asm__("cFELoadScreen_render");
+    void update() __asm__("cFELoadScreen_update");
+    int getTexttureID(int index) __asm__("cFELoadScreen_getTexttureID");
 };
 
 CHECK_OFFSET(cFELoadScreen, mVtbl, 0x000);
@@ -160,6 +203,8 @@ CHECK_SIZE(cFELoadScreen, 0x1C);
 // cFELoadScreen_load; [U] how retail code uses the field (src/fe/festateloadhint.cpp and the asm); [O] SSX On Tour's
 // DWARF (class cFELoadState, cUIState): names, types and order.
 
+struct cUIThing;
+
 struct cFELoadState : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFELoadState_vtbl (cFELoadScreen_load, dtor)
@@ -171,6 +216,9 @@ struct cFELoadState : public cUIState {
     cFELoadScreen* mpParentModule;  // 0x048 [O]; [R] 0, then cFELoadScreen_load stores the load screen; [U]
                                     //       InitwidgetMultiP shows mpParentModule->mTexID[player] as the player's
                                     //       picture
+
+    // Methods bound to their retail symbols by asm labels.
+    void widgetCreateQP(cUIThing* widget) __asm__("cFELoadState_widgetCreateQP");
 };
 
 CHECK_OFFSET(cFELoadState, mpParentModule, 0x048);
@@ -257,6 +305,10 @@ struct cGameLoadState : public cUIState {
                                     //       texture 0); [U] func_00246CF8 and cGameLoadState_widgetCreateQP show
                                     //       mpParentModule->mTexID[player] (views sLoadInfo_6CF8 / image[2] at 0x10).
                                     //       Name taken from cFELoadState's [O] member in the same role (no DWARF here)
+
+    // Methods bound to their retail symbols by asm labels.
+    void widgetCreateMultiP(char* obj) __asm__("cGameLoadState_widgetCreateMultiP");
+    void widgetCreateQP(char* obj) __asm__("cGameLoadState_widgetCreateQP");
 };
 
 CHECK_OFFSET(cGameLoadState, mpParentModule, 0x048);

@@ -1055,24 +1055,24 @@ extern "C" void DeleteSema(int);
  * thread (+0x4030) and the loader thread (+0x14040), then deletes the timer, loader, sync (+0x18) and halt (+0xC)
  * semaphores.
  */
-extern "C" void cPS2ExecutionMan_purge(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::purge()
 {
     DisableIntc(3);
-    RemoveIntcHandler(3, self->mIntcHandlerId);
+    RemoveIntcHandler(3, mIntcHandlerId);
     EnableIntc(3);
-    self->mQuit = (int)1;
-    SignalSema(self->mLoadSema);
-    SignalSema(self->mTimerSema);
+    mQuit = (int)1;
+    SignalSema(mLoadSema);
+    SignalSema(mTimerSema);
     SleepThread();
     SleepThread();
-    TerminateThread(self->mTimerThreadId);
-    DeleteThread(self->mTimerThreadId);
-    TerminateThread(self->mLoadThreadId);
-    DeleteThread(self->mLoadThreadId);
-    DeleteSema(self->mTimerSema);
-    DeleteSema(self->mLoadSema);
-    DeleteSema(self->mSyncSema);
-    DeleteSema(self->mHaltSema);
+    TerminateThread(mTimerThreadId);
+    DeleteThread(mTimerThreadId);
+    TerminateThread(mLoadThreadId);
+    DeleteThread(mLoadThreadId);
+    DeleteSema(mTimerSema);
+    DeleteSema(mLoadSema);
+    DeleteSema(mSyncSema);
+    DeleteSema(mHaltSema);
 }
 #endif
 
@@ -1087,10 +1087,10 @@ extern "C" void func_0031A3C0(void* buf);
  * Slot 11 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl (cExecutionMan_prepause in the base vtable); cPS2ExecutionMan_wait
  * calls it before it blocks on the sync semaphore.
  */
-extern "C" void cPS2ExecutionMan_prepause(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::prepause()
 {
-    if ((int)self->mpLoadModule != 0) {
-        func_0031A3C0((char*)&self->mVU0State);
+    if ((int)mpLoadModule != 0) {
+        func_0031A3C0((char*)&mVU0State);
     }
 }
 #endif
@@ -1104,10 +1104,10 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_postpause);
  * Slot 12 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl (cExecutionMan_postpause in the base vtable); cPS2ExecutionMan_wait
  * calls it after its wait on the sync semaphore ends.
  */
-extern "C" void cPS2ExecutionMan_postpause(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::postpause()
 {
-    if ((int)self->mpLoadModule != 0) {
-        func_0031A308((char*)&self->mVU0State);
+    if ((int)mpLoadModule != 0) {
+        func_0031A308((char*)&mVU0State);
     }
 }
 #endif
@@ -1136,18 +1136,18 @@ struct sMemBlkVEntryB {
  * (+0x18), clears the waiting flag, drains any extra signals with PollSema (it loops while PollSema returns the
  * semaphore id), and calls vtable slot 12 (cPS2ExecutionMan_postpause).
  */
-extern "C" void cPS2ExecutionMan_wait(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::wait()
 {
-    self->mIsWaiting = 1;
-    sMemBlkVEntryA* vt = (sMemBlkVEntryA*)self->mVtbl;
-    vt[11].fn(vthis(self, vt[11]));
-    WaitSema(self->mSyncSema);
-    self->mIsWaiting = 0;
-    while (PollSema(self->mSyncSema) == self->mSyncSema)
+    mIsWaiting = 1;
+    sMemBlkVEntryA* vt = (sMemBlkVEntryA*)mVtbl;
+    vt[11].fn(vthis(this, vt[11]));
+    WaitSema(mSyncSema);
+    mIsWaiting = 0;
+    while (PollSema(mSyncSema) == mSyncSema)
     {
     }
-    sMemBlkVEntryB* vt2 = (sMemBlkVEntryB*)self->mVtbl;
-    vt2[12].fn(vthis(self, vt2[12]));
+    sMemBlkVEntryB* vt2 = (sMemBlkVEntryB*)mVtbl;
+    vt2[12].fn(vthis(this, vt2[12]));
 }
 #endif
 
@@ -1159,10 +1159,10 @@ extern "C" void SignalSema(int);
 /**
  * Wakes a thread blocked in cPS2ExecutionMan_wait: signals the sync semaphore (+0x18) when the waiting flag (+0x1C) is set.
  */
-extern "C" void cPS2ExecutionMan_sync(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::sync()
 {
-    if (self->mIsWaiting != 0) {
-        SignalSema(self->mSyncSema);
+    if (mIsWaiting != 0) {
+        SignalSema(mSyncSema);
     }
 }
 #endif
@@ -1177,10 +1177,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_waitHalt__FPv);
  *
  * @return WaitSema's result
  */
-void* cPS2ExecutionMan_waitHalt(void* vself)
+void* cPS2ExecutionMan::waitHalt()
 {
-    cPS2ExecutionMan* self = (cPS2ExecutionMan*)vself;
-    return WaitSema(self->mHaltSema);
+    return WaitSema(mHaltSema);
 }
 #endif
 
@@ -1194,9 +1193,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_signalHalt);
  * callback when its flag is set (cAppMan_checkHalt passes 1). Never returns.
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cPS2ExecutionMan_signalHalt(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::signalHalt()
 {
-    SignalSema(self->mHaltSema);
+    SignalSema(mHaltSema);
     for (;;) {
         SleepThread();
     }
@@ -1232,21 +1231,21 @@ struct sMbOwner_AB30 {
  * the main thread if it is waiting in cPS2ExecutionMan_wait) and then waits on the halt semaphore (cPS2ExecutionMan_waitHalt).
  */
 // Halt request: on the execution thread checks the halt directly; otherwise forwards it and wakes the worker.
-extern "C" void cPS2ExecutionMan_halt(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::halt()
 {
-    cPS2ExecutionMan* man = (cPS2ExecutionMan*)self;
+    cPS2ExecutionMan* man = (cPS2ExecutionMan*)this;
     *(volatile int*)&man->mTimerHalted = 1;
     int cur = GetThreadId();
     if (cur != man->mLoadThreadId) {
         SuspendThread(man->mLoadThreadId);
     }
     if (cur == man->mMainThreadId) {
-        cExecutionMan_checkHalt(self, 0);
+        cExecutionMan_checkHalt(this, 0);
         return;
     }
     sMbOwner_AB30* vtable = (sMbOwner_AB30*)man->mVtbl;
     vtable->sync.fn(vthis(man, vtable->sync));
-    cPS2ExecutionMan_waitHalt(self);
+    waitHalt();
 }
 #endif
 
@@ -1366,10 +1365,10 @@ extern "C" void SignalSema(int);
  *
  * @param module  the job object
  */
-extern "C" void cPS2ExecutionMan_load(cPS2ExecutionMan* self, int module)
+void cPS2ExecutionMan::load(int module)
 {
-    self->mpLoadModule = (cAppModule*)module;
-    SignalSema(self->mLoadSema);
+    mpLoadModule = (cAppModule*)module;
+    SignalSema(mLoadSema);
 }
 #endif
 
@@ -1381,9 +1380,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_isLoadDone);
  *
  * @return 1 when no job is pending, else 0
  */
-extern "C" int cPS2ExecutionMan_isLoadDone(cPS2ExecutionMan* self)
+int cPS2ExecutionMan::isLoadDone()
 {
-    return (int)self->mpLoadModule == 0;
+    return (int)mpLoadModule == 0;
 }
 #endif
 

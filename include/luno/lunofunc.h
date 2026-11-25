@@ -33,11 +33,17 @@ CHECK_OFFSET(tChunkHeader, unk_8, 0x8);
 CHECK_OFFSET(tChunkHeader, unk_C, 0xC);
 CHECK_SIZE(tChunkHeader, 0x10);
 
+struct cBxReplayFrame;
+
 struct luno_cLunoFunc {
     const char* Chunk;                  // 0x0 [O] const tChunkHeader* (no tChunkHeader in include/ yet); [U] init stores
                                         //     its data argument; writeToReplayFrame (luno_cLunoFunc_writeToReplayFrame) writes Chunk - base,
                                         //     readFromReplayFrame (luno_cLunoFunc_readFromReplayFrame) stores base + the value read
     int FuncNum;                        // 0x4 [O]; [U] init; written / read as is by the replay functions
+
+    // Methods bound to their retail symbols by asm labels.
+    void writeToReplayFrame(cBxReplayFrame* stream, int base) __asm__("luno_cLunoFunc_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream, const char* base) __asm__("luno_cLunoFunc_readFromReplayFrame");
 };
 
 CHECK_OFFSET(luno_cLunoFunc, Chunk, 0x0);

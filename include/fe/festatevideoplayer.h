@@ -66,6 +66,16 @@ struct cFEStateVideoPlayer : public cFEState {
                                     //       it; onUpdate stops a pending stop only after a frame was drawn
     int mStopPending;               // 0x27C [O][P] (bool; preview 0x170); [R] 0; [U] onInputBegin sets it, onUpdate
                                     //       tests it, Stop clears it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setInterruptible(int value) __asm__("cFEStateVideoPlayer_setInterruptible");
+    void setFullScreen(int value) __asm__("cFEStateVideoPlayer_setFullScreen");
+    void setSound(int value) __asm__("cFEStateVideoPlayer_setSound");
+    void setOptions(void* src) __asm__("cFEStateVideoPlayer_setOptions");
+    void setVideoSourceFiles(const char* videoFile, const char* audioFile)
+        __asm__("cFEStateVideoPlayer_setVideoSourceFiles");
+    void Start() __asm__("cFEStateVideoPlayer_Start");
+    void Stop() __asm__("cFEStateVideoPlayer_Stop");
 };
 
 CHECK_OFFSET(cFEStateVideoPlayer, mVideoFileName, 0x048);

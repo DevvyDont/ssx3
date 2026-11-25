@@ -55,8 +55,8 @@ extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
     iface->discard();
     self->mScreen = 0;
-    cFEStateRiderBio_setupBioScreen(self);
-    cFEStateRiderBio_setupCharPics(self);
+    self->setupBioScreen();
+    self->setupCharPics();
 }
 #endif
 
@@ -88,56 +88,56 @@ extern char str_horizontal_dash[];
  * (cUIState_showObjSafe, cUIState_hideObjSafe); "vertical_dash" and "horizontal_dash" are shown on pages 0-1 and hidden
  * on 2-3. Any other value does nothing.
  */
-extern "C" void cFEStateRiderBio_setupBioScreen(cFEStateRiderBio* self)
+void cFEStateRiderBio::setupBioScreen()
 {
-    switch (self->mScreen) {
+    switch (mScreen) {
     case 0:
-        cUIState_showObjSafe(self, str_DNALabels);
-        cUIState_showObjSafe(self, str_DNAText);
-        cUIState_hideObjSafe(self, str_FavesLabels);
-        cUIState_hideObjSafe(self, str_FavesText);
-        cUIState_hideObjSafe(self, str_QNALabels);
-        cUIState_hideObjSafe(self, str_QNAText);
-        cUIState_hideObjSafe(self, str_BIOAutoScrollText);
-        cUIState_showObjSafe(self, str_vertical_dash);
-        cUIState_showObjSafe(self, str_horizontal_dash);
-        cFEStateRiderBio_fillDNAInfo(self);
+        cUIState_showObjSafe(this, str_DNALabels);
+        cUIState_showObjSafe(this, str_DNAText);
+        cUIState_hideObjSafe(this, str_FavesLabels);
+        cUIState_hideObjSafe(this, str_FavesText);
+        cUIState_hideObjSafe(this, str_QNALabels);
+        cUIState_hideObjSafe(this, str_QNAText);
+        cUIState_hideObjSafe(this, str_BIOAutoScrollText);
+        cUIState_showObjSafe(this, str_vertical_dash);
+        cUIState_showObjSafe(this, str_horizontal_dash);
+        fillDNAInfo();
         break;
     case 1:
-        cUIState_hideObjSafe(self, str_DNALabels);
-        cUIState_hideObjSafe(self, str_DNAText);
-        cUIState_showObjSafe(self, str_FavesLabels);
-        cUIState_showObjSafe(self, str_FavesText);
-        cUIState_hideObjSafe(self, str_QNALabels);
-        cUIState_hideObjSafe(self, str_QNAText);
-        cUIState_hideObjSafe(self, str_BIOAutoScrollText);
-        cUIState_showObjSafe(self, str_vertical_dash);
-        cUIState_showObjSafe(self, str_horizontal_dash);
-        cFEStateRiderBio_fillFavesInfo(self);
+        cUIState_hideObjSafe(this, str_DNALabels);
+        cUIState_hideObjSafe(this, str_DNAText);
+        cUIState_showObjSafe(this, str_FavesLabels);
+        cUIState_showObjSafe(this, str_FavesText);
+        cUIState_hideObjSafe(this, str_QNALabels);
+        cUIState_hideObjSafe(this, str_QNAText);
+        cUIState_hideObjSafe(this, str_BIOAutoScrollText);
+        cUIState_showObjSafe(this, str_vertical_dash);
+        cUIState_showObjSafe(this, str_horizontal_dash);
+        fillFavesInfo();
         break;
     case 2:
-        cUIState_hideObjSafe(self, str_DNALabels);
-        cUIState_hideObjSafe(self, str_DNAText);
-        cUIState_hideObjSafe(self, str_FavesLabels);
-        cUIState_hideObjSafe(self, str_FavesText);
-        cUIState_showObjSafe(self, str_QNALabels);
-        cUIState_showObjSafe(self, str_QNAText);
-        cUIState_hideObjSafe(self, str_BIOAutoScrollText);
-        cUIState_hideObjSafe(self, str_vertical_dash);
-        cUIState_hideObjSafe(self, str_horizontal_dash);
-        cFEStateRiderBio_fillQnAInfo(self);
+        cUIState_hideObjSafe(this, str_DNALabels);
+        cUIState_hideObjSafe(this, str_DNAText);
+        cUIState_hideObjSafe(this, str_FavesLabels);
+        cUIState_hideObjSafe(this, str_FavesText);
+        cUIState_showObjSafe(this, str_QNALabels);
+        cUIState_showObjSafe(this, str_QNAText);
+        cUIState_hideObjSafe(this, str_BIOAutoScrollText);
+        cUIState_hideObjSafe(this, str_vertical_dash);
+        cUIState_hideObjSafe(this, str_horizontal_dash);
+        fillQnAInfo();
         break;
     case 3:
-        cUIState_hideObjSafe(self, str_DNALabels);
-        cUIState_hideObjSafe(self, str_DNAText);
-        cUIState_hideObjSafe(self, str_FavesLabels);
-        cUIState_hideObjSafe(self, str_FavesText);
-        cUIState_hideObjSafe(self, str_QNALabels);
-        cUIState_hideObjSafe(self, str_QNAText);
-        cUIState_showObjSafe(self, str_BIOAutoScrollText);
-        cUIState_hideObjSafe(self, str_vertical_dash);
-        cUIState_hideObjSafe(self, str_horizontal_dash);
-        cFEStateRiderBio_fillBioInfo(self);
+        cUIState_hideObjSafe(this, str_DNALabels);
+        cUIState_hideObjSafe(this, str_DNAText);
+        cUIState_hideObjSafe(this, str_FavesLabels);
+        cUIState_hideObjSafe(this, str_FavesText);
+        cUIState_hideObjSafe(this, str_QNALabels);
+        cUIState_hideObjSafe(this, str_QNAText);
+        cUIState_showObjSafe(this, str_BIOAutoScrollText);
+        cUIState_hideObjSafe(this, str_vertical_dash);
+        cUIState_hideObjSafe(this, str_horizontal_dash);
+        fillBioInfo();
         break;
     }
 }
@@ -163,18 +163,18 @@ extern char str_pct_s_s[];
  * companion (str_pct_s_s, "%s_s") are shown when the index equals +0x48 and hidden otherwise (cUIState_showObjSafe,
  * cUIState_hideObjSafe).
  */
-extern "C" void cFEStateRiderBio_setupCharPics(cFEStateRiderBio* self)
+void cFEStateRiderBio::setupCharPics()
 {
     sNames_0CD8 names = D_0045E470;
     char buf[32];
     for (int i = 0; i < 10; i++) {
         sprintf(buf, str_pct_s_s, names.name[i]);
-        if (i == self->mCharID) {
-            cUIState_showObjSafe(self, names.name[i]);
-            cUIState_showObjSafe(self, buf);
+        if (i == mCharID) {
+            cUIState_showObjSafe(this, names.name[i]);
+            cUIState_showObjSafe(this, buf);
         } else {
-            cUIState_hideObjSafe(self, names.name[i]);
-            cUIState_hideObjSafe(self, buf);
+            cUIState_hideObjSafe(this, names.name[i]);
+            cUIState_hideObjSafe(this, buf);
         }
     }
 }
@@ -201,15 +201,15 @@ extern char str_DNApct_d[];
  * For each text found, the string ID comes from a 10 x 8 table indexed by the character ID (+0x48), e.g.
  * "kT_DNA1Moby" for Moby.
  */
-extern "C" void cFEStateRiderBio_fillDNAInfo(cFEStateRiderBio* self)
+void cFEStateRiderBio::fillDNAInfo()
 {
     sDNANames names = D_0045E998;
     char buf[16];
     for (int i = 0; i < 8; i++) {
         sprintf(buf, str_DNApct_d, i + 1);
-        cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (obj != 0) {
-            cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[self->mCharID][i]));
+            cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[mCharID][i]));
         }
     }
 }
@@ -236,15 +236,15 @@ extern char str_FAVESpct_d[];
  * For each text found, the string ID comes from a 10 x 12 table indexed by the character ID (+0x48), e.g.
  * "kT_FAVES1Moby" for Moby.
  */
-extern "C" void cFEStateRiderBio_fillFavesInfo(cFEStateRiderBio* self)
+void cFEStateRiderBio::fillFavesInfo()
 {
     sFavesNames names = D_0045F2D0;
     char buf[16];
     for (int i = 0; i < 12; i++) {
         sprintf(buf, str_FAVESpct_d, i + 1);
-        cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (obj != 0) {
-            cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[self->mCharID][i]));
+            cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[mCharID][i]));
         }
     }
 }
@@ -271,15 +271,15 @@ extern char str_QNApct_d[];
  * For each text found, the string ID comes from a 10 x 4 table indexed by the character ID (+0x48), e.g.
  * "kT_QNA1Moby" for Moby.
  */
-extern "C" void cFEStateRiderBio_fillQnAInfo(cFEStateRiderBio* self)
+void cFEStateRiderBio::fillQnAInfo()
 {
     sQnANames names = D_0045F730;
     char buf[16];
     for (int i = 0; i < 4; i++) {
         sprintf(buf, str_QNApct_d, i + 1);
-        cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (obj != 0) {
-            cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[self->mCharID][i]));
+            cUIText_setUnicodeStringByID(obj, GetHashValue32(names.name[mCharID][i]));
         }
     }
 }
@@ -307,13 +307,13 @@ extern char str_kT_FULLBIO1pct_s[];
  * probably starts with the name; character interface, BE interface 2). The scroller's old lines are freed
  * (cUITextScroll_clearBuffer) before cUITextScroll_addUnicodeStringByID() sets the new string ID. Nothing happens when the object is missing.
  */
-extern "C" void cFEStateRiderBio_fillBioInfo(cFEStateRiderBio* self)
+void cFEStateRiderBio::fillBioInfo()
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_BIOAutoScrollText));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_BIOAutoScrollText));
     if (obj) {
         char buf[64];
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 2);
-        sprintf(buf, str_kT_FULLBIO1pct_s, cBECharacterInterface_getShortNameByCharacter(iface, self->mCharID, 0));
+        sprintf(buf, str_kT_FULLBIO1pct_s, cBECharacterInterface_getShortNameByCharacter(iface, mCharID, 0));
         cUITextScroll_clearBuffer(obj);
         cUITextScroll_addUnicodeStringByID(obj, GetHashValue32(buf));
     }
@@ -352,7 +352,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
     }
     case 9:
         self->mScreen = *(unsigned char*)((char*)item + 0x319);
-        cFEStateRiderBio_setupBioScreen(self);
+        self->setupBioScreen();
         break;
     }
 }

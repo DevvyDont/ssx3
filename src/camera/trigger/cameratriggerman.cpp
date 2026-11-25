@@ -26,14 +26,14 @@ extern "C" void cCamera_resetChaseControllerSwitches();
  * Purges both active trigger lists (+0x14, +0x18), resets both trigger stacks (+0x1C, +0x3C), purges the
  * manager, re-initialises its trigger list and resets the chase camera controller switches.
  */
-extern "C" void cCameraTriggerMan_cleanupOnExit(cCameraTriggerMan* self)
+void cCameraTriggerMan::cleanupOnExit()
 {
-    cActiveTriggerList_purge((cActiveTriggerList*)&self->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)(&self->ActiveTriggerList[1]));
-    cCameraTriggerStack_init((cCameraTriggerStack*)&self->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)(&self->CameraTriggerStack[1]));
-    cCameraTriggerMan_purge(self);
-    cCameraTriggerList_init((cCameraTriggerList*)self);
+    cActiveTriggerList_purge((cActiveTriggerList*)&ActiveTriggerList);
+    cActiveTriggerList_purge((cActiveTriggerList*)(&ActiveTriggerList[1]));
+    cCameraTriggerStack_init((cCameraTriggerStack*)&CameraTriggerStack);
+    CameraTriggerStack[1].init();
+    purge();
+    cCameraTriggerList_init((cCameraTriggerList*)this);
     cCamera_resetChaseControllerSwitches();
 }
 #endif
@@ -170,8 +170,8 @@ extern "C" void func_0016CA18_impl(void* vvself)
         sCtBox_CA18 box = trigger->shape->bounds();
         remove_CA18(w, trigger->item, &box);
     }
-    cCameraTriggerStack_init((cCameraTriggerStack*)(&vself->CameraTriggerStack[0]));
-    cCameraTriggerStack_init((cCameraTriggerStack*)(&vself->CameraTriggerStack[1]));
+    vself->CameraTriggerStack[0].init();
+    vself->CameraTriggerStack[1].init();
     cCameraTriggerList_reset(vself);
     cCamera_resetChaseControllerSwitches();
 }
@@ -265,9 +265,9 @@ static inline void remove_P(char* w, void* item, const sCtBox_P* box)
  * @param vself  the camera trigger manager (this)
  */
 // Takes every registered trigger out of the world's space hash and clears the trigger stacks and active lists.
-extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* vself)
+void cCameraTriggerMan::purge()
 {
-    cCameraTriggerMan* self = vself;
+    cCameraTriggerMan* self = this;
     for (int i = 0; i < self->TriggerList.NumTriggers; i++) {
         sCtTrig_P* trigger = (*(sCtTrig_P***)&self->TriggerList)[i];
         if (trigger->reg != 0) {
@@ -276,11 +276,11 @@ extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* vself)
             remove_P(w, trigger->item, &box);
         }
     }
-    cCameraTriggerStack_init((cCameraTriggerStack*)&vself->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)(&vself->CameraTriggerStack[1]));
-    cCameraTriggerList_purge((void**)vself);
-    cActiveTriggerList_purge((cActiveTriggerList*)&vself->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)(&vself->ActiveTriggerList[1]));
+    cCameraTriggerStack_init((cCameraTriggerStack*)&CameraTriggerStack);
+    CameraTriggerStack[1].init();
+    cCameraTriggerList_purge((void**)this);
+    cActiveTriggerList_purge((cActiveTriggerList*)&ActiveTriggerList);
+    cActiveTriggerList_purge((cActiveTriggerList*)(&ActiveTriggerList[1]));
     cCamera_resetChaseControllerSwitches();
 }
 #endif
@@ -301,13 +301,13 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* file);
  * @param file  the trigger file name
  * @return 0 on success, otherwise cCameraTriggerList_loadFromFile()'s error code
  */
-extern "C" int cCameraTriggerMan_loadTriggers(cCameraTriggerMan* self, const char* file)
+int cCameraTriggerMan::loadTriggers(const char* file)
 {
-    int err = cCameraTriggerList_loadFromFile(self, file);
+    int err = cCameraTriggerList_loadFromFile(this, file);
     if (err != 0)
         return err;
-    for (int i = 0; i < self->TriggerList.NumTriggers; i++)
-        self->TriggerList.Triggers[i]->SpaceNode.Trigger = 0;
+    for (int i = 0; i < TriggerList.NumTriggers; i++)
+        TriggerList.Triggers[i]->SpaceNode.Trigger = 0;
     return 0;
 }
 #endif
@@ -332,14 +332,14 @@ void cCameraTriggerMan_setInGameTriggers(void* self);
  *
  * @param stream  the trigger file's data in memory (On Tour fileBuffer)
  */
-extern "C" void cCameraTriggerMan_streamIn(cCameraTriggerMan* self, void* stream)
+void cCameraTriggerMan::streamIn(void* stream)
 {
-    cCameraTriggerMan_cleanupOnExit(self);
-    cCameraTriggerList_loadFromBuffer(self, stream);
-    cCameraTriggerList* manager = &self->TriggerList;
+    cleanupOnExit();
+    cCameraTriggerList_loadFromBuffer(this, stream);
+    cCameraTriggerList* manager = &TriggerList;
     for (int i = 0; i < manager->NumTriggers; i++)
         manager->Triggers[i]->SpaceNode.Trigger = 0;
-    cCameraTriggerMan_setInGameTriggers(self);
+    cCameraTriggerMan_setInGameTriggers(this);
 }
 #endif
 
@@ -398,7 +398,7 @@ void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __as
 void cCameraTriggerMan_resolve_impl(void* self, void* rid, void* stream)
 {
     if (stream != 0) {
-        cCameraTriggerMan_streamIn((cCameraTriggerMan*)self, stream);
+        ((cCameraTriggerMan*)self)->streamIn(stream);
     }
 }
 #endif
@@ -619,10 +619,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_init__FP19cCa
 /**
  * Empties a camera trigger stack by zeroing its first two words.
  */
-void cCameraTriggerStack_init(cCameraTriggerStack* self)
+void cCameraTriggerStack::init()
 {
-    self->NumTriggers = 0;
-    self->LastEnterPlayed = 0;
+    NumTriggers = 0;
+    LastEnterPlayed = 0;
 }
 #endif
 
@@ -638,7 +638,7 @@ void cCameraTriggerStack_init(cCameraTriggerStack* self);
  */
 extern "C" cCameraTriggerStack* cCameraTriggerStack_cCameraTriggerStack(cCameraTriggerStack* self)
 {
-    cCameraTriggerStack_init(self);
+    self->init();
     return self;
 }
 #endif
@@ -654,12 +654,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_recordEnter__
  *
  * @param triggerId  the entered trigger's id (On Tour triggerID)
  */
-void cCameraTriggerStack_recordEnter(void* vself, int triggerId)
+void cCameraTriggerStack::recordEnter(int triggerId)
 {
-    cCameraTriggerStack* self = (cCameraTriggerStack*)vself;
-    self->TriggerIDStack[self->NumTriggers] = triggerId;
-    self->LastEnterPlayed = triggerId;
-    self->NumTriggers = self->NumTriggers + 1;
+    TriggerIDStack[NumTriggers] = triggerId;
+    LastEnterPlayed = triggerId;
+    NumTriggers = NumTriggers + 1;
 }
 #endif
 
@@ -872,7 +871,7 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
         }
         for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
             if (*(int*)(listNode + 8)) {
-                cCameraTriggerStack_recordEnter(&self->CameraTriggerStack[idx], **(int**)listNode);
+                self->CameraTriggerStack[idx].recordEnter(**(int**)listNode);
                 doTriggerAction_D320(*(void**)(*(char**)listNode + 0xC), ((char*)rider));
             }
         }
@@ -1283,15 +1282,15 @@ static inline t4VectorCtor ctmNormalize_E560(const t4Vector& v)
  */
 // Pushes *p out to the surface of the trigger's ellipsoid when it lies inside: into trigger space
 // (inverse of cCTBoundObjLine_worldPoint1's transform), normalize, and back to world space.
-extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, t4Vector* point)
+void cCTBoundObjEllipse::limitPoint(t4Vector* point)
 {
     t4MatrixVU xform(t4mat_Identity_E560);
     float one = 1.0f;
-    xform = ctmScaleMtx_E560(&xform, t4VectorCtor(one / src->Scale.x, one / src->Scale.y, one / src->Scale.z, one));
-    ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, -src->Heading);
-    ctmRotAxis_E560(&xform, t4vect_YAxis_E560, -src->Roll);
-    ctmRotAxis_E560(&xform, t4vect_XAxis_E560, -src->Pitch);
-    ctmTransMtx_E560(&xform, t4VectorCtor(-src->Pos, one));
+    xform = ctmScaleMtx_E560(&xform, t4VectorCtor(one / Scale.x, one / Scale.y, one / Scale.z, one));
+    ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, -Heading);
+    ctmRotAxis_E560(&xform, t4vect_YAxis_E560, -Roll);
+    ctmRotAxis_E560(&xform, t4vect_XAxis_E560, -Pitch);
+    ctmTransMtx_E560(&xform, t4VectorCtor(-Pos, one));
     t4VectorCtor localPt = ctmApplyMtx_E560(&xform, *point);
     localPt.w = 0.0f;
     if (localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z < one) {
@@ -1300,11 +1299,11 @@ extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, t4Vector*
     localPt = ctmNormalize_E560(localPt);
     localPt.w = one;
     xform = t4mat_Identity_E560;
-    ctmTransMtx_E560(&xform, t4VectorCtor(src->Pos.x, src->Pos.y, src->Pos.z, one));
-    ctmRotAxis_E560(&xform, t4vect_XAxis_E560, src->Pitch);
-    ctmRotAxis_E560(&xform, t4vect_YAxis_E560, src->Roll);
-    ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, src->Heading);
-    xform = ctmScaleMtx_E560(&xform, t4VectorCtor(src->Scale.x, src->Scale.y, src->Scale.z, one));
+    ctmTransMtx_E560(&xform, t4VectorCtor(Pos.x, Pos.y, Pos.z, one));
+    ctmRotAxis_E560(&xform, t4vect_XAxis_E560, Pitch);
+    ctmRotAxis_E560(&xform, t4vect_YAxis_E560, Roll);
+    ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, Heading);
+    xform = ctmScaleMtx_E560(&xform, t4VectorCtor(Scale.x, Scale.y, Scale.z, one));
     *point = ctmApplyMtx_E560(&xform, localPt);
     point->w = one;
 }

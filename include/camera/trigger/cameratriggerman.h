@@ -42,9 +42,19 @@ CHECK_SIZE(cActiveTriggerNode, 0x10);
 
 // The triggers a view's rider is currently inside (On Tour class cActiveTriggerList, 0x4): a singly linked node list
 // (methods cActiveTriggerList_* in camera/trigger/triggeralgorithms and cameratriggervolumes).
+struct tCameraTrigger;
+
 struct cActiveTriggerList {
     cActiveTriggerNode* Head;       // 0x0 [O]; [R] cActiveTriggerList_cActiveTriggerList__FPv zeroes it; [U] purge /
                                     //       find / add / remove walk it
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cActiveTriggerList_purge__FP18cActiveTriggerList");
+    void clearFlags() __asm__("cActiveTriggerList_clearFlags");
+    cActiveTriggerNode* find(void* key) __asm__("cActiveTriggerList_find");
+    void* find1(void* key) __asm__("cActiveTriggerList_find1");
+    void add(tCameraTrigger* item) __asm__("cActiveTriggerList_add");
+    cActiveTriggerNode* remove(cActiveTriggerNode* target) __asm__("cActiveTriggerList_remove");
 };
 
 CHECK_OFFSET(cActiveTriggerList, Head, 0x0);
@@ -58,6 +68,10 @@ struct cCameraTriggerStack {
                                     //      recordExitGetNext compares the new top with it
     unsigned int TriggerIDStack[6]; // 0x08 [O]; [U] recordEnter / recordExitGetNext (+0x8 + i * 4); the stride of
                                     //      cCameraTriggerMan's stack array (0x20) bounds it to 6
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cCameraTriggerStack_init__FP19cCameraTriggerStack");
+    void recordEnter(int triggerId) __asm__("cCameraTriggerStack_recordEnter__FPvi");
 };
 
 CHECK_OFFSET(cCameraTriggerStack, NumTriggers, 0x00);
@@ -79,6 +93,14 @@ struct cCameraTriggerMan {
     cCameraTriggerStack CameraTriggerStack[2];  // 0x1C [O]; [R] the ctor's 2-element loop (stride 0x20); [U] init /
                                                 //       initOnRestart / cleanupOnExit / purge / streamOut reset 0x1C
                                                 //       and 0x3C; checkCollisions uses [rider->mViewIndex]
+
+    // Methods bound to their retail symbols by asm labels.
+    void cleanupOnExit() __asm__("cCameraTriggerMan_cleanupOnExit");
+    void purge() __asm__("cCameraTriggerMan_purge");
+    int loadTriggers(const char* file) __asm__("cCameraTriggerMan_loadTriggers");
+    void streamIn(void* stream) __asm__("cCameraTriggerMan_streamIn");
+    void init() __asm__("cCameraTriggerMan_init");
+    void initOnRestart() __asm__("cCameraTriggerMan_initOnRestart");
 };
 
 CHECK_OFFSET(cCameraTriggerMan, TriggerList, 0x00);

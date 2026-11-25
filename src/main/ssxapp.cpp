@@ -134,10 +134,10 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
  * @param argc  number of command-line arguments (On Tour ac)
  * @param argv  the command-line arguments (On Tour av)
  */
-extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
+void cSSXApp::init(int argc, char** argv)
 {
-    SSXApp = (cSSXApp*)self;
-    *(void**)&self->ConsoleConfig = cConsoleConfig_construct();
+    SSXApp = (cSSXApp*)this;
+    *(void**)&ConsoleConfig = cConsoleConfig_construct();
     cPadCache* volatile pm = (cPadCache*)cMemMan_alloc(12028, str_PadCache, 0, 0);
     cPadCache_init(pm);
     PadCache = pm;
@@ -151,13 +151,13 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     int i;
     for (i = 0; i < 2; i++) {
         int* inputPad = (int*)cMemMan_alloc(676, str_InputPad, 0, 0);
-        self->InputPads[i] = (cInputPad*)inputPad;
+        InputPads[i] = (cInputPad*)inputPad;
         *inputPad = 0;
     }
-    *(int*)&self->Game = 0;
-    *(int*)&self->DebugFE = 0;
-    *(int*)&self->RealFE = 0;
-    cSSXApp_parseCommandLine(self, argc, argv);
+    *(int*)&Game = 0;
+    *(int*)&DebugFE = 0;
+    *(int*)&RealFE = 0;
+    parseCommandLine(argc, argv);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     vt2[44].fn(vthis(ps2GraphicsMan, vt2[44]), 0x100); // slot 44: InitTextures
@@ -168,11 +168,12 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     void* loadShape = SHAPE_locate(loadicon, str_load);
     SSXApp->LoadIconTextureID = vt3[46].fn(gfxThis, loadShape, str_loadicon, 0, 1, -1);
     cGraphicsMan_UploadTextures(GrMan);
-    self->LoadIndicator = new (str_LoadIndicator, 0, 0) cLoadIndicatorNew;
-    cAppMan_setNextModule((cAppMan*)self, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC, str_PreStartScreen, 0x100, 0)));
-    *(void**)&self->GameModeMan = cGameModeMan_getGM();
+    LoadIndicator = new (str_LoadIndicator, 0, 0) cLoadIndicatorNew;
+    cAppMan_setNextModule((cAppMan*)this, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC,
+            str_PreStartScreen, 0x100, 0)));
+    *(void**)&GameModeMan = cGameModeMan_getGM();
     void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
-    *(void**)&self->mFEAsyncManager = feAsyncManager;
+    *(void**)&mFEAsyncManager = feAsyncManager;
     cFEAsyncManager_Init(feAsyncManager);
 }
 #endif
@@ -405,7 +406,7 @@ extern char str_ReplayTimeLine[];
  * @return the new cInputMap, as an int (On Tour returns cInputMap*)
  */
 // PORT: the unit declares it returning int (callers store the map pointer in an int field).
-extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
+int cSSXApp::loadInputMap(const char* path)
 {
     cInputPreProcessor buf;
     int size;
@@ -662,7 +663,7 @@ extern char str_autolobby[];
  * @param argv  the arguments
  */
 // PORT: cBXString keeps its length in a header 8 bytes before the text (pointer held in int).
-extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
+void cSSXApp::parseCommandLine(int argc, char** argv)
 {
     int i = 1;
     while (i < argc) {
@@ -692,31 +693,31 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                     cBXString_operatorE(&track, &trimmed);
                     cBXString__cBXString(&trimmed, 2);
                 }
-                cBXString_operatorE(&self->CommandLineTrack, &track);
+                cBXString_operatorE(&CommandLineTrack, &track);
                 cBXString__cBXString(&track, 2);
             } else if (strcasecmp(opt, str_username_b) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_operatorE1(&self->UserName, argv[i]);
+                cBXString_operatorE1(&UserName, argv[i]);
             } else if (strcasecmp(opt, str_password) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_operatorE1(&self->Password, argv[i]);
+                cBXString_operatorE1(&Password, argv[i]);
             } else if (strcasecmp(opt, str_realfe) == 0) {
-                self->UseRealFE = 1;
+                UseRealFE = 1;
             } else if (strcasecmp(opt, str_nohud) == 0) {
-                self->ShowHUD = 0;
+                ShowHUD = 0;
             } else if (strcasecmp(opt, str_autolobby) == 0) {
-                self->AutoLobby = 1;
+                AutoLobby = 1;
             }
         }
         i++;
     }
-    cRenderToggles_m_DisableHUD = self->ShowHUD == 0;
+    cRenderToggles_m_DisableHUD = ShowHUD == 0;
 }
 #endif
 
@@ -762,7 +763,7 @@ extern void* Keyboard;
  *
  * @return 1 when a new input sample was taken, 0 when none was ready
  */
-extern "C" int cSSXApp_preUpdate(cSSXApp* self)
+int cSSXApp::preUpdate()
 {
     if (PadCache != 0 && cPadCache_nextInput(PadCache) != 0) {
         if (cCommSystem_mCommSystem != 0) {
@@ -775,7 +776,7 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         for (i = 0; i < 2; i++) {
             int valueCount = cPadCache_numButtons(PadCache, i);
             void* values = cPadCache_buttonValues(PadCache, i);
-            cInputPad_update(self->InputPads[i], valueCount, values);
+            cInputPad_update(InputPads[i], valueCount, values);
         }
         return 1;
     }
@@ -867,21 +868,21 @@ struct sVEPurge {
  *
  * InputPads, Inputs, LoadIndicator and FELocale are not freed here.
  */
-extern "C" void cSSXApp_purge(cSSXApp* self)
+void cSSXApp::purge()
 {
     int i;
     for (i = 0; i < 2; i++) {
-        if (self->InputMaps[i]) {
-            operator_delete((int*)self->InputMaps[i]);
+        if (InputMaps[i]) {
+            operator_delete((int*)InputMaps[i]);
         }
     }
-    cUIFontInterface* fontInterface = self->Fonts;
+    cUIFontInterface* fontInterface = Fonts;
     if (fontInterface) {
         cUIFontInterface_purgeFonts(fontInterface);
         operator_delete((int*)fontInterface);
     }
     int* mgr = (int*)PadCache;
-    self->Fonts = 0;
+    Fonts = 0;
     PadCache = 0;
     cPadCache_purge(mgr);
     operator_delete(mgr);
@@ -905,25 +906,25 @@ extern "C" void cSSXApp_purge(cSSXApp* self)
         }
     }
     GrMan = 0;
-    if (self->mScriptDataBigFile) FILESYS_delbigsync(self->mScriptDataBigFile, 100);
-    if (self->mModelBigFile) FILESYS_delbigsync(self->mModelBigFile, 100);
+    if (mScriptDataBigFile) FILESYS_delbigsync(mScriptDataBigFile, 100);
+    if (mModelBigFile) FILESYS_delbigsync(mModelBigFile, 100);
     for (i = 0; i < 11; i++) {
-        if (self->mTextureBigFile[i]) {
-            FILESYS_delbigsync(self->mTextureBigFile[i], 100);
+        if (mTextureBigFile[i]) {
+            FILESYS_delbigsync(mTextureBigFile[i], 100);
         }
     }
-    if (self->mRewardsBigFile) FILESYS_delbigsync(self->mRewardsBigFile, 100);
+    if (mRewardsBigFile) FILESYS_delbigsync(mRewardsBigFile, 100);
     WORLDTRIGGERMANAGER_DeInit_noarg();
     SSXAUDIO_DeInit();
-    if (self->mAudioBigFile) FILESYS_delbigsync(self->mAudioBigFile, 100);
-    if (self->mMusicBigFile) FILESYS_delbigsync(self->mMusicBigFile, 100);
-    if (self->mMusic2BigFile) FILESYS_delbigsync(self->mMusic2BigFile, 100);
-    if (self->mSpeechBigFile) FILESYS_delbigsync(self->mSpeechBigFile, 100);
-    if (self->BE) cBE_purgeBE(self->BE);
-    cGameModeMan_purgeGM(self->GameModeMan);
-    if (self->mFEAsyncManager) cFEAsyncManager__cFEAsyncManager(self->mFEAsyncManager, 3);
+    if (mAudioBigFile) FILESYS_delbigsync(mAudioBigFile, 100);
+    if (mMusicBigFile) FILESYS_delbigsync(mMusicBigFile, 100);
+    if (mMusic2BigFile) FILESYS_delbigsync(mMusic2BigFile, 100);
+    if (mSpeechBigFile) FILESYS_delbigsync(mSpeechBigFile, 100);
+    if (BE) cBE_purgeBE(BE);
+    cGameModeMan_purgeGM(GameModeMan);
+    if (mFEAsyncManager) cFEAsyncManager__cFEAsyncManager(mFEAsyncManager, 3);
     {
-        cConsoleConfig* consoleConfig = self->ConsoleConfig;
+        cConsoleConfig* consoleConfig = ConsoleConfig;
         if (consoleConfig) {
             sVEPurge* vt = (sVEPurge*)consoleConfig->mVtbl;
             vt[1].fn(vthis(consoleConfig, vt[1]), 3);
@@ -949,12 +950,12 @@ extern char str_GameModule[];
  * Allocates 0x22C bytes ("GameModule"), runs cGame_cGame(), stores the result in Game and refreshes
  * GameModeMan from cGameModeMan_getGM().
  */
-extern "C" void cSSXApp_startGameLoad(cSSXApp* self)
+void cSSXApp::startGameLoad()
 {
     void* game = cGame_cGame(cMemMan_alloc(556, str_GameModule, 0, 0));
-    *(void**)&self->Game = game;
-    cAppMan_setNextModule((cAppMan*)self, (unsigned int)game);
-    *(void**)&self->GameModeMan = cGameModeMan_getGM();
+    *(void**)&Game = game;
+    cAppMan_setNextModule((cAppMan*)this, (unsigned int)game);
+    *(void**)&GameModeMan = cGameModeMan_getGM();
 }
 #endif
 
@@ -972,17 +973,17 @@ extern "C" void* cDebugFE_cDebugFE(void* p);
  * Clears cFEPopupConfirm_mUsePreFE, then builds the 0xB5AE0-byte real front end (RealFE) when unk_60 is set, as the
  * constructor leaves it, or else the 0x238-byte debug front end (DebugFE); both are tagged "FEModule".
  */
-extern "C" void cSSXApp_startFELoad(cSSXApp* self)
+void cSSXApp::startFELoad()
 {
     cFEPopupConfirm_mUsePreFE = 0;
-    if (self->UseRealFE != 0) {
+    if (UseRealFE != 0) {
         void* frontEnd = cRealFE_cRealFE(cMemMan_alloc(0xB5AE0, str_FEModule, 0, 0));
-        *(void**)&self->RealFE = frontEnd;
-        cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
+        *(void**)&RealFE = frontEnd;
+        cAppMan_setNextModule((cAppMan*)this, (unsigned int)frontEnd);
     } else {
         void* frontEnd = cDebugFE_cDebugFE(cMemMan_alloc(568, str_FEModule, 0, 0));
-        *(void**)&self->DebugFE = frontEnd;
-        cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
+        *(void**)&DebugFE = frontEnd;
+        cAppMan_setNextModule((cAppMan*)this, (unsigned int)frontEnd);
     }
 }
 #endif
@@ -1141,8 +1142,8 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXScriptEngine* sm = (cSSXScriptEngine*)cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(2640, str_ScriptEngine, 0, 0));
     ScriptEngine = sm;
     cSSXScriptEngine_InitOnce(sm);
-    self->fB8[0] = cSSXApp_loadInputMap((cSSXApp*)self, str_data_config_input_map);
-    self->fB8[1] = cSSXApp_loadInputMap((cSSXApp*)self, str_data_config_input2_map);
+    self->fB8[0] = ((cSSXApp*)self)->loadInputMap(str_data_config_input_map);
+    self->fB8[1] = ((cSSXApp*)self)->loadInputMap(str_data_config_input2_map);
     for (int j = 0; j < 2; j++) {
         self->fB0[j] = new (str_Input, 0, 0) sPlayerInput_82D0(self->fA8[j], self->fB8[0]);
     }
@@ -1153,7 +1154,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cUIFontInterface_loadFonts(self->f88);
     self->f78 = cBE_getBE();
     cSSXApp_activateBEOptions_self(self);
-    cSSXApp_initLocale((cSSXApp*)self);
+    ((cSSXApp*)self)->initLocale();
     cRiderAnimBase_initAIAnimEventMap();
     self->f94 = cGameAnimMap_cGameAnimMap(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
     cGameAnimMap_initMap(self->f94);
@@ -1205,18 +1206,18 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
  * cBEOptionInterface_mOption) to its setLanguage (vtable slot 3), then calls cFELocale_loadCommon() on it. BE interface
  * 4 is fetched and unused.
  */
-extern "C" void cSSXApp_initLocale(cSSXApp* self)
+void cSSXApp::initLocale()
 {
-    if (self->FELocale == 0) {
-        *(void**)&self->FELocale = cFELocale_cFELocale(cMemMan_alloc(0xC0, str_FELocale, 0, 0));
+    if (FELocale == 0) {
+        *(void**)&FELocale = cFELocale_cFELocale(cMemMan_alloc(0xC0, str_FELocale, 0, 0));
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    cFELocale* loc = self->FELocale;
+    cFELocale* loc = FELocale;
     sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
     void* thisp = vthis(loc, vt[3]); // slot 3: setLanguage
     void (**pfn)(void*, int) = &vt[3].fn;
     (*pfn)(thisp, optLanguage_228A78(cBEOptionInterface_mOption_228A78));
-    cFELocale_loadCommon(self->FELocale);
+    cFELocale_loadCommon(FELocale);
 }
 #endif
 
@@ -2676,17 +2677,17 @@ extern "C" void FrustumIntersector_crossinginstance(void* self, void* node, int 
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllInstancesCrossing(FrustumIntersector* self, CellClipT* list, int count)
+void FrustumIntersector::AddAllInstancesCrossing(CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
         nash_Node* n = ((nash_Cell*)list->pCell)->nodesinside[0].head;
         while (n != 0) {
-            FrustumIntersector_crossinginstance(self, n, ((int)list->uVisMask));
+            FrustumIntersector_crossinginstance(this, n, ((int)list->uVisMask));
             n = n->next;
         }
     }
-    if ((int)self->lastinstance != 0) {
-        FrustumIntersector_crossinginstance(self, 0, 0);
+    if ((int)lastinstance != 0) {
+        FrustumIntersector_crossinginstance(this, 0, 0);
     }
 }
 #endif
@@ -2705,17 +2706,17 @@ extern "C" void FrustumIntersector_crossingpatch(void* self, void* node, int fru
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* self, CellClipT* list, int count)
+void FrustumIntersector::AddAllPatchesCrossing(CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
         nash_Node* n = ((nash_Cell*)list->pCell)->nodesinside[1].head;
         while (n != 0) {
-            FrustumIntersector_crossingpatch(self, n, ((int)list->uVisMask));
+            FrustumIntersector_crossingpatch(this, n, ((int)list->uVisMask));
             n = n->next;
         }
     }
-    if ((int)self->lastpatch != 0) {
-        FrustumIntersector_crossingpatch(self, 0, 0);
+    if ((int)lastpatch != 0) {
+        FrustumIntersector_crossingpatch(this, 0, 0);
     }
 }
 #endif
@@ -2739,20 +2740,20 @@ extern "C" void FrustumIntersector_crossingfogvolume(void* self, cTypedSpaceNode
  * @param items  the source entries
  * @param n  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllTypedCrossing(FrustumIntersector* self, CellClipT* items, int n)
+void FrustumIntersector::AddAllTypedCrossing(CellClipT* items, int n)
 {
     for (; n > 0; n--, items++) {
         cTypedSpaceNode* object = (cTypedSpaceNode*)((nash_Cell*)items->pCell)->nodesinside[2].head;
         for (; object != 0; object = ((cTypedSpaceNode*)object->next)) {
             if (object->type == 7) {
-                FrustumIntersector_crossingfogvolume(self, object, ((int)items->uVisMask));
+                FrustumIntersector_crossingfogvolume(this, object, ((int)items->uVisMask));
             } else if (object->type == 8) {
-                self->lighthalosinside[self->numlighthalosinside++] = (tHaloRecord*)object;
+                lighthalosinside[numlighthalosinside++] = (tHaloRecord*)object;
             }
         }
     }
-    if ((int)self->lastfogvolume != 0) {
-        FrustumIntersector_crossingfogvolume(self, 0, 0);
+    if ((int)lastfogvolume != 0) {
+        FrustumIntersector_crossingfogvolume(this, 0, 0);
     }
 }
 #endif
@@ -2851,13 +2852,12 @@ static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
  * microprogram at 0xEF0 (skipped when the mask is 0; result 2 means outside) and appended to the list at +0x20A0, count
  * +0x209C (no bounds check). FrustumIntersector_FrustumIntersector calls it with the fully-inside cell list (+0x98, count +0x94).
  *
- * @param self_  the world view being built (see FrustumIntersector_FrustumIntersector)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* self_, void* list_, int count)
+void FrustumIntersector::AddAllInstancesInside(void* list_, int count)
 {
-    sVisOwner_A5A0* self = (sVisOwner_A5A0*)self_;
+    sVisOwner_A5A0* self = (sVisOwner_A5A0*)this;
     sVisList_A5A0* list = (sVisList_A5A0*)list_;
     for (; count > 0; count--, list++) {
         sVisNode_A5A0* n = list->src->head;
@@ -2916,11 +2916,10 @@ static inline int visOnPath_A698(cWorldCache* cache, tPatchRecord* n)
  * page is loaded (m_State 3). Its m_fvBSphere is tested on VU0 (microprogram 0xEF0, 2 = outside) unless the entry's
  * plane mask is 0; survivors go to patchesinside, count numpatchesinside (no bounds check).
  *
- * @param self  the frustum query being built (see FrustumIntersector_FrustumIntersector)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self, void* list_, int count)
+void FrustumIntersector::AddAllPatchesInside(void* list_, int count)
 {
     CellClipT* list = (CellClipT*)list_;
     for (; count > 0; count--, list++) {
@@ -2929,9 +2928,9 @@ extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self,
             // A do/while(0) block around the body (as a macro would) reproduces the target's register choice.
             do {
                 int frustum = ((int)list->uVisMask);
-                if (visOnPath_A698(self->world->m_pWorldCache, n)) {
+                if (visOnPath_A698(world->m_pWorldCache, n)) {
                     if (frustum == 0 || visSphereTest_A698(&n->m_fvBSphere, frustum) != 2) {
-                        self->patchesinside[self->numpatchesinside++] = n;
+                        patchesinside[numpatchesinside++] = n;
                     }
                 }
                 n = (tPatchRecord*)n->m_iIntersect.next;
@@ -2970,7 +2969,7 @@ static inline int visSphereTest_A770(tf4Vector* sphere, int frustum)
  * @param list  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllTypedInside(FrustumIntersector* self, CellClipT* list, int count)
+void FrustumIntersector::AddAllTypedInside(CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
         cTypedSpaceNode* n = (cTypedSpaceNode*)((nash_Cell*)list->pCell)->nodesinside[2].head;
@@ -2980,10 +2979,10 @@ extern "C" void FrustumIntersector_AddAllTypedInside(FrustumIntersector* self, C
                 tParticleInstanceRecord* fog = (tParticleInstanceRecord*)n;
                 int frustum = ((int)list->uVisMask);
                 if (frustum == 0 || visSphereTest_A770(&fog->m_fvBSphere, frustum) != 2) {
-                    self->fogvolumesinside[self->numfogvolumesinside++] = fog;
+                    fogvolumesinside[numfogvolumesinside++] = fog;
                 }
             } else if (n->type == 8) {
-                self->lighthalosinside[self->numlighthalosinside++] = (tHaloRecord*)n;
+                lighthalosinside[numlighthalosinside++] = (tHaloRecord*)n;
             }
             n = (cTypedSpaceNode*)n->next;
         }
@@ -3302,12 +3301,12 @@ extern "C" FrustumIntersector* FrustumIntersector_FrustumIntersector(FrustumInte
     Load_22ADD8(&callback, nash->octant[1][0][1].rootcell, &nash->octant[1][0][1]);
     Load_22ADD8(&callback, nash->octant[1][1][0].rootcell, &nash->octant[1][1][0]);
     Load_22ADD8(&callback, nash->octant[1][1][1].rootcell, &nash->octant[1][1][1]);
-    FrustumIntersector_AddAllPatchesInside(self, self->cellsinside, self->numcellsinside);
-    FrustumIntersector_AddAllInstancesInside(self, self->cellsinside, self->numcellsinside);
-    FrustumIntersector_AddAllTypedInside(self, self->cellsinside, self->numcellsinside);
-    FrustumIntersector_AddAllPatchesCrossing(self, self->cellscrossing, self->numcellscrossing);
-    FrustumIntersector_AddAllInstancesCrossing(self, self->cellscrossing, self->numcellscrossing);
-    FrustumIntersector_AddAllTypedCrossing(self, self->cellscrossing, self->numcellscrossing);
+    self->AddAllPatchesInside(self->cellsinside, self->numcellsinside);
+    self->AddAllInstancesInside(self->cellsinside, self->numcellsinside);
+    self->AddAllTypedInside(self->cellsinside, self->numcellsinside);
+    self->AddAllPatchesCrossing(self->cellscrossing, self->numcellscrossing);
+    self->AddAllInstancesCrossing(self->cellscrossing, self->numcellscrossing);
+    self->AddAllTypedCrossing(self->cellscrossing, self->numcellscrossing);
     return self;
 }
 #endif
@@ -3613,47 +3612,47 @@ static inline int IsReady_22B008(cGame* self)
  *
  * @return 0 when GrMan's slot 17 returns 0, otherwise 1
  */
-extern "C" int cGame_render(cGame* self)
+int cGame::render()
 {
     if (((cGfx_22B008*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
     ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(-1);
     {
-        sLoader_22B008* streamPause = ((sLoader_22B008*)self->StreamPause);
+        sLoader_22B008* streamPause = ((sLoader_22B008*)StreamPause);
         sVEntry<int(void*, int)>* vt = streamPause->vt;
         char* thisp = (char*)streamPause + vt[2].delta;
         int (**pfn)(void*, int) = &vt[2].fn;
-        if ((*pfn)(thisp, IsReady_22B008(self)) == 0) {
+        if ((*pfn)(thisp, IsReady_22B008(this)) == 0) {
             return 1;
         }
     }
-    if (cFadeScreen_drawFade(self) != 0) {
+    if (cFadeScreen_drawFade(this) != 0) {
         return 1;
     }
     if (ScriptEngine->mIsPlaying != 0) {
-        func_0022C830(self);
+        func_0022C830(this);
         return 1;
     }
     cGarbageMan_Update();
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_22B008*)ps2GraphicsMan)->f10A8 = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->cur];
     ((cGfx_22B008*)ps2GraphicsMan)->f10AC = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->f44];
-    ((sRenderTarget_22B008*)self->LensFxMan)->views = ((sViewMan_22B008*)self->ViewMan)->views;
-    ((cGfx_22B008*)ps2GraphicsMan)->f270 = ((sViewMan_22B008*)self->ViewMan)->views;
+    ((sRenderTarget_22B008*)LensFxMan)->views = ((sViewMan_22B008*)ViewMan)->views;
+    ((cGfx_22B008*)ps2GraphicsMan)->f270 = ((sViewMan_22B008*)ViewMan)->views;
     sWorld_22B008* world = 0;
-    for (unsigned int i = 0; i < ((sViewMan_22B008*)self->ViewMan)->views; i++) {
+    for (unsigned int i = 0; i < ((sViewMan_22B008*)ViewMan)->views; i++) {
         ((cGfx_22B008*)GrMan)->view = i;
         ((cGfx_22B008*)GrMan)->ClearProjTextures();
-        ((sViewMan_22B008*)self->ViewMan)->cur = i;
-        sCam_22B008* cam = ((sViewMan_22B008*)self->ViewMan)->cams[((sViewMan_22B008*)self->ViewMan)->cur];
-        ((cGfx_22B008*)GrMan)->SetViewportWindow1(&((sViewMan_22B008*)self->ViewMan)->rects[i], 1);
+        ((sViewMan_22B008*)ViewMan)->cur = i;
+        sCam_22B008* cam = ((sViewMan_22B008*)ViewMan)->cams[((sViewMan_22B008*)ViewMan)->cur];
+        ((cGfx_22B008*)GrMan)->SetViewportWindow1(&((sViewMan_22B008*)ViewMan)->rects[i], 1);
         ((cGfx_22B008*)GrMan)->SetView1(&cam->mat);
         ((cGfx_22B008*)GrMan)->SetViewportPerspective(cam->fov, 1.0f, cam->farClip);
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFE7FFFFF) | 0x800000;
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFCFFFFF) | 0x300000;
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
-        ((cRenderer_22B008*)self->SkyBox)->v04();
+        ((cRenderer_22B008*)SkyBox)->v04();
         ((cGfx_22B008*)GrMan)->SetViewportPerspective(cam->fov, cam->nearClip, cam->farClip);
         ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(i);
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
@@ -3706,19 +3705,19 @@ extern "C" int cGame_render(cGame* self)
         sWorld_22B008 worldData;
         world = &worldData;
         // sBox_22B008 has tBoundBox's layout (MinPoint, MaxPoint)
-        FrustumIntersector_FrustumIntersector((FrustumIntersector*)world, self->BXNash, self->OcclusionMan,
-                                              (const tBoundBox*)&box, self->World);
-        cGame_renderBuckets(self);
-        func_00229BA8((cCrowdMan2d*)((void*)self->CrowdMan2d));
-        func_00344138(((void*)self->CrowdMan3d));
-        cMultiParticleMan_render(((void*)self->MultiParticleMan));
+        FrustumIntersector_FrustumIntersector((FrustumIntersector*)world, BXNash, OcclusionMan,
+                                              (const tBoundBox*)&box, World);
+        cGame_renderBuckets(this);
+        func_00229BA8((cCrowdMan2d*)((void*)CrowdMan2d));
+        func_00344138(((void*)CrowdMan3d));
+        cMultiParticleMan_render(((void*)MultiParticleMan));
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
-        ((cScene_22B008*)self->AI)->v04();
-        cGame_renderModels(self, world);
-        cGame_renderFogVolumes(self, world);
-        cGame_renderLightHalos(self, world, i);
+        ((cScene_22B008*)AI)->v04();
+        cGame_renderModels(this, world);
+        cGame_renderFogVolumes(this, world);
+        cGame_renderLightHalos(this, world, i);
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x40;
-        cGame_renderPatches(self, world);
+        cGame_renderPatches(this, world);
     }
     {
         sVEView_22B008* vt = (sVEView_22B008*)VPTR_OF(cGraphicsMan, GrMan);
@@ -3730,32 +3729,32 @@ extern "C" int cGame_render(cGame* self)
     ((cGfx_22B008*)GrMan)->SetView1(&t4mat_Identity_22B008);
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
-    sHud_22B008* hud = ((sHud_22B008*)self->DebugFont);
+    sHud_22B008* hud = ((sHud_22B008*)DebugFont);
     hud->f38 = hud->f30 * 0.8f;
     hud->f3C = hud->f34 * 0.8f;
-    ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
-    ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
-    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
-        cMenuSys_render(((void*)self->MenuSys));
-        ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
-        ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    ((sHud_22B008*)DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
+    ((sHud_22B008*)DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    if (cMenuSys_isActive(((void*)MenuSys)) != 0) {
+        cMenuSys_render(((void*)MenuSys));
+        ((sHud_22B008*)DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
+        ((sHud_22B008*)DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     }
     *((cGfx_22B008*)GrMan)->top = sDrawState_s_defaultDrawState_22B008;
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
-    ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
-    ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    ((sHud_22B008*)DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
+    ((sHud_22B008*)DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     if (cRenderToggles_m_DisableHUD == 0) {
-        ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(0.0f, 0.0f);
-        cUIEngine_render2D(((void*)self->UI));
-        cWScriptMan_render(((void*)self->WScriptMan));
+        ((sHud_22B008*)DebugFont)->scale = sScale_22B008(0.0f, 0.0f);
+        cUIEngine_render2D(((void*)UI));
+        cWScriptMan_render(((void*)WScriptMan));
     }
     cSSXScriptEngine_Render(ScriptEngine);
-    cBXLoadIndicator_Render(((void*)self->LoadIndicator));
+    cBXLoadIndicator_Render(((void*)LoadIndicator));
     ((cGfx_22B008*)GrMan)->DrawFrame();
-    cSSXAudio_Update(gSSXAudio, (float)self->mUpdateTick * (1.0f / 60.0f), 1);
+    cSSXAudio_Update(gSSXAudio, (float)mUpdateTick * (1.0f / 60.0f), 1);
     cWorldTriggerManager_Update(gWorldTriggerManager);
-    self->mUpdateTick = 0;
+    mUpdateTick = 0;
     return 1;
 }
 #endif

@@ -149,18 +149,18 @@ extern "C" float SphereTree_GetRadius(void* self);
  * @param hi  the box's maximum corner (On Tour bMax)
  * @return 0 when the sphere's bounding box lies wholly beyond one face, otherwise 1
  */
-extern "C" int cWorldSphTree_IsInBoxTransformed(cWorldSphTree* self, float* lo, float* hi)
+int cWorldSphTree::IsInBoxTransformed(float* lo, float* hi)
 {
     t4Vector ext;
-    float rx = SphereTree_GetRadius(self->st);
-    float ry = SphereTree_GetRadius(self->st);
-    float rz = SphereTree_GetRadius(self->st);
+    float rx = SphereTree_GetRadius(st);
+    float ry = SphereTree_GetRadius(st);
+    float rz = SphereTree_GetRadius(st);
     ext.x = rx;
     ext.y = ry;
     ext.z = rz;
     ext.w = 0.0f;
-    t4Vector mx = add_330540(*(&self->st->transCenter), ext);
-    t4Vector mn = sub_330540(*(&self->st->transCenter), ext);
+    t4Vector mx = add_330540(*(&st->transCenter), ext);
+    t4Vector mn = sub_330540(*(&st->transCenter), ext);
     float lx = lo[0];
     float tx = mx.x;
     if (tx < lx && mn.x < lx) return 0;
@@ -189,11 +189,11 @@ extern "C" float SphereTree_GetRadius(void* self);
  *
  * @return 2 * radius, or -1.0 for a low-detail wrapper
  */
-extern "C" float cWorldSphTree_GetIdealParam(cWorldSphTree* self)
+float cWorldSphTree::GetIdealParam()
 {
     float idealParam;
-    if (*(int*)self != 0) {
-        idealParam = SphereTree_GetRadius(self->st) * 2.0f;
+    if (*(int*)this != 0) {
+        idealParam = SphereTree_GetRadius(st) * 2.0f;
     } else {
         idealParam = -1.0f;
     }
@@ -216,12 +216,12 @@ extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  the uniform scale (On Tour scale)
  */
-extern "C" void cWorldSphTree_Transform(cWorldSphTree* self, t4Matrix* mat, float scale)
+void cWorldSphTree::Transform(t4Matrix* mat, float scale)
 {
-    bxSphereTree_operatorE(self->localTree, self->st);
-    self->st = (bxSphereTree*)((void*)self->localTree);
-    SphereTree_TransformRel(self->st, mat, scale);
-    self->isTransformed = 1;
+    bxSphereTree_operatorE(localTree, st);
+    st = (bxSphereTree*)((void*)localTree);
+    SphereTree_TransformRel(st, mat, scale);
+    isTransformed = 1;
 }
 #endif
 
@@ -234,12 +234,11 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_UnTransform__FPv);
  *
  * @return the original tree pointer (declared int; On Tour returns void)
  */
-int cWorldSphTree_UnTransform(void* vself)
+int cWorldSphTree::UnTransform()
 {
-    cWorldSphTree* self = (cWorldSphTree*)vself;
-    int original = (int)self->origSt;
-    self->isTransformed = 0;
-    self->st = (bxSphereTree*)original;
+    int original = (int)origSt;
+    isTransformed = 0;
+    st = (bxSphereTree*)original;
     return original;
 }
 #endif
@@ -306,10 +305,10 @@ extern "C" int SphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldSphTree_IsTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
+int cWorldSphTree::IsTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
 {
     t4Vector hitDir;
-    int hit = SphereTree_IsTriCollision(self->st, vertA, vertB, vertC, n, &hitDir, ipos);
+    int hit = SphereTree_IsTriCollision(st, vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330788(hitDir);
         *outLen = len;
@@ -379,10 +378,10 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldSphTree_Is2SidedTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
+int cWorldSphTree::Is2SidedTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
 {
     t4Vector hitDir;
-    int hit = bxSphereTree_Is2SidedTriCollision(self->st, vertA, vertB, vertC, n, &hitDir, ipos);
+    int hit = bxSphereTree_Is2SidedTriCollision(st, vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330828(hitDir);
         *outLen = len;
@@ -443,9 +442,9 @@ extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, voi
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsTreeCollision), otherwise 0
  */
-extern "C" int cWorldSphTree_IsSphTreeInt(cWorldSphTree* self, void* tree, tIntersectInfo* hit)
+int cWorldSphTree::IsSphTreeInt(void* tree, tIntersectInfo* hit)
 {
-    if (SphereTree_IsTreeCollision(self->st, tree, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
+    if (SphereTree_IsTreeCollision(st, tree, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
         float len = wsLength_3308C8((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
         wsDivEq_3308C8((*(t4Vector*)&hit->Inorm), len);
@@ -507,9 +506,9 @@ extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsBoxCollision), otherwise 0
  */
-extern "C" int cWorldSphTree_IsBoxInt(cWorldSphTree* self, void* bMin, void* bMax, tIntersectInfo* hit)
+int cWorldSphTree::IsBoxInt(void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (SphereTree_IsBoxCollision(self->st, bMin, bMax, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
+    if (SphereTree_IsBoxCollision(st, bMin, bMax, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
         float len = wsLength_330950((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
         wsDivEq_330950((*(t4Vector*)&hit->Inorm), len);
@@ -562,27 +561,26 @@ static inline int overlapBox_3309D8(const tBoundBox* b, const tBoundBox* o)
  * walkers nash_privy_QueryHelper_helpX1, nash_privy_QueryHelper_helpX3 and nash_privy_QueryHelper_helpX4, and
  * nash_Cell_descend, nash_Cell_descend2 and nash_Cell_descend3.
  *
- * @param ctx  the callback: instance list, count pointer, maximum, query box (On Tour OverlapInstancesCallback, this)
  * @param tree  the octree cell (On Tour const Cell& cell)
  */
-extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* ctx, nash_Cell* tree)
+void OverlapInstancesCallback::operatorCall(nash_Cell* tree)
 {
     for (tInstanceRecord* node = *(tInstanceRecord**)&tree->nodesinside[0]; node != 0; node = (*(tInstanceRecord**)&node->m_iIntersect)) {
         int flags = node->m_iFlags;
         if (flags & 0x20) {
-            if (overlapNode_3309D8(ctx->box, node)) {
-                unsigned int* cnt = ctx->number;
+            if (overlapNode_3309D8(box, node)) {
+                unsigned int* cnt = number;
                 int n = *cnt;
-                ctx->instances[n] = node;
+                instances[n] = node;
                 *cnt = n + 1;
             }
         } else if (flags & 0x40) {
             if (node->m_pActiveNode->hasBoundBox()) {
                 tBoundBox* objBox = (tBoundBox*)node->m_pActiveNode->getBoundBox();
-                if (overlapBox_3309D8(ctx->box, objBox)) {
-                    unsigned int* cnt = ctx->number;
+                if (overlapBox_3309D8(box, objBox)) {
+                    unsigned int* cnt = number;
                     int n = *cnt;
-                    ctx->instances[n] = node;
+                    instances[n] = node;
                     *cnt = n + 1;
                 }
             }
@@ -602,15 +600,15 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallba
 
 static inline void collect_330BA8(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
-    if (node->children[0][0][0] != 0) nash_Cell_descend(node->children[0][0][0], ctx);
-    if (node->children[0][0][1] != 0) nash_Cell_descend(node->children[0][0][1], ctx);
-    if (node->children[0][1][0] != 0) nash_Cell_descend(node->children[0][1][0], ctx);
-    if (node->children[0][1][1] != 0) nash_Cell_descend(node->children[0][1][1], ctx);
-    if (node->children[1][0][0] != 0) nash_Cell_descend(node->children[1][0][0], ctx);
-    if (node->children[1][0][1] != 0) nash_Cell_descend(node->children[1][0][1], ctx);
-    if (node->children[1][1][0] != 0) nash_Cell_descend(node->children[1][1][0], ctx);
-    if (node->children[1][1][1] != 0) nash_Cell_descend(node->children[1][1][1], ctx);
+    ctx->operatorCall((nash_Cell*)node);
+    if (node->children[0][0][0] != 0) node->children[0][0][0]->descend(ctx);
+    if (node->children[0][0][1] != 0) node->children[0][0][1]->descend(ctx);
+    if (node->children[0][1][0] != 0) node->children[0][1][0]->descend(ctx);
+    if (node->children[0][1][1] != 0) node->children[0][1][1]->descend(ctx);
+    if (node->children[1][0][0] != 0) node->children[1][0][0]->descend(ctx);
+    if (node->children[1][0][1] != 0) node->children[1][0][1]->descend(ctx);
+    if (node->children[1][1][0] != 0) node->children[1][1][0]->descend(ctx);
+    if (node->children[1][1][1] != 0) node->children[1][1][1]->descend(ctx);
 }
 
 // One top-level cell: test it, then either take the whole subtree or recurse into it.
@@ -641,18 +639,18 @@ static inline void queryCell_330BA8(cBXNash* nash, int i, void* box, OverlapInst
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_getinstances(cOverlapList* self, tBoundBox* box)
+void cOverlapList::getinstances(tBoundBox* box)
 {
     OverlapInstancesCallback ctx;
     char flags[8];
-    cBXNash* nash = self->nash;
+    cBXNash* nash = this->nash;
     OverlapInstancesCallback* pctx = &ctx;
-    self->deletecount = nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instances) = ((tInstanceRecord**)&self->instances[0]);
-    (*(int**)&ctx.number) = (int*)&self->numinstances;
+    deletecount = nash->deletecount;
+    (*(tInstanceRecord***)&ctx.instances) = ((tInstanceRecord**)&instances[0]);
+    (*(int**)&ctx.number) = (int*)&numinstances;
     ctx.maximum = 0x40;
     (*(tBoundBox**)&ctx.box) = box;
-    self->numinstances = (unsigned int)0;
+    numinstances = (unsigned int)0;
     queryCell_330BA8(nash, 0, box, pctx, flags);
     queryCell_330BA8(nash, 1, box, pctx, flags);
     queryCell_330BA8(nash, 2, box, pctx, flags);
@@ -661,8 +659,8 @@ extern "C" void cOverlapList_getinstances(cOverlapList* self, tBoundBox* box)
     queryCell_330BA8(nash, 5, box, pctx, flags);
     queryCell_330BA8(nash, 6, box, pctx, flags);
     queryCell_330BA8(nash, 7, box, pctx, flags);
-    self->numpatches = 0xFFFFFFFF;
-    self->numtyped = 0xFFFFFFFF;
+    numpatches = 0xFFFFFFFF;
+    numtyped = 0xFFFFFFFF;
 }
 #endif
 
@@ -725,17 +723,17 @@ static inline int queryCell_331450(cBXNash* nash, int i, void* box, OverlapInsta
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_gettyped(cOverlapList* self, tBoundBox* box)
+void cOverlapList::gettyped(tBoundBox* box)
 {
     OverlapInstancesCallback ctx;
-    cBXNash* nash = self->nash;
+    cBXNash* nash = this->nash;
     OverlapInstancesCallback* pctx = &ctx;
-    self->deletecount = nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instances) = (tInstanceRecord**)((void**)&self->typed[0]);
-    (*(int**)&ctx.number) = (int*)&self->numtyped;
+    deletecount = nash->deletecount;
+    (*(tInstanceRecord***)&ctx.instances) = (tInstanceRecord**)((void**)&typed[0]);
+    (*(int**)&ctx.number) = (int*)&numtyped;
     ctx.maximum = 0x200;
     (*(tBoundBox**)&ctx.box) = box;
-    self->numtyped = 0;
+    numtyped = 0;
     queryCell_331450(nash, 0, box, pctx);
     queryCell_331450(nash, 1, box, pctx);
     queryCell_331450(nash, 2, box, pctx);
@@ -744,8 +742,8 @@ extern "C" void cOverlapList_gettyped(cOverlapList* self, tBoundBox* box)
     queryCell_331450(nash, 5, box, pctx);
     queryCell_331450(nash, 6, box, pctx);
     queryCell_331450(nash, 7, box, pctx);
-    self->numpatches = 0xFFFFFFFF;
-    self->numinstances = 0xFFFFFFFF;
+    numpatches = 0xFFFFFFFF;
+    numinstances = 0xFFFFFFFF;
 }
 #endif
 
@@ -784,7 +782,7 @@ static inline int overlapObj_331E90(const tBoundBox* b, const sObj_331E90* n)
 
 static inline void collect_331E90(sTree_331E90* tree, OverlapInstancesCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
+    ctx->operatorCall((nash_Cell*)tree);
     OverlapInstancesCallback* q = (OverlapInstancesCallback*)((char*)ctx + 0x10);
     for (sObj_331E90* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_331E90(((tBoundBox*)q->box), p)) {
@@ -794,14 +792,14 @@ static inline void collect_331E90(sTree_331E90* tree, OverlapInstancesCallback* 
             *cnt = n + 1;
         }
     }
-    if (tree->child[0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[0]), ctx);
-    if (tree->child[1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[1]), ctx);
-    if (tree->child[2] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[2]), ctx);
-    if (tree->child[3] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[3]), ctx);
-    if (tree->child[4] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[4]), ctx);
-    if (tree->child[5] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[5]), ctx);
-    if (tree->child[6] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[6]), ctx);
-    if (tree->child[7] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[7]), ctx);
+    if (tree->child[0] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[0]))->descend2(ctx);
+    if (tree->child[1] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[1]))->descend2(ctx);
+    if (tree->child[2] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[2]))->descend2(ctx);
+    if (tree->child[3] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[3]))->descend2(ctx);
+    if (tree->child[4] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[4]))->descend2(ctx);
+    if (tree->child[5] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[5]))->descend2(ctx);
+    if (tree->child[6] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[6]))->descend2(ctx);
+    if (tree->child[7] != 0) ((nash_Cell*)((sTree_340C20*)tree->child[7]))->descend2(ctx);
 }
 
 struct sTag_331E90 {
@@ -835,22 +833,22 @@ static inline void queryCell_331E90(cBXNash* nash, int i, tBoundBox* box, Overla
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBox* box)
+void cOverlapList::getpatchesandinstances(tBoundBox* box)
 {
     OverlapPatchesAndInstancesCallback ctx;
-    self->deletecount = self->nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&self->instances[0]);
-    (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
+    deletecount = this->nash->deletecount;
+    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&instances[0]);
+    (*(int**)&ctx.instancecallback.number) = (int*)&numinstances;
     ctx.instancecallback.maximum = 0x40;
     (*(tBoundBox**)&ctx.instancecallback.box) = box;
-    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&self->patches[0]);
-    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&self->numpatches;
+    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&patches[0]);
+    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&numpatches;
     (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
     OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
-    self->numinstances = 0;
+    numinstances = 0;
     *((int*)objs->number) = 0;
-    cBXNash* nash = self->nash;
+    cBXNash* nash = this->nash;
     OverlapInstancesCallback* pctx = &ctx.instancecallback;
     queryCell_331E90(nash, 0, box, pctx);
     queryCell_331E90(nash, 1, box, pctx);
@@ -860,7 +858,7 @@ extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBo
     queryCell_331E90(nash, 5, box, pctx);
     queryCell_331E90(nash, 6, box, pctx);
     queryCell_331E90(nash, 7, box, pctx);
-    self->numtyped = 0xFFFFFFFF;
+    numtyped = 0xFFFFFFFF;
 }
 #endif
 
@@ -912,7 +910,7 @@ static inline void add_332DB8(OverlapInstancesCallback* s, void* p)
 
 static inline void collect_332DB8(sTree_332DB8* tree, OverlapEverythingCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(&ctx->instancecallback, (nash_Cell*)tree);
+    ctx->instancecallback.operatorCall((nash_Cell*)tree);
     OverlapInstancesCallback* s = &(*(OverlapInstancesCallback*)&ctx->patchescallback);
     for (sObj_332DB8* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_332DB8(((tBoundBox*)s->box), p)) {
@@ -923,14 +921,14 @@ static inline void collect_332DB8(sTree_332DB8* tree, OverlapEverythingCallback*
     for (void** q = tree->all; q != 0; q = (void**)*q) {
         add_332DB8(s, q);
     }
-    if (tree->child[0]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[0]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[1]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[1]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[2]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[2]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[3]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[3]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[4]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[4]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[5]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[5]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[6]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[6]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[7]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[7]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[0]) ((nash_Cell*)tree->child[0])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[1]) ((nash_Cell*)tree->child[1])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[2]) ((nash_Cell*)tree->child[2])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[3]) ((nash_Cell*)tree->child[3])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[4]) ((nash_Cell*)tree->child[4])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[5]) ((nash_Cell*)tree->child[5])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[6]) ((nash_Cell*)tree->child[6])->descend3((OverlapEverythingCallback*)ctx);
+    if (tree->child[7]) ((nash_Cell*)tree->child[7])->descend3((OverlapEverythingCallback*)ctx);
 }
 
 static inline void queryCell_332DB8(cBXNash* nash, int i, tBoundBox* box, OverlapEverythingCallback* ctx)
@@ -964,28 +962,28 @@ static inline void queryCell_332DB8(cBXNash* nash, int i, tBoundBox* box, Overla
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
+void cOverlapList::geteverything(tBoundBox* box)
 {
     OverlapEverythingCallback ctx;
-    self->deletecount = self->nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&self->instances[0]);
-    (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
+    deletecount = this->nash->deletecount;
+    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&instances[0]);
+    (*(int**)&ctx.instancecallback.number) = (int*)&numinstances;
     ctx.instancecallback.maximum = 0x40;
     (*(tBoundBox**)&ctx.instancecallback.box) = box;
-    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&self->patches[0]);
-    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&self->numpatches;
+    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&patches[0]);
+    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&numpatches;
     (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
     OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
-    self->numinstances = 0;
+    numinstances = 0;
     *((int*)objs->number) = 0;
-    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.typedcallback).instances) = ((tInstanceRecord**)&self->typed[0]);
-    (*(int**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).number) = (int*)&self->numtyped;
+    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.typedcallback).instances) = ((tInstanceRecord**)&typed[0]);
+    (*(int**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).number) = (int*)&numtyped;
     (*(OverlapInstancesCallback*)&ctx.typedcallback).maximum = 0x200;
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).box) = box;
     OverlapInstancesCallback* all = &(*(OverlapInstancesCallback*)&ctx.typedcallback);
     *((int*)all->number) = 0;
-    cBXNash* nash = self->nash;
+    cBXNash* nash = this->nash;
     OverlapEverythingCallback* pctx = &ctx;
     queryCell_332DB8(nash, 0, box, pctx);
     queryCell_332DB8(nash, 1, box, pctx);
@@ -1076,16 +1074,15 @@ static inline void reset_333EF8(tIntersectInfo* h)
  * 2) with the room left. Patch hits are not checked against @p cap. Called by cOverlapList_terrainIntersect1 and
  * cGroundMotion_setupGroundVectors.
  *
- * @param vself  the overlap list
  * @param vq  the query (On Tour cWorldIntersectType)
  * @param hits  out: the hit records
  * @param cap  the number of records @p hits holds
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt as its last argument (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, tIntersectInfo* hits, int cap, int hitCache)
+int cOverlapList::terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int hitCache)
 {
-    cOverlapList* self = vself;
+    cOverlapList* self = this;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     int n = 0;
     for (unsigned int i = 0; i < self->numpatches; i++) {
@@ -1189,11 +1186,10 @@ static inline int isBetter_003342D0(tIntersectInfo* a, tIntersectInfo* b)
  * @param hitCache  passed through to cOverlapList_terrainIntersect (On Tour tIntHint *hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, cWorldIntersectType* query, tIntersectInfo* out,
-                                                int hitCache)
+float cOverlapList::terrainIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int hitCache)
 {
     tIntersectInfoElem hits[64];
-    int n = cOverlapList_terrainIntersect(self, query, hits, 0x40, hitCache);
+    int n = terrainIntersect(query, hits, 0x40, hitCache);
     if (n == 0) {
         return -1.0f;
     }
@@ -1258,13 +1254,13 @@ static inline int overlapBox_334458(const cWorldIntersectType* q, const tBoundBo
  * @param full  nonzero selects mode 2 instead of 1 (On Tour includeridable)
  * @return the number of hits stored
  */
-extern "C" int cOverlapList_staticObjectIntersect(cOverlapList* self, cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
+int cOverlapList::staticObjectIntersect(cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
 {
     int mode = 1;
     if (full) mode = 2;
     int n = 0;
-    for (unsigned int i = 0; i < self->numinstances; i++) {
-        tInstanceRecord* node = self->instances[i];
+    for (unsigned int i = 0; i < numinstances; i++) {
+        tInstanceRecord* node = instances[i];
         int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_334458(query, node)) {
@@ -1330,7 +1326,7 @@ static inline void wsAddEq_334680(t4Vector& a, const t4Vector& b)
  * @param testRadius     the test radius
  * @return the number of hits
  */
-extern "C" int cOverlapList_splineIntersect(cOverlapList* self, t4Vector* pos, int intInfo, int mask, float testRadius)
+int cOverlapList::splineIntersect(t4Vector* pos, int intInfo, int mask, float testRadius)
 {
     tBoundBox box;
     t4Vector ext;
@@ -1347,8 +1343,8 @@ extern "C" int cOverlapList_splineIntersect(cOverlapList* self, t4Vector* pos, i
     ext.w = zero;
     wsSubEq_334680((*(t4Vector*)&box.MinPoint), ext);
     wsAddEq_334680((*(t4Vector*)&box.MaxPoint), ext);
-    for (unsigned int i = 0; i < self->numtyped; i++) {
-        cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)self->typed[i];
+    for (unsigned int i = 0; i < numtyped; i++) {
+        cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)typed[i];
         int type = spaceNode->type;
         if (type == 2) {
             cRailModifier_splineIntersect(((cRailSpaceNode*)spaceNode)->Rail, &box, &box, pos, mask, &cnt, &dist,
@@ -1380,10 +1376,10 @@ extern char str_AIFwdDiffCache[];
  * Allocates 0x10 bytes tagged "AIFwdDiffCache", runs the constructor, stores the cache at +0xA4 and calls
  * cAIFwdDiffCache_Init(cache, 40), which allocates the entries and their hash buckets.
  */
-extern "C" void cBXNash_initTheAIFwdDiffCache(cBXNash* self)
+void cBXNash::initTheAIFwdDiffCache()
 {
     void* cache = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, str_AIFwdDiffCache, 0, 0));
-    self->TheAIFwdDiffCache = (cAIFwdDiffCache*)cache;
+    TheAIFwdDiffCache = (cAIFwdDiffCache*)cache;
     cAIFwdDiffCache_Init(cache, 40);
 }
 #endif
@@ -1396,13 +1392,13 @@ extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(void* p, int flags);
 /**
  * Deletes the AI forward-difference cache (+0xA4) built by cBXNash_initTheAIFwdDiffCache, then clears the pointer.
  */
-extern "C" void cBXNash_purgeTheAIFwdDiffCache(cBXNash* self)
+void cBXNash::purgeTheAIFwdDiffCache()
 {
-    void* fwdDiffCache = self->TheAIFwdDiffCache;
+    void* fwdDiffCache = TheAIFwdDiffCache;
     if (fwdDiffCache != 0) {
         cAIFwdDiffCache__cAIFwdDiffCache(fwdDiffCache, 3);
     }
-    self->TheAIFwdDiffCache = 0;
+    TheAIFwdDiffCache = 0;
 }
 #endif
 
@@ -2300,14 +2296,14 @@ static inline void collect_335D78(nash_Cell* node, TerrainCallback* ctx)
     for (p = node->nodesinside[0].head; p != 0; p = p->next) {
         TerrainCallback_intersectinstance(ctx, p);
     }
-    if (node->children[0][0][0] != 0) nash_Cell_descend4(node->children[0][0][0], ctx);
-    if (node->children[0][0][1] != 0) nash_Cell_descend4(node->children[0][0][1], ctx);
-    if (node->children[0][1][0] != 0) nash_Cell_descend4(node->children[0][1][0], ctx);
-    if (node->children[0][1][1] != 0) nash_Cell_descend4(node->children[0][1][1], ctx);
-    if (node->children[1][0][0] != 0) nash_Cell_descend4(node->children[1][0][0], ctx);
-    if (node->children[1][0][1] != 0) nash_Cell_descend4(node->children[1][0][1], ctx);
-    if (node->children[1][1][0] != 0) nash_Cell_descend4(node->children[1][1][0], ctx);
-    if (node->children[1][1][1] != 0) nash_Cell_descend4(node->children[1][1][1], ctx);
+    if (node->children[0][0][0] != 0) node->children[0][0][0]->descend4(ctx);
+    if (node->children[0][0][1] != 0) node->children[0][0][1]->descend4(ctx);
+    if (node->children[0][1][0] != 0) node->children[0][1][0]->descend4(ctx);
+    if (node->children[0][1][1] != 0) node->children[0][1][1]->descend4(ctx);
+    if (node->children[1][0][0] != 0) node->children[1][0][0]->descend4(ctx);
+    if (node->children[1][0][1] != 0) node->children[1][0][1]->descend4(ctx);
+    if (node->children[1][1][0] != 0) node->children[1][1][0]->descend4(ctx);
+    if (node->children[1][1][1] != 0) node->children[1][1][1]->descend4(ctx);
 }
 
 // Queries octant i of the Nash (retail walks octant[2][2][2] in flat order, 0-7).
@@ -2337,17 +2333,15 @@ static inline void queryCell_335D78(cBXNash* nash, int i, tBoundBox* box, Terrai
  * its instance list (nodesinside[0]) to TerrainCallback_intersectinstance and its children to nash_Cell_descend4; 2
  * (crossing) goes to nash_privy_QueryHelper_helpX5. Called by cBXNash_terrainIntersect1.
  *
- * @param vself  the Nash
  * @param vq  the query (On Tour cWorldIntersectType)
  * @param hits  out: the hit records
  * @param cap  the number of records @p hits holds
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt for each patch (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-extern "C" int cBXNash_terrainIntersect(cBXNash* vself, cWorldIntersectType* vq, tIntersectInfo* hits, int cap,
-                                        int hitCache)
+int cBXNash::terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, int hitCache)
 {
-    cBXNash* nash = vself;
+    cBXNash* nash = this;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     TerrainCallback ctx;
     tBoundBox box;
@@ -2415,11 +2409,10 @@ static inline int isBetter_00336850(tIntersectInfo* a, tIntersectInfo* b)
  * @param hint  passed through to cBXNash_terrainIntersect (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cBXNash_terrainIntersect1(cBXNash* self, cWorldIntersectType* intersectType, tIntersectInfo* out,
-                                          int hint)
+float cBXNash::terrainIntersect1(cWorldIntersectType* intersectType, tIntersectInfo* out, int hint)
 {
     tIntersectInfoElem hits[64];
-    int n = cBXNash_terrainIntersect(self, intersectType, hits, 0x40, hint);
+    int n = terrainIntersect(intersectType, hits, 0x40, hint);
     if (n == 0) {
         return -1.0f;
     }
@@ -2482,7 +2475,7 @@ static inline int isBetter_003369D8(tIntersectInfo* a, tIntersectInfo* b)
 static inline void visit_003369D8(nash_Octant* c, nash_privy_QueryHelper* helper, TerrainCallback* q,
                                   VerticalLineProximityTest* p)
 {
-    nash_privy_QueryHelper_help(helper, q, q, p, c->rootcell, &c->rootkey);
+    helper->help(q, q, p, c->rootcell, &c->rootkey);
 }
 
 /**
@@ -2657,14 +2650,14 @@ static inline void collect_336F30(nash_Cell* node, StaticObjectCallback* ctx)
     for (p = node->nodesinside[0].head; p != 0; p = p->next) {
         StaticObjectCallback_intersectinstance(ctx, p);
     }
-    if (node->children[0][0][0] != 0) nash_Cell_descend5(node->children[0][0][0], ctx);
-    if (node->children[0][0][1] != 0) nash_Cell_descend5(node->children[0][0][1], ctx);
-    if (node->children[0][1][0] != 0) nash_Cell_descend5(node->children[0][1][0], ctx);
-    if (node->children[0][1][1] != 0) nash_Cell_descend5(node->children[0][1][1], ctx);
-    if (node->children[1][0][0] != 0) nash_Cell_descend5(node->children[1][0][0], ctx);
-    if (node->children[1][0][1] != 0) nash_Cell_descend5(node->children[1][0][1], ctx);
-    if (node->children[1][1][0] != 0) nash_Cell_descend5(node->children[1][1][0], ctx);
-    if (node->children[1][1][1] != 0) nash_Cell_descend5(node->children[1][1][1], ctx);
+    if (node->children[0][0][0] != 0) node->children[0][0][0]->descend5(ctx);
+    if (node->children[0][0][1] != 0) node->children[0][0][1]->descend5(ctx);
+    if (node->children[0][1][0] != 0) node->children[0][1][0]->descend5(ctx);
+    if (node->children[0][1][1] != 0) node->children[0][1][1]->descend5(ctx);
+    if (node->children[1][0][0] != 0) node->children[1][0][0]->descend5(ctx);
+    if (node->children[1][0][1] != 0) node->children[1][0][1]->descend5(ctx);
+    if (node->children[1][1][0] != 0) node->children[1][1][0]->descend5(ctx);
+    if (node->children[1][1][1] != 0) node->children[1][1][1]->descend5(ctx);
 }
 
 // Queries octant i of the Nash (retail walks octant[2][2][2] in flat order, 0-7).
@@ -2770,11 +2763,10 @@ static inline int isBetter_003378C0(tIntersectInfo* a, tIntersectInfo* b)
  * @param full  passed through to cBXNash_staticObjectIntersect (On Tour includeRidable)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, cWorldIntersectType* query, tIntersectInfo* out,
-                                               int full)
+float cBXNash::staticObjectIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int full)
 {
     tIntersectInfoElem hits[128];
-    int n = cBXNash_staticObjectIntersect(self, query, hits, 0x80, full);
+    int n = cBXNash_staticObjectIntersect(this, query, hits, 0x80, full);
     if (n == 0) {
         return -1.0f;
     }
@@ -2947,7 +2939,7 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallba
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
-    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
+    ctx->operatorCall((nash_Cell*)node);
     if (cell->level == 11) {
         return;
     }
@@ -3221,7 +3213,7 @@ static inline int overlapObj_33A3D8(const tBoundBox* b, const sObj_33A3D8* n)
 
 static inline void collectObjs_33A3D8(nash_Cell* tree, OverlapInstancesCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
+    ctx->operatorCall((nash_Cell*)tree);
     OverlapInstancesCallback* q = (OverlapInstancesCallback*)((char*)ctx + 0x10);
     for (sObj_33A3D8* p = (*(sObj_33A3D8**)&tree->nodesinside[1]); p != 0; p = p->next) {
         if (overlapObj_33A3D8(((tBoundBox*)q->box), p)) {
@@ -3236,14 +3228,14 @@ static inline void collectObjs_33A3D8(nash_Cell* tree, OverlapInstancesCallback*
 static inline void collect_33A3D8(nash_Cell* tree, OverlapInstancesCallback* ctx)
 {
     collectObjs_33A3D8(tree, ctx);
-    if (tree->children[0][0][0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[0][0][0]), ctx);
-    if (tree->children[0][0][1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[0][0][1]), ctx);
-    if (tree->children[0][1][0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[0][1][0]), ctx);
-    if (tree->children[0][1][1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[0][1][1]), ctx);
-    if (tree->children[1][0][0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[1][0][0]), ctx);
-    if (tree->children[1][0][1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[1][0][1]), ctx);
-    if (tree->children[1][1][0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[1][1][0]), ctx);
-    if (tree->children[1][1][1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->children[1][1][1]), ctx);
+    if (tree->children[0][0][0] != 0) tree->children[0][0][0]->descend2(ctx);
+    if (tree->children[0][0][1] != 0) tree->children[0][0][1]->descend2(ctx);
+    if (tree->children[0][1][0] != 0) tree->children[0][1][0]->descend2(ctx);
+    if (tree->children[0][1][1] != 0) tree->children[0][1][1]->descend2(ctx);
+    if (tree->children[1][0][0] != 0) tree->children[1][0][0]->descend2(ctx);
+    if (tree->children[1][0][1] != 0) tree->children[1][0][1]->descend2(ctx);
+    if (tree->children[1][1][0] != 0) tree->children[1][1][0]->descend2(ctx);
+    if (tree->children[1][1][1] != 0) tree->children[1][1][1]->descend2(ctx);
 }
 
 
@@ -3428,7 +3420,7 @@ static inline int overlap_33B748(const sBox_33B748* b, const sObjNode_33B748* n)
 
 static inline void visit_33B748(nash_Cell* self, OverlapEverythingCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall((OverlapInstancesCallback*)ctx, (nash_Cell*)self);
+    ((OverlapInstancesCallback*)ctx)->operatorCall((nash_Cell*)self);
     sSub_33B748* s = &(*(sSub_33B748*)&ctx->patchescallback);
     for (sObjNode_33B748* p = (*(sObjNode_33B748**)&self->nodesinside[1]); p != 0; p = p->next) {
         if (overlap_33B748(s->box, p)) {
@@ -3771,16 +3763,14 @@ static inline int Classify_DBE8(VerticalLineProximityTest* test, nash_CellKey* c
  * existing child with its key, in the order 000, 100, 110, 010, 011, 111, 101, 001 (x, y, z). Called by
  * cBXNash_getGroundHeight for each root cell.
  *
- * @param helper  the empty helper object, only passed on to the recursion (On Tour In *this)
  * @param query  the terrain query for crossing cells (On Tour oncross)
  * @param insideQuery  the terrain query for contained cells (On Tour oninside)
  * @param test  the line test: a pointer to the point (On Tour VerticalLineProximityTest)
  * @param node  the cell (On Tour const Cell *)
  * @param cell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_help(nash_privy_QueryHelper* helper, TerrainCallback* query,
-                                            TerrainCallback* insideQuery, VerticalLineProximityTest* test,
-                                            nash_Cell* node, nash_CellKey* cell)
+void nash_privy_QueryHelper::help(TerrainCallback* query, TerrainCallback* insideQuery,
+                                  VerticalLineProximityTest* test, nash_Cell* node, nash_CellKey* cell)
 {
     int overlap = Classify_DBE8(test, cell);
     if (overlap == 0) {
@@ -3792,28 +3782,28 @@ extern "C" void nash_privy_QueryHelper_help(nash_privy_QueryHelper* helper, Terr
             TerrainCallback_intersectinstance(insideQuery, objNode);
         }
         if (node->children[0][0][0]) {
-            nash_Cell_descend4(node->children[0][0][0], insideQuery);
+            node->children[0][0][0]->descend4(insideQuery);
         }
         if (node->children[0][0][1]) {
-            nash_Cell_descend4(node->children[0][0][1], insideQuery);
+            node->children[0][0][1]->descend4(insideQuery);
         }
         if (node->children[0][1][0]) {
-            nash_Cell_descend4(node->children[0][1][0], insideQuery);
+            node->children[0][1][0]->descend4(insideQuery);
         }
         if (node->children[0][1][1]) {
-            nash_Cell_descend4(node->children[0][1][1], insideQuery);
+            node->children[0][1][1]->descend4(insideQuery);
         }
         if (node->children[1][0][0]) {
-            nash_Cell_descend4(node->children[1][0][0], insideQuery);
+            node->children[1][0][0]->descend4(insideQuery);
         }
         if (node->children[1][0][1]) {
-            nash_Cell_descend4(node->children[1][0][1], insideQuery);
+            node->children[1][0][1]->descend4(insideQuery);
         }
         if (node->children[1][1][0]) {
-            nash_Cell_descend4(node->children[1][1][0], insideQuery);
+            node->children[1][1][0]->descend4(insideQuery);
         }
         if (node->children[1][1][1]) {
-            nash_Cell_descend4(node->children[1][1][1], insideQuery);
+            node->children[1][1][1]->descend4(insideQuery);
         }
     } else if (overlap == 2) {
         nash_Node* objNode;
@@ -3832,35 +3822,35 @@ extern "C" void nash_privy_QueryHelper_help(nash_privy_QueryHelper* helper, Terr
         sub.y = cell->y * 2;
         sub.z = cell->z * 2;
         if (node->children[0][0][0]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[0][0][0], &sub);
+            help(query, insideQuery, test, node->children[0][0][0], &sub);
         }
         sub.x++;
         if (node->children[1][0][0]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[1][0][0], &sub);
+            help(query, insideQuery, test, node->children[1][0][0], &sub);
         }
         sub.y++;
         if (node->children[1][1][0]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[1][1][0], &sub);
+            help(query, insideQuery, test, node->children[1][1][0], &sub);
         }
         sub.x--;
         if (node->children[0][1][0]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[0][1][0], &sub);
+            help(query, insideQuery, test, node->children[0][1][0], &sub);
         }
         sub.z++;
         if (node->children[0][1][1]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[0][1][1], &sub);
+            help(query, insideQuery, test, node->children[0][1][1], &sub);
         }
         sub.x++;
         if (node->children[1][1][1]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[1][1][1], &sub);
+            help(query, insideQuery, test, node->children[1][1][1], &sub);
         }
         sub.y--;
         if (node->children[1][0][1]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[1][0][1], &sub);
+            help(query, insideQuery, test, node->children[1][0][1], &sub);
         }
         sub.x--;
         if (node->children[0][0][1]) {
-            nash_privy_QueryHelper_help(helper, query, insideQuery, test, node->children[0][0][1], &sub);
+            help(query, insideQuery, test, node->children[0][0][1], &sub);
         }
     }
 }
@@ -3879,14 +3869,14 @@ static inline void collect_33DFD8(nash_Cell* node, StaticObjectCallback* ctx)
     for (p = (void**)(*(void**)&node->nodesinside[0]); p != 0; p = (void**)*p) {
         StaticObjectCallback_intersectinstance(ctx, p);
     }
-    if (node->children[0][0][0] != 0) nash_Cell_descend5(node->children[0][0][0], ctx);
-    if (node->children[0][0][1] != 0) nash_Cell_descend5(node->children[0][0][1], ctx);
-    if (node->children[0][1][0] != 0) nash_Cell_descend5(node->children[0][1][0], ctx);
-    if (node->children[0][1][1] != 0) nash_Cell_descend5(node->children[0][1][1], ctx);
-    if (node->children[1][0][0] != 0) nash_Cell_descend5(node->children[1][0][0], ctx);
-    if (node->children[1][0][1] != 0) nash_Cell_descend5(node->children[1][0][1], ctx);
-    if (node->children[1][1][0] != 0) nash_Cell_descend5(node->children[1][1][0], ctx);
-    if (node->children[1][1][1] != 0) nash_Cell_descend5(node->children[1][1][1], ctx);
+    if (node->children[0][0][0] != 0) node->children[0][0][0]->descend5(ctx);
+    if (node->children[0][0][1] != 0) node->children[0][0][1]->descend5(ctx);
+    if (node->children[0][1][0] != 0) node->children[0][1][0]->descend5(ctx);
+    if (node->children[0][1][1] != 0) node->children[0][1][1]->descend5(ctx);
+    if (node->children[1][0][0] != 0) node->children[1][0][0]->descend5(ctx);
+    if (node->children[1][0][1] != 0) node->children[1][0][1]->descend5(ctx);
+    if (node->children[1][1][0] != 0) node->children[1][1][0]->descend5(ctx);
+    if (node->children[1][1][1] != 0) node->children[1][1][1]->descend5(ctx);
 }
 
 /**
@@ -4448,10 +4438,9 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldLine_GetIdealParam__FPv);
  *
  * @return the radius stored at offset 0xA0 by the line's constructor
  */
-float cWorldLine_GetIdealParam(void* vself)
+float cWorldLine::GetIdealParam()
 {
-    cWorldLine* self = (cWorldLine*)vself;
-    return self->idealParam;
+    return idealParam;
 }
 #endif
 
@@ -4465,12 +4454,12 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphere_GetIdealParam);
  *
  * @return 2 * the radius at offset 0x70, or -1.0 if the first word is 0
  */
-extern "C" float cWorldSphere_GetIdealParam(cWorldSphere* self)
+float cWorldSphere::GetIdealParam()
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return -1.0f;
     }
-    return self->rad * 2.0f;
+    return rad * 2.0f;
 }
 #endif
 
@@ -4484,20 +4473,19 @@ INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend);
  * Runs OverlapInstancesCallback_operatorCall(@p ctx, @p node) on the cell, then calls itself on each non-null child
  * (+0x0..+0x1C). Used for cells that lie wholly inside the query box (cOverlapList_getinstances).
  *
- * @param node  the octree cell (On Tour nash::Cell)
  * @param ctx  the instance callback: list, count pointer, maximum, query box (On Tour OverlapInstancesCallback)
  */
-extern "C" void nash_Cell_descend(nash_Cell* node, OverlapInstancesCallback* ctx)
+void nash_Cell::descend(OverlapInstancesCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, node);
-    if (node->children[0][0][0] != 0) nash_Cell_descend(node->children[0][0][0], ctx);
-    if (node->children[0][0][1] != 0) nash_Cell_descend(node->children[0][0][1], ctx);
-    if (node->children[0][1][0] != 0) nash_Cell_descend(node->children[0][1][0], ctx);
-    if (node->children[0][1][1] != 0) nash_Cell_descend(node->children[0][1][1], ctx);
-    if (node->children[1][0][0] != 0) nash_Cell_descend(node->children[1][0][0], ctx);
-    if (node->children[1][0][1] != 0) nash_Cell_descend(node->children[1][0][1], ctx);
-    if (node->children[1][1][0] != 0) nash_Cell_descend(node->children[1][1][0], ctx);
-    if (node->children[1][1][1] != 0) nash_Cell_descend(node->children[1][1][1], ctx);
+    ctx->operatorCall(this);
+    if (children[0][0][0] != 0) children[0][0][0]->descend(ctx);
+    if (children[0][0][1] != 0) children[0][0][1]->descend(ctx);
+    if (children[0][1][0] != 0) children[0][1][0]->descend(ctx);
+    if (children[0][1][1] != 0) children[0][1][1]->descend(ctx);
+    if (children[1][0][0] != 0) children[1][0][0]->descend(ctx);
+    if (children[1][0][1] != 0) children[1][0][1]->descend(ctx);
+    if (children[1][1][0] != 0) children[1][1][0]->descend(ctx);
+    if (children[1][1][1] != 0) children[1][1][1]->descend(ctx);
 }
 #endif
 
@@ -4558,15 +4546,14 @@ static inline int overlapObj_340C20(const tBoundBox* b, const tPatchRecord* n)
  * child. Used by cOverlapList_getpatchesandinstances and nash_privy_QueryHelper_helpX3 for cells wholly inside the
  * query box.
  *
- * @param tree  the octree cell (On Tour nash::Cell)
  * @param ctx  the callback: instance part (instancecallback) and patch part (patchescallback)
  */
-extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ctx)
+void nash_Cell::descend2(OverlapInstancesCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, tree);
+    ctx->operatorCall(this);
     // ctx is the instance part of an OverlapPatchesAndInstancesCallback; its patch part follows
     OverlapPatchesCallback* objCtx = &((OverlapPatchesAndInstancesCallback*)ctx)->patchescallback;
-    for (nash_Node* node = tree->nodesinside[1].head; node != 0; node = node->next) {
+    for (nash_Node* node = nodesinside[1].head; node != 0; node = node->next) {
         tPatchRecord* obj = (tPatchRecord*)node;  // a patch record starts with its list link
         if (overlapObj_340C20(objCtx->box, obj)) {
             unsigned int* cnt = objCtx->number;
@@ -4575,14 +4562,14 @@ extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ct
             *cnt = n + 1;
         }
     }
-    if (tree->children[0][0][0] != 0) nash_Cell_descend2(tree->children[0][0][0], ctx);
-    if (tree->children[0][0][1] != 0) nash_Cell_descend2(tree->children[0][0][1], ctx);
-    if (tree->children[0][1][0] != 0) nash_Cell_descend2(tree->children[0][1][0], ctx);
-    if (tree->children[0][1][1] != 0) nash_Cell_descend2(tree->children[0][1][1], ctx);
-    if (tree->children[1][0][0] != 0) nash_Cell_descend2(tree->children[1][0][0], ctx);
-    if (tree->children[1][0][1] != 0) nash_Cell_descend2(tree->children[1][0][1], ctx);
-    if (tree->children[1][1][0] != 0) nash_Cell_descend2(tree->children[1][1][0], ctx);
-    if (tree->children[1][1][1] != 0) nash_Cell_descend2(tree->children[1][1][1], ctx);
+    if (children[0][0][0] != 0) children[0][0][0]->descend2(ctx);
+    if (children[0][0][1] != 0) children[0][0][1]->descend2(ctx);
+    if (children[0][1][0] != 0) children[0][1][0]->descend2(ctx);
+    if (children[0][1][1] != 0) children[0][1][1]->descend2(ctx);
+    if (children[1][0][0] != 0) children[1][0][0]->descend2(ctx);
+    if (children[1][0][1] != 0) children[1][0][1]->descend2(ctx);
+    if (children[1][1][0] != 0) children[1][1][0]->descend2(ctx);
+    if (children[1][1][1] != 0) children[1][1][1]->descend2(ctx);
 }
 #endif
 
@@ -4632,29 +4619,29 @@ static inline int overlap_340DC0(const tBoundBox* b, const tPatchRecord* n)
  *
  * @param ctx  the callback: instance, patch and typed-node parts, each list, count pointer, box
  */
-extern "C" void nash_Cell_descend3(nash_Cell* self, OverlapEverythingCallback* ctx)
+void nash_Cell::descend3(OverlapEverythingCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall((OverlapInstancesCallback*)ctx, self);
+    ((OverlapInstancesCallback*)ctx)->operatorCall(this);
     OverlapPatchesCallback* patchCtx = &ctx->patchescallback;
     nash_Node* node;
-    for (node = self->nodesinside[1].head; node != 0; node = node->next) {
+    for (node = nodesinside[1].head; node != 0; node = node->next) {
         tPatchRecord* patch = (tPatchRecord*)node;  // a patch record starts with its list link
         if (overlap_340DC0(patchCtx->box, patch)) {
             addPatch_340DC0(patchCtx, patch);
         }
     }
     OverlapTypedCallback* typedCtx = &ctx->typedcallback;
-    for (node = self->nodesinside[2].head; node != 0; node = node->next) {
+    for (node = nodesinside[2].head; node != 0; node = node->next) {
         addTyped_340DC0(typedCtx, (cTypedSpaceNode*)node);
     }
-    if (self->children[0][0][0]) nash_Cell_descend3(self->children[0][0][0], ctx);
-    if (self->children[0][0][1]) nash_Cell_descend3(self->children[0][0][1], ctx);
-    if (self->children[0][1][0]) nash_Cell_descend3(self->children[0][1][0], ctx);
-    if (self->children[0][1][1]) nash_Cell_descend3(self->children[0][1][1], ctx);
-    if (self->children[1][0][0]) nash_Cell_descend3(self->children[1][0][0], ctx);
-    if (self->children[1][0][1]) nash_Cell_descend3(self->children[1][0][1], ctx);
-    if (self->children[1][1][0]) nash_Cell_descend3(self->children[1][1][0], ctx);
-    if (self->children[1][1][1]) nash_Cell_descend3(self->children[1][1][1], ctx);
+    if (children[0][0][0]) children[0][0][0]->descend3(ctx);
+    if (children[0][0][1]) children[0][0][1]->descend3(ctx);
+    if (children[0][1][0]) children[0][1][0]->descend3(ctx);
+    if (children[0][1][1]) children[0][1][1]->descend3(ctx);
+    if (children[1][0][0]) children[1][0][0]->descend3(ctx);
+    if (children[1][0][1]) children[1][0][1]->descend3(ctx);
+    if (children[1][1][0]) children[1][1][0]->descend3(ctx);
+    if (children[1][1][1]) children[1][1][1]->descend3(ctx);
 }
 #endif
 
@@ -4673,23 +4660,23 @@ extern "C" void TerrainCallback_intersectinstance(void* ctx, void* obj);
  *
  * @param ctx  the terrain callback (query, hit buffer and count) passed to both tests
  */
-extern "C" void nash_Cell_descend4(nash_Cell* self, void* ctx)
+void nash_Cell::descend4(void* ctx)
 {
     void** objNode;
-    for (objNode = *(void***)&self->nodesinside[1]; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = *(void***)&nodesinside[1]; objNode != 0; objNode = (void**)*objNode) {
         TerrainCallback_intersectpatch(ctx, objNode);
     }
-    for (objNode = *(void***)&self->nodesinside[0]; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = *(void***)&nodesinside[0]; objNode != 0; objNode = (void**)*objNode) {
         TerrainCallback_intersectinstance(ctx, objNode);
     }
-    if (*(void**)&self->children[0]) nash_Cell_descend4((nash_Cell*)(*(void**)&self->children[0]), ctx);
-    if (self->children[0][0][1]) nash_Cell_descend4((nash_Cell*)(self->children[0][0][1]), ctx);
-    if (self->children[0][1][0]) nash_Cell_descend4((nash_Cell*)(self->children[0][1][0]), ctx);
-    if (self->children[0][1][1]) nash_Cell_descend4((nash_Cell*)(self->children[0][1][1]), ctx);
-    if (*(void**)&self->children[1]) nash_Cell_descend4((nash_Cell*)(*(void**)&self->children[1]), ctx);
-    if (self->children[1][0][1]) nash_Cell_descend4((nash_Cell*)(self->children[1][0][1]), ctx);
-    if (self->children[1][1][0]) nash_Cell_descend4((nash_Cell*)(self->children[1][1][0]), ctx);
-    if (self->children[1][1][1]) nash_Cell_descend4((nash_Cell*)(self->children[1][1][1]), ctx);
+    if (*(void**)&children[0]) ((nash_Cell*)(*(void**)&children[0]))->descend4(ctx);
+    if (children[0][0][1]) children[0][0][1]->descend4(ctx);
+    if (children[0][1][0]) children[0][1][0]->descend4(ctx);
+    if (children[0][1][1]) children[0][1][1]->descend4(ctx);
+    if (*(void**)&children[1]) ((nash_Cell*)(*(void**)&children[1]))->descend4(ctx);
+    if (children[1][0][1]) children[1][0][1]->descend4(ctx);
+    if (children[1][1][0]) children[1][1][0]->descend4(ctx);
+    if (children[1][1][1]) children[1][1][1]->descend4(ctx);
 }
 #endif
 
@@ -4706,20 +4693,20 @@ extern "C" void StaticObjectCallback_intersectinstance(void* ctx, void* obj);
  *
  * @param ctx  the static-object callback passed to StaticObjectCallback_intersectinstance
  */
-extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx)
+void nash_Cell::descend5(void* ctx)
 {
     void** objNode;
-    for (objNode = *(void***)&self->nodesinside[0]; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = *(void***)&nodesinside[0]; objNode != 0; objNode = (void**)*objNode) {
         StaticObjectCallback_intersectinstance(ctx, objNode);
     }
-    if (*(void**)&self->children[0]) nash_Cell_descend5((nash_Cell*)(*(void**)&self->children[0]), ctx);
-    if (self->children[0][0][1]) nash_Cell_descend5((nash_Cell*)(self->children[0][0][1]), ctx);
-    if (self->children[0][1][0]) nash_Cell_descend5((nash_Cell*)(self->children[0][1][0]), ctx);
-    if (self->children[0][1][1]) nash_Cell_descend5((nash_Cell*)(self->children[0][1][1]), ctx);
-    if (*(void**)&self->children[1]) nash_Cell_descend5((nash_Cell*)(*(void**)&self->children[1]), ctx);
-    if (self->children[1][0][1]) nash_Cell_descend5((nash_Cell*)(self->children[1][0][1]), ctx);
-    if (self->children[1][1][0]) nash_Cell_descend5((nash_Cell*)(self->children[1][1][0]), ctx);
-    if (self->children[1][1][1]) nash_Cell_descend5((nash_Cell*)(self->children[1][1][1]), ctx);
+    if (*(void**)&children[0]) ((nash_Cell*)(*(void**)&children[0]))->descend5(ctx);
+    if (children[0][0][1]) children[0][0][1]->descend5(ctx);
+    if (children[0][1][0]) children[0][1][0]->descend5(ctx);
+    if (children[0][1][1]) children[0][1][1]->descend5(ctx);
+    if (*(void**)&children[1]) ((nash_Cell*)(*(void**)&children[1]))->descend5(ctx);
+    if (children[1][0][1]) children[1][0][1]->descend5(ctx);
+    if (children[1][1][0]) children[1][1][0]->descend5(ctx);
+    if (children[1][1][1]) children[1][1][1]->descend5(ctx);
 }
 #endif
 
@@ -4881,31 +4868,31 @@ static inline t4VectorXYZW vu0Xform_341388(const t4Vector& v, const char* m)
  * @param def  the script's boost data (On Tour tMakeBoostData)
  * @return @p self
  */
-extern "C" cBoostNode* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, int nodeType, void* instance, tMakeBoostData* def)
+cBoostNode* cBoostNode::cBoostNode1(void* bucket, int nodeType, void* instance, tMakeBoostData* def)
 {
-    cInstanceNode_cInstanceNode1((self), bucket, nodeType, instance);
-    VPTR_OF(cObjNode, self) = cBoostNode_vtbl;
+    cInstanceNode_cInstanceNode1((this), bucket, nodeType, instance);
+    VPTR_OF(cObjNode, this) = cBoostNode_vtbl;
     int type = def->Type;
-    self->Type = type;
-    self->BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
+    Type = type;
+    BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
     if (def->BoostX == 0.0f && def->BoostY == 0.0f && def->BoostZ == 0.0f) {
         if (type == 2) {
-            self->Boost = *t4vect_YAxis;
+            Boost = *t4vect_YAxis;
         } else {
-            self->Boost = *t4vect_Zero;
+            Boost = *t4vect_Zero;
         }
     } else {
-        self->Boost = vu0Normalize_341388(t4VectorXYZW(def->BoostX, def->BoostY, def->BoostZ, 0.0f));
+        Boost = vu0Normalize_341388(t4VectorXYZW(def->BoostX, def->BoostY, def->BoostZ, 0.0f));
     }
-    self->MaxSpeed = def->MaxSpeed * 27.77777862548828f;
-    self->Drag = def->Drag;
-    self->Time = self->Type ? self->BoostTime : 0;
-    if (self->Type == 2) {
-        char* instMatrix = (char*)&self->Instance->m_fmTransform;
-        self->Boost = vu0Xform_341388(vu0Scale_341388(self->Boost, -1.0f), instMatrix);
-        self->MaxSpeed = -self->MaxSpeed;
+    MaxSpeed = def->MaxSpeed * 27.77777862548828f;
+    Drag = def->Drag;
+    Time = Type ? BoostTime : 0;
+    if (Type == 2) {
+        char* instMatrix = (char*)&Instance->m_fmTransform;
+        Boost = vu0Xform_341388(vu0Scale_341388(Boost, -1.0f), instMatrix);
+        MaxSpeed = -MaxSpeed;
     }
-    return (self);
+    return (this);
 }
 #endif
 
@@ -5055,9 +5042,10 @@ extern "C" float cObjectInterface_getUpdateTime();
  *
  * @param obj  the rider (cBeing)
  */
-extern "C" void cBoostNode_applyDrag(cBoostNode* self, cBeing* obj)
+void cBoostNode::applyDrag(cBeing* obj)
 {
-    t4Vector newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
+    t4Vector newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), Drag + 1.0f),
+            cObjectInterface_getUpdateTime());
     obj->applyBoost(&newVel);
 }
 #endif
@@ -5143,17 +5131,17 @@ static inline void push_341818(cBoostNodeState* p, cBeing* obj, const t4Vector& 
  *
  * @param obj  the rider (cBeing) being boosted
  */
-extern "C" void cBoostNode_applyBoost(cBoostNode* self, cBeing* obj)
+void cBoostNode::applyBoost(cBeing* obj)
 {
     t4Vector vel = *obj->getVelocity();
-    t4Vector dir = *(&self->Boost);
+    t4Vector dir = *(&Boost);
     if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f) {
         dir = vu0Normalize_341818(vel);
     }
     float alongSpeed = vu0Dot_341818(vel, dir);
-    float diff = self->MaxSpeed - alongSpeed;
-    cBoostNodeState* boostParams = (cBoostNodeState*)&self->Boost;
-    if (self->Type == 2) {
+    float diff = MaxSpeed - alongSpeed;
+    cBoostNodeState* boostParams = (cBoostNodeState*)&Boost;
+    if (Type == 2) {
         if (alongSpeed >= 0.0f) {
             t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->MaxSpeed), boostParams->Drag), cObjectInterface_getUpdateTime());
             obj->applyBoost(&newVel);
@@ -5405,13 +5393,13 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
             self->FrameStart = self->CurrTime;
             switch (*(short*)self) {
             case 2:
-                cAnimObjectNode_updateOscillate(self);
+                self->updateOscillate();
                 break;
             case 1:
-                cAnimObjectNode_updateCycle(self);
+                self->updateCycle();
                 break;
             default:
-                cAnimObjectNode_updateOnce(self);
+                self->updateOnce();
                 break;
             }
             if (cAnimNode_frameUpdate((char*)&self->CurrTime) == 0) {
@@ -5450,21 +5438,20 @@ struct sWrapFloat_1E48 {
  * Adds speed (+0x10) to the value (+0x1C) and stores the unwrapped result in +0x28; past max (+0x18) it continues from
  * min (+0x14) by the overshoot, below min (for a negative speed) from max.
  *
- * @param wrapValue  the animated object node
  */
-extern "C" void cAnimObjectNode_updateCycle(cAnimObjectNode* wrapValue)
+void cAnimObjectNode::updateCycle()
 {
-    if (wrapValue->AnimSpeed >= 0.0f) {
-        wrapValue->CurrTime += wrapValue->AnimSpeed;
-        wrapValue->FrameEnd = wrapValue->CurrTime;
-        if (wrapValue->CurrTime > wrapValue->ToTime) {
-            wrapValue->CurrTime = wrapValue->FromTime + (wrapValue->CurrTime - wrapValue->ToTime);
+    if (AnimSpeed >= 0.0f) {
+        CurrTime += AnimSpeed;
+        FrameEnd = CurrTime;
+        if (CurrTime > ToTime) {
+            CurrTime = FromTime + (CurrTime - ToTime);
         }
     } else {
-        wrapValue->CurrTime += wrapValue->AnimSpeed;
-        wrapValue->FrameEnd = wrapValue->CurrTime;
-        if (wrapValue->CurrTime < wrapValue->FromTime) {
-            wrapValue->CurrTime = wrapValue->ToTime - (wrapValue->FromTime - wrapValue->CurrTime);
+        CurrTime += AnimSpeed;
+        FrameEnd = CurrTime;
+        if (CurrTime < FromTime) {
+            CurrTime = ToTime - (FromTime - CurrTime);
         }
     }
 }
@@ -5489,23 +5476,22 @@ struct sBounceFloat_1EC0 {
  * Adds speed (+0x10) to the value (+0x1C) and stores the result in +0x28; past max (+0x18) or below min (+0x14) it
  * reverses the speed and reflects the value back into the range by the overshoot.
  *
- * @param bounceValue  the animated object node
  */
-extern "C" void cAnimObjectNode_updateOscillate(cAnimObjectNode* bounceValue)
+void cAnimObjectNode::updateOscillate()
 {
-    if (bounceValue->AnimSpeed >= 0.0f) {
-        bounceValue->CurrTime += bounceValue->AnimSpeed;
-        bounceValue->FrameEnd = bounceValue->CurrTime;
-        if (bounceValue->CurrTime > bounceValue->ToTime) {
-            bounceValue->AnimSpeed = -bounceValue->AnimSpeed;
-            bounceValue->CurrTime = bounceValue->ToTime - (bounceValue->CurrTime - bounceValue->ToTime);
+    if (AnimSpeed >= 0.0f) {
+        CurrTime += AnimSpeed;
+        FrameEnd = CurrTime;
+        if (CurrTime > ToTime) {
+            AnimSpeed = -AnimSpeed;
+            CurrTime = ToTime - (CurrTime - ToTime);
         }
     } else {
-        bounceValue->CurrTime += bounceValue->AnimSpeed;
-        bounceValue->FrameEnd = bounceValue->CurrTime;
-        if (bounceValue->CurrTime < bounceValue->FromTime) {
-            bounceValue->AnimSpeed = -bounceValue->AnimSpeed;
-            bounceValue->CurrTime = bounceValue->FromTime + (bounceValue->FromTime - bounceValue->CurrTime);
+        CurrTime += AnimSpeed;
+        FrameEnd = CurrTime;
+        if (CurrTime < FromTime) {
+            AnimSpeed = -AnimSpeed;
+            CurrTime = FromTime + (FromTime - CurrTime);
         }
     }
 }
@@ -5532,27 +5518,26 @@ struct sClampFloat_1F38 {
  * If the value (+0x1C) already sits at the end it is moving to (max +0x18 for a non-negative speed, else min +0x14) it
  * sets atLimit (+0x8). It then adds speed (+0x10), stores the result in +0x28 and clamps the value to that end.
  *
- * @param clampValue  the animated object node
  */
-extern "C" void cAnimObjectNode_updateOnce(cAnimObjectNode* clampValue)
+void cAnimObjectNode::updateOnce()
 {
-    if (clampValue->AnimSpeed >= 0.0f) {
-        if (clampValue->CurrTime == clampValue->ToTime) {
-            clampValue->AnimComplete = 1;
+    if (AnimSpeed >= 0.0f) {
+        if (CurrTime == ToTime) {
+            AnimComplete = 1;
         }
-        clampValue->CurrTime += clampValue->AnimSpeed;
-        clampValue->FrameEnd = clampValue->CurrTime;
-        if (clampValue->CurrTime > clampValue->ToTime) {
-            clampValue->CurrTime = clampValue->ToTime;
+        CurrTime += AnimSpeed;
+        FrameEnd = CurrTime;
+        if (CurrTime > ToTime) {
+            CurrTime = ToTime;
         }
     } else {
-        if (clampValue->CurrTime == clampValue->FromTime) {
-            clampValue->AnimComplete = 1;
+        if (CurrTime == FromTime) {
+            AnimComplete = 1;
         }
-        clampValue->CurrTime += clampValue->AnimSpeed;
-        clampValue->FrameEnd = clampValue->CurrTime;
-        if (clampValue->CurrTime < clampValue->FromTime) {
-            clampValue->CurrTime = clampValue->FromTime;
+        CurrTime += AnimSpeed;
+        FrameEnd = CurrTime;
+        if (CurrTime < FromTime) {
+            CurrTime = FromTime;
         }
     }
 }
@@ -5571,10 +5556,10 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_expire);
  *
  * @param runscript  nonzero to run the script
  */
-extern "C" void cAnimObjectNode_expire(cAnimObjectNode* self, int runscript)
+void cAnimObjectNode::expire(int runscript)
 {
     if (runscript != 0) {
-        cInstanceNode_runExpireScript(&self->MoveNodeBase);
+        cInstanceNode_runExpireScript(&MoveNodeBase);
     }
 }
 #endif
@@ -5661,11 +5646,11 @@ struct sVEntry_cAnimObjectNode_writeToReplayFrame {
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cAnimObjectNode_writeToReplayFrame(cAnimObjectNode* self, void* stream)
+void cAnimObjectNode::writeToReplayFrame(void* stream)
 {
-    cAnimNode_writeToReplayFrame((char*)&self->CurrTime, stream);
+    cAnimNode_writeToReplayFrame((char*)&CurrTime, stream);
     sVEntry_cAnimObjectNode_writeToReplayFrame* vt = *(sVEntry_cAnimObjectNode_writeToReplayFrame**)stream;
-    vt[1].fn(vthis(stream, vt[1]), self, 0x1C);
+    vt[1].fn(vthis(stream, vt[1]), this, 0x1C);
 }
 #endif
 
@@ -5723,29 +5708,29 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* vinf
  * @param def  the script's teeter data (On Tour tMakeAnimTeeterData)
  * @return @p self
  */
-extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int bucket, tInstanceRecord* obj, tMakeAnimTeeterData* def)
+void* cAnimTeeterNode::cAnimTeeterNode1(int bucket, tInstanceRecord* obj, tMakeAnimTeeterData* def)
 {
-    cAnimNode_cAnimNode(&self->CurrTime, bucket, 4, obj, 0);
-    self->mVtbl = cAnimTeeterNode_vtbl;
+    cAnimNode_cAnimNode(&CurrTime, bucket, 4, obj, 0);
+    mVtbl = cAnimTeeterNode_vtbl;
     float animStart = 0.0f;
     char* info = (char*)obj->m_Model;
-    if (self->AnimFrames != 0) {
-        animStart = cAnimFrame_getStartTime(self->AnimFrames);
+    if (AnimFrames != 0) {
+        animStart = cAnimFrame_getStartTime(AnimFrames);
     }
-    setRate_003421A0((sFloat_003421A0*)&self->FromTime, def->FromTime, animStart);
-    setRateMax_003421A0((sFloat_003421A0*)&self->ToTime, def->ToTime, info);
-    self->BounceFactor = def->BounceFactor;
-    self->TorqueScale = def->TorqueScale * 9.999999974752427e-07f;
-    self->MaxAnimSpeed = def->MaxSpeed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
-    self->AnimSign = def->AnimSign;
-    self->PivotTime = def->PivotTime * 0.03333333507180214f;
-    self->Damp = def->Damp;
-    self->Spring = def->Spring;
-    self->Flags |= 1;
-    *(int*)&self->TorqueSum = 0;
-    *(int*)&self->AnimSpeed = 0;
-    *(int*)&self->W = 0;
-    return (self);
+    setRate_003421A0((sFloat_003421A0*)&FromTime, def->FromTime, animStart);
+    setRateMax_003421A0((sFloat_003421A0*)&ToTime, def->ToTime, info);
+    BounceFactor = def->BounceFactor;
+    TorqueScale = def->TorqueScale * 9.999999974752427e-07f;
+    MaxAnimSpeed = def->MaxSpeed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
+    AnimSign = def->AnimSign;
+    PivotTime = def->PivotTime * 0.03333333507180214f;
+    Damp = def->Damp;
+    Spring = def->Spring;
+    Flags |= 1;
+    *(int*)&TorqueSum = 0;
+    *(int*)&AnimSpeed = 0;
+    *(int*)&W = 0;
+    return (this);
 }
 #endif
 
@@ -5824,59 +5809,58 @@ static inline float absf_00342358(float x)
  * It then clears the torque, copies the frame to +0x34 and runs cAnimNode_frameUpdate on the animation part; on success it sets
  * the dirty flag (bit 0 of +0x56). Slot 15 of cAnimTeeterNode_vtbl.
  *
- * @param spring  the teeter node
  * @return cAnimNode_frameUpdate's result: 1 after a successful frame update, else 0
  */
-extern "C" int cAnimTeeterNode_updateNode(cAnimTeeterNode* spring)
+int cAnimTeeterNode::updateNode()
 {
-    spring->FrameStart = spring->CurrTime;
+    FrameStart = CurrTime;
     float dt = cObjectInterface_getUpdateTime();
-    float force = spring->TorqueScale * spring->TorqueSum;
-    if (spring->TorqueScale < 0.0f) {
+    float force = TorqueScale * TorqueSum;
+    if (TorqueScale < 0.0f) {
         force = -force;
     }
-    float vel = spring->W;
-    float maxStep = spring->MaxAnimSpeed;
+    float vel = W;
+    float maxStep = MaxAnimSpeed;
     float step = vel * dt;
-    float acc = -spring->Spring * (spring->CurrTime - spring->PivotTime);
+    float acc = -Spring * (CurrTime - PivotTime);
     acc += force;
-    acc += -spring->Damp * vel;
-    spring->AnimSpeed = step;
+    acc += -Damp * vel;
+    AnimSpeed = step;
     if (maxStep < absf_00342358(step)) {
         if (step < 0.0f) {
-            spring->AnimSpeed = -maxStep;
+            AnimSpeed = -maxStep;
         } else {
-            spring->AnimSpeed = maxStep;
+            AnimSpeed = maxStep;
         }
     }
-    float pos = spring->CurrTime + spring->AnimSpeed;
-    float nv = spring->W + acc * dt;
-    spring->CurrTime = pos;
-    spring->FrameEnd = pos;
-    spring->W = nv;
-    if (pos < spring->FromTime) {
-        spring->CurrTime = spring->FromTime;
+    float pos = CurrTime + AnimSpeed;
+    float nv = W + acc * dt;
+    CurrTime = pos;
+    FrameEnd = pos;
+    W = nv;
+    if (pos < FromTime) {
+        CurrTime = FromTime;
         if (absf_00342358(nv) > 0.1f) {
-            spring->W = nv * spring->BounceFactor;
+            W = nv * BounceFactor;
         } else {
-            spring->AnimSpeed = 0.0f;
-            spring->W = 0.0f;
+            AnimSpeed = 0.0f;
+            W = 0.0f;
         }
-    } else if (spring->ToTime < pos) {
-        spring->CurrTime = spring->ToTime;
+    } else if (ToTime < pos) {
+        CurrTime = ToTime;
         if (absf_00342358(nv) > 0.1f) {
-            spring->W = nv * spring->BounceFactor;
+            W = nv * BounceFactor;
         } else {
-            spring->AnimSpeed = 0.0f;
-            spring->W = 0.0f;
+            AnimSpeed = 0.0f;
+            W = 0.0f;
         }
     }
-    spring->TorqueSum = 0.0f;
-    spring->CacheTime = spring->CurrTime;
-    if (cAnimNode_frameUpdate(&spring->CurrTime) == 0) {
+    TorqueSum = 0.0f;
+    CacheTime = CurrTime;
+    if (cAnimNode_frameUpdate(&CurrTime) == 0) {
         return 0;
     }
-    spring->Flags |= 1;
+    Flags |= 1;
     return 1;
 }
 #endif
@@ -5892,15 +5876,15 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_getAnimSpeed);
  *
  * @return the step per update, or 0
  */
-extern "C" float cAnimTeeterNode_getAnimSpeed(cAnimTeeterNode* self)
+float cAnimTeeterNode::getAnimSpeed()
 {
-    if (self->CurrTime <= self->FromTime && self->AnimSpeed < 0.0f) {
+    if (CurrTime <= FromTime && AnimSpeed < 0.0f) {
         return 0.0f;
     }
-    if (self->CurrTime >= self->ToTime && self->AnimSpeed > 0.0f) {
+    if (CurrTime >= ToTime && AnimSpeed > 0.0f) {
         return 0.0f;
     }
-    return self->AnimSpeed;
+    return AnimSpeed;
 }
 #endif
 
@@ -6042,15 +6026,15 @@ static inline float vu0Dot_342538(const t4Vector& a, const t4Vector& b)
  * @param intInfo  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
  * @param force  the force vector
  */
-extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo* intInfo, t4Vector* force)
+void cAnimTeeterNode::applyForce(tIntersectInfo* intInfo, t4Vector* force)
 {
     int idx = intInfo->Mesh;
     if (idx >= 0) {
-        cMoveNode* sub = (cMoveNode*)(&self->MoveNodeBase);
+        cMoveNode* sub = (cMoveNode*)(&MoveNodeBase);
         tMeshHeirarchyRecord* ents = sub->Instance->m_Model->m_MeshHeirarchy;
         if ((int)ents[idx].m_MeshAnim != 0) {
             // slot 29: cAnimNode_getAnimMat
-            sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)self->mVtbl;
+            sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)mVtbl;
             t4Matrix* animMat = vt[29].fn(vthis(sub, vt[29]), idx);
             t4Matrix* pivotMat = animMat;
             if (vu0Length_342538(*force) > 100.0f) {
@@ -6061,12 +6045,12 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo
                 scratch = animMat->row[3];
                 vu0Sub_342538(vuResult, (*(&intInfo->Ipos)), scratch);
                 leverArm = vuResult;
-                if (self->TorqueScale < 0.0f) {
+                if (TorqueScale < 0.0f) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
                     scratch = vuResult;
                     leverArm = vuResult;
                 }
-                if ((self->AnimSign >> intInfo->Mesh) & 1) {
+                if ((AnimSign >> intInfo->Mesh) & 1) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
                     scratch = vuResult;
                     leverArm = vuResult;
@@ -6075,7 +6059,7 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo
                 scratch = vuResult;
                 vu0Cross_342538(torqueVec, leverArm, *force);
                 vuResult = torqueVec;
-                self->TorqueSum += vu0Dot_342538(scratch, vuResult);
+                TorqueSum += vu0Dot_342538(scratch, vuResult);
             }
         }
     }
@@ -6100,11 +6084,11 @@ struct sVEntry_cAnimTeeterNode_writeToReplayFrame {
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cAnimTeeterNode_writeToReplayFrame(cAnimTeeterNode* self, void* stream)
+void cAnimTeeterNode::writeToReplayFrame(void* stream)
 {
-    cAnimNode_writeToReplayFrame(&self->CurrTime, stream);
+    cAnimNode_writeToReplayFrame(&CurrTime, stream);
     sVEntry_cAnimTeeterNode_writeToReplayFrame* vt = *(sVEntry_cAnimTeeterNode_writeToReplayFrame**)stream;
-    vt[1].fn(vthis(stream, vt[1]), self, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), this, 0x30);
 }
 #endif
 
@@ -6164,13 +6148,13 @@ extern void* cBoostModifier_vtbl[];
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, cBxReplayFrame* stream)
+void* cBoostModifier::cBoostModifier1(cBxReplayFrame* stream)
 {
-    self->Active = 1;
-    VPTR_OF(cPhysicsModifier, self) = cBoostModifier_vtbl;
-    stream->read((char*)&self->Boost, 0x30);
-    self->Instance = stream->readReplayInstance();
-    return ((void*)self);
+    Active = 1;
+    VPTR_OF(cPhysicsModifier, this) = cBoostModifier_vtbl;
+    stream->read((char*)&Boost, 0x30);
+    Instance = stream->readReplayInstance();
+    return ((void*)this);
 }
 #endif
 
@@ -6418,25 +6402,25 @@ extern void* cDebounceNode_vtbl[];
  * @param oldNode  the node it replaces (On Tour pOldNode)
  * @return @p self
  */
-extern "C" void* cDebounceNode_cDebounceNode1(cDebounceNode* self, void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
+void* cDebounceNode::cDebounceNode1(void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
 {
-    cMoveNode_cMoveNode1(self, bucket, 0, instance);
-    VPTR_OF(cObjNode, self) = cDebounceNode_vtbl;
-    self->Life = (int)(def->Time * (float)cAppMan_TheAppMan->TimerHz);
-    self->Type = def->Type;
-    cMoveNode_transferFromOld(self, oldNode);
+    cMoveNode_cMoveNode1(this, bucket, 0, instance);
+    VPTR_OF(cObjNode, this) = cDebounceNode_vtbl;
+    Life = (int)(def->Time * (float)cAppMan_TheAppMan->TimerHz);
+    Type = def->Type;
+    cMoveNode_transferFromOld(this, oldNode);
     if (def->Visible == 0) {
-        (*(unsigned int*)&self->Instance->m_iFlags) &= 0xFFFFFFF0;
+        (*(unsigned int*)&Instance->m_iFlags) &= 0xFFFFFFF0;
     } else if (def->Visible == 1) {
-        (*(unsigned int*)&self->Instance->m_iFlags) |= 1;
-        self->Instance->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2u) | 4;
+        (*(unsigned int*)&Instance->m_iFlags) |= 1;
+        Instance->m_iFlags = (((unsigned int)(Instance)->m_iFlags) & ~2u) | 4;
     } else {
-        tInstanceRecord* n = self->Instance;
+        tInstanceRecord* n = Instance;
         if ((((unsigned int)n->m_iFlags) & 3) == 3) {
             n->m_iFlags = (((unsigned int)n->m_iFlags) & ~2u) | 4;
         }
     }
-    return self;
+    return this;
 }
 #endif
 

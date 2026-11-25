@@ -33,6 +33,10 @@
 #include "bx/math3d.h"
 #include "intersect/riderspheretree.h"
 
+struct t4Matrix;
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cWorldRider {
     // --- cWorldIntersectType (On Tour 0x60; data 0x00-0x50, then the vptr)
     int mPrecision;                 // 0x000 [O] tIntPrecision; [R] ctor: 0 when isLow, else 1;
@@ -56,6 +60,18 @@ struct cWorldRider {
     cRiderSphereTree localTree;     // 0x070 [O]; [R] ctor constructs it, dtor destroys it (cRiderSphereTree__cRiderSphereTree);
                                     //       [U] Transform copies *st into it (cRiderSphereTree_operatorE) and
                                     //       cRiderSphereTree_ApplyTransform's it
+
+    // Methods bound to their retail symbols by asm labels.
+    int IsInBoxTransformed(t4Vector* mn, t4Vector* mx) __asm__("cWorldRider_IsInBoxTransformed");
+    void Transform(t4Matrix* mat, float scale) __asm__("cWorldRider_Transform");
+    int UnTransform() __asm__("cWorldRider_UnTransform__FPv");
+    float GetIdealParam() __asm__("cWorldRider_GetIdealParam");
+    int IsTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
+        __asm__("cWorldRider_IsTriInt");
+    int Is2SidedTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
+        __asm__("cWorldRider_Is2SidedTriInt");
+    int IsSphTreeInt(void* tree, tIntersectInfo* hit) __asm__("cWorldRider_IsSphTreeInt");
+    int IsBoxInt(void* bMin, void* bMax, tIntersectInfo* hit) __asm__("cWorldRider_IsBoxInt");
 };
 
 CHECK_OFFSET(cWorldRider, mPrecision, 0x000);

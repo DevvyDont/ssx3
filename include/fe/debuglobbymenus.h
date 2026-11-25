@@ -90,6 +90,11 @@ struct AccountDetailsMenu {
                                      //       the dtor
     cPopMenuItem mCancelItem;        // 0x1E4 [R] ctor cPopMenuItem_cPopMenuItem(this + 0x1E4, "Cancel"); destroyed by
                                      //       the dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    void* AccountDetailsMenu1(void* vinfo, void* actionLabel) __asm__("AccountDetailsMenu_AccountDetailsMenu1");
+    int onCommand() __asm__("AccountDetailsMenu_onCommand");
+    int onCommand1() __asm__("AccountDetailsMenu_onCommand1");
 };
 
 CHECK_OFFSET(AccountDetailsMenu, NumItems, 0x000);
@@ -176,6 +181,9 @@ struct CreatePersonaMenu {
                                      //       (this + 0x180)
     cCommandMenuItem mCreateItem;    // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Create"); destroyed by the
                                      //       dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand() __asm__("CreatePersonaMenu_onCommand");
 };
 
 CHECK_OFFSET(CreatePersonaMenu, NumItems, 0x000);
@@ -216,6 +224,9 @@ struct DeletePersonaMenu {
     cCommandMenuItem mPersonaItems[4]; // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed
                                      //       by the dtor (loop of 4) [U] DeletePersonaMenu_setpersonas sets their
                                      //       captions and IDs
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand(cMenuItem* item) __asm__("DeletePersonaMenu_onCommand");
 };
 
 CHECK_OFFSET(DeletePersonaMenu, NumItems, 0x000);
@@ -325,6 +336,8 @@ CHECK_SIZE(LobbyMenu, 0x318);
 // "Chat". Preview vtable pairs with retail RoomMenu_vtbl; ctor RoomMenu_RoomMenu, onCommand RoomMenu_onCommand, dtor
 // RoomMenu__RoomMenu, row fill RoomMenu_updateusers. cDebugLobbyScreen +0x1044 (mOccupantsMenu).
 
+struct LobbyMan;
+
 struct RoomMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu zeroes it; [U] cMenu_addItem counts
@@ -350,6 +363,10 @@ struct RoomMenu {
                                      //       items[24])
     cCommandMenuItem mChatItem;      // 0x4CC [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Chat"); destroyed by the
                                      //       dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    void updateusers(LobbyMan* src) __asm__("RoomMenu_updateusers");
+    int onCommand(cMenuItem* item) __asm__("RoomMenu_onCommand");
 };
 
 CHECK_OFFSET(RoomMenu, NumItems, 0x000);
@@ -370,6 +387,8 @@ CHECK_SIZE(RoomMenu, 0x4F0);
 // ChatMenu<cDebugLobbyScreen::OnMessage> (0x38C): "Chat Menu", an "Enter Chat" entry row and 14 message rows.
 // Preview vtable pairs with retail ChatMenu_vtbl; ctor ChatMenu_ChatMenu, onCommand ChatMenu_onCommand, dtor ChatMenu__ChatMenu.
 // cDebugLobbyScreen +0x1534.
+
+struct cCommandMenuItem;
 
 struct ChatMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -392,6 +411,9 @@ struct ChatMenu {
                                      //       destroyed by the dtor
     cCommandMenuItem mMessageItems[14]; // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 (14 message rows);
                                      //       destroyed by the dtor (loop of 14)
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand(cCommandMenuItem* item) __asm__("ChatMenu_onCommand");
 };
 
 CHECK_OFFSET(ChatMenu, NumItems, 0x000);
@@ -412,6 +434,8 @@ CHECK_SIZE(ChatMenu, 0x38C);
 // "You've been Challenged!", "by", the challenger line, a spacer and Accept / Decline. Preview vtable pairs with retail
 // D_0046D3D0; ctor at 0x001DB148 (misnamed ChallengeResponseMenu_ChallengeResponseMenu in retail symbols), onCommand ChallengeResponseMenu_onCommand,
 // dtor ChallengeResponseMenu__ChallengeResponseMenu. cDebugLobbyScreen +0x18C0.
+
+struct cMenuItem;
 
 struct ChallengeResponseMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -441,6 +465,9 @@ struct ChallengeResponseMenu {
                                      //       the dtor
     cCommandMenuItem mDeclineItem;   // 0x1C8 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 1 "Decline"); destroyed by
                                      //       the dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand(cMenuItem* item) __asm__("ChallengeResponseMenu_onCommand");
 };
 
 CHECK_OFFSET(ChallengeResponseMenu, NumItems, 0x000);
@@ -478,6 +505,9 @@ struct AbortMenu {
                                      //       AbortMenu_onCommand passes it to func_0017E558
     cCommandMenuItem mAbortItem;     // 0x134 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Abort"); destroyed by
                                      //       the dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand() __asm__("AbortMenu_onCommand");
 };
 
 CHECK_OFFSET(AbortMenu, NumItems, 0x000);

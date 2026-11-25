@@ -89,6 +89,9 @@ struct cFEStateLobbyMenu : public cFEStateNet {
                                     //       mszRoomName, the popup's message (+ 0xC4); extent: up to 0xB80
     char* mszRoomName;              // 0xB80 [R] cBXString (empty rep cBXString_EmptyString; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD460 /
                                     //       func_001BD540 assign the room being entered; func_001BD428 passes it to func_001BD540
+
+    // Methods bound to their retail symbols by asm labels.
+    void* cFEStateLobbyMenu1() __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu1");
 };
 
 CHECK_OFFSET(cFEStateLobbyMenu, mpMenuPlayers, 0x6D0);
