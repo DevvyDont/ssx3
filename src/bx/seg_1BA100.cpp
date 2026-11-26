@@ -73,9 +73,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Current);
  *
  * @return the current level's play options
  */
-int cSndPlayOpts::OPTS_Current()
+SNDPLAYOPTS* cSndPlayOpts::OPTS_Current()
 {
-    return ((int)mCurrent) + ((mInst) * 0x18);
+    return &mCurrent[mInst];
 }
 #endif
 
@@ -87,9 +87,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPos);
  *
  * @return the position vector pointer, or 0
  */
-int cSndPlayOpts::OPTS_GetPos()
+const t4Vector* cSndPlayOpts::OPTS_GetPos()
 {
-    return (int)mPosition[mInst];
+    return mPosition[mInst];
 }
 #endif
 
@@ -188,9 +188,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetDelay);
  *
  * @return the cDelayOpts record
  */
-int cSndPlayOpts::OPTS_GetDelay()
+cDelayOpts* cSndPlayOpts::OPTS_GetDelay()
 {
-    return ((int)mDelay) + ((mInst) * 0x10);
+    return &mDelay[mInst];
 }
 #endif
 
@@ -323,7 +323,7 @@ int cSndPlayOpts::OPTS_GetTwoPlayerSide()
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LibDefault);
 #ifdef SKIP_ASM
-extern "C" void SNDplaysetdef(int);
+extern "C" void SNDplaysetdef(SNDPLAYOPTS* opts);
 
 /**
  * Fills the current level's SNDPLAYOPTS (mCurrent[mInst]) with the audio library's defaults via SNDplaysetdef.
@@ -331,7 +331,7 @@ extern "C" void SNDplaysetdef(int);
  */
 void cSndPlayOpts::OPTS_LibDefault()
 {
-    SNDplaysetdef(((int)mCurrent) + ((mInst) * 0x18));
+    SNDplaysetdef(&mCurrent[mInst]);
 }
 #endif
 
@@ -895,9 +895,9 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_GetInstance);
  * @param instance  the instance index (64 records)
  * @return the cBankMonitorInstance
  */
-int cBankMonitor::BANKMONITOR_GetInstance(int instance)
+cBankMonitorInstance* cBankMonitor::BANKMONITOR_GetInstance(int instance)
 {
-    return ((int)mBankMonitorInstance) + (instance * 0xC0);
+    return &mBankMonitorInstance[instance];
 }
 #endif
 
@@ -1410,16 +1410,16 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_Current);
  *
  * @return mCurrent, or 0 when no song is set up
  */
-int cMusicSys::MUSIC_Current()
+cSongInstance* cMusicSys::MUSIC_Current()
 {
-    return ((int)mSongInstance);
+    return mSongInstance;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetStreamHandle);
 #ifdef SKIP_ASM
-extern "C" int func_002B2488(int);
+extern "C" int func_002B2488(cSongInstance* song);
 
 /**
  * Returns the current song's stream handle: func_002B2488(mCurrent), or -1 when there is no current song.
@@ -1428,15 +1428,15 @@ extern "C" int func_002B2488(int);
  */
 int cMusicSys::MUSIC_GetStreamHandle()
 {
-    int temp_4;
-    int var_2;
+    cSongInstance* song;
+    int handle;
 
-    temp_4 = ((int)mSongInstance);
-    var_2 = -1;
-    if (temp_4 != 0) {
-        var_2 = func_002B2488(temp_4);
+    song = mSongInstance;
+    handle = -1;
+    if (song != 0) {
+        handle = func_002B2488(song);
     }
-    return var_2;
+    return handle;
 }
 #endif
 
@@ -1513,7 +1513,7 @@ int cMusicSys::MUSIC_GetCurrentSongNum()
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_SetDelay);
 #ifdef SKIP_ASM
-extern "C" void func_002B2850(int, void *);
+extern "C" void func_002B2850(cSongInstance* song, void* musicSys);
 
 /**
  * Applies the delay settings to the current song: func_002B2850(mCurrent, @p musicSys).
@@ -1521,7 +1521,7 @@ extern "C" void func_002B2850(int, void *);
  */
 void cMusicSys::MUSIC_SetDelay()
 {
-    func_002B2850(((int)mSongInstance), this);
+    func_002B2850(mSongInstance, this);
 }
 #endif
 
@@ -1563,7 +1563,7 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_StoreDefaultActiveMap);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 void cMusicSys::MUSIC_StoreDefaultActiveMap()
 {
-    (*(long*)&mDefaultActiveMap) = (long) (*(long*)&mActiveMap);
+    mDefaultActiveMap = mActiveMap;
 }
 #endif
 
@@ -1579,7 +1579,7 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetDefaultActiveMap);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 long cMusicSys::MUSIC_GetDefaultActiveMap()
 {
-    return (*(long*)&mDefaultActiveMap);
+    return mDefaultActiveMap;
 }
 #endif
 
@@ -2216,7 +2216,7 @@ void cWorldPainterMan::update()
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load);
 #ifdef SKIP_ASM
-extern "C" void cWorldPainterSection_load(int, int);
+extern "C" void cWorldPainterSection_load(cWorldPainterSection* section, int fileName);
 
 /**
  * Starts loading a section's world-painter file: m_pCache[@p sectionId].load(@p fileName) via cWorldPainterSection_load.
@@ -2226,21 +2226,21 @@ extern "C" void cWorldPainterSection_load(int, int);
  */
 void cWorldPainterMan::load(int sectionId, int fileName)
 {
-    cWorldPainterSection_load(((int)m_pCache) + (sectionId * 0xC), fileName);
+    cWorldPainterSection_load(&m_pCache[sectionId], fileName);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load1);
 #ifdef SKIP_ASM
-extern "C" void cWorldPainterSection_load1(cWorldPainterSection*, int, int);
+extern "C" void cWorldPainterSection_load1(cWorldPainterSection* section, int sectionId, tWPHeader* wpData);
 /**
  * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through cWorldPainterSection_load1.
  *
  * @param sectionId  the section index into m_pCache
  * @param wpData  the section's world-painter data (a tWPHeader), kept in place (streamed)
  */
-void cWorldPainterMan::load1(int sectionId, int wpData)
+void cWorldPainterMan::load1(int sectionId, tWPHeader* wpData)
 {
     m_pCache[sectionId].load1(sectionId, wpData);
 }
@@ -2292,13 +2292,13 @@ extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void ASYNCFILE_release_B3F0(int, int *, int *) __asm__("ASYNCFILE_release");
-extern "C" void MEM_free_B3F0(int) __asm__("MEM_free");
-extern "C" void unpack_B3F0(int, int) __asm__("unpack");
-extern "C" int unpacksizez_B3F0(int) __asm__("unpacksizez");
+extern "C" void ASYNCFILE_release_B3F0(int handle, void** data, int* size) __asm__("ASYNCFILE_release");
+extern "C" void MEM_free_B3F0(void* p) __asm__("MEM_free");
+extern "C" void unpack_B3F0(void* src, void* dst) __asm__("unpack");
+extern "C" int unpacksizez_B3F0(void* src) __asm__("unpacksizez");
 extern "C" int ASYNCFILE_getstatus_B3F0(int) __asm__("ASYNCFILE_getstatus");
-extern "C" void MEM_copy_B3F0(int, int, int) __asm__("MEM_copy");
-int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
+extern "C" void MEM_copy_B3F0(void* dst, void* src, int size) __asm__("MEM_copy");
+void* operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_WPFile[];
 /**
  * Finishes a section's file load once its async read completes (m_iState kWPSection_Loading).
@@ -2311,27 +2311,27 @@ extern char str_WPFile[];
  * @param self_  the section
  */
 extern "C" void cWorldPainterSection_update(cWorldPainterSection* self_) {
-    short st = *(short*)self_;
+    short st = self_->m_iState;
     if (st == kWPSection_Loading && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
-        int packData = 0;
+        void* packData = 0;
         int packSize = 0;
         ASYNCFILE_release_B3F0(self_->m_iAsyncHandle, &packData, &packSize);
         if (packData != 0) {
             if (packSize > 0) {
                 int unpackedSize = unpacksizez_B3F0(packData);
                 if (unpackedSize > 0) {
-                    int header = operator_new_B3F0(unpackedSize, str_WPFile, 0x20000000, 0);
+                    void* header = operator_new_B3F0(unpackedSize, str_WPFile, 0x20000000, 0);
                     self_->m_pWPHeader = (tWPHeader*)header;
                     unpack_B3F0(packData, header);
                 } else {
-                    int header = operator_new_B3F0(packSize, str_WPFile, 0x20000000, 0);
+                    void* header = operator_new_B3F0(packSize, str_WPFile, 0x20000000, 0);
                     self_->m_pWPHeader = (tWPHeader*)header;
                     MEM_copy_B3F0(header, packData, packSize);
                 }
                 MEM_free_B3F0(packData);
             }
         }
-        *(short*)self_ = 2;
+        self_->m_iState = 2;
     }
 }
 #endif
@@ -2386,11 +2386,11 @@ extern "C" void cWorldPainterSection_resolve(cWorldPainterSection*);
  * @param sectionId  the section index (unused)
  * @param wpData  the world-painter data (a tWPHeader)
  */
-void cWorldPainterSection::load1(int sectionId, int wpData)
+void cWorldPainterSection::load1(int sectionId, tWPHeader* wpData)
 {
     m_iStreamed = 1;
     m_iState = 2;
-    m_pWPHeader = (tWPHeader*)wpData;
+    m_pWPHeader = wpData;
     resolve();
 }
 #endif
@@ -2398,7 +2398,7 @@ void cWorldPainterSection::load1(int sectionId, int wpData)
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_unload);
 #ifdef SKIP_ASM
-extern "C" void cMemMan_free__FPv(int);
+void cMemMan_free(void* p);
 
 /**
  * Unloads a section: frees m_pWPHeader with cMemMan_free unless m_iStreamed is set, clears it, and sets m_iState to 0.
@@ -2406,12 +2406,12 @@ extern "C" void cMemMan_free__FPv(int);
  */
 void cWorldPainterSection::unload()
 {
-    int temp_4;
+    tWPHeader* header;
 
-    temp_4 = ((int)m_pWPHeader);
-    if (temp_4 != 0) {
+    header = m_pWPHeader;
+    if (header != 0) {
         if ((m_iStreamed) == 0) {
-            cMemMan_free__FPv(temp_4);
+            cMemMan_free(header);
         }
         m_pWPHeader = 0;
     }
@@ -2455,7 +2455,7 @@ void cWorldPainterSection::resolve()
             if (self->m_iStreamed == 0) {
                 cMemMan_free(((sReloc_B5F0*)self->m_pWPHeader));
             }
-            *(sReloc_B5F0**)&self->m_pWPHeader = 0;
+            self->m_pWPHeader = 0;
         }
         if (((sReloc_B5F0*)self->m_pWPHeader) != 0) {
             int* layerPtr = ((sReloc_B5F0*)self->m_pWPHeader)->offs;
@@ -2476,7 +2476,7 @@ void cWorldPainterSection::resolve()
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterManRender);
 #ifdef SKIP_ASM
-extern "C" void cWorldPainterMan_render(int, void *);
+extern "C" void cWorldPainterMan_render(cWorldPainterMan* man, void* world);
 
 /**
  * Draws the world painter debug overlay of the current world.
@@ -2487,7 +2487,7 @@ extern "C" void cWorldPainterManRender(void) {
     cWorld* temp_5;
 
     temp_5 = (cWorld*)((void*)SSXApp->Game->World);
-    cWorldPainterMan_render(((int)temp_5->m_pWorldPainterMan), temp_5);
+    cWorldPainterMan_render(temp_5->m_pWorldPainterMan, temp_5);
 }
 #endif
 
@@ -2547,7 +2547,7 @@ extern "C" void cWorldPainterMan_render_impl(cWorldPainterMan_B6E0* self) {
                         cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
                         // PushDrawState + SetDefaultDrawState
                         (gm->m_pCurrentDrawState)[1] = (gm->m_pCurrentDrawState)[0];
-                        (*(sDrawState**)&gm->m_pCurrentDrawState)++;
+                        (gm->m_pCurrentDrawState)++;
                         *(gm->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
                         tBxVertex_B6E0 quadVerts[5];
                         tBxVertex_B6E0* quadVert;
@@ -2567,7 +2567,7 @@ extern "C" void cWorldPainterMan_render_impl(cWorldPainterMan_B6E0* self) {
                         t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
                                                 (float)(int)(32768.0f / tree->scale + tree->miny), 0.0f, 1.0f);
                         cWorldPainterMan_render1_B6E0(self, tree, tree->nodes + tree->root * 8, quadVerts, &mincorner, &maxcorner);
-                        (*(sDrawState**)&gm->m_pCurrentDrawState)--;  // PopDrawState
+                        (gm->m_pCurrentDrawState)--;  // PopDrawState
                     }
                 }
             }
@@ -4449,7 +4449,6 @@ extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, tWPData
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_blend);
 #ifdef SKIP_ASM
-struct sP_D5A8 { float x, y; };
 /**
  * Blends the lighting values towards a region's data.
  *
@@ -4464,10 +4463,10 @@ struct sP_D5A8 { float x, y; };
 extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, tWPData_Lighting* rhs, float blendFactor) {
     self->debugBlend();
     blendFactor = blendFactor * blendFactor;
-    *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)&rhs->m_LightIrradianceName;
-    *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)&rhs->m_ShadowIrradianceName;
-    *(sP_D5A8*)&self->m_TunnelIrradianceName = *(sP_D5A8*)&rhs->m_TunnelIrradianceName;
-    *(sP_D5A8*)&self->m_ObjectIrradianceName = *(sP_D5A8*)&rhs->m_ObjectIrradianceName;
+    self->m_LightIrradianceName = rhs->m_LightIrradianceName;
+    self->m_ShadowIrradianceName = rhs->m_ShadowIrradianceName;
+    self->m_TunnelIrradianceName = rhs->m_TunnelIrradianceName;
+    self->m_ObjectIrradianceName = rhs->m_ObjectIrradianceName;
     self->m_AmbientLightIntensityOffset = blendFactor * rhs->m_AmbientLightIntensityOffset + (1.0f - blendFactor) * self->m_AmbientLightIntensityOffset;
     self->m_lastAmbientLightIntensityOffset = rhs->m_AmbientLightIntensityOffset;
     self->m_RimLightIntensityOffset = blendFactor * rhs->m_RimLightIntensityOffset + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
@@ -5040,7 +5039,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_setDefaults);
  * @param musicTrigger  the in-game data
  */
 extern "C" void tWPInGameData_MusicTrigger_setDefaults(tWPInGameData_MusicTrigger* musicTrigger) {
-    *(int*)&musicTrigger->m_wpTravelDistance = 0;
+    musicTrigger->m_wpTravelDistance = 0.0f;
     musicTrigger->m_Type = -1;
     musicTrigger->m_Value = -1;
 }
@@ -5058,7 +5057,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_setDefaults);
  * @param mix  the in-game data
  */
 extern "C" void tWPInGameData_Mix_setDefaults(tWPInGameData_Mix* mix) {
-    *(int*)&mix->m_wpTravelDistance = 0;
+    mix->m_wpTravelDistance = 0.0f;
     mix->m_MixPreset = -1;
 }
 #endif
@@ -5075,7 +5074,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_setDefaults);
  * @param ambience  the in-game data
  */
 extern "C" void tWPInGameData_Ambience_setDefaults(tWPInGameData_Ambience* ambience) {
-    *(int*)&ambience->m_wpTravelDistance = 0;
+    ambience->m_wpTravelDistance = 0.0f;
     ambience->m_BankID = -1;
 }
 #endif
@@ -5092,7 +5091,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_setDefaults);
  * @param speech  the in-game data
  */
 extern "C" void tWPInGameData_Speech_setDefaults(tWPInGameData_Speech* speech) {
-    *(int*)&speech->m_wpTravelDistance = 0;
+    speech->m_wpTravelDistance = 0.0f;
     speech->m_SpeechID = -1;
 }
 #endif
@@ -5110,7 +5109,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_setDefaults);
  * @param camera  the in-game data
  */
 extern "C" void tWPInGameData_Camera_setDefaults(tWPInGameData_Camera* camera) {
-    *(int*)&camera->m_wpTravelDistance = 0;
+    camera->m_wpTravelDistance = 0.0f;
     camera->m_DrawDistance = 30000.0f;
 }
 #endif
@@ -5133,8 +5132,8 @@ extern "C" void tWPInGameData_Fog_setDefaults(tWPInGameData_Fog* fog) {
     fog->m_FogColourR = 0.43f;
     fog->m_FogColourG = 0.55f;
     fog->m_FogColourB = 0.71f;
-    *(int*)&fog->m_FogDensity = 0;
-    *(int*)&fog->m_wpTravelDistance = 0;
+    fog->m_FogDensity = 0.0f;
+    fog->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5157,9 +5156,9 @@ extern "C" void tWPInGameData_LightGlow_setDefaults(tWPInGameData_LightGlow* lig
     lightGlow->m_LightGlowCopyIntensity = 1.0f;
     lightGlow->m_LightGlowSourceIntensity = 1.0f;
     lightGlow->m_LightGlowFrameIntensity = 1.0f;
-    *(int*)&lightGlow->m_LightGlowBlend2 = 0;
-    *(int*)&lightGlow->m_LightGlowBlend3 = 0;
-    *(int*)&lightGlow->m_wpTravelDistance = 0;
+    lightGlow->m_LightGlowBlend2 = 0.0f;
+    lightGlow->m_LightGlowBlend3 = 0.0f;
+    lightGlow->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5179,10 +5178,10 @@ extern "C" void tWPInGameData_ScreenTint_setDefaults(tWPInGameData_ScreenTint* s
     screenTint->m_ScreenTintScaleR = 1.0f;
     screenTint->m_ScreenTintScaleG = 1.0f;
     screenTint->m_ScreenTintScaleB = 1.0f;
-    *(int*)&screenTint->m_ScreenTintOffsetR = 0;
-    *(int*)&screenTint->m_ScreenTintOffsetG = 0;
-    *(int*)&screenTint->m_ScreenTintOffsetB = 0;
-    *(int*)&screenTint->m_wpTravelDistance = 0;
+    screenTint->m_ScreenTintOffsetR = 0.0f;
+    screenTint->m_ScreenTintOffsetG = 0.0f;
+    screenTint->m_ScreenTintOffsetB = 0.0f;
+    screenTint->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5198,8 +5197,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_setDefaults);
  * @param skyBox  the in-game data
  */
 extern "C" void tWPInGameData_SkyBox_setDefaults(tWPInGameData_SkyBox* skyBox) {
-    *(int*)&skyBox->m_SkyBoxRotation = 0;
-    *(int*)&skyBox->m_wpTravelDistance = 0;
+    skyBox->m_SkyBoxRotation = 0.0f;
+    skyBox->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5216,8 +5215,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_setDefaults);
  * @param sun  the in-game data
  */
 extern "C" void tWPInGameData_Sun_setDefaults(tWPInGameData_Sun* sun) {
-    *(int*)&sun->m_SunPitchOffset = 0;
-    *(int*)&sun->m_SunYawOffset = 0;
+    sun->m_SunPitchOffset = 0.0f;
+    sun->m_SunYawOffset = 0.0f;
     sun->m_SunColorR = 1.0f;
     sun->m_SunColorG = 1.0f;
     sun->m_SunColorB = 1.0f;
@@ -5225,7 +5224,7 @@ extern "C" void tWPInGameData_Sun_setDefaults(tWPInGameData_Sun* sun) {
     sun->m_SunType = 0;
     sun->m_LensIntensity = 1.0f;
     sun->m_SunRadius = 1.0f;
-    *(int*)&sun->m_wpTravelDistance = 0;
+    sun->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5242,7 +5241,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_setDefaults);
  * @param surface  the in-game data
  */
 extern "C" void tWPInGameData_Surface_setDefaults(tWPInGameData_Surface* surface) {
-    *(int*)&surface->m_wpTravelDistance = 0;
+    surface->m_wpTravelDistance = 0.0f;
     surface->m_SnowSparkleDensity = 1.0f;
 }
 #endif
@@ -5285,7 +5284,7 @@ extern "C" void tWPInGameData_Lighting_setDefaults(tWPInGameData_Lighting* light
     (*(&lighting->m_ObjectIrradianceName)) = kNullNameField;
     lighting->m_AmbientLightIntensityOffset = 1.0f;
     lighting->m_RimLightIntensityOffset = 0.75f;
-    *(int*)&lighting->m_wpTravelDistance = 0;
+    lighting->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5303,17 +5302,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_setDefaults);
  * @param weather  the in-game data
  */
 extern "C" void tWPInGameData_Weather_setDefaults(tWPInGameData_Weather* weather) {
-    *(int*)&weather->m_SnowIntensity = 0;
+    weather->m_SnowIntensity = 0.0f;
     weather->m_FlakeSize = 6.0f;
-    *(int*)&weather->m_WindIntensity = 0;
-    *(int*)&weather->m_WindRotation = 0;
-    *(int*)&weather->m_PlayerWindIntensity = 0;
+    weather->m_WindIntensity = 0.0f;
+    weather->m_WindRotation = 0.0f;
+    weather->m_PlayerWindIntensity = 0.0f;
     weather->m_Temperature = 10.0f;
     weather->m_SnowFlurries = 1.0f;
     weather->m_SnowGravityMultiplier = 1.0f;
-    *(int*)&weather->m_SnowFluffItensity = 0;
-    *(int*)&weather->m_SnowFluffWindIntensity = 0;
-    *(int*)&weather->m_LightningChance = 0;
+    weather->m_SnowFluffItensity = 0.0f;
+    weather->m_SnowFluffWindIntensity = 0.0f;
+    weather->m_LightningChance = 0.0f;
     weather->m_SnowFlakeColourA = 1.0f;
     weather->m_SnowFlakeColourR = 1.0f;
     weather->m_SnowFlakeColourG = 1.0f;
@@ -5322,7 +5321,7 @@ extern "C" void tWPInGameData_Weather_setDefaults(tWPInGameData_Weather* weather
     weather->m_SnowFluffColourR = 1.0f;
     weather->m_SnowFluffColourG = 1.0f;
     weather->m_SnowFluffColourB = 1.0f;
-    *(int*)&weather->m_wpTravelDistance = 0;
+    weather->m_wpTravelDistance = 0.0f;
 }
 #endif
 
@@ -5340,8 +5339,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_setDefaults);
  */
 extern "C" void tWPInGameData_Danger_setDefaults(tWPInGameData_Danger* danger) {
     danger->m_Level = 0;
-    *(int*)&danger->m_PointRate = 0;
-    *(int*)&danger->m_wpTravelDistance = 0;
+    danger->m_PointRate = 0.0f;
+    danger->m_wpTravelDistance = 0.0f;
 }
 #endif
 

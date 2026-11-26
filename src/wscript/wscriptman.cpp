@@ -519,22 +519,22 @@ extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
  * instance is restored afterwards. Otherwise as cWScriptMan_runScript.
  *
  * @param handle  the script's resource ID
- * @param id  the instance record to make current
+ * @param inst  the instance record to make current
  */
-void cWScriptMan::runScript1(int* handle, int id)
+void cWScriptMan::runScript1(int* handle, tInstanceRecord* inst)
 {
     cWScriptMan_runScript1_sValue scriptVar;
     cWScriptMan_runScript1_sValue ret;
     cWScriptMan_runScript1_sCall call;
-    int saved = (int)Inst;
-    Inst = (tInstanceRecord*)id;
+    tInstanceRecord* saved = Inst;
+    Inst = inst;
     luno_cLunoFunc_init(&scriptVar, cWorld_getWScriptScript(World, handle), 0);
     ret.type = 0;
     ret.word0 = 0;
     void* table = (void*)GlobalTables[*(unsigned char*)handle];
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptVar, table, &ret);
-    Inst = (tInstanceRecord*)saved;
+    Inst = saved;
     luno_cLunoVar__cLunoVar((luno_cLunoVar*)&ret, 2);
 }
 #endif
@@ -653,11 +653,11 @@ void cWScriptMan::runGlobalScripts()
     }
     saved = Being;
     Being = -1;
-    *(int*)&Inst = 0;
-    *(int*)&CollideInfo = 0;
-    *(int*)&IntersectInfo = 0;
-    *(int*)&CurrentProcess = 0;
-    *(int*)&CurrentTask = 0;
+    Inst = 0;
+    CollideInfo = 0;
+    IntersectInfo = 0;
+    CurrentProcess = 0;
+    CurrentTask = 0;
     n = cWorldView_getNumSections(&World->m_pWorldCache->m_WorldView);
     for (i = 0; i < n; i++) {
         if (wsIsType3_9F18(&World->m_pWScriptCache->mpCache[i])) {
@@ -671,11 +671,11 @@ void cWScriptMan::runGlobalScripts()
             }
         }
     }
-    *(int*)&Inst = 0;
-    *(int*)&CollideInfo = 0;
-    *(int*)&IntersectInfo = 0;
-    *(int*)&CurrentProcess = 0;
-    *(int*)&CurrentTask = 0;
+    Inst = 0;
+    CollideInfo = 0;
+    IntersectInfo = 0;
+    CurrentProcess = 0;
+    CurrentTask = 0;
     Being = saved;
 }
 #endif
@@ -696,7 +696,7 @@ extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 extern "C" int cWorld_getWScriptScript(void*, int*);
 extern "C" void cWScriptMan_eventCollide(cWScriptMan* self, int v);
 extern char str_SetupLocalTable[];
@@ -740,9 +740,9 @@ void cWScriptMan::doOnCollideScript(tCollideInfo* collideInfo, tIntersectInfo* i
         luno_cLunoVar scriptFunc;
         luno_cLunoVar ret;
         luno_cLunoVMLocal call;
-        int id = cWorld_getWScriptHeaderId(World, (int)Inst, kInstScript_Collide);
+        int id = cWorld_getWScriptHeaderId(World, Inst, kInstScript_Collide);
         if (valid_30A060(&id)) {
-            if ((int)CurrentProcess == 0 && (int)CurrentTask == 0) {
+            if (CurrentProcess == 0 && CurrentTask == 0) {
                 runScript(&id);
             } else {
                 luno_cLunoFunc_init(&scriptFunc, cWorld_getWScriptScript(World, &id), 0);
@@ -784,25 +784,25 @@ done:
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnFocusScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 
 /**
  * Returns whether a world instance has an on-focus script: its world script header entry kInstScript_Focus
  * (cWorld_getWScriptHeaderId on the world, +0x28C) is not tResourceID::Invalid().
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  * @return true when it has one
  */
-bool cWScriptMan::hasOnFocusScript(int id)
+bool cWScriptMan::hasOnFocusScript(tInstanceRecord* inst)
 {
-    return cWorld_getWScriptHeaderId(World, id, kInstScript_Focus) != tResourceID::kInvalidRID;
+    return cWorld_getWScriptHeaderId(World, inst, kInstScript_Focus) != tResourceID::kInvalidRID;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnFocusScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
 
 /**
@@ -810,13 +810,13 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
  * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not tResourceID::Invalid(), then clears the current
  * instance.
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  */
-void cWScriptMan::doOnFocusScript(int id)
+void cWScriptMan::doOnFocusScript(tInstanceRecord* inst)
 {
     int idx;
-    Inst = (tInstanceRecord*)id;
-    idx = cWorld_getWScriptHeaderId(World, id, kInstScript_Focus);
+    Inst = inst;
+    idx = cWorld_getWScriptHeaderId(World, inst, kInstScript_Focus);
     int ok = idx != tResourceID::kInvalidRID;
     if (ok) {
         runScript(&idx);
@@ -828,18 +828,18 @@ void cWScriptMan::doOnFocusScript(int id)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnLoseFocusScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 
 /**
  * Returns whether a world instance has an on-lose-focus script: its world script header entry kInstScript_LoseFocus is
  * not tResourceID::Invalid().
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  * @return true when it has one
  */
-bool cWScriptMan::hasOnLoseFocusScript(int id)
+bool cWScriptMan::hasOnLoseFocusScript(tInstanceRecord* inst)
 {
-    return cWorld_getWScriptHeaderId(World, id, kInstScript_LoseFocus) != tResourceID::kInvalidRID;
+    return cWorld_getWScriptHeaderId(World, inst, kInstScript_LoseFocus) != tResourceID::kInvalidRID;
 }
 #endif
 
@@ -855,17 +855,16 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isFocusInstance);
  * @param obj  the instance record
  * @return true when it can
  */
-// PORT: the helpers take the object as int in this unit.
 bool cWScriptMan::isFocusInstance(nash_Node* obj)
 {
     tInstanceRecord* inst = (tInstanceRecord*)obj;
-    if ((int)inst->m_pActiveNode != 0) {
+    if (inst->m_pActiveNode != 0) {
         return true;
     }
     cWScriptCacheEntry* tab = World->m_pWScriptCache->mpCache;
     bool isReady = tab[*(unsigned char*)&inst->m_RID].mState == kWSCacheState_Ready;
     if (isReady) {
-        if (hasOnFocusScript((int)obj) || hasOnLoseFocusScript((int)obj)) {
+        if (hasOnFocusScript(inst) || hasOnLoseFocusScript(inst)) {
             return true;
         }
     }
@@ -948,8 +947,8 @@ void cWScriptMan::upFocusScript(tInstanceRecord* obj)
         cWScriptMan_upFocusScript_sType* instTypes = (cWScriptMan_upFocusScript_sType*)World->m_pWScriptCache->mpCache;
         bool isScript = instTypes[*(unsigned char*)&obj->m_RID].type == kWSCacheState_Ready;
         if (isScript) {
-            if (hasOnFocusScript((int)obj) != 0) {
-                doOnFocusScript((int)obj);
+            if (hasOnFocusScript(obj) != 0) {
+                doOnFocusScript(obj);
             }
         }
     }
@@ -960,7 +959,7 @@ void cWScriptMan::upFocusScript(tInstanceRecord* obj)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_downFocusScript);
 #ifdef SKIP_ASM
 // script object controller: 0xC bytes of data, then the vptr
-extern "C" void cWScriptMan_doOnLoseFocusScript(cWScriptMan* self, int id);
+extern "C" void cWScriptMan_doOnLoseFocusScript(cWScriptMan* self, tInstanceRecord* inst);
 
 /**
  * Handles a world instance losing the player's focus.
@@ -972,7 +971,6 @@ extern "C" void cWScriptMan_doOnLoseFocusScript(cWScriptMan* self, int id);
  *
  * @param obj  the instance losing focus (On Tour inst)
  */
-// PORT: cWScriptMan_hasOnLoseFocusScript/cWScriptMan_doOnLoseFocusScript take the object pointer as an int id
 void cWScriptMan::downFocusScript(tInstanceRecord* obj)
 {
     cWScriptCtl* ctl = (cWScriptCtl*)obj->m_pActiveNode;
@@ -986,15 +984,15 @@ void cWScriptMan::downFocusScript(tInstanceRecord* obj)
             return;
         }
         obj = node->Instance;
-        if (hasOnLoseFocusScript((int)obj) != 0) {
-            doOnLoseFocusScript((int)obj);
+        if (hasOnLoseFocusScript(obj) != 0) {
+            doOnLoseFocusScript(obj);
             return;
         }
         ((cWScriptCtl*)obj->m_pActiveNode)->loseFocus();
         return;
     }
-    if (hasOnLoseFocusScript((int)obj) != 0) {
-        doOnLoseFocusScript((int)obj);
+    if (hasOnLoseFocusScript(obj) != 0) {
+        doOnLoseFocusScript(obj);
     }
 }
 #endif
@@ -1002,7 +1000,7 @@ void cWScriptMan::downFocusScript(tInstanceRecord* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnLoseFocusScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
 
 /**
@@ -1012,13 +1010,13 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
  * cWorld_getWScriptHeaderId, runs it with cWScriptMan_runScript when it is not tResourceID::Invalid() and clears the
  * current instance.
  *
- * @param id  the instance record, passed as an int (On Tour inst)
+ * @param inst  the instance record (On Tour inst)
  */
-void cWScriptMan::doOnLoseFocusScript(int id)
+void cWScriptMan::doOnLoseFocusScript(tInstanceRecord* inst)
 {
     int idx;
-    Inst = (tInstanceRecord*)id;
-    idx = cWorld_getWScriptHeaderId(World, id, kInstScript_LoseFocus);
+    Inst = inst;
+    idx = cWorld_getWScriptHeaderId(World, inst, kInstScript_LoseFocus);
     int ok = idx != tResourceID::kInvalidRID;
     if (ok) {
         runScript(&idx);
@@ -1030,25 +1028,25 @@ void cWScriptMan::doOnLoseFocusScript(int id)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnExpireScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 
 /**
  * Returns whether a world instance has an on-expire script: its world script header entry kInstScript_Expire is not
  * tResourceID::Invalid().
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  * @return true when it has one
  */
-bool cWScriptMan::hasOnExpireScript(int id)
+bool cWScriptMan::hasOnExpireScript(tInstanceRecord* inst)
 {
-    return cWorld_getWScriptHeaderId(World, id, kInstScript_Expire) != tResourceID::kInvalidRID;
+    return cWorld_getWScriptHeaderId(World, inst, kInstScript_Expire) != tResourceID::kInvalidRID;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnExpireScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
 
 /**
@@ -1056,13 +1054,13 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
  * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not tResourceID::Invalid(), then clears the current
  * instance.
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  */
-void cWScriptMan::doOnExpireScript(int id)
+void cWScriptMan::doOnExpireScript(tInstanceRecord* inst)
 {
     int idx;
-    Inst = (tInstanceRecord*)id;
-    idx = cWorld_getWScriptHeaderId(World, id, kInstScript_Expire);
+    Inst = inst;
+    idx = cWorld_getWScriptHeaderId(World, inst, kInstScript_Expire);
     int ok = idx != tResourceID::kInvalidRID;
     if (ok) {
         runScript(&idx);
@@ -1074,7 +1072,7 @@ void cWScriptMan::doOnExpireScript(int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnInitScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
 
 /**
@@ -1082,13 +1080,13 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
  * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not tResourceID::Invalid(), then clears the current
  * instance.
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  */
-void cWScriptMan::doOnInitScript(int id)
+void cWScriptMan::doOnInitScript(tInstanceRecord* inst)
 {
     int idx;
-    Inst = (tInstanceRecord*)id;
-    idx = cWorld_getWScriptHeaderId(World, id, kInstScript_Init);
+    Inst = inst;
+    idx = cWorld_getWScriptHeaderId(World, inst, kInstScript_Init);
     int ok = idx != tResourceID::kInvalidRID;
     if (ok) {
         runScript(&idx);
@@ -1104,19 +1102,19 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnFrameUpdateScript);
  * Returns whether a world instance has a frame-update script: its world script header entry kInstScript_FrameUpdate
  * is not tResourceID::Invalid().
  *
- * @param scriptId  the instance record (passed as an int)
+ * @param inst  the instance record
  * @return true when it has one
  */
-bool cWScriptMan::hasOnFrameUpdateScript(int scriptId)
+bool cWScriptMan::hasOnFrameUpdateScript(tInstanceRecord* inst)
 {
-    return cWorld_getWScriptHeaderId(World, scriptId, kInstScript_FrameUpdate) != tResourceID::kInvalidRID;
+    return cWorld_getWScriptHeaderId(World, inst, kInstScript_FrameUpdate) != tResourceID::kInvalidRID;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnFrameUpdateScript);
 #ifdef SKIP_ASM
-extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
+extern "C" int cWorld_getWScriptHeaderId(void* world, tInstanceRecord* inst, int flag);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
 
 /**
@@ -1124,13 +1122,13 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
  * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not tResourceID::Invalid(), then clears the current
  * instance.
  *
- * @param id  the instance record (passed as an int)
+ * @param inst  the instance record
  */
-void cWScriptMan::doOnFrameUpdateScript(int id)
+void cWScriptMan::doOnFrameUpdateScript(tInstanceRecord* inst)
 {
     int idx;
-    Inst = (tInstanceRecord*)id;
-    idx = cWorld_getWScriptHeaderId(World, id, kInstScript_FrameUpdate);
+    Inst = inst;
+    idx = cWorld_getWScriptHeaderId(World, inst, kInstScript_FrameUpdate);
     int ok = idx != tResourceID::kInvalidRID;
     if (ok) {
         runScript(&idx);
@@ -1482,10 +1480,10 @@ void cWScriptMan::runScriptCode(void* obj, int data)
     cWScriptMan_runScriptCode_sValue scriptFunc;
     cWScriptMan_runScriptCode_sValue ret;
     cWScriptMan_runScriptCode_sCall call;
-    int savedId;
+    tInstanceRecord* savedInst;
     void* savedObj = CurrentProcess;
     CurrentProcess = (cWScriptProcess*)obj;
-    savedId = (int)Inst;
+    savedInst = Inst;
     luno_cLunoFunc_init(&scriptFunc, data, 0);
     ret.type = 0;
     ret.word0 = 0;
@@ -1501,7 +1499,7 @@ void cWScriptMan::runScriptCode(void* obj, int data)
         }
     }
     CurrentProcess = (cWScriptProcess*)savedObj;
-    Inst = (tInstanceRecord*)savedId;
+    Inst = savedInst;
     luno_cLunoVar__cLunoVar((luno_cLunoVar*)&ret, 2);
 }
 #endif
@@ -1544,10 +1542,10 @@ void cWScriptMan::runScriptCode1(cWScriptTask* obj, int scriptCode)
     cWScriptMan_runScriptCode1_sValue codeVar;
     cWScriptMan_runScriptCode1_sValue ret;
     cWScriptMan_runScriptCode1_sCall call;
-    int savedId;
+    tInstanceRecord* savedInst;
     void* savedObj = CurrentTask;
     CurrentTask = (cWScriptTask*)obj;
-    savedId = (int)Inst;
+    savedInst = Inst;
     luno_cLunoFunc_init(&codeVar, scriptCode, 0);
     ret.type = 0;
     ret.word0 = 0;
@@ -1563,7 +1561,7 @@ void cWScriptMan::runScriptCode1(cWScriptTask* obj, int scriptCode)
         }
     }
     CurrentTask = (cWScriptTask*)savedObj;
-    Inst = (tInstanceRecord*)savedId;
+    Inst = savedInst;
     luno_cLunoVar__cLunoVar((luno_cLunoVar*)&ret, 2);
 }
 #endif
@@ -1665,7 +1663,7 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_cProcessList__FPv);
 void* cProcessList_cProcessList(void* vself)
 {
     cProcessList* self = (cProcessList*)vself;
-    (*(void**)&((cProcessList*)self)->List) = 0;
+    ((cProcessList*)self)->List = 0;
     return ((void*)self);
 }
 #endif
@@ -1815,7 +1813,7 @@ void* cProcessList::removeHead()
 {
     cWScriptListNode* process = (cWScriptListNode*)((void*)List);
     if (process != 0) {
-        (*(void**)&List) = process->next;
+        List = (cWScriptProcess*)process->next;
     }
     return process;
 }
@@ -1852,11 +1850,11 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess__FPvT0);
  * @param node  the process
  * @return the previous head
  */
-int cProcessList::addProcess(void* node)
+cWScriptProcess* cProcessList::addProcess(void* node)
 {
-    int oldHead = (int)((void*)((cProcessList*)this)->List);
-    ((cWScriptListNode*)node)->next = (void*)oldHead;
-    (*(void**)&((cProcessList*)this)->List) = node;
+    cWScriptProcess* oldHead = List;
+    ((cWScriptListNode*)node)->next = oldHead;
+    List = (cWScriptProcess*)node;
     return oldHead;
 }
 #endif
@@ -1881,7 +1879,7 @@ extern "C" void cProcessList_appendProcess(cProcessList* self, cWScriptListNode*
         }
         tail->next = node;
     } else {
-        (*(void**)&self->List) = node;
+        self->List = (cWScriptProcess*)node;
     }
 }
 #endif
@@ -1895,11 +1893,11 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess1__FPvT0);
  * @param node  the mission
  * @return the previous head
  */
-int cProcessList::addProcess1(void* node)
+cWScriptProcess* cProcessList::addProcess1(void* node)
 {
-    int oldHead = (int)((void*)((cProcessList*)this)->List);
-    ((cWScriptListNode*)node)->next = (void*)oldHead;
-    (*(void**)&((cProcessList*)this)->List) = node;
+    cWScriptProcess* oldHead = List;
+    ((cWScriptListNode*)node)->next = oldHead;
+    List = (cWScriptProcess*)node;
     return oldHead;
 }
 #endif
@@ -1916,7 +1914,7 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_removeProcess);
 extern "C" bool cProcessList_removeProcess(cProcessList* self, cWScriptListNode* node)
 {
     if (node == ((void*)self->List)) {
-        (*(void**)&self->List) = node->next;
+        self->List = (cWScriptProcess*)node->next;
         return true;
     }
     cWScriptListNode* current = (cWScriptListNode*)((void*)self->List);
@@ -2159,20 +2157,15 @@ void cWScriptMan::updateMissionHeight(int being, void* src)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionTrick);
 #ifdef SKIP_ASM
-struct cWScriptPair {
-    int valueB;
-    int valueC;
-};
-
 /**
  * Turns on the mission trick display (+0x34) and copies the 8-byte trick definition @p src to +0x38.
  *
  * @param src  the trick definition
  */
-extern "C" void cWScriptMan_updateMissionTrick(cWScriptMan* self, cWScriptPair* src)
+extern "C" void cWScriptMan_updateMissionTrick(cWScriptMan* self, tTrickNameDef* src)
 {
     self->MissionTrickEnable = 1;
-    *(cWScriptPair*)&self->MissionTrick[0] = *src;
+    self->MissionTrick = *src;
 }
 #endif
 
@@ -2391,7 +2384,7 @@ bool cWScriptMan::isLocalMissionActive()
 {
     int n = 0;
     cWScriptMan_isLocalMissionActive_cNode* node;
-    for (node = *(cWScriptMan_isLocalMissionActive_cNode**)&ActiveList; node != 0; node = node->next) {
+    for (node = (cWScriptMan_isLocalMissionActive_cNode*)ActiveList.List; node != 0; node = node->next) {
         if (node->isMission() != 0 && ((cWScriptMission*)node)->Scope == kMissionScope_Local) {
             n++;
         }
@@ -2536,7 +2529,7 @@ struct cWScriptMan_collectInst_sMan {
     cWScriptMan_collectInst_sEntry entries[1];
 };
 
-extern "C" void cCollectPool_collectInst(void* e, int a1, int a2);
+extern "C" void cCollectPool_collectInst(void* e, unsigned int* instIds, int size);
 
 /**
  * Adds instances to collect pool @p id (cCollectPool_collectInst) when the manager's pool (+0x2C0) has that ID.
@@ -2545,7 +2538,7 @@ extern "C" void cCollectPool_collectInst(void* e, int a1, int a2);
  * @param instIds  the instance resource IDs (unsigned int array)
  * @param size  the number of IDs
  */
-void cWScriptMan::collectInst(int id, int instIds, int size)
+void cWScriptMan::collectInst(int id, unsigned int* instIds, int size)
 {
     cWScriptMan_collectInst_sEntry* pool = ((cWScriptMan_collectInst_sEntry*)&CollectPools[0]);
     int i;
@@ -3070,11 +3063,10 @@ static inline void respawn_C4A8(unsigned int id)
  * @param instIds  the instance resource IDs (unsigned int array)
  * @param size  the number of IDs
  */
-// PORT: a1 is really an unsigned int* id list and a2 its count (the unit declares both int).
-extern "C" void cCollectPool_collectInst(void* ep, int instIds, int size)
+extern "C" void cCollectPool_collectInst(void* ep, unsigned int* instIds, int size)
 {
     cCollectPool* pool = (cCollectPool*)ep;
-    unsigned int* ids = (unsigned int*)instIds;
+    unsigned int* ids = instIds;
     void* iface = cBE_getInterface_C4A8(cBE_getBE(), 10);
     if (size <= 0)
         return;
@@ -3661,9 +3653,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D238);
  * @param firstWord  value for the word at +0x0
  * @param secondWord  value for the word at +0x4
  */
-extern "C" void func_0030D238(void *dest, int firstWord, int secondWord) {
-    (*(int *)((char*)(dest) + 0)) = firstWord;
-    (*(int *)((char*)(dest) + 4)) = secondWord;
+extern "C" void func_0030D238(void* dest, int firstWord, int secondWord)
+{
+    int* words = (int*)dest;
+    words[0] = firstWord;
+    words[1] = secondWord;
 }
 #endif
 //100%
@@ -3948,9 +3942,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getInst);
  *
  * @return the instance record, or 0
  */
-int cWScriptMan::getInst()
+tInstanceRecord* cWScriptMan::getInst()
 {
-    return ((int)Inst);
+    return Inst;
 }
 #endif
 //100%
@@ -3974,9 +3968,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCollideInfo);
  *
  * @return the collision info pointer
  */
-int cWScriptMan::getCollideInfo()
+tCollideInfo* cWScriptMan::getCollideInfo()
 {
-    return ((int)CollideInfo);
+    return CollideInfo;
 }
 #endif
 //100%
@@ -3987,9 +3981,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getIntersectInfo);
  *
  * @return the intersection info pointer
  */
-int cWScriptMan::getIntersectInfo()
+tIntersectInfo* cWScriptMan::getIntersectInfo()
 {
-    return ((int)IntersectInfo);
+    return IntersectInfo;
 }
 #endif
 //100%
@@ -4029,9 +4023,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentTask);
  *
  * @return the task, or 0
  */
-int cWScriptMan::getCurrentTask()
+cWScriptTask* cWScriptMan::getCurrentTask()
 {
-    return ((int)CurrentTask);
+    return CurrentTask;
 }
 #endif
 //100%
@@ -4057,9 +4051,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentProcess);
  *
  * @return the process, or 0
  */
-int cWScriptMan::getCurrentProcess()
+cWScriptProcess* cWScriptMan::getCurrentProcess()
 {
-    return ((int)CurrentProcess);
+    return CurrentProcess;
 }
 #endif
 //100%
@@ -4155,9 +4149,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getNext);
  *
  * @return the next process, or 0 at the end of the list
  */
-int cWScriptProcess::getNext()
+cWScriptProcess* cWScriptProcess::getNext()
 {
-    return ((int)Next);
+    return Next;
 }
 #endif
 //100%
@@ -4166,11 +4160,11 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setNext);
 /**
  * Sets the next process in a process's list link (On Tour Next, +0x18) to @p nextProcess.
  *
- * @param nextProcess  the process to link after it (passed as an int), or 0
+ * @param nextProcess  the process to link after it, or 0
  */
-void cWScriptProcess::setNext(int nextProcess)
+void cWScriptProcess::setNext(cWScriptProcess* nextProcess)
 {
-    Next = (cWScriptProcess*)nextProcess;
+    Next = nextProcess;
 }
 #endif
 //100%
@@ -4196,11 +4190,11 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setTrickDef);
  *
  * The same store as cWScriptMan_setTrickDef, made through the process's manager pointer.
  *
- * @param trickDef  the trick definition (passed as an int), or 0
+ * @param trickDef  the trick definition, or 0
  */
-void cWScriptProcess::setTrickDef(int trickDef)
+void cWScriptProcess::setTrickDef(tTrickNameDef* trickDef)
 {
-    Manager->TrickDef = (tTrickNameDef*)trickDef;
+    Manager->TrickDef = trickDef;
 }
 #endif
 //100%
@@ -4211,9 +4205,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getLocalTable);
  *
  * @return the table, or 0 when the process has none
  */
-int cWScriptProcess::getLocalTable()
+cLunoTable* cWScriptProcess::getLocalTable()
 {
-    return ((int)Local);
+    return Local;
 }
 #endif
 //100%
@@ -4308,9 +4302,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptTask_getLocalTable);
  *
  * @return the process's local table, or 0
  */
-int cWScriptTask::getLocalTable()
+cLunoTable* cWScriptTask::getLocalTable()
 {
-    return ((int)Process->Local);
+    return Process->Local;
 }
 #endif
 //100%
@@ -4431,7 +4425,7 @@ extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
     ones.y = 1.0f;
     ones.z = 1.0f;
     ones.w = 1.0f;
-    *(t4Vector*)&self->ScaleVect = ones;
+    self->ScaleVect = ones;
     self->bones = 0;
     self->parts = 0;
     self->partIndex = 0;
@@ -4622,8 +4616,8 @@ void cAnimModel::init(int count, int maxVariants)
 {
     numLodRefs = maxVariants;
     MaxModelParts = count;
-    (*(void**)&parts) = operator_new_tag(count * 88, str_ModelRefs, 0, 0);
-    MEM_fill(((void*)parts), 0, MaxModelParts * 88);
+    parts = (sAnimModelPart*)operator_new_tag(count * 88, str_ModelRefs, 0, 0);
+    MEM_fill(parts, 0, MaxModelParts * 88);
     numParts = 0;
     NumTextureFiles = 0;
 }

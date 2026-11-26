@@ -74,7 +74,7 @@ struct cDebugFE {
     void purge() __asm__("cDebugFE_purge");
     void update() __asm__("cDebugFE_update");
     bool render() __asm__("cDebugFE_render");
-    int getFont() __asm__("cDebugFE_getFont");
+    cFont* getFont() __asm__("cDebugFE_getFont");
     int getBoxTID() __asm__("cDebugFE_getBoxTID");
     void startlobby() __asm__("cDebugFE_startlobby");
     bool loseFocus() __asm__("cDebugFE_loseFocus__FPv");

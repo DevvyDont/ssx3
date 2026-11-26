@@ -20,6 +20,7 @@
 
 #include "layout.h"
 #include "wscript/missionmenuqueue.h"
+#include "ai/ridermetrix.h"
 
 struct cWorld;
 struct tInstanceRecord;
@@ -63,8 +64,8 @@ struct cProcessList {
     int getCount() __asm__("cProcessList_getCount");
     void* findProcess1(int id) __asm__("cProcessList_findProcess1");
     void findMission1(int name) __asm__("cProcessList_findMission1");
-    int addProcess(void* node) __asm__("cProcessList_addProcess__FPvT0");
-    int addProcess1(void* node) __asm__("cProcessList_addProcess1__FPvT0");
+    cWScriptProcess* addProcess(void* node) __asm__("cProcessList_addProcess__FPvT0");
+    cWScriptProcess* addProcess1(void* node) __asm__("cProcessList_addProcess1__FPvT0");
 };
 
 // One queued world-script event (On Tour struct tWScriptEvent : tWScriptEventBase {EventId}, then an anonymous
@@ -208,7 +209,7 @@ struct cWScriptMan {
     unsigned int MissionHeightInstId;  // 0x02C [O] (tResourceID); [R] ctor = -1; [U] getHeightCurr's instance
     int MissionHeightBeing;            // 0x030 [O]; [U] getHeightCurr's rider index
     int MissionTrickEnable;            // 0x034 [O] (bool there); [U] isTrickEnabled, updateMissionTrick
-    unsigned int MissionTrick[2];      // 0x038 [O] tTrickNameDef (8 bytes in retail); [U] updateMissionTrick
+    tTrickNameDef MissionTrick;        // 0x038 [O] tTrickNameDef (8 bytes in retail); [U] updateMissionTrick
     char Events[0x184];                // 0x040 [O] tWScriptEventList: NumEvents + 32 events of 12 bytes; [U] eventJump,
                                        //       eventLand and eventCollide push onto it
     tMissionMenuQueue MissionMenuQueue; // 0x1C4 [O] tMissionMenuQueue (0xC8 on both); [R] tMissionMenuQueue_tMissionMenuQueue
@@ -246,24 +247,24 @@ struct cWScriptMan {
     int getScriptCode(int id) __asm__("cWScriptMan_getScriptCode");
     float getHeightCurr() __asm__("cWScriptMan_getHeightCurr");
     void runScript(int* handle) __asm__("cWScriptMan_runScript");
-    void runScript1(int* handle, int id) __asm__("cWScriptMan_runScript1");
+    void runScript1(int* handle, tInstanceRecord* inst) __asm__("cWScriptMan_runScript1");
     int isFunc(int idx, int value) __asm__("cWScriptMan_isFunc");
     void runFunc(int idx, int value) __asm__("cWScriptMan_runFunc");
     void runGlobalScripts() __asm__("cWScriptMan_runGlobalScripts");
     void doOnCollideScript(tCollideInfo* collideInfo, tIntersectInfo* intersectInfo, cBeing* obj)
         __asm__("cWScriptMan_doOnCollideScript");
-    bool hasOnFocusScript(int id) __asm__("cWScriptMan_hasOnFocusScript");
-    void doOnFocusScript(int id) __asm__("cWScriptMan_doOnFocusScript");
-    bool hasOnLoseFocusScript(int id) __asm__("cWScriptMan_hasOnLoseFocusScript");
+    bool hasOnFocusScript(tInstanceRecord* inst) __asm__("cWScriptMan_hasOnFocusScript");
+    void doOnFocusScript(tInstanceRecord* inst) __asm__("cWScriptMan_doOnFocusScript");
+    bool hasOnLoseFocusScript(tInstanceRecord* inst) __asm__("cWScriptMan_hasOnLoseFocusScript");
     bool isFocusInstance(nash_Node* obj) __asm__("cWScriptMan_isFocusInstance");
     void upFocusScript(tInstanceRecord* obj) __asm__("cWScriptMan_upFocusScript");
     void downFocusScript(tInstanceRecord* obj) __asm__("cWScriptMan_downFocusScript");
-    void doOnLoseFocusScript(int id) __asm__("cWScriptMan_doOnLoseFocusScript");
-    bool hasOnExpireScript(int id) __asm__("cWScriptMan_hasOnExpireScript");
-    void doOnExpireScript(int id) __asm__("cWScriptMan_doOnExpireScript");
-    void doOnInitScript(int id) __asm__("cWScriptMan_doOnInitScript");
-    bool hasOnFrameUpdateScript(int scriptId) __asm__("cWScriptMan_hasOnFrameUpdateScript");
-    void doOnFrameUpdateScript(int id) __asm__("cWScriptMan_doOnFrameUpdateScript");
+    void doOnLoseFocusScript(tInstanceRecord* inst) __asm__("cWScriptMan_doOnLoseFocusScript");
+    bool hasOnExpireScript(tInstanceRecord* inst) __asm__("cWScriptMan_hasOnExpireScript");
+    void doOnExpireScript(tInstanceRecord* inst) __asm__("cWScriptMan_doOnExpireScript");
+    void doOnInitScript(tInstanceRecord* inst) __asm__("cWScriptMan_doOnInitScript");
+    bool hasOnFrameUpdateScript(tInstanceRecord* inst) __asm__("cWScriptMan_hasOnFrameUpdateScript");
+    void doOnFrameUpdateScript(tInstanceRecord* inst) __asm__("cWScriptMan_doOnFrameUpdateScript");
     void gotoTask() __asm__("cWScriptMan_gotoTask");
     void advanceToTask() __asm__("cWScriptMan_advanceToTask");
     void doProcessCmd(unsigned int id, int kind) __asm__("cWScriptMan_doProcessCmd");
@@ -289,7 +290,7 @@ struct cWScriptMan {
     void collectPool(unsigned int id, int size) __asm__("cWScriptMan_collectPool");
     void collect(int rider, int id, int instId) __asm__("cWScriptMan_collect");
     int collectCount(int id) __asm__("cWScriptMan_collectCount");
-    void collectInst(int id, int instIds, int size) __asm__("cWScriptMan_collectInst");
+    void collectInst(int id, unsigned int* instIds, int size) __asm__("cWScriptMan_collectInst");
     void writeReplayProcessList(void** list, cBxReplayFrame* stream) __asm__("cWScriptMan_writeReplayProcessList");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cWScriptMan_readFromReplayFrame");
     void readReplayProcessList(cProcessList* list, cBxReplayFrame* stream) __asm__("cWScriptMan_readReplayProcessList");
@@ -307,14 +308,14 @@ struct cWScriptMan {
     int isTrickEnabled() __asm__("cWScriptMan_isTrickEnabled");
     void setLocalMissionId(int missionId) __asm__("cWScriptMan_setLocalMissionId");
     int getLocalMissionId() __asm__("cWScriptMan_getLocalMissionId");
-    int getInst() __asm__("cWScriptMan_getInst");
-    int getCollideInfo() __asm__("cWScriptMan_getCollideInfo");
-    int getIntersectInfo() __asm__("cWScriptMan_getIntersectInfo");
+    tInstanceRecord* getInst() __asm__("cWScriptMan_getInst");
+    tCollideInfo* getCollideInfo() __asm__("cWScriptMan_getCollideInfo");
+    tIntersectInfo* getIntersectInfo() __asm__("cWScriptMan_getIntersectInfo");
     void setInst(tInstanceRecord* inst) __asm__("cWScriptMan_setInst");
     cLunoTable* getGlobalTable(int sectionId) __asm__("cWScriptMan_getGlobalTable");
-    int getCurrentTask() __asm__("cWScriptMan_getCurrentTask");
+    cWScriptTask* getCurrentTask() __asm__("cWScriptMan_getCurrentTask");
     void setCurrentTask(cWScriptTask* task) __asm__("cWScriptMan_setCurrentTask");
-    int getCurrentProcess() __asm__("cWScriptMan_getCurrentProcess");
+    cWScriptProcess* getCurrentProcess() __asm__("cWScriptMan_getCurrentProcess");
     bool isMenuQueueReady() __asm__("cWScriptMan_isMenuQueueReady");
     void popMenuQueueEntry() __asm__("cWScriptMan_popMenuQueueEntry");
     void getMenuQueueEntry() __asm__("cWScriptMan_getMenuQueueEntry");

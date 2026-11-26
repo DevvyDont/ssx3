@@ -70,11 +70,13 @@ extern int D_00467DD8[];
  * The items are "You've been Challenged!", "by", an empty line, a spacer and the Accept and Decline items.
  * Accept and Decline later call func_0017E490 / func_0017E4F0 with the owner stored at +0x130 / +0x134.
  *
- * @param acceptOwner  the owner for Accept: its first word is stored at +0x130
- * @param declineOwner  the owner for Decline: its first word is stored at +0x134
+ * @param acceptOwner  the Accept functor (one word: the owning screen), copied to mAcceptScreen (+0x130)
+ * @param declineOwner  the Decline functor (one word: the owning screen), copied to mDeclineScreen (+0x134)
  * @return self
  */
-extern "C" char* ChallengeResponseMenu_ChallengeResponseMenu(ChallengeResponseMenu* self, int* acceptOwner, int* declineOwner)
+extern "C" char* ChallengeResponseMenu_ChallengeResponseMenu(ChallengeResponseMenu* self,
+                                                             cDebugLobbyScreen* const* acceptOwner,
+                                                             cDebugLobbyScreen* const* declineOwner)
 {
     char* item0 = (char*)&self->mTitleItem;
     char* item1 = (char*)&self->mByItem;
@@ -84,8 +86,8 @@ extern "C" char* ChallengeResponseMenu_ChallengeResponseMenu(ChallengeResponseMe
     char* item5 = (char*)&self->mDeclineItem;
     cMenu_cMenu(self);
     self->mVtbl = (void**)D_0046D3D0;
-    self->mAcceptScreen = (cDebugLobbyScreen*)(*acceptOwner);
-    self->mDeclineScreen = (cDebugLobbyScreen*)(*declineOwner);
+    self->mAcceptScreen = *acceptOwner;
+    self->mDeclineScreen = *declineOwner;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, str_You_ve_been_Challenged);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, str_by);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
@@ -119,14 +121,14 @@ extern int AbortMenu_vtbl[];
  * runs AbortMenu_onCommand. cDebugLobbyScreen_cDebugLobbyScreen builds it at +0x1AAC of the debug front end.
  *
  * @param menu  the menu to construct
- * @param owner  the owner reference; its first word (the debug front end) is stored at +0x130
+ * @param owner  the Abort functor (one word: the owning debug lobby screen), copied to mScreen (+0x130)
  * @return @p menu
  */
-extern "C" void *AbortMenu_AbortMenu(AbortMenu* menu, int *owner) {
+extern "C" void *AbortMenu_AbortMenu(AbortMenu* menu, cDebugLobbyScreen* const* owner) {
     cMenu_cMenu(menu);
     char *abortItem = (char*)&menu->mAbortItem;
     menu->mVtbl = (void**)AbortMenu_vtbl;
-    menu->mScreen = (cDebugLobbyScreen*)(*owner);
+    menu->mScreen = *owner;
     cCommandMenuItem_cCommandMenuItem2(abortItem, 0, D_00467DE0, 0);
     cMenu_addItem(menu, abortItem, -1);
     return ((char*)menu);
@@ -140,33 +142,36 @@ INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu_setpersonas);
 extern "C" void cMenuItem_activate(void* item, int enable);
 
 // Separate inline accessor: its own `i * 0x24` (not CSE'd with the call's address).
-static inline void setItemData_B330(char* row, int value) { *(int*)(row + 0x17C) = value; }
+static inline void setPersonaCaption(cCommandMenuItem* item, const char* name)
+{
+    item->Caption = name;
+}
 
-extern "C" void DeletePersonaMenu_setpersonas_impl(char *self, char *src) __asm__("DeletePersonaMenu_setpersonas");
+extern "C" void DeletePersonaMenu_setpersonas_impl(DeletePersonaMenu *self, LobbyMan *src)
+    __asm__("DeletePersonaMenu_setpersonas");
 /**
  * Fills the debug "Delete Persona" menu with every persona except the first.
  *
- * For each persona i from 1 to LobbyMan::mNumPersonas - 1 it uses command item i - 1 (items of 0x24 bytes from +0x168):
- * the caption (+0x14 of the item) becomes mPersonas[i], the item is activated (cMenuItem_activate with 1) and its ID (+0x8)
+ * For each persona i from 1 to LobbyMan::mNumPersonas - 1 it uses command item i - 1 (mPersonaItems, 0x24 bytes each
+ * from +0x168): the item's Caption becomes mPersonas[i], the item is activated (cMenuItem_activate with 1) and its ID
  * is set to i. The remaining items up to 4 are deactivated. Persona 0 is never offered for deletion.
  *
  * The object is the Delete Persona menu (built by DeletePersonaMenu_DeletePersonaMenu).
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void DeletePersonaMenu_setpersonas_impl(char *vself, char *src) {
-    DeletePersonaMenu* self = (DeletePersonaMenu*)vself;
+extern "C" void DeletePersonaMenu_setpersonas_impl(DeletePersonaMenu *self, LobbyMan *src) {
     int i = 0;
     int next;
-    while (i < *(int*)(src + 0x6C) - 1) {
+    while (i < src->mNumPersonas - 1) {
         next = i + 1;
-        setItemData_B330(((char*)self) + i * 36, *(int*)(src + next * 4 + 0x70));
-        cMenuItem_activate(((char*)self) + (i * 36 + 360), 1);
-        *(int*)(((char*)self) + i * 0x24 + 0x170) = next;
+        setPersonaCaption(&self->mPersonaItems[i], *(src->mPersonas + next));
+        cMenuItem_activate(&self->mPersonaItems[i], 1);
+        (self->mPersonaItems + i)->ID = next;
         i = next;
     }
     while (i < 4) {
-        cMenuItem_activate(((char*)self) + i * 36 + 0x168, 0);
+        cMenuItem_activate(&self->mPersonaItems[i], 0);
         i++;
     }
 }
@@ -197,9 +202,9 @@ extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, LobbyMan* src)
 {
     int i = 0;
     for (; i < src->mNumPersonas; i++) {
-        int id = ((int*)&src->mPersonas[0])[i];
+        const char* name = src->mPersonas[i];
         cCommandMenuItem* it = &((&self->mPersonaItems[0]))[i];
-        (*(int*)&it->Caption) = id;
+        it->Caption = name;
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
@@ -239,12 +244,12 @@ extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, LobbyMan* src)
     int n = LobbyMan_getnumrooms(src);
     for (; i < n; i++) {
         cCommandMenuItem* it = &((&self->mRoomItems[0]))[i];
-        (*(void**)&it->Caption) = func_0025F150(src, i);
+        it->Caption = (const char*)func_0025F150(src, i);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     if (i == 0) {
-        (*(void**)&((&self->mRoomItems[0]))[0].Caption) = str_Receiving_Room_List;
+        self->mRoomItems[0].Caption = str_Receiving_Room_List;
         i = 1;
         cMenuItem_activate(&((&self->mRoomItems[0]))[0], 1);
         ((&self->mRoomItems[0]))[0].ID = -1;
@@ -282,12 +287,12 @@ void RoomMenu::updateusers(LobbyMan* src)
     int n = func_0025F1B0(src);
     for (; i < n; i++) {
         cCommandMenuItem* it = &((&mUserItems[0]))[i];
-        (*(void**)&it->Caption) = func_0025F1E0(src, i, 0);
+        it->Caption = (const char*)func_0025F1E0(src, i, 0);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     if (i == 0) {
-        (*(void**)&((&mUserItems[0]))[0].Caption) = str_No_users_in_room;
+        mUserItems[0].Caption = str_No_users_in_room;
         i = 1;
         cMenuItem_activate(&((&mUserItems[0]))[0], 1);
         ((&mUserItems[0]))[0].ID = kItem_NoUsers;
@@ -302,24 +307,24 @@ void RoomMenu::updateusers(LobbyMan* src)
 INCLUDE_ASM("main/all_in_one_main", func_001DB718);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-struct N_B718 { N_B718 *next; N_B718 *prev; };
 
 /**
  * Empties a std::list: frees every node and leaves the head node linked to itself.
  *
- * Walks from head->next back to the head (the node pointer at +0x4), freeing each node with operator_delete, then sets
+ * Walks from the head's next node back to the head (mpHead, +0x4), freeing each node with operator_delete, then sets
  * the head's next and prev to the head. The head itself is kept. The LobbyMan destructor uses it on mEventList; the
  * async-file and lobby-tag code use it on their own lists.
  */
 extern "C" void func_001DB718(tLobbyEventList *self) {
-    N_B718 *node = ((N_B718*)self->mpHead)->next;
-    while (node != ((N_B718*)self->mpHead)) {
-        N_B718 *n = node;
-        node = node->next;
+    typedef _List_node<online_Event*> Node;
+    Node *node = (Node*)((Node*)self->mpHead)->_M_next;
+    while (node != ((Node*)self->mpHead)) {
+        Node *n = node;
+        node = (Node*)node->_M_next;
         operator_delete((int *)n);
     }
-    ((N_B718*)self->mpHead)->next = ((N_B718*)self->mpHead);
-    ((N_B718*)self->mpHead)->prev = ((N_B718*)self->mpHead);
+    ((Node*)self->mpHead)->_M_next = self->mpHead;
+    ((Node*)self->mpHead)->_M_prev = self->mpHead;
 }
 #endif
 
@@ -335,14 +340,14 @@ void operator_delete(int*);
 extern char str_StlBlock[];
 
 
-static inline void** sPtrVecDB778_allocate(unsigned int n)
+static inline cBXString** sPtrVecDB778_allocate(unsigned int n)
 {
     if (n == 1)
-        return (void**)cMemMan_alloc(4, str_StlBlock, 0x20000000, 0);
-    return (void**)operator_new_tagDB778(n * 4, str_StlBlock, 0x20000000, 0);
+        return (cBXString**)cMemMan_alloc(4, str_StlBlock, 0x20000000, 0);
+    return (cBXString**)operator_new_tagDB778(n * 4, str_StlBlock, 0x20000000, 0);
 }
 
-static inline void sPtrVecDB778_deallocate(void** p, unsigned int n)
+static inline void sPtrVecDB778_deallocate(cBXString** p, unsigned int n)
 {
     if (p != 0) {
         if (n == 1)
@@ -352,27 +357,27 @@ static inline void sPtrVecDB778_deallocate(void** p, unsigned int n)
     }
 }
 
-static inline void** sPtrVecDB778_copy(void** first, void** last, void** result)
+static inline cBXString** sPtrVecDB778_copy(cBXString** first, cBXString** last, cBXString** result)
 {
-    func_0041610C(result, first, (last - first) * sizeof(void*));
+    func_0041610C(result, first, (last - first) * sizeof(cBXString*));
     return result + (last - first);
 }
 
-static inline void** sPtrVecDB778_ucopy(void** first, void** last, void** result)
+static inline cBXString** sPtrVecDB778_ucopy(cBXString** first, cBXString** last, cBXString** result)
 {
     return sPtrVecDB778_copy(first, last, result);
 }
 
-static inline void sPtrVecDB778_construct(void** p, void* const& v)
+static inline void sPtrVecDB778_construct(cBXString** p, cBXString* const& v)
 {
     if (p != 0)
         *p = v;
 }
 
-static inline void** sPtrVecDB778_copy_backward(void** first, void** last, void** result)
+static inline cBXString** sPtrVecDB778_copy_backward(cBXString** first, cBXString** last, cBXString** result)
 {
     int n = last - first;
-    func_0041610C(result - n, first, n * sizeof(void*));
+    func_0041610C(result - n, first, n * sizeof(cBXString*));
     return result - n;
 }
 
@@ -390,28 +395,28 @@ static inline void** sPtrVecDB778_copy_backward(void** first, void** last, void*
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void func_001DB778(tFEStringPtrVector* self, void** pos, void* const& x)
+extern "C" void func_001DB778(tFEStringPtrVector* self, cBXString** pos, cBXString* const& x)
 {
-    if (((void**)self->mpFinish) != ((void**)self->mpEndOfStorage)) {
-        if (((void**)self->mpFinish) != 0)
-            *((void**)self->mpFinish) = ((void*)self->mpFinish[-1]);
-        ++(*(void***)&self->mpFinish);
-        void* x_copy = x;
-        sPtrVecDB778_copy_backward(pos, ((void**)self->mpFinish) - 2, ((void**)self->mpFinish) - 1);
+    if (self->mpFinish != self->mpEndOfStorage) {
+        if (self->mpFinish != 0)
+            *self->mpFinish = self->mpFinish[-1];
+        ++self->mpFinish;
+        cBXString* x_copy = x;
+        sPtrVecDB778_copy_backward(pos, self->mpFinish - 2, self->mpFinish - 1);
         *pos = x_copy;
     } else {
-        unsigned int old_size = ((void**)self->mpFinish) - ((void**)self->mpStart);
+        unsigned int old_size = self->mpFinish - self->mpStart;
         unsigned int len = old_size != 0 ? 2 * old_size : 1;
-        void** new_start = sPtrVecDB778_allocate(len);
-        void** new_finish = new_start;
-        new_finish = sPtrVecDB778_ucopy(((void**)self->mpStart), pos, new_start);
+        cBXString** new_start = sPtrVecDB778_allocate(len);
+        cBXString** new_finish = new_start;
+        new_finish = sPtrVecDB778_ucopy(self->mpStart, pos, new_start);
         sPtrVecDB778_construct(new_finish, x);
         ++new_finish;
-        new_finish = sPtrVecDB778_ucopy(pos, ((void**)self->mpFinish), new_finish);
-        sPtrVecDB778_deallocate(((void**)self->mpStart), ((void**)self->mpEndOfStorage) - ((void**)self->mpStart));
-        (*(void***)&self->mpStart) = new_start;
-        (*(void***)&self->mpFinish) = new_finish;
-        (*(void***)&self->mpEndOfStorage) = new_start + len;
+        new_finish = sPtrVecDB778_ucopy(pos, self->mpFinish, new_finish);
+        sPtrVecDB778_deallocate(self->mpStart, self->mpEndOfStorage - self->mpStart);
+        self->mpStart = new_start;
+        self->mpFinish = new_finish;
+        self->mpEndOfStorage = new_start + len;
     }
 }
 #endif
@@ -428,14 +433,14 @@ void operator_delete(int*);
 extern char str_StlBlock[];
 
 
-static inline void** sPtrVecDB918_allocate(unsigned int n)
+static inline cPrivateMessage** sPtrVecDB918_allocate(unsigned int n)
 {
     if (n == 1)
-        return (void**)cMemMan_alloc(4, str_StlBlock, 0x20000000, 0);
-    return (void**)operator_new_tagDB918(n * 4, str_StlBlock, 0x20000000, 0);
+        return (cPrivateMessage**)cMemMan_alloc(4, str_StlBlock, 0x20000000, 0);
+    return (cPrivateMessage**)operator_new_tagDB918(n * 4, str_StlBlock, 0x20000000, 0);
 }
 
-static inline void sPtrVecDB918_deallocate(void** p, unsigned int n)
+static inline void sPtrVecDB918_deallocate(cPrivateMessage** p, unsigned int n)
 {
     if (p != 0) {
         if (n == 1)
@@ -445,27 +450,30 @@ static inline void sPtrVecDB918_deallocate(void** p, unsigned int n)
     }
 }
 
-static inline void** sPtrVecDB918_copy(void** first, void** last, void** result)
+static inline cPrivateMessage** sPtrVecDB918_copy(cPrivateMessage** first, cPrivateMessage** last,
+        cPrivateMessage** result)
 {
-    func_0041610C(result, first, (last - first) * sizeof(void*));
+    func_0041610C(result, first, (last - first) * sizeof(cPrivateMessage*));
     return result + (last - first);
 }
 
-static inline void** sPtrVecDB918_ucopy(void** first, void** last, void** result)
+static inline cPrivateMessage** sPtrVecDB918_ucopy(cPrivateMessage** first, cPrivateMessage** last,
+        cPrivateMessage** result)
 {
     return sPtrVecDB918_copy(first, last, result);
 }
 
-static inline void sPtrVecDB918_construct(void** p, void* const& v)
+static inline void sPtrVecDB918_construct(cPrivateMessage** p, cPrivateMessage* const& v)
 {
     if (p != 0)
         *p = v;
 }
 
-static inline void** sPtrVecDB918_copy_backward(void** first, void** last, void** result)
+static inline cPrivateMessage** sPtrVecDB918_copy_backward(cPrivateMessage** first, cPrivateMessage** last,
+        cPrivateMessage** result)
 {
     int n = last - first;
-    func_0041610C(result - n, first, n * sizeof(void*));
+    func_0041610C(result - n, first, n * sizeof(cPrivateMessage*));
     return result - n;
 }
 
@@ -482,28 +490,28 @@ static inline void** sPtrVecDB918_copy_backward(void** first, void** last, void*
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void func_001DB918(tFEPrivateMessageVector* self, void** pos, void* const& x)
+extern "C" void func_001DB918(tFEPrivateMessageVector* self, cPrivateMessage** pos, cPrivateMessage* const& x)
 {
-    if (((void**)self->mpFinish) != ((void**)self->mpEndOfStorage)) {
-        if (((void**)self->mpFinish) != 0)
-            *((void**)self->mpFinish) = ((void*)self->mpFinish[-1]);
-        ++(*(void***)&self->mpFinish);
-        void* x_copy = x;
-        sPtrVecDB918_copy_backward(pos, ((void**)self->mpFinish) - 2, ((void**)self->mpFinish) - 1);
+    if (self->mpFinish != self->mpEndOfStorage) {
+        if (self->mpFinish != 0)
+            *self->mpFinish = self->mpFinish[-1];
+        ++self->mpFinish;
+        cPrivateMessage* x_copy = x;
+        sPtrVecDB918_copy_backward(pos, self->mpFinish - 2, self->mpFinish - 1);
         *pos = x_copy;
     } else {
-        unsigned int old_size = ((void**)self->mpFinish) - ((void**)self->mpStart);
+        unsigned int old_size = self->mpFinish - self->mpStart;
         unsigned int len = old_size != 0 ? 2 * old_size : 1;
-        void** new_start = sPtrVecDB918_allocate(len);
-        void** new_finish = new_start;
-        new_finish = sPtrVecDB918_ucopy(((void**)self->mpStart), pos, new_start);
+        cPrivateMessage** new_start = sPtrVecDB918_allocate(len);
+        cPrivateMessage** new_finish = new_start;
+        new_finish = sPtrVecDB918_ucopy(self->mpStart, pos, new_start);
         sPtrVecDB918_construct(new_finish, x);
         ++new_finish;
-        new_finish = sPtrVecDB918_ucopy(pos, ((void**)self->mpFinish), new_finish);
-        sPtrVecDB918_deallocate(((void**)self->mpStart), ((void**)self->mpEndOfStorage) - ((void**)self->mpStart));
-        (*(void***)&self->mpStart) = new_start;
-        (*(void***)&self->mpFinish) = new_finish;
-        (*(void***)&self->mpEndOfStorage) = new_start + len;
+        new_finish = sPtrVecDB918_ucopy(pos, self->mpFinish, new_finish);
+        sPtrVecDB918_deallocate(self->mpStart, self->mpEndOfStorage - self->mpStart);
+        self->mpStart = new_start;
+        self->mpFinish = new_finish;
+        self->mpEndOfStorage = new_start + len;
     }
 }
 #endif
@@ -511,7 +519,7 @@ extern "C" void func_001DB918(tFEPrivateMessageVector* self, void** pos, void* c
 //100%
 INCLUDE_ASM("main/all_in_one_main", AbortMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E558(int);
+extern "C" void func_0017E558(cDebugLobbyScreen* screen);
 
 /**
  * Handles the debug "Abort" menu's command: hands control back to the debug front end via func_0017E558.
@@ -523,7 +531,7 @@ extern "C" void func_0017E558(int);
  */
 int AbortMenu::onCommand()
 {
-    func_0017E558(((int)mScreen));
+    func_0017E558(mScreen);
     return 0;
 }
 #endif
@@ -531,8 +539,8 @@ int AbortMenu::onCommand()
 //100%
 INCLUDE_ASM("main/all_in_one_main", ChallengeResponseMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E490(int);
-extern "C" void func_0017E4F0(int);
+extern "C" void func_0017E490(cDebugLobbyScreen* screen);
+extern "C" void func_0017E4F0(cDebugLobbyScreen* screen);
 
 /**
  * Handles the debug challenge menu's commands: Accept or Decline.
@@ -551,9 +559,9 @@ int ChallengeResponseMenu::onCommand(cMenuItem* item)
 
     temp_3 = item->ID;
     if (temp_3 == kItem_Accept) {
-        func_0017E490(((int)mAcceptScreen));
+        func_0017E490(mAcceptScreen);
     } else if (temp_3 == kItem_Decline) {
-        func_0017E4F0(((int)mDeclineScreen));
+        func_0017E4F0(mDeclineScreen);
     }
     return 0;
 }
@@ -562,7 +570,7 @@ int ChallengeResponseMenu::onCommand(cMenuItem* item)
 //100%
 INCLUDE_ASM("main/all_in_one_main", ChatMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E418(int, int);
+extern "C" void func_0017E418(cDebugLobbyScreen* screen, const char* messageText);
 
 /**
  * Handles the debug "Chat Menu" command: sends the chosen line as a lobby chat message.
@@ -576,7 +584,7 @@ extern "C" void func_0017E418(int, int);
  */
 int ChatMenu::onCommand(cCommandMenuItem* item)
 {
-    func_0017E418(((int)mScreen), ((int)item->Caption));
+    func_0017E418(mScreen, item->Caption);
     return 0;
 }
 #endif
@@ -585,8 +593,8 @@ int ChatMenu::onCommand(cCommandMenuItem* item)
 INCLUDE_ASM("main/all_in_one_main", RoomMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E368_BB48(int, int) __asm__("func_0017E368");
-extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
+extern "C" void func_0017E368_BB48(cDebugLobbyScreen* screen, int user) __asm__("func_0017E368");
+extern "C" void func_0017E3B8_BB48(cDebugLobbyScreen* screen) __asm__("func_0017E3B8");
 
 /**
  * Handles the debug "Room Occupants" menu's commands.
@@ -602,9 +610,9 @@ int RoomMenu::onCommand(cMenuItem* item)
 {
     int itemValue = item->ID;
     if (itemValue == kItem_Chat) {
-        func_0017E3B8_BB48((int)mChatScreen);
+        func_0017E3B8_BB48(mChatScreen);
     } else if (itemValue != kItem_NoUsers) {
-        func_0017E368_BB48((int)mSelectUserScreen, itemValue);
+        func_0017E368_BB48(mSelectUserScreen, itemValue);
     }
     return 0;
 }
@@ -613,7 +621,7 @@ int RoomMenu::onCommand(cMenuItem* item)
 //100%
 INCLUDE_ASM("main/all_in_one_main", LobbyMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E2F8(int, int);
+extern "C" void func_0017E2F8(cDebugLobbyScreen* screen, int room);
 
 /**
  * Handles the debug "Select Room" menu's command: joins the chosen room.
@@ -631,7 +639,7 @@ extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, cMenuItem* item) {
 
     temp_5 = item->ID;
     if (temp_5 >= 0) {
-        func_0017E2F8(((int)menu->mScreen), temp_5);
+        func_0017E2F8(menu->mScreen, temp_5);
     }
     return 0;
 }
@@ -640,7 +648,7 @@ extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, cMenuItem* item) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", PersonaMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E290(int, int);
+extern "C" void func_0017E290(cDebugLobbyScreen* screen, int persona);
 
 /**
  * Handles the debug "Select Persona" menu's command: selects the chosen persona.
@@ -654,7 +662,7 @@ extern "C" void func_0017E290(int, int);
  * @return 0
  */
 extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, cMenuItem* item) {
-    func_0017E290(((int)menu->mScreen), item->ID);
+    func_0017E290(menu->mScreen, item->ID);
     return 0;
 }
 #endif
@@ -663,7 +671,7 @@ extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, cMenuItem* item) {
 INCLUDE_ASM("main/all_in_one_main", CreatePersonaMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
+extern "C" void func_0017E1C0_BBE8(cDebugLobbyScreen* screen, void *name) __asm__("func_0017E1C0");
 
 /**
  * Handles the debug "Create Persona" menu's command: creates a persona with the typed name.
@@ -676,7 +684,7 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
  */
 int CreatePersonaMenu::onCommand()
 {
-    func_0017E1C0_BBE8((int)mScreen, &mPersonaNameItem.Text[0]);
+    func_0017E1C0_BBE8(mScreen, &mPersonaNameItem.Text[0]);
     return 0;
 }
 #endif
@@ -684,7 +692,7 @@ int CreatePersonaMenu::onCommand()
 //100%
 INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E228(int, int);
+extern "C" void func_0017E228(cDebugLobbyScreen* screen, int persona);
 
 /**
  * Handles the debug "Delete Persona" menu's command: deletes the chosen persona.
@@ -698,7 +706,7 @@ extern "C" void func_0017E228(int, int);
  */
 int DeletePersonaMenu::onCommand(cMenuItem* item)
 {
-    func_0017E228(((int)mScreen), item->ID);
+    func_0017E228(mScreen, item->ID);
     return 0;
 }
 #endif
@@ -707,7 +715,8 @@ int DeletePersonaMenu::onCommand(cMenuItem* item)
 INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
+extern "C" void func_0017E030_BC38(cDebugLobbyScreen* screen, char* name, char* password)
+    __asm__("func_0017E030");
 
 /**
  * Handles the debug "Create Account" menu's command: creates an account with the typed name and password.
@@ -722,7 +731,7 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
  */
 int AccountDetailsMenu::onCommand()
 {
-    func_0017E030_BC38((int)mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
+    func_0017E030_BC38(mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -731,7 +740,8 @@ int AccountDetailsMenu::onCommand()
 INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu_onCommand1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
+extern "C" void func_0017E118_BC68(cDebugLobbyScreen* screen, char* name, char* password)
+    __asm__("func_0017E118");
 
 /**
  * Handles the debug "Login" menu's command: logs in with the typed name and password.
@@ -746,7 +756,7 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
  */
 int AccountDetailsMenu::onCommand1()
 {
-    func_0017E118_BC68((int)mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
+    func_0017E118_BC68(mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -1293,13 +1303,13 @@ extern "C" void cDebugScreen__cDebugScreen(cDebugScreen* self, int flags) {
 INCLUDE_ASM("main/all_in_one_main", cDebugFE_getFont);
 #ifdef SKIP_ASM
 /**
- * Returns the word at +0x18 of the debug front end, the font cDebugMenuScreen_draw reads from SSXApp's DebugFE.
+ * Returns the debug front end's font (Font, +0x18), the one cDebugMenuScreen_draw reads from SSXApp's DebugFE.
  *
- * @return the word at +0x18
+ * @return the font
  */
-int cDebugFE::getFont()
+cFont* cDebugFE::getFont()
 {
-    return ((int)Font);
+    return Font;
 }
 #endif
 
@@ -1321,12 +1331,12 @@ int cDebugFE::getBoxTID()
 INCLUDE_ASM("main/all_in_one_main", cDebugFE_startlobby);
 #ifdef SKIP_ASM
 /**
- * Copies the word at +0x10 of the debug front end into +0x14, the word just before its font (+0x18).
+ * Makes the lobby screen (Screens[1], +0x10) the debug front end's active screen (ActiveScreen, +0x14).
  *
  */
 void cDebugFE::startlobby()
 {
-    ActiveScreen = (cDebugScreen*)((int) ((int)Screens[1]));
+    ActiveScreen = Screens[1];
 }
 #endif
 
@@ -1635,9 +1645,9 @@ INCLUDE_ASM("main/all_in_one_main", cFE_getUI);
  *
  * @return the UI engine pointer cFE_cFE allocates ("UIEngine") and stores at +0xC
  */
-int cFE::getUI()
+cUIEngine* cFE::getUI()
 {
-    return ((int)mpUI);
+    return mpUI;
 }
 #endif
 
@@ -1912,8 +1922,8 @@ extern "C" void cDebugMenuScreen__cDebugMenuScreen(cDebugMenuScreen* self, int f
 //100%
 INCLUDE_ASM("main/all_in_one_main", ContinueMenu__ContinueMenu);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's "Continue" menu (vtable ContinueMenu_vtbl, built by ContinueMenu_ContinueMenu): its one item, then the menu.
@@ -1921,11 +1931,12 @@ extern "C" void cMenu__cMenu(int, int);
  * Destroys the item at +0x130 with cMenuItem__cMenuItem (flags 2: no free), then runs cMenu__cMenu with the caller's
  * flags. The July 2003 preview calls this class ContinueMenu.
  *
- * @param menu  the menu
+ * @param object  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void ContinueMenu__ContinueMenu(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 304, 2);
+extern "C" void ContinueMenu__ContinueMenu(void* object, int flags) {
+    ContinueMenu* menu = (ContinueMenu*)object;
+    cMenuItem__cMenuItem(&menu->mContinueItem, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1933,8 +1944,8 @@ extern "C" void ContinueMenu__ContinueMenu(int menu, int flags) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu__AccountDetailsMenu1);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's "Login" menu (vtable AccountDetailsMenu1_vtbl, built by AccountDetailsMenu_AccountDetailsMenu1).
@@ -1943,16 +1954,17 @@ extern "C" void cMenu__cMenu(int, int);
  * +0x150 spacer, +0x134 title) with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's flags. The
  * preview calls this class AccountDetailsMenu<cDebugLobbyScreen::OnLogin>.
  *
- * @param menu  the menu
+ * @param object  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void AccountDetailsMenu__AccountDetailsMenu1(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 484, 2);
-    cMenuItem__cMenuItem(menu + 0x1C0, 2);
-    cMenuItem__cMenuItem(menu + 404, 2);
-    cMenuItem__cMenuItem(menu + 360, 2);
-    cMenuItem__cMenuItem(menu + 336, 2);
-    cMenuItem__cMenuItem(menu + 308, 2);
+extern "C" void AccountDetailsMenu__AccountDetailsMenu1(void* object, int flags) {
+    AccountDetailsMenu* menu = (AccountDetailsMenu*)object;
+    cMenuItem__cMenuItem(&menu->mCancelItem, 2);
+    cMenuItem__cMenuItem(&menu->mActionItem, 2);
+    cMenuItem__cMenuItem(&menu->mPasswordItem, 2);
+    cMenuItem__cMenuItem(&menu->mLoginNameItem, 2);
+    cMenuItem__cMenuItem(&menu->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&menu->mTitleItem, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1960,8 +1972,8 @@ extern "C" void AccountDetailsMenu__AccountDetailsMenu1(int menu, int flags) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu__AccountDetailsMenu);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's "Create Account" menu (vtable AccountDetailsMenu_vtbl, built by AccountDetailsMenu_AccountDetailsMenu).
@@ -1970,16 +1982,17 @@ extern "C" void cMenu__cMenu(int, int);
  * then runs cMenu__cMenu with the caller's flags. The preview calls this class
  * AccountDetailsMenu<cDebugLobbyScreen::OnCreate>.
  *
- * @param menu  the menu
+ * @param object  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void AccountDetailsMenu__AccountDetailsMenu(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 484, 2);
-    cMenuItem__cMenuItem(menu + 0x1C0, 2);
-    cMenuItem__cMenuItem(menu + 404, 2);
-    cMenuItem__cMenuItem(menu + 360, 2);
-    cMenuItem__cMenuItem(menu + 336, 2);
-    cMenuItem__cMenuItem(menu + 308, 2);
+extern "C" void AccountDetailsMenu__AccountDetailsMenu(void* object, int flags) {
+    AccountDetailsMenu* menu = (AccountDetailsMenu*)object;
+    cMenuItem__cMenuItem(&menu->mCancelItem, 2);
+    cMenuItem__cMenuItem(&menu->mActionItem, 2);
+    cMenuItem__cMenuItem(&menu->mPasswordItem, 2);
+    cMenuItem__cMenuItem(&menu->mLoginNameItem, 2);
+    cMenuItem__cMenuItem(&menu->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&menu->mTitleItem, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1987,34 +2000,18 @@ extern "C" void AccountDetailsMenu__AccountDetailsMenu(int menu, int flags) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", AccountMenu__AccountMenu);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
-// PORT: pointers passed as int (unit declares the callees with int parameters)
-static inline void SubMenuB_CEA0(int m)
+// The rows of an embedded account menu (the same teardown as AccountDetailsMenu__AccountDetailsMenu, flags 2).
+static inline void destroyAccountDetailsMenu(AccountDetailsMenu* m)
 {
-    cMenuItem__cMenuItem(m + 0x24C, 2);
-    cMenuItem__cMenuItem(m + 0x230, 2);
-    cMenuItem__cMenuItem(m + 0x218, 2);
-    cMenuItem__cMenuItem(m + 0x1FC, 2);
-    cMenuItem__cMenuItem(m + 0x1E4, 2);
-    cMenuItem__cMenuItem(m + 0x1C0, 2);
-    cMenuItem__cMenuItem(m + 0x194, 2);
-    cMenuItem__cMenuItem(m + 0x168, 2);
-    cMenuItem__cMenuItem(m + 0x150, 2);
-    cMenuItem__cMenuItem(m + 0x134, 2);
-    cMenu__cMenu(m, 2);
-}
-
-static inline void SubMenuA_CEA0(int m)
-{
-    SubMenuB_CEA0(m + 0x1FC);
-    cMenuItem__cMenuItem(m + 0x1E4, 2);
-    cMenuItem__cMenuItem(m + 0x1C0, 2);
-    cMenuItem__cMenuItem(m + 0x194, 2);
-    cMenuItem__cMenuItem(m + 0x168, 2);
-    cMenuItem__cMenuItem(m + 0x150, 2);
-    cMenuItem__cMenuItem(m + 0x134, 2);
+    cMenuItem__cMenuItem(&m->mCancelItem, 2);
+    cMenuItem__cMenuItem(&m->mActionItem, 2);
+    cMenuItem__cMenuItem(&m->mPasswordItem, 2);
+    cMenuItem__cMenuItem(&m->mLoginNameItem, 2);
+    cMenuItem__cMenuItem(&m->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&m->mTitleItem, 2);
     cMenu__cMenu(m, 2);
 }
 
@@ -2028,9 +2025,14 @@ static inline void SubMenuA_CEA0(int m)
  *
  * @param flags  g++ destructor flags passed on to the last cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void AccountMenu__AccountMenu(int self, int flags)
+extern "C" void AccountMenu__AccountMenu(AccountMenu* self, int flags)
 {
-    SubMenuA_CEA0(self + 304);
+    cMenuItem__cMenuItem(&self->mLoginItem, 2);
+    cMenuItem__cMenuItem(&self->mCreateAccountItem, 2);
+    cMenuItem__cMenuItem(&self->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&self->mTitleItem, 2);
+    destroyAccountDetailsMenu(&self->mLoginMenu);
+    destroyAccountDetailsMenu(&self->mCreateAccountMenu);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2040,9 +2042,8 @@ INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu__DeletePersonaMenu);
 #ifdef SKIP_ASM
 struct VEnt { short delta; short idx; void (*fn)(void*, int); };
 struct VTab { int a; int b; VEnt dtor; };
-struct Obj { char pad[0x168]; cCommandMenuItem elems[4]; };
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's "Delete Persona" menu (vtable DeletePersonaMenu_vtbl, built by DeletePersonaMenu_DeletePersonaMenu).
@@ -2063,17 +2064,17 @@ extern "C" void DeletePersonaMenu__DeletePersonaMenu(DeletePersonaMenu* self, in
             ((VTab*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab*)elem->mVtbl)->dtor), 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 336, 2);
-    cMenuItem__cMenuItem((int)self + 308, 2);
-    cMenu__cMenu((int)self, flags);
+    cMenuItem__cMenuItem(&self->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&self->mTitleItem, 2);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", CreatePersonaMenu__CreatePersonaMenu);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's "Create Persona" menu (vtable CreatePersonaMenu_vtbl, built by CreatePersonaMenu_CreatePersonaMenu).
@@ -2082,14 +2083,15 @@ extern "C" void cMenu__cMenu(int, int);
  * (flags 2), then runs cMenu__cMenu with the caller's flags. The preview calls this class
  * CreatePersonaMenu<cDebugLobbyScreen::OnCreatePersona>.
  *
- * @param menu  the menu
+ * @param object  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void CreatePersonaMenu__CreatePersonaMenu(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 404, 2);
-    cMenuItem__cMenuItem(menu + 360, 2);
-    cMenuItem__cMenuItem(menu + 336, 2);
-    cMenuItem__cMenuItem(menu + 308, 2);
+extern "C" void CreatePersonaMenu__CreatePersonaMenu(void* object, int flags) {
+    CreatePersonaMenu* menu = (CreatePersonaMenu*)object;
+    cMenuItem__cMenuItem(&menu->mCreateItem, 2);
+    cMenuItem__cMenuItem(&menu->mPersonaNameItem, 2);
+    cMenuItem__cMenuItem(&menu->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&menu->mTitleItem, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -2166,9 +2168,6 @@ __asm__("_$_15cMenuPart_DD0C8 = cMenuItem__cMenuItem\n_$_15cMenuBase_DD0C8 = cMe
 //100%
 INCLUDE_ASM("main/all_in_one_main", LobbyMenu__LobbyMenu);
 #ifdef SKIP_ASM
-struct VEnt_D258 { short delta; short idx; void (*fn)(void*, int); };
-struct VTab_D258 { int a; int b; VEnt_D258 dtor; };
-struct Obj_D258 { char pad[0x168]; cCommandMenuItem elems[12]; };
 
 /**
  * Destroys the debug lobby's "Select Room" menu (vtable LobbyMenu_vtbl, built by LobbyMenu_LobbyMenu).
@@ -2185,21 +2184,18 @@ extern "C" void LobbyMenu__LobbyMenu(LobbyMenu* self, int flags) {
         cCommandMenuItem *elem = end;
         while (((&self->mRoomItems[0])) != elem) {
             elem--;
-            ((VTab_D258*)elem->mVtbl)->dtor.fn((char*)elem + ((VTab_D258*)elem->mVtbl)->dtor.delta, 0);
+            ((VTab*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab*)elem->mVtbl)->dtor), 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 336, 2);
-    cMenuItem__cMenuItem((int)self + 308, 2);
-    cMenu__cMenu((int)self, flags);
+    cMenuItem__cMenuItem(&self->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&self->mTitleItem, 2);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", RoomMenu__RoomMenu);
 #ifdef SKIP_ASM
-struct VEnt_D2F0 { short delta; short idx; void (*fn)(void*, int); };
-struct VTab_D2F0 { int a; int b; VEnt_D2F0 dtor; };
-struct Obj_D2F0 { char pad[0x16C]; cCommandMenuItem elems[24]; };
 
 /**
  * Destroys the debug lobby's "Room Occupants" menu (vtable RoomMenu_vtbl, built by RoomMenu_RoomMenu).
@@ -2211,26 +2207,23 @@ struct Obj_D2F0 { char pad[0x16C]; cCommandMenuItem elems[24]; };
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void RoomMenu__RoomMenu(RoomMenu* self, int flags) {
-    cMenuItem__cMenuItem((int)self + 1228, 2);
+    cMenuItem__cMenuItem(&self->mChatItem, 2);
     if (((&self->mUserItems[0])) != 0) {
         cCommandMenuItem *elem = ((&self->mUserItems[0])) + 24;
         while (((&self->mUserItems[0])) != elem) {
             elem--;
-            ((VTab_D2F0*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab_D2F0*)elem->mVtbl)->dtor), 0);
+            ((VTab*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab*)elem->mVtbl)->dtor), 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 340, 2);
-    cMenuItem__cMenuItem((int)self + 312, 2);
-    cMenu__cMenu((int)self, flags);
+    cMenuItem__cMenuItem(&self->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&self->mTitleItem, 2);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", ChatMenu__ChatMenu);
 #ifdef SKIP_ASM
-struct VEnt_D398 { short delta; short idx; void (*fn)(void*, int); };
-struct VTab_D398 { int a; int b; VEnt_D398 dtor; };
-struct Obj_D398 { char pad[0x194]; cCommandMenuItem elems[14]; };
 
 /**
  * Destroys the debug lobby's "Chat Menu" (vtable ChatMenu_vtbl, built by ChatMenu_ChatMenu).
@@ -2246,21 +2239,21 @@ extern "C" void ChatMenu__ChatMenu(ChatMenu* self, int flags) {
         cCommandMenuItem *elem = ((&self->mMessageItems[0])) + 14;
         while (((&self->mMessageItems[0])) != elem) {
             elem--;
-            ((VTab_D398*)elem->mVtbl)->dtor.fn((char*)elem + ((VTab_D398*)elem->mVtbl)->dtor.delta, 0);
+            ((VTab*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab*)elem->mVtbl)->dtor), 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 360, 2);
-    cMenuItem__cMenuItem((int)self + 336, 2);
-    cMenuItem__cMenuItem((int)self + 308, 2);
-    cMenu__cMenu((int)self, flags);
+    cMenuItem__cMenuItem(&self->mEnterChatItem, 2);
+    cMenuItem__cMenuItem(&self->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&self->mTitleItem, 2);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", ChallengeResponseMenu__ChallengeResponseMenu);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's challenge menu (vtable D_0046D3D0, built by ChallengeResponseMenu_ChallengeResponseMenu).
@@ -2269,16 +2262,17 @@ extern "C" void cMenu__cMenu(int, int);
  * "by", +0x138 "You've been Challenged!") with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's
  * flags. The preview calls this class ChallengeResponseMenu<OnAcceptChallenge, OnDeclineChallenge>.
  *
- * @param menu  the menu
+ * @param object  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void ChallengeResponseMenu__ChallengeResponseMenu(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 456, 2);
-    cMenuItem__cMenuItem(menu + 420, 2);
-    cMenuItem__cMenuItem(menu + 396, 2);
-    cMenuItem__cMenuItem(menu + 368, 2);
-    cMenuItem__cMenuItem(menu + 340, 2);
-    cMenuItem__cMenuItem(menu + 312, 2);
+extern "C" void ChallengeResponseMenu__ChallengeResponseMenu(void* object, int flags) {
+    ChallengeResponseMenu* menu = (ChallengeResponseMenu*)object;
+    cMenuItem__cMenuItem(&menu->mDeclineItem, 2);
+    cMenuItem__cMenuItem(&menu->mAcceptItem, 2);
+    cMenuItem__cMenuItem(&menu->mSpaceItem, 2);
+    cMenuItem__cMenuItem(&menu->mChallengerItem, 2);
+    cMenuItem__cMenuItem(&menu->mByItem, 2);
+    cMenuItem__cMenuItem(&menu->mTitleItem, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -2286,8 +2280,8 @@ extern "C" void ChallengeResponseMenu__ChallengeResponseMenu(int menu, int flags
 //100%
 INCLUDE_ASM("main/all_in_one_main", AbortMenu__AbortMenu);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem__cMenuItem(int, int);
-extern "C" void cMenu__cMenu(int, int);
+extern "C" void cMenuItem__cMenuItem(void* item, int flags);
+extern "C" void cMenu__cMenu(void* menu, int flags);
 
 /**
  * Destroys the debug lobby's "Abort" menu (vtable AbortMenu_vtbl, built by AbortMenu_AbortMenu): its one item, then the menu.
@@ -2295,11 +2289,12 @@ extern "C" void cMenu__cMenu(int, int);
  * Destroys the command item at +0x134 with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's
  * flags. The preview calls this class AbortMenu<cDebugLobbyScreen::OnAbortChallenge>.
  *
- * @param menu  the menu
+ * @param object  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void AbortMenu__AbortMenu(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 308, 2);
+extern "C" void AbortMenu__AbortMenu(void* object, int flags) {
+    AbortMenu* menu = (AbortMenu*)object;
+    cMenuItem__cMenuItem(&menu->mAbortItem, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -2320,7 +2315,7 @@ extern void* cFEInput_vtbl_D508[] __asm__("cFEInput_vtbl");
  * @return @p self
  */
 extern "C" void *cFEInput_cFEInput(cFEInput* self) {
-    (*(signed char*)&self->mPadNum) = 0;
+    self->mPadNum = 0;
     VPTR_OF(cUIInput, self) = cFEInput_vtbl_D508;
     self->mpInput = 0;
     self->mbKeyReady = 0;
@@ -2395,15 +2390,15 @@ int cFEInput::getAsciiKey() const
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getInput);
 #ifdef SKIP_ASM
 /**
- * Returns the word at +0x18 of an object; for a cFEInput that is the input device pointer cFEInput_cFEInput clears.
+ * Returns the front-end input's input device, mpInput (+0x18), which cFEInput_cFEInput clears.
  *
  * It follows cFEInput's out-of-line getters (cFEInput_getKeyReady, getVKey, getAsciiKey).
  *
- * @return the word at +0x18
+ * @return the input device
  */
-int cFEInput::getInput()
+cInput* cFEInput::getInput()
 {
-    return ((int)mpInput);
+    return mpInput;
 }
 #endif
 
@@ -2472,7 +2467,7 @@ extern "C" void *cScreenKeyboard_cScreenKeyboard(cScreenKeyboard* self) {
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
     cUIThing_cUIThing(self->mRootGroup, 0, 0);
-    *(int **)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    VPTR_OF(cListNode, self->mRootGroup) = (void**)cUIGroup_vtbl;
     cList_cList(&self->mRootGroup[116]);
     self->mpState = 0;
     self->mVtbl = (void**)cScreenKeyboard_vtbl;
@@ -2700,7 +2695,7 @@ void cFEState::setControllerFilter(signed char n)
             i++;
         } while (i < n);
     }
-    *(char*)&mCtrlBits = mask;
+    mCtrlBits = mask;
 }
 #endif
 
@@ -3245,15 +3240,14 @@ extern "C" void func_001DDA50(cPopupInfo* popupInfo, int messageId) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA60);
 #ifdef SKIP_ASM
-struct V8_DA60 { int a; int b; };
 /**
  * Copies a whole popup element (type and value, 8 bytes) into a popup's message, mtMessage (+0x4).
  *
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDA60(V8_DA60* dst, V8_DA60* src) {
-    *(V8_DA60*)((char*)dst + 4) = *src;
+extern "C" void func_001DDA60(cPopupInfo* dst, tPopupElement* src) {
+    dst->mtMessage = *src;
 }
 #endif
 
@@ -3319,15 +3313,14 @@ extern "C" void func_001DDAA0(cPopupInfo* popupInfo, int titleId) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDAB0);
 #ifdef SKIP_ASM
-struct V8_DDAB0 { int a; int b; };
 /**
  * Copies a whole popup element (type and value) into a popup's title, mtTitle (+0xC).
  *
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDAB0(V8_DDAB0* dst, V8_DDAB0* src) {
-    *(V8_DDAB0*)((char*)dst + 0xC) = *src;
+extern "C" void func_001DDAB0(cPopupInfo* dst, tPopupElement* src) {
+    dst->mtTitle = *src;
 }
 #endif
 
@@ -3393,15 +3386,14 @@ extern "C" void func_001DDAF0(cPopupInfo* popupInfo, int entryBoxTitleId) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB00);
 #ifdef SKIP_ASM
-struct V8_DDB00 { int a; int b; };
 /**
  * Copies a whole popup element (type and value) into a popup's entry-box title, mtEntryBoxTitle (+0x14).
  *
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDB00(V8_DDB00* dst, V8_DDB00* src) {
-    *(V8_DDB00*)((char*)dst + 0x14) = *src;
+extern "C" void func_001DDB00(cPopupInfo* dst, tPopupElement* src) {
+    dst->mtEntryBoxTitle = *src;
 }
 #endif
 
@@ -3470,7 +3462,6 @@ extern "C" void func_001DDB40(cPopupInfo* popupInfo, int entryBoxInitialId) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB50);
 #ifdef SKIP_ASM
-struct V8_DDB50 { int a; int b; };
 /**
  * Copies a whole popup element (type and value) into the text a popup's entry box starts with, mtEntryBoxInitial
  * (+0x1C).
@@ -3478,8 +3469,8 @@ struct V8_DDB50 { int a; int b; };
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDB50(V8_DDB50* dst, V8_DDB50* src) {
-    *(V8_DDB50*)((char*)dst + 0x1C) = *src;
+extern "C" void func_001DDB50(cPopupInfo* dst, tPopupElement* src) {
+    dst->mtEntryBoxInitial = *src;
 }
 #endif
 
@@ -3547,15 +3538,14 @@ extern "C" void func_001DDB90(cPopupInfo* popupInfo, int postPendingId) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDBA0);
 #ifdef SKIP_ASM
-struct V8_DDBA0 { int a; int b; };
 /**
  * Copies a whole popup element (type and value) into a popup's "post pending" text, mtPostPending (+0x4C).
  *
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDBA0(V8_DDBA0* dst, V8_DDBA0* src) {
-    *(V8_DDBA0*)((char*)dst + 0x4C) = *src;
+extern "C" void func_001DDBA0(cPopupInfo* dst, tPopupElement* src) {
+    dst->mtPostPending = *src;
 }
 #endif
 
@@ -3608,7 +3598,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_cScreenPopup1);
 extern "C" void *cUIState_cUIState1_DBD0(void *, int, int) __asm__("cUIState_cUIState1");
 extern "C" void cPopupInfo_cPopupInfo_DBD0(void *) __asm__("cPopupInfo_cPopupInfo");
 extern int cScreenPopup_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs a screen popup with no engine and no parent (the default constructor).
@@ -3624,8 +3614,8 @@ cScreenPopup * cScreenPopup::cScreenPopup1()
     cUIState_cUIState1_DBD0((this), 0, 0);
     VPTR_OF(cListNode, this) = (void**)cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char*)&info);
-    mszInputText.Str = (char*)cBXString_EmptyString;
-    mszStaticText.Str = (char*)cBXString_EmptyString;
+    mszInputText.Str = cBXString_EmptyString;
+    mszStaticText.Str = cBXString_EmptyString;
     return (this);
 }
 #endif
@@ -3680,9 +3670,9 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getEntryBoxText);
  *
  * @return the input text
  */
-int cScreenPopup::getEntryBoxText()
+char* cScreenPopup::getEntryBoxText()
 {
-    return ((int)mszInputText.Str);
+    return mszInputText.Str;
 }
 #endif
 
@@ -4381,7 +4371,7 @@ extern int cFEStateOptionsController_vtbl[];
 extern "C" void *cFEStateOptionsController_cFEStateOptionsController(cFEStateOptionsController* self) {
     cUIState_cUIState_E080(self, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateOptionsController_vtbl;
-    *((char*)&self->mVibrateOn) = 0;
+    self->mVibrateOn = 0;
     return ((void*)self);
 }
 #endif
@@ -4602,7 +4592,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cKeyboardPopup1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState1_E288(void *, int, int) __asm__("cUIState_cUIState1");
 extern int cKeyboardPopup_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs an on-screen keyboard popup with no engine and no parent (the default constructor).
@@ -4617,7 +4607,7 @@ cKeyboardPopup * cKeyboardPopup::cKeyboardPopup1()
     cUIState_cUIState1_E288((this), 0, 0);
     VPTR_OF(cListNode, this) = (void**)cKeyboardPopup_vtbl;
     miMaxCharacters = 0x3F;
-    mszStatic.Str = (char*)cBXString_EmptyString;
+    mszStatic.Str = cBXString_EmptyString;
     return (this);
 }
 #endif
@@ -5516,7 +5506,7 @@ int cFEStateNet::isProcessingEvents()
     int var_3;
 
     var_3 = 0;
-    if (((int)mpScreen) != 0) {
+    if (mpScreen != 0) {
         var_3 = mHasFocus != 0;
     }
     return var_3;
@@ -5700,8 +5690,9 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int GetHashValue32_EA20(char *) __asm__("GetHashValue32__FPc");
-extern "C" int cUIEngine_addScreenByHashName_EA20(int, void *, int, int) __asm__("cUIEngine_addScreenByHashName");
-extern "C" void cUIScreen_playFrame_EA20(int, int, int) __asm__("cUIScreen_playFrame");
+extern "C" cUIScreen* cUIEngine_addScreenByHashName_EA20(cUIEngine* engine, void* state, int hashName, int flags)
+    __asm__("cUIEngine_addScreenByHashName");
+extern "C" void cUIScreen_playFrame_EA20(cUIScreen* screen, int frame, int flags) __asm__("cUIScreen_playFrame");
 extern char str_111resetopts[];
 
 /**
@@ -5713,8 +5704,8 @@ extern char str_111resetopts[];
 extern "C" void cFEPopupOptionReset_onCreateScreen(cFEPopupOptionReset* self) {
     int hashName = GetHashValue32_EA20(str_111resetopts);
     self->mHashName = hashName;
-    int screen = cUIEngine_addScreenByHashName_EA20((int)self->mpEngine, self, hashName, 0);
-    self->mpScreen = (cUIScreen*)screen;
+    cUIScreen* screen = cUIEngine_addScreenByHashName_EA20(self->mpEngine, self, hashName, 0);
+    self->mpScreen = screen;
     if (screen != 0) {
         cUIScreen_playFrame_EA20(screen, 0, 0);
     }
@@ -5751,7 +5742,7 @@ extern "C" int cFEPopupOptionReset_onWidgetMenu(cFEPopupOptionReset* self, int m
 INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
-extern "C" void cUIStateStack_pop(int, int);
+extern "C" void cUIStateStack_pop(cUIStateStack* stack, int count);
 extern char str_yes[];
 extern char str_no[];
 
@@ -5759,8 +5750,8 @@ extern char str_no[];
  * Handles a button press on the options-reset popup: "yes" accepts, "no" declines, and either closes the popup.
  *
  * On event cUIState::kONNEXT from a widget, compares the widget's hash (+0x38) with GetHashValue32("yes") and ("no");
- * sets the accept byte (+0x48) to 1 or 0 and pops the state stack with cUIStateStack_pop(engine + 0x18, 1). Other
- * events and other widgets are ignored.
+ * sets the accept byte (+0x48) to 1 or 0 and pops the engine's state stack (mStateStack, +0x18) with
+ * cUIStateStack_pop. Other events and other widgets are ignored.
  *
  * @param widget  the widget (may be null)
  * @param event  the widget event
@@ -5771,12 +5762,12 @@ extern "C" void cFEPopupOptionReset_onWidgetEvent(cFEPopupOptionReset* self, cUI
             int yesCheckHash = widget->mHashName;
             if (yesCheckHash == GetHashValue32(str_yes)) {
                 self->mAccept = 1;
-                cUIStateStack_pop((int)self->mpEngine + 0x18, 1);
+                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             } else {
                 int noCheckHash = widget->mHashName;
                 if (noCheckHash == GetHashValue32(str_no)) {
                     self->mAccept = 0;
-                    cUIStateStack_pop((int)self->mpEngine + 0x18, 1);
+                    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
                 }
             }
         }
@@ -5794,7 +5785,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_getData);
  * @return the accept byte
  */
 extern "C" signed char cFEPopupOptionReset_getData(cFEPopupOptionReset* resetPopup) {
-    return (*(signed char*)&resetPopup->mAccept);
+    return resetPopup->mAccept;
 }
 #endif
 

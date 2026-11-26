@@ -99,7 +99,7 @@ struct cScriptObjCameraManager {
     bool IsMatchingEntity(cScriptPlayerEntity* entity, int n) __asm__("cScriptObjCameraManager_IsMatchingEntity");
     void ResetScriptManagementVars() __asm__("cScriptObjCameraManager_ResetScriptManagementVars");
     void SetupCameraObject(int ch, int anim) __asm__("cScriptObjCameraManager_SetupCameraObject");
-    int GetCameraObjectByTrack(int i) __asm__("cScriptObjCameraManager_GetCameraObjectByTrack");
+    cScriptObjCamera* GetCameraObjectByTrack(int i) __asm__("cScriptObjCameraManager_GetCameraObjectByTrack");
     void DoCameraTransition(tSSXFrameCameraManager* frame, float currFrame)
         __asm__("cScriptObjCameraManager_DoCameraTransition");
     int GetViewIndex() __asm__("cScriptObjCameraManager_GetViewIndex");

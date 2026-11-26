@@ -267,7 +267,6 @@ INCLUDE_ASM("world/worldview", cWorldView_isBoxValid);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" bool cWorldCache_isPageLoaded(void* self, int a1);
-extern void cWorldView_recursiveIsValid_9AC0(void* self, int sec, int box, int* ok) __asm__("cWorldView_recursiveIsValid");
 
 /**
  * Returns whether every hull page that @p box touches is loaded.
@@ -278,7 +277,7 @@ extern void cWorldView_recursiveIsValid_9AC0(void* self, int sec, int box, int* 
  * @param box  the box (minimum and maximum corners)
  * @return 1 when all those pages are loaded
  */
-int cWorldView::isBoxValid(int box)
+int cWorldView::isBoxValid(t4Vector* box)
 {
     tBxSection* cur = mp_Section;
     int ok;
@@ -292,7 +291,7 @@ int cWorldView::isBoxValid(int box)
     ok = 1;
     for (i = 0; i < ((cWorldView*)this)->mp_Hdr->m_uiNumSections; i++) {
         if (mp_SectionState[i].state == kSection_Active)
-            cWorldView_recursiveIsValid_9AC0(((char*)this), (int)mp_Section[i].m_BSP.m_pRoot, box, &ok);
+            recursiveIsValid(mp_Section[i].m_BSP.m_pRoot, box, &ok);
     }
     return ok;
 }
@@ -775,7 +774,7 @@ int cChunkResolve::resolveModelHeirarchy(tModelRecord* pModel)
     tMeshHeirarchyRecord* meshHierarchy = pModel->m_MeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, meshHierarchy++) {
-        if (((int)meshHierarchy->m_Mesh) != 0) {
+        if ((meshHierarchy->m_Mesh) != 0) {
             (*(int*)&meshHierarchy->m_Mesh) += (int)pModel;
             ((cChunkResolve_resolveModelHeirarchy_cObj*)this)->resolveMesh((void*)((int)meshHierarchy->m_Mesh), pModel);
         }
@@ -784,7 +783,7 @@ int cChunkResolve::resolveModelHeirarchy(tModelRecord* pModel)
         } else {
             (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) += (int)pModel;
         }
-        if (((int)meshHierarchy->m_MeshAnim) != 0) {
+        if ((meshHierarchy->m_MeshAnim) != 0) {
             (*(int*)&meshHierarchy->m_MeshAnim) += (int)pModel;
             ((cChunkResolve_resolveModelHeirarchy_cObj*)this)->resolveAnimation((void*)((int)meshHierarchy->m_MeshAnim), pModel);
         }
@@ -919,7 +918,7 @@ int cChunkResolve::resolveParticleModelHeirarchy(tParticleModelRecord* pModel)
     tParticleMeshHeirarchyRecord* meshHierarchy = (tParticleMeshHeirarchyRecord*)pModel->m_ParticleMeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, meshHierarchy++) {
-        if (((int)meshHierarchy->m_ParticleMesh) != 0) {
+        if ((meshHierarchy->m_ParticleMesh) != 0) {
             (*(int*)&meshHierarchy->m_ParticleMesh) += (int)pModel;
             ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)this)->resolveParticleMesh((void*)((int)meshHierarchy->m_ParticleMesh));
         }
@@ -928,7 +927,7 @@ int cChunkResolve::resolveParticleModelHeirarchy(tParticleModelRecord* pModel)
         } else {
             (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) += (int)pModel;
         }
-        if (((int)meshHierarchy->m_ParticleMeshAnim) != 0) {
+        if ((meshHierarchy->m_ParticleMeshAnim) != 0) {
             (*(int*)&meshHierarchy->m_ParticleMeshAnim) += (int)pModel;
             ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)this)->resolveAnimation((void*)((int)meshHierarchy->m_ParticleMeshAnim), 0);
         }
@@ -1231,19 +1230,19 @@ int cChunkResolve::resolveCollideModel(void* ctx, tCollideModelRecord* pCollideM
         pCollideModel->m_pColData = (char*)pCollideModel + (int)pCollideModel->m_pColData;
     }
     if ((int)((tSphTreeList*)pCollideModel->m_pPolyModelList) == kNullOffset) {
-        (*(tSphTreeList**)&pCollideModel->m_pPolyModelList) = 0;
+        pCollideModel->m_pPolyModelList = 0;
     } else {
         (*(tSphTreeList**)&pCollideModel->m_pPolyModelList) = (tSphTreeList*)((char*)pCollideModel + (int)((tSphTreeList*)pCollideModel->m_pPolyModelList));
     }
     if ((int)((char*)pCollideModel->m_pSphTree) == kNullOffset) {
-        (*(char**)&pCollideModel->m_pSphTree) = 0;
+        pCollideModel->m_pSphTree = 0;
     } else {
         (*(char**)&pCollideModel->m_pSphTree) = (char*)pCollideModel + (int)((char*)pCollideModel->m_pSphTree);
     }
     if (pCollideModel->m_usMethod == CR_SphereTree) {
         tSphTreeList* modelList = ((tSphTreeList*)pCollideModel->m_pPolyModelList);
         modelList->NumMesh = 0;
-        (*(char**)&modelList->MeshTree) = 0;
+        modelList->MeshTree = 0;
         modelList->NumMesh = pCollideModel->m_usNumMesh;
         (*(char**)&modelList->MeshTree) = ((char*)pCollideModel->m_pSphTree);
         for (int i = 0; i < modelList->NumMesh; i++) {
@@ -1256,7 +1255,7 @@ int cChunkResolve::resolveCollideModel(void* ctx, tCollideModelRecord* pCollideM
     } else if (pCollideModel->m_usMethod == CR_Polygon) {
         tSphTreeList* modelList = ((tSphTreeList*)pCollideModel->m_pPolyModelList);
         modelList->NumMesh = 0;
-        (*(char**)&modelList->MeshTree) = 0;
+        modelList->MeshTree = 0;
         modelList->NumMesh = pCollideModel->m_usNumMesh;
         (*(char**)&modelList->MeshTree) = ((char*)pCollideModel->m_pSphTree);
         tPolyModelMesh* node = (tPolyModelMesh*)pCollideModel->m_pColData;
@@ -1292,8 +1291,8 @@ float getHaloRadius_f(int flags) __asm__("getHaloRadius__FPv");
 int cChunkResolve::resolveHalo(tHaloRecord* obj)
 {
     float haloRadius = getHaloRadius_f(((int)obj->m_iFlags) & 0x70);
-    (*(int*)&obj->m_fOcclude[1]) = 0;
-    (*(int*)&obj->m_fOcclude[0]) = 0;
+    obj->m_fOcclude[1] = 0.0f;
+    obj->m_fOcclude[0] = 0.0f;
     obj->m_fvMin[0] = obj->m_fvWorldPos[0] - haloRadius;
     obj->m_fvMin[1] = obj->m_fvWorldPos[1] - haloRadius;
     obj->m_fvMin[2] = obj->m_fvWorldPos[2] - haloRadius;
@@ -1463,11 +1462,11 @@ INCLUDE_ASM("world/worldview", cPS2ChunkResolve_init);
  *
  * @param pNash  the texture manager handle cWorldCache_init passes on (On Tour Nash* pNash)
  */
-extern "C" void cPS2ChunkResolve_init(cPS2ChunkResolve* self, int pNash)
+extern "C" void cPS2ChunkResolve_init(cPS2ChunkResolve* self, Nash* pNash)
 {
     cWorld* w = cWorld_m_pTheWorld;
-    self->mp_Nash = (Nash*)pNash;
-    *(char****)self = (char***)w;
+    self->mp_Nash = pNash;
+    self->mp_World = w;
     self->m_iNumImages = w->m_pWorldCache->mp_DataHeader->m_iTable[9];
 }
 #endif
@@ -1585,12 +1584,12 @@ void* cPS2ChunkResolve::resolve(int msg, unsigned int RID, char* obj)
         break;
     case kBxStreamData_Image: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        (void*)w->AddTexture((const SHAPE*)obj, str_strm_tex, 0, 0, RID >> 8);
+        w->AddTexture((const SHAPE*)obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
     case kBxStreamData_LightPage: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        (void*)w->AddTexture((const SHAPE*)obj, str_strm_lpg, 0, 0, (RID >> 8) + m_iNumImages);
+        w->AddTexture((const SHAPE*)obj, str_strm_lpg, 0, 0, (RID >> 8) + m_iNumImages);
         break;
     }
     case kBxStreamData_Instance:
@@ -2431,9 +2430,9 @@ extern "C" void cWScriptCache_init(void* self, int a1);
  * @param world  the owning world (On Tour cWorld*)
  * @return self
  */
-extern "C" void* cWScriptCache_cWScriptCache(cWScriptCache* self, int world)
+extern "C" void* cWScriptCache_cWScriptCache(cWScriptCache* self, cWorld* world)
 {
-    self->mpWorld = (cWorld*)world;
+    self->mpWorld = world;
     self->mpCache = 0;
     cWScriptCache_init(self, 1);
     return ((void*)self);

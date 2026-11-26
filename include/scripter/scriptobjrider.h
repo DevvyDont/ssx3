@@ -31,6 +31,7 @@
 #include "bx/math3d.h"
 
 struct cScriptPlayerEntity;
+struct cScriptPlayerMain;
 struct tScriptAnimBankInfo;
 struct tScriptSoundBankInfo;
 
@@ -71,7 +72,7 @@ struct cScriptObjRider {
         __asm__("cScriptObjRider_ScriptAnimIDToGameAnimInfo__FPviT0T0");
     void ScriptSoundIDToGameSoundInfo(int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
         __asm__("cScriptObjRider_ScriptSoundIDToGameSoundInfo__FPviT0T0");
-    bool IsSuitableRole(cRider* rider, int id, int playerMain) __asm__("cScriptObjRider_IsSuitableRole");
+    bool IsSuitableRole(cRider* rider, int id, cScriptPlayerMain* playerMain) __asm__("cScriptObjRider_IsSuitableRole");
     float GetBaseRotX() __asm__("cScriptObjRider_GetBaseRotX");
     float GetBaseRotY() __asm__("cScriptObjRider_GetBaseRotY");
     float GetBaseRotZ() __asm__("cScriptObjRider_GetBaseRotZ");

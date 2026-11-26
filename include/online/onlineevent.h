@@ -188,6 +188,60 @@ enum tOnlineErrorCode {
     kNetErr_ton = 0x2D746F6E            // '-ton'
 };
 
+// The setup screen's update events (names ours; [R] tag "cSetupMan::Update"). cSetupMan's local senders
+// (func_00265458, func_00265568 in dirtysock/tagsunk) and its message handlers (func_00269478 ... func_00269CF0 in
+// bx/bxstringctor) allocate one and push it onto LobbyMan's mEventList for the front end.
+// Types 253 / 254, size 0xC ([R] func_00269608 / func_00269AE0 / func_00269B90 allocate 0xC with type 253, vtable
+// D_004813E0; func_002696F8 / func_00269C40 / func_00269CF0 type 254, vtable D_004813C0). Their clones (vtable slot 2)
+// are func_00269DC0 (253) and func_00269E40 (254).
+struct online_SetupEvent {
+    // --- online::Event
+    int mType;                      // 0x0 [R] 253 / 254
+    void** mVtbl;                   // 0x4 [R] D_004813E0 / D_004813C0
+    // --- the setup event
+    int mFlag;                      // 0x8 [R] 1 from func_00269608, func_002696F8, func_00269AE0 and func_00269C40;
+                                    //     0 from func_00269B90 and func_00269CF0
+};
+
+CHECK_OFFSET(online_SetupEvent, mType, 0x0);
+CHECK_OFFSET(online_SetupEvent, mVtbl, 0x4);
+CHECK_OFFSET(online_SetupEvent, mFlag, 0x8);
+CHECK_SIZE(online_SetupEvent, 0xC);
+
+// The bragging-rights row event: type 251, size 0x10, vtable D_00481150 ([R] func_00265458, func_00269478,
+// func_002697D0 and func_00269890 allocate 0x10).
+struct online_SetupRowEvent {
+    // --- online::Event
+    int mType;                      // 0x0 [R] 251
+    void** mVtbl;                   // 0x4 [R] D_00481150
+    // --- the setup row event
+    int mFlag;                      // 0x8 [R] 1 from func_00269478 and func_002697D0; 0 from func_00265458 and
+                                    //     func_00269890
+    int mRow;                       // 0xC [R] the highlighted row (the menu's current row, or the message's)
+};
+
+CHECK_OFFSET(online_SetupRowEvent, mFlag, 0x8);
+CHECK_OFFSET(online_SetupRowEvent, mRow, 0xC);
+CHECK_SIZE(online_SetupRowEvent, 0x10);
+
+// The race-rule event: type 252, size 0x14, vtable D_00481130 ([R] func_00265568, func_00269538, func_00269948 and
+// func_00269A18 allocate 0x14).
+struct online_SetupRuleEvent {
+    // --- online::Event
+    int mType;                      // 0x0 [R] 252
+    void** mVtbl;                   // 0x4 [R] D_00481130
+    // --- the setup rule event
+    int mFlag;                      // 0x8 [R] 1 from func_00269538 and func_00269948; 0 from func_00265568 and
+                                    //     func_00269A18
+    int mRuleSlot;                  // 0xC [R] the rule slot
+    int mRuleValue;                 // 0x10 [R] its new value
+};
+
+CHECK_OFFSET(online_SetupRuleEvent, mFlag, 0x8);
+CHECK_OFFSET(online_SetupRuleEvent, mRuleSlot, 0xC);
+CHECK_OFFSET(online_SetupRuleEvent, mRuleValue, 0x10);
+CHECK_SIZE(online_SetupRuleEvent, 0x14);
+
 // online::ErrorEvent: type 258, size 0xC ([R] online_ErrorEvent_clone allocates 0xC). Vtable online_ErrorEvent_vtbl
 // (0x00481290).
 struct online_ErrorEvent {

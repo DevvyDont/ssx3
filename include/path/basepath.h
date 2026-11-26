@@ -54,7 +54,7 @@ struct cPath {
 
     // Methods bound to their retail symbols by asm labels.
     int initPath(char* src) __asm__("cPath_initPath");
-    void populateNode(void* src, tPathNode* dst) __asm__("cPath_populateNode");
+    void populateNode(char* src, tPathNode* dst) __asm__("cPath_populateNode");
     void populateEvent(char* src, int* dst) __asm__("cPath_populateEvent");
     tPathEventNode* findEvent(int firstKey, int secondKey) __asm__("cPath_findEvent");
     tPathEventNode* findEvent1(int key) __asm__("cPath_findEvent1");

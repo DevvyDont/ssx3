@@ -11,6 +11,8 @@
 #include "visualfx/transitionobj.h"
 #include "path/pathsys.h"
 #include "sound/ssxaudio.h"
+#include "sound/streamsys.h"
+#include "sound/bankmanager.h"
 #include "bx/math3d.h"
 #include "main/gameviewman.h"
 #include "scripter/scriptentitycam.h"
@@ -422,7 +424,7 @@ void cSSXScriptEngine::ForceEndScriptsAll()
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ForcePlayUpdate);
 #ifdef SKIP_ASM
 extern "C" int cBXScriptEngine_ForcePlayUpdate(void* self, int key);
-extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
+extern "C" cScriptPlayerMain* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int requestHandle);
 extern "C" void cScriptObjCameraManager_Update(cScriptObjCameraManager* slot);
 
 struct sSsxVEntry8AD0 {
@@ -455,8 +457,7 @@ int cSSXScriptEngine::ForcePlayUpdate(int key)
             sSsxVEntry8AD0* vt = (sSsxVEntry8AD0*)mVtbl;
             int id = slot->id;
             void* obj = vthis(this, vt[4]);
-            // PORT: cBXScriptEngine_GetRequestPlayerByReqHandle returns a pointer as int
-            if (vt[4].fn(obj, id, *(int*)cBXScriptEngine_GetRequestPlayerByReqHandle(this, key))) {
+            if (vt[4].fn(obj, id, cBXScriptEngine_GetRequestPlayerByReqHandle(this, key)->mID)) {
                 ((cScriptObjCameraManager*)slot)->Update();
             }
         }
@@ -561,7 +562,7 @@ int cSSXScriptEngine::IsLoadTrackComplete()
     int complete;
     UpdateLoad();
     complete = 0;
-    if ((int)mFilterTableAsyncHandle == 0) {
+    if (mFilterTableAsyncHandle == 0) {
         complete = IsBankLoading(1) == 0;
     }
     return complete;
@@ -884,7 +885,7 @@ void cSSXScriptEngine::GetNISListScriptCategory(int i, int listIndex)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListVideoCategory);
 #ifdef SKIP_ASM
-extern "C" void tNISList_GetVideoCategory(int, int);
+extern "C" void tNISList_GetVideoCategory(tNISList* list, int listIndex);
 
 /**
  * Looks up the video category of entry @p listIndex of NIS list @p nisList: tNISList_GetVideoCategory on mpNISLists[@p
@@ -897,13 +898,13 @@ extern "C" void tNISList_GetVideoCategory(int, int);
  */
 void cSSXScriptEngine::GetNISListVideoCategory(int nisList, int listIndex)
 {
-    tNISList_GetVideoCategory(((int)mpNISLists) + (nisList * 204), listIndex);
+    tNISList_GetVideoCategory(&mpNISLists[nisList], listIndex);
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListScriptIndex);
 #ifdef SKIP_ASM
-extern "C" void tNISList_GetScriptIndex(int, int);
+extern "C" void tNISList_GetScriptIndex(tNISList* list, int listIndex);
 
 /**
  * Looks up the script index of entry @p listIndex of NIS list @p nisList: tNISList_GetScriptIndex on mpNISLists[@p
@@ -916,7 +917,7 @@ extern "C" void tNISList_GetScriptIndex(int, int);
  */
 void cSSXScriptEngine::GetNISListScriptIndex(int nisList, int listIndex)
 {
-    tNISList_GetScriptIndex(((int)mpNISLists) + (nisList * 204), listIndex);
+    tNISList_GetScriptIndex(&mpNISLists[nisList], listIndex);
 }
 #endif
 
@@ -975,7 +976,7 @@ void cSSXScriptEngine::GetNISListLength(int i)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsNISListNextScriptReady);
 #ifdef SKIP_ASM
-extern "C" void tNISList_IsPendingScriptReady(int, int);
+extern "C" void tNISList_IsPendingScriptReady(tNISList* list, int unused);
 
 /**
  * Asks whether the pending script of NIS list @p nisList is ready: tNISList_IsPendingScriptReady on mpNISLists[@p
@@ -988,10 +989,8 @@ extern "C" void tNISList_IsPendingScriptReady(int, int);
  */
 void cSSXScriptEngine::IsNISListNextScriptReady(int nisList)
 {
-    int temp_5;
-
-    temp_5 = nisList * 204;
-    tNISList_IsPendingScriptReady(((int)mpNISLists) + temp_5, temp_5);
+    int offset = nisList * sizeof(tNISList);
+    tNISList_IsPendingScriptReady(&mpNISLists[nisList], offset);
 }
 #endif
 
@@ -1050,7 +1049,7 @@ int cSSXScriptEngine::IsActiveNISSkippable()
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsPlayingNISListPlayer);
 #ifdef SKIP_ASM
-extern "C" int tNISList_IsPlayingScriptOwner(void*, int);
+extern "C" int tNISList_IsPlayingScriptOwner(tNISList* list, cScriptPlayerMain* pScriptPlayerMain);
 
 /**
  * Tells whether a script player belongs to the NIS list that is playing.
@@ -1058,7 +1057,7 @@ extern "C" int tNISList_IsPlayingScriptOwner(void*, int);
  * @param pScriptPlayerMain  the script player
  * @return 0 when no NIS list plays, otherwise tNISList_IsPlayingScriptOwner()'s answer
  */
-int cSSXScriptEngine::IsPlayingNISListPlayer(int pScriptPlayerMain)
+int cSSXScriptEngine::IsPlayingNISListPlayer(cScriptPlayerMain* pScriptPlayerMain)
 {
     int i = mPlayingNISList;
     if (i == keNISList_Num) {
@@ -1290,11 +1289,8 @@ int cSSXScriptEngine::RequestScriptByHashID(int id, int mainCharAIIndex, int sup
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PlayRequestScript);
 #ifdef SKIP_ASM
-extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
+extern "C" cScriptPlayerMain* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int requestHandle);
 extern "C" void* cBXScriptEngine_PlayScript(void* self, int key, int b, int c);
-// PORT: cSSXScriptEngine_GetScriptSetupInfo is defined in this unit as (void*), but this caller passes
-// (self, index); bind the 2-arg form to the symbol.
-void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
 
 /**
  * Plays a requested script in a given view: stores the view in the request's setup info, then plays it.
@@ -1306,8 +1302,7 @@ void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXSc
  */
 void cSSXScriptEngine::PlayRequestScript(int val, int key, int autoRecycle, int loop)
 {
-    tSSXScriptSetupInfo* setupInfo = (tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(
-        this, cBXScriptEngine_GetRequestPlayerByReqHandle(this, key));
+    tSSXScriptSetupInfo* setupInfo = GetScriptSetupInfo(cBXScriptEngine_GetRequestPlayerByReqHandle(this, key));
     setupInfo->viewIndex = val;
     cBXScriptEngine_PlayScript(this, key, autoRecycle, loop);
 }
@@ -1617,7 +1612,7 @@ int cSSXScriptEngine::AddObject(cScriptObject* obj)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_RemoveObject);
 #ifdef SKIP_ASM
-int cScriptDatabaseObject_GetObject(void* self, int i);
+cScriptObject* cScriptDatabaseObject_GetObject(void* self, int i);
 extern "C" void cScriptObjCameraManager_RemoveCameraObject(void* slot, void* obj);
 extern "C" int cScriptObjCameraManager_SetTransitionObject(cScriptObjCameraManager* self, void* obj);
 extern "C" int cScriptDatabaseObject_RemoveObject(cScriptDatabaseObject* self, int idx);
@@ -1631,8 +1626,7 @@ extern "C" int cScriptDatabaseObject_RemoveObject(cScriptDatabaseObject* self, i
  */
 void cSSXScriptEngine::RemoveObject(int idx)
 {
-    // PORT: cScriptDatabaseObject_GetObject returns a table pointer as int
-    cScriptObject* obj = (cScriptObject*)cScriptDatabaseObject_GetObject((this), idx);
+    cScriptObject* obj = cScriptDatabaseObject_GetObject(this, idx);
     if (obj->mObjType == keScriptObjectType_Camera) {
         cScriptObjCamera* camera = (cScriptObjCamera*)obj;
         cScriptObjCameraManager_RemoveCameraObject(&mObjectCameraManager[camera->mViewIndex], obj);
@@ -1649,7 +1643,7 @@ void cSSXScriptEngine::RemoveObject(int idx)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsObjInUseByPlayer);
 #ifdef SKIP_ASM
-int cScriptDatabaseObject_GetObject(void* self, int i);
+cScriptObject* cScriptDatabaseObject_GetObject(void* self, int i);
 extern "C" int cScriptObjCamera_IsInUseByPlayer(cScriptObjCamera* self, int val);
 extern "C" void cScriptDatabaseObject_IsObjInUseByPlayer(void* self, int i, int val);
 extern "C" void cScriptObjTransition_IsInUseByPlayer(void* obj, int val);
@@ -1665,9 +1659,8 @@ extern "C" void cScriptObjTransition_IsInUseByPlayer(void* obj, int val);
  */
 void cSSXScriptEngine::IsObjInUseByPlayer(int i, int val)
 {
-    // PORT: cScriptDatabaseObject_GetObject returns a table pointer as int
-    int* obj = (int*)cScriptDatabaseObject_GetObject(this, i);
-    int type = *obj;
+    cScriptObject* obj = cScriptDatabaseObject_GetObject(this, i);
+    int type = obj->mObjType;
     if (type == keScriptObjectType_Camera) {
         ((cScriptObjCamera*)obj)->IsInUseByPlayer(val);
     } else if (type != keScriptObjectType_Transition) {
@@ -1751,21 +1744,21 @@ static inline void* computerRider(cComputer* computer)
  * @param pPlayer  the script player whose request supplies the cast
  * @return the rider, or 0 when the subject has no rider
  */
-void* cSSXScriptEngine::GetSubjectRider(int slot, int pPlayer)
+void* cSSXScriptEngine::GetSubjectRider(int slot, cScriptPlayerMain* pPlayer)
 {
     int riderIndex;
     switch (slot) {
     case keSSXSubject_MainChar: {
-        tSSXScriptSetupInfo* setupInfo = (tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(this, pPlayer);
+        tSSXScriptSetupInfo* setupInfo = GetScriptSetupInfo(pPlayer);
         if (setupInfo->mainCharAIIndex < 0) break;
         return subjectAI()->Riders[setupInfo->mainCharAIIndex];
     }
     case keSSXSubject_SupportChar0:
-        riderIndex = ((tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(this, pPlayer))->supportChar0AIIndex;
+        riderIndex = GetScriptSetupInfo(pPlayer)->supportChar0AIIndex;
         if (riderIndex < 0) break;
         return subjectAI()->Riders[riderIndex];
     case keSSXSubject_SupportChar1:
-        riderIndex = ((tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(this, pPlayer))->supportChar1AIIndex;
+        riderIndex = GetScriptSetupInfo(pPlayer)->supportChar1AIIndex;
         if (riderIndex < 0) break;
         return subjectAI()->Riders[riderIndex];
     case keSSXSubject_Player0: case keSSXSubject_Player1: {
@@ -1856,14 +1849,14 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_impl(char* self, int id, v
     switch (id) {
     case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
     case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: {
-        void* subjectRider = ((cSSXScriptEngine*)self)->GetSubjectRider(id - 40, (int)obj);
+        void* subjectRider = ((cSSXScriptEngine*)self)->GetSubjectRider(id - 40, (cScriptPlayerMain*)obj);
         if (subjectRider != 0)
             cSSXScriptEngine_FillOrientationFromRiderOrientationInfo_v(self, subjectRider, pos, baseRotX, baseRotY, baseRotZ);
         break;
     }
     case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
     case 13: case 14: case 15: case 16: case 17: case 18: {
-        void* subjectRider = ((cSSXScriptEngine*)self)->GetSubjectRider(id + 2, (int)obj);
+        void* subjectRider = ((cSSXScriptEngine*)self)->GetSubjectRider(id + 2, (cScriptPlayerMain*)obj);
         if (subjectRider != 0)
             cSSXScriptEngine_FillOrientationFromStartPointInfo_v(self, subjectRider, pos, baseRotX, baseRotY, baseRotZ);
         break;
@@ -2564,7 +2557,7 @@ extern char str_ScriptChoice[];
 int* cSSXScriptEngine::GetScriptFromCategory(int cat)
 {
     cSSXScriptEngine* self = this;
-    if (((int)self->mpFilterTableHeader) == 0 || (self->mpCategoryFilterTable)[cat].numScripts == 0)
+    if (self->mpFilterTableHeader == 0 || (self->mpCategoryFilterTable)[cat].numScripts == 0)
         return 0;
     int flags[21];
     cSSXScriptEngine_BuildCharacterBitRoleArray(self, flags);
@@ -2610,7 +2603,7 @@ int* cSSXScriptEngine::GetScriptFromCategory(int cat)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SyncLoadScriptBank);
 #ifdef SKIP_ASM
 void tSSXScriptBankInfo_Clear(void* slot);
-extern "C" int cDataManager_AttachData(void* self, const char* name, int* data, int size);
+extern "C" void* cDataManager_AttachData(void* self, const char* name, int* data, int size);
 extern "C" int BXFILE_size(const char* name);
 extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int FILE_loadatz(const char* name, int* buf, int a2);
@@ -2632,7 +2625,7 @@ extern "C" int FILE_loadatz(const char* name, int* buf, int a2);
 void cSSXScriptEngine::SyncLoadScriptBank(int i, const char* name, int flags, int key, int* buf)
 {
     tSSXScriptBankInfo* bankInfo = (&mScriptDataBanks[i]);
-    if (((int)bankInfo->dataBankHandle) != 0) {
+    if (bankInfo->dataBankHandle != 0) {
         return;
     }
     bankInfo->dataIdentifier = key;
@@ -2656,7 +2649,7 @@ void cSSXScriptEngine::SyncLoadScriptBank(int i, const char* name, int flags, in
         return;
     }
     mCurrAttachingBankNum = i;
-    (*(int*)&bankInfo->dataBankHandle) = cDataManager_AttachData(&mMaxDataInstances, name, data, size);
+    bankInfo->dataBankHandle = cDataManager_AttachData(&mMaxDataInstances, name, data, size);
     mCurrAttachingBankNum = 10;
     bankInfo->dynamicMem = 1;
     if (buf != 0) {
@@ -2766,8 +2759,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNextAvailableAsyncBa
 
 static inline int isSlotFree(tSSXScriptBankInfo* ssxScriptBankInfo)
 {
-    if (((int)ssxScriptBankInfo->asyncHandle) == 0) {
-        if (((int)ssxScriptBankInfo->dataBankHandle) == 0) return 1;
+    if (ssxScriptBankInfo->asyncHandle == 0) {
+        if (ssxScriptBankInfo->dataBankHandle == 0) return 1;
     }
     return 0;
 }
@@ -2829,7 +2822,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ProcessAsyncLoadScriptB
 extern "C" int ASYNCFILE_release_out(void* file, int** data, int* size) __asm__("ASYNCFILE_release");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 void tSSXScriptBankInfo_Clear(void* slot);
-extern "C" int cDataManager_AttachData(void* self, const char* name, int* data, int size);
+extern "C" void* cDataManager_AttachData(void* self, const char* name, int* data, int size);
 extern const char str_asyncpct_08d[];
 
 /**
@@ -2848,7 +2841,7 @@ void cSSXScriptEngine::ProcessAsyncLoadScriptBankComplete(void* file)
     } loaded;
     for (int i = 0; i < 10; i++) {
         tSSXScriptBankInfo* ssxScriptBankInfo = &((&mScriptDataBanks[0]))[i];
-        if ((void*)((int)ssxScriptBankInfo->asyncHandle) == file) {
+        if (ssxScriptBankInfo->asyncHandle == file) {
             ASYNCFILE_release_out(file, &loaded.data, &loaded.size);
             mNumAsyncs -= 1;
             if (loaded.size == 0) {
@@ -2856,9 +2849,9 @@ void cSSXScriptEngine::ProcessAsyncLoadScriptBankComplete(void* file)
                 return;
             }
             sprintf(buf, str_asyncpct_08d, ssxScriptBankInfo->dataIdentifier);
-            *(int*)&ssxScriptBankInfo->asyncHandle = 0;
+            ssxScriptBankInfo->asyncHandle = 0;
             mCurrAttachingBankNum = i;
-            *(int*)&ssxScriptBankInfo->dataBankHandle = cDataManager_AttachData((char*)&mMaxDataInstances, buf,
+            ssxScriptBankInfo->dataBankHandle = cDataManager_AttachData((char*)&mMaxDataInstances, buf,
                     loaded.data, loaded.size);
             mCurrAttachingBankNum = 10;
             return;
@@ -3345,7 +3338,7 @@ extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
 bool cSSXScriptEngine::IsBankLoading(int i)
 {
     UpdateLoad();
-    return (int)mScriptDataBanks[i].asyncHandle != 0;
+    return mScriptDataBanks[i].asyncHandle != 0;
 }
 #endif
 
@@ -3928,7 +3921,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual int* GetValue();
-    virtual int GetCustom();
+    virtual void* GetCustom();
 };
 
 cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
@@ -4457,9 +4450,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetObject__FPvi);
  * @param i  the object ID
  * @return the object, or 0
  */
-int cScriptDatabaseObject::GetObject(int i)
+cScriptObject* cScriptDatabaseObject::GetObject(int i)
 {
-    return (int)mpObjectDatabase[i];
+    return mpObjectDatabase[i];
 }
 #endif
 
@@ -4625,15 +4618,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetAvailableEntiti
  * @param max  the most to list
  * @return the number listed
  */
-int cScriptDatabaseObject::GetAvailableEntities(int key, int* out, int max)
+int cScriptDatabaseObject::GetAvailableEntities(int key, cScriptEntity** out, int max)
 {
     int n = 0;
     int i = 0;
     tScriptEntityRecord* record = ((&mEntityDatabase[0]));
     while (i < 30 && n != max) {
-        if (((int)record->pEntity) != 0 && record->relation != keScriptEntityRelation_InUse
+        if (record->pEntity != 0 && record->relation != keScriptEntityRelation_InUse
             && (record->reservedPlayerID < 0 || record->reservedPlayerID == key)) {
-            *out++ = ((int)record->pEntity);
+            *out++ = record->pEntity;
             n++;
         }
         i++;
@@ -4670,7 +4663,7 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(cScriptObjCamera* self, int v
     self->mPlayerID = -1;
     self->mpCameraManager = 0;
     self->mpCameraEntity = 0;
-    *(int*)&self->mWeight = 0;
+    self->mWeight = 0.0f;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4686,9 +4679,9 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(cScriptObjCamera* self, int v
         : "r"((char*)&self->mBaseTransform), "r"(&t4mat_Identity)
         : "memory");
     self->mViewIndex = viewIndex;
-    *(int*)&self->mBaseRotX = 0;
-    *(int*)&self->mBaseRotY = 0;
-    *(int*)&self->mBaseRotZ = 0;
+    self->mBaseRotX = 0.0f;
+    self->mBaseRotY = 0.0f;
+    self->mBaseRotZ = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -4701,9 +4694,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraManager__FPvi)
  *
  * @param val  the camera manager, or 0
  */
-void cScriptObjCamera::SetCameraManager(int val)
+void cScriptObjCamera::SetCameraManager(cScriptObjCameraManager* val)
 {
-    mpCameraManager = (cScriptObjCameraManager*)val;
+    mpCameraManager = val;
 }
 #endif
 
@@ -4753,9 +4746,9 @@ void cScriptObjCamera::SetCameraEntity(void* anim)
             :
             : "r"((char*)&mBaseTransform), "r"(&t4mat_Identity)
             : "memory");
-        *(int*)&mBaseRotX = 0;
-        *(int*)&mBaseRotY = 0;
-        *(int*)&mBaseRotZ = 0;
+        mBaseRotX = 0.0f;
+        mBaseRotY = 0.0f;
+        mBaseRotZ = 0.0f;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mVtbl;
         vt[5].fn(vthis(this, vt[5]), mPlayerID);
         mpCameraEntity = 0;
@@ -4840,7 +4833,7 @@ void cScriptObjCamera::ResumeObjScript()
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_OnStartObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnStartObjectUse(void* self);
-extern "C" void cScriptObjCamera_CalculateBaseTransform(void* self, int a1);
+extern "C" void cScriptObjCamera_CalculateBaseTransform(void* self, cScriptEntityCamera* cameraEntity);
 extern "C" void cScriptCameraController_addCamera(void* ctrl, void* script);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 
@@ -4857,7 +4850,7 @@ void cScriptObjCamera::OnStartObjectUse()
     cScriptObject_OnStartObjectUse(this);
     if ((void*)SSXApp->Game != 0) {
         mWeight = 1.0f;
-        cScriptObjCamera_CalculateBaseTransform(this, (int)mpCameraEntity);
+        cScriptObjCamera_CalculateBaseTransform(this, mpCameraEntity);
         cCamera* camera = SSXApp->Game->ViewMan->PlayerCamera[mViewIndex];
         cScriptCameraController_addCamera(camera->ScriptController, this);
         if (camera->ScriptController->IsActive != 0) {
@@ -4890,7 +4883,7 @@ void cScriptObjCamera::OnEndObjectUse()
     cScriptObject_OnEndObjectUse(this);
     cSSXApp* app = SSXApp;
     if (app->Game != 0) {
-        *(int*)&mWeight = 0;
+        mWeight = 0.0f;
         cCamera* camera = app->Game->ViewMan->PlayerCamera[mViewIndex];
         cScriptCameraController_removeCamera(camera->ScriptController, this);
         if (camera->ScriptController->IsActive == 0) {
@@ -5538,9 +5531,9 @@ void cScriptObjRider::OnEndObjectUse()
         :
         : "r"((char*)&mBaseTransform), "r"(&t4mat_Identity)
         : "memory");
-    *(int*)&mBaseRotX = 0;
-    *(int*)&mBaseRotY = 0;
-    *(int*)&mBaseRotZ = 0;
+    mBaseRotX = 0.0f;
+    mBaseRotY = 0.0f;
+    mBaseRotZ = 0.0f;
     mpAnimBankInfo = 0;
     mpSoundBankInfo = 0;
 }
@@ -5578,7 +5571,7 @@ int cScriptObjRider::IsMatchingEntity(cScriptPlayerEntity* msg, int type)
     tSSXHeaderActor* info = (tSSXHeaderActor*)GetSSXActorHeader(msg);
     short charMask = info->character;
     if (charMask == 0 || (charMask & mask) != 0) {
-        return IsSuitableRole((cRider*)rider, info->role, (int)msg->mpOwner);
+        return IsSuitableRole((cRider*)rider, info->role, msg->mpOwner);
     }
     return 0;
 }
@@ -5636,7 +5629,7 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int i,
  * @param playerMain  the script player (cScriptPlayerMain)
  * @return whether the rider suits the role (false also for negative or larger roles)
  */
-bool cScriptObjRider::IsSuitableRole(cRider* rider, int id, int playerMain)
+bool cScriptObjRider::IsSuitableRole(cRider* rider, int id, cScriptPlayerMain* playerMain)
 {
     if (id != 0) {
         if (id >= 0) {
@@ -5713,11 +5706,13 @@ void cScriptObjEvent::Update()
         tScriptObjEventSound* soundSlot = &((&mSounds[0]))[i];
         if (soundSlot->soundHandle >= 0) {
             if (soundSlot->endSound != 0) {
-                cBankMonitor_BANKMONITOR_StopHandle(**(char***)&snd->MusicSys + 0x1D8, soundSlot->soundHandle, 1, 0.0f);
+                cBankMonitor_BANKMONITOR_StopHandle(&snd->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                        soundSlot->soundHandle, 1, 0.0f);
                 soundSlot->soundID = -1;
                 soundSlot->soundHandle = -1;
                 soundSlot->endSound = 0;
-            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)&snd->MusicSys + 0x1D8, soundSlot->soundHandle, 1) == 0) {
+            } else if (cBankMonitor_BANKMONITOR_GetHandle(&snd->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                       soundSlot->soundHandle, 1) == 0) {
                 soundSlot->soundID = -1;
                 soundSlot->soundHandle = -1;
                 soundSlot->endSound = 0;
@@ -5807,7 +5802,9 @@ void cScriptObjEvent::OnEndObjectUse()
     for (int i = 0; i < 4; i++) {
         int id = mSounds[i].soundHandle;
         if (id >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, id, 1, 0.0f);
+            cBankMonitor_BANKMONITOR_StopHandle(
+                    &cAudioInterface_bxAudio()->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                    id, 1, 0.0f);
         }
         tScriptObjEventSound* soundSlot = &mSounds[i];
         soundSlot->soundID = -1;
@@ -5815,7 +5812,7 @@ void cScriptObjEvent::OnEndObjectUse()
         soundSlot->endSound = 0;
     }
     GetSSXGameEventFrame(mpEntity, &info);
-    if (((int)info.pEnviroStateList) != 0) {
+    if (info.pEnviroStateList != 0) {
         cRenderStateMan_m_indoor = 0;
     }
     mNumAbortWorldScripts = 0;
@@ -6187,7 +6184,7 @@ void cScriptObjCameraManager::Update()
     if (mInUse > 0) {
         cCamera* camera = SSXApp->Game->ViewMan->PlayerCamera[mViewIndex];
         *(&mFocusBox) = camera->Pose.P;
-        if ((int)mpEntity == 0) {
+        if (mpEntity == 0) {
             SetupCameraObject(0, 0);
         }
     }
@@ -6259,7 +6256,7 @@ bool cScriptObjCameraManager::AddCameraObject(cScriptObjCamera* obj)
     for (int i = 0; i < 2; i++) {
         if (slots[i] == 0) {
             slots[i] = ((void*)obj);
-            obj->SetCameraManager((int)this); // PORT: pointer passed as int (callee mangled __FPvi)
+            obj->SetCameraManager(this);
             return true;
         }
     }
@@ -6294,7 +6291,7 @@ extern "C" bool cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCamera
     for (int i = 0; i < 2; i++) {
         cScriptObjCamera* cameraObj = self->mpCameraObjects[i];
         if (cameraObj != 0 && cameraObj->mObjID == k) {
-            if (self->mInUse > 0 && (int)cameraObj->mpCameraEntity != 0) {
+            if (self->mInUse > 0 && cameraObj->mpCameraEntity != 0) {
                 cameraObj->SetCameraEntity(0);
                 for (int j = 0; j < 2; j++) {
                     if (self->mAttachedCameraObject[j] == i) {
@@ -6363,7 +6360,8 @@ extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 extern "C" void cFocusMan_addbox(void* self, void* pos);
 // PORT: these two are declared (void*) but called with a second argument.
-void* cBXScriptEngine_GetRequestPlayerByPlayerID_2(void* self, int idx) __asm__("cBXScriptEngine_GetRequestPlayerByPlayerID__FPv");
+cScriptPlayerMain* cBXScriptEngine_GetRequestPlayerByPlayerID_2(void* self, int idx)
+    __asm__("cBXScriptEngine_GetRequestPlayerByPlayerID__FPv");
 void cScriptObject_OnStartObjectUse_2(void* self, int val) __asm__("cScriptObject_OnStartObjectUse__FPv");
 
 /**
@@ -6383,9 +6381,7 @@ void cScriptObjCameraManager::OnStartObjectUse(int val)
 {
     cScriptDatabaseObject_GetDatabaseObject()->MarkObjectAsReserved(mObjID, val);
     ResetScriptManagementVars();
-    // PORT: pointer passed as int
-    if (ScriptEngine->IsPlayingNISListPlayer((int)cBXScriptEngine_GetRequestPlayerByPlayerID_2(ScriptEngine,
-            val)) != 0) {
+    if (ScriptEngine->IsPlayingNISListPlayer(cBXScriptEngine_GetRequestPlayerByPlayerID_2(ScriptEngine, val)) != 0) {
         cFocusMan_addbox(SSXApp->Game->AI->FocusMan, (char*)&mFocusBox);
         mUseFocusBox = 1;
     }
@@ -6591,8 +6587,8 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
         if ((float)(n->data.overlapInFrames + n->data.scriptStartFrame) < currFrame) {
             mInTransition = 0;
         }
-        int camera = GetCameraObjectByTrack(n->data.track);
-        int otherCamera = GetCameraObjectByTrack(1 - n->data.track);
+        cScriptObjCamera* camera = GetCameraObjectByTrack(n->data.track);
+        cScriptObjCamera* otherCamera = GetCameraObjectByTrack(1 - n->data.track);
         if (otherCamera == 0) {
             mInTransition = 0;
             break;
@@ -6603,8 +6599,8 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
         } else {
             w = (currFrame - (float)n->data.scriptStartFrame) / (float)n->data.overlapInFrames;
         }
-        cScriptObjCamera_SetCameraWeight((void*)camera, w);
-        cScriptObjCamera_SetCameraWeight((void*)otherCamera, 1.0f - w);
+        cScriptObjCamera_SetCameraWeight(camera, w);
+        cScriptObjCamera_SetCameraWeight(otherCamera, 1.0f - w);
         break;
     }
     case keScriptTransition_Fade:
@@ -6613,21 +6609,21 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
     case keScriptTransition_WipeUp:
     case keScriptTransition_WipeDown:
     case keScriptTransition_WipeCircle: {
-        int camera = GetCameraObjectByTrack(n->data.track);
-        int otherCamera = GetCameraObjectByTrack(1 - n->data.track);
+        cScriptObjCamera* camera = GetCameraObjectByTrack(n->data.track);
+        cScriptObjCamera* otherCamera = GetCameraObjectByTrack(1 - n->data.track);
         cScriptObjTransition_Update(mpTransitionObject, dt);
         if (mpTransitionObject->mInUse <= 0) {
             mInTransition = 0;
         }
         if (mInTransition != 0 && otherCamera != 0 &&
             currFrame < (float)(n->data.overlapInFrames + n->data.scriptStartFrame)) {
-            cScriptObjCamera_SetCameraWeight((void*)otherCamera, 1.0f);
-            cScriptObjCamera_SetCameraWeight((void*)camera, 0.0f);
+            cScriptObjCamera_SetCameraWeight(otherCamera, 1.0f);
+            cScriptObjCamera_SetCameraWeight(camera, 0.0f);
         } else {
             if (otherCamera != 0) {
-                cScriptObjCamera_SetCameraWeight((void*)otherCamera, 0.0f);
+                cScriptObjCamera_SetCameraWeight(otherCamera, 0.0f);
             }
-            cScriptObjCamera_SetCameraWeight((void*)camera, 1.0f);
+            cScriptObjCamera_SetCameraWeight(camera, 1.0f);
         }
         break;
     }
@@ -6646,9 +6642,6 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_IsMatchingEntity);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
-
 /**
  * Returns whether the camera manager takes an InSeq entity: entity type 4 whose script setup info
  * (cSSXScriptEngine_GetScriptSetupInfo for the entity's player, mpOwner) has this manager's view index (mViewIndex) as
@@ -6663,8 +6656,7 @@ bool cScriptObjCameraManager::IsMatchingEntity(cScriptPlayerEntity* entity, int 
     if (n != keSSXEntityType_CameraManager) {
         return false;
     }
-    tSSXScriptSetupInfo* setupInfo =
-        (tSSXScriptSetupInfo*)cSSXScriptEngine_GetScriptSetupInfo_2(ScriptEngine, (int)entity->mpOwner);
+    tSSXScriptSetupInfo* setupInfo = ScriptEngine->GetScriptSetupInfo(entity->mpOwner);
     return setupInfo->viewIndex == mViewIndex;
 }
 #endif
@@ -6790,13 +6782,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetCameraObjectB
  * @param i  the track index
  * @return the script camera object, or 0 when none is attached
  */
-int cScriptObjCameraManager::GetCameraObjectByTrack(int i)
+cScriptObjCamera* cScriptObjCameraManager::GetCameraObjectByTrack(int i)
 {
     int j = mAttachedCameraObject[i];
     if (j < 0) {
         return 0;
     }
-    return (int)mpCameraObjects[j];
+    return mpCameraObjects[j];
 }
 #endif
 

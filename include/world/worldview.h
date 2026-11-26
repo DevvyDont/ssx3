@@ -241,7 +241,7 @@ struct cWorldView {
     bool deactivateSection(unsigned int idx) __asm__("cWorldView_deactivateSection");
     void* getHull(int uiIdx) __asm__("cWorldView_getHull");
     int getNumHull() __asm__("cWorldView_getNumHull__FPv");
-    int isBoxValid(int box) __asm__("cWorldView_isBoxValid");
+    int isBoxValid(t4Vector* box) __asm__("cWorldView_isBoxValid");
     void recursiveIsValid(tBxBSPNode* sec, t4Vector* box, int* ok) __asm__("cWorldView_recursiveIsValid");
     void refreshStreamFocus(int cam) __asm__("cWorldView_refreshStreamFocus");
     void recursiveTreeFocus(tBxBSPNode* sec_, int cam, int loaded) __asm__("cWorldView_recursiveTreeFocus");

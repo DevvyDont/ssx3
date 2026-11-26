@@ -188,7 +188,7 @@ struct cScreenPopup : public cUIState {
     cScreenPopup * cScreenPopup1() __asm__("cScreenPopup_cScreenPopup1");
     void setPassUpdate(int passUpdate) __asm__("cScreenPopup_setPassUpdate");
     int getPassUpdate() __asm__("cScreenPopup_getPassUpdate");
-    int getEntryBoxText() __asm__("cScreenPopup_getEntryBoxText");
+    char* getEntryBoxText() __asm__("cScreenPopup_getEntryBoxText");
     int isShowing() __asm__("cScreenPopup_isShowing");
     // retail's destructor cScreenPopup__cScreenPopup stays a C function (g++ 2.95 takes no asm label on a destructor);
     // declared first, it keeps the vtable out of the units defining the overrides

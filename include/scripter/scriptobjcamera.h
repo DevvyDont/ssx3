@@ -38,7 +38,7 @@ struct cScriptObjCamera {
     int mViewIndex;                           // 0x07C [O]
 
     // Methods bound to their retail symbols by asm labels.
-    void SetCameraManager(int val) __asm__("cScriptObjCamera_SetCameraManager__FPvi");
+    void SetCameraManager(cScriptObjCameraManager* val) __asm__("cScriptObjCamera_SetCameraManager__FPvi");
     void SetCameraEntity(void* anim) __asm__("cScriptObjCamera_SetCameraEntity");
     void SetCameraWeight(float val) __asm__("cScriptObjCamera_SetCameraWeight__FPvf");
     int IsInUseByPlayer(int val) __asm__("cScriptObjCamera_IsInUseByPlayer");

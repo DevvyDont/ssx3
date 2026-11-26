@@ -30,6 +30,7 @@ struct cWorldIntersectType;
 struct t4Vector;
 struct tBoundBox;
 struct tIntersectInfo;
+struct tIntHint;
 
 struct cOverlapList {
     cBXNash* nash;                  // 0x000 [O]; [R] ctor = the game's Nash (cRider_cRider) / the light manager's
@@ -52,13 +53,14 @@ struct cOverlapList {
     void gettyped(tBoundBox* box) __asm__("cOverlapList_gettyped");
     void getpatchesandinstances(tBoundBox* box) __asm__("cOverlapList_getpatchesandinstances");
     void geteverything(tBoundBox* box) __asm__("cOverlapList_geteverything");
-    int terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int hitCache)
+    int terrainIntersect(cWorldIntersectType* query, tIntersectInfo* hits, int cap, tIntHint* hitCache)
         __asm__("cOverlapList_terrainIntersect");
-    float terrainIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int hitCache)
+    float terrainIntersect1(cWorldIntersectType* query, tIntersectInfo* out, tIntHint* hitCache)
         __asm__("cOverlapList_terrainIntersect1");
     int staticObjectIntersect(cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
         __asm__("cOverlapList_staticObjectIntersect");
-    int splineIntersect(t4Vector* pos, int intInfo, int mask, float testRadius) __asm__("cOverlapList_splineIntersect");
+    int splineIntersect(t4Vector* pos, tIntersectInfo* intInfo, int mask, float testRadius)
+        __asm__("cOverlapList_splineIntersect");
 };
 
 CHECK_OFFSET(cOverlapList, nash, 0x000);

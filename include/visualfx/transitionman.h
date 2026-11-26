@@ -159,10 +159,12 @@ struct cTransitionMan : public cObjNode {
                                     //       update releases the grab 3 frames later
 
     // Methods bound to their retail symbols by asm labels.
-    void StartTransitionIn(int initiator, int transitionIn, float inTime, float holdTime)
+    void StartTransitionIn(int initiator, cTransitionObj* transitionIn, float inTime, float holdTime)
         __asm__("cTransitionMan_StartTransitionIn");
-    int StartTransitionOut(int initiator, int transition, float outTime) __asm__("cTransitionMan_StartTransitionOut");
-    void StartTransitionScreenGrab(int initiator, int transition, int externalTimePercentage, float transitionTime)
+    int StartTransitionOut(int initiator, cTransitionObj* transition, float outTime)
+        __asm__("cTransitionMan_StartTransitionOut");
+    void StartTransitionScreenGrab(int initiator, cTransitionObj* transition, float* externalTimePercentage,
+                                   float transitionTime)
         __asm__("cTransitionMan_StartTransitionScreenGrab");
     void EndTransition() __asm__("cTransitionMan_EndTransition");
     void PauseTransition(int up) __asm__("cTransitionMan_PauseTransition");

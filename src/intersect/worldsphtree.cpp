@@ -59,20 +59,20 @@ extern "C" void* cWorldSphTree_cWorldSphTree(cWorldSphTree* self, bxSphereTree* 
     }
     self->origSt = (bxSphereTree*)((void*)ast);
     self->st = (bxSphereTree*)((void*)ast);
-    t4Vector center = *(t4Vector*)&ast->transCenter;
+    t4Vector center = ast->transCenter;
     float radius = SphereTree_GetRadius(ast);
     t4Vector corner;
-    *(t4Vector*)&self->boxCenter = center;
+    self->boxCenter = center;
     corner.x = center.x + radius;
     corner.y = center.y + radius;
     corner.z = center.z + radius;
     corner.w = 1.0f;
-    *(t4Vector*)&self->boxMax = corner;
+    self->boxMax = corner;
     corner.x = center.x - radius;
     corner.y = center.y - radius;
     corner.z = center.z - radius;
     corner.w = 1.0f;
-    *(t4Vector*)&self->boxMin = corner;
+    self->boxMin = corner;
     void* localTree = cMemMan_alloc(320, str_SphereTree, 0, 0);
     SphereTree_SphereTree(localTree);
     self->localTree = (bxSphereTree*)localTree;
@@ -232,13 +232,13 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_UnTransform__FPv);
  * Undoes cWorldSphTree_Transform: makes the original tree (+0x64) current again (+0x60) and clears the transformed
  * flag.
  *
- * @return the original tree pointer (declared int; On Tour returns void)
+ * @return the original tree (On Tour returns void)
  */
-int cWorldSphTree::UnTransform()
+bxSphereTree* cWorldSphTree::UnTransform()
 {
-    int original = (int)origSt;
+    bxSphereTree* original = origSt;
     isTransformed = 0;
-    st = (bxSphereTree*)original;
+    st = original;
     return original;
 }
 #endif
@@ -444,10 +444,10 @@ extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, voi
  */
 int cWorldSphTree::IsSphTreeInt(void* tree, tIntersectInfo* hit)
 {
-    if (SphereTree_IsTreeCollision(st, tree, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
-        float len = wsLength_3308C8((*(t4Vector*)&hit->Inorm));
+    if (SphereTree_IsTreeCollision(st, tree, &hit->Inorm, hit) != 0) {
+        float len = wsLength_3308C8(hit->Inorm);
         hit->Iparam = len;
-        wsDivEq_3308C8((*(t4Vector*)&hit->Inorm), len);
+        wsDivEq_3308C8(hit->Inorm, len);
         return 1;
     }
     return 0;
@@ -508,10 +508,10 @@ extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a
  */
 int cWorldSphTree::IsBoxInt(void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (SphereTree_IsBoxCollision(st, bMin, bMax, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
-        float len = wsLength_330950((*(t4Vector*)&hit->Inorm));
+    if (SphereTree_IsBoxCollision(st, bMin, bMax, &hit->Inorm, hit) != 0) {
+        float len = wsLength_330950(hit->Inorm);
         hit->Iparam = len;
-        wsDivEq_330950((*(t4Vector*)&hit->Inorm), len);
+        wsDivEq_330950(hit->Inorm, len);
         return 1;
     }
     return 0;
@@ -565,7 +565,8 @@ static inline int overlapBox_3309D8(const tBoundBox* b, const tBoundBox* o)
  */
 void OverlapInstancesCallback::operatorCall(nash_Cell* tree)
 {
-    for (tInstanceRecord* node = *(tInstanceRecord**)&tree->nodesinside[0]; node != 0; node = (*(tInstanceRecord**)&node->m_iIntersect)) {
+    for (tInstanceRecord* node = (tInstanceRecord*)tree->nodesinside[0].head; node != 0;
+         node = (tInstanceRecord*)node->m_iIntersect.next) {
         int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_3309D8(box, node)) {
@@ -646,10 +647,10 @@ void cOverlapList::getinstances(tBoundBox* box)
     cBXNash* nash = this->nash;
     OverlapInstancesCallback* pctx = &ctx;
     deletecount = nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instances) = ((tInstanceRecord**)&instances[0]);
-    (*(int**)&ctx.number) = (int*)&numinstances;
+    ctx.instances = &instances[0];
+    ctx.number = &numinstances;
     ctx.maximum = 0x40;
-    (*(tBoundBox**)&ctx.box) = box;
+    ctx.box = box;
     numinstances = (unsigned int)0;
     queryCell_330BA8(nash, 0, box, pctx, flags);
     queryCell_330BA8(nash, 1, box, pctx, flags);
@@ -677,8 +678,8 @@ struct sTag_331450 {
 
 static inline void collect_331450(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
-    void** p;
-    for (p = (*(void***)&node->nodesinside[2]); p != 0; p = (void**)*p) {
+    nash_Node* p;
+    for (p = node->nodesinside[2].head; p != 0; p = p->next) {
         ((tInstanceRecord**)ctx->instances)[(*((int*)ctx->number))++] = (tInstanceRecord*)p;
     }
     if (node->children[0][0][0] != 0) nash_Cell_descend1(node->children[0][0][0], (sOctCollect*)ctx);
@@ -729,10 +730,10 @@ void cOverlapList::gettyped(tBoundBox* box)
     cBXNash* nash = this->nash;
     OverlapInstancesCallback* pctx = &ctx;
     deletecount = nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instances) = (tInstanceRecord**)((void**)&typed[0]);
-    (*(int**)&ctx.number) = (int*)&numtyped;
+    ctx.instances = (tInstanceRecord**)((void**)&typed[0]);
+    ctx.number = &numtyped;
     ctx.maximum = 0x200;
-    (*(tBoundBox**)&ctx.box) = box;
+    ctx.box = box;
     numtyped = 0;
     queryCell_331450(nash, 0, box, pctx);
     queryCell_331450(nash, 1, box, pctx);
@@ -837,17 +838,17 @@ void cOverlapList::getpatchesandinstances(tBoundBox* box)
 {
     OverlapPatchesAndInstancesCallback ctx;
     deletecount = this->nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&instances[0]);
-    (*(int**)&ctx.instancecallback.number) = (int*)&numinstances;
+    ctx.instancecallback.instances = &instances[0];
+    ctx.instancecallback.number = &numinstances;
     ctx.instancecallback.maximum = 0x40;
-    (*(tBoundBox**)&ctx.instancecallback.box) = box;
-    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&patches[0]);
-    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&numpatches;
-    (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
-    (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
-    OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
+    ctx.instancecallback.box = box;
+    ctx.patchescallback.patches = &patches[0];
+    ctx.patchescallback.number = &numpatches;
+    ctx.patchescallback.maximum = 0x40;
+    ctx.patchescallback.box = box;
+    OverlapPatchesCallback* objs = &ctx.patchescallback;
     numinstances = 0;
-    *((int*)objs->number) = 0;
+    *objs->number = 0;
     cBXNash* nash = this->nash;
     OverlapInstancesCallback* pctx = &ctx.instancecallback;
     queryCell_331E90(nash, 0, box, pctx);
@@ -966,23 +967,23 @@ void cOverlapList::geteverything(tBoundBox* box)
 {
     OverlapEverythingCallback ctx;
     deletecount = this->nash->deletecount;
-    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&instances[0]);
-    (*(int**)&ctx.instancecallback.number) = (int*)&numinstances;
+    ctx.instancecallback.instances = &instances[0];
+    ctx.instancecallback.number = &numinstances;
     ctx.instancecallback.maximum = 0x40;
-    (*(tBoundBox**)&ctx.instancecallback.box) = box;
-    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&patches[0]);
-    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&numpatches;
-    (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
-    (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
-    OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
+    ctx.instancecallback.box = box;
+    ctx.patchescallback.patches = &patches[0];
+    ctx.patchescallback.number = &numpatches;
+    ctx.patchescallback.maximum = 0x40;
+    ctx.patchescallback.box = box;
+    OverlapPatchesCallback* objs = &ctx.patchescallback;
     numinstances = 0;
-    *((int*)objs->number) = 0;
-    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.typedcallback).instances) = ((tInstanceRecord**)&typed[0]);
-    (*(int**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).number) = (int*)&numtyped;
-    (*(OverlapInstancesCallback*)&ctx.typedcallback).maximum = 0x200;
-    (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).box) = box;
-    OverlapInstancesCallback* all = &(*(OverlapInstancesCallback*)&ctx.typedcallback);
-    *((int*)all->number) = 0;
+    *objs->number = 0;
+    ctx.typedcallback.typed = &typed[0];
+    ctx.typedcallback.number = &numtyped;
+    ctx.typedcallback.maximum = 0x200;
+    ctx.typedcallback.box = box;
+    OverlapTypedCallback* all = &ctx.typedcallback;
+    *all->number = 0;
     cBXNash* nash = this->nash;
     OverlapEverythingCallback* pctx = &ctx;
     queryCell_332DB8(nash, 0, box, pctx);
@@ -1007,7 +1008,8 @@ extern t4Vector t4vect_Zero_333EF8[] __asm__("t4vect_Zero");
 
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
 struct sVec4_335960;
-extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist, t4Vector* uv, int arg);
+extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist,
+                                              t4Vector* uv, tIntHint* hint);
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
 static inline int overlapTri_333EF8(const cWorldIntersectType* q, const tPatchRecord* n)
@@ -1046,9 +1048,9 @@ static inline int overlapBox_333EF8(const cWorldIntersectType* q, const tBoundBo
 static inline void reset_333EF8(tIntersectInfo* h)
 {
     h->HitType = 2;
-    (*(void**)&h->Patch) = 0;
-    (*(int*)&h->Inst) = 0;
-    (*(int*)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
@@ -1074,16 +1076,15 @@ static inline void reset_333EF8(tIntersectInfo* h)
  * 2) with the room left. Patch hits are not checked against @p cap. Called by cOverlapList_terrainIntersect1 and
  * cGroundMotion_setupGroundVectors.
  *
- * @param vq  the query (On Tour cWorldIntersectType)
+ * @param query  the query (On Tour cWorldIntersectType)
  * @param hits  out: the hit records
  * @param cap  the number of records @p hits holds
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt as its last argument (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-int cOverlapList::terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int hitCache)
+int cOverlapList::terrainIntersect(cWorldIntersectType* query, tIntersectInfo* hits, int cap, tIntHint* hitCache)
 {
     cOverlapList* self = this;
-    cWorldIntersectType* query = (cWorldIntersectType*)vq;
     int n = 0;
     for (unsigned int i = 0; i < self->numpatches; i++) {
         tPatchRecord* obj = self->patches[i];
@@ -1106,7 +1107,7 @@ int cOverlapList::terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int 
         (*(&hits[n].Ipos)) = pos;
         (*(&hits[n].Inorm)) = nrm;
         hits[n].Stype = obj->m_sSurfaceType;
-        (*(void**)&hits[n].Patch) = obj;
+        hits[n].Patch = obj;
         hits[n].Iparam = dist;
         hits[n].u = uv.x;
         hits[n].v = uv.y;
@@ -1114,7 +1115,7 @@ int cOverlapList::terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int 
     }
     for (unsigned int j = 0; j < self->numinstances; j++) {
         tInstanceRecord* node = self->instances[j];
-        if (((int)node->m_pCollideRecord) == 0) {
+        if (node->m_pCollideRecord == 0) {
             continue;
         }
         int flags = node->m_iFlags;
@@ -1147,7 +1148,8 @@ struct tIntersectInfoElem : tIntersectInfo {
     tIntersectInfoElem() {}
 };
 
-extern "C" int cOverlapList_terrainIntersect(cOverlapList* self, void* q, tIntersectInfo* hits, int max, int a4);
+extern "C" int cOverlapList_terrainIntersect(cOverlapList* self, void* q, tIntersectInfo* hits, int max,
+        tIntHint* hint);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_003342D0(float x)
@@ -1186,7 +1188,7 @@ static inline int isBetter_003342D0(tIntersectInfo* a, tIntersectInfo* b)
  * @param hitCache  passed through to cOverlapList_terrainIntersect (On Tour tIntHint *hint)
  * @return the chosen hit's parameter, or -1.0
  */
-float cOverlapList::terrainIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int hitCache)
+float cOverlapList::terrainIntersect1(cWorldIntersectType* query, tIntersectInfo* out, tIntHint* hitCache)
 {
     tIntersectInfoElem hits[64];
     int n = terrainIntersect(query, hits, 0x40, hitCache);
@@ -1282,9 +1284,14 @@ int cOverlapList::staticObjectIntersect(cWorldIntersectType* query, tIntersectIn
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_splineIntersect);
 #ifdef SKIP_ASM
-extern "C" void cRailModifier_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, t4Vector* pos, int mask, int* cnt, float* dist, int a7);
-extern "C" void cFlexRailNode_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, t4Vector* pos, int mask, int* cnt, float* dist, int a7);
-extern "C" void intersect_staticSplineSegmentIntersect(void* obj, tBoundBox* box, t4Vector* pos, int* cnt, float* dist, int a5);
+extern "C" void cRailModifier_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, t4Vector* pos, int mask,
+        int* cnt,
+                                              float* dist, tIntersectInfo* intInfo);
+extern "C" void cFlexRailNode_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, t4Vector* pos, int mask,
+        int* cnt,
+                                              float* dist, tIntersectInfo* intInfo);
+extern "C" void intersect_staticSplineSegmentIntersect(void* obj, tBoundBox* box, t4Vector* pos, int* cnt, float* dist,
+                                                       tIntersectInfo* intInfo);
 
 // PORT: PS2-only VU0 inline asm (in-place vector subtract).
 static inline void wsSubEq_334680(t4Vector& a, const t4Vector& b)
@@ -1326,7 +1333,7 @@ static inline void wsAddEq_334680(t4Vector& a, const t4Vector& b)
  * @param testRadius     the test radius
  * @return the number of hits
  */
-int cOverlapList::splineIntersect(t4Vector* pos, int intInfo, int mask, float testRadius)
+int cOverlapList::splineIntersect(t4Vector* pos, tIntersectInfo* intInfo, int mask, float testRadius)
 {
     tBoundBox box;
     t4Vector ext;
@@ -1335,14 +1342,14 @@ int cOverlapList::splineIntersect(t4Vector* pos, int intInfo, int mask, float te
     float zero = 0.0f;
     cnt = 0;
     dist = zero;
-    (*(t4Vector*)&box.MinPoint) = *pos;
-    (*(t4Vector*)&box.MaxPoint) = *pos;
+    box.MinPoint = *pos;
+    box.MaxPoint = *pos;
     ext.x = testRadius;
     ext.y = testRadius;
     ext.z = testRadius;
     ext.w = zero;
-    wsSubEq_334680((*(t4Vector*)&box.MinPoint), ext);
-    wsAddEq_334680((*(t4Vector*)&box.MaxPoint), ext);
+    wsSubEq_334680(box.MinPoint, ext);
+    wsAddEq_334680(box.MaxPoint, ext);
     for (unsigned int i = 0; i < numtyped; i++) {
         cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)typed[i];
         int type = spaceNode->type;
@@ -2010,9 +2017,9 @@ static inline sV_335128 splineSlope_335128(const sV_335128* emat, float w)
 static inline void reset_335128(tIntersectInfo* h)
 {
     h->HitType = 2;
-    (*(void**)&h->Patch) = 0;
-    (*(int*)&h->Inst) = 0;
-    (*(void**)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
@@ -2049,9 +2056,9 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecor
  */
 extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecord* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, tIntersectInfo* intersectinfo)
 {
-    if ((*(t4Vector*)&box->MaxPoint).x < pSplineSeg->m_fvMin.m[0] || (*(t4Vector*)&box->MinPoint).x > pSplineSeg->m_fvMax.m[0] ||
-        (*(t4Vector*)&box->MaxPoint).y < pSplineSeg->m_fvMin.m[1] || (*(t4Vector*)&box->MinPoint).y > pSplineSeg->m_fvMax.m[1] ||
-        (*(t4Vector*)&box->MaxPoint).z < pSplineSeg->m_fvMin.m[2] || (*(t4Vector*)&box->MinPoint).z > pSplineSeg->m_fvMax.m[2]) {
+    if (box->MaxPoint.x < pSplineSeg->m_fvMin.m[0] || box->MinPoint.x > pSplineSeg->m_fvMax.m[0] ||
+        box->MaxPoint.y < pSplineSeg->m_fvMin.m[1] || box->MinPoint.y > pSplineSeg->m_fvMax.m[1] ||
+        box->MaxPoint.z < pSplineSeg->m_fvMin.m[2] || box->MinPoint.z > pSplineSeg->m_fvMax.m[2]) {
         return;
     }
 
@@ -2128,12 +2135,12 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecor
         (*(sV_335128*)&intersectinfo->Ipos) = lastp;
         (*(sV_335128*)&intersectinfo->Inorm) = Normalize_335128(splineSlope_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), lastt));
         intersectinfo->Stype = pSplineSeg->m_Parent->m_eSurfaceType;
-        (*(int*)&intersectinfo->Inst) = 0;
+        intersectinfo->Inst = 0;
         intersectinfo->Mesh = -1;
         (*(void**)&intersectinfo->Spline) = ((char*)pSplineSeg->m_Parent);
         intersectinfo->T = lastt;
         intersectinfo->Seg = -1;
-        (*(void**)&intersectinfo->Patch) = 0;
+        intersectinfo->Patch = 0;
     }
 }
 #endif
@@ -2146,7 +2153,8 @@ extern t4Vector t4vect_Zero[];
 
 
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
-extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist, t4Vector* uv, int arg);
+extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist,
+                                              t4Vector* uv, tIntHint* hint);
 
 static inline int overlap_335960(const cWorldIntersectType* q, const tPatchRecord* n)
 {
@@ -2162,9 +2170,9 @@ static inline int overlap_335960(const cWorldIntersectType* q, const tPatchRecor
 static inline void reset_335960(tIntersectInfo* h)
 {
     h->HitType = 2;
-    (*(void**)&h->Patch) = 0;
-    (*(int*)&h->Inst) = 0;
-    (*(int*)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
@@ -2202,12 +2210,12 @@ extern "C" void TerrainCallback_intersectpatch(void* vctx, void* vobj)
     if ((obj->m_sSurfaceFlags & tPatchRecord::kCollideFlags) != tPatchRecord::kCollideFlags) return;
     if (!overlap_335960(ctx->intersecttype, obj)) return;
     cAIFwdDiffCache_GetFwdDiff(((void*)ctx->fwddiffcache), obj, &node);
-    if (!cWorldIntersectType_IsPatchInt(ctx->intersecttype, obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
+    if (!cWorldIntersectType_IsPatchInt(ctx->intersecttype, obj, node, &pos, &nrm, &dist, &uv, ctx->hint)) return;
     reset_335960(&(ctx->intersectinfo)[*ctx->numintersectinfo]);
     (ctx->intersectinfo)[*ctx->numintersectinfo].Ipos = pos;
     (ctx->intersectinfo)[*ctx->numintersectinfo].Inorm = nrm;
     (ctx->intersectinfo)[*ctx->numintersectinfo].Stype = obj->m_sSurfaceType;
-    (*(void**)&(ctx->intersectinfo)[*ctx->numintersectinfo].Patch) = obj;
+    (ctx->intersectinfo)[*ctx->numintersectinfo].Patch = obj;
     (ctx->intersectinfo)[*ctx->numintersectinfo].Iparam = dist;
     (ctx->intersectinfo)[*ctx->numintersectinfo].u = uv.x;
     (ctx->intersectinfo)[*ctx->numintersectinfo].v = uv.y;
@@ -2265,7 +2273,7 @@ extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
 {
     TerrainCallback* ctx = (TerrainCallback*)vctx;
     tInstanceRecord* node = (tInstanceRecord*)vnode;
-    if (((int)node->m_pCollideRecord) == 0) return;
+    if (node->m_pCollideRecord == 0) return;
     int flags = node->m_iFlags;
     if (flags & 0x20) {
         if (overlapNode_335B90(ctx->intersecttype, node)) {
@@ -2345,18 +2353,18 @@ static inline void queryCell_335D78(cBXNash* nash, int i, tBoundBox* box, Terrai
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt for each patch (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-int cBXNash::terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, int hitCache)
+int cBXNash::terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, tIntHint* hitCache)
 {
     cBXNash* nash = this;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     TerrainCallback ctx;
     tBoundBox box;
     int count;
-    (*(cWorldIntersectType**)&ctx.intersecttype) = query;
+    ctx.intersecttype = query;
     ctx.intersectinfo = hits;
     ctx.maxintersectinfo = cap;
     ctx.numintersectinfo = &count;
-    (*(int*)&ctx.hint) = hitCache;
+    ctx.hint = hitCache;
     ctx.fwddiffcache = nash->TheAIFwdDiffCache;
     box.MinPoint = (*(&query->boxMin));
     box.MaxPoint = (*(&query->boxMax));
@@ -2377,7 +2385,8 @@ int cBXNash::terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/worldsphtree", cBXNash_terrainIntersect1);
 #ifdef SKIP_ASM
-extern "C" int cBXNash_terrainIntersect(cBXNash* self, cWorldIntersectType* q, tIntersectInfo* hits, int max, int a4);
+extern "C" int cBXNash_terrainIntersect(cBXNash* self, cWorldIntersectType* q, tIntersectInfo* hits, int max,
+        tIntHint* hint);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_00336850(float x)
@@ -2415,7 +2424,7 @@ static inline int isBetter_00336850(tIntersectInfo* a, tIntersectInfo* b)
  * @param hint  passed through to cBXNash_terrainIntersect (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
  * @return the chosen hit's parameter, or -1.0
  */
-float cBXNash::terrainIntersect1(cWorldIntersectType* intersectType, tIntersectInfo* out, int hint)
+float cBXNash::terrainIntersect1(cWorldIntersectType* intersectType, tIntersectInfo* out, tIntHint* hint)
 {
     tIntersectInfoElem hits[64];
     int n = terrainIntersect(intersectType, hits, 0x40, hint);
@@ -2520,7 +2529,7 @@ extern "C" bool cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* out
     }
     tIntersectInfoElem hits[64];
     TerrainCallback terrainQuery;
-    (*(void**)&terrainQuery.intersecttype) = seg;
+    terrainQuery.intersecttype = (cWorldIntersectType*)seg;  // the cWorldLine built in seg
     terrainQuery.intersectinfo = hits;
     terrainQuery.maxintersectinfo = 0x40;
     // The walk's state, kept together as in retail: the hit count, the line test, then one empty helper per octant.
@@ -2530,8 +2539,8 @@ extern "C" bool cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* out
         nash_privy_QueryHelper helpers[8];
     } walk;
     terrainQuery.numintersectinfo = &walk.count;
-    (*(int*)&terrainQuery.hint) = 0;
-    (*(void**)&terrainQuery.fwddiffcache) = (void*)self->TheAIFwdDiffCache;
+    terrainQuery.hint = 0;
+    terrainQuery.fwddiffcache = self->TheAIFwdDiffCache;
     walk.count = 0;
     walk.lineTest.position = (t4Vector*)pos;
     VerticalLineProximityTest* ctx = &walk.lineTest;
@@ -2707,7 +2716,7 @@ extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, cWorldIntersectType
     StaticObjectCallback ctx;
     tBoundBox box;
     int count;
-    (*(cWorldIntersectType**)&ctx.intersecttype) = query;
+    ctx.intersecttype = query;
     ctx.intersectinfo = hits;
     ctx.maxintersectinfo = cap;
     ctx.numintersectinfo = &count;
@@ -2810,16 +2819,16 @@ static inline void collect_337A48(nash_Cell* tree, SplineCallback* q)
         if (type == 2) {
             cRailModifier_splineIntersect(((cRailSpaceNode*)o)->Rail, ((tBoundBox*)q->box), ((tBoundBox*)q->box),
                                           ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit,
-                                          q->intersectdist, ((int)q->intersectinfo));
+                                          q->intersectdist, q->intersectinfo);
         } else if (type == 3) {
             cFlexRailNode_splineIntersect(((cFlexRailSpaceNode*)o)->FlexNode, ((tBoundBox*)q->box),
                                           ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos),
                                           ((int)q->splinefiltermask), q->hit, q->intersectdist,
-                                          ((int)q->intersectinfo));
+                                          q->intersectinfo);
         } else if (type == 1) {
             if (((tSplineSegmentRecord*)o)->m_Parent->m_iFlags & ((int)q->splinefiltermask)) {
                 intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), q->hit,
-                                                       q->intersectdist, ((int)q->intersectinfo));
+                                                       q->intersectdist, q->intersectinfo);
             }
         }
     }
@@ -2868,28 +2877,29 @@ static inline void queryCell_337A48(cBXNash* nash, int i, tBoundBox* box, Spline
  * @param testRadius  the test radius
  * @return nonzero when a hit was recorded
  */
-extern "C" int cBXNash_splineIntersect(cBXNash* grid, t4Vector* pos, int intInfo, int mask, float testRadius)
+extern "C" int cBXNash_splineIntersect(cBXNash* grid, t4Vector* pos, tIntersectInfo* intInfo, int mask,
+        float testRadius)
 {
     tBoundBox box;
     t4Vector ext;
     SplineCallback splineQuery;
     int cnt;
     float dist;
-    (*(t4Vector*)&box.MinPoint) = *pos;
-    (*(t4Vector*)&box.MaxPoint) = *pos;
+    box.MinPoint = *pos;
+    box.MaxPoint = *pos;
     ext.x = testRadius;
     ext.y = testRadius;
     ext.z = testRadius;
     ext.w = 0.0f;
-    wsSubEq_334680((*(t4Vector*)&box.MinPoint), ext);
-    wsAddEq_334680((*(t4Vector*)&box.MaxPoint), ext);
+    wsSubEq_334680(box.MinPoint, ext);
+    wsAddEq_334680(box.MaxPoint, ext);
     tBoundBox* pbox = &box;
-    (*(t4Vector**)&splineQuery.intersectpos) = pos;
-    (*(int*)&splineQuery.intersectinfo) = intInfo;
+    splineQuery.intersectpos = pos;
+    splineQuery.intersectinfo = intInfo;
     splineQuery.splinefiltermask = mask;
     splineQuery.hit = &cnt;
     splineQuery.intersectdist = &dist;
-    (*(tBoundBox**)&splineQuery.box) = pbox;
+    splineQuery.box = pbox;
     dist = 0.0f;
     cnt = 0;
     queryCell_337A48(grid, 0, pbox, &splineQuery);
@@ -2954,8 +2964,9 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallba
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -3080,8 +3091,8 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
-    void** objNode;
-    for (objNode = (*(void***)&node->nodesinside[2]); objNode != 0; objNode = (void**)*objNode) {
+    nash_Node* objNode;
+    for (objNode = node->nodesinside[2].head; objNode != 0; objNode = objNode->next) {
         ctx->instances[(*ctx->number)++] = (tInstanceRecord*)objNode;
     }
     if (cell->level == nash_CellKey::kLeafLevel) {
@@ -3092,8 +3103,9 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -3277,8 +3289,9 @@ extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallba
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -3489,8 +3502,9 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallb
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -3615,11 +3629,11 @@ extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, 
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
-    void** objNode;
-    for (objNode = (void**)(*(void**)&node->nodesinside[1]); objNode != 0; objNode = (void**)*objNode) {
+    nash_Node* objNode;
+    for (objNode = node->nodesinside[1].head; objNode != 0; objNode = objNode->next) {
         TerrainCallback_intersectpatch(ctx, objNode);
     }
-    for (objNode = (void**)(*(void**)&node->nodesinside[0]); objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = node->nodesinside[0].head; objNode != 0; objNode = objNode->next) {
         TerrainCallback_intersectinstance(ctx, objNode);
     }
     if (cell->level == nash_CellKey::kLeafLevel) {
@@ -3630,8 +3644,9 @@ extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, 
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -3739,8 +3754,9 @@ extern "C" void nash_Cell_descend4(nash_Cell* self, void* ctx);
 
 static inline int Classify_DBE8(VerticalLineProximityTest* test, nash_CellKey* c)
 {
-    int bits = (c->level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (c->level + 0x7F) << 23;
+    float s = bits.f;
     const t4Vector* p = test->position;
     if (p->x < ((float)c->x - 0.2f) * s) {
         return 1;
@@ -3871,8 +3887,8 @@ extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx);
 
 static inline void collect_33DFD8(nash_Cell* node, StaticObjectCallback* ctx)
 {
-    void** p;
-    for (p = (void**)(*(void**)&node->nodesinside[0]); p != 0; p = (void**)*p) {
+    nash_Node* p;
+    for (p = node->nodesinside[0].head; p != 0; p = p->next) {
         StaticObjectCallback_intersectinstance(ctx, p);
     }
     if (node->children[0][0][0] != 0) node->children[0][0][0]->descend5(ctx);
@@ -3906,8 +3922,8 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* 
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
-    void** objNode;
-    for (objNode = (void**)(*(void**)&node->nodesinside[0]); objNode != 0; objNode = (void**)*objNode) {
+    nash_Node* objNode;
+    for (objNode = node->nodesinside[0].head; objNode != 0; objNode = objNode->next) {
         StaticObjectCallback_intersectinstance(ctx, objNode);
     }
     if (cell->level == nash_CellKey::kLeafLevel) {
@@ -3918,8 +3934,9 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* 
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -4027,17 +4044,22 @@ INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX7);
 // PORT: alias; the unit defines nash_Cell_descend6 later with its own struct types.
 extern "C" void nash_Cell_descend6_33ED60(nash_Cell* tree, SplineCallback* q) __asm__("nash_Cell_descend6");
 
-static inline void objs_33ED60(char* o, SplineCallback* q)
+static inline void objs_33ED60(cTypedSpaceNode* o, SplineCallback* q)
 {
-    for (; o != 0; o = *(char**)o) {
-        int type = *(int*)(o + 8);
-        if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
-        } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
-        } else if (type == 1) {
-            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & ((int)q->splinefiltermask)) {
-                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
+    for (; o != 0; o = (cTypedSpaceNode*)o->next) {
+        int type = o->type;
+        if (type == kSNT_Rail) {
+            cRailModifier_splineIntersect(((cRailSpaceNode*)o)->Rail, ((tBoundBox*)q->box), ((tBoundBox*)q->box),
+                                          ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit,
+                                          q->intersectdist, q->intersectinfo);
+        } else if (type == kSNT_FlexRail) {
+            cFlexRailNode_splineIntersect(((cFlexRailSpaceNode*)o)->FlexNode, ((tBoundBox*)q->box),
+                                          ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos),
+                                          ((int)q->splinefiltermask), q->hit, q->intersectdist, q->intersectinfo);
+        } else if (type == kSNT_SplineSegment) {
+            if (((tSplineSegmentRecord*)o)->m_Parent->m_iFlags & ((int)q->splinefiltermask)) {
+                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), q->hit,
+                                                       q->intersectdist, q->intersectinfo);
             }
         }
     }
@@ -4045,7 +4067,7 @@ static inline void objs_33ED60(char* o, SplineCallback* q)
 
 static inline void collect_33ED60(nash_Cell* node, SplineCallback* q)
 {
-    objs_33ED60((*(char**)&node->nodesinside[2]), q);
+    objs_33ED60((cTypedSpaceNode*)node->nodesinside[2].head, q);
     if (node->children[0][0][0] != 0) nash_Cell_descend6_33ED60(node->children[0][0][0], q);
     if (node->children[0][0][1] != 0) nash_Cell_descend6_33ED60(node->children[0][0][1], q);
     if (node->children[0][1][0] != 0) nash_Cell_descend6_33ED60(node->children[0][1][0], q);
@@ -4091,7 +4113,7 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
-    objs_33ED60((*(char**)&node->nodesinside[2]), ctx);
+    objs_33ED60((cTypedSpaceNode*)node->nodesinside[2].head, ctx);
     if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
@@ -4100,8 +4122,9 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
-    int bits = (sub.level + 0x7F) << 23;
-    float cellSize = *(float*)&bits;
+    union { int i; float f; } bits;  // 2^level built from the float exponent field
+    bits.i = (sub.level + 0x7F) << 23;
+    float cellSize = bits.f;
 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
@@ -4515,18 +4538,18 @@ struct sOctCollect {
  */
 extern "C" void nash_Cell_descend1(nash_Cell* self, sOctCollect* out)
 {
-    void** objNode;
-    for (objNode = *(void***)&self->nodesinside[2]; objNode != 0; objNode = (void**)*objNode) {
+    nash_Node* objNode;
+    for (objNode = self->nodesinside[2].head; objNode != 0; objNode = objNode->next) {
         out->arr[(*out->count)++] = objNode;
     }
-    if (*(void**)&self->children[0]) nash_Cell_descend1((nash_Cell*)(*(void**)&self->children[0]), out);
-    if (self->children[0][0][1]) nash_Cell_descend1((nash_Cell*)(self->children[0][0][1]), out);
-    if (self->children[0][1][0]) nash_Cell_descend1((nash_Cell*)(self->children[0][1][0]), out);
-    if (self->children[0][1][1]) nash_Cell_descend1((nash_Cell*)(self->children[0][1][1]), out);
-    if (*(void**)&self->children[1]) nash_Cell_descend1((nash_Cell*)(*(void**)&self->children[1]), out);
-    if (self->children[1][0][1]) nash_Cell_descend1((nash_Cell*)(self->children[1][0][1]), out);
-    if (self->children[1][1][0]) nash_Cell_descend1((nash_Cell*)(self->children[1][1][0]), out);
-    if (self->children[1][1][1]) nash_Cell_descend1((nash_Cell*)(self->children[1][1][1]), out);
+    if (self->children[0][0][0]) nash_Cell_descend1(self->children[0][0][0], out);
+    if (self->children[0][0][1]) nash_Cell_descend1(self->children[0][0][1], out);
+    if (self->children[0][1][0]) nash_Cell_descend1(self->children[0][1][0], out);
+    if (self->children[0][1][1]) nash_Cell_descend1(self->children[0][1][1], out);
+    if (self->children[1][0][0]) nash_Cell_descend1(self->children[1][0][0], out);
+    if (self->children[1][0][1]) nash_Cell_descend1(self->children[1][0][1], out);
+    if (self->children[1][1][0]) nash_Cell_descend1(self->children[1][1][0], out);
+    if (self->children[1][1][1]) nash_Cell_descend1(self->children[1][1][1], out);
 }
 #endif
 
@@ -4669,18 +4692,18 @@ extern "C" void TerrainCallback_intersectinstance(void* ctx, void* obj);
  */
 void nash_Cell::descend4(void* ctx)
 {
-    void** objNode;
-    for (objNode = *(void***)&nodesinside[1]; objNode != 0; objNode = (void**)*objNode) {
+    nash_Node* objNode;
+    for (objNode = nodesinside[1].head; objNode != 0; objNode = objNode->next) {
         TerrainCallback_intersectpatch(ctx, objNode);
     }
-    for (objNode = *(void***)&nodesinside[0]; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = nodesinside[0].head; objNode != 0; objNode = objNode->next) {
         TerrainCallback_intersectinstance(ctx, objNode);
     }
-    if (*(void**)&children[0]) ((nash_Cell*)(*(void**)&children[0]))->descend4(ctx);
+    if (children[0][0][0]) children[0][0][0]->descend4(ctx);
     if (children[0][0][1]) children[0][0][1]->descend4(ctx);
     if (children[0][1][0]) children[0][1][0]->descend4(ctx);
     if (children[0][1][1]) children[0][1][1]->descend4(ctx);
-    if (*(void**)&children[1]) ((nash_Cell*)(*(void**)&children[1]))->descend4(ctx);
+    if (children[1][0][0]) children[1][0][0]->descend4(ctx);
     if (children[1][0][1]) children[1][0][1]->descend4(ctx);
     if (children[1][1][0]) children[1][1][0]->descend4(ctx);
     if (children[1][1][1]) children[1][1][1]->descend4(ctx);
@@ -4702,15 +4725,15 @@ extern "C" void StaticObjectCallback_intersectinstance(void* ctx, void* obj);
  */
 void nash_Cell::descend5(void* ctx)
 {
-    void** objNode;
-    for (objNode = *(void***)&nodesinside[0]; objNode != 0; objNode = (void**)*objNode) {
+    nash_Node* objNode;
+    for (objNode = nodesinside[0].head; objNode != 0; objNode = objNode->next) {
         StaticObjectCallback_intersectinstance(ctx, objNode);
     }
-    if (*(void**)&children[0]) ((nash_Cell*)(*(void**)&children[0]))->descend5(ctx);
+    if (children[0][0][0]) children[0][0][0]->descend5(ctx);
     if (children[0][0][1]) children[0][0][1]->descend5(ctx);
     if (children[0][1][0]) children[0][1][0]->descend5(ctx);
     if (children[0][1][1]) children[0][1][1]->descend5(ctx);
-    if (*(void**)&children[1]) ((nash_Cell*)(*(void**)&children[1]))->descend5(ctx);
+    if (children[1][0][0]) children[1][0][0]->descend5(ctx);
     if (children[1][0][1]) children[1][0][1]->descend5(ctx);
     if (children[1][1][0]) children[1][1][0]->descend5(ctx);
     if (children[1][1][1]) children[1][1][1]->descend5(ctx);
@@ -4744,17 +4767,17 @@ extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* splineQuery)
             cRailModifier_splineIntersect(((cRailSpaceNode*)typedNode)->Rail, ((tBoundBox*)splineQuery->box),
                                           ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos),
                                           ((int)splineQuery->splinefiltermask), splineQuery->hit,
-                                          splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
+                                          splineQuery->intersectdist, splineQuery->intersectinfo);
         } else if (type == kSNT_FlexRail) {
             cFlexRailNode_splineIntersect(((cFlexRailSpaceNode*)typedNode)->FlexNode, ((tBoundBox*)splineQuery->box),
                                           ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos),
                                           ((int)splineQuery->splinefiltermask), splineQuery->hit,
-                                          splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
+                                          splineQuery->intersectdist, splineQuery->intersectinfo);
         } else if (type == kSNT_SplineSegment) {
             if (((tSplineSegmentRecord*)typedNode)->m_Parent->m_iFlags & ((int)splineQuery->splinefiltermask)) {
                 intersect_staticSplineSegmentIntersect(typedNode, ((tBoundBox*)splineQuery->box),
                                                        ((t4Vector*)splineQuery->intersectpos), splineQuery->hit,
-                                                       splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
+                                                       splineQuery->intersectdist, splineQuery->intersectinfo);
             }
         }
     }
@@ -4953,7 +4976,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostNode__cBoostNode__FPv);
 void* cBoostNode__cBoostNode(void* vself)
 {
     cBoostNode* self = (cBoostNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cBoostNode_vtbl);
+    VPTR_OF(cObjNode, self) = cBoostNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -5211,11 +5234,7 @@ float AIrandf(float lo, float hi);
 float AIrangernd(float a, float b);
 
 
-struct sFloat_1AA0 {
-    float v;
-};
-
-static inline void setRate_1AA0(sFloat_1AA0* dst, float v, float dflt)
+static inline void setRate_1AA0(float* dst, float v, float dflt)
 {
     float r;
     if (v >= 0.0f) {
@@ -5223,10 +5242,10 @@ static inline void setRate_1AA0(sFloat_1AA0* dst, float v, float dflt)
     } else {
         r = dflt;
     }
-    dst->v = r;
+    *dst = r;
 }
 
-static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* vinfo)
+static inline void setRateMax_1AA0(float* dst, float v, char* vinfo)
 {
     tModelRecord* info = (tModelRecord*)vinfo;
     float r;
@@ -5235,7 +5254,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* vinfo)
     } else {
         r = v * 0.03333333507180214f;
     }
-    dst->v = r;
+    *dst = r;
 }
 
 /**
@@ -5271,9 +5290,9 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int buc
     if (self->AnimFrames != 0) {
         frameTime = cAnimFrame_getStartTime(self->AnimFrames);
     }
-    *(unsigned short*)&self->AnimType = (unsigned short)def->Type;
-    setRate_1AA0((sFloat_1AA0*)&self->FromTime, def->FromTime, frameTime);
-    setRateMax_1AA0((sFloat_1AA0*)&self->ToTime, def->ToTime, info);
+    self->AnimType = def->Type;
+    setRate_1AA0(&self->FromTime, def->FromTime, frameTime);
+    setRateMax_1AA0(&self->ToTime, def->ToTime, info);
     frameTime = def->StartTime;
     if (frameTime < 0.0f) {
         frameTime = self->FromTime;
@@ -5736,9 +5755,9 @@ void* cAnimTeeterNode::cAnimTeeterNode1(int bucket, tInstanceRecord* obj, tMakeA
     Damp = def->Damp;
     Spring = def->Spring;
     Flags |= 1;
-    *(int*)&TorqueSum = 0;
-    *(int*)&AnimSpeed = 0;
-    *(int*)&W = 0;
+    TorqueSum = 0.0f;
+    AnimSpeed = 0.0f;
+    W = 0.0f;
     return (this);
 }
 #endif
@@ -6041,7 +6060,7 @@ void cAnimTeeterNode::applyForce(tIntersectInfo* intInfo, t4Vector* force)
     if (idx >= 0) {
         cMoveNode* sub = (cMoveNode*)(&MoveNodeBase);
         tMeshHeirarchyRecord* ents = sub->Instance->m_Model->m_MeshHeirarchy;
-        if ((int)ents[idx].m_MeshAnim != 0) {
+        if (ents[idx].m_MeshAnim != 0) {
             // slot 29: cAnimNode_getAnimMat
             sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)mVtbl;
             t4Matrix* animMat = vt[29].fn(vthis(sub, vt[29]), idx);
@@ -6120,11 +6139,11 @@ extern void* cBoostModifier_vtbl[];
  * @param instRecord  the instance record the modifier belongs to
  * @return @p self
  */
-extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostData* def, int instRecord)
+extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostData* def, tInstanceRecord* instRecord)
 {
     self->Active = 1;
     VPTR_OF(cPhysicsModifier, self) = cBoostModifier_vtbl;
-    self->Instance = (tInstanceRecord*)instRecord;
+    self->Instance = instRecord;
     int type = def->Type;
     self->Type = type;
     int boostFrames = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
@@ -6420,9 +6439,9 @@ void* cDebounceNode::cDebounceNode1(void* bucket, void* instance, tMakeDebounceD
     Type = def->Type;
     cMoveNode_transferFromOld(this, oldNode);
     if (def->Visible == tMakeDebounceData::kVisible_Hide) {
-        (*(unsigned int*)&Instance->m_iFlags) &= 0xFFFFFFF0;
+        Instance->m_iFlags &= 0xFFFFFFF0;
     } else if (def->Visible == tMakeDebounceData::kVisible_Show) {
-        (*(unsigned int*)&Instance->m_iFlags) |= 1;
+        Instance->m_iFlags |= 1;
         Instance->m_iFlags = (((unsigned int)(Instance)->m_iFlags) & ~2u) | 4;
     } else {
         tInstanceRecord* n = Instance;

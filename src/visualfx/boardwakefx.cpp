@@ -910,11 +910,11 @@ extern t4Vector t4vect_Zero;
  */
 void cWakeParams::Clear()
 {
-    *(int*)&mAlpha = 0;
-    *(int*)&mSpeed = 0;
-    *(t4Vector*)&mUp = t4vect_Zero;
-    *(t4Vector*)&mForward = t4vect_Zero;
-    *(t4Vector*)&mSide = t4vect_Zero;
+    mAlpha = 0.0f;
+    mSpeed = 0.0f;
+    mUp = t4vect_Zero;
+    mForward = t4vect_Zero;
+    mSide = t4vect_Zero;
 }
 #endif
 
@@ -3417,7 +3417,7 @@ extern "C" void func_002E24D0(func_002E24D0_sFx* self)
         int i;
         for (i = 0; i < 10; i++) {
             cDynamicColourEmitter* w = &self->wakes[i];
-            if (((void*)w->m_enabled) != 0 && w->m_enabledCount > 0) {
+            if (w->m_enabled != 0 && w->m_enabledCount > 0) {
                 cDynamicColourEmitter_render(w, 7);
             }
         }
@@ -3639,9 +3639,9 @@ void cLightHalo::Render(int idx)
     }
     t3Vector n;
     tHaloRecord* haloRecord = mpHalo;
-    float x = (*(t3Vector*)&haloRecord->m_fvColor[0]).x;
-    float y = (*(t3Vector*)&haloRecord->m_fvColor[0]).y;
-    float z = (*(t3Vector*)&haloRecord->m_fvColor[0]).z;
+    float x = haloRecord->m_fvColor[0];
+    float y = haloRecord->m_fvColor[1];
+    float z = haloRecord->m_fvColor[2];
     float len = Sqrt_2868(x * x + y * y + z * z);
     if (len != 0.0f) {
         float inv = 1.0f / len;
@@ -3649,14 +3649,14 @@ void cLightHalo::Render(int idx)
         n.y = y * inv;
         n.z = z * inv;
     } else {
-        n.x = (*(t3Vector*)&haloRecord->m_fvColor[0]).x;
-        n.y = (*(t3Vector*)&haloRecord->m_fvColor[0]).y;
-        n.z = (*(t3Vector*)&haloRecord->m_fvColor[0]).z;
+        n.x = haloRecord->m_fvColor[0];
+        n.y = haloRecord->m_fvColor[1];
+        n.z = haloRecord->m_fvColor[2];
     }
     tARGB col;
-    (*(t3Vector*)&col.R).x = n.x;
-    (*(t3Vector*)&col.R).y = n.y;
-    (*(t3Vector*)&col.R).z = n.z;
+    col.R = n.x;
+    col.G = n.y;
+    col.B = n.z;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (mbRequestZSample != 0) {
         col.A = mpHalo->m_fOcclude[idx];
@@ -3688,9 +3688,9 @@ void cLightHalo::Render(int idx)
         break;
     }
     tHaloRecord* drawRecord = mpHalo;
-    ctx->DrawRotatedSprite(t4VectorInit((*(t3Vector*)&drawRecord->m_fvWorldPos[0]).x,
-                                        (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).y,
-                                        (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).z, 1.0f),
+    ctx->DrawRotatedSprite(t4VectorInit(drawRecord->m_fvWorldPos[0],
+                                        drawRecord->m_fvWorldPos[1],
+                                        drawRecord->m_fvWorldPos[2], 1.0f),
                            t2Vector(size, size), t2Vector(0.0f, 0.0f), t2Vector(1.0f, 1.0f), col, mAngle, 2);
 }
 #endif
@@ -3749,9 +3749,9 @@ void cLightHalo::Process(tViewInfo* viewInfo)
     cLightHalo* self = this;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     t4Vector pos;
-    pos.x = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).x;
-    pos.y = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).y;
-    pos.z = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).z;
+    pos.x = self->mpHalo->m_fvWorldPos[0];
+    pos.y = self->mpHalo->m_fvWorldPos[1];
+    pos.z = self->mpHalo->m_fvWorldPos[2];
     pos.w = 1.0f;
     if (obj->GetOutCode(pos)) {
         self->mbOnScreen = 0;
@@ -4169,7 +4169,7 @@ void cLensFxMan::ProcessLens(int idx)
     tRect viewRect = ctx->GetViewportWindow();
     self->mViewInfo.mViewRect = viewRect;
     {
-        vu0CopyMatrix3338(&(*(t4Matrix*)&self->mViewInfo.mViewMat), (t4Matrix*)ctx->GetView());
+        vu0CopyMatrix3338(&self->mViewInfo.mViewMat, (t4Matrix*)ctx->GetView());
     }
     int i = 0;
     {
@@ -4479,10 +4479,6 @@ struct sVtx_3AF8 {
     sVtx_3AF8() {}
 };
 
-struct sWkColor_3AF8 {
-    float a, r, g, b;
-};
-
 
 extern sDrawState sDrawState_s_defaultDrawState_3AF8 __asm__("sDrawState_s_defaultDrawState");
 
@@ -4707,18 +4703,18 @@ void cPlayerIndicatorFX::render()
     t4Vector beamUpper = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
     t4Vector beamLower = Add_3AF8(*base, Scale_3AF8(up, 130.0f));
     t4Vector off = Scale_3AF8(side, 85.0f);
-    sWkColor_3AF8 fade;
-    fade.a = 0.0f;
-    fade.r = (*(sWkColor_3AF8*)&CurColor).r;
-    fade.g = (*(sWkColor_3AF8*)&CurColor).g;
-    fade.b = (*(sWkColor_3AF8*)&CurColor).b;
+    tARGB fade;
+    fade.A = 0.0f;
+    fade.R = CurColor.R;
+    fade.G = CurColor.G;
+    fade.B = CurColor.B;
     sVtx_3AF8 verts[8];
     {
         t4Vector vertPos = Sub_3AF8(*base, off);
-        verts[0].r = (int)(fade.r * 255.0f);
-        verts[0].g = (int)(fade.g * 255.0f);
-        verts[0].b = (int)(fade.b * 255.0f);
-        verts[0].a = (int)(fade.a * 128.0f);
+        verts[0].r = (int)(fade.R * 255.0f);
+        verts[0].g = (int)(fade.G * 255.0f);
+        verts[0].b = (int)(fade.B * 255.0f);
+        verts[0].a = (int)(fade.A * 128.0f);
         verts[0].q = 1.0f;
         verts[0].pos = vertPos;
         verts[0].s = 0.0f;
@@ -4726,10 +4722,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Add_3AF8(*base, off);
-        verts[1].r = (int)(fade.r * 255.0f);
-        verts[1].g = (int)(fade.g * 255.0f);
-        verts[1].b = (int)(fade.b * 255.0f);
-        verts[1].a = (int)(fade.a * 128.0f);
+        verts[1].r = (int)(fade.R * 255.0f);
+        verts[1].g = (int)(fade.G * 255.0f);
+        verts[1].b = (int)(fade.B * 255.0f);
+        verts[1].a = (int)(fade.A * 128.0f);
         verts[1].q = 1.0f;
         verts[1].pos = vertPos;
         verts[1].s = 1.0f;
@@ -4737,10 +4733,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Sub_3AF8(beamLower, off);
-        verts[2].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
-        verts[2].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
-        verts[2].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
-        verts[2].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
+        verts[2].r = (int)(CurColor.R * 255.0f);
+        verts[2].g = (int)(CurColor.G * 255.0f);
+        verts[2].b = (int)(CurColor.B * 255.0f);
+        verts[2].a = (int)(CurColor.A * 128.0f);
         verts[2].q = 1.0f;
         verts[2].pos = vertPos;
         verts[2].s = 0.0f;
@@ -4748,10 +4744,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Add_3AF8(beamLower, off);
-        verts[3].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
-        verts[3].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
-        verts[3].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
-        verts[3].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
+        verts[3].r = (int)(CurColor.R * 255.0f);
+        verts[3].g = (int)(CurColor.G * 255.0f);
+        verts[3].b = (int)(CurColor.B * 255.0f);
+        verts[3].a = (int)(CurColor.A * 128.0f);
         verts[3].q = 1.0f;
         verts[3].pos = vertPos;
         verts[3].s = 1.0f;
@@ -4759,10 +4755,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Sub_3AF8(beamUpper, off);
-        verts[4].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
-        verts[4].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
-        verts[4].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
-        verts[4].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
+        verts[4].r = (int)(CurColor.R * 255.0f);
+        verts[4].g = (int)(CurColor.G * 255.0f);
+        verts[4].b = (int)(CurColor.B * 255.0f);
+        verts[4].a = (int)(CurColor.A * 128.0f);
         verts[4].q = 1.0f;
         verts[4].pos = vertPos;
         verts[4].s = 0.0f;
@@ -4770,10 +4766,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Add_3AF8(beamUpper, off);
-        verts[5].r = (int)((*(sWkColor_3AF8*)&CurColor).r * 255.0f);
-        verts[5].g = (int)((*(sWkColor_3AF8*)&CurColor).g * 255.0f);
-        verts[5].b = (int)((*(sWkColor_3AF8*)&CurColor).b * 255.0f);
-        verts[5].a = (int)((*(sWkColor_3AF8*)&CurColor).a * 128.0f);
+        verts[5].r = (int)(CurColor.R * 255.0f);
+        verts[5].g = (int)(CurColor.G * 255.0f);
+        verts[5].b = (int)(CurColor.B * 255.0f);
+        verts[5].a = (int)(CurColor.A * 128.0f);
         verts[5].q = 1.0f;
         verts[5].pos = vertPos;
         verts[5].s = 1.0f;
@@ -4781,10 +4777,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Sub_3AF8(beamTip, off);
-        verts[6].r = (int)(fade.r * 255.0f);
-        verts[6].g = (int)(fade.g * 255.0f);
-        verts[6].b = (int)(fade.b * 255.0f);
-        verts[6].a = (int)(fade.a * 128.0f);
+        verts[6].r = (int)(fade.R * 255.0f);
+        verts[6].g = (int)(fade.G * 255.0f);
+        verts[6].b = (int)(fade.B * 255.0f);
+        verts[6].a = (int)(fade.A * 128.0f);
         verts[6].q = 1.0f;
         verts[6].pos = vertPos;
         verts[6].s = 0.0f;
@@ -4792,10 +4788,10 @@ void cPlayerIndicatorFX::render()
     }
     {
         t4Vector vertPos = Add_3AF8(beamTip, off);
-        verts[7].r = (int)(fade.r * 255.0f);
-        verts[7].g = (int)(fade.g * 255.0f);
-        verts[7].b = (int)(fade.b * 255.0f);
-        verts[7].a = (int)(fade.a * 128.0f);
+        verts[7].r = (int)(fade.R * 255.0f);
+        verts[7].g = (int)(fade.G * 255.0f);
+        verts[7].b = (int)(fade.B * 255.0f);
+        verts[7].a = (int)(fade.A * 128.0f);
         verts[7].q = 1.0f;
         verts[7].pos = vertPos;
         verts[7].s = 1.0f;
@@ -4838,7 +4834,7 @@ extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucke
     self->mTransitionOut = 0;
     self->mUsingScreenGrab = 0;
     self->mRequestingScreenGrab = 0;
-    *(int*)&self->mScreenGrabHandle = 0;
+    self->mScreenGrabHandle.mMemory = 0;
     self->mExternalTimePercentage = 0;
     self->mCurrentInitiator = 0;
     self->mRequestingDelete = 0;
@@ -4897,7 +4893,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 
 // PORT: later callers declare this as void (and an int alias); the body returns int.
 extern "C" bool cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1,
-        float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
+        float f2, int a4, float* externalTimePercentage) __asm__("cTransitionMan_StartTransition");
 
 /**
  * Starts a screen transition made of an in part, a hold and an out part.
@@ -4919,14 +4915,14 @@ extern "C" bool cTransitionMan_StartTransition_def(void* self, int a1, void* o1,
  * @return true when the transition started, false when the screen grab could not be set up
  */
 extern "C" bool cTransitionMan_StartTransition_def(void* vself, int initiator, void* transitionIn, void* transitionOut,
-        float inTime, float holdTime, float outTime, int useScreenGrab, int externalTimePercentage)
+        float inTime, float holdTime, float outTime, int useScreenGrab, float* externalTimePercentage)
 {
     cTransitionMan* self = (cTransitionMan*)vself;
     if (self->mbPlayingTransition != 0) {
         self->EndTransition();
     }
     self->mCurrentInitiator = initiator;
-    self->mExternalTimePercentage = (float*)externalTimePercentage;
+    self->mExternalTimePercentage = externalTimePercentage;
     if (useScreenGrab != 0) {
         if (self->mRequestingDelete != 0) {
             self->mRequestingDelete = 0;
@@ -4954,7 +4950,7 @@ extern "C" bool cTransitionMan_StartTransition_def(void* vself, int initiator, v
     self->mfHoldTime = holdTime;
     self->mfOutTime = outTime;
     self->mbPlayingTransition = 1;
-    *(int*)&self->mfCurrentTime = 0;
+    self->mfCurrentTime = 0.0f;
     self->mUsingScreenGrab = useScreenGrab;
     if (useScreenGrab != 0) {
         self->mRequestingScreenGrab = 1;
@@ -4966,7 +4962,9 @@ extern "C" bool cTransitionMan_StartTransition_def(void* vself, int initiator, v
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionIn);
 #ifdef SKIP_ASM
-extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
+extern "C" void cTransitionMan_StartTransition(void* self, int initiator, cTransitionObj* transitionIn,
+                                               cTransitionObj* transitionOut, float f0, float f1, int useScreenGrab,
+                                               float* externalTimePercentage, float f2);
 
 /**
  * Starts a transition with only an in-object: cTransitionMan_StartTransition with no out-object, no out time and no
@@ -4979,7 +4977,7 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param inTime  the in time
  * @param holdTime  the hold time
  */
-void cTransitionMan::StartTransitionIn(int initiator, int transitionIn, float inTime, float holdTime)
+void cTransitionMan::StartTransitionIn(int initiator, cTransitionObj* transitionIn, float inTime, float holdTime)
 {
     cTransitionMan_StartTransition(this, initiator, transitionIn, 0, inTime, holdTime, 0, 0, 0.0f);
 }
@@ -4989,8 +4987,10 @@ void cTransitionMan::StartTransitionIn(int initiator, int transitionIn, float in
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionOut);
 #ifdef SKIP_ASM
 // PORT: the unit declares cTransitionMan_StartTransition as void; this caller returns its result.
-extern "C" bool cTransitionMan_StartTransition_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4,
-        int a5, float f2) __asm__("cTransitionMan_StartTransition");
+extern "C" bool cTransitionMan_StartTransition_i(void* self, int initiator, cTransitionObj* transitionIn,
+                                                 cTransitionObj* transitionOut, float f0, float f1, int useScreenGrab,
+                                                 float* externalTimePercentage, float f2)
+    __asm__("cTransitionMan_StartTransition");
 
 /**
  * Starts the out part of a screen transition, or adds it to the transition already running.
@@ -5003,12 +5003,12 @@ extern "C" bool cTransitionMan_StartTransition_i(void* self, int a1, int a2, int
  * @param outTime  length of the out part (On Tour outTime)
  * @return cTransitionMan_StartTransition's result, or 1 when added to a running transition
  */
-int cTransitionMan::StartTransitionOut(int initiator, int transition, float outTime)
+int cTransitionMan::StartTransitionOut(int initiator, cTransitionObj* transition, float outTime)
 {
     if (mbPlayingTransition == 0) {
         return cTransitionMan_StartTransition_i(this, initiator, 0, transition, 0.0f, 0.0f, 0, 0, outTime);
     }
-    mTransitionOut = (cTransitionObj*)transition;
+    mTransitionOut = transition;
     mfOutTime = outTime;
     return 1;
 }
@@ -5017,7 +5017,9 @@ int cTransitionMan::StartTransitionOut(int initiator, int transition, float outT
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionScreenGrab);
 #ifdef SKIP_ASM
-extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
+extern "C" void cTransitionMan_StartTransition(void* self, int initiator, cTransitionObj* transitionIn,
+                                               cTransitionObj* transitionOut, float f0, float f1, int useScreenGrab,
+                                               float* externalTimePercentage, float f2);
 
 /**
  * Starts a transition that plays out over a grab of the current screen.
@@ -5030,7 +5032,7 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
  * @param transitionTime  length of the transition (On Tour transitionTime)
  */
-void cTransitionMan::StartTransitionScreenGrab(int initiator, int transition, int externalTimePercentage,
+void cTransitionMan::StartTransitionScreenGrab(int initiator, cTransitionObj* transition, float* externalTimePercentage,
                                                float transitionTime)
 {
     cTransitionMan_StartTransition(this, initiator, 0, transition, 0.0f, 0.0f, 1, externalTimePercentage,
@@ -5252,7 +5254,7 @@ void cTransitionMan::render()
         cWorldPainterMan_reset_47E8();
     }
     (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
-    (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
+    ctx->m_pCurrentDrawState++;
     ctx->PushViewport();
     ctx->PushView();
     ctx->IdentityView();
@@ -5277,7 +5279,7 @@ void cTransitionMan::render()
     }
     ctx->PopView();
     ctx->PopViewport();
-    (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -5286,9 +5288,13 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_OnStartObjectUse);
 #ifdef SKIP_ASM
 
 void cScriptObject_OnStartObjectUse(void* self);
-extern "C" int cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id);
-extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
-extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, int a1, int a3, int a5, float f2);
+extern "C" cTransitionObj* cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id);
+extern "C" void cTransitionMan_StartTransition(void* self, int initiator, cTransitionObj* transitionIn,
+                                               cTransitionObj* transitionOut, float f0, float f1, int useScreenGrab,
+                                               float* externalTimePercentage, float f2);
+extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, int initiator,
+        cTransitionObj* transition,
+                                                         float* externalTimePercentage, float transitionTime);
 
 /**
  * Starts the transition a script object describes when a player starts using it.
@@ -5303,9 +5309,9 @@ void cTransitionMan::OnStartObjectUse()
     tScriptObjTransitionInfo* transitionInfo = (&mInfo);
     cScriptObject_OnStartObjectUse((char*)&mObjType);
     if (mInfo.transition != keScriptTransition_CrossFade) {
-        int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
+        cTransitionObj* transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
                 mInfo.transitionColour);
-        int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
+        cTransitionObj* transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
                 mInfo.transitionColour);
         cTransitionMan_StartTransition(this, 2, transitionIn, transitionOut, mInfo.outTime, mInfo.holdTime, 0, 0,
                 mInfo.inTime);
@@ -5457,7 +5463,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_cTransitionObj__FPv);
  */
 void* cTransitionObj_cTransitionObj(void* self)
 {
-    *(int*)self = (int)(void*)cTransitionObj_vtbl;
+    VPTR_AT(self, 0) = cTransitionObj_vtbl;
     return self;
 }
 #endif
@@ -5530,21 +5536,21 @@ static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const t4Vec
 extern "C" void* cSnowBox_cSnowBox(cSnowBox* self, int viewNum, int snowBoxType, float boxScale, float flakeSize, float opacity, float gravity)
 {
     self->mNumFlakes = 0;
-    *(int*)&self->mWindScale = 0;
-    *(int*)&self->mOffset = 0;
-    *(int*)&self->mOffset.y = 0;
-    *(int*)&self->mOffset.z = 0;
+    self->mWindScale = 0.0f;
+    self->mOffset.x = 0.0f;
+    self->mOffset.y = 0.0f;
+    self->mOffset.z = 0.0f;
     self->mOffset.w = 1.0f;
-    *(int*)&self->mWindNext = 0;
-    *(int*)&self->mWindNext.y = 0;
-    *(int*)&self->mWindNext.z = 0;
-    *(int*)&self->mWindNext.w = 0;
-    *(int*)&self->mWindLast = 0;
-    *(int*)&self->mWindLast.y = 0;
-    *(int*)&self->mWindLast.z = 0;
-    *(int*)&self->mWindLast.w = 0;
-    *(int*)&self->mCurrentTimeToWindChange = 0;
-    *(int*)&self->mTotalTimeToWindChange = 0;
+    self->mWindNext.x = 0.0f;
+    self->mWindNext.y = 0.0f;
+    self->mWindNext.z = 0.0f;
+    self->mWindNext.w = 0.0f;
+    self->mWindLast.x = 0.0f;
+    self->mWindLast.y = 0.0f;
+    self->mWindLast.z = 0.0f;
+    self->mWindLast.w = 0.0f;
+    self->mCurrentTimeToWindChange = 0.0f;
+    self->mTotalTimeToWindChange = 0.0f;
     self->mColourR = 1.0f;
     self->mColourG = 1.0f;
     self->mColourB = 1.0f;
@@ -5593,9 +5599,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_resetWind__FPv);
  */
 void cSnowBox::resetWind()
 {
-    *(int*)&mTotalTimeToWindChange = 0;
+    mTotalTimeToWindChange = 0.0f;
     mResetWind = 1;
-    *(int*)&mCurrentTimeToWindChange = 0;
+    mCurrentTimeToWindChange = 0.0f;
 }
 #endif
 
@@ -6458,13 +6464,6 @@ __asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_reset);
 #ifdef SKIP_ASM
-struct sWakeVec4 {
-    float x;
-    float y;
-    float z;
-    float w;
-} __attribute__((aligned(16)));
-
 /**
  * Resets a speed boost effect; despite the name it reads no replay data (it takes no frame).
  *
@@ -6473,17 +6472,17 @@ struct sWakeVec4 {
  */
 void cSpeedBoostFX::reset()
 {
-    sWakeVec4 defaultSide;
+    t4Vector defaultSide;
     defaultSide.x = 1.0f;
     defaultSide.y = 0.0f;
     defaultSide.z = 0.0f;
     defaultSide.w = 1.0f;
     mCurrentTexture = 57;
-    *(int*)&mAlpha = 0;
-    *(sWakeVec4*)&mLastSide = defaultSide;
-    *(int*)&mWidth = 0;
-    *(int*)&mVOffset = 0;
-    *(int*)&mSpeedBoostTrailCurrentLength = 0;
+    mAlpha = 0.0f;
+    mLastSide = defaultSide;
+    mWidth = 0.0f;
+    mVOffset = 0.0f;
+    mSpeedBoostTrailCurrentLength = 0.0f;
     mSpeedBoostTrailNumSegs = 0;
     mSpeedBoostTrailCurrentSeg = 0;
     mStreamBufLen = 0;

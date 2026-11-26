@@ -184,6 +184,7 @@ CHECK_SIZE(nash_Octant, 0x14);
 
 struct cWorldIntersectType;
 struct tIntersectInfo;
+struct tIntHint;
 
 struct cBXNash {
     // --- nash::Nash (On Tour 0xA4)
@@ -202,9 +203,9 @@ struct cBXNash {
     // Methods bound to their retail symbols by asm labels.
     void initTheAIFwdDiffCache() __asm__("cBXNash_initTheAIFwdDiffCache");
     void purgeTheAIFwdDiffCache() __asm__("cBXNash_purgeTheAIFwdDiffCache");
-    int terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, int hitCache)
+    int terrainIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, tIntHint* hitCache)
         __asm__("cBXNash_terrainIntersect");
-    float terrainIntersect1(cWorldIntersectType* intersectType, tIntersectInfo* out, int hint)
+    float terrainIntersect1(cWorldIntersectType* intersectType, tIntersectInfo* out, tIntHint* hint)
         __asm__("cBXNash_terrainIntersect1");
     float staticObjectIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int full)
         __asm__("cBXNash_staticObjectIntersect1");

@@ -77,7 +77,7 @@ struct cMusicSys {
     char unk_5444[0x4];                       // 0x5444 padding (the class is 8-aligned: unsigned long members)
 
     // Methods bound to their retail symbols by asm labels.
-    int MUSIC_Current() __asm__("cMusicSys_MUSIC_Current");
+    cSongInstance* MUSIC_Current() __asm__("cMusicSys_MUSIC_Current");
     int MUSIC_GetStreamHandle() __asm__("cMusicSys_MUSIC_GetStreamHandle");
     int MUSIC_GetNumSongs() __asm__("cMusicSys_MUSIC_GetNumSongs");
     int MUSIC_GetNumActiveSongs() __asm__("cMusicSys_MUSIC_GetNumActiveSongs");

@@ -55,7 +55,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cRiderState_cRiderState(void* self);
 extern "C" void* cScriptObjRider_cScriptObjRider(void* self);
 extern "C" void* func_002F1850(void* mem, void* rider);
-extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(void* self, int a1, int a2);
+extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(void* self, cRider* rider, void* emitterOwner);
 void* cPlayerShadow_cPlayerShadow(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* rig);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -125,15 +125,16 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mTrackPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
     self->mAIPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
     cOverlapList* aux = new (str_OverlapList, 0, 0) cOverlapList;
-    int nash = (int)SSXApp->Game->BXNash;  // the overlap list queries the game's Nash collision grid
-    (*(int*)&aux->nash) = nash;
+    cBXNash* nash = SSXApp->Game->BXNash;  // the overlap list queries the game's Nash collision grid
+    aux->nash = nash;
     aux->deletecount = 0;
     aux->numinstances = none;
     aux->numpatches = none;
     aux->numtyped = none;
     self->mOverlapList = aux;
     self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
-    self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
+    self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), self,
+                                                            self->mAttachedEmitterFX);
     self->mLineHint = (tIntHint*)cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
     self->mWallHint = (tIntHint*)cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
     MEM_fill_v(self->ActiveLights, 0, 0x20);
@@ -428,7 +429,7 @@ extern "C" void func_0011BD60(cRider* self, void** list, int n)
             tRiderLoader* entry = &((&nameTable->LoadList[0]))[nameTable->MdlLoadNum];
             strcpy(entry->FileName, name);
             entry->FileOp = -1;
-            (*(int*)&entry->DataPtr) = 0;
+            entry->DataPtr = 0;
             nameTable->MdlLoadNum++;
         }
     next:;
@@ -485,7 +486,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
                 tRiderLoader* entry = &((&nameTable->LoadList[0]))[end];
                 strcpy(entry->FileName, name);
                 entry->FileOp = -1;
-                (*(int*)&entry->DataPtr) = 0;
+                entry->DataPtr = 0;
                 nameTable->TexLoadNum++;
             }
         next:;
@@ -507,7 +508,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
                 tRiderLoader* entry = &((&nameTable->LoadList[0]))[end];
                 strcpy(entry->FileName, name);
                 entry->FileOp = -1;
-                (*(int*)&entry->DataPtr) = 0;
+                entry->DataPtr = 0;
                 nameTable->TexLoadNum++;
             }
         next2:;
@@ -2422,7 +2423,7 @@ extern "C" void* cRiderHandler__setControlState(void* obj);
 //100%
 INCLUDE_ASM("ai/rider", cRider_getMotionStateName);
 #ifdef SKIP_ASM
-extern "C" void cRiderHandler__getMotionStateName(int);
+extern "C" void cRiderHandler__getMotionStateName(cRiderHandler* handler);
 
 /**
  * Returns the name of the rider's motion state: cRiderHandler__getMotionStateName on mRiderHandler.
@@ -2432,7 +2433,7 @@ extern "C" void cRiderHandler__getMotionStateName(int);
  */
 void cRider::getMotionStateName()
 {
-    cRiderHandler__getMotionStateName(((int)mRiderHandler));
+    cRiderHandler__getMotionStateName(mRiderHandler);
 }
 #endif
 
@@ -2473,7 +2474,7 @@ int cRider::getControlState()
 //100%
 INCLUDE_ASM("ai/rider", cRider_getControlStateName);
 #ifdef SKIP_ASM
-extern "C" void cRiderHandler__getControlStateName(int);
+extern "C" void cRiderHandler__getControlStateName(cRiderHandler* handler);
 
 /**
  * Returns the name of the rider's control state: cRiderHandler__getControlStateName on mRiderHandler.
@@ -2483,7 +2484,7 @@ extern "C" void cRiderHandler__getControlStateName(int);
  */
 void cRider::getControlStateName()
 {
-    cRiderHandler__getControlStateName(((int)mRiderHandler));
+    cRiderHandler__getControlStateName(mRiderHandler);
 }
 #endif
 //100%
@@ -3022,7 +3023,7 @@ void cRider::updateSplitMiscFX()
 //100%
 INCLUDE_ASM("ai/rider", func_00120EB8);
 #ifdef SKIP_ASM
-extern "C" void cRiderHandler_updateRiderFX(int);
+extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* handler);
 
 /**
  * Updates the rider's handler FX: cRiderHandler_updateRiderFX on mRiderHandler. Nothing in the source calls it.
@@ -3030,7 +3031,7 @@ extern "C" void cRiderHandler_updateRiderFX(int);
  * @param rider  the cRider
  */
 extern "C" void func_00120EB8(cRider* rider) {
-    cRiderHandler_updateRiderFX(((int)rider->mRiderHandler));
+    cRiderHandler_updateRiderFX(rider->mRiderHandler);
 }
 #endif
 
@@ -3095,7 +3096,7 @@ void cRider::updateSplit1()
     if (frameSlot != mAIIndex % 3)
     {
         cGame* game = SSXApp->Game;
-        if (*(int*)&mOverlapList->deletecount == (int)game->BXNash->deletecount)
+        if (mOverlapList->deletecount == game->BXNash->deletecount)
         {
             void* obj = game->PlaybackMan;
             int busy = 0;
@@ -3418,7 +3419,7 @@ void cRider::updateSplit10()
 INCLUDE_ASM("ai/rider", cRider_updateSplit11);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
-extern "C" void cRenderStateMan_update(void* obj, float a, float b, float c);
+extern "C" void cRenderStateMan_update(int index, float a, float b, float c);
 extern "C" void cPlayerLights_Clear(void* p);
 
 
@@ -3434,7 +3435,7 @@ void cRider::updateSplit11()
     if (~mGroundPolyId != 0)
         mGroundMaterial = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan,
                 (unsigned char)mGroundPolyId);
-    cRenderStateMan_update((void*)getAIIndex(), mGroundContactPoint.x, mGroundContactPoint.y, -99999.0f);
+    cRenderStateMan_update(getAIIndex(), mGroundContactPoint.x, mGroundContactPoint.y, -99999.0f);
     cRiderHandler* handler = mRiderHandler;
     cPlayerLights_Clear(handler ? (char*)&handler->PlayerLights : 0);
 }
@@ -3815,8 +3816,8 @@ struct tRGBColour : tRGB {
     }
 };
 extern "C" void cIrradiance_Clear(void* p);
-extern "C" void* cRenderStateMan_getIrradiance(void* p);
-extern "C" float cRenderStateMan_RimLightIntensityOffset(void* p);
+extern "C" void* cRenderStateMan_getIrradiance(int index);
+extern "C" float cRenderStateMan_RimLightIntensityOffset(int index);
 extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
 extern "C" void func_00389CB8(void* m, void* q, float f);
 extern "C" void func_0038A6A8(void* m, void* q, void* p);
@@ -3836,12 +3837,12 @@ void cRider::SetRiderLights()
     t4Vector hipPos;
     cIrradiance_Clear(&PlayerIrradiance);
     {
-        (cIrradiance&)PlayerIrradiance = *(cIrradiance*)cRenderStateMan_getIrradiance((void*)getAIIndex());
+        (cIrradiance&)PlayerIrradiance = *(cIrradiance*)cRenderStateMan_getIrradiance(getAIIndex());
     }
     cRider_getHipPosition(&hipPos, this);
     tIrradianceInfo* lightState = &PlayerIrradiance;
     {
-        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset((void*)getAIIndex()));
+        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(getAIIndex()));
     }
     for (int i = 0; i < 8; i++) {
         void* light = ActiveLights[i];
@@ -4057,7 +4058,7 @@ extern "C" void* func_002F2088(void* obj);
 //100%
 INCLUDE_ASM("ai/rider", cRider_renderFX);
 #ifdef SKIP_ASM
-extern "C" void cRiderHandler_renderRiderFX(int);
+extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* handler);
 
 /**
  * Renders the rider's handler FX: cRiderHandler_renderRiderFX on mRiderHandler. Nothing in the source calls it.
@@ -4065,7 +4066,7 @@ extern "C" void cRiderHandler_renderRiderFX(int);
  */
 void cRider::renderFX()
 {
-    cRiderHandler_renderRiderFX(((int)mRiderHandler));
+    cRiderHandler_renderRiderFX(mRiderHandler);
 }
 #endif
 
@@ -4465,9 +4466,9 @@ INCLUDE_ASM("ai/rider", cRider_isVertZoneApplicable__FPv);
  *
  * @return cRider_isGroundNormalValid's result
  */
-void* cRider::isVertZoneApplicable()
+int cRider::isVertZoneApplicable()
 {
-    return (void*)((cRider*)this)->isGroundNormalValid();
+    return isGroundNormalValid();
 }
 #endif
 
@@ -4722,7 +4723,7 @@ extern t4Vector t4vect_XAxis;
 // their 4-float constructor stores the components; that order decides the float-register allocation of every
 // caller (merging them changes code), so they are kept apart.
 // sVec4 stores x, y, z, w.
-extern "C" void cReplay_eventReset(int a, int b);
+extern "C" void cReplay_eventReset(cReplay* replay, int riderIndex);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_002F1A00(void* a);
@@ -4827,7 +4828,7 @@ extern "C" void cRider_transport_v(cRider* self, const t4Matrix* m) __asm__("cRi
  */
 extern "C" void cRider_transport_v(cRider* self, const t4Matrix* mat)
 {
-    cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
+    cReplay_eventReset(SSXApp->Game->Replay, self->mAIIndex);
     sVec4 pos = *(const sVec4*)&mat->row[3];
     sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
     int i = self->mAIIndex;
@@ -4873,7 +4874,7 @@ INCLUDE_ASM("ai/rider", cRider_initForMission);
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 extern t4Vector t4vect_XAxis;
-extern "C" void cReplay_eventReset(int a, int b);
+extern "C" void cReplay_eventReset(cReplay* replay, int riderIndex);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
 extern "C" void func_002F1A00(void* a);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
@@ -4916,7 +4917,7 @@ void cRider::initForMission(t4Matrix* mat)
 {
     t4Vector pos;
     t4Vector dir;
-    cReplay_eventReset((int)SSXApp->Game->Replay, mAIIndex);
+    cReplay_eventReset(SSXApp->Game->Replay, mAIIndex);
     pos = mat->row[3];
     dir = MatMulV_34D0(((char*)mat), t4vect_XAxis);
     cRiderMetrix_evReset(mMetrix, 1);
@@ -4967,8 +4968,8 @@ void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlSt
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-int GetSSXActorHeader(void* self);
-extern "C" void GetSSXActorFrame(int, void*);
+tSSXHeaderActor* GetSSXActorHeader(void* self);
+extern "C" void GetSSXActorFrame(void* pPlayer, void* frame);
 struct sQuat_001241C0;
 extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, float ry, float rz);
 extern "C" void fSinCos(float* s, float* c, float angle);
@@ -5084,13 +5085,12 @@ void cRider::OnStartObjectUse()
         mSoundHandles[j] = -1;
     float zeroF;
     float one = 1.0f;
-    // PORT: GetSSXActorHeader returns a record pointer as int
-    tSSXHeaderActor* rec = (tSSXHeaderActor*)GetSSXActorHeader(mpEntity);
+    tSSXHeaderActor* rec = GetSSXActorHeader(mpEntity);
     zeroF = 0.0f;
     mNISShowBoardVisualFX = rec->isRidingBoard != 0;
     mOnGroundNIS = 1;
     mHiddenNIS = rec->hidden != 0;
-    GetSSXActorFrame((int)mpEntity, buf);
+    GetSSXActorFrame(mpEntity, buf);
     float* fb = (float*)buf;
     sVec4 poseVec;
     poseVec.x = fb[6];
@@ -5173,7 +5173,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
-int GetSSXActorHeader(void* self);
+tSSXHeaderActor* GetSSXActorHeader(void* self);
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" void* func_0014AD50(void* iface, int id);
@@ -5250,8 +5250,7 @@ void cRider::OnEndObjectUse()
     func_0030EA80(mAnimModel, 11, 0);
     func_0030E9E0(mAnimModel, 4, 0);
     func_0030E9E0(mAnimModel, 7, 0);
-    // PORT: GetSSXActorHeader returns a record pointer as int
-    if (((tSSXHeaderActor*)GetSSXActorHeader(mpEntity))->hideIllegalBoltOn != 0) {
+    if (GetSSXActorHeader(mpEntity)->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_noarg();
         cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, mAIIndex);
@@ -5274,7 +5273,9 @@ void cRider::OnEndObjectUse()
     int j;
     for (j = 0; j < 4; j++) {
         if (ids[j] >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, ids[j], 1, 0.0f);
+            cBankMonitor_BANKMONITOR_StopHandle(
+                    &cAudioInterface_bxAudio()->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                    ids[j], 1, 0.0f);
         }
         ids[j] = -1;
     }
@@ -5284,7 +5285,7 @@ void cRider::OnEndObjectUse()
 //100%
 INCLUDE_ASM("ai/rider", cRider_OnInSeqUpdate);
 #ifdef SKIP_ASM
-extern "C" void GetSSXActorFrame(int, void*);
+extern "C" void GetSSXActorFrame(void* pPlayer, void* frame);
 extern "C" void cRider_DoInSeqAnimUpdate(void*, void*, float, float, int);
 extern "C" void cRider_DoInSeqSoundUpdate(cRider*, void*, float, float, int);
 
@@ -5296,18 +5297,18 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider*, void*, float, float, int);
  * names do not match the argument registers: the two floats are On Tour's currFrame and frameDelta, the int
  * is its type.
  *
- * @param id  the script player entity (On Tour: pEntity)
+ * @param entity  the script player entity (On Tour: pEntity)
  * @param currFrame  the current frame (the first float argument; On Tour: currFrame)
  * @param frameDelta  the frame step (the second float argument; On Tour: frameDelta)
  * @param type  the entity type (On Tour: type); unused
  * @param flags  event bits, passed on to both updates
  */
-void cRider::OnInSeqUpdate(int id, float currFrame, float frameDelta, int type, int flags)
+void cRider::OnInSeqUpdate(cScriptPlayerEntity* entity, float currFrame, float frameDelta, int type, int flags)
 {
     int buf[12];
     if (mIsInNIS)
     {
-        GetSSXActorFrame(id, buf);
+        GetSSXActorFrame(entity, buf);
         cRider_DoInSeqAnimUpdate(this, buf, currFrame, frameDelta, flags);
         DoInSeqSoundUpdate(buf, currFrame, frameDelta, flags);
     }
@@ -5317,11 +5318,11 @@ void cRider::OnInSeqUpdate(int id, float currFrame, float frameDelta, int type, 
 //100%
 INCLUDE_ASM("ai/rider", cRider_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
-extern "C" void GetSSXActorFrame(int, void*);
+extern "C" void GetSSXActorFrame(void* pPlayer, void* frame);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" int func_002A1B58(void* self, int msg, int a);
-extern "C" int func_002A1B88(void* self, int type, int a, int b);
-extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, int a2);
+extern "C" int func_002A1B58(void* self, int msg, cRider* rider);
+extern "C" int func_002A1B88(void* self, int type, cRider* rider, void* otherRider);
+extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, cScriptPlayerMain* pPlayer);
 
 
 
@@ -5333,18 +5334,18 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, int a2);
  * with the event's subject rider (cSSXScriptEngine_GetSubjectRider) to func_002A1B88. Each event sent sets
  * unk_AC8.
  *
- * @param id  the script player entity (On Tour: pEntity); its mpOwner is passed to the subject lookup
+ * @param entity  the script player entity (On Tour: pEntity); its mpOwner is passed to the subject lookup
  * @param currFrame  the current frame (the first float argument; On Tour: currFrame); unused
  * @param ignoredFloat  a second float argument that the caller (cScriptPlayerEntity_ExecutePlay) does not set; unused
  * @param type  the entity type (On Tour: type); unused
  * @param flags  event bits; bit 0x10 enables the event handling
  */
-void cRider::OnInSeqKeyEvent(int id, float currFrame, float ignoredFloat, int type, int flags)
+void cRider::OnInSeqKeyEvent(cScriptPlayerEntity* entity, float currFrame, float ignoredFloat, int type, int flags)
 {
     tSSXFrameActor info;
     if (flags & 0x10)
     {
-        GetSSXActorFrame(id, &info);
+        GetSSXActorFrame(entity, &info);
         for (int i = 0; i < info.numSpeechEvent; i++)
         {
             tSpeechEvent* event = &(info.pSpeechEventArray)[i];
@@ -5352,18 +5353,16 @@ void cRider::OnInSeqKeyEvent(int id, float currFrame, float ignoredFloat, int ty
             if (ev == 102) continue;
             if (ev < 100)
             {
-                func_002A1B58(cAudioInterface_bxAudio(), ev, (int)this);
+                func_002A1B58(cAudioInterface_bxAudio(), ev, this);
                 mHasTriggeredSpeechEvents = 1;
             }
             else
             {
                 ev -= 100;
                 void* snd = cAudioInterface_bxAudio();
-                // PORT: id is the entity's handle; it is the cScriptPlayerEntity's address.
-                cScriptPlayerEntity* entity = (cScriptPlayerEntity*)id;
-                int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom),
-                                                                         (int)entity->mpOwner);
-                func_002A1B88(snd, ev, (int)this, subjectRider);
+                void* subjectRider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom),
+                                                                      entity->mpOwner);
+                func_002A1B88(snd, ev, this, subjectRider);
                 mHasTriggeredSpeechEvents = 1;
             }
         }
@@ -5376,7 +5375,7 @@ INCLUDE_ASM("ai/rider", cRider_GetNISEndPosition);
 #ifdef SKIP_ASM
 extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
-int GetSSXActorHeader(void* self);
+tSSXHeaderActor* GetSSXActorHeader(void* self);
 
 
 extern t4Vector t4vect_ZAxis_3F38 __asm__("t4vect_ZAxis");
@@ -5448,8 +5447,7 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
     if (self->mInUse <= 0)
         return *(&self->mPosition);
     float lift = 0.0f;
-    // PORT: GetSSXActorHeader returns a record pointer as int
-    tSSXHeaderActor* rec = (tSSXHeaderActor*)((char*)GetSSXActorHeader(self->mpEntity));
+    tSSXHeaderActor* rec = GetSSXActorHeader(self->mpEntity);
     t4Vector pos = *(&self->mPosition);
     switch (rec->scriptEndLocation) {
     case 0:
@@ -5779,7 +5777,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
         self->PatchUV.y = hit.v;
         self->SurfaceFlags = hit.Patch->m_sSurfaceFlags;
     } else {
-        *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;
+        self->mGroundPolyId = 0xFFFFFFFF;
     }
     if (hitDist < 0.0f) {
         self->mOnGroundNIS = 0;
@@ -5809,7 +5807,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
     self->SnowOffset = Dot_42B0(Sub_42B0(probeBase, hit.Ipos), *(&self->mGroundNormal));
     float speedDrop = self->mLastSpeed - speed;
-    *(int*)&self->mAudioBraking = 0;
+    self->mAudioBraking = 0.0f;
     if (speedDrop < self->mAudioBraking) {
         float braking = -speedDrop * 0.0036000001709908247f;
         self->mAudioBraking = braking;
@@ -6239,7 +6237,7 @@ INCLUDE_ASM("ai/rider", cRider_doFinishEvent);
 #ifdef SKIP_ASM
 extern "C" float cRiderMetrix_evFinishRace(void* self);
 extern "C" void cChaseCameraController_switchCamera_EndRace(void* self);
-extern "C" void cGameModeMan_raceFinish(void* self, int a1, int a2);
+extern "C" void cGameModeMan_raceFinish(void* self, int riderIndex, tRiderStats* stats);
 extern "C" void cSSXAudio_OnFinishEvent(void* self, void* rider);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
@@ -6254,7 +6252,7 @@ static inline void* getC0_125108()
  *
  * Online (cGameComm present), a human who finished sets the local or remote finished flag. Calls the metrix
  * finish (cRiderMetrix_evFinishRace), sets mFinishTick to the race clock plus mPenaltyTicks and mFinishTime to at least
- * 0, reports cGameModeMan_raceFinish(AI index, the metrix's stats at +0xFC), switches a split-screen rider's
+ * 0, reports cGameModeMan_raceFinish(AI index, the metrix's Totals at +0xFC), switches a split-screen rider's
  * chase camera to the end-race camera and calls cSSXAudio_OnFinishEvent on the audio system. A rider who did not finish
  * also gets ShouldCelebrateAtFinish cleared.
  */
@@ -6271,8 +6269,8 @@ void cRider::doFinishEvent()
     cRiderMetrix_evFinishRace(mMetrix);
     mFinishTick = SSXApp->Game->AI->EventTimerTick + mPenaltyTicks;
     if (mFinishTime < 0.0f) mFinishTime = 0.0f;
-    cGameModeMan_raceFinish(getC0_125108(), getAIIndex(), (int)mMetrix + 0xFC);
-    unsigned int k = *(unsigned int*)&mViewIndex;
+    cGameModeMan_raceFinish(getC0_125108(), getAIIndex(), &mMetrix->Totals);
+    unsigned int k = mViewIndex;
     if (k < 2)
     {
         cGameViewMan* tbl = SSXApp->Game->ViewMan;
@@ -6505,7 +6503,7 @@ void cRider::setUbersAllowed(int uberAllowedFlags)
     mUberFlags = uberAllowedFlags;
     if (uberAllowedFlags == 0) {
         mUberLevel = 0;
-        *(int*)&mUberTimer = 0;
+        mUberTimer = 0.0f;
     }
 }
 #endif
@@ -6615,8 +6613,8 @@ INCLUDE_ASM("ai/rider", cRider_syncCheckSum);
 int cRider::syncCheckSum()
 {
     union { float f; int i; } sumBits;
-    sumBits.f = *(float*)&mPosition + mPosition.y + mPosition.z
-        + (*(float*)&mRotation + mRotation.y + mRotation.z + mRotation.w);
+    sumBits.f = mPosition.x + mPosition.y + mPosition.z
+        + (mRotation.x + mRotation.y + mRotation.z + mRotation.w);
     return sumBits.i;
 }
 #endif
@@ -6639,11 +6637,10 @@ extern "C" void cPadDevice_clearAllVibrations(void* obj);
  * @param controller  the cPadDevice
  * @param on  0 to stop
  */
-// PORT: the unit declares (void*, int, int); the second argument is really an object pointer.
-extern "C" void func_00125B18(void* vibState, int controller, int on)
+extern "C" void func_00125B18(void* vibState, void* controller, int on)
 {
     float* vibLevels = (float*)vibState;
-    void* obj = (void*)controller;
+    void* obj = controller;
     if (on == 0)
     {
         vibLevels[0] = vibLevels[1] = 0.0f;
@@ -6986,7 +6983,7 @@ INCLUDE_ASM("ai/rider", cPlayer_vibrationUpdate);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int id);
-extern "C" void func_00125B18(void* p, int a, int b);
+extern "C" void func_00125B18(void* vibState, void* controller, int on);
 
 
 static inline bool riderInRange_1278E8(int v)
@@ -7003,7 +7000,7 @@ static inline bool riderInRange_1278E8(int v)
 void cPlayer::vibrationUpdate()
 {
     cPlayer* player = (cPlayer*)this;
-    if ((int)player->Pad != 0)
+    if (player->Pad != 0)
     {
         int flag = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -7011,7 +7008,7 @@ void cPlayer::vibrationUpdate()
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }
-        func_00125B18(&player->mVibrationBump, (int)player->Pad, flag);
+        func_00125B18(&player->mVibrationBump, player->Pad, flag);
     }
 }
 #endif

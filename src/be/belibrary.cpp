@@ -1571,10 +1571,15 @@ INCLUDE_ASM("be/belibrary", func_0014C2B0);
 #ifdef SKIP_ASM
 struct sBEEntry38 {
     signed char group; // 0x0
-    char pad_0x01[3];
+    signed char used;  // 0x1 [U] func_0014C590 sets it; the views' `used` (func_0014B2F8 / func_0014B378 take the
+                       //     definitions where it is 0)
+    char pad_0x02[2];
     short field_0x4;
     short field_0x6;
-    char pad_0x08[0x30];
+    char pad_0x08[4];
+    short equipPoints; // 0xC [U] func_0014C5D8 sets it; the equipped bolts' equip points are the sum of it
+    char pad_0x0E[0x26];
+    int flags;         // 0x34 [U] func_0014D608 does not descend into a bolt's children when flag 0x20 is set
 };
 
 struct sBEGroupTable {
@@ -1586,7 +1591,8 @@ struct sBEGroupTable {
     int groupCount[30]; // 0x2C
     int groupFirst[30]; // 0xA4
     short* lookup_0x11C[30]; // 0x11C
-    char pad_0x194[0x4DC - 0x194];
+    short* firstChildIndex[30]; // 0x194 [U] func_0014D558: per group, a parent bolt id's first child definition
+    char pad_0x20C[0x4DC - 0x20C];
     short* lookup_0x4DC[30]; // 0x4DC
 };
 
@@ -1774,7 +1780,7 @@ INCLUDE_ASM("be/belibrary", func_0014C590);
 extern "C" void func_0014C590(void** vself, int groupId, int key, int value)
 {
     sBEGroupTable* self = (sBEGroupTable*)vself;
-    *(char*)((char*)&self->entries[func_0014D448(self, groupId, key)] + 0x1) = value;
+    self->entries[func_0014D448(self, groupId, key)].used = value;
 }
 #endif
 //100%
@@ -1793,7 +1799,7 @@ INCLUDE_ASM("be/belibrary", func_0014C5D8);
 extern "C" void func_0014C5D8(void** vself, int groupId, int key, int value)
 {
     sBEGroupTable* self = (sBEGroupTable*)vself;
-    *(short*)((char*)&self->entries[func_0014D448(self, groupId, key)] + 0xC) = value;
+    self->entries[func_0014D448(self, groupId, key)].equipPoints = value;
 }
 #endif
 
@@ -1865,8 +1871,8 @@ extern "C" void func_0014BE70(void* self);
  */
 extern "C" void* func_0014C6A0(void* self)
 {
-    if (*(int*)((char*)self + 0x10) == 0) {
-        int none = *(int*)((char*)self + 4) == 0;
+    if (((sBEKeyTableG2*)self)->entries == 0) {
+        int none = ((sBEGroupTable*)self)->entries == 0;
         func_0014D240(self);
         func_0014BE70(self);
         func_0014C2B0((sBEGroupTable*)self);
@@ -2162,7 +2168,7 @@ INCLUDE_ASM("be/belibrary", func_0014D558);
 extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int groupId, int key)
 {
     short* lookup;
-    if (key == kNoBoltID || (lookup = *(short**)((char*)self + (groupId << 2) + 0x194)) == 0) {
+    if (key == kNoBoltID || (lookup = self->firstChildIndex[groupId]) == 0) {
         int i = self->groupFirst[groupId];
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
@@ -2210,7 +2216,7 @@ extern "C" int func_0014D608(sBEGroupTable* self, int groupId, int key, sBEEntry
                 *out++ = boltDef;
                 count++;
                 if (depth != 0) {
-                    if (!(*(int*)((char*)boltDef + 0x34) & 0x20) || all) {
+                    if (!(boltDef->flags & 0x20) || all) {
                         int childCount = func_0014D608(self, groupId, boltDef->field_0x4, out, depth - 1, all);
                         count += childCount;
                         out += childCount;
@@ -2227,7 +2233,7 @@ extern "C" int func_0014D608(sBEGroupTable* self, int groupId, int key, sBEEntry
             *out++ = boltDef;
             count++;
             if (depth != 0) {
-                if (!(*(int*)((char*)boltDef + 0x34) & 0x20) || all) {
+                if (!(boltDef->flags & 0x20) || all) {
                     int childCount = func_0014D608(self, groupId, boltDef->field_0x4, out, depth - 1, all);
                     count += childCount;
                     out += childCount;
@@ -2339,7 +2345,7 @@ INCLUDE_ASM("be/belibrary", func_0014D988__FPvi);
  */
 int func_0014D988(void* self, int i)
 {
-    return *(int*)((char*)self + (i << 2) + 0x2C);
+    return ((sBEGroupTable*)self)->groupCount[i];
 }
 #endif
 
@@ -2411,8 +2417,8 @@ INCLUDE_ASM("be/belibrary", func_0014DA08);
  * @param groupId  the group (a character ID)
  * @return the index
  */
-extern "C" int func_0014DA08(int tables, int groupId) {
-    return (*(int *)(((char*)(tables) + (groupId << 2)) + 0xA4));
+extern "C" int func_0014DA08(sBEGroupTable* tables, int groupId) {
+    return tables->groupFirst[groupId];
 }
 #endif
 //100%
@@ -2428,8 +2434,8 @@ INCLUDE_ASM("be/belibrary", func_0014DA18);
  * @param groupId  the group (a character ID)
  * @return the count
  */
-extern "C" int func_0014DA18(int tables, int groupId) {
-    return (*(int *)(((char*)(tables) + (groupId << 2)) + 0x20C));
+extern "C" int func_0014DA18(sBEKeyTableG* tables, int groupId) {
+    return tables->groupCount[groupId];
 }
 #endif
 //100%
@@ -2635,7 +2641,7 @@ INCLUDE_ASM("be/belibrary", func_0014DC00__FPvi);
  */
 int func_0014DC00(void* self, int i)
 {
-    return *(int*)((char*)self + (i << 2) + 0x2FC);
+    return ((sBEKeyTableG1*)self)->groupCount[i];
 }
 #endif
 
@@ -2670,7 +2676,7 @@ INCLUDE_ASM("be/belibrary", func_0014DC40__FPvi);
  */
 int func_0014DC40(void* self, int i)
 {
-    return *(int*)((char*)self + (i << 2) + 0x3EC);
+    return ((sBEKeyTableG2*)self)->groupCount[i];
 }
 #endif
 

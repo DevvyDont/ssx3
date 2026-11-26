@@ -281,15 +281,15 @@ struct cSndPlayOpts {
 
     // Methods bound to their retail symbols by asm labels.
     int OPTS_Instance() __asm__("cSndPlayOpts_OPTS_Instance");
-    int OPTS_Current() __asm__("cSndPlayOpts_OPTS_Current");
-    int OPTS_GetPos() __asm__("cSndPlayOpts_OPTS_GetPos");
+    SNDPLAYOPTS* OPTS_Current() __asm__("cSndPlayOpts_OPTS_Current");
+    const t4Vector* OPTS_GetPos() __asm__("cSndPlayOpts_OPTS_GetPos");
     int OPTS_GetStaticPos() __asm__("cSndPlayOpts_OPTS_GetStaticPos");
     int OPTS_GetVol() __asm__("cSndPlayOpts_OPTS_GetVol");
     float* OPTS_GetVolControl() __asm__("cSndPlayOpts_OPTS_GetVolControl");
     tSndCallback OPTS_GetCallback() __asm__("cSndPlayOpts_OPTS_GetCallback");
     unsigned short OPTS_GetAzimuth() __asm__("cSndPlayOpts_OPTS_GetAzimuth");
     short OPTS_GetElevation() __asm__("cSndPlayOpts_OPTS_GetElevation");
-    int OPTS_GetDelay() __asm__("cSndPlayOpts_OPTS_GetDelay");
+    cDelayOpts* OPTS_GetDelay() __asm__("cSndPlayOpts_OPTS_GetDelay");
     void* OPTS_GetPtr() __asm__("cSndPlayOpts_OPTS_GetPtr");
     int OPTS_GetViewport() __asm__("cSndPlayOpts_OPTS_GetViewport");
     float OPTS_GetVanish() __asm__("cSndPlayOpts_OPTS_GetVanish");
@@ -435,7 +435,7 @@ struct cBankMonitor {
                                                 //       BANKMONITOR_GetInstance (preview 0x8E0 -> 0x8EC, seen)
 
     // Methods bound to their retail symbols by asm labels.
-    int BANKMONITOR_GetInstance(int instance) __asm__("cBankMonitor_BANKMONITOR_GetInstance");
+    cBankMonitorInstance* BANKMONITOR_GetInstance(int instance) __asm__("cBankMonitor_BANKMONITOR_GetInstance");
     int BANKMONITOR_Paused() __asm__("cBankMonitor_BANKMONITOR_Paused");
     void BANKMONITOR_SetDoppler(int enable) __asm__("cBankMonitor_BANKMONITOR_SetDoppler");
     void BANKMONITOR_SetPositional(int enable) __asm__("cBankMonitor_BANKMONITOR_SetPositional");

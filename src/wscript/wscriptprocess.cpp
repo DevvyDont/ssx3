@@ -1421,7 +1421,7 @@ void cWScriptMan::init()
     MissionPointsGoal = -1;
     MissionTicksDir = -1;
     MissionHeightInstId = 0xFFFFFFFF;
-    MEM_fill((char*)MissionTrick, 0, 8);
+    MEM_fill(&MissionTrick, 0, sizeof(MissionTrick));
     tMissionMenuQueue_init(&MissionMenuQueue);
     // Events is the tWScriptEventList (the header types it as its 0x184 bytes)
     tWScriptEventList* events = (tWScriptEventList*)Events;

@@ -697,7 +697,7 @@ struct cSSXScriptEngine {
     void IsNISListNextScriptReady(int nisList) __asm__("cSSXScriptEngine_IsNISListNextScriptReady");
     int IsActiveNISInTransition() __asm__("cSSXScriptEngine_IsActiveNISInTransition");
     int IsActiveNISSkippable() __asm__("cSSXScriptEngine_IsActiveNISSkippable");
-    int IsPlayingNISListPlayer(int pScriptPlayerMain) __asm__("cSSXScriptEngine_IsPlayingNISListPlayer");
+    int IsPlayingNISListPlayer(cScriptPlayerMain* pScriptPlayerMain) __asm__("cSSXScriptEngine_IsPlayingNISListPlayer");
     void AddToIdleListByScriptCategory(int i, int scriptCategory, int flag, int mainCharAIIndex,
                                        int supportChar0AIIndex, int supportChar1AIIndex)
         __asm__("cSSXScriptEngine_AddToIdleListByScriptCategory");
@@ -727,7 +727,7 @@ struct cSSXScriptEngine {
     void IsObjInUseByPlayer(int i, int val) __asm__("cSSXScriptEngine_IsObjInUseByPlayer");
     void* GetAnimationBankInfo() __asm__("cSSXScriptEngine_GetAnimationBankInfo__FPv");
     void* GetSoundBankInfo() __asm__("cSSXScriptEngine_GetSoundBankInfo__FPv");
-    void* GetSubjectRider(int slot, int pPlayer) __asm__("cSSXScriptEngine_GetSubjectRider");
+    void* GetSubjectRider(int slot, cScriptPlayerMain* pPlayer) __asm__("cSSXScriptEngine_GetSubjectRider");
     void* MakeTransitionObject(int type, int mode) __asm__("cSSXScriptEngine_MakeTransitionObject");
     void OnInSeqPlay(cScriptPlayerMain* pPlayer) __asm__("cSSXScriptEngine_OnInSeqPlay");
     void OnInSeqUpdate(cScriptPlayerMain* pPlayer, float x, float y) __asm__("cSSXScriptEngine_OnInSeqUpdate");

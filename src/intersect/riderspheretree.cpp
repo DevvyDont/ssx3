@@ -118,17 +118,17 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Init);
  * Sets up a rider's collision spheres: one per listed bone, plus a bounding sphere.
  *
  * Sets the parent to -1, stores the count @p n and, per sphere, the bone id and radius (+0x44/+0x40 in
- * 0x20-byte entries); then the bone pose array, the bound bone and its radius. The C calls the pose pointer
- * `type` (On Tour _bonePoses) and the bound bone `user` (_boundBone).
+ * 0x20-byte entries); then the bone pose array, the bound bone and its radius. The C calls the bound bone `user`
+ * (On Tour _boundBone).
  *
- * @param type    the rider's bone poses (On Tour _bonePoses)
+ * @param poses   the rider's bone poses (On Tour _bonePoses)
  * @param n       number of spheres
  * @param ids     bone index of each sphere
  * @param radii   radius of each sphere
  * @param user    bone of the bounding sphere (On Tour _boundBone)
  * @param radius  radius of the bounding sphere
  */
-void cRiderSphereTree::Init(int type, int n, int* ids, float* radii, int user, float radius)
+void cRiderSphereTree::Init(tPose* poses, int n, int* ids, float* radii, int user, float radius)
 {
     sphMask = 0xFFFFFFFF;
     listLen = n;
@@ -136,7 +136,7 @@ void cRiderSphereTree::Init(int type, int n, int* ids, float* radii, int user, f
         sphList[i].bone = ids[i];
         sphList[i].rad = radii[i];
     }
-    *(int*)&bonePoses = type;
+    bonePoses = poses;
     boundRad = radius;
     boundBone = user;
 }
@@ -161,7 +161,7 @@ extern "C" void MEM_copy(void* dst, void* src, int size);
  */
 cRiderSphereTree* cRiderSphereTree::operatorE(cRiderSphereTree* src)
 {
-    (*(int*)&bonePoses) = ((int)src->bonePoses);
+    bonePoses = src->bonePoses;
     boundRad = src->boundRad;
     (*(&boundCen)) = (*(&src->boundCen));
     boundBone = src->boundBone;
@@ -1633,24 +1633,24 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, tPolyModelMe
                 continue;
             }
             tIntersectInfo* record = &out[n];
-            (*(int*)&record->Patch) = 0;
+            record->Patch = 0;
             record->HitType = 2;
             record->Face = -1;
-            (*(int*)&record->Inst) = 0;
-            (*(int*)&record->Spline) = 0;
+            record->Inst = 0;
+            record->Spline = 0;
             record->Mesh = -1;
             record->Seg = -1;
             record->Stype = -1;
-            (*(t4Vector*)&record->Ivel) = t4vect_Zero;
-            (*(t4Vector*)&record->Iangvel) = t4vect_Zero;
-            (*(int*)&record->T) = 0;
-            (*(int*)&record->u) = 0;
-            (*(int*)&record->v) = 0;
-            (*(t4Vector*)&record->Ipos) = pos;
-            (*(t4Vector*)&record->Inorm) = hn;
+            (record->Ivel) = t4vect_Zero;
+            (record->Iangvel) = t4vect_Zero;
+            record->T = 0.0f;
+            record->u = 0.0f;
+            record->v = 0.0f;
+            (record->Ipos) = pos;
+            (record->Inorm) = hn;
             record->Iparam = hitParam;
             record->Face = i;
-            (*(int*)&record->Patch) = 0;
+            record->Patch = 0;
             n++;
         }
     } else {
@@ -1681,24 +1681,24 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, tPolyModelMe
                     continue;
                 }
                 tIntersectInfo* record = &out[n];
-                (*(int*)&record->Patch) = 0;
+                record->Patch = 0;
                 record->HitType = 2;
                 record->Face = -1;
-                (*(int*)&record->Inst) = 0;
-                (*(int*)&record->Spline) = 0;
+                record->Inst = 0;
+                record->Spline = 0;
                 record->Mesh = -1;
                 record->Seg = -1;
                 record->Stype = -1;
-                (*(t4Vector*)&record->Ivel) = t4vect_Zero;
-                (*(t4Vector*)&record->Iangvel) = t4vect_Zero;
-                (*(int*)&record->T) = 0;
-                (*(int*)&record->u) = 0;
-                (*(int*)&record->v) = 0;
-                (*(t4Vector*)&record->Ipos) = pos;
-                (*(t4Vector*)&record->Inorm) = hn;
+                (record->Ivel) = t4vect_Zero;
+                (record->Iangvel) = t4vect_Zero;
+                record->T = 0.0f;
+                record->u = 0.0f;
+                record->v = 0.0f;
+                (record->Ipos) = pos;
+                (record->Inorm) = hn;
                 record->Iparam = hitParam;
                 record->Face = i;
-                (*(int*)&record->Patch) = 0;
+                record->Patch = 0;
                 n++;
             }
         }
@@ -1746,7 +1746,7 @@ void SphereTree::init()
     for (int i = 0; i < 8; i++) {
         dst[i] = gSphTreeAlignAxis[i];
     }
-    *(t4Vector*)&transCenter = t4vect_Origin;
+    transCenter = t4vect_Origin;
     scale = 1.0f;
 }
 #endif
@@ -1970,7 +1970,7 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float
     scaledCenter.y = transformedCenter.y * sc.y;
     scaledCenter.z = transformedCenter.z * sc.z;
     scaledCenter.w = transformedCenter.w * sc.w;
-    *(t4Vector*)&self->transCenter = scaledCenter;
+    self->transCenter = scaledCenter;
     self->scale = self->scale * scale;
 }
 #endif
@@ -1978,7 +1978,7 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsSphereCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
+extern "C" unsigned char* SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" bool SphereTree_isSphereCollision(SphereTree* self, t4Vector* a1, float f, t4Vector* pos, int a4, int a5,
         t4Vector* a6, t4Vector* a7);
 
@@ -1998,7 +1998,7 @@ int SphereTree::IsSphereCollision(t4Vector* spherePos, float sphereRadius, t4Vec
 {
     tSphTreeInfo* tree = treeInfo;
     if (tree->isCompressed != 0) {
-        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        treeInfo->bitTree = SphereTree_AllocBuf(tree);
     }
     return isSphereCollision(spherePos, sphereRadius, (t4Vector*)&transCenter, 0, 0, outPush, outContact);
 }
@@ -2007,7 +2007,7 @@ int SphereTree::IsSphereCollision(t4Vector* spherePos, float sphereRadius, t4Vec
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsBoxCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
+extern "C" unsigned char* SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" bool SphereTree_isBoxCollision(SphereTree* self, t3Vector* a1, t3Vector* a2, t4Vector* pos, int a4, int a5,
         t4Vector* a6, t4Vector* a7);
 
@@ -2026,7 +2026,7 @@ int SphereTree::IsBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* out
 {
     tSphTreeInfo* tree = treeInfo;
     if (tree->isCompressed != 0) {
-        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        treeInfo->bitTree = SphereTree_AllocBuf(tree);
     }
     return isBoxCollision(boxMin, boxMax, (t4Vector*)&transCenter, 0, 0, outPos, outNormal);
 }
@@ -2069,7 +2069,7 @@ extern "C" bool SphereTree_IsPlaneCollision(SphereTree* self, sVecArg_C9B8* plan
 {
     tSphTreeInfo* tree = self->treeInfo;
     if (tree->isCompressed != 0) {
-        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        self->treeInfo->bitTree = SphereTree_AllocBuf(tree);
     }
     SphereTree_populateSortAxis_v(self, zeroW_C9B8(*plane));
     self->worstCase = 0.0f;
@@ -2084,7 +2084,7 @@ extern "C" bool SphereTree_IsPlaneCollision(SphereTree* self, sVecArg_C9B8* plan
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsTriCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
+extern "C" unsigned char* SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" void SphereTree_populateSortAxis(SphereTree* self, t4Vector* v);
 extern "C" int SphereTree_checkTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* pos, int a6, int a7, void* a8, void* a9);
 
@@ -2107,7 +2107,7 @@ bool SphereTree::IsTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* po
 {
     tSphTreeInfo* treeInfo = this->treeInfo;
     if (treeInfo->isCompressed != 0) {
-        this->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(treeInfo);
+        this->treeInfo->bitTree = SphereTree_AllocBuf(treeInfo);
     }
     populateSortAxis((t4Vector*)uNorm);
     worstCase = 0.0f;
@@ -2122,7 +2122,7 @@ bool SphereTree::IsTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* po
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsTreeCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
+extern "C" unsigned char* SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" bool SphereTree_isTreeCollision(SphereTree* self, SphereTree* other, t4Vector* pos, int a3, int a4,
         t4Vector* a5, t4Vector* a6);
 
@@ -2141,11 +2141,11 @@ int SphereTree::IsTreeCollision(SphereTree* other, t4Vector* outPush, t4Vector* 
 {
     tSphTreeInfo* tree = treeInfo;
     if (tree->isCompressed != 0) {
-        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        treeInfo->bitTree = SphereTree_AllocBuf(tree);
     }
     tree = (tSphTreeInfo*)((void*)other->treeInfo);
     if (tree->isCompressed != 0) {
-        other->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        other->treeInfo->bitTree = SphereTree_AllocBuf(tree);
     }
     return isTreeCollision((SphereTree*)other, (t4Vector*)&transCenter, 0, 0, outPush, outContact);
 }
@@ -3137,22 +3137,21 @@ extern "C" void* sphTreeUnRLE(void* dst, void* src);
  * (round robin through bufPtr / bigBufPtr), records the id and remembers the slot.
  *
  * @param selfp  the tree info (On Tour tSphTreeInfo)
- * @return the buffer address (as an int)
+ * @return the unpacked bit tree
  */
-// PORT: returns the cached buffer pointer as int (the unit declares it int-returning).
-extern "C" int SphereTree_AllocBuf(tSphTreeInfo* selfp)
+extern "C" unsigned char* SphereTree_AllocBuf(tSphTreeInfo* selfp)
 {
     tSphTreeInfo* self = selfp;
     int key = self->treeID;
     int* pslot = &self->lastBufID;
     if (self->depth < SphereTree_bigBufDepth) {
         if (SphereTree_bufID[*pslot] == key) {
-            return (int)SphereTree_buffers[*pslot];
+            return (unsigned char*)SphereTree_buffers[*pslot];
         }
         for (int i = 0; i < SphereTree_bufNum; i++) {
             if (SphereTree_bufID[i] == key) {
                 *pslot = i;
-                return (int)SphereTree_buffers[i];
+                return (unsigned char*)SphereTree_buffers[i];
             }
         }
         sphTreeUnRLE(SphereTree_buffers[SphereTree_bufPtr], self->cmpTree);
@@ -3160,15 +3159,15 @@ extern "C" int SphereTree_AllocBuf(tSphTreeInfo* selfp)
         *pslot = SphereTree_bufPtr;
         SphereTree_bufPtr++;
         SphereTree_bufPtr %= SphereTree_bufNum;
-        return (int)SphereTree_buffers[*pslot];
+        return (unsigned char*)SphereTree_buffers[*pslot];
     } else {
         if (SphereTree_bigBufID[*pslot] == key) {
-            return (int)SphereTree_bigBuffers[*pslot];
+            return (unsigned char*)SphereTree_bigBuffers[*pslot];
         }
         for (int i = 0; i < SphereTree_bigBufNum; i++) {
             if (SphereTree_bigBufID[i] == key) {
                 *pslot = i;
-                return (int)SphereTree_bigBuffers[i];
+                return (unsigned char*)SphereTree_bigBuffers[i];
             }
         }
         sphTreeUnRLE(SphereTree_bigBuffers[SphereTree_bigBufPtr], self->cmpTree);
@@ -3176,7 +3175,7 @@ extern "C" int SphereTree_AllocBuf(tSphTreeInfo* selfp)
         *pslot = SphereTree_bigBufPtr;
         SphereTree_bigBufPtr++;
         SphereTree_bigBufPtr %= SphereTree_bigBufNum;
-        return (int)SphereTree_bigBuffers[*pslot];
+        return (unsigned char*)SphereTree_bigBuffers[*pslot];
     }
 }
 #endif
@@ -3276,18 +3275,18 @@ extern "C" cWorldLine* cWorldLine_cWorldLine(cWorldLine* self, t4Vector* startPo
     self->mVtbl = (void**)cWorldLine_vtbl;
     self->useRejectNormal = 0;
     self->isTransformed = 0;
-    *(t4Vector*)&self->origP0 = *startPoint;
-    *(t4Vector*)&self->p0 = *(t4Vector*)&self->origP0;
-    *(t4Vector*)&self->origDp = sphereCapsuleSub(endPoint, startPoint);
-    *(t4Vector*)&self->dp = *(t4Vector*)&self->origDp;
+    self->origP0 = *startPoint;
+    self->p0 = self->origP0;
+    self->origDp = sphereCapsuleSub(endPoint, startPoint);
+    self->dp = self->origDp;
     self->idealParam = idealParam;
-    *(t4Vector*)&self->boxMax = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
+    self->boxMax = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y > endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z > endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    *(t4Vector*)&self->boxMin = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
+    self->boxMin = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y < endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z < endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    *(t4Vector*)&self->boxCenter = sphereCapsuleDiv(sphereCapsuleAdd((t4Vector*)&self->boxMin, (t4Vector*)&self->boxMax), 2.0f);
+    self->boxCenter = sphereCapsuleDiv(sphereCapsuleAdd((t4Vector*)&self->boxMin, (t4Vector*)&self->boxMax), 2.0f);
     return (self);
 }
 #endif
@@ -3343,8 +3342,8 @@ struct sSphereProd_E398 : sSphereV4_E100 {
 void cWorldLine::Transform(t4Vector* mat, float scale)
 {
     sSphereV4_E100 sc(scale, scale, scale, 1.0f);
-    *(t4Vector*)&p0 = sSphereProd_E398(mtxMulVec_9B90(mat, (t4Vector*)&origP0), sc);
-    *(t4Vector*)&dp = sSphereProd_E398(mtxMulVec_9B90(mat, (t4Vector*)&origDp), sc);
+    p0 = sSphereProd_E398(mtxMulVec_9B90(mat, (t4Vector*)&origP0), sc);
+    dp = sSphereProd_E398(mtxMulVec_9B90(mat, (t4Vector*)&origDp), sc);
     isTransformed = 1;
 }
 #endif
@@ -3358,10 +3357,8 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_UnTransform);
  */
 void cWorldLine::UnTransform()
 {
-    cQuad128 origP0 = *(cQuad128*)&this->origP0;
-    cQuad128 origDp = *(cQuad128*)&this->origDp;
-    *(cQuad128*)&p0 = origP0;
-    *(cQuad128*)&dp = origDp;
+    p0 = origP0;
+    dp = origDp;
     isTransformed = 0;
 }
 #endif
@@ -3542,15 +3539,15 @@ extern t4Vector t4vect_Zero_E690[] __asm__("t4vect_Zero");
 static inline void reset_E690(tIntersectInfo* h)
 {
     h->HitType = 2;
-    (*(void**)&h->Patch) = 0;
-    (*(int*)&h->Inst) = 0;
-    (*(int*)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(t4Vector*)&h->Ivel) = *t4vect_Zero_E690;
-    (*(t4Vector*)&h->Iangvel) = *t4vect_Zero_E690;
+    (h->Ivel) = *t4vect_Zero_E690;
+    (h->Iangvel) = *t4vect_Zero_E690;
     h->T = 0;
     h->u = 0;
     h->v = 0;
@@ -3643,15 +3640,15 @@ int cWorldLine::IsBoxInt(float* bmin, float* bmax, tIntersectInfo* hits)
     if (0.0f <= tmin) {
         tIntersectInfo* entryHit = &hits[0];
         reset_E690(entryHit);
-        (*(t4Vector*)&entryHit->Inorm) = cWorldLine_IsBoxInt_norms[fmin];
-        (*(t4Vector*)&entryHit->Ipos) = vu0Add_E4D0(*(t4Vector*)&p0, vu0Scale_E4D0(*(t4Vector*)&dp, tmin));
+        (entryHit->Inorm) = cWorldLine_IsBoxInt_norms[fmin];
+        (entryHit->Ipos) = vu0Add_E4D0(p0, vu0Scale_E4D0(dp, tmin));
         entryHit->Iparam = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
         reset_E690(&hits[n]);
-        (*(t4Vector*)&hits[n].Inorm) = cWorldLine_IsBoxInt_norms[fmax];
-        (*(t4Vector*)&hits[n].Ipos) = vu0Add_E4D0(*(t4Vector*)&p0, vu0Scale_E4D0(*(t4Vector*)&dp, tmax));
+        (hits[n].Inorm) = cWorldLine_IsBoxInt_norms[fmax];
+        (hits[n].Ipos) = vu0Add_E4D0(p0, vu0Scale_E4D0(dp, tmax));
         hits[n].Iparam = tmax;
         n++;
     }
@@ -3844,7 +3841,7 @@ extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patc
     float duy = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 1));
     float duz = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 2));
     for (int i = 0; i < 4; i++) {
-        sVec3_E9A0 originDelta(vu0Sub_E9A0(*(t4Vector*)&line->p0, surfPos));
+        sVec3_E9A0 originDelta(vu0Sub_E9A0(line->p0, surfPos));
         // Jacobian [dP/du dP/dv -dir], filled row by row
         sMat3_E9A0 jacobian;
         jacobian.m[0] = dux;
@@ -4297,10 +4294,10 @@ extern "C" bool bxSphereTree_IsRiderTreeCollision(void* a, void* tree, t4Vector*
  */
 int cWorldRider::IsSphTreeInt(void* tree, tIntersectInfo* hit)
 {
-    if (bxSphereTree_IsRiderTreeCollision(tree, st, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
-        float len = sphereLength_32FA30((*(t4Vector*)&hit->Inorm));
+    if (bxSphereTree_IsRiderTreeCollision(tree, st, &(hit->Inorm), hit) != 0) {
+        float len = sphereLength_32FA30((hit->Inorm));
         hit->Iparam = len;
-        sphereDivEq_32FA30((*(t4Vector*)&hit->Inorm), len);
+        sphereDivEq_32FA30((hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4362,10 +4359,10 @@ extern "C" bool cRiderSphereTree_IsBoxCollision(cRiderSphereTree* tree, t3Vector
  */
 int cWorldRider::IsBoxInt(void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (st->IsBoxCollision((t3Vector*)bMin, (t3Vector*)bMax, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
-        float len = sphereLength_32FAC0((*(t4Vector*)&hit->Inorm));
+    if (st->IsBoxCollision((t3Vector*)bMin, (t3Vector*)bMax, &(hit->Inorm), hit) != 0) {
+        float len = sphereLength_32FAC0((hit->Inorm));
         hit->Iparam = len;
-        sphereDivEq_32FAC0((*(t4Vector*)&hit->Inorm), len);
+        sphereDivEq_32FAC0((hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4401,20 +4398,20 @@ extern "C" cWorldSphere* cWorldSphere_cWorldSphere(cWorldSphere* self, t4Vector*
     } else {
         self->mPrecision = 1;
     }
-    *(t4Vector*)&self->origCen = *sphereCenter;
-    *(t4Vector*)&self->cen = *(t4Vector*)&self->origCen;
+    self->origCen = *sphereCenter;
+    self->cen = self->origCen;
     self->rad = sphereRadius;
     self->origRad = sphereRadius;
     boxCorner.x = sphereCenter->x + sphereRadius;
     boxCorner.y = sphereCenter->y + sphereRadius;
     boxCorner.z = sphereCenter->z + sphereRadius;
     boxCorner.w = 1.0f;
-    *(t4Vector*)&self->boxMax = boxCorner;
+    self->boxMax = boxCorner;
     boxCorner.x = sphereCenter->x - sphereRadius;
     boxCorner.y = sphereCenter->y - sphereRadius;
     boxCorner.z = sphereCenter->z - sphereRadius;
-    *(t4Vector*)&self->boxMin = boxCorner;
-    *(t4Vector*)&self->boxCenter = *sphereCenter;
+    self->boxMin = boxCorner;
+    self->boxCenter = *sphereCenter;
     return (self);
 }
 #endif
@@ -4491,7 +4488,7 @@ void cWorldSphere::Transform(t4Vector* mat, float scale)
 {
     t4Vector newCenter = sphereMtxMulVec(mat, (t4Vector*)&origCen);
     isTransformed = 1;
-    *(t4Vector*)&cen = newCenter;
+    cen = newCenter;
     rad = scale * origRad;
 }
 #endif
@@ -4505,9 +4502,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_UnTransform);
  */
 void cWorldSphere::UnTransform()
 {
-    cQuad128 origCen = *(cQuad128*)&this->origCen;
-    float origRad = this->origRad;
-    *(cQuad128*)&cen = origCen;
+    cen = origCen;
     rad = origRad;
     isTransformed = 0;
 }
@@ -4566,11 +4561,11 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* a1, floa
  */
 int cWorldSphere::IsSphTreeInt(void* tree, tIntersectInfo* hit)
 {
-    if (((SphereTree*)tree)->IsSphereCollision((t4Vector*)&cen, rad, (t4Vector*)(&(*(t4Vector*)&hit->Inorm)),
+    if (((SphereTree*)tree)->IsSphereCollision((t4Vector*)&cen, rad, (t4Vector*)(&(hit->Inorm)),
             (t4Vector*)hit) != 0) {
-        float len = sphereLength_32FDB0((*(t4Vector*)&hit->Inorm));
+        float len = sphereLength_32FDB0((hit->Inorm));
         hit->Iparam = len;
-        sphereDivEq_32FDB0((*(t4Vector*)&hit->Inorm), len);
+        sphereDivEq_32FDB0((hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4658,7 +4653,7 @@ bool cWorldSphere::IsTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t
     if (isIntersectingPlane(plane, vertA, &dist) == 0) {
         return false;
     }
-    t4Vector hitPos = sphereSub_32FE78(*(t4Vector*)&cen, sphereScale_32FE78(*plane, dist));
+    t4Vector hitPos = sphereSub_32FE78(cen, sphereScale_32FE78(*plane, dist));
     *outPos = hitPos;
     if (gIsPointInsideTri_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0) {
         *outDir = *plane;
@@ -4748,7 +4743,7 @@ bool cWorldSphere::Is2SidedTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* ve
         dist = -dist;
         sphereScaleEq_32FFA0(newNorm, -1.0f);
     }
-    t4Vector hitPos = sphereSub_32FFA0(*(t4Vector*)&cen, sphereScale_32FFA0(newNorm, dist));
+    t4Vector hitPos = sphereSub_32FFA0(cen, sphereScale_32FFA0(newNorm, dist));
     *outPos = hitPos;
     if (gIsPointInsideTri_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0 || edgeSphereCollision(vertA,
             vertB, vertC) != 0) {
@@ -4895,7 +4890,7 @@ bool cWorldSphere::edgeSphereCollision(t4Vector* vert0, t4Vector* vert1, t4Vecto
     tri[2] = *vert2;
     for (int i = 0; i < 3; i++) {
         pt = closestPointOnLine_v(&tri[i], &tri[(i + 1) % 3], (t4Vector*)&cen);
-        float dist = vu0Length_30250(vu0Sub_30250(*(t4Vector*)&cen, pt));
+        float dist = vu0Length_30250(vu0Sub_30250(cen, pt));
         if (dist < rad) {
             return true;
         }
@@ -4949,7 +4944,7 @@ static inline float sphereAbs_330360(float x)
 bool cWorldSphere::isIntersectingPlane(t4Vector* plane, t4Vector* point, float* out)
 {
     float planeConst = planeDistance(plane, point);
-    float signedDist = sphereDot_330360(*plane, *(t4Vector*)&cen) + planeConst;
+    float signedDist = sphereDot_330360(*plane, cen) + planeConst;
     *out = signedDist;
     return sphereAbs_330360(signedDist) < rad;
 }

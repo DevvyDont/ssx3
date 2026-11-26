@@ -58,7 +58,7 @@ struct cWorldSphTree {
     bool IsInBoxTransformed(float* lo, float* hi) __asm__("cWorldSphTree_IsInBoxTransformed");
     float GetIdealParam() __asm__("cWorldSphTree_GetIdealParam");
     void Transform(t4Matrix* mat, float scale) __asm__("cWorldSphTree_Transform");
-    int UnTransform() __asm__("cWorldSphTree_UnTransform__FPv");
+    bxSphereTree* UnTransform() __asm__("cWorldSphTree_UnTransform__FPv");
     int IsTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
         __asm__("cWorldSphTree_IsTriInt");
     int Is2SidedTriInt(int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)

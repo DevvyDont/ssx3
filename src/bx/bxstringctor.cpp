@@ -10,6 +10,7 @@
 #include "path/basepath.h"
 #include "path/pathsys.h"
 #include "online/lobbyman.h"
+#include "online/onlineevent.h"
 
 extern void* cBXString_EmptyString;
 
@@ -117,7 +118,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 void cMemMan_free(void*);
 
-static inline void Dealloc89B8(void** p, int n)
+static inline void Dealloc89B8(void* p, int n)
 {
     if (p != 0) {
         if (n == 1) {
@@ -127,13 +128,6 @@ static inline void Dealloc89B8(void** p, int n)
         }
     }
 }
-
-struct sVec89B8 {
-    int f0;
-    void** mBegin;
-    void** mEnd;
-    void** mCap;
-};
 
 
 /**
@@ -149,10 +143,10 @@ struct sVec89B8 {
 extern "C" void BuddyMan__BuddyMan(BuddyMan* self, int flags)
 {
     cBXString__cBXString(((char*)&self->mResource), 2);
-    sVec89B8* vb = &(*(sVec89B8*)&self->mChallengersAlloc);
-    Dealloc89B8(vb->mBegin, (*(sVec89B8*)&self->mChallengersAlloc).mCap - (*(sVec89B8*)&self->mChallengersAlloc).mBegin);
-    sVec89B8* va = &(*(sVec89B8*)&self->mMessagesAlloc);
-    Dealloc89B8(va->mBegin, (*(sVec89B8*)&self->mMessagesAlloc).mCap - (*(sVec89B8*)&self->mMessagesAlloc).mBegin);
+    vector<cChallenger*>* challengers = (vector<cChallenger*>*)&self->mChallengersAlloc;
+    Dealloc89B8(challengers->_M_start, self->mChallengersEnd - self->mChallengersStart);
+    vector<cPrivateMessage*>* messages = (vector<cPrivateMessage*>*)&self->mMessagesAlloc;
+    Dealloc89B8(messages->_M_start, self->mMessagesEnd - self->mMessagesStart);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -977,11 +971,7 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-struct sMsgListNode_00269008 {
-    sMsgListNode_00269008* next;
-    sMsgListNode_00269008* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269008;
 
 struct sMsgListIter_00269008 {
     sMsgListNode_00269008* node;
@@ -989,16 +979,16 @@ struct sMsgListIter_00269008 {
     sMsgListIter_00269008(const sMsgListIter_00269008& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_00269008 pos, void* const& x)
+static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_00269008 pos, online_Event* const& x)
 {
     sMsgListNode_00269008* tmp = (sMsgListNode_00269008*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269008*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
 
@@ -1016,13 +1006,13 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
 extern "C" void func_00269008(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 243;
-    *(int*)self = hostState;
+    self->mState = hostState;
     func_00264CF0(self, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    netEvent[0] = kind;
-    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
-    void* mp = netEvent;
+    online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->mType = kind;
+    netEvent->mVtbl = online_Event_vtbl;
+    online_Event* mp = netEvent;
     sMsgList_00269008_insert(((sMsgListNode_00269008*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1039,11 +1029,7 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-struct sMsgListNode_002690C8 {
-    sMsgListNode_002690C8* next;
-    sMsgListNode_002690C8* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_002690C8;
 
 struct sMsgListIter_002690C8 {
     sMsgListNode_002690C8* node;
@@ -1051,16 +1037,16 @@ struct sMsgListIter_002690C8 {
     sMsgListIter_002690C8(const sMsgListIter_002690C8& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690C8 pos, void* const& x)
+static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690C8 pos, online_Event* const& x)
 {
     sMsgListNode_002690C8* tmp = (sMsgListNode_002690C8*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_002690C8*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
 
@@ -1078,13 +1064,13 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
 extern "C" void func_002690C8(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 244;
-    *(int*)self = hostState;
+    self->mState = hostState;
     func_00264CF0(self, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    netEvent[0] = kind;
-    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
-    void* mp = netEvent;
+    online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->mType = kind;
+    netEvent->mVtbl = online_Event_vtbl;
+    online_Event* mp = netEvent;
     sMsgList_002690C8_insert(((sMsgListNode_002690C8*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1101,11 +1087,7 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-struct sMsgListNode_00269188 {
-    sMsgListNode_00269188* next;
-    sMsgListNode_00269188* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269188;
 
 struct sMsgListIter_00269188 {
     sMsgListNode_00269188* node;
@@ -1113,16 +1095,16 @@ struct sMsgListIter_00269188 {
     sMsgListIter_00269188(const sMsgListIter_00269188& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_00269188 pos, void* const& x)
+static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_00269188 pos, online_Event* const& x)
 {
     sMsgListNode_00269188* tmp = (sMsgListNode_00269188*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269188*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
 
@@ -1141,10 +1123,10 @@ extern "C" void func_00269188(cSetupMan* self, int hostState)
     int kind = 247;
     (self)->mState = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    netEvent[0] = kind;
-    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
-    void* mp = netEvent;
+    online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->mType = kind;
+    netEvent->mVtbl = online_Event_vtbl;
+    online_Event* mp = netEvent;
     sMsgList_00269188_insert(((sMsgListNode_00269188*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1161,11 +1143,7 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-struct sMsgListNode_00269240 {
-    sMsgListNode_00269240* next;
-    sMsgListNode_00269240* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269240;
 
 struct sMsgListIter_00269240 {
     sMsgListNode_00269240* node;
@@ -1173,16 +1151,16 @@ struct sMsgListIter_00269240 {
     sMsgListIter_00269240(const sMsgListIter_00269240& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_00269240 pos, void* const& x)
+static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_00269240 pos, online_Event* const& x)
 {
     sMsgListNode_00269240* tmp = (sMsgListNode_00269240*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269240*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
 
@@ -1202,13 +1180,13 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
 extern "C" void func_00269240(cSetupMan* self, int riderId, int hostState, void* riderStats)
 {
     int kind = 243;
-    *(int*)self = hostState;
+    self->mState = hostState;
     func_00264D80(self, riderId, riderStats);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    netEvent[0] = kind;
-    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
-    void* mp = netEvent;
+    online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->mType = kind;
+    netEvent->mVtbl = online_Event_vtbl;
+    online_Event* mp = netEvent;
     sMsgList_00269240_insert(((sMsgListNode_00269240*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1225,11 +1203,7 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-struct sMsgListNode_00269300 {
-    sMsgListNode_00269300* next;
-    sMsgListNode_00269300* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269300;
 
 struct sMsgListIter_00269300 {
     sMsgListNode_00269300* node;
@@ -1237,16 +1211,16 @@ struct sMsgListIter_00269300 {
     sMsgListIter_00269300(const sMsgListIter_00269300& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_00269300 pos, void* const& x)
+static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_00269300 pos, online_Event* const& x)
 {
     sMsgListNode_00269300* tmp = (sMsgListNode_00269300*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269300*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
 
@@ -1265,13 +1239,13 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
 extern "C" void func_00269300(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 245;
-    *(int*)self = hostState;
+    self->mState = hostState;
     func_00264D80(self, riderId, 0);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    netEvent[0] = kind;
-    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
-    void* mp = netEvent;
+    online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->mType = kind;
+    netEvent->mVtbl = online_Event_vtbl;
+    online_Event* mp = netEvent;
     sMsgList_00269300_insert(((sMsgListNode_00269300*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1288,11 +1262,7 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-struct sMsgListNode_002693C0 {
-    sMsgListNode_002693C0* next;
-    sMsgListNode_002693C0* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_002693C0;
 
 struct sMsgListIter_002693C0 {
     sMsgListNode_002693C0* node;
@@ -1300,16 +1270,16 @@ struct sMsgListIter_002693C0 {
     sMsgListIter_002693C0(const sMsgListIter_002693C0& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693C0 pos, void* const& x)
+static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693C0 pos, online_Event* const& x)
 {
     sMsgListNode_002693C0* tmp = (sMsgListNode_002693C0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_002693C0*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
 
@@ -1328,10 +1298,10 @@ extern "C" void func_002693C0(cSetupMan* self, int hostState)
     int kind = 247;
     (self)->mState = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    netEvent[0] = kind;
-    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
-    void* mp = netEvent;
+    online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->mType = kind;
+    netEvent->mVtbl = online_Event_vtbl;
+    online_Event* mp = netEvent;
     sMsgList_002693C0_insert(((sMsgListNode_002693C0*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1347,11 +1317,7 @@ extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* D_00481150[];
 
-struct sMsgListNode_00269478 {
-    sMsgListNode_00269478* next;
-    sMsgListNode_00269478* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269478;
 
 struct sMsgListIter_00269478 {
     sMsgListNode_00269478* node;
@@ -1359,25 +1325,18 @@ struct sMsgListIter_00269478 {
     sMsgListIter_00269478(const sMsgListIter_00269478& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_00269478 pos, void* const& x)
+static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_00269478 pos, online_Event* const& x)
 {
     sMsgListNode_00269478* tmp = (sMsgListNode_00269478*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269478*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269478 {
-    int kind;
-    void** vt;
-    int f8;
-    int fC;
-};
 
 /**
  * Handles the client's highlighted bragging-rights row on the host: posts it as a lobby event.
@@ -1391,12 +1350,12 @@ struct sMsg_00269478 {
  */
 extern "C" void func_00269478(cSetupMan* self, int rowIndex)
 {
-    sMsg_00269478* netEvent = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 251;
-    netEvent->vt = D_00481150;
-    netEvent->f8 = 1;
-    netEvent->fC = rowIndex;
-    void* mp = netEvent;
+    online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 251;
+    netEvent->mVtbl = D_00481150;
+    netEvent->mFlag = 1;
+    netEvent->mRow = rowIndex;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269478_insert(((sMsgListNode_00269478*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1412,11 +1371,7 @@ extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* D_00481130[];
 
-struct sMsgListNode_00269538 {
-    sMsgListNode_00269538* next;
-    sMsgListNode_00269538* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269538;
 
 struct sMsgListIter_00269538 {
     sMsgListNode_00269538* node;
@@ -1424,26 +1379,18 @@ struct sMsgListIter_00269538 {
     sMsgListIter_00269538(const sMsgListIter_00269538& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_00269538 pos, void* const& x)
+static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_00269538 pos, online_Event* const& x)
 {
     sMsgListNode_00269538* tmp = (sMsgListNode_00269538*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269538*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269538 {
-    int kind;
-    void** vt;
-    int f8;
-    int fC;
-    int f10;
-};
 
 /**
  * Handles a bragging-rights rule change from the client on the host: posts it as a lobby event.
@@ -1458,13 +1405,13 @@ struct sMsg_00269538 {
  */
 extern "C" void func_00269538(cSetupMan* self, int ruleSlot, int ruleValue)
 {
-    sMsg_00269538* netEvent = (sMsg_00269538*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 0xFC;
-    netEvent->vt = D_00481130;
-    netEvent->f8 = 1;
-    netEvent->fC = ruleSlot;
-    netEvent->f10 = ruleValue;
-    void* mp = netEvent;
+    online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 0xFC;
+    netEvent->mVtbl = D_00481130;
+    netEvent->mFlag = 1;
+    netEvent->mRuleSlot = ruleSlot;
+    netEvent->mRuleValue = ruleValue;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269538_insert(((sMsgListNode_00269538*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1479,13 +1426,9 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
-extern char D_004813E0[];
+extern void* D_004813E0[];
 
-struct sMsgListNode_00269608 {
-    sMsgListNode_00269608* next;
-    sMsgListNode_00269608* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269608;
 
 struct sMsgListIter_00269608 {
     sMsgListNode_00269608* node;
@@ -1493,24 +1436,18 @@ struct sMsgListIter_00269608 {
     sMsgListIter_00269608(const sMsgListIter_00269608& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_00269608 pos, void* const& x)
+static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_00269608 pos, online_Event* const& x)
 {
     sMsgListNode_00269608* tmp = (sMsgListNode_00269608*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269608*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269608 {
-    int kind;
-    void* vt;
-    int f8;
-};
 
 /**
  * Handles the client locking its bragging-rights panel on the host: advances the state, answers and posts an event.
@@ -1522,22 +1459,22 @@ struct sMsg_00269608 {
  */
 extern "C" void func_00269608(cSetupMan* self)
 {
-    switch (*(int*)self)
+    switch (self->mState)
     {
     case 6:
     case 7:
-        *(int*)self = 8;
+        self->mState = 8;
         break;
     case 9:
-        *(int*)self = 10;
+        self->mState = 10;
         break;
     }
-    func_00264E50(self, 11, *(int*)self, 0);
-    sMsg_00269608* netEvent = (sMsg_00269608*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 253;
-    netEvent->vt = D_004813E0;
-    netEvent->f8 = 1;
-    void* mp = netEvent;
+    func_00264E50(self, 11, self->mState, 0);
+    online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 253;
+    netEvent->mVtbl = D_004813E0;
+    netEvent->mFlag = 1;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269608_insert(((sMsgListNode_00269608*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1552,13 +1489,9 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
-extern char D_004813C0[];
+extern void* D_004813C0[];
 
-struct sMsgListNode_002696F8 {
-    sMsgListNode_002696F8* next;
-    sMsgListNode_002696F8* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_002696F8;
 
 struct sMsgListIter_002696F8 {
     sMsgListNode_002696F8* node;
@@ -1566,24 +1499,18 @@ struct sMsgListIter_002696F8 {
     sMsgListIter_002696F8(const sMsgListIter_002696F8& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696F8 pos, void* const& x)
+static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696F8 pos, online_Event* const& x)
 {
     sMsgListNode_002696F8* tmp = (sMsgListNode_002696F8*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_002696F8*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_002696F8 {
-    int kind;
-    void* vt;
-    int f8;
-};
 
 /**
  * Handles the client unlocking its bragging-rights panel on the host: steps the state back, answers and posts an event.
@@ -1595,14 +1522,14 @@ struct sMsg_002696F8 {
  */
 extern "C" void func_002696F8(cSetupMan* self)
 {
-    if (*(int*)self == 8)
-        *(int*)self = 7;
-    func_00264E50(self, 0xC, *(int*)self, 0);
-    sMsg_002696F8* netEvent = (sMsg_002696F8*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 0xFE;
-    netEvent->vt = D_004813C0;
-    netEvent->f8 = 1;
-    void* mp = netEvent;
+    if (self->mState == 8)
+        self->mState = 7;
+    func_00264E50(self, 0xC, self->mState, 0);
+    online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 0xFE;
+    netEvent->mVtbl = D_004813C0;
+    netEvent->mFlag = 1;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_002696F8_insert(((sMsgListNode_002696F8*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1618,11 +1545,7 @@ extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* D_00481150[];
 
-struct sMsgListNode_002697D0 {
-    sMsgListNode_002697D0* next;
-    sMsgListNode_002697D0* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_002697D0;
 
 struct sMsgListIter_002697D0 {
     sMsgListNode_002697D0* node;
@@ -1630,25 +1553,18 @@ struct sMsgListIter_002697D0 {
     sMsgListIter_002697D0(const sMsgListIter_002697D0& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697D0 pos, void* const& x)
+static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697D0 pos, online_Event* const& x)
 {
     sMsgListNode_002697D0* tmp = (sMsgListNode_002697D0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_002697D0*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_002697D0 {
-    int kind;
-    void* vt;
-    int f8;
-    int fC;
-};
 
 /**
  * Handles the host's highlighted bragging-rights row on the client: posts it as a lobby event.
@@ -1662,12 +1578,12 @@ struct sMsg_002697D0 {
  */
 extern "C" void func_002697D0(cSetupMan* self, int rowIndex)
 {
-    sMsg_002697D0* netEvent = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 251;
-    netEvent->vt = D_00481150;
-    netEvent->f8 = 1;
-    netEvent->fC = rowIndex;
-    void* mp = netEvent;
+    online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 251;
+    netEvent->mVtbl = D_00481150;
+    netEvent->mFlag = 1;
+    netEvent->mRow = rowIndex;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_002697D0_insert(((sMsgListNode_002697D0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1683,11 +1599,7 @@ extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* D_00481150[];
 
-struct sMsgListNode_00269890 {
-    sMsgListNode_00269890* next;
-    sMsgListNode_00269890* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269890;
 
 struct sMsgListIter_00269890 {
     sMsgListNode_00269890* node;
@@ -1695,25 +1607,18 @@ struct sMsgListIter_00269890 {
     sMsgListIter_00269890(const sMsgListIter_00269890& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_00269890 pos, void* const& x)
+static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_00269890 pos, online_Event* const& x)
 {
     sMsgListNode_00269890* tmp = (sMsgListNode_00269890*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269890*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269890 {
-    int kind;
-    void* vt;
-    int f8;
-    int fC;
-};
 
 /**
  * Handles a type-7 highlighted-row message on the client: posts it as a lobby event with flag 0.
@@ -1726,12 +1631,12 @@ struct sMsg_00269890 {
  */
 extern "C" void func_00269890(cSetupMan* self, int rowIndex)
 {
-    sMsg_00269890* netEvent = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 251;
-    netEvent->vt = D_00481150;
-    netEvent->f8 = 0;
-    netEvent->fC = rowIndex;
-    void* mp = netEvent;
+    online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 251;
+    netEvent->mVtbl = D_00481150;
+    netEvent->mFlag = 0;
+    netEvent->mRow = rowIndex;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269890_insert(((sMsgListNode_00269890*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1747,11 +1652,7 @@ extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* D_00481130[];
 
-struct sMsgListNode_00269948 {
-    sMsgListNode_00269948* next;
-    sMsgListNode_00269948* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269948;
 
 struct sMsgListIter_00269948 {
     sMsgListNode_00269948* node;
@@ -1759,26 +1660,18 @@ struct sMsgListIter_00269948 {
     sMsgListIter_00269948(const sMsgListIter_00269948& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_00269948 pos, void* const& x)
+static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_00269948 pos, online_Event* const& x)
 {
     sMsgListNode_00269948* tmp = (sMsgListNode_00269948*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269948*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269948 {
-    int kind;
-    void* vt;
-    int f8;
-    int fC;
-    int f10;
-};
 
 /**
  * Handles a bragging-rights rule change from the host on the client: posts it as a lobby event.
@@ -1793,13 +1686,13 @@ struct sMsg_00269948 {
  */
 extern "C" void func_00269948(cSetupMan* self, int ruleSlot, int ruleValue)
 {
-    sMsg_00269948* netEvent = (sMsg_00269948*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 0xFC;
-    netEvent->vt = D_00481130;
-    netEvent->f8 = 1;
-    netEvent->fC = ruleSlot;
-    netEvent->f10 = ruleValue;
-    void* mp = netEvent;
+    online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 0xFC;
+    netEvent->mVtbl = D_00481130;
+    netEvent->mFlag = 1;
+    netEvent->mRuleSlot = ruleSlot;
+    netEvent->mRuleValue = ruleValue;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269948_insert(((sMsgListNode_00269948*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1815,11 +1708,7 @@ extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* D_00481130[];
 
-struct sMsgListNode_00269A18 {
-    sMsgListNode_00269A18* next;
-    sMsgListNode_00269A18* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269A18;
 
 struct sMsgListIter_00269A18 {
     sMsgListNode_00269A18* node;
@@ -1827,26 +1716,18 @@ struct sMsgListIter_00269A18 {
     sMsgListIter_00269A18(const sMsgListIter_00269A18& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A18 pos, void* const& x)
+static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A18 pos, online_Event* const& x)
 {
     sMsgListNode_00269A18* tmp = (sMsgListNode_00269A18*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269A18*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269A18 {
-    int kind;
-    void* vt;
-    int f8;
-    int fC;
-    int f10;
-};
 
 /**
  * Handles a type-9 rule-change message on the client: posts it as a lobby event with flag 0.
@@ -1861,13 +1742,13 @@ struct sMsg_00269A18 {
  */
 extern "C" void func_00269A18(cSetupMan* self, int ruleSlot, int ruleValue)
 {
-    sMsg_00269A18* netEvent = (sMsg_00269A18*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 0xFC;
-    netEvent->vt = D_00481130;
-    netEvent->f8 = 0;
-    netEvent->fC = ruleSlot;
-    netEvent->f10 = ruleValue;
-    void* mp = netEvent;
+    online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 0xFC;
+    netEvent->mVtbl = D_00481130;
+    netEvent->mFlag = 0;
+    netEvent->mRuleSlot = ruleSlot;
+    netEvent->mRuleValue = ruleValue;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269A18_insert(((sMsgListNode_00269A18*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1881,13 +1762,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern char D_004813E0[];
+extern void* D_004813E0[];
 
-struct sMsgListNode_00269AE0 {
-    sMsgListNode_00269AE0* next;
-    sMsgListNode_00269AE0* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269AE0;
 
 struct sMsgListIter_00269AE0 {
     sMsgListNode_00269AE0* node;
@@ -1895,24 +1772,18 @@ struct sMsgListIter_00269AE0 {
     sMsgListIter_00269AE0(const sMsgListIter_00269AE0& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269AE0 pos, void* const& x)
+static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269AE0 pos, online_Event* const& x)
 {
     sMsgListNode_00269AE0* tmp = (sMsgListNode_00269AE0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269AE0*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269AE0 {
-    int kind;
-    void* vt;
-    int f8;
-};
 
 /**
  * Handles the host locking its bragging-rights panel on the client: takes the host's state and posts an event.
@@ -1925,12 +1796,12 @@ struct sMsg_00269AE0 {
  */
 extern "C" void func_00269AE0(cSetupMan* self, int hostState)
 {
-    *(int*)self = hostState;
-    sMsg_00269AE0* netEvent = (sMsg_00269AE0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 253;
-    netEvent->vt = D_004813E0;
-    netEvent->f8 = 1;
-    void* mp = netEvent;
+    self->mState = hostState;
+    online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 253;
+    netEvent->mVtbl = D_004813E0;
+    netEvent->mFlag = 1;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269AE0_insert(((sMsgListNode_00269AE0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -1944,13 +1815,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern char D_004813E0[];
+extern void* D_004813E0[];
 
-struct sMsgListNode_00269B90 {
-    sMsgListNode_00269B90* next;
-    sMsgListNode_00269B90* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269B90;
 
 struct sMsgListIter_00269B90 {
     sMsgListNode_00269B90* node;
@@ -1958,24 +1825,18 @@ struct sMsgListIter_00269B90 {
     sMsgListIter_00269B90(const sMsgListIter_00269B90& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B90 pos, void* const& x)
+static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B90 pos, online_Event* const& x)
 {
     sMsgListNode_00269B90* tmp = (sMsgListNode_00269B90*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269B90*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269B90 {
-    int kind;
-    void* vt;
-    int f8;
-};
 
 /**
  * Handles the host's answer to the client's lock (type 11, sent by func_00269608): takes the host's state and posts an
@@ -1989,12 +1850,12 @@ struct sMsg_00269B90 {
  */
 extern "C" void func_00269B90(cSetupMan* self, int hostState)
 {
-    *(int*)self = hostState;
-    sMsg_00269B90* netEvent = (sMsg_00269B90*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 253;
-    netEvent->vt = D_004813E0;
-    netEvent->f8 = 0;
-    void* mp = netEvent;
+    self->mState = hostState;
+    online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 253;
+    netEvent->mVtbl = D_004813E0;
+    netEvent->mFlag = 0;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269B90_insert(((sMsgListNode_00269B90*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -2008,13 +1869,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern char D_004813C0[];
+extern void* D_004813C0[];
 
-struct sMsgListNode_00269C40 {
-    sMsgListNode_00269C40* next;
-    sMsgListNode_00269C40* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269C40;
 
 struct sMsgListIter_00269C40 {
     sMsgListNode_00269C40* node;
@@ -2022,24 +1879,18 @@ struct sMsgListIter_00269C40 {
     sMsgListIter_00269C40(const sMsgListIter_00269C40& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C40 pos, void* const& x)
+static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C40 pos, online_Event* const& x)
 {
     sMsgListNode_00269C40* tmp = (sMsgListNode_00269C40*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269C40*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269C40 {
-    int kind;
-    void* vt;
-    int f8;
-};
 
 /**
  * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
@@ -2053,12 +1904,12 @@ struct sMsg_00269C40 {
  */
 extern "C" void func_00269C40(cSetupMan* self, int hostState)
 {
-    *(int*)self = hostState;
-    sMsg_00269C40* netEvent = (sMsg_00269C40*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 0xFE;
-    netEvent->vt = D_004813C0;
-    netEvent->f8 = 1;
-    void* mp = netEvent;
+    self->mState = hostState;
+    online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 0xFE;
+    netEvent->mVtbl = D_004813C0;
+    netEvent->mFlag = 1;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269C40_insert(((sMsgListNode_00269C40*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -2072,13 +1923,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern char D_004813C0[];
+extern void* D_004813C0[];
 
-struct sMsgListNode_00269CF0 {
-    sMsgListNode_00269CF0* next;
-    sMsgListNode_00269CF0* prev;
-    void* data;
-};
+typedef _List_node<online_Event*> sMsgListNode_00269CF0;
 
 struct sMsgListIter_00269CF0 {
     sMsgListNode_00269CF0* node;
@@ -2086,24 +1933,18 @@ struct sMsgListIter_00269CF0 {
     sMsgListIter_00269CF0(const sMsgListIter_00269CF0& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269CF0 pos, void* const& x)
+static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269CF0 pos, online_Event* const& x)
 {
     sMsgListNode_00269CF0* tmp = (sMsgListNode_00269CF0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    void** data = &tmp->data;
+    online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
-    tmp->next = pos.node;
-    tmp->prev = pos.node->prev;
-    pos.node->prev->next = tmp;
-    pos.node->prev = tmp;
+    tmp->_M_next = pos.node;
+    tmp->_M_prev = pos.node->_M_prev;
+    ((sMsgListNode_00269CF0*)pos.node->_M_prev)->_M_next = tmp;
+    pos.node->_M_prev = tmp;
     return tmp;
 }
-
-struct sMsg_00269CF0 {
-    int kind;
-    void* vt;
-    int f8;
-};
 
 /**
  * Handles a type-13 unlock message on the client: takes the state from it and posts an event with flag 0.
@@ -2116,12 +1957,12 @@ struct sMsg_00269CF0 {
  */
 extern "C" void func_00269CF0(cSetupMan* self, int hostState)
 {
-    *(int*)self = hostState;
-    sMsg_00269CF0* netEvent = (sMsg_00269CF0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    netEvent->kind = 0xFE;
-    netEvent->vt = D_004813C0;
-    netEvent->f8 = 0;
-    void* mp = netEvent;
+    self->mState = hostState;
+    online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->mType = 0xFE;
+    netEvent->mVtbl = D_004813C0;
+    netEvent->mFlag = 0;
+    online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269CF0_insert(((sMsgListNode_00269CF0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
@@ -2149,13 +1990,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00269DC0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_NetEvent[];
-extern char D_004813E0[];
-
-struct sNode00269DC0 {
-    int kind;
-    void* vtbl;
-    int value;
-};
+extern void* D_004813E0[];
 
 /**
  * Returns a heap copy of a bragging-rights lock event (kind 253, vtable D_004813E0).
@@ -2164,13 +1999,13 @@ struct sNode00269DC0 {
  *
  * @return the new event
  */
-extern "C" sNode00269DC0* func_00269DC0(void* self)
+extern "C" online_SetupEvent* func_00269DC0(online_SetupEvent* self)
 {
-    sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int flagWord = *(int*)((char*)self + 8);
-    n->kind = 253;
-    n->vtbl = D_004813E0;
-    n->value = flagWord;
+    online_SetupEvent* n = (online_SetupEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+    int flagWord = self->mFlag;
+    n->mType = 253;
+    n->mVtbl = D_004813E0;
+    n->mFlag = flagWord;
     return n;
 }
 #endif
@@ -2196,13 +2031,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00269E40);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_NetEvent[];
-extern char D_004813C0[];
-
-struct sNode00269E40 {
-    int kind;
-    void* vtbl;
-    int value;
-};
+extern void* D_004813C0[];
 
 /**
  * Returns a heap copy of a bragging-rights unlock event (kind 254, vtable D_004813C0).
@@ -2211,13 +2040,13 @@ struct sNode00269E40 {
  *
  * @return the new event
  */
-extern "C" sNode00269E40* func_00269E40(void* self)
+extern "C" online_SetupEvent* func_00269E40(online_SetupEvent* self)
 {
-    sNode00269E40* n = (sNode00269E40*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int flagWord = *(int*)((char*)self + 8);
-    n->kind = 0xFE;
-    n->vtbl = D_004813C0;
-    n->value = flagWord;
+    online_SetupEvent* n = (online_SetupEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+    int flagWord = self->mFlag;
+    n->mType = 0xFE;
+    n->mVtbl = D_004813C0;
+    n->mFlag = flagWord;
     return n;
 }
 #endif
@@ -2369,7 +2198,7 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateDataWithDefaults__FPv);
  */
 void cTrackPath::populateDataWithDefaults()
 {
-    *(int*)&BaseDistanceLeft = 0;
+    BaseDistanceLeft = 0.0f;
 }
 #endif
 
@@ -2484,7 +2313,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_initPath);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_A180(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" void pathREAD_t3Vector(void* p, void* q);
-extern "C" void cPath_populateNode(cPath* self, void* src, tPathNode* dst);
+extern "C" void cPath_populateNode(cPath* self, char* src, tPathNode* dst);
 extern "C" void cPath_populateEvent(cPath* self, char* src, int* dst);
 
 
@@ -2535,13 +2364,13 @@ int cPath::initPath(char* src)
     src += 0xC;
     pathREAD_t3Vector(((char*)&MaxBound[0]), src);
     src += 0xC;
-    *(char**)&Nodes = src;
+    Nodes = (tPathNode*)src;
     for (int i = 0; i < NumNodes; i++)
     {
         populateNode(src, &Nodes[i]);
         src += 16;
     }
-    *(char**)&Events = src;
+    Events = (tPathEventNode*)src;
     for (int i = 0; i < NumEvents; i++)
     {
         populateEvent(src, &Events[i].Type);
@@ -2566,10 +2395,10 @@ void pathREAD_float_2(void* dst, void* src) __asm__("pathREAD_float");
  * @param src  the node in the serialized data
  * @param dst  the node to fill
  */
-void cPath::populateNode(void* src, tPathNode* dst)
+void cPath::populateNode(char* src, tPathNode* dst)
 {
     pathREAD_t3Vector(dst, src);
-    pathREAD_float_2(&dst->Len, (char*)src + 0xC);
+    pathREAD_float_2(&dst->Len, src + 0xC);
 }
 #endif
 
@@ -2988,7 +2817,7 @@ extern "C" tPathNode* cPath_getPathHeading(tPathNode* out, cPath* self, float pa
             out->Dir[0] = segment->Dir[0];
             out->Dir[1] = segment->Dir[1];
             out->Dir[2] = segment->Dir[2];
-            *(int*)&out->Len = 0;
+            out->Len = 0.0f;
             goto done;
         }
         pathParam -= segment->Len;
@@ -3328,9 +3157,9 @@ extern "C" void cPathSys_resolvePaths(cPathSys* self);
  * @param data  the path data
  * @return 1
  */
-int cPathSys::loadInjectedPaths(int data)
+int cPathSys::loadInjectedPaths(char* data)
 {
-    Data = (char*)data;
+    Data = data;
     m_bIsFileLoaded = 1;
     resolvePaths();
     return 1;
@@ -3353,18 +3182,18 @@ void cPathSys::removeInjectedPathFile()
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPathSys_loadPaths);
 #ifdef SKIP_ASM
-extern "C" int FILE_loadpack(int, int);
+extern "C" char* FILE_loadpack(const char* name, int flags);
 
 /**
  * Loads a path file: stores the pack (FILE_loadpack) at +0x48, marks it loaded (+0x4C) and parses it (cPathSys_resolvePaths).
  *
  * cAI_swaploadPathFile calls it on gPaths after cPathSys_purgePaths; cPathSys_appendPaths calls it when no file is loaded yet.
  *
- * @param name  the path file name (passed as an int)
+ * @param name  the path file name
  */
-void cPathSys::loadPaths(int name)
+void cPathSys::loadPaths(const char* name)
 {
-    Data = (char*)FILE_loadpack(name, 0);
+    Data = FILE_loadpack(name, 0);
     m_bIsFileLoaded = 1;
     resolvePaths();
 }
@@ -3423,7 +3252,7 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_appendPaths);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void cPathSys_loadPaths(cPathSys* self, int arg1);
-extern "C" int FILE_loadpack(int, int);
+extern "C" char* FILE_loadpack(const char* name, int flags);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_3(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
@@ -3436,9 +3265,9 @@ extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
  * whose buffer is then dropped without being freed. Then it loads the file again with FILE_loadpack, stores it at
  * +0x48, skips a header word and runs cPathSys_loadAIPaths and cPathSys_loadTrackPaths. Nothing in the C calls it.
  *
- * @param name  the path file name (passed as an int)
+ * @param name  the path file name
  */
-void cPathSys::appendPaths(int name)
+void cPathSys::appendPaths(const char* name)
 {
     int header;
     void* old = Data;
@@ -3448,7 +3277,7 @@ void cPathSys::appendPaths(int name)
         loadPaths(name);
     }
     Data = 0;
-    char* cursor = (char*)FILE_loadpack(name, 0);
+    char* cursor = FILE_loadpack(name, 0);
     Data = cursor;
     pathREAD_tInt32_3(&header, cursor);
     cursor += 4;
@@ -3487,16 +3316,16 @@ void cPathSys::purgePaths()
 INCLUDE_ASM("bx/bxstringctor", cPathSys_getTrackPath);
 #ifdef SKIP_ASM
 /**
- * Returns track path @p pathIndex: +0x14 plus pathIndex * 0x3C.
+ * Returns track path @p pathIndex: entry pathIndex (0x3C bytes each) of TrackPaths (+0x14).
  *
  * The AI stores the result as the rider's track path (+0xAB4).
  *
  * @param pathIndex  the track path index
  * @return the track path
  */
-int cPathSys::getTrackPath(int pathIndex)
+cTrackPath* cPathSys::getTrackPath(int pathIndex)
 {
-    return (int)TrackPaths + pathIndex * 0x3c;
+    return &TrackPaths[pathIndex];
 }
 #endif
 
@@ -3504,16 +3333,16 @@ int cPathSys::getTrackPath(int pathIndex)
 INCLUDE_ASM("bx/bxstringctor", cPathSys_getAIPath);
 #ifdef SKIP_ASM
 /**
- * Returns AI path @p index: +0xC plus index * 0x40.
+ * Returns AI path @p index: entry index (0x40 bytes each) of AIPaths (+0xC).
  *
  * The AI stores the result as the rider's AI path (+0xAB8).
  *
  * @param index  the AI path index
  * @return the AI path
  */
-int cPathSys::getAIPath(int index)
+cAIPath* cPathSys::getAIPath(int index)
 {
-    return (int)AIPaths + (index << 6);
+    return &AIPaths[index];
 }
 #endif
 

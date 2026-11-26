@@ -62,7 +62,7 @@ struct cWScriptTask {
     virtual void eventOnEvent3() __asm__("cWScriptTask_eventOnEvent3");                                  // 16
 
     // Methods bound to their retail symbols by asm labels.
-    int getLocalTable() __asm__("cWScriptTask_getLocalTable");
+    cLunoTable* getLocalTable() __asm__("cWScriptTask_getLocalTable");
     int getTaskId() __asm__("cWScriptTask_getTaskId");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWScriptTask_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWScriptTask_readFromReplayFrame");
@@ -74,6 +74,7 @@ CHECK_OFFSET(cWScriptTask, Process, 0x3C);
 CHECK_SIZE(cWScriptTask, 0x44);
 
 struct cBxReplayFrame;
+struct tTrickNameDef;
 struct tWScriptEvent;
 
 struct cWScriptProcess {
@@ -96,11 +97,11 @@ struct cWScriptProcess {
     void** mVtbl;                      // 0x5C [R] ctor = cWScriptProcess_vtbl
 
     // Methods bound to their retail symbols by asm labels.
-    int getNext() __asm__("cWScriptProcess_getNext");
-    void setNext(int nextProcess) __asm__("cWScriptProcess_setNext");
+    cWScriptProcess* getNext() __asm__("cWScriptProcess_getNext");
+    void setNext(cWScriptProcess* nextProcess) __asm__("cWScriptProcess_setNext");
     int getSectionId() __asm__("cWScriptProcess_getSectionId");
-    void setTrickDef(int trickDef) __asm__("cWScriptProcess_setTrickDef");
-    int getLocalTable() __asm__("cWScriptProcess_getLocalTable");
+    void setTrickDef(tTrickNameDef* trickDef) __asm__("cWScriptProcess_setTrickDef");
+    cLunoTable* getLocalTable() __asm__("cWScriptProcess_getLocalTable");
     int getProcessId() __asm__("cWScriptProcess_getProcessId");
     void runScriptCode() __asm__("cWScriptProcess_runScriptCode");
     void runScriptCode1() __asm__("cWScriptProcess_runScriptCode1");

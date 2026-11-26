@@ -49,7 +49,7 @@ struct cRiderSphereTree {
     // Methods bound to their retail symbols by asm labels.
     void* cRiderSphereTree1() __asm__("cRiderSphereTree_cRiderSphereTree1");
     void Init1(float radius) __asm__("cRiderSphereTree_Init1");
-    void Init(int type, int n, int* ids, float* radii, int user, float radius) __asm__("cRiderSphereTree_Init");
+    void Init(tPose* poses, int n, int* ids, float* radii, int user, float radius) __asm__("cRiderSphereTree_Init");
     cRiderSphereTree* operatorE(cRiderSphereTree* src) __asm__("cRiderSphereTree_operatorE");
     void Update(int n, t4Vector* pos, float* radii, t4Vector* center, float radius) __asm__("cRiderSphereTree_Update");
     void Update1() __asm__("cRiderSphereTree_Update1");

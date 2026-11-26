@@ -57,14 +57,15 @@ struct cScriptDatabaseObject {
     void MarkObjectAsUnreserved(int idx) __asm__("cScriptDatabaseObject_MarkObjectAsUnreserved");
     bool IsEntityInUseByPlayer(int i, int val) __asm__("cScriptDatabaseObject_IsEntityInUseByPlayer");
     int GetPlayerIDByEntity(cScriptEntity* entity) __asm__("cScriptDatabaseObject_GetPlayerIDByEntity");
-    int GetObject(int i) __asm__("cScriptDatabaseObject_GetObject__FPvi");
+    cScriptObject* GetObject(int i) __asm__("cScriptDatabaseObject_GetObject__FPvi");
     int AddEntity(int idx, void* item) __asm__("cScriptDatabaseObject_AddEntity");
     int RemoveEntity(void* msg) __asm__("cScriptDatabaseObject_RemoveEntity");
     void MarkEntityAsUsed(cScriptEntity* key, int value) __asm__("cScriptDatabaseObject_MarkEntityAsUsed");
     void MarkEntityAsFree(cScriptEntity* key) __asm__("cScriptDatabaseObject_MarkEntityAsFree");
     void MarkEntityAsReserved(void* entity, int playerId) __asm__("cScriptDatabaseObject_MarkEntityAsReserved");
     void MarkEntityAsUnreserved(void* entity) __asm__("cScriptDatabaseObject_MarkEntityAsUnreserved");
-    int GetAvailableEntities(int key, int* out, int max) __asm__("cScriptDatabaseObject_GetAvailableEntities");
+    int GetAvailableEntities(int key, cScriptEntity** out,
+            int max) __asm__("cScriptDatabaseObject_GetAvailableEntities");
 };
 
 CHECK_OFFSET(cScriptDatabaseObject, mpObjectDatabase, 0x000);

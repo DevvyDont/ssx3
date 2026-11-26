@@ -107,6 +107,7 @@ struct bxSphereTree;
 struct cRiderSphereTree;      // intersect/riderspheretree.h
 struct tPathIntersectInfo;    // path/basepath.h
 struct cOverlapList;          // intersect/overlaplist.h
+struct cScriptPlayerEntity;   // inseq/scriptplayerentity.h
 
 // A path event's type (tPathEventNode::Type). [O] On Tour's enum tPathEventType, names and values. [U]
 // cRider_flagEventPathEvent finishes the race on 1 and marks a replay chapter on 11 (cReplay_eventChapter); the
@@ -732,8 +733,9 @@ struct cRider : public cRiderState, public cBeing {
     int isGroundNormalValid() __asm__("cRider_isGroundNormalValid");
     void OnStartObjectUse() __asm__("cRider_OnStartObjectUse");
     void OnEndObjectUse() __asm__("cRider_OnEndObjectUse");
-    void OnInSeqUpdate(int id, float currFrame, float frameDelta, int type, int flags) __asm__("cRider_OnInSeqUpdate");
-    void OnInSeqKeyEvent(int id, float currFrame, float ignoredFloat, int type, int flags)
+    void OnInSeqUpdate(cScriptPlayerEntity* entity, float currFrame, float frameDelta, int type, int flags)
+        __asm__("cRider_OnInSeqUpdate");
+    void OnInSeqKeyEvent(cScriptPlayerEntity* entity, float currFrame, float ignoredFloat, int type, int flags)
         __asm__("cRider_OnInSeqKeyEvent");
     void cancelRiderTransitions() __asm__("cRider_cancelRiderTransitions");
     void doFinishEvent() __asm__("cRider_doFinishEvent");
@@ -863,7 +865,7 @@ struct cRider : public cRiderState, public cBeing {
     virtual bool isIntersecting(tInstanceRecord* instance) __asm__("cRider_isIntersecting");
     void checkTrackPathSwitch(int skipCur) __asm__("cRider_checkTrackPathSwitch");
     void* GetAttachedRider() __asm__("cRider_GetAttachedRider__FPv");
-    void* isVertZoneApplicable() __asm__("cRider_isVertZoneApplicable__FPv");
+    int isVertZoneApplicable() __asm__("cRider_isVertZoneApplicable__FPv");
     void updateTestSurface() __asm__("cRider_updateTestSurface__FPv");
 };
 

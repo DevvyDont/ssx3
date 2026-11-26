@@ -152,7 +152,7 @@ struct cFE {
     char unk_B5AA4[0xC];            // 0xB5AA4 tail padding (16-byte alignment; no access)
 
     // Methods bound to their retail symbols by asm labels.
-    int getUI() __asm__("cFE_getUI");
+    cUIEngine* getUI() __asm__("cFE_getUI");
 };
 
 CHECK_OFFSET(cFE, mVtbl, 0x000);

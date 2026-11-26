@@ -54,7 +54,7 @@ struct cWorldPainterSection {
                                     //       load(pData) stores pData, resolve relocates it, queryPosition/render read it
 
     // Methods bound to their retail symbols by asm labels.
-    void load1(int sectionId, int wpData) __asm__("cWorldPainterSection_load1");
+    void load1(int sectionId, tWPHeader* wpData) __asm__("cWorldPainterSection_load1");
     void unload() __asm__("cWorldPainterSection_unload");
     void resolve() __asm__("cWorldPainterSection_resolve");
 };
@@ -80,7 +80,7 @@ struct cWorldPainterMan {
     void init(int n) __asm__("cWorldPainterMan_init");
     void update() __asm__("cWorldPainterMan_update");
     void load(int sectionId, int fileName) __asm__("cWorldPainterMan_load");
-    void load1(int sectionId, int wpData) __asm__("cWorldPainterMan_load1");
+    void load1(int sectionId, tWPHeader* wpData) __asm__("cWorldPainterMan_load1");
     void render1(cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts, t4Vector* lo, t4Vector* hi)
         __asm__("cWorldPainterMan_render1");
     void reset() __asm__("cWorldPainterMan_reset__FPv");
