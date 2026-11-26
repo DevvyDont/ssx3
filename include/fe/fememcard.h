@@ -61,10 +61,14 @@ struct cFEMemCard : public cOVState {
     // --- cFEMemCard
     // cFEMemCard's own slots ([R] cFEMemCard_vtbl; types [O] On Tour's class cFEMemCard):
     virtual void displayStatus();                                                   // 26
-    virtual void updateChecking();                                                  // 27
-    virtual void updateSaving();                                                    // 28
-    virtual void updateLoading();                                                   // 29
-    virtual void updateDeleting();                                                  // 30
+    virtual void updateChecking()
+        __asm__("cFEMemCard_updateChecking__FPv");                                                  // 27
+    virtual void updateSaving()
+        __asm__("cFEMemCard_updateSaving__FPv");                                                    // 28
+    virtual void updateLoading()
+        __asm__("cFEMemCard_updateLoading__FPv");                                                   // 29
+    virtual void updateDeleting()
+        __asm__("cFEMemCard_updateDeleting__FPv");                                                  // 30
     virtual void updateStart()
         __asm__("cFEMemCard_updateStart");                                                     // 31
     virtual void updateSkip()
@@ -224,6 +228,7 @@ struct cFEMemCard : public cOVState {
     virtual void onUpdate() __asm__("cFEMemCard_onUpdate");
     virtual bool onLoseTransition() __asm__("cFEMemCard_onLoseTransition");
     virtual void onDestroyScreen() __asm__("cFEMemCard_onDestroyScreen");
+    void writeDone() __asm__("cFEMemCard_writeDone__FPv");
 };
 
 CHECK_OFFSET(cFEMemCard, mLastLoadFileName, 0x9C);

@@ -698,6 +698,13 @@ struct cSSXAudio {
     void* AudioModeToBEAudioMode(int audioMode) __asm__("cSSXAudio_AudioModeToBEAudioMode");
     void* GetCurrentSoundMode() __asm__("cSSXAudio_GetCurrentSoundMode__FPv");
     int PlayIntroMovieWithDJ() __asm__("cSSXAudio_PlayIntroMovieWithDJ__FPv");
+    void SwapBankStopped() __asm__("cSSXAudio_SwapBankStopped__FPv");
+    void CountdownStart() __asm__("cSSXAudio_CountdownStart__FPv");
+    void AvalancheGroundHit() __asm__("cSSXAudio_AvalancheGroundHit__FPv");
+    void* GetCameraPos(int viewport) __asm__("cSSXAudio_GetCameraPos__FPvi");
+    void HandleStreamChunk() __asm__("cSSXAudio_HandleStreamChunk__FPv");
+    void RiderCreated() __asm__("cSSXAudio_RiderCreated__FPv");
+    void* RiderDeleted() __asm__("cSSXAudio_RiderDeleted__FPv");
 };
 
 CHECK_OFFSET(cSSXAudio, mpVBankManager, 0x0);

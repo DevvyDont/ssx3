@@ -257,6 +257,7 @@ struct cInputPreProcessor {
     void skipCppComment(tInputSource* isrc, int path, int fileName) __asm__("cInputPreProcessor_skipCppComment");
     void skipToEOL(tInputSource* isrc) __asm__("cInputPreProcessor_skipToEOL");
     void readCmdLine(tInputSource* isrc, int path, int fn) __asm__("cInputPreProcessor_readCmdLine");
+    void error() __asm__("cInputPreProcessor_error__FPv");
 };
 
 CHECK_OFFSET(cInputPreProcessor, OutputTop, 0x0);

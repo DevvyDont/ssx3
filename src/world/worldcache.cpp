@@ -40,13 +40,12 @@ struct sWBAlloc {
  * 0x25000000, 128-byte aligned), marks every block unused and chains them all into the free list. The world memory
  * manager makes three: 2 blocks of 16 KB, none of 32 KB, and 53 of 128 KB.
  *
- * @param selfp      the allocator
  * @param count      number of blocks
  * @param blockSize  size of each block in bytes
  */
-extern "C" void cWorldBlockAllocator_init(void* selfp, int count, int blockSize)
+void cWorldBlockAllocator::init(int count, int blockSize)
 {
-    sWBAlloc* self = (sWBAlloc*)selfp;
+    sWBAlloc* self = (sWBAlloc*)this;
     self->blockSize = blockSize;
     self->count = count;
     self->numFree = count;
@@ -157,15 +156,16 @@ INCLUDE_ASM("world/worldcache", cSectionBlockAllocator_cSectionBlockAllocator__F
  * @param sectionId  the section id
  * @return @p self
  */
-void* cSectionBlockAllocator_cSectionBlockAllocator(void* self, int allocator, int sectionId)
+void* cSectionBlockAllocator_cSectionBlockAllocator(void* vself, int allocator, int sectionId)
 {
+    cSectionBlockAllocator* self = (cSectionBlockAllocator*)vself;
     cSectionBlockAllocator* arena = (cSectionBlockAllocator*)self;
     arena->m_uiSectionID = sectionId;
     arena->m_pBlockAllocator = (cWorldBlockAllocator*)allocator;
     arena->m_uiNumBlocks = 0;
     arena->m_pAllocBlocks = 0;
     arena->m_pMRUBlock = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -307,7 +307,7 @@ struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
     int blockSize; // bytes per block (e.g. 128 KB)
 };
 extern cWorldMemoryMan_cWorldMemoryMan_sCfg D_0044C1E0[];
-extern "C" void cWorldBlockAllocator_init(void* self, int count, int blockSize);
+extern "C" void cWorldBlockAllocator_init(cWorldBlockAllocator* self, int count, int blockSize);
 
 /**
  * Constructs the world memory manager: three block allocators sized from D_0044C1E0 and 64 empty section
@@ -317,9 +317,9 @@ extern "C" void cWorldBlockAllocator_init(void* self, int count, int blockSize);
  */
 extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
 {
-    cWorldBlockAllocator_init(self, D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
-    cWorldBlockAllocator_init(&self->m_BlockAllocator[1], D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
-    cWorldBlockAllocator_init(&self->m_BlockAllocator[2], D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
+    ((cWorldBlockAllocator*)self)->init(D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
+    self->m_BlockAllocator[1].init(D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
+    self->m_BlockAllocator[2].init(D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
     int i;
     for (i = 63; i >= 0; i--) {
         ((int*)&self->m_pSectionAllocator)[i] = 0;
@@ -521,13 +521,13 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 set to delete the object
  */
-extern "C" void cWorldCacheTable__cWorldCacheTable(int* self, int flags)
+extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int flags)
 {
     if (*(void**)self != 0) {
         cMemMan_free(*(void**)self);
     }
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -594,7 +594,7 @@ void cMemMan_free(void*);
 extern "C" void cWorldCache_resetPageMap(cWorldCache* self);
 extern "C" int cWorldView_isSectionUnLoaded(void* view, int i);
 extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i);
-extern "C" void cWorldCacheTable__cWorldCacheTable(int* self, int flags);
+extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int flags);
 
 struct cWorldCache_purge_sVEntry {
     short delta;
@@ -624,7 +624,7 @@ void cWorldCache::purge()
         chunkResolve->vt[1].fn(vthis(chunkResolve, chunkResolve->vt[1]), 3);
     }
     if (((int*)self->m_pSharedCacheTable) != 0) {
-        cWorldCacheTable__cWorldCacheTable(((int*)self->m_pSharedCacheTable), 3);
+        cWorldCacheTable__cWorldCacheTable((cWorldCacheTable*)((int*)self->m_pSharedCacheTable), 3);
     }
     if (((void*)self->m_pSectionCacheTable) != 0) {
         unsigned int i;
@@ -772,7 +772,7 @@ void cWorldCache::activateSectionMem(int i, int section)
 INCLUDE_ASM("world/worldcache", cWorldCache_deactivateSectionMem);
 #ifdef SKIP_ASM
 extern "C" void cWorldMemoryMan_deactivateSectionMem(cWorldMemoryMan* self, int i);
-extern "C" void cWorldCacheTable__cWorldCacheTable(int* self, int flags);
+extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int flags);
 
 /**
  * Releases a world section's allocator and deletes its cache table.
@@ -784,7 +784,7 @@ void cWorldCache::deactivateSectionMem(int i)
     m_pWorldMemMan->deactivateSectionMem(i);
     int* sectionTable = ((int*)m_pSectionCacheTable[i]);
     if (sectionTable != 0) {
-        cWorldCacheTable__cWorldCacheTable(sectionTable, 3);
+        cWorldCacheTable__cWorldCacheTable((cWorldCacheTable*)sectionTable, 3);
     }
     m_pSectionCacheTable[i] = 0;
 }
@@ -1513,7 +1513,7 @@ void cWorldView_purge(void* self);
  */
 extern "C" void cWorldView__cWorldView(cWorldView* self, int flags)
 {
-    cWorldView_purge(self);
+    self->purge();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1632,7 +1632,7 @@ INCLUDE_ASM("world/worldcache", cWorldView_purge__FPv);
 /**
  * Does nothing: this cWorldView_purge has an empty body.
  */
-void cWorldView_purge(void* self)
+void cWorldView::purge()
 {
 }
 #endif

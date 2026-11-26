@@ -285,6 +285,12 @@ struct cPS2MemCard {
     int SpaceRequired(int byteSize) __asm__("cPS2MemCard_SpaceRequired");
     void SpaceRequired1() __asm__("cPS2MemCard_SpaceRequired1");
     void IsDamaged() __asm__("cPS2MemCard_IsDamaged");
+    void* Format() __asm__("cPS2MemCard_Format__FPv");
+    void* SetWriteClose() __asm__("cPS2MemCard_SetWriteClose__FPv");
+    void* SetReadClose() __asm__("cPS2MemCard_SetReadClose__FPv");
+    int GetBlockSize() __asm__("cPS2MemCard_GetBlockSize__FPv");
+    int GetTotalSpace() __asm__("cPS2MemCard_GetTotalSpace__FPv");
+    int GetFreeDirEntries() __asm__("cPS2MemCard_GetFreeDirEntries__FPv");
 };
 
 CHECK_OFFSET(cPS2MemCard, mVtbl, 0x0000);

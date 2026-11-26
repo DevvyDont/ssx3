@@ -91,6 +91,7 @@ struct cInputSync {
     void sendClientInput(cInputSync_PadSample* src) __asm__("cInputSync_sendClientInput");
     int compressinput(cInputSync_PadSample* src, cInputSync_CompressedSample* dst) __asm__("cInputSync_compressinput");
     void decompressinput(cInputSync_PadSample* out, char* buf) __asm__("cInputSync_decompressinput");
+    void postupdate() __asm__("cInputSync_postupdate__FPv");
 };
 CHECK_OFFSET(cInputSync, sendlimit, 0x0);
 CHECK_OFFSET(cInputSync, latency, 0x4);

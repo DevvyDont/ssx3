@@ -458,7 +458,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cAvalanche__cAvalanche(int* self, int flags)
+extern "C" void cAvalanche__cAvalanche(cAvalanche* self, int flags)
 {
     *(void***)self = cAvalanche_vtbl;
     ((cAvalanche*)self)->reset();
@@ -468,7 +468,7 @@ extern "C" void cAvalanche__cAvalanche(int* self, int flags)
     }
     *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

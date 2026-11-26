@@ -4429,8 +4429,9 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldIntersectType_IntersectSubPatch__FPv
  * Slot 8 of cWorldRider_vtbl, cWorldSphTree_vtbl and cWorldSphere_vtbl (between IsBoxInt and IsInBoxTransformed), which
  * inherit it.
  */
-void cWorldIntersectType_IntersectSubPatch(void* self)
+void cWorldIntersectType_IntersectSubPatch(void* vself)
 {
+    cWorldIntersectType* self = (cWorldIntersectType*)vself;
 }
 #endif
 

@@ -28,11 +28,11 @@ INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
  *
  * @return the cBERaceState object
  */
-void* cBERaceState_getState(void* self)
+void* cBERaceState::getState()
 {
     if (cBERaceState_instance == 0) {
         cBERaceState* mem = (cBERaceState*)cMemMan_alloc(8, str_BERace, 0, 0);
-        (*(void**)&mem->nextState) = self;
+        (*(void**)&mem->nextState) = ((void*)this);
         (*(void**)&mem->mVtbl) = cBERaceState_vtbl;
         cBERaceState_instance = mem;
     }

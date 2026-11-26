@@ -91,7 +91,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isBetterMedal__FPvii);
  * @param newMedal  medal to test, or kMEDAL_NONE
  * @return true when @p newMedal is better than @p oldMedal
  */
-bool cBERewardInterface_isBetterMedal(void* self, int oldMedal, int newMedal)
+bool cBERewardInterface::isBetterMedal(int oldMedal, int newMedal)
 {
     if (newMedal == kMEDAL_NONE) {
         return false;
@@ -573,15 +573,15 @@ int cBERewardInterface::getTotalNumRewards(int kind)
 {
     switch (kind) {
     case kRewardPoster:
-        return cBERewardInterface_getTotalNumPosters(this);
+        return this->getTotalNumPosters();
     case kRewardCard:
-        return cBERewardInterface_getTotalNumTradingCards(this);
+        return this->getTotalNumTradingCards();
     case kRewardArt:
-        return cBERewardInterface_getTotalNumConceptArts(this);
+        return this->getTotalNumConceptArts();
     case kRewardVideo:
-        return cBERewardInterface_getTotalNumVideos(this);
+        return this->getTotalNumVideos();
     case kRewardToy:
-        return cBERewardInterface_getTotalNumToys(this);
+        return this->getTotalNumToys();
     case kRewardCheatChar:
         return 20;
     case kRewardBolt:
@@ -602,9 +602,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumPosters__FPv);
  *
  * @return the posters count
  */
-int cBERewardInterface_getTotalNumPosters(void* self)
+int cBERewardInterface::getTotalNumPosters()
 {
-    return ((cBERewardInterface*)self)->getDB()->mNumPosters;
+    return ((cBERewardInterface*)this)->getDB()->mNumPosters;
 }
 #endif
 
@@ -617,9 +617,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumTradingCards__FPv);
  *
  * @return the trading cards count
  */
-int cBERewardInterface_getTotalNumTradingCards(void* self)
+int cBERewardInterface::getTotalNumTradingCards()
 {
-    return ((cBERewardInterface*)self)->getDB()->mNumTradingCards;
+    return ((cBERewardInterface*)this)->getDB()->mNumTradingCards;
 }
 #endif
 
@@ -632,9 +632,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumConceptArts__FPv);
  *
  * @return the concept arts count
  */
-int cBERewardInterface_getTotalNumConceptArts(void* self)
+int cBERewardInterface::getTotalNumConceptArts()
 {
-    return ((cBERewardInterface*)self)->getDB()->mNumConceptArts;
+    return ((cBERewardInterface*)this)->getDB()->mNumConceptArts;
 }
 #endif
 
@@ -647,9 +647,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumToys__FPv);
  *
  * @return the toys count
  */
-int cBERewardInterface_getTotalNumToys(void* self)
+int cBERewardInterface::getTotalNumToys()
 {
-    return ((cBERewardInterface*)self)->getDB()->mNumToys;
+    return ((cBERewardInterface*)this)->getDB()->mNumToys;
 }
 #endif
 
@@ -662,9 +662,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumVideos__FPv);
  *
  * @return the videos count
  */
-int cBERewardInterface_getTotalNumVideos(void* self)
+int cBERewardInterface::getTotalNumVideos()
 {
-    return ((cBERewardInterface*)self)->getDB()->mNumVideos;
+    return ((cBERewardInterface*)this)->getDB()->mNumVideos;
 }
 #endif
 
@@ -678,8 +678,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumSongs__FPv);
  *
  * @return the song count
  */
-int cBERewardInterface_getTotalNumSongs(void* self)
+int cBERewardInterface_getTotalNumSongs(void* vself)
 {
+    cBERewardInterface* self = (cBERewardInterface*)vself;
     return cAudioInterface_bxAudio(self)->MusicSys.mNumFESongs;
 }
 #endif
@@ -693,9 +694,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumCheatChars__FPv);
  *
  * @return the cheat character count
  */
-int cBERewardInterface_getTotalNumCheatChars(void* self)
+int cBERewardInterface::getTotalNumCheatChars()
 {
-    return ((cBERewardInterface*)self)->getDB()->mNumCheatChars;
+    return ((cBERewardInterface*)this)->getDB()->mNumCheatChars;
 }
 #endif
 
@@ -1098,10 +1099,10 @@ bool cBERewardInterface::isPeakConquered(int iProfileIndex, int iCharacterID, in
             }
             else
             {
-                int medal = cBERewardInterface_getTrackMedal(this, iProfileIndex, iCharacterID, track, kind);
+                int medal = this->getTrackMedal(iProfileIndex, iCharacterID, track, kind);
                 if ((unsigned int)(track - 4) < 8)
                 {
-                    if (!cBERewardInterface_isBetterMedal(this, -1, medal))
+                    if (!this->isBetterMedal(-1, medal))
                         return false;
                 }
                 else if ((unsigned int)medal >= 2)
@@ -1235,7 +1236,7 @@ int cBERewardInterface::isTrophyOwned(int iProfileIndex, int iCharacterID, int k
             int kind = gMedalsInfo_v157BF0[k][i][j].kind;
             if (track < 0)
                 break;
-            if (!cBERewardInterface_isBetterMedal(this, -1, cBERewardInterface_getTrackMedal(this, iProfileIndex,
+            if (!this->isBetterMedal(-1, this->getTrackMedal(iProfileIndex,
                     iCharacterID, track, kind)))
                 return 0;
         }
@@ -1243,13 +1244,13 @@ int cBERewardInterface::isTrophyOwned(int iProfileIndex, int iCharacterID, int k
     case kTROPHY_EXPLORE:
     {
         int owned = 0;
-        if (cBERewardInterface_isBetterMedal(this, -1, getCollectiblesMedal(iProfileIndex, iCharacterID, k)))
-            owned = cBERewardInterface_isBetterMedal(this, -1, getBigChallengesMedal(iProfileIndex, iCharacterID,
+        if (this->isBetterMedal(-1, getCollectiblesMedal(iProfileIndex, iCharacterID, k)))
+            owned = this->isBetterMedal(-1, getBigChallengesMedal(iProfileIndex, iCharacterID,
                     k)) != 0;
         return owned;
     }
     case kTROPHY_EARNINGS:
-        return cBERewardInterface_isBetterMedal(this, -1, getEarningsMedal(iProfileIndex, iCharacterID, k));
+        return this->isBetterMedal(-1, getEarningsMedal(iProfileIndex, iCharacterID, k));
     }
     return 0;
 }
@@ -1509,7 +1510,7 @@ void cBERewardInterface::buyPoster(int profileIndex, int characterId, int bit, i
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (getNumOwnedPosters(profileIndex, characterId) == cBERewardInterface_getTotalNumPosters(this))
+    if (getNumOwnedPosters(profileIndex, characterId) == this->getTotalNumPosters())
     {
         buyCheatChar(profileIndex, characterId, 20, 0);
     }
@@ -1561,7 +1562,7 @@ void cBERewardInterface::buyTradingCard(int profileIndex, int characterId, int b
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (getNumOwnedTradingCards(profileIndex, characterId) == cBERewardInterface_getTotalNumTradingCards(this))
+    if (getNumOwnedTradingCards(profileIndex, characterId) == this->getTotalNumTradingCards())
     {
         buyCheatChar(profileIndex, characterId, 17, 0);
     }
@@ -1613,7 +1614,7 @@ void cBERewardInterface::buyConceptArt(int profileIndex, int characterId, int bi
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (getNumOwnedConceptArts(profileIndex, characterId) == cBERewardInterface_getTotalNumConceptArts(this))
+    if (getNumOwnedConceptArts(profileIndex, characterId) == this->getTotalNumConceptArts())
     {
         buyCheatChar(profileIndex, characterId, 22, 0);
     }
@@ -1665,7 +1666,7 @@ void cBERewardInterface::buyToy(int profileIndex, int characterId, int bit, int 
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
-    if (getNumOwnedToys(profileIndex, characterId) == cBERewardInterface_getTotalNumToys(this))
+    if (getNumOwnedToys(profileIndex, characterId) == this->getTotalNumToys())
     {
         buyCheatChar(profileIndex, characterId, 19, 0);
     }
@@ -2009,7 +2010,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsTarget__FPvi);
  * @param peakID  the peak id
  * @return the target amount
  */
-int cBERewardInterface_getEarningsTarget(void* self, int peakID)
+int cBERewardInterface::getEarningsTarget(int peakID)
 {
     return gEarningsMedalLevel[peakID];
 }
@@ -2057,7 +2058,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
  * @param location  passed as the score record's location
  * @return the medal (0 best to 3), or -1 when there is no record
  */
-signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int iCharacterID, int eventID, int location)
+signed char cBERewardInterface::getTrackMedal(int iProfileIndex, int iCharacterID, int eventID, int location)
 {
     tBETrackScore* result =
         cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[iProfileIndex][iCharacterID], location, eventID);
@@ -2241,7 +2242,7 @@ void* cBERewardInterface::calculateNextEarningsLevel(int iProfileIndex, int iCha
 {
     for (int i = 0; i < 3; i++)
     {
-        if (!cBERewardInterface_isBetterMedal(this, -1, getEarningsMedal(iProfileIndex, iCharacterID, i)))
+        if (!this->isBetterMedal(-1, getEarningsMedal(iProfileIndex, iCharacterID, i)))
             return (void*)gEarningsMedalLevel[i];
     }
     return 0;
@@ -2272,7 +2273,7 @@ int cBERewardInterface::calculateNextCollectiblesLevel(int iProfileIndex, int iC
     int best = 0;
     for (int i = 0; i < 4; i++)
     {
-        if (cBERewardInterface_isBetterMedal(this, medal, i))
+        if (this->isBetterMedal(medal, i))
         {
             if (best == 0 || gCollectiblesMedalLevel_2d[kind][i] < best)
                 best = gCollectiblesMedalLevel_2d[kind][i];
@@ -2306,7 +2307,7 @@ int cBERewardInterface::calculateNextBigChallengesLevel(int iProfileIndex, int i
     int best = 0;
     for (int i = 0; i < 4; i++)
     {
-        if (cBERewardInterface_isBetterMedal(this, medal, i))
+        if (this->isBetterMedal(medal, i))
         {
             if (best == 0 || gBigChallengesMedalLevel_2d[kind][i] < best)
                 best = gBigChallengesMedalLevel_2d[kind][i];
@@ -2358,7 +2359,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getUserAwards__FPv);
  *
  * @return cBELibrary_userAwards
  */
-void* cBERewardInterface_getUserAwards(void* self)
+void* cBERewardInterface::getUserAwards()
 {
     return (void*)cBELibrary_userAwards;
 }
@@ -2377,7 +2378,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumUserAwards__FPv);
  *
  * @return the award count
  */
-void* cBERewardInterface_getTotalNumUserAwards(void* self)
+void* cBERewardInterface::getTotalNumUserAwards()
 {
     return cBEUserAwards_getTotalNumAwards((void*)cBELibrary_userAwards);
 }
@@ -2657,7 +2658,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
         else if (medal == kMEDAL_SILVER)
             func_001E1DD0(group, mode, 1);
     }
-    if (cBERewardInterface_isBetterMedal(this, oldMedal, medal)) {
+    if (this->isBetterMedal(oldMedal, medal)) {
         int had = isTrophyOwned(profile, charID, group, tier);
         awardUserCash1(profile, charID, money);
         cBECharProfileDB_updateMedalStats(pc, event, mode, medal);
@@ -2672,7 +2673,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
         awardUser(profile, charID, 0);
     (cBERewardInterface_instance)->mLastEventMedal = medal;
     (cBERewardInterface_instance)->mLastEventCashReward = money;
-    if (!cBERewardInterface_isBetterMedal(this, -1, medal))
+    if (!this->isBetterMedal(-1, medal))
         return;
     int any = 0;
     int okA = 1;
@@ -2687,13 +2688,13 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
         }
         if ((unsigned int)(track - 4) < 2) {
             any = 1;
-            if (!cBERewardInterface_isBetterMedal(this, -1, cBERewardInterface_getTrackMedal(this, profile, charID,
+            if (!this->isBetterMedal(-1, this->getTrackMedal(profile, charID,
                     track, kind))) {
                 okB = 0;
                 break;
             }
         } else {
-            if (!cBERewardInterface_isBetterMedal(this, -1, cBERewardInterface_getTrackMedal(this, profile, charID,
+            if (!this->isBetterMedal(-1, this->getTrackMedal(profile, charID,
                     track, kind))) {
                 if (!any) {
                     if (cBELibrary_raceDB_1591E8.cGamePath == 0)
@@ -3522,12 +3523,12 @@ extern "C" void cBERewardDB_purge(void* self);
  *
  * @param flags  destructor flags; bit 0 frees the object
  */
-extern "C" void cBERewardDB__cBERewardDB(int* self, int flags)
+extern "C" void cBERewardDB__cBERewardDB(cBERewardDB* self, int flags)
 {
     cBERewardDB_purge(self);
     if (flags & 1)
     {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

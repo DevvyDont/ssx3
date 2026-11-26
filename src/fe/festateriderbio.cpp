@@ -138,8 +138,9 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onRender2D__FPv);
  *
  * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cFEStateRiderDetail_onRender2D(void* self)
+void* cFEStateRiderDetail_onRender2D(void* vself)
 {
+    cFEStateRiderDetail* self = (cFEStateRiderDetail*)vself;
     return cUIState_onRender2D(self);
 }
 #endif

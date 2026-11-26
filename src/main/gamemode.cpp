@@ -1892,8 +1892,9 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_riderGateHit__FPv);
 /**
  * Does nothing: slot +0x3C (riderGateHit) of the timed event handler's vtable cGMRaceHandler_vtbl.
  */
-void cGMRaceHandler_riderGateHit(void* self)
+void cGMRaceHandler_riderGateHit(void* vself)
 {
+    cGMRaceHandler* self = (cGMRaceHandler*)vself;
 }
 #endif
 

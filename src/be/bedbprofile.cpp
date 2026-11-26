@@ -19,13 +19,13 @@ INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_getScoreStats__FPvii);
  * @param event  the event or stat kind (On Tour: eBEGameEvent)
  * @return the record, or 0 when the pair has none (kNoScoreType)
  */
-void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
+void* cBECharProfileDB::getScoreStats(int locID, int event)
 {
     int type = cBELibrary_getScoreType(locID, event);
     if (type == kNoScoreType) {
         return 0;
     }
-    return &((&((cBECharProfileDB*)self)->mScoreStats[0]))[type];
+    return &((&((cBECharProfileDB*)this)->mScoreStats[0]))[type];
 }
 #endif
 

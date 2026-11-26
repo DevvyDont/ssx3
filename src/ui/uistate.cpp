@@ -249,7 +249,7 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_render3D__FPv);
  *
  * cUIEngine_render3D calls it on the engine's state stack.
  */
-void cUIStateStack_render3D(void* self)
+void cUIStateStack::render3D()
 {
 }
 #endif

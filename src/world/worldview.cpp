@@ -1442,7 +1442,7 @@ extern void* cChunkResolve_vtbl[];
 extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(cPS2ChunkResolve* self, int flags)
 {
     self->mVtbl = cPS2ChunkResolve_vtbl;
-    cPS2ChunkResolve_purge(self);
+    self->purge();
     self->mVtbl = cChunkResolve_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
@@ -1478,7 +1478,7 @@ INCLUDE_ASM("world/worldview", cPS2ChunkResolve_purge__FPv);
 /**
  * Releases the PS2 chunk resolver's platform data; does nothing in this build.
  */
-void cPS2ChunkResolve_purge(void* self)
+void cPS2ChunkResolve::purge()
 {
 }
 #endif

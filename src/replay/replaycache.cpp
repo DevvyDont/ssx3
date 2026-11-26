@@ -386,7 +386,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_beginMarkInstantReplay__FPv);
  * cReplay_eventJump and cReplay_eventWScript call it where an instant-replay mark would begin;
  * cReplay_endMarkInstantReplay and cReplay_cancelMarkInstantReplay do the real work.
  */
-void cReplay_beginMarkInstantReplay(void* self)
+void cReplay::beginMarkInstantReplay()
 {
 }
 #endif
@@ -1048,9 +1048,9 @@ INCLUDE_ASM("replay/replaycache", cReplay_purgeSave__FPv);
  *
  * @return cReplay_purgeSaveSpace's (meaningless) result
  */
-void* cReplay_purgeSave(void* self)
+void* cReplay::purgeSave()
 {
-    return ((cReplay*)self)->purgeSaveSpace();
+    return ((cReplay*)this)->purgeSaveSpace();
 }
 #endif
 
@@ -1066,9 +1066,9 @@ INCLUDE_ASM("replay/replaycache", cReplay_initLoad__FPv);
  *
  * @return cReplay_reset's result as this unit declares it
  */
-void* cReplay_initLoad(void* self)
+void* cReplay::initLoad()
 {
-    return cReplay_reset(self);
+    return cReplay_reset(this);
 }
 #endif
 
@@ -1080,7 +1080,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_purgeLoad__FPv);
  *
  * An empty stub, as in On Tour. cGame_load calls it right after cReplay_initLoad.
  */
-void cReplay_purgeLoad(void* self)
+void cReplay::purgeLoad()
 {
 }
 #endif
@@ -1774,11 +1774,11 @@ extern void* cReplayFramePtr_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cReplayFramePtr__cReplayFramePtr(int* self, int flags)
+extern "C" void cReplayFramePtr__cReplayFramePtr(cReplayFramePtr* self, int flags)
 {
     *(void**)self = cReplayFramePtr_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1916,11 +1916,11 @@ extern void* cReplayFramePtr_vtbl[];
  *
  * @param flags  bit 0 frees the memory
  */
-extern "C" void cReplayFrame__cReplayFrame(int* self, int flags)
+extern "C" void cReplayFrame__cReplayFrame(cReplayFrame* self, int flags)
 {
     *(void**)self = cReplayFramePtr_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1933,11 +1933,11 @@ INCLUDE_ASM("replay/replaycache", cReplayHighlight_reset);
  *
  * cReplay_cReplay runs it on both Highlight records; cReplay_reset then gives them their player numbers.
  */
-extern "C" void cReplayHighlight_reset(int* self)
+void cReplayHighlight::reset()
 {
-    self[0] = -1;
-    self[176 / 4] = 0;
-    MEM_fill(self + 1, 0, 172);
+    ((int*)this)[0] = -1;
+    ((int*)this)[176 / 4] = 0;
+    MEM_fill(((int*)this) + 1, 0, 172);
 }
 #endif
 
@@ -1971,8 +1971,9 @@ INCLUDE_ASM("replay/replaycache", cScriptHeap_cScriptHeap__FPvN20);
  * @param heapSize  the buffer size in bytes
  * @return the constructed heap (self)
  */
-void* cScriptHeap_cScriptHeap(void* self, void* pHeap, void* heapSize)
+void* cScriptHeap_cScriptHeap(void* vself, void* pHeap, void* heapSize)
 {
+    cScriptHeap* self = (cScriptHeap*)vself;
     cScriptHeap* heap = (cScriptHeap*)self;
     tFreeBlock* first = (tFreeBlock*)pHeap;
     heap->mpTopFreeBlock = first;
@@ -1980,7 +1981,7 @@ void* cScriptHeap_cScriptHeap(void* self, void* pHeap, void* heapSize)
     heap->mHeapSize = (int)heapSize;
     first->pNext = 0;
     heap->mpTopFreeBlock->size = (unsigned int)heapSize - 0x8;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2446,10 +2447,10 @@ void operator_delete(int* p);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cInSeq__cInSeq(int* self, int flags)
+extern "C" void cInSeq__cInSeq(cInSeq* self, int flags)
 {
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -4408,11 +4409,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain__cScriptPlayerMain);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptPlayerMain__cScriptPlayerMain(int* self, int flags)
+extern "C" void cScriptPlayerMain__cScriptPlayerMain(cScriptPlayerMain* self, int flags)
 {
     ((cScriptPlayerMain*)self)->DeInit();
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -5259,9 +5260,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetValue__FPv);
  *
  * @return a pointer into the channel object (On Tour: void*)
  */
-void* cScriptPlayerChannelSpline_GetValue(void* self)
+void* cScriptPlayerChannelSpline::GetValue()
 {
-    return &((cScriptPlayerChannelSpline*)self)->mCurrKeyValue;
+    return &((cScriptPlayerChannelSpline*)this)->mCurrKeyValue;
 }
 #endif
 
@@ -5287,7 +5288,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetNextKeyFrame__FP
  *
  * @return always -1
  */
-int cScriptPlayerChannelSpline_GetNextKeyFrame(void* self)
+int cScriptPlayerChannelSpline::GetNextKeyFrame()
 {
     return -0x1;
 }
@@ -5301,7 +5302,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetType__FPv);
  *
  * @return always 0 (object channels return 1, block channels 2, event channels 3)
  */
-int cScriptPlayerChannelSpline_GetType(void* self)
+int cScriptPlayerChannelSpline::GetType()
 {
     return 0;
 }
@@ -5343,9 +5344,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetValue__FPv);
  *
  * @return a pointer into the channel object (On Tour: void*)
  */
-void* cScriptPlayerChannelBlock_GetValue(void* self)
+void* cScriptPlayerChannelBlock::GetValue()
 {
-    return &((cScriptPlayerChannelBlock*)self)->mNumActiveBlocks;
+    return &((cScriptPlayerChannelBlock*)this)->mNumActiveBlocks;
 }
 #endif
 
@@ -5371,7 +5372,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetType__FPv);
  *
  * @return always 2 (spline channels return 0, object channels 1, event channels 3)
  */
-int cScriptPlayerChannelBlock_GetType(void* self)
+int cScriptPlayerChannelBlock::GetType()
 {
     return 0x2;
 }
@@ -5413,9 +5414,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetValue__FPv);
  *
  * @return a pointer into the channel object (On Tour: void*)
  */
-void* cScriptPlayerChannelEvent_GetValue(void* self)
+void* cScriptPlayerChannelEvent::GetValue()
 {
-    return &((cScriptPlayerChannelEvent*)self)->mNumActiveEvents;
+    return &((cScriptPlayerChannelEvent*)this)->mNumActiveEvents;
 }
 #endif
 
@@ -5441,7 +5442,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetType__FPv);
  *
  * @return always 3 (spline channels return 0, object channels 1, block channels 2)
  */
-int cScriptPlayerChannelEvent_GetType(void* self)
+int cScriptPlayerChannelEvent::GetType()
 {
     return 0x3;
 }
@@ -5483,9 +5484,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetValue__FPv);
  *
  * @return a pointer into the channel object (On Tour: void*)
  */
-void* cScriptPlayerChannelObject_GetValue(void* self)
+void* cScriptPlayerChannelObject::GetValue()
 {
-    return &((cScriptPlayerChannelObject*)self)->mNumActiveObjects;
+    return &((cScriptPlayerChannelObject*)this)->mNumActiveObjects;
 }
 #endif
 
@@ -5511,7 +5512,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetType__FPv);
  *
  * @return always 1 (spline channels return 0, block channels 2, event channels 3)
  */
-int cScriptPlayerChannelObject_GetType(void* self)
+int cScriptPlayerChannelObject::GetType()
 {
     return 0x1;
 }

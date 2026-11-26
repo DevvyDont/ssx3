@@ -65,6 +65,8 @@ struct cBEOptionInterface : public cBEInterface {
     char* getQuickKeyMessage(int i) __asm__("cBEOptionInterface_getQuickKeyMessage");
     void resetQuickKey(int i) __asm__("cBEOptionInterface_resetQuickKey");
     void resetAllQuickKeys() __asm__("cBEOptionInterface_resetAllQuickKeys");
+    int getDefaultQuickKeyMessageHashValue(int value)
+        __asm__("cBEOptionInterface_getDefaultQuickKeyMessageHashValue__FPvi");
 };
 
 extern cBEOptionInterface* cBEOptionInterface_instance;

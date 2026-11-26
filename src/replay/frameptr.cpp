@@ -424,7 +424,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_putFrameBlock__FPv);
  * An empty stub, as in On Tour. cReplayFrame_loadFrame (cReplayFrame_loadFrame) calls it with (frame, 1) after
  * cReplayFramePtr_loadBlock; the wait flag in $a1 is ignored.
  */
-void cReplayFramePtr_putFrameBlock(void* self)
+void cReplayFramePtr::putFrameBlock()
 {
 }
 #endif
@@ -627,37 +627,36 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cReplay__cReplay(int* self, int flags)
+extern "C" void cReplay__cReplay(cReplay* self, int flags)
 {
-    char* replay = (char*)self;
     int ok = 0;
-    int state = *self;
+    int state = self->State;
     if (state != 0) {
         ok = state;
         ok = ok < 10;
     }
     if (ok) {
-        ((cReplay*)self)->stopReplay();
+        self->stopReplay();
     }
-    cReplay_frameSync(self);
-    ((cReplay*)self)->purge();
-    if (replay + 0x494 != 0) {
-        char* element = replay + 0x494 + 0x168;
-        while (replay + 0x494 != element) {
-            element -= 0xB4;
-            ((cReplayHighlight*)element)->~cReplayHighlight();
+    self->frameSync();
+    self->purge();
+    if (self->Highlight != 0) {
+        cReplayHighlight* element = self->Highlight + 2;
+        while (self->Highlight != element) {
+            element--;
+            element->~cReplayHighlight();
         }
     }
-    if (replay + 0x2C != 0) {
-        char* element = replay + 0x2C + 0x380;
-        while (replay + 0x2C != element) {
-            element -= 0x38;
-            sVEntry<void(void*, int)>* vt = ((sVEntry<void (void*, int)>*)((cReplayFrame*)element)->mVtbl);
+    if (self->Frames != 0) {
+        cReplayFrame* element = self->Frames + 16;
+        while (self->Frames != element) {
+            element--;
+            sVEntry<void(void*, int)>* vt = ((sVEntry<void (void*, int)>*)element->mVtbl);
             vt[7].fn(vthis(element, vt[7]), 0);
         }
     }
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -717,7 +716,7 @@ void cReplay::reset()
     unsigned int st = State - 14;
     bool resettable = !(st < 2);
     if (!resettable) return;
-    cReplay_frameSync(this);
+    this->frameSync();
     int i = 0;
     char* frameList = (char*)&FrameList;
     char* freeList = (char*)&FreeFrameList;
@@ -822,7 +821,7 @@ INCLUDE_ASM("replay/frameptr", cReplay_frameSync__FPv);
  *
  * An empty stub, as in On Tour. cReplay_reset and the destructor cReplay__cReplay call it before touching the frames.
  */
-void cReplay_frameSync(void* self)
+void cReplay::frameSync()
 {
 }
 #endif
@@ -996,13 +995,13 @@ void cReplay_setReplayState(void* self, int state);
  *
  * Any other state is left alone.
  */
-extern "C" void cReplay_startRace(int* self)
+void cReplay::startRace()
 {
-    int replayState = *self;
+    int replayState = *((int*)this);
     bool ok = !(replayState == kReplayPaused || replayState == kReplayInit);
     if (ok) {
         if (replayState == kPreRace) {
-            cReplay_setReplayState(self, kStartRace);
+            cReplay_setReplayState(this, kStartRace);
         }
     }
 }
@@ -1211,16 +1210,16 @@ static inline bool isStateFA78(int* self, int s)
  * (camSubset[CurrentReplayCamIndex], On Tour camSubset) is CAMERA_ALGORITHM_CHASE_MANUAL (11), any movement on axes
  * 0x30..0x33 (cInput_getValue) refreshes the views too.
  */
-extern "C" void cReplay_updateCameraSelect(int* self)
+void cReplay::updateCameraSelect()
 {
-    if (!isStateFA78(self, kPlaybackInput)) {
+    if (!isStateFA78(((int*)this), kPlaybackInput)) {
         return;
     }
-    void* input = (void*)SSXApp->Inputs[self[40 / 4]];
+    void* input = (void*)SSXApp->Inputs[((int*)this)[40 / 4]];
     if (cInput_getState(input, 108) != 0) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
-    if (camSubset[self[1584 / 4]] != CAMERA_ALGORITHM_CHASE_MANUAL) {
+    if (camSubset[((int*)this)[1584 / 4]] != CAMERA_ALGORITHM_CHASE_MANUAL) {
         return;
     }
     if (cInput_getValue(input, 49) != 0.0f || cInput_getValue(input, 0x30) != 0.0f ||

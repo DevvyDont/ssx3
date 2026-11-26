@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/ovstate.h"
 #include "be/beinterface.h"
 #include "fe/keyboardpopup.h"
 #include "movie/mcoverlaymanager.h"
@@ -702,7 +703,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onInputBegin__FPv);
  *
  * @return always 0 (input not consumed)
  */
-int cOVState_AUTOSAVE_onInputBegin(void* self)
+int cOVState::AUTOSAVE_onInputBegin()
 {
     return 0;
 }

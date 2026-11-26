@@ -88,6 +88,8 @@ struct cBERewardDB {
     // Methods bound to their retail symbols by asm labels.
     void purge() __asm__("cBERewardDB_purge");
     int getRewardName(int type, int idx) __asm__("cBERewardDB_getRewardName");
+    void init(int async) __asm__("cBERewardDB_init");
+    void update() __asm__("cBERewardDB_update");
 };
 
 CHECK_OFFSET(cBERewardDB, mRewardFileIndex, 0x000);

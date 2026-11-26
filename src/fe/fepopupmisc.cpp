@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/festateonlineagreement.h"
 #include "ui/uithing.h"
 #include "ui/uimenu.h"
 #include "ui/uigroup.h"
@@ -384,8 +385,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onLoseTransition__FPv);
  *
  * @return always 1 (transition finished)
  */
-int cFEPopupScreenPos_onLoseTransition(void* self)
+int cFEPopupScreenPos_onLoseTransition(void* vself)
 {
+    cFEPopupScreenPos* self = (cFEPopupScreenPos*)vself;
     return 0x1;
 }
 #endif
@@ -574,8 +576,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights_onMenuGainFocus__FPv);
  *
  * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
  */
-void cFEStateBraggingRights_onMenuGainFocus(void* self)
+void cFEStateBraggingRights_onMenuGainFocus(void* vself)
 {
+    cFEStateBraggingRights* self = (cFEStateBraggingRights*)vself;
 }
 #endif
 
@@ -609,8 +612,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChatRoom_onMenuGainFocus__FPv);
  *
  * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
  */
-void cFEStateChatRoom_onMenuGainFocus(void* self)
+void cFEStateChatRoom_onMenuGainFocus(void* vself)
 {
+    cFEStateChatRoom* self = (cFEStateChatRoom*)vself;
 }
 #endif
 
@@ -662,8 +666,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineAgreement_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateOnlineAgreement_onLoseTransition(void* self)
+int cFEStateOnlineAgreement_onLoseTransition(void* vself)
 {
+    cFEStateOnlineAgreement* self = (cFEStateOnlineAgreement*)vself;
     return 0x1;
 }
 #endif
@@ -718,8 +723,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateNetQuickPlayPopup_onLoseTransition(void* self)
+int cFEStateNetQuickPlayPopup_onLoseTransition(void* vself)
 {
+    cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
     return 0x1;
 }
 #endif
@@ -927,8 +933,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateNetCreateRoomPopup_onLoseTransition(void* self)
+int cFEStateNetCreateRoomPopup_onLoseTransition(void* vself)
 {
+    cFEStateNetCreateRoomPopup* self = (cFEStateNetCreateRoomPopup*)vself;
     return 0x1;
 }
 #endif
@@ -1034,8 +1041,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_onLoseTransition__FPv);
  *
  * @return always 1 (transition finished)
  */
-int cFEStateNetHelpPopup_onLoseTransition(void* self)
+int cFEStateNetHelpPopup_onLoseTransition(void* vself)
 {
+    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
     return 0x1;
 }
 #endif
@@ -1258,8 +1266,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getIconsFileName__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getIconsFileName(void* self)
+int cFEStateRewardGalleryBase_getIconsFileName(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1291,8 +1300,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getIconID1__FPv);
  *
  * @return -1
  */
-int cFEStateRewardGalleryBase_getIconID1(void* self)
+int cFEStateRewardGalleryBase_getIconID1(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return -0x1;
 }
 #endif
@@ -1307,8 +1317,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getTextureElement__FPv);
  *
  * @return 0 (no texture element)
  */
-int cFEStateRewardGalleryBase_getTextureElement(void* self)
+int cFEStateRewardGalleryBase_getTextureElement(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1338,8 +1349,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_allocRewards__FPv);
  *
  * Each gallery class overrides it with the code that fills its reward array at +0xA28 (posters: cFEStateRewardGalleryPosters_allocRewards).
  */
-void cFEStateRewardGalleryBase_allocRewards(void* self)
+void cFEStateRewardGalleryBase_allocRewards(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
 }
 #endif
 
@@ -1352,8 +1364,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_purgeRewards__FPv);
  * The gallery classes override it (posters: cFEStateRewardGalleryPosters_purgeRewards clears the list); the destructors call this base version
  * directly.
  */
-void cFEStateRewardGalleryBase_purgeRewards(void* self)
+void cFEStateRewardGalleryBase_purgeRewards(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
 }
 #endif
 
@@ -1365,8 +1378,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getReward__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getReward(void* self)
+int cFEStateRewardGalleryBase_getReward(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1379,8 +1393,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardCost__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getRewardCost(void* self)
+int cFEStateRewardGalleryBase_getRewardCost(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1393,8 +1408,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardStoreNum__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getRewardStoreNum(void* self)
+int cFEStateRewardGalleryBase_getRewardStoreNum(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1407,8 +1423,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardName__FPv);
  *
  * @return 0 (no name)
  */
-int cFEStateRewardGalleryBase_getRewardName(void* self)
+int cFEStateRewardGalleryBase_getRewardName(void* vself)
 {
+    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1512,8 +1529,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardStoreNum__FP
  * @param other  the reward record (a tPosterInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryPosters_getRewardStoreNum(void* self, void* other)
+signed char cFEStateRewardGalleryPosters_getRewardStoreNum(void* vself, void* other)
 {
+    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
     tPosterInfo* poster = (tPosterInfo*)other;
     return poster->mStoreNum;
 }
@@ -1530,8 +1548,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardName__FPvT0)
  * @param other  the reward record (a tPosterInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryPosters_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryPosters_getRewardName(void* vself, void* other)
 {
+    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
     tPosterInfo* poster = (tPosterInfo*)other;
     return poster->mNameStringID;
 }
@@ -1636,8 +1655,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardStoreNu
  * @param other  the reward record (a tTradingCardInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryTradingCards_getRewardStoreNum(void* self, void* other)
+signed char cFEStateRewardGalleryTradingCards_getRewardStoreNum(void* vself, void* other)
 {
+    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
     tTradingCardInfo* card = (tTradingCardInfo*)other;
     return card->mStoreNum;
 }
@@ -1654,8 +1674,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardName__F
  * @param other  the reward record (a tTradingCardInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryTradingCards_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryTradingCards_getRewardName(void* vself, void* other)
 {
+    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
     tTradingCardInfo* card = (tTradingCardInfo*)other;
     return card->mNameStringID;
 }
@@ -1760,8 +1781,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardStoreNum
  * @param other  the reward record (a tConceptArtInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryConceptArts_getRewardStoreNum(void* self, void* other)
+signed char cFEStateRewardGalleryConceptArts_getRewardStoreNum(void* vself, void* other)
 {
+    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
     tConceptArtInfo* art = (tConceptArtInfo*)other;
     return art->mStoreNum;
 }
@@ -1778,8 +1800,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardName__FP
  * @param other  the reward record (a tConceptArtInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryConceptArts_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryConceptArts_getRewardName(void* vself, void* other)
 {
+    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
     tConceptArtInfo* art = (tConceptArtInfo*)other;
     return art->mNameStringID;
 }
@@ -1884,8 +1907,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardStoreNum__FPv
  * @param other  the reward record (a tVideoInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryVideos_getRewardStoreNum(void* self, void* other)
+signed char cFEStateRewardGalleryVideos_getRewardStoreNum(void* vself, void* other)
 {
+    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
     tVideoInfo* video = (tVideoInfo*)other;
     return video->mStoreNum;
 }
@@ -1902,8 +1926,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardName__FPvT0);
  * @param other  the reward record (a tVideoInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryVideos_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryVideos_getRewardName(void* vself, void* other)
 {
+    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
     tVideoInfo* video = (tVideoInfo*)other;
     return video->mNameStringID;
 }
@@ -2008,8 +2033,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0
  * @param other  the reward record (a tToyInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryToys_getRewardStoreNum(void* self, void* other)
+signed char cFEStateRewardGalleryToys_getRewardStoreNum(void* vself, void* other)
 {
+    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
     tToyInfo* toy = (tToyInfo*)other;
     return toy->mStoreNum;
 }
@@ -2026,8 +2052,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardName__FPvT0);
  * @param other  the reward record (a tToyInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryToys_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryToys_getRewardName(void* vself, void* other)
 {
+    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
     tToyInfo* toy = (tToyInfo*)other;
     return toy->mNameStringID;
 }
@@ -2132,8 +2159,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardStoreNum_
  * @param other  the reward record (a tCheatCharInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryCheatChars_getRewardStoreNum(void* self, void* other)
+signed char cFEStateRewardGalleryCheatChars_getRewardStoreNum(void* vself, void* other)
 {
+    cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
     tCheatCharInfo* cheatChar = (tCheatCharInfo*)other;
     return cheatChar->mStoreNum;
 }
@@ -2150,8 +2178,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardName__FPv
  * @param other  the reward record (a tCheatCharInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryCheatChars_getRewardName(void* self, void* other)
+char* cFEStateRewardGalleryCheatChars_getRewardName(void* vself, void* other)
 {
+    cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
     tCheatCharInfo* cheatChar = (tCheatCharInfo*)other;
     return cheatChar->mNameStringID;
 }
@@ -2232,8 +2261,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_onGainTransition__FPv);
  *
  * @return 1 (transition done)
  */
-int cFEStateVideoPlayer_onGainTransition(void* self)
+int cFEStateVideoPlayer_onGainTransition(void* vself)
 {
+    cFEStateVideoPlayer* self = (cFEStateVideoPlayer*)vself;
     return 0x1;
 }
 #endif
@@ -2248,8 +2278,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_onLoseTransition__FPv);
  *
  * @return 1 (transition done)
  */
-int cFEStateVideoPlayer_onLoseTransition(void* self)
+int cFEStateVideoPlayer_onLoseTransition(void* vself)
 {
+    cFEStateVideoPlayer* self = (cFEStateVideoPlayer*)vself;
     return 0x1;
 }
 #endif
@@ -2757,8 +2788,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onGainTransition__FP
  *
  * @return always 1 (transition finished)
  */
-int cFEPopupSelectMultiplayerMode_onGainTransition(void* self)
+int cFEPopupSelectMultiplayerMode_onGainTransition(void* vself)
 {
+    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
     return 0x1;
 }
 #endif
@@ -2773,8 +2805,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onLoseTransition__FP
  *
  * @return always 1 (transition finished)
  */
-int cFEPopupSelectMultiplayerMode_onLoseTransition(void* self)
+int cFEPopupSelectMultiplayerMode_onLoseTransition(void* vself)
 {
+    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
     return 0x1;
 }
 #endif
@@ -3426,8 +3459,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateChallengePopup_onLoseTransition(void* self)
+int cFEStateChallengePopup_onLoseTransition(void* vself)
 {
+    cFEStateChallengePopup* self = (cFEStateChallengePopup*)vself;
     return 0x1;
 }
 #endif
@@ -3488,8 +3522,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_onLoseTransition__F
  *
  * @return 1 (done)
  */
-int cFEStateChallengeReceivedPopup_onLoseTransition(void* self)
+int cFEStateChallengeReceivedPopup_onLoseTransition(void* vself)
 {
+    cFEStateChallengeReceivedPopup* self = (cFEStateChallengeReceivedPopup*)vself;
     return 0x1;
 }
 #endif
@@ -3639,8 +3674,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onGainTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateAuthDNAS_onGainTransition(void* self)
+int cFEStateAuthDNAS_onGainTransition(void* vself)
 {
+    cFEStateAuthDNAS* self = (cFEStateAuthDNAS*)vself;
     return 0x1;
 }
 #endif
@@ -3653,8 +3689,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateAuthDNAS_onLoseTransition(void* self)
+int cFEStateAuthDNAS_onLoseTransition(void* vself)
 {
+    cFEStateAuthDNAS* self = (cFEStateAuthDNAS*)vself;
     return 0x1;
 }
 #endif
@@ -3720,8 +3757,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateAuthDNASError_onLoseTransition(void* self)
+int cFEStateAuthDNASError_onLoseTransition(void* vself)
 {
+    cFEStateAuthDNASError* self = (cFEStateAuthDNASError*)vself;
     return 0x1;
 }
 #endif
@@ -3764,8 +3802,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onGainTransition__FPv);
  *
  * @return always 1 (the transition is done)
  */
-int cFEStateNetAccountMem_onGainTransition(void* self)
+int cFEStateNetAccountMem_onGainTransition(void* vself)
 {
+    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     return 0x1;
 }
 #endif
@@ -3778,8 +3817,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onLoseTransition__FPv);
  *
  * @return always 1 (the transition is done)
  */
-int cFEStateNetAccountMem_onLoseTransition(void* self)
+int cFEStateNetAccountMem_onLoseTransition(void* vself)
 {
+    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     return 0x1;
 }
 #endif
@@ -4052,8 +4092,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats_onMenuGainFocus__FPv);
  *
  * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
  */
-void cFEStateStats_onMenuGainFocus(void* self)
+void cFEStateStats_onMenuGainFocus(void* vself)
 {
+    cFEStateStats* self = (cFEStateStats*)vself;
 }
 #endif
 
@@ -4200,8 +4241,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onLoseTransition__FPv);
  *
  * @return 1
  */
-int cFEStateNetMessenger_onLoseTransition(void* self)
+int cFEStateNetMessenger_onLoseTransition(void* vself)
 {
+    cFEStateNetMessenger* self = (cFEStateNetMessenger*)vself;
     return 0x1;
 }
 #endif
@@ -4273,8 +4315,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateReadMessagePopup_onLoseTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateReadMessagePopup_onLoseTransition(void* self)
+int cFEStateReadMessagePopup_onLoseTransition(void* vself)
 {
+    cFEStateReadMessagePopup* self = (cFEStateReadMessagePopup*)vself;
     return 0x1;
 }
 #endif
@@ -8492,8 +8535,9 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onUpdate__FPv);
  *
  * @return cUIState_onUpdate()'s result (not meaningful; declared void* by the unit)
  */
-void* cOVState_ViewPopup_onUpdate(void* self)
+void* cOVState_ViewPopup_onUpdate(void* vself)
 {
+    cOVState* self = (cOVState*)vself;
     return cUIState_onUpdate(self);
 }
 #endif

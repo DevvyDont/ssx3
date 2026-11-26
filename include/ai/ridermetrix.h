@@ -272,6 +272,8 @@ struct cRiderMetrix {
     int updateBonusLevelAndCalcPoints(int* idx, tHoldBonusDB* tbl, int type, float x)
         __asm__("cRiderMetrix_updateBonusLevelAndCalcPoints");
     int losePoints() __asm__("cRiderMetrix_losePoints");
+    float evAutoResetSurface() __asm__("cRiderMetrix_evAutoResetSurface__FPv");
+    float evDangerLevelChange() __asm__("cRiderMetrix_evDangerLevelChange__FPv");
 };
 
 CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);

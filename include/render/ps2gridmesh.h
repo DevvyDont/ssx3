@@ -38,6 +38,9 @@ struct cGridMesh {
     // --- cGarbageMan
     cGridMesh* mNext;               // 0x000 [O] cGarbageMan::mNext (no retail access seen; no ctor writes it)
     void** mVtbl;                   // 0x004 [R] cGridMesh__cGridMesh stores cGarbageMan's vtable cGarbageMan_vtbl before delete
+
+    // Methods bound to their retail symbols by asm labels.
+    void SetScale() __asm__("cGridMesh_SetScale__FPv");
 };
 
 CHECK_OFFSET(cGridMesh, mNext, 0x000);

@@ -78,8 +78,8 @@ void operator_delete(int *);
  *
  * @param flags  bit 0 set: also free the object
  */
-extern "C" void cCubicSplineInterpolant__cCubicSplineInterpolant(int *self, int flags) {
+extern "C" void cCubicSplineInterpolant__cCubicSplineInterpolant(cCubicSplineInterpolant* self, int flags) {
     cCubicSplineInterpolant_purge(self);
-    if (flags & 1) operator_delete(self);
+    if (flags & 1) operator_delete(((int*)self));
 }
 #endif

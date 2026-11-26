@@ -1235,11 +1235,11 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
  * Calls WORLDTRIGGERMANAGER_DeInit(), SSXAUDIO_DeInit() and cAppMan_loadexecpurge() (the current module's
  * slot 3, then its deletion), then the graphics manager's loadexecpurge (vtable slot 119).
  */
-void cSSXApp_loadexecpurge(void* self)
+void cSSXApp::loadexecpurge()
 {
-    WORLDTRIGGERMANAGER_DeInit(self);
+    WORLDTRIGGERMANAGER_DeInit(this);
     SSXAUDIO_DeInit();
-    cAppMan_loadexecpurge(self);
+    cAppMan_loadexecpurge(this);
     cGraphicsMan_TheGraphicsMan->loadexecpurge();
 }
 #endif

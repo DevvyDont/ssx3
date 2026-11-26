@@ -245,6 +245,7 @@ struct cWorldView {
     void recursiveIsValid(tBxBSPNode* sec, t4Vector* box, int* ok) __asm__("cWorldView_recursiveIsValid");
     void refreshStreamFocus(int cam) __asm__("cWorldView_refreshStreamFocus");
     void recursiveTreeFocus(tBxBSPNode* sec_, int cam, int loaded) __asm__("cWorldView_recursiveTreeFocus");
+    void purge() __asm__("cWorldView_purge__FPv");
 };
 
 CHECK_OFFSET(cWorldView, mp_WorldCache, 0x000);

@@ -91,7 +91,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberHumans__FPvi);
  *
  * @param humans  number of human riders
  */
-void cBENewRaceInterface_setNumberHumans(void* self, int humans)
+void cBENewRaceInterface::setNumberHumans(int humans)
 {
     cBENewRaceInterface_newRace.iNumberHumans = humans;
     cBENewRaceInterface_newRace.iNumberRiders = humans + cBENewRaceInterface_newRace.iNumberAI + cBENewRaceInterface_newRace.iNumberMissionRiders;
@@ -113,7 +113,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberMission__FPvi);
  *
  * @param mission  number of mission riders
  */
-void cBENewRaceInterface_setNumberMission(void* self, int mission)
+void cBENewRaceInterface::setNumberMission(int mission)
 {
     int numHumans = cBENewRaceInterface_newRace.iNumberHumans;
     int numAI = cBENewRaceInterface_newRace.iNumberAI;
@@ -392,7 +392,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
  * @param iPlayer  the player, 0-5
  * @return the address of playerID[iGate] (no meaning; On Tour's method is void)
  */
-void* cBENewRaceInterface_assignPlayer(void* self, int iGate, int iPlayer)
+void* cBENewRaceInterface::assignPlayer(int iGate, int iPlayer)
 {
     cBENewRaceInterface_newRace.playerID[iGate] = iPlayer;
     cBENewRaceInterface_newRace.riderID[iPlayer] = iGate;
@@ -464,16 +464,16 @@ bool cBENewRaceInterface::setGameMode(int mode)
     }
     if (mode == kGAMEMODE_FREERIDE) {
         cBENewRaceInterface_newRace.cGameMode = mode;
-        cBENewRaceInterface_setNumberHumans(this, 1);
+        this->setNumberHumans(1);
         setNumberAI(0);
-        cBENewRaceInterface_setNumberMission(this, 1);
+        this->setNumberMission(1);
         cBEInterface* playerInterface = (cBEInterface*)cBENewPlayerInterface_getThis();
         cBENewPlayerInterface_setToMissionMan(1);
         playerInterface->submit();
     } else if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE) {
-        cBENewRaceInterface_setNumberHumans(this, humans);
+        this->setNumberHumans(humans);
         setNumberAI(0);
-        cBENewRaceInterface_setNumberMission(this, 0);
+        this->setNumberMission(0);
         cBEInterface* playerInterface = (cBEInterface*)cBENewPlayerInterface_getThis();
         if (cBENewPlayerInterface_isMissionMan(1) != 0) {
             cBENewPlayerInterface_resetFromMissionMan(playerInterface, 1);
@@ -482,7 +482,7 @@ bool cBENewRaceInterface::setGameMode(int mode)
     }
     cBENewRaceInterface_newRace.cGameMode = mode;
     if (mode == kGAMEMODE_HALFPIPE || mode == kGAMEMODE_TIMECHALLENGE || mode == kGAMEMODE_PNTSCHALLENGE) {
-        cBENewRaceInterface_setNumberHumans(this, humans);
+        this->setNumberHumans(humans);
         unsigned char ev = (unsigned char)cBENewRaceInterface_newRace.cGameEvent;
         if (ev >= kGAMEEVENT_RIVALTIME && ev <= kGAMEEVENT_RIVALPOINTS
             && cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER) {
@@ -490,17 +490,17 @@ bool cBENewRaceInterface::setGameMode(int mode)
         } else {
             setNumberAI(0);
         }
-        cBENewRaceInterface_setNumberMission(this, 0);
+        this->setNumberMission(0);
     }
     if (mode == kGAMEMODE_RACE) {
-        cBENewRaceInterface_setNumberHumans(this, humans);
+        this->setNumberHumans(humans);
         setNumberAI(ai);
-        cBENewRaceInterface_setNumberMission(this, 0);
+        this->setNumberMission(0);
     }
     if (mode == kGAMEMODE_SLOPESTYLE) {
-        cBENewRaceInterface_setNumberHumans(this, humans);
+        this->setNumberHumans(humans);
         setNumberAI(1);
-        cBENewRaceInterface_setNumberMission(this, 0);
+        this->setNumberMission(0);
     }
     if (mode == kGAMEMODE_TIMECHALLENGE) {
         setGameEvent(kGAMEEVENT_RIVALTIME);
@@ -527,18 +527,18 @@ void cBENewRaceInterface::setGamePath(int mode)
     switch (mode)
     {
     case kGAMEPATH_WORLDCIRCUIT:
-        cBENewRaceInterface_setNumberHumans(this, 1);
+        this->setNumberHumans(1);
         setNumberAI(0);
         break;
     case kGAMEPATH_SINGLEEVENT:
-        cBENewRaceInterface_setNumberHumans(this, 1);
+        this->setNumberHumans(1);
         if (beRaceDB->iNumberAI < 0)
             setNumberAI(0);
         if (beRaceDB->iNumberAI >= 6)
             setNumberAI(5);
         break;
     case kGAMEPATH_MULTIPLAYER:
-        cBENewRaceInterface_setNumberHumans(this, 2);
+        this->setNumberHumans(2);
         setNumberAI(0);
         break;
     }

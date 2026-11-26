@@ -232,6 +232,7 @@ struct cWorldTriggerManager {
     int ObjectRefFirstFrame(tInstanceRecord* src, cWorldTriggerInstance* state)
         __asm__("cWorldTriggerManager_ObjectRefFirstFrame");
     bool DuckAmbientAudioTrigger(unsigned int idx) __asm__("cWorldTriggerManager_DuckAmbientAudioTrigger");
+    int AdvancedTriggerToString() __asm__("cWorldTriggerManager_AdvancedTriggerToString__FPv");
 };
 
 CHECK_OFFSET(cWorldTriggerManager, m_aWorldTriggerInstances, 0x000);

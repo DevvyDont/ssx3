@@ -286,8 +286,9 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onLoseTransition__FPv);
  *
  * @return always 1
  */
-int cScreenPopup_onLoseTransition(void* self)
+int cScreenPopup_onLoseTransition(void* vself)
 {
+    cScreenPopup* self = (cScreenPopup*)vself;
     return 0x1;
 }
 #endif
@@ -2841,8 +2842,9 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onRender2D__FPv);
  *
  * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cScreenPopup_onRender2D(void* self)
+void* cScreenPopup_onRender2D(void* vself)
 {
+    cScreenPopup* self = (cScreenPopup*)vself;
     return cUIState_onRender2D(self);
 }
 #endif
@@ -3043,20 +3045,20 @@ extern char str_kT_16BuyMusicTrack[];
  * @param cost  price of the song
  * @param money  cash the player has (cFEStateRequestLine_showBuyPopup() passes its cash total)
  */
-extern "C" void cBuyPopupInfo_initBuySong(int* self, int songName, int cost, int money)
+extern "C" void cBuyPopupInfo_initBuySong(cBuyPopupInfo* self, int songName, int cost, int money)
 {
     int three = 3;
     int hash = GetHashValue32(str_kT_OVRSong);
-    self[4] = songName;
-    self[5] = three;
-    self[3] = 2;
-    self[6] = hash;
+    ((int*)self)[4] = songName;
+    ((int*)self)[5] = three;
+    ((int*)self)[3] = 2;
+    ((int*)self)[6] = hash;
     hash = GetHashValue32(str_kT_16BuyMusicTrack);
-    self[1] = money;
-    self[7] = three;
-    self[0] = cost;
-    self[2] = -1;
-    self[8] = hash;
+    ((int*)self)[1] = money;
+    ((int*)self)[7] = three;
+    ((int*)self)[0] = cost;
+    ((int*)self)[2] = -1;
+    ((int*)self)[8] = hash;
 }
 #endif
 
@@ -3142,20 +3144,20 @@ extern char str_kT_OVRCMNBuyItem[];
  * @param cost  price (the caller passes the item's price times 10)
  * @param money  cash the player has
  */
-extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int money)
+extern "C" void cBuyPopupInfo_initBuyBolt(cBuyPopupInfo* self, int boltName, int cost, int money)
 {
     int three = 3;
     int hash = GetHashValue32(str_kT_CMNItemColon);
-    self[4] = boltName;
-    self[5] = three;
-    self[3] = 2;
-    self[6] = hash;
+    ((int*)self)[4] = boltName;
+    ((int*)self)[5] = three;
+    ((int*)self)[3] = 2;
+    ((int*)self)[6] = hash;
     hash = GetHashValue32(str_kT_OVRCMNBuyItem);
-    self[1] = money;
-    self[7] = three;
-    self[0] = cost;
-    self[2] = -1;
-    self[8] = hash;
+    ((int*)self)[1] = money;
+    ((int*)self)[7] = three;
+    ((int*)self)[0] = cost;
+    ((int*)self)[2] = -1;
+    ((int*)self)[8] = hash;
 }
 #endif
 

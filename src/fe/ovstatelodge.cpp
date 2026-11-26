@@ -1069,8 +1069,9 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStatePeakRoom_onGainFocus(void* self)
+void* cFEStatePeakRoom_onGainFocus(void* vself)
 {
+    cFEStatePeakRoom* self = (cFEStatePeakRoom*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif

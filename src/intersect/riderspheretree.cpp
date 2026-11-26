@@ -3524,7 +3524,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsSphTreeInt__FPv);
  *
  * @return always 0
  */
-int cWorldLine_IsSphTreeInt(void* self)
+int cWorldLine::IsSphTreeInt()
 {
     return 0;
 }

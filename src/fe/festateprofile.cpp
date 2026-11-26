@@ -211,8 +211,9 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onRender2D__FPv);
  *
  * @return cUIState_onRender2D's result
  */
-void* cFEStateProfileLoad_onRender2D(void* self)
+void* cFEStateProfileLoad_onRender2D(void* vself)
 {
+    cFEStateProfileLoad* self = (cFEStateProfileLoad*)vself;
     return cUIState_onRender2D(self);
 }
 #endif

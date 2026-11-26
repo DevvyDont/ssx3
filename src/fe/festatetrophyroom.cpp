@@ -58,8 +58,9 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateTrophyRoom_onGainFocus(void* self)
+void* cFEStateTrophyRoom_onGainFocus(void* vself)
 {
+    cFEStateTrophyRoom* self = (cFEStateTrophyRoom*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif
@@ -1511,7 +1512,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_writeDone__FPv);
  *
  * cFEMemCard_initFEMemCard installs it as the manager's callbackWriteEnd.
  */
-void cFEMemCard_writeDone(void* self)
+void cFEMemCard::writeDone()
 {
 }
 #endif

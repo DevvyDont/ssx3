@@ -32,11 +32,11 @@ INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getState__FPv);
  *
  * @return the cBEPostRaceState object
  */
-void* cBEPostRaceState_getState(void* self)
+void* cBEPostRaceState::getState()
 {
     if (cBEPostRaceState_instance == 0) {
         cBEState* mem = (cBEState*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
-        (*(void**)&mem->nextState) = self;
+        (*(void**)&mem->nextState) = ((void*)this);
         (*(void**)&mem->mVtbl) = cBEPostRaceState_vtbl;
         cBEPostRaceState_instance = mem;
     }
@@ -179,11 +179,11 @@ INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getState__FPv);
  *
  * @return the cBEPreRaceState object
  */
-void* cBEPreRaceState_getState(void* self)
+void* cBEPreRaceState::getState()
 {
     if (cBEPreRaceState_instance == 0) {
         cBEState* mem = (cBEState*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
-        (*(void**)&mem->nextState) = self;
+        (*(void**)&mem->nextState) = ((void*)this);
         (*(void**)&mem->mVtbl) = cBEPreRaceState_vtbl;
         cBEPreRaceState_instance = mem;
     }

@@ -2158,9 +2158,9 @@ INCLUDE_ASM("ai/computer", cAI_InitGroupAI__FPv);
  *
  * @return cAI_RefreshGroupAI's result
  */
-void* cAI_InitGroupAI(void* self)
+void* cAI::InitGroupAI()
 {
-    return cAI_RefreshGroupAI(self);
+    return cAI_RefreshGroupAI(this);
 }
 #endif
 
@@ -3592,16 +3592,16 @@ void cRider::updateTrackPath()
     {
         void* old = TrackPath;
         if (500.0f < pathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
-            cRider_checkTrackPathSwitch(this, 0);
+            this->checkTrackPathSwitch(0);
         else if (cPath_getLength(TrackPath) - 200.0f < pathParam)
-            cRider_checkTrackPathSwitch(this, 1);
+            this->checkTrackPathSwitch(1);
         else
         {
             cTrackPath* trackPath = TrackPath;
             sVEntry<int(void*, float, float)>* vtable = (sVEntry<int(void*, float, float)>*)trackPath->mVtbl;
             sVEntry<int(void*, float, float)>* ve = &vtable[2];
             if (ve->fn(vthis(trackPath, *ve), MinDistanceLeft, mDistToFinish))
-                cRider_checkTrackPathSwitch(this, 0);
+                this->checkTrackPathSwitch(0);
         }
         if ((void*)TrackPath != old)
         {
@@ -3682,8 +3682,9 @@ INCLUDE_ASM("ai/computer", cRider_isPipeJump__FPv);
  *
  * @return always 0
  */
-int cRider_isPipeJump(void* self)
+int cRider_isPipeJump(void* vself)
 {
+    cRider* self = (cRider*)vself;
     return 0;
 }
 #endif
@@ -3876,45 +3877,44 @@ static inline float vu0Dot_1127F0(const t4Vector& a, const t4Vector& b)
  * For the current path, a position more than 1592 away from the expected distance-to-finish (+0x4D0) resets
  * mTrackPathHint.
  *
- * @param vself  the rider (this)
  * @param skipCur  On Tour mustSwitch: never keep the current track path
  */
-extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
+void cRider::checkTrackPathSwitch(int skipCur)
 {
     cTrackPath* paths[3];
     t4Vector out;
     t4Vector pos;
-    float len = vu0Length_1127F0(*(&vself->mVelocity));
-    void* best = vself->TrackPath;
+    float len = vu0Length_1127F0(*(&mVelocity));
+    void* best = TrackPath;
     float bestD = 9.999999933815813e+36f;
     if (len == 0.0f) {
-        pos = *(&vself->mPosition);
+        pos = *(&mPosition);
     } else {
-        float aheadScale = vself->calculateAheadDist(1) / len;
-        pos = vu0Add_1127F0(*(&vself->mPosition), vu0Scale_1127F0(*(&vself->mVelocity), aheadScale));
+        float aheadScale = calculateAheadDist(1) / len;
+        pos = vu0Add_1127F0(*(&mPosition), vu0Scale_1127F0(*(&mVelocity), aheadScale));
     }
     int n = cPathSys_getNearTrackPaths(gPaths, &pos, paths, 3);
     for (int i = 0; i < n; i++) {
-        if (skipCur && paths[i] == (void*)vself->TrackPath) {
+        if (skipCur && paths[i] == (void*)TrackPath) {
             continue;
         }
         float tOut;
         float nearParam = cPath_intersectPath(paths[i], &pos, &out, &tOut, 1);
-        if (paths[i] == (void*)vself->TrackPath) {
-            if (1592.0f < __builtin_fabsf(paths[i]->BaseDistanceLeft - vself->mDistToFinish - nearParam)) {
-                vself->mTrackPathHint->NodeID = -1;
+        if (paths[i] == (void*)TrackPath) {
+            if (1592.0f < __builtin_fabsf(paths[i]->BaseDistanceLeft - mDistToFinish - nearParam)) {
+                mTrackPathHint->NodeID = -1;
             }
         }
         nearParam += 796.0f;
         t4Vector aheadDelta = vu0Sub_1127F0(pos, cPath_getPathPos_1127F0(paths[i], 0, nearParam));
-        t4Vector nearDelta = vu0Sub_1127F0(*(&vself->mPosition), out);
+        t4Vector nearDelta = vu0Sub_1127F0(*(&mPosition), out);
         float dist = vu0Dot_1127F0(nearDelta, nearDelta) + vu0Dot_1127F0(aheadDelta, aheadDelta);
         if (dist < bestD) {
             best = paths[i];
             bestD = dist;
         }
     }
-    vself->TrackPath = (cTrackPath*)best;
+    TrackPath = (cTrackPath*)best;
 }
 #endif
 

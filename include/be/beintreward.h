@@ -187,6 +187,18 @@ struct cBERewardInterface : public cBEInterface {
     int getTrackPeakID(int locationID) __asm__("cBERewardInterface_getTrackPeakID");
     int getTrackTrophyID(int eventID, int locationID) __asm__("cBERewardInterface_getTrackTrophyID");
     cBERewardDB* getDB() __asm__("cBERewardInterface_getDB");
+    bool isBetterMedal(int oldMedal, int newMedal) __asm__("cBERewardInterface_isBetterMedal__FPvii");
+    int getTotalNumPosters() __asm__("cBERewardInterface_getTotalNumPosters__FPv");
+    int getTotalNumTradingCards() __asm__("cBERewardInterface_getTotalNumTradingCards__FPv");
+    int getTotalNumConceptArts() __asm__("cBERewardInterface_getTotalNumConceptArts__FPv");
+    int getTotalNumToys() __asm__("cBERewardInterface_getTotalNumToys__FPv");
+    int getTotalNumVideos() __asm__("cBERewardInterface_getTotalNumVideos__FPv");
+    int getTotalNumCheatChars() __asm__("cBERewardInterface_getTotalNumCheatChars__FPv");
+    int getEarningsTarget(int peakID) __asm__("cBERewardInterface_getEarningsTarget__FPvi");
+    signed char getTrackMedal(int iProfileIndex, int iCharacterID, int eventID, int location)
+        __asm__("cBERewardInterface_getTrackMedal__FPviiii");
+    void* getUserAwards() __asm__("cBERewardInterface_getUserAwards__FPv");
+    void* getTotalNumUserAwards() __asm__("cBERewardInterface_getTotalNumUserAwards__FPv");
 };
 
 CHECK_OFFSET(cBERewardInterface, mLastEventCashReward, 0x10);

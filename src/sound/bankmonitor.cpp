@@ -725,10 +725,10 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cMonitorInstance__cMonitorInstance(int* self, int flags)
+extern "C" void cMonitorInstance__cMonitorInstance(cMonitorInstance* self, int flags)
 {
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -767,7 +767,7 @@ void cMonitorInstance::Create(int Freq, long key, int Ptr, int Data1, int Data2,
     mData2 = Data2;
     mData3 = Data3;
     mData4 = Data4;
-    cMonitorInstance_Enable(this);
+    this->Enable();
 }
 #endif
 
@@ -827,9 +827,9 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_Enable__FPv);
  *
  * cMonitorInstance_Create calls it last.
  */
-void cMonitorInstance_Enable(void* self)
+void cMonitorInstance::Enable()
 {
-    ((cMonitorInstance*)self)->mEnabled = 1;
+    ((cMonitorInstance*)this)->mEnabled = 1;
 }
 #endif
 
@@ -992,7 +992,7 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
         cMonitorInstance* monitorInstance = end;
         while (((&self->mMonitorInstance[0])) != monitorInstance) {
             monitorInstance--;
-            cMonitorInstance__cMonitorInstance((int*)monitorInstance, 0);
+            cMonitorInstance__cMonitorInstance((cMonitorInstance*)((int*)monitorInstance), 0);
         }
     }
     cSndPlayOpts__cSndPlayOpts(((cBankMonitor*)self), 0);
@@ -1019,7 +1019,7 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_BeginMonitoring__FPv);
  *
  * @return no meaningful value (SNDSYS_add100hzclient returns nothing)
  */
-void* cMonitor_MONITOR_BeginMonitoring(void* self)
+void* cMonitor::MONITOR_BeginMonitoring()
 {
     return SNDSYS_add100hzclient((void*)func_002AD998);
 }

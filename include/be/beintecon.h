@@ -51,6 +51,8 @@ struct cBEEconInterface : public cBEInterface {
     int getMissionCash(int level) __asm__("cBEEconInterface_getMissionCash");
     int getCostForNextIncrement(int humanIndex, int characterId, unsigned int attribute)
         __asm__("cBEEconInterface_getCostForNextIncrement");
+    int getTotalMoneyEarned(int iHuman, int charType) __asm__("cBEEconInterface_getTotalMoneyEarned__FPvii");
+    int getAttribCost(int levelIndex) __asm__("cBEEconInterface_getAttribCost__FPvi");
 };
 
 extern cBEEconInterface* cBEEconInterface_instance;

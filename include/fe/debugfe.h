@@ -77,6 +77,7 @@ struct cDebugFE {
     int getFont() __asm__("cDebugFE_getFont");
     int getBoxTID() __asm__("cDebugFE_getBoxTID");
     void startlobby() __asm__("cDebugFE_startlobby");
+    bool loseFocus() __asm__("cDebugFE_loseFocus__FPv");
 };
 
 CHECK_OFFSET(cDebugFE, mVtbl, 0x000);
@@ -161,6 +162,8 @@ struct cTrackFileMan {
     void scanLocations() __asm__("cTrackFileMan_scanLocations");
     int checkLocation(char* name, char* tag) __asm__("cTrackFileMan_checkLocation");
     int checkLocation1(int n, void* namesp, char* tag) __asm__("cTrackFileMan_checkLocation1");
+    int getNextLocation(int start, void* key) __asm__("cTrackFileMan_getNextLocation");
+    int getPrevLocation(int start, void* key) __asm__("cTrackFileMan_getPrevLocation");
 };
 CHECK_OFFSET(cTrackFileMan, NumLocations, 0x0);
 CHECK_OFFSET(cTrackFileMan, LocationInfo, 0x4);

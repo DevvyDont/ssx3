@@ -40,6 +40,10 @@ struct cFlagNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFlagNode1(void* bucket, tInstanceRecord* node, void* src) __asm__("cFlagNode_cFlagNode1");
+    // retail's destructor cFlagNode__cFlagNode stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFlagNode();
+    virtual void render() __asm__("cFlagNode_render__FPv");
 };
 
 CHECK_SIZE(cFlagNode, 0x1C);

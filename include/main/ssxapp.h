@@ -128,6 +128,7 @@ struct cSSXApp {
     bool InGame() __asm__("cSSXApp_InGame");
     int InFE() __asm__("cSSXApp_InFE");
     int GetFEAsyncManager() __asm__("cSSXApp_GetFEAsyncManager");
+    void loadexecpurge() __asm__("cSSXApp_loadexecpurge__FPv");
 };
 
 CHECK_OFFSET(cSSXApp, LoadingModule, 0x04);

@@ -63,6 +63,8 @@ struct cProcessList {
     int getCount() __asm__("cProcessList_getCount");
     void* findProcess1(int id) __asm__("cProcessList_findProcess1");
     void findMission1(int name) __asm__("cProcessList_findMission1");
+    int addProcess(void* node) __asm__("cProcessList_addProcess__FPvT0");
+    int addProcess1(void* node) __asm__("cProcessList_addProcess1__FPvT0");
 };
 
 // One queued world-script event (On Tour struct tWScriptEvent : tWScriptEventBase {EventId}, then an anonymous
@@ -328,6 +330,8 @@ struct cWScriptMan {
     void initMissions() __asm__("cWScriptMan_initMissions");
     void processLocalMissionCmd() __asm__("cWScriptMan_processLocalMissionCmd");
     void update() __asm__("cWScriptMan_update");
+    void render() __asm__("cWScriptMan_render__FPv");
+    void* loadSection() __asm__("cWScriptMan_loadSection__FPv");
 };
 
 CHECK_OFFSET(cWScriptMan, MissionHeightInstId, 0x02C);

@@ -98,6 +98,7 @@ struct cReplayHighlight {
     void end() __asm__("cReplayHighlight_end__FPv");
     void cancel() __asm__("cReplayHighlight_cancel");
     bool setRanking(tRiderStats* stats, int mode) __asm__("cReplayHighlight_setRanking");
+    void reset() __asm__("cReplayHighlight_reset");
 };
 
 // The save stream's running size and byte checksum (On Tour tWriteCheckSum, 0x8).
@@ -328,6 +329,13 @@ struct cReplay {
     void* writeCheckSumStart() __asm__("cReplay_writeCheckSumStart__FPv");
     void writeCheckSum() __asm__("cReplay_writeCheckSum");
     bool load(char* buf) __asm__("cReplay_load");
+    void frameSync() __asm__("cReplay_frameSync__FPv");
+    void startRace() __asm__("cReplay_startRace");
+    void updateCameraSelect() __asm__("cReplay_updateCameraSelect");
+    void beginMarkInstantReplay() __asm__("cReplay_beginMarkInstantReplay__FPv");
+    void* purgeSave() __asm__("cReplay_purgeSave__FPv");
+    void* initLoad() __asm__("cReplay_initLoad__FPv");
+    void purgeLoad() __asm__("cReplay_purgeLoad__FPv");
 };
 
 CHECK_OFFSET(cReplayFrameList, Tail, 0x0);

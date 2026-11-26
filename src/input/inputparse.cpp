@@ -1898,10 +1898,11 @@ INCLUDE_ASM("input/inputparse", cInputExec_cInputExec__FPv);
  *
  * @return @p self
  */
-void* cInputExec_cInputExec(void* self)
+void* cInputExec_cInputExec(void* vself)
 {
+    cInputExec* self = (cInputExec*)vself;
     *(int*)self = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2749,7 +2750,7 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_error__FPv);
  * cInputPreProcessor_skipCComment, cInputPreProcessor_skipCppComment and cInputPreProcessor_readCmdLine call it with
  * the input source, path, file name and a message such as "unexpected EOF in comment"; the arguments are ignored.
  */
-void cInputPreProcessor_error(void* self)
+void cInputPreProcessor::error()
 {
 }
 #endif
@@ -3372,7 +3373,7 @@ INCLUDE_ASM("input/inputparse", cPadDevice_numActuators__FPv);
  *
  * @return 0
  */
-int cPadDevice_numActuators(void* self)
+int cPadDevice::numActuators()
 {
     return 0;
 }
@@ -3386,7 +3387,7 @@ INCLUDE_ASM("input/inputparse", cPadDevice_setActuator__FPv);
  *
  * On Tour's version only fails an assert, which retail compiles out.
  */
-void cPadDevice_setActuator(void* self)
+void cPadDevice::setActuator()
 {
 }
 #endif

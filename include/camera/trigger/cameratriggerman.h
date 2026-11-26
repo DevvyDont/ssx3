@@ -101,6 +101,10 @@ struct cCameraTriggerMan {
     void streamIn(void* stream) __asm__("cCameraTriggerMan_streamIn");
     void init() __asm__("cCameraTriggerMan_init");
     void initOnRestart() __asm__("cCameraTriggerMan_initOnRestart");
+    void loadTriggersIfNotStreaming() __asm__("cCameraTriggerMan_loadTriggersIfNotStreaming__FPv");
+    void unresolve() __asm__("cCameraTriggerMan_unresolve__FPv");
+    void setInGameTriggers() __asm__("cCameraTriggerMan_setInGameTriggers__FPv");
+    void* setReplayTriggers() __asm__("cCameraTriggerMan_setReplayTriggers__FPv");
 };
 
 CHECK_OFFSET(cCameraTriggerMan, TriggerList, 0x00);

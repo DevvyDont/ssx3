@@ -612,7 +612,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabPoints__FPvi);
  * @param grabEnum  the grab (On Tour grabEnum)
  * @return the grab's base points
  */
-int cBEBAGTInterface_getGrabPoints(void* self, int grabEnum)
+int cBEBAGTInterface::getGrabPoints(int grabEnum)
 {
     return cBELibrary_grabPointsDB[grabEnum].pointsPerGrab;
 }
@@ -629,7 +629,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabPointsPerSec__FPvi);
  * @param grabEnum  the grab (On Tour grabEnum)
  * @return the grab's points per second of hold
  */
-int cBEBAGTInterface_getGrabPointsPerSec(void* self, int grabEnum)
+int cBEBAGTInterface::getGrabPointsPerSec(int grabEnum)
 {
     return cBELibrary_grabPointsDB[grabEnum].pointsPerSec;
 }

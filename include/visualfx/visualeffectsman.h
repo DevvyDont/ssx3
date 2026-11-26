@@ -38,8 +38,9 @@
 // and render call their slots 1, 2 and 3. Only declared: no vtable or method is emitted from these declarations.
 struct cVisualEffect {
     virtual ~cVisualEffect();   // 1 [O]; [U] the manager's dtor deletes each effect through it
-    virtual void update();      // 2 [O]; [U] cPS2VisualEffectsMan_update
-    virtual void render();      // 3 [O]; [U] cPS2VisualEffectsMan_render
+    virtual void update() __asm__("cVisualEffect_update__FPv");      // 2 [O]; [U] cPS2VisualEffectsMan_update
+    virtual void render() __asm__("cVisualEffect_render__FPv");      // 3 [O]; [U] cPS2VisualEffectsMan_render
+    void deferredRender() __asm__("cVisualEffect_deferredRender__FPv");
 };
 
 CHECK_SIZE(cVisualEffect, 0x4);

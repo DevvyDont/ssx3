@@ -535,8 +535,9 @@ INCLUDE_ASM("ui/uimenu", cUIPair_setUIData__FPv);
  *
  * @return the result of cUIThing_setUIData()
  */
-void* cUIPair_setUIData(void* self)
+void* cUIPair_setUIData(void* vself)
 {
+    cUIPair* self = (cUIPair*)vself;
     return cUIThing_setUIData(self);
 }
 #endif

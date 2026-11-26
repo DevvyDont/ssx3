@@ -77,9 +77,9 @@ struct sAnimModelList {
  *
  * @param item  the texture file to add
  */
-void cAnimModel_addTextureFile(void* self, int item)
+void cAnimModel::addTextureFile(int item)
 {
-    sAnimModelList* list = (sAnimModelList*)self;
+    sAnimModelList* list = (sAnimModelList*)this;
     list->items[list->count++] = item;
 }
 #endif

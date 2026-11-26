@@ -360,11 +360,11 @@ extern char cAppModule_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cFadeScreen__cFadeScreen(int* self, int flags)
+extern "C" void cFadeScreen__cFadeScreen(cFadeScreen* self, int flags)
 {
     *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -398,11 +398,11 @@ extern char cAppModule_vtbl[];
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cPreStartScreen__cPreStartScreen(int* self, int flags)
+extern "C" void cPreStartScreen__cPreStartScreen(cPreStartScreen* self, int flags)
 {
     *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -413,7 +413,7 @@ INCLUDE_ASM("main/ssxappdtor", cPreStartScreen_load__FPv);
 /**
  * Loads nothing: the pre-start screen has no data of its own (empty, as in On Tour).
  */
-void cPreStartScreen_load(void* self)
+void cPreStartScreen::load()
 {
 }
 #endif
@@ -464,11 +464,11 @@ extern char cAppModule_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cLoadScreen__cLoadScreen(int* self, int flags)
+extern "C" void cLoadScreen__cLoadScreen(cLoadScreen* self, int flags)
 {
     *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -509,11 +509,11 @@ extern char cAppModule_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cStartScreen__cStartScreen(int* self, int flags)
+extern "C" void cStartScreen__cStartScreen(cStartScreen* self, int flags)
 {
     *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -533,11 +533,11 @@ extern char cAppModule_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGameLoadScreen__cGameLoadScreen(int* self, int flags)
+extern "C" void cGameLoadScreen__cGameLoadScreen(cGameLoadScreen* self, int flags)
 {
     *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -572,8 +572,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen_getTexttureID);
  * @param index  which texture (0 or 1; not range-checked)
  * @return the texture id at +0x10 + 4 * @p index
  */
-extern "C" int cGameLoadScreen_getTexttureID(void *self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x10);
+int cGameLoadScreen::getTexttureID(int index)
+{
+    return *(int *)((char *)this + (index << 2) + 0x10);
 }
 #endif
 
@@ -592,11 +593,11 @@ extern char cAppModule_vtbl[];
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cFELoadScreen__cFELoadScreen(int* self, int flags)
+extern "C" void cFELoadScreen__cFELoadScreen(cFELoadScreen* self, int flags)
 {
     *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -668,7 +669,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_preloadInit__FPv);
 /**
  * Does nothing: the base game state's preloadInit has an empty body.
  */
-void cGameState_preloadInit(void* self)
+void cGameState::preloadInit()
 {
 }
 #endif
@@ -679,7 +680,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_preloadUpdate__FPv);
 /**
  * Does nothing: the base game state's preloadUpdate has an empty body.
  */
-void cGameState_preloadUpdate(void* self)
+void cGameState::preloadUpdate()
 {
 }
 #endif
@@ -690,7 +691,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_preloadCancel__FPv);
 /**
  * Does nothing: the base game state's preloadCancel has an empty body.
  */
-void cGameState_preloadCancel(void* self)
+void cGameState::preloadCancel()
 {
 }
 #endif
@@ -704,7 +705,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_gainFocus__FPv);
  * It fills slot +0x2C of the base game-state vtable cGameState_vtbl and of the states that keep the default (the end-wait
  * and transport-wait states).
  */
-void cGameState_gainFocus(void* self)
+void cGameState::gainFocus()
 {
 }
 #endif
@@ -718,7 +719,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_update__FPv);
  * It fills slot +0x34 of the base game-state vtable cGameState_vtbl and of the states without their own update (end,
  * end-wait, transport-wait, riding).
  */
-void cGameState_update(void* self)
+void cGameState::update()
 {
 }
 #endif
@@ -729,7 +730,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_loseFocus__FPv);
 /**
  * Does nothing: the base game state's loseFocus has an empty body.
  */
-void cGameState_loseFocus(void* self)
+void cGameState::loseFocus()
 {
 }
 #endif
@@ -742,7 +743,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_isPreloadComplete__FPv);
  *
  * @return always 1
  */
-int cGameState_isPreloadComplete(void* self)
+int cGameState::isPreloadComplete()
 {
     return 0x1;
 }
@@ -754,7 +755,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_onWidgetEvent__FPv);
 /**
  * Ignores widget events: the base game state's onWidgetEvent has an empty body.
  */
-void cGameState_onWidgetEvent(void* self)
+void cGameState::onWidgetEvent()
 {
 }
 #endif
@@ -2220,11 +2221,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGMBigAirHandler__cGMBigAirHandler(int* self, int flags)
+extern "C" void cGMBigAirHandler__cGMBigAirHandler(cGMBigAirHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2242,11 +2243,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGMRaceHandler__cGMRaceHandler(int* self, int flags)
+extern "C" void cGMRaceHandler__cGMRaceHandler(cGMRaceHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2264,11 +2265,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGMMPRaceHandler__cGMMPRaceHandler(int* self, int flags)
+extern "C" void cGMMPRaceHandler__cGMMPRaceHandler(cGMMPRaceHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2286,11 +2287,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGMMPSlopeHandler__cGMMPSlopeHandler(int* self, int flags)
+extern "C" void cGMMPSlopeHandler__cGMMPSlopeHandler(cGMMPSlopeHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2358,11 +2359,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGMTimeHandler__cGMTimeHandler(int* self, int flags)
+extern "C" void cGMTimeHandler__cGMTimeHandler(cGMTimeHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2424,11 +2425,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGMPointHandler__cGMPointHandler(int* self, int flags)
+extern "C" void cGMPointHandler__cGMPointHandler(cGMPointHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2713,7 +2714,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_CallbackMemcard__FPv);
  *
  * cMCOverlayManager_cMCOverlayManager stores it in every void callback slot until the front end plugs in its own.
  */
-void cMCOverlayManager_CallbackMemcard(void* self)
+void cMCOverlayManager::CallbackMemcard()
 {
 }
 #endif
@@ -2728,7 +2729,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_CallbackFalse__FPv);
  *
  * @return 0
  */
-int cMCOverlayManager_CallbackFalse(void* self)
+int cMCOverlayManager::CallbackFalse()
 {
     return 0;
 }
@@ -2744,7 +2745,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_CallbackTrue__FPv);
  *
  * @return 1
  */
-int cMCOverlayManager_CallbackTrue(void* self)
+int cMCOverlayManager::CallbackTrue()
 {
     return 0x1;
 }
@@ -2758,7 +2759,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_Callbackpdate__FPv);
  *
  * @return 0
  */
-int cMCOverlayManager_Callbackpdate(void* self)
+int cMCOverlayManager::Callbackpdate()
 {
     return 0;
 }

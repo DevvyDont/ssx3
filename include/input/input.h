@@ -25,6 +25,7 @@ struct cInput {
     void getState1(int state, int modifier) __asm__("cInput_getState1");
     void setPad(int val) __asm__("cInput_setPad__FPvi");
     void setMap(int val) __asm__("cInput_setMap__FPvi");
+    void* getState(int state) __asm__("cInput_getState__FPvi");
 };
 
 CHECK_OFFSET(cInput, Pad, 0x00);

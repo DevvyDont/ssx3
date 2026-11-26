@@ -330,8 +330,9 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateRuleSelect_onGainFocus(void* self)
+void* cFEStateRuleSelect_onGainFocus(void* vself)
 {
+    cFEStateRuleSelect* self = (cFEStateRuleSelect*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif

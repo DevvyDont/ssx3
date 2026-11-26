@@ -1455,8 +1455,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconsFileName__
  *
  * @return D_00467070
  */
-void* cFEStateRewardGalleryPosters_getIconsFileName(void* self)
+void* cFEStateRewardGalleryPosters_getIconsFileName(void* vself)
 {
+    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
     return (void*)D_00467070;
 }
 #endif
@@ -1577,8 +1578,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconsFileN
  *
  * @return D_00467098
  */
-void* cFEStateRewardGalleryTradingCards_getIconsFileName(void* self)
+void* cFEStateRewardGalleryTradingCards_getIconsFileName(void* vself)
 {
+    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
     return (void*)D_00467098;
 }
 #endif
@@ -1700,8 +1702,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconsFileNa
  *
  * @return D_004670C8
  */
-void* cFEStateRewardGalleryConceptArts_getIconsFileName(void* self)
+void* cFEStateRewardGalleryConceptArts_getIconsFileName(void* vself)
 {
+    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
     return (void*)D_004670C8;
 }
 #endif
@@ -1822,8 +1825,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconsFileName__F
  *
  * @return D_004670F0
  */
-void* cFEStateRewardGalleryVideos_getIconsFileName(void* self)
+void* cFEStateRewardGalleryVideos_getIconsFileName(void* vself)
 {
+    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
     return (void*)D_004670F0;
 }
 #endif
@@ -1944,8 +1948,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconsFileName__FPv
  *
  * @return D_00467118
  */
-void* cFEStateRewardGalleryToys_getIconsFileName(void* self)
+void* cFEStateRewardGalleryToys_getIconsFileName(void* vself)
 {
+    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
     return (void*)D_00467118;
 }
 #endif

@@ -457,8 +457,9 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_onRender2D__FPv);
  *
  * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cOVState_onRender2D(void* self)
+void* cOVState_onRender2D(void* vself)
 {
+    cOVState* self = (cOVState*)vself;
     return cUIState_onRender2D(self);
 }
 #endif

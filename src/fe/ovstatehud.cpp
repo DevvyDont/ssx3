@@ -122,8 +122,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour__FPvT0);
  *
  * @param outColor  receives the colour as four floats (a tARGB: alpha, red, green, blue)
  */
-void tHUDDef_getColour(void* self, void* outColor)
+void tHUDDef_getColour(void* vself, void* outColor)
 {
+    tHUDDef* self = (tHUDDef*)vself;
     cTextureElement* elem = (cTextureElement*)self;
     float* out = (float*)outColor;
     out[0] = elem->mLeft;
@@ -144,8 +145,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour1__FPvT0);
  *
  * @param outColor  receives the colour as an (r, g, b, a) 4-vector
  */
-void tHUDDef_getColour1(void* self, void* outColor)
+void tHUDDef_getColour1(void* vself, void* outColor)
 {
+    tHUDDef* self = (tHUDDef*)vself;
     cTextureElement* elem = (cTextureElement*)self;
     float* out = (float*)outColor;
     out[3] = elem->mLeft;
@@ -165,9 +167,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getPos);
  *
  * @param outPos  receives (x, y)
  */
-extern "C" void tHUDDef_getPos(void* self, void* outPos)
+void tHUDDef::getPos(void* outPos)
 {
-    short* in = (short*)self;
+    short* in = (short*)this;
     float* out = (float*)outPos;
     out[0] = in[0];
     out[1] = in[1];
@@ -187,9 +189,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getSize);
  * @param outVec  receives (width, height)
  * @param fallback  a texture element whose mWidth/mHeight replace unset dimensions, or 0
  */
-extern "C" void tHUDDef_getSize(void* self, void* outVec, void* fallback)
+void tHUDDef::getSize(void* outVec, void* fallback)
 {
-    short* in = (short*)self;
+    short* in = (short*)this;
     float* out = (float*)outVec;
     float* def = (float*)fallback;
     float x = in[2];
@@ -225,8 +227,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getScale__FPvT0);
  * @param outRange  receives (scale x, scale y)
  * @return the x scale it copied
  */
-float tHUDDef_getScale(void* self, void* outRange)
+float tHUDDef_getScale(void* vself, void* outRange)
 {
+    tHUDDef* self = (tHUDDef*)vself;
     const tHUDDef* def = (const tHUDDef*)self;
     float* out = (float*)outRange;
     float scaleX = def->xx;
@@ -1453,7 +1456,7 @@ void cOVStateHUD1P::renderTime1(int hour, int minute, int sec, int secFrac, int 
     float scale[4];
     tARGB col;
     tHUDDef* elemDef = &defs[idx];
-    tHUDDef_getPos(elemDef, pos);
+    elemDef->getPos(pos);
     tHUDDef_getScale(elemDef, scale);
     if (scaleMul != 0) {
         scale[0] *= scaleMul[0];
@@ -1609,7 +1612,7 @@ void cOVStateHUD1P::renderText(cFont* font, tHUDDef* defs, int idx, const char* 
     scale[0] = 1.0f;
     scale[1] = 1.0f;
     tHUDDef* hudDef = &defs[idx];
-    tHUDDef_getPos(hudDef, pos);
+    hudDef->getPos(pos);
     tHUDDef_getScale(hudDef, escale);
     if (scaleMul != 0) {
         escale[0] *= scaleMul[0];
@@ -1767,14 +1770,14 @@ void cOVStateHUD1P::renderText1(float blend, cFont* font, tHUDDef* defs, int idx
     font->Scale[1] = font->BaseScale[1];
     cFont_textExtent(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     tHUDDef* startDef = &defs[idx1];
-    tHUDDef_getPos(startDef, pos1);
+    startDef->getPos(pos1);
     tHUDDef_getScale(startDef, esc1);
     if (scaleMul != 0) {
         esc1[0] *= scaleMul[0];
         esc1[1] *= scaleMul[1];
     }
     tHUDDef* endDef = &defs[idx2];
-    tHUDDef_getPos(endDef, pos2);
+    endDef->getPos(pos2);
     tHUDDef_getScale(endDef, esc2);
     if (scaleMul != 0) {
         esc2[0] *= scaleMul[0];
@@ -1885,7 +1888,7 @@ void cOVStateHUD1P::renderText2(cFont* font, tHUDDef* defs, int idx, const unsig
     scale[0] = 1.0f;
     scale[1] = 1.0f;
     tHUDDef* hudDef = &defs[idx];
-    tHUDDef_getPos(hudDef, pos);
+    hudDef->getPos(pos);
     tHUDDef_getScale(hudDef, escale);
     if (scaleMul != 0) {
         escale[0] *= scaleMul[0];
@@ -2028,14 +2031,14 @@ void cOVStateHUD1P::renderText3(float blend, cFont* font, tHUDDef* defs, int idx
     font->Scale[1] = font->BaseScale[1];
     cFont_textExtent1(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     tHUDDef* startDef = &defs[idx1];
-    tHUDDef_getPos(startDef, pos1);
+    startDef->getPos(pos1);
     tHUDDef_getScale(startDef, esc1);
     if (scaleMul != 0) {
         esc1[0] *= scaleMul[0];
         esc1[1] *= scaleMul[1];
     }
     tHUDDef* endDef = &defs[idx2];
-    tHUDDef_getPos(endDef, pos2);
+    endDef->getPos(pos2);
     tHUDDef_getScale(endDef, esc2);
     if (scaleMul != 0) {
         esc2[0] *= scaleMul[0];
@@ -2151,8 +2154,8 @@ void cOVStateHUD1P::renderMultiText(cFont* font, tHUDDef* defs, int idx, const c
     float scale[2];
     int n = 0;
     tHUDDef* hudDef = &defs[idx];
-    tHUDDef_getSize(hudDef, wrap, 0);
-    tHUDDef_getPos(hudDef, pos);
+    hudDef->getSize(wrap, 0);
+    hudDef->getPos(pos);
     tHUDDef_getScale(hudDef, escale);
     cFont* sf = mpFEFont;
     sf->Scale[0] = sf->BaseScale[0] * escale[0];
@@ -2249,9 +2252,9 @@ void cOVStateHUD1P::renderMultiText1(cFont* font, tHUDDef* defs, int idx, const 
     tARGB col;
     float scale[2];
     int n = 0;
-    tHUDDef_getSize(&defs[29], wrap, 0);
+    defs[29].getSize(wrap, 0);
     tHUDDef* hudDef = &defs[idx];
-    tHUDDef_getPos(hudDef, pos);
+    hudDef->getPos(pos);
     tHUDDef_getScale(hudDef, escale);
     cFont* sf = mpFEFont;
     sf->Scale[0] = sf->BaseScale[0] * escale[0];
@@ -2313,15 +2316,16 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_cBXLoadIndicator__FPv);
  *
  * @return @p self
  */
-void* cBXLoadIndicator_cBXLoadIndicator(void* self)
+void* cBXLoadIndicator_cBXLoadIndicator(void* vself)
 {
+    cBXLoadIndicator* self = (cBXLoadIndicator*)vself;
     cTextureElement* elem = (cTextureElement*)self;
     int initValue = 0;
     elem->mSourceShape = initValue;
     *(int*)&elem->mTop = initValue;
     (*(int*)&elem->mWidth) = initValue;
     *(int*)&elem->mHeight = initValue;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2365,9 +2369,9 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_DeInit__FPv);
  *
  * Zeroes the text (+0x0), the indicator mask (+0x4), the animation frame (+0x8) and the font (+0xC).
  */
-void cBXLoadIndicator_DeInit(void* self)
+void cBXLoadIndicator::DeInit()
 {
-    cTextureElement* indicator = (cTextureElement*)self;
+    cTextureElement* indicator = (cTextureElement*)this;
     int zero = 0;
     indicator->mSourceShape = zero;
     *(int*)&indicator->mTop = zero;

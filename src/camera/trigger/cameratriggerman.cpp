@@ -59,7 +59,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_loadTriggersIfN
  * cGame_loadTrack calls it on gCamTriggerMan with the track's ".cam" file name as a second argument, which the
  * declaration leaves out. The triggers arrive through the stream instead (cCameraTriggerMan_resolve, cCameraTriggerMan_streamIn).
  */
-void cCameraTriggerMan_loadTriggersIfNotStreaming(void* self)
+void cCameraTriggerMan::loadTriggersIfNotStreaming()
 {
 }
 #endif
@@ -340,7 +340,7 @@ void cCameraTriggerMan::streamIn(void* stream)
     cCameraTriggerList* manager = &TriggerList;
     for (int i = 0; i < manager->NumTriggers; i++)
         manager->Triggers[i]->SpaceNode.Trigger = 0;
-    cCameraTriggerMan_setInGameTriggers(this);
+    this->setInGameTriggers();
 }
 #endif
 
@@ -432,7 +432,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_unresolve__FPv)
  * func_0016CF18 calls it with gCamTriggerMan and the chunk's resource id (a second argument the declaration leaves
  * out); the triggers are only cleared when new ones stream in (cCameraTriggerMan_streamIn).
  */
-void cCameraTriggerMan_unresolve(void* self)
+void cCameraTriggerMan::unresolve()
 {
 }
 #endif
@@ -574,9 +574,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setInGameTrigge
  * Calls cCameraTriggerMan_setTriggers(self, 2): every trigger whose mask has bit 1 set is registered with its bounds in
  * SSXApp->Game->BXNash (if it is not already), and every other registered trigger is removed from it.
  */
-void cCameraTriggerMan_setInGameTriggers(void* self)
+void cCameraTriggerMan::setInGameTriggers()
 {
-    cCameraTriggerMan_setTriggers(self, 2);
+    cCameraTriggerMan_setTriggers(this, 2);
 }
 #endif
 
@@ -591,9 +591,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setReplayTrigge
  *
  * @return no meaningful value (cCameraTriggerMan_setTriggers returns nothing)
  */
-void* cCameraTriggerMan_setReplayTriggers(void* self)
+void* cCameraTriggerMan::setReplayTriggers()
 {
-    return cCameraTriggerMan_setTriggers(self, 1);
+    return cCameraTriggerMan_setTriggers(this, 1);
 }
 #endif
 

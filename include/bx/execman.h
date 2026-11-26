@@ -107,6 +107,9 @@ struct cPS2ExecutionMan {
     void halt() __asm__("cPS2ExecutionMan_halt");
     void load(int module) __asm__("cPS2ExecutionMan_load");
     bool isLoadDone() __asm__("cPS2ExecutionMan_isLoadDone");
+    void* getCurrentThreadId() __asm__("cPS2ExecutionMan_getCurrentThreadId__FPv");
+    void setTimerHz() __asm__("cPS2ExecutionMan_setTimerHz__FPv");
+    int getTimerHz() __asm__("cPS2ExecutionMan_getTimerHz__FPv");
 };
 
 CHECK_OFFSET(cPS2ExecutionMan, HaltCallback, 0x00000);

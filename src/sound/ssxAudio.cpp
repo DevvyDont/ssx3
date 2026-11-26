@@ -2710,7 +2710,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCameraPos__FPvi);
  * @param viewport  the view index (On Tour viewport)
  * @return pointer to the view's position (On Tour const t4Vector&)
  */
-void* cSSXAudio_GetCameraPos(void* self, int viewport)
+void* cSSXAudio::GetCameraPos(int viewport)
 {
     return &cAudioInterface_getGameView(viewport)->Pose.P;
 }
@@ -2801,7 +2801,7 @@ int cSSXAudio::CameraInRange(t4Vector* pos, float radius)
     rangeSq = rangeSq * rangeSq;
     int i;
     for (i = 0; i < cSSXAudio_GetNumViews_self(this); i++) {
-        t4Vector toCamera = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(this, i), *pos);
+        t4Vector toCamera = audVu0Sub(*(t4Vector*)this->GetCameraPos(i), *pos);
         if (audVu0Dot(toCamera, toCamera) < rangeSq) {
             return i;
         }
@@ -2832,7 +2832,7 @@ bool cSSXAudio::InCameraView(t4Vector* pos, float radius)
     radiusSq = radiusSq * radiusSq;
     int i;
     for (i = 0; i < cSSXAudio_GetNumViews_self(this); i++) {
-        t4Vector offset = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(this, i), *pos);
+        t4Vector offset = audVu0Sub(*(t4Vector*)this->GetCameraPos(i), *pos);
         if (audVu0Dot(offset, offset) < radiusSq && 0.0f < offset.z) {
             return true;
         }
@@ -3256,7 +3256,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_HandleStreamChunk__FPv);
 /**
  * Does nothing: handles a stream user-data chunk passed on by cSSXAudio_HandleUserChunk.
  */
-void cSSXAudio_HandleStreamChunk(void* self)
+void cSSXAudio::HandleStreamChunk()
 {
 }
 #endif
@@ -3494,7 +3494,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_RiderCreated__FPv);
  *
  * Called from cRider_cRider. On Tour's version takes the rider (cRider* pRider) and is empty too.
  */
-void cSSXAudio_RiderCreated(void* self)
+void cSSXAudio::RiderCreated()
 {
 }
 #endif
@@ -3511,9 +3511,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_RiderDeleted__FPv);
  *
  * @return the result of cSSXAudio_StopRiderSound (unused)
  */
-void* cSSXAudio_RiderDeleted(void* self)
+void* cSSXAudio::RiderDeleted()
 {
-    return cSSXAudio_StopRiderSound(self);
+    return cSSXAudio_StopRiderSound(this);
 }
 #endif
 

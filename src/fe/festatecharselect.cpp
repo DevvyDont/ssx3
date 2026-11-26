@@ -175,8 +175,9 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onRender2D__FPv);
  *
  * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cFEStateCharSelect_onRender2D(void* self)
+void* cFEStateCharSelect_onRender2D(void* vself)
 {
+    cFEStateCharSelect* self = (cFEStateCharSelect*)vself;
     return cUIState_onRender2D(self);
 }
 #endif

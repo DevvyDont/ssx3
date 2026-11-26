@@ -197,9 +197,9 @@ INCLUDE_ASM("main/gamestate", cGFGateState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFGateState_writeToReplayFrame(void* self)
+void* cGFGateState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -216,9 +216,9 @@ INCLUDE_ASM("main/gamestate", cGFGateState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFGateState_readFromReplayFrame(void* self)
+void* cGFGateState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -271,9 +271,9 @@ INCLUDE_ASM("main/gamestate", cGFRidingState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFRidingState_writeToReplayFrame(void* self)
+void* cGFRidingState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -288,9 +288,9 @@ INCLUDE_ASM("main/gamestate", cGFRidingState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFRidingState_readFromReplayFrame(void* self)
+void* cGFRidingState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -1192,9 +1192,9 @@ INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFSessionTeleportState_writeToReplayFrame(void* self)
+void* cGFSessionTeleportState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -1209,9 +1209,9 @@ INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFSessionTeleportState_readFromReplayFrame(void* self)
+void* cGFSessionTeleportState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -1679,7 +1679,7 @@ INCLUDE_ASM("main/gamestate", cGFSectionLoadState_loseFocus__FPv);
 /**
  * Does nothing: the section-load game state's loseFocus (slot +0x3C of cGFSectionLoadState_vtbl).
  */
-void cGFSectionLoadState_loseFocus(void* self)
+void cGFSectionLoadState::loseFocus()
 {
 }
 #endif
@@ -1695,9 +1695,9 @@ INCLUDE_ASM("main/gamestate", cGFSectionLoadState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFSectionLoadState_writeToReplayFrame(void* self)
+void* cGFSectionLoadState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -1712,9 +1712,9 @@ INCLUDE_ASM("main/gamestate", cGFSectionLoadState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFSectionLoadState_readFromReplayFrame(void* self)
+void* cGFSectionLoadState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -1747,9 +1747,9 @@ INCLUDE_ASM("main/gamestate", cGFTransportWaitState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFTransportWaitState_writeToReplayFrame(void* self)
+void* cGFTransportWaitState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -1764,9 +1764,9 @@ INCLUDE_ASM("main/gamestate", cGFTransportWaitState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFTransportWaitState_readFromReplayFrame(void* self)
+void* cGFTransportWaitState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -1911,9 +1911,9 @@ INCLUDE_ASM("main/gamestate", cGFPreEventState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFPreEventState_writeToReplayFrame(void* self)
+void* cGFPreEventState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -1928,9 +1928,9 @@ INCLUDE_ASM("main/gamestate", cGFPreEventState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFPreEventState_readFromReplayFrame(void* self)
+void* cGFPreEventState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -2023,9 +2023,9 @@ INCLUDE_ASM("main/gamestate", cGFPostEventState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFPostEventState_writeToReplayFrame(void* self)
+void* cGFPostEventState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -2040,9 +2040,9 @@ INCLUDE_ASM("main/gamestate", cGFPostEventState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFPostEventState_readFromReplayFrame(void* self)
+void* cGFPostEventState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -2111,9 +2111,9 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFPodiumState_writeToReplayFrame(void* self)
+void* cGFPodiumState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -2128,9 +2128,9 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFPodiumState_readFromReplayFrame(void* self)
+void* cGFPodiumState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -2162,7 +2162,7 @@ INCLUDE_ASM("main/gamestate", cGFReplayStartState_update__FPv);
 /**
  * Does nothing: the replay-start state's update has an empty body.
  */
-void cGFReplayStartState_update(void* self)
+void cGFReplayStartState::update()
 {
 }
 #endif
@@ -2488,7 +2488,7 @@ INCLUDE_ASM("main/gamestate", cInputSync_postupdate__FPv);
 /**
  * Input sync step after the game update: does nothing in this build.
  */
-void cInputSync_postupdate(void* self)
+void cInputSync::postupdate()
 {
 }
 #endif

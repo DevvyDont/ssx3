@@ -549,9 +549,9 @@ INCLUDE_ASM("object/instanceman", cCamAnimFrame_update__FPv);
  *
  * @return whatever cAnimFrame_update leaves (callers ignore it)
  */
-void* cCamAnimFrame_update(void* self)
+void* cCamAnimFrame::update()
 {
-    return cAnimFrame_update(self);
+    return cAnimFrame_update(this);
 }
 #endif
 

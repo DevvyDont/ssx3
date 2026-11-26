@@ -432,7 +432,7 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEndState_loseFocus__FPv);
 /**
  * Does nothing: the loseFocus slot of vtable cGFEndState_vtbl.
  */
-void cGFEndState_loseFocus(void* self)
+void cGFEndState::loseFocus()
 {
 }
 #endif
@@ -450,9 +450,9 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEndState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFEndState_writeToReplayFrame(void* self)
+void* cGFEndState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -469,9 +469,9 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEndState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFEndState_readFromReplayFrame(void* self)
+void* cGFEndState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 
@@ -486,9 +486,9 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_writeToReplayFrame__FPv);
  *
  * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGFEndWaitState_writeToReplayFrame(void* self)
+void* cGFEndWaitState::writeToReplayFrame()
 {
-    return cGameState_writeToReplayFrame(self);
+    return cGameState_writeToReplayFrame(this);
 }
 #endif
 
@@ -503,9 +503,9 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_readFromReplayFrame__FPv);
  *
  * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGFEndWaitState_readFromReplayFrame(void* self)
+void* cGFEndWaitState::readFromReplayFrame()
 {
-    return cGameState_readFromReplayFrame(self);
+    return cGameState_readFromReplayFrame(this);
 }
 #endif
 

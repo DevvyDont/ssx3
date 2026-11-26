@@ -100,6 +100,8 @@ struct cBEMissionInterface : public cBEInterface {
     int getMissionIDOnTrack(int index, int group) __asm__("cBEMissionInterface_getMissionIDOnTrack");
     int getNumberSessionsOnTrack(int id) __asm__("cBEMissionInterface_getNumberSessionsOnTrack");
     bool isSessionPoint(int value, int id) __asm__("cBEMissionInterface_isSessionPoint");
+    void addStreamData() __asm__("cBEMissionInterface_addStreamData__FPv");
+    void remStreamData() __asm__("cBEMissionInterface_remStreamData__FPv");
 };
 
 extern cBEMissionInterface* cBEMissionInterface_instance;

@@ -136,6 +136,10 @@ struct cFEStateNet : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNet1() __asm__("cFEStateNet_cFEStateNet1");
     int isProcessingEvents() __asm__("cFEStateNet_isProcessingEvents");
+    // retail's destructor cFEStateNet__cFEStateNet stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNet();
+    virtual void onCreateScreen() __asm__("cFEStateNet_onCreateScreen__FPv");
 };
 
 CHECK_OFFSET(cFEStateNet, mHasFocus, 0x048);

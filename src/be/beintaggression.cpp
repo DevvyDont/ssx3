@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/bestate.h"
 #include "be/bedbprofile.h"
 #include "be/beintnewrace.h"
 #include "be/beintaggression.h"
@@ -39,8 +40,9 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_submit__FPv);
 /**
  * Does nothing: the aggression interface's submit (slot 1 of its vtable cBEAggressionInterface_vtbl).
  */
-void cBEAggressionInterface_submit(void* self)
+void cBEAggressionInterface_submit(void* vself)
 {
+    cBEAggressionInterface* self = (cBEAggressionInterface*)vself;
 }
 #endif
 
@@ -50,8 +52,9 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_discard__FPv);
 /**
  * Does nothing: the aggression interface's discard (slot 2 of its vtable cBEAggressionInterface_vtbl).
  */
-void cBEAggressionInterface_discard(void* self)
+void cBEAggressionInterface_discard(void* vself)
 {
+    cBEAggressionInterface* self = (cBEAggressionInterface*)vself;
 }
 #endif
 
@@ -366,7 +369,8 @@ extern char* cBE_aBEState[];
  * The states are cBE_aBEState[cBE_currentState]; onExit and onEnter are vtable slots 3 and 4 (vtable pointer at +0x4
  * of each state).
  */
-extern "C" void cBEState_gotoNextState(int *self) {
+void cBEState::gotoNextState()
+{
     char* obj;
     char* vtbl;
     char* obj2;
@@ -376,7 +380,7 @@ extern "C" void cBEState_gotoNextState(int *self) {
     obj = cBE_aBEState[cBE_currentState];
     vtbl = *(char**)(obj + 4);
     (*(void (**)(void*))(vtbl + 0x1C))(obj + *(short*)(vtbl + 0x18));
-    next = *self;
+    next = *((int*)this);
     cBE_currentState = next;
     obj2 = cBE_aBEState[next];
     vtbl2 = *(char**)(obj2 + 4);

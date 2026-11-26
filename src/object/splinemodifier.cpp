@@ -943,8 +943,9 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateRootTransform__F
  *
  * @return the result of cMultiSplineModifier_updateNodes()
  */
-void* cMultiSplineModifier_updateRootTransform(void* self)
+void* cMultiSplineModifier_updateRootTransform(void* vself)
 {
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
     return ((cMultiSplineModifier*)self)->updateNodes();
 }
 #endif

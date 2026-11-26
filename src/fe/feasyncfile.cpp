@@ -2970,8 +2970,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateReadMessagePopup_onUpdate(void* self)
+void* cFEStateReadMessagePopup_onUpdate(void* vself)
 {
+    cFEStateReadMessagePopup* self = (cFEStateReadMessagePopup*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -3013,8 +3014,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_onWidgetCreate__FPv);
 /**
  * Widget-creation hook of the private-message popup: empty, the widgets are found in onCreateScreen instead.
  */
-void cFEStateReadMessagePopup_onWidgetCreate(void* self)
+void cFEStateReadMessagePopup_onWidgetCreate(void* vself)
 {
+    cFEStateReadMessagePopup* self = (cFEStateReadMessagePopup*)vself;
 }
 #endif
 
@@ -3648,7 +3650,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onCreateScreen__FPv);
 /**
  * Does nothing: cFEStateNet's onCreateScreen (vtable entry 4), which subclasses call before creating their screen.
  */
-void cFEStateNet_onCreateScreen(void* self)
+void cFEStateNet::onCreateScreen()
 {
 }
 #endif
@@ -3717,8 +3719,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onGainTransition__FPv);
  *
  * @return 0
  */
-int cFEStateNet_onGainTransition(void* self)
+int cFEStateNet_onGainTransition(void* vself)
 {
+    cFEStateNet* self = (cFEStateNet*)vself;
     return 0;
 }
 #endif
@@ -6592,7 +6595,7 @@ void cFEUseExistingAccount::onCreateScreen()
     }
     cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, str_empty_d);
     cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, str_empty_d);
-    cFEStateNet_onCreateScreen(((cFEStateNet*)this));
+    this->cFEStateNet::onCreateScreen();
 }
 #endif
 
@@ -6604,8 +6607,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEUseExistingAccount_onUpdate(void* self)
+void* cFEUseExistingAccount_onUpdate(void* vself)
 {
+    cFEUseExistingAccount* self = (cFEUseExistingAccount*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -7398,7 +7402,7 @@ void cFEStateSelectPersona::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFEStateNet_onCreateScreen(((cFEStateNet*)this));
+    this->cFEStateNet::onCreateScreen();
 }
 #endif
 
@@ -7410,8 +7414,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateSelectPersona_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateSelectPersona_onUpdate(void* self)
+void* cFEStateSelectPersona_onUpdate(void* vself)
 {
+    cFEStateSelectPersona* self = (cFEStateSelectPersona*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -8163,8 +8168,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateChallengePopup_onUpdate(void* self)
+void* cFEStateChallengePopup_onUpdate(void* vself)
 {
+    cFEStateChallengePopup* self = (cFEStateChallengePopup*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -9476,8 +9482,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateChallengeReceivedPopup_onUpdate(void* self)
+void* cFEStateChallengeReceivedPopup_onUpdate(void* vself)
 {
+    cFEStateChallengeReceivedPopup* self = (cFEStateChallengeReceivedPopup*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -10213,8 +10220,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateOnlineCharacterSelect_onUpdate(void* self)
+void* cFEStateOnlineCharacterSelect_onUpdate(void* vself)
 {
+    cFEStateOnlineCharacterSelect* self = (cFEStateOnlineCharacterSelect*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -14235,8 +14243,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetPair__FPv);
  *
  * @return always 0x101
  */
-int cFEStateNetConfig_onWidgetPair(void* self)
+int cFEStateNetConfig_onWidgetPair(void* vself)
 {
+    cFEStateNetConfig* self = (cFEStateNetConfig*)vself;
     return 257;
 }
 #endif
@@ -15145,8 +15154,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onCreateScreen__FPv);
  *
  * @return cFEBlankPopup_onCreateScreen()'s result (its value is not meaningful; declared void* by the unit)
  */
-void* cFEStateNetAccountMem_onCreateScreen(void* self)
+void* cFEStateNetAccountMem_onCreateScreen(void* vself)
 {
+    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     return cFEBlankPopup_onCreateScreen((cFEStateNet*)self);
 }
 #endif
@@ -16523,8 +16533,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
-void* cFEStateCreateStep1_onUpdate(void* self)
+void* cFEStateCreateStep1_onUpdate(void* vself)
 {
+    cFEStateCreateStep1* self = (cFEStateCreateStep1*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -17824,8 +17835,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
-void* cFEStateCreateStep2_onUpdate(void* self)
+void* cFEStateCreateStep2_onUpdate(void* vself)
 {
+    cFEStateCreateStep2* self = (cFEStateCreateStep2*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -19115,8 +19127,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateDuplicate_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateCreateDuplicate_onUpdate(void* self)
+void* cFEStateCreateDuplicate_onUpdate(void* vself)
 {
+    cFEStateCreateDuplicate* self = (cFEStateCreateDuplicate*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -19909,8 +19922,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
-void* cFEStateLobbyMenu_onUpdate(void* self)
+void* cFEStateLobbyMenu_onUpdate(void* vself)
 {
+    cFEStateLobbyMenu* self = (cFEStateLobbyMenu*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -21271,8 +21285,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateNetCreateRoomPopup_onUpdate(void* self)
+void* cFEStateNetCreateRoomPopup_onUpdate(void* vself)
 {
+    cFEStateNetCreateRoomPopup* self = (cFEStateNetCreateRoomPopup*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -21344,8 +21359,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_onWidgetPair__FPv);
  *
  * @return always 0x101
  */
-int cFEStateNetCreateRoomPopup_onWidgetPair(void* self)
+int cFEStateNetCreateRoomPopup_onWidgetPair(void* vself)
 {
+    cFEStateNetCreateRoomPopup* self = (cFEStateNetCreateRoomPopup*)vself;
     return 257;
 }
 #endif
@@ -21635,7 +21651,7 @@ void cFEStateLogin::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFEStateNet_onCreateScreen(((cFEStateNet*)this));
+    this->cFEStateNet::onCreateScreen();
 }
 #endif
 
@@ -21647,8 +21663,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate's result
  */
-void* cFEStateLogin_onUpdate(void* self)
+void* cFEStateLogin_onUpdate(void* vself)
 {
+    cFEStateLogin* self = (cFEStateLogin*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -23470,8 +23487,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_onWidgetPair__FPv);
  *
  * @return always 0x101
  */
-int cFEStateNetQuickPlayPopup_onWidgetPair(void* self)
+int cFEStateNetQuickPlayPopup_onWidgetPair(void* vself)
 {
+    cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
     return 257;
 }
 #endif
@@ -23990,8 +24008,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
-void* cFEStateNetQuickMessages_onUpdate(void* self)
+void* cFEStateNetQuickMessages_onUpdate(void* vself)
 {
+    cFEStateNetQuickMessages* self = (cFEStateNetQuickMessages*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
@@ -24663,8 +24682,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onUpdate__FPv);
  *
  * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
-void* cFEStateStats_onUpdate(void* self)
+void* cFEStateStats_onUpdate(void* vself)
 {
+    cFEStateStats* self = (cFEStateStats*)vself;
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif

@@ -3345,7 +3345,7 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_removeInjectedPathFile__FPv);
  *
  * cAI_removeInjectedFile calls it on gPaths when a chunk with injected AI paths is unloaded.
  */
-void cPathSys_removeInjectedPathFile(void* self)
+void cPathSys::removeInjectedPathFile()
 {
 }
 #endif

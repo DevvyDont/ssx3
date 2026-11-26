@@ -108,6 +108,7 @@ struct cWorldBlockAllocator {
     // Methods bound to their retail symbols by asm labels.
     void* getFreeBlock() __asm__("cWorldBlockAllocator_getFreeBlock__FPv");
     void releaseBlock(void* vitem) __asm__("cWorldBlockAllocator_releaseBlock__FPvT0");
+    void init(int count, int blockSize) __asm__("cWorldBlockAllocator_init");
 };
 
 CHECK_OFFSET(cWorldBlockAllocator, m_uiBlockSize, 0x00);

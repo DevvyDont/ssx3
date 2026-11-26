@@ -50,6 +50,8 @@ struct cMenu {
     void* getFocusItem() __asm__("cMenu_getFocusItem");
     void onGainFocus(int wrap) __asm__("cMenu_onGainFocus");
     void onLoseFocus() __asm__("cMenu_onLoseFocus");
+    int onCommand() __asm__("cMenu_onCommand__FPv");
+    void onChange() __asm__("cMenu_onChange__FPv");
 };
 
 CHECK_OFFSET(cMenu, NumItems, 0x000);
@@ -110,6 +112,8 @@ struct cMenuItem {
     void* getDown() __asm__("cMenuItem_getDown__FPv");
     void* getLeftShift() __asm__("cMenuItem_getLeftShift__FPv");
     void* getRightShift() __asm__("cMenuItem_getRightShift__FPv");
+    void gainFocus() __asm__("cMenuItem_gainFocus__FPv");
+    void loseFocus() __asm__("cMenuItem_loseFocus__FPv");
 };
 
 CHECK_OFFSET(cMenuItem, Flags, 0x04);
@@ -395,6 +399,7 @@ struct cNullMenuItem {
     void setStateText(int value) __asm__("cNullMenuItem_setStateText");
     void* preRender(cNullMenuItem* item) __asm__("cNullMenuItem_preRender");
     void* render(int rect) __asm__("cNullMenuItem_render__FPvi");
+    int canHaveFocus() __asm__("cNullMenuItem_canHaveFocus__FPv");
 };
 
 CHECK_OFFSET(cNullMenuItem, Menu, 0x00);
@@ -417,6 +422,10 @@ struct cSpaceMenuItem {
     void** mVtbl;                    // 0x10 [R] cSpaceMenuItem_vtbl (ctor)
     int Space;                       // 0x14 [O]; [R] ctor (callers pass 10 or 30); [U] preRender returns it (as float) as
                                      //       the row height
+
+    // Methods bound to their retail symbols by asm labels.
+    int canHaveFocus() __asm__("cSpaceMenuItem_canHaveFocus__FPv");
+    void render() __asm__("cSpaceMenuItem_render__FPv");
 };
 
 CHECK_OFFSET(cSpaceMenuItem, Menu, 0x00);
@@ -692,6 +701,7 @@ struct cRGBTitleMenuItem {
     // Methods bound to their retail symbols by asm labels.
     void setCaption(int value) __asm__("cRGBTitleMenuItem_setCaption");
     void render(float* rect) __asm__("cRGBTitleMenuItem_render");
+    int canHaveFocus() __asm__("cRGBTitleMenuItem_canHaveFocus__FPv");
 };
 
 CHECK_OFFSET(cRGBTitleMenuItem, Menu, 0x00);
@@ -720,6 +730,7 @@ struct cVectorTitleMenuItem {
     // Methods bound to their retail symbols by asm labels.
     void setCaption(int value) __asm__("cVectorTitleMenuItem_setCaption");
     void render(int rect) __asm__("cVectorTitleMenuItem_render");
+    int canHaveFocus() __asm__("cVectorTitleMenuItem_canHaveFocus__FPv");
 };
 
 CHECK_OFFSET(cVectorTitleMenuItem, Menu, 0x00);
@@ -870,6 +881,7 @@ struct cARGBMenuItem {
 
     // Methods bound to their retail symbols by asm labels.
     void setCaption(int value) __asm__("cARGBMenuItem_setCaption");
+    void* input() __asm__("cARGBMenuItem_input__FPv");
 };
 
 CHECK_OFFSET(cARGBMenuItem, Menu, 0x000);

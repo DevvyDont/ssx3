@@ -75,6 +75,7 @@ struct cWScriptMission {
     void missionUpdateWorld() __asm__("cWScriptMission_missionUpdateWorld");
     int getSortKey() __asm__("cWScriptMission_getSortKey");
     bool isScopeLocal() __asm__("cWScriptMission_isScopeLocal");
+    int isMission() __asm__("cWScriptMission_isMission__FPv");
 };
 
 CHECK_OFFSET(cWScriptMission, State, 0x00);

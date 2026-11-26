@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "util/surfprop.h"
 #include "util/localefile.h"
 #include "util/bxmemcard.h"
 #include "util/bxps2memcard.h"
@@ -1373,7 +1374,7 @@ INCLUDE_ASM("worldpainter/quadtree", cSurfPropCache_purge__FPv);
 /**
  * Releases the surface property cache; does nothing in this build.
  */
-void cSurfPropCache_purge(void* self)
+void cSurfPropCache::purge()
 {
 }
 #endif
@@ -1635,9 +1636,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_Format__FPv);
  *
  * @return func_002C48C0's result
  */
-void* cPS2MemCard_Format(void* self)
+void* cPS2MemCard::Format()
 {
-    return func_002C48C0((cPS2MemCard*)self, 17);
+    return func_002C48C0((cPS2MemCard*)this, 17);
 }
 #endif
 
@@ -1967,9 +1968,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteClose__FPv);
  *
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* cPS2MemCard_SetWriteClose(void* self)
+void* cPS2MemCard::SetWriteClose()
 {
-    return func_002C48C0((cPS2MemCard*)self, 0x18);
+    return func_002C48C0((cPS2MemCard*)this, 0x18);
 }
 #endif
 
@@ -2083,9 +2084,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadClose__FPv);
  *
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* cPS2MemCard_SetReadClose(void* self)
+void* cPS2MemCard::SetReadClose()
 {
-    return func_002C48C0((cPS2MemCard*)self, 0x1e);
+    return func_002C48C0((cPS2MemCard*)this, 0x1e);
 }
 #endif
 
@@ -3763,7 +3764,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetBlockSize__FPv);
  *
  * @return always 0x4000
  */
-int cPS2MemCard_GetBlockSize(void* self)
+int cPS2MemCard::GetBlockSize()
 {
     return 0x4000;
 }
@@ -3777,7 +3778,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetTotalSpace__FPv);
  *
  * @return always -1
  */
-int cPS2MemCard_GetTotalSpace(void* self)
+int cPS2MemCard::GetTotalSpace()
 {
     return -0x1;
 }
@@ -3853,7 +3854,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeDirEntries__FPv);
  *
  * @return always -1
  */
-int cPS2MemCard_GetFreeDirEntries(void* self)
+int cPS2MemCard::GetFreeDirEntries()
 {
     return -0x1;
 }

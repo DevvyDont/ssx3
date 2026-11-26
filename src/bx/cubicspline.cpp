@@ -58,10 +58,10 @@ INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initAsNatural__FPv);
  * The point count is the second argument, which the C does not declare; it reaches cCubicSplineInterpolant_initCommon
  * untouched in its register. The spline camera algorithm builds its interpolants with it.
  */
-void cCubicSplineInterpolant_initAsNatural(void* self)
+void cCubicSplineInterpolant::initAsNatural()
 {
-    cCubicSplineInterpolant_initCommon(self);
-    *(int*)self &= -2;
+    cCubicSplineInterpolant_initCommon(this);
+    *(int*)this &= -2;
 }
 #endif
 
@@ -1668,7 +1668,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc_usable_size__FPvT0);
  * @param mem  the allocation
  * @return the usable size, or 0
  */
-unsigned int cDynamicMemMan_dlmalloc_usable_size(void* self, void* mem)
+unsigned int cDynamicMemMan::dlmalloc_usable_size(void* mem)
 {
     // ORIGINAL-PTR: dlmalloc 2.7's mem2chunk: the chunk header sits 8 bytes before the user memory and its size
     // word 4 bytes before it (a byte heap)
@@ -1859,8 +1859,9 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan__cDynamicMemMan__FPvi);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-void cDynamicMemMan__cDynamicMemMan(void* self, int flags)
+void cDynamicMemMan__cDynamicMemMan(void* vself, int flags)
 {
+    cDynamicMemMan* self = (cDynamicMemMan*)vself;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1953,9 +1954,9 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_allocAlign__FPv);
  *
  * @return the memory (declared int)
  */
-int cDynamicMemMan_allocAlign(void* self)
+int cDynamicMemMan::allocAlign()
 {
-    return cDynamicMemMan_dlmemalign(self);
+    return cDynamicMemMan_dlmemalign(this);
 }
 #endif
 
@@ -1973,9 +1974,9 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_allocAlignHdr__FPv);
  *
  * @return the memory (declared int)
  */
-int cDynamicMemMan_allocAlignHdr(void* self)
+int cDynamicMemMan::allocAlignHdr()
 {
-    return cDynamicMemMan_dlmemalignhdr(self);
+    return cDynamicMemMan_dlmemalignhdr(this);
 }
 #endif
 
@@ -2009,9 +2010,9 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_free__FPv);
  *
  * @return nothing useful (the C declares int)
  */
-int cDynamicMemMan_free(void* self)
+int cDynamicMemMan::free()
 {
-    return cDynamicMemMan_dlfree(self);
+    return cDynamicMemMan_dlfree(this);
 }
 #endif
 

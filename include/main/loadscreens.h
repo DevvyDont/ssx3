@@ -39,6 +39,7 @@ struct cLoadScreen {
     // Methods bound to their retail symbols by asm labels.
     void drawSplash(int value) __asm__("cLoadScreen_drawSplash");
     int loseFocus() __asm__("cLoadScreen_loseFocus");
+    void* update() __asm__("cLoadScreen_update__FPv");
 };
 
 CHECK_OFFSET(cLoadScreen, mpUI, 0x0C);
@@ -52,6 +53,7 @@ struct cPreStartScreen {
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cPreStartScreen_update");
     bool loseFocus() __asm__("cPreStartScreen_loseFocus");
+    void load() __asm__("cPreStartScreen_load__FPv");
 };
 
 CHECK_OFFSET(cPreStartScreen, nextscreen, 0x08);
@@ -64,6 +66,7 @@ struct cPreGameLoadScreen {
     // Methods bound to their retail symbols by asm labels.
     bool loseFocus() __asm__("cPreGameLoadScreen_loseFocus");
     void update() __asm__("cPreGameLoadScreen_update");
+    void load() __asm__("cPreGameLoadScreen_load__FPv");
 };
 
 CHECK_OFFSET(cPreGameLoadScreen, ending, 0x04);
@@ -76,6 +79,7 @@ struct cPreFELoadScreen {
     // Methods bound to their retail symbols by asm labels.
     bool loseFocus() __asm__("cPreFELoadScreen_loseFocus");
     void update() __asm__("cPreFELoadScreen_update");
+    void load() __asm__("cPreFELoadScreen_load__FPv");
 };
 
 CHECK_OFFSET(cPreFELoadScreen, ending, 0x04);
@@ -102,6 +106,7 @@ struct cStartScreen {
     void update() __asm__("cStartScreen_update");
     void purge() __asm__("cStartScreen_purge");
     bool render() __asm__("cStartScreen_render");
+    void* loseFocus() __asm__("cStartScreen_loseFocus__FPv");
 };
 
 CHECK_OFFSET(cStartScreen, mpUI, 0x0C);
@@ -123,6 +128,8 @@ struct cGameLoadScreen {
     void purge() __asm__("cGameLoadScreen_purge");
     bool render() __asm__("cGameLoadScreen_render");
     void update() __asm__("cGameLoadScreen_update");
+    bool loseFocus() __asm__("cGameLoadScreen_loseFocus__FPv");
+    int getTexttureID(int index) __asm__("cGameLoadScreen_getTexttureID");
 };
 
 CHECK_OFFSET(cGameLoadScreen, mpUI, 0x0C);

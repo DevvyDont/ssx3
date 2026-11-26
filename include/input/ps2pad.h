@@ -41,6 +41,8 @@ struct cPadDevice {
 
     // Methods bound to their retail symbols by asm labels.
     void clearAllVibrations() __asm__("cPadDevice_clearAllVibrations");
+    int numActuators() __asm__("cPadDevice_numActuators__FPv");
+    void setActuator() __asm__("cPadDevice_setActuator__FPv");
 };
 
 CHECK_OFFSET(cPadDevice, mVtbl, 0x000);

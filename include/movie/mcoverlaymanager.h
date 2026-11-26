@@ -351,6 +351,14 @@ struct cMCOverlayManager {
     void* GatherDeviceInfo() __asm__("cMCOverlayManager_GatherDeviceInfo__FPv");
     void InitiateFileCheck() __asm__("cMCOverlayManager_InitiateFileCheck");
     void RecheckCard() __asm__("cMCOverlayManager_RecheckCard");
+    void CallbackMemcard() __asm__("cMCOverlayManager_CallbackMemcard__FPv");
+    int CallbackFalse() __asm__("cMCOverlayManager_CallbackFalse__FPv");
+    int CallbackTrue() __asm__("cMCOverlayManager_CallbackTrue__FPv");
+    int Callbackpdate() __asm__("cMCOverlayManager_Callbackpdate__FPv");
+    void* writeSetSize() __asm__("cMCOverlayManager_writeSetSize__FPv");
+    void UpdateInitCardsCheckDone() __asm__("cMCOverlayManager_UpdateInitCardsCheckDone__FPv");
+    void UpdateInitFileCheckDone() __asm__("cMCOverlayManager_UpdateInitFileCheckDone__FPv");
+    void* UpdateCardUnusable() __asm__("cMCOverlayManager_UpdateCardUnusable__FPv");
 };
 
 CHECK_OFFSET(cMCOverlayManager, callbackWriteStart, 0x0);

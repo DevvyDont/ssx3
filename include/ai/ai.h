@@ -43,6 +43,9 @@ struct cDangerMan;
 // OnGainState / OnLoseState / OnUpdate (e.g. cRaceHandler_OnUpdate, cRaceHandler: ai.EventTimerTick++).
 struct cAIStateHandler {
     void** mVtbl; // 0x0 [R] stored by cAI_cAI
+
+    // Methods bound to their retail symbols by asm labels.
+    void OnLoseState() __asm__("cAIStateHandler_OnLoseState__FPv");
 };
 
 CHECK_OFFSET(cAIStateHandler, mVtbl, 0x0);
@@ -198,6 +201,8 @@ struct cAI {
     int getFocusMan() __asm__("cAI_getFocusMan");
     void setAIState(int state) __asm__("cAI_setAIState");
     void AIStateUpdate() __asm__("cAI_AIStateUpdate");
+    void* resolveRace() __asm__("cAI_resolveRace__FPv");
+    void* InitGroupAI() __asm__("cAI_InitGroupAI__FPv");
 };
 
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).

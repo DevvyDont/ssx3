@@ -78,8 +78,9 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_submit__FPv);
  * The first virtual of the back-end interfaces (submit, discard, writeToReplayFrame, readFromReplayFrame). On Tour's
  * version only asserts that the score interface is active (instance->bIsActive); without asserts the body is empty.
  */
-void cBEScoreInterface_submit(void* self)
+void cBEScoreInterface_submit(void* vself)
 {
+    cBEScoreInterface* self = (cBEScoreInterface*)vself;
 }
 #endif
 
@@ -489,7 +490,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
  * @param highlight  which highlight (0-7; On Tour: eBEChallengeType)
  * @return the highlight's level
  */
-signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int highlight)
+signed char cBEScoreInterface::getCurrentHighlightLevel(int highlight)
 {
     int charID = cBELibrary_getCharacterID(0);
     return cBELibrary_profileLib[0][charID].mCareerHighlights[highlight];
@@ -549,8 +550,9 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_writeToReplayFrame__FPv);
 /**
  * Writes the score interface's state to a replay frame: an empty stub, nothing is recorded.
  */
-void cBEScoreInterface_writeToReplayFrame(void* self)
+void cBEScoreInterface_writeToReplayFrame(void* vself)
 {
+    cBEScoreInterface* self = (cBEScoreInterface*)vself;
 }
 #endif
 
@@ -560,8 +562,9 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_readFromReplayFrame__FPv);
 /**
  * Reads the score interface's state from a replay frame: an empty stub, nothing is restored.
  */
-void cBEScoreInterface_readFromReplayFrame(void* self)
+void cBEScoreInterface_readFromReplayFrame(void* vself)
 {
+    cBEScoreInterface* self = (cBEScoreInterface*)vself;
 }
 #endif
 

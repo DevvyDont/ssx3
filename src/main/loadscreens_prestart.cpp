@@ -254,7 +254,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_load__FPv);
 /**
  * Loads nothing: the pre-game load screen has no data of its own (empty, as in On Tour).
  */
-void cPreGameLoadScreen_load(void* self)
+void cPreGameLoadScreen::load()
 {
 }
 #endif
@@ -265,7 +265,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_load__FPv);
 /**
  * Does nothing: the load slot (+0x14) of cPreFELoadScreen_vtbl, the pre-front-end load screen's vtable.
  */
-void cPreFELoadScreen_load(void* self)
+void cPreFELoadScreen::load()
 {
 }
 #endif
@@ -694,9 +694,9 @@ INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_loseFocus__FPv);
  *
  * @return cFadeScreen_loseFocus's result
  */
-void* cStartScreen_loseFocus(void* self)
+void* cStartScreen::loseFocus()
 {
-    return cFadeScreen_loseFocus(self);
+    return cFadeScreen_loseFocus(this);
 }
 #endif
 
@@ -1036,9 +1036,9 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_loseFocus__FPv);
  *
  * @return true when cLoadScreen_loseFocus does
  */
-bool cGameLoadScreen_loseFocus(void* self)
+bool cGameLoadScreen::loseFocus()
 {
-    return (cLoadScreen_loseFocus(self) != 0);
+    return (cLoadScreen_loseFocus(this) != 0);
 }
 #endif
 

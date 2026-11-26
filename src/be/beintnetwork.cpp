@@ -73,7 +73,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getSyncDataSize__FPv);
  *
  * @return 0xC44
  */
-int cBENetworkInterface_getSyncDataSize(void* self)
+int cBENetworkInterface::getSyncDataSize()
 {
     return 3140;
 }

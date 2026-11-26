@@ -92,6 +92,8 @@ struct cBENewPlayerInterface : public cBEInterface {
     void setDifficultyLevel(int value, int flag) __asm__("cBENewPlayerInterface_setDifficultyLevel");
     short getDifficultyLevel(int which) __asm__("cBENewPlayerInterface_getDifficultyLevel");
     short getDifficultyDifference(int flag) __asm__("cBENewPlayerInterface_getDifficultyDifference");
+    signed char getRiderCharID(int riderIndex) __asm__("cBENewPlayerInterface_getRiderCharID__FPvi");
+    signed char getPlayerCharID(int index) __asm__("cBENewPlayerInterface_getPlayerCharID__FPvi");
 };
 
 extern cBENewPlayerInterface* cBENewPlayerInterface_instance;

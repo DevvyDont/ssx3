@@ -73,6 +73,7 @@ struct cCubicSplineInterpolant {
     void addPoint(float x, float y) __asm__("cCubicSplineInterpolant_addPoint");
     void SpewGraphPoints() __asm__("cCubicSplineInterpolant_SpewGraphPoints");
     void SpewSplineNumbers() __asm__("cCubicSplineInterpolant_SpewSplineNumbers");
+    void initAsNatural() __asm__("cCubicSplineInterpolant_initAsNatural__FPv");
 };
 
 CHECK_OFFSET(cCubicSplineInterpolant, MaxX, 0x004);

@@ -147,7 +147,7 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  */
 void* cBESaveInterface::generateSaveGame()
 {
-    int size = cBESaveInterface_getSaveGameSize(this);
+    int size = this->getSaveGameSize();
     cBESaveInterface_releaseBuffer_s(this);
     cBESaveInterface_buffer = operator_new_tag(size, str_save_file_buffer, 0x100, 0);
     char* cursor = (char*)cBESaveInterface_buffer;
@@ -178,7 +178,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveGameSize__FPv);
  *
  * @return 0xCCC
  */
-int cBESaveInterface_getSaveGameSize(void* self)
+int cBESaveInterface::getSaveGameSize()
 {
     return 3276;
 }
@@ -303,7 +303,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
  */
 bool cBESaveInterface::loadSaveGame(char* buf)
 {
-    int size = cBESaveInterface_getSaveGameSize(this) - 4;
+    int size = this->getSaveGameSize() - 4;
     int crc = MEM_crc16(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);

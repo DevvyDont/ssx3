@@ -162,6 +162,7 @@ struct cFEStateBraggingRights : public cFEStateNet {
     virtual ~cFEStateBraggingRights();
     virtual void onCreateScreen() __asm__("cFEStateBraggingRights_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateBraggingRights_onUpdate");
+    int getBEData(int chan, int kind) __asm__("cFEStateBraggingRights_getBEData");
 };
 
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);

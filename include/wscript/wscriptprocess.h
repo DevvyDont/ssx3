@@ -125,6 +125,8 @@ struct cWScriptProcess {
     void* getScriptCode() __asm__("cWScriptProcess_getScriptCode__FPv");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cWScriptProcess_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cWScriptProcess_readFromReplayFrame");
+    bool isProcessEvent(unsigned int eventId) __asm__("cWScriptProcess_isProcessEvent");
+    int isMission() __asm__("cWScriptProcess_isMission__FPv");
 };
 
 CHECK_OFFSET(cWScriptProcess, StateSectionId, 0x0C);

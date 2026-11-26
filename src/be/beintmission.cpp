@@ -1228,7 +1228,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_addStreamData__FPv);
  * world/worldview.cpp calls it on BE interface 10 with three more arguments when a streamed resource arrives (the
  * resource id byte, a pointer into the resource and its first word); this build ignores them.
  */
-void cBEMissionInterface_addStreamData(void* self)
+void cBEMissionInterface::addStreamData()
 {
 }
 #endif
@@ -1242,7 +1242,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_remStreamData__FPv);
  * world/worldview.cpp calls it on BE interface 10 with the resource id byte when a streamed resource goes away; this
  * build ignores it.
  */
-void cBEMissionInterface_remStreamData(void* self)
+void cBEMissionInterface::remStreamData()
 {
 }
 #endif

@@ -6216,7 +6216,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetNumScriptEnti
  *
  * @return 10
  */
-int cScriptObjCameraManager_GetNumScriptEntities(void* self)
+int cScriptObjCameraManager::GetNumScriptEntities()
 {
     return 10;
 }

@@ -105,6 +105,7 @@ struct cFERider {
     void speak() __asm__("cFERider_speak");
     void setVisible(int enable) __asm__("cFERider_setVisible");
     void setCharID(unsigned int item, int flag) __asm__("cFERider_setCharID");
+    void updateAnimModelParts() __asm__("cFERider_updateAnimModelParts");
 };
 
 CHECK_OFFSET(cFERider, mCharID, 0x000);

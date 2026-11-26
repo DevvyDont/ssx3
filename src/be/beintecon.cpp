@@ -87,7 +87,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
  * @param charType  the character id
  * @return the total earned, or 0
  */
-int cBEEconInterface_getTotalMoneyEarned(void* self, int iHuman, int charType)
+int cBEEconInterface::getTotalMoneyEarned(int iHuman, int charType)
 {
     if (iHuman >= 2) {
         return 0;
@@ -294,7 +294,7 @@ bool cBEEconInterface::buyAttribute(int humanIndex, int characterId, unsigned in
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cStability;
             break;
         }
-        cost = cBEEconInterface_getAttribCost(this, *attribLevel / 5 - 1);
+        cost = this->getAttribCost(*attribLevel / 5 - 1);
         if (cur < cost || *attribLevel == kAttribPointsMax) {
             return false;
         }
@@ -326,7 +326,7 @@ struct sEconTable {
  * @param levelIndex  the level index (callers pass level - 1)
  * @return the price
  */
-int cBEEconInterface_getAttribCost(void* self, int levelIndex)
+int cBEEconInterface::getAttribCost(int levelIndex)
 {
     return ((sEconTable*)cBELibrary_attribCost)->entries[levelIndex].value;
 }

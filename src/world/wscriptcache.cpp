@@ -1009,7 +1009,7 @@ INCLUDE_ASM("world/wscriptcache", cChunkResolve_resolveMeshContext__FPv);
  *
  * @return always 1 (resolved)
  */
-int cChunkResolve_resolveMeshContext(void* self)
+int cChunkResolve::resolveMeshContext()
 {
     return 0x1;
 }

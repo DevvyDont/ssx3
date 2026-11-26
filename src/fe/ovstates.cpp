@@ -139,8 +139,9 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onPopupEvent__FPv);
 /**
  * Ignores popup events: the title state's onPopupEvent has an empty body.
  */
-void cFEStateTitle_onPopupEvent(void* self)
+void cFEStateTitle_onPopupEvent(void* vself)
 {
+    cFEStateTitle* self = (cFEStateTitle*)vself;
 }
 #endif
 

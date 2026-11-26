@@ -954,10 +954,11 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_cMdfArchive__FPv);
  *
  * @return @p self
  */
-void* cMdfArchive_cMdfArchive(void* self)
+void* cMdfArchive_cMdfArchive(void* vself)
 {
+    cMdfArchive* self = (cMdfArchive*)vself;
     *(int*)self = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -974,12 +975,12 @@ extern "C" void cMdfArchive_purge(void** self);
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void cMdfArchive__cMdfArchive(int* self, int flags)
+extern "C" void cMdfArchive__cMdfArchive(cMdfArchive* self, int flags)
 {
     cMdfArchive_purge((void**)self);
     if (flags & 1)
     {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1023,8 +1024,9 @@ void cMdfArchive_linkArchive_impl(void* self, char* data) __asm__("cMdfArchive_l
  *
  * @param data  the MDF archive in memory
  */
-void cMdfArchive_attachArchive(void* self, int data)
+void cMdfArchive_attachArchive(void* vself, int data)
 {
+    cMdfArchive* self = (cMdfArchive*)vself;
     *(int*)self = data;
     cMdfArchive_linkArchive_impl(self, (char*)data);
 }
@@ -1041,8 +1043,9 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_attachConstArchive__FPv);
  *
  * @return what cMdfArchive_linkArchive leaves in the return register (callers ignore it)
  */
-void* cMdfArchive_attachConstArchive(void* self)
+void* cMdfArchive_attachConstArchive(void* vself)
 {
+    cMdfArchive* self = (cMdfArchive*)vself;
     *(int*)self = 0;
     return cMdfArchive_linkArchive(self);
 }

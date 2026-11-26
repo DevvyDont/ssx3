@@ -764,11 +764,11 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cReplayCache__cReplayCache(int* self, int flags)
+extern "C" void cReplayCache__cReplayCache(cReplayCache* self, int flags)
 {
     ((cReplayCache*)self)->purge();
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

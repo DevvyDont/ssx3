@@ -85,6 +85,7 @@ struct cStreamMan {
     void setBandWidthLimit(int rate) __asm__("cStreamMan_setBandWidthLimit");
     void update() __asm__("cStreamMan_update");
     bool processChunk(void* pcount_, void* pdata_) __asm__("cStreamMan_processChunk");
+    void* decompressChunk(int dst, int srcSize, int src) __asm__("cStreamMan_decompressChunk__FPviii");
 };
 
 CHECK_OFFSET(cStreamMan, mp_WorldCache, 0x000);

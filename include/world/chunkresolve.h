@@ -81,6 +81,7 @@ struct cChunkResolve {
     bool resolveLight(tLightRecord* obj) __asm__("cChunkResolve_resolveLight");
     bool unresolveLight(tLightRecord* pRTLight) __asm__("cChunkResolve_unresolveLight");
     float calcMaxLightDistance(tLightRecord* light, float divisor) __asm__("cChunkResolve_calcMaxLightDistance");
+    int resolveMeshContext() __asm__("cChunkResolve_resolveMeshContext__FPv");
 };
 
 CHECK_OFFSET(cChunkResolve, mp_World, 0x0);

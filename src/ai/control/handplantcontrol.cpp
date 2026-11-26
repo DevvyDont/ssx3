@@ -910,7 +910,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_loseFocus__FPv);
 /**
  * Does nothing when the air motion loses focus; the body is empty.
  */
-void cAirMotion_loseFocus(void* self)
+void cAirMotion::loseFocus()
 {
 }
 #endif
@@ -6528,8 +6528,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationReset__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 16 (kRiderVt_vibrationReset).
  */
-void cRider_vibrationReset(void* self)
+void cRider_vibrationReset(void* vself)
 {
+    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6539,8 +6540,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationBump__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 17 (kRiderVt_vibrationBump).
  */
-void cRider_vibrationBump(void* self)
+void cRider_vibrationBump(void* vself)
 {
+    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6550,8 +6552,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationRumble__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 18 (kRiderVt_vibrationRumble).
  */
-void cRider_vibrationRumble(void* self)
+void cRider_vibrationRumble(void* vself)
 {
+    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6561,8 +6564,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationUpdate__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 19 (kRiderVt_vibrationUpdate).
  */
-void cRider_vibrationUpdate(void* self)
+void cRider_vibrationUpdate(void* vself)
 {
+    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6672,9 +6676,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_GetAttachedRider__FPv);
  *
  * @return self
  */
-void* cRider_GetAttachedRider(void* self)
+void* cRider::GetAttachedRider()
 {
-    return self;
+    return ((void*)this);
 }
 #endif
 
@@ -6990,8 +6994,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getWipeoutMotionState)
  *
  * @return the eWMotionState value: WMS_Ground (0) or WMS_Air (1)
  */
-extern "C" int cWipeoutMotion_getWipeoutMotionState(int *self) {
-    return *self;
+extern "C" int cWipeoutMotion_getWipeoutMotionState(cWipeoutMotion* self) {
+    return *((int*)self);
 }
 #endif
 //100%
@@ -7739,7 +7743,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAIStateHandler_OnLoseState__FPv);
 /**
  * Does nothing when the AI state handler loses its state; the body is empty.
  */
-void cAIStateHandler_OnLoseState(void* self)
+void cAIStateHandler::OnLoseState()
 {
 }
 #endif
@@ -8294,8 +8298,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRiderAnim__cRiderAnim__FPv);
  *
  * @return no meaningful value (cRiderAnimBase__cRiderAnimBase() returns nothing)
  */
-void* cRiderAnim__cRiderAnim(void* self)
+void* cRiderAnim__cRiderAnim(void* vself)
 {
+    cRiderAnim* self = (cRiderAnim*)vself;
     return cRiderAnimBase__cRiderAnimBase(self);
 }
 #endif
@@ -8412,7 +8417,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_scorePath__FPv);
  *
  * @return always 0.0
  */
-float cPlayer_scorePath(void* self)
+float cPlayer::scorePath()
 {
     return 0.0f;
 }

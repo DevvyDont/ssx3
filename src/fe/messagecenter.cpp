@@ -1176,8 +1176,9 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongCost__FPv);
  *
  * @return 5000
  */
-int cFEStateRequestLine_getSongCost(void* self)
+int cFEStateRequestLine_getSongCost(void* vself)
 {
+    cFEStateRequestLine* self = (cFEStateRequestLine*)vself;
     return 5000;
 }
 #endif

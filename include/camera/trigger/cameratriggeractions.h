@@ -70,6 +70,9 @@ struct cCTAction {
     int Type;                   // 0x00 [O] eCTActionType; [R] get_camaction stores 0..3 per kind; [U] doTriggerAction
                                 //      switches on it
     void** mVtbl;               // 0x04 [R] cCTAction_vtbl (slot 1 purge)
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cCTAction_purge__FPv");
 };
 
 CHECK_OFFSET(cCTAction, Type, 0x00);

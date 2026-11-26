@@ -440,8 +440,9 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_writeToReplayFrame__FPv);
  *
  * @return no meaningful value (cInstanceNode_writeToReplayFrame() returns nothing)
  */
-void* cDeadFadeNode_writeToReplayFrame(void* self)
+void* cDeadFadeNode_writeToReplayFrame(void* vself)
 {
+    cDeadFadeNode* self = (cDeadFadeNode*)vself;
     return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
@@ -506,8 +507,9 @@ INCLUDE_ASM("object/deadfadenode", cHideNode_writeToReplayFrame__FPv);
  *
  * @return cInstanceNode_writeToReplayFrame()'s result
  */
-void* cHideNode_writeToReplayFrame(void* self)
+void* cHideNode_writeToReplayFrame(void* vself)
 {
+    cHideNode* self = (cHideNode*)vself;
     return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
@@ -572,8 +574,9 @@ INCLUDE_ASM("object/deadfadenode", cRestoreNode_writeToReplayFrame__FPv);
  *
  * @return cInstanceNode_writeToReplayFrame()'s result
  */
-void* cRestoreNode_writeToReplayFrame(void* self)
+void* cRestoreNode_writeToReplayFrame(void* vself)
 {
+    cRestoreNode* self = (cRestoreNode*)vself;
     return cInstanceNode_writeToReplayFrame(self);
 }
 #endif

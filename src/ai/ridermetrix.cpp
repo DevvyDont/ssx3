@@ -2215,9 +2215,9 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAutoResetSurface__FPv);
  *
  * @return always 0.0
  */
-float cRiderMetrix_evAutoResetSurface(void* self)
+float cRiderMetrix::evAutoResetSurface()
 {
-    cRiderMetrix_addHUDfx(self, 51, str_Wrong_Way, 1.5f, 0);
+    cRiderMetrix_addHUDfx(this, 51, str_Wrong_Way, 1.5f, 0);
     return 0.0f;
 }
 #endif
@@ -2232,7 +2232,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evDangerLevelChange__FPv);
  *
  * @return 0.0
  */
-float cRiderMetrix_evDangerLevelChange(void* self)
+float cRiderMetrix::evDangerLevelChange()
 {
     return 0.0f;
 }

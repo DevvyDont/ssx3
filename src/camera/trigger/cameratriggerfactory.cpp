@@ -3596,7 +3596,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTAction_purge__FPv);
  * Slot 1 of the cCTAction vtable cCTAction_vtbl (the plain switch and none actions). The bounded and spline actions
  * override it with cCTActionBoundedCam_purge and cCTActionSpline_purge, which free their bound object or spline.
  */
-void cCTAction_purge(void* self)
+void cCTAction::purge()
 {
 }
 #endif
@@ -4457,8 +4457,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_getR
  *
  * @return 0
  */
-float cDirectionChaseAlgorithm_getRestDrop(void* self)
+float cDirectionChaseAlgorithm_getRestDrop(void* vself)
 {
+    cDirectionChaseAlgorithm* self = (cDirectionChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -6633,14 +6634,14 @@ extern "C" bool cTrackFileMan_legalTrackMode(int* self, int i, void* key);
  * @return the next legal location index, or -1 when none is legal
  */
 // Circular search: first index after `start` for which cTrackFileMan_legalTrackMode matches.
-extern "C" int cTrackFileMan_getNextLocation(int* self, int start, void* key)
+int cTrackFileMan::getNextLocation(int start, void* key)
 {
     int n;
-    int i = (start + 1) % self[0];
-    for (n = 0; n < self[0]; n++) {
-        if (cTrackFileMan_legalTrackMode(self, i, key))
+    int i = (start + 1) % ((int*)this)[0];
+    for (n = 0; n < ((int*)this)[0]; n++) {
+        if (cTrackFileMan_legalTrackMode(((int*)this), i, key))
             return i;
-        i = (i + 1) % self[0];
+        i = (i + 1) % ((int*)this)[0];
     }
     return -1;
 }
@@ -6661,14 +6662,14 @@ extern "C" bool cTrackFileMan_legalTrackMode(int* self, int i, void* key);
  * @return the previous legal location index, or -1 when none is legal
  */
 // Circular search backwards: first index before `start` for which cTrackFileMan_legalTrackMode matches.
-extern "C" int cTrackFileMan_getPrevLocation(int* self, int start, void* key)
+int cTrackFileMan::getPrevLocation(int start, void* key)
 {
     int n;
-    int i = (start + self[0] - 1) % self[0];
-    for (n = 0; n < self[0]; n++) {
-        if (cTrackFileMan_legalTrackMode(self, i, key))
+    int i = (start + ((int*)this)[0] - 1) % ((int*)this)[0];
+    for (n = 0; n < ((int*)this)[0]; n++) {
+        if (cTrackFileMan_legalTrackMode(((int*)this), i, key))
             return i;
-        i = (i + self[0] - 1) % self[0];
+        i = (i + ((int*)this)[0] - 1) % ((int*)this)[0];
     }
     return -1;
 }

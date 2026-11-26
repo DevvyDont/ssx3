@@ -95,6 +95,9 @@ struct cScriptPlayerChannelSpline {
     int GetCustom() __asm__("cScriptPlayerChannelSpline_GetCustom__FPv");
     int GetOwner() __asm__("cScriptPlayerChannelSpline_GetOwner__FPv");
     bool IsPlaying() __asm__("cScriptPlayerChannelSpline_IsPlaying__FPv");
+    void* GetValue() __asm__("cScriptPlayerChannelSpline_GetValue__FPv");
+    int GetNextKeyFrame() __asm__("cScriptPlayerChannelSpline_GetNextKeyFrame__FPv");
+    int GetType() __asm__("cScriptPlayerChannelSpline_GetType__FPv");
 };
 
 // cScriptPlayerChannelObject: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 1;
@@ -128,6 +131,8 @@ struct cScriptPlayerChannelObject {
     int GetCustom() __asm__("cScriptPlayerChannelObject_GetCustom__FPv");
     int GetOwner() __asm__("cScriptPlayerChannelObject_GetOwner__FPv");
     bool IsPlaying() __asm__("cScriptPlayerChannelObject_IsPlaying__FPv");
+    void* GetValue() __asm__("cScriptPlayerChannelObject_GetValue__FPv");
+    int GetType() __asm__("cScriptPlayerChannelObject_GetType__FPv");
 };
 
 // cScriptPlayerChannelBlock: size 0x2C [R] (cScriptPlayerEntity_SetupPlay allocates 0x2C); GetType() = 2;
@@ -164,6 +169,8 @@ struct cScriptPlayerChannelBlock {
     int GetCustom() __asm__("cScriptPlayerChannelBlock_GetCustom__FPv");
     int GetOwner() __asm__("cScriptPlayerChannelBlock_GetOwner__FPv");
     bool IsPlaying() __asm__("cScriptPlayerChannelBlock_IsPlaying__FPv");
+    void* GetValue() __asm__("cScriptPlayerChannelBlock_GetValue__FPv");
+    int GetType() __asm__("cScriptPlayerChannelBlock_GetType__FPv");
 };
 
 // cScriptPlayerChannelEvent: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 3;
@@ -199,6 +206,8 @@ struct cScriptPlayerChannelEvent {
     int GetCustom() __asm__("cScriptPlayerChannelEvent_GetCustom__FPv");
     int GetOwner() __asm__("cScriptPlayerChannelEvent_GetOwner__FPv");
     bool IsPlaying() __asm__("cScriptPlayerChannelEvent_IsPlaying__FPv");
+    void* GetValue() __asm__("cScriptPlayerChannelEvent_GetValue__FPv");
+    int GetType() __asm__("cScriptPlayerChannelEvent_GetType__FPv");
 };
 
 CHECK_OFFSET(cScriptPlayerChannel, unk_00, 0x0);

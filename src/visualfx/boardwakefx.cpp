@@ -3573,9 +3573,10 @@ INCLUDE_ASM("visualfx/boardwakefx", cHalo_cHalo__FPv);
  *
  * @return @p self
  */
-void* cHalo_cHalo(void* self)
+void* cHalo_cHalo(void* vself)
 {
-    return self;
+    cHalo* self = (cHalo*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -4021,8 +4022,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan__drawFrameCallBack__FPv);
  *
  * cLensFxMan_cLensFxMan registers it with the graphics manager, passing the manager as the parameter.
  */
-void cLensFxMan__drawFrameCallBack(void* self)
+void cLensFxMan__drawFrameCallBack(void* vself)
 {
+    cLensFxMan* self = (cLensFxMan*)vself;
     cLensFxMan_SampleLens((cLensFxMan*)self);
 }
 #endif
@@ -5609,10 +5611,10 @@ void operator_delete(int* p);
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
-extern "C" void cSnowBox__cSnowBox(int* self, int flags)
+extern "C" void cSnowBox__cSnowBox(cSnowBox* self, int flags)
 {
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -6099,7 +6101,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowFall__cSnowFall);
 #ifdef SKIP_ASM
 extern void* cSnowFall_vtbl[];
 extern "C" void cMemMan_validate(void);
-extern "C" void cSnowBox__cSnowBox(int* self, int flags);
+extern "C" void cSnowBox__cSnowBox(cSnowBox* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
 /**
@@ -6116,7 +6118,7 @@ extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
     for (i = 0; i < 12; i++) {
         int* snowBox = ((int*)self->mSnowBoxes[i]);
         if (snowBox != 0) {
-            cSnowBox__cSnowBox(snowBox, 3);
+            cSnowBox__cSnowBox((cSnowBox*)snowBox, 3);
         }
     }
     cMemMan_validate();

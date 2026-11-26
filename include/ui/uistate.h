@@ -138,18 +138,21 @@ struct cUIState : public cListNode {
     // Virtuals. Slots [R] cUIState_vtbl (2-3 are cListNode's traverseFlat / traverseRecurse), names, order and types
     // [O] (On Tour class cUIState: the same 21 in the same order); bool parameters are words.
     virtual ~cUIState();                                                              // 1
-    virtual void onCreateScreen();                                                    // 4
+    virtual void onCreateScreen()
+        __asm__("cUIState_onCreateScreen__FPv");                                                    // 4
     virtual void onDestroyScreen();                                                   // 5
     virtual void onGainFocus(cUIState* pPrevState);                                   // 6
     virtual bool onGainTransition(int bFirstTime);                                    // 7
     virtual bool onInputBegin(cUIInput* pInput);                                      // 8
     virtual void onInputAlways(cUIInput* pInput);                                     // 9
-    virtual bool onLoseTransition();                                                  // 10
+    virtual bool onLoseTransition()
+        __asm__("cUIState_onLoseTransition__FPv");                                                  // 10
     virtual void onLoseFocus(cUIState* pNextState);                                   // 11
     virtual void onUpdate();                                                          // 12
     virtual void onMenuGainFocus(cUIGroup* pRootGroup)
         __asm__("cUIState_onMenuGainFocus");                               // 13
-    virtual void onPreRender2D();                                                     // 14
+    virtual void onPreRender2D()
+        __asm__("cUIState_onPreRender2D__FPv");                                                     // 14
     virtual void onRender2D()
         __asm__("cUIState_onRender2D");                                                        // 15
     virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event);               // 16

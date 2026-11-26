@@ -93,11 +93,11 @@ void operator_delete(int* ptr);
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void cGameAnimMap__cGameAnimMap(int* self, int flags)
+extern "C" void cGameAnimMap__cGameAnimMap(cGameAnimMap* self, int flags)
 {
     cGameAnimMap_TheGameAnimMap = 0;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

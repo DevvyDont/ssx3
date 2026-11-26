@@ -1098,7 +1098,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderCharID__FPvi);
  * @param riderIndex  rider slot, mapped to a player through cBENewPlayerInterface_getPlayerID()
  * @return the character ID
  */
-signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex)
+signed char cBENewPlayerInterface::getRiderCharID(int riderIndex)
 {
     int playerID = cBENewPlayerInterface_getPlayerID(riderIndex);
     cBEPlayerDB* entry = &cBENewPlayerInterface_tempPlayers[playerID];
@@ -1182,7 +1182,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCharID__FPvi);
  * @param index  the player slot
  * @return the character id
  */
-signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
+signed char cBENewPlayerInterface::getPlayerCharID(int index)
 {
     return cBENewPlayerInterface_tempPlayers[index].cCharacterID;
 }

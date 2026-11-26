@@ -13272,8 +13272,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_disconnect__FPv);
  *
  * @return no meaningful value (cCommChannel_channelClose() returns nothing)
  */
-void* cCommChannel_disconnect(void* self)
+void* cCommChannel_disconnect(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     return cCommChannel_channelClose(self);
 }
 #endif
@@ -13284,8 +13285,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_update__FPv);
 /**
  * Does nothing: the base comm channel's update has an empty body.
  */
-void cCommChannel_update(void* self)
+void cCommChannel_update(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
 }
 #endif
 
@@ -13297,8 +13299,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_isConnected__FPv);
  *
  * @return always 0
  */
-int cCommChannel_isConnected(void* self)
+int cCommChannel_isConnected(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     return 0;
 }
 #endif
@@ -13325,8 +13328,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_getChannelType__FPv);
  *
  * @return always 0 (cDSockChannel returns 1)
  */
-int cCommChannel_getChannelType(void* self)
+int cCommChannel_getChannelType(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     return 0;
 }
 #endif
@@ -13339,8 +13343,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_readPacket__FPv);
  *
  * @return always 0
  */
-int cCommChannel_readPacket(void* self)
+int cCommChannel_readPacket(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     return 0;
 }
 #endif
@@ -13353,8 +13358,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_writePacket__FPv);
  *
  * @return always 0
  */
-int cCommChannel_writePacket(void* self)
+int cCommChannel_writePacket(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     return 0;
 }
 #endif
@@ -13381,8 +13387,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cDSockChannel_getChannelType__FPv);
  *
  * @return always 1 (the base cCommChannel returns 0)
  */
-int cDSockChannel_getChannelType(void* self)
+int cDSockChannel_getChannelType(void* vself)
 {
+    cDSockChannel* self = (cDSockChannel*)vself;
     return 0x1;
 }
 #endif

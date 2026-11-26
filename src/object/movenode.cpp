@@ -2649,8 +2649,9 @@ INCLUDE_ASM("object/movenode", cParticleNode_writeToReplayFrame__FPv);
  *
  * @return the result of cMoveNode_writeToReplayFrame()
  */
-void* cParticleNode_writeToReplayFrame(void* self)
+void* cParticleNode_writeToReplayFrame(void* vself)
 {
+    cParticleNode* self = (cParticleNode*)vself;
     return cMoveNode_writeToReplayFrame(self);
 }
 #endif

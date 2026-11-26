@@ -48,6 +48,7 @@ struct cPS2ChunkResolve {
     void* unresolve(unsigned int msg, unsigned int resourceId, char* data) __asm__("cPS2ChunkResolve_unresolve");
     int resolveModel(tModelRecord* pModel) __asm__("cPS2ChunkResolve_resolveModel");
     int resolveInstance(tInstanceRecord* pInstance) __asm__("cPS2ChunkResolve_resolveInstance");
+    void purge() __asm__("cPS2ChunkResolve_purge__FPv");
 };
 CHECK_OFFSET(cPS2ChunkResolve, mp_World, 0x0);
 CHECK_OFFSET(cPS2ChunkResolve, m_pDummyCollideRecord, 0x4);

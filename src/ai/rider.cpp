@@ -3399,7 +3399,7 @@ void cRider::updateSplit10()
                     (char*)&VPTR_AT(this, sizeof(cRiderState)));
         }
     }
-    cRider_updateTestSurface(this);
+    this->updateTestSurface();
     if (mIsInNIS == 0)
     {
         cRider_updateTrackPath(this);
@@ -4465,9 +4465,9 @@ INCLUDE_ASM("ai/rider", cRider_isVertZoneApplicable__FPv);
  *
  * @return cRider_isGroundNormalValid's result
  */
-void* cRider_isVertZoneApplicable(void* self)
+void* cRider::isVertZoneApplicable()
 {
-    return (void*)((cRider*)self)->isGroundNormalValid();
+    return (void*)((cRider*)this)->isGroundNormalValid();
 }
 #endif
 
@@ -4492,7 +4492,7 @@ void cRider::updateDangerLevel()
     DangerLevel = dangerLevel;
     if (dangerLevel == 0)
     {
-        if (cRider_isVertZoneApplicable(this) != 0)
+        if (this->isVertZoneApplicable() != 0)
         {
             if (isInVertZone())
                 DangerLevel = 1;
@@ -6597,7 +6597,7 @@ INCLUDE_ASM("ai/rider", cRider_updateTestSurface__FPv);
 /**
  * Debug hook for testing surface types; compiled out, does nothing.
  */
-void cRider_updateTestSurface(void* self)
+void cRider::updateTestSurface()
 {
 }
 #endif
@@ -7183,9 +7183,9 @@ INCLUDE_ASM("ai/rider", cPlayer_writeToReplayFrame__FPv);
  *
  * @return no meaningful value (cRiderHandler_writeToReplayFrame returns nothing)
  */
-void* cPlayer_writeToReplayFrame(void* self)
+void* cPlayer::writeToReplayFrame()
 {
-    return cRiderHandler_writeToReplayFrame(self);
+    return cRiderHandler_writeToReplayFrame(this);
 }
 #endif
 
@@ -7202,9 +7202,9 @@ INCLUDE_ASM("ai/rider", cPlayer_readFromReplayFrame__FPv);
  *
  * @return no meaningful value (cRiderHandler_readFromReplayFrame returns nothing)
  */
-void* cPlayer_readFromReplayFrame(void* self)
+void* cPlayer::readFromReplayFrame()
 {
-    return cRiderHandler_readFromReplayFrame(self);
+    return cRiderHandler_readFromReplayFrame(this);
 }
 #endif
 

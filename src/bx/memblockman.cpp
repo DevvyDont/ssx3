@@ -1255,7 +1255,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_setTimerHz__FPv);
 /**
  * Does nothing (slot 7 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl).
  */
-void cPS2ExecutionMan_setTimerHz(void* self)
+void cPS2ExecutionMan::setTimerHz()
 {
 }
 #endif
@@ -1268,7 +1268,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_getTimerHz__FPv);
  *
  * @return 60
  */
-int cPS2ExecutionMan_getTimerHz(void* self)
+int cPS2ExecutionMan::getTimerHz()
 {
     return 0x3C;
 }

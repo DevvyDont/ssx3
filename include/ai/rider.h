@@ -861,6 +861,10 @@ struct cRider : public cRiderState, public cBeing {
     virtual void initForMission(t4Matrix* mat) __asm__("cRider_initForMission");
     virtual void applyBoost(t4Vector* impulse) __asm__("cRider_applyBoost");
     virtual bool isIntersecting(tInstanceRecord* instance) __asm__("cRider_isIntersecting");
+    void checkTrackPathSwitch(int skipCur) __asm__("cRider_checkTrackPathSwitch");
+    void* GetAttachedRider() __asm__("cRider_GetAttachedRider__FPv");
+    void* isVertZoneApplicable() __asm__("cRider_isVertZoneApplicable__FPv");
+    void updateTestSurface() __asm__("cRider_updateTestSurface__FPv");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

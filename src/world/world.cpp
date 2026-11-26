@@ -201,9 +201,9 @@ INCLUDE_ASM("world/world", cWorld_update__FPv);
  *
  * @return cWorldCache_update's result
  */
-void* cWorld_update(void* self)
+void* cWorld::update()
 {
-    return cWorldCache_update(*(int*)self);
+    return cWorldCache_update(*(int*)this);
 }
 #endif
 
@@ -482,7 +482,7 @@ INCLUDE_ASM("world/world", cWorld_getSphereTreeInfo__FPvT0);
  * @param instance  the tInstanceRecord
  * @return the list pointer
  */
-int cWorld_getSphereTreeInfo(void* self, void* instance)
+int cWorld::getSphereTreeInfo(void* instance)
 {
     return (int)((tInstanceRecord*)instance)->m_pCollideRecord->CollideModel->m_pSphTreeList;
 }
@@ -501,7 +501,7 @@ INCLUDE_ASM("world/world", cWorld_getPolyModelInfo__FPvT0);
  * @param instance  the tInstanceRecord
  * @return the list pointer
  */
-int cWorld_getPolyModelInfo(void* self, void* instance)
+int cWorld::getPolyModelInfo(void* instance)
 {
     return (int)((tInstanceRecord*)instance)->m_pCollideRecord->CollideModel->m_pPolyModelList;
 }
@@ -531,8 +531,9 @@ INCLUDE_ASM("world/world", tPolyModelList_getMeshPolyModel__FPvi);
  * @param meshNum  mesh index (On Tour meshNum)
  * @return entry @p meshNum of MeshPolyModel
  */
-int tPolyModelList_getMeshPolyModel(void* self, int meshNum)
+int tPolyModelList_getMeshPolyModel(void* vself, int meshNum)
 {
+    tPolyModelList* self = (tPolyModelList*)vself;
     return (int)((tPolyModelList*)self)->MeshPolyModel[meshNum];
 }
 #endif

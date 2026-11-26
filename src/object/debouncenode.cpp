@@ -111,8 +111,9 @@ INCLUDE_ASM("object/debouncenode", cDebounceNode_signal__FPv);
  *
  * @return no meaningful value (cMoveNode_signal() returns nothing)
  */
-void* cDebounceNode_signal(void* self)
+void* cDebounceNode_signal(void* vself)
 {
+    cDebounceNode* self = (cDebounceNode*)vself;
     return cMoveNode_signal(self);
 }
 #endif

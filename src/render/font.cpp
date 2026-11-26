@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/visualeffectsman.h"
 #include "render/garbageman.h"
 #include "render/bxps2deferman.h"
 #include "render/2drender.h"
@@ -2999,7 +3000,7 @@ INCLUDE_ASM("render/font", cGridMesh_SetScale__FPv);
  *
  * The derived vtable cPS2GridMesh_vtbl overrides the slot with cPS2GridMesh_SetScale.
  */
-void cGridMesh_SetScale(void* self)
+void cGridMesh::SetScale()
 {
 }
 #endif
@@ -3426,8 +3427,9 @@ INCLUDE_ASM("render/font", cPS2LightMan__cPS2LightMan__FPv);
  *
  * @return no meaningful value (cLightMan__cLightMan() returns nothing)
  */
-void* cPS2LightMan__cPS2LightMan(void* self)
+void* cPS2LightMan__cPS2LightMan(void* vself)
 {
+    cPS2LightMan* self = (cPS2LightMan*)vself;
     return cLightMan__cLightMan(self);
 }
 #endif
@@ -3526,8 +3528,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_SetAmbient__FPv);
 /**
  * Does nothing: cPS2LightMan's SetAmbient has an empty body.
  */
-void cPS2LightMan_SetAmbient(void* self)
+void cPS2LightMan_SetAmbient(void* vself)
 {
+    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3539,8 +3542,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_LoadLight__FPv);
  *
  * Slot 13 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_LoadLight__FPv, which is empty too.
  */
-void cPS2LightMan_LoadLight(void* self)
+void cPS2LightMan_LoadLight(void* vself)
 {
+    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3552,8 +3556,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_SetChannel__FPv);
  *
  * Slot 14 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_SetChannel__FPv, which is empty too.
  */
-void cPS2LightMan_SetChannel(void* self)
+void cPS2LightMan_SetChannel(void* vself)
 {
+    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3565,8 +3570,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_ClearChannel__FPv);
  *
  * Slot 15 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_ClearChannel__FPv, which is empty too.
  */
-void cPS2LightMan_ClearChannel(void* self)
+void cPS2LightMan_ClearChannel(void* vself)
 {
+    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -5233,11 +5239,11 @@ extern char cVisualEffect_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cVisualEffect__cVisualEffect_2(int* self, int flags)
+extern "C" void cVisualEffect__cVisualEffect_2(cVisualEffect* self, int flags)
 {
     *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

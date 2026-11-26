@@ -35,6 +35,7 @@ struct cBEPreRaceState {
 
     // Methods bound to their retail symbols by asm labels.
     void* getInterface(int kind) __asm__("cBEPreRaceState_getInterface");
+    void* getState() __asm__("cBEPreRaceState_getState__FPv");
 };
 
 CHECK_OFFSET(cBEPreRaceState, nextState, 0x0);
@@ -48,6 +49,7 @@ struct cBERaceState {
 
     // Methods bound to their retail symbols by asm labels.
     void* getInterface(int kind) __asm__("cBERaceState_getInterface");
+    void* getState() __asm__("cBERaceState_getState__FPv");
 };
 
 CHECK_OFFSET(cBERaceState, nextState, 0x0);
@@ -61,6 +63,7 @@ struct cBEPostRaceState {
 
     // Methods bound to their retail symbols by asm labels.
     void* getInterface(int kind) __asm__("cBEPostRaceState_getInterface");
+    void* getState() __asm__("cBEPostRaceState_getState__FPv");
 };
 
 CHECK_OFFSET(cBEPostRaceState, nextState, 0x0);
@@ -74,6 +77,9 @@ CHECK_SIZE(cBEPostRaceState, 0x8);
 struct cBEState {
     int nextState;                  // 0x0 [O]; [P] assert "nextState < kBESTATE_NULL"
     void** mVtbl;                   // 0x4 [R] the derived state's vtable
+
+    // Methods bound to their retail symbols by asm labels.
+    void gotoNextState() __asm__("cBEState_gotoNextState");
 };
 
 CHECK_OFFSET(cBEState, nextState, 0x0);

@@ -110,6 +110,7 @@ struct cBEScoreInterface : public cBEInterface {
     int getBestMedalOnTrack(int rider, int locationID, int eventID) __asm__("cBEScoreInterface_getBestMedalOnTrack");
     void setBestMedalOnTrack(int rider, int locationID, int eventID, int medal)
         __asm__("cBEScoreInterface_setBestMedalOnTrack");
+    signed char getCurrentHighlightLevel(int highlight) __asm__("cBEScoreInterface_getCurrentHighlightLevel__FPvi");
 };
 
 CHECK_OFFSET(cBEScoreInterface, bNewHighScore, 0x10);

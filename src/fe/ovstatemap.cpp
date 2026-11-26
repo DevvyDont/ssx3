@@ -130,7 +130,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetCreate__FPv);
  *
  * It is the onWidgetCreate slot (+0x94) of cOVState_MAP_vtbl.
  */
-void cOVState_MAP_onWidgetCreate(void* self)
+void cOVState::MAP_onWidgetCreate()
 {
 }
 #endif

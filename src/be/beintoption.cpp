@@ -223,7 +223,7 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_getDefaultQuickKeyMessageHashVa
  * @param value  the quick message number put into the key
  * @return GetHashValue32() of the key
  */
-int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value)
+int cBEOptionInterface::getDefaultQuickKeyMessageHashValue(int value)
 {
     char buf[24];
     sprintf(buf, str_kT_206QuickMessagepct_d, value);
@@ -278,7 +278,7 @@ void cBEOptionInterface::resetQuickKey(int i)
     cFELocale* obj = SSXApp->FELocale;
     sVEntry_0014F6E8* vt = (sVEntry_0014F6E8*)VPTR_OF(cUILocaleInterface, obj);
     void* localeThis = vthis(obj, vt[4]);
-    int hashValue = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(this, i);
+    int hashValue = this->getDefaultQuickKeyMessageHashValue(i);
     void* text = vt[4].fn(localeThis, hashValue);
     USTR_strcpyW(D_00535617[i], text);
 }

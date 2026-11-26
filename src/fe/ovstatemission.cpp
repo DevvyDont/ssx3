@@ -46,8 +46,9 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onWidgetCreate__FPv);
 /**
  * Does nothing: the multiplayer-circuit state's onWidgetCreate has an empty body.
  */
-void cFEStateMPCircuit_onWidgetCreate(void* self)
+void cFEStateMPCircuit_onWidgetCreate(void* vself)
 {
+    cFEStateMPCircuit* self = (cFEStateMPCircuit*)vself;
 }
 #endif
 
@@ -80,7 +81,7 @@ extern "C" void cFEStateMPCircuit_onGainFocus(cFEStateMPCircuit* self, int pPreS
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     }
-    cFEStateMPCircuit_updateWidget(self);
+    self->updateWidget();
     cUIState_onGainFocus(self, pPreSt);
 }
 #endif
@@ -131,7 +132,7 @@ void cFEStateMPCircuit::onWidgetEvent(cUIThing* item, unsigned int msg)
         if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(mpScreen, frame, 1);
         }
-        cFEStateMPCircuit_updateWidget(this);
+        this->updateWidget();
         break;
     }
     }
@@ -147,7 +148,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_initCircuitList__FPv);
  * cFEStateMPCircuit_onCreateScreen calls it with the screen's "ListBox" widget as a second argument, which this
  * definition does not declare.
  */
-void cFEStateMPCircuit_initCircuitList(void* self)
+void cFEStateMPCircuit::initCircuitList()
 {
 }
 #endif
@@ -161,7 +162,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_updateWidget__FPv);
  * Called by cFEStateMPCircuit_onGainFocus and by cFEStateMPCircuit_onWidgetEvent for a list change (event 9), each
  * after playing the frame of the current entry.
  */
-void cFEStateMPCircuit_updateWidget(void* self)
+void cFEStateMPCircuit::updateWidget()
 {
 }
 #endif

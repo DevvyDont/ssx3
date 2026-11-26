@@ -119,6 +119,7 @@ struct cAnimModel {
     void transform(sAnimModelBone* roots) __asm__("cAnimModel_transform");
     void writeToReplayFrame(cBxReplayFrame* data) __asm__("cAnimModel_writeToReplayFrame");
     void init(int count, int maxVariants) __asm__("cAnimModel_init");
+    void addTextureFile(int item) __asm__("cAnimModel_addTextureFile__FPvi");
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);

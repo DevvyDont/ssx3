@@ -96,6 +96,7 @@ struct cCamAnimFrame {
     void getPosition(t4Vector* out) __asm__("cCamAnimFrame_getPosition");
     void getAngles(t3Vector* out) __asm__("cCamAnimFrame_getAngles");
     void getFocalLength(float *out) __asm__("cCamAnimFrame_getFocalLength");
+    void* update() __asm__("cCamAnimFrame_update__FPv");
 };
 
 CHECK_OFFSET(cCamAnimFrame, Seg, 0x000);

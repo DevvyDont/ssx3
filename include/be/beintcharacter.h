@@ -52,6 +52,7 @@ struct cBECharacterInterface : public cBEInterface {
     void* getShortName(int rider) __asm__("cBECharacterInterface_getShortName");
     void* getShortNameByCharacter(int player, int index) __asm__("cBECharacterInterface_getShortNameByCharacter");
     void* getNickName(int rider) __asm__("cBECharacterInterface_getNickName");
+    int getWeight(int riderIndex) __asm__("cBECharacterInterface_getWeight__FPvi");
 };
 
 extern cBECharacterInterface* cBECharacterInterface_instance;

@@ -811,7 +811,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onGainTransition__FPv
  *
  * @return always 1 (transition finished)
  */
-int cOVState_PAUSE_ONLINE_ERROR_onGainTransition(void* self)
+int cOVState::PAUSE_ONLINE_ERROR_onGainTransition()
 {
     return 0x1;
 }
@@ -2935,9 +2935,9 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_onDestroyScreen__FPv);
  *
  * @return what cFEMemCard_onDestroyScreen returns (declared void* here)
  */
-void* cOVState_SAVEOPTIONS_onDestroyScreen(void* self)
+void* cOVState::SAVEOPTIONS_onDestroyScreen()
 {
-    return cFEMemCard_onDestroyScreen(self);
+    return cFEMemCard_onDestroyScreen(this);
 }
 #endif
 

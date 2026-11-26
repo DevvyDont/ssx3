@@ -738,8 +738,9 @@ INCLUDE_ASM("ui/uiengine", cUIGroup_setUIData__FPv);
  *
  * @return the result of cUIThing_setUIData()
  */
-void* cUIGroup_setUIData(void* self)
+void* cUIGroup_setUIData(void* vself)
 {
+    cUIGroup* self = (cUIGroup*)vself;
     return cUIThing_setUIData(self);
 }
 #endif

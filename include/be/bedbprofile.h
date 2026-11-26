@@ -342,6 +342,7 @@ struct cBECharProfileDB {
     bool hasVisitedPeak(int kind) __asm__("cBECharProfileDB_hasVisitedPeak");
     void setLocationVisited(int bit, int on) __asm__("cBECharProfileDB_setLocationVisited");
     bool updateScoreStats(int locationId, int stat, unsigned int value) __asm__("cBECharProfileDB_updateScoreStats");
+    void* getScoreStats(int locID, int event) __asm__("cBECharProfileDB_getScoreStats__FPvii");
 };
 CHECK_OFFSET(cBECharProfileDB, bFirstTimeWorldCircuit, 0x0);
 CHECK_OFFSET(cBECharProfileDB, mCollectibles, 0x4);

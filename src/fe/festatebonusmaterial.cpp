@@ -91,8 +91,9 @@ INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateBonusMaterial_onGainFocus(void* self)
+void* cFEStateBonusMaterial_onGainFocus(void* vself)
 {
+    cFEStateBonusMaterial* self = (cFEStateBonusMaterial*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif

@@ -49,6 +49,8 @@ struct cBEBAGTInterface : public cBEInterface {
     int getUberAnim(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberAnim");
     int getUberCycleAnim(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberCycleAnim");
     int getUberName(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberName");
+    int getGrabPoints(int grabEnum) __asm__("cBEBAGTInterface_getGrabPoints__FPvi");
+    int getGrabPointsPerSec(int grabEnum) __asm__("cBEBAGTInterface_getGrabPointsPerSec__FPvi");
 };
 
 extern cBEBAGTInterface* cBEBAGTInterface_instance;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "worldpainter/worldpainterman.h"
 
 extern "C" void cWorldPainterQuery_reset(void* self);
 
@@ -8,9 +9,9 @@ INCLUDE_ASM("worldpainter/worldpainterman", cWorldPainterMan_reset__FPv);
 /**
  * Resets the world painter manager by resetting its query with cWorldPainterQuery_reset().
  */
-void cWorldPainterMan_reset(void* self)
+void cWorldPainterMan::reset()
 {
-    cWorldPainterQuery_reset(self);
+    cWorldPainterQuery_reset(this);
 }
 #endif
 

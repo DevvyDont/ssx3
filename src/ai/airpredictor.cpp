@@ -306,8 +306,9 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_initLaunch__FPcP5sQuadT1);
  * @param launchPos  launch position (On Tour const t4Vector&)
  * @param launchVel  launch velocity (On Tour const t4Vector&)
  */
-void cAirPredictor_initLaunch(char* vself, sQuad* launchPos, sQuad* launchVel)
+void cAirPredictor_initLaunch(char* vvself, sQuad* launchPos, sQuad* launchVel)
 {
+    cAirPredictor* vself = (cAirPredictor*)vvself;
     cAirPredictor* self = (cAirPredictor*)vself;
     self->SimState = 0;
     *(sQuad*)&self->PrevTickPos = *launchPos;

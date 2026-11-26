@@ -1641,8 +1641,9 @@ INCLUDE_ASM("object/flexrailnode", cFlagNode_writeToReplayFrame__FPv);
  *
  * @return no meaningful value (cInstanceNode_writeToReplayFrame() returns nothing)
  */
-void* cFlagNode_writeToReplayFrame(void* self)
+void* cFlagNode_writeToReplayFrame(void* vself)
 {
+    cFlagNode* self = (cFlagNode*)vself;
     return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
@@ -1653,7 +1654,7 @@ INCLUDE_ASM("object/flexrailnode", cFlagNode_render__FPv);
 /**
  * Draws nothing: the flag node's render has an empty body.
  */
-void cFlagNode_render(void* self)
+void cFlagNode::render()
 {
 }
 #endif

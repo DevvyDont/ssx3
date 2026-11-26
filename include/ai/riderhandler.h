@@ -130,6 +130,7 @@ struct cAirMotion {
     void chooseFakieLandAnim(float normSpeed) __asm__("cAirMotion_chooseFakieLandAnim");
     void chooseLandAnim(float normSpeed) __asm__("cAirMotion_chooseLandAnim");
     bool checkTerrainCollisions(t4Vector* outp) __asm__("cAirMotion_checkTerrainCollisions");
+    void loseFocus() __asm__("cAirMotion_loseFocus__FPv");
 };
 
 CHECK_OFFSET(cAirMotion, IsLandVelAlign, 0x00);
@@ -166,6 +167,7 @@ struct cWipeoutMotion {
     int getBoardSphereTree() __asm__("cWipeoutMotion_getBoardSphereTree");
     void throwRider(t4Vector* initVel, t4Vector* initAngVel) __asm__("cWipeoutMotion_throwRider");
     void updateBoardSphereTree() __asm__("cWipeoutMotion_updateBoardSphereTree");
+    void loseFocus() __asm__("cWipeoutMotion_loseFocus__FPv");
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);
@@ -187,6 +189,7 @@ struct cStaticMotion {
 
     // Methods bound to their retail symbols by asm labels.
     void step() __asm__("cStaticMotion_step");
+    void resolve() __asm__("cStaticMotion_resolve__FPv");
 };
 
 CHECK_OFFSET(cStaticMotion, mRider, 0x00);
@@ -360,6 +363,7 @@ struct cPrewindControl {
     void update(tPrewindCmd* in) __asm__("cPrewindControl_update");
     void playFromTable(int (*tbl)[5]) __asm__("cPrewindControl_playFromTable");
     float getFlipSpinInputAng(int* out) __asm__("cPrewindControl_getFlipSpinInputAng");
+    void loseFocus() __asm__("cPrewindControl_loseFocus__FPv");
 };
 
 CHECK_OFFSET(cPrewindControl, mRider, 0x00);
@@ -1322,6 +1326,8 @@ struct cCheatFX {
     void setCheatInput(int type) __asm__("cCheatFX_setCheatInput");
     void clearInput() __asm__("cCheatFX_clearInput");
     int getInput() __asm__("cCheatFX_getInput");
+    void reset() __asm__("cCheatFX_reset__FPv");
+    void render() __asm__("cCheatFX_render__FPv");
 };
 
 CHECK_OFFSET(cCheatFX, mRider, 0x00);

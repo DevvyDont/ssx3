@@ -6349,7 +6349,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SwapBankStopped__FPv);
  * cWorldTriggerManager_Update (the world-trigger update) calls it for each stopped trigger whose name (+0x40) is not
  * str_empty_j; func_0029B818 handles the same name when a trigger starts.
  */
-void cSSXAudio_SwapBankStopped(void* self)
+void cSSXAudio::SwapBankStopped()
 {
 }
 #endif
@@ -6695,7 +6695,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_CountdownStart__FPv);
  *
  * cGFGateState_gainFocus calls it right before cSSXAudio_CountdownBeep(audio, 3), the first countdown beep.
  */
-void cSSXAudio_CountdownStart(void* self)
+void cSSXAudio::CountdownStart()
 {
 }
 #endif
@@ -8004,7 +8004,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_AvalancheGroundHit__FPv);
  *
  * tActiveAvalanche_update calls it for every avalanche event that fires and every sound cue it reaches.
  */
-void cSSXAudio_AvalancheGroundHit(void* self)
+void cSSXAudio::AvalancheGroundHit()
 {
 }
 #endif

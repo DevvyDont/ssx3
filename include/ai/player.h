@@ -74,6 +74,9 @@ struct cPlayer {
     void vibrationRumble(float val) __asm__("cPlayer_vibrationRumble__FPvf");
     void vibrationUpdate() __asm__("cPlayer_vibrationUpdate");
     void getControlCmd(tControlCmd* cmd) __asm__("cPlayer_getControlCmd");
+    float scorePath() __asm__("cPlayer_scorePath__FPv");
+    void* writeToReplayFrame() __asm__("cPlayer_writeToReplayFrame__FPv");
+    void* readFromReplayFrame() __asm__("cPlayer_readFromReplayFrame__FPv");
 };
 
 // Virtual slots of _vt$7cPlayer (D_00458338); names from the preview vtable where known.

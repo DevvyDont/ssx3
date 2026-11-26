@@ -83,6 +83,7 @@ struct cWorldPainterMan {
     void load1(int sectionId, int wpData) __asm__("cWorldPainterMan_load1");
     void render1(cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts, t4Vector* lo, t4Vector* hi)
         __asm__("cWorldPainterMan_render1");
+    void reset() __asm__("cWorldPainterMan_reset__FPv");
 };
 
 CHECK_OFFSET(cWorldPainterMan, m_uiNumSections, 0x0);

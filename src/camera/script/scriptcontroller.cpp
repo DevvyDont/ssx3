@@ -2383,10 +2383,11 @@ INCLUDE_ASM("camera/script/scriptcontroller", cCameraTriggerList_cCameraTriggerL
  *
  * @return @p self
  */
-void* cCameraTriggerList_cCameraTriggerList(void* self)
+void* cCameraTriggerList_cCameraTriggerList(void* vself)
 {
+    cCameraTriggerList* self = (cCameraTriggerList*)vself;
     *(int*)self = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 

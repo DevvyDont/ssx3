@@ -77,6 +77,10 @@ struct cOVState : public cUIState {
     virtual void onCreateScreen() __asm__("cOVState_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cOVState_onDestroyScreen");
     virtual void onUpdate() __asm__("cOVState_onUpdate");
+    void MAP_onWidgetCreate() __asm__("cOVState_MAP_onWidgetCreate__FPv");
+    int PAUSE_ONLINE_ERROR_onGainTransition() __asm__("cOVState_PAUSE_ONLINE_ERROR_onGainTransition__FPv");
+    void* SAVEOPTIONS_onDestroyScreen() __asm__("cOVState_SAVEOPTIONS_onDestroyScreen__FPv");
+    int AUTOSAVE_onInputBegin() __asm__("cOVState_AUTOSAVE_onInputBegin__FPv");
 };
 
 CHECK_OFFSET(cOVState, mDoneTransition, 0x48);

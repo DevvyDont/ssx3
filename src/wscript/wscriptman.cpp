@@ -1662,10 +1662,11 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_cProcessList__FPv);
  *
  * @return @p self
  */
-void* cProcessList_cProcessList(void* self)
+void* cProcessList_cProcessList(void* vself)
 {
+    cProcessList* self = (cProcessList*)vself;
     (*(void**)&((cProcessList*)self)->List) = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1851,11 +1852,11 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess__FPvT0);
  * @param node  the process
  * @return the previous head
  */
-int cProcessList_addProcess(void* self, void* node)
+int cProcessList::addProcess(void* node)
 {
-    int oldHead = (int)((void*)((cProcessList*)self)->List);
+    int oldHead = (int)((void*)((cProcessList*)this)->List);
     ((cWScriptListNode*)node)->next = (void*)oldHead;
-    (*(void**)&((cProcessList*)self)->List) = node;
+    (*(void**)&((cProcessList*)this)->List) = node;
     return oldHead;
 }
 #endif
@@ -1894,11 +1895,11 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess1__FPvT0);
  * @param node  the mission
  * @return the previous head
  */
-int cProcessList_addProcess1(void* self, void* node)
+int cProcessList::addProcess1(void* node)
 {
-    int oldHead = (int)((void*)((cProcessList*)self)->List);
+    int oldHead = (int)((void*)((cProcessList*)this)->List);
     ((cWScriptListNode*)node)->next = (void*)oldHead;
-    (*(void**)&((cProcessList*)self)->List) = node;
+    (*(void**)&((cProcessList*)this)->List) = node;
     return oldHead;
 }
 #endif
@@ -2071,7 +2072,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_render__FPv);
 /**
  * Does nothing (the world script manager's render hook).
  */
-void cWScriptMan_render(void* self)
+void cWScriptMan::render()
 {
 }
 #endif
@@ -2695,11 +2696,11 @@ void cWScriptMan::readFromReplayFrame(cBxReplayFrame* stream)
     cWScriptProcess* process;
     while ((process = (cWScriptProcess*)ActiveList.removeHead()) != 0) {
         process->State = 0;
-        cProcessList_addProcess(&IdleList, process);
+        IdleList.addProcess(process);
     }
     while ((process = (cWScriptProcess*)AddList.removeHead()) != 0) {
         process->State = 0;
-        cProcessList_addProcess(&IdleList, process);
+        IdleList.addProcess(process);
     }
     readReplayProcessList(&ActiveList, stream);
     readReplayProcessList(&AddList, stream);
@@ -4127,7 +4128,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_isProcessEvent);
  * @param eventId  the event id
  * @return true when @p eventId < 10
  */
-extern "C" bool cWScriptProcess_isProcessEvent(void* self, unsigned int eventId) {
+bool cWScriptProcess::isProcessEvent(unsigned int eventId)
+{
     return eventId < 10;
 }
 #endif
@@ -4236,7 +4238,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_isMission__FPv);
  *
  * @return always 0 (cWScriptMission returns 1)
  */
-int cWScriptProcess_isMission(void* self)
+int cWScriptProcess::isMission()
 {
     return 0;
 }
@@ -4362,7 +4364,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMission_isMission__FPv);
  *
  * @return always 1
  */
-int cWScriptMission_isMission(void* self)
+int cWScriptMission::isMission()
 {
     return 0x1;
 }

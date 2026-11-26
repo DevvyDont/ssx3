@@ -84,6 +84,7 @@ struct cMoviePlayer {
     void asyncUpdate() __asm__("cMoviePlayer_asyncUpdate");
     void asyncPause() __asm__("cMoviePlayer_asyncPause");
     void asyncResume() __asm__("cMoviePlayer_asyncResume");
+    void* SSXFreeMemFunc() __asm__("cMoviePlayer_SSXFreeMemFunc__FPv");
 };
 
 CHECK_OFFSET(tMoviePlayOptions, sVideoFileName, 0x00);

@@ -24,6 +24,7 @@ struct cBXLoadIndicator {
     void Render() __asm__("cBXLoadIndicator_Render");
     void Show(int bit) __asm__("cBXLoadIndicator_Show");
     void Hide(int bit) __asm__("cBXLoadIndicator_Hide");
+    void DeInit() __asm__("cBXLoadIndicator_DeInit__FPv");
 };
 
 CHECK_OFFSET(cBXLoadIndicator, mpLoadText, 0x000);

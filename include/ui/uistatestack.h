@@ -33,6 +33,7 @@ struct cUIStateStack {
     void* findState(int id) __asm__("cUIStateStack_findState");
     void* getCurrentState() __asm__("cUIStateStack_getCurrentState");
     void* getTopState() __asm__("cUIStateStack_getTopState");
+    void render3D() __asm__("cUIStateStack_render3D__FPv");
 };
 
 CHECK_OFFSET(cUIStateStack, mStack, 0x000);

@@ -221,8 +221,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_jumpToFrame__FPvUs);
  *
  * @param frame  frame to play from
  */
-void cUIScreen_jumpToFrame(void* self, unsigned short frame)
+void cUIScreen_jumpToFrame(void* vself, unsigned short frame)
 {
+    cUIScreen* self = (cUIScreen*)vself;
     void* thread = cUIScreen_getPrimaryThread((cUIScreen*)self);
     if (thread != 0) {
         cUIThread_deleteThread(thread);
@@ -536,7 +537,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseObjectVisible__FPv);
 /**
  * Handles a keyframe visibility command; does nothing in this build.
  */
-void cUIScreen_parseObjectVisible(void* self)
+void cUIScreen::parseObjectVisible()
 {
 }
 #endif
@@ -550,7 +551,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseEventAudio__FPv);
  * cUIScreen_playFrameByThread dispatches keyframe command 0x31 to it (0x30 goes to cUIScreen_parseEventTrigger); it
  * sits between cUIScreen_parseObjectVisible__FPv and cUIScreen_parseEventTrigger.
  */
-void cUIScreen_parseEventAudio(void* self)
+void cUIScreen::parseEventAudio()
 {
 }
 #endif
@@ -657,7 +658,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenStart__FPv);
 /**
  * Handles a keyframe screen-start command; does nothing in this build.
  */
-void cUIScreen_parseScreenStart(void* self)
+void cUIScreen::parseScreenStart()
 {
 }
 #endif
@@ -1157,8 +1158,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScrollBar_setUIData__FPv);
  *
  * @return cUIThing_setUIData's result (declared void* here)
  */
-void* cUIScrollBar_setUIData(void* self)
+void* cUIScrollBar_setUIData(void* vself)
 {
+    cUIScrollBar* self = (cUIScrollBar*)vself;
     return cUIThing_setUIData(self);
 }
 #endif
@@ -1747,8 +1749,9 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onInputAlways__FPv);
 /**
  * Does nothing: the base UI state's onInputAlways has an empty body.
  */
-void cUIState_onInputAlways(void* self)
+void cUIState_onInputAlways(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
 }
 #endif
 

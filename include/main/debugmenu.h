@@ -384,6 +384,10 @@ struct cLightGlowMenu {
     cFloatMenuItem IntensityBItem;       // 0x698 [O]; [R] ctor (26, "Intensity Blue", &cLightGlow_m_IntensityB, 0..1)
     cFloatMenuItem IntensityAItem;       // 0x6CC [O]; [R] ctor (27, "Intensity Alpha", &cLightGlow_m_IntensityA, 0..1)
     cFloatMenuItem IntensityScaleItem;   // 0x700 [O]; [R] ctor (28, "Intensity Scale", &cLightGlow_m_IntensityScale, 0..1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cLightGlowMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cLightGlowMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cLightGlowMenu, NumItems, 0x000);
@@ -456,6 +460,10 @@ struct cDepthFogMenu {
                                          //       &cDepthFog_m_XBoxDensityScale, 0..1)
     cARGBMenuItem ColourItem;            // 0x2C4 [O] (On Tour 0x2F8; placed by the caption and On Tour's order); [R]
                                          //       ctor (7, "Colour", &cDepthFog_m_Colour); the dtor tears it down inline
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cDepthFogMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cDepthFogMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cDepthFogMenu, NumItems, 0x000);
@@ -499,6 +507,10 @@ struct cHeightFogMenu {
     cIntMenuItem EnableItem;         // 0x164 [O]; [R] ctor (0, "Enable", &cHeightFog_m_Enable, 0..1)
     cFloatMenuItem StartHeightItem;  // 0x194 [O]; [R] ctor (1, "Start Height", &cHeightFog_m_StartHeight, -100000..100000)
     cFloatMenuItem ThicknessItem;    // 0x1C8 [O]; [R] ctor (2, "Thickness", &cHeightFog_m_Thickness, 0.0001..10000)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cHeightFogMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cHeightFogMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cHeightFogMenu, NumItems, 0x000);
@@ -545,6 +557,10 @@ struct cDetailSystemMenu {
     cFloatMenuItem XBoxSizeItem;          // 0x2CC [O]; [R] ctor (7, "XBox - World Size", &cDetailSystem_m_XBoxSize, 0..500)
     cFloatMenuItem XBoxMinSizeItem;       // 0x300 [O]; [R] ctor (8, "XBox - Min Screen Size", &cDetailSystem_m_XBoxMinSize, 0..100)
     cFloatMenuItem XBoxMaxSizeItem;       // 0x334 [O]; [R] ctor (9, "XBox - Max Screen Size", &cDetailSystem_m_XBoxMaxSize, 0..100)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cDetailSystemMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cDetailSystemMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cDetailSystemMenu, NumItems, 0x000);
@@ -888,6 +904,10 @@ struct cBoardTrailMenu {
                                              //       [R] ctor (20, "Draw Fixup Layer", &D_004A45CC, 0..1)
     cIntMenuItem UseSliceCapsItem;           // 0x59C [O] (On Tour 0x6D4; placed by the caption and On Tour's order);
                                              //       [R] ctor (21, "Use Slice Caps", &cBoardTrail_m_UseSliceCaps, 0..1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cBoardTrailMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cBoardTrailMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cBoardTrailMenu, NumItems, 0x000);
@@ -944,6 +964,10 @@ struct cFlagsMenu {
     cSpaceMenuItem SpaceItem;        // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem EnableUpdateItem;   // 0x164 [O]; [R] ctor (0, "EnableUpdate", &cFlags_m_EnableUpdate, 0..1)
     cIntMenuItem EnableRenderItem;   // 0x194 [O]; [R] ctor (1, "EnableRender", &cFlags_m_EnableRender, 0..1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cFlagsMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cFlagsMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cFlagsMenu, NumItems, 0x000);
@@ -1392,6 +1416,10 @@ struct cPathArrowMenu {
     cFloatMenuItem DistanceItem;          // 0x3F4 [O]; [R] ctor (13, "Distance", &cPathArrow_m_Distance, 50..1000)
     cIntMenuItem PathIdItem;              // 0x428 [O]; [R] ctor (14, "Path Id", &cPathArrow_m_PathId, 0..1000)
     cIntMenuItem MaxTickItem;             // 0x458 [O]; [R] ctor (15, "Max Tick", &cPathArrow_m_MaxTick, 1..18000)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cPathArrowMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cPathArrowMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cPathArrowMenu, NumItems, 0x000);
@@ -1570,6 +1598,10 @@ struct cAvalancheMenu {
     cFloatMenuItem PatchColourScale2Item;           // 0x748 [O]; [R] ctor (30, "Patch Colour Scale 2", &cAvalanche_m_PatchColourScale2,
                                                     //       0..10)
     cFloatMenuItem SeedItem;                        // 0x77C [O]; [R] ctor (31, "Seed", &cAvalanche_m_Seed, -1..1000)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cAvalancheMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cAvalancheMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cAvalancheMenu, NumItems, 0x000);
@@ -1637,6 +1669,10 @@ struct cAIVisualEffectsMainMenu {
     cSpaceMenuItem SpaceItem;        // 0x14C [O]; [R] ctor (space 40); not added to the menu
     cSubMenuItem AvalancheItem;      // 0x164 [O]; [R] ctor ("Avalanche Effects", Sub = &__AvalancheMenu, the static
                                      //       cAvalancheMenu)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cAIVisualEffectsMainMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cAIVisualEffectsMainMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cAIVisualEffectsMainMenu, NumItems, 0x000);

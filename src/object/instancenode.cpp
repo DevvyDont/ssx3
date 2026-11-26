@@ -217,7 +217,7 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runCollideScript__FPviii);
  * @param pBeing  the being that collided (On Tour cBeing* pBeing)
  * @return cObjectInterface_runCollideScript's result (On Tour's version returns nothing)
  */
-void* cInstanceNode_runCollideScript(void* self, int collideInfo, int intersectInfo, int pBeing)
+void* cInstanceNode::runCollideScript(int collideInfo, int intersectInfo, int pBeing)
 {
     return cObjectInterface_runCollideScript(collideInfo, intersectInfo, pBeing);
 }

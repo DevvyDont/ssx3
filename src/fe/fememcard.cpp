@@ -1023,8 +1023,9 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onInputBegin__FPv);
  *
  * @return always 0 (input not consumed)
  */
-int cFEStateMemCard_onInputBegin(void* self)
+int cFEStateMemCard_onInputBegin(void* vself)
 {
+    cFEStateMemCard* self = (cFEStateMemCard*)vself;
     return 0;
 }
 #endif

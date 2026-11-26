@@ -2475,11 +2475,11 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cFont__cFont(int* self, int flags)
+extern "C" void cFont__cFont(cFont* self, int flags)
 {
     cFont_purge(self);
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "be/beintecon.h"
+#include "be/beintsavefile.h"
+#include "be/beintcharacter.h"
 #include "vtable.h"
 #include "ai/ridermetrix.h"
 #include "fe/fereal.h"
@@ -36,19 +39,19 @@ extern char str_Rewards_File[];
  *
  * @param async  0 to load now, else passed on to the asynchronous request
  */
-extern "C" void cBERewardDB_init(int* self, int async)
+void cBERewardDB::init(int async)
 {
     if (async == 0)
     {
         int size = BXFILE_sizez(gRewardsFileName);
         void* data = operator_new_tag(size, str_Rewards_File, 0, 0);
         FILE_loadatz(gRewardsFileName, data, size);
-        cBERewardDB_initRewards_s(self, data);
-        *self = -1;
+        cBERewardDB_initRewards_s(this, data);
+        *((int*)this) = -1;
     }
     else
     {
-        *self = func_0019DA10(SSXApp->RealFE->mBoltFileManager, 0, gRewardsFileName, 10, async, 0);
+        *((int*)this) = func_0019DA10(SSXApp->RealFE->mBoltFileManager, 0, gRewardsFileName, 10, async, 0);
     }
 }
 #endif
@@ -139,14 +142,14 @@ extern "C" void cBERewardDB_initRewards(int* self, int v);
  * (func_0019E238), parses the loaded data (cBERewardDB_initRewards with the buffer from func_0019E330), releases the request
  * (func_0019DC20) and sets +0x0 to -1. cBERewardDB_init starts such a load when called with async set.
  */
-extern "C" void cBERewardDB_update(int* self)
+void cBERewardDB::update()
 {
-    if (*self >= 0) {
+    if (*((int*)this) >= 0) {
         char* snd = SSXApp->RealFE->mBoltFileManager;
-        if (func_0019E238(snd, 0, *self) != 0) {
-            cBERewardDB_initRewards(self, func_0019E330(snd, 0, *self));
-            func_0019DC20(snd, 0, *self);
-            *self = -1;
+        if (func_0019E238(snd, 0, *((int*)this)) != 0) {
+            cBERewardDB_initRewards(((int*)this), func_0019E330(snd, 0, *((int*)this)));
+            func_0019DC20(snd, 0, *((int*)this));
+            *((int*)this) = -1;
         }
     }
 }
@@ -573,8 +576,9 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_submit__FPv);
 /**
  * Does nothing: the mission interface's submit (slot 1 of its vtable cBEMissionInterface_vtbl).
  */
-void cBEMissionInterface_submit(void* self)
+void cBEMissionInterface_submit(void* vself)
 {
+    cBEMissionInterface* self = (cBEMissionInterface*)vself;
 }
 #endif
 
@@ -584,8 +588,9 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_discard__FPv);
 /**
  * Does nothing: the mission interface's discard (slot 2 of its vtable cBEMissionInterface_vtbl).
  */
-void cBEMissionInterface_discard(void* self)
+void cBEMissionInterface_discard(void* vself)
 {
+    cBEMissionInterface* self = (cBEMissionInterface*)vself;
 }
 #endif
 
@@ -1706,8 +1711,9 @@ INCLUDE_ASM("be/bedbreward", cBECharacterInterface_submit__FPv);
 /**
  * Does nothing: the character interface's submit (slot 1 of its vtable cBECharacterInterface_vtbl).
  */
-void cBECharacterInterface_submit(void* self)
+void cBECharacterInterface_submit(void* vself)
 {
+    cBECharacterInterface* self = (cBECharacterInterface*)vself;
 }
 #endif
 
@@ -1717,8 +1723,9 @@ INCLUDE_ASM("be/bedbreward", cBECharacterInterface_discard__FPv);
 /**
  * Does nothing: the character interface's discard (slot 2 of its vtable cBECharacterInterface_vtbl).
  */
-void cBECharacterInterface_discard(void* self)
+void cBECharacterInterface_discard(void* vself)
 {
+    cBECharacterInterface* self = (cBECharacterInterface*)vself;
 }
 #endif
 
@@ -1728,8 +1735,9 @@ INCLUDE_ASM("be/bedbreward", cBESaveInterface_submit__FPv);
 /**
  * Does nothing: the save interface's submit (slot 1 of its vtable cBESaveInterface_vtbl).
  */
-void cBESaveInterface_submit(void* self)
+void cBESaveInterface_submit(void* vself)
 {
+    cBESaveInterface* self = (cBESaveInterface*)vself;
 }
 #endif
 
@@ -1739,8 +1747,9 @@ INCLUDE_ASM("be/bedbreward", cBESaveInterface_discard__FPv);
 /**
  * Does nothing: the save interface's discard (slot 2 of its vtable cBESaveInterface_vtbl).
  */
-void cBESaveInterface_discard(void* self)
+void cBESaveInterface_discard(void* vself)
 {
+    cBESaveInterface* self = (cBESaveInterface*)vself;
 }
 #endif
 
@@ -1880,8 +1889,9 @@ INCLUDE_ASM("be/bedbreward", cBEEconInterface_submit__FPv);
 /**
  * Does nothing: the economy interface's submit (slot 1 of its vtable cBEEconInterface_vtbl).
  */
-void cBEEconInterface_submit(void* self)
+void cBEEconInterface_submit(void* vself)
 {
+    cBEEconInterface* self = (cBEEconInterface*)vself;
 }
 #endif
 
@@ -1891,8 +1901,9 @@ INCLUDE_ASM("be/bedbreward", cBEEconInterface_discard__FPv);
 /**
  * Does nothing: the economy interface's discard (slot 2 of its vtable cBEEconInterface_vtbl).
  */
-void cBEEconInterface_discard(void* self)
+void cBEEconInterface_discard(void* vself)
 {
+    cBEEconInterface* self = (cBEEconInterface*)vself;
 }
 #endif
 
@@ -2114,12 +2125,12 @@ extern "C" void cCameraAlgoList_removeAll(void* self);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cCameraAlgoList__cCameraAlgoList(int* self, int flags)
+extern "C" void cCameraAlgoList__cCameraAlgoList(cCameraAlgoList* self, int flags)
 {
     cCameraAlgoList_removeAll(self);
     if (flags & 1)
     {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

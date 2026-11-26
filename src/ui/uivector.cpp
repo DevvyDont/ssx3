@@ -625,11 +625,11 @@ extern void* cListOperator_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cListOperator__cListOperator(int* self, int flags)
+extern "C" void cListOperator__cListOperator(cListOperator* self, int flags)
 {
     *(void***)self = cListOperator_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1252,8 +1252,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_onInput__FPv);
  *
  * @return always 0
  */
-int cUIThing_onInput(void* self)
+int cUIThing_onInput(void* vself)
 {
+    cUIThing* self = (cUIThing*)vself;
     return 0;
 }
 #endif
@@ -1264,7 +1265,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_updateLocale__FPv);
 /**
  * Does nothing: cUIThing's updateLocale has an empty body.
  */
-void cUIThing_updateLocale(void* self)
+void cUIThing::updateLocale()
 {
 }
 #endif
@@ -1275,8 +1276,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_render2D__FPv);
 /**
  * Draws nothing: cUIThing's render2D has an empty body.
  */
-void cUIThing_render2D(void* self)
+void cUIThing_render2D(void* vself)
 {
+    cUIThing* self = (cUIThing*)vself;
 }
 #endif
 
@@ -1286,8 +1288,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_render3D__FPv);
 /**
  * Draws nothing: cUIThing's render3D has an empty body.
  */
-void cUIThing_render3D(void* self)
+void cUIThing_render3D(void* vself)
 {
+    cUIThing* self = (cUIThing*)vself;
 }
 #endif
 
@@ -1425,11 +1428,11 @@ extern void* cListOperator_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cListOpOnInput__cListOpOnInput(int* self, int flags)
+extern "C" void cListOpOnInput__cListOpOnInput(cListOpOnInput* self, int flags)
 {
     *(void***)self = cListOperator_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1469,11 +1472,11 @@ extern void* cListOperator_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cListOpSetFocus__cListOpSetFocus(int* self, int flags)
+extern "C" void cListOpSetFocus__cListOpSetFocus(cListOpSetFocus* self, int flags)
 {
     *(void***)self = cListOperator_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1645,8 +1648,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_getType__FPv);
  *
  * @return always 0x11 (groups return 0x10, menus 0x13)
  */
-int cUIIcon_getType(void* self)
+int cUIIcon_getType(void* vself)
 {
+    cUIIcon* self = (cUIIcon*)vself;
     return 17;
 }
 #endif
@@ -1937,8 +1941,9 @@ INCLUDE_ASM("ui/uivector", cUIGroup_getType__FPv);
  *
  * @return always 0x10 (vectors return 0x18)
  */
-int cUIGroup_getType(void* self)
+int cUIGroup_getType(void* vself)
 {
+    cUIGroup* self = (cUIGroup*)vself;
     return 0x10;
 }
 #endif
@@ -2081,7 +2086,7 @@ extern void* cUIMenu_vtbl[];
 // PORT: the other ctor in the unit calls this base ctor with (self, 0, 0)
 extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 extern "C" void* cList_cList(void* p);
-extern "C" void* tAttrMenu_tAttrMenu(void* self);
+extern "C" void* tAttrMenu_tAttrMenu(tAttrMenu* self);
 
 /**
  * Constructs an empty menu.
@@ -2151,8 +2156,9 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getType__FPv);
  *
  * @return always 0x13 (icons return 0x11, pairs 0x15)
  */
-int cUIMenu_getType(void* self)
+int cUIMenu_getType(void* vself)
 {
+    cUIMenu* self = (cUIMenu*)vself;
     return 19;
 }
 #endif
@@ -2166,10 +2172,10 @@ INCLUDE_ASM("ui/uivector", tAttrMenu_tAttrMenu);
  *
  * @return the tAttrMenu
  */
-extern "C" void* tAttrMenu_tAttrMenu(void* self)
+extern "C" void* tAttrMenu_tAttrMenu(tAttrMenu* self)
 {
     *(unsigned char*)self &= 0xf0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2438,8 +2444,9 @@ INCLUDE_ASM("ui/uivector", cUIPair_getType__FPv);
  *
  * @return always 0x15 (menus return 0x13, vectors 0x18)
  */
-int cUIPair_getType(void* self)
+int cUIPair_getType(void* vself)
 {
+    cUIPair* self = (cUIPair*)vself;
     return 21;
 }
 #endif
@@ -2586,8 +2593,9 @@ INCLUDE_ASM("ui/uivector", cUIListBox_getType__FPv);
  *
  * @return always 0x12 (18)
  */
-int cUIListBox_getType(void* self)
+int cUIListBox_getType(void* vself)
 {
+    cUIListBox* self = (cUIListBox*)vself;
     return 18;
 }
 #endif
@@ -2744,7 +2752,7 @@ unsigned char cUIListBox::getNumEntries()
 INCLUDE_ASM("ui/uivector", cUIState_cUIState2);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* p);
-extern "C" void* tAttrState_tAttrState(void* p);
+extern "C" void* tAttrState_tAttrState(tAttrState* p);
 extern void* cUIState_vtbl[];
 
 /**
@@ -2762,7 +2770,7 @@ void* cUIState::cUIState2()
     mpNext = (cListNode*)this;
     mpPrev = (cListNode*)this;
     VPTR_OF(cListNode, this) = cUIState_vtbl;
-    tAttrState_tAttrState(&mAttrState);
+    tAttrState_tAttrState((tAttrState*)(&mAttrState));
     cList_cList(&mScreens);
     return ((char*)this);
 }
@@ -3195,7 +3203,7 @@ INCLUDE_ASM("ui/uivector", cUIState_onCreateScreen__FPv);
  * Does nothing: the base cUIState's create-screen handler (vtable slot 4), which states override to set up their
  * screens.
  */
-void cUIState_onCreateScreen(void* self)
+void cUIState::onCreateScreen()
 {
 }
 #endif
@@ -3208,8 +3216,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onGainTransition__FPv);
  *
  * @return always 0
  */
-int cUIState_onGainTransition(void* self)
+int cUIState_onGainTransition(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif
@@ -3222,8 +3231,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onInputBegin__FPv);
  *
  * @return 0 (input not handled)
  */
-int cUIState_onInputBegin(void* self)
+int cUIState_onInputBegin(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif
@@ -3236,9 +3246,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onLoseTransition__FPv);
  *
  * @return 0
  */
-int cUIState_onLoseTransition(void* self)
+bool cUIState::onLoseTransition()
 {
-    return 0;
+    return false;
 }
 #endif
 
@@ -3248,8 +3258,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onLoseFocus__FPv);
 /**
  * Default handler for a state losing focus; does nothing.
  */
-void cUIState_onLoseFocus(void* self)
+void cUIState_onLoseFocus(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3259,7 +3270,7 @@ INCLUDE_ASM("ui/uivector", cUIState_onPreRender2D__FPv);
 /**
  * Default hook called before a state's screens are drawn; does nothing.
  */
-void cUIState_onPreRender2D(void* self)
+void cUIState::onPreRender2D()
 {
 }
 #endif
@@ -3272,8 +3283,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onScreenEvent__FPv);
  *
  * @return 0 (event not handled)
  */
-int cUIState_onScreenEvent(void* self)
+int cUIState_onScreenEvent(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif
@@ -3350,8 +3362,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onPopupEvent__FPv);
 /**
  * Ignores popup events: the base UI state's onPopupEvent has an empty body.
  */
-void cUIState_onPopupEvent(void* self)
+void cUIState_onPopupEvent(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3361,8 +3374,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetCreate__FPv);
 /**
  * Does nothing: the base UI state's onWidgetCreate has an empty body.
  */
-void cUIState_onWidgetCreate(void* self)
+void cUIState_onWidgetCreate(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3372,8 +3386,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetEvent__FPv);
 /**
  * Ignores widget events: the base UI state's onWidgetEvent has an empty body.
  */
-void cUIState_onWidgetEvent(void* self)
+void cUIState_onWidgetEvent(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3385,8 +3400,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetMenu__FPv);
  *
  * @return 0x101, the default result
  */
-int cUIState_onWidgetMenu(void* self)
+int cUIState_onWidgetMenu(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 257;
 }
 #endif
@@ -3399,8 +3415,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetPair__FPv);
  *
  * @return 0x101, the default result
  */
-int cUIState_onWidgetPair(void* self)
+int cUIState_onWidgetPair(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 257;
 }
 #endif
@@ -3413,8 +3430,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetListBox__FPv);
  *
  * @return 0x101, the default result
  */
-int cUIState_onWidgetListBox(void* self)
+int cUIState_onWidgetListBox(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 257;
 }
 #endif
@@ -3427,8 +3445,9 @@ INCLUDE_ASM("ui/uivector", cUIState_getData__FPv);
  *
  * @return always 0
  */
-int cUIState_getData(void* self)
+int cUIState_getData(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif
@@ -3441,8 +3460,9 @@ INCLUDE_ASM("ui/uivector", cUIState_handleEvent__FPv);
  *
  * @return always 0
  */
-int cUIState_handleEvent(void* self)
+int cUIState_handleEvent(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif
@@ -3734,8 +3754,9 @@ INCLUDE_ASM("ui/uivector", cUIText_getType__FPv);
  *
  * @return always 0x17 (23)
  */
-int cUIText_getType(void* self)
+int cUIText_getType(void* vself)
 {
+    cUIText* self = (cUIText*)vself;
     return 23;
 }
 #endif
@@ -3995,8 +4016,9 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_getType__FPv);
  *
  * @return always 0x21 (33)
  */
-int cUIScrollBar_getType(void* self)
+int cUIScrollBar_getType(void* vself)
 {
+    cUIScrollBar* self = (cUIScrollBar*)vself;
     return 33;
 }
 #endif
@@ -4187,8 +4209,9 @@ INCLUDE_ASM("ui/uivector", cUIProgress_getType__FPv);
  *
  * @return always 0x19 (vectors return 0x18)
  */
-int cUIProgress_getType(void* self)
+int cUIProgress_getType(void* vself)
 {
+    cUIProgress* self = (cUIProgress*)vself;
     return 25;
 }
 #endif
@@ -4299,8 +4322,9 @@ INCLUDE_ASM("ui/uivector", cUISlider_getType__FPv);
  *
  * @return 22
  */
-int cUISlider_getType(void* self)
+int cUISlider_getType(void* vself)
 {
+    cUISlider* self = (cUISlider*)vself;
     return 22;
 }
 #endif
@@ -4441,8 +4465,9 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_getType__FPv);
  *
  * @return always 0x20 (32)
  */
-int cUITextScroll_getType(void* self)
+int cUITextScroll_getType(void* vself)
 {
+    cUITextScroll* self = (cUITextScroll*)vself;
     return 0x20;
 }
 #endif
@@ -4752,8 +4777,9 @@ INCLUDE_ASM("ui/uivector", cUIVector_getType__FPv);
  *
  * @return always 0x18 (groups return 0x10)
  */
-int cUIVector_getType(void* self)
+int cUIVector_getType(void* vself)
 {
+    cUIVector* self = (cUIVector*)vself;
     return 0x18;
 }
 #endif
@@ -4837,10 +4863,10 @@ INCLUDE_ASM("ui/uivector", tAttrState_tAttrState);
  *
  * @return the object
  */
-extern "C" void* tAttrState_tAttrState(void* self)
+extern "C" void* tAttrState_tAttrState(tAttrState* self)
 {
     *(short*)self = 536;
-    return self;
+    return ((void*)self);
 }
 #endif
 //100%

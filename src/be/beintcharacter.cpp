@@ -24,7 +24,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
  * @param riderIndex  rider whose character is looked up
  * @return the character's weight
  */
-int cBECharacterInterface_getWeight(void* self, int riderIndex)
+int cBECharacterInterface::getWeight(int riderIndex)
 {
     return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].mWeight;
 }

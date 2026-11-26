@@ -16,6 +16,9 @@
 struct cSurfPropCache {
     tSurfData SurfData[19];         // 0x000 [O]; [P] getSurfData's "type < eST_Num"; [R] 19 rows of 0xB0; [U] indexed by
                                     //       the surface type (eSurfaceType)
+
+    // Methods bound to their retail symbols by asm labels.
+    void purge() __asm__("cSurfPropCache_purge__FPv");
 };
 
 CHECK_OFFSET(cSurfPropCache, SurfData, 0x000);

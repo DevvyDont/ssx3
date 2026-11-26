@@ -44,6 +44,7 @@ struct cBESaveInterface : public cBEInterface {
     void* generateSaveProfile(int idx) __asm__("cBESaveInterface_generateSaveProfile");
     bool loadSaveGame(char* buf) __asm__("cBESaveInterface_loadSaveGame");
     bool loadSaveProfile(char* buf, int idx) __asm__("cBESaveInterface_loadSaveProfile");
+    int getSaveGameSize() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 };
 
 CHECK_SIZE(cBESaveInterface, 0x10);

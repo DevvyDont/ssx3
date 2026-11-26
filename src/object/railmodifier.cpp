@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/effectmodifier.h"
+#include "render/particle.h"
+#include "object/boostnode.h"
+#include "object/deadfadenode.h"
 #include "world/instancerecord.h"
 #include "object/modifierblock.h"
 #include "world/worldrecords.h"
@@ -850,8 +854,9 @@ INCLUDE_ASM("object/railmodifier", cRailModifier_render__FPv);
 /**
  * The rail modifier's render virtual (cRailModifier_vtbl slot 3): an empty stub; rails draw nothing themselves.
  */
-void cRailModifier_render(void* self)
+void cRailModifier_render(void* vself)
 {
+    cRailModifier* self = (cRailModifier*)vself;
 }
 #endif
 
@@ -866,9 +871,10 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_cRigidBody__FPv);
  *
  * @return the body (self)
  */
-void* cRigidBody_cRigidBody(void* self)
+void* cRigidBody_cRigidBody(void* vself)
 {
-    return self;
+    cRigidBody* self = (cRigidBody*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -2008,8 +2014,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_updateRootTransform__FPv);
 /**
  * Does nothing: the roller modifier's updateRootTransform has an empty body.
  */
-void cRollerModifier_updateRootTransform(void* self)
+void cRollerModifier_updateRootTransform(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
 }
 #endif
 
@@ -3160,8 +3167,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_update__FPv);
 /**
  * Does nothing: cObjNode's update has an empty body.
  */
-void cObjNode_update(void* self)
+void cObjNode_update(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
 }
 #endif
 
@@ -3171,8 +3179,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_apply__FPv);
 /**
  * Does nothing: cObjNode's apply has an empty body.
  */
-void cObjNode_apply(void* self)
+void cObjNode_apply(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
 }
 #endif
 
@@ -3182,8 +3191,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_render__FPv);
 /**
  * Draws nothing: cObjNode's render has an empty body.
  */
-void cObjNode_render(void* self)
+void cObjNode_render(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
 }
 #endif
 
@@ -3193,8 +3203,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_renderModel__FPv);
 /**
  * Draws nothing: cObjNode's renderModel has an empty body.
  */
-void cObjNode_renderModel(void* self)
+void cObjNode_renderModel(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
 }
 #endif
 
@@ -3206,8 +3217,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_compare__FPv);
  *
  * @return 0 (false)
  */
-int cObjNode_compare(void* self)
+int cObjNode_compare(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
     return 0;
 }
 #endif
@@ -3220,8 +3232,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_equal__FPv);
  *
  * @return 0 (false)
  */
-int cObjNode_equal(void* self)
+int cObjNode_equal(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
     return 0;
 }
 #endif
@@ -3234,8 +3247,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_getSortIndex__FPv);
  *
  * @return 0
  */
-int cObjNode_getSortIndex(void* self)
+int cObjNode_getSortIndex(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
     return 0;
 }
 #endif
@@ -3248,8 +3262,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_hasParent__FPv);
  *
  * @return always 0
  */
-int cObjNode_hasParent(void* self)
+int cObjNode_hasParent(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
     return 0;
 }
 #endif
@@ -3262,8 +3277,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_isType__FPv);
  *
  * @return always 0
  */
-int cObjNode_isType(void* self)
+int cObjNode_isType(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
     return 0;
 }
 #endif
@@ -3288,8 +3304,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cObjNode's writeToReplayFrame has an empty body.
  */
-void cObjNode_writeToReplayFrame(void* self)
+void cObjNode_writeToReplayFrame(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
 }
 #endif
 
@@ -3299,8 +3316,9 @@ INCLUDE_ASM("object/railmodifier", cObjNode_readFromReplayFrame__FPv);
 /**
  * Reads nothing from the replay frame: cObjNode's readFromReplayFrame has an empty body.
  */
-void cObjNode_readFromReplayFrame(void* self)
+void cObjNode_readFromReplayFrame(void* vself)
 {
+    cObjNode* self = (cObjNode*)vself;
 }
 #endif
 
@@ -3310,8 +3328,9 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_update__FPv);
 /**
  * Does nothing: cTypeObjNode's update has an empty body.
  */
-void cTypeObjNode_update(void* self)
+void cTypeObjNode_update(void* vself)
 {
+    cTypeObjNode* self = (cTypeObjNode*)vself;
 }
 #endif
 
@@ -3321,8 +3340,9 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_render__FPv);
 /**
  * Draws nothing: cTypeObjNode's render has an empty body.
  */
-void cTypeObjNode_render(void* self)
+void cTypeObjNode_render(void* vself)
 {
+    cTypeObjNode* self = (cTypeObjNode*)vself;
 }
 #endif
 
@@ -3334,8 +3354,9 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_shouldRebound__FPv);
  *
  * @return always 1
  */
-int cTypeObjNode_shouldRebound(void* self)
+int cTypeObjNode_shouldRebound(void* vself)
 {
+    cTypeObjNode* self = (cTypeObjNode*)vself;
     return 0x1;
 }
 #endif
@@ -3657,8 +3678,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_updateNode__FPv);
  *
  * @return always 1
  */
-int cInstanceNode_updateNode(void* self)
+int cInstanceNode_updateNode(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0x1;
 }
 #endif
@@ -3671,8 +3693,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_isMoveNode__FPv);
  *
  * @return always 0 (cMoveNode returns 1)
  */
-int cInstanceNode_isMoveNode(void* self)
+int cInstanceNode_isMoveNode(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3700,8 +3723,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_isComplete__FPv);
  *
  * @return always 1
  */
-int cInstanceNode_isComplete(void* self)
+int cInstanceNode_isComplete(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0x1;
 }
 #endif
@@ -3712,8 +3736,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_throwMe__FPv);
 /**
  * Does nothing: cInstanceNode's throwMe has an empty body.
  */
-void cInstanceNode_throwMe(void* self)
+void cInstanceNode_throwMe(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -3725,8 +3750,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getNodeState__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_getNodeState(void* self)
+int cInstanceNode_getNodeState(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3739,8 +3765,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_hasFocusCount__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_hasFocusCount(void* self)
+int cInstanceNode_hasFocusCount(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3753,8 +3780,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_incFocusCount__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_incFocusCount(void* self)
+int cInstanceNode_incFocusCount(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3767,8 +3795,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_decFocusCount__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_decFocusCount(void* self)
+int cInstanceNode_decFocusCount(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3781,8 +3810,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getFocusCount__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_getFocusCount(void* self)
+int cInstanceNode_getFocusCount(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3841,8 +3871,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_hasAnimMats__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_hasAnimMats(void* self)
+int cInstanceNode_hasAnimMats(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3855,8 +3886,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimMats__FPv);
  *
  * @return 0
  */
-int cInstanceNode_getAnimMats(void* self)
+int cInstanceNode_getAnimMats(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3869,8 +3901,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getInstAnimMats__FPv);
  *
  * @return 0
  */
-int cInstanceNode_getInstAnimMats(void* self)
+int cInstanceNode_getInstAnimMats(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3883,8 +3916,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimMat__FPv);
  *
  * @return 0
  */
-int cInstanceNode_getAnimMat(void* self)
+int cInstanceNode_getAnimMat(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3897,8 +3931,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimFrame__FPv);
  *
  * @return always 0.0f
  */
-float cInstanceNode_getAnimFrame(void* self)
+float cInstanceNode_getAnimFrame(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0.0f;
 }
 #endif
@@ -3911,8 +3946,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimDir__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_getAnimDir(void* self)
+int cInstanceNode_getAnimDir(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3925,8 +3961,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_frameUpdateEvent__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_frameUpdateEvent(void* self)
+int cInstanceNode_frameUpdateEvent(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3937,8 +3974,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_signal__FPv);
 /**
  * Ignores the signal: cInstanceNode's signal has an empty body.
  */
-void cInstanceNode_signal(void* self)
+void cInstanceNode_signal(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -3948,8 +3986,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_makeActive__FPv);
 /**
  * Does nothing: cInstanceNode's makeActive has an empty body.
  */
-void cInstanceNode_makeActive(void* self)
+void cInstanceNode_makeActive(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -3961,8 +4000,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_hasIntersect__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_hasIntersect(void* self)
+int cInstanceNode_hasIntersect(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3975,8 +4015,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_intersect__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_intersect(void* self)
+int cInstanceNode_intersect(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -3987,8 +4028,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_onCollide__FPv);
 /**
  * Ignores collisions: cInstanceNode's onCollide has an empty body.
  */
-void cInstanceNode_onCollide(void* self)
+void cInstanceNode_onCollide(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -3998,8 +4040,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_setDebounce__FPv);
 /**
  * Does nothing: cInstanceNode's setDebounce has an empty body.
  */
-void cInstanceNode_setDebounce(void* self)
+void cInstanceNode_setDebounce(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -4009,8 +4052,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_updateIntersectInfo__FPv);
 /**
  * Does nothing: cInstanceNode's updateIntersectInfo has an empty body.
  */
-void cInstanceNode_updateIntersectInfo(void* self)
+void cInstanceNode_updateIntersectInfo(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -4020,8 +4064,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_applyForce__FPv);
 /**
  * Ignores the force: cInstanceNode's applyForce has an empty body.
  */
-void cInstanceNode_applyForce(void* self)
+void cInstanceNode_applyForce(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
 }
 #endif
 
@@ -4033,8 +4078,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_hasBoundBox__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_hasBoundBox(void* self)
+int cInstanceNode_hasBoundBox(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -4047,8 +4093,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getBoundBox__FPv);
  *
  * @return 0
  */
-int cInstanceNode_getBoundBox(void* self)
+int cInstanceNode_getBoundBox(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -4061,8 +4108,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_isFlexRail__FPv);
  *
  * @return always 0
  */
-int cInstanceNode_isFlexRail(void* self)
+int cInstanceNode_isFlexRail(void* vself)
 {
+    cInstanceNode* self = (cInstanceNode*)vself;
     return 0;
 }
 #endif
@@ -4095,8 +4143,9 @@ INCLUDE_ASM("object/railmodifier", cDeadNode_expire__FPv);
 /**
  * Does nothing: cDeadNode's expire has an empty body.
  */
-void cDeadNode_expire(void* self)
+void cDeadNode_expire(void* vself)
 {
+    cDeadNode* self = (cDeadNode*)vself;
 }
 #endif
 
@@ -4106,8 +4155,9 @@ INCLUDE_ASM("object/railmodifier", cDeadNode_loseFocus__FPv);
 /**
  * Does nothing: cDeadNode's loseFocus has an empty body.
  */
-void cDeadNode_loseFocus(void* self)
+void cDeadNode_loseFocus(void* vself)
 {
+    cDeadNode* self = (cDeadNode*)vself;
 }
 #endif
 
@@ -4117,8 +4167,9 @@ INCLUDE_ASM("object/railmodifier", cDeadNode_signal__FPv);
 /**
  * Ignores the signal: cDeadNode's signal has an empty body.
  */
-void cDeadNode_signal(void* self)
+void cDeadNode_signal(void* vself)
 {
+    cDeadNode* self = (cDeadNode*)vself;
 }
 #endif
 
@@ -4128,8 +4179,9 @@ INCLUDE_ASM("object/railmodifier", cDeadFadeNode_signal__FPv);
 /**
  * Ignores signals: cDeadFadeNode's signal has an empty body.
  */
-void cDeadFadeNode_signal(void* self)
+void cDeadFadeNode_signal(void* vself)
 {
+    cDeadFadeNode* self = (cDeadFadeNode*)vself;
 }
 #endif
 
@@ -4158,8 +4210,9 @@ INCLUDE_ASM("object/railmodifier", cHideNode_expire__FPv);
 /**
  * Does nothing when a hide node expires.
  */
-void cHideNode_expire(void* self)
+void cHideNode_expire(void* vself)
 {
+    cHideNode* self = (cHideNode*)vself;
 }
 #endif
 
@@ -4169,8 +4222,9 @@ INCLUDE_ASM("object/railmodifier", cHideNode_loseFocus__FPv);
 /**
  * Does nothing when a hide node loses focus.
  */
-void cHideNode_loseFocus(void* self)
+void cHideNode_loseFocus(void* vself)
 {
+    cHideNode* self = (cHideNode*)vself;
 }
 #endif
 
@@ -4180,8 +4234,9 @@ INCLUDE_ASM("object/railmodifier", cHideNode_signal__FPv);
 /**
  * Ignores signals sent to a hide node.
  */
-void cHideNode_signal(void* self)
+void cHideNode_signal(void* vself)
 {
+    cHideNode* self = (cHideNode*)vself;
 }
 #endif
 
@@ -4191,8 +4246,9 @@ INCLUDE_ASM("object/railmodifier", cHideNode_onCollide__FPv);
 /**
  * Ignores collisions with a hide node.
  */
-void cHideNode_onCollide(void* self)
+void cHideNode_onCollide(void* vself)
 {
+    cHideNode* self = (cHideNode*)vself;
 }
 #endif
 
@@ -4222,8 +4278,9 @@ INCLUDE_ASM("object/railmodifier", cRestoreNode_expire__FPv);
 /**
  * Does nothing when a restore node expires.
  */
-void cRestoreNode_expire(void* self)
+void cRestoreNode_expire(void* vself)
 {
+    cRestoreNode* self = (cRestoreNode*)vself;
 }
 #endif
 
@@ -4233,8 +4290,9 @@ INCLUDE_ASM("object/railmodifier", cRestoreNode_signal__FPv);
 /**
  * Ignores signals sent to a restore node.
  */
-void cRestoreNode_signal(void* self)
+void cRestoreNode_signal(void* vself)
 {
+    cRestoreNode* self = (cRestoreNode*)vself;
 }
 #endif
 
@@ -4244,8 +4302,9 @@ INCLUDE_ASM("object/railmodifier", cBoostNode_boostStart__FPv);
 /**
  * Hook called when a boost starts: does nothing.
  */
-void cBoostNode_boostStart(void* self)
+void cBoostNode_boostStart(void* vself)
 {
+    cBoostNode* self = (cBoostNode*)vself;
 }
 #endif
 
@@ -4255,8 +4314,9 @@ INCLUDE_ASM("object/railmodifier", cBoostNode_boostEnd__FPv);
 /**
  * Hook called when a boost ends: does nothing.
  */
-void cBoostNode_boostEnd(void* self)
+void cBoostNode_boostEnd(void* vself)
 {
+    cBoostNode* self = (cBoostNode*)vself;
 }
 #endif
 
@@ -4287,8 +4347,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_update__FPv);
 /**
  * Base cTransformModifier::update: does nothing.
  */
-void cTransformModifier_update(void* self)
+void cTransformModifier_update(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4298,8 +4359,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_updateRootTransform__FPv);
 /**
  * Does nothing: a transform modifier's root-transform update hook.
  */
-void cTransformModifier_updateRootTransform(void* self)
+void cTransformModifier_updateRootTransform(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4309,8 +4371,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_postUpdate__FPv);
 /**
  * Does nothing: cTransformModifier's postUpdate has an empty body.
  */
-void cTransformModifier_postUpdate(void* self)
+void cTransformModifier_postUpdate(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4320,8 +4383,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_signal__FPv);
 /**
  * Ignores the signal: cTransformModifier's signal has an empty body.
  */
-void cTransformModifier_signal(void* self)
+void cTransformModifier_signal(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4333,8 +4397,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_isComplete__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_isComplete(void* self)
+int cTransformModifier_isComplete(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4345,8 +4410,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_clearComplete__FPv);
 /**
  * Does nothing: cTransformModifier's clearComplete has an empty body.
  */
-void cTransformModifier_clearComplete(void* self)
+void cTransformModifier_clearComplete(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4358,8 +4424,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_shouldRebound__FPv);
  *
  * @return always 1 (cRollerModifier returns 0)
  */
-int cTransformModifier_shouldRebound(void* self)
+int cTransformModifier_shouldRebound(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0x1;
 }
 #endif
@@ -4372,8 +4439,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_runCollide__FPv);
  *
  * @return always 1 (cRollerModifier returns 0)
  */
-int cTransformModifier_runCollide(void* self)
+int cTransformModifier_runCollide(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0x1;
 }
 #endif
@@ -4384,8 +4452,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_collide__FPv);
 /**
  * Does nothing: cTransformModifier's collide has an empty body.
  */
-void cTransformModifier_collide(void* self)
+void cTransformModifier_collide(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4395,8 +4464,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_render__FPv);
 /**
  * Draws nothing: cTransformModifier's render has an empty body.
  */
-void cTransformModifier_render(void* self)
+void cTransformModifier_render(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4408,8 +4478,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getBoundBox__FPv);
  *
  * @return 0 (On Tour returns const tBoundBox*)
  */
-int cTransformModifier_getBoundBox(void* self)
+int cTransformModifier_getBoundBox(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4420,8 +4491,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_setBoundBox__FPv);
 /**
  * Base cTransformModifier::setBoundBox: does nothing (On Tour takes const tBoundBox& boundbox, not declared here).
  */
-void cTransformModifier_setBoundBox(void* self)
+void cTransformModifier_setBoundBox(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4433,8 +4505,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getRadius__FPv);
  *
  * @return 0.0
  */
-float cTransformModifier_getRadius(void* self)
+float cTransformModifier_getRadius(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0.0f;
 }
 #endif
@@ -4445,8 +4518,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_setRadius__FPv);
 /**
  * Base cTransformModifier::setRadius: does nothing (On Tour takes float radius, not declared here).
  */
-void cTransformModifier_setRadius(void* self)
+void cTransformModifier_setRadius(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4458,8 +4532,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getMesh__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_getMesh(void* self)
+int cTransformModifier_getMesh(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4472,8 +4547,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_isRootTransformDirty__FPv)
  *
  * @return always 0
  */
-int cTransformModifier_isRootTransformDirty(void* self)
+int cTransformModifier_isRootTransformDirty(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4486,8 +4562,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform__FPv);
  *
  * @return 0
  */
-int cTransformModifier_getRootTransform(void* self)
+int cTransformModifier_getRootTransform(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4500,8 +4577,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform1__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_getRootTransform1(void* self)
+int cTransformModifier_getRootTransform1(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4514,8 +4592,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_hasIntersect__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_hasIntersect(void* self)
+int cTransformModifier_hasIntersect(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4528,8 +4607,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_intersect__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_intersect(void* self)
+int cTransformModifier_intersect(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4540,8 +4620,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_updateIntersectInfo__FPv);
 /**
  * Does nothing: cTransformModifier's updateIntersectInfo has an empty body.
  */
-void cTransformModifier_updateIntersectInfo(void* self)
+void cTransformModifier_updateIntersectInfo(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4553,8 +4634,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getAnimMats__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_getAnimMats(void* self)
+int cTransformModifier_getAnimMats(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4565,8 +4647,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_updateOverlapSystem__FPv);
 /**
  * Does nothing: cTransformModifier's updateOverlapSystem has an empty body.
  */
-void cTransformModifier_updateOverlapSystem(void* self)
+void cTransformModifier_updateOverlapSystem(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4578,8 +4661,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getParent__FPv);
  *
  * @return always 0
  */
-int cTransformModifier_getParent(void* self)
+int cTransformModifier_getParent(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return 0;
 }
 #endif
@@ -4594,8 +4678,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_getTransformType__FPv);
  *
  * @return kTransform_None
  */
-int cTransformModifier_getTransformType(void* self)
+int cTransformModifier_getTransformType(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
     return cTransformModifier::kTransform_None;
 }
 #endif
@@ -4608,8 +4693,9 @@ INCLUDE_ASM("object/railmodifier", cTransformModifier_writeToReplayFrame__FPv);
  *
  * Subclasses with state override slot 27 (cPositionModifier_writeToReplayFrame, cAvaSplineModifier_writeToReplayFrame).
  */
-void cTransformModifier_writeToReplayFrame(void* self)
+void cTransformModifier_writeToReplayFrame(void* vself)
 {
+    cTransformModifier* self = (cTransformModifier*)vself;
 }
 #endif
 
@@ -4657,8 +4743,9 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier_update__FPv);
 /**
  * Does nothing: cPhysicsModifier's update has an empty body.
  */
-void cPhysicsModifier_update(void* self)
+void cPhysicsModifier_update(void* vself)
 {
+    cPhysicsModifier* self = (cPhysicsModifier*)vself;
 }
 #endif
 
@@ -4668,8 +4755,9 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier_signal__FPv);
 /**
  * Ignores the signal: cPhysicsModifier's signal has an empty body.
  */
-void cPhysicsModifier_signal(void* self)
+void cPhysicsModifier_signal(void* vself)
 {
+    cPhysicsModifier* self = (cPhysicsModifier*)vself;
 }
 #endif
 
@@ -4696,8 +4784,9 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier_getPhysicsType__FPv);
  *
  * @return always kPhysics_None (cBoostModifier returns kPhysics_Boost)
  */
-int cPhysicsModifier_getPhysicsType(void* self)
+int cPhysicsModifier_getPhysicsType(void* vself)
 {
+    cPhysicsModifier* self = (cPhysicsModifier*)vself;
     return cPhysicsModifier::kPhysics_None;
 }
 #endif
@@ -4715,8 +4804,9 @@ INCLUDE_ASM("object/railmodifier", cDynamicEmitter__cDynamicEmitter__FPv);
  *
  * @return the base destructor's result
  */
-void* cDynamicEmitter__cDynamicEmitter(void* self)
+void* cDynamicEmitter__cDynamicEmitter(void* vself)
 {
+    cDynamicEmitter* self = (cDynamicEmitter*)vself;
     return cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(self);
 }
 #endif
@@ -4755,8 +4845,9 @@ INCLUDE_ASM("object/railmodifier", cEffectLink_getType__FPv);
  *
  * @return 1
  */
-int cEffectLink_getType(void* self)
+int cEffectLink_getType(void* vself)
 {
+    cEffectLink* self = (cEffectLink*)vself;
     return 0x1;
 }
 #endif
@@ -4767,8 +4858,9 @@ INCLUDE_ASM("object/railmodifier", cEffectLink_fadeEffect__FPv);
 /**
  * Does nothing: cEffectLink's fadeEffect has an empty body.
  */
-void cEffectLink_fadeEffect(void* self)
+void cEffectLink_fadeEffect(void* vself)
 {
+    cEffectLink* self = (cEffectLink*)vself;
 }
 #endif
 
@@ -4778,8 +4870,9 @@ INCLUDE_ASM("object/railmodifier", cEffectLink_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cEffectLink's writeToReplayFrame has an empty body.
  */
-void cEffectLink_writeToReplayFrame(void* self)
+void cEffectLink_writeToReplayFrame(void* vself)
 {
+    cEffectLink* self = (cEffectLink*)vself;
 }
 #endif
 
@@ -4789,8 +4882,9 @@ INCLUDE_ASM("object/railmodifier", cEffectModifier_update__FPv);
 /**
  * Does nothing: cEffectModifier's update has an empty body.
  */
-void cEffectModifier_update(void* self)
+void cEffectModifier_update(void* vself)
 {
+    cEffectModifier* self = (cEffectModifier*)vself;
 }
 #endif
 
@@ -4800,8 +4894,9 @@ INCLUDE_ASM("object/railmodifier", cEffectModifier_render__FPv);
 /**
  * Draws nothing: cEffectModifier's render has an empty body.
  */
-void cEffectModifier_render(void* self)
+void cEffectModifier_render(void* vself)
 {
+    cEffectModifier* self = (cEffectModifier*)vself;
 }
 #endif
 
@@ -4811,8 +4906,9 @@ INCLUDE_ASM("object/railmodifier", cEffectModifier_signal__FPv);
 /**
  * Ignores the signal: cEffectModifier's signal has an empty body.
  */
-void cEffectModifier_signal(void* self)
+void cEffectModifier_signal(void* vself)
 {
+    cEffectModifier* self = (cEffectModifier*)vself;
 }
 #endif
 
@@ -4842,8 +4938,9 @@ INCLUDE_ASM("object/railmodifier", cParticleModifier_getType__FPv);
  * @return always kEffect_Particle (dynamic particle modifiers return kEffect_DynamicParticle, halo modifiers
  *         kEffect_Halo)
  */
-int cParticleModifier_getType(void* self)
+int cParticleModifier_getType(void* vself)
 {
+    cParticleModifier* self = (cParticleModifier*)vself;
     return cEffectLink::kEffect_Particle;
 }
 #endif
@@ -4856,8 +4953,9 @@ INCLUDE_ASM("object/railmodifier", cDynamicParticleModifier_getType__FPv);
  *
  * @return always kEffect_DynamicParticle (particle modifiers return kEffect_Particle, halo modifiers kEffect_Halo)
  */
-int cDynamicParticleModifier_getType(void* self)
+int cDynamicParticleModifier_getType(void* vself)
 {
+    cDynamicParticleModifier* self = (cDynamicParticleModifier*)vself;
     return cEffectLink::kEffect_DynamicParticle;
 }
 #endif
@@ -4888,8 +4986,9 @@ INCLUDE_ASM("object/railmodifier", cHaloModifier_getType__FPv);
  * @return always kEffect_Halo (particle modifiers return kEffect_Particle, dynamic particle modifiers
  *         kEffect_DynamicParticle)
  */
-int cHaloModifier_getType(void* self)
+int cHaloModifier_getType(void* vself)
 {
+    cHaloModifier* self = (cHaloModifier*)vself;
     return cEffectLink::kEffect_Halo;
 }
 #endif
@@ -4924,8 +5023,9 @@ INCLUDE_ASM("object/railmodifier", cRailLink_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cRailLink's writeToReplayFrame has an empty body.
  */
-void cRailLink_writeToReplayFrame(void* self)
+void cRailLink_writeToReplayFrame(void* vself)
 {
+    cRailLink* self = (cRailLink*)vself;
 }
 #endif
 
@@ -4961,8 +5061,9 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_updateAnimState__FPv);
 /**
  * Does nothing: cMoveNode's updateAnimState has an empty body.
  */
-void cMoveNode_updateAnimState(void* self)
+void cMoveNode_updateAnimState(void* vself)
 {
+    cMoveNode* self = (cMoveNode*)vself;
 }
 #endif
 
@@ -4974,8 +5075,9 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_isMoveNode__FPv);
  *
  * @return always 1 (cInstanceNode returns 0)
  */
-int cMoveNode_isMoveNode(void* self)
+int cMoveNode_isMoveNode(void* vself)
 {
+    cMoveNode* self = (cMoveNode*)vself;
     return 0x1;
 }
 #endif
@@ -5318,8 +5420,9 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_updateNode__FPv);
  *
  * @return 1
  */
-int cAnimNode_updateNode(void* self)
+int cAnimNode_updateNode(void* vself)
 {
+    cAnimNode* self = (cAnimNode*)vself;
     return 0x1;
 }
 #endif
@@ -5349,8 +5452,9 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimSpeed__FPv);
  *
  * @return 0.0f
  */
-float cAnimNode_getAnimSpeed(void* self)
+float cAnimNode_getAnimSpeed(void* vself)
 {
+    cAnimNode* self = (cAnimNode*)vself;
     return 0.0f;
 }
 #endif
@@ -5363,8 +5467,9 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_hasAnimMats__FPv);
  *
  * @return always 1
  */
-int cAnimNode_hasAnimMats(void* self)
+int cAnimNode_hasAnimMats(void* vself)
 {
+    cAnimNode* self = (cAnimNode*)vself;
     return 0x1;
 }
 #endif
@@ -5442,9 +5547,10 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getNodeState__FPv);
  *
  * @return self
  */
-void* cAnimObjectNode_getNodeState(void* self)
+void* cAnimObjectNode_getNodeState(void* vself)
 {
-    return self;
+    cAnimObjectNode* self = (cAnimObjectNode*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -5780,9 +5886,10 @@ INCLUDE_ASM("object/railmodifier", cAnimTeeterNode_getNodeState__FPv);
  *
  * @return self
  */
-void* cAnimTeeterNode_getNodeState(void* self)
+void* cAnimTeeterNode_getNodeState(void* vself)
 {
-    return self;
+    cAnimTeeterNode* self = (cAnimTeeterNode*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -5833,8 +5940,9 @@ INCLUDE_ASM("object/railmodifier", cBoostModifier_getPhysicsType__FPv);
  *
  * @return always kPhysics_Boost (the base cPhysicsModifier returns kPhysics_None)
  */
-int cBoostModifier_getPhysicsType(void* self)
+int cBoostModifier_getPhysicsType(void* vself)
 {
+    cBoostModifier* self = (cBoostModifier*)vself;
     return cPhysicsModifier::kPhysics_Boost;
 }
 #endif
@@ -5845,8 +5953,9 @@ INCLUDE_ASM("object/railmodifier", cBoostModifier_boostStart__FPv);
 /**
  * Does nothing when a boost starts; the body is empty.
  */
-void cBoostModifier_boostStart(void* self)
+void cBoostModifier_boostStart(void* vself)
 {
+    cBoostModifier* self = (cBoostModifier*)vself;
 }
 #endif
 
@@ -5856,8 +5965,9 @@ INCLUDE_ASM("object/railmodifier", cBoostModifier_boostEnd__FPv);
 /**
  * Does nothing when a boost ends; the body is empty.
  */
-void cBoostModifier_boostEnd(void* self)
+void cBoostModifier_boostEnd(void* vself)
 {
+    cBoostModifier* self = (cBoostModifier*)vself;
 }
 #endif
 
@@ -5888,8 +5998,9 @@ INCLUDE_ASM("object/railmodifier", cDebounceNode_onCollide__FPv);
 /**
  * Ignores collisions: cDebounceNode's onCollide has an empty body.
  */
-void cDebounceNode_onCollide(void* self)
+void cDebounceNode_onCollide(void* vself)
 {
+    cDebounceNode* self = (cDebounceNode*)vself;
 }
 #endif
 
@@ -5958,9 +6069,10 @@ INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_getNodeState__FPv);
  *
  * @return self
  */
-void* cFlexBridgeNode_getNodeState(void* self)
+void* cFlexBridgeNode_getNodeState(void* vself)
 {
-    return self;
+    cFlexBridgeNode* self = (cFlexBridgeNode*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -5972,8 +6084,9 @@ INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_hasIntersect__FPv);
  *
  * @return always 1
  */
-int cFlexBridgeNode_hasIntersect(void* self)
+int cFlexBridgeNode_hasIntersect(void* vself)
 {
+    cFlexBridgeNode* self = (cFlexBridgeNode*)vself;
     return 0x1;
 }
 #endif
@@ -5986,8 +6099,9 @@ INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_hasBoundBox__FPv);
  *
  * @return always 1
  */
-int cFlexBridgeNode_hasBoundBox(void* self)
+int cFlexBridgeNode_hasBoundBox(void* vself)
 {
+    cFlexBridgeNode* self = (cFlexBridgeNode*)vself;
     return 0x1;
 }
 #endif
@@ -6013,8 +6127,9 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateNodes__FPv);
 /**
  * Does nothing: a flex rail's per-frame node update.
  */
-void cFlexRailNode_updateNodes(void* self)
+void cFlexRailNode_updateNodes(void* vself)
 {
+    cFlexRailNode* self = (cFlexRailNode*)vself;
 }
 #endif
 
@@ -6024,8 +6139,9 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateMats__FPv);
 /**
  * Does nothing: a flex rail's segment-matrix update.
  */
-void cFlexRailNode_updateMats(void* self)
+void cFlexRailNode_updateMats(void* vself)
 {
+    cFlexRailNode* self = (cFlexRailNode*)vself;
 }
 #endif
 
@@ -6035,8 +6151,9 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_applyForce__FPv);
 /**
  * Ignores forces applied to a flex rail.
  */
-void cFlexRailNode_applyForce(void* self)
+void cFlexRailNode_applyForce(void* vself)
 {
+    cFlexRailNode* self = (cFlexRailNode*)vself;
 }
 #endif
 
@@ -6046,8 +6163,9 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateIntersectInfo__FPv);
 /**
  * Does nothing: a flex rail's intersect-info update.
  */
-void cFlexRailNode_updateIntersectInfo(void* self)
+void cFlexRailNode_updateIntersectInfo(void* vself)
 {
+    cFlexRailNode* self = (cFlexRailNode*)vself;
 }
 #endif
 
@@ -6059,8 +6177,9 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_getMesh__FPv);
  *
  * @return 0
  */
-int cFlexRailNode_getMesh(void* self)
+int cFlexRailNode_getMesh(void* vself)
 {
+    cFlexRailNode* self = (cFlexRailNode*)vself;
     return 0;
 }
 #endif
@@ -6073,8 +6192,9 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_isFlexRail__FPv);
  *
  * @return 1
  */
-int cFlexRailNode_isFlexRail(void* self)
+int cFlexRailNode_isFlexRail(void* vself)
 {
+    cFlexRailNode* self = (cFlexRailNode*)vself;
     return 0x1;
 }
 #endif
@@ -6241,8 +6361,9 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getNodeState__FPv);
  *
  * @return the address of the node state
  */
-void* cFloatingNode_getNodeState(void* self)
+void* cFloatingNode_getNodeState(void* vself)
 {
+    cFloatingNode* self = (cFloatingNode*)vself;
     return &((cFloatingNode*)self)->ZSpring;
 }
 #endif
@@ -6255,8 +6376,9 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_hasBoundBox__FPv);
  *
  * @return always 1
  */
-int cFloatingNode_hasBoundBox(void* self)
+int cFloatingNode_hasBoundBox(void* vself)
 {
+    cFloatingNode* self = (cFloatingNode*)vself;
     return 0x1;
 }
 #endif
@@ -6290,8 +6412,9 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_hasAnimMats__FPv);
  *
  * @return always 1
  */
-int cFloatingNode_hasAnimMats(void* self)
+int cFloatingNode_hasAnimMats(void* vself)
 {
+    cFloatingNode* self = (cFloatingNode*)vself;
     return 0x1;
 }
 #endif
@@ -6389,8 +6512,9 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_update__FPv);
 /**
  * The position modifier's update virtual: an empty stub (a fixed position needs no per-frame work).
  */
-void cPositionModifier_update(void* self)
+void cPositionModifier_update(void* vself)
 {
+    cPositionModifier* self = (cPositionModifier*)vself;
 }
 #endif
 
@@ -6419,8 +6543,9 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_getTransformType__FPv);
  *
  * @return kTransform_Position
  */
-int cPositionModifier_getTransformType(void* self)
+int cPositionModifier_getTransformType(void* vself)
 {
+    cPositionModifier* self = (cPositionModifier*)vself;
     return cTransformModifier::kTransform_Position;
 }
 #endif
@@ -6433,8 +6558,9 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_getBoundBox__FPv);
  *
  * @return pointer to BoundBox
  */
-void* cPositionModifier_getBoundBox(void* self)
+void* cPositionModifier_getBoundBox(void* vself)
 {
+    cPositionModifier* self = (cPositionModifier*)vself;
     return &((cPositionModifier*)self)->BoundBox;
 }
 #endif
@@ -6563,8 +6689,9 @@ INCLUDE_ASM("object/railmodifier", cParentModifier_getTransformType__FPv);
  *
  * @return kTransform_Parent
  */
-int cParentModifier_getTransformType(void* self)
+int cParentModifier_getTransformType(void* vself)
 {
+    cParentModifier* self = (cParentModifier*)vself;
     return cTransformModifier::kTransform_Parent;
 }
 #endif
@@ -6627,8 +6754,9 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_hasIntersect__FPv);
  *
  * @return always 1
  */
-int cMagnetModifier_hasIntersect(void* self)
+int cMagnetModifier_hasIntersect(void* vself)
 {
+    cMagnetModifier* self = (cMagnetModifier*)vself;
     return 0x1;
 }
 #endif
@@ -6641,8 +6769,9 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_getBoundBox__FPv);
  *
  * @return a pointer to the bound box (On Tour returns tBoundBox&)
  */
-void* cMagnetModifier_getBoundBox(void* self)
+void* cMagnetModifier_getBoundBox(void* vself)
 {
+    cMagnetModifier* self = (cMagnetModifier*)vself;
     return &((cMagnetModifier*)self)->BoundBox;
 }
 #endif
@@ -6684,8 +6813,9 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_setRadius__FPv);
  * The magnet modifier's setRadius virtual: an empty stub, so the radius set by the constructor never changes (On
  * Tour setRadius(float radius); the float is ignored).
  */
-void cMagnetModifier_setRadius(void* self)
+void cMagnetModifier_setRadius(void* vself)
 {
+    cMagnetModifier* self = (cMagnetModifier*)vself;
 }
 #endif
 
@@ -6699,8 +6829,9 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_getTransformType__FPv);
  *
  * @return kTransform_Magnet
  */
-int cMagnetModifier_getTransformType(void* self)
+int cMagnetModifier_getTransformType(void* vself)
 {
+    cMagnetModifier* self = (cMagnetModifier*)vself;
     return cTransformModifier::kTransform_Magnet;
 }
 #endif
@@ -6753,8 +6884,9 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getBoundBox__FPv);
  *
  * @return a pointer to the bound box (On Tour returns tBoundBox&)
  */
-void* cAvaSplineModifier_getBoundBox(void* self)
+void* cAvaSplineModifier_getBoundBox(void* vself)
 {
+    cAvaSplineModifier* self = (cAvaSplineModifier*)vself;
     return &((cAvaSplineModifier*)self)->BoundBox;
 }
 #endif
@@ -6814,8 +6946,9 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getTransformType__FPv);
  *
  * @return kTransform_AvaSpline
  */
-int cAvaSplineModifier_getTransformType(void* self)
+int cAvaSplineModifier_getTransformType(void* vself)
 {
+    cAvaSplineModifier* self = (cAvaSplineModifier*)vself;
     return cTransformModifier::kTransform_AvaSpline;
 }
 #endif
@@ -6828,8 +6961,9 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRootTransform__FPv);
  *
  * @return the root transform
  */
-void* cAvaSplineModifier_getRootTransform(void* self)
+void* cAvaSplineModifier_getRootTransform(void* vself)
 {
+    cAvaSplineModifier* self = (cAvaSplineModifier*)vself;
     return &((cAvaSplineModifier*)self)->Transform;
 }
 #endif
@@ -6890,8 +7024,9 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_getBoundBox__FPv);
  *
  * @return the address of the bound box (On Tour const tBoundBox*)
  */
-void* cSplineModifier_getBoundBox(void* self)
+void* cSplineModifier_getBoundBox(void* vself)
 {
+    cSplineModifier* self = (cSplineModifier*)vself;
     return &((cSplineModifier*)self)->BoundBox;
 }
 #endif
@@ -6985,8 +7120,9 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_getTransformType__FPv);
  * @return always kTransform_Spline (multi-spline modifiers return kTransform_MultiSpline, roller modifiers
  *         kTransform_Roller)
  */
-int cSplineModifier_getTransformType(void* self)
+int cSplineModifier_getTransformType(void* vself)
 {
+    cSplineModifier* self = (cSplineModifier*)vself;
     return cTransformModifier::kTransform_Spline;
 }
 #endif
@@ -7099,8 +7235,9 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getTransformType__FPv);
  * @return always kTransform_MultiSpline (spline modifiers return kTransform_Spline, roller modifiers
  *         kTransform_Roller)
  */
-int cMultiSplineModifier_getTransformType(void* self)
+int cMultiSplineModifier_getTransformType(void* vself)
 {
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
     return cTransformModifier::kTransform_MultiSpline;
 }
 #endif
@@ -7133,8 +7270,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_shouldRebound__FPv);
  *
  * @return always 0 (the base cTransformModifier returns 1)
  */
-int cRollerModifier_shouldRebound(void* self)
+int cRollerModifier_shouldRebound(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
     return 0;
 }
 #endif
@@ -7182,8 +7320,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_runCollide__FPv);
  *
  * @return always 0 (the base cTransformModifier returns 1)
  */
-int cRollerModifier_runCollide(void* self)
+int cRollerModifier_runCollide(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
     return 0;
 }
 #endif
@@ -7211,8 +7350,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getBoundBox__FPv);
  *
  * @return the address of the bound box
  */
-void* cRollerModifier_getBoundBox(void* self)
+void* cRollerModifier_getBoundBox(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
     return &((cRollerModifier*)self)->boundbox;
 }
 #endif
@@ -7255,8 +7395,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getRootTransform__FPv);
  *
  * @return the address of the transform matrix
  */
-void* cRollerModifier_getRootTransform(void* self)
+void* cRollerModifier_getRootTransform(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
     return &((cRollerModifier*)self)->Transform;
 }
 #endif
@@ -7272,8 +7413,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getRootTransform1__FPv);
  *
  * @return the address of the transform matrix
  */
-void* cRollerModifier_getRootTransform1(void* self)
+void* cRollerModifier_getRootTransform1(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
     return &((cRollerModifier*)self)->Transform;
 }
 #endif
@@ -7287,8 +7429,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getTransformType__FPv);
  * @return always kTransform_Roller (spline modifiers return kTransform_Spline, multi-spline modifiers
  *         kTransform_MultiSpline)
  */
-int cRollerModifier_getTransformType(void* self)
+int cRollerModifier_getTransformType(void* vself)
 {
+    cRollerModifier* self = (cRollerModifier*)vself;
     return cTransformModifier::kTransform_Roller;
 }
 #endif
@@ -7350,9 +7493,10 @@ INCLUDE_ASM("object/railmodifier", cAnimComboNode_getNodeState__FPv);
  *
  * @return self
  */
-void* cAnimComboNode_getNodeState(void* self)
+void* cAnimComboNode_getNodeState(void* vself)
 {
-    return self;
+    cAnimComboNode* self = (cAnimComboNode*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -7412,9 +7556,10 @@ INCLUDE_ASM("object/railmodifier", cAnimDeltaNode_getNodeState__FPv);
  *
  * @return self
  */
-void* cAnimDeltaNode_getNodeState(void* self)
+void* cAnimDeltaNode_getNodeState(void* vself)
 {
-    return self;
+    cAnimDeltaNode* self = (cAnimDeltaNode*)vself;
+    return ((void*)self);
 }
 #endif
 

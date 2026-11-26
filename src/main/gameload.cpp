@@ -2440,9 +2440,9 @@ INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
  *
  * @return cFadeScreen_update's result
  */
-void* cLoadScreen_update(void* self)
+void* cLoadScreen::update()
 {
-    return ((cFadeScreen*)self)->update();
+    return ((cFadeScreen*)this)->update();
 }
 #endif
 

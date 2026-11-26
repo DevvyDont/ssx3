@@ -2241,9 +2241,9 @@ INCLUDE_ASM("mem/memstd", cMoviePlayer_SSXFreeMemFunc__FPv);
  *
  * @return MEM_free's result
  */
-void* cMoviePlayer_SSXFreeMemFunc(void* self)
+void* cMoviePlayer::SSXFreeMemFunc()
 {
-    return MEM_free(self);
+    return MEM_free(this);
 }
 #endif
 

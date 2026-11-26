@@ -53,6 +53,9 @@ struct cWorld {
     int getNumMissionScripts(int i) __asm__("cWorld_getNumMissionScripts");
     int getMissionScripts(int i) __asm__("cWorld_getMissionScripts");
     int getWScriptScript(unsigned int* handle) __asm__("cWorld_getWScriptScript");
+    void* update() __asm__("cWorld_update__FPv");
+    int getSphereTreeInfo(void* instance) __asm__("cWorld_getSphereTreeInfo__FPvT0");
+    int getPolyModelInfo(void* instance) __asm__("cWorld_getPolyModelInfo__FPvT0");
 };
 
 CHECK_OFFSET(cWorld, m_pWorldCache, 0x00);

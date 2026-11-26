@@ -599,8 +599,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateOptionsGame_onGainFocus(void* self)
+void* cFEStateOptionsGame_onGainFocus(void* vself)
 {
+    cFEStateOptionsGame* self = (cFEStateOptionsGame*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif
@@ -1185,8 +1186,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateOptionsSound_onGainFocus(void* self)
+void* cFEStateOptionsSound_onGainFocus(void* vself)
 {
+    cFEStateOptionsSound* self = (cFEStateOptionsSound*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif
@@ -1690,8 +1692,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onGainFocus__FPv);
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateOptionsHUD_onGainFocus(void* self)
+void* cFEStateOptionsHUD_onGainFocus(void* vself)
 {
+    cFEStateOptionsHUD* self = (cFEStateOptionsHUD*)vself;
     return cUIState_onGainFocus(self);
 }
 #endif

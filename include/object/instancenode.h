@@ -85,6 +85,8 @@ struct cInstanceNode : public cSortObjNode {
     void makeThisDead() __asm__("cInstanceNode_makeThisDead");
     int getInstance() __asm__("cInstanceNode_getInstance");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cInstanceNode_writeToReplayFrame");
+    void* runCollideScript(int collideInfo, int intersectInfo, int pBeing)
+        __asm__("cInstanceNode_runCollideScript__FPviii");
 };
 
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);

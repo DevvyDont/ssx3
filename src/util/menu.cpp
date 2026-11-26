@@ -116,7 +116,7 @@ INCLUDE_ASM("util/menu", cMenuItem_gainFocus__FPv);
 /**
  * Does nothing: the base menu item's gainFocus has an empty body.
  */
-void cMenuItem_gainFocus(void* self)
+void cMenuItem::gainFocus()
 {
 }
 #endif
@@ -124,10 +124,12 @@ void cMenuItem_gainFocus(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_loseFocus__FPv);
 #ifdef SKIP_ASM
+void cMenuItem_loseFocus(void* vself);
+
 /**
  * Does nothing: the base menu item's loseFocus (cMenuItem_vtbl slot 7).
  */
-void cMenuItem_loseFocus(void* self)
+void cMenuItem::loseFocus()
 {
 }
 #endif
@@ -746,7 +748,7 @@ INCLUDE_ASM("util/menu", cMenu_onCommand__FPv);
  *
  * @return always 0
  */
-int cMenu_onCommand(void* self)
+int cMenu::onCommand()
 {
     return 0;
 }
@@ -758,7 +760,7 @@ INCLUDE_ASM("util/menu", cMenu_onChange__FPv);
 /**
  * Default notification that a menu item's value changed; does nothing.
  */
-void cMenu_onChange(void* self)
+void cMenu::onChange()
 {
 }
 #endif
@@ -1536,10 +1538,10 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
-extern "C" void cMenuSys__cMenuSys(int* self, int flags)
+extern "C" void cMenuSys__cMenuSys(cMenuSys* self, int flags)
 {
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2857,7 +2859,7 @@ INCLUDE_ASM("util/menu", cNullMenuItem_canHaveFocus__FPv);
  *
  * @return 0
  */
-int cNullMenuItem_canHaveFocus(void* self)
+int cNullMenuItem::canHaveFocus()
 {
     return 0;
 }
@@ -2942,7 +2944,7 @@ INCLUDE_ASM("util/menu", cSpaceMenuItem_canHaveFocus__FPv);
  *
  * @return 0
  */
-int cSpaceMenuItem_canHaveFocus(void* self)
+int cSpaceMenuItem::canHaveFocus()
 {
     return 0;
 }
@@ -2975,7 +2977,7 @@ INCLUDE_ASM("util/menu", cSpaceMenuItem_render__FPv);
 /**
  * Draws nothing: the spacer menu item's render has an empty body.
  */
-void cSpaceMenuItem_render(void* self)
+void cSpaceMenuItem::render()
 {
 }
 #endif
@@ -5128,7 +5130,7 @@ INCLUDE_ASM("util/menu", cRGBTitleMenuItem_canHaveFocus__FPv);
  *
  * @return 0
  */
-int cRGBTitleMenuItem_canHaveFocus(void* self)
+int cRGBTitleMenuItem::canHaveFocus()
 {
     return 0;
 }
@@ -5293,9 +5295,9 @@ INCLUDE_ASM("util/menu", cARGBMenuItem_input__FPv);
  *
  * @return the result of cExpandMenuItem_input()
  */
-void* cARGBMenuItem_input(void* self)
+void* cARGBMenuItem::input()
 {
-    return ((cExpandMenuItem*)self)->input();
+    return ((cExpandMenuItem*)this)->input();
 }
 #endif
 
@@ -5334,7 +5336,7 @@ INCLUDE_ASM("util/menu", cVectorTitleMenuItem_canHaveFocus__FPv);
  *
  * @return 0
  */
-int cVectorTitleMenuItem_canHaveFocus(void* self)
+int cVectorTitleMenuItem::canHaveFocus()
 {
     return 0;
 }

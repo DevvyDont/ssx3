@@ -374,12 +374,12 @@ void operator_delete(int* ptr);
  *
  * @param flags  destructor flags; bit 0 frees the memory
  */
-extern "C" void tNISList__tNISList(int* self, int flags)
+extern "C" void tNISList__tNISList(tNISList* self, int flags)
 {
     ((tNISList*)self)->Reset(1);
-    *self = 0;
+    *((int*)self) = 0;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -882,8 +882,9 @@ INCLUDE_ASM("scripter/datamanager", tNISList_Pause__FPvi);
  * @param pauseList  nonzero to pause, 0 to resume
  * @return tNISList_DoPause's return register (it returns nothing)
  */
-void* tNISList_Pause(void* self, int pauseList)
+void* tNISList_Pause(void* vself, int pauseList)
 {
+    tNISList* self = (tNISList*)vself;
     return tNISList_DoPause(self, pauseList, 0);
 }
 #endif
@@ -1231,8 +1232,9 @@ INCLUDE_ASM("scripter/datamanager", tNISList_GetLength__FPv);
  *
  * @return the entry count
  */
-void* tNISList_GetLength(void* vself)
+void* tNISList_GetLength(void* vvself)
 {
+    tNISList* vself = (tNISList*)vvself;
     tNISList* self = (tNISList*)vself;
     return cCircularBuffer_GetNumEntries(&self->mList.mBuffer[0]);
 }
@@ -1589,8 +1591,9 @@ INCLUDE_ASM("scripter/datamanager", tNISList_IsInTransition__FPv);
  *
  * @return the transition flag (nonzero during a transition)
  */
-int tNISList_IsInTransition(void* vself)
+int tNISList_IsInTransition(void* vvself)
 {
+    tNISList* vself = (tNISList*)vvself;
     tNISList* self = (tNISList*)vself;
     return self->mInScriptTransition;
 }
@@ -2253,8 +2256,9 @@ INCLUDE_ASM("scripter/datamanager", tSSXScriptBankInfo_Clear__FPv);
 /**
  * Resets a script bank info record: zeroes its words at +0x0, +0x8 and +0xC and sets +0x4 to -1.
  */
-void tSSXScriptBankInfo_Clear(void* vself)
+void tSSXScriptBankInfo_Clear(void* vvself)
 {
+    tSSXScriptBankInfo* vself = (tSSXScriptBankInfo*)vvself;
     tSSXScriptBankInfo* self = (tSSXScriptBankInfo*)vself;
     *(int*)self = 0;
     self->dataIdentifier = -1;

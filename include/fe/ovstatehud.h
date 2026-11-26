@@ -127,6 +127,10 @@ struct tHUDDef {
     char pivotY;                    // 0x21 [O]; [U] the vertical alignment
     char layer;                     // 0x22 [O]; [U] the element's draw layer (renderMultiText passes +0x22 on)
     char unk_23[0x1];               // 0x23 tail padding
+
+    // Methods bound to their retail symbols by asm labels.
+    void getPos(void* outPos) __asm__("tHUDDef_getPos");
+    void getSize(void* outVec, void* fallback) __asm__("tHUDDef_getSize");
 };
 
 struct cRider;

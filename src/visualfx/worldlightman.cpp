@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/particle.h"
 #include "be/beinterface.h"
 #include "visualfx/attachedemitterfx.h"
 #include "ai/rider.h"
@@ -539,7 +540,8 @@ extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* a, t4Vector* b, tLi
 
 struct cWorldLightMan_CalcLightDist_sVec3;
 struct cWorldLightMan_CalcLightDist_sLight;
-extern "C" bool cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, tLightRecord* light,
+extern "C" bool cWorldLightMan_CalcLightDist(cWorldLightMan* self, cWorldLightMan_CalcLightDist_sVec3* p,
+        tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot);
 
 
@@ -685,7 +687,8 @@ struct cWorldLightMan_CalcLightDist_sVec3 {
  * @param outDot  receives the cosine, or null
  * @return true when the point is within the radius, else false
  */
-extern "C" bool cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* point, tLightRecord* light,
+extern "C" bool cWorldLightMan_CalcLightDist(cWorldLightMan* self, cWorldLightMan_CalcLightDist_sVec3* point,
+        tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
     float dx = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).x - point->x;
@@ -811,7 +814,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_reset__FPv);
 /**
  * Does nothing (an empty reset).
  */
-void cCheatFX_reset(void* self)
+void cCheatFX::reset()
 {
 }
 #endif
@@ -1025,7 +1028,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_render__FPv);
 /**
  * Does nothing (an empty render).
  */
-void cCheatFX_render(void* self)
+void cCheatFX::render()
 {
 }
 #endif
@@ -1769,9 +1772,10 @@ INCLUDE_ASM("visualfx/worldlightman", tParticleEmitter_tParticleEmitter__FPv);
  *
  * @return @p self
  */
-void* tParticleEmitter_tParticleEmitter(void* self)
+void* tParticleEmitter_tParticleEmitter(void* vself)
 {
-    return self;
+    tParticleEmitter* self = (tParticleEmitter*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -2082,7 +2086,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cVisualEffect__cVisualEffect(void* self, int flags)
+extern "C" void cVisualEffect__cVisualEffect(cVisualEffect* self, int flags)
 {
     *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
@@ -2099,7 +2103,7 @@ INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_update__FPv);
  *
  * It is the slot after the destructor in cVisualEffect_vtbl and in the effect vtables built on it (cLightGlow_vtbl and others).
  */
-void cVisualEffect_update(void* self)
+void cVisualEffect::update()
 {
 }
 #endif
@@ -2112,7 +2116,7 @@ INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_render__FPv);
  *
  * It is the slot after cVisualEffect_update__FPv in cVisualEffect_vtbl and in the effect vtables built on it.
  */
-void cVisualEffect_render(void* self)
+void cVisualEffect::render()
 {
 }
 #endif
@@ -2123,7 +2127,7 @@ INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_deferredRender__FPv);
 /**
  * Draws nothing: cVisualEffect's deferredRender has an empty body.
  */
-void cVisualEffect_deferredRender(void* self)
+void cVisualEffect::deferredRender()
 {
 }
 #endif
@@ -3244,8 +3248,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan__cCutSceneTransitio
  *
  * @return the result of cObjNode__cObjNode()
  */
-void* cCutSceneTransitionMan__cCutSceneTransitionMan(void* self)
+void* cCutSceneTransitionMan__cCutSceneTransitionMan(void* vself)
 {
+    cCutSceneTransitionMan* self = (cCutSceneTransitionMan*)vself;
     return cObjNode__cObjNode(self);
 }
 #endif

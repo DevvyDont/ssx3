@@ -292,7 +292,7 @@ void cStreamMan::update()
         m_fTicksLeft = m_fTicksPerChunk;
         size = (chunk[7] << 24) | (chunk[6] << 16) | (chunk[5] << 8) | chunk[4];
         // PORT: the payload pointer is passed as an int.
-        *(void**)&m_iDecompressSizeLeft = cStreamMan_decompressChunk(this, ((int)m_pDecompressBuffer), size - 8,
+        *(void**)&m_iDecompressSizeLeft = this->decompressChunk(((int)m_pDecompressBuffer), size - 8,
                 (int)(chunk + 8));
         STREAM_release(((void*)m_streamHandle), chunk);
         *(int*)&m_pDecompressDataLeft = ((int)m_pDecompressBuffer);
@@ -330,7 +330,7 @@ INCLUDE_ASM("world/streamman", cStreamMan_decompressChunk__FPviii);
  * @param src  the compressed data
  * @return unpack's result
  */
-void* cStreamMan_decompressChunk(void* self, int dst, int srcSize, int src)
+void* cStreamMan::decompressChunk(int dst, int srcSize, int src)
 {
     return unpack(src);
 }

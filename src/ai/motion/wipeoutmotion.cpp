@@ -312,7 +312,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_loseFocus__FPv);
  *
  * On Tour's version also takes the next eMotionState, which this declaration omits.
  */
-void cWipeoutMotion_loseFocus(void* self)
+void cWipeoutMotion::loseFocus()
 {
 }
 #endif

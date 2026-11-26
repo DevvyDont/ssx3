@@ -227,9 +227,9 @@ INCLUDE_ASM("ai/ai", cAI_resolveRace__FPv);
  *
  * @return cAI_commonInit's value, which has no meaning (On Tour's resolveRace returns void; the callers ignore it)
  */
-void* cAI_resolveRace(void* self)
+void* cAI::resolveRace()
 {
-    return ((cAI*)self)->commonInit(0);
+    return ((cAI*)this)->commonInit(0);
 }
 #endif
 
@@ -4687,7 +4687,7 @@ INCLUDE_ASM("ai/ai", cPrewindControl_loseFocus__FPv);
 /**
  * Does nothing when the prewind control loses focus.
  */
-void cPrewindControl_loseFocus(void* self)
+void cPrewindControl::loseFocus()
 {
 }
 #endif
@@ -5892,8 +5892,9 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_handleIntoAirState__FPv);
  *
  * cBoardPressControl_update calls it for state 2 and passes the input in a1, which it ignores.
  */
-void cBoardPressControl_handleIntoAirState(void* self)
+void cBoardPressControl_handleIntoAirState(void* vself)
 {
+    cBoardPressControl* self = (cBoardPressControl*)vself;
     *(int*)self = 1;
 }
 #endif
@@ -9712,7 +9713,7 @@ INCLUDE_ASM("ai/ai", cStaticMotion_resolve__FPv);
 /**
  * Resolves the static motion: does nothing (empty body).
  */
-void cStaticMotion_resolve(void* self)
+void cStaticMotion::resolve()
 {
 }
 #endif

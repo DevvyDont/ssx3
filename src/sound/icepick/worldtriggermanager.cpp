@@ -1196,7 +1196,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AdvancedTr
  *
  * @return 0
  */
-int cWorldTriggerManager_AdvancedTriggerToString(void* self)
+int cWorldTriggerManager::AdvancedTriggerToString()
 {
     return 0;
 }
@@ -1571,10 +1571,10 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cWorldSound__cWorldSound(int* self, int flags)
+extern "C" void cWorldSound__cWorldSound(cWorldSound* self, int flags)
 {
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

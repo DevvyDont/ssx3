@@ -1795,7 +1795,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateChecking__FPv);
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 27, +0xDC).
  */
-void cFEMemCard_updateChecking(void* self)
+void cFEMemCard::updateChecking()
 {
 }
 #endif
@@ -1818,7 +1818,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateSaving__FPv);
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 28, +0xE4).
  */
-void cFEMemCard_updateSaving(void* self)
+void cFEMemCard::updateSaving()
 {
 }
 #endif
@@ -1829,7 +1829,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateDeleting__FPv);
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 30, +0xF4).
  */
-void cFEMemCard_updateDeleting(void* self)
+void cFEMemCard::updateDeleting()
 {
 }
 #endif
@@ -1840,7 +1840,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateLoading__FPv);
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 29, +0xEC).
  */
-void cFEMemCard_updateLoading(void* self)
+void cFEMemCard::updateLoading()
 {
 }
 #endif
@@ -2058,8 +2058,9 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseFocus__FPv);
 /**
  * Does nothing (the memory-card screen's onLoseFocus handler, vtable entry 11).
  */
-void cFEMemCard_onLoseFocus(void* self)
+void cFEMemCard_onLoseFocus(void* vself)
 {
+    cFEMemCard* self = (cFEMemCard*)vself;
 }
 #endif
 

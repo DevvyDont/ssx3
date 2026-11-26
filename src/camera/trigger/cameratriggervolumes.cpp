@@ -1,4 +1,6 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerman.h"
+#include "camera/trigger/cameratriggerlist.h"
 
 void operator_delete(int* ptr);
 
@@ -10,8 +12,9 @@ INCLUDE_ASM("camera/trigger/cameratriggervolumes", tCameraTrigger__tCameraTrigge
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-void tCameraTrigger__tCameraTrigger(void* self, int flags)
+void tCameraTrigger__tCameraTrigger(void* vself, int flags)
 {
+    tCameraTrigger* self = (tCameraTrigger*)vself;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -28,10 +31,11 @@ INCLUDE_ASM("camera/trigger/cameratriggervolumes", cActiveTriggerList_cActiveTri
  *
  * @return @p self
  */
-void* cActiveTriggerList_cActiveTriggerList(void* self)
+void* cActiveTriggerList_cActiveTriggerList(void* vself)
 {
+    cActiveTriggerList* self = (cActiveTriggerList*)vself;
     *(int*)self = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 

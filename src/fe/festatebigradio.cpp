@@ -29,7 +29,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cBraggingRightsMenu_setConfirmed_2DB0(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");
 void cBraggingRightsMenu_setEnableFlag(void* panel, int mask);
 extern "C" void cBraggingRightsMenu_setEnableItem_2DB0(void* panel, void* screen) __asm__("cBraggingRightsMenu_setEnableItem");
-extern "C" int cFEStateBraggingRights_getBEData(void* self, int player, int which);
+extern "C" int cFEStateBraggingRights_getBEData(cFEStateBraggingRights* self, int player, int which);
 extern "C" unsigned char cUIListBox_addEntryByStringID_2DB0(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" unsigned char cUIListBox_addEntryByAsciiString_2DB0(void* box, const char* str, int data) __asm__("cUIListBox_addEntryByAsciiString");
 extern "C" int cUIListBox_getEntryByData_2DB0(void* item, int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
@@ -166,7 +166,7 @@ void cFEStateBraggingRights::onCreateScreen()
             case kBRAGRIGHTS_TAKEHALFPOINTS:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNNo), 0);
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNYes), 1);
-                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(this, playerIndex,
+                cUIListBox_getEntryByData_2DB0(lb, this->getBEData(playerIndex,
                         ((signed char*)mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
@@ -176,7 +176,7 @@ void cFEStateBraggingRights::onCreateScreen()
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10s, 10);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15s, 15);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_20s, 20);
-                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(this, playerIndex,
+                cUIListBox_getEntryByData_2DB0(lb, this->getBEData(playerIndex,
                         ((signed char*)mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
@@ -186,7 +186,7 @@ void cFEStateBraggingRights::onCreateScreen()
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_5000, 5000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10000, 10000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15000, 15000);
-                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(this, playerIndex,
+                cUIListBox_getEntryByData_2DB0(lb, this->getBEData(playerIndex,
                         ((signed char*)mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
@@ -228,8 +228,9 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onGainTransition__FPv);
  *
  * @return always 0
  */
-int cFEStateBraggingRights_onGainTransition(void* self)
+int cFEStateBraggingRights_onGainTransition(void* vself)
 {
+    cFEStateBraggingRights* self = (cFEStateBraggingRights*)vself;
     return 0;
 }
 #endif
@@ -244,8 +245,9 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onRender2D__FPv);
  *
  * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cFEStateBraggingRights_onRender2D(void* self)
+void* cFEStateBraggingRights_onRender2D(void* vself)
 {
+    cFEStateBraggingRights* self = (cFEStateBraggingRights*)vself;
     return cUIState_onRender2D(self);
 }
 #endif
@@ -813,7 +815,8 @@ extern sRadioChan_3F38 cBERules_mRules_a[] __asm__("cBERules_mRules");
  * @param kind  the rule (eBRAGRIGHTs)
  * @return the rule's value, or -1 for other rules
  */
-extern "C" int cFEStateBraggingRights_getBEData(void *self, int chan, int kind) {
+int cFEStateBraggingRights::getBEData(int chan, int kind)
+{
     switch (kind) {
     case kBRAGRIGHTS_GIVEHEADSTART:
         return cBERules_mRules_a[other_3F38(chan)].f8;

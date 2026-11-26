@@ -344,9 +344,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_writeSetSize__FPv);
  *
  * @return whatever cMCOverlayManager_readSetSize left in the return register
  */
-void* cMCOverlayManager_writeSetSize(void* self)
+void* cMCOverlayManager::writeSetSize()
 {
-    return cMCOverlayManager_readSetSize(self);
+    return cMCOverlayManager_readSetSize(this);
 }
 #endif
 
@@ -1060,7 +1060,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitCardsCheckDone__FPv
 /**
  * Does nothing: the memory-card overlay's init-cards-check-done update has an empty body.
  */
-void cMCOverlayManager_UpdateInitCardsCheckDone(void* self)
+void cMCOverlayManager::UpdateInitCardsCheckDone()
 {
 }
 #endif
@@ -1175,7 +1175,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFileCheckDone__FPv)
 /**
  * Does nothing: the memory-card overlay's init-file-check-done update has an empty body.
  */
-void cMCOverlayManager_UpdateInitFileCheckDone(void* self)
+void cMCOverlayManager::UpdateInitFileCheckDone()
 {
 }
 #endif
@@ -2782,9 +2782,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCardUnusable__FPv);
  *
  * @return the result of cMCOverlayManager_ReturnToDevSelectScreen()
  */
-void* cMCOverlayManager_UpdateCardUnusable(void* self)
+void* cMCOverlayManager::UpdateCardUnusable()
 {
-    return ((cMCOverlayManager*)self)->ReturnToDevSelectScreen();
+    return ((cMCOverlayManager*)this)->ReturnToDevSelectScreen();
 }
 #endif
 

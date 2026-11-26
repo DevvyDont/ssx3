@@ -94,8 +94,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onInputBegin__FPv);
  *
  * @return always 1 (input consumed)
  */
-int cFEStateNetHelpPopup_onInputBegin(void* self)
+int cFEStateNetHelpPopup_onInputBegin(void* vself)
 {
+    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
     return 0x1;
 }
 #endif
@@ -399,9 +400,9 @@ struct sNetHelpPopup_DA510 {
  * @param textId  the text id (hash of a "kT_HELP..." name)
  * @param iconIndex  the button icon to show next to it
  */
-void cFEStateNetHelpPopup_setOption(void* self, int optionNum, int textId, int iconIndex)
+void cFEStateNetHelpPopup::setOption(int optionNum, int textId, int iconIndex)
 {
-    sNetHelpPopup_DA510* popup = (sNetHelpPopup_DA510*)self;
+    sNetHelpPopup_DA510* popup = (sNetHelpPopup_DA510*)this;
     popup->a[optionNum] = textId;
     popup->b[optionNum] = iconIndex;
 }

@@ -410,8 +410,9 @@ INCLUDE_ASM("fe/festateload", cFEStateMemCard_onWidgetMenu__FPv);
  *
  * @return 0x100
  */
-int cFEStateMemCard_onWidgetMenu(void* self)
+int cFEStateMemCard_onWidgetMenu(void* vself)
 {
+    cFEStateMemCard* self = (cFEStateMemCard*)vself;
     return 0x100;
 }
 #endif

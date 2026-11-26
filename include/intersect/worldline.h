@@ -66,6 +66,7 @@ struct cWorldLine {
         __asm__("cWorldLine_Is2SidedTriInt");
     int IsBoxInt(float* bmin, float* bmax, tIntersectInfo* hits) __asm__("cWorldLine_IsBoxInt");
     float GetIdealParam() __asm__("cWorldLine_GetIdealParam__FPv");
+    int IsSphTreeInt() __asm__("cWorldLine_IsSphTreeInt__FPv");
 };
 
 CHECK_OFFSET(cWorldLine, mPrecision, 0x000);

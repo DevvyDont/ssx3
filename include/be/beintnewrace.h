@@ -138,6 +138,9 @@ struct cBENewRaceInterface : public cBEInterface {
     int getLocationDefaultGameMode(unsigned int location) __asm__("cBENewRaceInterface_getLocationDefaultGameMode");
     int getLocationDefaultGameEvent(int idx) __asm__("cBENewRaceInterface_getLocationDefaultGameEvent");
     int getDefaultGameMode(unsigned int gameEvent) __asm__("cBENewRaceInterface_getDefaultGameMode");
+    void setNumberHumans(int humans) __asm__("cBENewRaceInterface_setNumberHumans__FPvi");
+    void setNumberMission(int mission) __asm__("cBENewRaceInterface_setNumberMission__FPvi");
+    void* assignPlayer(int iGate, int iPlayer) __asm__("cBENewRaceInterface_assignPlayer__FPvii");
 };
 
 CHECK_SIZE(cBENewRaceInterface, 0x10);

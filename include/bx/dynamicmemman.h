@@ -116,6 +116,10 @@ struct cDynamicMemMan {
     void* iALLOc(unsigned int n, unsigned int* sizes, int opts, void** chunks) __asm__("cDynamicMemMan_iALLOc");
     void* alloc(unsigned int bytes) __asm__("cDynamicMemMan_alloc");
     bool isBlock(unsigned int addr) __asm__("cDynamicMemMan_isBlock");
+    unsigned int dlmalloc_usable_size(void* mem) __asm__("cDynamicMemMan_dlmalloc_usable_size__FPvT0");
+    int allocAlign() __asm__("cDynamicMemMan_allocAlign__FPv");
+    int allocAlignHdr() __asm__("cDynamicMemMan_allocAlignHdr__FPv");
+    int free() __asm__("cDynamicMemMan_free__FPv");
 };
 
 CHECK_OFFSET(cDynamicMemMan, MallocState, 0x000);

@@ -1781,10 +1781,10 @@ void operator_delete(int* ptr);
  *
  * @param flags  bit 0 set to also delete the object
  */
-extern "C" void cBankMonitorInstance__cBankMonitorInstance(int* self, int flags)
+extern "C" void cBankMonitorInstance__cBankMonitorInstance(cBankMonitorInstance* self, int flags)
 {
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1955,7 +1955,7 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Dist2Vol__FPvi);
  * @param vol  the full volume (On Tour Vol)
  * @return the attenuated volume
  */
-void* cBankMonitorInstance_Dist2Vol(void* self, int vol)
+void* cBankMonitorInstance::Dist2Vol(int vol)
 {
     return ExpScale(vol);
 }

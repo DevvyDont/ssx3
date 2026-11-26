@@ -2115,8 +2115,9 @@ INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_snap__FPv);
 /**
  * Snaps the manual camera algorithm to its subject: an empty stub in retail (On Tour snap(int subjectID)).
  */
-void cManualCameraAlgorithm_snap(void* self)
+void cManualCameraAlgorithm_snap(void* vself)
 {
+    cManualCameraAlgorithm* self = (cManualCameraAlgorithm*)vself;
 }
 #endif
 
@@ -2580,8 +2581,9 @@ INCLUDE_ASM("camera/camera", cManualChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cManualChaseAlgorithm_getRestDrop(void* self)
+float cManualChaseAlgorithm_getRestDrop(void* vself)
 {
+    cManualChaseAlgorithm* self = (cManualChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -2595,8 +2597,9 @@ INCLUDE_ASM("camera/camera", cManualChaseAlgorithm_getRaceCamFinalPhaseData__FPv
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cManualChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cManualChaseAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cManualChaseAlgorithm* self = (cManualChaseAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif
@@ -2836,8 +2839,9 @@ INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0.0f
  */
-float cMatrixChaseAlgorithm_getRestDrop(void* self)
+float cMatrixChaseAlgorithm_getRestDrop(void* vself)
 {
+    cMatrixChaseAlgorithm* self = (cMatrixChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -2851,8 +2855,9 @@ INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_getRaceCamFinalPhaseData__FPv
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cMatrixChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cMatrixChaseAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cMatrixChaseAlgorithm* self = (cMatrixChaseAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif
@@ -3104,8 +3109,9 @@ INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0.0f
  */
-float cRelativeChaseAlgorithm_getRestDrop(void* self)
+float cRelativeChaseAlgorithm_getRestDrop(void* vself)
 {
+    cRelativeChaseAlgorithm* self = (cRelativeChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -3119,8 +3125,9 @@ INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_getRaceCamFinalPhaseData__F
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cRelativeChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cRelativeChaseAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cRelativeChaseAlgorithm* self = (cRelativeChaseAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif
@@ -3378,8 +3385,9 @@ INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cSplineCamAlgorithm_getRestDrop(void* self)
+float cSplineCamAlgorithm_getRestDrop(void* vself)
 {
+    cSplineCamAlgorithm* self = (cSplineCamAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -3393,8 +3401,9 @@ INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_getRaceCamFinalPhaseData__FPvT0
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cSplineCamAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cSplineCamAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cSplineCamAlgorithm* self = (cSplineCamAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif
@@ -3623,8 +3632,9 @@ INCLUDE_ASM("camera/camera", cIdleChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cIdleChaseAlgorithm_getRestDrop(void* self)
+float cIdleChaseAlgorithm_getRestDrop(void* vself)
 {
+    cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -3638,8 +3648,9 @@ INCLUDE_ASM("camera/camera", cIdleChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cIdleChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cIdleChaseAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif
@@ -7740,8 +7751,9 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateDebugCam__FPv);
  *
  * @return cLookAtChaseAlgorithm_verify's result (the function is really void; declared void*)
  */
-void* cLookAtChaseAlgorithm_updateDebugCam(void* self)
+void* cLookAtChaseAlgorithm_updateDebugCam(void* vself)
 {
+    cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)vself;
     return cLookAtChaseAlgorithm_verify(self);
 }
 #endif
@@ -8926,8 +8938,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_snap__FPv);
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 3, which cLookAtChaseAlgorithm_snap overrides.
  */
-void cCameraAlgorithm_snap(void* self)
+void cCameraAlgorithm_snap(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
 }
 #endif
 
@@ -8937,8 +8950,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_snapCurrent__FPv);
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 4, which cLookAtChaseAlgorithm_snapCurrent overrides.
  */
-void cCameraAlgorithm_snapCurrent(void* self)
+void cCameraAlgorithm_snapCurrent(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
 }
 #endif
 
@@ -8949,8 +8963,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_update__FPv);
  * Does nothing: cCameraAlgorithm's default for vtable slot 5, which the chase algorithms' update functions (e.g.
  * cIdleChaseAlgorithm_update) override.
  */
-void cCameraAlgorithm_update(void* self)
+void cCameraAlgorithm_update(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
 }
 #endif
 
@@ -8991,8 +9006,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_getRaceCamFinalPhaseData__FPv);
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 7 (no class in the camera unit overrides it).
  */
-void cCameraAlgorithm_getRaceCamFinalPhaseData(void* self)
+void cCameraAlgorithm_getRaceCamFinalPhaseData(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
 }
 #endif
 
@@ -9003,8 +9019,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_doRaceCamFinalPhase__FPv);
  * Does nothing: cCameraAlgorithm's default for vtable slot 8, which cLookAtChaseAlgorithm_doRaceCamFinalPhase
  * overrides.
  */
-void cCameraAlgorithm_doRaceCamFinalPhase(void* self)
+void cCameraAlgorithm_doRaceCamFinalPhase(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
 }
 #endif
 
@@ -9040,8 +9057,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_notifyMoveZ__FPv);
  *
  * Empty base-class virtual; the On Tour flag argument (didMoveZ) is unused, so the C omits it.
  */
-void cCameraAlgorithm_notifyMoveZ(void* self)
+void cCameraAlgorithm_notifyMoveZ(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
 }
 #endif
 
@@ -9054,8 +9072,9 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_shouldSnapOnUpdate__FPv);
  *
  * @return 0
  */
-int cCameraAlgorithm_shouldSnapOnUpdate(void* self)
+int cCameraAlgorithm_shouldSnapOnUpdate(void* vself)
 {
+    cCameraAlgorithm* self = (cCameraAlgorithm*)vself;
     return 0;
 }
 #endif
@@ -9477,8 +9496,9 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_update__FPv);
  *
  * @return cSimpleCamera_updateCamMat's result (declared void*)
  */
-void* cSimpleCamera_update(void* self)
+void* cSimpleCamera_update(void* vself)
 {
+    cSimpleCamera* self = (cSimpleCamera*)vself;
     return cSimpleCamera_updateCamMat(self);
 }
 #endif
@@ -9988,8 +10008,9 @@ INCLUDE_ASM("camera/camera", cLazyChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cLazyChaseAlgorithm_getRestDrop(void* self)
+float cLazyChaseAlgorithm_getRestDrop(void* vself)
 {
+    cLazyChaseAlgorithm* self = (cLazyChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -10003,8 +10024,9 @@ INCLUDE_ASM("camera/camera", cLazyChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cLazyChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cLazyChaseAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cLazyChaseAlgorithm* self = (cLazyChaseAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif
@@ -10294,8 +10316,9 @@ INCLUDE_ASM("camera/camera", cLookBackChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cLookBackChaseAlgorithm_getRestDrop(void* self)
+float cLookBackChaseAlgorithm_getRestDrop(void* vself)
 {
+    cLookBackChaseAlgorithm* self = (cLookBackChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -10309,8 +10332,9 @@ INCLUDE_ASM("camera/camera", cLookBackChaseAlgorithm_getRaceCamFinalPhaseData__F
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cLookBackChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cLookBackChaseAlgorithm_getRaceCamFinalPhaseData(void* vself, void* other)
 {
+    cLookBackChaseAlgorithm* self = (cLookBackChaseAlgorithm*)vself;
     ((cRaceCamFinalPhaseData*)other)->DoPitchBlending = 0;
 }
 #endif

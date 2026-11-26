@@ -2058,9 +2058,9 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_loseFocus__FPv);
  *
  * @return true when cFadeScreen_loseFocus() reports the fade done
  */
-bool cDebugFE_loseFocus(void* self)
+bool cDebugFE::loseFocus()
 {
-    return (cFadeScreen_loseFocus(self) != 0);
+    return (cFadeScreen_loseFocus(this) != 0);
 }
 #endif
 

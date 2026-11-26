@@ -515,7 +515,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_update);
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int cFERider_isDoneLoadingModels(int* self);
 extern "C" int cFERider_isDoneLoadingTextures(cFERider* self);
-extern "C" void cFERider_updateAnimModelParts(int* self);
+extern "C" void cFERider_updateAnimModelParts(cFERider* self);
 extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
 extern "C" void cRiderAnimBase_expireAnimation(void* anim);
@@ -557,7 +557,7 @@ void cFERider::update()
                     self->compileModel();
                 }
             } else if (self->mDoneLoadingModels != 0 && self->mDoneLoadingTextures != 0 && self->mCompiledModel != 0 && self->mDoneUpdatingModelParts == 0) {
-                cFERider_updateAnimModelParts((int*)self);
+                self->updateAnimModelParts();
                 self->mDoneUpdatingModelParts = 1;
                 int* pv = &self->mVisible;
                 *pv = self->mSetVisible != 0 || *pv != 0;
@@ -1019,23 +1019,23 @@ static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
  * entry (func_0014D448 on the item database) and, when its part index (+0x10) is not negative, sets that model part's
  * variant (cAnimModel_setModelPartVariant). Finally sets the first word of the bolt-on FX interface (+0xC74) to 1.
  */
-extern "C" void cFERider_updateAnimModelParts(int* self)
+void cFERider::updateAnimModelParts()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sBoneDbF780* db = (sBoneDbF780*)func_0014BDB8_noarg();
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self[1], self[0]);
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, ((int*)this)[1], ((int*)this)[0]);
     int n = list->mNumBolts;
     tBEProfileBolt* it = ((&list->mBolts[0]));
-    func_0030EB60(*(void**)((char*)self + 0x8));
+    func_0030EB60(mpAnimModel);
     int i;
     for (i = 0; i < n; i++) {
         if (it[i].flags & 0x10) {
-            sBoneEntF780* partEntry = getEntK19F780(db, func_0014D448(db, self[0], it[i].id));
+            sBoneEntF780* partEntry = getEntK19F780(db, func_0014D448(db, ((int*)this)[0], it[i].id));
             if (partEntry->partID >= 0)
-                cAnimModel_setModelPartVariant(*(void**)((char*)self + 0x8), partEntry->partID, partEntry->variant);
+                cAnimModel_setModelPartVariant(mpAnimModel, partEntry->partID, partEntry->variant);
         }
     }
-    **(int**)((char*)self + 0xC74) = 1;
+    *(int*)mpBoltOnFX = 1;
 }
 #endif
 

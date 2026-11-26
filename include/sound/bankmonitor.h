@@ -96,6 +96,7 @@ struct cMonitorInstance {
     void Reset() __asm__("cMonitorInstance_Reset");
     void CountReset(int periodMs) __asm__("cMonitorInstance_CountReset__FPvi");
     void Disable() __asm__("cMonitorInstance_Disable__FPv");
+    void Enable() __asm__("cMonitorInstance_Enable__FPv");
 };
 
 // cBankMonitorInstance::mRestartInfo (On Tour: an anonymous union __C1 of three anonymous structs, members bank /
@@ -203,6 +204,7 @@ struct cBankMonitorInstance {
     // Fade's level that fades the sound out and stops it (name ours). [U] Fade sets mFading for -1 (a stream is
     // purged) and clamps any other level to 0..127; cBankMonitor's BANKMONITOR_FadeOut / StopHandle pass it.
     enum { kFadeStop = -1 };
+    void* Dist2Vol(int vol) __asm__("cBankMonitorInstance_Dist2Vol__FPvi");
 };
 
 CHECK_OFFSET(tBankRestartInfo, mBank, 0x0);
@@ -385,6 +387,7 @@ struct cMonitor {
     int MONITOR_GetFreeInstance(int n) __asm__("cMonitor_MONITOR_GetFreeInstance");
     void MONITOR_Destroy(int idx) __asm__("cMonitor_MONITOR_Destroy");
     void MONITOR_DestroyAll() __asm__("cMonitor_MONITOR_DestroyAll");
+    void* MONITOR_BeginMonitoring() __asm__("cMonitor_MONITOR_BeginMonitoring__FPv");
 };
 
 struct cBankMonitor {

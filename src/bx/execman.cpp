@@ -378,9 +378,9 @@ INCLUDE_ASM("bx/execman", cPS2ExecutionMan_getCurrentThreadId__FPv);
  *
  * @return GetThreadId's result
  */
-void* cPS2ExecutionMan_getCurrentThreadId(void* self)
+void* cPS2ExecutionMan::getCurrentThreadId()
 {
-    return GetThreadId(self);
+    return GetThreadId(this);
 }
 #endif
 
@@ -509,9 +509,9 @@ INCLUDE_ASM("bx/execman", cInput_getState__FPvi);
  * @param state  input state id (On Tour eInputStates)
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cInput_getState(void* self, int state)
+void* cInput::getState(int state)
 {
-    cInput* input = (cInput*)self;
+    cInput* input = (cInput*)this;
     return cInputMap_getState(input->Map, input->Pad, state);
 }
 #endif

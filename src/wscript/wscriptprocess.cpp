@@ -1499,9 +1499,9 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_loadSection__FPv);
  *
  * @return cWScriptMan_allocateGlobalTable's result (the new table)
  */
-void* cWScriptMan_loadSection(void* self)
+void* cWScriptMan::loadSection()
 {
-    return cWScriptMan_allocateGlobalTable(self);
+    return cWScriptMan_allocateGlobalTable(this);
 }
 #endif
 
