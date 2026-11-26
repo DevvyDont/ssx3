@@ -2078,27 +2078,27 @@ extern "C" float cInputExec_getRegister_vm(cInputExec* self, unsigned int id) __
  * @return the value of register 0 when End is reached
  */
 // Runs one compiled input expression (see cInputMapParser_compileParseNode for the encoder); returns register 0.
-extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tInputOpCode* code)
+float cInputExec::execute(cInputPad* list, const tInputOpCode* code)
 {
     int pc = 0;
     int done = 0;
-    self->Pad = (cInputPad*)list;
+    Pad = (cInputPad*)list;
     do {
         const tInputOpCode* ins = &code[pc];
         pc++;
         switch (ins->Base.opcode) {
         case kInputOpCodeLoad: {
-            float* destSlot = (float*)self->getTempReg(ins->Load.dest);
+            float* destSlot = (float*)getTempReg(ins->Load.dest);
             *destSlot = code[pc++].Float.value;
             break;
         }
         case kInputOpCodeMove: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = cInputExec_getRegister_vm((self), ins->Unary.operand);
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = cInputExec_getRegister_vm((this), ins->Unary.operand);
             break;
         }
         case kInputOpCodeBranchFalse:
-            if (cInputExec_getRegister_vm((self), ins->Branch.operand) != 0.0f) {
+            if (cInputExec_getRegister_vm((this), ins->Branch.operand) != 0.0f) {
                 break;
             }
         case kInputOpCodeBranch:
@@ -2106,9 +2106,9 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             break;
         case kInputOpCodeOr: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
-                || cInputExec_getRegister_vm((self), ins->Binary.operand2) != 0.0f) {
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            if (cInputExec_getRegister_vm((this), ins->Binary.operand1) != 0.0f
+                || cInputExec_getRegister_vm((this), ins->Binary.operand2) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2116,161 +2116,161 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
         }
         case kInputOpCodeAnd: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
-                && cInputExec_getRegister_vm((self), ins->Binary.operand2) != 0.0f) {
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            if (cInputExec_getRegister_vm((this), ins->Binary.operand1) != 0.0f
+                && cInputExec_getRegister_vm((this), ins->Binary.operand2) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
             break;
         }
         case kInputOpCodeGR: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = (lhs > cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = (lhs > cInputExec_getRegister_vm((this), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeGE: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = (lhs >= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = (lhs >= cInputExec_getRegister_vm((this), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeLS: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = (lhs < cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = (lhs < cInputExec_getRegister_vm((this), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeLE: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = (lhs <= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = (lhs <= cInputExec_getRegister_vm((this), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeEQ: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = (lhs == cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = (lhs == cInputExec_getRegister_vm((this), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeNE: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = (lhs != cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = (lhs != cInputExec_getRegister_vm((this), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeAdd: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = lhs + cInputExec_getRegister_vm((self), ins->Binary.operand2);
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = lhs + cInputExec_getRegister_vm((this), ins->Binary.operand2);
             break;
         }
         case kInputOpCodeSub: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = lhs - cInputExec_getRegister_vm((self), ins->Binary.operand2);
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = lhs - cInputExec_getRegister_vm((this), ins->Binary.operand2);
             break;
         }
         case kInputOpCodeMul: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = lhs * cInputExec_getRegister_vm((self), ins->Binary.operand2);
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = lhs * cInputExec_getRegister_vm((this), ins->Binary.operand2);
             break;
         }
         case kInputOpCodeDiv: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = lhs / cInputExec_getRegister_vm((self), ins->Binary.operand2);
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = lhs / cInputExec_getRegister_vm((this), ins->Binary.operand2);
             break;
         }
         case kInputOpCodeMax: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
-                         > cInputExec_getRegister_vm((self), ins->Binary.operand2))
-                ? cInputExec_getRegister_vm((self), ins->Binary.operand1)
-                : cInputExec_getRegister_vm((self), ins->Binary.operand2);
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            *destSlot = (cInputExec_getRegister_vm((this), ins->Binary.operand1)
+                         > cInputExec_getRegister_vm((this), ins->Binary.operand2))
+                ? cInputExec_getRegister_vm((this), ins->Binary.operand1)
+                : cInputExec_getRegister_vm((this), ins->Binary.operand2);
             break;
         }
         case kInputOpCodeMin: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
-                         < cInputExec_getRegister_vm((self), ins->Binary.operand2))
-                ? cInputExec_getRegister_vm((self), ins->Binary.operand1)
-                : cInputExec_getRegister_vm((self), ins->Binary.operand2);
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            *destSlot = (cInputExec_getRegister_vm((this), ins->Binary.operand1)
+                         < cInputExec_getRegister_vm((this), ins->Binary.operand2))
+                ? cInputExec_getRegister_vm((this), ins->Binary.operand1)
+                : cInputExec_getRegister_vm((this), ins->Binary.operand2);
             break;
         }
         case kInputOpCodePow: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((this), ins->Binary.operand2));
             break;
         }
         case kInputOpCodeAtan2: {
-            float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
-            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
-            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
+            float* destSlot = (float*)getTempReg(ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((this), ins->Binary.operand1);
+            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((this), ins->Binary.operand2));
             break;
         }
         case kInputOpCodeAtan: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = func_0031C228(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = func_0031C228(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeSin: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = fSin(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = fSin(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeCos: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = fCos(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = fCos(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeExp: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = expf(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = expf(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeLog: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = logf(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = logf(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeFloor: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = floor_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = floor_43A0(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeCeil: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = ceil_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = ceil_43A0(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeAbs: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = abs_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = abs_43A0(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeSqrt: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = sqrt_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = sqrt_43A0(cInputExec_getRegister_vm((this), ins->Unary.operand));
             break;
         }
         case kInputOpCodeMinRadian: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            float x = cInputExec_getRegister_vm((self), ins->Unary.operand);
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            float x = cInputExec_getRegister_vm((this), ins->Unary.operand);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case kInputOpCodeNeg: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = -cInputExec_getRegister_vm((self), ins->Unary.operand);
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = -cInputExec_getRegister_vm((this), ins->Unary.operand);
             break;
         }
         case kInputOpCodeNot: {
-            float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
-            *destSlot = (cInputExec_getRegister_vm((self), ins->Unary.operand) == 0.0f) ? 1.0f : 0.0f;
+            float* destSlot = (float*)getTempReg(ins->Unary.dest);
+            *destSlot = (cInputExec_getRegister_vm((this), ins->Unary.operand) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
         case kInputOpCodeEnd:
@@ -2278,7 +2278,7 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             break;
         }
     } while (!done);
-    return cInputExec_getRegister_vm((self), 0);
+    return cInputExec_getRegister_vm((this), 0);
 }
 #endif
 

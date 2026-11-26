@@ -28,6 +28,8 @@ struct cAIFwdDiffCache;
 
 // nash::CellKey (On Tour struct CellKey, 0x10): an octree cell's level and integer grid coordinates.
 // nash_CellKey_proximitytest (intersect/aifwddiff) takes one as its this.
+struct tBoundBox;
+
 struct nash_CellKey {
     int level;                      // 0x000 [O]
     int x;                          // 0x004 [O]
@@ -37,6 +39,9 @@ struct nash_CellKey {
     // The level of the smallest cells (name ours): [U] FrustumCallback_operatorCall visits a cell's children (level
     // - 1) unless the cell is at level 11.
     enum { kLeafLevel = 11 };
+
+    // Methods bound to their retail symbols by asm labels.
+    int proximitytest(tBoundBox* box) __asm__("nash_CellKey_proximitytest");
 };
 
 CHECK_OFFSET(nash_CellKey, level, 0x000);
@@ -127,6 +132,8 @@ CHECK_SIZE(nash_NodeList, 0x4);
 struct OverlapEverythingCallback;
 struct OverlapInstancesCallback;
 
+struct SplineCallback;
+
 struct nash_Cell {
     nash_Cell* children[2][2][2];   // 0x000 [O] Cell* children[2][2][2]; [R] cleared by the allocating code (MEM_fill
                                     //       0x20); [U] descend* recurse into each non-null child (lw 0x0..0x1C);
@@ -160,6 +167,7 @@ struct nash_Cell {
     void descend3(OverlapEverythingCallback* ctx) __asm__("nash_Cell_descend3");
     void descend4(void* ctx) __asm__("nash_Cell_descend4");
     void descend5(void* ctx) __asm__("nash_Cell_descend5");
+    void descend6(SplineCallback* splineQuery) __asm__("nash_Cell_descend6");
 };
 
 CHECK_OFFSET(nash_Cell, children, 0x000);
@@ -186,6 +194,8 @@ struct cWorldIntersectType;
 struct tIntersectInfo;
 struct tIntHint;
 
+struct t4Vector;
+
 struct cBXNash {
     // --- nash::Nash (On Tour 0xA4)
     nash_Octant octant[2][2][2];    // 0x000 [O] Octant octant[2][2][2] (x, y, z order unknown: retail walks them as a
@@ -209,6 +219,11 @@ struct cBXNash {
         __asm__("cBXNash_terrainIntersect1");
     float staticObjectIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int full)
         __asm__("cBXNash_staticObjectIntersect1");
+    bool getGroundHeight(float* pos, t4Vector* outP, t4Vector* outN) __asm__("cBXNash_getGroundHeight");
+    int staticObjectIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, int full)
+        __asm__("cBXNash_staticObjectIntersect");
+    int splineIntersect(t4Vector* pos, tIntersectInfo* intInfo, int mask, float testRadius)
+        __asm__("cBXNash_splineIntersect");
 };
 
 CHECK_OFFSET(cBXNash, octant, 0x000);

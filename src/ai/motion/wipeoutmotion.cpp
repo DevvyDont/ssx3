@@ -1652,9 +1652,9 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_writeToReplayFrame);
  *
  * @param obj  the replay frame pointer to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cBxReplayFrame* obj)
+void cWipeoutMotion::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x40);
+    obj->write((const char*)this, 0x40);
 }
 #endif
 
@@ -1670,9 +1670,9 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_readFromReplayFrame);
  *
  * @param obj  the replay frame pointer to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, cBxReplayFrame* obj)
+void cWipeoutMotion::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x40);
+    obj->read((char*)this, 0x40);
 }
 #endif
 

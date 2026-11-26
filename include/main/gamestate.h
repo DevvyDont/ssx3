@@ -83,6 +83,8 @@ CHECK_OFFSET(cGameState, mOverlayDone, 0x08);
 CHECK_OFFSET(cGameState, mVtbl, 0x0C);
 CHECK_SIZE(cGameState, 0x10);
 
+struct cBxReplayFrame;
+
 struct cGFTrackStartState {
     // --- cGameState (inline in the ctor: mNextState = 0, vptr = cGameState_vtbl, cGameState::mpGame = 0)
     int mNextState;                 // 0x00 [O] eGFState; [R] the ctor stores 0 (cGameState) then 4; [U] gainFocus
@@ -118,6 +120,8 @@ struct cGFTrackStartState {
     void gainFocus() __asm__("cGFTrackStartState_gainFocus");
     void update() __asm__("cGFTrackStartState_update");
     void loseFocus() __asm__("cGFTrackStartState_loseFocus");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFTrackStartState_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFTrackStartState_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGFTrackStartState, mNextState, 0x00);
@@ -163,6 +167,8 @@ CHECK_SIZE(cGFTrackStartState, 0x20);
 //   [O] On Tour's class is 0x18: bools mPurgeCPURiders 0x10, mHasTransitionNIS 0x11, mPauseOnLoad 0x12, then
 //   mSubState 0x14; retail's bools are words, which puts mSubState at 0x1C (the ctor's 4 = Complete, update's switch).
 // Vtable cGFEventStartState_vtbl (0x0047D530): 1 dtor (0x00243E20), 5 gainFocus, 6 update, 7 loseFocus.
+struct cBxReplayFrame;
+
 struct cGFEventStartState {
     // --- cGameState (inline in the ctor: mNextState = 0, vptr = cGameState_vtbl, cGameState::mpGame = 0)
     int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 (cGameState) then 2 (kGFSM_PreEvent); [U] update
@@ -196,6 +202,8 @@ struct cGFEventStartState {
     void update() __asm__("cGFEventStartState_update");
     void loseFocus() __asm__("cGFEventStartState_loseFocus");
     void ReadyEvent() __asm__("cGFEventStartState_ReadyEvent");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFEventStartState_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFEventStartState_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGFEventStartState, mNextState, 0x00);

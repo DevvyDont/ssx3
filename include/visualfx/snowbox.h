@@ -17,6 +17,10 @@
 // colours and sizes for 0 and the fluff ones for 1; cSnowBox_render draws RenderSnowBoxFlakes / RenderSnowBoxFluffs.
 enum eSnowBoxType { eSnowBoxFlake = 0, eSnowBoxFluff = 1 };
 
+struct t4Matrix;
+struct t4Vector;
+struct tWorldPainterSnowfallParameters;
+
 struct cSnowBox {
     int mViewNum;                   // 0x000 [O]
     int mSnowBoxType;               // 0x004 [O] eSnowBoxType
@@ -43,6 +47,9 @@ struct cSnowBox {
 
     // Methods bound to their retail symbols by asm labels.
     void resetWind() __asm__("cSnowBox_resetWind__FPv");
+    void update(const tWorldPainterSnowfallParameters* params) __asm__("cSnowBox_update");
+    void updateForCameraPosition(const t4Vector* delta) __asm__("cSnowBox_updateForCameraPosition");
+    void render(const t4Matrix* snowMatrix, float x, float y, float z) __asm__("cSnowBox_render");
 };
 
 CHECK_OFFSET(cSnowBox, mViewNum, 0x000);

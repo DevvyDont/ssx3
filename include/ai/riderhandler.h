@@ -83,6 +83,8 @@ enum eControlState {
 // [O] size 0x18).
 struct tSurfData;
 
+struct cBxReplayFrame;
+
 struct cGroundMotion {
     float ChatterTime;     // 0x00 [O] cGroundMotionState; [U] float (gainFocus, step cGroundMotion_step)
     float PowderDepth1G;   // 0x04 [O]; [U] float (gainFocus, cGroundMotion_getSnowForce, step)
@@ -104,6 +106,8 @@ struct cGroundMotion {
     void resolve() __asm__("cGroundMotion_resolve");
     void loseFocus() __asm__("cGroundMotion_loseFocus");
     void checkWallCollisions() __asm__("cGroundMotion_checkWallCollisions");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cGroundMotion_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cGroundMotion_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGroundMotion, ChatterTime, 0x00);
@@ -117,6 +121,8 @@ CHECK_OFFSET(cGroundMotion, pad_1C, 0x1C);
 CHECK_SIZE(cGroundMotion, 0x20);
 
 // cAirMotion (cRiderHandler + 0x020, 0x10 bytes): motion state 1 (MS_Air). Base cAirMotionState (0x00-0x04).
+struct cBxReplayFrame;
+
 struct cAirMotion {
     int IsLandVelAlign; // 0x00 [O] cAirMotionState (bool; a word in retail); [U] gainFocus sw, step lw
     cRider* mRider;     // 0x04 [R] virtual-base pointer to the shared cRider; [R] vtable offset-to-top -0x10
@@ -131,6 +137,8 @@ struct cAirMotion {
     void chooseLandAnim(float normSpeed) __asm__("cAirMotion_chooseLandAnim");
     bool checkTerrainCollisions(t4Vector* outp) __asm__("cAirMotion_checkTerrainCollisions");
     void loseFocus() __asm__("cAirMotion_loseFocus__FPv");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cAirMotion_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cAirMotion_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cAirMotion, IsLandVelAlign, 0x00);
@@ -168,6 +176,8 @@ struct cWipeoutMotion {
     void throwRider(t4Vector* initVel, t4Vector* initAngVel) __asm__("cWipeoutMotion_throwRider");
     void updateBoardSphereTree() __asm__("cWipeoutMotion_updateBoardSphereTree");
     void loseFocus() __asm__("cWipeoutMotion_loseFocus__FPv");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutMotion_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutMotion_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);
@@ -224,6 +234,8 @@ struct cRailslideMotion {
     void resolve() __asm__("cRailslideMotion_resolve");
     void checkTerrainCollisions() __asm__("cRailslideMotion_checkTerrainCollisions");
     void loseFocus() __asm__("cRailslideMotion_loseFocus");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRailslideMotion_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cRailslideMotion_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cRailslideMotion, RailNorm, 0x00);
@@ -244,6 +256,8 @@ CHECK_SIZE(cRailslideMotion, 0x60);
 // cHandplantMotion (cRiderHandler + 0x110, 0xB0 bytes): motion state 5 (MS_Handplant). Base cHandplantMotionState
 // (0x00-0xA0, [O] size 0xA0).
 struct tIntersectInfo;
+
+struct cBxReplayFrame;
 
 struct cHandplantMotion {
     t4Vector InitPos;          // 0x00 [O]; [U] sq/lqc2 (cHandplantMotion_init)
@@ -270,6 +284,8 @@ struct cHandplantMotion {
     void init(tIntersectInfo* hit, float dur) __asm__("cHandplantMotion_init");
     void loseFocus() __asm__("cHandplantMotion_loseFocus");
     void* resolve() __asm__("cHandplantMotion_resolve__FPv");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cHandplantMotion_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cHandplantMotion_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cHandplantMotion, InitPos, 0x00);
@@ -314,6 +330,8 @@ CHECK_SIZE(cCruiseControl, 0x10);
 // cBoardPressControlState (0x00-0x14).
 struct tBoardPressCmd;
 
+struct cBxReplayFrame;
+
 struct cBoardPressControl {
     // [O] On Tour's enum cBoardPressControlState::eBoardPressState, names and values. [U] update runs handleIntoState
     // for 0, handleBalanceState for 1, handleIntoAirState for 2 and handleExitState for 3.
@@ -340,6 +358,8 @@ struct cBoardPressControl {
     void forceExit() __asm__("cBoardPressControl_forceExit");
     void autoCompletePivot() __asm__("cBoardPressControl_autoCompletePivot");
     void blendOutOfPivot() __asm__("cBoardPressControl_blendOutOfPivot");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cBoardPressControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cBoardPressControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cBoardPressControl, State, 0x00);
@@ -389,6 +409,8 @@ CHECK_SIZE(cBumpControl, 0x10);
 // cNaturalAirControlState (0x00-0x14; On Tour 0x10 with byte bools).
 struct tNaturalAirCmd;
 
+struct cBxReplayFrame;
+
 struct cNaturalAirControl {
     float LimitAng;   // 0x00 [O]; [U] float (gainFocus cNaturalAirControl_gainFocus)
     float LimitMag;   // 0x04 [O]; [U] float
@@ -405,6 +427,8 @@ struct cNaturalAirControl {
     void gainFocus() __asm__("cNaturalAirControl_gainFocus");
     void update(tNaturalAirCmd* in) __asm__("cNaturalAirControl_update");
     void loseFocus(int next) __asm__("cNaturalAirControl_loseFocus");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cNaturalAirControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cNaturalAirControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cNaturalAirControl, LimitAng, 0x00);
@@ -418,6 +442,9 @@ CHECK_SIZE(cNaturalAirControl, 0x20);
 
 // cSpinControl (cRiderHandler + 0x230, 0x60 bytes): control state 5 (CS_Spin). Base cSpinControlState (0x00-0x58; On
 // Tour 0x5C: it adds CurrentUberVar at 0xC).
+struct cBxReplayFrame;
+struct tSpinCmd;
+
 struct cSpinControl {
     // [O] On Tour's enums cSpinControlState::eAirAdjState, eGrabState and eSpinState, names and values. [U] isGrabHeld
     // tests kGS_Hold, isTweakHeld / isUberHeld kGS_TweakHold; update moves a spin kSS_Into -> kSS_Cycle -> kSS_OutOf ->
@@ -475,6 +502,9 @@ struct cSpinControl {
     float getFlipSpinInputAng(int* out) __asm__("cSpinControl_getFlipSpinInputAng");
     float getInvertScale() __asm__("cSpinControl_getInvertScale");
     float getOffAxisScale() __asm__("cSpinControl_getOffAxisScale");
+    void update(tSpinCmd* input) __asm__("cSpinControl_update");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cSpinControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cSpinControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cSpinControl, AirAdjState, 0x00);
@@ -506,6 +536,8 @@ CHECK_SIZE(cSpinControl, 0x60);
 // cGateControl (cRiderHandler + 0x290, 0x20 bytes): control state 6 (CS_Gate). Base cGateControlState (0x00-0x14).
 struct tGateCmd;
 
+struct cBxReplayFrame;
+
 struct cGateControl {
     // [O] On Tour's enum cGateControlState::eGateState, names and values. [U] update runs doGateRock for 0,
     // doGateLaunch for 1, doSit for 2 and doGetupFromSit for 3.
@@ -526,6 +558,8 @@ struct cGateControl {
     void doGateLaunch(tGateCmd* cmd) __asm__("cGateControl_doGateLaunch");
     void update(tGateCmd* cmd) __asm__("cGateControl_update");
     int isLaunchAllowed() __asm__("cGateControl_isLaunchAllowed");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cGateControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cGateControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGateControl, GateState, 0x00);
@@ -540,6 +574,8 @@ CHECK_SIZE(cGateControl, 0x20);
 // cRailslideControl (cRiderHandler + 0x2B0, 0x10 bytes): control state 7 (CS_Railslide). Base cRailslideControlState
 // (0x00-0x08).
 struct tRailslideCmd;
+
+struct cBxReplayFrame;
 
 struct cRailslideControl {
     float RSpinAngle;  // 0x00 [O]; [U] float
@@ -559,6 +595,8 @@ struct cRailslideControl {
     bool checkForUberGrind(int id) __asm__("cRailslideControl_checkForUberGrind");
     void playGainFocusAnim(int alt) __asm__("cRailslideControl_playGainFocusAnim");
     bool checkAirMotion(tRailslideCmd* cmd) __asm__("cRailslideControl_checkAirMotion");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRailslideControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cRailslideControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cRailslideControl, RSpinAngle, 0x00);
@@ -570,6 +608,8 @@ CHECK_SIZE(cRailslideControl, 0x10);
 // cWipeoutControl (cRiderHandler + 0x2C0, 0x90 bytes): control state 8 (CS_Wipeout). Base cWipeoutControlState
 // (0x00-0x80; On Tour 0xA0: BoardPrevPose[2]).
 struct tWipeoutCmd;
+
+struct cBxReplayFrame;
 
 struct cWipeoutControl {
     // [O] On Tour's enum cWipeoutControlState::eWRiderState, names and values. [U] update runs updateLaunch for 0,
@@ -606,6 +646,8 @@ struct cWipeoutControl {
     void playWipeoutGroundImpactAnim() __asm__("cWipeoutControl_playWipeoutGroundImpactAnim");
     float chooseTumbleAnimRate() __asm__("cWipeoutControl_chooseTumbleAnimRate");
     void loseFocus() __asm__("cWipeoutControl_loseFocus");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cWipeoutControl, RiderState, 0x00);
@@ -625,6 +667,8 @@ CHECK_SIZE(cWipeoutControl, 0x90);
 // cResetControl (cRiderHandler + 0x350, 0x10 bytes): control state 9 (CS_Reset). Base cResetControlState (0x00-0x08).
 struct tResetCmd;
 
+struct cBxReplayFrame;
+
 struct cResetControl {
     int IsAutoReset;   // 0x00 [O] bool (word); [U] lw; set via handler+0x350 (setIsAutoReset)
     float FadePercent; // 0x04 [O]; [U] float
@@ -636,6 +680,8 @@ struct cResetControl {
     void gainFocus() __asm__("cResetControl_gainFocus");
     void update(tResetCmd* cmd) __asm__("cResetControl_update");
     bool shouldTransition() __asm__("cResetControl_shouldTransition");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cResetControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cResetControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cResetControl, IsAutoReset, 0x00);
@@ -647,6 +693,8 @@ CHECK_SIZE(cResetControl, 0x10);
 // cFinishLineControl (cRiderHandler + 0x360, 0x10 bytes): control state 10 (CS_FinishLine). Base
 // cFinishLineControlState (0x00-0x04).
 struct tFinishLineCmd;
+
+struct cBxReplayFrame;
 
 struct cFinishLineControl {
     // [O] On Tour's enum cFinishLineControlState::eFinishState, names and values. [U] update brakes in 0, plays the
@@ -661,6 +709,8 @@ struct cFinishLineControl {
     // Methods bound to their retail symbols by asm labels.
     void gainFocus() __asm__("cFinishLineControl_gainFocus");
     void update(tFinishLineCmd* cmd) __asm__("cFinishLineControl_update");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cFinishLineControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cFinishLineControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cFinishLineControl, FinishState, 0x00);
@@ -671,6 +721,8 @@ CHECK_SIZE(cFinishLineControl, 0x10);
 // cHandplantControl (cRiderHandler + 0x370, 0x20 bytes): control state 11 (CS_Handplant). Base cHandplantControlState
 // (0x00-0x14; On Tour 0x10 with byte bools).
 struct tHandplantCmd;
+
+struct cBxReplayFrame;
 
 struct cHandplantControl {
     // [O] On Tour's enum cHandplantControlState::eHandplantType, names and values (heel side, toe side). [U] it is the
@@ -692,6 +744,8 @@ struct cHandplantControl {
     void update(tHandplantCmd* in) __asm__("cHandplantControl_update");
     void loseFocus() __asm__("cHandplantControl_loseFocus");
     void playHandplantAnim(int mode, int type) __asm__("cHandplantControl_playHandplantAnim");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cHandplantControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cHandplantControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cHandplantControl, EnterSec, 0x00);
@@ -719,6 +773,8 @@ CHECK_SIZE(tHandplantAnimInfo, 0x8);
 // (0x00-0x08).
 struct tUberGrindCmd;
 
+struct cBxReplayFrame;
+
 struct cUberGrindControl {
     // [O] On Tour's enum cUberGrindControlState::eGrindState, names and values. [U] update (cUberGrindControl_update).
     enum eGrindState { kGS_Locked = 0, kGS_Hold = 1, kGS_Over = 2 };
@@ -730,6 +786,8 @@ struct cUberGrindControl {
 
     // Methods bound to their retail symbols by asm labels.
     void update(tUberGrindCmd* in) __asm__("cUberGrindControl_update");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cUberGrindControl_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cUberGrindControl_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cUberGrindControl, GrindState, 0x00);

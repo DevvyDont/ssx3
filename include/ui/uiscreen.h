@@ -40,6 +40,9 @@ struct tUIBaseObject;
 struct tUIFrameHeader;
 struct tUIKCPObjectAnimate;
 
+struct cUIThread;
+struct tUIKCPKeyframeJump;
+
 struct cUIScreen {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] cUIState_updateScreens walks screens by it
@@ -93,6 +96,16 @@ struct cUIScreen {
     void parseObjectVisible() __asm__("cUIScreen_parseObjectVisible__FPv");
     void parseEventAudio() __asm__("cUIScreen_parseEventAudio__FPv");
     void parseScreenStart() __asm__("cUIScreen_parseScreenStart__FPv");
+    cUIThread* getPrimaryThread() __asm__("cUIScreen_getPrimaryThread");
+    void jumpToFrame(unsigned short frame) __asm__("cUIScreen_jumpToFrame__FPvUs");
+    void playFrameByThread(cUIThread* thread) __asm__("cUIScreen_playFrameByThread");
+    void parseKeyframePause(void* pFrame, void* pKCP, cUIThread* pThread) __asm__("cUIScreen_parseKeyframePause");
+    void parseKeyframeJump(void* pFrame, tUIKCPKeyframeJump* pKCP, cUIThread* pThread)
+        __asm__("cUIScreen_parseKeyframeJump");
+    void parseKeyframeSpawn(void* pFrame, tUIKCPKeyframeJump* pKCP) __asm__("cUIScreen_parseKeyframeSpawn");
+    void parseScreenEnd(void* pFrame, void* pKCP, cUIThread* pThread) __asm__("cUIScreen_parseScreenEnd");
+    void createAllObjects() __asm__("cUIScreen_createAllObjects");
+    void* createObjectByHashName(int key) __asm__("cUIScreen_createObjectByHashName");
 };
 
 CHECK_OFFSET(cUIScreen, mpPrev, 0x000);

@@ -1241,13 +1241,13 @@ void cGameState_writeToReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("c
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFEventStartState_writeToReplayFrame(cGFEventStartState* self, cBxReplayFrame* stream)
+void cGFEventStartState::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_writeToReplayFrame_2(self, stream);
-    stream->write((const char*)&self->mPurgeCPURiders, 4);
-    stream->write((const char*)&self->mHasTransitionNIS, 4);
-    stream->write((const char*)&self->mSubState, 4);
-    stream->write((const char*)&self->mOverlayDone, 4);
+    cGameState_writeToReplayFrame_2(this, stream);
+    stream->write((const char*)&mPurgeCPURiders, 4);
+    stream->write((const char*)&mHasTransitionNIS, 4);
+    stream->write((const char*)&mSubState, 4);
+    stream->write((const char*)&mOverlayDone, 4);
 }
 #endif
 
@@ -1265,13 +1265,13 @@ void cGameState_readFromReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFEventStartState_readFromReplayFrame(cGFEventStartState* self, cBxReplayFrame* stream)
+void cGFEventStartState::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_readFromReplayFrame_2(self, stream);
-    stream->read((char*)&self->mPurgeCPURiders, 4);
-    stream->read((char*)&self->mHasTransitionNIS, 4);
-    stream->read((char*)&self->mSubState, 4);
-    stream->read((char*)&self->mOverlayDone, 4);
+    cGameState_readFromReplayFrame_2(this, stream);
+    stream->read((char*)&mPurgeCPURiders, 4);
+    stream->read((char*)&mHasTransitionNIS, 4);
+    stream->read((char*)&mSubState, 4);
+    stream->read((char*)&mOverlayDone, 4);
 }
 #endif
 

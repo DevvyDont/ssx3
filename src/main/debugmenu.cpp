@@ -2011,10 +2011,9 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cVisualEffectsMainMenu_onGainFocus(void* vself)
+void* cVisualEffectsMainMenu::onGainFocus()
 {
-    cVisualEffectsMainMenu* self = (cVisualEffectsMainMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -2028,10 +2027,9 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cVisualEffectsMainMenu_onLoseFocus(void* vself)
+void* cVisualEffectsMainMenu::onLoseFocus()
 {
-    cVisualEffectsMainMenu* self = (cVisualEffectsMainMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3058,10 +3056,9 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cVisualEffectsTestMenu_onGainFocus(void* vself)
+void* cVisualEffectsTestMenu::onGainFocus()
 {
-    cVisualEffectsTestMenu* self = (cVisualEffectsTestMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3073,10 +3070,9 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cVisualEffectsTestMenu_onLoseFocus(void* vself)
+void* cVisualEffectsTestMenu::onLoseFocus()
 {
-    cVisualEffectsTestMenu* self = (cVisualEffectsTestMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3381,10 +3377,9 @@ INCLUDE_ASM("main/debugmenu", cShellRendererMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cShellRendererMenu_onGainFocus(void* vself)
+void* cShellRendererMenu::onGainFocus()
 {
-    cShellRendererMenu* self = (cShellRendererMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3396,10 +3391,9 @@ INCLUDE_ASM("main/debugmenu", cShellRendererMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cShellRendererMenu_onLoseFocus(void* vself)
+void* cShellRendererMenu::onLoseFocus()
 {
-    cShellRendererMenu* self = (cShellRendererMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3414,10 +3408,9 @@ INCLUDE_ASM("main/debugmenu", cScreenTintMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cScreenTintMenu_onGainFocus(void* vself)
+void* cScreenTintMenu::onGainFocus()
 {
-    cScreenTintMenu* self = (cScreenTintMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3429,10 +3422,9 @@ INCLUDE_ASM("main/debugmenu", cScreenTintMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cScreenTintMenu_onLoseFocus(void* vself)
+void* cScreenTintMenu::onLoseFocus()
 {
-    cScreenTintMenu* self = (cScreenTintMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3481,10 +3473,9 @@ INCLUDE_ASM("main/debugmenu", cShadowMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cShadowMenu_onGainFocus(void* vself)
+void* cShadowMenu::onGainFocus()
 {
-    cShadowMenu* self = (cShadowMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3496,10 +3487,9 @@ INCLUDE_ASM("main/debugmenu", cShadowMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cShadowMenu_onLoseFocus(void* vself)
+void* cShadowMenu::onLoseFocus()
 {
-    cShadowMenu* self = (cShadowMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3546,10 +3536,9 @@ INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cSnowSurfaceMenu_onGainFocus(void* vself)
+void* cSnowSurfaceMenu::onGainFocus()
 {
-    cSnowSurfaceMenu* self = (cSnowSurfaceMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3561,10 +3550,9 @@ INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cSnowSurfaceMenu_onLoseFocus(void* vself)
+void* cSnowSurfaceMenu::onLoseFocus()
 {
-    cSnowSurfaceMenu* self = (cSnowSurfaceMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3699,10 +3687,9 @@ INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cSnowfallTogglesMenu_onGainFocus(void* vself)
+void* cSnowfallTogglesMenu::onGainFocus()
 {
-    cSnowfallTogglesMenu* self = (cSnowfallTogglesMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3714,10 +3701,9 @@ INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cSnowfallTogglesMenu_onLoseFocus(void* vself)
+void* cSnowfallTogglesMenu::onLoseFocus()
 {
-    cSnowfallTogglesMenu* self = (cSnowfallTogglesMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3729,10 +3715,9 @@ INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cSplashTogglesMenu_onGainFocus(void* vself)
+void* cSplashTogglesMenu::onGainFocus()
 {
-    cSplashTogglesMenu* self = (cSplashTogglesMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3744,10 +3729,9 @@ INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cSplashTogglesMenu_onLoseFocus(void* vself)
+void* cSplashTogglesMenu::onLoseFocus()
 {
-    cSplashTogglesMenu* self = (cSplashTogglesMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3790,10 +3774,9 @@ INCLUDE_ASM("main/debugmenu", cTubeMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cTubeMenu_onGainFocus(void* vself)
+void* cTubeMenu::onGainFocus()
 {
-    cTubeMenu* self = (cTubeMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3805,10 +3788,9 @@ INCLUDE_ASM("main/debugmenu", cTubeMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cTubeMenu_onLoseFocus(void* vself)
+void* cTubeMenu::onLoseFocus()
 {
-    cTubeMenu* self = (cTubeMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 

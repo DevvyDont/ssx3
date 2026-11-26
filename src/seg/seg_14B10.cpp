@@ -221,12 +221,12 @@ INCLUDE_ASM("seg/seg_14B10", cPreRaceHandler_OnGainState);
  *
  * Slot 1 (word 3) of the handler's vtable cPreRaceHandler_vtbl; cAI_AIStateUpdate calls it when the AI enters the state.
  *
- * @param stateHandler  the handler
  * @param aiObj  the AI
  */
-extern "C" void cPreRaceHandler_OnGainState(cPreRaceHandler* stateHandler, cAI* aiObj) {
+void cPreRaceHandler::OnGainState(cAI* aiObj)
+{
     aiObj->EventTimerTick = 0;
-    stateHandler->unk_04 = 0;
+    unk_04 = 0;
 }
 #endif
 

@@ -102,6 +102,8 @@ struct cBEMissionInterface : public cBEInterface {
     bool isSessionPoint(int value, int id) __asm__("cBEMissionInterface_isSessionPoint");
     void addStreamData() __asm__("cBEMissionInterface_addStreamData__FPv");
     void remStreamData() __asm__("cBEMissionInterface_remStreamData__FPv");
+    void* getPictureFileName(int id) __asm__("cBEMissionInterface_getPictureFileName");
+    int getAudioType(int id) __asm__("cBEMissionInterface_getAudioType");
 };
 
 extern cBEMissionInterface* cBEMissionInterface_instance;

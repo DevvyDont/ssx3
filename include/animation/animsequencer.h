@@ -89,6 +89,8 @@ CHECK_OFFSET(tEventFlags, IsSet, 0x0);
 CHECK_OFFSET(tEventFlags, IsJustChanged, 0x8);
 CHECK_SIZE(tEventFlags, 0x10);
 
+struct cBxReplayFrame;
+
 struct cAnimSequence {
     int SequenceID;                 // 0x000 [O]; [R] the ctor stores its sequenceID argument
     tSubAnim SubAnims[3];           // 0x004 [O]; [R] the ctor clears IsActive at 0x18 / 0x34 / 0x50; [U] the indexed
@@ -139,6 +141,7 @@ struct cAnimSequence {
     void setEndTriggers() __asm__("cAnimSequence_setEndTriggers");
     int updateSubAnim(int i, float dt) __asm__("cAnimSequence_updateSubAnim");
     bool updateWeight(float dt) __asm__("cAnimSequence_updateWeight");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimSequence_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cAnimSequence, SequenceID, 0x000);

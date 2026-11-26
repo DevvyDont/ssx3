@@ -79,6 +79,8 @@ CHECK_OFFSET(cCameraTriggerStack, LastEnterPlayed, 0x04);
 CHECK_OFFSET(cCameraTriggerStack, TriggerIDStack, 0x08);
 CHECK_SIZE(cCameraTriggerStack, 0x20);
 
+struct cRider;
+
 struct cCameraTriggerMan {
     cCameraTriggerList TriggerList;             // 0x00 [O]; [R] the ctor runs
                                                 //       cCameraTriggerList_cCameraTriggerList__FPv on this, the dtor
@@ -105,6 +107,7 @@ struct cCameraTriggerMan {
     void unresolve() __asm__("cCameraTriggerMan_unresolve__FPv");
     void setInGameTriggers() __asm__("cCameraTriggerMan_setInGameTriggers__FPv");
     void* setReplayTriggers() __asm__("cCameraTriggerMan_setReplayTriggers__FPv");
+    void checkCollisions(cRider* rider) __asm__("cCameraTriggerMan_checkCollisions");
 };
 
 CHECK_OFFSET(cCameraTriggerMan, TriggerList, 0x00);

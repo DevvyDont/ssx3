@@ -198,22 +198,22 @@ extern "C" void DeletePersonaMenu_setpersonas(void* sub, LobbyMan* src);
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, LobbyMan* src)
+void PersonaMenu::setpersonas(LobbyMan* src)
 {
     int i = 0;
     for (; i < src->mNumPersonas; i++) {
         const char* name = src->mPersonas[i];
-        cCommandMenuItem* it = &((&self->mPersonaItems[0]))[i];
+        cCommandMenuItem* it = &((&mPersonaItems[0]))[i];
         it->Caption = name;
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     for (; i < 4; i++) {
-        cMenuItem_activate(&((&self->mPersonaItems[0]))[i], 0);
+        cMenuItem_activate(&((&mPersonaItems[0]))[i], 0);
     }
-    DeletePersonaMenu_setpersonas(((char*)&self->mDeletePersonaMenu), src);
-    cMenuItem_activate(((char*)&self->mDeletePersonaItem), src->mNumPersonas >= 2);
-    cMenuItem_activate(((char*)&self->mCreatePersonaItem), src->mNumPersonas < 4);
+    DeletePersonaMenu_setpersonas(((char*)&mDeletePersonaMenu), src);
+    cMenuItem_activate(((char*)&mDeletePersonaItem), src->mNumPersonas >= 2);
+    cMenuItem_activate(((char*)&mCreatePersonaItem), src->mNumPersonas < 4);
 }
 #endif
 
@@ -238,24 +238,24 @@ extern char str_Receiving_Room_List[];
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, LobbyMan* src)
+void LobbyMenu::updaterooms(LobbyMan* src)
 {
     int i = 0;
     int n = LobbyMan_getnumrooms(src);
     for (; i < n; i++) {
-        cCommandMenuItem* it = &((&self->mRoomItems[0]))[i];
+        cCommandMenuItem* it = &((&mRoomItems[0]))[i];
         it->Caption = (const char*)func_0025F150(src, i);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     if (i == 0) {
-        self->mRoomItems[0].Caption = str_Receiving_Room_List;
+        mRoomItems[0].Caption = str_Receiving_Room_List;
         i = 1;
-        cMenuItem_activate(&((&self->mRoomItems[0]))[0], 1);
-        ((&self->mRoomItems[0]))[0].ID = -1;
+        cMenuItem_activate(&((&mRoomItems[0]))[0], 1);
+        ((&mRoomItems[0]))[0].ID = -1;
     }
     for (; i < 12; i++) {
-        cMenuItem_activate(&((&self->mRoomItems[0]))[i], 0);
+        cMenuItem_activate(&((&mRoomItems[0]))[i], 0);
     }
 }
 #endif
@@ -630,16 +630,16 @@ extern "C" void func_0017E2F8(cDebugLobbyScreen* screen, int room);
  * func_0017E2F8 with the debug front end at +0x130 and the room index (state 11, then func_0025D800 on the lobby
  * manager); the "Receiving Room List" placeholder (ID -1) is ignored.
  *
- * @param menu  the Select Room menu
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, cMenuItem* item) {
+int LobbyMenu::onCommand(cMenuItem* item)
+{
     int temp_5;
 
     temp_5 = item->ID;
     if (temp_5 >= 0) {
-        func_0017E2F8(menu->mScreen, temp_5);
+        func_0017E2F8(mScreen, temp_5);
     }
     return 0;
 }
@@ -657,12 +657,12 @@ extern "C" void func_0017E290(cDebugLobbyScreen* screen, int persona);
  * end stored at +0x4E0 and the item's ID (the persona index), which sets state 7 and calls func_0025CD28 on the lobby
  * manager.
  *
- * @param menu  the Select Persona menu
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, cMenuItem* item) {
-    func_0017E290(menu->mScreen, item->ID);
+int PersonaMenu::onCommand(cMenuItem* item)
+{
+    func_0017E290(mScreen, item->ID);
     return 0;
 }
 #endif

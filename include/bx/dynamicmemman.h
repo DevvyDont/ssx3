@@ -120,6 +120,8 @@ struct cDynamicMemMan {
     int allocAlign() __asm__("cDynamicMemMan_allocAlign__FPv");
     int allocAlignHdr() __asm__("cDynamicMemMan_allocAlignHdr__FPv");
     int free() __asm__("cDynamicMemMan_free__FPv");
+    void init(unsigned int base, unsigned int size) __asm__("cDynamicMemMan_init");
+    unsigned int dlmorecore(long incr) __asm__("cDynamicMemMan_dlmorecore");
 };
 
 CHECK_OFFSET(cDynamicMemMan, MallocState, 0x000);

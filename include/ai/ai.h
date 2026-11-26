@@ -52,9 +52,14 @@ CHECK_OFFSET(cAIStateHandler, mVtbl, 0x0);
 CHECK_SIZE(cAIStateHandler, 0x4);
 
 // cPreRaceHandler: a cAIStateHandler with one int (On Tour size 0x8).
+struct cAI;
+
 struct cPreRaceHandler {
     void** mVtbl; // 0x0 [R] _vt$15cPreRaceHandler (cPreRaceHandler_vtbl), stored by cAI_cAI
     int unk_04;   // 0x4 [U] written by its OnGainState (cPreRaceHandler_OnGainState)
+
+    // Methods bound to their retail symbols by asm labels.
+    void OnGainState(cAI* aiObj) __asm__("cPreRaceHandler_OnGainState");
 };
 
 CHECK_OFFSET(cPreRaceHandler, mVtbl, 0x0);

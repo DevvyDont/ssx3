@@ -246,6 +246,10 @@ CHECK_SIZE(DeletePersonaMenu, 0x1F8);
 // four persona rows and sub-menu rows for the create / delete menus. Preview vtable pairs with retail PersonaMenu_vtbl; ctor
 // PersonaMenu_PersonaMenu, onCommand PersonaMenu_onCommand, dtor PersonaMenu__PersonaMenu, row fill PersonaMenu_setpersonas. cDebugLobbyScreen +0x74C.
 
+struct cMenuItem;
+
+struct LobbyMan;
+
 struct PersonaMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu zeroes it; [U] cMenu_addItem counts
@@ -274,6 +278,10 @@ struct PersonaMenu {
                                      //       0x130); destroyed by the dtor
     cSubMenuItem mDeletePersonaItem; // 0x5C4 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x5C4, "Delete Persona", this +
                                      //       0x2E8); destroyed by the dtor
+
+    // Methods bound to their retail symbols by asm labels.
+    int onCommand(cMenuItem* item) __asm__("PersonaMenu_onCommand");
+    void setpersonas(LobbyMan* src) __asm__("PersonaMenu_setpersonas");
 };
 
 CHECK_OFFSET(PersonaMenu, NumItems, 0x000);
@@ -297,6 +305,9 @@ CHECK_SIZE(PersonaMenu, 0x5E0);
 // retail LobbyMenu_vtbl; ctor LobbyMenu_LobbyMenu, onCommand LobbyMenu_onCommand, dtor LobbyMenu__LobbyMenu, row fill LobbyMenu_updaterooms.
 // cDebugLobbyScreen +0xD2C.
 
+struct LobbyMan;
+struct cMenuItem;
+
 struct LobbyMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu zeroes it; [U] cMenu_addItem counts
@@ -317,6 +328,10 @@ struct LobbyMenu {
     cCommandMenuItem mRoomItems[12]; // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (12 room rows); destroyed by
                                      //       the dtor (loop of 12) [U] LobbyMenu_updaterooms sets their data (+0x14
                                      //       Caption) and ID (view Menu_B528 items[12])
+
+    // Methods bound to their retail symbols by asm labels.
+    void updaterooms(LobbyMan* src) __asm__("LobbyMenu_updaterooms");
+    int onCommand(cMenuItem* item) __asm__("LobbyMenu_onCommand");
 };
 
 CHECK_OFFSET(LobbyMenu, NumItems, 0x000);

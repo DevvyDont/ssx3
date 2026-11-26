@@ -132,6 +132,8 @@ enum eMonitorType { MONITOR_NONE = 0, MONITOR_BANK = 1, MONITOR_MIDI = 2, MONITO
 // eMonitorType kept as an int.
 struct cController;
 
+struct cBankMonitor;
+
 struct cBankMonitorInstance {
     int mMonitorType;               // 0x00 [O]; [R] ctor 0; [U] DonePlaying / PosUpdate / PitchUpdate / VolUpdate /
                                     //       StopSound / RestartSound / Fade switch on it (1 SND*, 2 SNDseq* /
@@ -205,6 +207,9 @@ struct cBankMonitorInstance {
     // purged) and clamps any other level to 0..127; cBankMonitor's BANKMONITOR_FadeOut / StopHandle pass it.
     enum { kFadeStop = -1 };
     void* Dist2Vol(int vol) __asm__("cBankMonitorInstance_Dist2Vol__FPvi");
+    void Update3D(cBankMonitor* bm, float time) __asm__("cBankMonitorInstance_Update3D");
+    void Pause() __asm__("cBankMonitorInstance_Pause");
+    void Resume() __asm__("cBankMonitorInstance_Resume");
 };
 
 CHECK_OFFSET(tBankRestartInfo, mBank, 0x0);

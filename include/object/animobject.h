@@ -42,6 +42,8 @@ struct tModifierBlock;
 struct cMeshAnimFrame;
 struct tMeshVelocity;
 
+struct tMakeAnimObjectData;
+
 struct cAnimObjectNode {
     // --- cAnimObjectNodeState (On Tour 0x14, retail 0x1C; [R] the replay ctor reads it, getNodeState returns +0x0)
     short AnimType;                 // 0x00 [O]; [R] ctor1 sh the make-data Type (lhu +0x4); [U] updateNode switches on
@@ -110,6 +112,9 @@ struct cAnimObjectNode {
     float getAnimSpeed() __asm__("cAnimObjectNode_getAnimSpeed");
     int getAnimDir() __asm__("cAnimObjectNode_getAnimDir");
     int isComplete() __asm__("cAnimObjectNode_isComplete__FPv");
+    void* cAnimObjectNode1(int bucket, int nodeType, tInstanceRecord* obj, tMakeAnimObjectData* def)
+        __asm__("cAnimObjectNode_cAnimObjectNode1");
+    bool updateNode() __asm__("cAnimObjectNode_updateNode");
 };
 
 CHECK_OFFSET(cAnimObjectNode, AnimType, 0x00);

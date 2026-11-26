@@ -816,14 +816,14 @@ static inline int active_D320(char* vrider)
  *
  * @param rider  the rider (On Tour cRider&)
  */
-extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRider* rider)
+void cCameraTriggerMan::checkCollisions(cRider* rider)
 {
     if (active_D320(((char*)rider))) {
         int idx = rider->mViewIndex;
-        cActiveTriggerList_clearFlags(&self->ActiveTriggerList[idx]);
+        cActiveTriggerList_clearFlags(&ActiveTriggerList[idx]);
         CameraCollisionCallback ctx;
         nash_Octant* w = (nash_Octant*)SSXApp->Game->BXNash;
-        (*(void**)&ctx.ActiveTriggerList) = (char*)(idx * 4 + (int)self) + 0x14;
+        (*(void**)&ctx.ActiveTriggerList) = (char*)(idx * 4 + (int)this) + 0x14;
         (*(char**)&ctx.rider) = ((char*)rider);
         char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         t4Vector* riderPosMin = getPos_D320(sub);
@@ -853,26 +853,27 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
 
         int changed;
         int top;
-        cActiveTriggerNode* n = (cActiveTriggerNode*)(*(char**)((char*)(idx * 4 + (int)self) + 0x14));
+        cActiveTriggerNode* n = (cActiveTriggerNode*)(*(char**)((char*)(idx * 4 + (int)this) + 0x14));
         while (((char*)n) != 0) {
             if (n->IsActiveFlag == 0) {
                 char* trigger = *(char**)n;
-                if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)&self->CameraTriggerStack[idx], *(int*)trigger, &changed, &top)) {
+                if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)&CameraTriggerStack[idx], *(int*)trigger,
+                        &changed, &top)) {
                     doTriggerAction_D320(*(void**)(trigger + 0x10), ((char*)rider));
                 } else if (changed) {
-                    char* topActive = (char*)cActiveTriggerList_find1(&self->ActiveTriggerList[idx], top);
+                    char* topActive = (char*)cActiveTriggerList_find1(&ActiveTriggerList[idx], top);
                     if (topActive) {
                         doTriggerAction_D320(*(void**)(topActive + 0xC), ((char*)rider));
                     }
                 }
-                n = (cActiveTriggerNode*)cActiveTriggerList_remove(&self->ActiveTriggerList[idx], n);
+                n = (cActiveTriggerNode*)cActiveTriggerList_remove(&ActiveTriggerList[idx], n);
             } else {
                 n = (cActiveTriggerNode*)n->Next;
             }
         }
-        for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
+        for (char* listNode = *(char**)((char*)(idx * 4 + (int)this) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
             if (*(int*)(listNode + 8)) {
-                self->CameraTriggerStack[idx].recordEnter(**(int**)listNode);
+                CameraTriggerStack[idx].recordEnter(**(int**)listNode);
                 doTriggerAction_D320(*(void**)(*(char**)listNode + 0xC), ((char*)rider));
             }
         }

@@ -1186,7 +1186,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureFileName);
  * @param id  the location ID (On Tour eBELocationID)
  * @return the file name stored after the matching entry's ID, or 0 when no entry matches
  */
-extern "C" void* cBEMissionInterface_getPictureFileName(cBEMissionInterface* self, int id)
+void* cBEMissionInterface::getPictureFileName(int id)
 {
     for (int i = 0; i < 22; i++) {
         if (cBELibrary_pictureDB[i].iLocationID == id) {
@@ -1208,7 +1208,7 @@ extern tBEMissionInfo cBELibrary_missionInfo[];
  * @param id  the mission id
  * @return the value (the sound system uses it as the mission's audio kind)
  */
-extern "C" int cBEMissionInterface_getAudioType(cBEMissionInterface* self, int id)
+int cBEMissionInterface::getAudioType(int id)
 {
     for (int i = 0; i < 88; i++) {
         if (cBELibrary_missionInfo[i].id == id) {

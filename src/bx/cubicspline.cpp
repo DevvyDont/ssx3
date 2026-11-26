@@ -497,7 +497,7 @@ void* cDynamicMemMan::sYSMALLOc(unsigned int nb, malloc_state* av)
         size -= old_size;
     size = (size + pagemask) & ~pagemask;
     if (size > 0)
-        brk = (char*)cDynamicMemMan_dlmorecore(this, size);
+        brk = (char*)this->dlmorecore(size);
 
     if (brk != (char*)0xFFFFFFFF) {
         av->sbrked_mem += size;
@@ -529,11 +529,11 @@ void* cDynamicMemMan::sYSMALLOc(unsigned int nb, malloc_state* av)
                 end_misalign = (unsigned int)(brk + size + correction);
                 correction += ((end_misalign + pagemask) & ~pagemask) - end_misalign;
 
-                snd_brk = (char*)cDynamicMemMan_dlmorecore(this, correction);
+                snd_brk = (char*)this->dlmorecore(correction);
 
                 if (snd_brk == (char*)0xFFFFFFFF) {
                     correction = 0;
-                    snd_brk = (char*)cDynamicMemMan_dlmorecore(this, 0);
+                    snd_brk = (char*)this->dlmorecore(0);
                 } else if (snd_brk < brk) {
                     snd_brk = brk + size;
                     correction = 0;
@@ -541,7 +541,7 @@ void* cDynamicMemMan::sYSMALLOc(unsigned int nb, malloc_state* av)
                 }
             } else {
                 if (snd_brk == (char*)0xFFFFFFFF) {
-                    snd_brk = (char*)cDynamicMemMan_dlmorecore(this, 0);
+                    snd_brk = (char*)this->dlmorecore(0);
                     av->sbrked_mem += snd_brk - brk - size;
                 }
             }
@@ -627,10 +627,10 @@ bool cDynamicMemMan::sYSTRIm(unsigned int topPad, malloc_state* av)
     top_size = av->top->size & ~3;
     extra = __muldi3(__divdi3(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
     if (extra > 0) {
-        current_brk = (char*)cDynamicMemMan_dlmorecore(this, 0);
+        current_brk = (char*)this->dlmorecore(0);
         if (current_brk == (char*)(av->top) + top_size) {
-            cDynamicMemMan_dlmorecore(this, -extra);
-            new_brk = (char*)cDynamicMemMan_dlmorecore(this, 0);
+            this->dlmorecore(-extra);
+            new_brk = (char*)this->dlmorecore(0);
             if (new_brk != (char*)0xFFFFFFFF) {
                 released = current_brk - new_brk;
                 if (released != 0) {
@@ -1882,16 +1882,16 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param base  the memory to manage (On Tour heap)
  * @param size  its size in bytes
  */
-extern "C" void cDynamicMemMan_init(cDynamicMemMan* self, unsigned int base, unsigned int size)
+void cDynamicMemMan::init(unsigned int base, unsigned int size)
 {
     unsigned int start = (base + 0xF) & 0xFFFFFFF0;
-    self->Heap = (char*)start;
-    self->MallocState = (malloc_state*)start;
-    self->HeapSize = (size - (start - base)) & 0xFFFFFFF0;
+    Heap = (char*)start;
+    MallocState = (malloc_state*)start;
+    HeapSize = (size - (start - base)) & 0xFFFFFFF0;
     MEM_fill((void*)start, 0, 888);
-    *(unsigned int*)&self->Heap += 0x380;
-    self->HeapSize -= 0x380;
-    self->CoreTop = (char*)((unsigned int)self->Heap);
+    *(unsigned int*)&Heap += 0x380;
+    HeapSize -= 0x380;
+    CoreTop = (char*)((unsigned int)Heap);
 }
 #endif
 
@@ -1908,17 +1908,17 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmorecore);
  * @param incr  the number of bytes to add (negative to give back)
  * @return the old top (new top when shrinking), or -1 (0xFFFFFFFF)
  */
-extern "C" unsigned int cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long incr) // PORT: 64-bit long param
+unsigned int cDynamicMemMan::dlmorecore(long incr)
 {
     if (incr >= 0) {
-        unsigned int old = (unsigned int)self->CoreTop;
+        unsigned int old = (unsigned int)CoreTop;
         unsigned int top = old + incr;
-        if (top <= (unsigned int)self->Heap + self->HeapSize) {
-            self->CoreTop = (char*)top;
+        if (top <= (unsigned int)Heap + HeapSize) {
+            CoreTop = (char*)top;
             return old;
         }
     } else {
-        return *(unsigned int*)&self->CoreTop += incr;
+        return *(unsigned int*)&CoreTop += incr;
     }
     return 0xFFFFFFFF;
 }

@@ -841,9 +841,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cBxReplayFrame* obj)
+void cHandplantMotion::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 160);
+    obj->write((const char*)this, 160);
 }
 #endif
 
@@ -858,9 +858,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_readFromReplayFrame)
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, cBxReplayFrame* obj)
+void cHandplantMotion::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 160);
+    obj->read((char*)this, 160);
 }
 #endif
 
@@ -1711,9 +1711,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cBxReplayFrame* obj)
+void cAirMotion::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x4);
+    obj->write((const char*)this, 0x4);
 }
 #endif
 
@@ -1728,9 +1728,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_readFromReplayFrame);
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, cBxReplayFrame* obj)
+void cAirMotion::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x4);
+    obj->read((char*)this, 0x4);
 }
 #endif
 
@@ -2795,9 +2795,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cBxReplayFrame* obj)
+void cRailslideMotion::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 80);
+    obj->write((const char*)this, 80);
 }
 #endif
 
@@ -2812,9 +2812,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_readFromReplayFrame)
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, cBxReplayFrame* obj)
+void cRailslideMotion::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 80);
+    obj->read((char*)this, 80);
 }
 #endif
 
@@ -4640,9 +4640,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cBxReplayFrame* obj)
+void cGroundMotion::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x18);
+    obj->write((const char*)this, 0x18);
 }
 #endif
 
@@ -4657,9 +4657,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_readFromReplayFrame);
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, cBxReplayFrame* obj)
+void cGroundMotion::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x18);
+    obj->read((char*)this, 0x18);
 }
 #endif
 

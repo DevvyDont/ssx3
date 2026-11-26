@@ -1623,7 +1623,7 @@ void cBankMonitorInstance::Update(cController* controller, float time)
                 bm += 0x1D8;
             }
         }
-        cBankMonitorInstance_Update3D(this, (cBankMonitor*)bm, time);
+        this->Update3D((cBankMonitor*)bm, time);
     }
 }
 #endif
@@ -2518,47 +2518,46 @@ static inline float Sqrt_C868(float x)
  * cBankMonitorInstance_VolUpdate; a stopping instance whose sound is done (cBankMonitorInstance_DonePlaying) is cleared
  * instead (+0x8 and +0x54 zeroed, handle +0x4 set to -1).
  *
- * @param voice  the bank-monitor instance (this)
  * @param bm     the bank monitor (On Tour Monitor)
  * @param time   elapsed time (On Tour Time); reused for the Doppler factor
  */
-extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBankMonitor* bm, float time)
+void cBankMonitorInstance::Update3D(cBankMonitor* bm, float time)
 {
-    if (*(int*)voice == 0) {
+    if (*(int*)this == 0) {
         return;
     }
     int st[4];
     sPos_C868 pos;
     int vol = 0;
-    if (voice->mMonitorType == MONITOR_STREAM) {
+    if (mMonitorType == MONITOR_STREAM) {
         SNDSYS_entercritical();
-        int result = SNDSTRM_requeststatus_st(voice->mHandle, st);
+        int result = SNDSTRM_requeststatus_st(mHandle, st);
         SNDSYS_leavecritical();
         if (result <= 0 && st[0] != kSNDREQUEST_Playing) {
             return;
         }
     }
-    if (bm->mPositionalEnable != 0 && (int)voice->mPosition != 0) {
-        float dist = Sqrt_C868(((cStreamBM_C868*)bm)->v06(voice, &pos));
-        if (voice->mExternalVol != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, dist) != 0) {
-            float prevDist = voice->mLastDist;
+    if (bm->mPositionalEnable != 0 && (int)mPosition != 0) {
+        float dist = Sqrt_C868(((cStreamBM_C868*)bm)->v06(this, &pos));
+        if (mExternalVol != 0 || cBankMonitorInstance_CheckActive_3(this, bm, dist) != 0) {
+            float prevDist = mLastDist;
             if (prevDist != -1.0f && bm->mDopplerEnable != 0) {
-                time = cBankMonitorInstance_Doppler_3(voice, prevDist - dist, time);
+                time = cBankMonitorInstance_Doppler_3(this, prevDist - dist, time);
             } else {
                 time = 1.0f;
             }
-            voice->PosUpdate(pos.pos, pos.pos2);
-            voice->PitchUpdate((int)(time * 4096.0f));
-            if (voice->mExternalVol != 0) {
-                vol = voice->mBaseVol;
+            PosUpdate(pos.pos, pos.pos2);
+            PitchUpdate((int)(time * 4096.0f));
+            if (mExternalVol != 0) {
+                vol = mBaseVol;
             } else {
-                float range = voice->mVanish;
+                float range = mVanish;
                 if (range == 0.0f) {
-                    vol = cBankMonitorInstance_Dist2Vol_4(voice, voice->mBaseVol, dist, 30.0f);
+                    vol = cBankMonitorInstance_Dist2Vol_4(this, mBaseVol, dist, 30.0f);
                 } else {
-                    vol = cBankMonitorInstance_Dist2Vol_4(voice, voice->mBaseVol, dist, range);
+                    vol = cBankMonitorInstance_Dist2Vol_4(this, mBaseVol, dist, range);
                 }
-                int maxVol = voice->mMapToMaxVol;
+                int maxVol = mMapToMaxVol;
                 if (maxVol != kSNDMaxVol) {
                     vol = vol * 0x7F / maxVol;
                     if (vol > 0x7F) {
@@ -2576,22 +2575,22 @@ extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBank
         if (vol < 0) {
             vol = 0;
         }
-        voice->mLastDist = dist;
+        mLastDist = dist;
     } else {
-        vol = voice->mBaseVol;
+        vol = mBaseVol;
     }
-    if (voice->mFading == 0) {
-        float* volControl = voice->mVolControl;
+    if (mFading == 0) {
+        float* volControl = mVolControl;
         if (volControl != 0) {
             vol = (int)((float)vol * *volControl);
         }
-        voice->VolUpdate(vol);
+        VolUpdate(vol);
         return;
     }
-    if (voice->DonePlaying() != 0) {
-        voice->mActive = 0;
-        voice->mFading = 0;
-        voice->mHandle = -1;
+    if (DonePlaying() != 0) {
+        mActive = 0;
+        mFading = 0;
+        mHandle = -1;
     }
 }
 #endif
@@ -2610,13 +2609,13 @@ extern "C" void SNDseqpause(int h);
  * For a non-free instance that is not stopping: sets pitch and volume to 0 and, for a sequence (MONITOR_MIDI), pauses
  * it with SNDseqpause.
  */
-extern "C" void cBankMonitorInstance_Pause(cBankMonitorInstance* self)
+void cBankMonitorInstance::Pause()
 {
-    if (self->IsFree() == 0 && self->mFading == 0) {
-        self->PitchUpdate(0);
-        self->VolUpdate(0);
-        if (self->mMonitorType == MONITOR_MIDI) {
-            SNDseqpause(self->mHandle);
+    if (IsFree() == 0 && mFading == 0) {
+        PitchUpdate(0);
+        VolUpdate(0);
+        if (mMonitorType == MONITOR_MIDI) {
+            SNDseqpause(mHandle);
         }
     }
 }
@@ -2637,12 +2636,12 @@ extern "C" void SNDseqresume(int h);
  * cBankMonitorInstance_Pause set to 0 is not restored here. cBankMonitor_BANKMONITOR_Resume calls it for all 64
  * instances.
  */
-extern "C" void cBankMonitorInstance_Resume(cBankMonitorInstance* self)
+void cBankMonitorInstance::Resume()
 {
-    if (self->IsFree() == 0) {
-        self->PitchUpdate(0x1000);
-        if (self->mMonitorType == MONITOR_MIDI) {
-            SNDseqresume(self->mHandle);
+    if (IsFree() == 0) {
+        PitchUpdate(0x1000);
+        if (mMonitorType == MONITOR_MIDI) {
+            SNDseqresume(mHandle);
         }
     }
 }

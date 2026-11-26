@@ -382,12 +382,11 @@ class cAsStream;
  * Events (0x10), EndEvent and CheckTriggersAtCurrentFrame. Then the count of the Triggers list and each 16-byte
  * tTrigger, Next pointer included. cAnimSequence_readFromReplayFrame reads the same format back.
  *
- * @param node  the sequence to write
  * @param stream  the output stream
  */
-extern "C" void cAnimSequence_writeToReplayFrame(cAnimSequence* node, cBxReplayFrame* stream)
+void cAnimSequence::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cAnimSequence* self = (cAnimSequence*)node;
+    cAnimSequence* self = (cAnimSequence*)this;
     char* streamPtr = (char*)stream;
     Ser_313DD0(streamPtr, &self->SequenceID, 0x4);
     Ser_313DD0(streamPtr, &self->SubAnims[0], 84);
@@ -902,7 +901,7 @@ void cAnimSequencer::writeToReplayFrame(cBxReplayFrame* stream)
     cAnimSequence* n = PlayList;
     for (int i = 0; i < NumPlaying; i++)
     {
-        cAnimSequence_writeToReplayFrame(n, stream);
+        n->writeToReplayFrame(stream);
         n = n->Next;
     }
 }

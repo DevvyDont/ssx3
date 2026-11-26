@@ -5696,25 +5696,25 @@ static inline t4Vector Scale_4F50(float s, const t4Vector& v)
  *
  * @param params  the snowfall parameters filled by cSnowFall_update
  */
-extern "C" void cSnowBox_update(cSnowBox* self, const tWorldPainterSnowfallParameters* params)
+void cSnowBox::update(const tWorldPainterSnowfallParameters* params)
 {
-    switch (self->mSnowBoxType) {
+    switch (mSnowBoxType) {
     case 0:
-        self->mOpacity = params->mFlakeColourA;
-        self->mColourR = params->mFlakeColourR;
-        self->mColourG = params->mFlakeColourG;
-        self->mColourB = params->mFlakeColourB;
-        self->mNumFlakes = (int)(params->mFlakeRatio * 500.0f);
-        self->mWindScale = params->mFlakeWindRatio * 500.0f;
-        self->mFlakeSize = params->mFlakeSize;
+        mOpacity = params->mFlakeColourA;
+        mColourR = params->mFlakeColourR;
+        mColourG = params->mFlakeColourG;
+        mColourB = params->mFlakeColourB;
+        mNumFlakes = (int)(params->mFlakeRatio * 500.0f);
+        mWindScale = params->mFlakeWindRatio * 500.0f;
+        mFlakeSize = params->mFlakeSize;
         break;
     case eSnowBoxFluff:
-        self->mOpacity = params->mFluffColourA;
-        self->mColourR = params->mFluffColourR;
-        self->mColourG = params->mFluffColourG;
-        self->mColourB = params->mFluffColourB;
-        self->mNumFlakes = (int)(params->mFluffRatio * 6.0f);
-        self->mWindScale = params->mFluffWindRatio * 250.0f;
+        mOpacity = params->mFluffColourA;
+        mColourR = params->mFluffColourR;
+        mColourG = params->mFluffColourG;
+        mColourB = params->mFluffColourB;
+        mNumFlakes = (int)(params->mFluffRatio * 6.0f);
+        mWindScale = params->mFluffWindRatio * 250.0f;
         break;
     }
     const float kTimeDiff = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
@@ -5722,38 +5722,38 @@ extern "C" void cSnowBox_update(cSnowBox* self, const tWorldPainterSnowfallParam
     float x;
     float y;
     float z;
-    self->mCurrentTimeToWindChange -= kTimeDiff;
-    if (self->mCurrentTimeToWindChange < 0.0f) {
-        self->mWindLast = self->mWindNext;
+    mCurrentTimeToWindChange -= kTimeDiff;
+    if (mCurrentTimeToWindChange < 0.0f) {
+        mWindLast = mWindNext;
         float windSin;
         float windCos;
         sincos_4F50(deg2rad_4F50(params->mWindRotation), windSin, windCos);
-        t4VectorXYZW windBaseRotated(self->mWindScale * windCos, self->mWindScale * windSin, 0.0f, 0.0f);
+        t4VectorXYZW windBaseRotated(mWindScale * windCos, mWindScale * windSin, 0.0f, 0.0f);
         t4VectorXYZW windBaseFlurries(
             windBaseRotated.x * (1.0f - params->mSnowFlurries) +
-                params->mSnowFlurries * FXRand_4F50(-self->mWindScale, self->mWindScale),
+                params->mSnowFlurries * FXRand_4F50(-mWindScale, mWindScale),
             windBaseRotated.y * (1.0f - params->mSnowFlurries) +
-                params->mSnowFlurries * FXRand_4F50(-self->mWindScale, self->mWindScale),
-            params->mSnowFlurries * FXRand_4F50(-self->mWindScale, self->mWindScale), 0.0f);
-        self->mWindNext = windBaseFlurries;
-        self->mCurrentTimeToWindChange = self->mTotalTimeToWindChange = FXRand_4F50(1.0f, 5.0f);
-        if (self->mResetWind) {
-            self->mWindLast = self->mWindNext;
-            self->mResetWind = 0;
+                params->mSnowFlurries * FXRand_4F50(-mWindScale, mWindScale),
+            params->mSnowFlurries * FXRand_4F50(-mWindScale, mWindScale), 0.0f);
+        mWindNext = windBaseFlurries;
+        mCurrentTimeToWindChange = mTotalTimeToWindChange = FXRand_4F50(1.0f, 5.0f);
+        if (mResetWind) {
+            mWindLast = mWindNext;
+            mResetWind = 0;
         }
     }
-    windBlend = self->mCurrentTimeToWindChange / self->mTotalTimeToWindChange;
-    wakeAddE398(self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(self->mWindNext, 1.0f - windBlend),
-                                                         wakeScale0EE8(self->mWindLast, windBlend)),
+    windBlend = mCurrentTimeToWindChange / mTotalTimeToWindChange;
+    wakeAddE398(mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(mWindNext, 1.0f - windBlend),
+                                                         wakeScale0EE8(mWindLast, windBlend)),
                                              kTimeDiff));
-    wakeAddE398(self->mOffset, Scale_4F50(self->mGravity * params->mGravityMultiplier * kTimeDiff, t4vect_ZAxis_4F50));
-    x = (self->mOffset).x;
-    y = (self->mOffset).y;
-    z = (self->mOffset).z;
-    BringIntoRange_4F50(x, self->mBoxScale);
-    BringIntoRange_4F50(y, self->mBoxScale);
-    BringIntoRange_4F50(z, self->mBoxScale);
-    self->mOffset = t4VectorXYZW(x, y, z, 1.0f);
+    wakeAddE398(mOffset, Scale_4F50(mGravity * params->mGravityMultiplier * kTimeDiff, t4vect_ZAxis_4F50));
+    x = mOffset.x;
+    y = mOffset.y;
+    z = mOffset.z;
+    BringIntoRange_4F50(x, mBoxScale);
+    BringIntoRange_4F50(y, mBoxScale);
+    BringIntoRange_4F50(z, mBoxScale);
+    mOffset = t4VectorXYZW(x, y, z, 1.0f);
 }
 #endif
 
@@ -5806,19 +5806,19 @@ static inline void wakeWrap5430(float& r, float v, float s)
  *
  * @param delta  the camera movement since the last frame
  */
-extern "C" void cSnowBox_updateForCameraPosition(cSnowBox* self, const t4Vector* delta)
+void cSnowBox::updateForCameraPosition(const t4Vector* delta)
 {
-    wakeSub5430(self->mOffset, *delta);
-    float x = self->mOffset.x;
-    float y = self->mOffset.y;
-    float z = self->mOffset.z;
+    wakeSub5430(mOffset, *delta);
+    float x = mOffset.x;
+    float y = mOffset.y;
+    float z = mOffset.z;
     float px = x;
     float py = y;
     float pz = z;
-    wakeWrap5430(x, px, self->mBoxScale);
-    wakeWrap5430(y, py, self->mBoxScale);
-    wakeWrap5430(z, pz, self->mBoxScale);
-    self->mOffset = t4VectorCtor(x, y, z, 1.0f);
+    wakeWrap5430(x, px, mBoxScale);
+    wakeWrap5430(y, py, mBoxScale);
+    wakeWrap5430(z, pz, mBoxScale);
+    mOffset = t4VectorCtor(x, y, z, 1.0f);
 }
 #endif
 
@@ -5985,29 +5985,29 @@ static inline void wakeSubV55D8(t4Vector& a, const t4Vector& b)
  * @param y  minimum y of the cell
  * @param z  minimum z of the cell
  */
-extern "C" void cSnowBox_render(cSnowBox* self, const t4Matrix* snowMatrix, float x, float y, float z)
+void cSnowBox::render(const t4Matrix* snowMatrix, float x, float y, float z)
 {
-    if (self->mNumFlakes == 0) {
+    if (mNumFlakes == 0) {
         return;
     }
     float x1 = x + 1.0f;
     float y1 = y + 1.0f;
     float z1 = z + 1.0f;
     tSnowBoxData info;
-    vu0SetMatrix55D8(info.mSnowBoxToWorldMatrix, wakeMulMat55D8(*snowMatrix, self->mBoxMatrix));
-    t4Vector tempVec = wakeDiv55D8(self->mOffset, self->mBoxScale);
+    vu0SetMatrix55D8(info.mSnowBoxToWorldMatrix, wakeMulMat55D8(*snowMatrix, mBoxMatrix));
+    t4Vector tempVec = wakeDiv55D8(mOffset, mBoxScale);
     info.mParticleOffset = tempVec;
-    float red = self->mColourR * 128.0f;
-    float green = self->mColourG * 128.0f;
-    float blue = self->mColourB * 128.0f;
-    float alpha = self->mOpacity * 128.0f;
+    float red = mColourR * 128.0f;
+    float green = mColourG * 128.0f;
+    float blue = mColourB * 128.0f;
+    float alpha = mOpacity * 128.0f;
     tempVec.y = green;
-    info.mNumFlakes = self->mNumFlakes;
-    info.mRandSeed = self->mRandSeed;
-    info.mRandSeed2 = self->mRandSeed2;
-    info.mRandSeed3 = self->mRandSeed3;
-    info.mFlakeSize = self->mFlakeSize;
-    info.mBoxScale = self->mBoxScale;
+    info.mNumFlakes = mNumFlakes;
+    info.mRandSeed = mRandSeed;
+    info.mRandSeed2 = mRandSeed2;
+    info.mRandSeed3 = mRandSeed3;
+    info.mFlakeSize = mFlakeSize;
+    info.mBoxScale = mBoxScale;
     tempVec.x = red;
     tempVec.z = blue;
     info.mMinX = x;
@@ -6041,7 +6041,7 @@ extern "C" void cSnowBox_render(cSnowBox* self, const t4Matrix* snowMatrix, floa
     tempVec.z = 1.5f;
     tempVec.w = 0.0f;
     wakeSubV55D8(info.mParticleOffset, tempVec);
-    switch (self->mSnowBoxType) {
+    switch (mSnowBoxType) {
     case 0: {
         GrMan->RenderSnowBoxFlakes(info);
         break;
@@ -6225,7 +6225,7 @@ void cSnowFall::update()
     for (j = 0; j < 12; j++) {
         cSnowBox* snowBox = mSnowBoxes[j];
         if (snowBox != 0) {
-            cSnowBox_update(snowBox, &params[snowBox->mViewNum]);
+            snowBox->update(&params[snowBox->mViewNum]);
         }
     }
 }
@@ -6339,8 +6339,8 @@ void cSnowFall::render()
     for (i = 0; i < 12; i++) {
         cSnowBox* snowBox = mSnowBoxes[i];
         if (snowBox != 0 && snowBox->mViewNum == k) {
-            cSnowBox_updateForCameraPosition(snowBox, &camDiff);
-            cSnowBox_render(mSnowBoxes[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
+            snowBox->updateForCameraPosition(&camDiff);
+            mSnowBoxes[i]->render(&snowMatrix, boxMinX, boxMinY, boxMinZ);
         }
     }
     ctx->m_pCurrentDrawState--;

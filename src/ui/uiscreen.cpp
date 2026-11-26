@@ -193,9 +193,9 @@ int cListNode_isSentinel(cListNode*);
  *
  * @return that thread, or 0 when there is none
  */
-extern "C" cUIThread* cUIScreen_getPrimaryThread(cUIScreen* self)
+cUIThread* cUIScreen::getPrimaryThread()
 {
-    cUIThread* n = (cUIThread*)cList_first(&self->mThreads);
+    cUIThread* n = (cUIThread*)cList_first(&mThreads);
     if (n != 0) {
         for (; !cListNode_isSentinel((cListNode*)n); n = (cUIThread*)n->mpNext) {
             if ((*(int*)&n->mStopFrameNumber >> 25) & 1) { // mIsPrimary
@@ -221,14 +221,13 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_jumpToFrame__FPvUs);
  *
  * @param frame  frame to play from
  */
-void cUIScreen_jumpToFrame(void* vself, unsigned short frame)
+void cUIScreen::jumpToFrame(unsigned short frame)
 {
-    cUIScreen* self = (cUIScreen*)vself;
-    void* thread = cUIScreen_getPrimaryThread((cUIScreen*)self);
+    void* thread = getPrimaryThread();
     if (thread != 0) {
         cUIThread_deleteThread(thread);
     }
-    cUIScreen_playFrame(self, frame, 0);
+    cUIScreen_playFrame(this, frame, 0);
 }
 #endif
 
@@ -260,7 +259,7 @@ void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType
 {
     cUIScreen* self = (cUIScreen*)vself;
     if (ThreadType == 0) {
-        void* pPrimary = cUIScreen_getPrimaryThread((cUIScreen*)self);
+        void* pPrimary = self->getPrimaryThread();
         if (pPrimary != 0) {
             cUIThread_deleteThread(pPrimary);
         }
@@ -314,7 +313,7 @@ extern void cUIScreen_parseScreenEnd_4(void *, void *, void *, void *) __asm__("
  *
  * @param thread  the thread (On Tour cUIThread* pThread)
  */
-extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
+void cUIScreen::playFrameByThread(cUIThread* thread)
 {
     cUIThread *uiThread = thread;
     tUIFrameHeader *list;
@@ -335,7 +334,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
     } else {
         uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
     }
-    list = self->getFrameByIndex(CurrentFrame);
+    list = getFrameByIndex(CurrentFrame);
     // ORIGINAL-PTR: the frame's key-channel packets follow its header in the loaded screen data and are
     // variable-length (each mPacketSize bytes), so they are walked by byte offsets
     cmd = (tUIKCPBase *)(list + 1);
@@ -345,40 +344,40 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
             do {
                 switch (cmd->mTag) {
                 case tUIKCPBase::kKCP_KeyframePause:
-                    cUIScreen_parseKeyframePause_4(self, list, cmd, uiThread);
+                    cUIScreen_parseKeyframePause_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_KeyframeJump:
-                    cUIScreen_parseKeyframeJump_4(self, list, cmd, uiThread);
+                    cUIScreen_parseKeyframeJump_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_KeyframeSpawn:
-                    cUIScreen_parseKeyframeSpawn_4(self, list, cmd, uiThread);
+                    cUIScreen_parseKeyframeSpawn_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ObjectAnim:
-                    cUIScreen_parseObjectAnim_4(self, list, cmd, uiThread);
+                    cUIScreen_parseObjectAnim_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ObjectSetPos:
-                    cUIScreen_parseObjectSetPos_4(self, list, cmd, uiThread);
+                    cUIScreen_parseObjectSetPos_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ObjectVisible:
-                    cUIScreen_parseObjectVisible_4(self, list, cmd, uiThread);
+                    cUIScreen_parseObjectVisible_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_EventTrigger:
-                    cUIScreen_parseEventTrigger_4(self, list, cmd, uiThread);
+                    cUIScreen_parseEventTrigger_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_EventAudio:
-                    cUIScreen_parseEventAudio_4(self, list, cmd, uiThread);
+                    cUIScreen_parseEventAudio_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ScreenStart:
-                    cUIScreen_parseScreenStart_4(self, list, cmd, uiThread);
+                    cUIScreen_parseScreenStart_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ScreenEnd:
-                    cUIScreen_parseScreenEnd_4(self, list, cmd, uiThread);
+                    cUIScreen_parseScreenEnd_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ScreenFocusGain:
-                    cUIScreen_parseScreenFocusGain_4(self, list, cmd, uiThread);
+                    cUIScreen_parseScreenFocusGain_4(this, list, cmd, uiThread);
                     break;
                 case tUIKCPBase::kKCP_ScreenFocusLose:
-                    cUIScreen_parseScreenFocusLose_4(self, list, cmd, uiThread);
+                    cUIScreen_parseScreenFocusLose_4(this, list, cmd, uiThread);
                     break;
                 }
                 i++;
@@ -401,7 +400,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframePause);
  * @param pKCP  the command (On Tour pKCP)
  * @param pThread  the animation thread being played (On Tour pThread)
  */
-extern "C" void cUIScreen_parseKeyframePause(cUIScreen* self, void* pFrame, void* pKCP, cUIThread* pThread)
+void cUIScreen::parseKeyframePause(void* pFrame, void* pKCP, cUIThread* pThread)
 {
     *(unsigned int*)&pThread->mStopFrameNumber &= 0xFEFFFFFFU;
 }
@@ -417,12 +416,12 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
  * @param pKCP  the jump command; its label hash is mFrameHashName
  * @param pThread  the thread to move
  */
-extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, tUIKCPKeyframeJump* pKCP, cUIThread* pThread)
+void cUIScreen::parseKeyframeJump(void* pFrame, tUIKCPKeyframeJump* pKCP, cUIThread* pThread)
 {
     // ORIGINAL-PTR: the frames follow the block's count and are variable-length records (each mByteSize bytes)
-    tUIFrameHeader* entry = (tUIFrameHeader*)(self->mpKeyframeBlock + 1);
+    tUIFrameHeader* entry = (tUIFrameHeader*)(mpKeyframeBlock + 1);
     unsigned int i;
-    for (i = 0; i < self->mpKeyframeBlock->mNumFrames; i++) {
+    for (i = 0; i < mpKeyframeBlock->mNumFrames; i++) {
         if (entry->mHashID == pKCP->mFrameHashName) {
             pThread->mCurrentFrameNumber = entry->mFrameNumber;
             return;
@@ -441,14 +440,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
  * @param pFrame  the frame's command list (unused; On Tour pFrame)
  * @param pKCP  the spawn command; its label hash is mFrameHashName (On Tour pKCP)
  */
-extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, tUIKCPKeyframeJump* pKCP)
+void cUIScreen::parseKeyframeSpawn(void* pFrame, tUIKCPKeyframeJump* pKCP)
 {
     // ORIGINAL-PTR: the frames follow the block's count and are variable-length records (each mByteSize bytes)
-    tUIFrameHeader* entry = (tUIFrameHeader*)(self->mpKeyframeBlock + 1);
+    tUIFrameHeader* entry = (tUIFrameHeader*)(mpKeyframeBlock + 1);
     unsigned int i;
-    for (i = 0; i < self->mpKeyframeBlock->mNumFrames; i++) {
+    for (i = 0; i < mpKeyframeBlock->mNumFrames; i++) {
         if (entry->mHashID == pKCP->mFrameHashName) {
-            cUIScreen_playFrame(self, entry->mFrameNumber, 1);
+            cUIScreen_playFrame(this, entry->mFrameNumber, 1);
             return;
         }
         entry = (tUIFrameHeader*)((char*)entry + ((int)entry->mByteSize));
@@ -676,10 +675,10 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenEnd);
  * @param pKCP  the command (On Tour pKCP)
  * @param pThread  the animation thread being played (On Tour pThread)
  */
-extern "C" void cUIScreen_parseScreenEnd(cUIScreen* self, void* pFrame, void* pKCP, cUIThread* pThread)
+void cUIScreen::parseScreenEnd(void* pFrame, void* pKCP, cUIThread* pThread)
 {
     *(unsigned int*)&pThread->mStopFrameNumber &= 0xFEFFFFFFU;
-    cUIState* state = self->mpState;
+    cUIState* state = mpState;
     if (state != 0) {
         ((sUIFlags1C*)&state->mAttrState)->mode = 7;
     }
@@ -705,30 +704,30 @@ extern char str_UIScreenObjs[];
  * The objects go into a "UIScreenObjs" table and the screen's list; the state's slot 18 (onWidgetCreate) then
  * sees each one.
  */
-extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
+void cUIScreen::createAllObjects()
 {
-    tUIObjectBlock* data = self->mpObjectBlock;
+    tUIObjectBlock* data = mpObjectBlock;
     // ORIGINAL-PTR: the object records follow the block's count and are variable-length (each mByteSize bytes)
     tUIBaseObject* rec = (tUIBaseObject*)(data + 1);
     if (data->mNumObjects != 0) {
-        self->mppObjectList =
+        mppObjectList =
             (cUIThing**)operator_new_tag(data->mNumObjects * 4, str_UIScreenObjs, 0x20000000, 0);
-        MEM_fill(self->mppObjectList, 0, self->mpObjectBlock->mNumObjects * 4);
+        MEM_fill(mppObjectList, 0, mpObjectBlock->mNumObjects * 4);
     }
-    cUIThing** out = self->mppObjectList;
-    for (unsigned int i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
-        cUIThing* obj = self->createObjectByStruct(rec);
+    cUIThing** out = mppObjectList;
+    for (unsigned int i = 0; i < mpObjectBlock->mNumObjects; i++) {
+        cUIThing* obj = createObjectByStruct(rec);
         if (obj != 0) {
             *out++ = obj;
             obj->mHashName = rec->mHashID;
-            cList_addToEnd(&self->mRootGroup.mList, (cListNode*)obj);
+            cList_addToEnd(&mRootGroup.mList, (cListNode*)obj);
         }
         rec = (tUIBaseObject*)((char*)rec + rec->mByteSize);
     }
-    for (unsigned int i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
-        void* uiObj = self->mppObjectList[i];
+    for (unsigned int i = 0; i < mpObjectBlock->mNumObjects; i++) {
+        void* uiObj = mppObjectList[i];
         if (uiObj != 0) {
-            cUIState* state = self->mpState;
+            cUIState* state = mpState;
             state->onWidgetCreate((cUIThing*)uiObj);
         }
     }
@@ -748,14 +747,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByHashName);
  * @param key  the object hash name
  * @return the new object, or 0 when no record matches
  */
-extern "C" void* cUIScreen_createObjectByHashName(cUIScreen* self, int key)
+void* cUIScreen::createObjectByHashName(int key)
 {
     // ORIGINAL-PTR: the object records follow the block's count and are variable-length (each mByteSize bytes)
-    tUIBaseObject* record = (tUIBaseObject*)(self->mpObjectBlock + 1);
+    tUIBaseObject* record = (tUIBaseObject*)(mpObjectBlock + 1);
     unsigned int i;
-    for (i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
+    for (i = 0; i < mpObjectBlock->mNumObjects; i++) {
         if (((int)record->mHashID) == key) {
-            cUIThing* obj = self->createObjectByStruct(record);
+            cUIThing* obj = createObjectByStruct(record);
             obj->mHashName = key;
             return obj;
         }
@@ -1072,7 +1071,7 @@ void cUIScreen::update()
         while (!cListNode_isSentinel((cListNode*)n)) {
             void* next = n->mpNext;
             if (n->mLastFrameNumber != n->mCurrentFrameNumber) {
-                cUIScreen_playFrameByThread(this, n);
+                this->playFrameByThread(n);
                 int flags = *(signed char*)((char*)n + 0x13);
                 if ((flags & 1) == 0) {
                     cListNode_removeFromList(n);
@@ -1086,7 +1085,7 @@ void cUIScreen::update()
         }
     }
     unsigned short frame = 0xFFFF;
-    cUIThread* thread = cUIScreen_getPrimaryThread(this);
+    cUIThread* thread = this->getPrimaryThread();
     if (thread != 0) {
         frame = thread->mCurrentFrameNumber;
     } else {

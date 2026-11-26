@@ -847,12 +847,12 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_writeToReplayFrame(cGFTrackStartState* self, cBxReplayFrame* stream)
+void cGFTrackStartState::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_writeToReplayFrame_2(self, stream);
-    stream->write((const char*)&self->mPreLoadState, 4);
-    stream->write((const char*)&self->mPlayFirstTimeBCVideo, 4);
-    stream->write((const char*)&self->mPreLoadTicks, 4);
+    cGameState_writeToReplayFrame_2(this, stream);
+    stream->write((const char*)&mPreLoadState, 4);
+    stream->write((const char*)&mPlayFirstTimeBCVideo, 4);
+    stream->write((const char*)&mPreLoadTicks, 4);
 }
 #endif
 
@@ -870,12 +870,12 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_readFromReplayFrame(cGFTrackStartState* self, cBxReplayFrame* stream)
+void cGFTrackStartState::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cGameState_readFromReplayFrame_2(self, stream);
-    stream->read((char*)&self->mPreLoadState, 4);
-    stream->read((char*)&self->mPlayFirstTimeBCVideo, 4);
-    stream->read((char*)&self->mPreLoadTicks, 4);
+    cGameState_readFromReplayFrame_2(this, stream);
+    stream->read((char*)&mPreLoadState, 4);
+    stream->read((char*)&mPlayFirstTimeBCVideo, 4);
+    stream->read((char*)&mPreLoadTicks, 4);
 }
 #endif
 

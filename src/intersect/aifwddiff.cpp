@@ -603,39 +603,38 @@ INCLUDE_ASM("intersect/aifwddiff", nash_CellKey_proximitytest);
  * Called once per root cell by cCameraTriggerMan_checkCollisions (camera triggers) and the octree queries
  * cOverlapList_getinstances, cOverlapList_gettyped, cOverlapList_getpatchesandinstances, cOverlapList_geteverything, cBXNash_terrainIntersect, cBXNash_staticObjectIntersect and cBXNash_splineIntersect.
  *
- * @param cell  the cell key: level, x, y, z (On Tour CellKey, this)
  * @param box  the query box: min at +0x0, max at +0x10
  * @return 1 outside, 2 crossing, 0 inside (On Tour ProximityResult)
  */
-extern "C" int nash_CellKey_proximitytest(nash_CellKey* cell, tBoundBox* box)
+int nash_CellKey::proximitytest(tBoundBox* box)
 {
     union {
         int i;
         float f;
     } expBits;
-    expBits.i = (cell->level + 0x7F) << 23;
+    expBits.i = (level + 0x7F) << 23;
     float scale = expBits.f;
-    float x0 = ((float)cell->x - 0.2f) * scale;
+    float x0 = ((float)x - 0.2f) * scale;
     if (box->MaxPoint.x < x0) {
         return 1;
     }
-    float y0 = ((float)cell->y - 0.2f) * scale;
+    float y0 = ((float)y - 0.2f) * scale;
     if (box->MaxPoint.y < y0) {
         return 1;
     }
-    float z0 = ((float)cell->z - 0.2f) * scale;
+    float z0 = ((float)z - 0.2f) * scale;
     if (box->MaxPoint.z < z0) {
         return 1;
     }
-    float x1 = ((float)(cell->x + 1) + 0.2f) * scale;
+    float x1 = ((float)(x + 1) + 0.2f) * scale;
     if (x1 < box->MinPoint.x) {
         return 1;
     }
-    float y1 = ((float)(cell->y + 1) + 0.2f) * scale;
+    float y1 = ((float)(y + 1) + 0.2f) * scale;
     if (y1 < box->MinPoint.y) {
         return 1;
     }
-    float z1 = ((float)(cell->z + 1) + 0.2f) * scale;
+    float z1 = ((float)(z + 1) + 0.2f) * scale;
     if (z1 < box->MinPoint.z) {
         return 1;
     }

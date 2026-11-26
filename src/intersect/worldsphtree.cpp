@@ -2508,7 +2508,7 @@ static inline void visit_003369D8(nash_Octant* c, nash_privy_QueryHelper* helper
  * @param outN  out: the hit normal
  * @return true on a hit, otherwise false
  */
-extern "C" bool cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP, t4Vector* outN)
+bool cBXNash::getGroundHeight(float* pos, t4Vector* outP, t4Vector* outN)
 {
     char seg[176];
     float lo = pos[2] - 100000.0f;
@@ -2540,26 +2540,26 @@ extern "C" bool cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* out
     } walk;
     terrainQuery.numintersectinfo = &walk.count;
     terrainQuery.hint = 0;
-    terrainQuery.fwddiffcache = self->TheAIFwdDiffCache;
+    terrainQuery.fwddiffcache = TheAIFwdDiffCache;
     walk.count = 0;
     walk.lineTest.position = (t4Vector*)pos;
     VerticalLineProximityTest* ctx = &walk.lineTest;
-    nash_Octant* octant0 = &self->octant[0][0][0];
-    nash_Octant* octant1 = &self->octant[0][0][1];
-    nash_Octant* octant2 = &self->octant[0][1][0];
-    nash_Octant* octant3 = &self->octant[0][1][1];
-    nash_Octant* octant4 = &self->octant[1][0][0];
-    nash_Octant* octant5 = &self->octant[1][0][1];
-    nash_Octant* octant6 = &self->octant[1][1][0];
-    nash_Octant* octant7 = &self->octant[1][1][1];
-    if (((void*)self->octant[0][0][0].rootcell)) visit_003369D8(octant0, &walk.helpers[0], &terrainQuery, ctx);
-    if (((void*)self->octant[0][0][1].rootcell)) visit_003369D8(octant1, &walk.helpers[1], &terrainQuery, ctx);
-    if (((void*)self->octant[0][1][0].rootcell)) visit_003369D8(octant2, &walk.helpers[2], &terrainQuery, ctx);
-    if (((void*)self->octant[0][1][1].rootcell)) visit_003369D8(octant3, &walk.helpers[3], &terrainQuery, ctx);
-    if (((void*)self->octant[1][0][0].rootcell)) visit_003369D8(octant4, &walk.helpers[4], &terrainQuery, ctx);
-    if (((void*)self->octant[1][0][1].rootcell)) visit_003369D8(octant5, &walk.helpers[5], &terrainQuery, ctx);
-    if (((void*)self->octant[1][1][0].rootcell)) visit_003369D8(octant6, &walk.helpers[6], &terrainQuery, ctx);
-    if (((void*)self->octant[1][1][1].rootcell)) visit_003369D8(octant7, &walk.helpers[7], &terrainQuery, ctx);
+    nash_Octant* octant0 = &octant[0][0][0];
+    nash_Octant* octant1 = &octant[0][0][1];
+    nash_Octant* octant2 = &octant[0][1][0];
+    nash_Octant* octant3 = &octant[0][1][1];
+    nash_Octant* octant4 = &octant[1][0][0];
+    nash_Octant* octant5 = &octant[1][0][1];
+    nash_Octant* octant6 = &octant[1][1][0];
+    nash_Octant* octant7 = &octant[1][1][1];
+    if (((void*)octant[0][0][0].rootcell)) visit_003369D8(octant0, &walk.helpers[0], &terrainQuery, ctx);
+    if (((void*)octant[0][0][1].rootcell)) visit_003369D8(octant1, &walk.helpers[1], &terrainQuery, ctx);
+    if (((void*)octant[0][1][0].rootcell)) visit_003369D8(octant2, &walk.helpers[2], &terrainQuery, ctx);
+    if (((void*)octant[0][1][1].rootcell)) visit_003369D8(octant3, &walk.helpers[3], &terrainQuery, ctx);
+    if (((void*)octant[1][0][0].rootcell)) visit_003369D8(octant4, &walk.helpers[4], &terrainQuery, ctx);
+    if (((void*)octant[1][0][1].rootcell)) visit_003369D8(octant5, &walk.helpers[5], &terrainQuery, ctx);
+    if (((void*)octant[1][1][0].rootcell)) visit_003369D8(octant6, &walk.helpers[6], &terrainQuery, ctx);
+    if (((void*)octant[1][1][1].rootcell)) visit_003369D8(octant7, &walk.helpers[7], &terrainQuery, ctx);
     if (walk.count == 0) {
         return false;
     }
@@ -2701,17 +2701,15 @@ static inline void queryCell_336F30(cBXNash* nash, int i, tBoundBox* box, Static
  * cell's instance list (nodesinside[0]) to StaticObjectCallback_intersectinstance and its children to
  * nash_Cell_descend5; 2 (crossing) goes to nash_privy_QueryHelper_helpX6. Called by cBXNash_staticObjectIntersect1.
  *
- * @param vself  the Nash
  * @param vq  the query (On Tour cWorldIntersectType)
  * @param hits  out: the hit records
  * @param cap  the number of records @p hits holds
  * @param full  nonzero makes StaticObjectCallback_intersectinstance pass mode 3 instead of 1 (On Tour includeRidable)
  * @return the number of hits stored
  */
-extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, cWorldIntersectType* vq, tIntersectInfo* hits, int cap,
-                                             int full)
+int cBXNash::staticObjectIntersect(cWorldIntersectType* vq, tIntersectInfo* hits, int cap, int full)
 {
-    cBXNash* nash = vself;
+    cBXNash* nash = this;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     StaticObjectCallback ctx;
     tBoundBox box;
@@ -2781,7 +2779,7 @@ static inline int isBetter_003378C0(tIntersectInfo* a, tIntersectInfo* b)
 float cBXNash::staticObjectIntersect1(cWorldIntersectType* query, tIntersectInfo* out, int full)
 {
     tIntersectInfoElem hits[128];
-    int n = cBXNash_staticObjectIntersect(this, query, hits, 0x80, full);
+    int n = this->staticObjectIntersect(query, hits, 0x80, full);
     if (n == 0) {
         return -1.0f;
     }
@@ -2832,14 +2830,14 @@ static inline void collect_337A48(nash_Cell* tree, SplineCallback* q)
             }
         }
     }
-    if (tree->children[0][0][0] != 0) nash_Cell_descend6(tree->children[0][0][0], q);
-    if (tree->children[0][0][1] != 0) nash_Cell_descend6(tree->children[0][0][1], q);
-    if (tree->children[0][1][0] != 0) nash_Cell_descend6(tree->children[0][1][0], q);
-    if (tree->children[0][1][1] != 0) nash_Cell_descend6(tree->children[0][1][1], q);
-    if (tree->children[1][0][0] != 0) nash_Cell_descend6(tree->children[1][0][0], q);
-    if (tree->children[1][0][1] != 0) nash_Cell_descend6(tree->children[1][0][1], q);
-    if (tree->children[1][1][0] != 0) nash_Cell_descend6(tree->children[1][1][0], q);
-    if (tree->children[1][1][1] != 0) nash_Cell_descend6(tree->children[1][1][1], q);
+    if (tree->children[0][0][0] != 0) tree->children[0][0][0]->descend6(q);
+    if (tree->children[0][0][1] != 0) tree->children[0][0][1]->descend6(q);
+    if (tree->children[0][1][0] != 0) tree->children[0][1][0]->descend6(q);
+    if (tree->children[0][1][1] != 0) tree->children[0][1][1]->descend6(q);
+    if (tree->children[1][0][0] != 0) tree->children[1][0][0]->descend6(q);
+    if (tree->children[1][0][1] != 0) tree->children[1][0][1]->descend6(q);
+    if (tree->children[1][1][0] != 0) tree->children[1][1][0]->descend6(q);
+    if (tree->children[1][1][1] != 0) tree->children[1][1][1]->descend6(q);
 }
 
 // Queries octant i of the Nash (retail walks octant[2][2][2] in flat order, 0-7).
@@ -2870,15 +2868,13 @@ static inline void queryCell_337A48(cBXNash* nash, int i, tBoundBox* box, Spline
  * intersect_staticSplineSegmentIntersect. Nothing in the code calls it; cOverlapList_splineIntersect does the same over
  * an overlap list.
  *
- * @param grid  the Nash
  * @param pos  the point to test
  * @param intInfo  out: the nearest hit (On Tour intInfo)
  * @param mask  which spline types to accept (On Tour splineFilterMask)
  * @param testRadius  the test radius
  * @return nonzero when a hit was recorded
  */
-extern "C" int cBXNash_splineIntersect(cBXNash* grid, t4Vector* pos, tIntersectInfo* intInfo, int mask,
-        float testRadius)
+int cBXNash::splineIntersect(t4Vector* pos, tIntersectInfo* intInfo, int mask, float testRadius)
 {
     tBoundBox box;
     t4Vector ext;
@@ -2902,14 +2898,14 @@ extern "C" int cBXNash_splineIntersect(cBXNash* grid, t4Vector* pos, tIntersectI
     splineQuery.box = pbox;
     dist = 0.0f;
     cnt = 0;
-    queryCell_337A48(grid, 0, pbox, &splineQuery);
-    queryCell_337A48(grid, 1, pbox, &splineQuery);
-    queryCell_337A48(grid, 2, pbox, &splineQuery);
-    queryCell_337A48(grid, 3, pbox, &splineQuery);
-    queryCell_337A48(grid, 4, pbox, &splineQuery);
-    queryCell_337A48(grid, 5, pbox, &splineQuery);
-    queryCell_337A48(grid, 6, pbox, &splineQuery);
-    queryCell_337A48(grid, 7, pbox, &splineQuery);
+    queryCell_337A48(this, 0, pbox, &splineQuery);
+    queryCell_337A48(this, 1, pbox, &splineQuery);
+    queryCell_337A48(this, 2, pbox, &splineQuery);
+    queryCell_337A48(this, 3, pbox, &splineQuery);
+    queryCell_337A48(this, 4, pbox, &splineQuery);
+    queryCell_337A48(this, 5, pbox, &splineQuery);
+    queryCell_337A48(this, 6, pbox, &splineQuery);
+    queryCell_337A48(this, 7, pbox, &splineQuery);
     return cnt;
 }
 #endif
@@ -4755,12 +4751,11 @@ INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend6);
  * box, position, mask, hit-count and distance pointers and intInfo. It then calls itself on each non-null child. Used
  * by cBXNash_splineIntersect and nash_privy_QueryHelper_helpX7 for cells wholly inside the query box.
  *
- * @param tree  the octree cell (On Tour nash::Cell)
  * @param splineQuery  the spline query (On Tour SplineCallback)
  */
-extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* splineQuery)
+void nash_Cell::descend6(SplineCallback* splineQuery)
 {
-    for (cTypedSpaceNode* typedNode = (cTypedSpaceNode*)tree->nodesinside[2].head; typedNode != 0;
+    for (cTypedSpaceNode* typedNode = (cTypedSpaceNode*)nodesinside[2].head; typedNode != 0;
          typedNode = (cTypedSpaceNode*)typedNode->next) {
         int type = typedNode->type;
         if (type == kSNT_Rail) {
@@ -4781,14 +4776,14 @@ extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* splineQuery)
             }
         }
     }
-    if (tree->children[0][0][0] != 0) nash_Cell_descend6(tree->children[0][0][0], splineQuery);
-    if (tree->children[0][0][1] != 0) nash_Cell_descend6(tree->children[0][0][1], splineQuery);
-    if (tree->children[0][1][0] != 0) nash_Cell_descend6(tree->children[0][1][0], splineQuery);
-    if (tree->children[0][1][1] != 0) nash_Cell_descend6(tree->children[0][1][1], splineQuery);
-    if (tree->children[1][0][0] != 0) nash_Cell_descend6(tree->children[1][0][0], splineQuery);
-    if (tree->children[1][0][1] != 0) nash_Cell_descend6(tree->children[1][0][1], splineQuery);
-    if (tree->children[1][1][0] != 0) nash_Cell_descend6(tree->children[1][1][0], splineQuery);
-    if (tree->children[1][1][1] != 0) nash_Cell_descend6(tree->children[1][1][1], splineQuery);
+    if (children[0][0][0] != 0) children[0][0][0]->descend6(splineQuery);
+    if (children[0][0][1] != 0) children[0][0][1]->descend6(splineQuery);
+    if (children[0][1][0] != 0) children[0][1][0]->descend6(splineQuery);
+    if (children[0][1][1] != 0) children[0][1][1]->descend6(splineQuery);
+    if (children[1][0][0] != 0) children[1][0][0]->descend6(splineQuery);
+    if (children[1][0][1] != 0) children[1][0][1]->descend6(splineQuery);
+    if (children[1][1][0] != 0) children[1][1][0]->descend6(splineQuery);
+    if (children[1][1][1] != 0) children[1][1][1]->descend6(splineQuery);
 }
 #endif
 
@@ -5280,50 +5275,49 @@ static inline void setRateMax_1AA0(float* dst, float v, char* vinfo)
  * @return @p self
  */
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
-extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, tInstanceRecord* obj,
-                                                 tMakeAnimObjectData* def)
+void* cAnimObjectNode::cAnimObjectNode1(int bucket, int nodeType, tInstanceRecord* obj, tMakeAnimObjectData* def)
 {
-    cAnimNode_cAnimNode((char*)&self->CurrTime, bucket, nodeType, obj, def->ForceVisible != 0);
-    self->mVtbl = cAnimObjectNode_vtbl;
+    cAnimNode_cAnimNode((char*)&CurrTime, bucket, nodeType, obj, def->ForceVisible != 0);
+    mVtbl = cAnimObjectNode_vtbl;
     float frameTime = 0.0f;
     char* info = (char*)obj->m_Model;
-    if (self->AnimFrames != 0) {
-        frameTime = cAnimFrame_getStartTime(self->AnimFrames);
+    if (AnimFrames != 0) {
+        frameTime = cAnimFrame_getStartTime(AnimFrames);
     }
-    self->AnimType = def->Type;
-    setRate_1AA0(&self->FromTime, def->FromTime, frameTime);
-    setRateMax_1AA0(&self->ToTime, def->ToTime, info);
+    AnimType = def->Type;
+    setRate_1AA0(&FromTime, def->FromTime, frameTime);
+    setRateMax_1AA0(&ToTime, def->ToTime, info);
     frameTime = def->StartTime;
     if (frameTime < 0.0f) {
-        frameTime = self->FromTime;
+        frameTime = FromTime;
     } else {
         frameTime *= 0.03333333507180214f;
     }
-    if (frameTime < self->FromTime) {
-        frameTime = self->FromTime;
+    if (frameTime < FromTime) {
+        frameTime = FromTime;
     }
-    if (self->ToTime < frameTime) {
-        frameTime = self->ToTime;
+    if (ToTime < frameTime) {
+        frameTime = ToTime;
     }
     if (def->RandomStart != 0) {
-        frameTime = AIrandf(self->FromTime, self->ToTime);
+        frameTime = AIrandf(FromTime, ToTime);
     }
-    self->CurrTime = frameTime;
+    CurrTime = frameTime;
     if (def->SpeedRange != 0.0f) {
-        self->AnimSpeed = AIrangernd(def->Speed * 0.03333333507180214f, def->SpeedRange * 0.03333333507180214f)
+        AnimSpeed = AIrangernd(def->Speed * 0.03333333507180214f, def->SpeedRange * 0.03333333507180214f)
                           / (float)cAppMan_TheAppMan->TimerHz;
     } else {
-        self->AnimSpeed = def->Speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
+        AnimSpeed = def->Speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
     }
     if (def->Dir == tMakeAnimObjectData::kDir_Reverse) {
-        self->AnimSpeed = -self->AnimSpeed;
+        AnimSpeed = -AnimSpeed;
     }
-    self->CacheTime = self->CurrTime;
-    self->AnimActive = 1;
-    self->Flags |= 1;
-    self->Delay = 0;
-    self->AnimComplete = 0;
-    return (self);
+    CacheTime = CurrTime;
+    AnimActive = 1;
+    Flags |= 1;
+    Delay = 0;
+    AnimComplete = 0;
+    return (this);
 }
 #endif
 
@@ -5407,41 +5401,41 @@ extern "C" int cAnimNode_frameUpdate(void* p);
  *
  * @return false after a failed frame update or once the node expired, else true
  */
-extern "C" bool cAnimObjectNode_updateNode(cAnimObjectNode* self)
+bool cAnimObjectNode::updateNode()
 {
-    self->FrameStart = 10000000000.0f;
-    self->FrameEnd = 10000000000.0f;
-    if (self->AnimComplete != 0) {
+    FrameStart = 10000000000.0f;
+    FrameEnd = 10000000000.0f;
+    if (AnimComplete != 0) {
         return true;
     }
-    if (self->AnimActive != 0 && self->Delay >= 0) {
-        if (self->Delay > 0) {
-            self->Delay -= 1;
+    if (AnimActive != 0 && Delay >= 0) {
+        if (Delay > 0) {
+            Delay -= 1;
         } else {
-            self->FrameStart = self->CurrTime;
-            switch (*(short*)self) {
+            FrameStart = CurrTime;
+            switch (*(short*)this) {
             case cAnimObjectNode::kAnimType_Oscillate:
-                self->updateOscillate();
+                updateOscillate();
                 break;
             case cAnimObjectNode::kAnimType_Cycle:
-                self->updateCycle();
+                updateCycle();
                 break;
             default:
-                self->updateOnce();
+                updateOnce();
                 break;
             }
-            if (cAnimNode_frameUpdate((char*)&self->CurrTime) == 0) {
+            if (cAnimNode_frameUpdate((char*)&CurrTime) == 0) {
                 return false;
             }
         }
     }
-    char* obj = (char*)&self->MoveNodeBase;
-    self->Flags |= 1;
-    self->CacheTime = self->CurrTime;
-    if (self->AnimComplete == 0) {
+    char* obj = (char*)&MoveNodeBase;
+    Flags |= 1;
+    CacheTime = CurrTime;
+    if (AnimComplete == 0) {
         return true;
     }
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mVtbl;
     vt[34].fn(vthis(obj, vt[34]), 1);
     return false;
 }

@@ -284,6 +284,9 @@ CHECK_SIZE(cInputPreProcessor, 0x10);
 
 struct cInputPad;   // On Tour: int NumButtons + 24 button records of 0x1C (cPlaybackMan allocates 676 "cInputPad")
 
+struct cInputPad;
+union tInputOpCode;
+
 struct cInputExec {
     int DefaultButtonModifier;      // 0x000 [O] eButtonModifiers; [P] assert "DefaultButtonModifier !=
                                     //       kButtonModifier_Default"; [R] ctor 0; [U] getButton(kind 5) recurses with it;
@@ -299,6 +302,7 @@ struct cInputExec {
     float getRegister(unsigned int id) __asm__("cInputExec_getRegister");
     void* getTempReg(int i) __asm__("cInputExec_getTempReg");
     float getConfig(int varIndex) __asm__("cInputExec_getConfig");
+    float execute(cInputPad* list, const tInputOpCode* code) __asm__("cInputExec_execute");
 };
 
 CHECK_OFFSET(cInputExec, DefaultButtonModifier, 0x000);

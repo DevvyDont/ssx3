@@ -2890,9 +2890,9 @@ INCLUDE_ASM("ai/ai", cGateControl_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual write (slot 1) does the copy
  */
-extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cBxReplayFrame* obj)
+void cGateControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 20);
+    obj->write((const char*)this, 20);
 }
 #endif
 
@@ -2905,9 +2905,9 @@ INCLUDE_ASM("ai/ai", cGateControl_readFromReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual read (slot 2) does the copy
  */
-extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, cBxReplayFrame* obj)
+void cGateControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 20);
+    obj->read((char*)this, 20);
 }
 #endif
 
@@ -3147,9 +3147,9 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual write (slot 1) does the copy
  */
-extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, cBxReplayFrame* obj)
+void cFinishLineControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x4);
+    obj->write((const char*)this, 0x4);
 }
 #endif
 
@@ -3162,9 +3162,9 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_readFromReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual read (slot 2) does the copy
  */
-extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, cBxReplayFrame* obj)
+void cFinishLineControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x4);
+    obj->read((char*)this, 0x4);
 }
 #endif
 
@@ -4511,9 +4511,9 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cBxReplayFrame* obj)
+void cWipeoutControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x80);
+    obj->write((const char*)this, 0x80);
 }
 #endif
 
@@ -4529,9 +4529,9 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, cBxReplayFrame* obj)
+void cWipeoutControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x80);
+    obj->read((char*)this, 0x80);
 }
 #endif
 
@@ -5143,9 +5143,9 @@ INCLUDE_ASM("ai/ai", cResetControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cBxReplayFrame* obj)
+void cResetControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x8);
+    obj->write((const char*)this, 0x8);
 }
 #endif
 
@@ -5160,9 +5160,9 @@ INCLUDE_ASM("ai/ai", cResetControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, cBxReplayFrame* obj)
+void cResetControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x8);
+    obj->read((char*)this, 0x8);
 }
 #endif
 
@@ -5430,9 +5430,9 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, cBxReplayFrame* obj)
+void cNaturalAirControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 20);
+    obj->write((const char*)this, 20);
 }
 #endif
 
@@ -5447,9 +5447,9 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, cBxReplayFrame* obj)
+void cNaturalAirControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 20);
+    obj->read((char*)this, 20);
 }
 #endif
 
@@ -6570,9 +6570,9 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, cBxReplayFrame* obj)
+void cBoardPressControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 20);
+    obj->write((const char*)this, 20);
 }
 #endif
 
@@ -6587,9 +6587,9 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, cBxReplayFrame* obj)
+void cBoardPressControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 20);
+    obj->read((char*)this, 20);
 }
 #endif
 
@@ -7304,9 +7304,9 @@ INCLUDE_ASM("ai/ai", cRailslideControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cBxReplayFrame* obj)
+void cRailslideControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x8);
+    obj->write((const char*)this, 0x8);
 }
 #endif
 
@@ -7321,9 +7321,9 @@ INCLUDE_ASM("ai/ai", cRailslideControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, cBxReplayFrame* obj)
+void cRailslideControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x8);
+    obj->read((char*)this, 0x8);
 }
 #endif
 
@@ -7696,9 +7696,9 @@ INCLUDE_ASM("ai/ai", cHandplantControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cBxReplayFrame* obj)
+void cHandplantControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 20);
+    obj->write((const char*)this, 20);
 }
 #endif
 
@@ -7713,9 +7713,9 @@ INCLUDE_ASM("ai/ai", cHandplantControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, cBxReplayFrame* obj)
+void cHandplantControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 20);
+    obj->read((char*)this, 20);
 }
 #endif
 
@@ -7963,14 +7963,14 @@ static inline void aiSetChannel_133308(cRider* rider, int i, float rate, float t
  *
  * @param input  the spin command (On Tour tSpinCmd): button bits, grab id and 6-bit spin and flip values
  */
-extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
+void cSpinControl::update(tSpinCmd* input)
 {
-    if (cRider_checkForReset_3308(self->mRider, (*(int*)input >> 12) & 1, 0))
+    if (cRider_checkForReset_3308(mRider, (*(int*)input >> 12) & 1, 0))
         return;
-    if ((input->Handplant) && self->SpinState == cSpinControl::kSS_None &&
-        cRider_checkHandplantCollisions(self->mRider, input->AirAdjRotFB * 0.032258063554763794f > 0.5f))
+    if ((input->Handplant) && SpinState == cSpinControl::kSS_None &&
+        cRider_checkHandplantCollisions(mRider, input->AirAdjRotFB * 0.032258063554763794f > 0.5f))
         return;
-    if (cRider_checkRailBoardCollisions(self->mRider))
+    if (cRider_checkRailBoardCollisions(mRider))
         return;
 
     float flip = input->FlipAdjust * 0.032258063554763794f;
@@ -7979,29 +7979,29 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
     float flipAdj = input->AirAdjRotFB * 0.032258063554763794f;
     float spinAdj = input->AirAdjRotLR * 0.032258063554763794f;
 
-    if (self->AirAdjState == cSpinControl::kAS_AirAdj)
+    if (AirAdjState == cSpinControl::kAS_AirAdj)
     {
         if (input->LateSpin)
         {
             if (spinAdj != 0.0f || flipAdj != 0.0f)
-                self->AirAdjState = cSpinControl::kAS_LateSpin;
+                AirAdjState = cSpinControl::kAS_LateSpin;
         }
     }
     else if (spin != 0.0f || flip != 0.0f)
     {
-        self->AirAdjState = cSpinControl::kAS_AirAdj;
+        AirAdjState = cSpinControl::kAS_AirAdj;
     }
-    if (self->AirAdjState == cSpinControl::kAS_LateSpin)
+    if (AirAdjState == cSpinControl::kAS_LateSpin)
     {
         if (input->LateSpin)
             trick = cSpinControl::kNoGrab;
         else
-            self->AirAdjState = cSpinControl::kAS_Spin;
+            AirAdjState = cSpinControl::kAS_Spin;
     }
-    if (self->AirAdjState == cSpinControl::kAS_Spin || self->AirAdjState == cSpinControl::kAS_LateSpin)
+    if (AirAdjState == cSpinControl::kAS_Spin || AirAdjState == cSpinControl::kAS_LateSpin)
     {
-        if (spinAdj == 0.0f && flipAdj == 0.0f && self->NullFlipSpinInputSec > 0.30000001192092896f)
-            self->AirAdjState = cSpinControl::kAS_AirAdj;
+        if (spinAdj == 0.0f && flipAdj == 0.0f && NullFlipSpinInputSec > 0.30000001192092896f)
+            AirAdjState = cSpinControl::kAS_AirAdj;
         if (spin == 0.0f)
             spin = spinAdj;
         if (flip == 0.0f)
@@ -8009,11 +8009,11 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
         spinAdj = flipAdj = 0.0f;
     }
 
-    int busy = self->isGrabPlaying(trick, (*(int*)input >> 14) & 1);
-    if (!busy && self->AirAdjState == cSpinControl::kAS_None)
-        self->AirAdjState = cSpinControl::kAS_AirAdj;
+    int busy = isGrabPlaying(trick, (*(int*)input >> 14) & 1);
+    if (!busy && AirAdjState == cSpinControl::kAS_None)
+        AirAdjState = cSpinControl::kAS_AirAdj;
 
-    self->mRider->PressMode = kPM_None;
+    mRider->PressMode = kPM_None;
     float maxFlip = kMaxAdjFlipAng;
     int dir = input->BoardPress;
     float flipInput;
@@ -8033,76 +8033,76 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
     {
         flipAdj = flipInput;
         maxFlip = kMaxPressFlipAng;
-        if (self->AirAdjFlip < 0.0f || (self->AirAdjFlip == 0.0f && flipAdj < 0.0f))
-            self->mRider->PressMode = kPM_Tail;
+        if (AirAdjFlip < 0.0f || (AirAdjFlip == 0.0f && flipAdj < 0.0f))
+            mRider->PressMode = kPM_Tail;
         else
-            self->mRider->PressMode = kPM_Nose;
+            mRider->PressMode = kPM_Nose;
     }
-    cRider_setupBoostWarp(self->mRider, 0, 0);
+    cRider_setupBoostWarp(mRider, 0, 0);
 
-    int state0 = self->SpinState;
+    int state0 = SpinState;
     if (busy)
     {
         spinAdj = flipAdj = 0.0f;
-        if (self->AirAdjState == cSpinControl::kAS_AirAdj)
-            self->AirAdjState = cSpinControl::kAS_None;
+        if (AirAdjState == cSpinControl::kAS_AirAdj)
+            AirAdjState = cSpinControl::kAS_None;
     }
     else if (state0 == cSpinControl::kSS_None)
     {
-        if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim,
-                2) != kAID_ChangeFakieAir && !self->checkChangeFakieAir() &&
+        if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim,
+                2) != kAID_ChangeFakieAir && !checkChangeFakieAir() &&
             (spin != 0.0f || flip != 0.0f))
         {
-            cRider_snapAxisIncrement(self->mRider, &flip, &spin, 0.7853982448577881f, 0.0f);
-            self->initDesSpin(flip, spin);
-            self->TotalSpinAng = 0.0f;
-            self->TotalFlipAng = 0.0f;
-            self->MaxSpinAngVel = 4.499661445617676f;
-            self->mRider->mSpinRate = 4.499661445617676f;
-            self->MaxFlipAngVel = 2.99977445602417f;
-            self->mRider->mFlipRate = 2.99977445602417f;
-            self->SpinState = cSpinControl::kSS_Into;
-            cRider_flagEventBoostPowerUp(self->mRider, 1,
-                          cRiderMetrix_evLateSpin(self->mRider->mMetrix,
-                                  self->mRider->IsRidingFakie != self->mRider->IsGoofyStance));
+            cRider_snapAxisIncrement(mRider, &flip, &spin, 0.7853982448577881f, 0.0f);
+            initDesSpin(flip, spin);
+            TotalSpinAng = 0.0f;
+            TotalFlipAng = 0.0f;
+            MaxSpinAngVel = 4.499661445617676f;
+            mRider->mSpinRate = 4.499661445617676f;
+            MaxFlipAngVel = 2.99977445602417f;
+            mRider->mFlipRate = 2.99977445602417f;
+            SpinState = cSpinControl::kSS_Into;
+            cRider_flagEventBoostPowerUp(mRider, 1,
+                          cRiderMetrix_evLateSpin(mRider->mMetrix,
+                                  mRider->IsRidingFakie != mRider->IsGoofyStance));
         }
     }
 
-    if (self->SpinState == cSpinControl::kSS_Into)
+    if (SpinState == cSpinControl::kSS_Into)
     {
-        if (self->DesSpin == 0.0f && self->DesFlip == 0.0f)
+        if (DesSpin == 0.0f && DesFlip == 0.0f)
         {
             spin = 0.0f;
             flip = 0.0f;
-            if (self->CurSpin == 0.0f && self->CurFlip == 0.0f)
-                self->SpinState = cSpinControl::kSS_None;
+            if (CurSpin == 0.0f && CurFlip == 0.0f)
+                SpinState = cSpinControl::kSS_None;
         }
-        else if (aiAbs_133308(self->CurSpin - self->DesSpin) < aiTurnLimit_133308(3.1415929794311523f) &&
-                 aiAbs_133308(self->CurFlip - self->DesFlip) < aiTurnLimit_133308(6.283185958862305f))
+        else if (aiAbs_133308(CurSpin - DesSpin) < aiTurnLimit_133308(3.1415929794311523f) &&
+                 aiAbs_133308(CurFlip - DesFlip) < aiTurnLimit_133308(6.283185958862305f))
         {
-            self->SpinState = cSpinControl::kSS_Cycle;
+            SpinState = cSpinControl::kSS_Cycle;
         }
         else if (spin == 0.0f && flip == 0.0f)
         {
-            self->DesSpin = 0.0f;
-            self->DesFlip = 0.0f;
+            DesSpin = 0.0f;
+            DesFlip = 0.0f;
         }
     }
-    else if (self->SpinState == cSpinControl::kSS_Cycle)
+    else if (SpinState == cSpinControl::kSS_Cycle)
     {
         if (spin == 0.0f && flip == 0.0f)
         {
-            self->NullFlipSpinInputSec += 0.01666666753590107f;
-            float ds = self->DesSpin;
-            if (aiAbs_133308(ds - self->CurSpin) > 3.1415929794311523f)
+            NullFlipSpinInputSec += 0.01666666753590107f;
+            float ds = DesSpin;
+            if (aiAbs_133308(ds - CurSpin) > 3.1415929794311523f)
             {
                 if (ds < 0.0f)
                     ds += 3.1415929794311523f;
                 else
                     ds -= 3.1415929794311523f;
             }
-            float df = self->DesFlip;
-            if (aiAbs_133308(df - self->CurFlip) > 6.283185958862305f)
+            float df = DesFlip;
+            if (aiAbs_133308(df - CurFlip) > 6.283185958862305f)
             {
                 if (df < 0.0f)
                     df += 6.283185958862305f;
@@ -8110,162 +8110,162 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
                     df -= 6.283185958862305f;
             }
             float tol = 0.0f;
-            if (self->NullFlipSpinInputSec > 0.30000001192092896f)
+            if (NullFlipSpinInputSec > 0.30000001192092896f)
             {
-                self->DesSpin = ds;
-                self->DesFlip = df;
+                DesSpin = ds;
+                DesFlip = df;
                 tol = kSpinOutOfAng;
             }
-            if (aiAbs_133308(ds - self->CurSpin) <= tol && aiAbs_133308(df - self->CurFlip) <= tol)
-                self->SpinState = cSpinControl::kSS_OutOf;
+            if (aiAbs_133308(ds - CurSpin) <= tol && aiAbs_133308(df - CurFlip) <= tol)
+                SpinState = cSpinControl::kSS_OutOf;
         }
         else
         {
-            self->NullFlipSpinInputSec = 0.0f;
+            NullFlipSpinInputSec = 0.0f;
             if (spin == 0.0f)
-                self->DesSpinInputSec = 0.0f;
+                DesSpinInputSec = 0.0f;
             else
-                self->DesSpinInputSec += 0.01666666753590107f;
+                DesSpinInputSec += 0.01666666753590107f;
             if (flip == 0.0f)
-                self->DesFlipInputSec = 0.0f;
+                DesFlipInputSec = 0.0f;
             else
-                self->DesFlipInputSec += 0.01666666753590107f;
+                DesFlipInputSec += 0.01666666753590107f;
 
             {
-                float& des = self->DesSpin;
-                if (aiAbs_133308(self->CurSpin - des) <= kSpinOutOfAng)
+                float& des = DesSpin;
+                if (aiAbs_133308(CurSpin - des) <= kSpinOutOfAng)
                 {
                     float th = (des == 0.0f) ? 0.20000000298023224f : 0.0f;
-                    if (self->DesSpinInputSec > th)
+                    if (DesSpinInputSec > th)
                     {
                         float n;
                         if (des == 0.0f)
                         {
-                            self->IsPartialLateSpin = 1;
+                            IsPartialLateSpin = 1;
                             n = (spin < 0.0f) ? -3.1415929794311523f : 3.1415929794311523f;
                         }
                         else
                             n = (des < 0.0f) ? des - 3.1415929794311523f : des + 3.1415929794311523f;
                         des = n;
-                        if (aiAbs_133308(self->DesSpin) > kSpinNoDecayThresh)
-                            self->MaxSpinAngVel = (self->MaxSpinAngVel * 0.7999517321586609f) >? 2.9995594024658203f;
+                        if (aiAbs_133308(DesSpin) > kSpinNoDecayThresh)
+                            MaxSpinAngVel = (MaxSpinAngVel * 0.7999517321586609f) >? 2.9995594024658203f;
                     }
                 }
             }
             {
-                float& des = self->DesFlip;
-                if (aiAbs_133308(self->CurFlip - des) <= kSpinOutOfAng)
+                float& des = DesFlip;
+                if (aiAbs_133308(CurFlip - des) <= kSpinOutOfAng)
                 {
                     float th = (des == 0.0f) ? 0.20000000298023224f : 0.0f;
-                    if (self->DesFlipInputSec > th)
+                    if (DesFlipInputSec > th)
                     {
                         float n;
                         if (des == 0.0f)
                         {
-                            self->IsPartialLateSpin = 1;
+                            IsPartialLateSpin = 1;
                             n = (flip < 0.0f) ? -6.283185958862305f : 6.283185958862305f;
                         }
                         else
                             n = (des < 0.0f) ? des - 6.283185958862305f : des + 6.283185958862305f;
                         des = n;
-                        if (aiAbs_133308(self->DesFlip) > kFlipNoDecayThresh)
-                            self->MaxFlipAngVel = (self->MaxFlipAngVel * 0.6399227976799011f) >? 2.9995594024658203f;
+                        if (aiAbs_133308(DesFlip) > kFlipNoDecayThresh)
+                            MaxFlipAngVel = (MaxFlipAngVel * 0.6399227976799011f) >? 2.9995594024658203f;
                     }
                 }
             }
             if (busy)
-                self->IsPartialLateSpin = 1;
+                IsPartialLateSpin = 1;
         }
     }
-    else if (self->SpinState == cSpinControl::kSS_OutOf)
+    else if (SpinState == cSpinControl::kSS_OutOf)
     {
-        self->AirAdjState = cSpinControl::kAS_AirAdj;
+        AirAdjState = cSpinControl::kAS_AirAdj;
         spin = 0.0f;
         flip = 0.0f;
-        if (self->CurSpin == self->DesSpin && self->CurFlip == self->DesFlip)
+        if (CurSpin == DesSpin && CurFlip == DesFlip)
         {
-            self->CurSpin = 0.0f;
-            self->SpinState = cSpinControl::kSS_None;
-            self->DesSpin = 0.0f;
-            self->CurFlip = 0.0f;
-            self->DesFlip = 0.0f;
-            self->IsPartialLateSpin = 0;
+            CurSpin = 0.0f;
+            SpinState = cSpinControl::kSS_None;
+            DesSpin = 0.0f;
+            CurFlip = 0.0f;
+            DesFlip = 0.0f;
+            IsPartialLateSpin = 0;
         }
-        else if (!busy && cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) != kAID_ChangeFakieAir)
+        else if (!busy && cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) != kAID_ChangeFakieAir)
         {
-            self->checkChangeFakieAir();
+            checkChangeFakieAir();
         }
-        else if (self->DesFlip != self->CurFlip)
+        else if (DesFlip != CurFlip)
         {
-            if ((self->CurFlip < 0.0f && flipAdj > 0.0f) || (self->CurFlip > 0.0f && flipAdj < 0.0f))
+            if ((CurFlip < 0.0f && flipAdj > 0.0f) || (CurFlip > 0.0f && flipAdj < 0.0f))
                 flipAdj = -flipAdj;
         }
     }
 
     float invSpinAttribScale = 1.0f / (cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3),
-            self->mRider->mAIIndex,
-                                     self->mRider->mStatsIndex) * 0.349495530128479f + 1.0f);
-    float spinAttribScale = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex,
-                             self->mRider->mStatsIndex) * 0.5002591609954834f + 1.0f;
+            mRider->mAIIndex,
+                                     mRider->mStatsIndex) * 0.349495530128479f + 1.0f);
+    float spinAttribScale = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), mRider->mAIIndex,
+                             mRider->mStatsIndex) * 0.5002591609954834f + 1.0f;
     if (flip == 0.0f && spin == 0.0f)
-        self->FlipSpinInputAng = 1.0000000150474662e+30f;
+        FlipSpinInputAng = 1.0000000150474662e+30f;
     else
-        self->FlipSpinInputAng = aiAtan2_133308(flip, spin);
+        FlipSpinInputAng = aiAtan2_133308(flip, spin);
 
-    if (self->DesSpin == self->CurSpin)
+    if (DesSpin == CurSpin)
     {
-        self->mRider->mSpinRate = 0.0f;
+        mRider->mSpinRate = 0.0f;
     }
-    else if (spin * self->DesSpin < 0.0f)
+    else if (spin * DesSpin < 0.0f)
     {
-        self->mRider->mSpinRate = self->MaxSpinAngVel <? invSpinAttribScale * 2.000131845474243f;
+        mRider->mSpinRate = MaxSpinAngVel <? invSpinAttribScale * 2.000131845474243f;
     }
     else
     {
         if (spin != 0.0f)
         {
-            self->mRider->mSpinRate = self->MaxSpinAngVel;
+            mRider->mSpinRate = MaxSpinAngVel;
         }
         else
         {
-            float diff = self->CurSpin - self->DesSpin;
-            float sp = self->MaxSpinAngVel;
+            float diff = CurSpin - DesSpin;
+            float sp = MaxSpinAngVel;
             if (flip == 0.0f)
                 sp = aiSpeed_133308(aiAbs_133308(diff), sp);
             float ratio = aiAbs_133308(diff) / kSpinOutOfAng;
-            aiSetFalloff_133308(self->mRider->mSpinRate, ratio, sp);
+            aiSetFalloff_133308(mRider->mSpinRate, ratio, sp);
         }
-        self->mRider->mSpinRate *= spinAttribScale;
-        if (self->mRider->mPowerUpTrickTimer > 0.0f)
-            self->mRider->mSpinRate *= 1.9997502565383911f;
+        mRider->mSpinRate *= spinAttribScale;
+        if (mRider->mPowerUpTrickTimer > 0.0f)
+            mRider->mSpinRate *= 1.9997502565383911f;
     }
 
-    if (self->DesFlip == self->CurFlip)
+    if (DesFlip == CurFlip)
     {
-        self->mRider->mFlipRate = 0.0f;
+        mRider->mFlipRate = 0.0f;
     }
-    else if (flip * self->DesFlip < 0.0f)
+    else if (flip * DesFlip < 0.0f)
     {
-        self->mRider->mFlipRate = self->MaxFlipAngVel <? invSpinAttribScale * 2.000131845474243f;
+        mRider->mFlipRate = MaxFlipAngVel <? invSpinAttribScale * 2.000131845474243f;
     }
     else
     {
         if (flip != 0.0f)
         {
-            self->mRider->mFlipRate = self->MaxFlipAngVel;
+            mRider->mFlipRate = MaxFlipAngVel;
         }
         else
         {
-            float diff = self->CurFlip - self->DesFlip;
-            float sp = self->MaxFlipAngVel;
+            float diff = CurFlip - DesFlip;
+            float sp = MaxFlipAngVel;
             if (spin == 0.0f)
                 sp = aiSpeed_133308(aiAbs_133308(diff), sp);
             float ratio = aiAbs_133308(diff) / kSpinOutOfAng;
-            aiSetFalloff_133308(self->mRider->mFlipRate, ratio, sp);
+            aiSetFalloff_133308(mRider->mFlipRate, ratio, sp);
         }
-        self->mRider->mFlipRate *= spinAttribScale;
-        if (self->mRider->mPowerUpTrickTimer > 0.0f)
-            self->mRider->mFlipRate *= 1.9997502565383911f;
+        mRider->mFlipRate *= spinAttribScale;
+        if (mRider->mPowerUpTrickTimer > 0.0f)
+            mRider->mFlipRate *= 1.9997502565383911f;
     }
 
     if (aiAbs_133308(spinAdj) < 0.20000000298023224f)
@@ -8273,64 +8273,64 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
     if (aiAbs_133308(flipAdj) < 0.20000000298023224f)
         flipAdj = 0.0f;
 
-    float spin0 = self->CurSpin;
-    float flip0 = self->CurFlip;
+    float spin0 = CurSpin;
+    float flip0 = CurFlip;
 
     {
-        float tgt = aiTarget_133308(spinAdj, kMaxAdjSpinAng, self->AirAdjSpin);
-        float vel = self->AirAdjSpin;
-        self->AirAdjSpin = aiApproach_133308(vel, tgt, (aiAbs_133308(spinAdj) * 0.5f + 0.5f) *
+        float tgt = aiTarget_133308(spinAdj, kMaxAdjSpinAng, AirAdjSpin);
+        float vel = AirAdjSpin;
+        AirAdjSpin = aiApproach_133308(vel, tgt, (aiAbs_133308(spinAdj) * 0.5f + 0.5f) *
                                                     (aiTurnScale_133308(aiAbs_133308(tgt - vel), kMaxAdjSpinAng) * 0.04999711737036705f));
-        float cs = self->CurSpin;
-        float ds = self->DesSpin;
+        float cs = CurSpin;
+        float ds = DesSpin;
         if (cs < ds)
-            self->CurSpin = ds <? cs + self->AirAdjSpin - vel;
+            CurSpin = ds <? cs + AirAdjSpin - vel;
         else if (ds < cs)
-            self->CurSpin = ds >? cs + self->AirAdjSpin - vel;
-        float old = self->CurSpin;
-        float n = aiApproach_133308(old, self->DesSpin, self->mRider->mSpinRate * 0.01666666753590107f);
-        self->CurSpin = n;
-        self->TrickSpin += n - old;
+            CurSpin = ds >? cs + AirAdjSpin - vel;
+        float old = CurSpin;
+        float n = aiApproach_133308(old, DesSpin, mRider->mSpinRate * 0.01666666753590107f);
+        CurSpin = n;
+        TrickSpin += n - old;
     }
     {
-        float tgt = aiTarget_133308(flipAdj, maxFlip, self->AirAdjFlip);
+        float tgt = aiTarget_133308(flipAdj, maxFlip, AirAdjFlip);
         if (tgt > 0.0f)
             tgt = kAirAdjFwdMaxAng <? tgt;
-        float vel = self->AirAdjFlip;
-        self->AirAdjFlip = aiApproach_133308(vel, tgt, (aiAbs_133308(flipAdj) * 0.5f + 0.5f) *
+        float vel = AirAdjFlip;
+        AirAdjFlip = aiApproach_133308(vel, tgt, (aiAbs_133308(flipAdj) * 0.5f + 0.5f) *
                                                     (aiTurnScale_133308(aiAbs_133308(tgt - vel), kMaxAdjFlipAng) * 0.05000609531998634f));
-        float cf = self->CurFlip;
-        float df = self->DesFlip;
+        float cf = CurFlip;
+        float df = DesFlip;
         if (cf < df)
-            self->CurFlip = df <? cf + self->AirAdjFlip - vel;
+            CurFlip = df <? cf + AirAdjFlip - vel;
         else if (df < cf)
-            self->CurFlip = df >? cf + self->AirAdjFlip - vel;
-        float old = self->CurFlip;
-        float n = aiApproach_133308(old, self->DesFlip, self->mRider->mFlipRate * 0.01666666753590107f);
-        self->CurFlip = n;
-        self->TrickFlip += n - old;
+            CurFlip = df >? cf + AirAdjFlip - vel;
+        float old = CurFlip;
+        float n = aiApproach_133308(old, DesFlip, mRider->mFlipRate * 0.01666666753590107f);
+        CurFlip = n;
+        TrickFlip += n - old;
     }
-    self->TotalSpinAng += self->CurSpin - spin0;
-    self->TotalFlipAng += self->CurFlip - flip0;
+    TotalSpinAng += CurSpin - spin0;
+    TotalFlipAng += CurFlip - flip0;
 
-    float stanceSpin = self->TotalSpinAng;
-    if (self->mRider->IsGoofyStance)
+    float stanceSpin = TotalSpinAng;
+    if (mRider->IsGoofyStance)
         stanceSpin = -stanceSpin;
-    cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evSpin(self->mRider->mMetrix, stanceSpin));
-    cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evFlip(self->mRider->mMetrix, self->TotalFlipAng));
+    cRider_flagEventBoostPowerUp(mRider, 1, cRiderMetrix_evSpin(mRider->mMetrix, stanceSpin));
+    cRider_flagEventBoostPowerUp(mRider, 1, cRiderMetrix_evFlip(mRider->mMetrix, TotalFlipAng));
 
-    int cur = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
+    int cur = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
     int anim = cur;
-    aiSetChannel_133308(self->mRider, 14, 0.1666666716337204f, self->AirAdjSpin * (1.0f / kMaxAdjSpinAng));
-    aiSetChannel_133308(self->mRider, 13, 0.1666666716337204f, self->AirAdjFlip * (1.0f / kMaxAdjFlipAng));
+    aiSetChannel_133308(mRider, 14, 0.1666666716337204f, AirAdjSpin * (1.0f / kMaxAdjSpinAng));
+    aiSetChannel_133308(mRider, 13, 0.1666666716337204f, AirAdjFlip * (1.0f / kMaxAdjFlipAng));
 
     if (!busy && cur != kAID_ChangeFakieAir)
     {
-        if (self->AirAdjSpin != 0.0f || self->AirAdjFlip != 0.0f)
+        if (AirAdjSpin != 0.0f || AirAdjFlip != 0.0f)
         {
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) != kANCAT_IntoAir)
+            if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) != kANCAT_IntoAir)
             {
-                cRider* rd = self->mRider;
+                cRider* rd = mRider;
                 float x = rd->mSlewed[14].cur;
                 if (rd->IsRidingFakie)
                     x = -x;
@@ -8339,44 +8339,44 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
             }
         }
         else if (state0 == cSpinControl::kSS_None
-                 && (self->SpinState == cSpinControl::kSS_Into || self->SpinState == cSpinControl::kSS_Cycle))
+                 && (SpinState == cSpinControl::kSS_Into || SpinState == cSpinControl::kSS_Cycle))
         {
             float ang;
-            if (self->mRider->IsRidingFakie)
+            if (mRider->IsRidingFakie)
                 ang = aiAtan2_133308(flip, -spin);
             else
                 ang = aiAtan2_133308(flip, spin);
             anim = aiDir8_133308(ang, 270, 274, 272, 273, 276, 271, 275, 269);
             float spinAttrib = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3),
-                    self->mRider->mAIIndex,
-                                    self->mRider->mStatsIndex);
-            cRider* rd = self->mRider;
+                    mRider->mAIIndex,
+                                    mRider->mStatsIndex);
+            cRider* rd = mRider;
             float t = (spinAttrib * 0.5002591609954834f + 1.0f) * (rd->mFlipRate >? rd->mSpinRate) *
                       0.14284929633140564f;
             rd->mRiderAnim->FrameRateFactor = t;
         }
-        else if (self->SpinState == cSpinControl::kSS_Into && self->DesSpin == 0.0f && self->DesFlip == 0.0f)
+        else if (SpinState == cSpinControl::kSS_Into && DesSpin == 0.0f && DesFlip == 0.0f)
         {
             anim = kAID_AirCycle;
         }
-        else if (self->SpinState == cSpinControl::kSS_Cycle)
+        else if (SpinState == cSpinControl::kSS_Cycle)
         {
-            if (self->IsPartialLateSpin && cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim,
+            if (IsPartialLateSpin && cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim,
                     2) == kANCAT_AirCycle &&
-                !(self->CurSpin == self->DesSpin && self->CurFlip == self->DesFlip) &&
-                (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) || anim == kAID_AirCycle))
+                !(CurSpin == DesSpin && CurFlip == DesFlip) &&
+                (cRiderAnimBase_isCurrentAnimEndFlag(mRider->mRiderAnim, 2) || anim == kAID_AirCycle))
             {
-                float y = aiSign_133308(self->DesFlip, self->CurFlip);
-                float x = aiSign_133308(self->DesSpin, self->CurSpin);
+                float y = aiSign_133308(DesFlip, CurFlip);
+                float x = aiSign_133308(DesSpin, CurSpin);
                 float ang;
-                if (self->mRider->IsRidingFakie)
+                if (mRider->IsRidingFakie)
                     ang = aiAtan2_133308(y, -x);
                 else
                     ang = aiAtan2_133308(y, x);
                 anim = aiDir8_133308(ang, 294, 294, 293, 293, 296, 296, 295, 295);
             }
         }
-        else if (state0 != cSpinControl::kSS_OutOf && self->SpinState == cSpinControl::kSS_OutOf)
+        else if (state0 != cSpinControl::kSS_OutOf && SpinState == cSpinControl::kSS_OutOf)
         {
             switch (anim)
             {
@@ -8426,35 +8426,35 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
             }
             if (anim == cur)
                 return;
-            float len = cRiderAnimBase_getAIAnimDuration((char*)self->mRider->mRiderAnim, anim);
-            float dS = aiAbs_133308(self->CurSpin - self->DesSpin);
-            float dF = aiAbs_133308(self->CurFlip - self->DesFlip);
-            float t = dS / aiSpeed_133308(dS, self->MaxSpinAngVel);
-            float tF = dF / aiSpeed_133308(dF, self->MaxFlipAngVel);
+            float len = cRiderAnimBase_getAIAnimDuration((char*)mRider->mRiderAnim, anim);
+            float dS = aiAbs_133308(CurSpin - DesSpin);
+            float dF = aiAbs_133308(CurFlip - DesFlip);
+            float t = dS / aiSpeed_133308(dS, MaxSpinAngVel);
+            float tF = dF / aiSpeed_133308(dF, MaxFlipAngVel);
             if (t < tF)
                 t = tF;
-            if (self->mRider->mPowerUpTrickTimer > 0.0f)
+            if (mRider->mPowerUpTrickTimer > 0.0f)
                 t *= 0.5000624656677246f;
-            t *= 1.0f / (cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex,
-                                      self->mRider->mStatsIndex) * 0.5002591609954834f + 1.0f);
+            t *= 1.0f / (cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), mRider->mAIIndex,
+                                      mRider->mStatsIndex) * 0.5002591609954834f + 1.0f);
             float rate = 2.0f;
             if (t > 0.0010000000474974513f)
                 rate = len / t;
-            self->mRider->mRiderAnim->FrameRateFactor = rate <? 2.0f;
+            mRider->mRiderAnim->FrameRateFactor = rate <? 2.0f;
         }
         else
         {
-            if (aiIsGrinding_133308(self->mRider))
+            if (aiIsGrinding_133308(mRider))
             {
-                float dur = self->mRider->mAirPredictor->TotalAirTime - self->mRider->mAirPredictor->CurAirTime;
-                float len = cRiderAnimBase_getAIAnimDuration((char*)self->mRider->mRiderAnim, 305);
+                float dur = mRider->mAirPredictor->TotalAirTime - mRider->mAirPredictor->CurAirTime;
+                float len = cRiderAnimBase_getAIAnimDuration((char*)mRider->mRiderAnim, 305);
                 if (anim == kAID_AirCycle && len >= dur)
                 {
                     float ratio = 1.0f;
                     if (dur > 0.0010000000474974513f)
                         ratio = len / dur;
                     anim = kAID_OutOfAir;
-                    self->mRider->mRiderAnim->FrameRateFactor = ratio <? 2.0f;
+                    mRider->mRiderAnim->FrameRateFactor = ratio <? 2.0f;
                 }
                 else if (anim == kAID_OutOfAir && len < dur)
                 {
@@ -8465,8 +8465,8 @@ extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* input)
     }
     if (anim != cur)
     {
-        cRiderAnimBase_play(self->mRider->mRiderAnim, anim, 0, -1.0f);
-        self->mRider->mRiderAnim->FrameRateFactor = 1.0f;
+        cRiderAnimBase_play(mRider->mRiderAnim, anim, 0, -1.0f);
+        mRider->mRiderAnim->FrameRateFactor = 1.0f;
     }
 }
 #endif
@@ -9406,9 +9406,9 @@ INCLUDE_ASM("ai/ai", cSpinControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cBxReplayFrame* obj)
+void cSpinControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 88);
+    obj->write((const char*)this, 88);
 }
 #endif
 
@@ -9423,9 +9423,9 @@ INCLUDE_ASM("ai/ai", cSpinControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, cBxReplayFrame* obj)
+void cSpinControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 88);
+    obj->read((char*)this, 88);
 }
 #endif
 
@@ -9626,9 +9626,9 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cBxReplayFrame* obj)
+void cUberGrindControl::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 0x8);
+    obj->write((const char*)this, 0x8);
 }
 #endif
 
@@ -9643,9 +9643,9 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, cBxReplayFrame* obj)
+void cUberGrindControl::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 0x8);
+    obj->read((char*)this, 0x8);
 }
 #endif
 
