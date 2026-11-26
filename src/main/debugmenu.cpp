@@ -3027,10 +3027,9 @@ INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cRenderTogglesMenu_onGainFocus(void* vself)
+void* cRenderTogglesMenu::onGainFocus()
 {
-    cRenderTogglesMenu* self = (cRenderTogglesMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3042,10 +3041,9 @@ INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cRenderTogglesMenu_onLoseFocus(void* vself)
+void* cRenderTogglesMenu::onLoseFocus()
 {
-    cRenderTogglesMenu* self = (cRenderTogglesMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3130,10 +3128,9 @@ INCLUDE_ASM("main/debugmenu", cPlantsMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cPlantsMenu_onGainFocus(void* vself)
+void* cPlantsMenu::onGainFocus()
 {
-    cPlantsMenu* self = (cPlantsMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3145,10 +3142,9 @@ INCLUDE_ASM("main/debugmenu", cPlantsMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cPlantsMenu_onLoseFocus(void* vself)
+void* cPlantsMenu::onLoseFocus()
 {
-    cPlantsMenu* self = (cPlantsMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 
@@ -3672,10 +3668,9 @@ INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_onGainFocus__FPv);
  *
  * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
-void* cPowerUpFXTogglesMenu_onGainFocus(void* vself)
+void* cPowerUpFXTogglesMenu::onGainFocus()
 {
-    cPowerUpFXTogglesMenu* self = (cPowerUpFXTogglesMenu*)vself;
-    return cMenu_onGainFocus(self);
+    return cMenu_onGainFocus(this);
 }
 #endif
 
@@ -3687,10 +3682,9 @@ INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_onLoseFocus__FPv);
  *
  * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
-void* cPowerUpFXTogglesMenu_onLoseFocus(void* vself)
+void* cPowerUpFXTogglesMenu::onLoseFocus()
 {
-    cPowerUpFXTogglesMenu* self = (cPowerUpFXTogglesMenu*)vself;
-    return cMenu_onLoseFocus(self);
+    return cMenu_onLoseFocus(this);
 }
 #endif
 

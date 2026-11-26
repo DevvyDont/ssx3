@@ -42,6 +42,12 @@ struct cCommChannel {
     // Methods bound to their retail symbols by asm labels.
     void setError() __asm__("cCommChannel_setError");
     int getError() __asm__("cCommChannel_getError");
+    void* disconnect() __asm__("cCommChannel_disconnect__FPv");
+    void update() __asm__("cCommChannel_update__FPv");
+    int isConnected() __asm__("cCommChannel_isConnected__FPv");
+    int getChannelType() __asm__("cCommChannel_getChannelType__FPv");
+    int readPacket() __asm__("cCommChannel_readPacket__FPv");
+    int writePacket() __asm__("cCommChannel_writePacket__FPv");
 };
 
 CHECK_OFFSET(cCommChannel, mChannelOpen, 0x0);

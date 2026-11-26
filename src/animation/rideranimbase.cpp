@@ -1369,63 +1369,63 @@ static inline void fire_003135B0(cAnimSequence* self, float from, float to)
  * @param dt  the time step
  * @return always 0
  */
-extern "C" int cAnimSequence_updateSubAnim(cAnimSequence* self, int i, float dt)
+int cAnimSequence::updateSubAnim(int i, float dt)
 {
-    float startTime = self->SubAnims[i].Time;
-    float len = self->SubAnims[i].TotalTime;
-    float newTime = startTime + self->SubAnims[i].TimeScale * self->TimeScale * dt;
+    float startTime = SubAnims[i].Time;
+    float len = SubAnims[i].TotalTime;
+    float newTime = startTime + SubAnims[i].TimeScale * TimeScale * dt;
     if (i == 0) {
-        self->Events.IsJustChanged = 0;
-        self->EndEvent = 0;
-        if (self->CheckTriggersAtCurrentFrame != 0) {
-            self->checkTriggersAtTime(startTime);
-            self->CheckTriggersAtCurrentFrame = 0;
+        Events.IsJustChanged = 0;
+        EndEvent = 0;
+        if (CheckTriggersAtCurrentFrame != 0) {
+            checkTriggersAtTime(startTime);
+            CheckTriggersAtCurrentFrame = 0;
         }
     }
-    if (self->SubAnims[i].Type == 0) {
+    if (SubAnims[i].Type == 0) {
         if (newTime <= 0.0f) {
             newTime = 0.0f;
             if (i == 0) {
-                self->setEndTriggers();
+                setEndTriggers();
             }
         } else if (len <= newTime) {
             newTime = len;
             if (i == 0) {
-                self->setEndTriggers();
+                setEndTriggers();
             }
         }
         if (i == 0) {
-            fire_003135B0(self, startTime, newTime);
+            fire_003135B0(this, startTime, newTime);
         }
     } else if (newTime < 0.0f || len <= newTime) {
         int n = (int)ffloor_003135B0(newTime / len);
         newTime -= len * (float)n;
         if (i == 0) {
-            self->setEndTriggers();
+            setEndTriggers();
             if (n >= 2) {
-                fire_003135B0(self, 0.0f, len);
+                fire_003135B0(this, 0.0f, len);
             } else if (n < -1) {
-                fire_003135B0(self, len, 0.0f);
+                fire_003135B0(this, len, 0.0f);
             } else if (n == 1) {
                 if (startTime <= newTime) {
-                    fire_003135B0(self, 0.0f, len);
+                    fire_003135B0(this, 0.0f, len);
                 } else {
-                    fire_003135B0(self, startTime, len);
-                    fire_003135B0(self, 0.0f, newTime);
+                    fire_003135B0(this, startTime, len);
+                    fire_003135B0(this, 0.0f, newTime);
                 }
             } else if (n == -1) {
                 if (newTime <= startTime) {
-                    fire_003135B0(self, len, 0.0f);
+                    fire_003135B0(this, len, 0.0f);
                 } else {
-                    fire_003135B0(self, startTime, 0.0f);
-                    fire_003135B0(self, len, newTime);
+                    fire_003135B0(this, startTime, 0.0f);
+                    fire_003135B0(this, len, newTime);
                 }
             }
         }
     } else if (i == 0) {
-        fire_003135B0(self, startTime, newTime);
+        fire_003135B0(this, startTime, newTime);
     }
-    self->SubAnims[i].Time = newTime;
+    SubAnims[i].Time = newTime;
     return 0;
 }
 #endif
@@ -1447,25 +1447,25 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_updateWeight);
  */
 // Moves value toward target over the remaining time; returns true when the blend
 // finishes and notify is set.
-extern "C" bool cAnimSequence_updateWeight(cAnimSequence* self, float dt)
+bool cAnimSequence::updateWeight(float dt)
 {
-    float timeLeft = self->WeightTimer;
+    float timeLeft = WeightTimer;
     if (timeLeft != 0.0f)
     {
         if (timeLeft <= dt)
         {
-            self->CurrentWeight = self->TargetWeight;
-            self->WeightTimer = 0.0f;
-            if (self->IsFadeOutExpire != 0)
+            CurrentWeight = TargetWeight;
+            WeightTimer = 0.0f;
+            if (IsFadeOutExpire != 0)
             {
                 return true;
             }
         }
         else
         {
-            float current = self->CurrentWeight;
-            self->WeightTimer = timeLeft - dt;
-            self->CurrentWeight = current + (dt / timeLeft) * (self->TargetWeight - current);
+            float current = CurrentWeight;
+            WeightTimer = timeLeft - dt;
+            CurrentWeight = current + (dt / timeLeft) * (TargetWeight - current);
         }
     }
     return false;

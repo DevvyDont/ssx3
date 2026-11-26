@@ -65,6 +65,10 @@ struct cRailManNode : public cSortObjNode {
     void* cRailManNode1(void* bucket) __asm__("cRailManNode_cRailManNode1");
     void disableRail(int idx) __asm__("cRailManNode_disableRail");
     void enableRail(int idx) __asm__("cRailManNode_enableRail");
+    // retail's destructor cRailManNode__cRailManNode stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cRailManNode();
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cRailManNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cRailManNode, RailInfo, 0x018);

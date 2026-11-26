@@ -142,6 +142,7 @@ struct cTypeObjNode : public cObjNode {
     void setRootTransformDirty() __asm__("cTypeObjNode_setRootTransformDirty");
     int isRootTransformDirty() __asm__("cTypeObjNode_isRootTransformDirty");
     void resetRootTransformDirty() __asm__("cTypeObjNode_resetRootTransformDirty");
+    virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cTypeObjNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cTypeObjNode, ObjNodeType, 0x10);

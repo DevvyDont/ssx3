@@ -316,9 +316,9 @@ public:
  *
  * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cBxReplayFrame* obj)
+void cPhysicsModifier::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 4);
+    obj->write((const char*)this, 4);
 }
 #endif
 
@@ -741,10 +741,10 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, cBxReplayFrame* stream)
+void cRailManNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cSortObjNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->RailInfo, 0x200);
+    cSortObjNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&RailInfo, 0x200);
 }
 #endif
 

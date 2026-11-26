@@ -137,6 +137,8 @@ struct cAnimSequence {
     void checkTriggers(float from, float to) __asm__("cAnimSequence_checkTriggers");
     void checkTriggersAtTime(float time) __asm__("cAnimSequence_checkTriggersAtTime");
     void setEndTriggers() __asm__("cAnimSequence_setEndTriggers");
+    int updateSubAnim(int i, float dt) __asm__("cAnimSequence_updateSubAnim");
+    bool updateWeight(float dt) __asm__("cAnimSequence_updateWeight");
 };
 
 CHECK_OFFSET(cAnimSequence, SequenceID, 0x000);

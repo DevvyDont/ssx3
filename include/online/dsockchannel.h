@@ -62,6 +62,7 @@ struct cDSockChannel {
     void updateConnecting() __asm__("cDSockChannel_updateConnecting");
     void updateConnected() __asm__("cDSockChannel_updateConnected");
     float getLatency() __asm__("cDSockChannel_getLatency");
+    int getChannelType() __asm__("cDSockChannel_getChannelType__FPv");
 };
 
 CHECK_OFFSET(cDSockChannel, mChannelOpen, 0x00);

@@ -144,6 +144,10 @@ struct cRenderTogglesMenu {
                                                      //       &cRenderToggles_m_ProfileIndividualFX, 0..1)
     cIntMenuItem ShowSurfaceTypesItem;               // 0xA18 [O]; [R] ctor (46, "Show Surface Types", &cRenderToggles_m_ShowSurfaceTypes,
                                                      //       0..1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cRenderTogglesMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cRenderTogglesMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cRenderTogglesMenu, NumItems, 0x000);
@@ -303,6 +307,10 @@ struct cPlantsMenu {
                                           //       0..6000)
     cFloatMenuItem SwayDirectionItem;     // 0x364 [O]; [R] ctor (10, "Sway Direction", &cPlants_m_SwayDirection, 0..360)
     cFloatMenuItem BranchDirectionItem;   // 0x398 [O]; [R] ctor (11, "Branch Direction", &cPlants_m_BranchDirection, 0..360)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cPlantsMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cPlantsMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cPlantsMenu, NumItems, 0x000);
@@ -1041,6 +1049,10 @@ struct cPowerUpFXTogglesMenu {
                                                          //       &cPowerUpFXToggles_m_TestRedRibbon, 0..1)
     cIntMenuItem TestOrangeRibbonItem;                   // 0x418 [O]; [R] ctor (14, "Test Orange Ribbon",
                                                          //       &cPowerUpFXToggles_m_TestOrangeRibbon, 0..1)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* onGainFocus() __asm__("cPowerUpFXTogglesMenu_onGainFocus__FPv");
+    void* onLoseFocus() __asm__("cPowerUpFXTogglesMenu_onLoseFocus__FPv");
 };
 
 CHECK_OFFSET(cPowerUpFXTogglesMenu, NumItems, 0x000);
