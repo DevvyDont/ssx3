@@ -9,9 +9,9 @@ INCLUDE_ASM("util/list", cListNode_isSentinel__FP9cListNode);
 /**
  * Tells whether a list node is an end marker, i.e. links to itself in either direction.
  *
- * @return 1 if node->next or node->prev points back at the node, else 0
+ * @return true if node->next or node->prev points back at the node
  */
-int cListNode::isSentinel()
+bool cListNode::isSentinel()
 {
     return (mpNext == this) || (mpPrev == this);
 }

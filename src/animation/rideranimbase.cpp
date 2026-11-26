@@ -165,8 +165,8 @@ extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 /**
  * Returns the animation category of what a rider sequencer is currently playing.
  *
- * Reads the current AI anim of sequencer @p i (+@p i * 4); 0x1B6 (no anim) gives 0, otherwise word 0 of its attribute
- * record. cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
+ * Reads the current AI anim of sequencer @p i (+@p i * 4); kAID_Invalid (no anim) gives 0, otherwise word 0 of its
+ * attribute record. cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
  * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
  *
@@ -176,7 +176,7 @@ extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 int cRiderAnimBase::getCurrentAnimCategory(int i)
 {
     int anim = CurrentAnimID[i];
-    if (anim == 438) {
+    if (anim == kAID_Invalid) {
         return 0;
     }
     return cAIAnimEventMap_getAnimPlayAttr(anim)->AnimCategory;
@@ -494,15 +494,15 @@ int cRiderAnimBase::onInput(cAnimSequencer* vseq, int anim, int animid, int isDu
     cAnimSequence* node;
     if (blend == 0.0f)
         cAnimSequencer_expireAll(seq);
-    if (cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule == 2)
+    if (cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule == kAAU_CYCLE)
     {
         node = cAnimSequencer_playAndLoop(seq, anim, animid, 0.0f);
     }
     else
     {
         node = cAnimSequencer_playAndHold(seq, anim, animid, 0.0f);
-        if (cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule == 0
-            || cAIAnimEventMap_getAnimPlayAttr(anim)->ExpireRule != 0)
+        if (cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule == kAAU_FWD
+            || cAIAnimEventMap_getAnimPlayAttr(anim)->ExpireRule != kAAE_NOP)
             cAnimSequence_addEndTrigger(node, 0x3F);
     }
     cAnimSequence* nd = node;
@@ -540,7 +540,8 @@ int cRiderAnimBase::onInput(cAnimSequencer* vseq, int anim, int animid, int isDu
             cAnimSequence_removeEndTrigger(other, 0x3F);
             cAnimSequence_fadeOutAndExpire(other, blend);
             int type = cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule;
-            bool ok = other->SubAnims[0].AnimID == nd->SubAnims[0].AnimID || (type != 0 && type != 2 && type != 1);
+            bool ok = other->SubAnims[0].AnimID == nd->SubAnims[0].AnimID
+                      || (type != kAAU_FWD && type != kAAU_CYCLE && type != kAAU_HOLD_LAST);
             if (ok && other->SequenceID == nd->SequenceID && other->Mask == nd->Mask
                 && other->IsFlipped == nd->IsFlipped)
             {
@@ -733,7 +734,7 @@ extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
 /**
  * Returns how long the clip behind an AI animation lasts, in seconds.
  *
- * Vtable slot 4 (mVtbl) gives the game anim for @p aid; 0x207 (none) returns 0. Otherwise the clip id comes from
+ * Vtable slot 4 (mVtbl) gives the game anim for @p aid; kGAD_Invalid (none) returns 0. Otherwise the clip id comes from
  * cGameAnimMap_TheGameAnimMap->GameAnimMap and its length is (mNumAnimFrames - 1) / 30 from
  * cAnimDataBase_TheAnimDataBase.
  *
@@ -744,7 +745,7 @@ float cRiderAnimBase::getAIAnimDuration(int aid)
 {
     sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)mVtbl;
     int id = vt[4].fn(vthis(this, vt[4]), aid);
-    if (id == 519)
+    if (id == kGAD_Invalid)
         return 0.0f;
     // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
     // first).
@@ -762,7 +763,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimEventTime);
 /**
  * Returns the time in seconds of tag number @p frame in the clip that AI anim @p anim plays, or -1 if it has fewer.
  *
- * Maps the AI anim to a game animation with the virtual at vtable slot 4 (0 when that gives 519, no game anim), then
+ * Maps the AI anim to a game animation with the virtual at vtable slot 4 (0 when that gives kGAD_Invalid), then
  * through the map (GameAnimMap) of cGameAnimMap_TheGameAnimMap to a bank and clip of cAnimDataBase_TheAnimDataBase.
  * The clip's tAdfAnimHeader holds the first tag (mTagIndex) and tag count (mNumTags); tag frames come from the bank's
  * Tags table, converted at 30 frames per second. ai/computer uses tags 1 and 2 as trick markers.
@@ -775,7 +776,7 @@ float cRiderAnimBase::getAIAnimEventTime(int anim, int frame)
 {
     sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)mVtbl;
     int id = vt[4].fn(vthis(this, vt[4]), anim);
-    if (id == 519)
+    if (id == kGAD_Invalid)
         return 0.0f;
     // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
     // first).
@@ -811,7 +812,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm
 /**
  * Starts an AI animation on its sequencer slot and records it as that slot's current anim.
  *
- * Maps @p anim through vtable slot 4; the result 0x207 means it has no animation. A negative @p blend takes
+ * Maps @p anim through vtable slot 4; the result kGAD_Invalid means it has no animation. A negative @p blend takes
  * the anim's default blend-in time from its event-map record (cAIAnimEventMap_getAnimPlayAttr()[4]), whose [3]
  * also gives the sequencer slot; cRiderAnimBase_onInput starts the clip there with the slot's constant from kSequencerPriority
  * (3, 2, 1, 0, 0, 0).
@@ -820,15 +821,15 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm
  * @param flags  nonzero allows a duplicate sequence: a matching playing sequence then does not hand over its
  *               tracks (On Tour isDupSeqAllowed)
  * @param blend  blend-in time in seconds; negative for the anim's default
- * @return the started AI anim (also stored in CurrentAnimID[slot]), or 0x1B6 when it has no animation
+ * @return the started AI anim (also stored in CurrentAnimID[slot]), or kAID_Invalid when it has no animation
  */
 int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
 {
     cRiderAnimBase* self = (cRiderAnimBase*)vself;
     sVEntry<int(void*, int)>* vt = (sVEntry<int (void*, int)>*)self->mVtbl;
     int id = vt[4].fn(vthis(self, vt[4]), anim);
-    if (id == 519)
-        return 438;
+    if (id == kGAD_Invalid)
+        return kAID_Invalid;
     if (blend < 0.0f)
     {
         blend = cAIAnimEventMap_getAnimPlayAttr(anim)->BlendInTime;
@@ -1018,12 +1019,14 @@ struct sRabChannelSet {
 /**
  * Decodes @p count compressed animation channels, starting at channel @p first, at frame index @p frameIndex into @p out.
  *
- * Each 0x14-byte channel has a type and four constants (v4, v8, vC, v10): 0 gives 0, 1 the constant v4, 2-4 a
- * polynomial in @p frameIndex of degree 1-3, 5 a line t * v4 + v8 that continues with slope vC after t = v10. Types 6-9 read a
- * key from per-frame tables (vC is the key's column): 6 u8 per frame, 7 u8 every second frame, 8 u16 per frame (all
- * three scaled by v8 plus v4), 9 a raw float per frame. Keys are interpolated linearly to the next row by the fraction
- * of @p frameIndex (the half-frame fraction for type 7); fractions below 0.001 count as 0, and with both 0 no interpolation is
- * done. The loop tests for the end after each channel, so @p count must be at least 1.
+ * Each 0x14-byte channel has a type (eChanType) and four constants (v4, v8, vC, v10): eCT_Zero gives 0, eCT_Constant
+ * the constant v4, eCT_Linear to eCT_Cubic a polynomial in @p frameIndex of degree 1-3, eCT_TwoLine a line t * v4 + v8
+ * that continues with slope vC after t = v10. The quantized types and eCT_Raw read a key from per-frame tables (vC is
+ * the key's column): eCT_QuantizeByte u8 per frame, eCT_QuantizeByte2 u8 every second frame, eCT_QuantizeShort u16 per
+ * frame (all three scaled by v8 plus v4), eCT_Raw a raw float per frame. Keys are interpolated linearly to the next row
+ * by the fraction of @p frameIndex (the half-frame fraction for eCT_QuantizeByte2); fractions below 0.001 count as 0,
+ * and with both 0 no interpolation is done. The loop tests for the end after each channel, so @p count must be at least
+ * 1.
  *
  * @param first  the first channel to decode
  * @param count  the number of channels
@@ -1056,22 +1059,22 @@ extern "C" void dcmpGetFrame(sRabChannelSet* self, int first, int count, float f
         float* next10 = row10 + self->count9;
         for (;;) {
             switch (ch->type) {
-            case 0:
+            case eCT_Zero:
                 *out++ = 0.0f;
                 break;
-            case 1:
+            case eCT_Constant:
                 *out++ = ch->v4;
                 break;
-            case 2:
+            case eCT_Linear:
                 *out++ = frameIndex * ch->v4 + ch->v8;
                 break;
-            case 3:
+            case eCT_Quadratic:
                 *out++ = frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC;
                 break;
-            case 4:
+            case eCT_Cubic:
                 *out++ = frameIndex * (frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC) + ch->v10;
                 break;
-            case 5: {
+            case eCT_TwoLine: {
                 float split = ch->v10;
                 float a = ch->v4;
                 float intercept = ch->v8;
@@ -1083,25 +1086,25 @@ extern "C" void dcmpGetFrame(sRabChannelSet* self, int first, int count, float f
                 }
                 break;
             }
-            case 6: {
+            case eCT_QuantizeByte: {
                 int k = *(int*)&ch->vC;
                 float a = row4[k];
                 *out++ = (a + frac * ((float)next4[k] - a)) * ch->v8 + ch->v4;
                 break;
             }
-            case 7: {
+            case eCT_QuantizeByte2: {
                 int k = *(int*)&ch->vC;
                 float a = row8[k];
                 *out++ = (a + fracHalf * ((float)next8[k] - a)) * ch->v8 + ch->v4;
                 break;
             }
-            case 8: {
+            case eCT_QuantizeShort: {
                 int k = *(int*)&ch->vC;
                 float a = rowC[k];
                 *out++ = (a + frac * ((float)nextC[k] - a)) * ch->v8 + ch->v4;
                 break;
             }
-            case 9: {
+            case eCT_Raw: {
                 int k = *(int*)&ch->vC;
                 float a = row10[k];
                 *out++ = a + frac * (next10[k] - a);
@@ -1114,22 +1117,22 @@ extern "C" void dcmpGetFrame(sRabChannelSet* self, int first, int count, float f
     } else {
         for (;;) {
             switch (ch->type) {
-            case 0:
+            case eCT_Zero:
                 *out++ = 0.0f;
                 break;
-            case 1:
+            case eCT_Constant:
                 *out++ = ch->v4;
                 break;
-            case 2:
+            case eCT_Linear:
                 *out++ = frameIndex * ch->v4 + ch->v8;
                 break;
-            case 3:
+            case eCT_Quadratic:
                 *out++ = frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC;
                 break;
-            case 4:
+            case eCT_Cubic:
                 *out++ = frameIndex * (frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC) + ch->v10;
                 break;
-            case 5: {
+            case eCT_TwoLine: {
                 float split = ch->v10;
                 float a = ch->v4;
                 float intercept = ch->v8;
@@ -1141,16 +1144,16 @@ extern "C" void dcmpGetFrame(sRabChannelSet* self, int first, int count, float f
                 }
                 break;
             }
-            case 6:
+            case eCT_QuantizeByte:
                 *out++ = (float)row4[*(int*)&ch->vC] * ch->v8 + ch->v4;
                 break;
-            case 7:
+            case eCT_QuantizeByte2:
                 *out++ = (float)row8[*(int*)&ch->vC] * ch->v8 + ch->v4;
                 break;
-            case 8:
+            case eCT_QuantizeShort:
                 *out++ = (float)rowC[*(int*)&ch->vC] * ch->v8 + ch->v4;
                 break;
-            case 9:
+            case eCT_Raw:
                 *out++ = row10[*(int*)&ch->vC];
                 break;
             }
@@ -1176,13 +1179,13 @@ static inline float bitsToFloat_003130A8(int x)
 
 static inline void setType_003130A8(sRabChannelSet* self, sRabChannel* ch, int type)
 {
-    if (type == 6) {
+    if (type == eCT_QuantizeByte) {
         *(int*)&ch->vC = self->count6++;
-    } else if (type == 7) {
+    } else if (type == eCT_QuantizeByte2) {
         *(int*)&ch->vC = self->count7++;
-    } else if (type == 8) {
+    } else if (type == eCT_QuantizeShort) {
         *(int*)&ch->vC = self->count8++;
-    } else if (type == 9) {
+    } else if (type == eCT_Raw) {
         *(int*)&ch->vC = self->count9++;
     }
     ch->type = type;
@@ -1192,10 +1195,10 @@ static inline void setType_003130A8(sRabChannelSet* self, sRabChannel* ch, int t
  * Sets up a compressed-animation frame accessor from a packed channel buffer.
  *
  * Reads the channel count (first byte; 0 leaves the accessor untouched), one 4-bit type per channel (high nibble
- * first) and each channel's constants as 24-bit floats (the top three bytes; type 5 adds a 16-bit integer).
- * Channels of types 6-9 get an index within their type, and the four key streams that follow are located: type 6
- * (a byte per frame), type 7 (half rate), type 8 (16-bit, padded to an even offset) and type 9 (floats, after
- * further padding).
+ * first) and each channel's constants as 24-bit floats (the top three bytes; eCT_TwoLine adds a 16-bit integer).
+ * Channels of the quantized types and eCT_Raw get an index within their type, and the four key streams that follow
+ * are located: eCT_QuantizeByte (a byte per frame), eCT_QuantizeByte2 (half rate), eCT_QuantizeShort (16-bit,
+ * padded to an even offset) and eCT_Raw (floats, after further padding).
  *
  * @param data    the packed channel buffer (On Tour: chanBuf)
  * @param frames  number of frames in the animation (On Tour: numFrames)
@@ -1225,34 +1228,34 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
     ch = self->channels;
     do {
         switch (ch->type) {
-        case 1:
+        case eCT_Constant:
             ch->v4 = READ24_003130A8(ptr, 0);
             ptr += 3;
             break;
-        case 3:
+        case eCT_Quadratic:
             ch->v4 = READ24_003130A8(ptr, 0);
             ch->v8 = READ24_003130A8(ptr, 3);
             ch->vC = READ24_003130A8(ptr, 6);
             ptr += 9;
             break;
-        case 4:
+        case eCT_Cubic:
             ch->v4 = READ24_003130A8(ptr, 0);
             ch->v8 = READ24_003130A8(ptr, 3);
             ch->vC = READ24_003130A8(ptr, 6);
             ch->v10 = READ24_003130A8(ptr, 9);
             ptr += 12;
             break;
-        case 5:
+        case eCT_TwoLine:
             ch->v4 = READ24_003130A8(ptr, 0);
             ch->v8 = READ24_003130A8(ptr, 3);
             ch->vC = READ24_003130A8(ptr, 6);
             ch->v10 = (float)(ptr[9] | (ptr[10] << 8));
             ptr += 11;
             break;
-        case 2:
-        case 6:
-        case 7:
-        case 8:
+        case eCT_Linear:
+        case eCT_QuantizeByte:
+        case eCT_QuantizeByte2:
+        case eCT_QuantizeShort:
             ch->v4 = READ24_003130A8(ptr, 0);
             ch->v8 = READ24_003130A8(ptr, 3);
             ptr += 6;
@@ -1432,19 +1435,19 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_updateWeight);
 #ifdef SKIP_ASM
 
 /**
- * Steps the sequence's weight fade by @p dt; returns 1 when the fade ends on a sequence marked to expire.
+ * Steps the sequence's weight fade by @p dt; returns true when the fade ends on a sequence marked to expire.
  *
- * While the fade time left (+0x9C) is nonzero the current weight (+0x94) moves linearly toward the target (+0x98):
- * by dt / time left of the remaining difference. When @p dt reaches the time left the weight snaps to the target, the
- * timer is cleared, and the result is 1 if the fade-out-expire flag (+0xA0, set by cAnimSequence_fadeOutAndExpire) is
- * set.
+ * While the fade time left (+0x9C) is nonzero the current weight (+0x94) moves linearly toward the target (+0x98): by
+ * dt / time left of the remaining difference. When @p dt reaches the time left the weight snaps to the target, the
+ * timer is cleared, and the result is true if the fade-out-expire flag (+0xA0, set by cAnimSequence_fadeOutAndExpire)
+ * is set.
  *
  * @param dt  the time step
- * @return 1 when a fade-out-and-expire just finished, else 0
+ * @return true when a fade-out-and-expire just finished
  */
-// Moves value toward target over the remaining time; returns 1 when the blend
+// Moves value toward target over the remaining time; returns true when the blend
 // finishes and notify is set.
-extern "C" int cAnimSequence_updateWeight(cAnimSequence* self, float dt)
+extern "C" bool cAnimSequence_updateWeight(cAnimSequence* self, float dt)
 {
     float timeLeft = self->WeightTimer;
     if (timeLeft != 0.0f)
@@ -1455,7 +1458,7 @@ extern "C" int cAnimSequence_updateWeight(cAnimSequence* self, float dt)
             self->WeightTimer = 0.0f;
             if (self->IsFadeOutExpire != 0)
             {
-                return 1;
+                return true;
             }
         }
         else
@@ -1465,7 +1468,7 @@ extern "C" int cAnimSequence_updateWeight(cAnimSequence* self, float dt)
             self->CurrentWeight = current + (dt / timeLeft) * (self->TargetWeight - current);
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

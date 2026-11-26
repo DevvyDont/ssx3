@@ -1591,7 +1591,7 @@ extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 extern "C" void cOVState_onUpdate(void);
 extern "C" void cUIState_onUpdate(void*);
 extern "C" void cMCOverlayManager_ManagerStart(void*);
-extern "C" int cMCOverlayManager_isManagerDone(void*);
+extern "C" bool cMCOverlayManager_isManagerDone(void*);
 extern "C" void cMCOverlayManager_update(void*);
 extern char str_Temp_String[];
 extern char str_onmenu[];

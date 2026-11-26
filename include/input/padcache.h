@@ -51,7 +51,7 @@ struct cPadCache {
     void init() __asm__("cPadCache_init");
     void purge() __asm__("cPadCache_purge");
     void clearAllVibrations() __asm__("cPadCache_clearAllVibrations");
-    int nextInput() __asm__("cPadCache_nextInput");
+    bool nextInput() __asm__("cPadCache_nextInput");
     void cacheInput() __asm__("cPadCache_cacheInput");
     int flush() __asm__("cPadCache_flush");
     int numButtons(int i) __asm__("cPadCache_numButtons");

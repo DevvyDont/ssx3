@@ -229,15 +229,17 @@ static inline bool more_321AF0(sTok_321AF0* s)
 {
     return s->pos < s->base + s->len;
 }
+// What the readers below return past the end of the file text (name ours).
+enum { kEndOfText = -1 };
 static inline int pk_321AF0(sTok_321AF0* s)
 {
-    return more_321AF0(s) ? *s->pos : -1;
+    return more_321AF0(s) ? *s->pos : kEndOfText;
 }
 // peek into a variable (statement form: the token loops keep the lookahead in `c`)
-#define PKC_321AF0(v) { v = -1; if (more_321AF0(s)) v = *s->pos; }
+#define PKC_321AF0(v) { v = kEndOfText; if (more_321AF0(s)) v = *s->pos; }
 static inline int pk1_321AF0(sTok_321AF0* s)
 {
-    return s->pos + 1 < s->base + s->len ? s->pos[1] : -1;
+    return s->pos + 1 < s->base + s->len ? s->pos[1] : kEndOfText;
 }
 static inline void adv_321AF0(sTok_321AF0* s)
 {
@@ -259,7 +261,7 @@ static inline int isAlp_321AF0(char c)
 }
 static inline void blanks_321AF0(sTok_321AF0* s)
 {
-    while (isWh_321AF0(pk_321AF0(s)) && pk_321AF0(s) != -1 && pk_321AF0(s) != '\n') adv_321AF0(s);
+    while (isWh_321AF0(pk_321AF0(s)) && pk_321AF0(s) != kEndOfText && pk_321AF0(s) != '\n') adv_321AF0(s);
 }
 
 // append the current character to the token text (63 chars max) and advance
@@ -299,7 +301,7 @@ void cInputMapParser::readToken()
             blanks_321AF0(s);
             if (!isDig_321AF0(pk_321AF0(s))) {
                 cInputMapParser_error(s, str_malformed_pre_processor_line);
-                while (pk_321AF0(s) != '\n' && pk_321AF0(s) != -1) adv_321AF0(s);
+                while (pk_321AF0(s) != '\n' && pk_321AF0(s) != kEndOfText) adv_321AF0(s);
             } else {
                 s->line = 0;
                 while (isDig_321AF0(pk_321AF0(s))) {
@@ -309,14 +311,14 @@ void cInputMapParser::readToken()
                 blanks_321AF0(s);
                 if (pk_321AF0(s) != '"') {
                     cInputMapParser_error(s, str_malformed_pre_processor_line);
-                    while (pk_321AF0(s) != '\n' && pk_321AF0(s) != -1) adv_321AF0(s);
+                    while (pk_321AF0(s) != '\n' && pk_321AF0(s) != kEndOfText) adv_321AF0(s);
                     c = ' ';
                 } else {
                     adv_321AF0(s);
                     char* fnameCursor = s->fname;
                     int n = 0;
                     for (;;) {
-                        if (pk_321AF0(s) == '\n' || pk_321AF0(s) == -1) {
+                        if (pk_321AF0(s) == '\n' || pk_321AF0(s) == kEndOfText) {
                             cInputMapParser_error(s, str_malformed_pre_processor_line);
                             adv_321AF0(s);
                             goto strdone_321AF0;
@@ -346,7 +348,7 @@ void cInputMapParser::readToken()
         } else if (c == '/' && pk1_321AF0(s) == c) {
             adv_321AF0(s);
             adv_321AF0(s);
-            while (pk_321AF0(s) != '\n' && pk_321AF0(s) != -1) adv_321AF0(s);
+            while (pk_321AF0(s) != '\n' && pk_321AF0(s) != kEndOfText) adv_321AF0(s);
             s->lineStart = 0;
             c = ' ';
         } else {
@@ -361,10 +363,10 @@ void cInputMapParser::readToken()
     s->lineStart = 0;
     PKC_321AF0(c);
     *p++ = c;
-    if (c == -1) {
+    if (c == kEndOfText) {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 0;
+        s->tok = cInputMapParser::kTokenEOF;
         return;
     }
     if (c == '!') {
@@ -374,10 +376,10 @@ void cInputMapParser::readToken()
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 19;
+            s->tok = cInputMapParser::kTokenNE;
         } else {
             *p = 0;
-            s->tok = 0x18;
+            s->tok = cInputMapParser::kTokenNot;
         }
     } else if (c == '+') {
         adv_321AF0(s);
@@ -387,10 +389,10 @@ void cInputMapParser::readToken()
             adv_321AF0(s);
             *p = 0;
             cInputMapParser_error(s, str_Operator_plus_plus_not_defined);
-            s->tok = 1;
+            s->tok = cInputMapParser::kTokenError;
         } else {
             *p = 0;
-            s->tok = 20;
+            s->tok = cInputMapParser::kTokenPlus;
         }
     } else if (c == '-') {
         adv_321AF0(s);
@@ -400,23 +402,23 @@ void cInputMapParser::readToken()
             adv_321AF0(s);
             *p = 0;
             cInputMapParser_error(s, str_Operator_plus_plus_not_defined);
-            s->tok = 1;
+            s->tok = cInputMapParser::kTokenError;
         } else {
             *p = 0;
-            s->tok = 21;
+            s->tok = cInputMapParser::kTokenMinus;
         }
     } else if (c == '.') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 4;
+        s->tok = cInputMapParser::kTokenPeriod;
     } else if (c == '*') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 22;
+        s->tok = cInputMapParser::kTokenMul;
     } else if (c == '/') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 23;
+        s->tok = cInputMapParser::kTokenDiv;
     } else if (c == '=') {
         adv_321AF0(s);
         PKC_321AF0(c);
@@ -424,10 +426,10 @@ void cInputMapParser::readToken()
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 18;
+            s->tok = cInputMapParser::kTokenEQ;
         } else {
             *p = 0;
-            s->tok = 3;
+            s->tok = cInputMapParser::kTokenAssign;
         }
     } else if (c == '<') {
         adv_321AF0(s);
@@ -436,10 +438,10 @@ void cInputMapParser::readToken()
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 17;
+            s->tok = cInputMapParser::kTokenLE;
         } else {
             *p = 0;
-            s->tok = 0x10;
+            s->tok = cInputMapParser::kTokenLS;
         }
     } else if (c == '>') {
         adv_321AF0(s);
@@ -448,47 +450,47 @@ void cInputMapParser::readToken()
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 0xF;
+            s->tok = cInputMapParser::kTokenGE;
         } else {
             *p = 0;
-            s->tok = 0xE;
+            s->tok = cInputMapParser::kTokenGR;
         }
     } else if (c == '&' && pk1_321AF0(s) == c) {
         adv_321AF0(s);
         *p++ = pk_321AF0(s);
         adv_321AF0(s);
         *p = 0;
-        s->tok = 13;
+        s->tok = cInputMapParser::kTokenAnd;
     } else if (c == '|' && pk1_321AF0(s) == c) {
         adv_321AF0(s);
         *p++ = pk_321AF0(s);
         adv_321AF0(s);
         *p = 0;
-        s->tok = 0xC;
+        s->tok = cInputMapParser::kTokenOr;
     } else if (c == '(') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 9;
+        s->tok = cInputMapParser::kTokenOpenBracket;
     } else if (c == ')') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 10;
+        s->tok = cInputMapParser::kTokenCloseBracket;
     } else if (c == ',') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 8;
+        s->tok = cInputMapParser::kTokenComma;
     } else if (c == '?') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 6;
+        s->tok = cInputMapParser::kTokenQuestion;
     } else if (c == ';') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 5;
+        s->tok = cInputMapParser::kTokenSemicolon;
     } else if (c == ':') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 7;
+        s->tok = cInputMapParser::kTokenColon;
     } else if (isAlp_321AF0(c)) {
         // identifier or keyword
         adv_321AF0(s);
@@ -502,35 +504,35 @@ void cInputMapParser::readToken()
         }
         *p = 0;
         if (strcasecmp(text, str_max) == 0) {
-            s->tok = 25;
+            s->tok = cInputMapParser::kTokenMax;
         } else if (strcasecmp(text, str_min) == 0) {
-            s->tok = 26;
+            s->tok = cInputMapParser::kTokenMin;
         } else if (strcasecmp(text, str_pow) == 0) {
-            s->tok = 27;
+            s->tok = cInputMapParser::kTokenPow;
         } else if (strcasecmp(text, str_atan2) == 0) {
-            s->tok = 0x1C;
+            s->tok = cInputMapParser::kTokenAtan2;
         } else if (strcasecmp(text, str_atan) == 0) {
-            s->tok = 29;
+            s->tok = cInputMapParser::kTokenAtan;
         } else if (strcasecmp(text, str_sin) == 0) {
-            s->tok = 0x1E;
+            s->tok = cInputMapParser::kTokenSin;
         } else if (strcasecmp(text, str_cos) == 0) {
-            s->tok = 0x1F;
+            s->tok = cInputMapParser::kTokenCos;
         } else if (strcasecmp(text, str_exp) == 0) {
-            s->tok = 0x20;
+            s->tok = cInputMapParser::kTokenExp;
         } else if (strcasecmp(text, str_log_b) == 0) {
-            s->tok = 33;
+            s->tok = cInputMapParser::kTokenLog;
         } else if (strcasecmp(text, str_floor) == 0) {
-            s->tok = 34;
+            s->tok = cInputMapParser::kTokenFloor;
         } else if (strcasecmp(text, str_ceil) == 0) {
-            s->tok = 35;
+            s->tok = cInputMapParser::kTokenCeil;
         } else if (strcasecmp(text, str_abs) == 0) {
-            s->tok = 36;
+            s->tok = cInputMapParser::kTokenAbs;
         } else if (strcasecmp(text, str_sqrt) == 0) {
-            s->tok = 37;
+            s->tok = cInputMapParser::kTokenSqrt;
         } else if (strcasecmp(text, str_minradian) == 0) {
-            s->tok = 38;
+            s->tok = cInputMapParser::kTokenMinRadian;
         } else {
-            s->tok = 2;
+            s->tok = cInputMapParser::kTokenIdent;
         }
     } else if (c == '+' || c == '-' || isDig_321AF0(c)) {
         // number: [sign] digits [. digits] [(E|e) [sign] digits] [f]
@@ -560,7 +562,7 @@ void cInputMapParser::readToken()
                 if (!isDig_321AF0(c)) {
                     *p = 0;
                     cInputMapParser_error(s, str_Malformed_floating_point_constant);
-                    s->tok = 1;
+                    s->tok = cInputMapParser::kTokenError;
                 }
                 do {
                     PUSHC_321AF0(c, str_Constant_exceeds_64_characters)
@@ -574,13 +576,13 @@ void cInputMapParser::readToken()
         }
         *p = 0;
         sscanf(text, str_pct_f_b, &s->value);
-        s->tok = 11;
+        s->tok = cInputMapParser::kTokenConstant;
         return;
     } else {
         cInputMapParser_error(s, str_Unexpected_character_in_input_pct_c, c);
         *p = 0;
         adv_321AF0(s);
-        s->tok = 1;
+        s->tok = cInputMapParser::kTokenError;
     }
 }
 #endif
@@ -629,7 +631,7 @@ extern char str_Expected_to_end_statement[];
  */
 void cInputMapParser::parseStatement()
 {
-    if (CurrentToken != 2) {
+    if (CurrentToken != kTokenIdent) {
         cInputMapParser_error(this, str_Expected_identifier_in_statement);
         cInputMapParser_skipPastSemicolon(this);
         return;
@@ -654,7 +656,7 @@ void cInputMapParser::parseStatement()
     CurrentIdentifier = identifier;
     strcpy(identifier->Name, name);
     readToken();
-    if (CurrentToken != 3) {
+    if (CurrentToken != kTokenAssign) {
         cInputMapParser_error(this, str_Expected_in_statement);
         cInputMapParser_skipPastSemicolon(this);
         return;
@@ -664,7 +666,7 @@ void cInputMapParser::parseStatement()
         cInputMapParser_skipPastSemicolon(this);
         return;
     }
-    if (CurrentToken != 5) {
+    if (CurrentToken != kTokenSemicolon) {
         cInputMapParser_error(this, str_Expected_to_end_statement);
         cInputMapParser_skipPastSemicolon(this);
         return;
@@ -705,7 +707,7 @@ void* cInputMapParser::parseExpression()
     if (cond == 0) {
         return 0;
     }
-    if (CurrentToken != 6) {
+    if (CurrentToken != kTokenQuestion) {
         return cond;
     }
     readToken();
@@ -714,7 +716,7 @@ void* cInputMapParser::parseExpression()
         cInputMapParser_freeParseNode(this, cond);
         return 0;
     }
-    if (CurrentToken != 7) {
+    if (CurrentToken != kTokenColon) {
         cInputMapParser_error(this, D_0048DFA8);
         cInputMapParser_freeParseNode(this, cond);
         cInputMapParser_freeParseNode(this, thenExpr);
@@ -727,7 +729,7 @@ void* cInputMapParser::parseExpression()
         cInputMapParser_freeParseNode(this, thenExpr);
         return 0;
     }
-    if (cond->type == 4) {
+    if (cond->type == kNodeConstant) {
         if (cond->value != 0.0f) {
             cInputMapParser_freeParseNode(this, elseExpr);
             return thenExpr;
@@ -736,7 +738,7 @@ void* cInputMapParser::parseExpression()
         return elseExpr;
     }
     sExprNode_00323268* n = (sExprNode_00323268*)cInputMapParser_newParseNode(this);
-    n->type = 5;
+    n->type = kNodeSelection;
     n->cond = cond;
     n->a = thenExpr;
     n->b = elseExpr;
@@ -768,10 +770,10 @@ void* cInputMapParser::parseOr()
         return 0;
     }
     int isTrue = 0;
-    if (left->Type == 4 && left->Value != 0.0f) {
+    if (left->Type == kNodeConstant && left->Value != 0.0f) {
         isTrue = 1;
     }
-    while (CurrentToken == 0xC) {
+    while (CurrentToken == kTokenOr) {
         readToken();
         tParseNode* right = (tParseNode*)parseAnd();
         if (right == 0) {
@@ -781,7 +783,7 @@ void* cInputMapParser::parseOr()
         if (isTrue) {
             left->Value = 1.0f;
             cInputMapParser_freeParseNode(this, right);
-        } else if (right->Type == 4) {
+        } else if (right->Type == kNodeConstant) {
             if (right->Value != 0.0f) {
                 right->Value = 1.0f;
                 cInputMapParser_freeParseNode(this, left);
@@ -790,14 +792,14 @@ void* cInputMapParser::parseOr()
             } else {
                 cInputMapParser_freeParseNode(this, right);
             }
-        } else if (left->Type == 4) {
+        } else if (left->Type == kNodeConstant) {
             cInputMapParser_freeParseNode(this, left);
             left = right;
         } else {
             tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Operand2 = right;
-            n->Type = 6;
+            n->Type = kNodeOr;
             left = n;
         }
     }
@@ -825,10 +827,10 @@ void* cInputMapParser::parseAnd()
         return 0;
     }
     int isFalse = 0;
-    if (left->Type == 4 && left->Value == 0.0f) {
+    if (left->Type == kNodeConstant && left->Value == 0.0f) {
         isFalse = 1;
     }
-    while (CurrentToken == 13) {
+    while (CurrentToken == kTokenAnd) {
         readToken();
         tParseNode* right = (tParseNode*)parseCompare();
         if (right == 0) {
@@ -837,24 +839,24 @@ void* cInputMapParser::parseAnd()
         }
         if (isFalse) {
             cInputMapParser_freeParseNode(this, right);
-        } else if (right->Type == 4) {
+        } else if (right->Type == kNodeConstant) {
             if (right->Value == 0.0f) {
                 cInputMapParser_freeParseNode(this, left);
                 left = right;
                 isFalse = 1;
             } else {
                 cInputMapParser_freeParseNode(this, right);
-                if (left->Type == 4)
+                if (left->Type == kNodeConstant)
                     left->Value = 1.0f;
             }
-        } else if (left->Type == 4) {
+        } else if (left->Type == kNodeConstant) {
             cInputMapParser_freeParseNode(this, left);
             left = right;
         } else {
             tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
             n->Operand1 = left;
             n->Operand2 = right;
-            n->Type = 7;
+            n->Type = kNodeAnd;
             left = n;
         }
     }
@@ -883,23 +885,23 @@ void* cInputMapParser::parseCompare()
     for (;;) {
         int op;
         switch (CurrentToken) {
-        case 0x10:
-            op = 10;
+        case kTokenLS:
+            op = kNodeLS;
             break;
-        case 17:
-            op = 11;
+        case kTokenLE:
+            op = kNodeLE;
             break;
-        case 0xF:
-            op = 9;
+        case kTokenGE:
+            op = kNodeGE;
             break;
-        case 0xE:
-            op = 8;
+        case kTokenGR:
+            op = kNodeGR;
             break;
-        case 18:
-            op = 0xC;
+        case kTokenEQ:
+            op = kNodeEQ;
             break;
-        case 19:
-            op = 13;
+        case kTokenNE:
+            op = kNodeNE;
             break;
         default:
             return left;
@@ -910,24 +912,24 @@ void* cInputMapParser::parseCompare()
             cInputMapParser_freeParseNode(this, left);
             return 0;
         }
-        if (left->Type == 4 && right->Type == 4) {
+        if (left->Type == kNodeConstant && right->Type == kNodeConstant) {
             switch (op) {
-            case 10:
+            case kNodeLS:
                 left->Value = left->Value < right->Value ? 1.0f : 0.0f;
                 break;
-            case 11:
+            case kNodeLE:
                 left->Value = left->Value <= right->Value ? 1.0f : 0.0f;
                 break;
-            case 9:
+            case kNodeGE:
                 left->Value = left->Value >= right->Value ? 1.0f : 0.0f;
                 break;
-            case 8:
+            case kNodeGR:
                 left->Value = left->Value > right->Value ? 1.0f : 0.0f;
                 break;
-            case 0xC:
+            case kNodeEQ:
                 left->Value = left->Value == right->Value ? 1.0f : 0.0f;
                 break;
-            case 13:
+            case kNodeNE:
                 left->Value = left->Value != right->Value ? 1.0f : 0.0f;
                 break;
             }
@@ -965,17 +967,17 @@ void* cInputMapParser::parseSum()
         return 0;
     }
     tParseNode* konst = 0;
-    if (left->Type == 4) {
+    if (left->Type == kNodeConstant) {
         konst = left;
     }
     for (;;) {
         int op;
         switch (CurrentToken) {
-        case 20:
-            op = 0xE;
+        case kTokenPlus:
+            op = kNodeAdd;
             break;
-        case 21:
-            op = 0xF;
+        case kTokenMinus:
+            op = kNodeSub;
             break;
         default:
             return left;
@@ -986,25 +988,25 @@ void* cInputMapParser::parseSum()
             cInputMapParser_freeParseNode(this, left);
             return 0;
         }
-        if (right->Type == 4) {
+        if (right->Type == kNodeConstant) {
             if (konst != 0) {
                 switch (op) {
-                case 0xE:
+                case kNodeAdd:
                     konst->Value = konst->Value + right->Value;
                     break;
-                case 0xF:
+                case kNodeSub:
                     konst->Value = konst->Value - right->Value;
                     break;
                 }
                 cInputMapParser_freeParseNode(this, right);
             } else {
                 konst = right;
-                if (op == 0xF) {
+                if (op == kNodeSub) {
                     right->Value = -right->Value;
                 }
                 tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
                 n->Operand1 = left;
-                n->Type = 0xE;
+                n->Type = kNodeAdd;
                 n->Operand2 = right;
                 left = n;
             }
@@ -1041,17 +1043,17 @@ void* cInputMapParser::parseProduct()
         return 0;
     }
     tParseNode* konst = 0;
-    if (left->Type == 4) {
+    if (left->Type == kNodeConstant) {
         konst = left;
     }
     for (;;) {
         int op;
         switch (CurrentToken) {
-        case 22:
-            op = 0x10;
+        case kTokenMul:
+            op = kNodeMul;
             break;
-        case 23:
-            op = 17;
+        case kTokenDiv:
+            op = kNodeDiv;
             break;
         default:
             return left;
@@ -1062,25 +1064,25 @@ void* cInputMapParser::parseProduct()
             cInputMapParser_freeParseNode(this, left);
             return 0;
         }
-        if (right->Type == 4) {
+        if (right->Type == kNodeConstant) {
             if (konst != 0) {
                 switch (op) {
-                case 0x10:
+                case kNodeMul:
                     konst->Value = konst->Value * right->Value;
                     break;
-                case 17:
+                case kNodeDiv:
                     konst->Value = konst->Value / right->Value;
                     break;
                 }
                 cInputMapParser_freeParseNode(this, right);
             } else {
                 konst = right;
-                if (op == 17) {
+                if (op == kNodeDiv) {
                     right->Value = 1.0f / right->Value;
                 }
                 tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(this);
                 n->Operand1 = left;
-                n->Type = 0x10;
+                n->Type = kNodeMul;
                 n->Operand2 = right;
                 left = n;
             }
@@ -1142,27 +1144,27 @@ void* cInputMapParser::parseTerm()
 
 again:
     switch (CurrentToken) {
-    case 2:
+    case kTokenIdent:
         name = TokenText;
         input = cInputMapParser_lookupButtonName(this, name);
         if (input >= 0) {
-            mod = 5;
+            mod = kButtonModifier_Default;
             readToken();
-            if (CurrentToken == 4) {
+            if (CurrentToken == kTokenPeriod) {
                 readToken();
-                if (CurrentToken != 2) {
+                if (CurrentToken != kTokenIdent) {
                     cInputMapParser_error(this, str_Expected_modifier_after_button);
                     return 0;
                 }
                 mod = lookupModifierName(name);
-                if (mod == 6) {
+                if (mod == kButtonModifier_Num) {
                     cInputMapParser_error(this, str_Illegal_modifier_on_button_pct_s, name);
                     return 0;
                 }
                 readToken();
             }
             node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
-            node->type = 2;
+            node->type = kNodeButton;
             node->index = input;
             node->b = mod;
             return node;
@@ -1171,7 +1173,7 @@ again:
         if (cfg >= 0) {
             readToken();
             node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
-            node->type = 3;
+            node->type = kNodeConfig;
             node->index = cfg;
             return node;
         }
@@ -1183,122 +1185,122 @@ again:
                 cInputMapParser_error(this, str_Recursive_identifier_definition);
                 return 0;
             }
-            mod2 = 5;
-            if (CurrentToken == 4) {
+            mod2 = kButtonModifier_Default;
+            if (CurrentToken == kTokenPeriod) {
                 readToken();
-                if (CurrentToken != 2) {
+                if (CurrentToken != kTokenIdent) {
                     cInputMapParser_error(this, str_Expected_modifier_after_button);
                     return 0;
                 }
                 mod2 = lookupModifierName(name);
-                if (mod2 == 6) {
+                if (mod2 == kButtonModifier_Num) {
                     cInputMapParser_error(this, str_Illegal_modifier_on_reference_pct_s, name);
                     return 0;
                 }
                 readToken();
             }
             type = ((sTermNode_3BD8*)identifier->Expression)->type;
-            if (type == 4) {
+            if (type == kNodeConstant) {
                 node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
                 node->type = type;
                 node->value = ((sTermNode_3BD8*)identifier->Expression)->value;
                 return node;
             }
             node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
-            node->type = 1;
+            node->type = kNodeReference;
             node->a = identifier;
             node->b = mod2;
             return node;
         }
         cInputMapParser_error(this, str_Unexpected_identifier_pct_s, name);
         return 0;
-    case 11:
+    case kTokenConstant:
         node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
-        node->type = 4;
+        node->type = kNodeConstant;
         node->value = TokenValue;
         readToken();
         return node;
-    case 20:
+    case kTokenPlus:
         readToken();
         goto again;
-    case 21:
+    case kTokenMinus:
         readToken();
         operand = (sTermNode_3BD8*)parseTerm();
         if (operand == 0)
             return 0;
-        if (operand->type == 4) {
+        if (operand->type == kNodeConstant) {
             operand->value = -operand->value;
             return operand;
         }
         node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
-        node->type = 18;
+        node->type = kNodeNeg;
         node->a = operand;
         return node;
-    case 24:
+    case kTokenNot:
         readToken();
         operand = (sTermNode_3BD8*)parseTerm();
         if (operand == 0)
             return 0;
-        if (operand->type == 4) {
+        if (operand->type == kNodeConstant) {
             operand->value = operand->value == 0.0f ? 1.0f : 0.0f;
             return operand;
         }
         node = (sTermNode_3BD8*)cInputMapParser_newParseNode(this);
-        node->type = 19;
+        node->type = kNodeNot;
         node->a = operand;
         return node;
-    case 9:
+    case kTokenOpenBracket:
         readToken();
         node = (sTermNode_3BD8*)parseExpression();
-        if (CurrentToken != 10) {
+        if (CurrentToken != kTokenCloseBracket) {
             cInputMapParser_error(this, str_Expected_in_expression);
             cInputMapParser_freeParseNode(this, node);
             return 0;
         }
         readToken();
         return node;
-    case 25:
+    case kTokenMax:
         readToken();
-        return parseBinaryFunc(20);
-    case 26:
+        return parseBinaryFunc(kNodeMax);
+    case kTokenMin:
         readToken();
-        return parseBinaryFunc(21);
-    case 27:
+        return parseBinaryFunc(kNodeMin);
+    case kTokenPow:
         readToken();
-        return parseBinaryFunc(22);
-    case 28:
+        return parseBinaryFunc(kNodePow);
+    case kTokenAtan2:
         readToken();
-        return parseBinaryFunc(23);
-    case 29:
+        return parseBinaryFunc(kNodeAtan2);
+    case kTokenAtan:
         readToken();
-        return parseUnaryFunc(0x18);
-    case 30:
+        return parseUnaryFunc(kNodeAtan);
+    case kTokenSin:
         readToken();
-        return parseUnaryFunc(25);
-    case 31:
+        return parseUnaryFunc(kNodeSin);
+    case kTokenCos:
         readToken();
-        return parseUnaryFunc(26);
-    case 32:
+        return parseUnaryFunc(kNodeCos);
+    case kTokenExp:
         readToken();
-        return parseUnaryFunc(27);
-    case 33:
+        return parseUnaryFunc(kNodeExp);
+    case kTokenLog:
         readToken();
-        return parseUnaryFunc(0x1C);
-    case 34:
+        return parseUnaryFunc(kNodeLog);
+    case kTokenFloor:
         readToken();
-        return parseUnaryFunc(29);
-    case 35:
+        return parseUnaryFunc(kNodeFloor);
+    case kTokenCeil:
         readToken();
-        return parseUnaryFunc(0x1E);
-    case 36:
+        return parseUnaryFunc(kNodeCeil);
+    case kTokenAbs:
         readToken();
-        return parseUnaryFunc(0x1F);
-    case 37:
+        return parseUnaryFunc(kNodeAbs);
+    case kTokenSqrt:
         readToken();
-        return parseUnaryFunc(0x20);
-    case 38:
+        return parseUnaryFunc(kNodeSqrt);
+    case kTokenMinRadian:
         readToken();
-        return parseUnaryFunc(33);
+        return parseUnaryFunc(kNodeMinRadian);
     default:
         cInputMapParser_error(this, str_Expected_term_in_expression);
         return 0;
@@ -1359,7 +1361,7 @@ static inline float atan2_4138(float y, float x)
 // PORT: uses g++ min/max operators (<? >?).
 void* cInputMapParser::parseBinaryFunc(int op)
 {
-    if (CurrentToken != 9) {
+    if (CurrentToken != kTokenOpenBracket) {
         cInputMapParser_error(this, str_Expected_in_expression_b);
         return 0;
     }
@@ -1368,7 +1370,7 @@ void* cInputMapParser::parseBinaryFunc(int op)
     if (firstArg == 0) {
         return 0;
     }
-    if (CurrentToken != 8) {
+    if (CurrentToken != kTokenComma) {
         cInputMapParser_error(this, str_Expected_in_expression_c);
         cInputMapParser_freeParseNode(this, firstArg);
         return 0;
@@ -1378,25 +1380,25 @@ void* cInputMapParser::parseBinaryFunc(int op)
     if (secondArg == 0) {
         return 0;
     }
-    if (CurrentToken != 10) {
+    if (CurrentToken != kTokenCloseBracket) {
         cInputMapParser_error(this, str_Expected_in_expression);
         cInputMapParser_freeParseNode(this, firstArg);
         cInputMapParser_freeParseNode(this, secondArg);
         return 0;
     }
     readToken();
-    if (firstArg->Type == 4 && secondArg->Type == 4) {
+    if (firstArg->Type == kNodeConstant && secondArg->Type == kNodeConstant) {
         switch (op) {
-        case 21:
+        case kNodeMin:
             firstArg->Value = secondArg->Value <? firstArg->Value;
             break;
-        case 20:
+        case kNodeMax:
             firstArg->Value = secondArg->Value >? firstArg->Value;
             break;
-        case 22:
+        case kNodePow:
             firstArg->Value = pow_4138(firstArg->Value, secondArg->Value);
             break;
-        case 23:
+        case kNodeAtan2:
             firstArg->Value = atan2_4138(firstArg->Value, secondArg->Value);
             break;
         }
@@ -1472,7 +1474,7 @@ static inline float abs_43A0(float x)
 // Parses "(expr)" after a unary function name; constant arguments are folded immediately.
 void* cInputMapParser::parseUnaryFunc(int op)
 {
-    if (CurrentToken != 9) {
+    if (CurrentToken != kTokenOpenBracket) {
         cInputMapParser_error(this, str_Expected_in_expression_b);
         return 0;
     }
@@ -1481,42 +1483,42 @@ void* cInputMapParser::parseUnaryFunc(int op)
     if (operand == 0) {
         return 0;
     }
-    if (CurrentToken != 10) {
+    if (CurrentToken != kTokenCloseBracket) {
         cInputMapParser_error(this, str_Expected_in_expression);
         cInputMapParser_freeParseNode(this, operand);
         return 0;
     }
     readToken();
-    if (operand->Type == 4) {
+    if (operand->Type == kNodeConstant) {
         switch (op) {
-        case 0x18:
+        case kNodeAtan:
             operand->Value = func_0031C228(operand->Value);
             break;
-        case 25:
+        case kNodeSin:
             operand->Value = fSin(operand->Value);
             break;
-        case 26:
+        case kNodeCos:
             operand->Value = fCos(operand->Value);
             break;
-        case 27:
+        case kNodeExp:
             operand->Value = expf(operand->Value);
             break;
-        case 0x1C:
+        case kNodeLog:
             operand->Value = logf(operand->Value);
             break;
-        case 29:
+        case kNodeFloor:
             operand->Value = floor_43A0(operand->Value);
             break;
-        case 0x1E:
+        case kNodeCeil:
             operand->Value = ceil_43A0(operand->Value);
             break;
-        case 0x1F:
+        case kNodeAbs:
             operand->Value = abs_43A0(operand->Value);
             break;
-        case 0x20:
+        case kNodeSqrt:
             operand->Value = sqrt_43A0(operand->Value);
             break;
-        case 33: {
+        case kNodeMinRadian: {
             float x = operand->Value;
             operand->Value = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
@@ -1605,7 +1607,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
 {
     tInputOpCode* code = (tInputOpCode*)vcode;
     switch (node->Type) {
-    case 4:
+    case cInputMapParser::kNodeConstant:
         if (*dst < 0) {
             if (self->NumFreeRegisters > 0) {
                 *dst = self->FreeRegisters[--self->NumFreeRegisters];
@@ -1619,19 +1621,20 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->Binary.opcode = 0;
+        code->Binary.opcode = kInputOpCodeLoad;
         code->Binary.dest = *dst;
         code->Binary.operand1 = 0;
         code->Binary.operand2 = 0;
         code[1].Float.value = node->Value;
         return 2;
-    case 1:
+    case cInputMapParser::kNodeReference:
         return cInputMapParser_compileParseNode(self, node->Identifier->Expression, dst, code, cap,
-                                                node->Modifier != 5 ? node->Modifier : defaultModifier);
-    case 2: {
+                                                node->Modifier != kButtonModifier_Default ? node->Modifier
+                                                                                          : defaultModifier);
+    case cInputMapParser::kNodeButton: {
         int idx = self->buttonToRegister(node->Index,
-                                                   node->Modifier == 5 ? defaultModifier : node->Modifier);
-        if (*dst == -1) {
+                                         node->Modifier == kButtonModifier_Default ? defaultModifier : node->Modifier);
+        if (*dst == cInputMapParser::kNoRegister) {
             *dst = idx;
             return 0;
         }
@@ -1639,14 +1642,14 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->Binary.opcode = 1;
+        code->Binary.opcode = kInputOpCodeMove;
         code->Binary.dest = *dst;
         code->Binary.operand1 = idx;
         code->Binary.operand2 = 0;
         return 1;
     }
-    case 3:
-        if (*dst == -1) {
+    case cInputMapParser::kNodeConfig:
+        if (*dst == cInputMapParser::kNoRegister) {
             *dst = cInputMapParser_configToRegister_i(self, node->Index);
             return 0;
         }
@@ -1654,13 +1657,13 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->Binary.opcode = 1;
+        code->Binary.opcode = kInputOpCodeMove;
         code->Binary.dest = *dst;
         code->Binary.operand1 = cInputMapParser_configToRegister_i(self, node->Index);
         code->Binary.operand2 = 0;
         return 1;
-    case 5: {
-        int cond = -1;
+    case cInputMapParser::kNodeSelection: {
+        int cond = cInputMapParser::kNoRegister;
         int condLen = cInputMapParser_compileParseNode(self, node->Operand1, &cond, code, cap, defaultModifier);
         if (condLen < 0) {
             return -1;
@@ -1672,7 +1675,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             return -1;
         }
         unsigned int reg = cond;
-        code->Branch.opcode = 2;
+        code->Branch.opcode = kInputOpCodeBranchFalse;
         code->Branch.operand = reg;
         if (reg < 0x40) {
             self->FreeRegisters[self->NumFreeRegisters++] = reg;
@@ -1693,7 +1696,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->Branch.opcode = 3;
+        code->Branch.opcode = kInputOpCodeBranch;
         code->Branch.operand = 0;
         int elseLen = cInputMapParser_compileParseNode(self, node->Operand3, dst, code + 1, cap - 1, defaultModifier);
         if (elseLen < 0) {
@@ -1706,34 +1709,62 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
         code->Branch.offset = elseLen;
         return condLen + thenLen + elseLen + 2;
     }
-    case 6: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 4, defaultModifier);
-    case 7: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 5, defaultModifier);
-    case 8: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 6, defaultModifier);
-    case 9: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 7, defaultModifier);
-    case 10: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 8, defaultModifier);
-    case 11: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 9, defaultModifier);
-    case 12: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 10, defaultModifier);
-    case 13: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 11, defaultModifier);
-    case 14: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 12, defaultModifier);
-    case 15: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 13, defaultModifier);
-    case 16: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 14, defaultModifier);
-    case 17: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 15, defaultModifier);
-    case 20: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 16, defaultModifier);
-    case 21: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 17, defaultModifier);
-    case 22: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 18, defaultModifier);
-    case 23: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 19, defaultModifier);
-    case 24: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 20, defaultModifier);
-    case 25: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 21, defaultModifier);
-    case 26: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 22, defaultModifier);
-    case 27: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 23, defaultModifier);
-    case 28: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 24, defaultModifier);
-    case 29: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 25, defaultModifier);
-    case 30: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 26, defaultModifier);
-    case 31: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 27, defaultModifier);
-    case 32: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 28, defaultModifier);
-    case 33: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 29, defaultModifier);
-    case 18: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 30, defaultModifier);
-    case 19: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 31, defaultModifier);
+    case cInputMapParser::kNodeOr:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeOr, defaultModifier);
+    case cInputMapParser::kNodeAnd:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeAnd, defaultModifier);
+    case cInputMapParser::kNodeGR:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeGR, defaultModifier);
+    case cInputMapParser::kNodeGE:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeGE, defaultModifier);
+    case cInputMapParser::kNodeLS:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeLS, defaultModifier);
+    case cInputMapParser::kNodeLE:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeLE, defaultModifier);
+    case cInputMapParser::kNodeEQ:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeEQ, defaultModifier);
+    case cInputMapParser::kNodeNE:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeNE, defaultModifier);
+    case cInputMapParser::kNodeAdd:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeAdd, defaultModifier);
+    case cInputMapParser::kNodeSub:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeSub, defaultModifier);
+    case cInputMapParser::kNodeMul:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeMul, defaultModifier);
+    case cInputMapParser::kNodeDiv:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeDiv, defaultModifier);
+    case cInputMapParser::kNodeMax:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeMax, defaultModifier);
+    case cInputMapParser::kNodeMin:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeMin, defaultModifier);
+    case cInputMapParser::kNodePow:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodePow, defaultModifier);
+    case cInputMapParser::kNodeAtan2:
+        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeAtan2, defaultModifier);
+    case cInputMapParser::kNodeAtan:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeAtan, defaultModifier);
+    case cInputMapParser::kNodeSin:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeSin, defaultModifier);
+    case cInputMapParser::kNodeCos:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeCos, defaultModifier);
+    case cInputMapParser::kNodeExp:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeExp, defaultModifier);
+    case cInputMapParser::kNodeLog:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeLog, defaultModifier);
+    case cInputMapParser::kNodeFloor:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeFloor, defaultModifier);
+    case cInputMapParser::kNodeCeil:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeCeil, defaultModifier);
+    case cInputMapParser::kNodeAbs:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeAbs, defaultModifier);
+    case cInputMapParser::kNodeSqrt:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeSqrt, defaultModifier);
+    case cInputMapParser::kNodeMinRadian:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeMinRadian, defaultModifier);
+    case cInputMapParser::kNodeNeg:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeNeg, defaultModifier);
+    case cInputMapParser::kNodeNot:
+        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeNot, defaultModifier);
     }
     return -1;
 }
@@ -1971,32 +2002,32 @@ float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind) __
 /**
  * Reads one button of the pad being evaluated, as its analogue value or as one of its state flags.
  *
- * @p kind (On Tour eButtonModifiers) picks the field of button @p idx of the pad (+0x4): 0 the value, 1 held (+0xC), 2
- * pressed (+0x4), 3 released (+0x8), 4 repeated (+0x10), the flags converted to 0.0 / 1.0. 5 (default) uses the
- * evaluator's default modifier (+0x0) instead; if that is itself 5 it recurses forever. A button past the pad's count,
- * or an unknown kind, reads 0.
+ * @p kind (eButtonModifiers) picks the field of button @p idx of the pad (+0x4): kButtonModifier_Value the value, Held
+ * (+0xC), Pressed (+0x4), Released (+0x8) or Repeat (+0x10) the flag converted to 0.0 / 1.0. kButtonModifier_Default
+ * uses the evaluator's default modifier (+0x0) instead; if that is itself the default it recurses forever. A button
+ * past the pad's count, or an unknown kind, reads 0.
  *
  * @param idx  the button index
- * @param kind  the button modifier, 0..5
+ * @param kind  the button modifier (eButtonModifiers)
  * @return the value
  */
 float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind)
 {
     switch (kind) {
-    case 0:
+    case kButtonModifier_Value:
         if (idx < (self->Pad)->NumButtons) {
             return ((&(self->Pad)->Buttons[0]))[idx].Value;
         }
         break;
-    case 1:
+    case kButtonModifier_Held:
         return (float)GetC3252F8((self->Pad), idx);
-    case 2:
+    case kButtonModifier_Pressed:
         return (float)GetA3252F8((self->Pad), idx);
-    case 3:
+    case kButtonModifier_Released:
         return (float)GetB3252F8((self->Pad), idx);
-    case 4:
+    case kButtonModifier_Repeat:
         return (float)GetD3252F8((self->Pad), idx);
-    case 5:
+    case kButtonModifier_Default:
         return cInputExec_getButton_impl(self, idx, self->DefaultButtonModifier);
     }
     return 0.0f;
@@ -2055,24 +2086,24 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
         const tInputOpCode* ins = &code[pc];
         pc++;
         switch (ins->Base.opcode) {
-        case 0: {
+        case kInputOpCodeLoad: {
             float* destSlot = (float*)self->getTempReg(ins->Load.dest);
             *destSlot = code[pc++].Float.value;
             break;
         }
-        case 1: {
+        case kInputOpCodeMove: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = cInputExec_getRegister_vm((self), ins->Unary.operand);
             break;
         }
-        case 2:
+        case kInputOpCodeBranchFalse:
             if (cInputExec_getRegister_vm((self), ins->Branch.operand) != 0.0f) {
                 break;
             }
-        case 3:
+        case kInputOpCodeBranch:
             pc += ins->Branch.offset;
             break;
-        case 4: {
+        case kInputOpCodeOr: {
             unsigned int boolResult = 0;
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
@@ -2082,7 +2113,7 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             *destSlot = boolResult;
             break;
         }
-        case 5: {
+        case kInputOpCodeAnd: {
             unsigned int boolResult = 0;
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
@@ -2092,67 +2123,67 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
             *destSlot = boolResult;
             break;
         }
-        case 6: {
+        case kInputOpCodeGR: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs > cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
-        case 7: {
+        case kInputOpCodeGE: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs >= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
-        case 8: {
+        case kInputOpCodeLS: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs < cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
-        case 9: {
+        case kInputOpCodeLE: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs <= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
-        case 10: {
+        case kInputOpCodeEQ: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs == cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
-        case 11: {
+        case kInputOpCodeNE: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = (lhs != cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
-        case 12: {
+        case kInputOpCodeAdd: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs + cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
-        case 13: {
+        case kInputOpCodeSub: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs - cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
-        case 14: {
+        case kInputOpCodeMul: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs * cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
-        case 15: {
+        case kInputOpCodeDiv: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = lhs / cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
-        case 16: {
+        case kInputOpCodeMax: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
                          > cInputExec_getRegister_vm((self), ins->Binary.operand2))
@@ -2160,7 +2191,7 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
                 : cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
-        case 17: {
+        case kInputOpCodeMin: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
                          < cInputExec_getRegister_vm((self), ins->Binary.operand2))
@@ -2168,80 +2199,80 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tIn
                 : cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
-        case 18: {
+        case kInputOpCodePow: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
             break;
         }
-        case 19: {
+        case kInputOpCodeAtan2: {
             float* destSlot = (float*)self->getTempReg(ins->Binary.dest);
             float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
             *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
             break;
         }
-        case 20: {
+        case kInputOpCodeAtan: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = func_0031C228(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 21: {
+        case kInputOpCodeSin: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = fSin(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 22: {
+        case kInputOpCodeCos: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = fCos(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 23: {
+        case kInputOpCodeExp: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = expf(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 24: {
+        case kInputOpCodeLog: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = logf(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 25: {
+        case kInputOpCodeFloor: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = floor_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 26: {
+        case kInputOpCodeCeil: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = ceil_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 27: {
+        case kInputOpCodeAbs: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = abs_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 28: {
+        case kInputOpCodeSqrt: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = sqrt_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
-        case 29: {
+        case kInputOpCodeMinRadian: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             float x = cInputExec_getRegister_vm((self), ins->Unary.operand);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
-        case 30: {
+        case kInputOpCodeNeg: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = -cInputExec_getRegister_vm((self), ins->Unary.operand);
             break;
         }
-        case 31: {
+        case kInputOpCodeNot: {
             float* destSlot = (float*)self->getTempReg(ins->Unary.dest);
             *destSlot = (cInputExec_getRegister_vm((self), ins->Unary.operand) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
-        case 32:
+        case kInputOpCodeEnd:
             done = 1;
             break;
         }
@@ -2312,7 +2343,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 void cMemMan_free(void* ptr);
 extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, tInputSource* s);
 extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int a1, int a2);
-extern "C" int cInputPreProcessor_copyLine(cInputPreProcessor* self, tInputSource* s, int a2, int a3);
+extern "C" bool cInputPreProcessor_copyLine(cInputPreProcessor* self, tInputSource* s, int a2, int a3);
 extern "C" unsigned char* FILE_loadsize(const char* name, int* size, int flags);
 extern char D_004A3FA0[];
 
@@ -2364,9 +2395,9 @@ static inline int isWS_326150(int c)
  * @param isrc  the input source (On Tour tInputSource&)
  * @param path  directory of the file, for includes and messages
  * @param fn  file name, for messages
- * @return nonzero while the source has more characters
+ * @return true while the source has more characters
  */
-int cInputPreProcessor::copyLine(tInputSource* isrc, int path, int fn)
+bool cInputPreProcessor::copyLine(tInputSource* isrc, int path, int fn)
 {
     int ch;
     for (;;) {
@@ -2376,7 +2407,7 @@ int cInputPreProcessor::copyLine(tInputSource* isrc, int path, int fn)
         writeChar((char)CurrentChar);
         readChar(isrc);
         if (CurrentChar < 0)
-            return 0;
+            return false;
     }
     if (ch == '#') {
         readChar(isrc);
@@ -2602,7 +2633,7 @@ void cInputPreProcessor::skipToEOL(tInputSource* isrc)
 {
     while (CurrentChar >= 0) {
         readChar(isrc);
-        if (CurrentChar == 10) {
+        if (CurrentChar == '\n') {
             readChar(isrc);
             isrc->LineNumber += 1;
             break;
@@ -2803,16 +2834,16 @@ struct sInputParse_00326B48 {
  * Moves the read position (+0x2EE0) one step round the 30-line ring unless that would reach the write position
  * (+0x2EE4). Called once per game tick by cSSXApp_preUpdate.
  *
- * @return 1 when it advanced, 0 when no newer frame is cached
+ * @return true when it advanced, false when no newer frame is cached
  */
-int cPadCache::nextInput()
+bool cPadCache::nextInput()
 {
     unsigned int next = (CacheReadPos + 1) % 30;
     if (next == CacheWritePos) {
-        return 0;
+        return false;
     }
     CacheReadPos = next;
-    return 1;
+    return true;
 }
 #endif
 
@@ -3051,13 +3082,13 @@ static inline float Analog_326EB0(int v)
  *
  * Opens the port when needed and follows the usual libpad setup sequence over the state word +0x48: wait for a stable
  * pad, read its type (digital or analogue), switch an analogue pad to locked analogue mode, enter pressure-sensitive
- * mode (+0x54 set when that works), align the actuators (+0x5C) and finally read (state 10). A lost or reset pad goes
- * back to state 1.
+ * mode (+0x54 set when that works), align the actuators (+0x5C) and finally read (kPhaseRead). A lost or reset pad
+ * goes back to kPhaseGetType.
  *
  * Once a read succeeds it fills 24 values in @p out: Select, Start, L3 and R3 as 0 or 1; then the d-pad (right, left,
  * up, down), triangle, circle, cross, square, L1, R1, L2 and R2, as pressure / 255 in pressure mode, else 0 or 1; then
  * the four analogue stick axes (+0x58 set; else zeros) split into eight half-axis values 0..1, with a dead zone of
- * about 48 steps either side of the centre. In state 10 it also sends changed motor levels (+0x30, +0x38) with
+ * about 48 steps either side of the centre. In kPhaseRead it also sends changed motor levels (+0x30, +0x38) with
  * scePadSetActDirect. Slot 2 of cPS2PadDevice_vtbl; cPadCache_cacheInput calls it for every pad.
  *
  * @param out  receives up to 24 button values
@@ -3068,9 +3099,9 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
     unsigned char data[32];
     int ok = 0;
     int ret;
-    if (self->mPhase == 0) {
+    if (self->mPhase == cPS2PadDevice::kPhaseOpen) {
         int result = func_003FF708(self->mPort, self->mSlot, self->mPadBuf);
-        if (result == 1) {
+        if (result == kPadCallOk) {
             self->mPhase = result;
             self->mModeSet = 0;
             self->mActSmall = 0;
@@ -3080,13 +3111,13 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         }
     }
     int state = scePadGetState(self->mPort, self->mSlot);
-    if (state == 0 || state == 7) {
-        self->mPhase = 1;
+    if (state == kPadStateDisconnect || state == kPadStateError) {
+        self->mPhase = cPS2PadDevice::kPhaseGetType;
         self->mModeSet = 0;
     }
     switch (self->mPhase) {
-    case 1:
-        if (state == 6 || state == 2) {
+    case cPS2PadDevice::kPhaseGetType:
+        if (state == kPadStateStable || state == kPadStateFindCTP1) {
             self->mPressure = 0;
             self->mAnalog = 0;
             self->mActuator = 0;
@@ -3095,92 +3126,92 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
                 int ext = scePadInfoMode(self->mPort, self->mSlot, 2, 0);
                 switch (ext) {
                 case 0:
-                    if (id == 4)
-                        self->mPhase = 10;
+                    if (id == kPadIdDigital)
+                        self->mPhase = cPS2PadDevice::kPhaseRead;
                     break;
-                case 4:
-                    self->mPhase = 2;
+                case kPadIdDigital:
+                    self->mPhase = cPS2PadDevice::kPhaseSetMode;
                     break;
-                case 7:
+                case kPadIdAnalog:
                     self->mAnalog = 1;
-                    self->mPhase = 2;
+                    self->mPhase = cPS2PadDevice::kPhaseSetMode;
                     break;
                 }
             }
         }
         break;
-    case 2:
+    case cPS2PadDevice::kPhaseSetMode:
         if (self->mAnalog == 0 || self->mModeSet == 0) {
             int result = scePadSetMainMode(self->mPort, self->mSlot, 1, 3);
-            if (result == 1) {
+            if (result == kPadCallOk) {
                 self->mModeSet = result;
-                self->mPhase = 3;
+                self->mPhase = cPS2PadDevice::kPhaseWaitMode;
             }
         } else {
-            self->mPhase = 4;
+            self->mPhase = cPS2PadDevice::kPhaseCheckPressure;
         }
         break;
-    case 3:
-        if (scePadGetState(self->mPort, self->mSlot) != 5)
-            self->mPhase = 1;
+    case cPS2PadDevice::kPhaseWaitMode:
+        if (scePadGetState(self->mPort, self->mSlot) != kPadStateExecCmd)
+            self->mPhase = cPS2PadDevice::kPhaseGetType;
         break;
-    case 4:
-        if (scePadInfoPressMode(self->mPort, self->mSlot) == 1)
-            self->mPhase = 5;
+    case cPS2PadDevice::kPhaseCheckPressure:
+        if (scePadInfoPressMode(self->mPort, self->mSlot) == kPadCallOk)
+            self->mPhase = cPS2PadDevice::kPhaseEnterPressure;
         else
-            self->mPhase = 7;
+            self->mPhase = cPS2PadDevice::kPhaseCheckActuators;
         break;
-    case 5:
-        if (scePadEnterPressMode(self->mPort, self->mSlot) == 1) {
+    case cPS2PadDevice::kPhaseEnterPressure:
+        if (scePadEnterPressMode(self->mPort, self->mSlot) == kPadCallOk) {
             self->mRetry = 0;
-            self->mPhase = 6;
+            self->mPhase = cPS2PadDevice::kPhaseWaitPressure;
         }
         break;
-    case 6: {
+    case cPS2PadDevice::kPhaseWaitPressure: {
         int result = scePadGetReqState(self->mPort, self->mSlot);
-        if (result == 1) {
-            self->mPhase = 1;
+        if (result == kPadReqFailed) {
+            self->mPhase = cPS2PadDevice::kPhaseGetType;
             self->mModeSet = 0;
-        } else if (result == 0) {
+        } else if (result == kPadReqComplete) {
             if (++self->mRetry >= 5) {
                 self->mPressure = 1;
-                self->mPhase = 7;
+                self->mPhase = cPS2PadDevice::kPhaseCheckActuators;
             }
         } else {
             self->mRetry = 0;
         }
         break;
     }
-    case 7:
+    case cPS2PadDevice::kPhaseCheckActuators:
         if (scePadInfoAct(self->mPort, self->mSlot, -1, 0) != 0)
-            self->mPhase = 8;
+            self->mPhase = cPS2PadDevice::kPhaseAlignActuators;
         else
-            self->mPhase = 10;
+            self->mPhase = cPS2PadDevice::kPhaseRead;
         break;
-    case 8:
-        if (scePadSetActAlign(self->mPort, self->mSlot, &D_004A3FB8) == 1) {
+    case cPS2PadDevice::kPhaseAlignActuators:
+        if (scePadSetActAlign(self->mPort, self->mSlot, &D_004A3FB8) == kPadCallOk) {
             self->mRetry = 0;
-            self->mPhase = 9;
+            self->mPhase = cPS2PadDevice::kPhaseWaitActuators;
         }
         break;
-    case 9: {
+    case cPS2PadDevice::kPhaseWaitActuators: {
         int result = scePadGetReqState(self->mPort, self->mSlot);
-        if (result == 1) {
-            self->mPhase = 1;
+        if (result == kPadReqFailed) {
+            self->mPhase = cPS2PadDevice::kPhaseGetType;
             self->mModeSet = 0;
-        } else if (result == 0) {
+        } else if (result == kPadReqComplete) {
             if (++self->mRetry >= 5) {
                 self->mActuator = 1;
-                self->mPhase = 10;
+                self->mPhase = cPS2PadDevice::kPhaseRead;
             }
         } else {
             self->mRetry = 0;
         }
         break;
     }
-    case 10:
+    case cPS2PadDevice::kPhaseRead:
         if (scePadRead(self->mPort, self->mSlot, data) == 0 || data[0] != 0) {
-            self->mPhase = 1;
+            self->mPhase = cPS2PadDevice::kPhaseGetType;
             self->mModeSet = 0;
         } else {
             ok = 1;
@@ -3241,7 +3272,8 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
             out[23] = 0.0f;
         }
     }
-    if (self->mPhase == 10 && (self->mActSmall != self->mLastSmall || self->mActBig != self->mLastBig)) {
+    if (self->mPhase == cPS2PadDevice::kPhaseRead
+        && (self->mActSmall != self->mLastSmall || self->mActBig != self->mLastBig)) {
         self->mActDirect[0] = self->mActSmall;
         self->mActDirect[1] = self->mActBig;
         self->mLastSmall = self->mActSmall;
@@ -3286,7 +3318,8 @@ static inline int clamp_327740(int v, int lo, int hi)
 /**
  * Sets one of a PS2 pad's vibration motors.
  *
- * Actuator 1 is the on/off motor: +0x30 = (@p level != 0). Any other actuator sets the variable motor: +0x38 = level x
+ * kActuatorSmall (1) is the on/off motor: +0x30 = (@p level != 0). Any other actuator sets the variable motor:
+ * +0x38 = level x
  * 205 + 50 clamped to 50..255, or 0 when @p level is 0. cPS2PadDevice_sampleButtons sends changed values to the pad. Slot 4 of
  * cPS2PadDevice_vtbl.
  *
@@ -3295,7 +3328,7 @@ static inline int clamp_327740(int v, int lo, int hi)
  */
 void cPS2PadDevice::setActuator(int mode, float level)
 {
-    if (mode == 1) {
+    if (mode == kActuatorSmall) {
         mActSmall = level != 0.0f;
         return;
     }

@@ -190,7 +190,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
         spans[i] = x[i + 1] - x[i];
     }
     switch (self->flags.Type) {
-    case 0:
+    case cCubicSplineInterpolant::kNatural:
         for (i = 1; i < n; i++) {
             alpha[i] = 3.0f / spans[i] * (yValues[i + 1] - yValues[i]) - 3.0f / spans[i - 1] * (yValues[i] - yValues[i - 1]);
         }
@@ -211,7 +211,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
             cubicCoefs[i] = (quadCoefs[i + 1] - quadCoefs[i]) / (3.0f * spans[i]);
         }
         break;
-    case 1:
+    case cCubicSplineInterpolant::kClamped:
         alpha[0] = 3.0f * (yValues[1] - yValues[0]) / spans[0] - 3.0f * ((float*)self->data)[4];
         alpha[n] = 3.0f * self->MaxX - 3.0f * (yValues[n] - yValues[n - 1]) / spans[n - 1];
         for (i = 1; i < n; i++) {
@@ -610,9 +610,9 @@ extern "C" long __muldi3(long a, long b);
  *
  * @param topPad  bytes to keep above what is in use
  * @param av  the malloc state
- * @return 1 when memory was released, else 0
+ * @return true when memory was released
  */
-int cDynamicMemMan::sYSTRIm(unsigned int topPad, malloc_state* av)
+bool cDynamicMemMan::sYSTRIm(unsigned int topPad, malloc_state* av)
 {
     // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
     // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
@@ -636,12 +636,12 @@ int cDynamicMemMan::sYSTRIm(unsigned int topPad, malloc_state* av)
                 if (released != 0) {
                     av->sbrked_mem -= released;
                     av->top->size = (top_size - released) | 1;
-                    return 1;
+                    return true;
                 }
             }
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -879,7 +879,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlfree);
 struct sMState_31EEE8;
 struct sMState_31E6D8;
 extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_state* av);
-extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int pad, malloc_state* av);
+extern "C" bool cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int pad, malloc_state* av);
 
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
@@ -1638,7 +1638,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc_trim);
 struct sMState_31EEE8;
 struct sMState_31E6D8;
 extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_state* av);
-extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int pad, malloc_state* av);
+extern "C" bool cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int pad, malloc_state* av);
 
 /**
  * Consolidates the fast bins (cDynamicMemMan_malloc_consolidate) and returns unused top memory beyond @p topPad to the core
@@ -1779,19 +1779,19 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmallopt);
 /**
  * Sets a heap parameter and returns whether the value was accepted (dlmalloc 2.7's mallopt).
  *
- * Consolidates the fast bins first (cDynamicMemMan_malloc_consolidate). @p kind 1 sets the fastbin limit (+0x0) for values up to 80; -1 the
- * trim threshold (+0x344), -2 the top pad (+0x348), -3 the mmap threshold (+0x34C), and -4 the mmap count (+0x354),
- * which only accepts 0.
+ * Consolidates the fast bins first (cDynamicMemMan_malloc_consolidate). @p kind M_MXFAST sets the fastbin limit (+0x0)
+ * for values up to 80; M_TRIM_THRESHOLD the trim threshold (+0x344), M_TOP_PAD the top pad (+0x348),
+ * M_MMAP_THRESHOLD the mmap threshold (+0x34C), and M_MMAP_MAX the mmap count (+0x354), which only accepts 0.
  *
- * @param kind  the parameter: 1, -1, -2, -3 or -4
+ * @param kind  the parameter (eMallocOption)
  * @param val  the new value
- * @return 1 when accepted, else 0
+ * @return true when accepted
  */
-extern "C" int cDynamicMemMan_dlmallopt(void** self, int kind, unsigned int val) {
+extern "C" bool cDynamicMemMan_dlmallopt(void** self, int kind, unsigned int val) {
     malloc_state* ms = (malloc_state*)((char*)*self);
     ((cDynamicMemMan*)self)->malloc_consolidate((malloc_state*)ms);
     switch (kind) {
-    case 1:
+    case M_MXFAST:
         if (val < 81U) {
             int low = (*(int*)ms) & 3;
             int res;
@@ -1806,26 +1806,26 @@ extern "C" int cDynamicMemMan_dlmallopt(void** self, int kind, unsigned int val)
                 res = low | 8;
             }
             *(int*)ms = res;
-            return 1;
+            return true;
         }
-        return 0;
-    case -1:
+        return false;
+    case M_TRIM_THRESHOLD:
         ms->trim_threshold = val;
-        return 1;
-    case -2:
+        return true;
+    case M_TOP_PAD:
         ms->top_pad = val;
-        return 1;
-    case -3:
+        return true;
+    case M_MMAP_THRESHOLD:
         ms->mmap_threshold = val;
-        return 1;
-    case -4:
+        return true;
+    case M_MMAP_MAX:
         if (val == 0) {
             ms->n_mmaps_max = 0;
-            return 1;
+            return true;
         }
-        return 0;
+        return false;
     default:
-        return 0;
+        return false;
     }
 }
 #endif
@@ -1988,9 +1988,9 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_isBlock);
  * Returns whether an address lies strictly inside the dynamic heap (between +0x4 and +0x4 plus the size at +0xC).
  *
  * @param addr  the address to test
- * @return 1 when inside, else 0
+ * @return true when inside
  */
-int cDynamicMemMan::isBlock(unsigned int addr)
+bool cDynamicMemMan::isBlock(unsigned int addr)
 {
     unsigned int base = (unsigned int)Heap;
     unsigned int end = base + HeapSize;
@@ -2700,16 +2700,17 @@ extern char t3mat_Identity[], t4mat_Identity[], t4mat_Zero[], tquat_Identity[], 
 /**
  * Static initialisation and destruction of the bx library's globals.
  *
- * Only for priority 0xFFFF. With @p init: cBlockMan_cBlockMan on gBlockMan, cRandom_init (cRandom constructor) on BXrandom
- * and AIrandom, then the colour/vector/matrix constants and tPose_Identity, and cDynamicMemMan_cDynamicMemMan constructs
- * TheDynamicMemMan. Without: cDynamicMemMan__cDynamicMemMan destroys TheDynamicMemMan.
+ * Only for priority DEFAULT_INIT_PRIORITY. With @p init: cBlockMan_cBlockMan on gBlockMan, cRandom_init (cRandom
+ * constructor) on BXrandom and AIrandom, then the colour/vector/matrix constants and tPose_Identity, and
+ * cDynamicMemMan_cDynamicMemMan constructs TheDynamicMemMan. Without: cDynamicMemMan__cDynamicMemMan destroys
+ * TheDynamicMemMan.
  *
  * @param init  nonzero to construct, zero to destroy
- * @param prio  the init priority; only 0xFFFF does anything
+ * @param prio  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init != 0) {
             cBlockMan_cBlockMan(gBlockMan);
             cRandom_init(BXrandom);

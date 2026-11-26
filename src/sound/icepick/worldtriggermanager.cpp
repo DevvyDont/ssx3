@@ -2722,15 +2722,15 @@ extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio) __asm__("__
 /**
  * Static initializer of the unit: fills the colour tables cfm_sav_Render_Halo_SUN_kSunColour_3.. and the 14 colour keys kWPR_MusicTrigger_2..
  *
- * Runs only for (1, 0xFFFF): sets the float colour tables, clears D_004A5260 and gives each key kWPR_MusicTrigger_2 + 8k index
- * and id k (0..13). Listed in the global constructor table.
+ * Runs only for (1, DEFAULT_INIT_PRIORITY): sets the float colour tables, clears D_004A5260 and gives each key
+ * kWPR_MusicTrigger_2 + 8k index and id k (0..13). Listed in the global constructor table.
  *
  * @param init  nonzero to initialise
- * @param prio  the initialisation priority (acts on 0xFFFF)
+ * @param prio  the initialisation priority (acts on DEFAULT_INIT_PRIORITY, 65535)
  */
 extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio)
 {
-    if (prio == 0xFFFF && init) {
+    if (prio == DEFAULT_INIT_PRIORITY && init) {
         cfm_sav_Render_Halo_SUN_kSunColour_3.a = 1.0f;
         cfm_sav_Render_Halo_SUN_kSunColour_3.b = 1.0f;
         cfm_sav_Render_Halo_SUN_kSunColour_3.c = 1.0f;

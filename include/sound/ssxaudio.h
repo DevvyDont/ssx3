@@ -167,6 +167,11 @@ enum eSoundPreset {
 // cSSXAudio_FrontEndLoad passes 0 (all scales 1), cSSXAudio_InGameLoad 1 (the in-game balance).
 enum eGameAudioStates { eGameAudioState_FE = 0, eGameAudioState_Mountain = 1 };
 
+// A grunt's length (cSSXAudio_PlayGrunt's length). [O] On Tour's enum eCharGruntLength, names and values; [U] PlayGrunt
+// picks the character's odd patch for Long and its even one otherwise, and for character kind 14 a random patch of
+// 0-2 for Long, 3-5 for Short and the next of six (mGruntPatchCycle) for any other length.
+enum eCharGruntLength { keCharGruntLength_Short = 0, keCharGruntLength_Long = 1, keCharGruntLength_Cycle = 2 };
+
 // The animation sound tags cSSXAudio_PlayAniTag handles (names ours, after the call each makes): [U] 80
 // cSSXAudio_BindingsOff, 81 cSSXAudio_BindingsOn, 82 cSSXAudio_UndoBindings.
 enum { kANITAG_BindingsOff = 80, kANITAG_BindingsOn = 81, kANITAG_UndoBindings = 82 };

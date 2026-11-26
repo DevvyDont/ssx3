@@ -618,8 +618,8 @@ extern int D_004A2E74;
 extern "C" int MEMSYS_validaddress(void* p, int size, int flags);
 
 /**
- * Checks a free-list link: it must point at a readable 0x18-byte block (MEMSYS_validaddress) tagged as free (0x4246) or as a
- * sentinel (0x4253).
+ * Checks a free-list link: it must point at a readable 0x18-byte block (MEMSYS_validaddress) tagged as free
+ * (kMemSigFree) or as a sentinel (kMemSigSentinel).
  *
  * On failure sets the memory error code D_004A2E74 to 1.
  *
@@ -630,7 +630,7 @@ extern "C" int checkfree(FREEBLOCK* self)
     int ok = 0;
     if (MEMSYS_validaddress(self, 0x18, 0) != 0) {
         unsigned short blockTag = *(unsigned short*)self;
-        if (blockTag == 16966 || blockTag == 16979) {
+        if (blockTag == kMemSigFree || blockTag == kMemSigSentinel) {
             ok = 1;
         } else {
             D_004A2E74 = 1;
@@ -654,9 +654,10 @@ static inline unsigned int readBE32_002522B0(unsigned char* p)
 /**
  * Checks one heap block's integrity by its tag and records the failure kind in D_004A2E74.
  *
- * A sentinel (0x4253) needs flag 0x8000 (else error 2); a free block (0x4246) with flag 0x4000 needs valid next and
- * previous links (checkfree); an allocated block (0x424D) with flag 0x2000 needs the big-endian end marker "BEND"
- * just past its data (else error 3); any other tag is error 4. MEM_printclassf prints its result.
+ * A sentinel (kMemSigSentinel) needs flag 0x8000 (else error 2); a free block (kMemSigFree) with flag 0x4000 needs
+ * valid next and previous links (checkfree); an allocated block (kMemSigAlloc) with flag 0x2000 needs the big-endian
+ * end marker "BEND" (kMemEndMarker) just past its data (else error 3); any other tag is error 4. MEM_printclassf prints
+ * its result.
  *
  * @param blk  the block header
  * @return 1 when the block is consistent, else 0
@@ -666,21 +667,22 @@ extern "C" int checksentinel(FREEBLOCK* blk)
 {
     int ok = 0;
     unsigned short tag = blk->signature;
-    if (tag == 16979) {
+    if (tag == kMemSigSentinel) {
         if (blk->type & 0x8000) {
             ok = 1;
         } else {
             D_004A2E74 = 2;
         }
-    } else if (tag == 16966) {
+    } else if (tag == kMemSigFree) {
         if (blk->type & 0x4000) {
             ok = checkfree((FREEBLOCK*)((void*)blk->nextfree));
             if (ok) {
                 ok = checkfree((FREEBLOCK*)((void*)blk->prevfree));
             }
         }
-    } else if (tag == 16973) {
-        if (!(blk->type & 0x2000) || readBE32_002522B0((unsigned char*)(blk->size + (int)blk) + 0x10) == 0x42454E44) {
+    } else if (tag == kMemSigAlloc) {
+        if (!(blk->type & 0x2000)
+            || readBE32_002522B0((unsigned char*)(blk->size + (int)blk) + 0x10) == kMemEndMarker) {
             ok = 1;
         } else {
             D_004A2E74 = 3;
@@ -1018,9 +1020,9 @@ static inline void Unlink_252718(FREEBLOCK* b)
  * Resizes an EA heap block in place, absorbing a free block after it and splitting off any large remainder.
  *
  * Under the class mutex when locked: a free next block is unlinked (tag 0x424F) and merged. The wanted size (8 at
- * least; -1 means 0x40000000, i.e. as much as possible) plus the class tail (MEM_tailsize) is rounded to the class
- * alignment and capped at the space up to the next block. MEM_move moves the tail data to the new end, the block size
- * is updated, and a remainder of more than 0x40 bytes becomes a new free block (MEM_initblock) inserted into the
+ * least; kMemResizeMax means 0x40000000, i.e. as much as possible) plus the class tail (MEM_tailsize) is rounded to the
+ * class alignment and capped at the space up to the next block. MEM_move moves the tail data to the new end, the block
+ * size is updated, and a remainder of more than 0x40 bytes becomes a new free block (MEM_initblock) inserted into the
  * address-sorted free list. The data never moves.
  *
  * @param mem  the block's data pointer
@@ -1059,7 +1061,7 @@ extern "C" void* _MEM_resize(void* mem, int size)
     }
     want = size;
     if (want < 8) {
-        if (want == -1) {
+        if (want == kMemResizeMax) {
             want = 0x40000000;
         } else if (want >= 0) {
             want = 8;
@@ -1186,7 +1188,7 @@ static inline FREEBLOCK* FirstFit_2A10(MEMCLASS* cls, int size, int back)
             n = n->prevfree;
         } while (n->size < size);
     }
-    return n->signature != 0x4253 ? n : 0;
+    return n->signature != kMemSigSentinel ? n : 0;
 }
 
 // Largest free block holding min bytes (same body as FREE_findlargest).
@@ -1202,7 +1204,7 @@ static inline FREEBLOCK* BestFit_2A10(MEMCLASS* cls, int min, int back)
         n = (*(&cls->freehead)).nextfree;
         for (;;) {
             if (v < n->size - 0x10) {
-                if (n->signature == 0x4253) {
+                if (n->signature == kMemSigSentinel) {
                     break;
                 }
                 best = n;
@@ -1214,7 +1216,7 @@ static inline FREEBLOCK* BestFit_2A10(MEMCLASS* cls, int min, int back)
         n = (*(&cls->freehead)).prevfree;
         for (;;) {
             if (v < n->size - 0x10) {
-                if (n->signature == 0x4253) {
+                if (n->signature == kMemSigSentinel) {
                     break;
                 }
                 best = n;
@@ -1360,7 +1362,7 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
         }
         if (cls->hasmutex != 0)
             MUTEX_unlock(((int*)&cls->mutex));
-    } while (retry == 1);
+    } while (retry == true);
     return allocation;
 }
 #endif
@@ -1547,7 +1549,7 @@ INCLUDE_ASM("mem/memstd", FREE_find);
  * Returns the first free block of the EA heap class @p cls that holds at least @p size bytes (size field, header
  * included), walking the free list from the head forwards, or backwards when @p back is nonzero.
  *
- * The sentinel (tag 0x4253) stops the walk; reaching it returns 0. _MEM_allocaligna inlines the same search.
+ * The sentinel (tag kMemSigSentinel) stops the walk; reaching it returns 0. _MEM_allocaligna inlines the same search.
  *
  * @param cls  the memory class
  * @param size  minimum block size
@@ -1566,7 +1568,7 @@ extern "C" FREEBLOCK* FREE_find(MEMCLASS* cls, int size, int back)
             n = n->prevfree;
         } while (n->size < size);
     }
-    return n->signature != 16979 ? n : 0;
+    return n->signature != kMemSigSentinel ? n : 0;
 }
 #endif
 //100%
@@ -1574,7 +1576,7 @@ INCLUDE_ASM("mem/memstd", FREE_findlargest);
 #ifdef SKIP_ASM
 /**
  * Returns the largest free block of the EA heap class @p cls whose data (size - 16) exceeds @p size - 1, walking the
- * free list forwards, or backwards when @p dir is nonzero, up to the sentinel (tag 0x4253).
+ * free list forwards, or backwards when @p dir is nonzero, up to the sentinel (tag kMemSigSentinel).
  *
  * _MEM_allocaligna inlines the same search for its best-fit mode (flag 0x200).
  *
@@ -1598,7 +1600,7 @@ extern "C" FREEBLOCK* FREE_findlargest(MEMCLASS* cls, int size, int dir)
         node = (*(&cls->freehead)).nextfree;
         for (;;) {
             if (best < node->size - 0x10) {
-                if (node->signature == 16979) {
+                if (node->signature == kMemSigSentinel) {
                     break;
                 }
                 bestNode = node;
@@ -1610,7 +1612,7 @@ extern "C" FREEBLOCK* FREE_findlargest(MEMCLASS* cls, int size, int dir)
         node = (*(&cls->freehead)).prevfree;
         for (;;) {
             if (best < node->size - 0x10) {
-                if (node->signature == 16979) {
+                if (node->signature == kMemSigSentinel) {
                     break;
                 }
                 bestNode = node;
@@ -1627,7 +1629,7 @@ INCLUDE_ASM("mem/memstd", FREE_gettotalfree);
 #ifdef SKIP_ASM
 /**
  * Returns the total free data bytes of the EA heap class @p cls: the sum of size - 16 over its free list up to the
- * sentinel (tag 0x4253).
+ * sentinel (tag kMemSigSentinel).
  *
  * Both directions give the same total; @p back only chooses which end the walk starts from.
  *
@@ -1640,7 +1642,7 @@ extern "C" int FREE_gettotalfree(MEMCLASS* cls, int back)
     int total = 0;
     if (back == 0) {
         FREEBLOCK* n = (*(&cls->freehead)).nextfree;
-        while (n->signature != 16979) {
+        while (n->signature != kMemSigSentinel) {
             int size = n->size;
             int rest = total - 0x10;
             n = n->nextfree;
@@ -1648,7 +1650,7 @@ extern "C" int FREE_gettotalfree(MEMCLASS* cls, int back)
         }
     } else {
         FREEBLOCK* n = (*(&cls->freehead)).prevfree;
-        while (n->signature != 16979) {
+        while (n->signature != kMemSigSentinel) {
             int size = n->size;
             int rest = total - 0x10;
             n = n->prevfree;
@@ -2034,15 +2036,15 @@ extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self);
 /**
  * Starts asynchronous playback: when a decoder (+0x38) exists, starts it (cMoviePlayer_startPlay).
  *
- * @return 1 when started, 0 without a decoder
+ * @return true when started, false without a decoder
  */
-int cMoviePlayer::asyncPlay()
+bool cMoviePlayer::asyncPlay()
 {
     if (m_pPlayer == 0) {
-        return 0;
+        return false;
     }
     startPlay();
-    return 1;
+    return true;
 }
 #endif
 
@@ -2281,11 +2283,11 @@ extern "C" void func_00253B58_impl(int initialize, int priority) __asm__("func_0
  * func_00254330 calls it as the unit's global constructor; func_00254E60 builds an identical table for the next unit.
  *
  * @param initialize  nonzero to construct (0 would be destruction, which has nothing to do)
- * @param priority  init priority; only 0xFFFF does anything
+ * @param priority  init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_00253B58_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (D_004D2538) sV4_3B58(1.0f, 1.0f, 1.0f, 0.5f);
         new (D_004D2548) sV4_3B58(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (D_004D2558) sV4_3B58(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -2949,11 +2951,11 @@ extern "C" void func_00254E60_impl(int initialize, int priority) __asm__("func_0
  * func_002557C0 calls it as the unit's global constructor.
  *
  * @param initialize  nonzero to construct
- * @param priority  init priority; only 0xFFFF does anything
+ * @param priority  init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_00254E60_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (D_004D28B8) sV4_4E60(1.0f, 1.0f, 1.0f, 0.5f);
         new (D_004D28C8) sV4_4E60(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (D_004D28D8) sV4_4E60(0.12951700389385223f, 1.0f, 1.0f, 0.0f);

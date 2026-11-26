@@ -41,6 +41,14 @@ struct cAIPath {
     void** mVtbl;                   // 0x034 [R] cAIPath_vtbl (the inlined array ctor in cPathSys_loadAIPaths);
                                     //       [U] initPath calls slots 3 / 4 (lw 0x34)
     // --- cAIPath
+    // The path-file field ids populateData reads (names ours). [U] populateData reads a tInt32 into PathAttributes for
+    // 100 and into IsResetPath for 101 and ignores every other id.
+    enum eDataField { kFieldPathAttributes = 100, kFieldIsResetPath = 101 };
+    // PathAttributes bits 4-6: how the path's speed limit applies. [O] On Tour's enum tPathSpeed, names and values
+    // (cComputer::scorePath's local SpeedCheck); [U] cComputer_scorePath rejects the path above its speed limit for
+    // PS_SpeedLimit and below it for PS_SpeedMinimum.
+    enum tPathSpeed { PS_SpeedLimit = 0, PS_SpeedMatch = 1, PS_NoPref = 2, PS_SpeedMinimum = 3, PS_MaxNum = 4 };
+
     int PathAttributes;             // 0x038 [O]; [P] getPathAttributes (lw 0x38); [U] populateDataWithDefaults = 46,
                                     //       populateData(id 100) reads a tInt32 into it; cAIPath_getPathAttributes
     int IsResetPath;                // 0x03C [O] (an int in On Tour too); [P] getIsResetPath (lw 0x3C); [U]

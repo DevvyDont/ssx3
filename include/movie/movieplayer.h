@@ -79,7 +79,7 @@ struct cMoviePlayer {
     void purge() __asm__("cMoviePlayer_purge");
     void startPlay() __asm__("cMoviePlayer_startPlay");
     void syncPlay() __asm__("cMoviePlayer_syncPlay");
-    int asyncPlay() __asm__("cMoviePlayer_asyncPlay");
+    bool asyncPlay() __asm__("cMoviePlayer_asyncPlay");
     void asyncRender(int force) __asm__("cMoviePlayer_asyncRender");
     void asyncUpdate() __asm__("cMoviePlayer_asyncUpdate");
     void asyncPause() __asm__("cMoviePlayer_asyncPause");

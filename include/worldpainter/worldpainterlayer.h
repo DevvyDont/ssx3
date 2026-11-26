@@ -33,6 +33,10 @@ struct tWPData;
 
 // One painted region: its type id and its data (On Tour: tWPRegion, 8 bytes).
 struct tWPRegion {
+    // m_iDataOffset (and a tWPLayerPtr's m_iOffset) when there is nothing in the file (name ours). [U]
+    // cWorldPainterLayer::resolve leaves m_pData null for it, cWorldPainterSection::resolve a layer slot.
+    enum { kNoOffset = -1 };
+
     int m_iRegionType;              // 0x0 [O]; [U] queryPosition compares it with the query's m_regionType.m_id
     union {
         int m_iDataOffset;          // 0x4 [O] anonymous union; name ours: the file's offset (-1 = none), relative to
@@ -49,6 +53,10 @@ CHECK_SIZE(tWPRegion, 0x8);
 
 // One layer (On Tour: tWPLayer's data; cWorldPainterLayer is the same 0xC object with the methods).
 struct cWorldPainterLayer {
+    // What getQuadTreeContents gives for a position no region is painted at (name ours). [U] cWorldPainterQuery's
+    // lookupRegion returns no region for it.
+    enum { kNoRegion = -1 };
+
     union {
         int m_iQuadTreeOffset;      // 0x0 [P] "m_iQuadTreeOffset >= 0"; [O] anonymous union; offset from this
         cQuadTree* m_pQuadTree;     // 0x0 name ours ([P] getQuadTree()); [R] resolve stores this + offset, then
@@ -84,6 +92,9 @@ CHECK_SIZE(tWPLayerPtr, 0x4);
 
 // The section's world-painter file header; m_iNumLayers tWPLayerPtr follow it (On Tour: getWPLayers() = this + 1).
 struct tWPHeader {
+    // The only data version the game reads (name ours). [R] cWorldPainterSection::resolve drops any other.
+    enum { kVersion = 16 };
+
     int m_iVersion;                 // 0x0 [O]; [R] cWorldPainterSection::resolve drops the data unless it is 0x10
     int m_iNumLayers;               // 0x4 [O]; [P] getNumWPLayers() ("getNumWPLayers() == kWPLT_NumLayers");
                                     //       [R] resolve's loop count; [U] queryPosition and render bound the layer index

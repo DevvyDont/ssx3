@@ -14,7 +14,7 @@ extern char str_pct_02d_pct_02d_pct_02d_PM[];
 /**
  * Formats a time of day as "hh:mm:ss", in 24-hour or AM/PM form.
  *
- * Mode 0 prints the 24-hour time. Mode 1 adds " AM" before noon; from 12 on it adds " PM" and prints
+ * kCTime_24HR prints the 24-hour time. kCTime_12HR adds " AM" before noon; from 12 on it adds " PM" and prints
  * hour % 13 - 12 as the hour, which gives 0 for 12 and negative values from 13 on. Any other mode copies an
  * uninitialised buffer. The text goes to @p dst through func_002C25B8(), a bounded copy of 16-bit units.
  *
@@ -23,16 +23,16 @@ extern char str_pct_02d_pct_02d_pct_02d_PM[];
  * @param hour  hour, 0-23
  * @param min   minutes
  * @param sec   seconds
- * @param mode  0 for 24-hour time, 1 for AM/PM
+ * @param mode  the time notation (eConsoleTimeFormat): kCTime_24HR for 24-hour time, kCTime_12HR for AM/PM
  */
 void cConsoleConfig::setTimeString(char* dst, int size, int hour, int min, int sec, int mode)
 {
     char buf[0x40];
     switch (mode) {
-    case 0:
+    case kCTime_24HR:
         sprintf2(buf, str_pct_02d_pct_02d_pct_02d_c, hour, min, sec);
         break;
-    case 1:
+    case kCTime_12HR:
         if (hour < 12) {
             sprintf2(buf, str_pct_02d_pct_02d_pct_02d_AM, hour, min, sec);
         } else {
@@ -53,8 +53,9 @@ extern char str_pct_02d_pct_02d_pct_04d[];
 /**
  * Formats a date into @p dst, in one of three orders.
  *
- * Mode 0 prints "yyyy:mm:dd" (str_pct_04d_pct_02d_pct_02d, year, month, day), mode 1 "mm:dd:yyyy" and mode 2
- * "dd:mm:yyyy" (both str_pct_02d_pct_02d_pct_04d). Any other mode copies an uninitialised buffer. The text goes to
+ * kCDate_YYYYMMDD prints "yyyy:mm:dd" (str_pct_04d_pct_02d_pct_02d, year, month, day), kCDate_MMDDYYYY "mm:dd:yyyy" and
+ * kCDate_DDMMYYYY "dd:mm:yyyy" (both str_pct_02d_pct_02d_pct_04d). Any other mode copies an uninitialised buffer. The
+ * text goes to
  * @p dst through func_002C25B8(), a bounded copy of 16-bit units, as in cConsoleConfig_setTimeString.
  *
  * @param dst  destination buffer
@@ -62,19 +63,19 @@ extern char str_pct_02d_pct_02d_pct_04d[];
  * @param day  day of the month
  * @param month  month, 1-12
  * @param year  year
- * @param mode  0 year first, 1 month first, 2 day first
+ * @param mode  the date order (eConsoleDateFormat): year, month or day first
  */
 void cConsoleConfig::setDateString(char* dst, int size, int day, int month, int year, int mode)
 {
     char buf[0x40];
     switch (mode) {
-    case 0:
+    case kCDate_YYYYMMDD:
         sprintf2(buf, str_pct_04d_pct_02d_pct_02d, year, month, day);
         break;
-    case 1:
+    case kCDate_MMDDYYYY:
         sprintf2(buf, str_pct_02d_pct_02d_pct_04d, month, day, year);
         break;
-    case 2:
+    case kCDate_DDMMYYYY:
         sprintf2(buf, str_pct_02d_pct_02d_pct_04d, day, month, year);
         break;
     }
@@ -163,7 +164,7 @@ extern "C" int cConsoleConfig_isLeapYear(cConsoleConfig* self, int a1);
 extern "C" int cConsoleConfig_numberOfDays(int self, int month, int year)
 {
     int m = month;
-    if (month != 2) {
+    if (month != cConsoleConfig::kFebruary) {
         if (m >= 8) m++;
         return (m & 1) ? 31 : 30;
     }
@@ -318,11 +319,12 @@ extern char cPS2ConsoleConfig_vtbl[];
  * Constructs the PS2 console configuration object from the system settings and clock.
  *
  * Clears +0x24 and points +0x34 at cPS2ConsoleConfig_vtbl. From the OSD configuration it stores 1 at +0x28 when
- * sceScfGetSpdif (config bit 0) returns 0, else 0; 1 at +0x2C; the language from sceScfGetLanguage (0 to 7, otherwise 1) at
- * +0x30; sceScfGetDateFormat's 0 to 2 (else 0) at +0x0 and sceScfGetTimeNotation's 0 or 1 at +0x4. When sceCdReadClock reads the
- * real-time clock, sceScfGetLocalTimefromRTC converts it from Japan time to the console's time zone and the BCD bytes give the
- * hour, minute and second (+0x8 to +0x10) and the year (+ 2000), month and day (+0x14 to +0x1C); otherwise the date
- * defaults to 2003-10-14 at 00:00:00. +0x20 takes the word at SSXApp+0x18.
+ * sceScfGetSpdif (config bit 0) returns kSpdifOn, else 0; kSndMode_Stereo at +0x2C; the language from sceScfGetLanguage
+ * (kCLang_Japanese to kCLang_Portuguese, otherwise kCLang_English) at +0x30; sceScfGetDateFormat's eConsoleDateFormat
+ * (else kCDate_YYYYMMDD) at +0x0 and sceScfGetTimeNotation's eConsoleTimeFormat (else kCTime_24HR) at +0x4. When
+ * sceCdReadClock reads the real-time clock, sceScfGetLocalTimefromRTC converts it from Japan time to the console's time
+ * zone and the BCD bytes give the hour, minute and second (+0x8 to +0x10) and the year (+ 2000), month and day (+0x14
+ * to +0x1C); otherwise the date defaults to 2003-10-14 at 00:00:00. +0x20 takes the word at SSXApp+0x18.
  *
  * @param self_  the memory for the object (this)
  * @return this
@@ -335,71 +337,71 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(cPS2ConsoleConfig* self_)
     *(char**)&self[13] = cPS2ConsoleConfig_vtbl;
     int osdSetting = sceScfGetSpdif();
     switch (osdSetting) {
-    case 0:
+    case cPS2ConsoleConfig::kSpdifOn:
         self[10] = 1;
         break;
-    case 1:
+    case cPS2ConsoleConfig::kSpdifOff:
         self[10] = 0;
         break;
     default:
         self[10] = 0;
         break;
     }
-    self[11] = 1;
+    self[11] = cConsoleConfig::kSndMode_Stereo;
     switch (sceScfGetLanguage()) {
-    case 0:
-        self[12] = 0;
+    case cConsoleConfig::kCLang_Japanese:
+        self[12] = cConsoleConfig::kCLang_Japanese;
         break;
-    case 1:
-        self[12] = 1;
+    case cConsoleConfig::kCLang_English:
+        self[12] = cConsoleConfig::kCLang_English;
         break;
-    case 2:
-        self[12] = 2;
+    case cConsoleConfig::kCLang_French:
+        self[12] = cConsoleConfig::kCLang_French;
         break;
-    case 3:
-        self[12] = 3;
+    case cConsoleConfig::kCLang_Spanish:
+        self[12] = cConsoleConfig::kCLang_Spanish;
         break;
-    case 4:
-        self[12] = 4;
+    case cConsoleConfig::kCLang_German:
+        self[12] = cConsoleConfig::kCLang_German;
         break;
-    case 5:
-        self[12] = 5;
+    case cConsoleConfig::kCLang_Italian:
+        self[12] = cConsoleConfig::kCLang_Italian;
         break;
-    case 6:
-        self[12] = 6;
+    case cConsoleConfig::kCLang_Dutch:
+        self[12] = cConsoleConfig::kCLang_Dutch;
         break;
-    case 7:
-        self[12] = 7;
+    case cConsoleConfig::kCLang_Portuguese:
+        self[12] = cConsoleConfig::kCLang_Portuguese;
         break;
     default:
-        self[12] = 1;
+        self[12] = cConsoleConfig::kCLang_English;
         break;
     }
     osdSetting = sceScfGetDateFormat();
     switch (osdSetting) {
-    case 0:
-        self[0] = 0;
+    case cConsoleConfig::kCDate_YYYYMMDD:
+        self[0] = cConsoleConfig::kCDate_YYYYMMDD;
         break;
-    case 1:
+    case cConsoleConfig::kCDate_MMDDYYYY:
         self[0] = osdSetting;
         break;
-    case 2:
+    case cConsoleConfig::kCDate_DDMMYYYY:
         self[0] = osdSetting;
         break;
     default:
-        self[0] = 0;
+        self[0] = cConsoleConfig::kCDate_YYYYMMDD;
         break;
     }
     osdSetting = sceScfGetTimeNotation();
     switch (osdSetting) {
-    case 0:
-        self[1] = 0;
+    case cConsoleConfig::kCTime_24HR:
+        self[1] = cConsoleConfig::kCTime_24HR;
         break;
-    case 1:
-        self[1] = 1;
+    case cConsoleConfig::kCTime_12HR:
+        self[1] = cConsoleConfig::kCTime_12HR;
         break;
     default:
-        self[1] = 0;
+        self[1] = cConsoleConfig::kCTime_24HR;
         break;
     }
     if (sceCdReadClock(clock) != 0) {

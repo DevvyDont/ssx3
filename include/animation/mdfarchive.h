@@ -88,7 +88,7 @@ struct cMdfArchive {
 
     // Methods bound to their retail symbols by asm labels.
     short getNumModelParts() __asm__("cMdfArchive_getNumModelParts");
-    int findModelPart(const char* name) __asm__("cMdfArchive_findModelPart");
+    bool findModelPart(const char* name) __asm__("cMdfArchive_findModelPart");
     char* getModelPartPtr(const char* name) __asm__("cMdfArchive_getModelPartPtr");
     void* getModelPart(const char* name) __asm__("cMdfArchive_getModelPart");
     int getModelPartPtrByIndex(int index) __asm__("cMdfArchive_getModelPartPtrByIndex");

@@ -267,9 +267,9 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
  * @param id  statement slot (input state id) to evaluate
- * @return 1 when the statement's value is not 0.0, otherwise 0
+ * @return true when the statement's value is not 0.0
  */
-int cInputMap::getState(cInputPad* inputPad, int id)
+bool cInputMap::getState(cInputPad* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
@@ -303,10 +303,10 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param config5  config value 6
  * @param config6  config value 7
  * @param config7  config value 8 (On Tour c7)
- * @return 1 when the statement's value is not 0.0, otherwise 0
+ * @return true when the statement's value is not 0.0
  */
-int cInputMap::getState1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
-                         float config3, float config4, float config5, float config6, float config7)
+bool cInputMap::getState1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
+                          float config3, float config4, float config5, float config6, float config7)
 {
     cInputExec parser;
     cInputExec_cInputExec(&parser);
@@ -471,12 +471,12 @@ extern "C" void cInputMapParser_readToken(void* self);
 /**
  * Skips the rest of a malformed input-map statement, up to and including its semicolon.
  *
- * Reads tokens until the current token is a semicolon (5) or end of file (0), then reads one more.
- * cInputMapParser_parseStatement() calls it after each error it reports.
+ * Reads tokens until the current token is a semicolon (kTokenSemicolon) or end of file (kTokenEOF), then reads one
+ * more. cInputMapParser_parseStatement() calls it after each error it reports.
  */
 void cInputMapParser::skipPastSemicolon()
 {
-    while (CurrentToken != 5 && CurrentToken != 0) {
+    while (CurrentToken != kTokenSemicolon && CurrentToken != kTokenEOF) {
         cInputMapParser_readToken(this);
     }
     cInputMapParser_readToken(this);
@@ -513,9 +513,10 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_freeParseNode);
 /**
  * Returns a parse node and all of its child nodes to the parser's free node list.
  *
- * The node type decides how many children are freed first: one for types 18-19 and 24-33, two for 6-17 and
- * 20-21, three for type 5, none for 0-4 and 22-23. The node is then pushed onto FreeParseNodes, linked through
- * its first child field. A null node is ignored.
+ * The node type decides how many children are freed first: one for the unary nodes (kNodeNeg, kNodeNot, kNodeAtan
+ * to kNodeMinRadian), two for the binary operators kNodeOr to kNodeDiv and kNodeMax / kNodeMin, three for
+ * kNodeSelection, none for the leaves (kNodeNull to kNodeConstant) and, a leak, for kNodePow and kNodeAtan2. The
+ * node is then pushed onto FreeParseNodes, linked through its first child field. A null node is ignored.
  *
  * @param node  the node to free, or 0
  */
@@ -526,24 +527,24 @@ void cInputMapParser::freeParseNode(tParseNode* node)
         return;
     }
     switch (node->Type) {
-    case 18: case 19:
-    case 24: case 25: case 26: case 27: case 28:
-    case 29: case 30: case 31: case 32: case 33:
+    case kNodeNeg: case kNodeNot:
+    case kNodeAtan: case kNodeSin: case kNodeCos: case kNodeExp: case kNodeLog:
+    case kNodeFloor: case kNodeCeil: case kNodeAbs: case kNodeSqrt: case kNodeMinRadian:
         freeParseNode(node->Operand1);
         break;
-    case 6: case 7: case 8: case 9: case 10: case 11:
-    case 12: case 13: case 14: case 15: case 16: case 17:
-    case 20: case 21:
+    case kNodeOr: case kNodeAnd: case kNodeGR: case kNodeGE: case kNodeLS: case kNodeLE:
+    case kNodeEQ: case kNodeNE: case kNodeAdd: case kNodeSub: case kNodeMul: case kNodeDiv:
+    case kNodeMax: case kNodeMin:
         freeParseNode(node->Operand1);
         freeParseNode(node->Operand2);
         break;
-    case 5:
+    case kNodeSelection:
         freeParseNode(node->Operand1);
         freeParseNode(node->Operand2);
         freeParseNode(node->Operand3);
         break;
-    case 0: case 1: case 2: case 3: case 4:
-    case 22: case 23:
+    case kNodeNull: case kNodeReference: case kNodeButton: case kNodeConfig: case kNodeConstant:
+    case kNodePow: case kNodeAtan2:
         break;
     }
     node->Operand1 = FreeParseNodes;

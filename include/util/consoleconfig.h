@@ -27,6 +27,13 @@
 #include "layout.h"
 
 struct cConsoleConfig {
+    // The OSD date order (mDateFormat). [O] On Tour's enum eConsoleDateFormat, names and values; [U] setDateString
+    // prints year, month, day for kCDate_YYYYMMDD, month first for kCDate_MMDDYYYY and day first for kCDate_DDMMYYYY.
+    enum eConsoleDateFormat { kCDate_YYYYMMDD = 0, kCDate_MMDDYYYY = 1, kCDate_DDMMYYYY = 2 };
+    // The OSD time notation (mTimeFormat). [O] On Tour's enum eConsoleTimeFormat, names and values; [U] setTimeString
+    // prints the 24-hour time for kCTime_24HR and adds AM / PM for kCTime_12HR.
+    enum eConsoleTimeFormat { kCTime_24HR = 0, kCTime_12HR = 1 };
+
     int mDateFormat;                // 0x00 [O] eConsoleDateFormat; [R] ctor: sceScfGetDateFormat 0..2, else 0
     int mTimeFormat;                // 0x04 [O] eConsoleTimeFormat; [R] ctor: sceScfGetTimeNotation 0/1, else 0
     int m_iHour;                    // 0x08 [O]; [R] ctor: RTC hour (BCD) or 0; [U] getTime, updateDateTime
@@ -36,6 +43,9 @@ struct cConsoleConfig {
     int m_iYear;                    // 0x14 [O]; [R] ctor: RTC year + 2000 or 2003; [U] getDate, updateDateTime
                                     //      (addDaysToDate's year)
     int m_iMonth;                   // 0x18 [O]; [R] ctor: RTC month or 10; [U] getDate, updateDateTime
+    // The one month numberOfDays treats apart (months count from 1; name ours). [U] numberOfDays gives month 2 28 or
+    // 29 days by isLeapYear.
+    enum { kFebruary = 2 };
     int m_iDay;                     // 0x1C [O]; [R] ctor: RTC day or 14; [U] getDate, updateDateTime
     int m_iStartTick;               // 0x20 [O]; [R] ctor: SSXApp->TimerTick (0x18); [U] updateDateTime: elapsed ticks
                                     //      are measured from it, and it is reset to now
@@ -49,7 +59,17 @@ struct cConsoleConfig {
 
     int m_bDigitalOut;              // 0x28 [O] bool (a word); [R] ctor: 1 when sceScfGetSpdif returns 0, else 0
     int m_SoundMode;                // 0x2C [O] eConsoleSoundMode; [R] ctor 1
+    // The sound mode (m_SoundMode). [O] On Tour's enum eConsoleSoundMode, names and values; [R] the PS2 ctor stores
+    // kSndMode_Stereo.
+    enum eConsoleSoundMode { kSndMode_Mono = 0, kSndMode_Stereo = 1, kSndMode_Surround = 2 };
     int mLanguage;                  // 0x30 [O] eConsoleLanguage; [R] ctor: sceScfGetLanguage 0..7, else 1
+    // The system language (mLanguage). [O] On Tour's enum eConsoleLanguage, names and values; [U] the PS2 ctor keeps
+    // sceScfGetLanguage's 0..7 as they are (the PS2 OSD's order: Japanese, English, French, Spanish, German, Italian,
+    // Dutch, Portuguese) and falls back to kCLang_English.
+    enum eConsoleLanguage {
+        kCLang_Japanese = 0, kCLang_English = 1, kCLang_French = 2, kCLang_Spanish = 3, kCLang_German = 4,
+        kCLang_Italian = 5, kCLang_Dutch = 6, kCLang_Portuguese = 7, kCLang_Chinese = 8, kCLang_Korean = 9
+    };
     void** mVtbl;                   // 0x34 [R] cPS2ConsoleConfig_vtbl (ctor, dtor), cConsoleConfig_vtbl (cConsoleConfig's, stored
                                     //      by both destructors); slot 1 = destructor
 
@@ -86,6 +106,10 @@ CHECK_SIZE(cConsoleConfig, 0x38);
 // cPS2ConsoleConfig_vtbl (0x00486798, 1 slot = cPS2ConsoleConfig__cPS2ConsoleConfig). Same fields as cConsoleConfig
 // above (keep them in step).
 struct cPS2ConsoleConfig {
+    // What sceScfGetSpdif reports for the OSD's digital (optical) audio output setting (names ours). [U] the ctor sets
+    // m_bDigitalOut for kSpdifOn and clears it for kSpdifOff or anything else.
+    enum eSpdif { kSpdifOn = 0, kSpdifOff = 1 };
+
     // --- cConsoleConfig
     int mDateFormat;                // 0x00 [O]; [R] ctor
     int mTimeFormat;                // 0x04 [O]; [R] ctor

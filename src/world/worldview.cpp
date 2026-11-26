@@ -1521,7 +1521,7 @@ extern "C" void cOcclusionMan_addVisCurtain(void* self, void* obj);
 char* cAudioInterface_getGame_AE68() __asm__("cAudioInterface_getGame");
 extern "C" void cWorldSound_InitWorldAudioFile(void* self, void* obj, unsigned int arg);
 extern char* SSXApp_AE68 __asm__("SSXApp");
-extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
+extern "C" bool cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
 extern "C" void cWorldPainterMan_load1(void* self, int a, void* obj);
 extern "C" void cWScriptCache_load1(void* self, int a, void* obj);

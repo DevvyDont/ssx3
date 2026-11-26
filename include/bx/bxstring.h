@@ -70,6 +70,9 @@ struct cBXString {
     void ConcatImpl(int len, const char* str) __asm__("cBXString_ConcatImpl");
     cBXString* Concat(const char* str) __asm__("cBXString_Concat");
     char* getBuffer(int size) __asm__("cBXString_getBuffer");
+    // releaseBuffer's length that means "measure the text" (name ours). [U] releaseBuffer takes strlen for it, as MFC's
+    // CString::ReleaseBuffer does for its default of -1.
+    enum { kMeasureLength = -1 };
     void releaseBuffer(int len) __asm__("cBXString_releaseBuffer");
     char* getBufferSetLength(int len) __asm__("cBXString_getBufferSetLength");
     void freeExtra() __asm__("cBXString_freeExtra");

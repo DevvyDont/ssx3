@@ -35,6 +35,10 @@ enum tMenuKeys {
 };
 
 struct cMenuSys {
+    // Key, VKey and AsciiKey when nothing was read this frame (name ours). [U] cMenuSys_input stores -1 in VKey and
+    // AsciiKey before reading, and asks the USB keyboard only when the pad's menu key is -1.
+    enum { kNoKey = -1 };
+
     int MenuDepth;                  // 0x000 [O]
     cMenu* MenuStack[16];           // 0x004 [O]
     int Owner;                      // 0x044 [O]

@@ -842,16 +842,16 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_isPlaying);
  * Tells whether a sequence with the given id is in the sequencer's list (mFirstSequence chain).
  *
  * @param id  the sequence id (the node's first word)
- * @return 1 when found, else 0
+ * @return true when found
  */
-int cAnimSequencer::isPlaying(int id)
+bool cAnimSequencer::isPlaying(int id)
 {
     for (cAnimSequence *n = PlayList; n != 0; n = n->Next) {
         if (*(int *)n == id) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 //100%
@@ -1123,22 +1123,22 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_findModelPart);
 extern "C" int strcasecmp(const char* a, const char* b);
 
 /**
- * Returns 1 if the archive has a model part named @p name (case-insensitive), else 0.
+ * Tells whether the archive has a model part named @p name (case-insensitive).
  *
  * Compares @p name with each 0x60-byte entry of the part table (+0x8), for the header's part count. Unlike
  * cMdfArchive_getNumModelParts it does not check for a missing header.
  *
  * @param name  the part name to look for
- * @return 1 when found, else 0
+ * @return true when found
  */
-int cMdfArchive::findModelPart(const char* name)
+bool cMdfArchive::findModelPart(const char* name)
 {
     int i;
     for (i = 0; i < ArchiveHeader->mNumModels; i++) {
         if (strcasecmp(name, (char*)&ModelHeaders[i]) == 0)
-            return 1;
+            return true;
     }
-    return 0;
+    return false;
 }
 #endif
 //100%

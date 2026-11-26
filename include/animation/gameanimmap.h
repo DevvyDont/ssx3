@@ -25,6 +25,15 @@
 
 #include "layout.h"
 
+// A game animation id (gad: an index into cGameAnimMap's arrays). Only the bounds are listed. [O] On Tour's enum
+// tGameAnimID ends with kGAD_Num = 803 and kGAD_Invalid = 804 (kGAD_Num + 1); [R] retail's arrays have 518 entries, so
+// its kGAD_Num is 518 and kGAD_Invalid 519; [U] cRiderAnimBase's vtable slot 4 (AI anim to game anim) gives 519 for an
+// anim with no clip, which getAIAnimDuration, getAIAnimEventTime and play test.
+enum tGameAnimID {
+    kGAD_Num = 518,
+    kGAD_Invalid = 519
+};
+
 // EA's animation clip id (On Tour struct tAnimID, 0x4: unsigned int SourceID : 8, AnimID : 24): the low byte is the
 // bank / source, the upper 24 bits the clip index in it. kAnimIDInvalid (-1) is "no clip". [Staged by views group A.]
 // [U] cGameAnimMap_addSource builds one per bank clip (SourceID = the bank's kind, AnimID = i) and passes it by value

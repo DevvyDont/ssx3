@@ -54,7 +54,62 @@ enum {
     kPadDeviceVt_setActuator = 4    // void setActuator(int act, float level) (empty in cPadDevice)
 };
 
+// libpad's pad states (scePadGetState). [R] scePadStateIntToStr's name table (seg/seg_2FE810): 0 DISCONNECT,
+// 2 FINDCTP1, 5 EXECCMD, 6 STABLE, 7 ERROR; the enumerator names are ours, from those strings.
+enum ePadState {
+    kPadStateDisconnect = 0,
+    kPadStateFindCTP1 = 2,
+    kPadStateExecCmd = 5,
+    kPadStateStable = 6,
+    kPadStateError = 7
+};
+
+// libpad's request states (scePadGetReqState). [R] scePadReqIntToStr's name table: 0 COMPLETE, 1 FAILED, 2 BUSY
+// (enumerator names ours, from those strings).
+enum ePadReqState {
+    kPadReqComplete = 0,
+    kPadReqFailed = 1,
+    kPadReqBusy = 2
+};
+
+// What libpad's port-open and command calls (func_003FF708, scePadSetMainMode, scePadEnterPressMode,
+// scePadSetActAlign) return when they succeeded, and scePadInfoPressMode when the pad has pressure-sensitive buttons
+// (name ours). [U] sampleButtons moves on only on 1; seg/seg_2FE810: the senders return 0 when the port is not open,
+// scePadInfoPressMode returns whether the button mask is 0x3FFFF.
+enum { kPadCallOk = 1 };
+
+// Controller ids (scePadInfoMode term 1, the current id; term 2, the current extended id) that sampleButtons accepts
+// (names ours). [U] sampleButtons reads a pad whose id is 4 with no extended id straight away, sets mAnalog for
+// extended id 7 and puts a pad with extended id 4 or 7 into locked analogue mode first.
+enum ePadId {
+    kPadIdDigital = 4,
+    kPadIdAnalog = 7
+};
+
 struct cPS2PadDevice {
+    // sampleButtons' setup steps (mPhase), one per sample (names ours). [U] sampleButtons: open the port, wait for a
+    // stable pad and read its type, lock analogue mode and wait for it, try pressure mode (query, enter, wait), align
+    // the actuators (query, align, wait), then read the pad every sample; a lost pad goes back to kPhaseGetType.
+    enum ePhase {
+        kPhaseOpen = 0,
+        kPhaseGetType = 1,
+        kPhaseSetMode = 2,
+        kPhaseWaitMode = 3,
+        kPhaseCheckPressure = 4,
+        kPhaseEnterPressure = 5,
+        kPhaseWaitPressure = 6,
+        kPhaseCheckActuators = 7,
+        kPhaseAlignActuators = 8,
+        kPhaseWaitActuators = 9,
+        kPhaseRead = 10
+    };
+    // The two DualShock motors setActuator drives (names ours). [U] setActuator turns 1's level into on / off
+    // (mActSmall) and any other into a speed of 50..255 (mActBig); the front end's rumble test passes 0 and 1.
+    enum eActuator {
+        kActuatorBig = 0,
+        kActuatorSmall = 1
+    };
+
     // --- cPadDevice (vptr only)
     void** mVtbl;                   // 0x000 [R] ctor / dtor cPS2PadDevice_vtbl, then the dtor stores cPadDevice_vtbl
     // --- cPS2PadDevice
@@ -73,7 +128,7 @@ struct cPS2PadDevice {
                                     //       scePadSetActDirect (libpad's actuator-direct call: a 6-byte table; 8 with the
                                     //       padding to 0x48)
     int mPhase;                     // 0x048 [R] ctor 0 (open the port on the next sample); [U] sampleButtons' setup state
-                                    //       0..10 (10 = reading)
+                                    //       ePhase, kPhaseOpen .. kPhaseRead
     int mRetry;                     // 0x04C [R] ctor 0; [U] sampleButtons counts failed pressure / actuator requests to 5
     int mModeSet;                   // 0x050 [R] ctor 0; [U] set once the analogue mode lock was accepted
     int mPressure;                  // 0x054 [R] ctor 0; [U] 1 = pressure-sensitive mode: the 12 buttons are value / 255

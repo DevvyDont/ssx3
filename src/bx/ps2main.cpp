@@ -840,6 +840,10 @@ extern "C" tQuaternionXYZW tquat_slerp(const tQuaternion* fromQuat, const tQuate
 //100%
 INCLUDE_ASM("bx/ps2main", fSinCos);
 #ifdef SKIP_ASM
+// How many quarter turns (pi/2) the reduced angle is short of x, modulo a full turn (names ours): sin and cos of
+// x = r + k * pi/2 are those of r swapped and negated by k.
+enum eQuarterTurns { kNoTurn = 0, kQuarterTurn = 1, kHalfTurn = 2, kThreeQuarterTurns = 3 };
+
 /**
  * Computes the sine and cosine of an angle.
  *
@@ -878,19 +882,19 @@ extern "C" void fSinCos(float* sout, float* cout, float x)
     __asm__("sqrt.s %0, %1" : "=f"(cosPart) : "f"(cosSq));
     switch (quadrant & 3)
     {
-    case 0:
+    case kNoTurn:
         *sout = sinPart;
         *cout = cosPart;
         break;
-    case 1:
+    case kQuarterTurn:
         *sout = cosPart;
         *cout = -sinPart;
         break;
-    case 2:
+    case kHalfTurn:
         *sout = -sinPart;
         *cout = -cosPart;
         break;
-    case 3:
+    case kThreeQuarterTurns:
         *sout = -cosPart;
         *cout = sinPart;
         break;

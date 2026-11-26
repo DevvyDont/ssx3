@@ -736,16 +736,16 @@ extern char D_0048DCD4[];
 /**
  * Finishes a direct write into the string's buffer: stores the new length and the terminator.
  *
- * Unshares the buffer first (cBXString_copyBeforeWrite()); a length of -1 means strlen() of the text. Nothing
- * is stored when the string is the empty string.
+ * Unshares the buffer first (cBXString_copyBeforeWrite()); a length of kMeasureLength (-1) means strlen() of the
+ * text. Nothing is stored when the string is the empty string.
  *
- * @param len  the new length (On Tour newlen), or -1 to measure the text
+ * @param len  the new length (On Tour newlen), or kMeasureLength to measure the text
  */
 // PORT: pointer held in int to get the target's negative store offset.
 void cBXString::releaseBuffer(int len)
 {
     copyBeforeWrite();
-    if (len == -1)
+    if (len == kMeasureLength)
         len = strlen(Str);
     if (Str != D_0048DCD4)
     {

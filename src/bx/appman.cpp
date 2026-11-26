@@ -182,9 +182,9 @@ static inline void call1_6F00(char* o, int vtoff, int slot, int a)
  *
  * Each frame runs at most MaxUpdateSteps updates while the timer has ticks (counting Tick), renders when
  * updates
- * ran (two needed with the 30 fps lock) and keeps a damped FrameRate. LoadState 1 waits for the next module
+ * ran (two needed with the 30 fps lock) and keeps a damped FrameRate. LoadState kLoadActive waits for the next module
  * to
- * load, 2 swaps it in, 3 shuts the active module down and returns.
+ * load, kLoadFinished swaps it in, kLoadEnd shuts the active module down and returns.
  *
  * @param appMan  the application manager
  */
@@ -198,15 +198,15 @@ extern "C" void cAppMan_mainLoop(void* appMan)
         SYNCTASK_run(0);
         callv_6D60((char*)self->ExecutionMan, 8, 12);
         switch (*(volatile int*)&self->LoadState) {
-        case 1:
+        case cAppMan::kLoadActive:
             if (calli_6F00((char*)self->ExecutionMan, 8, 10)) {
-                *(volatile int*)&self->LoadState = 2;
+                *(volatile int*)&self->LoadState = cAppMan::kLoadFinished;
                 self->LoadTimer.endload();
             } else {
                 self->LoadTimer.update();
             }
             break;
-        case 2:
+        case cAppMan::kLoadFinished:
             if (calli_6F00((char*)self->ActiveModule, 0, 4)) {
                 cAppMan_checkHalt_v(self);
                 callv_6D60((char*)self->ActiveModule, 0, 3);
@@ -224,10 +224,10 @@ extern "C" void cAppMan_mainLoop(void* appMan)
                 cAppMan_checkHalt_v(self);
                 calli_6F00((char*)self, 92, 5);
                 self->FrameRate = 0.0f;
-                *(volatile int*)&self->LoadState = 0;
+                *(volatile int*)&self->LoadState = cAppMan::kLoadIdle;
             }
             break;
-        case 3:
+        case cAppMan::kLoadEnd:
             if (calli_6F00((char*)self->ActiveModule, 0, 4)) {
                 cAppMan_checkHalt_v(self);
                 callv_6D60((char*)self->ActiveModule, 0, 3);
@@ -239,11 +239,11 @@ extern "C" void cAppMan_mainLoop(void* appMan)
                 return;
             }
             break;
-        case 0:
+        case cAppMan::kLoadIdle:
             if (self->LoadingModule) {
                 self->LoadTimer.startload(10.0f);
                 call1_6F00((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
-                *(volatile int*)&self->LoadState = 1;
+                *(volatile int*)&self->LoadState = cAppMan::kLoadActive;
             }
             break;
         }
@@ -258,7 +258,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
             callv_6D60((char*)self->ActiveModule, 0, 6);
             cAppMan_checkHalt_v(self);
         }
-        if ((self->mLock30Fps == 1 && count > 1 && calli_6F00((char*)self->ActiveModule, 0, 7))
+        if ((self->mLock30Fps == true && count > 1 && calli_6F00((char*)self->ActiveModule, 0, 7))
             || (self->mLock30Fps == 0 && count != 0 && calli_6F00((char*)self->ActiveModule, 0, 7))) {
             cAppMan_checkHalt_v(self);
             if (0.0f < self->FrameRate) {

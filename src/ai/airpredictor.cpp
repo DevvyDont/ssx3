@@ -364,11 +364,11 @@ static inline t4Vector vu0Add_3648(const t4Vector& a, const t4Vector& b)
 /**
  * Advances the predicted flight by @p dt and returns the rider's position and velocity along it.
  *
- * Past 60 s of simulated time (+0x98) it gives up: in state 2 (+0xAC) it switches to state 3 with a fixed frame
- * (t4vect_Origin, t4vect_XAxis, t4vect_ZAxis) and +0x90 = 13, otherwise it re-launches from @p airPos / @p airVel
- * (cAirPredictor_initLaunch) in state 2. Otherwise, in state 1 a sim more than 0.2 s behind the clock (+0xA0) is
- * re-launched, and in states 0 and 2 cAirPredictor_simStep (On Tour simStep) runs until the sim passes the clock + dt or the
- * state changes.
+ * Past 60 s of simulated time (+0x98) it gives up: in kSS_SimCheckObjects (+0xAC) it switches to
+ * kSS_SimCheckObjectsDone with a fixed frame (t4vect_Origin, t4vect_XAxis, t4vect_ZAxis) and +0x90 = 13, otherwise it
+ * re-launches from @p airPos / @p airVel (cAirPredictor_initLaunch) in kSS_SimCheckObjects. Otherwise, in kSS_SimDone a
+ * sim more than 0.2 s behind the clock (+0xA0) is re-launched, and in kSS_Sim and kSS_SimCheckObjects
+ * cAirPredictor_simStep (On Tour simStep) runs until the sim passes the clock + dt or the state changes.
  *
  * Then the air position/velocity (+0x70/+0x80) are stepped in fixed 1/60 s ticks with cAirPredictor_simOneTick (On Tour
  * simOneTick), +0xA4 counting the time done. A remainder over 0.01 s is blended linearly between this tick and a
@@ -381,8 +381,8 @@ static inline t4Vector vu0Add_3648(const t4Vector& a, const t4Vector& b)
 void cAirPredictor::updateFlightPath(t4Vector* airPos, t4Vector* airVel, float dt)
 {
     if (TotalAirTime > 60.0f) {
-        if (SimState == 2) {
-            SimState = 3;
+        if (SimState == kSS_SimCheckObjects) {
+            SimState = kSS_SimCheckObjectsDone;
             *(sQuadR*)&GuessLandPosition = t4vect_Origin;
             *(sQuadR*)&GuessLandVelocity = t4vect_XAxis;
             *(sQuadR*)&GuessLandNormal = t4vect_ZAxis;
@@ -390,22 +390,22 @@ void cAirPredictor::updateFlightPath(t4Vector* airPos, t4Vector* airVel, float d
         } else {
             // Same-layout cast: initLaunch takes the vectors as its 16-byte sQuad (kept: its mangled name has it).
             cAirPredictor_initLaunch(((char*)this), (sQuad*)airPos, (sQuad*)airVel);
-            SimState = 2;
+            SimState = kSS_SimCheckObjects;
         }
     } else {
-        if (SimState == 1 && TotalAirTime - CurAirTime < -0.2f) {
+        if (SimState == kSS_SimDone && TotalAirTime - CurAirTime < -0.2f) {
             // Same-layout cast: initLaunch takes the vectors as its 16-byte sQuad (kept: its mangled name has it).
             cAirPredictor_initLaunch(((char*)this), (sQuad*)airPos, (sQuad*)airVel);
         }
         int st = SimState;
-        if (st == 0) {
+        if (st == kSS_Sim) {
             simStep();
-            while (SimState == 0 && TotalAirTime < CurAirTime + dt) {
+            while (SimState == kSS_Sim && TotalAirTime < CurAirTime + dt) {
                 simStep();
             }
-        } else if (st == 2) {
+        } else if (st == kSS_SimCheckObjects) {
             simStep();
-            while (SimState == 2 && TotalAirTime < CurAirTime + dt) {
+            while (SimState == kSS_SimCheckObjects && TotalAirTime < CurAirTime + dt) {
                 simStep();
             }
         }

@@ -11,6 +11,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "animation/rideranimbase.h"
 #include "replay/bxreplayframe.h"
 #include "object/being.h"
 
@@ -796,10 +797,10 @@ static inline void vu0ScaleEqW7(t4Vector& v, float s)
  * Moves the wiped-out rider through the air one tick with the air predictor.
  *
  * Runs cAirPredictor_updateFlightPath on mAirPredictor with mPosition, mVelocity and dt = mTimeScale / 60. Once the
- * predictor's SimState (+0xAC) is 1 or 3 (landing found) it turns the rider toward the landing (cRider_alignRiderAxis
- * with the landing normal and velocity, a rate of mTimeScale over the remaining air time, or x 60 when under one tick,
- * and mTimeScale x 6.63). RiderAngVelocity is damped by 1 - 1.5 dt and the orientation updated
- * (cRider_updateOrientationImplicit).
+ * predictor's SimState (+0xAC) is kSS_SimDone or kSS_SimCheckObjectsDone (landing found) it turns the rider toward the
+ * landing (cRider_alignRiderAxis with the landing normal and velocity, a rate of mTimeScale over the remaining air
+ * time, or x 60 when under one tick, and mTimeScale x 6.63). RiderAngVelocity is damped by 1 - 1.5 dt and the
+ * orientation updated (cRider_updateOrientationImplicit).
  *
  */
 void cWipeoutMotion::stepAirMotion()
@@ -809,7 +810,7 @@ void cWipeoutMotion::stepAirMotion()
     cAirPredictor_updateFlightPath(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, dt);
     int st = mRider->mAirPredictor->SimState;
     int ok = 0;
-    if (st == 1 || st == 3) ok = 1;
+    if (st == cAirPredictor::kSS_SimDone || st == cAirPredictor::kSS_SimCheckObjectsDone) ok = 1;
     if (ok)
     {
         cRider* airRider = mRider;
@@ -1250,15 +1251,16 @@ static inline t4Vector getFront_137D18(cRider* rider)
  *
  * RiderAngVelocity's length eases toward the speed x 0.0125. Friction comes from the surface material's curve
  * (SurfPropCache entry for mSurfaceType, its four points at +0x90) at the tangential speed relative to the ground
- * (GroundVelocity), x 3 + 1.5; slow slides (under 1111) during the root pose override or anim categories 29 / 25 blend toward
- * 40. It is scaled by mGroundNormal.z + 0.3 (clamped 0-1) and capped at 1 / dt. Position and velocity are integrated
- * with gravity -1800 and the speed capped at 3333.3, and the rider is aligned to the ground (cRider_alignRiderAxis).
- * cWipeoutMotion_intersectGround then probes the ground: a hit updates GroundVelocity, mGroundNormal, mSurfaceType, mGroundContactPoint and
- * unk_454; sinking deeper than the material limit (mAnimModel unk_140.x x material +0x18) pushes the rider out and
- * cancels the inward velocity, a shallower dip springs it back, both spawning the impact effect (func_00111AA0); more
- * than 10 above it launches the rider (cAirPredictor_startLaunchIntoAir, ForceNaturalAir (+0x4) = 1), as does a miss.
- * The hit object's owner (virtual slot 43) gets the velocity change, and a material with +0x44 set or a triangle with
- * flag 2 forces a reset (cRider_checkForReset with 0, 1).
+ * (GroundVelocity), x 3 + 1.5; slow slides (under 1111) during the root pose override or anim categories kANCAT_WSlide
+ * / kANCAT_WSlideNoBoard blend toward 40. It is scaled by mGroundNormal.z + 0.3 (clamped 0-1) and capped at 1 / dt.
+ * Position and velocity are integrated with gravity -1800 and the speed capped at 3333.3, and the rider is aligned to
+ * the ground (cRider_alignRiderAxis). cWipeoutMotion_intersectGround then probes the ground: a hit updates
+ * GroundVelocity, mGroundNormal, mSurfaceType, mGroundContactPoint and unk_454; sinking deeper than the material limit
+ * (mAnimModel unk_140.x x material +0x18) pushes the rider out and cancels the inward velocity, a shallower dip springs
+ * it back, both spawning the impact effect (func_00111AA0); more than 10 above it launches the rider
+ * (cAirPredictor_startLaunchIntoAir, ForceNaturalAir (+0x4) = 1), as does a miss. The hit object's owner (virtual slot
+ * 43) gets the velocity change, and a material with +0x44 set or a triangle with flag 2 forces a reset
+ * (cRider_checkForReset with 0, 1).
  *
  * @param self  the cWipeoutMotion
  */
@@ -1279,8 +1281,9 @@ void cWipeoutMotion::stepGroundMotion()
     float tl = vu0Length_137D18(tang);
     float fric = curve_137D18(mat, tl * 0.035999998450279236f) * 3.0f + 1.5f;
     if (tl < 1111.111083984375f
-        && (mRider->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 29
-            || cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 25)) {
+        && (mRider->mUseRootPoseOverride != 0
+            || cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WSlide
+            || cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_WSlideNoBoard)) {
         float slowBlend = 1.0f - tl * 0.0009000000427477062f;
         slowBlend *= slowBlend;
         slowBlend *= slowBlend;

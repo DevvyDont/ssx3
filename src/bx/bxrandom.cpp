@@ -54,6 +54,10 @@ unsigned int AIrand()
 //100%
 INCLUDE_ASM("bx/bxrandom", AIrandf__Fff);
 #ifdef SKIP_ASM
+// The bits of 1.0f (sign 0, exponent 127, mantissa 0; name ours): OR-ed onto 23 random mantissa bits, they make a
+// float in [1, 2).
+enum { kFloatOneBits = 0x3F800000 };
+
 /**
  * Draws a random float between two bounds from the AI's random generator.
  *
@@ -69,7 +73,7 @@ float AIrandf(float low, float high)
         unsigned int i;
         float f;
     } floatBits;
-    floatBits.i = (AIrand() & 0x7FFFFF) | 0x3F800000; // float in [1.0, 2.0)
+    floatBits.i = (AIrand() & 0x7FFFFF) | kFloatOneBits; // float in [1.0, 2.0)
     return low + (high - low) * (floatBits.f - 1.0f);
 }
 #endif

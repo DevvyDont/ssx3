@@ -1,6 +1,7 @@
 #include "vtable.h"
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintnewrace.h"
 #include "intersect/bxnash.h"
 #include "world/worldview.h"
 #include "world/worldrecords.h"
@@ -394,8 +395,9 @@ void cHandplantMotion::init(tIntersectInfo* hit, float dur)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_loseFocus);
 #ifdef SKIP_ASM
-// cHandplantMotion_calcExitVel returns a value in $2 that is unused here; declaring it int keeps $2 free as the target has it.
-extern "C" int cHandplantMotion_calcExitVel(void* self);
+// cHandplantMotion_calcExitVel returns a value in $2 that is unused here; declaring it with its bool return (not void)
+// keeps $2 free as the target has it.
+extern "C" bool cHandplantMotion_calcExitVel(void* self);
 
 
 /**
@@ -423,7 +425,7 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
-extern "C" int cHandplantMotion_calcExitVel(void* self);
+extern "C" bool cHandplantMotion_calcExitVel(void* self);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // t4Vector with an element-wise constructor (w stored first).
@@ -753,26 +755,27 @@ static inline void vu0SubTo_9548(t4Vector& dst, const t4Vector& a, const t4Vecto
     dst = r;
 }
 
-extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* s) __asm__("cHandplantMotion_calcExitVel");
+extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* s) __asm__("cHandplantMotion_calcExitVel");
 /**
  * Works out the handplant's exit velocity (ExitVel) from the rider's HandplantMode; returns whether it is set.
  *
- * Returns 1 at once when ExitVel is already non-zero. Speeds are in km/h (x 27.78). Mode 3: SplineDir times 0.7 x
- * InitTangentSpeed, minus 2 km/h (15 with IsRailSpline) along the horizontal normal of SplineDir signed by ApproachDir,
- * and a vertical 0 (10) km/h. Modes 4 and 5: 5 (15) km/h along the horizontal normal of SplineDir, turned toward
- * ApproachDir in mode 4 and away from it in mode 5, and a vertical 0 (5) km/h. Mode 6: SplineDir x 30 km/h plus 15 km/h
- * upward. The vertical value overwrites ExitVel.z in modes 3-5. Other modes return 0.
+ * Returns true at once when ExitVel is already non-zero. Speeds are in km/h (x 27.78). kHM_TransitionReflect:
+ * SplineDir times 0.7 x InitTangentSpeed, minus 2 km/h (15 with IsRailSpline) along the horizontal normal of SplineDir
+ * signed by ApproachDir, and a vertical 0 (10) km/h. kHM_ExitBalanceThrough and kHM_ExitBalanceReflect: 5 (15) km/h
+ * along the horizontal normal of SplineDir, turned toward ApproachDir for Through and away from it for Reflect, and a
+ * vertical 0 (5) km/h. kHM_ExitBalanceCenter: SplineDir x 30 km/h plus 15 km/h upward. The vertical value overwrites
+ * ExitVel.z in the first three. Other modes return false.
  *
  * @param handplant  the cHandplantMotion (this)
- * @return 1 when ExitVel is set, else 0
+ * @return true when ExitVel is set
  */
-extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
+extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
 {
     if (neq_9548(handplant, t4vect_Zero_9548))
-        return 1;
+        return true;
     int kind = handplant->mRider->HandplantMode;
     t4Vector n;
-    if (kind == 3) {
+    if (kind == kHM_TransitionReflect) {
         t4Vector exitVel;
         vu0CrossTo_9548(exitVel, t4vect_ZAxis_9548, handplant->SplineDir);
         vu0NormTo_9548(n, exitVel);
@@ -794,9 +797,9 @@ extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
         if (handplant->IsRailSpline != 0)
             z = 10.0f;
         handplant->ExitVel.z = z * 27.77777862548828f;
-        return 1;
+        return true;
     }
-    if (kind == 4) {
+    if (kind == kHM_ExitBalanceThrough) {
         t4Vector exitVel;
         vu0CrossTo_9548(exitVel, handplant->SplineDir, t4vect_ZAxis_9548);
         vu0NormTo_9548(n, exitVel);
@@ -814,9 +817,9 @@ extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
             z = 5.0f;
         k = z * kphScale;
         handplant->ExitVel.z = k;
-        return 1;
+        return true;
     }
-    if (kind == 5) {
+    if (kind == kHM_ExitBalanceReflect) {
         t4Vector exitVel;
         vu0CrossTo_9548(exitVel, handplant->SplineDir, t4vect_ZAxis_9548);
         vu0NormTo_9548(n, exitVel);
@@ -834,15 +837,15 @@ extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
             z = 5.0f;
         k = z * kphScale;
         handplant->ExitVel.z = k;
-        return 1;
+        return true;
     }
-    if (kind == 6) {
+    if (kind == kHM_ExitBalanceCenter) {
         vu0ScaleTo_9548(n, handplant->SplineDir, 833.3333740234375f);
         *(t4Vector*)&handplant->ExitVel.x = n;
         handplant->ExitVel.z += 416.66668701171875f;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -895,7 +898,7 @@ extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, f
  */
 extern "C" void cAirMotion_gainFocus(cAirMotion* self, int state)
 {
-    *(int*)self = state == 5;
+    *(int*)self = state == MS_Handplant;
     cRider* rider = self->mRider;
     cAirPredictor_startLaunchIntoAir(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, 3333.33349609375f);
 }
@@ -969,7 +972,8 @@ static inline float absf_139A20(float x)
  *
  * Applies wind (cRider_updateWind), steps position and velocity with cAirPredictor_updateFlightPath() by mTimeScale / 60, sets
  * mGroundNormal to the rider's posed up vector (RiderRoot row 2) and GroundVelocity to zero. When the
- * predictor has a landing (state 1 or 3) on a triangle with flag 0x8, on a surface that is neither type 0x12
+ * predictor has a landing (kSS_SimDone or kSS_SimCheckObjectsDone) on a triangle with flag 0x8, on a surface that is
+ * neither eST_Rock_WipeOut
  * nor a reset surface (+0x44), it turns the rider's up toward the landing normal, paced to finish around
  * touchdown (rate = time scale / time to landing, at most 80 degrees/s). In CS_Spin with |AirAdjSpin| above 5
  * degrees only the up axis turns; otherwise the heading also follows the landing velocity (flipped to the
@@ -988,7 +992,7 @@ void cAirMotion::step()
     *(t4Vector*)&mRider->GroundVelocity = *(t4Vector*)t4vect_Zero;
     int st = mRider->mAirPredictor->SimState;
     int ok = 0;
-    if (st == 1 || st == 3) ok = 1;
+    if (st == cAirPredictor::kSS_SimDone || st == cAirPredictor::kSS_SimCheckObjectsDone) ok = 1;
     if (ok) {
         cRider* rider2 = mRider;
         cAirPredictor* ap = rider2->mAirPredictor;
@@ -996,11 +1000,11 @@ void cAirMotion::step()
         tSurfData* snow = &SSXApp->Game->SurfPropCache->SurfData[idx];
         int flag = 0;
         short sf = ap->SurfaceFlags;
-        if (sf != -1) {
+        if (sf != cAirPredictor::kNoSurfaceFlags) {
             int orientableBit = sf & 8;
             flag = orientableBit != 0;
         }
-        if (idx != 18 && snow->IsResetSurface == 0 && flag) {
+        if (idx != eST_Rock_WipeOut && snow->IsResetSurface == 0 && flag) {
             float timeLeft = ap->TotalAirTime - ap->CurAirTime;
             float timeScale = rider2->mTimeScale;
             float x;
@@ -1009,7 +1013,7 @@ void cAirMotion::step()
             else
                 x = timeScale * 59.999996185302734f;
             float y = mRider->mTimeScale * 1.396263599395752f;
-            if (cRider_getControlState(mRider) == 5) {
+            if (cRider_getControlState(mRider) == CS_Spin) {
                 cRider* rider3 = mRider;
                 int big = 1;
                 if (!(0.0872664749622345f < absf_139A20(rider3->mRiderHandler->SpinControl.AirAdjSpin))) big = 0;
@@ -1063,7 +1067,7 @@ extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 extern "C" int cRider_isChangeFakieGround(void* rider);
 extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float v);
 extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float v);
-extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, t4Vector* out);
+extern "C" bool cAirMotion_checkTerrainCollisions(cAirMotion* self, t4Vector* out);
 extern "C" void cWScriptMan_eventLand(void* p);
 extern "C" void* cBE_getBE();
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
@@ -1248,7 +1252,8 @@ static inline t4Vector row_139C88(cRider* r, int k)
  * patches with surface flag 0x2 force an auto reset. Otherwise the rider is pushed out, its ground frame and
  * contact data come from the hit, the inward velocity is cancelled times the surface's LandingHardness (the rest
  * capped at MaxLandingPenetrationVel) and the hit object's node gets the impulse (applyForce). A crash
- * (cRider_flagEventWipeout) follows a layer-2 animation of category 0x12-0x15 whose sequence flags say so
+ * (cRider_flagEventWipeout) follows a layer-2 animation of category kANCAT_Grab to kANCAT_UberGrind whose sequence
+ * flags say so
  * (probably an unfinished trick), an upside-down board, or too much fore/aft tilt for a stat-scaled limit;
  * otherwise cRider_flagEventLand() takes the landing, the motion becomes MS_Ground, and the control state and
  * landing animation follow the press type and current control. Terrain (cAirMotion_checkTerrainCollisions),
@@ -1264,8 +1269,8 @@ void cAirMotion::resolve()
     }
     if (intParam >= 0.5f && vn < 0.0f) {
         float spd = vu0Len_139C88(mRider->mVelocity);
-        if (cRider_getControlState(((char*)mRider)) == 5) {
-            cRider_setControlState_9C88(((char*)mRider), 13);
+        if (cRider_getControlState(((char*)mRider)) == CS_Spin) {
+            cRider_setControlState_9C88(((char*)mRider), CS_Void);
         }
         cAirPredictor_land_9C88(mRider->mAirPredictor, &mRider->mPosition, &mRider->mVelocity);
         tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[hit.Stype];
@@ -1306,7 +1311,7 @@ void cAirMotion::resolve()
                 handler->applyForce(hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)SSXApp->TimerHz));
             }
         }
-        int anim = 438;
+        int anim = kAID_Invalid;
         cRider* landedRider = mRider;
         landedRider->mGroundForward = vu0Normalize_139C88(vu0Sub_139C88(
             row_139C88(landedRider, 1),
@@ -1317,16 +1322,16 @@ void cAirMotion::resolve()
         mRider->mGroundContactPoint = (*(t4Vector*)&hit.Ipos);
         mRider->SnowOffset = vu0Dot_139C88(vu0Sub_139C88(mRider->mPosition, (*(t4Vector*)&hit.Ipos)),
                 mRider->mGroundNormal);
-        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 20) {
+        if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Uber) {
             if (!cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events.isSet1(2)) anim = 361;
-        } else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 21) {
+        } else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_UberGrind) {
             if (!cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events.isSet1(3)) anim = 361;
         } else {
             int flip = 0;
-            if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 19) {
+            if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Tweak) {
                 flip = tEventFlags_isSet1_i(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events,
                         2) == 0;
-            } else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == 18 &&
+            } else if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Grab &&
                        !cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events.isSet1(2)) {
                 flip = tEventFlags_isSet1_i(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events,
                         0) != 0;
@@ -1371,7 +1376,7 @@ void cAirMotion::resolve()
                 }
             }
         }
-        if (anim != 438) {
+        if (anim != kAID_Invalid) {
             tCollideInfo info;
             info.Pos = (*(t4Vector*)&hit.Ipos);
             info.Direct = vu0Normalize_139C88(mRider->mVelocity);
@@ -1382,20 +1387,20 @@ void cAirMotion::resolve()
             cRider* rider5 = (cRider*)(((char*)mRider));
             cRider_flagEventLand(rider5, rider5->mGroundNormal.z < 0.699999988079071f, 0, rider5->PressMode, &hit, spd);
             cRider_setMotionState_9C88(((char*)mRider), 0);
-            if (cRider_getControlState(((char*)mRider)) != 0xC) {
-                if (cRider_getControlState(((char*)mRider)) == 2) {
+            if (cRider_getControlState(((char*)mRider)) != CS_UberGrind) {
+                if (cRider_getControlState(((char*)mRider)) == CS_Prewind) {
                     cRider_undoRailslideModeOrientation(((char*)mRider));
                     if (vn < -1388.888916015625f) {
                         chooseLandAnim(vn);
                     }
                 } else if (mRider->PressMode != 0) {
-                    if (cRider_getControlState(((char*)mRider)) != 1) {
-                        if (mRider->PressMode == 1) {
-                            cRiderAnimBase_play_i(mRider->mRiderAnim, 26, 0, -1.0f);
+                    if (cRider_getControlState(((char*)mRider)) != CS_BoardPress) {
+                        if (mRider->PressMode == kPM_Nose) {
+                            cRiderAnimBase_play_i(mRider->mRiderAnim, kAID_NoseLand, 0, -1.0f);
                         } else {
-                            cRiderAnimBase_play_i(mRider->mRiderAnim, 34, 0, -1.0f);
+                            cRiderAnimBase_play_i(mRider->mRiderAnim, kAID_TailLand, 0, -1.0f);
                         }
-                        cRider_setControlState_9C88(((char*)mRider), 1);
+                        cRider_setControlState_9C88(((char*)mRider), CS_BoardPress);
                     }
                 } else {
                     cRider_undoRailslideModeOrientation(((char*)mRider));
@@ -1676,12 +1681,12 @@ static inline t4Vector riderUp_AA48(cRider* r)
  * crash or reset). The query is destroyed with cWorldRider__cWorldRider().
  *
  * @param outp  receives the surface normal when the function returns 1
- * @return 1 when the rider hit terrain while moving into it, otherwise 0 (also 0 when it was only pushed out)
+ * @return true when the rider hit terrain while moving into it (false also when it was only pushed out)
  */
-int cAirMotion::checkTerrainCollisions(t4Vector* outp)
+bool cAirMotion::checkTerrainCollisions(t4Vector* outp)
 {
-    if (cRider_getControlState(((char*)mRider)) == 9)
-        return 0;
+    if (cRider_getControlState(((char*)mRider)) == CS_Reset)
+        return false;
     tIntersectInfo hit;
     cWorldRider sph;
     cRider* rider = mRider;
@@ -1690,13 +1695,13 @@ int cAirMotion::checkTerrainCollisions(t4Vector* outp)
     sph.useRejectNormal = 1;
     float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, (int)mRider->mWallHint);
     if (penetration < 0.0f)
-        { cWorldRider__cWorldRider(&sph, 2); return 0; }
+        { cWorldRider__cWorldRider(&sph, 2); return false; }
     {
         t4Vector push = vu0Scale_AA48(vu0Scale_AA48(hit.Inorm, 1.100000023841858f), penetration);
         cRider_moveFromCollision(((char*)mRider), &push);
         float dot2 = vu0Dot_AA48(vu0Scale_AA48(hit.Inorm, -1.0f), mRider->mVelocity);
         if (dot2 < 0.0f)
-            { cWorldRider__cWorldRider(&sph, 2); return 0; }
+            { cWorldRider__cWorldRider(&sph, 2); return false; }
         t4Vector n = vu0Normalize_AA48(mRider->mVelocity);
         float k = dot2 * 0.05000000074505806f < 27.77777862548828f ? 27.77777862548828f : dot2 * 0.05000000074505806f;
         vu0AddEq_AA48(mRider->mVelocity, vu0Scale_AA48(hit.Inorm, dot2 + k));
@@ -1710,7 +1715,7 @@ int cAirMotion::checkTerrainCollisions(t4Vector* outp)
         *(t4Vector*)outp = hit.Inorm;
     }
     cWorldRider__cWorldRider(&sph, 2);
-    return 1;
+    return true;
 }
 #endif
 
@@ -2156,7 +2161,7 @@ static inline float ScaleAtLeast_AF28(float v, float k, float lo)
  */
 void cRailslideMotion::step()
 {
-    if (cRider_getControlState(mRider) == 0xC)
+    if (cRider_getControlState(mRider) == CS_UberGrind)
         CrookedSlideAngle = 0.0f;
     cRider* rider = mRider;
     float len = Len_AF28(rider->mVelocity);
@@ -2247,7 +2252,7 @@ void cRailslideMotion::step()
             } else {
                 k = 0.30000001192092896f;
                 int st = mRider->RailslideMode;
-                if (st == 3 || st == 4)
+                if (st == kRSM_FS || st == kRSM_BS)
                     k = 1.7999999523162842f;
                 int grab = hit.Spline && (hit.Spline->m_iFlags & 4);
                 if (grab)
@@ -2272,7 +2277,7 @@ void cRailslideMotion::step()
             AddEq_AF28(mRider->mPosition, Scale_AF28(side_AF28(this), turn * dt));
             float target, roll;
             int st2 = mRider->RailslideMode;
-            if (st2 == 3 || st2 == 4) {
+            if (st2 == kRSM_FS || st2 == kRSM_BS) {
                 float lean = Clamp_AF28(side * 0.014285714365541935f, -1.0f, 1.0f);
                 RailOffCenter = lean;
                 target = lean * 0.523598849773407f;
@@ -2566,7 +2571,7 @@ void cRailslideMotion::resolve()
         cRider_applyJumpPop(((char*)mRider), -1.0f);
     }
     sTbl_BFA8 tbl = D_00458230;
-    if (cRider_getControlState(((char*)mRider)) == 0xC) {
+    if (cRider_getControlState(((char*)mRider)) == CS_UberGrind) {
         cRider* rider = (cRider*)(((char*)mRider));
         rider->mSphereTree->sphMask = tbl.v[rider->mRiderHandler->UberGrindControl.CurrentGrind];
     } else {
@@ -2577,7 +2582,7 @@ void cRailslideMotion::resolve()
     checkTerrainCollisions();
     mRider->mSphereTree->sphMask = 0xFFFFFFFF;
     cRider_checkOpponentCollisions(((char*)mRider));
-    if (ForceNaturalAir != 0 && cRider_getMotionState(((char*)mRider)) == 4) {
+    if (ForceNaturalAir != 0 && cRider_getMotionState(((char*)mRider)) == MS_Railslide) {
         cRider_setMotionState_impl_BFA8(((char*)mRider), 1);
         cSSXAudio_Lift((char*)gSSXAudio, ((char*)mRider));
     }
@@ -2724,7 +2729,7 @@ static inline float vu0Length_13C140(const t4Vector& v)
  */
 void cRailslideMotion::checkTerrainCollisions()
 {
-    if (cRider_getControlState(((char*)mRider)) == 9)
+    if (cRider_getControlState(((char*)mRider)) == CS_Reset)
         return;
     tIntersectInfo hit;
     cWorldRider sph;
@@ -3075,7 +3080,9 @@ static inline float vu0Length_13C948(const t4Vector& v)
  * term closes up to 1111.11 of the gap to the surface's speed (snow +0x20 * 27.78), weighted by the path
  * factor (1 on flag-0x10 triangles, else falling to 0 at 90 degrees off the path heading at rider +0x4CC).
  * Ground material (+0x434) 17 or above (On Tour's slow territory) halves the speed and the boost, and zeroes
- * everything when facing off the path; snow +0x24 scales the total and slewed channel 4 adds 56.4 per unit.
+ * everything when facing off the path; snow +0x24 scales the total and slewed channel 4 adds 56.4 per unit. On the
+ * half-pipe courses (ground material kLOCATION_BHP1, kLOCATION_CHP2 or kLOCATION_EHP3, as cRider_isOnHalfPipeCourse)
+ * the drive is scaled by |mGroundNormal.z|.
  *
  * @param snow  the surface data (SurfPropCache entry; On Tour tSurfData*)
  * @return the force along mGroundForward
@@ -3126,9 +3133,9 @@ float cGroundMotion::getBoostForce(tSurfData* snow)
         cBEStatInterface_getAccelerationAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), mRider->mAIIndex,
                 mRider->mStatsIndex);
         float getGoingFactor = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim,
-                2) == 22 ? 0.20000000298023224f : 0.0f;
+                2) == kAID_GetGoing ? 0.20000000298023224f : 0.0f;
         int st = mRider->mGroundMaterial;
-        if (st == 11 || st == 12 || st == 13)
+        if (st == kLOCATION_BHP1 || st == kLOCATION_CHP2 || st == kLOCATION_EHP3)
             boostDelta *= hpAbs_13C948(mRider->mGroundNormal.z);
         totalBoost += (pathFactor >? getGoingFactor * 1.0004451274871826f) * boostDelta;
     }
@@ -3203,13 +3210,12 @@ static inline float hpRamp_13CCF0(float v, float lo, float hi)
 /**
  * Computes the friction along the board's forward direction from the speed, braking and the surface.
  *
- * The base is the surface's friction curve (4 points at cfg +0x90) at the speed in km/h (|a| * 0.036),
- * lowered at low speed by a rider stat. Braking (b = |slewed channel 2|) adds 3 * b * b (times a stat factor)
- * to the friction factor and a constant drag of 1000 * b, both faded out on near-vertical ground
- * (mGroundNormal.z 0.2 to 0.1). Powder surfaces (types 2, 3, 13) scale it with the sinking depth, rising
- * relative to the ground cuts it to 0.6, switch stance without boost raises it by 11%, and surface 13
- * multiplies it by 34.8 while moving forward and rising. The caller's third argument (the normal force in g)
- * is not declared.
+ * The base is the surface's friction curve (4 points at cfg +0x90) at the speed in km/h (|a| * 0.036), lowered at low
+ * speed by a rider stat. Braking (b = |slewed channel 2|) adds 3 * b * b (times a stat factor) to the friction factor
+ * and a constant drag of 1000 * b, both faded out on near-vertical ground (mGroundNormal.z 0.2 to 0.1). Powder surfaces
+ * (eST_Snow_Powder, eST_Snow_DeepPowder, eST_Impassable) scale it with the sinking depth, rising relative to the ground
+ * cuts it to 0.6, switch stance without boost raises it by 11%, and eST_Impassable multiplies it by 34.8 while moving
+ * forward and rising. The caller's third argument (the normal force in g) is not declared.
  *
  * @param cfg  the surface data (SurfPropCache entry; On Tour tSurfData* snow)
  * @param forwardVel  the forward velocity relative to the ground (On Tour v)
@@ -3231,7 +3237,8 @@ float cGroundMotion::getSlipForce(tSurfData* cfg, float forwardVel)
     float lift = ramp * (spd * 3.0004208087921143f) * spd * brakeFactor;
     float drag = ramp * (spd * 999.9600219726562f);
     float powderFactor = 1.0f;
-    if (mRider->mSurfaceType == 2 || mRider->mSurfaceType == 3 || mRider->mSurfaceType == 13)
+    if (mRider->mSurfaceType == eST_Snow_Powder || mRider->mSurfaceType == eST_Snow_DeepPowder
+        || mRider->mSurfaceType == eST_Impassable)
         powderFactor = 0.5f - mRider->SnowOffset / PowderDepth3G;
     float risingFactor = 1.0f;
     if (0.0f < mRider->mVelocity.z - mRider->GroundVelocity.z)
@@ -3240,7 +3247,8 @@ float cGroundMotion::getSlipForce(tSurfData* cfg, float forwardVel)
     if (mRider->IsRidingFakie != mRider->IsGoofyStance && mRider->mBoostStrength == 0.0f)
         switchFactor = 1.1147289276123047f;
     float climbFactor = 1.0f;
-    if (0.0f < forwardVel && 0.0f < mRider->mVelocity.z - mRider->GroundVelocity.z && mRider->mSurfaceType == 13)
+    if (0.0f < forwardVel && 0.0f < mRider->mVelocity.z - mRider->GroundVelocity.z
+        && mRider->mSurfaceType == eST_Impassable)
         climbFactor = 34.84144592285156f;
     return ((-forwardVel * powderFactor) * (slipCurve + lift) * risingFactor * switchFactor - drag) * climbFactor;
 }
@@ -3535,14 +3543,14 @@ static inline int isBetter_13D1B8(tIntersectInfo* a, tIntersectInfo* b)
  * probe's middle (ties go to the lower instance, else patch, m_RID), then stores the patch data, surface type,
  * normal, contact point, ground velocity, mGroundForward and mGroundSide and the height above ground, and reports
  * the hit to its instance's active node (updateIntersectInfo). With no hit the frame is reset to world up and
- * surface type 0.
+ * surface type eST_Default (an eST_Undefined hit also becomes eST_Default).
  *
  * @param out  receives the chosen hit
  * @param dist  receives the probe point's distance from the contact point across the normal (On Tour
  *              latOffset; 0 with no hit)
- * @return 1 when ground was found, otherwise 0
+ * @return true when ground was found
  */
-int cGroundMotion::setupGroundVectors(tIntersectInfo* out, float* dist)
+bool cGroundMotion::setupGroundVectors(tIntersectInfo* out, float* dist)
 {
     mRider->LastGroundNormal = mRider->mGroundNormal;
     t4Vector pos = vu0Add_13D1B8(mRider->mPosition, vu0Scale_13D1B8(mRider->mGroundSide,
@@ -3561,7 +3569,7 @@ int cGroundMotion::setupGroundVectors(tIntersectInfo* out, float* dist)
         mRider->mGroundSide = vu0Cross_13D1B8(mRider->mGroundNormal, mRider->mGroundForward);
         mRider->mSurfaceType = 0;
         *dist = 0.0f;
-        return 0;
+        return false;
     }
     int best = 0;
     float up0 = vu0Dot_13D1B8(hits[0].Inorm, mRider->mGroundNormal);
@@ -3605,8 +3613,8 @@ int cGroundMotion::setupGroundVectors(tIntersectInfo* out, float* dist)
         }
     }
     mRider->mSurfaceType = out->Stype;
-    if (mRider->mSurfaceType == -1) {
-        mRider->mSurfaceType = 0;
+    if (mRider->mSurfaceType == eST_Undefined) {
+        mRider->mSurfaceType = eST_Default;
     }
     mRider->mGroundNormal = out->Inorm;
     mRider->mGroundContactPoint = out->Ipos;
@@ -3617,7 +3625,7 @@ int cGroundMotion::setupGroundVectors(tIntersectInfo* out, float* dist)
     t4Vector delta = vu0Sub_13D1B8(pos, out->Ipos);
     mRider->SnowOffset = vu0Dot_13D1B8(delta, mRider->mGroundNormal);
     *dist = vu0Length_13D1B8(vu0Sub_13D1B8(delta, vu0Scale_13D1B8(mRider->mGroundNormal, mRider->SnowOffset)));
-    return 1;
+    return true;
 }
 #endif
 
@@ -4070,8 +4078,10 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float ch = self->mRider->mSlewed[18].cur + (heightBefore - heightAfter) * 10.0f;
     ch *= 1.0f - dt * 20.0f;
     ch = clamp_13D818(ch, lo2, hi2);
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 10 || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 4 ||
-        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 5 || cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 22)
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_Land
+        || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_BoardPress
+        || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == kANCAT_Bobble
+        || cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == kAID_GetGoing)
         ch = 0.0f;
     cRider* rider = self->mRider;
     rider->mSlewed[18].target = ch * scale;
@@ -4080,8 +4090,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float yawRate = 0.0f;
     float relSpeed = vu0Len_13D818(rel);
     int st = cRider_getControlState(self->mRider);
-    if ((st != 2 || (cRider_getControlState(self->mRider) == 2 && 0.6499999761581421f < self->mRider->mGroundNormal.z)) &&
-        9.999999747378752e-06f < relSpeed) {
+    if ((st != CS_Prewind
+         || (cRider_getControlState(self->mRider) == CS_Prewind && 0.6499999761581421f < self->mRider->mGroundNormal.z))
+        && 9.999999747378752e-06f < relSpeed) {
         t4Vector ax = vu0Div_13D818(vu0Cross_13D818(rel, self->mRider->mGroundForward), relSpeed);
         float yaw = -func_0031C128(clamp_13D818(vu0Dot_13D818(ax, self->mRider->mGroundNormal), -1.0f, 1.0f));
         float turnKickFlare = snow->TurnKickFlare;
@@ -4178,7 +4189,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     }
 
     int surf = self->mRider->mSurfaceType;
-    if (!(surf == 2 || surf == 3 || surf == 13)) {
+    if (!(surf == eST_Snow_Powder || surf == eST_Snow_DeepPowder || surf == eST_Impassable)) {
         float vn = vu0Dot_13D818(rel, self->mRider->mGroundNormal);
         float lenBefore = vu0Len_13D818(rel);
         t4Vector bump = vu0Scale_13D818(self->mRider->mGroundNormal, vn * -0.4000000059604645f);
@@ -4209,8 +4220,11 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         }
         int layer = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
         int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
-        int onSlope = cRider_getControlState(self->mRider) != 1 && (self->mRider->mSurfaceType == 2 || self->mRider->mSurfaceType == 3);
-        int brace = !onSlope && layer != 10 && layer != 5 && anim != 22 && anim != 2;
+        int onSlope = cRider_getControlState(self->mRider) != CS_BoardPress
+                      && (self->mRider->mSurfaceType == eST_Snow_Powder
+                          || self->mRider->mSurfaceType == eST_Snow_DeepPowder);
+        int brace = !onSlope && layer != kANCAT_Land && layer != kANCAT_Bobble && anim != kAID_GetGoing
+                    && anim != kAID_SitToCruiseFwd;
         if (onSlope) {
             float tgt = curve_13D818(kPowderTiltBwd, vu0Len_13D818(rel) * 0.035999998450279236f);
             cRider* rider2 = self->mRider;
@@ -4364,7 +4378,7 @@ static inline float absf_13F178(float x)
  * Resolves the ground motion: natural-air pop or fatal surfaces, collisions, and the audio values.
  *
  * With ForceNaturalAir set it pops the rider with cRider_applyJumpPop(rider, -1) and, while still in MS_Ground
- * after the checks, switches to MS_Air with the lift sound. Otherwise surface type 0x12 starts a wipeout
+ * after the checks, switches to MS_Air with the lift sound. Otherwise surface type eST_Rock_WipeOut starts a wipeout
  * (anim 0x168) and reset surfaces (+0x44) or triangles with flag 0x2 force an auto reset. Walls
  * (cGroundMotion_checkWallCollisions, sphere-tree filter kOnGroundSphereMask), cRider_checkObjectCollisions() and opponents are
  * checked; rider +0x390 is blended toward mGroundNormal, the speed is capped at rider +0x2E4, and mAudioSpeed
@@ -4379,7 +4393,7 @@ void cGroundMotion::resolve()
         int idx = rider->mSurfaceType;
         tSurfData* snow = &SSXApp->Game->SurfPropCache->SurfData[idx];
         int fl;
-        if (idx == 18) {
+        if (idx == eST_Rock_WipeOut) {
             tCollideInfo info;
             (*(t4Vector*)&info.Pos) = *(t4Vector*)&rider->mPosition;
             (*(t4Vector*)&info.Direct) = vu0Normalize_13F178(*(t4Vector*)&rider->mVelocity);
@@ -4577,7 +4591,7 @@ static inline float absf_13F488(float x)
  */
 void cGroundMotion::checkWallCollisions()
 {
-    if (cRider_getControlState(((char*)mRider)) == 9)
+    if (cRider_getControlState(((char*)mRider)) == CS_Reset)
         return;
     if (!mRider->isHuman()) {
         cRider* rider = (cRider*)(((char*)mRider));
@@ -4890,11 +4904,11 @@ void sti_0013FB20(int init, int prio) __asm__("__sti__all_in_one_ai_cpp");
  * The C definition is sti_0013FB20 with an asm label.
  *
  * @param init  nonzero when constructing (g++ passes 0 for the matching destructor pass)
- * @param prio  the init priority; only 0xFFFF does anything
+ * @param prio  the init priority; only DEFAULT_INIT_PRIORITY (65535) does anything
  */
 void sti_0013FB20(int init, int prio)
 {
-    if (prio == 0xFFFF && init) {
+    if (prio == DEFAULT_INIT_PRIORITY && init) {
         D_004A5E60[0] = 1.0f;
         D_004A5E60[1] = 1.0f;
         D_004A5E60[2] = 1.0f;
@@ -5884,13 +5898,14 @@ int cRider::getSectionID()
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_isOnRaceCourse);
 #ifdef SKIP_ASM
 /**
- * Returns whether the rider is on a race course: its section id (+0x434, cRider_getSectionID) is below 17.
+ * Returns whether the rider is on a race course: its section id (+0x434, cRider_getSectionID) is below 17
+ * (kLOCATION_HUB_A, the first hub).
  *
  * On Tour's cRider::isOnRaceCourse.
  *
- * @return nonzero when the section id is below 17
+ * @return true when the section id is below 17
  */
-int cRider::isOnRaceCourse()
+bool cRider::isOnRaceCourse()
 {
     return (mGroundMaterial) < 17;
 }
@@ -5899,13 +5914,14 @@ int cRider::isOnRaceCourse()
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_isOnHalfPipeCourse);
 #ifdef SKIP_ASM
 /**
- * Returns whether the rider is on a half-pipe course: its section id (+0x434, cRider_getSectionID) is 11, 12 or 13.
+ * Returns whether the rider is on a half-pipe course: its section id (+0x434, cRider_getSectionID) is 11, 12 or 13
+ * (kLOCATION_BHP1, kLOCATION_CHP2, kLOCATION_EHP3).
  *
  * On Tour's cRider::isOnHalfPipeCourse.
  *
- * @return nonzero when the section id is 11, 12 or 13
+ * @return true when the section id is 11, 12 or 13
  */
-int cRider::isOnHalfPipeCourse()
+bool cRider::isOnHalfPipeCourse()
 {
     return (unsigned int) (mGroundMaterial - 11) < 3U;
 }
@@ -8168,7 +8184,7 @@ int cDangerMan::CalcAppliedDangerLevel(int pl)
     int n = mTrackedDangerElemNum;
     tDangerElemInfo* z = ((&mTrackedDangerElems[0]));
     for (int i = 0; i < 64 && n != 0; i++, z++) {
-        if (z->state == 2) {
+        if (z->state == keDangerElemState_Dead) {
             continue;
         }
         n--;
@@ -8436,15 +8452,15 @@ __asm__("_vt$12cHpD1_1446F8 = cPlayer_vtbl\n"
 INCLUDE_ASM("ai/control/handplantcontrol", cPlaybackMan_isRecord);
 #ifdef SKIP_ASM
 /**
- * Returns whether the playback manager's mode word (+0x70) is 3.
+ * Returns whether the playback manager's mode word (State, +0x70) is kRecord.
  *
  * cRider_updateSplit1 calls it on SSXApp->Game->PlaybackMan.
  *
- * @return 1 when the mode is 3, else 0
+ * @return true when the mode is kRecord
  */
-int cPlaybackMan::isRecord()
+bool cPlaybackMan::isRecord()
 {
-    return State == 3;
+    return State == kRecord;
 }
 #endif
 

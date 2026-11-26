@@ -1103,7 +1103,7 @@ typedef int (*MnCullFn_6298)(void*, t4Vector*, t4Vector*, const t4Matrix&);
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
 extern "C" void tModifierBlock_render(void* self);
-extern "C" int cObjectInterface_isSphereOccluded(void* v);
+extern "C" bool cObjectInterface_isSphereOccluded(void* v);
 extern "C" void* cUVScrollModifier_getTextureMat(void* self, void* m);
 
 

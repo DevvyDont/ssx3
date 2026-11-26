@@ -84,6 +84,17 @@ CHECK_OFFSET(malloc_state, max_mmapped_mem, 0x370);
 CHECK_OFFSET(malloc_state, max_total_mem, 0x374);
 CHECK_SIZE(malloc_state, 0x378);
 
+// dlmallopt's parameter numbers: dlmalloc 2.7's mallopt names and values (its source #defines them). [U]
+// cDynamicMemMan_dlmallopt sets max_fast for M_MXFAST, trim_threshold for M_TRIM_THRESHOLD, top_pad for M_TOP_PAD,
+// mmap_threshold for M_MMAP_THRESHOLD and n_mmaps_max for M_MMAP_MAX.
+enum eMallocOption {
+    M_MXFAST = 1,
+    M_TRIM_THRESHOLD = -1,
+    M_TOP_PAD = -2,
+    M_MMAP_THRESHOLD = -3,
+    M_MMAP_MAX = -4
+};
+
 struct cDynamicMemMan {
     malloc_state* MallocState;      // 0x000 [O]
     char* Heap;                     // 0x004 [O]
@@ -92,7 +103,7 @@ struct cDynamicMemMan {
 
     // Methods bound to their retail symbols by asm labels.
     void* sYSMALLOc(unsigned int nb, malloc_state* av) __asm__("cDynamicMemMan_sYSMALLOc");
-    int sYSTRIm(unsigned int topPad, malloc_state* av) __asm__("cDynamicMemMan_sYSTRIm");
+    bool sYSTRIm(unsigned int topPad, malloc_state* av) __asm__("cDynamicMemMan_sYSTRIm");
     void* dlmalloc(unsigned int bytes) __asm__("cDynamicMemMan_dlmalloc");
     void malloc_consolidate(malloc_state* av) __asm__("cDynamicMemMan_malloc_consolidate");
     void* dlrealloc(void* oldmem, unsigned int bytes) __asm__("cDynamicMemMan_dlrealloc");
@@ -104,7 +115,7 @@ struct cDynamicMemMan {
         __asm__("cDynamicMemMan_dlindependent_comalloc");
     void* iALLOc(unsigned int n, unsigned int* sizes, int opts, void** chunks) __asm__("cDynamicMemMan_iALLOc");
     void* alloc(unsigned int bytes) __asm__("cDynamicMemMan_alloc");
-    int isBlock(unsigned int addr) __asm__("cDynamicMemMan_isBlock");
+    bool isBlock(unsigned int addr) __asm__("cDynamicMemMan_isBlock");
 };
 
 CHECK_OFFSET(cDynamicMemMan, MallocState, 0x000);

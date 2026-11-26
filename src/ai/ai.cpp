@@ -569,7 +569,7 @@ void cAI::render()
 //100%
 INCLUDE_ASM("ai/ai", cAI_loadRiders);
 #ifdef SKIP_ASM
-extern "C" int cRider_isLoaded(void* self);
+extern "C" bool cRider_isLoaded(void* self);
 extern "C" void cRider_loadRider(void* self);
 
 /**
@@ -1055,7 +1055,7 @@ void cAI::initComputerActors()
 //100%
 INCLUDE_ASM("ai/ai", cAI_isAILoadedAndReady);
 #ifdef SKIP_ASM
-extern "C" int cRider_isLoaded(void* self);
+extern "C" bool cRider_isLoaded(void* self);
 
 /**
  * Tells whether every allocated rider has finished loading.
@@ -1206,7 +1206,8 @@ struct sAiObj12A340
 /**
  * Accepts or refuses an injected AI path file and, when accepted, swaps it in as the course path data.
  *
- * In BE sections 0x11-0x15, game mode 5 or game event 0xB takes only UID 1 and game mode 6 only UID 2; every
+ * In BE sections 0x11-0x15, game mode kGAMEMODE_TIMECHALLENGE or game event kGAMEEVENT_POINTS_PEAK3 takes only UID
+ * 1 and game mode kGAMEMODE_PNTSCHALLENGE only UID 2; every
  * other case refuses UIDs 1 and 2, and sections 0x16 and up refuse all files. On acceptance frees the old
  * data of the path object gPaths, loads the file into it and re-attaches each rider's path state
  * (cRider_initPath) if there is an AI.
@@ -1214,44 +1215,44 @@ struct sAiObj12A340
  * @param uiSectionID  the section ID (On Tour uiSectionID); not read, the section comes from Game->SectionMan
  * @param mode  the file's UID (On Tour uiUID); 1 and 2 are the game-mode-specific variants
  * @param data  the path file data (On Tour data)
- * @return 1 when the file was loaded, 0 when it was refused
+ * @return true when the file was loaded, false when it was refused
  */
-int cAI::swaploadInjectedPathFile(int uiSectionID, int mode, int data)
+bool cAI::swaploadInjectedPathFile(int uiSectionID, int mode, int data)
 {
     int lvl = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if ((unsigned)(lvl - 17) < 5)
     {
         signed char* newRace = (signed char*)((char*)&cBENewRaceInterface_newRace);
-        if (newRace[0x48] == 5 || newRace[0x4A] == 11)
+        if (newRace[0x48] == kGAMEMODE_TIMECHALLENGE || newRace[0x4A] == kGAMEEVENT_POINTS_PEAK3)
         {
             if (mode != 1)
-                return 0;
+                return false;
             goto ok;
         }
-        if (newRace[0x48] == 6)
+        if (newRace[0x48] == kGAMEMODE_PNTSCHALLENGE)
         {
             if (mode != 2)
-                return 0;
+                return false;
             goto ok;
         }
     }
     if (mode == 1 || mode == 2)
-        return 0;
+        return false;
 ok:
     if (lvl < 22)
     {
         cPathSys_purgePaths(gPaths);
         cPathSys_loadInjectedPaths(gPaths, data);
         if ((void*)SSXApp->Game->AI == 0)
-            return 1;
+            return true;
         for (int i = 0; i < NumberOfRidersAllocated; i++)
         {
             cRider_initPath(((char*)Riders[i]), 0);
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1595,7 +1596,7 @@ extern "C" void func_0012A998(cAI* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012AA78);
 #ifdef SKIP_ASM
-extern "C" int cRider_isSafeToDelete(void*);
+extern "C" bool cRider_isSafeToDelete(void*);
 struct sEnt_0012AA78 {
     char pad[0x18];
     cRider* rider;
@@ -1663,7 +1664,7 @@ void cAI::prepareToPurgeComputerRiders()
 //100%
 INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeComputerRiders);
 #ifdef SKIP_ASM
-extern "C" int cRider_isSafeToDelete(void*);
+extern "C" bool cRider_isSafeToDelete(void*);
 
 /**
  * Tells whether every computer rider can be deleted safely.
@@ -1718,7 +1719,7 @@ void cAI::prepareToPurgeComputerActors()
 //100%
 INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeComputerActors);
 #ifdef SKIP_ASM
-extern "C" int cRider_isSafeToDelete(void*);
+extern "C" bool cRider_isSafeToDelete(void*);
 
 /**
  * Tells whether every computer actor can be deleted safely.
@@ -2449,10 +2450,11 @@ static inline bool riderOk_12BB20(cPlayer* player)
  * Keeps an online race in step: checksums the AI, ends the race on a timer and sends the periodic sync packet.
  *
  * Does nothing unless cBENetworkInterface_networkOpt.bIsNetworkGame. Every 60 AITicks it takes cAI_syncCheckSum. In the
- * race state (AIS_Race), or AIS_PreRace while the game's state ID has the same value (3), and only for game event 0 or
- * 4 (newRace.cGameEvent, cBENewRaceInterface::cGameEvent): while EndOfRaceTimer is positive it counts down, and at 0
- * every player whose rider has not passed the finish line (mFinishTime < 0) is marked did-not-finish (mDidNotFinish =
- * 1) and finished with cRider_doFinishEvent, the replay is ended and the timer goes back to -1.
+ * race state (AIS_Race), or AIS_PreRace while the game's state ID has the same value (3), and only for game event
+ * kGAMEEVENT_RACE or kGAMEEVENT_RIVALTIME (newRace.cGameEvent, cBENewRaceInterface::cGameEvent): while EndOfRaceTimer
+ * is positive it counts down, and at 0 every player whose rider has not passed the finish line (mFinishTime < 0) is
+ * marked did-not-finish (mDidNotFinish = 1) and finished with cRider_doFinishEvent, the replay is ended and the timer
+ * goes back to -1.
  *
  * With no timer running, once a player has finished (and the game is neither ended remotely nor alone) before tick
  * 0xD32B, the timer starts at min(0xD3A4 - AITick, 7200); past tick 0xD3A3 the unfinished players are force-finished at
@@ -2476,7 +2478,7 @@ void cAI::onlineAICheck()
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char gameEvent = cBENewRaceInterface_newRace.cGameEvent;
-    if (gameEvent == 0 || gameEvent == 4) {
+    if (gameEvent == kGAMEEVENT_RACE || gameEvent == kGAMEEVENT_RIVALTIME) {
         int endTimer = EndOfRaceTimer;
         if (endTimer >= 0) {
             if (endTimer > 0) {
@@ -5087,10 +5089,11 @@ extern "C" void cRider_putAt_12F398(void* self, void* a, t4Vector* b, int n, flo
  *
  * FadePercent approaches 1 by mTimeScale * 0.025 per tick. On crossing 0.5 it picks a reset route
  * (cRider_switchToResetPath), places the rider along the path direction (cPath_getPathHeading, cRider_putAt with
- * kAID_AirCycle and 200 cm clearance, 1000 when cGameEvent (newRace.cGameEvent) is 2), calls cRider_cleanupAfterPutAt()
- * and takes boost through cRiderMetrix_evReset (which also counts the reset): 10% of the boost meter (rider + 0x2F8)
- * for an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when shouldTransition), starts a new
- * score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and requests CS_NaturalAir and MS_Air.
+ * kAID_AirCycle and 200 cm clearance, 1000 when cGameEvent (newRace.cGameEvent) is kGAMEEVENT_SUPERPIPE), calls
+ * cRider_cleanupAfterPutAt() and takes boost through cRiderMetrix_evReset (which also counts the reset): 10% of the
+ * boost meter (rider + 0x2F8) for an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when
+ * shouldTransition), starts a new score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and
+ * requests CS_NaturalAir and MS_Air.
  *
  * @param cmd  the command (On Tour const tResetCmd&); not read here
  */
@@ -5112,7 +5115,7 @@ void cResetControl::update(tResetCmd* cmd)
         cRider_switchToResetPath(mRider);
         cRider* rider = mRider;
         const t4Vector& dir = cPath_getPathHeading(rider->AIPath, rider->PathParam);
-        if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == 2)
+        if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_SUPERPIPE)
             range = 1000.0f;
         cRider_putAt_12F398(mRider, &mRider->PathPos, (t4Vector*)&dir, kAID_AirCycle, range);
         cRider_cleanupAfterPutAt(mRider, 1);

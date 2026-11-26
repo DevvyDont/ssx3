@@ -5,6 +5,8 @@
 #include "sound/ssxaudio.h"
 #include "sound/bankmanager.h"
 #include "be/beintnewrace.h"
+#include "be/bedbprofile.h"
+#include "main/gamemode.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "sound/streamsys.h"
@@ -1311,20 +1313,21 @@ extern int cGameModeMan_iCharRank[];
 extern char str_chartune[];
 
 struct sRace_28CDF8 {
-    int mode;
+    int mode;          // cGameModeMan::iHeatNum
     char pad4[0x14];
-    int tracks[8];
+    int tracks[8];     // cGameModeMan::iCharacters (eBECharacters)
 };
 
 /**
  * Starts the character tune for the podium (cGFPodiumState_gainFocus).
  *
  * Does nothing in a replay (cSSXAudio_ReplayMode), in kRADIOMODE_MOUNTAIN (mRadioModeID), unless SSXApp's GameModeMan
- * is in heat 3 (iHeatNum), or when the first entry of the rank table cGameModeMan_iRanking is 3 or more. The character
- * iCharacters[cGameModeMan_iCharRank[0]] (0-9) selects music event 10, 2, 8, 1, 5, 9, 3, 7, 4 or 6; other values do
- * nothing. It stores MusicSys.mCurrentSongNum in mSavedSongNum, starts the song "chartune" through MusicSys.mVtbl slot
- * 2 (12, the music volume control, 0), tags it kSONGTAG_CharTune (func_002B49C0), sends the event through slot 4, sets
- * the song's unk_5C (func_002B4A08) so that only forced events apply, and starts it with func_002B3C28.
+ * is in the final heat (iHeatNum cGameModeMan::kFinalHeat), or when the first entry of the rank table
+ * cGameModeMan_iRanking is 3 or more. The character iCharacters[cGameModeMan_iCharRank[0]] (kCHAR_MOBY to kCHAR_VIGGO)
+ * selects music event 10, 2, 8, 1, 5, 9, 3, 7, 4 or 6; other values do nothing. It stores MusicSys.mCurrentSongNum in
+ * mSavedSongNum, starts the song "chartune" through MusicSys.mVtbl slot 2 (12, the music volume control, 0), tags it
+ * kSONGTAG_CharTune (func_002B49C0), sends the event through slot 4, sets the song's unk_5C (func_002B4A08) so that
+ * only forced events apply, and starts it with func_002B3C28.
  */
 extern "C" void func_0028CDF8(cSSXAudio* self)
 {
@@ -1335,7 +1338,7 @@ extern "C" void func_0028CDF8(cSSXAudio* self)
         return;
     }
     sRace_28CDF8* race = (sRace_28CDF8*)SSXApp->GameModeMan;
-    if (race->mode != 3) {
+    if (race->mode != cGameModeMan::kFinalHeat) {
         return;
     }
     if (cGameModeMan_iRanking[0] >= 3) {
@@ -1343,16 +1346,16 @@ extern "C" void func_0028CDF8(cSSXAudio* self)
     }
     int track = -1;
     switch (race->tracks[cGameModeMan_iCharRank[0]]) {
-    case 0: track = 10; break;
-    case 1: track = 2; break;
-    case 2: track = 8; break;
-    case 3: track = 1; break;
-    case 4: track = 5; break;
-    case 5: track = 9; break;
-    case 6: track = 3; break;
-    case 7: track = 7; break;
-    case 8: track = 4; break;
-    case 9: track = 6; break;
+    case kCHAR_MOBY: track = 10; break;
+    case kCHAR_KAORI: track = 2; break;
+    case kCHAR_ALLEGRA: track = 8; break;
+    case kCHAR_MAC: track = 1; break;
+    case kCHAR_ZOE: track = 5; break;
+    case kCHAR_GRIFF: track = 9; break;
+    case kCHAR_ELISE: track = 3; break;
+    case kCHAR_NATE: track = 7; break;
+    case kCHAR_PSYMON: track = 4; break;
+    case kCHAR_VIGGO: track = 6; break;
     }
     if (track < 0) {
         return;

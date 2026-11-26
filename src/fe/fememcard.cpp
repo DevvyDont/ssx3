@@ -50,7 +50,7 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onUpdate);
 #ifdef SKIP_ASM
 extern char str_exclam[];
 extern "C" void cFEMemCard_onUpdate(void* self);
-extern "C" int cMCOverlayManager_isManagerDone(void* mp);
+extern "C" bool cMCOverlayManager_isManagerDone(void* mp);
 extern "C" void cUIThing_deleteAnimation(void* obj);
 
 
@@ -244,7 +244,7 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackAcknowledgeCardStatusChange)
 #ifdef SKIP_ASM
 extern int cFEStateMemCard_mStage;
 extern "C" void* cSSXApp_getMCManager(void* p);
-extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* game);
+extern "C" bool cMCOverlayManager_hasCardStatusCriticalError(void* game);
 
 /**
  * Tells the memory-card manager whether a card status change needs acknowledging during the start-up reads.
@@ -276,7 +276,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self);
 extern "C" void* cSSXApp_getMCManager(void* p);
-extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* mp);
+extern "C" bool cMCOverlayManager_hasCardStatusCriticalError(void* mp);
 extern "C" int cMCOverlayManager_GetFreeSpace(void* mp, int card);
 // cFEStateMemCard_mInstance, typed (other functions in this unit declare it as void*).
 extern cFEStateMemCard* cFEStateMemCard_mInstance_86F90 __asm__("cFEStateMemCard_mInstance");
@@ -936,7 +936,7 @@ extern "C" void cFEStateMemCard_startSettingsRead(void)
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_updateFreeSpaceCheckState);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* p);
-extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* mp);
+extern "C" bool cMCOverlayManager_hasCardStatusCriticalError(void* mp);
 extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
 extern int cFEStateMemCard_mStage;
 extern int cFEStateMemCard_mProfileFile;

@@ -149,6 +149,17 @@ CHECK_SIZE(tRiderStats, 0xAC);
 
 struct cBxReplayFrame;
 
+// Where awarded cash comes from (cRiderMetrix_evAddCash's kind). [O] On Tour's enum eRiderMetrixCashSource (evAddCash's
+// source), names and values; [U] evAddCash shows kHFX_EarnTrickPointCash, kHFX_EarnBonusCash, kHFX_EarnComboCash and
+// kHFX_EarnCollectible for 0-3 and no popup for kRMCS_Mission.
+enum eRiderMetrixCashSource {
+    kRMCS_TrickSuccess = 0,
+    kRMCS_BonusCash = 1,
+    kRMCS_ComboBonus = 2,
+    kRMCS_Collectible = 3,
+    kRMCS_Mission = 4
+};
+
 struct cRiderMetrix {
     // cRiderMetrixState
     int InitTrickIsFakie;            // 0x000 [O] (bool there)

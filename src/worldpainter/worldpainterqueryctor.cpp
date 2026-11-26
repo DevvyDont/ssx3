@@ -53,10 +53,10 @@ extern cWorldPainterQuery* cWorldPainterQuery_m_queryListStart_0410 __asm__("cWo
  * Constructs a world painter query for a region type, creates the matching query implementation and links the
  * query into the global query list.
  *
- * Kinds 0-13 get a new implementation at +0x0: tWPIGD_MusicTrigger, Mix, Ambience, Speech, Camera, Fog,
- * LightGlow, ScreenTint, SkyBox, Sun, Surface, Lighting, Weather, Danger; other kinds leave it unset. Both
- * distances (+0x8, +0xC) start at 4286578688.0, the integer 0xFF800000 (the bit pattern of -infinity)
- * converted to float. The query becomes the head of the list at cWorldPainterQuery_m_queryListStart.
+ * Kinds kWPRID_MusicTrigger to kWPRID_Danger (0-13) get a new implementation at +0x0: tWPIGD_MusicTrigger, Mix,
+ * Ambience, Speech, Camera, Fog, LightGlow, ScreenTint, SkyBox, Sun, Surface, Lighting, Weather, Danger; other kinds
+ * leave it unset. Both distances (+0x8, +0xC) start at 4286578688.0, the integer 0xFF800000 (the bit pattern of
+ * -infinity) converted to float. The query becomes the head of the list at cWorldPainterQuery_m_queryListStart.
  *
  * @param type  the region type (On Tour tWorldPainterRegionType): low byte kept as flags, the kind above it
  * @return @p self
@@ -70,46 +70,46 @@ extern "C" cWorldPainterQuery* cWorldPainterQuery_cWorldPainterQuery(cWorldPaint
     self->m_x = 4286578688.0f;
     self->m_y = 4286578688.0f;
     switch ((*(sWPQueryType*)&self->m_regionType).kind) {
-    case 0:
+    case kWPRID_MusicTrigger:
         self->m_data = (tWPInGameData*)tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger(cMemMan_alloc(0x18, str_tWPIGD_MusicTrigger, 0, 0));
         break;
-    case 1:
+    case kWPRID_Mix:
         self->m_data = (tWPInGameData*)tWPInGameData_Mix_tWPInGameData_Mix(cMemMan_alloc(0x10, str_tWPIGD_Mix, 0, 0));
         break;
-    case 2:
+    case kWPRID_Ambience:
         self->m_data = (tWPInGameData*)tWPInGameData_Ambience_tWPInGameData_Ambience(cMemMan_alloc(0x10, str_tWPIGD_Ambience, 0, 0));
         break;
-    case 3:
+    case kWPRID_Speech:
         self->m_data = (tWPInGameData*)tWPInGameData_Speech_tWPInGameData_Speech(cMemMan_alloc(0x10, str_tWPIGD_Speech, 0, 0));
         break;
-    case 4:
+    case kWPRID_Camera:
         self->m_data = (tWPInGameData*)tWPInGameData_Camera_tWPInGameData_Camera(cMemMan_alloc(0x10, str_tWPIGD_Camera, 0, 0));
         break;
-    case 5:
+    case kWPRID_Fog:
         self->m_data = (tWPInGameData*)tWPInGameData_Fog_tWPInGameData_Fog(cMemMan_alloc(0x38, str_tWPIGD_Fog, 0, 0));
         break;
-    case 6:
+    case kWPRID_LightGlow:
         self->m_data = (tWPInGameData*)tWPInGameData_LightGlow_tWPInGameData_LightGlow(cMemMan_alloc(0x40, str_tWPIGD_LightGlow, 0, 0));
         break;
-    case 7:
+    case kWPRID_ScreenTint:
         self->m_data = (tWPInGameData*)tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(cMemMan_alloc(0x38, str_tWPIGD_ScreenTint, 0, 0));
         break;
-    case 8:
+    case kWPRID_SkyBox:
         self->m_data = (tWPInGameData*)tWPInGameData_SkyBox_tWPInGameData_SkyBox(cMemMan_alloc(0x10, str_tWPIGD_SkyBox, 0, 0));
         break;
-    case 9:
+    case kWPRID_Sun:
         self->m_data = (tWPInGameData*)tWPInGameData_Sun_tWPInGameData_Sun(cMemMan_alloc(80, str_tWPIGD_Sun, 0, 0));
         break;
-    case 10:
+    case kWPRID_Surface:
         self->m_data = (tWPInGameData*)tWPInGameData_Surface_tWPInGameData_Surface(cMemMan_alloc(0x10, str_tWPIGD_Surface, 0, 0));
         break;
-    case 11:
+    case kWPRID_Lighting:
         self->m_data = (tWPInGameData*)tWPInGameData_Lighting_tWPInGameData_Lighting(cMemMan_alloc(88, str_tWPIGD_Lighting, 0, 0));
         break;
-    case 12:
+    case kWPRID_Weather:
         self->m_data = (tWPInGameData*)tWPInGameData_Weather_tWPInGameData_Weather(cMemMan_alloc(160, str_tWPIGD_Weather, 0, 0));
         break;
-    case 13:
+    case kWPRID_Danger:
         self->m_data = (tWPInGameData*)tWPInGameData_Danger_tWPInGameData_Danger(cMemMan_alloc(0x18, str_tWPIGD_Danger, 0, 0));
         break;
     }
@@ -202,7 +202,8 @@ struct sLayer_0778 {
 
 static inline int valid_0778(cWorldPainterSection* e)
 {
-    return e->m_iState == 3 && ((sLayer_0778*)e->m_pWPHeader) != 0 && ((sLayer_0778*)e->m_pWPHeader)->count > 0;
+    return e->m_iState == kWPSection_Resolved && ((sLayer_0778*)e->m_pWPHeader) != 0
+           && ((sLayer_0778*)e->m_pWPHeader)->count > 0;
 }
 
 static inline void end_0778(tWPInGameData* o)
@@ -312,12 +313,12 @@ extern "C" int cWorldPainterLayer_getQuadTreeContents(cWorldPainterQuery_lookupR
  * cWorldPainterLayer_getQuadTreeContents, which reads the leaf's second word.
  *
  * @param list  the world-painter layer (On Tour cWorldPainterLayer* pWPLayer)
- * @return the region (On Tour const tWPRegion*), or 0 when the index is -1
+ * @return the region (On Tour const tWPRegion*), or 0 when the index is cWorldPainterLayer::kNoRegion (-1)
  */
 extern "C" cWorldPainterQuery_lookupRegion_sItem* cWorldPainterQuery_lookupRegion(cWorldPainterQuery* self, cWorldPainterQuery_lookupRegion_sList* list)
 {
     int i = cWorldPainterLayer_getQuadTreeContents(list);
-    return (i != -1) ? &list->items[i] : 0;
+    return (i != cWorldPainterLayer::kNoRegion) ? &list->items[i] : 0;
 }
 #endif
 

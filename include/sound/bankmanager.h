@@ -116,8 +116,8 @@ struct cBankManager {
 
     // Methods bound to their retail symbols by asm labels.
     int BANK_Status(int bankId) __asm__("cBankManager_BANK_Status");
-    int BANK_Used(int bankId) __asm__("cBankManager_BANK_Used");
-    int BANK_Loading(int bankId) __asm__("cBankManager_BANK_Loading");
+    bool BANK_Used(int bankId) __asm__("cBankManager_BANK_Used");
+    bool BANK_Loading(int bankId) __asm__("cBankManager_BANK_Loading");
     int BANK_InUse(int idx) __asm__("cBankManager_BANK_InUse");
     int BANK_Handle(int bankId) __asm__("cBankManager_BANK_Handle");
     void BANK_SyncLoad(int i, void* id, int mainMemFlag) __asm__("cBankManager_BANK_SyncLoad");

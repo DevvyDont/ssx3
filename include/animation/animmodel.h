@@ -32,6 +32,10 @@ struct sAnimModelLod {
 
 // 0x58 bytes, one per model part (cAnimModel::parts).
 struct sAnimModelPart {
+    // The board's part id (name ours). [O] On Tour's cAnimModel::render(int lod, bool additiveBoard, bool
+    // additivePlayer); [U] retail's render passes its first flag for the part with this id, the second for the others.
+    enum { kPartBoard = 2 };
+
     int id;                     // 0x00 = the source part's signed byte at +0x52; 2 (or 1..2) picks the draw argument
     int firstBone;              // 0x04 first bone of this part (cAnimModel_applyOffset start + j; cAnimModel_getBoneSkelIndex returns firstBone + i)
     int unk_08;

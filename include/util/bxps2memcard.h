@@ -47,6 +47,12 @@
 // One sceMcGetInfo record per memory-card port (kMCMaxDevices = 2). Names: mType / mFreeClusters / mFormat after
 // libmc's sceMcGetInfo(port, slot, type, free, format); mLastError and mCardChanged after the [P] accessors that read them.
 struct tPS2MemCardDevice {
+    // mLastError codes the driver itself gives a meaning (names ours; the other sceMcSync results stay numbers). [U]
+    // ClearCardChanged resets kMcResChangedCard to 0 and Update raises the card-changed flag for it, GetLastError
+    // reports kMcResUnknown for any code it does not know, FileExistsError tests kMcResFileExists, and Update stores
+    // kMcResNotPS2Card for a card whose type is not a PS2 card's (IsInvalid tests it).
+    enum { kMcResChangedCard = -1, kMcResUnknown = -10, kMcResFileExists = -11, kMcResNotPS2Card = -10002 };
+
     int mType;                      // 0x00 [U] Update stores sceMcGetInfo's type (D_004A3938)
     int mFreeClusters;              // 0x04 [U] Update stores sceMcGetInfo's free clusters (D_004A393C);
                                     //       cPS2MemCard_GetFreeSpace1 returns it (slot 20 for the current device)
@@ -138,6 +144,10 @@ CHECK_OFFSET(tPS2MemCardFile, pad_76, 0x76);
 CHECK_SIZE(tPS2MemCardFile, 0x78);
 
 struct cPS2MemCard {
+    // The two mState values the driver's accessors name (names ours, from them; the other states stay numbers). [U]
+    // IsWriteWaiting tests kStateWriteWaiting and IsReadWaiting kStateReadWaiting.
+    enum { kStateWriteWaiting = 52, kStateReadWaiting = 53 };
+
     // --- cMemCard (base, no data) ---
     void** mVtbl;                   // 0x0000 [R] ctor stores cPS2MemCard_vtbl (cPS2MemCard); dtor stores cMemCard_vtbl (cMemCard)
     // --- cPS2MemCard ---
@@ -242,27 +252,27 @@ struct cPS2MemCard {
     void StartFileSlotWrite(const char* src, int writeBuffer, int writeSize) __asm__("cPS2MemCard_StartFileSlotWrite");
     void StartFileSlotWrite2(int fileSlot, int writeBuffer, int writeSize) __asm__("cPS2MemCard_StartFileSlotWrite2");
     void* WriteData(int buffer, int transferSize) __asm__("cPS2MemCard_WriteData__FPvii");
-    int IsWriteWaiting() __asm__("cPS2MemCard_IsWriteWaiting");
+    bool IsWriteWaiting() __asm__("cPS2MemCard_IsWriteWaiting");
     void SetWriteFailed() __asm__("cPS2MemCard_SetWriteFailed__FPv");
     void StartFileSlotRead(int fileSlot, int buffer, int transferSize) __asm__("cPS2MemCard_StartFileSlotRead");
     void* ReadData(int buffer, int transferSize) __asm__("cPS2MemCard_ReadData__FPvii");
-    int IsReadWaiting() __asm__("cPS2MemCard_IsReadWaiting");
+    bool IsReadWaiting() __asm__("cPS2MemCard_IsReadWaiting");
     void SetReadFailed() __asm__("cPS2MemCard_SetReadFailed__FPv");
-    int IsBusy() __asm__("cPS2MemCard_IsBusy");
-    int DidFormatFail() __asm__("cPS2MemCard_DidFormatFail");
-    int DidErrorOccur() __asm__("cPS2MemCard_DidErrorOccur__FPv");
-    int IsInvalid(int device) __asm__("cPS2MemCard_IsInvalid");
+    bool IsBusy() __asm__("cPS2MemCard_IsBusy");
+    bool DidFormatFail() __asm__("cPS2MemCard_DidFormatFail");
+    bool DidErrorOccur() __asm__("cPS2MemCard_DidErrorOccur__FPv");
+    bool IsInvalid(int device) __asm__("cPS2MemCard_IsInvalid");
     void* GetFreeSpace1(int device) __asm__("cPS2MemCard_GetFreeSpace1");
     void* GetFreeSpace() __asm__("cPS2MemCard_GetFreeSpace__FPv");
-    int IsAvailable(int i) __asm__("cPS2MemCard_IsAvailable");
-    int IsFormatted(int device) __asm__("cPS2MemCard_IsFormatted");
-    int CardChanged(int device) __asm__("cPS2MemCard_CardChanged");
+    bool IsAvailable(int i) __asm__("cPS2MemCard_IsAvailable");
+    bool IsFormatted(int device) __asm__("cPS2MemCard_IsFormatted");
+    bool CardChanged(int device) __asm__("cPS2MemCard_CardChanged");
     void GetStatus(int idx, unsigned short* dst) __asm__("cPS2MemCard_GetStatus");
     void* SetTitleString() __asm__("cPS2MemCard_SetTitleString__FPv");
     bool HasFileName(int fileSlot) __asm__("cPS2MemCard_HasFileName");
     void SetBrokenFile(int fileSlot) __asm__("cPS2MemCard_SetBrokenFile");
-    int IsFileSlotBroken(int fileSlot) __asm__("cPS2MemCard_IsFileSlotBroken");
-    int IsFileSlotDisabled(int fileSlot) __asm__("cPS2MemCard_IsFileSlotDisabled");
+    bool IsFileSlotBroken(int fileSlot) __asm__("cPS2MemCard_IsFileSlotBroken");
+    bool IsFileSlotDisabled(int fileSlot) __asm__("cPS2MemCard_IsFileSlotDisabled");
     void GetTitleString(int fileSlot, unsigned short* dst) __asm__("cPS2MemCard_GetTitleString");
     void CleanUp() __asm__("cPS2MemCard_CleanUp");
     void GetDeviceName(int device, unsigned short* dst, int dstLen) __asm__("cPS2MemCard_GetDeviceName");
@@ -270,7 +280,7 @@ struct cPS2MemCard {
     void GetFileTime(int fileSlot, unsigned short* dst) __asm__("cPS2MemCard_GetFileTime");
     int GetLastSavedFile() __asm__("cPS2MemCard_GetLastSavedFile");
     void SetFileSlotInfo(const char* name, int flag) __asm__("cPS2MemCard_SetFileSlotInfo");
-    int FileExistsError() __asm__("cPS2MemCard_FileExistsError");
+    bool FileExistsError() __asm__("cPS2MemCard_FileExistsError");
     void IsRemovable() __asm__("cPS2MemCard_IsRemovable");
     int SpaceRequired(int byteSize) __asm__("cPS2MemCard_SpaceRequired");
     void SpaceRequired1() __asm__("cPS2MemCard_SpaceRequired1");

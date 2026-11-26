@@ -57,7 +57,7 @@ extern "C" bool cVidEngine_ReadyVideo(void** self, int file)
 //100%
 INCLUDE_ASM("scripter/videngine", cVidEngine_PlayVideo);
 #ifdef SKIP_ASM
-extern "C" int cMoviePlayer_asyncPlay(void*);
+extern "C" bool cMoviePlayer_asyncPlay(void*);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);

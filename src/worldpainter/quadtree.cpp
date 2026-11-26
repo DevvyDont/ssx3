@@ -471,6 +471,9 @@ extern unsigned char D_00445998[];
 // Shift-JIS full-width range table: {first code, ASCII of first code} per range (digits, upper, lower case).
 extern unsigned char D_004A3890[6];
 extern unsigned char D_004A3891[5];
+// The two Shift-JIS lead bytes the converter knows (names ours): 0x81 starts the full-width punctuation (looked up in
+// D_00445998), 0x82 the full-width digits and letters (the range table).
+enum { kSJISLeadPunctuation = 0x81, kSJISLeadAlphanumeric = 0x82 };
 
 // Converts a Shift-JIS double-byte character (lead byte in the low byte) to ASCII; 0 if it has none.
 // PORT: declared earlier in the unit as char(short); defined under its own name bound to the symbol.
@@ -479,8 +482,9 @@ extern "C" unsigned char func_002C2430_impl(unsigned int code) __asm__("func_002
  * Returns the ASCII form of a Shift-JIS full-width character whose lead byte is in the low byte (the order
  * func_002C2338 produces), or 0 when it has none.
  *
- * Lead byte 0x81 (punctuation) looks the trail byte up in D_00445998 (from trail byte 0x40); lead byte 0x82 covers
- * digits (trail 0x4F-0x58), upper-case (0x60-0x79) and lower-case letters (0x81-0x9A), mapped through the range table
+ * Lead byte kSJISLeadPunctuation (0x81) looks the trail byte up in D_00445998 (from trail byte 0x40);
+ * kSJISLeadAlphanumeric (0x82) covers digits (trail 0x4F-0x58), upper-case (0x60-0x79) and lower-case letters
+ * (0x81-0x9A), mapped through the range table
  * D_004A3890 / D_004A3891 (a trail byte outside the three ranges is mapped with the digits' entry). Any other lead byte
  * gives 0. cMemCard_ShiftJISToAscii calls it per character.
  *
@@ -493,9 +497,9 @@ extern "C" unsigned char func_002C2430_impl(unsigned int code)
     int i = 0;
     unsigned char* ascii = D_004A3891;
     code &= 0xFF;
-    if (code == 129)
+    if (code == kSJISLeadPunctuation)
         return D_00445998[hi - 0x40];
-    if (code == 130) {
+    if (code == kSJISLeadAlphanumeric) {
         if (hi - 79 < 10)
             i = 0;
         else if (hi - 0x60 < 26)
@@ -843,15 +847,15 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C28F8);
 // Unit declares MEM_free / func_002C28F8 later with void return; keep the int-returning
 // signatures under asm labels. The argument passes straight through in a0.
 extern "C" int MEM_free_ret(void* p) __asm__("MEM_free");
-extern "C" int func_002C28F8_impl(void* p) __asm__("func_002C28F8");
+extern "C" bool func_002C28F8_impl(void* p) __asm__("func_002C28F8");
 
 /**
  * Frees a GameLink block with MEM_free and returns whether MEM_free returned nonzero.
  *
  * @param block  the block to free
- * @return 1 when MEM_free returned nonzero, else 0
+ * @return true when MEM_free returned nonzero
  */
-extern "C" int func_002C28F8_impl(void* block)
+extern "C" bool func_002C28F8_impl(void* block)
 {
     return MEM_free_ret(block) != 0;
 }
@@ -1198,15 +1202,15 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2D68);
 // Unit declares MEM_free / func_002C2D68 later with void return; keep the int-returning
 // signatures under asm labels. The argument passes straight through in a0.
 extern "C" int MEM_free_ret(void* p) __asm__("MEM_free");
-extern "C" int func_002C2D68_impl(void* p) __asm__("func_002C2D68");
+extern "C" bool func_002C2D68_impl(void* p) __asm__("func_002C2D68");
 
 /**
  * Frees an ISTR block with MEM_free and returns whether MEM_free returned nonzero.
  *
  * @param block  the block to free
- * @return 1 when MEM_free returned nonzero, else 0
+ * @return true when MEM_free returned nonzero
  */
-extern "C" int func_002C2D68_impl(void* block)
+extern "C" bool func_002C2D68_impl(void* block)
 {
     return MEM_free_ret(block) != 0;
 }
@@ -1769,12 +1773,12 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ClearCardChanged);
 
 /**
  * Clears the current port's card-changed flag (mCardChanged of mDevices[mDevice]) and turns a last libmc result
- * (mLastError) of -1 into 0. Card vtable slot 47.
+ * (mLastError) of kMcResChangedCard (-1) into 0. Card vtable slot 47.
  */
 void cPS2MemCard::ClearCardChanged()
 {
     mDevices[mDevice].mCardChanged = 0;
-    if (mDevices[mDevice].mLastError == -1) {
+    if (mDevices[mDevice].mLastError == tPS2MemCardDevice::kMcResChangedCard) {
         mDevices[mDevice].mLastError = 0;
     }
 }
@@ -1933,11 +1937,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsWriteWaiting);
 /**
  * Tests whether a file write is waiting for the caller.
  *
- * @return 1 when mState is 52 (0x34), else 0
+ * @return true when mState is kStateWriteWaiting (52)
  */
-int cPS2MemCard::IsWriteWaiting()
+bool cPS2MemCard::IsWriteWaiting()
 {
-    return mState == 52;
+    return mState == kStateWriteWaiting;
 }
 #endif
 
@@ -2049,11 +2053,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsReadWaiting);
 /**
  * Tests whether a file read is waiting for the caller.
  *
- * @return 1 when mState is 53 (0x35), else 0
+ * @return true when mState is kStateReadWaiting (53)
  */
-int cPS2MemCard::IsReadWaiting()
+bool cPS2MemCard::IsReadWaiting()
 {
-    return mState == 53;
+    return mState == kStateReadWaiting;
 }
 #endif
 
@@ -2508,14 +2512,14 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsBusy);
 /**
  * Tests whether the card object is in the middle of an operation.
  *
- * @return 1 when mState is not idle (0) or a sceMcGetInfo is still pending (mGetInfoPending), else 0
+ * @return true when mState is not idle (0) or a sceMcGetInfo is still pending (mGetInfoPending)
  */
-int cPS2MemCard::IsBusy()
+bool cPS2MemCard::IsBusy()
 {
     if (mState != 0 || mGetInfoPending != 0) {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2529,9 +2533,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DidFormatFail);
  * -10, -10001 and -10002 count as a failure. Virtual slot 9, declared right after Format; the test itself is not
  * specific to formatting.
  *
- * @return 1 when the last result is one of those codes, else 0
+ * @return true when the last result is one of those codes
  */
-int cPS2MemCard::DidFormatFail()
+bool cPS2MemCard::DidFormatFail()
 {
     switch (((&mDevices[0]))[mDevice].mLastError) {
     case -1:
@@ -2541,9 +2545,9 @@ int cPS2MemCard::DidFormatFail()
     case -10:
     case -10001:
     case -10002:
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2596,9 +2600,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DidErrorOccur__FPv);
  * Returns whether the current port (mDevice) has an error: cPS2MemCard_GetLastError for it is nonzero. Card vtable slot 73;
  * cPS2MemCard_Update checks it before starting a create, write or read.
  *
- * @return 1 when cPS2MemCard_GetLastError returns nonzero, else 0
+ * @return true when cPS2MemCard_GetLastError returns nonzero
  */
-int cPS2MemCard::DidErrorOccur()
+bool cPS2MemCard::DidErrorOccur()
 {
     return (cPS2MemCard_GetLastError(this, mDevice) != 0);
 }
@@ -2657,15 +2661,15 @@ extern "C" void func_002C52D8(cPS2MemCard* self)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsInvalid);
 #ifdef SKIP_ASM
 /**
- * Returns whether the last libmc result of a port (mLastError of device record mDevices[@p device]) is -10002, the code
- * cPS2MemCard_Update stores for a card that is not a PS2 memory card.
+ * Returns whether the last libmc result of a port (mLastError of device record mDevices[@p device]) is
+ * kMcResNotPS2Card (-10002), the code cPS2MemCard_Update stores for a card that is not a PS2 memory card.
  *
  * @param device  the memory-card port (0 or 1)
- * @return 1 for a non-PS2 card, else 0
+ * @return true for a non-PS2 card
  */
-int cPS2MemCard::IsInvalid(int device)
+bool cPS2MemCard::IsInvalid(int device)
 {
-    return mDevices[device].mLastError == -10002;
+    return mDevices[device].mLastError == tPS2MemCardDevice::kMcResNotPS2Card;
 }
 #endif
 
@@ -2710,9 +2714,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsAvailable);
  * card usable: 0, -1 to -5, -7 or -10001. Any other code (-6, -8 .. -10, -10002, positive values) gives 0.
  *
  * @param i  the memory-card port (0 or 1)
- * @return 1 for a usable code, else 0
+ * @return true for a usable code
  */
-int cPS2MemCard::IsAvailable(int i)
+bool cPS2MemCard::IsAvailable(int i)
 {
     switch (((&mDevices[0]))[i].mLastError) {
     case -10001:
@@ -2723,9 +2727,9 @@ int cPS2MemCard::IsAvailable(int i)
     case -2:
     case -1:
     case 0:
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2737,9 +2741,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFormatted);
  * mDevices[@p device] is nonzero.
  *
  * @param device  the memory-card port (0 or 1)
- * @return 1 when formatted, else 0
+ * @return true when formatted
  */
-int cPS2MemCard::IsFormatted(int device)
+bool cPS2MemCard::IsFormatted(int device)
 {
     return mDevices[device].mFormat != 0;
 }
@@ -2753,9 +2757,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CardChanged);
  * device], which cPS2MemCard_Update sets.
  *
  * @param device  the memory-card port (0 or 1)
- * @return 1 when the flag is set, else 0
+ * @return true when the flag is set
  */
-int cPS2MemCard::CardChanged(int device)
+bool cPS2MemCard::CardChanged(int device)
 {
     return mDevices[device].mCardChanged != 0;
 }
@@ -2917,14 +2921,14 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFileSlotBroken);
  * func_002C5570) is nonzero. Card vtable slot 65.
  *
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
- * @return 1 when either flag is set, else 0
+ * @return true when either flag is set
  */
-int cPS2MemCard::IsFileSlotBroken(int fileSlot)
+bool cPS2MemCard::IsFileSlotBroken(int fileSlot)
 {
     if (mFileSlots[fileSlot].mIconSysUnreadable != 0 || mFileSlots[fileSlot].mBroken != 0) {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2937,9 +2941,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFileSlotDisabled);
  * Tests mFileSlots[@p fileSlot].mDisabled; cPS2MemCard_GetTitleString shows such a slot as kT_MEMNoFreeSpace.
  *
  * @param fileSlot  the file slot
- * @return 1 when the flag is set, else 0
+ * @return true when the flag is set
  */
-int cPS2MemCard::IsFileSlotDisabled(int fileSlot)
+bool cPS2MemCard::IsFileSlotDisabled(int fileSlot)
 {
     return mFileSlots[fileSlot].mDisabled != 0;
 }
@@ -2953,7 +2957,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_Update);
 extern "C" int sceMcSync_i(int a0, int* a1, int* out) __asm__("sceMcSync");
 extern "C" int cPS2MemCard_GetLastError_i(void* self, int i) __asm__("cPS2MemCard_GetLastError");
 extern "C" void func_002C6280_v(void* self) __asm__("func_002C6280");
-extern "C" int func_002C63E8(cPS2MemCard* self, unsigned int a1);
+extern "C" bool func_002C63E8(cPS2MemCard* self, unsigned int a1);
 extern "C" int ASYNCFILE_getstatus(int h);
 extern "C" void ASYNCFILE_release(int h, int* a, int* b);
 extern "C" void func_002C4210(cPS2MemCard* self);
@@ -3491,9 +3495,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C63E8);
  * cPS2MemCard_Update uses it while polling: results outside this range are taken as they are.
  *
  * @param status  the result code
- * @return 1 for -9999 .. -10, else 0
+ * @return true for -9999 .. -10
  */
-extern "C" int func_002C63E8(cPS2MemCard* self, unsigned int status)
+extern "C" bool func_002C63E8(cPS2MemCard* self, unsigned int status)
 {
     return status + 9999 < 9990;
 }
@@ -3666,13 +3670,13 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_FileExistsError);
 /**
  * Tests whether the last card operation in the current port failed because the file exists.
  *
- * Compares the device record's result word (mDevices[mDevice].mLastError) with -11.
+ * Compares the device record's result word (mDevices[mDevice].mLastError) with kMcResFileExists (-11).
  *
- * @return 1 when the result is -11, else 0
+ * @return true when the result is kMcResFileExists
  */
-int cPS2MemCard::FileExistsError()
+bool cPS2MemCard::FileExistsError()
 {
-    return mDevices[mDevice].mLastError == -11;
+    return mDevices[mDevice].mLastError == tPS2MemCardDevice::kMcResFileExists;
 }
 #endif
 

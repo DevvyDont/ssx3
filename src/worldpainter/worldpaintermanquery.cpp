@@ -178,17 +178,17 @@ extern "C" void func_002C0B70_impl(int initialize, int priority) __asm__("func_0
 /**
  * Runs the static constructors of the world-painter query unit (g++'s static initialisation and destruction function).
  *
- * Only when @p initialize is nonzero and @p priority is 0xFFFF: constructs the 56 four-float colour constants
- * D_004D4638 .. D_004D49A8, zeroes this unit's kNullNameField copy (kNullNameField) and builds its 14 region-type constants
- * kWPR_MusicTrigger .. kWPR_Danger (D_004A53D8 .. D_004A5440, each tWorldPainterRegionType(n, n), n = 0 .. 13). The
- * destruction pass does nothing. func_002C1688__FPv calls it with (1, 0xFFFF).
+ * Only when @p initialize is nonzero and @p priority is DEFAULT_INIT_PRIORITY: constructs the 56 four-float colour
+ * constants D_004D4638 .. D_004D49A8, zeroes this unit's kNullNameField copy (kNullNameField) and builds its 14
+ * region-type constants kWPR_MusicTrigger .. kWPR_Danger (D_004A53D8 .. D_004A5440, each tWorldPainterRegionType(n, n),
+ * n = 0 .. 13). The destruction pass does nothing. func_002C1688__FPv calls it with (1, 0xFFFF).
  *
  * @param initialize  nonzero for the construction pass
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_002C0B70_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004D4638) sColor_2C0B70(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004D4648) sColor_2C0B70(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004D4658) sColor_2C0B70(0.12951700389385223f, 1.0f, 1.0f, 0.0f);

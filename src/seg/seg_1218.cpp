@@ -2121,7 +2121,7 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_updatePosNegSlider);
 extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
 extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
-extern "C" int cAnimSequence_updateWeight(void*, float);
+extern "C" bool cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 /**
  * Shows one of two animations at the point a signed weight selects, then advances the sequence's blend.
@@ -2165,7 +2165,7 @@ extern "C" void cAnimSequence_updateSubAnim(void*, int, float);
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
 extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
 extern "C" void cAnimSequence_setSubAnimWeight(void*, int, float);
-extern "C" int cAnimSequence_updateWeight(void*, float);
+extern "C" bool cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
 /**
@@ -2219,7 +2219,7 @@ extern "C" void cAnimSequence_updateSubAnim(void*, int, float);
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
 extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
 extern "C" void cAnimSequence_setSubAnimWeight(void*, int, float);
-extern "C" int cAnimSequence_updateWeight(void*, float);
+extern "C" bool cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
 /**
@@ -2294,7 +2294,7 @@ extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
 extern "C" void cAnimSequence_updateSubAnim(void*, int, float);
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
 extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
-extern "C" int cAnimSequence_updateWeight(void*, float);
+extern "C" bool cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
 /**

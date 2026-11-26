@@ -851,7 +851,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
-extern "C" int cPathSys_isStartpoint(void* tbl, int kind, int idx);
+extern "C" bool cPathSys_isStartpoint(void* tbl, int kind, int idx);
 extern "C" tPathStartpoint* cPathSys_getStartpoint(void* tbl, int kind, int idx);
 extern char gPaths[];
 extern char str_Map_Indicator_Icon[];

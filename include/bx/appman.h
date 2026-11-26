@@ -43,12 +43,16 @@ struct cAppMan {
     int mLock30Fps;                 // 0x034 [O] bool
     cLoadTimer LoadTimer;           // 0x038 [O]
     int LoadState;                  // 0x058 [O] volatile eLoadState
+    // The module-switch state (LoadState). [O] On Tour's cAppMan::eLoadState, names and values; [U] mainLoop starts
+    // loading the next module from kLoadIdle (-> kLoadActive), swaps it in once the execution manager's load is done
+    // (kLoadFinished -> kLoadIdle), and shuts the active module down and returns in kLoadEnd.
+    enum eLoadState { kLoadIdle = 0, kLoadActive = 1, kLoadFinished = 2, kLoadEnd = 3 };
     void** mVtbl;                   // 0x05C [R] ctor / dtor store cAppMan_vtbl (g++ 2.95 puts the vptr after the
                                     //       members)
 
     // Methods bound to their retail symbols by asm labels.
     int checkHalt() __asm__("cAppMan_checkHalt__FP7cAppMan");
-    int isLoading() __asm__("cAppMan_isLoading");
+    bool isLoading() __asm__("cAppMan_isLoading");
     void setGameRate(float fparg0) __asm__("cAppMan_setGameRate");
     int getTimerHz() __asm__("cAppMan_getTimerHz");
     float getTimerPeriod() __asm__("cAppMan_getTimerPeriod");

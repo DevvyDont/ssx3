@@ -106,7 +106,7 @@ struct cPS2ExecutionMan {
     void signalHalt() __asm__("cPS2ExecutionMan_signalHalt");
     void halt() __asm__("cPS2ExecutionMan_halt");
     void load(int module) __asm__("cPS2ExecutionMan_load");
-    int isLoadDone() __asm__("cPS2ExecutionMan_isLoadDone");
+    bool isLoadDone() __asm__("cPS2ExecutionMan_isLoadDone");
 };
 
 CHECK_OFFSET(cPS2ExecutionMan, HaltCallback, 0x00000);

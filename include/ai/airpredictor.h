@@ -49,6 +49,9 @@ struct cAirPredictor {
     t4Vector PrevTickVel;           // 0x80 [O]; [U] initLaunch = launchVel; updateFlightPath steps it
     int GuessLandSurface;           // 0x90 [O] eSurfaceType; [R] reset -1; [U] simStep stores the hit surface;
                                     //      updateFlightPath 13 on give-up; cRider_isChangeFakieAir indexes the surface cache by it
+    // SurfaceFlags when the guessed landing is not on a patch (name ours). [U] simStep stores -1 there;
+    // cAirMotion_step tests the orientable bit only on a patch.
+    enum { kNoSurfaceFlags = -1 };
     short SurfaceFlags;             // 0x94 [O]; [U] simStep (sh)
     char unk_96[0x2];               // 0x96 padding
     float TotalAirTime;             // 0x98 [O]; [R] reset 0; [U] simStep advances it, initLaunch = CurAirTime, land zeroes it;

@@ -222,13 +222,15 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_upd
  * Sets this computer rider's difficulty values for the race from its AI index (1-5) and the heat number.
  *
  * The level is the rider's getAIIndex() (1 if negative), the heat SSXApp->GameModeMan->iHeatNum. It sets
- * mPathDifficulty by updateRiderPathDifficulty(), mShouldTakeShortcuts for level 1 in heat 3 and mShouldBeRandom in
- * game modes 1, 5 and 6, then calls setIndividualRiderDifficulty() with a profile difficulty setting
- * (cBENewPlayerInterface_getDifficultyLevel). Game events 4 and 5 force mPathDifficulty to kPD_Easy and kPD_Hard. The
+ * mPathDifficulty by updateRiderPathDifficulty(), mShouldTakeShortcuts for level 1 in the final heat
+ * (cGameModeMan::kFinalHeat) and mShouldBeRandom in game modes kGAMEMODE_SLOPESTYLE, kGAMEMODE_TIMECHALLENGE and
+ * kGAMEMODE_PNTSCHALLENGE, then calls setIndividualRiderDifficulty() with a profile difficulty setting
+ * (cBENewPlayerInterface_getDifficultyLevel). Game events kGAMEEVENT_RIVALTIME and kGAMEEVENT_RIVALPOINTS force
+ * mPathDifficulty to kPD_Easy and kPD_Hard. The
  * Super AI race rule (D_005308D0 bit 2, "kT_11SuperAI") then maxes both skills, enables shortcuts, sets the rider's
  * rubber-band thresholds to -100/100 with glue level AI_GLUE_SPEEDUP (+0xE4, mGlueStrengthLevel), mPathDifficulty to
- * kPD_Hard (levels 1-2) or kPD_Medium and returns; otherwise locations 4 (+25%) and 2-3 (+10%) raise mTrickDifficulty,
- * capped at 1.
+ * kPD_Hard (levels 1-2) or kPD_Medium and returns; otherwise locations kLOCATION_ERA5 (+25%) and kLOCATION_CRA3 /
+ * kLOCATION_DRA4 (+10%) raise mTrickDifficulty, capped at 1.
  */
 void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
 {
@@ -237,22 +239,24 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
     int aiIndex = rider->getAIIndex();
     int level = ValidOr_UR(aiIndex, -1, 1);
     self->diff = cComputer_updateRiderPathDifficulty(self, level, mode);
-    if (level == 1 && mode == 3) {
+    if (level == 1 && mode == cGameModeMan::kFinalHeat) {
         self->f4 = 1;
     } else {
         self->f4 = 0;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGameMode == 1 || cBENewRaceInterface_newRace.cGameMode == 6 || cBENewRaceInterface_newRace.cGameMode == 5) {
+    if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_SLOPESTYLE
+        || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_PNTSCHALLENGE
+        || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_TIMECHALLENGE) {
         self->f8 = 1;
     } else {
         self->f8 = 0;
     }
     cComputer_setIndividualRiderDifficulty_UR(self, level, cBENewPlayerInterface_getDifficultyLevel(cBE_getInterface_Fv(cBE_getBE(), 1), cBENewRaceInterface_newRace.cGameMode == 0));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGameEvent == 4) {
+    if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME) {
         self->diff = cComputer::kPD_Easy;
-    } else if (cBENewRaceInterface_newRace.cGameEvent == 5) {
+    } else if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS) {
         self->diff = cComputer::kPD_Hard;
     }
     if ((D_005308D0[0] >> 2) & 1) {
@@ -269,9 +273,10 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
         }
         return;
     }
-    if (cBENewRaceInterface_getLocationID(iface) == 4) {
+    if (cBENewRaceInterface_getLocationID(iface) == kLOCATION_ERA5) {
         self->skillB += self->skillB * 0.25f;
-    } else if (cBENewRaceInterface_getLocationID(iface) == 2 || cBENewRaceInterface_getLocationID(iface) == 3) {
+    } else if (cBENewRaceInterface_getLocationID(iface) == kLOCATION_CRA3
+               || cBENewRaceInterface_getLocationID(iface) == kLOCATION_DRA4) {
         self->skillB += self->skillB * 0.10000000149011612f;
     }
     if (self->skillB > 1.0f) {
@@ -294,19 +299,20 @@ struct sVEntry10C9A8 { short delta; short index; int (*fn)(void*); };
 /**
  * Sets every stat of the computer's rider to one level chosen by the current location.
  *
- * Reads the location DB's field 0x54 for the current race location (cBENewRaceInterface_getLocationPeak1 on the new-race interface) and calls
- * cBEStatInterface_setStatLevel for the rider's AI index (rider vtable slot 7, getAIIndex) with level 7 when it is 2, 4
- * when it is 1 and 1 otherwise. Called from cAI_initComputerRiders for each new computer.
+ * Reads the location DB's field 0x54 (segmentID, the peak) for the current race location
+ * (cBENewRaceInterface_getLocationPeak1 on the new-race interface) and calls cBEStatInterface_setStatLevel for the
+ * rider's AI index (rider vtable slot 7, getAIIndex) with level 7 on kPEAK_3, 4 on kPEAK_2 and 1 otherwise. Called from
+ * cAI_initComputerRiders for each new computer.
  */
 void cComputer::setAttributeLevels()
 {
     void* statInterface = cBE_getInterface_Fv(cBE_getBE(), 3);
     void* newRaceInterface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_getLocationPeak1(newRaceInterface) == 2)
+    if (cBENewRaceInterface_getLocationPeak1(newRaceInterface) == kPEAK_3)
     {
         cBEStatInterface_setStatLevel(statInterface, RiderHandler.GroundMotion.mRider->getAIIndex(), 7);
     }
-    else if (cBENewRaceInterface_getLocationPeak1(newRaceInterface) == 1)
+    else if (cBENewRaceInterface_getLocationPeak1(newRaceInterface) == kPEAK_2)
     {
         cBEStatInterface_setStatLevel(statInterface, RiderHandler.GroundMotion.mRider->getAIIndex(), 4);
     }
@@ -767,12 +773,12 @@ static inline int speedLimit_10D410(int kind)
 /**
  * Scores an AI path as a route choice for this computer rider (route selection); higher is better.
  *
- * The path's flag word (+0x38) holds a shortcut bit (0), hard, medium and easy bits (1-3), a speed rule (bits
- * 4-6: 0 at most, 3 at least) and a speed (bits 7-9: 20-120 km/h). A path that fails
- * calculateDifficultyScore(), is a shortcut the rider may not take or breaks the speed rule scores 0; one
- * over 5000 from the point 796 ahead of the rider scores -1, and the rival's current path 100. Otherwise it
- * sums weighted terms (each /22): nearness, the speed-rule value, how few other computer riders use the path,
- * the difficulty score, the shortcut bonus and, with mShouldBeRandom, a random term.
+ * The path's flag word (+0x38) holds a shortcut bit (0), hard, medium and easy bits (1-3), a speed rule (bits 4-6,
+ * cAIPath::tPathSpeed: PS_SpeedLimit at most, PS_SpeedMinimum at least) and a speed (bits 7-9: 20-120 km/h). A path
+ * that fails calculateDifficultyScore(), is a shortcut the rider may not take or breaks the speed rule scores 0; one
+ * over 5000 from the point 796 ahead of the rider scores -1, and the rival's current path 100. Otherwise it sums
+ * weighted terms (each /22): nearness, the speed-rule value, how few other computer riders use the path, the difficulty
+ * score, the shortcut bonus and, with mShouldBeRandom, a random term.
  *
  * @param tgt  the candidate path (On Tour cAIPath* CurrentPath)
  * @return the score: 0 unusable, -1 too far, 100 the rival's path, otherwise the weighted sum
@@ -799,11 +805,11 @@ float cComputer::scorePath(cAIPath* tgt)
         return 0.0f;
     }
     float speed = vu0Length_10D410(*(&RiderHandler.GroundMotion.mRider->mVelocity)) * 0.035999998450279236f;
-    if (lvl == 0) {
+    if (lvl == cAIPath::PS_SpeedLimit) {
         if ((float)speedLimit_10D410(kind) < speed) {
             return 0.0f;
         }
-    } else if (lvl == 3) {
+    } else if (lvl == cAIPath::PS_SpeedMinimum) {
         if (speed < (float)speedLimit_10D410(kind)) {
             return 0.0f;
         }
@@ -1222,7 +1228,7 @@ float cComputer::setupWarp()
     if (rival == 0) return 1.0f;
     cRider* rider = RiderHandler.GroundMotion.mRider;
     if (rider->mGlueStrengthLevel == AI_GLUE_NONE) return 1.0f;
-    if (cBENewRaceInterface_newRace.cGamePath == 2) return 1.0f;
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) return 1.0f;
     if (rider->mDistToFinish < 50000.0f) return 1.0f;
     float warpVal;
     float relDist = cRider_getDistanceLeft((void*)rival) - RiderHandler.GroundMotion.mRider->mDistToFinish;
@@ -1484,7 +1490,8 @@ extern "C" void cRiderMetrix_evCheckpoint(void*, int);
  * Handles the rider passing a path checkpoint: scores it in checkpoint events.
  *
  * Copies +0xEC into +0xE8 first. Then, unless the rules word D_005308D0 has bit 9 set (On Tour
- * cBERules::getNoCheckPoints) and only while the new-race game event (newRace.cGameEvent) is 1, calls cRiderMetrix_evCheckpoint
+ * cBERules::getNoCheckPoints) and only while the new-race game event (newRace.cGameEvent) is kGAMEEVENT_SLOPESTYLE,
+ * calls cRiderMetrix_evCheckpoint
  * (On Tour cRiderMetrix::evCheckpoint) on the rider's metrix (+0x790) with the checkpoint's first word (On Tour
  * tPathCheckpoint::TimeBonusSec).
  *
@@ -1496,7 +1503,7 @@ void cRider::flagEventPathCheckpoint(int* checkpoint)
     if (((D_005308D0[0] >> 9) & 1) == 0)
     {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (cBENewRaceInterface_newRace.cGameEvent == 1)
+        if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_SLOPESTYLE)
         {
             cRiderMetrix_evCheckpoint(mMetrix, *checkpoint);
         }
@@ -1520,9 +1527,10 @@ static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMod
 /**
  * Handles a track-path event the rider reached: the finish line ends its race, a chapter marker tags the replay.
  *
- * A finish event (PE_FinishLine) counts when the game mode (cBENewRaceInterface_newRace.cGameMode) is 0-3, or 5/6 with
- * the game-mode manager's +0x98 set (On Tour isLastHeat), or the location is 1 or 5-13, or a game path is set; then a
- * rider not yet past the line (mFinishTime < 0) gets cRider_doFinishEvent. A chapter event (PE_Chapter) calls
+ * A finish event (PE_FinishLine) counts when the game mode (cBENewRaceInterface_newRace.cGameMode) is kGAMEMODE_RACE to
+ * kGAMEMODE_HALFPIPE, or kGAMEMODE_TIMECHALLENGE / kGAMEMODE_PNTSCHALLENGE with the game-mode manager's +0x98 set (On
+ * Tour isLastHeat), or the location is kLOCATION_BRA2 or kLOCATION_ASS1 to kLOCATION_EHP3, or a game path is set; then
+ * a rider not yet past the line (mFinishTime < 0) gets cRider_doFinishEvent. A chapter event (PE_Chapter) calls
  * cReplay_eventChapter on the game's replay with the rider's id (cBeing vtable slot 7) and the event's Arg.
  *
  * @p isPrev and @p isCur (On Tour isPrev/isCur) are not read.
@@ -1535,13 +1543,16 @@ void cRider::flagEventPathEvent(tPathEventNode* pathEvent, int isPrev, int isCur
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cGameModeMan* gameModeMan = SSXApp->GameModeMan;
-    int mode = *cBENewRaceInterface_getLocation(iface);
+    int location = *cBENewRaceInterface_getLocation(iface);
     int shouldTriggerFinishLine = 0;
-    if (state_0010E5D8() == 0 || state_0010E5D8() == 1 || state_0010E5D8() == 3 || state_0010E5D8() == 2
-        || (state_0010E5D8() == 5 && gameModeMan->bIsLastHeat != 0)
-        || (state_0010E5D8() == 6 && gameModeMan->bIsLastHeat != 0)
-        || mode == 5 || mode == 6 || mode == 7 || mode == 8 || mode == 9
-        || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
+    if (state_0010E5D8() == kGAMEMODE_RACE || state_0010E5D8() == kGAMEMODE_SLOPESTYLE
+        || state_0010E5D8() == kGAMEMODE_HALFPIPE || state_0010E5D8() == kGAMEMODE_BIGAIR
+        || (state_0010E5D8() == kGAMEMODE_TIMECHALLENGE && gameModeMan->bIsLastHeat != 0)
+        || (state_0010E5D8() == kGAMEMODE_PNTSCHALLENGE && gameModeMan->bIsLastHeat != 0)
+        || location == kLOCATION_ASS1 || location == kLOCATION_DSS2 || location == kLOCATION_ESS3
+        || location == kLOCATION_ABA1 || location == kLOCATION_CBA2 || location == kLOCATION_EBA3
+        || location == kLOCATION_BHP1 || location == kLOCATION_CHP2 || location == kLOCATION_EHP3
+        || location == kLOCATION_BRA2
         || cBENewRaceInterface_newRace.cGamePath != 0)
         shouldTriggerFinishLine = 1;
     if (pathEvent->Type == PE_FinishLine && shouldTriggerFinishLine != 0)
@@ -2159,7 +2170,7 @@ INCLUDE_ASM("ai/computer", cAI_RefreshGroupAI);
 struct sEnt_0010F3B8 { int vis; int val; float dist; int c; int d; int e; int f; int g; int h; };
 struct sRider_0010F3B8 { sEnt_0010F3B8 ent[6]; char pad[0x10]; int fE8; char pad2[0x4D8 - 0xEC]; float f4D8; };
 struct sAI_0010F3B8 { char pad[0x28]; sRider_0010F3B8* riders[20]; int count; };
-extern "C" int cRider_isLoaded(void*);
+extern "C" bool cRider_isLoaded(void*);
 float cRider_getDistanceLeft(void* self);
 
 // PORT: the unit declares this as returning void*; it returns nothing.

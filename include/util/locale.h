@@ -84,8 +84,11 @@ public:
                                     //       entries 0-3 (cLocaleFile_loadFile into a 0x14-byte "LocaleFile"),
                                     //       loadFE / loadOV add 4-19, deleteFile / deleteAllFiles free them,
                                     //       getStringByHash / getStringByIndex search all 20
+    // Which string set is loaded (mModule; names ours). [R] the ctor stores 0; [U] loadFE stores 1 and loadOV 2, and
+    // setLanguage reloads the front-end set (loadFE) for 1, else the in-game set (loadOV).
+    enum eModule { kModuleNone = 0, kModuleFrontEnd = 1, kModuleInGame = 2 };
     signed char mModule;            // 0x058 [O] char; [R] 0; [U] loadFE sets 1, loadOV 2; setLanguage reloads the
-                                    //       front-end set when it is 1, else the in-game set
+                                    //       front-end set when it is 1, else the in-game set (eModule)
     char unk_059[0x1];              // 0x059 padding
     unsigned short TempString[50];  // 0x05A [O]; [U] getStringByHash's fallback: sprintf2 writes " " here and returns
                                     //       it

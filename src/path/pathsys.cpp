@@ -158,22 +158,22 @@ INCLUDE_ASM("path/pathsys", cPathSys_isStartpoint);
  * Reports whether the path data has a startpoint of a given type and id.
  *
  * Scans the startpoints (count and 0x28-byte entries) for one whose type (+0x4) equals @p type and id (+0x0) equals
- * @p startpointId. The map screen uses it with type 2 to list the track's sessions.
+ * @p startpointId. The map screen uses it with kPATH_START_Session to list the track's sessions.
  *
- * @param type  the startpoint type (On Tour tPathStartType)
+ * @param type  the startpoint type (tPathStartType)
  * @param startpointId  the startpoint id (a session or rider index)
- * @return 1 if such a startpoint exists, else 0
+ * @return true if such a startpoint exists
  */
-int cPathSys::isStartpoint(int type, int startpointId)
+bool cPathSys::isStartpoint(int type, int startpointId)
 {
     int i;
     int count = NumStartpoints;
     for (i = 0; i < count; i++) {
         if (Startpoints[i].Type == type && Startpoints[i].Arg == startpointId) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -288,9 +288,9 @@ static inline float pathLen(const sPathVec3& v)
 /**
  * Finds the session startpoint nearest a position, for the map screen's initial selection.
  *
- * Among the startpoints of type 2 with a non-zero id, keeps those that the mission interface (BE interface 10,
- * cBEMissionInterface_isSessionPoint) accepts for the current location (the section manager's +0x1BC) and returns the id of the
- * closest one; the search starts at a distance of 1e7. Returns -1 when none qualifies.
+ * Among the startpoints of type kPATH_START_Session with a non-zero id, keeps those that the mission interface (BE
+ * interface 10, cBEMissionInterface_isSessionPoint) accepts for the current location (the section manager's +0x1BC) and
+ * returns the id of the closest one; the search starts at a distance of 1e7. Returns -1 when none qualifies.
  *
  * @param list  the path system (the startpoint count +0x0 and array +0x4 come first)
  * @param pos   the position to measure from (the rider's)
@@ -302,7 +302,7 @@ extern "C" int cPathSys_getNearestSessionPoint(sPathNearList* list, sPathVec3* p
     float best = 10000000.0f;
     int bestId = -1;
     for (i = 0; i < list->count; i++) {
-        if (list->entries[i].type == 2 && list->entries[i].id != 0) {
+        if (list->entries[i].type == kPATH_START_Session && list->entries[i].id != 0) {
             if (cBEMissionInterface_isSessionPoint(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
                               SSXApp->Game->SectionMan->mBELocationID) != 0) {
                 sPathVec3 difference = list->entries[i].pos - *pos;
@@ -597,11 +597,11 @@ extern "C" void func_0026BAE8_init(int initialize, int priority) __asm__("func_0
  * 0.8), and gives the key D_004A5158 -1 in both its fields. func_0026C438 runs it with (1, 0xFFFF).
  *
  * @param initialize  nonzero to build the constants
- * @param priority  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ * @param priority  initialisation priority; nothing happens unless it is DEFAULT_INIT_PRIORITY
  */
 extern "C" void func_0026BAE8_init(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004D2FB8) sV4_BAE8(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004D2FC8) sV4_BAE8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004D2FD8) sV4_BAE8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);

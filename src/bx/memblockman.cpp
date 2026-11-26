@@ -1378,9 +1378,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_isLoadDone);
 /**
  * Returns whether the loader thread has finished its job (the pending job at +0x14048 is null).
  *
- * @return 1 when no job is pending, else 0
+ * @return true when no job is pending
  */
-int cPS2ExecutionMan::isLoadDone()
+bool cPS2ExecutionMan::isLoadDone()
 {
     return (int)mpLoadModule == 0;
 }

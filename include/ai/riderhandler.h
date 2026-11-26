@@ -100,7 +100,7 @@ struct cGroundMotion {
     float getBoostForce(tSurfData* snow) __asm__("cGroundMotion_getBoostForce");
     float getSlipForce(tSurfData* cfg, float forwardVel) __asm__("cGroundMotion_getSlipForce");
     float getDigForce(float* snow, float dv, float sv, float lean) __asm__("cGroundMotion_getDigForce");
-    int setupGroundVectors(tIntersectInfo* out, float* dist) __asm__("cGroundMotion_setupGroundVectors");
+    bool setupGroundVectors(tIntersectInfo* out, float* dist) __asm__("cGroundMotion_setupGroundVectors");
     void resolve() __asm__("cGroundMotion_resolve");
     void loseFocus() __asm__("cGroundMotion_loseFocus");
     void checkWallCollisions() __asm__("cGroundMotion_checkWallCollisions");
@@ -129,7 +129,7 @@ struct cAirMotion {
     float intersectBoard(tIntersectInfo* hit) __asm__("cAirMotion_intersectBoard");
     void chooseFakieLandAnim(float normSpeed) __asm__("cAirMotion_chooseFakieLandAnim");
     void chooseLandAnim(float normSpeed) __asm__("cAirMotion_chooseLandAnim");
-    int checkTerrainCollisions(t4Vector* outp) __asm__("cAirMotion_checkTerrainCollisions");
+    bool checkTerrainCollisions(t4Vector* outp) __asm__("cAirMotion_checkTerrainCollisions");
 };
 
 CHECK_OFFSET(cAirMotion, IsLandVelAlign, 0x00);

@@ -7,6 +7,7 @@
 #include "render/2drender.h"
 #include "ui/uithing.h"
 #include "util/menusys.h"
+#include "ui/uiinput.h"
 #include "input/input.h"
 #include "input/inputpad.h"
 #include "render/ps2graphicsman.h"
@@ -67,24 +68,24 @@ INCLUDE_ASM("util/menu", cMenuItem_input);
 extern "C" int cMenuItem_getKey(void** self);
 
 /**
- * Returns the base menu navigation for the current key (cMenuItem_getKey): key 8 (Back) gives 1 (pop this menu), 7
- * (Cancel) gives 2 (exit all menus), 0 (Up) gives 4 (previous item), 1 (Down) gives 3 (next item), anything else 0.
+ * Returns the base menu navigation for the current key (cMenuItem_getKey): Back pops this menu, Cancel exits all
+ * menus, Up moves to the previous item and Down to the next, anything else gives MIR_Null.
  *
- * @return the navigation result (0 none, 1 pop menu, 2 exit menus, 3 next item, 4 previous item)
+ * @return the navigation result (tMIR: MIR_Null, MIR_PopMenu, MIR_ExitMenu, MIR_NextItem or MIR_PrevItem)
  */
 int cMenuItem::input()
 {
     switch (cMenuItem_getKey((void**)this)) {
-    case 8:
-        return 1;
-    case 7:
-        return 2;
-    case 0:
-        return 4;
-    case 1:
-        return 3;
+    case kMenuKeyBack:
+        return MIR_PopMenu;
+    case kMenuKeyCancel:
+        return MIR_ExitMenu;
+    case kMenuKeyUp:
+        return MIR_PrevItem;
+    case kMenuKeyDown:
+        return MIR_NextItem;
     }
-    return 0;
+    return MIR_Null;
 }
 #endif
 
@@ -714,10 +715,11 @@ extern "C" void cMenu_prevFocus(cMenu* self);
 /**
  * Runs one frame of menu input.
  *
- * Calls cMenu_checkFocus, then the focus item's input (virtual slot 2 of the item at Items[FocusItem]). Result 3 moves
- * the focus down (cMenu_nextFocus) and 4 up (cMenu_prevFocus), both returning 0; any other result is returned.
+ * Calls cMenu_checkFocus, then the focus item's input (virtual slot 2 of the item at Items[FocusItem]). MIR_NextItem
+ * moves the focus down (cMenu_nextFocus) and MIR_PrevItem up (cMenu_prevFocus), both returning MIR_Null; any other
+ * result is returned.
  *
- * @return the focus item's input result, or 0 when the focus moved
+ * @return the focus item's input result (tMIR), or MIR_Null when the focus moved
  */
 int cMenu::input()
 {
@@ -725,12 +727,12 @@ int cMenu::input()
     cMenu_input_cItem* item = (cMenu_input_cItem*)Items[FocusItem];
     int inputResult = item->input();
     switch (inputResult) {
-    case 3:
+    case MIR_NextItem:
         nextFocus();
-        return 0;
-    case 4:
+        return MIR_Null;
+    case MIR_PrevItem:
         prevFocus();
-        return 0;
+        return MIR_Null;
     }
     return inputResult;
 }
@@ -1618,11 +1620,11 @@ static inline int padHasButtons(cInput* input)
  * Reads this frame's menu key and lets the top menu handle it; pops one menu or all of them as the menu asks.
  *
  * Does nothing with no menu open (MenuDepth is 0) or no pad (Input->Pad is 0 or has no buttons). Stores the pad's menu
- * key (cInput_getValue 61) in Key and sets VKey and AsciiKey to -1. When the pad
+ * key (cInput_getValue 61) in Key and sets VKey and AsciiKey to -1 (kNoKey). When the pad
  * has no key (-1) and a USB keyboard exists (Keyboard), func_00266BA8 reads its key into VKey and AsciiKey: an ASCII
- * value below 0x20 becomes -1, and the virtual keys up (38), down (40), left (37), right (39), insert (45), delete
- * (46), enter (13) and escape (27) become menu keys 0, 1, 2, 3, 9, 10, 6 and 7. Then calls the top menu's vtable slot 2
- * (input): result 1 pops one menu (cMenuSys_popMenu), 2 pops until none is left.
+ * value below 0x20 becomes -1, and the virtual keys up, down, left, right, insert, delete, enter and escape become the
+ * menu keys up, down, left, right, Opt1, Opt2, select and cancel. Then calls the top menu's vtable slot 2 (input):
+ * MIR_PopMenu pops one menu (cMenuSys_popMenu), MIR_ExitMenu pops until none is left.
  */
 extern "C" void cMenuSys_input(cMenuSys* self)
 {
@@ -1635,32 +1637,32 @@ extern "C" void cMenuSys_input(cMenuSys* self)
     int input = (int)cInput_getValue_f(self->Input, 61);
     int* key = &self->VKey;
     int* chr = &self->AsciiKey;
-    *key = -1;
-    *chr = -1;
+    *key = cMenuSys::kNoKey;
+    *chr = cMenuSys::kNoKey;
     self->Key = input;
-    if (input == -1 && Keyboard != 0 && func_00266BA8(Keyboard, 0, key, chr) != 0) {
+    if (input == cMenuSys::kNoKey && Keyboard != 0 && func_00266BA8(Keyboard, 0, key, chr) != 0) {
         if (self->AsciiKey < 0x20) {
             self->AsciiKey = input;
         }
         switch (self->VKey) {
-        case 38: self->Key = 0; break;
-        case 40: self->Key = 1; break;
-        case 37: self->Key = 2; break;
-        case 39: self->Key = 3; break;
-        case 45: self->Key = 9; break;
-        case 46: self->Key = 10; break;
-        case 13: self->Key = 6; break;
-        case 27: self->Key = 7; break;
+        case kVK_Up: self->Key = kMenuKeyUp; break;
+        case kVK_Down: self->Key = kMenuKeyDown; break;
+        case kVK_Left: self->Key = kMenuKeyLeft; break;
+        case kVK_Right: self->Key = kMenuKeyRight; break;
+        case kVK_Insert: self->Key = kMenuKeyOpt1; break;
+        case kVK_Delete: self->Key = kMenuKeyOpt2; break;
+        case kVK_Return: self->Key = kMenuKeySelect; break;
+        case kVK_Escape: self->Key = kMenuKeyCancel; break;
         }
     }
     cMenu* menu = self->MenuStack[self->MenuDepth - 1];
     // cMenu entry 2: input
     sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)menu->mVtbl;
     switch (vt[2].fn(vthis(menu, vt[2]))) {
-    case 1:
+    case MIR_PopMenu:
         self->popMenu();
         break;
-    case 2:
+    case MIR_ExitMenu:
         while (self->MenuDepth != 0) {
             self->popMenu();
         }
@@ -1783,14 +1785,14 @@ INCLUDE_ASM("util/menu", cMenuSys_getLeftShift);
 // PORT: cInput_getValue is declared returning void* in this unit; this caller reads a float result ($f0).
 float cInput_getValue_f(int, int) __asm__("cInput_getValue");
 // PORT: the unit declares cMenuSys_getLeftShift as void*(int); the body takes the object pointer.
-int cMenuSys_getLeftShift_impl(void* self) __asm__("cMenuSys_getLeftShift");
+bool cMenuSys_getLeftShift_impl(void* self) __asm__("cMenuSys_getLeftShift");
 
 /**
  * Tells whether the menu's left-shift key is held: cInput_getValue on the cInput at +0x5C, value 66, is not 0.
  *
- * @return 1 while held, else 0
+ * @return true while held
  */
-int cMenuSys_getLeftShift_impl(void* vself)
+bool cMenuSys_getLeftShift_impl(void* vself)
 {
     cMenuSys* self = (cMenuSys*)vself;
     return cInput_getValue_f((int)self->Input, 66) != 0.0f;
@@ -1803,14 +1805,14 @@ INCLUDE_ASM("util/menu", cMenuSys_getRightShift);
 // PORT: cInput_getValue is declared returning void* in this unit; this caller reads a float result ($f0).
 float cInput_getValue_f(int, int) __asm__("cInput_getValue");
 // PORT: the unit declares cMenuSys_getRightShift as void*(int); the body takes the object pointer.
-int cMenuSys_getRightShift_impl(void* self) __asm__("cMenuSys_getRightShift");
+bool cMenuSys_getRightShift_impl(void* self) __asm__("cMenuSys_getRightShift");
 
 /**
  * Tells whether the menu's right-shift key is held: cInput_getValue on the cInput at +0x5C, value 67, is not 0.
  *
- * @return 1 while held, else 0
+ * @return true while held
  */
-int cMenuSys_getRightShift_impl(void* vself)
+bool cMenuSys_getRightShift_impl(void* vself)
 {
     cMenuSys* self = (cMenuSys*)vself;
     return cInput_getValue_f((int)self->Input, 67) != 0.0f;
@@ -2001,7 +2003,7 @@ public:
  * Handles input for an on/off item: toggles its flag on select, or on left/right when it has both state texts.
  *
  * Runs the base item input (cMenuItem_input) first. Unless the item is locked (cMenuItem_isLocked) or the base input
- * returned nonzero, a key of 6 (select), or 2/3 (left/right) when both the on (+0x18) and off (+0x1C) texts are set,
+ * returned nonzero, the select key, or left/right when both the on (+0x18) and off (+0x1C) texts are set,
  * flips bit 0 of the int at the flag pointer (+0x20) and calls the menu's vtable slot 4 (onChange) with the item.
  *
  * @return the base input's result
@@ -2010,7 +2012,9 @@ extern "C" int cBoolMenuItem_input(void** self)
 {
     int baseResult = ((cMenuItem*)self)->input();
     if (((cMenuItem*)self)->isLocked() == 0 && baseResult == 0) {
-        if ((self[6] != 0 && self[7] != 0 && (cMenuItem_getKey(self) == 2 || cMenuItem_getKey(self) == 3)) || cMenuItem_getKey(self) == 6) {
+        if ((self[6] != 0 && self[7] != 0
+             && (cMenuItem_getKey(self) == kMenuKeyLeft || cMenuItem_getKey(self) == kMenuKeyRight))
+            || cMenuItem_getKey(self) == kMenuKeySelect) {
             *(int*)self[8] ^= 1;
             ((cBoolMenuItem_input_cMenu*)self[0])->onChange(self);
         }
@@ -2204,11 +2208,11 @@ static inline void notifyChange(cEnumMenuItem* self)
  * Handles input for a list-choice item: left steps the int to the previous table value, right to the next (both wrap);
  * select calls the menu's onCommand.
  *
- * Runs the base item input (cMenuItem_input); a locked item or a nonzero base result returns that result. Key 6 (select)
- * returns the menu's vtable slot 3 (onCommand) with (item, 0). Otherwise it finds the current value (*(+0x20)) in the
- * table (+0x1C, count +0x18): keys 2 or 0 pick the previous entry and 3 or 1 the next, modulo the count; when the value
- * is not in the table, 2/0 pick the first entry and 3/1 the last. Each change calls the menu's slot 4 (onChange). (Keys
- * 0 and 1 never get here: the base input already returned for them.)
+ * Runs the base item input (cMenuItem_input); a locked item or a nonzero base result returns that result. The select
+ * key returns the menu's vtable slot 3 (onCommand) with (item, 0). Otherwise it finds the current value (*(+0x20)) in
+ * the table (+0x1C, count +0x18): left or up picks the previous entry and right or down the next, modulo the count;
+ * when the value is not in the table, left/up pick the first entry and right/down the last. Each change calls the
+ * menu's slot 4 (onChange). (Up and down never get here: the base input already returned for them.)
  *
  * @return the base input's result, or onCommand's on select
  */
@@ -2222,7 +2226,7 @@ int cEnumMenuItem::input()
     if (result != 0) {
         return result;
     }
-    if (cMenuItem_getKey((void**)self) == 6) {
+    if (cMenuItem_getKey((void**)self) == kMenuKeySelect) {
         sMenuCommandEntry* vt = (sMenuCommandEntry*)self->Menu->mVtbl;
         result = vt[3].fn(vthis(self->Menu, vt[3]), self, 0);
     } else {
@@ -2230,20 +2234,22 @@ int cEnumMenuItem::input()
     int i = 0;
     for (;;) {
         if (i == n) {
-            if (cMenuItem_getKey((void**)self) == 2 || cMenuItem_getKey((void**)self) == 0) {
+            if (cMenuItem_getKey((void**)self) == kMenuKeyLeft || cMenuItem_getKey((void**)self) == kMenuKeyUp) {
                 *self->Enum = self->Tags[0].Value;
                 notifyChange(self);
-            } else if (cMenuItem_getKey((void**)self) == 3 || cMenuItem_getKey((void**)self) == 1) {
+            } else if (cMenuItem_getKey((void**)self) == kMenuKeyRight
+                       || cMenuItem_getKey((void**)self) == kMenuKeyDown) {
                 *self->Enum = self->Tags[self->NumTags - 1].Value;
                 notifyChange(self);
             }
             goto done;
         }
         if (*self->Enum == self->Tags[i].Value) {
-            if (cMenuItem_getKey((void**)self) == 2 || cMenuItem_getKey((void**)self) == 0) {
+            if (cMenuItem_getKey((void**)self) == kMenuKeyLeft || cMenuItem_getKey((void**)self) == kMenuKeyUp) {
                 *self->Enum = self->Tags[(i + self->NumTags - 1) % self->NumTags].Value;
                 notifyChange(self);
-            } else if (cMenuItem_getKey((void**)self) == 3 || cMenuItem_getKey((void**)self) == 1) {
+            } else if (cMenuItem_getKey((void**)self) == kMenuKeyRight
+                       || cMenuItem_getKey((void**)self) == kMenuKeyDown) {
                 *self->Enum = self->Tags[(i + 1) % self->NumTags].Value;
                 notifyChange(self);
             }
@@ -2357,8 +2363,8 @@ extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item);
 /**
  * Handles input for a sub-menu item: the select command pushes the item's sub-menu onto the menu system.
  *
- * When the item is not locked, the base navigation result is 0 and the menu system's current command is 6
- * (select; Enter on a USB keyboard), it pushes the sub-menu (+0x18) onto Menu->MenuSys with cMenuSys_pushMenu,
+ * When the item is not locked, the base navigation result is 0 and the menu system's current command is
+ * kMenuKeySelect (Enter on a USB keyboard), it pushes the sub-menu (+0x18) onto Menu->MenuSys with cMenuSys_pushMenu,
  * which takes focus from the current menu.
  *
  * @return the base navigation result from cMenuItem_input (tMIR: 0 none, 1 close this menu, 2 close all menus,
@@ -2367,7 +2373,7 @@ extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item);
 int cSubMenuItem::input()
 {
     int result = ((cMenuItem*)this)->input();
-    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == 6) {
+    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == kMenuKeySelect) {
         Menu->MenuSys->pushMenu((cMenu*)(Sub));
     }
     return result;
@@ -2455,7 +2461,7 @@ extern "C" int cMenuItem_getKey(void** self);
 extern "C" void cMenuSys_popMenu(cMenuSys* stack);
 
 /**
- * Handles input for a "back" item: on select (key 6), unless locked or already handled by the base input
+ * Handles input for a "back" item: on select (kMenuKeySelect), unless locked or already handled by the base input
  * (cMenuItem_input), closes the top menu (cMenuSys_popMenu on Menu->MenuSys).
  *
  * @return the base input's result
@@ -2463,7 +2469,7 @@ extern "C" void cMenuSys_popMenu(cMenuSys* stack);
 int cPopMenuItem::input()
 {
     int result = ((cMenuItem*)this)->input();
-    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == 6) {
+    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == kMenuKeySelect) {
         Menu->MenuSys->popMenu();
     }
     return result;
@@ -2623,15 +2629,16 @@ extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
 /**
- * Handles input for a command item: on select (key 6), unless locked or handled by the base input (cMenuItem_input),
- * returns the menu's vtable slot 3 (onCommand) called with the item and its argument (+0x1C).
+ * Handles input for a command item: on select (kMenuKeySelect), unless locked or handled by the base input
+ * (cMenuItem_input), returns the menu's vtable slot 3 (onCommand) called with the item and its argument (+0x1C).
  *
  * @return the base input's result, or onCommand's
  */
 int cCommandMenuItem::input()
 {
     int baseResult = ((cMenuItem*)this)->input();
-    if (((cMenuItem*)this)->isLocked() == 0 && baseResult == 0 && cMenuItem_getKey((void**)this) == 6) {
+    if (((cMenuItem*)this)->isLocked() == 0 && baseResult == 0
+        && cMenuItem_getKey((void**)this) == kMenuKeySelect) {
         baseResult = (*(cCommandMenuItem_input_cMenu**)this)->onCommand(this, (void*)CmdArg);
     }
     return baseResult;
@@ -2758,15 +2765,15 @@ extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
 /**
- * Handles input for a callback item: on select (key 6), unless locked or handled by the base input (cMenuItem_input),
- * calls the function at +0x18 with no arguments.
+ * Handles input for a callback item: on select (kMenuKeySelect), unless locked or handled by the base input
+ * (cMenuItem_input), calls the function at +0x18 with no arguments.
  *
  * @return the base input's result
  */
 int cCallbackMenuItem::input()
 {
     int result = ((cMenuItem*)this)->input();
-    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == 6) {
+    if (((cMenuItem*)this)->isLocked() == 0 && result == 0 && cMenuItem_getKey((void**)this) == kMenuKeySelect) {
         (Callback)();
     }
     return result;
@@ -4029,16 +4036,17 @@ static inline void stepChar_E488(char* c, int step)
 /**
  * Handles input for a text-entry item: moves the cursor, cycles, inserts and deletes characters, and takes typed keys.
  *
- * Only when the base input (cMenuItem_input) returns 0. With len the text's length, keys 2/3 move the cursor (+0x28)
- * left/right modulo min(len + 1, 15); keys 4/5 step the character under the cursor down/up until it is a letter, '_' or
- * '!'; key 9 inserts '_' at the cursor and key 10 deletes the character there; key 6 returns 3 (focus the next item).
- * Otherwise it reads the keyboard (cMenuSys_getVKey VKey, cMenuSys_getAsciiKey AsciiKey of Menu->MenuSys): VKey 8 (backspace)
- * deletes and moves the cursor back, and a letter, '_' or '!' is inserted at the cursor, both only while the text is
- * shorter than 14. Likely bugs: the insert loops copy forwards (text[i + 1] = text[i] from the cursor up), smearing the
- * character at the cursor over the rest of the text instead of shifting it, and backspace removes the character under
- * the cursor rather than the one before it. The item's lock flag is not checked.
+ * Only when the base input (cMenuItem_input) returns 0. With len the text's length, the left/right keys move the cursor
+ * (+0x28) modulo min(len + 1, 15); the left/right shift keys step the character under the cursor down/up until it is a
+ * letter, '_' or '!'; Opt1 (insert) inserts '_' at the cursor and Opt2 (delete) deletes the character there; select
+ * returns MIR_NextItem (focus the next item). Otherwise it reads the keyboard (cMenuSys_getVKey VKey,
+ * cMenuSys_getAsciiKey AsciiKey of Menu->MenuSys): backspace (kVK_Back) deletes and moves the cursor back, and a
+ * letter, '_' or '!' is inserted at the cursor, both only while the text is shorter than 14. Likely bugs: the insert
+ * loops copy forwards (text[i + 1] = text[i] from the cursor up), smearing the character at the cursor over the rest of
+ * the text instead of shifting it, and backspace removes the character under the cursor rather than the one before it.
+ * The item's lock flag is not checked.
  *
- * @return the base input's result, or 3 on select
+ * @return the base input's result, or MIR_NextItem on select
  */
 int cTextMenuItem::input()
 {
@@ -4050,34 +4058,34 @@ int cTextMenuItem::input()
         mod = 15;
     }
     int key = cMenuItem_getKey((void**)this);
-    if (key == 2) {
+    if (key == kMenuKeyLeft) {
         CursorPos = (CursorPos + mod - 1) % mod;
-    } else if (key == 3) {
+    } else if (key == kMenuKeyRight) {
         CursorPos = (CursorPos + 1) % mod;
-    } else if (key == 4) {
+    } else if (key == kMenuKeyLeftShift) {
         stepChar_E488(&Text[CursorPos], -1);
-    } else if (key == 5) {
+    } else if (key == kMenuKeyRightShift) {
         stepChar_E488(&Text[CursorPos], 1);
-    } else if (key == 9) {
+    } else if (key == kMenuKeyOpt1) {
         if (len < 14) {
             for (int i = CursorPos; i < len; i++) {
                 Text[i + 1] = Text[i];
             }
             Text[CursorPos] = '_';
         }
-    } else if (key == 10) {
+    } else if (key == kMenuKeyOpt2) {
         if (len != 0 && CursorPos < len) {
             for (int i = CursorPos; i < len - 1; i++) {
                 Text[i] = Text[i + 1];
             }
             Text[len - 1] = 0;
         }
-    } else if (key == 6) {
-        result = 3;
+    } else if (key == kMenuKeySelect) {
+        result = MIR_NextItem;
     } else {
         int code = Menu->MenuSys->getVKey();
         int ch = Menu->MenuSys->getAsciiKey();
-        if (code == 8) {
+        if (code == kVK_Back) {
             if (len != 0 && CursorPos > 0) {
                 for (int i = CursorPos; i < len - 1; i++) {
                     Text[i] = Text[i + 1];
@@ -4832,11 +4840,11 @@ public:
  * Handles input for an expandable menu item by passing it to the focused item of its embedded menu.
  *
  * Checks the embedded menu's focus, then calls the focused item's input (slot 2). If this item is locked, the
- * result is returned as is. Result 3 moves to the next sub-item and 4 to the previous one; when that wraps
- * around, the focus is put back and the 3 or 4 is returned so the parent menu moves on instead.
+ * result is returned as is. MIR_NextItem moves to the next sub-item and MIR_PrevItem to the previous one; when that
+ * wraps around, the focus is put back and the result is returned so the parent menu moves on instead.
  *
  * @param expandItem  the expandable menu item
- * @return 0 when the move was handled inside the sub-menu, otherwise the focused item's input result (tMIR)
+ * @return MIR_Null when the move was handled inside the sub-menu, otherwise the focused item's input result (tMIR)
  */
 // PORT: returns a key code (int) through the unit's void* declaration.
 void* cExpandMenuItem::input()
@@ -4849,20 +4857,20 @@ void* cExpandMenuItem::input()
         return (void*)key;
     }
     switch (key) {
-    case 3:
+    case MIR_NextItem:
         cMenu_nextFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
         if (prev < (*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected) {
             return 0;
         }
         cMenu_setFocus(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu), prev);
-        return (void*)3;
-    case 4:
+        return (void*)MIR_NextItem;
+    case MIR_PrevItem:
         cMenu_prevFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
         if ((*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected < prev) {
             return 0;
         }
         cMenu_setFocus(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu), prev);
-        return (void*)4;
+        return (void*)MIR_PrevItem;
     }
     return (void*)key;
 }
@@ -5045,19 +5053,20 @@ extern "C" void cMenu_setFocus_v(void* self, int index) __asm__("cMenu_setFocus"
 /**
  * Gives an expandable menu item the focus and selects the sub-item matching the direction it was entered from.
  *
- * Calls cMenuItem_gainFocus, then sets the embedded menu (+0x18) focus to the first item for @p mode 0 or the last (-1)
- * for 1, and calls cMenu_onGainFocus with the parent menu's menu system.
+ * Calls cMenuItem_gainFocus, then sets the embedded menu (+0x18) focus to the first item when the focus came from
+ * above (MIGF_FromAbove) or the last (-1) when it came from below, and calls cMenu_onGainFocus with the parent menu's
+ * menu system.
  *
- * @param mode  how the focus arrived (On Tour tMIGainFocus whence)
+ * @param mode  how the focus arrived (tMIGainFocus whence)
  */
 void cExpandMenuItem::gainFocus(int mode)
 {
     cMenuItem_gainFocus_2(this, mode);
     switch (mode) {
-    case 0:
+    case MIGF_FromAbove:
         cMenu_setFocus_v(&ExpandMenu, 0);
         break;
-    case 1:
+    case MIGF_FromBelow:
         cMenu_setFocus_v(&ExpandMenu, -1);
         break;
     }
@@ -5573,13 +5582,13 @@ float cMenuItem_getDown_f(void* self) __asm__("cMenuItem_getDown__FPv");
  * Handles input for a graph item: select toggles edit mode; in edit mode keys pick a point and the stick moves it
  * within the range, the locks and the slope rule.
  *
- * Does nothing when locked. Key 6 flips the edit flag (+0x40). Outside edit mode it returns the base input
- * (cMenuItem_input). In edit mode keys 8 and 7 leave it; keys 4/5 select the previous/next point (+0x24, kept within the
- * point count +0x18). Up minus down (cMenuItem_getUp - cMenuItem_getDown) moves the point's y by that much times the y range
- * / 120 unless its bit in the y-lock mask (+0x20) is set, clamped to [+0x30, +0x38] and, with a slope rule (+0x3C) > 0,
- * kept between its neighbours' y (< 0: the reverse). Right minus left moves its x the same way unless x-locked (+0x1C),
- * clamped to [+0x2C, +0x34] and kept at least (x range) / max(2 * count, 50) from its neighbours. Any change calls the
- * menu's vtable slot 4 (onChange).
+ * Does nothing when locked. The select key flips the edit flag (+0x40). Outside edit mode it returns the base input
+ * (cMenuItem_input). In edit mode back and cancel leave it; left/right shift select the previous/next point (+0x24,
+ * kept within the point count +0x18). Up minus down (cMenuItem_getUp - cMenuItem_getDown) moves the point's y by that
+ * much times the y range / 120 unless its bit in the y-lock mask (+0x20) is set, clamped to [+0x30, +0x38] and, with a
+ * slope rule (+0x3C) > 0, kept between its neighbours' y (< 0: the reverse). Right minus left moves its x the same way
+ * unless x-locked (+0x1C), clamped to [+0x2C, +0x34] and kept at least (x range) / max(2 * count, 50) from its
+ * neighbours. Any change calls the menu's vtable slot 4 (onChange).
  *
  * @return the base input's result outside edit mode, else 0
  */
@@ -5588,21 +5597,21 @@ int cGraphMenuItem::input()
     int result = 0;
     if (((cMenuItem*)this)->isLocked() == 0) {
     int changed = 0;
-    if (cMenuItem_getKey((void**)this) == 6) {
+    if (cMenuItem_getKey((void**)this) == kMenuKeySelect) {
         IsEditMode ^= 1;
     }
     if (IsEditMode != 0) {
-        if (cMenuItem_getKey((void**)this) == 8) {
+        if (cMenuItem_getKey((void**)this) == kMenuKeyBack) {
             IsEditMode = 0;
-        } else if (cMenuItem_getKey((void**)this) == 7) {
+        } else if (cMenuItem_getKey((void**)this) == kMenuKeyCancel) {
             IsEditMode = 0;
         } else if (IsEditMode != 0) {
-            if (cMenuItem_getKey((void**)this) == 4) {
+            if (cMenuItem_getKey((void**)this) == kMenuKeyLeftShift) {
                 if (OnPoint > 0) {
                     OnPoint--;
                     changed = 1;
                 }
-            } else if (cMenuItem_getKey((void**)this) == 5) {
+            } else if (cMenuItem_getKey((void**)this) == kMenuKeyRightShift) {
                 if (OnPoint < NumPoints - 1) {
                     OnPoint++;
                     changed = 1;
@@ -6227,15 +6236,15 @@ extern void* cWScriptMan_TheWScriptMan;
  * cWScriptMan_doOnExpireScript. cInstanceNode's expire handler calls it with its instance.
  *
  * @param id  the instance (record)
- * @return 1 when a script ran, else 0
+ * @return true when a script ran
  */
-extern "C" int cObjectInterface_runExpireScript(int id)
+extern "C" bool cObjectInterface_runExpireScript(int id)
 {
     if (cWScriptMan_hasOnExpireScript(cWScriptMan_TheWScriptMan, id) != 0) {
         cWScriptMan_doOnExpireScript(cWScriptMan_TheWScriptMan, id);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6253,15 +6262,15 @@ extern void* cWScriptMan_TheWScriptMan;
  * (cWScriptMan_hasOnLoseFocusScript) and runs it (cWScriptMan_doOnLoseFocusScript).
  *
  * @param id  the instance record (On Tour tInstanceRecord*)
- * @return 1 when a script was run, otherwise 0
+ * @return true when a script was run
  */
-extern "C" int cObjectInterface_runOnLoseFocusScript(int id)
+extern "C" bool cObjectInterface_runOnLoseFocusScript(int id)
 {
     if (cWScriptMan_hasOnLoseFocusScript(cWScriptMan_TheWScriptMan, id) != 0) {
         cWScriptMan_doOnLoseFocusScript(cWScriptMan_TheWScriptMan, id);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 

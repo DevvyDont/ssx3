@@ -740,7 +740,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" int cMCOverlayManager_isManagerDone(void* mp);
+extern "C" bool cMCOverlayManager_isManagerDone(void* mp);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a2, int a3, int a4);
 extern "C" void cUIThing_deleteAnimation(void* obj);

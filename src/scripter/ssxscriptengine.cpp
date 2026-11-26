@@ -5549,7 +5549,7 @@ void cScriptObjRider::OnEndObjectUse()
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsMatchingEntity);
 #ifdef SKIP_ASM
-extern "C" int cRider_isLoaded(void* self);
+extern "C" bool cRider_isLoaded(void* self);
 extern "C" int cRider_getIdentity(void* self);
 extern "C" int cScriptObjRider_IsSuitableRole(cScriptObjRider* self, cRider* rider, int id, int a3);
 extern int kCharacterMappingTable[];

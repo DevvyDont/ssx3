@@ -139,13 +139,14 @@ struct sQ128 { float v[4]; } __attribute__((aligned(16)));
  * Walks the occluders of SSXApp->Game->OcclusionMan (m_iNumActive of them, enabled by m_uiVisMask; curtain i is
  * m_InView[i].pVis): for each enabled one it loads the curtain's plane and its four view-frustum planes
  * (m_fvPlaneCoeffs, m_fvVisFrustum) and @p box into vf1-vf6, runs the VU0 micro routine at 0x828 (vcallmsr) and reads
- * vi1; a result of 1 means occluded. cMoveNode's render skips drawing when it returns 1.
+ * vi1, a flag that is set (true) when the curtain hides the box. cMoveNode's render skips drawing when it returns
+ * true.
  *
  * @param box  the bounds to test (one quadword)
- * @return 1 when an occluder hides it, else 0
+ * @return true when an occluder hides it
  */
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
-extern "C" int cObjectInterface_isSphereOccluded(sQ128* box)
+extern "C" bool cObjectInterface_isSphereOccluded(sQ128* box)
 {
     cOcclusionMan* occlusionMan = SSXApp->Game->OcclusionMan;
     int mask = occlusionMan->m_uiVisMask;
@@ -173,11 +174,11 @@ extern "C" int cObjectInterface_isSphereOccluded(sQ128* box)
                 : "m"(curtain->m_fvPlaneCoeffs), "m"(curtain->m_fvVisFrustum[0]), "m"(curtain->m_fvVisFrustum[1]),
                   "m"(curtain->m_fvVisFrustum[2]), "m"(curtain->m_fvVisFrustum[3]), "m"(*box), "r"((int)D_828 >> 3)
                 : "memory");
-            int ok = result == 1;
-            if (ok) return 1;
+            int ok = result == true;
+            if (ok) return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

@@ -61,6 +61,26 @@ CHECK_OFFSET(cMenu, DrawLayer, 0x128);
 CHECK_OFFSET(cMenu, mVtbl, 0x12C);
 CHECK_SIZE(cMenu, 0x130);
 
+// A menu item's input result (cMenuItem::input and the derived rows' input, cMenu::input): what the menu should do
+// next. [O] On Tour's enum tMIR, names and values; [U] cMenuItem_input returns 1 for the back key and 2 for cancel,
+// cMenuSys_input pops one menu on 1 and every menu on 2, and cMenu_input moves the focus down on 3 and up on 4.
+enum tMIR {
+    MIR_Null = 0,
+    MIR_PopMenu = 1,
+    MIR_ExitMenu = 2,
+    MIR_NextItem = 3,
+    MIR_PrevItem = 4
+};
+
+// Where the focus came from when a row gains it (cMenuItem's gainFocus slot). [O] On Tour's enum tMIGainFocus, names
+// and values; [U] cMenu_nextFocus passes 0 (the row above had it), cMenu_prevFocus 1 and cMenu_setFocus 2, and
+// cExpandMenuItem_gainFocus focuses its first sub-row for 0 and its last for 1.
+enum tMIGainFocus {
+    MIGF_FromAbove = 0,
+    MIGF_FromBelow = 1,
+    MIGF_FromOutside = 2
+};
+
 // cMenuItem: the base of every debug-menu row (cSpaceMenuItem, cIntMenuItem, cFloatMenuItem, cColorMenuItem,
 // cRGBTitleMenuItem, cExpandMenuItem, ...; each derived constructor stores its own vtable at +0x10). Size 0x14: On
 // Tour's, and retail's methods reach the vptr at +0x10 (g++ 2.95 puts it after the members). Member names are EA's,

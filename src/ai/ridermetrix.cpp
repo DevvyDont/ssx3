@@ -1,5 +1,6 @@
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintnewrace.h"
 #include "ai/riderhandler.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
@@ -105,7 +106,7 @@ int cRiderMetrix::hasActiveHUDfx(int type)
         for (int i = 0; i < NumHUDfx; i++)
         {
             int entryType = HUDfx[i].ID;
-            if (entryType != 52)
+            if (entryType != kHFX_Null)
             {
                 // ORIGINAL-PTR: a bit array addressed by byte offset: retail forms (bit & ~0x1F) >> 3 (and + sra 3)
                 // and adds it to the array's address, where a word index would be sra 5 / sll 2.
@@ -336,21 +337,15 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cRiderMetrix_addHUDfx1_f(void* self, int type, int value, float duration, int arg) __asm__("cRiderMetrix_addHUDfx1");
 extern "C" void cRiderMetrix_evAddCash(void* self, int type, int value);
 
-struct sRaceSettings_117718 {
-    char pad[0x48];
-    signed char mode;       // 0x48
-    signed char online;     // 0x49
-};
-extern sRaceSettings_117718 cBENewRaceInterface_newRace_117718 __asm__("cBENewRaceInterface_newRace");
-
 /**
  * Cashes in the current combo chain: adds its points to the run totals and shows it, then resets the chain.
  *
  * With at least 2 combo links (+0x9C, On Tour NumCombos) and positive combo points (+0xA0): Totals.TotalPoints +=
- * points, NumComboChainLinks += links, BestComboPoints and LongestCombo are raised. When cBENewRaceInterface_newRace
- * has +0x48 == 4 and +0x49 == 0 (the free-ride case cRiderMetrix_earnNameAndPoints also checks; +0x49 is the game path cBENewRaceInterface_setGamePath
- * sets, which this C names online) the combo pays cash instead (cRiderMetrix_evAddCash(2, min(points / 500, 20)));
- * otherwise HUD effects 0x26 (points and links, 1.5 s) and 0x18 (0.7 s) show it. Always ends with
+ * points, NumComboChainLinks += links, BestComboPoints and LongestCombo are raised. In a career free ride
+ * (cBENewRaceInterface_newRace cGameMode kGAMEMODE_FREERIDE on cGamePath kGAMEPATH_WORLDCIRCUIT, the case
+ * cRiderMetrix_earnNameAndPoints also checks) the combo pays cash instead (cRiderMetrix_evAddCash(kRMCS_ComboBonus,
+ * min(points / 500, 20))); otherwise HUD effects 0x26 (points and links, 1.5 s) and kHFX_CashOrPointsAdded (0.7 s)
+ * show it. Always ends with
  * cRiderMetrix_resetComboChain.
  *
  * Retail cRiderMetrix fields sit 8 bytes after On Tour's cRiderMetrixState ones up to the combo fields; the run totals
@@ -372,15 +367,15 @@ void cRiderMetrix::earnComboChain()
             if (NumCombos > Totals.LongestCombo)
                 Totals.LongestCombo = NumCombos;
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            int offline = 0;
-            if (cBENewRaceInterface_newRace_117718.mode == 4)
-                offline = cBENewRaceInterface_newRace_117718.online == 0;
-            if (!offline) {
+            int careerFreeRide = 0;
+            if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE)
+                careerFreeRide = cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT;
+            if (!careerFreeRide) {
                 cRiderMetrix_addHUDfx1_f(((char*)this), 38, ComboPoints, 1.5f, NumCombos);
                 cRiderMetrix_addHUDfx1_f(((char*)this), 0x18, ComboPoints, 0.7f, 0);
             } else {
                 int cashAmount = ComboPoints / 500;
-                cRiderMetrix_evAddCash(((char*)this), 2, cashAmount > 20 ? 20 : cashAmount);
+                cRiderMetrix_evAddCash(((char*)this), kRMCS_ComboBonus, cashAmount > 20 ? 20 : cashAmount);
             }
         }
     }
@@ -719,7 +714,7 @@ void cRiderMetrix::update()
     float dt = Rider->mTimeScale * 0.016666668f;
     float speed = len17C28((*(&Rider->mVelocity)));
     if (ComboResetDelay >= 0.0f) {
-        if (cRider_getMotionState((Rider)) == 0 && cRider_getControlState((Rider)) != 1) {
+        if (cRider_getMotionState((Rider)) == 0 && cRider_getControlState((Rider)) != CS_BoardPress) {
             ComboResetDelay = ComboResetDelay - dt;
             if (ComboResetDelay <= 0.0f) {
                 earnComboChain();
@@ -879,7 +874,7 @@ void cRiderMetrix::updateStaticHUD()
         cRiderMetrix_addHUDfx1(self, 1, pts, self->calcTrickLevel(pts), -1.0f);
         cSSXAudio_PointsEvent(cAudioInterface_bxAudio(), self->Rider, pts);
     }
-    if (cRider_getControlState(self->Rider) == 8 && !subStateIs_117FE0(((self->Rider)->mRiderHandler), 3))
+    if (cRider_getControlState(self->Rider) == CS_Wipeout && !subStateIs_117FE0(((self->Rider)->mRiderHandler), 3))
         cHUDFX_setAsync_f(&self->HUDfx[11], 11, 0, ((self->Rider)->mRiderHandler)->WipeoutControl.RecoverPercent <? 1.0f, 0);
     else
         self->removeHUDfx(11);
@@ -891,7 +886,7 @@ void cRiderMetrix::updateStaticHUD()
     self->removeHUDfx(21);
     self->removeHUDfx(22);
     self->removeHUDfx(23);
-    if (cRider_getControlState(self->Rider) != 2 && cRider_getControlState(self->Rider) != 5) {
+    if (cRider_getControlState(self->Rider) != CS_Prewind && cRider_getControlState(self->Rider) != CS_Spin) {
         self->removeHUDfx(0xC);
         self->removeHUDfx(13);
         self->removeHUDfx(0xF);
@@ -899,7 +894,7 @@ void cRiderMetrix::updateStaticHUD()
     } else {
         int fail = 0;
         float angle;
-        if (cRider_getControlState(self->Rider) == 2)
+        if (cRider_getControlState(self->Rider) == CS_Prewind)
             angle = cPrewindControl_getFlipSpinInputAng(&(self->Rider)->mRiderHandler->PrewindControl, &fail);
         else
             angle = cSpinControl_getFlipSpinInputAng(&(self->Rider)->mRiderHandler->SpinControl, &fail);
@@ -926,7 +921,7 @@ void cRiderMetrix::updateStaticHUD()
             }
             cHUDFX_setAsync_f(&self->HUDfx[13], 13, 0, dialPct, 0);
         }
-        if (cRider_getControlState(self->Rider) == 2) {
+        if (cRider_getControlState(self->Rider) == CS_Prewind) {
             if (fail != 0)
                 self->removeHUDfx(0xC);
             else
@@ -941,10 +936,10 @@ void cRiderMetrix::updateStaticHUD()
                 self->removeHUDfx(0xE);
             } else {
                 cRiderMetrix_addHUDfx1(self, 0xC, 0, 0, -1.0f);
-                int invertZone1 = 52;
-                int invertZone2 = 52;
-                int offAxisZone1 = 52;
-                int offAxisZone2 = 52;
+                int invertZone1 = kHFX_Null;
+                int invertZone2 = kHFX_Null;
+                int offAxisZone1 = kHFX_Null;
+                int offAxisZone2 = kHFX_Null;
                 int main;
                                 if (abs_117FE0(yaw) > 2.7488937377929688f) {
                     main = 0x10;
@@ -982,13 +977,13 @@ void cRiderMetrix::updateStaticHUD()
                 float w1 = cSpinControl_getInvertScale(&(self->Rider)->mRiderHandler->SpinControl);
                 float w2 = cSpinControl_getOffAxisScale(&(self->Rider)->mRiderHandler->SpinControl);
                 cHUDFX_setAsync_f(&self->HUDfx[main], main, 0, 1.0f, 0);
-                if (invertZone1 != 52)
+                if (invertZone1 != kHFX_Null)
                     cHUDFX_setAsync_f(&self->HUDfx[invertZone1], invertZone1, 0, w1, 1);
-                if (invertZone2 != 52)
+                if (invertZone2 != kHFX_Null)
                     cHUDFX_setAsync_f(&self->HUDfx[invertZone2], invertZone2, 0, w1, 1);
-                if (offAxisZone1 != 52)
+                if (offAxisZone1 != kHFX_Null)
                     cHUDFX_setAsync_f(&self->HUDfx[offAxisZone1], offAxisZone1, 0, w2, 2);
-                if (offAxisZone2 != 52)
+                if (offAxisZone2 != kHFX_Null)
                     cHUDFX_setAsync_f(&self->HUDfx[offAxisZone2], offAxisZone2, 0, w2, 2);
                 int prev = 0;
                 if (!slotFree_117FE0(&self->HUDfx[14]))
@@ -1060,7 +1055,7 @@ void cRiderMetrix::updateStaticHUD()
     } else {
         float actualLevel = self->Rider->BoostPowerBar;
         float target;
-        if (self->Rider->mBoostMode != 3)
+        if (self->Rider->mBoostMode != kBOOST_Off)
             target = actualLevel + self->CurTrickPower;
         else
             target = actualLevel;
@@ -1548,20 +1543,23 @@ cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 
-// View of sGameSettings (defined later in this unit); bound to the same symbol by asm label.
+// View of sGameSettings (defined later in this unit); bound to the same symbol by asm label. Through the real cBERaceDB
+// (be/beintnewrace.h) g++ merges the two byte tests below into one halfword compare, so these two functions keep the
+// byte-aligned views.
 struct sGameSettings_119608 {
     char pad_0x00[0x48];
-    signed char eventKind; // 0x48: 4 = free ride
-    signed char gameType;  // 0x49: 0 = Conquer the Mountain
+    signed char eventKind; // 0x48: cBERaceDB::cGameMode
+    signed char gameType;  // 0x49: cBERaceDB::cGamePath
 };
 extern sGameSettings_119608 cBENewRaceInterface_newRace_119608 __asm__("cBENewRaceInterface_newRace");
 
 /**
  * Adds trick points to the score (+0x198), or turns them into cash in a career free ride.
  *
- * The points are scaled by the multiplier at +0x1C4 and rounded. In a free ride (cBENewRaceInterface_newRace eventKind
- * 4) of game type 0 they become cash: cRiderMetrix_evAddCash(1, points / 500, at most 20); otherwise HUD effects 35
- * (2.5 s) and 0x18 (0.7 s) show them. The score grows either way. The new-race interface is fetched and not used.
+ * The points are scaled by the multiplier at +0x1C4 and rounded. In a career free ride (cBENewRaceInterface_newRace
+ * cGameMode kGAMEMODE_FREERIDE on cGamePath kGAMEPATH_WORLDCIRCUIT) they become cash:
+ * cRiderMetrix_evAddCash(kRMCS_BonusCash, points / 500, at most 20); otherwise HUD effects 35 (2.5 s) and 0x18 (0.7 s)
+ * show them. The score grows either way. The new-race interface is fetched and not used.
  *
  * @param pts  the points
  * @return 0.0
@@ -1570,7 +1568,8 @@ float cRiderMetrix::evAddPoints(int pts)
 {
     int points = (int)(pts * mPointsMultiplier + 0.5f);
     cBE_getInterface(cBE_getBE(), 0);
-    int career = cBENewRaceInterface_newRace_119608.eventKind == 4 && cBENewRaceInterface_newRace_119608.gameType == 0;
+    int career = cBENewRaceInterface_newRace_119608.eventKind == kGAMEMODE_FREERIDE
+                 && cBENewRaceInterface_newRace_119608.gameType == kGAMEPATH_WORLDCIRCUIT;
     if (!career)
     {
         cRiderMetrix_addHUDfx1(this, 35, points, 0, 2.5f);
@@ -1583,7 +1582,7 @@ float cRiderMetrix::evAddPoints(int pts)
         {
             amount = 20;
         }
-        cRiderMetrix_evAddCash(this, 1, amount);
+        cRiderMetrix_evAddCash(this, kRMCS_BonusCash, amount);
     }
     Totals.TotalPoints += points;
     return 0.0f;
@@ -2166,11 +2165,12 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __a
  *
  * Does nothing for 0, or while the replay is in a playback state (State 1 to 9). Otherwise it checks the
  * earnings unlocks (func_001E3760) and credits the money through the back end's reward interface
- * (cBERewardInterface_awardUserCash), both for the rider's AI index (being slot 7), then posts the total flash (0x18, 0.7 s)
- * and, by @p kind, popup 0x2F (0), 0x2E (1), 0x30 (2, data = the combo count at +0x9C) for 2.5 s or 0x31 (3,
- * data = the amount) for 1.5 s; kind 4 posts no popup.
+ * (cBERewardInterface_awardUserCash), both for the rider's AI index (being slot 7), then posts the total flash
+ * (kHFX_CashOrPointsAdded, 0.7 s) and, by @p kind, popup kHFX_EarnTrickPointCash (kRMCS_TrickSuccess),
+ * kHFX_EarnBonusCash (kRMCS_BonusCash), kHFX_EarnComboCash (kRMCS_ComboBonus, data = the combo count at +0x9C) for
+ * 2.5 s or kHFX_EarnCollectible (kRMCS_Collectible, data = the amount) for 1.5 s; kRMCS_Mission posts no popup.
  *
- * @param kind    the cash source (On Tour eRiderMetrixCashSource), 0 to 4
+ * @param kind    the cash source (eRiderMetrixCashSource)
  * @param amount  money to award
  * @return always 0.0
  */
@@ -2184,19 +2184,19 @@ float cRiderMetrix_evAddCash_impl(char* vself, unsigned int kind, int amount)
         cBERewardInterface_awardUserCash(iface, GetId119EF8(((char*)self)), amount);
         cRiderMetrix_addHUDfx1_i(self, 0x18, amount, 0, 0.7f);
         switch (kind) {
-        case 3:
+        case kRMCS_Collectible:
             cRiderMetrix_addHUDfx1_i(self, 49, amount, amount, 1.5f);
             break;
-        case 1:
+        case kRMCS_BonusCash:
             cRiderMetrix_addHUDfx1_i(self, 46, amount, 0, 2.5f);
             break;
-        case 0:
+        case kRMCS_TrickSuccess:
             cRiderMetrix_addHUDfx1_i(self, 47, amount, 0, 2.5f);
             break;
-        case 2:
+        case kRMCS_ComboBonus:
             cRiderMetrix_addHUDfx1_i(self, 0x30, amount, self->NumCombos, 2.5f);
             break;
-        case 4:
+        case kRMCS_Mission:
             break;
         }
     }
@@ -2275,7 +2275,7 @@ extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 /**
  * Scores a passed mission: shows the reward and adds it as cash.
  *
- * HUD effect 0x1B with @p amount for 1.5 s, then cRiderMetrix_evAddCash(4, @p amount) (On Tour cash source 4).
+ * HUD effect 0x1B with @p amount for 1.5 s, then cRiderMetrix_evAddCash(kRMCS_Mission, @p amount).
  *
  * @param amount  the cash reward (On Tour money)
  * @return 0.0 (no boost change)
@@ -2283,7 +2283,7 @@ extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 float cRiderMetrix::evMissionSuccess(int amount)
 {
     cRiderMetrix_addHUDfx1(this, 27, amount, 0, 1.5f);
-    cRiderMetrix_evAddCash(this, 4, amount);
+    cRiderMetrix_evAddCash(this, kRMCS_Mission, amount);
     return 0.0f;
 }
 #endif
@@ -2292,7 +2292,8 @@ float cRiderMetrix::evMissionSuccess(int amount)
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnName);
 #ifdef SKIP_ASM
 struct sTrickId;
-extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style, int flag);
+extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style,
+                                            int flag);
 extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -2337,18 +2338,18 @@ struct sTrickId {
     int w1;
 };
 
+// cBENewRaceInterface_newRace's game mode and path as bytes (see sGameSettings_119608 above for why).
 struct sGameSettings {
     char pad_0x00[0x48];
-    signed char eventKind; // 0x48: 4 = free ride
-    signed char gameType;  // 0x49: 0 = Conquer the Mountain
+    signed char eventKind; // 0x48: cBERaceDB::cGameMode
+    signed char gameType;  // 0x49: cBERaceDB::cGamePath
 };
-
-
-extern sGameSettings cBENewRaceInterface_newRace;
+extern sGameSettings cBENewRaceInterface_newRaceSettings __asm__("cBENewRaceInterface_newRace");
 
 extern "C" void cRiderMetrix_removeHUDfx(cRiderMetrix* self, int type);
 extern "C" int cAI_isRaceFinished(void* race);
-extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style, int flag);
+extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style,
+                                            int flag);
 extern "C" int cRiderMetrix_getCurTrickPoints(cRiderMetrix* self);
 extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
@@ -2393,13 +2394,14 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnNameAndPoints);
  * Ends the trick in progress: names it, banks its points and statistics into the run totals and shows the result.
  *
  * Clears the live trick HUD effects and does nothing more once the race is over (cAI_isRaceFinished). With trick
- * points: names the trick (cRiderMetrix_buildTrickName), adds any monster bonus, announces it (cRiderMetrix_addTrick) and divides points and
- * boost by 1 + its repeats in the trick history (cRiderMetrix_addToHistory). The result goes into Totals: TotalPoints (+0x198),
- * TotalStylePoints (+0x19C), NumTricksLanded (+0x110), the trick-level counts, best trick (+0x18C, with its name at
- * +0x190), spin and flip degrees, grab time, ubers and the air/grab/rail/plant records; the combo chain grows
- * (cRiderMetrix_addToComboChain). It then shows HUD effects 0x23 (0x24 for a repeat) and 0x18, or in free ride
- * (cBENewRaceInterface_newRace +0x48 == 4, +0x49 == 0) pays cash via cRiderMetrix_evAddCash(0, min(total / 500, 20)).
- * Unless a rail or press continues the line, the combo gets at least 1.5 s more (cRiderMetrix_delayComboChainReset).
+ * points: names the trick (cRiderMetrix_buildTrickName), adds any monster bonus, announces it (cRiderMetrix_addTrick)
+ * and divides points and boost by 1 + its repeats in the trick history (cRiderMetrix_addToHistory). The result goes
+ * into Totals: TotalPoints (+0x198), TotalStylePoints (+0x19C), NumTricksLanded (+0x110), the trick-level counts, best
+ * trick (+0x18C, with its name at +0x190), spin and flip degrees, grab time, ubers and the air/grab/rail/plant records;
+ * the combo chain grows (cRiderMetrix_addToComboChain). It then shows HUD effects 0x23 (0x24 for a repeat) and 0x18, or
+ * in free ride (cBENewRaceInterface_newRace cGameMode kGAMEMODE_FREERIDE, cGamePath kGAMEPATH_WORLDCIRCUIT) pays cash
+ * via cRiderMetrix_evAddCash(kRMCS_TrickSuccess, min(total / 500, 20)). Unless a rail or press continues the line, the
+ * combo gets at least 1.5 s more (cRiderMetrix_delayComboChainReset).
  *
  * @param stance  On Tour isFakieLand: landed fakie
  * @param alternate  On Tour isPipeLand: landed in a pipe
@@ -2496,7 +2498,8 @@ float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int 
 
         cBE_getInterface(cBE_getBE(), 0);
         // free ride in Conquer the Mountain pays the career instead of the HUD
-        career = cBENewRaceInterface_newRace.eventKind == 4 && cBENewRaceInterface_newRace.gameType == 0;
+        career = cBENewRaceInterface_newRaceSettings.eventKind == kGAMEMODE_FREERIDE
+                 && cBENewRaceInterface_newRaceSettings.gameType == kGAMEPATH_WORLDCIRCUIT;
         if (!career) {
             if (repeats > 0) {
                 cRiderMetrix_addHUDfx1(this, 36, total, grade, 2.5f);
@@ -2509,7 +2512,7 @@ float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int 
             if (amount > 20) {
                 amount = 20;
             }
-            cRiderMetrix_evAddCash(this, 0, amount);
+            cRiderMetrix_evAddCash(this, kRMCS_TrickSuccess, amount);
         }
     }
 
@@ -2617,7 +2620,8 @@ struct sTrickBits_A8C8 {
  * @param flag  the press landed in (On Tour pressLand)
  * @return nonzero when the trick has a name
  */
-extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, int stance, int alternate, int style, int flag)
+extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, int stance, int alternate, int style,
+                                            int flag)
 {
     cRiderMetrix* self = vself;
     sTrickBits_A8C8* id = (sTrickBits_A8C8*)vid;
@@ -2637,12 +2641,12 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
         if (style != 0) {
             id->q = 3;
         }
-        return 1;
+        return true;
     }
     if (self->InitTrickIsFakie != 0) {
         self->CurTrickSpinAng = -self->CurTrickSpinAng;
     }
-    if (self->CurTrickRailslideMode == 4) {
+    if (self->CurTrickRailslideMode == kRSM_BS) {
         self->CurTrickFlipAng = -self->CurTrickFlipAng;
     }
     spinDeg = func_roundDegrees((int)(self->CurTrickSpinAng * 57.2957763671875f));
@@ -2674,14 +2678,14 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
             }
             id->p = nameCode;
         } else {
-            if (self->CurTrickPressMode == 1) {
+            if (self->CurTrickPressMode == kPM_Nose) {
                 id->p = self->CurTrickRailslideMode ? 3 : 1;
             } else {
                 id->p = self->CurTrickRailslideMode == 0 ? 2 : 4;
             }
             id->k1 = spins < 11 ? spins : 10;
         }
-        return 1;
+        return true;
     }
     if (self->CurTrickRailslideMode != 0) {
         if (self->CurTrickRailslideDist <= 50.0f) {
@@ -2690,14 +2694,14 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
             id->k0 = self->CurTrickRailslideMode;
             id->k1 = spins < 11 ? spins : 10;
             if (self->Rider->IsGoofyStance != 0) {
-                if (self->CurTrickRailslideMode == 1) {
+                if (self->CurTrickRailslideMode == kRSM_Riding) {
                     id->k0 = 2;
-                } else if (self->CurTrickRailslideMode == 2) {
+                } else if (self->CurTrickRailslideMode == kRSM_Fakie) {
                     id->k0 = 1;
                 }
             }
         }
-        return 1;
+        return true;
     }
     idx = spins;
     fidx = flips;
@@ -2717,9 +2721,9 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
     }
     for (n = 0; n < 3 && self->CurTrickGrabList[n] != 0; n++) {
     }
-    if (self->InitTrickPressMode == 1) {
+    if (self->InitTrickPressMode == kPM_Nose) {
         id->k2 = 5;
-    } else if (self->InitTrickPressMode == 2) {
+    } else if (self->InitTrickPressMode == kPM_Tail) {
         id->k2 = 6;
     } else if (self->InitTrickRailslideMode != 0) {
         if (self->InitTrickIsFakie != 0) {
@@ -2741,7 +2745,7 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
     } else {
         MEM_fill(id, 0, 8);
         id->tbl = 1;
-        return 1;
+        return true;
     }
     if (id->tbl == 0) {
         if (spins > 0) {
@@ -2774,9 +2778,9 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
     if (flips > 0 && spins != flips * 3 && spins < 15) {
         id->e = spins;
     }
-    if (flag == 1) {
+    if (flag == kPM_Nose) {
         id->q = 4;
-    } else if (flag == 2) {
+    } else if (flag == kPM_Tail) {
         id->q = 5;
     } else if (style != 0) {
         id->q = 3;
@@ -2947,7 +2951,7 @@ void cRider::updateTerminalVelocity()
         speeds[i] = lowTucLowSurfaceArea * lowTucLowSurface + lowTucHiSurfaceArea * lowTucHiSurface
                   + hiTucLowSurfaceArea * hiTucLowSurface + hiTucHiSurfaceArea * hiTucHiSurface;
     }
-    if (motionState == 1) {
+    if (motionState == MS_Air) {
         newTerminalVelocity = 3333.33349609375f;
     } else {
         newTerminalVelocity = (speedAttribute * speeds[1] + (1.0f - speedAttribute) * speeds[0]) * 27.77777862548828f;

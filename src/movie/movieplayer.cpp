@@ -43,7 +43,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasManager);
  *
  * @return 1 when the instance exists, else 0
  */
-extern "C" int cMCOverlayManager_hasManager(void) {
+extern "C" bool cMCOverlayManager_hasManager(void) {
     return cMCOverlayManager_instance != 0;
 }
 #endif
@@ -71,9 +71,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerDone);
  *
  * @return 1 when done, otherwise 0
  */
-int cMCOverlayManager::isManagerDone()
+bool cMCOverlayManager::isManagerDone()
 {
-    return mState == 1;
+    return mState == kMCOverlay_Done;
 }
 #endif
 
@@ -85,9 +85,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerLoaded);
  *
  * @return 1 when loaded, else 0
  */
-int cMCOverlayManager::isManagerLoaded()
+bool cMCOverlayManager::isManagerLoaded()
 {
-    return (mState) == 35;
+    return (mState) == kMCOverlay_LoadDone;
 }
 #endif
 //100%
@@ -113,7 +113,7 @@ extern int cMCOverlayManager_mSaveInProgress;
  *
  * @return 1 while saving, else 0
  */
-extern "C" int cMCOverlayManager_isSaveInProgress(void) {
+extern "C" bool cMCOverlayManager_isSaveInProgress(void) {
     return cMCOverlayManager_mSaveInProgress != 0;
 }
 #endif
@@ -128,7 +128,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasCardStatusCriticalError);
  *
  * @return 1 when another bit is set, otherwise 0
  */
-int cMCOverlayManager::hasCardStatusCriticalError()
+bool cMCOverlayManager::hasCardStatusCriticalError()
 {
     // masks applied as separate statements; folding them into one
     // expression collapses the two `and` instructions into one
@@ -158,9 +158,9 @@ extern char str_pct_s_pct_s_e[];
 
 
 /**
- * Prepares a memory-card read of file type @p mode (0 replay, 1 profile, 2 settings).
+ * Prepares a memory-card read of file type @p mode (tMCFileType: replay, profile or settings).
  *
- * Stores mFileType, switches to the device-select action (cMCOverlayManager_SetAction(1)), sets mSaveProfileID to -1
+ * Stores mFileType, switches to the device-select action (kMCOVAction_DeviceSelect), sets mSaveProfileID to -1
  * and mSave to 0, sets mMaxFiles (4 replays, 6 profiles, 1 settings file) and the card's data size (mpMemCard slot 19:
  * 0x80000 for replays, else cBESaveInterface_getSaveProfileSize / cBESaveInterface_getSaveGameSize), then writes the
  * search pattern "<product code>-<type>*" (cMCOverlayManager_getProductCode, cMCOverlayManager_getFileName) into mMatch.
@@ -173,15 +173,15 @@ void cMCOverlayManager::readSetFileType(int mode)
     char name[0x200];
     char fmt[0x200];
     mFileType = mode;
-    SetAction(1);
+    SetAction(kMCOVAction_DeviceSelect);
     mSaveProfileID = -1;
     mSave = 0;
     int fileType = mFileType;
-    if (fileType == 0) {
+    if (fileType == kMCFileType_Replay) {
         mMaxFiles = 4;
         cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(0x80000);
-    } else if (fileType == 1) {
+    } else if (fileType == kMCFileType_Profile) {
         mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
@@ -281,7 +281,7 @@ extern char str_pct_s_pct_s_e[];
  * As cMCOverlayManager_readSetFileType, but sets mSave to 1 and mSaveProfileID to @p profileId: stores mFileType, switches to the
  * device-select action, sets mMaxFiles and the card's data size by type and builds mMatch.
  *
- * @param mode  the file type (0 replay, 1 profile, 2 settings)
+ * @param mode  the file type (tMCFileType)
  * @param profileId  the profile to save, or -1
  */
 void cMCOverlayManager::writeSetFileType(int mode, int profileId)
@@ -290,15 +290,15 @@ void cMCOverlayManager::writeSetFileType(int mode, int profileId)
     char name[0x200];
     char fmt[0x200];
     mFileType = mode;
-    SetAction(1);
+    SetAction(kMCOVAction_DeviceSelect);
     mSaveProfileID = profileId;
     mSave = 1;
     int fileType = mFileType;
-    if (fileType == 0) {
+    if (fileType == kMCFileType_Replay) {
         mMaxFiles = 4;
         cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(0x80000);
-    } else if (fileType == 1) {
+    } else if (fileType == kMCFileType_Profile) {
         mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
@@ -366,8 +366,9 @@ extern char str_kT_OVGameOptions[];
 /**
  * Writes the title of file slot @p n, as a 16-bit string, into @p dst.
  *
- * For replays (mFileType 0) and profiles (1) prints "<type name> <n + 1>" (str_pct_spct_d_b widened, the type name from
- * cMCOverlayManager_getFileName); for settings (2) copies the localised "kT_OVGameOptions" text (FELocale slot 4 with its hash).
+ * For replays (kMCFileType_Replay) and profiles (kMCFileType_Profile) prints "<type name> <n + 1>" (str_pct_spct_d_b
+ * widened, the type name from cMCOverlayManager_getFileName); for settings (kMCFileType_Settings) copies the localised
+ * "kT_OVGameOptions" text (FELocale slot 4 with its hash).
  *
  * @param n  the file slot
  * @param dst  16-bit destination buffer
@@ -377,19 +378,19 @@ void cMCOverlayManager::GetTitleString(int n, char* dst)
     char name[0x100];
     char fmt[0x200];
     switch (mFileType) {
-    case 0:
+    case kMCFileType_Replay:
         func_002C2540(fmt, str_pct_spct_d_b);
         cMCOverlayManager_getFileName_r(this, mFileType, name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
-    case 2: {
+    case kMCFileType_Settings: {
         cFELocale* loc = SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
         void* thisp = vthis(loc, vt[4]);
         strcpy1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_OVGameOptions)));
         break;
     }
-    case 1:
+    case kMCFileType_Profile:
         func_002C2540(fmt, str_pct_spct_d_b);
         cMCOverlayManager_getFileName_r(this, mFileType, name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
@@ -436,7 +437,7 @@ void cMCOverlayManager::setTitleString(int n)
     GetTitleString(n, title);
     func_002C2540(fmt, str_SSX_3_pct_s);
     switch (mFileType) {
-    case 0: {
+    case kMCFileType_Replay: {
         cFELocale* loc = SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
         void* thisp = vthis(loc, vt[4]);
@@ -444,7 +445,7 @@ void cMCOverlayManager::setTitleString(int n)
         sprintf1_v(out, title, n);
         break;
     }
-    case 1: {
+    case kMCFileType_Profile: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         func_002C2540(name, cBENewPlayerInterface_getPlayerName(iface, mSaveProfileID));
         sprintf1_v(out, fmt, name);
@@ -472,21 +473,22 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_SetState);
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_SetAction);
 #ifdef SKIP_ASM
 /**
- * Switches the memory-card manager to another action, starting the display timers for action 1.
+ * Switches the memory-card manager to another action, starting the display timers for kMCOVAction_DeviceSelect.
  *
- * Stores @p mode in mAction, which cMCOverlayManager_update() switches on. Action 1 also sets mFlash to 1.0,
- * mFlashStep to 1/60 and mDisplayWaitTicks to 60; any other value only stores mAction.
+ * Stores @p mode in mAction, which cMCOverlayManager_update() switches on. kMCOVAction_DeviceSelect also sets mFlash to
+ * 1.0, mFlashStep to 1/60 and mDisplayWaitTicks to 60; any other value only stores mAction.
  *
- * @param mode  new action: 0 runs the load/save state machine, 1 the initial card and file checks
+ * @param mode  new action (tMCOverlayManagerAction): kMCOVAction_LoadSave runs the load/save state machine,
+ *              kMCOVAction_DeviceSelect the initial card and file checks
  * @return nothing meaningful; the body has no return statement
  */
 void* cMCOverlayManager::SetAction(int mode)
 {
     mAction = mode;
     switch (mode) {
-    case 0:
+    case kMCOVAction_LoadSave:
         break;
-    case 1:
+    case kMCOVAction_DeviceSelect:
         mFlash = 1.0f;
         mFlashStep = 0.016669999808073044f;
         mDisplayWaitTicks = 0x3C;
@@ -542,17 +544,18 @@ extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* s
 /**
  * Runs one update of the memory-card manager for its current action.
  *
- * Action 0 calls cMCOverlayManager_ManagerLoadSaveUpdate(); action 1 calls cMCOverlayManager_managerDeviceSelectUpdate(), which drives the
- * initial card and file checks (UpdateInitCardsCheck, UpdateInitFileCheck, UpdateInitFileCheckDevice) and can
- * switch back to action 0. Other actions do nothing.
+ * kMCOVAction_LoadSave calls cMCOverlayManager_ManagerLoadSaveUpdate(); kMCOVAction_DeviceSelect calls
+ * cMCOverlayManager_managerDeviceSelectUpdate(), which drives the initial card and file checks (UpdateInitCardsCheck,
+ * UpdateInitFileCheck, UpdateInitFileCheckDevice) and can switch back to kMCOVAction_LoadSave. Other actions do
+ * nothing.
  */
 void cMCOverlayManager::update()
 {
     switch (mAction) {
-    case 0:
+    case kMCOVAction_LoadSave:
         ManagerLoadSaveUpdate();
         break;
-    case 1:
+    case kMCOVAction_DeviceSelect:
         managerDeviceSelectUpdate();
         break;
     }
@@ -574,14 +577,16 @@ static inline bool isState_23D660(char* s, int k)
 }
 
 /**
- * Runs the manager's device-select action for one frame (cMCOverlayManager_update calls it for action 1).
+ * Runs the manager's device-select action for one frame (cMCOverlayManager_update calls it for
+ * kMCOVAction_DeviceSelect).
  *
  * Updates the card (mpMemCard slot 3); while mCheckCard is set it waits for the card to go idle (slot 11) and then
  * clears it. Fills mMaxDevices on first use (cMCOverlayManager_getMaxDevicesSupported). Once the card is idle it
- * switches back to the load/save action (SetAction(0)) and, unless mState is 49, 50, 51, 52 or 54 (the init checks),
- * sets state 3 through vtable slot 1 (cMCOverlayManager_SetState). Then runs the init state handlers:
- * cMCOverlayManager_UpdateInitCardsCheck (49), cMCOverlayManager_UpdateInitFileCheck (51) or
- * cMCOverlayManager_UpdateInitFileCheckDevice (54).
+ * switches back to the load/save action (kMCOVAction_LoadSave) and, unless mState is one of the init checks
+ * (kMCOverlay_InitCardsCheck .. kMCOverlay_InitFileCheckDone, kMCOverlay_InitFileCheckDevice), sets
+ * kMCOverlay_CheckCards through vtable slot 1 (cMCOverlayManager_SetState). Then runs the init state handlers:
+ * cMCOverlayManager_UpdateInitCardsCheck, cMCOverlayManager_UpdateInitFileCheck or
+ * cMCOverlayManager_UpdateInitFileCheckDevice, for the states of the same names.
  */
 void cMCOverlayManager::managerDeviceSelectUpdate()
 {
@@ -594,25 +599,27 @@ void cMCOverlayManager::managerDeviceSelectUpdate()
         }
         mCheckCard = 0;
     }
-    if (mMaxDevices == -1) {
+    if (mMaxDevices == kMaxDevicesUnknown) {
         mMaxDevices = getMaxDevicesSupported();
     }
     memCard = mpMemCard;
     if (memCard->IsBusy() == 0) {
-        SetAction(0);
-        int ok = !(isState_23D660(((char*)this), 49) || isState_23D660(((char*)this),
-                50) || isState_23D660(((char*)this), 51) || isState_23D660(((char*)this),
-                52) || isState_23D660(((char*)this), 54));
+        SetAction(kMCOVAction_LoadSave);
+        int ok = !(isState_23D660(((char*)this), kMCOverlay_InitCardsCheck)
+                   || isState_23D660(((char*)this), kMCOverlay_InitCardsCheckDone)
+                   || isState_23D660(((char*)this), kMCOverlay_InitFileCheck)
+                   || isState_23D660(((char*)this), kMCOverlay_InitFileCheckDone)
+                   || isState_23D660(((char*)this), kMCOverlay_InitFileCheckDevice));
         if (ok) {
-            SetState(3);
+            SetState(kMCOverlay_CheckCards);
         }
     }
     int st = mState;
-    if (st == 49) {
+    if (st == kMCOverlay_InitCardsCheck) {
         UpdateInitCardsCheck();
-    } else if (st == 51) {
+    } else if (st == kMCOverlay_InitFileCheck) {
         UpdateInitFileCheck();
-    } else if (st == 54) {
+    } else if (st == kMCOverlay_InitFileCheckDevice) {
         UpdateInitFileCheckDevice();
     }
 }
@@ -625,9 +632,9 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isLoadCardStatusErrorUnacknow
  * Tells whether a card status error that matters to a load is unacknowledged: mCurrDeviceStateAck is clear and
  * mCurrDeviceStateLast has a bit set other than "full" (4) and "unformatted" (0x10).
  *
- * @return 1 for an unacknowledged error, else 0
+ * @return true for an unacknowledged error
  */
-int cMCOverlayManager::isLoadCardStatusErrorUnacknowledged()
+bool cMCOverlayManager::isLoadCardStatusErrorUnacknowledged()
 {
     int deviceState = mCurrDeviceStateLast;
     deviceState &= ~4;
@@ -1301,11 +1308,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_CheckForCard);
  * (cMCOverlayManager_SetState).
  *
  * Uses mpMemCard's status slots (by On Tour's cMemCard order: 53 IsAvailable, 49 IsInvalid, 51 IsDamaged, 59
- * IsWrongDevice, 55 IsFormatted, 58 IsEncodingCorrect). With no usable card: state 5 when it is invalid, damaged or the
- * wrong device, else state 4 unless already there. With a formatted, correctly encoded, undamaged card: state 6 when
- * @p flag is set. Otherwise (or when not) state 7 for a save (mSave) or 29 for a load.
+ * IsWrongDevice, 55 IsFormatted, 58 IsEncodingCorrect). With no usable card: kMCOverlay_CardInvalid when it is
+ * invalid, damaged or the wrong device, else kMCOverlay_NoCardsError unless already there. With a formatted,
+ * correctly encoded, undamaged card: kMCOverlay_ReadingCard when @p flag is set. Otherwise (or when not)
+ * kMCOverlay_Save for a save (mSave) or kMCOverlay_Load for a load.
  *
- * @param flag  nonzero to go to state 6 (reading the card) when the card is good
+ * @param flag  nonzero to go to kMCOverlay_ReadingCard when the card is good
  */
 void cMCOverlayManager::CheckForCard(int flag)
 {
@@ -1313,22 +1321,22 @@ void cMCOverlayManager::CheckForCard(int flag)
 
     if (manager->mpMemCard->IsAvailable1() == 0) {
         if (manager->mpMemCard->IsInvalid1() != 0 || manager->mpMemCard->IsDamaged1() != 0 || manager->mpMemCard->IsWrongDevice() != 0) {
-            manager->SetState(5);
+            manager->SetState(kMCOverlay_CardInvalid);
         } else {
-            int ok = ((cMCOverlayManager*)manager)->mState != 4;
+            int ok = ((cMCOverlayManager*)manager)->mState != kMCOverlay_NoCardsError;
             if (ok) {
-                manager->SetState(4);
+                manager->SetState(kMCOverlay_NoCardsError);
             }
         }
     } else {
         if (manager->mpMemCard->IsFormatted() != 0 && manager->mpMemCard->IsEncodingCorrect1() != 0 && manager->mpMemCard->IsDamaged1() == 0 && manager->mpMemCard->IsWrongDevice() == 0) {
             if (flag != 0) {
-                manager->SetState(6);
+                manager->SetState(kMCOverlay_ReadingCard);
             }
         } else if (((cMCOverlayManager*)manager)->mSave != 0) {
-            manager->SetState(7);
+            manager->SetState(kMCOverlay_Save);
         } else {
-            manager->SetState(29);
+            manager->SetState(kMCOverlay_Load);
         }
     }
 }
@@ -1367,7 +1375,7 @@ void cMCOverlayManager::CancelCardOp(int showFailMessage)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_RetryCardOp);
 #ifdef SKIP_ASM
-extern "C" int cMCOverlayManager_hasCardStatusCriticalError(cMCOverlayManager* self);
+extern "C" bool cMCOverlayManager_hasCardStatusCriticalError(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_setSelectedDevice(cMCOverlayManager* self);
 void cMCOverlayManager_selectDevice(void* self, int val);
 extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self);
@@ -1820,7 +1828,7 @@ void cMCOverlayManager::UpdateSaveProgress()
         WriteFailed(1);
         return;
     }
-    if (mpMemCard->IsWriteWaiting() == 1) {
+    if (mpMemCard->IsWriteWaiting() == true) {
         int savedSize = mSavedSize;
         int totalSize = mSize;
         if (savedSize < totalSize) {
@@ -2268,7 +2276,7 @@ void cMCOverlayManager::UpdateLoadProgress()
         (callbackReadFailed)();
         return;
     }
-    if (mpMemCard->IsReadWaiting() == 1) {
+    if (mpMemCard->IsReadWaiting() == true) {
         int loadedSize = mLoadedSize;
         int totalSize = mSize;
         if (loadedSize < totalSize) {
@@ -3142,16 +3150,16 @@ static inline int nextChapter_241400(char* self, int i)
 /**
  * Moves the memory card device highlight to the next device that has a card.
  *
- * Does nothing when no device count is known (+0x424 == -1). Steps from the current device (+0x428) to the next
- * one the memory card object (+0x434) reports present, stopping at the last device unless wrapping is allowed
- * (+0x100); falls back to the current device or device 0. A new device is selected with cMCOverlayManager_selectDevice and
- * cMCOverlayManager_setSelectedDevice; +0xE0 is cleared. (The C's helper type names, cMovieDecoder_241400/hasChapter, are leftovers:
- * this is the memory card device list.)
+ * Does nothing when no device count is known (+0x424 == kMaxDevicesUnknown). Steps from the current device (+0x428) to
+ * the next one the memory card object (+0x434) reports present, stopping at the last device unless wrapping is allowed
+ * (+0x100); falls back to the current device or device 0. A new device is selected with cMCOverlayManager_selectDevice
+ * and cMCOverlayManager_setSelectedDevice; +0xE0 is cleared. (The C's helper type names,
+ * cMovieDecoder_241400/hasChapter, are leftovers: this is the memory card device list.)
  */
 void cMCOverlayManager::OnHighlightNextDevice()
 {
     int i = mSelectedDevice;
-    if (mMaxDevices == -1) {
+    if (mMaxDevices == kMaxDevicesUnknown) {
         return;
     }
     while (i = nextChapter_241400(((char*)this), i), mpMemCard->IsAvailable(i) == 0) {
@@ -3159,7 +3167,7 @@ void cMCOverlayManager::OnHighlightNextDevice()
             if (i == mSelectedDevice) {
                 break;
             }
-            if (mWrapItems != 1) {
+            if (mWrapItems != true) {
                 break;
             }
         }
@@ -3198,15 +3206,16 @@ static inline int prevChapter_241540(char* self, int i)
 /**
  * Moves the device highlight to the previous memory-card device that the card object reports as available.
  *
- * Does nothing while mMaxDevices is -1. Steps mSelectedDevice down, wrapping to mMaxDevices - 1 when mWrapItems
- * is set, until the card object's virtual slot 52 accepts the device or the search gives up. Without wrapping,
- * an unavailable device 0 keeps the current device (or 0 if that one is unavailable too). A new selection goes
- * through cMCOverlayManager_selectDevice() and cMCOverlayManager_setSelectedDevice(), which resets the device state monitor. Always clears mGetDir.
+ * Does nothing while mMaxDevices is kMaxDevicesUnknown. Steps mSelectedDevice down, wrapping to mMaxDevices - 1 when
+ * mWrapItems is set, until the card object's virtual slot 52 accepts the device or the search gives up. Without
+ * wrapping, an unavailable device 0 keeps the current device (or 0 if that one is unavailable too). A new selection
+ * goes through cMCOverlayManager_selectDevice() and cMCOverlayManager_setSelectedDevice(), which resets the device
+ * state monitor. Always clears mGetDir.
  */
 void cMCOverlayManager::OnHighlightPrevDevice()
 {
     int i = mSelectedDevice;
-    if (mMaxDevices == -1) {
+    if (mMaxDevices == kMaxDevicesUnknown) {
         return;
     }
     while (i = prevChapter_241540(((char*)this), i), mpMemCard->IsAvailable(i) == 0) {
@@ -3214,7 +3223,7 @@ void cMCOverlayManager::OnHighlightPrevDevice()
             if (i == mSelectedDevice) {
                 break;
             }
-            if (mWrapItems != 1) {
+            if (mWrapItems != true) {
                 break;
             }
         }
@@ -3550,22 +3559,22 @@ extern char str_GAM[];
 extern char str_SET[];
 
 /**
- * Writes the three-letter name of file type @p mode, widened to 16 bits, into @p buf: "REP" (0, replay), "GAM" (1,
- * profile) or "SET" (2, settings); other types leave it untouched.
+ * Writes the three-letter name of file type @p mode, widened to 16 bits, into @p buf: "REP" (kMCFileType_Replay),
+ * "GAM" (kMCFileType_Profile) or "SET" (kMCFileType_Settings); other types leave it untouched.
  *
- * @param mode  the file type
+ * @param mode  the file type (tMCFileType)
  * @param buf  16-bit destination buffer
  */
 void cMCOverlayManager::getFileName(int mode, void* buf)
 {
     switch (mode) {
-    case 0:
+    case kMCFileType_Replay:
         func_002C2540(buf, str_REP);
         break;
-    case 1:
+    case kMCFileType_Profile:
         func_002C2540(buf, str_GAM);
         break;
-    case 2:
+    case kMCFileType_Settings:
         func_002C2540(buf, str_SET);
         break;
     }
@@ -3644,7 +3653,7 @@ static inline void SetText_00241E18(void* out, char* key, void* arg)
  *
  * Starts from an empty string, gets the device number text (cMCOverlayManager_getDeviceNumberString) and, by state (+0x130), formats
  * kT_MEMFECheckingCardPS2, kT_MEMOVNotDetectedPS2, kT_MEMFormattingPS2, kT_MEMOVSaveSavingPS2NGC or
- * kT_MEMOVLoadingPS2NGC with it, or copies kT_MEMDeletingPS2; state 55 and others leave it empty.
+ * kT_MEMOVLoadingPS2NGC with it, or copies kT_MEMDeletingPS2; kMCOverlay_FileExists and others leave it empty.
  *
  * @param out  the destination wide-string buffer
  */
@@ -3655,27 +3664,30 @@ void cMCOverlayManager::GetMessage(void* out)
     func_002C2540(out, D_004A29E8);
     getDeviceNumberString(num, mSelectedDevice);
     switch (mState) {
-    case 0: case 2: case 3: case 6: case 7: case 13: case 29:
-    case 49: case 50: case 51: case 52: case 53: case 54:
+    case kMCOverlay_Idle: case kMCOverlay_CheckCardsWait: case kMCOverlay_CheckCards: case kMCOverlay_ReadingCard:
+    case kMCOverlay_Save: case kMCOverlay_PreSaveFile: case kMCOverlay_Load:
+    case kMCOverlay_InitCardsCheck: case kMCOverlay_InitCardsCheckDone: case kMCOverlay_InitFileCheck:
+    case kMCOverlay_InitFileCheckDone: case kMCOverlay_InitFileCheckWait: case kMCOverlay_InitFileCheckDevice:
         SetText_00241E18(out, str_kT_MEMFECheckingCardPS2_b, num);
         break;
-    case 4:
+    case kMCOverlay_NoCardsError:
         getDeviceNumberString(num2, mSelectedDevice);
         SetText_00241E18(out, str_kT_MEMOVNotDetectedPS2_b, num2);
         break;
-    case 10: case 11: case 39: case 40:
+    case kMCOverlay_FormatConfirm: case kMCOverlay_FormatProgress:
+    case kMCOverlay_InitFormatConfirm: case kMCOverlay_InitFormatProgress:
         SetText_00241E18(out, str_kT_MEMFormattingPS2_b, num);
         break;
-    case 15: case 16: case 17: case 18:
+    case kMCOverlay_CreateFile: case kMCOverlay_SaveFile: case kMCOverlay_SaveProgress: case kMCOverlay_SaveClosing:
         SetText_00241E18(out, str_kT_MEMOVSaveSavingPS2NGC_b, num);
         break;
-    case 31: case 32: case 33: case 34:
+    case kMCOverlay_LoadStart: case kMCOverlay_LoadProgress: case kMCOverlay_LoadClosing: case kMCOverlay_LoadDoneWait:
         SetText_00241E18(out, str_kT_MEMOVLoadingPS2NGC, num);
         break;
-    case 25: case 26: case 44:
+    case kMCOverlay_DeleteProgress: case kMCOverlay_DeleteDoneWait: case kMCOverlay_InitDeleteProgress:
         strcpy1(out, (void*)Loc_00241E18(str_kT_MEMDeletingPS2_b));
         break;
-    case 55:
+    case kMCOverlay_FileExists:
         break;
     }
 }

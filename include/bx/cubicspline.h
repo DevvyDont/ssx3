@@ -48,6 +48,10 @@ CHECK_SIZE(cCSICubicSpline, 0x14);
 
 
 struct cCubicSplineInterpolant {
+    // The end condition (Type; names ours). [U] initAsNatural clears the bit and initAsClamped sets it, parking the
+    // two end slopes that calculateSplines then reads for kClamped; kNatural solves with zero end curvature.
+    enum eType { kNatural = 0, kClamped = 1 };
+
     unsigned int Type : 1;          // 0x000 bit 0 [O]; [U] initAsNatural clears it (& -2), initAsClamped sets it (| 1);
                                     //       calculateSplines switches on it (0 natural, 1 clamped)
     unsigned int Initialized : 1;   // 0x000 bit 1 [O]; [R] ctor 0; [U] initCommon sets it, purge clears it (& -3)

@@ -7,6 +7,7 @@
 #include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
 #include "util/locale.h"
+#include "be/beintoption.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
 
@@ -109,9 +110,10 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang);
  * Does nothing when @p lang is already the language (+0x1). Otherwise it stores it and, unless bit 0 of the locale
  * flags (+0x3, On Tour's tAttrLocale mLocaleTest) is set, deletes every file (cFELocale_deleteAllFiles), loads the
  * common file for languages 0-3 (cFELocale_addFile; -1, which loads nothing, for any other value), then the front-end
- * set (cFELocale_loadFE) when the module byte (+0x58) is 1, else the in-game set (cFELocale_loadOV). Locale vtable slot 3.
+ * set (cFELocale_loadFE) when the module byte (+0x58) is kModuleFrontEnd, else the in-game set (cFELocale_loadOV).
+ * Locale vtable slot 3.
  *
- * @param lang  the language index (0 English, 1 French, 2 German, 3 Spanish)
+ * @param lang  the language index (the options' eOptionSpeechLanguage: kOPTLANG_English, French, German, Spanish)
  */
 extern "C" void cFELocale_setLanguage(cFELocale* self, signed char lang)
 {
@@ -122,21 +124,21 @@ extern "C" void cFELocale_setLanguage(cFELocale* self, signed char lang)
             cFELocale_deleteAllFiles(self);
             int langIndex = -1;
             switch (lang) {
-            case 0:
+            case kOPTLANG_English:
                 langIndex = 0;
                 break;
-            case 1:
+            case kOPTLANG_French:
                 langIndex = 1;
                 break;
-            case 2:
+            case kOPTLANG_German:
                 langIndex = 2;
                 break;
-            case 3:
+            case kOPTLANG_Spanish:
                 langIndex = 3;
                 break;
             }
             self->addFile(langIndex);
-            if (self->mModule == 1) {
+            if (self->mModule == cFELocale::kModuleFrontEnd) {
                 self->loadFE();
             } else {
                 self->loadOV();
@@ -154,23 +156,23 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 /**
  * Loads the string file shared by every front-end screen for the current language.
  *
- * Maps the language at +0x1 (0 to 3) to the matching file entry, or -1 for any other value, and passes it to
- * cFELocale_addFile.
+ * Maps the language at +0x1 (kOPTLANG_English to kOPTLANG_Spanish) to the matching file entry (0 to 3), or -1 for
+ * any other value, and passes it to cFELocale_addFile.
  */
 void cFELocale::loadCommon()
 {
     int lang = -1;
     switch (mLanguage) {
-    case 0:
+    case kOPTLANG_English:
         lang = 0;
         break;
-    case 1:
+    case kOPTLANG_French:
         lang = 1;
         break;
-    case 2:
+    case kOPTLANG_German:
         lang = 2;
         break;
-    case 3:
+    case kOPTLANG_Spanish:
         lang = 3;
         break;
     }
@@ -184,57 +186,57 @@ INCLUDE_ASM("util/locale", cFELocale_loadFE);
 extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 
 /**
- * Loads the front-end string files for the current language: sets the module byte (+0x58) to 1 and adds file entries
- * 4-7, 8-11 and 16-19, the one of each group that matches the language (+0x1, 0-3) with cFELocale_addFile. Any other
- * language adds nothing.
+ * Loads the front-end string files for the current language: sets the module byte (+0x58) to kModuleFrontEnd and adds
+ * file entries 4-7, 8-11 and 16-19, the one of each group that matches the language (+0x1, kOPTLANG_English to
+ * kOPTLANG_Spanish) with cFELocale_addFile. Any other language adds nothing.
  *
  */
 void cFELocale::loadFE()
 {
     int id = -1;
-    *(char*)&mModule = 1;
+    mModule = kModuleFrontEnd;
     switch (mLanguage) {
-    case 0:
+    case kOPTLANG_English:
         id = 4;
         break;
-    case 1:
+    case kOPTLANG_French:
         id = 5;
         break;
-    case 2:
+    case kOPTLANG_German:
         id = 6;
         break;
-    case 3:
+    case kOPTLANG_Spanish:
         id = 7;
         break;
     }
     addFile(id);
     switch (mLanguage) {
-    case 0:
+    case kOPTLANG_English:
         id = 8;
         break;
-    case 1:
+    case kOPTLANG_French:
         id = 9;
         break;
-    case 2:
+    case kOPTLANG_German:
         id = 10;
         break;
-    case 3:
+    case kOPTLANG_Spanish:
         id = 11;
         break;
     }
     addFile(id);
     id = -1;
     switch (mLanguage) {
-    case 0:
+    case kOPTLANG_English:
         id = 0x10;
         break;
-    case 1:
+    case kOPTLANG_French:
         id = 17;
         break;
-    case 2:
+    case kOPTLANG_German:
         id = 18;
         break;
-    case 3:
+    case kOPTLANG_Spanish:
         id = 19;
         break;
     }
@@ -274,24 +276,25 @@ INCLUDE_ASM("util/locale", cFELocale_loadOV);
 extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 
 /**
- * Loads the in-game string file for the current language: sets the module byte (+0x58) to 2 and adds file entry 12-15,
- * the one matching the language (+0x1, 0-3), with cFELocale_addFile (-1, nothing, for any other language).
+ * Loads the in-game string file for the current language: sets the module byte (+0x58) to kModuleInGame and adds
+ * file entry 12-15, the one matching the language (+0x1, kOPTLANG_English to kOPTLANG_Spanish), with
+ * cFELocale_addFile (-1, nothing, for any other language).
  */
 void cFELocale::loadOV()
 {
     int file = -1;
-    mModule = 2;
+    mModule = kModuleInGame;
     switch (mLanguage) {
-    case 0:
+    case kOPTLANG_English:
         file = 0xC;
         break;
-    case 1:
+    case kOPTLANG_French:
         file = 13;
         break;
-    case 2:
+    case kOPTLANG_German:
         file = 0xE;
         break;
-    case 3:
+    case kOPTLANG_Spanish:
         file = 0xF;
         break;
     }

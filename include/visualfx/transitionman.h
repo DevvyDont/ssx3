@@ -57,6 +57,16 @@ enum eScriptTransitionColour {
     keScriptTransitionColour_White = 1
 };
 
+// Who started a transition (cTransitionMan::mCurrentInitiator). [O] On Tour's enum eTransitionInitiator, names and
+// values. [R] the ctor and EndTransition store Invalid (0); [U] the script data manager starts its transitions as NIS
+// (2) (cDataManager in scripter/datamanager), and cRider_cancelRiderTransitions ends only a Rider (1) one.
+enum eTransitionInitiator {
+    eTransitionInitiator_Invalid = 0,
+    eTransitionInitiator_Rider = 1,
+    eTransitionInitiator_NIS = 2,
+    eTransitionInitiator_Other = 3
+};
+
 // The script's transition request (On Tour tScriptObjTransitionInfo, 0x18). [R] cScriptObjTransition's ctor stores
 // transition = 9 and zeroes the rest; [U] cTransitionMan_OnStartObjectUse reads all six (it passes outTime (+0xC) as
 // StartTransition's inTime and inTime (+0x4) as its outTime).

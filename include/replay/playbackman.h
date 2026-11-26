@@ -113,7 +113,7 @@ struct cPlaybackMan {
                                     //      cPlaybackMan_update polls it (ASYNCFILE_getstatus) and resets it to -1
 
     // Methods bound to their retail symbols by asm labels.
-    int isRecord() __asm__("cPlaybackMan_isRecord");
+    bool isRecord() __asm__("cPlaybackMan_isRecord");
     void update() __asm__("cPlaybackMan_update");
     void initLocation(const char* name) __asm__("cPlaybackMan_initLocation");
     void purgeLocation() __asm__("cPlaybackMan_purgeLocation");

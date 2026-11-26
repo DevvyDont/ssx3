@@ -34,9 +34,9 @@ struct cInputMap {
     float getValue1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
                     float config3, float config4, float config5, float config6, float config7)
         __asm__("cInputMap_getValue1");
-    int getState(cInputPad* inputPad, int id) __asm__("cInputMap_getState");
-    int getState1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
-                  float config3, float config4, float config5, float config6, float config7)
+    bool getState(cInputPad* inputPad, int id) __asm__("cInputMap_getState");
+    bool getState1(cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2,
+                   float config3, float config4, float config5, float config6, float config7)
         __asm__("cInputMap_getState1");
 };
 

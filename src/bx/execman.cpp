@@ -54,9 +54,9 @@ INCLUDE_ASM("bx/execman", cAppMan_isLoading);
  *
  * Nothing in the C calls it.
  *
- * @return 1 while a module is loading, else 0
+ * @return true while a module is loading
  */
-int cAppMan::isLoading()
+bool cAppMan::isLoading()
 {
     return ((int)LoadingModule) != 0;
 }

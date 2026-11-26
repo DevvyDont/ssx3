@@ -2,6 +2,7 @@
 #include "common.h"
 #include "bx/math3d.h"
 #include "be/beinterface.h"
+#include "be/bedbprofile.h"
 #include "main/gamemode.h"
 #include "ealib/snd.h"
 #include "sound/bankmonitor.h"
@@ -6946,10 +6947,10 @@ static inline int snd7B0Add(void* vself, int a, int b)
  * system's vtable slot 4 gets 0. Unless play-history event 0 is live: in the game paths kGAMEPATH_SINGLEEVENT and
  * kGAMEPATH_MULTIPLAYER (newRace.cGamePath) func_002A3170; otherwise on the last heat (cGameModeMan bIsLastHeat)
  * func_002A3400, func_002B1758(SpeechSys, 0) and, when func_002A4078 or func_002A40E8 is nonzero, mSongAnnouncePending
- * = 1 and mSongAnnounceNum = the current song's value from func_002B4908; on heat 1 the latter unconditionally, on heat
- * 2 under the same test. When mRaceMusicOn is 0 it is set to 1 and music slot 4 gets 37 (not replaying), or slot 4 gets
- * 37 when replaying with mReplaySongPlaying set. Finally play-history event 0 is moved to 50 ms past the monitor clock
- * and mGateDropHeat records iHeatNum.
+ * = 1 and mSongAnnounceNum = the current song's value from func_002B4908; in heat kHeat1 the latter unconditionally, in
+ * kHeat2 under the same test. When mRaceMusicOn is 0 it is set to 1 and music slot 4 gets 37 (not replaying), or slot 4
+ * gets 37 when replaying with mReplaySongPlaying set. Finally play-history event 0 is moved to 50 ms past the monitor
+ * clock and mGateDropHeat records iHeatNum.
  *
  */
 void cSSXAudio::CountdownGateDrop()
@@ -6984,10 +6985,10 @@ void cSSXAudio::CountdownGateDrop()
                 }
             } else {
                 int heatNum = gameModeMan[0];
-                if (heatNum == 1) {
+                if (heatNum == cGameModeMan::kHeat1) {
                     base->mSongAnnouncePending = 1;
                     base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
-                } else if (heatNum == 2) {
+                } else if (heatNum == cGameModeMan::kHeat2) {
                     if (func_002A4078(this) != 0 || func_002A40E8(this) != 0) {
                         base->mSongAnnouncePending = 1;
                         base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
@@ -8616,9 +8617,10 @@ extern "C" int func_0029F2B0_impl(unsigned int idx, int flag) __asm__("func_0029
 /**
  * Returns the speech-filter bit of a character identity, or 0 for a cheat identity.
  *
- * With @p flag 0 the identities map to 6: 0x1, 3: 0x2, 0: 0x4, 8: 0x8, 1: 0x10, 4: 0x20, 7: 0x40, 9: 0x80, 5: 0x100, 2:
- * 0x200 (by func_0029F3F8's grunt banks: eli, mac, mob, psy, kao, zoe, nat, vig, grf, ari); other identities and a
- * nonzero @p flag give 0. The unit declares it void(int, int).
+ * With @p flag 0 the identities (eBECharacters) map to kCHAR_ELISE 0x1, kCHAR_MAC 0x2, kCHAR_MOBY 0x4, kCHAR_PSYMON
+ * 0x8, kCHAR_KAORI 0x10, kCHAR_ZOE 0x20, kCHAR_NATE 0x40, kCHAR_VIGGO 0x80, kCHAR_GRIFF 0x100 and kCHAR_ALLEGRA 0x200
+ * (func_0029F3F8's grunt banks agree); other identities and a nonzero @p flag give 0. The unit declares it void(int,
+ * int).
  *
  * @param idx  the character identity (cRider_getIdentity)
  * @param flag  the cheat identity (cRider_getCheatIdentity); nonzero gives 0
@@ -8628,16 +8630,16 @@ extern "C" int func_0029F2B0_impl(unsigned int idx, int flag)
 {
     if (flag == 0) {
         switch (idx) {
-        case 6: return 1;
-        case 3: return 2;
-        case 0: return 4;
-        case 8: return 8;
-        case 1: return 0x10;
-        case 4: return 0x20;
-        case 9: return 0x80;
-        case 7: return 0x40;
-        case 5: return 0x100;
-        case 2: return 0x200;
+        case kCHAR_ELISE: return 1;
+        case kCHAR_MAC: return 2;
+        case kCHAR_MOBY: return 4;
+        case kCHAR_PSYMON: return 8;
+        case kCHAR_KAORI: return 0x10;
+        case kCHAR_ZOE: return 0x20;
+        case kCHAR_VIGGO: return 0x80;
+        case kCHAR_NATE: return 0x40;
+        case kCHAR_GRIFF: return 0x100;
+        case kCHAR_ALLEGRA: return 0x200;
         }
     }
     return 0;
@@ -8723,16 +8725,16 @@ extern "C" void func_0029F3F8(cSSXAudio* self)
 {
     char buf[64];
     switch (func_0029F378((cSSXAudio*)(((char*)self)), ((cAI*)cAudioInterface_getAI())->Riders[0])) {
-    case 6: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_eli_bnk); break;
-    case 3: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mac_bnk); break;
-    case 0: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mob_bnk); break;
-    case 8: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_psy_bnk); break;
-    case 1: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_kao_bnk); break;
-    case 4: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_zoe_bnk); break;
-    case 9: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_vig_bnk); break;
-    case 7: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_nat_bnk); break;
-    case 5: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_grf_bnk); break;
-    case 2: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_ari_bnk); break;
+    case kCHAR_ELISE: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_eli_bnk); break;
+    case kCHAR_MAC: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mac_bnk); break;
+    case kCHAR_MOBY: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mob_bnk); break;
+    case kCHAR_PSYMON: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_psy_bnk); break;
+    case kCHAR_KAORI: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_kao_bnk); break;
+    case kCHAR_ZOE: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_zoe_bnk); break;
+    case kCHAR_VIGGO: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_vig_bnk); break;
+    case kCHAR_NATE: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_nat_bnk); break;
+    case kCHAR_GRIFF: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_grf_bnk); break;
+    case kCHAR_ALLEGRA: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_ari_bnk); break;
     default: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_none_bnk); break;
     }
     cBankManager_BANK_SyncLoad(*(void**)self->MusicSys.mpVStreamSys, 0xE, buf, 0);
@@ -8792,11 +8794,11 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
  *
  * Skipped when speech is off, during a replay, after the rider has finished, or while another grunt plays; a
  * computer rider needs @p allowAI, or func_002A10C0() to allow it. The sample depends on the character and the
- * length
- * (character kind 14 picks randomly, or cycles for other lengths); local humans get a shorter range.
+ * length (character kind 14 picks randomly for keCharGruntLength_Long and keCharGruntLength_Short, or cycles for other
+ * lengths); local humans get a shorter range.
  *
  * @param vrider  the rider
- * @param length  grunt length (On Tour eCharGruntLength)
+ * @param length  grunt length (eCharGruntLength)
  * @param allowAI  nonzero to allow computer riders (On Tour allowAI)
  */
 void cSSXAudio::PlayGrunt(cRider* vrider, int length, int allowAI)
@@ -8816,10 +8818,10 @@ void cSSXAudio::PlayGrunt(cRider* vrider, int length, int allowAI)
     int kind = func_0029F620(self, rider);
     int prio;
     if (kind == 0xE) {
-        if (length == 1) {
+        if (length == keCharGruntLength_Long) {
             prio = (cSoundSys_SndRand(self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF)
                    * 3 / 0x7FFF;
-        } else if (length == 0) {
+        } else if (length == keCharGruntLength_Short) {
             prio = (cSoundSys_SndRand(self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF)
                    * 3 / 0x7FFF + 3;
         } else {
@@ -8829,7 +8831,7 @@ void cSSXAudio::PlayGrunt(cRider* vrider, int length, int allowAI)
                 self->mGruntPatchCycle = 0;
             }
         }
-    } else if (length == 1) {
+    } else if (length == keCharGruntLength_Long) {
         prio = func_0029F378(self, rider) * 2 + 1;
     } else {
         prio = func_0029F378(self, rider) * 2;
@@ -10121,8 +10123,9 @@ extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag) __asm_
 /**
  * Returns the character bit of an identity used for the rider spoken about, or 0x1000 for a cheat identity.
  *
- * With @p flag 0: 6 gives 0x1, 3: 0x2, 0: 0x4, 8: 0x8, 1: 0x10, 4: 0x20, 9: 0x40, 7: 0x80, 5: 0x100, 2: 0x200 (unlike
- * func_0029F2B0, 9 and 7 swap bits); anything else gives 0x1000. The unit declares it void(void*, int, int).
+ * With @p flag 0: kCHAR_ELISE gives 0x1, kCHAR_MAC 0x2, kCHAR_MOBY 0x4, kCHAR_PSYMON 0x8, kCHAR_KAORI 0x10, kCHAR_ZOE
+ * 0x20, kCHAR_VIGGO 0x40, kCHAR_NATE 0x80, kCHAR_GRIFF 0x100, kCHAR_ALLEGRA 0x200 (unlike func_0029F2B0, kCHAR_VIGGO
+ * and kCHAR_NATE swap bits); anything else gives 0x1000. The unit declares it void(void*, int, int).
  *
  * @param idx  the character identity
  * @param flag  the cheat identity; nonzero gives 0x1000
@@ -10132,16 +10135,16 @@ extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag)
 {
     if (flag == 0) {
         switch (idx) {
-        case 6: return 1;
-        case 3: return 2;
-        case 0: return 4;
-        case 8: return 8;
-        case 1: return 0x10;
-        case 4: return 0x20;
-        case 9: return 0x40;
-        case 7: return 0x80;
-        case 5: return 0x100;
-        case 2: return 0x200;
+        case kCHAR_ELISE: return 1;
+        case kCHAR_MAC: return 2;
+        case kCHAR_MOBY: return 4;
+        case kCHAR_PSYMON: return 8;
+        case kCHAR_KAORI: return 0x10;
+        case kCHAR_ZOE: return 0x20;
+        case kCHAR_VIGGO: return 0x40;
+        case kCHAR_NATE: return 0x80;
+        case kCHAR_GRIFF: return 0x100;
+        case kCHAR_ALLEGRA: return 0x200;
         }
     }
     return 0x1000;
@@ -10268,7 +10271,8 @@ extern "C" int func_002A1E68(void *self, cRider* obj)
 INCLUDE_ASM("sound/soundsys", func_002A1FA0);
 #ifdef SKIP_ASM
 /**
- * Returns a character group of a rider for speech: 2 for identities 1, 2, 4, 6, 1 for 0, 3, 5, 7, 8, 9, else 0.
+ * Returns a character group of a rider for speech: 2 for kCHAR_KAORI, kCHAR_ALLEGRA, kCHAR_ZOE and kCHAR_ELISE, 1 for
+ * the other six characters, else 0.
  *
  * A rider with a cheat identity gives 0. (By func_0029F3F8's grunt banks 1, 2, 4, 6 are kao, ari, zoe, eli: the women.)
  *
@@ -10279,17 +10283,17 @@ extern "C" int func_002A1FA0(void *self, void *obj)
 {
     if (cRider_getCheatIdentity(obj) == 0) {
         switch (cRider_getIdentity(obj)) {
-        case 1:
-        case 2:
-        case 4:
-        case 6:
+        case kCHAR_KAORI:
+        case kCHAR_ALLEGRA:
+        case kCHAR_ZOE:
+        case kCHAR_ELISE:
             return 2;
-        case 0:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 9:
+        case kCHAR_MOBY:
+        case kCHAR_MAC:
+        case kCHAR_GRIFF:
+        case kCHAR_NATE:
+        case kCHAR_PSYMON:
+        case kCHAR_VIGGO:
             return 1;
         default:
             return 0;
@@ -12242,13 +12246,13 @@ extern int cGameModeMan_iRanking[];
 /**
  * Records rider 0's result of the heat for the DJ's event-result lines (func_002A4660).
  *
- * In heat 1 (cGameModeMan iHeatNum) it first resets the tracking (func_002A4590(self, 0)). Passes rider 0's rank
- * cGameModeMan_iRanking[0], its frags (the metrix Totals.NumFrags, only when func_002A4078 holds, else 0), its uber tricks
- * (Totals.NumUberTricks) and whether it finished (mDidNotFinish == 0). cSSXAudio_OnFinishEvent calls it.
+ * In the first heat (cGameModeMan iHeatNum kHeat1) it first resets the tracking (func_002A4590(self, 0)). Passes rider
+ * 0's rank cGameModeMan_iRanking[0], its frags (the metrix Totals.NumFrags, only when func_002A4078 holds, else 0), its
+ * uber tricks (Totals.NumUberTricks) and whether it finished (mDidNotFinish == 0). cSSXAudio_OnFinishEvent calls it.
  */
 extern "C" void func_002A45C0(cSSXAudio* self)
 {
-    if (*(int*)SSXApp->GameModeMan == 1) {
+    if (SSXApp->GameModeMan->iHeatNum == cGameModeMan::kHeat1) {
         func_002A4590(self, 0);
     }
     int id = cGameModeMan_iRanking[0];
@@ -12274,9 +12278,9 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 /**
  * Adds one heat's result to the event-result tracking, and on the event's last heat marks the result as pending.
  *
- * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets unk_57F8, sets unk_57FC when @p finished is set and
- * the heat is 3, and stores the place (unk_5800) and the current location (unk_5810). The frag and uber-trick counts
- * are always added to unk_5804 and unk_5808. func_002A4770 picks the line from these.
+ * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets unk_57F8, sets unk_57FC when @p finished is
+ * set and the heat is cGameModeMan::kFinalHeat, and stores the place (unk_5800) and the current location (unk_5810).
+ * The frag and uber-trick counts are always added to unk_5804 and unk_5808. func_002A4770 picks the line from these.
  *
  * @param rank  the rider's rank (0 = first)
  * @param frags  the frags of the heat
@@ -12286,9 +12290,9 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void func_002A4660(cSSXAudio* self, int rank, int frags, int uberTricks, int finished)
 {
     cGameModeMan* gameModeMan = SSXApp->GameModeMan;
-    if (gameModeMan->bIsLastHeat != 0 || gameModeMan->iNextHeat <= *(int*)gameModeMan) {
+    if (gameModeMan->bIsLastHeat != 0 || gameModeMan->iNextHeat <= gameModeMan->iHeatNum) {
         self->unk_57F8 = 1;
-        if (finished != 0 && *(int*)gameModeMan == 3) {
+        if (finished != 0 && gameModeMan->iHeatNum == cGameModeMan::kFinalHeat) {
             self->unk_57FC = 1;
         }
         self->unk_5800 = rank;

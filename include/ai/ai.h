@@ -139,7 +139,7 @@ struct cAI {
     int isAILoadedAndReady() __asm__("cAI_isAILoadedAndReady");
     bool isRaceFinished() __asm__("cAI_isRaceFinished");
     void swaploadPathFile(int filename) __asm__("cAI_swaploadPathFile");
-    int swaploadInjectedPathFile(int uiSectionID, int mode, int data) __asm__("cAI_swaploadInjectedPathFile");
+    bool swaploadInjectedPathFile(int uiSectionID, int mode, int data) __asm__("cAI_swaploadInjectedPathFile");
     void prepareToPurgeComputerRiders() __asm__("cAI_prepareToPurgeComputerRiders");
     int isReadyToPurgeComputerRiders() __asm__("cAI_isReadyToPurgeComputerRiders");
     void prepareToPurgeComputerActors() __asm__("cAI_prepareToPurgeComputerActors");

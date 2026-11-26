@@ -794,7 +794,7 @@ extern sAmMat_0640 D_004FC420[];
  * lodInfo[lod] and each used part's first ref is drawn. Each draw also gets unk_140.y.
  *
  * @param lod  LOD slot, 0-3
- * @param x  draw flag for the part with id 2, probably the board (On Tour: additiveBoard)
+ * @param x  draw flag for the board part (id sAnimModelPart::kPartBoard; On Tour: additiveBoard)
  * @param y  draw flag for every other part (On Tour: additivePlayer)
  */
 void cAnimModel::render(int lod, int x, int y)
@@ -815,7 +815,7 @@ void cAnimModel::render(int lod, int x, int y)
                 sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
                 if (animModelLodRef->part != 0) {
                     ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FC420, 0, (const tMdfBlendedMatrix*)animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
-                    int additive = parts[j].id == 2 ? x : y;
+                    int additive = parts[j].id == sAnimModelPart::kPartBoard ? x : y;
                     ctx->DrawCharModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data,
                             ScaleVect.y, additive, 0);
                 }
@@ -830,7 +830,7 @@ void cAnimModel::render(int lod, int x, int y)
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
-                    int additive = animModelPart->id == 2 ? x : y;
+                    int additive = animModelPart->id == sAnimModelPart::kPartBoard ? x : y;
                     ctx->DrawCharModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data,
                             ScaleVect.y, additive, 0);
                 }
@@ -1397,6 +1397,10 @@ struct sSeqAM {
     char pad_0x10[4];
 };
 struct sEntAM {
+    // slot when the chunk has no channel-cache node (name ours). [U] getFramePartData reuses the node while slot is
+    // another value and otherwise takes one, storing this in the evicted owner's slot.
+    enum { kNoSlot = 0xFF };
+
     int off;                        // 0x0
     unsigned char kind;             // 0x4
     unsigned char slot;             // 0x5
@@ -1458,7 +1462,7 @@ void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* dest, unsign
     if (chunkChans < numChans) {
         numChans = chunkChans;
     }
-    if (ent->slot != 0xFF) {
+    if (ent->slot != sEntAM::kNoSlot) {
         node = D_pool_AM[kind] + ent->slot;
         sNodeAM** head = &D_head_AM[kind];
         if (node == *head) {
@@ -1479,7 +1483,7 @@ void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* dest, unsign
             node = gGenCacheBucket_AM(kind, chunkChans);
         } else if (node->owner != 0) {
             slot = node->owner->slot;
-            node->owner->slot = 0xFF;
+            node->owner->slot = sEntAM::kNoSlot;
             goto have_slot;
         }
         slot = (node - D_pool_AM[kind]);

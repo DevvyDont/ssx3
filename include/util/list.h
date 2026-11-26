@@ -45,7 +45,7 @@ public:
     int next() __asm__("cListNode_next");
     void setNext(int next) __asm__("cListNode_setNext");
     void destroyListNode() __asm__("cListNode_destroyListNode");
-    int isSentinel() __asm__("cListNode_isSentinel__FP9cListNode");
+    bool isSentinel() __asm__("cListNode_isSentinel__FP9cListNode");
     void removeFromList() __asm__("cListNode_removeFromList");
 };
 

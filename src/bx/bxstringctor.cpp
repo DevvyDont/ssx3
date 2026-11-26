@@ -2268,18 +2268,19 @@ extern "C" void pathREAD_tInt32(void* p);
 /**
  * Reads one attribute of an AI path from the path file's data.
  *
- * Id 0x64 reads the path attributes (+0x38) and id 0x65 the reset-path flag (+0x3C) with pathREAD_tInt32
+ * Id kFieldPathAttributes reads the path attributes (+0x38) and kFieldIsResetPath the reset-path flag (+0x3C) with
+ * pathREAD_tInt32
  * (pathREAD_tInt32); other ids are ignored. The C prototype of pathREAD_tInt32 leaves out the source pointer, which still
  * reaches it in $a1 from @p data.
  *
  * @param data  the field's data in the path file (On Tour p)
- * @param id  the field id: 0x64 or 0x65
+ * @param id  the field id (eDataField)
  */
 void cAIPath::populateData(int data, int id)
 {
-    if (id == 100) {
+    if (id == kFieldPathAttributes) {
         pathREAD_tInt32(&PathAttributes);
-    } else if (id == 101) {
+    } else if (id == kFieldIsResetPath) {
         pathREAD_tInt32(&IsResetPath);
     }
 }
@@ -2296,10 +2297,10 @@ extern "C" t4Vector cPath_getPathPos(cPath* self, int* inRange, float pathParam)
 /**
  * Finds where on an AI path a rider should be reset to, near a path position, and returns that point.
  *
- * Starting from *@p pathParam + 50 for both bounds, every range of the path's list that contains *@p pathParam adjusts them: type 16
- * raises the upper bound to its end, type 12 lowers the lower bound to its start, type 14 raises the lower bound to its
- * end. *@p pathParam becomes the lower bound unless that equals *@p pathParam, then the upper one, and cPath_getPathPos gives
- * the position.
+ * Starting from *@p pathParam + 50 for both bounds, every range of the path's list that contains *@p pathParam adjusts
+ * them: a jump (PE_Jump) raises the upper bound to its end, a reset zone's start (PE_ResetZoneStart) lowers the lower
+ * bound to its start, a reset zone's end (PE_ResetZoneEnd) raises the lower bound to its end. *@p pathParam becomes the
+ * lower bound unless that equals *@p pathParam, then the upper one, and cPath_getPathPos gives the position.
  *
  * @param path  the AI path (this); starts with its range list
  * @param pathParam  in: the rider's path position; out: the reset position (On Tour param)
@@ -2318,11 +2319,11 @@ extern "C" t4Vector cAIPath_getResetPos(cPath* path, float* pathParam)
             continue;
         if (pathEvent->ParamEnd < *pathParam)
             continue;
-        if (pathEvent->Type == 16)
+        if (pathEvent->Type == PE_Jump)
             hi = pathEvent->ParamEnd >? hi;
-        else if (pathEvent->Type == 12)
+        else if (pathEvent->Type == PE_ResetZoneStart)
             lo = pathEvent->ParamStart <? lo;
-        else if (pathEvent->Type == 14)
+        else if (pathEvent->Type == PE_ResetZoneEnd)
             lo = pathEvent->ParamEnd >? lo;
     }
     if (lo != *pathParam)
@@ -2338,23 +2339,23 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_isResetPermitted);
 #ifdef SKIP_ASM
 
 /**
- * Returns whether a reset is allowed at position @p x along an AI path: 0 inside any event of type 13, else 1.
+ * Returns whether a reset is allowed at position @p x along an AI path: not inside any PE_DisableReset event.
  *
- * Walks the path's events (count +0x0, 16-byte events at +0x4) for one of type 13 whose range [+0x8, +0xC] contains @p
- * x. Nothing in the C calls it.
+ * Walks the path's events (count +0x0, 16-byte events at +0x4) for a PE_DisableReset one whose range [+0x8, +0xC]
+ * contains @p x. Nothing in the C calls it.
  *
  * @param table  the AI path
  * @param x  the position along the path
- * @return 1 when a reset is allowed, else 0
+ * @return true when a reset is allowed
  */
-extern "C" int cAIPath_isResetPermitted(cPath* table, float x) {
+extern "C" bool cAIPath_isResetPermitted(cPath* table, float x) {
     int i;
     for (i = 0; i < table->NumEvents; i++) {
         tPathEventNode* entry = &(table->Events)[i];
-        if (!(x < entry->ParamStart) && !(entry->ParamEnd < x) && entry->Type == 13)
-            return 0;
+        if (!(x < entry->ParamStart) && !(entry->ParamEnd < x) && entry->Type == PE_DisableReset)
+            return false;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -2424,7 +2425,7 @@ int cTrackPath::getEventsInRange(tPathEventNode* out, int maxOut, float ldist, f
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_isForkInPath);
 #ifdef SKIP_ASM
 extern "C" float cPath_getLength(cPath* self);
-extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi);
+extern "C" bool cPath_isForkInPath(cTrackPath* self, float lo, float hi);
 
 /**
  * Tells whether the track path forks between two distances from the finish.
@@ -2434,9 +2435,9 @@ extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi);
  *
  * @param ldist  the first distance from the finish; negative for the path start (On Tour ldist)
  * @param hdist  the second distance from the finish; negative for the path end (On Tour hdist)
- * @return nonzero when there is a fork in that stretch
+ * @return true when there is a fork in that stretch
  */
-int cTrackPath::isForkInPath(float ldist, float hdist)
+bool cTrackPath::isForkInPath(float ldist, float hdist)
 {
     float lo;
     float hi;
@@ -2457,7 +2458,7 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_getFinishLineParam);
 #ifdef SKIP_ASM
 
 /**
- * Returns the start position (+0x8) of a track path's first type-1 event, or -1 when it has none.
+ * Returns the start position (+0x8) of a track path's first finish-line event (PE_FinishLine), or -1 when it has none.
  *
  * Walks the path's events (count +0x0, 16-byte events at +0x4). The AI uses it to find the first track path that has
  * one.
@@ -2470,7 +2471,7 @@ extern "C" float cTrackPath_getFinishLineParam(cPath* table)
     int i;
     for (i = 0; i < table->NumEvents; i++) {
         tPathEventNode* entry = &(table->Events)[i];
-        if (entry->Type == 1)
+        if (entry->Type == PE_FinishLine)
             return entry->ParamStart;
     }
     return -1.0f;
@@ -3259,24 +3260,24 @@ INCLUDE_ASM("bx/bxstringctor", cPath_isForkInPath);
 /**
  * Tells whether a fork event lies within a stretch of the path.
  *
- * Scans the event list (count +0x0, entries +0x4) for an entry of type 0x12 or 0x14 whose [min, max] overlaps [@p lo,
- * @p hi].
+ * Scans the event list (count +0x0, entries +0x4) for a fork (PE_Fork or PE_UserFork) whose [min, max] overlaps
+ * [@p lo, @p hi].
  *
  * @param lo  the start of the stretch (On Tour l)
  * @param hi  the end of the stretch (On Tour h)
- * @return 1 when a fork is found
+ * @return true when a fork is found
  */
-extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi)
+extern "C" bool cPath_isForkInPath(cTrackPath* self, float lo, float hi)
 {
     int i;
     for (i = 0; i < self->NumEvents; i++) {
         if (!(hi < self->Events[i].ParamStart) && !(self->Events[i].ParamEnd < lo)) {
-            if (self->Events[i].Type == 20 || self->Events[i].Type == 18) {
-                return 1;
+            if (self->Events[i].Type == PE_Fork || self->Events[i].Type == PE_UserFork) {
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -3297,19 +3298,19 @@ struct sBXBox2 {
  *
  * @param lo  the rectangle minimum (x, y)
  * @param hi  the rectangle maximum (x, y)
- * @return 1 when they overlap, else 0
+ * @return true when they overlap
  */
-int cPath::isPathInBox(float* lo, float* hi)
+bool cPath::isPathInBox(float* lo, float* hi)
 {
     if (hi[0] < MinBound[0])
-        return 0;
+        return false;
     if (hi[1] < MinBound[1])
-        return 0;
+        return false;
     if (lo[0] > MaxBound[0])
-        return 0;
+        return false;
     if (lo[1] > MaxBound[1])
-        return 0;
-    return 1;
+        return false;
+    return true;
 }
 #endif
 

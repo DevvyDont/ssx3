@@ -57,7 +57,7 @@ struct cPathSys {
     int loadAIPaths(char* data) __asm__("cPathSys_loadAIPaths");
     int getTrackPathIndex(cTrackPath* entry) __asm__("cPathSys_getTrackPathIndex");
     int getAIPathIndex(cAIPath* entry) __asm__("cPathSys_getAIPathIndex");
-    int isStartpoint(int type, int startpointId) __asm__("cPathSys_isStartpoint");
+    bool isStartpoint(int type, int startpointId) __asm__("cPathSys_isStartpoint");
     int getStartpointByIndex(int index) __asm__("cPathSys_getStartpointByIndex");
     int loadCheckpoints(char* cursor) __asm__("cPathSys_loadCheckpoints");
     int loadStartpoints(char* cursor) __asm__("cPathSys_loadStartpoints");
@@ -73,6 +73,16 @@ CHECK_OFFSET(cPathSys, CheckpointList, 0x018);
 CHECK_OFFSET(cPathSys, Data, 0x048);
 CHECK_OFFSET(cPathSys, m_bIsFileLoaded, 0x04C);
 CHECK_SIZE(cPathSys, 0x50);
+
+// A start point's kind (tPathStartpoint::Type). [O] On Tour's enum tPathStartType, names and values; [U] retail fits:
+// cSSXScriptEngine::FillOrientationFromStartPointInfo places a rider at its kPATH_START_Default point, and
+// cRider::putAtDropOffBC, cPathSys_getNearestSessionPoint and the map screen's session list use kPATH_START_Session.
+enum tPathStartType {
+    kPATH_START_Null = 0,
+    kPATH_START_Default = 1,
+    kPATH_START_Session = 2,
+    kPATH_START_Num = 3
+};
 
 // One race start point (On Tour struct tPathStartpoint, 0x28): its type / argument key, position and direction,
 // and the paths a rider starting there begins on. [R] cPathSys_getStartpoint walks Startpoints 0x28 apart comparing

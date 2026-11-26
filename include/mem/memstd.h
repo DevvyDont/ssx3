@@ -22,10 +22,29 @@ typedef struct FREEBLOCK FREEBLOCK;
 typedef struct MEMCLASS MEMCLASS;
 #endif
 
+// A block header's signature (MEMBLOCK / FREEBLOCK::signature): two letters, 'B' and a kind (names ours). [R]
+// MEMCLASS_create tags the bottom and top blocks and the free-list head 0x4253 ("BS"); [U] the free-list helpers tag
+// a free block 0x4246 ("BF"), and checksentinel checks each kind: a sentinel needs type 0x8000, a free block valid
+// links (checkfree), and an allocated block 0x424D ("BM") with type 0x2000 the end marker kMemEndMarker after its data.
+enum {
+    kMemSigSentinel = 0x4253,
+    kMemSigFree = 0x4246,
+    kMemSigAlloc = 0x424D
+};
+
+// The big-endian word "BEND" that checksentinel expects just past an allocated block's data when its type has 0x2000
+// (name ours). [U] checksentinel reads it byte by byte and records error 3 when it differs.
+enum { kMemEndMarker = 0x42454E44 };
+
+// _MEM_resize's size for "as large as the next block allows" (name ours). [U] _MEM_resize turns it into 0x40000000
+// before capping the size at the space up to the next block.
+enum { kMemResizeMax = -1 };
+
 // MEMBLOCK (0x10 [O]): the header in front of every block (MEM_initblock(MEMBLOCK* memblk, name, datasize, infosize,
 // memtype, prev, next) [O]).
 struct MEMBLOCK {
-    unsigned short signature;       // 0x0 [O]; [R] MEMCLASS_create stores 16979 in the bottom / top / free blocks
+    unsigned short signature;       // 0x0 [O]; [R] MEMCLASS_create stores 16979 (kMemSigSentinel) in the bottom / top /
+                                    //       free blocks
     unsigned short type;            // 0x2 [O] (memtype flags: 0x8000 bottom, 0x8100 top)
     int size;                       // 0x4 [O]
     struct MEMBLOCK* next;          // 0x8 [O]

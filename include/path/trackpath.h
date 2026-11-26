@@ -51,7 +51,7 @@ struct cTrackPath {
     void populateData(int data, int fieldId) __asm__("cTrackPath_populateData");
     int getEventsInRange(tPathEventNode* out, int maxOut, float ldist, float hdist)
         __asm__("cTrackPath_getEventsInRange");
-    int isForkInPath(float ldist, float hdist) __asm__("cTrackPath_isForkInPath");
+    bool isForkInPath(float ldist, float hdist) __asm__("cTrackPath_isForkInPath");
     float getBaseDistanceLeft() __asm__("cTrackPath_getBaseDistanceLeft");
 };
 

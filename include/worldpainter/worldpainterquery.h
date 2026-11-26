@@ -55,6 +55,15 @@ struct tWPRegion;
 // m_iRegionType and picks the tWPInGameData_<X> (0 MusicTrigger, 1 Mix, 2 Ambience, 3 Speech, 4 Camera, 5 Fog,
 // 6 LightGlow, 7 ScreenTint, 8 SkyBox, 9 Sun, 10 Surface, 11 Lighting, 12 Weather, 13 Danger). Bit fields: no
 // CHECK_OFFSET; the word is at offset 0.
+// The region type ids (tWorldPainterRegionType::m_id; names ours, after On Tour's constants kWPR_<X>). [O] On Tour's
+// kWPR_MusicTrigger .. kWPR_Danger are tWorldPainterRegionType(n, n), n = 0..13 in this order; [U] the
+// cWorldPainterQuery ctor creates the tWPInGameData_<X> of the same name for each id.
+enum eWPRegionId {
+    kWPRID_MusicTrigger = 0, kWPRID_Mix = 1, kWPRID_Ambience = 2, kWPRID_Speech = 3, kWPRID_Camera = 4,
+    kWPRID_Fog = 5, kWPRID_LightGlow = 6, kWPRID_ScreenTint = 7, kWPRID_SkyBox = 8, kWPRID_Sun = 9,
+    kWPRID_Surface = 10, kWPRID_Lighting = 11, kWPRID_Weather = 12, kWPRID_Danger = 13
+};
+
 struct tWorldPainterRegionType {
     unsigned int m_layer : 8;       // bits 0-7 [O]; [R] the ctor stores the low byte (sb); [U] queryPosition indexes
                                     //       the header's layer slots with it (lbu)

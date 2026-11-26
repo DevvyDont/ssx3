@@ -571,7 +571,10 @@ struct cRider : public cRiderState, public cBeing {
     /* 0x874 */ int mIsHuman; // [R] isHuman (cRider_isHuman); isComputer = !mIsHuman
     /* 0x878 */ int mIsActor; // [P] isActor (bracketed +0x114)
     /* 0x87C */ int mIsLocal; // [P] isLocal (bracketed +0x114)
-    /* 0x880 */ int mLoadStep; // [X] init state; 7 = initialised (cRider_initOnce)
+    // mLoadStep once cRider_loadRider has finished (name ours). [U] cRider_initOnce calls cRider_loadRider until
+    // mLoadStep reaches 7; cRider_isLoaded, cRider_initAlways and cRider_renderClip test it.
+    enum { kLoadStepDone = 7 };
+    /* 0x880 */ int mLoadStep; // [X] init state; kLoadStepDone (7) = initialised (cRider_initOnce)
     /* 0x884 */ int mRenderFlag; // [P] getRenderFlag (bracketed +0x114)
     enum { kSafeRenderTickUnset = -1 }; // mSafeRenderTick's "unset" (name ours): [U] cRider_isSafeToDelete, cAI_render
     /* 0x888 */ int mSafeRenderTick; // [P] getSafeRenderTick (bracketed +0x114); kSafeRenderTickUnset (-1) = unset
@@ -702,10 +705,10 @@ struct cRider : public cRiderState, public cBeing {
     int getNaturalAirMode() __asm__("cRider_getNaturalAirMode");
     void addFocusBox() __asm__("cRider_addFocusBox");
     void addRiderMetrix() __asm__("cRider_addRiderMetrix__FP6cRider");
-    int isSafeToDelete() __asm__("cRider_isSafeToDelete");
+    bool isSafeToDelete() __asm__("cRider_isSafeToDelete");
     void parsePartsFromBuf(int pData) __asm__("cRider_parsePartsFromBuf");
     void initOnce(int immediate) __asm__("cRider_initOnce");
-    int isLoaded() __asm__("cRider_isLoaded");
+    bool isLoaded() __asm__("cRider_isLoaded");
     void putAtDropOffBC() __asm__("cRider_putAtDropOffBC");
     void putAtStartpoint(int StartpointID, int StartpointType) __asm__("cRider_putAtStartpoint");
     void cleanupAfterPutAt(int notify) __asm__("cRider_cleanupAfterPutAt");
@@ -720,7 +723,7 @@ struct cRider : public cRiderState, public cBeing {
     void SetRiderLights() __asm__("cRider_SetRiderLights");
     void renderBody() __asm__("cRider_renderBody");
     void flushActiveLights() __asm__("cRider_flushActiveLights");
-    int isInVertZone() __asm__("cRider_isInVertZone");
+    bool isInVertZone() __asm__("cRider_isInVertZone");
     int estimateFinishTick() __asm__("cRider_estimateFinishTick");
     int estimateFinishScore() __asm__("cRider_estimateFinishScore");
     int getMissionInt(int query) __asm__("cRider_getMissionInt");
@@ -752,8 +755,8 @@ struct cRider : public cRiderState, public cBeing {
     int isLocal() __asm__("cRider_isLocal");
     int isRidingFlexRail() __asm__("cRider_isRidingFlexRail");
     void setVelocity(long long *velocity) __asm__("cRider_setVelocity");
-    int isOnRaceCourse() __asm__("cRider_isOnRaceCourse");
-    int isOnHalfPipeCourse() __asm__("cRider_isOnHalfPipeCourse");
+    bool isOnRaceCourse() __asm__("cRider_isOnRaceCourse");
+    bool isOnHalfPipeCourse() __asm__("cRider_isOnHalfPipeCourse");
     void setTrackPath(int value) __asm__("cRider_setTrackPath");
     void setAIPath(int value) __asm__("cRider_setAIPath");
     void setTotalPathDistance(float fparg0) __asm__("cRider_setTotalPathDistance");
@@ -816,7 +819,7 @@ struct cRider : public cRiderState, public cBeing {
     void renderFX() __asm__("cRider_renderFX");
     void updateDangerLevel() __asm__("cRider_updateDangerLevel");
     void resetForMission() __asm__("cRider_resetForMission");
-    int updateFinishTest() __asm__("cRider_updateFinishTest");
+    bool updateFinishTest() __asm__("cRider_updateFinishTest");
     void setUbersAllowed(int uberAllowedFlags) __asm__("cRider_setUbersAllowed");
     void updateWind() __asm__("cRider_updateWind");
     int syncCheckSum() __asm__("cRider_syncCheckSum");

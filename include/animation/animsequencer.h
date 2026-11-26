@@ -230,7 +230,7 @@ struct cAnimSequencer {
     void expireAll() __asm__("cAnimSequencer_expireAll");
     void fadeOutAndExpireAll(float time) __asm__("cAnimSequencer_fadeOutAndExpireAll");
     cAnimSequence* getSequence(int index) __asm__("cAnimSequencer_getSequence__FP14cAnimSequenceri");
-    int isPlaying(int id) __asm__("cAnimSequencer_isPlaying");
+    bool isPlaying(int id) __asm__("cAnimSequencer_isPlaying");
     int getPosition(int id) __asm__("cAnimSequencer_getPosition");
     void removeSequence(cAnimSequence* node) __asm__("cAnimSequencer_removeSequence");
     void* playAndLoop(int sequenceID, int anim, float val) __asm__("cAnimSequencer_playAndLoop");

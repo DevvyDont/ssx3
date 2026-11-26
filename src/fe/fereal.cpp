@@ -1300,7 +1300,7 @@ extern "C" void func_002B3A70(void* p);
 extern "C" void func_002B3A98(void* p);
 extern "C" void tMoviePlayOptions_SetDefaults(void* self);
 extern "C" int cMoviePlayer_init(void* p, void* q);
-extern "C" int cMoviePlayer_asyncPlay(void* self);
+extern "C" bool cMoviePlayer_asyncPlay(void* self);
 extern "C" void cMoviePlayer_asyncUpdate(void* self);
 extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 int cSSXAudio_PlayIntroMovieWithDJ(void* self);

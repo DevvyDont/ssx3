@@ -13,7 +13,8 @@
 
 // The virtual key codes getVKey (slot 42) reports for a USB keyboard key (names ours; the values are the Windows VK_*
 // codes). [U] cKeyboardPopup_onInputBegin moves the on-screen keyboard to the matching key: back to backspace, tab,
-// return to enter, shift, caps lock, escape, the four arrows, and F1..F10 to the quick-message keys Q1..Q10.
+// return to enter, shift, caps lock, escape, the four arrows, and F1..F10 to the quick-message keys Q1..Q10;
+// cMenuSys_input (util/menu) also turns insert and delete into the menu keys that insert and delete a character.
 enum tUIVirtualKey {
     kVK_Back = 8,
     kVK_Tab = 9,
@@ -25,6 +26,8 @@ enum tUIVirtualKey {
     kVK_Up = 38,
     kVK_Right = 39,
     kVK_Down = 40,
+    kVK_Insert = 45,
+    kVK_Delete = 46,
     kVK_F1 = 112,
     kVK_F2 = 113,
     kVK_F3 = 114,

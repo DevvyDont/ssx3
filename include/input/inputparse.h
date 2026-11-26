@@ -24,6 +24,33 @@
 
 #include "layout.h"
 
+// A button's modifier: what of the button a Reference / Button node reads (cInputExec::getButton). [O] On Tour's
+// enum eButtonModifiers, names and values; [P] preview asserts "DefaultButtonModifier != kButtonModifier_Default";
+// [U] buttonToRegister packs 6 (kButtonModifier_Num) per button, compileParseNode replaces kButtonModifier_Default by
+// the statement's default, and getButton reads held, pressed, released or repeat for 1 to 4.
+enum eButtonModifiers {
+    kButtonModifier_Value = 0,
+    kButtonModifier_Held = 1,
+    kButtonModifier_Pressed = 2,
+    kButtonModifier_Released = 3,
+    kButtonModifier_Repeat = 4,
+    kButtonModifier_Default = 5,
+    kButtonModifier_Num = 6
+};
+
+// The op codes of a compiled input-map program (tInputOpCode's opcode field). [O] On Tour's enum eInputOpCodes, names
+// and values; [U] compileParseNode emits kInputOpCodeOr .. kInputOpCodeNot for the operator nodes in On Tour's order,
+// and cInputExec_execute switches on them.
+enum eInputOpCodes {
+    kInputOpCodeLoad = 0, kInputOpCodeMove = 1, kInputOpCodeBranchFalse = 2, kInputOpCodeBranch = 3,
+    kInputOpCodeOr = 4, kInputOpCodeAnd = 5, kInputOpCodeGR = 6, kInputOpCodeGE = 7, kInputOpCodeLS = 8,
+    kInputOpCodeLE = 9, kInputOpCodeEQ = 10, kInputOpCodeNE = 11, kInputOpCodeAdd = 12, kInputOpCodeSub = 13,
+    kInputOpCodeMul = 14, kInputOpCodeDiv = 15, kInputOpCodeMax = 16, kInputOpCodeMin = 17, kInputOpCodePow = 18,
+    kInputOpCodeAtan2 = 19, kInputOpCodeAtan = 20, kInputOpCodeSin = 21, kInputOpCodeCos = 22, kInputOpCodeExp = 23,
+    kInputOpCodeLog = 24, kInputOpCodeFloor = 25, kInputOpCodeCeil = 26, kInputOpCodeAbs = 27, kInputOpCodeSqrt = 28,
+    kInputOpCodeMinRadian = 29, kInputOpCodeNeg = 30, kInputOpCodeNot = 31, kInputOpCodeEnd = 32
+};
+
 // One expression-tree node; 0x800 of them are embedded in the parser as a pool (cInputMapParser::ParseNodes).
 // On Tour: struct tParseNode { eNodeType Type; <anonymous union, members not in the dump>; } (size 0x10).
 // The union's member names are unknown; the members below are typed and named by retail use (Operand1..3 are the
@@ -74,6 +101,31 @@ CHECK_OFFSET(tIdentifier, Expression, 0x40);
 CHECK_SIZE(tIdentifier, 0x44);
 
 struct cInputMapParser {
+    // A token (CurrentToken). [O] On Tour's cInputMapParser::eToken, names and values; [P] preview assert
+    // "CurrentToken == kTokenIdent"; [U] readToken stores these numbers and the parse* functions compare them.
+    enum eToken {
+        kTokenEOF = 0, kTokenError = 1, kTokenIdent = 2, kTokenAssign = 3, kTokenPeriod = 4, kTokenSemicolon = 5,
+        kTokenQuestion = 6, kTokenColon = 7, kTokenComma = 8, kTokenOpenBracket = 9, kTokenCloseBracket = 10,
+        kTokenConstant = 11, kTokenOr = 12, kTokenAnd = 13, kTokenGR = 14, kTokenGE = 15, kTokenLS = 16,
+        kTokenLE = 17, kTokenEQ = 18, kTokenNE = 19, kTokenPlus = 20, kTokenMinus = 21, kTokenMul = 22,
+        kTokenDiv = 23, kTokenNot = 24, kTokenMax = 25, kTokenMin = 26, kTokenPow = 27, kTokenAtan2 = 28,
+        kTokenAtan = 29, kTokenSin = 30, kTokenCos = 31, kTokenExp = 32, kTokenLog = 33, kTokenFloor = 34,
+        kTokenCeil = 35, kTokenAbs = 36, kTokenSqrt = 37, kTokenMinRadian = 38
+    };
+    // The register number for "none" (name ours): registers are 0..63 (temporaries), 0x40.. (configs) and 0x60..
+    // (buttons). [U] compileParseNode allocates a temporary for a negative destination, emits nothing for a button or
+    // config read with this one, and starts a selection's condition register at it.
+    enum { kNoRegister = -1 };
+    // A parse node's type (tParseNode::Type). [O] On Tour's cInputMapParser::eNodeType, names and values; [U]
+    // freeParseNode and compileParseNode switch on them, the parse* functions build them.
+    enum eNodeType {
+        kNodeNull = 0, kNodeReference = 1, kNodeButton = 2, kNodeConfig = 3, kNodeConstant = 4, kNodeSelection = 5,
+        kNodeOr = 6, kNodeAnd = 7, kNodeGR = 8, kNodeGE = 9, kNodeLS = 10, kNodeLE = 11, kNodeEQ = 12, kNodeNE = 13,
+        kNodeAdd = 14, kNodeSub = 15, kNodeMul = 16, kNodeDiv = 17, kNodeNeg = 18, kNodeNot = 19, kNodeMax = 20,
+        kNodeMin = 21, kNodePow = 22, kNodeAtan2 = 23, kNodeAtan = 24, kNodeSin = 25, kNodeCos = 26, kNodeExp = 27,
+        kNodeLog = 28, kNodeFloor = 29, kNodeCeil = 30, kNodeAbs = 31, kNodeSqrt = 32, kNodeMinRadian = 33
+    };
+
     unsigned char* File;            // 0x00000 [O] (On Tour: const char*); [R] = file argument; [U] readToken's buffer
                                     //         start (end test File + FileLength)
     int FileLength;                 // 0x00004 [O]; [R] = length argument; [U] readToken's end test
@@ -196,7 +248,7 @@ struct cInputPreProcessor {
     // Methods bound to their retail symbols by asm labels.
     void* loadFileSize(char* path, int* outSize) __asm__("cInputPreProcessor_loadFileSize");
     void readFile(int path, int fn) __asm__("cInputPreProcessor_readFile");
-    int copyLine(tInputSource* isrc, int path, int fn) __asm__("cInputPreProcessor_copyLine");
+    bool copyLine(tInputSource* isrc, int path, int fn) __asm__("cInputPreProcessor_copyLine");
     void writeString(char* str) __asm__("cInputPreProcessor_writeString");
     void writeChar(char ch) __asm__("cInputPreProcessor_writeChar");
     void writeTagLine(int line, int name) __asm__("cInputPreProcessor_writeTagLine");

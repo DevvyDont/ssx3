@@ -100,11 +100,11 @@ void sti_003150F8(int init, int prio) __asm__("func_003150F8");
  * tables D_004FE420 .. D_004FE790 (four floats each) get constant values.
  *
  * @param init  nonzero to initialize (0 would be destruction; nothing is done then)
- * @param prio  the initialization priority; only 0xFFFF (the default) does anything
+ * @param prio  the initialization priority; only DEFAULT_INIT_PRIORITY does anything
  */
 void sti_003150F8(int init, int prio)
 {
-    if (prio == 0xFFFF && init) {
+    if (prio == DEFAULT_INIT_PRIORITY && init) {
         *(char*)&kAnimIDInvalid = -1;
         kAnimIDInvalid = (kAnimIDInvalid & 0xFF) | 0xFFFFFF00u;
         D_004FE420[0] = 1.0f;
@@ -649,11 +649,11 @@ void sti_00315A20(int init, int prio) __asm__("func_00315A20");
  * cfm_sav_Physics_BoardPress_kBPEasyBalanceRate, kBPHardBalanceRate -> cfm_sav_Physics_BoardPress_kBPHardBalanceRate).
  *
  * @param init  nonzero to initialize (0 would be destruction; nothing is done then)
- * @param prio  the initialization priority; only 0xFFFF (the default) does anything
+ * @param prio  the initialization priority; only DEFAULT_INIT_PRIORITY does anything
  */
 void sti_00315A20(int init, int prio)
 {
-    if (prio == 0xFFFF && init) {
+    if (prio == DEFAULT_INIT_PRIORITY && init) {
         cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[0] = 0.0f;
         cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[1] = 0.20000000298023224f;
         cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[2] = 0.4000000059604645f;

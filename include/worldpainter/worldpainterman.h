@@ -36,6 +36,12 @@
 //   1 (loading)             load(szFileName) with a valid async handle
 //   2 kWPSection_Loaded     update when the read completes, load(pData), load(szFileName) on a failed open
 //   3 kWPSection_Resolved   resolve
+enum eWPSectionState {
+    kWPSection_Unloaded = 0,
+    kWPSection_Loading = 1,         // name ours
+    kWPSection_Loaded = 2,
+    kWPSection_Resolved = 3
+};
 
 struct cWorldPainterSection {
     short m_iState;                 // 0x0 [O]; [P] "m_iState == kWPSection_Unloaded" etc.; [R] ctor 0; [U] update,

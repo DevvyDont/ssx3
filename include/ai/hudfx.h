@@ -10,6 +10,37 @@
 
 #include "layout.h"
 
+// A HUD effect's id (cHUDFX::ID, and the HUDfx slot it is shown in). [O] On Tour's enum eHUDFXID, names and values,
+// for the ids whose retail use fits On Tour's names (the others are left out, unchecked). [U]
+// cRiderMetrix_updateStaticHUD shows kHFX_PotentialPoints with the trick's points, kHFX_PotentialPower against the
+// boost bar, kHFX_WipeoutRecover with the wipeout's RecoverPercent in CS_Wipeout, the style meter group
+// (kHFX_StyleMeter to kHFX_StyleMultiplier) and the eight zones (kHFX_StyleZoneR to kHFX_StyleZoneDR, picked by the
+// flip-spin input angle) only in CS_Prewind / CS_Spin; cRiderMetrix_evAddCash shows kHFX_CashOrPointsAdded and the
+// matching kHFX_Earn*Cash / kHFX_EarnCollectible popup; hasActiveHUDfx and updateStaticHUD skip kHFX_Null.
+enum eHUDFXID {
+    kHFX_PotentialPoints = 1,
+    kHFX_PotentialPower = 5,
+    kHFX_WipeoutRecover = 11,
+    kHFX_StyleMeter = 12,
+    kHFX_StylePointer = 13,
+    kHFX_StyleLabel = 14,
+    kHFX_StyleMultiplier = 15,
+    kHFX_StyleZoneR = 16,
+    kHFX_StyleZoneUR = 17,
+    kHFX_StyleZoneU = 18,
+    kHFX_StyleZoneUL = 19,
+    kHFX_StyleZoneL = 20,
+    kHFX_StyleZoneDL = 21,
+    kHFX_StyleZoneD = 22,
+    kHFX_StyleZoneDR = 23,
+    kHFX_CashOrPointsAdded = 24,
+    kHFX_EarnBonusCash = 46,
+    kHFX_EarnTrickPointCash = 47,
+    kHFX_EarnComboCash = 48,
+    kHFX_EarnCollectible = 49,
+    kHFX_Null = 52
+};
+
 
 struct cHUDFX {
     int ID;                         // 0x000 [O] eHUDFXID

@@ -90,6 +90,25 @@ CHECK_OFFSET(tAdfTag, mTagFrame, 0x0);
 CHECK_OFFSET(tAdfTag, mTagID, 0x2);
 CHECK_SIZE(tAdfTag, 0x4);
 
+// How a compressed channel stores its values (tCmpChannel::channelType). [O] On Tour's enum eChanType, names and
+// values 0..10 (On Tour adds eCT_QuantizeByte3 .. eCT_QuantizeShort2, 11-17, which retail's 4-bit type field cannot
+// hold); [U] retail fits: dcmpInitFrameAccessor reads one constant for eCT_Constant, two for eCT_Linear and the
+// quantized types (On Tour's offset and scale), three for eCT_Quadratic, four for eCT_Cubic, three and a 16-bit
+// elbow for eCT_TwoLine and none for eCT_Raw, and dcmpGetFrame evaluates them that way.
+enum eChanType {
+    eCT_Zero = 0,
+    eCT_Constant = 1,
+    eCT_Linear = 2,
+    eCT_Quadratic = 3,
+    eCT_Cubic = 4,
+    eCT_TwoLine = 5,
+    eCT_QuantizeByte = 6,
+    eCT_QuantizeByte2 = 7,
+    eCT_QuantizeShort = 8,
+    eCT_Raw = 9,
+    eCT_Num = 10
+};
+
 // One decompression channel (On Tour struct tCmpChannel, 0x14: eChanType channelType, a 0x10-byte union uParam).
 // [R] gGenCacheBucket gives each cache node numChan of them ("AnimChanCache"); [U] dcmpInitFrameAccessor indexes them
 // with a 0x14 stride. [Staged by views2 group A.]

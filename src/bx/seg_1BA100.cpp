@@ -1058,15 +1058,15 @@ int cBankManager::BANK_Status(int bankId)
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Used);
 #ifdef SKIP_ASM
 /**
- * Returns whether bank @p bankId is loaded: its status (cBankManager +0xACC record) is 1.
+ * Returns whether bank @p bankId is loaded: its status (cBankManager +0xACC record) is USED.
  *
  * @param bankId  the bank index
- * @return 1 when the bank's status is 1 (used), else 0
+ * @return true when the bank's status is USED
  */
-int cBankManager::BANK_Used(int bankId)
+bool cBankManager::BANK_Used(int bankId)
 {
     cBankInstance *base = mBank;
-    return base[bankId].mBankStatus == 1;
+    return base[bankId].mBankStatus == USED;
 }
 #endif
 
@@ -1074,15 +1074,15 @@ int cBankManager::BANK_Used(int bankId)
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Loading);
 #ifdef SKIP_ASM
 /**
- * Returns whether bank @p bankId is loading: its status (cBankManager +0xACC record) is 2.
+ * Returns whether bank @p bankId is loading: its status (cBankManager +0xACC record) is LOADING.
  *
  * @param bankId  the bank index
- * @return 1 when the bank's status is 2 (loading), else 0
+ * @return true when the bank's status is LOADING
  */
-int cBankManager::BANK_Loading(int bankId)
+bool cBankManager::BANK_Loading(int bankId)
 {
     cBankInstance *base = mBank;
-    return base[bankId].mBankStatus == 2;
+    return base[bankId].mBankStatus == LOADING;
 }
 #endif
 
@@ -1098,18 +1098,18 @@ extern "C" int SNDbankinuse(int);
  * Returns whether a loaded bank is in use by the audio library.
  *
  * Between SNDSYS_entercritical and SNDSYS_leavecritical (the lock pair cBankSys_SFX_End also uses around library calls), checks that
- * the bank's status is 1 (used) and then whether SNDbankinuse returns 1 for its handle (cBankManager_BANK_Handle).
+ * the bank's status is USED and then whether SNDbankinuse returns true for its handle (cBankManager_BANK_Handle).
  *
  * @param idx  the bank index
- * @return 1 when the bank is loaded and SNDbankinuse reports 1, else 0
+ * @return 1 when the bank is loaded and SNDbankinuse reports it in use, else 0
  */
 int cBankManager::BANK_InUse(int idx)
 {
     int ready = 0;
     SNDSYS_entercritical();
-    bool ok = mBank[idx].mBankStatus != 1;
+    bool ok = mBank[idx].mBankStatus != USED;
     if (!ok) {
-        ready = SNDbankinuse(BANK_Handle(idx)) == 1;
+        ready = SNDbankinuse(BANK_Handle(idx)) == true;
     }
     SNDSYS_leavecritical();
     return ready;
@@ -1120,19 +1120,20 @@ int cBankManager::BANK_InUse(int idx)
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Handle);
 #ifdef SKIP_ASM
 /**
- * Returns bank @p bankId's library handle (the second word of its record) when the bank is loaded, else -1.
+ * Returns bank @p bankId's library handle (the second word of its record) when the bank is loaded, else
+ * kNoBankHandle (-1).
  *
  * @param bankId  the bank index
- * @return the bank handle, or -1 when its status is not 1 (used)
+ * @return the bank handle, or cBankInstance::kNoBankHandle when its status is not USED
  */
 int cBankManager::BANK_Handle(int bankId)
 {
     cBankInstance *base = mBank;
-    bool ne = base[bankId].mBankStatus != 1;
+    bool ne = base[bankId].mBankStatus != USED;
     if (!ne) {
         return base[bankId].mBankHandle;
     }
-    return -1;
+    return cBankInstance::kNoBankHandle;
 }
 #endif
 
@@ -1960,7 +1961,7 @@ void cQuadTree_resolve(void *);
  *
  * m_iQuadTreeOffset becomes m_pQuadTree (this + offset), which cQuadTree_resolve then resolves; m_iRegionOffset becomes
  * the region array pointer; each of the m_iNumRegions regions' m_iDataOffset becomes m_pData (this + offset), or 0
- * when the offset is -1.
+ * when the offset is tWPRegion::kNoOffset (-1).
  */
 void cWorldPainterLayer::resolve()
 {
@@ -1973,7 +1974,7 @@ void cWorldPainterLayer::resolve()
     int i;
     for (i = 0; i < m_iNumRegions; i++, region++) {
         int off = region->m_iDataOffset;
-        if (off != -1) {
+        if (off != tWPRegion::kNoOffset) {
             region->m_pData = (const tWPData*)((char*)this + off);
         } else {
             region->m_pData = 0;
@@ -2055,16 +2056,16 @@ extern sKey_AFB0 D_004A5350;
 /**
  * Constructs a static table of fourteen 8-byte keys (D_004A52E8..D_004A5350) and zeroes its header D_004A52E0.
  *
- * Runs only when @p initialize is set and @p priority is 0xFFFF. Key n (0-13) gets n in its low byte and n << 8 in the
- * rest of its first word. func_002BB0E0 calls it from the constructor table.
+ * Runs only when @p initialize is set and @p priority is DEFAULT_INIT_PRIORITY. Key n (0-13) gets n in its low byte and
+ * n << 8 in the rest of its first word. func_002BB0E0 calls it from the constructor table.
  *
  * @param initialize  nonzero to construct (0 would be destruction; nothing is done then)
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 // Static initializer (initialize, priority) for the key table.
 extern "C" void func_002BAFB0(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004A52E0) sPair_AFB0();
         new (&D_004A52E8) sKey_AFB0(0);
         new (&D_004A52F0) sKey_AFB0(1);
@@ -2300,18 +2301,18 @@ extern "C" void MEM_copy_B3F0(int, int, int) __asm__("MEM_copy");
 int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_WPFile[];
 /**
- * Finishes a section's file load once its async read completes (m_iState 1, loading).
+ * Finishes a section's file load once its async read completes (m_iState kWPSection_Loading).
  *
- * When ASYNCFILE_getstatus on m_iAsyncHandle returns 1, releases the read (ASYNCFILE_release gives its data and size)
- * and, for a non-empty read, allocates m_pWPHeader with operator new (tag "WPFile", str_WPFile): decompressed with
- * unpack when unpacksizez reports a packed size, otherwise copied with MEM_copy; the read buffer is then freed
- * (MEM_free). Sets m_iState to 2 (kWPSection_Loaded) either way, so a failed read leaves m_pWPHeader 0.
+ * When ASYNCFILE_getstatus on m_iAsyncHandle returns 1 (the same value), releases the read (ASYNCFILE_release gives its
+ * data and size) and, for a non-empty read, allocates m_pWPHeader with operator new (tag "WPFile", str_WPFile):
+ * decompressed with unpack when unpacksizez reports a packed size, otherwise copied with MEM_copy; the read buffer is
+ * then freed (MEM_free). Sets m_iState to 2 (kWPSection_Loaded) either way, so a failed read leaves m_pWPHeader 0.
  *
  * @param self_  the section
  */
 extern "C" void cWorldPainterSection_update(cWorldPainterSection* self_) {
     short st = *(short*)self_;
-    if (st == 1 && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
+    if (st == kWPSection_Loading && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
         int packData = 0;
         int packSize = 0;
         ASYNCFILE_release_B3F0(self_->m_iAsyncHandle, &packData, &packSize);
@@ -2434,9 +2435,10 @@ struct sReloc_B5F0 {
 /**
  * Relocates a section's loaded data and marks it resolved.
  *
- * A header whose version word is not 0x10 is dropped (freed with cMemMan_free unless m_iStreamed). For a valid header,
- * each of its layer slots becomes header + offset and is resolved with cWorldPainterLayer_resolve, or becomes 0 when
- * the offset is -1. m_iState is set to 3 (kWPSection_Resolved) in every case, even with no data.
+ * A header whose version word is not tWPHeader::kVersion is dropped (freed with cMemMan_free unless m_iStreamed). For a
+ * valid header, each of its layer slots becomes header + offset and is resolved with cWorldPainterLayer_resolve, or
+ * becomes 0 when the offset is tWPRegion::kNoOffset. m_iState is set to kWPSection_Resolved in every case, even with
+ * no data.
  *
  * @param vself  the section
  */
@@ -2445,11 +2447,11 @@ void cWorldPainterSection::resolve()
 {
     cWorldPainterSection* self = this;
     if (((sReloc_B5F0*)self->m_pWPHeader) == 0) {
-        self->m_iState = 3;
+        self->m_iState = kWPSection_Resolved;
         return;
     }
     {
-        if (((sReloc_B5F0*)self->m_pWPHeader)->magic != 0x10) {
+        if (((sReloc_B5F0*)self->m_pWPHeader)->magic != tWPHeader::kVersion) {
             if (self->m_iStreamed == 0) {
                 cMemMan_free(((sReloc_B5F0*)self->m_pWPHeader));
             }
@@ -2458,7 +2460,7 @@ void cWorldPainterSection::resolve()
         if (((sReloc_B5F0*)self->m_pWPHeader) != 0) {
             int* layerPtr = ((sReloc_B5F0*)self->m_pWPHeader)->offs;
             for (int i = 0; i < ((sReloc_B5F0*)self->m_pWPHeader)->count; i++, layerPtr++) {
-                if (*layerPtr == -1) {
+                if (*layerPtr == tWPRegion::kNoOffset) {
                     *layerPtr = 0;
                 } else {
                     *layerPtr = (int)((sReloc_B5F0*)self->m_pWPHeader) + *layerPtr;
@@ -2467,7 +2469,7 @@ void cWorldPainterSection::resolve()
             }
         }
     }
-    self->m_iState = 3;
+    self->m_iState = kWPSection_Resolved;
 }
 #endif
 
@@ -2811,11 +2813,11 @@ extern "C" void func_002BBC38_impl(int initialize, int priority) __asm__("func_0
  * constants D_004D42B8..D_004D4628 from literal values. func_002BC4E0 calls it from the constructor table.
  *
  * @param initialize  nonzero to construct (nothing is done for 0)
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_002BBC38_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         D_004A535C = 0;
         D_004A5358 = 0;
         new (&D_004A5360) sFlags_2BBC38(0, 0);
@@ -4668,11 +4670,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, tWPData_MusicTrigger* rhs) {
+extern "C" bool tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, tWPData_MusicTrigger* rhs) {
     if ((lhs->m_Type) != (rhs->m_Type)) {
-        return 0;
+        return false;
     }
     return (lhs->m_Value) == (rhs->m_Value);
 }
@@ -4688,9 +4690,9 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, tWPData_Mix* rhs) {
+extern "C" bool tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, tWPData_Mix* rhs) {
     return (lhs->m_MixPreset) == (rhs->m_MixPreset);
 }
 #endif
@@ -4705,9 +4707,9 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, tWPData_Ambience* rhs) {
+extern "C" bool tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, tWPData_Ambience* rhs) {
     return (lhs->m_BankID) == (rhs->m_BankID);
 }
 #endif
@@ -4722,9 +4724,9 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, tWPData_Speech* rhs) {
+extern "C" bool tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, tWPData_Speech* rhs) {
     return (lhs->m_SpeechID) == (rhs->m_SpeechID);
 }
 #endif
@@ -4763,16 +4765,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, tWPData_Fog* rhs) {
-    if (lhs->m_FogDensity != rhs->m_FogDensity) return 0;
-    if (lhs->m_FogNear != rhs->m_FogNear) return 0;
-    if (lhs->m_FogFar != rhs->m_FogFar) return 0;
-    if (lhs->m_FogColourR != rhs->m_FogColourR) return 0;
-    if (lhs->m_FogColourG != rhs->m_FogColourG) return 0;
-    if (lhs->m_FogColourB != rhs->m_FogColourB) return 0;
-    return 1;
+extern "C" bool tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, tWPData_Fog* rhs) {
+    if (lhs->m_FogDensity != rhs->m_FogDensity) return false;
+    if (lhs->m_FogNear != rhs->m_FogNear) return false;
+    if (lhs->m_FogFar != rhs->m_FogFar) return false;
+    if (lhs->m_FogColourR != rhs->m_FogColourR) return false;
+    if (lhs->m_FogColourG != rhs->m_FogColourG) return false;
+    if (lhs->m_FogColourB != rhs->m_FogColourB) return false;
+    return true;
 }
 #endif
 
@@ -4787,17 +4789,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, tWPData_LightGlow* rhs) {
-    if (lhs->m_LightGlowCutoff != rhs->m_LightGlowCutoff) return 0;
-    if (lhs->m_LightGlowCutoffScale != rhs->m_LightGlowCutoffScale) return 0;
-    if (lhs->m_LightGlowCopyIntensity != rhs->m_LightGlowCopyIntensity) return 0;
-    if (lhs->m_LightGlowSourceIntensity != rhs->m_LightGlowSourceIntensity) return 0;
-    if (lhs->m_LightGlowFrameIntensity != rhs->m_LightGlowFrameIntensity) return 0;
-    if (lhs->m_LightGlowBlend2 != rhs->m_LightGlowBlend2) return 0;
-    if (lhs->m_LightGlowBlend3 != rhs->m_LightGlowBlend3) return 0;
-    return 1;
+extern "C" bool tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, tWPData_LightGlow* rhs) {
+    if (lhs->m_LightGlowCutoff != rhs->m_LightGlowCutoff) return false;
+    if (lhs->m_LightGlowCutoffScale != rhs->m_LightGlowCutoffScale) return false;
+    if (lhs->m_LightGlowCopyIntensity != rhs->m_LightGlowCopyIntensity) return false;
+    if (lhs->m_LightGlowSourceIntensity != rhs->m_LightGlowSourceIntensity) return false;
+    if (lhs->m_LightGlowFrameIntensity != rhs->m_LightGlowFrameIntensity) return false;
+    if (lhs->m_LightGlowBlend2 != rhs->m_LightGlowBlend2) return false;
+    if (lhs->m_LightGlowBlend3 != rhs->m_LightGlowBlend3) return false;
+    return true;
 }
 #endif
 
@@ -4812,16 +4814,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, tWPData_ScreenTint* rhs) {
-    if (lhs->m_ScreenTintScaleR != rhs->m_ScreenTintScaleR) return 0;
-    if (lhs->m_ScreenTintScaleG != rhs->m_ScreenTintScaleG) return 0;
-    if (lhs->m_ScreenTintScaleB != rhs->m_ScreenTintScaleB) return 0;
-    if (lhs->m_ScreenTintOffsetR != rhs->m_ScreenTintOffsetR) return 0;
-    if (lhs->m_ScreenTintOffsetG != rhs->m_ScreenTintOffsetG) return 0;
-    if (lhs->m_ScreenTintOffsetB != rhs->m_ScreenTintOffsetB) return 0;
-    return 1;
+extern "C" bool tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, tWPData_ScreenTint* rhs) {
+    if (lhs->m_ScreenTintScaleR != rhs->m_ScreenTintScaleR) return false;
+    if (lhs->m_ScreenTintScaleG != rhs->m_ScreenTintScaleG) return false;
+    if (lhs->m_ScreenTintScaleB != rhs->m_ScreenTintScaleB) return false;
+    if (lhs->m_ScreenTintOffsetR != rhs->m_ScreenTintOffsetR) return false;
+    if (lhs->m_ScreenTintOffsetG != rhs->m_ScreenTintOffsetG) return false;
+    if (lhs->m_ScreenTintOffsetB != rhs->m_ScreenTintOffsetB) return false;
+    return true;
 }
 #endif
 
@@ -4859,19 +4861,19 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, tWPData_Sun* rhs) {
-    if (lhs->m_SunPitchOffset != rhs->m_SunPitchOffset) return 0;
-    if (lhs->m_SunYawOffset != rhs->m_SunYawOffset) return 0;
-    if (lhs->m_SunColorR != rhs->m_SunColorR) return 0;
-    if (lhs->m_SunColorG != rhs->m_SunColorG) return 0;
-    if (lhs->m_SunColorB != rhs->m_SunColorB) return 0;
-    if (lhs->m_SunIntensity != rhs->m_SunIntensity) return 0;
-    if (lhs->m_SunType != rhs->m_SunType) return 0;
-    if (lhs->m_LensIntensity != rhs->m_LensIntensity) return 0;
-    if (lhs->m_SunRadius != rhs->m_SunRadius) return 0;
-    return 1;
+extern "C" bool tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, tWPData_Sun* rhs) {
+    if (lhs->m_SunPitchOffset != rhs->m_SunPitchOffset) return false;
+    if (lhs->m_SunYawOffset != rhs->m_SunYawOffset) return false;
+    if (lhs->m_SunColorR != rhs->m_SunColorR) return false;
+    if (lhs->m_SunColorG != rhs->m_SunColorG) return false;
+    if (lhs->m_SunColorB != rhs->m_SunColorB) return false;
+    if (lhs->m_SunIntensity != rhs->m_SunIntensity) return false;
+    if (lhs->m_SunType != rhs->m_SunType) return false;
+    if (lhs->m_LensIntensity != rhs->m_LensIntensity) return false;
+    if (lhs->m_SunRadius != rhs->m_SunRadius) return false;
+    return true;
 }
 #endif
 
@@ -4913,16 +4915,16 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData_Lighting* rhs) {
-    if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return 0;
-    if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return 0;
-    if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return 0;
-    if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return 0;
-    if (lhs->m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return 0;
-    if (lhs->m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return 0;
-    return 1;
+extern "C" bool tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData_Lighting* rhs) {
+    if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return false;
+    if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return false;
+    if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return false;
+    if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return false;
+    if (lhs->m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return false;
+    if (lhs->m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return false;
+    return true;
 }
 #endif
 
@@ -4937,68 +4939,68 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Weather (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
 // Environment property compare: all 19 current values against the incoming set.
-extern "C" int tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, tWPData_Weather* rhs) {
+extern "C" bool tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, tWPData_Weather* rhs) {
     if ((lhs->m_SnowIntensity) != (rhs->m_SnowIntensity)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_FlakeSize) != (rhs->m_FlakeSize)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_WindIntensity) != (rhs->m_WindIntensity)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_WindRotation) != (rhs->m_WindRotation)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_PlayerWindIntensity) != (rhs->m_PlayerWindIntensity)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_Temperature) != (rhs->m_Temperature)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFlurries) != (rhs->m_SnowFlurries)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowGravityMultiplier) != (rhs->m_SnowGravityMultiplier)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFluffItensity) != (rhs->m_SnowFluffItensity)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFluffWindIntensity) != (rhs->m_SnowFluffWindIntensity)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_LightningChance) != (rhs->m_LightningChance)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFlakeColourA) != (rhs->m_SnowFlakeColourA)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFlakeColourR) != (rhs->m_SnowFlakeColourR)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFlakeColourG) != (rhs->m_SnowFlakeColourG)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFlakeColourB) != (rhs->m_SnowFlakeColourB)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFluffColourA) != (rhs->m_SnowFluffColourA)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFluffColourR) != (rhs->m_SnowFluffColourR)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFluffColourG) != (rhs->m_SnowFluffColourG)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_SnowFluffColourB) != (rhs->m_SnowFluffColourB)) {
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -5013,16 +5015,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_isEqual);
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
- * @return 1 if every value matches, else 0
+ * @return true if every value matches
  */
-extern "C" int tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, tWPData_Danger* rhs) {
+extern "C" bool tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, tWPData_Danger* rhs) {
     if ((lhs->m_Level) != (rhs->m_Level)) {
-        return 0;
+        return false;
     }
     if ((lhs->m_PointRate) != (rhs->m_PointRate)) {
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 #endif
 

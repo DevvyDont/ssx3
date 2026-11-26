@@ -75,7 +75,28 @@ enum tMCOverlayManagerState {
     kMCOverlay_CardChanged = 56
 };
 
+// A save file's kind (cMCOverlayManager::mFileType). [O] On Tour's enum tMCFileType, names and values; [U] retail
+// fits: getFileName names them "REP", "GAM" and "SET", readSetFileType allows 4 replays, 6 profiles (sized by
+// cBESaveInterface_getSaveProfileSize) and 1 settings file, and the ctor starts with kMCFileType_Settings.
+enum tMCFileType {
+    kMCFileType_Replay = 0,
+    kMCFileType_Profile = 1,
+    kMCFileType_Settings = 2
+};
+
+// What the manager is doing (cMCOverlayManager::mAction). [O] On Tour's enum tMCOverlayManagerAction, names and
+// values; [U] update runs ManagerLoadSaveUpdate for kMCOVAction_LoadSave and managerDeviceSelectUpdate for
+// kMCOVAction_DeviceSelect, which readSetFileType / writeSetFileType start with.
+enum tMCOverlayManagerAction {
+    kMCOVAction_LoadSave = 0,
+    kMCOVAction_DeviceSelect = 1
+};
+
 struct cMCOverlayManager {
+    // mMaxDevices before the card system was asked (name ours). [R] the ctor stores -1; [U] managerDeviceSelectUpdate
+    // fills it from getMaxDevicesSupported while it is -1, and OnHighlightNextDevice / PrevDevice do nothing then.
+    enum { kMaxDevicesUnknown = -1 };
+
     // --- 45 front-end callbacks. [R] the ctor fills all 45 words with default stubs whose kind matches On Tour's
     // return type slot for slot: void slots get cMCOverlayManager_CallbackMemcard (returns nothing), bool slots cMCOverlayManager_CallbackFalse /
     // cMCOverlayManager_CallbackTrue / cMCOverlayManager_Callbackpdate (return 0 / 1 / 0). [U] cFEMemCard_initFEMemCard (fe/festatetrophyroom.cpp) stores
@@ -191,7 +212,7 @@ struct cMCOverlayManager {
     int mCheckAllowed;          // 0x340 [O] (bool); [R] ctor 0; [U] cMCOverlayManager_ManagerStart sets 1; fememcardcallbacks.cpp tests it
     cMCOverlayManager_sdevice mDevices[1]; // 0x344 [O]; [R] MEM_fill(&mDevices[0], 0, 0xE0); [U] indexed by device in
                                            //       GatherDeviceInfo1 / GetDevice*String / ManagerLoadSaveUpdate
-    int mMaxDevices;            // 0x424 [O]; [R] ctor -1; [U] getMaxDevicesSupported returns it
+    int mMaxDevices;            // 0x424 [O]; [R] ctor -1 (kMaxDevicesUnknown); [U] getMaxDevicesSupported returns it
     int mSelectedDevice;        // 0x428 [O]; [U] cMCOverlayManager_selectDevice stores it; the fe passes it to GetDeviceDisplayString;
                                 //       preview 0x328
     int mCurrCheckDevice;       // 0x42C [O]; [U] checkDevice stores its arg; getDeviceState compares it with mSelectedDevice
@@ -227,10 +248,10 @@ struct cMCOverlayManager {
     void PollForNoCard(int pollNoCard) __asm__("cMCOverlayManager_PollForNoCard");
     void ShowCardChangeNotify(int showCardChange) __asm__("cMCOverlayManager_ShowCardChangeNotify");
     void RetryToInit(int retryToInit) __asm__("cMCOverlayManager_RetryToInit");
-    int isManagerDone() __asm__("cMCOverlayManager_isManagerDone");
-    int isManagerLoaded() __asm__("cMCOverlayManager_isManagerLoaded");
+    bool isManagerDone() __asm__("cMCOverlayManager_isManagerDone");
+    bool isManagerLoaded() __asm__("cMCOverlayManager_isManagerLoaded");
     int isManagerSaved() __asm__("cMCOverlayManager_isManagerSaved");
-    int hasCardStatusCriticalError() __asm__("cMCOverlayManager_hasCardStatusCriticalError");
+    bool hasCardStatusCriticalError() __asm__("cMCOverlayManager_hasCardStatusCriticalError");
     void readSetFileType(int mode) __asm__("cMCOverlayManager_readSetFileType");
     void readFile(int file, int data, int size) __asm__("cMCOverlayManager_readFile");
     void readClose() __asm__("cMCOverlayManager_readClose");
@@ -243,7 +264,7 @@ struct cMCOverlayManager {
     void ManagerLoseState() __asm__("cMCOverlayManager_ManagerLoseState");
     void update() __asm__("cMCOverlayManager_update");
     void managerDeviceSelectUpdate() __asm__("cMCOverlayManager_managerDeviceSelectUpdate");
-    int isLoadCardStatusErrorUnacknowledged() __asm__("cMCOverlayManager_isLoadCardStatusErrorUnacknowledged");
+    bool isLoadCardStatusErrorUnacknowledged() __asm__("cMCOverlayManager_isLoadCardStatusErrorUnacknowledged");
     void ManagerLoadSaveUpdate() __asm__("cMCOverlayManager_ManagerLoadSaveUpdate");
     void UpdateInitCardsCheck() __asm__("cMCOverlayManager_UpdateInitCardsCheck");
     void UpdateInitFileCheckWait() __asm__("cMCOverlayManager_UpdateInitFileCheckWait");
