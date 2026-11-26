@@ -70,7 +70,7 @@ static inline t4Vector vu0DivHP(const t4Vector& v, float s)
 void cHandplantMotion::gainFocus()
 {
     cRider* rider = mRider;
-    *(t4Vector*)&rider->mVelocity = vu0DivHP(vu0SubHP(*(t4Vector*)&SplinePos, *(t4Vector*)&rider->mPosition), EnterSec);
+    rider->mVelocity = vu0DivHP(vu0SubHP(SplinePos, rider->mPosition), EnterSec);
 }
 #endif
 
@@ -90,37 +90,18 @@ extern "C" float fSin(float x);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern t4Vector t4vect_XAxis;
 
-struct sQ_8BA0 {
-    float x, y, z, w;
+// t4Vector with the constructors the handplant math uses (this one stores w first).
+struct sQ_8BA0 : t4Vector {
     sQ_8BA0() {}
     sQ_8BA0(const float& ax, const float& ay, const float& az, const float& aw) { w = aw; x = ax; y = ay; z = az; }
-} __attribute__((aligned(16)));
+};
 
 struct sV_8BA0 : sQ_8BA0 {
     sV_8BA0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-struct sHP_8BA0 {
-    sQ_8BA0 start;   // 0x00
-    sQ_8BA0 vel;     // 0x10
-    sQ_8BA0 v20;     // 0x20
-    sQ_8BA0 target;  // 0x30
-    sQ_8BA0 v40;     // 0x40
-    sQ_8BA0 lpos;    // 0x50
-    sQ_8BA0 lvel;    // 0x60
-    sQ_8BA0 axis;    // 0x70
-    float spin;      // 0x80
-    float dur;       // 0x84
-    float time;      // 0x88
-    float f8C;       // 0x8C
-    int f90;         // 0x90
-    int f94;         // 0x94
-    char pad98[0x8];
-    char* rider;     // 0xA0
-};
-
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sQ_8BA0 Sub_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
+static inline sQ_8BA0 Sub_8BA0(const t4Vector& a, const t4Vector& b)
 {
     sQ_8BA0 r;
     __asm__(
@@ -135,7 +116,7 @@ static inline sQ_8BA0 Sub_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sQ_8BA0 Normalize_8BA0(const sQ_8BA0& v)
+static inline sQ_8BA0 Normalize_8BA0(const t4Vector& v)
 {
     sQ_8BA0 r;
     __asm__(
@@ -156,7 +137,7 @@ static inline sQ_8BA0 Normalize_8BA0(const sQ_8BA0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
+static inline float Dot_8BA0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -176,7 +157,7 @@ static inline float Dot_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_8BA0(const sQ_8BA0& v)
+static inline float Len_8BA0(const t4Vector& v)
 {
     float r;
     int t;
@@ -197,7 +178,7 @@ static inline float Len_8BA0(const sQ_8BA0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sQ_8BA0 Cross_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
+static inline sQ_8BA0 Cross_8BA0(const t4Vector& a, const t4Vector& b)
 {
     sQ_8BA0 r;
     __asm__(
@@ -214,7 +195,7 @@ static inline sQ_8BA0 Cross_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void DivEq_8BA0(sQ_8BA0& v, float s)
+static inline void DivEq_8BA0(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -231,7 +212,7 @@ static inline void DivEq_8BA0(sQ_8BA0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sQ_8BA0 Div_8BA0(const sQ_8BA0& v, float s)
+static inline sQ_8BA0 Div_8BA0(const t4Vector& v, float s)
 {
     sQ_8BA0 r;
     int t;
@@ -250,7 +231,7 @@ static inline sQ_8BA0 Div_8BA0(const sQ_8BA0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void ScaleEq_8BA0(sQ_8BA0& v, float s)
+static inline void ScaleEq_8BA0(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -265,7 +246,7 @@ static inline void ScaleEq_8BA0(sQ_8BA0& v, float s)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQ_8BA0 QuatMul_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
+static inline sQ_8BA0 QuatMul_8BA0(const t4Vector& a, const t4Vector& b)
 {
     sQ_8BA0 r;
     __asm__(
@@ -287,14 +268,14 @@ static inline sQ_8BA0 QuatMul_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
     return r;
 }
 
-static inline sQ_8BA0 AxisAngle_8BA0(const sQ_8BA0& axis, float angle)
+static inline sQ_8BA0 AxisAngle_8BA0(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
     return sQ_8BA0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-static inline sQ_8BA0 Conj_8BA0(const sQ_8BA0& q)
+static inline sQ_8BA0 Conj_8BA0(const t4Vector& q)
 {
     sQ_8BA0 r(q.x, q.y, q.z, q.w);
     r.x = -r.x;
@@ -303,7 +284,7 @@ static inline sQ_8BA0 Conj_8BA0(const sQ_8BA0& q)
     return r;
 }
 
-static inline sQ_8BA0 up_8BA0(cRider* r) { return *(sQ_8BA0*)&r->mMatrix.row[2]; }
+static inline t4Vector up_8BA0(cRider* r) { return r->mMatrix.row[2]; }
 
 /**
  * Starts a handplant on a wall hit: records the start and plant points and the rotation to the plant pose.
@@ -326,23 +307,23 @@ static inline sQ_8BA0 up_8BA0(cRider* r) { return *(sQ_8BA0*)&r->mMatrix.row[2];
 void cHandplantMotion::init(tIntersectInfo* hit, float dur)
 {
     cRider* rider = mRider;
-    *(sQ_8BA0*)&InitPos = *(sQ_8BA0*)&rider->mPosition;
-    *(sQ_8BA0*)&ExitVel = (const sQ_8BA0&)t4vect_Zero_8BA0;
-    *(sQ_8BA0*)&SplineDir = *(sQ_8BA0*)&hit->Inorm;
-    *(sQ_8BA0*)&SplinePos = *(sQ_8BA0*)&hit->Ipos;
+    InitPos = rider->mPosition;
+    ExitVel = t4vect_Zero_8BA0;
+    SplineDir = hit->Inorm;
+    SplinePos = hit->Ipos;
     sAnimModelBone* head = rider->mAnimModel->bones + rider->mBoneHead;
-    *(sQ_8BA0*)&ApproachDir = Normalize_8BA0(Sub_8BA0(*(sQ_8BA0*)&SplinePos, *(sQ_8BA0*)&head->pos));
+    ApproachDir = Normalize_8BA0(Sub_8BA0(SplinePos, head->pos));
     EnterSec = dur;
     ElapsedSec = 0.0f;
-    InitTangentSpeed = Dot_8BA0(*(sQ_8BA0*)&mRider->mVelocity, *(sQ_8BA0*)&SplineDir);
+    InitTangentSpeed = Dot_8BA0(mRider->mVelocity, SplineDir);
     int isRail = 0;
     if (hit->Spline)
         isRail = hit->Spline->m_iFlags & 1;
     IsRailSpline = isRail;
-    sQ_8BA0 idealOrientation = *(sQ_8BA0*)&mRider->mRotation;
+    t4Vector idealOrientation = mRider->mRotation;
     sQ_8BA0 deltaRot;
     sQ_8BA0 axis;
-    axis = Cross_8BA0(up_8BA0(mRider), (const sQ_8BA0&)t4vect_ZAxis_8BA0);
+    axis = Cross_8BA0(up_8BA0(mRider), t4vect_ZAxis_8BA0);
     float len = Len_8BA0(axis);
     if (0.001f < len) {
         DivEq_8BA0(axis, len);
@@ -354,7 +335,7 @@ void cHandplantMotion::init(tIntersectInfo* hit, float dur)
     fwd.y = 2.0f * (idealOrientation.x * idealOrientation.y + idealOrientation.w * idealOrientation.z);
     fwd.z = 2.0f * (idealOrientation.x * idealOrientation.z - idealOrientation.w * idealOrientation.y);
     fwd.w = 0.0f;
-    sQ_8BA0 flatSplineDir = *(sQ_8BA0*)&SplineDir;
+    t4Vector flatSplineDir = SplineDir;
     flatSplineDir.z = 0.0f;
     sQ_8BA0 n = Normalize_8BA0(flatSplineDir);
     IsToeside = Dot_8BA0(n, fwd) < 0.0f;
@@ -369,24 +350,24 @@ void cHandplantMotion::init(tIntersectInfo* hit, float dur)
         deltaRot = AxisAngle_8BA0(axis, func_0031C128(len <? 1.0f));
         idealOrientation = QuatMul_8BA0(deltaRot, idealOrientation);
     }
-    deltaRot = QuatMul_8BA0(idealOrientation, Conj_8BA0(*(sQ_8BA0*)&mRider->mRotation));
+    deltaRot = QuatMul_8BA0(idealOrientation, Conj_8BA0(mRider->mRotation));
     float ang;
     if (0.0f < deltaRot.w) {
         ang = (1.5707963705062866f - func_0031C128(deltaRot.w <? 1.0f)) * 2.0f;
         SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
-            *(sQ_8BA0*)&SnapRotationAxis = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f),
+            SnapRotationAxis = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f),
                     fSin(ang * 0.5f));
         else
-            *(sQ_8BA0*)&SnapRotationAxis = (const sQ_8BA0&)t4vect_XAxis;
+            SnapRotationAxis = t4vect_XAxis;
     } else {
         ang = (1.5707963705062866f - func_0031C128(-(deltaRot.w >? -1.0f))) * 2.0f;
         SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
-            *(sQ_8BA0*)&SnapRotationAxis = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f),
+            SnapRotationAxis = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f),
                     fSin(ang * -0.5f));
         else
-            *(sQ_8BA0*)&SnapRotationAxis = (const sQ_8BA0&)t4vect_XAxis;
+            SnapRotationAxis = t4vect_XAxis;
     }
     SnapRotationRate = SnapRotationRate / EnterSec;
 }
@@ -620,7 +601,7 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
 }
 #endif
 
-extern "C" void* cRider_updateBoundBox(int, int);
+extern "C" void* cRider_updateBoundBox(cRider* rider, int a1);
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_resolve__FPv);
@@ -633,7 +614,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_resolve__FPv);
  */
 void* cHandplantMotion::resolve()
 {
-    return cRider_updateBoundBox((int)mRider, 0);
+    return cRider_updateBoundBox(mRider, 0);
 }
 #endif
 
@@ -792,7 +773,7 @@ extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
         t4Vector sideVel;
         vu0ScaleTo_9548(sideVel, n, sideSpeed);
         vu0SubTo_9548(exitVel, alongVel, sideVel);
-        *(t4Vector*)&handplant->ExitVel.x = exitVel;
+        handplant->ExitVel = exitVel;
         float z = 0.0f;
         if (handplant->IsRailSpline != 0)
             z = 10.0f;
@@ -812,7 +793,7 @@ extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
             k = 15.0f;
         float kphScale = 27.77777862548828f;
         vu0ScaleTo_9548(exitVel, n, k * kphScale);
-        *(t4Vector*)&handplant->ExitVel.x = exitVel;
+        handplant->ExitVel = exitVel;
         if (handplant->IsRailSpline != 0)
             z = 5.0f;
         k = z * kphScale;
@@ -832,7 +813,7 @@ extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
             k = 15.0f;
         float kphScale = 27.77777862548828f;
         vu0ScaleTo_9548(exitVel, n, k * kphScale);
-        *(t4Vector*)&handplant->ExitVel.x = exitVel;
+        handplant->ExitVel = exitVel;
         if (handplant->IsRailSpline != 0)
             z = 5.0f;
         k = z * kphScale;
@@ -841,7 +822,7 @@ extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
     }
     if (kind == kHM_ExitBalanceCenter) {
         vu0ScaleTo_9548(n, handplant->SplineDir, 833.3333740234375f);
-        *(t4Vector*)&handplant->ExitVel.x = n;
+        handplant->ExitVel = n;
         handplant->ExitVel.z += 416.66668701171875f;
         return true;
     }
@@ -986,10 +967,10 @@ void cAirMotion::step()
     cAirPredictor_updateFlightPath(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, rider->mTimeScale * 0.01666666753590107f);
     cRider* rider1 = mRider;
     {
-        t4Vector up = *(t4Vector*)&rider1->RiderRoot.row[2];
-        *(t4Vector*)&rider1->mGroundNormal = up;
+        t4Vector up = rider1->RiderRoot.row[2];
+        rider1->mGroundNormal = up;
     }
-    *(t4Vector*)&mRider->GroundVelocity = *(t4Vector*)t4vect_Zero;
+    mRider->GroundVelocity = *(t4Vector*)t4vect_Zero;
     int st = mRider->mAirPredictor->SimState;
     int ok = 0;
     if (st == cAirPredictor::kSS_SimDone || st == cAirPredictor::kSS_SimCheckObjectsDone) ok = 1;
@@ -1026,8 +1007,8 @@ void cAirMotion::step()
             cAirPredictor* ap4 = rider4->mAirPredictor;
             char* tgt = (char*)&ap4->GuessLandNormal;
             if (ap4->GuessLandNormal.z < 0.30000001192092896f || *(int*)this != 0) {
-                t4Vector frontAlign = *(t4Vector*)&ap4->GuessLandVelocity;
-                if (vu0Dot_139A20(frontAlign, *(t4Vector*)&rider4->mMatrix.row[1]) < 0.0f) {
+                t4Vector frontAlign = ap4->GuessLandVelocity;
+                if (vu0Dot_139A20(frontAlign, rider4->mMatrix.row[1]) < 0.0f) {
                     vu0ScaleEq_139A20(frontAlign, -1.0f);
                 }
                 cRider* rider5 = mRider;
@@ -1265,7 +1246,7 @@ void cAirMotion::resolve()
     float intParam = cAirMotion_intersectBoard_9C88(this, &hit);
     float vn = 0.0f;
     if (intParam >= 0.5f) {
-        vn = vu0Dot_139C88(vu0Sub_139C88(mRider->mVelocity, (*(t4Vector*)&hit.Ivel)), (*(t4Vector*)&hit.Inorm));
+        vn = vu0Dot_139C88(vu0Sub_139C88(mRider->mVelocity, hit.Ivel), hit.Inorm);
     }
     if (intParam >= 0.5f && vn < 0.0f) {
         float spd = vu0Len_139C88(mRider->mVelocity);
@@ -1279,14 +1260,14 @@ void cAirMotion::resolve()
             cRider_checkForReset(((char*)mRider), 0, 1);
             return;
         }
-        float pen = vu0Dot_139C88(vu0Sub_139C88((*(t4Vector*)&hit.Ipos), mRider->mPosition),
-                (*(t4Vector*)&hit.Inorm)) - surf->PowderDepth3G;
+        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.Ipos, mRider->mPosition),
+                hit.Inorm) - surf->PowderDepth3G;
         if (0.0f < pen) {
-            t4Vector push = vu0Scale_139C88((*(t4Vector*)&hit.Inorm), pen);
+            t4Vector push = vu0Scale_139C88(hit.Inorm, pen);
             cRider_moveFromCollision(((char*)mRider), &push);
         }
-        mRider->mGroundNormal = (*(t4Vector*)&hit.Inorm);
-        mRider->GroundVelocity = (*(t4Vector*)&hit.Ivel);
+        mRider->mGroundNormal = hit.Inorm;
+        mRider->GroundVelocity = hit.Ivel;
         mRider->LastLandSpeed = -vn;
         mRider->LastGroundNormal = mRider->mGroundNormal;
         if (hit.Patch != 0) {
@@ -1319,8 +1300,8 @@ void cAirMotion::resolve()
                             vu0Dot_139C88(row_139C88(landedRider, 1), landedRider->mGroundNormal))));
         mRider->mGroundSide = vu0Cross_139C88(mRider->mGroundNormal, mRider->mGroundForward);
         mRider->mSurfaceType = hit.Stype;
-        mRider->mGroundContactPoint = (*(t4Vector*)&hit.Ipos);
-        mRider->SnowOffset = vu0Dot_139C88(vu0Sub_139C88(mRider->mPosition, (*(t4Vector*)&hit.Ipos)),
+        mRider->mGroundContactPoint = hit.Ipos;
+        mRider->SnowOffset = vu0Dot_139C88(vu0Sub_139C88(mRider->mPosition, hit.Ipos),
                 mRider->mGroundNormal);
         if (cRiderAnimBase_getCurrentAnimCategory(mRider->mRiderAnim, 2) == kANCAT_Uber) {
             if (!cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events.isSet1(2)) anim = 361;
@@ -1378,9 +1359,9 @@ void cAirMotion::resolve()
         }
         if (anim != kAID_Invalid) {
             tCollideInfo info;
-            info.Pos = (*(t4Vector*)&hit.Ipos);
+            info.Pos = hit.Ipos;
             info.Direct = vu0Normalize_139C88(mRider->mVelocity);
-            info.Reflect = (*(t4Vector*)&hit.Inorm);
+            info.Reflect = hit.Inorm;
             info.Vel = absf_139C88(vn);
             cRider_flagEventWipeout_9C88(((char*)mRider), anim, 0, mRider->mSurfaceType, &info);
         } else {
@@ -1437,7 +1418,7 @@ void cAirMotion::resolve()
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_intersectBoard);
 #ifdef SKIP_ASM
 extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, int n, float r);
-extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, tIntHint* hint);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector vu0Scale_13A7B0(const t4Vector& v, float s)
@@ -1499,11 +1480,11 @@ float cAirMotion::intersectBoard(tIntersectInfo* hit)
 {
     cRider* rider = mRider;
     t4Vector* pt = (t4Vector*)&rider->mAnimModel->bones[rider->mBoneBoardRoot];
-    t4Vector dir = *(t4Vector*)&rider->RiderRoot.row[2];
+    t4Vector dir = rider->RiderRoot.row[2];
     char seg[176];
     cWorldLine_cWorldLine(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
     cRider* rider2 = mRider;
-    float hitParam = cOverlapList_terrainIntersect1(rider2->mOverlapList, seg, hit, (int)rider2->mLineHint);
+    float hitParam = cOverlapList_terrainIntersect1(rider2->mOverlapList, seg, hit, rider2->mLineHint);
     if (hitParam >= 0.0f)
     {
         tInstanceRecord* hitObject = hit->Inst;
@@ -1538,7 +1519,7 @@ void cAirMotion::chooseFakieLandAnim(float normSpeed)
     if (normSpeed < -2222.22216796875f)
     {
         cRiderAnimBase_play_i(mRider->mRiderAnim, 65, 0, -1.0f);
-        *(int*)&mRider->mSpinRate = 0;
+        mRider->mSpinRate = 0.0f;
     }
     else
     {
@@ -1563,7 +1544,7 @@ void cAirMotion::chooseLandAnim(float normSpeed)
     if (normSpeed < -2222.22216796875f)
     {
         cRiderAnimBase_play_i(mRider->mRiderAnim, 0x3F, 0, -1.0f);
-        *(int*)&mRider->mSpinRate = 0;
+        mRider->mSpinRate = 0.0f;
     }
     else
     {
@@ -1588,7 +1569,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_checkTerrainCollisions);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
-extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, tIntHint* hint);
 extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
@@ -1693,7 +1674,7 @@ bool cAirMotion::checkTerrainCollisions(t4Vector* outp)
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !rider->isHuman());
     sph.rejectNormal = riderUp_AA48(mRider);
     sph.useRejectNormal = 1;
-    float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, (int)mRider->mWallHint);
+    float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, mRider->mWallHint);
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return false; }
     {
@@ -1786,17 +1767,17 @@ void cRailslideMotion::gainFocus()
     rider3->mSlewed[8].target = 0.0f;
     rider3->mSlewed[8].cur = 0.0f;
     rider3->mSlewed[8].rate = 0.0f;
-    *(int*)&RailLeanAngle = 0;
-    *(int*)&RailTime = 0;
-    *(int*)&RailOffCenter = 0;
-    *(int*)&mRider->mSpinRate = 0;
+    RailLeanAngle = 0.0f;
+    RailTime = 0.0f;
+    RailOffCenter = 0.0f;
+    mRider->mSpinRate = 0.0f;
     cRider* rider4 = mRider;
     rider4->mSlewed[9].rate = 0.05000000447034836f;
-    *(int*)&rider4->mSlewed[9].target = 0;
+    rider4->mSlewed[9].target = 0.0f;
     ForceNaturalAir = 0;
-    *(int*)&CrookedSlideAngle = 0;
+    CrookedSlideAngle = 0.0f;
     *(&PrevPos) = *(&mRider->mPosition);
-    *(int*)&StuckSec = 0;
+    StuckSec = 0.0f;
 }
 #endif
 
@@ -1883,8 +1864,8 @@ void cRailslideMotion::setCrookedAngle(t4Vector* railnorm)
     t4Vector upNorm = cRailslideMotion_getRailUpNorm(((char*)this), railnorm);
     t4Vector sideNorm = vu0Cross_13ADC0(upNorm, *railnorm);
     cRider* rider = mRider;
-    CrookedSlideAngle = Atan2_13ADC0(vu0DotV_13ADC0(*(t4Vector*)&rider->mMatrix.row[1], sideNorm),
-                                          vu0DotV_13ADC0(*(t4Vector*)&rider->mMatrix.row[1], *railnorm));
+    CrookedSlideAngle = Atan2_13ADC0(vu0DotV_13ADC0(rider->mMatrix.row[1], sideNorm),
+                                          vu0DotV_13ADC0(rider->mMatrix.row[1], *railnorm));
     float lim = 0.7853982448577881f;
     CrookedSlideAngle = Clamp_13ADC0(CrookedSlideAngle, -lim, lim);
 }
@@ -2184,7 +2165,7 @@ void cRailslideMotion::step()
         if (hit.Spline)
             SplineID = hit.Spline->m_RID;
         else
-            *(unsigned int*)&SplineID = 0xFFFFFFFF;
+            SplineID = 0xFFFFFFFF;
         if (hit.Inst) {
             cInstanceNode* handler = hit.Inst->m_pActiveNode;
             if (handler) {
@@ -2566,7 +2547,7 @@ void cRailslideMotion::resolve()
     cRider_updateBoundBox_v(((char*)mRider), 0);
     if (ForceNaturalAir != 0) {
         cRider* rider = (cRider*)(((char*)mRider));
-        *(int*)&rider->mSlewed[5].target = 0;
+        rider->mSlewed[5].target = 0.0f;
         rider->mSlewed[5].rate = 0.03333333507180214f;
         cRider_applyJumpPop(((char*)mRider), -1.0f);
     }
@@ -2587,9 +2568,9 @@ void cRailslideMotion::resolve()
         cSSXAudio_Lift((char*)gSSXAudio, ((char*)mRider));
     }
     cRider* rider = (cRider*)(((char*)mRider));
-    float len = vu0Length_BFA8(*(t4Vector*)&rider->mVelocity);
+    float len = vu0Length_BFA8(rider->mVelocity);
     if (rider->TerminalVelocity < len)
-        vu0ScaleEq_BFA8(*(t4Vector*)&rider->mVelocity, rider->TerminalVelocity / len);
+        vu0ScaleEq_BFA8(rider->mVelocity, rider->TerminalVelocity / len);
 }
 #endif
 
@@ -2598,7 +2579,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_checkTerrainCollisio
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
-extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, tIntHint* hint);
 extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
@@ -2735,17 +2716,17 @@ void cRailslideMotion::checkTerrainCollisions()
     cWorldRider sph;
     cRider* rider = mRider;
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !rider->isHuman());
-    float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, (int)mRider->mWallHint);
+    float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, mRider->mWallHint);
     if (penetration < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
-        float dot = vu0Dot_13C140(mRider->mGroundNormal, (*(t4Vector*)&hit.Inorm));
+        float dot = vu0Dot_13C140(mRider->mGroundNormal, hit.Inorm);
         if (dot < -0.9998999834060669f) { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            (*(t4Vector*)&hit.Inorm) = vu0Normalize_13C140(vu0Sub_13C140((*(t4Vector*)&hit.Inorm),
+            (hit.Inorm) = vu0Normalize_13C140(vu0Sub_13C140(hit.Inorm,
                     vu0Scale_13C140(mRider->mGroundNormal, dot)));
     }
     {
-        t4Vector push = vu0Scale_13C140(vu0Scale_13C140((*(t4Vector*)&hit.Inorm), 1.100000023841858f), penetration);
+        t4Vector push = vu0Scale_13C140(vu0Scale_13C140(hit.Inorm, 1.100000023841858f), penetration);
         cRider_moveFromCollision(((char*)mRider), &push);
         cRider_updateOrientationImplicit(((char*)mRider));
         t4Vector posDelta = vu0Sub_13C140(PrevPos, mRider->mPosition);
@@ -2757,25 +2738,25 @@ void cRailslideMotion::checkTerrainCollisions()
             StuckSec += 0.01666666753590107f;
             if (0.5f < StuckSec) {
                 t4Vector fwd = mRider->mMatrix.row[1];
-                float dd = vu0Dot_13C140(fwd, (*(t4Vector*)&hit.Inorm));
+                float dd = vu0Dot_13C140(fwd, hit.Inorm);
                 float spd = 1111.111083984375f;
                 if (dd < -0.9990000128746033f) {
                     mRider->mVelocity = vu0Scale_13C140(fwd, spd);
                 } else {
-                    t4Vector pushDir = vu0Sub_13C140(fwd, vu0Scale_13C140((*(t4Vector*)&hit.Inorm), dd));
+                    t4Vector pushDir = vu0Sub_13C140(fwd, vu0Scale_13C140(hit.Inorm, dd));
                     mRider->mVelocity = vu0Scale_13C140(vu0Normalize_13C140(pushDir), spd);
                 }
             }
         }
-        float dot2 = vu0Dot_13C140(vu0Scale_13C140((*(t4Vector*)&hit.Inorm), -1.0f), mRider->mVelocity);
+        float dot2 = vu0Dot_13C140(vu0Scale_13C140(hit.Inorm, -1.0f), mRider->mVelocity);
         if (dot2 < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
         t4Vector n = vu0Normalize_13C140(mRider->mVelocity);
         float newNormVel = dot2 * 0.5f < 27.77777862548828f ? 27.77777862548828f : dot2 * 0.5f;
-        vu0AddEq_13C140(mRider->mVelocity, vu0Scale_13C140((*(t4Vector*)&hit.Inorm), dot2 + newNormVel));
+        vu0AddEq_13C140(mRider->mVelocity, vu0Scale_13C140(hit.Inorm, dot2 + newNormVel));
         tCollideInfo info;
-        info.Pos = (*(t4Vector*)&hit.Ipos);
+        info.Pos = hit.Ipos;
         info.Direct = n;
-        info.Reflect = (*(t4Vector*)&hit.Inorm);
+        info.Reflect = hit.Inorm;
         info.Vel = newNormVel;
         cRider_reactToCollision(((char*)mRider), &info, hit.Stype);
     }
@@ -2889,7 +2870,7 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
     }
     self->AITickOnLoseFocus = 0;
     self->AITickOnGainFocus = 0;
-    *(int*)&self->mRider->ChatterMag = 0;
+    self->mRider->ChatterMag = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -3100,7 +3081,7 @@ float cGroundMotion::getBoostForce(tSurfData* snow)
         return 0.0f;
     float totalBoost = 0.0f;
     float pathFactor = 0.0f;
-    int fl = *(short*)&mRider->SurfaceFlags;
+    int fl = (short)mRider->SurfaceFlags;
     if (fl & 0x10)
     {
         pathFactor = 1.0f;
@@ -3348,7 +3329,7 @@ struct tIntersectInfoInit : tIntersectInfo {
     tIntersectInfoInit() {}
 };
 
-extern "C" int cOverlapList_terrainIntersect(void* world, void* seg, tIntersectInfo* hits, int max, int flags);
+extern "C" int cOverlapList_terrainIntersect(void* world, void* seg, tIntersectInfo* hits, int max, tIntHint* hint);
 extern t4Vector t4vect_ZAxis;
 extern t4Vector t4vect_Zero_v __asm__("t4vect_Zero");
 
@@ -3560,7 +3541,7 @@ bool cGroundMotion::setupGroundVectors(tIntersectInfo* out, float* dist)
     char seg[176];
     cWorldLine_cWorldLine(seg, lineBottom, lineTop, 2, 0.5f);
     tIntersectInfoInit hits[64];
-    int n = cOverlapList_terrainIntersect(mRider->mOverlapList, seg, hits, 0x40, (int)mRider->mLineHint);
+    int n = cOverlapList_terrainIntersect(mRider->mOverlapList, seg, hits, 0x40, mRider->mLineHint);
     if (n == 0) {
         mRider->mGroundNormal = t4vect_ZAxis;
         mRider->GroundVelocity = t4vect_Zero_v;
@@ -3895,8 +3876,9 @@ static inline float clamp_13D818(float v, float lo, float hi)
 static inline t4Vector front_13D818(cRider* rider) { return rider->mMatrix.row[1]; }
 static inline t4Vector up_13D818(cRider* rider) { return rider->mMatrix.row[2]; }
 
-struct sVec4C_13D818 : t4Vector {
-    sVec4C_13D818(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+// A t4Vector built from four floats, stored in x, y, z, w order.
+struct sVec4XYZW : t4Vector {
+    sVec4XYZW(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
 };
 
 // Move cur toward target by at most step.
@@ -4029,7 +4011,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float lift = (push <? (snow->Gravity + snow->Gravity)) / c;
     t4Vector up = vu0Add_13D818(vu0Scale_13D818(self->mRider->mGroundNormal, c), vu0Scale_13D818(self->mRider->mGroundSide, sinBank));
     push -= lift;
-    sVec4C_13D818 grav(0.0f, 0.0f, -snow->Gravity, 0.0f);
+    sVec4XYZW grav(0.0f, 0.0f, -snow->Gravity, 0.0f);
     t4Vector force = vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(
         vu0Scale_13D818(self->mRider->mGroundNormal, push), vu0Scale_13D818(up, lift)),
         vu0Scale_13D818(self->mRider->mGroundForward, steer + drag)),
@@ -4209,7 +4191,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     } else {
         if (dist < 5.0f) {
             t4Vector biasedNormal = vu0Normalize_13D818(vu0Add_13D818(self->mRider->mGroundNormal,
-                sVec4C_13D818(0.0f, 0.0f, self->mRider->mGroundNormal.z * 0.5f, 0.0f)));
+                sVec4XYZW(0.0f, 0.0f, self->mRider->mGroundNormal.z * 0.5f, 0.0f)));
             t4Vector axis = vu0Cross_13D818(biasedNormal, up_13D818(self->mRider));
             float al = vu0Len_13D818(axis);
             if (0.0010000000474974513f < al) {
@@ -4395,12 +4377,12 @@ void cGroundMotion::resolve()
         int fl;
         if (idx == eST_Rock_WipeOut) {
             tCollideInfo info;
-            (*(t4Vector*)&info.Pos) = *(t4Vector*)&rider->mPosition;
-            (*(t4Vector*)&info.Direct) = vu0Normalize_13F178(*(t4Vector*)&rider->mVelocity);
-            (*(t4Vector*)&info.Reflect) = mRider->mGroundNormal;
-            (*(int*)&info.Vel) = 0;
+            (info.Pos) = rider->mPosition;
+            (info.Direct) = vu0Normalize_13F178(rider->mVelocity);
+            (info.Reflect) = mRider->mGroundNormal;
+            info.Vel = 0.0f;
             cRider_flagEventWipeout(((char*)mRider), 360, 0, mRider->mSurfaceType, &info);
-        } else if (snow->IsResetSurface != 0 || (fl = *(short*)&rider->SurfaceFlags, (fl & 2) != 0)) {
+        } else if (snow->IsResetSurface != 0 || (fl = (short)rider->SurfaceFlags, (fl & 2) != 0)) {
             cRider_checkForReset(rider, 0, 1);
         }
     }
@@ -4415,12 +4397,12 @@ void cGroundMotion::resolve()
         cSSXAudio_Lift((char*)gSSXAudio, ((char*)mRider));
     }
     cRider* rider = (cRider*)(((char*)mRider));
-    *(t4Vector*)&rider->DampGroundNormal = vu0Normalize_13F178(vu0Add_13F178(mRider->DampGroundNormal,
-            vu0Scale_13F178(*(t4Vector*)&rider->mGroundNormal, 0.5f)));
+    rider->DampGroundNormal = vu0Normalize_13F178(vu0Add_13F178(mRider->DampGroundNormal,
+            vu0Scale_13F178(rider->mGroundNormal, 0.5f)));
     cRider* rider3 = (cRider*)(((char*)mRider));
-    float len = vu0Length_13F178(*(t4Vector*)&rider3->mVelocity);
+    float len = vu0Length_13F178(rider3->mVelocity);
     if (rider3->TerminalVelocity < len) {
-        vu0ScaleEq_13F178(*(t4Vector*)&rider3->mVelocity, rider3->TerminalVelocity / len);
+        vu0ScaleEq_13F178(rider3->mVelocity, rider3->TerminalVelocity / len);
     }
     float k = 0.0f;
     float vmax = 3333.33349609375f;
@@ -4453,14 +4435,14 @@ extern "C" int AITick();
 void cGroundMotion::loseFocus()
 {
     cRider* rider = mRider;
-    *(int*)&rider->mSlewed[17].target = 0;
+    rider->mSlewed[17].target = 0.0f;
     rider->mSlewed[17].rate = 0.05000000447034836f;
     cRider* rider2 = mRider;
     rider2->mSlewed[2].rate = 0.05000000447034836f;
-    *(int*)&rider2->mSlewed[2].target = 0;
+    rider2->mSlewed[2].target = 0.0f;
     cRider* rider3 = mRider;
     rider3->mSlewed[18].rate = 1.6666667461395264f;
-    *(int*)&rider3->mSlewed[18].target = 0;
+    rider3->mSlewed[18].target = 0.0f;
     if (AITickOnLoseFocus == -1)
         AITickOnLoseFocus = AITick() - 500;
     else
@@ -4473,7 +4455,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_checkWallCollisions);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
-extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, tIntHint* hint);
 extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_turnFromCollision(void* rider, void* hit);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
@@ -4603,8 +4585,8 @@ void cGroundMotion::checkWallCollisions()
     cRider* rider = (cRider*)(((char*)mRider));
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !rider->isHuman());
     sph.useRejectNormal = 1;
-    (*(t4Vector*)&sph.rejectNormal) = mRider->mGroundNormal;
-    float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, (int)mRider->mWallHint);
+    (sph.rejectNormal) = mRider->mGroundNormal;
+    float penetration = cOverlapList_terrainIntersect1(mRider->mOverlapList, &sph, &hit, mRider->mWallHint);
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
     if (hit.Inst != 0) {
@@ -4614,31 +4596,31 @@ void cGroundMotion::checkWallCollisions()
         }
     }
     {
-        float dot = vu0Dot_13F488(mRider->mGroundNormal, (*(t4Vector*)&hit.Inorm));
+        float dot = vu0Dot_13F488(mRider->mGroundNormal, hit.Inorm);
         if (dot < -0.9998999834060669f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            (*(t4Vector*)&hit.Inorm) = vu0Normalize_13F488(vu0Sub_13F488((*(t4Vector*)&hit.Inorm),
+            (hit.Inorm) = vu0Normalize_13F488(vu0Sub_13F488(hit.Inorm,
                     vu0Scale_13F488(mRider->mGroundNormal, dot)));
     }
     {
-        t4Vector push = vu0Scale_13F488(vu0Scale_13F488((*(t4Vector*)&hit.Inorm), 1.100000023841858f), penetration);
+        t4Vector push = vu0Scale_13F488(vu0Scale_13F488(hit.Inorm, 1.100000023841858f), penetration);
         cRider_moveFromCollision(((char*)mRider), &push);
-        t4Vector netVelocity = vu0Sub_13F488(mRider->mVelocity, (*(t4Vector*)&hit.Ivel));
-        float dot2 = vu0Dot_13F488(vu0Scale_13F488((*(t4Vector*)&hit.Inorm), -1.0f), netVelocity);
+        t4Vector netVelocity = vu0Sub_13F488(mRider->mVelocity, hit.Ivel);
+        float dot2 = vu0Dot_13F488(vu0Scale_13F488(hit.Inorm, -1.0f), netVelocity);
         if (dot2 < 0.0f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
         t4Vector n = vu0Normalize_13F488(netVelocity);
         float k = dot2 * 0.05000000074505806f;
         if (k < 27.77777862548828f)
             k = 27.77777862548828f;
-        vu0AddEq_13F488(mRider->mVelocity, vu0Scale_13F488((*(t4Vector*)&hit.Inorm), dot2 + k));
+        vu0AddEq_13F488(mRider->mVelocity, vu0Scale_13F488(hit.Inorm, dot2 + k));
         cRider_turnFromCollision(((char*)mRider), &hit);
         cRider_updateOrientationImplicit(((char*)mRider));
         tCollideInfo info;
-        info.Pos = (*(t4Vector*)&hit.Ipos);
+        info.Pos = hit.Ipos;
         info.Direct = n;
-        info.Reflect = (*(t4Vector*)&hit.Inorm);
+        info.Reflect = hit.Inorm;
         info.Vel = dot2;
         cRider_reactToCollision(((char*)mRider), &info, hit.Stype);
         cSSXAudio_WallCollision(cAudioInterface_bxAudio(), ((char*)mRider));
@@ -5605,9 +5587,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSphereTree);
  *
  * @return mSphereTree
  */
-int cRider::getSphereTree()
+cRiderSphereTree* cRider::getSphereTree()
 {
-    return ((int)mSphereTree);
+    return mSphereTree;
 }
 #endif
 //100%
@@ -5620,9 +5602,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getFront);
  * @param rider  the cRider
  * @return @p outFront
  */
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getFront(long long *outFront, cRider* rider) {
-    *outFront = (*(long long*)&rider->mMatrix.row[1]);
+extern "C" t4Vector* cRider_getFront(t4Vector* outFront, cRider* rider)
+{
+    *outFront = rider->mMatrix.row[1];
     return outFront;
 }
 #endif
@@ -5636,9 +5618,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSide);
  * @param rider  the cRider
  * @return @p outSide
  */
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getSide(long long *outSide, cRider* rider) {
-    *outSide = (*(long long*)&rider->mMatrix);
+extern "C" t4Vector* cRider_getSide(t4Vector* outSide, cRider* rider)
+{
+    *outSide = rider->mMatrix.row[0];
     return outSide;
 }
 #endif
@@ -5652,9 +5634,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getUp);
  * @param rider  the cRider
  * @return @p outUp
  */
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getUp(long long *outUp, cRider* rider) {
-    *outUp = (*(long long*)&rider->mMatrix.row[2]);
+extern "C" t4Vector* cRider_getUp(t4Vector* outUp, cRider* rider)
+{
+    *outUp = rider->mMatrix.row[2];
     return outUp;
 }
 #endif
@@ -5697,9 +5679,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getRotation);
  * @param rider  the cRider
  * @return @p outRotation
  */
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getRotation(long long *outRotation, cRider* rider) {
-    *outRotation = (*(long long*)&rider->mRotation);
+extern "C" t4Vector* cRider_getRotation(t4Vector* outRotation, cRider* rider)
+{
+    *outRotation = rider->mRotation;
     return outRotation;
 }
 #endif
@@ -5728,10 +5710,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setVelocity);
  * @param rider  the cRider
  * @param velocity  the new velocity
  */
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-void cRider::setVelocity(long long *velocity)
+void cRider::setVelocity(const t4Vector* velocity)
 {
-    *(long long*)&mVelocity = (long long) *velocity;
+    mVelocity = *velocity;
 }
 #endif
 //100%
@@ -5778,9 +5759,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getGroundNormal);
  * @param rider  the cRider
  * @return @p outNormal
  */
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getGroundNormal(long long *outNormal, cRider* rider) {
-    *outNormal = (*(long long*)&rider->mGroundNormal);
+extern "C" t4Vector* cRider_getGroundNormal(t4Vector* outNormal, cRider* rider)
+{
+    *outNormal = rider->mGroundNormal;
     return outNormal;
 }
 #endif
@@ -5835,9 +5816,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAnimModel);
  *
  * @return mAnimModel
  */
-int cRider::getAnimModel()
+cAnimModel* cRider::getAnimModel()
 {
-    return ((int)mAnimModel);
+    return mAnimModel;
 }
 #endif
 //100%
@@ -5848,9 +5829,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getRiderAnim);
  *
  * @return mRiderAnim
  */
-int cRider::getRiderAnim()
+cRiderAnim* cRider::getRiderAnim()
 {
-    return ((int)mRiderAnim);
+    return mRiderAnim;
 }
 #endif
 //100%
@@ -5861,9 +5842,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getRiderHandler);
  *
  * @return mRiderHandler
  */
-int cRider::getRiderHandler()
+cRiderHandler* cRider::getRiderHandler()
 {
-    return ((int)mRiderHandler);
+    return mRiderHandler;
 }
 #endif
 //100%
@@ -5973,9 +5954,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getTrackPath);
  *
  * @return the word at +0xAB4
  */
-int cRider::getTrackPath()
+cTrackPath* cRider::getTrackPath()
 {
-    return ((int)TrackPath);
+    return TrackPath;
 }
 #endif
 //100%
@@ -5986,9 +5967,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setTrackPath);
  *
  * @param value  the new path
  */
-void cRider::setTrackPath(int value)
+void cRider::setTrackPath(cTrackPath* value)
 {
-    TrackPath = (cTrackPath*)value;
+    TrackPath = value;
 }
 #endif
 //100%
@@ -5999,9 +5980,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAIPath);
  *
  * @return the word at +0xAB8
  */
-int cRider::getAIPath()
+cAIPath* cRider::getAIPath()
 {
-    return ((int)AIPath);
+    return AIPath;
 }
 #endif
 //100%
@@ -6012,9 +5993,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setAIPath);
  *
  * @param value  the new path
  */
-void cRider::setAIPath(int value)
+void cRider::setAIPath(cAIPath* value)
 {
-    AIPath = (cAIPath*)value;
+    AIPath = value;
 }
 #endif
 //100%
@@ -6451,9 +6432,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getMetrix);
  *
  * @return mMetrix
  */
-int cRider::getMetrix()
+cRiderMetrix* cRider::getMetrix()
 {
-    return ((int)mMetrix);
+    return mMetrix;
 }
 #endif
 //100%
@@ -6464,9 +6445,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAirPredictor);
  *
  * @return mAirPredictor
  */
-int cRider::getAirPredictor()
+cAirPredictor* cRider::getAirPredictor()
 {
-    return ((int)mAirPredictor);
+    return mAirPredictor;
 }
 #endif
 //100%
@@ -6591,9 +6572,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getFocusBox);
  *
  * @return mFocusBox
  */
-int cRider::getFocusBox()
+void* cRider::getFocusBox()
 {
-    return ((int)mFocusBox);
+    return mFocusBox;
 }
 #endif
 //100%
@@ -6604,9 +6585,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getShadow);
  *
  * @return mShadow
  */
-int cRider::getShadow()
+void* cRider::getShadow()
 {
-    return ((int)mShadow);
+    return mShadow;
 }
 #endif
 //100%
@@ -6968,9 +6949,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getBoardSphereTree);
  *
  * @return BoardSphereTree
  */
-int cWipeoutMotion::getBoardSphereTree()
+cRiderSphereTree* cWipeoutMotion::getBoardSphereTree()
 {
-    return ((int)BoardSphereTree);
+    return BoardSphereTree;
 }
 #endif
 //100%
@@ -7679,9 +7660,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cComputer_setInput);
  *
  * @param input  the cInput
  */
-void cComputer::setInput(int input)
+void cComputer::setInput(cInput* input)
 {
-    Input = (cInput*)input;
+    Input = input;
 }
 #endif
 //100%
@@ -7756,9 +7737,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getDangerMan);
  *
  * @return DangerMan
  */
-int cAI::getDangerMan()
+cDangerMan* cAI::getDangerMan()
 {
-    return ((int)DangerMan);
+    return DangerMan;
 }
 #endif
 //100%
@@ -7835,9 +7816,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getRider);
  * @param index  the rider index
  * @return the cRider
  */
-int cAI::getRider(int index)
+cRider* cAI::getRider(int index)
 {
-    return (int)Riders[index];
+    return Riders[index];
 }
 #endif
 //100%
@@ -7849,9 +7830,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getPlayer);
  * @param index  the player index
  * @return the cPlayer
  */
-int cAI::getPlayer(int index)
+cPlayer* cAI::getPlayer(int index)
 {
-    return (int)Players[index];
+    return Players[index];
 }
 #endif
 //100%
@@ -7863,9 +7844,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getComputer);
  * @param index  the computer index
  * @return the cComputer
  */
-int cAI::getComputer(int index)
+cComputer* cAI::getComputer(int index)
 {
-    return (int)Computers[index];
+    return Computers[index];
 }
 #endif
 //100%
@@ -7877,9 +7858,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getActor);
  * @param index  the actor index
  * @return the actor's cComputer
  */
-int cAI::getActor(int index)
+cComputer* cAI::getActor(int index)
 {
-    return (int)Actors[index];
+    return Actors[index];
 }
 #endif
 //100%
@@ -7891,9 +7872,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getMissionRider);
  * @param index  the mission rider index
  * @return the cMissionRider
  */
-int cAI::getMissionRider(int index)
+cMissionRider* cAI::getMissionRider(int index)
 {
-    return (int)MissionRiders[index];
+    return MissionRiders[index];
 }
 #endif
 //100%
@@ -8100,9 +8081,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getFocusMan);
  *
  * @return FocusMan
  */
-int cAI::getFocusMan()
+cFocusMan* cAI::getFocusMan()
 {
-    return ((int)FocusMan);
+    return FocusMan;
 }
 #endif
 
@@ -8191,18 +8172,18 @@ int cDangerMan::CalcAppliedDangerLevel(int pl)
             continue;
         }
         n--;
-        float distSq = (*(t3Vector*)&z->pos[0]).x - pos->x;
+        float distSq = z->pos[0] - pos->x;
         float radiusSq = z->radius * z->radius;
         distSq = distSq * distSq;
         if (radiusSq < distSq) {
             continue;
         }
-        float dy = (*(t3Vector*)&z->pos[0]).y - pos->y;
+        float dy = z->pos[1] - pos->y;
         dy = dy * dy;
         if (radiusSq < dy) {
             continue;
         }
-        float dz = (*(t3Vector*)&z->pos[0]).z - pos->z;
+        float dz = z->pos[2] - pos->z;
         distSq = distSq + dy + dz * dz;
         if (!(radiusSq < distSq)) {
             return lvl;
@@ -8386,10 +8367,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_setInput);
  * @param input  the cInput to read controls from (passed as an int)
  * @param device  the cPadDevice (passed as an int)
  */
-void cPlayer::setInput(int input, int device)
+void cPlayer::setInput(cInput* input, cPadDevice* device)
 {
-    Input = (cInput*)input;
-    Pad = (cPadDevice*)device;
+    Input = input;
+    Pad = device;
 }
 #endif
 //100%
@@ -8400,9 +8381,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_getInput);
  *
  * @return Input
  */
-int cPlayer::getInput()
+cInput* cPlayer::getInput()
 {
-    return ((int)Input);
+    return Input;
 }
 #endif
 

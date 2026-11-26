@@ -323,7 +323,7 @@ int bxSphereTree::Load(char* buf, int aTreeID)
     MEM_copy(&this->treeInfo->rootCenter[0], buf + 0x10, 0xC);
     MEM_copy(&this->treeInfo->centerOfMass[0], buf + 0x1C, 0xC);
     MEM_copy(&this->treeInfo->momentOfInertia[0][0], buf + 0x28, 36);
-    MEM_copy(&this->treeInfo->invMomentOfInertia[0][0], buf + 0x4C, 36);
+    MEM_copy(&this->treeInfo->invMomentOfInertia, buf + 0x4C, 36);
     char* cursor = buf + 0x70;
     this->treeInfo->levels = (tLevel*)cursor;
     cursor += (this->treeInfo->depth + 1) * 0xC;

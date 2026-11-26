@@ -85,8 +85,8 @@ struct cRiderCameraTarget : public cCameraTarget {
                                 //     [U] all 26 slots lw 0x4; cRiderCameraTarget_setRider setRider, cRiderCameraTarget_getRider getRider
 
     // Methods bound to their retail symbols by asm labels.
-    void setRider(int rider) __asm__("cRiderCameraTarget_setRider");
-    int getRider() __asm__("cRiderCameraTarget_getRider");
+    void setRider(cRider* rider) __asm__("cRiderCameraTarget_setRider");
+    cRider* getRider() __asm__("cRiderCameraTarget_getRider");
 };
 
 CHECK_OFFSET(cRiderCameraTarget, Rider, 0x4);
@@ -114,8 +114,8 @@ struct cSimpleCamera {
     // Methods bound to their retail symbols by asm labels.
     float getNear() __asm__("cSimpleCamera_getNear");
     float getFar() __asm__("cSimpleCamera_getFar");
-    void setPosition(long long *position) __asm__("cSimpleCamera_setPosition");
-    void setOrientation(long long *orientation) __asm__("cSimpleCamera_setOrientation");
+    void setPosition(const t4Vector* position) __asm__("cSimpleCamera_setPosition");
+    void setOrientation(const t4Vector* orientation) __asm__("cSimpleCamera_setOrientation");
     void setPose(tPose* pose) __asm__("cSimpleCamera_setPose");
     void setMaxFar(float fparg0) __asm__("cSimpleCamera_setMaxFar");
     void setMinNear(float fparg0) __asm__("cSimpleCamera_setMinNear");
@@ -195,11 +195,11 @@ struct cCamera {
     void shakeCamera(int type, float amount, float dist) __asm__("cCamera_shakeCamera");
     void applyCameraShake() __asm__("cCamera_applyCameraShake");
     void updateStreamFocus() __asm__("cCamera_updateStreamFocus");
-    void switchChaseControllerTargetRider(int value) __asm__("cCamera_switchChaseControllerTargetRider");
-    int getCurrentController() __asm__("cCamera_getCurrentController");
-    int getManualController() __asm__("cCamera_getManualController");
-    int getChaseController() __asm__("cCamera_getChaseController");
-    int getScriptController() __asm__("cCamera_getScriptController");
+    void switchChaseControllerTargetRider(cRider* value) __asm__("cCamera_switchChaseControllerTargetRider");
+    cCameraController* getCurrentController() __asm__("cCamera_getCurrentController");
+    cManualCameraController* getManualController() __asm__("cCamera_getManualController");
+    cChaseCameraController* getChaseController() __asm__("cCamera_getChaseController");
+    cScriptCameraController* getScriptController() __asm__("cCamera_getScriptController");
     int isStreamReady() __asm__("cCamera_isStreamReady");
     int getStreamFocusID() __asm__("cCamera_getStreamFocusID");
 };

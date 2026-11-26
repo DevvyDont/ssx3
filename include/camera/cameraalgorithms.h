@@ -230,7 +230,7 @@ struct cBasicCameraAlgorithm : public cCameraAlgorithm {
     char unk_38[0x8];           // 0x38 padding to the 16-byte class alignment
 
     // Methods bound to their retail symbols by asm labels.
-    void setPosition(long long *position) __asm__("cBasicCameraAlgorithm_setPosition");
+    void setPosition(const t4Vector* position) __asm__("cBasicCameraAlgorithm_setPosition");
     void setPitch(float fparg0) __asm__("cBasicCameraAlgorithm_setPitch");
     void setHeading(float fparg0) __asm__("cBasicCameraAlgorithm_setHeading");
     float getPitch() __asm__("cBasicCameraAlgorithm_getPitch");

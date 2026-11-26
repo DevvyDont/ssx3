@@ -92,7 +92,7 @@ struct cCamAnimFrame {
 
     // Methods bound to their retail symbols by asm labels.
     void* cCamAnimFrame1() __asm__("cCamAnimFrame_cCamAnimFrame1");
-    void setAnimRecord(int source) __asm__("cCamAnimFrame_setAnimRecord");
+    void setAnimRecord(const tAnimRecord* source) __asm__("cCamAnimFrame_setAnimRecord");
     void getPosition(t4Vector* out) __asm__("cCamAnimFrame_getPosition");
     void getAngles(t3Vector* out) __asm__("cCamAnimFrame_getAngles");
     void getFocalLength(float *out) __asm__("cCamAnimFrame_getFocalLength");

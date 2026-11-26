@@ -62,9 +62,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getBE);
  *
  * @return BE (+0x78)
  */
-int cSSXApp::getBE()
+cBE* cSSXApp::getBE()
 {
-    return ((int)BE);
+    return BE;
 }
 #endif
 //100%
@@ -75,9 +75,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getRealFE);
  *
  * @return RealFE (+0x7C)
  */
-int cSSXApp::getRealFE()
+cFE* cSSXApp::getRealFE()
 {
-    return ((int)RealFE);
+    return RealFE;
 }
 #endif
 //100%
@@ -88,9 +88,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getDebugFE);
  *
  * @return DebugFE (+0x80)
  */
-int cSSXApp::getDebugFE()
+cDebugFE* cSSXApp::getDebugFE()
 {
-    return ((int)DebugFE);
+    return DebugFE;
 }
 #endif
 //100%
@@ -101,9 +101,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGame);
  *
  * @return Game (+0x84); 0 outside a game
  */
-int cSSXApp::getGame()
+cGame* cSSXApp::getGame()
 {
-    return ((int)Game);
+    return Game;
 }
 #endif
 //100%
@@ -114,9 +114,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFonts);
  *
  * @return Fonts (+0x88)
  */
-int cSSXApp::getFonts()
+cUIFontInterface* cSSXApp::getFonts()
 {
-    return ((int)Fonts);
+    return Fonts;
 }
 #endif
 //100%
@@ -127,9 +127,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFELocale);
  *
  * @return FELocale (+0x8C)
  */
-int cSSXApp::getFELocale()
+cFELocale* cSSXApp::getFELocale()
 {
-    return ((int)FELocale);
+    return FELocale;
 }
 #endif
 //100%
@@ -141,9 +141,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInput);
  * @param index  the player (0 or 1; not range-checked)
  * @return Inputs[@p index] (+0xB0)
  */
-int cSSXApp::getInput(int index)
+cInput* cSSXApp::getInput(int index)
 {
-    return (int)Inputs[index];
+    return Inputs[index];
 }
 #endif
 //100%
@@ -155,9 +155,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInputMap);
  * @param index  the player (0 or 1; not range-checked)
  * @return InputMaps[@p index] (+0xB8)
  */
-int cSSXApp::getInputMap(int index)
+cInputMap* cSSXApp::getInputMap(int index)
 {
-    return (int)InputMaps[index];
+    return InputMaps[index];
 }
 #endif
 //100%
@@ -168,9 +168,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGameManager);
  *
  * @return GameModeMan (+0xC0)
  */
-int cSSXApp::getGameManager()
+cGameModeMan* cSSXApp::getGameManager()
 {
-    return ((int)GameModeMan);
+    return GameModeMan;
 }
 #endif
 //100%
@@ -207,9 +207,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getNetMan);
  *
  * @return NetMan (+0xD0)
  */
-int cSSXApp::getNetMan()
+cNetMan* cSSXApp::getNetMan()
 {
-    return ((int)NetMan);
+    return NetMan;
 }
 #endif
 //100%
@@ -220,9 +220,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getConsoleConfig);
  *
  * @return ConsoleConfig (+0x9C)
  */
-int cSSXApp::getConsoleConfig()
+cConsoleConfig* cSSXApp::getConsoleConfig()
 {
-    return ((int)ConsoleConfig);
+    return ConsoleConfig;
 }
 #endif
 //100%
@@ -233,9 +233,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIndicator);
  *
  * @return LoadIndicator (+0xA4)
  */
-int cSSXApp::getLoadIndicator()
+cLoadIndicator* cSSXApp::getLoadIndicator()
 {
-    return ((int)LoadIndicator);
+    return LoadIndicator;
 }
 #endif
 //100%
@@ -310,7 +310,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_InGame);
  */
 bool cSSXApp::InGame()
 {
-    return ((int)Game) != 0;
+    return Game != 0;
 }
 #endif
 //100%
@@ -326,7 +326,7 @@ int cSSXApp::InFE()
     int var_3;
 
     var_3 = 0;
-    if ((((int)RealFE) != 0) || (((int)DebugFE) != 0)) {
+    if (RealFE != 0 || DebugFE != 0) {
         var_3 = 1;
     }
     return var_3;
@@ -340,9 +340,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_GetFEAsyncManager);
  *
  * @return mFEAsyncManager (+0x11C)
  */
-int cSSXApp::GetFEAsyncManager()
+cFEAsyncManager* cSSXApp::GetFEAsyncManager()
 {
-    return ((int)mFEAsyncManager);
+    return mFEAsyncManager;
 }
 #endif
 
@@ -1466,9 +1466,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentStateInstance);
  *
  * @return mCurrentState (+0x200)
  */
-int cGame::getCurrentStateInstance()
+cGameState* cGame::getCurrentStateInstance()
 {
-    return ((int)mCurrentState);
+    return mCurrentState;
 }
 #endif
 //100%
@@ -1479,9 +1479,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getNash);
  *
  * @return BXNash (+0x20)
  */
-int cGame::getNash()
+cBXNash* cGame::getNash()
 {
-    return ((int)BXNash);
+    return BXNash;
 }
 #endif
 //100%
@@ -1492,9 +1492,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorld);
  *
  * @return World (+0x10)
  */
-int cGame::getWorld()
+cWorld* cGame::getWorld()
 {
-    return ((int)World);
+    return World;
 }
 #endif
 //100%
@@ -1505,9 +1505,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getDebugFont);
  *
  * @return DebugFont (+0x24)
  */
-int cGame::getDebugFont()
+cFont* cGame::getDebugFont()
 {
-    return ((int)DebugFont);
+    return DebugFont;
 }
 #endif
 //100%
@@ -1518,9 +1518,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getMenuSys);
  *
  * @return MenuSys (+0xA4)
  */
-int cGame::getMenuSys()
+cMenuSys* cGame::getMenuSys()
 {
-    return ((int)MenuSys);
+    return MenuSys;
 }
 #endif
 //100%
@@ -1531,9 +1531,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getAI);
  *
  * @return AI (+0xC)
  */
-int cGame::getAI()
+cAI* cGame::getAI()
 {
-    return ((int)AI);
+    return AI;
 }
 #endif
 //100%
@@ -1544,9 +1544,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getUI);
  *
  * @return UI (+0x48)
  */
-int cGame::getUI()
+cUIEngine* cGame::getUI()
 {
-    return ((int)UI);
+    return UI;
 }
 #endif
 //100%
@@ -1557,9 +1557,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getReplay);
  *
  * @return Replay (+0x28)
  */
-int cGame::getReplay()
+cReplay* cGame::getReplay()
 {
-    return ((int)Replay);
+    return Replay;
 }
 #endif
 //100%
@@ -1570,9 +1570,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getFXLoader);
  *
  * @return FXLoader (+0x2C)
  */
-int cGame::getFXLoader()
+cFXLoader* cGame::getFXLoader()
 {
-    return ((int)FXLoader);
+    return FXLoader;
 }
 #endif
 //100%
@@ -1583,9 +1583,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSurfPropCache);
  *
  * @return SurfPropCache (+0x44)
  */
-int cGame::getSurfPropCache()
+cSurfPropCache* cGame::getSurfPropCache()
 {
-    return ((int)SurfPropCache);
+    return SurfPropCache;
 }
 #endif
 //100%
@@ -1596,9 +1596,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorldSound);
  *
  * @return WorldSound (+0x4C)
  */
-int cGame::getWorldSound()
+cWorldSound* cGame::getWorldSound()
 {
-    return ((int)WorldSound);
+    return WorldSound;
 }
 #endif
 //100%
@@ -1609,9 +1609,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getAIVisualEffectsObjNode);
  *
  * @return AIVisualEffectsMan (+0x50)
  */
-int cGame::getAIVisualEffectsObjNode()
+cAIVisualEffectsObjNode* cGame::getAIVisualEffectsObjNode()
 {
-    return ((int)AIVisualEffectsMan);
+    return AIVisualEffectsMan;
 }
 #endif
 //100%
@@ -1622,9 +1622,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getVisualEffectsObjNode);
  *
  * @return VisualEffectsMan (+0x54)
  */
-int cGame::getVisualEffectsObjNode()
+cVisualEffectsObjNode* cGame::getVisualEffectsObjNode()
 {
-    return ((int)VisualEffectsMan);
+    return VisualEffectsMan;
 }
 #endif
 //100%
@@ -1635,9 +1635,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCutSceneTransitionman);
  *
  * @return CutSceneTransitionMan (+0x64)
  */
-int cGame::getCutSceneTransitionman()
+cCutSceneTransitionMan* cGame::getCutSceneTransitionman()
 {
-    return ((int)CutSceneTransitionMan);
+    return CutSceneTransitionMan;
 }
 #endif
 //100%
@@ -1648,9 +1648,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getFlagManager);
  *
  * @return FlagManager (+0x70)
  */
-int cGame::getFlagManager()
+cFlagManager* cGame::getFlagManager()
 {
-    return ((int)FlagManager);
+    return FlagManager;
 }
 #endif
 //100%
@@ -1661,9 +1661,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSnowFall);
  *
  * @return SnowFall (+0x74)
  */
-int cGame::getSnowFall()
+cSnowFall* cGame::getSnowFall()
 {
-    return ((int)SnowFall);
+    return SnowFall;
 }
 #endif
 //100%
@@ -1674,9 +1674,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getPlaybackMan);
  *
  * @return PlaybackMan (+0x34)
  */
-int cGame::getPlaybackMan()
+cPlaybackMan* cGame::getPlaybackMan()
 {
-    return ((int)PlaybackMan);
+    return PlaybackMan;
 }
 #endif
 //100%
@@ -1687,9 +1687,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSectionMan);
  *
  * @return SectionMan (+0x78)
  */
-int cGame::getSectionMan()
+cSectionMan* cGame::getSectionMan()
 {
-    return ((int)SectionMan);
+    return SectionMan;
 }
 #endif
 //100%
@@ -1700,9 +1700,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getInputSync);
  *
  * @return InputSync (+0x7C)
  */
-int cGame::getInputSync()
+cInputSync* cGame::getInputSync()
 {
-    return ((int)InputSync);
+    return InputSync;
 }
 #endif
 //100%
@@ -1713,9 +1713,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSkyBox);
  *
  * @return SkyBox (+0x14)
  */
-int cGame::getSkyBox()
+cSkyBox* cGame::getSkyBox()
 {
-    return ((int)SkyBox);
+    return SkyBox;
 }
 #endif
 //100%
@@ -1726,9 +1726,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan2d);
  *
  * @return CrowdMan2d (+0x38)
  */
-int cGame::getCrowdMan2d()
+cCrowdMan2d* cGame::getCrowdMan2d()
 {
-    return ((int)CrowdMan2d);
+    return CrowdMan2d;
 }
 #endif
 //100%
@@ -1739,9 +1739,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan3d);
  *
  * @return CrowdMan3d (+0x3C)
  */
-int cGame::getCrowdMan3d()
+cCrowdMan3d* cGame::getCrowdMan3d()
 {
-    return ((int)CrowdMan3d);
+    return CrowdMan3d;
 }
 #endif
 //100%
@@ -1752,9 +1752,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getMultiParticleMan);
  *
  * @return MultiParticleMan (+0x40)
  */
-int cGame::getMultiParticleMan()
+cMultiParticleMan* cGame::getMultiParticleMan()
 {
-    return ((int)MultiParticleMan);
+    return MultiParticleMan;
 }
 #endif
 //100%
@@ -1765,9 +1765,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getInstanceMan);
  *
  * @return InstanceMan (+0x88)
  */
-int cGame::getInstanceMan()
+cInstanceMan* cGame::getInstanceMan()
 {
-    return ((int)InstanceMan);
+    return InstanceMan;
 }
 #endif
 //100%
@@ -1778,9 +1778,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getOcclusionMan);
  *
  * @return OcclusionMan (+0x8C)
  */
-int cGame::getOcclusionMan()
+cOcclusionMan* cGame::getOcclusionMan()
 {
-    return ((int)OcclusionMan);
+    return OcclusionMan;
 }
 #endif
 //100%
@@ -1791,9 +1791,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorldLightMan);
  *
  * @return WorldLightMan (+0x90)
  */
-int cGame::getWorldLightMan()
+cWorldLightMan* cGame::getWorldLightMan()
 {
-    return ((int)WorldLightMan);
+    return WorldLightMan;
 }
 #endif
 //100%
@@ -1804,9 +1804,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getLoadIndicator);
  *
  * @return LoadIndicator (+0x94)
  */
-int cGame::getLoadIndicator()
+cBXLoadIndicator* cGame::getLoadIndicator()
 {
-    return ((int)LoadIndicator);
+    return LoadIndicator;
 }
 #endif
 //100%
@@ -1830,9 +1830,9 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getViewMan);
  *
  * @return ViewMan (+0x84)
  */
-int cGame::getViewMan()
+cGameViewMan* cGame::getViewMan()
 {
-    return ((int)ViewMan);
+    return ViewMan;
 }
 #endif
 //100%
@@ -2467,9 +2467,9 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getMemCard);
  *
  * @return mpMemCard (+0x434)
  */
-int cMCOverlayManager::getMemCard()
+cMemCard* cMCOverlayManager::getMemCard()
 {
-    return ((int)mpMemCard);
+    return mpMemCard;
 }
 #endif
 //100%
@@ -2782,8 +2782,8 @@ void cGameComm::stopSyncInput()
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGame_updateStreamFocus);
 #ifdef SKIP_ASM
-extern "C" void cGameViewMan_updateStreamFocus(int);
-extern "C" int cGameViewMan_isStreamReady(int);
+extern "C" void cGameViewMan_updateStreamFocus(cGameViewMan* viewMan);
+extern "C" int cGameViewMan_isStreamReady(cGameViewMan* viewMan);
 
 /**
  * Refreshes the views' stream focus and reports whether the stream is ready.
@@ -2796,11 +2796,11 @@ extern "C" int cGameViewMan_isStreamReady(int);
  */
 bool cGame::updateStreamFocus()
 {
-    cGameViewMan_updateStreamFocus((int)ViewMan);
+    cGameViewMan_updateStreamFocus(ViewMan);
     if (IsStreamPaused != 0) {
         return false;
     }
-    if (cGameViewMan_isStreamReady((int)ViewMan) == 0) {
+    if (cGameViewMan_isStreamReady(ViewMan) == 0) {
         IsStreamPaused = 1;
         m_bFlushStreamer = 1;
         return false;
@@ -2947,10 +2947,10 @@ extern "C" void func_00244A38(void) {
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGame_updateStreamLoading);
 #ifdef SKIP_ASM
-extern "C" void cGameViewMan_updateAll(int);
+extern "C" void cGameViewMan_updateAll(cGameViewMan* viewMan);
 extern "C" void cSectionMan_update(void *);
-extern "C" void cGameViewMan_updateStreamFocus(int);
-extern "C" int cGameViewMan_isStreamReady(int);
+extern "C" void cGameViewMan_updateStreamFocus(cGameViewMan* viewMan);
+extern "C" int cGameViewMan_isStreamReady(cGameViewMan* viewMan);
 extern "C" void cGame_updateState(void *);
 void cWorld_update(void *);
 extern "C" void cWorldCache_flushInActivePages(void *);
@@ -2972,22 +2972,22 @@ bool cGame::updateStreamLoading()
 {
     void *vtbl;
 
-    if ((cGameViewMan_isStreamReady((int)ViewMan) == 0) || (SectionMan->m_bStreamReady == 0)) {
+    if ((cGameViewMan_isStreamReady(ViewMan) == 0) || (SectionMan->m_bStreamReady == 0)) {
         *(int *)(*(char**)World + 0x3D4) = 0;
         cWorld_update(World);
-        cGameViewMan_updateAll((int)ViewMan);
+        cGameViewMan_updateAll(ViewMan);
         if (SectionMan->m_bStreamReady == 0) {
             cGame_updateState(this);
             cSectionMan_update(SectionMan);
         }
-        if ((IsStreamPaused == 0) && (cGameViewMan_isStreamReady((int)ViewMan) == 0)) {
+        if ((IsStreamPaused == 0) && (cGameViewMan_isStreamReady(ViewMan) == 0)) {
             m_bFlushStreamer = 1;
         }
         IsStreamPaused = 1;
         if (m_bFlushStreamer != 0) {
             vtbl = (void*)VPTR_OF(cGraphicsMan, GrMan);
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
-            cGameViewMan_updateStreamFocus((int)ViewMan);
+            cGameViewMan_updateStreamFocus(ViewMan);
             cWorldCache_flushInActivePages(*(void**)World);
             m_bFlushStreamer = 0;
         }
@@ -3172,10 +3172,10 @@ bool cGame::updateUI()
 INCLUDE_ASM("main/ssxappdtor", cGame_updateAI);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cInputSync_aiinputready(int);
-extern "C" int cInputSync_aiupdate(int);
-extern "C" int cReplay_isPauseAI(int);
-extern "C" void cReplay_update(int);
+extern "C" int cInputSync_aiinputready(cInputSync* inputSync);
+extern "C" int cInputSync_aiupdate(cInputSync* inputSync);
+extern "C" int cReplay_isPauseAI(cReplay* replay);
+extern "C" void cReplay_update(cReplay* replay);
 extern "C" int cPlaybackMan_isPauseAI(int);
 extern "C" void cBucketMan_updateBucket(void*, int);
 extern "C" void cBucketMan_mergeBucket(void*, int);
@@ -3185,7 +3185,7 @@ extern "C" void func_002294C8(int);
 extern "C" void func_003440C8(int);
 extern "C" void cMultiParticleMan_update(int);
 extern "C" void cWorldSound_TriggerWorldAudio(int, int, int);
-extern "C" void cGameViewMan_updateAll(int);
+extern "C" void cGameViewMan_updateAll(cGameViewMan* viewMan);
 extern "C" void cGame_updateState(void*);
 extern char gBucketMan[8];
 extern int cPauseState_Flags;
@@ -3207,7 +3207,7 @@ void cGame::updateAI()
 {
     char* obj;
     int skip;
-    if ((int)InputSync == 0 || cInputSync_aiinputready((int)InputSync) != 0) {
+    if (InputSync == 0 || cInputSync_aiinputready(InputSync) != 0) {
         if (mCurrentStateID == kGFSM_Gate) {
             obj = gBucketMan;
             cGame_updateState(this);
@@ -3217,18 +3217,18 @@ void cGame::updateAI()
             cGame_updateState(this);
         }
         if ((cPauseState_Flags & 1) == 0)
-            cReplay_update((int)Replay);
-        if (cReplay_isPauseAI((int)Replay) == 0 && (cPauseState_Flags & 8) == 0) {
+            cReplay_update(Replay);
+        if (cReplay_isPauseAI(Replay) == 0 && (cPauseState_Flags & 8) == 0) {
             sVEntry<void>* vt = (sVEntry<void>*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)(vthis(ScriptEngine, vt[5]));
         }
     }
     obj = gBucketMan;
     skip = 0;
-    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI((int)Replay) != 0)
+    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI(Replay) != 0)
         skip = 1;
     if (skip == 0) {
-        if ((int)InputSync == 0 || cInputSync_aiupdate((int)InputSync) != 0) {
+        if (InputSync == 0 || cInputSync_aiupdate(InputSync) != 0) {
             if (cPlaybackMan_isPauseAI((int)PlaybackMan) != 0)
                 goto setskip;
         } else {
@@ -3268,7 +3268,7 @@ void cGame::updateAI()
         int ok = replayMode != 0 && replayMode < 10;
         int x3 = replayMode ^ 3;
         if (!ok || x3 != 0)
-            cGameViewMan_updateAll((int)ViewMan);
+            cGameViewMan_updateAll(ViewMan);
     }
     mUpdateTick = mUpdateTick + 1;
     {
@@ -3286,14 +3286,14 @@ void cGame::updateAI()
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGame_preUpdateOnline);
 #ifdef SKIP_ASM
-extern "C" void cGameComm_update(int);
+extern "C" void cGameComm_update(cGameComm* gameComm);
 
 /**
  * Updates online play before the frame: cGameComm_update on cGameComm_mGameComm when one exists.
  */
 extern "C" void cGame_preUpdateOnline(void) {
     if (cGameComm_mGameComm != 0) {
-        cGameComm_update((int)cGameComm_mGameComm);
+        cGameComm_update(cGameComm_mGameComm);
     }
 }
 #endif
@@ -3327,7 +3327,7 @@ extern "C" void cFadeScreen_update(void *);
 bool cGame::updateScreenFade()
 {
     cFadeScreen_update(this);
-    if ((int)SSXApp->LoadingModule != 0) {
+    if (SSXApp->LoadingModule != 0) {
         unk_08 = 1;
         return false;
     }

@@ -25,8 +25,8 @@ struct cUVScrollModifier {
     float AngVel;                   // 0x14 [O]; [R] ctor (rate / frame rate); [U] update
     char unk_18[0x8];               // 0x18 padding (Axis is 16-byte aligned)
     t4Vector Axis;                  // 0x20 [O]; [R] ctor (sq 0x20); [U] getTextureMat
-    float UV[2];                    // 0x30 [O] t2Vector; [R] ctor; [U] update, signal, getTextureMat
-    float UVScroll[2];              // 0x38 [O] t2Vector; [R] ctor; [U] update (unaligned sdl/sdr copy), signal
+    t2Vector UV;                    // 0x30 [O] t2Vector; [R] ctor; [U] update, signal, getTextureMat
+    t2Vector UVScroll;              // 0x38 [O] t2Vector; [R] ctor; [U] update (unaligned sdl/sdr copy), signal
     int On;                         // 0x40 [O] bool; [R] ctor stores 1; [U] update, signal
     char unk_44[0xc];               // 0x44 padding to the 0x50 allocation
 

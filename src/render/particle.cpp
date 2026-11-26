@@ -5257,7 +5257,7 @@ extern "C" void func_0037A430(cPS2GraphicsMan* self)
     (*(int*)&self->m_pCurrentDrawState->m_bitGroups[0]) &= ~0x3C0;
     (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
     self->unk_5A28 = 0;
-    (*(unsigned long**)&self->unk_5A2C) = 0;
+    self->unk_5A2C = 0;
 }
 #endif
 
@@ -5475,7 +5475,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
 {
     if (cRenderToggles_m_DisablePlayerStrips == 0) {
         (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
-        (*(sDrawState**)&self->m_pCurrentDrawState)++;
+        (self->m_pCurrentDrawState)++;
         ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, self))[124].fn(vthis(self, ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, self))[124]), 1.0f);
         if (self->mMatricesValid == 0) {
             func_0037D968((cPS2GraphicsMan*)self);
@@ -5665,7 +5665,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
             matIdx += chunk->numSubs;
             chunk++;
         }
-        (*(sDrawState**)&self->m_pCurrentDrawState)--;
+        (self->m_pCurrentDrawState)--;
         SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[0]), 6, 4, 0);
         SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[3]), 0, 30, 0);
     }
@@ -7653,8 +7653,8 @@ extern "C" t4Vector func_0037DEE0(cPS2GraphicsMan* self, t4Vector* point)
         "sqc2      $vf13, %0\n"
         : "=m"(result)
         : "r"(point), "r"((char*)&self->mNetMatrix),
-          "m"(*(t4Vector*)&self->mScreenScale),
-          "m"(*(t4Vector*)&self->mScreenOffset));
+          "m"(self->mScreenScale),
+          "m"(self->mScreenOffset));
     return result;
 }
 #endif
@@ -11709,8 +11709,8 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardScale));
-    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardOffset));
+    AddQuad_6E78(pkt, mGuardScale);
+    AddQuad_6E78(pkt, mGuardOffset);
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, this);
     func_00386D10(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
@@ -11739,14 +11739,14 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     {
         t4Vector flatGuardScale;
         t4Vector flatGuardOffset;
-        flatGuardScale.x = (*(t4Vector*)&mGuardScale).x;
-        flatGuardScale.y = (*(t4Vector*)&mGuardScale).y;
+        flatGuardScale.x = (mGuardScale).x;
+        flatGuardScale.y = (mGuardScale).y;
         flatGuardScale.z = 0.0f;
-        flatGuardScale.w = (*(t4Vector*)&mGuardScale).w;
-        flatGuardOffset.x = (*(t4Vector*)&mGuardOffset).x;
-        flatGuardOffset.y = (*(t4Vector*)&mGuardOffset).y;
+        flatGuardScale.w = (mGuardScale).w;
+        flatGuardOffset.x = (mGuardOffset).x;
+        flatGuardOffset.y = (mGuardOffset).y;
         flatGuardOffset.z = 0.0f;
-        flatGuardOffset.w = (*(t4Vector*)&mGuardOffset).w;
+        flatGuardOffset.w = (mGuardOffset).w;
         AddQuad_6E78(pkt, flatGuardScale);
         AddQuad_6E78(pkt, flatGuardOffset);
     }
@@ -11766,8 +11766,8 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardScale));
-    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardOffset));
+    AddQuad_6E78(pkt, mGuardScale);
+    AddQuad_6E78(pkt, mGuardOffset);
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, this);
     func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, (void*)2, 0, (void*)1);

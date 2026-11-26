@@ -92,7 +92,7 @@ extern "C" void* cReplayFrameList_remTail(void* list);
  */
 void* cReplay::allocReplayFrame()
 {
-    void* list = (char*)&FreeFrameList;
+    void* list = &FreeFrameList;
     if (FreeFrameList.NumFrames <= 0) {
         freeOneReplayFrame();
     }
@@ -115,14 +115,6 @@ INCLUDE_ASM("replay/replaycache", cReplay_freeOneReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cReplay_freeReplayFrame(cReplay* self, void* node);
 
-struct sRcNode1A0 {
-    char pad_0x00[0x14];
-    sRcNode1A0* next;       // 0x14
-    char pad_0x18[0x6];
-    unsigned char locked;   // 0x1E
-    unsigned char used;     // 0x1F
-};
-
 
 /**
  * Frees one recorded frame to make room (On Tour freeOneReplayFrame).
@@ -137,18 +129,19 @@ void cReplay::freeOneReplayFrame()
     cReplay* replay = this;
     int i;
     for (i = 0; i < 2; i++) {
-        while (((sRcNode1A0*)replay->NextCandidate) != 0 && ((sRcNode1A0*)replay->NextCandidate)->next != 0 && ((sRcNode1A0*)replay->NextCandidate)->next->next != 0) {
-            sRcNode1A0* n = ((sRcNode1A0*)replay->NextCandidate)->next;
-            if (n->used == 0) {
-                if (n->locked == 0) {
-                    *(sRcNode1A0**)&replay->NextCandidate = n->next;
+        while (replay->NextCandidate != 0 && replay->NextCandidate->Next != 0
+               && replay->NextCandidate->Next->Next != 0) {
+            cReplayFrame* n = replay->NextCandidate->Next;
+            if (n->FrameType.Chapter == 0) {
+                if (n->FrameType.Highlights == 0) {
+                    replay->NextCandidate = n->Next;
                     freeReplayFrame(n);
                     return;
                 }
             }
-            *(sRcNode1A0**)&replay->NextCandidate = ((sRcNode1A0*)replay->NextCandidate)->next;
+            replay->NextCandidate = replay->NextCandidate->Next;
         }
-        *(sRcNode1A0**)&replay->NextCandidate = *(sRcNode1A0**)&replay->FrameList;
+        replay->NextCandidate = replay->FrameList.Tail;
     }
 }
 #endif
@@ -156,9 +149,9 @@ void cReplay::freeOneReplayFrame()
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_freeReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void cReplayFrameList_remFrame(void* list, void* node);
+extern "C" void cReplayFrameList_remFrame(cReplayFrameList* list, void* node);
 extern "C" void cReplayFrame_clearFrame(void* node);
-extern "C" void cReplayFrameList_addFrame(void* list, void* node);
+extern "C" void cReplayFrameList_addFrame(cReplayFrameList* list, void* node);
 
 /**
  * Gives a frame back: unlinks it from FrameList (cReplayFrameList_remFrame), clears it (cReplayFrame_clearFrame) and adds it to
@@ -168,9 +161,9 @@ extern "C" void cReplayFrameList_addFrame(void* list, void* node);
  */
 void cReplay::freeReplayFrame(void* node)
 {
-    cReplayFrameList_remFrame((char*)&FrameList, node);
+    cReplayFrameList_remFrame(&FrameList, node);
     cReplayFrame_clearFrame(node);
-    cReplayFrameList_addFrame((char*)&FreeFrameList, node);
+    cReplayFrameList_addFrame(&FreeFrameList, node);
 }
 #endif
 
@@ -251,7 +244,7 @@ void cReplay::rewind(void* frame)
     if (frame != 0) {
         PlaybackFrame = (cReplayFrame*)frame;
     } else {
-        PlaybackFrame = (cReplayFrame*)*(void**)&FrameList;
+        PlaybackFrame = FrameList.Tail;
     }
     PlaybackTick = PlaybackFrame->FrameStartTick;
     for (i = 0; i < 2; i++) {
@@ -363,7 +356,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_purgeIdleFrames);
  */
 void cReplay::purgeIdleFrames()
 {
-    cReplayFrame* node = *(cReplayFrame**)&FrameList;
+    cReplayFrame* node = FrameList.Tail;
     while (node != 0) {
         cReplayFrame* next = node->Next;
         if (node->FrameType.Type != 0) {
@@ -412,7 +405,7 @@ extern "C" void cReplay_startInstantReplay(cReplay* self);
 void cReplay::endMarkInstantReplay(int obj, int alt)
 {
     tRiderStats* stats = (tRiderStats*)obj;
-    if ((int)InstantReplayFrame == 0) {
+    if (InstantReplayFrame == 0) {
         return;
     }
     if (SSXApp->Game->AI->NumberOfPlayersAllocated != cAI::kOnePlayer) {
@@ -808,15 +801,6 @@ void cReplay::beginMarkHighlight(int playerId, int id)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_countHighlights);
 #ifdef SKIP_ASM
-struct sReplayCacheNode {
-    char pad[0x14];
-    sReplayCacheNode* next;
-    char pad2[0x1E - 0x18];
-    unsigned char mask;
-    char pad3;
-    int values[1];
-};
-
 /**
  * Counts player @p i's highlight frames of one kind (On Tour countHighlights(int playerId, bool land)).
  *
@@ -830,16 +814,16 @@ struct sReplayCacheNode {
 int cReplay::countHighlights(int i, int positive)
 {
     int count = 0;
-    sReplayCacheNode* n = *(sReplayCacheNode**)&FrameList;
+    cReplayFrame* n = FrameList.Tail;
     while (n != 0) {
-        if ((n->mask >> i) & 1) {
+        if ((n->FrameType.Highlights >> i) & 1) {
             if (positive) {
-                if (n->values[i] > 0) count++;
-            } else if (n->values[i] < 0) {
+                if (n->Ranking[i] > 0) count++;
+            } else if (n->Ranking[i] < 0) {
                 count++;
             }
         }
-        n = n->next;
+        n = n->Next;
     }
     return count;
 }
@@ -866,15 +850,6 @@ int cReplay::maxHighlights(int land)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_compareHighlights);
 #ifdef SKIP_ASM
-struct sReplayCacheNode2 {
-    char pad[0x14];
-    sReplayCacheNode2* next;
-    char pad2[0x1E - 0x18];
-    unsigned char mask;
-    unsigned char busy;
-    int values[1];
-};
-
 /**
  * Finds player @p i's weakest highlight of one kind, starting from @p best (On Tour compareHighlights(playerId,
  * frame1, land)).
@@ -887,23 +862,23 @@ struct sReplayCacheNode2 {
  * @param positive  non-zero for landings, 0 for wipeouts (On Tour land)
  * @return @p best or a weaker matching frame
  */
-extern "C" sReplayCacheNode2* cReplay_compareHighlights(cReplay* self, int i, sReplayCacheNode2* best, int positive)
+extern "C" cReplayFrame* cReplay_compareHighlights(cReplay* self, int i, cReplayFrame* best, int positive)
 {
-    sReplayCacheNode2* result = best;
-    sReplayCacheNode2* n = *(sReplayCacheNode2**)&self->FrameList;
+    cReplayFrame* result = best;
+    cReplayFrame* n = self->FrameList.Tail;
     while (n != 0) {
-        if (((n->mask >> i) & 1) && n->busy == 0) {
+        if (((n->FrameType.Highlights >> i) & 1) && n->FrameType.Chapter == 0) {
             if (positive) {
-                if (n->values[i] > 0 && !(best->values[i] < n->values[i])) {
+                if (n->Ranking[i] > 0 && !(best->Ranking[i] < n->Ranking[i])) {
                     best = result = n;
                 }
             } else {
-                if (n->values[i] < 0 && !(n->values[i] < best->values[i])) {
+                if (n->Ranking[i] < 0 && !(n->Ranking[i] < best->Ranking[i])) {
                     best = result = n;
                 }
             }
         }
-        n = n->next;
+        n = n->Next;
     }
     return result;
 }
@@ -950,10 +925,9 @@ void cReplay::endMarkHighlight(int playerId, int id, int positive)
     if (highlightIsMarking(&self->Highlight[playerId])) {
         if (cReplayHighlight_setRanking_s(&self->Highlight[playerId], id, positive)) {
             if (!(self->countHighlights(playerId, positive) < self->maxHighlights(positive))) {
-                sReplayCacheNode2* n =
-                    cReplay_compareHighlights(self, playerId,
-                                              (sReplayCacheNode2*)highlightFrame(&self->Highlight[playerId]), positive);
-                n->mask &= ~(1 << playerId);
+                cReplayFrame* n =
+                    cReplay_compareHighlights(self, playerId, highlightFrame(&self->Highlight[playerId]), positive);
+                n->FrameType.Highlights &= ~(1 << playerId);
             }
         } else {
             cReplayHighlight_cancel(&self->Highlight[playerId]);
@@ -1305,12 +1279,6 @@ void cReplay::writeHeader()
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_writeFrameCount);
 #ifdef SKIP_ASM
-struct sCacheNode {
-    char pad[0x14];
-    sCacheNode* next;
-};
-
-
 /**
  * Counts the recorded frames that will be saved: walks FrameList from the oldest frame, leaving out SaveFrame. Leaves
  * WriteFrame null.
@@ -1323,15 +1291,15 @@ struct sCacheNode {
 int cReplay::writeFrameCount()
 {
     int count = 0;
-    *(sCacheNode**)&WriteFrame = *(sCacheNode**)&FrameList;
-    while (((sCacheNode*)WriteFrame)) {
-        if (((sCacheNode*)WriteFrame) == ((sCacheNode*)SaveFrame)) {
-            *(sCacheNode**)&WriteFrame = ((sCacheNode*)WriteFrame)->next;
+    WriteFrame = FrameList.Tail;
+    while (WriteFrame) {
+        if (WriteFrame == SaveFrame) {
+            WriteFrame = WriteFrame->Next;
         } else {
             count++;
         }
-        if (((sCacheNode*)WriteFrame)) {
-            *(sCacheNode**)&WriteFrame = ((sCacheNode*)WriteFrame)->next;
+        if (WriteFrame) {
+            WriteFrame = WriteFrame->Next;
         }
     }
     return count;
@@ -1347,9 +1315,9 @@ INCLUDE_ASM("replay/replaycache", cReplay_writeFramesStart);
  */
 void cReplay::writeFramesStart()
 {
-    cReplayFrame* oldest = (cReplayFrame*)(*(void**)&FrameList);
-    WriteFrame = (cReplayFrame*)oldest;
-    if (((void*)oldest) == (void*)SaveFrame) {
+    cReplayFrame* oldest = FrameList.Tail;
+    WriteFrame = oldest;
+    if (oldest == SaveFrame) {
         WriteFrame = (cReplayFrame*)(oldest->Next);
     }
     WriteBlockData = 0;
@@ -1388,7 +1356,7 @@ void cReplay::writeFrames()
         int n = HUFF_encode(((void*)WriteBlockData), WriteBlockDataSize, sized + 1, &state);
         *((int*)WriteTmp) = n;
         writeSetup((signed char*)((int*)WriteTmp), n + 4);
-        *(void**)&WriteBlockData = 0;
+        WriteBlockData = 0;
         return;
     }
     if (WriteFrame != 0) {
@@ -1411,13 +1379,13 @@ void cReplay::writeFrames()
         *(void**)&WriteBlockData = ((void*)currentFrame->Block);
         WriteBlockDataSize = currentFrame->Size;
         cReplayFrame* next = currentFrame->Next;
-        *(cReplayFrame**)&WriteFrame = next;
+        WriteFrame = next;
         if (next != 0 && next == SaveFrame) {
-            *(cReplayFrame**)&WriteFrame = next->Next;
+            WriteFrame = next->Next;
         }
         return;
     }
-    *(int*)&WriteSrc = 0;
+    WriteSrc = 0;
     WriteSrcSize = 0;
     WriteState++;
 }
@@ -1463,7 +1431,7 @@ void cReplay::writeInput()
 {
     if (((int*)WriteCacheSave) != 0) {
         writeSetup((signed char*)((int*)WriteCacheSave), 8);
-        (*(int**)&WriteCacheSave) = 0;
+        WriteCacheSave = 0;
         return;
     }
     if (((void*)WriteCmdFrame) != 0) {
@@ -1472,13 +1440,13 @@ void cReplay::writeInput()
         int n = HUFF_encode(((void*)WriteCmdFrame), WriteCmdFrameSize, sized + 1, &state);
         *((int*)WriteTmp) = n;
         writeSetup((signed char*)((int*)WriteTmp), n + 4);
-        (*(void**)&WriteCmdFrame) = 0;
+        WriteCmdFrame = 0;
         return;
     }
     int cur = WriteIndex;
     if (cur < WriteIndexMax) {
-        (*(void**)&WriteCmdFrame) = 0;
-        (*(int**)&WriteCacheSave) = 0;
+        WriteCmdFrame = 0;
+        WriteCacheSave = 0;
         WriteCmdFrameSize = 0;
         cReplayCache* inputCache = InputCache[cur];
         if (inputCache != 0) {
@@ -1491,12 +1459,12 @@ void cReplay::writeInput()
         } else {
             WriteIndex = cur + 1;
             WriteSrcSize = 0;
-            (*(int*)&WriteSrc) = 0;
+            WriteSrc = 0;
         }
     } else {
         WriteState++;
         WriteSrcSize = 0;
-        (*(int*)&WriteSrc) = 0;
+        WriteSrc = 0;
     }
 }
 #endif
@@ -1584,7 +1552,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_load);
 extern "C" int cReplayCache_load(void* self, char** pp);
 extern "C" int cReplayFrame_loadFrame(void* self, char** pp);
 void cReplayFrameList_reset(void* self);
-extern "C" void cReplayFrameList_addFrame(void* list, void* node);
+extern "C" void cReplayFrameList_addFrame(cReplayFrameList* list, void* node);
 
 
 /**
@@ -1613,12 +1581,12 @@ bool cReplay::load(char* buf)
         EndRecordTick = data->EndRecordTick;
         SaveFrame = 0;
         PlaybackTick = 0;
-        cReplayFrameList_reset(((char*)&FrameList));
+        cReplayFrameList_reset(&FrameList);
         *pp = (char*)&data[1];
         for (int i = 0; i < data->NumSaveFrames; i++) {
             void* node = allocReplayFrame();
             cReplayFrame_loadFrame(node, pp);
-            cReplayFrameList_addFrame(((char*)&FrameList), node);
+            cReplayFrameList_addFrame(&FrameList, node);
         }
         for (int i = 0; i < data->Players; i++) {
             if (InputCache[i] != 0) {
@@ -2024,7 +1992,7 @@ extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* heap, unsigned int size)
                 }
                 found = block;
                 if (prev == 0)
-                    (*(tFreeBlock**)&heap->mpTopFreeBlock) = found->pNext;
+                    (heap->mpTopFreeBlock) = found->pNext;
                 else
                     prev->pNext = found->pNext;
                 block->pNext = 0;
@@ -2276,7 +2244,7 @@ extern "C" void* cScriptPlayerChannelSpline_cScriptPlayerChannelSpline(cScriptPl
     self->mpHeader = 0;
     self->mpCurrKey = 0;
     self->mCurrKeyIndex = (unsigned int)0;
-    *(int*)&self->mCurrKeyValue = 0;
+    self->mCurrKeyValue = 0.0f;
     self->mpCurrKeyCustom = 0;
     self->mpNextKey = 0;
     return ((void*)self);
@@ -2341,7 +2309,7 @@ void cScriptPlayerChannelSpline::Stop()
     mpHeader = 0;
     mpCurrKey = 0;
     mCurrKeyIndex = 0;
-    *(int*)&mCurrKeyValue = 0;
+    mCurrKeyValue = 0.0f;
     mpCurrKeyCustom = 0;
     mpNextKey = 0;
 }
@@ -2431,7 +2399,7 @@ extern "C" cInSeq* cInSeq_cInSeq(cInSeq* self, void* pHeap, void* heapSize, unsi
     }
     self->mpScriptHeap[0].pPrev = 0;
     self->mpScriptHeap[self->mMaxScripts - 1].pNext = 0;
-    *(int*)&self->mpScriptUsed = 0;
+    self->mpScriptUsed = 0;
     self->mpScriptUnused = self->mpScriptHeap;
     return self;
 }
@@ -2493,7 +2461,7 @@ extern "C" void* cScriptPlayerMain_Init(void* data, void* src, void* owner, int 
 int cInSeq::ReadyPlayer(void* src)
 {
     tScriptMainNode* n = mpScriptUnused;
-    *(tScriptMainNode**)&mpScriptUnused = n->pNext;
+    mpScriptUnused = n->pNext;
     n->pNext = 0;
     if (mpScriptUnused != 0) {
         mpScriptUnused->pPrev = 0;
@@ -2503,7 +2471,7 @@ int cInSeq::ReadyPlayer(void* src)
     if (mpScriptUsed != 0) {
         mpScriptUsed->pPrev = n;
     }
-    *(tScriptMainNode**)&mpScriptUsed = n;
+    mpScriptUsed = n;
     return n->index;
 }
 #endif
@@ -2529,7 +2497,7 @@ void cInSeq::RecyclePlayer(int playerID)
     tScriptMainNode* n = &nodes[playerID];
     n->script.DeInit();
     if (n->pPrev == 0) {
-        *(tScriptMainNode**)&mpScriptUsed = n->pNext;
+        mpScriptUsed = n->pNext;
         n->pNext = 0;
         if (mpScriptUsed != 0) {
             mpScriptUsed->pPrev = 0;
@@ -2546,7 +2514,7 @@ void cInSeq::RecyclePlayer(int playerID)
     if (mpScriptUnused != 0) {
         mpScriptUnused->pPrev = n;
     }
-    *(tScriptMainNode**)&mpScriptUnused = n;
+    mpScriptUnused = n;
 }
 #endif
 
@@ -2946,7 +2914,7 @@ bool cScriptPlayerChannelBlock::Update(int* flags, float currFrameNum)
         if ((float)event->data.scriptEndFrame <= currFrameNum) {
             *flags |= 8;
             if (prev == 0) {
-                event = *(tBlockEntry**)&mpActiveBlockList = event->pNext;
+                event = mpActiveBlockList = event->pNext;
             } else {
                 event = event->pNext;
                 prev->pNext = event;
@@ -2991,7 +2959,7 @@ struct sCacheTimeNode {
  */
 int cScriptPlayerChannelBlock::GetNextKeyFrame()
 {
-    if ((int)mpData == 0) {
+    if (mpData == 0) {
         return -1;
     }
     if (*(unsigned short*)mpHeader == 0) {
@@ -3108,7 +3076,7 @@ extern "C" void* cScriptPlayerChannelEvent_cScriptPlayerChannelEvent(cScriptPlay
     self->mNextKeyIndex = 0;
     self->mpEventArray = 0;
     self->mNumActiveEvents = 0;
-    *(int*)&self->mEventFrame = 0;
+    self->mEventFrame = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -3173,7 +3141,7 @@ bool cScriptPlayerChannelEvent::Play(unsigned short* data, cScriptPlayerEntity* 
             *flags |= 0x10;
             AddActiveKey(mpNextKey);
             LoadNextScriptKey();
-            *(int*)&mEventFrame = 0;
+            mEventFrame = 0.0f;
         } while (mpNextKey != 0 &&
                mpNextKey->frameNum == 0);
     }
@@ -3203,7 +3171,7 @@ void cScriptPlayerChannelEvent::Stop()
         mNextKeyIndex = 0;
         mpEventArray = 0;
         mNumActiveEvents = 0;
-        *(int*)&mEventFrame = 0;
+        mEventFrame = 0.0f;
     }
 }
 #endif
@@ -3253,7 +3221,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetNextKeyFrame);
  */
 int cScriptPlayerChannelEvent::GetNextKeyFrame()
 {
-    if ((int)mpData == 0) {
+    if (mpData == 0) {
         return -1;
     }
     if (*(unsigned short*)mpHeader == 0) {
@@ -3464,7 +3432,7 @@ bool cScriptPlayerChannelObject::Update(int* flags, float frameDelta, float dt)
         if ((float)event->data.scriptEndFrame <= frameDelta) {
             *flags |= 2;
             if (prev == 0) {
-                event = *(tObjectEntry**)&mpActiveObjectList = event->pNext;
+                event = mpActiveObjectList = event->pNext;
             } else {
                 event = event->pNext;
                 prev->pNext = event;
@@ -3514,7 +3482,7 @@ struct sCacheTimeNode2 {
  */
 int cScriptPlayerChannelObject::GetNextKeyFrame()
 {
-    if ((int)mpData == 0) {
+    if (mpData == 0) {
         return -1;
     }
     if (*(unsigned short*)mpHeader == 0) {
@@ -3712,7 +3680,7 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self);
  */
 void cScriptPlayerEntity::DeInit()
 {
-    if ((int)mpData != 0) {
+    if (mpData != 0) {
         Stop();
         mpData = 0;
         mpOwner = 0;
@@ -4389,7 +4357,7 @@ extern "C" void* cScriptPlayerMain_cScriptPlayerMain(cScriptPlayerMain* self)
     self->mLoopScript = 0;
     self->mPlayState = 0;
     self->mPlaySpeed = 1.0f;
-    *(int*)&self->mCurrFrame = 0;
+    self->mCurrFrame = 0.0f;
     self->mNumPaused = 0;
     self->mScriptLength = -1;
     self->mJumpFrame = -1;
@@ -4455,12 +4423,12 @@ extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScript
     self->mID = playerId;
     *(char**)&self->mpManager = owner;
     *(tInSeqScriptHeader**)&self->mpData = data;
-    *(tInSeqScriptHeader**)&self->mpSystemHeader = data;
+    self->mpSystemHeader = data;
     self->mJumpFrame = -1;
     self->mNumSteps = 0;
     self->mLoopScript = 0;
     if (data->headerSize >= 13) {
-        *(char**)&self->mpDataHeader = (char*)&data->nextSectionStart;
+        self->mpDataHeader = (char*)&data->nextSectionStart;
     }
     // ORIGINAL-PTR: the entity blocks follow the script header (headerSize bytes); each is blockSize bytes long
     char* entityData = (char*)data + (self->mpSystemHeader)->headerSize;
@@ -4526,15 +4494,15 @@ void cScriptPlayerMain::DeInit()
     }
     self->mNumSteps = 0;
     self->mID = -1;
-    *(void**)&self->mpData = 0;
-    *(void**)&self->mpManager = 0;
-    *(int*)&self->mpUserData = 0;
-    *(tInSeqScriptHeader**)&self->mpSystemHeader = 0;
-    *(char**)&self->mpDataHeader = 0;
-    *(cScriptPlayerEntity**)&self->mpEntityPlayers = 0;
+    self->mpData = 0;
+    self->mpManager = 0;
+    self->mpUserData = 0;
+    self->mpSystemHeader = 0;
+    self->mpDataHeader = 0;
+    self->mpEntityPlayers = 0;
     self->mLoopScript = 0;
     self->mPlayState = 0;
-    *(int*)&self->mCurrFrame = 0;
+    self->mCurrFrame = 0.0f;
     self->mNumPaused = 0;
     self->mScriptLength = -1;
     self->mPlaySpeed = 1.0f;
@@ -4705,7 +4673,7 @@ void cScriptPlayerMain::Stop()
         mpEntityPlayers[i].Stop();
     }
     mPlayState = 0;
-    *(int*)&mCurrFrame = 0;
+    mCurrFrame = 0.0f;
     mNumPaused = 0;
     mNumSteps = 0;
     mScriptLength = -1;
@@ -5172,7 +5140,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
             }
             changed2 = anyChanged;
         }
-        *(int*)&self->mCurrFrame = 0;
+        self->mCurrFrame = 0.0f;
         while (scriptLength < rem) {
             rem -= scriptLength;
         }
@@ -5332,7 +5300,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_IsPlaying__FPv);
  */
 bool cScriptPlayerChannelSpline::IsPlaying()
 {
-    return ((int)mpData != 0);
+    return (mpData != 0);
 }
 #endif
 
@@ -5402,7 +5370,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_IsPlaying__FPv);
  */
 bool cScriptPlayerChannelBlock::IsPlaying()
 {
-    return ((int)mpData != 0);
+    return (mpData != 0);
 }
 #endif
 
@@ -5472,7 +5440,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_IsPlaying__FPv);
  */
 bool cScriptPlayerChannelEvent::IsPlaying()
 {
-    return ((int)mpData != 0);
+    return (mpData != 0);
 }
 #endif
 
@@ -5542,7 +5510,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_IsPlaying__FPv);
  */
 bool cScriptPlayerChannelObject::IsPlaying()
 {
-    return ((int)mpData != 0);
+    return (mpData != 0);
 }
 #endif
 

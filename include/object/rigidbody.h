@@ -34,7 +34,7 @@ struct cRigidBody {
     float InvM;            // 0x40 [O]; [U] updateImplicit, rigidImpact, applyImpulse (lwc1 0x40)
     char unk_044[0xC];     // 0x44 padding to the state's 0x50 size ([R] the replay copies 0x50 bytes)
     // --- cRigidBody
-    float InvMOI[3][3];    // 0x50 [O] t3Matrix InvMOI; [U] updateImplicit/rigidImpact/applyImpulse read 0x50-0x70,
+    t3Matrix InvMOI;       // 0x50 [O] t3Matrix InvMOI; [U] updateImplicit/rigidImpact/applyImpulse read 0x50-0x70,
                            //      setW copies it (ldl/ldr + lw 0x70)
     char unk_074[0xC];     // 0x74 padding (V is 16-byte aligned)
     t4Vector V;            // 0x80 [O] velocity; [U] updateImplicit/applyImpulse write it (sq 0x80), stepMotion,

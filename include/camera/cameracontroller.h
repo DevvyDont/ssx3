@@ -60,7 +60,7 @@ struct cCameraController {
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cCameraController_update__FPv");
     int getBlendType() __asm__("cCameraController_getBlendType");
-    int getAlgorithmList() __asm__("cCameraController_getAlgorithmList");
+    cCameraAlgoList* getAlgorithmList() __asm__("cCameraController_getAlgorithmList");
     void snapCurrent() __asm__("cCameraController_snapCurrent");
     void* clearAlgorithms() __asm__("cCameraController_clearAlgorithms__FPv");
 };
@@ -92,8 +92,8 @@ struct cManualCameraController {
                                     //      inserts it
 
     // Methods bound to their retail symbols by asm labels.
-    int getManualAlgo() __asm__("cManualCameraController_getManualAlgo");
-    int getEditorAlgo() __asm__("cManualCameraController_getEditorAlgo");
+    cManualCameraAlgorithm* getManualAlgo() __asm__("cManualCameraController_getManualAlgo");
+    cEditorCameraAlgorithm* getEditorAlgo() __asm__("cManualCameraController_getEditorAlgo");
     void snap(int subjectID) __asm__("cManualCameraController_snap");
     void snapCurrent() __asm__("cManualCameraController_snapCurrent");
     void addAlgorithm(int algo, int deleteAlgorithmOnDestruction) __asm__("cManualCameraController_addAlgorithm");

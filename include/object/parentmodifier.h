@@ -32,7 +32,7 @@ struct cParentModifier : public cPositionModifier {
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
 
     // Methods bound to their retail symbols by asm labels.
-    void setParent(int parentInst) __asm__("cParentModifier_setParent");
+    void setParent(tInstanceRecord* parentInst) __asm__("cParentModifier_setParent");
     // retail's destructor cParentModifier__cParentModifier stays a C function (g++ 2.95 takes no asm label on a
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cParentModifier();

@@ -44,7 +44,9 @@ struct cSpeechSys {
                                         //       fills slot i with cMemMan_alloc(0x904, "SpeechInstance") + ctor
                                         //       func_002AFA68; the dtor frees the array
     void* unk_008;                      // 0x008 [U] SPCH_Init: MEM_alloc("bank mem", n, 0) (the speech bank buffer); func_002B0DA0 MEM_free()s and clears it
-    void (*mCallback)(int);             // 0x00C (our name) [R] ctor 0; [U] func_002B0F48 calls it with the started speech's handle (result unused); func_002B1058/func_002B1520 store it (as int)
+    void (*mCallback)(int);             // 0x00C (our name) [R] ctor 0; [U] func_002B0F48 calls it with the started
+                                        //       speech's handle (result unused); func_002B1058 stores it, func_002B1520
+                                        //       as an int
     int mCallbackInstance;              // 0x010 (our name) [R] ctor -1; [U] the speech instance index mCallback is armed for (func_002B0F48 compares, func_002B1058 sets/clears)
     char unk_014[0x4];                  // 0x014 no access found
     tSpeechRequest mRequest[10];        // 0x018 [R] ctor clears every used flag (func_002B1428); [U] func_002B1458/func_002B1520/func_002B16A0/func_002B1720

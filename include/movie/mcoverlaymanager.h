@@ -233,7 +233,7 @@ struct cMCOverlayManager {
     virtual ~cMCOverlayManager();                           // 2 cMCOverlayManager__cMCOverlayManager
 
     // Methods bound to their retail symbols by asm labels.
-    int getMemCard() __asm__("cMCOverlayManager_getMemCard");
+    cMemCard* getMemCard() __asm__("cMCOverlayManager_getMemCard");
     int GetState() __asm__("cMCOverlayManager_GetState");
     int isInSaveOperation() __asm__("cMCOverlayManager_isInSaveOperation");
     int isInDeleteOperation() __asm__("cMCOverlayManager_isInDeleteOperation");

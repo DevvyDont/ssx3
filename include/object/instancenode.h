@@ -83,7 +83,7 @@ struct cInstanceNode : public cSortObjNode {
     void* runExpireScript() __asm__("cInstanceNode_runExpireScript__FPv");
     void* runOnLoseFocusScript() __asm__("cInstanceNode_runOnLoseFocusScript__FPv");
     void makeThisDead() __asm__("cInstanceNode_makeThisDead");
-    int getInstance() __asm__("cInstanceNode_getInstance");
+    tInstanceRecord* getInstance() __asm__("cInstanceNode_getInstance");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cInstanceNode_writeToReplayFrame");
     void* runCollideScript(int collideInfo, int intersectInfo, int pBeing)
         __asm__("cInstanceNode_runCollideScript__FPviii");

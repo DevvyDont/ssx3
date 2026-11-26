@@ -2123,7 +2123,7 @@ extern "C" int SNDtimeremaining(int h);
 extern "C" int func_003B86C0(int h);
 extern "C" int SNDSTRM_status(int h, void* out);
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
-extern "C" void SNDSTRM_requeststatus(int h, int v);
+extern "C" void SNDSTRM_requeststatus(int h, void* status);
 extern "C" int func_003B7F18(int h);
 
 struct sStrmInfo_EC58 {
@@ -2215,7 +2215,7 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
             if (player->mRequests[j].mHandle < 0) {
                 continue;
             }
-            SNDSTRM_requeststatus(player->mRequests[j].mHandle, (int)&st);
+            SNDSTRM_requeststatus(player->mRequests[j].mHandle, &st);
             switch (st.state) {
             case kSNDREQUEST_Queued:
                 player->mRequests[j].mPosition = player->mRequests[j].mLength;
@@ -2267,7 +2267,7 @@ extern "C" int SNDtimeremaining(int h);
 extern "C" int func_003B86C0(int h);
 extern "C" int SNDSTRM_status(int h, void* out);
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
-extern "C" void SNDSTRM_requeststatus(int h, int v);
+extern "C" void SNDSTRM_requeststatus(int h, void* status);
 extern "C" int func_003B7F18(int h);
 
 struct sStrmInfo_EFA8 {
@@ -2359,7 +2359,7 @@ extern "C" void func_002AEFA8(int reset)
                     if (player->mRequests[j].mHandle < 0) {
                         continue;
                     }
-                    SNDSTRM_requeststatus(player->mRequests[j].mHandle, (int)&st);
+                    SNDSTRM_requeststatus(player->mRequests[j].mHandle, &st);
                     switch (st.state) {
                     case kSNDREQUEST_Queued:
                         player->mRequests[j].mPosition = player->mRequests[j].mLength;
@@ -2839,7 +2839,7 @@ void* cSpeechBank_cSpeechBank(void* vself)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSpeechBank__cSpeechBank);
 #ifdef SKIP_ASM
-extern "C" void func_003D6CA0(void* a0);
+extern "C" void func_003D6CA0(int bankId);
 
 /**
  * Destroys a cSpeechBank: releases its driver bank (func_003D6CA0(mBankId)) and frees mpData when mOwnsData.
@@ -2850,7 +2850,7 @@ extern "C" void func_003D6CA0(void* a0);
  */
 extern "C" void cSpeechBank__cSpeechBank(cSpeechBank* self, int flags)
 {
-    func_003D6CA0((void*)self->mBankId);
+    func_003D6CA0(self->mBankId);
     if (self->mOwnsData != 0) {
         MEM_free(self->mpData);
     }
@@ -2874,8 +2874,7 @@ extern char str_SpeechBank[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-// PORT: callers declare func_002AF960 as int(int, int, int); the body is (name, unused, data) returning an object pointer.
-void* func_002AF960_impl(const char* name, int unused, void* data) __asm__("func_002AF960");
+void* func_002AF960_impl(const char* name, const char* shortName, void* data) __asm__("func_002AF960");
 
 /**
  * Creates a cSpeechBank for "<name>.hdr": loads the header unless given, registers it with the speech driver.
@@ -2890,7 +2889,7 @@ void* func_002AF960_impl(const char* name, int unused, void* data) __asm__("func
  * @param data  the header data already in memory, or 0 to load it
  * @return the new cSpeechBank, or 0 when the file is missing
  */
-void* func_002AF960_impl(const char* name, int shortName, void* data)
+void* func_002AF960_impl(const char* name, const char* shortName, void* data)
 {
     char buf[80];
     int owned = data == 0;
@@ -2954,7 +2953,8 @@ extern "C" void func_002B0088(cSpeechInstance* self, int a, int b, int c);
  * @param a6  stored in unk_008 (no reader found)
  * @return mem
  */
-extern "C" void* func_002AFA68(cSpeechInstance* mem, int instanceIndex, int streamId, int section, int memType, int loadLangHead, int a6)
+extern "C" cSpeechInstance* func_002AFA68(cSpeechInstance* mem, int instanceIndex, int streamId, int section,
+        int memType, int loadLangHead, int a6)
 {
     cSpeechInstance* self = mem;
     self->unk_000 = instanceIndex;
@@ -3029,8 +3029,8 @@ extern "C" void func_002AFB38(cSpeechInstance* self, int flags)
 INCLUDE_ASM("sound/bankmonitor", func_002AFC88);
 #ifdef SKIP_ASM
 extern "C" int func_002B0290(cSpeechInstance* p);
-extern "C" void* func_003D7EC8(void* p);
-extern "C" void* func_003D8040(void* p);
+extern "C" int func_003D7EC8(int channel);
+extern "C" void* func_003D8040(int channel);
 
 class func_002AFC88_cObj {
 public:
@@ -3051,17 +3051,16 @@ public:
  *
  * @param i  the instance's index (the speech driver channel)
  */
-// PORT: i is passed through as a pointer-sized handle
 extern "C" void func_002AFC88(cSpeechInstance* self, int i)
 {
     if (func_002B0290(self) != 0) {
         if (self->unk_900 != 0) {
             ((func_002AFC88_cObj*)D_004A37B4)->v04();
-            if (func_003D7EC8((void*)i) != 0) {
+            if (func_003D7EC8(i) != 0) {
                 self->unk_900 = 0;
             }
         } else {
-            func_003D8040((void*)i);
+            func_003D8040(i);
             self->unk_900 = 1;
         }
     } else {
@@ -3073,10 +3072,10 @@ extern "C" void func_002AFC88(cSpeechInstance* self, int i)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AFD10);
 #ifdef SKIP_ASM
-extern "C" void* func_003D7EC8(void* p);
+extern "C" int func_003D7EC8(int channel);
 
-// PORT: real arity is (self, p); the unit later declares func_002AFD10(int)
-void* func_002AFD10_impl(cSpeechInstance* self, void* p) __asm__("func_002AFD10");
+// PORT: real arity is (self, channel); the unit later declares func_002AFD10(int)
+int func_002AFD10_impl(cSpeechInstance* self, int channel) __asm__("func_002AFD10");
 
 /**
  * Starts the next speech on a channel (func_003D7EC8) and clears the instance's unk_900 when that returns nonzero.
@@ -3086,9 +3085,9 @@ void* func_002AFD10_impl(cSpeechInstance* self, void* p) __asm__("func_002AFD10"
  * @param channel  the speech driver channel
  * @return func_003D7EC8's result
  */
-void* func_002AFD10_impl(cSpeechInstance* self, void* channel)
+int func_002AFD10_impl(cSpeechInstance* self, int channel)
 {
-    void* result = func_003D7EC8(channel);
+    int result = func_003D7EC8(channel);
     if (result != 0) {
         self->unk_900 = 0;
     }
@@ -3109,7 +3108,8 @@ extern "C" int BIG_count(void* big);
 extern "C" void func_003D66C0(void* h, int a);
 char* BIG_locateentryz_2AFD40(void* big, char* name, int index, int* offset, int* size) __asm__("BIG_locateentryz");
 extern char str_pct_seventdat_events_evt[];
-extern "C" void func_002B0348_l(cSpeechInstance* self, int a, int b, int c) __asm__("func_002B0348");
+extern "C" void func_002B0348_l(cSpeechInstance* self, const char* bankPath, const char* shortName, void* headerData)
+    __asm__("func_002B0348");
 
 /**
  * Loads one speech event file set for a cSpeechInstance: a headers .big with its banks, or a plain events file.
@@ -3180,7 +3180,7 @@ extern "C" bool func_002AFD40(cSpeechInstance* self, int isHeaders, char* name, 
                 int j = len - 4;
                 while (path[j] != '\\' && j >= 0)
                     j--;
-                func_002B0348_l(self, (int)path, (int)(path + j + 1), (int)entryData);
+                func_002B0348_l(self, path, path + j + 1, entryData);
             }
         }
     } else {
@@ -3217,7 +3217,7 @@ extern char str_BANK[];
 extern char str_pct_sheaders_big[];
 extern char str_pct_slanghead_big[];
 extern char str_pct_spct_s_c[];
-extern "C" void func_002B0348(cSpeechInstance* self, int a, int b, int c);
+extern "C" void func_002B0348(cSpeechInstance* self, const char* bankPath, const char* shortName, void* headerData);
 
 /**
  * Reads a cSpeechInstance's speech.inf section (D_004A37B0): its .big file, base paths and extra banks.
@@ -3269,7 +3269,7 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int instanceIndex
             {
                 FileParser_AssignString(parser, str_BANK, value);
                 sprintf(path, str_pct_spct_s_c, speechInstance->mBasePath, name);
-                func_002B0348(speechInstance, (int)path, (int)name, 0);
+                func_002B0348(speechInstance, path, name, 0);
             }
         }
     }
@@ -3335,7 +3335,7 @@ extern "C" void func_002B0320(cSpeechInstance* speechInstance)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B0348);
 #ifdef SKIP_ASM
-extern "C" int func_002AF960(int a, int b, int c);
+extern "C" cSpeechBank* func_002AF960(const char* bankPath, const char* shortName, void* headerData);
 extern int cSpeechInstance_mNumTotalBanks;
 
 /**
@@ -3348,9 +3348,9 @@ extern int cSpeechInstance_mNumTotalBanks;
  * @param shortName  the short name
  * @param headerData  the header data, or 0 to load it
  */
-extern "C" void func_002B0348(cSpeechInstance* self, int bankPath, int shortName, int headerData)
+extern "C" void func_002B0348(cSpeechInstance* self, const char* bankPath, const char* shortName, void* headerData)
 {
-    self->mBanks[self->mNumBanks] = (cSpeechBank*)func_002AF960(bankPath, shortName, headerData);
+    self->mBanks[self->mNumBanks] = func_002AF960(bankPath, shortName, headerData);
     if (self->mBanks[self->mNumBanks] != 0) {
         self->mNumBanks++;
         cSpeechInstance_mNumTotalBanks++;
@@ -3740,8 +3740,8 @@ extern "C" void func_002B0C78(cSpeechSys* self)
 INCLUDE_ASM("sound/bankmonitor", SPCH_Init);
 #ifdef SKIP_ASM
 extern "C" int func_003D6778(int a, int b, int c);
-// PORT: the unit defines cSoundSys_SndRand() with no args; this caller passes one.
-int cSoundSys_SndRand_a(int seed) __asm__("cSoundSys_SndRand");
+// cSoundSys::SndRand() is a member function: this caller passes the shared cSoundSys as its this pointer.
+int cSoundSys_SndRand_a(cSoundSys* soundSys) __asm__("cSoundSys_SndRand");
 extern "C" void bxLogPrint(const char* fmt, ...);
 extern "C" void func_003D6840(void* fn, int seed, int buf);
 extern "C" int func_003D6C58(int n);
@@ -3764,7 +3764,7 @@ extern char str_bank_mem[];
 extern "C" void SPCH_Init(cSpeechSys* self)
 {
     int buf = func_003D6778(22050, 0x10, 1);
-    int seed = cSoundSys_SndRand_a((int)self->mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys);
+    int seed = cSoundSys_SndRand_a(self->mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys);
     bxLogPrint(D_00483390, seed);
     func_003D6840((void*)func_002AF8A8, seed, buf);
     int n = func_003D6C58(500);
@@ -3829,7 +3829,7 @@ extern "C" int func_002B0E28(cSpeechSys* self, int i)
 INCLUDE_ASM("sound/bankmonitor", func_002B0E60);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002AFA68(cSpeechInstance* mem, int i, int a, int b, int c, int d, int e);
+extern "C" cSpeechInstance* func_002AFA68(cSpeechInstance* mem, int i, int a, int b, int c, int d, int e);
 extern const char str_SpeechInstance[];
 
 /**
@@ -3956,7 +3956,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1058);
  * @param volumeArg  mUserInfo for this trigger
  * @param floatArg  mRadius for this trigger, when > 0
  */
-extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, int callback, int volumeArg, float floatArg)
+extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, void (*callback)(int), int volumeArg,
+        float floatArg)
 {
     cSpeechInstance** chans = self->mSpeechInstance;
     if (chans[idx] != 0) {
@@ -3966,10 +3967,10 @@ extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, int callba
         }
         self->mSpeechInstance[idx]->mUserInfo = volumeArg;
         if (callback != 0) {
-            self->mCallback = (void (*)(int))callback;
+            self->mCallback = callback;
             self->mCallbackInstance = idx;
         }
-        func_003D8040((void*)idx);
+        func_003D8040(idx);
         self->mCallbackInstance = -1;
         self->mCallback = 0;
         self->mSpeechInstance[idx]->mRadius = 0.0f;
@@ -3981,7 +3982,7 @@ extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, int callba
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B1128);
 #ifdef SKIP_ASM
-extern "C" void func_002B1058(cSpeechSys* self, int idx, int a2, int a3, int a4, float v);
+extern "C" void func_002B1058(cSpeechSys* self, int idx, int a2, void (*a3)(int), int a4, float v);
 extern int D_004A37BC;
 
 /**
@@ -4070,7 +4071,7 @@ extern "C" int func_002B1220(cSpeechSys* self, int i)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1248);
 #ifdef SKIP_ASM
-extern "C" void cStreamSys_STREAM_ReleaseHoldCallback(int);
+extern "C" void cStreamSys_STREAM_ReleaseHoldCallback(cStreamSys* streamSys);
 
 /**
  * Ends a speech monitor callback: calls cStreamSys_STREAM_ReleaseHoldCallback on the speech system's cStreamSys (the instance stays in a1).
@@ -4080,7 +4081,7 @@ extern "C" void cStreamSys_STREAM_ReleaseHoldCallback(int);
  * @param speechSys  the cSpeechSys (its mpVStreamSys is the cStreamSys)
  */
 extern "C" void func_002B1248(cSpeechSys* speechSys) {
-    cStreamSys_STREAM_ReleaseHoldCallback((int)speechSys->mpVStreamSys);
+    cStreamSys_STREAM_ReleaseHoldCallback(speechSys->mpVStreamSys);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -4092,7 +4093,7 @@ struct sPacked8_1268 { long v; } __attribute__((packed));
 extern const sPacked8_1268 D_004A37E0_2B1268[] __asm__("D_004A37E0");
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i);
 extern "C" void cStreamSys_STREAM_SetVolControl(void* self, int i, int val);
-extern "C" void cMonitor_MONITOR_Create(int a, int b, long t, void* c, int d, int e, int f, int g);
+extern "C" void cMonitor_MONITOR_Create(cBankMonitor* a, int b, long t, void* c, int d, int e, int f, int g);
 extern "C" int func_002B1248_pp(void* self, void* msg) __asm__("func_002B1248");
 struct sVE1268 { short delta; short index; int (*fn)(void*, int, int, int); };
 
@@ -4112,7 +4113,7 @@ extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg)
     cSpeechInstance* ent = (cSpeechInstance*)msg->mPtr;
     int channel = func_002B1220((cSpeechSys*)D_004A37B4, ent->unk_000);
     if (cStreamSys_STREAM_GetCurrActiveSampleHandle(self->mpVStreamSys, channel) != msg->mData1) {
-        cMonitor_MONITOR_Create((int)&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, 200,
+        cMonitor_MONITOR_Create(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, 200,
                                 D_004A37E0_2B1268[0].v, msg->mPtr, msg->mData1, msg->mData2, 0, 0);
         return 1;
     }
@@ -4135,7 +4136,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1348);
 struct sPacked8_1348 { long v; } __attribute__((packed));
 extern const sPacked8_1348 D_004A37D8_2B1348[] __asm__("D_004A37D8");
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i);
-extern "C" void cMonitor_MONITOR_Create(int a, int b, long t, void* c, int d, int e, int f, int g);
+extern "C" void cMonitor_MONITOR_Create(cBankMonitor* a, int b, long t, void* c, int d, int e, int f, int g);
 extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg);
 
 /**
@@ -4155,7 +4156,7 @@ extern "C" int func_002B1348(cSpeechSys* self, cMonitorInstance* msg)
     if (cStreamSys_STREAM_Requests(self->mpVStreamSys, ent->unk_004) - 1 > 0) {
         if (cStreamSys_STREAM_Playing(self->mpVStreamSys, ent->unk_004) != 0) {
             float remainingMs = cStreamSys_STREAM_TimeRemaining(self->mpVStreamSys, ent->unk_004);
-            cMonitor_MONITOR_Create((int)&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, (int)remainingMs,
+            cMonitor_MONITOR_Create(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, (int)remainingMs,
                                     D_004A37D8_2B1348[0].v, ent, msg->mData1, msg->mData2, 0, 0);
             return 1;
         }
@@ -4418,11 +4419,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1758__FPvi);
  * @param channel  the instance index / driver channel
  * @return func_002AFD10's result
  */
-void* func_002B1758(void* vself, int channel)
+int func_002B1758(void* vself, int channel)
 {
     cSpeechSys* self = (cSpeechSys*)vself;
     // a1 also stays in $5 as func_002AFD10's second argument
-    return func_002AFD10_impl(self->mSpeechInstance[channel], (void*)channel);
+    return func_002AFD10_impl(self->mSpeechInstance[channel], channel);
 }
 #endif
 
@@ -5139,7 +5140,7 @@ int func_002B2578_impl(void* self, void* out)
 INCLUDE_ASM("sound/bankmonitor", func_002B25C8);
 #ifdef SKIP_ASM
 extern "C" void func_002B2578(void* self, void* out);
-extern "C" void SNDSTRM_requeststatus(int h, int v);
+extern "C" void SNDSTRM_requeststatus(int h, void* status);
 
 struct sBmInfo {
     int a;
@@ -5151,12 +5152,11 @@ struct sBmInfo {
 /**
  * Reads the status of the song stream's current request (SNDSTRM_requeststatus) into the given buffer.
  *
- * Gets the stream status first (func_002B2578) and uses its second word as the request handle. The parameter is
- * declared int but is the out buffer.
+ * Gets the stream status first (func_002B2578) and uses its second word as the request handle.
  *
  * @param requestStatus  receives the request status (type, position, length, ...)
  */
-extern "C" void func_002B25C8(cSongInstance* self, int requestStatus)
+extern "C" void func_002B25C8(cSongInstance* self, void* requestStatus)
 {
     sBmInfo info;
     func_002B2578(self, &info);
@@ -5168,8 +5168,6 @@ extern "C" void func_002B25C8(cSongInstance* self, int requestStatus)
 INCLUDE_ASM("sound/bankmonitor", func_002B2600);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit declares func_002B25C8(void*, int); its second arg is really an out pointer.
-void func_002B25C8_out(void* self, void* out) __asm__("func_002B25C8");
 
 
 /**
@@ -5182,7 +5180,7 @@ void func_002B25C8_out(void* self, void* out) __asm__("func_002B25C8");
 extern "C" float func_002B2600(cSongInstance* self)
 {
     SNDREQUESTSTATUS info;
-    func_002B25C8_out(self, &info);
+    func_002B25C8(self, &info);
     if (info.state == kSNDREQUEST_Playing) {
         return (float)info.currenttime;
     }
@@ -5196,18 +5194,18 @@ INCLUDE_ASM("sound/bankmonitor", func_002B2640);
 
 extern "C" float func_002B26B8(cSongInstance* self);
 
-// PORT: the unit later declares func_002B2640() as void() for a caller; real signature is float(void*).
-float func_002B2640_impl(void* self) __asm__("func_002B2640");
+// PORT: the unit later declares func_002B2640() as void() for a caller; real signature is float(cSongInstance*).
+float func_002B2640_impl(cSongInstance* self) __asm__("func_002B2640");
 /**
  * Returns the current request's length while it plays (kSNDREQUEST_Playing), otherwise one bar's length
  * (func_002B26B8).
  *
  * @return the length in ms
  */
-float func_002B2640_impl(void* self)
+float func_002B2640_impl(cSongInstance* self)
 {
     SNDREQUESTSTATUS info;
-    func_002B25C8_out(self, &info);
+    func_002B25C8(self, &info);
     if (info.state == kSNDREQUEST_Playing) {
         return (float)info.timetoend;
     }
@@ -6031,7 +6029,7 @@ extern "C" void func_002B3C28(cMusicSys* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B3C60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_002B2140_3C60(int) __asm__("func_002B2140");
+extern void func_002B2140_3C60(cSongInstance* song) __asm__("func_002B2140");
 
 /**
  * Calls func_002B2140 on the current song while playing, passing the caller's second argument through.
@@ -6039,12 +6037,12 @@ extern void func_002B2140_3C60(int) __asm__("func_002B2140");
  * @param musicSys  the cMusicSys
  */
 extern "C" void func_002B3C60(cMusicSys* musicSys) {
-    int temp_4;
+    cSongInstance* song;
 
     if (musicSys->mSongPlaying != 0) {
-        temp_4 = ((int)musicSys->mSongInstance);
-        if (temp_4 != 0) {
-            func_002B2140_3C60(temp_4);
+        song = musicSys->mSongInstance;
+        if (song != 0) {
+            func_002B2140_3C60(song);
         }
     }
 }
@@ -6154,7 +6152,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3D80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPacked8_3D80 { long v; } __attribute__((packed));
 extern const sPacked8_3D80 D_004A3850_3D80[] __asm__("D_004A3850");
-extern void cMonitor_MONITOR_Create_3D80(int a, int b, long t, int c, int d, int e, int f, int g) __asm__("cMonitor_MONITOR_Create");
+extern void cMonitor_MONITOR_Create_3D80(cBankMonitor* a, int b, long t, int c, int d, int e, int f,
+        int g) __asm__("cMonitor_MONITOR_Create");
 
 /**
  * Starts a base-volume fade of the current song to target over duration seconds, stepped by func_002B3E20.
@@ -6175,7 +6174,7 @@ extern "C" void func_002B3D80(cMusicSys* self, signed char target, float duratio
         self->unk_414 = target;
         self->unk_410 = (float)cur;
         self->unk_40C = (float)steps / duration;
-        cMonitor_MONITOR_Create_3D80((int)&self->mpVStreamSys->mpVBankManager->BankMonitor, 40, D_004A3850_3D80[0].v,
+        cMonitor_MONITOR_Create_3D80(&self->mpVStreamSys->mpVBankManager->BankMonitor, 40, D_004A3850_3D80[0].v,
                                      0, 0, 0, 0, 0);
     }
 }
@@ -6587,7 +6586,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4470);
 #ifdef SKIP_ASM
 struct sPacked8_4470 { long v; } __attribute__((packed));
 extern const sPacked8_4470 D_004A3838_4470[] __asm__("D_004A3838");
-extern void cMonitor_MONITOR_Create_4470(int a, int b, long t, int c, int d, int e, int f, int g) __asm__("cMonitor_MONITOR_Create");
+extern void cMonitor_MONITOR_Create_4470(cBankMonitor* a, int b, long t, int c, int d, int e, int f,
+        int g) __asm__("cMonitor_MONITOR_Create");
 
 /**
  * Arms the D_004A3838 callback (func_002B4740) at once and sets unk_4C, when the current song's unk_4C is 0.
@@ -6598,7 +6598,7 @@ extern "C" void func_002B4470(cMusicSys* self)
     cSongInstance* songInstance = self->mSongInstance;
     if (((void*)songInstance) != 0 && songInstance->unk_4C == 0) {
         songInstance->unk_4C = 1;
-        cMonitor_MONITOR_Create_4470((int)&self->mpVStreamSys->mpVBankManager->BankMonitor, 0, D_004A3838_4470[0].v,
+        cMonitor_MONITOR_Create_4470(&self->mpVStreamSys->mpVBankManager->BankMonitor, 0, D_004A3838_4470[0].v,
                                      0, 0, 0, 0, 0);
     }
 }
@@ -6611,7 +6611,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B44D8);
 struct sPacked8 { long v; } __attribute__((packed));
 extern const sPacked8 D_004A3838_2B44D8[] __asm__("D_004A3838");
 extern const sPacked8 D_004A3840_2B44D8[] __asm__("D_004A3840");
-extern "C" void cMonitor_MONITOR_DestroyAll1(int a, long t);
+extern "C" void cMonitor_MONITOR_DestroyAll1(cBankMonitor* a, long t);
 extern "C" void func_002B4708(cMusicSys* self);
 
 /**
@@ -6622,8 +6622,8 @@ extern "C" void func_002B4708(cMusicSys* self);
 extern "C" void func_002B44D8(cMusicSys* self)
 {
     if (self->mSongInstance != 0) {
-        cMonitor_MONITOR_DestroyAll1((int)&self->mpVStreamSys->mpVBankManager->BankMonitor, D_004A3838_2B44D8[0].v);
-        cMonitor_MONITOR_DestroyAll1((int)&self->mpVStreamSys->mpVBankManager->BankMonitor, D_004A3840_2B44D8[0].v);
+        cMonitor_MONITOR_DestroyAll1(&self->mpVStreamSys->mpVBankManager->BankMonitor, D_004A3838_2B44D8[0].v);
+        cMonitor_MONITOR_DestroyAll1(&self->mpVStreamSys->mpVBankManager->BankMonitor, D_004A3840_2B44D8[0].v);
         func_002B4708(self);
     }
 }
@@ -6659,7 +6659,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4568);
 extern const sPacked8 D_004A3840_2B4568[] __asm__("D_004A3840");
 extern "C" int func_002B2778(cSongInstance* ent);
 extern "C" int func_002B2500(cSongInstance* ent);
-extern "C" void cMonitor_MONITOR_Create(int a, int b, long t, void* c, int d, int e, int f, int g);
+extern "C" void cMonitor_MONITOR_Create(cBankMonitor* a, int b, long t, void* c, int d, int e, int f, int g);
 
 /**
  * Arms the beat-synchronised overlay callback (D_004A3840, func_002B4540) for the song ent.
@@ -6677,7 +6677,7 @@ extern "C" void func_002B4568(cMusicSys* self, cSongInstance* ent)
         float timeToBeat = func_002B2718((cSongInstance*)ent);
         int nextBeat = func_002B2778((cSongInstance*)ent) + 1;
         int phraseStart = func_002B2500((cSongInstance*)ent);
-        cMonitor_MONITOR_Create((int)&self->mpVStreamSys->mpVBankManager->BankMonitor, (int)timeToBeat,
+        cMonitor_MONITOR_Create(&self->mpVStreamSys->mpVBankManager->BankMonitor, (int)timeToBeat,
                                 D_004A3840_2B4568[0].v, self->mSongInstance, phraseStart, nextBeat, (int)beatLength, 0);
     }
 }

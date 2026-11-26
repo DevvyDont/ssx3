@@ -23,6 +23,7 @@
 struct cObjNode;
 struct tInstanceRecord;
 struct tModifierBlock;
+struct tMaterialBlockRecord;
 
 // World-script data that the cMoveNode add* functions take (On Tour tAddFadeData / tAddDebounceData 0xC,
 // tAddRailData 0x10; same layouts). [O] On Tour's cMoveNode::addFade(const tAddFadeData&), addDebounce(const
@@ -130,7 +131,7 @@ struct cMoveNode : public cInstanceNode {
     int getTransformModifier() __asm__("cMoveNode_getTransformModifier");
     int hasTextureMat() __asm__("cMoveNode_hasTextureMat");
     int hasMaterialBlock() __asm__("cMoveNode_hasMaterialBlock");
-    int getMaterialBlock() __asm__("cMoveNode_getMaterialBlock");
+    const tMaterialBlockRecord* getMaterialBlock() __asm__("cMoveNode_getMaterialBlock");
     void* getTextureMat() __asm__("cMoveNode_getTextureMat");
     void remTransformModifier() __asm__("cMoveNode_remTransformModifier");
     void remUVScrollModifier() __asm__("cMoveNode_remUVScrollModifier");

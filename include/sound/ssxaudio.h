@@ -538,13 +538,13 @@ struct cSSXAudio {
     int GetAudioUpdateState() __asm__("cSSXAudio_GetAudioUpdateState");
     int GetGruntVol(cRider* src) __asm__("cSSXAudio_GetGruntVol");
     int SFX_Play2D(int bank, int patch) __asm__("cSSXAudio_SFX_Play2D");
-    void SetCurTrickPower(int id, float value) __asm__("cSSXAudio_SetCurTrickPower");
+    void SetCurTrickPower(cRider* rider, float value) __asm__("cSSXAudio_SetCurTrickPower");
     void BeginWind() __asm__("cSSXAudio_BeginWind");
     void EndWind() __asm__("cSSXAudio_EndWind");
     void PlayThunder() __asm__("cSSXAudio_PlayThunder");
     int GetBoardBank(int surfaceType) __asm__("cSSXAudio_GetBoardBank");
     void BeginAllRiderSound() __asm__("cSSXAudio_BeginAllRiderSound");
-    void BeginRiderSound(int id) __asm__("cSSXAudio_BeginRiderSound");
+    void BeginRiderSound(cRider* rider) __asm__("cSSXAudio_BeginRiderSound");
     void StopRiderSound(int Rider) __asm__("cSSXAudio_StopRiderSound");
     void StopAllRiderSounds() __asm__("cSSXAudio_StopAllRiderSounds");
     void HandleChatter(cBankMonitorInstance* obj) __asm__("cSSXAudio_HandleChatter");
@@ -556,6 +556,8 @@ struct cSSXAudio {
     void AIGlideProgram(int id, cRider* rider, int* out, int* size) __asm__("cSSXAudio_AIGlideProgram");
     void CarveProgram(int id, cRider* rider, int* out, int* size) __asm__("cSSXAudio_CarveProgram");
     int GetSurfaceProgramType(int kind, cRider* rider) __asm__("cSSXAudio_GetSurfaceProgramType");
+    // [R] cSSXAudio_Surface: the surface sound id under @p rider (mRailType for a rider on a rail); asm
+    int Surface(cRider* rider) __asm__("cSSXAudio_Surface");
     void HardCarveProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_HardCarveProgram");
     void SoftCarveProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_SoftCarveProgram");
     void RailCarveProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_RailCarveProgram");
@@ -581,7 +583,7 @@ struct cSSXAudio {
     void WipeoutTumbleEnd(cRider* obj) __asm__("cSSXAudio_WipeoutTumbleEnd");
     void WorldSound(tInstanceRecord* evt, int n) __asm__("cSSXAudio_WorldSound");
     void AttachSound(tInstanceRecord* obj, int type, int id) __asm__("cSSXAudio_AttachSound");
-    void DetachSound(int inst, int patch) __asm__("cSSXAudio_DetachSound");
+    void DetachSound(tInstanceRecord* inst, int patch) __asm__("cSSXAudio_DetachSound");
     void InitAttachedSounds() __asm__("cSSXAudio_InitAttachedSounds");
     void UpdateAttachedSounds() __asm__("cSSXAudio_UpdateAttachedSounds");
     void ResetAttachedSounds() __asm__("cSSXAudio_ResetAttachedSounds");

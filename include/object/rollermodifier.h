@@ -119,8 +119,9 @@ struct cRollerModifier : public cTransformModifier {
     t4Vector L;                   // 0x060 [O] angular momentum; [U] update/collide (lqc2/sq 0x60, lwc1 0x60-0x6C)
     float InvM;                   // 0x070 [O]; [R] ctor: 1.0f / mMass; [U] Collision, update, collide (lwc1 0x70)
     char unk_074[0xC];            // 0x074 padding (cRigidBodyState ends at 0x80)
-    float InvMOI[3][3];           // 0x080 [O] t3Matrix; [U] updateMOI (cRollerModifier_updateMOI) writes the world-space inverse
-                                  //       inertia (sdl/sdr 0x80-0x9F + sw 0xA0); update/collide read 0x80-0xA0
+    t3Matrix InvMOI;              // 0x080 [O] t3Matrix; [U] updateMOI (cRollerModifier_updateMOI) writes the
+                                  //       world-space inverse inertia (sdl/sdr 0x80-0x9F + sw 0xA0); update/collide
+                                  //       read 0x80-0xA0
     char unk_0A4[0xC];            // 0x0A4 padding
     t4Vector V;                   // 0x0B0 [O] velocity; [U] Collision/update/collide (lqc2/sq 0xB0)
     t4Vector W;                   // 0x0C0 [O] angular velocity; [U] Collision/update/collide (lqc2/sq 0xC0)
@@ -133,7 +134,7 @@ struct cRollerModifier : public cTransformModifier {
     tBoundBox boundbox;           // 0x220 [O]; [U] setBoundBox (sq 0x220, 0x230), getBoundBox returns its address
     t4Matrix Transform;           // 0x240 [O]; [U] ctors/update build it from the body pose (sqc2 0x240-0x270);
                                   //       getRootTransform/getRootTransform1 return its address
-    float InvBodyMOI[3][3];       // 0x280 [O] t3Matrix; [R] ctors: tree info + 0x5C, each element * 0.5f;
+    t3Matrix InvBodyMOI;          // 0x280 [O] t3Matrix; [R] ctors: tree info + 0x5C, each element * 0.5f;
                                   //       [U] updateMOI reads it (lwc1 0x280-0x2A0)
     char unk_2A4[0xC];            // 0x2A4 padding
     t4Vector COMOffset;           // 0x2B0 [O]; [R] ctors: tree info + 0x2C (x, y, z; w = 0); [U] getBodyPose

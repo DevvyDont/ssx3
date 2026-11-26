@@ -65,8 +65,8 @@ struct cPlayer {
     cRider Rider;              // 0xE10 [R] cPlayer_cPlayer: cRider_cRider(this + 0xE10) when in charge
 
     // Methods bound to their retail symbols by asm labels.
-    void setInput(int input, int device) __asm__("cPlayer_setInput");
-    int getInput() __asm__("cPlayer_getInput");
+    void setInput(cInput* input, cPadDevice* device) __asm__("cPlayer_setInput");
+    cInput* getInput() __asm__("cPlayer_getInput");
     int getGrabHeld() __asm__("cPlayer_getGrabHeld");
     int getUberGrindHeld() __asm__("cPlayer_getUberGrindHeld");
     void vibrationReset() __asm__("cPlayer_vibrationReset__FPv");

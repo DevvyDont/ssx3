@@ -322,7 +322,7 @@ INCLUDE_ASM("object/railmodifier", cRailModifier_update);
 
 extern "C" void cRailModifier_updateBoundBox(void* self);
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box, tBoundBox* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* node, tBoundBox* box, tBoundBox* old);
 
 /**
  * Recomputes the rail's world bound box and moves its rail-space node in the Nash octree from the old box to the
@@ -335,7 +335,7 @@ extern "C" void cRailModifier_update(cRailModifier* self)
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
     cRailModifier_updateBoundBox((self));
-    nash_Nash_movenode(cObjectInterface_getNash(), 2, (int)self->Node, box, &old);
+    nash_Nash_movenode(cObjectInterface_getNash(), 2, self->Node, box, &old);
 }
 #endif
 
@@ -716,9 +716,9 @@ static inline float clamp_C698(float x, float lo, float hi)
 static inline void resetHit_C698(tIntersectInfo* h)
 {
     h->HitType = 2;
-    (*(void**)&h->Patch) = 0;
-    (*(void**)&h->Inst) = 0;
-    (*(void**)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
@@ -842,7 +842,7 @@ void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vecto
             out->Mesh = Mesh;
             out->T = t;
             (*(void**)&out->Spline) = spline;
-            (*(void**)&out->Patch) = 0;
+            out->Patch = 0;
         }
     }
 }
@@ -919,13 +919,13 @@ static inline void invertCFF0(t3Matrix& a)
 static inline t4Vector xformCFF0(const t3Matrix& m, cRigidBody* b)
 {
     t4Vector r;
-    float x = (*(t4Vector*)&b->W).x;
-    float y = (*(t4Vector*)&b->W).y;
-    float z = (*(t4Vector*)&b->W).z;
+    float x = b->W.x;
+    float y = b->W.y;
+    float z = b->W.z;
     r.x = m.m[0] * x + m.m[3] * y + m.m[6] * z;
     r.y = m.m[1] * x + m.m[4] * y + m.m[7] * z;
     r.z = m.m[2] * x + m.m[5] * y + m.m[8] * z;
-    r.w = (*(t4Vector*)&b->W).w;
+    r.w = b->W.w;
     return r;
 }
 
@@ -939,21 +939,16 @@ static inline t4Vector xformCFF0(const t3Matrix& m, cRigidBody* b)
  */
 void cRigidBody::setW(const t4Vector* newPos)
 {
-    (*(t4Vector*)&W) = *newPos;
-    // InvMOI is On Tour's t3Matrix ([O]), kept as float[3][3]: the same nine floats.
-    t3Matrix invRot = (*(t3Matrix*)&InvMOI[0][0]);
+    W = *newPos;
+    t3Matrix invRot = InvMOI;
     invertCFF0(invRot);
-    (*(t4Vector*)&L) = xformCFF0(invRot, this);
+    L = xformCFF0(invRot, this);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_updateImplicit);
 #ifdef SKIP_ASM
-
-struct sRmMat33 {
-    float m[3][3];
-};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector vu0ScaleRM(const t4Vector& v, float s)
@@ -972,16 +967,17 @@ static inline t4Vector vu0ScaleRM(const t4Vector& v, float s)
 }
 
 
-static inline t4Vector xformRM(cRollerModifier* b)
+// InvMOI * L, keeping L's w.
+static inline t4Vector xformRM(cRigidBody* b)
 {
     t4Vector r;
-    float x = b->Pose.P.x;
-    float y = b->Pose.P.y;
-    float z = b->Pose.P.z;
-    r.x = (*(sRmMat33*)&b->P).m[0][0] * x + (*(sRmMat33*)&b->P).m[1][0] * y + (*(sRmMat33*)&b->P).m[2][0] * z;
-    r.y = (*(sRmMat33*)&b->P).m[0][1] * x + (*(sRmMat33*)&b->P).m[1][1] * y + (*(sRmMat33*)&b->P).m[2][1] * z;
-    r.z = (*(sRmMat33*)&b->P).m[0][2] * x + (*(sRmMat33*)&b->P).m[1][2] * y + (*(sRmMat33*)&b->P).m[2][2] * z;
-    r.w = b->Pose.P.w;
+    float x = b->L.x;
+    float y = b->L.y;
+    float z = b->L.z;
+    r.x = b->InvMOI.m[0] * x + b->InvMOI.m[3] * y + b->InvMOI.m[6] * z;
+    r.y = b->InvMOI.m[1] * x + b->InvMOI.m[4] * y + b->InvMOI.m[7] * z;
+    r.z = b->InvMOI.m[2] * x + b->InvMOI.m[5] * y + b->InvMOI.m[8] * z;
+    r.w = b->L.w;
     return r;
 }
 
@@ -992,10 +988,10 @@ static inline t4Vector xformRM(cRollerModifier* b)
  * (InvMOI, 3x3 at +0x50) applied to the angular momentum (+0x30), keeping its w. Called after the inertia changes
  * (cRollerModifier_updateMOI) and after each simulation step.
  */
-extern "C" void cRigidBody_updateImplicit(cRollerModifier* self)
+extern "C" void cRigidBody_updateImplicit(cRigidBody* self)
 {
-    (*(t4Vector*)&self->InvMOI[0][0]) = vu0ScaleRM((*(t4Vector*)&self->Life), self->Pose.Q.x);
-    (*(t4Vector*)&self->InvMOI[1][1]) = xformRM(self);
+    self->V = vu0ScaleRM(self->P, self->InvM);
+    self->W = xformRM(self);
 }
 #endif
 
@@ -1124,7 +1120,7 @@ struct sRmRigid_D4A0 {
     char pad_0x10[0x30];
     float invMass;      // 0x40
     char pad_0x44[0xC];
-    sRmMat33 invI;      // 0x50
+    t3Matrix invI;      // 0x50
     char pad_0x74[0xC];
     t4Vector vel;        // 0x80
     t4Vector angVel;     // 0x90
@@ -1260,9 +1256,9 @@ static inline t4Vector MulID4A0(sRmRigid_D4A0* b, const t4Vector& v)
     float x = v.x;
     float y = v.y;
     float z = v.z;
-    r.x = b->invI.m[0][0] * x + b->invI.m[1][0] * y + b->invI.m[2][0] * z;
-    r.y = b->invI.m[0][1] * x + b->invI.m[1][1] * y + b->invI.m[2][1] * z;
-    r.z = b->invI.m[0][2] * x + b->invI.m[1][2] * y + b->invI.m[2][2] * z;
+    r.x = b->invI.m[0] * x + b->invI.m[3] * y + b->invI.m[6] * z;
+    r.y = b->invI.m[1] * x + b->invI.m[4] * y + b->invI.m[7] * z;
+    r.z = b->invI.m[2] * x + b->invI.m[5] * y + b->invI.m[8] * z;
     r.w = v.w;
     return r;
 }
@@ -1504,8 +1500,8 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     cRigidBody_cRigidBody(&self->Pose);
     *(void***)self = cRollerModifier_vtbl;
     SphereTree_SphereTree(&self->SphTree);
-    *(int*)&self->Life = 0;
-    self->m_pInstance = (tInstanceRecord*)((int)ii->Inst);
+    self->Life = 0.0f;
+    self->m_pInstance = ii->Inst;
     bxSphereTree_operatorE(&self->SphTree, ii->SphTree);
     self->mMass = rdata->Mass;
     tSphTreeInfo* info = self->SphTree.treeInfo;
@@ -1516,40 +1512,40 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     offset.y = info->centerOfMass[1];
     offset.z = info->centerOfMass[2];
     offset.w = 0.0f;
-    *(t4Vector*)&self->COMOffset = offset;
-    *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)&info->invMomentOfInertia[0][0];
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][0] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][1] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][2] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[1][0] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[1][1] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[1][2] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][0] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][1] *= 0.5f;
-    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][2] *= 0.5f;
+    self->COMOffset = offset;
+    self->InvBodyMOI = info->invMomentOfInertia;
+    self->InvBodyMOI.m[0] *= 0.5f;
+    self->InvBodyMOI.m[1] *= 0.5f;
+    self->InvBodyMOI.m[2] *= 0.5f;
+    self->InvBodyMOI.m[3] *= 0.5f;
+    self->InvBodyMOI.m[4] *= 0.5f;
+    self->InvBodyMOI.m[5] *= 0.5f;
+    self->InvBodyMOI.m[6] *= 0.5f;
+    self->InvBodyMOI.m[7] *= 0.5f;
+    self->InvBodyMOI.m[8] *= 0.5f;
     tPose x = tPose_tPose(&self->m_pInstance->m_fmTransform);
     {
         t4Vector rotated;
-        QuatRotTo_DA70(rotated, *(t4Vector*)&x.Q, *(t4Vector*)&self->COMOffset);
+        QuatRotTo_DA70(rotated, x.Q, self->COMOffset);
         offset = rotated;
         t4Vector shift;
         t4Vector rotatedAgain;
-        QuatRotTo_DA70(rotatedAgain, *(t4Vector*)&x.Q, offset);
+        QuatRotTo_DA70(rotatedAgain, x.Q, offset);
         shift = rotatedAgain;
-        AddTo_DA70(*(t4Vector*)&x.P, shift);
+        AddTo_DA70(x.P, shift);
     }
     *(&self->Pose) = x;
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
-    QuatPosToMtx_DA70(&self->Transform, *(t4Vector*)&y.Q, *(t4Vector*)&y.P);
+    QuatPosToMtx_DA70(&self->Transform, y.Q, y.P);
     self->updateMOI();
-    cRigidBody_updateImplicit((cRollerModifier*)(&self->Pose));
+    cRigidBody_updateImplicit((cRigidBody*)&self->Pose);
     self->ContactElastic = 0.10000000149011612f;
     self->ContactFriction = 0.4000000059604645f;
     self->StopContactSpeed = 277.77777099609375f;
-    *(int*)&self->ViscousDrag = 0;
+    self->ViscousDrag = 0.0f;
     SetBits_DA70((unsigned int*)(&self->m_pInstance->m_iFlags), 0xFFFFFFDFu, 0x40);
     SetBits_DA70((unsigned int*)(&self->m_pInstance->m_iFlags), 0xFFFFFFFDu, 0x4);
-    *(unsigned int*)&self->m_pInstance->m_iFlags |= 0x1;
+    self->m_pInstance->m_iFlags |= 0x1;
     cRollerModifier_Collision_DA70(((char*)self), ci, ii);
     return ((char*)self);
 }
@@ -1700,9 +1696,9 @@ void cRollerModifier_DDE8::Collision(const tCollideInfo* tc)
     if (addZ > 600.0f) {
         addZ = 600.0f;
     }
-    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8((*(t4Vector*)&tc->Direct), tc->Vel), 2.0f),
+    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8(tc->Direct, tc->Vel), 2.0f),
                         t4VectorInit(0.0f, 0.0f, addZ, 0.0f)));
-    setW(vu0ScaleR_35DDE8((*(t4Vector*)&tc->Reflect), 10.0f));
+    setW(vu0ScaleR_35DDE8(tc->Reflect, 10.0f));
     mKineticEnergy = vu0Dot_35DDE8(V, P) + vu0Dot_35DDE8(W, L);
 }
 #endif
@@ -1752,9 +1748,9 @@ cRollerModifier* cRollerModifier::cRollerModifier1(cBxReplayFrame* stream)
     SphereTree_SphereTree(((char*)&SphTree));
     ((cRigidBody*)(((char*)&Pose)))->readFromReplayFrame(stream);
     stream->read((char*)&mKineticEnergy, 40);
-    (*(int*)&m_pInstance) = (int)stream->readReplayInstance();
+    m_pInstance = stream->readReplayInstance();
     void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(),
-            (void*)((int)m_pInstance)), 0);
+            m_pInstance), 0);
     bxSphereTree_operatorE(((char*)&SphTree), meshTree);
     sRmSrcDF70* src = ((sRmSrcDF70*)SphTree.treeInfo);
     t4Vector off;
@@ -1762,22 +1758,22 @@ cRollerModifier* cRollerModifier::cRollerModifier1(cBxReplayFrame* stream)
     off.y = src->y;
     off.z = src->z;
     off.w = 0.0f;
-    (*(t4Vector*)&COMOffset) = off;
-    (*(t3Matrix*)&InvBodyMOI[0][0]) = src->rot;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[0] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[1] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[2] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[3] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[4] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[5] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[6] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[7] *= 0.5f;
-    (*(t3Matrix*)&InvBodyMOI[0][0]).m[8] *= 0.5f;
+    COMOffset = off;
+    InvBodyMOI = src->rot;
+    InvBodyMOI.m[0] *= 0.5f;
+    InvBodyMOI.m[1] *= 0.5f;
+    InvBodyMOI.m[2] *= 0.5f;
+    InvBodyMOI.m[3] *= 0.5f;
+    InvBodyMOI.m[4] *= 0.5f;
+    InvBodyMOI.m[5] *= 0.5f;
+    InvBodyMOI.m[6] *= 0.5f;
+    InvBodyMOI.m[7] *= 0.5f;
+    InvBodyMOI.m[8] *= 0.5f;
     tPose x = cRollerModifier_getBodyPose_DA70(this);
-    QuatPosToMtx_DA70(&Transform, *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
+    QuatPosToMtx_DA70(&Transform, x.Q, x.P);
     SphereTree_TransformAbs(((char*)&SphTree), &Transform, 1.0f);
     updateMOI();
-    cRigidBody_updateImplicit((cRollerModifier*)((char*)&Pose));
+    cRigidBody_updateImplicit((cRigidBody*)&Pose);
     return this;
 }
 #endif
@@ -1848,59 +1844,59 @@ static inline void QuatToMtx_E248(t4Matrix& m, const t4Vector& q)
 }
 
 // The 3x3 rotation part of a 4x4 matrix.
-static inline sRmMat33 Get33_E248(const t4Matrix& m)
+static inline t3Matrix Get33_E248(const t4Matrix& m)
 {
-    sRmMat33 r;
-    r.m[0][0] = ((float (*)[4])&m.row[0])[0][0];
-    r.m[0][1] = ((float (*)[4])&m.row[0])[0][1];
-    r.m[0][2] = ((float (*)[4])&m.row[0])[0][2];
-    r.m[1][0] = ((float (*)[4])&m.row[0])[1][0];
-    r.m[1][1] = ((float (*)[4])&m.row[0])[1][1];
-    r.m[1][2] = ((float (*)[4])&m.row[0])[1][2];
-    r.m[2][0] = ((float (*)[4])&m.row[0])[2][0];
-    r.m[2][1] = ((float (*)[4])&m.row[0])[2][1];
-    r.m[2][2] = ((float (*)[4])&m.row[0])[2][2];
+    t3Matrix r;
+    r.m[0] = ((float (*)[4])&m.row[0])[0][0];
+    r.m[1] = ((float (*)[4])&m.row[0])[0][1];
+    r.m[2] = ((float (*)[4])&m.row[0])[0][2];
+    r.m[3] = ((float (*)[4])&m.row[0])[1][0];
+    r.m[4] = ((float (*)[4])&m.row[0])[1][1];
+    r.m[5] = ((float (*)[4])&m.row[0])[1][2];
+    r.m[6] = ((float (*)[4])&m.row[0])[2][0];
+    r.m[7] = ((float (*)[4])&m.row[0])[2][1];
+    r.m[8] = ((float (*)[4])&m.row[0])[2][2];
     return r;
 }
 
-static inline void Transpose33_E248(sRmMat33& m)
+static inline void Transpose33_E248(t3Matrix& m)
 {
     float t;
-    t = m.m[0][1]; m.m[0][1] = m.m[1][0]; m.m[1][0] = t;
-    t = m.m[0][2]; m.m[0][2] = m.m[2][0]; m.m[2][0] = t;
-    t = m.m[1][2]; m.m[1][2] = m.m[2][1]; m.m[2][1] = t;
+    t = m.m[1]; m.m[1] = m.m[3]; m.m[3] = t;
+    t = m.m[2]; m.m[2] = m.m[6]; m.m[6] = t;
+    t = m.m[5]; m.m[5] = m.m[7]; m.m[7] = t;
 }
 
 // r = b * a (a applied first).
-static inline sRmMat33 Mul33_E248(const sRmMat33& a, const sRmMat33& b)
+static inline t3Matrix Mul33_E248(const t3Matrix& a, const t3Matrix& b)
 {
-    sRmMat33 r;
-    r.m[0][0] = a.m[0][0] * b.m[0][0] + a.m[1][0] * b.m[0][1] + a.m[2][0] * b.m[0][2];
-    r.m[1][0] = a.m[0][0] * b.m[1][0] + a.m[1][0] * b.m[1][1] + a.m[2][0] * b.m[1][2];
-    r.m[2][0] = a.m[0][0] * b.m[2][0] + a.m[1][0] * b.m[2][1] + a.m[2][0] * b.m[2][2];
-    r.m[0][1] = a.m[0][1] * b.m[0][0] + a.m[1][1] * b.m[0][1] + a.m[2][1] * b.m[0][2];
-    r.m[1][1] = a.m[0][1] * b.m[1][0] + a.m[1][1] * b.m[1][1] + a.m[2][1] * b.m[1][2];
-    r.m[2][1] = a.m[0][1] * b.m[2][0] + a.m[1][1] * b.m[2][1] + a.m[2][1] * b.m[2][2];
-    r.m[0][2] = a.m[0][2] * b.m[0][0] + a.m[1][2] * b.m[0][1] + a.m[2][2] * b.m[0][2];
-    r.m[1][2] = a.m[0][2] * b.m[1][0] + a.m[1][2] * b.m[1][1] + a.m[2][2] * b.m[1][2];
-    r.m[2][2] = a.m[0][2] * b.m[2][0] + a.m[1][2] * b.m[2][1] + a.m[2][2] * b.m[2][2];
+    t3Matrix r;
+    r.m[0] = a.m[0] * b.m[0] + a.m[3] * b.m[1] + a.m[6] * b.m[2];
+    r.m[3] = a.m[0] * b.m[3] + a.m[3] * b.m[4] + a.m[6] * b.m[5];
+    r.m[6] = a.m[0] * b.m[6] + a.m[3] * b.m[7] + a.m[6] * b.m[8];
+    r.m[1] = a.m[1] * b.m[0] + a.m[4] * b.m[1] + a.m[7] * b.m[2];
+    r.m[4] = a.m[1] * b.m[3] + a.m[4] * b.m[4] + a.m[7] * b.m[5];
+    r.m[7] = a.m[1] * b.m[6] + a.m[4] * b.m[7] + a.m[7] * b.m[8];
+    r.m[2] = a.m[2] * b.m[0] + a.m[5] * b.m[1] + a.m[8] * b.m[2];
+    r.m[5] = a.m[2] * b.m[3] + a.m[5] * b.m[4] + a.m[8] * b.m[5];
+    r.m[8] = a.m[2] * b.m[6] + a.m[5] * b.m[7] + a.m[8] * b.m[8];
     return r;
 }
 
 
 // r = I * a, with I the body inertia (passed through its owner so each element is an offset from it).
-static inline sRmMat33 MulI_E248(const sRmMat33& a, const cRollerModifier* body)
+static inline t3Matrix MulI_E248(const t3Matrix& a, const cRollerModifier* body)
 {
-    sRmMat33 r;
-    r.m[0][0] = a.m[0][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][0] + a.m[1][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][1] + a.m[2][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][2];
-    r.m[1][0] = a.m[0][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][0] + a.m[1][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][1] + a.m[2][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][2];
-    r.m[2][0] = a.m[0][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][0] + a.m[1][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][1] + a.m[2][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][2];
-    r.m[0][1] = a.m[0][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][0] + a.m[1][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][1] + a.m[2][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][2];
-    r.m[1][1] = a.m[0][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][0] + a.m[1][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][1] + a.m[2][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][2];
-    r.m[2][1] = a.m[0][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][0] + a.m[1][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][1] + a.m[2][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][2];
-    r.m[0][2] = a.m[0][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][0] + a.m[1][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][1] + a.m[2][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][2];
-    r.m[1][2] = a.m[0][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][0] + a.m[1][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][1] + a.m[2][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][2];
-    r.m[2][2] = a.m[0][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][0] + a.m[1][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][1] + a.m[2][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][2];
+    t3Matrix r;
+    r.m[0] = a.m[0] * body->InvBodyMOI.m[0] + a.m[3] * body->InvBodyMOI.m[1] + a.m[6] * body->InvBodyMOI.m[2];
+    r.m[3] = a.m[0] * body->InvBodyMOI.m[3] + a.m[3] * body->InvBodyMOI.m[4] + a.m[6] * body->InvBodyMOI.m[5];
+    r.m[6] = a.m[0] * body->InvBodyMOI.m[6] + a.m[3] * body->InvBodyMOI.m[7] + a.m[6] * body->InvBodyMOI.m[8];
+    r.m[1] = a.m[1] * body->InvBodyMOI.m[0] + a.m[4] * body->InvBodyMOI.m[1] + a.m[7] * body->InvBodyMOI.m[2];
+    r.m[4] = a.m[1] * body->InvBodyMOI.m[3] + a.m[4] * body->InvBodyMOI.m[4] + a.m[7] * body->InvBodyMOI.m[5];
+    r.m[7] = a.m[1] * body->InvBodyMOI.m[6] + a.m[4] * body->InvBodyMOI.m[7] + a.m[7] * body->InvBodyMOI.m[8];
+    r.m[2] = a.m[2] * body->InvBodyMOI.m[0] + a.m[5] * body->InvBodyMOI.m[1] + a.m[8] * body->InvBodyMOI.m[2];
+    r.m[5] = a.m[2] * body->InvBodyMOI.m[3] + a.m[5] * body->InvBodyMOI.m[4] + a.m[8] * body->InvBodyMOI.m[5];
+    r.m[8] = a.m[2] * body->InvBodyMOI.m[6] + a.m[5] * body->InvBodyMOI.m[7] + a.m[8] * body->InvBodyMOI.m[8];
     return r;
 }
 
@@ -1913,24 +1909,19 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const cRollerModifier* body)
 void cRollerModifier::updateMOI()
 {
     t4Matrix rotMat4;
-    QuatToMtx_E248(rotMat4, *(t4Vector*)&Pose.Q);
-    sRmMat33 rot;
-    sRmMat33 rotT;
+    QuatToMtx_E248(rotMat4, Pose.Q);
+    t3Matrix rot;
+    t3Matrix rotT;
     rotT = Get33_E248(rotMat4);
     rot = rotT;
     Transpose33_E248(rotT);
-    *(sRmMat33*)&InvMOI[0] = Mul33_E248(MulI_E248(rot, this), rotT);
+    InvMOI = Mul33_E248(MulI_E248(rot, this), rotT);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getBodyPose);
 #ifdef SKIP_ASM
-struct sRmXform {
-    t4Vector pos;    // 0x00
-    t4Vector quat;   // 0x10
-};
-
 // PORT: PS2-only VU0 inline asm (dst = v * s).
 static inline void vu0ScaleToRM(t4Vector& dst, const t4Vector& v, float s)
 {
@@ -1987,21 +1978,21 @@ static inline void vu0AddToRM(t4Vector& dst, const t4Vector& b)
  *
  * @return the pose (position and orientation quaternion)
  */
-extern "C" sRmXform cRollerModifier_getBodyPose(cRollerModifier* self)
+extern "C" tPose cRollerModifier_getBodyPose(cRollerModifier* self)
 {
-    sRmXform pose = *(sRmXform*)&self->Pose;
+    tPose pose = self->Pose;
     t4Vector negatedCom;
     t4Vector rotatedCom;
     t4Vector comOffset;
     t4Vector posDelta;
     t4Vector poseOffset;
-    vu0QuatRotToRM(comOffset, *(t4Vector*)&self->Pose.Q, *(t4Vector*)&self->COMOffset);
+    vu0QuatRotToRM(comOffset, self->Pose.Q, self->COMOffset);
     rotatedCom = comOffset;
     vu0ScaleToRM(comOffset, rotatedCom, -1.0f);
     negatedCom = comOffset;
-    vu0QuatRotToRM(poseOffset, pose.quat, negatedCom);
+    vu0QuatRotToRM(poseOffset, pose.Q, negatedCom);
     posDelta = poseOffset;
-    vu0AddToRM(pose.pos, posDelta);
+    vu0AddToRM(pose.P, posDelta);
     return pose;
 }
 #endif
@@ -2199,34 +2190,35 @@ static inline float vu0LengthEDC8(const t4Vector& v)
 }
 
 
-static inline t4Vector toDirEDC8(cRollerModifier* b, const t4Vector& v)
+// The momentum of a velocity: v / InvM.
+static inline t4Vector toDirEDC8(cRigidBody* b, const t4Vector& v)
 {
-    return vu0DivEDC8(v, b->Pose.Q.x);
+    return vu0DivEDC8(v, b->InvM);
 }
 
 static inline t4Vector xformEDC8(cRollerModifier* rollerModifier)
 {
     t4Vector o;
-    float x = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.x;
-    float y = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.y;
-    float z = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.z;
-    o.x = (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[0][0] * x + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[1][0] * y + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[2][0] * z;
-    o.y = (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[0][1] * x + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[1][1] * y + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[2][1] * z;
-    o.z = (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[0][2] * x + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[1][2] * y + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[2][2] * z;
-    o.w = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.w;
+    float x = rollerModifier->L.x;
+    float y = rollerModifier->L.y;
+    float z = rollerModifier->L.z;
+    o.x = rollerModifier->InvMOI.m[0] * x + rollerModifier->InvMOI.m[3] * y + rollerModifier->InvMOI.m[6] * z;
+    o.y = rollerModifier->InvMOI.m[1] * x + rollerModifier->InvMOI.m[4] * y + rollerModifier->InvMOI.m[7] * z;
+    o.z = rollerModifier->InvMOI.m[2] * x + rollerModifier->InvMOI.m[5] * y + rollerModifier->InvMOI.m[8] * z;
+    o.w = rollerModifier->L.w;
     return o;
 }
 
 static inline void setPosEDC8(cRollerModifier* rollerModifier, const t4Vector& v)
 {
-    (*(cRollerModifier*)&rollerModifier->Pose).Pose.P = v;
-    (*(t4Vector*)&(*(cRollerModifier*)&rollerModifier->Pose).InvMOI[1][1]) = xformEDC8(rollerModifier);
+    rollerModifier->L = v;
+    rollerModifier->W = xformEDC8(rollerModifier);
 }
 
 static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const t4Vector& v)
 {
-    (*(t4Vector*)&(*(cRollerModifier*)&rollerModifier->Pose).Life) = toDirEDC8((cRollerModifier*)&rollerModifier->Pose, v);
-    (*(t4Vector*)&(*(cRollerModifier*)&rollerModifier->Pose).InvMOI[0][0]) = v;
+    rollerModifier->P = toDirEDC8((cRigidBody*)&rollerModifier->Pose, v);
+    rollerModifier->V = v;
 }
 
 /**
@@ -2249,12 +2241,13 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
         t4Vector push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
         self->translateMe(&push);
         float k = 0.975f;
-        setPosEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->L, k));
-        setOutDirEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->V, k));
-        float dp = vu0DotEDC8(vu0AddEDC8(*(t4Vector*)&self->V, vu0CrossEDC8(*(t4Vector*)&self->W, vu0SubEDC8(hit.pos, *(t4Vector*)(cRollerModifier*)&self->Pose))), hit.normal);
+        setPosEDC8((self), vu0ScaleEDC8(self->L, k));
+        setOutDirEDC8((self), vu0ScaleEDC8(self->V, k));
+        float dp = vu0DotEDC8(vu0AddEDC8(self->V, vu0CrossEDC8(self->W, vu0SubEDC8(hit.pos, self->Pose.P))),
+                hit.normal);
         if (dp < zeroF) {
             float lim = self->StopContactSpeed;
-            float len = vu0LengthEDC8(*(t4Vector*)&self->V);
+            float len = vu0LengthEDC8(self->V);
             float elastic = self->ContactElastic;
             float friction = self->ContactFriction;
             if (len < lim)
@@ -2308,7 +2301,7 @@ extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier*
     self->Speed = rate;
     self->Dir = defData->Dir;
     self->BaseSpeed = rate;
-    *(int*)&self->Time = 0;
+    self->Time = 0.0f;
     int n = defData->StartId;
     if ((float)n < *(float*)(int*)&self->Time) {
         union { int i; float f; } randBits;
@@ -2702,32 +2695,15 @@ void* cUVScrollModifier::cUVScrollModifier1(cBxReplayFrame* stream)
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_update);
 #ifdef SKIP_ASM
 
-struct sV2_F7D0 {
-    float x, y;
-    sV2_F7D0() {}
-    sV2_F7D0(float ax, float ay) : x(ax), y(ay) {}
-    sV2_F7D0 operator-() const { return sV2_F7D0(-x, -y); }
-    sV2_F7D0 operator*(float s) const { return sV2_F7D0(x * s, y * s); }
-    sV2_F7D0& operator+=(const sV2_F7D0& o)
-    {
-        x += o.x;
-        y += o.y;
-        return *this;
-    }
-};
-
-struct sRmState_F7D0 {
-    int f0;             // 0x0
-    float t;            // 0x4
-    float dur;          // 0x8
-    float fC;           // 0xC
-    float f10;          // 0x10
-    float f14;          // 0x14
-    char pad_0x18[0x18];
-    sV2_F7D0 pos;       // 0x30
-    sV2_F7D0 vel;       // 0x38
-    int active;         // 0x40
-};
+// t2Vector arithmetic as update uses it (EA's t2Vector operators; the math header declares none).
+static inline t2Vector operator-(const t2Vector& v)
+{
+    return t2Vector(-v.x, -v.y);
+}
+static inline t2Vector operator*(const t2Vector& v, float s)
+{
+    return t2Vector(v.x * s, v.y * s);
+}
 
 /**
  * Advances the UV-scroll modifier: rotates the texture, scrolls its UV offset and switches between the on and off
@@ -2736,7 +2712,7 @@ struct sRmState_F7D0 {
  * Does nothing unless TimeOn or TimeOff is positive. Time grows by 1 / the frame rate (cAppMan_TheAppMan + 0x10). While
  * On: Angle grows by AngVel; at TimeOn the timer restarts, On clears when TimeOff > 0 and kUVScroll_PingPong (2) and
  * kUVScroll_EasedPingPong (6) reverse UVScroll. While still on, kUVScroll_EasedPingPong eases the UV offset with a
- * triangle profile over the on phase (UVScroll * t / TimeOn, the sign of UVScroll[0] choosing the half), other types
+ * triangle profile over the on phase (UVScroll * t / TimeOn, the sign of UVScroll.x choosing the half), other types
  * add UVScroll per frame; each UV component wraps into -1..1. While off, at TimeOff the timer restarts and On is set
  * again when TimeOn > 0. The 2*pi wrap tests and adjusts AngVel instead of Angle, and its second test is AngVel <= 2*pi
  * (not -2*pi), so a slow AngVel gains 2*pi every other frame and Angle grows without bound (harmless for the rotation,
@@ -2761,47 +2737,47 @@ void cUVScrollModifier::update()
                     On = 0;
                 }
                 if (Type == kUVScroll_PingPong || Type == kUVScroll_EasedPingPong) {
-                    *(sV2_F7D0*)&UVScroll[0] = -*(sV2_F7D0*)&UVScroll[0];
+                    UVScroll = -UVScroll;
                 }
             }
             if (On) {
                 if (Type == kUVScroll_EasedPingPong) {
-                    if (UVScroll[0] < 0.0f) {
+                    if (UVScroll.x < 0.0f) {
                         float time = Time;
                         if (time < TimeOn * 0.5f) {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * time * (1.0f / TimeOn);
-                            UV[0] += step.x;
-                            UV[1] += step.y;
+                            t2Vector step = UVScroll * time * (1.0f / TimeOn);
+                            UV.x += step.x;
+                            UV.y += step.y;
                         } else {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * (TimeOn - time) * (1.0f / TimeOn);
-                            UV[0] += step.x;
-                            UV[1] += step.y;
+                            t2Vector step = UVScroll * (TimeOn - time) * (1.0f / TimeOn);
+                            UV.x += step.x;
+                            UV.y += step.y;
                         }
                     } else {
                         float remaining = TimeOn - Time;
                         if (remaining < TimeOn * 0.5f) {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * remaining * (1.0f / TimeOn);
-                            UV[0] += step.x;
-                            UV[1] += step.y;
+                            t2Vector step = UVScroll * remaining * (1.0f / TimeOn);
+                            UV.x += step.x;
+                            UV.y += step.y;
                         } else {
-                            sV2_F7D0 step = (*(sV2_F7D0*)&UVScroll[0]) * (TimeOn - remaining) * (1.0f / TimeOn);
-                            UV[0] += step.x;
-                            UV[1] += step.y;
+                            t2Vector step = UVScroll * (TimeOn - remaining) * (1.0f / TimeOn);
+                            UV.x += step.x;
+                            UV.y += step.y;
                         }
                     }
                 } else {
-                    UV[0] += UVScroll[0];
-                    UV[1] += UVScroll[1];
+                    UV.x += UVScroll.x;
+                    UV.y += UVScroll.y;
                 }
-                if (UV[0] > 1.0f) {
-                    UV[0] = UV[0] - 1.0f;
-                } else if (UV[0] < -1.0f) {
-                    UV[0] = UV[0] + 1.0f;
+                if (UV.x > 1.0f) {
+                    UV.x = UV.x - 1.0f;
+                } else if (UV.x < -1.0f) {
+                    UV.x = UV.x + 1.0f;
                 }
-                if (UV[1] > 1.0f) {
-                    UV[1] = UV[1] - 1.0f;
-                } else if (UV[1] < -1.0f) {
-                    UV[1] = UV[1] + 1.0f;
+                if (UV.y > 1.0f) {
+                    UV.y = UV.y - 1.0f;
+                } else if (UV.y < -1.0f) {
+                    UV.y = UV.y + 1.0f;
                 }
             }
         } else if (Time >= TimeOff) {
@@ -2820,9 +2796,9 @@ INCLUDE_ASM("object/railmodifier", cUVScrollModifier_signal);
 /**
  * Handles a script signal for the UV-scroll modifier: scroll speeds, on / off times or the UV offset.
  *
- * Signal kUVScrollSignal_UScroll (201) sets UVScroll[0] and kUVScrollSignal_VScroll (200) UVScroll[1] (range -1..1;
+ * Signal kUVScrollSignal_UScroll (201) sets UVScroll.x and kUVScrollSignal_VScroll (200) UVScroll.y (range -1..1;
  * note the order is the reverse of 204/205); kUVScrollSignal_TimeOn (202) sets TimeOn and kUVScrollSignal_TimeOff
- * (203) TimeOff (0..60 seconds); kUVScrollSignal_U (204) sets UV[0] and kUVScrollSignal_V (205) UV[1] (-4..4). Values
+ * (203) TimeOff (0..60 seconds); kUVScrollSignal_U (204) sets UV.x and kUVScrollSignal_V (205) UV.y (-4..4). Values
  * out of range and other ids are ignored.
  *
  * @param id  the signal id (On Tour signal)
@@ -2833,9 +2809,9 @@ void cUVScrollModifier::signal(int id, float value)
     if (id == kUVScrollSignal_VScroll || id == kUVScrollSignal_UScroll) {
         if (value >= -1.0f && value <= 1.0f) {
             if (id == kUVScrollSignal_UScroll) {
-                UVScroll[0] = value;
+                UVScroll.x = value;
             } else {
-                UVScroll[1] = value;
+                UVScroll.y = value;
             }
         }
     } else if (id == kUVScrollSignal_TimeOn || id == kUVScrollSignal_TimeOff) {
@@ -2849,9 +2825,9 @@ void cUVScrollModifier::signal(int id, float value)
     } else if (id == kUVScrollSignal_U || id == kUVScrollSignal_V) {
         if (value >= -4.0f && value <= 4.0f) {
             if (id == kUVScrollSignal_U) {
-                UV[0] = value;
+                UV.x = value;
             } else {
-                UV[1] = value;
+                UV.y = value;
             }
         }
     }
@@ -2867,7 +2843,7 @@ extern t4Matrix t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
 
 /**
  * Builds the texture matrix of a UV-scroll modifier: a rotation by Angle about Axis (identity when Angle is 0) whose
- * row 3 holds the UV offset (UV[0], UV[1]).
+ * row 3 holds the UV offset (UV.x, UV.y).
  *
  * @param mat  receives the matrix (On Tour t4Matrix& mat)
  * @return @p mat
@@ -2920,8 +2896,8 @@ t4Matrix* cUVScrollModifier::getTextureMat(t4Matrix* mat)
             : "r"(mat), "r"(t4mat_Identity_35FC20)
             : "memory");
     }
-    mat->row[3].x = UV[0];
-    mat->row[3].y = UV[1];
+    mat->row[3].x = UV.x;
+    mat->row[3].y = UV.y;
     return mat;
 }
 #endif
@@ -3155,7 +3131,7 @@ extern void* cObjNode_vtbl[];
 void* cObjNode::cObjNode2()
 {
     Next = 0;
-    VPTR_OF(cObjNode, this) = (void**)((int)(void*)cObjNode_vtbl);
+    VPTR_OF(cObjNode, this) = cObjNode_vtbl;
     Prev = 0;
     return ((void*)this);
 }
@@ -3711,7 +3687,7 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getSectionId__FPv);
 unsigned char cInstanceNode_getSectionId(void* vself)
 {
     cInstanceNode* self = (cInstanceNode*)vself;
-    return *(unsigned char*)&self->Instance->m_RID;
+    return (unsigned char)self->Instance->m_RID;
 }
 #endif
 
@@ -3825,9 +3801,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getInstance);
  *
  * @return Instance
  */
-int cInstanceNode::getInstance()
+tInstanceRecord* cInstanceNode::getInstance()
 {
-    return ((int)Instance);
+    return Instance;
 }
 #endif
 
@@ -4132,7 +4108,7 @@ INCLUDE_ASM("object/railmodifier", cDeadNode__cDeadNode__FPv);
 void* cDeadNode__cDeadNode(void* vself)
 {
     cDeadNode* self = (cDeadNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cDeadNode_vtbl);
+    VPTR_OF(cObjNode, self) = cDeadNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4199,7 +4175,7 @@ INCLUDE_ASM("object/railmodifier", cHideNode__cHideNode__FPv);
 void* cHideNode__cHideNode(void* vself)
 {
     cHideNode* self = (cHideNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cHideNode_vtbl);
+    VPTR_OF(cObjNode, self) = cHideNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4267,7 +4243,7 @@ INCLUDE_ASM("object/railmodifier", cRestoreNode__cRestoreNode__FPv);
 void* cRestoreNode__cRestoreNode(void* vself)
 {
     cRestoreNode* self = (cRestoreNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cRestoreNode_vtbl);
+    VPTR_OF(cObjNode, self) = cRestoreNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -5171,15 +5147,15 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_hasTextureMat);
  */
 int cMoveNode::hasTextureMat()
 {
-    int var_2;
-    tModifierBlock* temp_3;
+    int has;
+    tModifierBlock* modBlock;
 
-    temp_3 = (tModifierBlock*)((void*)ModifierBlock);
-    var_2 = 0;
-    if (((void*)temp_3) != 0) {
-        var_2 = ((int)temp_3->UVScroll) != 0;
+    modBlock = ModifierBlock;
+    has = 0;
+    if (modBlock != 0) {
+        has = modBlock->UVScroll != 0;
     }
-    return var_2;
+    return has;
 }
 #endif
 //100%
@@ -5194,15 +5170,15 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_hasMaterialBlock);
  */
 int cMoveNode::hasMaterialBlock()
 {
-    int var_2;
-    tModifierBlock* temp_3;
+    int has;
+    tModifierBlock* modBlock;
 
-    temp_3 = (tModifierBlock*)((void*)ModifierBlock);
-    var_2 = 0;
-    if (((void*)temp_3) != 0) {
-        var_2 = ((int)temp_3->TexFlip) != 0;
+    modBlock = ModifierBlock;
+    has = 0;
+    if (modBlock != 0) {
+        has = modBlock->TexFlip != 0;
     }
-    return var_2;
+    return has;
 }
 #endif
 //100%
@@ -5214,22 +5190,23 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getMaterialBlock);
  *
  * @return the material block record (On Tour const tMaterialBlockRecord*)
  */
-int cMoveNode::getMaterialBlock()
+const tMaterialBlockRecord* cMoveNode::getMaterialBlock()
 {
     int cond;
     tModifierBlock* modBlock = ModifierBlock;
     cond = 0;
-    if (((char*)modBlock) != 0) {
-        cond = (int)modBlock->TexFlip != 0;
+    if (modBlock != 0) {
+        cond = modBlock->TexFlip != 0;
     }
     if (cond != 0) {
-        int matRec = (int)modBlock->TexFlip;
-        if (matRec != 0) {
-            return matRec + 36;
+        cTexFlipModifier* texFlip = modBlock->TexFlip;
+        if (texFlip != 0) {
+            // the modifier's block extends tMaterialBlockRecord (On Tour tTexFlipMaterialBlockRecord)
+            return (const tMaterialBlockRecord*)&texFlip->MaterialBlock;
         }
         return 0;
     }
-    return (int)Instance->m_MaterialBlock;
+    return Instance->m_MaterialBlock;
 }
 #endif
 //100%
@@ -5250,8 +5227,8 @@ void* cMoveNode::getTextureMat()
 {
     tModifierBlock* modBlock = ModifierBlock;
     int cond = 0;
-    if (((char*)modBlock) != 0) {
-        cond = (int)modBlock->UVScroll != 0;
+    if (modBlock != 0) {
+        cond = modBlock->UVScroll != 0;
     }
     if (cond != 0) {
         void* uvScroll = modBlock->UVScroll;
@@ -5265,83 +5242,67 @@ void* cMoveNode::getTextureMat()
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_remTransformModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_remTransformModifier(int);
-
 /**
  * Removes a move node's transform modifier (tModifierBlock_remTransformModifier), if it has a modifier block.
  *
  */
 void cMoveNode::remTransformModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_remTransformModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        modBlock->remTransformModifier();
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_remUVScrollModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_remUVScrollModifier(int);
-
 /**
  * Removes a move node's UV-scroll modifier (tModifierBlock_remUVScrollModifier), if it has a modifier block.
  *
  */
 void cMoveNode::remUVScrollModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_remUVScrollModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        modBlock->remUVScrollModifier();
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_remTexFlipModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_remTexFlipModifier(int);
-
 /**
  * Removes a move node's texture-flip modifier (tModifierBlock_remTexFlipModifier), if it has a modifier block.
  *
  */
 void cMoveNode::remTexFlipModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_remTexFlipModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        modBlock->remTexFlipModifier();
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_remPhysicsModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_remPhysicsModifier(int);
-
 /**
  * Removes a move node's physics modifier (tModifierBlock_remPhysicsModifier), if it has a modifier block.
  *
  */
 void cMoveNode::remPhysicsModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_remPhysicsModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        modBlock->remPhysicsModifier();
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_remHaloModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_remHaloModifier(int);
+extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* block);
 
 /**
  * Removes a move node's halo effects (tModifierBlock_remHaloModifier), if it has a modifier block.
@@ -5349,49 +5310,39 @@ extern "C" void tModifierBlock_remHaloModifier(int);
  */
 void cMoveNode::remHaloModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_remHaloModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        tModifierBlock_remHaloModifier(modBlock);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_remEffectModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_remEffectModifier(int);
-
 /**
  * Removes a move node's effect modifiers (tModifierBlock_remEffectModifier), if it has a modifier block.
  *
  */
 void cMoveNode::remEffectModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_remEffectModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        modBlock->remEffectModifier();
     }
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_fadeEffectModifier);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_fadeEffectModifier(int);
-
 /**
  * Fades out a move node's effects (tModifierBlock_fadeEffectModifier), if it has a modifier block.
  *
  */
 void cMoveNode::fadeEffectModifier()
 {
-    int temp_4;
-
-    temp_4 = ((int)ModifierBlock);
-    if (temp_4 != 0) {
-        tModifierBlock_fadeEffectModifier(temp_4);
+    tModifierBlock* modBlock = ModifierBlock;
+    if (modBlock != 0) {
+        modBlock->fadeEffectModifier();
     }
 }
 #endif
@@ -5407,7 +5358,7 @@ INCLUDE_ASM("object/railmodifier", cObjectNode__cObjectNode__FPv);
 void* cObjectNode__cObjectNode(void* vself)
 {
     cObjectNode* self = (cObjectNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cObjectNode_vtbl);
+    VPTR_OF(cObjNode, self) = cObjectNode_vtbl;
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -5486,14 +5437,14 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMats);
  *
  * @return the matrix array pointer stored at +0x44
  */
-int cAnimNode::getAnimMats()
+t4Matrix* cAnimNode::getAnimMats()
 {
     if (Flags & 1) {
         void* sub = (char*)&MoveNodeBase;
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)mVtbl;
         vt[51].fn(vthis(sub, vt[51]));
     }
-    return (int)AnimMats;
+    return AnimMats;
 }
 #endif
 
@@ -5613,7 +5564,7 @@ extern "C" void cAnimFrame_init(void*);
  */
 void* cAnimFrame::cAnimFrame1()
 {
-    mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
+    mVtbl = cAnimFrame_vtbl;
     cAnimFrame_init(this);
     return ((void*)this);
 }
@@ -5676,9 +5627,9 @@ extern "C" void cMeshAnimFrame_init(cMeshAnimFrame*);
  */
 void* cMeshAnimFrame::cMeshAnimFrame1()
 {
-    mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
+    mVtbl = cAnimFrame_vtbl;
     cAnimFrame_init(this);
-    mVtbl = (void**)((int)(void*)cMeshAnimFrame_vtbl);
+    mVtbl = cMeshAnimFrame_vtbl;
     init();
     return ((void*)this);
 }
@@ -5762,9 +5713,9 @@ extern "C" void cAnimFrame_init(void*);
  */
 void* cCamAnimFrame::cCamAnimFrame1()
 {
-    mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
+    mVtbl = cAnimFrame_vtbl;
     cAnimFrame_init(this);
-    mVtbl = (void**)((int)(void*)cCamAnimFrame_vtbl);
+    mVtbl = cCamAnimFrame_vtbl;
     return ((void*)this);
 }
 #endif
@@ -5797,9 +5748,9 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_setAnimRecord);
  *
  * @param source  the animation record
  */
-void cCamAnimFrame::setAnimRecord(int source)
+void cCamAnimFrame::setAnimRecord(const tAnimRecord* source)
 {
-    AnimRecord = (const tAnimRecord*)source;
+    AnimRecord = source;
 }
 #endif
 //100%
@@ -5987,7 +5938,7 @@ INCLUDE_ASM("object/railmodifier", cDebounceNode__cDebounceNode__FPv);
 void* cDebounceNode__cDebounceNode(void* vself)
 {
     cDebounceNode* self = (cDebounceNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cDebounceNode_vtbl);
+    VPTR_OF(cObjNode, self) = cDebounceNode_vtbl;
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -6019,7 +5970,7 @@ INCLUDE_ASM("object/railmodifier", cConveyorNode__cConveyorNode__FPv);
 void* cConveyorNode__cConveyorNode(void* vself)
 {
     cConveyorNode* self = (cConveyorNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cConveyorNode_vtbl);
+    VPTR_OF(cObjNode, self) = cConveyorNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -6056,7 +6007,7 @@ INCLUDE_ASM("object/railmodifier", cCounterNode__cCounterNode__FPv);
 void* cCounterNode__cCounterNode(void* vself)
 {
     cCounterNode* self = (cCounterNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cCounterNode_vtbl);
+    VPTR_OF(cObjNode, self) = cCounterNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -6386,7 +6337,7 @@ int cFloatingNode_hasBoundBox(void* vself)
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_getBoundBox);
 #ifdef SKIP_ASM
-extern "C" int tModifierBlock_getBoundBox(void* p);
+extern "C" const tBoundBox* tModifierBlock_getBoundBox(void* p);
 
 /**
  * Returns a floating node's bounding box: its modifier block's when it has one (+0x1C), otherwise its info
@@ -6394,13 +6345,13 @@ extern "C" int tModifierBlock_getBoundBox(void* p);
  *
  * @return the bounding box (On Tour const tBoundBox*), or 0 if neither exists
  */
-extern "C" int cFloatingNode_getBoundBox(cFloatingNode* self)
+extern "C" const tBoundBox* cFloatingNode_getBoundBox(cFloatingNode* self)
 {
     void* modBlock = self->ModifierBlock;
     if (modBlock != 0) {
         return tModifierBlock_getBoundBox(modBlock);
     }
-    return (int)self->Info;
+    return &self->Info->BoundBox;
 }
 #endif
 
@@ -6431,12 +6382,12 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMats);
  *
  * @return the matrix array pointer stored at +0x74
  */
-extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
+extern "C" t4Matrix* cFloatingNode_getAnimMats(cFloatingNode* self)
 {
     if (self->Flags & 1) {
         self->updateRootTransform();
     }
-    return (int)self->AnimMats;
+    return self->AnimMats;
 }
 #endif
 
@@ -6575,8 +6526,8 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_setBoundBox);
  */
 extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, tBoundBox* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
+    self->BoundBox.MinPoint = boundbox->MinPoint;
+    self->BoundBox.MaxPoint = boundbox->MaxPoint;
 }
 #endif
 
@@ -6704,9 +6655,9 @@ INCLUDE_ASM("object/railmodifier", cParentModifier_setParent);
  *
  * @param parentInst  instance record to follow
  */
-void cParentModifier::setParent(int parentInst)
+void cParentModifier::setParent(tInstanceRecord* parentInst)
 {
-    ParentInst = (tInstanceRecord*)parentInst;
+    ParentInst = parentInst;
 }
 #endif
 
@@ -6786,8 +6737,8 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_setBoundBox);
  */
 extern "C" void cMagnetModifier_setBoundBox(cMagnetModifier* self, tBoundBox* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
+    self->BoundBox.MinPoint = boundbox->MinPoint;
+    self->BoundBox.MaxPoint = boundbox->MaxPoint;
 }
 #endif
 
@@ -6901,8 +6852,8 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setBoundBox);
  */
 extern "C" void cAvaSplineModifier_setBoundBox(cAvaSplineModifier* self, tBoundBox* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
+    self->BoundBox.MinPoint = boundbox->MinPoint;
+    self->BoundBox.MaxPoint = boundbox->MaxPoint;
 }
 #endif
 
@@ -7041,8 +6992,8 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_setBoundBox);
  */
 extern "C" void cSplineModifier_setBoundBox(cSplineModifier* self, tBoundBox* boundbox)
 {
-    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
+    self->BoundBox.MinPoint = boundbox->MinPoint;
+    self->BoundBox.MaxPoint = boundbox->MaxPoint;
 }
 #endif
 
@@ -7156,8 +7107,8 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
 extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, tBoundBox* boundbox)
 {
     tMultiNode* nodes = self->Nodes;
-    *(cQuad128*)&nodes->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&nodes->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
+    nodes->BoundBox.MinPoint = boundbox->MinPoint;
+    nodes->BoundBox.MaxPoint = boundbox->MaxPoint;
 }
 #endif
 
@@ -7307,7 +7258,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_collide1__FPv);
  */
 void* cRollerModifier::collide1()
 {
-    *(int*)&Life = 0;
+    Life = 0.0f;
     return cRollerModifier_Collision(this);
 }
 #endif
@@ -7337,8 +7288,8 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_setBoundBox);
  */
 extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, tBoundBox* bb)
 {
-    *(cQuad128*)&self->boundbox = *(cQuad128*)bb;
-    *(cQuad128*)&self->boundbox.MaxPoint = *(cQuad128*)&bb->MaxPoint;
+    self->boundbox.MinPoint = bb->MinPoint;
+    self->boundbox.MaxPoint = bb->MaxPoint;
 }
 #endif
 
@@ -7466,7 +7417,7 @@ INCLUDE_ASM("object/railmodifier", cParticleNode__cParticleNode__FPv);
 void* cParticleNode__cParticleNode(void* vself)
 {
     cParticleNode* self = (cParticleNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cParticleNode_vtbl);
+    VPTR_OF(cObjNode, self) = cParticleNode_vtbl;
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -7514,7 +7465,7 @@ INCLUDE_ASM("object/railmodifier", cAnimComboNode_getAnimDir);
 int cAnimComboNode::getAnimDir()
 {
     int direction;
-    if (*(signed char*)&AnimActive2 != 0) {
+    if (AnimActive2 != 0) {
         direction = -1;
         if (AnimSpeed2 >= 0.0f) {
             direction = 1;
@@ -7543,7 +7494,7 @@ INCLUDE_ASM("object/railmodifier", cAnimDeltaNode__cAnimDeltaNode__FPv);
 void* cAnimDeltaNode__cAnimDeltaNode(void* vself)
 {
     cAnimDeltaNode* self = (cAnimDeltaNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cAnimDeltaNode_vtbl);
+    self->mVtbl = cAnimDeltaNode_vtbl;
     return cAnimObjectNode__cAnimObjectNode(self);
 }
 #endif
@@ -7581,19 +7532,34 @@ void* func_00361E10(void* self)
 }
 #endif
 
+// One of the table's three interrupt counters (names ours).
+struct tIntcCounter {
+    int count;                      // 0x0 [U] the VIF1 handler (func_00362340) increments the first one's
+    int reserved;                   // 0x4 [R] func_00361F60 zeroes it; nothing else reads or writes it
+};
+
+// The renderer's interrupt handler table (D_005059D8; struct name ours, the id tables' names are the preview build's
+// bxps2intc.cpp asserts): the INTC handler ids by cause and the DMAC handler ids by channel, -1 when none, and three
+// interrupt counters.
+struct tIntcHandlerTable {
+    int mIntCID[16];                // 0x00 [P] mIntCID; [R] func_00361EB8 fills -1; [U] func_00361F98 / func_00362008
+    int mDMACID[16];                // 0x40 [P] mDMACID; [R] func_00361EB8 fills -1; [U] func_00362058 / func_003620C8
+    tIntcCounter mCounters[3];      // 0x80 [R] func_00361F60 zeroes them; [U] func_00362340 counts into the first
+};
+
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361E30);
 #ifdef SKIP_ASM
 extern "C" int func_00362340(void);
 extern "C" int func_003623A8(void);
-extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int arg);
+extern "C" void func_00361F98(tIntcHandlerTable* self, int cause, int (*handler)(void), int arg);
 
 /**
  * Installs the renderer's two INTC handlers: func_00362340 for cause 5 (VIF1) and func_003623A8 for cause 7 (VU1).
  *
  * Both go through func_00361F98 with a 0 argument, which records each handler id in the per-cause table at +0x0.
  */
-extern "C" void func_00361E30(void* self)
+extern "C" void func_00361E30(tIntcHandlerTable* self)
 {
     func_00361F98(self, 5, func_00362340, 0);
     func_00361F98(self, 7, func_003623A8, 0);
@@ -7603,14 +7569,14 @@ extern "C" void func_00361E30(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361E80);
 #ifdef SKIP_ASM
-extern "C" void* func_00362008(void* self, int id);
+extern "C" void* func_00362008(tIntcHandlerTable* self, int id);
 
 /**
  * Removes the renderer's INTC handlers for causes 5 (VIF1) and 7 (VU1) with func_00362008.
  *
  * @return func_00362008's result for cause 7
  */
-extern "C" void* func_00361E80(void* self)
+extern "C" void* func_00361E80(tIntcHandlerTable* self)
 {
     func_00362008(self, 5);
     return func_00362008(self, 7);
@@ -7620,9 +7586,8 @@ extern "C" void* func_00361E80(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00361EB8);
 #ifdef SKIP_ASM
-struct sRailPairs;
-extern "C" void func_00361F60(sRailPairs* self);
-extern "C" void func_00361E30(void* self);
+extern "C" void func_00361F60(tIntcHandlerTable* self);
+extern "C" void func_00361E30(tIntcHandlerTable* self);
 
 static inline void func_00361EB8_fill(int* p, int v)
 {
@@ -7639,16 +7604,16 @@ static inline void func_00361EB8_fill(int* p, int v)
  * asserts call these mIntCID and mDMACID), clears the counters at +0x80 (func_00361F60) and installs the VIF1/VU1
  * handlers (func_00361E30).
  */
-extern "C" void func_00361EB8(void* self)
+extern "C" void func_00361EB8(tIntcHandlerTable* self)
 {
-    func_00361EB8_fill((int*)self, -1);
-    func_00361EB8_fill((int*)((char*)self + 0x40), -1);
-    func_00361F60((sRailPairs*)self);
+    func_00361EB8_fill(self->mIntCID, -1);
+    func_00361EB8_fill(self->mDMACID, -1);
+    func_00361F60(self);
     func_00361E30(self);
 }
 #endif
 
-extern "C" void* func_00361E80(void* self);
+extern "C" void* func_00361E80(tIntcHandlerTable* self);
 
 //99.29%
 INCLUDE_ASM("object/railmodifier", func_00361F40__FPv);
@@ -7662,7 +7627,7 @@ INCLUDE_ASM("object/railmodifier", func_00361F40__FPv);
  */
 void* func_00361F40(void* self)
 {
-    return func_00361E80(self);
+    return func_00361E80((tIntcHandlerTable*)self);
 }
 #endif
 
@@ -7674,20 +7639,15 @@ struct sRailPair {
     int b;
 };
 
-struct sRailPairs {
-    char pad_0x00[0x80];
-    sRailPair pairs[3];
-};
-
 /**
  * Zeroes the three counter pairs at +0x80 of the interrupt handler table (the VIF1 handler counts into the first).
  */
-extern "C" void func_00361F60(sRailPairs* self)
+extern "C" void func_00361F60(tIntcHandlerTable* self)
 {
     int i;
     for (i = 0; i < 3; i++) {
-        self->pairs[i].a = 0;
-        self->pairs[i].b = 0;
+        self->mCounters[i].count = 0;
+        self->mCounters[i].reserved = 0;
     }
 }
 #endif
@@ -7720,10 +7680,10 @@ extern "C" int EnableIntc(int ch);
  * @param handler  handler function
  * @param next  argument passed through to AddIntcHandler
  */
-extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int next)
+extern "C" void func_00361F98(tIntcHandlerTable* self, int cause, int (*handler)(void), int next)
 {
     DisableIntc(cause);
-    *(int*)((char*)self + (cause << 2)) = AddIntcHandler(cause, handler, next);
+    self->mIntCID[cause] = AddIntcHandler(cause, handler, next);
     EnableIntc(cause);
 }
 #endif
@@ -7742,10 +7702,10 @@ extern "C" void* RemoveIntcHandler(int ch, int id);
  * @param ch  INTC cause number
  * @return RemoveIntcHandler's result
  */
-extern "C" void* func_00362008(void* self, int ch)
+extern "C" void* func_00362008(tIntcHandlerTable* self, int ch)
 {
     DisableIntc(ch);
-    int* handlerSlot = (int*)((char*)self + (ch << 2));
+    int* handlerSlot = &self->mIntCID[ch];
     int id = *handlerSlot;
     *handlerSlot = -1;
     return RemoveIntcHandler(ch, id);
@@ -7770,9 +7730,10 @@ extern "C" void EnableDmac(int);
  * @param handler  handler function
  * @param next  argument passed through to AddDmacHandler
  */
-extern "C" void func_00362058(int owner, int channel, int handler, int next) {
+extern "C" void func_00362058(tIntcHandlerTable* owner, int channel, int handler, int next)
+{
     DisableDmac(channel);
-    (*(int *)(((char*)(owner) + (channel << 2)) + 0x40)) = AddDmacHandler(channel, handler, next);
+    owner->mDMACID[channel] = AddDmacHandler(channel, handler, next);
     EnableDmac(channel);
 }
 #endif
@@ -7788,11 +7749,11 @@ extern "C" void RemoveDmacHandler(int, int);
  *
  * @param idx  DMA channel number
  */
-extern "C" void func_003620C8(char* self, int idx)
+extern "C" void func_003620C8(tIntcHandlerTable* self, int idx)
 {
     DisableDmac(idx);
-    char* base = self + 0x40;
-    int* slot = (int*)(base + (idx << 2));
+    int* ids = self->mDMACID;
+    int* slot = ids + idx;
     int old = *slot;
     *slot = -1;
     RemoveDmacHandler(idx, old);
@@ -7978,11 +7939,7 @@ INCLUDE_ASM("object/railmodifier", func_00362340);
 extern "C" void func_00362120(void*);
 extern "C" void func_00362230(void*);
 
-struct sIntcStats00362340 {
-    char pad_0x00[0x80];
-    int count;
-};
-extern sIntcStats00362340 D_005059D8;
+extern tIntcHandlerTable D_005059D8;
 
 /**
  * Handles the VIF1 interrupt: cancels a VIF1 interrupt stall and counts it.
@@ -7997,11 +7954,11 @@ extern "C" int func_00362340(void)
 {
     char buf[0x100];
     func_00362120(buf);
-    sIntcStats00362340* stats = &D_005059D8;
+    tIntcHandlerTable* table = &D_005059D8;
     if (*(int*)0x10003C00 & 0x400) {
         *(volatile int*)0x10003C10 = 8;
     }
-    stats->count++;
+    table->mCounters[0].count++;
     func_00362230(buf);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
@@ -9368,18 +9325,14 @@ extern "C" void func_00364B88(sRailKeyTable* self, sRailKey4* k)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00364C90);
 #ifdef SKIP_ASM
-struct sData20 {
-    int w[5];
-};
-
 /**
  * Sets the defer manager's current draw state (+0x69CA8) to a copy of the 20-byte state src.
  *
  * @param src  draw state to copy
  */
-extern "C" void func_00364C90(cPS2DeferManager* self, sData20* src)
+extern "C" void func_00364C90(cPS2DeferManager* self, const sDrawState* src)
 {
-    *(sData20*)&self->mCurrentState = *src;
+    self->mCurrentState = *src;
 }
 #endif
 
@@ -10825,8 +10778,8 @@ extern "C" void func_00366E90(cTextureMan* self, tTexInfo* tex)
 {
     int n = 0;
     char* buf = new (str_TempTex, self->TexMemType ^ 0x100, 0) char[tex->mSize];
-    int tw = ((*(unsigned long*)&tex->mTEX0) >> 26) & 0xF;
-    int th = ((*(unsigned long*)&tex->mTEX0) >> 30) & 0xF;
+    int tw = (tex->mTEX0 >> 26) & 0xF;
+    int th = (tex->mTEX0 >> 30) & 0xF;
     int bpp = tex->mBPP;
     int w = 1 << tw;
     int height = 1 << th;

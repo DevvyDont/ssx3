@@ -164,7 +164,7 @@ struct cWipeoutMotion {
     float intersectGround(tIntersectInfo* hit, t4Vector* dir) __asm__("cWipeoutMotion_intersectGround");
     void stepAirMotion() __asm__("cWipeoutMotion_stepAirMotion");
     void stepGroundMotion() __asm__("cWipeoutMotion_stepGroundMotion");
-    int getBoardSphereTree() __asm__("cWipeoutMotion_getBoardSphereTree");
+    cRiderSphereTree* getBoardSphereTree() __asm__("cWipeoutMotion_getBoardSphereTree");
     void throwRider(t4Vector* initVel, t4Vector* initAngVel) __asm__("cWipeoutMotion_throwRider");
     void updateBoardSphereTree() __asm__("cWipeoutMotion_updateBoardSphereTree");
     void loseFocus() __asm__("cWipeoutMotion_loseFocus__FPv");
@@ -207,7 +207,7 @@ struct cRailslideMotion {
     float RailOffCenter;     // 0x18 [O]; [R] cRiderHandler ctor = 0; [U] read via handler+0xC8 (getOffCenter)
     float CrookedSlideAngle; // 0x1C [O]; [U] float
     int ForceNaturalAir;     // 0x20 [O] bool (word); [U] lw/sw
-    int SplineID;            // 0x24 [O] tResourceID (4 bytes); [R] cRiderHandler ctor = -1; [U] read via handler+0xD4
+    unsigned int SplineID;   // 0x24 [O] tResourceID (4 bytes); [R] cRiderHandler ctor = -1; [U] read via handler+0xD4
                              //      (getSplineID)
     char pad_28[0x8];        // 0x28
     t4Vector PrevPos;        // 0x30 [O]; [U] lqc2/sq

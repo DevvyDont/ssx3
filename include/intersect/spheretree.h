@@ -54,7 +54,7 @@ struct tSphTreeInfo {
                                     //       result
     float centerOfMass[3];          // 0x2C [O] t3Vector; [U] cRollerModifier's ctors read +0x2C
     float momentOfInertia[3][3];    // 0x38 [O] t3Matrix
-    float invMomentOfInertia[3][3]; // 0x5C [O] t3Matrix; [U] cRollerModifier's ctors read +0x5C
+    t3Matrix invMomentOfInertia;    // 0x5C [O] t3Matrix; [U] cRollerModifier's ctors read +0x5C
 };
 
 CHECK_OFFSET(tSphTreeInfo, treeID, 0x00);

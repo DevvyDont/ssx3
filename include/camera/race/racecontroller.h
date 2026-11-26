@@ -27,6 +27,7 @@ struct cCameraAlgoList;
 struct cInput;
 struct cCamera;
 struct cRiderCameraTarget;
+struct cRider;
 struct cCTAction;
 
 // Why and how the chase camera last switched algorithm (On Tour: tCameraSwitchRecord, 0x14). Algorithm types are
@@ -73,7 +74,7 @@ struct cChaseCameraController {
     // Methods bound to their retail symbols by asm labels.
     void switchCamera_HardReset(int i) __asm__("cChaseCameraController_switchCamera_HardReset");
     void setTarget(int* target) __asm__("cChaseCameraController_setTarget");
-    int getRider() __asm__("cChaseCameraController_getRider");
+    cRider* getRider() __asm__("cChaseCameraController_getRider");
     void processInput() __asm__("cChaseCameraController_processInput");
     void update() __asm__("cChaseCameraController_update");
     void addAlgorithm(cCameraAlgorithm* algo, float w) __asm__("cChaseCameraController_addAlgorithm");
@@ -89,7 +90,7 @@ struct cChaseCameraController {
     void switchCamera_EndRace() __asm__("cChaseCameraController_switchCamera_EndRace");
     void* switchCamera_EndPostRace() __asm__("cChaseCameraController_switchCamera_EndPostRace__FPv");
     int getLatestAlgoType() __asm__("cChaseCameraController_getLatestAlgoType");
-    int getTarget() __asm__("cChaseCameraController_getTarget");
+    cRiderCameraTarget* getTarget() __asm__("cChaseCameraController_getTarget");
     void createChaseAlgorithmBlend(int kind, char* ctx, float blend)
         __asm__("cChaseCameraController_createChaseAlgorithmBlend");
     int shouldDoExtraGroundTest() __asm__("cChaseCameraController_shouldDoExtraGroundTest");

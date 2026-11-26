@@ -118,7 +118,7 @@ struct cAnimNode {
     void cacheFrame() __asm__("cAnimNode_cacheFrame");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimNode_writeToReplayFrame");
     float getAnimFrame() __asm__("cAnimNode_getAnimFrame");
-    int getAnimMats() __asm__("cAnimNode_getAnimMats");
+    t4Matrix* getAnimMats() __asm__("cAnimNode_getAnimMats");
     t4Matrix* getAnimMat(int i) __asm__("cAnimNode_getAnimMat");
     void clearFrameEvent() __asm__("cAnimNode_clearFrameEvent");
 };

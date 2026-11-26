@@ -152,7 +152,7 @@ struct cComputer {
     bool checkForPunching(int* side) __asm__("cComputer_checkForPunching");
     int getRival() __asm__("cComputer_getRival");
     float setupWarp() __asm__("cComputer_setupWarp");
-    void setInput(int input) __asm__("cComputer_setInput");
+    void setInput(cInput* input) __asm__("cComputer_setInput");
     int getCurrentTarget() __asm__("cComputer_getCurrentTarget");
     int isAboutToRail(float fparg0) __asm__("cComputer_isAboutToRail");
     void setCruiseLogic(int idx) __asm__("cComputer_setCruiseLogic");
