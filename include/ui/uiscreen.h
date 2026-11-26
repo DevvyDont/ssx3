@@ -106,6 +106,7 @@ struct cUIScreen {
     void parseScreenEnd(void* pFrame, void* pKCP, cUIThread* pThread) __asm__("cUIScreen_parseScreenEnd");
     void createAllObjects() __asm__("cUIScreen_createAllObjects");
     void* createObjectByHashName(int key) __asm__("cUIScreen_createObjectByHashName");
+    void* playFrame(unsigned short frame, int ThreadType) __asm__("cUIScreen_playFrame");
 };
 
 CHECK_OFFSET(cUIScreen, mpPrev, 0x000);

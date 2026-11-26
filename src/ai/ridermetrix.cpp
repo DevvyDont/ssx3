@@ -595,7 +595,6 @@ extern "C" void cHUDFX_set(void* slot, int a, const char* b, float c, int d);
 
 // PORT: returns the slot index, but the unit's later declaration (used by
 // cRiderMetrix_evAutoResetSurface) says void; bind the int-returning body here.
-int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d) __asm__("cRiderMetrix_addHUDfx");
 
 /**
  * Posts a text message of a type to the HUD message bank.
@@ -609,13 +608,12 @@ int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d)
  * @param data  extra data stored in the slot (+0xC)
  * @return the slot index used, or -1 without a bank
  */
-int cRiderMetrix_addHUDfx_impl(void* vself, int hfx, const char* displayStr, float decayTime, int data)
+int cRiderMetrix::addHUDfx(int hfx, const char* displayStr, float decayTime, int data)
 {
-    cRiderMetrix* self = (cRiderMetrix*)vself;
-    if (self->HUDfx == 0)
+    if (HUDfx == 0)
         return -1;
-    int idx = self->allocHUDfx(hfx);
-    cHUDFX_set(&(self->HUDfx)[idx], hfx, displayStr, decayTime, data);
+    int idx = allocHUDfx(hfx);
+    cHUDFX_set(&HUDfx[idx], hfx, displayStr, decayTime, data);
     return idx;
 }
 #endif
@@ -628,7 +626,6 @@ extern "C" void cHUDFX_set1(void* slot, int type, int value, float duration, int
 
 // PORT: returns the slot index, but the unit's later declarations say void;
 // bind the int-returning body here.
-int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float duration) __asm__("cRiderMetrix_addHUDfx1");
 
 /**
  * Posts a number message of a type to the HUD message bank, its text being the number formatted with "%d".
@@ -642,13 +639,12 @@ int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float 
  * @param duration  seconds the message stays
  * @return the slot index used, or -1 without a bank
  */
-int cRiderMetrix_addHUDfx1_impl(void* vself, int type, int value, int data, float duration)
+int cRiderMetrix::addHUDfx1(int type, int value, int data, float duration)
 {
-    cRiderMetrix* self = (cRiderMetrix*)vself;
-    if (self->HUDfx == 0)
+    if (HUDfx == 0)
         return -1;
-    int idx = self->allocHUDfx(type);
-    cHUDFX_set1(&(self->HUDfx)[idx], type, value, duration, data);
+    int idx = allocHUDfx(type);
+    cHUDFX_set1(&HUDfx[idx], type, value, duration, data);
     return idx;
 }
 #endif
@@ -1699,13 +1695,12 @@ float cRiderMetrix_evSpin_impl(void* self, float x) __asm__("cRiderMetrix_evSpin
  * @param x  the trick's total spin so far, in radians (On Tour rad)
  * @return 0.0 (no boost change)
  */
-float cRiderMetrix_evSpin_impl(void* vself, float x)
+float cRiderMetrix::evSpin(float x)
 {
-    cRiderMetrix* self = (cRiderMetrix*)vself;
-    self->CurTrickPower -= metrixAbs_00119898(self->CurTrickSpinAng) * 0.015915492549538612f;
-    self->CurTrickSpinAng = x;
-    self->CurTrickPower += metrixAbs_00119898(x) * 0.015915492549538612f;
-    self->CurTrickPower = self->CurTrickPower >? 0.0f;
+    CurTrickPower -= metrixAbs_00119898(CurTrickSpinAng) * 0.015915492549538612f;
+    CurTrickSpinAng = x;
+    CurTrickPower += metrixAbs_00119898(x) * 0.015915492549538612f;
+    CurTrickPower = CurTrickPower >? 0.0f;
     return 0.0f;
 }
 #endif
@@ -1886,7 +1881,7 @@ float cRiderMetrix_evSpin_impl(void* self, float x) __asm__("cRiderMetrix_evSpin
 float cRiderMetrix::evPressPivot(int pressMode)
 {
     CurTrickPressMode = pressMode;
-    return cRiderMetrix_evSpin_impl(this, CurTrickSpinAng + 3.1415927410125732f);
+    return this->evSpin(CurTrickSpinAng + 3.1415927410125732f);
 }
 #endif
 

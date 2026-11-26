@@ -204,6 +204,8 @@ CHECK_SIZE(CreatePersonaMenu, 0x1B8);
 // pairs with retail DeletePersonaMenu_vtbl; ctor DeletePersonaMenu_DeletePersonaMenu, onCommand DeletePersonaMenu_onCommand, dtor DeletePersonaMenu__DeletePersonaMenu, row fill
 // DeletePersonaMenu_setpersonas.
 
+struct LobbyMan;
+
 struct DeletePersonaMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu zeroes it; [U] cMenu_addItem counts
@@ -227,6 +229,7 @@ struct DeletePersonaMenu {
 
     // Methods bound to their retail symbols by asm labels.
     int onCommand(cMenuItem* item) __asm__("DeletePersonaMenu_onCommand");
+    void setpersonas(LobbyMan *src) __asm__("DeletePersonaMenu_setpersonas");
 };
 
 CHECK_OFFSET(DeletePersonaMenu, NumItems, 0x000);

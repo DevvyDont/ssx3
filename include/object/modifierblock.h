@@ -82,6 +82,7 @@ struct tModifierBlock {
     bool findRail(int id) __asm__("tModifierBlock_findRail");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("tModifierBlock_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("tModifierBlock_readFromReplayFrame");
+    void setBoundBox(void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
 };
 
 CHECK_OFFSET(tModifierBlock, RootTransform, 0x00);

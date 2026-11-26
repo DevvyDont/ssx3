@@ -2214,7 +2214,6 @@ static inline void gmVecAddEq_D428(t4Vector& a, const t4Vector& b)
         : "memory");
 }
 
-extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, float dt) __asm__("tParticleEmitter_stepContinous");
 /**
  * Steps a particle emitter by @p dt, then moves its emission point along its motion for each whole time step that has
  * passed.
@@ -2225,26 +2224,26 @@ extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, floa
  *
  * @param dt  the frame time
  */
-extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, float dt)
+void tParticleEmitter::stepContinous(float dt)
 {
-    self->step(dt);
+    this->step(dt);
     for (;;) {
-        float step = self->TimeStep;
-        float time = self->EndTime;
-        if (!((float)self->NumParticles * step < time)) {
+        float step = TimeStep;
+        float time = EndTime;
+        if (!((float)NumParticles * step < time)) {
             break;
         }
-        self->EndTime = time - step;
-        gmVecAddEq_D428(*(&self->X0), *(&self->Xi));
-        func_0036D400_f(&self->SeedX0);
-        func_0036D400_f(&self->SeedX1);
-        func_0036D400_f(&self->SeedV0);
-        func_0036D400_f(&self->SeedV1);
-        func_0036D400_f(&self->SeedV2);
-        func_0036D400_f(&self->SeedC0);
-        func_0036D400_f(&self->SeedC1);
-        func_0036D400_f(&self->SeedSize);
-        func_0036D400_f(&self->SeedLife);
+        EndTime = time - step;
+        gmVecAddEq_D428(*(&X0), *(&Xi));
+        func_0036D400_f(&SeedX0);
+        func_0036D400_f(&SeedX1);
+        func_0036D400_f(&SeedV0);
+        func_0036D400_f(&SeedV1);
+        func_0036D400_f(&SeedV2);
+        func_0036D400_f(&SeedC0);
+        func_0036D400_f(&SeedC1);
+        func_0036D400_f(&SeedSize);
+        func_0036D400_f(&SeedLife);
     }
 }
 #endif
@@ -2289,8 +2288,6 @@ static inline void boxInit_D500(tBoundBox& b, const t4Vector& p)
 #define TURN_TIME_D500(v, b) (((v) / ((b) - (v)) - DRAG_B_D500) * (1.0f / (2.0f * DRAG_A_D500)))
 
 // Bounding box of every particle the emitter can produce over its lifetime.
-extern "C" void tParticleEmitter_calcBoundBox_D500(tParticleEmitter* self, tBoundBox* bb)
-    __asm__("tParticleEmitter_calcBoundBox");
 /**
  * Computes a bounding box for every particle the emitter can produce over its lifetime.
  *
@@ -2302,76 +2299,76 @@ extern "C" void tParticleEmitter_calcBoundBox_D500(tParticleEmitter* self, tBoun
  *
  * @param bb  receives the bounding box
  */
-extern "C" void tParticleEmitter_calcBoundBox_D500(tParticleEmitter* self, tBoundBox* bb)
+void tParticleEmitter::calcBoundBox(tBoundBox* bb)
 {
-    float lifeA = self->Life0 + self->LifeR;
-    float lifeB = self->Life0 + self->LifeR * 2.0f;
+    float lifeA = Life0 + LifeR;
+    float lifeB = Life0 + LifeR * 2.0f;
     float life = lifeA > lifeB ? lifeA : lifeB;
 
     // spawn positions: B0 + C0 * r1 + D0 * r2 (+ E0 * count), r in [1, 2]
-    boxInit_D500(*bb, vu0AddGM(vu0AddGM(self->X0, self->Xr0), self->Xr1));
-    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), self->Xr1));
-    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(self->X0, self->Xr0), vu0ScaleGM(self->Xr1, 2.0f)));
-    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), vu0ScaleGM(self->Xr1, 2.0f)));
-    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), self->Xr1),
-        vu0ScaleGM(self->Xi, (float)self->NumParticles)));
-    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(self->X0, self->Xr0), vu0ScaleGM(self->Xr1, 2.0f)),
-        vu0ScaleGM(self->Xi, (float)self->NumParticles)));
-    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(self->X0, vu0ScaleGM(self->Xr0, 2.0f)), vu0ScaleGM(self->Xr1, 2.0f)),
-        vu0ScaleGM(self->Xi, (float)self->NumParticles)));
+    boxInit_D500(*bb, vu0AddGM(vu0AddGM(X0, Xr0), Xr1));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(X0, vu0ScaleGM(Xr0, 2.0f)), Xr1));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(X0, Xr0), vu0ScaleGM(Xr1, 2.0f)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(X0, vu0ScaleGM(Xr0, 2.0f)), vu0ScaleGM(Xr1, 2.0f)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(X0, vu0ScaleGM(Xr0, 2.0f)), Xr1),
+        vu0ScaleGM(Xi, (float)NumParticles)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(X0, Xr0), vu0ScaleGM(Xr1, 2.0f)),
+        vu0ScaleGM(Xi, (float)NumParticles)));
+    boxAdd_D500(*bb, vu0AddGM(vu0AddGM(vu0AddGM(X0, vu0ScaleGM(Xr0, 2.0f)), vu0ScaleGM(Xr1, 2.0f)),
+        vu0ScaleGM(Xi, (float)NumParticles)));
 
     tBoundBox start = *bb;
 
     // velocities: 70 + 80 * r1 + 90 * r2 + A0 * r3, r in [1, 2]
     tBoundBox vel;
-    boxInit_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), self->Vr1), self->Vr2));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), self->Vr1), self->Vr2));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), vu0ScaleGM(self->Vr1, 2.0f)), self->Vr2));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), self->Vr1), vu0ScaleGM(self->Vr2, 2.0f)));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), vu0ScaleGM(self->Vr1, 2.0f)),
-        self->Vr2));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), self->Vr1),
-        vu0ScaleGM(self->Vr2, 2.0f)));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, self->Vr0), vu0ScaleGM(self->Vr1, 2.0f)),
-        vu0ScaleGM(self->Vr2, 2.0f)));
-    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(self->V0, vu0ScaleGM(self->Vr0, 2.0f)), vu0ScaleGM(self->Vr1, 2.0f)),
-        vu0ScaleGM(self->Vr2, 2.0f)));
+    boxInit_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, Vr0), Vr1), Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, vu0ScaleGM(Vr0, 2.0f)), Vr1), Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, Vr0), vu0ScaleGM(Vr1, 2.0f)), Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, Vr0), Vr1), vu0ScaleGM(Vr2, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, vu0ScaleGM(Vr0, 2.0f)), vu0ScaleGM(Vr1, 2.0f)),
+        Vr2));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, vu0ScaleGM(Vr0, 2.0f)), Vr1),
+        vu0ScaleGM(Vr2, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, Vr0), vu0ScaleGM(Vr1, 2.0f)),
+        vu0ScaleGM(Vr2, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(V0, vu0ScaleGM(Vr0, 2.0f)), vu0ScaleGM(Vr1, 2.0f)),
+        vu0ScaleGM(Vr2, 2.0f)));
 
-    t4Vector deltaMax = vu0SubGM(self->Force, vel.MaxPoint);
-    t4Vector deltaMin = vu0SubGM(self->Force, vel.MinPoint);
+    t4Vector deltaMax = vu0SubGM(Force, vel.MaxPoint);
+    t4Vector deltaMin = vu0SubGM(Force, vel.MinPoint);
 
-    ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, life, life <? DRAG_TMAX_D500);
+    ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, life, life <? DRAG_TMAX_D500);
 
-    float tx0 = TURN_TIME_D500(self->Force.x, vel.MinPoint.x);
-    float tx1 = TURN_TIME_D500(self->Force.x, vel.MaxPoint.x);
-    float ty0 = TURN_TIME_D500(self->Force.y, vel.MinPoint.y);
-    float ty1 = TURN_TIME_D500(self->Force.y, vel.MaxPoint.y);
-    float tz0 = TURN_TIME_D500(self->Force.z, vel.MinPoint.z);
-    float tz1 = TURN_TIME_D500(self->Force.z, vel.MaxPoint.z);
+    float tx0 = TURN_TIME_D500(Force.x, vel.MinPoint.x);
+    float tx1 = TURN_TIME_D500(Force.x, vel.MaxPoint.x);
+    float ty0 = TURN_TIME_D500(Force.y, vel.MinPoint.y);
+    float ty1 = TURN_TIME_D500(Force.y, vel.MaxPoint.y);
+    float tz0 = TURN_TIME_D500(Force.z, vel.MinPoint.z);
+    float tz1 = TURN_TIME_D500(Force.z, vel.MaxPoint.z);
 
     if (tx0 > 0.0f) {
         tx0 = tx0 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tx0, tx0);
+        ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, tx0, tx0);
     }
     if (tx1 > 0.0f) {
         tx1 = tx1 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tx1, tx1);
+        ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, tx1, tx1);
     }
     if (ty0 > 0.0f) {
         ty0 = ty0 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, ty0, ty0);
+        ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, ty0, ty0);
     }
     if (ty1 > 0.0f) {
         ty1 = ty1 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, ty1, ty1);
+        ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, ty1, ty1);
     }
     if (tz0 > 0.0f) {
         tz0 = tz0 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tz0, tz0);
+        ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, tz0, tz0);
     }
     if (tz1 > 0.0f) {
         tz1 = tz1 <? DRAG_TMAX_D500;
-        ADD_TRAJECTORY_D500(*bb, start, self->Force, deltaMax, deltaMin, tz1, tz1);
+        ADD_TRAJECTORY_D500(*bb, start, Force, deltaMax, deltaMin, tz1, tz1);
     }
 }
 #endif

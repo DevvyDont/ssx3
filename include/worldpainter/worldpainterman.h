@@ -57,6 +57,8 @@ struct cWorldPainterSection {
     void load1(int sectionId, tWPHeader* wpData) __asm__("cWorldPainterSection_load1");
     void unload() __asm__("cWorldPainterSection_unload");
     void resolve() __asm__("cWorldPainterSection_resolve");
+    void update() __asm__("cWorldPainterSection_update");
+    void load(int fileName) __asm__("cWorldPainterSection_load");
 };
 
 CHECK_OFFSET(cWorldPainterSection, m_iState, 0x0);

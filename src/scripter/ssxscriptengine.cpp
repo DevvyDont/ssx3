@@ -4358,8 +4358,6 @@ extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject
 
 // PORT: cSSXScriptEngine_IsObjInUseByPlayer declares cScriptDatabaseObject_IsObjInUseByPlayer as void; it really
 // returns a bool.
-bool cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val)
-    __asm__("cScriptDatabaseObject_IsObjInUseByPlayer");
 
 /**
  * Returns whether any script entity of object @p idx is in use by player @p val
@@ -4369,14 +4367,13 @@ bool cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val)
  * @param val  the player ID
  * @return true when one is
  */
-bool cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* vself, int idx, int val)
+bool cScriptDatabaseObject::IsObjInUseByPlayer(int idx, int val)
 {
-    cScriptDatabaseObject* self = (cScriptDatabaseObject*)vself;
-    cScriptObject* obj = self->mpObjectDatabase[idx];
+    cScriptObject* obj = mpObjectDatabase[idx];
     int i = 0;
     int n = scriptObjNumEntities(obj);
     for (; i < n; i++) {
-        if (self->IsEntityInUseByPlayer(scriptObjEntity(obj, i)->mDBID,
+        if (IsEntityInUseByPlayer(scriptObjEntity(obj, i)->mDBID,
                                                         val)) {
             return true;
         }
@@ -6272,8 +6269,6 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
 
 // PORT: the unit declares cScriptObjCameraManager_RemoveCameraObject(void*, void*) returning void; it returns found/not
 // found.
-extern "C" bool cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraManager* self, cScriptObjCamera* key)
-    __asm__("cScriptObjCameraManager_RemoveCameraObject");
 /**
  * Detaches a script camera object from the camera manager.
  *
@@ -6285,23 +6280,23 @@ extern "C" bool cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCamera
  * @param key  the script camera object
  * @return true, or false when it was not attached
  */
-extern "C" bool cScriptObjCameraManager_RemoveCameraObject_impl(cScriptObjCameraManager* self, cScriptObjCamera* key)
+bool cScriptObjCameraManager::RemoveCameraObject(cScriptObjCamera* key)
 {
     int k = key->mObjID;
     for (int i = 0; i < 2; i++) {
-        cScriptObjCamera* cameraObj = self->mpCameraObjects[i];
+        cScriptObjCamera* cameraObj = mpCameraObjects[i];
         if (cameraObj != 0 && cameraObj->mObjID == k) {
-            if (self->mInUse > 0 && cameraObj->mpCameraEntity != 0) {
+            if (mInUse > 0 && cameraObj->mpCameraEntity != 0) {
                 cameraObj->SetCameraEntity(0);
                 for (int j = 0; j < 2; j++) {
-                    if (self->mAttachedCameraObject[j] == i) {
-                        self->mAttachedCameraObject[j] = -1;
+                    if (mAttachedCameraObject[j] == i) {
+                        mAttachedCameraObject[j] = -1;
                         break;
                     }
                 }
             }
-            self->mpCameraObjects[i]->SetCameraManager(0);
-            self->mpCameraObjects[i] = 0;
+            mpCameraObjects[i]->SetCameraManager(0);
+            mpCameraObjects[i] = 0;
             return true;
         }
     }

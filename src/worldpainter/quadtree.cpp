@@ -1444,7 +1444,6 @@ extern int D_004A3940;
 extern int D_004A3944;
 
 // PORT: the unit declares cPS2MemCard_Init(void*) earlier; bound by asm label
-void cPS2MemCard_Init_impl(cPS2MemCard* self) __asm__("cPS2MemCard_Init");
 
 /**
  * Puts the memory-card object into its idle state.
@@ -1455,51 +1454,51 @@ void cPS2MemCard_Init_impl(cPS2MemCard* self) __asm__("cPS2MemCard_Init");
  * result), the name/path buffers, both device records (mDevices), the file slots (mFileSlots), the directory entries
  * (mFileDirEntry, mDirTable) and mSourceIconPath.
  */
-void cPS2MemCard_Init_impl(cPS2MemCard* self)
+void cPS2MemCard::Init()
 {
-    self->mTitleOffsLF = 0x1C;
-    self->mState = 0;
-    self->mDevice = 0;
-    self->mGetInfoDevice = 0;
-    self->mGetInfoPending = 0;
-    self->unk_04C = 0;
+    mTitleOffsLF = 0x1C;
+    mState = 0;
+    mDevice = 0;
+    mGetInfoDevice = 0;
+    mGetInfoPending = 0;
+    unk_04C = 0;
     D_004A3938 = 0;
     D_004A393C = 0;
     D_004A3940 = 0;
-    self->mFileDescriptor = -1;
-    self->mCurrentFileSlot = -1;
-    self->mIconFileHandle = -1;
-    self->mMaxFiles = 6;
-    self->unk_050 = 0;
-    self->mNumDirTable = 0;
-    self->mTransferSize = 0;
-    self->mDataSize = 0;
-    self->mBuffer = 0;
-    self->mIconFileData = 0;
-    self->mIconFileSize = 0;
-    self->mReadFailed = 0;
-    self->mWriteFailed = 0;
+    mFileDescriptor = -1;
+    mCurrentFileSlot = -1;
+    mIconFileHandle = -1;
+    mMaxFiles = 6;
+    unk_050 = 0;
+    mNumDirTable = 0;
+    mTransferSize = 0;
+    mDataSize = 0;
+    mBuffer = 0;
+    mIconFileData = 0;
+    mIconFileSize = 0;
+    mReadFailed = 0;
+    mWriteFailed = 0;
     D_004A3944 = 0;
-    self->mScanFileSlot = 0;
-    self->mOpenMode = 0;
-    self->mSeekOrigin = 0;
-    self->mSeekOffset = 0;
-    self->mFileInfoValid = 0;
-    MEM_fill_4050(self->mFileName, 0, 0x40);
-    MEM_fill_4050(self->mFilePath, 0, 0x40);
-    MEM_fill_4050(self->mIconFilePath, 0, 0x40);
-    MEM_fill_4050(self->mDirPattern, 0, 0x40);
+    mScanFileSlot = 0;
+    mOpenMode = 0;
+    mSeekOrigin = 0;
+    mSeekOffset = 0;
+    mFileInfoValid = 0;
+    MEM_fill_4050(mFileName, 0, 0x40);
+    MEM_fill_4050(mFilePath, 0, 0x40);
+    MEM_fill_4050(mIconFilePath, 0, 0x40);
+    MEM_fill_4050(mDirPattern, 0, 0x40);
     for (int i = 0; i < 2; i++) {
-        self->mDevices[i].mType = 0;
-        self->mDevices[i].mFreeClusters = 0;
-        self->mDevices[i].mLastError = 0;
-        self->mDevices[i].mFormat = 0;
-        self->mDevices[i].mCardChanged = 0;
+        mDevices[i].mType = 0;
+        mDevices[i].mFreeClusters = 0;
+        mDevices[i].mLastError = 0;
+        mDevices[i].mFormat = 0;
+        mDevices[i].mCardChanged = 0;
     }
-    MEM_fill_4050(&self->mFileDirEntry, 0, 0x40);
-    MEM_fill_4050(self->mFileSlots, 0, 720);
-    MEM_fill_4050(self->mDirTable, 0, 0x1000);
-    MEM_fill_4050(self->mSourceIconPath, 0, 0x20);
+    MEM_fill_4050(&mFileDirEntry, 0, 0x40);
+    MEM_fill_4050(mFileSlots, 0, 720);
+    MEM_fill_4050(mDirTable, 0, 0x1000);
+    MEM_fill_4050(mSourceIconPath, 0, 0x20);
 }
 #endif
 
@@ -2557,7 +2556,6 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastError);
 #ifdef SKIP_ASM
 // PORT: the unit declares this as `extern "C" void* cPS2MemCard_GetLastError(void*, int)`
 // for its callers; the body returns an int code, bound with an asm label.
-extern "C" int cPS2MemCard_GetLastError_impl(cPS2MemCard* self, int i) __asm__("cPS2MemCard_GetLastError");
 
 /**
  * Returns the last libmc result of a port (mLastError of device record mDevices[@p i]) when it is one of the codes the
@@ -2569,9 +2567,9 @@ extern "C" int cPS2MemCard_GetLastError_impl(cPS2MemCard* self, int i) __asm__("
  * @param i  the memory-card port (0 or 1)
  * @return the result code, or -10
  */
-extern "C" int cPS2MemCard_GetLastError_impl(cPS2MemCard* self, int i)
+int cPS2MemCard::GetLastError(int i)
 {
-    switch (self->mDevices[i].mLastError) {
+    switch (mDevices[i].mLastError) {
     case -10002:
     case -10001:
     case -7:
@@ -2582,7 +2580,7 @@ extern "C" int cPS2MemCard_GetLastError_impl(cPS2MemCard* self, int i)
     case -2:
     case -1:
     case 0:
-        return self->mDevices[i].mLastError;
+        return mDevices[i].mLastError;
     case -10:
     case -9:
     case -8:

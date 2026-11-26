@@ -1915,8 +1915,6 @@ struct tBoundBoxInit : tBoundBox {
 };
 
 // cWorldView::setFocus
-extern "C" void cWorldView_setFocus_impl(cWorldView* self, int id, const t4Vector& pos, float fRadius)
-    __asm__("cWorldView_setFocus");
 /**
  * Points one of the world view's streaming foci at a position.
  *
@@ -1927,24 +1925,24 @@ extern "C" void cWorldView_setFocus_impl(cWorldView* self, int id, const t4Vecto
  * @param pos  the position to stream around
  * @param fRadius  how far around it to load
  */
-extern "C" void cWorldView_setFocus_impl(cWorldView* self, int id, const t4Vector& pos, float fRadius)
+void cWorldView::setFocus(int id, const t4Vector& pos, float fRadius)
 {
-    self->m_StreamFocus[id].m_v4LoadPos = pos;
-    self->m_StreamFocus[id].m_fLoadRadius = fRadius >? 0.0f;
-    self->m_StreamFocus[id].m_FocusBox = tBoundBoxInit(pos, pos);
+    m_StreamFocus[id].m_v4LoadPos = pos;
+    m_StreamFocus[id].m_fLoadRadius = fRadius >? 0.0f;
+    m_StreamFocus[id].m_FocusBox = tBoundBoxInit(pos, pos);
     {
         t4Vector ext;
         ext.x = fRadius;
         ext.y = fRadius;
         ext.z = fRadius;
         ext.w = 0.0f;
-        vu0SubFromWC(self->m_StreamFocus[id].m_FocusBox.MinPoint, ext);
-        vu0AddToWC(self->m_StreamFocus[id].m_FocusBox.MaxPoint, ext);
+        vu0SubFromWC(m_StreamFocus[id].m_FocusBox.MinPoint, ext);
+        vu0AddToWC(m_StreamFocus[id].m_FocusBox.MaxPoint, ext);
     }
-    self->m_StreamFocus[id].m_bFocusUpdate = 1;
-    self->m_StreamFocus[id].m_fSafeRadius = 0.0f;
-    self->m_StreamFocus[id].m_fSafeTestRadius = 0.0f;
-    self->m_StreamFocus[id].m_iFocusTick = 0;
+    m_StreamFocus[id].m_bFocusUpdate = 1;
+    m_StreamFocus[id].m_fSafeRadius = 0.0f;
+    m_StreamFocus[id].m_fSafeTestRadius = 0.0f;
+    m_StreamFocus[id].m_iFocusTick = 0;
 }
 #endif
 

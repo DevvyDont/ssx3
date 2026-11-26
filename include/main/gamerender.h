@@ -94,6 +94,8 @@ struct FrustumIntersector {
     void AddAllInstancesInside(void* list_, int count) __asm__("FrustumIntersector_AddAllInstancesInside");
     void AddAllPatchesInside(void* list_, int count) __asm__("FrustumIntersector_AddAllPatchesInside");
     void AddAllTypedInside(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllTypedInside");
+    void crossingpatch(void *vnode, int frustum) __asm__("FrustumIntersector_crossingpatch");
+    void crossingfogvolume(tParticleInstanceRecord* obj, int frustum) __asm__("FrustumIntersector_crossingfogvolume");
 };
 
 CHECK_OFFSET(FrustumIntersector, occlusionman, 0x0000);

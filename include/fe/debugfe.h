@@ -164,6 +164,7 @@ struct cTrackFileMan {
     int checkLocation1(int n, void* namesp, char* tag) __asm__("cTrackFileMan_checkLocation1");
     int getNextLocation(int start, void* key) __asm__("cTrackFileMan_getNextLocation");
     int getPrevLocation(int start, void* key) __asm__("cTrackFileMan_getPrevLocation");
+    bool legalTrackMode(int idx, int kind) __asm__("cTrackFileMan_legalTrackMode");
 };
 CHECK_OFFSET(cTrackFileMan, NumLocations, 0x0);
 CHECK_OFFSET(cTrackFileMan, LocationInfo, 0x4);

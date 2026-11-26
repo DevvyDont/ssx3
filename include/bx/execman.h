@@ -42,6 +42,7 @@ struct cExecutionMan {
 
     // Methods bound to their retail symbols by asm labels.
     int checkHalt(int flag) __asm__("cExecutionMan_checkHalt__FPvi");
+    void halt(int callback, int data) __asm__("cExecutionMan_halt");
 };
 
 CHECK_OFFSET(cExecutionMan, HaltCallback, 0x0);

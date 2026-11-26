@@ -717,7 +717,6 @@ extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx);
 extern "C" void cSectionMan_loadMode(cSectionMan* self, int a1);
 
 // PORT: the unit's other callers declare (void*, int, char*); the body reads three ints, bound by asm label
-extern "C" void cSectionMan_load_impl(void* self, int idx, int mode) __asm__("cSectionMan_load");
 
 // Shared with cSectionMan_activate: true for a real section id (0x31 = no section).
 static inline bool IsSection(const int& id)
@@ -736,9 +735,8 @@ static inline bool IsSection(const int& id)
  * @param idx   the location (On Tour eBELocationID)
  * @param mode  the section manager mode, or kSMMode_Default for the location's default
  */
-extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
+void cSectionMan::load(int idx, int mode)
 {
-    cSectionMan* self = (cSectionMan*)vself;
     int resolvedMode;
     if (mode == kSMMode_Default) {
         resolvedMode = cSectionMan_mLocationModeMap[idx].mode;
@@ -764,23 +762,23 @@ extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
             found = 0;
         }
         if (found) {
-            self->unloadSection(i);
+            unloadSection(i);
         }
     }
-    self->mBELocationID = idx;
-    self->mbLocationIsActivated = 0;
+    mBELocationID = idx;
+    mbLocationIsActivated = 0;
     for (int k = 0; k < cSectionMan_mLocationMap_CEA8[idx].iNumSection; k++) {
-        self->loadSection(cSectionMan_mLocationMap_CEA8[idx].iBESectionID[k]);
+        loadSection(cSectionMan_mLocationMap_CEA8[idx].iBESectionID[k]);
     }
     if (IsSection(skySection)) {
-        self->m_bTriggerSkySwap = 0;
-        self->loadSection(skySection);
+        m_bTriggerSkySwap = 0;
+        loadSection(skySection);
     }
     int transportSection = cSectionMan_mLocationMap_CEA8[idx].iBETransportSectionID;
     if (transportSection >= 0) {
-        self->loadSection(transportSection);
+        loadSection(transportSection);
     }
-    self->loadMode(resolvedMode);
+    loadMode(resolvedMode);
 }
 #endif
 

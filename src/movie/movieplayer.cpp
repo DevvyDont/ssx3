@@ -240,7 +240,6 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readSetSize);
 #ifdef SKIP_ASM
 // PORT: the unit declares cMCOverlayManager_readSetSize(void* self), but the body takes a
 // second argument (callers pass it in $5); the real body is bound by asm label.
-void cMCOverlayManager_readSetSize_impl(void* self, int a) __asm__("cMCOverlayManager_readSetSize");
 
 /**
  * Sets the size of the file to read or write: passes @p size to mpMemCard's slot 19 (SetDataSize by On Tour's cMemCard
@@ -248,12 +247,11 @@ void cMCOverlayManager_readSetSize_impl(void* self, int a) __asm__("cMCOverlayMa
  *
  * @param size  the file's data size
  */
-void cMCOverlayManager_readSetSize_impl(void* vself, int size)
+void cMCOverlayManager::readSetSize(int size)
 {
-    cMCOverlayManager* self = (cMCOverlayManager*)vself;
-    cMemCard* obj = self->mpMemCard;
+    cMemCard* obj = mpMemCard;
     obj->SetDataSize(size);
-    self->mSize = size;
+    mSize = size;
 }
 #endif
 
@@ -3791,38 +3789,37 @@ extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i) __asm__
  *
  * @param i  device index
  */
-extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* vself, int i)
+void cMCOverlayManager::GatherDeviceInfo1(int i)
 {
-    cMCOverlayManager* self = (cMCOverlayManager*)vself;
-    sMP_20C8* me = (sMP_20C8*)self;
+    sMP_20C8* me = (sMP_20C8*)this;
     me->slots[i].a = 1;
-    char* bb = (char*)&self->mDevices[0].bFormatted;
+    char* bb = (char*)&mDevices[0].bFormatted;
     int* pb = (int*)(bb + i * 0xE0);
-    char* bc = (char*)&self->mDevices[0].bCorrectEncoding;
+    char* bc = (char*)&mDevices[0].bCorrectEncoding;
     int* pc = (int*)(bc + i * 0xE0);
     *pb = 1;
     *pc = 1;
     char* name = me->slots[i].name;
     me->slots[i].d = 1;
     MEM_fill(name, 0, 200);
-    if (self->mpMemCard->IsInvalid(i) || self->mpMemCard->IsDamaged(i) || self->mpMemCard->IsWrongDevice1(i))
+    if (mpMemCard->IsInvalid(i) || mpMemCard->IsDamaged(i) || mpMemCard->IsWrongDevice1(i))
     {
         me->slots[i].a = 0;
         return;
     }
-    if (!self->mpMemCard->IsFormatted1(i))
+    if (!mpMemCard->IsFormatted1(i))
     {
         *pb = 0;
         return;
     }
-    if (!self->mpMemCard->IsEncodingCorrect(i))
+    if (!mpMemCard->IsEncodingCorrect(i))
     {
         *pc = 0;
         return;
     }
     if (i == me->cur)
-        me->slots[me->cur].e = self->mpMemCard->GetFreeSpace();
-    self->mpMemCard->GetDeviceName(i, (unsigned short*)name, 100);
+        me->slots[me->cur].e = mpMemCard->GetFreeSpace();
+    mpMemCard->GetDeviceName(i, (unsigned short*)name, 100);
 }
 #endif
 

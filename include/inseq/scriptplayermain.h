@@ -94,6 +94,8 @@ struct cScriptPlayerMain {
     int GetNumUpdatesToEndLeft() __asm__("cScriptPlayerMain_GetNumUpdatesToEndLeft");
     int GetInSeqCommInterface() __asm__("cScriptPlayerMain_GetInSeqCommInterface");
     int DoUpdate(float time, float prev, float speed) __asm__("cScriptPlayerMain_DoUpdate");
+    int Init(tInSeqScriptHeader* data, char* owner, int playerId) __asm__("cScriptPlayerMain_Init");
+    void Play1(int loopScript) __asm__("cScriptPlayerMain_Play1");
 };
 
 CHECK_OFFSET(tInSeqScriptHeader, isSmallEndian, 0x0);

@@ -63,6 +63,7 @@ struct cCameraController {
     cCameraAlgoList* getAlgorithmList() __asm__("cCameraController_getAlgorithmList");
     void snapCurrent() __asm__("cCameraController_snapCurrent");
     void* clearAlgorithms() __asm__("cCameraController_clearAlgorithms__FPv");
+    void snap(int subjectID) __asm__("cCameraController_snap");
 };
 
 CHECK_OFFSET(cCameraController, Type, 0x00);

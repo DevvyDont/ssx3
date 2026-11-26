@@ -77,6 +77,10 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     char* getRoomName() __asm__("cFEStateNetCreateRoomPopup_getRoomName");
     char* getChannelName() __asm__("cFEStateNetCreateRoomPopup_getChannelName");
     char* getPassword() __asm__("cFEStateNetCreateRoomPopup_getPassword");
+    // retail's destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup stays a C function (g++ 2.95 takes no
+    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetCreateRoomPopup();
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetCreateRoomPopup_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mpTextRoomName, 0x6D0);

@@ -147,8 +147,6 @@ static inline void setPersonaCaption(cCommandMenuItem* item, const char* name)
     item->Caption = name;
 }
 
-extern "C" void DeletePersonaMenu_setpersonas_impl(DeletePersonaMenu *self, LobbyMan *src)
-    __asm__("DeletePersonaMenu_setpersonas");
 /**
  * Fills the debug "Delete Persona" menu with every persona except the first.
  *
@@ -160,18 +158,19 @@ extern "C" void DeletePersonaMenu_setpersonas_impl(DeletePersonaMenu *self, Lobb
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void DeletePersonaMenu_setpersonas_impl(DeletePersonaMenu *self, LobbyMan *src) {
+void DeletePersonaMenu::setpersonas(LobbyMan *src)
+{
     int i = 0;
     int next;
     while (i < src->mNumPersonas - 1) {
         next = i + 1;
-        setPersonaCaption(&self->mPersonaItems[i], *(src->mPersonas + next));
-        cMenuItem_activate(&self->mPersonaItems[i], 1);
-        (self->mPersonaItems + i)->ID = next;
+        setPersonaCaption(&mPersonaItems[i], *(src->mPersonas + next));
+        cMenuItem_activate(&mPersonaItems[i], 1);
+        (mPersonaItems + i)->ID = next;
         i = next;
     }
     while (i < 4) {
-        cMenuItem_activate(&self->mPersonaItems[i], 0);
+        cMenuItem_activate(&mPersonaItems[i], 0);
         i++;
     }
 }

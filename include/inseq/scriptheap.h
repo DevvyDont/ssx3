@@ -39,6 +39,7 @@ struct cScriptHeap {
 
     // Methods bound to their retail symbols by asm labels.
     void FreeMem(void* pMem) __asm__("cScriptHeap_FreeMem");
+    void* AllocMem(unsigned int size) __asm__("cScriptHeap_AllocMem");
 };
 
 CHECK_OFFSET(tFreeBlock, size, 0x0);

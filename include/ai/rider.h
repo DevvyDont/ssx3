@@ -525,6 +525,8 @@ enum eMissionQuery {
     kMQ_Num = 19
 };
 
+struct tSSXFrameActor;
+
 struct cRider : public cRiderState, public cBeing {
     // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
     // 0x6C4-0x6CF: alignment padding; the compiler starts the derived part on a 16-byte boundary (cScriptObjRider,
@@ -867,6 +869,15 @@ struct cRider : public cRiderState, public cBeing {
     void* GetAttachedRider() __asm__("cRider_GetAttachedRider__FPv");
     int isVertZoneApplicable() __asm__("cRider_isVertZoneApplicable__FPv");
     void updateTestSurface() __asm__("cRider_updateTestSurface__FPv");
+    void initAlways() __asm__("cRider_initAlways");
+    void putAt(const t4Vector* pos, const float* dir, float drop, int anim) __asm__("cRider_putAt");
+    void updateSkeleton() __asm__("cRider_updateSkeleton");
+    void SetNISGroundVectors(void* pRiderPos) __asm__("cRider_SetNISGroundVectors");
+    void DoInSeqAnimUpdate(tSSXFrameActor* pFrameInfo, float currFrame, float frameDelta, int eventBits)
+        __asm__("cRider_DoInSeqAnimUpdate");
+    void reactToCollision(tCollideInfo* info, int id) __asm__("cRider_reactToCollision");
+    void turnFromCollision(tIntersectInfo* hitInfo) __asm__("cRider_turnFromCollision");
+    bool checkRailBodyCollisions() __asm__("cRider_checkRailBodyCollisions");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

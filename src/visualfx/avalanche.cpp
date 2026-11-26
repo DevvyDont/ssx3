@@ -890,7 +890,6 @@ static inline t4Vector pos_7EF8(const sAvObj_7EF8* o)
     return o->pos;
 }
 
-extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self) __asm__("tActiveAvalanche_update");
 /**
  * Runs one update step of an active avalanche.
  *
@@ -899,42 +898,44 @@ extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self) __asm__("tA
  * if it has none, and play a ground-hit sound at its position. Sound cues whose frame has been reached play at their
  * object's sound position. When no node is active any more the avalanche ends (tActiveAvalanche_end).
  */
-extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self)
+void tActiveAvalanche::update()
 {
-    if (((sAvData_7EF8*)self->m_avalanche) == 0) {
+    if (((sAvData_7EF8*)m_avalanche) == 0) {
         return;
     }
     bool alive = false;
-    self->m_currTime += cAvalanche_m_UpdateTimeStep;
+    m_currTime += cAvalanche_m_UpdateTimeStep;
     int i = 0;
-    for (sAvNode_7EF8* n = ((sAvNode_7EF8*)self->m_activeNodeList); n != 0; n = n->next, i++) {
-        bool ok = tActiveAvalancheNode_update_7EF8(n, self->m_currTime);
+    for (sAvNode_7EF8* n = ((sAvNode_7EF8*)m_activeNodeList); n != 0; n = n->next, i++) {
+        bool ok = tActiveAvalancheNode_update_7EF8(n, m_currTime);
         alive = ok | alive;
         if (!ok) {
-            self->m_activeNodeArray[i] = 0;
+            m_activeNodeArray[i] = 0;
         }
     }
-    while (self->m_nextCollision < ((sAvData_7EF8*)self->m_avalanche)->nEvents && ((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].time <= self->m_currTime) {
-        if (((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].obj->spawned == 0) {
+    while (m_nextCollision < ((sAvData_7EF8*)m_avalanche)->nEvents && ((sAvData_7EF8*)m_avalanche)->events[m_nextCollision].time <= m_currTime) {
+        if (((sAvData_7EF8*)m_avalanche)->events[m_nextCollision].obj->spawned == 0) {
             // NOTE: function-local static of the original (guard D_004A54C8), written out as its guarded in-place construction.
             if (D_004A54C8 == 0) {
                 new (&D_004D5770) sAvFloatDef_7EF8();
                 D_004A54C8 = 1;
             }
-            cAnimObjectNode_cAnimObjectNode1(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, ((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].obj, &D_004D5770);
+            cAnimObjectNode_cAnimObjectNode1(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1,
+                    ((sAvData_7EF8*)m_avalanche)->events[m_nextCollision].obj, &D_004D5770);
         }
-        cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), pos_7EF8(((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].obj));
-        self->m_nextCollision++;
+        cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(),
+                pos_7EF8(((sAvData_7EF8*)m_avalanche)->events[m_nextCollision].obj));
+        m_nextCollision++;
     }
-    while (self->m_nextGroundCollision < ((sAvData_7EF8*)self->m_avalanche)->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->m_currTime)) {
-        sAvObj_7EF8* cueObj = ((sAvObj_7EF8*)self->m_activeNodeArray[((sAvData_7EF8*)self->m_avalanche)->sounds[self->m_nextGroundCollision].obj]);
+    while (m_nextGroundCollision < ((sAvData_7EF8*)m_avalanche)->nSounds && (float)soundFrame_7EF8(this) <= toFrames_7EF8(m_currTime)) {
+        sAvObj_7EF8* cueObj = ((sAvObj_7EF8*)m_activeNodeArray[((sAvData_7EF8*)m_avalanche)->sounds[m_nextGroundCollision].obj]);
         if (cueObj != 0) {
             cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), cueObj->sndPos);
         }
-        self->m_nextGroundCollision++;
+        m_nextGroundCollision++;
     }
     if (!alive) {
-        tActiveAvalanche_end_7EF8(self);
+        tActiveAvalanche_end_7EF8(this);
     }
 }
 #endif

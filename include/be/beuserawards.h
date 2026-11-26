@@ -55,6 +55,7 @@ struct cBEUserAwards {
     void setAward(int row, int col, int value) __asm__("cBEUserAwards_setAward");
     signed char getNumAwards(int row, int column) __asm__("cBEUserAwards_getNumAwards");
     int getAwardBits(int i) __asm__("cBEUserAwards_getAwardBits__FPvi");
+    int getTotalNumAwards() __asm__("cBEUserAwards_getTotalNumAwards");
 };
 
 CHECK_OFFSET(cBEUserAwards, mAwards, 0x000);

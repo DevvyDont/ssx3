@@ -191,6 +191,7 @@ struct cSunHalo {
     // Methods bound to their retail symbols by asm labels.
     void RenderLens() __asm__("cSunHalo_RenderLens");
     void Render(tViewInfo* viewInfo, int viewId) __asm__("cSunHalo_Render");
+    void InitLens() __asm__("cSunHalo_InitLens");
 };
 
 CHECK_OFFSET(cSunHalo, mZRect, 0x000);

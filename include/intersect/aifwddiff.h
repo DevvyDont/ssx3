@@ -28,6 +28,7 @@ struct cAIFwdDiffCache {
     void AddToHash(tAIFwdDiff* node) __asm__("cAIFwdDiffCache_AddToHash");
     void TesselatePatch(void* patch, cAIFwdDiffCache* fwdDiff) __asm__("cAIFwdDiffCache_TesselatePatch");
     void InitializeCache(tAIFwdDiff* patch) __asm__("cAIFwdDiffCache_InitializeCache");
+    void RemoveFromHash(tAIFwdDiff* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
 };
 
 CHECK_OFFSET(cAIFwdDiffCache, mCache, 0x000);

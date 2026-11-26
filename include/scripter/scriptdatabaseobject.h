@@ -66,6 +66,7 @@ struct cScriptDatabaseObject {
     void MarkEntityAsUnreserved(void* entity) __asm__("cScriptDatabaseObject_MarkEntityAsUnreserved");
     int GetAvailableEntities(int key, cScriptEntity** out,
             int max) __asm__("cScriptDatabaseObject_GetAvailableEntities");
+    bool IsObjInUseByPlayer(int idx, int val) __asm__("cScriptDatabaseObject_IsObjInUseByPlayer");
 };
 
 CHECK_OFFSET(cScriptDatabaseObject, mpObjectDatabase, 0x000);

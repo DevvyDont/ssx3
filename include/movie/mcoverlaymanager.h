@@ -359,6 +359,8 @@ struct cMCOverlayManager {
     void UpdateInitCardsCheckDone() __asm__("cMCOverlayManager_UpdateInitCardsCheckDone__FPv");
     void UpdateInitFileCheckDone() __asm__("cMCOverlayManager_UpdateInitFileCheckDone__FPv");
     void* UpdateCardUnusable() __asm__("cMCOverlayManager_UpdateCardUnusable__FPv");
+    void readSetSize(int size) __asm__("cMCOverlayManager_readSetSize");
+    void GatherDeviceInfo1(int i) __asm__("cMCOverlayManager_GatherDeviceInfo1");
 };
 
 CHECK_OFFSET(cMCOverlayManager, callbackWriteStart, 0x0);

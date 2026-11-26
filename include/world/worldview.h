@@ -246,6 +246,7 @@ struct cWorldView {
     void refreshStreamFocus(int cam) __asm__("cWorldView_refreshStreamFocus");
     void recursiveTreeFocus(tBxBSPNode* sec_, int cam, int loaded) __asm__("cWorldView_recursiveTreeFocus");
     void purge() __asm__("cWorldView_purge__FPv");
+    void setFocus(int id, const t4Vector& pos, float fRadius) __asm__("cWorldView_setFocus");
 };
 
 CHECK_OFFSET(cWorldView, mp_WorldCache, 0x000);

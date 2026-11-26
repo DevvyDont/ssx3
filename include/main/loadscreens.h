@@ -236,6 +236,7 @@ struct cFELoadState : public cUIState {
     virtual ~cFELoadState();
     virtual void onCreateScreen() __asm__("cFELoadState_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFELoadState_onWidgetCreate");
+    void InitwidgetMultiP(char player) __asm__("cFELoadState_InitwidgetMultiP");
 };
 
 CHECK_OFFSET(cFELoadState, mpParentModule, 0x048);

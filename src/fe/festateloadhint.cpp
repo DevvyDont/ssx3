@@ -1192,7 +1192,6 @@ extern "C" char* strcpy(char* dst, const char* src);
 
 
 // The player index is a char parameter (the caller in onCreateScreen declares it int); bound by asm label.
-extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player) __asm__("cFELoadState_InitwidgetMultiP");
 
 /**
  * Fills one player's column of the two-player loading screen with that rider's stats and picture.
@@ -1206,9 +1205,8 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player) __as
  *
  * @param player  screen side, 0 or 1 (On Tour iHuman)
  */
-extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
+void cFELoadState::InitwidgetMultiP(char player)
 {
-    cFELoadState* self = (cFELoadState*)vself;
     sName19_72C0 rankNumName = *(sName19_72C0*)str_1_Player_rank_numb;
     sName7_72C0 rankName = *(sName7_72C0*)str_1_rank;
     sName7_72C0 timeName = *(sName7_72C0*)str_1_time;
@@ -1242,13 +1240,13 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
     cGameModeMan_getGM();
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
     tRiderStats* st = (tRiderStats*)cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(rankNumName.c));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(rankNumName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, cGameModeMan_iRanking[player] + 1);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(rankName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(rankName.c));
     if (obj != 0) {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         int rank;
@@ -1265,13 +1263,13 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
         sprintf1(text, fmtw, rank);
         cUIText_setUnicodeString(obj, (char*)text);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(timeName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(timeName.c));
     if (obj != 0) {
         if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_RACE
         || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_TIMECHALLENGE) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
-            cUIThing* o = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Time));
+            cUIThing* o = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Time));
             if (o != 0) {
                 o->setVisible(1);
             }
@@ -1279,7 +1277,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
         } else {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int score = D_00536640[i];
-            cUIThing* o = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Score));
+            cUIThing* o = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Score));
             if (o != 0) {
                 o->setVisible(1);
             }
@@ -1287,37 +1285,37 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
         }
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(knockdownsName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(knockdownsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, st->NumFrags);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(wipeoutsName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(wipeoutsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, st->NumWipeouts);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(tricksName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(tricksName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, st->NumTricksLanded);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(handplantsName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(handplantsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, st->NumHandplants);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ubertricksName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(ubertricksName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, st->NumUberTricks);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ubergrindsName.c));
+    obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(ubergrindsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, st->NumUberGrindTricks);
@@ -1325,8 +1323,8 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
     }
     sName2_72C0 picName = *(sName2_72C0*)D_004A2C18;
     picName.c[0] = side + '0';
-    cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
-    cFELoadScreen* loadInfo = self->mpParentModule;
+    cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(picName.c));
+    cFELoadScreen* loadInfo = mpParentModule;
     if (loadInfo != 0 && ((char*)pic) != 0) {
         int textureId = loadInfo->mTexID[player];
         if (textureId != 0) {

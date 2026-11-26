@@ -303,6 +303,7 @@ struct cInputExec {
     void* getTempReg(int i) __asm__("cInputExec_getTempReg");
     float getConfig(int varIndex) __asm__("cInputExec_getConfig");
     float execute(cInputPad* list, const tInputOpCode* code) __asm__("cInputExec_execute");
+    float getButton(int idx, unsigned int kind) __asm__("cInputExec_getButton");
 };
 
 CHECK_OFFSET(cInputExec, DefaultButtonModifier, 0x000);

@@ -1276,26 +1276,22 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_FindSubtitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int key)
-    __asm__("RCMP_AV_SUBTITLE_ARRAY_FindSubtitle");
 /**
  * Finds the subtitle shown at a frame: the last entry whose frame number is below it.
  *
  * Binary-searches the entries by their frame number (mFrameNumber), which must be ascending, and clamps the result to
  * the array. Called by func_003AE718 with the movie player's current frame.
  *
- * @param subtitleArray  the subtitle array
  * @param key  the frame number
  * @return the entry, or 0 for an empty array
  */
-extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(RCMP_AV_SUBTITLE_ARRAY* subtitleArray,
-                                                                       unsigned int key)
+RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY::FindSubtitle(unsigned int key)
 {
-    if (subtitleArray->mNumberOfSubtitle == 0) {
+    if (mNumberOfSubtitle == 0) {
         return 0;
     }
-    int hi = subtitleArray->mNumberOfSubtitle;
-    RCMP_AV_SUBTITLE* arr = subtitleArray->mSubTitle;
+    int hi = mNumberOfSubtitle;
+    RCMP_AV_SUBTITLE* arr = mSubTitle;
     int lo = -1;
     while (hi - lo >= 2) {
         int mid = (hi + lo) / 2;
@@ -1307,7 +1303,7 @@ extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_FindSubtitle_impl(RCMP_AV_SU
     }
     int i = hi - 1;
     if (i < 0) i = 0;
-    i = (i < (int)subtitleArray->mNumberOfSubtitle - 1) ? i : (int)subtitleArray->mNumberOfSubtitle - 1;
+    i = (i < (int)mNumberOfSubtitle - 1) ? i : (int)mNumberOfSubtitle - 1;
     return &arr[i];
 }
 #endif
@@ -2043,7 +2039,6 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_ReleaseChunk);
 #ifdef SKIP_ASM
 
 // The unit later declares RCMP_DECODER_ReleaseChunk(void*, void*) for its caller; bind this definition by asm label.
-void RCMP_DECODER_ReleaseChunk_impl(RCMP_DECODER* self, int arg) __asm__("RCMP_DECODER_ReleaseChunk");
 /**
  * Gives a CHUNK back through the decoder's release function.
  *
@@ -2051,9 +2046,9 @@ void RCMP_DECODER_ReleaseChunk_impl(RCMP_DECODER* self, int arg) __asm__("RCMP_D
  *
  * @param chunk  the CHUNK
  */
-void RCMP_DECODER_ReleaseChunk_impl(RCMP_DECODER* self, int chunk)
+void RCMP_DECODER::ReleaseChunk(int chunk)
 {
-    ((void (*)(RCMP_DECODER*, void*, int))self->m_IData.m_ReleaseDataFunc)(self, (*(void**)&self->m_IData), chunk);
+    ((void (*)(RCMP_DECODER*, void*, int))m_IData.m_ReleaseDataFunc)(this, (*(void**)&m_IData), chunk);
 }
 #endif
 

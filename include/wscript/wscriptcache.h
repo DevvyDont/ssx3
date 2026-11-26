@@ -228,6 +228,7 @@ struct cWScriptCacheEntry {
     int getProcessScripts() __asm__("cWScriptCacheEntry_getProcessScripts");
     int getNumMissionScripts() __asm__("cWScriptCacheEntry_getNumMissionScripts");
     int getMissionScripts() __asm__("cWScriptCacheEntry_getMissionScripts");
+    void load(int fileName) __asm__("cWScriptCacheEntry_load");
 };
 
 CHECK_OFFSET(cWScriptCacheEntry, mAsyncHandle, 0x004);

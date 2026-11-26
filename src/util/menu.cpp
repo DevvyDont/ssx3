@@ -1789,17 +1789,15 @@ INCLUDE_ASM("util/menu", cMenuSys_getLeftShift);
 // PORT: cInput_getValue is declared returning void* in this unit; this caller reads a float result ($f0).
 float cInput_getValue_f(cInput*, int) __asm__("cInput_getValue");
 // PORT: the unit declares cMenuSys_getLeftShift as void*(cMenuSys*); the body returns a bool.
-bool cMenuSys_getLeftShift_impl(void* self) __asm__("cMenuSys_getLeftShift");
 
 /**
  * Tells whether the menu's left-shift key is held: cInput_getValue on the cInput at +0x5C, value 66, is not 0.
  *
  * @return true while held
  */
-bool cMenuSys_getLeftShift_impl(void* vself)
+bool cMenuSys::getLeftShift()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue_f(self->Input, 66) != 0.0f;
+    return cInput_getValue_f(Input, 66) != 0.0f;
 }
 #endif
 
@@ -1809,17 +1807,15 @@ INCLUDE_ASM("util/menu", cMenuSys_getRightShift);
 // PORT: cInput_getValue is declared returning void* in this unit; this caller reads a float result ($f0).
 float cInput_getValue_f(cInput*, int) __asm__("cInput_getValue");
 // PORT: the unit declares cMenuSys_getRightShift as void*(cMenuSys*); the body returns a bool.
-bool cMenuSys_getRightShift_impl(void* self) __asm__("cMenuSys_getRightShift");
 
 /**
  * Tells whether the menu's right-shift key is held: cInput_getValue on the cInput at +0x5C, value 67, is not 0.
  *
  * @return true while held
  */
-bool cMenuSys_getRightShift_impl(void* vself)
+bool cMenuSys::getRightShift()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue_f(self->Input, 67) != 0.0f;
+    return cInput_getValue_f(Input, 67) != 0.0f;
 }
 #endif
 

@@ -253,8 +253,6 @@ INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_evaluate);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float cCSICubicSpline_evaluate(cCSICubicSpline* seg, float t);
 
-extern "C" float cCubicSplineInterpolant_evaluate_impl(cCubicSplineInterpolant* s, float t)
-    __asm__("cCubicSplineInterpolant_evaluate");
 /**
  * Evaluates a spline interpolant at @p time.
  *
@@ -265,53 +263,52 @@ extern "C" float cCubicSplineInterpolant_evaluate_impl(cCubicSplineInterpolant* 
  * Likely bug: a time past the end (+0x4) while the cached segment is any other one reads past the segment array
  * (seg[cur + 2]) or never leaves the bisection, which keeps landing on the last segment.
  *
- * @param spline  the interpolant
  * @param time  the input value
  * @return the interpolated value
  */
-extern "C" float cCubicSplineInterpolant_evaluate_impl(cCubicSplineInterpolant* spline, float time)
+float cCubicSplineInterpolant::evaluate(float time)
 {
-    int last = spline->NumSplines - 1;
+    int last = NumSplines - 1;
     float* pend;
-    if (last == (int)spline->LastEvaluatedIndex) {
-        pend = &spline->MaxX;
+    if (last == (int)LastEvaluatedIndex) {
+        pend = &MaxX;
     } else {
-        pend = &spline->CubicSplines[spline->LastEvaluatedIndex + 1].X0;
+        pend = &CubicSplines[LastEvaluatedIndex + 1].X0;
     }
-    cCSICubicSpline* seg = &spline->CubicSplines[spline->LastEvaluatedIndex];
+    cCSICubicSpline* seg = &CubicSplines[LastEvaluatedIndex];
     if (seg->X0 <= time && time <= *pend) {
         return cCSICubicSpline_evaluate(seg, time);
     }
     if (time < seg->X0) {
-        if (time < spline->CubicSplines[1].X0) {
-            spline->LastEvaluatedIndex = 0;
-            return cCSICubicSpline_evaluate(spline->CubicSplines, time);
+        if (time < CubicSplines[1].X0) {
+            LastEvaluatedIndex = 0;
+            return cCSICubicSpline_evaluate(CubicSplines, time);
         }
     } else {
-        if ((int)spline->LastEvaluatedIndex == last - 1) {
-            spline->LastEvaluatedIndex = last;
-            return cCSICubicSpline_evaluate(&spline->CubicSplines[last], time);
+        if ((int)LastEvaluatedIndex == last - 1) {
+            LastEvaluatedIndex = last;
+            return cCSICubicSpline_evaluate(&CubicSplines[last], time);
         }
-        if (time < spline->CubicSplines[spline->LastEvaluatedIndex + 2].X0) {
-            spline->LastEvaluatedIndex = spline->LastEvaluatedIndex + 1;
-            return cCSICubicSpline_evaluate(&spline->CubicSplines[spline->LastEvaluatedIndex], time);
+        if (time < CubicSplines[LastEvaluatedIndex + 2].X0) {
+            LastEvaluatedIndex = LastEvaluatedIndex + 1;
+            return cCSICubicSpline_evaluate(&CubicSplines[LastEvaluatedIndex], time);
         }
     }
     int hi = last;
     int lo = 0;
     for (;;) {
         int mid = (hi + lo) / 2;
-        cCSICubicSpline* midSeg = &spline->CubicSplines[mid];
+        cCSICubicSpline* midSeg = &CubicSplines[mid];
         float segStart = midSeg->X0;
         float segEnd;
         if (mid < last) {
             segEnd = midSeg[1].X0;
         } else {
-            segEnd = spline->MaxX;
+            segEnd = MaxX;
         }
         if (segStart <= time) {
             if (time <= segEnd) {
-                spline->LastEvaluatedIndex = mid;
+                LastEvaluatedIndex = mid;
                 return cCSICubicSpline_evaluate(midSeg, time);
             } else {
                 lo = mid + 1;
@@ -882,7 +879,6 @@ extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_sta
 extern "C" bool cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int pad, malloc_state* av);
 
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
-extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 
 /**
  * Releases a heap block back to the dynamic memory manager (dlmalloc's free).
@@ -891,14 +887,13 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem) __asm_
  * the top chunk, which may then be trimmed (cDynamicMemMan_sYSTRIm) after consolidating the fast bins (cDynamicMemMan_malloc_consolidate). The C
  * definition is cDynamicMemMan_dlfree, bound by asm label because the unit declares cDynamicMemMan_dlfree with one argument.
  *
- * @param ms  the memory manager (this); holds the malloc state pointer
  * @param mem  the block to free, or null
  */
-extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
+void cDynamicMemMan::dlfree(void* mem)
 {
     // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
     // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
-    malloc_state* av = ms->MallocState;
+    malloc_state* av = MallocState;
     malloc_chunk* freedChunk;
     malloc_chunk* nextchunk;
     unsigned int size;
@@ -965,9 +960,9 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
             if (size >= 0x4000)
             {
                 if (av->max_fast & 2)
-                    ms->malloc_consolidate((malloc_state*)av);
+                    malloc_consolidate((malloc_state*)av);
                 if ((av->top->size & ~3U) >= av->trim_threshold)
-                    ms->sYSTRIm(av->top_pad, (malloc_state*)av);
+                    sYSTRIm(av->top_pad, (malloc_state*)av);
             }
         }
     }

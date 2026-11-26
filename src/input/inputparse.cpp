@@ -1998,7 +1998,6 @@ static inline unsigned int GetD3252F8(cInputPad* l, int idx)
 }
 
 // PORT: the unit declares cInputExec_getButton as (void*, int, int); the definition takes an unsigned kind.
-float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind) __asm__("cInputExec_getButton");
 
 /**
  * Reads one button of the pad being evaluated, as its analogue value or as one of its state flags.
@@ -2012,24 +2011,24 @@ float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind) __
  * @param kind  the button modifier (eButtonModifiers)
  * @return the value
  */
-float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind)
+float cInputExec::getButton(int idx, unsigned int kind)
 {
     switch (kind) {
     case kButtonModifier_Value:
-        if (idx < (self->Pad)->NumButtons) {
-            return ((&(self->Pad)->Buttons[0]))[idx].Value;
+        if (idx < Pad->NumButtons) {
+            return ((&Pad->Buttons[0]))[idx].Value;
         }
         break;
     case kButtonModifier_Held:
-        return (float)GetC3252F8((self->Pad), idx);
+        return (float)GetC3252F8((Pad), idx);
     case kButtonModifier_Pressed:
-        return (float)GetA3252F8((self->Pad), idx);
+        return (float)GetA3252F8((Pad), idx);
     case kButtonModifier_Released:
-        return (float)GetB3252F8((self->Pad), idx);
+        return (float)GetB3252F8((Pad), idx);
     case kButtonModifier_Repeat:
-        return (float)GetD3252F8((self->Pad), idx);
+        return (float)GetD3252F8((Pad), idx);
     case kButtonModifier_Default:
-        return cInputExec_getButton_impl(self, idx, self->DefaultButtonModifier);
+        return getButton(idx, DefaultButtonModifier);
     }
     return 0.0f;
 }

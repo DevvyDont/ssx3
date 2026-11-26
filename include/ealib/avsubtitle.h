@@ -69,6 +69,7 @@ struct RCMP_AV_SUBTITLE_ARRAY {
     void * AV_SUBTITLE_ARRAY() __asm__("RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY");
     RCMP_AV_SUBTITLE* GetSubtitle(unsigned int i) __asm__("RCMP_AV_SUBTITLE_ARRAY_GetSubtitle");
     int GetNumberOfSubtitle() __asm__("RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle");
+    RCMP_AV_SUBTITLE* FindSubtitle(unsigned int key) __asm__("RCMP_AV_SUBTITLE_ARRAY_FindSubtitle");
 };
 
 CHECK_OFFSET(RCMP_AV_SUBTITLE, mPosX, 0x00);

@@ -71,6 +71,7 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
     // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateCreateDuplicate();
     virtual void onCreateScreen() __asm__("cFEStateCreateDuplicate_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateDuplicate_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateCreateDuplicate, mbAccount, 0x6D0);

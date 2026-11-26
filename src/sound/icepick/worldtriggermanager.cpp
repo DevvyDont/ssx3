@@ -617,7 +617,6 @@ extern char* str_p5H;
 extern char str_m_aTriggerInfoInstances[];
 
 // PORT: the unit declares LoadTriggerInfo as void (the ctor ignores it); the body returns 0/1. Bound by asm label.
-bool cWorldTriggerManager_LoadTriggerInfo_impl(void* self) __asm__("cWorldTriggerManager_LoadTriggerInfo");
 
 /**
  * Loads the sound trigger definitions from data/config/watrig.adl and indexes them by entry.
@@ -628,23 +627,22 @@ bool cWorldTriggerManager_LoadTriggerInfo_impl(void* self) __asm__("cWorldTrigge
  *
  * @return false when the file's first byte is nonzero (rejected), otherwise true
  */
-bool cWorldTriggerManager_LoadTriggerInfo_impl(void* vself)
+bool cWorldTriggerManager::LoadTriggerInfo()
 {
-    cWorldTriggerManager* self = (cWorldTriggerManager*)vself;
     if (BXFILE_exists(str_p5H) != 0) {
         char* data = FILE_loadpack(str_p5H, 0);
         tTriggerInfoFileHeader* file = (tTriggerInfoFileHeader*)data;
-        self->m_pcTriggerInfoFile = data;
+        m_pcTriggerInfoFile = data;
         if (file->mFormatFlag != 0) {
             return false;
         }
-        self->m_iNumTriggers = file->mNumTriggers + 2;
-        self->m_aTriggerInfo = (tTriggerTypePointer*)operator_new_tag(self->m_iNumTriggers * 8,
+        m_iNumTriggers = file->mNumTriggers + 2;
+        m_aTriggerInfo = (tTriggerTypePointer*)operator_new_tag(m_iNumTriggers * 8,
             str_m_aTriggerInfoInstances, 0, 0);
         int* cursor = file->mRecords;
-        for (int i = 2; i < self->m_iNumTriggers; i++) {
-            self->m_aTriggerInfo[i].m_TriggerType = *cursor;
-            self->m_aTriggerInfo[i].m_pTriggerTypeStruct = (tTriggerType*)cursor;
+        for (int i = 2; i < m_iNumTriggers; i++) {
+            m_aTriggerInfo[i].m_TriggerType = *cursor;
+            m_aTriggerInfo[i].m_pTriggerTypeStruct = (tTriggerType*)cursor;
             int trigType = *cursor;
             if (trigType == eTRIGGERTYPE_Banked) {
                 cursor += 6;
@@ -657,9 +655,9 @@ bool cWorldTriggerManager_LoadTriggerInfo_impl(void* vself)
             }
         }
     } else {
-        self->m_pcTriggerInfoFile = 0;
-        self->m_iNumTriggers = 0;
-        self->m_aTriggerInfo = 0;
+        m_pcTriggerInfoFile = 0;
+        m_iNumTriggers = 0;
+        m_aTriggerInfo = 0;
     }
     return true;
 }

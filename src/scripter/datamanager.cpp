@@ -136,7 +136,6 @@ void cDataManager_AddToEmptyInstanceList(void* self, void* node);
 typedef sVEntry<void(void*, void*, int, void*, void*)> tDetachHookSlot;
 
 // PORT: the unit declares cDataManager_DetachData as returning void; it really returns the entry's key.
-int cDataManager_DetachData_impl(cDataManager* self, tDataInstanceInfo* entry) __asm__("cDataManager_DetachData");
 
 /**
  * Detaches an attached data handle and every instance linked to it, recycling their records.
@@ -147,26 +146,26 @@ int cDataManager_DetachData_impl(cDataManager* self, tDataInstanceInfo* entry) _
  * @param entry  the data handle returned by the attach
  * @return the detached data pointer, the handle's first word (On Tour returns void* pData)
  */
-int cDataManager_DetachData_impl(cDataManager* self, tDataInstanceInfo* entry)
+int cDataManager::DetachData(tDataInstanceInfo* entry)
 {
     tDataInstanceInfo* first = entry->pNext;
     if (first != 0) {
         tDataInstanceInfo* n = first;
         do {
             tDataInstanceInfo* next = n->pNext;
-            tDetachHookSlot* vt = (tDetachHookSlot*)self->mVtbl;
-            vt[3].fn(vthis(self, vt[3]), n->pData, n->dataSize, n->pUserData1, n->pUserData2); // OnDetachData
-            self->AddToEmptyInstanceList(n);
+            tDetachHookSlot* vt = (tDetachHookSlot*)mVtbl;
+            vt[3].fn(vthis(this, vt[3]), n->pData, n->dataSize, n->pUserData1, n->pUserData2); // OnDetachData
+            AddToEmptyInstanceList(n);
             n = next;
         } while (n != 0);
-        tDetachHookSlot* vt = (tDetachHookSlot*)self->mVtbl;
-        vt[5].fn(vthis(self, vt[5]), entry->pData, entry->dataSize, entry->pUserData1, entry->pUserData2);
+        tDetachHookSlot* vt = (tDetachHookSlot*)mVtbl;
+        vt[5].fn(vthis(this, vt[5]), entry->pData, entry->dataSize, entry->pUserData1, entry->pUserData2);
     } else {
-        tDetachHookSlot* vt = (tDetachHookSlot*)self->mVtbl;
-        vt[3].fn(vthis(self, vt[3]), entry->pData, entry->dataSize, entry->pUserData1, entry->pUserData2);
+        tDetachHookSlot* vt = (tDetachHookSlot*)mVtbl;
+        vt[3].fn(vthis(this, vt[3]), entry->pData, entry->dataSize, entry->pUserData1, entry->pUserData2);
     }
     int key = ((int)entry->pData);
-    self->AddToEmptyInstanceList(entry);
+    AddToEmptyInstanceList(entry);
     return key;
 }
 #endif
@@ -2103,7 +2102,6 @@ extern "C" void cCutSceneTransitionMan_Pause(void* p, int on);
 
 
 // The unit declares tNISList_DoPause as returning void*; the body returns nothing. Bind by asm label.
-extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard) __asm__("tNISList_DoPause");
 
 /**
  * Pauses or resumes a playing NIS list, through either the pause count or the pause-on-loading flag.
@@ -2119,15 +2117,15 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard) __asm__(
  * @param on  nonzero to pause, 0 to resume
  * @param hard  nonzero for the pause-on-loading flag, 0 for the pause count
  */
-extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
+void tNISList::DoPause(int on, int hard)
 {
-    if (self->mState != keNISListState_Playing) {
+    if (mState != keNISListState_Playing) {
         return;
     }
     if (hard == 0) {
-        int prevPauses = self->mNumPause;
+        int prevPauses = mNumPause;
         if (on) {
-            self->mNumPause = prevPauses + 1;
+            mNumPause = prevPauses + 1;
             if (prevPauses != 0) {
                 return;
             }
@@ -2136,34 +2134,34 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
                 return;
             }
             int remainingPauses = prevPauses - 1;
-            self->mNumPause = remainingPauses;
+            mNumPause = remainingPauses;
             if (remainingPauses != 0) {
                 return;
             }
         }
-        if (self->mPausedOnNextScriptLoading) {
+        if (mPausedOnNextScriptLoading) {
             return;
         }
     } else {
-        if (self->mPausedOnNextScriptLoading == on) {
+        if (mPausedOnNextScriptLoading == on) {
             return;
         }
-        self->mPausedOnNextScriptLoading = on;
-        if (self->mNumPause) {
+        mPausedOnNextScriptLoading = on;
+        if (mNumPause) {
             return;
         }
     }
     if (on) {
-        tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&self->mList), 0);
-        if (self->IsVideo(it) == 0) {
-            int st = cBXScriptEngine_GetRequestState(((char*)self->mpNISEngine), it->scriptHandle);
+        tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&mList), 0);
+        if (IsVideo(it) == 0) {
+            int st = cBXScriptEngine_GetRequestState(((char*)mpNISEngine), it->scriptHandle);
             if (st >= keScriptRequestState_PlayPending && st <= keScriptRequestState_Paused) {
-                cBXScriptEngine_PauseScript(((char*)self->mpNISEngine), it->scriptHandle);
+                cBXScriptEngine_PauseScript(((char*)mpNISEngine), it->scriptHandle);
             }
         } else {
-            cVidEngine_PauseVideo(&self->mpNISEngine->mpPlayer, 1);
+            cVidEngine_PauseVideo(&mpNISEngine->mpPlayer, 1);
         }
-        if (self->mIsCutSceneHandler) {
+        if (mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 1);
             cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (transitionMan->mbPlayingTransition) {
@@ -2171,16 +2169,16 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
             }
         }
     } else {
-        tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&self->mList), 0);
-        if (self->IsVideo(it) == 0) {
-            int requestState = cBXScriptEngine_GetRequestState(((char*)self->mpNISEngine), it->scriptHandle);
+        tNISListEntry* it = (tNISListEntry*)cCircularBuffer_operatorIndex(((char*)&mList), 0);
+        if (IsVideo(it) == 0) {
+            int requestState = cBXScriptEngine_GetRequestState(((char*)mpNISEngine), it->scriptHandle);
             if (requestState == keScriptRequestState_Paused) {
-                cBXScriptEngine_ResumeScript(((char*)self->mpNISEngine), it->scriptHandle);
+                cBXScriptEngine_ResumeScript(((char*)mpNISEngine), it->scriptHandle);
             }
         } else {
-            cVidEngine_PauseVideo(&self->mpNISEngine->mpPlayer, 0);
+            cVidEngine_PauseVideo(&mpNISEngine->mpPlayer, 0);
         }
-        if (self->mIsCutSceneHandler) {
+        if (mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 0);
             cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (transitionMan->mbPlayingTransition) {

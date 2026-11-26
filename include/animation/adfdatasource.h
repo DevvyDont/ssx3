@@ -178,6 +178,8 @@ struct cAdfDataSource {
 
     // Methods bound to their retail symbols by asm labels.
     void populateFromData(tAdfArchive* data) __asm__("cAdfDataSource_populateFromData");
+    void getFramePartData(void* dest, unsigned int* frame, int part, void* startChan, long numChans)
+        __asm__("cAdfDataSource_getFramePartData");
 };
 
 CHECK_OFFSET(cAdfDataSource, Data, 0x000);

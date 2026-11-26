@@ -52,6 +52,7 @@ struct cUIFontInterface {
     void purgeFonts() __asm__("cUIFontInterface_purgeFonts");
     void setData(tUIFontTableHeader* hdr) __asm__("cUIFontInterface_setData");
     void loadFonts() __asm__("cUIFontInterface_loadFonts");
+    void addFontEntry(int index, char* pszFontName, unsigned int hashID) __asm__("cUIFontInterface_addFontEntry");
 };
 
 CHECK_OFFSET(tUIFontTableHeader, mNumEntries, 0x0);

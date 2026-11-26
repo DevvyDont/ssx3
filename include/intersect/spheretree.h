@@ -120,6 +120,7 @@ struct SphereTree {
     int isSphereInsideTri(t4Vector* corner1, t4Vector* corner2, t4Vector* corner3, t4Vector* sphereCenter)
         __asm__("SphereTree_isSphereInsideTri");
     void populateSortAxis(t4Vector* vdir) __asm__("SphereTree_populateSortAxis");
+    void TransformRel(t4Vector* mat, float scale) __asm__("SphereTree_TransformRel");
 };
 
 CHECK_OFFSET(SphereTree, axis, 0x000);

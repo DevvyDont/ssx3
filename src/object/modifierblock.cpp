@@ -127,7 +127,6 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_setBoundBox__FP14tModifierBlo
 #ifdef SKIP_ASM
 // PORT: the symbol's mangling says one parameter, but the body passes $5 through
 // to the virtual call untouched, so the real function takes a second argument.
-void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
 
 /**
  * Passes a bounding box to the modifier block's node.
@@ -136,9 +135,9 @@ void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box) __asm__("t
  *
  * @param box  the bounding box, passed through unchanged
  */
-void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
+void tModifierBlock::setBoundBox(void* box)
 {
-    cTransformModifier* node = self->RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
         node->setBoundBox(*(const tBoundBox*)box);
     }

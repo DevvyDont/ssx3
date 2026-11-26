@@ -261,7 +261,6 @@ extern "C" int ASYNCFILE_load_CBB8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
 extern char str_bar_e[];
 extern char str_ssf[];
-extern "C" void cWScriptCacheEntry_load_impl(void *self, int arg) __asm__("cWScriptCacheEntry_load");
 /**
  * Starts loading an entry's script file asynchronously from str_bar_e + @p fileName + str_ssf.
  *
@@ -270,18 +269,18 @@ extern "C" void cWScriptCacheEntry_load_impl(void *self, int arg) __asm__("cWScr
  *
  * @param fileName  the file name (a cBXString)
  */
-extern "C" void cWScriptCacheEntry_load_impl(void *vself, int fileName) {
-    cWScriptCacheEntry* self = (cWScriptCacheEntry*)vself;
+void cWScriptCacheEntry::load(int fileName)
+{
     sBXStr_CBB8 fullPath;
     sBXStr_CBB8 prefixed;
-    self->mStreamed = 0;
+    mStreamed = 0;
     func_003186D0_CBB8(&prefixed, str_bar_e, fileName);
     func_00318630_CBB8(&fullPath, &prefixed, str_ssf);
-    self->mAsyncHandle = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
+    mAsyncHandle = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
     cBXString_dt_CBB8(&fullPath, 2);
     cBXString_dt_CBB8(&prefixed, 2);
-    int n = self->mAsyncHandle;
-    self->mState = n <= 0 ? 2 : 1;
+    int n = mAsyncHandle;
+    mState = n <= 0 ? 2 : 1;
 }
 #endif
 

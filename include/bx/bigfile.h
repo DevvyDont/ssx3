@@ -18,6 +18,7 @@ struct cBigFile {
     // Methods bound to their retail symbols by asm labels.
     cBigFile* cBigFile1() __asm__("cBigFile_cBigFile1__FP8cBigFile");
     int close() __asm__("cBigFile_close__FP8cBigFile");
+    int open(const char* name, int memtype) __asm__("cBigFile_open");
 };
 
 CHECK_OFFSET(cBigFile, Mounted, 0x04);

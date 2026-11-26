@@ -73,6 +73,8 @@ struct cMenuSys {
     void render() __asm__("cMenuSys_render");
     void pushMenu(cMenu* item) __asm__("cMenuSys_pushMenu");
     void popMenu() __asm__("cMenuSys_popMenu");
+    bool getLeftShift() __asm__("cMenuSys_getLeftShift");
+    bool getRightShift() __asm__("cMenuSys_getRightShift");
 };
 
 CHECK_OFFSET(cMenuSys, MenuDepth, 0x000);

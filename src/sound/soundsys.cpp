@@ -893,7 +893,6 @@ extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
 extern tSndCallback D_004A3688_17D0[] __asm__("D_004A3688");
 
 // PORT: 64-bit long sound key
-void cSSXAudio_BeginChatter_17D0(void* vself, cRider* obj) __asm__("cSSXAudio_BeginChatter");
 /**
  * Starts a local human rider's chatter loop: board-bank patch 0, following the rider, with cSSXAudio_HandleChatter as callback.
  *
@@ -905,12 +904,10 @@ void cSSXAudio_BeginChatter_17D0(void* vself, cRider* obj) __asm__("cSSXAudio_Be
  * viewport (mViewIndex). cBankSys_SFX_End plays it; the handle is not kept. Called by cSSXAudio_BeginRiderSound;
  * cSSXAudio_StopAllRiderSounds cancels the callback key.
  *
- * @param vself  the audio system (cSSXAudio)
  * @param obj  the rider
  */
-void cSSXAudio_BeginChatter_17D0(void* vself, cRider* obj)
+void cSSXAudio::BeginChatter(cRider* obj)
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
     bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) {
         return;
@@ -918,10 +915,10 @@ void cSSXAudio_BeginChatter_17D0(void* vself, cRider* obj)
     int flag = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        flag = cSSXAudio_ReplayMode(self) == 0;
+        flag = cSSXAudio_ReplayMode(this) == 0;
     }
-    int boardBank = self->GetBoardBank(0);
-    cBankManager* bankManager = ((cBankManager*)self->mpVBankManager);
+    int boardBank = GetBoardBank(0);
+    cBankManager* bankManager = ((cBankManager*)mpVBankManager);
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -943,48 +940,48 @@ void cSSXAudio_BeginChatter_17D0(void* vself, cRider* obj)
     playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 0x7F;
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
-    self->mBank[((cBankManager*)self->mpVBankManager)->BankMonitor.mInst] = boardBank;
-    self->mPatch[((cBankManager*)self->mpVBankManager)->BankMonitor.mInst] = 0;
-    cBankManager* volumeManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+    mBank[((cBankManager*)mpVBankManager)->BankMonitor.mInst] = boardBank;
+    mPatch[((cBankManager*)mpVBankManager)->BankMonitor.mInst] = 0;
+    cBankManager* volumeManager = MusicSys.mpVStreamSys->mpVBankManager;
     cBankMonitor* volumeOpts = &volumeManager->BankMonitor;
     volumeOpts->mBaseVol[volumeManager->BankMonitor.mInst] = 0;
     volumeOpts->mCurrent[volumeManager->BankMonitor.mInst].vol
             = (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F && volumeOpts->mBaseVol[volumeOpts->mInst] < 0) ? 0
             : (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F ? (unsigned char)volumeOpts->mBaseVol[volumeOpts->mInst]
             : 0x7F);
-    cBankManager** pp = (&self->MusicSys.mpVStreamSys->mpVBankManager);
-    float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 6, 0);
+    cBankManager** pp = (&MusicSys.mpVStreamSys->mpVBankManager);
+    float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 6, 0);
     (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volumeControl;
     {
-        cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
         optsManager->BankMonitor.mPosition[optsManager->BankMonitor.mInst] = &obj->mPosition;
     }
     {
-        cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
         tSndCallback k = D_004A3688_17D0[0];
         cBankMonitor* callbackOpts = &optsManager->BankMonitor;
         callbackOpts->mCallback[optsManager->BankMonitor.mInst] = k;
     }
     {
-        cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
         optsManager->BankMonitor.mPtr[optsManager->BankMonitor.mInst] = obj;
     }
     {
-        cBankManager** pq = (&self->MusicSys.mpVStreamSys->mpVBankManager);
-        int listenerView = cSSXAudio_GetClosestCamera1(self, obj);
+        cBankManager** pq = (&MusicSys.mpVStreamSys->mpVBankManager);
+        int listenerView = cSSXAudio_GetClosestCamera1(this, obj);
         (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = listenerView;
     }
-    cSndPlayOpts_OPTS_Radius(&(self->MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
-    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
-            self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
+    cSndPlayOpts_OPTS_Radius(&(MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
+    MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
+            MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
     if (flag) {
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerPan[
-                self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerSide[
-                self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] =
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerPan[
+                MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerSide[
+                MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] =
             obj->mViewIndex;
     }
-    ((cBankSys*)self)->SFX_End();
+    ((cBankSys*)this)->SFX_End();
 }
 #endif
 
@@ -1033,7 +1030,6 @@ static inline void snd1C88AddVoice(cSSXAudio* self, int a, int b)
 }
 
 // PORT: 64-bit long sound key
-void cSSXAudio_BeginGlide_1C88(void* vself, cRider* obj, int n) __asm__("cSSXAudio_BeginGlide");
 /**
  * Starts a rider's glide loop on a surface: board-bank patch n * 8 + 4 for a local human, n * 8 + 6 for others.
  *
@@ -1047,94 +1043,92 @@ void cSSXAudio_BeginGlide_1C88(void* vself, cRider* obj, int n) __asm__("cSSXAud
  * Called by cSSXAudio_BeginRiderSound, and by cSSXAudio_HandleGlide / cSSXAudio_HandleAIGlide with the new surface when
  * the rider's surface changes.
  *
- * @param vself  the audio system (cSSXAudio)
  * @param obj  the rider
  * @param n  the surface (its patches start at n * 8)
  */
-void cSSXAudio_BeginGlide_1C88(void* vself, cRider* obj, int n)
+void cSSXAudio::BeginGlide(cRider* obj, int n)
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
     bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         int flag = 0;
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-            flag = cSSXAudio_ReplayMode(self) == 0;
+            flag = cSSXAudio_ReplayMode(this) == 0;
         }
-        int boardBank = ((cSSXAudio*)self)->GetBoardBank(n);
+        int boardBank = ((cSSXAudio*)this)->GetBoardBank(n);
         int patchNum = n * 8 + 4;
-        snd1C88AddVoice(self, boardBank, patchNum);
-        cBankManager* volumeManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        snd1C88AddVoice(this, boardBank, patchNum);
+        cBankManager* volumeManager = MusicSys.mpVStreamSys->mpVBankManager;
         cBankMonitor* volumeOpts = &volumeManager->BankMonitor;
         volumeOpts->mBaseVol[volumeManager->BankMonitor.mInst] = 0;
         volumeOpts->mCurrent[volumeManager->BankMonitor.mInst].vol
                 = (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F && volumeOpts->mBaseVol[volumeOpts->mInst] < 0) ? 0
                 : (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F
                 ? (unsigned char)volumeOpts->mBaseVol[volumeOpts->mInst] : 0x7F);
-        cBankManager** pp = &self->MusicSys.mpVStreamSys->mpVBankManager;
-        float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 6, 0);
+        cBankManager** pp = &MusicSys.mpVStreamSys->mpVBankManager;
+        float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 6, 0);
         (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volumeControl;
         {
-            cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+            cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
             optsManager->BankMonitor.mPosition[optsManager->BankMonitor.mInst] = &obj->mPosition;
         }
         {
-            cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+            cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
             tSndCallback k = D_004A3690_1C88[0];
             cBankMonitor* callbackOpts = &optsManager->BankMonitor;
             callbackOpts->mCallback[optsManager->BankMonitor.mInst] = k;
         }
         {
-            cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+            cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
             optsManager->BankMonitor.mPtr[optsManager->BankMonitor.mInst] = obj;
         }
         {
-            cBankManager** pq = &self->MusicSys.mpVStreamSys->mpVBankManager;
-            int listenerView = cSSXAudio_GetClosestCamera1(self, obj);
+            cBankManager** pq = &MusicSys.mpVStreamSys->mpVBankManager;
+            int listenerView = cSSXAudio_GetClosestCamera1(this, obj);
             (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = listenerView;
         }
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
-                self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
-        cSndPlayOpts_OPTS_Radius(&(self->MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
+                MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
+        cSndPlayOpts_OPTS_Radius(&(MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
         if (flag) {
-            self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerPan[
-                    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
-            self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerSide[
-                    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = obj->mViewIndex;
+            MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerPan[
+                    MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
+            MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerSide[
+                    MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = obj->mViewIndex;
         }
-        ((cBankSys*)self)->SFX_End();
+        ((cBankSys*)this)->SFX_End();
     } else {
-        int boardBank = ((cSSXAudio*)self)->GetBoardBank(n);
+        int boardBank = ((cSSXAudio*)this)->GetBoardBank(n);
         int patchNum = n * 8 + 6;
-        snd1C88AddVoice(self, boardBank, patchNum);
-        cBankManager* volumeManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        snd1C88AddVoice(this, boardBank, patchNum);
+        cBankManager* volumeManager = MusicSys.mpVStreamSys->mpVBankManager;
         cBankMonitor* volumeOpts = &volumeManager->BankMonitor;
         volumeOpts->mBaseVol[volumeManager->BankMonitor.mInst] = 0;
         volumeOpts->mCurrent[volumeManager->BankMonitor.mInst].vol
                 = (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F && volumeOpts->mBaseVol[volumeOpts->mInst] < 0) ? 0
                 : (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F
                 ? (unsigned char)volumeOpts->mBaseVol[volumeOpts->mInst] : 0x7F);
-        cBankManager** pp = &self->MusicSys.mpVStreamSys->mpVBankManager;
-        float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 6, 0);
+        cBankManager** pp = &MusicSys.mpVStreamSys->mpVBankManager;
+        float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 6, 0);
         (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volumeControl;
         {
-            cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+            cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
             optsManager->BankMonitor.mPosition[optsManager->BankMonitor.mInst] = &obj->mPosition;
         }
         {
-            cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+            cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
             tSndCallback k = D_004A3698_1C88[0];
             cBankMonitor* callbackOpts = &optsManager->BankMonitor;
             callbackOpts->mCallback[optsManager->BankMonitor.mInst] = k;
         }
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
-                self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
+                MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
         {
-            cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+            cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
             optsManager->BankMonitor.mPtr[optsManager->BankMonitor.mInst] = obj;
         }
-        cSndPlayOpts_OPTS_Radius(&(self->MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
-        ((cBankSys*)self)->SFX_End();
+        cSndPlayOpts_OPTS_Radius(&(MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
+        ((cBankSys*)this)->SFX_End();
     }
 }
 #endif
@@ -1155,7 +1149,6 @@ extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
 extern tSndCallback D_004A36A0_2508[] __asm__("D_004A36A0");
 
 // PORT: 64-bit long sound key
-void cSSXAudio_BeginCarve_2508(void* vself, cRider* obj, int n) __asm__("cSSXAudio_BeginCarve");
 /**
  * Starts a local human rider's carve loop on a surface: board-bank patch n * 8 + 3 with cSSXAudio_HandleCarve.
  *
@@ -1166,13 +1159,11 @@ void cSSXAudio_BeginCarve_2508(void* vself, cRider* obj, int n) __asm__("cSSXAud
  * newRace.cGamePath is kGAMEPATH_MULTIPLAYER and not replaying, its own viewport (mViewIndex). cBankSys_SFX_End plays
  * it; the handle is not kept. Called by cSSXAudio_BeginRiderSound, and by cSSXAudio_HandleCarve on a surface change.
  *
- * @param vself  the audio system (cSSXAudio)
  * @param obj  the rider
  * @param n  the surface (its patches start at n * 8)
  */
-void cSSXAudio_BeginCarve_2508(void* vself, cRider* obj, int n)
+void cSSXAudio::BeginCarve(cRider* obj, int n)
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
     bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) {
         return;
@@ -1180,11 +1171,11 @@ void cSSXAudio_BeginCarve_2508(void* vself, cRider* obj, int n)
     int flag = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        flag = cSSXAudio_ReplayMode(self) == 0;
+        flag = cSSXAudio_ReplayMode(this) == 0;
     }
-    int boardBank = ((cSSXAudio*)self)->GetBoardBank(n);
+    int boardBank = ((cSSXAudio*)this)->GetBoardBank(n);
     int patchNum = n * 8 + 3;
-    cBankManager* bankManager = self->mpVBankManager;
+    cBankManager* bankManager = mpVBankManager;
     cBankMonitor* playOpts = &bankManager->BankMonitor;
     bankManager->BankMonitor.mInst++;
     playOpts->mCurrent[bankManager->BankMonitor.mInst] = bankManager->BankMonitor.mDefault;
@@ -1206,47 +1197,47 @@ void cSSXAudio_BeginCarve_2508(void* vself, cRider* obj, int n)
     playOpts->mTwoPlayerSide[bankManager->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankManager->BankMonitor.mInst] = 0x7F;
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
-    self->mBank[self->mpVBankManager->BankMonitor.mInst] = boardBank;
-    self->mPatch[self->mpVBankManager->BankMonitor.mInst] = patchNum;
-    cBankManager* volumeManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+    mBank[mpVBankManager->BankMonitor.mInst] = boardBank;
+    mPatch[mpVBankManager->BankMonitor.mInst] = patchNum;
+    cBankManager* volumeManager = MusicSys.mpVStreamSys->mpVBankManager;
     cBankMonitor* volumeOpts = &volumeManager->BankMonitor;
     volumeOpts->mBaseVol[volumeManager->BankMonitor.mInst] = 0;
     volumeOpts->mCurrent[volumeManager->BankMonitor.mInst].vol
             = (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F && volumeOpts->mBaseVol[volumeOpts->mInst] < 0) ? 0
             : (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F ? (unsigned char)volumeOpts->mBaseVol[volumeOpts->mInst]
             : 0x7F);
-    cBankManager** pp = &self->MusicSys.mpVStreamSys->mpVBankManager;
-    float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 6, 0);
+    cBankManager** pp = &MusicSys.mpVStreamSys->mpVBankManager;
+    float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 6, 0);
     (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volumeControl;
     {
-        cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
         optsManager->BankMonitor.mPosition[optsManager->BankMonitor.mInst] = &obj->mPosition;
     }
     {
-        cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
         tSndCallback k = D_004A36A0_2508[0];
         cBankMonitor* callbackOpts = &optsManager->BankMonitor;
         callbackOpts->mCallback[optsManager->BankMonitor.mInst] = k;
     }
-    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
-            self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
+    MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCloseOnEnd[
+            MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 0;
     {
-        cBankManager* optsManager = self->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankManager* optsManager = MusicSys.mpVStreamSys->mpVBankManager;
         optsManager->BankMonitor.mPtr[optsManager->BankMonitor.mInst] = obj;
     }
     {
-        cBankManager** pq = &self->MusicSys.mpVStreamSys->mpVBankManager;
-        int listenerView = cSSXAudio_GetClosestCamera1(self, obj);
+        cBankManager** pq = &MusicSys.mpVStreamSys->mpVBankManager;
+        int listenerView = cSSXAudio_GetClosestCamera1(this, obj);
         (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = listenerView;
     }
-    cSndPlayOpts_OPTS_Radius(&(self->MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
+    cSndPlayOpts_OPTS_Radius(&(MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor, 100.0f, -1.0f);
     if (flag) {
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerPan[
-                self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerSide[
-                self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = obj->mViewIndex;
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerPan[
+                MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
+        MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mTwoPlayerSide[
+                MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = obj->mViewIndex;
     }
-    ((cBankSys*)self)->SFX_End();
+    ((cBankSys*)this)->SFX_End();
 }
 #endif
 
@@ -1776,8 +1767,6 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HardGlideProgram);
 extern const AudioTable D_00482B78;
 extern const AudioTable D_00482BA0;
 
-void cSSXAudio_HardGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume, int* pitch)
-    __asm__("cSSXAudio_HardGlideProgram");
 /**
  * Computes a rider's glide volume and bend for surface program 0 from its pressure, edging, braking and speed.
  *
@@ -1791,7 +1780,7 @@ void cSSXAudio_HardGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
  * @param volume  receives the volume
  * @param pitch  receives the pitch bend
  */
-void cSSXAudio_HardGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume, int* pitch)
+void cSSXAudio::HardGlideProgram(cRider* rider, int* volume, int* pitch)
 {
     float level = rider->mAudioPressure;
     level *= 1.0f - (rider->mAudioEdging + rider->mAudioBraking);
@@ -1800,7 +1789,7 @@ void cSSXAudio_HardGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
         level = level * speed * 10.0f;
     }
     int idx = rider->getAIIndex();
-    float prev = self->mLastGlide[idx];
+    float prev = mLastGlide[idx];
     float levelDiff = prev - level;
     if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
@@ -1810,7 +1799,7 @@ void cSSXAudio_HardGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
         }
     }
     AudioTable volumeCurve = D_00482B78;
-    self->mLastGlide[idx] = level;
+    mLastGlide[idx] = level;
     AudioTable bendCurve = D_00482BA0;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
@@ -1823,8 +1812,6 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SoftGlideProgram);
 extern const AudioTable D_00482BC8;
 extern const AudioTable D_00482BF0;
 
-void cSSXAudio_SoftGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume, int* pitch)
-    __asm__("cSSXAudio_SoftGlideProgram");
 /**
  * Computes a rider's glide volume and bend for surface program 1 from its pressure, edging, braking and speed.
  *
@@ -1838,7 +1825,7 @@ void cSSXAudio_SoftGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
  * @param volume  receives the volume
  * @param pitch  receives the pitch bend
  */
-void cSSXAudio_SoftGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume, int* pitch)
+void cSSXAudio::SoftGlideProgram(cRider* rider, int* volume, int* pitch)
 {
     float level = rider->mAudioPressure;
     level *= 1.0f - (rider->mAudioEdging + rider->mAudioBraking);
@@ -1847,7 +1834,7 @@ void cSSXAudio_SoftGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
         level = level * speed * 10.0f;
     }
     int idx = rider->getAIIndex();
-    float prev = self->mLastGlide[idx];
+    float prev = mLastGlide[idx];
     float levelDiff = prev - level;
     if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
@@ -1857,7 +1844,7 @@ void cSSXAudio_SoftGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
         }
     }
     AudioTable volumeCurve = D_00482BC8;
-    self->mLastGlide[idx] = level;
+    mLastGlide[idx] = level;
     AudioTable bendCurve = D_00482BF0;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
@@ -1870,8 +1857,6 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_RailGlideProgram);
 extern const AudioTable D_00482C18;
 extern const AudioTable D_00482C40;
 
-void cSSXAudio_RailGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume, int* pitch)
-    __asm__("cSSXAudio_RailGlideProgram");
 /**
  * Computes a rider's glide volume and bend for surface program 2 from its pressure, edging, braking and speed.
  *
@@ -1885,7 +1870,7 @@ void cSSXAudio_RailGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
  * @param volume  receives the volume
  * @param pitch  receives the pitch bend
  */
-void cSSXAudio_RailGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume, int* pitch)
+void cSSXAudio::RailGlideProgram(cRider* rider, int* volume, int* pitch)
 {
     float level = rider->mAudioPressure;
     level *= 1.0f - (rider->mAudioEdging + rider->mAudioBraking);
@@ -1894,7 +1879,7 @@ void cSSXAudio_RailGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
         level = level * speed * 10.0f;
     }
     int idx = rider->getAIIndex();
-    float prev = self->mLastGlide[idx];
+    float prev = mLastGlide[idx];
     float levelDiff = prev - level;
     if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
@@ -1904,7 +1889,7 @@ void cSSXAudio_RailGlideProgram_impl(cSSXAudio* self, cRider* rider, int* volume
         }
     }
     AudioTable volumeCurve = D_00482C18;
-    self->mLastGlide[idx] = level;
+    mLastGlide[idx] = level;
     AudioTable bendCurve = D_00482C40;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
@@ -4117,7 +4102,6 @@ static inline int snd8488Add(void* vself, cRider* obj, int a, int b, int c)
     return ((cBankSys*)self)->SFX_End();
 }
 
-void cSSXAudio_RiderCollision_8488(void* self, cRider* a, cRider* b) __asm__("cSSXAudio_RiderCollision");
 /**
  * Plays the collision sound of two riders that bump into each other, near a camera.
  *
@@ -4132,22 +4116,21 @@ void cSSXAudio_RiderCollision_8488(void* self, cRider* a, cRider* b) __asm__("cS
  * @param rider  the rider whose position the sound follows
  * @param opponent  the other rider
  */
-void cSSXAudio_RiderCollision_8488(void* vself, cRider* rider, cRider* opponent)
+void cSSXAudio::RiderCollision(cRider* rider, cRider* opponent)
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    if (cSSXAudio_CameraInRange(self, rider->getPosition(), 100.0f) < 0) return;
-    if (cSSXAudio_InCameraView_8488(self, rider->getPosition(), 100.0f) == 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), 100.0f) < 0) return;
+    if (cSSXAudio_InCameraView_8488(this, rider->getPosition(), 100.0f) == 0) return;
     bool okA = rider->mIsHuman && rider->mIsLocal;
     if (!okA) {
         bool okB = opponent->mIsHuman && opponent->mIsLocal;
         if (!okB) return;
     }
-    if (self->PlayHistoryExists(7, 0) != 0) return;
+    if (PlayHistoryExists(7, 0) != 0) return;
     t4Vector sum = vu0Add_8488(*rider->getVelocity(), *opponent->getVelocity());
     int volume = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
-    int handle = snd8488Add(self, rider, 0, 54, volume);
-    self->PlayHistoryAdd((void*)7, handle,
-                             self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCounter + 50, 0, 0);
+    int handle = snd8488Add(this, rider, 0, 54, volume);
+    PlayHistoryAdd((void*)7, handle,
+                             MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCounter + 50, 0, 0);
 }
 #endif
 

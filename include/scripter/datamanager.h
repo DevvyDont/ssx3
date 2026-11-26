@@ -62,6 +62,7 @@ struct cDataManager {
         __asm__("cDataManager_AttachDataFromBigfile");
     void AddToEmptyInstanceList(void* vnode) __asm__("cDataManager_AddToEmptyInstanceList__FPvT0");
     void* GetEmptyInstance() __asm__("cDataManager_GetEmptyInstance__FPv");
+    int DetachData(tDataInstanceInfo* entry) __asm__("cDataManager_DetachData");
 };
 
 CHECK_OFFSET(cDataManager, mMaxDataInstances, 0x0);

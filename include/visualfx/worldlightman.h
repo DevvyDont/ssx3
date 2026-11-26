@@ -182,6 +182,7 @@ struct cWorldLightMan {
         __asm__("cWorldLightMan_IntersectLights1");
     void IntersectLights(void* point, void* mgrp, void** outp, int max) __asm__("cWorldLightMan_IntersectLights");
     float GetIntensity(t4Vector* point, tLightRecord* lp) __asm__("cWorldLightMan_GetIntensity");
+    tOverlapListNode* evictOverlapNode(int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
 };
 
 CHECK_OFFSET(cWorldLightMan, m_pNash, 0x000);

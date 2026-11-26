@@ -182,6 +182,9 @@ struct cTransitionMan : public cObjNode {
     virtual ~cTransitionMan();
     virtual void update() __asm__("cTransitionMan_update");
     virtual void render() __asm__("cTransitionMan_render");
+    bool StartTransition(int initiator, void* transitionIn, void* transitionOut, float inTime, float holdTime,
+                         float outTime, int useScreenGrab, float* externalTimePercentage)
+        __asm__("cTransitionMan_StartTransition");
 };
 
 CHECK_OFFSET(cTransitionMan, mObjType, 0x10);

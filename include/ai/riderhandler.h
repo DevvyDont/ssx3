@@ -286,6 +286,7 @@ struct cHandplantMotion {
     void* resolve() __asm__("cHandplantMotion_resolve__FPv");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cHandplantMotion_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cHandplantMotion_readFromReplayFrame");
+    bool calcExitVel() __asm__("cHandplantMotion_calcExitVel");
 };
 
 CHECK_OFFSET(cHandplantMotion, InitPos, 0x00);

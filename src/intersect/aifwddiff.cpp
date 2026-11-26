@@ -141,7 +141,6 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_RemoveFromHash);
 
 static inline int less_7B30(unsigned int a, unsigned int b) { return a < b; }
 
-extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFwdDiff* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
 /**
  * Removes an AI forward-difference cache node from the patch hash table.
  *
@@ -150,12 +149,12 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFw
  *
  * @param node  the node (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFwdDiff* node)
+void cAIFwdDiffCache::RemoveFromHash(tAIFwdDiff* node)
 {
     unsigned int key = node->mKey;
     if (key == tAIFwdDiff::kUnusedKey)
         return;
-    tAIFwdDiff** link = &self->mPatchHash[key % self->mHashSize];
+    tAIFwdDiff** link = &mPatchHash[key % mHashSize];
     if (*link == 0)
         return;
     tAIFwdDiff* n = *link;

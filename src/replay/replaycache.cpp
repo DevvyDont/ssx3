@@ -862,10 +862,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_compareHighlights);
  * @param positive  non-zero for landings, 0 for wipeouts (On Tour land)
  * @return @p best or a weaker matching frame
  */
-extern "C" cReplayFrame* cReplay_compareHighlights(cReplay* self, int i, cReplayFrame* best, int positive)
+cReplayFrame* cReplay::compareHighlights(int i, cReplayFrame* best, int positive)
 {
     cReplayFrame* result = best;
-    cReplayFrame* n = self->FrameList.Tail;
+    cReplayFrame* n = FrameList.Tail;
     while (n != 0) {
         if (((n->FrameType.Highlights >> i) & 1) && n->FrameType.Chapter == 0) {
             if (positive) {
@@ -926,7 +926,7 @@ void cReplay::endMarkHighlight(int playerId, int id, int positive)
         if (cReplayHighlight_setRanking_s(&self->Highlight[playerId], id, positive)) {
             if (!(self->countHighlights(playerId, positive) < self->maxHighlights(positive))) {
                 cReplayFrame* n =
-                    cReplay_compareHighlights(self, playerId, highlightFrame(&self->Highlight[playerId]), positive);
+                    self->compareHighlights(playerId, highlightFrame(&self->Highlight[playerId]), positive);
                 n->FrameType.Highlights &= ~(1 << playerId);
             }
         } else {
@@ -1959,7 +1959,6 @@ INCLUDE_ASM("replay/replaycache", cScriptHeap_AllocMem);
 
 // First-fit allocation from the heap's free list (8-byte block headers); splits a block that has room to spare.
 // PORT: the unit declares it as void*(void*, int); defined under its own name bound to the symbol.
-extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* h, unsigned int size) __asm__("cScriptHeap_AllocMem");
 /**
  * Allocates a block from the script heap (first fit).
  *
@@ -1968,22 +1967,21 @@ extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* h, unsigned int size) __
  * header (size, next = 0). Likely bug, shared with On Tour: when nothing fits it returns 8 (a null block plus the
  * header size), not 0.
  *
- * @param heap     the script heap (this)
  * @param size  the number of bytes wanted
  * @return the usable memory, just past the block header
  */
-extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* heap, unsigned int size)
+void* cScriptHeap::AllocMem(unsigned int size)
 {
     size = (size + 3) & ~3;
     tFreeBlock* prev = 0;
-    tFreeBlock* block = heap->mpTopFreeBlock;
+    tFreeBlock* block = mpTopFreeBlock;
     tFreeBlock* found = 0;
     unsigned int split = size + 16;
     if (block != 0) {
         do {
             if (block->size >= size) {
                 if (split < block->size) {
-                    // ORIGINAL-PTR: an allocator carving a byte heap: the remainder block starts size + 8 bytes in
+                    // ORIGINAL-PTR: an allocator carving a byte this: the remainder block starts size + 8 bytes in
                     tFreeBlock* nb = (tFreeBlock*)((char*)block + (size + 8));
                     nb->size = (block->size - size) - 8;
                     nb->pNext = block->pNext;
@@ -1992,7 +1990,7 @@ extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* heap, unsigned int size)
                 }
                 found = block;
                 if (prev == 0)
-                    (heap->mpTopFreeBlock) = found->pNext;
+                    (mpTopFreeBlock) = found->pNext;
                 else
                     prev->pNext = found->pNext;
                 block->pNext = 0;
@@ -4403,7 +4401,6 @@ struct cScriptPlayerEntityNew : cScriptPlayerEntity {
 
 // PORT: cScriptPlayerEntity_Init's third argument receives the owning stream pointer as an int.
 // PORT: the unit declares cScriptPlayerMain_Init as returning void*; it returns the header word.
-extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScriptHeader* data, char* owner, int a3) __asm__("cScriptPlayerMain_Init");
 /**
  * Binds a script player to its script data and creates one entity player per script entity.
  *
@@ -4418,28 +4415,28 @@ extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScript
  * @param playerId     the player id
  * @return the script header's size word (+0x8)
  */
-extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScriptHeader* data, char* owner, int playerId)
+int cScriptPlayerMain::Init(tInSeqScriptHeader* data, char* owner, int playerId)
 {
-    self->mID = playerId;
-    *(char**)&self->mpManager = owner;
-    *(tInSeqScriptHeader**)&self->mpData = data;
-    self->mpSystemHeader = data;
-    self->mJumpFrame = -1;
-    self->mNumSteps = 0;
-    self->mLoopScript = 0;
+    mID = playerId;
+    *(char**)&mpManager = owner;
+    *(tInSeqScriptHeader**)&mpData = data;
+    mpSystemHeader = data;
+    mJumpFrame = -1;
+    mNumSteps = 0;
+    mLoopScript = 0;
     if (data->headerSize >= 13) {
-        self->mpDataHeader = (char*)&data->nextSectionStart;
+        mpDataHeader = (char*)&data->nextSectionStart;
     }
     // ORIGINAL-PTR: the entity blocks follow the script header (headerSize bytes); each is blockSize bytes long
-    char* entityData = (char*)data + (self->mpSystemHeader)->headerSize;
-    if (self->mpSystemHeader->numEntities != 0) {
-        cScriptPlayerEntity** slot = &self->mpEntityPlayers;
-        *slot = new (owner + 8) cScriptPlayerEntityNew[(self->mpSystemHeader)->numEntities];
-        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
-            entityData += self->mpEntityPlayers[i].Init((tInSeqScriptEntityBlockHeader*)entityData, (int)self);
+    char* entityData = (char*)data + mpSystemHeader->headerSize;
+    if (mpSystemHeader->numEntities != 0) {
+        cScriptPlayerEntity** slot = &mpEntityPlayers;
+        *slot = new (owner + 8) cScriptPlayerEntityNew[mpSystemHeader->numEntities];
+        for (int i = 0; i < mpSystemHeader->numEntities; i++) {
+            entityData += mpEntityPlayers[i].Init((tInSeqScriptEntityBlockHeader*)entityData, (int)this);
         }
     }
-    return ((int)(self->mpSystemHeader)->size);
+    return ((int)(mpSystemHeader)->size);
 }
 #endif
 
@@ -4550,7 +4547,6 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Play1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // the unit declares this as returning void*; the body returns nothing,
 // so bind a void body to the symbol
-void cScriptPlayerMain_Play1_impl(void* self, int a1) __asm__("cScriptPlayerMain_Play1");
 
 /**
  * Starts the script player: a stopped player becomes PlayPending (mPlayState 1) with mLoopScript set to @p loopScript.
@@ -4561,16 +4557,15 @@ void cScriptPlayerMain_Play1_impl(void* self, int a1) __asm__("cScriptPlayerMain
  *
  * @param loopScript  non-zero to loop the script
  */
-void cScriptPlayerMain_Play1_impl(void* vself, int loopScript)
+void cScriptPlayerMain::Play1(int loopScript)
 {
-    cScriptPlayerMain* self = (cScriptPlayerMain*)vself;
-    if (self->mPlayState != 0) {
-        if (self->mEntityUpdateInProgress != 0) {
-            self->mDoStopInEntityUpdate = 0;
+    if (mPlayState != 0) {
+        if (mEntityUpdateInProgress != 0) {
+            mDoStopInEntityUpdate = 0;
         }
     } else {
-        self->mLoopScript = loopScript;
-        self->mPlayState = 1;
+        mLoopScript = loopScript;
+        mPlayState = 1;
     }
 }
 #endif

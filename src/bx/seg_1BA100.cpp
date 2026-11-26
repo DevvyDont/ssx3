@@ -2208,7 +2208,7 @@ void cWorldPainterMan::update()
 {
     unsigned i;
     for (i = 0; i < *(unsigned*)this; i++) {
-        cWorldPainterSection_update(&m_pCache[i]);
+        m_pCache[i].update();
     }
 }
 #endif
@@ -2308,30 +2308,30 @@ extern char str_WPFile[];
  * decompressed with unpack when unpacksizez reports a packed size, otherwise copied with MEM_copy; the read buffer is
  * then freed (MEM_free). Sets m_iState to 2 (kWPSection_Loaded) either way, so a failed read leaves m_pWPHeader 0.
  *
- * @param self_  the section
  */
-extern "C" void cWorldPainterSection_update(cWorldPainterSection* self_) {
-    short st = self_->m_iState;
-    if (st == kWPSection_Loading && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
+void cWorldPainterSection::update()
+{
+    short st = m_iState;
+    if (st == kWPSection_Loading && ASYNCFILE_getstatus_B3F0(m_iAsyncHandle) == st) {
         void* packData = 0;
         int packSize = 0;
-        ASYNCFILE_release_B3F0(self_->m_iAsyncHandle, &packData, &packSize);
+        ASYNCFILE_release_B3F0(m_iAsyncHandle, &packData, &packSize);
         if (packData != 0) {
             if (packSize > 0) {
                 int unpackedSize = unpacksizez_B3F0(packData);
                 if (unpackedSize > 0) {
                     void* header = operator_new_B3F0(unpackedSize, str_WPFile, 0x20000000, 0);
-                    self_->m_pWPHeader = (tWPHeader*)header;
+                    m_pWPHeader = (tWPHeader*)header;
                     unpack_B3F0(packData, header);
                 } else {
                     void* header = operator_new_B3F0(packSize, str_WPFile, 0x20000000, 0);
-                    self_->m_pWPHeader = (tWPHeader*)header;
+                    m_pWPHeader = (tWPHeader*)header;
                     MEM_copy_B3F0(header, packData, packSize);
                 }
                 MEM_free_B3F0(packData);
             }
         }
-        self_->m_iState = 2;
+        m_iState = 2;
     }
 }
 #endif
@@ -2347,7 +2347,6 @@ extern "C" int ASYNCFILE_load_B4D8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
 extern char str_bar_d[];
 extern char str_swp[];
-extern "C" void cWorldPainterSection_load_B4D8(void *self, int arg) __asm__("cWorldPainterSection_load");
 /**
  * Starts an asynchronous load of a section's world-painter file.
  *
@@ -2357,18 +2356,18 @@ extern "C" void cWorldPainterSection_load_B4D8(void *self, int arg) __asm__("cWo
  *
  * @param fileName  the file name (a cBXString)
  */
-extern "C" void cWorldPainterSection_load_B4D8(void *vself, int fileName) {
-    cWorldPainterSection* self = (cWorldPainterSection*)vself;
+void cWorldPainterSection::load(int fileName)
+{
     sBXStr_B4D8 swpPath;
     sBXStr_B4D8 basePath;
-    self->m_iStreamed = 0;
+    m_iStreamed = 0;
     func_003186D0_B4D8(&basePath, str_bar_d, fileName);
     func_00318630_B4D8(&swpPath, &basePath, str_swp);
-    self->m_iAsyncHandle = ASYNCFILE_load_B4D8(swpPath.p, 0);
+    m_iAsyncHandle = ASYNCFILE_load_B4D8(swpPath.p, 0);
     cBXString_dt_B4D8(&swpPath, 2);
     cBXString_dt_B4D8(&basePath, 2);
-    int n = self->m_iAsyncHandle;
-    self->m_iState = n <= 0 ? 2 : 1;
+    int n = m_iAsyncHandle;
+    m_iState = n <= 0 ? 2 : 1;
 }
 #endif
 

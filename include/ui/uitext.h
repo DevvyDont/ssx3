@@ -111,6 +111,7 @@ struct cUIText : public cUIThing {
     void setStaticColour(tARGB* in) __asm__("cUIText_setStaticColour");
     int getStringID() __asm__("cUIText_getStringID");
     virtual void updateLocale() __asm__("cUIText_updateLocale");
+    char getNumTextLines() __asm__("cUIText_getNumTextLines");
 };
 
 CHECK_OFFSET(cUIText, mAttrText, 0x074);

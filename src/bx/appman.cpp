@@ -420,7 +420,6 @@ INCLUDE_ASM("bx/appman", cExecutionMan_halt);
 // LANDING: the unit declares `extern "C" void cExecutionMan_halt(int);` (line ~245, used by cAppMan_halt);
 // retype it to (cExecutionMan*, int, int) or keep the alias below.
 
-extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int a1, int a2) __asm__("cExecutionMan_halt");
 
 /**
  * Installs a halt callback and its data, then calls the execution manager's virtual slot 13 (vtable +0x68).
@@ -430,12 +429,12 @@ extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int a1, int a2) __a
  * @param callback  the halt callback
  * @param data  the data passed to it
  */
-extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int callback, int data)
+void cExecutionMan::halt(int callback, int data)
 {
-    (*(int*)&self->HaltData) = data;
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)((void*)self->mVtbl);
-    (*(int*)&self->HaltCallback) = callback;
-    vt[13].fn(vthis(self, vt[13]));
+    (*(int*)&HaltData) = data;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)((void*)mVtbl);
+    (*(int*)&HaltCallback) = callback;
+    vt[13].fn(vthis(this, vt[13]));
 }
 #endif
 

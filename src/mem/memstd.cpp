@@ -1839,7 +1839,6 @@ extern "C" void* func_003ADE08(void* mem, int a1, int a2, char* name, int a4, in
 extern "C" void* func_003ADDC0(void* mem, int a1, int a2, int a3, int a4);
 
 
-extern "C" int cMoviePlayer_init_impl(void* self, tMoviePlayOptions* cfg) __asm__("cMoviePlayer_init");
 /**
  * Opens a movie: purges the player (cMoviePlayer_purge), copies the 0x24-byte play options @p cfg to +0x14 and creates the
  * REAL decoder (+0x38).
@@ -1852,29 +1851,28 @@ extern "C" int cMoviePlayer_init_impl(void* self, tMoviePlayOptions* cfg) __asm_
  * @param cfg  the play options (filled from tMoviePlayOptions_SetDefaults's defaults)
  * @return 1 (always)
  */
-extern "C" int cMoviePlayer_init_impl(void* vself, tMoviePlayOptions* cfg)
+int cMoviePlayer::init(tMoviePlayOptions* cfg)
 {
-    cMoviePlayer* self = (cMoviePlayer*)vself;
-    self->purge();
+    purge();
     int soundOff = 1;
-    *(&self->m_PlayOp) = *cfg;
+    *(&m_PlayOp) = *cfg;
     int optionSet = 0;
-    if (self->m_PlayOp.bPreLoad != 0) {
+    if (m_PlayOp.bPreLoad != 0) {
         optionSet = 1;
     }
-    if (self->m_PlayOp.bSoundOn != 0) {
+    if (m_PlayOp.bSoundOn != 0) {
         soundOff = 0;
     }
-    self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
-    char* name = (char*)self->m_PlayOp.sAudioFileName;
+    m_fSpeed = m_PlayOp.fPlaySpeed;
+    char* name = (char*)m_PlayOp.sAudioFileName;
     if (name != 0 && *name != 0) {
         void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
-        self->m_pPlayer = (RCMP_AV_PLAYER*)func_003ADE08(mem, *(int*)&self->m_PlayOp, 0x60000,
-                                                         (char*)self->m_PlayOp.sAudioFileName, 0x20000, optionSet,
+        m_pPlayer = (RCMP_AV_PLAYER*)func_003ADE08(mem, *(int*)&m_PlayOp, 0x60000,
+                                                         (char*)m_PlayOp.sAudioFileName, 0x20000, optionSet,
                                                          soundOff);
     } else {
         void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
-        self->m_pPlayer = (RCMP_AV_PLAYER*)func_003ADDC0(mem, *(int*)&self->m_PlayOp, 0x80000, optionSet, soundOff);
+        m_pPlayer = (RCMP_AV_PLAYER*)func_003ADDC0(mem, *(int*)&m_PlayOp, 0x80000, optionSet, soundOff);
     }
     return 1;
 }

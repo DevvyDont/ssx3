@@ -333,6 +333,7 @@ struct cWScriptMan {
     void update() __asm__("cWScriptMan_update");
     void render() __asm__("cWScriptMan_render__FPv");
     void* loadSection() __asm__("cWScriptMan_loadSection__FPv");
+    void* allocateGlobalTable(int i) __asm__("cWScriptMan_allocateGlobalTable");
 };
 
 CHECK_OFFSET(cWScriptMan, MissionHeightInstId, 0x02C);

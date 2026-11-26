@@ -2519,8 +2519,6 @@ static inline int visOk_A128(FrustumIntersector *self, tPatchRecord *node)
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
-extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, void *vnode, int frustum)
-    __asm__("FrustumIntersector_crossingpatch");
 /**
  * Files the previously tested patch (a tPatchRecord) by its VU0 frustum result, then starts the test for @p vnode.
  *
@@ -2533,13 +2531,13 @@ extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, 
  * @param vnode  the node to test, or null to file the pending node
  * @param frustum  the value put in vi14 for the microprogram
  */
-extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, void *vnode, int frustum)
+void FrustumIntersector::crossingpatch(void *vnode, int frustum)
 {
     tPatchRecord *node = (tPatchRecord *)vnode;
     unsigned int testResult;
 
     if (node != 0) {
-        if (!visOk_A128(self, node)) {
+        if (!visOk_A128(this, node)) {
             return;
         }
         {
@@ -2569,20 +2567,20 @@ extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, 
     switch (testResult) {
     case 0:
     case 3:
-        if (self->lastpatch != 0) {
-            self->patchesinside[self->numpatchesinside++] = self->lastpatch;
+        if (lastpatch != 0) {
+            patchesinside[numpatchesinside++] = lastpatch;
         }
         break;
     case 1:
     case 2:
         break;
     case 4:
-        if (self->lastpatch != 0) {
-            self->patchescrossing[self->numpatchescrossing++] = self->lastpatch;
+        if (lastpatch != 0) {
+            patchescrossing[numpatchescrossing++] = lastpatch;
         }
         break;
     }
-    self->lastpatch = node;
+    lastpatch = node;
 }
 #endif
 
@@ -2608,8 +2606,7 @@ extern "C" void FrustumIntersector_crossingfogvolume_impl(FrustumIntersector* se
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
 // Files the previous object by the result of its test, then starts the test for this one.
-extern "C" void FrustumIntersector_crossingfogvolume_impl(FrustumIntersector* self, tParticleInstanceRecord* obj,
-                                                          int frustum)
+void FrustumIntersector::crossingfogvolume(tParticleInstanceRecord* obj, int frustum)
 {
     unsigned int testResult;
     if (obj != 0) {
@@ -2645,20 +2642,20 @@ extern "C" void FrustumIntersector_crossingfogvolume_impl(FrustumIntersector* se
     switch (testResult) {
     case 0:
     case 3:
-        if (self->lastfogvolume != 0) {
-            self->fogvolumesinside[self->numfogvolumesinside++] = self->lastfogvolume;
+        if (lastfogvolume != 0) {
+            fogvolumesinside[numfogvolumesinside++] = lastfogvolume;
         }
         break;
     case 1:
     case 2:
         break;
     case 4:
-        if (self->lastfogvolume != 0) {
-            self->fogvolumescrossing[self->numfogvolumescrossing++] = self->lastfogvolume;
+        if (lastfogvolume != 0) {
+            fogvolumescrossing[numfogvolumescrossing++] = lastfogvolume;
         }
         break;
     }
-    self->lastfogvolume = obj;
+    lastfogvolume = obj;
 }
 #endif
 

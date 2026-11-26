@@ -122,6 +122,7 @@ struct cDynamicMemMan {
     int free() __asm__("cDynamicMemMan_free__FPv");
     void init(unsigned int base, unsigned int size) __asm__("cDynamicMemMan_init");
     unsigned int dlmorecore(long incr) __asm__("cDynamicMemMan_dlmorecore");
+    void dlfree(void* mem) __asm__("cDynamicMemMan_dlfree");
 };
 
 CHECK_OFFSET(cDynamicMemMan, MallocState, 0x000);

@@ -274,6 +274,9 @@ struct cRiderMetrix {
     int losePoints() __asm__("cRiderMetrix_losePoints");
     float evAutoResetSurface() __asm__("cRiderMetrix_evAutoResetSurface__FPv");
     float evDangerLevelChange() __asm__("cRiderMetrix_evDangerLevelChange__FPv");
+    int addHUDfx(int hfx, const char* displayStr, float decayTime, int data) __asm__("cRiderMetrix_addHUDfx");
+    int addHUDfx1(int type, int value, int data, float duration) __asm__("cRiderMetrix_addHUDfx1");
+    float evSpin(float x) __asm__("cRiderMetrix_evSpin");
 };
 
 CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);

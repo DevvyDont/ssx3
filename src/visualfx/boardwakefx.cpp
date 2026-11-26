@@ -4914,24 +4914,23 @@ extern "C" bool cTransitionMan_StartTransition_def(void* self, int a1, void* o1,
  * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
  * @return true when the transition started, false when the screen grab could not be set up
  */
-extern "C" bool cTransitionMan_StartTransition_def(void* vself, int initiator, void* transitionIn, void* transitionOut,
-        float inTime, float holdTime, float outTime, int useScreenGrab, float* externalTimePercentage)
+bool cTransitionMan::StartTransition(int initiator, void* transitionIn, void* transitionOut, float inTime,
+                                     float holdTime, float outTime, int useScreenGrab, float* externalTimePercentage)
 {
-    cTransitionMan* self = (cTransitionMan*)vself;
-    if (self->mbPlayingTransition != 0) {
-        self->EndTransition();
+    if (mbPlayingTransition != 0) {
+        EndTransition();
     }
-    self->mCurrentInitiator = initiator;
-    self->mExternalTimePercentage = externalTimePercentage;
+    mCurrentInitiator = initiator;
+    mExternalTimePercentage = externalTimePercentage;
     if (useScreenGrab != 0) {
-        if (self->mRequestingDelete != 0) {
-            self->mRequestingDelete = 0;
+        if (mRequestingDelete != 0) {
+            mRequestingDelete = 0;
         }
-        char* ref = (char*)&self->mScreenGrabHandle;
-        if (~self->mScreenGrabHandle.mTextureId == 0) {
+        char* ref = (char*)&mScreenGrabHandle;
+        if (~mScreenGrabHandle.mTextureId == 0) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
             obj->CreateScreenGrabTexture(*(tScreenGrabHandle*)ref, 0x100, 0x100);
-            if (~self->mScreenGrabHandle.mTextureId == 0) {
+            if (~mScreenGrabHandle.mTextureId == 0) {
                 if (transitionIn != 0) {
                     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)transitionIn;
                     vt[1].fn(vthis(transitionIn, vt[1]), 3);
@@ -4944,16 +4943,16 @@ extern "C" bool cTransitionMan_StartTransition_def(void* vself, int initiator, v
             }
         }
     }
-    self->mTransitionIn = (cTransitionObj*)transitionIn;
-    self->mTransitionOut = (cTransitionObj*)transitionOut;
-    self->mfInTime = inTime;
-    self->mfHoldTime = holdTime;
-    self->mfOutTime = outTime;
-    self->mbPlayingTransition = 1;
-    self->mfCurrentTime = 0.0f;
-    self->mUsingScreenGrab = useScreenGrab;
+    mTransitionIn = (cTransitionObj*)transitionIn;
+    mTransitionOut = (cTransitionObj*)transitionOut;
+    mfInTime = inTime;
+    mfHoldTime = holdTime;
+    mfOutTime = outTime;
+    mbPlayingTransition = 1;
+    mfCurrentTime = 0.0f;
+    mUsingScreenGrab = useScreenGrab;
     if (useScreenGrab != 0) {
-        self->mRequestingScreenGrab = 1;
+        mRequestingScreenGrab = 1;
     }
     return true;
 }

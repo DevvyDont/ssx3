@@ -95,7 +95,6 @@ extern "C" int FILESYS_addbigsync(const char* name, int memtype, int a2, cBigFil
 
 // PORT: the unit declares cBigFile_open(cBigFile*) returning void; the body takes
 // (self, name, memtype) and returns field_0x4. Bound by asm label.
-int cBigFile_open_impl(cBigFile* self, const char* name, int memtype) __asm__("cBigFile_open");
 
 /**
  * Opens a big (archive) file in a memory class, if it exists.
@@ -106,18 +105,18 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memtype) __asm__("c
  * @param memtype  memory class for its data
  * @return 1 when the file is open, otherwise 0
  */
-int cBigFile_open_impl(cBigFile* self, const char* name, int memtype)
+int cBigFile::open(const char* name, int memtype)
 {
     if (FILESYS_existssync(name, 100) == 0) {
         return 0;
     }
     int saved = D_004A2E78;
     D_004A2E78 = memtype;
-    if (FILESYS_addbigsync(name, memtype, 100, self) != 0) {
-        self->Mounted = 1;
+    if (FILESYS_addbigsync(name, memtype, 100, this) != 0) {
+        Mounted = 1;
     }
     D_004A2E78 = saved;
-    return self->Mounted;
+    return Mounted;
 }
 #endif
 

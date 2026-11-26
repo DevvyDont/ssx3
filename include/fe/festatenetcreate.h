@@ -126,6 +126,7 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     virtual ~cFEStateCreateStep2();
     virtual void onCreateScreen() __asm__("cFEStateCreateStep2_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* box) __asm__("cFEStateCreateStep2_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateStep2_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateCreateStep2, mpAccount, 0x6D0);

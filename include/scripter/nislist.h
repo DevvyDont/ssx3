@@ -208,6 +208,7 @@ struct tNISList {
     void PlayNextScriptOnAvailable() __asm__("tNISList_PlayNextScriptOnAvailable");
     void PlayNextScript() __asm__("tNISList_PlayNextScript");
     bool IsVideo(void* entry) __asm__("tNISList_IsVideo");
+    void DoPause(int on, int hard) __asm__("tNISList_DoPause");
 };
 
 CHECK_OFFSET(tNISList, mpNISEngine, 0x000);

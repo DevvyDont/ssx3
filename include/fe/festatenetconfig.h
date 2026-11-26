@@ -101,6 +101,7 @@ struct cFEStateNetConfig : public cFEStateNet {
     virtual void onDestroyScreen() __asm__("cFEStateNetConfig_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateNetConfig_onUpdate");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateNetConfig_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetConfig_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);

@@ -1479,7 +1479,7 @@ void cWScriptMan::rebuildGlobalTables()
         cWScriptCacheEntry* tbl = World->m_pWScriptCache->mpCache;
         int ok = tbl[i].mState >= 2 && tbl[i].mpScriptHeader != 0;
         if (ok) {
-            cWScriptMan_allocateGlobalTable_impl(this, i);
+            this->allocateGlobalTable(i);
         }
     }
 }
@@ -1526,10 +1526,9 @@ void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptM
  * @param i  the world section index
  * @return the new table
  */
-void* cWScriptMan_allocateGlobalTable_impl(void* vself, int i)
+void* cWScriptMan::allocateGlobalTable(int i)
 {
-    cWScriptMan* self = (cWScriptMan*)vself;
-    cLunoTable** tables = self->GlobalTables;
+    cLunoTable** tables = GlobalTables;
     cLunoTable** slot = &tables[i];
     if (*slot != 0) {
         luno_cLunoTable__cLunoTable(*slot, 3);

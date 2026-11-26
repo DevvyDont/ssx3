@@ -261,6 +261,8 @@ struct tParticleEmitter {
     void step(float deltaTime) __asm__("tParticleEmitter_step");
     void setupEmitter(t4Matrix* transform, tParticleData* particleData, tBoundBox* boundBox, float seed)
         __asm__("tParticleEmitter_setupEmitter");
+    void stepContinous(float dt) __asm__("tParticleEmitter_stepContinous");
+    void calcBoundBox(tBoundBox* bb) __asm__("tParticleEmitter_calcBoundBox");
 };
 
 CHECK_OFFSET(tParticleEmitter, NumParticles, 0x00);

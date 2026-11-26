@@ -295,7 +295,6 @@ extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern char str_DynamicSoundMem[];
 
 // PORT: real body returns the buffer; a later caller in this unit declares it void(void*, int, int)
-void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __asm__("cBankInstance_OnAsyncMainMemAlloc");
 
 /**
  * Supplies main memory for an asynchronous bank load, allocating it ("DynamicSoundMem") unless the bank has
@@ -305,14 +304,13 @@ void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __
  * @param flags  memory flags
  * @return the bank's main-memory block
  */
-void* cBankInstance_OnAsyncMainMemAlloc_impl(void* vself, int size, int flags)
+void* cBankInstance::OnAsyncMainMemAlloc(int size, int flags)
 {
-    cBankInstance* self = (cBankInstance*)vself;
-    if (self->mAllocLocation == 0) {
-        self->mpMainMemData = (char*)MEM_alloc(str_DynamicSoundMem, size, flags);
-        self->mMainMemDataSize = size;
+    if (mAllocLocation == 0) {
+        mpMainMemData = (char*)MEM_alloc(str_DynamicSoundMem, size, flags);
+        mMainMemDataSize = size;
     }
-    return self->mpMainMemData;
+    return mpMainMemData;
 }
 #endif
 

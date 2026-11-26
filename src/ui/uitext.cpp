@@ -185,7 +185,6 @@ INCLUDE_ASM("ui/uitext", cUIText_getNumTextLines);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned short gUSTRBackSlash;
-extern "C" char cUIText_getNumTextLines_(void* self) __asm__("cUIText_getNumTextLines");
 /**
  * Counts the lines of a text object's string.
  *
@@ -193,10 +192,9 @@ extern "C" char cUIText_getNumTextLines_(void* self) __asm__("cUIText_getNumText
  *
  * @return the number of lines, or 0 when there is no string
  */
-extern "C" char cUIText_getNumTextLines_(void* vself)
+char cUIText::getNumTextLines()
 {
-    cUIText* self = (cUIText*)vself;
-    unsigned short* text = self->mpString;
+    unsigned short* text = mpString;
     if (text == 0) return 0;
     unsigned short* cursor = text;
     int n = 1;

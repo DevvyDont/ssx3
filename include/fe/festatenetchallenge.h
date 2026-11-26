@@ -171,6 +171,7 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
     virtual ~cFEStateChallengeReceivedPopup();
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateChallengeReceivedPopup_onGainTransition");
     virtual void onCreateScreen() __asm__("cFEStateChallengeReceivedPopup_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateChallengeReceivedPopup_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mszChallenger, 0x6D0);

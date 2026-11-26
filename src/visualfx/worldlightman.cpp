@@ -415,7 +415,6 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictOverlapNode);
 
 
 // getRealTimeLights declares this function under its C name; define it under a second name bound to the symbol.
-extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan* self, int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
 /**
  * Takes an overlap node for reuse: the first free one (id -1) of the 8, else the one with the oldest tick.
  *
@@ -425,19 +424,19 @@ extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan
  * @param iCurrentTick  the current tick (cAppMan_TheAppMan +0x18)
  * @return the node, or null when none qualifies
  */
-extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan* self, int iCurrentTick)
+tOverlapListNode* cWorldLightMan::evictOverlapNode(int iCurrentTick)
 {
     tOverlapListNode* pNode = 0;
     int iOldest = iCurrentTick + 1;
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        if (self->OverlapNodeList[i].RID == tResourceID::Invalid()) {
-            pNode = &self->OverlapNodeList[i];
+        if (OverlapNodeList[i].RID == tResourceID::Invalid()) {
+            pNode = &OverlapNodeList[i];
             break;
         }
-        if (self->OverlapNodeList[i].iTick < iOldest) {
-            iOldest = self->OverlapNodeList[i].iTick;
-            pNode = &self->OverlapNodeList[i];
+        if (OverlapNodeList[i].iTick < iOldest) {
+            iOldest = OverlapNodeList[i].iTick;
+            pNode = &OverlapNodeList[i];
         }
     }
     return pNode;

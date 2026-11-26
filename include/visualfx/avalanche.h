@@ -217,6 +217,7 @@ struct tActiveAvalanche {
     // Methods bound to their retail symbols by asm labels.
     void buildArray() __asm__("tActiveAvalanche_buildArray");
     void render() __asm__("tActiveAvalanche_render");
+    void update() __asm__("tActiveAvalanche_update");
 };
 
 CHECK_OFFSET(tActiveAvalanche, m_avalanche, 0x000);

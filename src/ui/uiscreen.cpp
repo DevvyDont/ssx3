@@ -245,7 +245,6 @@ extern char str_UIThread[];
 extern void* cUIThread_vtbl[];
 
 // PORT: the unit declares cUIScreen_playFrame as void; the body returns the new thread. Bound by asm label.
-void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType) __asm__("cUIScreen_playFrame");
 
 /**
  * Starts an animation thread at a frame; a primary thread (type 0) replaces the screen's current primary
@@ -255,11 +254,10 @@ void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
  * @param ThreadType  0 for the primary thread, otherwise an extra thread
  * @return the new thread
  */
-void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType)
+void* cUIScreen::playFrame(unsigned short frame, int ThreadType)
 {
-    cUIScreen* self = (cUIScreen*)vself;
     if (ThreadType == 0) {
-        void* pPrimary = self->getPrimaryThread();
+        void* pPrimary = getPrimaryThread();
         if (pPrimary != 0) {
             cUIThread_deleteThread(pPrimary);
         }
@@ -281,7 +279,7 @@ void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType
     pNewThread->mpPrev = (cListNode*)pNewThread;
     pNewThread->setActive(true);
     pNewThread->setPrimary(ThreadType == 0);
-    cList_addToEnd((cList*)(&self->mThreads), (cListNode*)pNewThread);
+    cList_addToEnd((cList*)(&mThreads), (cListNode*)pNewThread);
     return pNewThread;
 }
 #endif

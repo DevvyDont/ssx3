@@ -38,6 +38,7 @@ struct cUIGroup : public cUIThing {
     virtual void updateLocale() __asm__("cUIGroup_updateLocale");
     virtual void render2D(float x, float y) __asm__("cUIGroup_render2D");
     virtual void update(unsigned short ev) __asm__("cUIGroup_update");
+    virtual void render3D(cUIRenderContext* pRenCon) __asm__("cUIGroup_render3D");
 };
 
 CHECK_OFFSET(cUIGroup, mList, 0x074);

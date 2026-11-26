@@ -193,6 +193,7 @@ struct cSectionMan {
     void addActiveEvent(int id) __asm__("cSectionMan_addActiveEvent");
     int getNextActiveEvent(tSectionManEvent* pPrevEvent) __asm__("cSectionMan_getNextActiveEvent");
     void removeActiveEvent(tSectionManEvent* prev, tSectionManEvent* node) __asm__("cSectionMan_removeActiveEvent");
+    void load(int idx, int mode) __asm__("cSectionMan_load");
 };
 
 CHECK_OFFSET(cSectionMan, m_EventPool, 0x000);

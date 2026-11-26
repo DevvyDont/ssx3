@@ -736,7 +736,6 @@ static inline void vu0SubTo_9548(t4Vector& dst, const t4Vector& a, const t4Vecto
     dst = r;
 }
 
-extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* s) __asm__("cHandplantMotion_calcExitVel");
 /**
  * Works out the handplant's exit velocity (ExitVel) from the rider's HandplantMode; returns whether it is set.
  *
@@ -747,83 +746,82 @@ extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* s) __asm__("cHa
  * vertical 0 (5) km/h. kHM_ExitBalanceCenter: SplineDir x 30 km/h plus 15 km/h upward. The vertical value overwrites
  * ExitVel.z in the first three. Other modes return false.
  *
- * @param handplant  the cHandplantMotion (this)
  * @return true when ExitVel is set
  */
-extern "C" bool cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
+bool cHandplantMotion::calcExitVel()
 {
-    if (neq_9548(handplant, t4vect_Zero_9548))
+    if (neq_9548(this, t4vect_Zero_9548))
         return true;
-    int kind = handplant->mRider->HandplantMode;
+    int kind = mRider->HandplantMode;
     t4Vector n;
     if (kind == kHM_TransitionReflect) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, t4vect_ZAxis_9548, handplant->SplineDir);
+        vu0CrossTo_9548(exitVel, t4vect_ZAxis_9548, SplineDir);
         vu0NormTo_9548(n, exitVel);
-        float tangentSpeed = handplant->InitTangentSpeed * 0.699999988079071f;
+        float tangentSpeed = InitTangentSpeed * 0.699999988079071f;
         float k = 2.0f;
-        if (handplant->IsRailSpline != 0)
+        if (IsRailSpline != 0)
             k = 15.0f;
-        float approachDot = vu0Dot_9548(handplant->ApproachDir, n);
+        float approachDot = vu0Dot_9548(ApproachDir, n);
         float sideSpeed = k * 27.77777862548828f;
         if (approachDot < 0.0f)
             sideSpeed = -sideSpeed;
         t4Vector alongVel;
-        vu0ScaleTo_9548(alongVel, handplant->SplineDir, tangentSpeed);
+        vu0ScaleTo_9548(alongVel, SplineDir, tangentSpeed);
         t4Vector sideVel;
         vu0ScaleTo_9548(sideVel, n, sideSpeed);
         vu0SubTo_9548(exitVel, alongVel, sideVel);
-        handplant->ExitVel = exitVel;
+        ExitVel = exitVel;
         float z = 0.0f;
-        if (handplant->IsRailSpline != 0)
+        if (IsRailSpline != 0)
             z = 10.0f;
-        handplant->ExitVel.z = z * 27.77777862548828f;
+        ExitVel.z = z * 27.77777862548828f;
         return true;
     }
     if (kind == kHM_ExitBalanceThrough) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, handplant->SplineDir, t4vect_ZAxis_9548);
+        vu0CrossTo_9548(exitVel, SplineDir, t4vect_ZAxis_9548);
         vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
-        float approachDot = vu0Dot_9548(n, handplant->ApproachDir);
+        float approachDot = vu0Dot_9548(n, ApproachDir);
         if (approachDot < z)
             vu0ScaleEq_9548(n, -1.0f);
         float k = 5.0f;
-        if (handplant->IsRailSpline != 0)
+        if (IsRailSpline != 0)
             k = 15.0f;
         float kphScale = 27.77777862548828f;
         vu0ScaleTo_9548(exitVel, n, k * kphScale);
-        handplant->ExitVel = exitVel;
-        if (handplant->IsRailSpline != 0)
+        ExitVel = exitVel;
+        if (IsRailSpline != 0)
             z = 5.0f;
         k = z * kphScale;
-        handplant->ExitVel.z = k;
+        ExitVel.z = k;
         return true;
     }
     if (kind == kHM_ExitBalanceReflect) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, handplant->SplineDir, t4vect_ZAxis_9548);
+        vu0CrossTo_9548(exitVel, SplineDir, t4vect_ZAxis_9548);
         vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
-        float approachDot = vu0Dot_9548(n, handplant->ApproachDir);
+        float approachDot = vu0Dot_9548(n, ApproachDir);
         if (z < approachDot)
             vu0ScaleEq_9548(n, -1.0f);
         float k = 5.0f;
-        if (handplant->IsRailSpline != 0)
+        if (IsRailSpline != 0)
             k = 15.0f;
         float kphScale = 27.77777862548828f;
         vu0ScaleTo_9548(exitVel, n, k * kphScale);
-        handplant->ExitVel = exitVel;
-        if (handplant->IsRailSpline != 0)
+        ExitVel = exitVel;
+        if (IsRailSpline != 0)
             z = 5.0f;
         k = z * kphScale;
-        handplant->ExitVel.z = k;
+        ExitVel.z = k;
         return true;
     }
     if (kind == kHM_ExitBalanceCenter) {
-        vu0ScaleTo_9548(n, handplant->SplineDir, 833.3333740234375f);
-        handplant->ExitVel = n;
-        handplant->ExitVel.z += 416.66668701171875f;
+        vu0ScaleTo_9548(n, SplineDir, 833.3333740234375f);
+        ExitVel = n;
+        ExitVel.z += 416.66668701171875f;
         return true;
     }
     return false;

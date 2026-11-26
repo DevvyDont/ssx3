@@ -140,6 +140,7 @@ struct cSplineModifier : public cTransformModifier {
     virtual void update() __asm__("cSplineModifier_update");
     virtual void updateRootTransform() __asm__("cSplineModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSplineModifier_writeToReplayFrame");
+    void setSpeed(float speed) __asm__("cSplineModifier_setSpeed");
 };
 
 CHECK_OFFSET(cSplineModifier, unk_04, 0x04);

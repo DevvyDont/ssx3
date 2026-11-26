@@ -123,6 +123,7 @@ struct cSimpleCamera {
     void init(float x, float y, float z) __asm__("cSimpleCamera_init");
     float getHeading() __asm__("cSimpleCamera_getHeading");
     float getPitch() __asm__("cSimpleCamera_getPitch");
+    void updateCamMat() __asm__("cSimpleCamera_updateCamMat");
 };
 
 CHECK_OFFSET(cSimpleCamera, View, 0x00);

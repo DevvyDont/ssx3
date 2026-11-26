@@ -93,6 +93,7 @@ struct cMdfArchive {
     void* getModelPart(const char* name) __asm__("cMdfArchive_getModelPart");
     int getModelPartPtrByIndex(int index) __asm__("cMdfArchive_getModelPartPtrByIndex");
     void* getModelPartByIndex(int i) __asm__("cMdfArchive_getModelPartByIndex");
+    void linkArchive(char* data) __asm__("cMdfArchive_linkArchive");
 };
 
 CHECK_OFFSET(cMdfArchive, Archive, 0x000);

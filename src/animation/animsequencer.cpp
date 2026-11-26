@@ -1027,7 +1027,7 @@ void cMdfArchive_attachArchive(void* vself, int data)
 {
     cMdfArchive* self = (cMdfArchive*)vself;
     *(int*)self = data;
-    cMdfArchive_linkArchive_impl(self, (char*)data);
+    self->linkArchive((char*)data);
 }
 #endif
 
@@ -1068,7 +1068,7 @@ extern "C" char *FILE_loadpack(int, int);
 extern "C" void cMdfArchive_loadArchive(cMdfArchive* self, int name, int flags) {
     char *data = FILE_loadpack(name, flags);
     *(char **)self = data;
-    cMdfArchive_linkArchive_impl(self, data);
+    self->linkArchive(data);
 }
 #endif
 
@@ -1090,15 +1090,14 @@ void cMdfArchive_linkArchive_impl(void* self, char* data) __asm__("cMdfArchive_l
  *
  * @param data  the MDF archive header
  */
-void cMdfArchive_linkArchive_impl(void* vself, char* data)
+void cMdfArchive::linkArchive(char* data)
 {
-    cMdfArchive* self = (cMdfArchive*)vself;
     tMdfArchive* archive = (tMdfArchive*)data;
-    self->ArchiveHeader = archive;
+    ArchiveHeader = archive;
     // ORIGINAL-PTR: an MDF file blob: its header holds the byte offsets of the model header table (mHeaderOffset) and
     // the packed data (mBodyOffset) from the start of the file.
-    self->ModelHeaders = (tMdfModelHeader*)(data + archive->mHeaderOffset);
-    self->Data = data + archive->mBodyOffset;
+    ModelHeaders = (tMdfModelHeader*)(data + archive->mHeaderOffset);
+    Data = data + archive->mBodyOffset;
 }
 #endif
 

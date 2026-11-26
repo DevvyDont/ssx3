@@ -68,7 +68,6 @@ extern "C" void cSplashManager_CameraSnapped(void* p);
 
 // PORT: the unit declares cCameraController_snap(void* self), but the body takes a
 // second argument (callers pass it in $5); the real body is bound by asm label.
-void cCameraController_snap_impl(void* self, int a) __asm__("cCameraController_snap");
 
 /**
  * Snaps every camera algorithm in the controller's list to a subject, then snaps the camera's result algorithm.
@@ -79,15 +78,14 @@ void cCameraController_snap_impl(void* self, int a) __asm__("cCameraController_s
  *
  * @param subjectID  the subject (rider index) to snap to
  */
-void cCameraController_snap_impl(void* vself, int subjectID)
+void cCameraController::snap(int subjectID)
 {
-    cCameraController* self = (cCameraController*)vself;
-    for (cCameraAlgoListNode* n = self->AlgorithmList->Head; n != 0; n = n->Next)
+    for (cCameraAlgoListNode* n = AlgorithmList->Head; n != 0; n = n->Next)
     {
         n->Algorithm->snap(subjectID);
     }
-    cCamera_snapResultAlgorithm(self->Camera);
-    cSplashManager_CameraSnapped(self->Camera);
+    cCamera_snapResultAlgorithm(Camera);
+    cSplashManager_CameraSnapped(Camera);
 }
 #endif
 

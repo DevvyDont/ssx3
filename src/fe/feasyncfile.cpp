@@ -3022,24 +3022,23 @@ extern char str_empty_d[];
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup* self, cUIThing* pWidget,
-    unsigned int msg)
+void cFEStateReadMessagePopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONPREV:
-        self->mpParentState->onPopupEvent(self, cUIState::kONSCREENPOPUPPREV);
+        mpParentState->onPopupEvent(this, cUIState::kONSCREENPOPUPPREV);
         break;
     case cUIState::kONNEXT:
-        func_001A9090((cFEStateNet*)self, 0, self->mszSender, str_empty_d, 0, 0, 0x3F);
-        self->mpKeyboard->meType = 0;
-        cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
-        cKeyboardPopup_setIncludeQuickKeyRow(self->mpKeyboard, 1);
-        self->mpKeyboard->mbReferEventsToParent = 1;
+        func_001A9090((cFEStateNet*)this, 0, mszSender, str_empty_d, 0, 0, 0x3F);
+        mpKeyboard->meType = 0;
+        cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
+        cKeyboardPopup_setIncludeQuickKeyRow(mpKeyboard, 1);
+        mpKeyboard->mbReferEventsToParent = 1;
         break;
     case cUIState::kONOPTION:
         break;
     case cUIState::kONKEYBOARDEND:
-        func_001A7ED8(self, self->mpKeyboard->mszEditString);
+        func_001A7ED8(this, mpKeyboard->mszEditString);
         if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
@@ -3049,11 +3048,11 @@ extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup*
         if (BuddyMan_mBuddyMan == 0) {
             func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00262690(BuddyMan_mBuddyMan, self->mszSender, self->mpKeyboard->mszEditString);
-        func_001A81F0(self);
+        func_00262690(BuddyMan_mBuddyMan, mszSender, mpKeyboard->mszEditString);
+        func_001A81F0(this);
         break;
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }
@@ -9474,7 +9473,7 @@ static inline int IsHash_001B0150(int id, char* name) { return id == GetHashValu
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeReceivedPopup* self, cUIThing* obj)
+void cFEStateChallengeReceivedPopup::onWidgetCreate(cUIThing* obj)
 {
     char buf[16];
     cUIThing* widget = (cUIThing*)obj;
@@ -10294,8 +10293,7 @@ static inline int IsHash1B1280(int id, char* name) { return id == GetHashValue32
  * @param pWidget  the widget (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharacterSelect* self, cUIThing* pWidget,
-        unsigned int msg)
+void cFEStateOnlineCharacterSelect::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     cUIThing* obj = pWidget;
     if (obj == 0) {
@@ -10303,29 +10301,29 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
     }
     switch (msg) {
     case cUIState::kONNEXT:
-        if (self->mbConfirmed != 0) {
+        if (mbConfirmed != 0) {
             return;
         }
         if (cSetupMan_mSetupMan == 0) {
             return;
         }
-        if (self->miCharID != cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect)) {
+        if (miCharID != cUIListBox_getCurrentEntryData(mpLBChallengerSelect)) {
             cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setPlayerCheatCharID(iface, 0, 0);
             iface->submit();
         }
         {
             void* mgr = cSetupMan_mSetupMan;
-            func_00265018(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
+            func_00265018(mgr, cUIListBox_getCurrentEntryData(mpLBChallengerSelect));
         }
-        self->miConfirmCtrl = self->mCurrentCtrl;
+        miConfirmCtrl = mCurrentCtrl;
         obj->setStatic(1);
-        func_001B1A08(self, 1, 0);
-        self->mbConfirmed = 1;
+        func_001B1A08(this, 1, 0);
+        mbConfirmed = 1;
         break;
     case cUIState::kONPREV:
-        if (self->mbConfirmed == 0) {
-            cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
+        if (mbConfirmed == 0) {
+            cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)this);
             popup->info.meType = 2;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNCancelChallenge);
@@ -10334,22 +10332,22 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
             popup->info.miMiscData = 2104;
             popup->info.miDefaultOption = 1;
-            func_001A9BC0((cFEStateNet*)self, popup);
+            func_001A9BC0((cFEStateNet*)this, popup);
         } else {
             func_00265140(cSetupMan_mSetupMan);
             obj->setStatic(0);
-            func_001B1A08(self, 0, 0);
-            self->mbConfirmed = 0;
+            func_001B1A08(this, 0, 0);
+            mbConfirmed = 0;
         }
         break;
     case cUIState::kONCHANGE:
         if (IsHash1B1280(obj->mHashName, str_LBChallengerSelect)) {
             void* mgr = cSetupMan_mSetupMan;
-            func_00264F88(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
-            func_001B1B10(self, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect), 0);
+            func_00264F88(mgr, cUIListBox_getCurrentEntryData(mpLBChallengerSelect));
+            func_001B1B10(this, cUIListBox_getCurrentEntryData(mpLBChallengerSelect), 0);
         }
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }
@@ -14081,7 +14079,7 @@ static inline int IsHash1B60A8(int id, char* name) { return id == GetHashValue32
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, cUIThing* pWidget, unsigned int msg)
+void cFEStateNetConfig::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     cUIThing* obj = pWidget;
     if (((char*)obj) == 0) {
@@ -14092,11 +14090,11 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, cUIThin
         int miscData = obj->mMiscData;
         switch (miscData) {
         case 0:
-            self->mpPairSettings->setStatic(1);
-            func_001B4198(self);
+            mpPairSettings->setStatic(1);
+            func_001B4198(this);
             break;
         case 1: {
-            cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)this);
             popup->info.meType = 2;
             cPopupInfo* sub = &popup->info;
             func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
@@ -14105,7 +14103,7 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, cUIThin
             popup->info.mtMessage.eType = 3;
             popup->info.miMiscData = 2116;
             popup->info.miDefaultOption = 1;
-            func_001A9BC0((cFEStateNet*)self, popup);
+            func_001A9BC0((cFEStateNet*)this, popup);
             break;
         }
         }
@@ -14113,20 +14111,20 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, cUIThin
     }
     case cUIState::kONCHANGE:
         if (IsHash1B60A8(obj->mHashName, str_LBSettings)) {
-            self->miSelectedSetting = ((cUIListBox*)obj)->mCurrentEntry;
-            cUIListBox_setCurrentEntryByIndex(self->mpLBAdapters, (unsigned char)self->miSelectedSetting);
+            miSelectedSetting = ((cUIListBox*)obj)->mCurrentEntry;
+            cUIListBox_setCurrentEntryByIndex(mpLBAdapters, (unsigned char)miSelectedSetting);
         }
         break;
     case cUIState::kONMISC:
-        func_001B5268(self, 0);
+        func_001B5268(this, 0);
         break;
     case cUIState::kONPREV:
         func_001A86E8(0);
-        func_001A8A40(self, cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0),
-                self->mpEngine));
+        func_001A8A40(this, cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0),
+                mpEngine));
         break;
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }
@@ -17686,64 +17684,64 @@ static inline int IsHash_001BA618(int id, char* name) { return id == GetHashValu
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, cUIThing* pWidget, unsigned int msg)
+void cFEStateCreateStep2::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     cUIThing* obj = pWidget;
     switch (msg) {
     case cUIState::kONCHANGE:
-        if (self->mbScreenReady != 0) {
+        if (mbScreenReady != 0) {
             if (IsHash_001BA618(obj->mHashName, str_LBMonth)) {
-                self->mpAccount->mBornMonth = cUIListBox_getCurrentEntryData(obj);
-                cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBDay));
+                mpAccount->mBornMonth = cUIListBox_getCurrentEntryData(obj);
+                cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBDay));
                 if (box != 0) {
-                    tLobbyAccount* account = self->mpAccount;
-                    func_001BB840(self, box, account->mBornMonth, account->mBornYear, account->mBornDay);
+                    tLobbyAccount* account = mpAccount;
+                    func_001BB840(this, box, account->mBornMonth, account->mBornYear, account->mBornDay);
                 }
             }
             if (IsHash_001BA618(obj->mHashName, str_LBYear)) {
                 char buf[16];
-                self->mpAccount->mBornYear = ((cUIListBox*)obj)->mCurrentEntry + 1900;
-                sprintf(buf, str_pct_d_b, self->mpAccount->mBornYear);
+                mpAccount->mBornYear = ((cUIListBox*)obj)->mCurrentEntry + 1900;
+                sprintf(buf, str_pct_d_b, mpAccount->mBornYear);
                 cUIListBox_setEntryByAsciiString(obj, 0, buf, 0);
-                cBXString_Reset(&self->mpAccount->mParentMail);
-                cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBDay));
+                cBXString_Reset(&mpAccount->mParentMail);
+                cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBDay));
                 if (box != 0) {
-                    tLobbyAccount* account = self->mpAccount;
-                    func_001BB840(self, box, account->mBornMonth, account->mBornYear, account->mBornDay);
+                    tLobbyAccount* account = mpAccount;
+                    func_001BB840(this, box, account->mBornMonth, account->mBornYear, account->mBornDay);
                 }
             }
             if (IsHash_001BA618(obj->mHashName, str_LBDay)) {
-                self->mpAccount->mBornDay = cUIListBox_getCurrentEntryData(obj);
+                mpAccount->mBornDay = cUIListBox_getCurrentEntryData(obj);
             }
             if (IsHash_001BA618(obj->mHashName, str_LBGender)) {
-                self->mpAccount->mGender = cUIListBox_getCurrentEntryData(obj);
+                mpAccount->mGender = cUIListBox_getCurrentEntryData(obj);
             }
             if (IsHash_001BA618(obj->mHashName, str_LBLegalYesNo)) {
-                self->mpAccount->mLegalAccepted = cUIListBox_getCurrentEntryData(obj) == 1;
+                mpAccount->mLegalAccepted = cUIListBox_getCurrentEntryData(obj) == 1;
             }
         }
         break;
     case cUIState::kONNEXT:
         if (IsHash_001BA618(obj->mHashName, str_StaticSubmit)) {
-            if (func_001BBAA8(self)) {
-                func_001BA9F8(self, 1);
+            if (func_001BBAA8(this)) {
+                func_001BA9F8(this, 1);
             }
         }
         break;
     case cUIState::kONPREV:
-        func_001A8A40(self, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(1780,
-                str_cFEStateCreateStep1, 0, 0), self->mpEngine, 1));
+        func_001A8A40(this, cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(1780,
+                str_cFEStateCreateStep1, 0, 0), mpEngine, 1));
         break;
     case cUIState::kONMISC: {
         cUIState* agreement = (cUIState*)cFEStateOnlineAgreement_cFEStateOnlineAgreement(
                 (cFEStateOnlineAgreement*)cMemMan_alloc(1756, str_cFEStateOnlineAgreement, 0x100, 0),
-                self->mpEngine);
+                mpEngine);
         agreement->miMiscData = 22;
-        func_001A8A40(self, agreement);
+        func_001A8A40(this, agreement);
         break;
     }
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }
@@ -18947,58 +18945,57 @@ static inline void* GetSession_001BBF18()
  * @param pWidget  the widget (On Tour pWidget); reused for its id under kONNEXT
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* self, cUIThing* pWidget,
-    unsigned int msg)
+void cFEStateCreateDuplicate::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONNEXT: {
         int option = pWidget->mMiscData;
         if (option == 4) {
-            if (self->mbAccount != 0) {
-                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_TITLEDuplicateAccount), str_empty_d, 0,
+            if (mbAccount != 0) {
+                func_001A9150((cFEStateNet*)this, 0, GetHashValue32(str_kT_TITLEDuplicateAccount), str_empty_d, 0,
                               -1, 0x10);
-                self->mpKeyboard->mbDisableForFirst = 1;
-                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
-                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
+                mpKeyboard->mbDisableForFirst = 1;
+                cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
+                cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             } else {
-                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_TITLEDuplicateUser), str_empty_d, 0, -1,
+                func_001A9150((cFEStateNet*)this, 0, GetHashValue32(str_kT_TITLEDuplicateUser), str_empty_d, 0, -1,
                               0xC);
-                self->mpKeyboard->mbDisableForFirst = 1;
-                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
-                cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
+                mpKeyboard->mbDisableForFirst = 1;
+                cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
+                cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             }
-        } else if (self->mbAccount != 0) {
-            tLobbyAccount* lobbyAccount = self->mpAccount;
+        } else if (mbAccount != 0) {
+            tLobbyAccount* lobbyAccount = mpAccount;
             cBXString_operatorE(lobbyAccount, &lobbyAccount->mNameOptions[option]);
-            func_001BC290(self);
+            func_001BC290(this);
         } else {
             // through a pointer, not the array: retail adds the index first
-            func_001BC300(self, (&self->mpAccount->mNameOptions[0])[option]);
+            func_001BC300(this, (&mpAccount->mNameOptions[0])[option]);
         }
         break;
     }
     case cUIState::kONPREV:
-        if (self->mbAccount != 0) {
+        if (mbAccount != 0) {
             func_00261408(GetSession_001BBF18());
             func_0025B800(LobbyMan_mLobbyMan);
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, self, 0, 0, 0);
+            cScreenPopup* popup = (cScreenPopup*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, this, 0, 0, 0);
             popup->miMiscData = 2098;
-            cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, popup);
+            cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, popup);
         } else {
-            func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                    str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+            func_001A8A40(this, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
+                    str_cFEStateSelectPersona, 0, 0), mpEngine));
         }
         break;
     case cUIState::kONKEYBOARDEND:
-        if (self->mbAccount != 0) {
-            cBXString_operatorE1(self->mpAccount, self->mpKeyboard->mszEditString);
-            func_001BC290(self);
+        if (mbAccount != 0) {
+            cBXString_operatorE1(mpAccount, mpKeyboard->mszEditString);
+            func_001BC290(this);
         } else {
-            func_001BC300(self, self->mpKeyboard->mszEditString);
+            func_001BC300(this, mpKeyboard->mszEditString);
         }
         break;
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }
@@ -21065,66 +21062,65 @@ extern char str_kT_POPUP231AddPassword[];
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPopup* self, cUIThing* pWidget,
-        unsigned int msg)
+void cFEStateNetCreateRoomPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     cUIThing* obj = pWidget;
     switch (msg) {
     case cUIState::kONNEXT:
         switch (obj->mMiscData) {
         case 1:
-            func_001A9150((cFEStateNet*)self, self->mpTextRoomName, GetHashValue32(str_kT_POPUP231NewRoom),
-                    self->mszRoomName, 0, 1, 8);
-            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
+            func_001A9150((cFEStateNet*)this, mpTextRoomName, GetHashValue32(str_kT_POPUP231NewRoom),
+                    mszRoomName, 0, 1, 8);
+            cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             break;
         case 2:
-            func_001A9150((cFEStateNet*)self, self->mpTextPassword, GetHashValue32(str_kT_POPUP231AddPassword),
-                    self->mszPassword, 0, 2, 8);
-            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
+            func_001A9150((cFEStateNet*)this, mpTextPassword, GetHashValue32(str_kT_POPUP231AddPassword),
+                    mszPassword, 0, 2, 8);
+            cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             break;
         case 3:
-            if (func_001BEC78(self)) {
-                self->mpParentState->onPopupEvent(self, 0xF);
+            if (func_001BEC78(this)) {
+                mpParentState->onPopupEvent(this, 0xF);
             }
             break;
         }
         break;
     case cUIState::kONPREV:
-        self->mpParentState->onPopupEvent(self, 20);
+        mpParentState->onPopupEvent(this, 20);
         break;
     case cUIState::kONCHANGE:
-        if (obj == self->mpLBChannelName) {
+        if (obj == mpLBChannelName) {
             switch (cUIListBox_getCurrentEntryData(obj)) {
             case 0:
-                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A60);
+                cBXString_operatorE1((char*)&mszChannelName, D_004A1A60);
                 break;
             case 1:
-                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A64);
+                cBXString_operatorE1((char*)&mszChannelName, D_004A1A64);
                 break;
             case 2:
-                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A6C);
+                cBXString_operatorE1((char*)&mszChannelName, D_004A1A6C);
                 break;
             case 3:
-                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A68);
+                cBXString_operatorE1((char*)&mszChannelName, D_004A1A68);
                 break;
             }
         }
         break;
     case cUIState::kONKEYBOARDEND: {
-        cKeyboardPopup* keyboard = self->mpKeyboard;
+        cKeyboardPopup* keyboard = mpKeyboard;
         switch (keyboard->miMiscData) {
         case 1:
-            cBXString_operatorE1((char*)&self->mszRoomName, keyboard->mszEditString);
-            cUIText_setAsciiString(self->mpTextRoomName, (const char*)self->mszRoomName);
+            cBXString_operatorE1((char*)&mszRoomName, keyboard->mszEditString);
+            cUIText_setAsciiString(mpTextRoomName, (const char*)mszRoomName);
             break;
         case 2:
-            cBXString_operatorE1((char*)&self->mszPassword, keyboard->mszEditString);
-            cUIText_setAsciiString(self->mpTextPassword, (const char*)self->mszPassword);
+            cBXString_operatorE1((char*)&mszPassword, keyboard->mszEditString);
+            cUIText_setAsciiString(mpTextPassword, (const char*)mszPassword);
             break;
         }
     }
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }
@@ -22730,8 +22726,7 @@ extern const char str_cFEStateNetSSXWorld[];
  * @param pWidget  the widget (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateOnlineAgreement_onWidgetEvent(cFEStateOnlineAgreement* self, cUIThing* pWidget,
-    unsigned int msg)
+void cFEStateOnlineAgreement::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     void* obj;
     if (pWidget == 0) {
@@ -22740,33 +22735,33 @@ extern "C" void cFEStateOnlineAgreement_onWidgetEvent(cFEStateOnlineAgreement* s
     switch (msg) {
     case cUIState::kONNEXT:
     case cUIState::kONPREV:
-        switch (self->miMiscData) {
+        switch (miMiscData) {
         case 18:
             obj = cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateNetLogin, 0, 0),
-                    self->mpEngine);
+                    mpEngine);
             break;
         case 20:
             obj = cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(1780,
-                    str_cFEStateCreateStep1, 0, 0), self->mpEngine, 1);
+                    str_cFEStateCreateStep1, 0, 0), mpEngine, 1);
             break;
         case 21:
             obj = cFEStateCreateStep1_cFEStateCreateStep1((cFEStateCreateStep1*)cMemMan_alloc(1780,
-                    str_cFEStateCreateStep1, 0, 0), self->mpEngine, 0);
+                    str_cFEStateCreateStep1, 0, 0), mpEngine, 0);
             break;
         case 22:
             obj = cFEStateCreateStep2_cFEStateCreateStep2((cFEStateCreateStep2*)((cFEStateNet*)cMemMan_alloc(1760,
-                    str_cFEStateCreateStep2, 0, 0)), self->mpEngine);
+                    str_cFEStateCreateStep2, 0, 0)), mpEngine);
             break;
         case 19:
         default:
             obj = cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(1744, str_cFEStateNetSSXWorld, 0,
-                    0), self->mpEngine);
+                    0), mpEngine);
             break;
         }
-        func_001A8A40(((cFEStateNet*)self), obj);
+        func_001A8A40(((cFEStateNet*)this), obj);
         break;
     default:
-        cFEStateNet_onWidgetEvent(((cFEStateNet*)self), pWidget, msg);
+        cFEStateNet_onWidgetEvent(((cFEStateNet*)this), pWidget, msg);
         break;
     }
 }
@@ -23100,57 +23095,56 @@ extern char str_kT_BTNCancel[];
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopup* self, cUIThing* pWidget,
-    unsigned int msg)
+void cFEStateNetQuickPlayPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONOPTION:
-        if (self->mbSearching == 0) {
-            cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, 7);
+        if (mbSearching == 0) {
+            cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, 7);
         }
         break;
     case cUIState::kONNEXT:
-        if (self->mpTextOK == pWidget) {
-            if (self->mbSearching != 0) {
-                cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
-                self->mpTextOK->setStatic(1);
-                func_001C13E0(self, self->mbSearching ^ 1);
+        if (mpTextOK == pWidget) {
+            if (mbSearching != 0) {
+                cUIText_setUnicodeStringByID(mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
+                mpTextOK->setStatic(1);
+                func_001C13E0(this, mbSearching ^ 1);
                 func_0025EED8(LobbyMan_mLobbyMan);
             } else {
-                self->mbQuickMatchTimeout = 0;
-                self->mbSearching = 1;
-                cFEStateNetQuickPlayPopup* feStateNetQuickPlayPopup = self;
+                mbQuickMatchTimeout = 0;
+                mbSearching = 1;
+                cFEStateNetQuickPlayPopup* feStateNetQuickPlayPopup = this;
                 int* ids = feStateNetQuickPlayPopup->miSearchOptions;
-                func_001C13E0(self, 0);
+                func_001C13E0(this, 0);
                 cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
-                cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
+                cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(mpLBRanked) != 0;
                 iface->submit();
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
-                feStateNetQuickPlayPopup->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
-                feStateNetQuickPlayPopup->miSearchOptions[1] = cUIListBox_getCurrentEntryData(self->mpLBRace);
-                feStateNetQuickPlayPopup->miSearchOptions[2] = cUIListBox_getCurrentEntryData(self->mpLBBigAir);
-                feStateNetQuickPlayPopup->miSearchOptions[3] = cUIListBox_getCurrentEntryData(self->mpLBSuperpipe);
-                feStateNetQuickPlayPopup->miSearchOptions[4] = cUIListBox_getCurrentEntryData(self->mpLBSlopeStyle);
-                func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
-                self->mpTextSearching->setVisible(1);
-                cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(str_kT_BTNCancel));
-                self->miBlinkFrames = 0x1E;
-                func_001C17F8(self, 1);
+                feStateNetQuickPlayPopup->miSearchOptions[0] = cUIListBox_getCurrentEntryData(mpLBRanked);
+                feStateNetQuickPlayPopup->miSearchOptions[1] = cUIListBox_getCurrentEntryData(mpLBRace);
+                feStateNetQuickPlayPopup->miSearchOptions[2] = cUIListBox_getCurrentEntryData(mpLBBigAir);
+                feStateNetQuickPlayPopup->miSearchOptions[3] = cUIListBox_getCurrentEntryData(mpLBSuperpipe);
+                feStateNetQuickPlayPopup->miSearchOptions[4] = cUIListBox_getCurrentEntryData(mpLBSlopeStyle);
+                func_0025EE20(LobbyMan_mLobbyMan, ids, mCurrentCtrl);
+                mpTextSearching->setVisible(1);
+                cUIText_setUnicodeStringByID(mpTextOK, GetHashValue32(str_kT_BTNCancel));
+                miBlinkFrames = 0x1E;
+                func_001C17F8(this, 1);
             }
         }
         break;
     case cUIState::kONPREV:
-        func_001C13E0(self, self->mbSearching ^ 1);
-        if (self->mbSearching != 0) {
-            cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
-            self->mpTextOK->setStatic(1);
+        func_001C13E0(this, mbSearching ^ 1);
+        if (mbSearching != 0) {
+            cUIText_setUnicodeStringByID(mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
+            mpTextOK->setStatic(1);
             func_0025EED8(LobbyMan_mLobbyMan);
         } else {
-            self->mpParentState->onPopupEvent(self, 20);
+            mpParentState->onPopupEvent(this, 20);
         }
         break;
     default:
-        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
         break;
     }
 }

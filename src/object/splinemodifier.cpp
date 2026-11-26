@@ -63,7 +63,6 @@ extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* sel
 INCLUDE_ASM("object/splinemodifier", cSplineModifier_setSpeed);
 #ifdef SKIP_ASM
 // PORT: callers declare cSplineModifier_setSpeed(void* self); the body also takes the speed in $f12.
-extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed) __asm__("cSplineModifier_setSpeed");
 /**
  * Sets the spline modifier's speed: Velocity (+0x48) = speed * 27.7778.
  *
@@ -72,10 +71,9 @@ extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed) __asm__("
  *
  * @param speed  the new speed, probably in km/h
  */
-extern "C" void cSplineModifier_setSpeed_impl(void* vself, float speed)
+void cSplineModifier::setSpeed(float speed)
 {
-    cSplineModifier* self = (cSplineModifier*)vself;
-    self->Velocity = speed * 27.77777862548828f;
+    Velocity = speed * 27.77777862548828f;
 }
 #endif
 

@@ -43,6 +43,7 @@ struct cFEStateCharSelect : public cUIState {
     virtual bool onGainTransition(int on) __asm__("cFEStateCharSelect_onGainTransition");
     virtual void onUpdate() __asm__("cFEStateCharSelect_onUpdate");
     virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateCharSelect_onInputBegin");
+    void updateWidget(signed char rider, signed char charID) __asm__("cFEStateCharSelect_updateWidget");
 };
 
 CHECK_OFFSET(cFEStateCharSelect, mpSelectedCharWidget, 0x048);

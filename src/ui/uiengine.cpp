@@ -639,7 +639,6 @@ INCLUDE_ASM("ui/uiengine", cUIFontInterface_addFontEntry);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cUIFontInterface::addFontEntry (On Tour): fill font slot `index` (cUIFontEntry::setFileName then
 // setHashName, both inline here) and bump the font count.
-extern "C" void cUIFontInterface_addFontEntry_impl(cUIFontInterface* self, int index, char* pszFontName, unsigned int hashID) __asm__("cUIFontInterface_addFontEntry");
 
 static inline void uiFontSetFileName(cUIFontEntry* e, const char* name)
 {
@@ -661,12 +660,12 @@ static inline void uiFontSetHashName(cUIFontEntry* e, unsigned int hash)
  * @param pszFontName  the font file name
  * @param hashID  the font hash name
  */
-extern "C" void cUIFontInterface_addFontEntry_impl(cUIFontInterface* self, int index, char* pszFontName, unsigned int hashID)
+void cUIFontInterface::addFontEntry(int index, char* pszFontName, unsigned int hashID)
 {
-    if (self->mFontCount < 4) {
-        uiFontSetFileName(&((&self->mFontEntry[0]))[index], pszFontName);
-        uiFontSetHashName(&((&self->mFontEntry[0]))[index], hashID);
-        self->mFontCount++;
+    if (mFontCount < 4) {
+        uiFontSetFileName(&((&mFontEntry[0]))[index], pszFontName);
+        uiFontSetHashName(&((&mFontEntry[0]))[index], hashID);
+        mFontCount++;
     }
 }
 #endif
@@ -884,9 +883,9 @@ INCLUDE_ASM("ui/uiengine", cUIGroup_render3D);
  *
  * @param pRenCon  the render context (On Tour cUIRenderContext*)
  */
-extern "C" void cUIGroup_render3D(cUIGroup* self, cUIRenderContext* pRenCon)
+void cUIGroup::render3D(cUIRenderContext* pRenCon)
 {
-    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    cUIThing* n = (cUIThing*)cList_first((cList*)&mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             n->render3D(pRenCon);

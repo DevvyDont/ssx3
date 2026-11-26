@@ -183,6 +183,7 @@ struct cComputer {
     bool shouldRiderTweak() __asm__("cComputer_shouldRiderTweak");
     bool shouldRiderGrab() __asm__("cComputer_shouldRiderGrab");
     int updateRiderPathDifficulty(int RiderID, int Heat) __asm__("cComputer_updateRiderPathDifficulty");
+    void followPathCruise(tCruiseCmd* cruiseCmd) __asm__("cComputer_followPathCruise");
 };
 
 // Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: __pure_virtual);

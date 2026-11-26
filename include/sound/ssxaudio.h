@@ -707,6 +707,13 @@ struct cSSXAudio {
     void HandleStreamChunk() __asm__("cSSXAudio_HandleStreamChunk__FPv");
     void RiderCreated() __asm__("cSSXAudio_RiderCreated__FPv");
     void* RiderDeleted() __asm__("cSSXAudio_RiderDeleted__FPv");
+    void BeginChatter(cRider* obj) __asm__("cSSXAudio_BeginChatter");
+    void BeginGlide(cRider* obj, int n) __asm__("cSSXAudio_BeginGlide");
+    void BeginCarve(cRider* obj, int n) __asm__("cSSXAudio_BeginCarve");
+    void HardGlideProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_HardGlideProgram");
+    void SoftGlideProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_SoftGlideProgram");
+    void RailGlideProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_RailGlideProgram");
+    void RiderCollision(cRider* rider, cRider* opponent) __asm__("cSSXAudio_RiderCollision");
 };
 
 CHECK_OFFSET(cSSXAudio, mpVBankManager, 0x0);

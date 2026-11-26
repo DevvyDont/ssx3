@@ -3419,7 +3419,6 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getTotalNumAwards);
 // PORT: the unit declares cBEUserAwards_getTotalNumAwards as returning void* (line ~378, used by
 // cBERewardInterface_getTotalNumUserAwards); the body returns an int sum, so it is bound by asm label.
 // The lander should change that declaration to int instead.
-int cBEUserAwards_getTotalNumAwards_impl(cBEUserAwards* self) __asm__("cBEUserAwards_getTotalNumAwards");
 
 /**
  * Counts all awards recorded in a user-awards table.
@@ -3429,14 +3428,14 @@ int cBEUserAwards_getTotalNumAwards_impl(cBEUserAwards* self) __asm__("cBEUserAw
  *
  * @return the total award count
  */
-int cBEUserAwards_getTotalNumAwards_impl(cBEUserAwards* self)
+int cBEUserAwards::getTotalNumAwards()
 {
     int sum = 0;
     for (int i = 0; i < 32; i++)
     {
         for (int j = 0; j < 10; j++)
         {
-            sum += self->mAwards.iNumAwards[i][j];
+            sum += mAwards.iNumAwards[i][j];
         }
     }
     return sum;

@@ -6575,8 +6575,6 @@ cBEInterface* cBE_getInterface_A158(void* be, int kind) __asm__("cBE_getInterfac
 extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 // PORT: the unit also declares this with a pointer third argument; defined under an asm label with its real type
-extern "C" bool cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
-    __asm__("cTrackFileMan_legalTrackMode");
 /**
  * Tells whether a location may be raced in a game mode (debug menu track picker).
  *
@@ -6584,15 +6582,14 @@ extern "C" bool cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, 
  * mode 0 ids 0..4, 1 ids 5..7, 2 ids 8..10, 3 ids 11..13, 5 and 6 ids 14..16; mode 4 accepts any location for
  * which cBENewRaceInterface_getLocationType (On Tour cBENewRaceInterface::getLocationType) returns 0. Other modes give 0.
  *
- * @param list  the track file manager (this)
  * @param idx   the location index
  * @param kind  the game mode (On Tour eBEGameMode)
  * @return true when the location is legal for the mode, otherwise false
  */
-extern "C" bool cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
+bool cTrackFileMan::legalTrackMode(int idx, int kind)
 {
-    if (idx >= 0 && idx < list->NumLocations) {
-        unsigned int locationId = list->LocationInfo[idx].locationID;
+    if (idx >= 0 && idx < NumLocations) {
+        unsigned int locationId = LocationInfo[idx].locationID;
         switch (kind) {
         case kGAMEMODE_RACE:
             if (locationId < 5) return true;

@@ -1944,7 +1944,6 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformRel);
 #ifdef SKIP_ASM
 
 
-extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* m, float scale) __asm__("SphereTree_TransformRel");
 
 /**
  * Transforms a sphere tree's four axis directions (their opposites follow) and its centre, then scales them
@@ -1953,14 +1952,14 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* m, float s
  * @param mat  the transform (On Tour const t4Matrix& transMat)
  * @param scale  uniform scale (On Tour s)
  */
-extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float scale)
+void SphereTree::TransformRel(t4Vector* mat, float scale)
 {
     for (int i = 0; i < 4; i++) {
-        self->axis[i] = Scale_B2B8(mtxMulVec_9B90(mat, &self->axis[i]), scale);
-        self->axis[7 - i] = Scale_B2B8(self->axis[i], -1.0f);
+        axis[i] = Scale_B2B8(mtxMulVec_9B90(mat, &axis[i]), scale);
+        axis[7 - i] = Scale_B2B8(axis[i], -1.0f);
     }
     t4Vector scaledCenter;
-    t4Vector transformedCenter = mtxMulVec_9B90(mat, (t4Vector*)&self->transCenter);
+    t4Vector transformedCenter = mtxMulVec_9B90(mat, (t4Vector*)&transCenter);
     t4Vector sc;
     sc.w = 1.0f;
     sc.x = scale;
@@ -1970,8 +1969,8 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float
     scaledCenter.y = transformedCenter.y * sc.y;
     scaledCenter.z = transformedCenter.z * sc.z;
     scaledCenter.w = transformedCenter.w * sc.w;
-    self->transCenter = scaledCenter;
-    self->scale = self->scale * scale;
+    transCenter = scaledCenter;
+    this->scale = this->scale * scale;
 }
 #endif
 

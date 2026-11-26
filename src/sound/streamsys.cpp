@@ -262,7 +262,6 @@ extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDSTRM_status(int h, void* out);
 
 // PORT: returns int; the unit declares it void(void*, void*) further down
-int cStreamInstance_GetStatus_impl(void* self, void* out) __asm__("cStreamInstance_GetStatus");
 
 /**
  * Reads a stream's status from the sound driver (SNDSTRM_status, in a critical section).
@@ -270,12 +269,11 @@ int cStreamInstance_GetStatus_impl(void* self, void* out) __asm__("cStreamInstan
  * @param out  receives the status (SNDSTREAMSTATUS)
  * @return the driver's result
  */
-int cStreamInstance_GetStatus_impl(void* vself, void* out)
+int cStreamInstance::GetStatus(void* out)
 {
-    cStreamInstance* self = (cStreamInstance*)vself;
     int result;
     SNDSYS_entercritical();
-    result = SNDSTRM_status(self->mHandle, out);
+    result = SNDSTRM_status(mHandle, out);
     SNDSYS_leavecritical();
     return result;
 }

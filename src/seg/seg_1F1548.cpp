@@ -2775,7 +2775,6 @@ extern sCol_43E0 D_004FAC80;
 
 
 
-extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self) __asm__("cSunHalo_InitLens");
 /**
  * Sets up the sun's default lens flare: nine lens elements with type, position, scale and colour.
  *
@@ -2783,54 +2782,54 @@ extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self) __asm__("cSunHalo_InitLen
  * position along the flare axis, scale, colour from D_004FAB80..D_004FAC80, On Tour's kLensNColour) and counts each
  * one. Types 1, 3, 0, 2, 0, 0, 1, 3, 1; positions run from 1.3 down to -1.0.
  */
-extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self)
+void cSunHalo::InitLens()
 {
-    self->mNumLens = 0;
-    ((&self->mSunLens[0]))[0].mType = 1;
-    ((&self->mSunLens[0]))[0].mPosition = 1.2999999523162842f;
-    ((&self->mSunLens[0]))[0].mScale = 0.03999999910593033f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[0].mColor[0]) = D_004FAB80;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[1].mType = 3;
-    ((&self->mSunLens[0]))[1].mPosition = 0.595413327217102f;
-    ((&self->mSunLens[0]))[1].mScale = 0.03453768044710159f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[1].mColor[0]) = D_004FABA0;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[2].mType = 0;
-    ((&self->mSunLens[0]))[2].mPosition = 0.5f;
-    ((&self->mSunLens[0]))[2].mScale = 0.20000000298023224f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[2].mColor[0]) = D_004FABC0;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[3].mType = 2;
-    ((&self->mSunLens[0]))[3].mPosition = 0.20000000298023224f;
-    ((&self->mSunLens[0]))[3].mScale = 0.025077050551772118f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[3].mColor[0]) = D_004FABE0;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[4].mType = 0;
-    ((&self->mSunLens[0]))[4].mPosition = 0.0f;
-    ((&self->mSunLens[0]))[4].mScale = 0.03999999910593033f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[4].mColor[0]) = D_004FAC00;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[5].mType = 0;
-    ((&self->mSunLens[0]))[5].mPosition = -0.5141515731811523f;
-    ((&self->mSunLens[0]))[5].mScale = 0.06998095661401749f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[5].mColor[0]) = D_004FAC20;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[6].mType = 1;
-    ((&self->mSunLens[0]))[6].mPosition = -0.40145567059516907f;
-    ((&self->mSunLens[0]))[6].mScale = 0.030118949711322784f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[6].mColor[0]) = D_004FAC40;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[7].mType = 3;
-    ((&self->mSunLens[0]))[7].mPosition = -0.6160849332809448f;
-    ((&self->mSunLens[0]))[7].mScale = 0.03999999910593033f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[7].mColor[0]) = D_004FAC60;
-    self->mNumLens++;
-    ((&self->mSunLens[0]))[8].mType = 1;
-    ((&self->mSunLens[0]))[8].mPosition = -1.0f;
-    ((&self->mSunLens[0]))[8].mScale = 0.0206892192363739f;
-    (*(sCol_43E0*)&((&self->mSunLens[0]))[8].mColor[0]) = D_004FAC80;
-    self->mNumLens++;
+    mNumLens = 0;
+    ((&mSunLens[0]))[0].mType = 1;
+    ((&mSunLens[0]))[0].mPosition = 1.2999999523162842f;
+    ((&mSunLens[0]))[0].mScale = 0.03999999910593033f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[0].mColor[0]) = D_004FAB80;
+    mNumLens++;
+    ((&mSunLens[0]))[1].mType = 3;
+    ((&mSunLens[0]))[1].mPosition = 0.595413327217102f;
+    ((&mSunLens[0]))[1].mScale = 0.03453768044710159f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[1].mColor[0]) = D_004FABA0;
+    mNumLens++;
+    ((&mSunLens[0]))[2].mType = 0;
+    ((&mSunLens[0]))[2].mPosition = 0.5f;
+    ((&mSunLens[0]))[2].mScale = 0.20000000298023224f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[2].mColor[0]) = D_004FABC0;
+    mNumLens++;
+    ((&mSunLens[0]))[3].mType = 2;
+    ((&mSunLens[0]))[3].mPosition = 0.20000000298023224f;
+    ((&mSunLens[0]))[3].mScale = 0.025077050551772118f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[3].mColor[0]) = D_004FABE0;
+    mNumLens++;
+    ((&mSunLens[0]))[4].mType = 0;
+    ((&mSunLens[0]))[4].mPosition = 0.0f;
+    ((&mSunLens[0]))[4].mScale = 0.03999999910593033f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[4].mColor[0]) = D_004FAC00;
+    mNumLens++;
+    ((&mSunLens[0]))[5].mType = 0;
+    ((&mSunLens[0]))[5].mPosition = -0.5141515731811523f;
+    ((&mSunLens[0]))[5].mScale = 0.06998095661401749f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[5].mColor[0]) = D_004FAC20;
+    mNumLens++;
+    ((&mSunLens[0]))[6].mType = 1;
+    ((&mSunLens[0]))[6].mPosition = -0.40145567059516907f;
+    ((&mSunLens[0]))[6].mScale = 0.030118949711322784f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[6].mColor[0]) = D_004FAC40;
+    mNumLens++;
+    ((&mSunLens[0]))[7].mType = 3;
+    ((&mSunLens[0]))[7].mPosition = -0.6160849332809448f;
+    ((&mSunLens[0]))[7].mScale = 0.03999999910593033f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[7].mColor[0]) = D_004FAC60;
+    mNumLens++;
+    ((&mSunLens[0]))[8].mType = 1;
+    ((&mSunLens[0]))[8].mPosition = -1.0f;
+    ((&mSunLens[0]))[8].mScale = 0.0206892192363739f;
+    (*(sCol_43E0*)&((&mSunLens[0]))[8].mColor[0]) = D_004FAC80;
+    mNumLens++;
 }
 #endif
 

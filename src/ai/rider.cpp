@@ -648,7 +648,6 @@ void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlSt
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 
-void cRider_initAlways_impl(cRider* self) __asm__("cRider_initAlways");
 /**
  * Resets a loaded rider for a new run: stance, path, start position, timers and per-race state.
  *
@@ -666,32 +665,32 @@ void cRider_initAlways_impl(cRider* self) __asm__("cRider_initAlways");
  * initialised. Finally the finish/uber/boost timers, start tick (= AITick), penalty and overlap counts, rival fields
  * and transitions are cleared and the vibration reset (vtable slot 16) and rider FX reset run.
  */
-void cRider_initAlways_impl(cRider* self)
+void cRider::initAlways()
 {
-    if (self->mLoadStep == cRider::kLoadStepDone)
+    if (mLoadStep == cRider::kLoadStepDone)
     {
-        self->mRiderHandler->MotionState = MS_Static;
-        self->mRiderHandler->ControlState = CS_Void;
-        self->mRubberBandBehind = 0;
-        self->mRubberBandAhead = 0;
-        self->CheckID = -1;
-        cRiderMetrix_reset(self->mMetrix);
-        cRiderAnimBase_reset(self->mRiderAnim);
-        self->IsGoofyStance = cBECharacterInterface_getIsGoofyFoot(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
-        cRider_initPath(self, 1);
+        mRiderHandler->MotionState = MS_Static;
+        mRiderHandler->ControlState = CS_Void;
+        mRubberBandBehind = 0;
+        mRubberBandAhead = 0;
+        CheckID = -1;
+        cRiderMetrix_reset(mMetrix);
+        cRiderAnimBase_reset(mRiderAnim);
+        IsGoofyStance = cBECharacterInterface_getIsGoofyFoot(cBE_getInterface_11D390(cBE_getBE(), 2), mAIIndex);
+        cRider_initPath(this, 1);
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
         // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall
         //       into.
-        if (cBENewPlayerInterface_isFirstTimeWC(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
+        if (cBENewPlayerInterface_isFirstTimeWC(cBE_getInterface_11D390(cBE_getBE(), 1), mAIIndex) != 0
             && cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT
             && *cBENewRaceInterface_getLocation(iface) == kLOCATION_ABC1)
         {
             if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE)
             {
-                self->putAtDropOffBC();
-                cRider_setMotionState_impl(self, MS_Air);
-                cRider_setControlState_impl(self, CS_NaturalAir);
-                cRiderMetrix_evTakeoff(self->mMetrix, 0, 0);
+                putAtDropOffBC();
+                cRider_setMotionState_impl(this, MS_Air);
+                cRider_setControlState_impl(this, CS_NaturalAir);
+                cRiderMetrix_evTakeoff(mMetrix, 0, 0);
                 goto done;
             }
             goto m5;
@@ -712,53 +711,53 @@ void cRider_initAlways_impl(cRider* self)
             case kLOCATION_HUB_C:
             case kLOCATION_HUB_D:
             case kLOCATION_HUB_E:
-                self->putAtStartpoint(0, 2);
-                self->cleanupAfterPutAt(0);
+                putAtStartpoint(0, 2);
+                cleanupAfterPutAt(0);
                 break;
             case kLOCATION_ABC1:
             case kLOCATION_DBC2:
             case kLOCATION_EBC3:
-                self->putAtStartpoint(self->mAIIndex, 1);
-                self->cleanupAfterPutAt(0);
+                putAtStartpoint(mAIIndex, 1);
+                cleanupAfterPutAt(0);
                 break;
             default:
-                self->putAtStartpoint(1, 2);
-                self->cleanupAfterPutAt(0);
+                putAtStartpoint(1, 2);
+                cleanupAfterPutAt(0);
                 break;
             }
         }
         else
         {
-            cRider_setMotionState_impl(self, MS_Static);
-            cRider_setControlState_impl(self, CS_Gate);
+            cRider_setMotionState_impl(this, MS_Static);
+            cRider_setControlState_impl(this, CS_Gate);
         }
     done:
         if (cBENewRaceInterface_newRace.cGamePath != 0)
-            self->initBoost();
-        self->mFinishTime = -1.0f;
-        self->InTunnel = 0;
-        self->mUberTimer = 0;
-        self->mUberLevel = 0;
-        self->mDidNotFinish = 0;
-        self->mStartTick = SSXApp->Game->AI->AITick;
-        self->mFinishTick = 0;
-        self->mPenaltyTicks = 0;
-        self->NumPathEventsCur = 0;
-        self->mPowerUpBoostTimer = 0;
-        self->mPowerUpTrickTimer = 0;
-        self->ConsecutiveAirFrames = 0;
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_AT(self, sizeof(cRiderState));
-        vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
-        cRiderHandler_resetRiderFX(self->mRiderHandler);
-        self->VerticalJump = 0;
-        self->DidPop = 0;
-        self->RidingFlexRail = 0;
-        self->PissedOff = 0;
-        self->LastPunchTick = 0;
-        self->PissedAIIndex = -1;
-        self->ShouldCelebrateAtFinish = 1;
-        self->cancelRiderTransitions();
-        self->DangerLevel = 0;
+            initBoost();
+        mFinishTime = -1.0f;
+        InTunnel = 0;
+        mUberTimer = 0;
+        mUberLevel = 0;
+        mDidNotFinish = 0;
+        mStartTick = SSXApp->Game->AI->AITick;
+        mFinishTick = 0;
+        mPenaltyTicks = 0;
+        NumPathEventsCur = 0;
+        mPowerUpBoostTimer = 0;
+        mPowerUpTrickTimer = 0;
+        ConsecutiveAirFrames = 0;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_AT(this, sizeof(cRiderState));
+        vt[kRiderVt_vibrationReset].fn(vthis(this, vt[kRiderVt_vibrationReset]));
+        cRiderHandler_resetRiderFX(mRiderHandler);
+        VerticalJump = 0;
+        DidPop = 0;
+        RidingFlexRail = 0;
+        PissedOff = 0;
+        LastPunchTick = 0;
+        PissedAIIndex = -1;
+        ShouldCelebrateAtFinish = 1;
+        cancelRiderTransitions();
+        DangerLevel = 0;
     }
 }
 #endif
@@ -1074,7 +1073,6 @@ static inline void InitChannel_D660(cRider* self, int i, float v, float z)
 // PORT: the unit declares cRider_putAt(void*, sVec4_0011DE60*, ..., int, float) later; bind the cRider* view by asm
 // label.
 // drop is declared before anim: the order of the parameter copies follows it (ABI-identical: f12 and a3 either way).
-extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim) __asm__("cRider_putAt");
 /**
  * Places the rider at a position facing a direction, optionally on the ground below, and resets its motion and
  * animation.
@@ -1094,14 +1092,14 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
  * @param drop  On Tour height: when >= 0, drop onto the ground below and stand this far above it
  * @param anim  the AI animation to start (On Tour tAIAnimID initAnim)
  */
-extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim)
+void cRider::putAt(const t4Vector* pos, const float* dir, float drop, int anim)
 {
-    ClearCache_D660((char*)self->mLineHint);
-    ClearCache_D660((char*)self->mWallHint);
+    ClearCache_D660((char*)mLineHint);
+    ClearCache_D660((char*)mWallHint);
     t4Vector placePos = *pos;
     t4Vector n = t4vect_ZAxis_D660;
     float angle = Atan2_D660(dir[1], dir[0]);
-    self->mVisitedIds[0] = 0xFFFFFFFF;
+    mVisitedIds[0] = 0xFFFFFFFF;
     if (drop >= 0.0f)
     {
         t4Vector lo = Add_D660(*pos, Scale_D660(t4vect_ZAxis_D660, -7000.0f));
@@ -1116,9 +1114,9 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         }
         AddEq_D660(placePos, Scale_D660(t4vect_ZAxis_D660, drop));
     }
-    self->mPosition = placePos;
-    *(sQuatW*)&self->mRotation = AxisAngle_D660(t4vect_ZAxis_D660, angle - 1.5707963705062866f);
-    self->mUseRootPoseOverride = 0;
+    mPosition = placePos;
+    *(sQuatW*)&mRotation = AxisAngle_D660(t4vect_ZAxis_D660, angle - 1.5707963705062866f);
+    mUseRootPoseOverride = 0;
     t4Vector axis = Cross_D660(t4vect_ZAxis_D660, n);
     float len = Length_D660(axis);
     if (len > 0.0010000000474974513f)
@@ -1126,79 +1124,80 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         DivEq_D660(axis, len);
         // PORT: g++ minimum operator.
         sQuatW tiltRot = AxisAngleL_D660(axis, func_0031C128(len <? 1.0f));
-        self->mRotation = QuatMul_D660(tiltRot, self->mRotation);
+        mRotation = QuatMul_D660(tiltRot, mRotation);
     }
-    self->updateOrientationImplicit();
-    self->mGroundNormal = n;
-    self->GroundVelocity = t4vect_Zero_D660;
-    self->mGroundForward = Normalize_D660(SubV_D660(self->mMatrix.row[1], Scale_D660(self->mGroundNormal, DotV_D660(self->mMatrix.row[1], self->mGroundNormal))));
-    self->mGroundSide = Cross_D660(self->mGroundNormal, self->mGroundForward);
-    self->mVelocity = t4vect_Zero_D660;
-    self->mGroundContactPoint = self->mPosition;
-    self->mSurfaceType = 0;
-    self->SnowOffset = 0.0f;
-    self->mImpulse = t4vect_Zero_D660;
-    self->mImpactAccum = 0.0f;
-    self->mImpactAccum2 = 0.0f;
-    InitChannel_D660(self, 0, 0.0f, 0.0f);
-    InitChannel_D660(self, 1, 0.0f, 0.0f);
-    InitChannel_D660(self, 2, 0.0f, 0.0f);
-    InitChannel_D660(self, 3, 0.0f, 0.0f);
-    InitChannel_D660(self, 4, 0.0f, 0.0f);
-    InitChannel_D660(self, 5, 0.0f, 0.0f);
-    InitChannel_D660(self, 6, 0.0f, 0.0f);
-    InitChannel_D660(self, 7, 0.0f, 0.0f);
-    InitChannel_D660(self, 8, 0.0f, 0.0f);
-    InitChannel_D660(self, 9, 1.0f, 0.0f);
-    InitChannel_D660(self, 10, 0.0f, 0.0f);
-    InitChannel_D660(self, 11, 0.0f, 0.0f);
-    InitChannel_D660(self, 12, 0.0f, 0.0f);
-    InitChannel_D660(self, 13, 0.0f, 0.0f);
-    InitChannel_D660(self, 14, 0.0f, 0.0f);
-    InitChannel_D660(self, 15, 0.0f, 0.0f);
-    InitChannel_D660(self, 16, 0.0f, 0.0f);
-    InitChannel_D660(self, 17, 0.0f, 0.0f);
-    InitChannel_D660(self, 18, 0.0f, 0.0f);
-    self->mSpinRate = 0.0f;
-    self->mFlipRate = 0.0f;
-    self->mBoostStrength = 0.0f;
-    self->mTimeScale = 1.0f;
-    self->LegIK = 1.0f;
-    self->ChatterMag = 0.0f;
-    self->RailslideMode = 0;
-    self->HandplantMode = 0;
-    self->PressMode = 0;
-    self->PunchVect = t4vect_Zero_D660;
-    self->PunchStrength = 0.0f;
-    self->ReactionEventTick = -1;
-    self->ReactionEventType = 0;
-    self->ProximityActionDelay = 0.0f;
-    self->IsRidingFakie = self->IsGoofyStance;
-    cRiderAnimBase_reset(self->mRiderAnim);
-    self->mRiderAnim->IsFlipped = self->IsRidingFakie;
+    updateOrientationImplicit();
+    mGroundNormal = n;
+    GroundVelocity = t4vect_Zero_D660;
+    mGroundForward = Normalize_D660(SubV_D660(mMatrix.row[1], Scale_D660(mGroundNormal, DotV_D660(mMatrix.row[1],
+            mGroundNormal))));
+    mGroundSide = Cross_D660(mGroundNormal, mGroundForward);
+    mVelocity = t4vect_Zero_D660;
+    mGroundContactPoint = mPosition;
+    mSurfaceType = 0;
+    SnowOffset = 0.0f;
+    mImpulse = t4vect_Zero_D660;
+    mImpactAccum = 0.0f;
+    mImpactAccum2 = 0.0f;
+    InitChannel_D660(this, 0, 0.0f, 0.0f);
+    InitChannel_D660(this, 1, 0.0f, 0.0f);
+    InitChannel_D660(this, 2, 0.0f, 0.0f);
+    InitChannel_D660(this, 3, 0.0f, 0.0f);
+    InitChannel_D660(this, 4, 0.0f, 0.0f);
+    InitChannel_D660(this, 5, 0.0f, 0.0f);
+    InitChannel_D660(this, 6, 0.0f, 0.0f);
+    InitChannel_D660(this, 7, 0.0f, 0.0f);
+    InitChannel_D660(this, 8, 0.0f, 0.0f);
+    InitChannel_D660(this, 9, 1.0f, 0.0f);
+    InitChannel_D660(this, 10, 0.0f, 0.0f);
+    InitChannel_D660(this, 11, 0.0f, 0.0f);
+    InitChannel_D660(this, 12, 0.0f, 0.0f);
+    InitChannel_D660(this, 13, 0.0f, 0.0f);
+    InitChannel_D660(this, 14, 0.0f, 0.0f);
+    InitChannel_D660(this, 15, 0.0f, 0.0f);
+    InitChannel_D660(this, 16, 0.0f, 0.0f);
+    InitChannel_D660(this, 17, 0.0f, 0.0f);
+    InitChannel_D660(this, 18, 0.0f, 0.0f);
+    mSpinRate = 0.0f;
+    mFlipRate = 0.0f;
+    mBoostStrength = 0.0f;
+    mTimeScale = 1.0f;
+    LegIK = 1.0f;
+    ChatterMag = 0.0f;
+    RailslideMode = 0;
+    HandplantMode = 0;
+    PressMode = 0;
+    PunchVect = t4vect_Zero_D660;
+    PunchStrength = 0.0f;
+    ReactionEventTick = -1;
+    ReactionEventType = 0;
+    ProximityActionDelay = 0.0f;
+    IsRidingFakie = IsGoofyStance;
+    cRiderAnimBase_reset(mRiderAnim);
+    mRiderAnim->IsFlipped = IsRidingFakie;
     float yaw = 0.0f;
-    if (self->IsRidingFakie != 0)
+    if (IsRidingFakie != 0)
         yaw = 3.1415927410125732f;
-    cRiderAnim* riderAnim = self->mRiderAnim;
+    cRiderAnim* riderAnim = mRiderAnim;
     riderAnim->OrientationOffset.P = t4vect_Origin_D660;
     *(sQuatW*)&riderAnim->OrientationOffset.Q = AxisAngle_D660(t4vect_ZAxis_D660, -yaw);
-    cRiderAnimBase_play(self->mRiderAnim, anim, 0, -1.0f);
-    cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
-    self->updateAnimation(1.0f);
-    cRider_updateSkeleton(self);
-    cAnimModel_buildSkelMatrices(self->mAnimModel);
-    cRider_updateBoundBox(self, 0);
-    cOverlapList_geteverything(self->mOverlapList, &self->mBoundsMin);
-    self->updateActiveLights();
-    func_002105B0(self->mAIIndex);
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)&VPTR_AT(self, sizeof(cRiderState));
-    vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
-    if ((unsigned int)self->mViewIndex < 2)
+    cRiderAnimBase_play(mRiderAnim, anim, 0, -1.0f);
+    cRiderAnimBase_setupAnimation(mRiderAnim, 0);
+    updateAnimation(1.0f);
+    cRider_updateSkeleton(this);
+    cAnimModel_buildSkelMatrices(mAnimModel);
+    cRider_updateBoundBox(this, 0);
+    cOverlapList_geteverything(mOverlapList, &mBoundsMin);
+    updateActiveLights();
+    func_002105B0(mAIIndex);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)&VPTR_AT(this, sizeof(cRiderState));
+    vt[kRiderVt_vibrationReset].fn(vthis(this, vt[kRiderVt_vibrationReset]));
+    if ((unsigned int)mViewIndex < 2)
     {
         cGameViewMan* views = SSXApp->Game->ViewMan;
         if (views != 0)
         {
-            cChaseCameraController* viewHandler = views->PlayerCamera[self->mViewIndex]->ChaseController;
+            cChaseCameraController* viewHandler = views->PlayerCamera[mViewIndex]->ChaseController;
             sVEntry<void(void*)>* hv = (sVEntry<void(void*)>*)viewHandler->mVtbl;
             hv[4].fn(vthis(viewHandler, hv[4])); // cCameraController_snapCurrent
         }
@@ -1973,7 +1972,6 @@ static inline sXf_EB98 Combine_EB98(const sXf_EB98& a, const sXf_EB98& b)
     return r;
 }
 
-extern "C" void cRider_updateSkeleton_impl(cRider* self) __asm__("cRider_updateSkeleton");
 /**
  * Poses the rider's skeleton from its position and rotation plus spin, flip, lean, board tilt and leg adjustments.
  *
@@ -1988,80 +1986,83 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self) __asm__("cRider_updateS
  *
  * The C definition is cRider_updateSkeleton with an asm label.
  */
-extern "C" void cRider_updateSkeleton_impl(cRider* self)
+void cRider::updateSkeleton()
 {
     sXf_EB98 xf;
-    xf.pos = *(sVec4W*)&self->mPosition;
-    xf.rot = *(sVec4W*)&self->mRotation;
-    if (self->getControlState() == CS_Spin)
-        cSpinControl_applyFlipSpinAngle(&self->mRiderHandler->SpinControl, &xf);
-    cRider_doLeanPoseAdjust(self, &xf);
+    xf.pos = *(sVec4W*)&mPosition;
+    xf.rot = *(sVec4W*)&mRotation;
+    if (getControlState() == CS_Spin)
+        cSpinControl_applyFlipSpinAngle(&mRiderHandler->SpinControl, &xf);
+    cRider_doLeanPoseAdjust(this, &xf);
     sXf_EB98 ab[2];
     ab[1] = xf;
     ab[0] = xf;
-    if (self->getControlState() != CS_Void && self->mSlewed[18].cur != 0.0f)
+    if (getControlState() != CS_Void && mSlewed[18].cur != 0.0f)
     {
-        sVec4W liftOffset = Scale_EB98(t4vect_ZAxis, self->mSlewed[18].cur);
+        sVec4W liftOffset = Scale_EB98(t4vect_ZAxis, mSlewed[18].cur);
         ab[0].pos += Rot_EB98(ab[0].rot, liftOffset);
     }
-    if (self->mUseRootPoseOverride != 0)
+    if (mUseRootPoseOverride != 0)
     {
-        self->mAnimModel->localPos[self->mBoneBoardRoot] = t4vect_Origin;
-        self->mAnimModel->localRot[self->mBoneBoardRoot] = tquat_Identity;
-        self->mAnimModel->localPos[self->mBoneBoardChild] = t4vect_Origin;
-        self->mAnimModel->localRot[self->mBoneBoardChild] = tquat_Identity;
-        ab[1].pos = *(sVec4W*)&self->mRootPoseOverridePos;
-        ab[1].rot = *(sVec4W*)&self->mRootPoseOverrideRot;
+        mAnimModel->localPos[mBoneBoardRoot] = t4vect_Origin;
+        mAnimModel->localRot[mBoneBoardRoot] = tquat_Identity;
+        mAnimModel->localPos[mBoneBoardChild] = t4vect_Origin;
+        mAnimModel->localRot[mBoneBoardChild] = tquat_Identity;
+        ab[1].pos = *(sVec4W*)&mRootPoseOverridePos;
+        ab[1].rot = *(sVec4W*)&mRootPoseOverrideRot;
     }
-    cAnimModel_transform(self->mAnimModel, ab);
-    if (self->mSlewed[17].cur != 0.0f)
+    cAnimModel_transform(mAnimModel, ab);
+    if (mSlewed[17].cur != 0.0f)
     {
-        sXf_EB98* boardRoot = (sXf_EB98*)&self->mAnimModel->bones[self->mBoneBoardRoot];
+        sXf_EB98* boardRoot = (sXf_EB98*)&mAnimModel->bones[mBoneBoardRoot];
         float qx = boardRoot->rot.x, qy = boardRoot->rot.y, qz = boardRoot->rot.z, qw = boardRoot->rot.w;
         sVec4W ax;
         ax.w = 0.0f;
         ax.x = 1.0f - 2.0f * (qy * qy + qz * qz);
         ax.y = 2.0f * (qx * qy + qw * qz);
         ax.z = 2.0f * (qx * qz - qw * qy);
-        sVec4W tiltAxis = Cross_EB98(*(sVec4W*)&self->DampGroundNormal, ax);
+        sVec4W tiltAxis = Cross_EB98(*(sVec4W*)&DampGroundNormal, ax);
         float len = Length_EB98(tiltAxis);
         if (len > 9.99999993922529e-09f)
         {
-            float tiltDot = DivDot_EB98(tiltAxis, len, *(sVec4W*)&self->DampGroundNormal, ax);
+            float tiltDot = DivDot_EB98(tiltAxis, len, *(sVec4W*)&DampGroundNormal, ax);
             float sinTilt = Min_EB98(len, 1.0f);
             sVec4W tiltRot;
             if (tiltDot < 0.0f)
-                tiltRot = AxisAngle_EB98(tiltAxis, (func_0031C128(sinTilt) - 1.5707963705062866f) * self->mSlewed[17].cur);
+                tiltRot = AxisAngle_EB98(tiltAxis, (func_0031C128(sinTilt) - 1.5707963705062866f) * mSlewed[17].cur);
             else
-                tiltRot = AxisAngle_EB98(tiltAxis, (1.5707963705062866f - func_0031C128(sinTilt)) * self->mSlewed[17].cur);
+                tiltRot = AxisAngle_EB98(tiltAxis, (1.5707963705062866f - func_0031C128(sinTilt)) * mSlewed[17].cur);
             boardRoot->rot = QuatMul_EB98(tiltRot, boardRoot->rot);
         }
-        if (0.0f < self->ChatterMag)
-            AddTo_EB98(boardRoot->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&self->mGroundNormal, self->ChatterMag), self->mSlewed[17].cur));
+        if (0.0f < ChatterMag)
+            AddTo_EB98(boardRoot->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&mGroundNormal, ChatterMag), mSlewed[17].cur));
         {
-            cAnimModel* am = self->mAnimModel;
+            cAnimModel* am = mAnimModel;
             sXf_EB98 local;
-            local.pos = sVec4W(am->localPos[self->mBoneBoardChild].x * am->ScaleVect.x, am->localPos[self->mBoneBoardChild].y * am->ScaleVect.y, am->localPos[self->mBoneBoardChild].z * am->ScaleVect.z, am->localPos[self->mBoneBoardChild].w * am->ScaleVect.w);
-            sVec4W* lr = (sVec4W*)&am->localRot[self->mBoneBoardChild];
+            local.pos = sVec4W(am->localPos[mBoneBoardChild].x * am->ScaleVect.x,
+                    am->localPos[mBoneBoardChild].y * am->ScaleVect.y,
+                    am->localPos[mBoneBoardChild].z * am->ScaleVect.z,
+                    am->localPos[mBoneBoardChild].w * am->ScaleVect.w);
+            sVec4W* lr = (sVec4W*)&am->localRot[mBoneBoardChild];
             local.rot = *lr;
-            sXf_EB98* bn = (sXf_EB98*)&am->bones[self->mBoneBoardChild];
+            sXf_EB98* bn = (sXf_EB98*)&am->bones[mBoneBoardChild];
             *bn = Combine_EB98(*boardRoot, local);
         }
     }
-    if (self->getControlState() != CS_Void && self->LegIK != 0.0f)
+    if (getControlState() != CS_Void && LegIK != 0.0f)
     {
-        sXf_EB98* bb = (sXf_EB98*)&self->mAnimModel->bones[self->mBoneBoardChild];
+        sXf_EB98* bb = (sXf_EB98*)&mAnimModel->bones[mBoneBoardChild];
         {
-            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->RightLeg.BoardRelativePose);
-            cRider_doLegIK(self, &self->RightLeg, &xx, self->LegIK);
+            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&RightLeg.BoardRelativePose);
+            cRider_doLegIK(this, &RightLeg, &xx, LegIK);
         }
         {
-            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->LeftLeg.BoardRelativePose);
-            cRider_doLegIK(self, &self->LeftLeg, &xx, self->LegIK);
+            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&LeftLeg.BoardRelativePose);
+            cRider_doLegIK(this, &LeftLeg, &xx, LegIK);
         }
     }
-    QuatToMat_EB98(&self->RiderRoot, &xf.rot, &xf.pos);
-    cRider_updateCollideInfo(self);
+    QuatToMat_EB98(&RiderRoot, &xf.rot, &xf.pos);
+    cRider_updateCollideInfo(this);
 }
 #endif
 
@@ -5736,7 +5737,6 @@ static inline t4Vector SubV_42B0(sVecP_42B0 a, const t4Vector& b)
 
 // PORT: the unit declares cRider_SetNISGroundVectors(void*, void*); this definition binds the cRider* view by asm
 // label.
-extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("cRider_SetNISGroundVectors");
 /**
  * Probes the ground under a position during an NIS (in-game cutscene) and sets the rider's ground vectors.
  *
@@ -5757,70 +5757,72 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  *
  * @param pRiderPos  the position to probe under (mPosition, or the board root bone; see cRider_updateSplit1)
  */
-extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
+void cRider::SetNISGroundVectors(void* pRiderPos)
 {
-    char* vtObj = (char*)&VPTR_AT(self, sizeof(cRiderState));
+    char* vtObj = (char*)&VPTR_AT(this, sizeof(cRiderState));
     sVEntry<t4Vector*(void*)>* ve = &(*(sVEntry<t4Vector*(void*)>**)vtObj)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(vthis(vtObj, *ve)));
-    float sideOffset = self->mAnimModel->ScaleVect.x * (self->mSlewed[0].cur * 45.0f);
-    t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&self->mGroundSide), sideOffset));
-    t4Vector lo = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), -100.0f));
-    t4Vector hi = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), 200.0f));
+    float sideOffset = mAnimModel->ScaleVect.x * (mSlewed[0].cur * 45.0f);
+    t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&mGroundSide), sideOffset));
+    t4Vector lo = Add_42B0(probeBase, Scale_42B0(*(&mGroundNormal), -100.0f));
+    t4Vector hi = Add_42B0(probeBase, Scale_42B0(*(&mGroundNormal), 200.0f));
     tIntersectInfo hit;
     cWorldLine ray;
     cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
-    float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
-    *(&self->LastGroundNormal) = *(&self->mGroundNormal);
+    float hitDist = cOverlapList_terrainIntersect1(mOverlapList, &ray, &hit, 0);
+    *(&LastGroundNormal) = *(&mGroundNormal);
     if (hitDist > 0.0f && hit.Patch != 0) {
-        self->mGroundPolyId = hit.Patch->m_RID;
-        self->PatchUV.x = hit.u;
-        self->PatchUV.y = hit.v;
-        self->SurfaceFlags = hit.Patch->m_sSurfaceFlags;
+        mGroundPolyId = hit.Patch->m_RID;
+        PatchUV.x = hit.u;
+        PatchUV.y = hit.v;
+        SurfaceFlags = hit.Patch->m_sSurfaceFlags;
     } else {
-        self->mGroundPolyId = 0xFFFFFFFF;
+        mGroundPolyId = 0xFFFFFFFF;
     }
     if (hitDist < 0.0f) {
-        self->mOnGroundNIS = 0;
-        *(&self->mGroundNormal) = t4vect_ZAxis_42B0;
-        *(&self->GroundVelocity) = t4vect_Zero_42B0;
-        *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
-        *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
-        self->mSurfaceType = 0;
-        self->mAudioBraking = 0.0f;
-        self->mAudioEdging = 0.0f;
-        self->mAudioPressure = 0.0f;
-        self->mAudioSpeed = 0.0f;
-        self->mLastSpeed = speed;
+        mOnGroundNIS = 0;
+        *(&mGroundNormal) = t4vect_ZAxis_42B0;
+        *(&GroundVelocity) = t4vect_Zero_42B0;
+        *(&mGroundForward) = Normalize_42B0(SubV_42B0(*(&mMatrix.row[1]), Scale_42B0(*(&mGroundNormal),
+                DotV_42B0(*(&mMatrix.row[1]), *(&mGroundNormal)))));
+        *(&mGroundSide) = Cross_42B0(*(&mGroundNormal), *(&mGroundForward));
+        mSurfaceType = 0;
+        mAudioBraking = 0.0f;
+        mAudioEdging = 0.0f;
+        mAudioPressure = 0.0f;
+        mAudioSpeed = 0.0f;
+        mLastSpeed = speed;
         return;
     }
-    if (self->mNISShowBoardVisualFX != 0 && self->mOnGroundNIS == 0) {
-        func_00111AA0_42B0(self->mRiderHandler, &hit, &hit.Inorm, hit.Stype, Length_42B0(hit.Ivel));
+    if (mNISShowBoardVisualFX != 0 && mOnGroundNIS == 0) {
+        func_00111AA0_42B0(mRiderHandler, &hit, &hit.Inorm, hit.Stype, Length_42B0(hit.Ivel));
     }
-    self->mOnGroundNIS = 1;
-    self->mSurfaceType = hit.Stype;
+    mOnGroundNIS = 1;
+    mSurfaceType = hit.Stype;
     if (hit.Stype == eST_Undefined)
-        self->mSurfaceType = eST_Default;
-    *(&self->mGroundNormal) = hit.Inorm;
-    *(&self->mGroundContactPoint) = hit.Ipos;
-    *(&self->GroundVelocity) = hit.Ivel;
-    *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
-    *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
-    self->SnowOffset = Dot_42B0(Sub_42B0(probeBase, hit.Ipos), *(&self->mGroundNormal));
-    float speedDrop = self->mLastSpeed - speed;
-    self->mAudioBraking = 0.0f;
-    if (speedDrop < self->mAudioBraking) {
+        mSurfaceType = eST_Default;
+    *(&mGroundNormal) = hit.Inorm;
+    *(&mGroundContactPoint) = hit.Ipos;
+    *(&GroundVelocity) = hit.Ivel;
+    *(&mGroundForward) = Normalize_42B0(SubV_42B0(*(&mMatrix.row[1]), Scale_42B0(*(&mGroundNormal),
+            DotV_42B0(*(&mMatrix.row[1]), *(&mGroundNormal)))));
+    *(&mGroundSide) = Cross_42B0(*(&mGroundNormal), *(&mGroundForward));
+    SnowOffset = Dot_42B0(Sub_42B0(probeBase, hit.Ipos), *(&mGroundNormal));
+    float speedDrop = mLastSpeed - speed;
+    mAudioBraking = 0.0f;
+    if (speedDrop < mAudioBraking) {
         float braking = -speedDrop * 0.0036000001709908247f;
-        self->mAudioBraking = braking;
+        mAudioBraking = braking;
         if (1.0f < braking)
-            self->mAudioBraking = 1.0f;
+            mAudioBraking = 1.0f;
     }
     float speedLevel = speed * 0.0007200000109151006f;
-    self->mAudioSpeed = speedLevel;
+    mAudioSpeed = speedLevel;
     if (1.0f < speedLevel)
-        self->mAudioSpeed = 1.0f;
-    self->mLastSpeed = speed;
-    self->mAudioPressure = 0.30000001192092896f;
-    self->mAudioEdging = 0.0f;
+        mAudioSpeed = 1.0f;
+    mLastSpeed = speed;
+    mAudioPressure = 0.30000001192092896f;
+    mAudioEdging = 0.0f;
 }
 #endif
 
@@ -6033,7 +6035,6 @@ static inline sVec4 GetFront_124788(cRider* rider)
 
 
 // The unit declares cRider_DoInSeqAnimUpdate(void*, void*, float, float, int); bind the typed definition by asm label.
-extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFrameInfo, float currFrame, float frameDelta, int eventBits) __asm__("cRider_DoInSeqAnimUpdate");
 /**
  * Drives the rider from an in-game scripted sequence (NIS) frame: starts its animation and follows the scripted
  * position and angles.
@@ -6056,7 +6057,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
  * @param frameDelta  frames advanced this update
  * @param eventBits  bit 0: key event on this frame; bit 1: the sequence ended
  */
-extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFrameInfo, float currFrame, float frameDelta, int eventBits)
+void cRider::DoInSeqAnimUpdate(tSSXFrameActor* pFrameInfo, float currFrame, float frameDelta, int eventBits)
 {
     if (eventBits & 1) {
         if (pFrameInfo->numMainAnim == 0) {
@@ -6070,91 +6071,92 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
         float startTime = pCurrMainAnim->data.currObjectFrame * 0.01666666753590107f;
         int animID;
         int sourceID;
-        cScriptObjRider_ScriptAnimIDToGameAnimInfo(&self->mScriptObjRiderVtbl, pCurrMainAnim->data.objectID, &animID, &sourceID);
+        cScriptObjRider_ScriptAnimIDToGameAnimInfo(&mScriptObjRiderVtbl, pCurrMainAnim->data.objectID, &animID,
+                &sourceID);
         tAnimID animInfo(sourceID, animID);
         if (pCurrMainAnimCustom->alignBody != 0) {
             char buf[80];
-            cRiderAnimBase_getAIAnimFrame(buf, self->mRiderAnim, 432, animInfo, startTime);
+            cRiderAnimBase_getAIAnimFrame(buf, mRiderAnim, 432, animInfo, startTime);
             tPose animPose;
-            func_0030ECD8(&animPose, self->mAnimModel, buf, 0);
-            cAnimModel* trk = self->mAnimModel;
-            sVec4* n = (sVec4*)((self->mBoneHips << 4) + (int)trk->localPos);
+            func_0030ECD8(&animPose, mAnimModel, buf, 0);
+            cAnimModel* trk = mAnimModel;
+            sVec4* n = (sVec4*)((mBoneHips << 4) + (int)trk->localPos);
             tPose node;
             (*(sVec4*)&node.P) = sVec4(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
                                  n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w);
-            t4Vector* rot = &self->mAnimModel->localRot[self->mBoneHips];
+            t4Vector* rot = &mAnimModel->localRot[mBoneHips];
             node.Q = *rot;
             tPose y = Combine_124788(node, Invert_124788(animPose));
-            tPose* rx = (tPose*)&self->mPosition;
+            tPose* rx = (tPose*)&mPosition;
             *rx = Combine_124788(*rx, y);
-            self->updateOrientationImplicit();
+            updateOrientationImplicit();
             tPose w = Invert_124788(y);
-            cRiderAnimBase_changeOrientationOffset(self->mRiderAnim, &w);
+            cRiderAnimBase_changeOrientationOffset(mRiderAnim, &w);
         }
         if (pCurrMainAnimCustom->applySGOffsets != 0) {
-            float kneeOffset = cRider_getStartGateKneeOffset(self);
-            self->mSlewed[18].target = kneeOffset;
-            self->mSlewed[18].rate = 0;
-            self->mSlewed[18].cur = kneeOffset;
-            AddEq_124788(*(sVec4*)&self->mPosition,
-                         Scale_124788(GetFront_124788(self), cRider_getStartGateHorizOffset(self)));
-            self->updateOrientationImplicit();
+            float kneeOffset = cRider_getStartGateKneeOffset(this);
+            mSlewed[18].target = kneeOffset;
+            mSlewed[18].rate = 0;
+            mSlewed[18].cur = kneeOffset;
+            AddEq_124788(*(sVec4*)&mPosition,
+                         Scale_124788(GetFront_124788(this), cRider_getStartGateHorizOffset(this)));
+            updateOrientationImplicit();
         }
         int isFlipped = pCurrMainAnimCustom->isFlipped != 0;
-        if (isFlipped != self->mWasFlipped) {
+        if (isFlipped != mWasFlipped) {
             float headingOffset = 0.0f;
             if (isFlipped) {
                 headingOffset = 3.1415927410125732f;
             }
-            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, headingOffset);
-            self->mWasFlipped = isFlipped;
+            cRiderAnimBase_changeHeadingOffset(mRiderAnim, headingOffset);
+            mWasFlipped = isFlipped;
         }
         float start = pCurrMainAnim->data.blendInFrames;
-        self->mRiderAnim->FrameRateFactor = pCurrMainAnim->data.playRate;
-        cRiderAnimBase_playFromAnimID(self->mRiderAnim, 432, animInfo, start * 0.01666666753590107f);
-        cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2), 0, startTime);
-        cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
-        self->mRiderAnim->FrameRateFactor = 1.0f;
+        mRiderAnim->FrameRateFactor = pCurrMainAnim->data.playRate;
+        cRiderAnimBase_playFromAnimID(mRiderAnim, 432, animInfo, start * 0.01666666753590107f);
+        cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 2), 0, startTime);
+        cRiderAnimBase_setupAnimation(mRiderAnim, 0);
+        mRiderAnim->FrameRateFactor = 1.0f;
     } else if ((eventBits & 2) && pFrameInfo->numMainAnim == 0) {
-        cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
+        cRiderAnimBase_play(mRiderAnim, 5, 0, -1.0f);
     }
-    sVec4 oldStart = *(sVec4*)&self->mScriptCurrPosOffset;
-    *(sVec4*)&self->mScriptCurrPosOffset = sVec4(pFrameInfo->posX, pFrameInfo->posY, pFrameInfo->posZ, 1.0f);
-    float prevAngX = self->mScriptCurrRotX;
-    float prevAngY = self->mScriptCurrRotY;
-    float prevAngZ = self->mScriptCurrRotZ;
-    sVec4 oldPos = *(sVec4*)&self->mPosition;
-    self->mScriptCurrRotX = pFrameInfo->rotX * 0.01745329424738884f;
-    self->mScriptCurrRotY = pFrameInfo->rotY * 0.01745329424738884f;
-    self->mScriptCurrRotZ = pFrameInfo->rotZ * 0.01745329424738884f;
-    AddEq_124788(*(sVec4*)&self->mPosition,
-                 MatMulV_124788((char*)&self->mScriptMatrix,
-                                Sub_124788(*(sVec4*)&self->mScriptCurrPosOffset, oldStart)));
-    sVec4 delta = Sub_124788(*(sVec4*)&self->mPosition, oldPos);
-    *(sVec4*)&self->mVelocity = delta;
-    self->EulerToQuat((tQuaternion*)&delta, self->mScriptCurrRotZ - prevAngZ, self->mScriptCurrRotY - prevAngY,
-            self->mScriptCurrRotX - prevAngX);
-    *(sVec4*)&self->mRotation = QuatMul_124788(delta, *(sVec4*)&self->mRotation);
-    self->updateOrientationImplicit();
-    sVec4* bone = (sVec4*)&self->mAnimModel->bones[self->mBoneBoardRoot].pos;
+    sVec4 oldStart = *(sVec4*)&mScriptCurrPosOffset;
+    *(sVec4*)&mScriptCurrPosOffset = sVec4(pFrameInfo->posX, pFrameInfo->posY, pFrameInfo->posZ, 1.0f);
+    float prevAngX = mScriptCurrRotX;
+    float prevAngY = mScriptCurrRotY;
+    float prevAngZ = mScriptCurrRotZ;
+    sVec4 oldPos = *(sVec4*)&mPosition;
+    mScriptCurrRotX = pFrameInfo->rotX * 0.01745329424738884f;
+    mScriptCurrRotY = pFrameInfo->rotY * 0.01745329424738884f;
+    mScriptCurrRotZ = pFrameInfo->rotZ * 0.01745329424738884f;
+    AddEq_124788(*(sVec4*)&mPosition,
+                 MatMulV_124788((char*)&mScriptMatrix,
+                                Sub_124788(*(sVec4*)&mScriptCurrPosOffset, oldStart)));
+    sVec4 delta = Sub_124788(*(sVec4*)&mPosition, oldPos);
+    *(sVec4*)&mVelocity = delta;
+    EulerToQuat((tQuaternion*)&delta, mScriptCurrRotZ - prevAngZ, mScriptCurrRotY - prevAngY,
+            mScriptCurrRotX - prevAngX);
+    *(sVec4*)&mRotation = QuatMul_124788(delta, *(sVec4*)&mRotation);
+    updateOrientationImplicit();
+    sVec4* bone = (sVec4*)&mAnimModel->bones[mBoneBoardRoot].pos;
     sVec4 before = *bone;
-    self->updateAnimation(frameDelta);
-    cRider_updateSkeleton(self);
-    if (self->mNISShowBoardVisualFX != 0) {
-        *(sVec4*)&self->mVelocity = Sub_124788(*bone, before);
+    updateAnimation(frameDelta);
+    cRider_updateSkeleton(this);
+    if (mNISShowBoardVisualFX != 0) {
+        *(sVec4*)&mVelocity = Sub_124788(*bone, before);
     }
     if (frameDelta > 0.0f) {
-        self->mVelocity.x = self->mVelocity.x / frameDelta;
-        self->mVelocity.y = self->mVelocity.y / frameDelta;
-        self->mVelocity.z = self->mVelocity.z / frameDelta;
+        mVelocity.x = mVelocity.x / frameDelta;
+        mVelocity.y = mVelocity.y / frameDelta;
+        mVelocity.z = mVelocity.z / frameDelta;
     }
-    tEventFlags* ch = &cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->Events;
+    tEventFlags* ch = &cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 2)->Events;
     int on = 0;
     if (tEventFlags_isSet1(ch, 0) != 0) {
         on = tEventFlags_isJustChanged(ch, 0) != 0;
     }
     if (on) {
-        func_0030E9E0(self->mAnimModel, 11, 0);
+        func_0030E9E0(mAnimModel, 11, 0);
         tEventFlags_clear1(ch, 0);
     } else {
         int on2 = 0;
@@ -6162,15 +6164,15 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
             on2 = tEventFlags_isJustChanged(ch, 1) != 0;
         }
         if (on2) {
-            func_0030EA80(self->mAnimModel, 11, 0);
+            func_0030EA80(mAnimModel, 11, 0);
             tEventFlags_clear1(ch, 1);
         }
     }
-    sAnimModelBone* hips = &self->mAnimModel->bones[self->mBoneHips];
+    sAnimModelBone* hips = &mAnimModel->bones[mBoneHips];
     sVec4 hipsPos = *(sVec4*)&hips->pos;
-    hipsPos.z = self->mPosition.z;
-    cRider_updateBoundBox_4788(self, &hipsPos);
-    cRider_updateCollideInfo_4788(self);
+    hipsPos.z = mPosition.z;
+    cRider_updateBoundBox_4788(this, &hipsPos);
+    cRider_updateCollideInfo_4788(this);
 }
 #endif
 
