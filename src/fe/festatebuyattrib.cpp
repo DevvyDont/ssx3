@@ -240,7 +240,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             cUIStateBuyPopup_initBuyAttributes(pPopup, 0, self->mTotalCost, self->mBank);
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, pPopup);
         } else {
-            cUISoundInterface* sound = *(cUISoundInterface**)&self->mpEngine->mpSound;
+            cUISoundInterface* sound = self->mpEngine->mpSound;
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
@@ -628,8 +628,8 @@ extern "C" void* cFEStateCareerStats_cFEStateCareerStats(cFEStateCareerStats* se
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateCareerStats_vtbl;
     self->mHashName = 42;
-    *(char*)&self->mUserNum = 0;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
+    self->mUserNum = 0;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
     return ((void*)self);
 }
 #endif
@@ -920,7 +920,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
             }
         }
     }
-    cUISoundInterface* sound = *(cUISoundInterface**)&self->mpEngine->mpSound;
+    cUISoundInterface* sound = self->mpEngine->mpSound;
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)
@@ -1641,7 +1641,7 @@ void cFEStateCareerStats::initTotalEventMedal()
         if (i % 3 == 0) mode = 4;
         char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_004780D0[i]);
         if (medal == 0) {
-            *(int*)&mbitOwnedRaceMedal |= 1 << i;
+            mbitOwnedRaceMedal |= 1 << i;
             mTotalOwnedRaceEvent += 1;
         }
     }
@@ -1654,7 +1654,7 @@ void cFEStateCareerStats::initTotalEventMedal()
         }
         char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_00478110[i]);
         if (medal == 0) {
-            *(int*)&mbitOwnedFSMedal |= 1 << i;
+            mbitOwnedFSMedal |= 1 << i;
             mTotalOwnedFSEvent += 1;
         }
     }

@@ -376,8 +376,8 @@ extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cFEStateLodge
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateLodgeRiderDetail_vtbl;
     self->mHashName = 40;
-    *(char*)&self->mUserNum = 0;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
+    self->mUserNum = 0;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
     return ((void*)self);
 }
 #endif

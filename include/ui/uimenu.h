@@ -121,7 +121,7 @@ struct cUIMenu : public cUIGroup {
     void setSelected(cUIThing* item, int play) __asm__("cUIMenu_setSelected");
     bool onInputChangeItem(unsigned char OldScrollItemCurrent) __asm__("cUIMenu_onInputChangeItem");
     void setScrollableMenu(char NumItems) __asm__("cUIMenu_setScrollableMenu");
-    void setScrollBar(int scrollBar) __asm__("cUIMenu_setScrollBar");
+    void setScrollBar(cUIScrollBar* scrollBar) __asm__("cUIMenu_setScrollBar");
     unsigned char findFirstHighlightable(unsigned char start) __asm__("cUIMenu_findFirstHighlightable");
     unsigned char reverseFindFirstHighlightable(unsigned char idx) __asm__("cUIMenu_reverseFindFirstHighlightable");
     void setSelectedByIndex(unsigned char idx) __asm__("cUIMenu_setSelectedByIndex");
@@ -137,7 +137,7 @@ struct cUIMenu : public cUIGroup {
     void setScrollIndex(signed char scrollItemCurrent) __asm__("cUIMenu_setScrollIndex");
     void setScrollNum(signed char scrollItemNum) __asm__("cUIMenu_setScrollNum");
     void setScrollOffset(signed char scrollItemOffset) __asm__("cUIMenu_setScrollOffset");
-    int getSelected() __asm__("cUIMenu_getSelected");
+    cUIThing* getSelected() __asm__("cUIMenu_getSelected");
     unsigned char getSelectedIndex() __asm__("cUIMenu_getSelectedIndex");
 };
 

@@ -511,7 +511,7 @@ void cUITextureBank::setData(int id, void* vdata)
     }
     MEM_free(fsh);
     sUITexSrc8138* src = data->e;
-    *(sUITexData8138**)&self->mpTextureTableHeader = data;
+    self->mpTextureTableHeader = (tUITextureTableHeader*)data;
     int n = data->count;
     self->mNumElements = n;
     sUITexElem8138*& slot = ((sUITexElem8138*)self->mpElements);
@@ -611,7 +611,7 @@ int cUIFontInterface::getFontByHashName(int key)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIFontInterface_purgeFonts);
 #ifdef SKIP_ASM
-extern "C" void cFont__cFont(int h, int a);
+extern "C" void cFont__cFont(cFont* h, int a);
 
 /**
  * Releases all fonts of a font interface and empties it.
@@ -624,9 +624,9 @@ void cUIFontInterface::purgeFonts()
     for (int i = 0; i < mFontCount; i++) {
         cUIFontEntry* fontEntry = &((&mFontEntry[0]))[i];
         if (((int)fontEntry->mpFont) != 0) {
-            cFont__cFont(((int)fontEntry->mpFont), 3);
+            cFont__cFont((fontEntry->mpFont), 3);
         }
-        (*(int*)&fontEntry->mpFileName) = 0;
+        fontEntry->mpFileName = 0;
         fontEntry->mHashID = 0;
     }
     mFontCount = 0;
@@ -882,14 +882,14 @@ INCLUDE_ASM("ui/uiengine", cUIGroup_render3D);
 /**
  * Renders a group's children in 3D.
  *
- * @param pRenCon  the render context (On Tour cUIRenderContext*, passed as int)
+ * @param pRenCon  the render context (On Tour cUIRenderContext*)
  */
-extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
+extern "C" void cUIGroup_render3D(cUIGroup* self, cUIRenderContext* pRenCon)
 {
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            n->render3D((cUIRenderContext*)pRenCon);
+            n->render3D(pRenCon);
             n = (cUIThing*)((void*)n->mpNext);
         }
     }
@@ -1308,13 +1308,13 @@ extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
     tListBoxEntry* listBoxEntry = ((&self->mpEntries[0]));
     for (int i = 31; i != -1; i--, listBoxEntry++) {
         listBoxEntry->mStringID = 0;
-        *(int*)&listBoxEntry->mpString = 0;
-        *(int*)&listBoxEntry->mpAsciiString = 0;
-        *(int*)&listBoxEntry->mpData = 0;
+        listBoxEntry->mpString = 0;
+        listBoxEntry->mpAsciiString = 0;
+        listBoxEntry->mpData = 0;
         listBoxEntry->mUnicodeBufferSize = 0;
     }
-    *(char*)&self->mNumEntries = 0;
-    *(char*)&self->mCurrentEntry = 0;
+    self->mNumEntries = 0;
+    self->mCurrentEntry = 0;
     memset(((&self->mpEntries[0])), 0, 640);
     (*(&self->mStaticColour)) = gStaticColour;
     return (self);

@@ -343,7 +343,7 @@ extern "C" void* cFEStateUberTrick_cFEStateUberTrick(cFEStateUberTrick* self, in
     VPTR_OF(cListNode, self) = cFEStateUberTrick_vtbl;
     self->mHashName = 18;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mpMainMenu = 0;
     self->mpTrickMenu = 0;
     self->mbModelVisible = 0;
@@ -431,33 +431,6 @@ void cFEStateUberTrick::activateTrickMenu()
 INCLUDE_ASM("fe/festateriderbio", func_00183D08);
 #ifdef SKIP_ASM
 
-class cWidget_00183D08 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int a);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void getSize(t3Vector* p);
-    virtual void setSize(t3Vector* p);
-};
-
 /**
  * Sizes a UI object to a texture element and shows it, or hides the object when there is no element.
  *
@@ -469,7 +442,7 @@ public:
  * @param rect  the texture element (cTextureElement), or 0
  * @param scale  size factor on top of 256 per texture-coordinate unit
  */
-extern "C" void func_00183D08(cWidget_00183D08* self, cTextureElement* rect, float scale)
+extern "C" void func_00183D08(cUIThing* self, cTextureElement* rect, float scale)
 {
     if (((void*)rect)) {
         t3Vector pos;

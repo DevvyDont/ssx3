@@ -353,10 +353,10 @@ struct sVec2f { float x, y; };
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
-extern "C" void func_001E94E0(tTextPictLine* self, char* str, int font, sVec2f* scale)
+extern "C" void func_001E94E0(tTextPictLine* self, char* str, cFont* font, sVec2f* scale)
 {
     func_002C2540((unsigned short*)(&self->text[0]), str);
-    self->pFont = (cFont*)font;
+    self->pFont = font;
     *(sVec2f*)&self->fontScaleBase[0] = *scale;
     splitTextPictLine(self);
 }
@@ -377,10 +377,10 @@ extern "C" void splitTextPictLine(tTextPictLine* self);
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
-extern "C" void makeTextPictLine(tTextPictLine* self, unsigned short* str, int font, sVec2f* scale)
+extern "C" void makeTextPictLine(tTextPictLine* self, unsigned short* str, cFont* font, sVec2f* scale)
 {
     strcpy1((unsigned short*)(&self->text[0]), str);
-    self->pFont = (cFont*)font;
+    self->pFont = font;
     *(sVec2f*)&self->fontScaleBase[0] = *scale;
     splitTextPictLine(self);
 }
@@ -568,8 +568,8 @@ extern "C" void* cOVStateHUD1P_cOVStateHUD1P(cOVStateHUD1P* hud, int pEngine)
     hud->mHideHUDOV = 0;
     hud->mGlow.mWidth = 1.0f;
     hud->mGlow.mHeight = 1.0f;
-    *(int*)&hud->mGlow.mTop = 0;
-    *(int*)&hud->mGlow.mLeft = 0;
+    hud->mGlow.mTop = 0.0f;
+    hud->mGlow.mLeft = 0.0f;
     hud->mGlow.mRight = 1.0f;
     hud->mGlow.mBottom = 1.0f;
     return ((void*)hud);
@@ -1114,12 +1114,12 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
         break;
     case 12:
         self->mRenderFlags |= 0x20000;
-        *(int*)&self->mMessageFrame = 0;
+        self->mMessageFrame = 0.0f;
         strcpy1((unsigned short*)(&self->mMessage[0]), str);
         break;
     case 13:
         self->mMessage[0] = 0;
-        *(int*)&self->mMessageFrame = 0;
+        self->mMessageFrame = 0.0f;
         self->mRenderFlags &= ~0x20000;
         break;
     case 14:
@@ -1141,34 +1141,34 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
         if (!(self->mRenderFlags & 0x10000) || hash != self->mLastSongNameHashId) {
             self->mLastSongNameHashId = (unsigned int)hash;
             self->mBigRadioAnimFrame = -1.0f;
-            *(int*)&self->mBigRadioTextAnimFrame = 0;
+            self->mBigRadioTextAnimFrame = 0.0f;
             self->mBigRadioTextLinesNum = 0;
             self->mBigRadioTextLineSongIndexMax = 0;
-            *(int*)&self->mBigRadioBkgdAnimFrame = 0;
+            self->mBigRadioBkgdAnimFrame = 0.0f;
         }
         break;
     }
     case 6:
         self->mEventStateData = 0;
-        *(int*)&self->mEventStateFrame = 0;
+        self->mEventStateFrame = 0.0f;
         self->mEventStateHFX = 8;
         break;
     case 7:
         self->mRenderFlags &= 0xFFBDC3FF;
         self->mEventStateHFX = 80;
-        *(int*)&self->mEventStateFrame = 0;
-        *(int*)&self->mMessageFrame = 0;
+        self->mEventStateFrame = 0.0f;
+        self->mMessageFrame = 0.0f;
         self->mMessage[0] = 0;
         self->mLastMissionID = 0xFFFFFFFF;
         break;
     case 8:
-        *(int*)&self->mFlashIconTime = 0;
+        self->mFlashIconTime = 0.0f;
         self->mbFlashIcon = 1;
         break;
     case 9:
         self->mbFlashIcon = 0;
-        *(int*)&self->mFlashIconTime = 0;
-        *(int*)&self->mFlashIconPhase = 0;
+        self->mFlashIconTime = 0.0f;
+        self->mFlashIconPhase = 0.0f;
         break;
     }
     return 0;
@@ -1471,8 +1471,8 @@ void cOVStateHUD1P::renderTime1(int hour, int minute, int sec, int secFrac, int 
     } else {
         col = *color;
     }
-    renderTime(hour, minute, sec, secFrac, timeRenderFlags, pos, scale, &col, (*(signed char*)&defs[idx].pivotX),
-            (*(signed char*)&defs[idx].pivotY), reflect);
+    renderTime(hour, minute, sec, secFrac, timeRenderFlags, pos, scale, &col, (defs[idx].pivotX),
+            (defs[idx].pivotY), reflect);
 }
 #endif
 
@@ -1621,8 +1621,8 @@ void cOVStateHUD1P::renderText(cFont* font, tHUDDef* defs, int idx, const char* 
     font->Scale[0] = font->BaseScale[0] * escale[0];
     font->Scale[1] = font->BaseScale[1] * escale[1];
     cFont_textExtent(font, str, extent, 0, font->Scale[0], font->Scale[1]);
-    int ax = (align == kPivotFromDef) ? (*(signed char*)&hudDef->pivotX) : align;
-    int ay = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx].pivotY) : flags;
+    int ax = (align == kPivotFromDef) ? (hudDef->pivotX) : align;
+    int ay = (flags == kPivotFromDef) ? (defs[idx].pivotY) : flags;
     size[0] = extent[2];
     size[1] = extent[3];
     calcElemPos(out, pos, size, scale, ax, ay, reflect);
@@ -1787,10 +1787,10 @@ void cOVStateHUD1P::renderText1(float blend, cFont* font, tHUDDef* defs, int idx
     size1[1] = extent[3] * esc1[1];
     size2[0] = extent[2] * esc2[0];
     size2[1] = extent[3] * esc2[1];
-    int ax1 = (align == kPivotFromDef) ? (*(signed char*)&startDef->pivotX) : (signed char)align;
-    int ay1 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx1].pivotY) : (signed char)flags;
-    int ax2 = (align == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotX) : (signed char)align;
-    int ay2 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotY) : (signed char)flags;
+    int ax1 = (align == kPivotFromDef) ? (startDef->pivotX) : (signed char)align;
+    int ay1 = (flags == kPivotFromDef) ? (defs[idx1].pivotY) : (signed char)flags;
+    int ax2 = (align == kPivotFromDef) ? (defs[idx2].pivotX) : (signed char)align;
+    int ay2 = (flags == kPivotFromDef) ? (defs[idx2].pivotY) : (signed char)flags;
     calcElemPos(out1, pos1, size1, scale, ax1, ay1, reflect);
     calcElemPos(out2, pos2, size2, scale, ax2, ay2, reflect);
     dEsc[0] = esc2[0] - esc1[0];
@@ -1897,8 +1897,8 @@ void cOVStateHUD1P::renderText2(cFont* font, tHUDDef* defs, int idx, const unsig
     font->Scale[0] = font->BaseScale[0] * escale[0];
     font->Scale[1] = font->BaseScale[1] * escale[1];
     cFont_textExtent1(font, str, extent, 0, font->Scale[0], font->Scale[1]);
-    int ax = (align == kPivotFromDef) ? (*(signed char*)&hudDef->pivotX) : align;
-    int ay = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx].pivotY) : flags;
+    int ax = (align == kPivotFromDef) ? (hudDef->pivotX) : align;
+    int ay = (flags == kPivotFromDef) ? (defs[idx].pivotY) : flags;
     size[0] = extent[2];
     size[1] = extent[3];
     calcElemPos(out, pos, size, scale, ax, ay, reflect);
@@ -2048,10 +2048,10 @@ void cOVStateHUD1P::renderText3(float blend, cFont* font, tHUDDef* defs, int idx
     size1[1] = extent[3] * esc1[1];
     size2[0] = extent[2] * esc2[0];
     size2[1] = extent[3] * esc2[1];
-    int ax1 = (align == kPivotFromDef) ? (*(signed char*)&startDef->pivotX) : (signed char)align;
-    int ay1 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx1].pivotY) : (signed char)flags;
-    int ax2 = (align == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotX) : (signed char)align;
-    int ay2 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotY) : (signed char)flags;
+    int ax1 = (align == kPivotFromDef) ? (startDef->pivotX) : (signed char)align;
+    int ay1 = (flags == kPivotFromDef) ? (defs[idx1].pivotY) : (signed char)flags;
+    int ax2 = (align == kPivotFromDef) ? (defs[idx2].pivotX) : (signed char)align;
+    int ay2 = (flags == kPivotFromDef) ? (defs[idx2].pivotY) : (signed char)flags;
     calcElemPos(out1, pos1, size1, scale, ax1, ay1, reflect);
     calcElemPos(out2, pos2, size2, scale, ax2, ay2, reflect);
     dEsc[0] = esc2[0] - esc1[0];
@@ -2172,7 +2172,7 @@ void cOVStateHUD1P::renderMultiText(cFont* font, tHUDDef* defs, int idx, const c
     rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[idx].layer << 5) & 0x3E0);
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
-    float y = alignPos_001F2AA0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
+    float y = alignPos_001F2AA0(pos[1], (defs[idx].pivotY), totalH);
     if (rect != 0) {
         rect[0] = 65536.0f;
         rect[1] = y;
@@ -2184,7 +2184,7 @@ void cOVStateHUD1P::renderMultiText(cFont* font, tHUDDef* defs, int idx, const c
         char* line = lines[i];
         float w = cFont_textExtent(font, line, 0, 0, font->Scale[0], font->Scale[1]);
         float x = pos[0];
-        int al = (*(signed char*)&defs[idx].pivotX);
+        int al = (defs[idx].pivotX);
         if (flags & 1) {
             x = 640.0f - x;
             if (!(flags & 2)) al = -al;
@@ -2271,7 +2271,7 @@ void cOVStateHUD1P::renderMultiText1(cFont* font, tHUDDef* defs, int idx, const 
     rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[idx].layer << 5) & 0x3E0);
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
-    float y = alignPos_001F2DB0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
+    float y = alignPos_001F2DB0(pos[1], (defs[idx].pivotY), totalH);
     if (rect != 0) {
         rect[0] = 65536.0f;
         rect[1] = y;
@@ -2283,7 +2283,7 @@ void cOVStateHUD1P::renderMultiText1(cFont* font, tHUDDef* defs, int idx, const 
         unsigned short* line = lines[i];
         float w = cFont_textExtent1(font, line, 0, 0, font->Scale[0], font->Scale[1]);
         float x = pos[0];
-        int al = (*(signed char*)&defs[idx].pivotX);
+        int al = (defs[idx].pivotX);
         if (flags & 1) {
             x = 640.0f - x;
             if (!(flags & 2)) al = -al;
@@ -2592,7 +2592,7 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Show);
  */
 void cBXLoadIndicator::Show(int bit)
 {
-    *(int*)&mLoadIndicators |= (1 << bit);
+    mLoadIndicators |= (1 << bit);
 }
 #endif
 
@@ -2609,9 +2609,9 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Hide);
  */
 void cBXLoadIndicator::Hide(int bit)
 {
-    *(int*)&mLoadIndicators &= ~(1 << bit);
+    mLoadIndicators &= ~(1 << bit);
     if ((int)mLoadIndicators == 0) {
-        *(int*)&mAnimFrame = 0;
+        mAnimFrame = 0.0f;
     }
 }
 #endif

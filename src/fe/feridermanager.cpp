@@ -950,7 +950,7 @@ extern "C" void cFERider_setBoneQuaternion(cFERider* self, int slot, cQuad128* s
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_getAnimID);
 #ifdef SKIP_ASM
-extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(int, int);
+extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(cRiderAnim*, int);
 
 /**
  * Asks the front-end rider's animation (+0xC) for its current animation id (cRiderAnimBase_getCurrentAnimID with 2).
@@ -958,13 +958,13 @@ extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(int, int);
  * @param riderSlot  the front-end rider
  */
 extern "C" void cFERider_getAnimID(cFERider* riderSlot) {
-    cRiderAnimBase_getCurrentAnimID__FPvi(((int)riderSlot->mpRiderAnim), 2);
+    cRiderAnimBase_getCurrentAnimID__FPvi((riderSlot->mpRiderAnim), 2);
 }
 #endif
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_getAnimPercent);
 #ifdef SKIP_ASM
-extern "C" void cRiderAnimBase_getCurrentAnimFramePercent(int, int);
+extern "C" void cRiderAnimBase_getCurrentAnimFramePercent(cRiderAnim*, int);
 
 /**
  * Returns how far the front-end rider's current animation has played (cRiderAnimBase_getCurrentAnimFramePercent on its animation +0xC, sequencer
@@ -976,7 +976,7 @@ extern "C" void cRiderAnimBase_getCurrentAnimFramePercent(int, int);
  * @param riderSlot  the front-end rider
  */
 extern "C" void cFERider_getAnimPercent(cFERider* riderSlot) {
-    cRiderAnimBase_getCurrentAnimFramePercent(((int)riderSlot->mpRiderAnim), 2);
+    cRiderAnimBase_getCurrentAnimFramePercent((riderSlot->mpRiderAnim), 2);
 }
 #endif
 

@@ -679,7 +679,7 @@ struct cUIThing_cUIThing_sFlags {
  * @param pParent  the parent widget, or 0 (On Tour pParent)
  * @return this
  */
-extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
+extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, cUIScreen* pScreen, cUIThing* pParent)
 {
     VPTR_OF(cListNode, self) = (void**)cUIThing_vtbl;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b0 = 1;
@@ -695,21 +695,21 @@ extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
     self->mpNext = (cListNode*)(self);
     self->mpPrev = (cListNode*)(self);
     self->mpAnim = 0;
-    *(char*)&self->mAnimPlaybackStatus = 0;
+    self->mAnimPlaybackStatus = 0;
     self->mMiscData = 0;
     self->mColour.A = 1.0f;
     self->mColour.R = 1.0f;
     self->mColour.G = 1.0f;
     self->mColour.B = 1.0f;
     (*(cUIThing_cUIThing_sVec3*)&self->mAngle) = t3vect_Zero;
-    self->mpParent = (cUIThing*)pParent;
+    self->mpParent = pParent;
     self->mHashName = 0;
     self->mpEvents = 0;
     (*(cUIThing_cUIThing_sVec3*)&self->mPosition) = t3vect_Zero;
     self->mScale.x = 1.0f;
     self->mScale.y = 1.0f;
     self->mScale.z = 1.0f;
-    self->mpScreen = (cUIScreen*)pScreen;
+    self->mpScreen = pScreen;
     (*(cUIThing_cUIThing_sVec3*)&self->mSize) = t3vect_Zero;
     self->mSound[0] = 4;
     self->mSound[1] = 6;
@@ -957,9 +957,9 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getEngine__FPv);
  *
  * @return the UI engine
  */
-int cUIThing::getEngine()
+cUIEngine* cUIThing::getEngine()
 {
-    return (int)mpScreen->mpState->mpEngine;
+    return mpScreen->mpState->mpEngine;
 }
 #endif
 

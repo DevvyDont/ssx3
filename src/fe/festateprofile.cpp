@@ -298,13 +298,13 @@ void cFEStateProfileLoad::hideActionButtons(int on)
     if (mIsHidden == on)
         return;
     int off = on ^ 1;
-    ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x)))->setVisible(off);
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x))->setVisible(off);
     if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3)))->setVisible(off);
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext5))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
     } else {
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3a)))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3a))->setVisible(off);
     }
     mIsHidden = on;
 }
@@ -345,8 +345,8 @@ extern "C" void cFEStateProfileLoad_hideDeleteButton(cFEStateProfileLoad* self, 
 {
     if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
         int off = !on;
-        ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
     }
     self->mDeleteButtonActive = !on;
 }
@@ -1069,7 +1069,7 @@ extern "C" void* cFEStateRiderBio_cFEStateRiderBio(cFEStateRiderBio* self, int e
     VPTR_OF(cListNode, self) = cFEStateRiderBio_vtbl;
     self->mHashName = 0xF;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     return ((void*)self);
 }
 #endif

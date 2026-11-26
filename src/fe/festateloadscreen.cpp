@@ -107,7 +107,7 @@ void cFELoadScreen::load()
         cFEInput* feInput = (cFEInput*)operator new(sizeof(cFEInput), str_FLUIInput, 0x100, 0);
         feInput->mPadNum = 0;
         VPTR_OF(cUIInput, feInput) = cFEInput_vtbl;
-        (*(int*)&feInput->mpInput) = 0;
+        feInput->mpInput = 0;
         feInput->mbKeyReady = 0;
         feInput->miVKey = 0;
         feInput->miAsciiKey = 0;

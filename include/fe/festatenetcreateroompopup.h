@@ -74,9 +74,9 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetCreateRoomPopup1() __asm__("cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1");
-    int getRoomName() __asm__("cFEStateNetCreateRoomPopup_getRoomName");
-    int getChannelName() __asm__("cFEStateNetCreateRoomPopup_getChannelName");
-    int getPassword() __asm__("cFEStateNetCreateRoomPopup_getPassword");
+    char* getRoomName() __asm__("cFEStateNetCreateRoomPopup_getRoomName");
+    char* getChannelName() __asm__("cFEStateNetCreateRoomPopup_getChannelName");
+    char* getPassword() __asm__("cFEStateNetCreateRoomPopup_getPassword");
 };
 
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mpTextRoomName, 0x6D0);

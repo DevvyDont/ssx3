@@ -303,9 +303,9 @@ extern "C" cUIText* cUIText_cUIText(cUIText* self)
     VPTR_OF(cListNode, self) = cUIText_vtbl;
     (*(unsigned char*)&self->mAttrText) = ((*(unsigned char*)&self->mAttrText) | 4) & 0x87;
     self->mNumLines = 0;
-    (*(int*)&self->mpLineOffset) = 0;
+    self->mpLineOffset = 0;
     self->mStringID = 0;
-    (*(int*)&self->mpString) = 0;
+    self->mpString = 0;
     self->mStringSize = 0;
     self->mLineSize = 0;
     (*(cUIText_cUIText_sQuad*)&self->mStaticColour) = gStaticColour;

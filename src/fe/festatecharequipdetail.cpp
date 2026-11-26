@@ -203,19 +203,19 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     self->f84 = 0;
     self->f88 = 0;
     {
-        cUIEngine* mgr = *(cUIEngine**)&self->mgr;
+        cUIEngine* mgr = (cUIEngine*)self->mgr;
         self->fA90 = Find_8DB8(mgr, GetHashValue32(str_dollargreen));
     }
     {
-        cUIEngine* mgr = *(cUIEngine**)&self->mgr;
+        cUIEngine* mgr = (cUIEngine*)self->mgr;
         self->fA94 = Find_8DB8(mgr, GetHashValue32(str_dollarred));
     }
     {
-        cUIEngine* mgr = *(cUIEngine**)&self->mgr;
+        cUIEngine* mgr = (cUIEngine*)self->mgr;
         self->fA98 = Find_8DB8(mgr, GetHashValue32(str_checkbox));
     }
     {
-        cUIEngine* mgr = *(cUIEngine**)&self->mgr;
+        cUIEngine* mgr = (cUIEngine*)self->mgr;
         self->fA9C = Find_8DB8(mgr, GetHashValue32(str_empty_box));
     }
     self->fAA0 = 0;
@@ -350,8 +350,8 @@ void cFEStateCharEquip::onCreateScreen()
             cRiderAnimBase_play(anim, 434, 0, -1.0f);
         }
     }
-    *(int*)&mZoom = 0;
-    *(int*)&mPlayerRotation = 0;
+    mZoom = 0.0f;
+    mPlayerRotation = 0.0f;
     mPan = -1.0f;
     update3DPositions();
     func_0028F140(cAudioInterface_bxAudio(), 2);
@@ -1466,19 +1466,6 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateHelpText);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
-class cUIObj_A798 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
 struct sEquipItem_A798 {
     short f0;
     signed char slot;   // 0x2
@@ -1535,12 +1522,12 @@ static inline void setText_A798(cFEStateCharEquip* self, char* s)
  */
 void cFEStateCharEquip::updateHelpText()
 {
-    if ((cUIObj_A798*)mpHelpText == 0)
+    if ((cUIThing*)mpHelpText == 0)
         return;
-    ((cUIObj_A798*)mpHelpText)->setVisible(0);
+    ((cUIThing*)mpHelpText)->setVisible(0);
     int sel = mpMenu->mScrollItemCurrent;
     if (sel < 0 || sel >= mNumItems) {
-        ((cUIObj_A798*)mpHelpText)->setVisible(1);
+        ((cUIThing*)mpHelpText)->setVisible(1);
         if (!isMode1_A798(this)) {
             if (mCanSwitchMode != 0)
                 setText_A798(this, str_kT_HELPNoItemsCTM);
@@ -1575,7 +1562,7 @@ void cFEStateCharEquip::updateHelpText()
             setText_A798(this, str_kT_FEHELPRemoveItems);
         }
     }
-    ((cUIObj_A798*)mpHelpText)->setVisible(1);
+    ((cUIThing*)mpHelpText)->setVisible(1);
 }
 #endif
 
@@ -3406,7 +3393,7 @@ extern "C" void func_0019CE68(void* self)
             tBoltFile* slot = &((sEquipSlotK19CE68*)&cache->mFiles[0][0])[i].e[j];
             slot->flags = 0;
             slot->fileName[0] = 0;
-            (*(int*)&slot->dataPtr) = 0;
+            slot->dataPtr = 0;
             slot->fileSize = 0;
             slot->asyncFileHandle = 0;
             slot->refCount = 0;

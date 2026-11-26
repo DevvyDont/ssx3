@@ -2664,10 +2664,10 @@ static inline void Notify_1CA298(cUIState* o, int vi, void* self, int v)
  * text into mszInputText and refits the entry box. kONOPTION and kONMISC are ignored; anything else goes to the
  * parent's onWidgetEvent (slot 19).
  *
- * @param id  the widget (On Tour: cUIThing *pWidget), compared as an int against the option pointers
+ * @param id  the widget (On Tour: cUIThing *pWidget), compared against the option pointers
  * @param ev  the widget event (On Tour: Event)
  */
-extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
+extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, cUIThing* id, int ev)
 {
     switch (ev) {
     case cUIState::kONNEXT:
@@ -2676,7 +2676,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             int i;
             self->mbNoEntryOnNext = 0;
             for (i = 0; i < 5; i++) {
-                if (id == (int)self->mpOptions[i]) {
+                if (id == self->mpOptions[i]) {
                     if (self->mtConfirmation[i].eType != 0) {
                         self->createConfirmationPopup(i);
                     } else {
@@ -2689,7 +2689,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             if (handled) {
                 break;
             }
-            if (id != (int)self->mpTextBoxPair) {
+            if (id != self->mpTextBoxPair) {
                 break;
             }
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
@@ -2720,7 +2720,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
     default:
         {
             cUIState* parentState = self->mpParentState;
-            parentState->onWidgetEvent((cUIThing*)id, ev);
+            parentState->onWidgetEvent(id, ev);
         }
         break;
     }
@@ -3190,7 +3190,7 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, cUIEn
     self->mHashName = 7;
     void* custom = (void*)self->mpEngine->mpCustom;
     if (custom != 0) {
-        *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(custom, idx);
+        self->mCtrlBits = cFECustom_getPlayerCtrlMask(custom, idx);
     }
     self->mInfo.clear();
     return ((void*)self);
@@ -3304,10 +3304,10 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(cUIStateBuyPopup* self, void* wi
         }
     } else if (id == GetHashValue32(str_group_credit)) {
         if (self->mInfo.mCreditsLeft <= 0)
-            ((cUIObj_AC98*)widget)->setVisible(0);
+            ((cUIThing*)widget)->setVisible(0);
     } else if (id == GetHashValue32(str_group_cash)) {
         if (self->mInfo.mCreditsLeft > 0)
-            ((cUIObj_AC98*)widget)->setVisible(0);
+            ((cUIThing*)widget)->setVisible(0);
     }
 }
 #endif
@@ -3664,12 +3664,12 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleEvent);
  * @param pParam  event parameter (On Tour: pParam)
  * @return the parent's result, or 0
  */
-extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pParam)
+extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, void* pParam)
 {
     if (self->mbReferEventsToParent != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            return obj->handleEvent(msg, (void*)pParam);
+            return obj->handleEvent(msg, pParam);
         }
     }
     return 0;

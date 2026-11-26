@@ -33,8 +33,8 @@ struct cUIProgress : public cUIThing {
     // Methods bound to their retail symbols by asm labels.
     void setValue(int pos) __asm__("cUIProgress_setValue");
     void* cUIProgress1() __asm__("cUIProgress_cUIProgress1");
-    void setBackgroundObject(int background) __asm__("cUIProgress_setBackgroundObject");
-    void setKnobObject(int knob) __asm__("cUIProgress_setKnobObject");
+    void setBackgroundObject(cUIThing* background) __asm__("cUIProgress_setBackgroundObject");
+    void setKnobObject(cUIThing* knob) __asm__("cUIProgress_setKnobObject");
     int getValue() __asm__("cUIProgress_getValue");
     void setNumValues(int numValues) __asm__("cUIProgress_setNumValues");
     virtual void render2D(float x, float y) __asm__("cUIProgress_render2D");

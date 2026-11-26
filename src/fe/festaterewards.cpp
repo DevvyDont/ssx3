@@ -207,8 +207,8 @@ static inline void Play_F270(cUISoundInterface* snd, int id)
 bool cFEStateRewardGalleryBase::onInputBegin(cUIInput* in)
 {
     cUISoundInterface* snd = &gUISoundNull_F270;
-    if (*(cUISoundInterface**)&mpEngine->mpSound != 0) {
-        snd = *(cUISoundInterface**)&mpEngine->mpSound;
+    if (mpEngine->mpSound != 0) {
+        snd = mpEngine->mpSound;
     }
     if (Test_F270(((char*)in), 6)) {
         Play_F270(snd, 3);
@@ -449,7 +449,8 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_poster_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    texHash);
             }
             w->mTextureID = -1;
             break;
@@ -457,7 +458,8 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_trading_card_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    texHash);
             }
             w->mTextureID = -1;
             break;
@@ -465,7 +467,8 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_art_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    texHash);
             }
             w->mTextureID = -1;
             break;
@@ -473,7 +476,8 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_video_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    texHash);
             }
             w->mTextureID = -1;
             break;
@@ -481,7 +485,8 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_toys_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    texHash);
             }
             w->mTextureID = -1;
             break;
@@ -1127,12 +1132,12 @@ void cFEStateRewardGalleryBase::updateRow(int row)
                 if (rewardIndex >= 0) {
                     cUIIcon* cell = mpIcons[row][col];
                     cell->mTextureID = rewardIndex;
-                    (*(void**)&cell->mpTextureElem) = 0;
+                    cell->mpTextureElem = 0;
                 } else {
                     int texture = (int)getTextureElement(idx);
                     if (texture != 0) {
                         cUIIcon* cell = mpIcons[row][col];
-                        (*(void**)&cell->mpTextureElem) = (void*)texture;
+                        cell->mpTextureElem = (const cTextureElement*)((void*)texture);
                         cell->mTextureID = -1;
                     }
                 }
@@ -1149,7 +1154,7 @@ void cFEStateRewardGalleryBase::updateRow(int row)
                     icon = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
                 }
                 cUIIcon* cell = mpIcons[row][col];
-                (*(void**)&cell->mpTextureElem) = icon;
+                cell->mpTextureElem = (const cTextureElement*)icon;
                 cell->mTextureID = -1;
             }
             cUIIcon* cell = mpIcons[row][col];
@@ -2309,7 +2314,8 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_poster_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    iconHash);
             }
             w->mTextureID = -1;
             break;
@@ -2317,7 +2323,8 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_trading_card_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    iconHash);
             }
             w->mTextureID = -1;
             break;
@@ -2325,7 +2332,8 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_art_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    iconHash);
             }
             w->mTextureID = -1;
             break;
@@ -2333,7 +2341,8 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_toys_icon);
-                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                w->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(&ui->mTextureBank,
+                    iconHash);
             }
             w->mTextureID = -1;
             break;
@@ -2390,7 +2399,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         cUIIcon* item = self->items[sel];
         if (item != 0 && self->frames[sel] != 0) {
             item->mTextureID = self->f70;
-            (*(void**)&item->mpTextureElem) = 0;
+            item->mpTextureElem = 0;
             cUIIcon* frame = self->frames[self->sel];
             frame->setVisible(1);
         }
@@ -2477,7 +2486,7 @@ extern sDefObj_1FF0 gUISoundNull;
 bool cFEStatePreviewReward::onInputBegin(cUIInput* obj)
 {
     if (obj->isPrevious() != 0) {
-    sDefObj_1FF0* sound = *(sDefObj_1FF0**)&mpEngine->mpSound;
+    sDefObj_1FF0* sound = (sDefObj_1FF0*)mpEngine->mpSound;
     if (sound == 0) {
         sound = &gUISoundNull;
     }

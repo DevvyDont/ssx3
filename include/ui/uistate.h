@@ -178,7 +178,7 @@ struct cUIState : public cListNode {
     void* cUIState2() __asm__("cUIState_cUIState2");
     void setHashName(int hashName) __asm__("cUIState_setHashName");
     int getHashName() __asm__("cUIState_getHashName");
-    int getEngine() __asm__("cUIState_getEngine");
+    cUIEngine* getEngine() __asm__("cUIState_getEngine");
     void setCurrentCtrl(signed char currentCtrl) __asm__("cUIState_setCurrentCtrl");
     signed char getCurrentCtrl() __asm__("cUIState_getCurrentCtrl");
     void setAllCtrlBits(signed char ctrlBits) __asm__("cUIState_setAllCtrlBits");
@@ -208,9 +208,9 @@ struct cUIState : public cListNode {
     void setPopup(int isPopup) __asm__("cUIState_setPopup");
     int isVisible() __asm__("cUIState_isVisible");
     void setVisible(int visible) __asm__("cUIState_setVisible");
-    void setParentState(int parentState) __asm__("cUIState_setParentState");
-    int getParentState() __asm__("cUIState_getParentState");
-    int getScreen() __asm__("cUIState_getScreen");
+    void setParentState(cUIState* parentState) __asm__("cUIState_setParentState");
+    cUIState* getParentState() __asm__("cUIState_getParentState");
+    cUIScreen* getScreen() __asm__("cUIState_getScreen");
     void setUserNum(signed char userNum) __asm__("cUIState_setUserNum");
     signed char getUserNum() __asm__("cUIState_getUserNum");
 };

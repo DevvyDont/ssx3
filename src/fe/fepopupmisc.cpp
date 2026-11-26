@@ -154,7 +154,7 @@ struct sPopup_EC68 {
 bool cFEPopupVideoCalibration::onInputBegin(cUIInput* in)
 {
     if (in->isNext() != 0) {
-        if (*(signed char*)&mImage == 0) {
+        if (mImage == 0) {
             cUIThing* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A1540));
             if (obj != 0) {
                 obj->setVisible(0);
@@ -171,11 +171,11 @@ bool cFEPopupVideoCalibration::onInputBegin(cUIInput* in)
             if (obj != 0) {
                 obj->setVisible(0);
             }
-            *(signed char*)&mImage = 1;
+            mImage = 1;
         } else {
             mAttrState = ((mAttrState | 0x80) & ~0x3F00) | 0x700;
         }
-        sDefObj_EC68* uiSound = *(sDefObj_EC68**)&mpEngine->mpSound;
+        sDefObj_EC68* uiSound = (sDefObj_EC68*)mpEngine->mpSound;
         if (uiSound == 0)
             uiSound = &gUISoundNull_EC68;
         if (uiSound != 0)
@@ -205,7 +205,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos__cFEPopupScreenPos__FPv);
 void* cFEPopupScreenPos__cFEPopupScreenPos(void* vself)
 {
     cFEPopupScreenPos* self = (cFEPopupScreenPos*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEPopupScreenPos_vtbl);
+    VPTR_OF(cListNode, self) = cFEPopupScreenPos_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -277,7 +277,7 @@ extern "C" int cFEPopupScreenPos_getData(cFEPopupScreenPos* self, int i)
     case 1:
         return self->mY;
     }
-    return *(signed char*)&self->mAccept;
+    return self->mAccept;
 }
 #endif
 
@@ -334,7 +334,7 @@ static inline int clamp_F050(int v, int lo, int hi)
  */
 void cFEPopupScreenPos::onUpdate()
 {
-    cUIInput* in = (cUIInput*)(*(char**)&mpEngine->mpInput);
+    cUIInput* in = (cUIInput*)((char*)mpEngine->mpInput);
     for (int i = 0; i < 2; i++) {
         sVEntry<void(void*, unsigned char)>* vt = (sVEntry<void (void*, unsigned char)>*)VPTR_OF(cUIInput, in);
         vt[44].fn(vthis(in, vt[44]), i);
@@ -343,12 +343,12 @@ void cFEPopupScreenPos::onUpdate()
         }
         if (in->isNext()) {
             sound_F050((this), 6);
-            *(signed char*)&mAccept = 1;
+            mAccept = 1;
             mAttrState |= 0x80;
             cUIStateStack_pop(&mpEngine->mStateStack, 1);
         } else if (in->isPrevious()) {
             sound_F050((this), 3);
-            *(signed char*)&mAccept = 0;
+            mAccept = 0;
             mAttrState |= 0x80;
             cUIStateStack_pop(&mpEngine->mStateStack, 1);
         } else if (in->isLeft()) {
@@ -432,7 +432,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
 void* cFEStateRiderBio__cFEStateRiderBio(void* vself)
 {
     cFEStateRiderBio* self = (cFEStateRiderBio*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -476,7 +476,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
 void* cFEStateRuleSelect__cFEStateRuleSelect(void* vself)
 {
     cFEStateRuleSelect* self = (cFEStateRuleSelect*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -653,7 +653,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FP
 void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateOnlineMainMenu_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateOnlineMainMenu_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -710,7 +710,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPop
 void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* vself)
 {
     cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetQuickPlayPopup_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateNetQuickPlayPopup_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -765,7 +765,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv);
 void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetSSXWorld_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateNetSSXWorld_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -806,7 +806,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages__cFEStateNetQuickMessages
 void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* vself)
 {
     cFEStateNetQuickMessages* self = (cFEStateNetQuickMessages*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetQuickMessages_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateNetQuickMessages_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -832,7 +832,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateLobbyMenu_cFEStateLobbyMenu1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateLobbyMenu_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs the lobby menu without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
@@ -843,10 +843,10 @@ extern int cBXString_EmptyString;
 void* cFEStateLobbyMenu::cFEStateLobbyMenu1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyStr = cBXString_EmptyString;
+    char* emptyStr = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEStateLobbyMenu_vtbl;
-    mszChannelName = (char*)emptyStr;
-    mszRoomName = (char*)emptyStr;
+    mszChannelName = emptyStr;
+    mszRoomName = emptyStr;
     return ((void*)this);
 }
 #endif
@@ -881,7 +881,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPo
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateNetCreateRoomPopup_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs the create-room popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
@@ -892,11 +892,11 @@ extern int cBXString_EmptyString;
 void* cFEStateNetCreateRoomPopup::cFEStateNetCreateRoomPopup1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyStr = cBXString_EmptyString;
+    char* emptyStr = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEStateNetCreateRoomPopup_vtbl;
-    mszRoomName = (char*)emptyStr;
-    mszChannelName = (char*)emptyStr;
-    mszPassword = (char*)emptyStr;
+    mszRoomName = emptyStr;
+    mszChannelName = emptyStr;
+    mszPassword = emptyStr;
     return ((void*)this);
 }
 #endif
@@ -951,9 +951,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
  *
  * @return the room name string
  */
-int cFEStateNetCreateRoomPopup::getRoomName()
+char* cFEStateNetCreateRoomPopup::getRoomName()
 {
-    return ((int)mszRoomName);
+    return mszRoomName;
 }
 #endif
 //100%
@@ -964,9 +964,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getChannelName);
  *
  * @return the channel name string
  */
-int cFEStateNetCreateRoomPopup::getChannelName()
+char* cFEStateNetCreateRoomPopup::getChannelName()
 {
-    return ((int)mszChannelName);
+    return mszChannelName;
 }
 #endif
 //100%
@@ -977,9 +977,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getPassword);
  *
  * @return the password string
  */
-int cFEStateNetCreateRoomPopup::getPassword()
+char* cFEStateNetCreateRoomPopup::getPassword()
 {
-    return ((int)mszPassword);
+    return mszPassword;
 }
 #endif
 //100%
@@ -1026,7 +1026,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup__cFEStateNetHelpPopup__FPv);
 void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* vself)
 {
     cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetHelpPopup_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateNetHelpPopup_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -1490,12 +1490,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getReward__FPvi);
  * Vtable entry 34 (+0x114) of cFEStateRewardGalleryPosters_vtbl; no bounds check.
  *
  * @param i  the reward index
- * @return the reward record (passed around as an int)
+ * @return the reward record
  */
-int cFEStateRewardGalleryPosters_getReward(void* vself, int i)
+const tPosterInfo* cFEStateRewardGalleryPosters_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
-    return (int)self->mpPosters[i];
+    return self->mpPosters[i];
 }
 #endif
 
@@ -1503,16 +1503,16 @@ int cFEStateRewardGalleryPosters_getReward(void* vself, int i)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardCost);
 #ifdef SKIP_ASM
 /**
- * Returns the price of a posters gallery reward: its short at +0xC, times 10 when positive.
+ * Returns the price of a posters gallery reward: its mCost, times 10 when positive.
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryPosters_vtbl; zero and negative values are returned unchanged.
  *
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryPosters* self, cFEStateRewardGalleryPosters* reward)
+extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryPosters* self, const tPosterInfo* reward)
 {
-    int value = *(short*)&reward->mHashName;
+    int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1616,12 +1616,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getReward__FPvi)
  * Vtable entry 34 (+0x114) of cFEStateRewardGalleryTradingCards_vtbl; no bounds check.
  *
  * @param i  the reward index
- * @return the reward record (passed around as an int)
+ * @return the reward record
  */
-int cFEStateRewardGalleryTradingCards_getReward(void* vself, int i)
+const tTradingCardInfo* cFEStateRewardGalleryTradingCards_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
-    return (int)self->mpTradingCards[i];
+    return self->mpTradingCards[i];
 }
 #endif
 
@@ -1629,16 +1629,17 @@ int cFEStateRewardGalleryTradingCards_getReward(void* vself, int i)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardCost);
 #ifdef SKIP_ASM
 /**
- * Returns the price of a trading-card gallery reward: its short at +0xC, times 10 when positive.
+ * Returns the price of a trading-card gallery reward: its mCost, times 10 when positive.
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryTradingCards_vtbl; zero and negative values are returned unchanged.
  *
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGalleryTradingCards* self, cFEStateRewardGalleryTradingCards* reward)
+extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGalleryTradingCards* self,
+        const tTradingCardInfo* reward)
 {
-    int value = *(short*)&reward->mHashName;
+    int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1742,12 +1743,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getReward__FPvi);
  * Vtable entry 34 (+0x114) of cFEStateRewardGalleryConceptArts_vtbl; no bounds check.
  *
  * @param i  the reward index
- * @return the reward record (passed around as an int)
+ * @return the reward record
  */
-int cFEStateRewardGalleryConceptArts_getReward(void* vself, int i)
+const tConceptArtInfo* cFEStateRewardGalleryConceptArts_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
-    return (int)self->mpConceptArts[i];
+    return self->mpConceptArts[i];
 }
 #endif
 
@@ -1755,16 +1756,17 @@ int cFEStateRewardGalleryConceptArts_getReward(void* vself, int i)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardCost);
 #ifdef SKIP_ASM
 /**
- * Returns the price of a concept-art gallery reward: its short at +0xC, times 10 when positive.
+ * Returns the price of a concept-art gallery reward: its mCost, times 10 when positive.
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryConceptArts_vtbl; zero and negative values are returned unchanged.
  *
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGalleryConceptArts* self, cFEStateRewardGalleryConceptArts* reward)
+extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGalleryConceptArts* self,
+        const tConceptArtInfo* reward)
 {
-    int value = *(short*)&reward->mHashName;
+    int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1868,12 +1870,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getReward__FPvi);
  * Vtable entry 34 (+0x114) of cFEStateRewardGalleryVideos_vtbl; no bounds check.
  *
  * @param i  the reward index
- * @return the reward record (passed around as an int)
+ * @return the reward record
  */
-int cFEStateRewardGalleryVideos_getReward(void* vself, int i)
+const tVideoInfo* cFEStateRewardGalleryVideos_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
-    return (int)self->mpVideos[i];
+    return self->mpVideos[i];
 }
 #endif
 
@@ -1881,16 +1883,16 @@ int cFEStateRewardGalleryVideos_getReward(void* vself, int i)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardCost);
 #ifdef SKIP_ASM
 /**
- * Returns the price of a video gallery reward: its short at +0xC, times 10 when positive.
+ * Returns the price of a video gallery reward: its mCost, times 10 when positive.
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryVideos_vtbl; zero and negative values are returned unchanged.
  *
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVideos* self, cFEStateRewardGalleryVideos* reward)
+extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVideos* self, const tVideoInfo* reward)
 {
-    int value = *(short*)&reward->mHashName;
+    int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1994,12 +1996,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getReward__FPvi);
  * Vtable entry 34 (+0x114) of cFEStateRewardGalleryToys_vtbl; no bounds check.
  *
  * @param i  the reward index
- * @return the reward record (passed around as an int)
+ * @return the reward record
  */
-int cFEStateRewardGalleryToys_getReward(void* vself, int i)
+const tToyInfo* cFEStateRewardGalleryToys_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
-    return (int)self->mpToys[i];
+    return self->mpToys[i];
 }
 #endif
 
@@ -2007,16 +2009,16 @@ int cFEStateRewardGalleryToys_getReward(void* vself, int i)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardCost);
 #ifdef SKIP_ASM
 /**
- * Returns the price of a toy gallery reward: its short at +0xC, times 10 when positive.
+ * Returns the price of a toy gallery reward: its mCost, times 10 when positive.
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryToys_vtbl; zero and negative values are returned unchanged.
  *
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys* self, cFEStateRewardGalleryToys* reward)
+extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys* self, const tToyInfo* reward)
 {
-    int value = *(short*)&reward->mHashName;
+    int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -2120,12 +2122,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getReward__FPvi);
  * Vtable entry 34 (+0x114) of cFEStateRewardGalleryCheatChars_vtbl; no bounds check.
  *
  * @param i  the reward index
- * @return the reward record (passed around as an int)
+ * @return the reward record
  */
-int cFEStateRewardGalleryCheatChars_getReward(void* vself, int i)
+const tCheatCharInfo* cFEStateRewardGalleryCheatChars_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
-    return (int)self->mpCheatChars[i];
+    return self->mpCheatChars[i];
 }
 #endif
 
@@ -2133,16 +2135,17 @@ int cFEStateRewardGalleryCheatChars_getReward(void* vself, int i)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardCost);
 #ifdef SKIP_ASM
 /**
- * Returns the price of a cheat-character gallery reward: its short at +0xC, times 10 when positive.
+ * Returns the price of a cheat-character gallery reward: its mCost, times 10 when positive.
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryCheatChars_vtbl; zero and negative values are returned unchanged.
  *
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalleryCheatChars* self, cFEStateRewardGalleryCheatChars* reward)
+extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalleryCheatChars* self,
+        const tCheatCharInfo* reward)
 {
-    int value = *(short*)&reward->mHashName;
+    int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -2334,10 +2337,6 @@ void cFEStateVideoPlayer::setSound(int value)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setOptions);
 #ifdef SKIP_ASM
-struct sBlock24 {
-    int w[9];
-};
-
 /**
  * Copies a whole set of movie play options (0x24 bytes) into the video-player state at +0x24C.
  *
@@ -2346,9 +2345,9 @@ struct sBlock24 {
  *
  * @param src  the options to copy (nine words)
  */
-void cFEStateVideoPlayer::setOptions(void* src)
+void cFEStateVideoPlayer::setOptions(const tMoviePlayOptions* src)
 {
-    *(sBlock24*)&mOptions = *(sBlock24*)src;
+    mOptions = *src;
 }
 #endif
 //100%
@@ -2498,7 +2497,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
 void* cFEStatePeakRoom__cFEStatePeakRoom(void* vself)
 {
     cFEStatePeakRoom* self = (cFEStatePeakRoom*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -2585,7 +2584,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
 void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* vself)
 {
     cFEStateRewardsRoom* self = (cFEStateRewardsRoom*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -2623,7 +2622,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode__cFEPopupSelectMulti
 void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* vself)
 {
     cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEPopupSelectMultiplayerMode_vtbl);
+    VPTR_OF(cListNode, self) = cFEPopupSelectMultiplayerMode_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -2774,7 +2773,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_getData__FPv);
 signed char cFEPopupSelectMultiplayerMode_getData(void* vself)
 {
     cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
-    return *(signed char*)&self->mMultiMode;
+    return self->mMultiMode;
 }
 #endif
 
@@ -2849,7 +2848,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
 void* cFEStateAudioOptions__cFEStateAudioOptions(void* vself)
 {
     cFEStateAudioOptions* self = (cFEStateAudioOptions*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -2905,7 +2904,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
 void* cFEStateRequestLine__cFEStateRequestLine(void* vself)
 {
     cFEStateRequestLine* self = (cFEStateRequestLine*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -2963,7 +2962,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_selectSong);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 void cFEStateRequestLine::selectSong(int bit)
 {
-    *(long*)&mPlaylist |= 1L << bit;
+    mPlaylist |= 1L << bit;
 }
 #endif
 //100%
@@ -2977,7 +2976,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_unselectSong);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 void cFEStateRequestLine::unselectSong(int bit)
 {
-    *(long*)&mPlaylist &= ~(1L << bit);
+    mPlaylist &= ~(1L << bit);
 }
 #endif
 //100%
@@ -3065,7 +3064,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongOwned);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 int cFEStateRequestLine::isSongOwned(int bit)
 {
-    return (*(unsigned long*)&mOwnedSong >> bit) & 1;
+    return (mOwnedSong >> bit) & 1;
 }
 #endif
 //100%
@@ -3079,7 +3078,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_ownSong);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 void cFEStateRequestLine::ownSong(int bit)
 {
-    *(long*)&mOwnedSong |= 1L << bit;
+    mOwnedSong |= 1L << bit;
 }
 #endif
 //100%
@@ -3101,7 +3100,7 @@ int cFEStateRequestLine::getNumOwnedSongs()
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (*(unsigned long*)&mOwnedSong) >> var_4) & 1;
+        temp_2 = (mOwnedSong >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);
@@ -3241,7 +3240,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMulti
 void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* vself)
 {
     cFEStateSelectMultiplayerMode* self = (cFEStateSelectMultiplayerMode*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3282,7 +3281,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
 void* cFEStateMPCircuit__cFEStateMPCircuit(void* vself)
 {
     cFEStateMPCircuit* self = (cFEStateMPCircuit*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3292,7 +3291,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEUseExistingAccount_cFEUseExistingAccount1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEUseExistingAccount_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs the use-existing-account state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
@@ -3304,9 +3303,9 @@ extern int cBXString_EmptyString;
 void* cFEUseExistingAccount::cFEUseExistingAccount1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyString = cBXString_EmptyString;
+    char* emptyString = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEUseExistingAccount_vtbl;
-    mszEmail = (char*)emptyString;
+    mszEmail = emptyString;
     unk_6D0 = 0;
     mpTextForgotPassword = 0;
     return ((void*)this);
@@ -3366,7 +3365,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona__cFEStateSelectPersona__FPv)
 void* cFEStateSelectPersona__cFEStateSelectPersona(void* vself)
 {
     cFEStateSelectPersona* self = (cFEStateSelectPersona*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateSelectPersona_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateSelectPersona_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3471,7 +3470,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_cFEStateChallengeRe
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChallengeReceivedPopup_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs the challenge-received popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
@@ -3482,9 +3481,9 @@ extern int cBXString_EmptyString;
 void* cFEStateChallengeReceivedPopup::cFEStateChallengeReceivedPopup1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyStr = cBXString_EmptyString;
+    char* emptyStr = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEStateChallengeReceivedPopup_vtbl;
-    mszChallenger = (char*)emptyStr;
+    mszChallenger = emptyStr;
     return ((void*)this);
 }
 #endif
@@ -3567,7 +3566,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect__cFEStateOnlineChara
 void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* vself)
 {
     cFEStateOnlineCharacterSelect* self = (cFEStateOnlineCharacterSelect*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateOnlineCharacterSelect_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateOnlineCharacterSelect_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3829,7 +3828,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1_cFEStateCreateStep11);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateCreateStep1_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 /**
  * Constructs an account-creation step-1 state with no engine (the default-constructor copy).
@@ -3842,11 +3841,11 @@ extern int cBXString_EmptyString;
 void* cFEStateCreateStep1::cFEStateCreateStep11()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyStr = cBXString_EmptyString;
+    char* emptyStr = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEStateCreateStep1_vtbl;
-    mszSavedPassword = (char*)emptyStr;
-    mszSavedConfirm = (char*)emptyStr;
-    mszSavedMail = (char*)emptyStr;
+    mszSavedPassword = emptyStr;
+    mszSavedConfirm = emptyStr;
+    mszSavedMail = emptyStr;
     mbEditAccount = 1;
     mpStaticContinue = 0;
     return ((void*)this);
@@ -3933,7 +3932,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
 void* cFEStateCreateStep2__cFEStateCreateStep2(void* vself)
 {
     cFEStateCreateStep2* self = (cFEStateCreateStep2*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateCreateStep2_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateCreateStep2_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3990,7 +3989,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate__cFEStateCreateDuplicate__
 void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* vself)
 {
     cFEStateCreateDuplicate* self = (cFEStateCreateDuplicate*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateCreateDuplicate_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateCreateDuplicate_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4079,7 +4078,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
 void* cFEStateStats__cFEStateStats(void* vself)
 {
     cFEStateStats* self = (cFEStateStats*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateStats_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateStats_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4115,7 +4114,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews__cFEStateNetNews__FPv);
 void* cFEStateNetNews__cFEStateNetNews(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetNews_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateNetNews_vtbl;
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4169,7 +4168,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin__cFEStateRelogin__FPv);
 void* cFEStateRelogin__cFEStateRelogin(void* vself)
 {
     cFEStateLogin* self = (cFEStateLogin*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateRelogin_vtbl);
+    VPTR_OF(cListNode, self) = cFEStateRelogin_vtbl;
     return cFEStateLogin__cFEStateLogin(self);
 }
 #endif
@@ -4195,7 +4194,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_cFEStateNetMessenger1);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
 extern void* cFEStateNetMessenger_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 struct sAlloc_E0F60 {
     sAlloc_E0F60() {}
@@ -4223,11 +4222,11 @@ static inline void InitVec_E0F60(void* vvself, const sAlloc_E0F60& a = sAlloc_E0
 void* cFEStateNetMessenger::cFEStateNetMessenger1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyString = cBXString_EmptyString;
+    char* emptyString = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEStateNetMessenger_vtbl;
-    mszFoundName = (char*)emptyString;
-    mszSearchName = (char*)emptyString;
-    mszShownName = (char*)emptyString;
+    mszFoundName = emptyString;
+    mszSearchName = emptyString;
+    mszShownName = emptyString;
     InitVec_E0F60(this);
     return ((void*)this);
 }
@@ -4272,7 +4271,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateReadMessagePopup_cFEStateReadMessagePopup1
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
 extern void* cFEStateReadMessagePopup_vtbl[];
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 
 struct sAlloc_E0FF0 {
     sAlloc_E0FF0() {}
@@ -4299,9 +4298,9 @@ static inline void InitVec_E0FF0(cFEStateReadMessagePopup* self, const sAlloc_E0
 void* cFEStateReadMessagePopup::cFEStateReadMessagePopup1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
-    int emptyStr = cBXString_EmptyString;
+    char* emptyStr = cBXString_EmptyString;
     VPTR_OF(cListNode, this) = cFEStateReadMessagePopup_vtbl;
-    mszSender = (char*)emptyStr;
+    mszSender = emptyStr;
     InitVec_E0FF0(this);
     return this;
 }
@@ -5076,7 +5075,7 @@ INCLUDE_ASM("fe/fepopupmisc", cUIInput_setPadNum__FPvi);
  */
 void cUIInput::setPadNum(int val)
 {
-    *(char*)&mPadNum = (char)val;
+    mPadNum = (char)val;
 }
 #endif
 
@@ -5320,8 +5319,8 @@ extern "C" void func_001E1458(void)
 INCLUDE_ASM("fe/fepopupmisc", func_001E14C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(void* self);
-void func_001E1548(void* self);
+extern "C" bool func_001E3A30(int group);
+void func_001E1548(int group) __asm__("func_001E1548__FPv");
 
 struct sEntry14_14C0 {
     int type;
@@ -5342,10 +5341,10 @@ extern "C" void func_001E14C0(int type)
 {
     int i;
     for (i = 0; i < 61; i++) {
-        if (func_001E3A30((void*)i) == 0) {
+        if (func_001E3A30(i) == 0) {
             int groupType = D_00441630_14C0[i].type;
             if (groupType == type || groupType == 5) {
-                func_001E1548((void*)i);
+                func_001E1548(i);
             }
         }
     }
@@ -5357,8 +5356,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1548__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the per-group hook func_001E14C0 calls.
+ *
+ * @param group  the message group index (the symbol's mangling says void*)
  */
-void func_001E1548(void* self)
+void func_001E1548(int group)
 {
 }
 #endif
@@ -5371,7 +5372,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* iface, int a, int ch, int b, int c);
@@ -5396,7 +5397,7 @@ extern "C" void func_001E1550(void)
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
-        if (func_001E3A30((void*)1) == 0) {
+        if (func_001E3A30(1) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 0, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xE, 4) == 0) {
                 func_001E3A78(1, 1);
                 if (ch != 3) {
@@ -5405,7 +5406,7 @@ extern "C" void func_001E1550(void)
                     func_001E2FE0(BXrand() % 3 + 3, 0);
                 }
             }
-        } else if (func_001E3A30((void*)2) == 0) {
+        } else if (func_001E3A30(2) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 1, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xF, 4) == 0) {
                 func_001E3A78(2, 1);
                 if (ch != 7) {
@@ -5414,7 +5415,7 @@ extern "C" void func_001E1550(void)
                     func_001E2FE0(BXrand() % 3 + 9, 0);
                 }
             }
-        } else if (func_001E3A30((void*)3) == 0) {
+        } else if (func_001E3A30(3) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 2, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0x10, 4) == 0) {
                 func_001E3A78(3, 1);
                 if (ch != 8) {
@@ -5424,7 +5425,7 @@ extern "C" void func_001E1550(void)
                 }
             }
         }
-        if (func_001E3A30((void*)4) == 0) {
+        if (func_001E3A30(4) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 0, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xE, 5) == 0) {
                 func_001E3A78(4, 1);
                 if (ch != 3) {
@@ -5433,7 +5434,7 @@ extern "C" void func_001E1550(void)
                     func_001E2FE0(BXrand() % 3 + 21, 0);
                 }
             }
-        } else if (func_001E3A30((void*)5) == 0) {
+        } else if (func_001E3A30(5) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 1, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xF, 5) == 0) {
                 func_001E3A78(5, 1);
                 if (ch != 7) {
@@ -5442,7 +5443,7 @@ extern "C" void func_001E1550(void)
                     func_001E2FE0(BXrand() % 3 + 27, 0);
                 }
             }
-        } else if (func_001E3A30((void*)6) == 0) {
+        } else if (func_001E3A30(6) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 2, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0x10, 5) == 0) {
                 func_001E3A78(6, 1);
                 if (ch != 8) {
@@ -5551,7 +5552,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
 struct sEntry14_1C10 {
@@ -5584,10 +5585,10 @@ extern "C" void func_001E1C10(int which)
         int id;
         switch (which) {
         case 0: {
-            if (func_001E3A30((void*)0x1C) != 0) {
+            if (func_001E3A30(28) != 0) {
                 break;
             }
-            if (func_001E3A30((void*)29) != 0) {
+            if (func_001E3A30(29) != 0) {
                 break;
             }
             sEntry14_1C10* foreshadowGroup;
@@ -5605,10 +5606,10 @@ extern "C" void func_001E1C10(int which)
             break;
         }
         case 1: {
-            if (func_001E3A30((void*)0x1E) != 0) {
+            if (func_001E3A30(30) != 0) {
                 break;
             }
-            if (func_001E3A30((void*)0x1F) != 0) {
+            if (func_001E3A30(31) != 0) {
                 break;
             }
             sEntry14_1C10* foreshadowGroup;
@@ -5626,10 +5627,10 @@ extern "C" void func_001E1C10(int which)
             break;
         }
         case 2: {
-            if (func_001E3A30((void*)0x20) != 0) {
+            if (func_001E3A30(32) != 0) {
                 break;
             }
-            if (func_001E3A30((void*)33) != 0) {
+            if (func_001E3A30(33) != 0) {
                 break;
             }
             sEntry14_1C10* foreshadowGroup;
@@ -5655,7 +5656,7 @@ extern "C" void func_001E1C10(int which)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1DD0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int id, int a1);
 static inline int IsBusy001E1DD0()
 {
@@ -5678,12 +5679,12 @@ extern "C" void func_001E1DD0(void* self, int kind, int alt)
     if (IsBusy001E1DD0()) return;
     int id = 0;
     switch (kind) {
-    case 6: id = func_001E3A30((void*)34) == 0 ? 40 : 0; break;
-    case 7: id = func_001E3A30((void*)36) == 0 ? 44 : 0; break;
-    case 8: id = func_001E3A30((void*)38) == 0 ? 0x30 : 0; break;
-    case 9: id = func_001E3A30((void*)35) == 0 ? 42 : 0; break;
-    case 10: id = func_001E3A30((void*)37) == 0 ? 46 : 0; break;
-    case 11: id = func_001E3A30((void*)39) == 0 ? 50 : 0; break;
+    case 6: id = func_001E3A30(34) == 0 ? 40 : 0; break;
+    case 7: id = func_001E3A30(36) == 0 ? 44 : 0; break;
+    case 8: id = func_001E3A30(38) == 0 ? 0x30 : 0; break;
+    case 9: id = func_001E3A30(35) == 0 ? 42 : 0; break;
+    case 10: id = func_001E3A30(37) == 0 ? 46 : 0; break;
+    case 11: id = func_001E3A30(39) == 0 ? 50 : 0; break;
     }
     if (id != 0) {
         if (alt != 0) id++;
@@ -5695,7 +5696,7 @@ extern "C" void func_001E1DD0(void* self, int kind, int alt)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1EB8);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E20D0(int which, int flag);
 extern "C" void func_001E2220(int which, int flag);
@@ -5713,45 +5714,45 @@ extern "C" void func_001E1EB8(void)
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
-        if (func_001E3A30((void*)40) != 0) {
+        if (func_001E3A30(40) != 0) {
             func_001E2220(0, 0);
             func_001E3A78(40, 0);
-        } else if (func_001E3A30((void*)41) != 0) {
+        } else if (func_001E3A30(41) != 0) {
             func_001E2220(0, 1);
             func_001E3A78(41, 0);
         }
-        if (func_001E3A30((void*)44) != 0) {
+        if (func_001E3A30(44) != 0) {
             func_001E2220(1, 0);
             func_001E3A78(44, 0);
-        } else if (func_001E3A30((void*)45) != 0) {
+        } else if (func_001E3A30(45) != 0) {
             func_001E2220(1, 1);
             func_001E3A78(45, 0);
         }
-        if (func_001E3A30((void*)0x30) != 0) {
+        if (func_001E3A30(48) != 0) {
             func_001E2220(2, 0);
             func_001E3A78(0x30, 0);
-        } else if (func_001E3A30((void*)49) != 0) {
+        } else if (func_001E3A30(49) != 0) {
             func_001E2220(2, 1);
             func_001E3A78(49, 0);
         }
-        if (func_001E3A30((void*)42) != 0) {
+        if (func_001E3A30(42) != 0) {
             func_001E20D0(0, 0);
             func_001E3A78(42, 0);
-        } else if (func_001E3A30((void*)43) != 0) {
+        } else if (func_001E3A30(43) != 0) {
             func_001E20D0(0, 1);
             func_001E3A78(43, 0);
         }
-        if (func_001E3A30((void*)46) != 0) {
+        if (func_001E3A30(46) != 0) {
             func_001E20D0(1, 0);
             func_001E3A78(46, 0);
-        } else if (func_001E3A30((void*)47) != 0) {
+        } else if (func_001E3A30(47) != 0) {
             func_001E20D0(1, 1);
             func_001E3A78(47, 0);
         }
-        if (func_001E3A30((void*)50) != 0) {
+        if (func_001E3A30(50) != 0) {
             func_001E20D0(2, 0);
             func_001E3A78(50, 0);
-        } else if (func_001E3A30((void*)51) != 0) {
+        } else if (func_001E3A30(51) != 0) {
             func_001E20D0(2, 1);
             func_001E3A78(51, 0);
         }
@@ -5763,7 +5764,7 @@ extern "C" void func_001E1EB8(void)
 INCLUDE_ASM("fe/fepopupmisc", func_001E20D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5790,7 +5791,7 @@ extern "C" void func_001E20D0(int which, int flag)
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30((void*)35) == 0) {
+            if (func_001E3A30(35) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
                     func_001E3A78(35, 1);
@@ -5801,7 +5802,7 @@ extern "C" void func_001E20D0(int which, int flag)
             }
             break;
         case 1:
-            if (func_001E3A30((void*)37) == 0) {
+            if (func_001E3A30(37) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
                     func_001E3A78(37, 1);
@@ -5812,7 +5813,7 @@ extern "C" void func_001E20D0(int which, int flag)
             }
             break;
         case 2:
-            if (func_001E3A30((void*)39) == 0) {
+            if (func_001E3A30(39) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
                     func_001E3A78(39, 1);
@@ -5831,7 +5832,7 @@ extern "C" void func_001E20D0(int which, int flag)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2220);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5858,7 +5859,7 @@ extern "C" void func_001E2220(int which, int flag)
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30((void*)34) == 0) {
+            if (func_001E3A30(34) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
                     func_001E3A78(34, 1);
@@ -5869,7 +5870,7 @@ extern "C" void func_001E2220(int which, int flag)
             }
             break;
         case 1:
-            if (func_001E3A30((void*)36) == 0) {
+            if (func_001E3A30(36) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
                     func_001E3A78(36, 1);
@@ -5880,7 +5881,7 @@ extern "C" void func_001E2220(int which, int flag)
             }
             break;
         case 2:
-            if (func_001E3A30((void*)38) == 0) {
+            if (func_001E3A30(38) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
                     func_001E3A78(38, 1);
@@ -5933,7 +5934,7 @@ extern "C" void func_001E2370(int which)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2428);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5952,19 +5953,19 @@ extern "C" void func_001E2428(int which)
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30((void*)57) == 0) {
+            if (func_001E3A30(57) == 0) {
                 func_001E3A78(57, 1);
                 func_001E2FE0(0xFC, 0);
             }
             break;
         case 1:
-            if (func_001E3A30((void*)58) == 0) {
+            if (func_001E3A30(58) == 0) {
                 func_001E3A78(57, 1);
                 func_001E2FE0(253, 0);
             }
             break;
         case 2:
-            if (func_001E3A30((void*)59) == 0) {
+            if (func_001E3A30(59) == 0) {
                 func_001E3A78(59, 1);
                 func_001E2FE0(0xFE, 0);
             }
@@ -5977,7 +5978,7 @@ extern "C" void func_001E2428(int which)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2518);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5990,7 +5991,7 @@ extern "C" void func_001E2518(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
-    if (busy == 0 && func_001E3A30((void*)0x3C) == 0) {
+    if (busy == 0 && func_001E3A30(60) == 0) {
         func_001E3A78(0x3C, 1);
         func_001E2FE0(0xFF, 0);
     }
@@ -6000,7 +6001,7 @@ extern "C" void func_001E2518(void)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2578);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -6013,7 +6014,7 @@ extern "C" void func_001E2578(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
-    if (busy == 0 && func_001E3A30((void*)0x38) == 0) {
+    if (busy == 0 && func_001E3A30(56) == 0) {
         func_001E3A78(0x38, 1);
         func_001E2FE0(251, 0);
     }
@@ -6060,7 +6061,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E32C8(int type);
@@ -6087,7 +6088,7 @@ extern "C" void func_001E2648_impl(int which, int flag)
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
-            if (func_001E3A30((void*)22) != 0) {
+            if (func_001E3A30(22) != 0) {
                 break;
             }
             func_001E32C8(1);
@@ -6108,7 +6109,7 @@ extern "C" void func_001E2648_impl(int which, int flag)
             }
             break;
         case 0xF:
-            if (func_001E3A30((void*)23) != 0) {
+            if (func_001E3A30(23) != 0) {
                 break;
             }
             func_001E32C8(2);
@@ -6129,7 +6130,7 @@ extern "C" void func_001E2648_impl(int which, int flag)
             }
             break;
         case 0x10:
-            if (func_001E3A30((void*)0x18) != 0) {
+            if (func_001E3A30(24) != 0) {
                 break;
             }
             func_001E32C8(3);
@@ -6161,7 +6162,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E32C8(int type);
@@ -6188,7 +6189,7 @@ extern "C" void func_001E2828_impl(int which, int flag)
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
-            if (func_001E3A30((void*)25) != 0) {
+            if (func_001E3A30(25) != 0) {
                 break;
             }
             func_001E32C8(4);
@@ -6209,7 +6210,7 @@ extern "C" void func_001E2828_impl(int which, int flag)
             }
             break;
         case 0xF:
-            if (func_001E3A30((void*)26) != 0) {
+            if (func_001E3A30(26) != 0) {
                 break;
             }
             func_001E32C8(5);
@@ -6230,7 +6231,7 @@ extern "C" void func_001E2828_impl(int which, int flag)
             }
             break;
         case 0x10:
-            if (func_001E3A30((void*)27) != 0) {
+            if (func_001E3A30(27) != 0) {
                 break;
             }
             func_001E32C8(6);
@@ -6264,7 +6265,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E2B38(int charID);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 unsigned int BXrand();
@@ -6299,7 +6300,7 @@ extern "C" void func_001E2A08(int charID, int level)
         return;
     int id = func_001E2B38(charID);
     sEntry14_2A08* aggressionGroup = &D_00441630_2A08[id];
-    if (func_001E3A30((void*)id)) {
+    if (func_001E3A30(id)) {
         if (level < 5)
             func_001E3A78(id, 0);
     } else if ((int)((BXrand() & 7) + 0xF) < level) {
@@ -6343,7 +6344,7 @@ extern "C" int func_001E2B38(int x)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2BB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 
 struct sEntry14_2BB8 {
     int type;
@@ -6371,7 +6372,7 @@ extern "C" int func_001E2BB8(int type, int all)
     for (i = 0; i < 61; i++) {
         sEntry14_2BB8* groupEntry = &D_00441630_2BB8[i];
         if (groupEntry->type == type) {
-            if (all != 0 || (groupEntry->f10 != 0 && func_001E3A30((void*)i) != 0)) {
+            if (all != 0 || (groupEntry->f10 != 0 && func_001E3A30(i) != 0)) {
                 total += groupEntry->count;
             } else {
                 total += 1;
@@ -6411,7 +6412,7 @@ extern "C" int func_001E2C60(int i)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 
 struct sEntry14_2C80 {
     int type;
@@ -6443,7 +6444,7 @@ extern "C" int func_001E2C80(int type, int idx, int mode)
         sEntry14_2C80* groupEntry = &D_00441630_2C80[i];
         if (groupEntry->type == type) {
             int n;
-            if (mode == 0 || groupEntry->f10 == 0 || func_001E3A30((void*)i) != 0) {
+            if (mode == 0 || groupEntry->f10 == 0 || func_001E3A30(i) != 0) {
                 n = groupEntry->count;
             } else {
                 n = 1;
@@ -6472,7 +6473,9 @@ struct sPopupEntry18 {
 extern sPopupEntry18 D_004C6C08[];
 
 struct sPopupEntry14 {
-    char pad_0x0[0xC];
+    int type;
+    int start;   // 0x4: the group's first message
+    int count;   // 0x8: its message count
     int field_0xC;
     int field_0x10;
 };
@@ -6535,8 +6538,8 @@ extern "C" int func_001E2DC0(int idx)
     while (i <= idx) {
         sPopupEntry18* messageEntry = &D_004C6C08[i];
         sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
-        int start = *(int*)((char*)groupEntry + 4);
-        int count = *(int*)((char*)groupEntry + 8);
+        int start = groupEntry->start;
+        int count = groupEntry->count;
         if (start + count - 1 < idx) {
             if (groupEntry->field_0xC == target->field_0xC) position += count;
             i += count;
@@ -6882,7 +6885,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E33E8__FPv);
  */
 unsigned char func_001E33E8(void* self)
 {
-    return *(unsigned char*)((char*)func_001E39F8(self) + 0xcc);
+    return func_001E39F8_list()->count;
 }
 #endif
 
@@ -7025,15 +7028,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E35F0);
 extern "C" void* func_001E39F8(void* self);
 
 /**
- * Returns the address of message-list entry @p self (the list plus 8 bytes per entry).
+ * Returns the address of message-list entry @p index (the list plus 8 bytes per entry).
  *
- * The declared parameter is really the entry index.
- *
+ * @param index  the entry's index
  * @return the entry's address
  */
-extern "C" int func_001E35F0(void* self)
+extern "C" sPopupListEntry* func_001E35F0(int index)
 {
-    return (int)func_001E39F8(self) + ((int)self << 3);
+    return &func_001E39F8_list()->entries[index];
 }
 #endif
 
@@ -7131,7 +7133,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 int cBERewardInterface_getEarningsTarget(void* self, int a1);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -7152,13 +7154,15 @@ extern "C" void func_001E3760(int rider, int amt)
         void* rew = cBE_getInterface_Fv(cBE_getBE(), 13);
         void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (cBENewPlayerInterface_isPeakLocked1(pl, 0, 1)) {
-            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, 0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && func_001E3A30((void*)52) == 0) {
+            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ,
+                    0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && func_001E3A30(52) == 0) {
                 func_001E3A78(52, 1);
                 func_001E2FE0(247, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(pl, rider, 2)) {
-            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && func_001E3A30((void*)53) == 0) {
+            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ,
+                    rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && func_001E3A30(53) == 0) {
                 func_001E3A78(53, 1);
                 func_001E2FE0(0xF8, 0);
             }
@@ -7177,7 +7181,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -7197,13 +7201,13 @@ extern "C" void func_001E38B8(int player)
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
         int charID = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 1)) {
-            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && func_001E3A30((void*)54) == 0) {
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && func_001E3A30(54) == 0) {
                 func_001E3A78(54, 1);
                 func_001E2FE0(249, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 2)) {
-            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && func_001E3A30((void*)55) == 0) {
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && func_001E3A30(55) == 0) {
                 func_001E3A78(55, 1);
                 func_001E2FE0(250, 0);
             }
@@ -7237,20 +7241,21 @@ extern "C" void* func_001E39F8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3A30);
 #ifdef SKIP_ASM
-extern "C" int func_00147980(void* iface, int a1, void* a2);
+extern "C" int func_00147980(void* iface, int a1, int flag);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
- * Reports whether the human rider's message flag number @p self is set (func_00147980 on the player interface).
+ * Reports whether the human rider's message flag number @p group is set (func_00147980 on the player interface).
  *
- * The flags are the bits of the character record's words at +0xF08; the declared parameter is really the flag index.
+ * The flags are the bits of the character record's words at +0xF08.
  *
+ * @param group  the message group (flag) index
  * @return true when the flag is set, else false
  */
-extern "C" bool func_001E3A30(void* self)
+extern "C" bool func_001E3A30(int group)
 {
-    return func_00147980(cBE_getInterface_Fv(cBE_getBE(), 1), 0, self) != 0;
+    return func_00147980(cBE_getInterface_Fv(cBE_getBE(), 1), 0, group) != 0;
 }
 #endif
 
@@ -7327,7 +7332,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int hash);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 int GetHashValue32(char* str);
 extern void* cOVState_vtbl[];
@@ -7409,7 +7414,7 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
         stateView->h16C = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     if (~D_004A20CC != 0) {
-        if (func_001E3A30((void*)7) != 0)
+        if (func_001E3A30(7) != 0)
             self->miMiscData = 0;
         else
             self->miMiscData = 1;
@@ -7700,10 +7705,10 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
  * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears D_004A20C0. kONGAINFOCUS:
  * calls vtable entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
  *
- * @param widget  the widget (a row's From text holds its message index at +0x18)
+ * @param widget  the widget (a row's From text holds its message index in mMiscData)
  * @param event   the widget event
  */
-extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* self, void* widget, unsigned int event)
+extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* self, cUIThing* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -7714,14 +7719,14 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
     switch (event) {
     case cUIState::kONNEXT:
         if (faqRowCount + queuedCount > 0) {
-            int k = *(unsigned char*)((char*)self->mpMenu + 0x95);
+            int k = self->mpMenu->mScrollItemCurrent;
             int idx = queuedCount - k - 1;
             if (idx >= 0) {
                 int id = func_001E3620(idx);
                 list->mask |= 1 << idx;
                 func_001E50C8(self, id, k + 1);
             } else if (idx + faqRowCount >= 0) {
-                int w = *(int*)((char*)widget + 0x18);
+                int w = widget->mMiscData;
                 sPopupEntry18_4200* messageEntry = &D_004C6C08_4200[w];
                 sPopupEntry14_4200* groupEntry = &D_00441630_4200[messageEntry->id];
                 if (groupEntry->enabled != 0 && w == groupEntry->start) {
@@ -7738,7 +7743,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
     case cUIState::kONOPTION:
         self->mbMessageDeleted = 0;
         if (queuedCount > 0) {
-            int idx = queuedCount - *(unsigned char*)((char*)self->mpMenu + 0x95) - 1;
+            int idx = queuedCount - self->mpMenu->mScrollItemCurrent - 1;
             if (idx >= 0) {
                 func_001E5148(self, idx);
                 self->mbMessageDeleted = 1;
@@ -7777,7 +7782,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 // PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" int func_001E2C80(int type, int idx, int mode);
-extern "C" bool func_001E3A30(void* self);
+extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj);
 extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj);
 extern char str_kT_BTNView[];
@@ -7806,7 +7811,7 @@ extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
  */
 extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
 {
-    int base = *(unsigned char*)((char*)self->mpMenu + 0x95);
+    int base = self->mpMenu->mScrollItemCurrent;
     int diff = func_001E33E8_noarg() - base;
     if (diff - 1 >= 0) {
         func_001E4878(self, self->mpButtonSquare);
@@ -7822,7 +7827,7 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
             int groupIndex = messageEntry->field_0x4;
             sEntry14_4458* groupEntry = &D_00441630_4458[groupIndex];
             if (id == groupEntry->field_0x4) {
-                if (func_001E3A30((void*)groupIndex))
+                if (func_001E3A30(groupIndex))
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
                 else
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNExpand));
@@ -8293,7 +8298,7 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
     if (idx == -1) {
         if (groupEntry->f10 != 0) {
             if (id == groupEntry->f4) {
-                if (func_001E3A30((void*)messageEntry->f4) == 0)
+                if (func_001E3A30(messageEntry->f4) == 0)
                     setTint_4C78(self->aBC[slot], self->f164, idx);
                 else
                     setTint_4C78(self->aBC[slot], self->f168, idx);
@@ -8316,7 +8321,7 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
     if (self->a11C[slot] != 0) {
         if (groupEntry->f10 != 0) {
             if (id == groupEntry->f4) {
-                if (func_001E3A30((void*)messageEntry->f4) == 0)
+                if (func_001E3A30(messageEntry->f4) == 0)
                     sprintf(buf, str_plus);
                 else
                     sprintf(buf, str_dash);
@@ -8446,21 +8451,21 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
 /**
  * Deletes a queued message from the message center and refreshes it.
  *
- * Removes list entry @p idx (func_001E31B8), moves the menu's selected row (+0x95) back by one when it is now past the
- * end, then refreshes the rows, labels and arrows.
+ * Removes list entry @p idx (func_001E31B8), moves the menu's selected row (mScrollItemCurrent) back by one when it is
+ * now past the end, then refreshes the rows, labels and arrows.
  *
  * @param idx  the message-list position
  */
 extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx)
 {
     func_001E31B8(idx);
-    int cur = *(unsigned char*)((char*)self->mpMenu + 0x95);
+    int cur = self->mpMenu->mScrollItemCurrent;
     int n = func_001E2BB8(4, 1);
     n += func_001E33E8_noarg();
     if (cur >= n) {
         cur--;
     }
-    *(unsigned char*)((char*)self->mpMenu + 0x95) = cur;
+    self->mpMenu->mScrollItemCurrent = cur;
     func_001E48B0(self);
     func_001E4758(self);
     func_001E4658(self);
@@ -8931,7 +8936,7 @@ extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMe
     case cUIMenu::kONOPTION: {
         sPopupEntry18* popupEntry = &D_004C6C08[self->miMessage];
         sPopupEntry14* typeEntry = &D_00441630[popupEntry->groupIndex];
-        return *(int*)typeEntry->pad_0x0 != kMessageGroupFAQ;
+        return typeEntry->type != kMessageGroupFAQ;
     }
     }
     return 257;
@@ -9026,20 +9031,6 @@ struct sIdx5_5B80 {
 };
 extern sIdx5_5B80 D_0046E488;
 
-
-class cUIObj_5B80 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
 
 /**
  * Builds the freestyle heat standings overlay (overlay 10, vtable cOVState_HEAT_STANDINGS_vtbl, entry 4 onCreateScreen).
@@ -9152,7 +9143,7 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
             sprintf(name, str_run_2_pct_d, i);
             uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             sprintf(name, str_total_pct_d, i);
-            cUIObj_5B80* totalText = (cUIObj_5B80*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
+            cUIThing* totalText = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             if (kind == 2 || flag) {
                 if (hl) {
                     cUIText_setAsciiString(uiText, str_DNF);
@@ -9210,9 +9201,9 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
         }
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            cFELocale* object = (cFELocale*)((cUIObj_5B80*)cUIScreen_getObjectByHashName(mpScreen,
+            cFELocale* object = (cFELocale*)((cUIThing*)cUIScreen_getObjectByHashName(mpScreen,
                     GetHashValue32(name)));
-            if (((cUIObj_5B80*)object) != 0) {
+            if (((cUIThing*)object) != 0) {
                 if (i < 5) {
                     cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(D_00441D10[ids.v[i]]));
                     if (i == 0 && ids.v[0] == 1 && info->iNextHeat == 3) {
@@ -9220,8 +9211,8 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
                     }
                     object->mpLocaleFile[4] = (cLocaleFile*)ids.v[i];
                 } else {
-                    ((cUIObj_5B80*)object)->setVisible(0);
-                    ((cUIObj_5B80*)object)->setStatic(1);
+                    ((cUIThing*)object)->setVisible(0);
+                    ((cUIThing*)object)->setStatic(1);
                 }
             }
         }
@@ -10128,7 +10119,7 @@ void cOVState_RACE_FINISHOV::onCreateScreen()
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(this);
-    *(int*)&mElapsedTime = 0;
+    mElapsedTime = 0.0f;
     char* obj = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu0000_b));
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
@@ -10327,21 +10318,6 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern char str_kT_OVRCMNPointstotal[];
 extern char str_place6[];
 
-class cUIObj_8200 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
-
 /**
  * Builds the event finish overlay for scored runs (overlay 13, vtable cOVState_BASSSP_QUAL_FINISHOV_vtbl, entry 4 onCreateScreen).
  *
@@ -10364,7 +10340,7 @@ void cOVState_BASSSP_QUAL_FINISHOV::onCreateScreen()
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(this);
-    *(int*)&mElapsedTime = 0;
+    mElapsedTime = 0.0f;
     char* obj = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu0000_b));
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
@@ -10425,10 +10401,10 @@ void cOVState_BASSSP_QUAL_FINISHOV::onCreateScreen()
     }
     int off = pl * 4;
     int i;
-    cUIObj_8200* screenWidget;
+    cUIThing* screenWidget;
     for (i = 1; i < 7; i++) {
         sprintf(buf, str_placepct_d, i);
-        screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
+        screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         screenWidget->setVisible(0);
         if (i == sel + 1) {
             screenWidget->setVisible(1);
@@ -10437,13 +10413,13 @@ void cOVState_BASSSP_QUAL_FINISHOV::onCreateScreen()
     if ((unsigned int)sel >= 6) {
         cUIState_showObjSafe(this, str_place6);
     }
-    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pointstotal));
+    screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pointstotal));
     cFELocale* loc = SSXApp->FELocale;
     sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
     strcpy1(fmt, vt[4].fn(vthis(loc, vt[4]), GetHashValue32(str_kT_OVRCMNPointstotal)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
     cUIText_setUnicodeString(screenWidget, text);
-    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_new_record));
+    screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_new_record));
     int vis = 0;
     if (iface8->mNewTrackHighScoreIndex[0] >= 0 || iface8->mNewTrackHighScoreIndex[1] >= 0) {
         vis = 1;
@@ -10624,20 +10600,6 @@ extern char str_kT_HELPSorryBeatTime[];
 extern char str_kT_HELPSorryBeatScore[];
 extern char str_overlayOptpct_d[];
 
-class cUIObj_8920 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
-
 /**
  * Builds the peak challenge results overlay (overlay 22, vtable D_00473ED8, entry 4 onCreateScreen).
  *
@@ -10701,7 +10663,7 @@ extern "C" void func_001E8920(cOVState* self)
             cUIText_setAsciiString(resultValue, buf);
         }
     }
-    cUIObj_8920* screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
+    cUIThing* screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
     int playerPlace = cGameModeMan_iRanking[pl];
     if (playerPlace == 0) goto yes;
     if (playerPlace == 1) goto yes;
@@ -10726,11 +10688,11 @@ done:
         int i;
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+            screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (screenWidget != 0) {
                 if (i < 3) {
                     cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(D_00441D10[ids.v[i]]));
-                    *(int*)((char*)screenWidget + 0x18) = ids.v[i];
+                    screenWidget->mMiscData = ids.v[i];
                 } else {
                     screenWidget->setVisible(0);
                     screenWidget->setStatic(1);

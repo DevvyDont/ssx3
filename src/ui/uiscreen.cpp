@@ -1529,7 +1529,7 @@ void cUISlider::render2D(float dx, float dy)
     float y = dy + mPosition.y;
     background->render2D(x, y);
     cUIThing* bgObj = mpObjBackground;
-    t3Vector pos = *(t3Vector*)&bgObj->mPosition;
+    t3Vector pos = bgObj->mPosition;
     t3Vector bgSize;
     bgObj->getSize((t3Vector*)&bgSize);
     cUIThing* knob = mpObjKnob;
@@ -1537,9 +1537,9 @@ void cUISlider::render2D(float dx, float dy)
     knob->getSize((t3Vector*)&knobSize);
     float w = bgSize.x - knobSize.x;
     cUIThing* knobObj = mpObjKnob;
-    t3Vector knobPos = *(t3Vector*)&knobObj->mPosition;
+    t3Vector knobPos = knobObj->mPosition;
     knobPos.x = pos.x + w / ((float)mNumValues - 1.0f) * (float)mValue;
-    *(t3Vector*)&knobObj->mPosition = knobPos;
+    knobObj->mPosition = knobPos;
     cUIThing* knobWidget = mpObjKnob;
     knobWidget->render2D(x, y);
 }
@@ -1581,15 +1581,15 @@ extern void* cUIState_vtbl[];
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" void* cUIState_cUIState(cUIState* self, int engine)
+extern "C" void* cUIState_cUIState(cUIState* self, cUIEngine* engine)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
     VPTR_OF(cListNode, self) = cUIState_vtbl;
     self->mHashName = 0;
-    self->mpEngine = (cUIEngine*)engine;
+    self->mpEngine = engine;
     self->mCurrentCtrl = -1;
-    *(signed char*)&self->mCtrlBits = 0xF;
+    self->mCtrlBits = 0xF;
     *(short*)&self->mAttrState = 536;
     self->mpParentState = 0;
     cList_cList(&self->mScreens);
@@ -1622,7 +1622,7 @@ void* cUIState::cUIState1(int engine, int parentState)
     mHashName = 0;
     mpEngine = (cUIEngine*)engine;
     mCurrentCtrl = -1;
-    *(signed char*)&mCtrlBits = 0xF;
+    mCtrlBits = 0xF;
     *(short*)&mAttrState = 536;
     mpParentState = (cUIState*)parentState;
     cList_cList(&mScreens);
@@ -1796,11 +1796,11 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
  */
 extern "C" void cUIState_onUpdate(cUIState* self)
 {
-    int mask = *(signed char*)&self->mCtrlBits;
-    cUIInput* input = (cUIInput*)(*(char**)&self->mpEngine->mpInput);
+    int mask = (signed char)self->mCtrlBits;
+    cUIInput* input = (cUIInput*)((char*)self->mpEngine->mpInput);
     self->mCurrentCtrl = 0;
     do {
-        input->setPadNum(*(unsigned char*)&self->mCurrentCtrl);
+        input->setPadNum((unsigned char)self->mCurrentCtrl);
         if (cUIState_onUpdate_padTest(((char*)input), 45)) {
             if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {
                 cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)VPTR_OF(cListNode, self);

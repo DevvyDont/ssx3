@@ -186,31 +186,6 @@ extern "C" unsigned short* cUITextScroll_getStringByIndex(void* self, int idx);
 
 
 
-class cUIObj185F40 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void getSize(tARGB* out);
-};
-
 struct sRS_185F40 {
     int f0;
     int f4;
@@ -243,7 +218,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
         t3Vector pos = *(&textScroll->mPosition);
         t3Vector size = *(&textScroll->mScale);
         tARGB box;
-        ((cUIObj185F40*)textScroll)->getSize(&box);
+        ((cUIThing*)textScroll)->getSize((t3Vector*)&box);
         cFont* font = (cFont*)cUITextScroll_getFont(self->mpTextScroll);
         if (((char*)font) != 0)
         {
@@ -283,10 +258,10 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                     {
                         tARGB iconSize;
                         any = 1;
-                        ((cUIObj185F40*)self->mpDolbyIcon)->getSize(&iconSize);
+                        ((cUIThing*)self->mpDolbyIcon)->getSize((t3Vector*)&iconSize);
                         newPos.x = (640.0f - iconSize.A) * 0.5f;
                         *(t3Vector*)((char*)self->mpDolbyIcon + 0x44) = newPos;
-                        ((cUIObj185F40*)self->mpDolbyIcon)->setVisible(1);
+                        ((cUIThing*)self->mpDolbyIcon)->setVisible(1);
                     }
                     else
                     {
@@ -315,7 +290,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
             if (!any)
             {
                 if (self->mpDolbyIcon != 0)
-                    ((cUIObj185F40*)self->mpDolbyIcon)->setVisible(0);
+                    ((cUIThing*)self->mpDolbyIcon)->setVisible(0);
             }
             int total = count * rows;
             int lim = self->mpTextScroll->mLineSize * rows + total;
@@ -490,7 +465,7 @@ extern "C" void cFEState_onLoseFocus(cFEState* self)
     if (screen != 0) {
         cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (((void*)obj) != 0) {
-            cFEFlowState_setValue(&gFlowState, *(signed char*)&self->mHashName, *(signed char*)&obj->mScrollItemCurrent);
+            cFEFlowState_setValue(&gFlowState, *(signed char*)&self->mHashName, (signed char)obj->mScrollItemCurrent);
         }
     }
 }

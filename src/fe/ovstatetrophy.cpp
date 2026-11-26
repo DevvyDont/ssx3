@@ -1681,9 +1681,9 @@ extern "C" void func_00210940(cOVState* self)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
 #ifdef SKIP_ASM
 extern char str_empty_e[];
-extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
+extern "C" int cGameComm_getQueuedChat(cGameComm* a, char* name, int len);
 extern "C" void func_00210BD8(cOVState* self, char* name, int a);
-extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void func_00210F40(void* self, int a1, char* a2, char* a3, int a4, int a5, int a6);
 
 /**
  * Starts the chat overlay: on the first transition it shows a waiting incoming message, or else opens the keyboard.
@@ -1701,11 +1701,10 @@ extern "C" int func_00210B58(void* self, int ok)
 {
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
-        if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
+        if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8((cOVState*)self, name, 0);
         } else {
-            // PORT: func_00210F40's unit definition takes these string pointers as int.
-            func_00210F40(self, 0, (int)str_empty_e, (int)str_empty_e, 0, 0, 61);
+            func_00210F40(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
         }
     }
     return 1;
@@ -1775,7 +1774,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* cUIStateStack_popToState(void* list);
-extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
+extern "C" int cGameComm_getQueuedChat(cGameComm* a, char* name, int len);
 extern "C" void func_00210BD8(cOVState* self, char* name, int a);
 
 /**
@@ -1799,7 +1798,7 @@ extern "C" void func_00210D20(cOVState* self)
     }
     if ((int)self->mpScreen != 0) {
         char* name = (char*)self + 0x9C;
-        if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
+        if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
     }
@@ -1831,7 +1830,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
 extern char str_empty_e[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cOVState_onWidgetEvent(void* self);
-extern "C" void cGameComm_sendChat(int a, char* name);
+extern "C" void cGameComm_sendChat(cGameComm* a, char* name);
 // PORT: cUIStateStack_pop returns the last node it touched; bound with its value return.
 void* cUIStateStack_pop_r(void* list, int a1) __asm__("cUIStateStack_pop");
 extern "C" int strlen(const char* s);
@@ -1864,19 +1863,18 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
         break;
     case cUIState::kONNEXT:
         if (*(int*)((char*)self + 0xE0) == 0) {
-            // PORT: func_00210F40's unit definition takes these string pointers as int.
-            func_00210F40(self, 0, (int)str_empty_e, (int)str_empty_e, 0, 0, 61);
+            func_00210F40(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
             cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
         }
         break;
     case cUIState::kONKEYBOARDEND: {
         char* name = (char*)self + 0x9C;
-        if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
+        if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
         char* typedText = *(char**)((char*)self + 0xE0) + 0x74;
         if (strlen(typedText) != 0) {
-            cGameComm_sendChat((int)cGameComm_mGameComm, typedText);
+            cGameComm_sendChat(cGameComm_mGameComm, typedText);
             func_00210BD8(self, typedText, 1);
         }
         break;
@@ -1892,8 +1890,8 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);
 #ifdef SKIP_ASM
 extern "C" void func_00210FA0(cOVState* self, int a1, int a2, int a3, int a4);
-extern "C" void cKeyboardPopup_setStatic2(void* p, int a);
-extern "C" void cKeyboardPopup_setInputText(void* p, int a);
+extern "C" void cKeyboardPopup_setStatic2(void* p, char* a);
+extern "C" void cKeyboardPopup_setInputText(void* p, char* a);
 
 /**
  * Opens the chat overlay's keyboard with a prompt and a starting text.
@@ -1908,7 +1906,8 @@ extern "C" void cKeyboardPopup_setInputText(void* p, int a);
  * @param miscData  the popup's miMiscData
  * @param maxChars  the text length limit
  */
-extern "C" void func_00210F40(void* self, int textObj, int staticText, int inputText, int password, int miscData, int maxChars)
+extern "C" void func_00210F40(void* self, int textObj, char* staticText, char* inputText, int password, int miscData,
+        int maxChars)
 {
     func_00210FA0((cOVState*)self, textObj, password, miscData, maxChars);
     cKeyboardPopup_setStatic2(*(void**)((char*)self + 0xE0), staticText);

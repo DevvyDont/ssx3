@@ -33,6 +33,7 @@ struct cUIScreen;
 struct tUIBaseObject;
 struct cUIInput;
 struct cUIRenderContext;
+struct cUIEngine;
 
 // EA's colour (type name from the preview's setColour__8cUIThingRC5tARGB). 16 bytes, only 4-byte aligned on the PS2
 // (it sits at cUIThing+0x1C; copied with two ldl/ldr pairs). Members from On Tour's DWARF (struct tARGB: A R G B).
@@ -165,7 +166,7 @@ struct cUIThing : public cListNode {
     void deleteAnimation() __asm__("cUIThing_deleteAnimation");
     void setFrameByPercent(float fraction) __asm__("cUIThing_setFrameByPercent");
     int isLastAnimFrame() __asm__("cUIThing_isLastAnimFrame");
-    int getEngine() __asm__("cUIThing_getEngine__FPv");
+    cUIEngine* getEngine() __asm__("cUIThing_getEngine__FPv");
     unsigned short getKeyframerEvent(int x) __asm__("cUIThing_getKeyframerEvent__FP8cUIThingi");
     bool playKeyframerEvent(signed char idx) __asm__("cUIThing_playKeyframerEvent");
     void getAbsPosition(t3Vector* out) __asm__("cUIThing_getAbsPosition");
@@ -173,7 +174,7 @@ struct cUIThing : public cListNode {
     void setSound(int soundIndex, int sound) __asm__("cUIThing_setSound");
     void* cUIThing1() __asm__("cUIThing_cUIThing1");
     bool isPlayingAnimation() __asm__("cUIThing_isPlayingAnimation");
-    int getAnimation() __asm__("cUIThing_getAnimation");
+    cUIAnimation* getAnimation() __asm__("cUIThing_getAnimation");
     int isHorizontal() __asm__("cUIThing_isHorizontal");
     int isVertical() __asm__("cUIThing_isVertical");
     int isActive() __asm__("cUIThing_isActive");
@@ -193,13 +194,13 @@ struct cUIThing : public cListNode {
     int getPivot() __asm__("cUIThing_getPivot");
     void setHashName(int hashName) __asm__("cUIThing_setHashName");
     int getHashName() __asm__("cUIThing_getHashName");
-    void setParent(int parent) __asm__("cUIThing_setParent");
-    int getParent() __asm__("cUIThing_getParent");
+    void setParent(cUIThing* parent) __asm__("cUIThing_setParent");
+    cUIThing* getParent() __asm__("cUIThing_getParent");
     void getPosition(t3Vector* out) __asm__("cUIThing_getPosition");
     void setPosition(t3Vector* out) __asm__("cUIThing_setPosition");
     void getScale(t3Vector* out) __asm__("cUIThing_getScale");
     void setScale(t3Vector* out) __asm__("cUIThing_setScale");
-    int getScreen() __asm__("cUIThing_getScreen");
+    cUIScreen* getScreen() __asm__("cUIThing_getScreen");
 };
 
 CHECK_SIZE(tAttrThing, 0x4);

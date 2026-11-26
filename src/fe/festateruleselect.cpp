@@ -100,7 +100,7 @@ void cFEStateRuleSelect::setupMenu(signed char first)
         cUIText* txt = (cUIText*)find_1388(self, lp);
         if (lb != 0 && txt != 0) {
             signed char row = i + first;
-            if (row >= *(signed char*)&self->mcArraySize)
+            if (row >= self->mcArraySize)
                 break;
             int rule = ((signed char*)self->mpGameEventMapping)[row];
             int kind = D_00441008[rule];
@@ -692,7 +692,7 @@ void cFEStateRuleSelect::updateMenuColor()
     char name1[16];
     __builtin_memcpy(name0, str_0b, 3);
     __builtin_memcpy(name1, str_0t, 3);
-    signed char n = *(signed char*)&mcArraySize < 12 ? *(signed char*)&mcArraySize : 11;
+    signed char n = mcArraySize < 12 ? mcArraySize : 11;
     for (signed char i = 0; i < n; i++) {
         cUIText* listBox = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name0));
         cUIText* textBox = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name1));
@@ -911,24 +911,9 @@ extern char str_w21[];
 extern char D_004A14F8[];
 extern char str_box1[];
 
-class cFEVObj_00192970 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
-
 static inline void Hide_00192970(void* screen, char* name)
 {
-    cFEVObj_00192970* t = (cFEVObj_00192970*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+    cUIThing* t = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
     if (t != 0) {
         t->setVisible(0);
     }
@@ -936,7 +921,7 @@ static inline void Hide_00192970(void* screen, char* name)
 
 struct sOwner_00192970 {
     char pad[0x8];
-    cFEVObj_00192970* items[8];     // 0x8
+    cUIThing* items[8];     // 0x8
     int f28;                        // 0x28
     int mask;                       // 0x2C
 };

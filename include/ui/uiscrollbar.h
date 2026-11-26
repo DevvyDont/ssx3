@@ -54,11 +54,11 @@ struct cUIScrollBar : public cUIThing {
     // Methods bound to their retail symbols by asm labels.
     void setScrollVisibile(int bVisible) __asm__("cUIScrollBar_setScrollVisibile");
     void* cUIScrollBar1() __asm__("cUIScrollBar_cUIScrollBar1");
-    void setBackgroundObject(int background) __asm__("cUIScrollBar_setBackgroundObject");
-    void setKnobObject(int knob) __asm__("cUIScrollBar_setKnobObject");
-    void setUpArrowObject(int upArrow) __asm__("cUIScrollBar_setUpArrowObject");
-    void setDownArrowObject(int downArrow) __asm__("cUIScrollBar_setDownArrowObject");
-    void setHideOnEmpty(int hideOnEmpty) __asm__("cUIScrollBar_setHideOnEmpty");
+    void setBackgroundObject(cUIThing* background) __asm__("cUIScrollBar_setBackgroundObject");
+    void setKnobObject(cUIThing* knob) __asm__("cUIScrollBar_setKnobObject");
+    void setUpArrowObject(cUIThing* upArrow) __asm__("cUIScrollBar_setUpArrowObject");
+    void setDownArrowObject(cUIThing* downArrow) __asm__("cUIScrollBar_setDownArrowObject");
+    void setHideOnEmpty(cUIThing* hideOnEmpty) __asm__("cUIScrollBar_setHideOnEmpty");
     void setHideState(int hideState) __asm__("cUIScrollBar_setHideState");
     void setUpAnimationName(char* str) __asm__("cUIScrollBar_setUpAnimationName");
     void setDownAnimationName(char* str) __asm__("cUIScrollBar_setDownAnimationName");

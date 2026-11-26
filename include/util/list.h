@@ -42,8 +42,8 @@ public:
     virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cListNode_traverseRecurse
 
     // Methods bound to their retail symbols by asm labels.
-    int next() __asm__("cListNode_next");
-    void setNext(int next) __asm__("cListNode_setNext");
+    cListNode* next() __asm__("cListNode_next");
+    void setNext(cListNode* next) __asm__("cListNode_setNext");
     void destroyListNode() __asm__("cListNode_destroyListNode");
     bool isSentinel() __asm__("cListNode_isSentinel__FP9cListNode");
     void removeFromList() __asm__("cListNode_removeFromList");

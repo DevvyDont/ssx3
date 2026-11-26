@@ -380,8 +380,8 @@ extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(cFEStateRuleSelect* self)
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateRuleSelect_vtbl;
     self->mpGameEventMapping = 0;
-    *(char*)&self->mUserNum = 0;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
+    self->mUserNum = 0;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
     self->mHashName = 20;
     return ((void*)self);
 }

@@ -81,7 +81,7 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
     self->mAttrVector.mLoop = pIYFVector->mFlags & 2;
     self->mAttrVector.mNumTriangles = pIYFVector->mNumTriangles;
     if (self->mAttrVector.mNumTriangles)
-        *(void**)&self->mpTriangles = (unsigned char*)&pIYFVector[1]; // the triangle list follows the record
+        self->mpTriangles = (unsigned char*)&pIYFVector[1]; // the triangle list follows the record
     self->mAttrVector.mNumVertices = pIYFVector->mNumVertices;
     if (pIYFVector->mNumVertices)
     {
@@ -338,7 +338,7 @@ void cUIVector::getSize(t3Vector* out)
     float minY = 1000.0f;
     float maxY = -1000.0f;
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)&mAttrVector >> 17; i++) {
+    for (i = 0; i < mAttrVector.mNumVertices; i++) {
         t3Vector* vertexPos = &mpVertexPosition[i];
         if (vertexPos->x < minX) {
             minX = vertexPos->x;
@@ -362,11 +362,6 @@ void cUIVector::getSize(t3Vector* out)
 INCLUDE_ASM("ui/uivector", cUIVector_setSize);
 #ifdef SKIP_ASM
 
-struct cUIVector_setSize_sCount74 {
-    unsigned int lo : 17;
-    unsigned int count : 15;
-};
-
 /**
  * Sets a UI vector's size, rebuilding its corners when it is a four-vertex quad.
  *
@@ -377,7 +372,7 @@ struct cUIVector_setSize_sCount74 {
  */
 extern "C" void cUIVector_setSize(cUIVector* self, t3Vector* off)
 {
-    if (((cUIVector_setSize_sCount74*)&self->mAttrVector)->count == cUIVector::kQuadVertices) {
+    if (self->mAttrVector.mNumVertices == cUIVector::kQuadVertices) {
         signed char i;
         for (i = 1; i < cUIVector::kQuadVertices; i++) {
             (self->mpVertexPosition)[i] = (self->mpVertexPosition)[0];
@@ -700,9 +695,9 @@ INCLUDE_ASM("ui/uivector", cListNode_next);
  *
  * @return mpNext
  */
-int cListNode::next()
+cListNode* cListNode::next()
 {
-    return ((int)mpNext);
+    return mpNext;
 }
 #endif
 //100%
@@ -726,9 +721,9 @@ INCLUDE_ASM("ui/uivector", cListNode_setNext);
  *
  * @param next  the new next node
  */
-void cListNode::setNext(int next)
+void cListNode::setNext(cListNode* next)
 {
-    mpNext = (cListNode*)next;
+    mpNext = next;
 }
 #endif
 
@@ -804,7 +799,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_isPlayingAnimation);
  */
 bool cUIThing::isPlayingAnimation()
 {
-    return ((int)mpAnim) != 0;
+    return mpAnim != 0;
 }
 #endif
 //100%
@@ -815,9 +810,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getAnimation);
  *
  * @return mpAnim
  */
-int cUIThing::getAnimation()
+cUIAnimation* cUIThing::getAnimation()
 {
-    return ((int)mpAnim);
+    return mpAnim;
 }
 #endif
 //100%
@@ -1302,9 +1297,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setParent);
  *
  * @param parent  the new parent thing
  */
-void cUIThing::setParent(int parent)
+void cUIThing::setParent(cUIThing* parent)
 {
-    mpParent = (cUIThing*)parent;
+    mpParent = parent;
 }
 #endif
 //100%
@@ -1315,9 +1310,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getParent);
  *
  * @return mpParent
  */
-int cUIThing::getParent()
+cUIThing* cUIThing::getParent()
 {
-    return ((int)mpParent);
+    return mpParent;
 }
 #endif
 //100%
@@ -1380,9 +1375,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getScreen);
  *
  * @return mpScreen
  */
-int cUIThing::getScreen()
+cUIScreen* cUIThing::getScreen()
 {
-    return ((int)mpScreen);
+    return mpScreen;
 }
 #endif
 
@@ -1635,7 +1630,7 @@ INCLUDE_ASM("ui/uivector", cUIIcon__cUIIcon__FPv);
 void* cUIIcon__cUIIcon(void* vself)
 {
     cUIIcon* self = (cUIIcon*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cUIIcon_vtbl);
+    VPTR_OF(cListNode, self) = cUIIcon_vtbl;
     return cUIThing__cUIThing(self);
 }
 #endif
@@ -1765,9 +1760,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_getElement);
  *
  * @return mpTextureElem
  */
-int cUIIcon::getElement()
+const cTextureElement* cUIIcon::getElement()
 {
-    return ((int)mpTextureElem);
+    return mpTextureElem;
 }
 #endif
 //100%
@@ -1778,9 +1773,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setElement);
  *
  * @param textureElem  the cTextureElement to draw
  */
-void cUIIcon::setElement(int textureElem)
+void cUIIcon::setElement(const cTextureElement* textureElem)
 {
-    mpTextureElem = (const cTextureElement*)textureElem;
+    mpTextureElem = textureElem;
     mTextureID = -1;
 }
 #endif
@@ -2308,7 +2303,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollIndex);
  */
 void cUIMenu::setScrollIndex(signed char scrollItemCurrent)
 {
-    *(signed char*)&mScrollItemCurrent = scrollItemCurrent;
+    mScrollItemCurrent = scrollItemCurrent;
 }
 #endif
 //100%
@@ -2321,7 +2316,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollNum);
  */
 void cUIMenu::setScrollNum(signed char scrollItemNum)
 {
-    *(signed char*)&mScrollItemNum = scrollItemNum;
+    mScrollItemNum = scrollItemNum;
 }
 #endif
 //100%
@@ -2334,7 +2329,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollOffset);
  */
 void cUIMenu::setScrollOffset(signed char scrollItemOffset)
 {
-    *(signed char*)&mScrollItemOffset = scrollItemOffset;
+    mScrollItemOffset = scrollItemOffset;
 }
 #endif
 //100%
@@ -2345,9 +2340,9 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getSelected);
  *
  * @return mpSelected
  */
-int cUIMenu::getSelected()
+cUIThing* cUIMenu::getSelected()
 {
-    return ((int)mpSelected);
+    return mpSelected;
 }
 #endif
 //100%
@@ -2476,9 +2471,9 @@ INCLUDE_ASM("ui/uivector", cUIPair_getEntry);
  *
  * @return mpEntry
  */
-int cUIPair::getEntry()
+cUIThing* cUIPair::getEntry()
 {
-    return ((int)mpEntry);
+    return mpEntry;
 }
 #endif
 //100%
@@ -2506,9 +2501,9 @@ INCLUDE_ASM("ui/uivector", cUIPair_getWidget);
  *
  * @return mpWidget
  */
-int cUIPair::getWidget()
+cUIThing* cUIPair::getWidget()
 {
-    return ((int)mpWidget);
+    return mpWidget;
 }
 #endif
 //100%
@@ -2809,9 +2804,9 @@ INCLUDE_ASM("ui/uivector", cUIState_getEngine);
  *
  * @return mpEngine
  */
-int cUIState::getEngine()
+cUIEngine* cUIState::getEngine()
 {
-    return ((int)mpEngine);
+    return mpEngine;
 }
 #endif
 //100%
@@ -2850,7 +2845,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setAllCtrlBits);
  */
 void cUIState::setAllCtrlBits(signed char ctrlBits)
 {
-    *(signed char*)&mCtrlBits = ctrlBits;
+    mCtrlBits = ctrlBits;
 }
 #endif
 //100%
@@ -3298,9 +3293,9 @@ INCLUDE_ASM("ui/uivector", cUIState_setParentState);
  *
  * @param parentState  the new parent state
  */
-void cUIState::setParentState(int parentState)
+void cUIState::setParentState(cUIState* parentState)
 {
-    mpParentState = (cUIState*)parentState;
+    mpParentState = parentState;
 }
 #endif
 //100%
@@ -3311,9 +3306,9 @@ INCLUDE_ASM("ui/uivector", cUIState_getParentState);
  *
  * @return mpParentState
  */
-int cUIState::getParentState()
+cUIState* cUIState::getParentState()
 {
-    return ((int)mpParentState);
+    return mpParentState;
 }
 #endif
 //100%
@@ -3324,9 +3319,9 @@ INCLUDE_ASM("ui/uivector", cUIState_getScreen);
  *
  * @return mpScreen
  */
-int cUIState::getScreen()
+cUIScreen* cUIState::getScreen()
 {
-    return ((int)mpScreen);
+    return mpScreen;
 }
 #endif
 //100%
@@ -3539,10 +3534,10 @@ extern void* cUIScreen_vtbl[];
  * builds the root group in place (cUIThing constructor at +0x40 with no screen or parent, cUIGroup_vtbl, its cList at
  * +0xB4). Then mpState = @p pState.
  *
- * @param pState  the owning cUIState (declared int)
+ * @param pState  the owning cUIState
  * @return @p self
  */
-extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
+extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, cUIState* pState)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
@@ -3557,7 +3552,7 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
     cUIThing_cUIThing(&self->mRootGroup, 0, 0);
     VPTR_OF(cListNode, &self->mRootGroup) = cUIGroup_vtbl;
     cList_cList(&self->mRootGroup.mList);
-    self->mpState = (cUIState*)pState;
+    self->mpState = pState;
     return ((char*)self);
 }
 #endif
@@ -3677,9 +3672,9 @@ INCLUDE_ASM("ui/uivector", cUIScreen_getEngine);
  *
  * @return the state's engine
  */
-int cUIScreen::getEngine()
+cUIEngine* cUIScreen::getEngine()
 {
-    return ((int)mpState->mpEngine);
+    return mpState->mpEngine;
 }
 #endif
 //100%
@@ -3690,9 +3685,9 @@ INCLUDE_ASM("ui/uivector", cUIScreen_getParentState);
  *
  * @return mpState
  */
-int cUIScreen::getParentState()
+cUIState* cUIScreen::getParentState()
 {
-    return ((int)mpState);
+    return mpState;
 }
 #endif
 //100%
@@ -4031,9 +4026,9 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setBackgroundObject);
  *
  * @param background  the background UI object
  */
-void cUIScrollBar::setBackgroundObject(int background)
+void cUIScrollBar::setBackgroundObject(cUIThing* background)
 {
-    mpObjBackground = (cUIThing*)background;
+    mpObjBackground = background;
 }
 #endif
 //100%
@@ -4044,9 +4039,9 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setKnobObject);
  *
  * @param knob  the knob UI object
  */
-void cUIScrollBar::setKnobObject(int knob)
+void cUIScrollBar::setKnobObject(cUIThing* knob)
 {
-    mpObjKnob = (cUIThing*)knob;
+    mpObjKnob = knob;
 }
 #endif
 //100%
@@ -4057,9 +4052,9 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setUpArrowObject);
  *
  * @param upArrow  the up-arrow UI object
  */
-void cUIScrollBar::setUpArrowObject(int upArrow)
+void cUIScrollBar::setUpArrowObject(cUIThing* upArrow)
 {
-    mpUpArrow = (cUIThing*)upArrow;
+    mpUpArrow = upArrow;
 }
 #endif
 //100%
@@ -4070,9 +4065,9 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setDownArrowObject);
  *
  * @param downArrow  the down-arrow UI object
  */
-void cUIScrollBar::setDownArrowObject(int downArrow)
+void cUIScrollBar::setDownArrowObject(cUIThing* downArrow)
 {
-    mpDownArrow = (cUIThing*)downArrow;
+    mpDownArrow = downArrow;
 }
 #endif
 //100%
@@ -4083,9 +4078,9 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setHideOnEmpty);
  *
  * @param hideOnEmpty  the UI object to hide
  */
-void cUIScrollBar::setHideOnEmpty(int hideOnEmpty)
+void cUIScrollBar::setHideOnEmpty(cUIThing* hideOnEmpty)
 {
-    mpHideOnEmpty = (cUIThing*)hideOnEmpty;
+    mpHideOnEmpty = hideOnEmpty;
 }
 #endif
 //100%
@@ -4224,9 +4219,9 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setBackgroundObject);
  *
  * @param background  the background UI object
  */
-void cUIProgress::setBackgroundObject(int background)
+void cUIProgress::setBackgroundObject(cUIThing* background)
 {
-    mpObjBackground = (cUIThing*)background;
+    mpObjBackground = background;
 }
 #endif
 //100%
@@ -4237,9 +4232,9 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setKnobObject);
  *
  * @param knob  the knob UI object
  */
-void cUIProgress::setKnobObject(int knob)
+void cUIProgress::setKnobObject(cUIThing* knob)
 {
-    mpObjKnob = (cUIThing*)knob;
+    mpObjKnob = knob;
 }
 #endif
 //100%
@@ -4376,9 +4371,9 @@ INCLUDE_ASM("ui/uivector", cUISlider_setBackgroundObject);
  *
  * @param background  the background UI object
  */
-void cUISlider::setBackgroundObject(int background)
+void cUISlider::setBackgroundObject(cUIThing* background)
 {
-    mpObjBackground = (cUIThing*)background;
+    mpObjBackground = background;
 }
 #endif
 //100%
@@ -4389,9 +4384,9 @@ INCLUDE_ASM("ui/uivector", cUISlider_setKnobObject);
  *
  * @param knob  the knob UI object
  */
-void cUISlider::setKnobObject(int knob)
+void cUISlider::setKnobObject(cUIThing* knob)
 {
-    mpObjKnob = (cUIThing*)knob;
+    mpObjKnob = knob;
 }
 #endif
 //100%
@@ -4675,9 +4670,9 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setScrollBar);
  *
  * @param scrollBar  the cUIScrollBar
  */
-void cUITextScroll::setScrollBar(int scrollBar)
+void cUITextScroll::setScrollBar(cUIThing* scrollBar)
 {
-    mpScrollBar = (cUIThing*)scrollBar;
+    mpScrollBar = scrollBar;
 }
 #endif
 //100%
@@ -4690,7 +4685,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setLineOffset);
  */
 void cUITextScroll::setLineOffset(short linesOffset)
 {
-    *(short*)&mLinesOffset = linesOffset;
+    mLinesOffset = linesOffset;
 }
 #endif
 //100%
@@ -4729,7 +4724,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setSelectedIndex);
  */
 void cUITextScroll::setSelectedIndex(short selectedIndex)
 {
-    *(short*)&mSelectedIndex = selectedIndex;
+    mSelectedIndex = selectedIndex;
 }
 #endif
 //100%
@@ -4848,7 +4843,7 @@ extern "C" void *tListBoxEntry_tListBoxEntry(tListBoxEntry* entry) {
     entry->mpString = 0;
     entry->mpAsciiString = 0;
     entry->mpData = 0;
-    (*(signed char*)&entry->mUnicodeBufferSize) = 0;
+    entry->mUnicodeBufferSize = 0;
     return ((void*)entry);
 }
 #endif
@@ -4906,12 +4901,6 @@ extern "C" unsigned char *tAttrTextScroll_tAttrTextScroll(unsigned char *attr) {
 //100%
 INCLUDE_ASM("ui/uivector", tAttrVector_tAttrVector);
 #ifdef SKIP_ASM
-struct sCount_6618 {
-    unsigned int flag : 1;
-    unsigned int pad1 : 1;
-    unsigned int mode : 15;
-    unsigned int count : 15;
-};
 /**
  * Constructs a cUIVector's tAttrVector word and returns it: clears mFill (bit 0), mLoop (bit 1) and the 15-bit vertex
  * count mNumVertices (bits 17-31); the triangle count (bits 2-16) is left as it was.
@@ -4923,11 +4912,10 @@ struct sCount_6618 {
  */
 extern "C" void* tAttrVector_tAttrVector(tAttrVector* attrVector)
 {
-    sCount_6618* self = (sCount_6618*)attrVector;
-    self->flag = 0;
-    self->pad1 = 0;
-    self->count = 0;
-    return self;
+    attrVector->mFill = 0;
+    attrVector->mLoop = 0;
+    attrVector->mNumVertices = 0;
+    return attrVector;
 }
 #endif
 

@@ -17,20 +17,6 @@ extern char str_option_savereplay[];
 extern char str_option_exitreplay[];
 extern char str_option_continue[];
 
-class cUIObj_20DE30 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int v);
-    virtual void v07(int v);
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Tags the replay menu's items with their choice ids and hides Save Replay for a loaded replay.
  *
@@ -39,7 +25,7 @@ public:
  *
  * @param w  the widget being created
  */
-extern "C" void cOVState_REPLAY_onWidgetCreate(cOVState_REPLAY* self, cUIObj_20DE30* w)
+extern "C" void cOVState_REPLAY_onWidgetCreate(cOVState_REPLAY* self, cUIThing* w)
 {
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(str_option_savereplay)) {

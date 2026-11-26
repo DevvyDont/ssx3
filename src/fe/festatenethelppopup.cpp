@@ -45,12 +45,12 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_handleEvent);
  * @param msgParam  the event data (On Tour: void *pParam)
  * @return the parent's result, or 0
  */
-extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int msg, int msgParam)
+extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int msg, void* msgParam)
 {
     if (self->mbReferEventsToParent != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            return obj->handleEvent(msg, (void*)msgParam);
+            return obj->handleEvent(msg, msgParam);
         }
     }
     return 0;
@@ -151,13 +151,13 @@ void cFEStateNetHelpPopup::onWidgetCreate(cUIThing* w)
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_OnlineAccSetup)) {
         mpScreenName = (cUIText*)w;
-        (*(unsigned int*)&w->mAttr) |= 0x80;
+        (w->mAttr) |= 0x80;
     } else if (hashName == GetHashValue32(str_TopText)) {
         mpDescription = (cUIText*)w;
-        (*(unsigned int*)&w->mAttr) |= 0x80;
+        (w->mAttr) |= 0x80;
     } else if (hashName == GetHashValue32(str_BottomNote)) {
         mpBottom = (cUIText*)w;
-        (*(unsigned int*)&w->mAttr) |= 0x80;
+        (w->mAttr) |= 0x80;
     } else if (IsHash_1D9F38(w->mHashName, str_xselect)) {
         mpObject[0] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_ps2triangle)) {

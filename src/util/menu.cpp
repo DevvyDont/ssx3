@@ -222,7 +222,7 @@ extern "C" int cMenuItem_getKey(void** self)
 #endif
 
 // PORT: cMenuSys_getLeft is C++ (void*); this caller passes an int handle.
-void* cMenuSys_getLeft(int) __asm__("cMenuSys_getLeft__FPv");
+void* cMenuSys_getLeft(cMenuSys*) __asm__("cMenuSys_getLeft__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getLeft__FPv);
@@ -235,12 +235,12 @@ INCLUDE_ASM("util/menu", cMenuItem_getLeft__FPv);
  */
 void* cMenuItem::getLeft()
 {
-    return cMenuSys_getLeft((int)Menu->MenuSys);
+    return cMenuSys_getLeft(Menu->MenuSys);
 }
 #endif
 
 // PORT: cMenuSys_getRight is C++ (void*); this caller passes an int handle.
-void* cMenuSys_getRight(int) __asm__("cMenuSys_getRight__FPv");
+void* cMenuSys_getRight(cMenuSys*) __asm__("cMenuSys_getRight__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getRight__FPv);
@@ -253,12 +253,12 @@ INCLUDE_ASM("util/menu", cMenuItem_getRight__FPv);
  */
 void* cMenuItem::getRight()
 {
-    return cMenuSys_getRight((int)Menu->MenuSys);
+    return cMenuSys_getRight(Menu->MenuSys);
 }
 #endif
 
 // PORT: cMenuSys_getUp is C++ (void*); this caller passes an int handle.
-void* cMenuSys_getUp(int) __asm__("cMenuSys_getUp__FPv");
+void* cMenuSys_getUp(cMenuSys*) __asm__("cMenuSys_getUp__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getUp__FPv);
@@ -271,12 +271,12 @@ INCLUDE_ASM("util/menu", cMenuItem_getUp__FPv);
  */
 void* cMenuItem::getUp()
 {
-    return cMenuSys_getUp((int)Menu->MenuSys);
+    return cMenuSys_getUp(Menu->MenuSys);
 }
 #endif
 
 // PORT: cMenuSys_getDown is C++ (void*); this caller passes an int handle.
-void* cMenuSys_getDown(int) __asm__("cMenuSys_getDown__FPv");
+void* cMenuSys_getDown(cMenuSys*) __asm__("cMenuSys_getDown__FPv");
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getDown__FPv);
@@ -289,11 +289,11 @@ INCLUDE_ASM("util/menu", cMenuItem_getDown__FPv);
  */
 void* cMenuItem::getDown()
 {
-    return cMenuSys_getDown((int)Menu->MenuSys);
+    return cMenuSys_getDown(Menu->MenuSys);
 }
 #endif
 
-extern "C" void* cMenuSys_getLeftShift(int);
+extern "C" void* cMenuSys_getLeftShift(cMenuSys*);
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getLeftShift__FPv);
@@ -310,11 +310,11 @@ void* cMenuItem_getLeftShift(void* vself);
  */
 void* cMenuItem::getLeftShift()
 {
-    return cMenuSys_getLeftShift((int)Menu->MenuSys);
+    return cMenuSys_getLeftShift(Menu->MenuSys);
 }
 #endif
 
-extern "C" void* cMenuSys_getRightShift(int);
+extern "C" void* cMenuSys_getRightShift(cMenuSys*);
 
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_getRightShift__FPv);
@@ -331,7 +331,7 @@ void* cMenuItem_getRightShift(void* vself);
  */
 void* cMenuItem::getRightShift()
 {
-    return cMenuSys_getRightShift((int)Menu->MenuSys);
+    return cMenuSys_getRightShift(Menu->MenuSys);
 }
 #endif
 
@@ -364,8 +364,9 @@ static inline float widthOr0_2CA4C8(cMenuItem* item, const char* s)
 
 #define MAXF_2CA4C8(a, b) ((a) > (b) ? (a) : (b))
 
-// PORT: the unit's callers declare cMenuItem_textPreRender as (void*, void*, int, int, void*) returning void;
-// the body returns an sRect by value (hidden return pointer) from (item, left, center, right). Bound by asm label.
+// PORT: the unit's callers declare cMenuItem_textPreRender as (void*, void*, const char*, const char*, void*)
+// returning void; the body returns an sRect by value (hidden return pointer) from (item, left, center, right). Bound
+// by asm label.
 extern "C" tRect cMenuItem_textPreRender_impl(cMenuItem* item, const char* left, const char* center, const char* right)
     __asm__("cMenuItem_textPreRender");
 
@@ -501,10 +502,11 @@ struct cMenuItem_textRender1_sColor {
     float b;
 };
 
-extern "C" void* cMenuItem_textRender(void* self, int a1, int a2, int a3, void* a4, char* style, cMenuItem_textRender1_sColor* col);
+extern "C" void* cMenuItem_textRender(void* self, int a1, const char* a2, const char* a3, void* a4, char* style,
+        cMenuItem_textRender1_sColor* col);
 
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the body reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a menu row in the focused or normal colours, through cMenuItem_textRender.
@@ -519,7 +521,7 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rightText  text at the right edge, or 0
  * @return cMenuItem_textRender's return value (it returns nothing)
  */
-void* cMenuItem_textRender1_5(void* self, int rect, int leftText, int centerText, void* rightText)
+void* cMenuItem_textRender1_5(void* self, int rect, const char* leftText, const char* centerText, void* rightText)
 {
     int focused = self == ((cMenu*)(*(void**)self))->getFocusItem();
     char* style = focused ? kBoxSelectedColor : kBoxUnselectedColor;
@@ -550,11 +552,11 @@ void* cMenu_cMenu(void* vself)
 {
     cMenu* self = (cMenu*)vself;
     int zeroValue = 0;
-    *(int*)self = zeroValue;
-    self->mVtbl = (void**)((int)(void*)cMenu_vtbl);
+    self->NumItems = zeroValue;
+    self->mVtbl = cMenu_vtbl;
     self->FocusItem = zeroValue;
     self->TopItem = zeroValue;
-    self->MenuSys = (cMenuSys*)zeroValue;
+    self->MenuSys = 0;
     return ((void*)self);
 }
 #endif
@@ -974,7 +976,7 @@ extern "C" void cMenu_postRender()
 {
     GrMan->PopView();
     GrMan->PopViewport();
-    *(int*)&GrMan->m_pCurrentDrawState = (int)GrMan->m_pCurrentDrawState - 20;
+    GrMan->m_pCurrentDrawState--;
 }
 #endif
 
@@ -1451,7 +1453,7 @@ struct cMenu_onGainFocus_sMenu {
     int wrap;           // 0x124
 };
 
-extern "C" void cMenu_onGainFocus(cMenu* menu, int wrap);
+extern "C" void cMenu_onGainFocus(cMenu* menu, cMenuSys* wrap);
 
 /**
  * Activates the menu: records its owner, clamps the focus index and tells the focused item it has focus.
@@ -1715,7 +1717,7 @@ int cMenuSys::getAsciiKey()
 }
 #endif
 
-extern "C" void* cInput_getValue(int, int);
+extern "C" void* cInput_getValue(cInput*, int);
 
 //100%
 INCLUDE_ASM("util/menu", cMenuSys_getLeft__FPv);
@@ -1729,7 +1731,7 @@ INCLUDE_ASM("util/menu", cMenuSys_getLeft__FPv);
  */
 void* cMenuSys::getLeft()
 {
-    return cInput_getValue((int)Input, 0x3e);
+    return cInput_getValue(Input, 0x3e);
 }
 #endif
 
@@ -1745,7 +1747,7 @@ INCLUDE_ASM("util/menu", cMenuSys_getRight__FPv);
  */
 void* cMenuSys::getRight()
 {
-    return cInput_getValue((int)Input, 0x3f);
+    return cInput_getValue(Input, 0x3f);
 }
 #endif
 
@@ -1761,7 +1763,7 @@ INCLUDE_ASM("util/menu", cMenuSys_getUp__FPv);
  */
 void* cMenuSys::getUp()
 {
-    return cInput_getValue((int)Input, 0x40);
+    return cInput_getValue(Input, 0x40);
 }
 #endif
 
@@ -1777,7 +1779,7 @@ INCLUDE_ASM("util/menu", cMenuSys_getDown__FPv);
  */
 void* cMenuSys::getDown()
 {
-    return cInput_getValue((int)Input, 65);
+    return cInput_getValue(Input, 65);
 }
 #endif
 
@@ -1785,8 +1787,8 @@ void* cMenuSys::getDown()
 INCLUDE_ASM("util/menu", cMenuSys_getLeftShift);
 #ifdef SKIP_ASM
 // PORT: cInput_getValue is declared returning void* in this unit; this caller reads a float result ($f0).
-float cInput_getValue_f(int, int) __asm__("cInput_getValue");
-// PORT: the unit declares cMenuSys_getLeftShift as void*(int); the body takes the object pointer.
+float cInput_getValue_f(cInput*, int) __asm__("cInput_getValue");
+// PORT: the unit declares cMenuSys_getLeftShift as void*(cMenuSys*); the body returns a bool.
 bool cMenuSys_getLeftShift_impl(void* self) __asm__("cMenuSys_getLeftShift");
 
 /**
@@ -1797,7 +1799,7 @@ bool cMenuSys_getLeftShift_impl(void* self) __asm__("cMenuSys_getLeftShift");
 bool cMenuSys_getLeftShift_impl(void* vself)
 {
     cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue_f((int)self->Input, 66) != 0.0f;
+    return cInput_getValue_f(self->Input, 66) != 0.0f;
 }
 #endif
 
@@ -1805,8 +1807,8 @@ bool cMenuSys_getLeftShift_impl(void* vself)
 INCLUDE_ASM("util/menu", cMenuSys_getRightShift);
 #ifdef SKIP_ASM
 // PORT: cInput_getValue is declared returning void* in this unit; this caller reads a float result ($f0).
-float cInput_getValue_f(int, int) __asm__("cInput_getValue");
-// PORT: the unit declares cMenuSys_getRightShift as void*(int); the body takes the object pointer.
+float cInput_getValue_f(cInput*, int) __asm__("cInput_getValue");
+// PORT: the unit declares cMenuSys_getRightShift as void*(cMenuSys*); the body returns a bool.
 bool cMenuSys_getRightShift_impl(void* self) __asm__("cMenuSys_getRightShift");
 
 /**
@@ -1817,7 +1819,7 @@ bool cMenuSys_getRightShift_impl(void* self) __asm__("cMenuSys_getRightShift");
 bool cMenuSys_getRightShift_impl(void* vself)
 {
     cMenuSys* self = (cMenuSys*)vself;
-    return cInput_getValue_f((int)self->Input, 67) != 0.0f;
+    return cInput_getValue_f(self->Input, 67) != 0.0f;
 }
 #endif
 
@@ -1972,13 +1974,14 @@ extern void* cBoolMenuItem_vtbl[];
  * @param offText  text shown when it is clear, or 0
  * @return @p self
  */
-extern "C" void* cBoolMenuItem_cBoolMenuItem(cBoolMenuItem* self, void* text, int flagPtr, int caption, int onText, int offText)
+extern "C" void* cBoolMenuItem_cBoolMenuItem(cBoolMenuItem* self, void* text, int* flagPtr, const char* caption,
+        const char* onText, const char* offText)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)caption;
-    self->OnText = (const char*)onText;
-    self->OffText = (const char*)offText;
-    self->Flag = (int*)flagPtr;
+    self->Caption = caption;
+    self->OnText = onText;
+    self->OffText = offText;
+    self->Flag = flagPtr;
     self->mVtbl = cBoolMenuItem_vtbl;
     return ((void*)self);
 }
@@ -2028,7 +2031,7 @@ extern "C" int cBoolMenuItem_input(void** self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cBoolMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 
 
 /**
@@ -2047,13 +2050,13 @@ extern "C" tRect* cBoolMenuItem_preRender(tRect* ret, cBoolMenuItem* item)
         tRect trueRect;
         tRect falseRect;
         tRect measured;
-        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, (void*)item->OnText);
+        cMenuItem_textPreRender(&measured, item, item->Caption, 0, (void*)item->OnText);
         trueRect = measured;
-        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, (void*)item->OffText);
+        cMenuItem_textPreRender(&measured, item, item->Caption, 0, (void*)item->OffText);
         falseRect = measured;
         *ret = (trueRect.W > falseRect.W) ? trueRect : falseRect;
     } else {
-        cMenuItem_textPreRender(ret, item, 0, (int)item->Caption, 0);
+        cMenuItem_textPreRender(ret, item, 0, item->Caption, 0);
     }
     return ret;
 }
@@ -2063,7 +2066,7 @@ extern "C" tRect* cBoolMenuItem_preRender(tRect* ret, cBoolMenuItem* item)
 INCLUDE_ASM("util/menu", cBoolMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws an on/off item: caption on the left and the OnText or OffText on the right, chosen by the int at the
@@ -2078,9 +2081,9 @@ void cBoolMenuItem::render(int rect)
     const char* trueText = OnText;
     const char* falseText;
     if (trueText != 0 && (falseText = OffText) != 0) {
-        cMenuItem_textRender1_5(this, rect, (int)Caption, 0, (void*)(*Flag ? trueText : falseText));
+        cMenuItem_textRender1_5(this, rect, Caption, 0, (void*)(*Flag ? trueText : falseText));
     } else {
-        cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
+        cMenuItem_textRender1_5(this, rect, 0, Caption, 0);
     }
 }
 #endif
@@ -2152,14 +2155,14 @@ extern void* cEnumMenuItem_vtbl[];
  * @param tags  the entries, 8 bytes each: name, value
  * @return @p self
  */
-void* cEnumMenuItem::cEnumMenuItem2(void* text, int enumPtr, int caption, int numTags, int tags)
+void* cEnumMenuItem::cEnumMenuItem2(void* text, int* enumPtr, const char* caption, int numTags, const tCFMEnumTag* tags)
 {
     cMenuItem_cMenuItem((cMenuItem*)this, text);
     mVtbl = cEnumMenuItem_vtbl;
-    Caption = (const char*)caption;
-    Enum = (int*)enumPtr;
+    Caption = caption;
+    Enum = enumPtr;
     NumTags = numTags;
-    Tags = (const tCFMEnumTag*)tags;
+    Tags = tags;
     return ((void*)this);
 }
 #endif
@@ -2269,7 +2272,7 @@ done:
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cEnumMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern char str_Invalid_b[];
 
 /**
@@ -2284,10 +2287,10 @@ extern "C" tRect* cEnumMenuItem_preRender(tRect* ret, cEnumMenuItem* item)
 {
     tRect best;
     tRect measured;
-    cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, str_Invalid_b);
+    cMenuItem_textPreRender(&measured, item, item->Caption, 0, str_Invalid_b);
     best = measured;
     for (int i = 0; i < item->NumTags; i++) {
-        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, (char*)item->Tags[i].Text);
+        cMenuItem_textPreRender(&measured, item, item->Caption, 0, (char*)item->Tags[i].Text);
         if (measured.W > best.W) {
             best = measured;
         }
@@ -2313,11 +2316,11 @@ void cEnumMenuItem::render(int rect)
     int i = 0;
     for (;;) {
         if (i == NumTags) {
-            cMenuItem_textRender1_5(this, rect, (int)Caption, 0, str_Invalid_b);
+            cMenuItem_textRender1_5(this, rect, Caption, 0, str_Invalid_b);
             break;
         }
         if (*Enum == Tags[i].Value) {
-            cMenuItem_textRender1_5(this, rect, (int)Caption, 0, (char*)Tags[i].Text);
+            cMenuItem_textRender1_5(this, rect, Caption, 0, (char*)Tags[i].Text);
             return;
         }
         i++;
@@ -2385,7 +2388,7 @@ int cSubMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cSubMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 
 /**
  * Computes a sub-menu item's row rectangle: its label (+0x14) measured as centred text.
@@ -2399,7 +2402,7 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  */
 void* cSubMenuItem::preRender(cSubMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, 0, (int)item->Caption, 0);
+    cMenuItem_textPreRender(this, item, 0, item->Caption, 0);
     return ((void*)this);
 }
 #endif
@@ -2411,7 +2414,7 @@ INCLUDE_ASM("util/menu", cSubMenuItem_render__FPvi);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a sub-menu item: its row background and its label centred.
@@ -2419,12 +2422,12 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * cMenuItem_textRender1 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
  * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
  *
- * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @param rect  the row rectangle (a tRect pointer held in an int)
  * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
  */
 void* cSubMenuItem::render(int rect)
 {
-    return cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
+    return cMenuItem_textRender1_5(this, rect, 0, Caption, 0);
 }
 #endif
 
@@ -2481,7 +2484,7 @@ int cPopMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cPopMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 
 /**
  * Measures a "back" item: its caption alone, centred (cMenuItem_textPreRender with (0, caption, 0)).
@@ -2491,7 +2494,7 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  */
 void* cPopMenuItem::preRender(cPopMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, 0, (int)item->Caption, 0);
+    cMenuItem_textPreRender(this, item, 0, item->Caption, 0);
     return ((void*)this);
 }
 #endif
@@ -2501,7 +2504,7 @@ INCLUDE_ASM("util/menu", cPopMenuItem_render__FPvi);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a "back" item: its caption, centred, through cMenuItem_textRender1.
@@ -2511,7 +2514,7 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  */
 void* cPopMenuItem::render(int rect)
 {
-    return cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
+    return cMenuItem_textRender1_5(this, rect, 0, Caption, 0);
 }
 #endif
 
@@ -2586,10 +2589,10 @@ extern void* cCommandMenuItem_vtbl[];
  * @param commandArg  argument for onCommand
  * @return @p self
  */
-cCommandMenuItem* cCommandMenuItem::cCommandMenuItem2(void* text, int caption, int commandArg)
+cCommandMenuItem* cCommandMenuItem::cCommandMenuItem2(void* text, const char* caption, int commandArg)
 {
     cMenuItem_cMenuItem((cMenuItem*)this, text);
-    Caption = (const char*)caption;
+    Caption = caption;
     mVtbl = (void**)cCommandMenuItem_vtbl;
     CmdArg = commandArg;
     Data = 0;
@@ -2607,9 +2610,9 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_init);
  * @param label  caption
  * @param commandArg  argument for onCommand
  */
-void cCommandMenuItem::init(int label, int commandArg)
+void cCommandMenuItem::init(const char* label, int commandArg)
 {
-    Caption = (const char*)label;
+    Caption = label;
     CmdArg = commandArg;
     State = 0;
 }
@@ -2650,7 +2653,7 @@ int cCommandMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cCommandMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 
 /**
  * Measures a command item: caption on the left with the State text on the right, or the caption alone, centred,
@@ -2664,9 +2667,9 @@ extern "C" tRect* cCommandMenuItem_preRender(tRect* ret, cCommandMenuItem* item)
 {
     const char* rightText = item->State;
     if (rightText != 0) {
-        cMenuItem_textPreRender(ret, item, (int)item->Caption, 0, (void*)rightText);
+        cMenuItem_textPreRender(ret, item, item->Caption, 0, (void*)rightText);
     } else {
-        cMenuItem_textPreRender(ret, item, 0, (int)item->Caption, 0);
+        cMenuItem_textPreRender(ret, item, 0, item->Caption, 0);
     }
     return ret;
 }
@@ -2676,7 +2679,7 @@ extern "C" tRect* cCommandMenuItem_preRender(tRect* ret, cCommandMenuItem* item)
 INCLUDE_ASM("util/menu", cCommandMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: The unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a command item: caption on the left with the State text on the right, or the caption alone, centred,
@@ -2688,9 +2691,9 @@ void cCommandMenuItem::render(int rect)
 {
     const char* rightText = State;
     if (rightText != 0) {
-        cMenuItem_textRender1_5(this, rect, (int)Caption, 0, (void*)rightText);
+        cMenuItem_textRender1_5(this, rect, Caption, 0, (void*)rightText);
     } else {
-        cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
+        cMenuItem_textRender1_5(this, rect, 0, Caption, 0);
     }
 }
 #endif
@@ -2735,11 +2738,11 @@ extern void* cCallbackMenuItem_vtbl[];
  * @param callback  function called on select
  * @return @p self
  */
-void* cCallbackMenuItem::cCallbackMenuItem1(void* text, int caption, int callback)
+void* cCallbackMenuItem::cCallbackMenuItem1(void* text, const char* caption, void (*callback)())
 {
     cMenuItem_cMenuItem((cMenuItem*)this, text);
-    Caption = (const char*)caption;
-    Callback = (void (*)())callback;
+    Caption = caption;
+    Callback = callback;
     mVtbl = cCallbackMenuItem_vtbl;
     return ((void*)this);
 }
@@ -2753,10 +2756,10 @@ INCLUDE_ASM("util/menu", cCallbackMenuItem_init);
  * @param label  caption
  * @param callback  function called on select
  */
-void cCallbackMenuItem::init(int label, int callback)
+void cCallbackMenuItem::init(const char* label, void (*callback)())
 {
-    Caption = (const char*)label;
-    Callback = (void (*)())callback;
+    Caption = label;
+    Callback = callback;
 }
 #endif
 
@@ -2785,7 +2788,7 @@ int cCallbackMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cCallbackMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern void* D_004866C8[];
 
 /**
@@ -2797,7 +2800,7 @@ extern void* D_004866C8[];
  */
 void* cCallbackMenuItem::preRender(cCallbackMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866C8);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866C8);
     return ((void*)this);
 }
 #endif
@@ -2810,7 +2813,7 @@ INCLUDE_ASM("util/menu", cCallbackMenuItem_render__FPvi);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a callback item: its caption on the left and "[Callback on Select]" (D_004866C8) on the right (cMenuItem_textRender1).
@@ -2820,7 +2823,7 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  */
 void* cCallbackMenuItem::render(int rect)
 {
-    return cMenuItem_textRender1_5(this, rect, (int)Caption, 0, D_004866C8);
+    return cMenuItem_textRender1_5(this, rect, Caption, 0, D_004866C8);
 }
 #endif
 
@@ -2868,7 +2871,7 @@ int cNullMenuItem::canHaveFocus()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cNullMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 
 /**
  * Computes a text-only menu item's row rectangle: its text (+0x14) measured as centred text.
@@ -2882,7 +2885,7 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  */
 void* cNullMenuItem::preRender(cNullMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, 0, (int)item->Caption, 0);
+    cMenuItem_textPreRender(this, item, 0, item->Caption, 0);
     return ((void*)this);
 }
 #endif
@@ -2892,7 +2895,7 @@ INCLUDE_ASM("util/menu", cNullMenuItem_render__FPvi);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a text-only menu item: its row background and its text (+0x14) centred.
@@ -2900,12 +2903,12 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * cMenuItem_textRender1 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
  * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
  *
- * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @param rect  the row rectangle (a tRect pointer held in an int)
  * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
  */
 void* cNullMenuItem::render(int rect)
 {
-    return cMenuItem_textRender1_5(this, rect, 0, (int)Caption, 0);
+    return cMenuItem_textRender1_5(this, rect, 0, Caption, 0);
 }
 #endif
 
@@ -3004,11 +3007,11 @@ extern "C" void* cCharMenuItem_cCharMenuItem(cCharMenuItem* self)
     self->Caption = 0;
     self->mVtbl = cCharMenuItem_vtbl;
     self->Value = 0;
-    *(char*)&self->Min = 0;
-    *(char*)&self->Max = 0;
+    self->Min = 0;
+    self->Max = 0;
     self->AccelDir = 0;
     self->AccelCount = 0;
-    *(int*)&self->Fraction = 0;
+    self->Fraction = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -3029,11 +3032,11 @@ void* cCharMenuItem::cCharMenuItem1(void* text)
     Caption = 0;
     mVtbl = cCharMenuItem_vtbl;
     Value = 0;
-    *(char*)&Min = 0;
-    *(char*)&Max = 0;
+    Min = 0;
+    Max = 0;
     AccelDir = 0;
     AccelCount = 0;
-    *(int*)&Fraction = 0;
+    Fraction = 0.0f;
     return ((void*)this);
 }
 #endif
@@ -3056,17 +3059,18 @@ extern void* cCharMenuItem_vtbl[];
  * @param caption  caption
  * @return @p self
  */
-void* cCharMenuItem::cCharMenuItem2(void* text, int valuePtr, signed char minValue, signed char maxValue, int caption)
+void* cCharMenuItem::cCharMenuItem2(void* text, signed char* valuePtr, signed char minValue, signed char maxValue,
+                                     const char* caption)
 {
     cMenuItem_cMenuItem((cMenuItem*)this, text);
-    Caption = (const char*)caption;
-    Value = (signed char*)valuePtr;
-    *(char*)&Min = minValue;
-    *(char*)&Max = maxValue;
+    Caption = caption;
+    Value = valuePtr;
+    Min = minValue;
+    Max = maxValue;
     mVtbl = cCharMenuItem_vtbl;
     AccelDir = 0;
     AccelCount = 0;
-    *(int*)&Fraction = 0;
+    Fraction = 0.0f;
     return ((void*)this);
 }
 #endif
@@ -3211,7 +3215,7 @@ int cCharMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cCharMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern void* D_004866E0[];
 
 /**
@@ -3223,7 +3227,7 @@ extern void* D_004866E0[];
  */
 void* cCharMenuItem::preRender(cCharMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866E0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866E0);
     return ((void*)this);
 }
 #endif
@@ -3233,7 +3237,7 @@ INCLUDE_ASM("util/menu", cCharMenuItem_render);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 extern char str_pct_d_i[];
 
 /**
@@ -3246,7 +3250,7 @@ void cCharMenuItem::render(int rect)
 {
     char buf[0x70];
     sprintf(buf, str_pct_d_i, *Value);
-    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
+    cMenuItem_textRender1_5(this, rect, Caption, 0, buf);
 }
 #endif
 
@@ -3273,7 +3277,7 @@ void* cIntMenuItem::cIntMenuItem1()
     Max = 0;
     AccelDir = 0;
     AccelCount = 0;
-    *(int*)&Fraction = 0;
+    Fraction = 0.0f;
     return ((void*)this);
 }
 #endif
@@ -3298,7 +3302,7 @@ void* cIntMenuItem::cIntMenuItem2(void* text)
     Max = 0;
     AccelDir = 0;
     AccelCount = 0;
-    *(int*)&Fraction = 0;
+    Fraction = 0.0f;
     return ((void*)this);
 }
 #endif
@@ -3323,17 +3327,18 @@ extern void* cIntMenuItem_vtbl[];
  * @param cap    the item's label text
  * @return @p self
  */
-extern "C" cIntMenuItem* cIntMenuItem_cIntMenuItem(cIntMenuItem* self, void* text, int value, int mini, int maxi, int cap)
+extern "C" cIntMenuItem* cIntMenuItem_cIntMenuItem(cIntMenuItem* self, void* text, int* value, int mini, int maxi,
+        const char* cap)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)cap;
-    self->Value = (int*)value;
+    self->Caption = cap;
+    self->Value = value;
     self->Min = mini;
     self->Max = maxi;
     self->mVtbl = (void**)cIntMenuItem_vtbl;
     self->AccelDir = 0;
     self->AccelCount = 0;
-    *(int*)&self->Fraction = 0;
+    self->Fraction = 0.0f;
     return (self);
 }
 #endif
@@ -3490,7 +3495,7 @@ int cIntMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cIntMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern void* D_004866E0[];
 
 /**
@@ -3505,7 +3510,7 @@ extern void* D_004866E0[];
  */
 void* cIntMenuItem::preRender(cIntMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866E0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866E0);
     return ((void*)this);
 }
 #endif
@@ -3515,7 +3520,7 @@ INCLUDE_ASM("util/menu", cIntMenuItem_render);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 extern char str_pct_d_i[];
 
 /**
@@ -3524,13 +3529,13 @@ extern char str_pct_d_i[];
  * cMenuItem_textRender1 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
  * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
  *
- * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @param rect  the row rectangle (a tRect pointer held in an int)
  */
 void cIntMenuItem::render(int rect)
 {
     char buf[0x70];
     sprintf(buf, str_pct_d_i, *Value);
-    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
+    cMenuItem_textRender1_5(this, rect, Caption, 0, buf);
 }
 #endif
 
@@ -3554,11 +3559,11 @@ void* cFloatMenuItem::cFloatMenuItem1()
     ValueScale = 1.0f;
     Caption = 0;
     Value = 0;
-    *(int*)&Min = 0;
-    *(int*)&Max = 0;
+    Min = 0.0f;
+    Max = 0.0f;
     AccelDir = 0;
     AccelCount = 0;
-    *(int*)&ValueOffset = 0;
+    ValueOffset = 0.0f;
     return ((void*)this);
 }
 #endif
@@ -3583,18 +3588,19 @@ extern void* cFloatMenuItem_vtbl[];
  * @param cap    largest allowed value
  * @return @p self
  */
-extern "C" cFloatMenuItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem* self, void* text, int value, int minf, float maxf, float cap)
+extern "C" cFloatMenuItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem* self, void* text, float* value,
+        const char* minf, float maxf, float cap)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)minf;
-    self->Value = (float*)value;
+    self->Caption = minf;
+    self->Value = value;
     self->Min = maxf;
     self->Max = cap;
     self->mVtbl = (void**)cFloatMenuItem_vtbl;
     self->ValueScale = 1.0f;
     self->AccelDir = 0;
     self->AccelCount = 0;
-    *(int*)&self->ValueOffset = 0;
+    self->ValueOffset = 0.0f;
     return (self);
 }
 #endif
@@ -3715,7 +3721,7 @@ void cFloatMenuItem::zeroValue()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cFloatMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern void* D_004866F0[];
 
 /**
@@ -3730,7 +3736,7 @@ extern void* D_004866F0[];
  */
 void* cFloatMenuItem::preRender(cFloatMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866F0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866F0);
     return ((void*)this);
 }
 #endif
@@ -3801,7 +3807,7 @@ void* prettyFloat_impl(void* out, float value)
 INCLUDE_ASM("util/menu", cFloatMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 extern "C" void cBXString__cBXString(void* self, int flags);
 
 struct cFloatMenuItem_render_sString {
@@ -3819,13 +3825,13 @@ extern "C" void prettyFloat(cFloatMenuItem_render_sString* out, float v);
  * the item its menu's focus item?), draws the row background through the menu (vtable slot 8), then the text
  * with a 2-pixel drop shadow.
  *
- * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @param rect  the row rectangle (a tRect pointer held in an int)
  */
 void cFloatMenuItem::render(int rect)
 {
     cFloatMenuItem_render_sString pretty;
     prettyFloat(&pretty, *Value * ValueScale + ValueOffset);
-    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, pretty.str);
+    cMenuItem_textRender1_5(this, rect, Caption, 0, pretty.str);
     cBXString__cBXString(&pretty, 2);
 }
 #endif
@@ -3849,11 +3855,12 @@ extern void* cAngleMenuItem_vtbl[];
  * @param maxValue  maximum value
  * @return @p self
  */
-extern "C" void* cAngleMenuItem_cAngleMenuItem(cAngleMenuItem* self, void* text, int valuePtr, int caption, float minValue, float maxValue)
+extern "C" void* cAngleMenuItem_cAngleMenuItem(cAngleMenuItem* self, void* text, float* valuePtr, const char* caption,
+        float minValue, float maxValue)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->Caption = (const char*)caption;
-    self->Value = (float*)valuePtr;
+    self->Caption = caption;
+    self->Value = valuePtr;
     self->Min = minValue;
     self->Max = maxValue;
     self->mVtbl = cAngleMenuItem_vtbl;
@@ -3933,7 +3940,7 @@ int cAngleMenuItem::input()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cAngleMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern void* D_004866F0[];
 
 /**
@@ -3948,7 +3955,7 @@ extern void* D_004866F0[];
  */
 void* cAngleMenuItem::preRender(cAngleMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, (int)item->Caption, 0, D_004866F0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866F0);
     return ((void*)this);
 }
 #endif
@@ -3959,7 +3966,7 @@ INCLUDE_ASM("util/menu", cAngleMenuItem_render);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 extern char str_pct_3_2f[];
 
 /**
@@ -3969,13 +3976,13 @@ extern char str_pct_3_2f[];
  * cMenuItem_textRender1 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
  * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
  *
- * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @param rect  the row rectangle (a tRect pointer held in an int)
  */
 void cAngleMenuItem::render(int rect)
 {
     char buf[0x70];
     sprintf(buf, str_pct_3_2f, fptodp(*Value * 57.2957763671875f));
-    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
+    cMenuItem_textRender1_5(this, rect, Caption, 0, buf);
 }
 #endif
 
@@ -4113,7 +4120,7 @@ int cTextMenuItem::input()
 INCLUDE_ASM("util/menu", cTextMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void* cMenu_getFocusItem(cMenu* self);
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" char* strcat(char* dst, const char* src);
@@ -4126,7 +4133,7 @@ struct cTextMenuItem_preRender_sResult {
     int d;
 };
 
-static inline cTextMenuItem_preRender_sResult cTextMenuItem_preRender_make(void* item, int id, char* text)
+static inline cTextMenuItem_preRender_sResult cTextMenuItem_preRender_make(void* item, const char* id, char* text)
 {
     cTextMenuItem_preRender_sResult t;
     cMenuItem_textPreRender(&t, item, id, 0, text);
@@ -4150,7 +4157,7 @@ extern "C" cTextMenuItem_preRender_sResult cTextMenuItem_preRender(cTextMenuItem
     if (focused && item->CursorPos == len && item->CursorPos < 15) {
         strcat(buf, str_underscore);
     }
-    cTextMenuItem_preRender_sResult rowRect = cTextMenuItem_preRender_make(item, (int)item->Caption, buf);
+    cTextMenuItem_preRender_sResult rowRect = cTextMenuItem_preRender_make(item, item->Caption, buf);
     return rowRect;
 }
 #endif
@@ -4810,8 +4817,8 @@ void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpan
  */
 void cExpandMenuItem::setTitle(cMenuItem* item)
 {
-    for (int i = 0; i < ((cMenuList*)(&ExpandMenu))->count; i++) {
-        if (((cMenuList*)(&ExpandMenu))->items[i] == (void*)Title) {
+    for (int i = 0; i < ExpandMenu.NumItems; i++) {
+        if (ExpandMenu.Items[i] == Title) {
             cMenu_remItem_pi(&ExpandMenu, i);
             break;
         }
@@ -4848,33 +4855,32 @@ public:
  * @param expandItem  the expandable menu item
  * @return MIR_Null when the move was handled inside the sub-menu, otherwise the focused item's input result (tMIR)
  */
-// PORT: returns a key code (int) through the unit's void* declaration.
-void* cExpandMenuItem::input()
+int cExpandMenuItem::input()
 {
     cExpandMenuItem* self = this;
-    cMenu_checkFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
-    int prev = (*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected;
-    int key = ((cExpandMenuItem_input_cItem*)(*(cMenu_setFocus_sMenu*)&self->ExpandMenu).items[prev])->input();
+    cMenu_checkFocus((cMenu*)(&self->ExpandMenu));
+    int prev = self->ExpandMenu.FocusItem;
+    int key = ((cExpandMenuItem_input_cItem*)self->ExpandMenu.Items[prev])->input();
     if (((cMenuItem*)self)->isLocked() != 0) {
-        return (void*)key;
+        return key;
     }
     switch (key) {
     case MIR_NextItem:
-        cMenu_nextFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
-        if (prev < (*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected) {
+        cMenu_nextFocus((cMenu*)(&self->ExpandMenu));
+        if (prev < self->ExpandMenu.FocusItem) {
             return 0;
         }
-        cMenu_setFocus(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu), prev);
-        return (void*)MIR_NextItem;
+        cMenu_setFocus((cMenu_setFocus_sMenu*)&self->ExpandMenu, prev);
+        return MIR_NextItem;
     case MIR_PrevItem:
-        cMenu_prevFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
-        if ((*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected < prev) {
+        cMenu_prevFocus((cMenu*)(&self->ExpandMenu));
+        if (self->ExpandMenu.FocusItem < prev) {
             return 0;
         }
-        cMenu_setFocus(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu), prev);
-        return (void*)MIR_PrevItem;
+        cMenu_setFocus((cMenu_setFocus_sMenu*)&self->ExpandMenu, prev);
+        return MIR_PrevItem;
     }
-    return (void*)key;
+    return key;
 }
 #endif
 
@@ -5072,7 +5078,7 @@ void cExpandMenuItem::gainFocus(int mode)
         cMenu_setFocus_v(&ExpandMenu, -1);
         break;
     }
-    cMenu_onGainFocus((cMenu*)(&ExpandMenu), (int)Menu->MenuSys);
+    cMenu_onGainFocus((cMenu*)(&ExpandMenu), Menu->MenuSys);
 }
 #endif
 
@@ -5160,7 +5166,7 @@ struct cRGBTitleMenuItem_preRender_sRect {
 extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTitleMenuItem_preRender_sRect* out, cRGBTitleMenuItem* item)
 {
     cRGBTitleMenuItem_preRender_sRect rect;
-    cMenuItem_textPreRender(&rect, item, (int)item->Caption, 0, 0);
+    cMenuItem_textPreRender(&rect, item, item->Caption, 0, 0);
     rect.w += 36.0f;
     rect.h = rect.h >? 29.0f;
     *out = rect;
@@ -5172,7 +5178,7 @@ extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTi
 INCLUDE_ASM("util/menu", cRGBTitleMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the body reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a colour title row: the title on the left and a 20 x 17 swatch of the colour at the right edge.
@@ -5186,7 +5192,7 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
 // PORT: rect pointer passed through cMenuItem_textRender1's int parameter
 void cRGBTitleMenuItem::render(float* rect)
 {
-    cMenuItem_textRender1_5(((char*)this), (int)rect, (int)Caption, 0, 0);
+    cMenuItem_textRender1_5(((char*)this), (int)rect, Caption, 0, 0);
     tBxVertex verts[4];
     tRect rc;
     rc.W = 20.0f;
@@ -5295,7 +5301,7 @@ INCLUDE_ASM("util/menu", cARGBMenuItem_input__FPv);
  *
  * @return the result of cExpandMenuItem_input()
  */
-void* cARGBMenuItem::input()
+int cARGBMenuItem::input()
 {
     return ((cExpandMenuItem*)this)->input();
 }
@@ -5318,11 +5324,12 @@ extern void* cVectorTitleMenuItem_vtbl[];
  * @param vector  the vector (three floats) shown
  * @return @p self
  */
-extern "C" void* cVectorTitleMenuItem_cVectorTitleMenuItem(cVectorTitleMenuItem* self, int caption, int vector)
+extern "C" void* cVectorTitleMenuItem_cVectorTitleMenuItem(cVectorTitleMenuItem* self, const char* caption,
+    float* vector)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Vector = (t3Vector*)vector;
-    self->Caption = (const char*)caption;
+    self->Caption = caption;
     self->mVtbl = cVectorTitleMenuItem_vtbl;
     return ((void*)self);
 }
@@ -5345,7 +5352,7 @@ int cVectorTitleMenuItem::canHaveFocus()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cVectorTitleMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
+extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
 extern char str_pct_2f_pct_2f_pct_2f[];
@@ -5366,7 +5373,7 @@ extern "C" void* cVectorTitleMenuItem_preRender(void* ret, cVectorTitleMenuItem*
     int y = fptodp(item->Vector->y);
     int z = fptodp(item->Vector->z);
     sprintf(buf, fmt, x, y, z);
-    cMenuItem_textPreRender(ret, item, (int)item->Caption, 0, buf);
+    cMenuItem_textPreRender(ret, item, item->Caption, 0, buf);
     return ret;
 }
 #endif
@@ -5378,7 +5385,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
 extern char str_pct_2f_pct_2f_pct_2f[];
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the callee reads $8 (5th arg).
-void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
+void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
  * Draws a vector title item: its caption on the left and the vector at +0x14 printed with "%.2f, %.2f, %.2f" on the
@@ -5394,16 +5401,15 @@ void cVectorTitleMenuItem::render(int rect)
     int y = fptodp(Vector->y);
     int z = fptodp(Vector->z);
     sprintf(buf, fmt, x, y, z);
-    cMenuItem_textRender1_5(this, rect, (int)Caption, 0, buf);
+    cMenuItem_textRender1_5(this, rect, Caption, 0, buf);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", cVectorMenuItem_cVectorMenuItem);
 #ifdef SKIP_ASM
-extern "C" void* cVectorTitleMenuItem_cVectorTitleMenuItem(cVectorTitleMenuItem* self, int a1, int a2);
+extern "C" void* cVectorTitleMenuItem_cVectorTitleMenuItem(cVectorTitleMenuItem* self, const char* a1, float* a2);
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
-// PORT: the unit's definition types the value pointer and label as int; they are pointers.
 void* cFloatMenuItem_ptr(void* self, int index, float* value, void* label, float f1, float f2) __asm__("cFloatMenuItem_cFloatMenuItem");
 extern void* cVectorMenuItem_vtbl[];
 extern char D_004A39D8[];
@@ -5425,7 +5431,8 @@ extern char D_004A39E8[];
  * @param maxValue  largest value each component may take
  * @return this
  */
-extern "C" void* cVectorMenuItem_cVectorMenuItem(cVectorMenuItem* self, void* name, float* values, int caption, float minValue, float maxValue)
+extern "C" void* cVectorMenuItem_cVectorMenuItem(cVectorMenuItem* self, void* name, float* values, const char* caption,
+        float minValue, float maxValue)
 {
     cExpandMenuItem_cExpandMenuItem((cExpandMenuItem*)self, name, &self->TitleItem);
     self->Vector = (t3Vector*)values;
@@ -5433,7 +5440,7 @@ extern "C" void* cVectorMenuItem_cVectorMenuItem(cVectorMenuItem* self, void* na
     cFloatMenuItem_ptr(&self->X, 0, values, D_004A39D8, minValue, maxValue);
     cFloatMenuItem_ptr(&self->Y, 1, values + 1, D_004A39E0, minValue, maxValue);
     cFloatMenuItem_ptr(&self->Z, 2, values + 2, D_004A39E8, minValue, maxValue);
-    cVectorTitleMenuItem_cVectorTitleMenuItem((cVectorTitleMenuItem*)(&self->TitleItem), caption, (int)values);
+    cVectorTitleMenuItem_cVectorTitleMenuItem((cVectorTitleMenuItem*)(&self->TitleItem), caption, values);
     cExpandMenuItem_addItem3(self, &self->X, -1);
     cExpandMenuItem_addItem3(self, &self->Y, -1);
     cExpandMenuItem_addItem3(self, &self->Z, -1);
@@ -5491,9 +5498,9 @@ static inline void normalize(t3Vector& out, const t3Vector& v)
  *
  * @return cExpandMenuItem_input()'s result
  */
-void* cVectorMenuItem::input()
+int cVectorMenuItem::input()
 {
-    void* ret = ((cExpandMenuItem*)this)->input();
+    int ret = ((cExpandMenuItem*)this)->input();
     if (Normalize != 0) {
         t3VectorXYZ n;
         t3VectorXYZ vec(X.ValueScale * itemValue(&X) + X.ValueOffset,
@@ -5534,11 +5541,12 @@ extern void* D_00486738[];
  * @param maxPoint  the maximum point (x, y)
  * @return @p self
  */
-extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoints, int xLockBits, int yLockBits, int slope, int points, t2Vector* minPoint, t2Vector* maxPoint)
+extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoints, int xLockBits, int yLockBits,
+        int slope, t2Vector* points, t2Vector* minPoint, t2Vector* maxPoint)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->NumPoints = numPoints;
-    self->Points = (t2Vector*)points;
+    self->Points = points;
     self->XLock = (unsigned int)xLockBits;
     self->YLock = (unsigned int)yLockBits;
     self->mVtbl = cGraphMenuItem_vtbl;

@@ -25,7 +25,7 @@
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cUIState_cUIState_Room(void *, int) __asm__("cUIState_cUIState");
+extern "C" void* cUIState_cUIState_Room(void *, cUIEngine*) __asm__("cUIState_cUIState");
 
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
@@ -67,15 +67,15 @@ extern char str_dot_visit_arrow[];
 extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom* self, cUIEngine* ui, int idx)
 {
     signed char pl = idx;
-    cUIState_cUIState_Room(self, (int)ui);
+    cUIState_cUIState_Room(self, ui);
     self->mHashName = 43;
     VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
     cFEStateMountainRoom* room = self;
     room->mUserNum = pl;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, pl);
-    (*(int*)&room->mpPassGroup) = 0;
-    (*(int*)&room->mpPassIcon) = 0;
-    (*(int*)&room->mpHelpText) = 0;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, pl);
+    room->mpPassGroup = 0;
+    room->mpPassIcon = 0;
+    room->mpHelpText = 0;
     for (int i = 4; i >= 0; i--) {
         room->mpRaceMarkers[i] = 0;
     }
@@ -98,8 +98,8 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     for (int i = 2; i >= 0; i--) {
         row4[i] = 0;
     }
-    (*(int*)&room->mpDoneElem) = 0;
-    (*(int*)&room->mpNotDoneElem) = 0;
+    room->mpDoneElem = 0;
+    room->mpNotDoneElem = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     room->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, room->mUserNum);
     for (int i = 0; i < 3; i++) {
@@ -113,7 +113,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     char* item = cBERewardInterface_getPeakPass(iface13, room->mPeakNum, room->mCharID);
     room->mTextureFileIndex = -1;
     room->mFrontTextureID = -1;
-    (*(char**)&room->mpPeakPassInfo) = item;
+    room->mpPeakPassInfo = (tPeakPassInfo*)item;
     (*(int*)&room->mpNotDoneElem) = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_loc_arrow));
     (*(int*)&room->mpDoneElem) = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_visit_arrow));
     cFEStateMountainRoom_loadPeakPass_Room(self);
@@ -460,7 +460,7 @@ bool cFEStateMountainRoom::onInputBegin(cUIInput* widget)
 {
     if (IsShown1D2EA0(((char*)this))) {
     if (widget->isPrevious()) {
-        char* snd = *(char**)&mpEngine->mpSound;
+        char* snd = (char*)mpEngine->mpSound;
         if (snd == 0) {
             snd = &gUISoundNull;
         }
@@ -634,7 +634,7 @@ void cFEStateMountainRoom::onUpdate()
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_loadPeakPass);
 #ifdef SKIP_ASM
-extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+extern "C" int func_0019DA10(void* self, int bank, char* id, int a3, int a4, int a5);
 
 /**
  * Starts loading the mountain room's peak-pass picture, unless a load is already pending or there is no pass to show.
@@ -649,7 +649,7 @@ void cFEStateMountainRoom::loadPeakPass()
     if (mTextureFileIndex < 0) {
         tPeakPassInfo* item = mpPeakPassInfo;
         if (item != 0) {
-            mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, mCharID, (int)item->mpTextureFileName,
+            mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, mCharID, item->mpTextureFileName,
                     10, 1, 0);
         }
     }
@@ -859,7 +859,7 @@ extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(cFEStatePeakRoom* self, int e
     self->mHashName = 44;
     VPTR_OF(cListNode, self) = cFEStatePeakRoom_vtbl;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     sLodge_3780* peakRoom = (sLodge_3780*)self;
     peakRoom->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     peakRoom->fE0 = peakNum;
@@ -1216,7 +1216,7 @@ void cFEStatePeakRoom::updateHelpText(int index)
         } else {
             cUIText_setUnicodeStringByID(mpHelpText, GetHashValue32(str_kT_HELP_LockedGoal));
         }
-        ((cPeakWidget_3EC8*)mpHelpText)->show(1);
+        ((cUIThing*)mpHelpText)->setVisible(1);
     }
 }
 #endif
@@ -1332,9 +1332,9 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     self->mHashName = 45;
     VPTR_OF(cListNode, self) = cFEStateTrophyRoom_vtbl;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     cFEStateTrophyRoom* trophyRoom = self;
-    *(int*)&trophyRoom->mpBigIcon = 0;
+    trophyRoom->mpBigIcon = 0;
     cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     trophyRoom->mCharID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     pi->discard();

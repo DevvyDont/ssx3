@@ -52,9 +52,9 @@ struct cUIPair : public cUIThing {
     // Methods bound to their retail symbols by asm labels.
     void destroyPair() __asm__("cUIPair_destroyPair");
     void* cUIPair1() __asm__("cUIPair_cUIPair1");
-    int getEntry() __asm__("cUIPair_getEntry");
+    cUIThing* getEntry() __asm__("cUIPair_getEntry");
     void setEntry(cUIThing* obj) __asm__("cUIPair_setEntry");
-    int getWidget() __asm__("cUIPair_getWidget");
+    cUIThing* getWidget() __asm__("cUIPair_getWidget");
     void setWidget(cUIThing* obj) __asm__("cUIPair_setWidget");
     virtual void setVisible(int on) __asm__("cUIPair_setVisible");
     virtual void setFocus(int on) __asm__("cUIPair_setFocus");

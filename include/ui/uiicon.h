@@ -54,8 +54,8 @@ struct cUIIcon : public cUIThing {
     void setIconFlip(int enable) __asm__("cUIIcon_setIconFlip");
     bool isIconRotate() __asm__("cUIIcon_isIconRotate");
     void setIconRotate(int enable) __asm__("cUIIcon_setIconRotate");
-    int getElement() __asm__("cUIIcon_getElement");
-    void setElement(int textureElem) __asm__("cUIIcon_setElement");
+    const cTextureElement* getElement() __asm__("cUIIcon_getElement");
+    void setElement(const cTextureElement* textureElem) __asm__("cUIIcon_setElement");
     int getTexture() __asm__("cUIIcon_getTexture");
     void setTexture(int textureId) __asm__("cUIIcon_setTexture");
     void setTileUV1(float x, float y) __asm__("cUIIcon_setTileUV1");

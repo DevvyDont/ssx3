@@ -237,7 +237,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_getNumFrames);
  */
 short cUIAnimation::getNumFrames()
 {
-    return *(short*)&mpAnimHeader->mNumFrames;
+    return (short)mpAnimHeader->mNumFrames;
 }
 #endif
 
@@ -261,11 +261,11 @@ void cUIAnimation::start(int mode, unsigned short FrameNum)
         mScreenStartFrame = FrameNum;
     }
     if (mode == kPlay_Backward) {
-        *(unsigned char*)&mFrameDirection = UIANIMDIR_BW;
-        *(unsigned short*)&mFrameNum = mpAnimHeader->mNumFrames - 1;
+        mFrameDirection = UIANIMDIR_BW;
+        mFrameNum = mpAnimHeader->mNumFrames - 1;
     } else {
-        *(unsigned char*)&mFrameDirection = UIANIMDIR_FW;
-        *(unsigned short*)&mFrameNum = 0;
+        mFrameDirection = UIANIMDIR_FW;
+        mFrameNum = 0;
     }
 }
 #endif
@@ -322,19 +322,19 @@ void cUIAnimation::updateFrame(unsigned char flags)
         }
         break;
     case kPlay_PingPong:
-        if ((*(signed char*)&mFrameDirection) == UIANIMDIR_FW) {
+        if ((mFrameDirection) == UIANIMDIR_FW) {
             mFrameNum++;
         } else {
             mFrameNum--;
         }
-        if ((*(signed char*)&mFrameDirection) == UIANIMDIR_FW) {
+        if ((mFrameDirection) == UIANIMDIR_FW) {
             if (mFrameNum >= ((cUIAnimation_updateFrame_sData*)mpAnimHeader)->count) {
                 mFrameDirection = UIANIMDIR_BW;
                 mFrameNum = ((cUIAnimation_updateFrame_sData*)mpAnimHeader)->count - 1;
                 return;
             }
         }
-        if ((*(signed char*)&mFrameDirection) == UIANIMDIR_BW && mFrameNum < 0) {
+        if ((mFrameDirection) == UIANIMDIR_BW && mFrameNum < 0) {
             mFrameDirection = UIANIMDIR_FW;
             mFrameNum = 0;
         }

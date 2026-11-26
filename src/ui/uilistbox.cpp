@@ -31,7 +31,7 @@ unsigned char cUIListBox::addEntryByAsciiString(const char* text, int data)
     unsigned short* wide = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, str_UILBAscii, 0x100, 0);
     UIAsciiToUnicode(wide, text);
     mpEntries[mNumEntries].mpAsciiString = text;
-    *(unsigned short**)&mpEntries[mNumEntries].mpString = wide;
+    mpEntries[mNumEntries].mpString = wide;
     *(int*)&mpEntries[mNumEntries].mpData = data;
     return (mNumEntries)++;
 }
@@ -61,7 +61,7 @@ unsigned char cUIListBox::addEntryByUnicodeString(unsigned short* str, int data)
     unsigned short* tempString = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
     USTR_copy(tempString, str);
     mpEntries[mNumEntries].mpAsciiString = 0;
-    *(unsigned short**)&mpEntries[mNumEntries].mpString = tempString;
+    mpEntries[mNumEntries].mpString = tempString;
     *(int*)&mpEntries[mNumEntries].mpData = data;
     return (mNumEntries)++;
 }
@@ -204,7 +204,7 @@ void cUIListBox::setCurrentEntryByIndex(int Index)
 {
     unsigned char entryIndex = (unsigned char)Index;
     if (entryIndex < mNumEntries) {
-        *(char*)&mCurrentEntry = entryIndex;
+        mCurrentEntry = entryIndex;
     }
 }
 #endif
@@ -295,8 +295,8 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_setCallbackListBox);
  */
 void cUIListBox::setCallbackListBox(int count)
 {
-    *(char*)&mNumEntries = count;
-    *(char*)&mCurrentEntry = 0;
+    mNumEntries = count;
+    mCurrentEntry = 0;
     *(int*)&mAttrListBox |= 0x10;
     cUIState* obj = mpScreen->mpState;
     obj->onWidgetEvent((cUIThing*)this, 9);
@@ -383,8 +383,8 @@ extern "C" void cUIMenu_setUIData(cUIMenu* self)
 {
     cUIThing_setUIData(self);
     char count = cList_size((char*)&self->mList);
-    *(char*)&self->mScrollItemNumVisible = count;
-    *(char*)&self->mScrollItemNum = count;
+    self->mScrollItemNumVisible = count;
+    self->mScrollItemNum = count;
     self->setInputMap(0);
 }
 #endif

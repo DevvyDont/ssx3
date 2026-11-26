@@ -119,14 +119,14 @@ extern "C" void memset(void* dst, int value, int size);
  */
 extern "C" void* cFELocale_cFELocale(cFELocale* self)
 {
-    *(char*)&self->mDisplayMode = 0;
-    *(char*)&self->mLanguage = 0;
-    *(char*)&self->mNumLanguages = 0;
+    self->mDisplayMode = 0;
+    self->mLanguage = 0;
+    self->mNumLanguages = 0;
     VPTR_OF(cUILocaleInterface, self) = cUILocaleInterface_vtbl;
     tAttrLocale_tAttrLocale((char*)&self->mAttrLocale);
-    *(char*)&self->mModule = 0;
+    self->mModule = 0;
     VPTR_OF(cUILocaleInterface, self) = cFELocale_vtbl;
-    *(char*)&self->mNumLanguages = 4;
+    self->mNumLanguages = 4;
     memset((char*)&self->mpLocaleFile, 0, 80);
     return ((void*)self);
 }

@@ -1097,8 +1097,8 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, voi
 extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i);
 // PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
-extern "C" void cBuyPopupInfo_initBuySong(cBuyPopupInfo* self, int a1, int a2, int a3);
-extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song, int credit);
+extern "C" void cBuyPopupInfo_initBuySong(cBuyPopupInfo* self, void* a1, int a2, int a3);
+extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, void* song, int credit);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char str_cUIStateBuyPopup[];
 
@@ -1118,7 +1118,7 @@ void cFEStateRequestLine::showBuyPopup(int idx)
     for (int i = 0; i < 64; i++) {
         n += (int)((mOwnedSong >> i) & 1);
     }
-    int song = (int)getSongTitle(idx);
+    void* song = getSongTitle(idx);
     if (n >= 6) {
         int cost = cFEStateRequestLine_getSongCost_2(this, idx);
         cBuyPopupInfo_initBuySong(&popup->mInfo, song, cost, mMoney);

@@ -459,36 +459,36 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     self->mState = 0;
     cMenuSys_cMenuSys(&self->mMenuSys);
     cDebugLobbyScreen::OnCreate onCreate;
-    (*(void**)&onCreate.unk_0) = ((char*)self);
+    onCreate.unk_0 = (cDebugLobbyScreen*)((char*)self);
     cDebugLobbyScreen::OnCreate onLogin;
-    (*(void**)&onLogin.unk_0) = ((char*)self);
+    onLogin.unk_0 = (cDebugLobbyScreen*)((char*)self);
     AccountMenu_AccountMenu(&self->mLoginMenu, &onCreate, &onLogin);
     ContinueMenu_ContinueMenu(&self->mContinueMenu);
     cDebugLobbyScreen::OnCreate onSelectPersona;
-    (*(void**)&onSelectPersona.unk_0) = ((char*)self);
+    onSelectPersona.unk_0 = (cDebugLobbyScreen*)((char*)self);
     cDebugLobbyScreen::OnCreate onCreatePersona;
-    (*(void**)&onCreatePersona.unk_0) = ((char*)self);
+    onCreatePersona.unk_0 = (cDebugLobbyScreen*)((char*)self);
     cDebugLobbyScreen::OnCreate onDeletePersona;
-    (*(void**)&onDeletePersona.unk_0) = ((char*)self);
+    onDeletePersona.unk_0 = (cDebugLobbyScreen*)((char*)self);
     PersonaMenu_PersonaMenu(&self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
     cDebugLobbyScreen::OnCreate onSelectRoom;
-    (*(void**)&onSelectRoom.unk_0) = ((char*)self);
+    onSelectRoom.unk_0 = (cDebugLobbyScreen*)((char*)self);
     LobbyMenu_LobbyMenu(&self->mRoomMenu, &onSelectRoom);
     cDebugLobbyScreen::OnCreate onSelectUser;
-    (*(void**)&onSelectUser.unk_0) = ((char*)self);
+    onSelectUser.unk_0 = (cDebugLobbyScreen*)((char*)self);
     cDebugLobbyScreen::OnCreate onChat;
-    (*(void**)&onChat.unk_0) = ((char*)self);
+    onChat.unk_0 = (cDebugLobbyScreen*)((char*)self);
     RoomMenu_RoomMenu(&self->mOccupantsMenu, &onSelectUser, &onChat);
     cDebugLobbyScreen::OnCreate onMessage;
-    (*(void**)&onMessage.unk_0) = ((char*)self);
+    onMessage.unk_0 = (cDebugLobbyScreen*)((char*)self);
     ChatMenu_ChatMenu(&self->mChatMenu, &onMessage);
     cDebugLobbyScreen::OnCreate onAcceptChallenge;
-    (*(void**)&onAcceptChallenge.unk_0) = ((char*)self);
+    onAcceptChallenge.unk_0 = (cDebugLobbyScreen*)((char*)self);
     cDebugLobbyScreen::OnCreate onDeclineChallenge;
-    (*(void**)&onDeclineChallenge.unk_0) = ((char*)self);
+    onDeclineChallenge.unk_0 = (cDebugLobbyScreen*)((char*)self);
     ChallengeResponseMenu_ChallengeResponseMenu(&self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
     cDebugLobbyScreen::OnCreate onAbortChallenge;
-    (*(void**)&onAbortChallenge.unk_0) = ((char*)self);
+    onAbortChallenge.unk_0 = (cDebugLobbyScreen*)((char*)self);
     AbortMenu_AbortMenu(&self->mAbortMenu, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
     cSSXApp* app = SSXApp;
@@ -1419,7 +1419,7 @@ extern "C" void func_0017E418(cDebugLobbyScreen* self, int messageText)
 INCLUDE_ASM("fe/debugfe", func_0017E490);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
-extern "C" void func_0025FB58(void* a, int b, int c);
+extern "C" void func_0025FB58(void* a, char* b, int c);
 
 /**
  * Accepts a challenge from the debug "You've been Challenged!" menu.
@@ -1435,7 +1435,7 @@ extern "C" void func_0017E490(cDebugLobbyScreen* self)
         cMenuSys_popMenu(list);
     }
     self->mState = 13;
-    func_0025FB58(LobbyMan_mLobbyMan, (int)self->mChallenger, 0);
+    func_0025FB58(LobbyMan_mLobbyMan, self->mChallenger, 0);
 }
 #endif
 
@@ -1917,9 +1917,9 @@ extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
     cFadeScreen_cFadeScreen(self);
     *(void**)self = cDebugFE_vtbl;
     *(int*)&self->HeartBeat = 0;
-    *(int*)&self->HeartBeat.Angle[1] = 0;
-    *(int*)&self->HeartBeat.Phase[0] = 0;
-    *(int*)&self->HeartBeat.Phase[1] = 0;
+    self->HeartBeat.Angle[1] = 0.0f;
+    self->HeartBeat.Phase[0] = 0.0f;
+    self->HeartBeat.Phase[1] = 0.0f;
     cHeartBeat* list = ((&self->HeartBeat));
     new (((t2Vector*)&list->History[0][0])) t2Vector[64];
     list->HistoryIdx = 0;
@@ -2243,7 +2243,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
+void* cInput_getState(cInput*, int) __asm__("cInput_getState__FPvi");
 
 /**
  * Reads one of the eight front-end input states: maps @p k 0-7 to input ids 0x72-0x79 for cInput_getState(mpInput).
@@ -2266,12 +2266,12 @@ extern "C" void cFEInput_getState(cFEInput* self, signed char k)
     case 6: id = 0x78; break;
     case 7: id = 121; break;
     }
-    cInput_getState((int)self->mpInput, id);
+    cInput_getState(self->mpInput, id);
 }
 #endif
 
 // PORT: the real function is C++ void* cInput_getState(void* self, int) (bx/execman); these thunks pass an int handle.
-void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
+void* cInput_getState(cInput*, int) __asm__("cInput_getState__FPvi");
 
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
@@ -2284,7 +2284,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
 void* cFEInput_isStart(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 0x70);
+    return cInput_getState(self->mpInput, 0x70);
 }
 #endif
 
@@ -2299,7 +2299,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isSelect__FPv);
 void* cFEInput_isSelect(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 113);
+    return cInput_getState(self->mpInput, 113);
 }
 #endif
 
@@ -2314,7 +2314,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNext__FPv);
 void* cFEInput_isNext(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 122);
+    return cInput_getState(self->mpInput, 122);
 }
 #endif
 
@@ -2329,7 +2329,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPrevious__FPv);
 void* cFEInput_isPrevious(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 123);
+    return cInput_getState(self->mpInput, 123);
 }
 #endif
 
@@ -2344,7 +2344,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOption__FPv);
 void* cFEInput_isOption(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 0x7c);
+    return cInput_getState(self->mpInput, 0x7c);
 }
 #endif
 
@@ -2359,7 +2359,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMisc__FPv);
 void* cFEInput_isMisc(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 125);
+    return cInput_getState(self->mpInput, 125);
 }
 #endif
 
@@ -2374,7 +2374,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextHeld__FPv);
 void* cFEInput_isNextHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 151);
+    return cInput_getState(self->mpInput, 151);
 }
 #endif
 
@@ -2389,7 +2389,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousHeld__FPv);
 void* cFEInput_isPreviousHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 152);
+    return cInput_getState(self->mpInput, 152);
 }
 #endif
 
@@ -2404,7 +2404,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionHeld__FPv);
 void* cFEInput_isOptionHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 153);
+    return cInput_getState(self->mpInput, 153);
 }
 #endif
 
@@ -2419,7 +2419,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscHeld__FPv);
 void* cFEInput_isMiscHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 154);
+    return cInput_getState(self->mpInput, 154);
 }
 #endif
 
@@ -2434,7 +2434,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextReleased__FPv);
 void* cFEInput_isNextReleased(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 155);
+    return cInput_getState(self->mpInput, 155);
 }
 #endif
 
@@ -2449,7 +2449,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousReleased__FPv);
 void* cFEInput_isPreviousReleased(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 156);
+    return cInput_getState(self->mpInput, 156);
 }
 #endif
 
@@ -2464,7 +2464,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionReleased__FPv);
 void* cFEInput_isOptionReleased(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 157);
+    return cInput_getState(self->mpInput, 157);
 }
 #endif
 
@@ -2479,7 +2479,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscReleased__FPv);
 void* cFEInput_isMiscReleased(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 158);
+    return cInput_getState(self->mpInput, 158);
 }
 #endif
 
@@ -2494,7 +2494,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUp__FPv);
 void* cFEInput_isUp(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 114);
+    return cInput_getState(self->mpInput, 114);
 }
 #endif
 
@@ -2509,7 +2509,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDown__FPv);
 void* cFEInput_isDown(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 115);
+    return cInput_getState(self->mpInput, 115);
 }
 #endif
 
@@ -2524,7 +2524,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeft__FPv);
 void* cFEInput_isLeft(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 116);
+    return cInput_getState(self->mpInput, 116);
 }
 #endif
 
@@ -2539,7 +2539,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRight__FPv);
 void* cFEInput_isRight(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 117);
+    return cInput_getState(self->mpInput, 117);
 }
 #endif
 
@@ -2554,7 +2554,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUpHeld__FPv);
 void* cFEInput_isUpHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 147);
+    return cInput_getState(self->mpInput, 147);
 }
 #endif
 
@@ -2569,7 +2569,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDownHeld__FPv);
 void* cFEInput_isDownHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 148);
+    return cInput_getState(self->mpInput, 148);
 }
 #endif
 
@@ -2584,7 +2584,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeftHeld__FPv);
 void* cFEInput_isLeftHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 149);
+    return cInput_getState(self->mpInput, 149);
 }
 #endif
 
@@ -2599,7 +2599,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRightHeld__FPv);
 void* cFEInput_isRightHeld(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 150);
+    return cInput_getState(self->mpInput, 150);
 }
 #endif
 
@@ -2614,7 +2614,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1__FPv);
 void* cFEInput_isRShift1(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 0x7e);
+    return cInput_getState(self->mpInput, 0x7e);
 }
 #endif
 
@@ -2629,7 +2629,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2__FPv);
 void* cFEInput_isRShift2(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 0x7f);
+    return cInput_getState(self->mpInput, 0x7f);
 }
 #endif
 
@@ -2644,7 +2644,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1__FPv);
 void* cFEInput_isLShift1(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 0x80);
+    return cInput_getState(self->mpInput, 0x80);
 }
 #endif
 
@@ -2659,7 +2659,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2__FPv);
 void* cFEInput_isLShift2(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 129);
+    return cInput_getState(self->mpInput, 129);
 }
 #endif
 
@@ -2674,7 +2674,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1Held__FPv);
 void* cFEInput_isRShift1Held(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 130);
+    return cInput_getState(self->mpInput, 130);
 }
 #endif
 
@@ -2689,7 +2689,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2Held__FPv);
 void* cFEInput_isRShift2Held(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 131);
+    return cInput_getState(self->mpInput, 131);
 }
 #endif
 
@@ -2704,7 +2704,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1Held__FPv);
 void* cFEInput_isLShift1Held(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 132);
+    return cInput_getState(self->mpInput, 132);
 }
 #endif
 
@@ -2719,7 +2719,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2Held__FPv);
 void* cFEInput_isLShift2Held(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 133);
+    return cInput_getState(self->mpInput, 133);
 }
 #endif
 
@@ -2734,7 +2734,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamZoom__FPv);
 void* cFEInput_isCamZoom(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 144);
+    return cInput_getState(self->mpInput, 144);
 }
 #endif
 
@@ -2749,7 +2749,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamPan__FPv);
 void* cFEInput_isCamPan(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 146);
+    return cInput_getState(self->mpInput, 146);
 }
 #endif
 
@@ -2764,11 +2764,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamRotate__FPv);
 void* cFEInput_isCamRotate(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getState((int)self->mpInput, 145);
+    return cInput_getState(self->mpInput, 145);
 }
 #endif
 
-extern "C" void* cInput_getValue(int, int);
+extern "C" void* cInput_getValue(cInput*, int);
 
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
@@ -2781,7 +2781,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
 void* cFEInput_getCamZoom(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getValue((int)self->mpInput, 144);
+    return cInput_getValue(self->mpInput, 144);
 }
 #endif
 
@@ -2796,7 +2796,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamPan__FPv);
 void* cFEInput_getCamPan(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getValue((int)self->mpInput, 146);
+    return cInput_getValue(self->mpInput, 146);
 }
 #endif
 
@@ -2811,7 +2811,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamRotate__FPv);
 void* cFEInput_getCamRotate(void* vself)
 {
     cFEInput* self = (cFEInput*)vself;
-    return cInput_getValue((int)self->mpInput, 145);
+    return cInput_getValue(self->mpInput, 145);
 }
 #endif
 
@@ -2828,14 +2828,14 @@ INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
 extern "C" int cFEInput_keyPressed(cFEInput* self)
 {
     int pressed = 0;
-    if (cInput_getState((int)self->mpInput, 114) || cInput_getState((int)self->mpInput, 115) ||
-        cInput_getState((int)self->mpInput, 116) || cInput_getState((int)self->mpInput, 117) ||
-        cInput_getState((int)self->mpInput, 118) || cInput_getState((int)self->mpInput, 119) ||
-        cInput_getState((int)self->mpInput, 0x78) || cInput_getState((int)self->mpInput, 121) ||
-        cInput_getState((int)self->mpInput, 122) || cInput_getState((int)self->mpInput, 123) ||
-        cInput_getState((int)self->mpInput, 125) || cInput_getState((int)self->mpInput, 0x7C) ||
-        cInput_getState((int)self->mpInput, 144) || cInput_getState((int)self->mpInput, 146) ||
-        cInput_getState((int)self->mpInput, 145) || cInput_getState((int)self->mpInput, 113))
+    if (cInput_getState(self->mpInput, 114) || cInput_getState(self->mpInput, 115) ||
+        cInput_getState(self->mpInput, 116) || cInput_getState(self->mpInput, 117) ||
+        cInput_getState(self->mpInput, 118) || cInput_getState(self->mpInput, 119) ||
+        cInput_getState(self->mpInput, 0x78) || cInput_getState(self->mpInput, 121) ||
+        cInput_getState(self->mpInput, 122) || cInput_getState(self->mpInput, 123) ||
+        cInput_getState(self->mpInput, 125) || cInput_getState(self->mpInput, 0x7C) ||
+        cInput_getState(self->mpInput, 144) || cInput_getState(self->mpInput, 146) ||
+        cInput_getState(self->mpInput, 145) || cInput_getState(self->mpInput, 113))
         pressed = 1;
     return pressed;
 }
@@ -2935,7 +2935,7 @@ extern int cUIGroup_vtbl[];
  * @param parentState  the owning UI state; cScreenKeyboard_pressKey calls its virtual slot 19 after each key press
  * @return @p self
  */
-extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
+extern "C" void* func_00180508(cScreenKeyboard* self, cUIState* parentState)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
@@ -2950,7 +2950,7 @@ extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
     cUIThing_cUIThing(self->mRootGroup, 0, 0);
     *(int**)(((char*)self) + 0x48) = cUIGroup_vtbl;
     cList_cList(&self->mRootGroup[116]);
-    self->mpState = (cUIState*)parentState;
+    self->mpState = parentState;
     self->mVtbl = (void**)cScreenKeyboard_vtbl;
     self->mIncludeNumbers = 0;
     self->mIncludeShift = 0;

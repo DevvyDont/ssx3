@@ -71,7 +71,7 @@ struct cFEStateVideoPlayer : public cFEState {
     void setInterruptible(int value) __asm__("cFEStateVideoPlayer_setInterruptible");
     void setFullScreen(int value) __asm__("cFEStateVideoPlayer_setFullScreen");
     void setSound(int value) __asm__("cFEStateVideoPlayer_setSound");
-    void setOptions(void* src) __asm__("cFEStateVideoPlayer_setOptions");
+    void setOptions(const tMoviePlayOptions* src) __asm__("cFEStateVideoPlayer_setOptions");
     void setVideoSourceFiles(const char* videoFile, const char* audioFile)
         __asm__("cFEStateVideoPlayer_setVideoSourceFiles");
     void Start() __asm__("cFEStateVideoPlayer_Start");

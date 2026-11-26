@@ -230,7 +230,7 @@ struct cEnumMenuItem {
     void setCaption(int value) __asm__("cEnumMenuItem_setCaption");
     int getCaption() __asm__("cEnumMenuItem_getCaption");
     void* cEnumMenuItem1(void* text) __asm__("cEnumMenuItem_cEnumMenuItem1");
-    void* cEnumMenuItem2(void* text, int enumPtr, int caption, int numTags, int tags)
+    void* cEnumMenuItem2(void* text, int* enumPtr, const char* caption, int numTags, const tCFMEnumTag* tags)
         __asm__("cEnumMenuItem_cEnumMenuItem2");
     void setEnumTagsNullTerm(int *table) __asm__("cEnumMenuItem_setEnumTagsNullTerm");
     int input() __asm__("cEnumMenuItem_input");
@@ -330,9 +330,9 @@ struct cCommandMenuItem {
     void setData(int value) __asm__("cCommandMenuItem_setData");
     int getData() __asm__("cCommandMenuItem_getData");
     void* cCommandMenuItem1(void* text) __asm__("cCommandMenuItem_cCommandMenuItem1");
-    cCommandMenuItem* cCommandMenuItem2(void* text, int caption, int commandArg)
+    cCommandMenuItem* cCommandMenuItem2(void* text, const char* caption, int commandArg)
         __asm__("cCommandMenuItem_cCommandMenuItem2");
-    void init(int label, int commandArg) __asm__("cCommandMenuItem_init");
+    void init(const char* label, int commandArg) __asm__("cCommandMenuItem_init");
     int input() __asm__("cCommandMenuItem_input");
     void render(int rect) __asm__("cCommandMenuItem_render");
 };
@@ -364,8 +364,9 @@ struct cCallbackMenuItem {
     // Methods bound to their retail symbols by asm labels.
     void setCaption(int value) __asm__("cCallbackMenuItem_setCaption");
     int getCaption() __asm__("cCallbackMenuItem_getCaption");
-    void* cCallbackMenuItem1(void* text, int caption, int callback) __asm__("cCallbackMenuItem_cCallbackMenuItem1");
-    void init(int label, int callback) __asm__("cCallbackMenuItem_init");
+    void* cCallbackMenuItem1(void* text, const char* caption, void (*callback)())
+        __asm__("cCallbackMenuItem_cCallbackMenuItem1");
+    void init(const char* label, void (*callback)()) __asm__("cCallbackMenuItem_init");
     int input() __asm__("cCallbackMenuItem_input");
     void* preRender(cCallbackMenuItem* item) __asm__("cCallbackMenuItem_preRender");
     void* render(int rect) __asm__("cCallbackMenuItem_render__FPvi");
@@ -460,7 +461,8 @@ struct cCharMenuItem {
     void setValue(int value) __asm__("cCharMenuItem_setValue");
     void setCaption(int value) __asm__("cCharMenuItem_setCaption");
     void* cCharMenuItem1(void* text) __asm__("cCharMenuItem_cCharMenuItem1");
-    void* cCharMenuItem2(void* text, int valuePtr, signed char minValue, signed char maxValue, int caption)
+    void* cCharMenuItem2(void* text, signed char* valuePtr, signed char minValue, signed char maxValue,
+                         const char* caption)
         __asm__("cCharMenuItem_cCharMenuItem2");
     void setMinMax(int lo, int hi) __asm__("cCharMenuItem_setMinMax");
     void zeroValue() __asm__("cCharMenuItem_zeroValue");
@@ -842,7 +844,7 @@ struct cExpandMenuItem {
     void addItem(void* item) __asm__("cExpandMenuItem_addItem__FPvT0");
     void remAllItems() __asm__("cExpandMenuItem_remAllItems");
     void setTitle(cMenuItem* item) __asm__("cExpandMenuItem_setTitle");
-    void* input() __asm__("cExpandMenuItem_input");
+    int input() __asm__("cExpandMenuItem_input");
     void gainFocus(int mode) __asm__("cExpandMenuItem_gainFocus");
     void loseFocus() __asm__("cExpandMenuItem_loseFocus");
 };
@@ -881,7 +883,7 @@ struct cARGBMenuItem {
 
     // Methods bound to their retail symbols by asm labels.
     void setCaption(int value) __asm__("cARGBMenuItem_setCaption");
-    void* input() __asm__("cARGBMenuItem_input__FPv");
+    int input() __asm__("cARGBMenuItem_input__FPv");
 };
 
 CHECK_OFFSET(cARGBMenuItem, Menu, 0x000);
@@ -927,7 +929,7 @@ struct cVectorMenuItem {
 
     // Methods bound to their retail symbols by asm labels.
     void setCaption(int value) __asm__("cVectorMenuItem_setCaption");
-    void* input() __asm__("cVectorMenuItem_input");
+    int input() __asm__("cVectorMenuItem_input");
 };
 
 CHECK_OFFSET(cVectorMenuItem, Menu, 0x000);

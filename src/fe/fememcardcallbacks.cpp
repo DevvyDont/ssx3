@@ -1452,7 +1452,7 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
             if (self->mPopupType == button) {
                 self->mIsStatusPopupOn = 0;
             }
-            *(int*)&cFEMemCard_mInstance->mStatusPopup = 0;
+            cFEMemCard_mInstance->mStatusPopup = 0;
         }
     }
 }
@@ -1764,7 +1764,7 @@ void cFEMemCard::SetLoadPressed(int on)
         cMemCard* obj = mcManager->mpMemCard;
         obj->GetTitleString(mcManager->mFileCursor, (unsigned short*)&mLastLoadFileName);
     } else {
-        *(short*)&mLastLoadFileName[0] = 0;
+        mLastLoadFileName[0] = 0;
     }
 }
 #endif
@@ -2134,7 +2134,7 @@ void cFEMemCard::createReadBuffer(unsigned int size)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_cFEPopupConfirm);
 #ifdef SKIP_ASM
 extern "C" void* cScreenPopup_cScreenPopup(void* mem, void* engine, void* owner);
-extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, void* a1, int a2, int a3, int a4, int a5, int a6);
 extern char cFEPopupConfirm_vtbl[];
 extern int cFEPopupConfirm_mUsePreFE;
 
@@ -2148,7 +2148,7 @@ extern int cFEPopupConfirm_mUsePreFE;
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param owner  the parent state (On Tour pParentState)
- * @param ustrDisplay  the message, a 16-bit string (declared int here)
+ * @param ustrDisplay  the message, a 16-bit string
  * @param bYesOnly  nonzero for a single button
  * @param bNoButtons  nonzero for no buttons
  * @param layerOffset  draw-layer offset of the popup
@@ -2156,7 +2156,8 @@ extern int cFEPopupConfirm_mUsePreFE;
  * @param bSnowFlake  passed on to initPopup(), which ignores it
  * @return @p self
  */
-extern "C" cFEPopupConfirm* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm* self, cUIEngine* engine, cUIState* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
+extern "C" cFEPopupConfirm* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm* self, cUIEngine* engine, cUIState* owner,
+        void* ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     cScreenPopup_cScreenPopup((self), engine, owner);
     VPTR_OF(cListNode, self) = (void**)cFEPopupConfirm_vtbl;
@@ -2195,17 +2196,18 @@ extern char str_empty_d[];
  * The message is copied twice; a null @p ustrDisplay converts "" into the buffer and then still copies from
  * the null pointer.
  *
- * @param ustrDisplay  the message, a 16-bit string (declared int here)
+ * @param ustrDisplay  the message, a 16-bit string
  * @param bYesOnly  nonzero for a single button
  * @param bNoButtons  nonzero for no buttons (wins over @p bYesOnly)
  * @param layerOffset  draw-layer offset, stored in info.miLayerOffset
  * @param passUpdate  stored in info.mbPassUpdate for the one- and two-button kinds
  * @param bSnowFlake  unused
  */
-// PORT: the unit declares the string pointer as int; a6 is unused
-extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
+// PORT: a6 is unused
+extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, void* ustrDisplay, int bYesOnly, int bNoButtons,
+        int layerOffset, int passUpdate, int bSnowFlake)
 {
-    void* str = (void*)ustrDisplay;
+    void* str = ustrDisplay;
     cPopupInfo* sub = &self->info;
     func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));

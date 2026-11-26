@@ -70,7 +70,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     self->mHashName = GetHashValue32(str_cOVTemplate_PauseMenu);
     void* engine = ((void*)self->mpEngine);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_31paus_freeride), 0);
-    (*(void**)&self->mpPauseScreen) = screen;
+    self->mpPauseScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -98,7 +98,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     }
     self->mMoveIcons = 1;
     self->mNewMailAlphaDiff = 0.05f;
-    (*(int*)&self->mNewMailAlpha) = 0;
+    self->mNewMailAlpha = 0.0f;
     self->mScreenExiting = 0;
     int i;
     for (i = 0; i < 14; i++) {

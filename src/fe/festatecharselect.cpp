@@ -59,8 +59,8 @@ void cFEStateCharSelect::onCreateScreen()
     cFERider_setVisible(cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum), 0);
     mbDraw3D = 1;
     mPan = -1.0f;
-    *(int*)&mZoom = 0;
-    *(int*)&mPlayerRotation = 0;
+    mZoom = 0.0f;
+    mPlayerRotation = 0.0f;
 }
 #endif
 
@@ -578,20 +578,6 @@ struct sStr4_181BD0 { char c[4]; };
 extern sStr9_181BD0 D_0045D6E0;
 extern char str_0pb[];
 
-class cFEVObj_181BD0 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 // PORT: the unit declares cFEStateCharSelect_updateWidget with an int index; the body sign-extends both id arguments.
 extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rider, signed char charID) __asm__("cFEStateCharSelect_updateWidget");
 
@@ -630,7 +616,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* vself, signed char ri
     int total = 0;
     for (int i = 0; i < 7; i++) {
         name.c[7] = '0' + i;
-        cFEVObj_181BD0* statText = (cFEVObj_181BD0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name.c));
+        cUIThing* statText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name.c));
         bar[0] = '0' + i;
         char* statBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(bar));
         if (statText != 0 && statBar != 0) {
@@ -930,24 +916,24 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* 
 {
     int hashName = w->hash;
     if (hashName == GetHashValue32(str_6pics)) {
-        *(sCW_2460**)&self->mpMenu = w;
+        self->mpMenu = (cUIMenu*)w;
         w->id18 = 0;
         ((sCW_2460*)self->mpMenu)->b0 = 0;
         if (self->mNumCharacters >= 6) cUIMenu_setScrollableMenu(((sCW_2460*)self->mpMenu), self->mNumCharacters);
         return;
     }
     if (hashName == GetHashValue32(str_arrowleft)) {
-        *(sCW_2460**)&self->mpArrowPrev = w;
+        self->mpArrowPrev = (cUIThing*)w;
         vcall_2460(w, 9, self->mNumCharacters >= 7);
         return;
     }
     if (hashName == GetHashValue32(str_arrowright)) {
-        *(sCW_2460**)&self->mpArrowNext = w;
+        self->mpArrowNext = (cUIThing*)w;
         vcall_2460(w, 9, self->mNumCharacters >= 7);
         return;
     }
     if (hashName == GetHashValue32(str_nametext)) {
-        *(sCW_2460**)&self->mpNameWidget = w;
+        self->mpNameWidget = (cUIText*)w;
         cUIText_setAsciiString((cUIText*)w, str_empty_d);
         return;
     }

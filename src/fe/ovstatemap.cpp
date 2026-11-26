@@ -44,20 +44,6 @@ extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* self);
 extern char str_38session[];
 extern char str_MapPic[];
 
-class cUIObj_86A8 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 struct sMap_86A8 {
     char pad_0x0[0x10];
     void* engine;       // 0x10
@@ -66,7 +52,7 @@ struct sMap_86A8 {
     int mSessionPointsOnPic;            // 0xC0
     int fC4;            // 0xC4
     char pad_0xC8[0x8];
-    cUIObj_86A8* obj;   // 0xD0
+    cUIThing* obj;   // 0xD0
     void* screen;       // 0xD4
     char pad_0xD8[0x4];
     int fDC;            // 0xDC
@@ -102,7 +88,7 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
     self->fBC = 0;
     self->scale = 1.0f;
     self->speed = 0.1599999964237213f;
-    cUIObj_86A8* mapPic = (cUIObj_86A8*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_MapPic));
+    cUIThing* mapPic = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_MapPic));
     self->obj = mapPic;
     if (mapPic != 0) {
         mapPic->setVisible(0);
@@ -1191,7 +1177,7 @@ extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
+extern "C" int cGameComm_getQueuedChat(cGameComm* a, char* name, int len);
 extern char str_helptext_b[];
 extern char str_helptexts[];
 extern char str_textScrollChat_b[];
@@ -1224,7 +1210,7 @@ int cOVState::onUpdate_HandleIncomingChat()
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
             char* name = mszChatBuff;
-            if (cGameComm_getQueuedChat((int)sess, name, 65) != 0) {
+            if (cGameComm_getQueuedChat(sess, name, 65) != 0) {
                 cUIThing* helpText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_b));
                 if (helpText != 0)
                     helpText->setVisible(0);

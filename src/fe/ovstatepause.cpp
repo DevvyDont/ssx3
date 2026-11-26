@@ -504,7 +504,7 @@ void cOVState_PAUSE_OPTIONS::onWidgetEvent(cUIThing* obj, unsigned int msg)
             cUIEngine* stack = SSXApp->Game->UI;
             cUIState* st = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0),
                                                                         mpEngine,
-                                                                        *(unsigned char*)&mCurrentCtrl, 42);
+                                                                        (unsigned char)mCurrentCtrl, 42);
             st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(&stack->mStateStack, st, 0, 0);
         }

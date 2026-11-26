@@ -413,7 +413,7 @@ void cUIText::setUnicodeStringPrivate(const unsigned short* str)
     deleteText();
     int len = USTR_length((unsigned short*)str);
     if (len < 801) {
-        *(short*)&mStringSize = len + 1;
+        mStringSize = len + 1;
         mpString = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITextUStr, 0x100, 0);
         USTR_copy(mpString, (unsigned short*)str);
         int n = cUIText_getNumTextLines(((char*)this));
@@ -422,7 +422,7 @@ void cUIText::setUnicodeStringPrivate(const unsigned short* str)
             unsigned short** lines = (unsigned short**)operator_new_tag(n * 4, str_UITextLine, 0x100, 0);
             unsigned short* text = mpString;
             mpLineOffset = lines;
-            *(short*)&mLineSize = *(unsigned short*)&mNumLines;
+            mLineSize = *(unsigned short*)&mNumLines;
             lines[0] = text;
             int k = 1;
             unsigned short* cursor = text;
@@ -558,10 +558,10 @@ extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int pState, in
     self->mpScrollBar = 0;
     self->mpLineOffset = 0;
     self->mStringID = (unsigned int)0;
-    *(short*)&self->mSelectedIndex = 0;
-    *(short*)&self->mLinesOffset = 0;
-    *(short*)&self->mLineSize = 0;
-    *(int*)&self->mPixelOffset = 0;
+    self->mSelectedIndex = 0;
+    self->mLinesOffset = 0;
+    self->mLineSize = 0;
+    self->mPixelOffset = 0.0f;
     self->setInputMap(0);
     return ((void*)self);
 }
@@ -694,7 +694,7 @@ void cUITextScroll::updateLocale()
             if (wideStr != 0) {
                 setUnicodeStringWrap(wideStr);
             }
-            ((cUITextScroll_updateLocale_cVirtB*)this)->setCached(1);
+            ((cUIThing*)(this))->setCached(1);
         }
     }
 }
@@ -736,13 +736,13 @@ bool cUITextScroll::onInput(cUIInput* input)
     }
     signed char rows = (int)(mSize.y / (mScale.y * ((float)font->MaxCharHeight * font->BaseScale[1]) + 3.0f));
     if ((*(unsigned int*)&mAttrTextScroll) & 1) {
-        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[0])) != 0) {
+        if (pressed13E0(((char*)input), (mInputMap[0])) != 0) {
             if (mSelectedIndex != 0) {
                 mSelectedIndex--;
             }
             return true;
         }
-        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[1])) != 0) {
+        if (pressed13E0(((char*)input), (mInputMap[1])) != 0) {
             if (mSelectedIndex < mLineSize - 1) {
                 mSelectedIndex++;
             }
@@ -755,13 +755,13 @@ bool cUITextScroll::onInput(cUIInput* input)
             mLinesOffset = mSelectedIndex - rows + 1;
         }
     } else {
-        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[0])) != 0) {
+        if (pressed13E0(((char*)input), (mInputMap[0])) != 0) {
             if (mLinesOffset != 0) {
                 mLinesOffset--;
             }
             return true;
         }
-        if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[1])) == 0) {
+        if (pressed13E0(((char*)input), (mInputMap[1])) == 0) {
             return false;
         }
         if (mLinesOffset < mLineSize - rows) {
@@ -1183,7 +1183,7 @@ void cUITextScroll::addUnicodeStringByID(int id)
         if (unicodeString != 0) {
             addUnicodeStringWrap(unicodeString);
         }
-        ((cUITextScroll_addUnicodeStringByID_cVirtB*)this)->setCached(1);
+        ((cUIThing*)(this))->setCached(1);
     }
 }
 #endif

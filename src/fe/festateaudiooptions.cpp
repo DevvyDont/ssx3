@@ -126,7 +126,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void cBERewardInterface_setRadioMode(void* iface, int player, int a2, int a3);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
-extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* p, int a1, signed char idx, int a3);
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* p, char* a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void cUIStateStack_pop(void* stack, int a1);
 extern "C" void cUIStateStack_push(void* stack, void* state);
@@ -251,7 +251,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
-        cFEStateRequestLine* popup = (cFEStateRequestLine*)cFEStateRequestLine_cFEStateRequestLine((cFEStateRequestLine*)cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
+        cFEStateRequestLine* popup = (cFEStateRequestLine*)cFEStateRequestLine_cFEStateRequestLine((cFEStateRequestLine*)cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), self->owner, self->player, self->f74);
         if (online_AOWE()) {
             popup->mAttrState = (popup->mAttrState & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
@@ -441,7 +441,8 @@ static inline int Find_196B90(char* mgr, int hash)
  * @param inStore   nonzero when opened from the store (cFECustom_getNextState passes gInLodge)
  * @return @p requestLine
  */
-extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* requestLine, int uiEngine, signed char idx, int inStore)
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* requestLine, char* uiEngine,
+        signed char idx, int inStore)
 {
     sAudioState_196B90* self = (sAudioState_196B90*)requestLine;
     cUIState_cUIState(self);

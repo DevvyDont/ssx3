@@ -744,8 +744,8 @@ extern "C" void *func_0021CBA0(cOVStateHUD1P* state) {
     state->mGlow.mSourceShape = -1;
     state->mGlow.mWidth = 1.0f;
     state->mGlow.mHeight = 1.0f;
-    *(int*)&state->mGlow.mTop = 0;
-    *(int*)&state->mGlow.mLeft = 0;
+    state->mGlow.mTop = 0.0f;
+    state->mGlow.mLeft = 0.0f;
     state->mGlow.mRight = 1.0f;
     state->mGlow.mBottom = 1.0f;
     return ((void*)state);

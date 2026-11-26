@@ -88,8 +88,8 @@ struct cUIScreen {
     void setFocus(int focused) __asm__("cUIScreen_setFocus");
     void setVisible(int enable) __asm__("cUIScreen_setVisible");
     int isVisible() __asm__("cUIScreen_isVisible");
-    int getEngine() __asm__("cUIScreen_getEngine");
-    int getParentState() __asm__("cUIScreen_getParentState");
+    cUIEngine* getEngine() __asm__("cUIScreen_getEngine");
+    cUIState* getParentState() __asm__("cUIScreen_getParentState");
     void parseObjectVisible() __asm__("cUIScreen_parseObjectVisible__FPv");
     void parseEventAudio() __asm__("cUIScreen_parseEventAudio__FPv");
     void parseScreenStart() __asm__("cUIScreen_parseScreenStart__FPv");

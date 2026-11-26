@@ -104,7 +104,7 @@ void cFEStateBraggingRights::onCreateScreen()
 {
     void* engine = ((void*)mpEngine);
     void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_65bragrights), 0);
-    (*(void**)&mpScreen) = screen;
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
     cBraggingRightsMenu* firstPanel = &mMenuCtrl[0];
@@ -949,8 +949,10 @@ extern "C" void cBraggingRightsMenu_setConfirmed_41B0(void* panel, int on) __asm
 extern "C" void cBraggingRightsMenu_setEnableItem_41B0(void* panel, void* screen) __asm__("cBraggingRightsMenu_setEnableItem");
 extern "C" void func_001AB288_41B0(void* self) __asm__("func_001AB288");
 extern "C" int func_0025DA90_41B0(void* self) __asm__("func_0025DA90");
-extern "C" void* cFEStateChatRoom_cFEStateChatRoom_41B0(void* mem, int a1) __asm__("cFEStateChatRoom_cFEStateChatRoom");
-extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(void* mem, int a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
+extern "C" void* cFEStateChatRoom_cFEStateChatRoom_41B0(void* mem,
+    cUIEngine* a1) __asm__("cFEStateChatRoom_cFEStateChatRoom");
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(void* mem,
+        cUIEngine* a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
 extern "C" void func_001A8A40_41B0(void* self, void* obj) __asm__("func_001A8A40");
 extern "C" int func_001A8E40_41B0(void* self, int msg, void* data) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc_41B0(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -1013,9 +1015,12 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         break;
     case 268:
         if (func_0025DA90_41B0(LobbyMan_mLobbyMan)) {
-            func_001A8A40_41B0(((char*)self), cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine));
+            func_001A8A40_41B0(((char*)self), cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852,
+                    str_cFEStateChatRoom, 0, 0), self->mpEngine));
         } else {
-            func_001A8A40_41B0(((char*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine));
+            func_001A8A40_41B0(((char*)self),
+                    cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(1744,
+                    str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine));
         }
         break;
     case 254: {

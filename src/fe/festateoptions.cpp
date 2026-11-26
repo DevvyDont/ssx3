@@ -474,21 +474,6 @@ struct sOptionIface_188F28 {
     sGameCfg_188F28 getOptions() { return cBEOptionInterface_mOption_188F28; }
 };
 
-class cUIObj_188F28 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
-
 static inline void* find_188F28(cFEStateOptionsGame* self, char** names, int i)
 {
     return cUIScreen_getObjectByHashName(((char*)self->mpScreen), GetHashValue32(names[((signed char*)&self->mLanguageSlot)[i]]));
@@ -520,7 +505,7 @@ void cFEStateOptionsGame::onCreateScreen()
     ((signed char*)&mLanguageSlot)[0] = -1;
     ((signed char*)&mLanguageSlot)[1] = 1;
     ((signed char*)&mLanguageSlot)[2] = 2;
-    cUIObj_188F28* uiObj = (cUIObj_188F28*)cUIScreen_getObjectByHashName((char*)mpScreen, GetHashValue32(D_004A14F8));
+    cUIThing* uiObj = (cUIThing*)cUIScreen_getObjectByHashName((char*)mpScreen, GetHashValue32(D_004A14F8));
     cUIScreen_getObjectByHashName((char*)mpScreen, GetHashValue32(D_004A1500));
     uiObj->setVisible(0);
     uiObj->setStatic(1);
@@ -2181,7 +2166,7 @@ void cFEStateOptionsController::onWidgetEvent(cUIThing* widget, unsigned int eve
             if (cBENewPlayerInterface_getUseDualShock(iface, 0)) {
                 vibratePad(0, 10.0f, 10.0f);
                 mTimer[0] = 0x3C;
-                *(unsigned char*)&mVibrateOn |= 1;
+                mVibrateOn |= 1;
             } else {
                 vibratePad(0, 0.0f, 0.0f);
             }
@@ -2190,7 +2175,7 @@ void cFEStateOptionsController::onWidgetEvent(cUIThing* widget, unsigned int eve
             if (cBENewPlayerInterface_getUseDualShock(iface, 1)) {
                 vibratePad(1, 10.0f, 10.0f);
                 mTimer[1] = 0x3C;
-                *(unsigned char*)&mVibrateOn |= 2;
+                mVibrateOn |= 2;
             } else {
                 vibratePad(1, 0.0f, 0.0f);
             }
@@ -2386,21 +2371,21 @@ extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* 
 void cFEStateOptionsController::onUpdate()
 {
     cUIState_onUpdate(this);
-    if (*(unsigned char*)&mVibrateOn & 1) {
+    if ((unsigned char)mVibrateOn & 1) {
         if (mTimer[0] > 0) {
             mTimer[0] -= 1;
         } else {
             mTimer[0] = 0;
-            *(unsigned char*)&mVibrateOn &= ~1;
+            mVibrateOn &= ~1;
             vibratePad(0, 0.0f, 0.0f);
         }
     }
-    if (*(unsigned char*)&mVibrateOn & 2) {
+    if ((unsigned char)mVibrateOn & 2) {
         if (mTimer[1] > 0) {
             mTimer[1] -= 1;
         } else {
             mTimer[1] = 0;
-            *(unsigned char*)&mVibrateOn &= ~2;
+            mVibrateOn &= ~2;
             vibratePad(1, 0.0f, 0.0f);
         }
     }
@@ -2481,7 +2466,7 @@ void* cFEStateOptionsSaveLoad::cFEStateOptionsSaveLoad1()
     cUIState_cUIState(this);
     mHashName = 0x20;
     VPTR_OF(cListNode, this) = cFEStateOptionsSaveLoad_vtbl;
-    *(char*)&mSaveLoadCurrentCtrl = 0;
+    mSaveLoadCurrentCtrl = 0;
     return ((void*)this);
 }
 #endif

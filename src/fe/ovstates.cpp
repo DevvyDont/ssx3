@@ -278,7 +278,7 @@ void cFEStateMainMenu::onCreateScreen()
     iface->submit();
     func_0028F140(cAudioInterface_bxAudio(), 1);
     cUIInput* input = mpEngine->mpInput;
-    *(unsigned char*)&mNumOfCtrl = 0;
+    mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
         input->setPadNum((unsigned char)i); // the original passes the pad number as a byte
         if (input->isActive()) {
@@ -339,7 +339,7 @@ void cFEStateMainMenu::onPreRender2D()
 {
     cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_3multi_play));
     if (obj != 0) {
-        if (*(signed char*)&mNumOfCtrl < 2) {
+        if (mNumOfCtrl < 2) {
             DisableTextWidget(obj);
         } else if ((*(unsigned char*)((char*)this + 0x1D) & 0x3F) == 5) {
             obj->setUseStaticColour(0);
@@ -425,17 +425,17 @@ void cFEStateMainMenu::onUpdate()
     int i = 0;
     cUIState_onUpdate(this);
     cUIInput* input = mpEngine->mpInput;
-    *(signed char*)&mNumOfCtrl = 0;
+    mNumOfCtrl = 0;
     for (; i < 2; i++) {
         input->setPadNum((unsigned char)i); // the original passes the pad number as a byte
         if (input->isActive()) {
-            (*(signed char*)&mNumOfCtrl)++;
+            (mNumOfCtrl)++;
         }
     }
     cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu));
     if (menu != 0) {
         if (menu->mScrollItemCurrent == 2) {
-            if (*(signed char*)&mNumOfCtrl < 2) {
+            if (mNumOfCtrl < 2) {
                 cUIMenu_setSelectedByIndex(menu, 1);
             }
         }
@@ -522,7 +522,7 @@ void cFEStateMainMenu::onWidgetEvent(cUIThing* item_, unsigned int type)
             cBENewRaceInterface_setGamePath(iface, kGAMEPATH_SINGLEEVENT);
             mGoToNextState = 1;
             // both arms set the flag; the leftover compare on the cheat counter is in the target too
-            if (*(signed char*)&mHackCheatTotal >= 7)
+            if (mHackCheatTotal >= 7)
                 mGoToNextState = 1;
             break;
         case 22:
@@ -547,7 +547,7 @@ void cFEStateMainMenu::onWidgetEvent(cUIThing* item_, unsigned int type)
             VPTR_OF(cListNode, popup) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
             bit <<= mSaveCurrentCtrl;
-            *(char*)&popup->mCtrlBits = bit;
+            popup->mCtrlBits = bit;
             popup->mMultiMode = 0;
             cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
             mpSelectMultiModeWidget = (cUIThing*)item_;
@@ -578,7 +578,7 @@ void cFEStateMainMenu::onWidgetEvent(cUIThing* item_, unsigned int type)
         break;
     }
     case cUIState::kONMISC:
-        if (++*(signed char*)&mHackCheatTotal >= 7) {
+        if (++mHackCheatTotal >= 7) {
             setWidgetVisible_194EB0(((char*)this), str_2quick_play);
             setWidgetVisible_194EB0(((char*)this), str_3multi_play);
             setWidgetVisible_194EB0(((char*)this), str_4online);
@@ -656,7 +656,7 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
     if ((int)obj->getData(0) != 0) {
         self->mGoToNextState = 1;
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
-        *(char*)&self->mCurrentCtrl = savedCtrl;
+        self->mCurrentCtrl = savedCtrl;
         cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
         self->onWidgetEvent(self->mpSelectMultiModeWidget, 5);
     }

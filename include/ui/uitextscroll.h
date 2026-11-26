@@ -92,7 +92,7 @@ struct cUITextScroll : public cUIThing {
     void setChatWindowMode() __asm__("cUITextScroll_setChatWindowMode");
     int isChatWindowMode() __asm__("cUITextScroll_isChatWindowMode");
     void setSelectedColour(tARGB* in) __asm__("cUITextScroll_setSelectedColour");
-    void setScrollBar(int scrollBar) __asm__("cUITextScroll_setScrollBar");
+    void setScrollBar(cUIThing* scrollBar) __asm__("cUITextScroll_setScrollBar");
     void setLineOffset(short linesOffset) __asm__("cUITextScroll_setLineOffset");
     unsigned short getLineOffset() __asm__("cUITextScroll_getLineOffset");
     unsigned short getLineSize() __asm__("cUITextScroll_getLineSize");

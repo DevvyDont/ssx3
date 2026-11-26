@@ -506,7 +506,7 @@ extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(cFEStateRewardsRoom* se
     self->mHashName = 46;
     VPTR_OF(cListNode, self) = cFEStateRewardsRoom_vtbl;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mInStore = inStore;
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     return ((void*)self);
@@ -776,9 +776,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_001BF228(void* self, int msg);
-extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, int a1);
+extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, cUIEngine* a1);
 extern "C" void func_0025C610(void* mgr);
-extern "C" void* func_0025CD50(void*, int);
+extern "C" void* func_0025CD50(void*, char*);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
 extern char str_cFEStateOnlineMainMenu[];
 
@@ -802,10 +802,11 @@ extern "C" int func_001D5138(cFEStateLogin* self, int msg)
         func_0025C610(LobbyMan_mLobbyMan);
         break;
     case kNetEvent_Authentication:
-        func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
+        func_0025CD50(LobbyMan_mLobbyMan, (LobbyMan_mLobbyMan->mPersona));
         break;
     case 257:
-        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744,
+                str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine));
         break;
     case 273: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1176,7 +1177,7 @@ void cFEMemCard::initFEMemCard(int mode)
     mpStartReadBuffer = 0;
     mpReadBuffer = 0;
     mIsReplayAlloc = 0;
-    *(short*)&mLastLoadFileName[0] = 0;
+    mLastLoadFileName[0] = 0;
     cMCOverlayManager_ManagerGainState(app);
     cBE_getInterface_Fv(cBE_getBE(), 5);
     if (mType == kTYPE_GAMEOPTIONS)
@@ -1272,7 +1273,7 @@ extern "C" void cMCOverlayManager_SettingsWriteStart(void* app);
 extern "C" void cReplay_initSave(void* p);
 extern "C" int cBE_getDataSize(void* be);
 extern "C" void cFEMemCard_createReadBuffer_59A0(void* self, int size) __asm__("cFEMemCard_createReadBuffer");
-extern "C" void cBE_writeToData(void* be, int a);
+extern "C" void cBE_writeToData(void* be, char* a);
 extern "C" int cBESaveInterface_generateSaveProfile(void* iface, int a);
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void cMCOverlayManager_getFileName(void* app, int a, char* buf, int n);
@@ -1315,7 +1316,7 @@ extern "C" void cFEMemCard_writeStart(void)
         cReplay_initSave(replay);
         int size = cBE_getDataSize(cBE_getBE());
         cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
-        cBE_writeToData(cBE_getBE(), (int)cFEMemCard_mInstance->mpStartReadBuffer);
+        cBE_writeToData(cBE_getBE(), cFEMemCard_mInstance->mpStartReadBuffer);
         cMCOverlayManager_getFileName(app, 0, name, 65);
         func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         cMCOverlayManager_getProductCode(slot, 0x100);
@@ -1452,7 +1453,7 @@ extern "C" int cBE_getDataSize(void* be);
 // PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
 int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
-extern "C" void cMCOverlayManager_readFile(void* self, int a, int b, int c);
+extern "C" void cMCOverlayManager_readFile(void* self, int a, char* b, int c);
 
 
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
@@ -1482,7 +1483,7 @@ extern "C" void cFEMemCard_readStart()
     case cFEMemCard::kTYPE_GAMEOPTIONS: {
         int n = cBESaveInterface_getSaveGameSize_r();
         cFEMemCard_createReadBuffer(cFEMemCard_mInstance_tr5, n);
-        cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, ((int)cFEMemCard_mInstance_tr5->mpReadBuffer), n);
+        cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, (cFEMemCard_mInstance_tr5->mpReadBuffer), n);
         break;
     }
     case cFEMemCard::kTYPE_REPLAY: {
@@ -1490,14 +1491,14 @@ extern "C" void cFEMemCard_readStart()
         int replayBuffer = cBESaveInterface_getReplayBuffer(iface);
         cFEMemCard* memCardInst = cFEMemCard_mInstance_tr5;
         (*(int*)&memCardInst->mpStartReadBuffer) = (*(int*)&memCardInst->mpReadBuffer) = replayBuffer;
-        cMCOverlayManager_readFile(app, memCardInst->mSlot, ((int)memCardInst->mpReadBuffer), cBE_getDataSize(cBE_getBE()));
+        cMCOverlayManager_readFile(app, memCardInst->mSlot, (memCardInst->mpReadBuffer), cBE_getDataSize(cBE_getBE()));
         cFEMemCard_mInstance_tr5->mLoadBEData = mode;
         break;
     }
     case cFEMemCard::kTYPE_PROFILE: {
         int n = cBESaveInterface_getSaveProfileSize();
         cFEMemCard_createReadBuffer(cFEMemCard_mInstance_tr5, n);
-        cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, ((int)cFEMemCard_mInstance_tr5->mpReadBuffer), n);
+        cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, (cFEMemCard_mInstance_tr5->mpReadBuffer), n);
         break;
     }
     }

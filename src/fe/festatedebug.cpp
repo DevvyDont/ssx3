@@ -29,20 +29,6 @@ extern char str_dash_gt[];
 extern char str_END[];
 extern char str_mypro1[];
 
-class cUIObjK180B60 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Sets up an on-screen keyboard on a screen: key labels, hidden cursors and the starting text "mypro1".
  *
@@ -54,32 +40,32 @@ public:
  */
 void cScreenKeyboard::initScreenKeyboard(cUIScreen* screen)
 {
-    cUIObjK180B60* textObj;
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrLeft));
+    cUIThing* textObj;
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrLeft));
     if (textObj != 0)
     {
         textObj->setVisible(1);
         cUIText_setAsciiString((cUIText*)textObj, str_lt_dash);
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrRight));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrRight));
     if (textObj != 0)
     {
         textObj->setVisible(1);
         cUIText_setAsciiString((cUIText*)textObj, str_dash_gt);
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_end));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_end));
     if (textObj != 0)
     {
         textObj->setVisible(1);
         cUIText_setAsciiString((cUIText*)textObj, str_END);
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_arrLeft));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_arrLeft));
     if (textObj != 0)
         textObj->setVisible(0);
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_arrRight));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_arrRight));
     if (textObj != 0)
         textObj->setVisible(0);
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_end));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_end));
     if (textObj != 0)
         textObj->setVisible(0);
     char name[0x20];
@@ -89,11 +75,11 @@ void cScreenKeyboard::initScreenKeyboard(cUIScreen* screen)
     for (int i = 0; i < 26; i++)
     {
         cScreenKeyboard_getKeyObjName(((char*)this), i + 10, name);
-        textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
         cScreenKeyboard_getCursorObjName(((char*)this), i + 10, name);
-        textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
         ch[0]++;
@@ -102,20 +88,20 @@ void cScreenKeyboard::initScreenKeyboard(cUIScreen* screen)
     for (int j = 0; j < 10; j++)
     {
         cScreenKeyboard_getKeyObjName(((char*)this), j, name);
-        textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
         cScreenKeyboard_getCursorObjName(((char*)this), j, name);
-        textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
         ch[0]++;
     }
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_A));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_A));
     if (textObj != 0)
         textObj->setVisible(1);
     cScreenKeyboard_setInputText(((char*)this), str_mypro1);
-    textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
     if (textObj != 0)
         cUIText_setAsciiString((cUIText*)textObj, mHiScoreName);
 }
@@ -134,18 +120,6 @@ extern "C" void cScreenKeyboard_kbMoveDown(void* self);
 extern "C" void cScreenKeyboard_pressKey(void* self);
 extern "C" void cScreenKeyboard_toggleShift(void* self);
 
-struct sDbgObj_180EF0 {
-    char pad0[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
 struct sDbgInput_180EF0 {
     char pad0[0x8];
     virtual void v01();
@@ -195,7 +169,7 @@ extern "C" int cScreenKeyboard_onInput(cScreenKeyboard* self, sDbgInput_180EF0* 
 {
     char buf[0x20];
     cScreenKeyboard_getCursorObjName((self), self->mCurrentKey, buf);
-    sDbgObj_180EF0* keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName((self), GetHashValue32(buf));
+    cUIThing* keyObject = (cUIThing*)cUIScreen_getObjectByHashName((self), GetHashValue32(buf));
     if (keyObject) {
         keyObject->setVisible(0);
     }
@@ -213,7 +187,7 @@ extern "C" int cScreenKeyboard_onInput(cScreenKeyboard* self, sDbgInput_180EF0* 
         cScreenKeyboard_toggleShift((self));
     }
     cScreenKeyboard_getCursorObjName((self), self->mCurrentKey, buf);
-    keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName((self), GetHashValue32(buf));
+    keyObject = (cUIThing*)cUIScreen_getObjectByHashName((self), GetHashValue32(buf));
     if (keyObject) {
         keyObject->setVisible(1);
     }

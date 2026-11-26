@@ -1656,20 +1656,6 @@ extern char* D_00441D10[];
 extern char str_overlayMenu[];
 extern char str_overlayOptpct_d[];
 
-class cUIObj_20D1D8 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Builds the screen of a simple overlay: the base overlay screen plus a menu with one visible option.
  *
@@ -1687,7 +1673,7 @@ extern "C" void cOVTemplate_Simple_onCreateScreen(cOVTemplate_Simple* self)
     for (int i = 0; i < 5; i++) {
         char buf[32];
         sprintf(buf, str_overlayOptpct_d, i);
-        cUIObj_20D1D8* optionWidget = (cUIObj_20D1D8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIThing* optionWidget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (optionWidget != 0) {
             if (i < 1) {
                 int labelIndex = D_004A2860[i];
@@ -2070,7 +2056,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 cUIEngine* ui = SSXApp->Game->UI;
                 cUIState* st =
                     (cUIState*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0),
-                                                                 self->mpEngine, *(unsigned char*)&self->mCurrentCtrl,
+                                                                 self->mpEngine, (unsigned char)self->mCurrentCtrl,
                                                                  0x18);
                 st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
                 cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);

@@ -373,11 +373,11 @@ extern "C" char cList_size(void*);
  */
 void cUIMenu::setScrollableMenu(char NumItems)
 {
-    *(char*)&mScrollItemCurrent = 0;
-    *(char*)&mScrollItemNum = NumItems;
+    mScrollItemCurrent = 0;
+    mScrollItemNum = NumItems;
     *(int*)&mAttrMenu |= 4;
-    *(char*)&mScrollItemNumVisible = cList_size((char*)&mList);
-    *(char*)&mScrollItemOffset = 0;
+    mScrollItemNumVisible = cList_size((char*)&mList);
+    mScrollItemOffset = 0;
 }
 #endif
 
@@ -391,9 +391,9 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollBar);
  *
  * @param scrollBar  the scroll bar widget
  */
-void cUIMenu::setScrollBar(int scrollBar)
+void cUIMenu::setScrollBar(cUIScrollBar* scrollBar)
 {
-    mpScrollBar = (cUIScrollBar*)scrollBar;
+    mpScrollBar = scrollBar;
 }
 #endif
 

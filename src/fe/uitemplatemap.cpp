@@ -64,20 +64,6 @@ extern char str_P2you_are_here[];
 extern char str_P3you_are_here[];
 extern char str_SP_InfoDataTitle[];
 
-class cUIObj_200700 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 struct sMapTmpl_200700 {
     char pad0[0x2CC];
     int popup;                  // 0x2CC
@@ -86,7 +72,7 @@ struct sMapTmpl_200700 {
     int file;                   // 0x2D8
     int f2DC;
     int f2E0;
-    cUIObj_200700* map;         // 0x2E4
+    cUIThing* map;         // 0x2E4
     void* screen;               // 0x2E8
     void* owner;                // 0x2EC
     int f2F0;                   // 0x2F0
@@ -123,7 +109,7 @@ void cUITemplate_MAP::onCreateScreen(void* screen, cUIState* owner)
     self->mode = -1;
     self->file = cFEAsyncManager_GetFreeAsyncFile(SSXApp->mFEAsyncManager);
     self->pic = 0;
-    cUIObj_200700* mapObj = (cUIObj_200700*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_MapPic));
+    cUIThing* mapObj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_MapPic));
     self->map = mapObj;
     if (mapObj != 0)
         mapObj->setVisible(0);
@@ -2592,7 +2578,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
     char buf[200];
     sRewardDesc_0388 desc;
     char name[32];
-    cUIObj_200700* mapObj = (cUIObj_200700*)getObj_207430(self, str_HelpText);
+    cUIThing* mapObj = (cUIThing*)getObj_207430(self, str_HelpText);
     if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION)
         mapObj->setVisible(1);
     void* mission = cBE_getInterface_Fv(cBE_getBE(), 10);

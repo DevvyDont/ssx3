@@ -367,15 +367,16 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, cUIEngine* engi
     mc->mRetryToInit = one;
     mc->mPollForNoCard = one;
     mc->mPollForUnformatted = one;
-    (*(void**)&mc->callbackLoadReady) = (void*)cFEStateMemCard_callbackLoadReady;
-    (*(void**)&mc->callbackFileNotFound) = (void*)cFEStateMemCard_callbackFileNotFound;
-    (*(void**)&mc->callbackFileChecked) = (void*)cFEStateMemCard_callbackFileChecked;
-    (*(void**)&mc->callbackSysRecheckFile) = (void*)cFEStateMemCard_callbackSysRecheckFile;
-    (*(void**)&mc->callbackCardsChecked) = (void*)cFEStateMemCard_callbackCardsChecked;
-    (*(void**)&mc->callbackConfirmFormat) = (void*)func_00186C98;
-    (*(void**)&mc->callbackConfirmNoCards) = (void*)func_00186D60;
-    (*(void**)&mc->callbackAcknowledgeCardStatusChange) = (void*)cFEStateMemCard_callbackAcknowledgeCardStatusChange;
-    (*(void**)&mc->callbackConfirmNoFreeBlocks) = (void*)cFEStateMemCard_callbackConfirmNoFreeBlocks;
+    mc->callbackLoadReady = (void (*)())((void*)cFEStateMemCard_callbackLoadReady);
+    mc->callbackFileNotFound = (void (*)())((void*)cFEStateMemCard_callbackFileNotFound);
+    mc->callbackFileChecked = (void (*)())((void*)cFEStateMemCard_callbackFileChecked);
+    mc->callbackSysRecheckFile = (void (*)())((void*)cFEStateMemCard_callbackSysRecheckFile);
+    mc->callbackCardsChecked = (void (*)())((void*)cFEStateMemCard_callbackCardsChecked);
+    mc->callbackConfirmFormat = (void (*)())((void*)func_00186C98);
+    mc->callbackConfirmNoCards = (void (*)())((void*)func_00186D60);
+    mc->callbackAcknowledgeCardStatusChange =
+        (int (*)(int))((void*)cFEStateMemCard_callbackAcknowledgeCardStatusChange);
+    mc->callbackConfirmNoFreeBlocks = (void (*)())((void*)cFEStateMemCard_callbackConfirmNoFreeBlocks);
     mc->mShowCardChangeNotify = 0;
     mc->mPollForFullCard = 0;
     return (self);
