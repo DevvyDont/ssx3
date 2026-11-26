@@ -47,6 +47,18 @@ struct SHAPE {
     unsigned int mipmaps : 4;       // 0xC bits 28..31 [O]; [U] SHAPE_createat stores the level count
 };
 
+// A shape's pixel format (SHAPE::type, low 7 bits; bit 7 marks packed data; names ours). [R] SHAPE_depth's table
+// shapetypetobpp gives 4, 8, 15, 24, 32 and 16 bits per pixel for types 1 .. 6; [U] cPS2GraphicsMan_AddTexture and
+// SetNewTextureData give types 1 and 2 a palette (the next shape) and the PSMT4 / PSMT8 texel formats, type 3 the
+// 16-bit and type 5 the 32-bit one.
+enum eSHAPEType {
+    kSHAPE_PAL4 = 1, kSHAPE_PAL8 = 2, kSHAPE_RGB15 = 3, kSHAPE_RGB24 = 4, kSHAPE_RGB32 = 5, kSHAPE_RGB16 = 6
+};
+
+// The first two bytes of RefPack-packed data (names ours). [U] unpackz decodes data whose second byte is 0xFB and whose
+// first is 0x10 or 0x90 (REF_decode); cPS2GraphicsMan_SetNewTextureData unpacks shape data that starts 0x10 0xFB.
+enum { kREFPACK_TYPE = 0x10, kREFPACK_MAGIC = 0xFB };
+
 CHECK_OFFSET(SHAPE, width, 0x4);
 CHECK_OFFSET(SHAPE, height, 0x6);
 CHECK_OFFSET(SHAPE, centerx, 0x8);

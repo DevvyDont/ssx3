@@ -66,40 +66,40 @@ void* cBESaveInterface_getThis();
  * 4 option, 5 save, 6 BAGT, 7 network, 8 score, 9 cBEBoltInterface_getThis's singleton, 10 mission, 11 econ, 12 aggression, 13
  * reward.
  *
- * @param kind  the interface kind (On Tour eBE_Interface interfaceType)
+ * @param kind  the interface kind (eBE_Interface; On Tour interfaceType)
  * @return the interface's getThis() singleton, or 0 for an unknown kind
  */
 // Returns the backend interface singleton for the given kind.
 void* cBERaceState::getInterface(int kind)
 {
     switch (kind) {
-    case 0:
+    case kInt_Newrace:
         return cBENewRaceInterface_getThis();
-    case 1:
+    case kInt_Newplayer:
         return cBENewPlayerInterface_getThis();
-    case 2:
+    case kInt_Character:
         return cBECharacterInterface_getThis();
-    case 3:
+    case kInt_Stat:
         return cBEStatInterface_getThis();
-    case 4:
+    case kInt_Option:
         return cBEOptionInterface_getThis();
-    case 6:
+    case kInt_BAGT:
         return cBEBAGTInterface_getThis();
-    case 7:
+    case kInt_Network:
         return cBENetworkInterface_getThis();
-    case 8:
+    case kInt_Score:
         return cBEScoreInterface_getThis();
-    case 9:
+    case kInt_Bolt:
         return cBEBoltInterface_getThis();
-    case 10:
+    case kInt_Mission:
         return cBEMissionInterface_getThis();
-    case 11:
+    case kInt_Economy:
         return cBEEconInterface_getThis();
-    case 12:
+    case kInt_Aggression:
         return cBEAggressionInterface_getThis();
-    case 13:
+    case kInt_Reward:
         return cBERewardInterface_getThis();
-    case 5:
+    case kInt_Save:
         return cBESaveInterface_getThis();
     }
     return 0;

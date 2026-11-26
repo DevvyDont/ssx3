@@ -1,6 +1,7 @@
 #include "common.h"
 #include "vtable.h"
 #include "be/beintnewrace.h"
+#include "be/bedbprofile.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENewRaceInt[];
@@ -412,9 +413,10 @@ extern unsigned int uiAI[][7];
  * limit. The limit comes from the table uiAI, indexed by cGamePath and cGameMode.
  *
  * @param count  number of AI riders
- * @return 1 when @p count is within the limit (compared unsigned, so a negative count fails), else 0
+ * @return true when @p count is within the limit (compared unsigned, so a negative count fails); [O] On Tour's
+ *         setNumberAI returns bool
  */
-int cBENewRaceInterface::setNumberAI(int count)
+bool cBENewRaceInterface::setNumberAI(int count)
 {
     cBENewRaceInterface_newRace.iNumberAI = count;
     cBENewRaceInterface_newRace.iNumberRiders = cBENewRaceInterface_newRace.iNumberHumans + count + cBENewRaceInterface_newRace.iNumberMissionRiders;
@@ -427,8 +429,8 @@ int cBENewRaceInterface::setNumberAI(int count)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
-extern "C" int cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int event);
+extern "C" bool cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
+extern "C" bool cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int event);
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int a1);
 extern "C" void cBENewPlayerInterface_setToMissionMan(int a0);
 int cBENewPlayerInterface_isMissionMan(int a0);
@@ -438,27 +440,29 @@ void* cBENewPlayerInterface_getThis();
 /**
  * Sets the race's game mode and the matching numbers of human, AI and mission riders.
  *
- * Refused when the mode is not allowed on the current game path (cBELibrary_gamePathDB). Mode 4 gets 1 human and 1
- * mission rider and makes player 1 the mission man with player 0's character (cBENewPlayerInterface_setToMissionMan), then submits;
- * leaving mode 4 restores the humans (2 on path 2) and resets player 1. Modes 0 (5 AI, 4 on path 2), 1 (1 AI)
- * and 3, 5, 6 (1 AI for events 4-5 off path 2) set the counts; mode 5 also sets event 4.
+ * Refused when the mode is not allowed on the current game path (cBELibrary_gamePathDB). kGAMEMODE_FREERIDE gets 1
+ * human and 1 mission rider and makes player 1 the mission man with player 0's character
+ * (cBENewPlayerInterface_setToMissionMan), then submits; leaving it restores the humans (2 on kGAMEPATH_MULTIPLAYER)
+ * and resets player 1. kGAMEMODE_RACE (5 AI, 4 multiplayer), kGAMEMODE_SLOPESTYLE (1 AI) and kGAMEMODE_HALFPIPE,
+ * kGAMEMODE_TIMECHALLENGE, kGAMEMODE_PNTSCHALLENGE (1 AI for the rival events off the multiplayer path) set the
+ * counts; kGAMEMODE_TIMECHALLENGE also sets kGAMEEVENT_RIVALTIME.
  *
- * @param mode  the game mode
- * @return 1 when set, 0 when the mode is not allowed
+ * @param mode  the game mode (eBEGameMode)
+ * @return true when set, false when the mode is not allowed ([O] On Tour's setGameMode returns bool)
  */
-int cBENewRaceInterface::setGameMode(int mode)
+bool cBENewRaceInterface::setGameMode(int mode)
 {
     tBEPathDB row = cBELibrary_gamePathDB[cBENewRaceInterface_newRace.cGamePath];
     int humans = 1;
     int ai = 5;
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         humans = 2;
         ai = 4;
     }
-    if (row.cModes[mode] != 1) {
-        return 0;
+    if (row.cModes[mode] != true) {
+        return false;
     }
-    if (mode == 4) {
+    if (mode == kGAMEMODE_FREERIDE) {
         cBENewRaceInterface_newRace.cGameMode = mode;
         cBENewRaceInterface_setNumberHumans(this, 1);
         setNumberAI(0);
@@ -466,7 +470,7 @@ int cBENewRaceInterface::setGameMode(int mode)
         cBEInterface* playerInterface = (cBEInterface*)cBENewPlayerInterface_getThis();
         cBENewPlayerInterface_setToMissionMan(1);
         playerInterface->submit();
-    } else if (cBENewRaceInterface_newRace.cGameMode == 4) {
+    } else if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE) {
         cBENewRaceInterface_setNumberHumans(this, humans);
         setNumberAI(0);
         cBENewRaceInterface_setNumberMission(this, 0);
@@ -477,30 +481,31 @@ int cBENewRaceInterface::setGameMode(int mode)
         }
     }
     cBENewRaceInterface_newRace.cGameMode = mode;
-    if (mode == 3 || mode == 5 || mode == 6) {
+    if (mode == kGAMEMODE_HALFPIPE || mode == kGAMEMODE_TIMECHALLENGE || mode == kGAMEMODE_PNTSCHALLENGE) {
         cBENewRaceInterface_setNumberHumans(this, humans);
         unsigned char ev = (unsigned char)cBENewRaceInterface_newRace.cGameEvent;
-        if (ev >= 4 && ev <= 5 && cBENewRaceInterface_newRace.cGamePath != 2) {
+        if (ev >= kGAMEEVENT_RIVALTIME && ev <= kGAMEEVENT_RIVALPOINTS
+            && cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER) {
             setNumberAI(1);
         } else {
             setNumberAI(0);
         }
         cBENewRaceInterface_setNumberMission(this, 0);
     }
-    if (mode == 0) {
+    if (mode == kGAMEMODE_RACE) {
         cBENewRaceInterface_setNumberHumans(this, humans);
         setNumberAI(ai);
         cBENewRaceInterface_setNumberMission(this, 0);
     }
-    if (mode == 1) {
+    if (mode == kGAMEMODE_SLOPESTYLE) {
         cBENewRaceInterface_setNumberHumans(this, humans);
         setNumberAI(1);
         cBENewRaceInterface_setNumberMission(this, 0);
     }
-    if (mode == 5) {
-        setGameEvent(4);
+    if (mode == kGAMEMODE_TIMECHALLENGE) {
+        setGameEvent(kGAMEEVENT_RIVALTIME);
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -521,18 +526,18 @@ void cBENewRaceInterface::setGamePath(int mode)
     *((char*)&beRaceDB->cGamePath) = mode;
     switch (mode)
     {
-    case 0:
+    case kGAMEPATH_WORLDCIRCUIT:
         cBENewRaceInterface_setNumberHumans(this, 1);
         setNumberAI(0);
         break;
-    case 1:
+    case kGAMEPATH_SINGLEEVENT:
         cBENewRaceInterface_setNumberHumans(this, 1);
         if (beRaceDB->iNumberAI < 0)
             setNumberAI(0);
         if (beRaceDB->iNumberAI >= 6)
             setNumberAI(5);
         break;
-    case 2:
+    case kGAMEPATH_MULTIPLAYER:
         cBENewRaceInterface_setNumberHumans(this, 2);
         setNumberAI(0);
         break;
@@ -543,15 +548,15 @@ void cBENewRaceInterface::setGamePath(int mode)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
+extern "C" bool cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
 
 /**
- * Sets the race's game event; events 4 and 5 also set one AI rider (none on game path 2).
+ * Sets the race's game event; the rival events (4 and 5) also set one AI rider (none on kGAMEPATH_MULTIPLAYER).
  *
  * @param event  the game event
- * @return whether the event's mode (cBELibrary_gameEventDB) matches the current game mode
+ * @return true when the event's mode (cBELibrary_gameEventDB) matches the current game mode
  */
-int cBENewRaceInterface::setGameEvent(int event)
+bool cBENewRaceInterface::setGameEvent(int event)
 {
     tBEEventDB eventRec = cBELibrary_gameEventDB[event];
     cBENewRaceInterface_newRace.cGameEvent = event;
@@ -559,7 +564,7 @@ int cBENewRaceInterface::setGameEvent(int event)
     {
         if (event >= 4)
         {
-            if (cBENewRaceInterface_newRace.cGamePath == 2)
+            if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER)
                 setNumberAI(0);
             else
                 setNumberAI(1);
@@ -842,30 +847,32 @@ struct sRacePair_001456A0
 extern sRacePair_001456A0 cBELibrary_platinumDB[];
 
 /**
- * Returns the target for location @p idx and event @p mode from cBELibrary_platinumDB, or -1.
+ * Returns the target for location @p idx and event @p mode from cBELibrary_platinumDB, or kNoPlatinumGoal (-1).
  *
- * Events 6-11 give -1. Below location 14 it is entry @p idx's second halfword (times 100 unless @p mode is 0); from
- * 14 on, @p mode 4 gives entry @p idx's value, @p mode 5 entry @p idx + 3's times 100, others -1.
+ * Events 6-11 (the peaks' time and points challenges) give -1. Below location 14 it is entry @p idx's second halfword
+ * (times 100 unless @p mode is 0); from 14 on, kGAMEEVENT_RIVALTIME gives entry @p idx's value,
+ * kGAMEEVENT_RIVALPOINTS entry @p idx + 3's times 100, others -1.
  *
  * @param idx  the location
- * @param mode  the event
- * @return the target, or -1
+ * @param mode  the event (eBEGameEvent)
+ * @return the target, or kNoPlatinumGoal
  */
 int cBENewRaceInterface::getPlatinumGoal(int idx, int mode)
 {
-    if (mode == 9 || mode == 10 || mode == 11 || mode == 6 || mode == 7 || mode == 8)
-        return -1;
+    if (mode == kGAMEEVENT_POINTS_PEAK1 || mode == kGAMEEVENT_POINTS_PEAK2 || mode == kGAMEEVENT_POINTS_PEAK3
+        || mode == kGAMEEVENT_TIME_PEAK1 || mode == kGAMEEVENT_TIME_PEAK2 || mode == kGAMEEVENT_TIME_PEAK3)
+        return kNoPlatinumGoal;
     if (idx < 14)
     {
         if (mode == 0)
             return cBELibrary_platinumDB[(short)idx].b;
         return cBELibrary_platinumDB[(short)idx].b * 100;
     }
-    if (mode == 4)
+    if (mode == kGAMEEVENT_RIVALTIME)
         return cBELibrary_platinumDB[(short)idx].b;
-    if (mode == 5)
+    if (mode == kGAMEEVENT_RIVALPOINTS)
         return cBELibrary_platinumDB[(short)idx + 3].b * 100;
-    return -1;
+    return kNoPlatinumGoal;
 }
 #endif
 
@@ -877,10 +884,11 @@ signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int a1);
 
 /**
- * Returns the rival character of the current peak (cBENewRaceInterface_getLocationPeak of the race's location): 3 on peak 0, 7 on peak 1,
- * 8 on peak 2, or 5, 4, 6 when the human rider already plays that character; 3 otherwise.
+ * Returns the rival character of the current peak (cBENewRaceInterface_getLocationPeak of the race's location): Mac
+ * on peak 0, Nate on peak 1, Psymon on peak 2, or Griff, Zoe, Elise when the human rider already plays that
+ * character; Mac otherwise.
  *
- * @return the rival's character id
+ * @return the rival's character id (eBECharacters; [O] On Tour's getRival returns eBECharacters)
  */
 int cBENewRaceInterface::getRival()
 {
@@ -888,14 +896,14 @@ int cBENewRaceInterface::getRival()
     int humanChar = cBENewPlayerInterface_getRiderCharID(players, cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface_getThis(), 0));
     switch (getLocationPeak(cBENewRaceInterface_newRace.iLocationIdx))
     {
-    case 0:
-        return humanChar == 3 ? 5 : 3;
-    case 1:
-        return humanChar == 7 ? 4 : 7;
-    case 2:
-        return humanChar == 8 ? 6 : 8;
+    case kPEAK_1:
+        return humanChar == kCHAR_MAC ? kCHAR_GRIFF : kCHAR_MAC;
+    case kPEAK_2:
+        return humanChar == kCHAR_NATE ? kCHAR_ZOE : kCHAR_NATE;
+    case kPEAK_3:
+        return humanChar == kCHAR_PSYMON ? kCHAR_ELISE : kCHAR_PSYMON;
     }
-    return 3;
+    return kCHAR_MAC;
 }
 #endif
 
@@ -903,39 +911,39 @@ int cBENewRaceInterface::getRival()
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationDefaultGameMode);
 #ifdef SKIP_ASM
 /**
- * Returns the default game mode of location @p location: 0 for locations 0-4, 1 for 5-7, 2 for 8-10, 3 for 11-13, 4
- * otherwise.
+ * Returns the default game mode of location @p location: race for the race tracks (0-4), slope style for 5-7, big air
+ * for 8-10, half pipe for 11-13, free ride otherwise.
  *
- * @param location  the location
- * @return the game mode
+ * @param location  the location (eBELocationID)
+ * @return the game mode (eBEGameMode)
  */
 int cBENewRaceInterface::getLocationDefaultGameMode(unsigned int location)
 {
     switch (location) {
-    case 14:
-    case 15:
-    case 16:
-        return 4;
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-        return 0;
-    case 5:
-    case 6:
-    case 7:
-        return 1;
-    case 8:
-    case 9:
-    case 10:
-        return 2;
-    case 11:
-    case 12:
-    case 13:
-        return 3;
+    case kLOCATION_ABC1:
+    case kLOCATION_DBC2:
+    case kLOCATION_EBC3:
+        return kGAMEMODE_FREERIDE;
+    case kLOCATION_ARA1:
+    case kLOCATION_BRA2:
+    case kLOCATION_CRA3:
+    case kLOCATION_DRA4:
+    case kLOCATION_ERA5:
+        return kGAMEMODE_RACE;
+    case kLOCATION_ASS1:
+    case kLOCATION_DSS2:
+    case kLOCATION_ESS3:
+        return kGAMEMODE_SLOPESTYLE;
+    case kLOCATION_ABA1:
+    case kLOCATION_CBA2:
+    case kLOCATION_EBA3:
+        return kGAMEMODE_BIGAIR;
+    case kLOCATION_BHP1:
+    case kLOCATION_CHP2:
+    case kLOCATION_EHP3:
+        return kGAMEMODE_HALFPIPE;
     default:
-        return 4;
+        return kGAMEMODE_FREERIDE;
     }
 }
 #endif
@@ -944,41 +952,41 @@ int cBENewRaceInterface::getLocationDefaultGameMode(unsigned int location)
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationDefaultGameEvent);
 #ifdef SKIP_ASM
 /**
- * Returns the default game event of location @p idx: 0 for locations 0-4, 1 for 5-7, 3 for 8-10, 2 for 11-13, 12
- * otherwise.
+ * Returns the default game event of location @p idx: race for the race tracks (0-4), slope style for 5-7, big air for
+ * 8-10, super pipe for 11-13, free ride otherwise.
  *
- * @param idx  the location
- * @return the game event
+ * @param idx  the location (eBELocationID)
+ * @return the game event (eBEGameEvent)
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBENewRaceInterface::getLocationDefaultGameEvent(int idx)
 {
     switch (idx)
     {
-    case 14:
-    case 15:
-    case 16:
-        return 12;
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-        return 0;
-    case 5:
-    case 6:
-    case 7:
-        return 1;
-    case 8:
-    case 9:
-    case 10:
-        return 3;
-    case 11:
-    case 12:
-    case 13:
-        return 2;
+    case kLOCATION_ABC1:
+    case kLOCATION_DBC2:
+    case kLOCATION_EBC3:
+        return kGAMEEVENT_FREERIDE;
+    case kLOCATION_ARA1:
+    case kLOCATION_BRA2:
+    case kLOCATION_CRA3:
+    case kLOCATION_DRA4:
+    case kLOCATION_ERA5:
+        return kGAMEEVENT_RACE;
+    case kLOCATION_ASS1:
+    case kLOCATION_DSS2:
+    case kLOCATION_ESS3:
+        return kGAMEEVENT_SLOPESTYLE;
+    case kLOCATION_ABA1:
+    case kLOCATION_CBA2:
+    case kLOCATION_EBA3:
+        return kGAMEEVENT_BIGAIR;
+    case kLOCATION_BHP1:
+    case kLOCATION_CHP2:
+    case kLOCATION_EHP3:
+        return kGAMEEVENT_SUPERPIPE;
     }
-    return 12;
+    return kGAMEEVENT_FREERIDE;
 }
 #endif
 
@@ -989,29 +997,29 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getDefaultGameMode);
 /**
  * Returns the default game mode of game event @p gameEvent: 0->0, 1->1, 2->3, 3->2, 4->5, 5->6, 12 and 13->4, others 0.
  *
- * @param gameEvent  the game event
- * @return the game mode
+ * @param gameEvent  the game event (eBEGameEvent)
+ * @return the game mode (eBEGameMode)
  */
 int cBENewRaceInterface::getDefaultGameMode(unsigned int gameEvent)
 {
     switch (gameEvent) {
-    case 0:
-        return 0;
-    case 1:
-        return 1;
-    case 2:
-        return 3;
-    case 3:
-        return 2;
-    case 4:
-        return 5;
-    case 5:
-        return 6;
-    case 12:
-    case 13:
-        return 4;
+    case kGAMEEVENT_RACE:
+        return kGAMEMODE_RACE;
+    case kGAMEEVENT_SLOPESTYLE:
+        return kGAMEMODE_SLOPESTYLE;
+    case kGAMEEVENT_SUPERPIPE:
+        return kGAMEMODE_HALFPIPE;
+    case kGAMEEVENT_BIGAIR:
+        return kGAMEMODE_BIGAIR;
+    case kGAMEEVENT_RIVALTIME:
+        return kGAMEMODE_TIMECHALLENGE;
+    case kGAMEEVENT_RIVALPOINTS:
+        return kGAMEMODE_PNTSCHALLENGE;
+    case kGAMEEVENT_FREERIDE:
+    case kGAMEEVENT_MISSION:
+        return kGAMEMODE_FREERIDE;
     default:
-        return 0;
+        return kGAMEMODE_RACE;
     }
 }
 #endif

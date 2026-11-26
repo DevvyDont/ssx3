@@ -39,6 +39,14 @@ struct tWorldPainterQuery;
 // 0xC, m_iFlags at 0x10). Readers: cWorldLightMan_GetIntensity ([O] GetIntensity(const t4Vector&, const tLightRecord&)),
 // cWorldLightMan_CalcLightDist, cWorldLightMan_IntersectLights ([O] ..., tLightRecord** Lights, int Max),
 // cPS2LightMan_CreateLights (render/lightman). EA's header for it is not known.
+
+// A world light's type (tLightRecord::m_eLightType). [O] On Tour's enum eNEWLightType, names and values; [U]
+// func_0038A6A8 lights a point with the spot (1) and point (2) tests and adds nothing for a directional light (0).
+enum eNEWLightType {
+    eNEWLight_Directional = 0, eNEWLight_Spot = 1, eNEWLight_Point = 2, eNEWLight_Ambient = 3, eNEWLight_Num = 4,
+    eNEWLight_Unknown = 5
+};
+
 struct tLightRecord {
     int m_iIntersect[3];            // 0x00 [O] (the Nash space-node header: next, prev, type); [U] IntersectLights
                                     //      tests [2] == 6 (kSNT_Light)

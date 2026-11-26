@@ -82,6 +82,10 @@ CHECK_SIZE(tScriptObjTransitionInfo, 0x18);
 struct tScreenGrabHandle {
     char* mMemory;                  // 0x0 [O]; [R] cTransitionMan's ctor zeroes it
     int mTextureId;                 // 0x4 [O]; [R] ctor -1; [U] -1 = no grab (StartTransition, EndTransition test ~id)
+
+    // mTextureId when no screen grab is held (name ours): [R] cTransitionMan's ctor; [U]
+    // cPS2GraphicsMan_RemoveScreenGrabTexture frees only another id and stores it back.
+    enum { kNoScreenGrab = -1 };
 };
 
 CHECK_OFFSET(tScreenGrabHandle, mMemory, 0x0);

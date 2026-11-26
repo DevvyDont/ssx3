@@ -107,10 +107,10 @@ struct cSplineModifier_9698 {
  * Velocity (+0x48). Unless stopped (Start +0x54 clear or Complete +0x50 set), OffsetDistance (+0x3C) moves by
  * Velocity * tick and RootTransformDirty (+0x58) is set.
  *
- * Past an end, SequenceType (+0x30) 0 and 4 stop there (at 0 or Length - 0.1; Complete set, Start cleared,
- * Velocity reversed), 2 reverses Velocity and any other type wraps around the spline Length (+0xE4). Type 2
- * reflects the overshoot at the start (-pos), but at the far end its pos - (pos - (Length - 0.1)) comes to
- * Length - 0.1 instead of a reflection.
+ * Past an end, SequenceType (+0x30) 0 and 4 stop there (at 0 or Length - 0.1; Complete set, Start cleared, Velocity
+ * reversed), kSplineSeq_PingPong reverses Velocity and any other type wraps around the spline Length (+0xE4).
+ * kSplineSeq_PingPong reflects the overshoot at the start (-pos), but at the far end its pos - (pos - (Length - 0.1))
+ * comes to Length - 0.1 instead of a reflection.
  */
 extern "C" void cSplineModifier_update(cSplineModifier* self)
 {
@@ -134,7 +134,7 @@ extern "C" void cSplineModifier_update(cSplineModifier* self)
             self->OffsetDistance = zeroF;
             self->Complete = 1;
             self->Start = 0;
-        } else if (mode == 2) {
+        } else if (mode == kSplineSeq_PingPong) {
             self->Velocity = -self->Velocity;
             self->OffsetDistance = -pos;
         } else if (mode == 4) {
@@ -152,7 +152,7 @@ extern "C" void cSplineModifier_update(cSplineModifier* self)
             self->Complete = 1;
             self->Velocity = -self->Velocity;
             self->OffsetDistance = self->Spline.Length - 0.10000000149011612f;
-        } else if (mode == 2) {
+        } else if (mode == kSplineSeq_PingPong) {
             self->Velocity = -self->Velocity;
             self->OffsetDistance = pos - (pos - (self->Spline.Length - 0.10000000149011612f));
         } else if (mode == 4) {
@@ -291,10 +291,10 @@ static inline void vu0CopyMat_9830(t4Matrix* d, const t4Matrix* s)
 /**
  * Rebuilds the spline modifier's transform from the spline's position and direction at its current distance.
  *
- * Evaluates the spline at OffsetDistance (+0x3C) into Pos, Dir and DDir (+0xA0, +0xB0, +0xC0) and caches X2 =
- * Dir.x^2 and Y2 = Dir.y^2. OrientType (+0x34) 2 or 3 adds yaw and 1 or 3 adds pitch along Dir; that rotation
- * and Pos form Transform (+0x60), turned by HeadTweak (+0x38) about the up axis (t4vect_ZAxis) when it is
- * nonzero. Clears RootTransformDirty (+0x58).
+ * Evaluates the spline at OffsetDistance (+0x3C) into Pos, Dir and DDir (+0xA0, +0xB0, +0xC0) and caches X2 = Dir.x^2
+ * and Y2 = Dir.y^2. OrientType (+0x34) kSplineOrient_Heading or kSplineOrient_HeadingPitch adds yaw and
+ * kSplineOrient_Pitch or kSplineOrient_HeadingPitch adds pitch along Dir; that rotation and Pos form Transform (+0x60),
+ * turned by HeadTweak (+0x38) about the up axis (t4vect_ZAxis) when it is nonzero. Clears RootTransformDirty (+0x58).
  */
 extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
 {
@@ -305,10 +305,10 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     self->X2 = self->Dir.x * self->Dir.x;
     self->Y2 = self->Dir.y * self->Dir.y;
     t4Vector n = vu0Normalize(self->Dir);
-    if ((unsigned)(self->OrientType - 2) < 2) {
+    if ((unsigned)(self->OrientType - kSplineOrient_Heading) < 2) {
         rz = ry - Atan2_9830(n.y, n.x);
     }
-    if (self->OrientType == 1 || self->OrientType == 3) {
+    if (self->OrientType == kSplineOrient_Pitch || self->OrientType == kSplineOrient_HeadingPitch) {
         float len = fsqrt(self->X2 + self->Y2);
         ry += Atan2_9830(self->Dir.z, len);
     }
@@ -582,24 +582,25 @@ INCLUDE_ASM("object/splinemodifier", cSplineModifier_signal);
 extern "C" void cSplineModifier_setSpeed(void* self);
 
 /**
- * Handles a script signal: 0x190 sets the speed and starts, 0x191 starts, 0x192 reverses and starts.
+ * Handles a script signal: kSplineSignal_SetSpeed sets the speed and starts, kSplineSignal_Start starts,
+ * kSplineSignal_Reverse reverses and starts.
  *
- * Starting clears Complete (+0x50) and sets Start (+0x54); 0x192 negates Velocity (+0x48). For 0x190 the
- * speed is On Tour's float arg, which arrives in $f12 and passes untouched to cSplineModifier_setSpeed() (the
- * C declares no float parameter). Other signals are ignored.
+ * Starting clears Complete (+0x50) and sets Start (+0x54); kSplineSignal_Reverse negates Velocity (+0x48). For
+ * kSplineSignal_SetSpeed the speed is On Tour's float arg, which arrives in $f12 and passes untouched to
+ * cSplineModifier_setSpeed() (the C declares no float parameter). Other signals are ignored.
  *
  * @param msg  signal id (On Tour signal)
  */
 extern "C" void cSplineModifier_signal(cSplineModifier* self, int msg)
 {
-    if (msg == 400) {
+    if (msg == kSplineSignal_SetSpeed) {
         cSplineModifier_setSpeed(self);
         self->Complete = 0;
         self->Start = 1;
-    } else if (msg == 401) {
+    } else if (msg == kSplineSignal_Start) {
         self->Complete = 0;
         self->Start = 1;
-    } else if (msg == 402) {
+    } else if (msg == kSplineSignal_Reverse) {
         self->Velocity = -self->Velocity;
         self->Complete = 0;
         self->Start = 1;
@@ -1661,10 +1662,10 @@ void* cMultiSplineModifier::updateNodes()
         cSpline_getPos_AC20((char*)&self->Spline, &(*(t4Vector*)&pt->Pos), &(*(t4Vector*)&pt->Dir), &(*(t4Vector*)&pt->DDir), offsets[i]);
         pt->X2 = (*(t4Vector*)&pt->Dir).x * (*(t4Vector*)&pt->Dir).x;
         pt->Y2 = (*(t4Vector*)&pt->Dir).y * (*(t4Vector*)&pt->Dir).y;
-        if (self->OrientType == 2 || self->OrientType == 3) {
+        if (self->OrientType == kSplineOrient_Heading || self->OrientType == kSplineOrient_HeadingPitch) {
             rz -= atan2_AC20((*(t4Vector*)&pt->Dir).y, (*(t4Vector*)&pt->Dir).x);
         }
-        if (self->OrientType == 1 || self->OrientType == 3) {
+        if (self->OrientType == kSplineOrient_Pitch || self->OrientType == kSplineOrient_HeadingPitch) {
             ry += atan2_AC20((*(t4Vector*)&pt->Dir).z, Sqrt_AC20(pt->X2 + pt->Y2));
         }
         ang.x = rx;
@@ -1720,11 +1721,11 @@ extern "C" void cSpline_draw(void* a, void* b);
  * Draws every instance copy but the first that passes the view test, then the spline path when DrawPath is
  * set.
  *
- * Refreshes the transforms first when dirty (slot 3). Each copy's box (Nodes +0x3C, at +0x30) goes through
- * the graphics manager's box test (slot 93, with slot 43's matrix): 1 (culled) is skipped; otherwise the
- * model's node builds the copy's matrices (slot 33, into AnimMats +0x38) and draws them (slot 5) with flags
- * 0x420 when the box needs clipping (2) or 0x400 when inside (0). DrawPath (+0x1C) draws the spline in Colour
- * (+0x20) through cSpline_draw.
+ * Refreshes the transforms first when dirty (slot 3). Each copy's box (Nodes +0x3C, at +0x30) goes through the graphics
+ * manager's box test (slot 93, with slot 43's matrix): GM_CLIPCODE_OUTSIDE (culled) is skipped; otherwise the model's
+ * node builds the copy's matrices (slot 33, into AnimMats +0x38) and draws them (slot 5) with flags 0x420 when the box
+ * needs clipping (GM_CLIPCODE_CROSSING) or 0x400 when inside (GM_CLIPCODE_INSIDE). DrawPath (+0x1C) draws the spline in
+ * Colour (+0x20) through cSpline_draw.
  */
 extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
 {
@@ -1740,9 +1741,9 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
         tMultiNode* box = &(self->Nodes)[i];
         tNetMatrixSlot* vt2 = (tNetMatrixSlot*)VPTR_OF(cGraphicsMan, w);
         int hit = vt[93].fn(thisp, &box->BoundBox.MinPoint, &box->BoundBox.MaxPoint, vt2[43].fn(vthis(w, vt2[43])));
-        if (hit != 1) {
+        if (hit != GM_CLIPCODE_OUTSIDE) {
             model->makeAnimMats((const t4Matrix*)&self->NodeInst[i]->m_fmTransform, self->AnimMats);
-            if (hit != 0) {
+            if (hit != GM_CLIPCODE_INSIDE) {
                 model->renderModel(self->AnimMats, 1056);
             } else {
                 model->renderModel(self->AnimMats, 0x400);

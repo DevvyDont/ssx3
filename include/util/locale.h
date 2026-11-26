@@ -49,6 +49,10 @@ struct tAttrLocale {
 
 class cUILocaleInterface {
 public:
+    // EA's eDisplayMode (mDisplayMode). [O] On Tour's cUILocaleInterface::eDisplayMode, names and values; [U] retail
+    // fits: setDisplayMode sets the mTextNumChar flag exactly for kDisplayNumChar, and getStringByHash returns the
+    // strings only in kDisplayNormal.
+    enum eDisplayMode { kDisplayNormal = 0, kDisplayLongest = 1, kDisplayNumChar = 2, kDisplayID = 3, kDisplayNum = 4 };
     signed char mDisplayMode;       // 0x000 [O] char; [R] 0; [U] cUILocaleInterface_setDisplayMode stores it;
                                     //       getStringByHash returns the blank buffer unless it is 0
     signed char mLanguage;          // 0x001 [O] char; [R] 0; [U] setLanguage compares and stores it; loadCommon /

@@ -52,12 +52,12 @@ INCLUDE_ASM("main/streampause", func_00242D90);
  * @param last1  end of the first range
  * @param first2  start of the second range
  * @param last2  end of the second range
- * @return 1 when the first range orders before the second (a smaller element first, or a proper prefix), else 0
+ * @return true when the first range orders before the second (a smaller element first, or a proper prefix)
  */
-extern "C" int func_00242D90(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
+extern "C" bool func_00242D90(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
-        if (*first1 < *first2) return 1;
-        if (*first2 < *first1) return 0;
+        if (*first1 < *first2) return true;
+        if (*first2 < *first1) return false;
     }
     return first1 == last1 && first2 != last2;
 }
@@ -159,19 +159,19 @@ extern sSlot_2EB8 D_004A4F68, D_004A4F78, D_004A4F80, D_004A4F88, D_004A4F90, D_
 /**
  * Runs the static constructors or destructors of this unit's globals (g++'s static initialization and destruction).
  *
- * Only priority 0xFFFF does anything. With @p init set it constructs the 56 four-float constants D_004C90A8..D_004C9418
- * (colour and blend vectors), the fifteen two-word slots D_004A4F68 (-1) and D_004A4F78..D_004A4FE0 (0..13) whose first
- * word packs the number twice (8 + 24 bits), clears D_004A4F70 / D_004A4F74, constructs the application object at
- * D_004C9428 with cSSXApp_cSSXApp and GMrandom with cRandom_init. With @p init clear it destroys the application
- * object (its three cBXString members, then the cAppMan base). func_00247E20 calls it with (1, 0xFFFF) and
- * func_00247E40 with (0, 0xFFFF).
+ * Only priority DEFAULT_INIT_PRIORITY (0xFFFF) does anything. With @p init set it constructs the 56 four-float
+ * constants D_004C90A8..D_004C9418 (colour and blend vectors), the fifteen two-word slots D_004A4F68 (-1) and
+ * D_004A4F78..D_004A4FE0 (0..13) whose first word packs the number twice (8 + 24 bits), clears D_004A4F70 / D_004A4F74,
+ * constructs the application object at D_004C9428 with cSSXApp_cSSXApp and GMrandom with cRandom_init. With @p init
+ * clear it destroys the application object (its three cBXString members, then the cAppMan base). func_00247E20 calls it
+ * with (1, 0xFFFF) and func_00247E40 with (0, 0xFFFF).
  *
  * @param init  1 to construct, 0 to destroy
- * @param prio  the init priority; only 0xFFFF is handled
+ * @param prio  the init priority; only DEFAULT_INIT_PRIORITY is handled
  */
 extern "C" void func_00242EB8(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init != 0) {
             new (D_004C90A8) sV4_2EB8(1.0f, 1.0f, 1.0f, 0.5f);
             new (D_004C90B8) sV4_2EB8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);

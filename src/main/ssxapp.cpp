@@ -761,9 +761,9 @@ extern void* Keyboard;
  * the keyboard object Keyboard when they exist, and passes each of the two sample slots (value count and
  * values) to InputPads[i] through cInputPad_update().
  *
- * @return 1 when a new input sample was taken, 0 when none was ready
+ * @return true when a new input sample was taken, false when none was ready
  */
-int cSSXApp::preUpdate()
+bool cSSXApp::preUpdate()
 {
     if (PadCache != 0 && cPadCache_nextInput(PadCache) != 0) {
         if (cCommSystem_mCommSystem != 0) {
@@ -778,9 +778,9 @@ int cSSXApp::preUpdate()
             void* values = cPadCache_buttonValues(PadCache, i);
             cInputPad_update(InputPads[i], valueCount, values);
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1268,17 +1268,17 @@ extern "C" void cSSXApp_activateBEOptions()
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (GetOptions_228C08().iUseWidescreen) {
-    case 0:
-        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(0);
+    case kWidescreen_Off:
+        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(GM_FULLSCREEN);
         break;
-    case 1:
-        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(1);
+    case kWidescreen_16x9:
+        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(GM_WIDESCREEN);
         break;
-    case 2:
-        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(2);
+    case kWidescreen_Anamorphic:
+        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(GM_ANIMORPHIC);
         break;
     default:
-        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(0);
+        cGraphicsMan_TheGraphicsMan->SetTVDisplayFormat(GM_FULLSCREEN);
         break;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -1533,7 +1533,7 @@ extern "C" void func_00229398(cCrowdMan2d* self)
     int i;
     for (i = 0; i < 0x80; i++) {
         unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
-        if (*slotId != 0xFFFFFFFF) {
+        if (*slotId != cCrowdMan2d::kFreeQuad) {
             func_00229B90(self, i);
         }
     }
@@ -1558,7 +1558,7 @@ extern "C" void func_00229408(cCrowdMan2d* self, int id)
     int i;
     for (i = 0; i < 0x80; i++) {
         unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
-        if (*slotId != 0xFFFFFFFF && *(unsigned char*)slotId == id) {
+        if (*slotId != cCrowdMan2d::kFreeQuad && *(unsigned char*)slotId == id) {
             func_00229B90(self, i);
         }
     }
@@ -1711,7 +1711,7 @@ extern "C" void func_00229530(cCrowdMan2d* selfp)
     }
     int dec = self->count * 10 + 4;
     for (int i = 0; i < 128; i++) {
-        if (self->ids[i] != 0xFFFFFFFF) {
+        if (self->ids[i] != cCrowdMan2d::kFreeQuad) {
             self->slots[i].delay -= dec;
             if (self->slots[i].delay <= 0) {
                 float dxScale = rands_229530(-1.0f, 1.0f);
@@ -1780,7 +1780,7 @@ extern "C" void func_00229788(cCrowdMan2d* self, int resourceId)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (((unsigned int*)(&self->mQuadId[0]))[i] == 0xFFFFFFFF) {
+        if (((unsigned int*)(&self->mQuadId[0]))[i] == cCrowdMan2d::kFreeQuad) {
             func_00229910(self, i, resourceId);
             break;
         }
@@ -2288,7 +2288,7 @@ extern "C" void func_00229E58(cCrowdMan2d* self, cBxReplayFrame* stream)
     stream->read((char*)ids, 0x200);
     int i;
     for (i = 0; i < 128; i++) {
-        if (ids[i].id != 0xFFFFFFFF) {
+        if (ids[i].id != cCrowdMan2d::kFreeQuad) {
             func_00229910(self, i, ids[i].id);
         }
     }
@@ -2729,8 +2729,8 @@ INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllTypedCrossing);
 extern "C" void FrustumIntersector_crossingfogvolume(void* self, cTypedSpaceNode* node, int arg);
 
 /**
- * Sorts the objects of each listed source: type 7 is frustum-tested (FrustumIntersector_crossingfogvolume), type 8
- * goes straight into lighthalosinside (count numlighthalosinside).
+ * Sorts the objects of each listed source: kSNT_FogVol (7) is frustum-tested (FrustumIntersector_crossingfogvolume),
+ * kSNT_Halo (8) goes straight into lighthalosinside (count numlighthalosinside).
  *
  * Walks the typed list (nodesinside[2]) of each of the @p n entries' cells (cell, frustum value), switching on each
  * object's type. Other types are skipped. Ends with FrustumIntersector_crossingfogvolume(self, 0, 0) when an object
@@ -2745,9 +2745,9 @@ void FrustumIntersector::AddAllTypedCrossing(CellClipT* items, int n)
     for (; n > 0; n--, items++) {
         cTypedSpaceNode* object = (cTypedSpaceNode*)((nash_Cell*)items->pCell)->nodesinside[2].head;
         for (; object != 0; object = ((cTypedSpaceNode*)object->next)) {
-            if (object->type == 7) {
+            if (object->type == kSNT_FogVol) {
                 FrustumIntersector_crossingfogvolume(this, object, ((int)items->uVisMask));
-            } else if (object->type == 8) {
+            } else if (object->type == kSNT_Halo) {
                 lighthalosinside[numlighthalosinside++] = (tHaloRecord*)object;
             }
         }
@@ -2849,8 +2849,9 @@ static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
  * cell's remaining clip-plane mask. An object qualifies when both low bits of its flags (+0x8) are set and it is either
  * unassigned (slot +0x7D is 0xFF) or its slot in the camera-slot table (*(self + 0x90), entries at +0x20) has type 6
  * and the path it names (+0x7E) has kind 3. Qualifying objects are sphere-tested against the masked planes by the VU0
- * microprogram at 0xEF0 (skipped when the mask is 0; result 2 means outside) and appended to the list at +0x20A0, count
- * +0x209C (no bounds check). FrustumIntersector_FrustumIntersector calls it with the fully-inside cell list (+0x98, count +0x94).
+ * microprogram at 0xEF0 (skipped when the mask is 0; kSphereTestOutside means outside) and appended to the list at
+ * +0x20A0, count +0x209C (no bounds check). FrustumIntersector_FrustumIntersector calls it with the fully-inside cell
+ * list (+0x98, count +0x94).
  *
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
@@ -2865,7 +2866,7 @@ void FrustumIntersector::AddAllInstancesInside(void* list_, int count)
 
                 int frustum = list->vuFrustum;
                 if (visUsable_A5A0(self, n)) {
-                    if (frustum == 0 || visSphereTest_A5A0(n->sphere, frustum) != 2) {
+                    if (frustum == 0 || visSphereTest_A5A0(n->sphere, frustum) != kSphereTestOutside) {
                         self->nodes[self->count++] = n;
                     }
                 }
@@ -2911,9 +2912,9 @@ static inline int visOnPath_A698(cWorldCache* cache, tPatchRecord* n)
 /**
  * Collects the visible patches of each listed octree cell into patchesinside.
  *
- * Same walk as FrustumIntersector_AddAllInstancesInside over each cell's patch list (nodesinside[1]): a patch
- * qualifies when its m_SMap hull page is not negative, its section's state in the world cache's view is 6 and that
- * page is loaded (m_State 3). Its m_fvBSphere is tested on VU0 (microprogram 0xEF0, 2 = outside) unless the entry's
+ * Same walk as FrustumIntersector_AddAllInstancesInside over each cell's patch list (nodesinside[1]): a patch qualifies
+ * when its m_SMap hull page is not negative, its section's state in the world cache's view is 6 and that page is loaded
+ * (m_State 3). Its m_fvBSphere is tested on VU0 (microprogram 0xEF0, kSphereTestOutside = outside) unless the entry's
  * plane mask is 0; survivors go to patchesinside, count numpatchesinside (no bounds check).
  *
  * @param list_  the cell entries (cell, plane mask)
@@ -2929,7 +2930,7 @@ void FrustumIntersector::AddAllPatchesInside(void* list_, int count)
             do {
                 int frustum = ((int)list->uVisMask);
                 if (visOnPath_A698(world->m_pWorldCache, n)) {
-                    if (frustum == 0 || visSphereTest_A698(&n->m_fvBSphere, frustum) != 2) {
+                    if (frustum == 0 || visSphereTest_A698(&n->m_fvBSphere, frustum) != kSphereTestOutside) {
                         patchesinside[numpatchesinside++] = n;
                     }
                 }
@@ -2961,9 +2962,9 @@ static inline int visSphereTest_A770(tf4Vector* sphere, int frustum)
 /**
  * Sorts the objects of each listed octree cell by type into two lists of the world view.
  *
- * Walks each entry's cell's typed list (nodesinside[2]), switching on each node's type. Fog volumes (type 7) are
- * sphere-tested on VU0 (microprogram 0xEF0, 2 = outside; skipped when the entry's plane mask is 0) and appended to
- * fogvolumesinside (count numfogvolumesinside); light halos (type 8) go to lighthalosinside (count
+ * Walks each entry's cell's typed list (nodesinside[2]), switching on each node's type. Fog volumes (kSNT_FogVol) are
+ * sphere-tested on VU0 (microprogram 0xEF0, kSphereTestOutside = outside; skipped when the entry's plane mask is 0) and
+ * appended to fogvolumesinside (count numfogvolumesinside); light halos (kSNT_Halo) go to lighthalosinside (count
  * numlighthalosinside) untested. Other types are skipped. Neither append checks for overflow.
  *
  * @param list  the cell entries (cell, plane mask)
@@ -2974,14 +2975,14 @@ void FrustumIntersector::AddAllTypedInside(CellClipT* list, int count)
     for (; count > 0; count--, list++) {
         cTypedSpaceNode* n = (cTypedSpaceNode*)((nash_Cell*)list->pCell)->nodesinside[2].head;
         while (n != 0) {
-            if (n->type == 7) {
+            if (n->type == kSNT_FogVol) {
                 // the typed records begin with the cTypedSpaceNode words: the casts view the node as its record
                 tParticleInstanceRecord* fog = (tParticleInstanceRecord*)n;
                 int frustum = ((int)list->uVisMask);
-                if (frustum == 0 || visSphereTest_A770(&fog->m_fvBSphere, frustum) != 2) {
+                if (frustum == 0 || visSphereTest_A770(&fog->m_fvBSphere, frustum) != kSphereTestOutside) {
                     fogvolumesinside[numfogvolumesinside++] = fog;
                 }
-            } else if (n->type == 8) {
+            } else if (n->type == kSNT_Halo) {
                 lighthalosinside[numlighthalosinside++] = (tHaloRecord*)n;
             }
             n = (cTypedSpaceNode*)n->next;
@@ -3078,13 +3079,14 @@ static inline void boxResult_A830(int* r)
  * The context @p vctx holds the world view being built (+0x0), the clip-plane source (+0x4: plane count at +0x10C,
  * planes at +0x8 in 8-byte steps), the mask of planes still to test (+0x8) and an inside flag (+0xC). A cell's size is
  * 2^level (built from the float exponent). Unless the parent was fully inside, the cell box goes through the VU0
- * box-vs-frustum microprogram at 0x570 (matrices at D_00442130 and the view's +0x10): 1 is outside (return), 2 is
- * partly inside, 0 is inside. With a non-zero mask the cell's bounding sphere (center at the cell middle, radius 1.2124
- * * size) is then tested against each masked plane by the microprogram at D_948: 0 culls the cell, and planes the
- * sphere is wholly in front of are cleared from the mask. A fully-inside cell is appended (node, mask) to the list at
- * +0x98 (count +0x94) and its children are visited with the inside flag set; a partly-inside one goes to the list at
- * +0x109C (count +0x1098) and its children are box-tested again. Children are visited unless the level is 11 (the leaf
- * level); child index bit 2 is +x, bit 1 +y, bit 0 +z. No list bounds checks.
+ * box-vs-frustum microprogram at 0x570 (matrices at D_00442130 and the view's +0x10; GMClipCodes): GM_CLIPCODE_OUTSIDE
+ * returns, GM_CLIPCODE_CROSSING is partly inside, GM_CLIPCODE_INSIDE is inside. With a non-zero mask the cell's
+ * bounding sphere (center at the cell middle, radius 1.2124 * size) is then tested against each masked plane by the
+ * microprogram at D_948: 0 culls the cell, and planes the sphere is wholly in front of are cleared from the mask. A
+ * fully-inside cell is appended (node, mask) to the list at +0x98 (count +0x94) and its children are visited with the
+ * inside flag set; a partly-inside one goes to the list at +0x109C (count +0x1098) and its children are box-tested
+ * again. Children are visited unless the level is kLeafLevel (11); child index bit 2 is +x, bit 1 +y, bit 0 +z. No list
+ * bounds checks.
  *
  * @param vctx  the cull context (view, plane source, plane mask, inside flag)
  * @param vnode  the octree node (eight child pointers)
@@ -3100,7 +3102,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
     int mask = ((int)ctx->vismask_);
     int cullResult;
     if (ctx->insidefrustum_ != 0) {
-        cullResult = 0;
+        cullResult = GM_CLIPCODE_INSIDE;
         if (mask != 0)
             { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
     } else {
@@ -3130,12 +3132,12 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
         boxResult_A830(&cullResult);
     }
-    bool out_ = cullResult == 1;
+    bool out_ = cullResult == GM_CLIPCODE_OUTSIDE;
     if (out_)
         return;
     if (mask != 0 && sphereTest_A830(((char*)ctx->occlusionman), &mask, &sphere) == 0)
         return;
-    if (cullResult == 0) {
+    if (cullResult == GM_CLIPCODE_INSIDE) {
         ((sVisOwner_A830*)ctx->intersector)->in[((sVisOwner_A830*)ctx->intersector)->countIn].node = node;
         ((sVisOwner_A830*)ctx->intersector)->in[((sVisOwner_A830*)ctx->intersector)->countIn].mask = mask;
         ((sVisOwner_A830*)ctx->intersector)->countIn++;
@@ -3144,7 +3146,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
         (*(char**)&childCtx.intersector) = ((char*)ctx->intersector);
         (*(char**)&childCtx.occlusionman) = ((char*)ctx->occlusionman);
         childCtx.vismask_ = mask;
-        if (cfg->level != 11) {
+        if (cfg->level != nash_CellKey::kLeafLevel) {
             nash_CellKey n;
             n.level = cfg->level - 1;
             n.x = cfg->x * 2;
@@ -3166,7 +3168,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             n.x--;
             if (((nash_Cell**)&node->children[0][0][0])[1]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[1], &n);
         }
-    } else if (cullResult == 2) {
+    } else if (cullResult == GM_CLIPCODE_CROSSING) {
         ((sVisOwner_A830*)ctx->intersector)->part[((sVisOwner_A830*)ctx->intersector)->countPart].node = node;
         ((sVisOwner_A830*)ctx->intersector)->part[((sVisOwner_A830*)ctx->intersector)->countPart].mask = mask;
         ((sVisOwner_A830*)ctx->intersector)->countPart++;
@@ -3175,7 +3177,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
         (*(char**)&childCtx.intersector) = ((char*)ctx->intersector);
         (*(char**)&childCtx.occlusionman) = ((char*)ctx->occlusionman);
         childCtx.vismask_ = mask;
-        if (cfg->level != 11) {
+        if (cfg->level != nash_CellKey::kLeafLevel) {
             nash_CellKey n;
             n.level = cfg->level - 1;
             n.x = cfg->x * 2;
@@ -3598,24 +3600,25 @@ static inline int IsReady_22B008(cGame* self)
 /**
  * Draws one game frame: every camera view of the world, then the 2D overlays, UI and audio tick.
  *
- * Returns 0 when GrMan's slot 17 does; returns 1 early while StreamPause (slot 2) holds the frame, while the fade
- * screen is fully faded (cFadeScreen_drawFade) or while a script plays (func_0022C830 draws the cut scene). For each
- * ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws SkyBox
- * (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space box
- * of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
- * distance), gathers the visible world (FrustumIntersector_FrustumIntersector with BXNash, OcclusionMan and World), and draws
- * cGame_renderBuckets, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes, light
- * halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
- * WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio update for mUpdateTick
+ * Returns false when GrMan's slot 17 returns 0; returns true early while StreamPause (slot 2) holds the frame, while
+ * the fade screen is fully faded (cFadeScreen_drawFade) or while a script plays (func_0022C830 draws the cut scene).
+ * For each ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws
+ * SkyBox (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space
+ * box of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
+ * distance), gathers the visible world (FrustumIntersector_FrustumIntersector with BXNash, OcclusionMan and World), and
+ * draws cGame_renderBuckets, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes,
+ * light halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
+ * WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio update
+ * for mUpdateTick
  * / 60 seconds and the world triggers; clears mUpdateTick. The local view's names are off: scene is AI, renderer
  * SkyBox, target LensFxMan, cfg BXNash, hud DebugFont, loader StreamPause, frames mUpdateTick.
  *
- * @return 0 when GrMan's slot 17 returns 0, otherwise 1
+ * @return false when GrMan's slot 17 returns 0, otherwise true
  */
-int cGame::render()
+bool cGame::render()
 {
     if (((cGfx_22B008*)GrMan)->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(-1);
     {
@@ -3624,15 +3627,15 @@ int cGame::render()
         char* thisp = (char*)streamPause + vt[2].delta;
         int (**pfn)(void*, int) = &vt[2].fn;
         if ((*pfn)(thisp, IsReady_22B008(this)) == 0) {
-            return 1;
+            return true;
         }
     }
     if (cFadeScreen_drawFade(this) != 0) {
-        return 1;
+        return true;
     }
     if (ScriptEngine->mIsPlaying != 0) {
         func_0022C830(this);
-        return 1;
+        return true;
     }
     cGarbageMan_Update();
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -3755,7 +3758,7 @@ int cGame::render()
     cSSXAudio_Update(gSSXAudio, (float)mUpdateTick * (1.0f / 60.0f), 1);
     cWorldTriggerManager_Update(gWorldTriggerManager);
     mUpdateTick = 0;
-    return 1;
+    return true;
 }
 #endif
 

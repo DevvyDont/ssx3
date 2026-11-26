@@ -42,8 +42,8 @@ struct cBESaveInterface : public cBEInterface {
     // Methods bound to their retail symbols by asm labels.
     void* generateSaveGame() __asm__("cBESaveInterface_generateSaveGame");
     void* generateSaveProfile(int idx) __asm__("cBESaveInterface_generateSaveProfile");
-    int loadSaveGame(char* buf) __asm__("cBESaveInterface_loadSaveGame");
-    int loadSaveProfile(char* buf, int idx) __asm__("cBESaveInterface_loadSaveProfile");
+    bool loadSaveGame(char* buf) __asm__("cBESaveInterface_loadSaveGame");
+    bool loadSaveProfile(char* buf, int idx) __asm__("cBESaveInterface_loadSaveProfile");
 };
 
 CHECK_SIZE(cBESaveInterface, 0x10);

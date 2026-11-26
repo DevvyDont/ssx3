@@ -63,7 +63,7 @@ struct tModifierBlock {
     void preUpdate() __asm__("tModifierBlock_preUpdate");
     void postUpdate() __asm__("tModifierBlock_postUpdate");
     void render() __asm__("tModifierBlock_render");
-    int isRootTransformDirty() __asm__("tModifierBlock_isRootTransformDirty");
+    bool isRootTransformDirty() __asm__("tModifierBlock_isRootTransformDirty");
     void updateRootTransform() __asm__("tModifierBlock_updateRootTransform");
     int isComplete() __asm__("tModifierBlock_isComplete");
     void clearComplete() __asm__("tModifierBlock_clearComplete");
@@ -79,7 +79,7 @@ struct tModifierBlock {
     void remHaloModifier() __asm__("tModifierBlock_remHaloModifier");
     void remRailModifier(unsigned int id) __asm__("tModifierBlock_remRailModifier");
     void transferEffectModifier(cEffectLink* list) __asm__("tModifierBlock_transferEffectModifier");
-    int findRail(int id) __asm__("tModifierBlock_findRail");
+    bool findRail(int id) __asm__("tModifierBlock_findRail");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("tModifierBlock_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("tModifierBlock_readFromReplayFrame");
 };

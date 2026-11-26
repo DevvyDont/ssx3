@@ -30,6 +30,16 @@ struct cUVScrollModifier {
     int On;                         // 0x40 [O] bool; [R] ctor stores 1; [U] update, signal
     char unk_44[0xc];               // 0x44 padding to the 0x50 allocation
 
+    // The Type values update treats specially (names ours). [U] cUVScrollModifier_update reverses UVScroll every
+    // TimeOn for types 2 and 6, and type 6 also eases the offset over the on phase; other types scroll one way.
+    enum { kUVScroll_PingPong = 2, kUVScroll_EasedPingPong = 6 };
+    // signal's ids (names ours). [U] cUVScrollModifier_signal: 200 / 201 set UVScroll[1] / [0], 202 / 203 TimeOn /
+    // TimeOff, 204 / 205 UV[0] / [1].
+    enum eUVScrollSignal {
+        kUVScrollSignal_VScroll = 200, kUVScrollSignal_UScroll = 201, kUVScrollSignal_TimeOn = 202,
+        kUVScrollSignal_TimeOff = 203, kUVScrollSignal_U = 204, kUVScrollSignal_V = 205
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void* cUVScrollModifier1(cBxReplayFrame* stream) __asm__("cUVScrollModifier_cUVScrollModifier1");
     void update() __asm__("cUVScrollModifier_update");

@@ -55,9 +55,9 @@ INCLUDE_ASM("object/debouncenode", cDebounceNode_updateNode);
  * When the counter at offset 0x2C is positive it is decremented; on reaching 0 the node's expire virtual
  * (slot 34, cDebounceNode_expire) is called with 1.
  *
- * @return 0 on the tick the node expires, otherwise 1
+ * @return false on the tick the node expires, otherwise true
  */
-extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
+extern "C" bool cDebounceNode_updateNode(cDebounceNode* self)
 {
     int n = self->Life;
     if (n > 0) {
@@ -65,10 +65,10 @@ extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
         self->Life = n;
         if (n == 0) {
             self->expire(1);
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -128,8 +128,8 @@ extern const char str_RestoreNode_b[];
  * Ends a debounce node and replaces it according to its expire mode.
  *
  * Does nothing when @p check is set and the instance's expire script runs instead (cInstanceNode_runExpireScript), or when
- * the countdown is negative. Otherwise the node deletes itself and the instance gets a dead node (mode 0), a
- * restore node (mode 3, "RestoreNode") or no new node (other modes).
+ * the countdown is negative. Otherwise the node deletes itself and the instance gets a dead node (kExpire_Dead), a
+ * restore node (kExpire_Restore, "RestoreNode") or no new node (other types).
  *
  * @param check  nonzero to run the instance's script first (On Tour runscript)
  */
@@ -140,11 +140,11 @@ extern "C" void cDebounceNode_expire(cDebounceNode* self, int check)
     }
     if (self->Life >= 0) {
         int mode = self->Type;
-        if (mode == 0) {
+        if (mode == cDebounceNode::kExpire_Dead) {
             void* parent = self->Instance;
             delete self;
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
-        } else if (mode == 3) {
+        } else if (mode == cDebounceNode::kExpire_Restore) {
             void* parent = self->Instance;
             delete self;
             cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
@@ -509,7 +509,7 @@ extern "C" void cConveyorNode_updateIntersectInfo(cConveyorNode* self, tIntersec
     tMeshHeirarchyRecord* bones = self->Instance->m_Model->m_MeshHeirarchy;
     // a bone's tf4Matrix has t4Matrix's layout (16 floats)
     t4MatrixVU boneMat = *((t4MatrixVU*)bones[hit->Mesh].m_pMeshMatrix);
-    for (int parentIndex = bones[hit->Mesh].m_iParentID; parentIndex != -1;
+    for (int parentIndex = bones[hit->Mesh].m_iParentID; parentIndex != tMeshHeirarchyRecord::kNoParent;
          parentIndex = bones[parentIndex].m_iParentID) {
         boneMat = mulMat3130(*((t4MatrixVU*)bones[parentIndex].m_pMeshMatrix), boneMat);
     }
@@ -641,7 +641,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
         sVEntry<void>* viewVt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         int res = ((tClipBoundBoxFn*)vt[93].fn)(clipThis, &cullBox[0], &cullBox[1],
                                                  ((tGetNetMatrixFn*)viewVt[43].fn)(vthis(gfx, viewVt[43])));
-        if (res == 1) {
+        if (res == GM_CLIPCODE_OUTSIDE) {
             return;
         }
     }
@@ -758,9 +758,9 @@ INCLUDE_ASM("object/debouncenode", cCounterNode_signal);
  * Counts a signal towards a counter node's target; each counted signal decrements the count (+0x1C) while
  * positive.
  *
- * Levels 1-10 map to bits 0-9 of the received mask (+0x20). Signal 500 counts each level once, in any order;
- * signal 501 counts each level once and only in sequence (level 1 first, then a level whose predecessor was
- * received); signal 502 always counts. Other signals do nothing.
+ * Levels 1-10 map to bits 0-9 of the received mask (+0x20). kCounterSignal_Level counts each level once, in any order;
+ * kCounterSignal_LevelInOrder counts each level once and only in sequence (level 1 first, then a level whose
+ * predecessor was received); kCounterSignal_Count always counts. Other signals do nothing.
  *
  * @param msg    signal number (On Tour signal)
  * @param level  the signal's argument: the level 1-10 (On Tour arg)
@@ -789,7 +789,7 @@ extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
         bit = 0x100;
     else if (level == 10.0f)
         bit = 0x200;
-    if (msg == 500)
+    if (msg == cCounterNode::kCounterSignal_Level)
     {
         int seenLevels = self->Counted;
         if ((seenLevels & bit) == 0)
@@ -798,7 +798,7 @@ extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
             self->Counted = seenLevels | bit;
         }
     }
-    else if (msg == 501)
+    else if (msg == cCounterNode::kCounterSignal_LevelInOrder)
     {
         int seenLevels = self->Counted;
         if ((seenLevels & bit) == 0)
@@ -817,7 +817,7 @@ extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
     }
     else
     {
-        fire = msg == 502;
+        fire = msg == cCounterNode::kCounterSignal_Count;
     }
     if (fire)
     {
@@ -1129,15 +1129,15 @@ extern "C" void func_003449F0(void* elem);
 /**
  * Updates the 3D crowds: advances the animation of every block that is in use.
  *
- * A block is in use while its key (+0x8) is not -1; each such block goes through func_003449F0. Called once per game
- * update for cGame's CrowdMan3d.
+ * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block goes through func_003449F0.
+ * Called once per game update for cGame's CrowdMan3d.
  */
 extern "C" void func_003440C8(sDebounceElem40C8* self)
 {
     int i;
     sDebounceElem40C8* crowdBlock = self;
     for (i = 0; i < 5; i++) {
-        if (self[i].field_0x8 != 0xFFFFFFFF) {
+        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
             func_003449F0(crowdBlock);
         }
         crowdBlock++;
@@ -1160,15 +1160,15 @@ extern "C" void func_00344E18(void* elem);
 /**
  * Renders the 3D crowds: draws every block that is in use.
  *
- * A block is in use while its key (+0x8) is not -1; each such block is drawn by func_00344E18. Called from the game
- * render pass.
+ * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block is drawn by func_00344E18. Called
+ * from the game render pass.
  */
 extern "C" void func_00344138(sDebounceElem4138* self)
 {
     int i;
     sDebounceElem4138* crowdBlock = self;
     for (i = 0; i < 5; i++) {
-        if (self[i].field_0x8 != 0xFFFFFFFF) {
+        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
             func_00344E18(crowdBlock);
         }
         crowdBlock++;
@@ -1203,7 +1203,7 @@ extern "C" void func_003441A8(sDebounceElem41A8* self, cBxReplayFrame* replayStr
     int i;
     for (i = 0; i < 5; i++) {
         replayStream->write((const char*)&self[i].field_0x8, 4);
-        if (self[i].field_0x8 != 0xFFFFFFFF) {
+        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
             func_00344FC0(&self[i], replayStream);
         }
     }
@@ -1238,7 +1238,7 @@ extern "C" void func_00344240(sDebounceElem4240* self, cBxReplayFrame* replayStr
     func_00343BC0((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
         replayStream->read((char*)&self[i].field_0x8, 4);
-        if (self[i].field_0x8 != 0xFFFFFFFF) {
+        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
             func_00344FF8(&self[i], replayStream);
         }
     }
@@ -1913,7 +1913,7 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
     for (int i = 0; i < self->info->count; i++, part++) {
         int parent = part->parent;
         if (part->animated != 0) {
-            if (parent != -1) {
+            if (parent != tMeshHeirarchyRecord::kNoParent) {
                 // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
                 sDbMat_4AA0* local = &((sDbItem_4AA0*)(n++ * (int)sizeof(sDbItem_4AA0) + (int)self->items))->mat;
                 sDbMat_4AA0 combined;
@@ -1924,7 +1924,7 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
                 scaleTrans_4AA0(&self->mats[i], scaleVec);
             }
         } else {
-            if (parent != -1) {
+            if (parent != tMeshHeirarchyRecord::kNoParent) {
                 sDbMat_4AA0 combined;
                 partMat_4AA0(&combined, &self->mats[parent], part->mat, scaleVec);
                 vu0CopyMat_4AA0(&self->mats[i], &combined);
@@ -2248,9 +2248,9 @@ INCLUDE_ASM("object/debouncenode", cSpline_isVisible);
  * Builds the min/max corners from the spline record's box (+0x4..+0x18, w = 1) and asks graphics-manager slot 93 to
  * cull them against the view matrix from slot 43.
  *
- * @return 1 unless the cull test returns 1 (fully outside)
+ * @return true unless the cull test returns GM_CLIPCODE_OUTSIDE
  */
-int cSpline::isVisible()
+bool cSpline::isVisible()
 {
     tSplineRecord* spline = splineRecord(SplineId);
     t4Vector box[2];
@@ -2267,7 +2267,7 @@ int cSpline::isVisible()
     void* clipThis = vthis(gfx, vt[93]);
     int res = ((tClipBoundBoxFn*)vt[93].fn)(clipThis, &box[0], &box[1],
                                              ((tGetNetMatrixFn*)vt[43].fn)(vthis(gfx, vt[43])));
-    return res != 1;
+    return res != GM_CLIPCODE_OUTSIDE;
 }
 #endif
 

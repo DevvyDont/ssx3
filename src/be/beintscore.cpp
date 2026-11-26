@@ -5,6 +5,7 @@
 #include "be/beinterface.h"
 #include "be/beintscore.h"
 #include "be/beintnewrace.h"
+#include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
@@ -200,9 +201,10 @@ void cBEScoreInterface::processEventRiderStats(int rider, tRiderStats* stats, un
     pc = &cBELibrary_profileLib[profile][charID];
     bNewHighScore[profile] = 0;
     mNewTrackHighScoreIndex[profile] = -1;
-    if (event == 22)
-        event = 0;
-    if (cBELibrary_raceDB_154AB8.cGameMode == 0 || cBELibrary_raceDB_154AB8.cGameMode == 5) {
+    if (event == kLOCATION_DEBUG)
+        event = kLOCATION_ARA1;
+    if (cBELibrary_raceDB_154AB8.cGameMode == kGAMEMODE_RACE
+        || cBELibrary_raceDB_154AB8.cGameMode == kGAMEMODE_TIMECHALLENGE) {
         timed = 1;
         score = (int)(score * (1.0f / 60.0f));
     }
@@ -271,13 +273,14 @@ extern sEvent_154EE8 cBELibrary_locationDB[];
  * interface.
  *
  * Only profiles 0 and 1. Stores @p result at +0xCC + profile * 0xB0 (the last-event slot's rank). The medal is
- * cBEScoreInterface_convertRankToMedal(@p result); events 4 and 5 (newRace.cGameEvent) give 1 for first place, else none.
- * Unless raceDB +0x49 is set it updates the event popups (func_001E25D8, then func_001E1EB8 and, outside events 4 and
- * 5, func_001E1550).
+ * cBEScoreInterface_convertRankToMedal(@p result); the rival events 4 and 5 (newRace.cGameEvent) give kMEDAL_GOLD for
+ * first place, else none. Unless raceDB +0x49 is set it updates the event popups (func_001E25D8, then func_001E1EB8
+ * and, outside events 4 and 5, func_001E1550).
  *
- * With a medal, unless raceDB +0x49 is set or raceDB +0x48 is 4: when @p score meets or beats the event's target from
- * cBENewRaceInterface_getPlatinumGoal (time target * 60 for events 0 and 4, lower is better; a score target otherwise) the medal becomes 0
- * (the best). Then calls cBERewardInterface_calculateUserTrackMedalRewards on the reward interface.
+ * With a medal, unless raceDB +0x49 is set or raceDB +0x48 is kGAMEMODE_FREERIDE: when @p score meets or beats the
+ * event's target from cBENewRaceInterface_getPlatinumGoal (time target * 60 for events 0 and 4, lower is better; a
+ * score target otherwise) the medal becomes kMEDAL_PLATINUM (the best). Then calls
+ * cBERewardInterface_calculateUserTrackMedalRewards on the reward interface.
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param result  the finishing rank, 0 first (On Tour iRanking)
@@ -293,33 +296,33 @@ void cBEScoreInterface::processRiderRanking(int rider, int result, int score)
     int charID = cBELibrary_getCharacterID(rider);
     int mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = cBELibrary_locationDB[cBELibrary_raceDB.iLocationIdx].id;
-    if (event == 22)
-        event = 0;
+    if (event == kLOCATION_DEBUG)
+        event = kLOCATION_ARA1;
     int medal = convertRankToMedal(result);
-    if (mode == 4 || mode == 5)
-        medal = result == 0 ? 1 : -1;
+    if (mode == kGAMEEVENT_RIVALTIME || mode == kGAMEEVENT_RIVALPOINTS)
+        medal = result == 0 ? kMEDAL_GOLD : kMEDAL_NONE;
     if (cBELibrary_raceDB.cGamePath == 0)
         func_001E25D8(mode, event, result);
-    if (medal == -1)
+    if (medal == kMEDAL_NONE)
         return;
     if (cBELibrary_raceDB.cGamePath == 0) {
         func_001E1EB8();
-        if (cBELibrary_raceDB.cGamePath == 0 && mode != 4 && mode != 5)
+        if (cBELibrary_raceDB.cGamePath == 0 && mode != kGAMEEVENT_RIVALTIME && mode != kGAMEEVENT_RIVALPOINTS)
             func_001E1550();
     }
     void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);
     if (cBELibrary_raceDB.cGamePath != 0)
         return;
-    if (cBELibrary_raceDB.cGameMode == 4)
+    if (cBELibrary_raceDB.cGameMode == kGAMEMODE_FREERIDE)
         return;
     int best = cBENewRaceInterface_getPlatinumGoal(be, event, mode);
-    if (best != -1) {
-        if (mode == 0 || mode == 4) {
+    if (best != cBENewRaceInterface::kNoPlatinumGoal) {
+        if (mode == kGAMEEVENT_RACE || mode == kGAMEEVENT_RIVALTIME) {
             if (best * 60 >= score)
-                medal = 0;
+                medal = kMEDAL_PLATINUM;
         } else {
             if (score >= best)
-                medal = 0;
+                medal = kMEDAL_PLATINUM;
         }
     }
     cBERewardInterface_calculateUserTrackMedalRewards(reward, profile, charID, mode, event, medal);
@@ -497,20 +500,20 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int highlight
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_isBetterMedal);
 #ifdef SKIP_ASM
 /**
- * Tells whether @p newMedal beats @p currentMedal: never when the new one is -1 (none), always when the current one is
- * -1, otherwise when its id is lower (lower ids are better medals).
+ * Tells whether @p newMedal beats @p currentMedal: never when the new one is kMEDAL_NONE, always when the current one
+ * is kMEDAL_NONE, otherwise when its id is lower (lower ids are better medals; eBEMedalID).
  *
- * @param currentMedal  the medal held so far, or -1
- * @param newMedal  the medal just won, or -1
- * @return 1 when the new medal is better, else 0
+ * @param currentMedal  the medal held so far, or kMEDAL_NONE
+ * @param newMedal  the medal just won, or kMEDAL_NONE
+ * @return true when the new medal is better
  */
-int cBEScoreInterface::isBetterMedal(int currentMedal, int newMedal)
+bool cBEScoreInterface::isBetterMedal(int currentMedal, int newMedal)
 {
-    if (newMedal == -1) {
-        return 0;
+    if (newMedal == kMEDAL_NONE) {
+        return false;
     }
-    if (currentMedal == -1) {
-        return 1;
+    if (currentMedal == kMEDAL_NONE) {
+        return true;
     }
     return newMedal < currentMedal;
 }
@@ -530,13 +533,13 @@ int cBEScoreInterface::convertRankToMedal(int rank)
 {
     switch (rank) {
     case 0:
-        return 1;
+        return kMEDAL_GOLD;
     case 1:
-        return 2;
+        return kMEDAL_SILVER;
     case 2:
-        return 3;
+        return kMEDAL_BRONZE;
     }
-    return -1;
+    return kMEDAL_NONE;
 }
 #endif
 
@@ -635,9 +638,9 @@ struct sRecord_155420 {
  * Updates a character's best stats from one event's results and raises the matching career highlights.
  *
  * Does nothing when raceDB +0x49 is set or the rider's profile is above 2. The best stats are the ten (value, location)
- * pairs at +0xDE4 of the character record; the location is cBELibrary_locationDB[raceDB +0x40].id (22 becomes 0). Pairs
- * 0-7 take the larger of the stored value and the stats words at +0x2C, +0x18, +0x1C, +0x20, +0x88 and the rounded
- * floats at +0x5C, +0x58, +0x50 (On Tour tRiderStats has NumFrags, NumUberTricks, NumSuperUberTricks,
+ * pairs at +0xDE4 of the character record; the location is cBELibrary_locationDB[raceDB +0x40].id (kLOCATION_DEBUG
+ * becomes 0). Pairs 0-7 take the larger of the stored value and the stats words at +0x2C, +0x18, +0x1C, +0x20, +0x88
+ * and the rounded floats at +0x5C, +0x58, +0x50 (On Tour tRiderStats has NumFrags, NumUberTricks, NumSuperUberTricks,
  * NumUberGrindTricks, LongestCombo, BiggestHandplantTime, BiggestRailDist, BiggestAirTime there), each also raising a
  * highlight with cBEScoreInterface_processHighlight (pair 1 excepted).
  *
@@ -665,17 +668,17 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
     int event = cBELibrary_locationDB_r155420[rs->iLocationIdx].id;
     int kind = rs->cGameMode;
     int mode = rs->cGameEvent;
-    if (event == 22)
-        event = 0;
+    if (event == kLOCATION_DEBUG)
+        event = kLOCATION_ARA1;
     sRecord_155420* best = (sRecord_155420*)(&rec->mRiderBest);
     int start = 0;
-    if (stats == 0 || mode == 12)
-        start = 8;
+    if (stats == 0 || mode == kGAMEEVENT_FREERIDE)
+        start = tRiderBest::keEventStat_RaceSecsMin;
     for (int i = start; i < 10; i++) {
         sRecord_155420* slot = &best[i];
         int statValue;
         switch (i) {
-        case 0:
+        case tRiderBest::keEventStat_KnockdownMax:
             statValue = stats->f2C;
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -683,14 +686,14 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 3, statValue);
             }
             break;
-        case 1:
+        case tRiderBest::keEventStat_UbersMax:
             statValue = stats->f18;
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
             }
             break;
-        case 2:
+        case tRiderBest::keEventStat_SuperUbersMax:
             statValue = stats->f1C;
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -698,7 +701,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 5, statValue);
             }
             break;
-        case 3:
+        case tRiderBest::keEventStat_UberGrindsMax:
             statValue = stats->f20;
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -706,7 +709,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 4, statValue);
             }
             break;
-        case 4:
+        case tRiderBest::keEventStat_ComboLongest:
             statValue = stats->f88;
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -714,7 +717,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 7, statValue);
             }
             break;
-        case 5:
+        case tRiderBest::keEventStat_HandplantSecsLongest:
             statValue = (int)(stats->f5C + 0.5f);
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -722,7 +725,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 1, statValue);
             }
             break;
-        case 6:
+        case tRiderBest::keEventStat_RailLengthLongest:
             statValue = (int)(stats->f58 + 0.5f);
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -730,7 +733,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 0, statValue);
             }
             break;
-        case 7:
+        case tRiderBest::keEventStat_AirSecsLongest:
             statValue = (int)(stats->f50 + 0.5f);
             if (statValue >= slot->score) {
                 slot->score = statValue;
@@ -738,17 +741,17 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                 cBEScoreInterface_processHighlight(rec, 2, statValue);
             }
             break;
-        case 8:
-            if (eventTime > 0 && mode == 0) {
+        case tRiderBest::keEventStat_RaceSecsMin:
+            if (eventTime > 0 && mode == kGAMEEVENT_RACE) {
                 if (slot->score == 0 || eventTime <= slot->score) {
                     slot->score = eventTime;
                     slot->event = event;
                 }
             }
             break;
-        case 9:
+        case tRiderBest::keEventStat_FreeStylePointsMax:
             if (eventPoints > 0) {
-                if ((mode >= 1 && mode <= 3) || kind == 6) {
+                if ((mode >= kGAMEEVENT_SLOPESTYLE && mode <= kGAMEEVENT_BIGAIR) || kind == kGAMEMODE_PNTSCHALLENGE) {
                     if (eventPoints >= slot->score) {
                         slot->score = eventPoints;
                         slot->event = event;

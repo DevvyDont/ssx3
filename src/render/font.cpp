@@ -36,9 +36,8 @@ extern char str_Glyphs[];
 /**
  * Builds a font's glyph table from loaded font data and uploads its texture.
  *
- * Records the run of consecutive character codes from the first (LastLinearCode), uses glyph 0xAC as the
- * missing
- * glyph, gives 0xA0 (no-break space) the space's metrics, and tracks the tallest glyph.
+ * Records the run of consecutive character codes from the first (LastLinearCode), uses the glyph of kChar_NotSign
+ * (0xAC) as the missing glyph, gives kChar_NoBreakSpace (0xA0) the space's metrics, and tracks the tallest glyph.
  *
  * @param vdata  the font file's data (On Tour const char* data)
  * @param flags  memory class for the glyph table (On Tour memtype)
@@ -51,8 +50,8 @@ void cFont::linkFont(void* vdata, int flags)
     // of the glyph sheet's SHAPE (+0x1C) from the start of the file
     tGlyph* src = (tGlyph*)(data + *(int*)(data + 0x14));
     t2Vector offset;
-    offset.x = (float)data[0x10];
-    offset.y = (float)data[0x11];
+    offset.x = (float)data[16];
+    offset.y = (float)data[17];
     *(t2Vector*)&self->Offset[0] = offset;
     self->NumGlyphs = *(short*)(data + 0xA);
     *(tGlyph**)&self->Glyphs = (tGlyph*)operator_new_tag(self->NumGlyphs * 12, str_Glyphs, flags, 0);
@@ -74,10 +73,10 @@ void cFont::linkFont(void* vdata, int flags)
         if ((self->Glyphs)[i].code == ' ') {
             space = i;
         }
-        if ((self->Glyphs)[i].code == 172) {
+        if ((self->Glyphs)[i].code == kChar_NotSign) {
             *(tGlyph**)&self->MissingGlyph = &(self->Glyphs)[i];
         }
-        if ((self->Glyphs)[i].code == 160) {
+        if ((self->Glyphs)[i].code == kChar_NoBreakSpace) {
             (self->Glyphs)[i].width = src[space].width;
             (self->Glyphs)[i].height = src[space].height;
             (self->Glyphs)[i].u = src[space].u;
@@ -574,7 +573,7 @@ char* cFont::textSmartLimit(const char* str, char* dst, int max, float sx, float
     const char* start = str;
     float w = 0.0f;
     float pend = w;
-    int lastSpace = -1;
+    int lastSpace = kNoBreakPoint;
     int n = 0;
     int k = 0;
     while (*str) {
@@ -598,7 +597,7 @@ char* cFont::textSmartLimit(const char* str, char* dst, int max, float sx, float
             pend = glyph->advance * sx - right;
         }
         if (width <= w) {
-            if (lastSpace == -1) {
+            if (lastSpace == kNoBreakPoint) {
                 dst[n] = 0;
                 return (char*)str;
             }
@@ -681,7 +680,7 @@ unsigned short* cFont::textSmartLimit1(float sx, float width, const unsigned sho
     const unsigned short* start = str;
     float w = 0.0f;
     float pend = w;
-    int lastSpace = -1;
+    int lastSpace = kNoBreakPoint;
     int n = 0;
     int k = 0;
     while (*str) {
@@ -705,7 +704,7 @@ unsigned short* cFont::textSmartLimit1(float sx, float width, const unsigned sho
             pend = glyph->advance * sx - right;
         }
         if (width <= w) {
-            if (lastSpace == -1) {
+            if (lastSpace == kNoBreakPoint) {
                 dst[n] = 0;
                 return (unsigned short*)str;
             }
@@ -1090,9 +1089,10 @@ static inline long packWord_2E98(int y, int n, int x, int mode, int mask)
  * Closes the VIF unpack block opened by func_00392E60: writes its STCYCL and UNPACK codes at the block start.
  *
  * With a negative @p count the element count comes from the bytes written since the block start (minus the 16-byte
- * header) divided by the element size of the unpack mode (12, 6, 3, 16, 8, 4 or 2 bytes; mode 2 counts bytes), then
- * scaled by max(CL, WL) / min(CL, WL). The STCYCL word is CL | WL << 8 and the UNPACK word carries the VU address, the
- * count (low 8 bits), the FLG bit when the address was nonzero and the mode. Clears the open flag.
+ * header) divided by the element size of the unpack mode (eVIFUnpackFormat: 12, 6, 3, 16, 8, 4 or 2 bytes;
+ * kVIF_UNPACK_S_8 counts bytes), then scaled by max(CL, WL) / min(CL, WL). The STCYCL word is CL | WL << 8 and the
+ * UNPACK word carries the VU address, the count (low 8 bits), the FLG bit when the address was nonzero and the mode.
+ * Clears the open flag.
  *
  * @param count  the number of elements, or negative to compute it
  */
@@ -1103,25 +1103,30 @@ extern "C" void func_00392E98(sFontPkt_2E98* self, int count)
     if (requested < 0) {
         n = self->cur - self->start - 16;
         switch (self->mode) {
-        case 8:
+        case kVIF_UNPACK_V3_32:
             n /= 12;
             break;
-        case 9:
+        case kVIF_UNPACK_V3_16:
             n /= 6;
             break;
-        case 10:
+        case kVIF_UNPACK_V3_8:
             n /= 3;
             break;
-        case 12:
+        case kVIF_UNPACK_V4_32:
             n /= 16;
             break;
-        case 4: case 13:
+        case kVIF_UNPACK_V2_32:
+        case kVIF_UNPACK_V4_16:
             n /= 8;
             break;
-        case 0: case 5: case 14:
+        case kVIF_UNPACK_S_32:
+        case kVIF_UNPACK_V2_16:
+        case kVIF_UNPACK_V4_8:
             n /= 4;
             break;
-        case 1: case 6: case 15:
+        case kVIF_UNPACK_S_16:
+        case kVIF_UNPACK_V2_8:
+        case kVIF_UNPACK_V4_5:
             n /= 2;
             break;
         }
@@ -2788,23 +2793,23 @@ static inline short* sFontRS_shorts_47D8(char* vst)
  * Compares the four state words of *m_pCurrentDrawState, then its two texture ids, with the draw state that vtable slot
  * 64 (cGraphicsMan_ActiveDrawState, &m_activeDrawState) returns; the virtual is called again for every word.
  *
- * @return 1 at the first difference, else 0
+ * @return true at the first difference, else false
  */
-int cGraphicsMan::DrawStateChanged()
+bool cGraphicsMan::DrawStateChanged()
 {
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
         int* current = (int*)&m_pCurrentDrawState->m_bitGroups[i];
         const sDrawState* cmp = ActiveDrawState();
-        if (*current != (int)cmp->m_bitGroups[i]) return 1;
+        if (*current != (int)cmp->m_bitGroups[i]) return true;
     }
     for (j = 0; j < 2; j++) {
         short* current = sFontRS_shorts_47D8((char*)m_pCurrentDrawState) + j;
         const sDrawState* cmp = ActiveDrawState();
-        if (*current != cmp->m_textureState.m_texid[j]) return 1;
+        if (*current != cmp->m_textureState.m_texid[j]) return true;
     }
-    return 0;
+    return false;
 }
 #endif
 //100%
@@ -2845,23 +2850,23 @@ INCLUDE_ASM("render/font", getFalloffIntensity);
 /**
  * Returns a distance falloff factor that is 1 within 100 units and falls off as 1/d, 1/d^2 or 1/d^3.
  *
- * @p mode 1: 100 / d; 2: 10000 / d^2; 3: 1000000 / d^3, each only once @p distance reaches 100; any other mode returns
- * 1. No caller in C or asm (an out-of-line copy of an inline helper).
+ * @p mode DECAY_LINEAR: 100 / d; DECAY_EXPONENTIAL2: 10000 / d^2; DECAY_EXPONENTIAL3: 1000000 / d^3, each only once
+ * @p distance reaches 100; any other mode returns 1. No caller in C or asm (an out-of-line copy of an inline helper).
  *
- * @param mode  the falloff order (1-3)
+ * @param mode  the falloff, eLightDecay
  * @param distance  the distance
  * @return the factor, 1 at most
  */
 extern "C" float getFalloffIntensity(int mode, float distance)
 {
     switch (mode) {
-    case 1:
+    case DECAY_LINEAR:
         if (distance < 100.0f) return 1.0f;
         return 100.0f / distance;
-    case 2:
+    case DECAY_EXPONENTIAL2:
         if (distance < 100.0f) return 1.0f;
         return 10000.0f / (distance * distance);
-    case 3:
+    case DECAY_EXPONENTIAL3:
         if (distance < 100.0f) return 1.0f;
         return 1000000.0f / (distance * distance * distance);
     }
@@ -2874,9 +2879,10 @@ INCLUDE_ASM("render/font", getIntensityInv);
 /**
  * Returns a near-range ramp: (100x)^n while 100x is below 1, else 1.
  *
- * @p mode 1, 2 or 3 picks the power n; any other mode returns 1. No caller in C or asm.
+ * @p mode DECAY_LINEAR, DECAY_EXPONENTIAL2 or DECAY_EXPONENTIAL3 picks the power n (1, 2, 3); any other mode returns 1.
+ * No caller in C or asm.
  *
- * @param mode  the ramp order (1-3)
+ * @param mode  the ramp order, eLightDecay (On Tour: int decayRate)
  * @param x  the value, scaled by 100 first
  * @return the ramp value, 1 at most
  */
@@ -2885,9 +2891,9 @@ extern "C" float getIntensityInv(int mode, float x)
     float scaled = x * 100.0f;
     if (scaled < 1.0f) {
         switch (mode) {
-        case 1: return scaled;
-        case 2: return scaled * scaled;
-        case 3: return scaled * scaled * scaled;
+        case DECAY_LINEAR: return scaled;
+        case DECAY_EXPONENTIAL2: return scaled * scaled;
+        case DECAY_EXPONENTIAL3: return scaled * scaled * scaled;
         }
     }
     return 1.0f;

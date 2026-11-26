@@ -43,9 +43,9 @@ struct cBEEconInterface : public cBEInterface {
     int addMoney(int humanIndex, int characterId, int amount) __asm__("cBEEconInterface_addMoney");
     int addMoney1(int rider, int amount) __asm__("cBEEconInterface_addMoney1");
     int reduceMoney(int profileIndex, int characterId, int amount) __asm__("cBEEconInterface_reduceMoney");
-    int getPeakPass(int profileIndex, int characterId, int peak, int unlocked) __asm__("cBEEconInterface_getPeakPass");
-    int buyAttribute(int humanIndex, int characterId, unsigned int attribute) __asm__("cBEEconInterface_buyAttribute");
-    int sellAttribute(int profile, int characterId, unsigned int kind) __asm__("cBEEconInterface_sellAttribute");
+    bool getPeakPass(int profileIndex, int characterId, int peak, int unlocked) __asm__("cBEEconInterface_getPeakPass");
+    bool buyAttribute(int humanIndex, int characterId, unsigned int attribute) __asm__("cBEEconInterface_buyAttribute");
+    bool sellAttribute(int profile, int characterId, unsigned int kind) __asm__("cBEEconInterface_sellAttribute");
     int getCashReward(int medal, int key, int place) __asm__("cBEEconInterface_getCashReward");
     int getCollectableCash(int level) __asm__("cBEEconInterface_getCollectableCash");
     int getMissionCash(int level) __asm__("cBEEconInterface_getMissionCash");

@@ -82,21 +82,21 @@ extern "C" void cLoadIndicator_render(void* a);
 /**
  * Renders the pre-start screen: clears to black and draws the load indicator once the renderer is ready.
  *
- * Returns 0 without drawing while GrMan's IsRenderReady (slot 17) is 0. Otherwise sets the clear colour to (0, 0, 0)
- * (SetScreenClearColour, slot 15), draws SSXApp's load indicator (cLoadIndicator_render) and the frame (DrawFrame, slot 20).
- * Render slot (+0x3C) of cPreStartScreen_vtbl.
+ * Returns false without drawing while GrMan's IsRenderReady (slot 17) is 0. Otherwise sets the clear colour to (0, 0,
+ * 0) (SetScreenClearColour, slot 15), draws SSXApp's load indicator (cLoadIndicator_render) and the frame (DrawFrame,
+ * slot 20). Render slot (+0x3C) of cPreStartScreen_vtbl.
  *
- * @return 1 when a frame was drawn, otherwise 0
+ * @return true when a frame was drawn
  */
-extern "C" int cPreStartScreen_render(void)
+extern "C" bool cPreStartScreen_render(void)
 {
     if (GrMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
     GrMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 
@@ -108,14 +108,14 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_loseFocus);
  *
  * LoseFocus slot (+0x24) of cPreStartScreen_vtbl.
  *
- * @return 1 when the timer is at least 0.75, otherwise 0
+ * @return true when the timer is at least 0.75
  */
-int cPreStartScreen::loseFocus()
+bool cPreStartScreen::loseFocus()
 {
     if (progressivetimer < 0.75f) {
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -210,17 +210,17 @@ extern "C" void cLoadIndicator_render(void* a);
  * Same body as cPreStartScreen_render: IsRenderReady (slot 17), SetScreenClearColour (slot 15) with (0, 0, 0), the load
  * indicator (cLoadIndicator_render) and DrawFrame (slot 20). Render slot (+0x3C) of cInitLoadScreen_vtbl.
  *
- * @return 1 when a frame was drawn, otherwise 0
+ * @return true when a frame was drawn
  */
-extern "C" int cInitLoadScreen_render(void)
+extern "C" bool cInitLoadScreen_render(void)
 {
     if (GrMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
     GrMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 
@@ -239,9 +239,9 @@ struct sLoadScreen2326D8 {
  *
  * LoseFocus slot (+0x24) of cInitLoadScreen_vtbl.
  *
- * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
+ * @return true when the load indicator's alpha (+0x4) is 0
  */
-int cInitLoadScreen::loseFocus()
+bool cInitLoadScreen::loseFocus()
 {
     ending = 1;
     return SSXApp->LoadIndicator->alpha == 0.0f;
@@ -370,9 +370,9 @@ struct sLoadScreen2327B0 {
  *
  * LoseFocus slot (+0x24) of cPreGameLoadScreen_vtbl.
  *
- * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
+ * @return true when the load indicator's alpha (+0x4) is 0
  */
-int cPreGameLoadScreen::loseFocus()
+bool cPreGameLoadScreen::loseFocus()
 {
     ending = 1;
     return SSXApp->LoadIndicator->alpha == 0.0f;
@@ -393,9 +393,9 @@ struct sLoadScreen2327E8 {
  *
  * LoseFocus slot (+0x24) of cPreFELoadScreen_vtbl.
  *
- * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
+ * @return true when the load indicator's alpha (+0x4) is 0
  */
-int cPreFELoadScreen::loseFocus()
+bool cPreFELoadScreen::loseFocus()
 {
     ending = 1;
     return SSXApp->LoadIndicator->alpha == 0.0f;
@@ -413,17 +413,17 @@ extern "C" void cLoadIndicator_render(void* a);
  * Same body as cPreStartScreen_render (IsRenderReady, SetScreenClearColour (0, 0, 0), cLoadIndicator_render, DrawFrame). Render slot
  * (+0x3C) of cPreGameLoadScreen_vtbl.
  *
- * @return 1 when a frame was drawn, otherwise 0
+ * @return true when a frame was drawn
  */
-extern "C" int cPreGameLoadScreen_render(void)
+extern "C" bool cPreGameLoadScreen_render(void)
 {
     if (GrMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
     GrMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 
@@ -438,17 +438,17 @@ extern "C" void cLoadIndicator_render(void* a);
  * Same body as cPreStartScreen_render (IsRenderReady, SetScreenClearColour (0, 0, 0), cLoadIndicator_render, DrawFrame). Render slot
  * (+0x3C) of cPreFELoadScreen_vtbl.
  *
- * @return 1 when a frame was drawn, otherwise 0
+ * @return true when a frame was drawn
  */
-extern "C" int cPreFELoadScreen_render(void)
+extern "C" bool cPreFELoadScreen_render(void)
 {
     if (GrMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
     GrMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 
@@ -613,11 +613,11 @@ extern void* D_0047CA18[];
 /**
  * Loads the start screen: creates its UI engine from "data/ui/su" and pushes the memory card or progressive-scan state.
  *
- * Calls GrMan's InitTextures (slot 44) with 0x100, builds a 0x70-byte UI engine (tag "UIEngine",
- * cUIEngine_cUIEngine) into mpUI, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale
- * (mpLocaleInterface) and Fonts (mpFontInterface) and a new 0x1C-byte cFEInput (tag "GLUIInput", vtable
- * cFEInput_vtbl, fields cleared) as its mpInput. Type (meStartScreen_type) 0 pushes a cFEStateMemCard (584 bytes,
- * func_00186A08); type 2 pushes a 72-byte "cFEStateProgressive" (cUIState base cUIState_cUIState, vtable D_0047CA18);
+ * Calls GrMan's InitTextures (slot 44) with 0x100, builds a 0x70-byte UI engine (tag "UIEngine", cUIEngine_cUIEngine)
+ * into mpUI, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale (mpLocaleInterface) and Fonts
+ * (mpFontInterface) and a new 0x1C-byte cFEInput (tag "GLUIInput", vtable cFEInput_vtbl, fields cleared) as its
+ * mpInput. Type (meStartScreen_type) eStartScreen_Legal pushes a cFEStateMemCard (584 bytes, func_00186A08);
+ * eStartScreen_Progressive pushes a 72-byte "cFEStateProgressive" (cUIState base cUIState_cUIState, vtable D_0047CA18);
  * any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
 void cStartScreen::load()
@@ -637,10 +637,10 @@ void cStartScreen::load()
     mpUI->mpInput = input;
     mpUI->mpFontInterface = SSXApp->Fonts;
     int mode = meStartScreen_type;
-    if (mode == 0) {
+    if (mode == eStartScreen_Legal) {
         void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), mpUI);
         cUIStateStack_push(&mpUI->mStateStack, item);
-    } else if (mode == 2) {
+    } else if (mode == eStartScreen_Progressive) {
         cUIState* progressiveState = (cUIState*)operator new(72, str_cFEStateProgressive, 0, 0);
         cUIState_cUIState(progressiveState, mpUI);
         VPTR_OF(cListNode, progressiveState) = D_0047CA18;
@@ -753,21 +753,22 @@ extern "C" void cUIEngine_render2D(void* obj);
 /**
  * Renders the start screen once the renderer is ready: the UI engine unless the fade covers the screen, then the frame.
  *
- * Returns 0 while GrMan's IsRenderReady (slot 17) is 0. Otherwise draws the fade (cFadeScreen_drawFade) and, when it is not
- * fully opaque, the UI engine (cUIEngine_render2D on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of cStartScreen_vtbl.
+ * Returns false while GrMan's IsRenderReady (slot 17) is 0. Otherwise draws the fade (cFadeScreen_drawFade) and, when
+ * it is not fully opaque, the UI engine (cUIEngine_render2D on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of
+ * cStartScreen_vtbl.
  *
- * @return 1 when a frame was drawn, otherwise 0
+ * @return true when a frame was drawn
  */
-int cStartScreen::render()
+bool cStartScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     if (cFadeScreen_drawFade(this) == 0) {
         cUIEngine_render2D(mpUI);
     }
     GrMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 
@@ -858,7 +859,7 @@ struct cLoadItemC_2E20 {
  * (tag "UIEngine", cUIEngine_cUIEngine) into +0xC, loads "data/ui/gl", gives it SSXApp's Fonts and FELocale and a 0x1C-byte
  * "GLUIInput" input. Then pushes one 0x48-byte state built on cUIState_cUIState:
  * - "cGameLoadStateOutLodge" (vtable cGameLoadStateOutLodge_vtbl, clears gInLodge) when gInLodge is set, or on the career path
- *   (cGamePath 0) in game mode 5 or 6;
+ *   (cGamePath kGAMEPATH_WORLDCIRCUIT) in kGAMEMODE_TIMECHALLENGE or kGAMEMODE_PNTSCHALLENGE;
  * - "cGameLoadStateConquer" (D_0047C7A8, clears D_004A19DC) on the career path in any other mode;
  * - otherwise "cGameLoadState" (cGameLoadState_vtbl) with this screen as its owner (+0x48), after
  *   cGameLoadScreen_loadTexture(this, 0).
@@ -885,12 +886,12 @@ void cGameLoadScreen::load()
     ((sUI_2E20*)mpUI)->fC = n;
     void* item;
     if (gInLodge == 0) {
-        signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
-        if (newRaceBytes[0x49] != 0)
+        cBERaceDB* newRace = &cBENewRaceInterface_newRace;
+        if (newRace->cGamePath != kGAMEPATH_WORLDCIRCUIT)
             goto other;
-        if (newRaceBytes[0x48] == 5)
+        if (newRace->cGameMode == kGAMEMODE_TIMECHALLENGE)
             goto makeA;
-        if (newRaceBytes[0x48] != 6)
+        if (newRace->cGameMode != kGAMEMODE_PNTSCHALLENGE)
             goto other;
     }
 makeA:
@@ -898,12 +899,12 @@ makeA:
     goto done;
 other:
     {
-        signed char* raceDbBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
+        cBERaceDB* raceDB = &cBENewRaceInterface_newRace;
         int x = 0;
-        if (raceDbBytes[0x49] == 0) {
-            int notMode5 = raceDbBytes[0x48] != 5;
+        if (raceDB->cGamePath == kGAMEPATH_WORLDCIRCUIT) {
+            int notMode5 = raceDB->cGameMode != kGAMEMODE_TIMECHALLENGE;
             if (notMode5)
-                x = raceDbBytes[0x48] != 6;
+                x = raceDB->cGameMode != kGAMEMODE_PNTSCHALLENGE;
         }
         if (x) {
             item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(mpUI);
@@ -954,8 +955,8 @@ static inline int loadTex_3048(char* data, const char* name)
  * Loads the game load screen's picture: both players' character pictures online, the course picture
  * otherwise.
  *
- * On the online game path (newRace.cGamePath == 2) it loads "|<character>_small_flat.ssh" for each player from
- * data/ui/charpic.big as "CharaPics" into +0x10 and +0x14; otherwise "|<location>.ssh" for the race's
+ * On the online game path (newRace.cGamePath == kGAMEPATH_MULTIPLAYER) it loads "|<character>_small_flat.ssh" for each
+ * player from data/ui/charpic.big as "CharaPics" into +0x10 and +0x14; otherwise "|<location>.ssh" for the race's
  * location (0 when above 16) from data/ui/courspic.big as "coursePics" into +0x10.
  *
  * Textures go through GrMan's slot 46, the file data is freed and the big file closed. On Tour's version also
@@ -967,7 +968,7 @@ void cGameLoadScreen::loadTexture()
     cBigFile bf;
     void* plr = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
         int* slot = (int*)(&mTexID[0]);
         for (int i = 0; i < 2; i++) {
@@ -1033,9 +1034,9 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_loseFocus__FPv);
  *
  * LoseFocus slot (+0x24) of cGameLoadScreen_vtbl.
  *
- * @return 1 or 0
+ * @return true when cLoadScreen_loseFocus does
  */
-int cGameLoadScreen_loseFocus(void* self)
+bool cGameLoadScreen_loseFocus(void* self)
 {
     return (cLoadScreen_loseFocus(self) != 0);
 }
@@ -1090,18 +1091,18 @@ extern "C" void cUIEngine_render2D(void* obj);
  * Same body as cStartScreen_render (IsRenderReady, cFadeScreen_drawFade, cUIEngine_render2D on +0xC, DrawFrame). Render slot (+0x3C) of
  * cGameLoadScreen_vtbl.
  *
- * @return 1 when a frame was drawn, otherwise 0
+ * @return true when a frame was drawn
  */
-int cGameLoadScreen::render()
+bool cGameLoadScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     if (cFadeScreen_drawFade(this) == 0) {
         cUIEngine_render2D(mpUI);
     }
     GrMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 

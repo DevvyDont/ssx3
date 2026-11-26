@@ -15,6 +15,25 @@ struct cFont;
 struct cInput;
 struct cMenu;
 
+// A menu key (cMenuSys::Key, and the value cInput_getValue reports for the menu-key input state 61, On Tour
+// kIS_MenuKey). [O] On Tour's enum tMenuKeys, names and values; [R] cMenuSys_init stores kMenuKeyNull (11); [U]
+// cDebugMenuScreen_update moves its cursor with kMenuKeyUp / kMenuKeyDown, changes a row with kMenuKeyLeft /
+// kMenuKeyRight and runs the network and lobby rows on kMenuKeySelect.
+enum tMenuKeys {
+    kMenuKeyUp = 0,
+    kMenuKeyDown = 1,
+    kMenuKeyLeft = 2,
+    kMenuKeyRight = 3,
+    kMenuKeyLeftShift = 4,
+    kMenuKeyRightShift = 5,
+    kMenuKeySelect = 6,
+    kMenuKeyCancel = 7,
+    kMenuKeyBack = 8,
+    kMenuKeyOpt1 = 9,
+    kMenuKeyOpt2 = 10,
+    kMenuKeyNull = 11
+};
+
 struct cMenuSys {
     int MenuDepth;                  // 0x000 [O]
     cMenu* MenuStack[16];           // 0x004 [O]

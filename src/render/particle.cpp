@@ -973,8 +973,8 @@ INCLUDE_ASM("render/particle", func_003720F0);
 /**
  * Walks a DMA chain and rebases every ref tag's address onto @p chain, stopping after the ret tag.
  *
- * Tag ids: 1 (cnt) and 6 (ret) carry QWC quadwords of data, 3 (ref) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7
- * do not advance the walk, so a chain containing one never ends. No caller.
+ * Tag ids: kDMATag_CNT (1) and kDMATag_RET (6) carry QWC quadwords of data, kDMATag_REF (3) points elsewhere. Likely
+ * bug: ids 0, 2, 4, 5 and 7 (eDMATagID) do not advance the walk, so a chain containing one never ends. No caller.
  *
  * @param chain  the first tag of the chain
  * @return the address just past the ret tag's data
@@ -994,21 +994,21 @@ extern "C" unsigned long* func_003720F0(unsigned long* chain)
         int qwc = (int)tag & 0xFFFF;
 
         switch (id) {
-        case 0:
-        case 2:
-        case 4:
-        case 5:
-        case 7:
+        case kDMATag_REFE:
+        case kDMATag_NEXT:
+        case kDMATag_REFS:
+        case kDMATag_CALL:
+        case kDMATag_END:
             break;
-        case 1:
+        case kDMATag_CNT:
             tagPtr += 2;
             tagPtr += qwc * 2;
             break;
-        case 3:
+        case kDMATag_REF:
             *tagPtr = ((unsigned long)(unsigned int)((char*)chain + addr) << 32) | (*tagPtr & 0xFFFFFFFF);
             tagPtr += 2;
             break;
-        case 6:
+        case kDMATag_RET:
             tagPtr += 2;
             tagPtr += qwc * 2;
             done = 1;
@@ -1032,10 +1032,10 @@ extern "C" void* MEM_copy(void*, void*, int);
  *
  * Ref tags pointing at @p addrA or @p addrB become a zero quadword; one pointing at @p addrC becomes the quadword
  * 0x3000000005000001 (low dword first). The ret tag and its data are copied last. The first tag keeps bits 16-31 of its
- * low word, gets the copied quadword count as QWC, and loses its address word. Tag ids: 1 (cnt) and 6 (ret) carry QWC
- * quadwords of data, 3 (ref) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7 do not advance the walk, so a chain
- * containing one never ends. A ref tag whose address matches none of the three leaves the walk stuck the same way. No
- * caller.
+ * low word, gets the copied quadword count as QWC, and loses its address word. Tag ids: kDMATag_CNT (1) and kDMATag_RET
+ * (6) carry QWC quadwords of data, kDMATag_REF (3) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7 (eDMATagID) do
+ * not advance the walk, so a chain containing one never ends. A ref tag whose address matches none of the three leaves
+ * the walk stuck the same way. No caller.
  *
  * @param buf  the chain, rewritten in place
  * @param addrA  a ref address to blank
@@ -1057,13 +1057,13 @@ extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
         int qwc = (int)tag & 0xFFFF;
 
         switch (id) {
-        case 0:
-        case 2:
-        case 4:
-        case 5:
-        case 7:
+        case kDMATag_REFE:
+        case kDMATag_NEXT:
+        case kDMATag_REFS:
+        case kDMATag_CALL:
+        case kDMATag_END:
             break;
-        case 1: {
+        case kDMATag_CNT: {
             int size = qwc << 4;
             src += 0x10;
             MEM_copy(dst, src, size);
@@ -1072,7 +1072,7 @@ extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
             count += qwc;
             break;
         }
-        case 3:
+        case kDMATag_REF:
             if (addr == addrA) {
                 *(unsigned long*)dst = 0;
                 count++;
@@ -1096,7 +1096,7 @@ extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
                 dst += 8;
             }
             break;
-        case 6:
+        case kDMATag_RET:
             MEM_copy(dst, src, (qwc + 1) * 0x10);
             src += 0x10;
             dst += 0x10;
@@ -1126,9 +1126,10 @@ extern "C" void* MEM_copy(void*, void*, int);
  * Ref tags pointing at @p addrA or @p addrB become a zero quadword inside the current block. A ref to @p addrC closes
  * the block (its header becomes a cnt tag with the block's quadword count), is written as a ref with address @p buf +
  * @p addrC and the source tag's low word, and opens a new block header after it. At the ret tag the open block is
- * closed if non-empty and the ret tag with its data is copied. Tag ids: 1 (cnt) and 6 (ret) carry QWC quadwords of
- * data, 3 (ref) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7 do not advance the walk, so a chain containing one
- * never ends. A ref tag whose address matches none of the three leaves the walk stuck the same way. No caller.
+ * closed if non-empty and the ret tag with its data is copied. Tag ids: kDMATag_CNT (1) and kDMATag_RET (6) carry QWC
+ * quadwords of data, kDMATag_REF (3) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7 (eDMATagID) do not advance the
+ * walk, so a chain containing one never ends. A ref tag whose address matches none of the three leaves the walk stuck
+ * the same way. No caller.
  *
  * @param buf  the chain, rewritten in place
  * @param addrA  a ref address to blank
@@ -1150,13 +1151,13 @@ extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
         int qwc = (int)tag & 0xFFFF;
 
         switch (id) {
-        case 0:
-        case 2:
-        case 4:
-        case 5:
-        case 7:
+        case kDMATag_REFE:
+        case kDMATag_NEXT:
+        case kDMATag_REFS:
+        case kDMATag_CALL:
+        case kDMATag_END:
             break;
-        case 1: {
+        case kDMATag_CNT: {
             int size = qwc << 4;
             src += 0x10;
             MEM_copy(dst, src, size);
@@ -1165,7 +1166,7 @@ extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
             count += qwc;
             break;
         }
-        case 3:
+        case kDMATag_REF:
             if (addr == addrA || addr == addrB) {
                 *(unsigned long*)dst = 0;
                 count++;
@@ -1186,7 +1187,7 @@ extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
                 dst += 0x10;
             }
             break;
-        case 6:
+        case kDMATag_RET:
             if (count > 0) {
                 hdr[0] = count | 0x10000000;
                 hdr[1] = 0;
@@ -3032,11 +3033,11 @@ struct sPartTexCache {
  * Returns the index of the display mode matching a resolution and pixel formats, or -1.
  *
  * Walks the NumDisplayModes 0xA4-byte entries of DisplayModes. An entry matches when its width (+0x88), height (+0x8C)
- * and id (+0xA0) equal @p width, @p height and @p id, its frame-buffer format (+0x90) fits @p bpp (32 -> 0, 24 -> 1, 16
- * -> 2), its second buffer format (+0x94) fits @p clutBpp the same way, and @p fmt is 24 with a z-buffer format (+0x98)
- * of 49 (PSMZ24). Likely bugs: case 16 of the @p bpp switch falls through into the 24 test, so a 16-bit request also
- * accepts 24-bit modes; and any @p fmt other than 24 can never match. Slot 123 of cPS2GraphicsMan_vtbl; cPS2GraphicsMan_SetDisplayMode
- * calls it.
+ * and id (+0xA0) equal @p width, @p height and @p id, its frame-buffer format (+0x90) fits @p bpp (32 -> kGS_PSMCT32,
+ * 24 -> kGS_PSMCT24, 16 -> kGS_PSMCT16), its second buffer format (+0x94) fits @p clutBpp the same way, and @p fmt is
+ * 24 with a z-buffer format (+0x98) of kGS_PSMZ24. Likely bugs: case 16 of the @p bpp switch falls through into the 24
+ * test, so a 16-bit request also accepts 24-bit modes; and any @p fmt other than 24 can never match. Slot 123 of
+ * cPS2GraphicsMan_vtbl; cPS2GraphicsMan_SetDisplayMode calls it.
  *
  * @param width  the screen width
  * @param height  the screen height
@@ -3058,27 +3059,27 @@ extern "C" int cPS2GraphicsMan_GetDisplayMode(cPS2GraphicsMan* self, int width, 
             int ok3 = 0;
             switch (bpp) {
             case 16:
-                if (displayMode->psm == 2) ok1 = 1; else ok1 = 0;
+                if (displayMode->psm == kGS_PSMCT16) ok1 = 1; else ok1 = 0;
             case 24:
-                if (displayMode->psm == 1) ok1 = 1;
+                if (displayMode->psm == kGS_PSMCT24) ok1 = 1;
                 break;
             case 32:
-                if (displayMode->psm == 0) ok1 = 1; else ok1 = 0;
+                if (displayMode->psm == kGS_PSMCT32) ok1 = 1; else ok1 = 0;
                 break;
             }
             switch (clutBpp) {
             case 16:
-                if (displayMode->clutPsm == 2) ok2 = 1; else ok2 = 0;
+                if (displayMode->clutPsm == kGS_PSMCT16) ok2 = 1; else ok2 = 0;
                 break;
             case 24:
-                if (displayMode->clutPsm == 1) ok2 = 1; else ok2 = 0;
+                if (displayMode->clutPsm == kGS_PSMCT24) ok2 = 1; else ok2 = 0;
                 break;
             case 32:
-                if (displayMode->clutPsm == 0) ok2 = 1; else ok2 = 0;
+                if (displayMode->clutPsm == kGS_PSMCT32) ok2 = 1; else ok2 = 0;
                 break;
             }
             if (fmt == 24) {
-                if (displayMode->fmt == 49) ok3 = 1; else ok3 = 0;
+                if (displayMode->fmt == kGS_PSMZ24) ok3 = 1; else ok3 = 0;
             }
             if (ok1 && ok2 && ok3) {
                 return i;
@@ -3339,15 +3340,15 @@ extern "C" void func_00364B88(void* table, void* key);
 /**
  * Pops the viewport stack: decrements mViewportDepth and restores everything PushViewport saved.
  *
- * The scissor is re-registered with DeferMan (func_00364B88) when the saved scissor index is -1, otherwise the index
- * is put back. Clears mMatricesValid.
+ * The scissor is re-registered with DeferMan (func_00364B88) when the saved scissor index is kNoActivePort, otherwise
+ * the index is put back. Clears mMatricesValid.
  */
 extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
 {
     self->mViewportDepth--;
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
     *(tDeferViewPort*)&self->mScissor[0] = *(tDeferViewPort*)&viewportStack->mScissor[0];
-    if (viewportStack->mDeferScissorIndex == -1) {
+    if (viewportStack->mDeferScissorIndex == cPS2DeferManager::kNoActivePort) {
         func_00364B88((char*)self->mpDeferMan, (tDeferViewPort*)&self->mScissor[0]);
     } else {
         self->mpDeferMan->mActivePortIndex = viewportStack->mDeferScissorIndex;
@@ -3630,7 +3631,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     float w = *(float*)(viewBase + 0x6D28);
     float viewHeight = *(float*)(viewBase + 0x6D2C);
     float zlo, zhi, zscale;
-    if (self->mCurrentZBFormat == 49) {
+    if (self->mCurrentZBFormat == kGS_PSMZ24) {
         zscale = 16777215.0f;
         zlo = -8388467.5f;
         zhi = 8388467.5f;
@@ -3836,8 +3837,8 @@ static inline float DepthOffset7278(cPS2GraphicsMan* self, t4VectorInit* pos, fl
  * Sets a depth bias for the current viewport from a world position and a world-space distance.
  *
  * Updates the clip matrices first when they are stale. The offset comes from DepthOffset7278(); when it differs from
- * the viewport's stored depth it is saved there and added to 32767.5 (8388467.5 when the mode word is 49) to give the
- * two Z constants at +0x58F8 and +0x5858, and texReady is cleared so the state is re-sent.
+ * the viewport's stored depth it is saved there and added to 32767.5 (8388467.5 when the mode word is kGS_PSMZ24) to
+ * give the two Z constants at +0x58F8 and +0x5858, and texReady is cleared so the state is re-sent.
  *
  * @param pos  the world position the bias is measured at
  * @param dist  the bias distance in world units
@@ -3852,7 +3853,7 @@ extern "C" void cPS2GraphicsMan_SetViewportZBias(cPS2GraphicsMan* self, t4Vector
     if (depthOffset != view->mZBias) {
         view->mZBias = depthOffset;
         float k = 32767.5f;
-        if (self->mCurrentZBFormat == 49) {
+        if (self->mCurrentZBFormat == kGS_PSMZ24) {
             k = 8388467.5f;
         }
         self->mScreenOffset.z = k + depthOffset;
@@ -3957,7 +3958,7 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     ((float*)&(*(&self->mClipMax)).x)[3] = 1.0f;
     self->mMatricesValid = 0;
     float zlo, zhi;
-    if (self->mCurrentZBFormat == 49) {
+    if (self->mCurrentZBFormat == kGS_PSMZ24) {
         zlo = -8388467.5f;
         zhi = 8388467.5f;
     } else {
@@ -4043,30 +4044,30 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTVDisplayFormat);
 /**
  * Sets the TV display format (mTVDisplayFormat) from a format number.
  *
- * Stores @p mode in mDisplayFormat, then: 0 (On Tour GM_FULLSCREEN) sets mfTVYOffset 0 and mfTVYScale, mfXAspectAdjust,
+ * Stores @p mode in mDisplayFormat, then: 0 (GM_FULLSCREEN) sets mfTVYOffset 0 and mfTVYScale, mfXAspectAdjust,
  * mfYAspectAdjust 1; 1 (GM_WIDESCREEN, letterboxed) sets the offset 0.125 and the three scales 0.75; 2 (GM_ANIMORPHIC)
  * sets mfXAspectAdjust 0.75, the offset 0 and the other two 1. Other values change only mDisplayFormat. Slot 40 of
  * cPS2GraphicsMan_vtbl.
  *
- * @param mode  the display format: 0 full screen, 1 widescreen (letterbox), 2 anamorphic
+ * @param mode  the display format (GMDisplayFormat): 0 full screen, 1 widescreen (letterbox), 2 anamorphic
  */
 extern "C" void cPS2GraphicsMan_SetTVDisplayFormat(cPS2GraphicsMan* self, int mode)
 {
     self->mTVDisplayFormat.mDisplayFormat = mode;
     switch (mode) {
-    case 0:
+    case GM_FULLSCREEN:
         self->mTVDisplayFormat.mfTVYOffset = 0.0f;
         self->mTVDisplayFormat.mfTVYScale = 1.0f;
         self->mTVDisplayFormat.mfXAspectAdjust = 1.0f;
         self->mTVDisplayFormat.mfYAspectAdjust = 1.0f;
         break;
-    case 1:
+    case GM_WIDESCREEN:
         self->mTVDisplayFormat.mfTVYOffset = 0.125f;
         self->mTVDisplayFormat.mfTVYScale = 0.75f;
         self->mTVDisplayFormat.mfXAspectAdjust = 0.75f;
         self->mTVDisplayFormat.mfYAspectAdjust = 0.75f;
         break;
-    case 2:
+    case GM_ANIMORPHIC:
         self->mTVDisplayFormat.mfXAspectAdjust = 0.75f;
         self->mTVDisplayFormat.mfTVYOffset = 0.0f;
         self->mTVDisplayFormat.mfTVYScale = 1.0f;
@@ -4218,7 +4219,7 @@ void cGfx_7A10::EndFrame_impl()
     gfxBase->mQueuedVif2 = vif2;
     gfxBase->mQueuedGif1 = gif1;
     gfxBase->mQueuedGif2 = gif2;
-    *state = 2;
+    *state = cPS2GraphicsMan::kBuf_Queued;
     SignalSema(gfxBase->mQueueMutex);
     SignalSema(gfxBase->mKickSema);
     gfxBase->mBuildIndex = gfxBase->mBuildIndex == 0;
@@ -5973,38 +5974,37 @@ extern "C" int func_0037BC40(void* self, int w, int height, int fbPsm, int texPs
 INCLUDE_ASM("render/particle", func_0037BD38);
 #ifdef SKIP_ASM
 /**
- * Returns 1 when colour format @p psmA can be used with z format @p psmB, else 0.
+ * Tells whether colour format @p psmA (eGSPixelStorage) can be used with z format @p psmB.
  *
- * 32-bit, 24-bit and PSMCT16S colour (0, 1, 10) and PSMZ32/24/16S (48, 49, 58; written as the characters '0', '1', ':')
- * go with PSMZ32, PSMZ24 or PSMZ16S; PSMCT16 and PSMZ16 (2, 50 = '2') go only with PSMZ16. func_0037BD98 checks the
- * draw-buffer and z formats with it.
+ * 32-bit, 24-bit and PSMCT16S colour (0, 1, 10) and PSMZ32/24/16S (48, 49, 58) go with PSMZ32, PSMZ24 or PSMZ16S;
+ * PSMCT16 and PSMZ16 (2, 50) go only with PSMZ16. func_0037BD98 checks the draw-buffer and z formats with it.
  *
  * @param psmA  the colour (or z) format
  * @param psmB  the z format
- * @return 1 when the pair is allowed, 0 otherwise
+ * @return true when the pair is allowed
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_0037BD38(void* self, int psmA, int psmB)
+extern "C" bool func_0037BD38(void* self, int psmA, int psmB)
 {
     switch (psmA) {
-    case 0:
-    case 1:
-    case 10:
-    case '0':
-    case '1':
-    case ':':
-        if (psmB == '0' || psmB == '1' || psmB == ':') {
-            return 1;
+    case kGS_PSMCT32:
+    case kGS_PSMCT24:
+    case kGS_PSMCT16S:
+    case kGS_PSMZ32:
+    case kGS_PSMZ24:
+    case kGS_PSMZ16S:
+        if (psmB == kGS_PSMZ32 || psmB == kGS_PSMZ24 || psmB == kGS_PSMZ16S) {
+            return true;
         }
         break;
-    case 2:
-    case '2':
-        if (psmB == '2') {
-            return 1;
+    case kGS_PSMCT16:
+    case kGS_PSMZ16:
+        if (psmB == kGS_PSMZ16) {
+            return true;
         }
         break;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6024,14 +6024,15 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * Sets a GS display mode: checks the formats, stores the display and frame buffer settings, lays out VRAM again and
  * resets the GS.
  *
- * Returns 0 at once when func_0037BD38 rejects @p psm2 with @p zpsm. Otherwise stores @p displayWidth x @p displayHeight as the display size
- * (unk_5A54, unk_5A58), @p w x @p bufferHeight as the frame buffer size (mFBWidth, mFBHeight), @p psm as the display format
- * (unk_5A38), @p psm2 as mCurrentFBFormat, @p zpsm as mCurrentZBFormat, @p interlaceMode and @p fieldMode in unk_5A44 and unk_5A46, 2 in
- * unk_5A48 (the output mode) and @p flag in unk_5A4C; clears mCurrentFrameCount and the vertical magnification
- * (unk_5A60), and sets the horizontal one (unk_5A64) from the display width: 256 -> 9, 320 -> 7, 384 -> 6, 512 -> 4,
- * 640 -> 3 (other widths leave it unchanged). It computes the buffer widths in 64-pixel units (mFrameBufferWidth,
- * unk_5A5C), the page counts of the display, draw and z buffers (unk_5A68, unk_5A6C, unk_5A70: pages of 64 x 32 pixels
- * for 32/24-bit formats, 64 x 64 for 16-bit ones) and the dither flag unk_59D0 (1 for a 16-bit display format).
+ * Returns false at once when func_0037BD38 rejects @p psm2 with @p zpsm. Otherwise stores @p displayWidth x @p
+ * displayHeight as the display size (unk_5A54, unk_5A58), @p w x @p bufferHeight as the frame buffer size (mFBWidth,
+ * mFBHeight), @p psm as the display format (unk_5A38), @p psm2 as mCurrentFBFormat, @p zpsm as mCurrentZBFormat, @p
+ * interlaceMode and @p fieldMode in unk_5A44 and unk_5A46, 2 in unk_5A48 (the output mode) and @p flag in unk_5A4C;
+ * clears mCurrentFrameCount and the vertical magnification (unk_5A60), and sets the horizontal one (unk_5A64) from the
+ * display width: 256 -> 9, 320 -> 7, 384 -> 6, 512 -> 4, 640 -> 3 (other widths leave it unchanged). It computes the
+ * buffer widths in 64-pixel units (mFrameBufferWidth, unk_5A5C), the page counts of the display, draw and z buffers
+ * (unk_5A68, unk_5A6C, unk_5A70: pages of 64 x 32 pixels for 32/24-bit formats, 64 x 64 for 16-bit ones) and the dither
+ * flag unk_59D0 (1 for a 16-bit display format).
  *
  * Then it empties the texture manager's VRAM heaps (func_00367078), allocates the draw, display and z buffers in that
  * order (func_003673D8; their pages go to unk_5A78, unk_5A7C and mCurrentZBufferPage) and sets up the texture manager's
@@ -6052,13 +6053,14 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * @param interlaceMode  interlace setting (unk_5A44), passed on to sceGsResetGraph
  * @param fieldMode  field/frame setting (unk_5A46), passed on to sceGsResetGraph
  * @param flag  nonzero for output mode 80 (0x50) instead of 2 and func_003E6690(3) instead of 1; kept in unk_5A4C
- * @return 1 when the mode was set, 0 when the draw and z formats do not go together
+ * @return true when the mode was set, false when the draw and z formats do not go together
  */
-extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight, unsigned int w, unsigned int bufferHeight,
-                             unsigned int psm, unsigned int psm2, unsigned int zpsm, short resetMode, short interlaceMode, short fieldMode, int flag)
+extern "C" bool func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight,
+                              unsigned int w, unsigned int bufferHeight, unsigned int psm, unsigned int psm2,
+                              unsigned int zpsm, short resetMode, short interlaceMode, short fieldMode, int flag)
 {
     if (!func_0037BD38((self), psm2, zpsm))
-        return 0;
+        return false;
 
     self->unk_5A58 = (int)displayHeight;
     self->mFBWidth = (int)w;
@@ -6075,16 +6077,16 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
     self->unk_5A60 = 0;
 
     switch (displayWidth) {
-    case 0x100:
+    case 256:
         self->unk_5A64 = 9;
         break;
     case 320:
         self->unk_5A64 = 7;
         break;
-    case 0x180:
+    case 384:
         self->unk_5A64 = 6;
         break;
-    case 0x200:
+    case 512:
         self->unk_5A64 = 4;
         break;
     case 640:
@@ -6096,44 +6098,44 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
     self->unk_5A5C = (int)(((unsigned int)self->unk_5A54 + 0x3F) >> 6);
 
     switch ((unsigned int)self->unk_5A38) {
-    case 0:
-    case 1:
-    case 0x30:
-    case 49:
+    case kGS_PSMCT32:
+    case kGS_PSMCT24:
+    case kGS_PSMZ32:
+    case kGS_PSMZ24:
         self->unk_59D0 = 0;
         self->unk_5A68 = (unsigned int)self->unk_5A5C * (((unsigned int)self->unk_5A58 + 0x1F) >> 5);
         break;
-    case 2:
-    case 10:
-    case 50:
-    case 58:
+    case kGS_PSMCT16:
+    case kGS_PSMCT16S:
+    case kGS_PSMZ16:
+    case kGS_PSMZ16S:
         self->unk_59D0 = 1;
         self->unk_5A68 = (unsigned int)self->unk_5A5C * (((unsigned int)self->unk_5A58 + 0x3F) >> 6);
         break;
     }
 
     switch ((unsigned int)self->mCurrentFBFormat) {
-    case 0:
-    case 1:
-    case 0x30:
-    case 49:
+    case kGS_PSMCT32:
+    case kGS_PSMCT24:
+    case kGS_PSMZ32:
+    case kGS_PSMZ24:
         self->unk_5A6C = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
         break;
-    case 2:
-    case 10:
-    case 50:
-    case 58:
+    case kGS_PSMCT16:
+    case kGS_PSMCT16S:
+    case kGS_PSMZ16:
+    case kGS_PSMZ16S:
         self->unk_5A6C = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
         break;
     }
 
     switch ((unsigned int)self->mCurrentZBFormat) {
-    case 0x30:
-    case 49:
+    case kGS_PSMZ32:
+    case kGS_PSMZ24:
         self->unk_5A70 = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
         break;
-    case 50:
-    case 58:
+    case kGS_PSMZ16:
+    case kGS_PSMZ16S:
         self->unk_5A70 = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
         break;
     }
@@ -6145,9 +6147,9 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
     self->mCurrentZBufferPage = func_003673D8(gs, self->unk_5A70 << 13);
 
     // PORT: reads psm and psm2 as one 64-bit word.
-    if (*(long*)(unsigned int*)&self->unk_5A38 == 0x100000001L)
+    if (*(long*)(unsigned int*)&self->unk_5A38 == ((long)kGS_PSMCT24 << 32 | kGS_PSMCT24))
         func_00367340((void*)(int)self->mTexMan, self->unk_5A78 << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
-    else if ((unsigned int)self->unk_5A38 == 1)
+    else if ((unsigned int)self->unk_5A38 == kGS_PSMCT24)
         func_00367340((void*)(int)self->mTexMan, self->unk_5A7C << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
     else
         func_00367340((void*)(int)self->mTexMan, self->mCurrentZBufferPage << 11, (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
@@ -6161,7 +6163,7 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
     sceGsResetGraph(resetMode, self->unk_5A44, flag ? 80 : self->unk_5A48, self->unk_5A46);
     func_003E6690(flag ? 3 : 1);
     func_00382AF0(self, 0, 1);
-    return 1;
+    return true;
 }
 #endif
 
@@ -6462,9 +6464,9 @@ static inline int clampW_C8C0(int v, int lo, int hi)
  *
  * The record is On Tour's SHAPE: type is the pixel format and next the offset to the next record (the palette);
  * flags bit 0x1000 means the texels sit at dataoffset (else right after the 16-byte header), bit 0x2000 picks the
- * swizzled format, and its top four bits are the mipmap count. Type 1 gives texel
- * format 11 (12 when swizzled) and type 2 gives 9 (10), both with CLUT format 1 and the palette record's texels; type 3
- * gives 2 and type 5 gives 0, without a CLUT. A palettised record whose offset is 0 would make the palette record null
+ * swizzled format, and its top four bits are the mipmap count. Type kSHAPE_PAL4 gives texel format 11 (12 when
+ * swizzled) and kSHAPE_PAL8 gives 9 (10), both with CLUT format 1 and the palette record's texels; kSHAPE_RGB15 gives 2
+ * and kSHAPE_RGB32 gives 0, without a CLUT. A palettised record whose offset is 0 would make the palette record null
  * and be dereferenced.
  *
  * For a mipmapped record with a non-zero centerx it then computes k = -16 * log2(240 / (centerx / 16384)), clamped to
@@ -6488,7 +6490,7 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, const SHAPEIMAG
     // ORIGINAL-PTR: a SHAPE file blob: the palette shape starts next bytes after this one, and the pixels start
     // dataoffset bytes into a shape (flag 0x1000) or right after its 16-byte header
     switch (type) {
-    case 1: {
+    case kSHAPE_PAL4: {
         const SHAPEIMAGE* base = src->next ? (const SHAPEIMAGE*)((char*)src + src->next) : 0;
         fmt = 11;
         if (src->flags & 0x2000) fmt = 0xC;
@@ -6499,7 +6501,7 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, const SHAPEIMAG
             pal = (char*)base + 0x10;
         break;
     }
-    case 2: {
+    case kSHAPE_PAL8: {
         const SHAPEIMAGE* base = src->next ? (const SHAPEIMAGE*)((char*)src + src->next) : 0;
         fmt = 9;
         if (src->flags & 0x2000) fmt = 10;
@@ -6510,10 +6512,10 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, const SHAPEIMAG
             pal = (char*)base + 0x10;
         break;
     }
-    case 3:
+    case kSHAPE_RGB15:
         fmt = 2;
         break;
-    case 5:
+    case kSHAPE_RGB32:
         fmt = 0;
         break;
     default:
@@ -6687,17 +6689,17 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveScreenGrabTexture);
 extern "C" void func_00367B60(void* mgr, int id);
 
 /**
- * Releases a screen-grab texture: when the handle's texture id is not -1, frees it in the texture manager
- * (func_00367B60), removes it (virtual slot 50) and sets the id to -1.
+ * Releases a screen-grab texture: when the handle's texture id is not kNoScreenGrab (-1), frees it in the texture
+ * manager (func_00367B60), removes it (virtual slot 50) and sets the id to kNoScreenGrab.
  *
  * @param item  the tScreenGrabHandle to release
  */
 extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, tScreenGrabHandle* item)
 {
-    if (item->mTextureId != -1) {
+    if (item->mTextureId != tScreenGrabHandle::kNoScreenGrab) {
         func_00367B60(self->mTexMan, item->mTextureId);
         self->RemoveTexture(item->mTextureId);
-        item->mTextureId = -1;
+        item->mTextureId = tScreenGrabHandle::kNoScreenGrab;
     }
 }
 #endif
@@ -6890,11 +6892,11 @@ extern "C" void* MEM_free(void* p);
 /**
  * Replaces the texels of texture @p textureId with an EA shape record's, unpacking a compressed record first.
  *
- * Formats as in cPS2GraphicsMan_AddTexture: type 1 gives texel format 11 (12 swizzled), type 2 gives 9 (10), both with
- * CLUT format 1 and the next record's palette; type 3 gives 2 and type 5 gives 0. When the bytes after the header start
- * 0x10 0xFB (a packed stream whose 24-bit size follows) it allocates size + 0x10 bytes (label str_unpack), copies the
- * header, unpacks the data with unpack, clears bit 7 of the type byte and uses the copy, freeing it with MEM_free
- * afterwards.
+ * Formats as in cPS2GraphicsMan_AddTexture: kSHAPE_PAL4 gives texel format 11 (12 swizzled), kSHAPE_PAL8 gives 9 (10),
+ * both with CLUT format 1 and the next record's palette; kSHAPE_RGB15 gives 2 and kSHAPE_RGB32 gives 0. When the bytes
+ * after the header start kREFPACK_TYPE kREFPACK_MAGIC (0x10 0xFB: a packed stream whose 24-bit size follows) it
+ * allocates size + 0x10 bytes (label str_unpack), copies the header, unpacks the data with unpack, clears bit 7 of the
+ * type byte and uses the copy, freeing it with MEM_free afterwards.
  *
  * Calls vtable slot 49 (cPS2GraphicsMan_SetNewTextureData1) with (@p textureId, texels, width, height, mipmap count, texel format, CLUT format,
  * palette, @p copyMem). Slot 48 of cPS2GraphicsMan_vtbl.
@@ -6916,7 +6918,7 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
     // dataoffset bytes into a shape (flag 0x1000) or right after its 16-byte header, and a packed shape's stream
     // header is read byte by byte
     switch (type) {
-    case 1: {
+    case kSHAPE_PAL4: {
         mode = 11;
         int w = obj->next;
         flagB = 1;
@@ -6929,7 +6931,7 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
             extra = sub + 0x10;
         break;
     }
-    case 2: {
+    case kSHAPE_PAL8: {
         mode = 9;
         int w = obj->next;
         flagB = 1;
@@ -6942,10 +6944,10 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
             extra = sub + 0x10;
         break;
     }
-    case 3:
+    case kSHAPE_RGB15:
         mode = 2;
         break;
-    case 5:
+    case kSHAPE_RGB32:
         mode = 0;
         break;
     }
@@ -6955,8 +6957,8 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
     unsigned int fC;
     char* data;
     unsigned char* ob = (unsigned char*)obj;
-    if (ob[0x10] == 0x10 && ob[0x11] == 251) {
-        unsigned int size = (ob[0x12] << 16 | ob[0x13] << 8 | ob[0x14]) + 0x10;
+    if (ob[16] == kREFPACK_TYPE && ob[17] == kREFPACK_MAGIC) {
+        unsigned int size = (ob[18] << 16 | ob[19] << 8 | ob[20]) + 0x10;
         allocated = 1;
         unpackedCopy = (char*)operator_new_D0B0(size, str_unpack, 0x80000100, 0);
         MEM_move(unpackedCopy, obj, 0x10);
@@ -6977,7 +6979,7 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
             data = afterHeader;
         fC = obj->flags;
     }
-    sVE_D0B0* slotEntry = &((sVE_D0B0*)VPTR_OF(cGraphicsMan, self))[0x188 / 8];
+    sVE_D0B0* slotEntry = &((sVE_D0B0*)VPTR_OF(cGraphicsMan, self))[49];
     slotEntry->fn(vthis(self, *slotEntry), textureId, data, obj->width, obj->height, fC >> 28, mode, flagB, extra,
         copyMem);
     if (allocated) {
@@ -7143,13 +7145,13 @@ struct sPtGfx_D668 {
  *
  * @param pp  the packet cursor
  * @param frameMask  the FBMSK bits (1 = do not write that bit)
- * @param mode  0 for context 1, 1 for context 2
+ * @param mode  kGS_Context1 (0) or kGS_Context2 (1)
  */
 extern "C" void func_0037D668(cPS2GraphicsMan* self, ulong** pp, int frameMask, int mode)
 {
     ulong* packet = *pp;
     switch (mode) {
-    case 0:
+    case kGS_Context1:
         packet[1] = ((ulong)0x50000001 << 32) | 0x11000000;
         packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
@@ -7157,7 +7159,7 @@ extern "C" void func_0037D668(cPS2GraphicsMan* self, ulong** pp, int frameMask, 
         packet[4] = (ulong)(unsigned int)self->mCurrentFrameBufferPage | ((ulong)(unsigned int)self->mFrameBufferWidth << 16) | ((ulong)(unsigned int)self->mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
         packet[5] = 76;
         break;
-    case 1:
+    case kGS_Context2:
         packet[1] = ((ulong)0x50000002 << 32) | 0x11000000;
         packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
@@ -7581,7 +7583,8 @@ extern char D_570[];
  * @param minp  the box's minimum corner
  * @param maxp  the box's maximum corner
  * @param mat  the box's transform
- * @return 1 when the microprogram's second result is set, else 2 when its first is set, else 0
+ * @return GM_CLIPCODE_OUTSIDE when the microprogram's second result is set, else GM_CLIPCODE_CROSSING when its first
+ *         is set, else GM_CLIPCODE_INSIDE
  */
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
 // version of the microprogram.
@@ -7605,12 +7608,12 @@ extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, v
         : "=r"(vi1Result), "=r"(vi2Result)
         : "r"(minp), "r"(maxp), "r"(mat), "r"((unsigned int)D_570 >> 3));
     if (vi2Result != 0) {
-        return 1;
+        return GM_CLIPCODE_OUTSIDE;
     }
     if (vi1Result != 0) {
-        return 2;
+        return GM_CLIPCODE_CROSSING;
     }
-    return 0;
+    return GM_CLIPCODE_INSIDE;
 }
 #endif
 
@@ -7718,11 +7721,11 @@ struct sPartSys_DF88 {
 };
 
 /**
- * Returns a bit mask of the projective textures whose clip volume a box is not classified 1 against.
+ * Returns a bit mask of the projective textures whose clip volume a box is not outside of (GM_CLIPCODE_OUTSIDE).
  *
- * For each of the mNumShdw entries of mProjTextures it calls virtual slot 93 (cPS2GraphicsMan_ClipBoundBox)
- * with @p boxMin, @p boxMax and the entry's clip matrix (tProjTexInfo +0x10) and sets bit i when the result is not 1.
- * func_0038CA08 in render/bezierman calls it.
+ * For each of the mNumShdw entries of mProjTextures it calls virtual slot 93 (cPS2GraphicsMan_ClipBoundBox) with @p
+ * boxMin, @p boxMax and the entry's clip matrix (tProjTexInfo +0x10) and sets bit i when the result is not
+ * GM_CLIPCODE_OUTSIDE. func_0038CA08 in render/bezierman calls it.
  *
  * @param boxMin  the box's minimum corner
  * @param boxMax  the box's maximum corner
@@ -7733,7 +7736,7 @@ extern "C" unsigned int cPS2GraphicsMan_CheckProjectiveTexturesHits(sPartSys_DF8
     unsigned int mask = 0;
     for (unsigned int i = 0; i < self->count; i++) {
         sPartVEntry_DF88* vtEntry = &self->vt[93];
-        if (vtEntry->fn(vthis(self, *vtEntry), boxMin, boxMax, &self->items[i]) != 1) {
+        if (vtEntry->fn(vthis(self, *vtEntry), boxMin, boxMax, &self->items[i]) != GM_CLIPCODE_OUTSIDE) {
             mask |= 1 << i;
         }
     }
@@ -8820,7 +8823,7 @@ struct sCtx1AD0 {
     int w[5];
 };
 
-extern "C" int func_00383A10(void* self, sVtx1AD0* v, sPt1AD0* p, int* codes);
+extern "C" bool func_00383A10(void* self, sVtx1AD0* v, sPt1AD0* p, int* codes);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
 static inline sPt1AD0 MulMat1AD0(const sMat1AD0* m, const sPt1AD0& v)
@@ -9253,7 +9256,7 @@ extern "C" void func_003825F8(cPS2GraphicsMan* arg);
  */
 extern "C" int func_003825C0(int cause, void* graphicsMan)
 {
-    if (cause != 2) {
+    if (cause != kINTC_VBLANK_S) {
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
@@ -9279,9 +9282,9 @@ extern "C" void iSignalSema(int sema);
 extern "C" void func_003825F8(cPS2GraphicsMan* self)
 {
     int vblanks = ++self->mVblankCounter;
-    if (self->mKickState == 4) {
+    if (self->mKickState == cPS2GraphicsMan::kKick_Phase2Done) {
         if (vblanks >= self->mMinFlipWait) {
-            self->mKickState = 5;
+            self->mKickState = cPS2GraphicsMan::kKick_FlipDue;
             self->mVblankCounter = 0;
             iSignalSema(self->mKickSema);
         }
@@ -9307,7 +9310,7 @@ extern "C" void func_00382688(cPS2GraphicsMan* arg);
  */
 extern "C" int func_00382650(int cause, void* graphicsMan)
 {
-    if (cause != 1) {
+    if (cause != kDMAC_VIF1) {
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
@@ -9332,11 +9335,11 @@ extern "C" void iSignalSema(int sema);
  */
 extern "C" void func_00382688(cPS2GraphicsMan* self)
 {
-    if (self->mKickState == 1) {
-        self->mKickState = 2;
+    if (self->mKickState == cPS2GraphicsMan::kKick_Phase1Sent) {
+        self->mKickState = cPS2GraphicsMan::kKick_Phase1Done;
         iSignalSema(self->mKickSema);
-    } else if (self->mKickState == 3) {
-        self->mKickState = 4;
+    } else if (self->mKickState == cPS2GraphicsMan::kKick_Phase2Sent) {
+        self->mKickState = cPS2GraphicsMan::kKick_Phase2Done;
     }
 }
 #endif
@@ -9345,24 +9348,24 @@ extern "C" void func_00382688(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/particle", func_003826E0);
 #ifdef SKIP_ASM
 /**
- * Returns 1 when the packet buffer being built (mBufState[mBuildIndex]) is free or already being built, marking a free
- * one as being built (0 -> 1); returns 0 while it is queued or being sent.
+ * Tells whether the packet buffer being built (mBufState[mBuildIndex]) is free or already being built, marking a free
+ * one as being built (kBuf_Free -> kBuf_Building); false while it is queued or being sent.
  *
  * cPS2GraphicsMan_IsRenderReady__FPv returns its result.
  *
- * @return 1 when rendering into the buffer may start, else 0
+ * @return true when rendering into the buffer may start
  */
-extern "C" int func_003826E0(cPS2GraphicsMan* self)
+extern "C" bool func_003826E0(cPS2GraphicsMan* self)
 {
     volatile int* arr = (volatile int*)(&self->mBufState[0]);
     volatile int* bufState = &arr[self->mBuildIndex];
-    if (*bufState == 0 || *bufState == 1) {
-        if (*bufState == 0) {
-            *bufState = 1;
+    if (*bufState == cPS2GraphicsMan::kBuf_Free || *bufState == cPS2GraphicsMan::kBuf_Building) {
+        if (*bufState == cPS2GraphicsMan::kBuf_Free) {
+            *bufState = cPS2GraphicsMan::kBuf_Building;
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -9370,15 +9373,15 @@ extern "C" int func_003826E0(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/particle", func_00382730);
 #ifdef SKIP_ASM
 /**
- * Returns 1 when no frame is being sent (mKickState is 0), else 0.
+ * Tells whether no frame is being sent (mKickState is kKick_Idle).
  *
  * cPS2GraphicsMan_IsRenderIdle__FPv returns its result.
  *
- * @return 1 when the DMA kick state is idle
+ * @return true when the DMA kick state is idle
  */
-extern "C" int func_00382730(cPS2GraphicsMan* self)
+extern "C" bool func_00382730(cPS2GraphicsMan* self)
 {
-    return (volatile unsigned int)self->mKickState == 0;
+    return (volatile unsigned int)self->mKickState == cPS2GraphicsMan::kKick_Idle;
 }
 #endif
 
@@ -9437,23 +9440,24 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
     for (;;) {
         WaitSema(self->mKickSema);
         WaitSema(self->mQueueMutex);
-        if (self->mKickState == 5) {
-            self->mBufState[self->mInFlightIndex] = 0;
-            self->mKickState = 0;
+        if (self->mKickState == cPS2GraphicsMan::kKick_FlipDue) {
+            self->mBufState[self->mInFlightIndex] = cPS2GraphicsMan::kBuf_Free;
+            self->mKickState = cPS2GraphicsMan::kKick_Idle;
             func_00382AF0((cPS2GraphicsMan*)self, 1, 0);
         }
-        if (self->mKickState == 0 && self->mBufState[self->mQueuedIndex] == 2) {
+        if (self->mKickState == cPS2GraphicsMan::kKick_Idle
+            && self->mBufState[self->mQueuedIndex] == cPS2GraphicsMan::kBuf_Queued) {
             while (*(volatile int*)0x10009000 & 0x100) {
             }
             while (*(volatile int*)0x1000A000 & 0x100) {
             }
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
-            while ((*(volatile long*)0x12001000 & 0xC000) != 0x4000) {
+            while ((*(volatile long*)0x12001000 & kGS_CSR_FIFO_MASK) != kGS_CSR_FIFO_EMPTY) {
             }
             self->mInFlightIndex = self->mQueuedIndex;
-            self->mBufState[self->mInFlightIndex] = 3;
-            self->mKickState = 1;
+            self->mBufState[self->mInFlightIndex] = cPS2GraphicsMan::kBuf_Sending;
+            self->mKickState = cPS2GraphicsMan::kKick_Phase1Sent;
             self->mInFlightVif2 = self->mQueuedVif2;
             self->mInFlightGif2 = self->mQueuedGif2;
             FlushCache(0);
@@ -9463,13 +9467,13 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
             *(volatile int*)0x10003010 = 4;
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
-            while ((*(volatile long*)0x12001000 & 0xC000) != 0x4000) {
+            while ((*(volatile long*)0x12001000 & kGS_CSR_FIFO_MASK) != kGS_CSR_FIFO_EMPTY) {
             }
             *(volatile int*)0x1000A030 = self->mQueuedGif1;
             *(volatile int*)0x1000A000 = 261;
             *(volatile int*)0x10009030 = self->mQueuedVif1;
             *(volatile int*)0x10009000 = 389;
-        } else if (self->mKickState == 2) {
+        } else if (self->mKickState == cPS2GraphicsMan::kKick_Phase1Done) {
             if (self->mPhase2Callback) {
                 self->mPhase2Callback(self->mPhase2CallbackArg);
             }
@@ -9477,11 +9481,11 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
             *(volatile int*)0x10003010 = 4;
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
-            while ((*(volatile long*)0x12001000 & 0xC000) != 0x4000) {
+            while ((*(volatile long*)0x12001000 & kGS_CSR_FIFO_MASK) != kGS_CSR_FIFO_EMPTY) {
             }
             *(volatile int*)0x1000A030 = self->mInFlightGif2;
             *(volatile int*)0x1000A000 = 261;
-            self->mKickState = 3;
+            self->mKickState = cPS2GraphicsMan::kKick_Phase2Sent;
             *(volatile int*)0x10009030 = self->mInFlightVif2;
             *(volatile int*)0x10009000 = 389;
         }
@@ -9568,7 +9572,7 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
     }
     while (*(volatile int*)0x10003C00 & 0x1F000003) { // VIF1_STAT
     }
-    while ((*(volatile ulong*)0x12001000 & 0xC000) != 0x4000) { // GS CSR.FIFO empty
+    while ((*(volatile ulong*)0x12001000 & kGS_CSR_FIFO_MASK) != kGS_CSR_FIFO_EMPTY) { // GS CSR.FIFO empty
     }
     if (waitVsync != 0) {
         *(volatile ulong*)0x12001000 = 8; // CSR.VSINT
@@ -9600,7 +9604,7 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
     } else {
         int fieldMul = 1;
         if (vself->unk_5A44 != 0) {
-            fieldMul = vself->unk_5A46 == 1 ? 2 : 1;
+            fieldMul = vself->unk_5A46 == kGS_FFMD_FRAME ? 2 : 1;
         }
         *(volatile ulong*)0x12000080 = (ulong)(vself->m_screenOffset[0] * 8.0f + 5.0f + 636.0f)
                                      | ((ulong)(50.0f - vself->m_screenOffset[1] * 2.0f) << 12)
@@ -9644,7 +9648,7 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
         gsPacket[22] = 0;
         gsPacket[23] = 0x3F; // TEXFLUSH
         {
-            int abe = (unsigned int)vself->unk_59F8 != 0x80;
+            int abe = (unsigned int)vself->unk_59F8 != kGSAlphaOne;
             // GIFtag: 1 loop, REGLIST {PRIM, RGBAQ}
             gsPacket[24] = ((ulong)2 << 60) | ((ulong)1 << 58) | 1;
             gsPacket[25] = 0x10;
@@ -9858,7 +9862,7 @@ extern "C" void func_00371F98(unsigned int tadr, int flags);
  * @param w  width in pixels
  * @param height  height in pixels
  * @param dbw  destination buffer width in pixels
- * @param psm  GS pixel format of the data
+ * @param psm  GS pixel format of the data (eGSPixelStorage)
  * @param dsax  destination x
  * @param dsay  destination y
  */
@@ -9870,20 +9874,20 @@ extern "C" void func_00383808(void* self, int src, int dbp, int w, int height, i
     int id = 3;
 
     switch (psm) {
-    case 0:
+    case kGS_PSMCT32:
         bpr = w << 2;
         break;
-    case 1:
+    case kGS_PSMCT24:
         bpr = w * 3;
         break;
-    case 2:
-    case 10:
+    case kGS_PSMCT16:
+    case kGS_PSMCT16S:
         bpr = w << 1;
         break;
-    case 19:
+    case kGS_PSMT8:
         bpr = w;
         break;
-    case 20:
+    case kGS_PSMT4:
         bpr = w >> 1;
         break;
     }
@@ -9936,24 +9940,25 @@ INCLUDE_ASM("render/particle", func_00383A10);
 
 
 
-extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* v, t4Vector* p, int* codes) __asm__("func_00383A10");
+extern "C" bool func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* v, t4Vector* p, int* codes)
+    __asm__("func_00383A10");
 
 /**
- * Clips the segment between two projected points to the guard band, moving the outside end(s) onto it, and returns 0
- * when nothing is left.
+ * Clips the segment between two projected points to the guard band, moving the outside end(s) onto it, and returns
+ * false when nothing is left.
  *
  * @p codes holds the two ends' clip codes from cPS2GraphicsMan_RenderLineStrip. For each plane crossed (far 0x20 and near 0x10 in w, then
  * y min 8 and max 4, then x min 2 and max 1, bounds from mClipMin / mClipMax) the end outside is moved to the crossing:
  * x, y, z and w of @p points are interpolated and s, t and the four colour ints of @p verts are interpolated with the
  * same fraction (for the w planes the fraction is corrected by the w ratio); that end's codes are recomputed, and it
- * returns 0 as soon as both ends are outside the same plane. cPS2GraphicsMan_RenderLineStrip calls it.
+ * returns false as soon as both ends are outside the same plane. cPS2GraphicsMan_RenderLineStrip calls it.
  *
  * @param verts  the two vertices (s, t, colour), updated in place
  * @param points  the two projected points, updated in place
  * @param codes  the two clip codes, updated in place
- * @return 1 when part of the segment is inside, 0 when it is all outside
+ * @return true when part of the segment is inside, false when it is all outside
  */
-extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vector* points, int* codes)
+extern "C" bool func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vector* points, int* codes)
 {
     int unionCodes = codes[0] | codes[1];
 
@@ -9980,7 +9985,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         if (points[k].x > self->mClipMax.x) codes[k] |= 1;
         if (points[k].y < self->mClipMin.y) codes[k] |= 8;
         if (points[k].y > self->mClipMax.y) codes[k] |= 4;
-        if (codes[0] & codes[1]) return 0;
+        if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 0x10) {
@@ -10006,7 +10011,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         if (points[k].x > self->mClipMax.x) codes[k] |= 1;
         if (points[k].y < self->mClipMin.y) codes[k] |= 8;
         if (points[k].y > self->mClipMax.y) codes[k] |= 4;
-        if (codes[0] & codes[1]) return 0;
+        if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 8) {
@@ -10028,7 +10033,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         codes[k] = 0;
         if (points[k].x < self->mClipMin.x) codes[k] |= 2;
         if (points[k].x > self->mClipMax.x) codes[k] |= 1;
-        if (codes[0] & codes[1]) return 0;
+        if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 4) {
@@ -10050,7 +10055,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         codes[k] = 0;
         if (points[k].x < self->mClipMin.x) codes[k] |= 2;
         if (points[k].x > self->mClipMax.x) codes[k] |= 1;
-        if (codes[0] & codes[1]) return 0;
+        if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 2) {
@@ -10091,7 +10096,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -13168,13 +13173,13 @@ extern "C" void func_00389CB8(t4Vector* out, void* sunp, float scale)
 INCLUDE_ASM("render/particle", func_0038A530);
 #ifdef SKIP_ASM
 /**
- * Tests whether @p point is inside a spot light's radius; if so returns 1 with the unit direction to the light, the
+ * Tests whether @p point is inside a spot light's radius; if so returns true with the unit direction to the light, the
  * distance, its inverse and the cosine against the light's direction.
  *
- * The light position is at +0x38 and the radius at +0x1C; returns 0 when the point is farther than the radius. When the
- * point is exactly at the light the direction stays zero and the distance and inverse are 1. @p planeD gets minus the
- * dot product of the direction with the light's direction (+0x2C), i.e. the cosine of the point's angle off the beam.
- * func_0038A6A8 calls it for type 1 lights.
+ * The light position is at +0x38 and the radius at +0x1C; returns false when the point is farther than the radius. When
+ * the point is exactly at the light the direction stays zero and the distance and inverse are 1. @p planeD gets minus
+ * the dot product of the direction with the light's direction (+0x2C), i.e. the cosine of the point's angle off the
+ * beam. func_0038A6A8 calls it for type 1 lights.
  *
  * @param point  the lit point
  * @param n  receives the unit direction from the point to the light (w = 1)
@@ -13182,9 +13187,9 @@ INCLUDE_ASM("render/particle", func_0038A530);
  * @param dist  receives the distance
  * @param inv  receives 1 / distance
  * @param planeD  receives the cosine against the light's direction
- * @return 1 when the point is within the radius, else 0
+ * @return true when the point is within the radius
  */
-extern "C" int func_0038A530(float* point, float* n, tLightRecord* forceSrc, float* dist, float* inv, float* planeD)
+extern "C" bool func_0038A530(float* point, float* n, tLightRecord* forceSrc, float* dist, float* inv, float* planeD)
 {
     float length;
     float k;
@@ -13194,7 +13199,7 @@ extern "C" int func_0038A530(float* point, float* n, tLightRecord* forceSrc, flo
     float dz = forceSrc->m_fvWorldPos[2] - point[2];
     float distSq = dx * dx + dy * dy + dz * dz;
     if (radius * radius < distSq) {
-        return 0;
+        return false;
     }
     if (distSq != 0.0f) {
         // PORT: sqrt.s (sqrtf without errno check)
@@ -13214,7 +13219,7 @@ extern "C" int func_0038A530(float* point, float* n, tLightRecord* forceSrc, flo
     n[1] = dy;
     n[2] = dz;
     n[3] = 1.0f;
-    return 1;
+    return true;
 }
 #endif
 
@@ -13222,20 +13227,20 @@ extern "C" int func_0038A530(float* point, float* n, tLightRecord* forceSrc, flo
 INCLUDE_ASM("render/particle", func_0038A618);
 #ifdef SKIP_ASM
 /**
- * Tests whether @p point is inside a point light's radius; if so returns 1 with the unit direction to the light, the
+ * Tests whether @p point is inside a point light's radius; if so returns true with the unit direction to the light, the
  * distance and its inverse.
  *
- * The light position is at +0x38 and the radius at +0x1C; returns 0 when the point is farther than the radius. Unlike
- * func_0038A530 there is no check for a zero distance before dividing. func_0038A6A8 calls it for type 2 lights.
+ * The light position is at +0x38 and the radius at +0x1C; returns false when the point is farther than the radius.
+ * Unlike func_0038A530 there is no check for a zero distance before dividing. func_0038A6A8 calls it for type 2 lights.
  *
  * @param point  the lit point
  * @param n  receives the unit direction from the point to the light (w = 1)
  * @param forceSrc  the light
  * @param dist  receives the distance
  * @param inv  receives 1 / distance
- * @return 1 when the point is within the radius, else 0
+ * @return true when the point is within the radius
  */
-extern "C" int func_0038A618(float* point, float* n, tLightRecord* forceSrc, float* dist, float* inv)
+extern "C" bool func_0038A618(float* point, float* n, tLightRecord* forceSrc, float* dist, float* inv)
 {
     float dx = forceSrc->m_fvWorldPos[0] - point[0];
     float dy = forceSrc->m_fvWorldPos[1] - point[1];
@@ -13243,7 +13248,7 @@ extern "C" int func_0038A618(float* point, float* n, tLightRecord* forceSrc, flo
     float dz = forceSrc->m_fvWorldPos[2] - point[2];
     float distSq = dx * dx + dy * dy + dz * dz;
     if (radius * radius < distSq) {
-        return 0;
+        return false;
     }
     float length;
     // PORT: sqrt.s (sqrtf without errno check)
@@ -13258,7 +13263,7 @@ extern "C" int func_0038A618(float* point, float* n, tLightRecord* forceSrc, flo
     n[0] = dx;
     n[1] = dy;
     n[2] = dz;
-    return 1;
+    return true;
 }
 #endif
 
@@ -13336,13 +13341,14 @@ static inline float clamp_38A6A8(float x, float hi)
 /**
  * Adds one world light's contribution at @p point to irradiance set @p self.
  *
- * Type (+0x10) 0 adds nothing. Type 1 (spot): func_0038A530 gives the direction, distance and beam cosine; nothing is
- * added outside the radius or when the cosine is below the inner limit (+0x60). The strength (+0x14) is shaped by the
- * falloff curve (+0x64: 1, 2 or 3 for (100 / distance) to that power once the distance passes 100), a fade from 3750 to
- * 5000 units for lights whose radius is at least 5000, and the beam term (the cosine to the power +0x65 above the outer
- * limit +0x5C, a linear ramp between the limits), then clamped to 0..5. Type 2 (point): func_0038A618, the same without
- * the beam term. The light's colour (+0x20, which the C calls dir) times that factor is added from the light's
- * direction with func_00389520. cWorldLightMan_IntersectLights1 and cRider_SetRiderLights call it.
+ * Type (+0x10, eNEWLightType) eNEWLight_Directional adds nothing. eNEWLight_Spot: func_0038A530 gives the direction,
+ * distance and beam cosine; nothing is added outside the radius or when the cosine is below the inner limit (+0x60).
+ * The strength (+0x14) is shaped by the falloff curve (+0x64: 1, 2 or 3 for (100 / distance) to that power once the
+ * distance passes 100), a fade from 3750 to 5000 units for lights whose radius is at least 5000, and the beam term (the
+ * cosine to the power +0x65 above the outer limit +0x5C, a linear ramp between the limits), then clamped to 0..5.
+ * eNEWLight_Point: func_0038A618, the same without the beam term. The light's colour (+0x20, which the C calls dir)
+ * times that factor is added from the light's direction with func_00389520. cWorldLightMan_IntersectLights1 and
+ * cRider_SetRiderLights call it.
  *
  * @param point  the lit point
  * @param forceSrc  the world light
@@ -13358,9 +13364,9 @@ extern "C" void func_0038A6A8(void* self, float* point, tLightRecord* forceSrc)
     float fade;
 
     switch (forceSrc->m_eLightType) {
-    case 0:
+    case eNEWLight_Directional:
         break;
-    case 1:
+    case eNEWLight_Spot:
         if (!func_0038A530(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv, &planeD))
             return;
         if (!(planeD >= forceSrc->unk_060))
@@ -13384,7 +13390,7 @@ extern "C" void func_0038A6A8(void* self, float* point, tLightRecord* forceSrc)
         }
         func_00389520(self, (float*)&n, &out);
         break;
-    case 2:
+    case eNEWLight_Point:
         if (!func_0038A618(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv))
             return;
         fade = fade_38A6A8(forceSrc, dist);

@@ -411,14 +411,14 @@ static inline void mulScaled_FED8(sInMat_FED8* dst, const sInMat_FED8* local, co
 /**
  * Builds the world matrix of one mesh of a placed instance, walking up the model's mesh hierarchy.
  *
- * If the instance has a node (+0xC) whose virtual slot 26 says it has animation matrices, mesh @p mesh's matrix
- * comes straight from its slot 29 (getAnimMat). Otherwise the base is the node's root transform (slot 24) or the
- * record's own matrix (+0x10). For mesh >= 0 the mesh's local matrix (model +0x80: parts +0x8, matrix +0xC) is
- * multiplied by each parent's (parent index +0x0, until -1), every translation row scaled by the instance scale
- * (+0x84), and finally by the base; mesh -1 gives the base itself.
+ * If the instance has a node (+0xC) whose virtual slot 26 says it has animation matrices, mesh @p mesh's matrix comes
+ * straight from its slot 29 (getAnimMat). Otherwise the base is the node's root transform (slot 24) or the record's own
+ * matrix (+0x10). For mesh >= 0 the mesh's local matrix (model +0x80: parts +0x8, matrix +0xC) is multiplied by each
+ * parent's (parent index +0x0, until tMeshHeirarchyRecord::kNoParent), every translation row scaled by the instance
+ * scale (+0x84), and finally by the base; mesh kNoParent gives the base itself.
  *
  * @param self  the instance record (static: On Tour inst)
- * @param mesh  the mesh index, or -1 for the instance's root
+ * @param mesh  the mesh index, or tMeshHeirarchyRecord::kNoParent for the instance's root
  * @param out   receives the matrix (On Tour mat)
  */
 // Builds the world matrix of mesh `mesh` by walking its parent chain.
@@ -428,7 +428,8 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
     sInModel_FED8* pModel = self->pModel;
     sInOther_FED8* instNode = self->other;
     if (instNode != 0) {
-        if (mesh != -1 && ((InBoolFn_FED8)instNode->vt[26].fn)(vthis(instNode, instNode->vt[26]))) {
+        if (mesh != tMeshHeirarchyRecord::kNoParent
+            && ((InBoolFn_FED8)instNode->vt[26].fn)(vthis(instNode, instNode->vt[26]))) {
             vu0CopyMat_FED8(out, ((InPartMatFn_FED8)self->other->vt[29].fn)(vthis(self->other, self->other->vt[29]), mesh));
             return;
         }
@@ -449,7 +450,7 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
             mulv_FED8(scaledPos, translation, scaleVec);
             out->r[3] = scaledPos;
         }
-        for (mesh = parts[mesh].parent; mesh != -1; mesh = parts[mesh].parent) {
+        for (mesh = parts[mesh].parent; mesh != tMeshHeirarchyRecord::kNoParent; mesh = parts[mesh].parent) {
             sInMat_FED8 chained;
             mulScaled_FED8(&chained, parts[mesh].mat, scaleVec, out);
             vu0CopyMat_FED8(out, &chained);
@@ -548,9 +549,9 @@ static inline void buildBone_0288(t4Matrix* d, const t4Matrix* parent, const t4M
  * Builds the matrix of every mesh of the instance's model from its parent's matrix and the mesh's local
  * matrix.
  *
- * For each mesh (model at record +0x80: count +0x4, 0x10-byte entries +0x8) the local matrix's translation is
- * scaled by the record's scale (+0x84), then combined with out[parent], or with @p parent for a mesh whose
- * parent index is -1. A parent mesh must therefore come before its children.
+ * For each mesh (model at record +0x80: count +0x4, 0x10-byte entries +0x8) the local matrix's translation is scaled by
+ * the record's scale (+0x84), then combined with out[parent], or with @p parent for a mesh whose parent index is
+ * tMeshHeirarchyRecord::kNoParent. A parent mesh must therefore come before its children.
  *
  * @param parent  root transform for meshes without a parent (On Tour root)
  * @param out     receives one matrix per mesh (On Tour animMats)
@@ -568,7 +569,7 @@ extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, t4Matrix* parent
     scale.w = 1.0f;
     for (int i = 0; i < sk->m_iNumMeshes; i++, bone++) {
         t4Matrix boneMat;
-        if (bone->m_iParentID != -1) {
+        if (bone->m_iParentID != tMeshHeirarchyRecord::kNoParent) {
             buildBone_0288(&boneMat, &out[bone->m_iParentID], ((t4Matrix*)bone->m_pMeshMatrix), scale);
             vu0CopyMat_0288(&out[i], &boneMat);
         } else {
@@ -683,9 +684,9 @@ INCLUDE_ASM("object/instancenode", hasAnimationChannels);
  * Walks the model's mesh list (self +0x80: count +0x4, 16-byte entries at +0x8) and checks each entry's animated word
  * (+0x8).
  *
- * @return 1 if at least one mesh is animated, else 0
+ * @return true if at least one mesh is animated
  */
-extern "C" int hasAnimationChannels(tInstanceRecord* self)
+extern "C" bool hasAnimationChannels(tInstanceRecord* self)
 {
     tModelRecord* list = self->m_Model;
     int i;
@@ -693,10 +694,10 @@ extern "C" int hasAnimationChannels(tInstanceRecord* self)
     tMeshHeirarchyRecord* meshEntry = (list->m_MeshHeirarchy);
     for (i = 0; i < count; i++, meshEntry++) {
         if (((int)meshEntry->m_MeshAnim) != 0) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

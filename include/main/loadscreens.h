@@ -24,7 +24,7 @@ struct cInitLoadScreen {
 
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cInitLoadScreen_update");
-    int loseFocus() __asm__("cInitLoadScreen_loseFocus");
+    bool loseFocus() __asm__("cInitLoadScreen_loseFocus");
     void activateProgressiveMode() __asm__("cInitLoadScreen_activateProgressiveMode");
 };
 
@@ -51,7 +51,7 @@ struct cPreStartScreen {
 
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cPreStartScreen_update");
-    int loseFocus() __asm__("cPreStartScreen_loseFocus");
+    bool loseFocus() __asm__("cPreStartScreen_loseFocus");
 };
 
 CHECK_OFFSET(cPreStartScreen, nextscreen, 0x08);
@@ -62,7 +62,7 @@ struct cPreGameLoadScreen {
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
 
     // Methods bound to their retail symbols by asm labels.
-    int loseFocus() __asm__("cPreGameLoadScreen_loseFocus");
+    bool loseFocus() __asm__("cPreGameLoadScreen_loseFocus");
     void update() __asm__("cPreGameLoadScreen_update");
 };
 
@@ -74,7 +74,7 @@ struct cPreFELoadScreen {
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
 
     // Methods bound to their retail symbols by asm labels.
-    int loseFocus() __asm__("cPreFELoadScreen_loseFocus");
+    bool loseFocus() __asm__("cPreFELoadScreen_loseFocus");
     void update() __asm__("cPreFELoadScreen_update");
 };
 
@@ -90,13 +90,18 @@ struct cStartScreen {
     int SplashTexID;                // 0x10 [O]
     int DisplayTicks;               // 0x14 [O]; [U] gainFocus, update
     int meStartScreen_type;         // 0x18 [O] eStartScreenType; [R] ctor; [U] load
+    // [O] On Tour's enum cStartScreen::eStartScreenType, names and values; [U] cStartScreen_load pushes the memory card
+    // state for eStartScreen_Legal and the progressive-scan state for eStartScreen_Progressive.
+    enum eStartScreenType {
+        eStartScreen_Legal = 0, eStartScreen_LoadCtrl = 1, eStartScreen_Progressive = 2, eStartScreen_NUMS = 3
+    };
 
     // Methods bound to their retail symbols by asm labels.
     void load() __asm__("cStartScreen_load");
     void gainFocus() __asm__("cStartScreen_gainFocus");
     void update() __asm__("cStartScreen_update");
     void purge() __asm__("cStartScreen_purge");
-    int render() __asm__("cStartScreen_render");
+    bool render() __asm__("cStartScreen_render");
 };
 
 CHECK_OFFSET(cStartScreen, mpUI, 0x0C);
@@ -116,7 +121,7 @@ struct cGameLoadScreen {
     void load() __asm__("cGameLoadScreen_load");
     void loadTexture() __asm__("cGameLoadScreen_loadTexture");
     void purge() __asm__("cGameLoadScreen_purge");
-    int render() __asm__("cGameLoadScreen_render");
+    bool render() __asm__("cGameLoadScreen_render");
     void update() __asm__("cGameLoadScreen_update");
 };
 

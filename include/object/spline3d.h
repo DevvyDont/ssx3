@@ -27,7 +27,7 @@ struct cSpline {
     // Methods bound to their retail symbols by asm labels.
     void init(unsigned int id) __asm__("cSpline_init");
     void getPos(float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc) __asm__("cSpline_getPos");
-    int isVisible() __asm__("cSpline_isVisible");
+    bool isVisible() __asm__("cSpline_isVisible");
     void draw(int lineColour) __asm__("cSpline_draw");
     float calcLength() __asm__("cSpline_calcLength__FP7cSpline");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cSpline_writeToReplayFrame");

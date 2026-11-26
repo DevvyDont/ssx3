@@ -339,6 +339,10 @@ CHECK_SIZE(LobbyMenu, 0x318);
 struct LobbyMan;
 
 struct RoomMenu {
+    // Item IDs other than the occupant rows' 0.. (names ours): [U] RoomMenu_RoomMenu gives the "Chat" item kItem_Chat,
+    // RoomMenu_updateusers gives the "No users in room" line kItem_NoUsers, and RoomMenu_onCommand opens the chat menu
+    // for kItem_Chat and ignores kItem_NoUsers.
+    enum { kItem_Chat = -2, kItem_NoUsers = -1 };
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu zeroes it; [U] cMenu_addItem counts
                                      //       the rows
@@ -438,6 +442,9 @@ CHECK_SIZE(ChatMenu, 0x38C);
 struct cMenuItem;
 
 struct ChallengeResponseMenu {
+    // The command items' IDs (names ours): [U] ChallengeResponseMenu_ChallengeResponseMenu builds mAcceptItem with
+    // kItem_Accept and mDeclineItem with kItem_Decline; onCommand answers or declines the challenge by them.
+    enum { kItem_Accept = 0, kItem_Decline = 1 };
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu zeroes it; [U] cMenu_addItem counts
                                      //       the rows

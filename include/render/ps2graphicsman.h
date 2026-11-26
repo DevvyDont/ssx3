@@ -32,6 +32,57 @@
 struct cPS2DeferManager;
 struct cTextureMan;
 
+// A GS pixel storage format: the PSM field of the GS FRAME / ZBUF / TEX0 / BITBLTBUF registers (names ours, after the
+// PSM names the GS documentation and the existing notes use). [U] the display modes' formats
+// (tDisplayMode::mDisplayPSM, mFramePSM, mZBufferPSM; mCurrentFBFormat / mCurrentZBFormat): func_0037BD98 counts 32-row
+// pages for kGS_PSMCT32, PSMCT24, PSMZ32 and PSMZ24 and 64-row pages for kGS_PSMCT16, PSMCT16S, PSMZ16 and PSMZ16S, and
+// func_0037BD38 pairs the colour formats with the z formats 48, 49 and 58 or 50.
+enum eGSPixelStorage {
+    kGS_PSMCT32 = 0, kGS_PSMCT24 = 1, kGS_PSMCT16 = 2, kGS_PSMCT16S = 10, kGS_PSMT8 = 19, kGS_PSMT4 = 20,
+    kGS_PSMZ32 = 48, kGS_PSMZ24 = 49, kGS_PSMZ16 = 50, kGS_PSMZ16S = 58
+};
+
+// EE interrupt sources the renderer installs handlers for (names after Sony's eekernel.h INTC_VBLANK_S and DMAC_VIF1).
+// [U] cPS2GraphicsMan_Init installs func_003825C0 for INTC cause 2 and func_00382650 for DMA channel 1 (VIF1), and each
+// handler traps on any other cause.
+enum { kINTC_VBLANK_S = 2 };
+
+// The data format of a VIF UNPACK code (the low 4 bits of the 0x60..0x6F command: vn << 2 | vl; names after the EE
+// User's Manual's S-32 ... V4-5). [U] func_00392E98 (render/font) divides a block's byte count by each format's element
+// size from that manual: 12 for V3-32, 6 for V3-16, 3 for V3-8, 16 for V4-32, 8 for V2-32 / V4-16, 4 for S-32 /
+// V2-16 / V4-8 and 2 for S-16 / V2-8 / V4-5.
+enum eVIFUnpackFormat {
+    kVIF_UNPACK_S_32 = 0, kVIF_UNPACK_S_16 = 1, kVIF_UNPACK_S_8 = 2, kVIF_UNPACK_V2_32 = 4, kVIF_UNPACK_V2_16 = 5,
+    kVIF_UNPACK_V2_8 = 6, kVIF_UNPACK_V3_32 = 8, kVIF_UNPACK_V3_16 = 9, kVIF_UNPACK_V3_8 = 10, kVIF_UNPACK_V4_32 = 12,
+    kVIF_UNPACK_V4_16 = 13, kVIF_UNPACK_V4_8 = 14, kVIF_UNPACK_V4_5 = 15
+};
+enum { kDMAC_VIF1 = 1 };
+
+// The FIFO field of the GS CSR register (bits 14-15; names ours). [U] the kick thread and func_00382AF0 wait until it
+// reads "empty" (01) before starting DMA or writing the display registers.
+enum { kGS_CSR_FIFO_MASK = 0xC000, kGS_CSR_FIFO_EMPTY = 0x4000 };
+
+// The GS's alpha scale: 0x80 is fully opaque (1.0) (name ours). [U] func_00382AF0 draws the filter pass with alpha
+// blending only when the filter alpha (cPS2GraphicsMan::unk_59F8) is not 0x80.
+enum { kGSAlphaOne = 0x80 };
+
+// SMODE2's FFMD bit, the field / frame read mode (names after Sony's libgraph SCE_GS_FIELD / SCE_GS_FRAME). [U]
+// func_0037BD98 keeps it in cPS2GraphicsMan::unk_5A46 for sceGsResetGraph; func_00382AF0 doubles the display height
+// for an interlaced frame-mode display.
+enum { kGS_FFMD_FIELD = 0, kGS_FFMD_FRAME = 1 };
+
+// A GS drawing context, as an index (names ours). [U] func_0037D668 writes FRAME_1 (register 76) for 0 and FRAME_2
+// (77) for 1.
+enum eGSContext { kGS_Context1 = 0, kGS_Context2 = 1 };
+
+// A DMA tag's ID field (bits 28-30 of a source-chain tag; names ours, after the tag names the EE DMA documentation
+// uses). [U] func_003720F0, func_00372198 and func_00372348 walk a chain: cnt and ret tags carry QWC quadwords of
+// data after the tag, a ref tag points elsewhere, and the ret tag ends the walk.
+enum eDMATagID {
+    kDMATag_REFE = 0, kDMATag_CNT = 1, kDMATag_NEXT = 2, kDMATag_REF = 3, kDMATag_REFS = 4, kDMATag_CALL = 5,
+    kDMATag_RET = 6, kDMATag_END = 7
+};
+
 // One display mode of cPS2GraphicsMan::DisplayModes (EA's name: [O] tDisplayMode, the type of cPSPGraphicsMan's
 // DisplayModes; On Tour's PSP record is 0x54 and only its leading name lines up). Size 0xA4: [P] GetScreenWidth /
 // GetScreenHeight index DisplayModes[CurrentDisplayMode] by 0xA4; [U] cPS2GraphicsMan_GetDisplayModeName returns
@@ -74,6 +125,11 @@ CHECK_OFFSET(tDisplayMode, mZBufferPSM, 0x98);
 CHECK_OFFSET(tDisplayMode, mInterlace, 0x9C);
 CHECK_OFFSET(tDisplayMode, mDTV, 0xA0);
 CHECK_SIZE(tDisplayMode, 0xA4);
+
+// The TV display format (tTVDisplayFormat::mDisplayFormat). [O] On Tour's enum GMDisplayFormat, names and values; [U]
+// cPS2GraphicsMan_SetTVDisplayFormat letterboxes GM_WIDESCREEN (offset 0.125, scales 0.75) and narrows only the x
+// aspect for GM_ANIMORPHIC.
+enum GMDisplayFormat { GM_FULLSCREEN = 0, GM_WIDESCREEN = 1, GM_ANIMORPHIC = 2 };
 
 // [O] tTVDisplayFormat (0x14 in On Tour too). [P] GetTVDisplayFormat returns &self->mTVDisplayFormat.
 struct tTVDisplayFormat {
@@ -236,6 +292,18 @@ public:
     int mDisplayBufferAddress;      // 0x5A88 [P] GetDisplayBufferAddress (cPS2GraphicsMan_GetDisplayBufferAddress)
     volatile int mKickState;        // 0x5A8C [X] kickState; [U] the DMA kick thread and IRQ handlers
     volatile int mBufState[2];      // 0x5A90 [X] bufState
+
+    // mKickState: where the frame being sent is (names ours). [U] the DMA kick thread func_00382760 starts phase 1
+    // from idle (1) and phase 2 once phase 1 is done (2 -> 3); the VIF1 DMA handler's func_00382688 moves 1 -> 2 and
+    // 3 -> 4; the VBlank handler's func_003825F8 moves 4 -> 5 after mMinFlipWait blanks; the thread then flips and goes
+    // back to 0 (func_00382730 tests for it).
+    enum eKickState {
+        kKick_Idle = 0, kKick_Phase1Sent = 1, kKick_Phase1Done = 2, kKick_Phase2Sent = 3, kKick_Phase2Done = 4,
+        kKick_FlipDue = 5
+    };
+    // mBufState[i]: one packet buffer's state (names ours). [U] func_003826E0 marks a free buffer as being built,
+    // EndFrame queues the built one (2), the kick thread sends a queued one (3) and frees it after the flip (0).
+    enum eBufState { kBuf_Free = 0, kBuf_Building = 1, kBuf_Queued = 2, kBuf_Sending = 3 };
     volatile int mInFlightIndex;    // 0x5A98 [X]
     int mInFlightVif2;              // 0x5A9C [X]
     int mInFlightGif2;              // 0x5AA0 [X]

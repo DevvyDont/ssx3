@@ -179,7 +179,7 @@ struct sRewardDB_AF40 {
  * Types 0 and 1 use 12-byte records (tables at +0x8, +0xC), type 2 8-byte records (+0x10), types 3-8 16-byte records
  * (+0x14, +0x18, +0x1C, then type 6 at +0x24, type 7 at +0x20, type 8 at +0x28). No bounds check.
  *
- * @param type  the reward type, 0-9
+ * @param type  the reward type (tRewardType), 0-9
  * @param idx  the record index
  * @return the record's first word
  */
@@ -187,16 +187,16 @@ struct sRewardDB_AF40 {
 int cBERewardDB::getRewardName(int type, int idx)
 {
     switch (type) {
-    case 0: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)mpTrophies + off); }
-    case 1: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)mpMedals + off); }
-    case 2: { int off = idx * 8; return *(int*)((char*)mpPeakPasses + off); }
-    case 3: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpPosters + off); }
-    case 4: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpTradingCards + off); }
-    case 5: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpConceptArts + off); }
-    case 6: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpVideos + off); }
-    case 7: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpToys + off); }
-    case 8: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpCheatChars + off); }
-    case 9: break;
+    case kRewardTrophy: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)mpTrophies + off); }
+    case kRewardMedal: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)mpMedals + off); }
+    case kRewardPeakPass: { int off = idx * 8; return *(int*)((char*)mpPeakPasses + off); }
+    case kRewardPoster: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpPosters + off); }
+    case kRewardCard: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpTradingCards + off); }
+    case kRewardArt: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpConceptArts + off); }
+    case kRewardVideo: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpVideos + off); }
+    case kRewardToy: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpToys + off); }
+    case kRewardCheatChar: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)mpCheatChars + off); }
+    case kRewardBolt: break;
     }
     return 0;
 }

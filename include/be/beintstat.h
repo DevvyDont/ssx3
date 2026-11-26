@@ -82,7 +82,7 @@ struct cBEStatInterface : public cBEInterface {
     float getSpeedAttrib(int rider, int value) __asm__("cBEStatInterface_getSpeedAttrib");
     float getSpinAttrib(int rider, int value) __asm__("cBEStatInterface_getSpinAttrib");
     float getTrickAttrib(int rider, int value) __asm__("cBEStatInterface_getTrickAttrib");
-    int shouldCelebrateTrick(int rider, int value) __asm__("cBEStatInterface_shouldCelebrateTrick");
+    bool shouldCelebrateTrick(int rider, int value) __asm__("cBEStatInterface_shouldCelebrateTrick");
 };
 
 extern cBEStatInterface* cBEStatInterface_instance;

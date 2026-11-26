@@ -6,6 +6,8 @@
 #include "visualfx/visualeffectsman.h"
 #include "ui/uiengine.h"
 #include "wscript/missionmenuqueue.h"
+#include "wscript/wscriptman.h"
+#include "ui/uimenu.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
 #include "world/worldcache.h"
@@ -304,9 +306,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_InGame);
 /**
  * Returns whether a game is running (Game is set).
  *
- * @return 1 when Game (+0x84) is non-null, else 0
+ * @return true when Game (+0x84) is non-null
  */
-int cSSXApp::InGame()
+bool cSSXApp::InGame()
 {
     return ((int)Game) != 0;
 }
@@ -2547,9 +2549,9 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_hasCardStatusError);
 /**
  * Returns whether the last card status is an error (mCurrDeviceStateLast is non-zero).
  *
- * @return 1 when mCurrDeviceStateLast (+0x43C) is non-zero, else 0
+ * @return true when mCurrDeviceStateLast (+0x43C) is non-zero
  */
-int cMCOverlayManager::hasCardStatusError()
+bool cMCOverlayManager::hasCardStatusError()
 {
     return (mCurrDeviceStateLast) != 0;
 }
@@ -2785,24 +2787,24 @@ extern "C" int cGameViewMan_isStreamReady(int);
 /**
  * Refreshes the views' stream focus and reports whether the stream is ready.
  *
- * Calls cGameViewMan_updateStreamFocus on ViewMan (+0x84). When IsStreamPaused (+0x9C) is already set it returns 0;
+ * Calls cGameViewMan_updateStreamFocus on ViewMan (+0x84). When IsStreamPaused (+0x9C) is already set it returns false;
  * otherwise, when cGameViewMan_isStreamReady says the stream is not ready, it sets IsStreamPaused and m_bFlushStreamer
- * (+0xA0) and returns 0.
+ * (+0xA0) and returns false.
  *
- * @return 1 when the stream is ready and not paused, else 0
+ * @return true when the stream is ready and not paused
  */
-int cGame::updateStreamFocus()
+bool cGame::updateStreamFocus()
 {
     cGameViewMan_updateStreamFocus((int)ViewMan);
     if (IsStreamPaused != 0) {
-        return 0;
+        return false;
     }
     if (cGameViewMan_isStreamReady((int)ViewMan) == 0) {
         IsStreamPaused = 1;
         m_bFlushStreamer = 1;
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -2963,9 +2965,9 @@ extern "C" void cWorldCache_flushInActivePages(void *);
  * then clears the flag. Otherwise the bandwidth limit goes back on, both flags are cleared and cWorld_update and
  * cSectionMan_update run. cGame_update has the same code inline.
  *
- * @return 0 while waiting on the stream, 1 when the game can update
+ * @return false while waiting on the stream, true when the game can update
  */
-int cGame::updateStreamLoading()
+bool cGame::updateStreamLoading()
 {
     void *vtbl;
 
@@ -2988,14 +2990,14 @@ int cGame::updateStreamLoading()
             cWorldCache_flushInActivePages(*(void**)World);
             m_bFlushStreamer = 0;
         }
-        return 0;
+        return false;
     }
     *(int *)(*(char**)World + 0x3D4) = 1;
     IsStreamPaused = 0;
     m_bFlushStreamer = 0;
     cWorld_update(World);
     cSectionMan_update(SectionMan);
-    return 1;
+    return true;
 }
 #endif
 //100%
@@ -3082,14 +3084,14 @@ static inline bool playing_4B48(char* pb)
  * Runs the in-game UI for one frame (overlays, script messages, pause requests) and decides whether the race updates.
  *
  * Calls cOVStateManager_update. While MenuSys (+0xA4) is not active, the next message of the world script manager's
- * queue is handled: type 8 opens overlay 29 and pushes pause owner 3 (its flags from D_004428FC) with an icon sound;
- * type 9 runs cWScriptMan_doMissionCmd(..., 5, ...) and either opens overlay 0x1E with pause owner 3 (when the UI has
- * no "fail" state) or pops the message. A pending script pause request (D_004A20CC not 0xFFFFFFFF) opens overlay 34
- * with pause owner 0xC and clears the request. An active MenuSys is updated (cMenuSys_input). When
- * cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is running, cOVStateManager_allowPauseMenu opens the
- * pause menu: pause owner 2, the UI's virtual slot 44 with PauseOwner (+0x228), audio paused. Otherwise
- * cUIEngine_update(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update run. Each pause push writes cPauseState_Stack[++cPauseState_StackIdx] and
- * cPauseState_Flags.
+ * queue is handled: kMissionCmd_MenuStart opens overlay 29 and pushes pause owner 3 (its flags from D_004428FC) with an
+ * icon sound; kMissionCmd_MenuFail runs cWScriptMan_doMissionCmd(..., kMissionCmd_Fail, ...) and either opens overlay
+ * 0x1E with pause owner 3 (when the UI has no "fail" state) or pops the message. A pending script pause request
+ * (D_004A20CC not 0xFFFFFFFF) opens overlay 34 with pause owner 0xC and clears the request. An active MenuSys is
+ * updated (cMenuSys_input). When cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is
+ * running, cOVStateManager_allowPauseMenu opens the pause menu: pause owner 2, the UI's virtual slot 44 with PauseOwner
+ * (+0x228), audio paused. Otherwise cUIEngine_update(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update
+ * run. Each pause push writes cPauseState_Stack[++cPauseState_StackIdx] and cPauseState_Flags.
  *
  * @return true when the race should update this frame (no menu, no new pause, not just unpaused), else false
  */
@@ -3102,15 +3104,16 @@ bool cGame::updateUI()
         tMissionMenuQueue* msgQueue = &sm->queue;
         if (sm->hasMessage()) {
             tMissionMenuQueueEntry* msg = tMissionMenuQueue_getEntry(msgQueue);
-            if (msg->Cmd == 8) {
+            if (msg->Cmd == kMissionCmd_MenuStart) {
                 cOVStateManager_triggerOverlay(29);
                 cPauseState_Stack[++cPauseState_StackIdx] = 3;
                 cPauseState_Flags = D_004428FC[0];
                 cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 4, 0, 1.0f);
                 return false;
             }
-            if (msg->Cmd == 9) {
-                cWScriptMan_doMissionCmd(((sScript_4B48*)WScriptMan), ((int)msg->MissionId), 5, msg->Being);
+            if (msg->Cmd == kMissionCmd_MenuFail) {
+                cWScriptMan_doMissionCmd(((sScript_4B48*)WScriptMan), ((int)msg->MissionId), kMissionCmd_Fail,
+                                         msg->Being);
                 if (cUIStateStack_findState(&(*(sStateStack_4B48*)&UI->mStateStack),
                         GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
@@ -3190,13 +3193,13 @@ struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
 /**
  * Updates the game simulation for one frame: game state, replay, scripts, AI, update buckets and views.
  *
- * When InputSync (+0x7C) is null or cInputSync_aiinputready accepts: cGame_updateState (merging bucket 1 in state 3),
- * cReplay_update unless paused (cPauseState_Flags bit 0), and ScriptEngine's virtual slot 5 unless the replay pauses
- * the AI or flag 8 is set. The AI step is skipped while paused, while the replay or the playback manager pauses the AI
- * or when cInputSync_aiupdate fails; otherwise it updates gBucketMan buckets 1 (unless flag 2), 5 and 6, applies bucket
- * 1, calls the AI's virtual slot 3 (vptr at +0xCC), updates buckets 2 (unless flag 0x10) and 3 (unless flag 4),
- * WScriptMan, both crowd managers and MultiParticleMan, and merges bucket 1. Skipped, only buckets 5 and 3 run. Then
- * bucket 4, cGameViewMan_updateAll (except in replay mode 3), mUpdateTick (+0xAC) is counted and
+ * When InputSync (+0x7C) is null or cInputSync_aiinputready accepts: cGame_updateState (merging bucket 1 in
+ * kGFSM_Gate), cReplay_update unless paused (cPauseState_Flags bit 0), and ScriptEngine's virtual slot 5 unless the
+ * replay pauses the AI or flag 8 is set. The AI step is skipped while paused, while the replay or the playback manager
+ * pauses the AI or when cInputSync_aiupdate fails; otherwise it updates gBucketMan buckets 1 (unless flag 2), 5 and 6,
+ * applies bucket 1, calls the AI's virtual slot 3 (vptr at +0xCC), updates buckets 2 (unless flag 0x10) and 3 (unless
+ * flag 4), WScriptMan, both crowd managers and MultiParticleMan, and merges bucket 1. Skipped, only buckets 5 and 3
+ * run. Then bucket 4, cGameViewMan_updateAll (except in replay mode 3), mUpdateTick (+0xAC) is counted and
  * cWorldSound_TriggerWorldAudio runs for each view camera (+0x20 of it). cGame_update has the same code inline.
  */
 void cGame::updateAI()
@@ -3204,7 +3207,7 @@ void cGame::updateAI()
     char* obj;
     int skip;
     if ((int)InputSync == 0 || cInputSync_aiinputready((int)InputSync) != 0) {
-        if (mCurrentStateID == 3) {
+        if (mCurrentStateID == kGFSM_Gate) {
             obj = gBucketMan;
             cGame_updateState(this);
             cBucketMan_mergeBucket(obj, 1);
@@ -3316,18 +3319,18 @@ extern "C" void cFadeScreen_update(void *);
  * Advances the game's screen fade and reports whether the game may update.
  *
  * Calls cFadeScreen_update (cGame's base). When the application's word at +0x4 (its cAppMan base) is set, it sets the
- * fade's ending flag (+0x8) and returns 0. cGame_update has the same code inline.
+ * fade's ending flag (+0x8) and returns false. cGame_update has the same code inline.
  *
- * @return 1 when the game may update, 0 when it is ending
+ * @return true when the game may update, false when it is ending
  */
-int cGame::updateScreenFade()
+bool cGame::updateScreenFade()
 {
     cFadeScreen_update(this);
     if ((int)SSXApp->LoadingModule != 0) {
         unk_08 = 1;
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 #endif
 //100%
@@ -3455,20 +3458,20 @@ static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
 /**
  * Handles the progressive-scan popup's answer: pushes a new UI state that records it.
  *
- * Only widget events of type 5 with a message count. A new 0x50-byte UI state (cUIState_cUIState on the UI engine, vtable
- * D_0047DA58) is pushed on the UI state stack (engine + 0x18) with its flag at +0x48 cleared for "yes" (the message
- * hash at +0x38) or set otherwise; "yes" also calls cGraphicsMan_TheGraphicsMan's vtable slot 8 with 1. Slot +0x9C
- * (onWidgetEvent) of D_0047CA18.
+ * Only widget events of type cUIState::kONNEXT with a message count. A new 0x50-byte UI state (cUIState_cUIState on the
+ * UI engine, vtable D_0047DA58) is pushed on the UI state stack (engine + 0x18) with its flag at +0x48 cleared for
+ * "yes" (the message hash at +0x38) or set otherwise; "yes" also calls cGraphicsMan_TheGraphicsMan's vtable slot 8 with
+ * 1. Slot +0x9C (onWidgetEvent) of D_0047CA18.
  *
  * @param msg  the widget event message (ignored when null)
- * @param type  the event type (only 5 is handled)
+ * @param type  the event type (only cUIState::kONNEXT is handled)
  */
 extern "C" void func_002452D8(cUIState* self, char* msg, int type)
 {
     if (msg == 0) {
         return;
     }
-    if (type != 5) {
+    if (type != cUIState::kONNEXT) {
         return;
     }
     if (isHash_2452D8(*(int*)(msg + 0x38), str_yes_c)) {
@@ -3486,15 +3489,16 @@ extern "C" void func_002452D8(cUIState* self, char* msg, int type)
 INCLUDE_ASM("main/ssxappdtor", func_002453E0);
 #ifdef SKIP_ASM
 /**
- * Answers the progressive-scan popup's menu query: 257 for event 6, else 0. Slot +0xA4 (onWidgetMenu) of D_0047CA18.
+ * Answers the progressive-scan popup's menu query: 257 for cUIMenu::kONNEXT, else 0. Slot +0xA4 (onWidgetMenu) of
+ * D_0047CA18.
  *
  * @param menu  the menu widget (unused)
  * @param event  the menu event
- * @return 257 when @p event is 6, else 0
+ * @return 257 when @p event is cUIMenu::kONNEXT, else 0
  */
 extern "C" int func_002453E0(void* self, int menu, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -3533,7 +3537,8 @@ extern char str_102MPMatch[];
 extern char str_99QPEvent[];
 
 /**
- * Creates the match / event loading screen: "102MPMatch" when newRace.cGamePath is 2, else "99QPEvent".
+ * Creates the match / event loading screen: "102MPMatch" when newRace.cGamePath is kGAMEPATH_MULTIPLAYER, else
+ * "99QPEvent".
  *
  * Fetches the BE interface 0 first (result unused), adds the screen to the UI engine (+0x10) with this state as owner,
  * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
@@ -3542,7 +3547,7 @@ extern char str_99QPEvent[];
 extern "C" void cGameLoadState_onCreateScreen(cGameLoadState* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         void* engine = self->mpEngine;
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_102MPMatch), 0);
         self->mpScreen = (cUIScreen*)screen;
@@ -3606,7 +3611,8 @@ extern "C" void cGameLoadState_widgetCreateQP(void* self, int a1);
 extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
 
 /**
- * Creates a widget of the match / event loading screen: cGameLoadState_widgetCreateMultiP when newRace.cGamePath is 2, else cGameLoadState_widgetCreateQP.
+ * Creates a widget of the match / event loading screen: cGameLoadState_widgetCreateMultiP when newRace.cGamePath is
+ * kGAMEPATH_MULTIPLAYER, else cGameLoadState_widgetCreateQP.
  *
  * Fetches the BE interface 0 first (result unused). Slot +0x94 (onWidgetCreate) of cGameLoadState_vtbl.
  *
@@ -3615,7 +3621,7 @@ extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
 extern "C" void cGameLoadState_onWidgetCreate(cGameLoadState* self, int widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    bool ok = cBENewRaceInterface_newRace.cGamePath != 2;
+    bool ok = cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER;
     if (ok) {
         cGameLoadState_widgetCreateQP(self, widget);
     } else {

@@ -68,6 +68,9 @@ struct cDebounceNode : public cMoveNode {
                                     //      swc1: an int through the FPU); the replay ctor reads 4 bytes; [U] updateNode
                                     //      counts it down and expires at 0 (lw/sw); expire / loseFocus do nothing when
                                     //      it is negative
+    // What expire leaves on the instance (names ours): [U] expire makes a cDeadNode for kExpire_Dead and a cRestoreNode
+    // for kExpire_Restore and just deletes the node for any other Type; loseFocus makes a cDeadNode for kExpire_Dead.
+    enum { kExpire_Dead = 0, kExpire_Restore = 3 };
     int Type;                       // 0x30 [O]; [P] preview 0x2C; [R] ctor1 = data Type (+0x8); the replay ctor reads 4
                                     //      bytes; [U] expire: 0 -> cDeadNode, 3 -> cRestoreNode, else just delete;
                                     //      loseFocus: 0 -> cDeadNode, else delete

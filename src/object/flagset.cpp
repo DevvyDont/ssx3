@@ -330,7 +330,7 @@ void cFlagSet::render()
             t4Vector* pb = &boxMax;
             tNetMatrixSlot* vt43 = (tNetMatrixSlot*)VPTR_OF(cGraphicsMan, gm);
             t4Matrix viewMat = vt43[43].fn(vthis(gm, vt43[43]));
-            if (vt[93].fn(thisp, &boxMin, pb, &viewMat) == 1) {
+            if (vt[93].fn(thisp, &boxMin, pb, &viewMat) == GM_CLIPCODE_OUTSIDE) {
                 continue;
             }
         }
@@ -439,7 +439,7 @@ void cFlagSet::updateGrid(t3Vector* vout)
             if (iRatioMultiplier > 0.5f) {
                 iRatioMultiplier = 1.0f - iRatioMultiplier;
             }
-        } else if (self->mode == 1) {
+        } else if (self->mode == true) {
             idx = self->cols - i - 1;
         }
         float colAngle = iRatio * 6.2831854820251465f;
@@ -476,7 +476,7 @@ void cFlagSet::updateGrid(t3Vector* vout)
                 if (iRatioMultiplier > 0.5f) {
                     iRatioMultiplier = 1.0f - iRatioMultiplier;
                 }
-            } else if (self->mode == 1) {
+            } else if (self->mode == true) {
                 iRatioMultiplier = 1.0f - iRatioMultiplier;
                 iRatio = iRatioMultiplier;
             } else if (neitherHeld) {
@@ -1377,9 +1377,9 @@ struct sFlagMesh_CF98 {
  * Bends a fence's grid mesh by its current force.
  *
  * Does nothing without a grid mesh (+0x40). The sway vector is (200, 0, 0) * Force (+0x2C) * Flexibility (+0x24); each
- * of the 8 columns gets it scaled by the weight table cFenceNode_updateGrid_bendtable. The top row (+0x44) always moves; the bottom row
- * (+0xA4) moves too when the fence Type (+0x20) is 1, otherwise it stays at rest. The 16 points go to the mesh's vtable
- * entry 3.
+ * of the 8 columns gets it scaled by the weight table cFenceNode_updateGrid_bendtable. The top row (+0x44) always
+ * moves; the bottom row (+0xA4) moves too when the fence Type (+0x20) is kFenceType_SwingBottom, otherwise it stays at
+ * rest. The 16 points go to the mesh's vtable entry 3.
  *
  */
 void cFenceNode::updateGrid()
@@ -1397,7 +1397,7 @@ void cFenceNode::updateGrid()
         *offsetIter++ = fsScale_CF98(dir, cFenceNode_updateGrid_bendtable[i]);
     }
     sFsVec3_CF98 pts[16];
-    if (self->FenceData.Type == 1) {
+    if (self->FenceData.Type == tMakeFenceData::kFenceType_SwingBottom) {
         for (int i = 0; i < 8; i++) {
             pts[i] = fsAdd_CF98(self->Verts[i], offs[i]);
             pts[i + 8] = fsAdd_CF98(self->Verts[i + 8], offs[i]);
@@ -1608,7 +1608,7 @@ extern "C" void cFenceNode_render(cFenceNode* self)
         t4Vector* pb = &boxMax;
         tNetMatrixSlot* vt43 = (tNetMatrixSlot*)VPTR_OF(cGraphicsMan, gm);
         t4Matrix cullInfo = vt43[43].fn(vthis(gm, vt43[43]));
-        if (vt[93].fn(thisp, &boxMin, pb, &cullInfo) == 1) {
+        if (vt[93].fn(thisp, &boxMin, pb, &cullInfo) == GM_CLIPCODE_OUTSIDE) {
             return;
         }
     }
@@ -1979,13 +1979,13 @@ extern "C" void cAnimNode_makeAnimMats(cAnimNode* self, t4Matrix* vroot, sFsMtx_
     int k = 0;
     for (int i = 0; i < skel->count; i++, bone++) {
         if (bone->animated) {
-            if (bone->parent != -1) {
+            if (bone->parent != tMeshHeirarchyRecord::kNoParent) {
                 out[i] = mulScaledFS(out[bone->parent], *(sFsMtx_DD18*)self->getFrameMat(k++), scale);
             } else {
                 out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)self->getFrameMat(k++), scale);
             }
         } else {
-            if (bone->parent != -1) {
+            if (bone->parent != tMeshHeirarchyRecord::kNoParent) {
                 out[i] = mulScaledFS(out[bone->parent], *bone->mtx, scale);
             } else {
                 out[i] = mulScaledFS(*root, *bone->mtx, scale);

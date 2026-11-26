@@ -2,6 +2,7 @@
 #include "vtable.h"
 #include "be/beintoption.h"
 #include "main/ssxapp.h"
+#include "util/consoleconfig.h"
 #include "util/locale.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -153,23 +154,24 @@ public:
 /**
  * Resets the game options and submits them.
  *
- * Widescreen mode follows the console configuration (SSXApp->ConsoleConfig +0x24: 1 gives 2, 2 gives 1, else 0);
+ * Widescreen mode follows the console configuration (SSXApp->ConsoleConfig->mTVAspect: anamorphic for an anamorphic
+ * TV, 16:9 for a 16:9 one, else off);
  * language, metric units and the replay option become 0, brightness 9, and the screen offsets (mOption +5, +6) 0. Then
  * calls the option interface's vtable slot 1 (cBEOptionInterface_submit).
  */
 void cBEOptionInterface::defaultGame()
 {
-    switch (*(int*)((char*)SSXApp->ConsoleConfig + 0x24))
+    switch (SSXApp->ConsoleConfig->mTVAspect)
     {
-    case 1:
-        cBEOptionInterface_mOption_v0014F4F8[0].j = 2;
+    case cConsoleConfig::kCTV_AspectAnimorphic:
+        cBEOptionInterface_mOption_v0014F4F8[0].j = kWidescreen_Anamorphic;
         break;
-    case 2:
-        cBEOptionInterface_mOption_v0014F4F8[0].j = 1;
+    case cConsoleConfig::kCTV_Aspect169:
+        cBEOptionInterface_mOption_v0014F4F8[0].j = kWidescreen_16x9;
         break;
-    case 0:
+    case cConsoleConfig::kCTV_Aspect43:
     default:
-        cBEOptionInterface_mOption_v0014F4F8[0].j = 0;
+        cBEOptionInterface_mOption_v0014F4F8[0].j = kWidescreen_Off;
         break;
     }
     cBEOptionInterface_mOption_v0014F4F8[0].k = 0;
@@ -344,17 +346,17 @@ INCLUDE_ASM("be/beintoption", cBERules_hasModifiedRules);
  * "my rules" pair (+0x18, +0x1C).
  *
  * @param i  the player, 0 or 1
- * @return 1 when any is set, else 0
+ * @return true when any is set
  */
-extern "C" int cBERules_hasModifiedRules(int i)
+extern "C" bool cBERules_hasModifiedRules(int i)
 {
     tBERuleOptionDB* rules = &cBERules_mRules;
     if (rules->Bragging[i].Flags != 0 || rules->Bragging[i].StartingPoints != 0 || rules->Bragging[i].HeadStartSecs != 0
         || rules->MyRules.Flags != 0 || rules->MyRules.AIHeadStartSecs != 0)
     {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 

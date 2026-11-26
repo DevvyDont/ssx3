@@ -47,7 +47,7 @@ struct tTexInfo {
     int mMemAlloc;          // 0x00 [P] "Tex.mMemAlloc==bCopyMem"; [U] cTextureMan_AddTexture stores its ownsData argument;
                             //      cTextureMan_RemoveTexture frees mpTexels / mCLUTData only when set
     char mName[8];          // 0x04 (our name) [U] cTextureMan_AddTexture strncpy(mName, name, 8)
-    int mFormat;            // 0x0C (our name) texel format code (0 32-bit, 2 16-bit, 8 24-bit, 9/10 8-bit, 11/12 4-bit);
+    int mFormat;            // 0x0C (our name) texel format, eGMTexelFormat (render/graphicsman.h);
                             //      [U] cTextureMan_AddTexture stores it; func_00367B60 / func_00369098 / cTextureMan_RemoveTexture /
                             //      func_00368660 pick the second heap for 9; func_00366E90 stores 10
     int mSize;              // 0x10 [P] "Size <= Tex.mSize"; [U] cTextureMan_AddTexture sums the data size of all levels;
@@ -62,6 +62,8 @@ struct tTexInfo {
                             //      cTextureMan_RemoveTexture frees it
     int mNumMips;           // 0x24 (our name) [U] extra mip levels: cTextureMan_AddTexture stores it; func_00368170 /
                             //      func_00368970 / func_00366E90 loop 0..mNumMips
+    enum { kNoVRAM = -1 };  // mTexAddr / mCLUTAddr / mTexBlock / mCLUTBlock while not in VRAM (name ours; [P] below;
+                            //      [R] cTextureMan_AddTexture stores it in all four)
     int mTexAddr;           // 0x28 [P] "Tex.mTexAddr != -1", "!(Tex.mTexAddr & 0x1f)"; [U] -1 = not in VRAM
                             //      (cTextureMan_AddTexture sets -1; func_00367B60 / func_00369098 / func_00368660 test it;
                             //      func_00368660 stores the block address; cTextureMan_LockFrameToTexture builds FRAME_1 from it)
@@ -98,6 +100,12 @@ struct cTextureMan {
                                          //        indexes it by texture id (self + 8 + id * 4)
     cLinkTexInfo* m_pNonBindFreeTexInfo; // 0x1F48 [O][P]; [R] cTextureMan_InitTexInfo: &m_pTexInfo[1500]; [U]
                                          //        cTextureMan_NewNonBindTexID pops, DeleteNonBindTexID pushes
+    // No texture (names ours): [U] mBoundTex / mCLUTTex are reset to kNoTexID, func_003691B0 ignores it as an id and
+    // cTextureMan_AddTexture returns it for a format it cannot store.
+    enum { kNoTexID = -1 };
+    // [U] func_0038FED0 / func_00390198 accept a texture whose sides are one of the kNumTexSides powers of two
+    // 1024 >> 0 .. 1024 >> 10 (name ours).
+    enum { kNumTexSides = 11 };
     int mBoundTex[2];                    // 0x1F4C (our name; [X] boundTex) texture id selected in GS context 1 / 2;
                                          //        [R] func_00366FE8 -1; [U] func_00368970 compares / stores;
                                          //        func_00368660, func_00367360, func_00367078, cTextureMan_RemoveTexture,

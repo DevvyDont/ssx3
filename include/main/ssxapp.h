@@ -104,7 +104,7 @@ struct cSSXApp {
     void init(int argc, char** argv) __asm__("cSSXApp_init");
     int loadInputMap(const char* path) __asm__("cSSXApp_loadInputMap");
     void parseCommandLine(int argc, char** argv) __asm__("cSSXApp_parseCommandLine");
-    int preUpdate() __asm__("cSSXApp_preUpdate");
+    bool preUpdate() __asm__("cSSXApp_preUpdate");
     void purge() __asm__("cSSXApp_purge");
     void startGameLoad() __asm__("cSSXApp_startGameLoad");
     void startFELoad() __asm__("cSSXApp_startFELoad");
@@ -125,7 +125,7 @@ struct cSSXApp {
     void setLoadIconTextureID(int textureId) __asm__("cSSXApp_setLoadIconTextureID");
     void endFE() __asm__("cSSXApp_endFE");
     void endGame() __asm__("cSSXApp_endGame");
-    int InGame() __asm__("cSSXApp_InGame");
+    bool InGame() __asm__("cSSXApp_InGame");
     int InFE() __asm__("cSSXApp_InFE");
     int GetFEAsyncManager() __asm__("cSSXApp_GetFEAsyncManager");
 };

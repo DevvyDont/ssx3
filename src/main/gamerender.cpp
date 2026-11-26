@@ -6,6 +6,7 @@
 #include "camera/cameracontroller.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
+#include "main/gamestate.h"
 #include "main/ssxapp.h"
 #include "world/world.h"
 #include "world/worldcache.h"
@@ -108,12 +109,12 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_updateViewState);
 #ifdef SKIP_ASM
 
 /**
- * Splits or joins the screen when the game's state changes: one full-screen view, or two side-by-side halves for states
- * 3-5.
+ * Splits or joins the screen when the game's state changes: one full-screen view, or two side-by-side halves for
+ * kGFSM_Gate, kGFSM_Riding and kGFSM_Finishline.
  *
  * Does nothing when the stored state (m_GFState) already equals the game's mCurrentStateID, while a replay is
  * playing (Replay state 1-9), or with one player (m_uiNumPlayers). Otherwise stores the state and, from GrMan's width
- * and height (vtable slots 10 and 11), sets m_uiNumView, m_uiCurrentView and m_ViewRect: states 3-5 give two
+ * and height (vtable slots 10 and 11), sets m_uiNumView, m_uiCurrentView and m_ViewRect: those three states give two
  * half-width views with far clip 20000 on both cameras, any other state one full view with far clip 30000. Then
  * clears the world view's stream-focus active flags for the unused view (one view) or for both (two views).
  * cGame_updateState calls it.
@@ -137,9 +138,9 @@ void cGameViewMan::updateViewState()
     float w = (float)(unsigned int)GrMan->GetScreenWidth();
     float screenHeight = (float)(unsigned int)GrMan->GetScreenHeight();
     switch (m_GFState) {
-    case 3:
-    case 4:
-    case 5: {
+    case kGFSM_Gate:
+    case kGFSM_Riding:
+    case kGFSM_Finishline: {
         float hw = w * 0.5f;
         m_uiNumView = 2;
         m_uiCurrentView = 0;
@@ -281,17 +282,17 @@ struct sRenderList {
  *
  * Checks the cameras at +0x4 for the view count at +0x10. cGame_update and cGame_render test it.
  *
- * @return 1 when every view is ready, otherwise 0
+ * @return true when every view is ready
  */
-int cGameViewMan::isStreamReady()
+bool cGameViewMan::isStreamReady()
 {
     unsigned int i;
     for (i = 0; i < m_uiNumView; i++) {
         if (PlayerCamera[i]->bStreamIsReady == 0) {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 

@@ -158,7 +158,7 @@ extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instR
     int* bn = &desc->Mesh1;
     for (int i = 0; i < 8; i++, ids++, bn++) {
         unsigned int id = *ids;
-        if (id != 0xFFFFFFFF) {
+        if (id != tResourceID::kInvalidRID) {
             refs[n].m_uiRID = id;
             bones[n] = *bn;
             n++;
@@ -765,7 +765,7 @@ extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* in
     int* bn = &desc->Mesh1;
     for (int i = 0; i < 8; i++, ids++, bn++) {
         unsigned int id = *ids;
-        if (id != 0xFFFFFFFF) {
+        if (id != tResourceID::kInvalidRID) {
             refs[n].m_uiRID = id;
             bones[n] = *bn;
             n++;
@@ -1747,15 +1747,15 @@ extern "C" int memcmp(const void* a, const void* b, int n);
  *
  * @param data  converted flag data of the new flag
  * @param ctx  instance record of the new flag
- * @return 1 if the flag can join this set, else 0
+ * @return true if the flag can join this set
  */
-int cFlagSet::SameKind(void* data, tInstanceRecord* ctx)
+bool cFlagSet::SameKind(void* data, tInstanceRecord* ctx)
 {
     if (mCurrentNumInstances == 0) {
-        return 0;
+        return false;
     }
     if (*(int*)ctx->m_Model != mModelID) {
-        return 0;
+        return false;
     }
     return memcmp(data, this, 88) == 0;
 }
@@ -1804,15 +1804,15 @@ extern "C" void cFlagSet_PurgeMesh(void* self);
  * its mesh (cFlagSet_PurgeMesh).
  *
  * @param rider  instance record of the flag to remove
- * @return 1 if the instance was removed, else 0
+ * @return true if the instance was removed
  */
-extern "C" int cFlagSet_RemoveFlag(cFlagSet* self, tInstanceRecord* rider)
+extern "C" bool cFlagSet_RemoveFlag(cFlagSet* self, tInstanceRecord* rider)
 {
     if (self->mCurrentNumInstances == 0) {
-        return 0;
+        return false;
     }
     if (*((int*)rider->m_Model) != self->mModelID) {
-        return 0;
+        return false;
     }
     for (int i = 0; i < self->mCurrentNumInstances; i++) {
         if (((int)self->mInstances[i]->m_RID) == ((int)rider->m_RID)) {
@@ -1821,10 +1821,10 @@ extern "C" int cFlagSet_RemoveFlag(cFlagSet* self, tInstanceRecord* rider)
             if (--self->mCurrentNumInstances == 0) {
                 cFlagSet_PurgeMesh(self);
             }
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

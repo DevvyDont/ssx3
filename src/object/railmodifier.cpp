@@ -173,6 +173,9 @@ struct sLink_C0E8 {
     int next;               // 0x0
     char pad_0x4[0x8];
     t4Matrix* mat;         // 0xC
+
+    // next at the end of a mesh's link chain (name ours): [U] buildXform multiplies link matrices until it reads -1.
+    enum { kNoNext = -1 };
 };
 
 struct sLinkTbl_C0E8 {
@@ -250,7 +253,7 @@ void cRailModifier::buildXform()
         rr.w = origin.w * scl.w;
         XForm.row[3] = rr;
         int i = links[mesh].next;
-        while (i != -1) {
+        while (i != sLink_C0E8::kNoNext) {
             t4Matrix* mm = xform;
             t4Matrix productCopy;
             t4Matrix linkMat;
@@ -2473,9 +2476,10 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_update);
  * Advances the tex-flip timer and, on each whole step, shows the next (or previous) texture of the flip sequence.
  *
  * Time grows by Speed per frame (nothing happens while Speed <= 0); when it reaches 1.0 it drops by 1.0 and Type
- * decides: 0 steps TexIndex forward or, with Dir set, backward, wrapping at NumTexFlipMaterials; 1 sets Speed to 10
- * / the frame rate (cAppMan_TheAppMan + 0x10), switches to type 2 and steps forward; 2 sets Speed to BaseSpeed times a
- * random 0.25..1.0 (BXrand mantissa trick), switches to type 1 and steps forward. Ends with cTexFlipModifier_setTexIndex (On Tour
+ * decides: kTexFlip_Sequence (0) steps TexIndex forward or, with Dir set, backward, wrapping at NumTexFlipMaterials;
+ * kTexFlip_RandomSlow (1) sets Speed to 10 / the frame rate (cAppMan_TheAppMan + 0x10), switches to kTexFlip_RandomFast
+ * and steps forward; kTexFlip_RandomFast (2) sets Speed to BaseSpeed times a random 0.25..1.0 (BXrand mantissa trick),
+ * switches to kTexFlip_RandomSlow and steps forward. Ends with cTexFlipModifier_setTexIndex (On Tour
  * setTexIndex). The comment above the definition calls the timer a rail timer; it is the tex-flip one.
  */
 extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
@@ -2490,7 +2494,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
         return;
     }
     *acc -= one;
-    if (self->Type == 0) {
+    if (self->Type == cTexFlipModifier::kTexFlip_Sequence) {
         if (self->Dir == 0) {
             if (++self->TexIndex >= self->NumTexFlipMaterials) {
                 self->TexIndex = 0;
@@ -2498,17 +2502,17 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
         } else if (--self->TexIndex < 0) {
             self->TexIndex = self->NumTexFlipMaterials - 1;
         }
-    } else if (self->Type == 1) {
+    } else if (self->Type == cTexFlipModifier::kTexFlip_RandomSlow) {
         self->Speed = 10.0f / (float)cAppMan_TheAppMan->TimerHz;
-        self->Type = 2;
+        self->Type = cTexFlipModifier::kTexFlip_RandomFast;
         if (++self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 0;
         }
-    } else if (self->Type == 2) {
+    } else if (self->Type == cTexFlipModifier::kTexFlip_RandomFast) {
         union { int i; float f; } bits;
         float base = 0.25f;
         bits.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
-        self->Type = 1;
+        self->Type = cTexFlipModifier::kTexFlip_RandomSlow;
         self->Speed = self->BaseSpeed * ((bits.f - one) * 0.75f + base);
         if (++self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 0;
@@ -2545,9 +2549,10 @@ static inline float fTrunc_F598(float x)
 /**
  * Handles a script signal for the tex-flip modifier: set its speed, pick a texture or step to the next one.
  *
- * Signal 300 sets Speed to @p value; 301 with 0 <= @p value < 9 sets TexIndex to @p value rounded up and applies it
- * (cTexFlipModifier_setTexIndex, On Tour setTexIndex); 302 steps TexIndex forward, wrapping to 1 (not 0 as cTexFlipModifier_update
- * does), and applies it. Other ids are ignored.
+ * Signal kTexFlipSignal_Speed (300) sets Speed to @p value; kTexFlipSignal_SetTexture (301) with 0 <= @p value < 9 sets
+ * TexIndex to @p value rounded up and applies it (cTexFlipModifier_setTexIndex, On Tour setTexIndex);
+ * kTexFlipSignal_NextTexture (302) steps TexIndex forward, wrapping to 1 (not 0 as cTexFlipModifier_update does), and
+ * applies it. Other ids are ignored.
  *
  * @param id  the signal id (On Tour signal)
  * @param value  the signal's argument value (On Tour arg)
@@ -2555,10 +2560,10 @@ static inline float fTrunc_F598(float x)
 void cTexFlipModifier::signal(int id, float value)
 {
     switch (id) {
-    case 300:
+    case kTexFlipSignal_Speed:
         Speed = value;
         break;
-    case 301:
+    case kTexFlipSignal_SetTexture:
         if (value >= 0.0f && value < 9.0f) {
             float ceilVal = fTrunc_F598(value);
             if (ceilVal < value) {
@@ -2569,7 +2574,7 @@ void cTexFlipModifier::signal(int id, float value)
             setTexIndex(n);
         }
         break;
-    case 302:
+    case kTexFlipSignal_NextTexture:
         TexIndex++;
         if (TexIndex >= NumTexFlipMaterials) {
             TexIndex = 1;
@@ -2722,12 +2727,13 @@ struct sRmState_F7D0 {
  * phases.
  *
  * Does nothing unless TimeOn or TimeOff is positive. Time grows by 1 / the frame rate (cAppMan_TheAppMan + 0x10). While
- * On: Angle grows by AngVel; at TimeOn the timer restarts, On clears when TimeOff > 0 and types 2 and 6 reverse
- * UVScroll. While still on, type 6 eases the UV offset with a triangle profile over the on phase (UVScroll * t /
- * TimeOn, the sign of UVScroll[0] choosing the half), other types add UVScroll per frame; each UV component wraps
- * into -1..1. While off, at TimeOff the timer restarts and On is set again when TimeOn > 0. The 2*pi wrap tests and
- * adjusts AngVel instead of Angle, and its second test is AngVel <= 2*pi (not -2*pi), so a slow AngVel gains 2*pi
- * every other frame and Angle grows without bound (harmless for the rotation, likely an original bug).
+ * On: Angle grows by AngVel; at TimeOn the timer restarts, On clears when TimeOff > 0 and kUVScroll_PingPong (2) and
+ * kUVScroll_EasedPingPong (6) reverse UVScroll. While still on, kUVScroll_EasedPingPong eases the UV offset with a
+ * triangle profile over the on phase (UVScroll * t / TimeOn, the sign of UVScroll[0] choosing the half), other types
+ * add UVScroll per frame; each UV component wraps into -1..1. While off, at TimeOff the timer restarts and On is set
+ * again when TimeOn > 0. The 2*pi wrap tests and adjusts AngVel instead of Angle, and its second test is AngVel <= 2*pi
+ * (not -2*pi), so a slow AngVel gains 2*pi every other frame and Angle grows without bound (harmless for the rotation,
+ * likely an original bug).
  */
 void cUVScrollModifier::update()
 {
@@ -2747,12 +2753,12 @@ void cUVScrollModifier::update()
                 if (Time < TimeOff) {
                     On = 0;
                 }
-                if (Type == 2 || Type == 6) {
+                if (Type == kUVScroll_PingPong || Type == kUVScroll_EasedPingPong) {
                     *(sV2_F7D0*)&UVScroll[0] = -*(sV2_F7D0*)&UVScroll[0];
                 }
             }
             if (On) {
-                if (Type == 6) {
+                if (Type == kUVScroll_EasedPingPong) {
                     if (UVScroll[0] < 0.0f) {
                         float time = Time;
                         if (time < TimeOn * 0.5f) {
@@ -2807,34 +2813,35 @@ INCLUDE_ASM("object/railmodifier", cUVScrollModifier_signal);
 /**
  * Handles a script signal for the UV-scroll modifier: scroll speeds, on / off times or the UV offset.
  *
- * Signal 201 sets UVScroll[0] and 200 UVScroll[1] (range -1..1; note the order is the reverse of 204/205); 202 sets
- * TimeOn and 203 TimeOff (0..60 seconds); 204 sets UV[0] and 205 UV[1] (-4..4). Values out of range and other ids
- * are ignored.
+ * Signal kUVScrollSignal_UScroll (201) sets UVScroll[0] and kUVScrollSignal_VScroll (200) UVScroll[1] (range -1..1;
+ * note the order is the reverse of 204/205); kUVScrollSignal_TimeOn (202) sets TimeOn and kUVScrollSignal_TimeOff
+ * (203) TimeOff (0..60 seconds); kUVScrollSignal_U (204) sets UV[0] and kUVScrollSignal_V (205) UV[1] (-4..4). Values
+ * out of range and other ids are ignored.
  *
  * @param id  the signal id (On Tour signal)
  * @param value  the signal's argument value (On Tour arg)
  */
 void cUVScrollModifier::signal(int id, float value)
 {
-    if (id == 200 || id == 201) {
+    if (id == kUVScrollSignal_VScroll || id == kUVScrollSignal_UScroll) {
         if (value >= -1.0f && value <= 1.0f) {
-            if (id == 201) {
+            if (id == kUVScrollSignal_UScroll) {
                 UVScroll[0] = value;
             } else {
                 UVScroll[1] = value;
             }
         }
-    } else if (id == 202 || id == 203) {
+    } else if (id == kUVScrollSignal_TimeOn || id == kUVScrollSignal_TimeOff) {
         if (value >= 0.0f && value <= 60.0f) {
-            if (id == 202) {
+            if (id == kUVScrollSignal_TimeOn) {
                 TimeOn = value;
             } else {
                 TimeOff = value;
             }
         }
-    } else if (id == 204 || id == 205) {
+    } else if (id == kUVScrollSignal_U || id == kUVScrollSignal_V) {
         if (value >= -4.0f && value <= 4.0f) {
-            if (id == 204) {
+            if (id == kUVScrollSignal_U) {
                 UV[0] = value;
             } else {
                 UV[1] = value;
@@ -3051,15 +3058,16 @@ extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0
 /**
  * Runs the railmodifier unit's static initialisation: builds its global vectors and matrices and the bucket manager.
  *
- * Only for priority 0xFFFF with initialize set. Constructs the colour/parameter vectors D_004FF740..D_004FFAB0, the
- * Catmull-Rom basis CatmullRom used for rail segment matrices, D_004FFB00/D_004FFB10, and gBucketMan (cBucketMan_cBucketMan).
+ * Only for priority DEFAULT_INIT_PRIORITY with initialize set. Constructs the colour/parameter vectors
+ * D_004FF740..D_004FFAB0, the Catmull-Rom basis CatmullRom used for rail segment matrices, D_004FFB00/D_004FFB10, and
+ * gBucketMan (cBucketMan_cBucketMan).
  *
  * @param initialize  nonzero for construction
- * @param priority  init priority; only 0xFFFF does anything
+ * @param priority  init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_0035FE10_init(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004FF740_v) sV4_FE10(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004FF750_v) sV4_FE10(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004FF760_v) sV4_FE10(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -3339,9 +3347,9 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_isType);
  * Tells whether an object node has a given type (the short at +0x10).
  *
  * @param type  node type to compare with
- * @return 1 when the types match, otherwise 0
+ * @return true when the types match
  */
-extern "C" int cTypeObjNode_isType(cTypeObjNode* self, int type)
+extern "C" bool cTypeObjNode_isType(cTypeObjNode* self, int type)
 {
     return self->ObjNodeType == type;
 }
@@ -3426,9 +3434,9 @@ INCLUDE_ASM("object/railmodifier", cSortObjNode_compare);
  * Compares obj's virtual getSortIndex() (vtable slot 8) with this node's SortIndex (+0x14), unsigned.
  *
  * @param obj  the other node (On Tour cObjNode*)
- * @return 1 when obj's sort index is greater than or equal to this node's, otherwise 0
+ * @return true when obj's sort index is greater than or equal to this node's
  */
-extern "C" int cSortObjNode_compare(cSortObjNode* self, cObjNode* obj)
+extern "C" bool cSortObjNode_compare(cSortObjNode* self, cObjNode* obj)
 {
     return obj->getSortIndex() >= self->SortIndex;
 }
@@ -3443,9 +3451,9 @@ INCLUDE_ASM("object/railmodifier", cSortObjNode_equal);
  * Compares this node's SortIndex (+0x14) with obj's virtual getSortIndex() (vtable slot 8).
  *
  * @param obj  the other node (On Tour cObjNode*)
- * @return 1 when the two sort indices are equal, otherwise 0
+ * @return true when the two sort indices are equal
  */
-extern "C" int cSortObjNode_equal(cSortObjNode* self, cObjNode* obj)
+extern "C" bool cSortObjNode_equal(cSortObjNode* self, cObjNode* obj)
 {
     return self->SortIndex == obj->getSortIndex();
 }
@@ -4580,15 +4588,15 @@ int cTransformModifier_getParent(void* self)
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the transform-modifier type id of cTransformModifier: 0.
+ * Returns the transform-modifier type id of cTransformModifier: kTransform_None (0).
  *
  * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
  *
- * @return 0
+ * @return kTransform_None
  */
 int cTransformModifier_getTransformType(void* self)
 {
-    return 0;
+    return cTransformModifier::kTransform_None;
 }
 #endif
 
@@ -4686,11 +4694,11 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier_getPhysicsType__FPv);
 /**
  * Returns the base physics modifier's physics type id.
  *
- * @return always 0 (cBoostModifier returns 1)
+ * @return always kPhysics_None (cBoostModifier returns kPhysics_Boost)
  */
 int cPhysicsModifier_getPhysicsType(void* self)
 {
-    return 0;
+    return cPhysicsModifier::kPhysics_None;
 }
 #endif
 
@@ -4831,11 +4839,12 @@ INCLUDE_ASM("object/railmodifier", cParticleModifier_getType__FPv);
 /**
  * Returns the effect type id of a particle modifier.
  *
- * @return always 1 (dynamic particle modifiers return 2, halo modifiers 3)
+ * @return always kEffect_Particle (dynamic particle modifiers return kEffect_DynamicParticle, halo modifiers
+ *         kEffect_Halo)
  */
 int cParticleModifier_getType(void* self)
 {
-    return 0x1;
+    return cEffectLink::kEffect_Particle;
 }
 #endif
 
@@ -4845,11 +4854,11 @@ INCLUDE_ASM("object/railmodifier", cDynamicParticleModifier_getType__FPv);
 /**
  * Returns the effect type id of a dynamic particle modifier.
  *
- * @return always 2 (particle modifiers return 1, halo modifiers 3)
+ * @return always kEffect_DynamicParticle (particle modifiers return kEffect_Particle, halo modifiers kEffect_Halo)
  */
 int cDynamicParticleModifier_getType(void* self)
 {
-    return 0x2;
+    return cEffectLink::kEffect_DynamicParticle;
 }
 #endif
 
@@ -4876,11 +4885,12 @@ INCLUDE_ASM("object/railmodifier", cHaloModifier_getType__FPv);
 /**
  * Returns the effect type id of a halo modifier.
  *
- * @return always 3 (particle modifiers return 1, dynamic particle modifiers 2)
+ * @return always kEffect_Halo (particle modifiers return kEffect_Particle, dynamic particle modifiers
+ *         kEffect_DynamicParticle)
  */
 int cHaloModifier_getType(void* self)
 {
-    return 0x3;
+    return cEffectLink::kEffect_Halo;
 }
 #endif
 
@@ -5821,11 +5831,11 @@ INCLUDE_ASM("object/railmodifier", cBoostModifier_getPhysicsType__FPv);
 /**
  * Returns the boost modifier's physics type id.
  *
- * @return always 1 (the base cPhysicsModifier returns 0)
+ * @return always kPhysics_Boost (the base cPhysicsModifier returns kPhysics_None)
  */
 int cBoostModifier_getPhysicsType(void* self)
 {
-    return 0x1;
+    return cPhysicsModifier::kPhysics_Boost;
 }
 #endif
 
@@ -6202,9 +6212,9 @@ INCLUDE_ASM("object/railmodifier", cFlagSet_Empty);
 /**
  * Tells whether a flag set holds no flags: its flag count (+0x5C) is 0.
  *
- * @return 1 if empty, else 0
+ * @return true if empty
  */
-int cFlagSet::Empty()
+bool cFlagSet::Empty()
 {
     return (mCurrentNumInstances) == 0;
 }
@@ -6403,15 +6413,15 @@ int cPositionModifier_isRootTransformDirty(void* vself)
 INCLUDE_ASM("object/railmodifier", cPositionModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the transform-modifier type id of cPositionModifier: 3.
+ * Returns the transform-modifier type id of cPositionModifier: kTransform_Position (3).
  *
  * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
  *
- * @return 3
+ * @return kTransform_Position
  */
 int cPositionModifier_getTransformType(void* self)
 {
-    return 0x3;
+    return cTransformModifier::kTransform_Position;
 }
 #endif
 
@@ -6547,15 +6557,15 @@ int cParentModifier_getMesh(void* vself)
 INCLUDE_ASM("object/railmodifier", cParentModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the transform-modifier type id of cParentModifier: 4.
+ * Returns the transform-modifier type id of cParentModifier: kTransform_Parent (4).
  *
  * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
  *
- * @return 4
+ * @return kTransform_Parent
  */
 int cParentModifier_getTransformType(void* self)
 {
-    return 0x4;
+    return cTransformModifier::kTransform_Parent;
 }
 #endif
 
@@ -6600,9 +6610,9 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_isRootTransformDirty__FPv);
 /**
  * Tells whether the magnet's transform changed since it was last rebuilt (RootTransformDirty, +0x50).
  *
- * @return 1 when dirty, otherwise 0
+ * @return true when dirty
  */
-int cMagnetModifier_isRootTransformDirty(void* vself)
+bool cMagnetModifier_isRootTransformDirty(void* vself)
 {
     cMagnetModifier* self = (cMagnetModifier*)vself;
     return (self->RootTransformDirty != 0);
@@ -6683,15 +6693,15 @@ void cMagnetModifier_setRadius(void* self)
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the transform-modifier type id of cMagnetModifier: 6.
+ * Returns the transform-modifier type id of cMagnetModifier: kTransform_Magnet (6).
  *
  * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
  *
- * @return 6
+ * @return kTransform_Magnet
  */
 int cMagnetModifier_getTransformType(void* self)
 {
-    return 0x6;
+    return cTransformModifier::kTransform_Magnet;
 }
 #endif
 
@@ -6798,15 +6808,15 @@ void cAvaSplineModifier_setRadius(void* vself, float val)
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the transform-modifier type id of cAvaSplineModifier: 7.
+ * Returns the transform-modifier type id of cAvaSplineModifier: kTransform_AvaSpline (7).
  *
  * Callers use the id to tell the modifier kinds apart (On Tour returns the same value).
  *
- * @return 7
+ * @return kTransform_AvaSpline
  */
 int cAvaSplineModifier_getTransformType(void* self)
 {
-    return 0x7;
+    return cTransformModifier::kTransform_AvaSpline;
 }
 #endif
 
@@ -6972,11 +6982,12 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_getTransformType__FPv);
 /**
  * Returns the transform type id of a spline modifier.
  *
- * @return always 1 (multi-spline modifiers return 2, roller modifiers 5)
+ * @return always kTransform_Spline (multi-spline modifiers return kTransform_MultiSpline, roller modifiers
+ *         kTransform_Roller)
  */
 int cSplineModifier_getTransformType(void* self)
 {
-    return 0x1;
+    return cTransformModifier::kTransform_Spline;
 }
 #endif
 
@@ -7085,11 +7096,12 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getTransformType__FPv);
 /**
  * Returns the transform type id of a multi-spline modifier.
  *
- * @return always 2 (spline modifiers return 1, roller modifiers 5)
+ * @return always kTransform_MultiSpline (spline modifiers return kTransform_Spline, roller modifiers
+ *         kTransform_Roller)
  */
 int cMultiSplineModifier_getTransformType(void* self)
 {
-    return 0x2;
+    return cTransformModifier::kTransform_MultiSpline;
 }
 #endif
 
@@ -7135,9 +7147,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_isComplete);
  *
  * Compares Life with 17.0; On Tour names this limit kMaxRollerDeath.
  *
- * @return 1 when Life >= 17.0, otherwise 0
+ * @return true when Life >= 17.0
  */
-extern "C" int cRollerModifier_isComplete(cRollerModifier* self)
+extern "C" bool cRollerModifier_isComplete(cRollerModifier* self)
 {
     return self->Life >= 17.0f;
 }
@@ -7272,11 +7284,12 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getTransformType__FPv);
 /**
  * Returns the transform type id of a roller modifier.
  *
- * @return always 5 (spline modifiers return 1, multi-spline modifiers 2)
+ * @return always kTransform_Roller (spline modifiers return kTransform_Spline, multi-spline modifiers
+ *         kTransform_MultiSpline)
  */
 int cRollerModifier_getTransformType(void* self)
 {
-    return 0x5;
+    return cTransformModifier::kTransform_Roller;
 }
 #endif
 
@@ -9897,6 +9910,15 @@ struct sRailNode {
     int mNext;               // 0x10
     int mSPrev;              // 0x14
     int mSNext;              // 0x18
+
+    // A list link (mPrev, mNext, mSPrev, mSNext; names ours): a node index, kLinkEnd at the end of a list, or a
+    // size-class head, a negative word with kHeadListA or kHeadListB in kHeadListMask and the class in the low bits.
+    // [U] func_003660A8 files used blocks under heads 0x90000000 | class (list A) and free ones under 0xA0000000 |
+    // class (list B); func_00366008, func_003660A8 and func_00366238 resolve a negative link through these bits.
+    enum { kLinkEnd = -1, kHeadListMask = 0x70000000, kHeadListA = 0x10000000, kHeadListB = 0x20000000 };
+    // The field_0x8 value func_003663D8 treats as "no owner texture" (name ours): it clears the owner's block fields
+    // for any other value (func_003662D0 gives a split-off block -1 instead).
+    enum { kNoOwner = 0x7FFFFFFF };
 };
 
 struct sRailNodeMan {
@@ -9920,7 +9942,7 @@ extern "C" void func_00366008(sRailNodeMan* self, int idx)
     sRailNode* prev;
     int link = node->mPrev;
     if (link < 0) {
-        if ((link & 0x70000000) == 0x10000000) {
+        if ((link & sRailNode::kHeadListMask) == sRailNode::kHeadListA) {
             prev = &self->headsA[link & 0x0FFFFFFF];
         } else {
             prev = &self->headsB[link & 0x0FFFFFFF];
@@ -9977,7 +9999,7 @@ extern "C" void func_003660A8(void* selfp, int idx)
     int sizeClass = railFloorLog2_60A8(node->mBlockSize) - 6;
     sRailNode* head = &heads[sizeClass];
     int first = head->mSNext;
-    if (first == -1) {
+    if (first == sRailNode::kLinkEnd) {
         head->mSNext = idx;
         node->mSPrev = sizeClass | tag;
         node->mSNext = first;
@@ -9985,10 +10007,10 @@ extern "C" void func_003660A8(void* selfp, int idx)
     }
     for (int i = first; i >= 0; i = self->nodes[i].mSNext) {
         sRailNode* n = &self->nodes[i];
-        if (n->mSNext == -1) {
+        if (n->mSNext == sRailNode::kLinkEnd) {
             n->mSNext = idx;
             node->mSPrev = i;
-            node->mSNext = -1;
+            node->mSNext = sRailNode::kLinkEnd;
             return;
         }
         if ((heads == self->headsA && n->mBlockAddr > node->mBlockAddr) ||
@@ -9998,7 +10020,7 @@ extern "C" void func_003660A8(void* selfp, int idx)
             node->mSPrev = link;
             sRailNode* prev;
             if (link < 0) {
-                if ((link & 0x70000000) == 0x10000000) {
+                if ((link & sRailNode::kHeadListMask) == sRailNode::kHeadListA) {
                     prev = &self->headsA[link & 0x0FFFFFFF];
                 } else {
                     prev = &self->headsB[link & 0x0FFFFFFF];
@@ -10028,7 +10050,7 @@ extern "C" void func_00366238(sRailNodeMan* self, int idx)
     sRailNode* prev;
     int link = node->mSPrev;
     if (link < 0) {
-        if ((link & 0x70000000) == 0x10000000) {
+        if ((link & sRailNode::kHeadListMask) == sRailNode::kHeadListA) {
             prev = &self->headsA[link & 0x0FFFFFFF];
         } else {
             prev = &self->headsB[link & 0x0FFFFFFF];
@@ -10064,7 +10086,7 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
 {
     sRailNode* node = &self->nodes[idx];
     func_00366238(self, idx);
-    if (size == node->mBlockSize || self->freeHead == -1) {
+    if (size == node->mBlockSize || self->freeHead == sRailNode::kLinkEnd) {
         node->mBlockAddr |= 1;
     } else {
         int n = func_00365FE8_pop(self);
@@ -10093,9 +10115,9 @@ INCLUDE_ASM("object/railmodifier", func_003663D8);
 /**
  * Frees a used block, detaches it from its owner and merges it with free neighbours.
  *
- * Unless the owner (+0x8) is 0x7FFFFFFF, sets the owner texture's block fields (pool +0x23E8 entry: +0x28/+0x30, or
- * +0x2C/+0x34 when flag bit 2 is set) to -1. Clears the low six flag bits, refiles the block and repeatedly joins it
- * with a free block before or after it in the address list.
+ * Unless the owner (+0x8) is kNoOwner (0x7FFFFFFF), sets the owner texture's block fields (pool +0x23E8 entry:
+ * +0x28/+0x30, or +0x2C/+0x34 when flag bit 2 is set) to -1. Clears the low six flag bits, refiles the block and
+ * repeatedly joins it with a free block before or after it in the address list.
  *
  * @param selfp  the allocator
  * @param idx  block index
@@ -10104,7 +10126,7 @@ extern "C" void func_003663D8(void* selfp, int idx)
 {
     sRailNodeMan* self = (sRailNodeMan*)selfp;
     sRailNode* n = &self->nodes[idx];
-    if (n->field_0x8 != 0x7FFFFFFF) {
+    if (n->field_0x8 != sRailNode::kNoOwner) {
         tTexInfo* owner = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[n->field_0x8];
         if ((n->mBlockAddr >> 2) & 1) {
             owner->mCLUTAddr = -1;
@@ -10375,9 +10397,9 @@ static inline int railFloorLog2v(int x)
  * @param skipA  owner to keep
  * @param skipB  another owner to keep
  * @param age  current position in the frame's draw order
- * @return 1 if a block was freed, else 0
+ * @return true if a block was freed
  */
-extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int age)
+extern "C" bool func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int age)
 {
     int i = self->headsA[railFloorLog2v(size) - 6].mSNext;
     int bestIdx = -1;
@@ -10403,10 +10425,10 @@ extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB,
         }
     }
     if (bestIdx < 0) {
-        return 0;
+        return false;
     }
     func_003663D8(self, bestIdx);
-    return 1;
+    return true;
 }
 #endif
 
@@ -10522,7 +10544,7 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
 INCLUDE_ASM("object/railmodifier", func_00366CE0);
 #ifdef SKIP_ASM
 extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size);
-extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int level);
+extern "C" bool func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int level);
 extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB, int level);
 
 /**
@@ -10561,7 +10583,7 @@ extern "C" int func_00366CE0(sRailNodeMan* self, int size, int owner, int skipB,
             self->nodes[idx].field_0x8 = owner;
             return idx;
         }
-        if (func_003668F8(self, size, owner, skipB, level) == 0) {
+        if (!func_003668F8(self, size, owner, skipB, level)) {
             func_003669F0(self, size, owner, skipB, level);
         }
     }

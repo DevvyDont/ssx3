@@ -70,6 +70,12 @@ struct cMeshAnimNode : public cInstanceNode {
     t4Vector Pos[24];               // 0x3B0 [O]; [R] ctors construct 24; ctor1 stores each mesh pose's position (sq);
                                     //       [U] update adds Vel, render uses it as the mesh matrix's position row
     t4Vector Vel[24];               // 0x530 [O]; [R] ctors construct 24; [U] init stores it (sq), update adds gravity
+    // What expire does with the node (names ours): [U] expire makes it a cDeadNode for kMeshAnimExpire_Dead,
+    // deletes it for kMeshAnimExpire_Delete and leaves it for any other Type.
+    enum { kMeshAnimExpire_Dead = 0, kMeshAnimExpire_Delete = 2 };
+    // tMakeMeshAnimData::RootMesh ([O] int, 0x38) when the meshes have no root mesh (name ours): [U] ctor1 takes the
+    // root matrix from the owner's anim mats [RootMesh] and rebuilds the mats from the bones unless it is kNoRootMesh.
+    enum { kNoRootMesh = -1 };
     int Type;                       // 0x6B0 [O]; [P] 0x6B0; [R] ctor1 data Type (+0x4) (sw); [U] expire: 0 ->
                                     //       makeThisDead, 2 -> delete; loseFocus: != 0 -> reset flags and delete (lw)
     float Drag;                     // 0x6B4 [O]; [R] ctor1 data Drag (+0x8) (swc1); [U] update: Vel.z += Drag * -980 *

@@ -4,6 +4,8 @@
 #include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "be/beintecon.h"
+#include "be/beintnewrace.h"
+#include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEEconInt[];
@@ -207,30 +209,30 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getPeakPass);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Unlocks or locks peak @p peak (1 or 2) for character @p characterId of profile slot @p profileIndex: stores
- * !@p unlocked in bPeak2Locked (peak 1) or bPeak3Locked (peak 2) of the character's profile record.
+ * Unlocks or locks peak @p peak (kPEAK_2 or kPEAK_3) for character @p characterId of profile slot @p profileIndex:
+ * stores !@p unlocked in bPeak2Locked (peak 1) or bPeak3Locked (peak 2) of the character's profile record.
  *
  * Other peak numbers change nothing.
  *
  * @param profileIndex  the profile slot (0 or 1; 2 and up return 0)
  * @param characterId  the character
- * @param peak  the peak, 1 or 2
+ * @param peak  the peak (eBEPeakID), kPEAK_2 or kPEAK_3
  * @param unlocked  nonzero to unlock
- * @return 1, or 0 for profile slots >= 2
+ * @return true, or false for profile slots >= 2
  */
 // Sets the locked state of a peak for a profile/character: stores the inverse of `unlocked`.
-int cBEEconInterface::getPeakPass(int profileIndex, int characterId, int peak, int unlocked)
+bool cBEEconInterface::getPeakPass(int profileIndex, int characterId, int peak, int unlocked)
 {
     if (profileIndex >= 2) {
-        return 0;
+        return false;
     }
     unlocked ^= 1;
-    if (peak == 1) {
+    if (peak == kPEAK_2) {
         cBELibrary_profileLib[profileIndex][characterId].bPeak2Locked = unlocked;
-    } else if (peak == 2) {
+    } else if (peak == kPEAK_3) {
         cBELibrary_profileLib[profileIndex][characterId].bPeak3Locked = unlocked;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -248,58 +250,58 @@ int cBEEconInterface_getAttribCost(void* self, int a1);
 /**
  * Buys one point of attribute @p attribute for character @p characterId of profile slot @p humanIndex, if affordable.
  *
- * The seven attribute bytes are the character profile's statDB. The price is
- * cBEEconInterface_getAttribCost(points / 5 - 1); when the money (mMoney) covers it and the attribute is not at 55,
- * the money drops by the price, the attribute rises by 1 and the stat interface's vtable slot 2 runs.
+ * The seven attribute bytes are the character profile's statDB. The price is cBEEconInterface_getAttribCost(points / 5
+ * - 1); when the money (mMoney) covers it and the attribute is not at kAttribPointsMax (55), the money drops by the
+ * price, the attribute rises by 1 and the stat interface's vtable slot 2 runs.
  *
  * @param humanIndex  the profile slot (2 and up return 0)
  * @param characterId  the character
- * @param attribute  the attribute, 0-6 (others read a null pointer)
- * @return 1 if bought, else 0
+ * @param attribute  the attribute (eBEAttributes), 0-6 (others read a null pointer)
+ * @return true if bought
  */
-int cBEEconInterface::buyAttribute(int humanIndex, int characterId, unsigned int attribute)
+bool cBEEconInterface::buyAttribute(int humanIndex, int characterId, unsigned int attribute)
 {
     signed char *attribLevel;
     int cur;
     int cost;
 
     if (humanIndex >= 2) {
-        return 0;
+        return false;
     }
     {
         attribLevel = 0;
         cur = cBELibrary_profileLib[humanIndex][characterId].mMoney;
         switch (attribute) {
-        case 0:
+        case kATTRIB_SPEED:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpeed;
             break;
-        case 1:
+        case kATTRIB_ACCEL:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cAccel;
             break;
-        case 2:
+        case kATTRIB_TRICK:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cTrick;
             break;
-        case 3:
+        case kATTRIB_EDGING:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cEdging;
             break;
-        case 4:
+        case kATTRIB_SPIN:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpin;
             break;
-        case 5:
+        case kATTRIB_TOUGH:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cToughness;
             break;
-        case 6:
+        case kATTRIB_STAB:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cStability;
             break;
         }
         cost = cBEEconInterface_getAttribCost(this, *attribLevel / 5 - 1);
-        if (cur < cost || *attribLevel == 55) {
-            return 0;
+        if (cur < cost || *attribLevel == kAttribPointsMax) {
+            return false;
         }
         cBELibrary_profileLib[humanIndex][characterId].mMoney -= cost;
         *attribLevel = (unsigned char)*attribLevel + 1;
         cBEStatInterface_getThis()->discard();
-        return 1;
+        return true;
     }
 }
 #endif
@@ -339,37 +341,38 @@ struct sEcon0E68 { int a; int b; };
 extern sEcon0E68 cBELibrary_attribCost_0E68[] __asm__("cBELibrary_attribCost");
 
 /**
- * Refunds one point of attribute @p kind for character @p characterId of slot @p profile, unless the attribute is at 5.
+ * Refunds one point of attribute @p kind for character @p characterId of slot @p profile, unless the attribute is at
+ * kAttribPointsMin (5).
  *
  * Adds the price cBELibrary_attribCost[(points - 1) / 5] to the money (mMoney), then increments the attribute byte
  * (statDB byte @p kind) instead of decrementing it (likely a bug; nothing calls this function).
  *
  * @param profile  the profile slot (2 and up return 0)
  * @param characterId  the character
- * @param kind  the attribute, 0-6
- * @return 1 if refunded, else 0
+ * @param kind  the attribute (eBEAttributes), 0-6
+ * @return true if refunded
  */
-int cBEEconInterface::sellAttribute(int profile, int characterId, unsigned int kind)
+bool cBEEconInterface::sellAttribute(int profile, int characterId, unsigned int kind)
 {
     signed char* attribLevel;
-    if (profile >= 2) return 0;
+    if (profile >= 2) return false;
     attribLevel = 0;
     switch (kind) {
-    case 0: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cSpeed; break;
-    case 1: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cAccel; break;
-    case 2: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cTrick; break;
-    case 3: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cEdging; break;
-    case 4: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cSpin; break;
-    case 5: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cToughness; break;
-    case 6: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cStability; break;
+    case kATTRIB_SPEED: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cSpeed; break;
+    case kATTRIB_ACCEL: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cAccel; break;
+    case kATTRIB_TRICK: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cTrick; break;
+    case kATTRIB_EDGING: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cEdging; break;
+    case kATTRIB_SPIN: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cSpin; break;
+    case kATTRIB_TOUGH: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cToughness; break;
+    case kATTRIB_STAB: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cStability; break;
     }
-    if (*attribLevel == 5) return 0;
+    if (*attribLevel == kAttribPointsMin) return false;
     {
         int refund = cBELibrary_attribCost_0E68[(*attribLevel - 1) / 5].b;
         cBELibrary_profileLib[profile][characterId].mMoney += refund;
     }
     (*attribLevel)++;
-    return 1;
+    return true;
 }
 #endif
 
@@ -394,7 +397,7 @@ extern sEconPrize_151040 D_004405A0[];
  * For @p place 6-11: cBENewRaceInterface_getPeakRewardAmount(race, @p place, tier) with tier 2 for medals 0-1, 1 for medal 2 and 0 for medal 3.
  * Otherwise the D_004405A0 row (17 rows) whose key is @p key, column @p medal, times 100. 0 when nothing matches.
  *
- * @param medal  the medal, 0-3
+ * @param medal  the medal (eBEMedalID), 0-3
  * @param key  the track key matched against D_004405A0
  * @param place  the event (6-11 are the peak events)
  * @return the money
@@ -407,14 +410,14 @@ int cBEEconInterface::getCashReward(int medal, int key, int place)
     {
         switch (medal)
         {
-        case 0:
-        case 1:
+        case kMEDAL_PLATINUM:
+        case kMEDAL_GOLD:
             reward = cBENewRaceInterface_getPeakRewardAmount(race, place, 2);
             break;
-        case 2:
+        case kMEDAL_SILVER:
             reward = cBENewRaceInterface_getPeakRewardAmount(race, place, 1);
             break;
-        case 3:
+        case kMEDAL_BRONZE:
             reward = cBENewRaceInterface_getPeakRewardAmount(race, place, 0);
             break;
         }
@@ -426,16 +429,16 @@ int cBEEconInterface::getCashReward(int medal, int key, int place)
             if (D_004405A0[i].key != key) continue;
             switch (medal)
             {
-            case 0:
+            case kMEDAL_PLATINUM:
                 reward = D_004405A0[i].prize[0] * 100;
                 break;
-            case 1:
+            case kMEDAL_GOLD:
                 reward = D_004405A0[i].prize[1] * 100;
                 break;
-            case 2:
+            case kMEDAL_SILVER:
                 reward = D_004405A0[i].prize[2] * 100;
                 break;
-            case 3:
+            case kMEDAL_BRONZE:
                 reward = D_004405A0[i].prize[3] * 100;
                 break;
             }
@@ -451,19 +454,19 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getCollectableCash);
 /**
  * Returns the cash a collectible is worth on peak @p level: 1000 for 1, 2000 for 2, otherwise 500.
  *
- * @param level  the peak, 0-2
+ * @param level  the peak (eBEPeakID; [O] On Tour eBEPeakID peak), 0-2
  * @return the cash
  */
 int cBEEconInterface::getCollectableCash(int level)
 {
     switch (level)
     {
-    case 0:
+    case kPEAK_1:
     default:
         return 500;
-    case 1:
+    case kPEAK_2:
         return 1000;
-    case 2:
+    case kPEAK_3:
         return 2000;
     }
 }
@@ -504,7 +507,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getCostForNextIncrement);
  *
  * @param humanIndex  the profile slot (2 and up return 0)
  * @param characterId  the character
- * @param attribute  the attribute, 0-6
+ * @param attribute  the attribute (eBEAttributes), 0-6
  * @return the price
  */
 int cBEEconInterface::getCostForNextIncrement(int humanIndex, int characterId, unsigned int attribute)
@@ -516,25 +519,25 @@ int cBEEconInterface::getCostForNextIncrement(int humanIndex, int characterId, u
     {
         attribLevel = 0;
         switch (attribute) {
-        case 0:
+        case kATTRIB_SPEED:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpeed;
             break;
-        case 1:
+        case kATTRIB_ACCEL:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cAccel;
             break;
-        case 2:
+        case kATTRIB_TRICK:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cTrick;
             break;
-        case 3:
+        case kATTRIB_EDGING:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cEdging;
             break;
-        case 4:
+        case kATTRIB_SPIN:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpin;
             break;
-        case 5:
+        case kATTRIB_TOUGH:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cToughness;
             break;
-        case 6:
+        case kATTRIB_STAB:
             attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cStability;
             break;
         }
@@ -577,7 +580,7 @@ int func_0014DC40(void* self, int kind);
 extern "C" void* func_0014DC50(void* self, int kind);
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
-extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
+extern "C" bool func_00151C90(cBECharProfileDB* self, int id, int on);
 extern char D_004A6750[];
 
 
@@ -620,8 +623,9 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
  * or built-in items.
  *
  * For the character kind (+0xBC0) from the item database D_004A6750: owns each group's prize item (func_00151C90);
- * owned items (flag 0x10) get flags 0x26; items priced 0 get flag 2, and items priced -1 also become owned. If any
- * did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and func_00151A88 call it.
+ * owned items (flag 0x10) get flags 0x26; items priced 0 get flag 2, and items priced kBoltPriceBuiltIn (-1) also
+ * become owned. If any did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and func_00151A88
+ * call it.
  *
  * @param vself  the character profile
  */
@@ -651,7 +655,7 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
         {
             (*(short*)&Find_1513B8(self, itemDef->id)->flags) |= 2;
         }
-        else if (Price_1513B8(itemDef) == -1)
+        else if (Price_1513B8(itemDef) == kBoltPriceBuiltIn)
         {
             (*(short*)&Find_1513B8(self, itemDef->id)->flags) |= 2;
             func_00151C90((cBECharProfileDB*)self, itemDef->id, 1);
@@ -1121,7 +1125,7 @@ void* func_0014BDB8_1C90() __asm__("func_0014BDB8__FPv");
 extern "C" int func_0014D448(void* db, int kind, int id);
 extern "C" void* func_0014D558(void* db, int kind, int id);
 extern "C" int func_0014D4C8(void* db, int kind, int id);
-extern "C" int func_00151EF0(cBECharProfileDB* self, int id, int on);
+extern "C" bool func_00151EF0(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1178,16 +1182,16 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
  *
  * Owning an item whose definition has flag 1 first un-owns the other members of its group (those owned or with flag
  * 8); un-owning one that was owned (or has flag 8) un-owns its dependants. A real change then applies the item's links
- * (func_00151EF0). Returns 0 as soon as a nested change fails.
+ * (func_00151EF0). Returns false as soon as a nested change fails.
  *
  * @param selfp  the character profile
  * @param id  the item id
  * @param on  nonzero to own
- * @return 1 on success, 0 on failure
+ * @return true on success, false on failure
  */
 // Sets item id owned/unowned; turning on cascades turn-offs to conflicting items (def flag 1), turning off
 // cascades to dependent items (owned before or def flag 8). Then applies the item's links; 0 on failure.
-extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
+extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
 {
     cBECharProfileDB* self = selfp;
     sEconDefs_151C90* db = (sEconDefs_151C90*)func_0014BDB8_1C90();
@@ -1201,7 +1205,7 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
     else
         item->flags &= ~0x10;
     if (on && wasOn)
-        return 1;
+        return true;
     if (on && bit1)
     {
         int rid = def->rel;
@@ -1216,7 +1220,7 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
                 if (j >= 0 && (isOwned_151C90(&((&self->mBolts[0]))[j]) || (rel->flags & 8)))
                 {
                     if (func_00151C90((cBECharProfileDB*)self, sid, 0) == 0)
-                        return 0;
+                        return false;
                 }
             }
         }
@@ -1228,15 +1232,15 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
         for (int i = 0; i < n; i++, rel++)
         {
             if (func_00151C90((cBECharProfileDB*)self, rel->other, 0) == 0)
-                return 0;
+                return false;
         }
     }
     if ((on && !wasOn) || (!on && wasOn))
     {
         if (func_00151EF0((cBECharProfileDB*)self, id, on) == 0)
-            return 0;
+            return false;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1248,7 +1252,7 @@ void* func_0014BDB8_1EF0() __asm__("func_0014BDB8__FPv");
 struct sEconLink_151EF0;
 extern "C" sEconLink_151EF0* func_0014DB40(void* db, int kind, int id, int on, int* n);
 extern "C" int func_0014D448(void* db, int kind, int id);
-extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
+extern "C" bool func_00151C90(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1298,17 +1302,17 @@ static inline sEconDef_151EF0* getDef_151EF0(sEconDefs_151EF0* db, int i)
 /**
  * Applies the dependency links of item @p id for the given owned state: each link may own or un-own another item.
  *
- * Links come from func_0014DB40. A link is skipped when its target is -1, when its condition item's owned state
- * differs from the link's, or when the target is already in the wanted state (unless it is owned and its definition
- * has flag 8). A link to @p id itself only sets its flag; others go through func_00151C90.
+ * Links come from func_0014DB40. A link is skipped when its target is kNoBoltID (-1), when its condition item's owned
+ * state differs from the link's, or when the target is already in the wanted state (unless it is owned and its
+ * definition has flag 8). A link to @p id itself only sets its flag; others go through func_00151C90.
  *
  * @param selfp  the character profile
  * @param id  the item id
  * @param on  the item's new owned state
- * @return 1 on success, 0 if a nested change failed
+ * @return true on success, false if a nested change failed
  */
 // Sets item id owned/unowned and applies its dependency links (cascading through func_00151C90); 0 on failure.
-extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
+extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
 {
     cBECharProfileDB* self = selfp;
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
@@ -1317,9 +1321,9 @@ extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
     tBEProfileBolt* item = getItem_151EF0(self, id);
     for (int i = 0; i < n; i++, link++)
     {
-        if (link->target == -1)
+        if (link->target == kNoBoltID)
             continue;
-        if (link->condId != -1)
+        if (link->condId != kNoBoltID)
         {
             if ((isOwned_151EF0(getItem_151EF0(self, link->condId)) != 0) != (link->cond != 0))
                 continue;
@@ -1342,10 +1346,10 @@ extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
         }
         else if (func_00151C90((cBECharProfileDB*)self, targetItem->id, link->on != 0) == 0)
         {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1355,7 +1359,7 @@ INCLUDE_ASM("be/beintecon", func_001520E8);
 void* func_0014BDB8(void* self);
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
-extern "C" int func_00151EF0(cBECharProfileDB* self, int id, int on);
+extern "C" bool func_00151EF0(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1379,9 +1383,9 @@ static inline tBEProfileBolt* getItem_001520E8(cBECharProfileDB* self, int id)
  * Re-applies the links of every owned item whose definition has flag 0x1000, and reports whether there were any.
  *
  * @param changed  receives 1 when at least one such item was owned, else 0
- * @return 1 on success, 0 if applying links failed
+ * @return true on success, false if applying links failed
  */
-extern "C" int func_001520E8(cBECharProfileDB* self, int* changed)
+extern "C" bool func_001520E8(cBECharProfileDB* self, int* changed)
 {
     void* db = func_0014BDB8((self));
     int n = func_0014D988(db, *((char*)&self->unk_BC0));
@@ -1395,11 +1399,11 @@ extern "C" int func_001520E8(cBECharProfileDB* self, int* changed)
             {
                 *changed = 1;
                 if (func_00151EF0(self, def->id, 1) == 0)
-                    return 0;
+                    return false;
             }
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1411,7 +1415,7 @@ void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 int func_0014DC40(void* self, int kind);
 extern "C" void* func_0014DC50(void* self, int kind);
 extern "C" int func_0014D608(void* self, int kind, int id, void** out, int a, int b);
-extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
+extern "C" bool func_00151C90(cBECharProfileDB* self, int id, int on);
 
 
 

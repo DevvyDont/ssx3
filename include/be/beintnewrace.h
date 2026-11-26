@@ -117,10 +117,10 @@ struct cBENewRaceInterface : public cBEInterface {
     int getLocationDifficulty(int location) __asm__("cBENewRaceInterface_getLocationDifficulty");
     void* getSectionFile(int iSection) __asm__("cBENewRaceInterface_getSectionFile");
     int getSectionType(int iSection) __asm__("cBENewRaceInterface_getSectionType");
-    int setNumberAI(int count) __asm__("cBENewRaceInterface_setNumberAI");
-    int setGameMode(int mode) __asm__("cBENewRaceInterface_setGameMode");
+    bool setNumberAI(int count) __asm__("cBENewRaceInterface_setNumberAI");
+    bool setGameMode(int mode) __asm__("cBENewRaceInterface_setGameMode");
     void setGamePath(int mode) __asm__("cBENewRaceInterface_setGamePath");
-    int setGameEvent(int event) __asm__("cBENewRaceInterface_setGameEvent");
+    bool setGameEvent(int event) __asm__("cBENewRaceInterface_setGameEvent");
     void* getEventName1(int i) __asm__("cBENewRaceInterface_getEventName1");
     void* getModeName1(int gameMode) __asm__("cBENewRaceInterface_getModeName1");
     int getSimThreshold(int kind, int place, int mode) __asm__("cBENewRaceInterface_getSimThreshold");
@@ -131,6 +131,9 @@ struct cBENewRaceInterface : public cBEInterface {
     int getPeakSplitTimePoints(int gameEvent, int tier, int checkpoint)
         __asm__("cBENewRaceInterface_getPeakSplitTimePoints");
     int getPlatinumGoal(int idx, int mode) __asm__("cBENewRaceInterface_getPlatinumGoal");
+    // getPlatinumGoal's result for an event with no platinum target (name ours): [U] it returns -1 for the peaks' time
+    // and points challenges and unknown events, and cBEScoreInterface_processRiderRanking then keeps the rank's medal.
+    enum { kNoPlatinumGoal = -1 };
     int getRival() __asm__("cBENewRaceInterface_getRival");
     int getLocationDefaultGameMode(unsigned int location) __asm__("cBENewRaceInterface_getLocationDefaultGameMode");
     int getLocationDefaultGameEvent(int idx) __asm__("cBENewRaceInterface_getLocationDefaultGameEvent");
@@ -225,6 +228,17 @@ enum eBELocationID {
 // kGAMEEVENT_TIME_PEAK1 .. 3 (cUITemplate_MAP_isMapEventCompleted).
 enum eBEPeakID {
     kPEAK_1 = 0, kPEAK_2 = 1, kPEAK_3 = 2, kPEAK_NUM = 3
+};
+
+// A location's type (tBELocationDB::type, cBENewRaceInterface::getLocationType). [O] On Tour's enum eBELocationType,
+// names and values; [R] cBELibrary_locationDB gives the 17 tracks 0 and the five stations 1.
+enum eBELocationType { kLOCATIONTYPE_COURSE = 0, kLOCATIONTYPE_HUB = 1, kLOCATIONTYPE_NUM = 2 };
+
+// A section's type (cBENewRaceInterface::getSectionType). [O] On Tour's enum eBESectionType, names and values; [U]
+// cSectionMan_update hands a finished kSECTIONTYPE_SKY section to skyLoadComplete.
+enum eBESectionType {
+    kSECTIONTYPE_COURSE = 0, kSECTIONTYPE_HUB = 1, kSECTIONTYPE_SPOKE = 2, kSECTIONTYPE_TRANSPORT = 3,
+    kSECTIONTYPE_SKY = 4, kSECTIONTYPE_NUM = 5
 };
 
 // tBELocationDB: one race location (17 tracks, 5 stations and the debug track). [O] On Tour struct tBELocationDB

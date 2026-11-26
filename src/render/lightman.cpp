@@ -175,12 +175,13 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
 /**
  * Creates the light instances for a block of light records (directional, spot, point or ambient).
  *
- * For each record i, fetches light @p base + i through vtable slot 2 (cPS2LightMan_GetLightObj), stores the record pointer in its
- * first word and builds an ARGB colour (alpha 1.0, rgb from +0x20). The record type (+0x10) picks the cLightInst
- * creator: 0 directional (cLightInst_CreateDirectional, normalised direction +0x2C), 2 point (cLightInst_CreatePoint, position +0x38, decay
- * byte +0x64), 1 spot (cLightInst_CreateSpot, cone angle pi/2 - func_0031C128(+0x5C), decay and dropoff bytes +0x64/+0x65), 3
- * ambient (cLightInst_CreateAmbient); intensity is +0x14. On the PS2 the four cLightInst creators are empty stubs, so only the
- * record pointer sticks. Vtable slot 5 of vt_00493650.
+ * For each record i, fetches light @p base + i through vtable slot 2 (cPS2LightMan_GetLightObj), stores the record
+ * pointer in its first word and builds an ARGB colour (alpha 1.0, rgb from +0x20). The record type (+0x10) picks the
+ * cLightInst creator: eNEWLight_Directional (cLightInst_CreateDirectional, normalised direction +0x2C), eNEWLight_Point
+ * (cLightInst_CreatePoint, position +0x38, decay byte +0x64), eNEWLight_Spot (cLightInst_CreateSpot, cone angle pi/2 -
+ * func_0031C128(+0x5C), decay and dropoff bytes +0x64/+0x65), eNEWLight_Ambient (cLightInst_CreateAmbient); intensity
+ * is +0x14. On the PS2 the four cLightInst creators are empty stubs, so only the record pointer sticks. Vtable slot 5
+ * of vt_00493650.
  *
  * @param lights  the light records (0x70 bytes each)
  * @param n       how many records to create
@@ -198,21 +199,21 @@ void cPS2LightMan::CreateLights(tLightRecord* lights, int n, int base)
         col.g = lights[i].m_fvColor[1];
         col.b = lights[i].m_fvColor[2];
         switch (lights[i].m_eLightType) {
-        case 0: {
+        case eNEWLight_Directional: {
             sV3_DC70 dir = Normalize_DC70((*(sV3_DC70*)&lights[i].m_fvDirection[0]).x, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).y, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).z);
             cLightInst_CreateDirectional_DC70(obj, &col, &dir, lights[i].m_fIntensity);
             break;
         }
-        case 2:
+        case eNEWLight_Point:
             cLightInst_CreatePoint_DC70(obj, &col, ((char*)&lights[i].m_fvWorldPos[0]), lights[i].m_fIntensity, lights[i].m_cDecayRate);
             break;
-        case 1: {
+        case eNEWLight_Spot: {
             char* pos = ((char*)&lights[i].m_fvWorldPos[0]);
             sV3_DC70 dir = Normalize_DC70((*(sV3_DC70*)&lights[i].m_fvDirection[0]).x, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).y, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).z);
             cLightInst_CreateSpot_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].unk_05C), lights[i].m_fIntensity, lights[i].m_cDecayRate, (float)lights[i].m_cDropOff);
             break;
         }
-        case 3:
+        case eNEWLight_Ambient:
             cLightInst_CreateAmbient_DC70(obj, &col, lights[i].m_fIntensity);
             break;
         }
@@ -1006,16 +1007,16 @@ extern char* D_004A5B84_F300 __asm__("D_004A5B84");
 /**
  * Splits the scratchpad into the buffers of the DMA ring for @p mode.
  *
- * Does nothing when the mode is unchanged. Modes 1 to 7 give 1, 2, 2, 2, 2, 3, 3 buffers of 0x400, 0x200, 0x1C0, 0x180,
- * 0x100, 320, 0x100 qwords at 0x70000000 + i * size * 16; both indices and all addresses and sizes are reset.
- * D_004A5B84 gets the scratchpad space after the buffers, or 0 when none is left. Then it waits for both scratchpad DMA
- * channels (func_0038F768, func_0038F7B0). The ring object (D_004A4474): mode +0, buffer count +4, next buffer +8,
- * current buffer +0xC, default size in qwords +0x10, scratchpad buffers +0x14[3], main-memory addresses +0x20[3], sizes
- * +0x2C[3].
+ * Does nothing when the mode is unchanged. Modes kLayout_1x1024 to kLayout_3x256 give 1, 2, 2, 2, 2, 3, 3 buffers of
+ * 0x400, 0x200, 0x1C0, 0x180, 0x100, 320, 0x100 qwords at 0x70000000 + i * size * 16; both indices and all addresses
+ * and sizes are reset. D_004A5B84 gets the scratchpad space after the buffers, or 0 when none is left. Then it waits
+ * for both scratchpad DMA channels (func_0038F768, func_0038F7B0). The ring object (D_004A4474): mode +0, buffer count
+ * +4, next buffer +8, current buffer +0xC, default size in qwords +0x10, scratchpad buffers +0x14[3], main-memory
+ * addresses +0x20[3], sizes +0x2C[3].
  *
  * Callers: __sti__all_in_one_render_cpp and func_00363490.
  *
- * @param mode  the layout, 1 to 7
+ * @param mode  the layout, cPS2ScratchPad::eLayout
  */
 extern "C" void func_0038F300(cPS2ScratchPad* self, int mode)
 {
@@ -1025,26 +1026,26 @@ extern "C" void func_0038F300(cPS2ScratchPad* self, int mode)
     }
     self->unk_00 = mode;
     switch (mode) {
-    case 1: self->unk_04 = 1; break;
-    case 2: self->unk_04 = 2; break;
-    case 3: self->unk_04 = 2; break;
-    case 4: self->unk_04 = 2; break;
-    case 5: self->unk_04 = 2; break;
-    case 6:
-    case 7:
+    case cPS2ScratchPad::kLayout_1x1024: self->unk_04 = 1; break;
+    case cPS2ScratchPad::kLayout_2x512: self->unk_04 = 2; break;
+    case cPS2ScratchPad::kLayout_2x448: self->unk_04 = 2; break;
+    case cPS2ScratchPad::kLayout_2x384: self->unk_04 = 2; break;
+    case cPS2ScratchPad::kLayout_2x256: self->unk_04 = 2; break;
+    case cPS2ScratchPad::kLayout_3x320:
+    case cPS2ScratchPad::kLayout_3x256:
         self->unk_04 = 3;
         break;
     }
     self->unk_08 = 0;
     self->mDMABlock = 0;
     switch (mode) {
-    case 1: self->mBlockSize = 0x400; break;
-    case 2: self->mBlockSize = 0x200; break;
-    case 3: self->mBlockSize = 0x1C0; break;
-    case 4: self->mBlockSize = 0x180; break;
-    case 6: self->mBlockSize = 320; break;
-    case 5:
-    case 7:
+    case cPS2ScratchPad::kLayout_1x1024: self->mBlockSize = 0x400; break;
+    case cPS2ScratchPad::kLayout_2x512: self->mBlockSize = 0x200; break;
+    case cPS2ScratchPad::kLayout_2x448: self->mBlockSize = 0x1C0; break;
+    case cPS2ScratchPad::kLayout_2x384: self->mBlockSize = 0x180; break;
+    case cPS2ScratchPad::kLayout_3x320: self->mBlockSize = 320; break;
+    case cPS2ScratchPad::kLayout_2x256:
+    case cPS2ScratchPad::kLayout_3x256:
         self->mBlockSize = 0x100;
         break;
     }
@@ -1646,19 +1647,19 @@ extern "C" int func_0038FED0(void* self, int w, int height, unsigned char* src, 
     int j;
     int k;
 
-    for (i = 0; i < 11; i++) {
+    for (i = 0; i < cTextureMan::kNumTexSides; i++) {
         if (w == (0x400 >> i))
             break;
     }
-    if (i == 11)
+    if (i == cTextureMan::kNumTexSides)
         return -1;
     memset(tile, 0, 0x2000);
     memset(out, 0, 0x2000);
-    for (i = 0; i < 11; i++) {
+    for (i = 0; i < cTextureMan::kNumTexSides; i++) {
         if (height == (0x400 >> i))
             break;
     }
-    if (i == 11)
+    if (i == cTextureMan::kNumTexSides)
         return -1;
 
     int nx = (w - 1) / 128 + 1;
@@ -1735,17 +1736,17 @@ extern "C" int func_00390198(cTextureMan* self, int w, int height, unsigned char
     int i;
     int j;
     int k;
-    for (i = 0; i < 11; i++) {
+    for (i = 0; i < cTextureMan::kNumTexSides; i++) {
         if (w == (0x400 >> i))
             break;
     }
-    if (i == 11)
+    if (i == cTextureMan::kNumTexSides)
         return -1;
-    for (i = 0; i < 11; i++) {
+    for (i = 0; i < cTextureMan::kNumTexSides; i++) {
         if (height == (0x400 >> i))
             break;
     }
-    if (i == 11)
+    if (i == cTextureMan::kNumTexSides)
         return -1;
     memset(bufA, 0, 0x2000);
     memset(bufB, 0, 0x2000);
@@ -2061,18 +2062,18 @@ extern int cScreenTint_m_timeTillThunder;
 /**
  * Reports once that the thunder of the last lightning flash is due.
  *
- * When cScreenTint_m_LightningEnable is set and the countdown cScreenTint_m_timeTillThunder has reached 0, sets it to -1 and returns 1.
- * Caller: cSSXAudio_Update (audio).
+ * When cScreenTint_m_LightningEnable is set and the countdown cScreenTint_m_timeTillThunder has reached 0, sets it to
+ * -1 and returns true. Caller: cSSXAudio_Update (audio).
  *
- * @return 1 on the frame the thunder is due, else 0
+ * @return true on the frame the thunder is due, else false
  */
-extern "C" int PlayThunder()
+extern "C" bool PlayThunder()
 {
     if (cScreenTint_m_LightningEnable != 0 && cScreenTint_m_timeTillThunder == 0) {
         cScreenTint_m_timeTillThunder = -1;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 

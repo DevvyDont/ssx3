@@ -16,6 +16,7 @@
 #include "sound/fileparser.h"
 #include "sound/banksys.h"
 #include "sound/ssxaudio.h"
+#include "be/beintoption.h"
 #include "be/beintnewrace.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"

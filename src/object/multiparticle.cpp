@@ -458,7 +458,8 @@ extern "C" void cRailManNode_unloadSection(int kind)
     if (cRailManNode_ActiveNode != 0) {
         for (i = 0; i < 0x80; i++) {
             sMpMgr_8700* railMan = (sMpMgr_8700*)cRailManNode_ActiveNode;
-            if (((unsigned int*)((char*)railMan + 0x18))[i] != 0xFFFFFFFF && railMan->slots[i].kind == kind) {
+            if (((unsigned int*)((char*)railMan + 0x18))[i] != tResourceID::kInvalidRID
+                && railMan->slots[i].kind == kind) {
                 ((cRailManNode*)railMan)->enableRail(i);
             }
         }
@@ -695,9 +696,9 @@ extern "C" void cRailManNode_addRail(tResourceID key, int add)
         ((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0))->cRailManNode1((void*)1);
     }
     tRailInfo kFree;
-    int idx = -1;
+    int idx = cRailManNode::kNoSlot;
     for (int i = 0; i < 128; i++) {
-        if (idx == -1 && cRailManNode_ActiveNode_mgr8B28->RailInfo[i].RailRID == kFree.RailRID) {
+        if (idx == cRailManNode::kNoSlot && cRailManNode_ActiveNode_mgr8B28->RailInfo[i].RailRID == kFree.RailRID) {
             idx = i;
         }
         if (cRailManNode_ActiveNode_mgr8B28->RailInfo[i].RailRID == key) {
@@ -707,7 +708,7 @@ extern "C" void cRailManNode_addRail(tResourceID key, int add)
     }
 found:
     cRailManNode* mgr = cRailManNode_ActiveNode_mgr8B28;
-    if (idx != -1) {
+    if (idx != cRailManNode::kNoSlot) {
         tRailInfo& railSlot = mgr->RailInfo[idx];
         if (railSlot.RailRID == key) {
             if (add == 0) {
@@ -890,15 +891,16 @@ extern "C" int cAnimNode_frameUpdate(void* p);
 /**
  * Updates an anim combo node for one frame.
  *
- * Resets the frame-event times (+0x3C, +0x40) to 1e10. When stopped (+0x15) it returns 1 at once. When the second range
- * is not active (+0x14) it runs the normal animated-object update (cAnimObjectNode_updateNode). When active it counts down the start
- * delay (+0x24); once that is 0 it advances the time (+0x4) by the step, sets the frame events to the current frame,
- * and on reaching the end (+0xC) clamps there, ends the range and marks the node stopped if Stop is set; it returns 0
- * when the frame-update script (cAnimNode_frameUpdate) says so. Otherwise sets RootTransformDirty (+0x5A) and returns 1.
+ * Resets the frame-event times (+0x3C, +0x40) to 1e10. When stopped (+0x15) it returns true at once. When the second
+ * range is not active (+0x14) it runs the normal animated-object update (cAnimObjectNode_updateNode). When active it
+ * counts down the start delay (+0x24); once that is 0 it advances the time (+0x4) by the step, sets the frame events to
+ * the current frame, and on reaching the end (+0xC) clamps there, ends the range and marks the node stopped if Stop is
+ * set; it returns 0 when the frame-update script (cAnimNode_frameUpdate) says so. Otherwise sets RootTransformDirty
+ * (+0x5A) and returns true.
  *
- * @return 0 when the frame-update script asks to stop updating, else 1
+ * @return false when the frame-update script asks to stop updating, else true
  */
-int cAnimComboNode::updateNode()
+bool cAnimComboNode::updateNode()
 {
     FrameStart = 10000000000.0f;
     FrameEnd = 10000000000.0f;
@@ -923,17 +925,17 @@ int cAnimComboNode::updateNode()
                         *(signed char*)&AnimActive2 = 0;
                     }
                     if (cAnimNode_frameUpdate(&CurrTime) == 0) {
-                        return 0;
+                        return false;
                     }
                 }
             }
         } else {
             cAnimObjectNode_updateNode(&AnimType);
-            return 1;
+            return true;
         }
         Flags |= 1;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -970,17 +972,17 @@ extern "C" void cAnimObjectNode_signal(void*);
 extern "C" void cAnimComboNode_setComboXform(cAnimComboNode*);
 
 /**
- * Handles a signal on an anim combo node: signal 130 starts the second time range.
+ * Handles a signal on an anim combo node: kAnimComboSignal_Start2 starts the second time range.
  *
- * For 130, when neither active nor stopped (+0x14, +0x15), it copies +0x38 to +0x10, snapshots the current mesh
- * matrices (cAnimComboNode_setComboXform), marks the range active and sets the time to its start (+0x8). Any other signal goes to the
- * animated-object handler cAnimObjectNode_signal.
+ * For kAnimComboSignal_Start2, when neither active nor stopped (+0x14, +0x15), it copies +0x38 to +0x10, snapshots the
+ * current mesh matrices (cAnimComboNode_setComboXform), marks the range active and sets the time to its start (+0x8).
+ * Any other signal goes to the animated-object handler cAnimObjectNode_signal.
  *
  * @param msg  signal id
  */
 void cAnimComboNode::signal(int msg)
 {
-    if (msg == 130) {
+    if (msg == kAnimComboSignal_Start2) {
         if (*(unsigned short*)&AnimActive2 == 0) {
             ComboTime = CacheTime;
             setComboXform();
@@ -1191,9 +1193,9 @@ extern "C" void cAnimObjectNode_updateNode(void* p);
  * Quirk: the branch that expires the node (vtable entry 34) re-tests +0x8, which is already known to be 0, so it never
  * runs.
  *
- * @return 0 only from that dead expire branch, else 1
+ * @return false only from that dead expire branch, else true
  */
-int cAnimDeltaNode::updateNode()
+bool cAnimDeltaNode::updateNode()
 {
     FrameStart = 10000000000.0f;
     FrameEnd = 10000000000.0f;
@@ -1215,7 +1217,7 @@ int cAnimDeltaNode::updateNode()
                 } else {
                     AnimActive = 0;
                 }
-                return 1;
+                return true;
             }
         } else {
             if (countdown > 0) {
@@ -1226,12 +1228,12 @@ int cAnimDeltaNode::updateNode()
                 sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mVtbl;
                 sVEntry<void(void*, int)>* vtEntry = &vt[34];
                 vtEntry->fn(vthis(obj, *vtEntry), 1);
-                return 0;
+                return false;
             }
         }
         Flags |= 1;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1242,14 +1244,15 @@ INCLUDE_ASM("object/multiparticle", cAnimDeltaNode_signal);
 extern "C" void cAnimObjectNode_signal_set(void* self, int id, float v) __asm__("cAnimObjectNode_signal");
 
 /**
- * Handles a signal on an anim delta node: signal 140 adds arg / 30 to Delta (+0x6C); others go to cAnimObjectNode_signal.
+ * Handles a signal on an anim delta node: kAnimDeltaSignal_AddDelta adds arg / 30 to Delta (+0x6C); others go to
+ * cAnimObjectNode_signal.
  *
  * @param id  signal id
  * @param signalArg  signal argument
  */
 void cAnimDeltaNode::signal(int id, float signalArg)
 {
-    if (id == 140) {
+    if (id == kAnimDeltaSignal_AddDelta) {
         Delta += signalArg * 0.03333333507180214f;
     } else {
         cAnimObjectNode_signal_set(this, id, signalArg);

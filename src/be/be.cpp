@@ -78,11 +78,11 @@ INCLUDE_ASM("be/be", cBE_IsBEInitialized);
 extern int cBE_BEInitialized;
 
 /**
- * Returns whether the back end has been initialised: 1 when cBE_BEInitialized is nonzero, else 0.
+ * Returns whether the back end has been initialised: true when cBE_BEInitialized is nonzero.
  *
- * @return 1 or 0
+ * @return true when initialised
  */
-extern "C" int cBE_IsBEInitialized(void) {
+extern "C" bool cBE_IsBEInitialized(void) {
     return cBE_BEInitialized != 0;
 }
 #endif

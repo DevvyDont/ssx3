@@ -1177,8 +1177,9 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
 /**
  * Draws a moving node's object when it is visible, enabled, not culled, and not hidden by the transfer flag.
  *
- * Culls with its bound box or the object's bounds, picks animation matrices or the root transform, applies
- * modifier rotation and lighting, and draws with its fade through GrMan slot 95.
+ * Culls with its bound box or the object's bounds (GrMan's ClipBoundBox, skipped on GM_CLIPCODE_OUTSIDE), picks
+ * animation matrices or the root transform, applies modifier rotation and lighting (flag 0x2000 under a
+ * kTransform_AvaSpline modifier), and draws with its fade through GrMan slot 95.
  */
 extern "C" void cMoveNode_render(cMoveNode* self)
 {
@@ -1193,7 +1194,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         tModifierBlock_render(((sMnMod_6298*)self->ModifierBlock));
         cMnOwner_6298* modOwner = ((sMnMod_6298*)self->ModifierBlock)->owner;
         if (modOwner) {
-            if (modOwner->getTransformType() == 7) {
+            if (modOwner->getTransformType() == cTransformModifier::kTransform_AvaSpline) {
                 flags |= 0x2000;
             }
         }
@@ -1225,7 +1226,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         objBounds[1].w = 1.0f;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, &objBounds[0], &objBounds[1], ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
     }
-    if (res == 1) {
+    if (res == GM_CLIPCODE_OUTSIDE) {
         return;
     }
     flags |= 0x400;
@@ -1479,14 +1480,14 @@ extern "C" int tModifierBlock_getBoundBox(void*);
 /**
  * Tells whether the node's modifier block provides a bounding box.
  *
- * @return 1 when the node has a modifier block whose tModifierBlock_getBoundBox() is non-null, otherwise 0
+ * @return true when the node has a modifier block whose tModifierBlock_getBoundBox() is non-null
  */
-extern "C" int cMoveNode_hasBoundBox(cMoveNode* self)
+extern "C" bool cMoveNode_hasBoundBox(cMoveNode* self)
 {
     if (((void*)self->ModifierBlock) != 0) {
         return tModifierBlock_getBoundBox(((void*)self->ModifierBlock)) != 0;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1668,20 +1669,20 @@ static inline int VCall_6BF0(char* o, int i)
     return vt[i].fn(vthis(o, vt[i]));
 }
 /**
- * Tells whether the node keeps a focus count, which only a type-2 root transform modifier does.
+ * Tells whether the node keeps a focus count, which only a kTransform_MultiSpline root transform modifier does.
  *
- * @return 1 when it does, otherwise 0
+ * @return true when it does
  */
 // Does the modifier object's virtual slot 26 report state 2?
-extern "C" int cMoveNode_hasFocusCount(cMoveNode* self)
+extern "C" bool cMoveNode_hasFocusCount(cMoveNode* self)
 {
     char** modBlock = (char**)self->ModifierBlock;
     if (modBlock != 0) {
         char* transformModifier = *modBlock;
-        if (transformModifier != 0 && VCall_6BF0(transformModifier, 26) == 2)
-            return 1;
+        if (transformModifier != 0 && VCall_6BF0(transformModifier, 26) == cTransformModifier::kTransform_MultiSpline)
+            return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1694,7 +1695,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_incFocusCount);
 int cMultiSplineModifier_incFocusCount_2(void* self, void* a1) __asm__("cMultiSplineModifier_incFocusCount__FPv");
 
 /**
- * Increments the focus count of a type-2 root transform modifier.
+ * Increments the focus count of a kTransform_MultiSpline root transform modifier.
  *
  * @param pInst  the instance gaining focus (unused by the counter)
  * @return the new count, or 0 when the node keeps no focus count
@@ -1706,7 +1707,7 @@ extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
         void* node = *(void**)block;
         if (node != 0) {
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)node;
-            if (vt[26].fn(vthis(node, vt[26])) == 2) {
+            if (vt[26].fn(vthis(node, vt[26])) == cTransformModifier::kTransform_MultiSpline) {
                 return cMultiSplineModifier_incFocusCount_2(*(void**)self->ModifierBlock, pInst);
             }
         }
@@ -1730,7 +1731,7 @@ struct sMnVEntryI6CC8 {
 int cMultiSplineModifier_decFocusCount_2(void* self, void* a1) __asm__("cMultiSplineModifier_decFocusCount__FPv");
 
 /**
- * Decrements the focus count of a type-2 root transform modifier.
+ * Decrements the focus count of a kTransform_MultiSpline root transform modifier.
  *
  * @param pInst  the instance losing focus (unused by the counter)
  * @return the new count, or 0 when the node keeps no focus count
@@ -1742,7 +1743,7 @@ extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
         void* node = *(void**)block;
         if (node != 0) {
             sMnVEntryI6CC8* vt = *(sMnVEntryI6CC8**)node;
-            if (vt[26].fn(vthis(node, vt[26])) == 2) {
+            if (vt[26].fn(vthis(node, vt[26])) == cTransformModifier::kTransform_MultiSpline) {
                 return cMultiSplineModifier_decFocusCount_2(*(void**)self->ModifierBlock, pInst);
             }
         }
@@ -1758,8 +1759,8 @@ INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
 /**
  * Returns the focus count of a node driven by a multi-spline modifier.
  *
- * Only a transform modifier whose getTransformType() (slot 26) is 2, cMultiSplineModifier, has one: its FocusCount
- * (+0x34).
+ * Only a transform modifier whose getTransformType() (slot 26) is kTransform_MultiSpline, cMultiSplineModifier, has
+ * one: its FocusCount (+0x34).
  *
  * @return the modifier's count, or 0 when there is no modifier block, no modifier or another modifier type
  */
@@ -1773,7 +1774,7 @@ extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
     if (node == 0) {
         return 0;
     }
-    if (node->getTransformType() != 2) {
+    if (node->getTransformType() != cTransformModifier::kTransform_MultiSpline) {
         return 0;
     }
     return ((cMultiSplineModifier*)self->ModifierBlock->RootTransform)->FocusCount;

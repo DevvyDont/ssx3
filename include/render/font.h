@@ -32,6 +32,12 @@ struct tGlyph {
 };
 
 struct cFont {
+    // Character codes linkFont treats specially (Latin-1; names ours): [U] cFont_linkFont makes the glyph of
+    // kChar_NotSign (0xAC) the MissingGlyph and gives kChar_NoBreakSpace (0xA0) the space glyph's width and height.
+    enum { kChar_NoBreakSpace = 160, kChar_NotSign = 172 };
+    // [U] textSmartLimit / textSmartLimit1 keep the index of the last character before a space as the place to break
+    // the line; it starts at kNoBreakPoint, and while it is still there the text is cut inside the word (names ours).
+    enum { kNoBreakPoint = -1 };
     int NumGlyphs;                  // 0x00 [O]; [U] cFont_linkFont, cFont_charAdvance
     tGlyph* Glyphs;                 // 0x04 [O]; [U] ditto
     tGlyph* MissingGlyph;           // 0x08 [O]; [R] ctor zeroes it; [U] cFont_charAdvance falls back to it

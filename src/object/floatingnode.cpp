@@ -332,7 +332,7 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
     int i;
     for (i = 0; i < skel->m_iNumMeshes; i++, bone++) {
         t4Matrix boneMat;
-        if (bone->m_iParentID != -1) {
+        if (bone->m_iParentID != tMeshHeirarchyRecord::kNoParent) {
             Pose_F120(&boneMat, &out[bone->m_iParentID], ((t4Matrix*)bone->m_pMeshMatrix), scale);
             Copy_F120(&out[i], &boneMat);
         } else {
@@ -716,9 +716,9 @@ extern char cInstanceNode_vtbl[];
 /**
  * Constructs the instance-node base of a node for a placed instance.
  *
- * Runs the sort-node constructor cSortObjNode_cSortObjNode1, stores the record in Instance, installs cInstanceNode_vtbl and makes
- * this node the record's active node (cInstanceNode_setActiveNode). Unless the record flags have bit 0x100 or the type is 6, 0x10 or
- * 22, it also passes the record to cObjectInterface_addToFocusBox.
+ * Runs the sort-node constructor cSortObjNode_cSortObjNode1, stores the record in Instance, installs cInstanceNode_vtbl
+ * and makes this node the record's active node (cInstanceNode_setActiveNode). Unless the record flags have bit 0x100 or
+ * the type is ATYPE_DEAD, ATYPE_HIDE or ATYPE_DEADFADE, it also passes the record to cObjectInterface_addToFocusBox.
  *
  * @param bucket  update bucket
  * @param type  node type (tObjNodeType)
@@ -732,7 +732,7 @@ void* cInstanceNode::cInstanceNode1(void* bucket, int type, cInstanceNode* node)
     VPTR_OF(cObjNode, this) = (void**)cInstanceNode_vtbl;
     cInstanceNode_setActiveNode(this, node);
     if (((int)node->Prev & 0x100) == 0) {
-        if (type != 6 && type != 0x10 && type != 22) {
+        if (type != ATYPE_DEAD && type != ATYPE_HIDE && type != ATYPE_DEADFADE) {
             cObjectInterface_addToFocusBox(node);
         }
     }

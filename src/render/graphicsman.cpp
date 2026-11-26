@@ -25,7 +25,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_AddBlendedMatrix);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_BlendedMatrixHistory[];
 
-extern "C" int areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int tol2);
+extern "C" bool areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int tol2);
 
 /**
  * Adds a skinning blend matrix to the shared history, or reuses a near-identical one already there.
@@ -99,9 +99,9 @@ static inline int iabs_9A78(int v)
  * @param tol0  largest allowed difference of the first weights
  * @param tol1  largest allowed difference of the second weights
  * @param tol2  largest allowed difference of the third weights
- * @return 1 when the two records are treated as the same blended matrix, else 0
+ * @return true when the two records are treated as the same blended matrix, else false
  */
-extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, int tol2)
+extern "C" bool areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, int tol2)
 {
     tMdfBlendedMatrix* lhs = (tMdfBlendedMatrix*)ap;
     tMdfBlendedMatrix* rhs = (tMdfBlendedMatrix*)bp;
@@ -112,13 +112,13 @@ extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, i
     switch (lhs->m_iNumMatrices) {
     case 1:
         if (lhs->m_matrixList[0].m_iWeight == rhs->m_matrixList[0].m_iWeight)
-            return 1;
+            return true;
         break;
     case 2:
         if (lhs->m_matrixList[0].m_iWeight == rhs->m_matrixList[0].m_iWeight
             && componentKey(&lhs->m_matrixList[1]) == componentKey(&rhs->m_matrixList[1])
             && lhs->m_matrixList[1].m_iWeight == rhs->m_matrixList[1].m_iWeight)
-            return 1;
+            return true;
         break;
     case 3:
         break;
@@ -131,17 +131,17 @@ extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, i
             || iabs_9A78(lhs->m_matrixList[1].m_iWeight - rhs->m_matrixList[1].m_iWeight) > tol1
             || iabs_9A78(lhs->m_matrixList[2].m_iWeight - rhs->m_matrixList[2].m_iWeight) > tol2)
             goto fail;
-        return 1;
+        return true;
     }
     if (componentKey(&lhs->m_matrixList[2]) == componentKey(&rhs->m_matrixList[1])
         && componentKey(&lhs->m_matrixList[1]) == componentKey(&rhs->m_matrixList[2])) {
         if (iabs_9A78(lhs->m_matrixList[0].m_iWeight - rhs->m_matrixList[0].m_iWeight) <= tol0
             && iabs_9A78(lhs->m_matrixList[2].m_iWeight - rhs->m_matrixList[1].m_iWeight) <= tol1
             && iabs_9A78(lhs->m_matrixList[1].m_iWeight - rhs->m_matrixList[2].m_iWeight) <= tol2)
-            return 1;
+            return true;
     }
 fail:
-    return 0;
+    return false;
 }
 #endif
 
@@ -2749,7 +2749,7 @@ void cStaticEmitter::render1()
     tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, gfx);
     tNetMatrixSlot* vtMat = (tNetMatrixSlot*)vt;
     if (vt[93].fn(vthis(gfx, vt[93]), &BoundBox.MinPoint, &BoundBox.MaxPoint,
-                  vtMat[43].fn(vthis(gfx, vtMat[43]))) == 1) {
+                  vtMat[43].fn(vthis(gfx, vtMat[43]))) == GM_CLIPCODE_OUTSIDE) {
         return;
     }
     if (m_initialized == 0) {

@@ -17,6 +17,7 @@
 #include "main/sectionman.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
+#include "main/gamestate.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "render/graphicsman.h"
@@ -730,16 +731,16 @@ static inline bool IsSection(const int& id)
  * Unloads each of the 0x32 sections that is not in the location's list (cSectionMan_mLocationMap) and not one of the kept
  * sections 0x2B-0x30, stores the location at +0x1BC (clearing +0x1C0), loads the location's sections, its sky
  * section (default 0x31; +0x1A4 cleared first) and its transport section, then the mode with cSectionMan_loadMode.
- * Mode 7 means the location's default mode from cSectionMan_mLocationModeMap.
+ * kSMMode_Default means the location's default mode from cSectionMan_mLocationModeMap.
  *
  * @param idx   the location (On Tour eBELocationID)
- * @param mode  the section manager mode, or 7 for the location's default
+ * @param mode  the section manager mode, or kSMMode_Default for the location's default
  */
 extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
 {
     cSectionMan* self = (cSectionMan*)vself;
     int resolvedMode;
-    if (mode == 7) {
+    if (mode == kSMMode_Default) {
         resolvedMode = cSectionMan_mLocationModeMap[idx].mode;
     } else {
         resolvedMode = mode;
@@ -812,7 +813,7 @@ extern "C" void cSectionMan_setSky(void* self, int sky);
  * Activates a location: unloads every section it does not use, activates its sections and sky, then its event
  * mode.
  *
- * Sky sections 0x2B-0x30 are never unloaded here. Mode 7 (default) uses the location's own mode.
+ * Sky sections 0x2B-0x30 are never unloaded here. kSMMode_Default uses the location's own mode.
  *
  * @param idx  the location (On Tour eBELocationID LocationID)
  * @param mode  the event mode (On Tour eSectionManMode Mode)
@@ -820,7 +821,7 @@ extern "C" void cSectionMan_setSky(void* self, int sky);
 void cSectionMan::activate(int idx, int mode)
 {
     int sectionMode;
-    if (mode == 7) {
+    if (mode == kSMMode_Default) {
         sectionMode = cSectionMan_mLocationModeMap_D088[idx].f4;
     } else {
         sectionMode = mode;
@@ -946,8 +947,8 @@ extern "C" void cSectionMan_addActiveEvent(void* self);
 /**
  * Queues a section for loading unless it is already loaded or on its way.
  *
- * An empty or unloading section (states 0, 7) becomes load-queued (3); one queued for unload (5) goes back to
- * loaded (1).
+ * An empty or unloading section (kSectionMap_Empty, kSectionMap_UnLoading) becomes kSectionMap_LoadQueue; one queued
+ * for unload (kSectionMap_UnLoadQueue) goes back to kSectionMap_Loaded.
  *
  * @param idx  the back-end section (On Tour eBESectionID SectionID)
  */
@@ -956,15 +957,20 @@ void cSectionMan::loadSection(int idx)
     if (cSectionMan_mSectionMap[idx].iWorldSectionID >= 0) {
         int changed = 0;
         switch (cSectionMan_mSectionMap[idx].State) {
-        case 5:
-            cSectionMan_mSectionMap[idx].State = 1;
+        case kSectionMap_UnLoadQueue:
+            cSectionMan_mSectionMap[idx].State = kSectionMap_Loaded;
             changed = 1;
             break;
-        case 0: case 7:
-            cSectionMan_mSectionMap[idx].State = 3;
+        case kSectionMap_Empty: case kSectionMap_UnLoading:
+            cSectionMan_mSectionMap[idx].State = kSectionMap_LoadQueue;
             changed = 1;
             break;
-        case 1: case 2: case 3: case 4: case 6: case 8:
+        case kSectionMap_Loaded:
+        case kSectionMap_Active:
+        case kSectionMap_LoadQueue:
+        case kSectionMap_LoadActivateQueue:
+        case kSectionMap_Loading:
+        case kSectionMap_LoadingActivate:
             break;
         }
         if (changed) {
@@ -985,9 +991,9 @@ void cWorldView_activateSection_478(void* mgr, int handle) __asm__("cWorldView_a
 /**
  * Makes a section active: at once when it is loaded, otherwise once its load finishes.
  *
- * A loaded section (1, or 5 queued for unload) is activated in the world view (2); empty or queued sections
- * become
- * load-and-activate queued (4), and one loading (6) is marked to activate when loaded (8).
+ * A loaded section (kSectionMap_Loaded, or kSectionMap_UnLoadQueue) is activated in the world view
+ * (kSectionMap_Active); empty, unloading or load-queued sections become kSectionMap_LoadActivateQueue, and one
+ * kSectionMap_Loading is marked to activate when loaded (kSectionMap_LoadingActivate).
  *
  * @param i  the back-end section (On Tour eBESectionID SectionID)
  */
@@ -998,30 +1004,30 @@ void cSectionMan::activateSection(int i)
         return;
     changed = 0;
     switch (cSectionMan_mSectionMap[i].State) {
-    case 0:
-        cSectionMan_mSectionMap[i].State = 4;
+    case kSectionMap_Empty:
+        cSectionMan_mSectionMap[i].State = kSectionMap_LoadActivateQueue;
         changed = 1;
         break;
-    case 7:
-        cSectionMan_mSectionMap[i].State = 4;
+    case kSectionMap_UnLoading:
+        cSectionMan_mSectionMap[i].State = kSectionMap_LoadActivateQueue;
         changed = 1;
         break;
-    case 3:
-        cSectionMan_mSectionMap[i].State = 4;
+    case kSectionMap_LoadQueue:
+        cSectionMan_mSectionMap[i].State = kSectionMap_LoadActivateQueue;
         changed = 1;
         break;
-    case 6:
-        cSectionMan_mSectionMap[i].State = 8;
+    case kSectionMap_Loading:
+        cSectionMan_mSectionMap[i].State = kSectionMap_LoadingActivate;
         changed = 1;
         break;
-    case 1:
-    case 5:
-        cSectionMan_mSectionMap[i].State = 2;
+    case kSectionMap_Loaded:
+    case kSectionMap_UnLoadQueue:
+        cSectionMan_mSectionMap[i].State = kSectionMap_Active;
         cWorldView_activateSection_478(*(char**)(char*)mpGame->World + 0x10,
                 cSectionMan_mSectionMap[i].iWorldSectionID);
         changed = 1;
         break;
-    case 8:
+    case kSectionMap_LoadingActivate:
         break;
     }
     if (changed)
@@ -1036,8 +1042,8 @@ INCLUDE_ASM("main/game", cSectionMan_unloadSection);
 extern "C" void cSectionMan_addActiveEvent(void* self);
 
 /**
- * Queues a section for unloading: a load-queued one goes back to empty, a loaded, active or loading one to
- * state 5.
+ * Queues a section for unloading: a load-queued one goes back to kSectionMap_Empty, a loaded, active or loading one
+ * to kSectionMap_UnLoadQueue.
  *
  * @param idx  the back-end section (On Tour eBESectionID SectionID)
  */
@@ -1046,15 +1052,19 @@ void cSectionMan::unloadSection(int idx)
     if (cSectionMan_mSectionMap[idx].iWorldSectionID >= 0) {
         int changed = 0;
         switch (cSectionMan_mSectionMap[idx].State) {
-        case 3:
-            cSectionMan_mSectionMap[idx].State = 0;
+        case kSectionMap_LoadQueue:
+            cSectionMan_mSectionMap[idx].State = kSectionMap_Empty;
             changed = 1;
             break;
-        case 1: case 2: case 6:
-            cSectionMan_mSectionMap[idx].State = 5;
+        case kSectionMap_Loaded: case kSectionMap_Active: case kSectionMap_Loading:
+            cSectionMan_mSectionMap[idx].State = kSectionMap_UnLoadQueue;
             changed = 1;
             break;
-        case 0: case 4: case 5: case 7: case 8:
+        case kSectionMap_Empty:
+        case kSectionMap_LoadActivateQueue:
+        case kSectionMap_UnLoadQueue:
+        case kSectionMap_UnLoading:
+        case kSectionMap_LoadingActivate:
             break;
         }
         if (changed) {
@@ -1087,7 +1097,10 @@ INCLUDE_ASM("main/game", cSectionMan_activateMode);
 /**
  * Requests a switch to an event mode, after its preload finishes when one is running.
  *
- * @param flag  the event mode (On Tour eSectionManMode Mode); 0 does nothing
+ * Idle, it stores the mode and goes to kSectionM_PreLoadQueueWait; a queued preload (kSectionM_PreLoadQueue) also
+ * goes to kSectionM_PreLoadQueueWait and a running one (kSectionM_PreLoading) to kSectionM_PreLoadingWait.
+ *
+ * @param flag  the event mode (On Tour eSectionManMode Mode); kSMMode_None does nothing
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void cSectionMan::activateMode(int flag)
@@ -1096,18 +1109,18 @@ void cSectionMan::activateMode(int flag)
         return;
     }
     switch (mModeState) {
-    case 0:
+    case kSectionM_Idle:
         mMode = flag;
-        mModeState = 3;
+        mModeState = kSectionM_PreLoadQueueWait;
         break;
-    case 1:
-        mModeState = 3;
+    case kSectionM_PreLoadQueue:
+        mModeState = kSectionM_PreLoadQueueWait;
         break;
-    case 2:
-        mModeState = 4;
+    case kSectionM_PreLoading:
+        mModeState = kSectionM_PreLoadingWait;
         break;
-    case 3:
-    case 4:
+    case kSectionM_PreLoadQueueWait:
+    case kSectionM_PreLoadingWait:
         break;
     }
 }
@@ -1133,62 +1146,61 @@ static inline bool Is_22D6C8(int m, int v)
 /**
  * Switches the race setup to the event the rider has entered while riding freely, and starts it.
  *
- * Only offline in game mode 4 (probably free ride), outside locations 14-16 and not for mode 1. Maps the
- * section
- * mode to the back end's game mode and event (race, slopestyle, big air, pipe, time challenge), resets the
- * riders'
- * stat totals and initializes the game mode.
+ * Only offline in kGAMEMODE_FREERIDE, outside locations 14-16, not for kSMMode_Freeride and only while riding
+ * (kGFSM_Riding). Maps the section mode to the back end's game mode and event (race, slopestyle, big air, pipe, time
+ * challenge), resets the riders' stat totals, initializes the game mode and enters kGFSM_EventStart.
  *
  * @param mode  the event mode (On Tour eSectionManMode Mode)
  */
 void cSectionMan::eventbegin(int mode)
 {
     cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    int skip = cBENewRaceInterface_newRace.cGamePath != 0 || !Is_22D6C8(cBENewRaceInterface_newRace.cGameMode,
-            4) || (unsigned int)(mBELocationID - 14) < 3 || mode == 1;
+    int skip = cBENewRaceInterface_newRace.cGamePath != 0
+               || !Is_22D6C8(cBENewRaceInterface_newRace.cGameMode, kGAMEMODE_FREERIDE)
+               || (unsigned int)(mBELocationID - 14) < 3 || mode == kSMMode_Freeride;
     if (skip) {
         return;
     }
     cBE_setState(0);
-    if (SSXApp->Game->mCurrentStateID != 4) {
+    if (SSXApp->Game->mCurrentStateID != kGFSM_Riding) {
         return;
     }
     cAI_resetRidersStatTotals(SSXApp->Game->AI);
     cSSXApp* app = SSXApp;
     app->Game->AI->EventTimerTick = 0;
     if ((unsigned int)(app->Game->SectionMan->mBELocationID - 14) < 3) {
-        cBENewRaceInterface_setGameMode(race, 4);
-        cBENewRaceInterface_setGameEvent(race, 12);
+        cBENewRaceInterface_setGameMode(race, kGAMEMODE_FREERIDE);
+        cBENewRaceInterface_setGameEvent(race, kGAMEEVENT_FREERIDE);
     } else {
         switch (mode) {
-        case 2:
-            cBENewRaceInterface_setGameMode(race, 0);
-            cBENewRaceInterface_setGameEvent(race, 0);
+        case kSMMode_Race:
+            cBENewRaceInterface_setGameMode(race, kGAMEMODE_RACE);
+            cBENewRaceInterface_setGameEvent(race, kGAMEEVENT_RACE);
             break;
-        case 3:
-            cBENewRaceInterface_setGameMode(race, 1);
-            cBENewRaceInterface_setGameEvent(race, 1);
+        case kSMMode_SlopeStype:
+            cBENewRaceInterface_setGameMode(race, kGAMEMODE_SLOPESTYLE);
+            cBENewRaceInterface_setGameEvent(race, kGAMEEVENT_SLOPESTYLE);
             break;
-        case 4:
-            cBENewRaceInterface_setGameMode(race, 2);
-            cBENewRaceInterface_setGameEvent(race, 3);
+        case kSMMode_BigAir:
+            cBENewRaceInterface_setGameMode(race, kGAMEMODE_BIGAIR);
+            cBENewRaceInterface_setGameEvent(race, kGAMEEVENT_BIGAIR);
             break;
-        case 5:
-            cBENewRaceInterface_setGameMode(race, 3);
-            cBENewRaceInterface_setGameEvent(race, 2);
+        case kSMMode_HalfPipe:
+            cBENewRaceInterface_setGameMode(race, kGAMEMODE_HALFPIPE);
+            cBENewRaceInterface_setGameEvent(race, kGAMEEVENT_SUPERPIPE);
             break;
-        case 6:
-            cBENewRaceInterface_setGameMode(race, 5);
-            cBENewRaceInterface_setGameEvent(race, 4);
+        case kSMMode_TimeChallenge:
+            cBENewRaceInterface_setGameMode(race, kGAMEMODE_TIMECHALLENGE);
+            cBENewRaceInterface_setGameEvent(race, kGAMEEVENT_RIVALTIME);
             break;
-        case 0:
-        case 1:
+        case kSMMode_None:
+        case kSMMode_Freeride:
             break;
         }
     }
     race->submit();
     cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace.cGameEvent);
-    cGame_setState(mpGame, 1, 1, 0);
+    cGame_setState(mpGame, kGFSM_EventStart, 1, 0);
 }
 #endif
 
@@ -1233,9 +1245,9 @@ static inline cWorldView* gameWorldView_22D8D8(void* self)
  * Runs the section streaming each frame: advances queued loads and unloads, the sky swap and the event-mode
  * switch.
  *
- * Finished sections leave the active list; queued loads start only when no unload is pending. It then picks
- * the
- * stream bandwidth (fastest while loading, 4 while a mode switch holds the stream) and sets m_bStreamReady.
+ * Finished sections leave the active list (a finished kSECTIONTYPE_SKY section goes to skyLoadComplete); queued
+ * loads start only when no unload is pending. It then picks the stream bandwidth (eStreamRate: kStreamRate_NormalLoad1
+ * while loading, kStreamRate_WaitLoad while a mode switch holds the stream) and sets m_bStreamReady.
  */
 void cSectionMan::update()
 {
@@ -1245,7 +1257,7 @@ void cSectionMan::update()
     }
     int* node = cSectionMan_getNextActiveEvent(this, 0);
     int* prev = 0;
-    if (node == 0 && mModeState == 0) {
+    if (node == 0 && mModeState == kSectionM_Idle) {
         return;
     }
     int busy = 0;
@@ -1258,31 +1270,31 @@ void cSectionMan::update()
         int remove = 0;
         int section = cSectionMan_mSectionMap[idx].iWorldSectionID;
         switch (cSectionMan_mSectionMap[idx].State) {
-        case 7:
+        case kSectionMap_UnLoading:
             if (cWorldView_isSectionUnLoaded(gameWorldView_22D8D8(this), section)) {
-                cSectionMan_mSectionMap[idx].State = 0;
+                cSectionMan_mSectionMap[idx].State = kSectionMap_Empty;
             } else {
                 busy = 1;
             }
             break;
-        case 5:
+        case kSectionMap_UnLoadQueue:
             if (cWorldView_unloadSection(gameWorldView_22D8D8(this), section)) {
-                cSectionMan_mSectionMap[idx].State = 7;
+                cSectionMan_mSectionMap[idx].State = kSectionMap_UnLoading;
                 cGame_sectionUnloading(mpGame, section);
             }
             busy = 1;
             break;
-        case 6:
+        case kSectionMap_Loading:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(this), section)) {
-                cSectionMan_mSectionMap[idx].State = 1;
+                cSectionMan_mSectionMap[idx].State = kSectionMap_Loaded;
                 cGame_sectionLoaded(mpGame, section);
             } else {
                 changed = 1;
             }
             break;
-        case 8:
+        case kSectionMap_LoadingActivate:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(this), section)) {
-                cSectionMan_mSectionMap[idx].State = 2;
+                cSectionMan_mSectionMap[idx].State = kSectionMap_Active;
                 cGame_sectionLoaded(mpGame, section);
                 cWorldView_activateSection(gameWorldView_22D8D8(this), section);
             } else {
@@ -1290,21 +1302,21 @@ void cSectionMan::update()
                 forceOff = 1;
             }
             break;
-        case 3:
+        case kSectionMap_LoadQueue:
             pending = 1;
             break;
-        case 4:
+        case kSectionMap_LoadActivateQueue:
             pending = 1;
             forceOff = 1;
             break;
-        case 1:
-            if (cBENewRaceInterface_getSectionType(iface, idx) == 4) {
+        case kSectionMap_Loaded:
+            if (cBENewRaceInterface_getSectionType(iface, idx) == kSECTIONTYPE_SKY) {
                 skyLoadComplete(idx);
             }
             remove = 1;
             break;
-        case 2:
-            if (cBENewRaceInterface_getSectionType(iface, idx) == 4) {
+        case kSectionMap_Active:
+            if (cBENewRaceInterface_getSectionType(iface, idx) == kSECTIONTYPE_SKY) {
                 skyLoadComplete(idx);
             }
             if (m_bSkySwapPending != 0) {
@@ -1312,7 +1324,7 @@ void cSectionMan::update()
             }
             remove = 1;
             break;
-        case 0:
+        case kSectionMap_Empty:
             remove = 1;
             break;
         }
@@ -1331,16 +1343,16 @@ void cSectionMan::update()
             int section = cSectionMan_mSectionMap[idx].iWorldSectionID;
             sprintf(buf, str_pct_spct_s_b, fmt, cBENewRaceInterface_getSectionFile(iface, idx));
             int* state = &cSectionMan_mSectionMap[idx].State;
-            if (*state == 3) {
+            if (*state == kSectionMap_LoadQueue) {
                 if (cWorldView_loadSection(gameWorldView_22D8D8(this), section,
                         D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
                     changed = 1;
-                    *state = 6;
+                    *state = kSectionMap_Loading;
                 }
-            } else if (*state == 4) {
+            } else if (*state == kSectionMap_LoadActivateQueue) {
                 if (cWorldView_loadSection(gameWorldView_22D8D8(this), section,
                         D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
-                    *state = 8;
+                    *state = kSectionMap_LoadingActivate;
                     changed = 1;
                     forceOff = 1;
                 }
@@ -1348,39 +1360,39 @@ void cSectionMan::update()
         }
     }
     if (changed) {
-        mStreamRate = 2;
+        mStreamRate = kStreamRate_NormalLoad1;
     } else if (mbLocationIsActivated == 0) {
-        mStreamRate = 3;
+        mStreamRate = kStreamRate_NormalLoad2;
     } else {
         cWorldCache* w = (cWorldCache*)(*(char**)(char*)mpGame->World);
         if (w->m_WorldView.m_StreamFocus[0].m_bActive != 0 && w->m_WorldView.m_StreamFocus[1].m_bActive != 0) {
-            mStreamRate = 1;
+            mStreamRate = kStreamRate_Default2Player;
         } else {
-            mStreamRate = 0;
+            mStreamRate = kStreamRate_Default1Player;
         }
     }
     int hold = 0;
     switch ((unsigned int)mModeState) {
-    case 0:
+    case kSectionM_Idle:
         break;
-    case 1:
+    case kSectionM_PreLoadQueue:
         preLoadMode();
-        mModeState = 2;
+        mModeState = kSectionM_PreLoading;
         break;
-    case 2:
+    case kSectionM_PreLoading:
         break;
-    case 3:
+    case kSectionM_PreLoadQueueWait:
         hold = 1;
         preLoadMode();
-        mModeState = 4;
+        mModeState = kSectionM_PreLoadingWait;
         break;
-    case 4:
+    case kSectionM_PreLoadingWait:
         if (forceOff) {
             hold = 1;
         } else if (isPreLoadModeDone() != 0) {
             changeMode();
-            mModeState = 0;
-            mMode = 0;
+            mModeState = kSectionM_Idle;
+            mMode = kSMMode_None;
         } else {
             hold = 1;
         }
@@ -1388,7 +1400,7 @@ void cSectionMan::update()
     }
     if (forceOff || hold) {
         m_bStreamReady = 0;
-        mStreamRate = 4;
+        mStreamRate = kStreamRate_WaitLoad;
     } else {
         m_bStreamReady = 1;
     }
@@ -1528,9 +1540,9 @@ INCLUDE_ASM("main/game", cSectionMan_isSectionLoaded);
  * Tells whether a back-end section is loaded or active.
  *
  * @param SectionID  the back-end section (On Tour eBESectionID SectionID)
- * @return 1 when the section's state is 1 or 2, otherwise 0
+ * @return true when the section's state is kSectionMap_Loaded or kSectionMap_Active
  */
-int cSectionMan::isSectionLoaded(int SectionID)
+bool cSectionMan::isSectionLoaded(int SectionID)
 {
     int loadState = cSectionMan_mSectionMap[SectionID].State;
     return (unsigned int)(loadState - 1) < 2;

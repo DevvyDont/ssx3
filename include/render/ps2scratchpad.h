@@ -21,7 +21,13 @@
 #include "layout.h"
 
 struct cPS2ScratchPad {
-    int unk_00;                     // 0x00 [U] func_0038F300: the current layout mode (1..7; returns when unchanged)
+    // The block layouts func_0038F300 sets up (names ours, after what it does: block count x block size in quadwords).
+    // [U] func_0038F300; func_00363490 (object/railmodifier) switches to kLayout_2x256 and back.
+    enum eLayout {
+        kLayout_1x1024 = 1, kLayout_2x512 = 2, kLayout_2x448 = 3, kLayout_2x384 = 4, kLayout_2x256 = 5,
+        kLayout_3x320 = 6, kLayout_3x256 = 7
+    };
+    int unk_00;                     // 0x00 [U] func_0038F300: the current layout mode, eLayout (returns when unchanged)
     int unk_04;                     // 0x04 [U] func_0038F300: the number of blocks (1..3); func_0038F460 / func_0038F598
                                     //      wrap the block indices with it
     int unk_08;                     // 0x08 [U] func_0038F460: the next block to open (post-incremented, wrapped)

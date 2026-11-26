@@ -1,6 +1,7 @@
 #include "common.h"
 #include "vtable.h"
 #include "be/beintbagt.h"
+#include "be/bedbprofile.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEBAGTInt[];
@@ -463,16 +464,16 @@ int cBEBAGTInterface::getUberAnim(int rider, int idx, int second)
     switch (ch)
     {
     case 20:
-        if (idx == 4) return 160;
+        if (idx == kGrabButtons_L2L1) return 160;
         break;
     case 0x18:
-        if (idx == 4) return 159;
+        if (idx == kGrabButtons_L2L1) return 159;
         break;
     case 25:
-        if (idx == 9) return 162;
+        if (idx == kGrabButtons_R1R2) return 162;
         break;
     case 0x1C:
-        if (idx == 4) return 161;
+        if (idx == kGrabButtons_L2L1) return 161;
         break;
     }
     int k = chooseUberVar(rider, idx, second);
@@ -522,16 +523,16 @@ int cBEBAGTInterface::getUberCycleAnim(int rider, int idx, int second)
     switch (ch)
     {
     case 20:
-        if (idx == 4) return 210;
+        if (idx == kGrabButtons_L2L1) return 210;
         break;
     case 0x18:
-        if (idx == 4) return 209;
+        if (idx == kGrabButtons_L2L1) return 209;
         break;
     case 25:
-        if (idx == 9) return 212;
+        if (idx == kGrabButtons_R1R2) return 212;
         break;
     case 0x1C:
-        if (idx == 4) return 211;
+        if (idx == kGrabButtons_L2L1) return 211;
         break;
     }
     int k = chooseUberVar(rider, idx, second);
@@ -580,16 +581,16 @@ int cBEBAGTInterface::getUberName(int rider, int idx, int second)
     switch (ch)
     {
     case 20:
-        if (idx == 4) return 82;
+        if (idx == kGrabButtons_L2L1) return 82;
         break;
     case 0x18:
-        if (idx == 4) return 81;
+        if (idx == kGrabButtons_L2L1) return 81;
         break;
     case 25:
-        if (idx == 9) return 84;
+        if (idx == kGrabButtons_R1R2) return 84;
         break;
     case 0x1C:
-        if (idx == 4) return 83;
+        if (idx == kGrabButtons_L2L1) return 83;
         break;
     }
     int k = chooseUberVar(rider, idx, second);
@@ -662,7 +663,7 @@ extern "C" void MEM_fill(void*, int, int);
  * For grabs 0-14 both masks get one bit per variant in kGrabDB (+0xC count) minus bits 0-1; the first mask (for
  * sale) also drops the second chosen variant. cBECharProfileDB_init calls it.
  *
- * @param mode  the character (selects the starting choices)
+ * @param mode  the character (eBECharacters; selects the starting choices)
  * @param entries  the record's first entries (6 bytes each)
  */
 extern "C" void func_00150558(int mode, sBagtSlot0558* entries)
@@ -670,39 +671,39 @@ extern "C" void func_00150558(int mode, sBagtSlot0558* entries)
     int i;
     MEM_fill(entries, 0, 90);
     switch (mode) {
-    case 0:
+    case kCHAR_MOBY:
         entries[0].a = 1; entries[0].b = 3; entries[1].a = 0; entries[1].b = 2; entries[2].a = 0; entries[2].b = 2;
         entries[3].a = 1; entries[3].b = 2; entries[4].a = 0; entries[4].b = 7; entries[9].a = 1; entries[9].b = 3;
         break;
-    case 1:
+    case kCHAR_KAORI:
         entries[0].a = 0; entries[0].b = 2; entries[1].a = 0; entries[1].b = 2; entries[2].a = 1; entries[2].b = 3;
         entries[3].a = 0; entries[3].b = 3; entries[4].a = 1; entries[4].b = 2; entries[9].a = 0; entries[9].b = 9;
         break;
-    case 2:
+    case kCHAR_ALLEGRA:
         entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 3; entries[2].a = 0; entries[2].b = 2;
         entries[3].a = 0; entries[3].b = 2; entries[4].a = 0; entries[4].b = 8; entries[9].a = 1; entries[9].b = 3;
         break;
-    case 3:
+    case kCHAR_MAC:
         entries[0].a = 1; entries[0].b = 2; entries[1].a = 0; entries[1].b = 3; entries[2].a = 0; entries[2].b = 3;
         entries[3].a = 1; entries[3].b = 2; entries[4].a = 0; entries[4].b = 2; entries[9].a = 1; entries[9].b = 6;
         break;
-    case 4:
+    case kCHAR_ZOE:
         entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 2; entries[2].a = 0; entries[2].b = 2;
         entries[3].a = 1; entries[3].b = 2; entries[4].a = 1; entries[4].b = 10; entries[9].a = 1; entries[9].b = 3;
         break;
-    case 5:
+    case kCHAR_GRIFF:
         entries[0].a = 0; entries[0].b = 2; entries[1].a = 0; entries[1].b = 3; entries[2].a = 0; entries[2].b = 2;
         entries[3].a = 0; entries[3].b = 2; entries[4].a = 0; entries[4].b = 3; entries[9].a = 1; entries[9].b = 7;
         break;
-    case 6:
+    case kCHAR_ELISE:
         entries[0].a = 0; entries[0].b = 2; entries[1].a = 0; entries[1].b = 2; entries[2].a = 1; entries[2].b = 3;
         entries[3].a = 0; entries[3].b = 3; entries[4].a = 1; entries[4].b = 2; entries[9].a = 0; entries[9].b = 8;
         break;
-    case 7:
+    case kCHAR_NATE:
         entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 2; entries[2].a = 0; entries[2].b = 2;
         entries[3].a = 1; entries[3].b = 3; entries[4].a = 0; entries[4].b = 9; entries[9].a = 0; entries[9].b = 2;
         break;
-    case 8:
+    case kCHAR_PSYMON:
         entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 2; entries[2].a = 0; entries[2].b = 3;
         entries[3].a = 1; entries[3].b = 2; entries[4].a = 0; entries[4].b = 3; entries[9].a = 0; entries[9].b = 10;
         break;

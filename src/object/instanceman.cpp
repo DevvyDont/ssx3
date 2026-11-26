@@ -878,7 +878,7 @@ extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, vo
         if (ownerSlot->fn(vthis(obj, *ownerSlot)) != 0) {
             ownerSlot = &obj->vt[27];
             mats = (sImMtx*)ownerSlot->fn(vthis(obj, *ownerSlot));
-            if (def->bone != -1) {
+            if (def->bone != cMeshAnimNode::kNoRootMesh) {
                 root = &mats[def->bone];
                 mats = local;
             }
@@ -889,7 +889,7 @@ extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, vo
         float modelScale = self->model->scale;
         sImV4 scale(modelScale, modelScale, modelScale, 1.0f);
         for (int i = 0; i < skel->count; i++, boneIter++) {
-            if (boneIter->parent != -1) {
+            if (boneIter->parent != tMeshHeirarchyRecord::kNoParent) {
                 local[i] = mulScaledIM(local[boneIter->parent], *boneIter->mtx, scale);
             } else {
                 local[i] = mulScaledIM(*root, *boneIter->mtx, scale);
@@ -1205,8 +1205,9 @@ extern "C" void cInstanceNode_makeThisDead(void* self);
  * Expires a mesh animation node according to its end mode (+0x6B0).
  *
  * When @p check is set and cInstanceNode_runExpireScript() runs a script for the instance (probably its on-expire script),
- * nothing else happens. Mode 0 replaces the node with a new cDeadNode for the same instance (cInstanceNode_makeThisDead);
- * mode 2 deletes the node through its virtual destructor; other modes leave it.
+ * nothing else happens. kMeshAnimExpire_Dead replaces the node with a new cDeadNode for the same instance
+ * (cInstanceNode_makeThisDead); kMeshAnimExpire_Delete deletes the node through its virtual destructor; other modes
+ * leave it.
  *
  * @param check  nonzero to give the instance's script the first chance (On Tour expire's runscript)
  */
@@ -1215,10 +1216,10 @@ extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
     if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
         return;
     }
-    if (self->Type == 0) {
+    if (self->Type == cMeshAnimNode::kMeshAnimExpire_Dead) {
         cInstanceNode_makeThisDead(self);
     }
-    if (self->Type == 2 && ((void*)self) != 0) {
+    if (self->Type == cMeshAnimNode::kMeshAnimExpire_Delete && ((void*)self) != 0) {
         delete self;
     }
 }

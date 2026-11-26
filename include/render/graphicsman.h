@@ -104,6 +104,31 @@ struct tTVDisplayFormat;
 struct BoardTrailInfoT;
 struct tBxVertex;
 
+// ClipBoundBox's result. [O] On Tour's enum GMClipCodes, names and values; [U] cPS2GraphicsMan_ClipBoundBox returns 1
+// when the VU0 clip program's second flag is set, 2 for its first, else 0; cPS2GraphicsMan_CheckProjectiveTexturesHits
+// marks every projective texture whose clip volume a box is not outside of.
+enum GMClipCodes { GM_CLIPCODE_INSIDE = 0, GM_CLIPCODE_OUTSIDE = 1, GM_CLIPCODE_CROSSING = 2 };
+
+// A texture's texel format (tTexInfo::mFormat). [O] On Tour's enum eGMTexelFormat, names and values; [U] retail fits:
+// cTextureMan_AddTexture gives GM_TEXEL_RGB888 the GS PSMCT24 format, GM_TEXEL_ARGB1555 PSMCT16, the INDEX8 formats
+// PSMT8, the INDEX4 formats PSMT4 and the rest PSMCT32, and keeps GM_TEXEL_INDEX8 textures in the second VRAM heap.
+enum eGMTexelFormat {
+    GM_TEXEL_ARGB8888 = 0, GM_TEXEL_ARGB0565 = 1, GM_TEXEL_ARGB1555 = 2, GM_TEXEL_ARGB4444 = 3, GM_TEXEL_ARGB8888S = 4,
+    GM_TEXEL_ARGB0565S = 5, GM_TEXEL_ARGB1555S = 6, GM_TEXEL_ARGB4444S = 7, GM_TEXEL_RGB888 = 8, GM_TEXEL_INDEX8 = 9,
+    GM_TEXEL_INDEX8S = 10, GM_TEXEL_INDEX4 = 11, GM_TEXEL_INDEX4S = 12, GM_TEXEL_RGB5A3 = 13, GM_TEXEL_R8 = 14,
+    GM_TEXEL_INTENSITY8 = 15, GM_TEXEL_DXT1 = 16, GM_TEXEL_DXT3 = 17, GM_TEXEL_DXT5 = 18, GM_TEXEL_YUY2 = 19,
+    GM_TEXEL_Z24 = 20, GM_NUM_TEXEL_FORMATS = 21
+};
+
+// How a texture holds its VRAM (the lockType of cTextureMan_AddTexture / cPS2GraphicsMan_AddTexture). [O] On Tour's
+// enum eGMTexLockType (AddTexture(..., eGMTexLockType lockType, ...)), names and values; [U] retail fits:
+// cTextureMan_AddTexture leaves a GM_TEXTYPE_DYNAMIC texture's VRAM to the bind (func_00368660), allocates it at once
+// for GM_TEXTYPE_LOCKED and for GM_TEXTYPE_WINDOW (0x2000 bytes more, locked, 32-block aligned), which
+// cTextureMan_AddLockedFrameTexture passes for its render-target texture.
+enum eGMTexLockType {
+    GM_TEXTYPE_DYNAMIC = 0, GM_TEXTYPE_LOCKED = 1, GM_TEXTYPE_LOCKED8H = 2, GM_TEXTYPE_WINDOW = 3, GM_TEXTYPE_VRAM = 4
+};
+
 class cGraphicsMan {
 public:
     float m_screenOffset[2];        // 0x000 [O] t2Vector; [P] Get/SetScreenOffset (cGraphicsMan_SetScreenOffset/FD8/FF0)
@@ -344,7 +369,7 @@ public:
     void SetTexture(short value, int idx) __asm__("cGraphicsMan_SetTexture");
     void PushDrawState() __asm__("cGraphicsMan_PushDrawState");
     void PopDrawState() __asm__("cGraphicsMan_PopDrawState");
-    int DrawStateChanged() __asm__("cGraphicsMan_DrawStateChanged");
+    bool DrawStateChanged() __asm__("cGraphicsMan_DrawStateChanged");
     void setEffectTexMap(int idx, int value) __asm__("cGraphicsMan_setEffectTexMap");
     void AddBlendedMatrix(tMdfBlendedMatrix* blendedMatrix) __asm__("cGraphicsMan_AddBlendedMatrix");
     void UploadTextures() __asm__("cGraphicsMan_UploadTextures");

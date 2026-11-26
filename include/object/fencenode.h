@@ -35,7 +35,11 @@ struct cGridMesh;
 // and then sets InstId to -1.
 struct tMakeFenceData {
     unsigned int InstId;            // 0x0 [O] tResourceID; [R] ctors store 0xFFFFFFFF after the copy
-    int Type;                       // 0x4 [O]; [U] updateGrid: 1 = the bottom row bends too (lw 0x20)
+    // A Type whose bottom row swings with the top (name ours): [U] cFenceNode::updateGrid moves both rows for it and
+    // keeps the bottom row at rest for any other Type.
+    enum { kFenceType_SwingBottom = 1 };
+    int Type;                       // 0x4 [O]; [U] updateGrid: kFenceType_SwingBottom = the bottom row bends too
+                                    //     (lw 0x20)
     float Flexibility;              // 0x8 [O]; [U] updateGrid scales the sway by it (lwc1 0x24)
     char null;                      // 0xC [O] WScriptNullType (1 byte)
     char unk_D[0x3];                // 0xD padding

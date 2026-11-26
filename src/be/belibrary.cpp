@@ -53,13 +53,13 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getProfileIndex__Fi);
  * Returns the profile a race rider belongs to: 0 or 1 for a human player, probably 2 for a computer rider.
  *
  * @param index  race rider slot
- * @return the profile index, or 2 when the record's +0xC is -1 (a computer rider)
+ * @return the profile index, or 2 when the record's +0xC is kNoController (-1, a computer rider)
  */
 int cBELibrary_getProfileIndex(int index)
 {
     int charID = cBELibrary_raceDB[index];
     cBEPlayerDB* entry = &cBELibrary_playerDB[charID];
-    if (entry->iControllerID == -1) {
+    if (entry->iControllerID == cBEPlayerDB::kNoController) {
         return 2;
     }
     return entry->iHumanID;
@@ -241,8 +241,8 @@ extern "C" int cBELibrary_getScoreType(int a, int b);
 /**
  * Returns the 5-entry high-score table for a location and event, or null when the pair has none.
  *
- * The index is cBELibrary_getScoreType(@p locationId, @p gameEvent); 26 means none. The tables are cBELibrary_highScores, 0x64 bytes each (five
- * 0x14-byte entries: score, character ID, 12-byte name).
+ * The index is cBELibrary_getScoreType(@p locationId, @p gameEvent); kNoScoreType (26) means none. The tables are
+ * cBELibrary_highScores, 0x64 bytes each (five 0x14-byte entries: score, character ID, 12-byte name).
  *
  * @param locationId  the location (On Tour eBELocationID)
  * @param gameEvent  the game event or stat kind
@@ -251,7 +251,7 @@ extern "C" int cBELibrary_getScoreType(int a, int b);
 extern "C" void* cBELibrary_getHighScoreTable(int locationId, int gameEvent)
 {
     int type = cBELibrary_getScoreType(locationId, gameEvent);
-    if (type == 26) {
+    if (type == kNoScoreType) {
         return 0;
     }
     return &cBELibrary_highScores[type];
@@ -631,9 +631,9 @@ extern "C" void func_0014AF10(void)
 INCLUDE_ASM("be/belibrary", func_0014AFB0);
 #ifdef SKIP_ASM
 extern cBECharProfileDB cBELibrary_profileLib[][10];
-extern "C" int func_00151C90(void* prof, int idx, int on);
+extern "C" bool func_00151C90(void* prof, int idx, int on);
 extern "C" int func_001521F0(void* prof);
-extern "C" int func_001520E8(void* prof, int* out);
+extern "C" bool func_001520E8(void* prof, int* out);
 
 static inline tBEProfileBolt* getEntry_14AFB0(cBECharProfileDB* p, int idx)
 {
@@ -655,9 +655,9 @@ static inline tBEProfileBolt* getEntry_14AFB0(cBECharProfileDB* p, int idx)
  * @param characterId  character ID
  * @param idx  the bolt id
  * @param on  1 to equip, 0 to take off
- * @return 1 when the change was kept, else 0
+ * @return true when the change was kept
  */
-extern "C" int func_0014AFB0(void* self, int profileIndex, int characterId, int idx, int on)
+extern "C" bool func_0014AFB0(void* self, int profileIndex, int characterId, int idx, int on)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     tBEProfileBolt save[525];
@@ -673,12 +673,12 @@ extern "C" int func_0014AFB0(void* self, int profileIndex, int characterId, int 
             int n = 0;
             if (func_001520E8(charRecord, &n)) {
                 if (n == 0 || func_001521F0(charRecord))
-                    return 1;
+                    return true;
             }
         }
     }
     MEM_copy(charRecord->mBolts, save, 2100);
-    return 0;
+    return false;
 }
 #endif
 
@@ -1048,22 +1048,22 @@ extern char str_data_char_viggotxp_big_deiter_icons_ssh[];
  * Characters 0-9 map to the moby, kaori, alleg (arielle), mac, zoe, griff (grommet), elise, nate (rocco), psymo
  * (psymon) and viggo (deiter) files. The equip screen builds its icon file names from it.
  *
- * @param x  character ID, 0 to 9
+ * @param x  character ID (eBECharacters), 0 to 9
  * @return the file name, or null for other IDs
  */
 extern "C" char* func_0014B700(void* self, unsigned int x)
 {
     switch (x) {
-    case 0: return str_data_char_mobytxp_big_moby_icons_ssh;
-    case 1: return str_data_char_kaoritxp_big_kaori_icons_ssh;
-    case 2: return str_data_char_allegtxp_big_arielle_icons_ssh;
-    case 3: return str_data_char_mactxp_big_mac_icons_ssh;
-    case 4: return str_data_char_zoetxp_big_zoe_icons_ssh;
-    case 5: return str_data_char_grifftxp_big_grommet_icons_ssh;
-    case 6: return str_data_char_elisetxp_big_elise_icons_ssh;
-    case 7: return str_data_char_natetxp_big_rocco_icons_ssh;
-    case 8: return str_data_char_psymotxp_big_psymon_icons_ssh;
-    case 9: return str_data_char_viggotxp_big_deiter_icons_ssh;
+    case kCHAR_MOBY: return str_data_char_mobytxp_big_moby_icons_ssh;
+    case kCHAR_KAORI: return str_data_char_kaoritxp_big_kaori_icons_ssh;
+    case kCHAR_ALLEGRA: return str_data_char_allegtxp_big_arielle_icons_ssh;
+    case kCHAR_MAC: return str_data_char_mactxp_big_mac_icons_ssh;
+    case kCHAR_ZOE: return str_data_char_zoetxp_big_zoe_icons_ssh;
+    case kCHAR_GRIFF: return str_data_char_grifftxp_big_grommet_icons_ssh;
+    case kCHAR_ELISE: return str_data_char_elisetxp_big_elise_icons_ssh;
+    case kCHAR_NATE: return str_data_char_natetxp_big_rocco_icons_ssh;
+    case kCHAR_PSYMON: return str_data_char_psymotxp_big_psymon_icons_ssh;
+    case kCHAR_VIGGO: return str_data_char_viggotxp_big_deiter_icons_ssh;
     }
     return 0;
 }
@@ -1168,30 +1168,30 @@ struct sBEEntry38_14B988 {
  * Builds the file name of one bolt for a character, filling its '$' wildcards from the other equipped bolts of the same
  * group.
  *
- * Copies the definition's name (+0x2C) to @p out; a definition with group (+0x3) -1 or no name gives an empty string
- * and 0. When the name has '$' characters, walks the character's bolts of the same group that have a name, another id
- * (+0x4) and flag 0x10 in the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88), and
- * copies each one's characters into the '$' positions before the '.' until none is left. The rider loader and the AI
- * rider code use it to queue model files.
+ * Copies the definition's name (+0x2C) to @p out; a definition with group (+0x3) kNoBoltGroup (-1) or no name gives an
+ * empty string and 0. When the name has '$' characters, walks the character's bolts of the same group that have a name,
+ * another id (+0x4) and flag 0x10 in the character record (cBELibrary_profileLib + profile * 0x9B50 + character *
+ * 0xF88), and copies each one's characters into the '$' positions before the '.' until none is left. The rider loader
+ * and the AI rider code use it to queue model files.
  *
  * @param profileIndex  profile index
  * @param characterId  character ID
  * @param boltDef  the bolt definition (0x38 bytes)
  * @param out  receives the file name
- * @return 1 when a name was written, 0 for none
+ * @return true when a name was written
  */
-extern "C" int func_0014B988(void* self, int profileIndex, int characterId, sBEEntry38_14B988* boltDef, char* out)
+extern "C" bool func_0014B988(void* self, int profileIndex, int characterId, sBEEntry38_14B988* boltDef, char* out)
 {
     signed char grp = boltDef->group;
-    if (grp == -1 || boltDef->name == 0) {
+    if (grp == kNoBoltGroup || boltDef->name == 0) {
         *out = 0;
-        return 0;
+        return false;
     }
     sBELibTables* tbl = (sBELibTables*)D_004A6750;
     cBECharProfileDB* prof = (cBECharProfileDB*)func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), profileIndex, characterId);
     strcpy(out, boltDef->name);
     char* wildcard = strchr(out, '$');
-    if (wildcard == 0) return 1;
+    if (wildcard == 0) return true;
     int n = func_0014D988(tbl, characterId);
     sBEEntry38_14B988* otherDef = (sBEEntry38_14B988*)func_0014D998(tbl, characterId);
     for (int i = 0; i < n; i++, otherDef++) {
@@ -1208,9 +1208,9 @@ extern "C" int func_0014B988(void* self, int profileIndex, int characterId, sBEE
             k++;
         }
         while (*wildcard != 0 && *wildcard != '$' && *wildcard != '.') wildcard++;
-        if (*wildcard != '$') return 1;
+        if (*wildcard != '$') return true;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1522,7 +1522,7 @@ struct sBELib_14C068 {
  * Allocates a "child bolts data" block of 90 * kBolt_Num shorts (kBolt_Num is the number of bolt ids) and carves 30
  * count tables (+0x11C), 30 first-child tables (+0x194) and 30 index tables (+0x4DC) out of it, one per group. The
  * index tables map each definition's id (+0x4) to its index; the count and first tables are keyed by the parent id
- * (+0x6, -1 for none). The run tracker that sets the first child starts at kBolt_Num instead of -1 and is shared
+ * (+0x6, kNoBoltID for none). The run tracker that sets the first child starts at kBolt_Num instead of -1 and is shared
  * across groups. Nothing in the C calls it.
  */
 extern "C" void func_0014C068(sBELib_14C068* self)
@@ -1555,7 +1555,7 @@ extern "C" void func_0014C068(sBELib_14C068* self)
     for (int i = 0; i < self->n0; i++) {
         int parentId = self->entries[i].group;
         int charGroup = self->entries[i].type;
-        if (parentId != -1) {
+        if (parentId != kNoBoltID) {
             self->count[charGroup][parentId]++;
             if (last != parentId) {
                 last = parentId;
@@ -2152,17 +2152,17 @@ INCLUDE_ASM("be/belibrary", func_0014D558);
 /**
  * Returns the first bolt definition in group @p groupId whose parent (short +0x6) is @p key.
  *
- * For @p key -1, or without the group's first-child table (+0x194), searches the group. Otherwise returns null when the
- * child count (+0x11C) is 0 or less, else the definition the first-child table names.
+ * For @p key kNoBoltID (-1), or without the group's first-child table (+0x194), searches the group. Otherwise returns
+ * null when the child count (+0x11C) is 0 or less, else the definition the first-child table names.
  *
  * @param groupId  the group (a character ID)
- * @param key  the parent bolt id, or -1
+ * @param key  the parent bolt id, or kNoBoltID
  * @return the definition, or null
  */
 extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int groupId, int key)
 {
     short* lookup;
-    if (key == -1 || (lookup = *(short**)((char*)self + (groupId << 2) + 0x194)) == 0) {
+    if (key == kNoBoltID || (lookup = *(short**)((char*)self + (groupId << 2) + 0x194)) == 0) {
         int i = self->groupFirst[groupId];
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
@@ -2188,11 +2188,11 @@ INCLUDE_ASM("be/belibrary", func_0014D608);
  *
  * Takes every definition whose parent (short +0x6) is @p key and, while @p depth is not 0, recurses into its children
  * (by its id, +0x4) with depth - 1; a definition with flag 0x20 (+0x34) is only descended into when @p all is set. Uses
- * the child tables (func_0014D558, +0x11C) when present and @p key is not -1, else searches the group, stopping at a
- * larger parent id. beintecon passes depth -1 (no limit) and all 1.
+ * the child tables (func_0014D558, +0x11C) when present and @p key is not kNoBoltID, else searches the group, stopping
+ * at a larger parent id. beintecon passes depth -1 (no limit) and all 1.
  *
  * @param groupId  the group (a character ID)
- * @param key  the parent bolt id, or -1 for the top level
+ * @param key  the parent bolt id, or kNoBoltID for the top level
  * @param out  receives the definition pointers
  * @param depth  levels to descend; negative for no limit
  * @param all  non-zero to descend into flag-0x20 definitions too
@@ -2201,7 +2201,7 @@ INCLUDE_ASM("be/belibrary", func_0014D608);
 extern "C" int func_0014D608(sBEGroupTable* self, int groupId, int key, sBEEntry38** out, int depth, int all)
 {
     int count = 0;
-    if (key == -1 || self->lookup_0x11C[groupId] == 0) {
+    if (key == kNoBoltID || self->lookup_0x11C[groupId] == 0) {
         int i = self->groupFirst[groupId];
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
@@ -2304,7 +2304,7 @@ INCLUDE_ASM("be/belibrary", func_0014D908);
  * Returns whether bolt @p key is an ancestor of a bolt definition by the parent links (short +0x6).
  *
  * Walks up from @p boltDef: its parent is found with func_0014D448 in the definition's group (byte +0x0); the walk stops at
- * parent -1 or a missing definition. The cheat codes use it to find the items under D_004A11E0.
+ * parent kNoBoltID or a missing definition. The cheat codes use it to find the items under D_004A11E0.
  *
  * @param boltDef  the bolt definition to start from, or null
  * @param key  the bolt id to look for
@@ -2316,7 +2316,7 @@ extern "C" int func_0014D908(sBEGroupTable* self, sBEEntry38* boltDef, int key)
         return 0;
     if (boltDef->field_0x6 == key)
         return 1;
-    if (boltDef->field_0x6 == -1)
+    if (boltDef->field_0x6 == kNoBoltID)
         return 0;
     int i = func_0014D448(self, boltDef->group, boltDef->field_0x6);
     sBEEntry38* parent;

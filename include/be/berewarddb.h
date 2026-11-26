@@ -11,6 +11,27 @@
 
 #include "layout.h"
 
+// The reward kinds (names ours): the reward file's tables and cBERewardDB's members in this order, the rewardType of
+// cBEUserAwards::setAward ([O] On Tour's int rewardType; its mpAwardBits has 10 entries) and the kind the reward
+// interface's per-kind dispatchers take. [U] cBERewardDB_initRewards parses tables 0 trophies, 1 medals, 2 peak passes,
+// 3 posters, 4 trading cards, 5 concept arts, 6 videos, 7 toys, 8 cheat characters; cBERewardDB_getRewardName returns
+// nothing for 9; cBEUserAwards_setAward logs 9 as the bolt item (iCharBoltID); cBuyPopupInfo_initBuyReward labels 3 ..
+// 8 "kT_OVRCMNPosterColon", "kT_OVRCMNCardColon", "kT_OVRCMNArtColon", "kT_OVRCMNVideoColon", "kT_OVRCMNToyColon" and
+// "kT_OVRCMNCheatCharColon"; cFEStateRewardGalleryBase_showReward plays a kRewardVideo in a cFEStateVideoPlayer.
+enum tRewardType {
+    kRewardTrophy = 0,
+    kRewardMedal = 1,
+    kRewardPeakPass = 2,
+    kRewardPoster = 3,
+    kRewardCard = 4,
+    kRewardArt = 5,
+    kRewardVideo = 6,
+    kRewardToy = 7,
+    kRewardCheatChar = 8,
+    kRewardBolt = 9,
+    kRewardTypeNum = 10
+};
+
 // One cheat character's reward record (cBERewardDB::mpCheatChars[mNumCheatChars]). [O] struct tCheatCharInfo (0x10);
 // [U] cFEStateCheatCharSelect_cFEStateCheatCharSelect walks mpCheatChars with a 0x10 stride: mCheatCharID (the byte at
 // 0xF) goes to cBERewardInterface_isCheatCharOwned and mCharIDs, mpIconName is hashed into the texture bank,

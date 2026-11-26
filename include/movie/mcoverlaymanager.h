@@ -218,7 +218,7 @@ struct cMCOverlayManager {
     int isInDeleteOperation() __asm__("cMCOverlayManager_isInDeleteOperation");
     void isInLoadOperation() __asm__("cMCOverlayManager_isInLoadOperation");
     int isCardStatusErrorUnacknowledged() __asm__("cMCOverlayManager_isCardStatusErrorUnacknowledged");
-    int hasCardStatusError() __asm__("cMCOverlayManager_hasCardStatusError");
+    bool hasCardStatusError() __asm__("cMCOverlayManager_hasCardStatusError");
     int getCardLastState() __asm__("cMCOverlayManager_getCardLastState");
     void forceCardStatusAck() __asm__("cMCOverlayManager_forceCardStatusAck");
     int getFirstCorruptFile() __asm__("cMCOverlayManager_getFirstCorruptFile");

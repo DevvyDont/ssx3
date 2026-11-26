@@ -28,6 +28,9 @@ CHECK_SIZE(tCrowdMember3d, 0x8);
 
 // One crowd block (0x1F4 bytes).
 struct tCrowdBlock3d {
+    // A free id (name ours): [R] the ctor and func_003442E0 store it in mModelId, mKey and every member's mInstanceId;
+    // [U] a block is in use while its mKey is not kFree.
+    enum { kFree = 0xFFFFFFFF };
     int mNumMembers;                // 0x000 [R] func_003442E0 zeroes it; [U] func_00343F38 decrements it and empties
                                     //       the block at 0
     unsigned int mModelId;          // 0x004 [R] the ctor and func_003442E0 store -1; [U] func_00344368 stores the

@@ -1,6 +1,7 @@
 #include "vtable.h"
 #include "common.h"
 #include "fe/debugfe.h"
+#include "util/menusys.h"
 #include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "sound/ssxaudio.h"
@@ -48,13 +49,13 @@ struct sBgFile_17ACC8 {
  * Allocates the texture-ID table ("BackTID") with one entry per shape, unpacks each shape, registers it as a
  * "back" texture (graphics manager vtable slot 46) and frees the unpacked copy and the file afterwards.
  *
- * @return 1 when the file was loaded, 0 if it could not be read
+ * @return true when the file was loaded, false if it could not be read
  */
-int cBackgroundMan::loadImages()
+bool cBackgroundMan::loadImages()
 {
     sBgFile_17ACC8* file = (sBgFile_17ACC8*)FILE_loadz(str_data_textures_backs_ssh, 0x100);
     if (file == 0) {
-        return 0;
+        return false;
     }
     int n = file->count;
     miNumImage = n;
@@ -70,7 +71,7 @@ int cBackgroundMan::loadImages()
     if (file != 0) {
         cMemMan_free(file);
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -317,9 +318,9 @@ static inline char* lsEntryName_B1B0(sLSSub_B1B0* s, int i)
  * Constructs the debug front-end menu screen and sets up a default single-player race for it.
  *
  * Loads the background images, sets one human, game mode 4 and event 12, clears the network flag (and, with
- * EnableOnline set, brings up the comm system using "mc0:"), selects the first active track entry as the race
- * location, sets the network defaults (port 3658, latency 1/60 s, not host), picks default riders for both
- * players
+ * EnableOnline set, brings up the comm system using "mc0:"), selects the first active track entry as the race location
+ * (a kLOCATION_DEBUG entry also gives the back end its debug location file), puts the cursor on the track row
+ * (kTrackItem), sets the network defaults (port 3658, latency 1/60 s, not host), picks default riders for both players
  * and starts the menu sound.
  *
  * @return @p self
@@ -370,10 +371,10 @@ extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen*
     if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].f84 == 0) {
         cBENewRaceInterface_bIsBamLocation = 0;
     }
-    if (kind == 22) {
+    if (kind == kLOCATION_DEBUG) {
         cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation));
     }
-    self->SelectedItem = 4;
+    self->SelectedItem = cDebugMenuScreen::kTrackItem;
     cBENetworkInterface_networkOpt.fLatency = 0.016666668f;
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = 0;
@@ -528,22 +529,24 @@ static inline int bgCount_B4E0(cBackgroundMan* bg)
 /**
  * Runs one frame of the debug start menu: moves between its 15 items, changes the selected one and starts the game.
  *
- * Input state 0x65 saves the choices (func_0017D0A8) and starts: item 14 (On Tour kRealFEItem) sets the app's word
- * +0x60 and moves to a cPreFELoadScreen module (cPreFELoadScreen_cPreFELoadScreen), any other item to a cPreGameLoadScreen. Up / down
- * (cInput_getValue(.., 0x3D) 0 / 1, only while no background is previewed, f8C30 == -1) step the item, skipping 12
- * (network) without a comm system and 13 without a network connection. Left / right (2 / 3) change the item: 0 game
- * path (3 values; path 0 needs the track list and a WCBAM start location), 1 game mode (7), 2 game event (14), 3
- * the player's first-time-on-track flag, 4 location (cTrackFileMan next / previous), 5 character (10), 6 a player
- * flag (cBENewPlayerInterface_setControllerMapping), 7 a one-value option stored in the BE's first word (always 0), 8 the AI rider count up to
- * getMaxAIRiders, 9 the background preview, 10 GrMan slot 8 toggled from slot 9, 11 the song, 12 the network mode
- * 0-4 (sets bIsNetworkGame / bIsHost and starts or stops the comm system), 13 (event 6) copies a word of the app's
- * +0x80 object. Mode, event, location and AI count are re-validated after each change.
+ * Input state 0x65 saves the choices (func_0017D0A8) and starts: kRealFEItem sets the app's word +0x60 and moves to a
+ * cPreFELoadScreen module (cPreFELoadScreen_cPreFELoadScreen), any other item to a cPreGameLoadScreen. Up / down
+ * (cInput_getValue(.., 0x3D) kMenuKeyUp / kMenuKeyDown, only while no background is previewed, CurrentBack ==
+ * cBackgroundMan::kNoImage) step the item (tItems), skipping kNetworkItem without a comm system and kLobbyItem without
+ * a network connection. Left / right (kMenuKeyLeft / kMenuKeyRight) change the item: 0 game path (3 values; path 0
+ * needs the track list and a WCBAM start location), 1 game mode (7), 2 game event (14), 3 the player's
+ * first-time-on-track flag, 4 location (cTrackFileMan next / previous), 5 character (10), 6 a player flag
+ * (cBENewPlayerInterface_setControllerMapping), 7 a one-value option stored in the BE's first word (always 0), 8 the AI
+ * rider count up to getMaxAIRiders, 9 the background preview, 10 GrMan slot 8 toggled from slot 9, 11 the song, 12 the
+ * network mode (tNetworkMode kNetwork_Disabled .. kNetwork_DNAS; sets bIsNetworkGame / bIsHost and starts or stops the
+ * comm system), 13 (on kMenuKeySelect) copies a word of the app's +0x80 object. Mode, event, location and AI count are
+ * re-validated after each change.
  */
 void cDebugMenuScreen::update()
 {
     if (cInput_getState(SSXApp_b4->input, 101)) {
         func_0017D0A8(this);
-        if (SelectedItem == 14) {
+        if (SelectedItem == kRealFEItem) {
             SSXApp_b4->f60 = 1;
             cAppMan_setNextModule((cAppMan*)SSXApp_b4, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
         } else {
@@ -551,9 +554,9 @@ void cDebugMenuScreen::update()
         }
     }
     int dir = (int)cInput_getValue(SSXApp_b4->input, 61);
-    if (dir == 0 && CurrentBack == -1) {
+    if (dir == kMenuKeyUp && CurrentBack == cBackgroundMan::kNoImage) {
         SelectedItem = (SelectedItem + 15 - 1) % 15;
-        if (SelectedItem == 13) {
+        if (SelectedItem == kLobbyItem) {
             if (cCommSystem_mCommSystem == 0) {
                 SelectedItem = (SelectedItem + 15 - 2) % 15;
             } else if (cCommSystem_mNumNetConn <= 0) {
@@ -562,12 +565,12 @@ void cDebugMenuScreen::update()
         }
         return;
     }
-    if (dir == 1 && CurrentBack == -1) {
+    if (dir == kMenuKeyDown && CurrentBack == cBackgroundMan::kNoImage) {
         SelectedItem = (SelectedItem + 1) % 15;
-        if (SelectedItem == 12 && cCommSystem_mCommSystem == 0) {
+        if (SelectedItem == kNetworkItem && cCommSystem_mCommSystem == 0) {
             SelectedItem = (SelectedItem + 15 + 2) % 15;
         }
-        if (SelectedItem == 13) {
+        if (SelectedItem == kLobbyItem) {
             if (cCommSystem_mCommSystem == 0 || cCommSystem_mNumNetConn <= 0) {
                 SelectedItem = (SelectedItem + 15 + 1) % 15;
             }
@@ -575,11 +578,11 @@ void cDebugMenuScreen::update()
         return;
     }
     switch (SelectedItem) {
-    case 0: {
+    case kGamePathItem: {
         void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         int quick = beRaceDB->cGamePath;
-        if (dir == 3) {
+        if (dir == kMenuKeyRight) {
             quick = (quick + 1) % 3;
             if (quick == 0) {
                 if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&TrackFileMan)) != 0) {
@@ -595,7 +598,7 @@ void cDebugMenuScreen::update()
                 }
             }
             cDebugMenuScreen_setGamePath(this, quick);
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             quick = (quick + 2) % 3;
             if (quick == 0) {
                 if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&TrackFileMan)) != 0) {
@@ -630,7 +633,7 @@ void cDebugMenuScreen::update()
             if ((*(sLSSub_B1B0*)&TrackFileMan).e[currentLocation].f84 == 0) {
                 cBENewRaceInterface_bIsBamLocation = 0;
             }
-            if (kind == 22) {
+            if (kind == kLOCATION_DEBUG) {
                 cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&TrackFileMan),
                         currentLocation));
             }
@@ -653,7 +656,7 @@ void cDebugMenuScreen::update()
         }
         break;
     }
-    case 1: {
+    case kGameModeItem: {
         void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         if (beRaceDB->cGamePath == 0) {
@@ -663,15 +666,15 @@ void cDebugMenuScreen::update()
             break;
         }
         int mode = beRaceDB->cGameMode;
-        if (dir != 2 && dir != 3) {
+        if (dir != kMenuKeyLeft && dir != kMenuKeyRight) {
             return;
         }
         int changed = 0;
         do {
             do {
-                if (dir == 3) {
+                if (dir == kMenuKeyRight) {
                     mode = (mode + 1) % 7;
-                } else if (dir == 2) {
+                } else if (dir == kMenuKeyLeft) {
                     mode = (mode + 6) % 7;
                 }
             } while (!cBENewRaceInterface_setGameMode_b4(race, mode));
@@ -687,7 +690,7 @@ void cDebugMenuScreen::update()
             if ((*(sLSSub_B1B0*)&TrackFileMan).e[currentLocation].f84 == 0) {
                 cBENewRaceInterface_bIsBamLocation = 0;
             }
-            if (kind == 22) {
+            if (kind == kLOCATION_DEBUG) {
                 cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&TrackFileMan),
                         currentLocation));
             }
@@ -710,18 +713,18 @@ void cDebugMenuScreen::update()
         }
         break;
     }
-    case 2: {
+    case kGameEventItem: {
         void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         int ev = beRaceDB->cGameEvent;
         if (beRaceDB->cGamePath == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
             cBENewRaceInterface_setNumberAI(race, 0);
-        } else if (dir == 2 || dir == 3) {
+        } else if (dir == kMenuKeyLeft || dir == kMenuKeyRight) {
             do {
-                if (dir == 3) {
+                if (dir == kMenuKeyRight) {
                     ev = (ev + 1) % 14;
-                } else if (dir == 2) {
+                } else if (dir == kMenuKeyLeft) {
                     ev = (ev + 13) % 14;
                 }
             } while (!cBENewRaceInterface_setGameEvent_b4(race, ev));
@@ -736,19 +739,19 @@ void cDebugMenuScreen::update()
         }
         break;
     }
-    case 3: {
+    case kFirstTimeWCItem: {
         cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         void* player = cBE_getInterface_B1B0(SSXApp_b4->be, 1);
         int firstTimeOnTrack = cBENewPlayerInterface_isFirstTimeWC(player, 0);
         if (cBENewRaceInterface_newRace.cGamePath != 0) {
             break;
         }
-        if (dir != 2 && dir != 3) {
+        if (dir != kMenuKeyLeft && dir != kMenuKeyRight) {
             return;
         }
-        if (dir == 3) {
+        if (dir == kMenuKeyRight) {
             firstTimeOnTrack = 1;
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             firstTimeOnTrack = 0;
         }
         cBENewPlayerInterface_setIsFirstTimeWC(player, 0, firstTimeOnTrack);
@@ -756,24 +759,24 @@ void cDebugMenuScreen::update()
         update_B4E0(player);
         break;
     }
-    case 4: {
+    case kTrackItem: {
         void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
-        if (dir != 2 && dir != 3) {
+        if (dir != kMenuKeyLeft && dir != kMenuKeyRight) {
             return;
         }
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         if (beRaceDB->cGamePath == 0) {
-            if (dir == 3) {
+            if (dir == kMenuKeyRight) {
                 currentLocation = cTrackFileMan_getNextWCBAMStartLocation_b4(&(*(sLSSub_B1B0*)&TrackFileMan),
                         currentLocation);
-            } else if (dir == 2) {
+            } else if (dir == kMenuKeyLeft) {
                 currentLocation = cTrackFileMan_getPrevWCBAMStartLocation(&(*(sLSSub_B1B0*)&TrackFileMan),
                         currentLocation);
             }
         } else {
             int mode = beRaceDB->cGameMode;
             do {
-                if (dir == 3) {
+                if (dir == kMenuKeyRight) {
                     currentLocation = cTrackFileMan_getNextLocation(&(*(sLSSub_B1B0*)&TrackFileMan), currentLocation,
                             cBENewRaceInterface_newRace.cGameMode);
                 } else {
@@ -795,34 +798,34 @@ void cDebugMenuScreen::update()
         if (sub->e[currentLocation].f84 == 0) {
             cBENewRaceInterface_bIsBamLocation = 0;
         }
-        if (kind == 22) {
+        if (kind == kLOCATION_DEBUG) {
             cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(sub, currentLocation));
         }
         update_B4E0(race);
         break;
     }
-    case 7:
+    case kBoardItem:
         // Wraps over a range of one value: both arms fold to 0 (the binary keeps both compares and one store).
-        if (dir == 3) {
+        if (dir == kMenuKeyRight) {
             CurrentBoard = (CurrentBoard + 1) % 1;
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             CurrentBoard = (CurrentBoard + 1 - 1) % 1;
         }
         *SSXApp_b4->be = CurrentBoard;
         break;
-    case 5: {
+    case kCharItem: {
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
-        if (dir == 3) {
+        if (dir == kMenuKeyRight) {
             CurrentChar = (CurrentChar + 1) % 10;
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             CurrentChar = (CurrentChar + 9) % 10;
         }
         cBENewPlayerInterface_setPlayerCharID(player, 0, CurrentChar);
         update_B4E0(player);
         break;
     }
-    case 6: {
-        if (dir == 2 || dir == 3) {
+    case kCtrlMapItem: {
+        if (dir == kMenuKeyLeft || dir == kMenuKeyRight) {
             CurrentMap = !CurrentMap;
         }
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
@@ -830,7 +833,7 @@ void cDebugMenuScreen::update()
         update_B4E0(player);
         break;
     }
-    case 8: {
+    case kNumAIRidersItem: {
         void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         int numAI = cBENewRaceInterface_newRace.iNumberAI;
         int maxAI = cDebugMenuScreen_getMaxAIRiders(this, cBENewRaceInterface_newRace.cGamePath,
@@ -839,31 +842,31 @@ void cDebugMenuScreen::update()
             numAI = maxAI;
         }
         for (;;) {
-            if (dir == 3) {
+            if (dir == kMenuKeyRight) {
                 numAI = (cBENewRaceInterface_newRace.iNumberAI + 1) % (maxAI + 1);
-            } else if (dir == 2) {
+            } else if (dir == kMenuKeyLeft) {
                 numAI = (cBENewRaceInterface_newRace.iNumberAI + maxAI) % (maxAI + 1);
             }
             if (cBENewRaceInterface_setNumberAI(race, numAI)) {
                 break;
             }
-            if (dir != 2 && dir != 3) {
+            if (dir != kMenuKeyLeft && dir != kMenuKeyRight) {
                 break;
             }
         }
         update_B4E0(race);
         break;
     }
-    case 9:
-        if (dir == 3) {
+    case kBackgroundItem:
+        if (dir == kMenuKeyRight) {
             CurrentBack = (CurrentBack + 2) % (bgCount_B4E0((cBackgroundMan*)((char*)&BackgroundMan)) + 1) - 1;
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             CurrentBack = (CurrentBack + bgCount_B4E0((cBackgroundMan*)((char*)&BackgroundMan)) + 1) % (bgCount_B4E0((cBackgroundMan*)((char*)&BackgroundMan)) + 1) - 1;
         }
         cBackgroundMan_setActiveImage(((char*)&BackgroundMan), CurrentBack);
         break;
-    case 10: {
-        if (dir != 2 && dir != 3) {
+    case kDTVItem: {
+        if (dir != kMenuKeyLeft && dir != kMenuKeyRight) {
             return;
         }
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -871,50 +874,50 @@ void cDebugMenuScreen::update()
         ((void (*)(void*, int))vt[8].fn)(vthis(ps2GraphicsMan, vt[8]), !((bool (*)(void*))vt[9].fn)(vthis(ps2GraphicsMan, vt[9])));
         break;
     }
-    case 11:
-        if (dir == 3) {
+    case kPlaylistItem:
+        if (dir == kMenuKeyRight) {
             CurrentPlaylist = (CurrentPlaylist + 1) % numSongs_B4E0();
             playSong_B4E0(this);
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             CurrentPlaylist = (CurrentPlaylist + numSongs_B4E0() - 1) % numSongs_B4E0();
             playSong_B4E0(this);
         }
         break;
-    case 12: {
-        if (dir == 6) {
-            if (NetworkMode == 3) {
+    case kNetworkItem: {
+        if (dir == kMenuKeySelect) {
+            if (NetworkMode == kNetwork_NetGui) {
                 func_00256088();
             }
-            if (NetworkMode == 4) {
+            if (NetworkMode == kNetwork_DNAS) {
                 func_002560B0();
             }
         }
         if (cCommSystem_mCommSystem == 0) {
             return;
         }
-        if (dir == 3) {
+        if (dir == kMenuKeyRight) {
             NetworkMode++;
-            if (cCommSystem_mNumNetConn <= 0 && (NetworkMode == 1 || NetworkMode == 2)) {
-                NetworkMode = 3;
+            if (cCommSystem_mNumNetConn <= 0 && (NetworkMode == kNetwork_Host || NetworkMode == kNetwork_Join)) {
+                NetworkMode = kNetwork_NetGui;
             }
-        } else if (dir == 2) {
+        } else if (dir == kMenuKeyLeft) {
             NetworkMode--;
-            if (cCommSystem_mNumNetConn <= 0 && (NetworkMode == 1 || NetworkMode == 2)) {
-                NetworkMode = 0;
+            if (cCommSystem_mNumNetConn <= 0 && (NetworkMode == kNetwork_Host || NetworkMode == kNetwork_Join)) {
+                NetworkMode = kNetwork_Disabled;
             }
         }
-        if (NetworkMode > 4) {
-            NetworkMode = 0;
+        if (NetworkMode > kNetwork_DNAS) {
+            NetworkMode = kNetwork_Disabled;
         }
-        if (NetworkMode < 0) {
-            NetworkMode = 4;
+        if (NetworkMode < kNetwork_Disabled) {
+            NetworkMode = kNetwork_DNAS;
         }
         void* net = cBE_getInterface_B1B0(SSXApp_b4->be, 7);
         cBENetworkInterface_networkOpt.bIsNetworkGame = netOn_B4E0(NetworkMode);
-        cBENetworkInterface_networkOpt.bIsHost = NetworkMode == 1;
+        cBENetworkInterface_networkOpt.bIsHost = NetworkMode == kNetwork_Host;
         update_B4E0(net);
-        if (NetworkMode != 0) {
-            if (NetworkMode != 3) {
+        if (NetworkMode != kNetwork_Disabled) {
+            if (NetworkMode != kNetwork_NetGui) {
                 if (commIdle_B4E0(cCommSystem_mCommSystem)) {
                     cCommSystem_netConnConnect(cCommSystem_mCommSystem, 0);
                     while (commBusy_B4E0(cCommSystem_mCommSystem)) {
@@ -931,21 +934,21 @@ void cDebugMenuScreen::update()
         }
         break;
     }
-    case 13:
+    case kLobbyItem:
         if (cCommSystem_mCommSystem == 0) {
             return;
         }
         if (cCommSystem_mNumNetConn <= 0) {
             return;
         }
-        if (dir == 6) {
+        if (dir == kMenuKeySelect) {
             SSXApp_b4->f80->f14 = SSXApp_b4->f80->f10;
         }
         break;
-    case 14:
+    case kRealFEItem:
         break;
     }
-    if (dir == 2 || dir == 3) {
+    if (dir == kMenuKeyLeft || dir == kMenuKeyRight) {
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
         CurrentBoard = *SSXApp_b4->be;
         CurrentChar = cBENewPlayerInterface_getPlayerCharID(player, 0);

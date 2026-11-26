@@ -4,8 +4,10 @@
 #include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "be/beintplayer.h"
+#include "be/beintnewrace.h"
 #include "be/beintstat.h"
 #include "be/beintnetwork.h"
+#include "be/beintoption.h"
 #include "main/ssxapp.h"
 #include "util/locale.h"
 extern int cBELibrary_raceDB[];
@@ -211,7 +213,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param bit  the location (On Tour eBELocationID locTrack)
  * @return true when the location has not been visited
  */
-int cBENewPlayerInterface::isFirstTimeOnTrack(int index, int bit)
+bool cBENewPlayerInterface::isFirstTimeOnTrack(int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -297,9 +299,9 @@ void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
  * @param index  the rider (On Tour iRider)
  * @param locationId  the location (On Tour eBELocationID)
  * @param event  the game event (On Tour eBEGameEvent)
- * @return 1 when the byte is nonzero, else 0
+ * @return true when the byte is nonzero
  */
-int cBENewPlayerInterface::hasPlayedEvent(int index, int locationId, int event)
+bool cBENewPlayerInterface::hasPlayedEvent(int index, int locationId, int event)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -321,15 +323,15 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param iProfileIndex  profile index
  * @param iCharacterID  character id
- * @param peak  the peak, 0-2
+ * @param peak  the peak (eBEPeakID), 0-2
  * @return 1 when locked, else 0
  */
 // PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 int cBENewPlayerInterface::isPeakLocked(int iProfileIndex, int iCharacterID, int peak)
 {
-    if (peak != 0)
+    if (peak != kPEAK_1)
     {
-        if (peak == 1)
+        if (peak == kPEAK_2)
         {
             return cBELibrary_profileLib[iProfileIndex][iCharacterID].bPeak2Locked;
         }
@@ -380,7 +382,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * tempPlayers[getPlayerID(@p index)].cCharacterID; the bits cBENewPlayerInterface_isPeakLocked reads.
  *
  * @param index  the rider (On Tour iRider)
- * @param kind  the peak (0-based): 1, or 2 (any other value also writes bit 13)
+ * @param kind  the peak (eBEPeakID): kPEAK_2, or kPEAK_3 (any other value also writes bit 13)
  * @param value  1 to lock, 0 to unlock
  */
 void cBENewPlayerInterface::setPeakLocked(int index, int kind, int value)
@@ -388,7 +390,7 @@ void cBENewPlayerInterface::setPeakLocked(int index, int kind, int value)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    if (kind == 1) {
+    if (kind == kPEAK_2) {
         cBELibrary_profileLib[profile][charId].bPeak2Locked = value;
     } else {
         cBELibrary_profileLib[profile][charId].bPeak3Locked = value;
@@ -411,7 +413,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * tempPlayers[getPlayerID(@p index)].cCharacterID): bit 3 + @p kind of the flags at +0x278, else bit @p kind.
  *
  * @param index  the rider (On Tour iRider)
- * @param kind  the peak, 0-2; any other gives 0
+ * @param kind  the peak (eBEPeakID), 0-2; any other gives 0
  * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0 (the end-of-event script passes game mode == 0)
  * @return the bit, 0 or 1
  */
@@ -422,19 +424,19 @@ int cBENewPlayerInterface::isRivalChallengePlayed(int index, int kind, int flag)
     int id = cBENewPlayerInterface_getPlayerID(index);
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     if (flag) {
-        if (kind == 0) {
+        if (kind == kPEAK_1) {
             return cBELibrary_profileLib[profile][charId].bPeak1RivalTimeChallengePlayed;
-        } else if (kind == 1) {
+        } else if (kind == kPEAK_2) {
             return cBELibrary_profileLib[profile][charId].bPeak2RivalTimeChallengePlayed;
-        } else if (kind == 2) {
+        } else if (kind == kPEAK_3) {
             return cBELibrary_profileLib[profile][charId].bPeak3RivalTimeChallengePlayed;
         }
     } else {
-        if (kind == 0) {
+        if (kind == kPEAK_1) {
             return cBELibrary_profileLib[profile][charId].bPeak1RivalPtsChallengePlayed;
-        } else if (kind == 1) {
+        } else if (kind == kPEAK_2) {
             return cBELibrary_profileLib[profile][charId].bPeak2RivalPtsChallengePlayed;
-        } else if (kind == 2) {
+        } else if (kind == kPEAK_3) {
             return cBELibrary_profileLib[profile][charId].bPeak3RivalPtsChallengePlayed;
         }
     }
@@ -458,7 +460,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * outside 0-2 writes nothing.
  *
  * @param index  the rider (On Tour iRider)
- * @param kind  the peak, 0-2
+ * @param kind  the peak (eBEPeakID), 0-2
  * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0
  * @param value  the new bit
  */
@@ -468,19 +470,19 @@ void cBENewPlayerInterface::setRivalChallengePlayed(int index, int kind, int fla
     int id = cBENewPlayerInterface_getPlayerID(index);
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     if (flag) {
-        if (kind == 0) {
+        if (kind == kPEAK_1) {
             cBELibrary_profileLib[profile][charId].bPeak1RivalTimeChallengePlayed = value;
-        } else if (kind == 1) {
+        } else if (kind == kPEAK_2) {
             cBELibrary_profileLib[profile][charId].bPeak2RivalTimeChallengePlayed = value;
-        } else if (kind == 2) {
+        } else if (kind == kPEAK_3) {
             cBELibrary_profileLib[profile][charId].bPeak3RivalTimeChallengePlayed = value;
         }
     } else {
-        if (kind == 0) {
+        if (kind == kPEAK_1) {
             cBELibrary_profileLib[profile][charId].bPeak1RivalPtsChallengePlayed = value;
-        } else if (kind == 1) {
+        } else if (kind == kPEAK_2) {
             cBELibrary_profileLib[profile][charId].bPeak2RivalPtsChallengePlayed = value;
-        } else if (kind == 2) {
+        } else if (kind == kPEAK_3) {
             cBELibrary_profileLib[profile][charId].bPeak3RivalPtsChallengePlayed = value;
         }
     }
@@ -502,7 +504,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param index  the rider whose profile is used (On Tour iRider)
  * @param character  the character (On Tour eBECharacters)
- * @param kind  the peak, 0-2; any other gives 0
+ * @param kind  the peak (eBEPeakID), 0-2; any other gives 0
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0 (the map passes 1 for event kind 4, 0 for kind 5)
  * @return 1 when locked, else 0
  */
@@ -512,30 +514,30 @@ int cBENewPlayerInterface::isRivalEventLocked(int index, int character, int kind
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
         switch (kind) {
-        case 0:
+        case kPEAK_1:
             {
             return cBELibrary_profileLib[profile][character].bPeak1TimeRCLocked;
         }
-        case 1:
+        case kPEAK_2:
             {
             return cBELibrary_profileLib[profile][character].bPeak2TimeRCLocked;
         }
-        case 2:
+        case kPEAK_3:
             {
             return cBELibrary_profileLib[profile][character].bPeak3TimeRCLocked;
         }
         }
     } else {
         switch (kind) {
-        case 0:
+        case kPEAK_1:
             {
             return cBELibrary_profileLib[profile][character].bPeak1FreeRCLocked;
         }
-        case 1:
+        case kPEAK_2:
             {
             return cBELibrary_profileLib[profile][character].bPeak2FreeRCLocked;
         }
-        case 2:
+        case kPEAK_3:
             {
             return cBELibrary_profileLib[profile][character].bPeak3FreeRCLocked;
         }
@@ -562,8 +564,8 @@ extern sTrackInfo_1466A0 cBELibrary_locationDB[];
  * Returns whether the rival event of the current peak is still locked for a rider's character.
  *
  * The peak is the word at +0x54 of the current location's cBELibrary_locationDB record (location: cBELibrary_raceDB
- * +0x40). When the committed game mode (cBELibrary_raceDB byte +0x48) is 5, reads bPeak<n>TimeRCLocked (n = peak + 1)
- * of the character record (profile cBELibrary_getProfileIndex(@p index), character
+ * +0x40). When the committed game mode (cBELibrary_raceDB byte +0x48) is kGAMEMODE_TIMECHALLENGE, reads
+ * bPeak<n>TimeRCLocked (n = peak + 1) of the character record (profile cBELibrary_getProfileIndex(@p index), character
  * tempPlayers[getPlayerID(@p index)].cCharacterID), else bPeak<n>FreeRCLocked. A peak outside 0-2 gives 0.
  *
  * @param index  the rider (On Tour iRider)
@@ -576,32 +578,32 @@ int cBENewPlayerInterface::isRivalEventLocked1(int index)
     int id = cBENewPlayerInterface_getPlayerID(index);
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     int kind = cBELibrary_locationDB[cBELibrary_raceDB[16]].kind;
-    if (*(signed char*)&cBELibrary_raceDB[18] == 5) {
+    if (*(signed char*)&cBELibrary_raceDB[18] == kGAMEMODE_TIMECHALLENGE) {
         switch (kind) {
-        case 0:
+        case kPEAK_1:
             {
             return cBELibrary_profileLib[profile][charId].bPeak1TimeRCLocked;
         }
-        case 1:
+        case kPEAK_2:
             {
             return cBELibrary_profileLib[profile][charId].bPeak2TimeRCLocked;
         }
-        case 2:
+        case kPEAK_3:
             {
             return cBELibrary_profileLib[profile][charId].bPeak3TimeRCLocked;
         }
         }
     } else {
         switch (kind) {
-        case 0:
+        case kPEAK_1:
             {
             return cBELibrary_profileLib[profile][charId].bPeak1FreeRCLocked;
         }
-        case 1:
+        case kPEAK_2:
             {
             return cBELibrary_profileLib[profile][charId].bPeak2FreeRCLocked;
         }
-        case 2:
+        case kPEAK_3:
             {
             return cBELibrary_profileLib[profile][charId].bPeak3FreeRCLocked;
         }
@@ -625,7 +627,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param index  the rider whose profile is used (On Tour iRider)
  * @param character  the character (On Tour eBECharacters)
- * @param kind  the peak, 0-2
+ * @param kind  the peak (eBEPeakID), 0-2
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0
  * @param value  1 to lock, 0 to unlock
  */
@@ -634,25 +636,25 @@ void cBENewPlayerInterface::setRivalEventLocked(int index, int character, int ki
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
         switch (kind) {
-        case 0:
+        case kPEAK_1:
             cBELibrary_profileLib[profile][character].bPeak1TimeRCLocked = value;
             break;
-        case 1:
+        case kPEAK_2:
             cBELibrary_profileLib[profile][character].bPeak2TimeRCLocked = value;
             break;
-        case 2:
+        case kPEAK_3:
             cBELibrary_profileLib[profile][character].bPeak3TimeRCLocked = value;
             break;
         }
     } else {
         switch (kind) {
-        case 0:
+        case kPEAK_1:
             cBELibrary_profileLib[profile][character].bPeak1FreeRCLocked = value;
             break;
-        case 1:
+        case kPEAK_2:
             cBELibrary_profileLib[profile][character].bPeak2FreeRCLocked = value;
             break;
-        case 2:
+        case kPEAK_3:
             cBELibrary_profileLib[profile][character].bPeak3FreeRCLocked = value;
             break;
         }
@@ -683,22 +685,22 @@ int cBENewPlayerInterface::isEventLocked(int index, int character, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     switch (kind) {
-    case 6: {
+    case kGAMEEVENT_TIME_PEAK1: {
         return cBELibrary_profileLib[profile][character].bPeak1TCLocked;
     }
-    case 7: {
+    case kGAMEEVENT_TIME_PEAK2: {
         return cBELibrary_profileLib[profile][character].bPeak2TCLocked;
     }
-    case 8: {
+    case kGAMEEVENT_TIME_PEAK3: {
         return cBELibrary_profileLib[profile][character].bPeak3TCLocked;
     }
-    case 9: {
+    case kGAMEEVENT_POINTS_PEAK1: {
         return cBELibrary_profileLib[profile][character].bPeak1FCLocked;
     }
-    case 10: {
+    case kGAMEEVENT_POINTS_PEAK2: {
         return cBELibrary_profileLib[profile][character].bPeak2FCLocked;
     }
-    case 11: {
+    case kGAMEEVENT_POINTS_PEAK3: {
         return cBELibrary_profileLib[profile][character].bPeak3FCLocked;
     }
     }
@@ -717,29 +719,29 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setEventLocked);
  *
  * @param rider  the rider whose profile is used (On Tour iRider)
  * @param character  the character (On Tour eBECharacters)
- * @param event  the game event, 6-11
+ * @param event  the game event (eBEGameEvent), kGAMEEVENT_TIME_PEAK1 to kGAMEEVENT_POINTS_PEAK3
  * @param locked  1 to lock, 0 to unlock
  */
 void cBENewPlayerInterface::setEventLocked(int rider, int character, int event, int locked)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     switch (event) {
-    case 6:
+    case kGAMEEVENT_TIME_PEAK1:
         cBELibrary_profileLib[profile][character].bPeak1TCLocked = locked;
         break;
-    case 7:
+    case kGAMEEVENT_TIME_PEAK2:
         cBELibrary_profileLib[profile][character].bPeak2TCLocked = locked;
         break;
-    case 8:
+    case kGAMEEVENT_TIME_PEAK3:
         cBELibrary_profileLib[profile][character].bPeak3TCLocked = locked;
         break;
-    case 9:
+    case kGAMEEVENT_POINTS_PEAK1:
         cBELibrary_profileLib[profile][character].bPeak1FCLocked = locked;
         break;
-    case 10:
+    case kGAMEEVENT_POINTS_PEAK2:
         cBELibrary_profileLib[profile][character].bPeak2FCLocked = locked;
         break;
-    case 11:
+    case kGAMEEVENT_POINTS_PEAK3:
         cBELibrary_profileLib[profile][character].bPeak3FCLocked = locked;
         break;
     }
@@ -872,7 +874,8 @@ extern char str_JUGADOR_pct_d[];
  * (bIsHost, +0x8) rider 0 is this player's name (+0x488) and rider 1 the opponent's (+0x498), on the other console the
  * reverse. Otherwise, when the name of the rider's entry (tempPlayers[getPlayerID(@p idx)]) is empty, formats
  * str_PLAYER_pct_d, str_JOUEUR_pct_d, str_SPIELER_pct_d or str_JUGADOR_pct_d with @p idx + 1 into it, by the language
- * field (bits 22-24 of cBEOptionInterface_mOption[0]; a language above 3 leaves it empty), and returns that name.
+ * field (eOptionSpeechLanguage, bits 22-24 of cBEOptionInterface_mOption[0]; a language above 3 leaves it empty), and
+ * returns that name.
  *
  * @param idx  the rider
  * @return the name string
@@ -895,16 +898,16 @@ extern "C" char* func_00146F88(cBENewPlayerInterface* self, int idx)
     if (cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].strUserName[0] == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 4);
         switch ((int)((cBEOptionInterface_mOption[0] >> 22) & 7)) {
-        case 0:
+        case kOPTLANG_English:
             sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].strUserName, str_PLAYER_pct_d, idx + 1);
             break;
-        case 1:
+        case kOPTLANG_French:
             sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].strUserName, str_JOUEUR_pct_d, idx + 1);
             break;
-        case 2:
+        case kOPTLANG_German:
             sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].strUserName, str_SPIELER_pct_d, idx + 1);
             break;
-        case 3:
+        case kOPTLANG_Spanish:
             sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].strUserName, str_JUGADOR_pct_d, idx + 1);
             break;
         }
@@ -1073,7 +1076,7 @@ void cBENewPlayerInterface::setRiderCharID(int index, int charID)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBEPlayerDB* entry = &cBENewPlayerInterface_tempPlayers[id];
-    if (func_00147338_isLocked(entry) == 1)
+    if (func_00147338_isLocked(entry) == true)
     {
         entry->cCharacterID = cBENewPlayerInterface_tempPlayers[0].cCharacterID;
     }
@@ -1162,7 +1165,7 @@ static inline int cBENewPlayerInterface_setPlayerCharID_isMissionMan(cBEPlayerDB
 void cBENewPlayerInterface::setPlayerCharID(int iPlayer, int charID)
 {
     cBEPlayerDB* playerRec = &cBENewPlayerInterface_tempPlayers[iPlayer];
-    if (cBENewPlayerInterface_setPlayerCharID_isMissionMan(playerRec) == 1) {
+    if (cBENewPlayerInterface_setPlayerCharID_isMissionMan(playerRec) == true) {
         playerRec->cCharacterID = cBENewPlayerInterface_tempPlayers[0].cCharacterID;
     } else {
         playerRec->cCharacterID = charID;
@@ -1412,7 +1415,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderHumanIndex);
 /**
  * Returns iHumanID (flag bit 0) of player slot @p index's entry, or -1 when the slot has no controller.
  *
- * The slot indexes cBENewPlayerInterface_tempPlayers directly; a controller id (+0xC) of -1 gives -1, otherwise the
+ * The slot indexes cBENewPlayerInterface_tempPlayers directly; a controller id (+0xC) of kNoController (-1) gives -1,
+ * otherwise the
  * result is bit 0 of the flags at +0x10.
  *
  * @param index  the player slot
@@ -1420,7 +1424,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderHumanIndex);
  */
 int cBENewPlayerInterface::getRiderHumanIndex(int index)
 {
-    if (cBENewPlayerInterface_tempPlayers[index].iControllerID == -1) {
+    if (cBENewPlayerInterface_tempPlayers[index].iControllerID == cBEPlayerDB::kNoController) {
         return -1;
     }
     return cBENewPlayerInterface_tempPlayers[index].iHumanID;
@@ -1518,9 +1522,9 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param index  the rider
  * @param bit  the flag number
- * @return 1 when set, else 0
+ * @return true when set
  */
-extern "C" int func_00147980(cBENewPlayerInterface* self, int index, int bit)
+extern "C" bool func_00147980(cBENewPlayerInterface* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1902,7 +1906,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @p profile of cBELibrary_profileLib.
  *
  * @param profile  the human, used both as the profile index and to look up the character (On Tour iHuman)
- * @param stat  the attribute, 0-6 (On Tour eBEAttributes)
+ * @param stat  the attribute (eBEAttributes), 0-6
  * @return the attribute value, or -1
  */
 // Returns one of a character's seven stat levels for the given profile, or -1.
@@ -1910,25 +1914,25 @@ int cBEStatInterface::getStatFromProfile(int profile, unsigned int stat)
 {
     int charId = cBELibrary_getCharacterID(profile);
     switch (stat) {
-    case 0: {
+    case kATTRIB_SPEED: {
         return cBELibrary_profileLib[profile][charId].statDB.cSpeed;
     }
-    case 1: {
+    case kATTRIB_ACCEL: {
         return cBELibrary_profileLib[profile][charId].statDB.cAccel;
     }
-    case 2: {
+    case kATTRIB_TRICK: {
         return cBELibrary_profileLib[profile][charId].statDB.cTrick;
     }
-    case 3: {
+    case kATTRIB_EDGING: {
         return cBELibrary_profileLib[profile][charId].statDB.cEdging;
     }
-    case 4: {
+    case kATTRIB_SPIN: {
         return cBELibrary_profileLib[profile][charId].statDB.cSpin;
     }
-    case 5: {
+    case kATTRIB_TOUGH: {
         return cBELibrary_profileLib[profile][charId].statDB.cToughness;
     }
-    case 6: {
+    case kATTRIB_STAB: {
         return cBELibrary_profileLib[profile][charId].statDB.cStability;
     }
     }
@@ -2724,11 +2728,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getBrakingAttrib);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_isMissionMan(int index);
 
-struct sCharStat_005308D8
-{
-    signed char v[15];
-};
-extern sCharStat_005308D8 cBELibrary_statDefault[];
+extern tBEStatDefault cBELibrary_statDefault[];
 
 /**
  * Returns a rider's braking attribute as a fraction of the character's maximum edging level.
@@ -2753,7 +2753,7 @@ float cBEStatInterface::getBrakingAttrib(int rider, int value)
         attribLevel = value;
     else
         attribLevel = cBEStatInterface_currentStat[profile].e[charID].v[3] / 5;
-    return (float)attribLevel / (float)cBELibrary_statDefault[charID].v[0xB];
+    return (float)attribLevel / (float)cBELibrary_statDefault[charID].cMaxEdging;
 }
 #endif
 
@@ -2763,11 +2763,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getEdgingAttrib);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBENewPlayerInterface_isMissionMan(int index);
 
-struct sCharStat_00148E68
-{
-    signed char v[15];
-};
-extern sCharStat_00148E68 cBELibrary_statDefault_00148E68[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault cBELibrary_statDefault[];
 
 /**
  * Returns a rider's edging attribute as a fraction of the character's maximum edging level.
@@ -2792,7 +2788,7 @@ float cBEStatInterface::getEdgingAttrib(int rider, int value)
         attribLevel = value;
     else
         attribLevel = cBEStatInterface_currentStat[profile].e[charID].v[3] / 5;
-    return (float)attribLevel / (float)cBELibrary_statDefault_00148E68[charID].v[0xB];
+    return (float)attribLevel / (float)cBELibrary_statDefault[charID].cMaxEdging;
 }
 #endif
 

@@ -70,6 +70,16 @@ struct cTexFlipModifier {
     tTexFlipMaterialBlockRecord MaterialBlock; // 0x24 [O] (On Tour 0x84; retail 0xC4); [U] setup MEM_fills and
                                     //      fills it; passed to cTexFlipModifier_setTexIndex
 
+    // Type: how the flip advances (names ours). [U] cTexFlipModifier_update steps a kTexFlip_Sequence one texture per
+    // Speed tick (backward with Dir set); a random flicker alternates kTexFlip_RandomSlow (a random 0.25..1.0 of
+    // BaseSpeed) and kTexFlip_RandomFast (10 steps a second), switching on every step.
+    enum eTexFlipType { kTexFlip_Sequence = 0, kTexFlip_RandomSlow = 1, kTexFlip_RandomFast = 2 };
+    // signal's ids (names ours). [U] cTexFlipModifier_signal: 300 sets Speed, 301 picks a texture, 302 steps to the
+    // next one.
+    enum eTexFlipSignal {
+        kTexFlipSignal_Speed = 300, kTexFlipSignal_SetTexture = 301, kTexFlipSignal_NextTexture = 302
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void* cTexFlipModifier1(cBxReplayFrame* obj) __asm__("cTexFlipModifier_cTexFlipModifier1");
     void setupTexFlip() __asm__("cTexFlipModifier_setupTexFlip");

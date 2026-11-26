@@ -2,6 +2,7 @@
 #include "bx/math3d.h"
 #include "object/instancenode.h"
 #include "world/instancerecord.h"
+#include "world/worldrecords.h"
 #include "vtable.h"
 #include "object/deadfadenode.h"
 #include "object/restorenode.h"
@@ -185,7 +186,7 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
         sDfMat_0750 partMatrix;
         for (int i = 0; i < model->count; i++, part++) {
             int parent = part->parent;
-            if (parent != -1) {
+            if (parent != tMeshHeirarchyRecord::kNoParent) {
                 partMat_0750(&partMatrix, &((sDfMatElem_0750*)self->AnimMats)[parent], part->mat, scaleVec);
                 vu0CopyMat_0750(&((sDfMatElem_0750*)self->AnimMats)[i], &partMatrix);
             } else {
@@ -408,7 +409,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
         box[1].z = ((sDfObj_350CB8*)self->Instance)->scl[2];
         box[1].w = 1.0f;
         int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
-        if (res == 1) {
+        if (res == GM_CLIPCODE_OUTSIDE) {
             return;
         }
     }

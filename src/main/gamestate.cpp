@@ -21,6 +21,7 @@
 #include "be/beintmission.h"
 #include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
+#include "scripter/nislist.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
@@ -154,8 +155,7 @@ static inline float ffloor_00234C68(float x)
  * moves on.
  *
  * At zero it also tells the HUD (event 6) and the audio system, then goes to the next state. Nothing happens
- * while
- * a replay plays or in game mode 4.
+ * while a replay plays or in kGAMEMODE_FREERIDE.
  */
 void cGFGateState::update()
 {
@@ -163,7 +163,7 @@ void cGFGateState::update()
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGameMode == 4) {
+    if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE) {
         return;
     }
     if (cGameState_mpGame->AI->CountdownTicksLeft <= 0) {
@@ -237,15 +237,15 @@ extern cGame* cGameState_mpGame;
  * Starts the riding game state: lets the AI riders go and hands the game to the back end's racing state.
  *
  * Calls cAI_setAIState on the game's AI (cGameState_mpGame->AI) with 5; unless the race's game mode (newRace.cGameMode)
- * is 4, sets the AI's ComputerRidersActive to 1 and ComputerActorsActive to 0. Then cBE_setState(1) and, when no replay
- * is playing (Replay state outside 1-9), purges the UI's normal states (cUIStateStack_purgeNormalStates). Slot +0x2C
- * (gainFocus) of cGFRidingState_vtbl.
+ * is kGAMEMODE_FREERIDE, sets the AI's ComputerRidersActive to 1 and ComputerActorsActive to 0. Then cBE_setState(1)
+ * and, when no replay is playing (Replay state outside 1-9), purges the UI's normal states
+ * (cUIStateStack_purgeNormalStates). Slot +0x2C (gainFocus) of cGFRidingState_vtbl.
  */
 extern "C" void cGFRidingState_gainFocus(void)
 {
     cAI_setAIState(cGameState_mpGame->AI, 5);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGameMode != 4) {
+    if (cBENewRaceInterface_newRace.cGameMode != kGAMEMODE_FREERIDE) {
         cGame* game = cGameState_mpGame;
         game->AI->ComputerRidersActive = 1;
         game->AI->ComputerActorsActive = 0;
@@ -317,7 +317,7 @@ extern "C" void* cGFTrackStartState_cGFTrackStartState(cGFTrackStartState* self)
     cGameState_mpGame = 0;
     self->mVtbl = (void**)cGFTrackStartState_vtbl;
     self->mNextState = 4;
-    self->mPreLoadState = 5;
+    self->mPreLoadState = cGFTrackStartState::kPreLoad_Done;
     self->mStartupFlag = 0;
     self->mPlayFirstTimeBCVideo = 0;
     self->mPreLoadTicks = 0;
@@ -652,7 +652,7 @@ void cGFTrackStartState::preloadCancel()
 {
     cSSXScriptEngine_PurgeTrack(ScriptEngine);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
-    mPreLoadState = 5;
+    mPreLoadState = kPreLoad_Done;
 }
 #endif
 
@@ -660,13 +660,13 @@ void cGFTrackStartState::preloadCancel()
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_isPreloadComplete);
 #ifdef SKIP_ASM
 /**
- * Tells whether the track-start preload has finished: its preload state (+0x10) is 5.
+ * Tells whether the track-start preload has finished: its preload state (+0x10) is kPreLoad_Done.
  *
- * @return 1 when the preload is complete, otherwise 0
+ * @return true when the preload is complete
  */
-int cGFTrackStartState::isPreloadComplete()
+bool cGFTrackStartState::isPreloadComplete()
 {
-    return mPreLoadState == 5;
+    return mPreLoadState == kPreLoad_Done;
 }
 #endif
 
@@ -707,9 +707,8 @@ static inline int isMode2_2355C0(cSSXScriptEngine* s)
  * Starts a track: picks the start flow, initialises the missions and global scripts, and plays the start NIS
  * lists.
  *
- * Offline outside locations 14-16 the state goes to step 4; otherwise to step 1. Game mode 4 puts the AI in
- * state 3
- * and disables its countdown flag. A location visited for the first time is recorded for player 1.
+ * Offline outside locations 14-16 the state goes to step 4; otherwise to step 1. kGAMEMODE_FREERIDE puts the AI in
+ * state 3 and disables its countdown flag. A hub (kLOCATIONTYPE_HUB) is recorded as player 1's last hub.
  */
 void cGFTrackStartState::gainFocus()
 {
@@ -728,17 +727,17 @@ void cGFTrackStartState::gainFocus()
         mNextState = 1;
         mStartupFlag = flag == 0;
     }
-    if (mode == 4)
+    if (mode == kGAMEMODE_FREERIDE)
         cAI_setAIState(cGameState_mpGame->AI, 3);
     cBE_setState(0);
     cWScriptMan_initMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
-    if (cBENewRaceInterface_getLocationType(race, cBENewRaceInterface_getLocationID(race)) == 1) {
+    if (cBENewRaceInterface_getLocationType(race, cBENewRaceInterface_getLocationID(race)) == kLOCATIONTYPE_HUB) {
         cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setLastHub(player, 0, cBENewRaceInterface_getLocationID(race));
         player->submit();
     }
-    cGameState_mpGame->AI->ComputerRidersActive = mode != 4;
+    cGameState_mpGame->AI->ComputerRidersActive = mode != kGAMEMODE_FREERIDE;
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     if (flag) {
         mNextState = 1;
@@ -801,8 +800,8 @@ static inline int otherSide_235868(cCamera* camera)
 /**
  * Finishes the track start: sets up the missions, restarts the replay recording and resets heat flags.
  *
- * Offline it records the location as visited for player 1; game modes 5 and 6 reset the heat in the game mode
- * manager; a split-screen game clears the other view's cache flag.
+ * Offline it records the location as visited for player 1; kGAMEMODE_TIMECHALLENGE and kGAMEMODE_PNTSCHALLENGE reset
+ * the heat in the game mode manager; a split-screen game clears the other view's cache flag.
  */
 void cGFTrackStartState::loseFocus()
 {
@@ -818,10 +817,10 @@ void cGFTrackStartState::loseFocus()
         cBENewPlayerInterface_setFirstTimeOnTrack(player, 0, 0, *cBENewRaceInterface_getLocation(race));
     }
     int gameMode = beRaceDB->cGameMode;
-    if (gameMode == 5) {
+    if (gameMode == kGAMEMODE_TIMECHALLENGE) {
         goto restart;
     }
-    if (gameMode == 6) {
+    if (gameMode == kGAMEMODE_PNTSCHALLENGE) {
     restart:
         cGameModeMan_riderCheckpointHit(SSXApp->GameModeMan, 0, 0);
     }
@@ -908,7 +907,8 @@ extern void* cWScriptMan_TheWScriptMan;
  * Starts the next heat: restarts the heat and the game, re-picks the computer riders and queues the start
  * sequence.
  *
- * Game modes 5 and 6, and online games, skip straight to step 3. Race mode also plays the transport sequence.
+ * kGAMEMODE_TIMECHALLENGE and kGAMEMODE_PNTSCHALLENGE, and online games, skip straight to NH_DONE. Race mode also plays
+ * the transport sequence.
  */
 void cGFNextHeatState::gainFocus()
 {
@@ -921,13 +921,13 @@ void cGFNextHeatState::gainFocus()
     cGame_partialRestart(SSXApp->Game);
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     int gameMode = beRaceDB->cGameMode;
-    if (gameMode == 5)
+    if (gameMode == kGAMEMODE_TIMECHALLENGE)
         goto bail;
-    if (gameMode == 6)
+    if (gameMode == kGAMEMODE_PNTSCHALLENGE)
         goto bail;
     if (beRaceDB->cGamePath != 0) {
     bail:
-        CurrentNextHeatState = 3;
+        CurrentNextHeatState = NH_DONE;
         return;
     }
     int n = gm->iNumberAI - gm->iSimAI;
@@ -1005,16 +1005,16 @@ void cGFNextHeatState::update()
     cWorld* world = game->World;
     int idx = game->ViewMan->PlayerCamera[0]->StreamFocusID == 0;
     switch (state) {
-    case 0:
+    case NH_PURGING:
         if (cAI_isReadyToPurgeComputerRiders(game->AI)) {
             cAI_cleanupAfterRace(SSXApp->Game->AI);
             if (cBENewRaceInterface_newRace.iNumberAI >= 2)
                 cAI_cleanupActors(SSXApp->Game->AI);
             cAI_initAIRiders(SSXApp->Game->AI);
-            CurrentNextHeatState = 1;
+            CurrentNextHeatState = NH_LOADINGAI;
         }
         break;
-    case 1:
+    case NH_LOADINGAI:
         if (cAI_isAILoadedAndReady(game->AI)) {
             cAI_resolveRace(SSXApp->Game->AI);
             cGameState_mpGame->AI->ComputerRidersActive = 1;
@@ -1022,12 +1022,12 @@ void cGFNextHeatState::update()
             cPlayer* player = SSXApp->Game->AI->Players[0];
             t4Vector pos = cRider_getEventStartPos(player->mRider);
             cWorldView_setFocus(&world->m_pWorldCache->m_WorldView, idx, (const t4Vector*)&pos, 45000.0f);
-            CurrentNextHeatState = 2;
+            CurrentNextHeatState = NH_READY;
         } else {
             cAI_loadRiders(SSXApp->Game->AI);
         }
         break;
-    case 2:
+    case NH_READY:
         if (PlayTransport != 0) {
             t4Vector focusPos;
             float dist;
@@ -1036,7 +1036,7 @@ void cGFNextHeatState::update()
                 break;
             if (WaitTicks < 120)
                 break;
-            if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1)
+            if (cSSXScriptEngine_GetNISListState(ScriptEngine, keNISList_Main) == keNISListState_Loading)
                 break;
             cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0)
@@ -1049,9 +1049,9 @@ void cGFNextHeatState::update()
                 break;
             cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         }
-        CurrentNextHeatState = 3;
+        CurrentNextHeatState = NH_DONE;
         break;
-    case 3:
+    case NH_DONE:
         cGameState_gotoNextState(this);
         break;
     }
@@ -1273,9 +1273,9 @@ static inline int isOne_6250(int m)
 /**
  * Starts the user-select flow (choosing where to go next) and plays its NIS.
  *
- * @param mode  how it was entered (On Tour startupFlag): 0 the session menu, 1 a saved target location, 2 or
- *              3 the
- *              transport map
+ * @param mode  how it was entered (On Tour startupFlag; eUserSelectMode): keUserSelectMode_Lodge the session menu,
+ *              keUserSelectMode_TransportPauseMenu a saved target location, keUserSelectMode_Transport or
+ *              keUserSelectMode_TransportNoTransitionIn the transport map
  */
 void cGFUserSelectState::gainFocus(int mode)
 {
@@ -1284,11 +1284,11 @@ void cGFUserSelectState::gainFocus(int mode)
     cAI_setAIState(cGameState_mpGame->AI, 3);
     cGameState_mpGame->AI->Players[0]->mRider->BoostPowerBar = 0.0f;
     mNextLocation = 23;
-    mCurrState = 0;
+    mCurrState = US_WAITSTARTNIS;
     mMode = mode;
     mOverlayDone = 0;
     mWaitingForOverlay = 0;
-    if (mode == 1) {
+    if (mode == keUserSelectMode_TransportPauseMenu) {
         mOverlayDone = mode;
         cBE_getInterface_Fv(cBE_getBE(), 0);
         mNextLocation = cBENewRaceInterface_mNextLocation;
@@ -1296,18 +1296,21 @@ void cGFUserSelectState::gainFocus(int mode)
     if (mNextLocation == *cBENewRaceInterface_getLocation(iface))
         cGame_partialRestart(SSXApp->Game);
     int curMode = mMode;
-    if (curMode == 0) {
-        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 22, 3, 0, -1, -1, -1);
-        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 23, 1, 0, -1, -1, -1);
+    if (curMode == keUserSelectMode_Lodge) {
+        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1,
+                                                      keSSXScriptCategory_wclodgearrive, 3, 0, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1,
+                                                      keSSXScriptCategory_wclodgeleave, 1, 0, -1, -1, -1);
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     } else if (curMode >= 0) {
-        if (curMode < 4) {
+        if (curMode < keUserSelectMode_Num) {
             if (!isOne_6250(curMode))
-                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 11, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, keSSXScriptCategory_wctransportstart, 3,
+                                                              0, -1, -1, -1);
             cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
             cRider_initAlways(SSXApp->Game->AI->Players[0]->mRider);
-            cSSXScriptEngine_PlayNISList(ScriptEngine, 1, mMode == 2, 0);
+            cSSXScriptEngine_PlayNISList(ScriptEngine, 1, mMode == keUserSelectMode_Transport, 0);
         }
     }
 }
@@ -1390,19 +1393,20 @@ void cGFUserSelectState::update()
     int one = 1;
     int ns;
     switch (mCurrState) {
-    case 0: {
+    case US_WAITSTARTNIS: {
         int nisListInfo = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1);
-        if (!(nisListInfo == 4 || nisListInfo == 5 || nisListInfo == 0))
+        if (!(nisListInfo == keNISListStatePlay_GoingToNext || nisListInfo == keNISListStatePlay_GoingToStop
+              || nisListInfo == keNISListStatePlay_Stopped))
             return;
         int curMode = mMode;
-        if (curMode == 0) {
+        if (curMode == keUserSelectMode_Lodge) {
             cOVStateManager_triggerOverlay(0x1F);
             push2_6418();
             mOverlayDone = 0;
-        } else if (curMode == 2) {
+        } else if (curMode == keUserSelectMode_Transport) {
             int flag = 0;
             if (atLeast_6418(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))))
-                flag = one && cBENewRaceInterface_newRace.cGameMode == 4;
+                flag = one && cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE;
             if (flag)
                 cUITemplate_MAP_mMapStyle = 3;
             else
@@ -1411,10 +1415,10 @@ void cGFUserSelectState::update()
             push2_6418();
             mOverlayDone = 0;
         }
-        ns = 1;
+        ns = US_WAITOVERLAY;
         break;
     }
-    case 1: {
+    case US_WAITOVERLAY: {
         if (mOverlayDone == 0)
             return;
         cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 0x1E);
@@ -1423,8 +1427,8 @@ void cGFUserSelectState::update()
         int* mode = &mMode;
         if (!isOne_6418(*mode))
             pop_6418();
-        if (*mode == 0) {
-            ns = 2;
+        if (*mode == keUserSelectMode_Lodge) {
+            ns = US_WAITLEAVE;
             break;
         }
         {
@@ -1433,7 +1437,7 @@ void cGFUserSelectState::update()
             int curInBackcountry = (unsigned)(curLocation - 0xE) < 3;
             int destInBackcountry = (unsigned)(destLocation - 0xE) < 3;
             if (destLocation == curLocation && !destInBackcountry) {
-                mCurrState = 3;
+                mCurrState = US_WAITEND;
                 ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 10))->f10 = one;
                 cGame_setState(SSXApp->Game, 0xF, 0, 0);
                 return;
@@ -1441,14 +1445,15 @@ void cGFUserSelectState::update()
             if (destInBackcountry && cBENewRaceInterface_newRace.cGamePath == 0)
                 mOverlayDone = 0;
             cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !destInBackcountry && !curInBackcountry, 1);
-            ns = 2;
+            ns = US_WAITLEAVE;
         }
         break;
     }
-    case 2:
-        if (mMode != 0) {
+    case US_WAITLEAVE:
+        if (mMode != keUserSelectMode_Lodge) {
             int nisListInfo = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
-            if (nisListInfo == 0xE || nisListInfo == 20) {
+            if (nisListInfo == keSSXScriptCategory_wctransportheliintransitloop
+                || nisListInfo == keSSXScriptCategory_wctransportgondolaintransitloop) {
                 if (mOverlayDone == 0) {
                     if (mWaitingForOverlay != 0)
                         return;
@@ -1459,15 +1464,16 @@ void cGFUserSelectState::update()
                 mWaitingForOverlay = 0;
                 ((cSectionMan*)(void*)SSXApp->Game->SectionMan)->mWaitTransport = one;
                 cSectionMan_load(SSXApp->Game->SectionMan, mNextLocation, 7);
-                ns = 3;
+                ns = US_WAITEND;
                 break;
             }
-            if (nisListInfo == 13 || nisListInfo == 19)
+            if (nisListInfo == keSSXScriptCategory_wctransportheliintransitstart
+                || nisListInfo == keSSXScriptCategory_wctransportgondolaintransitstart)
                 cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 0);
             return;
         }
         cGameState_gotoNextState(this);
-        ns = 3;
+        ns = US_WAITEND;
         break;
     default:
         return;
@@ -1608,12 +1614,13 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 /**
  * Steps the section-load game state while the section manager waits for a transport.
  *
- * Does nothing unless the section manager's mWaitTransport (+0x1C8) is set. Sub-state 0: once the location's section
- * (mBELocationID) is loaded, puts the world view's focus for the inactive view at the first rider's NIS end position
- * (cRider_GetNISEndPosition) with radius 45000 and goes to 1. Sub-state 1: waits until the test focus is at least 20000
- * away, the first transition manager (cGame_getTransitionMan) is idle and no NIS is in transition, then ends the transport
- * sequence (cSSXScriptEngine_EndTransportSequence), clears mWaitTransport, activates the location in mode 7
- * (cSectionMan_activate) and goes to 2. Slot +0x34 (update) of cGFSectionLoadState_vtbl.
+ * Does nothing unless the section manager's mWaitTransport (+0x1C8) is set. In kSectionLoad_WaitSection, once the
+ * location's section (mBELocationID) is loaded, puts the world view's focus for the inactive view at the first rider's
+ * NIS end position (cRider_GetNISEndPosition) with radius 45000 and goes to kSectionLoad_WaitTransport. There it waits
+ * until the test focus is at least 20000 away, the first transition manager (cGame_getTransitionMan) is idle and no NIS
+ * is in transition, then ends the transport sequence (cSSXScriptEngine_EndTransportSequence), clears mWaitTransport,
+ * activates the location in mode 7 (cSectionMan_activate) and goes to kSectionLoad_Done. Slot +0x34 (update) of
+ * cGFSectionLoadState_vtbl.
  */
 void cGFSectionLoadState::update()
 {
@@ -1626,16 +1633,16 @@ void cGFSectionLoadState::update()
     cWorld* world = appGame->World;
     int idx = appGame->ViewMan->PlayerCamera[0]->StreamFocusID == 0;
     switch (state) {
-    case 0:
+    case kSectionLoad_WaitSection:
         if (cSectionMan_isLoaded(sectionMan, sectionMan->mBELocationID) != 0) {
             cPlayer* aiPlayer = SSXApp->Game->AI->Players[0];
             t4Vector pos = cRider_GetNISEndPosition(aiPlayer->mRider);
             world->m_pWorldCache->m_WorldView.m_StreamFocus[idx].m_bActive = 1;
             cWorldView_setFocus(&world->m_pWorldCache->m_WorldView, idx, &pos, 45000.0f);
-            mSubState = 1;
+            mSubState = kSectionLoad_WaitTransport;
         }
         break;
-    case 1: {
+    case kSectionLoad_WaitTransport: {
         t4Vector focusPos;
         float dist;
         cWorldView_getTestFocus(&world->m_pWorldCache->m_WorldView, idx, &focusPos, &dist);
@@ -1657,10 +1664,10 @@ void cGFSectionLoadState::update()
         cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         sectionMan->mWaitTransport = 0;
         cSectionMan_activate(sectionMan, sectionMan->mBELocationID, 7);
-        mSubState = 2;
+        mSubState = kSectionLoad_Done;
         break;
     }
-    case 2:
+    case kSectionLoad_Done:
         break;
     }
 }
@@ -1827,7 +1834,7 @@ extern "C" void cGameState_gotoNextState(void* self);
 void cGFPreEventState::update()
 {
     if (cGameComm_mGameComm == 0 || cGameComm_mGameComm->mError == 0) {
-        if (mOverlayDone == 1) {
+        if (mOverlayDone == true) {
             cGameState_gotoNextState(this);
         }
     }
@@ -1981,7 +1988,7 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
  */
 void cGFPostEventState::update()
 {
-    if (mOverlayDone == 1) {
+    if (mOverlayDone == true) {
         cGame_setState(SSXApp->Game, 0xE, 2, 0);
     }
 }
@@ -2067,12 +2074,13 @@ extern "C" void cGameState_gotoNextState(void* self);
 /**
  * Waits for the podium NIS to end, then moves the game to its next state.
  *
- * Calls cGameState_gotoNextState() once NIS list 0 reports play state 0 or 5.
+ * Calls cGameState_gotoNextState() once NIS list 0 reports play state keNISListStatePlay_Stopped or
+ * keNISListStatePlay_GoingToStop.
  */
 void cGFPodiumState::update()
 {
     int playState = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
-    int busy = playState != 0 && playState != 5;
+    int busy = playState != keNISListStatePlay_Stopped && playState != keNISListStatePlay_GoingToStop;
     if (!busy) {
         cGameState_gotoNextState(this);
     }
@@ -2497,29 +2505,29 @@ struct sOwner237950 {
 /**
  * Tells whether every synced pad has a sample ready for the AI update.
  *
- * Returns 0 while cGameComm_mGameComm's state is below 14, while it is unpausing (flag or timer), or when any pad's
+ * False while cGameComm_mGameComm's state is below 14, while it is unpausing (flag or timer), or when any pad's
  * read position equals its write position.
  *
- * @return 1 when input is ready, otherwise 0
+ * @return true when input is ready
  */
-int cInputSync::aiinputready()
+bool cInputSync::aiinputready()
 {
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm->mState < 14) {
-        return 0;
+        return false;
     }
     int busy = gameComm->mUnPauseFlag != 0 || gameComm->mUnPauseTimer > 0;
     if (busy) {
-        return 0;
+        return false;
     }
     int i;
     for (i = 0; i < numsyncedpads; i++) {
         cInputSync_SyncedPad* slot = &((&syncedpads[0]))[i];
         if (slot->readpos == slot->writepos) {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -2540,18 +2548,19 @@ struct sPlayer002379C8 {
 /**
  * Feeds the synced pads their next received input sample, once every player's input for the frame is there.
  *
- * Returns 0 while cGameComm_mGameComm's state is below 14 or cInputSync_aiinputready says inputs are not ready; otherwise,
- * for each synced pad, passes the current sample (cursor modulo the ring size) to cInputPad_update and advances it.
+ * Returns false while cGameComm_mGameComm's state is below 14 or cInputSync_aiinputready says inputs are not ready;
+ * otherwise, for each synced pad, passes the current sample (cursor modulo the ring size) to cInputPad_update and
+ * advances it.
  *
- * @return 1 when the pads were updated
+ * @return true when the pads were updated
  */
-int cInputSync::aiupdate()
+bool cInputSync::aiupdate()
 {
     if (cGameComm_mGameComm->mState < 14) {
-        return 0;
+        return false;
     }
-    if (aiinputready() == 0) {
-        return 0;
+    if (!aiinputready()) {
+        return false;
     }
     int i;
     for (i = 0; i < numsyncedpads; i++) {
@@ -2560,7 +2569,7 @@ int cInputSync::aiupdate()
         cInputPad_update(((void*)syncedPad->destinationpad), inputSample->NumButtons, ((char*)&inputSample->Buttons[0]));
         syncedPad->readpos++;
     }
-    return 1;
+    return true;
 }
 #endif
 

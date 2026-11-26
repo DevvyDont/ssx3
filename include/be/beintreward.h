@@ -36,6 +36,40 @@ enum eBEMedalID {
     kMEDAL_NONE = -1, kMEDAL_PLATINUM = 0, kMEDAL_GOLD = 1, kMEDAL_SILVER = 2, kMEDAL_BRONZE = 3
 };
 
+// A trophy, one of a peak's four (cFEStateTrophyRoom::mTrophyType, the trophy index of gMedalsInfo). [O] On Tour's
+// enum eBETrophyID, names and values; [U] cFEStateTrophyRoom_onWidgetCreate titles them kT_TITLERaceTrophy,
+// kT_TITLEFSTrophy, kT_TITLEExploreTrophy and kT_TITLEEarningsTrophy; cBERewardInterface_isTrophyOwned gives trophy 2
+// for the collectibles and big challenges and trophy 3 for the earnings.
+enum eBETrophyID {
+    kTROPHY_NONE = -1, kTROPHY_RACE = 0, kTROPHY_FREESTYLE = 1, kTROPHY_EXPLORE = 2, kTROPHY_EARNINGS = 3,
+    kTROPHY_NUM = 4
+};
+
+// gMedalsInfo[peak][trophy][5]: a trophy's event requirements, (event, location) byte pairs. An event of
+// kMEDALSINFO_END ends a trophy's list (name ours): [U] cBERewardInterface_calculateUserTrackMedalRewards stops at it,
+// isPeakConquered and isTrophyOwned at any negative event.
+enum { kMEDALSINFO_END = -1 };
+
+// An award category (On Tour's int awardCategory; names ours): the bit of cBECharProfileDB::mAwardsReceived and the row
+// of the user-awards log. [U] cBERewardInterface_awardUser gives 0 once the mountain is conquered and 1 once it is
+// completed, 2 + peak for a completed peak; getAwardTrophyCategory maps a peak's trophy to 5 + 3 * trophy + peak;
+// calculateUserTrackMedalRewards maps a medal at a peak to 17 + peak (events 0-3), 20 + peak (rival time), 23 + peak
+// (rival points), 26 + peak (time challenges) and 29 + peak (points challenges).
+enum eBEAwardCategory {
+    kAWARD_MOUNTAIN_CONQUERED = 0, kAWARD_MOUNTAIN_COMPLETED = 1,
+    kAWARD_PEAK1_COMPLETED = 2, kAWARD_PEAK2_COMPLETED = 3, kAWARD_PEAK3_COMPLETED = 4,
+    kAWARD_PEAK1_RACE_TROPHY = 5, kAWARD_PEAK2_RACE_TROPHY = 6, kAWARD_PEAK3_RACE_TROPHY = 7,
+    kAWARD_PEAK1_FREESTYLE_TROPHY = 8, kAWARD_PEAK2_FREESTYLE_TROPHY = 9, kAWARD_PEAK3_FREESTYLE_TROPHY = 10,
+    kAWARD_PEAK1_EXPLORE_TROPHY = 11, kAWARD_PEAK2_EXPLORE_TROPHY = 12, kAWARD_PEAK3_EXPLORE_TROPHY = 13,
+    kAWARD_PEAK1_EARNINGS_TROPHY = 14, kAWARD_PEAK2_EARNINGS_TROPHY = 15, kAWARD_PEAK3_EARNINGS_TROPHY = 16,
+    kAWARD_PEAK1_EVENT_MEDAL = 17, kAWARD_PEAK2_EVENT_MEDAL = 18, kAWARD_PEAK3_EVENT_MEDAL = 19,
+    kAWARD_PEAK1_RIVALTIME_MEDAL = 20, kAWARD_PEAK2_RIVALTIME_MEDAL = 21, kAWARD_PEAK3_RIVALTIME_MEDAL = 22,
+    kAWARD_PEAK1_RIVALPOINTS_MEDAL = 23, kAWARD_PEAK2_RIVALPOINTS_MEDAL = 24, kAWARD_PEAK3_RIVALPOINTS_MEDAL = 25,
+    kAWARD_PEAK1_TIMECHALLENGE_MEDAL = 26, kAWARD_PEAK2_TIMECHALLENGE_MEDAL = 27, kAWARD_PEAK3_TIMECHALLENGE_MEDAL = 28,
+    kAWARD_PEAK1_POINTSCHALLENGE_MEDAL = 29, kAWARD_PEAK2_POINTSCHALLENGE_MEDAL = 30,
+    kAWARD_PEAK3_POINTSCHALLENGE_MEDAL = 31, kAWARD_NUM = 32
+};
+
 struct cBERewardInterface : public cBEInterface {
     // cBEInterface (0x00-0x0F, be/beinterface.h):
     //   bCanSubmit: (On Tour: a bool at 0x0); no retail access seen
@@ -83,10 +117,10 @@ struct cBERewardInterface : public cBEInterface {
     int getNumOwnedToys(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedToys");
     int getNumOwnedVideos(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedVideos");
     int getNumOwnedCheatChars(int profileIndex, int characterId) __asm__("cBERewardInterface_getNumOwnedCheatChars");
-    int isMountainConquered(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_isMountainConquered");
-    int isMountainCompleted(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_isMountainCompleted");
-    int isPeakConquered(int iProfileIndex, int iCharacterID, int k) __asm__("cBERewardInterface_isPeakConquered");
-    int isPeakCompleted(int iProfileIndex, int iCharacterID, int peakID) __asm__("cBERewardInterface_isPeakCompleted");
+    bool isMountainConquered(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_isMountainConquered");
+    bool isMountainCompleted(int iProfileIndex, int iCharacterID) __asm__("cBERewardInterface_isMountainCompleted");
+    bool isPeakConquered(int iProfileIndex, int iCharacterID, int k) __asm__("cBERewardInterface_isPeakConquered");
+    bool isPeakCompleted(int iProfileIndex, int iCharacterID, int peakID) __asm__("cBERewardInterface_isPeakCompleted");
     int isPeakLocked(int rider, int peak) __asm__("cBERewardInterface_isPeakLocked");
     int isPeakLocked1(int profileIndex, int characterId, int peak) __asm__("cBERewardInterface_isPeakLocked1");
     int isTrophyOwned(int iProfileIndex, int iCharacterID, int k, int i) __asm__("cBERewardInterface_isTrophyOwned");

@@ -24,6 +24,14 @@ struct cLightInst;
 
 struct tLightRecord;
 
+// How a light falls off with distance (tLightRecord::m_cDecayRate, the decay argument of cLightInst_CreatePoint /
+// CreateSpot). [O] On Tour's enum eLightDecay (cLightInst::m_decayType; getIntensityInv(float, int decayRate)), names
+// and values; [U] retail fits: getFalloffIntensity falls off as 1/d, 1/d^2, 1/d^3 and getIntensityInv ramps as x, x^2,
+// x^3 for DECAY_LINEAR, DECAY_EXPONENTIAL2, DECAY_EXPONENTIAL3.
+enum eLightDecay {
+    DECAY_NONE = 0, DECAY_LINEAR = 1, DECAY_EXPONENTIAL2 = 2, DECAY_EXPONENTIAL3 = 3, NUMDECAYTYPES = 4
+};
+
 struct cPS2LightMan {
     // --- cLightMan
     void** mVtbl;                    // 0x00 [R] cLightMan_vtbl (cPSPLightMan ctor), cPS2LightMan_vtbl (cLightMan_construct)

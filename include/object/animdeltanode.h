@@ -41,6 +41,9 @@ struct tMeshVelocity;
 struct cBxReplayFrame;
 
 struct cAnimDeltaNode {
+    // The signal that adds to Delta (name ours): [U] signal adds its argument / 30 to Delta and passes any other signal
+    // to cAnimObjectNode_signal.
+    enum { kAnimDeltaSignal_AddDelta = 140 };
     // --- cAnimObjectNode (0x6C; object/animobject.h): cAnimObjectNodeState (On Tour 0x14, retail 0x1C)
     short AnimType;                 // 0x00 [O]; [R] cAnimObjectNode_cAnimObjectNode1 (data Type)
     char unk_002[0x2];              // 0x02 padding (On Tour keeps its two byte bools here)
@@ -86,7 +89,7 @@ struct cAnimDeltaNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cAnimDeltaNode1(int bucket, int instRecord, int animData) __asm__("cAnimDeltaNode_cAnimDeltaNode1");
-    int updateNode() __asm__("cAnimDeltaNode_updateNode");
+    bool updateNode() __asm__("cAnimDeltaNode_updateNode");
     void signal(int id, float signalArg) __asm__("cAnimDeltaNode_signal");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimDeltaNode_writeToReplayFrame");
 };

@@ -25,6 +25,14 @@ struct cMoveNode;
 struct cBxReplayFrame;
 
 struct cTransformModifier {
+    // What getTransformType (slot 26) reports (names ours, from the classes): [R] cTransformModifier_getTransformType
+    // returns 0, cSplineModifier 1, cMultiSplineModifier 2, cPositionModifier 3, cParentModifier 4, cRollerModifier 5,
+    // cMagnetModifier 6, cAvaSplineModifier 7; [U] cMoveNode's focus-count methods act only on kTransform_MultiSpline.
+    enum eTransformType {
+        kTransform_None = 0, kTransform_Spline = 1, kTransform_MultiSpline = 2, kTransform_Position = 3,
+        kTransform_Parent = 4, kTransform_Roller = 5, kTransform_Magnet = 6, kTransform_AvaSpline = 7
+    };
+
     // 0x00: the vptr. [R] cTransformModifier__cTransformModifier (dtor) stores cTransformModifier_vtbl; derived ctors
     // store their own. Slots [R] cTransformModifier_vtbl (27; names from its entries), types [O] On Tour's class
     // cTransformModifier (same order; its second getRootTransform overload is retail's getRootTransform1):

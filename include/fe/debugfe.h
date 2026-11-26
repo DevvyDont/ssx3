@@ -204,6 +204,17 @@ struct cDebugMenuScreen {
                                     //       (ctor), cBackgroundMan__cBackgroundMan(.., 2) (dtor); [U] update sets the
                                     //       active image; draw renders it instead of the menu while miActiveImage
                                     //       (0x8C18) >= 0
+    // The menu rows (SelectedItem). [O] On Tour's enum cDebugMenuScreen::tItems names the rows both games share
+    // (kGamePathItem ... kNumAIRidersItem, kRealFEItem); retail has 15 rows and no metagame / challenge / movie row, so
+    // the values are retail's and the other names ours. [U] cDebugMenuScreen_update: row 3 toggles the player's
+    // first-time-WC flag, 9 previews BackgroundMan's images, 10 toggles GrMan's SetDTV (slot 8) from GetDTV (slot 9),
+    // 11 plays a playlist entry, 12 sets the network mode, 13 (lobby) needs a net connection, 14 starts the real front
+    // end (cPreFELoadScreen) instead of a game.
+    enum tItems {
+        kGamePathItem = 0, kGameModeItem = 1, kGameEventItem = 2, kFirstTimeWCItem = 3, kTrackItem = 4, kCharItem = 5,
+        kCtrlMapItem = 6, kBoardItem = 7, kNumAIRidersItem = 8, kBackgroundItem = 9, kDTVItem = 10, kPlaylistItem = 11,
+        kNetworkItem = 12, kLobbyItem = 13, kRealFEItem = 14, kNumItems = 15
+    };
     int SelectedItem;               // 0x8C1C [O] tItems (an enum, a word); [R] ctor 4; [U] the cursor row: update moves
                                     //       it over the 15 rows (12 network is skipped without a comm system, 13 Lobby,
                                     //       14 Real Front End), draw highlights it (lw 0x8C1C through this + 0x8000)
@@ -225,6 +236,12 @@ struct cDebugMenuScreen {
                                     //       * it); update cycles it and plays it; draw prints the entry's name
     int LastGamePathGameMode[3];    // 0x8C38 [O]; [R] ctor 4, 4, 4; [U] setGamePath saves the current game mode under
                                     //       the current path and restores the new path's
+    // The network row's modes (names ours, from their labels): [R] draw prints D_0045CFB8's names "Disabled", "Host",
+    // "Join", "NetGui" and "DNAS" for 0..4; [U] update makes Host and Join network games (Host the host) and skips
+    // them without a net connection, and kMenuKeySelect runs func_00256088 in NetGui and func_002560B0 in DNAS.
+    enum tNetworkMode {
+        kNetwork_Disabled = 0, kNetwork_Host = 1, kNetwork_Join = 2, kNetwork_NetGui = 3, kNetwork_DNAS = 4
+    };
     int NetworkMode;                // 0x8C44 [U] the network row (name from its use; no On Tour member): ctor 0; update
                                     //       cycles 0 ... 4 (1 / 2 only with a net connection) and sets
                                     //       networkOpt.bIsNetworkGame / bIsHost (1 = host) from it; draw prints

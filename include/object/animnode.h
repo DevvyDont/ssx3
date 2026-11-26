@@ -110,7 +110,7 @@ struct cAnimNode {
     void calcPosition(int id, int idx, t4Vector* out) __asm__("cAnimNode_calcPosition");
     void updateIntersectInfo(tIntersectInfo* body) __asm__("cAnimNode_updateIntersectInfo");
     void updateMeshVelocity() __asm__("cAnimNode_updateMeshVelocity");
-    int frameUpdate() __asm__("cAnimNode_frameUpdate");
+    bool frameUpdate() __asm__("cAnimNode_frameUpdate");
     int frameUpdateEvent(float frame) __asm__("cAnimNode_frameUpdateEvent");
     void* cAnimNode1(void* bucket, cBxReplayFrame* stream) __asm__("cAnimNode_cAnimNode1");
     void updateRootTransform() __asm__("cAnimNode_updateRootTransform");

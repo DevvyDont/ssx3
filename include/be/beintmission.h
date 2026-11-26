@@ -69,7 +69,7 @@ struct cBEMissionInterface : public cBEInterface {
     int getCurrentCollectForPeakByChar(int profile, int character, int owner)
         __asm__("cBEMissionInterface_getCurrentCollectForPeakByChar");
     char* getCollectBits(int rider, int idx) __asm__("cBEMissionInterface_getCollectBits");
-    int isBitSet(int rider, int bit, int idx) __asm__("cBEMissionInterface_isBitSet");
+    bool isBitSet(int rider, int bit, int idx) __asm__("cBEMissionInterface_isBitSet");
     void setBit(int rider, int bit, int idx) __asm__("cBEMissionInterface_setBit");
     unsigned short* getMissionName(int id) __asm__("cBEMissionInterface_getMissionName");
     unsigned short* getMissionShortDesc(int id) __asm__("cBEMissionInterface_getMissionShortDesc");
@@ -99,7 +99,7 @@ struct cBEMissionInterface : public cBEInterface {
     int getMissionID(int iIdx) __asm__("cBEMissionInterface_getMissionID");
     int getMissionIDOnTrack(int index, int group) __asm__("cBEMissionInterface_getMissionIDOnTrack");
     int getNumberSessionsOnTrack(int id) __asm__("cBEMissionInterface_getNumberSessionsOnTrack");
-    int isSessionPoint(int value, int id) __asm__("cBEMissionInterface_isSessionPoint");
+    bool isSessionPoint(int value, int id) __asm__("cBEMissionInterface_isSessionPoint");
 };
 
 extern cBEMissionInterface* cBEMissionInterface_instance;

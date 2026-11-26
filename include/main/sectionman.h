@@ -55,6 +55,24 @@ CHECK_OFFSET(tSectionManEvent, SectionID, 0x0);
 CHECK_OFFSET(tSectionManEvent, pNext, 0x4);
 CHECK_SIZE(tSectionManEvent, 0x8);
 
+// A row's load state (tSectionMap::State; names ours, in the style of On Tour's cWorldView::eSectionState, whose
+// numbering retail's section map does not use). [U] loadSection queues kSectionMap_Empty / kSectionMap_UnLoading as
+// kSectionMap_LoadQueue and takes kSectionMap_UnLoadQueue back to kSectionMap_Loaded; activateSection activates a
+// loaded row (kSectionMap_Active) and queues the others to load and then activate; unloadSection queues loaded, active
+// and loading rows to unload; update starts the queued loads (kSectionMap_Loading / kSectionMap_LoadingActivate) and
+// unloads (kSectionMap_UnLoading) and settles them once cWorldView reports the section loaded or unloaded.
+enum eSectionMapState {
+    kSectionMap_Empty = 0,
+    kSectionMap_Loaded = 1,
+    kSectionMap_Active = 2,
+    kSectionMap_LoadQueue = 3,
+    kSectionMap_LoadActivateQueue = 4,
+    kSectionMap_UnLoadQueue = 5,
+    kSectionMap_Loading = 6,
+    kSectionMap_UnLoading = 7,
+    kSectionMap_LoadingActivate = 8
+};
+
 // One row of the static section map mSectionMap[50] (cSectionMan_mSectionMap): a back-end section and the world
 // section it streams as (On Tour struct tSectionMap, 0x10, same four members; retail's table has 50 rows, the loop bound
 // of cSectionMan_init). Replaces the views sGameEntry (main/game) and field_0x0..field_0xc in the methods.
@@ -75,6 +93,30 @@ CHECK_OFFSET(tSectionMap, iWorldSectionID, 0x4);
 CHECK_OFFSET(tSectionMap, State, 0x8);
 CHECK_OFFSET(tSectionMap, Priority, 0xC);
 CHECK_SIZE(tSectionMap, 0x10);
+
+// The event-switch sequence (cSectionMan::mModeState). [O] On Tour's enum eSectionModeState, names and values; [U]
+// loadMode queues it (kSectionM_PreLoadQueue), activateMode asks for the switch (kSectionM_PreLoadQueueWait), update
+// runs preLoadMode for each queued step and, in kSectionM_PreLoadingWait, changeMode once the preload is done.
+enum eSectionModeState {
+    kSectionM_Idle = 0,
+    kSectionM_PreLoadQueue = 1,
+    kSectionM_PreLoading = 2,
+    kSectionM_PreLoadQueueWait = 3,
+    kSectionM_PreLoadingWait = 4
+};
+
+// The stream bandwidth step (cSectionMan::mStreamRate, an index into mStreamBandWidthRates). [O] On Tour's enum
+// eStreamRate, names and values; [U] update picks kStreamRate_NormalLoad1 while sections load, kStreamRate_NormalLoad2
+// before the location is activated, kStreamRate_Default2Player when both stream focuses are active and
+// kStreamRate_WaitLoad while the stream is held.
+enum eStreamRate {
+    kStreamRate_Default1Player = 0,
+    kStreamRate_Default2Player = 1,
+    kStreamRate_NormalLoad1 = 2,
+    kStreamRate_NormalLoad2 = 3,
+    kStreamRate_WaitLoad = 4,
+    kStreamRate_Num = 5
+};
 
 // A section-manager game mode (mMode, eventbegin's mode): [O] enum eSectionManMode, names and values. [U] the script
 // mode table D_00445E40 that SetGameModeFunc and SectionFunc read holds {2, 3, 4, 5, 1, 1, 1, 0}: script modes 0-3 are
@@ -139,7 +181,7 @@ struct cSectionMan {
     void preLoadMode() __asm__("cSectionMan_preLoadMode");
     void* isPreLoadModeDone() __asm__("cSectionMan_isPreLoadModeDone__FPv");
     void changeMode() __asm__("cSectionMan_changeMode");
-    int isSectionLoaded(int SectionID) __asm__("cSectionMan_isSectionLoaded");
+    bool isSectionLoaded(int SectionID) __asm__("cSectionMan_isSectionLoaded");
     int getWorldSectionIDFromBELocationID(int LocationID) __asm__("cSectionMan_getWorldSectionIDFromBELocationID");
     int getWorldSectionIDFromBESectionID(int SectionID) __asm__("cSectionMan_getWorldSectionIDFromBESectionID");
     int getBESectionIDFromWorldSectionID(int WorldSectionID) __asm__("cSectionMan_getBESectionIDFromWorldSectionID");

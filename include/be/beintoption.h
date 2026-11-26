@@ -114,6 +114,13 @@ enum eWidescreenSetting {
     kWidescreen_Anamorphic = 2
 };
 
+// The options' language index (tBEOptionDB::iLanguage, bits 22..24 of cBEOptionInterface_mOption's first word; names
+// ours). [U] func_0029F198 maps 0..3 to kSPEECHLANG_English, French, German and Spanish (anything else to English);
+// func_00146F88 names an unnamed player PLAYER, JOUEUR, SPIELER or JUGADOR by it.
+enum eOptionSpeechLanguage {
+    kOPTLANG_English = 0, kOPTLANG_French = 1, kOPTLANG_German = 2, kOPTLANG_Spanish = 3
+};
+
 // iUseWidescreen's place in the option block's first word (bits 20-21), for code that tests the whole word (names
 // ours; [U] tNISList_GetVideoDBRecord).
 enum {

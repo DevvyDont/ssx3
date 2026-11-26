@@ -13,6 +13,10 @@
 struct cBxReplayFrame;
 
 struct cPhysicsModifier {
+    // What getPhysicsType (slot 5) reports (names ours): [R] cPhysicsModifier_getPhysicsType returns 0 and
+    // cBoostModifier_getPhysicsType 1; [U] tModifierBlock_readFromReplayFrame rebuilds a cBoostModifier for
+    // kPhysics_Boost.
+    enum ePhysicsType { kPhysics_None = 0, kPhysics_Boost = 1 };
     int Active;                     // 0x00 [O] bool (4 bytes); [R] ctor cPhysicsModifier_cPhysicsModifier1 stores 1, the replay ctor
                                     //      cPhysicsModifier_cPhysicsModifier reads 4 bytes here; [U] isActive (lw 0x0)
     // 0x04: the vptr. [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl

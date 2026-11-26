@@ -1503,7 +1503,7 @@ void cGame::update()
         if (updateState_2306B8((this))) {
             int skip;
             if ((char*)InputSync == 0 || cInputSync_aiinputready((char*)InputSync) != 0) {
-                if (mCurrentStateID == 3) {
+                if (mCurrentStateID == kGFSM_Gate) {
                     updateState();
                     cBucketMan_mergeBucket(&gBucketMan, 1);
                 } else {
@@ -1647,17 +1647,17 @@ struct cMgr00230E98 {
  * On success it calls the graphics manager's v15 with (0, 0, 0), sets its +0x270 flag, turns the screen
  * effects off, and calls helpers on the script engine and the load indicator.
  *
- * @return 1 when focus was given up, 0 while the stream pause or the fade is still busy
+ * @return true when focus was given up, false while the stream pause or the fade is still busy
  */
-int cGame::loseFocus()
+bool cGame::loseFocus()
 {
     void* obj = StreamPause;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[3].fn(vthis(obj, vt[3])) == 0) {
-        return 0;
+        return false;
     }
     if (((cFadeScreen*)this)->loseFocus() == 0) {
-        return 0;
+        return false;
     }
     cPS2GraphicsMan* mgr = GrMan;
     ((cMgr00230E98*)mgr)->SetScreenClearColour(sVec3_00230E98(0.0f, 0.0f, 0.0f));
@@ -1667,7 +1667,7 @@ int cGame::loseFocus()
     cLightGlow_m_Enable = 0;
     cSSXScriptEngine_DeInit(ScriptEngine);
     cBXLoadIndicator_DeInit(LoadIndicator);
-    return 1;
+    return true;
 }
 #endif
 
@@ -1700,9 +1700,10 @@ static inline void StateGainFocus_0F40(cGameState* state, int startupFlag)
  *
  * Returns at once in an offline game (cBENetworkInterface_networkOpt.bIsNetworkGame 0) while ControllerUnplugged
  * (+0x224) is set, or while cPauseState_Flags has bit 0x20. Calls the current state's update() (virtual slot 6) unless
- * it is the gate state (3) with a switch pending. A pending preload id (mPendingPreloadStateID, +0x208) picks the
- * member state for that id (ids 1-16: +0xB0 ... +0x1EC) as mPreloadingState (+0x204), moves the id to mPreloadStateID
- * (+0x20C) and calls its preloadInit() (slot 2); a preloading state gets preloadUpdate() (slot 3) on every call.
+ * it is the gate state (kGFSM_Gate) with a switch pending. A pending preload id (mPendingPreloadStateID, +0x208) picks
+ * the member state for that id (eGFState kGFSM_EventStart .. kGFSM_ReplayStart: +0xB0 ... +0x1EC) as mPreloadingState
+ * (+0x204), moves the id to mPreloadStateID (+0x20C) and calls its preloadInit() (slot 2); a preloading state gets
+ * preloadUpdate() (slot 3) on every call.
  *
  * When mPendingStateID (+0x210) is set, the current state gets loseFocus() (slot 7) and becomes the previous one
  * (mPrevState, mPrevStateID), the member state for the id becomes mCurrentState / mCurrentStateID, the pending id and
@@ -1722,56 +1723,56 @@ void cGame::updateState()
         return;
     if (cPauseState_Flags & 0x20)
         return;
-    if (self->mCurrentState != 0 && (self->mCurrentStateID != 3 || self->mPendingStateID == 0))
+    if (self->mCurrentState != 0 && (self->mCurrentStateID != kGFSM_Gate || self->mPendingStateID == 0))
         StateCall_0F40(self->mCurrentState, 6); // update
     if (self->mPendingPreloadStateID != 0) {
         switch (self->mPendingPreloadStateID) {
-    case 1:
+    case kGFSM_EventStart:
         self->mPreloadingState = (cGameState*)&self->mEventStartState;
         break;
-    case 2:
+    case kGFSM_PreEvent:
         self->mPreloadingState = (cGameState*)&self->mPreEventState;
         break;
-    case 3:
+    case kGFSM_Gate:
         self->mPreloadingState = (cGameState*)&self->mGateState;
         break;
-    case 4:
+    case kGFSM_Riding:
         self->mPreloadingState = (cGameState*)&self->mRidingState;
         break;
-    case 5:
+    case kGFSM_Finishline:
         self->mPreloadingState = (cGameState*)&self->mFinishlineState;
         break;
-    case 6:
+    case kGFSM_End:
         self->mPreloadingState = (cGameState*)&self->mEndState;
         break;
-    case 7:
+    case kGFSM_PostEvent:
         self->mPreloadingState = (cGameState*)&self->mPostEventState;
         break;
-    case 8:
+    case kGFSM_EndWait:
         self->mPreloadingState = (cGameState*)&self->mEndWaitState;
         break;
-    case 9:
+    case kGFSM_TransportWait:
         self->mPreloadingState = (cGameState*)&self->mTransportWaitState;
         break;
-    case 10:
+    case kGFSM_TrackStart:
         self->mPreloadingState = (cGameState*)&self->mTrackStartState;
         break;
-    case 11:
+    case kGFSM_SectionLoad:
         self->mPreloadingState = (cGameState*)&self->mSectionLoadState;
         break;
-    case 12:
+    case kGFSM_Podium:
         self->mPreloadingState = (cGameState*)&self->mPodiumState;
         break;
-    case 13:
+    case kGFSM_NextHeat:
         self->mPreloadingState = (cGameState*)&self->mNextHeatState;
         break;
-    case 14:
+    case kGFSM_UserSelect:
         self->mPreloadingState = (cGameState*)&self->mUserSelectState;
         break;
-    case 15:
+    case kGFSM_SessionTeleport:
         self->mPreloadingState = (cGameState*)&self->mSessionTeleportState;
         break;
-    case 16:
+    case kGFSM_ReplayStart:
         self->mPreloadingState = (cGameState*)&self->mReplayStartState;
         break;
         }
@@ -1790,67 +1791,67 @@ void cGame::updateState()
     self->mPrevStateID = self->mCurrentStateID;
     self->mPrevState = self->mCurrentState;
     switch (next) {
-    case 1:
+    case kGFSM_EventStart:
         self->mCurrentState = (cGameState*)&self->mEventStartState;
         self->mCurrentStateID = 1;
         break;
-    case 2:
+    case kGFSM_PreEvent:
         self->mCurrentState = (cGameState*)&self->mPreEventState;
         self->mCurrentStateID = 2;
         break;
-    case 3:
+    case kGFSM_Gate:
         self->mCurrentState = (cGameState*)&self->mGateState;
         self->mCurrentStateID = 3;
         break;
-    case 4:
+    case kGFSM_Riding:
         self->mCurrentState = (cGameState*)&self->mRidingState;
         self->mCurrentStateID = 4;
         break;
-    case 5:
+    case kGFSM_Finishline:
         self->mCurrentState = (cGameState*)&self->mFinishlineState;
         self->mCurrentStateID = 5;
         break;
-    case 6:
+    case kGFSM_End:
         self->mCurrentState = (cGameState*)&self->mEndState;
         self->mCurrentStateID = 6;
         break;
-    case 7:
+    case kGFSM_PostEvent:
         self->mCurrentState = (cGameState*)&self->mPostEventState;
         self->mCurrentStateID = 7;
         break;
-    case 8:
+    case kGFSM_EndWait:
         self->mCurrentState = (cGameState*)&self->mEndWaitState;
         self->mCurrentStateID = 8;
         break;
-    case 9:
+    case kGFSM_TransportWait:
         self->mCurrentState = (cGameState*)&self->mTransportWaitState;
         self->mCurrentStateID = 9;
         break;
-    case 10:
+    case kGFSM_TrackStart:
         self->mCurrentState = (cGameState*)&self->mTrackStartState;
         self->mCurrentStateID = 10;
         break;
-    case 11:
+    case kGFSM_SectionLoad:
         self->mCurrentState = (cGameState*)&self->mSectionLoadState;
         self->mCurrentStateID = 11;
         break;
-    case 12:
+    case kGFSM_Podium:
         self->mCurrentState = (cGameState*)&self->mPodiumState;
         self->mCurrentStateID = 12;
         break;
-    case 13:
+    case kGFSM_NextHeat:
         self->mCurrentState = (cGameState*)&self->mNextHeatState;
         self->mCurrentStateID = 13;
         break;
-    case 14:
+    case kGFSM_UserSelect:
         self->mCurrentState = (cGameState*)&self->mUserSelectState;
         self->mCurrentStateID = 14;
         break;
-    case 15:
+    case kGFSM_SessionTeleport:
         self->mCurrentState = (cGameState*)&self->mSessionTeleportState;
         self->mCurrentStateID = 15;
         break;
-    case 16:
+    case kGFSM_ReplayStart:
         self->mCurrentState = (cGameState*)&self->mReplayStartState;
         self->mCurrentStateID = 16;
         break;
@@ -2060,11 +2061,11 @@ void cGFSessionTeleportState_readFromReplayFrame_14D0(void* state, void* stream)
  * state.
  *
  * Loads FlagManager and SnowFall (their load virtuals), reads mCurrentStateID, mPrevStateID, mPendingStateID and
- * mPendingStateStartupFlag (4 bytes each), then each cGF*State in mStates (event start, pre-event, gate, riding,
- * finish line, end, post-event, end wait, transport wait, track start, section load, podium, next heat, user
- * select, session teleport; the state at +0x1EC is not read). mCurrentState and mPrevState are pointed at the state
- * object for their id (1-16; 0 is none, an unknown id becomes 0). The comment above the definition calls it a save
- * stream; it is a replay frame.
+ * mPendingStateStartupFlag (4 bytes each), then each cGF*State in mStates (event start, pre-event, gate, riding, finish
+ * line, end, post-event, end wait, transport wait, track start, section load, podium, next heat, user select, session
+ * teleport; the state at +0x1EC is not read). mCurrentState and mPrevState are pointed at the state object for their id
+ * (eGFState kGFSM_EventStart .. kGFSM_ReplayStart; kGFSM_Null is none, an unknown id becomes kGFSM_Null). The comment
+ * above the definition calls it a save stream; it is a replay frame.
  *
  * @param self_  the game (this)
  * @param stream  the replay frame to read from (On Tour cReplayFramePtr*)
@@ -2099,52 +2100,52 @@ void cGame::readFromReplayFrame(cBxReplayFrame* stream)
     case 0:
         self->mCurrentState = 0;
         break;
-    case 1:
+    case kGFSM_EventStart:
         self->mCurrentState = (cGameState*)&self->mEventStartState;
         break;
-    case 2:
+    case kGFSM_PreEvent:
         self->mCurrentState = (cGameState*)&self->mPreEventState;
         break;
-    case 3:
+    case kGFSM_Gate:
         self->mCurrentState = (cGameState*)&self->mGateState;
         break;
-    case 4:
+    case kGFSM_Riding:
         self->mCurrentState = (cGameState*)&self->mRidingState;
         break;
-    case 5:
+    case kGFSM_Finishline:
         self->mCurrentState = (cGameState*)&self->mFinishlineState;
         break;
-    case 6:
+    case kGFSM_End:
         self->mCurrentState = (cGameState*)&self->mEndState;
         break;
-    case 7:
+    case kGFSM_PostEvent:
         self->mCurrentState = (cGameState*)&self->mPostEventState;
         break;
-    case 8:
+    case kGFSM_EndWait:
         self->mCurrentState = (cGameState*)&self->mEndWaitState;
         break;
-    case 9:
+    case kGFSM_TransportWait:
         self->mCurrentState = (cGameState*)&self->mTransportWaitState;
         break;
-    case 10:
+    case kGFSM_TrackStart:
         self->mCurrentState = (cGameState*)&self->mTrackStartState;
         break;
-    case 11:
+    case kGFSM_SectionLoad:
         self->mCurrentState = (cGameState*)&self->mSectionLoadState;
         break;
-    case 12:
+    case kGFSM_Podium:
         self->mCurrentState = (cGameState*)&self->mPodiumState;
         break;
-    case 13:
+    case kGFSM_NextHeat:
         self->mCurrentState = (cGameState*)&self->mNextHeatState;
         break;
-    case 14:
+    case kGFSM_UserSelect:
         self->mCurrentState = (cGameState*)&self->mUserSelectState;
         break;
-    case 15:
+    case kGFSM_SessionTeleport:
         self->mCurrentState = (cGameState*)&self->mSessionTeleportState;
         break;
-    case 16:
+    case kGFSM_ReplayStart:
         self->mCurrentState = (cGameState*)&self->mReplayStartState;
         break;
     default:
@@ -2153,52 +2154,52 @@ void cGame::readFromReplayFrame(cBxReplayFrame* stream)
         break;
     }
     switch (self->mPrevStateID) {
-    case 1:
+    case kGFSM_EventStart:
         self->mPrevState = (cGameState*)&self->mEventStartState;
         break;
-    case 2:
+    case kGFSM_PreEvent:
         self->mPrevState = (cGameState*)&self->mPreEventState;
         break;
-    case 3:
+    case kGFSM_Gate:
         self->mPrevState = (cGameState*)&self->mGateState;
         break;
-    case 4:
+    case kGFSM_Riding:
         self->mPrevState = (cGameState*)&self->mRidingState;
         break;
-    case 5:
+    case kGFSM_Finishline:
         self->mPrevState = (cGameState*)&self->mFinishlineState;
         break;
-    case 6:
+    case kGFSM_End:
         self->mPrevState = (cGameState*)&self->mEndState;
         break;
-    case 7:
+    case kGFSM_PostEvent:
         self->mPrevState = (cGameState*)&self->mPostEventState;
         break;
-    case 8:
+    case kGFSM_EndWait:
         self->mPrevState = (cGameState*)&self->mEndWaitState;
         break;
-    case 9:
+    case kGFSM_TransportWait:
         self->mPrevState = (cGameState*)&self->mTransportWaitState;
         break;
-    case 10:
+    case kGFSM_TrackStart:
         self->mPrevState = (cGameState*)&self->mTrackStartState;
         break;
-    case 11:
+    case kGFSM_SectionLoad:
         self->mPrevState = (cGameState*)&self->mSectionLoadState;
         break;
-    case 12:
+    case kGFSM_Podium:
         self->mPrevState = (cGameState*)&self->mPodiumState;
         break;
-    case 13:
+    case kGFSM_NextHeat:
         self->mPrevState = (cGameState*)&self->mNextHeatState;
         break;
-    case 14:
+    case kGFSM_UserSelect:
         self->mPrevState = (cGameState*)&self->mUserSelectState;
         break;
-    case 15:
+    case kGFSM_SessionTeleport:
         self->mPrevState = (cGameState*)&self->mSessionTeleportState;
         break;
-    case 16:
+    case kGFSM_ReplayStart:
         self->mPrevState = (cGameState*)&self->mReplayStartState;
         break;
     default:
@@ -2244,18 +2245,18 @@ static inline char* At_1840(char* self, int i)
 /**
  * Decides whether the pause menu should open this frame, and for which player.
  *
- * Returns 0 while a network error is shown. Looks at the replay's player in replay mode, else at each human
+ * Returns false while a network error is shown. Looks at the replay's player in replay mode, else at each human
  * rider's controller (cBENewPlayerInterface_getRiderCtrlID): unplugged controllers set bits in a mask, and the first with pause pressed
  * (input 0x3C) becomes the owner. The mask is stored at +0x224 (On Tour ControllerUnplugged); an unplugged
  * controller always pauses, owned by the presser or the first ready player. Otherwise a press pauses when online
  * or when cGame_canUserActivatePauseMenu allows it. The owner goes to +0x228 (PauseOwner).
  *
- * @return 1 when the pause menu should open
+ * @return true when the pause menu should open
  */
-int cGame::activatePauseMenu()
+bool cGame::activatePauseMenu()
 {
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mDisplayError > 0) {
-        return 0;
+        return false;
     }
     int mask = 0;
     void* bi = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2305,16 +2306,16 @@ int cGame::activatePauseMenu()
             }
         }
         PauseOwner = sel;
-        return 1;
+        return true;
     }
     if (sel >= 0) {
         cBE_getInterface_Fv(cBE_getBE(), 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || canUserActivatePauseMenu()) {
             PauseOwner = sel;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2326,8 +2327,9 @@ extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(void* a);
 /**
  * Tells whether the player may open the pause menu now.
  *
- * Not while mPendingStateID (+0x210) or mCurrentStateID (+0x214) is 1, 5, 10 or 14 (On Tour eGFState EventStart,
- * Finishline, TrackStart, UserSelect), and only when the script engine allows it (cSSXScriptEngine_IsPauseMenuAllowed).
+ * Not while mPendingStateID (+0x210) or mCurrentStateID (+0x214) is kGFSM_EventStart, kGFSM_Finishline,
+ * kGFSM_TrackStart or kGFSM_UserSelect (On Tour eGFState EventStart, Finishline, TrackStart, UserSelect), and only when
+ * the script engine allows it (cSSXScriptEngine_IsPauseMenuAllowed).
  *
  * @return 1 when the pause menu may open, otherwise 0
  */
@@ -2335,14 +2337,16 @@ int cGame::canUserActivatePauseMenu()
 {
     int mode = mPendingStateID;
     if (mode != 0) {
-        if (mode == 5 || mode == 14 || mode == 1 || mode == 10) {
+        if (mode == kGFSM_Finishline || mode == kGFSM_UserSelect || mode == kGFSM_EventStart
+            || mode == kGFSM_TrackStart) {
             return 0;
         }
     }
     int allowed = 0;
     if (cSSXScriptEngine_IsPauseMenuAllowed(ScriptEngine) != 0) {
         int currentStateId = mCurrentStateID;
-        allowed = currentStateId != 5 && currentStateId != 14 && currentStateId != 1 && currentStateId != 10;
+        allowed = currentStateId != kGFSM_Finishline && currentStateId != kGFSM_UserSelect
+                  && currentStateId != kGFSM_EventStart && currentStateId != kGFSM_TrackStart;
     }
     return allowed;
 }
@@ -2472,9 +2476,9 @@ INCLUDE_ASM("main/gameload", cFadeScreen_loseFocus);
  * Sets the fade-out flag (offset 8), which makes the per-frame update raise the fade level by 1/60; the level
  * starts at 0.2 when constructed.
  *
- * @return 1 once the fade level (offset 4) is at least 0.2, otherwise 0
+ * @return true once the fade level (offset 4) is at least 0.2
  */
-int cFadeScreen::loseFocus()
+bool cFadeScreen::loseFocus()
 {
     IsEnding = 1;
     return FadeTimer >= 0.20000000298023224f;
@@ -2528,14 +2532,14 @@ static inline float Clamp231D60(float v, float lo, float hi)
 /**
  * Draws a screen fade: a full-screen quad whose alpha is the fade timer times 5, clamped to [0, 1].
  *
- * Does nothing and returns 0 while the timer (+0x4) is 0 or less. Otherwise pushes a copy of the draw state, resets it
- * to sDrawState_s_defaultDrawState, sets the full-screen viewport and the identity matrix and the blend bits, draws a
- * quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through c2DRender_drawRect4 (G2D), and pops the draw
+ * Does nothing and returns false while the timer (+0x4) is 0 or less. Otherwise pushes a copy of the draw state, resets
+ * it to sDrawState_s_defaultDrawState, sets the full-screen viewport and the identity matrix and the blend bits, draws
+ * a quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through c2DRender_drawRect4 (G2D), and pops the draw
  * state. cGame_render, cRealFE_render, cDebugFE_render and cFELoadScreen_render call it.
  *
- * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
+ * @return true once the fade is fully opaque (alpha >= 1)
  */
-int cFadeScreen::drawFade()
+bool cFadeScreen::drawFade()
 {
     if (FadeTimer > 0.0f) {
     cPS2GraphicsMan* ctx = GrMan;
@@ -2564,7 +2568,7 @@ int cFadeScreen::drawFade()
     *(int*)&GrMan->m_pCurrentDrawState -= 20;
     return alpha >= 1.0f;
     }
-    return 0;
+    return false;
 }
 #endif
 

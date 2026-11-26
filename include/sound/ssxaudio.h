@@ -205,11 +205,7 @@ enum eSpeechLanguageBit {
     kSPEECHLANG_English = 1, kSPEECHLANG_French = 2, kSPEECHLANG_German = 4, kSPEECHLANG_Spanish = 8
 };
 
-// The options' speech language index (bits 22..24 of cBEOptionInterface_mOption's first word; names ours). [U]
-// func_0029F198 maps 0..3 to kSPEECHLANG_English, French, German and Spanish (anything else to English).
-enum eOptionSpeechLanguage {
-    kOPTLANG_English = 0, kOPTLANG_French = 1, kOPTLANG_German = 2, kOPTLANG_Spanish = 3
-};
+// The options' language index (eOptionSpeechLanguage, tBEOptionDB::iLanguage) lives in be/beintoption.h.
 
 // The radio mode (cSSXAudio::mRadioModeID). [O] On Tour's enum eRadioModeID, names and values. [U] func_0028BF78 plays
 // the default song map in 0, the radio playlist (mRadioPlayList) in 1 and 3, and the peak ambience in 2

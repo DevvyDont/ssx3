@@ -41,7 +41,7 @@ struct tRailInfo {
                                     //     0xFFFFFFFF; [U] enableRail stores -1, cRailManNode_addRail stores the key;
                                     //     cRailManNode_unloadSection compares the low byte with the section (lbu)
 
-    tRailInfo() : RailRID(0xFFFFFFFF) {} // [O] tRailInfo::tRailInfo(); [R] above
+    tRailInfo() : RailRID(tResourceID::kInvalidRID) {} // [O] tRailInfo::tRailInfo(); [R] above
 };
 
 CHECK_OFFSET(tRailInfo, RailRID, 0x0);
@@ -54,6 +54,8 @@ struct cRailManNode : public cSortObjNode {
     //   Next: [U] bucket list (bucket 1 from addRail)
     //   ObjNodeType: [R] cRailManNode1 passes type 18
     // --- cRailManNode
+    // No RailInfo slot (name ours): [U] cRailManNode_addRail's slot index until it finds the key or a free slot.
+    enum { kNoSlot = -1 };
     tRailInfo RailInfo[128];        // 0x018 [O] tRailInfo RailInfo[128]; [R] ctors: 128 x 0xFFFFFFFF; the replay ctor
                                     //      reads / writeToReplayFrame writes 0x200 bytes here; [U] enableRail /
                                     //      disableRail look up RailInfo[i] in the world's resource tables, the dtor and

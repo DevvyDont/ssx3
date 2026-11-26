@@ -292,17 +292,17 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_isRootTransformDirty);
 /**
  * Tells whether the block's transform modifier reports a changed transform (slot 17).
  *
- * @return 1 when there is a transform modifier and it is dirty, otherwise 0
+ * @return true when there is a transform modifier and it is dirty
  */
-int tModifierBlock::isRootTransformDirty()
+bool tModifierBlock::isRootTransformDirty()
 {
     cTransformModifier* node = RootTransform;
     if (node != 0) {
         if (node->isRootTransformDirty() != 0) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -576,8 +576,8 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remHaloModifier);
 /**
  * Removes every halo effect from a modifier block.
  *
- * Walks the effect chain (+0x10) and deletes (vtable entry 1, flags 3) each link whose getType (vtable entry 2) is 3,
- * the halo modifier's type.
+ * Walks the effect chain (+0x10) and deletes (vtable entry 1, flags 3) each link whose getType (vtable entry 2) is
+ * cEffectLink::kEffect_Halo, the halo modifier's type.
  */
 void tModifierBlock::remHaloModifier()
 {
@@ -586,7 +586,7 @@ void tModifierBlock::remHaloModifier()
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            if (link->getType() == 3) {
+            if (link->getType() == cEffectLink::kEffect_Halo) {
                 if (link != 0) {
                     delete link;
                 }
@@ -678,18 +678,18 @@ struct sModifierLink {
  * Walks the rail list (Rail, +0x1C) comparing each rail's SplineId (+0x30).
  *
  * @param id  the spline's resource id (On Tour tResourceID splineId)
- * @return 1 if a rail with that spline id is found, otherwise 0
+ * @return true if a rail with that spline id is found
  */
-int tModifierBlock::findRail(int id)
+bool tModifierBlock::findRail(int id)
 {
     sModifierLink* rail = *(sModifierLink**)&Rail;
     while (rail != 0) {
         if (rail->id == id) {
-            return 1;
+            return true;
         }
         rail = rail->next;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -844,10 +844,11 @@ extern const char str_RailModifier[];
 /**
  * Rebuilds a modifier block from a replay frame: reads the header and re-creates every modifier it lists.
  *
- * The root transform is built by type: 1 spline, 2 multi-spline, 3 position, 4 parent, 5 roller, 6 magnet, 7
- * AvaSpline modifier; UV scroll, tex flip and (physics type 1) boost modifiers follow their flags. Effects
- * are rebuilt by type (1 particle, 2 dynamic particle, 3 halo) and appended to Effect (+0x10), rails to Rail
- * (+0x1C). An unknown effect type appends a null pointer, which cEffectLink_append writes through.
+ * The root transform is built by its cTransformModifier::eTransformType (kTransform_Spline ... kTransform_AvaSpline);
+ * UV scroll, tex flip and (physics type kPhysics_Boost) boost modifiers follow their flags. Effects are rebuilt by
+ * their cEffectLink::eEffectType (kEffect_Particle, kEffect_DynamicParticle, kEffect_Halo) and appended to Effect
+ * (+0x10), rails to Rail (+0x1C). An unknown effect type appends a null pointer, which cEffectLink_append writes
+ * through.
  *
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  */
@@ -863,25 +864,25 @@ void tModifierBlock::readFromReplayFrame(cBxReplayFrame* stream)
     stream->read((char*)&hdr, 52);
 
     if (hdr.flags & 1) {
-        if (hdr.type == 1) {
+        if (hdr.type == cTransformModifier::kTransform_Spline) {
             RootTransform = (cTransformModifier*)cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0,
                     str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == 2) {
+        } else if (hdr.type == cTransformModifier::kTransform_MultiSpline) {
             RootTransform = (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88,
                     str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == 4) {
+        } else if (hdr.type == cTransformModifier::kTransform_Parent) {
             RootTransform = (cTransformModifier*)cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier,
                     0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == 3) {
+        } else if (hdr.type == cTransformModifier::kTransform_Position) {
             RootTransform = (cTransformModifier*)cPositionModifier_cPositionModifier2(cMemMan_alloc(144,
                     str_PositionModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == 5) {
+        } else if (hdr.type == cTransformModifier::kTransform_Roller) {
             RootTransform = (cTransformModifier*)cRollerModifier_cRollerModifier1(cMemMan_alloc(720,
                     str_RollerModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == 6) {
+        } else if (hdr.type == cTransformModifier::kTransform_Magnet) {
             RootTransform = (cTransformModifier*)cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176,
                     str_MagnetModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == 7) {
+        } else if (hdr.type == cTransformModifier::kTransform_AvaSpline) {
             RootTransform = (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144,
                     str_AvaSplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         }
@@ -894,17 +895,17 @@ void tModifierBlock::readFromReplayFrame(cBxReplayFrame* stream)
         TexFlip = (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier,
                 0x20000000, 0), (cReplayFramePtr*)stream);
     }
-    if ((hdr.flags & 8) && hdr.kind == 1) {
+    if ((hdr.flags & 8) && hdr.kind == cPhysicsModifier::kPhysics_Boost) {
         Physics = (cPhysicsModifier*)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000,
                 0), (cReplayFramePtr*)stream);
     }
     for (i = 0; i < hdr.numA; i++) {
         void* effect;
-        if (hdr.typesA[i] == 1) {
+        if (hdr.typesA[i] == cEffectLink::kEffect_Particle) {
             effect = cParticleModifier_cParticleModifier1(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.typesA[i] == 2) {
+        } else if (hdr.typesA[i] == cEffectLink::kEffect_DynamicParticle) {
             effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.typesA[i] == 3) {
+        } else if (hdr.typesA[i] == cEffectLink::kEffect_Halo) {
             effect = cHaloModifier_cHaloModifier1(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else {
             effect = 0;

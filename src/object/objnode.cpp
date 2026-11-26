@@ -143,8 +143,9 @@ static inline int objNextId_4850(int* c)
 /**
  * Constructs the sorted object-node base of a node.
  *
- * Runs cTypeObjNode_cTypeObjNode1, installs cSortObjNode_vtbl and takes SortIndex (+0x14) from cSortObjNode_ObjNodeNoSortIndex for
- * type 6 or cSortObjNode_ObjNodeSortIndex otherwise, post-incrementing the counter.
+ * Runs cTypeObjNode_cTypeObjNode1, installs cSortObjNode_vtbl and takes SortIndex (+0x14) from
+ * cSortObjNode_ObjNodeNoSortIndex for ATYPE_DEAD or cSortObjNode_ObjNodeSortIndex otherwise, post-incrementing the
+ * counter.
  *
  * @param bucket  update bucket
  * @param type  node type
@@ -155,7 +156,7 @@ void* cSortObjNode::cSortObjNode1(void* bucket, int type)
     int id;
     this->cTypeObjNode1(bucket, type);
     VPTR_OF(cObjNode, this) = cSortObjNode_vtbl;
-    if (type == 6) {
+    if (type == ATYPE_DEAD) {
         id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
     } else {
         id = objNextId_4850(&cSortObjNode_ObjNodeSortIndex);

@@ -182,16 +182,17 @@ struct sBezMan_B190 {
 /**
  * Queues one Bezier patch for drawing in the list that matches its four edge LODs.
  *
- * When all four bytes of @p edgeLods are equal, the patch goes to the uniform list for that LOD: 4 to m4x4Patches (at most
- * 900, mLod 0, unk_0C = tex4, the halfword at +0x1A6 of the patch record), 6 to m6x6Patches (at most 220, mLod 1, tex6
- * at +0x1A8) and 8 to m8x8Patches (at most 50, mLod 2, tex8 at +0x1AA); any other uniform value is dropped. Otherwise
- * it goes to mMixedPatches (at most 75) with mLod 2 when any edge is 8 (else 0), unk_0C = tex8 and the four edge LODs
- * copied into mEdgeLods. Each entry stores @p patchRec in mpPatch and @p extra in unk_04. A full list drops the patch
- * silently. This is slot 22 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl).
+ * When all four bytes of @p edgeLods are equal, the patch goes to the uniform list for that LOD: kPatchGrid_4x4 to
+ * m4x4Patches (at most 900, mLod kPatchLod_4x4, unk_0C = tex4, the halfword at +0x1A6 of the patch record),
+ * kPatchGrid_6x6 to m6x6Patches (at most 220, mLod kPatchLod_6x6, tex6 at +0x1A8) and kPatchGrid_8x8 to m8x8Patches (at
+ * most 50, mLod kPatchLod_8x8, tex8 at +0x1AA); any other uniform value is dropped. Otherwise it goes to mMixedPatches
+ * (at most 75) with mLod kPatchLod_8x8 when any edge is kPatchGrid_8x8 (else kPatchLod_4x4), unk_0C = tex8 and the four
+ * edge LODs copied into mEdgeLods. Each entry stores @p patchRec in mpPatch and @p extra in unk_04. A full list drops
+ * the patch silently. This is slot 22 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl).
  *
  * @param bezierMan  the patch manager (this)
  * @param patchRec  the patch record
- * @param edgeLods  the four edge LODs (4, 6 or 8 each)
+ * @param edgeLods  the four edge LODs (ePatchGrid each)
  * @param ignoredArg  ignored
  * @param extra  stored in the entry's unk_04 (used as the patch's program/table index when the patch is drawn)
  */
@@ -199,29 +200,29 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, tPatchRecord* patchRec, 
 {
     if (edgeLods[0] == edgeLods[2] && edgeLods[1] == edgeLods[3] && edgeLods[0] == edgeLods[1]) {
         switch (edgeLods[0]) {
-        case 4:
+        case kPatchGrid_4x4:
             if (bezierMan->mNum4x4Patches < 900) {
                 tBezierPatchEntry* patchEntry = &((&bezierMan->m4x4Patches[0]))[bezierMan->mNum4x4Patches++];
                 (*(int*)&patchEntry->unk_04) = extra;
                 patchEntry->mpPatch = patchRec;
-                patchEntry->mLod = 0;
+                patchEntry->mLod = kPatchLod_4x4;
                 patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[0]);
             }
             break;
-        case 6:
+        case kPatchGrid_6x6:
             if (bezierMan->mNum6x6Patches < 220) {
                 tBezierPatchEntry* patchEntry = &((&bezierMan->m6x6Patches[0]))[bezierMan->mNum6x6Patches++];
                 (*(int*)&patchEntry->unk_04) = extra;
-                patchEntry->mLod = 1;
+                patchEntry->mLod = kPatchLod_6x6;
                 patchEntry->mpPatch = patchRec;
                 patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[1]);
             }
             break;
-        case 8:
+        case kPatchGrid_8x8:
             if (bezierMan->mNum8x8Patches < 50) {
                 tBezierPatchEntry* patchEntry = &((&bezierMan->m8x8Patches[0]))[bezierMan->mNum8x8Patches++];
                 (*(int*)&patchEntry->unk_04) = extra;
-                patchEntry->mLod = 2;
+                patchEntry->mLod = kPatchLod_8x8;
                 patchEntry->mpPatch = patchRec;
                 patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[2]);
             }
@@ -234,7 +235,8 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, tPatchRecord* patchRec, 
         (*(int*)&patchEntry->unk_04) = extra;
         patchEntry->mpPatch = patchRec;
         int* pk = &patchEntry->mLod;
-        *pk = (edgeLods[0] == 8 || edgeLods[1] == 8 || edgeLods[2] == 8 || edgeLods[3] == 8) ? 2 : 0;
+        *pk = (edgeLods[0] == kPatchGrid_8x8 || edgeLods[1] == kPatchGrid_8x8 || edgeLods[2] == kPatchGrid_8x8
+                || edgeLods[3] == kPatchGrid_8x8) ? 2 : 0;
         patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[2]);
         for (int i = 0; i < 4; i++) {
             patchEntry->mEdgeLods[i] = edgeLods[i];
@@ -930,7 +932,7 @@ INCLUDE_ASM("render/bezierman", func_0038C788);
  * bytes per vertex), and ends with a DMA ret tag. Any other @p type gives address 0. Called by
  * cPS2BezierMan_DrawPatches for newly cached patches.
  *
- * @param type  the LOD list: 0 = 4x4, 1 = 6x6, 2 = 8x8
+ * @param type  the LOD list, ePatchLod
  * @param idx  the cache entry index
  */
 // PORT: builds a DMA/VIF/GIF packet in uncached (0x30000000) memory; addresses held in int and packed into 64-bit words.
@@ -940,13 +942,13 @@ extern "C" void func_0038C788(void* self, int type, int idx)
     int n = type * 2 + 4;
     int v3Addr;
     switch (type) {
-    case 0:
+    case kPatchLod_4x4:
         v3Addr = *(int*)(manager + 0x58) + idx * 0xC0;
         break;
-    case 1:
+    case kPatchLod_6x6:
         v3Addr = *(int*)(manager + 0x5C) + idx * 432;
         break;
-    case 2:
+    case kPatchLod_8x8:
         v3Addr = *(int*)(manager + 0x60) + idx * 0x300;
         break;
     default:
@@ -955,13 +957,13 @@ extern "C" void func_0038C788(void* self, int type, int idx)
     }
     int v2AddrA;
     switch (type) {
-    case 0:
+    case kPatchLod_4x4:
         v2AddrA = *(int*)(manager + 0x64) + idx * 0x80;
         break;
-    case 1:
+    case kPatchLod_6x6:
         v2AddrA = *(int*)(manager + 0x68) + idx * 288;
         break;
-    case 2:
+    case kPatchLod_8x8:
         v2AddrA = *(int*)(manager + 0x6C) + idx * 0x200;
         break;
     default:
@@ -970,13 +972,13 @@ extern "C" void func_0038C788(void* self, int type, int idx)
     }
     int v2AddrB;
     switch (type) {
-    case 0:
+    case kPatchLod_4x4:
         v2AddrB = *(int*)(manager + 0x70) + idx * 0x80;
         break;
-    case 1:
+    case kPatchLod_6x6:
         v2AddrB = *(int*)(manager + 0x74) + idx * 288;
         break;
-    case 2:
+    case kPatchLod_8x8:
         v2AddrB = *(int*)(manager + 0x78) + idx * 0x200;
         break;
     default:
@@ -1112,17 +1114,17 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
  * Emits one cached uniform-LOD patch into the frame's packet stream, or defers it to be drawn grouped by texture.
  *
  * Copies the 432-byte patch record to the scratchpad (func_0038F708). The shine pass runs when the record's flags at
- * +0xC have 0x600000 set and the debug switch cRenderToggles_m_DisablePatchReflection is clear; for the 8x8 list (@p kind 2) the projector pass runs
- * when func_0038CA08 finds projective textures and cRenderToggles_m_DisablePatchShadow is clear. Flag bits 0x180000 select bits 2-3 of the
- * current draw state's word 0 (0x80000 = 8, 0x100000 = 4, both = 0xC; none clears them). If any of these apply the
- * patch is drawn now: the texture ids from +0x1A0/+0x1A2 go into the draw state, a DMA call to the cached packet
- * (mVifCachePos[kind] + sub * 256) and an MSCAL of the program from str_at_HP[kind] are written at *@p handle, the
- * packet is registered in the graphics manager's draw ring (when it holds fewer than 2600 records) and then
- * func_0038D168 and func_0038D448 add their passes. Otherwise the texture ids, @p kind, the cache address and @p patch
- * are appended to the deferred list at +0x5364 (no bounds check; it has room for 1170 entries, the sum of the three
- * uniform lists).
+ * +0xC have 0x600000 set and the debug switch cRenderToggles_m_DisablePatchReflection is clear; for the 8x8 list (@p
+ * kind kPatchLod_8x8) the projector pass runs when func_0038CA08 finds projective textures and
+ * cRenderToggles_m_DisablePatchShadow is clear. Flag bits 0x180000 select bits 2-3 of the current draw state's word 0
+ * (0x80000 = 8, 0x100000 = 4, both = 0xC; none clears them). If any of these apply the patch is drawn now: the texture
+ * ids from +0x1A0/+0x1A2 go into the draw state, a DMA call to the cached packet (mVifCachePos[kind] + sub * 256) and
+ * an MSCAL of the program from str_at_HP[kind] are written at *@p handle, the packet is registered in the graphics
+ * manager's draw ring (when it holds fewer than 2600 records) and then func_0038D168 and func_0038D448 add their
+ * passes. Otherwise the texture ids, @p kind, the cache address and @p patch are appended to the deferred list at
+ * +0x5364 (no bounds check; it has room for 1170 entries, the sum of the three uniform lists).
  *
- * @param kind  the LOD list: 0 = 4x4, 1 = 6x6, 2 = 8x8
+ * @param kind  the LOD list, ePatchLod
  * @param sub  the cache entry index
  * @param patch  the queued patch entry (record pointer, program index)
  * @param handle  the packet write cursor, advanced past what is written
@@ -1144,7 +1146,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
             draw = doA != 0;
     }
     int res = 0;
-    if (kind == 2)
+    if (kind == kPatchLod_8x8)
         res = func_0038CA08_i(self, patchCopy);
     int doB = res != 0;
     if (doB) {

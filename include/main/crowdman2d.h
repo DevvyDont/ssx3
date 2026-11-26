@@ -68,6 +68,9 @@ struct cCrowdMan2d {
     unsigned int mQuadId[128];      // 0x0008 [R] ctor / reset 0xFFFFFFFF (free); [U] the world resource id of each used
                                     //        slot (low byte: the world section); func_00229788 / func_002297D8 use the
                                     //        first 64; func_00229E20 / func_00229E58 save / load all 0x200 bytes
+    // mQuadId of a free slot (name ours): [R] the ctor and reset fill it; [U] func_00229398, func_00229408,
+    // func_00229530 and func_00229E58 skip such slots, func_00229788 takes the first one.
+    enum { kFreeQuad = 0xFFFFFFFF };
     char unk_0208[0x8];             // 0x0208 no access (alignment of mQuad)
     tCrowdQuad2d mQuad[128];        // 0x0210 [R] ctor builds 128, reset MEM_fill's 0x2000 bytes; [U] func_00229910
                                     //        places one, func_00229530 walks the used ones

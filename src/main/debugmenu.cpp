@@ -2853,11 +2853,11 @@ extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio) __asm__("_
  * menus in reverse order with flags 2 (no free), inlining the destructors of seven of them.
  *
  * @param init  nonzero to construct the static objects, 0 to destroy them
- * @param prio  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ * @param prio  initialisation priority; nothing happens unless it is DEFAULT_INIT_PRIORITY
  */
 extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init != 0) {
             new (&cfm_sav_Render_Halo_SUN_kSunColour) sV4_E8D8(1.0f, 1.0f, 1.0f, 0.5f);
             new (&cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour) sV4_E8D8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
@@ -4200,11 +4200,11 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio) __asm__(
  * __AvalancheMenu. With @p init clear it destroys that menu with flags 2 (no free).
  *
  * @param init  nonzero to construct the static objects, 0 to destroy them
- * @param prio  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ * @param prio  initialisation priority; nothing happens unless it is DEFAULT_INIT_PRIORITY
  */
 extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init != 0) {
             new (cfm_sav_Render_Halo_SUN_kSunColour_2) sV4_0CB0(1.0f, 1.0f, 1.0f, 0.5f);
             new (cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_2) sV4_0CB0(0.4998680055141449f, 1.0f, 1.0f, 0.0f);

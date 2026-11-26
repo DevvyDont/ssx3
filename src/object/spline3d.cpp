@@ -238,19 +238,19 @@ struct sVEnt_5638 {
  *
  * Builds the box corners (x, y, z, 1) from the segment's m_fvMin (+0x6C) and m_fvMax (+0x78), gets the current view
  * matrix from the graphics manager's virtual slot 43 and passes all three to its box test (virtual slot 93). The result
- * is 1 unless that test returns 1 (the box is outside the view), the same test as cSpline_isVisible. cSpline_draw draws
- * only the segments for which this returns non-zero.
+ * is true unless that test returns GM_CLIPCODE_OUTSIDE (the box is outside the view), the same test as
+ * cSpline_isVisible. cSpline_draw draws only the segments for which this returns true.
  *
- * @return 1 when the box is (at least partly) in view, 0 when the test culls it
+ * @return true when the box is (at least partly) in view, false when the test culls it
  */
-extern "C" int cSplineSegment_isVisible(tSplineSegmentRecord* self)
+extern "C" bool cSplineSegment_isVisible(tSplineSegmentRecord* self)
 {
     tSplineSegmentRecord* nodeBytes = (tSplineSegmentRecord*)self;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     sVEnt_5638* vt = (sVEnt_5638*)VPTR_OF(cGraphicsMan, w);
     return vt[93].fn(vthis(w, vt[93]), sV4_5638(nodeBytes->m_fvMin.m[0], nodeBytes->m_fvMin.m[1], nodeBytes->m_fvMin.m[2], 1.0f),
                   sV4_5638(nodeBytes->m_fvMax.m[0], nodeBytes->m_fvMax.m[1], nodeBytes->m_fvMax.m[2], 1.0f),
-                  ((cWorld_5638*)w)->GetNetMatrix()) != 1;
+                  ((cWorld_5638*)w)->GetNetMatrix()) != GM_CLIPCODE_OUTSIDE;
 }
 #endif
 

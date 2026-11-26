@@ -22,6 +22,16 @@
 
 class cBxReplayFrame;
 
+// An interface kind, cBE::getInterface's argument. [O] On Tour's enum eBE_Interface, names and values for 0 .. 8;
+// retail has one more interface: [U] the states' getInterface (cBERaceState / cBEPreRaceState / cBEPostRaceState)
+// return cBEBoltInterface_getThis for 9 (kInt_Bolt, name ours), then the mission (10), econ (11), aggression (12) and
+// reward (13) interfaces, each one above On Tour's (which has kInt_Events 13 and kNum_Interfaces 14).
+enum eBE_Interface {
+    kInt_Newrace = 0, kInt_Newplayer = 1, kInt_Character = 2, kInt_Stat = 3, kInt_Option = 4, kInt_Save = 5,
+    kInt_BAGT = 6, kInt_Network = 7, kInt_Score = 8, kInt_Bolt = 9, kInt_Mission = 10, kInt_Economy = 11,
+    kInt_Aggression = 12, kInt_Reward = 13, kNum_Interfaces = 14
+};
+
 class cBEInterface {
 public:
     int bCanSubmit;                                              // 0x000 [O] bool; no retail access seen

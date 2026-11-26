@@ -41,6 +41,12 @@ struct cConsoleConfig {
                                     //      are measured from it, and it is reset to now
     int mTVAspect;                  // 0x24 [O] eConsoleTVAspect; [R] ctor 0; [U] cBEOptionInterface_defaultGame (1 -> 2,
                                     //      2 -> 1 widescreen modes)
+
+    // The TV aspect ratio (mTVAspect). [O] On Tour's enum eConsoleTVAspect, names and values; [U]
+    // cBEOptionInterface_defaultGame sets the anamorphic widescreen option for kCTV_AspectAnimorphic and 16:9 for
+    // kCTV_Aspect169.
+    enum eConsoleTVAspect { kCTV_Aspect43 = 0, kCTV_AspectAnimorphic = 1, kCTV_Aspect169 = 2 };
+
     int m_bDigitalOut;              // 0x28 [O] bool (a word); [R] ctor: 1 when sceScfGetSpdif returns 0, else 0
     int m_SoundMode;                // 0x2C [O] eConsoleSoundMode; [R] ctor 1
     int mLanguage;                  // 0x30 [O] eConsoleLanguage; [R] ctor: sceScfGetLanguage 0..7, else 1

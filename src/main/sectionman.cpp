@@ -1,5 +1,6 @@
 #include "common.h"
 #include "main/sectionman.h"
+#include "be/beintnewrace.h"
 
 //100%
 INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
@@ -17,9 +18,11 @@ extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
 /**
  * Selects the particle-library lighting entry for a location.
  *
- * Maps @p sky to one of the entries "APBR1" to "EPBR1" (A: 0, 5, 8, 14, 17 and any other value; B: 1, 11, 18;
- * C: 2, 9, 12, 19; D: 3, 6, 15, 20; E: 4, 7, 10, 13, 16, 21) and stores its index in cIrradianceDataBase_TheDataBase (0 if absent)
- * in cIrradianceDataBase_mDefaultId, which func_00389C38() applies. The source's note calls it the default rider irradiance bank.
+ * Maps @p sky to one of the entries "APBR1" to "EPBR1" by the location's peak, the first letter of its kLOCATION_ name
+ * (A: kLOCATION_ARA1, ASS1, ABA1, ABC1, HUB_A and any other value; B: BRA2, BHP1, HUB_B; C: CRA3, CBA2, CHP2, HUB_C; D:
+ * DRA4, DSS2, DBC2, HUB_D; E: ERA5, ESS3, EBA3, EHP3, EBC3, HUB_E) and stores its index in
+ * cIrradianceDataBase_TheDataBase (0 if absent) in cIrradianceDataBase_mDefaultId, which func_00389C38() applies. The
+ * source's note calls it the default rider irradiance bank.
  *
  * @param sky  BE location ID (callers pass the section manager's or the new race's location)
  */
@@ -27,36 +30,36 @@ extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
 void cSectionMan::setSky(int sky)
 {
     switch (sky) {
-    case 1:
-    case 11:
-    case 18:
+    case kLOCATION_BRA2:
+    case kLOCATION_BHP1:
+    case kLOCATION_HUB_B:
         cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_BPBR1);
         break;
-    case 2:
-    case 9:
-    case 12:
-    case 19:
+    case kLOCATION_CRA3:
+    case kLOCATION_CBA2:
+    case kLOCATION_CHP2:
+    case kLOCATION_HUB_C:
         cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_CPBR1);
         break;
-    case 3:
-    case 6:
-    case 15:
-    case 20:
+    case kLOCATION_DRA4:
+    case kLOCATION_DSS2:
+    case kLOCATION_DBC2:
+    case kLOCATION_HUB_D:
         cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_DPBR1);
         break;
-    case 4:
-    case 7:
-    case 10:
-    case 13:
-    case 16:
-    case 21:
+    case kLOCATION_ERA5:
+    case kLOCATION_ESS3:
+    case kLOCATION_EBA3:
+    case kLOCATION_EHP3:
+    case kLOCATION_EBC3:
+    case kLOCATION_HUB_E:
         cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_EPBR1);
         break;
-    case 0:
-    case 5:
-    case 8:
-    case 14:
-    case 17:
+    case kLOCATION_ARA1:
+    case kLOCATION_ASS1:
+    case kLOCATION_ABA1:
+    case kLOCATION_ABC1:
+    case kLOCATION_HUB_A:
     default:
         cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_APBR1);
         break;

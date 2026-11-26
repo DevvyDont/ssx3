@@ -43,7 +43,7 @@ struct cGameViewMan {
     void snapAll() __asm__("cGameViewMan_snapAll");
     void updateAll() __asm__("cGameViewMan_updateAll");
     void updateStreamFocus() __asm__("cGameViewMan_updateStreamFocus");
-    int isStreamReady() __asm__("cGameViewMan_isStreamReady");
+    bool isStreamReady() __asm__("cGameViewMan_isStreamReady");
 };
 CHECK_OFFSET(cGameViewMan, m_uiNumPlayers, 0x0);
 CHECK_OFFSET(cGameViewMan, PlayerCamera, 0x4);

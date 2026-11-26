@@ -49,6 +49,12 @@ CHECK_OFFSET(tMakeCounterData, unk_008, 0x8);
 CHECK_SIZE(tMakeCounterData, 0xC);
 
 struct cCounterNode : public cInstanceNode {
+    // The signals a counter counts (names ours): [U] cCounterNode_signal counts kCounterSignal_Level once per level
+    // 1..10, kCounterSignal_LevelInOrder once per level and only in order, and kCounterSignal_Count every time; it
+    // ignores any other signal.
+    enum eCounterSignal {
+        kCounterSignal_Level = 500, kCounterSignal_LevelInOrder = 501, kCounterSignal_Count = 502
+    };
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cCounterNode_vtbl (0x004903F0) in both ctors and the dtor; [P] 0xC; [U] update calls slot 34 (expire)
     // cCounterNode's notes on cInstanceNode's fields:

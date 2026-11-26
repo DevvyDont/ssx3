@@ -46,10 +46,10 @@ struct cBENewPlayerInterface : public cBEInterface {
     void defaultCtrl() __asm__("cBENewPlayerInterface_defaultCtrl");
     int isFirstTimeWC(int index) __asm__("cBENewPlayerInterface_isFirstTimeWC");
     void setIsFirstTimeWC(int index, int value) __asm__("cBENewPlayerInterface_setIsFirstTimeWC");
-    int isFirstTimeOnTrack(int index, int bit) __asm__("cBENewPlayerInterface_isFirstTimeOnTrack");
+    bool isFirstTimeOnTrack(int index, int bit) __asm__("cBENewPlayerInterface_isFirstTimeOnTrack");
     void setFirstTimeOnTrack(bool flag, int index, int bit) __asm__("cBENewPlayerInterface_setFirstTimeOnTrack");
     int hasVisitedPeakWC(int index, int kind) __asm__("cBENewPlayerInterface_hasVisitedPeakWC");
-    int hasPlayedEvent(int index, int locationId, int event) __asm__("cBENewPlayerInterface_hasPlayedEvent");
+    bool hasPlayedEvent(int index, int locationId, int event) __asm__("cBENewPlayerInterface_hasPlayedEvent");
     int isPeakLocked(int iProfileIndex, int iCharacterID, int peak) __asm__("cBENewPlayerInterface_isPeakLocked");
     int isPeakLocked1(int rider, int peak) __asm__("cBENewPlayerInterface_isPeakLocked1");
     void setPeakLocked(int index, int kind, int value) __asm__("cBENewPlayerInterface_setPeakLocked");
@@ -113,6 +113,12 @@ struct cBEPlayerDB {
                                     //      returns the record's address
     int iControllerID;              // 0x0C [O]; [R] setRiderCtrlID / setPlayerCtrlID store the pad, getRiderCtrlID /
                                     //      getPlayerCtrlID return it
+
+    // iControllerID of a rider no pad drives, a computer rider (name ours): [U] cBELibrary_getProfileIndex gives it
+    // the computer profile (2), cBENewPlayerInterface_getRiderHumanIndex returns -1 for it, getHumanRider counts only
+    // the riders with a controller of 0 or more.
+    enum { kNoController = -1 };
+
     unsigned int iHumanID : 1;      // 0x10 bit 0 [O] (a full word in On Tour); [R] setPlayerCtrlID / setRiderCtrlID store
                                     //      the low bit of the player index
     unsigned int iUseDualShock : 1; // 0x10 bit 1 [O]; [R] get/setUseDualShock; reset sets it

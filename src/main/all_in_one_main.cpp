@@ -90,8 +90,8 @@ extern "C" char* ChallengeResponseMenu_ChallengeResponseMenu(ChallengeResponseMe
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, str_by);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)item3, (void*)0xE);
-    cCommandMenuItem_cCommandMenuItem2(item4, 0, D_00467DD0, 0);
-    cCommandMenuItem_cCommandMenuItem2(item5, 1, D_00467DD8, 0);
+    cCommandMenuItem_cCommandMenuItem2(item4, ChallengeResponseMenu::kItem_Accept, D_00467DD0, 0);
+    cCommandMenuItem_cCommandMenuItem2(item5, ChallengeResponseMenu::kItem_Decline, D_00467DD8, 0);
     cMenu_addItem(self, item0, -1);
     cMenu_addItem(self, item1, -1);
     cMenu_addItem(self, item2, -1);
@@ -269,8 +269,8 @@ extern char str_No_users_in_room[];
  * Fills the debug "Room Occupants" menu with the users in the current room.
  *
  * Asks func_0025F1B0 for the user count and gives command item i (24 items of 0x24 bytes from +0x16C) the name from
- * func_0025F1E0(src, i, 0), activates it and sets its ID to i. An empty room shows "No users in room" with ID -1 (which
- * the command handler RoomMenu_onCommand ignores). The remaining items are deactivated.
+ * func_0025F1E0(src, i, 0), activates it and sets its ID to i. An empty room shows "No users in room" with ID
+ * kItem_NoUsers (which the command handler RoomMenu_onCommand ignores). The remaining items are deactivated.
  *
  * The object is the Room Occupants menu (built by RoomMenu_RoomMenu).
  *
@@ -290,7 +290,7 @@ void RoomMenu::updateusers(LobbyMan* src)
         (*(void**)&((&mUserItems[0]))[0].Caption) = str_No_users_in_room;
         i = 1;
         cMenuItem_activate(&((&mUserItems[0]))[0], 1);
-        ((&mUserItems[0]))[0].ID = -1;
+        ((&mUserItems[0]))[0].ID = kItem_NoUsers;
     }
     for (; i < 24; i++) {
         cMenuItem_activate(&((&mUserItems[0]))[i], 0);
@@ -537,9 +537,10 @@ extern "C" void func_0017E4F0(int);
 /**
  * Handles the debug challenge menu's commands: Accept or Decline.
  *
- * It is the onCommand slot of the challenge menu's vtable D_0046D3D0 (built by ChallengeResponseMenu_ChallengeResponseMenu). Item ID 0
- * (Accept) calls func_0017E490 with the owner at +0x130, which answers the challenge through func_0025FB58; ID 1
- * (Decline) calls func_0017E4F0 with the owner at +0x134, which declines through func_0025FC28.
+ * It is the onCommand slot of the challenge menu's vtable D_0046D3D0 (built by
+ * ChallengeResponseMenu_ChallengeResponseMenu). Item ID kItem_Accept calls func_0017E490 with the owner at +0x130,
+ * which answers the challenge through func_0025FB58; ID kItem_Decline calls func_0017E4F0 with the owner at +0x134,
+ * which declines through func_0025FC28.
  *
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
@@ -549,9 +550,9 @@ int ChallengeResponseMenu::onCommand(cMenuItem* item)
     int temp_3;
 
     temp_3 = item->ID;
-    if (temp_3 == 0) {
+    if (temp_3 == kItem_Accept) {
         func_0017E490(((int)mAcceptScreen));
-    } else if (temp_3 == 1) {
+    } else if (temp_3 == kItem_Decline) {
         func_0017E4F0(((int)mDeclineScreen));
     }
     return 0;
@@ -590,9 +591,9 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
 /**
  * Handles the debug "Room Occupants" menu's commands.
  *
- * It is the onCommand slot of vtable RoomMenu_vtbl (built by RoomMenu_RoomMenu). The "Chat" item (ID -2) calls func_0017E3B8
- * with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls func_0017E368 with the owner at
- * +0x130 and the occupant's index; the placeholder line (ID -1) does nothing.
+ * It is the onCommand slot of vtable RoomMenu_vtbl (built by RoomMenu_RoomMenu). The "Chat" item (ID kItem_Chat) calls
+ * func_0017E3B8 with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls func_0017E368 with
+ * the owner at +0x130 and the occupant's index; the placeholder line (ID kItem_NoUsers) does nothing.
  *
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
@@ -600,9 +601,9 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
 int RoomMenu::onCommand(cMenuItem* item)
 {
     int itemValue = item->ID;
-    if (itemValue == -2) {
+    if (itemValue == kItem_Chat) {
         func_0017E3B8_BB48((int)mChatScreen);
-    } else if (itemValue != -1) {
+    } else if (itemValue != kItem_NoUsers) {
         func_0017E368_BB48((int)mSelectUserScreen, itemValue);
     }
     return 0;
@@ -873,11 +874,11 @@ void sti_001DBC98(int init, int prio) __asm__("func_001DBC98");
  * header.
  *
  * @param init  1 to construct, 0 to destroy
- * @param prio  initialization priority; only 0xFFFF does anything
+ * @param prio  initialization priority; only DEFAULT_INIT_PRIORITY does anything
  */
 void sti_001DBC98(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init) {
             D_004C6328[0] = 1.0f;
             D_004C6328[1] = 1.0f;
@@ -1666,19 +1667,19 @@ INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setDisplayMode);
 extern "C" void cUILocaleInterface_setTextNumCharFlag_CC08(void*, int) __asm__("cUILocaleInterface_setTextNumCharFlag");
 
 /**
- * Sets the locale's display mode (the byte at +0x0) and turns the text-num-char flag on for mode 2.
+ * Sets the locale's display mode (the byte at +0x0) and turns the text-num-char flag on for kDisplayNumChar.
  *
- * Stores @p mode at +0x0, then calls cUILocaleInterface_setTextNumCharFlag, which sets bit 3 of the attribute byte at +0x3 (tAttrLocale's fourth
- * flag, On Tour's mTextNumChar) when @p mode is 2 and clears it otherwise. It is slot 0x14 of both the base locale vtable
- * cUILocaleInterface_vtbl and the front-end locale's cFELocale_vtbl.
+ * Stores @p mode at +0x0, then calls cUILocaleInterface_setTextNumCharFlag, which sets bit 3 of the attribute byte at
+ * +0x3 (tAttrLocale's fourth flag, On Tour's mTextNumChar) when @p mode is kDisplayNumChar and clears it otherwise. It
+ * is slot 0x14 of both the base locale vtable cUILocaleInterface_vtbl and the front-end locale's cFELocale_vtbl.
  *
  * The object is the locale interface.
  *
- * @param mode  the new display mode
+ * @param mode  the new display mode, cUILocaleInterface::eDisplayMode
  */
 extern "C" void cUILocaleInterface_setDisplayMode(signed char *self, signed char mode) {
     *self = mode;
-    cUILocaleInterface_setTextNumCharFlag_CC08(self, mode == 2);
+    cUILocaleInterface_setTextNumCharFlag_CC08(self, mode == cUILocaleInterface::kDisplayNumChar);
 }
 #endif
 
@@ -4021,9 +4022,9 @@ extern int cFEMemCard_mInstance_DDC8 __asm__("cFEMemCard_mInstance");
 /**
  * Tells whether a memory-card screen exists: returns cFEMemCard_mInstance != 0.
  *
- * @return 1 when cFEMemCard_mInstance is set, otherwise 0
+ * @return true when cFEMemCard_mInstance is set, otherwise false
  */
-extern "C" int cFEMemCard_isInstance(void) {
+extern "C" bool cFEMemCard_isInstance(void) {
     return cFEMemCard_mInstance_DDC8 != 0;
 }
 #endif
@@ -5461,12 +5462,12 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateNet_fePathIsOnline);
 extern int D_004A1A70;
 
 /**
- * Tells whether the front end is on the online path: returns D_004A1A70 == 1.
+ * Tells whether the front end is on the online path: returns D_004A1A70 == cFEStateNet::kFEPathOnline.
  *
- * @return 1 when D_004A1A70 is 1, otherwise 0
+ * @return true when D_004A1A70 is cFEStateNet::kFEPathOnline, otherwise false
  */
-extern "C" int cFEStateNet_fePathIsOnline(void) {
-    return D_004A1A70 == 1;
+extern "C" bool cFEStateNet_fePathIsOnline(void) {
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 #endif
 
@@ -5757,16 +5758,16 @@ extern char str_no[];
 /**
  * Handles a button press on the options-reset popup: "yes" accepts, "no" declines, and either closes the popup.
  *
- * On event 5 from a widget, compares the widget's hash (+0x38) with GetHashValue32("yes") and ("no"); sets the accept
- * byte (+0x48) to 1 or 0 and pops the state stack with cUIStateStack_pop(engine + 0x18, 1). Other events and other widgets
- * are ignored.
+ * On event cUIState::kONNEXT from a widget, compares the widget's hash (+0x38) with GetHashValue32("yes") and ("no");
+ * sets the accept byte (+0x48) to 1 or 0 and pops the state stack with cUIStateStack_pop(engine + 0x18, 1). Other
+ * events and other widgets are ignored.
  *
  * @param widget  the widget (may be null)
  * @param event  the widget event
  */
 extern "C" void cFEPopupOptionReset_onWidgetEvent(cFEPopupOptionReset* self, cUIThing* widget, int event) {
     if (((char*)widget) != 0) {
-        if (event == 5) {
+        if (event == cUIState::kONNEXT) {
             int yesCheckHash = widget->mHashName;
             if (yesCheckHash == GetHashValue32(str_yes)) {
                 self->mAccept = 1;

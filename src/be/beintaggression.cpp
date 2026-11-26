@@ -139,7 +139,7 @@ extern signed char D_005305F9[];
  *
  * @param iRider1  the rider who is angered (On Tour iRider1)
  * @param iRider2  the rider they are angry at (On Tour iRider2)
- * @param event  the contact (On Tour eBEAggBehaviors): 0 mild, 1 moderate, 2 hard, 3 Bertuzzi
+ * @param event  the contact (eBEAggBehaviors): 0 mild, 1 moderate, 2 hard, 3 Bertuzzi
  */
 void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event)
 {
@@ -151,16 +151,16 @@ void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event
     int pts = cBELibrary_profileLib[profile][ca].mRelations[cb].tick;
     int st = cBELibrary_profileLib[profile][ca].mRelations[cb].aggState;
     switch (event) {
-    case 0:
+    case kAGG_MILDCONTACT:
         add = 1;
         break;
-    case 1:
+    case kAGG_MODCONTACT:
         add = 2;
         break;
-    case 2:
+    case kAGG_HARDCONTACT:
         add = 4;
         break;
-    case 3:
+    case kAGG_BERTUZZI:
         add = 6;
         break;
     }
@@ -172,20 +172,20 @@ void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event
             func_001E2A08(cb, pts);
         }
         switch (st) {
-        case 0:
+        case kAGG_FRIEND:
             if (lv >= 3) {
                 lvl = 2;
                 pts = 10;
             }
             break;
-        case 1:
+        case kAGG_NEUTRAL:
             if (lv >= 4) {
                 lvl = 2;
                 pts = 10;
-                st = 3;
+                st = kAGG_ENEMY;
             }
             break;
-        case 2:
+        case kAGG_RIVAL:
             if (lv <= 0) {
                 lvl = 1;
                 pts = 5;
@@ -194,7 +194,7 @@ void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event
                 pts = 15;
             }
             break;
-        case 3:
+        case kAGG_ENEMY:
             if (lv <= 0) {
                 lvl = 1;
                 pts = 5;
@@ -247,20 +247,20 @@ extern "C" void cBEAggressionInterface_regressAggression(void)
                 func_001E2A08(j, pts);
             }
             switch (st) {
-            case 0:
+            case kAGG_FRIEND:
                 if (lvl >= 3) {
                     lvl = 2;
                     pts = 10;
                 }
                 break;
-            case 1:
+            case kAGG_NEUTRAL:
                 if (lvl >= 4) {
                     lvl = 2;
                     pts = 10;
-                    st = 3;
+                    st = kAGG_ENEMY;
                 }
                 break;
-            case 2:
+            case kAGG_RIVAL:
                 if (lvl <= 0) {
                     lvl = 1;
                 } else if (lvl >= 4) {
@@ -268,9 +268,9 @@ extern "C" void cBEAggressionInterface_regressAggression(void)
                     pts = 15;
                 }
                 break;
-            case 3:
+            case kAGG_ENEMY:
                 if (lvl == 0) {
-                    st = 1;
+                    st = kAGG_NEUTRAL;
                     lvl = 3;
                     pts = 15;
                 } else if (lvl >= 5) {

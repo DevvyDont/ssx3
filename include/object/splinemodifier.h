@@ -19,6 +19,22 @@
 #include "world/worldview.h"
 #include "object/spline3d.h"
 
+// How a spline modifier turns its instance along the spline (OrientType; names ours). [U]
+// cSplineModifier_updateRootTransform and cMultiSplineModifier_updateNodes add the heading (atan2 of the direction's
+// y and x, about z) for kSplineOrient_Heading and kSplineOrient_HeadingPitch, and the pitch (atan2 of z over the
+// horizontal length, about y) for kSplineOrient_Pitch and kSplineOrient_HeadingPitch.
+enum eSplineOrientType {
+    kSplineOrient_None = 0, kSplineOrient_Pitch = 1, kSplineOrient_Heading = 2, kSplineOrient_HeadingPitch = 3
+};
+
+// The SequenceType that bounces between the spline's ends (name ours): [U] cSplineModifier_update reverses the
+// velocity at either end for it; 0 and 4 stop there, any other type wraps around.
+enum { kSplineSeq_PingPong = 2 };
+
+// The script signals a spline modifier handles (names ours): [U] cSplineModifier_signal sets the speed and starts for
+// kSplineSignal_SetSpeed, starts for kSplineSignal_Start and reverses and starts for kSplineSignal_Reverse.
+enum eSplineSignal { kSplineSignal_SetSpeed = 400, kSplineSignal_Start = 401, kSplineSignal_Reverse = 402 };
+
 // World-script data that adds a spline modifier (On Tour tAddSplineData, 0x30; same layout). [O] On Tour's
 // cSplineModifier(const tAddSplineData& sdata); [U] cSplineModifier_cSplineModifier1 (src/object/multiparticle.cpp)
 // reads every member from SplineId to ForceTime at these offsets and widths.

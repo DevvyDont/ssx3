@@ -28,12 +28,8 @@ struct sPlayerStatRow_getCollisionAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_getCollisionAttrib
-{
-    signed char v[15];
-};
 extern sPlayerStatRow_getCollisionAttrib cBEStatInterface_currentStat_getCollisionAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_getCollisionAttrib cBELibrary_statDefault_getCollisionAttrib[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault cBELibrary_statDefault_getCollisionAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's collision attribute as a fraction of the character's maximum.
@@ -57,7 +53,7 @@ float cBEStatInterface::getCollisionAttrib(int rider, int value)
         attribLevel = value;
     else
         attribLevel = cBEStatInterface_currentStat_getCollisionAttrib[profile].e[charID][5] / 5;
-    return (float)attribLevel / (float)cBELibrary_statDefault_getCollisionAttrib[charID].v[0xD];
+    return (float)attribLevel / (float)cBELibrary_statDefault_getCollisionAttrib[charID].cMaxToughness;
 }
 #endif
 
@@ -73,12 +69,8 @@ struct sPlayerStatRow_cBEStatInterface_getStrikingAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_cBEStatInterface_getStrikingAttrib
-{
-    signed char v[15];
-};
 extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib cBEStatInterface_currentStat_cBEStatInterface_getStrikingAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getStrikingAttrib cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how hard a rider hits, as a fraction of the character's best.
@@ -102,7 +94,7 @@ float cBEStatInterface::getStrikingAttrib(int rider, int value)
         level = value;
     else
         level = cBEStatInterface_currentStat_cBEStatInterface_getStrikingAttrib[profile].e[character][5] / 5;
-    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[character].v[0xD];
+    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[character].cMaxToughness;
 }
 #endif
 
@@ -222,7 +214,7 @@ float cBEStatInterface::getRecoveryAttrib(int rider, int value)
         attribLevel = value;
     else
         attribLevel = cBEStatInterface_currentStat_cBEStatInterface_getStrikingAttrib[profile].e[charID][6] / 5;
-    return (float)attribLevel / (float)cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[charID].v[0xE];
+    return (float)attribLevel / (float)cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[charID].cMaxStability;
 }
 #endif
 
@@ -372,12 +364,8 @@ struct sPlayerStatRow_cBEStatInterface_getTrickAttrib
 {
     signed char e[10][7]; // 0x46 bytes
 };
-struct sCharStat_cBEStatInterface_getTrickAttrib
-{
-    signed char v[15];
-};
 extern sPlayerStatRow_cBEStatInterface_getTrickAttrib cBEStatInterface_currentStat_cBEStatInterface_getTrickAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getTrickAttrib cBELibrary_statDefault_cBEStatInterface_getTrickAttrib[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault cBELibrary_statDefault_cBEStatInterface_getTrickAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's trick skill, as a fraction of the character's best.
@@ -400,7 +388,7 @@ float cBEStatInterface::getTrickAttrib(int rider, int value)
         level = value;
     else
         level = cBEStatInterface_currentStat_cBEStatInterface_getTrickAttrib[profile].e[character][2] / 5;
-    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getTrickAttrib[character].v[0xA];
+    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getTrickAttrib[character].cMaxTrick;
 }
 #endif
 
@@ -426,12 +414,12 @@ extern const sLevelTable_00149778 D_0045A2B0;
  *
  * @param rider  the rider (On Tour iRider)
  * @param value  the trick's points (On Tour iPoints)
- * @return 1 when the points reach the threshold
+ * @return true when the points reach the threshold
  */
-int cBEStatInterface::shouldCelebrateTrick(int rider, int value)
+bool cBEStatInterface::shouldCelebrateTrick(int rider, int value)
 {
     if (cBENewPlayerInterface_isMissionMan(rider))
-        return 0;
+        return false;
     sLevelTable_00149778 pointThresholds = D_0045A2B0;
     int n = cBEStatInterface_getStatLevel(this, rider) - 1;
     int lvl;

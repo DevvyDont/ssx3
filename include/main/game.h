@@ -155,7 +155,7 @@ struct cGame {
     int getTransitionMan(int i) __asm__("cGame_getTransitionMan__FPvi");
     int getSplashManager(int i) __asm__("cGame_getSplashManager__FPvi");
     void update() __asm__("cGame_update");
-    int loseFocus() __asm__("cGame_loseFocus");
+    bool loseFocus() __asm__("cGame_loseFocus");
     void updateState() __asm__("cGame_updateState");
     void setState(int iNextState, int startupFlag, int refresh) __asm__("cGame_setState");
     void setPreloadState(int val) __asm__("cGame_setPreloadState__FPvi");
@@ -164,9 +164,9 @@ struct cGame {
     void doNextState() __asm__("cGame_doNextState");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGame_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGame_readFromReplayFrame");
-    int activatePauseMenu() __asm__("cGame_activatePauseMenu");
+    bool activatePauseMenu() __asm__("cGame_activatePauseMenu");
     int canUserActivatePauseMenu() __asm__("cGame_canUserActivatePauseMenu");
-    int render() __asm__("cGame_render");
+    bool render() __asm__("cGame_render");
     int getCurrentState() __asm__("cGame_getCurrentState");
     int getPreviousState() __asm__("cGame_getPreviousState");
     int getCurrentStateInstance() __asm__("cGame_getCurrentStateInstance");
@@ -202,11 +202,11 @@ struct cGame {
     int getNumGameView() __asm__("cGame_getNumGameView");
     int getCurrentRenderView() __asm__("cGame_getCurrentRenderView");
     int getCurrentRenderViewNum() __asm__("cGame_getCurrentRenderViewNum");
-    int updateStreamFocus() __asm__("cGame_updateStreamFocus");
-    int updateStreamLoading() __asm__("cGame_updateStreamLoading");
+    bool updateStreamFocus() __asm__("cGame_updateStreamFocus");
+    bool updateStreamLoading() __asm__("cGame_updateStreamLoading");
     bool updateUI() __asm__("cGame_updateUI");
     void updateAI() __asm__("cGame_updateAI");
-    int updateScreenFade() __asm__("cGame_updateScreenFade");
+    bool updateScreenFade() __asm__("cGame_updateScreenFade");
     void updateVibration() __asm__("cGame_updateVibration");
 };
 

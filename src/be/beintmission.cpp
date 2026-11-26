@@ -386,9 +386,9 @@ extern char D_004A6CAC[];
  * @param rider  the rider (selects profile slot and character)
  * @param bit  the collectible's bit, 0-63
  * @param idx  the offset from the race's location
- * @return 1 if found, else 0
+ * @return true if found
  */
-int cBEMissionInterface::isBitSet(int rider, int bit, int idx)
+bool cBEMissionInterface::isBitSet(int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -1140,16 +1140,16 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isSessionPoint);
  *
  * @param value  the session point index (On Tour iIdx)
  * @param id  the location (On Tour eBELocationID locID)
- * @return 1 when such a session point exists
+ * @return true when such a session point exists
  */
-int cBEMissionInterface::isSessionPoint(int value, int id)
+bool cBEMissionInterface::isSessionPoint(int value, int id)
 {
     for (int i = 0; i < 22; i++) {
         if (cBELibrary_pictureDB[i].iLocationID == id && cBELibrary_pictureDB[i].numSessionPoints >= value) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

@@ -1,5 +1,7 @@
 #include "common.h"
 #include "be/bedbprofile.h"
+#include "be/beintnewrace.h"
+#include "be/beintreward.h"
 
 extern "C" int cBELibrary_getScoreType(int a, int b);
 
@@ -15,12 +17,12 @@ INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_getScoreStats__FPvii);
  *
  * @param locID  the location (On Tour: eBELocationID)
  * @param event  the event or stat kind (On Tour: eBEGameEvent)
- * @return the record, or 0 when the pair has none (type 26)
+ * @return the record, or 0 when the pair has none (kNoScoreType)
  */
 void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
 {
     int type = cBELibrary_getScoreType(locID, event);
-    if (type == 26) {
+    if (type == kNoScoreType) {
         return 0;
     }
     return &((&((cBECharProfileDB*)self)->mScoreStats[0]))[type];
@@ -45,9 +47,9 @@ extern const sProfileMasks_001523E8 D_0045A7C0;
  * 0x18924C or 0x21A490 (from D_0045A7C0). No range check on @p kind.
  *
  * @param kind  the peak, 0-2
- * @return 1 when a location of that peak was visited, else 0
+ * @return true when a location of that peak was visited
  */
-int cBECharProfileDB::hasVisitedPeak(int kind)
+bool cBECharProfileDB::hasVisitedPeak(int kind)
 {
     sProfileMasks_001523E8 masks = D_0045A7C0;
     return ((int)mVisitLocFlags & masks.m[kind]) != 0;
@@ -101,31 +103,31 @@ static inline int IsBetter_00152460(int stat, tBETrackScore* s, unsigned int val
 }
 
 /**
- * Records @p value as the character's best for a location and event if it beats the stored one; returns 1 if so.
+ * Records @p value as the character's best for a location and event if it beats the stored one; returns true if so.
  *
  * The record is the 8-byte entry at +0xAD0 that cBELibrary_getScoreType(@p locationId, @p stat) selects (as in
- * cBECharProfileDB_getScoreStats); type 26 (none) and @p value 0 return 0. For @p stat 0, 4, 6, 7 and 8 lower is
- * better (times), for the rest higher (points); an empty record (0) always takes the value.
+ * cBECharProfileDB_getScoreStats); kNoScoreType (none) and @p value 0 return false. For @p stat 0, 4, 6, 7 and 8 lower
+ * is better (times), for the rest higher (points); an empty record (0) always takes the value.
  *
  * @param locationId  the location
  * @param stat  the event kind, which also decides whether lower or higher is better
  * @param value  the new score or time
- * @return 1 when the record was updated, else 0
+ * @return true when the record was updated
  */
-int cBECharProfileDB::updateScoreStats(int locationId, int stat, unsigned int value)
+bool cBECharProfileDB::updateScoreStats(int locationId, int stat, unsigned int value)
 {
     int type = cBELibrary_getScoreType(locationId, stat);
-    if (type == 26)
-        return 0;
+    if (type == kNoScoreType)
+        return false;
     if (value == 0)
-        return 0;
+        return false;
     tBETrackScore* scoreStat = &((&mScoreStats[0]))[type];
     if (scoreStat->uiHighScore == 0 || IsBetter_00152460(stat, scoreStat, value))
     {
         scoreStat->uiHighScore = value;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -155,30 +157,30 @@ struct sEventDef_00152528
 extern sEventDef_00152528 cBELibrary_locationDB[];
 
 /**
- * Records finishing place @p place for an event in the character's profile; returns 1 when it is a new best.
+ * Records finishing place @p place for an event in the character's profile; returns true when it is a new best.
  *
- * Nothing happens for @p place -1 or a pair without a record (cBELibrary_getScoreType gives 26). Otherwise the record
- * at +0xAD0 is marked done and its count incremented for places 0 and 1. A place not better than the stored best
- * returns 0. The first place stored (best still -1) also bumps the medal counters of the location's category
- * (cBELibrary_locationDB[@p ev] +0x54): the first counter for @p mode 0, the second for modes 1-3.
+ * Nothing happens for @p place kMEDAL_NONE or a pair without a record (cBELibrary_getScoreType gives kNoScoreType).
+ * Otherwise the record at +0xAD0 is marked done and its count incremented for places 0 and 1. A place not better than
+ * the stored best returns false. The first place stored (best still kMEDAL_NONE) also bumps the medal counters of the
+ * location's category (cBELibrary_locationDB[@p ev] +0x54): the first counter for @p mode 0, the second for modes 1-3.
  *
  * @param ev  the location
  * @param mode  the event kind
- * @param place  the finishing place / medal (0 best), or -1 for none
- * @return 1 when the best place was updated, else 0
+ * @param place  the finishing place / medal (eBEMedalID, 0 best), or kMEDAL_NONE for none
+ * @return true when the best place was updated
  */
-extern "C" int cBECharProfileDB_updateMedalStats(sCharProfile_00152528* self, int ev, int mode, int place)
+extern "C" bool cBECharProfileDB_updateMedalStats(sCharProfile_00152528* self, int ev, int mode, int place)
 {
-    if (place != -1)
+    if (place != kMEDAL_NONE)
     {
         int type = cBELibrary_getScoreType(ev, mode);
-        if (type != 26)
+        if (type != kNoScoreType)
         {
             tBETrackScore* placeStat = &self->stats[type];
             placeStat->hasPlayed = 1;
             if ((unsigned int)place < 2)
                 placeStat->iNumGoldOrPlat++;
-            if (placeStat->BestMedal != -1)
+            if (placeStat->BestMedal != kMEDAL_NONE)
             {
                 if (place >= placeStat->BestMedal)
                     goto fail;
@@ -192,11 +194,11 @@ extern "C" int cBECharProfileDB_updateMedalStats(sCharProfile_00152528* self, in
                     self->medals[cat].b++;
             }
             placeStat->BestMedal = place;
-            return 1;
+            return true;
         }
     }
 fail:
-    return 0;
+    return false;
 }
 #endif
 

@@ -35,7 +35,9 @@ struct t4Vector;                    // bx/math3d.h
 
 // A model's mesh table entry (On Tour tMeshHeirarchyRecord, 0x10; same layout).
 struct tMeshHeirarchyRecord {
-    int m_iParentID;                // 0x0 [O]; [U] cConveyorNode_updateIntersectInfo walks the parents to -1
+    enum { kNoParent = -1 };        // a root mesh's m_iParentID (name ours; [U] the conveyor's parent walk ends on it,
+                                    //      and the crowd and anim-node bone builders use the root matrix for it)
+    int m_iParentID;                // 0x0 [O]; [U] cConveyorNode_updateIntersectInfo walks the parents to kNoParent
                                     //      (view sBone3130 parent)
     struct tMeshRecord* m_Mesh;     // 0x4 [O] tMeshID; [U] resolveModelHeirarchy fixes it up and resolves the mesh;
                                     //      worldsphtree func_4888 reads the mesh box (view sWsBone_4888.mesh)

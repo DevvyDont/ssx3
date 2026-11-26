@@ -164,6 +164,9 @@ struct cPS2DeferManager {
                                     //         submitters store it as tDeferSubmit::mViewIndex
     int mActivePortIndex;           // 0x69CC4 [P] "mActivePortIndex >= 0" (the word after the view index); [U]
                                     //         func_00362CC8 -1; func_00364B88 sets it (sRailKeyTable::found)
+    // mActivePortIndex when no scissor port is active (name ours): [U] func_00362CC8 resets it to -1, and
+    // cPS2GraphicsMan_PopViewport re-registers the saved scissor (func_00364B88) when the saved index is -1.
+    enum { kNoActivePort = -1 };
     int mIndexView;                 // 0x69CC8 [P] "mIndexView < kMaxNumViewState"; [U] func_00362CC8 0;
                                     //         func_003645B8 appends at it (sRailXfTable_45B8::count)
     int unk_69CCC;                  // 0x69CCC not accessed (alignment of mViewStates)

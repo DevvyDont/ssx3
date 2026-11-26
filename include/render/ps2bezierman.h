@@ -28,6 +28,13 @@
 #include "layout.h"
 #include "render/beziercache.h"
 
+// A patch's tessellation (names ours, after the lists m4x4Patches / m6x6Patches / m8x8Patches): the n x n grid named by
+// its edge LODs (mEdgeLods; ePatchGrid) and the index of that grid's list and VIF cache (mLod; ePatchLod). [U]
+// func_0038B190 queues a patch whose four edge LODs are all kPatchGrid_4x4 / 6x6 / 8x8 into the list with mLod
+// kPatchLod_4x4 / 6x6 / 8x8; func_0038C788 / func_0038CA70 build an n x n grid for LOD index l with n = l * 2 + 4.
+enum ePatchGrid { kPatchGrid_4x4 = 4, kPatchGrid_6x6 = 6, kPatchGrid_8x8 = 8 };
+enum ePatchLod { kPatchLod_4x4 = 0, kPatchLod_6x6 = 1, kPatchLod_8x8 = 2 };
+
 // One queued patch (0x10). [U] func_0038B190 stores mpPatch (a1), unk_04 (t0), mLod (0/1/2 for the 4x4/6x6/8x8 lists),
 // and a halfword read from the patch record (+0x1A6/+0x1A8/+0x1AA) at 0xC.
 struct tBezierPatchEntry {

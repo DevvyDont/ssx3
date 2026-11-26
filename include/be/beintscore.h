@@ -103,7 +103,7 @@ struct cBEScoreInterface : public cBEInterface {
     void* getPlayerLastCompletedEventStats(int profileIndex)
         __asm__("cBEScoreInterface_getPlayerLastCompletedEventStats");
     void* getPlayerBestStats(int profileIndex, int characterId) __asm__("cBEScoreInterface_getPlayerBestStats");
-    int isBetterMedal(int currentMedal, int newMedal) __asm__("cBEScoreInterface_isBetterMedal");
+    bool isBetterMedal(int currentMedal, int newMedal) __asm__("cBEScoreInterface_isBetterMedal");
     bool isEligibleForHighScore(int rider) __asm__("cBEScoreInterface_isEligibleForHighScore");
     int getNumberOfWinsOnTrack(int rider, int locationID, int eventID)
         __asm__("cBEScoreInterface_getNumberOfWinsOnTrack");

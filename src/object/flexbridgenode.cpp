@@ -1070,7 +1070,7 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
         t4Vector* hi = &self->BoundBox.MaxPoint;
         tGetNetMatrixSlot* vt43 = (tGetNetMatrixSlot*)VPTR_OF(cGraphicsMan, ctx);
         t4Matrix viewMatrix = vt43[43].fn(vthis(ctx, vt43[43]));
-        if (vt[93].fn(thisp, lo, hi, &viewMatrix) == 1) {
+        if (vt[93].fn(thisp, lo, hi, &viewMatrix) == GM_CLIPCODE_OUTSIDE) {
             return;
         }
     }
@@ -1155,7 +1155,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType
     self->NumNodes = 0;
     self->RailFlags = len;
     for (int i = 0; i < 8; i++) {
-        if ((&def->InstId1)[i] != 0xFFFFFFFF) {
+        if ((&def->InstId1)[i] != tResourceID::kInvalidRID) {
             self->NumNodes += 1;
         }
     }
@@ -1317,7 +1317,7 @@ extern "C" void cFlexRailNode_render(cFlexRailNode* self)
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx);
     if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
-                                  ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == 1) return;
+                                  ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == GM_CLIPCODE_OUTSIDE) return;
     if (D_004A5980 == 0) {
         D_004FF6C0[0][0] = 0.0f;
         D_004FF6C0[0][1] = 0.0f;
@@ -1583,8 +1583,8 @@ extern float D_0048E7F0[5];
  * search bracket for it from D_0048E7D8/D_0048E7F0 and narrows it by golden-section search (at most 24 steps, until the
  * bracket is under 0.0005). When *hit is 0 or the distance beats *dist, it sets *hit and *dist and fills intInfo: type
  * 2, position, unit tangent, Instance as the object, the mesh from vtable entry 49 (getMesh), the segment, t and the
- * surface from the instance's mesh table (+0x88, short at +0x1A per 12-byte entry; -1 becomes 0). minBpos and maxBpos
- * are not used.
+ * surface from the instance's mesh table (+0x88, short at +0x1A per 12-byte entry; eST_Undefined becomes eST_Default).
+ * minBpos and maxBpos are not used.
  *
  * Quirk: the chord projection is clamped at 0 but not at 1.
  *
@@ -1692,8 +1692,8 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
                 mesh = 0;
             }
             short* surf = (short*)((char*)self->Instance->m_pCollideRecord + 0x1A + mesh * 12);
-            if (*surf == -1) {
-                intInfo->Stype = 0;
+            if (*surf == eST_Undefined) {
+                intInfo->Stype = eST_Default;
             } else {
                 intInfo->Stype = *surf;
             }

@@ -89,6 +89,13 @@ struct cGFTrackStartState {
                                     //      isPreloadComplete and preloadUpdate test it; written to / read from the
                                     //       replay
                                     //      frame (writeToReplayFrame / readFromReplayFrame pass its address)
+    // mPreLoadState's steps (names ours). [U] cGFTrackStartState_preloadUpdate waits for the track scripts and queues
+    // the intro NIS (0), waits for the NIS lists (1), rebuilds the AI riders (2), loads them (3) and holds an intro
+    // for 180 frames (4); 5 is done: the ctor and preloadCancel store it, isPreloadComplete tests it.
+    enum ePreLoadState {
+        kPreLoad_TrackScripts = 0, kPreLoad_WaitNIS = 1, kPreLoad_InitRiders = 2, kPreLoad_LoadRiders = 3,
+        kPreLoad_Intro = 4, kPreLoad_Done = 5
+    };
     int mPlayFirstTimeBCVideo;      // 0x14 [O] bool; [R] ctor 0; [U] preloadInit / loseFocus set it, gainFocus and
                                     //      preloadUpdate test it; in the replay frame
     int mPreLoadTicks;              // 0x18 [O]; [R] ctor 0; [U] preloadInit 0, preloadUpdate counts it; in the replay
@@ -99,7 +106,7 @@ struct cGFTrackStartState {
     void preloadInit() __asm__("cGFTrackStartState_preloadInit");
     void preloadUpdate() __asm__("cGFTrackStartState_preloadUpdate");
     void preloadCancel() __asm__("cGFTrackStartState_preloadCancel");
-    int isPreloadComplete() __asm__("cGFTrackStartState_isPreloadComplete");
+    bool isPreloadComplete() __asm__("cGFTrackStartState_isPreloadComplete");
     void gainFocus() __asm__("cGFTrackStartState_gainFocus");
     void update() __asm__("cGFTrackStartState_update");
     void loseFocus() __asm__("cGFTrackStartState_loseFocus");
@@ -409,6 +416,10 @@ struct cGFSectionLoadState {
     // --- cGFSectionLoadState
     int mSubState;                  // 0x10 [O]; [U] gainFocus 0, update's switch (0 wait for the section, 1 wait for
                                     //      the focus / transition, 2 done); not in the replay frame
+    // mSubState's steps (names ours). [U] update waits in kSectionLoad_WaitSection until the location's section is
+    // loaded, in kSectionLoad_WaitTransport until the stream focus is far enough and no transition or NIS runs, then
+    // ends the transport and stays in kSectionLoad_Done; gainFocus starts it at kSectionLoad_WaitSection.
+    enum eSubState { kSectionLoad_WaitSection = 0, kSectionLoad_WaitTransport = 1, kSectionLoad_Done = 2 };
 
     // Methods bound to their retail symbols by asm labels.
     void gainFocus() __asm__("cGFSectionLoadState_gainFocus");
@@ -461,6 +472,9 @@ struct cGFNextHeatState {
     void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFNextHeatState_vtbl (ctor); cGameState_vtbl
                                     //      (dtor)
     // --- cGFNextHeatState (On Tour's names have no m prefix)
+    // CurrentNextHeatState's steps. [O] On Tour's enum cGFNextHeatState::eNextHeatStatus for 0 .. 2, names and values;
+    // retail's update also has a fourth step, 3 (NH_DONE, name ours), that goes on to the next game state.
+    enum eNextHeatStatus { NH_PURGING = 0, NH_LOADINGAI = 1, NH_READY = 2, NH_DONE = 3 };
     int CurrentNextHeatState;       // 0x10 [O] eNextHeatStatus (0 NH_PURGING, 1 NH_LOADINGAI, 2 NH_READY; retail also
                                     //      uses 3 = go on); [U] gainFocus 0 (3 when it skips: modes 5 / 6, game
                                     //      path), update's switch; in the replay frame; not set by the ctor
@@ -512,6 +526,14 @@ struct cGFUserSelectState {
     int mMode;                      // 0x14 [O] eUserSelectMode (0 Lodge, 1 TransportPauseMenu, 2 Transport,
                                     //      3 TransportNoTransitionIn); [R] ctor 0; [U] gainFocus stores its startup
                                     //      flag, update tests it; in the replay frame
+    // mCurrState and mMode's values. [O] On Tour's enums cGFUserSelectState::eUserSelectStatus (US_*) and
+    // eUserSelectMode (keUserSelectMode_*), names and values; [U] update's switch walks US_WAITSTARTNIS ..
+    // US_WAITEND; gainFocus plays the lodge NIS for keUserSelectMode_Lodge and starts the transport for the others.
+    enum eUserSelectStatus { US_WAITSTARTNIS = 0, US_WAITOVERLAY = 1, US_WAITLEAVE = 2, US_WAITEND = 3 };
+    enum eUserSelectMode {
+        keUserSelectMode_Lodge = 0, keUserSelectMode_TransportPauseMenu = 1, keUserSelectMode_Transport = 2,
+        keUserSelectMode_TransportNoTransitionIn = 3, keUserSelectMode_Num = 4
+    };
     int mNextLocation;              // 0x18 [O][P] (preview 0x14, setNextLocation); [R] ctor 23; [U] setNextLocation
                                     //      stores it, gainFocus 23 (mode 1: cBENewRaceInterface_mNextLocation), update
                                     //      compares it with the current location and loads it; in the replay frame

@@ -442,15 +442,16 @@ struct sAnimNode_EBA0 {
  * Runs the frame-update world script of the instance whose node sits 0x14 bytes into @p self, and returns whether that
  * node is still the instance's active node.
  *
- * Passes the instance record at @p self + 0x2C (the node's Instance) to cObjectInterface_runFrameUpdateScript, which runs the record's type-5
- * script through cWScriptMan_doOnFrameUpdateScript (the type cWScriptMan uses for frame-update scripts), then compares the record's
- * active-node pointer (+0xC) with @p self + 0x14. Its callers (cAnimObjectNode_updateNode, cAnimTeeterNode_updateNode, cAnimComboNode_updateNode) return 0
- * from their node update when it returns 0.
+ * Passes the instance record at @p self + 0x2C (the node's Instance) to cObjectInterface_runFrameUpdateScript, which
+ * runs the record's type-5 script through cWScriptMan_doOnFrameUpdateScript (the type cWScriptMan uses for frame-update
+ * scripts), then compares the record's active-node pointer (+0xC) with @p self + 0x14. Its callers
+ * (cAnimObjectNode_updateNode, cAnimTeeterNode_updateNode, cAnimComboNode_updateNode) return false from their node
+ * update when it returns false.
  *
- * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
+ * @return true if the node at @p self + 0x14 is still the record's active node
  */
 // is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
-int cAnimNode::frameUpdate()
+bool cAnimNode::frameUpdate()
 {
     sAnimLink_EBA0* link = (sAnimLink_EBA0*)&MoveNodeBase;
     cObjectInterface_runFrameUpdateScript(Instance);

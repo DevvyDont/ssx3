@@ -88,6 +88,9 @@ struct cBxReplayFrame;
 struct tIntersectInfo;
 
 struct cAnimComboNode {
+    // The signal that starts the second time range (name ours): [U] signal handles it and passes any other signal to
+    // cAnimObjectNode_signal.
+    enum { kAnimComboSignal_Start2 = 130 };
     // --- cAnimComboNodeState (On Tour 0x18; getNodeState returns +0x0; replay ctor/writeToReplayFrame move these 0x18
     //       bytes)
     float AnimSpeed2;               // 0x00 [O]; [R] ctor: Speed2 / 30 / frame rate; [U] updateNode adds it to
@@ -158,7 +161,7 @@ struct cAnimComboNode {
                                     //       (cMeshAnimFrame_transform)
 
     // Methods bound to their retail symbols by asm labels.
-    int updateNode() __asm__("cAnimComboNode_updateNode");
+    bool updateNode() __asm__("cAnimComboNode_updateNode");
     void updateIntersectInfo(tIntersectInfo* out) __asm__("cAnimComboNode_updateIntersectInfo");
     void signal(int msg) __asm__("cAnimComboNode_signal");
     void setComboXform() __asm__("cAnimComboNode_setComboXform");

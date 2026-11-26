@@ -29,6 +29,7 @@
 #include "layout.h"
 #include "ui/uistate.h"
 #include "fe/festate.h"
+#include "be/beintreward.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -37,13 +38,7 @@ struct cUIScreen;
 struct cUIIcon;
 struct cUIText;
 
-// A trophy (cFEStateTrophyRoom::mTrophyType). [O] On Tour's enum eBETrophyID, names and values; [U]
-// cFEStateTrophyRoom_onWidgetCreate titles them kT_TITLERaceTrophy, kT_TITLEFSTrophy, kT_TITLEExploreTrophy and
-// kT_TITLEEarningsTrophy.
-enum eBETrophyID {
-    kTROPHY_NONE = -1, kTROPHY_RACE = 0, kTROPHY_FREESTYLE = 1, kTROPHY_EXPLORE = 2, kTROPHY_EARNINGS = 3,
-    kTROPHY_NUM = 4
-};
+// eBETrophyID (cFEStateTrophyRoom::mTrophyType) lives in be/beintreward.h.
 
 struct cFEStateTrophyRoom : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:

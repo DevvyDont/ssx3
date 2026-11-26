@@ -292,23 +292,23 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
 /**
  * Loads a game save written by cBESaveInterface_generateSaveGame, after checking its CRC.
  *
- * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (MEM_crc16, seed 64490) with the
- * stored one and returns 0 on a mismatch. Otherwise restores cBELibrary_optionDB and calls the option interface's onLoad,
- * restores the high-score tables cBELibrary_highScores (2600 bytes) and calls the score interface's onLoad, restores the two
- * player bits of cBELibrary_playerDB and calls the player interface's onLoad, then re-applies the locale and options
- * (cSSXApp_initLocale, cSSXApp_activateBEOptions).
+ * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (MEM_crc16, seed 64490) with the stored
+ * one and returns false on a mismatch. Otherwise restores cBELibrary_optionDB and calls the option interface's onLoad,
+ * restores the high-score tables cBELibrary_highScores (2600 bytes) and calls the score interface's onLoad, restores
+ * the two player bits of cBELibrary_playerDB and calls the player interface's onLoad, then re-applies the locale and
+ * options (cSSXApp_initLocale, cSSXApp_activateBEOptions).
  *
  * @param buf  the save data read from the memory card
- * @return 1 when loaded, 0 when the CRC is wrong
+ * @return true when loaded, false when the CRC is wrong
  */
-int cBESaveInterface::loadSaveGame(char* buf)
+bool cBESaveInterface::loadSaveGame(char* buf)
 {
     int size = cBESaveInterface_getSaveGameSize(this) - 4;
     int crc = MEM_crc16(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
     if (crc != stored) {
-        return 0;
+        return false;
     }
     char* cursor = buf;
     cBEIface_2BB0* iface;
@@ -329,7 +329,7 @@ int cBESaveInterface::loadSaveGame(char* buf)
     iface->onLoad();
     cSSXApp_initLocale(SSXApp);
     cSSXApp_activateBEOptions(SSXApp);
-    return 1;
+    return true;
 }
 #endif
 
@@ -351,24 +351,24 @@ extern sCharFlag_2DE0 D_00535B31[];
 /**
  * Loads one rider profile from a profile save, after checking its CRC.
  *
- * Compares the CRC of the first cBESaveInterface_getSaveProfileSize() - 4 bytes (MEM_crc16, seed 64490) with the
- * stored one and returns 0 on a mismatch. Otherwise copies the 12-byte name into cBELibrary_playerDB[@p idx], the ten
+ * Compares the CRC of the first cBESaveInterface_getSaveProfileSize() - 4 bytes (MEM_crc16, seed 64490) with the stored
+ * one and returns false on a mismatch. Otherwise copies the 12-byte name into cBELibrary_playerDB[@p idx], the ten
  * character records into cBELibrary_profileLib[@p idx] and one byte into playerDB +0x11, then calls the onLoad of the
  * player, stat and BAGT interfaces. The word at +0x288 of each character record (the item index table pointer that
  * func_00156C70 reads) is kept across the load, and func_001515B8 is called on each record afterwards.
  *
  * @param buf  the save data read from the memory card
  * @param idx  the profile slot to load into (On Tour iProfile)
- * @return 1 when loaded, 0 when the CRC is wrong
+ * @return true when loaded, false when the CRC is wrong
  */
-int cBESaveInterface::loadSaveProfile(char* buf, int idx)
+bool cBESaveInterface::loadSaveProfile(char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;
     int crc = MEM_crc16(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
     if (crc != stored) {
-        return 0;
+        return false;
     }
     int keep[10];
     for (int i = 0; i < 10; i++) {
@@ -387,7 +387,7 @@ int cBESaveInterface::loadSaveProfile(char* buf, int idx)
         cBELibrary_profileLib_2DE0[idx].sub[i].keep = keep[i];
         func_001515B8(&cBELibrary_profileLib_2DE0[idx].sub[i]);
     }
-    return 1;
+    return true;
 }
 #endif
 

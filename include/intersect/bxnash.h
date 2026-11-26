@@ -33,6 +33,10 @@ struct nash_CellKey {
     int x;                          // 0x004 [O]
     int y;                          // 0x008 [O]
     int z;                          // 0x00C [O]
+
+    // The level of the smallest cells (name ours): [U] FrustumCallback_operatorCall visits a cell's children (level
+    // - 1) unless the cell is at level 11.
+    enum { kLeafLevel = 11 };
 };
 
 CHECK_OFFSET(nash_CellKey, level, 0x000);

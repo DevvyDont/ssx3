@@ -101,9 +101,9 @@ struct cFlagSet {
     void updateGrid(t3Vector* vout) __asm__("cFlagSet_updateGrid");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlagSet_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cFlagSet_readFromReplayFrame");
-    int SameKind(void* data, tInstanceRecord* ctx) __asm__("cFlagSet_SameKind");
+    bool SameKind(void* data, tInstanceRecord* ctx) __asm__("cFlagSet_SameKind");
     void AddFlag(tFlagState* def, tInstanceRecord* mesh) __asm__("cFlagSet_AddFlag");
-    int Empty() __asm__("cFlagSet_Empty");
+    bool Empty() __asm__("cFlagSet_Empty");
 };
 
 CHECK_OFFSET(cFlagSet, mFlagData, 0x000);

@@ -337,31 +337,35 @@ static inline int clutPsm_7440(int f)
  *
  * The id is @p bindId when it is 0 or more (cTextureMan_NewBindTexID) or a free non-bound one
  * (cTextureMan_NewNonBindTexID). The 0x58-byte info gets: the copy flag (+0x0), 8 characters of @p texName (+0x4), the
- * texel format (+0xC), mip count (+0x24), -1 in the four VRAM fields (+0x28..+0x34), and the bits per pixel (+0x18) of
- * the GS format chosen from @p texelFormat (8 -> PSMCT24, 2 -> PSMCT16, 9/10 -> PSMT8, 11/12 -> PSMT4, else PSMCT32). With
- * pixels it sums the data size (+0x10, each level at least 0x100 bytes) and the page-rounded VRAM size (+0x14) over
- * levels 0 to @p mipCount, and either copies the data into a new buffer tagged with the name (when @p ownsData) or keeps the
- * pointer (+0x1C); without pixels the data size is 0 and the VRAM size covers one level. A CLUT (16 entries for formats
- * 11/12, else 256) is copied or referenced likewise (+0x20).
+ * texel format (+0xC), mip count (+0x24), tTexInfo::kNoVRAM in the four VRAM fields (+0x28..+0x34), and the bits per
+ * pixel (+0x18) of the GS format chosen from @p texelFormat (GM_TEXEL_RGB888 -> PSMCT24, GM_TEXEL_ARGB1555 -> PSMCT16,
+ * the INDEX8 formats -> PSMT8, the INDEX4 formats -> PSMT4, else PSMCT32). With pixels it sums the data size (+0x10,
+ * each level at least 0x100 bytes) and the page-rounded VRAM size (+0x14) over levels 0 to @p mipCount, and either
+ * copies the data into a new buffer tagged with the name (when @p ownsData) or keeps the pointer (+0x1C); without
+ * pixels the data size is 0 and the VRAM size covers one level. A CLUT (16 entries for the INDEX4 formats, else 256) is
+ * copied or referenced likewise (+0x20).
  *
  * TEX0 (+0x38) gets the buffer width, format, log2 size, TCC and the CLUT format; TEX1 (+0x40) the mip settings; with
- * mips, MIPTBP1/2 (+0x48/+0x50) get the level widths. @p vramMode 1 allocates the VRAM block now (heap +0x1F60, node
- * flag 2) and mode 3 allocates 0x2000 bytes more, locked (flags 0x22), with the address rounded up to 32 blocks. An
- * 8-bit format 9 texture becomes PSMT8H, or is converted by func_00366E90 when it owns its data, the free space at
- * +0x6344 is smaller than its VRAM size and @p vramMode is 0. cPS2GraphicsMan_AddTexture1 and cTextureMan_AddLockedFrameTexture call it.
+ * mips, MIPTBP1/2 (+0x48/+0x50) get the level widths. @p vramMode GM_TEXTYPE_LOCKED allocates the VRAM block now (heap
+ * +0x1F60, node flag 2) and GM_TEXTYPE_WINDOW allocates 0x2000 bytes more, locked (flags 0x22), with the address
+ * rounded up to 32 blocks. A GM_TEXEL_INDEX8 texture becomes PSMT8H, or is converted by func_00366E90 when it owns its
+ * data, the free space at +0x6344 is smaller than its VRAM size and @p vramMode is GM_TEXTYPE_DYNAMIC.
+ * cPS2GraphicsMan_AddTexture1 and cTextureMan_AddLockedFrameTexture call it.
  *
  * @param pixelData  the pixel data (all mip levels), or null
  * @param texName  the texture name (8 characters are kept)
  * @param texWidth  width in texels
  * @param texHeight  height in texels
  * @param mipCount  number of extra mip levels
- * @param texelFormat  texel format (8 24-bit, 2 16-bit, 9/10 8-bit, 11/12 4-bit, other 32-bit)
+ * @param texelFormat  texel format, eGMTexelFormat (GM_TEXEL_RGB888 24-bit, GM_TEXEL_ARGB1555 16-bit, the INDEX8
+ *                     formats 8-bit, the INDEX4 formats 4-bit, other 32-bit)
  * @param clutFormat  CLUT format (1 32-bit, 2 16-bit, 0 none)
  * @param clutData  the CLUT, or null
- * @param vramMode  VRAM handling: 0 on demand, 1 allocate now, 3 allocate now and lock
+ * @param vramMode  VRAM handling, eGMTexLockType (On Tour lockType): GM_TEXTYPE_DYNAMIC on demand, GM_TEXTYPE_LOCKED
+ *                  allocate now, GM_TEXTYPE_WINDOW allocate now and lock
  * @param ownsData  nonzero to copy the pixels and CLUT into the manager's own buffers
  * @param bindId  the id to use, or a negative value to take a free non-bound id
- * @return the texture id, or -1 for a format with no bit depth
+ * @return the texture id, or kNoTexID for a format with no bit depth
  */
 int cTextureMan::AddTexture(int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
                             int clutFormat, int clutData, int vramMode, int ownsData, int bindId)
@@ -385,36 +389,36 @@ int cTextureMan::AddTexture(int pixelData, void* texName, int texWidth, int texH
     strncpy(tex->mName, name, 8);
     tex->mMemAlloc = ownsData;
     tex->mFormat = fmt;
-    tex->mTexAddr = -1;
-    tex->mTexBlock = -1;
-    tex->mCLUTAddr = -1;
+    tex->mTexAddr = tTexInfo::kNoVRAM;
+    tex->mTexBlock = tTexInfo::kNoVRAM;
+    tex->mCLUTAddr = tTexInfo::kNoVRAM;
     tex->mNumMips = mip;
-    tex->mCLUTBlock = -1;
+    tex->mCLUTBlock = tTexInfo::kNoVRAM;
     int psm;
     switch (fmt) {
-    case 8:
-        psm = 1;
+    case GM_TEXEL_RGB888:
+        psm = kGS_PSMCT24;
         break;
-    case 2:
-        psm = 2;
+    case GM_TEXEL_ARGB1555:
+        psm = kGS_PSMCT16;
         break;
-    case 9:
-    case 10:
-        psm = 19;
+    case GM_TEXEL_INDEX8:
+    case GM_TEXEL_INDEX8S:
+        psm = kGS_PSMT8;
         break;
-    case 11:
-    case 12:
-        psm = 20;
+    case GM_TEXEL_INDEX4:
+    case GM_TEXEL_INDEX4S:
+        psm = kGS_PSMT4;
         break;
-    case 0:
+    case GM_TEXEL_ARGB8888:
     default:
-        psm = 0;
+        psm = kGS_PSMCT32;
         break;
     }
     int bpp = psmBpp_7440(psm);
     tex->mBPP = bpp;
     if (bpp <= 0)
-        return -1;
+        return kNoTexID;
     if (data != 0) {
         int size = 0;
         int vram = 0;
@@ -479,14 +483,14 @@ int cTextureMan::AddTexture(int pixelData, void* texName, int texWidth, int texH
         tex->mMIPTBP2 = ((ulong)((w + 0x3FF) >> 10) << 14) | ((ulong)((w + 0x7FF) >> 11) << 34)
             | ((ulong)((w + 0xFFF) >> 12) << 54);
     }
-    if (vramMode == 1) {
+    if (vramMode == GM_TEXTYPE_LOCKED) {
         int node = func_00366CE0(mMainHeap, tex->mVRAMSize, id, -1, -1, 1);
         int* nodeFlags = (int*)(*(char**)(((char*)this) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 2;
         *nodeFlags = fl;
         tex->mTexBlock = node;
         tex->mTexAddr = fl >> 8;
-    } else if (vramMode == 3) {
+    } else if (vramMode == GM_TEXTYPE_WINDOW) {
         int node = func_00366CE0(mMainHeap, tex->mVRAMSize + 0x2000, id, -1, -1, 1);
         int* nodeFlags = (int*)(*(char**)(((char*)this) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 0x22;
@@ -496,13 +500,13 @@ int cTextureMan::AddTexture(int pixelData, void* texName, int texWidth, int texH
         tex->mTexAddr = vramAddr + (-vramAddr & 0x1F);
     }
     if (tex->mMemAlloc != 0) {
-        if (tex->mFormat == 9) {
-            if (*(int*)(((char*)this) + 0x6344) < tex->mVRAMSize && vramMode == 0)
+        if (tex->mFormat == GM_TEXEL_INDEX8) {
+            if (*(int*)(((char*)this) + 0x6344) < tex->mVRAMSize && vramMode == GM_TEXTYPE_DYNAMIC)
                 func_00366E90(this, tex);
             else
                 tex->mTEX0 = (tex->mTEX0 & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
         }
-    } else if (tex->mFormat == 9) {
+    } else if (tex->mFormat == GM_TEXEL_INDEX8) {
         tex->mTEX0 = (tex->mTEX0 & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
     }
     return id;
@@ -515,8 +519,8 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
 /**
  * Unlocks texture @p i's VRAM block so the heap may evict it again.
  *
- * When the texture has a block (+0x28 not -1) it clears flag bit 1 of that block's node (+0x30) in the main heap
- * (+0x1F60), or the second heap (+0x4350) for texel format 9. cPS2GraphicsMan_RemoveScreenGrabTexture and
+ * When the texture has a block (+0x28 not tTexInfo::kNoVRAM) it clears flag bit 1 of that block's node (+0x30) in the
+ * main heap (+0x1F60), or the second heap (+0x4350) for GM_TEXEL_INDEX8. cPS2GraphicsMan_RemoveScreenGrabTexture and
  * cPlayerShadow__cPlayerShadow call it on mTexMan.
  *
  * @param i  the texture id
@@ -524,8 +528,8 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
 extern "C" void func_00367B60(cTextureMan* self, int i)
 {
     tTexInfo* obj = self->m_pTexInfo[i].pTexInfo;
-    if (obj->mTexAddr != -1) {
-        char* sub = obj->mFormat != 9 ? self->mMainHeap : self->mTempHeap;
+    if (obj->mTexAddr != tTexInfo::kNoVRAM) {
+        char* sub = obj->mFormat != GM_TEXEL_INDEX8 ? self->mMainHeap : self->mTempHeap;
         char* node = *(char**)(sub + 0x1FF0) + obj->mTexBlock * 0x1C;
         *(int*)node &= ~2;
     }
@@ -546,23 +550,22 @@ static inline void fill7BC0(int* p, int v)
 }
 
 /**
- * Removes texture @p id from the texture manager: frees its VRAM blocks, owned buffers and id.
- *
- * Frees the texture's block (+0x30) in the main heap (+0x1F60; the second heap +0x4350 for texel format 9) and its CLUT
- * block (+0x34, main heap) with func_003663D8 when they exist; when the texture owns its data (+0x0) frees the pixel
- * and CLUT buffers (+0x1C, +0x20). Then deletes the id (cTextureMan_DeleteBindTexID for ids below 1500, else cTextureMan_DeleteNonBindTexID) and sets
- * the per-context bound texture ids (+0x1F4C) and the loaded-CLUT texture (+0x1F54) to -1.
- * cPS2GraphicsMan_RemoveTexture calls it.
+ * Removes texture @p id from the texture manager: frees its VRAM blocks, owned buffers and id.  Frees the texture's
+ * block (+0x30) in the main heap (+0x1F60; the second heap +0x4350 for GM_TEXEL_INDEX8) and its CLUT block (+0x34, main
+ * heap) with func_003663D8 when they exist; when the texture owns its data (+0x0) frees the pixel and CLUT buffers
+ * (+0x1C, +0x20). Then deletes the id (cTextureMan_DeleteBindTexID for ids below 1500, else
+ * cTextureMan_DeleteNonBindTexID) and sets the per-context bound texture ids (+0x1F4C) and the loaded-CLUT texture
+ * (+0x1F54) to -1. cPS2GraphicsMan_RemoveTexture calls it.
  *
  * @param id  the texture id
  */
 void cTextureMan::RemoveTexture(int id)
 {
     tTexInfo* tex = m_pTexInfo[id].pTexInfo;
-    if (tex->mTexAddr != -1) {
-        func_003663D8(tex->mFormat != 9 ? mMainHeap : mTempHeap, tex->mTexBlock);
+    if (tex->mTexAddr != tTexInfo::kNoVRAM) {
+        func_003663D8(tex->mFormat != GM_TEXEL_INDEX8 ? mMainHeap : mTempHeap, tex->mTexBlock);
     }
-    if (tex->mCLUTAddr != -1) {
+    if (tex->mCLUTAddr != tTexInfo::kNoVRAM) {
         func_003663D8(mMainHeap, tex->mCLUTBlock);
     }
     if (tex->mMemAlloc != 0) {
@@ -851,8 +854,9 @@ template <class T> static inline T Max_8170(T a, T b)
  * (0x50: VRAM block, buffer width, format), TRXPOS (0x51), TRXREG (0x52: width x height) and TRXDIR (0x53), an IMAGE
  * GIF tag and a DMA ref to the level's pixels (at least 0x100 bytes), and an A+D TEXFLUSH (0x3F; end of packet on the
  * last level). Each level halves the size and moves the source and VRAM block on (VRAM in page-rounded steps). Texel
- * format 10 is sent as 32-bit at half size, format 12 as 32-bit at a quarter, and format 9 as PSMT8H with a smaller
- * block shift. Ends the @p dma chain with func_00368138. func_00368660 calls it for textures not yet in VRAM.
+ * format GM_TEXEL_INDEX8S is sent as 32-bit at half size, GM_TEXEL_INDEX4S as 32-bit at a quarter, and GM_TEXEL_INDEX8
+ * as PSMT8H with a smaller block shift. Ends the @p dma chain with func_00368138. func_00368660 calls it for textures
+ * not yet in VRAM.
  *
  * @param self_  the texture manager (this)
  * @param idx  the texture id
@@ -873,14 +877,14 @@ extern "C" void func_00368170(cTextureMan* self_, int idx, ulong** dma, ulong** 
     int src = texture->src;
     int dbp = texture->dbp;
     int shift = 8;
-    if (psm == 10) {
+    if (psm == GM_TEXEL_INDEX8S) {
         fmt = 0;
         w >>= 1;
         height >>= 1;
-    } else if (psm == 9) {
+    } else if (psm == GM_TEXEL_INDEX8) {
         fmt = 27;
         shift = 6;
-    } else if (psm == 12) {
+    } else if (psm == GM_TEXEL_INDEX4S) {
         fmt = 0;
         if (w == height) {
             w >>= 1;
@@ -1061,7 +1065,7 @@ struct sUpMgr_8660 {
  * Makes sure the textures for GS contexts 1 and 2 are in VRAM (uploading them if needed) and binds them.
  *
  * Does nothing when both ids are negative. For each given texture without a VRAM block (+0x28 < 0) it forgets the
- * context's bound id, allocates a block in the main heap (+0x1F60; +0x4350 with a shift of 2 for texel format 9)
+ * context's bound id, allocates a block in the main heap (+0x1F60; +0x4350 with a shift of 2 for GM_TEXEL_INDEX8)
  * protecting the other context's texture, stores the node (+0x30) and address and queues the pixel upload
  * (func_00368170) in an upload chain opened at *@p gifOut; a CLUT not in VRAM gets a 0x100- or 0x400-byte block (flag
  * 4) and func_003684F0. The upload chain is closed into *@p gifOut; when nothing was sent a 1-quadword no-op goes to
@@ -1097,7 +1101,7 @@ extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Te
         tTexInfo* texRecord = ((sUpMgr_8660*)self)->texs[idx];
         sUpHeap_8660* heap;
         int shift;
-        if (((unsigned int)texRecord->mFormat) == 9) {
+        if (((unsigned int)texRecord->mFormat) == GM_TEXEL_INDEX8) {
             heap = (sUpHeap_8660*)(((char*)self) + 0x4350);
             shift = 2;
         } else {
@@ -1240,7 +1244,7 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
             rMip1 = 53;
             rMip2 = 55;
         }
-        int shift = tex->mFormat == 9 ? 6 : 8;
+        int shift = tex->mFormat == GM_TEXEL_INDEX8 ? 6 : 8;
         int n;
         if (tex->mNumMips >= 4) {
             n = 4;
@@ -1311,17 +1315,17 @@ extern "C" void func_00366E30(void* list, int i);
 /**
  * Drops texture @p idx's VRAM copy so it is uploaded again, and forgets the textures bound to the GS contexts.
  *
- * When the texture has a VRAM block (+0x28 not -1), func_00366E30 frees its data and CLUT blocks in the main heap
- * (+0x1F60), or the second heap (+0x4350) for texel format 9. Then sets both per-context bound ids (+0x1F4C) and the
- * loaded-CLUT texture (+0x1F54) to -1. cTextureMan_SetNewTextureData calls it after replacing a texture's data.
+ * When the texture has a VRAM block (+0x28 not tTexInfo::kNoVRAM), func_00366E30 frees its data and CLUT blocks in the
+ * main heap (+0x1F60), or the second heap (+0x4350) for GM_TEXEL_INDEX8. Then sets both per-context bound ids (+0x1F4C)
+ * and the loaded-CLUT texture (+0x1F54) to -1. cTextureMan_SetNewTextureData calls it after replacing a texture's data.
  *
  * @param idx  the texture id
  */
 extern "C" void func_00369098(cTextureMan* self, int idx)
 {
     tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
-    if (tex->mTexAddr != -1) {
-        if (tex->mFormat != 9) {
+    if (tex->mTexAddr != tTexInfo::kNoVRAM) {
+        if (tex->mFormat != GM_TEXEL_INDEX8) {
             func_00366E30(self->mMainHeap, idx);
         } else {
             func_00366E30(self->mTempHeap, idx);
@@ -1419,15 +1423,15 @@ struct sGfxTexTable {
 /**
  * Sets the texture function (TEX0.TFX: modulate, decal, highlight, highlight 2) of texture @p idx.
  *
- * Changes only that field of the stored TEX0 value (+0x38); an @p idx of -1 is ignored. func_0037CBC8__FPv calls it on
- * mTexMan.
+ * Changes only that field of the stored TEX0 value (+0x38); an @p idx of cTextureMan::kNoTexID is ignored.
+ * func_0037CBC8__FPv calls it on mTexMan.
  *
- * @param idx  the texture id, or -1
+ * @param idx  the texture id, or cTextureMan::kNoTexID
  * @param tfx  the TFX value (0-3)
  */
 extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
 {
-    if (idx != -1) {
+    if (idx != cTextureMan::kNoTexID) {
         self->entries[idx]->tex0.TFX = tfx;
     }
 }

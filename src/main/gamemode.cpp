@@ -5,6 +5,7 @@
 #include "ai/ridermetrix.h"
 #include "ai/player.h"
 #include "be/beintnewrace.h"
+#include "be/beintreward.h"
 #include "main/gamemode.h"
 #include "be/beintnetwork.h"
 #include "main/game.h"
@@ -198,9 +199,11 @@ struct sGameModeMan {
  * Switches the game-mode manager to a new event type and picks the matching mode handler.
  *
  * Purges the current handler (its slot 3, cGameModeHandler_purge), stores @p type in iCurrentGameEvent and the new race's
- * cGamePath in iCurrentGamePath. Online (path 2): events 0 -> handler 8, 1-3 -> 9, 4 -> 5, 5 -> 6, others 8.
- * Offline: 1-3 -> 0, 0 -> 1, 12 -> 2, 6-8 -> 4, 4 -> 5, 5 -> 6, 9-11 -> 7; other types keep the purged
- * handler index. Then sets bIsEventDone and calls cGameModeMan_restartHeat().
+ * cGamePath in iCurrentGamePath. Multiplayer (kGAMEPATH_MULTIPLAYER): the freestyle events (kGAMEEVENT_SLOPESTYLE,
+ * SUPERPIPE, BIGAIR) -> kHANDLER_MPSLOPE, the rival events -> kHANDLER_RIVALTIME / RIVALPOINT, others kHANDLER_MPRACE.
+ * Offline: freestyle events -> kHANDLER_BIGAIR, kGAMEEVENT_RACE -> kHANDLER_RACE, FREERIDE -> kHANDLER_FREERIDE, the
+ * TIME_PEAK events -> kHANDLER_TIME, the rival events as online, the POINTS_PEAK events -> kHANDLER_POINT; other types
+ * keep the purged handler index. Then sets bIsEventDone and calls cGameModeMan_restartHeat().
  *
  * @param type  the BE game event (newRace.cGameEvent)
  */
@@ -212,38 +215,38 @@ void cGameModeMan::initGameMode(unsigned int type)
     iCurrentGameEvent = (int)type;
     int net = cBENewRaceInterface_newRace.cGamePath;
     iCurrentGamePath = net;
-    if (net == 2) {
+    if (net == kGAMEPATH_MULTIPLAYER) {
         switch (type) {
-        case 0: iCurrModeHandler = 8; break;
-        case 1: iCurrModeHandler = 9; break;
-        case 3: iCurrModeHandler = 9; break;
-        case 2: iCurrModeHandler = 9; break;
-        case 4: iCurrModeHandler = 5; break;
-        case 5: iCurrModeHandler = 6; break;
-        default: iCurrModeHandler = 8; break;
+        case kGAMEEVENT_RACE: iCurrModeHandler = kHANDLER_MPRACE; break;
+        case kGAMEEVENT_SLOPESTYLE: iCurrModeHandler = kHANDLER_MPSLOPE; break;
+        case kGAMEEVENT_BIGAIR: iCurrModeHandler = kHANDLER_MPSLOPE; break;
+        case kGAMEEVENT_SUPERPIPE: iCurrModeHandler = kHANDLER_MPSLOPE; break;
+        case kGAMEEVENT_RIVALTIME: iCurrModeHandler = kHANDLER_RIVALTIME; break;
+        case kGAMEEVENT_RIVALPOINTS: iCurrModeHandler = kHANDLER_RIVALPOINT; break;
+        default: iCurrModeHandler = kHANDLER_MPRACE; break;
         }
     } else {
         switch (type) {
-        case 1:
-        case 2:
-        case 3:
-            iCurrModeHandler = 0;
+        case kGAMEEVENT_SLOPESTYLE:
+        case kGAMEEVENT_SUPERPIPE:
+        case kGAMEEVENT_BIGAIR:
+            iCurrModeHandler = kHANDLER_BIGAIR;
             break;
-        case 0: iCurrModeHandler = 1; break;
-        case 12: iCurrModeHandler = 2; break;
-        case 4: iCurrModeHandler = 5; break;
-        case 6: iCurrModeHandler = 4; break;
-        case 7: iCurrModeHandler = 4; break;
-        case 8: iCurrModeHandler = 4; break;
-        case 5: iCurrModeHandler = 6; break;
-        case 9:
-        case 10:
-        case 11:
-            iCurrModeHandler = 7;
+        case kGAMEEVENT_RACE: iCurrModeHandler = kHANDLER_RACE; break;
+        case kGAMEEVENT_FREERIDE: iCurrModeHandler = kHANDLER_FREERIDE; break;
+        case kGAMEEVENT_RIVALTIME: iCurrModeHandler = kHANDLER_RIVALTIME; break;
+        case kGAMEEVENT_TIME_PEAK1: iCurrModeHandler = kHANDLER_TIME; break;
+        case kGAMEEVENT_TIME_PEAK2: iCurrModeHandler = kHANDLER_TIME; break;
+        case kGAMEEVENT_TIME_PEAK3: iCurrModeHandler = kHANDLER_TIME; break;
+        case kGAMEEVENT_RIVALPOINTS: iCurrModeHandler = kHANDLER_RIVALPOINT; break;
+        case kGAMEEVENT_POINTS_PEAK1:
+        case kGAMEEVENT_POINTS_PEAK2:
+        case kGAMEEVENT_POINTS_PEAK3:
+            iCurrModeHandler = kHANDLER_POINT;
             break;
         }
     }
-    bIsEventDone = 1;
+    bIsEventDone = true;
     restartHeat();
 }
 #endif
@@ -765,7 +768,8 @@ static inline cAI* race_238E20()
 }
 
 /**
- * Starts a heat of the scored three-heat event (handler 0, vtable cGMBigAirHandler_vtbl; offline events 1-3).
+ * Starts a heat of the scored three-heat event (kHANDLER_BIGAIR, vtable cGMBigAirHandler_vtbl; the offline freestyle
+ * events kGAMEEVENT_SLOPESTYLE, SUPERPIPE and BIGAIR).
  *
  * Sets the time limit from cBENewRaceInterface_getTimeLimit(race, heat) * 60 and iHeatNum from iNextHeat. Heat 1 (or 0) sets five timed AI
  * riders and, when the event was done, clears the score table (+0x4, 3 heats x 10 riders), runs slot +0x24, picks the
@@ -784,7 +788,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
     gm->uiPointTarget = 0;
     if (quick != 0) {
         gm->iNumberAI = 5;
-        if (gm->iCurrentGameEvent == 1) {
+        if (gm->iCurrentGameEvent == kGAMEEVENT_SLOPESTYLE) {
             gm->iSimAI = 4;
         } else {
             gm->iSimAI = 5;
@@ -792,14 +796,14 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         cGameModeMan* gameModeMan = cGameModeHandler_pManager;
         gameModeMan->iNextLocation = -1;
         gameModeMan->unk_90 = 0;
-        if (gameModeMan->iCurrentGameEvent == 1) {
+        if (gameModeMan->iCurrentGameEvent == kGAMEEVENT_SLOPESTYLE) {
             gameModeMan->unk_94 = gameModeMan->iCurrentGameEvent;
         } else {
             gameModeMan->unk_94 = 0;
         }
         memset(self->uiScore, 0, 0x78);
         self->cleanRiderRanksPoints();
-        if (cGameModeHandler_pManager->bIsEventDone == 1) {
+        if (cGameModeHandler_pManager->bIsEventDone == true) {
             func_00239938_self(self);
         }
         cGameModeMan* modeMan = cGameModeHandler_pManager;
@@ -809,7 +813,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
     }
     cGameModeHandler_pManager->uiTimeLimit = cBENewRaceInterface_getTimeLimit(race, cGameModeHandler_pManager->iHeatNum) * 60;
     cGameModeMan* modeManager = cGameModeHandler_pManager;
-    if (modeManager->iCurrentGameEvent == 2) {
+    if (modeManager->iCurrentGameEvent == kGAMEEVENT_SUPERPIPE) {
         modeManager->unk_94 = 0;
     } else {
         modeManager->unk_94 = 1;
@@ -819,7 +823,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
     manager->iHeatNum = nextHeat;
     switch (nextHeat) {
     case 0:
-    case 1: {
+    case cGameModeMan::kHeat1: {
         manager->iHeatNum = 1;
         manager->iNextHeat = 1;
         manager->iRestoreHeat = 1;
@@ -835,7 +839,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         self->uiScore[1][0] = 0;
         self->uiScore[2][0] = 0;
         unsigned int* firstHeatScores = self->uiScore[0];
-        if (manager->bIsEventDone == 1) {
+        if (manager->bIsEventDone == true) {
             memset(firstHeatScores, 0, 0x78);
             self->cleanRiderRanksPoints();
             func_00239938_self(self);
@@ -858,7 +862,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         cGameModeHandler_pManager->bIsEventDone = 0;
         break;
     }
-    case 2:
+    case cGameModeMan::kHeat2:
         manager->bAreResultsLocked = 0;
         manager->iNextHeat = 1;
         manager->iRestoreHeat = 1;
@@ -869,7 +873,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         break;
-    case 3:
+    case cGameModeMan::kFinalHeat:
         manager->bIsLastHeat = 1;
         manager->iNextHeat = 3;
         manager->iRestoreHeat = 3;
@@ -949,7 +953,7 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
         return;
     cGameModeMan* gm = cGameModeHandler_pManager;
     switch (gm->iHeatNum) {
-    case 1:
+    case cGameModeMan::kHeat1:
         gm->iRestoreHeat = gm->iNextHeat;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
@@ -969,7 +973,7 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
         }
         Rider_239230(idx)->ShouldCelebrateAtFinish = 1;
         break;
-    case 2:
+    case cGameModeMan::kHeat2:
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
@@ -989,7 +993,7 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
                 func_00147E18(player, 0);
         }
         break;
-    case 3: {
+    case cGameModeMan::kFinalHeat: {
         gm->bAreResultsLocked = 1;
         int last = Race_239230()->NumberOfComputersAllocated;
         for (int i = 0; i < last + 1; i++) {
@@ -1023,9 +1027,9 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
     }
     }
     int place = cGameModeMan_iRanking[n];
-    if (place == 0)
+    if (place == cGameModeMan::kFirstPlace)
         ((&Race_239230()->Players[0])[0]->mRider)->BoostPowerBar = 0.699999988079071f;
-    else if (place == 1)
+    else if (place == cGameModeMan::kSecondPlace)
         ((&Race_239230()->Players[0])[0]->mRider)->BoostPowerBar = 0.3499999940395355f;
     else
         ((&Race_239230()->Players[0])[0]->mRider)->BoostPowerBar = 0.0f;
@@ -1037,28 +1041,29 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 
 /**
- * Handles a checkpoint in the scored three-heat event: in event 1 adds @p secs seconds to the time limit.
+ * Handles a checkpoint in the scored three-heat event: in kGAMEEVENT_SLOPESTYLE adds @p secs seconds to the time
+ * limit.
  *
- * Returns 1 except in event 1 when the new limit is still below the race clock (AI + 0x8). Slot +0x34
+ * Returns true except in kGAMEEVENT_SLOPESTYLE when the new limit is still below the race clock (AI + 0x8). Slot +0x34
  * (riderCheckpointHit) of cGMBigAirHandler_vtbl.
  *
  * @param player  the rider index (unused)
  * @param secs  seconds to add
- * @return 1, or 0 when the extended limit has already run out
+ * @return true, or false when the extended limit has already run out
  */
-extern "C" int cGMBigAirHandler_riderCheckpointHit(cGMBigAirHandler* self, int player, int secs)
+extern "C" bool cGMBigAirHandler_riderCheckpointHit(cGMBigAirHandler* self, int player, int secs)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
-    if (gameModeMan->iCurrentGameEvent == 1) {
+    if (gameModeMan->iCurrentGameEvent == kGAMEEVENT_SLOPESTYLE) {
         unsigned int limit = (unsigned int)SSXApp->Game->AI->AITick;
         unsigned int newTimeLimit = gameModeMan->uiTimeLimit + secs * 60;
         gameModeMan->uiTimeLimit = newTimeLimit;
         if (newTimeLimit < limit) {
-            return 0;
+            return false;
         }
-        return 1;
+        return true;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1364,17 +1369,17 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 
 /**
- * Counts a checkpoint for one player in the two-player event of handler 9.
+ * Counts a checkpoint for one player in the two-player event of kHANDLER_MPSLOPE.
  *
- * Increments the player's counter (LastCheckpointHit[@p player]); returns 0 unless it is now ahead of the other
- * player's. In event 1 the leader also adds @p secs seconds to the time limit, unless the limit has already passed
- * (then 0). Slot +0x34 (riderCheckpointHit) of cGMMPSlopeHandler_vtbl.
+ * Increments the player's counter (LastCheckpointHit[@p player]); returns false unless it is now ahead of the other
+ * player's. In kGAMEEVENT_SLOPESTYLE the leader also adds @p secs seconds to the time limit, unless the limit has
+ * already passed (then false). Slot +0x34 (riderCheckpointHit) of cGMMPSlopeHandler_vtbl.
  *
  * @param player  the player (0 or 1)
  * @param secs  seconds to add
- * @return 1 when the player took the lead (and time was added), otherwise 0
+ * @return true when the player took the lead (and time was added)
  */
-extern "C" int cGMMPSlopeHandler_riderCheckpointHit(cGMMPSlopeHandler* self, int player, int secs)
+extern "C" bool cGMMPSlopeHandler_riderCheckpointHit(cGMMPSlopeHandler* self, int player, int secs)
 {
     short* score = self->LastCheckpointHit;
     short* mine = &score[player];
@@ -1385,18 +1390,18 @@ extern "C" int cGMMPSlopeHandler_riderCheckpointHit(cGMMPSlopeHandler* self, int
     }
     short* theirs = &score[other];
     if (*theirs >= newScore) {
-        return 0;
+        return false;
     }
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
-    if (gameModeMan->iCurrentGameEvent == 1) {
+    if (gameModeMan->iCurrentGameEvent == kGAMEEVENT_SLOPESTYLE) {
         unsigned int timeLimit = gameModeMan->uiTimeLimit;
         if (timeLimit < (unsigned int)SSXApp->Game->AI->AITick) {
-            return 0;
+            return false;
         }
         gameModeMan->uiTimeLimit = secs * 60 + timeLimit;
-        return 1;
+        return true;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1459,13 +1464,13 @@ static inline void fillOthers_23A108(int* dst, int p)
 }
 
 /**
- * Starts a heat of the three-heat timed event (handler 1, vtable cGMRaceHandler_vtbl; offline event 0).
+ * Starts a heat of the three-heat timed event (kHANDLER_RACE, vtable cGMRaceHandler_vtbl; offline kGAMEEVENT_RACE).
  *
- * Sets iHeatNum from iNextHeat (forced to 3 off the career path) and five AI riders. Heat 1 builds the heat line-ups
- * (func_0023A4F0) and applies one (func_0023A668) when the event was done, fills the time table (+0x58) with 9s and
- * runs slot +0x2C. Heat 2 and heat 3 record the player's character and the riders that survived the last heat
- * (cGameModeMan_iCharRank) in the next line-up and apply it, and reset the score and rank tables. +0x8 and +0xC remember which heat
- * set-up already ran.
+ * Sets iHeatNum from iNextHeat (forced to kFinalHeat off the career path) and five AI riders. Heat 1 builds the heat
+ * line-ups (func_0023A4F0) and applies one (func_0023A668) when the event was done, fills the time table (+0x58) with
+ * 9s and runs slot +0x2C. Heat 2 and heat 3 record the player's character and the riders that survived the last heat
+ * (cGameModeMan_iCharRank) in the next line-up and apply it, and reset the score and rank tables. +0x8 and +0xC
+ * remember which heat set-up already ran.
  */
 extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
 {
@@ -1475,8 +1480,8 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int quick = cBENewRaceInterface_newRace.cGamePath;
-    if (quick != 0 && cGameModeHandler_pManager->iHeatNum != 3) {
-        cGameModeHandler_pManager->iHeatNum = 3;
+    if (quick != 0 && cGameModeHandler_pManager->iHeatNum != cGameModeMan::kFinalHeat) {
+        cGameModeHandler_pManager->iHeatNum = cGameModeMan::kFinalHeat;
         self->mHeat3Ready = 0;
     }
     cGameModeMan* gm = cGameModeHandler_pManager;
@@ -1485,12 +1490,12 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
     gm->bHasPointTarget = 0;
     switch (state) {
     case 0:
-    case 1:
+    case cGameModeMan::kHeat1:
         gm->bIsLastHeat = 0;
         gm->iHeatNum = 1;
         gm->iSimAI = 0;
         gm->iNumberAI = 5;
-        if (gm->bIsEventDone == 1) {
+        if (gm->bIsEventDone == true) {
             func_0023A4F0(self);
             func_0023A668(self);
         }
@@ -1511,7 +1516,7 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
         self->mHeat2Ready = 0;
         self->mHeat3Ready = 0;
         break;
-    case 2:
+    case cGameModeMan::kHeat2:
         gm->bIsLastHeat = 0;
         gm->iNumberAI = 5;
         gm->iSimAI = 0;
@@ -1542,7 +1547,7 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
         self->mHeat2Ready = 1;
         self->mHeat3Ready = 0;
         break;
-    case 3:
+    case cGameModeMan::kFinalHeat:
         gm->iNumberAI = 5;
         gm->iSimAI = 0;
         gm->bIsLastHeat = 1;
@@ -1834,19 +1839,22 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     if (cGameModeMan_iRanking[n] < 3) {
         gm->iNextHeat = gm->iHeatNum + 1;
         GetRace()->riders[idx]->ShouldCelebrateAtFinish = 1;
-        if (gm->iHeatNum == 3) {
+        if (gm->iHeatNum == cGameModeMan::kFinalHeat) {
             gm->bIsEventDone = 1;
             gm->iNextHeat = 3;
         }
         if (cBENewRaceInterface_newRace.cGamePath == 0) {
-            if (cGameModeMan_iRanking[n] == 0) {
-                if ((cGameModeHandler_pManager->iHeatNum < 2 && D_00536640[1] - D_00536640[0] > 600) ||
-                    (cGameModeHandler_pManager->iHeatNum == 2 && D_00536640[1] - D_00536640[0] > 300) ||
-                    (cGameModeHandler_pManager->iHeatNum == 3 && D_00536640[1] - D_00536640[0] > 180)) {
+            if (cGameModeMan_iRanking[n] == cGameModeMan::kFirstPlace) {
+                if ((cGameModeHandler_pManager->iHeatNum < cGameModeMan::kHeat2
+                     && D_00536640[1] - D_00536640[0] > 600) ||
+                    (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kHeat2
+                     && D_00536640[1] - D_00536640[0] > 300) ||
+                    (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat
+                     && D_00536640[1] - D_00536640[0] > 180)) {
                     func_00147D20(player, 1);
                 }
             }
-            if (cGameModeHandler_pManager->iHeatNum == 3) {
+            if (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat) {
                 cGameModeHandler_pManager->iNextHeat = 0;
                 cGameModeHandler_pManager->iRestoreHeat = 0;
             }
@@ -1857,20 +1865,21 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
         self->mHeat3Ready = 1;
         GetRace()->riders[idx]->ShouldCelebrateAtFinish = 0;
         if (cBENewRaceInterface_newRace.cGamePath == 0) {
-            if (cGameModeHandler_pManager->iHeatNum < 2 ||
-                (cGameModeHandler_pManager->iHeatNum == 2 && cGameModeMan_iRanking[n] >= 4) ||
-                (cGameModeHandler_pManager->iHeatNum == 3 && cGameModeMan_iRanking[n] == 5)) {
+            if (cGameModeHandler_pManager->iHeatNum < cGameModeMan::kHeat2 ||
+                (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kHeat2 && cGameModeMan_iRanking[n] >= 4) ||
+                (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat
+                 && cGameModeMan_iRanking[n] == cGameModeMan::kLastPlace)) {
                 func_00147E18(player, 1);
             }
         }
     }
-    if (cGameModeHandler_pManager->iHeatNum == 3) {
+    if (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat) {
         cGameModeHandler_pManager->bAreResultsLocked = 1;
     }
     int place = cGameModeMan_iRanking[n];
-    if (place == 0)
+    if (place == cGameModeMan::kFirstPlace)
         GetRace()->players[0]->rider->BoostPowerBar = 0.699999988079071f;
-    else if (place == 1)
+    else if (place == cGameModeMan::kSecondPlace)
         GetRace()->players[0]->rider->BoostPowerBar = 0.3499999940395355f;
     else
         GetRace()->players[0]->rider->BoostPowerBar = 0.0f;
@@ -2256,12 +2265,13 @@ struct sMode_23B268 {
 };
 
 /**
- * Starts the timed event of handler 4 (vtable cGMTimeHandler_vtbl; events 6-8) at its location.
+ * Starts the timed event of kHANDLER_TIME (vtable cGMTimeHandler_vtbl; kGAMEEVENT_TIME_PEAK1-3) at its location.
  *
- * Event 6, 7 or 8 maps to location 14, 15 or 16 (next locations 0, 3, 4). The medal already won there (cBEScoreInterface_getBestMedalOnTrack)
- * picks the target tier (+0xA: 2 for results 1-2, 1 for 3, else 0); the time limit (+0x4 and uiTimeLimit) is
- * cBENewRaceInterface_getPeakGoal(race, event, tier) * 60 and also becomes the point target. Runs slot +0x2C, gives the human its
- * character and clears the checkpoint counter (+0x8). Slot +0x14 (init) of cGMTimeHandler_vtbl.
+ * kGAMEEVENT_TIME_PEAK1, 2 or 3 maps to location 14, 15 or 16 (next locations 0, 3, 4). The medal already won there
+ * (cBEScoreInterface_getBestMedalOnTrack) picks the target tier (+0xA: 2 for kMEDAL_GOLD or kMEDAL_SILVER, 1 for
+ * kMEDAL_BRONZE, else 0); the time limit (+0x4 and uiTimeLimit) is cBENewRaceInterface_getPeakGoal(race, event, tier) *
+ * 60 and also becomes the point target. Runs slot +0x2C, gives the human its character and clears the checkpoint
+ * counter (+0x8). Slot +0x14 (init) of cGMTimeHandler_vtbl.
  */
 extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
 {
@@ -2276,24 +2286,24 @@ extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
     gm->iSimAI = 0;
     gm->bHasPointTarget = 0;
     switch (mode) {
-    case 6:
+    case kGAMEEVENT_TIME_PEAK1:
         gm->iNextLocation = 0;
         gm->iLocation = 14;
         break;
-    case 7:
+    case kGAMEEVENT_TIME_PEAK2:
         gm->iLocation = 15;
         gm->iNextLocation = 3;
         break;
-    case 8:
+    case kGAMEEVENT_TIME_PEAK3:
         gm->iLocation = 16;
         gm->iNextLocation = 4;
         break;
     }
     int medalResult = cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
     self->mCurrentDifficulty = 0;
-    if (medalResult == 1 || medalResult == 2) {
+    if (medalResult == kMEDAL_GOLD || medalResult == kMEDAL_SILVER) {
         self->mCurrentDifficulty = 2;
-    } else if (medalResult == 3) {
+    } else if (medalResult == kMEDAL_BRONZE) {
         self->mCurrentDifficulty = 1;
     }
     int tierTime = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, self->mCurrentDifficulty);
@@ -2487,10 +2497,12 @@ struct sGM_23B6C0 {
 
 
 /**
- * Starts the head-to-head event of handler 5 (vtable cGMRivalTimeHandler_vtbl; event 4): one last heat against one AI rider.
+ * Starts the head-to-head event of kHANDLER_RIVALTIME (vtable cGMRivalTimeHandler_vtbl; kGAMEEVENT_RIVALTIME): one last
+ * heat against one AI rider.
  *
- * Runs slot +0x2C. Online (path 2) both players take their characters and no AI; offline the human gets its character
- * and the next slot gets the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of cGMRivalTimeHandler_vtbl.
+ * Runs slot +0x2C. Online (kGAMEPATH_MULTIPLAYER) both players take their characters and no AI; offline the human gets
+ * its character and the next slot gets the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of
+ * cGMRivalTimeHandler_vtbl.
  */
 extern "C" void cGMRivalTimeHandler_init(cGameModeHandler* self)
 {
@@ -2516,7 +2528,7 @@ extern "C" void cGMRivalTimeHandler_init(cGameModeHandler* self)
     gm->bIsLastHeat = one;
     gm->bAreResultsLocked = 0;
     self->cleanRiderRanksTime();
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
         int secondHuman = cBENewPlayerInterface_getHumanRider(player, 1);
@@ -2573,7 +2585,7 @@ static inline char* Rider_23B8C8(int i)
 }
 
 /**
- * Records a rider's time in the head-to-head event of handler 5 and decides the winner when the race is over.
+ * Records a rider's time in the head-to-head event of kHANDLER_RIVALTIME and decides the winner when the race is over.
  *
  * Stores the finish tick (0x57E40 for did-not-finish). Online it ranks with sortTimes and returns early for the faster
  * player. Offline it estimates unfinished riders, ranks with sortTimes, and a human in first place that finished ends
@@ -2601,7 +2613,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cGameModeHandler_pManager->sortTimes(10);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
@@ -2677,8 +2689,8 @@ struct sGM_23BB98 {
 
 
 /**
- * Starts the head-to-head scored event of handler 6 (vtable cGMRivalPointHandler_vtbl; event 5): one timed last heat against one AI
- * rider.
+ * Starts the head-to-head scored event of kHANDLER_RIVALPOINT (vtable cGMRivalPointHandler_vtbl;
+ * kGAMEEVENT_RIVALPOINTS): one timed last heat against one AI rider.
  *
  * The time limit is cBENewRaceInterface_getTimeLimit(race, 1) * 60. Runs slot +0x24; online both players take their characters, offline
  * the human and the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of cGMRivalPointHandler_vtbl.
@@ -2709,7 +2721,7 @@ extern "C" void cGMRivalPointHandler_init(cGameModeHandler* self)
     gm2->unk_94 = 0;
     gm2->bIsLastHeat = one;
     self->cleanRiderRanksPoints();
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
         int secondHuman = cBENewPlayerInterface_getHumanRider(player, 1);
@@ -2754,7 +2766,8 @@ static inline char* Rider_23BDB8(int i)
 }
 
 /**
- * Records a rider's score in the head-to-head scored event of handler 6 and decides the winner when the race is over.
+ * Records a rider's score in the head-to-head scored event of kHANDLER_RIVALPOINT and decides the winner when the race
+ * is over.
  *
  * Stores the score (0 for did-not-finish). Online it ranks the two players with sortScores and clears +0x100 of the
  * loser; offline it estimates unfinished riders' scores, ranks, and a human in first place that finished ends the event
@@ -2777,7 +2790,7 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cGameModeHandler_pManager->sortScores(2);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
@@ -2853,12 +2866,14 @@ struct sGM_23C0D0 {
 };
 
 /**
- * Starts the point-target event of handler 7 (vtable cGMPointHandler_vtbl; events 9-11) at its location.
+ * Starts the point-target event of kHANDLER_POINT (vtable cGMPointHandler_vtbl; kGAMEEVENT_POINTS_PEAK1-3) at its
+ * location.
  *
- * Event 9, 10 or 11 maps to location 14, 15 or 16 (next locations 5, 6, 4). The medal already won (cBEScoreInterface_getBestMedalOnTrack) picks
- * the tier (+0xA); the point target (+0x4) is cBENewRaceInterface_getPeakGoal(race, event, tier) * 100 and the time limit
- * cBENewRaceInterface_getPeakTimeLimit(..) * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot
- * +0x14 (init) of cGMPointHandler_vtbl.
+ * kGAMEEVENT_POINTS_PEAK1, 2 or 3 maps to location 14, 15 or 16 (next locations 5, 6, 4). The medal already won
+ * (cBEScoreInterface_getBestMedalOnTrack) picks the tier (+0xA); the point target (+0x4) is
+ * cBENewRaceInterface_getPeakGoal(race, event, tier) * 100 and the time limit cBENewRaceInterface_getPeakTimeLimit(..)
+ * * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot +0x14 (init) of
+ * cGMPointHandler_vtbl.
  */
 extern "C" void cGMPointHandler_init(cGMPointHandler* self)
 {
@@ -2872,15 +2887,15 @@ extern "C" void cGMPointHandler_init(cGMPointHandler* self)
     gm->iCurrentGameEvent = mode;
     gm->iSimAI = 0;
     switch (mode) {
-    case 9:
+    case kGAMEEVENT_POINTS_PEAK1:
         gm->iLocation = 14;
         gm->iNextLocation = 5;
         break;
-    case 10:
+    case kGAMEEVENT_POINTS_PEAK2:
         gm->iLocation = 15;
         gm->iNextLocation = 6;
         break;
-    case 11:
+    case kGAMEEVENT_POINTS_PEAK3:
         gm->iLocation = 16;
         gm->iNextLocation = 4;
         break;
@@ -2889,7 +2904,7 @@ extern "C" void cGMPointHandler_init(cGMPointHandler* self)
     self->mCurrentDifficulty = 0;
     if (medalResult < 3) {
         self->mCurrentDifficulty = 2;
-    } else if (medalResult == 3) {
+    } else if (medalResult == kMEDAL_BRONZE) {
         self->mCurrentDifficulty = 1;
     }
     int pointTarget = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, self->mCurrentDifficulty) * 100;

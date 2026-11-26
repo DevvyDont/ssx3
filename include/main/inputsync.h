@@ -86,8 +86,8 @@ struct cInputSync {
     void* createlocalinput(int* realinput) __asm__("cInputSync_createlocalinput");
     void* createremoteinput(int realinputmap) __asm__("cInputSync_createremoteinput");
     void preupdate() __asm__("cInputSync_preupdate");
-    int aiinputready() __asm__("cInputSync_aiinputready");
-    int aiupdate() __asm__("cInputSync_aiupdate");
+    bool aiinputready() __asm__("cInputSync_aiinputready");
+    bool aiupdate() __asm__("cInputSync_aiupdate");
     void sendClientInput(cInputSync_PadSample* src) __asm__("cInputSync_sendClientInput");
     int compressinput(cInputSync_PadSample* src, cInputSync_CompressedSample* dst) __asm__("cInputSync_compressinput");
     void decompressinput(cInputSync_PadSample* out, char* buf) __asm__("cInputSync_decompressinput");

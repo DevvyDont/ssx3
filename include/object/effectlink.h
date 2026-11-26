@@ -13,6 +13,10 @@
 struct cBxReplayFrame;
 
 struct cEffectLink {
+    // What getType (slot 2) reports (names ours, from the classes): [R] cEffectLink_getType and
+    // cParticleModifier_getType return 1, cDynamicParticleModifier_getType 2, cHaloModifier_getType 3; [U]
+    // tModifierBlock_readFromReplayFrame rebuilds each effect by it and remHaloModifier deletes the kEffect_Halo links.
+    enum eEffectType { kEffect_Particle = 1, kEffect_DynamicParticle = 2, kEffect_Halo = 3 };
     cEffectLink* Next;              // 0x00 [O]; [U] cEffectLink_add, cEffectLink_append
     cEffectLink* Prev;              // 0x04 [O]; [U] cEffectLink_add
     // 0x08: the vptr. [R] cEffectLink_vtbl (0x00491340): the dtor and tModifierBlock_tModifierBlock (+0x18) store it

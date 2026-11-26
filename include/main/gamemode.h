@@ -42,6 +42,17 @@ struct cGameModeMan {
     // iHeatNum's heats (names ours): [U] the freestyle pre-event overlay (fe/ovstatepause func_001FBD20) shows the
     // "heat1_tab" for 0 / 1, "heat2_tab" for 2 and "finalheat_tab" for 3.
     enum { kHeat1 = 1, kHeat2 = 2, kFinalHeat = 3 };
+    // aHandler's slots (names ours): [R] getGM builds cGMBigAirHandler in 0, cGMRaceHandler 1, cGMFreerideHandler 2,
+    // cGMTimeHandler 4, cGMRivalTimeHandler 5, cGMRivalPointHandler 6, cGMPointHandler 7, cGMMPRaceHandler 8 and
+    // cGMMPSlopeHandler 9 (slot 3 stays empty); [U] initGameMode picks one per game event.
+    enum eModeHandler {
+        kHANDLER_BIGAIR = 0, kHANDLER_RACE = 1, kHANDLER_FREERIDE = 2, kHANDLER_TIME = 4, kHANDLER_RIVALTIME = 5,
+        kHANDLER_RIVALPOINT = 6, kHANDLER_POINT = 7, kHANDLER_MPRACE = 8, kHANDLER_MPSLOPE = 9, kHANDLER_NUM = 10
+    };
+    // Finishing places in cGameModeMan_iRanking (names ours): [U] 0-based among the 6 riders (iNumberAI 5 + the
+    // player); the race and big-air raceFinish give kFirstPlace a 0.7 boost bar and kSecondPlace 0.35, and the race
+    // handler's final heat counts kLastPlace as a loss.
+    enum { kFirstPlace = 0, kSecondPlace = 1, kLastPlace = 5 };
 
     int iHeatNum;               // 0x00 [R] getGM = 0, purge = 0, freeride init = 1, big air init = iNextHeat;
                                 //      [U] the current heat (1..3); [O] On Tour getCurrentHeat

@@ -44,6 +44,16 @@ CHECK_OFFSET(tBEProfileBolt, id, 0x0);
 CHECK_OFFSET(tBEProfileBolt, flags, 0x2);
 CHECK_SIZE(tBEProfileBolt, 0x4);
 
+// A bolt id that names no bolt (name ours): [R] tBEProfileBolt's constructor stores it in an empty slot; [U] a bolt
+// definition's parent id is kNoBoltID at the top level (func_0014C068, func_0014D558, func_0014D608, func_0014D908);
+// func_00151EF0's links use it for no target and no condition; func_00156C70 / func_00156EE0 return it when no
+// candidate is left, and cBERewardInterface_awardUser then logs no bolt.
+enum { kNoBoltID = -1 };
+
+// A bolt definition's group byte for a bolt in no group (name ours): [U] func_0014B988 builds no file name for it and
+// fills a name's '$' wildcards from the other bolts of the same group.
+enum { kNoBoltGroup = -1 };
+
 // One bolt-on (equipment item) definition in the back end's item database (name ours). The records are 0x38 bytes:
 // [R] func_0014D998 returns a character's first one as the table's base + index * 0x38 (func_0014D988 counts them),
 // and every walker steps 0x38. Laid out through the members the matched code reads; belibrary, beintecon,
@@ -67,6 +77,16 @@ CHECK_OFFSET(tBEBoltDef, lodPartNames, 0x18);
 CHECK_OFFSET(tBEBoltDef, flags, 0x34);
 CHECK_SIZE(tBEBoltDef, 0x38);
 
+// A bolt definition's price (the short at +0xE, in tens of dollars) for an item every character starts with (name
+// ours): [U] func_001513B8 marks the items priced 0 free (flag 2) and makes the ones priced kBoltPriceBuiltIn owned
+// too.
+enum { kBoltPriceBuiltIn = -1 };
+
+// A character's attribute points (a tBEStatDB byte) at the bottom and top of the scale (names ours): [U]
+// cBEEconInterface_sellAttribute refuses at kAttribPointsMin and cBEEconInterface_buyAttribute at kAttribPointsMax;
+// the price table is indexed by points / 5 (11 levels of 5 points).
+enum { kAttribPointsMin = 5, kAttribPointsMax = 55 };
+
 // [O] struct tBETrackScore (8): one location / event best.
 struct tBETrackScore {
     char hasPlayed;                 // 0x000 [O]; [R] init: 0
@@ -80,6 +100,12 @@ CHECK_OFFSET(tBETrackScore, iNumGoldOrPlat, 0x2);
 CHECK_OFFSET(tBETrackScore, uiHighScore, 0x4);
 CHECK_SIZE(tBETrackScore, 0x8);
 
+// The score types: the index of a location / event pair's record in cBECharProfileDB::mScoreStats and of its table in
+// cBELibrary_highScores (names ours). [U] cBELibrary_getScoreType maps the time and points challenges to 0 .. 5 and
+// the other pairs through its map, and returns kNoScoreType (one past the 26 records) for a pair with none;
+// getScoreStats, updateScoreStats and getHighScoreTable then have no record.
+enum { kNumScoreTypes = 26, kNoScoreType = kNumScoreTypes };
+
 // [O] struct tBEPeakMedals (8).
 struct tBEPeakMedals {
     unsigned int uiNumRaceMedals;   // 0x000 [O]; [U] the word at +0xBA0 + peak * 8 (beintplayer / updateMedalStats)
@@ -88,6 +114,19 @@ struct tBEPeakMedals {
 CHECK_OFFSET(tBEPeakMedals, uiNumRaceMedals, 0x0);
 CHECK_OFFSET(tBEPeakMedals, uiNumFreeStyleMedals, 0x4);
 CHECK_SIZE(tBEPeakMedals, 0x8);
+
+// A relation's state (tBERelationDB::aggState). [O] On Tour's enum eBEAggState, names and values; [U] func_001519E0
+// sets 0 for a friend .. 3 for an enemy; cBEAggressionInterface_applyAggression caps a friend at aggression level 2
+// and turns a neutral rider pushed to level 4 into an enemy, regressAggression turns an enemy back to neutral at 0.
+enum eBEAggState {
+    kAGG_FRIEND = 0, kAGG_NEUTRAL = 1, kAGG_RIVAL = 2, kAGG_ENEMY = 3, kAGG_NUMSTATES = 4
+};
+
+// A contact between riders (cBEAggressionInterface::applyAggression's event). [O] On Tour's enum eBEAggBehaviors, names
+// and values; [U] applyAggression adds 1, 2, 4 and 6 aggression points for them.
+enum eBEAggBehaviors {
+    kAGG_MILDCONTACT = 0, kAGG_MODCONTACT = 1, kAGG_HARDCONTACT = 2, kAGG_BERTUZZI = 3, kAGG_NUMBEHAVIORS = 4
+};
 
 // [O] struct tBERelationDB (3): how this character feels about another one (cBEAggressionInterface).
 struct tBERelationDB {
@@ -99,6 +138,14 @@ CHECK_OFFSET(tBERelationDB, aggState, 0x0);
 CHECK_OFFSET(tBERelationDB, aggLevel, 0x1);
 CHECK_OFFSET(tBERelationDB, tick, 0x2);
 CHECK_SIZE(tBERelationDB, 0x3);
+
+// An attribute, the index of its byte in tBEStatDB. [O] On Tour's enum eBEAttributes, names and values (kATTRIB_SPEED 0
+// .. kATTRIB_STAB 6, kATTRIB_NUM 7), in tBEStatDB's member order; [U] cBEStatInterface_getStatFromProfile returns
+// cSpeed .. cStability for 0 .. 6.
+enum eBEAttributes {
+    kATTRIB_SPEED = 0, kATTRIB_ACCEL = 1, kATTRIB_TRICK = 2, kATTRIB_EDGING = 3, kATTRIB_SPIN = 4, kATTRIB_TOUGH = 5,
+    kATTRIB_STAB = 6, kATTRIB_NUM = 7
+};
 
 // [O] struct tBEStatDB (7): the character's attribute levels.
 struct tBEStatDB {
@@ -143,6 +190,17 @@ CHECK_SIZE(tBEStatDefault, 0xF);
 // On Tour's element type is an 8-byte tStat variant whose member names are not in the dump (its 0x10-byte tStat
 // {m_num, m_total, m_max, m_numUpdates} is a different variant), so the pair is kept as two words.
 struct tRiderBest {
+    // The ten best stats (eventStat's index). [O] On Tour's enum tRiderBest::eEventStat, names and values; [U]
+    // cBEScoreInterface_processRiderBest fills 0 .. 7 from the rider stats On Tour names NumFrags, NumUberTricks,
+    // NumSuperUberTricks, NumUberGrindTricks, LongestCombo, BiggestHandplantTime, BiggestRailDist and BiggestAirTime,
+    // 8 with the shortest race time and 9 with the most freestyle points.
+    enum eEventStat {
+        keEventStat_KnockdownMax = 0, keEventStat_UbersMax = 1, keEventStat_SuperUbersMax = 2,
+        keEventStat_UberGrindsMax = 3, keEventStat_ComboLongest = 4, keEventStat_HandplantSecsLongest = 5,
+        keEventStat_RailLengthLongest = 6, keEventStat_AirSecsLongest = 7, keEventStat_RaceSecsMin = 8,
+        keEventStat_FreeStylePointsMax = 9, keEventStat_Num = 10
+    };
+
     int eventStat[10][2];           // 0x00 [O] tStat eventStat[10] (8 bytes each); [U] [k][0] the best value, [k][1]
                                     //      the location it was set at (cBENewRaceInterface_getLocationName)
     int comboLongestOverall;        // 0x50 [O]
@@ -196,6 +254,18 @@ struct tBEMissionFlags {
 };
 
 CHECK_SIZE(tBEMissionFlags, 0x4);
+
+// A playable character (cBEPlayerDB::cCharacterID, the column of cBELibrary_profileLib[profile][10]). [O] On Tour's
+// enum eBECharacters names the SSX 3 riders it keeps kCHAR_ALLEGRA, kCHAR_ELISE, kCHAR_KAORI, kCHAR_MAC, kCHAR_NATE,
+// kCHAR_PSYMON and kCHAR_ZOE (with other values; MOBY, GRIFF and VIGGO are ours); [R] the values from retail's
+// per-character file lists in this order: func_0014B700's icon files "data/char/mobytxp/big_moby_icons.ssh",
+// "kaoritxp", "allegtxp", "mactxp", "zoetxp", "grifftxp", "elisetxp", "natetxp", "psymotxp", "viggotxp", and
+// cSSXApp::mTextureBigFile ("data/char/mobytxp.big" .. "viggotxp.big"); [P] the preview asserts charID < kCHAR_NUM
+// for cFEBoltFileManager::mFiles[10].
+enum eBECharacters {
+    kCHAR_MOBY = 0, kCHAR_KAORI = 1, kCHAR_ALLEGRA = 2, kCHAR_MAC = 3, kCHAR_ZOE = 4, kCHAR_GRIFF = 5, kCHAR_ELISE = 6,
+    kCHAR_NATE = 7, kCHAR_PSYMON = 8, kCHAR_VIGGO = 9, kCHAR_NUM = 10
+};
 
 struct cBECharProfileDB {
     int bFirstTimeWorldCircuit;     // 0x000 [O] (bool; a word) - first data member after On Tour's strProfileName;
@@ -269,9 +339,9 @@ struct cBECharProfileDB {
                                     //       mode getter / setter
 
     // Methods bound to their retail symbols by asm labels.
-    int hasVisitedPeak(int kind) __asm__("cBECharProfileDB_hasVisitedPeak");
+    bool hasVisitedPeak(int kind) __asm__("cBECharProfileDB_hasVisitedPeak");
     void setLocationVisited(int bit, int on) __asm__("cBECharProfileDB_setLocationVisited");
-    int updateScoreStats(int locationId, int stat, unsigned int value) __asm__("cBECharProfileDB_updateScoreStats");
+    bool updateScoreStats(int locationId, int stat, unsigned int value) __asm__("cBECharProfileDB_updateScoreStats");
 };
 CHECK_OFFSET(cBECharProfileDB, bFirstTimeWorldCircuit, 0x0);
 CHECK_OFFSET(cBECharProfileDB, mCollectibles, 0x4);

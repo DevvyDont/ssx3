@@ -84,6 +84,10 @@ struct FrustumIntersector {
     char unk_81C8[0x8];             // 0x81C8 no access (tail padding to the 16-byte alignment)
 
     // Methods bound to their retail symbols by asm labels.
+    // The VU0 sphere-vs-frustum microprogram's (0xEF0) result for a sphere wholly outside the planes (name ours): [U]
+    // AddAllInstancesInside, AddAllPatchesInside and AddAllTypedInside keep a node unless the test gives 2.
+    enum { kSphereTestOutside = 2 };
+
     void AddAllInstancesCrossing(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllInstancesCrossing");
     void AddAllPatchesCrossing(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllPatchesCrossing");
     void AddAllTypedCrossing(CellClipT* items, int n) __asm__("FrustumIntersector_AddAllTypedCrossing");
