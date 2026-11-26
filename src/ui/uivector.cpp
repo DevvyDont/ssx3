@@ -110,9 +110,9 @@ extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v)
 /**
  * Sets one animated channel of a UI vector shape.
  *
- * Channels below 21 go to cUIThing_setChannelData(). Higher channels address vertex data, nine per vertex: x,
- * y, z, u, v and the four colour components in tARGB order. Does nothing at all, even for base channels,
- * while the shape has no vertex positions; vertex channels past the last vertex are ignored.
+ * Channels below kUIChannel_FirstVertex (21) go to cUIThing_setChannelData(). Higher channels address vertex data,
+ * kVertexChannels (nine) per vertex: x, y, z, u, v and the four colour components in tARGB order. Does nothing at all,
+ * even for base channels, while the shape has no vertex positions; vertex channels past the last vertex are ignored.
  *
  * @param key  channel number (On Tour channel)
  * @param data    the channel's new value
@@ -122,22 +122,22 @@ extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, fl
     if ((self->mpVertexPosition) == 0) {
         return;
     }
-    if (key >= 21) {
-        key -= 21;
-        unsigned short idx = key / 9;
+    if (key >= cUIThing::kUIChannel_FirstVertex) {
+        key -= cUIThing::kUIChannel_FirstVertex;
+        unsigned short idx = key / cUIVector::kVertexChannels;
         if (idx >= self->mAttrVector.mNumVertices) {
             return;
         }
-        switch ((unsigned short)(key % 9)) {
-        case 0: (self->mpVertexPosition)[idx].x = data; break;
-        case 1: (self->mpVertexPosition)[idx].y = data; break;
-        case 2: (self->mpVertexPosition)[idx].z = data; break;
-        case 3: (self->mpUV)[idx].x = data; break;
-        case 4: (self->mpUV)[idx].y = data; break;
-        case 5: (self->mpVertexColour)[idx].A = data; break;
-        case 6: (self->mpVertexColour)[idx].R = data; break;
-        case 7: (self->mpVertexColour)[idx].G = data; break;
-        case 8: (self->mpVertexColour)[idx].B = data; break;
+        switch ((unsigned short)(key % cUIVector::kVertexChannels)) {
+        case cUIVector::kVertexChannel_X: (self->mpVertexPosition)[idx].x = data; break;
+        case cUIVector::kVertexChannel_Y: (self->mpVertexPosition)[idx].y = data; break;
+        case cUIVector::kVertexChannel_Z: (self->mpVertexPosition)[idx].z = data; break;
+        case cUIVector::kVertexChannel_U: (self->mpUV)[idx].x = data; break;
+        case cUIVector::kVertexChannel_V: (self->mpUV)[idx].y = data; break;
+        case cUIVector::kVertexChannel_Alpha: (self->mpVertexColour)[idx].A = data; break;
+        case cUIVector::kVertexChannel_Red: (self->mpVertexColour)[idx].R = data; break;
+        case cUIVector::kVertexChannel_Green: (self->mpVertexColour)[idx].G = data; break;
+        case cUIVector::kVertexChannel_Blue: (self->mpVertexColour)[idx].B = data; break;
         }
     } else {
         cUIThing_setChannelData(self, key, data);
@@ -167,34 +167,34 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sho
     for (unsigned int i = 0; i < n; i++, keys += 2) {
         float data = (float)keys[1];
         int key = keys[0];
-        if (key >= 21) {
-            key -= 21;
-            unsigned short idx = key / 9;
+        if (key >= cUIThing::kUIChannel_FirstVertex) {
+            key -= cUIThing::kUIChannel_FirstVertex;
+            unsigned short idx = key / cUIVector::kVertexChannels;
             if (idx >= self->mAttrVector.mNumVertices) {
                 continue;
             }
-            switch (key % 9) {
-            case 0: (self->mpVertexPosition)[idx].x = data; break;
-            case 1: (self->mpVertexPosition)[idx].y = data; break;
-            case 2: (self->mpVertexPosition)[idx].z = data; break;
-            case 5: (self->mpVertexColour)[idx].A = data; break;
-            case 6: (self->mpVertexColour)[idx].R = data; break;
-            case 7: (self->mpVertexColour)[idx].G = data; break;
-            case 8: (self->mpVertexColour)[idx].B = data; break;
+            switch (key % cUIVector::kVertexChannels) {
+            case cUIVector::kVertexChannel_X: (self->mpVertexPosition)[idx].x = data; break;
+            case cUIVector::kVertexChannel_Y: (self->mpVertexPosition)[idx].y = data; break;
+            case cUIVector::kVertexChannel_Z: (self->mpVertexPosition)[idx].z = data; break;
+            case cUIVector::kVertexChannel_Alpha: (self->mpVertexColour)[idx].A = data; break;
+            case cUIVector::kVertexChannel_Red: (self->mpVertexColour)[idx].R = data; break;
+            case cUIVector::kVertexChannel_Green: (self->mpVertexColour)[idx].G = data; break;
+            case cUIVector::kVertexChannel_Blue: (self->mpVertexColour)[idx].B = data; break;
             }
         } else {
             switch (key) {
-            case 0: self->mPosition.x = data; break;
-            case 1: self->mPosition.y = data; break;
-            case 9: self->mScale.x = data * 0.01f; break;
-            case 10: self->mScale.y = data * 0.01f; break;
-            case 12: ((tAttrThing*)&self->mAttr)->mPivot = (int)data; break;
-            case 13: self->mColour.A = data * (1.0f / 255.0f); break;
-            case 14: self->mColour.R = data * (1.0f / 255.0f); break;
-            case 15: self->mColour.G = data * (1.0f / 255.0f); break;
-            case 16: self->mColour.B = data * (1.0f / 255.0f); break;
-            case 6: self->mSize.x = data; break;
-            case 7: self->mSize.y = data; break;
+            case cUIThing::kUIChannel_PosX: self->mPosition.x = data; break;
+            case cUIThing::kUIChannel_PosY: self->mPosition.y = data; break;
+            case cUIThing::kUIChannel_ScaleX: self->mScale.x = data * 0.01f; break;
+            case cUIThing::kUIChannel_ScaleY: self->mScale.y = data * 0.01f; break;
+            case cUIThing::kUIChannel_Pivot: ((tAttrThing*)&self->mAttr)->mPivot = (int)data; break;
+            case cUIThing::kUIChannel_Alpha: self->mColour.A = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_Red: self->mColour.R = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_Green: self->mColour.G = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_Blue: self->mColour.B = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_SizeX: self->mSize.x = data; break;
+            case cUIThing::kUIChannel_SizeY: self->mSize.y = data; break;
             }
         }
     }
@@ -377,9 +377,9 @@ struct cUIVector_setSize_sCount74 {
  */
 extern "C" void cUIVector_setSize(cUIVector* self, t3Vector* off)
 {
-    if (((cUIVector_setSize_sCount74*)&self->mAttrVector)->count == 4) {
+    if (((cUIVector_setSize_sCount74*)&self->mAttrVector)->count == cUIVector::kQuadVertices) {
         signed char i;
-        for (i = 1; i < 4; i++) {
+        for (i = 1; i < cUIVector::kQuadVertices; i++) {
             (self->mpVertexPosition)[i] = (self->mpVertexPosition)[0];
         }
         (self->mpVertexPosition)[1].x += off->x;
@@ -495,11 +495,11 @@ extern "C" void func_003A3F48_impl(int initialize, int priority) __asm__("func_0
  * initialiser func_003A6648 calls it with (1, 0xFFFF), the static destructor func_003A6668 with (0, 0xFFFF).
  *
  * @param initialize  non-zero to construct, zero to destroy
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_003A3F48_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF) {
+    if (priority == DEFAULT_INIT_PRIORITY) {
         if (initialize != 0) {
         new (&D_005083D0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_005083E0) sColor_3A3F48(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
@@ -800,9 +800,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_isPlayingAnimation);
 /**
  * Returns whether the UI thing has an animation attached (mpAnim is not null).
  *
- * @return 1 when mpAnim is set, else 0
+ * @return true when mpAnim is set, else false
  */
-int cUIThing::isPlayingAnimation()
+bool cUIThing::isPlayingAnimation()
 {
     return ((int)mpAnim) != 0;
 }
@@ -1727,9 +1727,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_isIconRotate);
  * Returns whether the icon is drawn rotated: whether its 2-bit rotate field (mAttrIcon bits 2-3, mIconRotate) is
  * non-zero.
  *
- * @return 1 when rotated, else 0
+ * @return true when rotated, else false
  */
-int cUIIcon::isIconRotate()
+bool cUIIcon::isIconRotate()
 {
     return ((*(int*)&mAttrIcon) & 0xC) != 0;
 }
@@ -2401,7 +2401,7 @@ extern "C" void* cUIPair_cUIPair(cUIPair* self)
     tAttrPair_tAttrPair(&self->mAttrPair);
     self->mpEntry = 0;
     self->mpWidget = 0;
-    ((sUIVectorFlags*)(&self->mAttr))->bit1 = 1;
+    ((sUIVectorFlags*)(&self->mAttr))->bit1 = true;
     return ((char*)self);
 }
 #endif
@@ -3072,9 +3072,9 @@ INCLUDE_ASM("ui/uivector", cUIState_hasPopup);
 /**
  * Returns whether the state has a popup open: whether its 2-bit popup count (mAttrState bits 1-2) is non-zero.
  *
- * @return 1 when the count is non-zero, else 0
+ * @return true when the count is non-zero, else false
  */
-int cUIState::hasPopup()
+bool cUIState::hasPopup()
 {
     return ((mAttrState) & 6) != 0;
 }

@@ -869,21 +869,21 @@ void cWorldCache::resetPageMap()
     unsigned int i;
     for (i = 0; i < self->count; i++) {
         switch (self->ents[i].state) {
-        case 0:
-        case 1:
+        case kHullPage_Empty:
+        case kHullPage_Queued:
             break;
-        case 2:
+        case kHullPage_Loading:
             cStreamMan_cancelStreamRequest((char*)self + 0x300, i);
-            self->ents[i].state = 4;
+            self->ents[i].state = kHullPage_InActive;
             ((cWorldCache*)self)->purgePage(i);
             break;
-        case 3:
-        case 4:
-            self->ents[i].state = 4;
+        case kHullPage_Active:
+        case kHullPage_InActive:
+            self->ents[i].state = kHullPage_InActive;
             ((cWorldCache*)self)->purgePage(i);
             break;
         }
-        self->ents[i].state = 0;
+        self->ents[i].state = kHullPage_Empty;
         self->ents[i].f8 = 0;
         self->ents[i].f4 = 0;
         self->ents[i].f10 = 0;
@@ -917,15 +917,15 @@ extern "C" void cWorldCache_touchPage(sWCSlots* self, int i, float priority)
     self->slot[i].m_fPriority = priority;
     self->slot[i].m_bLock = 0;
     switch (self->slot[i].m_State) {
-    case 0:
-        self->slot[i].m_State = 1;
+    case kHullPage_Empty:
+        self->slot[i].m_State = kHullPage_Queued;
         break;
-    case 1:
-    case 2:
-    case 3:
+    case kHullPage_Queued:
+    case kHullPage_Loading:
+    case kHullPage_Active:
         break;
-    case 4:
-        self->slot[i].m_State = 3;
+    case kHullPage_InActive:
+        self->slot[i].m_State = kHullPage_Active;
         break;
     }
 }
@@ -1012,14 +1012,14 @@ void cWorldCache::purgePage(int cell)
 INCLUDE_ASM("world/worldcache", cWorldCache_isPageLoaded);
 #ifdef SKIP_ASM
 /**
- * Tells whether a hull page is loaded (state 3).
+ * Tells whether a hull page is loaded (kHullPage_Active).
  *
  * @param uiHullPage  the page index (On Tour uiHullPage)
- * @return 1 when loaded, otherwise 0
+ * @return true when loaded, otherwise false
  */
-int cWorldCache::isPageLoaded(int uiHullPage)
+bool cWorldCache::isPageLoaded(int uiHullPage)
 {
-    return m_HullPages[uiHullPage].m_State == 3;
+    return m_HullPages[uiHullPage].m_State == kHullPage_Active;
 }
 #endif
 
@@ -1027,14 +1027,14 @@ int cWorldCache::isPageLoaded(int uiHullPage)
 INCLUDE_ASM("world/worldcache", cWorldCache_isPageEmpty);
 #ifdef SKIP_ASM
 /**
- * Tells whether a hull page is empty (state 0).
+ * Tells whether a hull page is empty (kHullPage_Empty).
  *
  * @param uiHullPage  the page index (On Tour uiHullPage)
- * @return 1 when empty, otherwise 0
+ * @return true when empty, otherwise false
  */
-int cWorldCache::isPageEmpty(int uiHullPage)
+bool cWorldCache::isPageEmpty(int uiHullPage)
 {
-    return m_HullPages[uiHullPage].m_State == 0;
+    return m_HullPages[uiHullPage].m_State == kHullPage_Empty;
 }
 #endif
 
@@ -1090,19 +1090,19 @@ void cWorldCache::updatePages()
     for (unsigned int i = 0; i < m_uiNumHullPage; i++)
     {
         int st = m_HullPages[i].m_State;
-        if (st == 0)
+        if (st == kHullPage_Empty)
             continue;
         int expired = 0;
         if (m_HullPages[i].m_bLock == 0 && now - m_HullPages[i].m_iTouchTick >= m_iTouchStaleAge)
             expired = 1;
         switch (st)
         {
-        case 2:
+        case kHullPage_Loading:
             break;
-        case 1:
+        case kHullPage_Queued:
             if (expired)
             {
-                m_HullPages[i].m_State = 0;
+                m_HullPages[i].m_State = kHullPage_Empty;
                 break;
             }
             if (m_HullPages[i].m_fPriority > bestPri)
@@ -1111,17 +1111,17 @@ void cWorldCache::updatePages()
                 best = i;
             }
             break;
-        case 3:
+        case kHullPage_Active:
             if (!expired)
                 break;
-            m_HullPages[i].m_State = 4;
+            m_HullPages[i].m_State = kHullPage_InActive;
             m_HullPages[i].m_iRenderTick = Frame_8668();
             break;
-        case 4:
+        case kHullPage_InActive:
             if (Frame_8668() - m_HullPages[i].m_iRenderTick < 5)
                 break;
             purgePage(i);
-            m_HullPages[i].m_State = 0;
+            m_HullPages[i].m_State = kHullPage_Empty;
             break;
         }
     }
@@ -1133,7 +1133,7 @@ void cWorldCache::updatePages()
     tBxBSPHull* hull = (tBxBSPHull*)cWorldView_getHull(&m_WorldView, best);
     m_HullPages[best].mp_Page = new (str_cHullPage, 0x20000000, 0) cHullPageNew(hull);
     cStreamMan_addStreamRequest(mgr, best, hull->m_uiNumChunk, hull->m_iStreamOffset);
-    m_HullPages[best].m_State = 2;
+    m_HullPages[best].m_State = kHullPage_Loading;
 }
 #endif
 
@@ -1154,26 +1154,26 @@ void cWorldCache::flushInActivePages()
     for (unsigned int i = 0; i < m_uiNumHullPage; i++)
     {
         int st = m_HullPages[i].m_State;
-        if (st == 0)
+        if (st == kHullPage_Empty)
             continue;
         int expired = 0;
         if (m_HullPages[i].m_bLock == 0 && m_HullPages[i].m_iTouchTick < now)
             expired = 1;
         switch (st)
         {
-        case 2:
+        case kHullPage_Loading:
             break;
-        case 1:
+        case kHullPage_Queued:
             if (expired)
-                m_HullPages[i].m_State = 0;
+                m_HullPages[i].m_State = kHullPage_Empty;
             break;
-        case 3:
+        case kHullPage_Active:
             if (!expired)
                 break;
-            m_HullPages[i].m_State = 4;
-        case 4:
+            m_HullPages[i].m_State = kHullPage_InActive;
+        case kHullPage_InActive:
             purgePage(i);
-            m_HullPages[i].m_State = 0;
+            m_HullPages[i].m_State = kHullPage_Empty;
             break;
         }
     }
@@ -1252,7 +1252,7 @@ extern char str_BxStream_AIPATH[];
 
 static inline void* bxAlloc_8AA8(cWorldMemoryMan* mem, int bank, int size, unsigned int flags)
 {
-    if (bank == 0xFF)
+    if (bank == cWorldCache::kSharedBank)
         return operator_new_bx(size, D_00494D40, flags, 0);
     return mem->m_pSectionAllocator[bank]->allocate(size, flags);
 }
@@ -1281,13 +1281,13 @@ static inline void release_8AA8(tWorldCacheDataTag* tag)
  *
  * The key holds the bank in its low byte (0xFF for the shared bank) and the resource ID above it. Memory
  * comes
- * from a pool picked by the data type; AI paths (type 14) use a "BxStream AIPATH" allocation.
+ * from a pool picked by the data type; AI paths (kBxStreamData_AIPath) use a "BxStream AIPATH" allocation.
  *
  * @param slot  the hull page (On Tour uiHullPage)
  * @param type  the data type (On Tour eBxStreamDataType dataType)
  * @param key  the resource ID (On Tour tResourceID RID)
  * @param size  the data size (On Tour uiDataSize)
- * @return the storage address; 0 when it is already resident or @p size is 0; 0xFFFFFFFF when allocation
+ * @return the storage address; 0 when it is already resident or @p size is 0; kStreamNoRoom when allocation
  *         failed
  */
 // Adds one stream data item (type, bank|id<<8) to a load list, allocating its storage on first use.
@@ -1296,7 +1296,7 @@ unsigned int cWorldCache::addBxStreamDataTest(int slot, int type, unsigned int k
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
     cWorldCacheTable* table;
-    if (bank == 0xFF)
+    if (bank == kSharedBank)
         table = m_pSharedCacheTable;
     else
         table = m_pSectionCacheTable[bank];
@@ -1312,18 +1312,18 @@ unsigned int cWorldCache::addBxStreamDataTest(int slot, int type, unsigned int k
         return 0;
     void* data;
     switch (type) {
-    case 9:
-    case 10:
+    case kBxStreamData_Image:
+    case kBxStreamData_LightPage:
         data = bxAlloc_8AA8(m_pWorldMemMan, bank, size, 0x45000000);
         break;
-    case 1:
-    case 2:
-    case 3:
-    case 11:
-    case 12:
+    case kBxStreamData_Patch:
+    case kBxStreamData_Model:
+    case kBxStreamData_Instance:
+    case kBxStreamData_VisCurtain:
+    case kBxStreamData_CollideModel:
         data = bxAlloc_8AA8(m_pWorldMemMan, bank, size, 0x22000000);
         break;
-    case 14:
+    case kBxStreamData_AIPath:
         data = operator_new_bx(size, str_BxStream_AIPATH, 0, 0);
         break;
     default:
@@ -1333,7 +1333,7 @@ unsigned int cWorldCache::addBxStreamDataTest(int slot, int type, unsigned int k
     if (data != 0)
         return (unsigned int)data;
     release_8AA8(&table->m_pCacheTable[type].m_pDataTag[id]);
-    return 0xFFFFFFFF;
+    return kStreamNoRoom;
 }
 #endif
 
@@ -1362,7 +1362,7 @@ void cWorldCache::addBxStreamDataSubmit(int group, int id, unsigned int key, int
     cWorldCacheTable* table;
     cHullPage* page;
     unsigned int hi = key >> 8;
-    if ((key & 0xFF) == 0xFF) {
+    if ((key & 0xFF) == kSharedBank) {
         table = m_pSharedCacheTable;
     } else {
         table = m_pSectionCacheTable[key & 0xFF];
@@ -1424,7 +1424,7 @@ extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
     cWorldCacheTable* table;
-    if (bank == 0xFF)
+    if (bank == cWorldCache::kSharedBank)
         table = self->m_pSharedCacheTable;
     else
         table = self->m_pSectionCacheTable[bank];
@@ -1439,7 +1439,7 @@ extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key
             tUnresolveSlot* vt = (tUnresolveSlot*)callbackObj->mVtbl;
             chunk = (char*)vt[4].fn(vthis(callbackObj, vt[4]), type, key, chunk);
         }
-        if (chunk != 0 && bank == 0xFF)
+        if (chunk != 0 && bank == cWorldCache::kSharedBank)
             cMemMan_free(chunk);
     }
 }
@@ -1747,11 +1747,9 @@ struct sWCLoader_9258 {
 /**
  * Advances each world section's load state and refreshes the two stream focuses.
  *
- * States: 1 load requested (activates its memory; sky sections ASKY-ESKY use block type 0, others 2), 2
- * loading,
- * 3 unload requested, 4 unloading, 5 and 6 loaded (counted). Newly loaded sections are announced to the
- * renderer
- * (slot 102).
+ * States (eSectionState): kSection_LoadQueue (activates its memory; sky sections ASKY-ESKY use block type 0, others
+ * 2), kSection_Loading, kSection_UnLoadQueue, kSection_UnLoading, kSection_Loaded and kSection_Active (counted). Newly
+ * loaded sections are announced to the renderer (slot 102).
  *
  */
 void cWorldView::update()
@@ -1763,9 +1761,9 @@ void cWorldView::update()
     self->f2E4 = 0;
     for (unsigned int i = 0; i < self->info->count; i++) {
         switch (self->entries[i].state) {
-        case 0:
+        case kSection_Empty:
             break;
-        case 1:
+        case kSection_LoadQueue:
             if (strncmp(self->sections[i].name, str_ASKY, 4) == 0
                 || strncmp(self->sections[i].name, str_BSKY, 4) == 0
                 || strncmp(self->sections[i].name, str_CSKY, 4) == 0
@@ -1776,37 +1774,37 @@ void cWorldView::update()
                 ((cWorldCache*)self->cache)->activateSectionMem(i, 2);
             cWorldCache_touchPage((sWCSlots*)self->cache, self->sections[i].id, self->entries[i].pri);
             ((cWorldCache*)self->cache)->setPageLock(self->sections[i].id, 1);
-            self->entries[i].state = 2;
+            self->entries[i].state = kSection_Loading;
             break;
-        case 2:
+        case kSection_Loading:
             if (((cWorldCache*)self->cache)->isPageLoaded(self->sections[i].id)) {
-                self->entries[i].state = 5;
+                self->entries[i].state = kSection_Loaded;
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
                 ps2GraphicsMan->SectionLoaded(i);
             }
             break;
-        case 4:
+        case kSection_UnLoading:
             if (((cWorldCache*)self->cache)->isPageEmpty(self->sections[i].id)) {
                 int ok = 1;
                 cWorldView_recursiveIsEmptyPages((void**)self, (tBxBSPNode*)self->sections[i].tree, &ok);
                 if (ok) {
-                    self->entries[i].state = 0;
+                    self->entries[i].state = kSection_Empty;
                     ((cWorldCache*)self->cache)->deactivateSectionMem(i);
                     flushWorldLightCache();
                 }
             }
             break;
-        case 5:
+        case kSection_Loaded:
             self->f2E0++;
             break;
-        case 6:
+        case kSection_Active:
             self->f2E0++;
             self->f2E4++;
             break;
-        case 3:
+        case kSection_UnLoadQueue:
             cWorldCache_flushPage_i((sWCSlots*)self->cache, self->sections[i].id);
             cWorldView_recursiveFlushPages((void**)self, (cWorldView_recursiveFlushPages_sNode*)self->sections[i].tree);
-            self->entries[i].state = 4;
+            self->entries[i].state = kSection_UnLoading;
             break;
         }
     }
@@ -1851,7 +1849,7 @@ extern "C" void cWorldView_recursiveFlushPages(void** self, cWorldView_recursive
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldView_recursiveIsEmptyPages);
 #ifdef SKIP_ASM
-extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1);
+extern "C" bool cWorldCache_isPageEmpty(cWorldCache* self, int a1);
 
 /**
  * Clears @p ok when any hull page under a BSP node is not empty (cWorldCache_isPageEmpty), stopping at the first.

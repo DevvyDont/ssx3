@@ -108,25 +108,25 @@ extern "C" void* cUIStateStack_getCurrentState(cUIStateStack* self);
  * Pushes a state onto the front of the stack, choosing whether it starts enabled and whether the current one
  * dies.
  *
- * If the current (first enabled) state is in mode 5 it moves to mode 7 with mPendingDelete = @p
+ * If the current (first enabled) state is in kUPDATE it moves to kLOSEFOCUS with mPendingDelete = @p
  * bDestroyCurrent; other modes are left alone. With no current state the new one is forced enabled and set to
- * mode 2. The pushed state's mEnabled becomes @p bEnable.
+ * kPENDINGCREATE. The pushed state's mEnabled becomes @p bEnable.
  *
  * @param st               the state to push (On Tour pPushState)
  * @param bEnable          whether the pushed state starts enabled
- * @param bDestroyCurrent  stored as the current state's mPendingDelete when it is in mode 5
+ * @param bDestroyCurrent  stored as the current state's mPendingDelete when it is in kUPDATE
  */
 extern "C" void cUIStateStack_pushSpecial(cUIStateStack* self, cUIStateStack_sState* st, int bEnable, int bDestroyCurrent)
 {
     cUIStateStack_sState* cur = (cUIStateStack_sState*)self->getCurrentState();
     if (cur != 0) {
-        if (((*(int*)((char*)cur + 0x1C) >> 5) & 1) && cUIStateStack_stateId(cur) == 5) {
-            cur->id = 7;
+        if (((*(int*)((char*)cur + 0x1C) >> 5) & 1) && cUIStateStack_stateId(cur) == cUIState::kUPDATE) {
+            cur->id = cUIState::kLOSEFOCUS;
             cur->b7 = bDestroyCurrent;
         }
     } else {
         bEnable = 1;
-        st->id = 2;
+        st->id = cUIState::kPENDINGCREATE;
     }
     cList_addToFront(((cList*)self), (cListNode*)st);
     st->b5 = bEnable;
@@ -823,7 +823,7 @@ void cUIThing::setFrameByPercent(float fraction)
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing_isLastAnimFrame);
 #ifdef SKIP_ASM
-extern "C" int cUIAnimation_isLastFrame(int);
+extern "C" bool cUIAnimation_isLastFrame(int);
 
 /**
  * Returns whether a UI thing's animation (mpAnim) is on its last frame; false without an animation.

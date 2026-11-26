@@ -199,19 +199,20 @@ int cReplay::isPauseAI()
 {
     int paused = 0;
     switch (State) {
-    case 0: case 2: case 10: case 11: case 12: case 13: case 14: case 15:
+    case kGameRecording: case kInstantPlayback: case kPreRace: case kStartRace: case kStartRace1: case kReplayEnd:
+    case kReplayPaused: case kReplayInit:
         break;
-    case 1:
-    case 7:
+    case kGamePlayback:
+    case kPlaybackStart:
         if (NextFrame == 0)
             paused = 1;
         if (PlaybackTick >= EndRecordTick)
             paused = 1;
         break;
-    case 4:
+    case kPlaybackStep:
         paused = PlaybackTick >= EndRecordTick;
         break;
-    case 3: case 5: case 6: case 8: case 9:
+    case kPlaybackInput: case kPlaybackUpdate: case kPlaybackStepUpdate: case kPlaybackLoad: case kStartAutoReplay:
         paused = 1;
         break;
     }
@@ -414,7 +415,7 @@ void cReplay::endMarkInstantReplay(int obj, int alt)
     if ((int)InstantReplayFrame == 0) {
         return;
     }
-    if (SSXApp->Game->AI->NumberOfPlayersAllocated != 1) {
+    if (SSXApp->Game->AI->NumberOfPlayersAllocated != cAI::kOnePlayer) {
         return;
     }
     int now;
@@ -506,12 +507,12 @@ INCLUDE_ASM("replay/replaycache", cReplay_startAutoReplay);
 void cReplay_setReplayState_cpp(void* self, int arg) __asm__("cReplay_setReplayState__FPvi");
 
 /**
- * Switches to state 9 (kStartAutoReplay) unless an automatic replay is already on or the state is already 9.
+ * Switches to kStartAutoReplay unless an automatic replay is already on or the state is already kStartAutoReplay.
  */
 void cReplay::startAutoReplay()
 {
-    if (AutoReplay == 0 && *(int*)this != 9) {
-        cReplay_setReplayState_cpp(this, 9);
+    if (AutoReplay == 0 && *(int*)this != kStartAutoReplay) {
+        cReplay_setReplayState_cpp(this, kStartAutoReplay);
     }
 }
 #endif
@@ -721,10 +722,10 @@ void cReplay::eventWScript(int key, int mode)
         if (slot >= 0) {
             cRider* rider = SSXApp->Game->AI->Riders[key];
             switch (mode) {
-            case 0:
+            case kWScriptReplay_MarkInstantReplay:
                 cReplay_beginMarkInstantReplay_2(this, (int)rider->mMetrix + 0xFC);
                 break;
-            case 1:
+            case kWScriptReplay_MarkHighlight:
                 beginMarkHighlight(slot, (int)rider->mMetrix + 0xFC);
                 break;
             }
@@ -913,7 +914,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_endMarkHighlight);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cReplayHighlight_setRanking_s(void* self, int id, int mode) __asm__("cReplayHighlight_setRanking");
+extern "C" bool cReplayHighlight_setRanking_s(void* self, int id, int mode) __asm__("cReplayHighlight_setRanking");
 extern "C" void cReplayHighlight_cancel(void* p);
 void cReplayHighlight_end(void* self);
 
@@ -1210,47 +1211,47 @@ extern "C" void cReplay_writeCheckSum(cReplay* self);
 /**
  * Produces the next block of the replay save (On Tour getSaveData(tReplayMemCardBlock** data, int& size)).
  *
- * Unless the writer is done (WriteState 11), fills WriteBlock from its start: copies pending data (writeBuffered) and
- * runs the writer step for WriteState (0 header start, 1 header, 2 frames start, 3 frames, 4 input start, 5 input, 6
- * pad start, 7 pad, 8 checksum start, 9 checksum, 10 finish) until the 0x4000-byte block is full or the writer is
- * done.
+ * Unless the writer is done (WriteState kWrite_Done), fills WriteBlock from its start: copies pending data
+ * (writeBuffered) and runs the writer step for WriteState (0 header start, 1 header, 2 frames start, 3 frames, 4 input
+ * start, 5 input, 6 pad start, 7 pad, 8 checksum start, 9 checksum, 10 finish; cReplay::eWriteState) until the
+ * 0x4000-byte block is full or the writer is done.
  *
  * @param block  receives WriteBlock
  * @param size  receives the bytes in the block (0 when done)
- * @return 1 when a block was produced, 0 when the save is complete
+ * @return true when a block was produced, false when the save is complete
  */
-int cReplay::getSaveData(char** block, int* size)
+bool cReplay::getSaveData(char** block, int* size)
 {
-    if (WriteState == 11) {
+    if (WriteState == kWrite_Done) {
         *size = 0;
-        return 0;
+        return false;
     }
     WriteSize = 0;
     WriteData = (char*)WriteBlock;
-    while (WriteSize < 0x4000 && WriteState != 11) {
+    while (WriteSize < 0x4000 && WriteState != kWrite_Done) {
         writeBuffered();
         if (WriteSize >= 0x4000) {
             goto done;
         }
         switch (WriteState) {
-        case 0: writeHeaderStart(); break;
-        case 1: writeHeader(); break;
-        case 2: writeFramesStart(); break;
-        case 3: writeFrames(); break;
-        case 4: writeInputStart(); break;
-        case 5: writeInput(); break;
-        case 6: writePadStart(); break;
-        case 7: writePad(); break;
-        case 8: writeCheckSumStart(); break;
-        case 9: writeCheckSum(); break;
-        case 10: WriteState++; break;
-        case 11: break;
+        case kWrite_HeaderStart: writeHeaderStart(); break;
+        case kWrite_Header: writeHeader(); break;
+        case kWrite_FramesStart: writeFramesStart(); break;
+        case kWrite_Frames: writeFrames(); break;
+        case kWrite_InputStart: writeInputStart(); break;
+        case kWrite_Input: writeInput(); break;
+        case kWrite_PadStart: writePadStart(); break;
+        case kWrite_Pad: writePad(); break;
+        case kWrite_CheckSumStart: writeCheckSumStart(); break;
+        case kWrite_CheckSum: writeCheckSum(); break;
+        case kWrite_Finish: WriteState++; break;
+        case kWrite_Done: break;
         }
     }
 done:
     *size = WriteSize;
     *block = (char*)WriteBlock;
-    return 1;
+    return true;
 }
 #endif
 
@@ -1595,14 +1596,14 @@ extern "C" void cReplayFrameList_addFrame(void* list, void* node);
  * (cReplayCache::load). Ends in state 8 (kPlaybackLoad) with Cmd 1.
  *
  * @param buf  the saved replay (On Tour char* data)
- * @return 1 when loaded, 0 when the rider count differs (On Tour returns bool)
+ * @return true when loaded, false when the rider count differs (On Tour returns bool)
  */
-int cReplay::load(char* buf)
+bool cReplay::load(char* buf)
 {
     tReplayManSaveHeader* data = (tReplayManSaveHeader*)buf;
     char** pp = &buf;
     if (data->Players != SSXApp->Game->AI->NumberOfPlayersAllocated) {
-        return 0;
+        return false;
     }
     {
         Loaded = 1;
@@ -1627,7 +1628,7 @@ int cReplay::load(char* buf)
         State = 8;
         Cmd = 1;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1679,11 +1680,11 @@ extern "C" void func_002718E8_impl(int initialize, int priority) __asm__("func_0
  * constructor func_002722C0 calls it.
  *
  * @param initialize  non-zero to construct (0 would destroy; nothing is done then)
- * @param priority  the initialisation priority; only 0xFFFF does anything
+ * @param priority  the initialisation priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_002718E8_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (D_004D33F0) sV4_18E8(1.0f, 1.0f, 1.0f, 0.5f);
         new (D_004D3400) sV4_18E8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (D_004D3410) sV4_18E8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -2297,9 +2298,9 @@ extern "C" float GetCubicSplineValue(float* coef, float t);
  *
  * @param data  the channel's script data (On Tour pScriptData)
  * @param key  the script player entity that owns the channel (On Tour pOwner)
- * @return 1 when there is a next key to reach, otherwise 0
+ * @return true when there is a next key to reach, otherwise false
  */
-int cScriptPlayerChannelSpline::Play(unsigned int* data, int key)
+bool cScriptPlayerChannelSpline::Play(unsigned int* data, int key)
 {
     tInSeqSplineChannelHeader* header = (tInSeqSplineChannelHeader*)data;
     char* body = &header->keyStart;
@@ -2356,12 +2357,12 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Update);
  * value is GetCubicSplineValue (GetCubicSplineValue) at @p currFrameNum minus the current key's start frame.
  *
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
- * @return 1 while the channel runs, 0 once it reached its last key (or has none to reach)
+ * @return true while the channel runs, false once it reached its last key (or has none to reach)
  */
-int cScriptPlayerChannelSpline::Update(float currFrameNum)
+bool cScriptPlayerChannelSpline::Update(float currFrameNum)
 {
     tInSeqSplineChannelKey* n = mpNextKey;
-    if (n == 0) return 0;
+    if (n == 0) return false;
     if ((float)n->frameNum <= currFrameNum) {
         mpCurrKey = n;
         mpCurrKeyCustom = 0;
@@ -2370,7 +2371,7 @@ int cScriptPlayerChannelSpline::Update(float currFrameNum)
         if (((int)mCurrKeyIndex) == mpHeader->numKeys - 1) {
             mpNextKey = 0;
             mCurrKeyValue = GetCubicSplineValue(&mpCurrKey->splineCoef[0], 0.0f);
-            return 0;
+            return false;
         }
         // ORIGINAL-PTR: keys are variable-length records; the next one starts keySize bytes on
         char* curr = (char*)mpCurrKey;
@@ -2378,7 +2379,7 @@ int cScriptPlayerChannelSpline::Update(float currFrameNum)
     }
     tInSeqSplineChannelKey* keyLoc = mpCurrKey;
     mCurrKeyValue = GetCubicSplineValue(&keyLoc->splineCoef[0], currFrameNum - (float)keyLoc->frameNum);
-    return 1;
+    return true;
 }
 #endif
 
@@ -2868,9 +2869,9 @@ extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannel
  * @param data  the channel's script data (On Tour pScriptData): key count, active-key count, keys
  * @param owner  the script player entity that owns the channel (On Tour pOwner)
  * @param flags  the sequence's event bits (On Tour int& events)
- * @return 1 when the channel has keys, otherwise 0
+ * @return true when the channel has keys, otherwise false
  */
-int cScriptPlayerChannelBlock::Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags)
+bool cScriptPlayerChannelBlock::Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags)
 {
     mpData = (const char*)data;
     mpOwner = (cScriptPlayerEntity*)owner;
@@ -2933,9 +2934,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Update);
  *
  * @param flags  the sequence's event bits (On Tour int& events)
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
- * @return 0 when no key is active or pending, otherwise 1
+ * @return false when no key is active or pending, otherwise true
  */
-int cScriptPlayerChannelBlock::Update(int* flags, float currFrameNum)
+bool cScriptPlayerChannelBlock::Update(int* flags, float currFrameNum)
 {
     float zeroF;
     tBlockEntry* prev = 0;
@@ -2966,8 +2967,8 @@ loop:
         }
     } while (0);
     if (mpActiveBlockList == 0 && mpNextKey == 0)
-        return 0;
-    return 1;
+        return false;
+    return true;
 }
 #endif
 
@@ -3154,9 +3155,9 @@ extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannel
  * @param data  the channel's script data (On Tour pScriptData): key count, buffer count, keys
  * @param owner  the script player entity that owns the channel (On Tour pOwner)
  * @param flags  the sequence's event bits (On Tour int& events)
- * @return 1 while a key is still pending, otherwise 0
+ * @return true while a key is still pending, otherwise false
  */
-int cScriptPlayerChannelEvent::Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags)
+bool cScriptPlayerChannelEvent::Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags)
 {
     mpData = (const char*)data;
     mpOwner = (cScriptPlayerEntity*)owner;
@@ -3222,9 +3223,9 @@ extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannel
  *
  * @param flags  the sequence's event bits (On Tour int& events)
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
- * @return 1 while a key is still pending, otherwise 0
+ * @return true while a key is still pending, otherwise false
  */
-int cScriptPlayerChannelEvent::Update(int* flags, float currFrameNum)
+bool cScriptPlayerChannelEvent::Update(int* flags, float currFrameNum)
 {
     if (mEventFrame != currFrameNum) {
         mNumActiveEvents = 0;
@@ -3381,9 +3382,9 @@ extern "C" void cScriptPlayerChannelObject_LoadNextScriptKey(cScriptPlayerChanne
  * @param data  the channel's script data (On Tour pScriptData): key count, active-key count, keys
  * @param owner  the script player entity that owns the channel (On Tour pOwner)
  * @param flags  the sequence's event bits (On Tour int& events)
- * @return 1 when the channel has keys, otherwise 0
+ * @return true when the channel has keys, otherwise false
  */
-int cScriptPlayerChannelObject::Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags)
+bool cScriptPlayerChannelObject::Play(unsigned short* data, cScriptPlayerEntity* owner, int* flags)
 {
     mpData = (const char*)data;
     mpOwner = (cScriptPlayerEntity*)owner;
@@ -3451,9 +3452,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Update);
  * @param flags  the sequence's event bits (On Tour int& events)
  * @param frameDelta  the sequence's current frame (On Tour currFrameNum)
  * @param dt  the frames since the last update (On Tour frameDelta)
- * @return 0 when no key is active or pending, otherwise 1
+ * @return false when no key is active or pending, otherwise true
  */
-int cScriptPlayerChannelObject::Update(int* flags, float frameDelta, float dt)
+bool cScriptPlayerChannelObject::Update(int* flags, float frameDelta, float dt)
 {
     float zeroF;
     tObjectEntry* prev = 0;
@@ -3489,8 +3490,8 @@ loop:
         }
     } while (0);
     if (mpActiveObjectList == 0 && mpNextKey == 0)
-        return 0;
-    return 1;
+        return false;
+    return true;
 }
 #endif
 
@@ -3792,22 +3793,22 @@ int cScriptPlayerEntity::SetupPlay()
             channelData += 4;
             // &mpChannelPlayers[i] in integer form below: the subscript changes retail's register allocation
             switch (channelHeader->type) {
-            case 0: {
+            case kChannelSpline: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
                 *slot = (cScriptPlayerChannel*)cScriptPlayerChannelSpline_cScriptPlayerChannelSpline((cScriptPlayerChannelSpline*)func_00272488_impl(40, heap));
                 break;
             }
-            case 1: {
+            case kChannelObject: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
                 *slot = (cScriptPlayerChannel*)cScriptPlayerChannelObject_cScriptPlayerChannelObject((cScriptPlayerChannelObject*)func_00272488_impl(40, heap));
                 break;
             }
-            case 2: {
+            case kChannelBlock: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
                 *slot = (cScriptPlayerChannel*)cScriptPlayerChannelBlock_cScriptPlayerChannelBlock((cScriptPlayerChannelBlock*)func_00272488_impl(44, heap));
                 break;
             }
-            case 3: {
+            case kChannelEvent: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
                 *slot = (cScriptPlayerChannel*)cScriptPlayerChannelEvent_cScriptPlayerChannelEvent((cScriptPlayerChannelEvent*)func_00272488_impl(40, heap));
                 break;
@@ -3925,24 +3926,24 @@ void cScriptPlayerEntity::Stop()
             objs[i]->Stop();
             switch (((cRcObj_3DC0*)mpChannelPlayers[i])->GetType())
             {
-            case 0:
+            case kChannelSpline:
                 func_002724E8_impl(((cRcObj_3DC0*)mpChannelPlayers[i]));
                 break;
-            case 1:
+            case kChannelObject:
             {
                 cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0*)mpChannelPlayers[i]);
                 if (channelPlayer)
                     channelPlayer->v10(3);
                 break;
             }
-            case 2:
+            case kChannelBlock:
             {
                 cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0*)mpChannelPlayers[i]);
                 if (channelPlayer)
                     channelPlayer->v10(3);
                 break;
             }
-            case 3:
+            case kChannelEvent:
             {
                 cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0*)mpChannelPlayers[i]);
                 if (channelPlayer)
@@ -4785,7 +4786,7 @@ void cScriptPlayerMain::UpdateFrame()
         if (self->mLoopScript != 0)
             target = target % len;
         float ft = (float)target;
-        if (self->mPlayState == 1)
+        if (self->mPlayState == keScriptPlayState_PlayPending)
             cScriptPlayerMain_DoUpdateFrame(self);
         if (ft != self->mCurrFrame)
         {
@@ -5102,8 +5103,8 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
         return;
     }
     cRcListener4DE0* comm = (cRcListener4DE0*)cScriptPlayerMain_GetInSeqCommInterface_p();
-    if (self->mPlayState == 1) {
-        self->mPlayState = 2;
+    if (self->mPlayState == keScriptPlayState_PlayPending) {
+        self->mPlayState = keScriptPlayState_PlayExecuting;
         if (comm != 0) {
             comm->OnInSeqPlay(self);
         }
@@ -5115,7 +5116,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
     float scriptLength = (float)cScriptPlayerMain_GetScriptLength_4DE0(self);
     int hit = 0;
     float rem = 0.0f;
-    if (self->mPlayState == 4 && scriptLength <= self->mCurrFrame) {
+    if (self->mPlayState == keScriptPlayState_PlayEnding && scriptLength <= self->mCurrFrame) {
         cScriptPlayerMain_Stop_4DE0(self);
         return;
     }
@@ -5124,7 +5125,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
         float currFrame = self->mCurrFrame;
         float fullStep = step;
         float lim = currFrame + step;
-        if (self->mPlayState == 4) {
+        if (self->mPlayState == keScriptPlayState_PlayEnding) {
             lim = scriptLength;
         }
         if (scriptLength <= lim) {
@@ -5157,7 +5158,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
             comm->OnInSeqUpdate(self, 0.0f, 0.0f);
         }
     }
-    if (self->mDoStopInEntityUpdate != 0 || self->mPlayState == 4) {
+    if (self->mDoStopInEntityUpdate != 0 || self->mPlayState == keScriptPlayState_PlayEnding) {
         cScriptPlayerMain_Stop_4DE0(self);
         return;
     }
@@ -5326,9 +5327,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_IsPlaying__FPv);
 /**
  * Tells whether the spline channel is playing, from its word at +0x8.
  *
- * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ * @return true if the word at +0x8 is nonzero, otherwise false
  */
-int cScriptPlayerChannelSpline::IsPlaying()
+bool cScriptPlayerChannelSpline::IsPlaying()
 {
     return ((int)mpData != 0);
 }
@@ -5396,9 +5397,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_IsPlaying__FPv);
 /**
  * Tells whether the block channel is playing, from its word at +0x8.
  *
- * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ * @return true if the word at +0x8 is nonzero, otherwise false
  */
-int cScriptPlayerChannelBlock::IsPlaying()
+bool cScriptPlayerChannelBlock::IsPlaying()
 {
     return ((int)mpData != 0);
 }
@@ -5466,9 +5467,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_IsPlaying__FPv);
 /**
  * Tells whether the event channel is playing, from its word at +0x8.
  *
- * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ * @return true if the word at +0x8 is nonzero, otherwise false
  */
-int cScriptPlayerChannelEvent::IsPlaying()
+bool cScriptPlayerChannelEvent::IsPlaying()
 {
     return ((int)mpData != 0);
 }
@@ -5536,9 +5537,9 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_IsPlaying__FPv);
 /**
  * Tells whether the object channel is playing, from its word at +0x8.
  *
- * @return 1 if the word at +0x8 is nonzero, otherwise 0
+ * @return true if the word at +0x8 is nonzero, otherwise false
  */
-int cScriptPlayerChannelObject::IsPlaying()
+bool cScriptPlayerChannelObject::IsPlaying()
 {
     return ((int)mpData != 0);
 }

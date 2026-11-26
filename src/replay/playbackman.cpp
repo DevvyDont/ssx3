@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ealib/hlafile.h"
 #include "be/beinterface.h"
 #include "ai/missionrider.h"
 #include "ai/ai.h"
@@ -58,7 +59,7 @@ extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPl
     self->AI = level;
     self->AsyncFileNum = -1;
     self->MaxPlaybackFiles = maxPlaybackFiles;
-    self->AsyncHandle = -1;
+    self->AsyncHandle = cPlaybackMan::kNoAsyncHandle;
     self->SaveFrame = 0;
     self->SaveFrameData = 0;
     self->CurrentFrame = 0;
@@ -139,13 +140,13 @@ static inline void allocPackData(tPlaybackFile& entry, int size)
 /**
  * Finishes a pending playback-file load by copying the file into the current entry.
  *
- * When the async request (AsyncHandle) has completed (ASYNCFILE_getstatus() == 1), releases it, copies a non-empty
- * result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer and
- * sets the handle to -1. cPlaybackMan_load starts these loads.
+ * When the async request (AsyncHandle) has completed (ASYNCFILE_getstatus() == kASYNCFILE_Done), releases it, copies
+ * a non-empty result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer
+ * and sets the handle to kNoAsyncHandle. cPlaybackMan_load starts these loads.
  */
 void cPlaybackMan::update()
 {
-    if (AsyncHandle >= 0 && ASYNCFILE_getstatus(AsyncHandle) == 1) {
+    if (AsyncHandle >= 0 && ASYNCFILE_getstatus(AsyncHandle) == kASYNCFILE_Done) {
         void* data = 0;
         int size = 0;
         ASYNCFILE_release(AsyncHandle, &data, &size);
@@ -155,7 +156,7 @@ void cPlaybackMan::update()
             MEM_copy(PlaybackFiles[AsyncFileNum].PackData, data, size);
             MEM_free(data);
         }
-        AsyncHandle = -1;
+        AsyncHandle = kNoAsyncHandle;
     }
 }
 #endif
@@ -195,7 +196,7 @@ void cPlaybackMan::initLocation(const char* name)
     strcpy(Location, name);
     SaveFrame = 0;
     AsyncFileNum = -1;
-    AsyncHandle = -1;
+    AsyncHandle = kNoAsyncHandle;
     SaveFrameData = (char*)operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
     SaveFramePtr.clearFrame();
     cReplayFramePtr_setBlock(&SaveFramePtr, ((void*)SaveFrameData), 0);
@@ -229,17 +230,18 @@ extern "C" void ASYNCFILE_cancel(int handle);
 /**
  * Releases everything the current playback location loaded.
  *
- * Cancels the pending async read (+0x78, ASYNCFILE_cancel) and resets the handle to -1; frees each playback file's data
- * and clears its state (table +0x58, count +0x50), then the table; frees the frame buffer (+0x4C); clears +0x10 and
- * deletes the input stream (+0x4); clears +0x70. Called by the destructor and by cWScriptMan_setupMissions.
+ * Cancels the pending async read (+0x78, ASYNCFILE_cancel) and resets the handle to kNoAsyncHandle; frees each playback
+ * file's data and clears its state (table +0x58, count +0x50), then the table; frees the frame buffer (+0x4C); clears
+ * +0x10 and deletes the input stream (+0x4); clears +0x70 (kIdle). Called by the destructor and by
+ * cWScriptMan_setupMissions.
  *
  */
 void cPlaybackMan::purgeLocation()
 {
     cPlaybackMan* self = this;
-    if (self->AsyncHandle != -1) {
+    if (self->AsyncHandle != kNoAsyncHandle) {
         ASYNCFILE_cancel(self->AsyncHandle);
-        self->AsyncHandle = -1;
+        self->AsyncHandle = kNoAsyncHandle;
     }
     if (self->PlaybackFiles != 0) {
         for (int i = 0; i < self->NumPlaybackFiles; i++) {
@@ -280,18 +282,18 @@ extern "C" int cPlaybackMan_findFileById();
  * negative), so a failed load also reports ready. An unknown id gives 0.
  *
  * @param fileId  the playback file id
- * @return 1 when the file is loaded or no load is pending, 0 otherwise
+ * @return true when the file is loaded or no load is pending, false otherwise
  */
-int cPlaybackMan::isLoaded(int fileId)
+bool cPlaybackMan::isLoaded(int fileId)
 {
     int idx = cPlaybackMan_findFileById();
     if (idx >= 0) {
         if ((int)PlaybackFiles[idx].PackData != 0)
-            return 1;
+            return true;
         if (AsyncHandle < 0)
-            return 1;
+            return true;
     }
-    return 0;
+    return false;
 }
 #endif
 //100%
@@ -319,26 +321,26 @@ extern char str_bar_c[];
  * copies the finished file into the entry.
  *
  * @param key  the playback file id
- * @return 1 when loaded or the load started, 0 for an unknown id or a failed start
+ * @return true when loaded or the load started, false for an unknown id or a failed start
  */
-int cPlaybackMan::load(int key)
+bool cPlaybackMan::load(int key)
 {
     char path[0x100];
     int idx = cPlaybackMan_findFileById_C9F0(this, key);
     if (idx >= 0) {
         if (PlaybackFiles[idx].PackData != 0)
-            return 1;
+            return true;
         AsyncFileNum = idx;
-        AsyncHandle = -1;
+        AsyncHandle = kNoAsyncHandle;
         int num = kPlaybackPath;
         sprintf(path, D_004A3414, str_bar_c, num, Location, PlaybackFiles[idx].Id);
         int asyncHandle = ASYNCFILE_load(path, 0x100);
         AsyncHandle = asyncHandle;
         if (asyncHandle >= 0)
-            return 1;
-        AsyncHandle = -1;
+            return true;
+        AsyncHandle = kNoAsyncHandle;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -374,10 +376,10 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_setupPreview);
 #ifdef SKIP_ASM
 extern "C" void SYNCTASK_run(int);
 extern "C" void THREAD_yieldticks(int);
-extern "C" int cPlaybackMan_isLoaded(cPlaybackMan* self, int a1);
-extern "C" int cPlaybackMan_load(cPlaybackMan* self, int a1);
+extern "C" bool cPlaybackMan_isLoaded(cPlaybackMan* self, int a1);
+extern "C" bool cPlaybackMan_load(cPlaybackMan* self, int a1);
 extern "C" int cPlaybackMan_findFileById();
-extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx);
+extern "C" bool cPlaybackMan_setupFile(cPlaybackMan* self, int idx);
 
 /**
  * Loads playback file @p fileId and unpacks it into the current frame, waiting for the load; returns 1 if it holds input.
@@ -388,12 +390,12 @@ extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx);
  * (wscript) calls it before starting a preview.
  *
  * @param fileId  the playback file id
- * @return 1 when the file was unpacked and its recorded input end (current frame +0xC) is above 0, else 0
+ * @return true when the file was unpacked and its recorded input end (current frame +0xC) is above 0, else false
  */
-int cPlaybackMan::setupPreview(int fileId)
+bool cPlaybackMan::setupPreview(int fileId)
 {
     int idx;
-    if (State == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && load(fileId) != 0) {
+    if (State == kIdle && (idx = cPlaybackMan_findFileById()) >= 0 && load(fileId) != 0) {
         while (isLoaded(fileId) == 0) {
             update();
             SYNCTASK_run(0);
@@ -401,10 +403,10 @@ int cPlaybackMan::setupPreview(int fileId)
         }
         if (setupFile(idx) != 0) {
             if (CurrentFrame->Buffer.IndexMax > 0)
-                return 1;
+                return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -530,7 +532,7 @@ void cReplay_setReplayState(void* self, int val);
  */
 void cPlaybackMan::stopPreview()
 {
-    if (State == 1) {
+    if (State == kPreview) {
         cAI_purgeMissionRiders(AI);
         cAI_reinitMissionRiders(AI);
         cReplay* replay = Game->Replay;
@@ -587,19 +589,19 @@ void cPlaybackMan_stopPerform(void* self);
 /**
  * Stops whatever the playback manager is doing.
  *
- * Mode (+0x70) 1 calls cPlaybackMan_stopPreview, mode 2 cPlaybackMan_stopPerform; other modes do nothing. Called by
+ * State kPreview calls cPlaybackMan_stopPreview, kPerform cPlaybackMan_stopPerform; other states do nothing. Called by
  * cPlaybackMan_restart and the mission scripts.
  */
 void cPlaybackMan::stop()
 {
     switch (State) {
-    case 0:
+    case kIdle:
     default:
         break;
-    case 1:
+    case kPreview:
         stopPreview();
         break;
-    case 2:
+    case kPerform:
         stopPerform();
         break;
     }
@@ -615,19 +617,19 @@ extern "C" void cInputPad_update(void* self, int n, float* vals);
 /**
  * Steps the recorded pad input by one frame and says whether the AI should pause.
  *
- * Mode 1 (playback): reads one packed frame from CurrentFrame's input buffer (a count byte, then one byte per value,
+ * kPreview (playback): reads one packed frame from CurrentFrame's input buffer (a count byte, then one byte per value,
  * scaled by 1/255) and feeds it to the playback pad (InputPad) with cInputPad_update (On Tour cInputPad::update).
- * Mode 3 (record): packs the live pad's button values (RealInputPad) into the buffer the same way and feeds the
+ * kRecord: packs the live pad's button values (RealInputPad) into the buffer the same way and feeds the
  * quantised values to the playback pad. cGame_update pauses the AI while it returns nonzero.
  *
- * @return 1 when the buffer is exhausted (mode 1) or full (mode 3), else 0
+ * @return true when the buffer is exhausted (kPreview) or full (kRecord), else false
  */
-// Replay channel step: mode 1 plays back one packed frame of axis values, mode 3 records one.
-// Returns 1 when the buffer is exhausted (or full), 0 otherwise.
-int cPlaybackMan::isPauseAI()
+// Replay channel step: kPreview plays back one packed frame of axis values, kRecord records one.
+// Returns true when the buffer is exhausted (or full), false otherwise.
+bool cPlaybackMan::isPauseAI()
 {
     float vals[24];
-    if (State == 1) {
+    if (State == kPreview) {
         tPlaybackFrame* buf = CurrentFrame;
         if (buf->Buffer.Index < buf->Buffer.IndexMax) {
             unsigned char* cursor = &buf->Buffer.Buffer[buf->Buffer.Index];
@@ -636,11 +638,11 @@ int cPlaybackMan::isPauseAI()
                 vals[i] = *cursor++ * 0.003921568859368563f;
             CurrentFrame->Buffer.Index += 1 + n;
             cInputPad_update(InputPad, n, vals);
-            return 0;
+            return false;
         } else {
-            return 1;
+            return true;
         }
-    } else if (State == 3) {
+    } else if (State == kRecord) {
         tPlaybackFrame* buf = CurrentFrame;
         if (buf->Buffer.Index < buf->Buffer.Size - 0x18) {
             unsigned char* cursor = &buf->Buffer.Buffer[buf->Buffer.Index];
@@ -659,12 +661,12 @@ int cPlaybackMan::isPauseAI()
             CurrentFrame->Buffer.Index += 1 + n;
             CurrentFrame->Buffer.IndexMax += 1 + n;
             cInputPad_update(InputPad, n, vals);
-            return 0;
+            return false;
         } else {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -708,20 +710,20 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * the result is 0.
  *
  * @param idx  the index in the playback file table (PlaybackFiles)
- * @return 1 when the file's data was unpacked, 0 when the frame was reset instead
+ * @return true when the file's data was unpacked, false when the frame was reset instead
  */
-int cPlaybackMan::setupFile(int idx)
+bool cPlaybackMan::setupFile(int idx)
 {
     char* data = PlaybackFiles[idx].PackData;
     if (data != 0) {
         HUFF_decode(data, 0, (int)CurrentFrame);
-        return 1;
+        return true;
     }
     tPlaybackFrame* buf = CurrentFrame;
     MEM_fill(buf, 0, 0x1C22C);
     buf->Version = 0xDBAC0101;
     buf->Buffer.Size = 0x1C200;
-    return 0;
+    return false;
 }
 #endif
 
@@ -813,15 +815,15 @@ INCLUDE_ASM("replay/playbackman", cReplayCache_updateControlCmd);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cReplayCache_addControlCmd(cReplayCache* self, tControlCmd* cmd);
-extern "C" int cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* cmd);
+extern "C" bool cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* cmd);
 /**
  * Records or plays back one frame's control command, depending on the replay state.
  *
  * Returns 0 at once when the cache has no command buffer (+0xC). In kGameRecording the command is appended with
- * cReplayCache_addControlCmd, unless the replay has EndReplay, Loaded or ReplayError set; in states 10, 11, 12 and 14 nothing
- * happens and the result is 0. In kGamePlayback, kInstantPlayback and kPlaybackStep the command is replaced by the next
- * recorded one (cReplayCache_getControlCmd). Every other state leaves it and returns 1. cPlayer_getControlCmd calls it each frame
- * when a replay recorder is attached.
+ * cReplayCache_addControlCmd, unless the replay has EndReplay, Loaded or ReplayError set; in kPreRace, kStartRace,
+ * kStartRace1 and kReplayPaused nothing happens and the result is 0. In kGamePlayback, kInstantPlayback and
+ * kPlaybackStep the command is replaced by the next recorded one (cReplayCache_getControlCmd). Every other state leaves
+ * it and returns 1. cPlayer_getControlCmd calls it each frame when a replay recorder is attached.
  *
  * @param controlCmd  the 8-byte control command: read when recording, overwritten during playback
  * @return 0 when recording or idle, cReplayCache_getControlCmd's result during playback, 1 in the other states
@@ -833,7 +835,7 @@ int cReplayCache::updateControlCmd(tControlCmd* controlCmd)
     }
     int result = 1;
     switch (SSXApp->Game->Replay->State) {
-    case 0: {
+    case kGameRecording: {
         cReplay* replay = SSXApp->Game->Replay;
         if (replay->EndReplay != 0 || replay->Loaded != 0 || replay->ReplayError != 0) {
             break;
@@ -841,13 +843,14 @@ int cReplayCache::updateControlCmd(tControlCmd* controlCmd)
         addControlCmd(controlCmd);
     }
         /* fall through */
-    case 10: case 11: case 12: case 14:
+    case kPreRace: case kStartRace: case kStartRace1: case kReplayPaused:
         result = 0;
         break;
-    case 1: case 2: case 4:
+    case kGamePlayback: case kInstantPlayback: case kPlaybackStep:
         result = cReplayCache_getControlCmd(this, controlCmd);
         break;
-    case 3: case 5: case 6: case 7: case 8: case 9: case 13:
+    case kPlaybackInput: case kPlaybackUpdate: case kPlaybackStepUpdate: case kPlaybackStart: case kPlaybackLoad:
+    case kStartAutoReplay: case kReplayEnd:
         break;
     }
     return result;
@@ -969,13 +972,13 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * down, moving to the next chunk at 0.
  *
  * @param out  receives the command
- * @return 1 when a command was read, 0 past the end
+ * @return true when a command was read, false past the end
  */
-extern "C" int cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* out)
+extern "C" bool cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* out)
 {
     MEM_fill(out, 0, 8);
     if (self->PlaybackCursor >= self->RecordCursor) {
-        return 0;
+        return false;
     }
     if (self->PlaybackLeft <= 0) {
         self->PlaybackLeft = self->CmdFrame[self->PlaybackCursor].CruiseCmd.Count;
@@ -984,7 +987,7 @@ extern "C" int cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* out)
     if (--self->PlaybackLeft <= 0) {
         self->PlaybackCursor++;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1011,9 +1014,9 @@ struct sPlaybackStream {
  * cReplay_rewindFrame, cReplay_lastFrame and cReplay_stepFrame call it for each InputCache with PlaybackTick.
  *
  * @param pos  the tick to move to
- * @return 1 on success, 0 when the tick lies past the recorded input
+ * @return true on success, false when the tick lies past the recorded input
  */
-int cReplayCache::moveTo(unsigned int pos)
+bool cReplayCache::moveTo(unsigned int pos)
 {
     int i = 0;
     sPlaybackChunk* chunk = (sPlaybackChunk*)CmdFrame;
@@ -1025,11 +1028,11 @@ int cReplayCache::moveTo(unsigned int pos)
         }
     }
     if (i >= RecordCursor) {
-        return 0;
+        return false;
     }
     PlaybackCursor = i;
     PlaybackLeft = total - pos;
-    return 1;
+    return true;
 }
 #endif
 

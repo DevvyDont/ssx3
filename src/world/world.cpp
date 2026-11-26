@@ -227,11 +227,11 @@ extern char str_sdb[];
 /**
  * Checks which of @p n section names exist in a track's .sdb section table.
  *
- * Loads the file named str_bar_e + @p path + str_sdb with FILE_loadz. When it loaded and its cookie's first halfword
- * is 0x3800, each name is upper-cased and compared (strcmp) with the m_uiNumSections section records (tBxSection,
- * after the 0x50-byte tStreamDataHeader); a found name gets its flag set (names[i].bFound = 1, else 0). The file is
- * freed afterwards. When the file is missing or has the wrong cookie the flags are left untouched. Called by
- * cTrackFileMan_scanLocations' helpers (cTrackFileMan_checkLocation, cTrackFileMan_checkLocation1).
+ * Loads the file named str_bar_e + @p path + str_sdb with FILE_loadz. When it loaded and its cookie's first halfword is
+ * tStreamDataHeader::kCookie (0x3800), each name is upper-cased and compared (strcmp) with the m_uiNumSections section
+ * records (tBxSection, after the 0x50-byte tStreamDataHeader); a found name gets its flag set (names[i].bFound = 1,
+ * else 0). The file is freed afterwards. When the file is missing or has the wrong cookie the flags are left untouched.
+ * Called by cTrackFileMan_scanLocations' helpers (cTrackFileMan_checkLocation, cTrackFileMan_checkLocation1).
  *
  * @param path  the track's base name
  * @param n  how many names to check
@@ -256,7 +256,7 @@ extern "C" int isValidMap(const char* path, int n, tWorldSectionScan* names)
         cBXString__cBXString(prefixed, 2);
         cBXString__cBXString(&str, 2);
     }
-    ret = data && *(unsigned short*)data->m_cCookie == 0x3800;
+    ret = data && *(unsigned short*)data->m_cCookie == tStreamDataHeader::kCookie;
     if (ret)
     {
         int i;

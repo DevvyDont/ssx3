@@ -98,7 +98,7 @@ struct cUIListBox : public cUIThing {
     void deleteAllEntries() __asm__("cUIListBox_deleteAllEntries");
     int getCurrentAsciiText() __asm__("cUIListBox_getCurrentAsciiText");
     int getCurrentEntryData() __asm__("cUIListBox_getCurrentEntryData");
-    int getEntryByData(int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
+    bool getEntryByData(int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
     void setCurrentEntryByIndex(int Index) __asm__("cUIListBox_setCurrentEntryByIndex");
     void setEntryDataByIndex(int Index, int value) __asm__("cUIListBox_setEntryDataByIndex");
     void setCallbackListBox(int count) __asm__("cUIListBox_setCallbackListBox");

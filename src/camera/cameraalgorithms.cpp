@@ -4,6 +4,7 @@
 #include "bx/math3d.h"
 #include "vtable.h"
 #include "camera/trigger/cameratriggerman.h"
+#include "camera/trigger/cameratriggervolumes.h"
 #include "camera/camera.h"
 #include "camera/race/racecontroller.h"
 #include "main/game.h"
@@ -56,11 +57,10 @@ static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
 /**
  * Creates the chase-camera algorithm for a camera type, aims it at the controller's target and blends it in.
  *
- * Types include idle, mid left and right, manual, lazy, look back, matrix, eight "Direction N" and
- * relative-angle
- * cameras, superpipe (91, falling back to a bounded camera), spline (92) and post-race; most others use
- * DEFAULT_3.
- * Type 67 and unlisted types leave no algorithm and then call through a null pointer.
+ * Types include idle, mid left and right, manual, lazy, look back, matrix, eight "Direction N" and relative-angle
+ * cameras, CAMERA_ALGORITHM_TRIGGER_BOUNDED (a superpipe camera along an eCTBoundObjLine target, else a bounded
+ * camera), CAMERA_ALGORITHM_TRIGGER_SPLINE and post-race; most others use DEFAULT_3. CAMERA_ALGORITHM_CHASE_SUPERPIPE
+ * and unlisted types leave no algorithm and then call through a null pointer.
  *
  * @param kind  the camera algorithm type (On Tour eCamAlgoType type)
  * @param ctx  the camera action that asked for it (On Tour cCTAction* action)
@@ -75,11 +75,11 @@ void cChaseCameraController::createChaseAlgorithmBlend(int kind, char* ctx, floa
         blendRate = 1.0f;
     }
     switch (kind) {
-    case 91: {
+    case CAMERA_ALGORITHM_TRIGGER_BOUNDED: {
         int n = *(int*)SSXApp->Game->Replay;
         if (!camNetActive_D0A0(n)) {
             char* target = *(char**)(ctx + 8);
-            if (*(int*)(target + 0x28) == 2) {
+            if (*(int*)(target + 0x28) == eCTBoundObjLine) {
                 void* mem = cMemMan_alloc(944, str_SUPERPIPE_Chase_Camera_Algorithm, 0x20000000, 0);
                 t4Vector lineStart;
                 cCTBoundObjLine_worldPoint1(&lineStart, target);
@@ -93,7 +93,7 @@ void cChaseCameraController::createChaseAlgorithmBlend(int kind, char* ctx, floa
         *(char**)((char*)algo + 0x80) = ctx;
         break;
     }
-    case 92: {
+    case CAMERA_ALGORITHM_TRIGGER_SPLINE: {
         char* target = *(char**)(ctx + 8);
         void* mem = cMemMan_alloc(976, D_0045B298, 0x20000000, 0);
         t4Vector point1;
@@ -108,93 +108,135 @@ void cChaseCameraController::createChaseAlgorithmBlend(int kind, char* ctx, floa
                           *(float*)(ctx + 0x18), *(float*)(ctx + 0x14), *(float*)(ctx + 0x1C), *(float*)(ctx + 0x10));
         break;
     }
-    case 7:
+    case CAMERA_ALGORITHM_CHASE_IDLE:
         algo = cIdleChaseAlgorithm_cIdleChaseAlgorithm(cMemMan_alloc(912, str_Idle_Chase_Camera_Algorithm, 0x20000000, 0));
         break;
-    case 9:
+    case CAMERA_ALGORITHM_CHASE_MID_RIGHT:
         algo = cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(cMemMan_alloc(912, D_0045B348, 0x20000000, 0));
         break;
-    case 10:
+    case CAMERA_ALGORITHM_CHASE_MID_LEFT:
         algo = cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm(cMemMan_alloc(912, D_0045B370, 0x20000000, 0));
         break;
-    case 11:
+    case CAMERA_ALGORITHM_CHASE_MANUAL:
         algo = cManualChaseAlgorithm_cManualChaseAlgorithm(cMemMan_alloc(912, D_0045B390, 0x20000000, 0));
         break;
-    case 13:
+    case CAMERA_ALGORITHM_CHASE_LAZY:
         algo = cLazyChaseAlgorithm_cLazyChaseAlgorithm(cMemMan_alloc(912, str_Lazy_Chase_Camera_Algorithm, 0x20000000, 0));
         break;
-    case 18:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_N:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B3D0, 0x20000000, 0), 0);
         break;
-    case 19:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_NW:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B3F8, 0x20000000, 0), 1);
         break;
-    case 20:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_W:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B420, 0x20000000, 0), 2);
         break;
-    case 21:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_SW:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B448, 0x20000000, 0), 3);
         break;
-    case 22:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_S:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B470, 0x20000000, 0), 4);
         break;
-    case 23:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_SE:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B498, 0x20000000, 0), 5);
         break;
-    case 24:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_E:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, D_0045B4C0, 0x20000000, 0), 6);
         break;
-    case 25:
+    case CAMERA_ALGORITHM_CHASE_DIRECTION_NE:
         algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(928, str_Direction_NE_Chase_Camera_Algorithm, 0x20000000, 0), 7);
         break;
-    case 32:
+    case CAMERA_ALGORITHM_CHASE_LOOKBACK:
         algo = cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(cMemMan_alloc(912, D_0045B510, 0x20000000, 0));
         break;
-    case 41:
+    case CAMERA_ALGORITHM_CHASE_MATRIX:
         algo = cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMemMan_alloc(928, D_0045B538, 0x20000000, 0));
         break;
-    case 33: case 34: case 35: case 36: case 37: case 38: case 39: case 40: {
-        float angle = (float)(kind - 33) * 0.7853982f;
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_FRONT:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_FRONT_LEFT:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_LEFT:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_REAR_LEFT:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_REAR:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_REAR_RIGHT:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_RIGHT:
+    case CAMERA_ALGORITHM_CHASE_RELATIVE_FRONT_RIGHT: {
+        float angle = (float)(kind - CAMERA_ALGORITHM_CHASE_RELATIVE_FRONT) * 0.7853982f;
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), angle);
         *(int*)((char*)algo + 0xC) = kind;
         break;
     }
-    case 2: case 60:
+    case CAMERA_ALGORITHM_CHASE_NEAR: case CAMERA_ALGORITHM_CHASE_DEFAULT_2:
         algo = cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cMemMan_alloc(912, D_0045B2D8, 0x20000000, 0));
         break;
-    case 1: case 62:
+    case CAMERA_ALGORITHM_CHASE_FAR: case CAMERA_ALGORITHM_CHASE_DEFAULT_4:
         algo = cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cMemMan_alloc(912, str_DEFAULT_4_Chase_Camera_Algorithm, 0x20000000, 0));
         break;
-    case 0: case 3: case 4: case 5: case 6: case 8: case 12: case 14: case 15: case 16: case 17:
-    case 26: case 27: case 28: case 29: case 30: case 31:
-    case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
-    case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59:
-    case 61: case 63: case 64: case 65: case 74:
+    case CAMERA_ALGORITHM_CHASE_MID:
+    case CAMERA_ALGORITHM_CHASE_FIRST_PERSON:
+    case CAMERA_ALGORITHM_CHASE_HALFPIPE:
+    case CAMERA_ALGORITHM_CHASE_TIGHT:
+    case CAMERA_ALGORITHM_CHASE_SLOPE_STYLE:
+    case CAMERA_ALGORITHM_CHASE_TRICKY:
+    case CAMERA_ALGORITHM_CHASE_MID_FOV:
+    case CAMERA_ALGORITHM_CHASE_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_VERY_FAR:
+    case CAMERA_ALGORITHM_CHASE_BOOT_LEFT:
+    case CAMERA_ALGORITHM_CHASE_BOOT_RIGHT:
+    case CAMERA_ALGORITHM_CHASE_PAUL_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_LARRY_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_DYNAMIC_LARRY_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_DYNAMIC_PAUL_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_DYNAMIC_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_HIGH_STUBBORN:
+    case CAMERA_ALGORITHM_CHASE_ARA1:
+    case CAMERA_ALGORITHM_CHASE_ASS1:
+    case CAMERA_ALGORITHM_CHASE_ABA1:
+    case CAMERA_ALGORITHM_CHASE_ABC1:
+    case CAMERA_ALGORITHM_CHASE_BRA2:
+    case CAMERA_ALGORITHM_CHASE_BHP1:
+    case CAMERA_ALGORITHM_CHASE_CRA3:
+    case CAMERA_ALGORITHM_CHASE_CHP2:
+    case CAMERA_ALGORITHM_CHASE_CBA2:
+    case CAMERA_ALGORITHM_CHASE_DRA4:
+    case CAMERA_ALGORITHM_CHASE_DBC2:
+    case CAMERA_ALGORITHM_CHASE_DSS2:
+    case CAMERA_ALGORITHM_CHASE_ERA5:
+    case CAMERA_ALGORITHM_CHASE_ESS3:
+    case CAMERA_ALGORITHM_CHASE_EBA3:
+    case CAMERA_ALGORITHM_CHASE_EHP3:
+    case CAMERA_ALGORITHM_CHASE_EBC3:
+    case CAMERA_ALGORITHM_CHASE_DEFAULT_1:
+    case CAMERA_ALGORITHM_CHASE_DEFAULT_3:
+    case CAMERA_ALGORITHM_CHASE_DEFAULT_5:
+    case CAMERA_ALGORITHM_CHASE_SAFE_LOW:
+    case CAMERA_ALGORITHM_CHASE_SAFE_HIGH:
+    case CAMERA_ALGORITHM_CHASE_REPLAY:
         algo = cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cMemMan_alloc(912, D_0045B2B0, 0x20000000, 0));
         break;
-    case 66:
+    case CAMERA_ALGORITHM_CHASE_SPOKE:
         algo = cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cMemMan_alloc(928, D_0045B578, 0x20000000, 0));
         break;
-    case 67:
+    case CAMERA_ALGORITHM_CHASE_SUPERPIPE:
         algo = 0;
         break;
-    case 68:
+    case CAMERA_ALGORITHM_CHASE_POST_RACE_1:
         algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(944,
                 str_POST_RACE_1_Chase_Camera_Algorithm, 0x20000000, 0), Target);
         break;
-    case 94:
+    case CAMERA_ALGORITHM_REPLAY_FRONT_RIGHT:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
         *(int*)((char*)algo + 0xC) = kind;
         break;
-    case 95:
+    case CAMERA_ALGORITHM_REPLAY_FRONT_LEFT:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 0.3926991f);
         *(int*)((char*)algo + 0xC) = kind;
         break;
-    case 96:
+    case CAMERA_ALGORITHM_REPLAY_REAR_RIGHT:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -2.3561945f);
         *(int*)((char*)algo + 0xC) = kind;
         break;
-    case 97:
+    case CAMERA_ALGORITHM_REPLAY_REAR_LEFT:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 2.3561945f);
         *(int*)((char*)algo + 0xC) = kind;
         break;

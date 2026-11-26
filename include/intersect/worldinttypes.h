@@ -21,6 +21,11 @@ struct tIntersectInfo;
 struct tPatchRecord;
 struct t3Vector;
 
+// cWorldIntersectType::mPrecision. [O] On Tour's enum tIntPrecision, names and values; [U] the cWorldSphTree ctor
+// stores Low or Med, cBXNash_getGroundHeight builds its line with High; cWorldIntersectType_IsPatchInt walks the coarse
+// cells for Low and refines a High hit's uv (virtual slot 8).
+enum tIntPrecision { kIntPrecision_Low = 0, kIntPrecision_Med = 1, kIntPrecision_High = 2 };
+
 struct cWorldIntersectType {
     int mPrecision;                 // 0x000 [O] tIntPrecision; [R] cWorldSphTree ctor: 0 when isLow, else 1
     int isTransformed;              // 0x004 [O] bool (retail word); [P] assert !isTransformed; [U] Transform 1,

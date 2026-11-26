@@ -102,17 +102,17 @@ struct SphereTree {
         __asm__("SphereTree_IsSphereCollision");
     int IsBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, t4Vector* outNormal)
         __asm__("SphereTree_IsBoxCollision");
-    int IsTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* uNorm, t4Vector* overlap,
+    bool IsTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* uNorm, t4Vector* overlap,
                        t4Vector* loc)
         __asm__("SphereTree_IsTriCollision");
     int IsTreeCollision(SphereTree* other, t4Vector* outPush, t4Vector* outContact)
         __asm__("SphereTree_IsTreeCollision");
-    int isTreeCollision(SphereTree* other, t4Vector* posp, int depth, int base, t4Vector* outPush, t4Vector* outContact)
-        __asm__("SphereTree_isTreeCollision");
-    int isSphereCollision(t4Vector* spherePos, float sphereRadius, t4Vector* pos, int depth, int base, t4Vector* outA,
+    bool isTreeCollision(SphereTree* other, t4Vector* posp, int depth, int base, t4Vector* outPush,
+                         t4Vector* outContact) __asm__("SphereTree_isTreeCollision");
+    bool isSphereCollision(t4Vector* spherePos, float sphereRadius, t4Vector* pos, int depth, int base, t4Vector* outA,
                           t4Vector* outB)
         __asm__("SphereTree_isSphereCollision");
-    int isBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* pos, int depth, int base, t4Vector* outPos,
+    bool isBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* pos, int depth, int base, t4Vector* outPos,
                        t4Vector* outNormal)
         __asm__("SphereTree_isBoxCollision");
     void checkPlaneCollision(void* plane, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB)

@@ -287,18 +287,19 @@ extern "C" void cManualCameraController_addAlgorithm(cManualCameraController* se
 /**
  * Switches the manual camera controller to its editor or its manual algorithm.
  *
- * Type 0x50 selects the editor algorithm (+0x1C) and 0x51 the manual one (+0x18); other types are ignored.
+ * CAMERA_ALGORITHM_EDITOR (80) selects the editor algorithm (+0x1C) and CAMERA_ALGORITHM_MANUAL (81) the manual one
+ * (+0x18); other types are ignored.
  * cManualCameraController_addAlgorithm empties the algorithm list and inserts the chosen algorithm at weight 1.0.
  *
- * @param msg  the eCamAlgoType to select (On Tour type): 0x50 editor, 0x51 manual
+ * @param msg  the eCamAlgoType to select (On Tour type): CAMERA_ALGORITHM_EDITOR or CAMERA_ALGORITHM_MANUAL
  */
 void cManualCameraController::setCurrentAlgorithmType(int msg)
 {
     switch (msg) {
-    case 80:
+    case CAMERA_ALGORITHM_EDITOR:
         addAlgorithm((int)EditorAlgo, 0);
         break;
-    case 81:
+    case CAMERA_ALGORITHM_MANUAL:
         addAlgorithm((int)ManualAlgo, 0);
         break;
     }
@@ -337,9 +338,10 @@ void cManualCameraController::update()
 INCLUDE_ASM("camera/cameracontroller", cChaseCameraController_shouldDoExtraGroundTest);
 #ifdef SKIP_ASM
 /**
- * Returns whether the chase camera is in a replay camera other than types 93 (0x5D) and 60 (0x3C).
+ * Returns whether the chase camera is in a replay camera other than CAMERA_ALGORITHM_WEBCAM (93) and
+ * CAMERA_ALGORITHM_CHASE_DEFAULT_2 (60).
  *
- * True when CamSwitchRecord.IsInReplay is set and CamSwitchRecord.LatestReplayType is neither 93 nor 60.
+ * True when CamSwitchRecord.IsInReplay is set and CamSwitchRecord.LatestReplayType is neither of them.
  *
  * @return 1 or 0
  */
@@ -348,8 +350,8 @@ int cChaseCameraController::shouldDoExtraGroundTest()
     int replayCamActive = 0;
     if (CamSwitchRecord.IsInReplay) {
         int replayType = CamSwitchRecord.LatestReplayType;
-        if (replayType != 93) {
-            replayCamActive = replayType != 0x3C;
+        if (replayType != CAMERA_ALGORITHM_WEBCAM) {
+            replayCamActive = replayType != CAMERA_ALGORITHM_CHASE_DEFAULT_2;
         }
     }
     return replayCamActive;

@@ -206,7 +206,7 @@ extern "C" char cUIText_getNumTextLines_(void* vself)
         if (curChar == gUSTRBackSlash && next == curChar) {
             cursor += 2;
             n++;
-        } else if (curChar == 13) {
+        } else if (curChar == '\r') {
             cursor++;
             n++;
         } else {
@@ -346,7 +346,7 @@ void cUIText::setUnicodeStringWrap(unsigned short* str)
             i += 2;
         } else {
             w += cFont_charAdvance1(font, buf[i]) * mScale.x;
-            if (buf[i] == 0x20) {
+            if (buf[i] == ' ') {
                 last = i;
             }
             if (w > mSize.x && last >= 0) {
@@ -433,7 +433,7 @@ void cUIText::setUnicodeStringPrivate(const unsigned short* str)
                     *cursor = 0;
                     cursor += 2;
                     lines[k++] = cursor;
-                } else if (curChar == 13) {
+                } else if (curChar == '\r') {
                     *cursor = 0;
                     cursor++;
                     lines[k++] = cursor;
@@ -721,18 +721,18 @@ static inline int pressed13E0(char* input, int key)
  * Scrolls the text, or moves the selection in a selectable list (mMode), on the keys in mInputMap.
  *
  * Rows that fit = mSize.y / (line height + 3). Selection mode: up / down (mInputMap[0] / [1], getState) move
- * mSelectedIndex within the lines and return 1; with neither key, mLinesOffset is moved to keep the selection in view
- * (0 is returned). Plain mode: up / down move mLinesOffset within 0 .. lines - rows and return 1. Nothing happens
- * without a font.
+ * mSelectedIndex within the lines and return true; with neither key, mLinesOffset is moved to keep the selection in
+ * view (false is returned). Plain mode: up / down move mLinesOffset within 0 .. lines - rows and return true. Nothing
+ * happens without a font.
  *
  * @param input  the input (On Tour const cUIInput* pInput)
- * @return 1 when a key was used, else 0 (On Tour returns bool)
+ * @return true when a key was used, else false (On Tour returns bool)
  */
-int cUITextScroll::onInput(cUIInput* input)
+bool cUITextScroll::onInput(cUIInput* input)
 {
     cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)this);
     if (font == 0) {
-        return 0;
+        return false;
     }
     signed char rows = (int)(mSize.y / (mScale.y * ((float)font->MaxCharHeight * font->BaseScale[1]) + 3.0f));
     if ((*(unsigned int*)&mAttrTextScroll) & 1) {
@@ -740,13 +740,13 @@ int cUITextScroll::onInput(cUIInput* input)
             if (mSelectedIndex != 0) {
                 mSelectedIndex--;
             }
-            return 1;
+            return true;
         }
         if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[1])) != 0) {
             if (mSelectedIndex < mLineSize - 1) {
                 mSelectedIndex++;
             }
-            return 1;
+            return true;
         }
         short rowOffset = mSelectedIndex - mLinesOffset;
         if (rowOffset < 0) {
@@ -759,17 +759,17 @@ int cUITextScroll::onInput(cUIInput* input)
             if (mLinesOffset != 0) {
                 mLinesOffset--;
             }
-            return 1;
+            return true;
         }
         if (pressed13E0(((char*)input), (*(signed char*)&mInputMap[1])) == 0) {
-            return 0;
+            return false;
         }
         if (mLinesOffset < mLineSize - rows) {
             mLinesOffset++;
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -964,14 +964,14 @@ void cUITextScroll::addAsciiString(char* str)
     int start = 0;
     func_002C2540(buf, str);
     while (i < len) {
-        if (buf[i] == 92 && buf[i + 1] == buf[i]) {
+        if (buf[i] == '\\' && buf[i + 1] == buf[i]) {
             buf[i] = 0;
             i += 2;
             addUnicodeString(&buf[start]);
             last = -1;
             w = 0.0f;
             start = i;
-        } else if (buf[i] == 13) {
+        } else if (buf[i] == '\r') {
             buf[i] = 0;
             i += 1;
             addUnicodeString(&buf[start]);
@@ -980,7 +980,7 @@ void cUITextScroll::addAsciiString(char* str)
             start = i;
         } else {
             w += cFont_charAdvance1(font, buf[i]) * mScale.x;
-            if (buf[i] == 0x20) {
+            if (buf[i] == ' ') {
                 last = i;
             }
             if (w > mSize.x) {
@@ -1104,7 +1104,7 @@ void cUITextScroll::addUnicodeStringWrap(void* vstr)
     int start = 0;
     USTR_copy(buf, str);
     while (i < len) {
-        if (buf[i] == 92 && buf[i + 1] == buf[i]) {
+        if (buf[i] == '\\' && buf[i + 1] == buf[i]) {
             buf[i] = 0;
             i += 2;
             addUnicodeString(&buf[start]);
@@ -1113,7 +1113,7 @@ void cUITextScroll::addUnicodeStringWrap(void* vstr)
             start = i;
         } else {
             w += cFont_charAdvance1(font, buf[i]) * mScale.x;
-            if (buf[i] == 0x20) {
+            if (buf[i] == ' ') {
                 last = i;
             }
             if (w > mSize.x) {

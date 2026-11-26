@@ -37,7 +37,7 @@ void cAIFwdDiffCache::Init(int n)
     for (int i = 0; i < n; i++) {
         mCache[i].mNext = &mCache[i] + 1;
         mCache[i].mPrev = &mCache[i] - 1;
-        mCache[i].mKey = 0xFFFFFFFF;
+        mCache[i].mKey = tAIFwdDiff::kUnusedKey;
     }
     mCache[0].mPrev = (mCache) + n - 1;
     mCache[n - 1].mNext = (mCache);
@@ -145,15 +145,15 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFw
 /**
  * Removes an AI forward-difference cache node from the patch hash table.
  *
- * Does nothing for an unused node (key 0xFFFFFFFF). Otherwise walks the node's bucket (key modulo mHashSize; the
- * chain is sorted by key, so the walk stops at a larger key) and unlinks the entry with the node's key.
+ * Does nothing for an unused node (key tAIFwdDiff::kUnusedKey). Otherwise walks the node's bucket (key modulo
+ * mHashSize; the chain is sorted by key, so the walk stops at a larger key) and unlinks the entry with the node's key.
  *
  * @param node  the node (On Tour node)
  */
 extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFwdDiff* node)
 {
     unsigned int key = node->mKey;
-    if (key == 0xFFFFFFFF)
+    if (key == tAIFwdDiff::kUnusedKey)
         return;
     tAIFwdDiff** link = &self->mPatchHash[key % self->mHashSize];
     if (*link == 0)
@@ -358,17 +358,17 @@ extern "C" int SphereTree_isSphereCollision(void* self, void* pos, void* out, in
  * Tests a sphere tree against a rider's spheres.
  *
  * Makes sure the tree's data buffer is loaded (SphereTree_AllocBuf when the info word +0x8 is set; the buffer goes to
- * info +0x28), then tests the rider's bounding sphere (+0x10, radius +0x20) with SphereTree_isSphereCollision from the root (centre
- * +0x80). A miss returns 0. A hit returns 1 when the rider has no sphere list (+0x2C = 0); otherwise each listed sphere
- * (from +0x30, 0x20 bytes each) is tested and the first hit returns 1. The push-out and contact outputs are filled by
- * SphereTree_isSphereCollision. Called by cWorldRider_IsSphTreeInt.
+ * info +0x28), then tests the rider's bounding sphere (+0x10, radius +0x20) with SphereTree_isSphereCollision from the
+ * root (centre +0x80). A miss returns false. A hit returns true when the rider has no sphere list (+0x2C = 0);
+ * otherwise each listed sphere (from +0x30, 0x20 bytes each) is tested and the first hit returns true. The push-out and
+ * contact outputs are filled by SphereTree_isSphereCollision. Called by cWorldRider_IsSphTreeInt.
  *
  * @param shape  the rider's sphere tree (On Tour const cRiderSphereTree*)
  * @param outPush  out: how far to push apart (On Tour overlap)
  * @param outContact  out: the contact point (On Tour loc)
- * @return 1 on contact, else 0
+ * @return true on contact, else false
  */
-int bxSphereTree::IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int outContact)
+bool bxSphereTree::IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int outContact)
 {
     tSphTreeInfo* tree = treeInfo;
     if (tree->isCompressed != 0) {
@@ -376,18 +376,18 @@ int bxSphereTree::IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int
     }
     if (SphereTree_isSphereCollision(this, ((float*)&shape->boundCen), &transCenter, 0, 0, outPush, outContact,
             shape->boundRad) == 0) {
-        return 0;
+        return false;
     }
     if (shape->listLen == 0) {
-        return 1;
+        return true;
     }
     for (int i = 0; i < shape->listLen; i++) {
         if (SphereTree_isSphereCollision(this, ((float*)&((&shape->sphList[0]))[i].cen), &transCenter, 0, 0, outPush,
                 outContact, ((&shape->sphList[0]))[i].rad) != 0) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1130,9 +1130,10 @@ static inline t4Vector vu0Scale_29590(const t4Vector& v, float s)
  * @param hp  out: the contact point (On Tour ipos)
  * @param nrm  out: the face normal (On Tour inorm)
  * @param outDist  out: the depth, 1e30 when there is none (On Tour param)
- * @return 1 when a face was found, else 0
+ * @return true when a face was found, else false
  */
-extern "C" int gIsBoxSphereInt(float margin, t4Vector* mn, t4Vector* mx, t4Vector* point, t4Vector* hp, t4Vector* nrm, float* outDist)
+extern "C" bool gIsBoxSphereInt(float margin, t4Vector* mn, t4Vector* mx, t4Vector* point, t4Vector* hp, t4Vector* nrm,
+        float* outDist)
 {
     *outDist = 1e30f;
     if (mn->y <= point->y && point->y <= mx->y && point->z >= mn->z && point->z <= mx->z) {

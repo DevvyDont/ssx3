@@ -133,7 +133,7 @@ struct cAnimTeeterNode {
     // Methods bound to their retail symbols by asm labels.
     void* cAnimTeeterNode1(int bucket, tInstanceRecord* obj, tMakeAnimTeeterData* def)
         __asm__("cAnimTeeterNode_cAnimTeeterNode1");
-    int updateNode() __asm__("cAnimTeeterNode_updateNode");
+    bool updateNode() __asm__("cAnimTeeterNode_updateNode");
     float getAnimSpeed() __asm__("cAnimTeeterNode_getAnimSpeed");
     void applyForce(tIntersectInfo* intInfo, t4Vector* force) __asm__("cAnimTeeterNode_applyForce");
     void writeToReplayFrame(void* stream) __asm__("cAnimTeeterNode_writeToReplayFrame");

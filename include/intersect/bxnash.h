@@ -43,6 +43,11 @@ CHECK_OFFSET(nash_CellKey, level, 0x000);
 CHECK_OFFSET(nash_CellKey, x, 0x004);
 CHECK_OFFSET(nash_CellKey, y, 0x008);
 CHECK_OFFSET(nash_CellKey, z, 0x00C);
+
+// How a cell lies against a query (nash::ProximityResult). [O] On Tour's enum ProximityResult in namespace nash:
+// inside 0, outside 1, crossing 2; [U] nash_CellKey_proximitytest and the query helpers' classifiers answer 1 when the
+// query misses the cell and 2 when it touches it, and nash_privy_QueryHelper_help walks a cell whole for 0.
+enum nash_ProximityResult { kNash_Inside = 0, kNash_Outside = 1, kNash_Crossing = 2 };
 CHECK_SIZE(nash_CellKey, 0x10);
 
 // nash::Node (On Tour class Node, 0x8): the intrusive list link a filed object starts with (an instance record, a

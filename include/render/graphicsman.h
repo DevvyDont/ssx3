@@ -40,6 +40,8 @@ struct tMdfBlendedMatrix {
 
 // [O] sTextureState: one texture id per GS context (On Tour's PSP build has 1); -1 = none.
 struct sTextureState {
+    // No texture (name ours): [R] the ctor fills m_texid with it; [U] InitVertex scales colours for an untextured draw.
+    enum { kNoTexture = -1 };
     short m_texid[2];               // 0x0 [O]; [R] ctor fills -1; [X] texture ids for context 1/2
 };
 

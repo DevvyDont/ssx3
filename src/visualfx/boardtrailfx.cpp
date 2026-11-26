@@ -2,6 +2,7 @@
 #include "render/graphicsman.h"
 #include "animation/animsequencer.h"
 #include "ai/rider.h"
+#include "animation/rideranimbase.h"
 #include "vtable.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
@@ -231,20 +232,20 @@ static inline int boardTrailCanDraw_86F0(char* vvr)
 /**
  * Returns whether the board trail takes a new sample this frame, and if so remembers the rider's ground contact point.
  *
- * While the delay (+0xE0) is positive it counts it down and returns 0. Otherwise the trail samples when its state
- * (+0x94) is 1, when the rider's mGroundContactPoint has moved at least 110 units from the last sample (+0xB0; 30 units
- * when mIsInNIS is set, unk_AD0 is clear and unk_AFC is set), or when @p dirDot is below 0.999. State 1 also sets the delay
- * to 2. On a sample it copies mGroundContactPoint to +0xB0. cBoardTrailFX_update calls it with the dot product of the
- * new and previous travel directions.
+ * While the delay (+0xE0) is positive it counts it down and returns false. Otherwise the trail samples when its state
+ * (+0x94) is eBTSLand, when the rider's mGroundContactPoint has moved at least 110 units from the last sample (+0xB0;
+ * 30 units when mIsInNIS is set, unk_AD0 is clear and unk_AFC is set), or when @p dirDot is below 0.999. eBTSLand also
+ * sets the delay to 2. On a sample it copies mGroundContactPoint to +0xB0. cBoardTrailFX_update calls it with the dot
+ * product of the new and previous travel directions.
  *
  * @param dirDot  dot product of this frame's and the last direction (1 = no turn)
- * @return 1 when a new sample is taken, otherwise 0
+ * @return true when a new sample is taken, otherwise false
  */
-int cBoardTrailFX::shouldSample(float dirDot)
+bool cBoardTrailFX::shouldSample(float dirDot)
 {
     if (DelaySampling > 0) {
         DelaySampling--;
-        return 0;
+        return false;
     }
     t4Vector dist = btSub_86F0(mRider->mGroundContactPoint, (*(&LastCen)));
     float maxLen = 110.0f;
@@ -252,14 +253,14 @@ int cBoardTrailFX::shouldSample(float dirDot)
     if (boardTrailCanDraw_86F0(((char*)mRider))) {
         maxLen = 30.0f;
     }
-    if (State == 1 || maxLen <= len || dirDot < 0.999f) {
-        if (State == 1) {
+    if (State == eBTSLand || maxLen <= len || dirDot < 0.999f) {
+        if (State == eBTSLand) {
             DelaySampling = 2;
         }
         (*(&LastCen)) = mRider->mGroundContactPoint;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -285,52 +286,54 @@ static inline int boardTrailCanDraw(cRider* r)
 /**
  * Returns whether the rider lays a board trail this frame and sets the trail's fade rate (CurDepth) from the surface.
  *
- * In motion state 2 (wipeout, cRider_getMotionState) there is no trail when the handler's WipeoutMotionState is set. In
- * the other non-ground states it needs mIsInNIS set, mHiddenNIS clear and mNISShowBoardVisualFX and mOnGroundNIS set.
- * When layer 2's animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and tEventFlags_isSet1 on its
- * sequence (+0xB0) is true for 0 but false for 1, there is no trail either.
+ * In MS_Wipeout (cRider_getMotionState) there is no trail when the handler's WipeoutMotionState is set. In the other
+ * non-ground states it needs mIsInNIS set, mHiddenNIS clear and mNISShowBoardVisualFX and mOnGroundNIS set. When layer
+ * 2's animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is kAID_GetGoing and tEventFlags_isSet1 on its sequence
+ * (+0xB0) is true for 0 but false for 1, there is no trail either.
  *
- * Then by mSurfaceType: 1 sets cBoardTrail_m_LooseDepthScale (0); 0, 5, 6 and 12 set cBoardTrail_m_PackedDepthScale (5); 2 and 13 set cBoardTrail_m_PowderDepthScale (-20); 3 sets
- * cBoardTrail_m_DeepPowderDepthScale (-40). Any other surface gives no trail. cBoardTrailFX_update closes the trail when it returns 0.
+ * Then by mSurfaceType: loose snow sets cBoardTrail_m_LooseDepthScale (0); packed snow, water, slush and sand set
+ * cBoardTrail_m_PackedDepthScale (5); powder and eST_Impassable (13) set cBoardTrail_m_PowderDepthScale (-20); deep
+ * powder sets cBoardTrail_m_DeepPowderDepthScale (-40). Any other surface gives no trail. cBoardTrailFX_update closes
+ * the trail when it returns false.
  *
- * @return 1 when a trail is laid, otherwise 0
+ * @return true when a trail is laid, otherwise false
  */
-int cBoardTrailFX::shouldPlow()
+bool cBoardTrailFX::shouldPlow()
 {
-    if (cRider_getMotionState(mRider) == 2) {
+    if (cRider_getMotionState(mRider) == MS_Wipeout) {
         if (mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState != 0) {
-            return 0;
+            return false;
         }
-    } else if (cRider_getMotionState(mRider) != 0) {
-        if (!boardTrailCanDraw(mRider)) return 0;
-        if (mRider->mOnGroundNIS == 0) return 0;
+    } else if (cRider_getMotionState(mRider) != MS_Ground) {
+        if (!boardTrailCanDraw(mRider)) return false;
+        if (mRider->mOnGroundNIS == 0) return false;
     }
-    if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) == 22) {
+    if (cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2) == kAID_GetGoing) {
         if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 0)) {
             if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRider->mRiderAnim, 2)->Events, 1)) {
-                return 0;
+                return false;
             }
         }
     }
     switch (mRider->mSurfaceType) {
-    case 1:
+    case eST_Snow_Loose:
         CurDepth = cBoardTrail_m_LooseDepthScale;
-        return 1;
-    case 0:
-    case 5:
-    case 6:
-    case 12:
+        return true;
+    case eST_Snow_Packed:
+    case eST_Water_Surface:
+    case eST_Slush_Surface:
+    case eST_Sand_Surface:
         CurDepth = cBoardTrail_m_PackedDepthScale;
-        return 1;
-    case 2:
-    case 13:
+        return true;
+    case eST_Snow_Powder:
+    case eST_Impassable:
         CurDepth = cBoardTrail_m_PowderDepthScale;
-        return 1;
-    case 3:
+        return true;
+    case eST_Snow_DeepPowder:
         CurDepth = cBoardTrail_m_DeepPowderDepthScale;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -400,7 +403,7 @@ extern float D_004A3B2C;
 extern int D_004A3AFC;
 extern "C" float func_0031C228(float);
 // Decides whether the trail starts a new segment this frame.
-extern "C" int cBoardTrailFX_shouldSample_8938(sBTrail_8938* self, float d) __asm__("cBoardTrailFX_shouldSample");
+extern "C" bool cBoardTrailFX_shouldSample_8938(sBTrail_8938* self, float d) __asm__("cBoardTrailFX_shouldSample");
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline t4Vector btScale(const t4Vector& v, float s)
@@ -657,8 +660,8 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
     int prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
     if (((cBoardTrailFX*)self)->shouldPlow() == 0) {
-        if (self->state == 0) return;
-        if (self->state == 1) {
+        if (self->state == cBoardTrailFX::eBTSInAir) return;
+        if (self->state == cBoardTrailFX::eBTSLand) {
             self->head = (self->head + kTrailNumSeg - 3) % kTrailNumSeg;
             // Unused on this path; retail keeps the divisor load of its (removed) division check.
             prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
@@ -677,10 +680,10 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
                 self->strip[i][self->head].b = self->strip[1][prev].b;
             }
         }
-        self->state = 0;
+        self->state = cBoardTrailFX::eBTSInAir;
         return;
     }
-    if (self->state == 0) {
+    if (self->state == cBoardTrailFX::eBTSInAir) {
         self->head = (self->head + 3) % kTrailNumSeg;
         prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
     }
@@ -781,7 +784,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     float fb = btDot(eb, dir);
     float st = btDot(et, across);
     float sb = btDot(eb, across);
-    if (cRider_getMotionState(self->rider) == 2) {
+    if (cRider_getMotionState(self->rider) == MS_Wipeout) {
         top = btAdd(btAdd(self->rider->mGroundContactPoint, btScale(across, st * 0.75f)),
                     btScale(self->rider->mGroundNormal, D_004A3B28));
         bot = btAdd(btAdd(self->rider->mGroundContactPoint, btScale(across, sb * 0.75f)),
@@ -868,7 +871,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         btGrow(self);
         btGrow(self);
         btGrow(self);
-        self->state = 1;
+        self->state = cBoardTrailFX::eBTSLand;
     }
     if (cBoardTrailFX_shouldSample_8938(self, btDot(dir, self->lastDir))) {
         int h = self->head;
@@ -884,7 +887,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
             self->strip[i][self->head].g = self->strip[i][h].g;
             self->strip[i][self->head].b = self->strip[i][h].b;
         }
-        self->state = 2;
+        self->state = cBoardTrailFX::eBTSNormal;
     }
     self->lastDir = dir;
     self->flip = 1 - self->flip;
@@ -1059,27 +1062,27 @@ struct cCutSceneTransitionMan_StartCutScene_sFade {
 void cCutSceneTransitionMan::StartCutScene(float dur)
 {
     switch (mCurrentState) {
-    case 0:
+    case kRegularMode:
         FindTVParameters();
         mfLengthOfTime = dur;
         mfCurrentTime = 0.0f;
         break;
-    case 1:
+    case kCutSceneMode:
         return;
-    case 2: {
+    case kTransitionToRegularMode: {
         float progress = mfCurrentTime / mfLengthOfTime;
         mfLengthOfTime = dur;
         mfCurrentTime = (1.0f - progress) * dur;
         break;
     }
-    case 3: {
+    case kTransitionToCutSceneMode: {
         float progress = mfCurrentTime / mfLengthOfTime;
         mfLengthOfTime = dur;
         mfCurrentTime = progress * dur;
         break;
     }
     }
-    mCurrentState = 3;
+    mCurrentState = kTransitionToCutSceneMode;
 }
 #endif
 
@@ -1106,22 +1109,22 @@ struct sTrailFade {
 void cCutSceneTransitionMan::EndCutScene(float fadeTime)
 {
     switch (mCurrentState) {
-    case 0:
+    case kRegularMode:
         return;
-    case 1:
+    case kCutSceneMode:
         mfLengthOfTime = fadeTime;
         mfCurrentTime = 0.0f;
         break;
-    case 2:
+    case kTransitionToRegularMode:
         mfCurrentTime = (mfCurrentTime / mfLengthOfTime) * fadeTime;
         mfLengthOfTime = fadeTime;
         break;
-    case 3:
+    case kTransitionToCutSceneMode:
         mfCurrentTime = (1.0f - mfCurrentTime / mfLengthOfTime) * fadeTime;
         mfLengthOfTime = fadeTime;
         break;
     }
-    mCurrentState = 2;
+    mCurrentState = kTransitionToRegularMode;
 }
 #endif
 
@@ -1181,7 +1184,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_Pause);
 void cCutSceneTransitionMan::Pause(int up)
 {
     int state = mCurrentState;
-    if (state == 2 || state == 3) {
+    if (state == kTransitionToRegularMode || state == kTransitionToCutSceneMode) {
         mNumPause = 0;
         return;
     }
@@ -1228,18 +1231,19 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     if (self->mNumPause != 0)
         return;
     int mode = self->mCurrentState;
-    if (mode != 2 && mode != 3)
+    if (mode != cCutSceneTransitionMan::kTransitionToRegularMode &&
+        mode != cCutSceneTransitionMan::kTransitionToCutSceneMode)
         return;
     self->mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     if (self->mfLengthOfTime < self->mfCurrentTime) {
-        if (mode == 2)
+        if (mode == cCutSceneTransitionMan::kTransitionToRegularMode)
             self->ForceToRegularMode();
         else
             self->ForceToCutSceneMode();
         return;
     }
     float k = self->mfCurrentTime / self->mfLengthOfTime;
-    if (mode == 2)
+    if (mode == cCutSceneTransitionMan::kTransitionToRegularMode)
         k = 1.0f - k;
     tTVDisplayFormat col;
     col.mDisplayFormat = self->mRegularTVFormat.mDisplayFormat;
@@ -1268,9 +1272,9 @@ struct sBTState {
 /**
  * Saves the current TV display format and derives the cut-scene format from it.
  *
- * Reads the format from the graphics manager (virtual slot 42) into +0x20. Display format 2 gets the
- * cut-scene format (2, y offset 0, y scale 1.0, aspect 0.75/0.63); any other gets (1, 0.125, 0.75,
- * 0.75/0.63), probably a letterbox.
+ * Reads the format from the graphics manager (virtual slot 42) into +0x20. GM_ANIMORPHIC gets the cut-scene format
+ * (GM_ANIMORPHIC, y offset 0, y scale 1.0, aspect 0.75/0.63); any other gets (GM_WIDESCREEN, 0.125, 0.75, 0.75/0.63), a
+ * letterbox.
  */
 void cCutSceneTransitionMan::FindTVParameters()
 {
@@ -1279,14 +1283,14 @@ void cCutSceneTransitionMan::FindTVParameters()
     (*(sBTState*)&transMan->mRegularTVFormat) = *(sBTState*)obj->GetTVDisplayFormat();
     float xAspectAngle = 0.75f;
     float yAspectAngle = 0.6299999952316284f;
-    if ((*(sBTState*)&transMan->mRegularTVFormat).mode == 2) {
+    if ((*(sBTState*)&transMan->mRegularTVFormat).mode == GM_ANIMORPHIC) {
         (*(sBTState*)&transMan->mCutSceneTVFormat).d = yAspectAngle;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = 2;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = GM_ANIMORPHIC;
         (*(sBTState*)&transMan->mCutSceneTVFormat).b = 1.0f;
         (*(sBTState*)&transMan->mCutSceneTVFormat).c = xAspectAngle;
         (*(sBTState*)&transMan->mCutSceneTVFormat).a = 0.0f;
     } else {
-        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = 1;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = GM_WIDESCREEN;
         (*(sBTState*)&transMan->mCutSceneTVFormat).a = 0.125f;
         (*(sBTState*)&transMan->mCutSceneTVFormat).b = xAspectAngle;
         (*(sBTState*)&transMan->mCutSceneTVFormat).c = xAspectAngle;
@@ -1475,7 +1479,7 @@ void cTrickBoostFX::update()
         col.w = zeroF;
         cPlayerLights_AddDirectional(fs, &col, &sz);
     }
-    if (zeroF < speed && cRider_getMotionState(((char*)mRider)) == 1)
+    if (zeroF < speed && cRider_getMotionState(((char*)mRider)) == MS_Air)
     {
         mCurrentBlurBuffer = (mCurrentBlurBuffer + 2) % 3;
         int n = mNumActiveBlurBuffers + 1;
@@ -1868,9 +1872,10 @@ struct sBTVtx_BF48 {
 /**
  * Fills a screen-space vertex for the transition effects from a 2D position and a colour.
  *
- * Colour channels come from @p colour as (a, r, g, b) floats, scaled by 128 when the current draw state has a texture (its
- * +0x10 is not -1) and by 255 otherwise (alpha always by 128). z is 1, the texture coordinates are (x, y, 0, 1) and the
- * position maps @p x over 640 and @p y over 480 into the screen rectangle at gUStart..gVHeight.
+ * Colour channels come from @p colour as (a, r, g, b) floats, scaled by 128 when the current draw state has a texture
+ * (its +0x10 is not sTextureState::kNoTexture) and by 255 otherwise (alpha always by 128). z is 1, the texture
+ * coordinates are (x, y, 0, 1) and the position maps @p x over 640 and @p y over 480 into the screen rectangle at
+ * gUStart..gVHeight.
  *
  * @param vertex  the vertex to fill (On Tour v)
  * @param colour  the colour, as a, r, g, b floats (On Tour colour)
@@ -1879,7 +1884,7 @@ struct sBTVtx_BF48 {
  */
 extern "C" void InitVertex(sBTVtx_BF48* vertex, float* colour, float x, float y)
 {
-    if (cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] != -1) {
+    if (cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] != sTextureState::kNoTexture) {
         vertex->r = (int)(colour[1] * 128.0f);
         vertex->g = (int)(colour[2] * 128.0f);
         vertex->b = (int)(colour[3] * 128.0f);

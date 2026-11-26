@@ -70,7 +70,7 @@ struct cUITextScroll : public cUIThing {
 
     // Methods bound to their retail symbols by asm labels.
     void updateLocale() __asm__("cUITextScroll_updateLocale");
-    int onInput(cUIInput* input) __asm__("cUITextScroll_onInput");
+    bool onInput(cUIInput* input) __asm__("cUITextScroll_onInput");
     void render2D(float x, float y) __asm__("cUITextScroll_render2D");
     void clearBuffer(void* ignored) __asm__("cUITextScroll_clearBuffer");
     int allocLine() __asm__("cUITextScroll_allocLine");

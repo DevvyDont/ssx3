@@ -43,8 +43,10 @@ struct tBxBSPNode;
 
 // The .sdb section database header (On Tour: tStreamDataHeader_PSP; the PS2 tStreamDataHeader has the same 0x50 size).
 struct tStreamDataHeader {
+    // m_cCookie[0..1] read as one halfword in a .sdb this build loads (name ours): [U] isValidMap rejects any other.
+    enum { kCookie = 0x3800 };
     char m_cCookie[4];              // 0x00 [P] assert mp_DataHeader->m_cCookie[kCookieVer]; [U] isValidMap reads
-                                    //      [0..1] as one halfword (== 0x3800)
+                                    //      [0..1] as one halfword (== kCookie)
     unsigned int m_uiCheckSum;      // 0x04 [O]
     unsigned int m_uiNumSections;   // 0x08 [P] assert mp_Hdr->m_uiNumSections; [U] cWorldView_getNumSections
     unsigned int m_uiNumBSPNodes;   // 0x0C [O]; [R] cWorldView_init: count of 0x60-byte nodes
@@ -149,6 +151,14 @@ CHECK_OFFSET(tBxBSPNode, m_pHull, 0x58);
 CHECK_OFFSET(tBxBSPNode, unk_05C, 0x5C);
 CHECK_SIZE(tBxBSPNode, 0x60);
 
+// tSectionState::state. [O] On Tour's cWorldView::eSectionState, names and values; [U] loadSection queues an empty
+// section (kSection_LoadQueue) and takes kSection_UnLoadQueue back to kSection_Loaded, unloadSection queues loaded and
+// active sections, activateSection makes a loaded section kSection_Active.
+enum eSectionState {
+    kSection_Empty = 0, kSection_LoadQueue = 1, kSection_Loading = 2, kSection_UnLoadQueue = 3, kSection_UnLoading = 4,
+    kSection_Loaded = 5, kSection_Active = 6
+};
+
 // Per-section load state (On Tour tSectionState).
 struct tSectionState {
     int state;                      // 0x0 [O] eSectionState; [U] the cWorldView state machine (values above)
@@ -223,12 +233,12 @@ struct cWorldView {
     int getTestFocus(int i, t4Vector* outPos, float* outT) __asm__("cWorldView_getTestFocus");
     int getNumSections() __asm__("cWorldView_getNumSections__FP10cWorldView");
     void* getSectionName(unsigned int i) __asm__("cWorldView_getSectionName");
-    int isSectionLoaded(int section) __asm__("cWorldView_isSectionLoaded__FP10cWorldViewi");
-    int isSectionUnLoaded(unsigned int i) __asm__("cWorldView_isSectionUnLoaded");
-    int loadSection(unsigned int idx, float value) __asm__("cWorldView_loadSection");
-    int unloadSection(unsigned int idx) __asm__("cWorldView_unloadSection");
-    int activateSection(unsigned int i) __asm__("cWorldView_activateSection");
-    int deactivateSection(unsigned int idx) __asm__("cWorldView_deactivateSection");
+    bool isSectionLoaded(int section) __asm__("cWorldView_isSectionLoaded__FP10cWorldViewi");
+    bool isSectionUnLoaded(unsigned int i) __asm__("cWorldView_isSectionUnLoaded");
+    bool loadSection(unsigned int idx, float value) __asm__("cWorldView_loadSection");
+    bool unloadSection(unsigned int idx) __asm__("cWorldView_unloadSection");
+    bool activateSection(unsigned int i) __asm__("cWorldView_activateSection");
+    bool deactivateSection(unsigned int idx) __asm__("cWorldView_deactivateSection");
     void* getHull(int uiIdx) __asm__("cWorldView_getHull");
     int getNumHull() __asm__("cWorldView_getNumHull__FPv");
     int isBoxValid(int box) __asm__("cWorldView_isBoxValid");

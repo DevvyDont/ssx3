@@ -55,6 +55,9 @@ CHECK_SIZE(tAIFwdInfo, 0x40);
 // (view sCacheEntry_7890); [U] the cache code (src/intersect/aifwddiff.cpp, views sCacheNode_279D0 / sCacheNode_7B30)
 // links mNext / mPrev / mHashLink and compares mKey.
 struct tAIFwdDiff {
+    // mKey of an entry that holds no patch (name ours): [U] cAIFwdDiffCache::Init stores it in every entry,
+    // cAIFwdDiffCache_RemoveFromHash skips such an entry.
+    enum { kUnusedKey = 0xFFFFFFFF };
     unsigned int mKey;              // 0x0000 [O]; [U] compared with the patch key
     tAIFwdDiff* mNext;              // 0x0004 [O]; [U] age-queue link
     tAIFwdDiff* mPrev;              // 0x0008 [O]; [U] age-queue link

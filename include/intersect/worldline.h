@@ -55,7 +55,7 @@ struct cWorldLine {
     char unk_0A4[0xC];              // 0x0A4 padding (16-byte aligned class)
 
     // Methods bound to their retail symbols by asm labels.
-    int IsInBoxTransformed(t4Vector* mn, t4Vector* mx) __asm__("cWorldLine_IsInBoxTransformed");
+    bool IsInBoxTransformed(t4Vector* mn, t4Vector* mx) __asm__("cWorldLine_IsInBoxTransformed");
     void Transform(t4Vector* mat, float scale) __asm__("cWorldLine_Transform");
     void UnTransform() __asm__("cWorldLine_UnTransform");
     int IsTriInt(t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* n, t4Vector* hit, t4Vector* outN,

@@ -74,6 +74,15 @@ struct cUIVector : public cUIThing {
     t3Vector* mpVertexPosition;      // 0x080 [O]; [R] = 0, freed; [U] setUIData new[]s it ("UIVectorVtx", t3vect_Zero);
                                      //       getSize / setSize / setChannelData / render2D
     t3Vector* mpVertexPositionRender; // 0x084 [O]; [R] = 0, freed; [U] setUIData new[]s it ("UIVectorVtxRdr"); render2D
+    // A vertex's channels: kUIChannel_FirstVertex + vertex * kVertexChannels + one of these (names ours). [U]
+    // cUIVector_setChannelData: x, y, z, u, v, then the colour in tARGB order.
+    enum eUIVertexChannel {
+        kVertexChannel_X = 0, kVertexChannel_Y = 1, kVertexChannel_Z = 2, kVertexChannel_U = 3, kVertexChannel_V = 4,
+        kVertexChannel_Alpha = 5, kVertexChannel_Red = 6, kVertexChannel_Green = 7, kVertexChannel_Blue = 8,
+        kVertexChannels = 9
+    };
+    // The vertex count of a plain quad (name ours): [U] cUIVector_setSize rebuilds the corners only for it.
+    enum { kQuadVertices = 4 };
     t2Vector* mpUV;                  // 0x088 [O]; [R] = 0 (cUIVector_cUIVector), freed by the dtor; [U] cUIVector_setChannelData
                                      //       reads it (never allocated by setUIData)
     tBxVertex* mpVertices;           // 0x08C [O]; [R] = 0, freed; [U] setUIData new[]s mNumVertices 0x30-byte entries

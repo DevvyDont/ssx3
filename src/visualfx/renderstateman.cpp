@@ -12,6 +12,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 #include "ui/uithing.h"
+#include "replay/replay.h"
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourR);
@@ -1249,7 +1250,7 @@ static inline int Approach_EF6D0(int n, int step)
  */
 void cAirStreamerFX::update()
 {
-    if (cRider_getMotionState(((char*)mRider)) == 1) {
+    if (cRider_getMotionState(((char*)mRider)) == MS_Air) {
         char* riderPtr = ((char*)mRider);
         t4Vector bodyOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
         t4Vector boardOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
@@ -1637,7 +1638,7 @@ extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i);
 extern "C" float cRenderStateMan_LightGlowBlend2(int i);
 extern "C" float cRenderStateMan_LightGlowBlend3(int i);
 extern "C" float cRenderStateMan_SnowSparkleDensity(int i);
-extern "C" int func_002F7BE0(void* p);
+extern "C" bool func_002F7BE0(void* p);
 extern void* cRenderStateMan_m_inNIS;
 extern int cDepthFog_m_OverrideWP;
 extern int cDepthFog_m_Exponent;
@@ -1680,9 +1681,9 @@ extern tARGB cDepthFog_m_Colour;
  *
  * Unless cDepthFog_m_OverrideWP is set, the fog density, near and far planes and colour come from the matching queries;
  * unless cScreenTint_m_OverrideWP is set, the tint scale and fill colours and the lightning chance do too (lightning is
- * enabled when the app's +0x84 state is 1 or func_002F7BE0 says so); unless cLightGlow_m_OverrideWP is set, the
- * light-glow intensities and scales do. The in-NIS flag and the remaining per-camera values are stored per @p i in the
- * graphics context.
+ * enabled when the game's Replay state is kGamePlayback or func_002F7BE0 says so); unless cLightGlow_m_OverrideWP is
+ * set, the light-glow intensities and scales do. The in-NIS flag and the remaining per-camera values are stored per @p
+ * i in the graphics context.
  *
  * @param i  which camera's render state to use (On Tour cameraId)
  */
@@ -1710,7 +1711,7 @@ void cVisualEffectsMan::commonUpdate(int i)
         cScreenTint_m_LightningChance = cRenderStateMan_LightningChance(i);
         int on = 0;
         int* st = *(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
-        if (*st == 1 || func_002F7BE0(st))
+        if (*st == kGamePlayback || func_002F7BE0(st))
             on = 1;
         cScreenTint_m_LightningEnable = on;
     }

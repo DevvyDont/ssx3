@@ -204,6 +204,24 @@ CHECK_OFFSET(tWorldCacheDataTable, m_pDataTag, 0x0);
 CHECK_OFFSET(tWorldCacheDataTable, m_uiNumTag, 0x4);
 CHECK_SIZE(tWorldCacheDataTable, 0x8);
 
+// The kinds of streamed world data (the type cPS2ChunkResolve::resolve / unresolve switch on, the index of a
+// cWorldCacheTable's m_pCacheTable). [O] On Tour's enum eBxStreamDataType, names and values; [U] retail's resolve
+// files patches (1), instances (3), lights (6), halos (7) and spline segments (8) in the space hash, hands images (9)
+// and light pages (10) to the graphics manager as "strm_tex" / "strm_lpg", the collide models (12) to
+// resolveCollideModel, the world painter (15), the world-script cache (16), the anchor table (18) and the AI path
+// data (14) to their owners.
+enum eBxStreamDataType {
+    kBxStreamData_Material = 0, kBxStreamData_Patch = 1, kBxStreamData_Model = 2, kBxStreamData_Instance = 3,
+    kBxStreamData_ParticleModel = 4, kBxStreamData_ParticleInstance = 5, kBxStreamData_RealTimeLight = 6,
+    kBxStreamData_HaloLight = 7, kBxStreamData_Spline = 8, kBxStreamData_Image = 9, kBxStreamData_LightPage = 10,
+    kBxStreamData_VisCurtain = 11, kBxStreamData_CollideModel = 12, kBxStreamData_IcePick = 13,
+    kBxStreamData_AIPath = 14, kBxStreamData_WorldPainter = 15, kBxStreamData_ColdSpell = 16,
+    kBxStreamData_CameraFile = 17, kBxStreamData_NISTable = 18, kBxStreamData_Mission = 19,
+    kBxStreamData_AudioBank = 20, kBxStreamData_Radar = 21, kBxStreamData_Avalanche = 22,
+    kBxStreamData_ModelBuffer = 23, kBxStreamData_RGBBuffer = 24, kBxStreamData_CoordBuffer = 25,
+    kBxStreamData_NormalBuffer = 26, kBxStreamData_UVBuffer = 27, kBxStreamData_Num = 28
+};
+
 // cWorldCacheTable: the resource table of one section (cWorldCache_activateSectionMem: cMemMan_alloc(0xE8,
 // "SectionTable")) or of the shared data (cWorldCache_init: cMemMan_alloc(0xE8, "SharedTable")). On Tour 0xE8, same
 // layout. Methods: cWorldCacheTable_cWorldCacheTable, cWorldCacheTable__cWorldCacheTable (dtor); get/set/testIncrement/testDecrement are
@@ -219,6 +237,13 @@ CHECK_OFFSET(cWorldCacheTable, m_pCacheTableMem, 0x00);
 CHECK_OFFSET(cWorldCacheTable, m_pCacheTable, 0x04);
 CHECK_OFFSET(cWorldCacheTable, m_piTable, 0xE4);
 CHECK_SIZE(cWorldCacheTable, 0xE8);
+
+// tWorldCacheHullPage::m_State. [O] On Tour's enum cWorldCache::eHullPageState, names and values; [P] the preview's
+// asserts name kHullPage_Queued, kHullPage_Loading and kHullPage_InActive; [U] touchPage, updatePages,
+// flushInActivePages and resetPageMap step the pages through them.
+enum eHullPageState {
+    kHullPage_Empty = 0, kHullPage_Queued = 1, kHullPage_Loading = 2, kHullPage_Active = 3, kHullPage_InActive = 4
+};
 
 // One hull page slot (On Tour tWorldCacheHullPage). 0x18 bytes.
 struct tWorldCacheHullPage {
@@ -251,6 +276,12 @@ CHECK_SIZE(tWorldCacheHullPage, 0x18);
 // cWorldCache_addBxStreamDataTest, cWorldCache_addBxStreamDataSubmit, cWorldCache_removeBxStreamData,
 // cWorldCache_activateSectionPatches. The section/focus/bandwidth wrappers are inlined into their callers.
 struct cWorldCache {
+    // A tResourceID's bank byte for the shared data (name ours). [U] addBxStreamDataTest / addBxStreamDataSubmit /
+    // removeBxStreamData use m_pSharedCacheTable for it and m_pSectionCacheTable[bank] otherwise.
+    enum { kSharedBank = 0xFF };
+    // addBxStreamDataTest's result when the bank has no room for the block yet (name ours). [U]
+    // cStreamMan::processChunk then stops and the stream manager retries the block on its next update.
+    enum { kStreamNoRoom = 0xFFFFFFFF };
     tStreamDataHeader* mp_DataHeader;  // 0x0000 [P] assert mp_DataHeader->m_uiNumSections; [R] init: FILE_load of
                                     //        "|<track>.sdb"; [U] purge frees it
     cWorldCacheTable* m_pSharedCacheTable; // 0x0004 [O]; [R] init: cMemMan_alloc(0xE8, "SharedTable"); [U] resources
@@ -279,8 +310,8 @@ struct cWorldCache {
     void setPageLock(int hullPage, int lock) __asm__("cWorldCache_setPageLock");
     int isPageLocked(int hullPage) __asm__("cWorldCache_isPageLocked");
     void purgePage(int cell) __asm__("cWorldCache_purgePage");
-    int isPageLoaded(int uiHullPage) __asm__("cWorldCache_isPageLoaded");
-    int isPageEmpty(int uiHullPage) __asm__("cWorldCache_isPageEmpty");
+    bool isPageLoaded(int uiHullPage) __asm__("cWorldCache_isPageLoaded");
+    bool isPageEmpty(int uiHullPage) __asm__("cWorldCache_isPageEmpty");
     void signalPageLoadComplete(int uiHullPage) __asm__("cWorldCache_signalPageLoadComplete");
     void updatePages() __asm__("cWorldCache_updatePages");
     void flushInActivePages() __asm__("cWorldCache_flushInActivePages");

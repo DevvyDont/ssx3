@@ -177,18 +177,18 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_getEntryByData);
  *
  * @param key  the data to look for (On Tour pData)
  * @param out  receives the entry index (On Tour pIndex)
- * @return 1 when found, 0 otherwise
+ * @return true when found, false otherwise
  */
-int cUIListBox::getEntryByData(int key, unsigned char* out)
+bool cUIListBox::getEntryByData(int key, unsigned char* out)
 {
     int i;
     for (i = 0; i < mNumEntries; i++) {
         if ((int)mpEntries[i].mpData == key) {
             *out = i;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -325,19 +325,19 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
 {
     ((tAttrThing*)&self->mAttr)->mFocused = on != 0;
     if (on) {
-        if (self->mStoredIndex != 0xFF) {
+        if (self->mStoredIndex != cUIMenu::kNoItem) {
             cUIMenu_setSelectedByIndex(((char*)self), self->mStoredIndex);
             return;
         }
         cUIThing* cur = self->mpSelected;
         if (((char*)cur) == 0) {
             unsigned char idx = cUIMenu_findFirstHighlightable(((char*)self), 0);
-            if (idx == 0xFF)
+            if (idx == cUIMenu::kNoItem)
                 idx = 0;
             cUIMenu_setSelectedByIndex(((char*)self), idx);
         } else if (((cur->mAttr >> 4) & 1) == 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 0);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 void* scr = self->mpSelected->mpScreen;
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
@@ -352,7 +352,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
         cUIThing* cur = self->mpSelected;
         if (((char*)cur) != 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 void* scr = self->mpSelected->mpScreen;
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
@@ -460,8 +460,8 @@ extern "C" void* cList_getByIndex(void* list, unsigned char i);
  * Finds the selectable item before the current one (mScrollItemCurrent), wrapping to the last when mWrap is set.
  *
  * An item is selectable when the screen's state accepts it (onWidgetMenu(self, 1, i), slot 20) for a scrollable menu
- * (mScrollMenu), else when its mStatic bit is clear. Without mWrap, running off the start returns the current index.
- * Gives up after mScrollItemNum + 1 tries.
+ * (mScrollMenu), else when its mStatic bit is clear. Without mWrap, running off the start (the index wraps to kNoItem)
+ * returns the current index. Gives up after mScrollItemNum + 1 tries.
  *
  * @return the item index, the current index (start reached without wrap), or 0 when none is selectable
  */
@@ -470,7 +470,7 @@ unsigned char cUIMenu::getPrev()
     unsigned char n = mScrollItemNum;
     unsigned char i = mScrollItemCurrent - 1;
     do {
-        if (i != 0xFF) {
+        if (i != kNoItem) {
             if (*(int*)&mAttrMenu & 4) {
                 cUIState* mgr = mpScreen->mpState;
                 if (mgr->onWidgetMenu(this, 1, i)) {

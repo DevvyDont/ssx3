@@ -23,6 +23,8 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "ai/riderhandler.h"
+#include "be/beintnewrace.h"
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
@@ -137,28 +139,28 @@ extern "C" int get_camaction(void* reader, void** out)
     int type;
     int n = get_uint(reader, &type);
     switch (type) {
-    case 0: {
+    case eCTActionSwitchCam: {
         sCTActSwitchA* action = new (str_Camera_Switch_Action, 0, 0) sCTActSwitchA;
         int bytesRead = get_cCTActionSwitchCam(reader, (cCTActionSwitchCam*)action);
         *out = action;
         n += bytesRead;
         break;
     }
-    case 1: {
+    case eCTActionBoundedCam: {
         sCTActBoundedA* action = new (str_Camera_Bound_Action, 0, 0) sCTActBoundedA;
         int bytesRead = get_cCTActionBoundedCam(reader, (cCTActionBoundedCam*)action);
         *out = action;
         n += bytesRead;
         break;
     }
-    case 2: {
+    case eCTActionSpline: {
         sCTActSplineA* action = new (str_Camera_Spline_Action, 0, 0) sCTActSplineA;
         int bytesRead = get_cCTActionSpline(reader, (cCTActionSpline*)action);
         *out = action;
         n += bytesRead;
         break;
     }
-    case 3: {
+    case eCTActionNone: {
         sCTActNoneA* action = new (str_Camera_Action_None, 0, 0) sCTActNoneA;
         // PORT: get_cCTActionNone returns the byte count as void*.
         int bytesRead = (int)get_cCTActionNone(reader, (int*)action);
@@ -376,28 +378,28 @@ extern "C" int get_camboundobj(void* reader, void** out)
     int type;
     int n = get_uint(reader, &type);
     switch (type) {
-    case 0: {
+    case eCTBoundObjEllipse: {
         sCTBoundEllG* boundObj = new (str_Camera_Ellipse_BoundObj, 0, 0) sCTBoundEllG;
         int bytesRead = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllipse*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
-    case 1: {
+    case eCTBoundObjBox: {
         sCTBoundBoxG* boundObj = new (str_Camera_Box_BoundObj, 0, 0) sCTBoundBoxG;
         int bytesRead = get_cCTBoundObjBox(reader, (cCTBoundObj*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
-    case 2: {
+    case eCTBoundObjLine: {
         sCTBoundLineG* boundObj = new (str_Camera_Line_BoundObj, 0, 0) sCTBoundLineG;
         int bytesRead = get_cCTBoundObjLine(reader, (cCTBoundObjLine*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
-    case 3: {
+    case eCTBoundObjPoint: {
         sCTBoundPointG* boundObj = new (str_Camera_Point_BoundObj, 0, 0) sCTBoundPointG;
         // PORT: get_cCTBoundObjPoint returns the byte count as void*.
         int bytesRead = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)boundObj);
@@ -982,10 +984,10 @@ static inline void RotAxis_172278(t4Matrix* m, const t4Vector& axis, float angle
  * cCTVolumeEllipse_vtbl.
  *
  * @param point  the world point to test
- * @return 1 when the point is inside (or on) the ellipsoid, else 0
+ * @return true when the point is inside (or on) the ellipsoid, else false
  */
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
-int cCTVolumeEllipse::containsPoint(t4Vector* point)
+bool cCTVolumeEllipse::containsPoint(t4Vector* point)
 {
     t4MatrixVU0 toLocal(t4mat_Identity_v172278);
     float one = 1.0f;
@@ -1303,10 +1305,10 @@ extern t4Vector D_004C5480[3];      // static local: the three box axes
  *
  * @param t  the box volume (this): position, heading/pitch/roll and half-extents
  * @param pt  the world point to test
- * @return 1 when the point is inside the box, else 0
+ * @return true when the point is inside the box, else false
  */
 // cCTVolumeBox: is pt inside the (rotated) box?
-extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* pt)
+extern "C" bool cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* pt)
 {
     sMtx_28F8 toLocal = (const sMtx_28F8&)t4mat_Identity_28F8;
     {
@@ -1336,14 +1338,14 @@ extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* 
         t4Vector n = Scale_28F8(D_004C5480[i], -1.0f);
         float planeDist = Dot_28F8(n, dmin);
         if (planeDist > 0.0f) {
-            return 0;
+            return false;
         }
         planeDist = Dot_28F8(D_004C5480[i], dmax);
         if (planeDist > 0.0f) {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1382,14 +1384,14 @@ extern "C" int get_camvolume(void* reader, void** out)
     int type;
     int n = get_uint(reader, &type);
     switch (type) {
-    case 0: {
+    case eCTVolumeEllipse: {
         sCTVolEllG* volume = new (str_Camera_Sphere_Trigger, 0, 0) sCTVolEllG;
         int bytesRead = get_cCTVolumeEllipse(reader, (cCTVolumeEllipse*)volume);
         *out = volume;
         n += bytesRead;
         break;
     }
-    case 1: {
+    case eCTVolumeBox: {
         sCTVolBoxG* volume = new (str_Camera_Box_Trigger, 0, 0) sCTVolBoxG;
         int bytesRead = get_cCTVolumeBox(reader, (cCTVolume*)volume);
         *out = volume;
@@ -2326,7 +2328,7 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
     self->View = act->FieldOfView;
     self->LeadDistance = act->LeadDistance;
     t4Vector lookTarget;
-    if (act->TargetType == 1) {
+    if (act->TargetType == eCTTargetPoint) {
         lookTarget.x = act->TargetPoint.x;
         lookTarget.y = act->TargetPoint.y;
         lookTarget.z = act->TargetPoint.z;
@@ -2512,7 +2514,7 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
         return;
     cCTActionBoundedCam* act = self->BoundAction;
     t4Vector lookTarget;
-    if (act->TargetType == 1) {
+    if (act->TargetType == eCTTargetPoint) {
         lookTarget.x = act->TargetPoint.x;
         lookTarget.y = act->TargetPoint.y;
         lookTarget.z = act->TargetPoint.z;
@@ -2670,7 +2672,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, CameraCollisionCallback* c
     nash_Cell* ch;
 
     WalkList_4848((cCTNode*)node->nodesinside[2].head, ctx1);
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     int bits = (cell->level + 0x7E) << 23;
@@ -2877,7 +2879,7 @@ void sti_00175A20(int init, int prio) __asm__("func_00175A20");
  */
 void sti_00175A20(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init) {
             D_004C54B0[0] = 1.0f;
             D_004C54B0[1] = 1.0f;
@@ -3772,7 +3774,7 @@ extern "C" void descend(nash_Cell* node, CameraCollisionCallback* ctx)
 {
     cCTNode* entry;
     for (entry = (cCTNode*)node->nodesinside[2].head; entry != 0; entry = entry->next) {
-        if (entry->type == 4) {
+        if (entry->type == kSNT_CameraTrigger) {
             tCameraTrigger* trig = entry->Trigger;
             cBeing& rider = *ctx->rider;
             cCTVolume* volume = trig->Volume;
@@ -4581,7 +4583,7 @@ extern "C" void func_00177650_impl(int initialize, int priority) __asm__("func_0
  */
 extern "C" void func_00177650_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004C5890) sColor_177650(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004C58A0) sColor_177650(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004C58B0) sColor_177650(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -4962,7 +4964,7 @@ static inline t4Vector ctScaleP_7FC0(const t4Vector* v, float s)
 extern "C" t4Vector cSPOKEChaseAlgorithm_getDesiredPosition(cSPOKEChaseAlgorithm* self, const t4Vector& in)
 {
     t4Vector dir;
-    if (cRider_getMotionState_7FC0(self->Target->Rider) == 5)
+    if (cRider_getMotionState_7FC0(self->Target->Rider) == MS_Handplant)
         dir = *ctGetA_7FC0(self);
     else
         dir = in;
@@ -5154,7 +5156,7 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* vself)
         distFrac = 0.0f;
     }
     float keepWeight = (1.0f - distFrac) * 0.9879999756813049f;
-    if (cRider_getMotionState(self->Target->Rider) == 5) {
+    if (cRider_getMotionState(self->Target->Rider) == MS_Handplant) {
         keepWeight = Sqrt_8208(keepWeight);
     }
     {
@@ -6187,7 +6189,7 @@ extern "C" void func_00178F58_impl(int initialize, int priority) __asm__("func_0
  */
 extern "C" void func_00178F58_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004C5C10) sColor_178F58(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004C5C20) sColor_178F58(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004C5C30) sColor_178F58(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -6379,7 +6381,7 @@ extern "C" void func_00179798_impl(int initialize, int priority) __asm__("func_0
  */
 extern "C" void func_00179798_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004C5F90) sColor_179798(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004C5FA0) sColor_179798(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004C5FB0) sColor_179798(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -6474,17 +6476,17 @@ extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
  * (cBE_getInterface 0) returns 1 for @p id, or when @p id is 14, 15 or 16.
  *
  * @param id  the location (On Tour eBELocationID)
- * @return 1 for a WC BAM start location, otherwise 0
+ * @return true for a WC BAM start location, otherwise false
  */
-int cTrackFileMan::testWCBAMStartLocation(int id)
+bool cTrackFileMan::testWCBAMStartLocation(int id)
 {
-    if (cBENewRaceInterface_getLocationType(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
-        return 1;
+    if (cBENewRaceInterface_getLocationType(cBE_getInterface_Fv(cBE_getBE(), 0), id) == kLOCATIONTYPE_HUB) {
+        return true;
     }
     if (id >= 0xE && id <= 0x10) {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -6548,7 +6550,7 @@ cBEInterface* cBE_getInterface_A158(void* be, int kind) __asm__("cBE_getInterfac
 extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 // PORT: the unit also declares this with a pointer third argument; defined under an asm label with its real type
-extern "C" int cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
+extern "C" bool cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
     __asm__("cTrackFileMan_legalTrackMode");
 /**
  * Tells whether a location may be raced in a game mode (debug menu track picker).
@@ -6560,42 +6562,42 @@ extern "C" int cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, i
  * @param list  the track file manager (this)
  * @param idx   the location index
  * @param kind  the game mode (On Tour eBEGameMode)
- * @return 1 when the location is legal for the mode, otherwise 0
+ * @return true when the location is legal for the mode, otherwise false
  */
-extern "C" int cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
+extern "C" bool cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
 {
     if (idx >= 0 && idx < list->NumLocations) {
         unsigned int locationId = list->LocationInfo[idx].locationID;
         switch (kind) {
-        case 0:
-            if (locationId < 5) return 1;
+        case kGAMEMODE_RACE:
+            if (locationId < 5) return true;
             break;
-        case 1:
-            if (locationId >= 5 && locationId < 8) return 1;
+        case kGAMEMODE_SLOPESTYLE:
+            if (locationId >= 5 && locationId < 8) return true;
             break;
-        case 2:
-            if (locationId >= 8 && locationId < 11) return 1;
+        case kGAMEMODE_BIGAIR:
+            if (locationId >= 8 && locationId < 11) return true;
             break;
-        case 3:
-            if (locationId >= 11 && locationId < 14) return 1;
+        case kGAMEMODE_HALFPIPE:
+            if (locationId >= 11 && locationId < 14) return true;
             break;
-        case 5:
-        case 6:
-            if (locationId >= 14 && locationId < 17) return 1;
+        case kGAMEMODE_TIMECHALLENGE:
+        case kGAMEMODE_PNTSCHALLENGE:
+            if (locationId >= 14 && locationId < 17) return true;
             break;
-        case 4:
-            if (!cBENewRaceInterface_getLocationType(cBE_getInterface_A158(cBE_getBE(), 0), locationId)) return 1;
+        case kGAMEMODE_FREERIDE:
+            if (!cBENewRaceInterface_getLocationType(cBE_getInterface_A158(cBE_getBE(), 0), locationId)) return true;
             break;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getNextLocation);
 #ifdef SKIP_ASM
-extern "C" int cTrackFileMan_legalTrackMode(int* self, int i, void* key);
+extern "C" bool cTrackFileMan_legalTrackMode(int* self, int i, void* key);
 
 /**
  * Finds the next location after @p start that is legal for a game mode, wrapping around.
@@ -6623,7 +6625,7 @@ extern "C" int cTrackFileMan_getNextLocation(int* self, int start, void* key)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevLocation);
 #ifdef SKIP_ASM
-extern "C" int cTrackFileMan_legalTrackMode(int* self, int i, void* key);
+extern "C" bool cTrackFileMan_legalTrackMode(int* self, int i, void* key);
 
 /**
  * Finds the previous location before @p start that is legal for a game mode, wrapping around.
@@ -6763,7 +6765,8 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_17A638(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int id);
 extern "C" int cTrackFileMan_checkLocation1_A638(void* self, int n, void* names, char* tag) __asm__("cTrackFileMan_checkLocation1");
-extern "C" int cTrackFileMan_testWCBAMStartLocation_A638(void* self, int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
+extern "C" bool cTrackFileMan_testWCBAMStartLocation_A638(void* self,
+        int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
 extern "C" char* strcpy(char* d, const char* s);
 extern char* str_BAM_b[];
 

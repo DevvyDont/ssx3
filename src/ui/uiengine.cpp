@@ -858,12 +858,12 @@ extern "C" int cList_traverseFlat(void* list, cUIGroup_onInput_sFunctor* fn);
  * ignores input.
  *
  * @param pInput  the input (const cUIInput*, passed as int)
- * @return 1 when a child used the input, otherwise 0
+ * @return true when a child used the input, otherwise false
  */
-extern "C" int cUIGroup_onInput(cUIGroup* self, int pInput)
+extern "C" bool cUIGroup_onInput(cUIGroup* self, int pInput)
 {
     if ((self->mAttr >> 5) & 1) {
-        return 0;
+        return false;
     }
     cUIGroup_onInput_sFunctor inputOp;
     inputOp.vt = cListOperator_vtbl;
@@ -1435,12 +1435,12 @@ static inline int isClear_9970(int flags)
  * listener (gUISoundNull when none).
  *
  * @param in  the input (On Tour const cUIInput* pInput)
- * @return 1 when the input was used, else 0 (On Tour returns bool)
+ * @return true when the input was used, else false (On Tour returns bool)
  */
-extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
+extern "C" bool cUIListBox_onInput(cUIListBox* self, cUIInput* in)
 {
     if (self->mNumEntries == 0)
-        return 0;
+        return false;
     int result = 0;
     char* listener = gUISoundNull;
     cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
@@ -1467,7 +1467,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             moveResult = focusMove_9970(((char*)self), 3);
         if (moveResult & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
-            if (ev != 0xFFFF && self->mpScreen != 0) {
+            if (ev != cUIScreen::kNoFrame && self->mpScreen != 0) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
@@ -1480,7 +1480,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(vthis(listener, vt[2]), result);
         }
-        return 1;
+        return true;
     } else if ((inputIs_9970(in, 20) && isClear_9970(self->mAttr))
                || (inputIs_9970(in, 17) && (self->mAttr & 1))) {
         int next = self->mCurrentEntry + 1;
@@ -1500,7 +1500,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             moveResult = focusMove_9970(((char*)self), 2);
         if (moveResult & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
-            if (ev != 0xFFFF && self->mpScreen != 0) {
+            if (ev != cUIScreen::kNoFrame && self->mpScreen != 0) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
@@ -1513,13 +1513,13 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(vthis(listener, vt[2]), result);
         }
-        return 1;
+        return true;
     } else if (inputIs_9970(in, 6)) {
         focusNotify_9970(((char*)self), 6);
         moveResult = focusMove_9970(((char*)self), 4);
         if (moveResult & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 3);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
@@ -1532,9 +1532,9 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(vthis(listener, vt[2]), result);
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 

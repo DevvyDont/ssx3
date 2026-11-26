@@ -21,6 +21,7 @@
 #include "world/worldview.h"
 #include "world/worldcache.h"
 #include "render/graphicsman.h"
+#include "render/ps2lightman.h"
 
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
@@ -66,14 +67,14 @@ INCLUDE_ASM("world/worldview", cWorldView_isSectionLoaded__FP10cWorldViewi);
  * Tells whether a world section is loaded (stream state 5, or 6 when it is also active).
  *
  * @param section  section id
- * @return 1 when loaded, 0 otherwise (also for an out-of-range id)
+ * @return true when loaded, false otherwise (also for an out-of-range id)
  */
-int cWorldView::isSectionLoaded(int section)
+bool cWorldView::isSectionLoaded(int section)
 {
     if (mp_Hdr == 0 || (unsigned int)section >= (unsigned int)mp_Hdr->m_uiNumSections) {
-        return 0;
+        return false;
     }
-    return (unsigned int)(mp_SectionState[section].state - 5) < 2;
+    return (unsigned int)(mp_SectionState[section].state - kSection_Loaded) < 2;
 }
 #endif
 
@@ -84,13 +85,13 @@ INCLUDE_ASM("world/worldview", cWorldView_isSectionUnLoaded);
  * Tells whether a world section is fully unloaded (stream state 0).
  *
  * @param i  section id
- * @return 1 when unloaded, 0 otherwise (also for an out-of-range id)
+ * @return true when unloaded, false otherwise (also for an out-of-range id)
  */
-int cWorldView::isSectionUnLoaded(unsigned int i)
+bool cWorldView::isSectionUnLoaded(unsigned int i)
 {
     tStreamDataHeader* list = mp_Hdr;
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
-        return 0;
+        return false;
     }
     return mp_SectionState[i].state == 0;
 }
@@ -108,26 +109,26 @@ INCLUDE_ASM("world/worldview", cWorldView_loadSection);
  *
  * @param idx  section id (On Tour id)
  * @param value  load priority (On Tour fPriority)
- * @return 0 when the section is in state 4, else 1
+ * @return false when the section is in state 4 (kSection_UnLoading), else true
  */
-int cWorldView::loadSection(unsigned int idx, float value)
+bool cWorldView::loadSection(unsigned int idx, float value)
 {
     if (mp_Hdr != 0 && idx < mp_Hdr->m_uiNumSections) {
         mp_SectionState[idx].priority = value;
         switch (mp_SectionState[idx].state) {
-        case 0:
-            mp_SectionState[idx].state = 1;
+        case kSection_Empty:
+            mp_SectionState[idx].state = kSection_LoadQueue;
             break;
-        case 3:
-            mp_SectionState[idx].state = 5;
+        case kSection_UnLoadQueue:
+            mp_SectionState[idx].state = kSection_Loaded;
             break;
-        case 4:
-            return 0;
-        case 1: case 2: case 5: case 6:
+        case kSection_UnLoading:
+            return false;
+        case kSection_LoadQueue: case kSection_Loading: case kSection_Loaded: case kSection_Active:
             break;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -143,25 +144,25 @@ INCLUDE_ASM("world/worldview", cWorldView_unloadSection);
  * mp_Hdr, also returns 1. Called by cSectionMan_update.
  *
  * @param idx  the section id
- * @return 0 while the section is loading, else 1
+ * @return false while the section is loading, else true
  */
-int cWorldView::unloadSection(unsigned int idx)
+bool cWorldView::unloadSection(unsigned int idx)
 {
     if (mp_Hdr != 0 && idx < mp_Hdr->m_uiNumSections) {
         switch (mp_SectionState[idx].state) {
-        case 2:
-            return 0;
-        case 5: case 6:
-            mp_SectionState[idx].state = 3;
+        case kSection_Loading:
+            return false;
+        case kSection_Loaded: case kSection_Active:
+            mp_SectionState[idx].state = kSection_UnLoadQueue;
             break;
-        case 1:
-            mp_SectionState[idx].state = 0;
+        case kSection_LoadQueue:
+            mp_SectionState[idx].state = kSection_Empty;
             break;
-        case 0: case 3: case 4:
+        case kSection_Empty: case kSection_UnLoadQueue: case kSection_UnLoading:
             break;
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -175,22 +176,22 @@ extern "C" void cWorldCache_activateSectionPatches(void* world, unsigned int i);
  * A loaded section (state 5) becomes active (6) and the world cache activates its contents (cWorldCache_activateSectionPatches).
  *
  * @param i  section id
- * @return 1 if the section is now active (or already was), 0 if it is not loaded or the id is out of range
+ * @return true if the section is now active (or already was), false if it is not loaded or the id is out of range
  */
-int cWorldView::activateSection(unsigned int i)
+bool cWorldView::activateSection(unsigned int i)
 {
     tStreamDataHeader* list = mp_Hdr;
     if (list != 0 && i < (unsigned int)list->m_uiNumSections) {
         int st = mp_SectionState[i].state;
-        if (st == 5) {
-            mp_SectionState[i].state = 6;
+        if (st == kSection_Loaded) {
+            mp_SectionState[i].state = kSection_Active;
             cWorldCache_activateSectionPatches(mp_WorldCache, i);
-            return 1;
-        } else if (st == 6) {
-            return 1;
+            return true;
+        } else if (st == kSection_Active) {
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -203,17 +204,17 @@ INCLUDE_ASM("world/worldview", cWorldView_deactivateSection);
  * No C caller in the source.
  *
  * @param idx  the section id
- * @return 1 for a valid index, else 0
+ * @return true for a valid index, else false
  */
-int cWorldView::deactivateSection(unsigned int idx)
+bool cWorldView::deactivateSection(unsigned int idx)
 {
     if (mp_Hdr != 0 && idx < (unsigned int)mp_Hdr->m_uiNumSections) {
-        if (mp_SectionState[idx].state == 6) {
-            mp_SectionState[idx].state = 5;
+        if (mp_SectionState[idx].state == kSection_Active) {
+            mp_SectionState[idx].state = kSection_Loaded;
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 //100%
@@ -265,7 +266,7 @@ int cWorldView::getNumHull()
 INCLUDE_ASM("world/worldview", cWorldView_isBoxValid);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
+extern "C" bool cWorldCache_isPageLoaded(void* self, int a1);
 extern void cWorldView_recursiveIsValid_9AC0(void* self, int sec, int box, int* ok) __asm__("cWorldView_recursiveIsValid");
 
 /**
@@ -290,7 +291,7 @@ int cWorldView::isBoxValid(int box)
     }
     ok = 1;
     for (i = 0; i < ((cWorldView*)this)->mp_Hdr->m_uiNumSections; i++) {
-        if (mp_SectionState[i].state == 6)
+        if (mp_SectionState[i].state == kSection_Active)
             cWorldView_recursiveIsValid_9AC0(((char*)this), (int)mp_Section[i].m_BSP.m_pRoot, box, &ok);
     }
     return ok;
@@ -299,7 +300,7 @@ int cWorldView::isBoxValid(int box)
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_recursiveIsValid);
 #ifdef SKIP_ASM
-extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
+extern "C" bool cWorldCache_isPageLoaded(void* self, int a1);
 
 
 struct sSecInfo_9BB8 {
@@ -403,8 +404,8 @@ void cWorldView::refreshStreamFocus(int cam)
         unsigned int i;
         for (i = 0; i < (unsigned int)mp_Hdr->m_uiNumSections; i++) {
             int st = ((&mp_SectionState[0]))[i].state;
-            if (st == 5 || st == 6) {
-                recursiveTreeFocus(mp_Section[i].m_BSP.m_pRoot, cam, st == 6);
+            if (st == kSection_Loaded || st == kSection_Active) {
+                recursiveTreeFocus(mp_Section[i].m_BSP.m_pRoot, cam, st == kSection_Active);
             }
         }
         m_StreamFocus[cam].m_iFocusTick = frame;
@@ -529,7 +530,7 @@ extern "C" float cWorldView_getDistanceToBox_impl(void* self, const t4Vector& po
 INCLUDE_ASM("world/worldview", cWorldView_recursiveTreeFocus);
 #ifdef SKIP_ASM
 extern "C" float cWorldView_getDistanceToBox(void* self, void* pos, void* bmin, void* bmax);
-extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
+extern "C" bool cWorldCache_isPageLoaded(void* self, int a1);
 extern "C" void cWorldCache_touchPage(void* self, int i, float f);
 
 
@@ -778,7 +779,7 @@ int cChunkResolve::resolveModelHeirarchy(tModelRecord* pModel)
             (*(int*)&meshHierarchy->m_Mesh) += (int)pModel;
             ((cChunkResolve_resolveModelHeirarchy_cObj*)this)->resolveMesh((void*)((int)meshHierarchy->m_Mesh), pModel);
         }
-        if (((unsigned int)meshHierarchy->m_pMeshMatrix) == 0xFFFFFFFF) {
+        if (((unsigned int)meshHierarchy->m_pMeshMatrix) == kNullOffset) {
             (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) = (unsigned int)&t4mat_Identity;
         } else {
             (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) += (int)pModel;
@@ -922,7 +923,7 @@ int cChunkResolve::resolveParticleModelHeirarchy(tParticleModelRecord* pModel)
             (*(int*)&meshHierarchy->m_ParticleMesh) += (int)pModel;
             ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)this)->resolveParticleMesh((void*)((int)meshHierarchy->m_ParticleMesh));
         }
-        if (((unsigned int)meshHierarchy->m_pParticleMeshMatrix) == 0xFFFFFFFF) {
+        if (((unsigned int)meshHierarchy->m_pParticleMeshMatrix) == kNullOffset) {
             (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) = (unsigned int)&t4mat_Identity;
         } else {
             (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) += (int)pModel;
@@ -1001,7 +1002,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterial);
 // PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
 int cChunkResolve::resolveMaterial(tMaterialRecord* pMaterial)
 {
-    if (pMaterial->m_TextureFlip.m_iTextureFlip == -1) {
+    if (pMaterial->m_TextureFlip.m_iTextureFlip == kNullOffset) {
         pMaterial->m_TextureFlip.m_iTextureFlip = 0;
     } else {
         pMaterial->m_TextureFlip.m_iTextureFlip = (int)(pMaterial + 1); // the flip table follows the record
@@ -1175,12 +1176,12 @@ int cChunkResolve::resolveSpline(tSplineRecord* list)
     list->m_HeaderSeg = nodes;
     int prev = count - 1;
     for (i = 0; i < list->m_iNumSegments; i++) {
-        if ((int)nodes[i].m_PrevSeg != -1) {
+        if ((int)nodes[i].m_PrevSeg != kNullOffset) {
             nodes[i].m_PrevSeg = &nodes[prev];
         } else {
             nodes[i].m_PrevSeg = 0;
         }
-        if ((int)nodes[i].m_NextSeg != -1) {
+        if ((int)nodes[i].m_NextSeg != kNullOffset) {
             nodes[i].m_NextSeg = &nodes[next];
         } else {
             nodes[i].m_NextSeg = 0;
@@ -1211,10 +1212,10 @@ extern "C" int bxSphereTree_Load(void* self, char* data, void* ctx);
 /**
  * Builds a collision model's runtime data after it is loaded.
  *
- * Offsets of -1 at +0x4 (data), +0x8 (list) and +0xC (items) become 0, others become pointers into the record. For type
- * 3 the list gets the record's mesh count and item array; every 0x140-byte item is initialized with SphereTree_init and
- * then loaded from consecutive data with bxSphereTree_Load. For type 1 each mesh's four offsets are made absolute and
- * stored in the item array.
+ * Offsets of -1 (kNullOffset) at +0x4 (data), +0x8 (list) and +0xC (items) become 0, others become pointers into the
+ * record. For type 3 (CR_SphereTree) the list gets the record's mesh count and item array; every 0x140-byte item is
+ * initialized with SphereTree_init and then loaded from consecutive data with bxSphereTree_Load. For type 1
+ * (CR_Polygon) each mesh's four offsets are made absolute and stored in the item array.
  *
  * @param ctx  resource id of the model, passed on to bxSphereTree_Load (On Tour RID)
  * @param pCollideModel  the collision model record (On Tour pCollideModel)
@@ -1224,22 +1225,22 @@ int cChunkResolve::resolveCollideModel(void* ctx, tCollideModelRecord* pCollideM
 {
     // ORIGINAL-PTR: the loaded record (a file blob) holds byte offsets from itself in m_pColData / m_pPolyModelList /
     // m_pSphTree, and each tPolyModelMesh byte offsets from itself in its four arrays; they are made absolute here
-    if ((int)pCollideModel->m_pColData == -1) {
+    if ((int)pCollideModel->m_pColData == kNullOffset) {
         pCollideModel->m_pColData = 0;
     } else {
         pCollideModel->m_pColData = (char*)pCollideModel + (int)pCollideModel->m_pColData;
     }
-    if ((int)((tSphTreeList*)pCollideModel->m_pPolyModelList) == -1) {
+    if ((int)((tSphTreeList*)pCollideModel->m_pPolyModelList) == kNullOffset) {
         (*(tSphTreeList**)&pCollideModel->m_pPolyModelList) = 0;
     } else {
         (*(tSphTreeList**)&pCollideModel->m_pPolyModelList) = (tSphTreeList*)((char*)pCollideModel + (int)((tSphTreeList*)pCollideModel->m_pPolyModelList));
     }
-    if ((int)((char*)pCollideModel->m_pSphTree) == -1) {
+    if ((int)((char*)pCollideModel->m_pSphTree) == kNullOffset) {
         (*(char**)&pCollideModel->m_pSphTree) = 0;
     } else {
         (*(char**)&pCollideModel->m_pSphTree) = (char*)pCollideModel + (int)((char*)pCollideModel->m_pSphTree);
     }
-    if (pCollideModel->m_usMethod == 3) {
+    if (pCollideModel->m_usMethod == CR_SphereTree) {
         tSphTreeList* modelList = ((tSphTreeList*)pCollideModel->m_pPolyModelList);
         modelList->NumMesh = 0;
         (*(char**)&modelList->MeshTree) = 0;
@@ -1252,7 +1253,7 @@ int cChunkResolve::resolveCollideModel(void* ctx, tCollideModelRecord* pCollideM
         for (int i = 0; i < modelList->NumMesh; i++) {
             data += bxSphereTree_Load(&modelList->MeshTree[i], data, ctx);
         }
-    } else if (pCollideModel->m_usMethod == 1) {
+    } else if (pCollideModel->m_usMethod == CR_Polygon) {
         tSphTreeList* modelList = ((tSphTreeList*)pCollideModel->m_pPolyModelList);
         modelList->NumMesh = 0;
         (*(char**)&modelList->MeshTree) = 0;
@@ -1309,16 +1310,16 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveLight);
 /**
  * Accepts a loaded real-time light, limiting its range.
  *
- * Returns 0 for a light with flag 0x100 or a type (+0x10) other than 1 or 2; otherwise caps the range at +0x1C to 5000
- * and returns 1.
+ * Returns false for a light with flag 0x100 or a type (+0x10) other than 1 or 2; otherwise caps the range at +0x1C to
+ * 5000 and returns true.
  *
  * @param obj  the light record (On Tour pRTLight)
- * @return 1 when the light is used, else 0
+ * @return true when the light is used, else false
  */
-int cChunkResolve::resolveLight(tLightRecord* obj)
+bool cChunkResolve::resolveLight(tLightRecord* obj)
 {
     if (obj->m_iFlags & 0x100) {
-        return 0;
+        return false;
     }
     int lightType = obj->m_eLightType;
     if (lightType < 3) {
@@ -1326,10 +1327,10 @@ int cChunkResolve::resolveLight(tLightRecord* obj)
             if (obj->m_fMaxDistance > 5000.0f) {
                 obj->m_fMaxDistance = 5000.0f;
             }
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1340,19 +1341,19 @@ INCLUDE_ASM("world/worldview", cChunkResolve_unresolveLight);
  * Tells whether a real-time light being unloaded was one the resolver accepted.
  *
  * @param pRTLight  the light record (On Tour pRTLight)
- * @return 1 for a light of type 1 or 2 without flag 0x100, else 0
+ * @return true for a spot or point light (type 1 or 2) without flag 0x100, else false
  */
-int cChunkResolve::unresolveLight(tLightRecord* pRTLight)
+bool cChunkResolve::unresolveLight(tLightRecord* pRTLight)
 {
     if (pRTLight->m_iFlags & 0x100) {
-        return 0;
+        return false;
     }
     switch (pRTLight->m_eLightType) {
-    case 1:
-    case 2:
-        return 1;
+    case eNEWLight_Spot:
+    case eNEWLight_Point:
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1379,15 +1380,15 @@ float cChunkResolve::calcMaxLightDistance(tLightRecord* light, float divisor)
     float prod = light->m_fIntensity * light->m_fRGBIntensity;
     float ratio = prod / divisor;
     switch (light->m_cDecayRate) {
-    case 1:
+    case DECAY_LINEAR:
         return ratio * 100.0f;
-    case 2: {
+    case DECAY_EXPONENTIAL2: {
         float root;
         // PORT: sqrt.s (sqrtf without errno check)
         __asm__("sqrt.s %0, %1" : "=f"(root) : "f"(ratio));
         return root * 100.0f;
     }
-    case 3:
+    case DECAY_EXPONENTIAL3:
     {
         float third = 0.33333334f;
         float logRatio = logf(ratio);
@@ -1578,42 +1579,42 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
 void* cPS2ChunkResolve::resolve(int msg, unsigned int RID, char* obj)
 {
     switch (msg) {
-    case 1:
+    case kBxStreamData_Patch:
         *(unsigned short*)(obj + 0x1A2) += m_iNumImages;
         insert_AE68(this, 1, obj, 344);
         break;
-    case 9: {
+    case kBxStreamData_Image: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         (void*)w->AddTexture((const SHAPE*)obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
-    case 10: {
+    case kBxStreamData_LightPage: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         (void*)w->AddTexture((const SHAPE*)obj, str_strm_lpg, 0, 0, (RID >> 8) + m_iNumImages);
         break;
     }
-    case 3:
+    case kBxStreamData_Instance:
         CALL1_AE68(this, 104, obj);
         insert_AE68(this, 0, obj, 0x60);
         break;
-    case 2:
+    case kBxStreamData_Model:
         CALL1_AE68(this, 40, obj);
         break;
-    case 0:
+    case kBxStreamData_Material:
         CALL1_AE68(this, 72, obj);
         break;
-    case 6:
+    case kBxStreamData_RealTimeLight:
         if (CALL1_AE68(this, 168, obj)) {
             *(int*)(obj + 8) = 6;
             insert_AE68(this, 2, obj, 68);
         }
         break;
-    case 7:
+    case kBxStreamData_HaloLight:
         CALL1_AE68(this, 160, obj);
         *(int*)(obj + 8) = 8;
         insert_AE68(this, 2, obj, 40);
         break;
-    case 8: {
+    case kBxStreamData_Spline: {
         CALL1_AE68(this, 144, obj);
         tSplineSegmentRecord* child = (tSplineSegmentRecord*)(*(char**)(obj + 0x24));
         for (int i = 0; i < *(int*)(obj + 0x20); i++) {
@@ -1623,58 +1624,58 @@ void* cPS2ChunkResolve::resolve(int msg, unsigned int RID, char* obj)
         }
         break;
     }
-    case 5:
+    case kBxStreamData_ParticleInstance:
         CALL1_AE68(this, 136, obj);
         *(int*)(obj + 8) = 7;
         insert_AE68(this, 2, obj, 104);
         break;
-    case 4:
+    case kBxStreamData_ParticleModel:
         CALL1_AE68(this, 0x70, obj);
         break;
-    case 12:
+    case kBxStreamData_CollideModel:
         ((tMsg2_AE68)VT_AE68(this, 152)->fn)((char*)this + VT_AE68(this, 0x98)->delta, RID, obj);
         break;
-    case 13:
+    case kBxStreamData_IcePick:
         cWorldSound_InitWorldAudioFile(*(void**)(cAudioInterface_getGame_AE68() + 0x4C), obj, RID);
         break;
-    case 17:
+    case kBxStreamData_CameraFile:
         gCamTriggerMan_resolve((void*)RID, (int)obj);
         break;
-    case 15:
+    case kBxStreamData_WorldPainter:
         if (cWorld_m_pTheWorld) {
             cWorldPainterMan_load1((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, RID & 0xFF, obj);
         }
         break;
-    case 16:
+    case kBxStreamData_ColdSpell:
         if (cWorld_m_pTheWorld) {
             int sectionIdx = RID & 0xFF;
             cWScriptCache_load1((char**)cWorld_m_pTheWorld->m_pWScriptCache, sectionIdx, obj);
             cGame_loadWScriptManSection(getGame(), sectionIdx);
         }
         break;
-    case 18:
+    case kBxStreamData_NISTable:
         cSSXScriptEngine_AttachAnchorDataTable(ScriptEngine, RID & 0xFF, obj);
         break;
-    case 20:
+    case kBxStreamData_AudioBank:
         cSSXAudio_AttachAudioBank(cAudioInterface_bxAudio(), RID, obj);
         break;
-    case 19:
+    case kBxStreamData_Mission:
         cBEMissionInterface_addStreamData_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
         break;
-    case 21:
+    case kBxStreamData_Radar:
         func_002105D0(obj);
         break;
-    case 11:
+    case kBxStreamData_VisCurtain:
         cOcclusionMan_addVisCurtain(getOcclusionMan(), obj);
         break;
-    case 14:
+    case kBxStreamData_AIPath:
         if (!cAI_swaploadInjectedPathFile(*(void**)(*(char**)(SSXApp_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
             if (obj) {
                 cMemMan_free(obj);
             }
         }
         break;
-    case 22:
+    case kBxStreamData_Avalanche:
         cAvalanche_resolve(obj);
         break;
     }
@@ -1783,31 +1784,31 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
 void* cPS2ChunkResolve::unresolve(unsigned int msg, unsigned int resourceId, char* data)
 {
     switch (msg) {
-    case 0:
+    case kBxStreamData_Material:
         break;
-    case 1: {
+    case kBxStreamData_Patch: {
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 344);
         update_B498((char*)mp_Nash, 1, data, &box);
         break;
     }
-    case 9: {
+    case kBxStreamData_Image: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         ps2GraphicsMan->RemoveTexture(resourceId >> 8);
         break;
     }
-    case 10: {
+    case kBxStreamData_LightPage: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         ps2GraphicsMan->RemoveTexture((resourceId >> 8) + m_iNumImages);
         break;
     }
-    case 3: {
+    case kBxStreamData_Instance: {
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 0x60);
         update_B498((char*)mp_Nash, 0, data, &box);
         break;
     }
-    case 8: {
+    case kBxStreamData_Spline: {
         int i = 0;
         char* node = *(char**)(data + 0x24);
         if (i < *(int*)(data + 0x20)) {
@@ -1823,7 +1824,7 @@ void* cPS2ChunkResolve::unresolve(unsigned int msg, unsigned int resourceId, cha
         }
         break;
     }
-    case 6: {
+    case kBxStreamData_RealTimeLight: {
         sVEntry<void>* vt = (sVEntry<void>*)mVtbl;
         if (((int (*)(void*, void*))vt[22].fn)(vthis(this, vt[22]), data)) {
             *(int*)(data + 0x8) = 6;
@@ -1833,51 +1834,51 @@ void* cPS2ChunkResolve::unresolve(unsigned int msg, unsigned int resourceId, cha
         }
         break;
     }
-    case 7: {
+    case kBxStreamData_HaloLight: {
         *(int*)(data + 0x8) = 8;
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 40);
         update_B498((char*)mp_Nash, 2, data, &box);
         break;
     }
-    case 5: {
+    case kBxStreamData_ParticleInstance: {
         *(int*)(data + 0x8) = 7;
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 104);
         update_B498((char*)mp_Nash, 2, data, &box);
         break;
     }
-    case 13:
+    case kBxStreamData_IcePick:
         cWorldSound_PurgeWorldAudioFile(cAudioInterface_getGame()->WorldSound, data, resourceId);
         break;
-    case 17:
+    case kBxStreamData_CameraFile:
         func_0016CF18(resourceId);
         break;
-    case 15:
+    case kBxStreamData_WorldPainter:
         if (cWorld_m_pTheWorld != 0) {
             cWorldPainterSection_unload(((char**)(char**)cWorld_m_pTheWorld->m_pWorldPainterMan)[1] + (unsigned char)resourceId * 12);
         }
         break;
-    case 18:
+    case kBxStreamData_NISTable:
         cSSXScriptEngine_DetachAnchorDataTable(ScriptEngine, resourceId);
         break;
-    case 20:
+    case kBxStreamData_AudioBank:
         cSSXAudio_UnAttachAudioBank(cAudioInterface_bxAudio(), resourceId, data);
         break;
-    case 19:
+    case kBxStreamData_Mission:
         cBEMissionInterface_remStreamData_2(cBE_getInterface_Fv(cBE_getBE(), 10), resourceId);
         break;
-    case 21:
+    case kBxStreamData_Radar:
         func_00210608(data);
         break;
-    case 11:
+    case kBxStreamData_VisCurtain:
         cOcclusionMan_removeVisCurtain(getOcclusionMan(), data);
         break;
-    case 14:
+    case kBxStreamData_AIPath:
         data = 0;
         cAI_removeInjectedFile(SSXApp->Game->AI, resourceId);
         break;
-    case 22:
+    case kBxStreamData_Avalanche:
         cAvalanche_reset();
         break;
     }
@@ -2076,7 +2077,7 @@ extern "C" int func_003AC048_impl(void* vself, char* obj, char* ctx, int index)
     do {
         tag = *(long*)tagPtr;
         switch (((int)((tag << 4) >> 32)) & 7) {
-        case 3: {
+        case kDMATag_REF: {
             if (*(unsigned int*)(tagPtr + 4) & 0x80000000) {
                 split = 1;
                 *(unsigned int*)(tagPtr + 4) &= 0x7FFFFFFF;
@@ -2097,7 +2098,7 @@ extern "C" int func_003AC048_impl(void* vself, char* obj, char* ctx, int index)
             }
             if (split) {
                 char* next = tagPtr + 0x10;
-                if ((((int)((*(long*)next << 4) >> 32)) & 7) == 6) {
+                if ((((int)((*(long*)next << 4) >> 32)) & 7) == kDMATag_RET) {
                     *(long*)(tagPtr + 0x8) = 0;
                     *(long*)tagPtr = ((unsigned long)(unsigned int)D_00509400 << 32) | 0x30000001;
                     if (first) {
@@ -2138,7 +2139,7 @@ extern "C" int func_003AC048_impl(void* vself, char* obj, char* ctx, int index)
             first = 0;
             break;
         }
-        case 6:
+        case kDMATag_RET:
             tagPtr += 0x10;
             done = 1;
             break;
@@ -2271,7 +2272,7 @@ extern "C" char* func_003AC438(int ignored0, int ignored1, char* ctx, char* tagP
     do {
         tag = *(long*)tagPtr;
         switch (((int)((tag << 4) >> 32)) & 7) {
-        case 3: {
+        case kDMATag_REF: {
             *(int*)(tagPtr + 4) = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
             tagPtr += 0x10;
             tag = *(long*)tagPtr;
@@ -2289,7 +2290,7 @@ extern "C" char* func_003AC438(int ignored0, int ignored1, char* ctx, char* tagP
             }
             break;
         }
-        case 6:
+        case kDMATag_RET:
             tagPtr += 0x10;
             done = 1;
             break;
@@ -2331,7 +2332,7 @@ extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* instance
     do {
         tag = *(long*)tagPtr;
         switch (((int)((tag << 4) >> 32)) & 7) {
-        case 3: {
+        case kDMATag_REF: {
             int flag = 0;
             if (*(int*)(tagPtr + 4) & 0x80000000) {
                 *(int*)(tagPtr + 4) &= 0x7FFFFFFF;
@@ -2353,7 +2354,7 @@ extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* instance
             }
             if (flag) {
                 char* next = tagPtr + 0x10;
-                if ((((int)((*(long*)next << 4) >> 32)) & 7) == 6) {
+                if ((((int)((*(long*)next << 4) >> 32)) & 7) == kDMATag_RET) {
                     tag = *(long*)tagPtr;
                     int addr = (int)ctx->unk_024 + *(int*)(tagPtr + 4);
                     qwc = ((int)tag) & 0xFFFF;
@@ -2409,7 +2410,7 @@ extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* instance
             first = 0;
             break;
         }
-        case 6:
+        case kDMATag_RET:
             tagPtr += 0x10;
             done = 1;
             break;

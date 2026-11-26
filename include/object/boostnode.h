@@ -92,6 +92,14 @@ struct cBoostNode : public cInstanceNode {
                                     //      ctor1 test 1 / 2 (lw)
     char unk_044[0xC];              // 0x44 the state's tail padding (On Tour cBoostNodeState is 0x30; no access)
 
+    // Type values (names ours; On Tour's tMakeBoostData::Type is a plain int). [U] update boosts kBoostType_Timed
+    // beings every frame and expires the node once nothing touches it and Time is out; the other types boost only once
+    // Time is out. kBoostType_Local: ctor1 turns Boost by the instance's matrix and negates MaxSpeed, update skips
+    // computer riders, applyBoost pushes along Boost whenever the being is not moving against it.
+    enum eBoostType { kBoostType_Timed = 1, kBoostType_Local = 2 };
+    // The signal that restarts Time from BoostTime (name ours): [U] cBoostNode_signal ignores every other one.
+    enum { kBoostSignal_Restart = 1 };
+
     // Methods bound to their retail symbols by asm labels.
     cBoostNode* cBoostNode1(void* bucket, int nodeType, void* instance, tMakeBoostData* def)
         __asm__("cBoostNode_cBoostNode1");

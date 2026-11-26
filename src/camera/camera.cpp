@@ -230,10 +230,10 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     self->f458 = 0;
     self->f45C = 0;
     switch (riderIndex) {
-    case 0:
+    case cGameViewMan::kPlayer1View:
         self->fB0 = 0;
         break;
-    case 1:
+    case cGameViewMan::kPlayer2View:
         self->fB0 = 1;
         break;
     }
@@ -274,13 +274,13 @@ INCLUDE_ASM("camera/camera", cCamera_setCurrentController);
 void cCamera::setCurrentController(int mode)
 {
     switch (mode) {
-    case 1:
+    case CAMERA_CONTROLLER_MANUAL:
         Controller = (cCameraController*)((int)ManualController);
         break;
-    case 2:
+    case CAMERA_CONTROLLER_CHASE:
         Controller = (cCameraController*)((int)ChaseController);
         break;
-    case 3:
+    case CAMERA_CONTROLLER_SCRIPT:
         Controller = (cCameraController*)((int)ScriptController);
         break;
     }
@@ -939,7 +939,7 @@ extern "C" void cCamera_updateCamMat_E668(cCamera* self)
     algoNode = self->Controller->AlgorithmList->Head;
     cCameraAlgorithm* algo = algoNode->Algorithm;
     bool listLengthOne = self->Controller->AlgorithmList->Length == 1;
-    if (listLengthOne || algo->AlgorithmType == 74) {
+    if (listLengthOne || algo->AlgorithmType == CAMERA_ALGORITHM_CHASE_REPLAY) {
         self->Pose = algo->getPose();
         if (self->Controller == (cCameraController*)self->ChaseController) {
             self->ResultAlgorithm.Position = self->Pose.P;
@@ -1030,7 +1030,7 @@ static inline float clamp_15EC98(float v, float lo, float hi)
 void cCamera::updateStreamFocus()
 {
     float viewDist;
-    if ((int)SSXApp->Game->ViewMan->m_uiNumView == 1)
+    if ((int)SSXApp->Game->ViewMan->m_uiNumView == cGameViewMan::kOneView)
         viewDist = Far;
     else
         viewDist = clamp_15EC98(Far, 0.0f, 15000.0f);
@@ -1706,7 +1706,7 @@ extern "C" int cRiderCameraTarget_isAirPredictorDone(cRiderCameraTarget* self)
     cAirPredictor* airPredictor = rider->mAirPredictor;
     int simState = airPredictor->SimState;
     int done = 0;
-    if (simState == 1 || simState == 3) {
+    if (simState == cAirPredictor::kSS_SimDone || simState == cAirPredictor::kSS_SimCheckObjectsDone) {
         done = 1;
     }
     return done;
@@ -3998,11 +3998,11 @@ static inline float vlength_161AB0(const t4Vector& v)
 void cChaseCameraController::processInput()
 {
     int mode = 61;
-    if (PreferredChaseAlgoLastFrame != mode && LatestAlgoType != 74)
+    if (PreferredChaseAlgoLastFrame != mode && LatestAlgoType != CAMERA_ALGORITHM_CHASE_REPLAY)
         switchCamera_UserChange(mode);
     PreferredChaseAlgoLastFrame = mode;
     float speed = vlength_161AB0(Target->getVelocity()) * 0.035999998450279236f;
-    int boarding = cRider_getMotionState(Target->Rider) == 5;
+    int boarding = cRider_getMotionState(Target->Rider) == MS_Handplant;
     if (GoingSlow == 0) {
         if (boarding) {
             GoingSlow = 1;
@@ -4076,7 +4076,7 @@ void cChaseCameraController::update()
         n = n->Next;
         while (n) {
             Smooth_161BB8(n, ApproachZero_161BB8(n->Weight, rate));
-            if (n->Algorithm->AlgorithmType == 74)
+            if (n->Algorithm->AlgorithmType == CAMERA_ALGORITHM_CHASE_REPLAY)
                 n->Weight = 0.0f;
             if (n->Weight <= 0.0f || n->SmoothWeight <= 0.0f) {
                 n = cCameraAlgoList_remove(AlgorithmList, n);
@@ -4090,7 +4090,8 @@ void cChaseCameraController::update()
     int idle = InRace_161BB8(st) && st[1156 / 4] == 0;
     if (idle)
         TimeSinceLastSuggestedVolumeTrigger = 0.0f;
-    if (InRace_161BB8(st) && CamSwitchRecord.LatestReplayType == 93 && LatestAlgoType != CamSwitchRecord.PlayerChoiceType) {
+    if (InRace_161BB8(st) && CamSwitchRecord.LatestReplayType == CAMERA_ALGORITHM_WEBCAM &&
+        LatestAlgoType != CamSwitchRecord.PlayerChoiceType) {
         TimeSinceLastSuggestedVolumeTrigger += 0.01666666753590107f;
         if (TimeSinceLastSuggestedVolumeTrigger > 10.0f) {
             TimeSinceLastSuggestedVolumeTrigger = 0.0f;
@@ -4195,15 +4196,15 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_ReplayToggle);
 void cChaseCameraController::switchCamera_ReplayToggle(int mode)
 {
     CamSwitchRecord.IsInReplay = 1;
-    if (mode == 76) {
+    if (mode == CAMERA_ALGORITHM_CHASE_PREFERRED) {
         mode = CamSwitchRecord.PlayerChoiceType;
         cChaseCameraController_createChaseAlgorithmCut(this, mode, 0);
-    } else if (mode == 93) {
+    } else if (mode == CAMERA_ALGORITHM_WEBCAM) {
         if (CamSwitchRecord.IsInVolume)
             cChaseCameraController_createChaseAlgorithmCut(this, CamSwitchRecord.VolumeType,
                     (int)CamSwitchRecord.TriggerAction);
         else if (CamSwitchRecord.IsSlow)
-            cChaseCameraController_createChaseAlgorithmCut(this, 66, 0);
+            cChaseCameraController_createChaseAlgorithmCut(this, CAMERA_ALGORITHM_CHASE_SPOKE, 0);
         else
             cChaseCameraController_createChaseAlgorithmCut(this, CamSwitchRecord.PlayerChoiceType, 0);
     } else {
@@ -4230,7 +4231,7 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
  */
 void cChaseCameraController::switchCamera_Volume(int mode, int action, float blend)
 {
-    if (mode == 76) {
+    if (mode == CAMERA_ALGORITHM_CHASE_PREFERRED) {
         CamSwitchRecord.IsInVolume = 0;
         mode = CamSwitchRecord.PlayerChoiceType;
     } else {
@@ -4238,7 +4239,7 @@ void cChaseCameraController::switchCamera_Volume(int mode, int action, float ble
         CamSwitchRecord.IsInVolume = 1;
         CamSwitchRecord.TriggerAction = (cCTAction*)action;
     }
-    int ok = !CamSwitchRecord.IsInReplay ? 1 : CamSwitchRecord.LatestReplayType == 93;
+    int ok = !CamSwitchRecord.IsInReplay ? 1 : CamSwitchRecord.LatestReplayType == CAMERA_ALGORITHM_WEBCAM;
     if (ok) {
         cChaseCameraController_createChaseAlgorithmBlend(this, mode, action, blend);
     }
@@ -4261,7 +4262,7 @@ void cChaseCameraController::switchCamera_Chapter()
 {
     int mode = CamSwitchRecord.LatestReplayType;
     CamSwitchRecord.IsInVolume = 0;
-    if (mode == 93)
+    if (mode == CAMERA_ALGORITHM_WEBCAM)
         mode = CamSwitchRecord.PlayerChoiceType;
     cCamera_invalidateSafePosition();
     cChaseCameraController_createChaseAlgorithmBlend(this, mode, 0, 1.0f);
@@ -4321,8 +4322,10 @@ void cChaseCameraController::switchCamera_Slow()
 {
     CamSwitchRecord.IsSlow = 1;
     if (!CamSwitchRecord.IsInVolume && !CamSwitchRecord.IsInReplay) {
-        float blendTime = cRider_getMotionState(Target->Rider) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
-        cChaseCameraController_createChaseAlgorithmBlend(this, 66, 0, blendTime * 0.01666666753590107f);
+        float blendTime = cRider_getMotionState(Target->Rider) == MS_Handplant ? 1.2000000476837158f
+                                                                               : 0.6000000238418579f;
+        cChaseCameraController_createChaseAlgorithmBlend(this, CAMERA_ALGORITHM_CHASE_SPOKE, 0,
+                                                         blendTime * 0.01666666753590107f);
     }
 }
 #endif
@@ -4683,7 +4686,7 @@ extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(cLookAtChaseAlgorithm*
     t4Vector n = cmDot_162568(targetVelocity, targetVelocity) > 0.0f ? cmNormalized_162568(targetVelocity) : t4vect_Zero_v162568;
     int k = self->Target->getSurfaceType();
     float lo, hi, startSlope, endSlope;
-    if ((unsigned)(k - 2) < 2 || k == 13) {
+    if ((unsigned)(k - eST_Snow_Powder) < 2 || k == eST_Impassable) {
         lo = powderVelMinSmoothness;
         hi = powderVelMaxSmoothness;
         startSlope = powderVelStartSlope;
@@ -4706,7 +4709,7 @@ extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(cLookAtChaseAlgorithm*
         frac = 0.0f;
     }
     float smoothness = lo + (hi - lo) * frac;
-    if (mode == 1) {
+    if (mode == MS_Air) {
         if (cmLength_001607E0(w) < 27.77777862548828f) {
             w = self->LastHorizontalVel;
         }
@@ -4714,10 +4717,10 @@ extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(cLookAtChaseAlgorithm*
     t4Vector nf = cmLerp_162568(self->LastHorizontalVel, w, smoothness);
     self->LastHorizontalVel = nf;
     t4Vector chaseVelocity = cmAdd_001607E0(nf, dz);
-    out->RailSliding = mode == 4;
-    out->WipedOut = mode == 2;
-    out->Handplanting = mode == 5;
-    out->Airborne = mode == 1;
+    out->RailSliding = mode == MS_Railslide;
+    out->WipedOut = mode == MS_Wipeout;
+    out->Handplanting = mode == MS_Handplant;
+    out->Airborne = mode == MS_Air;
     out->MotionState = mode;
     out->Boost = self->Target->getBoostWarp();
     out->Crouch = self->Target->getCrouch();
@@ -5545,7 +5548,7 @@ extern "C" void cLookAtChaseAlgorithm_updateFOVWithSpeed(cLookAtChaseAlgorithm* 
     float k = obj->TargetSpeed;
     float x = fOVSpeedScalar * (k * 1.0000000116860974e-07f) * k + 1.0f + (fOVBoostScalar - 1.0f) * obj->Boost;
     int mode = obj->MotionState;
-    if (mode == 1)
+    if (mode == MS_Air)
         smoothness = 1.0f;
     else if (mode != 0)
         smoothness = 0.9990000128746033f;
@@ -6407,28 +6410,28 @@ void cLookAtChaseAlgorithm::updateSlowSpeedCam(cChaseSetup* info, float slowSpee
 {
     int trig = info->TargetSpeed * 0.035999998450279236f < slowSpeed && info->Airborne == 0 &&
                info->Handplanting == 0;
-    if (SlowCamState == 3 && trig) {
-        SlowCamState = 0;
+    if (SlowCamState == CABS_FullyOut && trig) {
+        SlowCamState = CABS_BlendingIn;
         SlowCamBlend = 0.0f;
         *(&SlowCamEnterLook) = Sub_1643A8(*(&CamTargetPos), *(&Position));
-    } else if (SlowCamState == 2 && !trig) {
-        SlowCamState = 1;
+    } else if (SlowCamState == CABS_FullyIn && !trig) {
+        SlowCamState = CABS_BlendingOut;
         SlowCamBlend = 1.0f;
-    } else if (SlowCamState == 0 && !trig) {
-        SlowCamState = 1;
-    } else if (SlowCamState == 1 && trig) {
-        SlowCamState = 0;
+    } else if (SlowCamState == CABS_BlendingIn && !trig) {
+        SlowCamState = CABS_BlendingOut;
+    } else if (SlowCamState == CABS_BlendingOut && trig) {
+        SlowCamState = CABS_BlendingIn;
     }
-    if (SlowCamState == 0) {
+    if (SlowCamState == CABS_BlendingIn) {
         SlowCamBlend = (SlowCamBlend + 0.01666666753590107f / blendInTime) <? 1.0f;
         if (SlowCamBlend == 1.0f)
-            SlowCamState = 2;
-    } else if (SlowCamState == 1) {
+            SlowCamState = CABS_FullyIn;
+    } else if (SlowCamState == CABS_BlendingOut) {
         SlowCamBlend = (SlowCamBlend - 0.01666666753590107f / blendOutTime) >? 0.0f;
         if (SlowCamBlend == 0.0f)
-            SlowCamState = 3;
+            SlowCamState = CABS_FullyOut;
     }
-    if (SlowCamState != 3) {
+    if (SlowCamState != CABS_FullyOut) {
         float fractionIn = SlowCamBlend;
         float fractionSquared = fractionIn * fractionIn;
         float smoothFraction = fractionSquared * 3.0f - (fractionSquared + fractionSquared) * fractionIn;
@@ -8745,7 +8748,7 @@ extern "C" void func_001673F8_impl(int initialize, int priority) __asm__("func_0
  */
 extern "C" void func_001673F8_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004C5020) sColor_1673F8(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004C5030) sColor_1673F8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004C5040) sColor_1673F8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);

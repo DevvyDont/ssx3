@@ -118,6 +118,23 @@ struct cUIState : public cListNode {
         kONPOPUPDESTROY = 22
     };
 
+    // EA's tUIStateMode: a state's life-cycle step, tAttrState::mMode. [O] On Tour enum cUIState::tUIStateMode, names
+    // and values. [U] retail fits: the ctors start at kPENDINGCREATE; cUIStateStack_updateLoop creates the screens
+    // (slot 4) and moves to kGAINTRANSITION, waits for it (slot 7), gains focus (slot 6) in kGAINFOCUS, runs kUPDATE
+    // (slot 12) every pass, waits out kLOSETRANSITION (slot 10), and in kLOSEFOCUS destroys the screens (slot 5) and
+    // ends in kNOFOCUS; it brings up a kPENDINGNEXT (else a kNOFOCUS) state when nothing is current.
+    enum tUIStateMode {
+        kNONE = 0,
+        kPENDINGNEXT = 1,
+        kPENDINGCREATE = 2,
+        kGAINFOCUS = 3,
+        kGAINTRANSITION = 4,
+        kUPDATE = 5,
+        kLOSETRANSITION = 6,
+        kLOSEFOCUS = 7,
+        kNOFOCUS = 8
+    };
+
     // Virtuals. Slots [R] cUIState_vtbl (2-3 are cListNode's traverseFlat / traverseRecurse), names, order and types
     // [O] (On Tour class cUIState: the same 21 in the same order); bool parameters are words.
     virtual ~cUIState();                                                              // 1
@@ -177,7 +194,7 @@ struct cUIState : public cListNode {
     void setExplicit(int isExplicit) __asm__("cUIState_setExplicit");
     int isPendingDelete() __asm__("cUIState_isPendingDelete");
     void setPendingDelete(int pendingDelete) __asm__("cUIState_setPendingDelete");
-    int hasPopup() __asm__("cUIState_hasPopup");
+    bool hasPopup() __asm__("cUIState_hasPopup");
     int numPopup() __asm__("cUIState_numPopup");
     void setHasPopup(int popupCount) __asm__("cUIState_setHasPopup");
     void incrementPopup() __asm__("cUIState_incrementPopup");

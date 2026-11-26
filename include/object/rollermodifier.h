@@ -56,7 +56,7 @@ struct bxSphereTree {
     // Methods bound to their retail symbols by asm labels.
     bxSphereTree* operatorE(bxSphereTree* src) __asm__("bxSphereTree_operatorE");
     int Load(char* buf, int aTreeID) __asm__("bxSphereTree_Load");
-    int IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int outContact)
+    bool IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, int outContact)
         __asm__("bxSphereTree_IsRiderTreeCollision");
     int Is2SidedTriCollision(t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* dir, t4Vector* overlap,
                              t4Vector* loc)

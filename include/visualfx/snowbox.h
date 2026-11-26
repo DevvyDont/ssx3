@@ -13,6 +13,9 @@
 #include "bx/math3d.h"
 #include "ui/uithing.h"           /* tARGB */
 
+// cSnowBox::mSnowBoxType. [O] On Tour's enum eSnowBoxType, names and values. [U] cSnowBox_update takes the flake
+// colours and sizes for 0 and the fluff ones for 1; cSnowBox_render draws RenderSnowBoxFlakes / RenderSnowBoxFluffs.
+enum eSnowBoxType { eSnowBoxFlake = 0, eSnowBoxFluff = 1 };
 
 struct cSnowBox {
     int mViewNum;                   // 0x000 [O]

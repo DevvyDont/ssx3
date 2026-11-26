@@ -57,9 +57,9 @@ struct cRiderSphereTree {
     void ApplyTransform(t4Matrix* mat, float scale) __asm__("cRiderSphereTree_ApplyTransform");
     void GetBoundBox(tBoundBox* box) __asm__("cRiderSphereTree_GetBoundBox");
     void GetMaskBoundBox(t4Vector* mnp, t4Vector* mxp) __asm__("cRiderSphereTree_GetMaskBoundBox");
-    int IsRiderCollision(cRiderSphereTree* nodeB, t4Vector* outA, t4Vector* outB)
+    bool IsRiderCollision(cRiderSphereTree* nodeB, t4Vector* outA, t4Vector* outB)
         __asm__("cRiderSphereTree_IsRiderCollision");
-    int IsBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, tIntersectInfo* hit)
+    bool IsBoxCollision(t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, tIntersectInfo* hit)
         __asm__("cRiderSphereTree_IsBoxCollision");
 };
 

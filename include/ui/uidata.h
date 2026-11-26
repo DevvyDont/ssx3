@@ -27,6 +27,13 @@ struct tUIARGB {
 
 // The common head of every object record. [O] struct tUIBaseObject (0x20).
 struct tUIBaseObject {
+    // The object kinds mTag holds (names ours). [U] cUIScreen::createObjectByStruct builds the widget for each, and
+    // each widget class's getType returns its own (cUIGroup_getType 0x10 .. cUIScrollBar_getType 0x21).
+    enum eUIObjectType {
+        kUIObj_Group = 0x10, kUIObj_Icon = 0x11, kUIObj_ListBox = 0x12, kUIObj_Menu = 0x13, kUIObj_Pair = 0x15,
+        kUIObj_Slider = 0x16, kUIObj_Text = 0x17, kUIObj_Vector = 0x18, kUIObj_Progress = 0x19,
+        kUIObj_TextScroll = 0x20, kUIObj_ScrollBar = 0x21
+    };
     unsigned short mTag;            // 0x00 [O] the object kind
     unsigned short mByteSize;       // 0x02 [O]; [U] cUIScreen_createObjectByHashName steps to the next record by it
     unsigned int mHashID;           // 0x04 [O]; [U] createObjectByHashName matches the hash; the object's mHashName
@@ -214,6 +221,14 @@ struct tUIFrameHeader {
 
 // The head of every key-channel packet in a frame. [O] struct tUIKCPBase (0x4).
 struct tUIKCPBase {
+    // The packet kinds mTag holds: keyframe 0x1x, object 0x2x, event 0x3x, screen 0x4x. Names ours, after the
+    // [O] handler each one goes to in cUIScreen_playFrameByThread (parseKeyframePause .. parseScreenFocusLose).
+    enum eKCPTag {
+        kKCP_KeyframePause = 0x10, kKCP_KeyframeJump = 0x11, kKCP_KeyframeSpawn = 0x12,
+        kKCP_ObjectAnim = 0x20, kKCP_ObjectSetPos = 0x21, kKCP_ObjectVisible = 0x22,
+        kKCP_EventTrigger = 0x30, kKCP_EventAudio = 0x31,
+        kKCP_ScreenStart = 0x40, kKCP_ScreenEnd = 0x41, kKCP_ScreenFocusGain = 0x42, kKCP_ScreenFocusLose = 0x43
+    };
     unsigned char mTag;             // 0x0 [O]; [U] cUIScreen_playFrameByThread switches on it
     unsigned char mPad1_tUIKCPBase; // 0x1 [O]
     unsigned short mPacketSize;     // 0x2 [O]; [U] playFrameByThread steps to the next packet by it

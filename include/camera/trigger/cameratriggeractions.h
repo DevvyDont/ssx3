@@ -31,6 +31,37 @@
 struct cCTBoundObj;
 struct cCTSpline;
 
+// cCTAction::Type. [O] On Tour's enum eCTActionType, names and values; [R] get_camaction builds a "Camera Switch
+// Action", "Camera Bound Action", "Camera Spline Action" or "Camera Action None" for 0..3.
+enum eCTActionType {
+    eCTActionSwitchCam = 0, eCTActionBoundedCam = 1, eCTActionSpline = 2, eCTActionNone = 3, eCTActionNum = 4
+};
+// cCTActionSwitchCam::SwitchType. [O] On Tour's enum eCTSwitchType, names and values; [U] doTriggerAction maps each
+// to the eCamAlgoType of the same name (eCTSwitchCustom and unknown values to CAMERA_ALGORITHM_CHASE_MID).
+enum eCTSwitchType {
+    eCTSwitchMid = 0, eCTSwitchNear = 1, eCTSwitchFar = 2, eCTSwitchHalfPipe = 3, eCTSwitchIdle = 4, eCTSwitchTight = 5,
+    eCTSwitchSlopeStyle = 6, eCTSwitchFirstPerson = 7, eCTSwitchTricky = 8, eCTSwitchMidLeft = 9,
+    eCTSwitchMidRight = 10, eCTSwitchManual = 11, eCTSwitchMidFOV = 12, eCTSwitchLazy = 13, eCTSwitchStubborn = 14,
+    eCTSwitchVeryFar = 15, eCTSwitchBootLeft = 16, eCTSwitchBootRight = 17, eCTSwitchDirection_N = 18,
+    eCTSwitchDirection_NW = 19, eCTSwitchDirection_W = 20, eCTSwitchDirection_SW = 21, eCTSwitchDirection_S = 22,
+    eCTSwitchDirection_SE = 23, eCTSwitchDirection_E = 24, eCTSwitchDirection_NE = 25, eCTSwitchPaulStubborn = 26,
+    eCTSwitchLarryStubborn = 27, eCTSwitchDynamicLarryStubborn = 28, eCTSwitchDynamicPaulStubborn = 29,
+    eCTSwitchDynamicStubborn = 30, eCTSwitchHighStubborn = 31, eCTSwitchLookBack = 32, eCTSwitchMatrix = 33,
+    eCTSwitchRelativeFront = 34, eCTSwitchRelativeFrontLeft = 35, eCTSwitchRelativeLeft = 36,
+    eCTSwitchRelativeRearLeft = 37, eCTSwitchRelativeRear = 38, eCTSwitchRelativeRearRight = 39,
+    eCTSwitchRelativeRight = 40, eCTSwitchRelativeFrontRight = 41, eCTSwitchPreferred = 42, eCTSwitchCustom = 43,
+    eCTSwitchARA1 = 44, eCTSwitchASS1 = 45, eCTSwitchABA1 = 46, eCTSwitchABC1 = 47, eCTSwitchBRA2 = 48,
+    eCTSwitchBHP1 = 49, eCTSwitchCRA3 = 50, eCTSwitchCHP2 = 51, eCTSwitchCBA2 = 52, eCTSwitchDRA4 = 53,
+    eCTSwitchDBC2 = 54, eCTSwitchDSS2 = 55, eCTSwitchERA5 = 56, eCTSwitchESS3 = 57, eCTSwitchEBA3 = 58,
+    eCTSwitchEHP3 = 59, eCTSwitchEBC3 = 60, eCTSwitchDEFAULT_1 = 61, eCTSwitchDEFAULT_2 = 62, eCTSwitchDEFAULT_3 = 63,
+    eCTSwitchDEFAULT_4 = 64, eCTSwitchDEFAULT_5 = 65, eCTSwitchSAFE_LOW = 66, eCTSwitchSAFE_HIGH = 67,
+    eCTSwitchSPOKE = 68, eCTSwitchSUPERPIPE = 69, eCTSwitchPOST_RACE_1 = 70, eCTSwitchPOST_RACE_2 = 71,
+    eCTSwitchPOST_RACE_3 = 72, eCTSwitchPOST_RACE_4 = 73, eCTSwitchPOST_RACE_5 = 74, eCTSwitchPOST_RACE_6 = 75
+};
+// cCTActionBoundedCam::TargetType. [O] On Tour's enum eCTTargetType, names and values; [U] cBoundedAlgorithm_update /
+// snap look at TargetPoint for eCTTargetPoint.
+enum eCTTargetType { eCTTargetRider = 0, eCTTargetPoint = 1, eCTTargetInstance = 2 };
+
 // cCTAction (retail and On Tour 0x8): the base of every action, and the type a trigger's EnterAction / ExitAction and
 // cChaseCameraController_createChaseAlgorithmBlend's action argument have ([O] createChaseAlgorithmBlend(...,
 // cCTAction* action, float blendRate)). [R] get_camaction stores cCTAction_vtbl first in every action it builds, then Type;

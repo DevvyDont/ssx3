@@ -94,6 +94,15 @@ struct cUIThing : public cListNode {
                                      //       [R] = t3vect_Zero; [U] channels 3-5 (degrees -> radians)
     int mHashName;                   // 0x038 [P] getHashName/setHashName (lw/sw 0x38; retail cUIThing_getHashName/cUIThing_setHashName);
                                      //       [U] compared by cUIThing_getObjectByHashName; set from the object record (cUIScreen_createAllObjects)
+    // Keyframe channels (names ours). [U] cUIThing_setChannelData / setChannelDataKCP: position, angle in degrees,
+    // size, scale in percent, the pivot bits of mAttr and the colour in 0-255; cUIVector_setChannelData takes the
+    // channels from kUIChannel_FirstVertex on as vertex data and passes the rest here.
+    enum eUIChannel {
+        kUIChannel_PosX = 0, kUIChannel_PosY = 1, kUIChannel_AngleX = 3, kUIChannel_AngleY = 4,
+        kUIChannel_AngleZ = 5, kUIChannel_SizeX = 6, kUIChannel_SizeY = 7, kUIChannel_ScaleX = 9,
+        kUIChannel_ScaleY = 10, kUIChannel_Pivot = 12, kUIChannel_Alpha = 13, kUIChannel_Red = 14,
+        kUIChannel_Green = 15, kUIChannel_Blue = 16, kUIChannel_FirstVertex = 21
+    };
     unsigned short* mpEvents;        // 0x03C [O]; [R] = 0; [U] keyframer event per index, 0xFFFF = none (cUIThing_getKeyframerEvent);
                                      //       cUIThing_setUIData points it after the object record
     cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail cUIThing_getParent/cUIThing_setParent); [R] = pParent;
@@ -145,12 +154,12 @@ struct cUIThing : public cListNode {
     int isLastAnimFrame() __asm__("cUIThing_isLastAnimFrame");
     int getEngine() __asm__("cUIThing_getEngine__FPv");
     unsigned short getKeyframerEvent(int x) __asm__("cUIThing_getKeyframerEvent__FP8cUIThingi");
-    int playKeyframerEvent(signed char idx) __asm__("cUIThing_playKeyframerEvent");
+    bool playKeyframerEvent(signed char idx) __asm__("cUIThing_playKeyframerEvent");
     void getAbsPosition(t3Vector* out) __asm__("cUIThing_getAbsPosition");
     int getSound(int soundIndex) __asm__("cUIThing_getSound");
     void setSound(int soundIndex, int sound) __asm__("cUIThing_setSound");
     void* cUIThing1() __asm__("cUIThing_cUIThing1");
-    int isPlayingAnimation() __asm__("cUIThing_isPlayingAnimation");
+    bool isPlayingAnimation() __asm__("cUIThing_isPlayingAnimation");
     int getAnimation() __asm__("cUIThing_getAnimation");
     int isHorizontal() __asm__("cUIThing_isHorizontal");
     int isVertical() __asm__("cUIThing_isVertical");

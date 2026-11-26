@@ -52,7 +52,7 @@ struct cUIIcon : public cUIThing {
     void setTiled(int tiled) __asm__("cUIIcon_setTiled");
     int isIconFlip() __asm__("cUIIcon_isIconFlip");
     void setIconFlip(int enable) __asm__("cUIIcon_setIconFlip");
-    int isIconRotate() __asm__("cUIIcon_isIconRotate");
+    bool isIconRotate() __asm__("cUIIcon_isIconRotate");
     void setIconRotate(int enable) __asm__("cUIIcon_setIconRotate");
     int getElement() __asm__("cUIIcon_getElement");
     void setElement(int textureElem) __asm__("cUIIcon_setElement");

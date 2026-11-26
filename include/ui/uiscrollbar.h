@@ -18,6 +18,16 @@
 #include "layout.h"
 #include "ui/uithing.h"
 
+// What cUIScrollBar::meHideState hides when the knob fills the track. [O] On Tour enum eScrollBarHide, names and
+// values; [U] cUIScrollBar_setValues hides the whole bar (All), the arrows and knob (Slider_HArrows) or only the knob,
+// showing the arrows (Slider_SArrows).
+enum eScrollBarHide {
+    eScrollBarHide_All = 0,
+    eScrollBarHide_Slider_HArrows = 1,
+    eScrollBarHide_Slider_SArrows = 2,
+    eScrollBarHide_None = 3
+};
+
 struct cUIScrollBar : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIScrollBar_vtbl (createObjectByStruct, cUIScrollBar_cUIScrollBar1, cUIScrollBar_cUIScrollBar, the dtor

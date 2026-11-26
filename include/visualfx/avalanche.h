@@ -46,6 +46,11 @@ struct tAvalancheNode;
 struct tActiveAvalancheNode;
 
 struct cAvalanche {
+    // Constants (names ours). [U] cAvalanche_SaveData writes kFileMagic as the .sav file's first word,
+    // cAvalanche_LoadData and cAvalanche_resolve reject data without it; cAvalanche_triggerAvalanche fills at most
+    // kMaxActiveNodes tActiveAvalancheNodes (cAvalanche_m_activeNodes[64]).
+    enum { kFileMagic = 0x2BEEF00, kMaxActiveNodes = 64 };
+
     // --- cVisualEffect (vptr only)
     void** mVtbl;                   // 0x000 [R] cAvalanche_vtbl (cAvalanche_cAvalanche, the allocation above);
                                     //       cAvalanche__cAvalanche stores it, then cVisualEffect's cVisualEffect_vtbl
@@ -154,7 +159,14 @@ struct tAvalancheNode {
                                     //       copies the 0xD8-byte record in when the node gets an emitter
     char unk_0D8[0x8];              // 0x0D8 alignment gap before the 16-aligned m_start (On Tour has it too)
     t4Vector m_start;               // 0x0E0 [O]; [U] resolveDataPointers stores (x, y, z, 1.0) from the file; calculate (lq)
-    unsigned short m_baseType;      // 0x0F0 [O]; [R] addAvalancheNode: 2 / 0 / 1 from the instance type; [U] calculate (lhu)
+    // m_baseType values (names ours). [U] tAvalancheNode_calculate gives only kBase_Bounce nodes the random bounce
+    // after a ground hit (cAvalanche_m_RandomBounceChance); a kBase_Permanent node never fades out (calculateScale) or
+    // ends (tActiveAvalancheNode_update / end), gets no emitter and is what getAvalancheDataByPosition reports.
+    enum eBaseType { kBase_Bounce = 0, kBase_NoBounce = 1, kBase_Permanent = 2 };
+    // cAvalanche_addAvalancheNode's script type (names ours, by the base it gives): 2 bounces, 5 is permanent.
+    enum { kScriptType_Bounce = 2, kScriptType_Permanent = 5 };
+    unsigned short m_baseType;      // 0x0F0 [O] eBaseType; [R] addAvalancheNode: 2 / 0 / 1 from the instance type;
+                                    //       [U] calculate (lhu)
     unsigned char m_hasEmitter;     // 0x0F2 [O]; [R] zeroed; [U] setAvalancheNodeEmitterData sets it
     unsigned char m_historyDeleteable; // 0x0F3 [O]; [R] zeroed; [U] resolveDataPointers frees m_history when set; calculate
     tAvalancheNode* m_next;         // 0x0F4 [O]; [R] pushed on tAvalanche::m_nodeList
@@ -237,7 +249,7 @@ struct tActiveAvalancheNode {
 
     // Methods bound to their retail symbols by asm labels.
     void calculateScale(float currTime) __asm__("tActiveAvalancheNode_calculateScale");
-    int update(float currTime) __asm__("tActiveAvalancheNode_update");
+    bool update(float currTime) __asm__("tActiveAvalancheNode_update");
     void end(int force) __asm__("tActiveAvalancheNode_end");
     void renderLines() __asm__("tActiveAvalancheNode_renderLines");
 };

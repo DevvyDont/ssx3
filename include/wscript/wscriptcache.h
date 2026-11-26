@@ -114,7 +114,9 @@ CHECK_SIZE(tCollideRecordEntry, 0x4);
 // cWScriptCacheEntry_resolve turns the ten of them into pointers once the cookie and the world checksum match. Union
 // member names from the prx DIEs (types.json drops them).
 struct tScriptFileHeader {
-    char Cookie[4];                 // 0x00 [O]; [U] resolve checks the first halfword against 0x1000
+    // The file's cookie halfword (name ours). [U] cWScriptCacheEntry_resolve drops a file whose first halfword differs.
+    enum { kCookie = 0x1000 };
+    char Cookie[4];                 // 0x00 [O]; [U] resolve checks the first halfword against kCookie (0x1000)
     char unk_004[0x8];              // 0x04 [O] char Coldfusion[4], char ScriptCookie[4]
     int WorldCheckSum;              // 0x0C [O]; [U] resolve compares it with the world data header's m_uiCheckSum
     int NumGlobalScriptData;        // 0x10 [O]; [U] the cache's global-script count getter returns it

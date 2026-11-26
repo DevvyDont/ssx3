@@ -38,21 +38,22 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 /**
  * Plays the object's keyframer event @p idx on its screen (cUIScreen_playFrame(.., event, 1)).
  *
- * Nothing happens when the object has no event table, the event is 0xFFFF (none) or there is no screen.
+ * Nothing happens when the object has no event table, the event is cUIScreen::kNoFrame (0xFFFF, none) or there is no
+ * screen.
  *
  * @param idx  the event index (On Tour char e)
- * @return 1 when the event was played, else 0 (On Tour returns bool)
+ * @return true when the event was played, else false (On Tour returns bool)
  */
-int cUIThing::playKeyframerEvent(signed char idx)
+bool cUIThing::playKeyframerEvent(signed char idx)
 {
-    if (mpEvents != 0 && mpEvents[idx] != 0xFFFF) {
+    if (mpEvents != 0 && mpEvents[idx] != cUIScreen::kNoFrame) {
         void* scr = mpScreen;
         if (scr != 0) {
             cUIScreen_playFrame(scr, mpEvents[idx], 1);
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -84,8 +85,8 @@ INCLUDE_ASM("ui/uithing", cUIThing_setChannelData);
 /**
  * Sets one animatable property of a widget from a keyframe value.
  *
- * Channels: 0-1 position, 3-5 rotation in degrees, 6-7 size, 9-10 scale in percent, 12 frame, 13-16 alpha and
- * RGB in 0-255. Other channels are ignored.
+ * Channels (eUIChannel): 0-1 position, 3-5 rotation in degrees, 6-7 size, 9-10 scale in percent, 12 frame, 13-16 alpha
+ * and RGB in 0-255. Other channels are ignored.
  *
  * @param key  the channel (On Tour channel)
  * @param data  the value in the channel's units
@@ -93,46 +94,46 @@ INCLUDE_ASM("ui/uithing", cUIThing_setChannelData);
 extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float data)
 {
     switch (key) {
-    case 0:
+    case cUIThing::kUIChannel_PosX:
         self->mPosition.x = data;
         break;
-    case 1:
+    case cUIThing::kUIChannel_PosY:
         self->mPosition.y = data;
         break;
-    case 9:
+    case cUIThing::kUIChannel_ScaleX:
         self->mScale.x = data * 0.01f;
         break;
-    case 10:
+    case cUIThing::kUIChannel_ScaleY:
         self->mScale.y = data * 0.01f;
         break;
-    case 3:
+    case cUIThing::kUIChannel_AngleX:
         self->mAngle.x = data * 0.017444444820284843f;
         break;
-    case 4:
+    case cUIThing::kUIChannel_AngleY:
         self->mAngle.y = data * 0.017444444820284843f;
         break;
-    case 5:
+    case cUIThing::kUIChannel_AngleZ:
         self->mAngle.z = data * 0.017444444820284843f;
         break;
-    case 12:
+    case cUIThing::kUIChannel_Pivot:
         ((tAttrThing*)&self->mAttr)->mPivot = (int)data;
         break;
-    case 13:
+    case cUIThing::kUIChannel_Alpha:
         self->mColour.A = data * 0.003921568859368563f;
         break;
-    case 14:
+    case cUIThing::kUIChannel_Red:
         self->mColour.R = data * 0.003921568859368563f;
         break;
-    case 15:
+    case cUIThing::kUIChannel_Green:
         self->mColour.G = data * 0.003921568859368563f;
         break;
-    case 16:
+    case cUIThing::kUIChannel_Blue:
         self->mColour.B = data * 0.003921568859368563f;
         break;
-    case 6:
+    case cUIThing::kUIChannel_SizeX:
         self->mSize.x = data;
         break;
-    case 7:
+    case cUIThing::kUIChannel_SizeY:
         self->mSize.y = data;
         break;
     }
@@ -145,9 +146,9 @@ INCLUDE_ASM("ui/uithing", cUIThing_setChannelDataKCP);
 /**
  * Applies a list of animation key values to the UI thing, one channel per pair.
  *
- * Each pair is a channel ID and a value: 0 and 1 position x/y, 3 to 5 angle x/y/z (degrees), 6 and 7 size x/y,
- * 9 and 10 scale x/y (percent), 12 attribute bits 13-18, 13 to 16 colour alpha, red, green and blue (0-255).
- * Other IDs are ignored.
+ * Each pair is a channel ID (eUIChannel) and a value: 0 and 1 position x/y, 3 to 5 angle x/y/z (degrees), 6 and 7 size
+ * x/y, 9 and 10 scale x/y (percent), 12 attribute bits 13-18, 13 to 16 colour alpha, red, green and blue (0-255). Other
+ * IDs are ignored.
  *
  * @param vself  the UI thing (this)
  * @param count  the number of pairs
@@ -162,46 +163,46 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
             float data = (float)pPtr[1];
             short id = pPtr[0];
             switch (id) {
-            case 0:
+            case cUIThing::kUIChannel_PosX:
                 vself->mPosition.x = data;
                 break;
-            case 1:
+            case cUIThing::kUIChannel_PosY:
                 vself->mPosition.y = data;
                 break;
-            case 9:
+            case cUIThing::kUIChannel_ScaleX:
                 vself->mScale.x = data * 0.01f;
                 break;
-            case 10:
+            case cUIThing::kUIChannel_ScaleY:
                 vself->mScale.y = data * 0.01f;
                 break;
-            case 3:
+            case cUIThing::kUIChannel_AngleX:
                 vself->mAngle.x = data * 0.017444445f;
                 break;
-            case 4:
+            case cUIThing::kUIChannel_AngleY:
                 vself->mAngle.y = data * 0.017444445f;
                 break;
-            case 5:
+            case cUIThing::kUIChannel_AngleZ:
                 vself->mAngle.z = data * 0.017444445f;
                 break;
-            case 12:
+            case cUIThing::kUIChannel_Pivot:
                 vself->mAttr = (vself->mAttr & 0xFFF81FFF) | (((int)data & 0x3F) << 13);
                 break;
-            case 13:
+            case cUIThing::kUIChannel_Alpha:
                 vself->mColour.A = data * 0.003921569f;
                 break;
-            case 14:
+            case cUIThing::kUIChannel_Red:
                 vself->mColour.R = data * 0.003921569f;
                 break;
-            case 15:
+            case cUIThing::kUIChannel_Green:
                 vself->mColour.G = data * 0.003921569f;
                 break;
-            case 16:
+            case cUIThing::kUIChannel_Blue:
                 vself->mColour.B = data * 0.003921569f;
                 break;
-            case 6:
+            case cUIThing::kUIChannel_SizeX:
                 vself->mSize.x = data;
                 break;
-            case 7:
+            case cUIThing::kUIChannel_SizeY:
                 vself->mSize.y = data;
                 break;
             }

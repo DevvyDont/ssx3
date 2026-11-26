@@ -80,11 +80,11 @@ struct cStreamMan {
     // Methods bound to their retail symbols by asm labels.
     void reset() __asm__("cStreamMan_reset");
     void purge() __asm__("cStreamMan_purge");
-    int addStreamRequest(int uiHullID, int uiNumHullChunk, int uiFileOffset) __asm__("cStreamMan_addStreamRequest");
+    bool addStreamRequest(int uiHullID, int uiNumHullChunk, int uiFileOffset) __asm__("cStreamMan_addStreamRequest");
     void cancelStreamRequest() __asm__("cStreamMan_cancelStreamRequest");
     void setBandWidthLimit(int rate) __asm__("cStreamMan_setBandWidthLimit");
     void update() __asm__("cStreamMan_update");
-    int processChunk(void* pcount_, void* pdata_) __asm__("cStreamMan_processChunk");
+    bool processChunk(void* pcount_, void* pdata_) __asm__("cStreamMan_processChunk");
 };
 
 CHECK_OFFSET(cStreamMan, mp_WorldCache, 0x000);

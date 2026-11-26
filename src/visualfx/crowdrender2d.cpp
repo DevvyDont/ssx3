@@ -193,13 +193,13 @@ INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_advanceFrame);
 /**
  * Steps a crowd animation frame according to its play mode and returns the new frame.
  *
- * Mode 0 plays forward and holds the last frame, 1 plays backward and holds frame 0, 2 and 3 ping-pong forward
- * and backward (the mode flips at each end), and 4 plays forward and loops to frame 0. Modes 2-4 leave a
- * one-frame animation alone. @p self is not used.
+ * kAT_Fwd plays forward and holds the last frame, kAT_Bck plays backward and holds frame 0, kAT_CycF and kAT_CycB
+ * ping-pong forward and backward (the mode flips at each end), and kAT_CycLoop plays forward and loops to frame 0. The
+ * cycling modes leave a one-frame animation alone. @p self is not used.
  *
  * @param frame  current frame
  * @param n      number of frames
- * @param mode   play mode; switched between 2 and 3 in place when a ping-pong reverses
+ * @param mode   play mode (eAnimPlayType); switched between kAT_CycF and kAT_CycB in place when a ping-pong reverses
  * @return the new frame
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -207,39 +207,39 @@ INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_advanceFrame);
 int cCrowdAnim2D::advanceFrame(int frame, int n, int* mode)
 {
     switch (*mode) {
-    case 0:
+    case kAT_Fwd:
         frame++;
         if (frame >= n) {
             frame = n - 1;
         }
         break;
-    case 1:
+    case kAT_Bck:
         frame--;
         if (frame < 0) {
             frame = 0;
         }
         break;
-    case 2:
+    case kAT_CycF:
         if (n == 1) {
             break;
         }
         frame++;
         if (frame >= n) {
-            *mode = 3;
+            *mode = kAT_CycB;
             frame = n - 2;
         }
         break;
-    case 3:
+    case kAT_CycB:
         if (n == 1) {
             break;
         }
         frame--;
         if (frame < 0) {
-            *mode = 2;
+            *mode = kAT_CycF;
             frame = 1;
         }
         break;
-    case 4:
+    case kAT_CycLoop:
         if (n == 1) {
             break;
         }
@@ -289,8 +289,9 @@ struct sCrowdAnim2D_BAC0 {
  * Advances a 2D crowd animation once its delay has passed, moving to the next animation through the
  * transition table.
  *
- * The table (cCrowdRender2D_mAnimStateMap, by type and current animation) gives the next animation. Kind 0 switches when back
- * at frame 0, kind 1 at the last frame, kind 2 at once; then the frame's texture is stored.
+ * The table (cCrowdRender2D_mAnimStateMap, by type and current animation) gives the next animation and its
+ * eAnimExitType: kAE_First switches when back at frame 0, kAE_Last at the last frame, kAE_Any at once; then the frame's
+ * texture is stored.
  */
 void cCrowdAnim2D::update()
 {
@@ -306,15 +307,15 @@ void cCrowdAnim2D::update()
         m_iCurrentFrame = advanceFrame(m_iCurrentFrame, cCrowdRender2D_mAnimTable[tr->anim].count, &m_CurrentPlayType);
     } else {
         switch (tr->kind) {
-        case 0: {
+        case kAE_First: {
             int* dir = &m_CurrentPlayType;
-            if (*dir == 0) {
-                *dir = 1;
+            if (*dir == kAT_Fwd) {
+                *dir = kAT_Bck;
             }
             if (m_iCurrentFrame == 0) {
                 m_CurrentAnimation = tr->anim;
                 m_CurrentPlayType = tr->mode;
-                if (m_CurrentPlayType == 1) {
+                if (m_CurrentPlayType == kAT_Bck) {
                     m_iCurrentFrame = cCrowdRender2D_mAnimTable[m_CurrentAnimation].count - 1;
                 } else {
                     m_iCurrentFrame = 0;
@@ -325,16 +326,16 @@ void cCrowdAnim2D::update()
             }
             break;
         }
-        case 1: {
+        case kAE_Last: {
             int* dir = &m_CurrentPlayType;
-            if (*dir == 1) {
-                *dir = 0;
+            if (*dir == kAT_Bck) {
+                *dir = kAT_Fwd;
             }
             int cnt = cCrowdRender2D_mAnimTable[m_CurrentAnimation].count;
             if (m_iCurrentFrame == cnt - 1) {
                 m_CurrentAnimation = tr->anim;
                 m_CurrentPlayType = tr->mode;
-                if (m_CurrentPlayType == 1) {
+                if (m_CurrentPlayType == kAT_Bck) {
                     m_iCurrentFrame = cCrowdRender2D_mAnimTable[m_CurrentAnimation].count - 1;
                 } else {
                     m_iCurrentFrame = 0;
@@ -344,7 +345,7 @@ void cCrowdAnim2D::update()
             }
             break;
         }
-        case 2:
+        case kAE_Any:
             m_CurrentAnimation = tr->anim;
             m_CurrentPlayType = tr->mode;
             m_iCurrentFrame = advanceFrame(m_iCurrentFrame, cCrowdRender2D_mAnimTable[m_CurrentAnimation].count,

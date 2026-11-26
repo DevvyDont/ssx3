@@ -39,7 +39,7 @@ void cUIMenu::setSelected(cUIThing* item, int play)
     cUIThing* cur = mpSelected;
     if (((char*)cur) != 0 && ((cur->mAttr >> 4) & 1)) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
-        if (ev != 0xFFFF) {
+        if (ev != cUIScreen::kNoFrame) {
             void* scr = mpSelected->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
@@ -58,7 +58,7 @@ void cUIMenu::setSelected(cUIThing* item, int play)
     cUIThing* newSelected = mpSelected;
     newSelected->setFocus(1);
     unsigned short ev2 = cUIThing_getKeyframerEvent(mpSelected, 0);
-    if (ev2 != 0xFFFF) {
+    if (ev2 != cUIScreen::kNoFrame) {
         void* scr = mpSelected->mpScreen;
         if (scr != 0) {
             if (play) {
@@ -101,12 +101,12 @@ static inline void cUIMenu_onInputChangeItem_notify(char* vself, int ev, unsigne
  *
  * @param selfp  the menu
  * @param OldScrollItemCurrent  the current item before the input
- * @return 1 when the current item changed, otherwise 0
+ * @return true when the current item changed, otherwise false
  */
 // cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent) (On Tour debug 0x0027E39C):
 // keeps the selected row (0x95) inside the visible window (top 0x98, rows 0x97), then reselects.
 // MenuEntryIndex is a short in On Tour's DWARF; the short is what keeps the second 0x95 load.
-int cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent)
+bool cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent)
 {
     if (OldScrollItemCurrent != mScrollItemCurrent) {
         short MenuEntryIndex = mScrollItemCurrent - mScrollItemOffset;
@@ -124,9 +124,9 @@ int cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent)
         char* pNextSelected = (char*)cList_getByIndex_i_AE98(&mList, MenuEntryIndex);
         setSelected((cUIThing*)pNextSelected, *(int*)&mAttrMenu & 1);
         cUIMenu_onInputChangeItem_notify(((char*)this), 5, mScrollItemOffset);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -140,7 +140,7 @@ extern "C" int cUIThing_getSound(void* self, int a);
 extern char gUISoundNull[4];
 extern "C" unsigned char cUIMenu_getNext(void* self);
 extern "C" unsigned char cUIMenu_getPrev(void* self);
-extern "C" int cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
+extern "C" bool cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
 
 
 static inline int inputIs_B000(void* in, int slot)
@@ -177,7 +177,7 @@ static inline int bit_B000(char* p, int off, int bit)
 static inline void playEvent_B000(char* thing, int which)
 {
     unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)thing, which);
-    if (ev != 0xFFFF) {
+    if (ev != cUIScreen::kNoFrame) {
         void* scr = *(void**)(thing + 0x5C);
         if (scr != 0) {
             cUIScreen_playFrame(scr, ev, 1);
@@ -195,20 +195,20 @@ static inline void playEvent_B000(char* thing, int which)
  * state's menu handler, whose result flags pick the item's animation and sound; the UI sound player plays it.
  *
  * @param in  the input (On Tour const cUIInput*)
- * @return 1 when the menu used the input, otherwise 0
+ * @return true when the menu used the input, otherwise false
  */
-extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
+extern "C" bool cUIMenu_onInput(cUIMenu* self, cUIInput* in)
 {
     if (((self->mAttr >> 5) & 1) || (char*)self->mpSelected == 0) {
-        return 0;
+        return false;
     }
     cUIThing* cur = self->mpSelected;
     if (!bit_B000(((char*)self), 20, 4)) {
-        return 0;
+        return false;
     }
     if (bit_B000(((char*)cur), 20, 3) && !bit_B000(((char*)cur), 20, 5)) {
         if (cur->onInput(in) != 0) {
-            return 1;
+            return true;
         }
     }
     int result = 0;
@@ -222,7 +222,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         } else {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 7);
         }
-        if (ev != 0xFFFF) {
+        if (ev != cUIScreen::kNoFrame) {
             void* scr = self->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
@@ -245,7 +245,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         } else {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 6);
         }
-        if (ev != 0xFFFF) {
+        if (ev != cUIScreen::kNoFrame) {
             void* scr = self->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
@@ -312,7 +312,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 4);
     } else {
-        return 0;
+        return false;
     }
     cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
     char* listener = (char*)owner->mpSound;
@@ -323,7 +323,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
         vt[2].fn(vthis(listener, vt[2]), result);
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -414,12 +414,12 @@ struct cUIMenu_findFirstHighlightable_sVEntry {
  * With menu attribute bit 2 set the screen's handler (+0xD0, slot 20) decides per index (called with the menu, 1
  * and the index); otherwise an item qualifies when bit 5 of its flags (+0x14) is clear.
  *
- * @param start  the first index to try (On Tour startIndex); 0xFF means 0
- * @return the item's index, or 0xFF when none qualifies
+ * @param start  the first index to try (On Tour startIndex); kNoItem (0xFF) means 0
+ * @return the item's index, or kNoItem when none qualifies
  */
 unsigned char cUIMenu::findFirstHighlightable(unsigned char start)
 {
-    unsigned char i = start == 0xFF ? 0 : start;
+    unsigned char i = start == kNoItem ? 0 : start;
     for (; i < mScrollItemNum; i++) {
         void* item = cList_getByIndex((char*)&mList, i);
         if (*(int*)&mAttrMenu & 4) {
@@ -644,7 +644,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
     }
     if (on) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 0);
-        if (ev != 0xFFFF) {
+        if (ev != cUIScreen::kNoFrame) {
             void* scr = self->mpWidget->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
@@ -656,7 +656,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         screenState->onWidgetEvent(self->mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
-        if (ev != 0xFFFF) {
+        if (ev != cUIScreen::kNoFrame) {
             void* scr = self->mpWidget->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
@@ -854,7 +854,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
         moveResult = focusMove_BED8(((char*)self), 0);
         if (moveResult & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 2);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }
@@ -872,7 +872,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
         moveResult = focusMove_BED8(((char*)self), 1);
         if (moveResult & 0x100) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 3);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
         }

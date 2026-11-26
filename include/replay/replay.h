@@ -97,7 +97,7 @@ struct cReplayHighlight {
     void begin(cReplayFrame* rider, tRiderStats* src) __asm__("cReplayHighlight_begin");
     void end() __asm__("cReplayHighlight_end__FPv");
     void cancel() __asm__("cReplayHighlight_cancel");
-    int setRanking(tRiderStats* stats, int mode) __asm__("cReplayHighlight_setRanking");
+    bool setRanking(tRiderStats* stats, int mode) __asm__("cReplayHighlight_setRanking");
 };
 
 // The save stream's running size and byte checksum (On Tour tWriteCheckSum, 0x8).
@@ -182,8 +182,17 @@ struct cReplay {
                                          //       frames and EndRecordTick; blocks event marking (cReplay_eventJump,
                                          //       cReplay_eventChapter); saved by cReplay_writeHeaderStart, loaded by cReplay_load
     int ShowError;                       // 0x614 [O]; [U] cReplay_update counts it down to 0
-    int Cmd;                             // 0x618 [O]; [U] cReplay_updateInput stores the replay-menu command (0..8);
-                                         //       cReplay_processInput switches on it
+    // Cmd values (names ours). [U] cReplay_processInput: Rewind goes to the start, LastFrame to the last frame,
+    // PrevFrame / NextFrame to the previous / next key frame, Step steps one frame, TogglePause switches between
+    // kPlaybackInput and kGamePlayback, Pause enters kPlaybackInput (cReplay_update does too), Stop does nothing
+    // (cReplay_updateInput sets it after cGame_stopReplay).
+    enum eReplayCmd {
+        kReplayCmd_None = 0, kReplayCmd_Rewind = 1, kReplayCmd_LastFrame = 2, kReplayCmd_PrevFrame = 3,
+        kReplayCmd_NextFrame = 4, kReplayCmd_Step = 5, kReplayCmd_TogglePause = 6, kReplayCmd_Pause = 7,
+        kReplayCmd_Stop = 8
+    };
+    int Cmd;                             // 0x618 [O] eReplayCmd; [U] cReplay_updateInput stores the replay-menu command
+                                         //       (0..8); cReplay_processInput switches on it
     int AutoReplay;                      // 0x61C [O] (On Tour: bool); [U] cReplay_update sets it (state 9);
                                          //       cReplay_startAutoReplay, cReplay_stopAutoReplay, cReplay_stepFrame (loop at the
                                          //       end)
@@ -199,6 +208,14 @@ struct cReplay {
     int CurrentInstantReplayCamIndex;    // 0x634 [O]; [U] cReplay_setupInstantReplayCameras steps it % 9
     int WriteState;                      // 0x638 [O]; [U] the save writer's state (0..11): cReplay_getSaveData switches on
                                          //       it, every step ++ it
+    // WriteState values (names ours; On Tour's WriteState is a plain int): [U] cReplay_getSaveData runs the writer
+    // step named by each (writeHeaderStart .. writeCheckSum), steps kWrite_Finish on by itself and stops at
+    // kWrite_Done.
+    enum eWriteState {
+        kWrite_HeaderStart = 0, kWrite_Header = 1, kWrite_FramesStart = 2, kWrite_Frames = 3, kWrite_InputStart = 4,
+        kWrite_Input = 5, kWrite_PadStart = 6, kWrite_Pad = 7, kWrite_CheckSumStart = 8, kWrite_CheckSum = 9,
+        kWrite_Finish = 10, kWrite_Done = 11
+    };
     tReplayMemCardBlock* WriteBlock;     // 0x63C [O]; [R] cReplay_allocSaveSpace: cMemMan_alloc(0x4000, "WriteBlock"); [U]
                                          //       cReplay_getSaveData fills and returns it
     char* WriteTmp;                      // 0x640 [O]; [R] cReplay_allocSaveSpace: operator new(0xC800, "WriteTmp"); [U]
@@ -282,6 +299,9 @@ struct cReplay {
     void eventLand(int key, int id) __asm__("cReplay_eventLand");
     void eventWipeout(int key, int id) __asm__("cReplay_eventWipeout");
     void eventReset(int key) __asm__("cReplay_eventReset");
+    // eventWScript's command (names ours; On Tour's cmd is a plain int): [U] cReplay_eventWScript begins an
+    // instant-replay mark for kWScriptReplay_MarkInstantReplay and a highlight mark for kWScriptReplay_MarkHighlight.
+    enum { kWScriptReplay_MarkInstantReplay = 0, kWScriptReplay_MarkHighlight = 1 };
     void eventWScript(int key, int mode) __asm__("cReplay_eventWScript");
     void eventChapter(int key, int bit) __asm__("cReplay_eventChapter");
     void beginMarkHighlight(int playerId, int id) __asm__("cReplay_beginMarkHighlight");
@@ -295,7 +315,7 @@ struct cReplay {
     void* purgeSaveSpace() __asm__("cReplay_purgeSaveSpace");
     void writeBuffered() __asm__("cReplay_writeBuffered");
     void writeSetup(signed char* data, int size) __asm__("cReplay_writeSetup");
-    int getSaveData(char** block, int* size) __asm__("cReplay_getSaveData");
+    bool getSaveData(char** block, int* size) __asm__("cReplay_getSaveData");
     void writeHeaderStart() __asm__("cReplay_writeHeaderStart");
     void writeHeader() __asm__("cReplay_writeHeader");
     int writeFrameCount() __asm__("cReplay_writeFrameCount");
@@ -307,7 +327,7 @@ struct cReplay {
     void writePad() __asm__("cReplay_writePad");
     void* writeCheckSumStart() __asm__("cReplay_writeCheckSumStart__FPv");
     void writeCheckSum() __asm__("cReplay_writeCheckSum");
-    int load(char* buf) __asm__("cReplay_load");
+    bool load(char* buf) __asm__("cReplay_load");
 };
 
 CHECK_OFFSET(cReplayFrameList, Tail, 0x0);

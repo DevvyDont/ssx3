@@ -144,16 +144,16 @@ static inline void cUIStateStack_enableState_setId(cUIStateStack_enableState_nod
 static inline void cUIStateStack_enableState_setB4(cUIStateStack_enableState_node* n, int v) { n->bits.b4 = v; }
 
 /**
- * Enables the first non-explicit state of mode @p id on a state stack: sets it visible, enabled and first-time, mode 2
- * (starting).
+ * Enables the first non-explicit state of mode @p id on a state stack: sets it visible, enabled and first-time, mode
+ * kPENDINGCREATE.
  *
- * Modes are bits 8..13 of the state's attribute word (+0x1C); explicit states (bit 6) are skipped. cUIStateStack_updateLoop uses
- * it to bring up a mode-1 or mode-8 state when nothing is current.
+ * Modes are bits 8..13 of the state's attribute word (+0x1C); explicit states (bit 6) are skipped.
+ * cUIStateStack_updateLoop uses it to bring up a kPENDINGNEXT or kNOFOCUS state when nothing is current.
  *
  * @param id  the mode to look for
- * @return 1 when a state was enabled, else 0
+ * @return true when a state was enabled, else false
  */
-int cUIStateStack::enableState(signed char id)
+bool cUIStateStack::enableState(signed char id)
 {
     cUIStateStack_enableState_node* n = (cUIStateStack_enableState_node*)cList_first(((cList*)this));
     if (n != 0) {
@@ -161,14 +161,14 @@ int cUIStateStack::enableState(signed char id)
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
                 cUIStateStack_enableState_setB3(n, 1);
                 cUIStateStack_enableState_setB5(n, 1);
-                cUIStateStack_enableState_setId(n, 2);
+                cUIStateStack_enableState_setId(n, cUIState::kPENDINGCREATE);
                 cUIStateStack_enableState_setB4(n, 1);
-                return 1;
+                return true;
             }
             n = n->next;
         } while (!cListNode_isSentinel((cListNode*)n));
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -190,23 +190,23 @@ struct cUIStateStack_checkForState_node {
 /**
  * Returns whether a state stack holds a non-explicit state of mode @p id.
  *
- * cUIStateStack_updateLoop uses it with mode 1 when a popup closes.
+ * cUIStateStack_updateLoop uses it with kPENDINGNEXT when a popup closes.
  *
  * @param id  the mode to look for
- * @return 1 when one exists, else 0
+ * @return true when one exists, else false
  */
-int cUIStateStack::checkForState(signed char id)
+bool cUIStateStack::checkForState(signed char id)
 {
     cUIStateStack_checkForState_node* n = (cUIStateStack_checkForState_node*)cList_first(((cList*)this));
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
-                return 1;
+                return true;
             }
             n = n->next;
         } while (!cListNode_isSentinel((cListNode*)n));
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -305,14 +305,16 @@ struct cUIStateStack_updateLoop_sVEntryV {
 /**
  * Runs one pass of the UI state life cycle over the enabled states of a state stack's main list.
  *
- * By mode (attribute bits 8..13): 2 calls virtual slot 4 and becomes 4 (a popup also shows its parent chain with
- * cUIStateStack_setVisibleToChain and sends the parent event 0x15 through slot 17); 4 waits for slot 7 (passed the first-time bit) to
- * return nonzero, then 3; 3 calls slot 6 and becomes 5; 5 calls slot 12 each pass; 6 waits for slot 10, then 7; 7 calls
- * slots 11 and 5, becomes 8 and is disabled. A closing popup is marked pending delete, lowers its parent's popup count
- * (re-enabling the parent at 0) and sends it event 0x16; but when a mode-1 state exists (checked unless the push-check
- * bit 14 is set) it only hides its parent chain. A pending-delete state is unlinked and deleted (slot 1 with 3), others
- * are hidden. When nothing is current afterwards, a mode-1 state (or else a mode-8 one) is enabled with cUIStateStack_enableState.
- * Changed states run cUIState_updateScreens.
+ * By mode (cUIState::tUIStateMode, attribute bits 8..13): kPENDINGCREATE calls virtual slot 4 and becomes
+ * kGAINTRANSITION (a popup also shows its parent chain with cUIStateStack_setVisibleToChain and sends the parent
+ * kONPOPUPCREATE through slot 17); kGAINTRANSITION waits for slot 7 (passed the first-time bit) to return nonzero, then
+ * kGAINFOCUS; kGAINFOCUS calls slot 6 and becomes kUPDATE; kUPDATE calls slot 12 each pass; kLOSETRANSITION waits for
+ * slot 10, then kLOSEFOCUS; kLOSEFOCUS calls slots 11 and 5, becomes kNOFOCUS and is disabled. A closing popup is
+ * marked pending delete, lowers its parent's popup count (re-enabling the parent at 0) and sends it kONPOPUPDESTROY;
+ * but when a kPENDINGNEXT state exists (checked unless the push-check bit 14 is set) it only hides its parent chain. A
+ * pending-delete state is unlinked and deleted (slot 1 with 3), others are hidden. When nothing is current afterwards,
+ * a kPENDINGNEXT state (or else a kNOFOCUS one) is enabled with cUIStateStack_enableState. Changed states run
+ * cUIState_updateScreens.
  *
  * @return nonzero when a state finished closing and none started in this pass (cUIStateStack_update then runs another pass)
  */
@@ -326,52 +328,52 @@ int cUIStateStack::updateLoop()
             cUIStateStack_updateLoop_node* next = n->next;
             if ((n->flags >> 5) & 1) {
                 switch ((signed char)n->bits.id) {
-                case 2:
+                case cUIState::kPENDINGCREATE:
                     any = 1;
                     VCALLV_ECB0(n, 4);
-                    n->bits.id = 4;
+                    n->bits.id = cUIState::kGAINTRANSITION;
                     cUIState_updateScreens(n);
                     if (n->flags & 1) {
                         cUIStateStack_updateLoop_node* o = n->owner;
                         if (o != 0) {
                             cUIStateStack_setVisibleToChain(this, o, 1, 1);
-                            VCALLV_ECB0(o, 17, n, 0x15);
+                            VCALLV_ECB0(o, 17, n, cUIState::kONPOPUPCREATE);
                         }
                     }
-                case 4:
+                case cUIState::kGAINTRANSITION:
                     if (VCALL_ECB0(n, 7, (n->flags >> 4) & 1)) {
-                        n->bits.id = 3;
+                        n->bits.id = cUIState::kGAINFOCUS;
                     }
                     n->bits.b4 = 0;
                     cUIState_updateScreens(n);
                     break;
-                case 3:
+                case cUIState::kGAINFOCUS:
                     if ((n->flags >> 4) & 1) {
                         VCALL_ECB0(n, 7, 1);
                         n->bits.b4 = 0;
                     }
                     VCALLV_ECB0(n, 6, 0);
-                    n->bits.id = 5;
+                    n->bits.id = cUIState::kUPDATE;
                     cUIState_updateScreens(n);
                     break;
-                case 5:
+                case cUIState::kUPDATE:
                     VCALLV_ECB0(n, 12);
                     cUIState_updateScreens(n);
                     break;
-                case 6:
+                case cUIState::kLOSETRANSITION:
                     if (VCALL_ECB0(n, 10)) {
-                        n->bits.id = 7;
+                        n->bits.id = cUIState::kLOSEFOCUS;
                     }
                     n->bits.b4 = 1;
                     cUIState_updateScreens(n);
                     break;
-                case 7: {
+                case cUIState::kLOSEFOCUS: {
                     int top;
                     int found = 0;
                     popped = 1;
                     VCALLV_ECB0(n, 11, 0);
                     VCALLV_ECB0(n, 5);
-                    n->bits.id = 8;
+                    n->bits.id = cUIState::kNOFOCUS;
                     n->bits.b5 = 0;
                     if ((n->flags >> 7) & 1) {
                         cListNode_removeFromList(n);
@@ -381,7 +383,7 @@ int cUIStateStack::updateLoop()
                         cUIStateStack_updateLoop_node* o = n->owner;
                         popped = 0;
                         if (((n->flags >> 14) & 1) == 0) {
-                            found = checkForState(1);
+                            found = checkForState(cUIState::kPENDINGNEXT);
                         } else {
                             found = 0;
                         }
@@ -392,7 +394,7 @@ int cUIStateStack::updateLoop()
                                     o->bits.cnt = o->bits.cnt - 1;
                                 }
                                 o->bits.b5 = o->bits.cnt == 0;
-                                VCALLV_ECB0(o, 17, n, 0x16);
+                                VCALLV_ECB0(o, 17, n, cUIState::kONPOPUPDESTROY);
                             }
                         } else if (o != 0) {
                             cUIStateStack_setVisibleToChain(this, o, 0, 1);
@@ -407,8 +409,8 @@ int cUIStateStack::updateLoop()
                         }
                     }
                     if (top == 0 || found != 0) {
-                        if (cUIStateStack_getCurrentState(this) == 0 && enableState(1) == 0) {
-                            enableState(8);
+                        if (cUIStateStack_getCurrentState(this) == 0 && !enableState(cUIState::kPENDINGNEXT)) {
+                            enableState(cUIState::kNOFOCUS);
                         }
                     }
                     break;
@@ -509,7 +511,7 @@ done:
 INCLUDE_ASM("ui/uistate", cUIStateStack_pop1);
 #ifdef SKIP_ASM
 /**
- * Closes one active state: when @p node is enabled and in mode 5 it becomes mode 6 (losing) and pending delete.
+ * Closes one active state: when @p node is enabled and in kUPDATE it becomes kLOSETRANSITION and pending delete.
  *
  * Nothing in the retail code references it.
  *
@@ -518,7 +520,7 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_pop1);
 void cUIStateStack::pop1(cUIState* node)
 {
     int flags = node->mAttrState;
-    if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == 5) {
+    if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == cUIState::kUPDATE) {
         node->mAttrState = (flags & ~0x3F00) | 0x680;
     }
 }

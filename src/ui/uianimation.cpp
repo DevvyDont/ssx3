@@ -141,7 +141,7 @@ extern void* cUIAnimation_vtbl[];
  * Constructs an animation over an animation record and points one channel at each of its tracks.
  *
  * Stores the vtable (+0x10) and @p data (+0x0), and marks no frame applied (+0x8 = -1), frame 0 (+0xA) and no
- * start frame (+0xC = 0xFFFF). When the record has tracks (count at +0x4) it array-allocates the channels
+ * start frame (+0xC = kNoStartFrame). When the record has tracks (count at +0x4) it array-allocates the channels
  * ("UIAnimChan") and points each at its track; tracks follow the 0x10-byte header, each sized by its u16 at
  * +0x4.
  *
@@ -155,7 +155,7 @@ extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
     self->mpAnimChannels = 0;
     self->mLastFrameEval = -1;
     self->mFrameNum = 0;
-    self->mScreenStartFrame = 0xFFFF;
+    self->mScreenStartFrame = cUIAnimation::kNoStartFrame;
     int** slot = (int**)(&self->mpAnimChannels);
     unsigned int n = *(unsigned int*)((char*)data + 4);
     if (n != 0) {
@@ -218,9 +218,9 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_isLastFrame);
  *
  * cUIThing_isLastAnimFrame uses it.
  *
- * @return 1 at or past the last frame, else 0
+ * @return true at or past the last frame, else false
  */
-int cUIAnimation::isLastFrame()
+bool cUIAnimation::isLastFrame()
 {
     return (mFrameNum) >= (int) (mpAnimHeader->mNumFrames);
 }
@@ -247,9 +247,9 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
 /**
  * Starts the animation in a playback mode.
  *
- * Only the low 3 bits of @p mode count. Mode 0 (driven by an external frame clock) records @p FrameNum as the
- * start frame (+0xC). Mode 2 (backwards) starts at the last frame with the direction byte (+0xE) set to 1;
- * every other mode starts at frame 0 with it cleared.
+ * Only the low 3 bits of @p mode count (ePlayback). kPlay_Clock (driven by an external frame clock) records @p
+ * FrameNum as the start frame (+0xC). kPlay_Backward starts at the last frame with the direction byte (+0xE) set to
+ * UIANIMDIR_BW; every other mode starts at frame 0 with it UIANIMDIR_FW.
  *
  * @param mode      playback mode (On Tour playback): 0 external clock, 1 forward, 2 backward, 3 ping-pong
  * @param FrameNum  the current clock frame, kept as the start frame in mode 0
@@ -257,14 +257,14 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
 void cUIAnimation::start(int mode, unsigned short FrameNum)
 {
     mode &= 7;
-    if (mode == 0) {
+    if (mode == kPlay_Clock) {
         mScreenStartFrame = FrameNum;
     }
-    if (mode == 2) {
-        *(unsigned char*)&mFrameDirection = 1;
+    if (mode == kPlay_Backward) {
+        *(unsigned char*)&mFrameDirection = UIANIMDIR_BW;
         *(unsigned short*)&mFrameNum = mpAnimHeader->mNumFrames - 1;
     } else {
-        *(unsigned char*)&mFrameDirection = 0;
+        *(unsigned char*)&mFrameDirection = UIANIMDIR_FW;
         *(unsigned short*)&mFrameNum = 0;
     }
 }
@@ -282,9 +282,10 @@ struct cUIAnimation_updateFrame_sData {
 /**
  * Steps the animation's frame once according to the play-mode flags.
  *
- * The low three bits of @p flags select the mode: 1 steps forward, 2 steps backward and 3 ping-pongs between the
- * ends using self->dir. In modes 1 and 2, bit 3 (0x8) wraps to the other end instead of stopping at the last or
- * first frame. Mode 0, modes 4-7 and an animation without data leave the frame alone.
+ * The low three bits of @p flags select the mode (ePlayback): kPlay_Forward steps forward, kPlay_Backward steps
+ * backward and kPlay_PingPong ping-pongs between the ends using mFrameDirection. In the first two, kPlay_Wrap (0x8)
+ * wraps to the other end instead of stopping at the last or first frame. kPlay_Clock, modes 4-7 and an animation
+ * without data leave the frame alone.
  *
  * @param flags  play mode in bits 0-2, wrap flag in bit 3
  */
@@ -296,45 +297,45 @@ void cUIAnimation::updateFrame(unsigned char flags)
         return;
     }
     mode = flags & 7;
-    if (mode == 0) {
+    if (mode == kPlay_Clock) {
         return;
     }
     switch (mode) {
-    case 2:
+    case kPlay_Backward:
         mFrameNum--;
         if (mFrameNum < 0) {
-            if (flags & 8) {
+            if (flags & kPlay_Wrap) {
                 mFrameNum = data->count - 1;
             } else {
                 mFrameNum = 0;
             }
         }
         break;
-    case 1:
+    case kPlay_Forward:
         mFrameNum++;
         if (mFrameNum >= data->count) {
-            if (!(flags & 8)) {
+            if (!(flags & kPlay_Wrap)) {
                 mFrameNum = data->count - 1;
             } else {
                 mFrameNum = 0;
             }
         }
         break;
-    case 3:
-        if ((*(signed char*)&mFrameDirection) == 0) {
+    case kPlay_PingPong:
+        if ((*(signed char*)&mFrameDirection) == UIANIMDIR_FW) {
             mFrameNum++;
         } else {
             mFrameNum--;
         }
-        if ((*(signed char*)&mFrameDirection) == 0) {
+        if ((*(signed char*)&mFrameDirection) == UIANIMDIR_FW) {
             if (mFrameNum >= ((cUIAnimation_updateFrame_sData*)mpAnimHeader)->count) {
-                mFrameDirection = 1;
+                mFrameDirection = UIANIMDIR_BW;
                 mFrameNum = ((cUIAnimation_updateFrame_sData*)mpAnimHeader)->count - 1;
                 return;
             }
         }
-        if ((*(signed char*)&mFrameDirection) == 1 && mFrameNum < 0) {
-            mFrameDirection = 0;
+        if ((*(signed char*)&mFrameDirection) == UIANIMDIR_BW && mFrameNum < 0) {
+            mFrameDirection = UIANIMDIR_FW;
             mFrameNum = 0;
         }
         break;
@@ -361,7 +362,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_updateThing);
 void cUIAnimation::updateThing(cUIThing* obj, int mode, unsigned short FrameNum)
 {
     unsigned short frame = mFrameNum;
-    if ((mode & 7) == 0 && mScreenStartFrame != 0xFFFF) {
+    if ((mode & 7) == kPlay_Clock && mScreenStartFrame != kNoStartFrame) {
         if (FrameNum < mScreenStartFrame) return;
         frame = FrameNum - mScreenStartFrame;
         if (mFrameNum == frame) return;

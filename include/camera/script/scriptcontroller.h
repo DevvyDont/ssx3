@@ -32,6 +32,12 @@ struct cCamera;
 struct cScriptObjCamera;
 
 struct cScriptCameraController {
+    // A script camera entity's kind, cScriptPlayerEntity_GetType's result (names ours, from the algorithm name strings
+    // addCamera tags each with: "Manual", "Target", "Subject" and "Algorithmic Script Camera Algo"). [U] addCamera
+    // builds a manual, point, target or relative script algorithm for them and ignores other kinds.
+    enum eScriptCameraKind {
+        kScriptCam_Manual = 0, kScriptCam_Target = 1, kScriptCam_Subject = 2, kScriptCam_Algorithmic = 3
+    };
     // --- cCameraController (On Tour: 0x18; camera/cameracontroller.h)
     int Type;                       // 0x00 [O] eCamControllerType; [R] base ctor 0, then 3 (script)
     int BlendType;                  // 0x04 [O] eCamBlendType; [R] base ctor 0

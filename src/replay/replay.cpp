@@ -211,9 +211,8 @@ extern "C" sObj_RO* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, vo
 /**
  * Recreates one recorded world object of the stream's next node type in a bucket.
  *
- * Types 6 and 12 have no case and are not read. Type 22 is constructed and then deleted at once (virtual slot
- * 1
- * with flags 3), which looks like a leftover.
+ * ATYPE_DEAD and ATYPE_TRICKTRIGGER have no case and are not read. ATYPE_DEADFADE is constructed and then deleted at
+ * once (virtual slot 1 with flags 3), which looks like a leftover.
  *
  * @param bucket  the bucket to link the object into
  * @param stream  the frame's stream, positioned at the object (On Tour cReplayFramePtr* data)
@@ -222,67 +221,67 @@ extern "C" sObj_RO* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, vo
 void cReplay::restoreObject(void* bucket, cBxReplayFrame* stream)
 {
     switch (cReplayFramePtr_peekObjNodeType(stream)) {
-    case 0:
+    case ATYPE_DEBOUNCE:
         cDebounceNode_cDebounceNode_RO(cMemMan_alloc(52, str_Debounce, 0x20000000, 0), bucket, stream);
         break;
-    case 1:
+    case ATYPE_ANIMOBJECT:
         cAnimObjectNode_cAnimObjectNode_RO(cMemMan_alloc(108, str_AnimObject, 0x20000000, 0), bucket, stream);
         break;
-    case 2:
+    case ATYPE_ANIMDELTA:
         cAnimDeltaNode_cAnimDeltaNode_RO(cMemMan_alloc(0x70, str_AnimDelta, 0x20000000, 0), bucket, stream);
         break;
-    case 3:
+    case ATYPE_ANIMCOMBO:
         cAnimComboNode_cAnimComboNode_RO(cMemMan_alloc(136, str_AnimCombo, 0x20000000, 0), bucket, stream);
         break;
-    case 4:
+    case ATYPE_ANIMTEETER:
         cAnimTeeterNode_cAnimTeeterNode_RO(cMemMan_alloc(0x80, str_AnimTeeter, 0x20000000, 0), bucket, stream);
         break;
-    case 5:
+    case ATYPE_FLEXBRIDGE:
         cFlexBridgeNode_cFlexBridgeNode1_RO(cMemMan_alloc(176, str_FlexBridge, 0x20000000, 0), bucket, stream);
         break;
-    case 7:
+    case ATYPE_COUNTER:
         cCounterNode_cCounterNode_RO(cMemMan_alloc(36, str_Counter, 0x20000000, 0), bucket, stream);
         break;
-    case 8:
+    case ATYPE_BOOST:
         cBoostNode_cBoostNode_RO(cMemMan_alloc(80, str_Boost, 0x20000000, 0), bucket, stream);
         break;
-    case 9:
+    case ATYPE_FENCE:
         cFenceNode_cFenceNode_RO(cMemMan_alloc(268, str_Fence, 0x20000000, 0), bucket, stream);
         break;
-    case 10:
+    case ATYPE_FLAG:
         cFlagNode_cFlagNode_RO(cMemMan_alloc(0x1C, str_Flag, 0x20000000, 0), bucket, stream);
         break;
-    case 11:
+    case ATYPE_MESHANIM:
         cMeshAnimNode_cMeshAnimNode_RO(cMemMan_alloc(1728, str_MeshAnim, 0x20000000, 0), bucket, stream);
         break;
-    case 13:
+    case ATYPE_PARTICLE:
         cParticleNode_cParticleNode_RO(cMemMan_alloc(44, str_Particle, 0x20000000, 0), bucket, stream);
         break;
-    case 18:
+    case ATYPE_RAILMAN:
         cRailManNode_cRailManNode_RO(cMemMan_alloc(536, str_RailMan, 0x20000000, 0), bucket, stream);
         break;
-    case 19:
+    case ATYPE_RESTORE:
         cRestoreNode_cRestoreNode1_RO(cMemMan_alloc(0x1C, str_Restore, 0x20000000, 0), bucket, stream);
         break;
-    case 14:
+    case ATYPE_FLOATING:
         cFloatingNode_cFloatingNode1_RO(cMemMan_alloc(0x7C, str_Floating, 0x20000000, 0), bucket, stream);
         break;
-    case 15:
+    case ATYPE_CONVEYOR:
         cConveyorNode_cConveyorNode1_RO(cMemMan_alloc(72, str_Conveyor, 0x20000000, 0), bucket, stream);
         break;
-    case 16:
+    case ATYPE_HIDE:
         cHideNode_cHideNode1_RO(cMemMan_alloc(0x1C, str_Hide, 0x20000000, 0), bucket, stream);
         break;
-    case 17:
+    case ATYPE_OBJECT:
         cObjectNode_cObjectNode1_RO(cMemMan_alloc(44, str_Object, 0x20000000, 0), bucket, stream);
         break;
-    case 20:
+    case ATYPE_FLOATRAIL:
         cFloatRailNode_cFloatRailNode1_RO(cMemMan_alloc(0x80, str_FloatRail, 0x20000000, 0), bucket, stream);
         break;
-    case 21:
+    case ATYPE_SPRINGRAIL:
         cSpringRailNode_cSpringRailNode1_RO(cMemMan_alloc(0x80, str_SpringRail, 0x20000000, 0), bucket, stream);
         break;
-    case 22: {
+    case ATYPE_DEADFADE: {
         sObj_RO* deadFadeNode = cDeadFadeNode_cDeadFadeNode1_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
         if (deadFadeNode != 0) {
             deadFadeNode->vt[1].fn(vthis(deadFadeNode, deadFadeNode->vt[1]), 3);
@@ -745,33 +744,33 @@ void cReplayFrame_setRanking(void*, int, int);
  *
  * With @p mode set (a landing): the points gained since the highlight began (the stats word at +0x9C minus the kept
  * copy) give the ranking when they are at least 1000; otherwise an air time (float at +0x44) of at least 5.0 gives air
- * time * 1000. With no gain at all the result is 0. Without @p mode, or when neither rule applied, the ranking is minus
- * the increase of the word at +0xA4 (On Tour TotalPointsLostToWipeouts), and 0 is returned when it did not change. The
- * ranking is stored with cReplayFrame_setRanking on Frame (+0xB0) for PlayerId.
+ * time * 1000. With no gain at all the result is false. Without @p mode, or when neither rule applied, the ranking is
+ * minus the increase of the word at +0xA4 (On Tour TotalPointsLostToWipeouts), and false is returned when it did not
+ * change. The ranking is stored with cReplayFrame_setRanking on Frame (+0xB0) for PlayerId.
  *
  * @param stats  the rider stats now (On Tour tRiderStats)
  * @param mode  non-zero when the highlight ended with a landing
- * @return 1 when a ranking was stored, 0 when nothing changed
+ * @return true when a ranking was stored, false when nothing changed
  */
-int cReplayHighlight::setRanking(tRiderStats* stats, int mode)
+bool cReplayHighlight::setRanking(tRiderStats* stats, int mode)
 {
     if (mode) {
         int pointsGained = stats->TotalPoints - Stats.TotalPoints;
-        if (pointsGained == 0) return 0;
+        if (pointsGained == 0) return false;
         if (pointsGained >= 1000) {
             cReplayFrame_setRanking(Frame, *(int*)this, pointsGained);
-            return 1;
+            return true;
         }
         float airTime = stats->AirTime;
         if (airTime >= 5.0f) {
             cReplayFrame_setRanking(Frame, *(int*)this, (int)(airTime * 1000.0f));
-            return 1;
+            return true;
         }
     }
     int pointsLost = stats->TotalPointsLostToWipeouts - Stats.TotalPointsLostToWipeouts;
-    if (pointsLost == 0) return 0;
+    if (pointsLost == 0) return false;
     cReplayFrame_setRanking(Frame, *(int*)this, -pointsLost);
-    return 1;
+    return true;
 }
 #endif
 

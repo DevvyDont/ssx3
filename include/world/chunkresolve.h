@@ -56,6 +56,11 @@ struct cChunkResolve {
                                             //     resolveAnimation and the particle resolvers make virtual calls
                                             //       through it
 
+    // A streamed record's offset or index field that points nowhere, before the fix-up (name ours): [U]
+    // resolveModelHeirarchy (a mesh matrix: the identity), resolveMaterial (no texture flip table), resolveSpline (no
+    // previous / next segment) and resolveCollideModel (no data, list or sphere trees) turn it into 0 or a default.
+    enum { kNullOffset = -1 };
+
     // Methods bound to their retail symbols by asm labels.
     int resolveModel(tModelRecord* pModel) __asm__("cChunkResolve_resolveModel");
     int resolveModelHeirarchy(tModelRecord* pModel) __asm__("cChunkResolve_resolveModelHeirarchy");
@@ -73,8 +78,8 @@ struct cChunkResolve {
     int resolveSpline(tSplineRecord* list) __asm__("cChunkResolve_resolveSpline");
     int resolveCollideModel(void* ctx, tCollideModelRecord* pCollideModel) __asm__("cChunkResolve_resolveCollideModel");
     int resolveHalo(tHaloRecord* obj) __asm__("cChunkResolve_resolveHalo");
-    int resolveLight(tLightRecord* obj) __asm__("cChunkResolve_resolveLight");
-    int unresolveLight(tLightRecord* pRTLight) __asm__("cChunkResolve_unresolveLight");
+    bool resolveLight(tLightRecord* obj) __asm__("cChunkResolve_resolveLight");
+    bool unresolveLight(tLightRecord* pRTLight) __asm__("cChunkResolve_unresolveLight");
     float calcMaxLightDistance(tLightRecord* light, float divisor) __asm__("cChunkResolve_calcMaxLightDistance");
 };
 

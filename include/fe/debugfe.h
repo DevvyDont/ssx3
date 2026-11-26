@@ -154,7 +154,7 @@ struct cTrackFileMan {
                                     //        getNext/PrevWCBAMStartLocation return -1 while it is 0; the debug menu reads it
 
     // Methods bound to their retail symbols by asm labels.
-    int testWCBAMStartLocation(int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
+    bool testWCBAMStartLocation(int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
     int getNextWCBAMStartLocation(int i) __asm__("cTrackFileMan_getNextWCBAMStartLocation");
     int getPrevWCBAMStartLocation(int i) __asm__("cTrackFileMan_getPrevWCBAMStartLocation");
     void scanTrackIndex(const char* file) __asm__("cTrackFileMan_scanTrackIndex");

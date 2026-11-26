@@ -2,6 +2,7 @@
 #include "be/bedbprofile.h"
 #include "ui/uiengine.h"
 #include "world/worldcache.h"
+#include "world/patchrecord.h"
 #include "ui/uistate.h"
 #include "ai/rider.h"
 #include "worldpainter/worldpainterquery.h"
@@ -229,9 +230,9 @@ extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(sLensFx* self, int flags)
     *(void***)((char*)self + 0xC4) = cBoltOnFXInterface_vtbl;
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->entries[i].id != -1) {
+        if (self->entries[i].id != tBoltOnFXEntry::kNoEmitter) {
             func_002F2218(*(int*)((char*)self + 0xC), self->entries[i].id);
-            self->entries[i].id = -1;
+            self->entries[i].id = tBoltOnFXEntry::kNoEmitter;
         }
     }
     if (flags & 1) {
@@ -271,7 +272,8 @@ extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int kind, int itemId)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->entries[i].id != -1 && self->entries[i].b == itemId && self->entries[i].c == kind) {
+        if (self->entries[i].id != tBoltOnFXEntry::kNoEmitter && self->entries[i].b == itemId &&
+            self->entries[i].c == kind) {
             return i;
         }
     }
@@ -300,7 +302,7 @@ extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
     cBoltOnFXInterface* self = lensMgr;
     int i;
     for (i = 0; i < 15; i++) {
-        if (((sLensEntry*)&self->mEntries[0])[i].id == -1) {
+        if (((sLensEntry*)&self->mEntries[0])[i].id == tBoltOnFXEntry::kNoEmitter) {
             ((sLensEntry*)&self->mEntries[0])[i].id = func_002F2130((int)self->mAttachedEmitterFX, x, y);
             ((sLensEntry*)&self->mEntries[0])[i].a = y;
             ((sLensEntry*)&self->mEntries[0])[i].b = x;
@@ -333,6 +335,8 @@ struct sVEi_CCB8 {
 };
 
 struct sLensItem_CCB8 {
+    // An unused kind or item id (name ours): [U] func_002ECCB8 skips the bolt or the item slot.
+    enum { kNone = -1 };
     char pad0[4];
     short slot;                 // 0x4
     char pad6[0x11 - 6];
@@ -385,7 +389,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     sLensItem_CCB8* item = (sLensItem_CCB8*)func_0014D998(lib2, id);
     for (int i = 0; i < n; i++, item++) {
         int k = item->kind;
-        if (k == -1) {
+        if (k == sLensItem_CCB8::kNone) {
             continue;
         }
         short tableIndex = (tbl->mpBoltsMap)[item->slot];
@@ -400,7 +404,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
         }
         for (int j = 0; j < 2; j++) {
             int itemId = item->ids[j];
-            if (itemId == -1) {
+            if (itemId == sLensItem_CCB8::kNone) {
                 continue;
             }
             if (k >= 50) {
@@ -412,9 +416,9 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
         }
     }
     for (int entryIdx = 0; entryIdx < 15; entryIdx++) {
-        if (ents[entryIdx].id != -1 && used[entryIdx] == 0) {
+        if (ents[entryIdx].id != tBoltOnFXEntry::kNoEmitter && used[entryIdx] == 0) {
             func_002F2218(((int)self->mAttachedEmitterFX), ents[entryIdx].id);
-            ents[entryIdx].id = -1;
+            ents[entryIdx].id = tBoltOnFXEntry::kNoEmitter;
         }
     }
     self->mDirty = 0;
@@ -735,11 +739,12 @@ static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
  * Samples a world patch's textures at a point and derives the two colours for the render state from them.
  *
  * Does nothing for a null patch or one whose texture page is not loaded (world cache checks). Of the patch's three
- * layers (3 type bits each at +0xC), a type-5 layer is sampled at the patch rectangle (+0x10..+0x1C) point given by @p
- * tx, @p ty clamped to 0..1, and a type-1 layer at the UV interpolated from the corner values (+0x20..+0x3C), wrapped
- * to 0..1; samples come from GrMan virtual slot 58 with the layer texture (+0x1A0). Then *@p baseColour = (type-1 sample -
- * type-5 sample) * D_004FAB00 * (2 * type-5 sample.x) and *@p lightmapColour = *@p baseColour / type-1 sample, with both alphas (x) set to
- * 0.5. cRenderStateMan_update and tAvalancheNode_calculate call it.
+ * layers (3 type bits each at +0xC), a kPatchLayer_Lightmap (5) layer is sampled at the patch rectangle (+0x10..+0x1C)
+ * point given by @p tx, @p ty clamped to 0..1, and a kPatchLayer_Base (1) layer at the UV interpolated from the corner
+ * values (+0x20..+0x3C), wrapped to 0..1; samples come from GrMan virtual slot 58 with the layer texture (+0x1A0). Then
+ * *@p baseColour = (type-1 sample - type-5 sample) * D_004FAB00 * (2 * type-5 sample.x) and *@p lightmapColour = *@p
+ * baseColour / type-1 sample, with both alphas (x) set to 0.5. cRenderStateMan_update and tAvalancheNode_calculate call
+ * it.
  *
  * @param tx  u position on the patch, 0..1
  * @param ty  v position on the patch, 0..1
@@ -752,10 +757,10 @@ extern "C" void cRenderStateMan_calculatePatchColour(sLensSrc_DB20* self, float 
     sV4_DB20 type1Sample(0.0f, 0.0f, 0.0f, 0.0f);
     if (self && IsLoaded_DB20(self)) {
         for (int i = 0; i < 3; i++) {
-            if (((self->types >> (i * 3)) & 7) == 5) {
+            if (((self->types >> (i * 3)) & 7) == tPatchRecord::kPatchLayer_Lightmap) {
                 type5Sample = Sample_DB20(self->x0 + self->w0 * Clamp_DB20(tx, 0.0f, 1.0f), self->y0 + self->h0 * Clamp_DB20(ty, 0.0f, 1.0f), self->tex[i]);
             }
-            if (((self->types >> (i * 3)) & 7) == 1) {
+            if (((self->types >> (i * 3)) & 7) == tPatchRecord::kPatchLayer_Base) {
                 float top = Lerp_DB20(self->c00, self->c10, tx);
                 float bot = Lerp_DB20(self->c02, self->c12, tx);
                 float lft = Lerp_DB20(self->c01, self->c03, ty);
@@ -849,8 +854,8 @@ extern char cIrradianceDataBase_TheDataBase[];
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 
 /**
- * Resolves an irradiance name field in place: replaces its first word with the name's id and sets +0x4 to 0x123400 to
- * mark it resolved.
+ * Resolves an irradiance name field in place: replaces its first word with the name's id and sets +0x4 to
+ * tWPNameField::kResolved (0x123400) to mark it resolved.
  *
  * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database cIrradianceDataBase_TheDataBase. cRenderStateMan_Irradiance calls it
  * on first use.
@@ -858,7 +863,7 @@ extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 extern "C" void cRenderStateMan_resolveIrradianceName(tWPNameField* self)
 {
     *(int*)self = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, self);
-    self->m_nameId[1] = 0x123400;
+    self->m_nameId[1] = tWPNameField::kResolved;
 }
 #endif
 
@@ -873,16 +878,18 @@ extern "C" void* cRenderStateMan_Irradiance_r(void* self) __asm__("cRenderStateM
 /**
  * Returns the irradiance record for an irradiance name field, resolving the name on first use.
  *
- * A field not yet tagged 0x123400 at +0x4 is resolved with cRenderStateMan_resolveIrradianceName, or, when its name is empty, gives the default
- * id cIrradianceDataBase_mDefaultId. The record comes from cIrradianceDataBase_Get on the irradiance database cIrradianceDataBase_TheDataBase. cRenderStateMan_getCustomIrradiance,
- * cRenderStateMan_LightIrradiance, cRenderStateMan_ShadowIrradiance, cRenderStateMan_TunnelIrradiance and cRenderStateMan_ObjectIrradiance call it.
+ * A field not yet tagged tWPNameField::kResolved at +0x4 is resolved with cRenderStateMan_resolveIrradianceName, or,
+ * when its name is empty, gives the default id cIrradianceDataBase_mDefaultId. The record comes from
+ * cIrradianceDataBase_Get on the irradiance database cIrradianceDataBase_TheDataBase.
+ * cRenderStateMan_getCustomIrradiance, cRenderStateMan_LightIrradiance, cRenderStateMan_ShadowIrradiance,
+ * cRenderStateMan_TunnelIrradiance and cRenderStateMan_ObjectIrradiance call it.
  *
  * @return the irradiance record
  */
 extern "C" void* cRenderStateMan_Irradiance_r(void* vself)
 {
     tWPNameField* self = (tWPNameField*)vself;
-    if (self->m_nameId[1] != 0x123400) {
+    if (self->m_nameId[1] != tWPNameField::kResolved) {
         if (*(signed char*)self == 0) {
             return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, cIrradianceDataBase_mDefaultId);
         }

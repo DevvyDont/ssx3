@@ -54,11 +54,23 @@ CHECK_OFFSET(tCameraTrigger, ExitAction, 0x10);
 CHECK_OFFSET(tCameraTrigger, SpaceNode, 0x14);
 CHECK_SIZE(tCameraTrigger, 0x24);
 
+// The camera trigger loaders' result. [O] On Tour's enum eCamLoadErrorStatus, names and values (loadFromBuffer and
+// readHeader return it); [U] cCameraTriggerList::loadFromBuffer returns eCamLoadErrorCookieMismatch for a file whose
+// cookie is not kCookie.
+enum eCamLoadErrorStatus {
+    eCamLoadErrorNone = 0, eCamLoadErrorMissingFile = 1, eCamLoadErrorCouldNotLoadFile = 2,
+    eCamLoadErrorCookieMismatch = 3, eCamLoadErrorInvalidVolumeType = 4, eCamLoadErrorInvalidBoundObjType = 5,
+    eCamLoadErrorInvalidActionType = 6
+};
+
 struct cCameraTriggerList {
+    // The trigger file version this build reads (name ours): [U] loadFromBuffer rejects any other Cookie and passes it
+    // to readHeader and readTrigger.
+    enum { kCookie = 7 };
     tCameraTrigger** Triggers;      // 0x00 [O]; [U] loadFromBuffer allocates it (NumTriggers entries)
     int NumTriggers;                // 0x04 [O]; [U] readHeader reads it from the stream
     unsigned int NextID;            // 0x08 [O]; [U] readHeader reads it
-    int Cookie;                     // 0x0C [O]; [U] readCookie reads it; loadFromBuffer requires 7 and stores 7
+    int Cookie;                     // 0x0C [O]; [U] readCookie reads it; loadFromBuffer requires kCookie and stores it
     int Time;                       // 0x10 [O]; [U] readHeader reads it
 
     // Methods bound to their retail symbols by asm labels.

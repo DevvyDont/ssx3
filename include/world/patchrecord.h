@@ -26,6 +26,14 @@ struct tPatchRecord {
     short m_sSurfaceType;           // 0x008 [O]; [U] terrainIntersect (src/intersect/worldsphtree.cpp, view
                                     //       sTriObj_333EF8 id) copies it into the hit's surface type
     unsigned short m_sSurfaceFlags; // 0x00A [O] short; [U] terrainIntersect tests & 0x41 (lhu)
+    // The m_sSurfaceFlags bits a patch needs for collision (name ours): [U] terrainIntersect and
+    // TerrainCallback_intersectpatch skip a patch unless both are set; cWorldCache::activateSectionPatches sets 0x40
+    // on each patch of a section that comes in (no retail write of 0x01 seen).
+    enum { kCollideFlags = 0x41 };
+    // A texture layer's type, 3 bits per layer in m_iFlags (names ours). [U] cRenderStateMan_calculatePatchColour
+    // samples a kPatchLayer_Lightmap layer in the m_fMapScale rectangle (the lightmap UVs, func_00374440) and a
+    // kPatchLayer_Base layer at the m_fUV0 corner UVs, giving its base and lightmap colours.
+    enum ePatchLayerType { kPatchLayer_Base = 1, kPatchLayer_Lightmap = 5 };
     int m_iFlags;                   // 0x00C [O]; [U] bezierman: 0x800000 snow sparkle (func_0038D690), 0x600000 shine
                                     //       (func_0038CA70 / CE20, Render_B370), 0x400000 (func_0038D168), 0x180000
                                     //       pass selection (func_0038CA70)

@@ -50,7 +50,14 @@ struct tBxVertex;             // render/2drender.h (cBoardTrailFX's strips)
 
 // On Tour struct tCheatState (4 chars). Retail reads m_misc with lbu only (it also holds the cheat input bits).
 struct tCheatState {
-    char m_state;           // 0x0 [O]; [U] lb/sb (cCheatFX_update, cCheatFX_updateState)
+    // m_state values (names ours). [U] cCheatFX_updateState: the reset state 0 counts the code's inputs, a wrong count
+    // drops to -1 (a handplant input starts over), kCheatCodeSteps right counts reach 1; cCheatFX_update turns on
+    // eUS_UltraUber with full boost while it is 1.
+    enum eCheatState { kCheat_Failed = -1, kCheat_Entering = 0, kCheat_On = 1 };
+    // The code's length (name ours). [O] On Tour's cCheatFX::m_cheatStateEnterCounts[9]; [U] updateState turns the
+    // cheat on when m_index reaches it.
+    enum { kCheatCodeSteps = 9 };
+    char m_state;           // 0x0 [O] eCheatState; [U] lb/sb (cCheatFX_update, cCheatFX_updateState)
     char m_index;           // 0x1 [O]; [U] lb/lbu/sb
     char m_count;           // 0x2 [O]; [U] lb/lbu/sb
     char m_misc;            // 0x3 [O]; [U] lbu/sb (setCheatInput cCheatFX_setCheatInput, cCheatFX_clearInput, cCheatFX_getInput)
@@ -836,7 +843,7 @@ struct cBoardWakeFX {
     void render() __asm__("cBoardWakeFX_render");
     void fillCurrentSeg(t4Vector* pos, float width) __asm__("cBoardWakeFX_fillCurrentSeg");
     void createSeg() __asm__("cBoardWakeFX_createSeg");
-    int IsWakeActive() __asm__("cBoardWakeFX_IsWakeActive");
+    bool IsWakeActive() __asm__("cBoardWakeFX_IsWakeActive");
 };
 
 CHECK_OFFSET(cBoardWakeFX, mRider, 0x00);
@@ -933,6 +940,9 @@ struct cBoardTrailFX {
     short SliceCaps[48];            // 0x2C [O] (0x4C); [R] initialize fills -1 (from the last)
     int BufHead;                    // 0x8C [O] (0xAC); [U] reset 0; update: the ring-buffer head
     int BufLen;                     // 0x90 [O] (0xB0); [U] reset 0; update counts up to the segment count
+    // State values. [O] On Tour's enum eBoardTrailState, names and values; [U] update closes the trail into eBTSInAir,
+    // restarts it in eBTSLand (shouldSample then samples at once) and runs it in eBTSNormal.
+    enum eBoardTrailState { eBTSInAir = 0, eBTSLand = 1, eBTSNormal = 2 };
     int State;                      // 0x94 [O] eBoardTrailState (0xB4): 0 eBTSInAir, 1 eBTSLand, 2 eBTSNormal;
                                     //      [U] reset 2; update / shouldSample test 0 and 1
     float CurAlpha;                 // 0x98 [O] (0xB8); [U] reset 0
@@ -949,8 +959,8 @@ struct cBoardTrailFX {
     // Methods bound to their retail symbols by asm labels.
     void* initialize(int inChrg) __asm__("cBoardTrailFX_initialize");
     void reset() __asm__("cBoardTrailFX_reset");
-    int shouldSample(float dirDot) __asm__("cBoardTrailFX_shouldSample");
-    int shouldPlow() __asm__("cBoardTrailFX_shouldPlow");
+    bool shouldSample(float dirDot) __asm__("cBoardTrailFX_shouldSample");
+    bool shouldPlow() __asm__("cBoardTrailFX_shouldPlow");
     void render() __asm__("cBoardTrailFX_render");
 };
 
@@ -1014,6 +1024,9 @@ struct cSpeedBoostFX {
                                              //       * 0.95; render
     float mVOffset;                          // 0x010 [O]; [U] reset 0; update scrolls it with the speed (wraps 0..1);
                                              //       render: the texture v
+    // mSpeedBoostTrail's length (name ours). [R] the ctor's 30-entry placement loop; [U] UpdateSpeedBoostTrail wraps
+    // mSpeedBoostTrailCurrentSeg at it and stops adding segments there.
+    enum { kMaxTrailSegs = 30 };
     int mSpeedBoostTrailNumSegs;             // 0x014 [O]; [U] reset 0; UpdateSpeedBoostTrail counts up to 30; update
                                              //       clears it on landing
     float mSpeedBoostTrailCurrentLength;     // 0x018 [O]; [U] reset 0; UpdateSpeedBoostTrail: the summed mLength
@@ -1196,6 +1209,10 @@ struct cDynamicSprayFX {
     float mHeadPuffGlow;                // 0x01C (name ours) [U] func_002DF3B0 clears it; func_002E1120 steps it towards
                                         //       the anim's target and derives the head puffs' period and alpha from it
     char unk_020[0x8];                  // 0x020
+    // Emitter indices (names ours). [U] func_002E1598 throws the slow-down burst from kEmitter_BigBurst on a surface
+    // with ImpactLarge above strength 277.8 (it also reports the impact), else from kEmitter_SmallBurst (half the
+    // level, a shorter throw).
+    enum { kEmitter_BigBurst = 5, kEmitter_SmallBurst = 6 };
     cDynamicColourEmitter* mEmitters;   // 0x028 (name ours) [R] ctor new cDynamicColourEmitter[10]
                                         //       ("DynamicSprayEmitter"), dtor delete[]; [U] func_002E2550 sets their
                                         //       m_enabled, func_002E26B8 re-runs emitters 5 and 6's setupEmitter
@@ -1298,6 +1315,10 @@ struct cCheatFX {
     void* resetStates() __asm__("cCheatFX_resetStates__FPv");
     void update() __asm__("cCheatFX_update");
     void updateState() __asm__("cCheatFX_updateState");
+    // setCheatInput's inputs and the m_misc bits they set (names ours). [U] the callers: cRider::setupBoostWarp sends
+    // 0 on a boost press, cRider::checkForPrewind 1 on a jump press, cRider::checkHandplantCollisions 2.
+    enum eCheatInput { kCheatInput_Boost = 0, kCheatInput_Jump = 1, kCheatInput_Handplant = 2 };
+    enum { kCheatBit_Boost = 0x10, kCheatBit_Jump = 0x20, kCheatBit_Handplant = 0x40 };
     void setCheatInput(int type) __asm__("cCheatFX_setCheatInput");
     void clearInput() __asm__("cCheatFX_clearInput");
     int getInput() __asm__("cCheatFX_getInput");

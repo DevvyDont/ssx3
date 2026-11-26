@@ -89,6 +89,18 @@ struct cAnimObjectNode {
                                     //      (cAnimFrame_getStartTime)
     tMeshVelocity* MeshVelocity;    // 0x68 [O]; [U] cAnimNode_updateMeshVelocity / updateIntersectInfo (this + 0x4C)
 
+    // AnimType values (names ours): [U] updateNode steps kAnimType_Cycle with updateCycle (wraps at the limits),
+    // kAnimType_Oscillate with updateOscillate (bounces) and anything else with updateOnce (clamps and completes);
+    // signal kAnimSignal_PlayOnce sets kAnimType_Once.
+    enum eAnimType { kAnimType_Once = 0, kAnimType_Cycle = 1, kAnimType_Oscillate = 2 };
+    // The world-script signals signal handles (names ours): [U] cAnimObjectNode_signal sets the start delay (seconds),
+    // the frame (kept inside FromTime..ToTime), the speed, ToTime, FromTime, and the play type kAnimType_Once; it
+    // passes any other signal to cMoveNode_signal.
+    enum eAnimSignal {
+        kAnimSignal_SetDelay = 100, kAnimSignal_SetTime = 101, kAnimSignal_SetSpeed = 102, kAnimSignal_SetToTime = 103,
+        kAnimSignal_SetFromTime = 104, kAnimSignal_PlayOnce = 105
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void updateCycle() __asm__("cAnimObjectNode_updateCycle");
     void updateOscillate() __asm__("cAnimObjectNode_updateOscillate");
@@ -138,7 +150,7 @@ CHECK_SIZE(cAnimObjectNode, 0x6C);
 struct tMakeAnimObjectData {
     unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read here)
     int Type;                       // 0x04 [O]; [U] cAnimObjectNode ctor: -> AnimType (lhu)
-    int Dir;                        // 0x08 [O]; [U] cAnimObjectNode ctor: 1 negates AnimSpeed
+    int Dir;                        // 0x08 [O]; [U] cAnimObjectNode ctor: kDir_Reverse negates AnimSpeed
     float FromTime;                 // 0x0C [O]; [U] cAnimObjectNode ctor: / 30 -> FromTime
     float ToTime;                   // 0x10 [O]; [U] cAnimObjectNode ctor: / 30 -> ToTime
     float Speed;                    // 0x14 [O]; [U] cAnimObjectNode ctor: AnimSpeed
@@ -147,6 +159,9 @@ struct tMakeAnimObjectData {
     int RandomStart;                // 0x20 [O]; [U] cAnimObjectNode ctor: CurrTime = AIrandf(From, To)
     int ForceVisible;               // 0x24 [O]; [U] cAnimObjectNode ctor: passed to cAnimNode_cAnimNode
     char unk_028[0x4];              // 0x28 [O] WScriptNullType null (1 byte) + padding
+
+    // The Dir that plays backwards (name ours): [U] the cAnimObjectNode ctor negates AnimSpeed for it.
+    enum { kDir_Reverse = 1 };
 };
 
 CHECK_OFFSET(tMakeAnimObjectData, unk_000, 0x00);

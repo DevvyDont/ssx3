@@ -524,7 +524,7 @@ static inline sV4_ABC8 RiderSide_ABC8(char* vrider)
  * Updates a rider's board sparks: grit particles, the glow under the board and random spark points.
  *
  * Above a speed of about 278 the surface decides: a surface with glow (+0x8C) lights the glow, and while rail
- * sliding also the sparks. Grit is thrown on surface type 9 (brown) or on a rail whose surface has grit
+ * sliding also the sparks. Grit is thrown on eST_Wood_Surface (brown) or on a rail whose surface has grit
  * (+0x88), with a chance that grows with speed. The glow is magenta in the uber states, otherwise blue and
  * red.
  */
@@ -546,7 +546,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
     self->f78 = 0;
     float bspeed = Len_ABC8(*(sV4_ABC8*)(self->rider + 0x1E0));
     bool fastEnough = 277.77777099609375f < bspeed;
-    bool isRailSlide = cRider_getMotionState(self->rider) == 4;
+    bool isRailSlide = cRider_getMotionState(self->rider) == MS_Railslide;
     if (fastEnough) {
         if (surfaceData->GrindingSparks) {
             self->f70 = 1;
@@ -554,7 +554,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
                 self->f74 = 1;
             }
         }
-        if ((isRailSlide && surfaceData->GrindingParticles) || *(int*)(self->rider + 0x438) == 9) {
+        if ((isRailSlide && surfaceData->GrindingParticles) || *(int*)(self->rider + 0x438) == eST_Wood_Surface) {
             self->f78 = 1;
         }
     }
@@ -563,7 +563,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
     if (self->f78) {
         float maxChance = 0.6000000238418579f;
         sV4_ABC8 groundColour;
-        if (*(int*)(self->rider + 0x438) == 9) {
+        if (*(int*)(self->rider + 0x438) == eST_Wood_Surface) {
             sV4_ABC8 presetColour;
             presetColour.x = 0.21559999883174896f;
             presetColour.y = 0.18000000715255737f;

@@ -12,6 +12,15 @@
 
 struct cCrowdRender2D;
 
+// How a crowd animation plays (cCrowdAnim2D::m_CurrentPlayType). [O] On Tour's enum eAnimPlayType, names and values;
+// [U] cCrowdAnim2D::advanceFrame plays forward and holds (kAT_Fwd), backward and holds (kAT_Bck), ping-pongs between
+// kAT_CycF and kAT_CycB, and loops forward (kAT_CycLoop).
+enum eAnimPlayType { kAT_Fwd = 0, kAT_Bck = 1, kAT_CycF = 2, kAT_CycB = 3, kAT_CycLoop = 4 };
+// When a crowd animation may hand over to the next one (On Tour tAnimState::EType). [O] On Tour's enum eAnimExitType,
+// names and values; [U] cCrowdAnim2D::update switches at frame 0 (kAE_First), at the last frame (kAE_Last) or at
+// once (kAE_Any).
+enum eAnimExitType { kAE_First = 0, kAE_Last = 1, kAE_Any = 2, kAE_None = 3 };
+
 struct cCrowdAnim2D {
     int m_TargetState;              // 0x000 [O] eCrowdState
     int m_CurrentAnimation;         // 0x004 [O] eCrowdAnimation

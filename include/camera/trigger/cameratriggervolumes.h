@@ -57,6 +57,15 @@ CHECK_OFFSET(cCTObject, mVtbl, 0x24);
 CHECK_SIZE(cCTObject, 0x28);
 
 // cCTVolume (retail and On Tour 0x2C): base cCTObject. The abstract trigger volume: a cCTObject plus its shape type.
+// cCTVolume::Type. [O] On Tour's enum eCTVolumeType, names and values; [R] get_camvolume builds a "Camera Sphere
+// Trigger" for 0 and a "Camera Box Trigger" for 1.
+enum eCTVolumeType { eCTVolumeEllipse = 0, eCTVolumeBox = 1, eCTVolumeNum = 2 };
+// cCTBoundObj::Type. [O] On Tour's enum eCTBoundObjType, names and values; [R] get_camboundobj builds a "Camera
+// Ellipse BoundObj", "Camera Box BoundObj", "Camera Line BoundObj" or "Camera Point BoundObj" for 0..3.
+enum eCTBoundObjType {
+    eCTBoundObjEllipse = 0, eCTBoundObjBox = 1, eCTBoundObjLine = 2, eCTBoundObjPoint = 3, eCTBoundObjNum = 4
+};
+
 // Vtable D_0045C3A0 (slots 6 boundBox and 7 containsPoint __pure_virtual, slot 8 cCTVolume_getBoundaryPointClosestTo).
 // [R] cCTVolume_cCTVolume (uncalled ctor copy): the cCTObject defaults, cCTObject_vtbl then D_0045C3A0; it leaves Type
 // unset. [Staged by views group A.]
@@ -103,7 +112,7 @@ struct cCTVolumeEllipse {
                                 //      stores 0 again
 
     // Methods bound to their retail symbols by asm labels.
-    int containsPoint(t4Vector* point) __asm__("cCTVolumeEllipse_containsPoint");
+    bool containsPoint(t4Vector* point) __asm__("cCTVolumeEllipse_containsPoint");
 };
 
 CHECK_OFFSET(cCTVolumeEllipse, Pos, 0x00);

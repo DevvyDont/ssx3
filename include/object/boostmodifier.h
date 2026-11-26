@@ -71,6 +71,12 @@ struct cBoostModifier : public cPhysicsModifier {
     tInstanceRecord* Instance;      // 0x40 [O]; [R] both ctors; [U] update
     char unk_44[0xc];               // 0x44 padding to the 0x50 allocation
 
+    // The timed Type (name ours): [R] the ctor starts Time at BoostTime only for it; [U] update boosts it every frame,
+    // the other types only once Time is out.
+    enum { kBoostModType_Timed = 1 };
+    // The signal that restarts Time from BoostTime (name ours): [U] cBoostModifier_signal ignores every other one.
+    enum { kBoostModSignal_Restart = 600 };
+
     // Methods bound to their retail symbols by asm labels.
     void* cBoostModifier1(cBxReplayFrame* stream) __asm__("cBoostModifier_cBoostModifier1");
 };

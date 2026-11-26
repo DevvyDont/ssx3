@@ -4,6 +4,7 @@
 #include "vtable.h"
 #include "intersect/bxnash.h"
 #include "camera/trigger/cameratriggerman.h"
+#include "camera/trigger/cameratriggeractions.h"
 #include "ai/rider.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -676,17 +677,17 @@ struct sCamTrigStack {
  *
  * Deletes the first entry equal to @p key, closing the gap. If entries remain, the top one is compared with the last
  * entered trigger (+0x4): when they differ *@p changed = 1 and *@p out = the top id, otherwise *@p changed = 0; either
- * way it returns 0. When the stack is empty *@p changed = 0 and it returns 1.
+ * way it returns false. When the stack is empty *@p changed = 0 and it returns true.
  *
- * cCameraTriggerMan_checkCollisions runs the exited trigger's exit action on 1, and the new top trigger's enter action when @p changed is
- * set.
+ * cCameraTriggerMan_checkCollisions runs the exited trigger's exit action on true, and the new top trigger's enter
+ * action when @p changed is set.
  *
  * @param key  the exited trigger's id (On Tour triggerID)
  * @param changed  receives 1 when another trigger's enter action should be played (On Tour playEnter_outArg)
  * @param out  receives that trigger's id (On Tour enterToPlay_outArg)
- * @return 1 when the stack is now empty, else 0
+ * @return true when the stack is now empty, else false
  */
-extern "C" int cCameraTriggerStack_recordExitGetNext(sCamTrigStack* self, int key, int* changed, int* out)
+extern "C" bool cCameraTriggerStack_recordExitGetNext(sCamTrigStack* self, int key, int* changed, int* out)
 {
     unsigned int i;
     for (i = 0; i < self->count; i++) {
@@ -707,10 +708,10 @@ extern "C" int cCameraTriggerStack_recordExitGetNext(sCamTrigStack* self, int ke
             *changed = 1;
             *out = newTop;
         }
-        return 0;
+        return false;
     }
     *changed = 0;
-    return 1;
+    return true;
 }
 #endif
 
@@ -902,9 +903,11 @@ struct sCams_E1D8 {
  *
  * The chase controller is +0xA8 of the camera SSXApp->Game->ViewMan lists for the rider's mViewIndex (+0x870). The
  * blend rate is 1 / (BlendTime (+0xC) x 60) per frame, or 1 (a cut) when BlendTime is 0. By the action's Type (+0x0, On
- * Tour eCTActionType): 0 (switch) maps the action's SwitchType (+0x8, eCTSwitchType 1..75) to a camera algorithm type
- * (mostly the same number; 0, 43 and unknown values give 0) and calls cChaseCameraController_switchCamera_Volume(type,
- * 0, rate); 1 (bounded) and 2 (spline) call it with type 91 or 92 and the action itself. Type 3 (none) does nothing.
+ * Tour eCTActionType): eCTActionSwitchCam maps the action's SwitchType (+0x8, eCTSwitchType) to the eCamAlgoType of
+ * the same name (eCTSwitchMid, eCTSwitchCustom and unknown values give CAMERA_ALGORITHM_CHASE_MID; the relative
+ * cameras are one lower) and calls cChaseCameraController_switchCamera_Volume(type, 0, rate); eCTActionBoundedCam and
+ * eCTActionSpline call it with CAMERA_ALGORITHM_TRIGGER_BOUNDED or CAMERA_ALGORITHM_TRIGGER_SPLINE and the action
+ * itself. eCTActionNone does nothing.
  *
  * Called by cCameraTriggerMan_checkCollisions with a trigger's enter or exit action.
  *
@@ -916,25 +919,25 @@ extern "C" void doTriggerAction(sCamEvt_E1D8* evt, cRider* rider)
     cGameViewMan* cams = SSXApp->Game->ViewMan;
     void* cam = cams->PlayerCamera[rider->mViewIndex]->ChaseController;
     switch (evt->type) {
-    case 2: {
+    case eCTActionSpline: {
         float rate;
         if (evt->dur != 0.0f)
             rate = 1.0f / evt->dur * 0.016666668f;
         else
             rate = 1.0f;
-        cChaseCameraController_switchCamera_Volume(cam, 92, (int)evt, rate);
+        cChaseCameraController_switchCamera_Volume(cam, CAMERA_ALGORITHM_TRIGGER_SPLINE, (int)evt, rate);
         break;
     }
-    case 1: {
+    case eCTActionBoundedCam: {
         float rate;
         if (evt->dur != 0.0f)
             rate = 1.0f / evt->dur * 0.016666668f;
         else
             rate = 1.0f;
-        cChaseCameraController_switchCamera_Volume(cam, 91, (int)evt, rate);
+        cChaseCameraController_switchCamera_Volume(cam, CAMERA_ALGORITHM_TRIGGER_BOUNDED, (int)evt, rate);
         break;
     }
-    case 0: {
+    case eCTActionSwitchCam: {
         float rate = 0.0f;
         if (evt->dur == rate)
             rate = 1.0f;
@@ -942,76 +945,83 @@ extern "C" void doTriggerAction(sCamEvt_E1D8* evt, cRider* rider)
             rate = 1.0f / evt->dur * 0.016666668f;
         int mode;
         switch (evt->id) {
-        case 3: mode = 4; break;
-        case 7: mode = 3; break;
-        case 1: mode = 2; break;
-        case 2: mode = 1; break;
-        case 4: mode = 7; break;
-        case 5: mode = 5; break;
-        case 6: mode = 6; break;
-        case 8: mode = 8; break;
-        case 10: mode = 9; break;
-        case 9: mode = 10; break;
-        case 11: mode = 11; break;
-        case 12: mode = 12; break;
-        case 13: mode = 13; break;
-        case 14: mode = 14; break;
-        case 15: mode = 15; break;
-        case 16: mode = 16; break;
-        case 17: mode = 17; break;
-        case 18: mode = 18; break;
-        case 19: mode = 19; break;
-        case 20: mode = 20; break;
-        case 21: mode = 21; break;
-        case 22: mode = 22; break;
-        case 23: mode = 23; break;
-        case 24: mode = 24; break;
-        case 25: mode = 25; break;
-        case 26: mode = 26; break;
-        case 27: mode = 27; break;
-        case 28: mode = 28; break;
-        case 29: mode = 29; break;
-        case 30: mode = 30; break;
-        case 31: mode = 31; break;
-        case 32: mode = 32; break;
-        case 33: mode = 41; break;
-        case 34: case 35: case 36: case 37: case 38: case 39: case 40: case 41: mode = evt->id - 1; break;
-        case 44: mode = 42; break;
-        case 45: mode = 43; break;
-        case 46: mode = 44; break;
-        case 47: mode = 45; break;
-        case 48: mode = 46; break;
-        case 49: mode = 47; break;
-        case 50: mode = 0x30; break;
-        case 51: mode = 49; break;
-        case 52: mode = 50; break;
-        case 53: mode = 51; break;
-        case 54: mode = 52; break;
-        case 55: mode = 53; break;
-        case 56: mode = 54; break;
-        case 57: mode = 55; break;
-        case 58: mode = 0x38; break;
-        case 59: mode = 57; break;
-        case 60: mode = 58; break;
-        case 61: mode = 59; break;
-        case 62: mode = 0x3C; break;
-        case 63: mode = 61; break;
-        case 64: mode = 0x3E; break;
-        case 65: mode = 0x3F; break;
-        case 66: mode = 0x40; break;
-        case 67: mode = 65; break;
-        case 68: mode = 66; break;
-        case 69: mode = 67; break;
-        case 70: mode = 68; break;
-        case 71: mode = 69; break;
-        case 72: mode = 70; break;
-        case 73: mode = 71; break;
-        case 74: mode = 72; break;
-        case 75: mode = 73; break;
-        case 42: mode = 76; break;
-        case 0:
-        case 43:
-        default: mode = 0; break;
+        case eCTSwitchHalfPipe: mode = CAMERA_ALGORITHM_CHASE_HALFPIPE; break;
+        case eCTSwitchFirstPerson: mode = CAMERA_ALGORITHM_CHASE_FIRST_PERSON; break;
+        case eCTSwitchNear: mode = CAMERA_ALGORITHM_CHASE_NEAR; break;
+        case eCTSwitchFar: mode = CAMERA_ALGORITHM_CHASE_FAR; break;
+        case eCTSwitchIdle: mode = CAMERA_ALGORITHM_CHASE_IDLE; break;
+        case eCTSwitchTight: mode = CAMERA_ALGORITHM_CHASE_TIGHT; break;
+        case eCTSwitchSlopeStyle: mode = CAMERA_ALGORITHM_CHASE_SLOPE_STYLE; break;
+        case eCTSwitchTricky: mode = CAMERA_ALGORITHM_CHASE_TRICKY; break;
+        case eCTSwitchMidRight: mode = CAMERA_ALGORITHM_CHASE_MID_RIGHT; break;
+        case eCTSwitchMidLeft: mode = CAMERA_ALGORITHM_CHASE_MID_LEFT; break;
+        case eCTSwitchManual: mode = CAMERA_ALGORITHM_CHASE_MANUAL; break;
+        case eCTSwitchMidFOV: mode = CAMERA_ALGORITHM_CHASE_MID_FOV; break;
+        case eCTSwitchLazy: mode = CAMERA_ALGORITHM_CHASE_LAZY; break;
+        case eCTSwitchStubborn: mode = CAMERA_ALGORITHM_CHASE_STUBBORN; break;
+        case eCTSwitchVeryFar: mode = CAMERA_ALGORITHM_CHASE_VERY_FAR; break;
+        case eCTSwitchBootLeft: mode = CAMERA_ALGORITHM_CHASE_BOOT_LEFT; break;
+        case eCTSwitchBootRight: mode = CAMERA_ALGORITHM_CHASE_BOOT_RIGHT; break;
+        case eCTSwitchDirection_N: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_N; break;
+        case eCTSwitchDirection_NW: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_NW; break;
+        case eCTSwitchDirection_W: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_W; break;
+        case eCTSwitchDirection_SW: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_SW; break;
+        case eCTSwitchDirection_S: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_S; break;
+        case eCTSwitchDirection_SE: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_SE; break;
+        case eCTSwitchDirection_E: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_E; break;
+        case eCTSwitchDirection_NE: mode = CAMERA_ALGORITHM_CHASE_DIRECTION_NE; break;
+        case eCTSwitchPaulStubborn: mode = CAMERA_ALGORITHM_CHASE_PAUL_STUBBORN; break;
+        case eCTSwitchLarryStubborn: mode = CAMERA_ALGORITHM_CHASE_LARRY_STUBBORN; break;
+        case eCTSwitchDynamicLarryStubborn: mode = CAMERA_ALGORITHM_CHASE_DYNAMIC_LARRY_STUBBORN; break;
+        case eCTSwitchDynamicPaulStubborn: mode = CAMERA_ALGORITHM_CHASE_DYNAMIC_PAUL_STUBBORN; break;
+        case eCTSwitchDynamicStubborn: mode = CAMERA_ALGORITHM_CHASE_DYNAMIC_STUBBORN; break;
+        case eCTSwitchHighStubborn: mode = CAMERA_ALGORITHM_CHASE_HIGH_STUBBORN; break;
+        case eCTSwitchLookBack: mode = CAMERA_ALGORITHM_CHASE_LOOKBACK; break;
+        case eCTSwitchMatrix: mode = CAMERA_ALGORITHM_CHASE_MATRIX; break;
+        case eCTSwitchRelativeFront:
+        case eCTSwitchRelativeFrontLeft:
+        case eCTSwitchRelativeLeft:
+        case eCTSwitchRelativeRearLeft:
+        case eCTSwitchRelativeRear:
+        case eCTSwitchRelativeRearRight:
+        case eCTSwitchRelativeRight:
+        case eCTSwitchRelativeFrontRight: mode = evt->id - 1; break;
+        case eCTSwitchARA1: mode = CAMERA_ALGORITHM_CHASE_ARA1; break;
+        case eCTSwitchASS1: mode = CAMERA_ALGORITHM_CHASE_ASS1; break;
+        case eCTSwitchABA1: mode = CAMERA_ALGORITHM_CHASE_ABA1; break;
+        case eCTSwitchABC1: mode = CAMERA_ALGORITHM_CHASE_ABC1; break;
+        case eCTSwitchBRA2: mode = CAMERA_ALGORITHM_CHASE_BRA2; break;
+        case eCTSwitchBHP1: mode = CAMERA_ALGORITHM_CHASE_BHP1; break;
+        case eCTSwitchCRA3: mode = CAMERA_ALGORITHM_CHASE_CRA3; break;
+        case eCTSwitchCHP2: mode = CAMERA_ALGORITHM_CHASE_CHP2; break;
+        case eCTSwitchCBA2: mode = CAMERA_ALGORITHM_CHASE_CBA2; break;
+        case eCTSwitchDRA4: mode = CAMERA_ALGORITHM_CHASE_DRA4; break;
+        case eCTSwitchDBC2: mode = CAMERA_ALGORITHM_CHASE_DBC2; break;
+        case eCTSwitchDSS2: mode = CAMERA_ALGORITHM_CHASE_DSS2; break;
+        case eCTSwitchERA5: mode = CAMERA_ALGORITHM_CHASE_ERA5; break;
+        case eCTSwitchESS3: mode = CAMERA_ALGORITHM_CHASE_ESS3; break;
+        case eCTSwitchEBA3: mode = CAMERA_ALGORITHM_CHASE_EBA3; break;
+        case eCTSwitchEHP3: mode = CAMERA_ALGORITHM_CHASE_EHP3; break;
+        case eCTSwitchEBC3: mode = CAMERA_ALGORITHM_CHASE_EBC3; break;
+        case eCTSwitchDEFAULT_1: mode = CAMERA_ALGORITHM_CHASE_DEFAULT_1; break;
+        case eCTSwitchDEFAULT_2: mode = CAMERA_ALGORITHM_CHASE_DEFAULT_2; break;
+        case eCTSwitchDEFAULT_3: mode = CAMERA_ALGORITHM_CHASE_DEFAULT_3; break;
+        case eCTSwitchDEFAULT_4: mode = CAMERA_ALGORITHM_CHASE_DEFAULT_4; break;
+        case eCTSwitchDEFAULT_5: mode = CAMERA_ALGORITHM_CHASE_DEFAULT_5; break;
+        case eCTSwitchSAFE_LOW: mode = CAMERA_ALGORITHM_CHASE_SAFE_LOW; break;
+        case eCTSwitchSAFE_HIGH: mode = CAMERA_ALGORITHM_CHASE_SAFE_HIGH; break;
+        case eCTSwitchSPOKE: mode = CAMERA_ALGORITHM_CHASE_SPOKE; break;
+        case eCTSwitchSUPERPIPE: mode = CAMERA_ALGORITHM_CHASE_SUPERPIPE; break;
+        case eCTSwitchPOST_RACE_1: mode = CAMERA_ALGORITHM_CHASE_POST_RACE_1; break;
+        case eCTSwitchPOST_RACE_2: mode = CAMERA_ALGORITHM_CHASE_POST_RACE_2; break;
+        case eCTSwitchPOST_RACE_3: mode = CAMERA_ALGORITHM_CHASE_POST_RACE_3; break;
+        case eCTSwitchPOST_RACE_4: mode = CAMERA_ALGORITHM_CHASE_POST_RACE_4; break;
+        case eCTSwitchPOST_RACE_5: mode = CAMERA_ALGORITHM_CHASE_POST_RACE_5; break;
+        case eCTSwitchPOST_RACE_6: mode = CAMERA_ALGORITHM_CHASE_POST_RACE_6; break;
+        case eCTSwitchPreferred: mode = CAMERA_ALGORITHM_CHASE_PREFERRED; break;
+        case eCTSwitchMid:
+        case eCTSwitchCustom:
+        default: mode = CAMERA_ALGORITHM_CHASE_MID; break;
         }
         cChaseCameraController_switchCamera_Volume(cam, mode, 0, rate);
         break;

@@ -20,8 +20,8 @@ struct cUIStateStack {
     cList mExplicitStack;           // 0x01C [O]
 
     // Methods bound to their retail symbols by asm labels.
-    int enableState(signed char id) __asm__("cUIStateStack_enableState");
-    int checkForState(signed char id) __asm__("cUIStateStack_checkForState");
+    bool enableState(signed char id) __asm__("cUIStateStack_enableState");
+    bool checkForState(signed char id) __asm__("cUIStateStack_checkForState");
     void render2D() __asm__("cUIStateStack_render2D");
     int updateLoop() __asm__("cUIStateStack_updateLoop");
     void update() __asm__("cUIStateStack_update");

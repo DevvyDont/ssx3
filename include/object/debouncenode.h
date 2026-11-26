@@ -45,6 +45,10 @@ struct tMakeDebounceData {
     int Visible;                    // 0x0C [O]; [U] 0 clears the record's low four flag bits, 1 sets bit 0 and bit 2
                                     //      (clears bit 1), else bit 1 becomes bit 2 when bits 0 and 1 are set
     char unk_010[0x4];              // 0x10 [O] WScriptNullType null (1 byte) + padding
+
+    // Visible values (names ours): [U] the ctor hides the instance for kVisible_Hide (clears the record's low four
+    // flag bits) and shows it for kVisible_Show (sets bits 0 and 2, clears bit 1); any other value keeps it.
+    enum { kVisible_Hide = 0, kVisible_Show = 1 };
 };
 
 CHECK_OFFSET(tMakeDebounceData, unk_000, 0x00);

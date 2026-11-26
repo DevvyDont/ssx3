@@ -50,6 +50,9 @@
 // flags & 0x70 pick texture and size). The type / flags swap of tLightRecord (visualfx/worldlightman.h) shows here
 // too: retail flags at 0xC. Size: 0x48 is the end of the last member retail touches; no array stride is known.
 struct tHaloRecord {
+    // Halo types, m_iFlags & 0x70 (names ours, by size). [U] cLensFxMan_getHaloRadius gives them radius 180, 100 and
+    // 350; cLightHalo_Render draws them with effect textures 53, 54 and 53 at the same sizes.
+    enum eHaloType { kHaloType_Medium = 0x10, kHaloType_Small = 0x20, kHaloType_Large = 0x40 };
     char unk_000[0xC];              // 0x00 (On Tour: the Nash node header m_iIntersect[3]); no retail access seen
     unsigned int m_iFlags;          // 0x0C [O] m_iFlags; [U] resolveHalo / cLightHalo_Render: flags & 0x70 = the
                                     //      halo type (0x10, 0x20, 0x40)

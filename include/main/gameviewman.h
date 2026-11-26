@@ -32,6 +32,10 @@ struct cGameViewMan {
                                     //       cGame::mCurrentStateID (0x214) and stores the new state
     unsigned int m_uiNumView;       // 0x010 [O]; [R] ctor: 1; [U] updateViewState: 2 in states 3-5, else 1; the update loops
                                     //       run to it; the destructor zeroes it; cGame_getNumGameView, game.cpp, menu.cpp read it
+    // m_uiNumView values and the view indices (names ours): [U] updateViewState shows one full-screen view or two
+    // halves in split screen; view i belongs to player i (the ctor makes PlayerCamera[i] for each player).
+    enum { kOneView = 1, kTwoViews = 2 };
+    enum { kPlayer1View = 0, kPlayer2View = 1 };
     unsigned int m_uiCurrentView;   // 0x014 [O]; [R] ctor: 0; [U] updateViewState zeroes it; cGame_getCurrentRenderViewNum,
                                     //       boardwakefx / angerfx / menu.cpp read it (the view being rendered)
     tRect m_ViewRect[2];            // 0x018 [O] (On Tour [4]); [R] ctor: rect 0 = {0, 0, screen width, screen height}

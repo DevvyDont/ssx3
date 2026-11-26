@@ -137,20 +137,20 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_insert__FP19c
  * @param list  list to modify
  * @param item  trigger to store
  * @param idx   slot to overwrite, or negative to append
- * @return 0 if an append found the list full, otherwise 1
+ * @return false if an append found the list full, otherwise true
  */
-int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
+bool cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
 {
     if (idx < 0) {
         if (list->count >= 0x78) {
-            return 0;
+            return false;
         }
         list->arr[list->count] = item;
         list->count++;
     } else {
         list->arr[idx] = item;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -224,12 +224,13 @@ struct tCameraTrigger_K3 {
 /**
  * Parses a camera trigger file image into the list's trigger array.
  *
- * Reads the version cookie, which must be 7, and the header (including the trigger count). It then allocates
+ * Reads the version cookie, which must be kCookie (7), and the header (including the trigger count). It then allocates
  * the "Camera Trigger Array" and reads each trigger with readTrigger(). A failed trigger is destroyed and its
  * error returned, leaving the triggers before it in place.
  *
  * @param buf    start of the file image
- * @return 0 on success, 3 for a wrong version, otherwise readTrigger's error
+ * @return eCamLoadErrorNone on success, eCamLoadErrorCookieMismatch for a wrong version, otherwise readTrigger's
+ *         error
  */
 int cCameraTriggerList::loadFromBuffer(void* buf)
 {
@@ -237,26 +238,26 @@ int cCameraTriggerList::loadFromBuffer(void* buf)
     void* cur = buf;
     self->initHeader();
     self->readCookie(&cur);
-    if (self->Cookie != 7) {
-        self->Cookie = 7;
-        return 3;
+    if (self->Cookie != kCookie) {
+        self->Cookie = kCookie;
+        return eCamLoadErrorCookieMismatch;
     }
-    int status = cCameraTriggerList_readHeader_K3(self, &cur, 7);
-    if (status != 0)
+    int status = cCameraTriggerList_readHeader_K3(self, &cur, kCookie);
+    if (status != eCamLoadErrorNone)
         return status;
     self->Triggers = (tCameraTrigger**)operator_new_K3(self->NumTriggers * 4, str_Camera_Trigger_Array, 0, 0);
     for (int i = 0; i < self->NumTriggers; i++) {
         tCameraTrigger_K3* newTrig = new (str_Camera_Trigger, 0, 0) tCameraTrigger_K3;
         status = readTrigger(&cur, &newTrig, self->Cookie);
-        if (status != 0) {
+        if (status != eCamLoadErrorNone) {
             if (newTrig != 0)
                 tCameraTrigger__tCameraTrigger(newTrig, 3);
             return status;
         }
         cCameraTriggerList_insert((cCameraTriggerList2*)self, newTrig, i);
     }
-    self->Cookie = 7;
-    return 0;
+    self->Cookie = kCookie;
+    return eCamLoadErrorNone;
 }
 #endif
 

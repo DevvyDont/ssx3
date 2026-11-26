@@ -39,6 +39,18 @@ CHECK_SIZE(cUIAnimationChannel, 0x4);
 struct cUIThing;
 
 struct cUIAnimation {
+    // The playback mode, the low 3 bits of start / updateFrame / updateThing's playback byte, and its wrap bit (names
+    // ours). [U] start records the clock frame for kPlay_Clock and starts kPlay_Backward at the last frame;
+    // updateFrame steps kPlay_Forward up, kPlay_Backward down and kPlay_PingPong both ways by mFrameDirection, and
+    // wraps instead of stopping when kPlay_Wrap is set; updateThing follows the external frame clock in kPlay_Clock.
+    enum ePlayback { kPlay_Clock = 0, kPlay_Forward = 1, kPlay_Backward = 2, kPlay_PingPong = 3 };
+    enum { kPlay_Wrap = 8 };
+    // mFrameDirection values [O] (On Tour cUIAnimation's UIANIMDIR_FW / UIANIMDIR_BW): [U] start sets UIANIMDIR_BW for
+    // kPlay_Backward; kPlay_PingPong flips it at the ends.
+    enum { UIANIMDIR_FW = 0, UIANIMDIR_BW = 1 };
+    // mScreenStartFrame before a kPlay_Clock start (name ours): [R] the ctor stores it; [U] updateThing ignores the
+    // clock while it is set.
+    enum { kNoStartFrame = 0xFFFF };
     tUIAnimation* mpAnimHeader;          // 0x000 [O]
     cUIAnimationChannel* mpAnimChannels; // 0x004 [O]
     short mLastFrameEval;                // 0x008 [O]
@@ -50,7 +62,7 @@ struct cUIAnimation {
                                          //       members)
 
     // Methods bound to their retail symbols by asm labels.
-    int isLastFrame() __asm__("cUIAnimation_isLastFrame");
+    bool isLastFrame() __asm__("cUIAnimation_isLastFrame");
     short getNumFrames() __asm__("cUIAnimation_getNumFrames");
     void start(int mode, unsigned short FrameNum) __asm__("cUIAnimation_start");
     void updateFrame(unsigned char flags) __asm__("cUIAnimation_updateFrame");

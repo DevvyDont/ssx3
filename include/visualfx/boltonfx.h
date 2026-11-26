@@ -33,6 +33,9 @@ struct cAttachedEmitterFX; // preview class name (cAttachedEmitterFX::ShouldDisa
 // One bolt-on emitter slot (0xC; our name and member names). [R] func_002EC9D0 (the element constructor, run 15 times
 // by both constructors) sets mEmitter = -1; func_002ECAF0 empties all 15.
 struct tBoltOnFXEntry {
+    // A free slot's mEmitter (name ours): [R] func_002EC9D0 sets it; [U] the dtor, func_002ECBC0, func_002ECC28 and
+    // func_002ECCB8 treat it as no emitter.
+    enum { kNoEmitter = -1 };
     int mEmitter;   // 0x0 (our name) the cAttachedEmitterFX emitter index, -1 = free: [U] func_002ECC28 stores
                     //     func_002F2130's result; cBoltOnFXInterface__cBoltOnFXInterface / func_002ECCB8 release it with func_002F2218
     int mItem;      // 0x4 (our name) the item (attach point) id: [U] func_002ECC28 stores, func_002ECBC0 matches

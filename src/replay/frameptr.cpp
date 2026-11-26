@@ -783,7 +783,7 @@ void cReplay::reset()
     int three = 3;
     CurrentReplayCamIndex = 0;
     CurrentInstantReplayCamIndex = 0;
-    if (SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
+    if (SSXApp->Game->AI->NumberOfPlayersAllocated == cAI::kOnePlayer) {
         MaxPlayerHighlights = three;
         MaxChapters = three;
     } else {
@@ -885,8 +885,8 @@ static inline void addFrame_F4A8(cReplay* self, short type)
  * Runs one frame of the replay state machine: records the race, plays instant replays and drives replay playback (On
  * Tour cReplay::update).
  *
- * Does nothing while paused or uninitialised (State 14 / 15). Counts ShowError down, clears NextFrame, turns Cmd 7
- * into kPlaybackInput (3) and clears SkipFrame outside states 3 / 4. Then by State:
+ * Does nothing while paused or uninitialised (kReplayPaused / kReplayInit). Counts ShowError down, clears NextFrame,
+ * turns Cmd kReplayCmd_Pause into kPlaybackInput (3) and clears SkipFrame outside states 3 / 4. Then by State:
  * - 11 (kStartRace) moves to 12; 12 and 0 (recording) set state 0 and clear SaveFrame. On EndReplay (ignored once a
  *   replay is Loaded) it cancels the instant-replay and highlight marks, purges idle frames, saves a final full frame
  *   and enters kReplayEnd (13). On StartInstantReplay it starts the replay at InstantReplayFrame and enters
@@ -904,30 +904,30 @@ static inline void addFrame_F4A8(cReplay* self, short type)
 void cReplay::update()
 {
     int state = State;
-    bool ok = !(state == 14 || state == 15);
+    bool ok = !(state == kReplayPaused || state == kReplayInit);
     if (!ok)
         return;
     if (ShowError > 0)
         ShowError--;
     NextFrame = 0;
-    if (Cmd == 7)
-        setReplayState(3);
-    if (!(State == 3 || State == 4))
+    if (Cmd == kReplayCmd_Pause)
+        setReplayState(kPlaybackInput);
+    if (!(State == kPlaybackInput || State == kPlaybackStep))
         SkipFrame = 0;
     switch (State) {
-    case 11:
-        setReplayState(12);
+    case kStartRace:
+        setReplayState(kStartRace1);
         return;
-    case 2:
+    case kInstantPlayback:
         if (PlaybackTick < RecordTick - 1) {
             cReplay_updateInput((this), 0);
             processInput();
             return;
         }
         cReplay_stopInstantReplay((this));
-    case 0:
-    case 12:
-        setReplayState(0);
+    case kGameRecording:
+    case kStartRace1:
+        setReplayState(kGameRecording);
         SaveFrame = 0;
         if (EndReplay != 0) {
             if (Loaded != 0)
@@ -936,12 +936,12 @@ void cReplay::update()
             cReplay_cancelMarkHighlights((this));
             cReplay_purgeIdleFrames((this));
             addFrame_F4A8((this), 1);
-            setReplayState(13);
+            setReplayState(kReplayEnd);
             return;
         }
         if (StartInstantReplay != 0) {
             cReplay_startReplay_F4A8((this), (int)InstantReplayFrame, 1, 0);
-            setReplayState(2);
+            setReplayState(kInstantPlayback);
             StartInstantReplay = 0;
             InstantReplay = 1;
             return;
@@ -957,30 +957,30 @@ void cReplay::update()
             EndRecordTick++;
         RecordTick++;
         return;
-    case 3: {
+    case kPlaybackInput: {
         void* input = SSXApp_F4A8->players[PadNum];
         if (input != 0 && cInput_getState(input, 107))
             cReplay_updateInput((this), 0);
         processInput();
         return;
     }
-    case 9:
+    case kStartAutoReplay:
         cReplay_startReplay_F4A8((this), 0, 0, 1);
-        setReplayState(1);
+        setReplayState(kGamePlayback);
         AutoReplay = 1;
         return;
-    case 8:
+    case kPlaybackLoad:
         cReplay_startReplay_F4A8((this), 0, 0, 0);
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-        setReplayState(3);
+    case kPlaybackStep:
+    case kPlaybackUpdate:
+    case kPlaybackStepUpdate:
+    case kPlaybackStart:
+        setReplayState(kPlaybackInput);
         return;
     default:
         processInput();
-    case 10:
-    case 13:
+    case kPreRace:
+    case kReplayEnd:
         return;
     }
 }
@@ -999,10 +999,10 @@ void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_startRace(int* self)
 {
     int replayState = *self;
-    bool ok = !(replayState == 14 || replayState == 15);
+    bool ok = !(replayState == kReplayPaused || replayState == kReplayInit);
     if (ok) {
-        if (replayState == 10) {
-            cReplay_setReplayState(self, 11);
+        if (replayState == kPreRace) {
+            cReplay_setReplayState(self, kStartRace);
         }
     }
 }
@@ -1099,7 +1099,7 @@ extern "C" void func_0028F200(void* self);
  */
 void cReplay::startReplay(void* frame, int instantReplay, int autoReplay)
 {
-    int ok = !(State == 14 || State == 15);
+    int ok = !(State == kReplayPaused || State == kReplayInit);
     if (ok) {
         if (Loaded == 0) {
             pushReplaySaveFrame();
@@ -1145,7 +1145,7 @@ extern "C" void func_0028F2C0(void* self);
  */
 void cReplay::stopReplay()
 {
-    int ok = !(State == 14 || State == 15);
+    int ok = !(State == kReplayPaused || State == kReplayInit);
     if (ok) {
         cReplay_cancelMarkInstantReplay((this));
         if (AutoReplay == 0 && InstantReplay == 0) {
@@ -1175,13 +1175,14 @@ void cReplay::stopReplay()
 INCLUDE_ASM("replay/frameptr", cReplay_endReplay);
 #ifdef SKIP_ASM
 /**
- * Requests the end of the recording: sets EndReplay unless the replay is paused or uninitialised (State 14 / 15).
+ * Requests the end of the recording: sets EndReplay unless the replay is paused or uninitialised (kReplayPaused /
+ * kReplayInit).
  * cReplay_update acts on it.
  */
 void cReplay::endReplay()
 {
     int curState = State;
-    bool ok = !(curState == 0xE || curState == 0xF);
+    bool ok = !(curState == kReplayPaused || curState == kReplayInit);
     if (ok) {
         EndReplay = 1;
     }
@@ -1205,20 +1206,21 @@ static inline bool isStateFA78(int* self, int s)
 /**
  * Lets the replay viewer change the camera while a replay plays.
  *
- * Only in state 3. Reads the replay pad (SSXApp's input at +0xB0 + PadNum * 4): input state 0x6C refreshes every game
- * view (cGameViewMan_updateAll). When the current replay camera's algorithm (camSubset[CurrentReplayCamIndex], On Tour
- * camSubset) is 0xB, any movement on axes 0x30..0x33 (cInput_getValue) refreshes the views too.
+ * Only in kPlaybackInput (3). Reads the replay pad (SSXApp's input at +0xB0 + PadNum * 4): input state 0x6C refreshes
+ * every game view (cGameViewMan_updateAll). When the current replay camera's algorithm
+ * (camSubset[CurrentReplayCamIndex], On Tour camSubset) is CAMERA_ALGORITHM_CHASE_MANUAL (11), any movement on axes
+ * 0x30..0x33 (cInput_getValue) refreshes the views too.
  */
 extern "C" void cReplay_updateCameraSelect(int* self)
 {
-    if (!isStateFA78(self, 3)) {
+    if (!isStateFA78(self, kPlaybackInput)) {
         return;
     }
-    void* input = (void*)SSXApp->Inputs[self[0x28 / 4]];
+    void* input = (void*)SSXApp->Inputs[self[40 / 4]];
     if (cInput_getState(input, 108) != 0) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
-    if (camSubset[self[1584 / 4]] != 11) {
+    if (camSubset[self[1584 / 4]] != CAMERA_ALGORITHM_CHASE_MANUAL) {
         return;
     }
     if (cInput_getValue(input, 49) != 0.0f || cInput_getValue(input, 0x30) != 0.0f ||
@@ -1274,74 +1276,75 @@ static inline bool isIdleNoCamFB88(char* s)
 
 // PORT: returns whether a menu action was queued; the unit declares it
 // void earlier, so the definition goes through an asm label.
-extern "C" int cReplay_updateInput_FB88(void* self, int a1) __asm__("cReplay_updateInput");
-extern "C" int cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_updateInput");
+extern "C" bool cReplay_updateInput_FB88(void* self, int a1) __asm__("cReplay_updateInput");
+extern "C" bool cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_updateInput");
 /**
  * Reads the replay menu buttons into the next replay command.
  *
  * Does nothing while a command is pending (Cmd, +0x618). Outside auto and instant replays (+0x61C/+0x620): input 0x6A
  * (SkipFrameTicks = 10, SkipFrame = 0) and 0x6B (counts SkipFrameTicks down and toggles SkipFrame, acting once both are
- * 0) give command 5, 0x67 command 6, 0x68 command 4 and 0x69 command 3; each gives 7 outside state 3 and none when the
- * playback cursor is already at the end (0x69: at the start). 0x66 stops the replay through cGame (cGame_stopReplay, Cmd
- * 8) when @p debug is set, else queues 7 outside state 3, and returns 0; 0x6C cycles the camera algorithm
+ * 0) give kReplayCmd_Step, 0x67 kReplayCmd_TogglePause, 0x68 kReplayCmd_NextFrame and 0x69 kReplayCmd_PrevFrame; each
+ * gives kReplayCmd_Pause outside kPlaybackInput and none when the playback cursor is already at the end (0x69: at the
+ * start). 0x66 stops the replay through cGame (cGame_stopReplay, Cmd kReplayCmd_Stop) when @p debug is set, else
+ * queues kReplayCmd_Pause outside kPlaybackInput, and returns false; 0x6C cycles the camera algorithm
  * (cReplay_cycleReplayCameraAlgorithm). Menu sounds go through the front end's sound interface (gUISoundNull when there
  * is none), vtable slot 2. Stores the command in Cmd.
  *
  * @param debug  nonzero to stop the replay at once on input 0x66 (On Tour: bool debug)
- * @return nonzero when a command was queued
+ * @return true when a command was queued
  */
-extern "C" int cReplay_updateInput_impl(void* self, int debug)
+extern "C" bool cReplay_updateInput_impl(void* self, int debug)
 {
     cReplay* replay = (cReplay*)self;
     cSSXApp* app = SSXApp;
     sFpView_FB88* uiSound = (sFpView_FB88*)&gUISoundNull;
     sFpView_FB88* cur = (sFpView_FB88*)app->Game->UI->mpSound;
     if (cur != 0) uiSound = cur;
-    if (replay->Cmd != 0) return 0;
-    int command = 0;
+    if (replay->Cmd != cReplay::kReplayCmd_None) return false;
+    int command = cReplay::kReplayCmd_None;
     void* input = (void*)app->Inputs[replay->PadNum];
     if (replay->AutoReplay == 0 && replay->InstantReplay == 0) {
         if (cInput_getState(input, 106)) {
             replay->SkipFrameTicks = 10;
             replay->SkipFrame = 0;
-            if (!isStateFB88(((char*)replay), 3)) command = 7;
-            else command = isIdleFB88(((char*)replay)) ? 0 : 5;
+            if (!isStateFB88(((char*)replay), kPlaybackInput)) command = cReplay::kReplayCmd_Pause;
+            else command = isIdleFB88(((char*)replay)) ? cReplay::kReplayCmd_None : cReplay::kReplayCmd_Step;
         } else if (cInput_getState(input, 107)) {
             if (replay->SkipFrameTicks > 0) replay->SkipFrameTicks -= 1;
             replay->SkipFrame ^= 1;
             if (replay->SkipFrameTicks <= 0 && replay->SkipFrame == 0) {
-                if (!isStateFB88(((char*)replay), 3)) command = 7;
-                else command = isIdleFB88(((char*)replay)) ? 0 : 5;
+                if (!isStateFB88(((char*)replay), kPlaybackInput)) command = cReplay::kReplayCmd_Pause;
+                else command = isIdleFB88(((char*)replay)) ? cReplay::kReplayCmd_None : cReplay::kReplayCmd_Step;
             }
         } else if (cInput_getState(input, 103)) {
-            if (!isStateFB88(((char*)replay), 3)) command = 7;
-            else command = isIdleFB88(((char*)replay)) ? 0 : 6;
+            if (!isStateFB88(((char*)replay), kPlaybackInput)) command = cReplay::kReplayCmd_Pause;
+            else command = isIdleFB88(((char*)replay)) ? cReplay::kReplayCmd_None : cReplay::kReplayCmd_TogglePause;
         } else if (cInput_getState(input, 102)) {
             if (debug) {
                 cGame_stopReplay(SSXApp->Game);
-                replay->Cmd = 8;
-            } else if (!isStateFB88(((char*)replay), 3)) {
-                replay->Cmd = 7;
+                replay->Cmd = cReplay::kReplayCmd_Stop;
+            } else if (!isStateFB88(((char*)replay), kPlaybackInput)) {
+                replay->Cmd = cReplay::kReplayCmd_Pause;
             }
-            return 0;
+            return false;
         } else if (cInput_getState(input, 104)) {
-            if (!isStateFB88(((char*)replay), 3)) command = 7;
+            if (!isStateFB88(((char*)replay), kPlaybackInput)) command = cReplay::kReplayCmd_Pause;
             else if (!isIdleFB88(((char*)replay))) {
                 uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
-                command = 4;
+                command = cReplay::kReplayCmd_NextFrame;
             } else {
                 uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 4);
             }
         } else if (cInput_getState(input, 105)) {
-            if (isStateFB88(((char*)replay), 3)) {
+            if (isStateFB88(((char*)replay), kPlaybackInput)) {
                 if (!isIdleNoCamFB88(((char*)replay))) {
                     uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
-                    command = 3;
+                    command = cReplay::kReplayCmd_PrevFrame;
                 } else {
                     uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 4);
                 }
             } else {
-                command = 7;
+                command = cReplay::kReplayCmd_Pause;
             }
         } else if (cInput_getState(input, 108)) {
             uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
@@ -1349,7 +1352,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
         }
     }
     replay->Cmd = command;
-    return command != 0;
+    return command != cReplay::kReplayCmd_None;
 }
 #endif
 
@@ -1369,44 +1372,46 @@ extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
 /**
  * Applies the pending replay-menu command (Cmd, set by updateInput) and clears it (On Tour processInput).
  *
- * - 1: rewinds to the start; 2: jumps to the last frame; 3: goes back to the previous key frame (to the start of the
- *   frame PlaybackTick is in, or the one before when already at a frame start). Each then steps once with setframe
- *   and enters kPlaybackStepUpdate (6) at tick 0, else kPlaybackUpdate (5).
- * - 4: when PlaybackFrame has a next frame, moves to it, steps with setframe and enters kPlaybackUpdate.
- * - 5: steps one frame and enters kPlaybackStep (4).
- * - 6: toggles pause: kPlaybackInput (3) goes to kGamePlayback (1), any other state to kPlaybackInput.
- * - 7: enters kPlaybackInput; 8: nothing.
- * - 0 (and any other value): unless paused (State 3), sets NextFrame and steps one frame.
+ * - kReplayCmd_Rewind rewinds to the start; kReplayCmd_LastFrame jumps to the last frame; kReplayCmd_PrevFrame goes
+ *   back to the previous key frame (to the start of the frame PlaybackTick is in, or the one before when already at a
+ *   frame start). Each then steps once with setframe and enters kPlaybackStepUpdate (6) at tick 0, else
+ *   kPlaybackUpdate (5).
+ * - kReplayCmd_NextFrame: when PlaybackFrame has a next frame, moves to it, steps with setframe and enters
+ *   kPlaybackUpdate.
+ * - kReplayCmd_Step steps one frame and enters kPlaybackStep (4).
+ * - kReplayCmd_TogglePause: kPlaybackInput (3) goes to kGamePlayback (1), any other state to kPlaybackInput.
+ * - kReplayCmd_Pause enters kPlaybackInput; kReplayCmd_Stop does nothing.
+ * - kReplayCmd_None (and any other value): unless paused (State kPlaybackInput), sets NextFrame and steps one frame.
  *
- * Commands 1 to 4 also redraw: they switch the first view's chase camera (cChaseCameraController_switchCamera_Chapter
- * on ViewMan's PlayerCamera[0]->ChaseController), call its snapCurrent (virtual slot 4) and update all views
- * (cGameViewMan_updateAll).
+ * Commands Rewind to NextFrame (1 to 4) also redraw: they switch the first view's chase camera
+ * (cChaseCameraController_switchCamera_Chapter on ViewMan's PlayerCamera[0]->ChaseController), call its snapCurrent
+ * (virtual slot 4) and update all views (cGameViewMan_updateAll).
  */
 void cReplay::processInput()
 {
     int redraw = 0;
     switch (Cmd) {
-    case 1:
+    case kReplayCmd_Rewind:
         cReplay_rewind(((char*)this), 0);
         redraw = 1;
         cReplay_stepFrame(((char*)this), 1);
         if (PlaybackTick == 0) {
-            cReplay_setReplayState(((char*)this), 6);
+            cReplay_setReplayState(((char*)this), kPlaybackStepUpdate);
         } else {
-            cReplay_setReplayState(((char*)this), 5);
+            cReplay_setReplayState(((char*)this), kPlaybackUpdate);
         }
         break;
-    case 2:
+    case kReplayCmd_LastFrame:
         cReplay_lastFrame(((char*)this));
         redraw = 1;
         cReplay_stepFrame(((char*)this), 1);
         if (PlaybackTick == 0) {
-            cReplay_setReplayState(((char*)this), 6);
+            cReplay_setReplayState(((char*)this), kPlaybackStepUpdate);
         } else {
-            cReplay_setReplayState(((char*)this), 5);
+            cReplay_setReplayState(((char*)this), kPlaybackUpdate);
         }
         break;
-    case 3: {
+    case kReplayCmd_PrevFrame: {
         redraw = 1;
         cReplayFrame* frame = (cReplayFrame*)((char*)cReplay_findFrame_2(((char*)this), PlaybackTick));
         PlaybackFrame = (cReplayFrame*)frame;
@@ -1420,44 +1425,44 @@ void cReplay::processInput()
         }
         cReplay_stepFrame(((char*)this), 1);
         if (PlaybackTick == 0) {
-            cReplay_setReplayState(((char*)this), 6);
+            cReplay_setReplayState(((char*)this), kPlaybackStepUpdate);
         } else {
-            cReplay_setReplayState(((char*)this), 5);
+            cReplay_setReplayState(((char*)this), kPlaybackUpdate);
         }
         break;
     }
-    case 4:
+    case kReplayCmd_NextFrame:
         redraw = 1;
         if ((int)PlaybackFrame->Next != 0) {
             cReplay_nextFrame(((char*)this));
             cReplay_stepFrame(((char*)this), 1);
-            cReplay_setReplayState(((char*)this), 5);
+            cReplay_setReplayState(((char*)this), kPlaybackUpdate);
         }
         break;
-    case 5:
+    case kReplayCmd_Step:
         cReplay_stepFrame(((char*)this), 0);
-        cReplay_setReplayState(((char*)this), 4);
+        cReplay_setReplayState(((char*)this), kPlaybackStep);
         break;
-    case 6:
-        if (State == 3) {
-            cReplay_setReplayState(((char*)this), 1);
+    case kReplayCmd_TogglePause:
+        if (State == kPlaybackInput) {
+            cReplay_setReplayState(((char*)this), kGamePlayback);
         } else {
-            cReplay_setReplayState(((char*)this), 3);
+            cReplay_setReplayState(((char*)this), kPlaybackInput);
         }
         break;
-    case 7:
-        cReplay_setReplayState(((char*)this), 3);
+    case kReplayCmd_Pause:
+        cReplay_setReplayState(((char*)this), kPlaybackInput);
         break;
-    case 8:
+    case kReplayCmd_Stop:
         break;
     default:
-        if (State != 3) {
+        if (State != kPlaybackInput) {
             NextFrame = 1;
             cReplay_stepFrame(((char*)this), 0);
         }
         break;
     }
-    Cmd = 0;
+    Cmd = kReplayCmd_None;
     if (redraw) {
         cGameViewMan* views = SSXApp->Game->ViewMan;
         cChaseCameraController* controller = views->PlayerCamera[0]->ChaseController;

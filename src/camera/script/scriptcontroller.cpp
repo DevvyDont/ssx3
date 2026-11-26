@@ -126,8 +126,8 @@ extern char str_Algorithmic_Script_Camera_Algo[];
 /**
  * Creates the camera algorithm for a script camera object and adds it to the controller.
  *
- * The kind (cScriptPlayerEntity_GetType on the object's data) picks a manual (0), target (1), subject (2) or algorithmic
- * (3) script camera algorithm; other kinds are ignored. The algorithm is bound to the object, stored at its
+ * The kind (eScriptCameraKind, cScriptPlayerEntity_GetType on the object's data) picks a manual, target, subject or
+ * algorithmic script camera algorithm; other kinds are ignored. The algorithm is bound to the object, stored at its
  * +0x1C, added as owned (cScriptCameraController_addAlgorithm, probably addAlgorithm) and the controller becomes active (+0x18 = 1).
  *
  * @param cam  the script camera object (cScriptObjCamera)
@@ -137,16 +137,16 @@ void cScriptCameraController::addCamera(cScriptObjCamera* cam)
     void* ctl;
     switch (cScriptPlayerEntity_GetType(cam->mpCameraEntity->mpEntity))
     {
-    case 0:
+    case kScriptCam_Manual:
         ctl = cScriptManualAlgorithm_cScriptManualAlgorithm((cScriptManualAlgorithm*)cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
         break;
-    case 1:
+    case kScriptCam_Target:
         ctl = cScriptPointAlgorithm_cScriptPointAlgorithm((cScriptPointAlgorithm*)cMemMan_alloc(176, str_Target_Script_Camera_Algo, 0x20000000, 0));
         break;
-    case 2:
+    case kScriptCam_Subject:
         ctl = cScriptTargetAlgorithm_cScriptTargetAlgorithm((cScriptTargetAlgorithm*)cMemMan_alloc(160, str_Subject_Script_Camera_Algo, 0x20000000, 0));
         break;
-    case 3:
+    case kScriptCam_Algorithmic:
         ctl = cScriptRelativeAlgorithm_cScriptRelativeAlgorithm((cScriptRelativeAlgorithm*)cMemMan_alloc(160, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
         break;
     default:
@@ -1266,10 +1266,10 @@ struct sVEp_16A510 {
  * Updates the target script camera: a scripted position that looks at the subject rider.
  *
  * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
- * (GetSSXCameraSubjectHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraSubjectFrame reads this frame's channel
- * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraSubject). The subject rider is
- * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x22), the entity's script player at
- * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
+ * (GetSSXCameraSubjectHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraSubjectFrame reads
+ * this frame's channel values into FrameInfo (+0x4C, On Tour tSSXFrameCameraSubject). The subject rider is
+ * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x22, byte 34), the entity's script player
+ * at +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
  * (converted with * 0.0174533).
  *
  * View (+0x0) becomes fov (+0x64) and Roll (+0x40) roll (+0x60) plus mBaseRotX (ScriptObj +0x70). Position (+0x30) is
@@ -1287,7 +1287,7 @@ extern "C" void cScriptTargetAlgorithm_update(cScriptTargetAlgorithm* algorithm)
     char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraSubjectHeader(cam);
     char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
-    char* rider = (char*)cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x22], *(int*)(cam + 8));
+    char* rider = (char*)cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[34], *(int*)(cam + 8));
     if (rider == 0) {
         rider = (char*)SSXApp->Game->AI->Riders[0];
     }

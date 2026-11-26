@@ -147,9 +147,9 @@ extern "C" float SphereTree_GetRadius(void* self);
  *
  * @param lo  the box's minimum corner (On Tour bMin)
  * @param hi  the box's maximum corner (On Tour bMax)
- * @return 0 when the sphere's bounding box lies wholly beyond one face, otherwise 1
+ * @return false when the sphere's bounding box lies wholly beyond one face, otherwise true
  */
-int cWorldSphTree::IsInBoxTransformed(float* lo, float* hi)
+bool cWorldSphTree::IsInBoxTransformed(float* lo, float* hi)
 {
     t4Vector ext;
     float rx = SphereTree_GetRadius(st);
@@ -163,17 +163,17 @@ int cWorldSphTree::IsInBoxTransformed(float* lo, float* hi)
     t4Vector mn = sub_330540(*(&st->transCenter), ext);
     float lx = lo[0];
     float tx = mx.x;
-    if (tx < lx && mn.x < lx) return 0;
-    if (hi[0] < tx && hi[0] < mn.x) return 0;
+    if (tx < lx && mn.x < lx) return false;
+    if (hi[0] < tx && hi[0] < mn.x) return false;
     float ly = lo[1];
     float ty = mx.y;
-    if (ty < ly && mn.y < ly) return 0;
-    if (hi[1] < ty && hi[1] < mn.y) return 0;
+    if (ty < ly && mn.y < ly) return false;
+    if (hi[1] < ty && hi[1] < mn.y) return false;
     float lz = lo[2];
     float tz = mx.z;
-    if (tz < lz && mn.z < lz) return 0;
-    if (!(hi[2] < tz) || !(hi[2] < mn.z)) return 1;
-    return 0;
+    if (tz < lz && mn.z < lz) return false;
+    if (!(hi[2] < tz) || !(hi[2] < mn.z)) return true;
+    return false;
 }
 #endif
 
@@ -1087,7 +1087,7 @@ int cOverlapList::terrainIntersect(void* vq, tIntersectInfo* hits, int cap, int 
     int n = 0;
     for (unsigned int i = 0; i < self->numpatches; i++) {
         tPatchRecord* obj = self->patches[i];
-        if ((obj->m_sSurfaceFlags & 0x41) != 65) {
+        if ((obj->m_sSurfaceFlags & tPatchRecord::kCollideFlags) != tPatchRecord::kCollideFlags) {
             continue;
         }
         if (!overlapTri_333EF8(query, obj)) {
@@ -1346,13 +1346,13 @@ int cOverlapList::splineIntersect(t4Vector* pos, int intInfo, int mask, float te
     for (unsigned int i = 0; i < numtyped; i++) {
         cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)typed[i];
         int type = spaceNode->type;
-        if (type == 2) {
+        if (type == kSNT_Rail) {
             cRailModifier_splineIntersect(((cRailSpaceNode*)spaceNode)->Rail, &box, &box, pos, mask, &cnt, &dist,
                                           intInfo);
-        } else if (type == 3) {
+        } else if (type == kSNT_FlexRail) {
             cFlexRailNode_splineIntersect(((cFlexRailSpaceNode*)spaceNode)->FlexNode, &box, &box, pos, mask, &cnt,
                                           &dist, intInfo);
-        } else if (type == 1) {
+        } else if (type == kSNT_SplineSegment) {
             if (((tSplineSegmentRecord*)spaceNode)->m_Parent->m_iFlags & mask) {
                 intersect_staticSplineSegmentIntersect(spaceNode, &box, pos, &cnt, &dist, intInfo);
             }
@@ -1643,6 +1643,12 @@ static inline sWsPart_4888* GetPart_4888(sWsInstDef_4888* def, int i)
     return &def->parts[i];
 }
 
+// intersect_instanceIntersect's mode (names ours; On Tour's parameter is int flags): [U] kInstIntersect_PlainParts
+// tests only the meshes without a surface type (part id eST_Undefined), kInstIntersect_SurfaceParts only those with
+// one, any other mode every mesh. cOverlapList_terrainIntersect passes kInstIntersect_SurfaceParts,
+// staticObjectIntersect one or the other.
+enum { kInstIntersect_PlainParts = 1, kInstIntersect_SurfaceParts = 2 };
+
 // Collects the triangle hits of instance `node` against query q into buf (mode 1: unnamed parts only, mode 2: named
 // parts only); bone matrices come from the instance's animated object or are built here from the skeleton.
 extern "C" int func_4888(cWorldIntersectType* q, tInstanceRecord* node, sWsHit_4888* buf, int cap, int mode) __asm__("intersect_instanceIntersect");
@@ -1670,7 +1676,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
         }
     }
     int type = ((sWsInstDef_4888*)node->m_pCollideRecord)->type;
-    if (type != 3 && type != 1 && type != 2)
+    if (type != CR_SphereTree && type != CR_Polygon && type != CR_Box)
         return 0;
     cInstanceNode* obj = node->m_pActiveNode;
     sWsMat_4888 mats[24];
@@ -1701,7 +1707,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
     for (int i = 0, k = 0; i < tbl->m_iNumMeshes; i++, bone++, boneMat++) {
         if (useLocal) {
             int parent = bone->m_iParentID;
-            if (parent != -1) {
+            if (parent != tMeshHeirarchyRecord::kNoParent) {
                 sWsMat_4888 productCopy;
                 sWsMat_4888 scaledLocal;
                 t4Vector res;
@@ -1753,15 +1759,15 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
         }
         if (bone->m_Mesh == 0)
             continue;
-        if (mode == 2) {
-            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id == -1) {
-                if (type != 2)
+        if (mode == kInstIntersect_SurfaceParts) {
+            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id == eST_Undefined) {
+                if (type != CR_Box)
                     k++;
                 continue;
             }
-        } else if (mode == 1) {
-            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != -1) {
-                if (type != 2)
+        } else if (mode == kInstIntersect_PlainParts) {
+            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != eST_Undefined) {
+                if (type != CR_Box)
                     k++;
                 continue;
             }
@@ -1771,14 +1777,14 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
         InvertOrtho_4888(inv);
         int inum = 0;
         void* tri = 0;
-        ((SetXf_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[1].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[1]), 1.0f / node->m_fScale, &inv);
-        if (type == 2) {
-            inum = ((Tris_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7]), ((char*)bone->m_Mesh), (char*)&bone->m_Mesh->m_fvMax, ii, 64);
+        ((SetXf_4888)((sWsVtSlot*)VPTR_AT(intersectType, 80))[1].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 80))[1]), 1.0f / node->m_fScale, &inv);
+        if (type == CR_Box) {
+            inum = ((Tris_4888)((sWsVtSlot*)VPTR_AT(intersectType, 80))[7].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 80))[7]), ((char*)bone->m_Mesh), (char*)&bone->m_Mesh->m_fvMax, ii, 64);
         } else {
-            if (((Hit_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9]), ((char*)bone->m_Mesh), (char*)&bone->m_Mesh->m_fvMax)) {
-                if (type == 3) {
+            if (((Hit_4888)((sWsVtSlot*)VPTR_AT(intersectType, 80))[9].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 80))[9]), ((char*)bone->m_Mesh), (char*)&bone->m_Mesh->m_fvMax)) {
+                if (type == CR_SphereTree) {
                     tri = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo_4888(cWorld_m_pTheWorld, node), k);
-                    inum = ((Mesh_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[6].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[6]), tri, ii, 64);
+                    inum = ((Mesh_4888)((sWsVtSlot*)VPTR_AT(intersectType, 80))[6].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 80))[6]), tri, ii, 64);
                 } else {
                     inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(cWorld_getSphereTreeInfo_4888(cWorld_m_pTheWorld, node), k),
                                              bone->m_Mesh->m_iFlags & 1, ii, 64);
@@ -1786,7 +1792,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
             }
             k++;
         }
-        ((Reset_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[2].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[2]));
+        ((Reset_4888)((sWsVtSlot*)VPTR_AT(intersectType, 80))[2].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 80))[2]));
         for (int j = 0; j < inum; j++) {
             ii[j].nrm = vu0MtxMul_4888(boneMat, ii[j].nrm);
             buf[n] = ii[j];
@@ -1799,7 +1805,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
             buf[n].v20 = *t4vect_Zero_4888;
             buf[n].v30 = *t4vect_Zero_4888;
             buf[n].obj = 0;
-            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != -1)
+            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != eST_Undefined)
                 buf[n].id = GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id;
             n++;
         }
@@ -2193,7 +2199,7 @@ extern "C" void TerrainCallback_intersectpatch(void* vctx, void* vobj)
     t4Vector uv;
     void* node;
     float dist;
-    if ((obj->m_sSurfaceFlags & 0x41) != 65) return;
+    if ((obj->m_sSurfaceFlags & tPatchRecord::kCollideFlags) != tPatchRecord::kCollideFlags) return;
     if (!overlap_335960(ctx->intersecttype, obj)) return;
     cAIFwdDiffCache_GetFwdDiff(((void*)ctx->fwddiffcache), obj, &node);
     if (!cWorldIntersectType_IsPatchInt(ctx->intersecttype, obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
@@ -2479,21 +2485,21 @@ static inline void visit_003369D8(nash_Octant* c, nash_privy_QueryHelper* helper
 }
 
 /**
- * Finds the terrain straight above or below @p pos; on a hit stores its position and normal and returns 1.
+ * Finds the terrain straight above or below @p pos; on a hit stores its position and normal and returns true.
  *
  * Builds a vertical cWorldLine from 100000 below to 100000 above @p pos (precision 2, ideal parameter at 20 units above
  * @p pos, clamped to 0..1) and a terrain query on it (64 hit records, no hint, the AI forward-difference cache
  * TheAIFwdDiffCache), then walks each of the eight octants that has a root cell with nash_privy_QueryHelper_help.
- * Returns 0 without hits; otherwise picks the hit whose height (z) is closest to @p pos's, ties going to an instance
- * hit and then to the smaller m_RID, and copies that hit's position and normal out. Called by
+ * Returns false without hits; otherwise picks the hit whose height (z) is closest to @p pos's, ties going to an
+ * instance hit and then to the smaller m_RID, and copies that hit's position and normal out. Called by
  * cSSXScriptEngine_GetAnchorOrientation.
  *
  * @param pos  the point (x, y, z)
  * @param outP  out: the hit position
  * @param outN  out: the hit normal
- * @return 1 on a hit, otherwise 0
+ * @return true on a hit, otherwise false
  */
-extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP, t4Vector* outN)
+extern "C" bool cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP, t4Vector* outN)
 {
     char seg[176];
     float lo = pos[2] - 100000.0f;
@@ -2546,7 +2552,7 @@ extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP
     if (((void*)self->octant[1][1][0].rootcell)) visit_003369D8(octant6, &walk.helpers[6], &terrainQuery, ctx);
     if (((void*)self->octant[1][1][1].rootcell)) visit_003369D8(octant7, &walk.helpers[7], &terrainQuery, ctx);
     if (walk.count == 0) {
-        return 0;
+        return false;
     }
     float ref = pos[2];
     int best = 0;
@@ -2564,7 +2570,7 @@ extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP
     }
     *outP = (hits + best)->Ipos;
     *outN = (hits + best)->Inorm;
-    return 1;
+    return true;
 }
 #endif
 
@@ -2940,7 +2946,7 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallba
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     ctx->operatorCall((nash_Cell*)node);
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -3078,7 +3084,7 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
     for (objNode = (*(void***)&node->nodesinside[2]); objNode != 0; objNode = (void**)*objNode) {
         ctx->instances[(*ctx->number)++] = (tInstanceRecord*)objNode;
     }
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -3263,7 +3269,7 @@ extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallba
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     collectObjs_33A3D8(node, ctx);
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -3475,7 +3481,7 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallb
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     visit_33B748(node, ctx);
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -3616,7 +3622,7 @@ extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, 
     for (objNode = (void**)(*(void**)&node->nodesinside[0]); objNode != 0; objNode = (void**)*objNode) {
         TerrainCallback_intersectinstance(ctx, objNode);
     }
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -3805,7 +3811,7 @@ void nash_privy_QueryHelper::help(TerrainCallback* query, TerrainCallback* insid
         if (node->children[1][1][1]) {
             node->children[1][1][1]->descend4(insideQuery);
         }
-    } else if (overlap == 2) {
+    } else if (overlap == kNash_Crossing) {
         nash_Node* objNode;
         for (objNode = node->nodesinside[1].head; objNode != 0; objNode = objNode->next) {
             TerrainCallback_intersectpatch(query, objNode);
@@ -3813,7 +3819,7 @@ void nash_privy_QueryHelper::help(TerrainCallback* query, TerrainCallback* insid
         for (objNode = node->nodesinside[0].head; objNode != 0; objNode = objNode->next) {
             TerrainCallback_intersectinstance(query, objNode);
         }
-        if (cell->level == 11) {
+        if (cell->level == nash_CellKey::kLeafLevel) {
             return;
         }
         nash_CellKey sub;
@@ -3904,7 +3910,7 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* 
     for (objNode = (void**)(*(void**)&node->nodesinside[0]); objNode != 0; objNode = (void**)*objNode) {
         StaticObjectCallback_intersectinstance(ctx, objNode);
     }
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -4086,7 +4092,7 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     objs_33ED60((*(char**)&node->nodesinside[2]), ctx);
-    if (cell->level == 11) {
+    if (cell->level == nash_CellKey::kLeafLevel) {
         return;
     }
     nash_CellKey sub;
@@ -4321,7 +4327,7 @@ extern "C" void func_003400D8_init(int initialize, int priority) __asm__("func_0
  */
 extern "C" void func_003400D8_init(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004FF2C0_v) sV4_3400D8(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004FF2D0_v) sV4_3400D8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004FF2E0_v) sV4_3400D8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -4733,17 +4739,17 @@ extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* splineQuery)
     for (cTypedSpaceNode* typedNode = (cTypedSpaceNode*)tree->nodesinside[2].head; typedNode != 0;
          typedNode = (cTypedSpaceNode*)typedNode->next) {
         int type = typedNode->type;
-        if (type == 2) {
+        if (type == kSNT_Rail) {
             cRailModifier_splineIntersect(((cRailSpaceNode*)typedNode)->Rail, ((tBoundBox*)splineQuery->box),
                                           ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos),
                                           ((int)splineQuery->splinefiltermask), splineQuery->hit,
                                           splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
-        } else if (type == 3) {
+        } else if (type == kSNT_FlexRail) {
             cFlexRailNode_splineIntersect(((cFlexRailSpaceNode*)typedNode)->FlexNode, ((tBoundBox*)splineQuery->box),
                                           ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos),
                                           ((int)splineQuery->splinefiltermask), splineQuery->hit,
                                           splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
-        } else if (type == 1) {
+        } else if (type == kSNT_SplineSegment) {
             if (((tSplineSegmentRecord*)typedNode)->m_Parent->m_iFlags & ((int)splineQuery->splinefiltermask)) {
                 intersect_staticSplineSegmentIntersect(typedNode, ((tBoundBox*)splineQuery->box),
                                                        ((t4Vector*)splineQuery->intersectpos), splineQuery->hit,
@@ -4876,7 +4882,7 @@ cBoostNode* cBoostNode::cBoostNode1(void* bucket, int nodeType, void* instance, 
     Type = type;
     BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
     if (def->BoostX == 0.0f && def->BoostY == 0.0f && def->BoostZ == 0.0f) {
-        if (type == 2) {
+        if (type == kBoostType_Local) {
             Boost = *t4vect_YAxis;
         } else {
             Boost = *t4vect_Zero;
@@ -4887,7 +4893,7 @@ cBoostNode* cBoostNode::cBoostNode1(void* bucket, int nodeType, void* instance, 
     MaxSpeed = def->MaxSpeed * 27.77777862548828f;
     Drag = def->Drag;
     Time = Type ? BoostTime : 0;
-    if (Type == 2) {
+    if (Type == kBoostType_Local) {
         char* instMatrix = (char*)&Instance->m_fmTransform;
         Boost = vu0Xform_341388(vu0Scale_341388(Boost, -1.0f), instMatrix);
         MaxSpeed = -MaxSpeed;
@@ -4959,10 +4965,10 @@ extern "C" cBeing* cObjectInterface_getBeing(int i);
 
 
 /**
- * Applies the boost node to every being touching it, and expires a timed (type 1) node once nothing keeps it
+ * Applies the boost node to every being touching it, and expires a timed (kBoostType_Timed) node once nothing keeps it
  * alive.
  *
- * Counts the timer (Time) down. For type 1, or once the timer is out, each being touching the node (being
+ * Counts the timer (Time) down. For kBoostType_Timed, or once the timer is out, each being touching the node (being
  * slot 3 with the node's Instance; type 2 skips computer riders, slot 9) is slowed (slot 48: velocity times
  * (1 + factor)) when the factor (Drag) is negative, else pushed along the boost direction (slot 47). A type
  * 1 node that no being touches and whose timer is out expires (slot 34, runscript 1); slots 49/50 (empty)
@@ -4971,7 +4977,7 @@ extern "C" cBeing* cObjectInterface_getBeing(int i);
 extern "C" void cBoostNode_update(cBoostNode* self)
 {
     int hit = 0;
-    if (self->Type != 1) {
+    if (self->Type != cBoostNode::kBoostType_Timed) {
         hit = 1;
     }
     int timeLeft = self->Time;
@@ -4984,10 +4990,10 @@ extern "C" void cBoostNode_update(cBoostNode* self)
     }
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
     vt[49].fn(vthis(self, vt[49]));
-    if (self->Type == 1 || self->Time <= 0) {
+    if (self->Type == cBoostNode::kBoostType_Timed || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             cBeing* obj = cObjectInterface_getBeing(i);
-            if (self->Type == 2) {
+            if (self->Type == cBoostNode::kBoostType_Local) {
                 if (obj->isComputer() != 0) continue;
             }
             if (obj->isIntersecting(self->Instance) != 0) {
@@ -5141,7 +5147,7 @@ void cBoostNode::applyBoost(cBeing* obj)
     float alongSpeed = vu0Dot_341818(vel, dir);
     float diff = MaxSpeed - alongSpeed;
     cBoostNodeState* boostParams = (cBoostNodeState*)&Boost;
-    if (Type == 2) {
+    if (Type == kBoostType_Local) {
         if (alongSpeed >= 0.0f) {
             t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->MaxSpeed), boostParams->Drag), cObjectInterface_getUpdateTime());
             obj->applyBoost(&newVel);
@@ -5157,7 +5163,7 @@ void cBoostNode::applyBoost(cBeing* obj)
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_signal);
 #ifdef SKIP_ASM
 /**
- * Handles a signal sent to the boost node: signal 1 restarts its timer.
+ * Handles a signal sent to the boost node: kBoostSignal_Restart (1) restarts its timer.
  *
  * Reloads the timer (+0x3C) from the duration (+0x38); other signals are ignored. On Tour's float argument is
  * not taken.
@@ -5166,7 +5172,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostNode_signal);
  */
 extern "C" void cBoostNode_signal(cBoostNode* self, int signal)
 {
-    if (signal == 1) {
+    if (signal == cBoostNode::kBoostSignal_Restart) {
         self->Time = self->BoostTime;
     }
 }
@@ -5289,7 +5295,7 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int buc
     } else {
         self->AnimSpeed = def->Speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
     }
-    if (def->Dir == 1) {
+    if (def->Dir == tMakeAnimObjectData::kDir_Reverse) {
         self->AnimSpeed = -self->AnimSpeed;
     }
     self->CacheTime = self->CurrTime;
@@ -5370,21 +5376,23 @@ extern "C" int cAnimNode_frameUpdate(void* p);
  * Advances an animated object node by one step and expires it once a play-once animation has reached its end.
  *
  * Resets +0x24 and +0x28 (the stepped-from and stepped-to frames) to 1e10. When atLimit (+0x8) is already set it
- * returns 1 at once. While active (+0x4) and the start delay (+0xC) is not negative, it counts the delay down, or once
- * it is 0 records the frame (+0x1C) in +0x24 and steps it by the play type (+0x0): 2 cAnimObjectNode_updateOscillate (bounce), 1
- * cAnimObjectNode_updateCycle (wrap), otherwise cAnimObjectNode_updateOnce (clamp), returning 0 if cAnimNode_frameUpdate on the animation part fails.
+ * returns true at once. While active (+0x4) and the start delay (+0xC) is not negative, it counts the delay down, or
+ * once it is 0 records the frame (+0x1C) in +0x24 and steps it by the play type (+0x0): kAnimType_Oscillate
+ * cAnimObjectNode_updateOscillate (bounce), kAnimType_Cycle cAnimObjectNode_updateCycle (wrap), otherwise
+ * cAnimObjectNode_updateOnce (clamp), returning false if cAnimNode_frameUpdate on the animation part fails.
  *
  * It then sets the dirty flag (bit 0 of +0x42) and copies the frame to +0x20. When the step set atLimit it calls the
- * node's slot 34 (cAnimObjectNode_expire) with 1 and returns 0; otherwise it returns 1. Slot 15 of cAnimObjectNode_vtbl.
+ * node's slot 34 (cAnimObjectNode_expire) with 1 and returns false; otherwise it returns true. Slot 15 of
+ * cAnimObjectNode_vtbl.
  *
- * @return 0 after a failed frame update or once the node expired, else 1
+ * @return false after a failed frame update or once the node expired, else true
  */
-extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
+extern "C" bool cAnimObjectNode_updateNode(cAnimObjectNode* self)
 {
     self->FrameStart = 10000000000.0f;
     self->FrameEnd = 10000000000.0f;
     if (self->AnimComplete != 0) {
-        return 1;
+        return true;
     }
     if (self->AnimActive != 0 && self->Delay >= 0) {
         if (self->Delay > 0) {
@@ -5392,10 +5400,10 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
         } else {
             self->FrameStart = self->CurrTime;
             switch (*(short*)self) {
-            case 2:
+            case cAnimObjectNode::kAnimType_Oscillate:
                 self->updateOscillate();
                 break;
-            case 1:
+            case cAnimObjectNode::kAnimType_Cycle:
                 self->updateCycle();
                 break;
             default:
@@ -5403,7 +5411,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
                 break;
             }
             if (cAnimNode_frameUpdate((char*)&self->CurrTime) == 0) {
-                return 0;
+                return false;
             }
         }
     }
@@ -5411,11 +5419,11 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
     self->Flags |= 1;
     self->CacheTime = self->CurrTime;
     if (self->AnimComplete == 0) {
-        return 1;
+        return true;
     }
     sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
     vt[34].fn(vthis(obj, vt[34]), 1);
-    return 0;
+    return false;
 }
 #endif
 
@@ -5584,17 +5592,17 @@ extern "C" void cMoveNode_signal(void* p);
  */
 extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msgValue)
 {
-    if (msg == 100) {
+    if (msg == cAnimObjectNode::kAnimSignal_SetDelay) {
         self->Delay = (int)(msgValue * (float)cAppMan_TheAppMan->TimerHz);
-    } else if (msg == 101) {
+    } else if (msg == cAnimObjectNode::kAnimSignal_SetTime) {
         msgValue = msgValue * 0.03333333507180214f;
         if (self->FromTime <= msgValue && msgValue <= self->ToTime) {
             self->CurrTime = msgValue;
         }
-    } else if (msg == 102) {
+    } else if (msg == cAnimObjectNode::kAnimSignal_SetSpeed) {
         msgValue = msgValue * 0.03333333507180214f;
         self->AnimSpeed = msgValue / (float)cAppMan_TheAppMan->TimerHz;
-    } else if (msg == 103) {
+    } else if (msg == cAnimObjectNode::kAnimSignal_SetToTime) {
         msgValue = msgValue * 0.03333333507180214f;
         float lim = self->Instance->m_Model->m_fAnimTime;
         if (lim < msgValue) {
@@ -5607,7 +5615,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         if (msgValue < self->CurrTime) {
             self->CurrTime = msgValue;
         }
-    } else if (msg == 104) {
+    } else if (msg == cAnimObjectNode::kAnimSignal_SetFromTime) {
         msgValue = msgValue * 0.03333333507180214f;
         float lim = self->Instance->m_Model->m_fAnimTime;
         if (lim < msgValue) {
@@ -5620,8 +5628,8 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         if (self->CurrTime < msgValue) {
             self->CurrTime = msgValue;
         }
-    } else if (msg == 105) {
-        *(short*)self = 0;
+    } else if (msg == cAnimObjectNode::kAnimSignal_PlayOnce) {
+        *(short*)self = cAnimObjectNode::kAnimType_Once;
     } else {
         cMoveNode_signal(&self->MoveNodeBase);
     }
@@ -5809,9 +5817,9 @@ static inline float absf_00342358(float x)
  * It then clears the torque, copies the frame to +0x34 and runs cAnimNode_frameUpdate on the animation part; on success it sets
  * the dirty flag (bit 0 of +0x56). Slot 15 of cAnimTeeterNode_vtbl.
  *
- * @return cAnimNode_frameUpdate's result: 1 after a successful frame update, else 0
+ * @return cAnimNode_frameUpdate's result: true after a successful frame update, else false
  */
-int cAnimTeeterNode::updateNode()
+bool cAnimTeeterNode::updateNode()
 {
     FrameStart = CurrTime;
     float dt = cObjectInterface_getUpdateTime();
@@ -5858,10 +5866,10 @@ int cAnimTeeterNode::updateNode()
     TorqueSum = 0.0f;
     CacheTime = CurrTime;
     if (cAnimNode_frameUpdate(&CurrTime) == 0) {
-        return 0;
+        return false;
     }
     Flags |= 1;
-    return 1;
+    return true;
 }
 #endif
 
@@ -6128,7 +6136,7 @@ extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostDa
     *(&self->Boost) = boostDir;
     self->MaxSpeed = def->MaxSpeed * 100.0f;
     self->Drag = def->Drag;
-    self->Time = type == 1 ? boostFrames : 0;
+    self->Time = type == cBoostModifier::kBoostModType_Timed ? boostFrames : 0;
     return (self);
 }
 #endif
@@ -6190,7 +6198,7 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
         }
     }
     self->boostStart();
-    if (self->Type == 1 || self->Time <= 0) {
+    if (self->Type == cBoostModifier::kBoostModType_Timed || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             cBeing* obj = cObjectInterface_getBeing(i);
             if (obj->isIntersecting(self->Instance) != 0) {
@@ -6339,7 +6347,7 @@ extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_signal);
 #ifdef SKIP_ASM
 /**
- * Handles a signal sent to the boost modifier: signal 0x258 (600) restarts its timer.
+ * Handles a signal sent to the boost modifier: kBoostModSignal_Restart (600) restarts its timer.
  *
  * Reloads the timer (+0x2C) from the duration (+0x28); other signals are ignored.
  *
@@ -6347,7 +6355,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_signal);
  */
 extern "C" void cBoostModifier_signal(cBoostModifier* self, int signal)
 {
-    if (signal == 600) {
+    if (signal == cBoostModifier::kBoostModSignal_Restart) {
         self->Time = self->BoostTime;
     }
 }
@@ -6409,9 +6417,9 @@ void* cDebounceNode::cDebounceNode1(void* bucket, void* instance, tMakeDebounceD
     Life = (int)(def->Time * (float)cAppMan_TheAppMan->TimerHz);
     Type = def->Type;
     cMoveNode_transferFromOld(this, oldNode);
-    if (def->Visible == 0) {
+    if (def->Visible == tMakeDebounceData::kVisible_Hide) {
         (*(unsigned int*)&Instance->m_iFlags) &= 0xFFFFFFF0;
-    } else if (def->Visible == 1) {
+    } else if (def->Visible == tMakeDebounceData::kVisible_Show) {
         (*(unsigned int*)&Instance->m_iFlags) |= 1;
         Instance->m_iFlags = (((unsigned int)(Instance)->m_iFlags) & ~2u) | 4;
     } else {

@@ -161,7 +161,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
  * Looks up a keyframe label's frame number in the screen's keyframe block.
  *
  * @param label  the label's hash (On Tour hashname)
- * @return the frame number, or 0xFFFF when the label is not found
+ * @return the frame number, or kNoFrame (0xFFFF) when the label is not found
  */
 unsigned short cUIScreen::getFrameByLabel(int label)
 {
@@ -175,7 +175,7 @@ unsigned short cUIScreen::getFrameByLabel(int label)
         }
         entry = (tUIFrameHeader*)((char*)entry + ((int)entry->mByteSize));
     }
-    return 0xFFFF;
+    return kNoFrame;
 }
 #endif
 
@@ -308,9 +308,8 @@ extern void cUIScreen_parseScreenEnd_4(void *, void *, void *, void *) __asm__("
 /**
  * Advances a thread one frame (toward its stop frame, if any) and runs the commands of the frame it was on.
  *
- * Commands 0x10-0x12 are keyframe stop, jump and spawn, 0x2x and 0x3x object commands, 0x40-0x43 screen and
- * focus
- * events.
+ * Commands (tUIKCPBase::eKCPTag) 0x10-0x12 are keyframe stop, jump and spawn, 0x2x object and 0x3x event commands,
+ * 0x40-0x43 screen and focus events.
  *
  * @param thread  the thread (On Tour cUIThread* pThread)
  */
@@ -322,7 +321,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
     unsigned int i;
     unsigned short CurrentFrame = uiThread->getCurrentFrameNumber();
     uiThread->setLastFrameNumber(uiThread->getCurrentFrameNumber());
-    if (uiThread->mStopFrameNumber != 0xFFFF) {
+    if (uiThread->mStopFrameNumber != cUIScreen::kNoFrame) {
         if (uiThread->getFrameIncrement() > 0) {
             if (uiThread->mLastFrameNumber < uiThread->mStopFrameNumber) {
                 uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
@@ -344,40 +343,40 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
         if (list->mNumKCP != 0) {
             do {
                 switch (cmd->mTag) {
-                case 0x10:
+                case tUIKCPBase::kKCP_KeyframePause:
                     cUIScreen_parseKeyframePause_4(self, list, cmd, uiThread);
                     break;
-                case 17:
+                case tUIKCPBase::kKCP_KeyframeJump:
                     cUIScreen_parseKeyframeJump_4(self, list, cmd, uiThread);
                     break;
-                case 18:
+                case tUIKCPBase::kKCP_KeyframeSpawn:
                     cUIScreen_parseKeyframeSpawn_4(self, list, cmd, uiThread);
                     break;
-                case 0x20:
+                case tUIKCPBase::kKCP_ObjectAnim:
                     cUIScreen_parseObjectAnim_4(self, list, cmd, uiThread);
                     break;
-                case 33:
+                case tUIKCPBase::kKCP_ObjectSetPos:
                     cUIScreen_parseObjectSetPos_4(self, list, cmd, uiThread);
                     break;
-                case 34:
+                case tUIKCPBase::kKCP_ObjectVisible:
                     cUIScreen_parseObjectVisible_4(self, list, cmd, uiThread);
                     break;
-                case 0x30:
+                case tUIKCPBase::kKCP_EventTrigger:
                     cUIScreen_parseEventTrigger_4(self, list, cmd, uiThread);
                     break;
-                case 49:
+                case tUIKCPBase::kKCP_EventAudio:
                     cUIScreen_parseEventAudio_4(self, list, cmd, uiThread);
                     break;
-                case 0x40:
+                case tUIKCPBase::kKCP_ScreenStart:
                     cUIScreen_parseScreenStart_4(self, list, cmd, uiThread);
                     break;
-                case 65:
+                case tUIKCPBase::kKCP_ScreenEnd:
                     cUIScreen_parseScreenEnd_4(self, list, cmd, uiThread);
                     break;
-                case 66:
+                case tUIKCPBase::kKCP_ScreenFocusGain:
                     cUIScreen_parseScreenFocusGain_4(self, list, cmd, uiThread);
                     break;
-                case 67:
+                case tUIKCPBase::kKCP_ScreenFocusLose:
                     cUIScreen_parseScreenFocusLose_4(self, list, cmd, uiThread);
                     break;
                 }
@@ -807,10 +806,10 @@ static inline void* alloc_D078(unsigned int size, const char* tag)
 /**
  * Creates the widget a screen-data record describes, by record type, and adopts the child widgets it names.
  *
- * Types: 0x10 group, 0x11 icon, 0x12 list box, 0x13 menu, 0x15 pair, 0x16 slider, 0x17 text, 0x18 vector,
- * 0x19 progress, 0x20 text scroll, 0x21 scroll. Each kind is built inline or by its constructor and reads the record
- * in its virtual setUIData; the container kinds also adopt the children their records name (tUIGroup, tUIMenu,
- * tUIPair, tUIProgress, tUIScrollBar, tUISlider, tUITextScroll in ui/uidata.h).
+ * Types (tUIBaseObject::eUIObjectType): 0x10 group, 0x11 icon, 0x12 list box, 0x13 menu, 0x15 pair, 0x16 slider, 0x17
+ * text, 0x18 vector, 0x19 progress, 0x20 text scroll, 0x21 scroll. Each kind is built inline or by its constructor and
+ * reads the record in its virtual setUIData; the container kinds also adopt the children their records name (tUIGroup,
+ * tUIMenu, tUIPair, tUIProgress, tUIScrollBar, tUISlider, tUITextScroll in ui/uidata.h).
  *
  * @param rec  the object record (On Tour tUIBaseObject* pObject)
  * @return the new widget, or 0 for an unknown type
@@ -818,7 +817,7 @@ static inline void* alloc_D078(unsigned int size, const char* tag)
 cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
 {
     switch (rec->mTag) {
-    case 17: {
+    case tUIBaseObject::kUIObj_Icon: {
         cUIIcon* created = (cUIIcon*)alloc_D078(sizeof(cUIIcon), str_UIIcon);
         cUIThing_cUIThing(created, this, 0);
         VPTR_OF(cListNode, created) = cUIIcon_vtbl;
@@ -828,7 +827,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         created->setUIData(rec);
         return created;
     }
-    case 0x10: {
+    case tUIBaseObject::kUIObj_Group: {
         cUIGroup* created = (cUIGroup*)alloc_D078(sizeof(cUIGroup), str_cUIGroup);
         cUIThing_cUIThing(created, this, 0);
         VPTR_OF(cListNode, created) = cUIGroup_vtbl;
@@ -846,13 +845,13 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         created->setUIData(rec);
         return created;
     }
-    case 18: {
+    case tUIBaseObject::kUIObj_ListBox: {
         cUIListBox* created =
             (cUIListBox*)cUIListBox_cUIListBox(alloc_D078(sizeof(cUIListBox), str_UIListBox), this, 0);
         created->setUIData(rec);
         return created;
     }
-    case 19: {
+    case tUIBaseObject::kUIObj_Menu: {
         cUIMenu* created = (cUIMenu*)alloc_D078(sizeof(cUIMenu), str_UIMenu);
         cUIThing_cUIThing(created, this, 0);
         VPTR_OF(cListNode, created) = cUIGroup_vtbl;
@@ -879,7 +878,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         created->setUIData(rec);
         return created;
     }
-    case 21: {
+    case tUIBaseObject::kUIObj_Pair: {
         cUIPair* created = (cUIPair*)alloc_D078(sizeof(cUIPair), str_UIPair);
         tUIPlaceWidget* pPBW = ((tUIPair*)rec)->mWidgets;
         cUIThing_cUIThing(created, this, 0);
@@ -910,7 +909,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         }
         return created;
     }
-    case 25: {
+    case tUIBaseObject::kUIObj_Progress: {
         cUIProgress* created = (cUIProgress*)alloc_D078(sizeof(cUIProgress), str_cUIProgress);
         tUIProgress* data = (tUIProgress*)rec;
         cUIThing_cUIThing(created, this, 0);
@@ -939,7 +938,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         }
         return created;
     }
-    case 33: {
+    case tUIBaseObject::kUIObj_ScrollBar: {
         cUIScrollBar* created = (cUIScrollBar*)alloc_D078(sizeof(cUIScrollBar), str_cUIScroll);
         tUIScrollBar* data = (tUIScrollBar*)rec;
         cUIThing_cUIThing(created, this, 0);
@@ -974,7 +973,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         }
         return created;
     }
-    case 22: {
+    case tUIBaseObject::kUIObj_Slider: {
         cUISlider* created = (cUISlider*)alloc_D078(sizeof(cUISlider), str_cUISlider);
         tUISlider* data = (tUISlider*)rec;
         cUIThing_cUIThing(created, this, 0);
@@ -1004,12 +1003,12 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         }
         return created;
     }
-    case 23: {
+    case tUIBaseObject::kUIObj_Text: {
         cUIText* created = (cUIText*)cUIText_cUIText(alloc_D078(sizeof(cUIText), str_UIText), this, 0);
         created->setUIData(rec);
         return created;
     }
-    case 32: {
+    case tUIBaseObject::kUIObj_TextScroll: {
         cUITextScroll* created =
             (cUITextScroll*)cUITextScroll_cUITextScroll(alloc_D078(sizeof(cUITextScroll), str_cUITextScroll), this, 0);
         tUITextScroll* data = (tUITextScroll*)rec;
@@ -1026,7 +1025,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         created->setUIData(rec);
         return created;
     }
-    case 24: {
+    case tUIBaseObject::kUIObj_Vector: {
         cUIVector* created = (cUIVector*)cUIVector_cUIVector(alloc_D078(sizeof(cUIVector), str_UIVector), this, 0);
         created->setUIData(rec);
         return created;
@@ -1255,8 +1254,9 @@ static inline void wSet_DA20(sWidget_DA20* w, sV4_DA20* in)
  * When the position goes up (or down) and an up (down) label name is set, the screen plays the frame with that label.
  * With a non-zero total and the vertical flag, the knob is placed at track y + track height * pos / total and sized
  * track height * visible / total (capped at the track). The up and down arrows are hidden at either end. When the knob
- * fills the track, the mode at self->mode hides the whole bar (0), the arrows and knob (1) or only the knob (2);
- * otherwise the knob, track and extra widget are shown. The knob's size is set through its virtual slot 21.
+ * fills the track, the eScrollBarHide mode at self->mode hides the whole bar (All), the arrows and knob
+ * (Slider_HArrows) or only the knob (Slider_SArrows); otherwise the knob, track and extra widget are shown. The knob's
+ * size is set through its virtual slot 21.
  *
  * @param pos  first visible item (On Tour pos)
  * @param visible  number of items visible at once (On Tour page)
@@ -1269,7 +1269,7 @@ extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible,
         cUIScreen* scr = self->screen;
         if (scr != 0) {
             int frameNum = scr->getFrameByLabel(GetHashValue32(name));
-            if (frameNum != 0xFFFF)
+            if (frameNum != cUIScreen::kNoFrame)
                 cUIScreen_playFrame(scr, frameNum, 1);
         }
     }
@@ -1278,7 +1278,7 @@ extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible,
         cUIScreen* scr = self->screen;
         if (scr != 0) {
             int frameNum = scr->getFrameByLabel(GetHashValue32(name));
-            if (frameNum != 0xFFFF)
+            if (frameNum != cUIScreen::kNoFrame)
                 cUIScreen_playFrame(scr, frameNum, 1);
         }
     }
@@ -1331,17 +1331,17 @@ extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible,
     }
     if (nsize.y == tsize.y) {
         switch (self->mode) {
-        case 0:
+        case eScrollBarHide_All:
             ((cUIScrollBar*)self)->setScrollVisibile(0);
             break;
-        case 1:
+        case eScrollBarHide_Slider_HArrows:
             if (self->up != 0)
                 wShow_DA20(self->up, 0);
             if (self->down != 0)
                 wShow_DA20(self->down, 0);
             wShow_DA20(self->thumb, 0);
             break;
-        case 2:
+        case eScrollBarHide_Slider_SArrows:
             if (self->up != 0)
                 wShow_DA20(self->up, 1);
             if (self->down != 0)
@@ -1460,14 +1460,14 @@ struct cUISlider_onInput_sVEntryS {
 /**
  * Moves the slider's value one step on left / right and reports it.
  *
- * Left lowers mValue while above 0 (keyframer event 8), right raises it while below mNumValues - 1 (event 9); a
- * change is reported to the screen's state as widget event 9 (onWidgetEvent) and to slot 2 of the engine's +0x14
+ * Left lowers mValue while above 0 (keyframer event 8), right raises it while below mNumValues - 1 (event 9); a change
+ * is reported to the screen's state as widget event kONCHANGE (onWidgetEvent) and to slot 2 of the engine's +0x14
  * listener (gUISoundNull when none) with 1.
  *
  * @param input  the input (On Tour const cUIInput* pInput)
- * @return 1 for left or right (even at the end of the range), else 0 (On Tour returns bool)
+ * @return true for left or right (even at the end of the range), else false (On Tour returns bool)
  */
-extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
+extern "C" bool cUISlider_onInput(cUISlider* self, cUIInput* input)
 {
     char* customSnd = (char*)((cUIEngine*)cUIThing_getEngine(((char*)self)))->mpSound;
     char* snd = &gUISoundNull;
@@ -1475,32 +1475,32 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
     if (input->isLeft()) {
         if (self->mValue > 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
             self->mValue = self->mValue - 1;
             cUIState* mgr = self->mpScreen->mpState;
-            mgr->onWidgetEvent((cUIThing*)self, 9);
+            mgr->onWidgetEvent((cUIThing*)self, cUIState::kONCHANGE);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
         }
-        return 1;
+        return true;
     }
     if (input->isRight()) {
         if (self->mValue + 1 < self->mNumValues) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
-            if (ev != 0xFFFF) {
+            if (ev != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
             self->mValue = self->mValue + 1;
             cUIState* mgr = self->mpScreen->mpState;
-            mgr->onWidgetEvent((cUIThing*)self, 9);
+            mgr->onWidgetEvent((cUIThing*)self, cUIState::kONCHANGE);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 

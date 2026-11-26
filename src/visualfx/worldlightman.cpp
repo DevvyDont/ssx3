@@ -181,12 +181,12 @@ static inline t4VectorXYZW ObjPos_5400(tInstanceRecord* obj)
 }
 
 // A painted irradiance name is resolved on first use: m_nameId[0] becomes the irradiance id and m_nameId[1] the tag
-// 0x123400 (the field is the world painter's, written in place).
+// tWPNameField::kResolved (the field is the world painter's, written in place).
 static inline cIrradiance* Resolve_5400(tWPNameField* ref)
 {
-    if (ref->m_nameId[1] != 0x123400) {
+    if (ref->m_nameId[1] != tWPNameField::kResolved) {
         ref->m_nameId[0] = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, ref);
-        ref->m_nameId[1] = 0x123400;
+        ref->m_nameId[1] = tWPNameField::kResolved;
     }
     return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, ref->m_nameId[0]);
 }
@@ -507,9 +507,9 @@ void cWorldLightMan::IntersectLights(void* point, void* mgrp, void** outp, int m
     float minScore = 0.0f;
     unsigned int n = mgr->numtyped;
     for (unsigned int j = 0; j < n; j++) {
-        // A typed space node of type 6 (kSNT_Light) is a tLightRecord, which begins with the node's next, prev, type.
+        // A typed space node of type kSNT_Light (6) is a tLightRecord, which begins with the node's next, prev, type.
         tLightRecord* lightRec = (tLightRecord*)mgr->typed[j];
-        if (lightRec->m_iIntersect[2] == 6) {
+        if (lightRec->m_iIntersect[2] == kSNT_Light) {
             float lightScore = GetIntensity((t4Vector*)point, lightRec);
             if (minScore < lightScore) {
                 int k;
@@ -539,7 +539,7 @@ extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* a, t4Vector* b, tLi
 
 struct cWorldLightMan_CalcLightDist_sVec3;
 struct cWorldLightMan_CalcLightDist_sLight;
-extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, tLightRecord* light,
+extern "C" bool cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot);
 
 
@@ -607,14 +607,15 @@ static inline float Pow_5D30(float x, int n)
 }
 
 /**
- * Returns a light's intensity at a point, by light type: 0 ambient, 1 spot, 2 point, 3 none.
+ * Returns a light's intensity at a point, by light type (eNEWLightType): directional, spot, point or ambient.
  *
- * Type (+0x10) 0 returns the scale (+0x18). Type 1 and 2 need the point within the radius (+0x1C, cWorldLightMan_CalcLightDist); the
- * result is scale * intensity (+0x14) * the falloff (with s = 100 / distance below 1: s, s^2 or s^3 for falloff 1, 2 or
- * 3 at +0x64, else 1) * the distance fade (1, or 1 - (distance - 3750) * 0.0008 for a radius of 5000 or more past
- * 3750). A spot (type 1) also needs the cosine to the light direction at least the outer value (+0x60) and multiplies
- * by cosine^n (n = +0x65) inside the inner value (+0x5C), else by inner^n scaled linearly between outer and inner.
- * Anything else gives 0. Likely bug: for a radius above 5000 the fade turns negative past a distance of 5000.
+ * A directional light (+0x10) returns the scale (+0x18). Spot and point lights need the point within the radius (+0x1C,
+ * cWorldLightMan_CalcLightDist); the result is scale * intensity (+0x14) * the falloff (with s = 100 / distance below
+ * 1: s, s^2 or s^3 for falloff 1, 2 or 3 at +0x64, else 1) * the distance fade (1, or 1 - (distance - 3750) * 0.0008
+ * for a radius of 5000 or more past 3750). A spot also needs the cosine to the light direction at least the outer value
+ * (+0x60) and multiplies by cosine^n (n = +0x65) inside the inner value (+0x5C), else by inner^n scaled linearly
+ * between outer and inner. An ambient light or any other type gives 0. Likely bug: for a radius above 5000 the fade
+ * turns negative past a distance of 5000.
  *
  * @param point  the point to light
  * @param lp  the light record
@@ -629,9 +630,9 @@ float cWorldLightMan::GetIntensity(t4Vector* point, tLightRecord* lp)
     float att;
     float amount;
     switch (light->m_eLightType) {
-    case 0:
+    case eNEWLight_Directional:
         return light->m_fRGBIntensity;
-    case 1:
+    case eNEWLight_Spot:
         if (cWorldLightMan_CalcLightDist(this, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, &dot)) {
             if (dot >= light->unk_060) {
                 att = Atten_5D30(light, dist);
@@ -646,14 +647,14 @@ float cWorldLightMan::GetIntensity(t4Vector* point, tLightRecord* lp)
             }
         }
         break;
-    case 2:
+    case eNEWLight_Point:
         if (cWorldLightMan_CalcLightDist(this, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, 0)) {
             att = Atten_5D30(light, dist);
             amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
             return light->m_fRGBIntensity * amount;
         }
         break;
-    case 3:
+    case eNEWLight_Ambient:
         return 0.0f;
     }
     return 0.0f;
@@ -682,9 +683,9 @@ struct cWorldLightMan_CalcLightDist_sVec3 {
  * @param outDist  receives the distance
  * @param outInvDist  receives 1 / distance
  * @param outDot  receives the cosine, or null
- * @return 1 when the point is within the radius, else 0
+ * @return true when the point is within the radius, else false
  */
-extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* point, tLightRecord* light,
+extern "C" bool cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* point, tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
     float dx = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).x - point->x;
@@ -694,7 +695,7 @@ extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLight
     float dist;
     float inv;
     if (light->m_fMaxDistance * light->m_fMaxDistance < distSq) {
-        return 0;
+        return false;
     }
     if (distSq != 0.0f) {
         // PORT: sqrt.s (sqrtf without errno check)
@@ -709,7 +710,7 @@ extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLight
     }
     *outDist = dist;
     *outInvDist = inv;
-    return 1;
+    return true;
 }
 #endif
 
@@ -946,11 +947,9 @@ static inline t4Vector add6518(const t4Vector& a, const t4Vector& b)
  * Runs the rider's cheat for a tick: reads the entered inputs and, while the cheat is on, applies its rider
  * overrides.
  *
- * The cheat is forced off in network games. While on, the rider is held in mode 11 and its speed is pulled
- * toward
- * a set maximum and steered toward its facing direction. The closing test (x < 0 and x >= 0) can never be
- * true,
- * so the velocity reset after it is dead code.
+ * The cheat is forced off in network games (state reset to kCheat_Entering). While kCheat_On, the rider is held at
+ * uber level eUS_UltraUber with full boost and its speed is pulled toward a set maximum and steered toward its facing
+ * direction. The closing test (x < 0 and x >= 0) can never be true, so the velocity reset after it is dead code.
  */
 void cCheatFX::update()
 {
@@ -966,8 +965,8 @@ void cCheatFX::update()
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         (*(signed char*)&m_cheatState) = 0;
     }
-    if ((*(signed char*)&m_cheatState) == 1) {
-        mRider->mUberLevel = 11;
+    if ((*(signed char*)&m_cheatState) == tCheatState::kCheat_On) {
+        mRider->mUberLevel = eUS_UltraUber;
         mRider->mAllowNaturalAir = ((*(unsigned char*)&m_cheatState.m_misc) >> 1) & 1;
         mRider->BoostPowerBar = 1.0f;
         mRider->mUberTimer = 60.0f;
@@ -976,7 +975,7 @@ void cCheatFX::update()
         mRider->mBoostMode = 0;
     } else {
         mRider->mAllowNaturalAir = 1;
-        if (mRider->mUberLevel != 11) {
+        if (mRider->mUberLevel != eUS_UltraUber) {
             return;
         }
         mRider->mUberLevel = 0;
@@ -987,7 +986,7 @@ void cCheatFX::update()
         mRider->mBoostMode = 1;
     }
     cRider* curRider = (mRider);
-    if (curRider->mUberLevel != 11) {
+    if (curRider->mUberLevel != eUS_UltraUber) {
         return;
     }
     if (!(0.0f < curRider->mBoostStrength)) {
@@ -1043,12 +1042,13 @@ extern "C" int cCheatFX_getInput(cCheatFX* self);
 /**
  * Advances a cheat effect's code state machine (m_cheatState) by this frame's cheat input, then clears the input.
  *
- * The input is cCheatFX_getInput's bits 0x10, 0x20 and 0x40 of m_misc (set by cCheatFX_setCheatInput), cleared by
- * cCheatFX_clearInput. With no input it clears the held bit 0 of m_misc; while bit 0 is set further input is ignored, so each
- * press counts once. State -1 (off): 0x40 starts the code (state, index, count and misc 0). State 0: 0x10 counts up
- * m_count; 0x20 compares m_count with cCheatFX_m_cheatStateEnterCounts[m_index] and either advances m_index (after 9 steps state 1) or drops
- * back to -1. State 1: exactly 0x60 sets cCheatFX_m_resetStates to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
- * it.
+ * The input is cCheatFX_getInput's bits kCheatBit_Boost, kCheatBit_Jump and kCheatBit_Handplant (0x10, 0x20, 0x40) of
+ * m_misc (set by cCheatFX_setCheatInput), cleared by cCheatFX_clearInput. With no input it clears the held bit 0 of
+ * m_misc; while bit 0 is set further input is ignored, so each press counts once. kCheat_Failed (-1): a handplant
+ * starts the code again (state, index, count and misc 0). kCheat_Entering (0): a boost counts up m_count; a jump
+ * compares m_count with cCheatFX_m_cheatStateEnterCounts[m_index] and either advances m_index (after kCheatCodeSteps
+ * steps, kCheat_On) or drops to kCheat_Failed. kCheat_On (1): a jump and a handplant together set
+ * cCheatFX_m_resetStates to 8; otherwise a handplant toggles bit 1 of m_misc. cCheatFX_update calls it.
  */
 void cCheatFX::updateState()
 {
@@ -1063,35 +1063,35 @@ void cCheatFX::updateState()
     }
     (*(unsigned char*)&m_cheatState.m_misc) |= 1;
     switch ((*(signed char*)&m_cheatState)) {
-    case -1:
-        if (cheatInput & 0x40) {
-            (*(signed char*)&m_cheatState) = 0;
+    case tCheatState::kCheat_Failed:
+        if (cheatInput & kCheatBit_Handplant) {
+            (*(signed char*)&m_cheatState) = tCheatState::kCheat_Entering;
             m_cheatState.m_count = 0;
             m_cheatState.m_index = 0;
             m_cheatState.m_misc = 0;
         }
         break;
-    case 0:
-        if (cheatInput & 0x10) {
+    case tCheatState::kCheat_Entering:
+        if (cheatInput & kCheatBit_Boost) {
             (*(signed char*)&m_cheatState.m_count)++;
-        } else if (cheatInput & 0x20) {
+        } else if (cheatInput & kCheatBit_Jump) {
             if ((*(signed char*)&m_cheatState.m_count) == cCheatFX_m_cheatStateEnterCounts[(signed char)(*(unsigned char*)&m_cheatState.m_index)]) {
                 m_cheatState.m_count = 0;
                 (*(unsigned char*)&m_cheatState.m_index)++;
-                if ((*(unsigned char*)&m_cheatState.m_index) == 9) {
+                if ((*(unsigned char*)&m_cheatState.m_index) == tCheatState::kCheatCodeSteps) {
                     m_cheatState.m_index = 0;
                     m_cheatState.m_count = 0;
-                    (*(signed char*)&m_cheatState) = 1;
+                    (*(signed char*)&m_cheatState) = tCheatState::kCheat_On;
                 }
             } else {
-                (*(signed char*)&m_cheatState) = -1;
+                (*(signed char*)&m_cheatState) = tCheatState::kCheat_Failed;
             }
         }
         break;
-    case 1:
-        if (cheatInput == 0x60) {
+    case tCheatState::kCheat_On:
+        if (cheatInput == (kCheatBit_Jump | kCheatBit_Handplant)) {
             cCheatFX_m_resetStates = 8;
-        } else if (cheatInput & 0x40) {
+        } else if (cheatInput & kCheatBit_Handplant) {
             (*(unsigned char*)&m_cheatState.m_misc) ^= 2;
         }
         break;
@@ -1138,25 +1138,26 @@ extern "C" void cCheatFX_readFromReplayFrame(cCheatFX* self, cCheatFX_writeToRep
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_setCheatInput);
 #ifdef SKIP_ASM
 /**
- * Records one of the three cheat-sequence inputs (bits 0x10, 0x20, 0x40 of m_misc) for the next update.
+ * Records one of the three cheat-sequence inputs (bits kCheatBit_Boost, kCheatBit_Jump, kCheatBit_Handplant of
+ * m_misc) for the next update.
  *
- * The rider code sends them: inputs 0 and 1 from two trick paths, input 2 from the handplant code. Nine
- * counted
- * steps that match cCheatFX_m_cheatStateEnterCounts turn the cheat on.
+ * The rider code sends them: kCheatInput_Boost on a boost press, kCheatInput_Jump on a jump press,
+ * kCheatInput_Handplant from the handplant check. kCheatCodeSteps (9) counted steps that match
+ * cCheatFX_m_cheatStateEnterCounts turn the cheat on.
  *
- * @param type  the input, 0 to 2 (On Tour flag)
+ * @param type  the input, an eCheatInput (On Tour flag)
  */
 void cCheatFX::setCheatInput(int type)
 {
     switch (type) {
-    case 0:
-        *(unsigned char*)&m_cheatState.m_misc |= 0x10;
+    case kCheatInput_Boost:
+        *(unsigned char*)&m_cheatState.m_misc |= kCheatBit_Boost;
         break;
-    case 1:
-        *(unsigned char*)&m_cheatState.m_misc |= 0x20;
+    case kCheatInput_Jump:
+        *(unsigned char*)&m_cheatState.m_misc |= kCheatBit_Jump;
         break;
-    case 2:
-        *(unsigned char*)&m_cheatState.m_misc |= 0x40;
+    case kCheatInput_Handplant:
+        *(unsigned char*)&m_cheatState.m_misc |= kCheatBit_Handplant;
         break;
     }
 }
@@ -1368,20 +1369,20 @@ void sti_002F6B88(int init, int prio) __asm__("func_002F6B88");
 /**
  * Runs the static constructors (@p init nonzero) or destructors (@p init 0) of this visual-effects unit's globals.
  *
- * Acts only for @p prio 0xFFFF. Construction fills the colour preset table D_004D57B0..D_004D5B60 (a, r, g, b), sets
- * the region type constants kWPR_MusicTrigger..kWPR_Danger to 0..13, constructs vertlist (2048), collisionvertlist (64)
- * and cAvalanche_m_activeNodes (64, each with a cDynamicColourEmitter at +0xD0), sets kBeamPulseRate to 2 pi, constructs
- * the 8 cRenderStateMan_m_state rows, clears the custom irradiance name cRenderStateMan_m_customIrradiance, copies presets into the colours
- * D_004FAAF0..D_004FAC80 and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs
- * tActiveAvalancheNode__tActiveAvalancheNode on the 64 active avalanche nodes, last first. func_002F8370 and
- * func_002F8390 call it.
+ * Acts only for @p prio DEFAULT_INIT_PRIORITY (0xFFFF). Construction fills the colour preset table
+ * D_004D57B0..D_004D5B60 (a, r, g, b), sets the region type constants kWPR_MusicTrigger..kWPR_Danger to 0..13,
+ * constructs vertlist (2048), collisionvertlist (64) and cAvalanche_m_activeNodes (64, each with a
+ * cDynamicColourEmitter at +0xD0), sets kBeamPulseRate to 2 pi, constructs the 8 cRenderStateMan_m_state rows, clears
+ * the custom irradiance name cRenderStateMan_m_customIrradiance, copies presets into the colours D_004FAAF0..D_004FAC80
+ * and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs tActiveAvalancheNode__tActiveAvalancheNode on the 64
+ * active avalanche nodes, last first. func_002F8370 and func_002F8390 call it.
  *
  * @param init  nonzero to construct, 0 to destroy
- * @param prio  the init priority; only 0xFFFF does anything
+ * @param prio  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 void sti_002F6B88(int init, int prio)
 {
-    if (prio == 0xFFFF) {
+    if (prio == DEFAULT_INIT_PRIORITY) {
         if (init) {
             D_004D57B0[0] = 1.0f;
             D_004D57B0[1] = 1.0f;
@@ -1778,13 +1779,13 @@ void* tParticleEmitter_tParticleEmitter(void* self)
 INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_IsWakeActive);
 #ifdef SKIP_ASM
 /**
- * Returns whether the int at +0x4 of @p arg0 is greater than 0.
+ * Returns whether the wake has any lines (mNumWakeLines, +0x4, greater than 0).
  *
  * Nothing in the retail code references it.
  *
- * @return 1 when +0x4 > 0, else 0
+ * @return true when mNumWakeLines (+0x4) > 0, else false
  */
-int cBoardWakeFX::IsWakeActive()
+bool cBoardWakeFX::IsWakeActive()
 {
     return (mNumWakeLines) > 0;
 }
@@ -2059,9 +2060,9 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BE0);
  * cVisualEffectsMan_commonUpdate calls it on the game's Replay: lightning is enabled when the state is 1 or this
  * returns true.
  *
- * @return 1 when the state is 0, else 0
+ * @return true when the state is 0 (kGameRecording), else false
  */
-extern "C" int func_002F7BE0(void* self)
+extern "C" bool func_002F7BE0(void* self)
 {
     return *(unsigned int*)self == 0;
 }
@@ -3196,10 +3197,10 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
  *
  * @param bits  the 64-bit flag word
  * @param n  the bit number, 0..63
- * @return 1 when the bit is set, else 0
+ * @return true when the bit is set, else false
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_002F8170(unsigned long* bits, int n)
+extern "C" bool func_002F8170(unsigned long* bits, int n)
 {
     unsigned long mask = (unsigned long)1 << n;
     return (*bits & mask) != 0;
@@ -4375,15 +4376,15 @@ extern "C" void func_002F9040_impl(int initialize, int priority) __asm__("func_0
 /**
  * Runs the static constructors of a second copy of the visual-effects colour presets (D_004FAC90..D_004FB000).
  *
- * Acts only for @p priority 0xFFFF with @p initialize set: builds the 56 (a, r, g, b) colours, the same presets
- * func_002F6B88 writes to D_004D57B0 onward. func_002F9818__FPv calls it.
+ * Acts only for @p priority DEFAULT_INIT_PRIORITY with @p initialize set: builds the 56 (a, r, g, b) colours, the same
+ * presets func_002F6B88 writes to D_004D57B0 onward. func_002F9818__FPv calls it.
  *
  * @param initialize  nonzero to construct; 0 does nothing
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_002F9040_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004FAC90) sColor_2F9040(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004FACA0) sColor_2F9040(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004FACB0) sColor_2F9040(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
@@ -5329,15 +5330,15 @@ extern "C" void func_002FA640_impl(int initialize, int priority) __asm__("func_0
 /**
  * Runs the static constructors of a third copy of the visual-effects colour presets (56 colours from D_004FB010).
  *
- * Acts only for @p priority 0xFFFF with @p initialize set; the same presets as func_002F9040. func_002FAE18__FPv calls
- * it.
+ * Acts only for @p priority DEFAULT_INIT_PRIORITY with @p initialize set; the same presets as func_002F9040.
+ * func_002FAE18__FPv calls it.
  *
  * @param initialize  nonzero to construct; 0 does nothing
- * @param priority  the init priority; only 0xFFFF does anything
+ * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
 extern "C" void func_002FA640_impl(int initialize, int priority)
 {
-    if (priority == 0xFFFF && initialize != 0) {
+    if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004FB010) sColor_2FA640(1.0f, 1.0f, 1.0f, 0.5f);
         new (&D_004FB020) sColor_2FA640(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
         new (&D_004FB030) sColor_2FA640(0.12951700389385223f, 1.0f, 1.0f, 0.0f);

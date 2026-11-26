@@ -55,7 +55,7 @@ struct cWorldSphTree {
     char unk_06C[0x4];              // 0x06C padding (16-byte aligned class)
 
     // Methods bound to their retail symbols by asm labels.
-    int IsInBoxTransformed(float* lo, float* hi) __asm__("cWorldSphTree_IsInBoxTransformed");
+    bool IsInBoxTransformed(float* lo, float* hi) __asm__("cWorldSphTree_IsInBoxTransformed");
     float GetIdealParam() __asm__("cWorldSphTree_GetIdealParam");
     void Transform(t4Matrix* mat, float scale) __asm__("cWorldSphTree_Transform");
     int UnTransform() __asm__("cWorldSphTree_UnTransform__FPv");

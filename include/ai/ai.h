@@ -96,6 +96,9 @@ struct cAI {
     int RaceRankType;               // 0x74 [O] tRaceRankType (above); [R] cAI_cAI = 0; [U] cAI_setRaceRankType
     int NumberOfRidersAllocated;    // 0x78 [P] getNumRiders; [U] the init functions' next rider index
     int NumberOfPlayersAllocated;   // 0x7C [P] getNumPlayers
+    // NumberOfPlayersAllocated in a one- and a two-player (split-screen) race (names ours): [U] the instant replay
+    // marks only in a one-player race (cReplay_endMarkInstantReplay); Players[] has room for two.
+    enum { kOnePlayer = 1, kTwoPlayers = 2 };
     int NumberOfComputersAllocated; // 0x80 [P] getNumComputers; [U] initComputerRiders
     int NumberOfActorsAllocated;    // 0x84 [P] getNumActors; [U] initComputerActors
     int NumberOfMissionRidersLoaded; // 0x88 [P] getNumMissionRiders; [U] initMissionRiders

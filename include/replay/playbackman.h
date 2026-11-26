@@ -98,7 +98,12 @@ struct cPlaybackMan {
                                     //      [U] cPlaybackMan_isPauseAI fills it
     cInput* Input;                  // 0x6C [O]; [R] the ctor: cMemMan_alloc(8, "cInput") with cInput_setPad(InputPad);
                                     //      the dtor deletes it
-    int State;                      // 0x70 [O] (tPlaybackMan_Idle = 0 ...); [P] isRecord__C12cPlaybackMan lw 0x70 == 3;
+    // State values (names ours). [P] the methods' names: startPreview sets kPreview and stopPreview kIdle,
+    // startPerform kPerform, isRecord__C12cPlaybackMan tests kRecord; [U] stop and isPauseAI switch on them.
+    enum eState { kIdle = 0, kPreview = 1, kPerform = 2, kRecord = 3 };
+    // AsyncHandle with no read pending (name ours): [R] ctor; [U] update and purgeLocation reset it to this.
+    enum { kNoAsyncHandle = -1 };
+    int State;                      // 0x70 [O] eState (On Tour int); [P] isRecord__C12cPlaybackMan lw 0x70 == 3;
                                     //      [R] ctor 0; [U] start/stopPreview, start/stopPerform, restart and
                                     //      purgeLocation set it; stop, setupPreview and isPauseAI test it
     int AsyncFileNum;               // 0x74 [O]; [R] ctor -1; [U] cPlaybackMan_load stores the file index being loaded,
@@ -112,10 +117,10 @@ struct cPlaybackMan {
     void update() __asm__("cPlaybackMan_update");
     void initLocation(const char* name) __asm__("cPlaybackMan_initLocation");
     void purgeLocation() __asm__("cPlaybackMan_purgeLocation");
-    int isLoaded(int fileId) __asm__("cPlaybackMan_isLoaded");
-    int load(int key) __asm__("cPlaybackMan_load");
+    bool isLoaded(int fileId) __asm__("cPlaybackMan_isLoaded");
+    bool load(int key) __asm__("cPlaybackMan_load");
     void restart() __asm__("cPlaybackMan_restart");
-    int setupPreview(int fileId) __asm__("cPlaybackMan_setupPreview");
+    bool setupPreview(int fileId) __asm__("cPlaybackMan_setupPreview");
     void reset() __asm__("cPlaybackMan_reset__FPv");
     void saveFrame() __asm__("cPlaybackMan_saveFrame");
     void* restoreFrame() __asm__("cPlaybackMan_restoreFrame");
@@ -124,9 +129,9 @@ struct cPlaybackMan {
     void startPerform() __asm__("cPlaybackMan_startPerform");
     void stopPerform() __asm__("cPlaybackMan_stopPerform__FPv");
     void stop() __asm__("cPlaybackMan_stop");
-    int isPauseAI() __asm__("cPlaybackMan_isPauseAI");
+    bool isPauseAI() __asm__("cPlaybackMan_isPauseAI");
     int findFileById(int id) __asm__("cPlaybackMan_findFileById");
-    int setupFile(int idx) __asm__("cPlaybackMan_setupFile");
+    bool setupFile(int idx) __asm__("cPlaybackMan_setupFile");
 };
 
 CHECK_OFFSET(cPlaybackMan, BigFile, 0x00);

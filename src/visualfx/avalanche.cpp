@@ -651,7 +651,7 @@ void tActiveAvalancheNode::calculateScale(float currTime)
         m_objectScale = 1.0f;
         return;
     }
-    if (avData->m_baseType != 2) {
+    if (avData->m_baseType != tAvalancheNode::kBase_Permanent) {
         float fadeOut = (avData->m_life - x) / avData->m_fadeout;
         m_emitterAlphaScale = fadeOut;
         m_objectScale = fadeOut;
@@ -708,11 +708,11 @@ static inline void vu0CopyMatrixCA8(t4Matrix* dst, t4Matrix* src)
  * tActiveAvalancheNode_end(node, 0).
  *
  * @param currTime  time since the avalanche started, in seconds (On Tour currTime)
- * @return 1 while the node is still active, else 0
+ * @return true while the node is still active, else false
  */
-int tActiveAvalancheNode::update(float currTime)
+bool tActiveAvalancheNode::update(float currTime)
 {
-    if (m_node == 0) return 0;
+    if (m_node == 0) return false;
     currTime *= m_node->m_speed;
     sAvFrameCA8 fd = getFrameData_CA8(this, currTime);
     if (currTime * 30.0f < m_node->m_life) {
@@ -722,18 +722,18 @@ int tActiveAvalancheNode::update(float currTime)
         m_colour = fd.colour;
         tAvalancheNode* nodeData = m_node;
         t4Vector* colour = &m_colour;
-        if (nodeData->m_baseType != 2 && nodeData->m_hasEmitter != 0) {
+        if (nodeData->m_baseType != tAvalancheNode::kBase_Permanent && nodeData->m_hasEmitter != 0) {
             void* org = &t4vect_Zero_7CA8;
             void* em = &m_emitter;
             m_emitter.m_emitter.Cr0.w = m_emitterAlphaScale;
             int alive = currTime < nodeData->m_life;
             cDynamicColourEmitter_update(em, pos, org, colour, alive, 0.01666666753590107f);
         }
-        return 1;
+        return true;
     }
-    if (m_node->m_baseType == 2) return 1;
+    if (m_node->m_baseType == tAvalancheNode::kBase_Permanent) return true;
     end(0);
-    return 0;
+    return false;
 }
 #endif
 
@@ -755,7 +755,7 @@ extern "C" void cDynamicColourEmitter_reset(void* self);
 void tActiveAvalancheNode::end(int force)
 {
     tAvalancheNode* avData = m_node;
-    if (((char*)avData) != 0 && (force != 0 || avData->m_baseType != 2)) {
+    if (((char*)avData) != 0 && (force != 0 || avData->m_baseType != tAvalancheNode::kBase_Permanent)) {
         tInstanceRecord* inst = avData->m_instance;
         if (((char*)inst) != 0) {
             cInstanceNode* obj = inst->m_pActiveNode;
@@ -1101,7 +1101,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
                 off += 4;
             }
         }
-        int magic = 0x2BEEF00;
+        int magic = cAvalanche::kFileMagic;
         cAvalanche_writeData(direct, (void*)fd, 0, (char*)&magic, 4, 1);
         cAvalanche_writeData(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
         off = 8;
@@ -1175,7 +1175,7 @@ extern "C" void cAvalanche_LoadData(void)
         }
         int* hdr = (int*)operator_new_tag(8, buf, 0, 0);
         FILESYS_readsync_i(fd, 0, hdr, 8, 100);
-        if (hdr[0] != 0x2BEEF00) {
+        if (hdr[0] != cAvalanche::kFileMagic) {
             if (hdr != 0) {
                 cMemMan_free(hdr);
             }
@@ -1638,7 +1638,8 @@ static inline float Abs_D92D0(float x)
  * Adds a node (a falling object) to the avalanche with the given id, creating the avalanche if needed.
  *
  * The new node takes the instance, life/fade-in/fade-out in frames (seconds x 30), the speed, a radius of 0.2
- * x the instance's smallest bound extent and a base type (5 gives 2, 2 gives 0, else 1). It is registered in
+ * x the instance's smallest bound extent and a base type (kScriptType_Permanent gives kBase_Permanent,
+ * kScriptType_Bounce kBase_Bounce, else kBase_NoBounce). It is registered in
  * the node table cAvalanche_m_nodeList and its index is written into the instance's m_sRenderFlags ((index << 8) | 2).
  *
  * @param id  avalanche id
@@ -1683,14 +1684,14 @@ extern "C" void cAvalanche_addAvalancheNode(int id, tInstanceRecord* obj, int ty
     n->m_history = 0;
     n->m_historyDeleteable = 0;
     switch (type) {
-    case 5:
-        n->m_baseType = 2;
+    case tAvalancheNode::kScriptType_Permanent:
+        n->m_baseType = tAvalancheNode::kBase_Permanent;
         break;
-    case 2:
-        n->m_baseType = 0;
+    case tAvalancheNode::kScriptType_Bounce:
+        n->m_baseType = tAvalancheNode::kBase_Bounce;
         break;
     default:
-        n->m_baseType = 1;
+        n->m_baseType = tAvalancheNode::kBase_NoBounce;
         break;
     }
     n->m_hasEmitter = 0;
@@ -1725,7 +1726,7 @@ extern "C" void cAvalanche_setAvalancheNodeEmitterData(int id, tParticleData* pa
     for (tAvalanche* group = (tAvalanche*)cAvalanche_m_avalancheList; group != 0; group = group->m_next) {
         for (tAvalancheNode* n = (group->m_nodeList); n != 0; n = n->m_next) {
             if (((int)n->m_instance) == id) {
-                if (n->m_baseType == 2) return;
+                if (n->m_baseType == tAvalancheNode::kBase_Permanent) return;
                 n->m_hasEmitter = 1;
                 n->m_data = *params;
                 return;
@@ -1898,7 +1899,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
             tActiveAvalancheNode* act = D_act_D97A8;
             int k = 0;
             for (tAvalancheNode* n = (avalanche->m_nodeList); n != 0; n = n->m_next) {
-                for (; k < 64; k++, act++) {
+                for (; k < cAvalanche::kMaxActiveNodes; k++, act++) {
                     if ((act->m_node) == 0) {
                         (*(tAvalancheNode**)&act->m_node) = n;
                         n->m_activeNode = act;
@@ -1928,7 +1929,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                         break;
                     }
                 }
-                if (k == 64) {
+                if (k == cAvalanche::kMaxActiveNodes) {
                     (*(tAvalanche**)&slot->m_avalanche) = 0;
                     for (act = (slot->m_activeNodeList); act != 0; act = act->m_next) {
                         if ((act->m_node))
@@ -2251,7 +2252,7 @@ extern "C" void cAvalanche_resolve(void* data)
     }
     cAvalanche_m_filedata = data;
     cAvalanche_m_fileDataDeleteable = 0;
-    if (*(int*)data != 0x2BEEF00) {
+    if (*(int*)data != cAvalanche::kFileMagic) {
         cAvalanche_m_filedata = 0;
         cAvalanche_m_badCookie = 1;
     } else {
@@ -2434,7 +2435,7 @@ extern "C" sAvInfo_A1C0 cAvalanche_getAvalancheDataByPosition(t3Vector position)
     posData.minDist = 999999.0f;
     posData.count = 0;
     posData.total = 0.0f;
-    posData.any = 0;
+    posData.any = false;
     for (int i = 0; i < 16; i++) {
         tActiveAvalanche* activeSlot = &activeAvalanches_A1C0[i];
         if (activeSlot->m_avalanche == 0)
@@ -2448,7 +2449,7 @@ extern "C" sAvInfo_A1C0 cAvalanche_getAvalancheDataByPosition(t3Vector position)
                 vAddEq_A1C0(posData.center, n->m_position);
                 posData.total += n->m_objectScale;
                 posData.minDist = posData.minDist <? dist;
-                posData.any |= n->m_node->m_baseType == 2;
+                posData.any |= n->m_node->m_baseType == tAvalancheNode::kBase_Permanent;
                 posData.count++;
             }
         }

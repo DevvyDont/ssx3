@@ -119,7 +119,7 @@ struct cUIMenu : public cUIGroup {
     unsigned char getNext() __asm__("cUIMenu_getNext");
     unsigned char getPrev() __asm__("cUIMenu_getPrev");
     void setSelected(cUIThing* item, int play) __asm__("cUIMenu_setSelected");
-    int onInputChangeItem(unsigned char OldScrollItemCurrent) __asm__("cUIMenu_onInputChangeItem");
+    bool onInputChangeItem(unsigned char OldScrollItemCurrent) __asm__("cUIMenu_onInputChangeItem");
     void setScrollableMenu(char NumItems) __asm__("cUIMenu_setScrollableMenu");
     void setScrollBar(int scrollBar) __asm__("cUIMenu_setScrollBar");
     unsigned char findFirstHighlightable(unsigned char start) __asm__("cUIMenu_findFirstHighlightable");

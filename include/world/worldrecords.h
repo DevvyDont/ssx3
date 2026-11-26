@@ -428,6 +428,12 @@ CHECK_OFFSET(tCollideSurface, Flags, 0x8);
 CHECK_OFFSET(tCollideSurface, Stype, 0xA);
 CHECK_SIZE(tCollideSurface, 0xC);
 
+// tCollideRecord::Method. [P] the July 2003 preview's world.cpp asserts "Method == CR_Polygon" and "Method ==
+// CR_SphereTree" (names); [U] intersect_instanceIntersect tests a CR_Polygon mesh with cWorldIntersectType_IsMeshInt,
+// a CR_SphereTree mesh through the query's IsSphTreeInt and a CR_Box mesh (name ours) only against its bounding box
+// (IsBoxInt); cWScriptCacheEntry_resolve resolves a collide model for 1 and 3 only.
+enum tCollideMethod { CR_Polygon = 1, CR_Box = 2, CR_SphereTree = 3 };
+
 // An instance's collision record (On Tour tCollideRecord, 0x10). tInstanceRecord::m_pCollideRecord points here
 // (cWScriptCacheEntry_resolve stores it from the script file's CollideRecordEntryTable). Retail reads a 12-byte
 // per-mesh table right after the record (+0x10 + 12 * mesh): Surfaces, a GNU zero-length array, so the size stays 0x10.

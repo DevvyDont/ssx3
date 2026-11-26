@@ -217,7 +217,7 @@ extern char str_WScriptFile[];
 extern "C" void cWScriptCacheEntry_update_impl(void *self_) __asm__("cWScriptCacheEntry_update");
 /**
  * Finishes a script file load: once the entry is loading (state 1) and its async file reports status 1, takes the data,
- * unpacks or copies it into a new "WScriptFile" buffer (mpScriptHeader) and sets state 2.
+ * unpacks or copies it into a new "WScriptFile" buffer (mpScriptHeader) and sets kWSCacheState_Loaded.
  *
  * ASYNCFILE_release gives the data and size; with unpacksizez above 0 the data is unpacked, otherwise copied as is. The
  * async buffer is freed with MEM_free. State 2 is set even when no data came back.
@@ -227,7 +227,7 @@ extern "C" void cWScriptCacheEntry_update_impl(void *self_) __asm__("cWScriptCac
 extern "C" void cWScriptCacheEntry_update_impl(void *self_) {
     cWScriptCacheEntry* self = (cWScriptCacheEntry*)self_;
     short st = *(short*)self;
-    if (st == 1 && ASYNCFILE_getstatus_CAD0(self->mAsyncHandle) == st) {
+    if (st == kWSCacheState_Loading && ASYNCFILE_getstatus_CAD0(self->mAsyncHandle) == st) {
         int data = 0;
         int size = 0;
         ASYNCFILE_release_CAD0(self->mAsyncHandle, &data, &size);
@@ -246,7 +246,7 @@ extern "C" void cWScriptCacheEntry_update_impl(void *self_) {
                 MEM_free_CAD0(data);
             }
         }
-        *(short*)self = 2;
+        *(short*)self = kWSCacheState_Loaded;
     }
 }
 #endif
@@ -299,7 +299,8 @@ extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* e, cWorld* world,
 
 /**
  * Gives an entry the script data that came with the stream: stores @p value, marks it streamed (mStreamed 1, not freed
- * by the entry), sets state 2 and resolves it (cWScriptCacheEntry_resolve with cWorld_m_pTheWorld and @p index).
+ * by the entry), sets kWSCacheState_Loaded and resolves it (cWScriptCacheEntry_resolve with cWorld_m_pTheWorld and @p
+ * index).
  *
  * @param index  the section id
  * @param value  the script file header
@@ -320,7 +321,7 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_unload);
 void cMemMan_free(void* p);
 
 /**
- * Unloads an entry's script data: frees it unless streamed, clears mpScriptHeader and sets state 0.
+ * Unloads an entry's script data: frees it unless streamed, clears mpScriptHeader and sets kWSCacheState_Empty.
  */
 extern "C" void cWScriptCacheEntry_unload(cWScriptCacheEntry* self)
 {
@@ -393,14 +394,14 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
  * Resolves a section's script data: checks it against the world, turns its offsets into pointers and links the
  * section's instances and other resources to it. Always ends in state 3.
  *
- * Without data it only sets state 3. Data whose first halfword is not 0x1000 or whose +0xC word differs from the
- * world's .sdb checksum (mp_DataHeader->m_uiCheckSum) is dropped (freed unless streamed). Otherwise the ten offsets at
- * +0x14 .. +0x58 and the tables at +0x3C (count +0x38) and +0x50 (count +0x4C, relative to +0x40) become pointers. Each
- * instance of the section (count +0x44, kBxStreamData_Instance) gets its script record at +0x88 (from +0x48) and a
- * rebuilt flag word at +0x8; script records of type 1 or 3 get their collide model (kBxStreamData_CollideModel) at
- * +0xC, others 0; each spline (count +0x54, kBxStreamData_Spline) gets two values from the +0x58 pairs at +0x28 and
- * +0x1C; and the records of the tables at +0x2C (0x40 bytes) and +0x24 (0x54 bytes) get their +0x8 offsets fixed. There
- * are no null checks on the looked-up resources.
+ * Without data it only sets kWSCacheState_Ready. Data whose first halfword is not tScriptFileHeader::kCookie or whose
+ * +0xC word differs from the world's .sdb checksum (mp_DataHeader->m_uiCheckSum) is dropped (freed unless streamed).
+ * Otherwise the ten offsets at +0x14 .. +0x58 and the tables at +0x3C (count +0x38) and +0x50 (count +0x4C, relative to
+ * +0x40) become pointers. Each instance of the section (count +0x44, kBxStreamData_Instance) gets its script record at
+ * +0x88 (from +0x48) and a rebuilt flag word at +0x8; script records of Method CR_Polygon or CR_SphereTree get their
+ * collide model (kBxStreamData_CollideModel) at +0xC, others 0; each spline (count +0x54, kBxStreamData_Spline) gets
+ * two values from the +0x58 pairs at +0x28 and +0x1C; and the records of the tables at +0x2C (0x40 bytes) and +0x24
+ * (0x54 bytes) get their +0x8 offsets fixed. There are no null checks on the looked-up resources.
  *
  * @param world  the cWorld
  * @param index  the section id
@@ -410,11 +411,12 @@ void cWScriptCacheEntry::resolve(cWorld* world, int index)
     char** wp = (char**)world;
     tScriptFileHeader* scriptData = mpScriptHeader;
     if (((char*)scriptData) == 0) {
-        mState = 3;
+        mState = kWSCacheState_Ready;
         return;
     }
     {
-        if (!(*(unsigned short*)scriptData == 0x1000 && scriptData->WorldCheckSum == *(int*)(*(char**)*wp + 0x4))) {
+        if (!(*(unsigned short*)scriptData == tScriptFileHeader::kCookie &&
+              scriptData->WorldCheckSum == *(int*)(*(char**)*wp + 0x4))) {
             if (mStreamed == 0) {
                 cMemMan_free(scriptData);
             }
@@ -455,7 +457,7 @@ void cWScriptCacheEntry::resolve(cWorld* world, int index)
             for (int i = 0; i < mpScriptHeader->NumCollideRecords; i++) {
                 char* tableEntry = ((char**)mpScriptHeader->CollideRecordEntryTable)[i];
                 int type = *(int*)tableEntry;
-                if (type == 1 || type == 3) {
+                if (type == CR_Polygon || type == CR_SphereTree) {
                     *(void**)(tableEntry + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(tableEntry + 0xC), 100);
                 } else {
                     *(void**)(tableEntry + 0xC) = 0;
@@ -487,7 +489,7 @@ void cWScriptCacheEntry::resolve(cWorld* world, int index)
             }
         }
     }
-    mState = 3;
+    mState = kWSCacheState_Ready;
 }
 #endif
 
@@ -724,11 +726,11 @@ void sti_003AD290(int init, int prio) __asm__("func_003AD290");
  * doubleword and a VIF MSCAL of the VU1 microprograms D_2400, D_2270 and D_22C8.
  *
  * @param init  1 to construct
- * @param prio  the priority; only 0xFFFF does anything
+ * @param prio  the priority; only DEFAULT_INIT_PRIORITY does anything
  */
 void sti_003AD290(int init, int prio)
 {
-    if (prio == 0xFFFF && init) {
+    if (prio == DEFAULT_INIT_PRIORITY && init) {
         D_00509080[0] = 1.0f;
         D_00509080[1] = 1.0f;
         D_00509080[2] = 1.0f;
@@ -1019,7 +1021,7 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
 /**
  * Returns the code of one script in a world-script cache entry.
  *
- * When the entry's state (the short at +0x0) is 3 (loaded), it returns entry @p i of the script table
+ * When the entry's state (the short at +0x0) is kWSCacheState_Ready, it returns entry @p i of the script table
  * (WScriptScriptHeaders) of the entry's data (mpScriptHeader); otherwise it returns 0. Unlike the other getters it does
  * not check the data pointer for null. cWorld_getWScriptScript calls it with the high 24 bits of a script resource id.
  *
@@ -1028,7 +1030,7 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
  */
 int cWScriptCacheEntry::getWScriptScript(int i)
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         return data->WScriptScriptHeaders[i].ScriptCode;
     }
@@ -1042,12 +1044,12 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumGlobalScripts);
 /**
  * Returns how many global scripts a loaded world-script cache entry has.
  *
- * @return the count at +0x10 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
+ * @return the count at +0x10 of the entry's data (+0x8) when the entry's state (mState) is kWSCacheState_Ready and it
  *         has data, else 0
  */
 int cWScriptCacheEntry::getNumGlobalScripts()
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->NumGlobalScriptData;
@@ -1063,12 +1065,12 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getGlobalScripts);
 /**
  * Returns the global-script records of a loaded world-script cache entry.
  *
- * @return the pointer at +0x14 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
+ * @return the pointer at +0x14 of the entry's data (+0x8) when the entry's state (mState) is kWSCacheState_Ready and
  *         it has data, else 0
  */
 int cWScriptCacheEntry::getGlobalScripts()
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->GlobalScriptDataOff;
@@ -1084,11 +1086,11 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumProcessScripts);
 /**
  * Returns how many process scripts a loaded world script section has.
  *
- * @return the count at +0x28 of the entry's data when the entry is loaded (state 3) and has data, else 0
+ * @return the count at +0x28 of the entry's data when the entry is kWSCacheState_Ready and has data, else 0
  */
 int cWScriptCacheEntry::getNumProcessScripts()
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->NumProcessScriptData;
@@ -1104,11 +1106,11 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getProcessScripts);
 /**
  * Returns the process-script table of a loaded world script section.
  *
- * @return the pointer at +0x2C of the entry's data when the entry is loaded (state 3) and has data, else 0
+ * @return the pointer at +0x2C of the entry's data when the entry is kWSCacheState_Ready and has data, else 0
  */
 int cWScriptCacheEntry::getProcessScripts()
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->ProcessScriptDataOff;
@@ -1124,12 +1126,12 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumMissionScripts);
 /**
  * Returns how many mission scripts a loaded world-script cache entry has.
  *
- * @return the count at +0x20 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
+ * @return the count at +0x20 of the entry's data (+0x8) when the entry's state (mState) is kWSCacheState_Ready and it
  *         has data, else 0
  */
 int cWScriptCacheEntry::getNumMissionScripts()
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->NumMissionScriptData;
@@ -1145,12 +1147,12 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getMissionScripts);
 /**
  * Returns the mission-script records of a loaded world-script cache entry.
  *
- * @return the pointer at +0x24 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
+ * @return the pointer at +0x24 of the entry's data (+0x8) when the entry's state (mState) is kWSCacheState_Ready and
  *         it has data, else 0
  */
 int cWScriptCacheEntry::getMissionScripts()
 {
-    if (*(short*)this == 3) {
+    if (*(short*)this == kWSCacheState_Ready) {
         tScriptFileHeader* data = mpScriptHeader;
         if (((void*)data) != 0) {
             return data->MissionScriptDataOff;

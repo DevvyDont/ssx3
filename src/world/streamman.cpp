@@ -1,6 +1,7 @@
 #include "common.h"
 #include "bx/appman.h"
 #include "world/streamman.h"
+#include "world/worldcache.h"
 
 //100%
 INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
@@ -57,15 +58,16 @@ extern "C" void cStreamMan_purge(cStreamMan* self);
  * when asked to.
  *
  * m_pBxChunkMemHandle is freed only when it is set, m_uiBxChunkSizeLeft is nonzero and the low byte of
- * m_BxChunkResourceID (the section) is 0xFF, the shared section. cStreamMan_reset() (reset) and cStreamMan_purge()
- * (purge: releases the stream handle and frees the stream and decompression buffers) follow.
+ * m_BxChunkResourceID (the bank) is cWorldCache::kSharedBank (0xFF), the shared bank. cStreamMan_reset() (reset) and
+ * cStreamMan_purge() (purge: releases the stream handle and frees the stream and decompression buffers) follow.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
 {
     void* buf = self->m_pBxChunkMemHandle;
-    if (buf != 0 && (int)self->m_uiBxChunkSizeLeft != 0 && *(unsigned char*)&self->m_BxChunkResourceID == 0xFF) {
+    if (buf != 0 && (int)self->m_uiBxChunkSizeLeft != 0
+        && *(unsigned char*)&self->m_BxChunkResourceID == cWorldCache::kSharedBank) {
         cMemMan_free(buf);
     }
     self->reset();
@@ -172,10 +174,10 @@ extern "C" int STREAM_queuefile(int h, void* p, int a, int tag);
  * @param uiHullID  the hull page to load (stored in m_ActiveHull)
  * @param uiNumHullChunk  number of chunks in the page (m_uiNumHullChunk)
  * @param uiFileOffset  byte offset of the page in the stream file
- * @return 1 when the read was queued (stored in m_streamRequest), 0 when a request was already active or
+ * @return true when the read was queued (stored in m_streamRequest), false when a request was already active or
  *         queuing failed
  */
-int cStreamMan::addStreamRequest(int uiHullID, int uiNumHullChunk, int uiFileOffset)
+bool cStreamMan::addStreamRequest(int uiHullID, int uiNumHullChunk, int uiFileOffset)
 {
     if (m_bActive == 0) {
         int streamReq = STREAM_queuefile(m_streamHandle, (char*)&m_filename, uiFileOffset, 0x444E4543);
@@ -188,10 +190,10 @@ int cStreamMan::addStreamRequest(int uiHullID, int uiNumHullChunk, int uiFileOff
             m_bBxNullChunk = 0;
             m_iLastTimerTick = 0;
             *(int*)&m_fTicksLeft = 0;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -247,7 +249,7 @@ INCLUDE_ASM("world/streamman", cStreamMan_update);
 #ifdef SKIP_ASM
 
 void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3);
-extern "C" int cStreamMan_processChunk(cStreamMan* self, void* a, void* b);
+extern "C" bool cStreamMan_processChunk(cStreamMan* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
 extern "C" unsigned char* STREAM_get(void* cache);
 extern "C" void STREAM_release(void* cache, void* p);
@@ -367,20 +369,20 @@ struct sStreamMan7238 {
  *
  * While data remains, a new block's 8-byte header is read (type byte m_BxChunkDataType, 24-bit m_uiBxChunkSizeLeft,
  * resource id word; a header split across buffers is completed from m_sCarryData, m_iCarrySize bytes) and
- * cWorldCache_addBxStreamDataTest asked for a destination for page m_ActiveHull: -1 means no room yet and 0 is returned
- * (the caller, cStreamMan_update, then sets m_bAllocFailed so the next call retests first); 0 means the block is
- * skipped (an empty one is submitted as cStreamMan_NULLCHUNK). Block data is copied with MEM_copy and each completed
- * block is submitted with cWorldCache_addBxStreamDataSubmit, counting down the blocks left in the page (m_uiNumHullChunk). Leftover bytes
- * shorter than a header are kept for the next call; when the page's last block is done the rest of the buffer is
- * dropped.
+ * cWorldCache_addBxStreamDataTest asked for a destination for page m_ActiveHull: kStreamNoRoom means no room yet and
+ * false is returned (the caller, cStreamMan_update, then sets m_bAllocFailed so the next call retests first); 0 means
+ * the block is skipped (an empty one is submitted as cStreamMan_NULLCHUNK). Block data is copied with MEM_copy and each
+ * completed block is submitted with cWorldCache_addBxStreamDataSubmit, counting down the blocks left in the page
+ * (m_uiNumHullChunk). Leftover bytes shorter than a header are kept for the next call; when the page's last block is
+ * done the rest of the buffer is dropped.
  *
  * @param self_    the stream manager (cStreamMan, this)
  * @param pcount_  bytes left in the buffer; updated as data is consumed (On Tour iSize)
  * @param pdata_   read position in the buffer; advanced as data is consumed (On Tour pData)
- * @return 1 when the buffer was used up, 0 when the cache had no room and the call must be repeated
+ * @return true when the buffer was used up, false when the cache had no room and the call must be repeated
  */
 // PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.
-int cStreamMan::processChunk(void* pcount_, void* pdata_)
+bool cStreamMan::processChunk(void* pcount_, void* pdata_)
 {
     sStreamMan7238* self = (sStreamMan7238*)this;
     int* pcount = (int*)pcount_;
@@ -392,8 +394,8 @@ int cStreamMan::processChunk(void* pcount_, void* pdata_)
         {
             addResult = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
             self->result = addResult;
-            if (addResult == 0xFFFFFFFF)
-                return 0;
+            if (addResult == cWorldCache::kStreamNoRoom)
+                return false;
             self->retry = 0;
             if (addResult != 0)
             {
@@ -443,8 +445,8 @@ int cStreamMan::processChunk(void* pcount_, void* pdata_)
             }
             addResult = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
             self->result = addResult;
-            if (addResult == 0xFFFFFFFF)
-                return 0;
+            if (addResult == cWorldCache::kStreamNoRoom)
+                return false;
             if (addResult != 0)
             {
                 self->dst = (char*)addResult;
@@ -498,7 +500,7 @@ int cStreamMan::processChunk(void* pcount_, void* pdata_)
         for (int i = 0; i < *pcount; i++)
             self->buf[i] = *(*pdata)++;
     }
-    return 1;
+    return true;
 }
 #endif
 

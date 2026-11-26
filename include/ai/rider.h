@@ -579,6 +579,9 @@ struct cRider : public cRiderState, public cBeing {
     /* 0x88C */ void* mAttachedEmitterFX; // [X] object with its vptr at +0xA4
     /* 0x890 */ void* mBoltOnFX; // [X] object with its vptr at +0xC4
     /* 0x894 */ void* mLoadList; // [X] anim name table; two different views in func_0011BD60 / func_0011BE88
+    // mLOD values (names ours). [U] func_00121F30 picks them by the scaled depth in front of the camera (below 6, below
+    // 10, else); func_002E2550 runs all spray emitters at kLOD_Near, fewer at kLOD_Mid, two at kLOD_Far.
+    enum eRiderLOD { kLOD_Near = 0, kLOD_Mid = 1, kLOD_Far = 2 };
     /* 0x898 */ int mLOD; // [U] 0-2 from camera distance (func_00121F30)
     /* 0x89C */ int mBoneHips; // [X] index into mAnimModel's 0x20-byte transform array
     /* 0x8A0 */ int mBoneBoardRoot; // [X] same array

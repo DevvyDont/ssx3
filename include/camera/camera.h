@@ -184,6 +184,12 @@ struct cCamera {
 
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cCamera_update");
+    // setCurrentController's mode. [O] On Tour's enum eCamControllerType, names and values; [U]
+    // cCamera_setCurrentController picks ManualController, ChaseController or ScriptController for 1 / 2 / 3.
+    enum eCamControllerType {
+        CAMERA_CONTROLLER_GENERIC = 0, CAMERA_CONTROLLER_MANUAL = 1, CAMERA_CONTROLLER_CHASE = 2,
+        CAMERA_CONTROLLER_SCRIPT = 3, NUM_CAMERA_CONTROLLERS = 4
+    };
     void setCurrentController(int mode) __asm__("cCamera_setCurrentController");
     void* snapResultAlgorithm() __asm__("cCamera_snapResultAlgorithm__FPv");
     void shakeCamera(int type, float amount, float dist) __asm__("cCamera_shakeCamera");

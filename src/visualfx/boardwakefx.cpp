@@ -23,6 +23,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
+#include "animation/rideranimbase.h"
 #include "visualfx/renderstateman.h"
 
 //100%
@@ -2079,7 +2080,8 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     cRider* obj = self->obj;
     if (obj->PressMode != 0) {
         int animId = cRiderAnimBase_getCurrentAnimID(obj->mRiderAnim, 2);
-        if ((animId >= 23 && animId <= 28) || animId == 37 || animId == 38) {
+        if ((animId >= kAID_NoseChangeFakie && animId <= kAID_NoseBalance) || animId == kAID_TailPivotL ||
+            animId == kAID_TailPivotR) {
             self->f12C = self->obj->IsRidingFakie ? -1.0f : 1.0f;
         } else {
             self->f12C = self->obj->IsRidingFakie ? 1.0f : -1.0f;
@@ -2102,7 +2104,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->iB0 = 1;
     int st = cRider_getMotionState(self->obj);
     self->iD4 = st;
-    if (st == 1 || st == 2 || st == 4 || cRider_getControlState(self->obj) == 9) {
+    if (st == MS_Air || st == MS_Wipeout || st == MS_Railslide || cRider_getControlState(self->obj) == CS_Reset) {
         self->iB0 = 0;
     } else {
         cRider* riderObj = self->obj;
@@ -2122,7 +2124,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->pD0 = &SSXApp->Game->SurfPropCache->SurfData[riderObj->mSurfaceType];
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
-        x = cRider_getControlState(riderObj) != 9;
+        x = cRider_getControlState(riderObj) != CS_Reset;
     }
     float burstStrength = acc * 0.5f;
     cRider* nisRider = self->obj;
@@ -2641,7 +2643,7 @@ extern "C" void func_002E1120(sWakeFx1120* self)
         return;
     } else {
         float target = 0.0f;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->obj->mRiderAnim, 2) == 30) {
+        if (cRiderAnimBase_getCurrentAnimCategory(self->obj->mRiderAnim, 2) == kANCAT_WRecover) {
             target = 1.0f;
         }
         if (self->glow <= target) {
@@ -2807,18 +2809,18 @@ extern "C" void func_002E1598(sWakeFx1598* self)
 {
     tSurfData* cfg = self->pD0;
     if (27.77777862548828f < self->fE0 && cfg->ImpactActive != 0) {
-        int emitterIdx = 6;
-        int otherIdx = 5;
+        int emitterIdx = cDynamicSprayFX::kEmitter_SmallBurst;
+        int otherIdx = cDynamicSprayFX::kEmitter_BigBurst;
         if (cfg->ImpactLarge != 0 && 277.77777099609375f < self->fE0) {
-            emitterIdx = 5;
-            otherIdx = 6;
+            emitterIdx = cDynamicSprayFX::kEmitter_BigBurst;
+            otherIdx = cDynamicSprayFX::kEmitter_SmallBurst;
         }
-        if (emitterIdx == 5 && self->obj->mIsInNIS == 0) {
+        if (emitterIdx == cDynamicSprayFX::kEmitter_BigBurst && self->obj->mIsInNIS == 0) {
             ReportImpact(&self->vF0, self->fE0);
         }
         t4Vector pos = self->vF0;
         float k = 1.0f;
-        if (emitterIdx == 6) {
+        if (emitterIdx == cDynamicSprayFX::kEmitter_SmallBurst) {
             k = 0.5f;
             wakeAddE398(pos, wakeScale0EE8(self->dir, 20.0f));
         } else {
@@ -2827,8 +2829,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         float lim = 3333.33349609375f;
         float strengthFrac = wakeClamp1598(self->fE0 / lim, 0.0f, 1.0f);
         float level = self->f4;
-        if (level < 1.0f || emitterIdx == 5) {
-            if (self->iD4 == 2) {
+        if (level < 1.0f || emitterIdx == cDynamicSprayFX::kEmitter_BigBurst) {
+            if (self->iD4 == MS_Wipeout) {
                 if (level < 2.0f) {
                     float n = level + (strengthFrac + strengthFrac) * k;
                     self->f4 = wakeMin1598(n, 2.0f);
@@ -3274,7 +3276,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         if (self->i78 >= 30) {
             self->i78 = 0;
         }
-        if (self->iD4 != 2) {
+        if (self->iD4 != MS_Wipeout) {
             self->f4 = (self->f4 - dt) >? zero;
         }
     } else {
@@ -3439,7 +3441,7 @@ extern "C" void func_002E2550(cDynamicSprayFX* self)
     int mode = self->mRider->mLOD;
     self->mLOD = mode;
     switch (mode) {
-    case 0:
+    case cRider::kLOD_Near:
         self->mEmitters[5].m_enabled = 1;
         self->mEmitters[6].m_enabled = 1;
         self->mEmitters[0].m_enabled = 1;
@@ -3456,7 +3458,7 @@ extern "C" void func_002E2550(cDynamicSprayFX* self)
         self->mEmitters[8].m_enabled = self->mIsPlayer;
         self->mEmitters[9].m_enabled = self->mIsPlayer;
         break;
-    case 1:
+    case cRider::kLOD_Mid:
         self->mEmitters[5].m_enabled = 1;
         self->mEmitters[6].m_enabled = 1;
         self->mEmitters[0].m_enabled = 1;
@@ -3549,11 +3551,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_getHaloRadius);
 extern "C" float cLensFxMan_getHaloRadius(int type)
 {
     switch (type) {
-    case 0x10:
+    case tHaloRecord::kHaloType_Medium:
         return 180.0f;
-    case 0x20:
+    case tHaloRecord::kHaloType_Small:
         return 100.0f;
-    case 0x40:
+    case tHaloRecord::kHaloType_Large:
         return 350.0f;
     }
     return 0.0f;
@@ -3671,15 +3673,15 @@ void cLightHalo::Render(int idx)
     }
     float size = 0.0f;
     switch ((unsigned int)(((int)(mpHalo)->m_iFlags) & 0x70)) {
-    case 0x10:
+    case tHaloRecord::kHaloType_Medium:
         *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(53);
         size = 180.0f;
         break;
-    case 0x20:
+    case tHaloRecord::kHaloType_Small:
         *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(54);
         size = 100.0f;
         break;
-    case 0x40:
+    case tHaloRecord::kHaloType_Large:
         *ctx->m_pCurrentDrawState->m_textureState.m_texid = ctx->getEffectTexMap(53);
         size = 350.0f;
         break;
@@ -3780,13 +3782,13 @@ void cLightHalo::Process(tViewInfo* viewInfo)
                 (viewInfo->mViewRect.Y + viewInfo->mViewRect.H) - self->mZSRect.H);
             float pullBack = 0.0f;
             switch ((unsigned int)(((int)(self->mpHalo)->m_iFlags) & 0x70)) {
-            case 0x10:
+            case tHaloRecord::kHaloType_Medium:
                 pullBack = 100.0f;
                 break;
-            case 0x20:
+            case tHaloRecord::kHaloType_Small:
                 pullBack = 80.0f;
                 break;
-            case 0x40:
+            case tHaloRecord::kHaloType_Large:
                 pullBack = 200.0f;
                 break;
             }
@@ -4892,7 +4894,8 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 
 // PORT: later callers declare this as void (and an int alias); the body returns int.
-extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
+extern "C" bool cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1,
+        float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
 
 /**
  * Starts a screen transition made of an in part, a hold and an out part.
@@ -4911,9 +4914,10 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, 
  * @param outTime  length of the out part (On Tour outTime)
  * @param useScreenGrab  nonzero to grab the screen as the transition's texture (On Tour useScreenGrab)
  * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
- * @return 1 when the transition started, 0 when the screen grab could not be set up
+ * @return true when the transition started, false when the screen grab could not be set up
  */
-extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, void* transitionIn, void* transitionOut, float inTime, float holdTime, float outTime, int useScreenGrab, int externalTimePercentage)
+extern "C" bool cTransitionMan_StartTransition_def(void* vself, int initiator, void* transitionIn, void* transitionOut,
+        float inTime, float holdTime, float outTime, int useScreenGrab, int externalTimePercentage)
 {
     cTransitionMan* self = (cTransitionMan*)vself;
     if (self->mbPlayingTransition != 0) {
@@ -4938,7 +4942,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
                     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)transitionOut;
                     vt[1].fn(vthis(transitionOut, vt[1]), 3);
                 }
-                return 0;
+                return false;
             }
         }
     }
@@ -4953,7 +4957,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
     if (useScreenGrab != 0) {
         self->mRequestingScreenGrab = 1;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -4982,8 +4986,9 @@ void cTransitionMan::StartTransitionIn(int initiator, int transitionIn, float in
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionOut);
 #ifdef SKIP_ASM
-// PORT: the unit declares cTransitionMan_StartTransition as void; this caller returns its int result.
-extern "C" int cTransitionMan_StartTransition_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2) __asm__("cTransitionMan_StartTransition");
+// PORT: the unit declares cTransitionMan_StartTransition as void; this caller returns its result.
+extern "C" bool cTransitionMan_StartTransition_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4,
+        int a5, float f2) __asm__("cTransitionMan_StartTransition");
 
 /**
  * Starts the out part of a screen transition, or adds it to the transition already running.
@@ -5295,7 +5300,7 @@ void cTransitionMan::OnStartObjectUse()
 {
     tScriptObjTransitionInfo* transitionInfo = (&mInfo);
     cScriptObject_OnStartObjectUse((char*)&mObjType);
-    if (mInfo.transition != 7) {
+    if (mInfo.transition != keScriptTransition_CrossFade) {
         int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
                 mInfo.transitionColour);
         int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, mInfo.transition,
@@ -5695,7 +5700,7 @@ extern "C" void cSnowBox_update(cSnowBox* self, const tWorldPainterSnowfallParam
         self->mWindScale = params->mFlakeWindRatio * 500.0f;
         self->mFlakeSize = params->mFlakeSize;
         break;
-    case 1:
+    case eSnowBoxFluff:
         self->mOpacity = params->mFluffColourA;
         self->mColourR = params->mFluffColourR;
         self->mColourG = params->mFluffColourG;
@@ -6033,7 +6038,7 @@ extern "C" void cSnowBox_render(cSnowBox* self, const t4Matrix* snowMatrix, floa
         GrMan->RenderSnowBoxFlakes(info);
         break;
     }
-    case 1: {
+    case eSnowBoxFluff: {
         GrMan->RenderSnowBoxFluffs(info);
         break;
     }
@@ -6696,7 +6701,7 @@ static inline void Trail_66B8(cSpeedBoostFX* self, const t4Vector& pos, int on, 
  */
 void cSpeedBoostFX::update()
 {
-    int air = cRider_getMotionState(mRider) == 1;
+    int air = cRider_getMotionState(mRider) == MS_Air;
     int on = 0;
     if (!air) {
         cRider* riderPtr = mRider;
@@ -6713,7 +6718,7 @@ void cSpeedBoostFX::update()
     cRider* riderPtr = mRider;
     float k = 0.002f;
     int type = riderPtr->mUberLevel;
-    if (type == 11) {
+    if (type == eUS_UltraUber) {
         k = 0.01f;
         mCurrentTexture = 61;
     } else if (0.01f < riderPtr->mPowerUpBoostTimer || cPowerUpFXToggles_m_TestSpeedBoostRibbon != 0) {
@@ -6733,7 +6738,7 @@ void cSpeedBoostFX::update()
     if (on) {
         float boostAmt = Clamp_66B8(Max_66B8(riderPtr->mPowerUpBoostTimer, riderPtr->mBoostStrength), 0.0f, 1.0f);
         mTrailLength = (boostAmt * 400.0f + 400.0f) * (speed / 3333.3335f);
-        trailWidth(this) = (riderPtr->mUberLevel == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
+        trailWidth(this) = (riderPtr->mUberLevel == eUS_UltraUber) ? 50.0f : boostAmt * 9.0f + 6.0f;
         mAlpha = 1.0f;
     } else {
         mTrailLength *= 0.95f;
@@ -6913,7 +6918,7 @@ void cSpeedBoostFX::UpdateSpeedBoostTrail()
     if (0.0f < mTrailLength || 0.0f < mSpeedBoostTrailCurrentLength) {
         if (0.0f < wakeLenE6C08(mRider->mVelocity)) {
             tSpeedBoostTrailSeg* ring;
-            if (mSpeedBoostTrailNumSegs == 30) {
+            if (mSpeedBoostTrailNumSegs == kMaxTrailSegs) {
                 mSpeedBoostTrailCurrentLength -= mSpeedBoostTrail[(mSpeedBoostTrailCurrentSeg + 29) % 30].mLength;
                 ring = mSpeedBoostTrail;
             } else {
@@ -6945,7 +6950,8 @@ void cSpeedBoostFX::UpdateSpeedBoostTrail()
             float lean = 0.0f;
             if (mRider->PressMode != 0) {
                 int curID = cRiderAnimBase_getCurrentAnimID(mRider->mRiderAnim, 2);
-                if ((curID >= 23 && curID <= 28) || curID == 37 || curID == 38) {
+                if ((curID >= kAID_NoseChangeFakie && curID <= kAID_NoseBalance) || curID == kAID_TailPivotL ||
+                    curID == kAID_TailPivotR) {
                     lean = 1.0f;
                 } else {
                     lean = -1.0f;
