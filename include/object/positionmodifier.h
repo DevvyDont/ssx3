@@ -34,6 +34,13 @@ struct cPositionModifier : public cTransformModifier {
     // --- cPositionModifier
     t4Matrix Transform;             // 0x50 [O]; [R] ctors copy t4mat_Identity (or the matrix) here, then the offset into
                                     //      row 3 (sq 0x80); [U] getRootTransform returns +0x50
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cPositionModifier__cPositionModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cPositionModifier();
+    virtual void updateRootTransform() __asm__("cPositionModifier_updateRootTransform");
+    virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cPositionModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cPositionModifier, unk_04, 0x04);

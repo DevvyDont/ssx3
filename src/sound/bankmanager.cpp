@@ -192,7 +192,7 @@ extern "C" int SNDbankadd(void* sema, int a1);
  */
 extern "C" void cBankInstance_Attach(cBankInstance* self, int mainMemData, int mainMemSize)
 {
-    cBankInstance_UnAttach(self);
+    self->UnAttach();
     self->mpMainMemData = (char*)mainMemData;
     self->mMainMemDataSize = mainMemSize;
     SNDbankadd((char*)&self->mBankHandle, mainMemData);
@@ -212,15 +212,15 @@ extern "C" int SNDbankremove(int id);
  * handle to kNoBankHandle; then it zeroes the main-memory data (+0x10) and size (+0x14) without freeing them. Called by
  * cBankInstance_Attach and, by bank index, by cBankManager_BANK_UnAttach.
  */
-extern "C" void cBankInstance_UnAttach(cBankInstance* self)
+void cBankInstance::UnAttach()
 {
-    self->mBankStatus = EMPTY;
-    if (self->mBankHandle != cBankInstance::kNoBankHandle) {
-        SNDbankremove(self->mBankHandle);
-        self->mBankHandle = cBankInstance::kNoBankHandle;
+    mBankStatus = EMPTY;
+    if (mBankHandle != cBankInstance::kNoBankHandle) {
+        SNDbankremove(mBankHandle);
+        mBankHandle = cBankInstance::kNoBankHandle;
     }
-    self->mpMainMemData = 0;
-    self->mMainMemDataSize = 0;
+    mpMainMemData = 0;
+    mMainMemDataSize = 0;
 }
 #endif
 
@@ -277,13 +277,13 @@ public:
  * base reached through gpBankManager->BankMonitor.mpVSoundSys. On Tour asserts the bank was not already loading and
  * that the handle is valid; retail checks neither.
  */
-extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance* self)
+void cBankInstance::OnBeginAsyncLoad()
 {
-    cBankInstance_Unload(self);
-    cBankInstance_SharedUnload(self);
-    self->mBankStatus = LOADING;
-    if (self->mAllocLocation == keSoundMemLocation_Sound) {
-        ((cSndStream_B878*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->v6(self->mSoundMemHandle);
+    cBankInstance_Unload(this);
+    cBankInstance_SharedUnload(this);
+    mBankStatus = LOADING;
+    if (mAllocLocation == keSoundMemLocation_Sound) {
+        ((cSndStream_B878*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->v6(mSoundMemHandle);
     }
 }
 #endif
@@ -704,7 +704,7 @@ extern "C" void cBankInstance_UnAttach(cBankInstance*);
  */
 void cBankManager::BANK_UnAttach(int i)
 {
-    cBankInstance_UnAttach(&mBank[i]);
+    mBank[i].UnAttach();
 }
 #endif
 
@@ -723,7 +723,7 @@ extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance*);
  */
 void cBankManager::ASYNCSYS_OnBeginAsyncLoad(int i)
 {
-    cBankInstance_OnBeginAsyncLoad(&mBank[i]);
+    mBank[i].OnBeginAsyncLoad();
 }
 #endif
 

@@ -62,26 +62,26 @@ static inline void showIdx_182928(cFEStateCharSetup* self, char* name, int idx)
  * "Option_Continue", "Option_Equip", "Option_Rider" and "Option_Radio" are shown with misc data 0 to 3;
  * "Option_GBA" is hidden and gets vtable slot 8 (cUIThing_setStatic) with 1.
  */
-extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
+void cFEStateCharSetup::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, (self), GetHashValue32(str_09set_char), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, (this), GetHashValue32(str_09set_char), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    self->updateWidget();
+    updateWidget();
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
+    int charId = cBENewPlayerInterface_getPlayerCharID(iface, mUserNum);
     iface->discard();
-    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
-    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charId, 0);
+    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, mUserNum, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, charId, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title));
+    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title));
     if (txt != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-            switch (self->mUserNum) {
+            switch (mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID(txt, GetHashValue32(str_kT_TITLEPlayer1SetupCharacter));
                 break;
@@ -91,11 +91,11 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
             }
         }
     }
-    showIdx_182928((self), str_Option_Continue, 0);
-    showIdx_182928((self), str_Option_Equip, 1);
-    showIdx_182928((self), str_Option_Rider, 2);
-    showIdx_182928((self), str_Option_Radio, 3);
-    cUIThing* gbaOption = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_GBA));
+    showIdx_182928((this), str_Option_Continue, 0);
+    showIdx_182928((this), str_Option_Equip, 1);
+    showIdx_182928((this), str_Option_Rider, 2);
+    showIdx_182928((this), str_Option_Radio, 3);
+    cUIThing* gbaOption = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Option_GBA));
     if (gbaOption != 0) {
         gbaOption->setVisible(0);
         gbaOption->setStatic(1);
@@ -114,10 +114,10 @@ void* cUIState_onDestroyScreen(void* self);
  *
  * It fills the onDestroyScreen slot (+0x2C) of cFEStateCharSetup_vtbl and cFEStateRiderDetail_vtbl.
  */
-extern "C" void cFEStateCharSetup_onDestroyScreen(cFEStateCharSetup* self)
+void cFEStateCharSetup::onDestroyScreen()
 {
-    self->show3DCharacter(0);
-    cUIState_onDestroyScreen(self);
+    show3DCharacter(0);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -133,10 +133,10 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self);
  * cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and its screens.
  * cFEStateCharSetup_updateCharacter3DPos() places the loaded rider model and, when the state asks for it, restarts its animation.
  */
-extern "C" void cFEStateCharSetup_onUpdate(cFEStateCharSetup* self)
+void cFEStateCharSetup::onUpdate()
 {
-    cUIState_onUpdate(self);
-    self->updateCharacter3DPos();
+    cUIState_onUpdate(this);
+    updateCharacter3DPos();
 }
 #endif
 
@@ -180,32 +180,32 @@ extern char str_FEOptions[];
  * @param item  the widget (On Tour pWidget)
  * @param event  the event (On Tour Event)
  */
-extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThing* item, unsigned int event)
+void cFEStateCharSetup::onWidgetEvent(cUIThing* item, unsigned int event)
 {
     if (((void*)item) == 0)
         return;
     switch (event) {
     case cUIState::kONNEXT: {
-        cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        void* nextState = factory->getNextState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* factory = (cUICustomInterface*)((char*)mpEngine->mpCustom);
+        void* nextState = factory->getNextState((cUIState*)this, item->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
-        self->show3DCharacter(0);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
+        show3DCharacter(0);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        void* nextState = factory->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* factory = (cUICustomInterface*)((char*)mpEngine->mpCustom);
+        void* nextState = factory->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
-            self->show3DCharacter(0);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
+            show3DCharacter(0);
         }
         break;
     }
     case cUIState::kONOPTION: {
-        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
+        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
-        cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
+        cUIStateStack_pushSpecial(&mpEngine->mStateStack, st, 0, 0);
         break;
     }
     }

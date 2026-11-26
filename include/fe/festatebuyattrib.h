@@ -35,6 +35,13 @@ struct cFEStateBuyAttrib : public cUIState {
     void updateTotalCost() __asm__("cFEStateBuyAttrib_updateTotalCost");
     void updateBank() __asm__("cFEStateBuyAttrib_updateBank");
     void buyExperience() __asm__("cFEStateBuyAttrib_buyExperience");
+    // retail's destructor cFEStateBuyAttrib__cFEStateBuyAttrib stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateBuyAttrib();
+    virtual void onCreateScreen() __asm__("cFEStateBuyAttrib_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateBuyAttrib_onWidgetCreate");
+    virtual bool onGainTransition(int on) __asm__("cFEStateBuyAttrib_onGainTransition");
+    virtual void onInputAlways(cUIInput* w) __asm__("cFEStateBuyAttrib_onInputAlways");
 };
 
 CHECK_OFFSET(cFEStateBuyAttrib, mpAttribScreen, 0x048);

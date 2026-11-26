@@ -60,6 +60,12 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateOnlineAgreement1() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement1");
     void* cFEStateOnlineAgreement2() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement2");
+    // retail's destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOnlineAgreement();
+    virtual void onCreateScreen() __asm__("cFEStateOnlineAgreement_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateOnlineAgreement_onUpdate");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateOnlineAgreement_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateOnlineAgreement, mpTOSLines, 0x6D0);

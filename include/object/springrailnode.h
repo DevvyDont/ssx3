@@ -137,6 +137,12 @@ struct cSpringRailNode : public cFlexRailNode {
     // Methods bound to their retail symbols by asm labels.
     void* cSpringRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cSpringRailNode_cSpringRailNode1");
     void getPosition(tSpringRailNode* node) __asm__("cSpringRailNode_getPosition");
+    // retail's destructor cSpringRailNode__cSpringRailNode stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cSpringRailNode();
+    virtual void updateBoundBox() __asm__("cSpringRailNode_updateBoundBox");
+    virtual void updateMats() __asm__("cSpringRailNode_updateMats");
+    virtual void updateNodes() __asm__("cSpringRailNode_updateNodes");
 };
 
 CHECK_OFFSET(cSpringRailNode, ASpring, 0x060);

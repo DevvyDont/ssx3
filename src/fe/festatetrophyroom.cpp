@@ -37,11 +37,11 @@ extern char str_127trophyroom[];
 /**
  * Opens the trophy-room screen ("127trophyroom"), keeps it at 0x40 and plays its frame 0.
  */
-extern "C" void cFEStateTrophyRoom_onCreateScreen(cFEStateTrophyRoom* self)
+void cFEStateTrophyRoom::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_127trophyroom), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_127trophyroom), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -122,22 +122,22 @@ static inline void vcall_43F0(void* o, int slot, int arg)
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateTrophyRoom_onWidgetCreate(cFEStateTrophyRoom* self, cUIThing* w)
+void cFEStateTrophyRoom::onWidgetCreate(cUIThing* w)
 {
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_bitmap)) {
-        self->mpBigIcon = (cUIIcon*)((void*)w);
-        self->updateBigArt(self->mCurSelection);
+        mpBigIcon = (cUIIcon*)((void*)w);
+        updateBigArt(mCurSelection);
         return;
     }
     if (hashName == GetHashValue32(str_stats)) {
-        self->mpStats = (cUIText*)((void*)w);
+        mpStats = (cUIText*)((void*)w);
         vcall_43F0(w, 9, 0);
         return;
     }
     if (hashName == GetHashValue32(str_screentitle)) {
         int id = 0;
-        switch (self->mTrophyType) {
+        switch (mTrophyType) {
         case kTROPHY_EARNINGS:
             id = GetHashValue32(str_kT_TITLEEarningsTrophy);
             break;
@@ -156,19 +156,19 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(cFEStateTrophyRoom* self, cUIT
     }
     for (int i = 0; i < 6; i++) {
         if (hashName == GetHashValue32(D_00441600[i])) {
-            int n = func_001CE6F0(self->mPeakNum, self->mTrophyType);
+            int n = func_001CE6F0(mPeakNum, mTrophyType);
             w->mMiscData = i;
             if (n < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             } else if (i == 0) {
                 cUIText_setAsciiString((cUIText*)w, cBERewardInterface_getTrophy(cBE_getInterface_Fv(cBE_getBE(), 13),
-                                       self->mPeakNum, self->mTrophyType)->mNameStringID);
+                                       mPeakNum, mTrophyType)->mNameStringID);
             } else {
-                setChallengeName(w, self->mPeakNum, self->mTrophyType, i - 1);
+                setChallengeName(w, mPeakNum, mTrophyType, i - 1);
             }
         } else if (hashName == GetHashValue32(D_00441618[i])) {
-            if (func_001CE6F0(self->mPeakNum, self->mTrophyType) < i) {
+            if (func_001CE6F0(mPeakNum, mTrophyType) < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             }
@@ -260,12 +260,12 @@ extern "C" void* cUIState_onUpdate(void* self);
  * loading to GrMan under the name "trph", releases it and decrements the count. Then runs the base UI-state
  * update cUIState_onUpdate().
  */
-extern "C" void cFEStateTrophyRoom_onUpdate(cFEStateTrophyRoom* self)
+void cFEStateTrophyRoom::onUpdate()
 {
-    if (self->mNumLoadingFiles > 0) {
-        self->updateTexturesLoad();
+    if (mNumLoadingFiles > 0) {
+        updateTexturesLoad();
     }
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -525,11 +525,11 @@ extern char str_128rewardsroom[];
 /**
  * Opens the rewards-room screen ("128rewardsroom") and switches the front-end sound-bank mode to 6.
  */
-extern "C" void cFEStateRewardsRoom_onCreateScreen(cFEStateRewardsRoom* self)
+void cFEStateRewardsRoom::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_128rewardsroom), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_128rewardsroom), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -564,7 +564,7 @@ extern char str_txtmdl_5[];
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, cUIThing* w)
+void cFEStateRewardsRoom::onWidgetCreate(cUIThing* w)
 {
     int id = w->mHashName;
     if (id == GetHashValue32(str_art)) {
@@ -580,17 +580,17 @@ extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, cU
     } else if (id == GetHashValue32(str_cheat_character)) {
         w->mMiscData = 8;
     } else if (id == GetHashValue32(str_txtmdl_0)) {
-        self->setRewardsWidgetText(5, (cUIText*)w);
+        setRewardsWidgetText(5, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_1)) {
-        self->setRewardsWidgetText(3, (cUIText*)w);
+        setRewardsWidgetText(3, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_2)) {
-        self->setRewardsWidgetText(7, (cUIText*)w);
+        setRewardsWidgetText(7, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_3)) {
-        self->setRewardsWidgetText(4, (cUIText*)w);
+        setRewardsWidgetText(4, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_4)) {
-        self->setRewardsWidgetText(8, (cUIText*)w);
+        setRewardsWidgetText(8, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_5)) {
-        self->setRewardsWidgetText(6, (cUIText*)w);
+        setRewardsWidgetText(6, (cUIText*)w);
     }
 }
 #endif
@@ -609,7 +609,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUIThing* item, unsigned int msg)
+void cFEStateRewardsRoom::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
@@ -618,16 +618,16 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
     case 0:
         break;
     case cUIState::kONNEXT: {
-        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)mpEngine->mpCustom);
+        void* nextState = obj->getNextState((cUIState*)this, item->mMiscData);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)mpEngine->mpCustom);
+        void* nextState = obj->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -1232,15 +1232,15 @@ extern "C" void cMCOverlayManager_cleanUp(void* self);
  * (+0x434), cleans it up (cMCOverlayManager_cleanUp, cMCOverlayManager_ManagerLoseState, cMCOverlayManager_purge). A
  * buffer this screen allocated (+0x228 == keBufferState_Valid) is freed. Ends with cOVState_onDestroyScreen.
  */
-extern "C" void cFEMemCard_onDestroyScreen(cFEMemCard* self)
+void cFEMemCard::onDestroyScreen()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    if (self->mType == cFEMemCard::kTYPE_REPLAY && self->mBufferState == cFEMemCard::keBufferState_ReplayExternal
-        && self->mIsLoadDoneOK == 0) {
+    if (mType == cFEMemCard::kTYPE_REPLAY && mBufferState == cFEMemCard::keBufferState_ReplayExternal
+        && mIsLoadDoneOK == 0) {
         cBESaveInterface_releaseReplayBuffer(iface);
-        self->mpStartReadBuffer = 0;
-        self->mpReadBuffer = 0;
-        self->mBufferState = 0;
+        mpStartReadBuffer = 0;
+        mpReadBuffer = 0;
+        mBufferState = 0;
     }
     cBESaveInterface_releaseBuffer(iface);
     cMCOverlayManager* app = (cMCOverlayManager*)((char*)cSSXApp_getMCManager(SSXApp));
@@ -1249,15 +1249,15 @@ extern "C" void cFEMemCard_onDestroyScreen(cFEMemCard* self)
         cMCOverlayManager_ManagerLoseState(app);
         cMCOverlayManager_purge(app);
     }
-    if (self->mBufferState == cFEMemCard::keBufferState_Valid) {
-        self->mBufferState = 0;
-        if (self->mpStartReadBuffer != 0) {
-            cMemMan_free(self->mpStartReadBuffer);
+    if (mBufferState == cFEMemCard::keBufferState_Valid) {
+        mBufferState = 0;
+        if (mpStartReadBuffer != 0) {
+            cMemMan_free(mpStartReadBuffer);
         }
-        self->mpStartReadBuffer = 0;
-        self->mpReadBuffer = 0;
+        mpStartReadBuffer = 0;
+        mpReadBuffer = 0;
     }
-    cOVState_onDestroyScreen(self);
+    cOVState_onDestroyScreen(this);
 }
 #endif
 

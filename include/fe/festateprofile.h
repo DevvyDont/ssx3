@@ -105,6 +105,14 @@ struct cFEStateProfileLoad : public cFEMemCard {
     void initLoadScreen() __asm__("cFEStateProfileLoad_initLoadScreen");
     void initSaveScreen() __asm__("cFEStateProfileLoad_initSaveScreen");
     void setQuitPath(int action) __asm__("cFEStateProfileLoad_setQuitPath");
+    // retail's destructor cFEStateProfileLoad__cFEStateProfileLoad stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateProfileLoad();
+    virtual void onCreateScreen() __asm__("cFEStateProfileLoad_onCreateScreen");
+    virtual void hideActionButtons(int on) __asm__("cFEStateProfileLoad_hideActionButtons");
+    virtual void displayStatus() __asm__("cFEStateProfileLoad_displayStatus");
+    virtual void updateDone() __asm__("cFEStateProfileLoad_updateDone");
+    virtual void onDestroyScreen() __asm__("cFEStateProfileLoad_onDestroyScreen__FPv");
 };
 
 CHECK_OFFSET(cFEStateProfileLoad, miCntrlID, 0x22C);
@@ -143,6 +151,11 @@ struct cFEStateProfileSelect : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateProfileSelect1() __asm__("cFEStateProfileSelect_cFEStateProfileSelect1");
+    // retail's destructor cFEStateProfileSelect__cFEStateProfileSelect stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateProfileSelect();
+    virtual void onCreateScreen() __asm__("cFEStateProfileSelect_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* menu, unsigned int msg) __asm__("cFEStateProfileSelect_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateProfileSelect, 0x48);

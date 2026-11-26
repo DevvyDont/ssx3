@@ -15,11 +15,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the bonus material screen ("146Bonusmat") and plays its first frame.
  */
-extern "C" void cFEStateBonusMaterial_onCreateScreen(cFEStateBonusMaterial* self)
+void cFEStateBonusMaterial::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_146Bonusmat), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_146Bonusmat), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -39,7 +39,7 @@ extern char D_004A1508[];
  *
  * @param menu  the widget being created
  */
-extern "C" void cFEStateBonusMaterial_onWidgetCreate(cFEStateBonusMaterial* self, cUIThing* menu)
+void cFEStateBonusMaterial::onWidgetCreate(cUIThing* menu)
 {
     int menuHash = menu->mHashName;
     if (menuHash == GetHashValue32(D_004A14F8)) {
@@ -115,7 +115,7 @@ extern const char* D_00441128[];
  * @param item  the entry (its index at +0x18 picks the video from D_00441128), or 0
  * @param event  widget event number (On Tour Event)
  */
-extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self, cUIThing* item, unsigned int event)
+void cFEStateBonusMaterial::onWidgetEvent(cUIThing* item, unsigned int event)
 {
     if (((void*)item) == 0)
         return;
@@ -123,17 +123,18 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
     case cUIState::kONSELECT:
         break;
     case cUIState::kONNEXT: {
-        void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
-                                self->mUserNum);
+        void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0),
+                mpEngine, this,
+                                mUserNum);
         cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[item->mMiscData], 0);
-        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
+        cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        void* nextState = factory->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* factory = (cUICustomInterface*)((char*)mpEngine->mpCustom);
+        void* nextState = factory->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         break;
     }
     }

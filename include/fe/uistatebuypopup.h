@@ -62,6 +62,10 @@ struct cUIStateBuyPopup : public cUIState {
     void initBuyAttributes(int pAttrName, int cost, int money) __asm__("cUIStateBuyPopup_initBuyAttributes");
     void * cUIStateBuyPopup1() __asm__("cUIStateBuyPopup_cUIStateBuyPopup1");
     int isAccept() __asm__("cUIStateBuyPopup_isAccept");
+    // retail's destructor cUIStateBuyPopup__cUIStateBuyPopup stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cUIStateBuyPopup();
+    virtual void onCreateScreen() __asm__("cUIStateBuyPopup_onCreateScreen");
 };
 
 CHECK_OFFSET(cUIStateBuyPopup, mInfo, 0x048);

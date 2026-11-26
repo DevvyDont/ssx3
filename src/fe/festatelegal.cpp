@@ -17,15 +17,15 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the autosave notice screen ("122bAutosave") and resets its frame counter.
  */
-extern "C" void cFEStateLegal_onCreateScreen(cFEStateLegal* self)
+void cFEStateLegal::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_122bAutosave), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_122bAutosave), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    self->mDisplayTicks = 0;
+    mDisplayTicks = 0;
 }
 #endif
 

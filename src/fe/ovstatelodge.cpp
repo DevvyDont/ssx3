@@ -177,23 +177,23 @@ extern char D_004A1508[];
  * Creates the mountain room screen ("125mountainroom"), labels the peak numbers 1-3, and calls
  * func_0028F140(.., 7) on the audio system.
  */
-extern "C" void cFEStateMountainRoom_onCreateScreen(cFEStateMountainRoom* self)
+void cFEStateMountainRoom::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_125mountainroom), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_125mountainroom), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Numb_1));
+    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Numb_1));
     if (textObj1 != 0) {
         cUIText_setAsciiString(textObj1, D_004A14F8);
     }
-    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Numb_2));
+    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Numb_2));
     if (textObj2 != 0) {
         cUIText_setAsciiString(textObj2, D_004A1500);
     }
-    cUIText* textObj3 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Numb_3));
+    cUIText* textObj3 = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Numb_3));
     if (textObj3 != 0) {
         cUIText_setAsciiString(textObj3, D_004A1508);
     }
@@ -456,17 +456,17 @@ static inline int IsShown1D2EA0(char* self)
  * @return true when the peak pass was shown and is closed
  */
 // Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
-extern "C" bool cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUIInput* widget)
+bool cFEStateMountainRoom::onInputBegin(cUIInput* widget)
 {
-    if (IsShown1D2EA0(((char*)self))) {
+    if (IsShown1D2EA0(((char*)this))) {
     if (widget->isPrevious()) {
-        char* snd = *(char**)&self->mpEngine->mpSound;
+        char* snd = *(char**)&mpEngine->mpSound;
         if (snd == 0) {
             snd = &gUISoundNull;
         }
         sVEntry<void(void*, int)>* svt = *(sVEntry<void(void*, int)>**)snd;
         svt[2].fn(vthis(snd, svt[2]), 3);
-        cUIGroup* w = self->mpPassGroup;
+        cUIGroup* w = mpPassGroup;
         w->setVisible(0);
     }
     return true;
@@ -547,7 +547,7 @@ struct sText_MR {
  * @param msg  widget event number (On Tour Event)
  */
 // Widget events of the mountain-room menu: opens sub-screens and updates the description text.
-extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, cUIThing* w, unsigned int msg)
+void cFEStateMountainRoom::onWidgetEvent(cUIThing* w, unsigned int msg)
 {
     if (((char*)w) == 0) {
         return;
@@ -556,25 +556,25 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
     case cUIState::kONNEXT: {
         int idx = w->mMiscData;
         if (idx == 0) {
-            cFEStateMountainRoom_showPassFront_MR(((char*)self));
+            cFEStateMountainRoom_showPassFront_MR(((char*)this));
             break;
         }
-        sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
-        void* nextState = factory->vt[4].fn(vthis(factory, factory->vt[4]), ((char*)self), idx - 1);
-        cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
+        sFactory_MR* factory = *(sFactory_MR**)mpEngine;
+        void* nextState = factory->vt[4].fn(vthis(factory, factory->vt[4]), ((char*)this), idx - 1);
+        cUIStateStack_push_MR(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONPREV: {
-        sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
-        void* nextState = factory->vt[5].fn(vthis(factory, factory->vt[5]), ((char*)self), w->mMiscData);
+        sFactory_MR* factory = *(sFactory_MR**)mpEngine;
+        void* nextState = factory->vt[5].fn(vthis(factory, factory->vt[5]), ((char*)this), w->mMiscData);
         if (nextState == 0) {
             break;
         }
-        cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push_MR(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONGAINFOCUS: {
-        if (self->mpHelpText == 0) {
+        if (mpHelpText == 0) {
             break;
         }
         int stringId = 0;
@@ -586,23 +586,23 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
             stringId = GetHashValue32(str_kT_HELPViewTrophies);
             break;
         case 2:
-            if (self->mPeakNum > 0) {
+            if (mPeakNum > 0) {
                 stringId = GetHashValue32(str_kT_HELPViewTrophies);
             } else {
                 stringId = GetHashValue32(str_kT_MAPHELPLockedPeak2);
             }
             break;
         case 3:
-            if (self->mPeakNum >= 2) {
+            if (mPeakNum >= 2) {
                 stringId = GetHashValue32(str_kT_HELPViewTrophies);
             } else {
                 stringId = GetHashValue32(str_kT_MAPHELPLockedPeak3);
             }
             break;
         }
-        cUIText* helpText = self->mpHelpText;
+        cUIText* helpText = mpHelpText;
         helpText->setVisible(1);
-        cUIText_setUnicodeStringByID(self->mpHelpText, stringId);
+        cUIText_setUnicodeStringByID(mpHelpText, stringId);
         break;
     }
     }
@@ -622,12 +622,12 @@ extern "C" void* cUIState_onUpdate(void* self);
  * handed to GrMan under the name "pass" and attached to the widget at 0x50, and the slot is released. Then runs
  * the base UI-state update cUIState_onUpdate().
  */
-extern "C" void cFEStateMountainRoom_onUpdate(cFEStateMountainRoom* self)
+void cFEStateMountainRoom::onUpdate()
 {
-    if (~self->mTextureFileIndex != 0) {
-        self->updateTextureLoad();
+    if (~mTextureFileIndex != 0) {
+        updateTextureLoad();
     }
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -890,11 +890,11 @@ extern char str_126peakroom[];
 /**
  * Creates the peak (trophy) room screen ("126peakroom") and plays its first frame.
  */
-extern "C" void cFEStatePeakRoom_onCreateScreen(cFEStatePeakRoom* self)
+void cFEStatePeakRoom::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_126peakroom), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_126peakroom), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -1098,38 +1098,38 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the menu entry (its trophy index at +0x18), or 0
  * @param key  widget event number (On Tour Event)
  */
-extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing* item, unsigned int key)
+void cFEStatePeakRoom::onWidgetEvent(cUIThing* item, unsigned int key)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (key) {
     case cUIState::kONNEXT:
-        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
-                          self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
-            cUICustomInterface* obj = self->mpEngine->mpCustom;
-            void* nextState = obj->getNextState((cUIState*)self, (self->mPeakNum << 16) | item->mMiscData);
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum,
+                          mCharID, mPeakNum, item->mMiscData) != 0) {
+            cUICustomInterface* obj = mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)this, (mPeakNum << 16) | item->mMiscData);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     case cUIState::kONPREV: {
-        int id = (self->mPeakNum << 16) | item->mMiscData;
+        int id = (mPeakNum << 16) | item->mMiscData;
         for (int i = 0; i < 4; i++) {
-            cUIThing* listItem = self->mpTrophyIcons[i];
+            cUIThing* listItem = mpTrophyIcons[i];
             if (listItem != 0) {
                 listItem->setVisible(0);
             }
         }
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, id);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, id);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONGAINFOCUS:
-        self->updateHelpText(item->mMiscData);
-        self->updateMedalsList(item->mMiscData);
+        updateHelpText(item->mMiscData);
+        updateMedalsList(item->mMiscData);
         break;
     }
 }

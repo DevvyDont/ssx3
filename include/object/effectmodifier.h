@@ -52,6 +52,7 @@ struct cEffectModifier : public cEffectLink {
 
     // Methods bound to their retail symbols by asm labels.
     void* cEffectModifier1(cBxReplayFrame* obj) __asm__("cEffectModifier_cEffectModifier1");
+    virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cEffectModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cEffectModifier, Instance, 0x0C);
@@ -75,6 +76,12 @@ struct cParticleModifier : public cEffectModifier {
 
     // Methods bound to their retail symbols by asm labels.
     void* cParticleModifier1(cBxReplayFrame* stream) __asm__("cParticleModifier_cParticleModifier1");
+    // retail's destructor cParticleModifier__cParticleModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cParticleModifier();
+    virtual void update() __asm__("cParticleModifier_update");
+    virtual void render() __asm__("cParticleModifier_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cParticleModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cParticleModifier, Transform, 0x10);
@@ -114,6 +121,13 @@ struct cDynamicParticleModifier : public cEffectModifier {
     cDynamicParticleModifier* cDynamicParticleModifier1(tParticleData* particleDesc, int owner, int bone, t4Vector* pos)
         __asm__("cDynamicParticleModifier_cDynamicParticleModifier1");
     void updatePosition() __asm__("cDynamicParticleModifier_updatePosition");
+    // retail's destructor cDynamicParticleModifier__cDynamicParticleModifier stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cDynamicParticleModifier();
+    virtual void update() __asm__("cDynamicParticleModifier_update");
+    virtual void fadeEffect() __asm__("cDynamicParticleModifier_fadeEffect__FPv");
+    virtual void render() __asm__("cDynamicParticleModifier_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cDynamicParticleModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cDynamicParticleModifier, Mesh, 0x10);
@@ -187,6 +201,12 @@ struct cHaloModifier : public cEffectModifier {
 
     // Methods bound to their retail symbols by asm labels.
     void* cHaloModifier1(cBxReplayFrame* stream) __asm__("cHaloModifier_cHaloModifier1");
+    // retail's destructor cHaloModifier__cHaloModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cHaloModifier();
+    virtual void update() __asm__("cHaloModifier_update");
+    virtual void render() __asm__("cHaloModifier_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cHaloModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cHaloModifier, Color, 0x010);

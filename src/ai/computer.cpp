@@ -1585,11 +1585,11 @@ extern "C" void func_002A3B18(void*, void*, int);
  *
  * @param amount  seconds of boost to add (On Tour sec)
  */
-extern "C" void cRider_flagEventSpeedBoost(cRider* self, float amount)
+void cRider::flagEventSpeedBoost(float amount)
 {
-    self->mPowerUpBoostTimer += amount;
-    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 0, self, 1.0f);
-    func_002A3B18(cAudioInterface_bxAudio(), self, 1);
+    mPowerUpBoostTimer += amount;
+    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 0, this, 1.0f);
+    func_002A3B18(cAudioInterface_bxAudio(), this, 1);
 }
 #endif
 
@@ -1607,11 +1607,11 @@ extern "C" void func_002A3B18(void*, void*, int);
  *
  * @param amount  the time to add
  */
-extern "C" void cRider_flagEventTrickBoost(cRider* self, float amount)
+void cRider::flagEventTrickBoost(float amount)
 {
-    self->mPowerUpTrickTimer += amount;
-    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 1, self, 1.0f);
-    func_002A3B18(cAudioInterface_bxAudio(), self, 2);
+    mPowerUpTrickTimer += amount;
+    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 1, this, 1.0f);
+    func_002A3B18(cAudioInterface_bxAudio(), this, 2);
 }
 #endif
 
@@ -1633,12 +1633,12 @@ extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
  *
  * @param value  the multiplier
  */
-extern "C" void cRider_flagEventTrickMultiplier(cRider* self, float value)
+void cRider::flagEventTrickMultiplier(float value)
 {
-    if (cRider_getMotionState(self) == MS_Air || cRider_getMotionState(self) == MS_Railslide)
+    if (cRider_getMotionState(this) == MS_Air || cRider_getMotionState(this) == MS_Railslide)
     {
-        self->flagEventBoostPowerUp(4, cRiderMetrix_evCollectMultiplier((char*)self->mMetrix, value));
-        cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 2, self, value);
+        flagEventBoostPowerUp(4, cRiderMetrix_evCollectMultiplier((char*)mMetrix, value));
+        cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 2, this, value);
     }
 }
 #endif

@@ -96,6 +96,12 @@ struct cDeadFadeNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cDeadFadeNode1() __asm__("cDeadFadeNode_cDeadFadeNode1");
+    // retail's destructor cDeadFadeNode__cDeadFadeNode stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cDeadFadeNode();
+    virtual void update() __asm__("cDeadFadeNode_update");
+    virtual void loseFocus() __asm__("cDeadFadeNode_loseFocus");
+    virtual void render() __asm__("cDeadFadeNode_render");
 };
 
 CHECK_OFFSET(cDeadFadeNode, Data, 0x1C);

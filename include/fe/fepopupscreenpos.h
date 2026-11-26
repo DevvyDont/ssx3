@@ -22,6 +22,13 @@ struct cFEPopupScreenPos : public cUIState {
     int mY;                         // 0x04C [O]
     char mAccept;                   // 0x050 [O]
     char unk_051[0x3];              // 0x051 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEPopupScreenPos__cFEPopupScreenPos stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEPopupScreenPos();
+    virtual void onCreateScreen() __asm__("cFEPopupScreenPos_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEPopupScreenPos_onUpdate");
 };
 
 CHECK_OFFSET(cFEPopupScreenPos, mX, 0x048);

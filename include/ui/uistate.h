@@ -147,9 +147,11 @@ struct cUIState : public cListNode {
     virtual bool onLoseTransition();                                                  // 10
     virtual void onLoseFocus(cUIState* pNextState);                                   // 11
     virtual void onUpdate();                                                          // 12
-    virtual void onMenuGainFocus(cUIGroup* pRootGroup);                               // 13
+    virtual void onMenuGainFocus(cUIGroup* pRootGroup)
+        __asm__("cUIState_onMenuGainFocus");                               // 13
     virtual void onPreRender2D();                                                     // 14
-    virtual void onRender2D();                                                        // 15
+    virtual void onRender2D()
+        __asm__("cUIState_onRender2D");                                                        // 15
     virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event);               // 16
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event);                  // 17
     virtual void onWidgetCreate(cUIThing* pWidget);                                   // 18

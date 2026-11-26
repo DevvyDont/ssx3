@@ -66,6 +66,14 @@ struct cOVState_SAVEOPTIONS : public cFEMemCard {
                                     //       card (mpMemCard slot 14, GetTitleString) write a slot's title here and
                                     //       shows it (cUIText_setUnicodeString)
     char unk_272[0x2];              // 0x272 padding to the 4-byte size
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_SAVEOPTIONS();
+    virtual void updateDone() __asm__("cOVState_SAVEOPTIONS_updateDone");
+    virtual void displayStatus() __asm__("cOVState_SAVEOPTIONS_displayStatus");
+    virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cOVState_SAVEOPTIONS_onWidgetEvent");
 };
 
 CHECK_OFFSET(cOVState_SAVEOPTIONS, mIsHidden, 0x22C);

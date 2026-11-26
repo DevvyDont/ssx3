@@ -42,48 +42,48 @@ static inline void SetText_6540(void* vw, int text)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, cUIThing* w)
+void cFEStateAudioOptions::onWidgetCreate(cUIThing* w)
 {
     int id = w->mHashName;
     if (id == GetHashValue32(str_0box))
     {
-        self->mpChecks[0] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == kRADIOMODE_RADIO)
-            SetText_6540(w, (int)self->mpCheckBox);
+        mpChecks[0] = (cUIIcon*)((void*)w);
+        if (mRadioMode == kRADIOMODE_RADIO)
+            SetText_6540(w, (int)mpCheckBox);
         else
-            SetText_6540(w, (int)self->mpEmptyBox);
+            SetText_6540(w, (int)mpEmptyBox);
     }
     else if (id == GetHashValue32(str_1box))
     {
-        self->mpChecks[2] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == kRADIOMODE_MOUNTAIN)
-            SetText_6540(w, (int)self->mpCheckBox);
+        mpChecks[2] = (cUIIcon*)((void*)w);
+        if (mRadioMode == kRADIOMODE_MOUNTAIN)
+            SetText_6540(w, (int)mpCheckBox);
         else
-            SetText_6540(w, (int)self->mpEmptyBox);
+            SetText_6540(w, (int)mpEmptyBox);
     }
     else if (id == GetHashValue32(str_2box))
     {
-        self->mpChecks[1] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == kRADIOMODE_REQUESTLINE)
-            SetText_6540(w, (int)self->mpCheckBox);
+        mpChecks[1] = (cUIIcon*)((void*)w);
+        if (mRadioMode == kRADIOMODE_REQUESTLINE)
+            SetText_6540(w, (int)mpCheckBox);
         else
-            SetText_6540(w, (int)self->mpEmptyBox);
+            SetText_6540(w, (int)mpEmptyBox);
     }
     else if (id == GetHashValue32(str_2box))
     {
-        self->mpChecks[1] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == kRADIOMODE_REQUESTLINE)
-            SetText_6540(w, (int)self->mpCheckBox);
+        mpChecks[1] = (cUIIcon*)((void*)w);
+        if (mRadioMode == kRADIOMODE_REQUESTLINE)
+            SetText_6540(w, (int)mpCheckBox);
         else
-            SetText_6540(w, (int)self->mpEmptyBox);
+            SetText_6540(w, (int)mpEmptyBox);
     }
     else if (id == GetHashValue32(str_3box))
     {
-        self->mpChecks[3] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == kRADIOMODE_PLAYLIST)
-            SetText_6540(w, (int)self->mpCheckBox);
+        mpChecks[3] = (cUIIcon*)((void*)w);
+        if (mRadioMode == kRADIOMODE_PLAYLIST)
+            SetText_6540(w, (int)mpCheckBox);
         else
-            SetText_6540(w, (int)self->mpEmptyBox);
+            SetText_6540(w, (int)mpEmptyBox);
     }
     else if (id == GetHashValue32(str_radio_big))
     {
@@ -95,17 +95,17 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, 
     }
     else if (id == GetHashValue32(str_request_line))
     {
-        self->mpRequestLineOption = (cUIText*)((void*)w);
+        mpRequestLineOption = (cUIText*)((void*)w);
         w->mMiscData = 1;
     }
     else if (id == GetHashValue32(str_edit_req))
     {
-        self->mpEditRequestOption = (cUIText*)((void*)w);
+        mpEditRequestOption = (cUIText*)((void*)w);
         w->mMiscData = 4;
     }
     else if (id == GetHashValue32(str_playlist))
     {
-        self->mpPlaylistOption = (cUIText*)((void*)w);
+        mpPlaylistOption = (cUIText*)((void*)w);
         w->mMiscData = 3;
     }
 }
@@ -519,23 +519,23 @@ extern char str_143radio_pda[];
  *
  * Then makes the song menu scrollable over the song count (+0x14C).
  */
-extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
+void cFEStateRequestLine::onCreateScreen()
 {
     char* name = str_16radio;
     if ((void*)SSXApp->Game != 0) {
         name = str_143radio_pda;
-        void* list = (char*)&self->mpEngine->mStateStack;
+        void* list = (char*)&mpEngine->mStateStack;
         cUIState* obj = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud)));
         if (((char*)obj) != 0) {
             obj->handleEvent(3, 0);
         }
     }
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(name), 0);
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(name), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIMenu_setScrollableMenu(self->mpRadioMenu, *(unsigned char*)&self->mNumSongs);
+    cUIMenu_setScrollableMenu(mpRadioMenu, *(unsigned char*)&mNumSongs);
 }
 #endif
 
@@ -551,15 +551,15 @@ extern char str_hud[];
 /**
  * Destroys the request-line screen, first telling the in-game HUD to come back (4) when a game is running.
  */
-extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
+void cFEStateRequestLine::onDestroyScreen()
 {
     if ((int)SSXApp->Game != 0) {
-        cUIState* obj = (cUIState*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
+        cUIState* obj = (cUIState*)cUIStateStack_findState(&mpEngine->mStateStack, GetHashValue32(str_hud));
         if (((void*)obj) != 0) {
             obj->handleEvent(4, 0);
         }
     }
-    cUIState_onDestroyScreen(self);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -604,14 +604,14 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
  * @param bFirstTime  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateRequestLine_onGainTransition(cFEStateRequestLine* self, int bFirstTime)
+bool cFEStateRequestLine::onGainTransition(int bFirstTime)
 {
     if (bFirstTime != 0) {
-        cFEStateRequestLine_updatePlayListArrows(self);
-        cFEStateRequestLine_updateButtonsText(self, 0);
-        cFEStateRequestLine_updateHelpText(self, 0);
+        cFEStateRequestLine_updatePlayListArrows(this);
+        cFEStateRequestLine_updateButtonsText(this, 0);
+        cFEStateRequestLine_updateHelpText(this, 0);
     }
-    return 0;
+    return false;
 }
 #endif
 

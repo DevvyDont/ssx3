@@ -51,6 +51,12 @@ struct cOVState_BIGCHALLENGE_START : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void getChallengeData() __asm__("cOVState_BIGCHALLENGE_START_getChallengeData");
+    // retail's destructor cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START stays a C function (g++ 2.95 takes
+    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_BIGCHALLENGE_START();
+    virtual void onCreateScreen() __asm__("cOVState_BIGCHALLENGE_START_onCreateScreen");
+    virtual bool onGainTransition(int gained) __asm__("cOVState_BIGCHALLENGE_START_onGainTransition");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cOVState_BIGCHALLENGE_START_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mMissionId, 0x9C);
@@ -76,6 +82,11 @@ struct cOVState_BIGCHALLENGE_FAIL : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void getChallengeData() __asm__("cOVState_BIGCHALLENGE_FAIL_getChallengeData");
+    // retail's destructor cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL stays a C function (g++ 2.95 takes no
+    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_BIGCHALLENGE_FAIL();
+    virtual void onCreateScreen() __asm__("cOVState_BIGCHALLENGE_FAIL_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cOVState_BIGCHALLENGE_FAIL_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mMissionId, 0x9C);

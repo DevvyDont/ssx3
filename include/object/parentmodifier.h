@@ -33,6 +33,11 @@ struct cParentModifier : public cPositionModifier {
 
     // Methods bound to their retail symbols by asm labels.
     void setParent(int parentInst) __asm__("cParentModifier_setParent");
+    // retail's destructor cParentModifier__cParentModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cParentModifier();
+    virtual void updateRootTransform() __asm__("cParentModifier_updateRootTransform");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cParentModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cParentModifier, Mesh, 0x90);

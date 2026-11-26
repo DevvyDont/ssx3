@@ -46,6 +46,10 @@ struct cFEState : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void setControllerFilter(signed char n) __asm__("cFEState_setControllerFilter");
     void setControllerMask(signed char userNum, signed char controllerNum) __asm__("cFEState_setControllerMask");
+    // retail's destructor cFEState__cFEState stays a C function (g++ 2.95 takes no asm label on a destructor); declared
+    // first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEState();
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEState_onGainFocus");
 };
 
 CHECK_SIZE(cFEState, 0x48);

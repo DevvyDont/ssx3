@@ -170,6 +170,12 @@ struct cFlexBridgeNode : public cInstanceNode {
     // Methods bound to their retail symbols by asm labels.
     void* cFlexBridgeNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFlexBridgeNode_cFlexBridgeNode1");
     void updateGrid() __asm__("cFlexBridgeNode_updateGrid");
+    // retail's destructor cFlexBridgeNode__cFlexBridgeNode stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFlexBridgeNode();
+    virtual void update() __asm__("cFlexBridgeNode_update");
+    virtual void render() __asm__("cFlexBridgeNode_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlexBridgeNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cFlexBridgeNode, unk_01C, 0x01C);

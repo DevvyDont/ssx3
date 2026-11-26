@@ -51,6 +51,13 @@ struct cFEStateMountainRoom : public cUIState {
     void loadPeakPass() __asm__("cFEStateMountainRoom_loadPeakPass");
     void updateTextureLoad() __asm__("cFEStateMountainRoom_updateTextureLoad");
     void showPassFront() __asm__("cFEStateMountainRoom_showPassFront");
+    // retail's destructor cFEStateMountainRoom__cFEStateMountainRoom stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateMountainRoom();
+    virtual void onCreateScreen() __asm__("cFEStateMountainRoom_onCreateScreen");
+    virtual bool onInputBegin(cUIInput* widget) __asm__("cFEStateMountainRoom_onInputBegin");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateMountainRoom_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEStateMountainRoom_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateMountainRoom, mpPassGroup, 0x048);

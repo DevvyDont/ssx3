@@ -169,7 +169,7 @@ extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, cUIState* pPr
             cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
     }
-    cFEState_onGainFocus((cFEState*)self, pPrevState);
+    ((cFEState*)self)->cFEState::onGainFocus(pPrevState);
 }
 #endif
 
@@ -453,16 +453,16 @@ extern sFlowState_865A8 gFlowState;
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
  */
-extern "C" void cFEState_onGainFocus(cFEState* self, cUIState* pPrevState)
+void cFEState::onGainFocus(cUIState* pPrevState)
 {
-    void* screen = cList_first((cList*)(&self->mScreens));
+    void* screen = cList_first((cList*)(&mScreens));
     if (screen != 0) {
         void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (menu != 0) {
-            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&gFlowState, *(signed char*)&self->mHashName));
+            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&gFlowState, *(signed char*)&mHashName));
         }
     }
-    cUIState_onGainFocus(self, pPrevState);
+    cUIState_onGainFocus(this, pPrevState);
 }
 #endif
 

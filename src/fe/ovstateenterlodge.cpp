@@ -33,16 +33,16 @@ extern char str_98enterlodge[];
 /**
  * Builds the Enter Lodge prompt ("98enterlodge"), adds the PDA template and runs the base overlay set-up.
  */
-extern "C" void cOVState_ENTERLODGE_onCreateScreen(cOVState_ENTERLODGE* self)
+void cOVState_ENTERLODGE::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_98enterlodge), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_98enterlodge), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVStateManager_addPDATemplate();
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
 }
 #endif
 
@@ -62,17 +62,17 @@ extern "C" void cUIState_onGainFocus(void* self, void* a1);
  *
  * @param pPrevState  the state that had the focus before (passed on)
  */
-extern "C" void cOVState_ENTERLODGE_onGainFocus(cOVState_ENTERLODGE* self, cUIState* pPrevState)
+void cOVState_ENTERLODGE::onGainFocus(cUIState* pPrevState)
 {
-    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b));
+    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_yes_b));
     if (((void*)obj) != 0) {
         obj->mMiscData = 0;
     }
-    obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b));
+    obj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_no_b));
     if (((void*)obj) != 0) {
         obj->mMiscData = 1;
     }
-    cUIState_onGainFocus(self, pPrevState);
+    cUIState_onGainFocus(this, pPrevState);
 }
 #endif
 
@@ -185,15 +185,15 @@ extern char str_63bc_start[];
 /**
  * Builds the Big Challenge offer screen ("63bc_start") and runs the base overlay set-up.
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(cOVState_BIGCHALLENGE_START* self)
+void cOVState_BIGCHALLENGE_START::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_63bc_start), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_63bc_start), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
 }
 #endif
 
@@ -221,20 +221,20 @@ extern char str_ObjText[];
  * @param gained  nonzero on the first call (On Tour bFirstTime)
  * @return always 0
  */
-extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(cOVState_BIGCHALLENGE_START* self, int gained)
+bool cOVState_BIGCHALLENGE_START::onGainTransition(int gained)
 {
     if (gained) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
-        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_chalname));
+        void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_chalname));
         if (obj) {
-            cUIText_setUnicodeString(obj, cBEMissionInterface_getMissionName(iface, self->mMissionId));
+            cUIText_setUnicodeString(obj, cBEMissionInterface_getMissionName(iface, mMissionId));
         }
-        obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ObjText));
+        obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ObjText));
         if (obj) {
-            cUIText_setUnicodeStringWrap(obj, cBEMissionInterface_getMissionLongDesc(iface, self->mMissionId));
+            cUIText_setUnicodeStringWrap(obj, cBEMissionInterface_getMissionLongDesc(iface, mMissionId));
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -250,7 +250,7 @@ extern char str_no_b[];
  *
  * @param item  the widget being created
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(cOVState_BIGCHALLENGE_START* self, cUIThing* item)
+void cOVState_BIGCHALLENGE_START::onWidgetCreate(cUIThing* item)
 {
     int id = item->mHashName;
     if (id == GetHashValue32(str_yes_b)) {
@@ -380,18 +380,18 @@ extern char str_90bc_fail[];
  * (cUIEngine_addScreenByHashName) into mpScreen, plays it from frame 0 when it exists, then runs
  * cOVState_onCreateScreen. It is the onCreateScreen slot of this overlay's vtable cOVState_BIGCHALLENGE_FAIL_vtbl.
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onCreateScreen(cOVState_BIGCHALLENGE_FAIL* self)
+void cOVState_BIGCHALLENGE_FAIL::onCreateScreen()
 {
     void* engine;
     void* screen;
-    self->mHashName = GetHashValue32(str_90bc_fail);
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_90bc_fail), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    mHashName = GetHashValue32(str_90bc_fail);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_90bc_fail), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
 }
 #endif
 
@@ -429,7 +429,7 @@ extern char str_info[];
  *
  * @param item  the widget being created
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(cOVState_BIGCHALLENGE_FAIL* self, cUIThing* item)
+void cOVState_BIGCHALLENGE_FAIL::onWidgetCreate(cUIThing* item)
 {
     int id = item->mHashName;
     if (id == GetHashValue32(str_yes_b)) {
@@ -604,27 +604,27 @@ static inline int Loc1F7958(char* name)
  * the time formatted by func_0020A1A8 or the points as "%d". Plays UI event 0xE.
  * func_001FD190() is declared without parameters here; retail relies on $a0 still holding the event kind.
  */
-extern "C" void cOVState_TOPTIMES_onCreateScreen(cOVState_TOPTIMES* self)
+void cOVState_TOPTIMES::onCreateScreen()
 {
     char buf[0x40];
     char line[0x40];
     unsigned short wtext[104];
     unsigned short wfmt[0x10];
     int full;
-    self->mIsNextScreenPending = 0;
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_61toptimes), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    mIsNextScreenPending = 0;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)this), GetHashValue32(str_61toptimes), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_OV_darkblue), 0);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, ((char*)this), GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     full = 1;
-    cOVState_onCreateScreen(((char*)self));
+    cOVState_onCreateScreen(((char*)this));
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 8);
     int ev = cBENewRaceInterface_newRace.cGameEvent;
@@ -659,40 +659,40 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(cOVState_TOPTIMES* self)
         break;
     }
     }
-    cUIText_setUnicodeString(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_xxx)), wtext);
+    cUIText_setUnicodeString(cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_track_xxx)), wtext);
     int gameMode = cBENewRaceInterface_newRace.cGameMode;
     if (gameMode == kGAMEMODE_RACE || gameMode == kGAMEMODE_TIMECHALLENGE) {
-        cUIState_showObjSafe(((char*)self), str_time);
-        cUIState_hideObjSafe(((char*)self), str_points_b);
-        cUIState_showObjSafe(((char*)self), str_top5record);
-        cUIState_hideObjSafe(((char*)self), str_top5scores);
-        cUIState_showObjSafe(((char*)self), str_helptext01);
-        cUIState_hideObjSafe(((char*)self), str_helptext02);
+        cUIState_showObjSafe(((char*)this), str_time);
+        cUIState_hideObjSafe(((char*)this), str_points_b);
+        cUIState_showObjSafe(((char*)this), str_top5record);
+        cUIState_hideObjSafe(((char*)this), str_top5scores);
+        cUIState_showObjSafe(((char*)this), str_helptext01);
+        cUIState_hideObjSafe(((char*)this), str_helptext02);
     } else {
-        cUIState_hideObjSafe(((char*)self), str_time);
-        cUIState_showObjSafe(((char*)self), str_points_b);
-        cUIState_hideObjSafe(((char*)self), str_top5record);
-        cUIState_showObjSafe(((char*)self), str_top5scores);
-        cUIState_hideObjSafe(((char*)self), str_helptext01);
-        cUIState_showObjSafe(((char*)self), str_helptext02);
+        cUIState_hideObjSafe(((char*)this), str_time);
+        cUIState_showObjSafe(((char*)this), str_points_b);
+        cUIState_hideObjSafe(((char*)this), str_top5record);
+        cUIState_showObjSafe(((char*)this), str_top5scores);
+        cUIState_hideObjSafe(((char*)this), str_helptext01);
+        cUIState_showObjSafe(((char*)this), str_helptext02);
         full = 0;
     }
-    cUIState_showObjSafe(((char*)self), str_ngca_b);
-    cUIState_showObjSafe(((char*)self), str_xba_b);
-    cUIState_showObjSafe(((char*)self), str_ps2x_b);
+    cUIState_showObjSafe(((char*)this), str_ngca_b);
+    cUIState_showObjSafe(((char*)this), str_xba_b);
+    cUIState_showObjSafe(((char*)this), str_ps2x_b);
     if (cOVStateManager_mMiscData != 0) {
-        cUIState_hideObjSafe(((char*)self), str_helptext01);
-        cUIState_hideObjSafe(((char*)self), str_helptext02);
+        cUIState_hideObjSafe(((char*)this), str_helptext01);
+        cUIState_hideObjSafe(((char*)this), str_helptext02);
     }
     for (int i = 1; i < 6; i++) {
         sprintf(buf, str_name0pct_d, i);
-        cUIText* nameText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* nameText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         cUIText_setAsciiString_i(nameText, func_00155208(stats, i - 1));
         sprintf(buf, str_with0pct_d, i);
-        cUIText* withText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* withText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         cUIText_setAsciiString_i(withText, func_00155190(stats, i - 1));
         sprintf(buf, str_time0pct_d, i);
-        cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (full == true) {
             sprintf(line, func_0020A1A8(func_00155130(stats, i - 1)));
         } else {
@@ -781,19 +781,19 @@ static inline void LoadRider1F7F08(void* self, int n)
  *
  * @param pPrevState  the state that had the focus before (passed on)
  */
-extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, cUIState* pPrevState)
+void cOVState_TOPTIMES::onGainFocus(cUIState* pPrevState)
 {
-    cUIState_onGainFocus(self, pPrevState);
+    cUIState_onGainFocus(this, pPrevState);
     cBEScoreInterface* prof = (cBEScoreInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 8));
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int id = prof->mNewTrackHighScoreIndex[0];
     if (id >= 0) {
-        LoadRider1F7F08(self, id + 1);
+        LoadRider1F7F08(this, id + 1);
     }
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         int id2 = prof->mNewTrackHighScoreIndex[1];
         if (id2 >= 0) {
-            LoadRider1F7F08(self, id2 + 1);
+            LoadRider1F7F08(this, id2 + 1);
         }
     }
 }

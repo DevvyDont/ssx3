@@ -31,6 +31,13 @@ struct cAvaSplineModifier : public cTransformModifier {
     tInstanceRecord* Instance;      // 0x80 [O]; [R] ctor stores the instance, replay ctor reads it; [U] update,
                                     //      writeToReplayFrame cAvaSplineModifier_writeToReplayFrame
     char unk_84[0xc];               // 0x84 padding to the 0x90 allocation
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cAvaSplineModifier__cAvaSplineModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cAvaSplineModifier();
+    virtual void update() __asm__("cAvaSplineModifier_update");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAvaSplineModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cAvaSplineModifier, unk_04, 0x04);

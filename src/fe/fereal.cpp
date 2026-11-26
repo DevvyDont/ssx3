@@ -1624,7 +1624,7 @@ extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
  *
  * @param sel  the UI sound event
  */
-extern "C" void cFESound_playSound(cFESound* self, int sel)
+void cFESound::playSound(int sel)
 {
     switch (sel) {
     case 1:
@@ -1685,7 +1685,7 @@ extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
  *
  * @param sel  the sound event (On Tour: int e)
  */
-extern "C" void cOVSound_playSound(cOVSound* self, int sel)
+void cOVSound::playSound(int sel)
 {
     switch (sel) {
     case 1:

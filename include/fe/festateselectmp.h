@@ -38,6 +38,11 @@ struct cFEStateSelectMultiplayerMode : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateSelectMultiplayerMode1() __asm__("cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1");
+    // retail's destructor cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateSelectMultiplayerMode();
+    virtual void onCreateScreen() __asm__("cFEStateSelectMultiplayerMode_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateSelectMultiplayerMode_onWidgetCreate");
 };
 
 CHECK_SIZE(cFEStateSelectMultiplayerMode, 0x48);

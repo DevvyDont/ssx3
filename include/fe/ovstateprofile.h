@@ -86,6 +86,11 @@ struct cOVState_PROFILE : public cFEMemCard {
     void displayOff() __asm__("cOVState_PROFILE_displayOff");
     void displayOn() __asm__("cOVState_PROFILE_displayOn");
     void initGeneral() __asm__("cOVState_PROFILE_initGeneral");
+    // retail's destructor cOVState_PROFILE__cOVState_PROFILE stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_PROFILE();
+    virtual void displayStatus() __asm__("cOVState_PROFILE_displayStatus");
+    virtual void updateDone() __asm__("cOVState_PROFILE_updateDone");
 };
 
 CHECK_OFFSET(cOVState_PROFILE, mIsOn, 0x22C);

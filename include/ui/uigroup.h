@@ -34,6 +34,10 @@ struct cUIGroup : public cUIThing {
 
     // Methods bound to their retail symbols by asm labels.
     void* cUIGroup1() __asm__("cUIGroup_cUIGroup1");
+    virtual void setFocus(int on) __asm__("cUIGroup_setFocus");
+    virtual void updateLocale() __asm__("cUIGroup_updateLocale");
+    virtual void render2D(float x, float y) __asm__("cUIGroup_render2D");
+    virtual void update(unsigned short ev) __asm__("cUIGroup_update");
 };
 
 CHECK_OFFSET(cUIGroup, mList, 0x074);

@@ -54,6 +54,12 @@ struct cFEStateLogin : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateLogin1() __asm__("cFEStateLogin_cFEStateLogin1");
+    // retail's destructor cFEStateLogin__cFEStateLogin stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateLogin();
+    virtual void onCreateScreen() __asm__("cFEStateLogin_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateLogin_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* popup, unsigned int kind) __asm__("cFEStateLogin_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateLogin, mpustrDisconnect, 0x6D0);

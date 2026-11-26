@@ -78,6 +78,12 @@ struct cFEStateCreateStep1 : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateCreateStep11() __asm__("cFEStateCreateStep1_cFEStateCreateStep11");
+    // retail's destructor cFEStateCreateStep1__cFEStateCreateStep1 stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCreateStep1();
+    virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateCreateStep1_onPopupEvent");
+    virtual void onCreateScreen() __asm__("cFEStateCreateStep1_onCreateScreen");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateCreateStep1_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateCreateStep1, mpAccount, 0x6D0);
@@ -115,6 +121,11 @@ struct cFEStateCreateStep2 : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateCreateStep21() __asm__("cFEStateCreateStep2_cFEStateCreateStep21");
+    // retail's destructor cFEStateCreateStep2__cFEStateCreateStep2 stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCreateStep2();
+    virtual void onCreateScreen() __asm__("cFEStateCreateStep2_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* box) __asm__("cFEStateCreateStep2_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateCreateStep2, mpAccount, 0x6D0);

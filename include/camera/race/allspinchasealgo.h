@@ -35,6 +35,10 @@ struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
     virtual float getRestDrop();                                                    // 13 ([R] cSPOKEChaseAlgorithm_vtbl: cSPOKEChaseAlgorithm_getRestDrop)
     t4Vector LastLookDir;           // 0x390 [O] (On Tour 0x380); [U] snap cSPOKEChaseAlgorithm_snap (sq), getDesiredPosition
                                     //       cSPOKEChaseAlgorithm_getDesiredPosition (lqc2, sq)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData");
 };
 
 CHECK_OFFSET(cSPOKEChaseAlgorithm, LastLookDir, 0x390);
@@ -51,6 +55,11 @@ struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
     t4Vector Point1;                // 0x390 [O] (On Tour 0x380); [R] ctor = *point1 (lq/sq); [U] getIdealPosition
                                     //       cSUPERPIPEChaseAlgorithm_getIdealPosition (lqc2)
     t4Vector Point2;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = *point2 (lq/sq); [U] getIdealPosition (lqc2)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void snap(int id) __asm__("cSUPERPIPEChaseAlgorithm_snap");
 };
 
 CHECK_OFFSET(cSUPERPIPEChaseAlgorithm, Point1, 0x390);
@@ -68,6 +77,10 @@ struct cPOST_RACE_1ChaseAlgorithm : public cLookAtChaseAlgorithm {
                                     //       .z = 0 (sw), renormalised (lqc2/sqc2); [U] update cPOST_RACE_1ChaseAlgorithm_update (lqc2)
     int AgeInFrames;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = 0 (sw); [U] update cPOST_RACE_1ChaseAlgorithm_update (lw/sw)
     char unk_3A4[0xC];              // 0x3A4 padding to the 16-byte class alignment (alloc 0x3B0)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cPOST_RACE_1ChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cPOST_RACE_1ChaseAlgorithm_snap");
 };
 
 CHECK_OFFSET(cPOST_RACE_1ChaseAlgorithm, StartDir, 0x390);

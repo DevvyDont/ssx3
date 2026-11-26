@@ -1058,7 +1058,7 @@ extern "C" void cBankInstance_DeallocMem(void* self);
  */
 extern "C" void cBankInstance__cBankInstance(cBankInstance* self, int flags)
 {
-    cBankInstance_Unload(self);
+    self->Unload();
     cBankInstance_UnshareBank(self);
     cBankInstance_DeallocMem(self);
     if (flags & 1) {
@@ -1082,7 +1082,7 @@ void cBankInstance::SharedUnload()
 {
     if (mpNext != 0) {
         for (cBankInstance* node = mpNext; node != this; node = node->mpNext) {
-            cBankInstance_Unload(node);
+            node->Unload();
         }
     }
 }
@@ -1137,13 +1137,13 @@ public:
  *               not an alignment
  */
 // PORT: data pointers are passed through int parameters of the semaphore/bank helpers
-extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, int align)
+void cBankInstance::SyncLoad(const char* file, int align)
 {
     void* data = 0;
-    cBankInstance_Unload(self);
-    self->SharedUnload();
+    Unload();
+    SharedUnload();
     int size = 0;
-    switch (self->mAllocLocation) {
+    switch (mAllocLocation) {
     case keSoundMemLocation_Dynamic:
         data = FILE_loadsizez(file, &size, align);
         if (data == 0) {
@@ -1157,47 +1157,47 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
         }
         break;
     case keSoundMemLocation_Main:
-        if (FILE_loadatz(file, self->mpMainMemData, self->mMainMemDataSize) == 0) {
+        if (FILE_loadatz(file, mpMainMemData, mMainMemDataSize) == 0) {
             return;
         }
-        size = self->mMainMemDataSize;
-        data = (void*)self->mpMainMemData;
+        size = mMainMemDataSize;
+        data = (void*)mpMainMemData;
         break;
     }
-    if (self->mAllocLocation == keSoundMemLocation_Sound) {
-        (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(self->mSoundMemHandle);
+    if (mAllocLocation == keSoundMemLocation_Sound) {
+        (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(mSoundMemHandle);
     }
-    switch (SNDbankadd((char*)&self->mBankHandle, (int)data)) {
+    switch (SNDbankadd((char*)&mBankHandle, (int)data)) {
     case kSNDBANKADD_Uploaded: {
-        int headerSize = SNDbankheadersize(self->mBankHandle);
-        if (self->mAllocLocation == keSoundMemLocation_Sound) {
-            SNDbankheadercopy(self->mpMainMemData, self->mBankHandle);
+        int headerSize = SNDbankheadersize(mBankHandle);
+        if (mAllocLocation == keSoundMemLocation_Sound) {
+            SNDbankheadercopy(mpMainMemData, mBankHandle);
         } else {
             void* headerMem = MEM_alloc((void*)file, headerSize, 0);
-            self->mpMainMemData = (char*)headerMem;
-            SNDbankheadercopy(headerMem, self->mBankHandle);
+            mpMainMemData = (char*)headerMem;
+            SNDbankheadercopy(headerMem, mBankHandle);
             MEM_free(data);
-            self->mMainMemDataSize = headerSize;
+            mMainMemDataSize = headerSize;
         }
-        self->mBankStatus = USED;
+        mBankStatus = USED;
         break;
     }
     case kSNDBANKADD_Resident:
-        if (self->mAllocLocation == keSoundMemLocation_Dynamic) {
-            self->mpMainMemData = (char*)data;
-            self->mMainMemDataSize = size;
+        if (mAllocLocation == keSoundMemLocation_Dynamic) {
+            mpMainMemData = (char*)data;
+            mMainMemDataSize = size;
         }
-        self->mBankStatus = USED;
+        mBankStatus = USED;
         break;
     default:
-        if (self->mAllocLocation != keSoundMemLocation_Main) {
+        if (mAllocLocation != keSoundMemLocation_Main) {
             MEM_free(data);
         }
-        self->mBankStatus = EMPTY;
+        mBankStatus = EMPTY;
         break;
     }
     (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v7();
-    strcpy((char*)&self->mBankFilename, file);
+    strcpy((char*)&mBankFilename, file);
 }
 #endif
 
@@ -1214,16 +1214,16 @@ extern "C" void* MEM_free(void* self);
  * +0x4, mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation keSoundMemLocation_Dynamic),
  * frees +0x10 (mpMainMemData) with MEM_free and clears it and +0x14 (mMainMemDataSize).
  */
-extern "C" void cBankInstance_Unload(cBankInstance* self)
+void cBankInstance::Unload()
 {
-    if (self->mBankStatus == USED) {
-        self->mBankStatus = EMPTY;
-        SNDbankremove(self->mBankHandle);
-        self->mBankHandle = -1;
-        if (self->mAllocLocation == keSoundMemLocation_Dynamic) {
-            MEM_free(self->mpMainMemData);
-            self->mpMainMemData = 0;
-            self->mMainMemDataSize = 0;
+    if (mBankStatus == USED) {
+        mBankStatus = EMPTY;
+        SNDbankremove(mBankHandle);
+        mBankHandle = -1;
+        if (mAllocLocation == keSoundMemLocation_Dynamic) {
+            MEM_free(mpMainMemData);
+            mpMainMemData = 0;
+            mMainMemDataSize = 0;
         }
     }
 }

@@ -174,8 +174,8 @@ extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instR
         self->getPosition(&self->Nodes[j]);
         self->Nodes[j].OPos = self->Nodes[j].Pos;
     }
-    cFloatRailNode_updateMats(self);
-    cFloatRailNode_updateBoundBox(self);
+    self->cFloatRailNode::updateMats();
+    self->cFloatRailNode::updateBoundBox();
     self->addSpaceHash();
     return ((char*)self);
 }
@@ -216,8 +216,8 @@ void* cFloatRailNode::cFloatRailNode1(void* bucket, cBxReplayFrame* stream)
     tFloatRailNode** nodes = &Nodes;
     *nodes = new (str_FloatRailNodes, 0x20000000, 0) tFloatRailNodeInit[NumNodes];
     stream->read((char*)Nodes, NumNodes * 80);
-    cFloatRailNode_updateMats(this);
-    cFloatRailNode_updateBoundBox(this);
+    this->cFloatRailNode::updateMats();
+    this->cFloatRailNode::updateBoundBox();
     this->addSpaceHash();
     return ((char*)this);
 }
@@ -299,30 +299,30 @@ static inline void vu0AddFRBox(t4Vector& dst, t4Vector& b)
  * Recomputes a float rail's BoundBox from its node positions, padded by 200 on each axis.
  */
 // bounding box of the rail elements, padded by 200 on x/y/z
-extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
+void cFloatRailNode::updateBoundBox()
 {
-    sFrBoxElem* points = (sFrBoxElem*)self->Nodes;
-    int n = self->NumNodes;
-    *(t4Vector*)&self->BoundBox = *(t4Vector*)&self->BoundBox.MaxPoint = points[0].pos;
+    sFrBoxElem* points = (sFrBoxElem*)Nodes;
+    int n = NumNodes;
+    *(t4Vector*)&BoundBox = *(t4Vector*)&BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
         t4Vector* point = &points[i].pos;
-        if (point->x < self->BoundBox.MinPoint.x) {
-            self->BoundBox.MinPoint.x = point->x;
+        if (point->x < BoundBox.MinPoint.x) {
+            BoundBox.MinPoint.x = point->x;
         }
-        if (point->y < self->BoundBox.MinPoint.y) {
-            self->BoundBox.MinPoint.y = point->y;
+        if (point->y < BoundBox.MinPoint.y) {
+            BoundBox.MinPoint.y = point->y;
         }
-        if (point->z < self->BoundBox.MinPoint.z) {
-            self->BoundBox.MinPoint.z = point->z;
+        if (point->z < BoundBox.MinPoint.z) {
+            BoundBox.MinPoint.z = point->z;
         }
-        if (point->x > self->BoundBox.MaxPoint.x) {
-            self->BoundBox.MaxPoint.x = point->x;
+        if (point->x > BoundBox.MaxPoint.x) {
+            BoundBox.MaxPoint.x = point->x;
         }
-        if (point->y > self->BoundBox.MaxPoint.y) {
-            self->BoundBox.MaxPoint.y = point->y;
+        if (point->y > BoundBox.MaxPoint.y) {
+            BoundBox.MaxPoint.y = point->y;
         }
-        if (point->z > self->BoundBox.MaxPoint.z) {
-            self->BoundBox.MaxPoint.z = point->z;
+        if (point->z > BoundBox.MaxPoint.z) {
+            BoundBox.MaxPoint.z = point->z;
         }
     }
     t4Vector margin;
@@ -330,8 +330,8 @@ extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(*(t4Vector*)&self->BoundBox, margin);
-    vu0AddFRBox(*(t4Vector*)&self->BoundBox.MaxPoint, margin);
+    vu0SubFRBox(*(t4Vector*)&BoundBox, margin);
+    vu0AddFRBox(*(t4Vector*)&BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -491,9 +491,9 @@ static inline void updateMat_92A8(t4Matrix& out, const t4Vector& a, const t4Vect
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
+void cFloatRailNode::updateMats()
 {
-    cFloatRailNode* self = selfv;
+    cFloatRailNode* self = this;
     int i = 1;
     updateMat_92A8(self->Mats[0], self->Nodes[0].Pos, self->Nodes[0].Pos, self->Nodes[1].Pos, self->Nodes[2].Pos);
     for (; i < self->NumNodes - 2; i++) {
@@ -656,20 +656,20 @@ static inline void vu0AddEq_98E8(t4Vector& dst, t4Vector b)
  * (m_pActiveNode); accel = -(Pos - OPos) * LSpring + Force * ForceScale - Vel * LDamp; Pos += Vel * dt; Vel += accel *
  * dt (dt from cObjectInterface_getUpdateTime); Force is cleared.
  */
-extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
+void cFloatRailNode::updateNodes()
 {
     float dt = cObjectInterface_getUpdateTime();
-    tFloatRailNode* n = self->Nodes;
-    for (int i = 0; i < self->NumNodes; i++, n++) {
+    tFloatRailNode* n = Nodes;
+    for (int i = 0; i < NumNodes; i++, n++) {
         if (getRailInstance(n->InstId)->m_pActiveNode)
-            self->getPosition((tFloatRailNode*)n);
+            getPosition((tFloatRailNode*)n);
         // The three cFloatRailNodeState words (LSpring, LDamp, ForceScale): retail keeps their address in a register
         // and reads ForceScale as its third word.
-        float* state = &self->LSpring;
-        float ks = -self->LSpring;
+        float* state = &LSpring;
+        float ks = -LSpring;
         t4Vector acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8((*(&n->Pos)), (*(&n->OPos))), ks),
                                     vu0Scale_98E8((*(&n->Force)), state[2]));
-        vu0AddEq_98E8(acc, vu0Scale_98E8((*(&n->Vel)), -self->LDamp));
+        vu0AddEq_98E8(acc, vu0Scale_98E8((*(&n->Vel)), -LDamp));
         vu0AddEq_98E8((*(&n->Pos)), vu0Scale_98E8((*(&n->Vel)), dt));
         vu0AddEq_98E8((*(&n->Vel)), vu0Scale_98E8(acc, dt));
         (*(&n->Force)) = t4vect_Zero_98E8;
@@ -785,8 +785,8 @@ extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* in
     for (int k = 0; k < self->NumNodes - 1; k++) {
         self->Nodes[k].V = Sub_9B48(self->Nodes[k + 1].P, self->Nodes[k].P);
     }
-    cSpringRailNode_updateMats(self);
-    cSpringRailNode_updateBoundBox(self);
+    self->cSpringRailNode::updateMats();
+    self->cSpringRailNode::updateBoundBox();
     self->addSpaceHash();
     return ((char*)self);
 }
@@ -825,7 +825,7 @@ void* cSpringRailNode::cSpringRailNode1(void* bucket, cBxReplayFrame* stream)
     tSpringRailNode** nodes = &Nodes;
     *nodes = new (str_SpringRailNodes, 0x20000000, 0) tSpringRailNodeInit[NumNodes];
     stream->read((char*)Nodes, NumNodes * 0x60);
-    cSpringRailNode_updateMats(this);
+    this->cSpringRailNode::updateMats();
     this->addSpaceHash();
     return ((char*)this);
 }
@@ -883,30 +883,30 @@ struct sFrBoxRail60 {
 // PORT: PS2-only VU0 inline asm (vector sub-assign).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 // bounding box of the rail elements, padded by 200 on x/y/z
-extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
+void cSpringRailNode::updateBoundBox()
 {
-    sFrBoxElem60* points = (sFrBoxElem60*)self->Nodes;
-    int n = self->NumNodes;
-    *(t4Vector*)&self->BoundBox = *(t4Vector*)&self->BoundBox.MaxPoint = points[0].pos;
+    sFrBoxElem60* points = (sFrBoxElem60*)Nodes;
+    int n = NumNodes;
+    *(t4Vector*)&BoundBox = *(t4Vector*)&BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
         t4Vector* point = &points[i].pos;
-        if (point->x < self->BoundBox.MinPoint.x) {
-            self->BoundBox.MinPoint.x = point->x;
+        if (point->x < BoundBox.MinPoint.x) {
+            BoundBox.MinPoint.x = point->x;
         }
-        if (point->y < self->BoundBox.MinPoint.y) {
-            self->BoundBox.MinPoint.y = point->y;
+        if (point->y < BoundBox.MinPoint.y) {
+            BoundBox.MinPoint.y = point->y;
         }
-        if (point->z < self->BoundBox.MinPoint.z) {
-            self->BoundBox.MinPoint.z = point->z;
+        if (point->z < BoundBox.MinPoint.z) {
+            BoundBox.MinPoint.z = point->z;
         }
-        if (point->x > self->BoundBox.MaxPoint.x) {
-            self->BoundBox.MaxPoint.x = point->x;
+        if (point->x > BoundBox.MaxPoint.x) {
+            BoundBox.MaxPoint.x = point->x;
         }
-        if (point->y > self->BoundBox.MaxPoint.y) {
-            self->BoundBox.MaxPoint.y = point->y;
+        if (point->y > BoundBox.MaxPoint.y) {
+            BoundBox.MaxPoint.y = point->y;
         }
-        if (point->z > self->BoundBox.MaxPoint.z) {
-            self->BoundBox.MaxPoint.z = point->z;
+        if (point->z > BoundBox.MaxPoint.z) {
+            BoundBox.MaxPoint.z = point->z;
         }
     }
     t4Vector margin;
@@ -914,8 +914,8 @@ extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(*(t4Vector*)&self->BoundBox, margin);
-    vu0AddFRBox(*(t4Vector*)&self->BoundBox.MaxPoint, margin);
+    vu0SubFRBox(*(t4Vector*)&BoundBox, margin);
+    vu0AddFRBox(*(t4Vector*)&BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -1048,9 +1048,9 @@ static inline void updateMatEnd_A0B0(t4Matrix& out, const t4Vector& a, const tSp
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void cSpringRailNode_updateMats(cSpringRailNode* selfv)
+void cSpringRailNode::updateMats()
 {
-    cSpringRailNode* self = selfv;
+    cSpringRailNode* self = this;
     int i = 1;
     updateMatSeg_A0B0(self->Mats[0], self->Nodes[0].P, &self->Nodes[0]);
     for (; i < self->NumNodes - 2; i++) {
@@ -1403,32 +1403,32 @@ static inline void vu0AddEq_A8C8(t4Vector& dst, const t4Vector& b)
  * the chain accumulating O and places P[i + 1] at P[i] + V[i] bent by the accumulated angle (normalised V + V cross
  * angle, scaled back to |V|). T of every node is cleared. dt comes from cObjectInterface_getUpdateTime.
  */
-extern "C" void cSpringRailNode_updateNodes(cSpringRailNode* self)
+void cSpringRailNode::updateNodes()
 {
     float dt = cObjectInterface_getUpdateTime();
     sV4Slot_A8C8 segTorque[8];
-    for (int i = 0; i < self->NumNodes - 1; i++) {
-        segTorque[i].v = vu0Scale_A8C8(self->Nodes[i].O, -self->ASpring);
-        vu0AddEq_A8C8(segTorque[i].v, vu0Scale_A8C8(self->Nodes[i].W, -self->ADamp));
+    for (int i = 0; i < NumNodes - 1; i++) {
+        segTorque[i].v = vu0Scale_A8C8(Nodes[i].O, -ASpring);
+        vu0AddEq_A8C8(segTorque[i].v, vu0Scale_A8C8(Nodes[i].W, -ADamp));
     }
-    for (int i = 0; i < self->NumNodes - 1; i++) {
-        vu0AddEq_A8C8(segTorque[i].v, self->Nodes[i].T);
+    for (int i = 0; i < NumNodes - 1; i++) {
+        vu0AddEq_A8C8(segTorque[i].v, Nodes[i].T);
     }
-    for (int i = 0; i < self->NumNodes - 1; i++) {
+    for (int i = 0; i < NumNodes - 1; i++) {
         t4Vector angVelStep;
         angVelStep = vu0Scale_A8C8(segTorque[i].v, dt);
-        vu0AddEq_A8C8(self->Nodes[i].O, vu0Scale_A8C8(self->Nodes[i].W, dt));
-        vu0AddEq_A8C8(self->Nodes[i].W, angVelStep);
+        vu0AddEq_A8C8(Nodes[i].O, vu0Scale_A8C8(Nodes[i].W, dt));
+        vu0AddEq_A8C8(Nodes[i].W, angVelStep);
     }
     t4Vector acc = t4vect_Zero_A8C8;
-    for (int i = 0; i < self->NumNodes - 1; i++) {
-        vu0AddEq_A8C8(acc, self->Nodes[i].O);
-        float len = vu0Len_A8C8(self->Nodes[i].V);
-        t4Vector segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->Nodes[i].V, vu0Cross_A8C8(self->Nodes[i].V, acc))), len);
-        (self->Nodes)[i + 1].P = vu0Add_A8C8(self->Nodes[i].P, segVec);
+    for (int i = 0; i < NumNodes - 1; i++) {
+        vu0AddEq_A8C8(acc, Nodes[i].O);
+        float len = vu0Len_A8C8(Nodes[i].V);
+        t4Vector segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(Nodes[i].V, vu0Cross_A8C8(Nodes[i].V, acc))), len);
+        Nodes[i + 1].P = vu0Add_A8C8(Nodes[i].P, segVec);
     }
-    for (int i = 0; i < self->NumNodes; i++) {
-        self->Nodes[i].T = t4vect_Zero_A8C8;
+    for (int i = 0; i < NumNodes; i++) {
+        Nodes[i].T = t4vect_Zero_A8C8;
     }
 }
 #endif

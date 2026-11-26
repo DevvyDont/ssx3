@@ -27,6 +27,14 @@ struct cFESound : public cUISoundInterface {
     // --- cFESound
     int mDummyVar;                   // 0x004 [O] (0x4 in On Tour too); [R] cFESound_cFESound zeroes it (sw $0, 0x4); no
                                      //       other access
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFESound__cFESound stays a C function (g++ 2.95 takes no asm label on a destructor); declared
+    // first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFESound();
+    virtual void soundInitialize() __asm__("cFESound_soundInitialize__FPv");
+    virtual void soundShutdown() __asm__("cFESound_soundShutdown__FPv");
+    virtual void playSound(int sel) __asm__("cFESound_playSound");
 };
 
 CHECK_OFFSET(cFESound, mDummyVar, 0x004);
@@ -38,6 +46,14 @@ struct cOVSound : public cUISoundInterface {
     // --- cOVSound
     int mDummyVar;                   // 0x004 [O] (0x4 in On Tour too); [R] cOVSound_cOVSound zeroes it (sw $0, 0x4); no
                                      //       other access
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVSound__cOVSound stays a C function (g++ 2.95 takes no asm label on a destructor); declared
+    // first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVSound();
+    virtual void soundInitialize() __asm__("cOVSound_soundInitialize__FPv");
+    virtual void soundShutdown() __asm__("cOVSound_soundShutdown__FPv");
+    virtual void playSound(int sel) __asm__("cOVSound_playSound");
 };
 
 CHECK_OFFSET(cOVSound, mDummyVar, 0x004);

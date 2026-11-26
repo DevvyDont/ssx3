@@ -25,22 +25,22 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
  * Only "Map" is kept in the state's screen pointer. Clears cUITemplate_MAP_mMapStyle, then runs
  * cUITemplate_MAP_onCreateScreen() on the template at +0x48.
  */
-extern "C" void cFEStateEventSelect_onCreateScreen(cFEStateEventSelect* self)
+void cFEStateEventSelect::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Map), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_Map), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_femap_template), 0);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_femap_template), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* main = self->mpScreen;
+    void* main = mpScreen;
     cUITemplate_MAP_mMapStyle = 0;
-    cUITemplate_MAP_onCreateScreen((char*)&self->mMap, main, self);
+    cUITemplate_MAP_onCreateScreen((char*)&mMap, main, this);
 }
 #endif
 
@@ -109,10 +109,10 @@ extern "C" void cUITemplate_MAP_onDestroyScreen(void* tmpl);
  * After cUIState_onDestroyScreen(), cUITemplate_MAP_onDestroyScreen() unloads the template's async file, removes the PDA template
  * in map states 1, 3 and 4, and calls func_0028F678() on the audio object with 0.
  */
-extern "C" void cFEStateEventSelect_onDestroyScreen(cFEStateEventSelect* self)
+void cFEStateEventSelect::onDestroyScreen()
 {
-    cUIState_onDestroyScreen(self);
-    cUITemplate_MAP_onDestroyScreen((char*)&self->mMap);
+    cUIState_onDestroyScreen(this);
+    cUITemplate_MAP_onDestroyScreen((char*)&mMap);
 }
 #endif
 
@@ -302,10 +302,10 @@ extern "C" void cUITemplate_MAP_onUpdate(void* tmpl);
  *
  * Calls cUIState_onUpdate() and then cUITemplate_MAP_onUpdate() on the template embedded at +0x48.
  */
-extern "C" void cFEStateEventSelect_onUpdate(cFEStateEventSelect* self)
+void cFEStateEventSelect::onUpdate()
 {
-    cUIState_onUpdate(self);
-    cUITemplate_MAP_onUpdate((char*)&self->mMap);
+    cUIState_onUpdate(this);
+    cUITemplate_MAP_onUpdate((char*)&mMap);
 }
 #endif
 

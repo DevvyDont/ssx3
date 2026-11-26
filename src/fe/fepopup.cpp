@@ -149,13 +149,13 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
  * Adds the screen through cUIEngine_addScreenByHashName() and stores it in mpScreen; when that succeeds, sets
  * mbShowing and plays frame 0.
  */
-extern "C" void cScreenPopup_onCreateScreen(cScreenPopup* self)
+void cScreenPopup::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_popup), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_popup), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
-        self->mbShowing = 1;
+        mbShowing = 1;
         cUIScreen_playFrame(screen, 0, 0);
     }
 }
@@ -236,43 +236,43 @@ extern char str_Start[];
  * @param first  nonzero on the first call of the transition (On Tour: bFirstTime)
  * @return false while the background is still growing, true when the transition is done
  */
-extern "C" bool cScreenPopup_onGainTransition(cScreenPopup* self, int first)
+bool cScreenPopup::onGainTransition(int first)
 {
     if (first) {
         t3Vector bgScale;
         bgScale.x = 0.2f;
         bgScale.y = 0.2f;
         bgScale.z = 1.0f;
-        self->mbFirstGainTran = 1;
-        self->initScreenPopup((cPopupInfo*)&self->info);
-        self->scaleBackground(&bgScale);
-        if (self->meBackgroundType == ePopupBackground_Blue)
-            self->SetTextObjectsAlpha(0.0f);
-        int startFrame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_Start));
+        mbFirstGainTran = 1;
+        initScreenPopup((cPopupInfo*)&info);
+        scaleBackground(&bgScale);
+        if (meBackgroundType == ePopupBackground_Blue)
+            SetTextObjectsAlpha(0.0f);
+        int startFrame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_Start));
         if (startFrame != cUIScreen::kNoFrame)
-            self->miStartFrame = startFrame;
+            miStartFrame = startFrame;
         else
-            self->miStartFrame = 25;
-        if (self->miStartFrame == 1)
-            self->miStartFrame = 2;
-        self->miGainTransistionCount = 1;
-        self->mvAnimateIncrement.x = (self->mvCurrentScale.x - 0.2f) / (float)(self->miStartFrame - 1);
-        self->mvAnimateIncrement.y = (self->mvCurrentScale.y - 0.2f) / (float)(self->miStartFrame - 1);
+            miStartFrame = 25;
+        if (miStartFrame == 1)
+            miStartFrame = 2;
+        miGainTransistionCount = 1;
+        mvAnimateIncrement.x = (mvCurrentScale.x - 0.2f) / (float)(miStartFrame - 1);
+        mvAnimateIncrement.y = (mvCurrentScale.y - 0.2f) / (float)(miStartFrame - 1);
     }
-    if (self->meBackgroundType == ePopupBackground_Blue) {
-        float transitionStep = (float)self->miGainTransistionCount;
-        t3Vector pos = self->mpBackGroundSmall->mPosition;
+    if (meBackgroundType == ePopupBackground_Blue) {
+        float transitionStep = (float)miGainTransistionCount;
+        t3Vector pos = mpBackGroundSmall->mPosition;
         t3Vector bgScale;
-        bgScale.x = transitionStep * self->mvAnimateIncrement.x + 0.2f;
-        bgScale.y = transitionStep * self->mvAnimateIncrement.y + 0.2f;
-        self->scaleBackground(&bgScale);
-        if (self->miGainTransistionCount < self->miStartFrame) {
-            self->miGainTransistionCount += 1;
+        bgScale.x = transitionStep * mvAnimateIncrement.x + 0.2f;
+        bgScale.y = transitionStep * mvAnimateIncrement.y + 0.2f;
+        scaleBackground(&bgScale);
+        if (miGainTransistionCount < miStartFrame) {
+            miGainTransistionCount += 1;
             return false;
         }
     } else {
-        t3Vector bgScale = self->mvCurrentScale;
-        self->scaleBackground(&bgScale);
+        t3Vector bgScale = mvCurrentScale;
+        scaleBackground(&bgScale);
     }
     return true;
 }
@@ -2821,13 +2821,13 @@ extern "C" void cUIState_onUpdate(void*);
  * When mbPassUpdate is set, calls the parent state's onUpdate (vtable slot 12); then runs the base UI-state
  * update cUIState_onUpdate().
  */
-extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
+void cScreenPopup::onUpdate()
 {
-    if (self->mbPassUpdate != 0) {
-        cUIState* obj = self->mpParentState;
+    if (mbPassUpdate != 0) {
+        cUIState* obj = mpParentState;
         obj->onUpdate();
     }
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -3206,11 +3206,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the buy popup's screen "139buy_popup" and plays its first frame.
  */
-extern "C" void cUIStateBuyPopup_onCreateScreen(cUIStateBuyPopup* self)
+void cUIStateBuyPopup::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_139buy_popup), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_139buy_popup), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -3538,11 +3538,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
  *
  * The screen goes into mpScreen; frame 0 is played only when the screen was created.
  */
-extern "C" void cKeyboardPopup_onCreateScreen(cKeyboardPopup* self)
+void cKeyboardPopup::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Fullkeyboard), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_Fullkeyboard), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -3563,14 +3563,14 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  * running, pops the top state off the UI state stack (cUIStateStack_pop(stack, 1)). When mbCallParentsUpdate is set,
  * also calls the parent state's onUpdate (vtable slot 12).
  */
-extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
+void cKeyboardPopup::onUpdate()
 {
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mOverlayTimeout == 0 && (int)SSXApp->Game != 0) {
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
-    if (self->mbCallParentsUpdate != 0) {
-        cUIState* obj = self->mpParentState;
+    if (mbCallParentsUpdate != 0) {
+        cUIState* obj = mpParentState;
         if (((void*)obj) != 0) {
             obj->onUpdate();
         }
@@ -3629,7 +3629,7 @@ static inline int IsK1CB2C8(int id, char* s)
  *
  * @param widget  the widget being created
  */
-extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, cUIThing* widget)
+void cKeyboardPopup::onWidgetCreate(cUIThing* widget)
 {
     if (IsK1CB2C8(widget->mHashName, str_HelpGroup)) {
         widget->setVisible(0);
@@ -3640,11 +3640,11 @@ extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, cUIThing* wi
             widget->setVisible(0);
         }
     } else if (IsK1CB2C8(widget->mHashName, str_back_com)) {
-        self->mpBackCompact = (cUIVector*)widget;
+        mpBackCompact = (cUIVector*)widget;
     } else if (IsK1CB2C8(widget->mHashName, str_back_exp)) {
-        self->mpBackExpand = (cUIVector*)widget;
+        mpBackExpand = (cUIVector*)widget;
     } else if (IsK1CB2C8(widget->mHashName, str_back_reg)) {
-        self->mpBackRegular = (cUIVector*)widget;
+        mpBackRegular = (cUIVector*)widget;
     }
 }
 #endif
@@ -5271,27 +5271,27 @@ extern char str_empty_d[];
  * @param first  nonzero on the first call (On Tour: bFirstTime)
  * @return always 1 (the transition finishes at once)
  */
-extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
+bool cKeyboardPopup::onGainTransition(int first)
 {
     if (first) {
         char buf[16];
-        (self)->mbTransistionDone = 1;
-        (self)->mbCapsOn = 1;
+        mbTransistionDone = 1;
+        mbCapsOn = 1;
         if (Keyboard != 0) {
-            (self)->mbCapsOn = (((cUsbKeyboard*)Keyboard)->mSlots[0].mFlags >> 1) & 1;
+            mbCapsOn = (((cUsbKeyboard*)Keyboard)->mSlots[0].mFlags >> 1) & 1;
         }
-        self->mbShiftOn = 0;
-        if (self->mbSetInputText == 0) {
-            self->mszEditString[0] = 0;
+        mbShiftOn = 0;
+        if (mbSetInputText == 0) {
+            mszEditString[0] = 0;
         }
-        self->miViewableStartIndex = 0;
-        self->miViewableEndIndex = 0;
-        self->miCursorPos = 0;
+        miViewableStartIndex = 0;
+        miViewableEndIndex = 0;
+        miCursorPos = 0;
         int showCompact = 0;
         int showRegular = 0;
         int showExpand = 0;
-        self->redrawScreen();
-        switch (self->meType) {
+        redrawScreen();
+        switch (meType) {
         case eKeyboardType_Regular:
             showRegular = 1;
             sprintf(buf, str_regular);
@@ -5306,72 +5306,72 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
             sprintf(buf, str_compact);
             break;
         }
-        cUIThing* oa = self->mpBackCompact;
+        cUIThing* oa = mpBackCompact;
         if (oa != 0) {
             oa->setVisible(showCompact);
         }
-        cUIThing* ob = self->mpBackExpand;
+        cUIThing* ob = mpBackExpand;
         if (ob != 0) {
             ob->setVisible(showExpand);
         }
-        cUIThing* oc = self->mpBackRegular;
+        cUIThing* oc = mpBackRegular;
         if (oc != 0) {
             oc->setVisible(showRegular);
         }
-        int frameNum = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(buf));
+        int frameNum = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(buf));
         if (frameNum != cUIScreen::kNoFrame) {
-            cUIScreen_playFrame(self->mpScreen, frameNum, 1);
+            cUIScreen_playFrame(mpScreen, frameNum, 1);
         }
-        cUIThing* charCursor = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
+        cUIThing* charCursor = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_CharacterCursor));
         if (charCursor != 0) {
-            charCursor->getSize(&self->mvSizeCursor);
-            self->mvPosCursor = charCursor->mPosition;
+            charCursor->getSize(&mvSizeCursor);
+            mvPosCursor = charCursor->mPosition;
         }
-        cUIThing* enterValue = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
+        cUIThing* enterValue = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterValue));
         if (enterValue != 0) {
-            enterValue->getSize(&self->mvSizeEnter);
-            self->mvPosEnter = enterValue->mPosition;
-            self->mvPosCursor.y = self->mvSizeEnter.y + self->mvPosEnter.y;
+            enterValue->getSize(&mvSizeEnter);
+            mvPosEnter = enterValue->mPosition;
+            mvPosCursor.y = mvSizeEnter.y + mvPosEnter.y;
         }
-        cUIThing* nameBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Name_bar));
+        cUIThing* nameBar = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Name_bar));
         if (nameBar != 0) {
             t3Vector nameBarPos = nameBar->mPosition;
-            self->mvPosEnter.x += nameBarPos.x;
-            self->mvPosEnter.y += nameBarPos.y;
-            self->mvPosEnter.z += nameBarPos.z;
+            mvPosEnter.x += nameBarPos.x;
+            mvPosEnter.y += nameBarPos.y;
+            mvPosEnter.z += nameBarPos.z;
         }
-        cUIThing* extendCursorLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorLeft));
+        cUIThing* extendCursorLeft = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ExtendCursorLeft));
         if (extendCursorLeft != 0) {
             extendCursorLeft->setVisible(0);
         }
-        cUIThing* extendCursorRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorRight));
+        cUIThing* extendCursorRight = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ExtendCursorRight));
         if (extendCursorRight != 0) {
             extendCursorRight->setVisible(0);
         }
-        if (self->mbSetInputText != 0) {
-            self->setInputText(self->mszEditString);
+        if (mbSetInputText != 0) {
+            setInputText(mszEditString);
         }
-        if ((int)self->muiStatic != 0) {
-            self->setStatic1((int)self->muiStatic);
-            self->muiStatic = (unsigned int)0;
-        } else if ((int)self->mpustrStatic != 0) {
-            self->setStatic(self->mpustrStatic);
-            if (self->mpustrStatic != 0) {
-                cMemMan_free(self->mpustrStatic);
+        if ((int)muiStatic != 0) {
+            setStatic1((int)muiStatic);
+            muiStatic = (unsigned int)0;
+        } else if ((int)mpustrStatic != 0) {
+            setStatic(mpustrStatic);
+            if (mpustrStatic != 0) {
+                cMemMan_free(mpustrStatic);
             }
-            self->mpustrStatic = 0;
+            mpustrStatic = 0;
         } else {
-            cBXString* str = &self->mszStatic;
+            cBXString* str = &mszStatic;
             if (str->getData()->DataLength != 0) {
-                self->setStatic2(str->Str);
+                setStatic2(str->Str);
                 cBXString_Reset(str);
             } else {
-                self->setStatic2(str_empty_d);
+                setStatic2(str_empty_d);
             }
         }
-        self->updateCursor();
+        updateCursor();
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -5636,42 +5636,42 @@ static inline int isOnK1CDB98()
  * @param ev  the input object (On Tour: cUIInput *pInput)
  * @return always 1 (input consumed)
  */
-extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
+bool cKeyboardPopup::onInputBegin(cUIInput* ev)
 {
     if (InputK1CDB98(((char*)ev), 8) != 0)
-        return 1;
+        return true;
     {
         char name[32];
         int changed = 0;
         int sound = 1;
-        self->getObjName(self->miCurrentKey, name, 1);
+        getObjName(miCurrentKey, name, 1);
         {
-            cUIThing* textObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+            cUIThing* textObj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             if (textObj != 0) {
                 textObj->setColour(tARGBInit(0.3f, 0.0f, 0.0f, 0.0f).ptr());
             }
         }
         if (InputK1CDB98(((char*)ev), 19)) {
             changed = 1;
-            self->kbMoveLeft(1);
+            kbMoveLeft(1);
         } else if (InputK1CDB98(((char*)ev), 20)) {
             changed = 1;
-            self->kbMoveRight(1);
+            kbMoveRight(1);
         } else if (InputK1CDB98(((char*)ev), 17)) {
             changed = 1;
-            self->kbMoveUp(1);
+            kbMoveUp(1);
         } else if (InputK1CDB98(((char*)ev), 18)) {
             changed = 1;
-            self->kbMoveDown(1);
+            kbMoveDown(1);
         } else if (InputK1CDB98(((char*)ev), 5)) {
             changed = 1;
-            self->pressKey(0);
+            pressKey(0);
         } else if (InputK1CDB98(((char*)ev), 7)) {
             if (isOnK1CDB98()) {
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
                     cFEStateNetHelpPopup* popup = (cFEStateNetHelpPopup*)cFEStateNetHelpPopup_cFEStateNetHelpPopup(
-                        cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
+                        cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), mpEngine, this);
                     cFEStateNetHelpPopup_setNumHelpOptions(popup, 6);
                     popup->muiScreenName = GetHashValue32(str_kT_HELPKeyboard);
                     cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELPKeyboardMessage));
@@ -5681,83 +5681,83 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
                     cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPKeyboardShift), 6);
                     cFEStateNetHelpPopup_setOption(popup, 4, GetHashValue32(str_kT_HELPKeyboardSelectCharacter), 0);
                     cFEStateNetHelpPopup_setOption(popup, 5, GetHashValue32(str_kT_HELPKeyboardCancel), 1);
-                    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
+                    cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
                 }
                 sound = 5;
             }
         } else if (InputK1CDB98(((char*)ev), 6)) {
             changed = 1;
             sound = 6;
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-            cUIState* parent = self->mpParentState;
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
+            cUIState* parent = mpParentState;
             parent->onWidgetEvent(0, cUIState::kONKEYBOARDCANCEL);
         } else if (InputK1CDB98(((char*)ev), 25)) {
             changed = 1;
-            self->mbCapsOn ^= 1;
-            self->redrawScreen();
+            mbCapsOn ^= 1;
+            redrawScreen();
         } else if (InputK1CDB98(((char*)ev), 27)) {
             changed = 1;
-            self->mbShiftOn ^= 1;
-            self->redrawScreen();
+            mbShiftOn ^= 1;
+            redrawScreen();
         } else {
             int fail = 0;
             if (InputK1CDB98(((char*)ev), 41)) {
                 int typed = 0;
                 switch (InputK1CDB98(((char*)ev), 42)) {
                 case kVK_Back:
-                    if (self->allowSelection(eKeyboard_BACKSPACE, 0)) self->miCurrentKey = eKeyboard_BACKSPACE;
+                    if (allowSelection(eKeyboard_BACKSPACE, 0)) miCurrentKey = eKeyboard_BACKSPACE;
                     else fail = 1;
                     break;
                 case kVK_Return:
-                    self->miCurrentKey = eKeyboard_ENTER;
+                    miCurrentKey = eKeyboard_ENTER;
                     break;
                 case kVK_Shift:
-                    if (self->allowSelection(eKeyboard_LSHIFT, 0)) self->miCurrentKey = eKeyboard_LSHIFT;
+                    if (allowSelection(eKeyboard_LSHIFT, 0)) miCurrentKey = eKeyboard_LSHIFT;
                     else fail = 1;
                     break;
                 case kVK_Capital:
-                    if (self->allowSelection(eKeyboard_CAPS, 0)) self->miCurrentKey = eKeyboard_CAPS;
+                    if (allowSelection(eKeyboard_CAPS, 0)) miCurrentKey = eKeyboard_CAPS;
                     else fail = 1;
                     break;
                 case kVK_Escape:
-                    if (self->allowSelection(eKeyboard_ESC, 0)) self->miCurrentKey = eKeyboard_ESC;
+                    if (allowSelection(eKeyboard_ESC, 0)) miCurrentKey = eKeyboard_ESC;
                     else fail = 1;
                     break;
                 case kVK_Left:
-                    if (self->allowSelection(eKeyboard_LARROW, 0)) self->miCurrentKey = eKeyboard_LARROW;
+                    if (allowSelection(eKeyboard_LARROW, 0)) miCurrentKey = eKeyboard_LARROW;
                     else fail = 1;
                     break;
                 case kVK_Right:
-                    if (self->allowSelection(eKeyboard_RARROW, 0)) self->miCurrentKey = eKeyboard_RARROW;
+                    if (allowSelection(eKeyboard_RARROW, 0)) miCurrentKey = eKeyboard_RARROW;
                     else fail = 1;
                     break;
                 case kVK_Up:
-                    if (self->allowSelection(eKeyboard_UARROW, 0)) self->miCurrentKey = eKeyboard_UARROW;
+                    if (allowSelection(eKeyboard_UARROW, 0)) miCurrentKey = eKeyboard_UARROW;
                     else fail = 1;
                     break;
                 case kVK_Down:
-                    if (self->allowSelection(eKeyboard_DARROW, 0)) self->miCurrentKey = eKeyboard_DARROW;
+                    if (allowSelection(eKeyboard_DARROW, 0)) miCurrentKey = eKeyboard_DARROW;
                     else fail = 1;
                     break;
                 case kVK_Tab:
-                    if (self->allowSelection(eKeyboard_TAB, 0)) self->miCurrentKey = eKeyboard_TAB;
+                    if (allowSelection(eKeyboard_TAB, 0)) miCurrentKey = eKeyboard_TAB;
                     else fail = 1;
                     break;
                 case kVK_F1: case kVK_F2: case kVK_F3: case kVK_F4: case kVK_F5:
                 case kVK_F6: case kVK_F7: case kVK_F8: case kVK_F9: case kVK_F10: {
                     int key = InputK1CDB98(((char*)ev), 42) - kVK_F1 + eKeyboard_Q1;
-                    if (self->allowSelection(key, 0)) self->miCurrentKey = key;
+                    if (allowSelection(key, 0)) miCurrentKey = key;
                     else fail = 1;
                     break;
                 }
                 default:
                     if (InputK1CDB98(((char*)ev), 43) >= 0x20) {
                         char asciiChar = InputK1CDB98(((char*)ev), 43);
-                        fail = !cKeyboardPopup_updateToAscii_b(self, asciiChar);
+                        fail = !cKeyboardPopup_updateToAscii_b(this, asciiChar);
                         if (!fail) {
-                            if (self->allowSelection(self->miCurrentKey, 0)) {
-                                if (asciiChar == '`') self->AddAsciiEdit('~');
-                                else self->AddAsciiEdit(asciiChar);
+                            if (allowSelection(miCurrentKey, 0)) {
+                                if (asciiChar == '`') AddAsciiEdit('~');
+                                else AddAsciiEdit(asciiChar);
                             } else {
                                 fail = 1;
                             }
@@ -5768,24 +5768,24 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
                 }
                 if (!fail) {
                     changed = 1;
-                    self->pressKey(typed);
+                    pressKey(typed);
                 }
             }
         }
-        self->getObjName(self->miCurrentKey, name, 1);
+        getObjName(miCurrentKey, name, 1);
         {
-            cUIThing* textObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+            cUIThing* textObj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             if (textObj != 0) {
                 textObj->setColour(tARGBInit(1.0f, 0.0f, 0.0f, 0.0f).ptr());
             }
         }
-        cUISoundInterface* snd = self->mpEngine->mpSound;
+        cUISoundInterface* snd = mpEngine->mpSound;
         if (snd == 0)
             snd = &gUISoundNull;
         if (changed && snd != 0)
             snd->playSound(sound);
     }
-    return 1;
+    return true;
 }
 #endif
 

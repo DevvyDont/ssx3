@@ -121,6 +121,12 @@ struct cFEStateRequestLine : public cFEState {
     void showBuyPopup(int idx) __asm__("cFEStateRequestLine_showBuyPopup");
     void* getSongTitle(int i) __asm__("cFEStateRequestLine_getSongTitle");
     void* getSongArtist(int i) __asm__("cFEStateRequestLine_getSongArtist");
+    // retail's destructor cFEStateRequestLine__cFEStateRequestLine stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRequestLine();
+    virtual void onCreateScreen() __asm__("cFEStateRequestLine_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateRequestLine_onDestroyScreen");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateRequestLine_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateRequestLine, mCharID, 0x048);

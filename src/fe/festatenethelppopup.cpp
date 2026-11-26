@@ -20,11 +20,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the online help popup's screen ("help_popup") and plays its first frame.
  */
-extern "C" void cFEStateNetHelpPopup_onCreateScreen(cFEStateNetHelpPopup* self)
+void cFEStateNetHelpPopup::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_help_popup), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_help_popup), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -66,7 +66,7 @@ extern "C" void cUIStateStack_pop(void*, int);
 /**
  * Closes the help popup once neither controller holds input 0x99, probably the help button that opened it.
  */
-extern "C" void cFEStateNetHelpPopup_onUpdate(cFEStateNetHelpPopup* self)
+void cFEStateNetHelpPopup::onUpdate()
 {
     int i;
     int found = 0;
@@ -78,7 +78,7 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(cFEStateNetHelpPopup* self)
         }
     }
     if (found == 0) {
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
 }
 #endif
@@ -145,42 +145,42 @@ static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateNetHelpPopup_onWidgetCreate(cFEStateNetHelpPopup* self, cUIThing* w)
+void cFEStateNetHelpPopup::onWidgetCreate(cUIThing* w)
 {
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_OnlineAccSetup)) {
-        self->mpScreenName = (cUIText*)w;
+        mpScreenName = (cUIText*)w;
         (*(unsigned int*)&w->mAttr) |= 0x80;
     } else if (hashName == GetHashValue32(str_TopText)) {
-        self->mpDescription = (cUIText*)w;
+        mpDescription = (cUIText*)w;
         (*(unsigned int*)&w->mAttr) |= 0x80;
     } else if (hashName == GetHashValue32(str_BottomNote)) {
-        self->mpBottom = (cUIText*)w;
+        mpBottom = (cUIText*)w;
         (*(unsigned int*)&w->mAttr) |= 0x80;
     } else if (IsHash_1D9F38(w->mHashName, str_xselect)) {
-        self->mpObject[0] = (cUIIcon*)w;
+        mpObject[0] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_ps2triangle)) {
-        self->mpObject[1] = (cUIIcon*)w;
+        mpObject[1] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_ps2circle)) {
-        self->mpObject[2] = (cUIIcon*)w;
+        mpObject[2] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_updownarrows)) {
-        self->mpObject[3] = (cUIIcon*)w;
+        mpObject[3] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_leftrightarrows)) {
-        self->mpObject[4] = (cUIIcon*)w;
+        mpObject[4] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_ps2l1)) {
-        self->mpObject[6] = (cUIIcon*)w;
+        mpObject[6] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_ps2r1)) {
-        self->mpObject[5] = (cUIIcon*)w;
+        mpObject[5] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_actrl)) {
-        self->mpObject[8] = (cUIIcon*)w;
+        mpObject[8] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->mHashName, str_ps2sel)) {
-        self->mpObject[7] = (cUIIcon*)w;
+        mpObject[7] = (cUIIcon*)w;
     } else {
         char buf[16];
         for (int i = 0; i < 7; i++) {
             sprintf(buf, str_TextOptionpct_d, i);
             if (hashName == GetHashValue32(buf)) {
-                self->mpOptions[i] = (cUIText*)w;
+                mpOptions[i] = (cUIText*)w;
                 break;
             }
         }

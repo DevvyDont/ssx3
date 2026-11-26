@@ -6353,19 +6353,19 @@ INCLUDE_ASM("seg/seg_1218", cRider_isIntersecting);
  * Compares the instance's id (m_RID) with the ids in mVisitedIds that cRider_objectIntersect records (at most 64, ended
  * by kInvalidRID). Virtual slot 3 (word 7) of the rider vtables.
  *
- * @param rider  the rider
  * @param instance  the instance
  * @return true when the id is listed, else false
  */
-extern "C" bool cRider_isIntersecting(cRider* rider, tInstanceRecord* instance) {
+bool cRider::isIntersecting(tInstanceRecord* instance)
+{
     int i = 0;
-    if (~rider->mVisitedIds[0]) {
+    if (~mVisitedIds[0]) {
         do {
-            if (rider->mVisitedIds[i] == instance->m_RID) {
+            if (mVisitedIds[i] == instance->m_RID) {
                 return true;
             }
             i++;
-        } while (i < 64 && rider->mVisitedIds[i] != cRiderState::kInvalidRID);
+        } while (i < 64 && mVisitedIds[i] != cRiderState::kInvalidRID);
     }
     return false;
 }

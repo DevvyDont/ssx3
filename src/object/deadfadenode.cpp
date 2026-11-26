@@ -267,15 +267,15 @@ void* cObjectInterface_makeDead_2(void*, void*) __asm__("cObjectInterface_makeDe
  * opacity has reached 0, cObjectInterface_makeDead() applies the fade data's follow-up event to the instance (event 0
  * turns it into a dead node, 3 into a restore node).
  */
-extern "C" void cDeadFadeNode_update(cDeadFadeNode* self)
+void cDeadFadeNode::update()
 {
     float fade;
-    self->Dist += self->DistRate;
-    fade = self->Fade;
+    Dist += DistRate;
+    fade = Fade;
     if (fade > 0.0f) {
-        self->Fade = fade - self->FadeRate;
+        Fade = fade - FadeRate;
     } else {
-        cObjectInterface_makeDead_2(self->Instance, &self->Data);
+        cObjectInterface_makeDead_2(Instance, &Data);
     }
 }
 #endif
@@ -295,9 +295,9 @@ void* cObjectInterface_makeDead_2(void*, void*) __asm__("cObjectInterface_makeDe
  * it with a new "DeadNode" (0) or with a "RestoreNode" (3); the update does the same once the fade timer runs
  * out.
  */
-extern "C" void cDeadFadeNode_loseFocus(cDeadFadeNode* self)
+void cDeadFadeNode::loseFocus()
 {
-    cObjectInterface_makeDead_2(self->Instance, &self->Data);
+    cObjectInterface_makeDead_2(Instance, &Data);
 }
 #endif
 
@@ -389,10 +389,10 @@ static inline int Visible_350CB8(sDfCam_350CB8* cam, sDfObj_350CB8* obj)
  * by the depth (+0x30), the opacity (+0x28) and the saved part matrices (+0x38).
  */
 // Draws the fading corpse: culls its box, then draws it lowered by the fade depth at 0x30.
-extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
+void cDeadFadeNode::render()
 {
     sDfCam_350CB8* cam = (sDfCam_350CB8*)cWorld_m_pTheWorld->m_pWorldCache;
-    if (!Visible_350CB8(cam, ((sDfObj_350CB8*)self->Instance))) {
+    if (!Visible_350CB8(cam, ((sDfObj_350CB8*)Instance))) {
         return;
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
@@ -400,13 +400,13 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
         sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         t4Vector box[2];
-        box[0].x = ((sDfObj_350CB8*)self->Instance)->pos[0];
-        box[0].y = ((sDfObj_350CB8*)self->Instance)->pos[1];
-        box[0].z = ((sDfObj_350CB8*)self->Instance)->pos[2];
+        box[0].x = ((sDfObj_350CB8*)Instance)->pos[0];
+        box[0].y = ((sDfObj_350CB8*)Instance)->pos[1];
+        box[0].z = ((sDfObj_350CB8*)Instance)->pos[2];
         box[0].w = 1.0f;
-        box[1].x = ((sDfObj_350CB8*)self->Instance)->scl[0];
-        box[1].y = ((sDfObj_350CB8*)self->Instance)->scl[1];
-        box[1].z = ((sDfObj_350CB8*)self->Instance)->scl[2];
+        box[1].x = ((sDfObj_350CB8*)Instance)->scl[0];
+        box[1].y = ((sDfObj_350CB8*)Instance)->scl[1];
+        box[1].z = ((sDfObj_350CB8*)Instance)->scl[2];
         box[1].w = 1.0f;
         int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
         if (res == GM_CLIPCODE_OUTSIDE) {
@@ -418,11 +418,13 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
     t4Vector offset;
     offset.x = 0.0f;
     offset.y = 0.0f;
-    offset.z = -self->Dist;
+    offset.z = -Dist;
     offset.w = 1.0f;
     xf.r[3] = offset;
-    ((DfDrawFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].delta, ((sDfObj_350CB8*)self->Instance), ((sDfObj_350CB8*)self->Instance)->light, &xf,
-                                      self->Fade, self->AnimMats, 0, 0);
+    ((DfDrawFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan,
+            gfx))[95].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].delta,
+            ((sDfObj_350CB8*)Instance), ((sDfObj_350CB8*)Instance)->light, &xf,
+                                      Fade, AnimMats, 0, 0);
 }
 #endif
 

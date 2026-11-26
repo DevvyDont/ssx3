@@ -1173,16 +1173,16 @@ INCLUDE_ASM("ui/uiscreen", cUIScrollBar_render2D);
  * @param x  the parent's x offset
  * @param y  the parent's y offset
  */
-extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
+void cUIScrollBar::render2D(float x, float y)
 {
-    cUIThing* background = self->mpObjBackground;
-    if (((char*)background) != 0 && self->mpObjKnob != 0) {
-        float px = x + self->mPosition.x;
-        float py = y + self->mPosition.y;
+    cUIThing* background = mpObjBackground;
+    if (((char*)background) != 0 && mpObjKnob != 0) {
+        float px = x + mPosition.x;
+        float py = y + mPosition.y;
         if ((background->mAttr >> 6) & 1) {
             background->render2D(px, py);
         }
-        cUIThing* knob = self->mpObjKnob;
+        cUIThing* knob = mpObjKnob;
         if ((knob->mAttr >> 6) & 1) {
             knob->render2D(px, py);
         }
@@ -1517,28 +1517,28 @@ INCLUDE_ASM("ui/uiscreen", cUISlider_render2D);
  * @param dx  the parent's x offset (On Tour x)
  * @param dy  the parent's y offset (On Tour y)
  */
-extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
+void cUISlider::render2D(float dx, float dy)
 {
-    cUIThing* background = self->mpObjBackground;
-    if (((char*)background) == 0 || (char*)self->mpObjKnob == 0) {
+    cUIThing* background = mpObjBackground;
+    if (((char*)background) == 0 || (char*)mpObjKnob == 0) {
         return;
     }
-    float x = dx + self->mPosition.x;
-    float y = dy + self->mPosition.y;
+    float x = dx + mPosition.x;
+    float y = dy + mPosition.y;
     background->render2D(x, y);
-    cUIThing* bgObj = self->mpObjBackground;
+    cUIThing* bgObj = mpObjBackground;
     t3Vector pos = *(t3Vector*)&bgObj->mPosition;
     t3Vector bgSize;
     bgObj->getSize((t3Vector*)&bgSize);
-    cUIThing* knob = self->mpObjKnob;
+    cUIThing* knob = mpObjKnob;
     t3Vector knobSize;
     knob->getSize((t3Vector*)&knobSize);
     float w = bgSize.x - knobSize.x;
-    cUIThing* knobObj = self->mpObjKnob;
+    cUIThing* knobObj = mpObjKnob;
     t3Vector knobPos = *(t3Vector*)&knobObj->mPosition;
-    knobPos.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
+    knobPos.x = pos.x + w / ((float)mNumValues - 1.0f) * (float)mValue;
     *(t3Vector*)&knobObj->mPosition = knobPos;
-    cUIThing* knobWidget = self->mpObjKnob;
+    cUIThing* knobWidget = mpObjKnob;
     knobWidget->render2D(x, y);
 }
 #endif
@@ -1847,7 +1847,7 @@ public:
  *
  * @param obj  the menu group gaining focus (On Tour pRootGroup)
  */
-extern "C" void cUIState_onMenuGainFocus(cUIState* self, cUIState_onMenuGainFocus_cVirt* obj)
+void cUIState::onMenuGainFocus(cUIGroup*obj)
 {
     obj->setFocus(1);
 }
@@ -1868,11 +1868,11 @@ int cListNode_isSentinel(cListNode*);
  * If the screen list at +0x24 is not empty, calls virtual slot 14 (cUIState_onPreRender2D) and then each screen whose
  * visible bit (bit 6 of +0x54) is set is drawn through the virtual slot 17 of its object at +0x40 with (0.0f, 0.0f).
  */
-extern "C" void cUIState_onRender2D(cUIState* self)
+void cUIState::onRender2D()
 {
-    cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
+    cUIScreen* n = (cUIScreen*)cList_first((cList*)&mScreens);
     if (((void*)n) != 0) {
-        self->onPreRender2D();
+        onPreRender2D();
         do {
             char* obj = (char*)&n->mRootGroup;
             if ((n->mRootGroup.mAttr >> 6) & 1) {

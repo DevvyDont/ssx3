@@ -18,11 +18,11 @@ extern char str_86sel_multi[];
  *
  * The new screen is kept in mpScreen (+0x40); the frame is played only when the screen was created.
  */
-extern "C" void cFEStateSelectMultiplayerMode_onCreateScreen(cFEStateSelectMultiplayerMode* self)
+void cFEStateSelectMultiplayerMode::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_86sel_multi), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_86sel_multi), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -43,7 +43,7 @@ extern char D_004A1500[];
  *
  * @param item  the widget just created (On Tour pWidget)
  */
-extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(cFEStateSelectMultiplayerMode* self, cUIThing* item)
+void cFEStateSelectMultiplayerMode::onWidgetCreate(cUIThing* item)
 {
     int id = item->mHashName;
     if (id == GetHashValue32(D_004A14F8)) {

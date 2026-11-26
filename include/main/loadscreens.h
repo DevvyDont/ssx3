@@ -224,6 +224,11 @@ struct cFELoadState : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void widgetCreateQP(cUIThing* widget) __asm__("cFELoadState_widgetCreateQP");
+    // retail's destructor cFELoadState__cFELoadState stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFELoadState();
+    virtual void onCreateScreen() __asm__("cFELoadState_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cFELoadState_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFELoadState, mpParentModule, 0x048);
@@ -253,6 +258,12 @@ struct cFELoadHintState : public cUIState {
     cFELoadScreen* mpParentModule;  // 0x048 [O]; [R] 0, then cFELoadScreen_load stores the load screen; [U]
                                     //       onCreateScreen shows mpParentModule->mTexID[0] on "Bitmap0000" when both
                                     //       are set
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFELoadHintState__cFELoadHintState stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFELoadHintState();
+    virtual void onCreateScreen() __asm__("cFELoadHintState_onCreateScreen");
 };
 
 CHECK_OFFSET(cFELoadHintState, mpParentModule, 0x048);
@@ -277,6 +288,12 @@ struct cFELoadStateInLodge : public cUIState {
     // cFELoadStateInLodge's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "117loadinlodge" through it
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFELoadStateInLodge__cFELoadStateInLodge stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFELoadStateInLodge();
+    virtual void onCreateScreen() __asm__("cFELoadStateInLodge_onCreateScreen");
 };
 
 CHECK_SIZE(cFELoadStateInLodge, 0x48);
@@ -314,6 +331,11 @@ struct cGameLoadState : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void widgetCreateMultiP(char* obj) __asm__("cGameLoadState_widgetCreateMultiP");
     void widgetCreateQP(char* obj) __asm__("cGameLoadState_widgetCreateQP");
+    // retail's destructor cGameLoadState__cGameLoadState stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGameLoadState();
+    virtual void onCreateScreen() __asm__("cGameLoadState_onCreateScreen");
+    virtual bool onGainTransition(int refresh) __asm__("cGameLoadState_onGainTransition");
 };
 
 CHECK_OFFSET(cGameLoadState, mpParentModule, 0x048);
@@ -339,6 +361,12 @@ struct cGameLoadStateOutLodge : public cUIState {
     // cGameLoadStateOutLodge's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "118loadoutlodge" through it
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGameLoadStateOutLodge__cGameLoadStateOutLodge stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGameLoadStateOutLodge();
+    virtual void onCreateScreen() __asm__("cGameLoadStateOutLodge_onCreateScreen");
 };
 
 CHECK_SIZE(cGameLoadStateOutLodge, 0x48);

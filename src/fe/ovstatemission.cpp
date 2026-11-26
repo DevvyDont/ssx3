@@ -24,18 +24,18 @@ extern char str_ListBox[];
  *
  * Sets the list box's flag 0x80, clears flag 1, and fills it with cFEStateMPCircuit_initCircuitList().
  */
-extern "C" void cFEStateMPCircuit_onCreateScreen(cFEStateMPCircuit* self)
+void cFEStateMPCircuit::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_108cct_select), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_108cct_select), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
+    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ListBox));
     if (((void*)obj) != 0) {
         obj->mAttr = (obj->mAttr & ~1) | 0x80;
-        cFEStateMPCircuit_initCircuitList_2(self, obj);
+        cFEStateMPCircuit_initCircuitList_2(this, obj);
     }
 }
 #endif
@@ -104,34 +104,34 @@ void cFEStateMPCircuit_updateWidget(void* self);
  * @param item  the widget (its index at +0x18), or 0
  * @param msg  widget event number (On Tour Event)
  */
-extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThing* item, unsigned int msg)
+void cFEStateMPCircuit::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case cUIState::kONNEXT: {
-        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)mpEngine->mpCustom);
+        void* nextState = obj->getNextState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)mpEngine->mpCustom);
+        void* nextState = obj->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONCHANGE: {
-        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(item)));
+        int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(item)));
         if (frame != cUIScreen::kNoFrame) {
-            cUIScreen_playFrame(self->mpScreen, frame, 1);
+            cUIScreen_playFrame(mpScreen, frame, 1);
         }
-        cFEStateMPCircuit_updateWidget(self);
+        cFEStateMPCircuit_updateWidget(this);
         break;
     }
     }

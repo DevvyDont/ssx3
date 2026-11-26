@@ -21,6 +21,12 @@ struct cFEStateBonusMaterial : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateBonusMaterial1() __asm__("cFEStateBonusMaterial_cFEStateBonusMaterial1");
+    // retail's destructor cFEStateBonusMaterial__cFEStateBonusMaterial stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateBonusMaterial();
+    virtual void onCreateScreen() __asm__("cFEStateBonusMaterial_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* menu) __asm__("cFEStateBonusMaterial_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cFEStateBonusMaterial_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateBonusMaterial, 0x48);

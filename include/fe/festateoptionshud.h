@@ -21,6 +21,11 @@ struct cFEStateOptionsHUD : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void updateWidget() __asm__("cFEStateOptionsHUD_updateWidget");
+    // retail's destructor cFEStateOptionsHUD__cFEStateOptionsHUD stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOptionsHUD();
+    virtual void onCreateScreen() __asm__("cFEStateOptionsHUD_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsHUD_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateOptionsHUD, 0x48);

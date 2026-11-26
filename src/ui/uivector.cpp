@@ -117,30 +117,30 @@ extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v)
  * @param key  channel number (On Tour channel)
  * @param data    the channel's new value
  */
-extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, float data)
+void cUIVector::setChannelData(unsigned short key, float data)
 {
-    if ((self->mpVertexPosition) == 0) {
+    if ((mpVertexPosition) == 0) {
         return;
     }
     if (key >= cUIThing::kUIChannel_FirstVertex) {
         key -= cUIThing::kUIChannel_FirstVertex;
         unsigned short idx = key / cUIVector::kVertexChannels;
-        if (idx >= self->mAttrVector.mNumVertices) {
+        if (idx >= mAttrVector.mNumVertices) {
             return;
         }
         switch ((unsigned short)(key % cUIVector::kVertexChannels)) {
-        case cUIVector::kVertexChannel_X: (self->mpVertexPosition)[idx].x = data; break;
-        case cUIVector::kVertexChannel_Y: (self->mpVertexPosition)[idx].y = data; break;
-        case cUIVector::kVertexChannel_Z: (self->mpVertexPosition)[idx].z = data; break;
-        case cUIVector::kVertexChannel_U: (self->mpUV)[idx].x = data; break;
-        case cUIVector::kVertexChannel_V: (self->mpUV)[idx].y = data; break;
-        case cUIVector::kVertexChannel_Alpha: (self->mpVertexColour)[idx].A = data; break;
-        case cUIVector::kVertexChannel_Red: (self->mpVertexColour)[idx].R = data; break;
-        case cUIVector::kVertexChannel_Green: (self->mpVertexColour)[idx].G = data; break;
-        case cUIVector::kVertexChannel_Blue: (self->mpVertexColour)[idx].B = data; break;
+        case cUIVector::kVertexChannel_X: mpVertexPosition[idx].x = data; break;
+        case cUIVector::kVertexChannel_Y: mpVertexPosition[idx].y = data; break;
+        case cUIVector::kVertexChannel_Z: mpVertexPosition[idx].z = data; break;
+        case cUIVector::kVertexChannel_U: mpUV[idx].x = data; break;
+        case cUIVector::kVertexChannel_V: mpUV[idx].y = data; break;
+        case cUIVector::kVertexChannel_Alpha: mpVertexColour[idx].A = data; break;
+        case cUIVector::kVertexChannel_Red: mpVertexColour[idx].R = data; break;
+        case cUIVector::kVertexChannel_Green: mpVertexColour[idx].G = data; break;
+        case cUIVector::kVertexChannel_Blue: mpVertexColour[idx].B = data; break;
         }
     } else {
-        cUIThing_setChannelData(self, key, data);
+        cUIThing_setChannelData(this, key, data);
     }
 }
 #endif
@@ -159,9 +159,9 @@ INCLUDE_ASM("ui/uivector", cUIVector_setChannelDataKCP);
  * @param n     number of pairs (On Tour NumChannels)
  * @param keys  the pairs, two shorts each (channel, value)
  */
-extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, short* keys)
+void cUIVector::setChannelDataKCP(unsigned int n, short* keys)
 {
-    if ((self->mpVertexPosition) == 0) {
+    if ((mpVertexPosition) == 0) {
         return;
     }
     for (unsigned int i = 0; i < n; i++, keys += 2) {
@@ -170,31 +170,31 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sho
         if (key >= cUIThing::kUIChannel_FirstVertex) {
             key -= cUIThing::kUIChannel_FirstVertex;
             unsigned short idx = key / cUIVector::kVertexChannels;
-            if (idx >= self->mAttrVector.mNumVertices) {
+            if (idx >= mAttrVector.mNumVertices) {
                 continue;
             }
             switch (key % cUIVector::kVertexChannels) {
-            case cUIVector::kVertexChannel_X: (self->mpVertexPosition)[idx].x = data; break;
-            case cUIVector::kVertexChannel_Y: (self->mpVertexPosition)[idx].y = data; break;
-            case cUIVector::kVertexChannel_Z: (self->mpVertexPosition)[idx].z = data; break;
-            case cUIVector::kVertexChannel_Alpha: (self->mpVertexColour)[idx].A = data; break;
-            case cUIVector::kVertexChannel_Red: (self->mpVertexColour)[idx].R = data; break;
-            case cUIVector::kVertexChannel_Green: (self->mpVertexColour)[idx].G = data; break;
-            case cUIVector::kVertexChannel_Blue: (self->mpVertexColour)[idx].B = data; break;
+            case cUIVector::kVertexChannel_X: mpVertexPosition[idx].x = data; break;
+            case cUIVector::kVertexChannel_Y: mpVertexPosition[idx].y = data; break;
+            case cUIVector::kVertexChannel_Z: mpVertexPosition[idx].z = data; break;
+            case cUIVector::kVertexChannel_Alpha: mpVertexColour[idx].A = data; break;
+            case cUIVector::kVertexChannel_Red: mpVertexColour[idx].R = data; break;
+            case cUIVector::kVertexChannel_Green: mpVertexColour[idx].G = data; break;
+            case cUIVector::kVertexChannel_Blue: mpVertexColour[idx].B = data; break;
             }
         } else {
             switch (key) {
-            case cUIThing::kUIChannel_PosX: self->mPosition.x = data; break;
-            case cUIThing::kUIChannel_PosY: self->mPosition.y = data; break;
-            case cUIThing::kUIChannel_ScaleX: self->mScale.x = data * 0.01f; break;
-            case cUIThing::kUIChannel_ScaleY: self->mScale.y = data * 0.01f; break;
-            case cUIThing::kUIChannel_Pivot: ((tAttrThing*)&self->mAttr)->mPivot = (int)data; break;
-            case cUIThing::kUIChannel_Alpha: self->mColour.A = data * (1.0f / 255.0f); break;
-            case cUIThing::kUIChannel_Red: self->mColour.R = data * (1.0f / 255.0f); break;
-            case cUIThing::kUIChannel_Green: self->mColour.G = data * (1.0f / 255.0f); break;
-            case cUIThing::kUIChannel_Blue: self->mColour.B = data * (1.0f / 255.0f); break;
-            case cUIThing::kUIChannel_SizeX: self->mSize.x = data; break;
-            case cUIThing::kUIChannel_SizeY: self->mSize.y = data; break;
+            case cUIThing::kUIChannel_PosX: mPosition.x = data; break;
+            case cUIThing::kUIChannel_PosY: mPosition.y = data; break;
+            case cUIThing::kUIChannel_ScaleX: mScale.x = data * 0.01f; break;
+            case cUIThing::kUIChannel_ScaleY: mScale.y = data * 0.01f; break;
+            case cUIThing::kUIChannel_Pivot: ((tAttrThing*)&mAttr)->mPivot = (int)data; break;
+            case cUIThing::kUIChannel_Alpha: mColour.A = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_Red: mColour.R = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_Green: mColour.G = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_Blue: mColour.B = data * (1.0f / 255.0f); break;
+            case cUIThing::kUIChannel_SizeX: mSize.x = data; break;
+            case cUIThing::kUIChannel_SizeY: mSize.y = data; break;
             }
         }
     }
@@ -241,54 +241,54 @@ static inline void AddY_3A39F8(t4Vector& p, float d)
  * @param x  horizontal offset added to the position
  * @param y  vertical offset added to the position
  */
-extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
+void cUIVector::render2D(float x, float y)
 {
-    if (self->mpVertexPosition == 0)
+    if (mpVertexPosition == 0)
         return;
-    for (unsigned int i = 0; i < self->mAttrVector.mNumVertices; i++)
+    for (unsigned int i = 0; i < mAttrVector.mNumVertices; i++)
     {
-        (self->mpVertexPositionRender)[i] = (self->mpVertexPosition)[i];
-        (self->mpVertexPositionRender)[i].x *= self->mScale.x;
-        (self->mpVertexPositionRender)[i].y *= self->mScale.y;
+        mpVertexPositionRender[i] = mpVertexPosition[i];
+        mpVertexPositionRender[i].x *= mScale.x;
+        mpVertexPositionRender[i].y *= mScale.y;
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0)
-                         | ((((sFlags14_3A39F8*)&self->mAttr)->layer + 9) << 5 & 0x3E0);
+                         | ((((sFlags14_3A39F8*)&mAttr)->layer + 9) << 5 & 0x3E0);
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
-    if (self->mAttrVector.mFill)
+    if (mAttrVector.mFill)
     {
         float pos[3];
-        pos[0] = self->mPosition.x + x;
-        pos[1] = self->mPosition.y + y;
+        pos[0] = mPosition.x + x;
+        pos[1] = mPosition.y + y;
         pos[2] = 0.0f;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->RenderIndexedTriList(self->mAttrVector.mNumTriangles, self->mAttrVector.mNumVertices,
-                                             self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour,
+        ps2GraphicsMan->RenderIndexedTriList(mAttrVector.mNumTriangles, mAttrVector.mNumVertices,
+                                             mpTriangles, mpVertexPositionRender, 0, mpVertexColour,
                                              *(const t3Vector*)pos);
         return;
     }
-    if (self->mpVertices == 0)
+    if (mpVertices == 0)
         return;
-    for (unsigned int i = 0; i < self->mAttrVector.mNumVertices; i++)
+    for (unsigned int i = 0; i < mAttrVector.mNumVertices; i++)
     {
         t4Vector tt;
-        tt.x = (self->mpVertexPositionRender)[i].x;
-        tt.y = (self->mpVertexPositionRender)[i].y;
-        tt.z = (self->mpVertexPositionRender)[i].z;
+        tt.x = mpVertexPositionRender[i].x;
+        tt.y = mpVertexPositionRender[i].y;
+        tt.z = mpVertexPositionRender[i].z;
         tt.w = 1.0f;
-        self->mpVertices[i].p = tt;
-        AddX_3A39F8(self->mpVertices[i].p, self->mPosition.x + x);
-        AddY_3A39F8(self->mpVertices[i].p, self->mPosition.y + y);
-        self->mpVertices[i].one = 1.0f;
-        self->mpVertices[i].u = 0.0f;
-        self->mpVertices[i].v = 0.0f;
-        SetCol_3A39F8(self->mpVertices[i], 3, (self->mpVertexColour)[i].A);
-        SetCol_3A39F8(self->mpVertices[i], 0, (self->mpVertexColour)[i].R);
-        SetCol_3A39F8(self->mpVertices[i], 1, (self->mpVertexColour)[i].G);
-        SetCol_3A39F8(self->mpVertices[i], 2, (self->mpVertexColour)[i].B);
+        mpVertices[i].p = tt;
+        AddX_3A39F8(mpVertices[i].p, mPosition.x + x);
+        AddY_3A39F8(mpVertices[i].p, mPosition.y + y);
+        mpVertices[i].one = 1.0f;
+        mpVertices[i].u = 0.0f;
+        mpVertices[i].v = 0.0f;
+        SetCol_3A39F8(mpVertices[i], 3, mpVertexColour[i].A);
+        SetCol_3A39F8(mpVertices[i], 0, mpVertexColour[i].R);
+        SetCol_3A39F8(mpVertices[i], 1, mpVertexColour[i].G);
+        SetCol_3A39F8(mpVertices[i], 2, mpVertexColour[i].B);
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    ps2GraphicsMan->RenderLineStrip(self->mAttrVector.mNumVertices, self->mpVertices, 0);
+    ps2GraphicsMan->RenderLineStrip(mAttrVector.mNumVertices, mpVertices, 0);
 }
 #endif
 
@@ -303,12 +303,12 @@ extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
  *
  * @param ev  the frame number (On Tour FrameNum)
  */
-extern "C" void cUIVector_update(cUIVector* self, unsigned short ev)
+void cUIVector::update(unsigned short ev)
 {
-    void* anim = self->mpAnim;
+    void* anim = mpAnim;
     if (anim != 0) {
-        cUIAnimation_updateThing(anim, self, self->mAnimPlaybackStatus, ev);
-        cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
+        cUIAnimation_updateThing(anim, this, mAnimPlaybackStatus, ev);
+        cUIAnimation_updateFrame(mpAnim, mAnimPlaybackStatus);
     }
 }
 #endif
@@ -327,9 +327,9 @@ extern t3Vector t3vect_Zero;
  *
  * @param out  receives the size
  */
-extern "C" void cUIVector_getSize(cUIVector* self, t3Vector* out)
+void cUIVector::getSize(t3Vector* out)
 {
-    if (self->mpVertexPosition == 0) {
+    if (mpVertexPosition == 0) {
         return;
     }
     *out = t3vect_Zero;
@@ -338,8 +338,8 @@ extern "C" void cUIVector_getSize(cUIVector* self, t3Vector* out)
     float minY = 1000.0f;
     float maxY = -1000.0f;
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
-        t3Vector* vertexPos = &(self->mpVertexPosition)[i];
+    for (i = 0; i < *(unsigned int*)&mAttrVector >> 17; i++) {
+        t3Vector* vertexPos = &mpVertexPosition[i];
         if (vertexPos->x < minX) {
             minX = vertexPos->x;
         }
@@ -949,9 +949,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setActive);
  *
  * @param enable  nonzero to set the flag, 0 to clear it
  */
-extern "C" void cUIThing_setActive(cUIThing* self, int enable)
+void cUIThing::setActive(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttr)->bit1 = enable;
+    ((sUIVectorFlags*)&mAttr)->bit1 = enable;
 }
 #endif
 
@@ -965,9 +965,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setCached);
  *
  * @param enable  nonzero to set the flag, 0 to clear it
  */
-extern "C" void cUIThing_setCached(cUIThing* self, int enable)
+void cUIThing::setCached(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttr)->bit2 = enable;
+    ((sUIVectorFlags*)&mAttr)->bit2 = enable;
 }
 #endif
 
@@ -981,9 +981,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setEnabled);
  *
  * @param enable  nonzero to set the flag, 0 to clear it
  */
-extern "C" void cUIThing_setEnabled(cUIThing* self, int enable)
+void cUIThing::setEnabled(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttr)->bit3 = enable;
+    ((sUIVectorFlags*)&mAttr)->bit3 = enable;
 }
 #endif
 
@@ -997,9 +997,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setFocus);
  *
  * @param enable  nonzero to set the flag, 0 to clear it
  */
-extern "C" void cUIThing_setFocus(cUIThing* self, int enable)
+void cUIThing::setFocus(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttr)->bit4 = enable;
+    ((sUIVectorFlags*)&mAttr)->bit4 = enable;
 }
 #endif
 
@@ -1013,9 +1013,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setStatic);
  *
  * @param enable  nonzero to set the flag, 0 to clear it
  */
-extern "C" void cUIThing_setStatic(cUIThing* self, int enable)
+void cUIThing::setStatic(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttr)->bit5 = enable;
+    ((sUIVectorFlags*)&mAttr)->bit5 = enable;
 }
 #endif
 
@@ -1029,9 +1029,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setVisible);
  *
  * @param enable  nonzero to set the flag, 0 to clear it
  */
-extern "C" void cUIThing_setVisible(cUIThing* self, int enable)
+void cUIThing::setVisible(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttr)->bit6 = enable;
+    ((sUIVectorFlags*)&mAttr)->bit6 = enable;
 }
 #endif
 
@@ -1107,9 +1107,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setColour);
  *
  * @param in  colour to copy
  */
-extern "C" void cUIThing_setColour(cUIThing* self, tARGB* in)
+void cUIThing::setColour(const tARGB*in)
 {
-    *(&self->mColour) = *in;
+    *(&mColour) = *in;
 }
 #endif
 
@@ -1392,9 +1392,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_getSize);
  *
  * @param out  receives the size
  */
-extern "C" void cUIThing_getSize(cUIThing* self, t3Vector* out)
+void cUIThing::getSize(t3Vector*out)
 {
-    *out = *(&self->mSize);
+    *out = *(&mSize);
 }
 #endif
 
@@ -1406,9 +1406,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_setSize);
  *
  * @param in  new size
  */
-extern "C" void cUIThing_setSize(cUIThing* self, t3Vector* in)
+void cUIThing::setSize(const t3Vector*in)
 {
-    *(&self->mSize) = *in;
+    *(&mSize) = *in;
 }
 #endif
 
@@ -2627,8 +2627,9 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setShadow);
  *
  * @param enable  non-zero to draw a shadow
  */
-extern "C" void cUIListBox_setShadow(cUIListBox* self, int enable) {
-    ((sUIVectorFlags*)&self->mAttrListBox)->bit2 = enable;
+void cUIListBox::setShadow(int enable)
+{
+    ((sUIVectorFlags*)&mAttrListBox)->bit2 = enable;
 }
 #endif
 
@@ -2654,9 +2655,9 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setUseStaticColour);
  *
  * @param enable  non-zero to draw in mStaticColour
  */
-extern "C" void cUIListBox_setUseStaticColour(cUIListBox* self, int enable)
+void cUIListBox::setUseStaticColour(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrListBox)->bit5 = enable;
+    ((sUIVectorFlags*)&mAttrListBox)->bit5 = enable;
 }
 #endif
 
@@ -3828,9 +3829,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setShadow);
  *
  * @param enable  nonzero sets the bit, 0 clears it
  */
-extern "C" void cUIText_setShadow(cUIText* self, int enable)
+void cUIText::setShadow(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrText)->bit2 = enable;
+    ((sUIVectorFlags*)&mAttrText)->bit2 = enable;
 }
 #endif
 
@@ -3842,9 +3843,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setUnicode);
  *
  * @param enable  nonzero sets the bit, 0 clears it
  */
-extern "C" void cUIText_setUnicode(cUIText* self, int enable)
+void cUIText::setUnicode(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrText)->bit3 = enable;
+    ((sUIVectorFlags*)&mAttrText)->bit3 = enable;
 }
 #endif
 
@@ -3857,9 +3858,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setUseStaticColour);
  *
  * @param enable  nonzero sets the bit, 0 clears it
  */
-extern "C" void cUIText_setUseStaticColour(cUIText* self, int enable)
+void cUIText::setUseStaticColour(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrText)->bit4 = enable;
+    ((sUIVectorFlags*)&mAttrText)->bit4 = enable;
 }
 #endif
 
@@ -3872,9 +3873,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setUseDisabledColour);
  *
  * @param enable  nonzero sets the bit, 0 clears it
  */
-extern "C" void cUIText_setUseDisabledColour(cUIText* self, int enable)
+void cUIText::setUseDisabledColour(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrText)->bit5 = enable;
+    ((sUIVectorFlags*)&mAttrText)->bit5 = enable;
 }
 #endif
 
@@ -3887,9 +3888,9 @@ INCLUDE_ASM("ui/uivector", cUIText_setEllipses);
  *
  * @param enable  nonzero sets the bit, 0 clears it
  */
-extern "C" void cUIText_setEllipses(cUIText* self, int enable)
+void cUIText::setEllipses(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrText)->bit6 = enable;
+    ((sUIVectorFlags*)&mAttrText)->bit6 = enable;
 }
 #endif
 
@@ -4494,9 +4495,9 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setShadow);
  *
  * @param enable  non-zero to draw a shadow
  */
-extern "C" void cUITextScroll_setShadow(cUITextScroll* self, int enable)
+void cUITextScroll::setShadow(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrTextScroll)->bit3 = enable;
+    ((sUIVectorFlags*)&mAttrTextScroll)->bit3 = enable;
 }
 #endif
 
@@ -4508,9 +4509,9 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setUnicode);
  *
  * @param enable  non-zero when the text is UTF-16
  */
-extern "C" void cUITextScroll_setUnicode(cUITextScroll* self, int enable)
+void cUITextScroll::setUnicode(int enable)
 {
-    ((sUIVectorFlags*)&self->mAttrTextScroll)->bit4 = enable;
+    ((sUIVectorFlags*)&mAttrTextScroll)->bit4 = enable;
 }
 #endif
 

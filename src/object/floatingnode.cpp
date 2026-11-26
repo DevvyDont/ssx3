@@ -102,9 +102,9 @@ static inline t4Vector nodePos_34EF40(char* vself)
  *
  * Without an info block it falls back to cMoveNode_updateOverlapSystem().
  */
-extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
+void cFloatingNode::updateOverlapSystem()
 {
-    tFloatBoundBoxInfo* info = self->Info;
+    tFloatBoundBoxInfo* info = Info;
     if (info != 0) {
         tBoundBox nb;
         tBoundBox old = (*(&info->BoundBox));
@@ -114,13 +114,13 @@ extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
         ext.y = extent;
         ext.z = extent;
         ext.w = 0.0f;
-        nb.MinPoint = vu0Sub_34EF40(nodePos_34EF40(((char*)self)), ext);
-        nb.MaxPoint = vu0Add_34EF40(nodePos_34EF40(((char*)self)), ext);
-        (*(&(self->Info)->BoundBox)) = nb;
-        void* id = self->Instance;
+        nb.MinPoint = vu0Sub_34EF40(nodePos_34EF40(((char*)this)), ext);
+        nb.MaxPoint = vu0Add_34EF40(nodePos_34EF40(((char*)this)), ext);
+        (*(&Info->BoundBox)) = nb;
+        void* id = Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (tBoundBox*)&nb, (tBoundBox*)&old);
     } else {
-        cMoveNode_updateOverlapSystem(((char*)self));
+        cMoveNode_updateOverlapSystem(((char*)this));
     }
 }
 #endif
@@ -141,13 +141,13 @@ extern "C" void cMoveNode_restoreOverlapSystem(void* self);
  *
  * Without an info block it falls back to cMoveNode_restoreOverlapSystem().
  */
-extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
+void cFloatingNode::restoreOverlapSystem()
 {
-    tBoundBox* info = (tBoundBox*)((void*)self->Info);
+    tBoundBox* info = (tBoundBox*)((void*)Info);
     if (info != 0) {
         tBoundBox nb;
         tBoundBox old = *info;
-        tInstanceRecord* inst = self->Instance;
+        tInstanceRecord* inst = Instance;
         t4Vector corner;
         corner.x = inst->m_fvMin.m[0];
         corner.y = inst->m_fvMin.m[1];
@@ -159,11 +159,11 @@ extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
         corner.z = inst->m_fvMax.m[2];
         (*(&nb.MaxPoint)) = corner;
         *info = nb;
-        void* id = self->Instance;
+        void* id = Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &nb, &old);
-        self->purgeInfo();
+        purgeInfo();
     } else {
-        cMoveNode_restoreOverlapSystem(self);
+        cMoveNode_restoreOverlapSystem(this);
     }
 }
 #endif
@@ -653,28 +653,28 @@ struct sFloatingNode_34F930 {
  */
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // Steps the float spring (bob height plus two tilt axes) by one frame.
-extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
+bool cFloatingNode::updateNode()
 {
     float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
-    float accelZ = -self->ZSpring * (self->Z - self->Zo) + self->ForceScale * self->Force + -self->ZDamp * self->Vel;
-    float accelX = -self->ASpring * self->OX + self->TorqueScale * self->TX + -self->ADamp * self->WX;
-    float accelY = -self->ASpring * self->OY + self->TorqueScale * self->TY + -self->ADamp * self->WY;
-    self->Z += self->Vel * dt;
-    self->Vel += accelZ * dt;
-    self->OX += self->WX * dt;
-    self->WX += accelX * dt;
-    self->OY += self->WY * dt;
-    self->WY += accelY * dt;
-    cFloatingNodeState* tilt = (cFloatingNodeState*)&self->ZSpring;
+    float accelZ = -ZSpring * (Z - Zo) + ForceScale * Force + -ZDamp * Vel;
+    float accelX = -ASpring * OX + TorqueScale * TX + -ADamp * WX;
+    float accelY = -ASpring * OY + TorqueScale * TY + -ADamp * WY;
+    Z += Vel * dt;
+    Vel += accelZ * dt;
+    OX += WX * dt;
+    WX += accelX * dt;
+    OY += WY * dt;
+    WY += accelY * dt;
+    cFloatingNodeState* tilt = (cFloatingNodeState*)&ZSpring;
     float lo = -1.3962635f;    // +-80 degrees
     float hi = 1.3962635f;
-    self->OX = tilt->OX >= lo ? tilt->OX <? hi : lo;
-    self->OY = tilt->OY >= lo ? tilt->OY <? hi : lo;
-    self->Force = 0.0f;
-    self->TX = 0.0f;
-    self->TY = 0.0f;
-    self->Flags |= 1;
-    return 1;
+    OX = tilt->OX >= lo ? tilt->OX <? hi : lo;
+    OY = tilt->OY >= lo ? tilt->OY <? hi : lo;
+    Force = 0.0f;
+    TX = 0.0f;
+    TY = 0.0f;
+    Flags |= 1;
+    return true;
 }
 #endif
 
@@ -695,13 +695,13 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, cBxReplayFrame* stream)
+void cFloatingNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
     int has;
-    cMoveNode_writeToReplayFrame(self, stream);
-    has = ((void*)self->Info) != 0;
+    cMoveNode_writeToReplayFrame(this, stream);
+    has = ((void*)Info) != 0;
     stream->write((const char*)&has, 4);
-    stream->write((const char*)&self->ZSpring, 72);
+    stream->write((const char*)&ZSpring, 72);
 }
 #endif
 

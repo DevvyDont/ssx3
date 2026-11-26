@@ -36,15 +36,15 @@ extern char str_kT_14Heading4[];
  * (+0x44) at +0x48 (then discards the player interface, its vtable slot 2), selects page 0 (+0x4C), shows
  * that page (cFEStateRiderBio_setupBioScreen) and shows only this rider's "<name>" and "<name>_s" objects (cFEStateRiderBio_setupCharPics).
  */
-extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
+void cFEStateRiderBio::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_14rid_prof), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_14rid_prof), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox0000));
+    void* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ListBox0000));
     if (box != 0) {
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading1), 0);
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading2), 0);
@@ -52,11 +52,11 @@ extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading4), 0);
     }
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    self->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
+    mCharID = cBENewPlayerInterface_getPlayerCharID(iface, mUserNum);
     iface->discard();
-    self->mScreen = 0;
-    self->setupBioScreen();
-    self->setupCharPics();
+    mScreen = 0;
+    setupBioScreen();
+    setupCharPics();
 }
 #endif
 

@@ -39,6 +39,12 @@ struct cFEStateLegal : public cUIState {
 
     // How many frames the notice stays up (names ours): [U] onUpdate leaves when mDisplayTicks reaches it.
     enum { kDisplayTicks = 240 };
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateLegal__cFEStateLegal stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateLegal();
+    virtual void onCreateScreen() __asm__("cFEStateLegal_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateLegal, mDisplayTicks, 0x048);

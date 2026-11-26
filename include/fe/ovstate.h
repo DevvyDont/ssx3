@@ -74,6 +74,9 @@ struct cOVState : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     int onUpdate_HandleIncomingChat() __asm__("cOVState_onUpdate_HandleIncomingChat");
     void triggerTextFade(char* objName, char* animName) __asm__("cOVState_triggerTextFade");
+    virtual void onCreateScreen() __asm__("cOVState_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cOVState_onDestroyScreen");
+    virtual void onUpdate() __asm__("cOVState_onUpdate");
 };
 
 CHECK_OFFSET(cOVState, mDoneTransition, 0x48);

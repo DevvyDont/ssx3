@@ -88,6 +88,12 @@ struct cFEStateMemCard : public cFEMemCard {
     void terminateFreeSpaceCheck() __asm__("cFEStateMemCard_terminateFreeSpaceCheck");
     void exitScreen() __asm__("cFEStateMemCard_exitScreen");
     void updateFreeSpaceCheckState() __asm__("cFEStateMemCard_updateFreeSpaceCheckState");
+    // retail's destructor cFEStateMemCard__cFEStateMemCard stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateMemCard();
+    virtual void onCreateScreen() __asm__("cFEStateMemCard_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateMemCard_onUpdate");
+    virtual void updateDone() __asm__("cFEStateMemCard_updateDone");
 };
 
 CHECK_OFFSET(cFEStateMemCard, mMissingSavedFileTypeFlags, 0x22C);

@@ -16,10 +16,10 @@ extern char str_snowanim[];
 /**
  * Creates the front end's background screen ("snowanim") and plays its first frame.
  */
-extern "C" void cFEStateBackground_onCreateScreen(cFEStateBackground* self)
+void cFEStateBackground::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_snowanim), 0);
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_snowanim), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -37,13 +37,13 @@ extern char str_whitefade[];
 /**
  * Creates the transition state's two screens, "transition" and "whitefade".
  */
-extern "C" void cFEStateTransition_onCreateScreen(cFEStateTransition* self)
+void cFEStateTransition::onCreateScreen()
 {
-    void* engine = self->mpEngine;
+    void* engine = mpEngine;
     void* engine2;
-    self->mpSnow = (cUIScreen*)cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_transition), 0);
-    engine2 = (void*)self->mpEngine;
-    self->mpWhite = (cUIScreen*)cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_whitefade), 0);
+    mpSnow = (cUIScreen*)cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_transition), 0);
+    engine2 = (void*)mpEngine;
+    mpWhite = (cUIScreen*)cUIEngine_addScreenByHashName(engine2, this, GetHashValue32(str_whitefade), 0);
 }
 #endif
 

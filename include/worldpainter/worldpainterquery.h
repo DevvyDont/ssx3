@@ -800,6 +800,13 @@ struct cWorldPainterQuery : public tWorldPainterQuery {
     tWorldPainterRegionType m_regionType; // 0x10 [O]; [R] ctor's argument (sb low byte, then the word with the id)
     cWorldPainterQuery* m_next;     // 0x14 [O]; [R] ctor links this in front of m_queryListStart; dtor unlinks;
                                     //       [U] reset walks the list
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cWorldPainterQuery__cWorldPainterQuery stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cWorldPainterQuery();
+    virtual const tWPInGameData* queryPosition(float x, float z, float blend)
+        __asm__("cWorldPainterQuery_queryPosition");
 };
 
 CHECK_OFFSET(cWorldPainterQuery, m_x, 0x08);

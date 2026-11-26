@@ -164,19 +164,19 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_expire);
  *
  * @param runscript  nonzero to try the instance's expire script first
  */
-extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
+void cInstanceNode::expire(int runscript)
 {
     if (runscript != 0) {
-        if (self->runExpireScript() != 0) return;
+        if (runExpireScript() != 0) return;
     }
-    self->Instance->m_iFlags &= 0xFFFF0300;
+    Instance->m_iFlags &= 0xFFFF0300;
     {
-        tInstanceRecord* instance = self->Instance;
+        tInstanceRecord* instance = Instance;
         int instFlags = instance->m_iFlags;
         instance->m_iFlags = instFlags | (instFlags >> 16);
     }
-    self->Instance->m_iFlags |= 2;
-    delete self;
+    Instance->m_iFlags |= 2;
+    delete this;
 }
 #endif
 
@@ -189,15 +189,15 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_loseFocus);
  * Like cInstanceNode_expire() without the script check, except that bits 8-9 of the record's flags (+0x8) are
  * cleared too (mask 0xFFFF0000) before the upper half is ORed into the lower half and bit 1 is set.
  */
-extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
+void cInstanceNode::loseFocus()
 {
-    int* flagsPtr = (int*)(&self->Instance->m_iFlags);
+    int* flagsPtr = (int*)(&Instance->m_iFlags);
     *flagsPtr &= 0xFFFF0000;
-    flagsPtr = (int*)(&self->Instance->m_iFlags);
+    flagsPtr = (int*)(&Instance->m_iFlags);
     *flagsPtr |= *flagsPtr >> 16;
-    flagsPtr = (int*)(&self->Instance->m_iFlags);
+    flagsPtr = (int*)(&Instance->m_iFlags);
     *flagsPtr |= 2;
-    delete self;
+    delete this;
 }
 #endif
 
@@ -263,10 +263,10 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, cBxReplayFrame* stream)
+void cInstanceNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cSortObjNode_writeToReplayFrame(self, stream);
-    stream->writeReplayInstance((cInstanceNode*)self);
+    cSortObjNode_writeToReplayFrame(this, stream);
+    stream->writeReplayInstance((cInstanceNode*)this);
 }
 #endif
 
@@ -556,9 +556,9 @@ static inline void buildBone_0288(t4Matrix* d, const t4Matrix* parent, const t4M
  * @param parent  root transform for meshes without a parent (On Tour root)
  * @param out     receives one matrix per mesh (On Tour animMats)
  */
-extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, t4Matrix* parent, t4Matrix* out)
+void cInstanceNode::makeAnimMats(const t4Matrix*parent, t4Matrix*out)
 {
-    tInstanceRecord* instance = self->Instance;
+    tInstanceRecord* instance = Instance;
     tModelRecord* sk = instance->m_Model;
     float uniformScale = instance->m_fScale;
     tMeshHeirarchyRecord* bone = sk->m_MeshHeirarchy;

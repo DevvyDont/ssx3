@@ -69,6 +69,9 @@ struct cTriggerAlgorithm : public cChaseAlgorithm {
     float PitchOffset;          // 0x78 [O]; [R] 20.0f (degrees); [U] snap/update (x pi/180); cBoundedAlgorithm_update
                                 //      copies the action's PitchOffset (+0x1C)
     char unk_7C[0x4];           // 0x7C padding to the 16-byte class alignment
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cTriggerAlgorithm_update");
 };
 
 CHECK_OFFSET(cTriggerAlgorithm, Position, 0x40);

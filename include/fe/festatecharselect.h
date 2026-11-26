@@ -35,6 +35,14 @@ struct cFEStateCharSelect : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void updateCharacter3DPos() __asm__("cFEStateCharSelect_updateCharacter3DPos");
+    // retail's destructor cFEStateCharSelect__cFEStateCharSelect stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCharSelect();
+    virtual void onCreateScreen() __asm__("cFEStateCharSelect_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateCharSelect_onDestroyScreen");
+    virtual bool onGainTransition(int on) __asm__("cFEStateCharSelect_onGainTransition");
+    virtual void onUpdate() __asm__("cFEStateCharSelect_onUpdate");
+    virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateCharSelect_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateCharSelect, mpSelectedCharWidget, 0x048);
@@ -105,6 +113,11 @@ struct cFEStateCheatCharSelect : public cFEState {
     void updateCharWidgets() __asm__("cFEStateCheatCharSelect_updateCharWidgets");
     int isDone() __asm__("cFEStateCheatCharSelect_isDone");
     int getCheatCharID() __asm__("cFEStateCheatCharSelect_getCheatCharID");
+    // retail's destructor cFEStateCheatCharSelect__cFEStateCheatCharSelect stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCheatCharSelect();
+    virtual void onCreateScreen() __asm__("cFEStateCheatCharSelect_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* menu, unsigned int msg) __asm__("cFEStateCheatCharSelect_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateCheatCharSelect, mpArrowPrev, 0x048);

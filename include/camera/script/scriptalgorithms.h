@@ -189,6 +189,10 @@ struct cScriptManualAlgorithm : public cScriptAlgorithm {
     cCameraJitterer Jitterer;   // 0x74 [O]; [R] cCameraJitterer_cCameraJitterer(this + 0x74); [U] update / getPose pass
                                 //      +0x74 to the jitterer's methods
     char unk_A4[0xC];           // 0xA4 padding to the 16-byte class alignment (alloc 0xB0)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void snapCurrent() __asm__("cScriptManualAlgorithm_snapCurrent");
+    virtual void update() __asm__("cScriptManualAlgorithm_update");
 };
 
 CHECK_OFFSET(cScriptManualAlgorithm, Position, 0x30);
@@ -215,6 +219,10 @@ struct cScriptPointAlgorithm : public cScriptAlgorithm {
     tSSXFrameCameraTarget FrameInfo; // 0x4C [O]; [U] update: GetSSXCameraTargetFrame(&FrameInfo), reads 0x4C..0x70
     cCameraJitterer Jitterer;   // 0x74 [O]; [R] cCameraJitterer_cCameraJitterer(this + 0x74); [U] update / getPose
     char unk_A4[0xC];           // 0xA4 padding to the 16-byte class alignment (alloc 0xB0)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void snapCurrent() __asm__("cScriptPointAlgorithm_snapCurrent");
+    virtual void update() __asm__("cScriptPointAlgorithm_update");
 };
 
 CHECK_OFFSET(cScriptPointAlgorithm, Position, 0x30);
@@ -240,6 +248,10 @@ struct cScriptTargetAlgorithm : public cScriptAlgorithm {
     float Pitch;                // 0x48 [O]; [R] 0; [U] update (swc1), getPose (lwc1)
     tSSXFrameCameraSubject FrameInfo; // 0x4C [O]; [U] update: GetSSXCameraSubjectFrame(&FrameInfo), reads 0x4C..0x6C
     cCameraJitterer Jitterer;   // 0x70 [O]; [R] cCameraJitterer_cCameraJitterer(this + 0x70); [U] update / getPose
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void snapCurrent() __asm__("cScriptTargetAlgorithm_snapCurrent");
+    virtual void update() __asm__("cScriptTargetAlgorithm_update");
 };
 
 CHECK_OFFSET(cScriptTargetAlgorithm, Position, 0x30);
@@ -266,6 +278,10 @@ struct cScriptRelativeAlgorithm : public cScriptAlgorithm {
     tSSXFrameCameraAlgorithmic FrameInfo; // 0x4C [O]; [U] snap / update: GetSSXCameraAlgorithmicFrame(&FrameInfo),
                                 //      read 0x4C..0x6C
     cCameraJitterer Jitterer;   // 0x70 [O]; [R] cCameraJitterer_cCameraJitterer(this + 0x70); [U] snap / update / getPose
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void snapCurrent() __asm__("cScriptRelativeAlgorithm_snapCurrent");
+    virtual void update() __asm__("cScriptRelativeAlgorithm_update");
 };
 
 CHECK_OFFSET(cScriptRelativeAlgorithm, Position, 0x30);

@@ -562,7 +562,7 @@ extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int pState, in
     *(short*)&self->mLinesOffset = 0;
     *(short*)&self->mLineSize = 0;
     *(int*)&self->mPixelOffset = 0;
-    cUITextScroll_setInputMap(self, 0);
+    self->setInputMap(0);
     return ((void*)self);
 }
 #endif
@@ -619,11 +619,11 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
  *
  * @return the cFont (as an int), or 0 without an engine
  */
-extern "C" int cUITextScroll_getFont(cUITextScroll* self)
+int cUITextScroll::getFont()
 {
-    cUIEngine* engine = self->mpScreen->mpState->mpEngine;
+    cUIEngine* engine = mpScreen->mpState->mpEngine;
     if (((void*)engine) != 0) {
-        return (int)(&engine->mpFontInterface->mFontEntry[0])[(*(unsigned int*)&self->mAttrTextScroll >> 1) & 3].mpFont;
+        return (int)(&engine->mpFontInterface->mFontEntry[0])[(*(unsigned int*)&mAttrTextScroll >> 1) & 3].mpFont;
     }
     return 0;
 }
@@ -637,18 +637,18 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_setInputMap);
  *
  * @param value  which input set to use
  */
-extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char value)
+void cUITextScroll::setInputMap(char value)
 {
     if (value == 0) {
-        self->mInputMap[0] = 0;
-        self->mInputMap[1] = 1;
-        self->mInputMap[2] = 2;
-        self->mInputMap[3] = 3;
+        mInputMap[0] = 0;
+        mInputMap[1] = 1;
+        mInputMap[2] = 2;
+        mInputMap[3] = 3;
     } else {
-        self->mInputMap[0] = 4;
-        self->mInputMap[1] = 5;
-        self->mInputMap[2] = 6;
-        self->mInputMap[3] = 7;
+        mInputMap[0] = 4;
+        mInputMap[1] = 5;
+        mInputMap[2] = 6;
+        mInputMap[3] = 7;
     }
 }
 #endif
@@ -730,7 +730,7 @@ static inline int pressed13E0(char* input, int key)
  */
 bool cUITextScroll::onInput(cUIInput* input)
 {
-    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)this);
+    cFont* font = (cFont*)this->getFont();
     if (font == 0) {
         return false;
     }
@@ -818,7 +818,7 @@ void cUITextScroll::render2D(float x, float y)
     if (((mAttr >> 2) & 1) == 0) {
         updateLocale();
     }
-    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)this);
+    cFont* font = (cFont*)this->getFont();
     if (font == 0) {
         return;
     }
@@ -952,7 +952,7 @@ extern "C" void func_002C2540(void* dst, void* src);
 void cUITextScroll::addAsciiString(char* str)
 {
     setCached(1);
-    void* font = (void*)cUITextScroll_getFont(this);
+    void* font = (void*)this->getFont();
     if (font == 0) {
         return;
     }
@@ -1092,7 +1092,7 @@ void cUITextScroll::addUnicodeStringWrap(void* vstr)
 {
     unsigned short* str = (unsigned short*)vstr;
     setCached(1);
-    void* font = (void*)cUITextScroll_getFont(this);
+    void* font = (void*)this->getFont();
     if (font == 0) {
         return;
     }

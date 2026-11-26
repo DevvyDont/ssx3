@@ -39,20 +39,20 @@ extern "C" void func_0028F140(void* self, int a1);
  * front-end sound-bank mode to 1, clears bToNextState (0x4C) and mbIsYesOrNo (0x54) and sets
  * mPathToSaveProfile (0x50) to 0x12.
  */
-extern "C" void cFEStateLodge_onCreateScreen(cFEStateLodge* self)
+void cFEStateLodge::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_28lodge), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_28lodge), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    self->mCheatCharID = cBENewPlayerInterface_getPlayerCheatCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+    mCheatCharID = cBENewPlayerInterface_getPlayerCheatCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
     D_00441B14[0] = 0;
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    self->bToNextState = 0;
-    self->mPathToSaveProfile = 18;
-    self->mbIsYesOrNo = 0;
+    bToNextState = 0;
+    mPathToSaveProfile = 18;
+    mbIsYesOrNo = 0;
 }
 #endif
 
@@ -90,7 +90,7 @@ extern char str_kT_TITLELodgePeak3[];
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, cUIThing* w)
+void cFEStateLodge::onWidgetCreate(cUIThing* w)
 {
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_option_0)) {
@@ -277,34 +277,34 @@ extern char str_kT_CMNSaveBeforeQuit[];
  * @param id  the popup event (kONSCREENPOPUPOPTION0 yes, kONSCREENPOPUPOPTION1 no, kONPOPUPCREATE opened,
  *            kONPOPUPDESTROY closed)
  */
-extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, unsigned int id)
+void cFEStateLodge::onPopupEvent(cUIState* msg, unsigned int id)
 {
     switch (id) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        self->mbIsYesOrNo = 1;
-        if (self->mPathToSaveProfile == cFEStateLodge::kPathQuit
-            || self->mPathToSaveProfile == cFEStateLodge::kPathSaveProgress
-            || self->mPathToSaveProfile == cFEStateLodge::kPathSaveBeforeQuit) {
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        mbIsYesOrNo = 1;
+        if (mPathToSaveProfile == cFEStateLodge::kPathQuit
+            || mPathToSaveProfile == cFEStateLodge::kPathSaveProgress
+            || mPathToSaveProfile == cFEStateLodge::kPathSaveBeforeQuit) {
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
         }
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        self->mbIsYesOrNo = 0;
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-        switch (self->mPathToSaveProfile) {
+        mbIsYesOrNo = 0;
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
+        switch (mPathToSaveProfile) {
         case cFEStateLodge::kPathSaveProgress: {
-            self->bToNextState = 1;
-            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
-            vt[19].fn(vthis(self, vt[19]), cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_0)), 5);
+            bToNextState = 1;
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, this);
+            vt[19].fn(vthis(this, vt[19]), cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_option_0)), 5);
             break;
         }
         case cFEStateLodge::kPathSaveBeforeQuit: {
-            self->bToNextState = 1;
-            cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-            cUICustomInterface* obj = self->mpEngine->mpCustom;
-            void* nextState = obj->getNextState((cUIState*)self, 6);
+            bToNextState = 1;
+            cUIScreen_playFrame(mpScreen, cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
+            cUICustomInterface* obj = mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)this, 6);
             if (nextState != 0) {
-                cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
+                cUIStateStack_pushCheck(&mpEngine->mStateStack, nextState);
             }
             break;
         }
@@ -316,26 +316,26 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         if (msg->mHashName != 0) {
             break;
         }
-        if (self->mbIsYesOrNo == 0) {
+        if (mbIsYesOrNo == 0) {
             break;
         }
-        switch (self->mPathToSaveProfile) {
+        switch (mPathToSaveProfile) {
         case cFEStateLodge::kPathSaveProgress: {
             void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
             cFEStateProfileLoad* newState =
-                (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
+                (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, mpEngine, 3, mCtrlBits);
             newState->mTypeOfQuit = 1;
             newState->mAttrState = (newState->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
-            cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
+            cUIStateStack_pushSpecial(&mpEngine->mStateStack, newState, 0, 1);
             break;
         }
         case cFEStateLodge::kPathSaveBeforeQuit: {
             void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
             cFEStateProfileLoad* newState =
-                (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
+                (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, mpEngine, 3, mCtrlBits);
             newState->mTypeOfQuit = 2;
             newState->mAttrState = (newState->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
-            cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
+            cUIStateStack_pushSpecial(&mpEngine->mStateStack, newState, 0, 1);
             break;
         }
         case cFEStateLodge::kPathQuit: {
@@ -344,9 +344,9 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
                 (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveBeforeQuit));
             void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
-            void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-            self->mPathToSaveProfile = cFEStateLodge::kPathSaveBeforeQuit;
-            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
+            void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, mpEngine, ((char*)this), text, 0, 0, 0, 0, 0);
+            mPathToSaveProfile = cFEStateLodge::kPathSaveBeforeQuit;
+            cUIStateStack_pushPopup(&mpEngine->mStateStack, newState);
             break;
         }
         }
@@ -401,18 +401,18 @@ extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int 
  * Keeps the screen at 0x40 and sets 0x48 (On Tour mbCheatCharEnable) to 1, or to 0 when cBERewardInterface_getNumOwnedCheatChars() on
  * the reward interface (13) counts no unlocked cheat characters (ids 10-29) for the user and their character.
  */
-extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(cFEStateLodgeRiderDetail* self)
+void cFEStateLodgeRiderDetail::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_155rider_details_conquer), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_155rider_details_conquer), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    self->mbCheatCharEnable = 1;
-    int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
-    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, charID) == 0) {
-        self->mbCheatCharEnable = 0;
+    mbCheatCharEnable = 1;
+    int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
+    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum, charID) == 0) {
+        mbCheatCharEnable = 0;
     }
 }
 #endif
@@ -510,7 +510,7 @@ extern char str_rider_name_b[];
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(cFEStateLodgeRiderDetail* self, cUIThing* w)
+void cFEStateLodgeRiderDetail::onWidgetCreate(cUIThing* w)
 {
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_Option_1_b)) {
@@ -549,10 +549,10 @@ extern char str_Option_3_b[];
  * When 0x48 (On Tour mbCheatCharEnable) is 0, DisableTextWidget() makes the widget static and caps its alpha at
  * 0.5.
  */
-extern "C" void cFEStateLodgeRiderDetail_onPreRender2D(cFEStateLodgeRiderDetail* self)
+void cFEStateLodgeRiderDetail::onPreRender2D()
 {
-    if (self->mbCheatCharEnable == 0) {
-        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_3_b));
+    if (mbCheatCharEnable == 0) {
+        void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Option_3_b));
         if (obj != 0) {
             DisableTextWidget(obj);
         }

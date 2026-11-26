@@ -26,11 +26,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the profile select screen ("05sel_prof") and shows its first frame.
  */
-extern "C" void cFEStateProfileSelect_onCreateScreen(cFEStateProfileSelect* self)
+void cFEStateProfileSelect::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_05sel_prof), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_05sel_prof), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -60,7 +60,7 @@ typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
  * @param menu  the widget the event is for (null: nothing happens)
  * @param msg  UI event code (1, 2, 5 or 6)
  */
-extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self, cUIThing* menu, unsigned int msg)
+void cFEStateProfileSelect::onWidgetEvent(cUIThing* menu, unsigned int msg)
 {
     if (((char*)menu) == 0)
         return;
@@ -68,17 +68,17 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
     case cUIState::kONNEXT: {
         tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
         vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 1.0f, 0.0f, 0.0f));
-        cUICustomInterface* custom = self->mpEngine->mpCustom;
-        void* nextState = custom->getNextState((cUIState*)self, menu->mMiscData);
+        cUICustomInterface* custom = mpEngine->mpCustom;
+        void* nextState = custom->getNextState((cUIState*)this, menu->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* custom = self->mpEngine->mpCustom;
-        void* nextState = custom->getPrevState((cUIState*)self, menu->mMiscData);
+        cUICustomInterface* custom = mpEngine->mpCustom;
+        void* nextState = custom->getPrevState((cUIState*)this, menu->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONGAINFOCUS: {
@@ -176,24 +176,24 @@ extern "C" void cFEStateProfileLoad_initSaveScreen(cFEStateProfileLoad* self);
  * cFEStateProfileLoad_initLoadScreen (kScreenActionLoad) or cFEStateProfileLoad_initSaveScreen (kScreenActionSave),
  * probably On Tour's initLoadScreen and initSaveScreen.
  */
-extern "C" void cFEStateProfileLoad_onCreateScreen(cFEStateProfileLoad* self)
+void cFEStateProfileLoad::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_93profile_load), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_93profile_load), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    self->initGeneral();
+    initGeneral();
     switch (cFEStateProfileLoad_mScreenAction) {
     case cFEStateProfileLoad::kScreenActionCreate:
-        self->initCreateScreen();
+        initCreateScreen();
         break;
     case cFEStateProfileLoad::kScreenActionLoad:
-        self->initLoadScreen();
+        initLoadScreen();
         break;
     case cFEStateProfileLoad::kScreenActionSave:
-        self->initSaveScreen();
+        initSaveScreen();
         break;
     }
 }
@@ -292,20 +292,20 @@ struct cUIObj_EF70 {
  *
  * @param on  1 to hide the buttons, 0 to show them
  */
-extern "C" void cFEStateProfileLoad_hideActionButtons(cFEStateProfileLoad* self, int on)
+void cFEStateProfileLoad::hideActionButtons(int on)
 {
-    if (self->mIsHidden == on)
+    if (mIsHidden == on)
         return;
     int off = on ^ 1;
-    ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)))->setVisible(off);
+    ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x)))->setVisible(off);
     if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(off);
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3)))->setVisible(off);
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
     } else {
-        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(off);
+        ((cUIObj_EF70*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3a)))->setVisible(off);
     }
-    self->mIsHidden = on;
+    mIsHidden = on;
 }
 #endif
 
@@ -401,12 +401,12 @@ extern "C" void cFEStateProfileLoad_displayOff(cFEStateProfileLoad* self);
  * Runs cFEStateProfileLoad_displayOn when the display state (+0x214) is 3, otherwise cFEStateProfileLoad_displayOff. Fills slot +0xD4 of
  * cFEStateProfileLoad_vtbl (cFEMemCard_displayStatus's slot).
  */
-extern "C" void cFEStateProfileLoad_displayStatus(cFEStateProfileLoad* self)
+void cFEStateProfileLoad::displayStatus()
 {
-    if (self->mScreenStatus == cFEMemCard::kDISPLAY_ON) {
-        self->displayOn();
+    if (mScreenStatus == cFEMemCard::kDISPLAY_ON) {
+        displayOn();
     } else {
-        self->displayOff();
+        displayOff();
     }
 }
 #endif
@@ -614,15 +614,15 @@ extern char str_cFEStateTitle[];
  * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
  * slot).
  */
-extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
+void cFEStateProfileLoad::updateDone()
 {
-    if (self->mIsDone == 0) {
-        int sel = self->mTypeOfQuit;
+    if (mIsDone == 0) {
+        int sel = mTypeOfQuit;
         if (sel == cFEStateProfileLoad::kQuitToPrevious) {
-            cUICustomInterface* frontEnd = self->mpEngine->mpCustom;
-            void* nextState = frontEnd->getPrevState((cUIState*)self, self->mType);
+            cUICustomInterface* frontEnd = mpEngine->mpCustom;
+            void* nextState = frontEnd->getPrevState((cUIState*)this, mType);
             if (nextState != 0)
-                cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
+                cUIStateStack_pushCheck(&mpEngine->mStateStack, nextState);
         } else if (sel == cFEStateProfileLoad::kQuitToHub) {
             cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -635,11 +635,11 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         } else if (sel == cFEStateProfileLoad::kQuitToTitle) {
             gInLodge = 0;
-            void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->mpEngine);
-            cUIStateStack_push(&self->mpEngine->mStateStack, st);
+            void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), mpEngine);
+            cUIStateStack_push(&mpEngine->mStateStack, st);
         }
     }
-    self->mIsDone = 1;
+    mIsDone = 1;
 }
 #endif
 
@@ -654,11 +654,10 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onDestroyScreen__FPv);
  * The teardown, cFEMemCard_onDestroyScreen(), calls helpers of back-end interface 5, runs three memory card manager calls
  * when its word at +0x434 is set, and frees the buffer at +0x1D4 when one is held.
  */
-void cFEStateProfileLoad_onDestroyScreen(void* vself)
+void cFEStateProfileLoad::onDestroyScreen()
 {
-    cFEStateProfileLoad* self = (cFEStateProfileLoad*)vself;
-    cFEMemCard_onDestroyScreen(self);
-    self->mpKeyboard = 0;
+    cFEMemCard_onDestroyScreen(this);
+    mpKeyboard = 0;
 }
 #endif
 

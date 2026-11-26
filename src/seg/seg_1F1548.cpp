@@ -2527,16 +2527,16 @@ extern "C" void tDrop_render(tDrop*, const t2Vector*);
  * splashes instead (reset). Draws in its own 2D scene with a pushed copy of the default draw state
  * (sDrawState_s_defaultDrawState), offset by the current viewport window's corner (GetViewportWindow).
  */
-extern "C" void cSplashManager_render(cSplashManager* self)
+void cSplashManager::render()
 {
     if (cSplashToggles_m_Enable == 0)
         return;
     if (cSplashToggles_m_Render == 0)
         return;
-    if (self->mViewIndex != SSXApp->Game->ViewMan->m_uiCurrentView)
+    if (mViewIndex != SSXApp->Game->ViewMan->m_uiCurrentView)
         return;
     if (cRenderStateMan_m_indoor) {
-        self->reset();
+        reset();
         return;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -2557,10 +2557,10 @@ extern "C" void cSplashManager_render(cSplashManager* self)
     SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 0, 3, 0);
     SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 2, 0, 0x7FFFF, 10);
     SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 1, 1, 22);
-    for (i = 0; i < self->mNumActiveDrops; i++)
-        tDrop_render(&self->mDropList[i], &off);
-    for (i = 0; i < self->mNumActiveCrystals; i++)
-        self->mCrystalList[i].render(&off);
+    for (i = 0; i < mNumActiveDrops; i++)
+        tDrop_render(&mDropList[i], &off);
+    for (i = 0; i < mNumActiveCrystals; i++)
+        mCrystalList[i].render(&off);
     ps2GraphicsMan->m_pCurrentDrawState--;
     ps2GraphicsMan->PopView();
     ps2GraphicsMan->PopViewport();

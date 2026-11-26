@@ -372,26 +372,26 @@ static inline bool isField_FA100(signed char* g, int off, int v)
  * 8, setStatic) and "camera 2 select" / "2lb" are greyed out (DisableTextWidget: static, alpha at most
  * 0.5). "save" is greyed out unless cGameMode is 4 (free ride in the game-flow notes).
  */
-extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(cOVState_PAUSE_OPTIONS* self)
+void cOVState_PAUSE_OPTIONS::onPreRender2D()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || !isField_FA100((signed char*)&cBENewRaceInterface_newRace, 73, 2)) {
-        cUIThing* pair2 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A24E0));
+        cUIThing* pair2 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A24E0));
         if (pair2 != 0) {
             pair2->setStatic(1);
         }
-        void* camSelect2 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_camera_2_select));
+        void* camSelect2 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_camera_2_select));
         if (camSelect2 != 0) {
             DisableTextWidget(camSelect2);
         }
-        void* label2 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_2lb_b));
+        void* label2 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_2lb_b));
         if (label2 != 0) {
             DisableTextWidget(label2);
         }
     }
     if (!isField_FA100((signed char*)&cBENewRaceInterface_newRace, 72, 4)) {
-        void* saveItem = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_save));
+        void* saveItem = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_save));
         if (saveItem != 0) {
             DisableTextWidget(saveItem);
         }
@@ -492,7 +492,7 @@ static inline cCamera* Camera_A238(int view)
  * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle, kONCHANGE value changed
  */
 // Pause-options widget handler: kONNEXT opens the sub-state, kONPREV pops, kONCHANGE applies a changed setting.
-extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* self, cUIThing* obj, unsigned int msg)
+void cOVState_PAUSE_OPTIONS::onWidgetEvent(cUIThing* obj, unsigned int msg)
 {
     if (obj == 0) {
         return;
@@ -503,14 +503,14 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
         if (IsId_A238(obj, str_save)) {
             cUIEngine* stack = SSXApp->Game->UI;
             cUIState* st = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0),
-                                                                        self->mpEngine,
-                                                                        *(unsigned char*)&self->mCurrentCtrl, 42);
+                                                                        mpEngine,
+                                                                        *(unsigned char*)&mCurrentCtrl, 42);
             st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(&stack->mStateStack, st, 0, 0);
         }
         break;
     case cUIState::kONPREV:
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
         break;
     case cUIState::kONCHANGE:
         if (IsId_A238(obj, str_0lb)) {
@@ -575,18 +575,18 @@ extern char str_TransitionOut_b[];
  * After cOVState_onUpdate(), if a cGameComm exists and its mPauseTimeout or mOverlayTimeout is 0, plays the
  * screen's "TransitionOut" frame and closes the state (cUIStateStack_pop).
  */
-extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(cOVState_PAUSE_OPTIONS* self)
+void cOVState_PAUSE_OPTIONS::onUpdate()
 {
-    cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
+            int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, (unsigned short)frame, 1);
+                cUIScreen_playFrame(mpScreen, (unsigned short)frame, 1);
             }
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
         }
     }
 }
@@ -838,28 +838,28 @@ extern char str_TextInfo[];
  * mCheating[0] is clear, else it hides the "TextInfo" object. In both cases it then calls cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1)
  * and clears +0x9C; with no reply and time left it waits.
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(cOVState_PAUSE_ONLINE_ERROR* self)
+void cOVState_PAUSE_ONLINE_ERROR::onUpdate()
 {
-    cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
     cGameComm* gameComm = cGameComm_mGameComm;
-    if (gameComm != 0 && (int)self->miStartPingTick != 0) {
+    if (gameComm != 0 && (int)miStartPingTick != 0) {
         int timedOut = gameComm->mPingTimer <= 0 && gameComm->mPingReceived == 0;
         if (timedOut) {
             gameComm->mPingResult = 0;
-            self->displayPingTimedOut();
+            displayPingTimedOut();
         } else {
             if (gameComm->mPingReceived == 0) {
                 return;
             }
             int received = gameComm->mRaceInProgress != 0 && gameComm->mLocalFinishedRace == 0 && gameComm->mCheating[0] == 0;
             if (received) {
-                self->displayPingReceived();
+                displayPingReceived();
             } else {
-                cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo))->setVisible(0);
+                cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextInfo))->setVisible(0);
             }
         }
-        self->enableCancelButton(1);
-        self->miStartPingTick = (unsigned int)0;
+        enableCancelButton(1);
+        miStartPingTick = (unsigned int)0;
     }
 }
 #endif
@@ -1241,9 +1241,9 @@ extern "C" void* cOVState_onUpdate(void* self);
  * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
  * and cOVStateManager_mStatus to 1 (go to the next overlay).
  */
-extern "C" void cOVState_HEAT_PREEVENT_onUpdate(cOVState_HEAT_PREEVENT* self)
+void cOVState_HEAT_PREEVENT::onUpdate()
 {
-    cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0 && gameComm->mOverlayTimeout == 0) {
         gameComm->mOverlayTimeout = -1;
@@ -2431,12 +2431,12 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * When +0x1AC (On Tour mIsDone) is still 0 it calls cUIStateStack_popToStateInclusive(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
-extern "C" void cOVState_SAVEREPLAY_updateDone(cOVState_SAVEREPLAY* self)
+void cOVState_SAVEREPLAY::updateDone()
 {
-    if (self->mIsDone == 0) {
-        cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
+    if (mIsDone == 0) {
+        cUIStateStack_popToStateInclusive(&mpEngine->mStateStack);
     }
-    self->mIsDone = 1;
+    mIsDone = 1;
 }
 #endif
 
@@ -2542,24 +2542,24 @@ static inline cUIText* getObj_DF40(cUIState* self, char* name)
  * cFEMemCard_checkNextAvailableDevice finds a device that way. When the display state (+0x214) is not 3, all four slots
  * end up static with the normal colour.
  */
-extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
+void cOVState_SAVEREPLAY::displayStatus()
 {
     unsigned short buf[800];
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    if (((cState_DF40*)self)->displayFileOK()) {
+    if (((cState_DF40*)this)->displayFileOK()) {
         if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
-            ((cState_DF40*)self)->triggerDisplayState(cFEMemCard::kDISPLAY_ON);
+        } else if (mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+            ((cState_DF40*)this)->triggerDisplayState(cFEMemCard::kDISPLAY_ON);
         }
     }
-    if (((cState_DF40*)self)->displayFileOK()) {
+    if (((cState_DF40*)this)->displayFileOK()) {
         int sel = 0;
-        ((cState_DF40*)self)->setMenuHighlight();
+        ((cState_DF40*)this)->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
-        cUIText_setUnicodeStringWrap(getObj_DF40(self, str_Memory_card_info), buf);
-        cUIText* widget = getObj_DF40(self, str_1percentage_b);
+        cUIText_setUnicodeStringWrap(getObj_DF40(this, str_Memory_card_info), buf);
+        cUIText* widget = getObj_DF40(this, str_1percentage_b);
         mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
@@ -2569,9 +2569,9 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
-            widget = getObj_DF40(self, name);
-            mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)&self->mTitle);
-            cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
+            widget = getObj_DF40(this, name);
+            mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)&mTitle);
+            cUIText_setUnicodeString(widget, (unsigned short*)((char*)&mTitle));
             if (!mp->mpMemCard->HasFileName(i - 1) && !mp->mpMemCard->IsFileSlotDisabled(i - 1)
                 && mp->mpMemCard->IsFormatted()) {
                 if (sel == 0) {
@@ -2595,21 +2595,21 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
                 widget->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)this), mp, mp->mSelectedDevice, 1)
             == cFEMemCard::kNoNextDevice)
-            getObj_DF40(self, str_arrw_left_b)->setVisible(0);
+            getObj_DF40(this, str_arrw_left_b)->setVisible(0);
         else
-            getObj_DF40(self, str_arrw_left_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 0)
+            getObj_DF40(this, str_arrw_left_b)->setVisible(1);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)this), mp, mp->mSelectedDevice, 0)
             == cFEMemCard::kNoNextDevice)
-            getObj_DF40(self, str_arrw_right_b)->setVisible(0);
+            getObj_DF40(this, str_arrw_right_b)->setVisible(0);
         else
-            getObj_DF40(self, str_arrw_right_b)->setVisible(1);
+            getObj_DF40(this, str_arrw_right_b)->setVisible(1);
     }
-    if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+    if (mScreenStatus != cFEMemCard::kDISPLAY_ON) {
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
-            cUIText* widget = getObj_DF40(self, name);
+            cUIText* widget = getObj_DF40(this, name);
             widget->setUseStaticColour(0);
             widget->setStatic(1);
         }
@@ -2724,70 +2724,70 @@ extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMC
  * @param msg  the widget the event is for (its mMiscData is the file slot)
  * @param type  the widget event: kONNEXT select, kONPREV back, kONOPTION delete
  */
-extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUIThing* msg, unsigned int type)
+void cOVState_SAVEREPLAY::onWidgetEvent(cUIThing* msg, unsigned int type)
 {
     if (msg == 0)
         return;
-    if (self->mIsProcessing != 0)
+    if (mIsProcessing != 0)
         return;
     switch (type)
     {
     case cUIState::kONNEXT:
     {
         int one = 1;
-        if (self->mState == cFEMemCard::kDONE)
+        if (mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        int st = self->mScreenStatus;
+        int st = mScreenStatus;
         if (st != cFEMemCard::kDISPLAY_ON)
             return;
         int fileSlot = msg->mMiscData;
-        self->mSlot = fileSlot;
+        mSlot = fileSlot;
         mp->mFileCursor = fileSlot;
-        self->mIsProcessing = one;
-        if (self->mIsReplayAlloc == one)
+        mIsProcessing = one;
+        if (mIsReplayAlloc == one)
         {
             cReplay_purgeSave(SSXApp->Game->Replay);
-            self->mIsReplayAlloc = 0;
+            mIsReplayAlloc = 0;
         }
         cMCOverlayManager_writeSetFileType(mp, 0, -1);
-        self->mIsSavePressed = one;
-        self->mIsProcessing = one;
-        self->mState = st;
+        mIsSavePressed = one;
+        mIsProcessing = one;
+        mState = st;
         break;
     }
     case cUIState::kONPREV:
     {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing == true)
+        if (mIsProcessing == true)
             return;
-        int cardState = self->mState;
+        int cardState = mState;
         if (cardState == cFEMemCard::kDONE)
             return;
-        self->mIsCancelPressed = 1;
+        mIsCancelPressed = 1;
         if (cardState == cFEMemCard::kSTART || cardState == cFEMemCard::kSKIP || cardState == cFEMemCard::kCHECKING)
             mp->SetState(0);
-        self->mState = cFEMemCard::kDONE;
+        mState = cFEMemCard::kDONE;
         break;
     }
     case cUIState::kONOPTION:
     {
         int one = 1;
-        if (self->mState == cFEMemCard::kDONE)
+        if (mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (!mp->mpMemCard->IsActionable(mp->mSelectedDevice))
             return;
         int fileSlot = msg->mMiscData;
-        self->mSlot = fileSlot;
+        mSlot = fileSlot;
         mp->mFileCursor = fileSlot;
-        int cardState = self->mState;
+        int cardState = mState;
         if (cardState != one)
             return;
-        if (!mp->mpMemCard->HasFileName(self->mSlot))
+        if (!mp->mpMemCard->HasFileName(mSlot))
             return;
-        self->mIsProcessing = cardState;
-        self->mState = cFEMemCard::kDELETING;
+        mIsProcessing = cardState;
+        mState = cFEMemCard::kDELETING;
         cMCOverlayManager_SetAction_v(mp, 0);
         mp->SetState(0x18);
         break;
@@ -2952,12 +2952,12 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * When +0x1AC (On Tour mIsDone) is still 0 it calls cUIStateStack_popToStateInclusive(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
-extern "C" void cOVState_SAVEOPTIONS_updateDone(cOVState_SAVEOPTIONS* self)
+void cOVState_SAVEOPTIONS::updateDone()
 {
-    if (self->mIsDone == 0) {
-        cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
+    if (mIsDone == 0) {
+        cUIStateStack_popToStateInclusive(&mpEngine->mStateStack);
     }
-    self->mIsDone = 1;
+    mIsDone = 1;
 }
 #endif
 
@@ -3058,23 +3058,23 @@ static inline cUIText* getObj_ECA0(cUIState* self, char* name)
  * The device arrows follow cFEMemCard_checkNextAvailableDevice. Outside display state 3 (+0x214) the slot ends up
  * static with the normal colour.
  */
-extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
+void cOVState_SAVEOPTIONS::displayStatus()
 {
     unsigned short buf[800];
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    if (((cState_ECA0*)self)->displayFileOK()) {
+    if (((cState_ECA0*)this)->displayFileOK()) {
         if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
-            ((cState_ECA0*)self)->triggerDisplayState(cFEMemCard::kDISPLAY_ON);
+        } else if (mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+            ((cState_ECA0*)this)->triggerDisplayState(cFEMemCard::kDISPLAY_ON);
         }
     }
-    if (((cState_ECA0*)self)->displayFileOK()) {
-        ((cState_ECA0*)self)->setMenuHighlight();
+    if (((cState_ECA0*)this)->displayFileOK()) {
+        ((cState_ECA0*)this)->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
-        cUIText_setUnicodeStringWrap(getObj_ECA0(self, str_Memory_card_info), buf);
-        cUIText* widget = getObj_ECA0(self, str_1percentage_b);
+        cUIText_setUnicodeStringWrap(getObj_ECA0(this, str_Memory_card_info), buf);
+        cUIText* widget = getObj_ECA0(this, str_1percentage_b);
         mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
@@ -3083,9 +3083,9 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
         void* localeThis = vthis(localeObj, vt[4]);
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
-        widget = getObj_ECA0(self, name);
-        mp->mpMemCard->GetTitleString(0, (unsigned short*)&self->mTitle);
-        cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
+        widget = getObj_ECA0(this, name);
+        mp->mpMemCard->GetTitleString(0, (unsigned short*)&mTitle);
+        cUIText_setUnicodeString(widget, (unsigned short*)((char*)&mTitle));
         if (!mp->mpMemCard->HasFileName(0) && !mp->mpMemCard->IsFileSlotDisabled(0)
             && mp->mpMemCard->IsFormatted()) {
             widget->setUseStaticColour(0);
@@ -3102,20 +3102,20 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
             widget->setUseStaticColour(1);
             widget->setStatic(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)this), mp, mp->mSelectedDevice, 1)
             == cFEMemCard::kNoNextDevice)
-            getObj_ECA0(self, str_arrw_left_b)->setVisible(0);
+            getObj_ECA0(this, str_arrw_left_b)->setVisible(0);
         else
-            getObj_ECA0(self, str_arrw_left_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 0)
+            getObj_ECA0(this, str_arrw_left_b)->setVisible(1);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)this), mp, mp->mSelectedDevice, 0)
             == cFEMemCard::kNoNextDevice)
-            getObj_ECA0(self, str_arrw_right_b)->setVisible(0);
+            getObj_ECA0(this, str_arrw_right_b)->setVisible(0);
         else
-            getObj_ECA0(self, str_arrw_right_b)->setVisible(1);
+            getObj_ECA0(this, str_arrw_right_b)->setVisible(1);
     }
-    if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+    if (mScreenStatus != cFEMemCard::kDISPLAY_ON) {
         sprintf(name, str_pct_dmemory_card_b, 1);
-        cUIText* widget = getObj_ECA0(self, name);
+        cUIText* widget = getObj_ECA0(this, name);
         widget->setUseStaticColour(0);
         widget->setStatic(1);
     }
@@ -3229,65 +3229,65 @@ extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMC
  * @param msg  the widget the event is for (its mMiscData is the file slot)
  * @param type  the widget event: kONNEXT select, kONPREV back, kONOPTION delete
  */
-extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, cUIThing* msg, unsigned int type)
+void cOVState_SAVEOPTIONS::onWidgetEvent(cUIThing* msg, unsigned int type)
 {
     if (msg == 0)
         return;
-    if (self->mIsProcessing != 0)
+    if (mIsProcessing != 0)
         return;
     switch (type)
     {
     case cUIState::kONNEXT:
     {
         int one = 1;
-        if (self->mState == cFEMemCard::kDONE)
+        if (mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        int st = self->mScreenStatus;
+        int st = mScreenStatus;
         if (st != cFEMemCard::kDISPLAY_ON)
             return;
         int fileSlot = msg->mMiscData;
-        self->mSlot = fileSlot;
+        mSlot = fileSlot;
         mp->mFileCursor = fileSlot;
-        self->mIsProcessing = one;
+        mIsProcessing = one;
         cMCOverlayManager_writeSetFileType(mp, 2, -1);
-        self->mIsSavePressed = one;
-        self->mIsProcessing = one;
-        self->mState = st;
+        mIsSavePressed = one;
+        mIsProcessing = one;
+        mState = st;
         break;
     }
     case cUIState::kONPREV:
     {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing == true)
+        if (mIsProcessing == true)
             return;
-        int cardState = self->mState;
+        int cardState = mState;
         if (cardState == cFEMemCard::kDONE)
             return;
-        self->mIsCancelPressed = 1;
+        mIsCancelPressed = 1;
         if (cardState == cFEMemCard::kSTART || cardState == cFEMemCard::kSKIP || cardState == cFEMemCard::kCHECKING)
             mp->SetState(0);
-        self->mState = cFEMemCard::kDONE;
+        mState = cFEMemCard::kDONE;
         break;
     }
     case cUIState::kONOPTION:
     {
         int one = 1;
-        if (self->mState == cFEMemCard::kDONE)
+        if (mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (!mp->mpMemCard->IsActionable(mp->mSelectedDevice))
             return;
         int fileSlot = msg->mMiscData;
-        self->mSlot = fileSlot;
+        mSlot = fileSlot;
         mp->mFileCursor = fileSlot;
-        int cardState = self->mState;
+        int cardState = mState;
         if (cardState != one)
             return;
-        if (!mp->mpMemCard->HasFileName(self->mSlot))
+        if (!mp->mpMemCard->HasFileName(mSlot))
             return;
-        self->mIsProcessing = cardState;
-        self->mState = cFEMemCard::kDELETING;
+        mIsProcessing = cardState;
+        mState = cFEMemCard::kDELETING;
         cMCOverlayManager_SetAction_v(mp, 0);
         mp->SetState(0x18);
         break;

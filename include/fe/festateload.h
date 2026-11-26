@@ -52,6 +52,12 @@ struct cFEStateEventSelect : public cFEState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateEventSelect1() __asm__("cFEStateEventSelect_cFEStateEventSelect1");
+    // retail's destructor cFEStateEventSelect__cFEStateEventSelect stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateEventSelect();
+    virtual void onCreateScreen() __asm__("cFEStateEventSelect_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateEventSelect_onDestroyScreen");
+    virtual void onUpdate() __asm__("cFEStateEventSelect_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateEventSelect, mMap, 0x048);

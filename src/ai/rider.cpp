@@ -4912,24 +4912,24 @@ static inline t4Vector MatMulV_34D0(const char* m, const t4Vector& v) return r
  *
  * @param mat  the start transform (On Tour: const t4Matrix & mat)
  */
-extern "C" void cRider_initForMission(cRider* self, t4Matrix* mat)
+void cRider::initForMission(t4Matrix* mat)
 {
     t4Vector pos;
     t4Vector dir;
-    cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
+    cReplay_eventReset((int)SSXApp->Game->Replay, mAIIndex);
     pos = mat->row[3];
     dir = MatMulV_34D0(((char*)mat), t4vect_XAxis);
-    cRiderMetrix_evReset(self->mMetrix, 1);
-    cRider_setMotionState_impl(self, 3);
-    cRider_setControlState_impl(self, 13);
-    cRider_putAt_34D0(self, &pos, &dir, 5, 0.0f);
-    self->mRiderHandler->GateControl.GateState = 2;
-    cRider_setControlState_impl(self, 6);
-    self->cancelRiderTransitions();
-    cRiderHandler_resetRiderFX(self->mRiderHandler);
-    func_002F1A00(self->mAttachedEmitterFX);
-    if ((unsigned int)self->mViewIndex < 2) {
-        cChaseCameraController* obj = SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex]->ChaseController;
+    cRiderMetrix_evReset(mMetrix, 1);
+    cRider_setMotionState_impl(this, 3);
+    cRider_setControlState_impl(this, 13);
+    cRider_putAt_34D0(this, &pos, &dir, 5, 0.0f);
+    mRiderHandler->GateControl.GateState = 2;
+    cRider_setControlState_impl(this, 6);
+    cancelRiderTransitions();
+    cRiderHandler_resetRiderFX(mRiderHandler);
+    func_002F1A00(mAttachedEmitterFX);
+    if ((unsigned int)mViewIndex < 2) {
+        cChaseCameraController* obj = SSXApp->Game->ViewMan->PlayerCamera[mViewIndex]->ChaseController;
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
         vt[4].fn(vthis(obj, vt[4]));
     }
@@ -6225,12 +6225,12 @@ static inline void riderAddEq_001250A8(t4Vector& a, const t4Vector& b)
  *
  * @param impulse  the velocity change (On Tour: const t4Vector & f)
  */
-extern "C" void cRider_applyBoost(cRider* self, t4Vector* impulse)
+void cRider::applyBoost(t4Vector* impulse)
 {
-    t4Vector* velocity = (&self->mVelocity);
+    t4Vector* velocity = (&mVelocity);
     riderAddEq_001250A8(*velocity, *impulse);
-    if (self->getMotionState() == MS_Air)
-        cAirPredictor_startLaunchIntoAir(self->mAirPredictor, &self->mPosition, velocity, 3333.33349609375f);
+    if (getMotionState() == MS_Air)
+        cAirPredictor_startLaunchIntoAir(mAirPredictor, &mPosition, velocity, 3333.33349609375f);
 }
 #endif
 

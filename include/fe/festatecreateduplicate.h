@@ -67,6 +67,10 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateCreateDuplicate1() __asm__("cFEStateCreateDuplicate_cFEStateCreateDuplicate1");
+    // retail's destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCreateDuplicate();
+    virtual void onCreateScreen() __asm__("cFEStateCreateDuplicate_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateCreateDuplicate, mbAccount, 0x6D0);

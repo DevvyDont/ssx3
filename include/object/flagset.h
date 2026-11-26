@@ -165,6 +165,13 @@ struct cFlagManager : public cObjNode {
     void AddFlag(cFlagNode* node, void* desc) __asm__("cFlagManager_AddFlag");
     void RemoveFlag(tInstanceRecord* instRecord) __asm__("cFlagManager_RemoveFlag");
     float GetWindFactor() __asm__("cFlagManager_GetWindFactor");
+    // retail's destructor cFlagManager__cFlagManager stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFlagManager();
+    virtual void update() __asm__("cFlagManager_update");
+    virtual void render() __asm__("cFlagManager_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlagManager_writeToReplayFrame");
+    virtual void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cFlagManager_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cFlagManager, mCurrentWindFactor, 0x010);

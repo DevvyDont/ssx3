@@ -115,6 +115,7 @@ struct cSplashManager : public cObjNode {
     void AddSplashes() __asm__("cSplashManager_AddSplashes");
     void ReportImpactLocal(t4Vector* impactPos, float speed) __asm__("cSplashManager_ReportImpactLocal");
     void ReportSnowfall(float intensity) __asm__("cSplashManager_ReportSnowfall");
+    virtual void render() __asm__("cSplashManager_render");
 };
 
 CHECK_OFFSET(cSplashManager, mViewIndex, 0x010);

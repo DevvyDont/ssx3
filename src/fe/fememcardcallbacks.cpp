@@ -1158,7 +1158,6 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
  * Reads the popup id through cFEMemCard_mInstance but writes +0x210 and +0x218 through @p self_; callers pass the
  * instance.
  *
- * @param self_  the memory-card screen
  * @param displayText  the 16-bit message text
  * @param yesOnly  nonzero for a single (yes) button
  * @param noButtons  nonzero for no buttons
@@ -1166,13 +1165,13 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
  * @param passUpdate  passUpdate: nonzero lets updates pass to the screen below
  * @param snowFlake  nonzero for the snowflake variant
  */
-extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, unsigned short* displayText, int yesOnly, int noButtons,
-                                    int layerOffset, int passUpdate, int snowFlake)
+void cFEMemCard::getPopup(unsigned short*displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate,
+                          int snowFlake)
 {
     if (cFEMemCard_mInstance->mPopupType != cFEMemCard::kPOP_STATUS) {
-        self_->mIsStatusPopupOn = 0;
+        mIsStatusPopupOn = 0;
     }
-    cFEPopupConfirm* existingPopup = self_->mStatusPopup;
+    cFEPopupConfirm* existingPopup = mStatusPopup;
     if (existingPopup != 0) {
         existingPopup->initPopup(displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
     } else {
@@ -1180,11 +1179,11 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, unsigned short* displayTe
         void* engine = cFEMemCard_mInstance->mpEngine;
         cFEPopupConfirm* n = (cFEPopupConfirm*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance,
             displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
-        self_->mStatusPopup = n;
-        cUIStateStack_pushPopup(&self_->mpEngine->mStateStack, n);
+        mStatusPopup = n;
+        cUIStateStack_pushPopup(&mpEngine->mStateStack, n);
     }
     if (cFEMemCard_mInstance->mPopupType == cFEMemCard::kPOP_OVERWRITE) {
-        self_->mStatusPopup->setDefaultButton(1);
+        mStatusPopup->setDefaultButton(1);
     }
 }
 #endif
@@ -1217,10 +1216,9 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exit__FPv);
 /**
  * Sets the memory-card screen's state (+0x1C0) to 6.
  */
-void cFEMemCard_exit(void* vself)
+void cFEMemCard::exit()
 {
-    cFEMemCard* self = (cFEMemCard*)vself;
-    self->mState = cFEMemCard::kDONE;
+    mState = cFEMemCard::kDONE;
 }
 #endif
 
@@ -1235,12 +1233,12 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
  *
  * Calls cFEMemCard_SetLoadPressed(@p self, 1), then vtable slot 47 (cFEMemCard_displayStatusPopup).
  */
-extern "C" void cFEMemCard_startLoad(cFEMemCard* self)
+void cFEMemCard::startLoad()
 {
-    self->SetLoadPressed(1);
-    self->mIsProcessing = 1;
-    self->mState = cFEMemCard::kLOADING;
-    self->displayStatusPopup();
+    SetLoadPressed(1);
+    mIsProcessing = 1;
+    mState = cFEMemCard::kLOADING;
+    displayStatusPopup();
 }
 #endif
 
@@ -1472,18 +1470,18 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
  * words and the load request (cFEMemCard_SetLoadPressed 0); sets the cancel word (+0x1E4) that
  * cFEMemCard_isCancelPressed returns and the screen state (+0x1C0) to 2.
  */
-extern "C" void cFEMemCard_cancel(cFEMemCard* self)
+void cFEMemCard::cancel()
 {
-    self->mIsProcessing = 0;
-    self->mIsOverwriteOK = 0;
-    self->mIsRetryPressed = 0;
-    self->mIsLoadWait = 0;
-    self->mIsCancelPressed = 1;
-    self->SetLoadPressed(0);
-    self->mState = cFEMemCard::kSKIP;
-    self->mIsDeletePressed = 0;
-    self->mIsFormatPressed = 0;
-    self->mIsSavePressed = 0;
+    mIsProcessing = 0;
+    mIsOverwriteOK = 0;
+    mIsRetryPressed = 0;
+    mIsLoadWait = 0;
+    mIsCancelPressed = 1;
+    SetLoadPressed(0);
+    mState = cFEMemCard::kSKIP;
+    mIsDeletePressed = 0;
+    mIsFormatPressed = 0;
+    mIsSavePressed = 0;
 }
 #endif
 
@@ -1525,27 +1523,27 @@ extern char str_right_arr[];
  * @param input  the UI input (On Tour cUIInput* pInput)
  * @return 1 when left or right was pressed, otherwise 0
  */
-extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
+bool cFEMemCard::onInputBegin(cUIInput* input)
 {
     int handled = 0;
-    if (self->mIsProcessing == true)
-        return 0;
+    if (mIsProcessing == true)
+        return false;
     if (input->isLeft()) {
         handled = 1;
-        self->mDoPrevMemCard = handled;
-        if (self->mpScreen) {
-            unsigned short frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_left_arr));
+        mDoPrevMemCard = handled;
+        if (mpScreen) {
+            unsigned short frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_left_arr));
             if (frame != cUIScreen::kNoFrame)
-                cUIScreen_playFrame(self->mpScreen, frame, 1);
+                cUIScreen_playFrame(mpScreen, frame, 1);
         }
     } else {
         if (input->isRight()) {
             handled = 1;
-            self->mDoNextMemCard = handled;
-            if (self->mpScreen) {
-                unsigned short frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_right_arr));
+            mDoNextMemCard = handled;
+            if (mpScreen) {
+                unsigned short frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_right_arr));
                 if (frame != cUIScreen::kNoFrame)
-                    cUIScreen_playFrame(self->mpScreen, frame, 1);
+                    cUIScreen_playFrame(mpScreen, frame, 1);
             }
         }
     }
@@ -1567,14 +1565,14 @@ extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
  * (vtable slot 36) with yes-only, no-buttons and snowflake set, then sets the status-popup flag (+0x210); cFEMemCard_onUpdate
  * refreshes the text every frame while that flag is set.
  */
-extern "C" void cFEMemCard_displayStatusPopup(cFEMemCard* self)
+void cFEMemCard::displayStatusPopup()
 {
     unsigned short buf[800];
     void* obj = cSSXApp_getMCManager(SSXApp);
-    self->mPopupType = cFEMemCard::kPOP_STATUS;
+    mPopupType = cFEMemCard::kPOP_STATUS;
     cMCOverlayManager_GetMessage(obj, buf, 800);
-    self->getPopup(buf, 1, 1, 0, 0, 1);
-    self->mIsStatusPopupOn = 1;
+    getPopup(buf, 1, 1, 0, 0, 1);
+    mIsStatusPopupOn = 1;
 }
 #endif
 
@@ -1621,52 +1619,51 @@ extern char str_onmenu[];
  * mScrollItemCurrent, else mSlot) decides hideDeleteButton and hideMainButton: no file in the slot (the card's
  * HasFileName) or no card (IsAvailable1).
  *
- * @param self  the memory-card screen
  */
-extern "C" void cFEMemCard_onUpdate(cFEMemCard* self)
+void cFEMemCard::onUpdate()
 {
-    if (self->mStatusPopup == 0 && self->mpKeyboard == 0) {
+    if (mStatusPopup == 0 && mpKeyboard == 0) {
         if ((int)SSXApp->Game != 0) {
             cOVState_onUpdate();
         } else {
-            cUIState_onUpdate(self);
+            cUIState_onUpdate(this);
         }
     }
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    if (self->mIsManagerStarted == 0) {
+    if (mIsManagerStarted == 0) {
         cMCOverlayManager_ManagerStart(mp);
-        self->mIsManagerStarted = 1;
-        self->mScreenStatus = cFEMemCard::kDISPLAY_OFF;
-        self->triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
+        mIsManagerStarted = 1;
+        mScreenStatus = cFEMemCard::kDISPLAY_OFF;
+        triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
         mp->SetState(kMCOverlay_InitCardsCheck);
     }
-    if (self->mState != cFEMemCard::kDONE || MEMCARD_BUSY(self, mp)) {
+    if (mState != cFEMemCard::kDONE || MEMCARD_BUSY(this, mp)) {
         cMCOverlayManager_update(mp);
     }
-    switch (self->mState) {
+    switch (mState) {
     case cFEMemCard::kSTART:
-        self->updateStart();
+        updateStart();
         break;
     case cFEMemCard::kCHECKING:
-        self->updateChecking();
+        updateChecking();
         break;
     case cFEMemCard::kSKIP:
-        self->updateSkip();
+        updateSkip();
         break;
     case cFEMemCard::kSAVING:
-        self->updateSaving();
+        updateSaving();
         break;
     case cFEMemCard::kDELETING:
-        self->updateDeleting();
+        updateDeleting();
         break;
     case cFEMemCard::kLOADING:
-        self->updateLoading();
+        updateLoading();
         break;
     case cFEMemCard::kDONE:
         {
             cMCOverlayManager* mp2 = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-            if (!MEMCARD_BUSY(self, mp2))
-                self->updateDone();
+            if (!MEMCARD_BUSY(this, mp2))
+                updateDone();
         }
         break;
     }
@@ -1679,32 +1676,32 @@ extern "C" void cFEMemCard_onUpdate(cFEMemCard* self)
             || managerState == kMCOverlay_LoadProgress || managerState == kMCOverlay_LoadDoneWait
             || managerState == kMCOverlay_InitDeleteProgress || managerState == kMCOverlay_DeleteProgress
             || managerState == kMCOverlay_DeleteDoneWait) {
-            self->displayStatusPopup();
+            displayStatusPopup();
         }
     }
     if (cFEMemCard_mInstance->mIsStatusPopupOn != 0) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(mp, buf, 800);
-        self->mStatusPopup->setMessage(buf);
+        mStatusPopup->setMessage(buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
     }
-    self->displayStatus();
-    if (self->mStatusPopup == 0 && mp->mpMemCard->IsFileInfoValid() != 0) {
-        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
-        int sel = self->mSlot;
+    displayStatus();
+    if (mStatusPopup == 0 && mp->mpMemCard->IsFileInfoValid() != 0) {
+        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_onmenu));
+        int sel = mSlot;
         if (menu != 0) {
             sel = menu->mScrollItemCurrent;
         }
         // hideDeleteButton (slot 38) through its entry: retail keeps &vt[38].fn live across the two card calls, a real
         // call keeps &vt[38] (lw 4(entry) instead of lw 0(fn)).
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, this);
         void (**pf)(void*, int) = &vt[38].fn;
-        (*pf)(vthis(self, vt[38]), mp->mpMemCard->HasFileName(sel) == 0 || mp->mpMemCard->IsAvailable1() == 0);
+        (*pf)(vthis(this, vt[38]), mp->mpMemCard->HasFileName(sel) == 0 || mp->mpMemCard->IsAvailable1() == 0);
         bool slotEmpty = !mp->mpMemCard->HasFileName(sel);
         bool cardMissing = !mp->mpMemCard->IsAvailable1();
-        self->hideMainButton(slotEmpty, cardMissing);
+        hideMainButton(slotEmpty, cardMissing);
     }
 }
 #endif
@@ -1725,9 +1722,9 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  * (flag bit 5), picks the first highlightable item; selects that index with cUIMenu_setSelectedByIndex (index 0
  * when none is highlightable) and stores it at +0x1C4.
  */
-extern "C" void cFEMemCard_setMenuHighlight(cFEMemCard* self)
+void cFEMemCard::setMenuHighlight()
 {
-    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_onmenu));
     if (((void*)menu) != 0) {
         cUIThing* item = menu->mpSelected;
         int idx = menu->mScrollItemCurrent;
@@ -1736,10 +1733,10 @@ extern "C" void cFEMemCard_setMenuHighlight(cFEMemCard* self)
         }
         if (idx != cUIMenu::kNoItem) {
             cUIMenu_setSelectedByIndex(menu, idx);
-            self->mSlot = idx;
+            mSlot = idx;
         } else {
             cUIMenu_setSelectedByIndex(menu, 0);
-            self->mSlot = 0;
+            mSlot = 0;
         }
     }
 }
@@ -1783,11 +1780,11 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateStart);
  * (cFEMemCard_triggerDisplayState) with it. Fills vtable entry 31 (+0xFC) of the memory-card states (cFEStateMemCard,
  * cFEStateProfileLoad, cFEStateOptionsDeviceSelect), between the empty update entries and the skip handler.
  */
-extern "C" void cFEMemCard_updateStart(cFEMemCard* self)
+void cFEMemCard::updateStart()
 {
-    if (self->mScreenStatus != cFEMemCard::kDISPLAY_OFF) {
-        self->mScreenStatus = cFEMemCard::kDISPLAY_OFF;
-        self->triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
+    if (mScreenStatus != cFEMemCard::kDISPLAY_OFF) {
+        mScreenStatus = cFEMemCard::kDISPLAY_OFF;
+        triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
     }
 }
 #endif
@@ -1809,10 +1806,9 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateSkip__FPv);
 /**
  * Sets the memory-card screen state (+0x1C0) to 1.
  */
-void cFEMemCard_updateSkip(void* vself)
+void cFEMemCard::updateSkip()
 {
-    cFEMemCard* self = (cFEMemCard*)vself;
-    self->mState = cFEMemCard::kCHECKING;
+    mState = cFEMemCard::kCHECKING;
 }
 #endif
 
@@ -1859,9 +1855,9 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseTransition);
  *
  * @return true when the screen state is kDONE
  */
-extern "C" bool cFEMemCard_onLoseTransition(cFEMemCard* self)
+bool cFEMemCard::onLoseTransition()
 {
-    return self->mState == cFEMemCard::kDONE;
+    return mState == cFEMemCard::kDONE;
 }
 #endif
 
@@ -1931,23 +1927,23 @@ extern char str_kT_MEMFECheckingCardPS2[];
  *
  * @param state  the display state, kDISPLAY_OFF .. kDISPLAY_ON (On Tour gotoScreenState)
  */
-extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
+void cFEMemCard::triggerDisplayState(int state)
 {
     unsigned short buf[0x100];
     int frame = 0xFFFF;
-    self->mScreenStatus = state;
+    mScreenStatus = state;
     switch (state) {
     case cFEMemCard::kDISPLAY_OFF: {
-        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             widget->setFocus(0);
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
             widget->setFocus(1);
         }
-        frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_off));
-        cUIThing* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
+        frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_off));
+        cUIThing* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_text_box_message));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
@@ -1964,16 +1960,16 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     }
     case cFEMemCard::kDISPLAY_FILES: {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             widget->setFocus(0);
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
             widget->setFocus(1);
         }
-        frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_file_display));
-        cUIThing* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
+        frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_file_display));
+        cUIThing* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_text_box_message));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager_getDeviceNumberString(mp, buf, mp->mSelectedDevice);
@@ -1988,20 +1984,20 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         break;
     }
     case cFEMemCard::kDISPLAY_ON: {
-        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             widget->setFocus(1);
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
             widget->setFocus(0);
         }
-        frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_on));
+        frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_on));
         break;
     }
     }
     if (frame != cUIScreen::kNoFrame)
-        cUIScreen_jumpToFrame(self->mpScreen, frame);
+        cUIScreen_jumpToFrame(mpScreen, frame);
 }
 #endif
 
@@ -2082,12 +2078,12 @@ static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) =
  *
  * @return 1 when all the checks pass, else 0
  */
-extern "C" int cFEMemCard_displayFileOK(cFEMemCard* self)
+bool cFEMemCard::displayFileOK()
 {
     int allowed = 0;
     int one = 1;
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    int st = self->mState;
+    int st = mState;
     if (st != cFEMemCard::kSTART && st != cFEMemCard::kDONE && mp->mCheckAllowed != 0 && mp->mGetDir == 0
         && mp->mpMemCard->IsBusy() == 0) {
         if (!IsModeK1D9880(((char*)mp), kMCOverlay_ReadingCard) && !IsModeK1D9880(((char*)mp), kMCOverlay_Done)) {
@@ -2264,28 +2260,28 @@ void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup
  * @param src  the label, a 16-bit string (On Tour ustrText)
  * @param mode  which button: 0, 1, or anything else for a third one (On Tour uiButton)
  */
-extern "C" void cFEPopupConfirm_setButtonText(cFEPopupConfirm* self, void* src, int mode)
+void cFEPopupConfirm::setButtonText(unsigned short*src, unsigned int mode)
 {
-    void* slots = (char*)&self->info;
+    void* slots = (char*)&info;
     if (mode == 0) {
-        void* buttonText = (char*)&self->mYesText[0];
+        void* buttonText = (char*)&mYesText[0];
         strcpy1(buttonText, src);
         func_001C57A0(slots, 0, (int)buttonText); // PORT: pointer passed as int
     } else if (mode == 1) {
-        if (self->mNumButtons >= 2) {
-            void* buttonText = (char*)&self->mNoText[0];
+        if (mNumButtons >= 2) {
+            void* buttonText = (char*)&mNoText[0];
             strcpy1(buttonText, src);
             func_001C57A0(slots, 1, (int)buttonText);
         }
     } else {
-        void* buttonText = (char*)&self->mAltText[0];
-        self->mNumButtons = 3;
-        self->info.meType = 3;
+        void* buttonText = (char*)&mAltText[0];
+        mNumButtons = 3;
+        info.meType = 3;
         strcpy1(buttonText, src);
         func_001C57A0(slots, 2, (int)buttonText);
     }
-    if ((int)self->mpScreen != 0) {
-        cScreenPopup_redrawPopup_self(self);
+    if ((int)mpScreen != 0) {
+        cScreenPopup_redrawPopup_self(this);
     }
 }
 #endif
@@ -2307,15 +2303,15 @@ void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup
  *
  * @param src  the new 16-bit message
  */
-extern "C" void cFEPopupConfirm_setMessage(cFEPopupConfirm* self, void* src)
+void cFEPopupConfirm::setMessage(unsigned short*src)
 {
     if (src != 0 && strlen1(src) != 0) {
-        void* dst = (char*)&self->mDisplayText[0];
+        void* dst = (char*)&mDisplayText[0];
         strcpy1(dst, src);
-        self->info.mtMessage.pustr = (const unsigned short*)dst;
-        self->info.mtMessage.eType = 1;
-        if ((int)self->mpScreen != 0) {
-            cScreenPopup_redrawPopup_self(self);
+        info.mtMessage.pustr = (const unsigned short*)dst;
+        info.mtMessage.eType = 1;
+        if ((int)mpScreen != 0) {
+            cScreenPopup_redrawPopup_self(this);
         }
     }
 }

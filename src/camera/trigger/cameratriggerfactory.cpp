@@ -1908,34 +1908,34 @@ static inline float Wrap_1736E0(float v)
  * Position (+0x40) is set from those, then Heading (+0x50) and Pitch (+0x54) turn toward the new camera-to-focus
  * direction by HeadingLookRate (+0x64) / 60 and PitchLookRate (+0x68) / 60 (the pitch step is not wrapped).
  */
-extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
+void cTriggerAlgorithm::update()
 {
     t4Vector focusPos, riderVel, riderFront;
-    char* riderTarget = (char*)self->Target;
+    char* riderTarget = (char*)Target;
     sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[1];
     ((void (*)(void*, void*))vEntry->fn)(&focusPos, vthis(riderTarget, *vEntry));
-    riderTarget = (char*)self->Target;
+    riderTarget = (char*)Target;
     vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[3];
     ((void (*)(void*, void*))vEntry->fn)(&riderVel, vthis(riderTarget, *vEntry));
-    riderTarget = (char*)self->Target;
+    riderTarget = (char*)Target;
     vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[4];
     ((void (*)(void*, void*))vEntry->fn)(&riderFront, vthis(riderTarget, *vEntry));
     {
         t4Vector scaledVec;
-        ScaleTo_1736E0(scaledVec, t4vect_ZAxis_36E0, self->HeightOffset);
+        ScaleTo_1736E0(scaledVec, t4vect_ZAxis_36E0, HeightOffset);
         AddEq_1736E0(focusPos, scaledVec);
-        ScaleTo_1736E0(scaledVec, riderFront, self->LeadDistance);
+        ScaleTo_1736E0(scaledVec, riderFront, LeadDistance);
         AddEq_1736E0(focusPos, scaledVec);
     }
-    self->CamTargetPos = focusPos;
-    t4Vector toFocus = Sub_1736E0(focusPos, self->Position);
+    CamTargetPos = focusPos;
+    t4Vector toFocus = Sub_1736E0(focusPos, Position);
     float yawD = Atan2_1736E0(toFocus.y, toFocus.x);
     float yawC = Atan2_1736E0(riderFront.y, riderFront.x);
     float diff = Wrap_1736E0(yawC) - yawD;
     float wd = Wrap_1736E0(diff);
     float len3 = Length_1736E0(toFocus);
-    float dd = self->IdealDist - len3;
-    float yawN = yawD + wd * self->HeadingAdjustRate * 0.01666666753590107f;
+    float dd = IdealDist - len3;
+    float yawN = yawD + wd * HeadingAdjustRate * 0.01666666753590107f;
     float dist;
     if (Abs_1736E0(dd) > 5000.0f) {
         dist = len3 + dd;
@@ -1951,8 +1951,8 @@ extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
     }
     float pitchD = Atan2_1736E0(-toFocus.z, Len2_1736E0(sVec2(toFocus.x, toFocus.y)));
     float pitchC = Atan2_1736E0(riderFront.z, Len2_1736E0(sVec2(riderFront.x, riderFront.y)));
-    float tp = pitchC * -self->PitchMultiplier + self->PitchOffset * 0.01745329424738884f;
-    float pitchN = pitchD + (Wrap_1736E0(tp) - pitchD) * self->PitchAdjustRate * 0.01666666753590107f;
+    float tp = pitchC * -PitchMultiplier + PitchOffset * 0.01745329424738884f;
+    float pitchN = pitchD + (Wrap_1736E0(tp) - pitchD) * PitchAdjustRate * 0.01666666753590107f;
     t4Vector dir;
     t4Vector n;
     float sc0, sc1, sc2, sc3;
@@ -1967,14 +1967,14 @@ extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
         ScaleTo_1736E0(scaledVec, dir, dist);
         n = SubN_1736E0(focusPos, scaledVec);
     }
-    self->Position = n;
-    n = SubN_1736E0(focusPos, self->Position);
+    Position = n;
+    n = SubN_1736E0(focusPos, Position);
     float yawE = Atan2_1736E0(n.y, n.x);
-    float oy = self->Heading;
-    self->Heading = oy + Wrap_1736E0(yawE - oy) * self->HeadingLookRate * 0.01666666753590107f;
+    float oy = Heading;
+    Heading = oy + Wrap_1736E0(yawE - oy) * HeadingLookRate * 0.01666666753590107f;
     float pitchE = Atan2_1736E0(n.z, Len2_1736E0(sVec2(n.x, n.y)));
-    float op = self->Pitch;
-    self->Pitch = op + (pitchE - op) * self->PitchLookRate * 0.01666666753590107f;
+    float op = Pitch;
+    Pitch = op + (pitchE - op) * PitchLookRate * 0.01666666753590107f;
 }
 #endif
 
@@ -3911,7 +3911,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_2ChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
+void cDEFAULT_2ChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
 {
     out->PitchBlendingMaxAngleDown = 6.654887676239014f;
     out->PitchBlendingMaxAngleUp = 16.140756607055664f;
@@ -3953,30 +3953,36 @@ extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(void* self, void* info,
  * pi/4), updateHandplant, updateCamTargetLate (base height 57.0), updateAirCam, updateHalfPipeCam (1.53 s),
  * updateRailCam (rise 120.9), updateViewCam (600, 300, 100) and updateSlowSpeedCam (15 km/h, 1.5 s each way).
  */
-extern "C" void cDEFAULT_2ChaseAlgorithm_update(cDEFAULT_2ChaseAlgorithm* self)
+void cDEFAULT_2ChaseAlgorithm::update()
 {
     cChaseSetup info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)this), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateCamTarget(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 222.8457794189453f, 5.91639518737793f, 76.68663024902344f, 5.25f,
+    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateCamTarget(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupCamDirection(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateFollowDistance(((char*)this), &info, 222.8457794189453f, 5.91639518737793f,
+            76.68663024902344f, 5.25f,
                   1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
-    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)self), &info, 5.74874210357666f, 27.03497314453125f, 8.82034969329834f, 7.998477935791016f,
+    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)this), &info, 5.74874210357666f, 27.03497314453125f,
+            8.82034969329834f, 7.998477935791016f,
                   0.9783917665481567f);
-    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)self), &info, 0.0f, 0.9651793837547302f, 1.0f, 0.949999988079071f);
-    cLookAtChaseAlgorithm_updateHandplant(((char*)self), &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)this), &info, 0.0f, 0.9651793837547302f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateHandplant(((char*)this), &info, 348.64111328125f, 66.33821868896484f,
+            162.2997283935547f, 2.00368070602417f, 0.0f,
                   0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
-    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)self), &info, 57.0410041809082f, 1.552131175994873f, 10.378137588500977f, 10.066482543945312f,
+    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)this), &info, 57.0410041809082f, 1.552131175994873f,
+            10.378137588500977f, 10.066482543945312f,
                   0.9241908192634583f);
-    cLookAtChaseAlgorithm_updateAirCam(((char*)self), &info, 1.840967059135437f, 2.494720935821533f, 0.0949358195066452f, 0.8546590209007263f);
-    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)self), &info, 1.5269116163253784f);
-    cLookAtChaseAlgorithm_updateRailCam(((char*)self), &info, 120.85977172851562f, 0.9706981778144836f);
-    cLookAtChaseAlgorithm_updateViewCam(((char*)self), &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
-    cLookAtChaseAlgorithm_updateSlowSpeedCam(((char*)self), &info, 15.0f, 1.5f, 1.5f);
+    cLookAtChaseAlgorithm_updateAirCam(((char*)this), &info, 1.840967059135437f, 2.494720935821533f,
+            0.0949358195066452f, 0.8546590209007263f);
+    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)this), &info, 1.5269116163253784f);
+    cLookAtChaseAlgorithm_updateRailCam(((char*)this), &info, 120.85977172851562f, 0.9706981778144836f);
+    cLookAtChaseAlgorithm_updateViewCam(((char*)this), &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    cLookAtChaseAlgorithm_updateSlowSpeedCam(((char*)this), &info, 15.0f, 1.5f, 1.5f);
 }
 #endif
 
@@ -3994,12 +4000,12 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
-extern "C" void cDEFAULT_2ChaseAlgorithm_snap(cDEFAULT_2ChaseAlgorithm* self, int id)
+void cDEFAULT_2ChaseAlgorithm::snap(int id)
 {
-    if (id == self->Target->Rider->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
-        self->update();
+    if (id == Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(this, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(this, 559.7440185546875f, 300.0f);
+        update();
     }
 }
 #endif
@@ -4074,7 +4080,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_3ChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
+void cDEFAULT_3ChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
 {
     out->PitchBlendingMaxAngleDown = 6.654887676239014f;
     out->PitchBlendingMaxAngleUp = 16.140756607055664f;
@@ -4115,30 +4121,36 @@ extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(void* self, void* info,
  * per speed, boost 10.76), updateFOVWithSpeed (0.960 * pi/4), updateCamTargetLate (base height 31.1), updateAirCam
  * (amplitude 0.136) and updateRailCam (rise 146.4).
  */
-extern "C" void cDEFAULT_3ChaseAlgorithm_update(cDEFAULT_3ChaseAlgorithm* self)
+void cDEFAULT_3ChaseAlgorithm::update()
 {
     cChaseSetup info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)this), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateCamTarget(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 300.9249267578125f, 11.549837112426758f, 76.68663024902344f, 10.755208015441895f,
+    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateCamTarget(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupCamDirection(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateFollowDistance(((char*)this), &info, 300.9249267578125f, 11.549837112426758f,
+            76.68663024902344f, 10.755208015441895f,
                   1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
-    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)self), &info, 11.678784370422363f, 31.225603103637695f, 11.392387390136719f, 9.33469009399414f,
+    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)this), &info, 11.678784370422363f, 31.225603103637695f,
+            11.392387390136719f, 9.33469009399414f,
                   0.9783917665481567f);
-    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)self), &info, 0.0f, 0.9599078297615051f, 1.0f, 0.949999988079071f);
-    cLookAtChaseAlgorithm_updateHandplant(((char*)self), &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)this), &info, 0.0f, 0.9599078297615051f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateHandplant(((char*)this), &info, 348.64111328125f, 66.33821868896484f,
+            162.2997283935547f, 2.00368070602417f, 0.0f,
                   0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
-    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)self), &info, 31.10257339477539f, 0.37469127774238586f, 12.332656860351562f, 10.589057922363281f,
+    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)this), &info, 31.10257339477539f, 0.37469127774238586f,
+            12.332656860351562f, 10.589057922363281f,
                   0.9241908192634583f);
-    cLookAtChaseAlgorithm_updateAirCam(((char*)self), &info, 1.8110172748565674f, 2.494720935821533f, 0.13641449809074402f, 0.8536682724952698f);
-    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)self), &info, 1.5269116163253784f);
-    cLookAtChaseAlgorithm_updateRailCam(((char*)self), &info, 146.38900756835938f, 0.9706981778144836f);
-    cLookAtChaseAlgorithm_updateViewCam(((char*)self), &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
-    cLookAtChaseAlgorithm_updateSlowSpeedCam(((char*)self), &info, 15.0f, 1.5f, 1.5f);
+    cLookAtChaseAlgorithm_updateAirCam(((char*)this), &info, 1.8110172748565674f, 2.494720935821533f,
+            0.13641449809074402f, 0.8536682724952698f);
+    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)this), &info, 1.5269116163253784f);
+    cLookAtChaseAlgorithm_updateRailCam(((char*)this), &info, 146.38900756835938f, 0.9706981778144836f);
+    cLookAtChaseAlgorithm_updateViewCam(((char*)this), &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    cLookAtChaseAlgorithm_updateSlowSpeedCam(((char*)this), &info, 15.0f, 1.5f, 1.5f);
 }
 #endif
 
@@ -4155,12 +4167,12 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
-extern "C" void cDEFAULT_3ChaseAlgorithm_snap(cDEFAULT_3ChaseAlgorithm* self, int id)
+void cDEFAULT_3ChaseAlgorithm::snap(int id)
 {
-    if (id == self->Target->Rider->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
-        self->update();
+    if (id == Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(this, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(this, 559.7440185546875f, 300.0f);
+        update();
     }
 }
 #endif
@@ -4235,7 +4247,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_4ChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
+void cDEFAULT_4ChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
 {
     out->PitchBlendingMaxAngleDown = 6.654887676239014f;
     out->PitchBlendingMaxAngleUp = 16.140756607055664f;
@@ -4276,30 +4288,36 @@ extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(void* self, void* info,
  * per speed, boost 11.38), updateDropWithSpeed (rise 98.8), updateFOVWithSpeed (0.965 * pi/4), updateCamTargetLate
  * (base height 50.0), updateAirCam (amplitude 0.102) and updateRailCam (rise 167.9).
  */
-extern "C" void cDEFAULT_4ChaseAlgorithm_update(cDEFAULT_4ChaseAlgorithm* self)
+void cDEFAULT_4ChaseAlgorithm::update()
 {
     cChaseSetup info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)this), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateCamTarget(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 505.79815673828125f, 11.549837112426758f, 76.68663024902344f, 11.38194465637207f,
+    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateCamTarget(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupCamDirection(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateFollowDistance(((char*)this), &info, 505.79815673828125f, 11.549837112426758f,
+            76.68663024902344f, 11.38194465637207f,
                   1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
-    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)self), &info, 13.021197319030762f, 98.84776306152344f, 12.293619155883789f, 13.058300971984863f,
+    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)this), &info, 13.021197319030762f, 98.84776306152344f,
+            12.293619155883789f, 13.058300971984863f,
                   0.9783917665481567f);
-    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)self), &info, 0.0f, 0.9653480052947998f, 1.0f, 0.949999988079071f);
-    cLookAtChaseAlgorithm_updateHandplant(((char*)self), &info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f, 0.0f,
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)this), &info, 0.0f, 0.9653480052947998f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateHandplant(((char*)this), &info, 348.64111328125f, 66.33821868896484f,
+            162.2997283935547f, 2.00368070602417f, 0.0f,
                   0.9800000190734863f, 0.9599999785423279f, 0.4552607834339142f);
-    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)self), &info, 50.02703094482422f, 2.5781052112579346f, 13.97744369506836f, 10.748767852783203f,
+    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)this), &info, 50.02703094482422f, 2.5781052112579346f,
+            13.97744369506836f, 10.748767852783203f,
                   0.9241908192634583f);
-    cLookAtChaseAlgorithm_updateAirCam(((char*)self), &info, 1.878627061843872f, 2.494720935821533f, 0.10213389247655869f, 0.8599911332130432f);
-    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)self), &info, 1.5269116163253784f);
-    cLookAtChaseAlgorithm_updateRailCam(((char*)self), &info, 167.9465789794922f, 0.9706981778144836f);
-    cLookAtChaseAlgorithm_updateViewCam(((char*)self), &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
-    cLookAtChaseAlgorithm_updateSlowSpeedCam(((char*)self), &info, 15.0f, 1.5f, 1.5f);
+    cLookAtChaseAlgorithm_updateAirCam(((char*)this), &info, 1.878627061843872f, 2.494720935821533f,
+            0.10213389247655869f, 0.8599911332130432f);
+    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)this), &info, 1.5269116163253784f);
+    cLookAtChaseAlgorithm_updateRailCam(((char*)this), &info, 167.9465789794922f, 0.9706981778144836f);
+    cLookAtChaseAlgorithm_updateViewCam(((char*)this), &info, 600.0f, 300.0f, 100.0f, 0.9800000190734863f);
+    cLookAtChaseAlgorithm_updateSlowSpeedCam(((char*)this), &info, 15.0f, 1.5f, 1.5f);
 }
 #endif
 
@@ -4316,12 +4334,12 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
-extern "C" void cDEFAULT_4ChaseAlgorithm_snap(cDEFAULT_4ChaseAlgorithm* self, int id)
+void cDEFAULT_4ChaseAlgorithm::snap(int id)
 {
-    if (id == self->Target->Rider->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
-        self->update();
+    if (id == Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(this, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(this, 559.7440185546875f, 300.0f);
+        update();
     }
 }
 #endif
@@ -4355,26 +4373,31 @@ extern "C" void cLookAtChaseAlgorithm_updateRotation(void* self, float ang);
  * (rise 0), then updateRotation with Angle to put the eye on the fixed heading. There is no handplant, view or
  * slow-speed step.
  */
-extern "C" void cDirectionChaseAlgorithm_update(cDirectionChaseAlgorithm* self)
+void cDirectionChaseAlgorithm::update()
 {
     cChaseSetup info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)this), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateCamTarget(((char*)self), &info);
-    cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
-    cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 356.4251708984375f, 0.0f, 76.68663024902344f, 0.0f, 1.6834967136383057f,
+    cLookAtChaseAlgorithm_setupHandplantBlend(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateCamTarget(((char*)this), &info);
+    cLookAtChaseAlgorithm_setupCamDirection(((char*)this), &info);
+    cLookAtChaseAlgorithm_updateFollowDistance(((char*)this), &info, 356.4251708984375f, 0.0f, 76.68663024902344f,
+            0.0f, 1.6834967136383057f,
                   0.9239780306816101f, 0.907414972782135f);
-    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)self), &info, 0.0f, -168.60406494140625f, 0.0f, 0.0f, 0.9783917665481567f);
-    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)self), &info, 0.0f, 0.9709749817848206f, 1.0f, 0.949999988079071f);
-    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)self), &info, -0.24752351641654968f, 0.008603549562394619f, 0.12915411591529846f,
+    cLookAtChaseAlgorithm_updateDropWithSpeed(((char*)this), &info, 0.0f, -168.60406494140625f, 0.0f, 0.0f,
+            0.9783917665481567f);
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(((char*)this), &info, 0.0f, 0.9709749817848206f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateCamTargetLate(((char*)this), &info, -0.24752351641654968f, 0.008603549562394619f,
+            0.12915411591529846f,
                   0.22476252913475037f, 0.9241908192634583f);
-    cLookAtChaseAlgorithm_updateAirCam(((char*)self), &info, 1.878627061843872f, 2.494720935821533f, 0.19890090823173523f, 0.8672914505004883f);
-    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)self), &info, 1.5269116163253784f);
-    cLookAtChaseAlgorithm_updateRailCam(((char*)self), &info, 0.0f, 0.9706981778144836f);
-    cLookAtChaseAlgorithm_updateRotation(((char*)self), self->Angle);
+    cLookAtChaseAlgorithm_updateAirCam(((char*)this), &info, 1.878627061843872f, 2.494720935821533f,
+            0.19890090823173523f, 0.8672914505004883f);
+    cLookAtChaseAlgorithm_updateHalfPipeCam(((char*)this), &info, 1.5269116163253784f);
+    cLookAtChaseAlgorithm_updateRailCam(((char*)this), &info, 0.0f, 0.9706981778144836f);
+    cLookAtChaseAlgorithm_updateRotation(((char*)this), Angle);
 }
 #endif
 
@@ -4451,7 +4474,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDirectionChaseAlgorithm_getRaceCamFinalPhaseData(cDirectionChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
+void cDirectionChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
 {
     out->PitchBlendingMaxAngleDown = 6.654887676239014f;
     out->PitchBlendingMaxAngleUp = 16.140756607055664f;
@@ -4474,12 +4497,12 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
-extern "C" void cDirectionChaseAlgorithm_snap(cDirectionChaseAlgorithm* self, int id)
+void cDirectionChaseAlgorithm::snap(int id)
 {
-    if (id == self->Target->Rider->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
-        self->update();
+    if (id == Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(this, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(this, 559.7440185546875f, 300.0f);
+        update();
     }
 }
 #endif
@@ -4743,7 +4766,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getRaceC
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData(cSPOKEChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
+void cSPOKEChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
 {
     out->PitchBlendingMaxAngleDown = 6.654887676239014f;
     out->PitchBlendingMaxAngleUp = 16.140756607055664f;
@@ -5337,7 +5360,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData(cSUPERPIPEChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
+void cSUPERPIPEChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
 {
     out->PitchBlendingMaxAngleDown = 6.654887676239014f;
     out->PitchBlendingMaxAngleUp = 16.140756607055664f;
@@ -5665,14 +5688,14 @@ extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealTargetPos(void* self);
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
-extern "C" void cSUPERPIPEChaseAlgorithm_snap(cSUPERPIPEChaseAlgorithm* self, int id)
+void cSUPERPIPEChaseAlgorithm::snap(int id)
 {
-    if (id == self->Target->Rider->getAIIndex()) {
-        *(&self->Position) = cSUPERPIPEChaseAlgorithm_getIdealPosition(self);
-        *(&self->CamTargetPos) = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(self);
-        cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
-        self->update();
+    if (id == Target->Rider->getAIIndex()) {
+        *(&Position) = cSUPERPIPEChaseAlgorithm_getIdealPosition(this);
+        *(&CamTargetPos) = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(this);
+        cLookAtChaseAlgorithm_snap(this, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(this, 559.7440185546875f, 300.0f);
+        update();
     }
 }
 #endif
@@ -6036,20 +6059,21 @@ static inline t4Vector getPos_00178BB0(char* self)
  * the target position (slot 1) - Z * 3; Position = CamTargetPos - v * 126 - Z * 27, or v * 326 back and 123 up when
  * two or more riders are allocated (cAI::NumberOfRidersAllocated, AI + 0x78).
  */
-extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* self)
+void cPOST_RACE_1ChaseAlgorithm::update()
 {
     cChaseSetup info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)this), &info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    (self->AgeInFrames)++;
-    self->AgeInFrames %= 1100;
-    float ang = wrap_00178BB0((float)self->AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
+    (AgeInFrames)++;
+    AgeInFrames %= 1100;
+    float ang = wrap_00178BB0((float)AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
     float angle = (1.0f - fCos(ang)) * 0.7482788562774658f + -0.7482788562774658f;
     angle -= ffloor_00178BB0(angle * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     t4Vector rotation = AxisAngle_00178BB0(t4vect_ZAxis, angle);
-    t4Vector look = ctRot_00178BB0(rotation, *(&self->StartDir));
-    *(&self->CamTargetPos) = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
+    t4Vector look = ctRot_00178BB0(rotation, *(&StartDir));
+    *(&CamTargetPos) = ctAdd_00178BB0(getPos_00178BB0(((char*)this)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
     int multi = SSXApp->Game->AI->NumberOfRidersAllocated >= 2;
     float multiplayerHeight = 0.0f;
     if (multi) {
@@ -6059,8 +6083,8 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     if (multi) {
         multiplayerDistance = 200.0f;
     }
-    *(&self->Position) =
-        ctAdd_00178BB0(ctSub_00178BB0(*(&self->CamTargetPos), ctScale_00178BB0(look, multiplayerDistance + 126.0f)),
+    *(&Position) =
+        ctAdd_00178BB0(ctSub_00178BB0(*(&CamTargetPos), ctScale_00178BB0(look, multiplayerDistance + 126.0f)),
                        ctScale_00178BB0(t4vect_ZAxis, multiplayerHeight + -27.0f));
 }
 #endif
@@ -6079,13 +6103,13 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
-extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self, int id)
+void cPOST_RACE_1ChaseAlgorithm::snap(int id)
 {
-    if (id == self->Target->Rider->getAIIndex())
+    if (id == Target->Rider->getAIIndex())
     {
-        cLookAtChaseAlgorithm_snap(self, id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(self, 100.0f, 100.0f);
-        self->update();
+        cLookAtChaseAlgorithm_snap(this, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(this, 100.0f, 100.0f);
+        update();
     }
 }
 #endif

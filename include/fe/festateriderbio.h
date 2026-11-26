@@ -29,6 +29,10 @@ struct cFEStateRiderBio : public cUIState {
     void fillFavesInfo() __asm__("cFEStateRiderBio_fillFavesInfo");
     void fillQnAInfo() __asm__("cFEStateRiderBio_fillQnAInfo");
     void fillBioInfo() __asm__("cFEStateRiderBio_fillBioInfo");
+    // retail's destructor cFEStateRiderBio__cFEStateRiderBio stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRiderBio();
+    virtual void onCreateScreen() __asm__("cFEStateRiderBio_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateRiderBio, mCharID, 0x048);

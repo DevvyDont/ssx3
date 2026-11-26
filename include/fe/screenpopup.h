@@ -190,6 +190,12 @@ struct cScreenPopup : public cUIState {
     int getPassUpdate() __asm__("cScreenPopup_getPassUpdate");
     int getEntryBoxText() __asm__("cScreenPopup_getEntryBoxText");
     int isShowing() __asm__("cScreenPopup_isShowing");
+    // retail's destructor cScreenPopup__cScreenPopup stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cScreenPopup();
+    virtual void onCreateScreen() __asm__("cScreenPopup_onCreateScreen");
+    virtual bool onGainTransition(int first) __asm__("cScreenPopup_onGainTransition");
+    virtual void onUpdate() __asm__("cScreenPopup_onUpdate");
 };
 
 CHECK_OFFSET(cScreenPopup, mpBackGroundWhite, 0x48);

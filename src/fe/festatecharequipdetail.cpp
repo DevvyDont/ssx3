@@ -332,14 +332,14 @@ extern char str_12equ_char[];
  * and turn (0xAAC) to 0 and the pan (0xAA8) to -1, places the camera and models (cFEStateCharEquip_update3DPositions) and switches
  * the front-end sound-bank mode to 2.
  */
-extern "C" void cFEStateCharEquip_onCreateScreen(cFEStateCharEquip* self)
+void cFEStateCharEquip::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_12equ_char), 0);
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_12equ_char), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
     feRider->mDrawLayer = 17;
     feRider->mAnimateBoard = 0;
     int ok = *(unsigned int*)feRider < 10 && feRider->mDoneLoadingTextures != 0 && feRider->mCompiledModel != 0;
@@ -350,10 +350,10 @@ extern "C" void cFEStateCharEquip_onCreateScreen(cFEStateCharEquip* self)
             cRiderAnimBase_play(anim, 434, 0, -1.0f);
         }
     }
-    *(int*)&self->mZoom = 0;
-    *(int*)&self->mPlayerRotation = 0;
-    self->mPan = -1.0f;
-    self->update3DPositions();
+    *(int*)&mZoom = 0;
+    *(int*)&mPlayerRotation = 0;
+    mPan = -1.0f;
+    update3DPositions();
     func_0028F140(cAudioInterface_bxAudio(), 2);
 }
 #endif
@@ -369,14 +369,14 @@ void* cUIState_onDestroyScreen(void* self);
  *
  * The rider is left alone when SSXApp->RealFE is null; cUIState_onDestroyScreen() does the rest.
  */
-extern "C" void cFEStateCharEquip_onDestroyScreen(cFEStateCharEquip* self)
+void cFEStateCharEquip::onDestroyScreen()
 {
     cFE* mgr = SSXApp->RealFE;
     if (((char*)mgr) != 0) {
-        cFERider* feRider = cFERiderManager_getHuman1(&mgr->mRiderManager, self->mUserNum);
+        cFERider* feRider = cFERiderManager_getHuman1(&mgr->mRiderManager, mUserNum);
         *(unsigned int*)&feRider->mDrawLayer = 0xFFFFFFFF;
     }
-    cUIState_onDestroyScreen(self);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -706,23 +706,23 @@ extern char str_loading_text[];
  * a large preview is pending (0xA6C, 0x95C), otherwise until the FE rider's model is shown (+0xCC8). Then
  * cFEStateCharEquip_updatePreviewLoad() advances the preview load and cFEStateCharEquip_update3DPositions() places the camera and models.
  */
-extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
+void cFEStateCharEquip::onUpdate()
 {
-    cUIState_onUpdate(self);
-    if (self->mIconsLoaded == 0
-        && func_0019E238((sEquipTable*)(SSXApp->RealFE->mBoltFileManager), self->mCharID,
-                         self->mIconsFileIndex)) {
-        self->mIconsLoaded = 1;
-        func_0019A9B8(self);
+    cUIState_onUpdate(this);
+    if (mIconsLoaded == 0
+        && func_0019E238((sEquipTable*)(SSXApp->RealFE->mBoltFileManager), mCharID,
+                         mIconsFileIndex)) {
+        mIconsLoaded = 1;
+        func_0019A9B8(this);
     }
-    void* screen = cList_first((cList*)(&self->mScreens));
+    void* screen = cList_first((cList*)(&mScreens));
     cUIThing* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
-        cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+        cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
         int on = 0;
-        int mode1 = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
+        int mode1 = mEquipMode == cFEStateCharEquip::kEquipModeStore;
         if (mode1) {
-            if (self->mPreviewTextureFileIndex >= 0 || self->mLargePreviewDelay > 0)
+            if (mPreviewTextureFileIndex >= 0 || mLargePreviewDelay > 0)
                 on = 1;
         } else {
             on = feRider->mVisible;
@@ -730,8 +730,8 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
         }
         obj->setVisible(on);
     }
-    cFEStateCharEquip_updatePreviewLoad(self);
-    self->update3DPositions();
+    cFEStateCharEquip_updatePreviewLoad(this);
+    update3DPositions();
 }
 #endif
 
@@ -914,13 +914,12 @@ static inline int isMode1_9C28(sCharEquip_9C28* self)
  * the FE rider's Customize speech request (mCustomized) and pushes getPrevState's state. kONGAINFOCUS (row focused)
  * starts a delayed large-preview load in store mode and refreshes the item preview.
  *
- * @param selfv  the equip-gear state (this)
  * @param w  the row widget that sent the event; nothing happens when null
  * @param ev  the widget event (kONNEXT accept, kONPREV back, kONGAINFOCUS focused)
  */
-extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThing* w, unsigned int ev)
+void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
 {
-    sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
+    sCharEquip_9C28* self = (sCharEquip_9C28*)this;
     if (((char*)w) == 0)
         return;
     switch (ev) {

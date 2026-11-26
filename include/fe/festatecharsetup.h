@@ -54,6 +54,13 @@ struct cFEStateCharSetup : public cFEState {
     void updateWidget() __asm__("cFEStateCharSetup_updateWidget");
     void updateCharacter3DPos() __asm__("cFEStateCharSetup_updateCharacter3DPos");
     void show3DCharacter(int on) __asm__("cFEStateCharSetup_show3DCharacter");
+    // retail's destructor cFEStateCharSetup__cFEStateCharSetup stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCharSetup();
+    virtual void onCreateScreen() __asm__("cFEStateCharSetup_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateCharSetup_onDestroyScreen");
+    virtual void onUpdate() __asm__("cFEStateCharSetup_onUpdate");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cFEStateCharSetup_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateCharSetup, mbIsFirst, 0x048);

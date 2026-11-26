@@ -180,9 +180,9 @@ struct sEffVEntry {
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, cBxReplayFrame* obj)
+void cEffectModifier::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->writeReplayInstance((const tInstanceRecord*)self->Instance);
+    obj->writeReplayInstance((const tInstanceRecord*)Instance);
 }
 #endif
 
@@ -331,16 +331,16 @@ extern "C" void cStaticEmitter_update(void* self, float dt);
  * An emitter whose life (+0x50) starts negative runs forever; otherwise the effect is marked finished
  * (+0x1E4) once the life has run down to 0.
  */
-extern "C" void cParticleModifier_update(cParticleModifier* self)
+void cParticleModifier::update()
 {
-    if (self->Complete == 0) {
-        void* emitter = (char*)&self->Emitter;
-        if (self->Emitter.Duration < 0.0f) {
+    if (Complete == 0) {
+        void* emitter = (char*)&Emitter;
+        if (Emitter.Duration < 0.0f) {
             cStaticEmitter_update(emitter, 0.01666666753590107f);
         } else {
             cStaticEmitter_update(emitter, 0.01666666753590107f);
-            if (self->Emitter.Duration <= 0.0f) {
-                self->Complete = 1;
+            if (Emitter.Duration <= 0.0f) {
+                Complete = 1;
             }
         }
     }
@@ -358,10 +358,10 @@ extern "C" void cStaticEmitter_render1(void*);
  * Calls cStaticEmitter_render1() on the emitter embedded at offset 0x50 while the finished flag (offset 0x1E4,
  * set by cParticleModifier_update when the emitter's time runs out) is clear.
  */
-extern "C" void cParticleModifier_render(cParticleModifier* self)
+void cParticleModifier::render()
 {
-    if (self->Complete == 0) {
-        cStaticEmitter_render1((char*)&self->Emitter);
+    if (Complete == 0) {
+        cStaticEmitter_render1((char*)&Emitter);
     }
 }
 #endif
@@ -385,14 +385,14 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, cBxReplayFrame* stream)
+void cParticleModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    stream->write((const char*)&self->Complete, 4);
-    if (self->Complete == 0) {
-        stream->write((const char*)self->ParticleData, 216);
-        stream->write((const char*)&self->Transform, 0x40);
-        cStaticEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
+    this->cEffectModifier::writeToReplayFrame(stream);
+    stream->write((const char*)&Complete, 4);
+    if (Complete == 0) {
+        stream->write((const char*)ParticleData, 216);
+        stream->write((const char*)&Transform, 0x40);
+        cStaticEmitter_writeToReplayFrame((char*)&Emitter, stream);
     }
 }
 #endif
@@ -606,30 +606,30 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b
  * otherwise it keeps emitting and finishes when a non-negative life (+0x60) runs out. Does nothing once
  * finished (+0x18).
  */
-extern "C" void cDynamicParticleModifier_update(cDynamicParticleModifier* self)
+void cDynamicParticleModifier::update()
 {
-    if (self->Complete != 0) {
+    if (Complete != 0) {
         return;
     }
-    self->updatePosition();
-    if (self->Fade > 0) {
-        float* sub = (float*)(&self->Emitter);
-        if (self->Emitter.m_enabledCount > 0) {
-            cBaseClass_DynamicEmitter_updateBASE(sub, &self->Pos, &self->Vel, 0, 0.01666666753590107f);
+    updatePosition();
+    if (Fade > 0) {
+        float* sub = (float*)(&Emitter);
+        if (Emitter.m_enabledCount > 0) {
+            cBaseClass_DynamicEmitter_updateBASE(sub, &Pos, &Vel, 0, 0.01666666753590107f);
             return;
         }
     } else {
-        float* sub = (float*)(&self->Emitter);
-        if (self->Emitter.Duration < 0.0f) {
-            cBaseClass_DynamicEmitter_updateBASE(sub, &self->Pos, &self->Vel, 1, 0.01666666753590107f);
+        float* sub = (float*)(&Emitter);
+        if (Emitter.Duration < 0.0f) {
+            cBaseClass_DynamicEmitter_updateBASE(sub, &Pos, &Vel, 1, 0.01666666753590107f);
             return;
         }
-        cBaseClass_DynamicEmitter_updateBASE(sub, &self->Pos, &self->Vel, 1, 0.01666666753590107f);
-        if (!(self->Emitter.Duration <= 0.0f)) {
+        cBaseClass_DynamicEmitter_updateBASE(sub, &Pos, &Vel, 1, 0.01666666753590107f);
+        if (!(Emitter.Duration <= 0.0f)) {
             return;
         }
     }
-    self->Complete = 1;
+    Complete = 1;
 }
 #endif
 
@@ -642,10 +642,9 @@ INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_fadeEffect__FPv);
  * Sets the fade flag (offset 0x14). cDynamicParticleModifier_update then stops emitting and marks the effect
  * finished once the emitter's count at offset 0x240 (probably its live particles) reaches 0.
  */
-void cDynamicParticleModifier_fadeEffect(void* vself)
+void cDynamicParticleModifier::fadeEffect()
 {
-    cDynamicParticleModifier* self = (cDynamicParticleModifier*)vself;
-    self->Fade = 1;
+    Fade = 1;
 }
 #endif
 
@@ -660,10 +659,10 @@ extern "C" void cDynamicEmitter_render(void*, int);
  * Calls cDynamicEmitter_render() with 7 on the emitter embedded at offset 0x60 while the finished flag
  * (offset 0x18) is clear.
  */
-extern "C" void cDynamicParticleModifier_render(cDynamicParticleModifier* self)
+void cDynamicParticleModifier::render()
 {
-    if (self->Complete == 0) {
-        cDynamicEmitter_render((char*)&self->Emitter, 7);
+    if (Complete == 0) {
+        cDynamicEmitter_render((char*)&Emitter, 7);
     }
 }
 #endif
@@ -682,13 +681,13 @@ extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(void* self, void* s
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModifier* self, cBxReplayFrame* stream)
+void cDynamicParticleModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    stream->write((const char*)&self->Mesh, 80);
-    if (self->Complete == 0) {
-        stream->write((const char*)self->ParticleData, 216);
-        cBaseClass_DynamicEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
+    this->cEffectModifier::writeToReplayFrame(stream);
+    stream->write((const char*)&Mesh, 80);
+    if (Complete == 0) {
+        stream->write((const char*)ParticleData, 216);
+        cBaseClass_DynamicEmitter_writeToReplayFrame((char*)&Emitter, stream);
     }
 }
 #endif
@@ -780,12 +779,12 @@ INCLUDE_ASM("object/effectlink", cHaloModifier_update);
 /**
  * Spins a halo: adds the integer step (+0x2C) to its angle in degrees (+0x30), resetting it to 0 at +/-360.
  */
-extern "C" void cHaloModifier_update(cHaloModifier* self)
+void cHaloModifier::update()
 {
-    float angle = self->Angle + (float)self->Speed;
-    self->Angle = angle;
+    float angle = Angle + (float)Speed;
+    Angle = angle;
     if (angle >= 360.0f || angle <= -360.0f) {
-        self->Angle = 0.0f;
+        Angle = 0.0f;
     }
 }
 #endif
@@ -804,14 +803,14 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(t4Vector* pos, void* p, i
  * Gets the world matrix of mesh +0x28 of the instance (+0xC) and draws the halo sprite there with
  * cObjectInterface_renderSimpleLightHalo(), passing the halo data (+0x10), +0x24, the size (+0x20) and the current angle (+0x30).
  */
-extern "C" void cHaloModifier_render(cHaloModifier* self)
+void cHaloModifier::render()
 {
     t4Matrix matrix;
-    void* colour = (char*)&self->Color;
-    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, &matrix);
+    void* colour = (char*)&Color;
+    cInstanceNode_buildMeshMat(Instance, Mesh, &matrix);
     t4Vector origin = ((&matrix.row[0]))[3];
-    cObjectInterface_renderSimpleLightHalo(&origin, colour, self->Type,
-                  self->Radius, self->Angle);
+    cObjectInterface_renderSimpleLightHalo(&origin, colour, Type,
+                  Radius, Angle);
 }
 #endif
 
@@ -834,10 +833,10 @@ extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, cBxRep
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, cBxReplayFrame* stream)
+void cHaloModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    stream->write((const char*)&self->Color, 0x30);
+    this->cEffectModifier::writeToReplayFrame(stream);
+    stream->write((const char*)&Color, 0x30);
 }
 #endif
 

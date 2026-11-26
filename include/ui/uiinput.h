@@ -48,50 +48,50 @@ struct cUIInput {
     //   virtuals, same names and order (setPadNum takes an int in retail: cUIInput_setPadNum__FPvi).
     virtual ~cUIInput();                                        // 1
     virtual bool getState(char state) const;                    // 2
-    virtual bool isStart() const;                               // 3
-    virtual bool isSelect() const;                              // 4
-    virtual bool isNext() const;                                // 5
-    virtual bool isPrevious() const;                            // 6
-    virtual bool isOption() const;                              // 7
-    virtual bool isMisc() const;                                // 8
-    virtual bool isNextHeld() const;                            // 9
-    virtual bool isPreviousHeld() const;                        // 10
-    virtual bool isOptionHeld() const;                          // 11
-    virtual bool isMiscHeld() const;                            // 12
-    virtual bool isNextReleased() const;                        // 13
-    virtual bool isPreviousReleased() const;                    // 14
-    virtual bool isOptionReleased() const;                      // 15
-    virtual bool isMiscReleased() const;                        // 16
-    virtual bool isUp() const;                                  // 17
-    virtual bool isDown() const;                                // 18
-    virtual bool isLeft() const;                                // 19
-    virtual bool isRight() const;                               // 20
-    virtual bool isUpHeld() const;                              // 21
-    virtual bool isDownHeld() const;                            // 22
-    virtual bool isLeftHeld() const;                            // 23
-    virtual bool isRightHeld() const;                           // 24
-    virtual bool isRShift1() const;                             // 25
-    virtual bool isRShift2() const;                             // 26
-    virtual bool isLShift1() const;                             // 27
-    virtual bool isLShift2() const;                             // 28
-    virtual bool isRShift1Held() const;                         // 29
-    virtual bool isRShift2Held() const;                         // 30
-    virtual bool isLShift1Held() const;                         // 31
-    virtual bool isLShift2Held() const;                         // 32
-    virtual bool isCamZoom() const;                             // 33
-    virtual bool isCamPan() const;                              // 34
-    virtual bool isCamRotate() const;                           // 35
-    virtual float getCamZoom() const;                           // 36
-    virtual float getCamPan() const;                            // 37
-    virtual float getCamRotate() const;                         // 38
+    virtual bool isStart() const __asm__("cUIInput_isStart__FPv");                               // 3
+    virtual bool isSelect() const __asm__("cUIInput_isSelect__FPv");                              // 4
+    virtual bool isNext() const __asm__("cUIInput_isNext__FPv");                                // 5
+    virtual bool isPrevious() const __asm__("cUIInput_isPrevious__FPv");                            // 6
+    virtual bool isOption() const __asm__("cUIInput_isOption__FPv");                              // 7
+    virtual bool isMisc() const __asm__("cUIInput_isMisc__FPv");                                // 8
+    virtual bool isNextHeld() const __asm__("cUIInput_isNextHeld__FPv");                            // 9
+    virtual bool isPreviousHeld() const __asm__("cUIInput_isPreviousHeld__FPv");                        // 10
+    virtual bool isOptionHeld() const __asm__("cUIInput_isOptionHeld__FPv");                          // 11
+    virtual bool isMiscHeld() const __asm__("cUIInput_isMiscHeld__FPv");                            // 12
+    virtual bool isNextReleased() const __asm__("cUIInput_isNextReleased__FPv");                        // 13
+    virtual bool isPreviousReleased() const __asm__("cUIInput_isPreviousReleased__FPv");                    // 14
+    virtual bool isOptionReleased() const __asm__("cUIInput_isOptionReleased__FPv");                      // 15
+    virtual bool isMiscReleased() const __asm__("cUIInput_isMiscReleased__FPv");                        // 16
+    virtual bool isUp() const __asm__("cUIInput_isUp__FPv");                                  // 17
+    virtual bool isDown() const __asm__("cUIInput_isDown__FPv");                                // 18
+    virtual bool isLeft() const __asm__("cUIInput_isLeft__FPv");                                // 19
+    virtual bool isRight() const __asm__("cUIInput_isRight__FPv");                               // 20
+    virtual bool isUpHeld() const __asm__("cUIInput_isUpHeld__FPv");                              // 21
+    virtual bool isDownHeld() const __asm__("cUIInput_isDownHeld__FPv");                            // 22
+    virtual bool isLeftHeld() const __asm__("cUIInput_isLeftHeld__FPv");                            // 23
+    virtual bool isRightHeld() const __asm__("cUIInput_isRightHeld__FPv");                           // 24
+    virtual bool isRShift1() const __asm__("cUIInput_isRShift1__FPv");                             // 25
+    virtual bool isRShift2() const __asm__("cUIInput_isRShift2__FPv");                             // 26
+    virtual bool isLShift1() const __asm__("cUIInput_isLShift1__FPv");                             // 27
+    virtual bool isLShift2() const __asm__("cUIInput_isLShift2__FPv");                             // 28
+    virtual bool isRShift1Held() const __asm__("cUIInput_isRShift1Held__FPv");                         // 29
+    virtual bool isRShift2Held() const __asm__("cUIInput_isRShift2Held__FPv");                         // 30
+    virtual bool isLShift1Held() const __asm__("cUIInput_isLShift1Held__FPv");                         // 31
+    virtual bool isLShift2Held() const __asm__("cUIInput_isLShift2Held__FPv");                         // 32
+    virtual bool isCamZoom() const __asm__("cUIInput_isCamZoom__FPv");                             // 33
+    virtual bool isCamPan() const __asm__("cUIInput_isCamPan__FPv");                              // 34
+    virtual bool isCamRotate() const __asm__("cUIInput_isCamRotate__FPv");                           // 35
+    virtual float getCamZoom() const __asm__("cUIInput_getCamZoom__FPv");                           // 36
+    virtual float getCamPan() const __asm__("cUIInput_getCamPan__FPv");                            // 37
+    virtual float getCamRotate() const __asm__("cUIInput_getCamRotate__FPv");                         // 38
     virtual void setKey(int key);                               // 39
-    virtual bool keyPressed() const;                            // 40
-    virtual bool getKeyReady() const;                           // 41
-    virtual int getVKey() const;                                // 42
-    virtual int getAsciiKey() const;                            // 43
-    virtual void setPadNum(int num);                            // 44
-    virtual bool isActive();                                    // 45
-    virtual void update();                                      // 46
+    virtual bool keyPressed() const __asm__("cUIInput_keyPressed__FPv");                            // 40
+    virtual bool getKeyReady() const __asm__("cUIInput_getKeyReady__FPv");                           // 41
+    virtual int getVKey() const __asm__("cUIInput_getVKey__FPv");                                // 42
+    virtual int getAsciiKey() const __asm__("cUIInput_getAsciiKey__FPv");                            // 43
+    virtual void setPadNum(int num) __asm__("cUIInput_setPadNum__FPvi");                            // 44
+    virtual bool isActive() __asm__("cUIInput_isActive__FPv");                                    // 45
+    virtual void update() __asm__("cUIInput_update__FPv");                                      // 46
 };
 
 CHECK_OFFSET(cUIInput, mPadNum, 0x4);

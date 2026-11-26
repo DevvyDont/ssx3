@@ -44,8 +44,10 @@ struct cFEPopupConfirm : public cScreenPopup {
     // cFEPopupConfirm's own slots ([R] cFEPopupConfirm_vtbl after cScreenPopup's 24; types [O] On Tour's class cFEPopupConfirm,
     // which derives from cScreenPopup):
     virtual void setDefaultButton(unsigned int uiButton);                          // 25
-    virtual void setButtonText(unsigned short* ustrText, unsigned int uiButton);    // 26
-    virtual void setMessage(unsigned short* ustrText);                             // 27
+    virtual void setButtonText(unsigned short* ustrText, unsigned int uiButton)
+        __asm__("cFEPopupConfirm_setButtonText");    // 26
+    virtual void setMessage(unsigned short* ustrText)
+        __asm__("cFEPopupConfirm_setMessage");                             // 27
     virtual void initPopup(unsigned short* ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate,
                            int bSnowFlake);                                         // 28 (On Tour: the flags are bool)
     // --- cFEPopupConfirm

@@ -595,14 +595,14 @@ struct cUIPair_setVisible_sFlags {
  *
  * @param on  nonzero to show (On Tour visible)
  */
-extern "C" void cUIPair_setVisible(cUIPair* self, int on)
+void cUIPair::setVisible(int on)
 {
-    ((cUIPair_setVisible_sFlags*)&self->mAttr)->on = (on != 0);
-    cUIThing* entry = self->mpEntry;
+    ((cUIPair_setVisible_sFlags*)&mAttr)->on = (on != 0);
+    cUIThing* entry = mpEntry;
     if (entry != 0) {
         entry->setVisible(on);
     }
-    cUIThing* widget = self->mpWidget;
+    cUIThing* widget = mpWidget;
     if (widget != 0) {
         widget->setVisible(on);
     }
@@ -631,41 +631,41 @@ struct cUIPair_setFocus_sFlags {
  *
  * @param on  nonzero to focus (On Tour focus)
  */
-extern "C" void cUIPair_setFocus(cUIPair* self, int on)
+void cUIPair::setFocus(int on)
 {
-    ((cUIPair_setFocus_sFlags*)(&self->mAttr))->on = on != 0;
-    cUIThing* entry = self->mpEntry;
+    ((cUIPair_setFocus_sFlags*)(&mAttr))->on = on != 0;
+    cUIThing* entry = mpEntry;
     if (((char*)entry) != 0) {
         entry->setFocus(on);
     }
-    char* widget = (char*)self->mpWidget;
+    char* widget = (char*)mpWidget;
     if (widget == 0) {
         return;
     }
     if (on) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 0);
         if (ev != cUIScreen::kNoFrame) {
-            void* scr = self->mpWidget->mpScreen;
+            void* scr = mpWidget->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        cUIThing* widgetObj = self->mpWidget;
+        cUIThing* widgetObj = mpWidget;
         widgetObj->setFocus(1);
-        cUIState* screenState = self->mpScreen->mpState;
-        screenState->onWidgetEvent(self->mpWidget, 1);
+        cUIState* screenState = mpScreen->mpState;
+        screenState->onWidgetEvent(mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
         if (ev != cUIScreen::kNoFrame) {
-            void* scr = self->mpWidget->mpScreen;
+            void* scr = mpWidget->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        cUIThing* widgetObj = self->mpWidget;
+        cUIThing* widgetObj = mpWidget;
         widgetObj->setFocus(0);
-        cUIState* screenState = self->mpScreen->mpState;
-        screenState->onWidgetEvent(self->mpWidget, 2);
+        cUIState* screenState = mpScreen->mpState;
+        screenState->onWidgetEvent(mpWidget, 2);
     }
 }
 #endif
@@ -766,13 +766,13 @@ public:
 /**
  * Refreshes the localized text of both widgets of a pair.
  */
-extern "C" void cUIPair_updateLocale(cUIPair* self)
+void cUIPair::updateLocale()
 {
-    cUIPair_updateLocale_cVirt* entry = (cUIPair_updateLocale_cVirt*)self->mpEntry;
+    cUIPair_updateLocale_cVirt* entry = (cUIPair_updateLocale_cVirt*)mpEntry;
     if (entry != 0) {
         entry->updateLocale();
     }
-    cUIPair_updateLocale_cVirt* widget = (cUIPair_updateLocale_cVirt*)self->mpWidget;
+    cUIPair_updateLocale_cVirt* widget = (cUIPair_updateLocale_cVirt*)mpWidget;
     if (widget != 0) {
         widget->updateLocale();
     }
@@ -908,15 +908,15 @@ INCLUDE_ASM("ui/uimenu", cUIPair_render2D);
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIPair_render2D(cUIPair* self, float x, float y)
+void cUIPair::render2D(float x, float y)
 {
-    cUIThing* entry = self->mpEntry;
+    cUIThing* entry = mpEntry;
     if (entry != 0) {
-        entry->render2D(x + self->mPosition.x, y + self->mPosition.y);
+        entry->render2D(x + mPosition.x, y + mPosition.y);
     }
-    cUIThing* widget = self->mpWidget;
+    cUIThing* widget = mpWidget;
     if (widget != 0) {
-        widget->render2D(x + self->mPosition.x, y + self->mPosition.y);
+        widget->render2D(x + mPosition.x, y + mPosition.y);
     }
 }
 #endif
@@ -956,14 +956,14 @@ public:
  *
  * @param ev  the frame number (On Tour FrameNum)
  */
-extern "C" void cUIPair_update(cUIPair* self, unsigned short ev)
+void cUIPair::update(unsigned short ev)
 {
-    cUIThing_update(self, ev);
-    cUIPair_update_cVirt* entry = (cUIPair_update_cVirt*)self->mpEntry;
+    cUIThing_update(this, ev);
+    cUIPair_update_cVirt* entry = (cUIPair_update_cVirt*)mpEntry;
     if (entry != 0) {
         entry->update(ev);
     }
-    cUIPair_update_cVirt* widget = (cUIPair_update_cVirt*)self->mpWidget;
+    cUIPair_update_cVirt* widget = (cUIPair_update_cVirt*)mpWidget;
     if (widget != 0) {
         widget->update(ev);
     }
@@ -1019,14 +1019,14 @@ INCLUDE_ASM("ui/uimenu", cUIProgress_render2D);
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIProgress_render2D(cUIProgress* self, float x, float y)
+void cUIProgress::render2D(float x, float y)
 {
-    cUIThing* background = self->mpObjBackground;
-    if (background != 0 && self->mpObjKnob != 0) {
-        float px = x + self->mPosition.x;
-        float py = y + self->mPosition.y;
+    cUIThing* background = mpObjBackground;
+    if (background != 0 && mpObjKnob != 0) {
+        float px = x + mPosition.x;
+        float py = y + mPosition.y;
         background->render2D(px, py);
-        cUIThing* knob = self->mpObjKnob;
+        cUIThing* knob = mpObjKnob;
         knob->render2D(px, py);
     }
 }
@@ -1043,17 +1043,17 @@ extern "C" void cUIAnimation_updateFrame(void* anim, unsigned char flags);
  *
  * @param ev  the frame number (On Tour FrameNum)
  */
-extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
+void cUIProgress::update(unsigned short ev)
 {
-    if (self->mpAnim != 0) {
-        cUIAnimation_updateThing(self->mpAnim, self, self->mAnimPlaybackStatus, ev);
-        cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
+    if (mpAnim != 0) {
+        cUIAnimation_updateThing(mpAnim, this, mAnimPlaybackStatus, ev);
+        cUIAnimation_updateFrame(mpAnim, mAnimPlaybackStatus);
     }
-    cUIThing* knob = self->mpObjKnob;
+    cUIThing* knob = mpObjKnob;
     if (knob != 0) {
         knob->update(ev);
     }
-    cUIThing* background = self->mpObjBackground;
+    cUIThing* background = mpObjBackground;
     if (background != 0) {
         background->update(ev);
     }

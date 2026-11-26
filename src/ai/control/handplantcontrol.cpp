@@ -6233,10 +6233,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAIIndex__FPv);
  *
  * @return mAIIndex (cRider offset 0x86C)
  */
-int cRider_getAIIndex(void* vself)
+int cRider::getAIIndex()
 {
-    cRider* self = (cRider*)vself;
-    return self->mAIIndex;
+    return mAIIndex;
 }
 #endif
 

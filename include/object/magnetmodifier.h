@@ -39,6 +39,14 @@ struct cMagnetModifier : public cTransformModifier {
     tInstanceRecord* Instance;      // 0xA0 [O]; [R] ctor stores the instance arg, the replay ctor reads it; [U]
                                     //      intersect, writeToReplayFrame cMagnetModifier_writeToReplayFrame
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cMagnetModifier__cMagnetModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cMagnetModifier();
+    virtual void update() __asm__("cMagnetModifier_update");
+    virtual void updateRootTransform() __asm__("cMagnetModifier_updateRootTransform");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMagnetModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cMagnetModifier, unk_04, 0x04);

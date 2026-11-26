@@ -27,6 +27,12 @@ struct cFEStateRewardsRoom : public cUIState {
     void* cFEStateRewardsRoom1() __asm__("cFEStateRewardsRoom_cFEStateRewardsRoom1");
     int isInStore() __asm__("cFEStateRewardsRoom_isInStore");
     void setRewardsWidgetText(int index, cUIText* text) __asm__("cFEStateRewardsRoom_setRewardsWidgetText");
+    // retail's destructor cFEStateRewardsRoom__cFEStateRewardsRoom stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRewardsRoom();
+    virtual void onCreateScreen() __asm__("cFEStateRewardsRoom_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateRewardsRoom_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateRewardsRoom_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateRewardsRoom, mCharID, 0x048);

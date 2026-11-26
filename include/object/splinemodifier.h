@@ -132,6 +132,14 @@ struct cSplineModifier : public cTransformModifier {
     cSpline Spline;                 // 0xD8 [O]; [R] ctors: SplineId -1, SegIndex 0, Seg 0, Length 0; the replay ctor
                                     //      calls cSpline_readFromReplayFrame(+0xD8)
     char unk_E8[0x8];               // 0xE8 padding to the 0xF0 allocation
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cSplineModifier__cSplineModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cSplineModifier();
+    virtual void update() __asm__("cSplineModifier_update");
+    virtual void updateRootTransform() __asm__("cSplineModifier_updateRootTransform");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSplineModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cSplineModifier, unk_04, 0x04);

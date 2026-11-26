@@ -68,12 +68,12 @@ extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
  *
  * @param ev  the animation frame number, passed to cUIAnimation_updateThing() (On Tour FrameNum)
  */
-extern "C" void cUIThing_update(cUIThing* self, unsigned short ev)
+void cUIThing::update(unsigned short ev)
 {
-    void* anim = self->mpAnim;
+    void* anim = mpAnim;
     if (anim != 0) {
-        cUIAnimation_updateThing(anim, self, self->mAnimPlaybackStatus, ev);
-        cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
+        cUIAnimation_updateThing(anim, this, mAnimPlaybackStatus, ev);
+        cUIAnimation_updateFrame(mpAnim, mAnimPlaybackStatus);
     }
 }
 #endif
@@ -91,50 +91,50 @@ INCLUDE_ASM("ui/uithing", cUIThing_setChannelData);
  * @param key  the channel (On Tour channel)
  * @param data  the value in the channel's units
  */
-extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float data)
+void cUIThing::setChannelData(unsigned short key, float data)
 {
     switch (key) {
     case cUIThing::kUIChannel_PosX:
-        self->mPosition.x = data;
+        mPosition.x = data;
         break;
     case cUIThing::kUIChannel_PosY:
-        self->mPosition.y = data;
+        mPosition.y = data;
         break;
     case cUIThing::kUIChannel_ScaleX:
-        self->mScale.x = data * 0.01f;
+        mScale.x = data * 0.01f;
         break;
     case cUIThing::kUIChannel_ScaleY:
-        self->mScale.y = data * 0.01f;
+        mScale.y = data * 0.01f;
         break;
     case cUIThing::kUIChannel_AngleX:
-        self->mAngle.x = data * 0.017444444820284843f;
+        mAngle.x = data * 0.017444444820284843f;
         break;
     case cUIThing::kUIChannel_AngleY:
-        self->mAngle.y = data * 0.017444444820284843f;
+        mAngle.y = data * 0.017444444820284843f;
         break;
     case cUIThing::kUIChannel_AngleZ:
-        self->mAngle.z = data * 0.017444444820284843f;
+        mAngle.z = data * 0.017444444820284843f;
         break;
     case cUIThing::kUIChannel_Pivot:
-        ((tAttrThing*)&self->mAttr)->mPivot = (int)data;
+        ((tAttrThing*)&mAttr)->mPivot = (int)data;
         break;
     case cUIThing::kUIChannel_Alpha:
-        self->mColour.A = data * 0.003921568859368563f;
+        mColour.A = data * 0.003921568859368563f;
         break;
     case cUIThing::kUIChannel_Red:
-        self->mColour.R = data * 0.003921568859368563f;
+        mColour.R = data * 0.003921568859368563f;
         break;
     case cUIThing::kUIChannel_Green:
-        self->mColour.G = data * 0.003921568859368563f;
+        mColour.G = data * 0.003921568859368563f;
         break;
     case cUIThing::kUIChannel_Blue:
-        self->mColour.B = data * 0.003921568859368563f;
+        mColour.B = data * 0.003921568859368563f;
         break;
     case cUIThing::kUIChannel_SizeX:
-        self->mSize.x = data;
+        mSize.x = data;
         break;
     case cUIThing::kUIChannel_SizeY:
-        self->mSize.y = data;
+        mSize.y = data;
         break;
     }
 }
@@ -150,11 +150,10 @@ INCLUDE_ASM("ui/uithing", cUIThing_setChannelDataKCP);
  * x/y, 9 and 10 scale x/y (percent), 12 attribute bits 13-18, 13 to 16 colour alpha, red, green and blue (0-255). Other
  * IDs are ignored.
  *
- * @param vself  the UI thing (this)
  * @param count  the number of pairs
  * @param pPtr      the pairs, as shorts: channel ID, then value
  */
-extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, short *pPtr)
+void cUIThing::setChannelDataKCP(unsigned int count, short*pPtr)
 {
     unsigned int i = 0;
 
@@ -164,46 +163,46 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
             short id = pPtr[0];
             switch (id) {
             case cUIThing::kUIChannel_PosX:
-                vself->mPosition.x = data;
+                mPosition.x = data;
                 break;
             case cUIThing::kUIChannel_PosY:
-                vself->mPosition.y = data;
+                mPosition.y = data;
                 break;
             case cUIThing::kUIChannel_ScaleX:
-                vself->mScale.x = data * 0.01f;
+                mScale.x = data * 0.01f;
                 break;
             case cUIThing::kUIChannel_ScaleY:
-                vself->mScale.y = data * 0.01f;
+                mScale.y = data * 0.01f;
                 break;
             case cUIThing::kUIChannel_AngleX:
-                vself->mAngle.x = data * 0.017444445f;
+                mAngle.x = data * 0.017444445f;
                 break;
             case cUIThing::kUIChannel_AngleY:
-                vself->mAngle.y = data * 0.017444445f;
+                mAngle.y = data * 0.017444445f;
                 break;
             case cUIThing::kUIChannel_AngleZ:
-                vself->mAngle.z = data * 0.017444445f;
+                mAngle.z = data * 0.017444445f;
                 break;
             case cUIThing::kUIChannel_Pivot:
-                vself->mAttr = (vself->mAttr & 0xFFF81FFF) | (((int)data & 0x3F) << 13);
+                mAttr = (mAttr & 0xFFF81FFF) | (((int)data & 0x3F) << 13);
                 break;
             case cUIThing::kUIChannel_Alpha:
-                vself->mColour.A = data * 0.003921569f;
+                mColour.A = data * 0.003921569f;
                 break;
             case cUIThing::kUIChannel_Red:
-                vself->mColour.R = data * 0.003921569f;
+                mColour.R = data * 0.003921569f;
                 break;
             case cUIThing::kUIChannel_Green:
-                vself->mColour.G = data * 0.003921569f;
+                mColour.G = data * 0.003921569f;
                 break;
             case cUIThing::kUIChannel_Blue:
-                vself->mColour.B = data * 0.003921569f;
+                mColour.B = data * 0.003921569f;
                 break;
             case cUIThing::kUIChannel_SizeX:
-                vself->mSize.x = data;
+                mSize.x = data;
                 break;
             case cUIThing::kUIChannel_SizeY:
-                vself->mSize.y = data;
+                mSize.y = data;
                 break;
             }
             i++;
@@ -385,25 +384,25 @@ extern "C" void cUIText_setUnicodeStringPrivate(void* self, unsigned short* str)
 /**
  * Reloads a text widget's localized string for the current language, wrapping it when the widget wraps.
  */
-extern "C" void cUIText_updateLocale(cUIText* self)
+void cUIText::updateLocale()
 {
-    int id = self->mStringID;
+    int id = mStringID;
     if (id != 0) {
-        cUIScreen* screen = self->mpScreen;
+        cUIScreen* screen = mpScreen;
         cUIState* state = screen->mpState;
         cUIEngine* engine = state->mpEngine;
         cUILocaleInterface* loc = engine->mpLocaleInterface;
         if (loc != 0) {
             unsigned short* str = loc->getStringByHash(id);
             if (str != 0) {
-                int attrBits = self->mAttr >> 7;
-                if ((attrBits & 1) || ((self->mAttrText >> 6) & 1)) {
-                    cUIText_setUnicodeStringWrap(self, str);
+                int attrBits = mAttr >> 7;
+                if ((attrBits & 1) || ((mAttrText >> 6) & 1)) {
+                    cUIText_setUnicodeStringWrap(this, str);
                 } else {
-                    cUIText_setUnicodeStringPrivate(self, str);
+                    cUIText_setUnicodeStringPrivate(this, str);
                 }
             }
-            self->setCached(1);
+            setCached(1);
         }
     }
 }

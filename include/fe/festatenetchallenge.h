@@ -114,6 +114,11 @@ struct cFEStateChallengePopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateChallengePopup1() __asm__("cFEStateChallengePopup_cFEStateChallengePopup1");
+    // retail's destructor cFEStateChallengePopup__cFEStateChallengePopup stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateChallengePopup();
+    virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateChallengePopup_onPopupEvent");
+    virtual void onCreateScreen() __asm__("cFEStateChallengePopup_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateChallengePopup, mbChallengeSent, 0x6D0);
@@ -161,6 +166,11 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateChallengeReceivedPopup1() __asm__("cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1");
+    // retail's destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateChallengeReceivedPopup();
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateChallengeReceivedPopup_onGainTransition");
+    virtual void onCreateScreen() __asm__("cFEStateChallengeReceivedPopup_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mszChallenger, 0x6D0);

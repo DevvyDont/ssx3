@@ -51,6 +51,11 @@ struct cFEStateCareerStats : public cUIState {
     void setupRidersBest() __asm__("cFEStateCareerStats_setupRidersBest");
     int getOwnedMedalByith(unsigned int mask, int n, int count) __asm__("cFEStateCareerStats_getOwnedMedalByith");
     void initTotalEventMedal() __asm__("cFEStateCareerStats_initTotalEventMedal");
+    // retail's destructor cFEStateCareerStats__cFEStateCareerStats stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateCareerStats();
+    virtual void onCreateScreen() __asm__("cFEStateCareerStats_onCreateScreen");
+    virtual bool onGainTransition(int on) __asm__("cFEStateCareerStats_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateCareerStats, mStatsState, 0x048);

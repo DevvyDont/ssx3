@@ -45,6 +45,13 @@ struct cSnowFall : public cObjNode {
     t4Vector mLastCameraPosition[2];    // 0x40 [O]; [R] ctor (0, 0, 0, 1) each; [U] render: indexed by the current view,
                                         //      the view's camera position (+0x20 of its cGame::ViewMan entry) minus it
                                         //      is the boxes' move this frame, then it is overwritten
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cSnowFall__cSnowFall stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cSnowFall();
+    virtual void update() __asm__("cSnowFall_update");
+    virtual void render() __asm__("cSnowFall_render");
 };
 
 CHECK_OFFSET(cSnowFall, mSnowBoxes, 0x10);

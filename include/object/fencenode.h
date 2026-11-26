@@ -114,6 +114,11 @@ struct cFenceNode : public cInstanceNode {
     void updateGrid() __asm__("cFenceNode_updateGrid");
     void setupFence() __asm__("cFenceNode_setupFence");
     void setForce(float force) __asm__("cFenceNode_setForce");
+    // retail's destructor cFenceNode__cFenceNode stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFenceNode();
+    virtual void render() __asm__("cFenceNode_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFenceNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cFenceNode, FenceData, 0x01C);

@@ -27,6 +27,11 @@ struct cFEStateOptionsSound : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void updateWidget() __asm__("cFEStateOptionsSound_updateWidget");
     void setSoundMode(unsigned int mode) __asm__("cFEStateOptionsSound_setSoundMode");
+    // retail's destructor cFEStateOptionsSound__cFEStateOptionsSound stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOptionsSound();
+    virtual void onCreateScreen() __asm__("cFEStateOptionsSound_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsSound_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateOptionsSound, 0x48);

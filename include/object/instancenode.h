@@ -55,9 +55,12 @@ struct cInstanceNode : public cSortObjNode {
     virtual float getAnimFrame() const;                                             // 30
     virtual int getAnimDir() const;                                                 // 31
     virtual int frameUpdateEvent(float frame);                                      // 32
-    virtual void makeAnimMats(const t4Matrix* root, t4Matrix* animMats);            // 33
-    virtual void expire(int runscript);                                             // 34 On Tour bool
-    virtual void loseFocus();                                                       // 35
+    virtual void makeAnimMats(const t4Matrix* root, t4Matrix* animMats)
+        __asm__("cInstanceNode_makeAnimMats");            // 33
+    virtual void expire(int runscript)
+        __asm__("cInstanceNode_expire");                                             // 34 On Tour bool
+    virtual void loseFocus()
+        __asm__("cInstanceNode_loseFocus");                                                       // 35
     virtual void signal(int signal, float arg);                                     // 36
     virtual void makeActive();                                                      // 37
     virtual bool hasIntersect() const;                                              // 38
@@ -81,6 +84,7 @@ struct cInstanceNode : public cSortObjNode {
     void* runOnLoseFocusScript() __asm__("cInstanceNode_runOnLoseFocusScript__FPv");
     void makeThisDead() __asm__("cInstanceNode_makeThisDead");
     int getInstance() __asm__("cInstanceNode_getInstance");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cInstanceNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);

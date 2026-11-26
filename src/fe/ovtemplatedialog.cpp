@@ -60,21 +60,21 @@ static inline int div_PDA(int a, int b)
  * The temperature is -10 C minus (app update ticks / 3600) mod 15, so it drops by one degree a minute (at 60
  * updates a second) and wraps from -24 back to -10.
  */
-extern "C" void cPDATemplate_onCreateScreen(cPDATemplate* self)
+void cPDATemplate::onCreateScreen()
 {
-    self->mHashName = 41;
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_PDATemplate), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    mHashName = 41;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_PDATemplate), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_bganim1), 0);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_bganim1), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 1);
     }
-    cUIText* text = (cUIText*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_temperature)));
+    cUIText* text = (cUIText*)((char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_temperature)));
     if (((char*)text) != 0) {
         int fmt = Loc_PDA(text->mStringID);
         if (fmt != 0) {
@@ -1843,11 +1843,11 @@ extern char str_Menu0000_b[];
  *
  * @param item  the widget being created; only the one whose hash name (+0x38) is "Menu0000" is touched
  */
-extern "C" void cOVTemplate_Dialog_onWidgetCreate(cOVTemplate_Dialog* self, cUIThing* item)
+void cOVTemplate_Dialog::onWidgetCreate(cUIThing* item)
 {
     int id = item->mHashName;
     if (id == GetHashValue32(str_Menu0000_b)) {
-        if (self->mDialogType == cOVTemplate_Dialog::kDialogSavePrompt) {
+        if (mDialogType == cOVTemplate_Dialog::kDialogSavePrompt) {
             cUIMenu_setSelectedByIndex(item, 0);
         } else {
             cUIMenu_setSelectedByIndex(item, 1);

@@ -791,10 +791,10 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode*);
  *
  * Calls cSpring_update() and then cFlexBridgeNode_updateGrid().
  */
-extern "C" void cFlexBridgeNode_update(cFlexBridgeNode* self)
+void cFlexBridgeNode::update()
 {
-    cSpring_update((char*)&self->Mesh);
-    self->updateGrid();
+    cSpring_update((char*)&Mesh);
+    updateGrid();
 }
 #endif
 
@@ -1056,9 +1056,9 @@ typedef sVEntry<void(void*, const t4Matrix*, tMaterialBlockRecord*, void*)> tGri
  * render state with field 5 set for the draw and pops it afterwards.
  */
 // Draws the bridge piece's model (through its handler if it has one) unless it is culled or not streamed in.
-extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
+void cFlexBridgeNode::render()
 {
-    tInstanceRecord* model = self->Instance;
+    tInstanceRecord* model = Instance;
     if (!IsLoaded_7B80(model)) {
         return;
     }
@@ -1066,26 +1066,26 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
     {
         tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, ctx);
         void* thisp = vthis(ctx, vt[93]);
-        t4Vector* lo = &self->BoundBox.MinPoint;
-        t4Vector* hi = &self->BoundBox.MaxPoint;
+        t4Vector* lo = &BoundBox.MinPoint;
+        t4Vector* hi = &BoundBox.MaxPoint;
         tGetNetMatrixSlot* vt43 = (tGetNetMatrixSlot*)VPTR_OF(cGraphicsMan, ctx);
         t4Matrix viewMatrix = vt43[43].fn(vthis(ctx, vt43[43]));
         if (vt[93].fn(thisp, lo, hi, &viewMatrix) == GM_CLIPCODE_OUTSIDE) {
             return;
         }
     }
-    const t4Matrix* mtx = self->getRootTransform();
+    const t4Matrix* mtx = getRootTransform();
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     sDrawState* state = ctx->m_pCurrentDrawState;
     ctx->m_pCurrentDrawState = state + 1;
     state[1].m_bitGroups[1] = ((int)state[1].m_bitGroups[1] & ~0x7C) | (5 << 2);
-    cGridMesh* renderer = self->GridMesh;
+    cGridMesh* renderer = GridMesh;
     if (renderer != 0) {
         tGridMeshRenderSlot* hv = (tGridMeshRenderSlot*)renderer->mVtbl;
-        hv[7].fn(vthis(renderer, hv[7]), mtx, self->Instance->m_MaterialBlock, 0);
+        hv[7].fn(vthis(renderer, hv[7]), mtx, Instance->m_MaterialBlock, 0);
     } else {
         tRenderModelSlot* ctxVtbl = (tRenderModelSlot*)VPTR_OF(cGraphicsMan, ctx);
-        ctxVtbl[96].fn(vthis(ctx, ctxVtbl[96]), self->Instance, 0, 0, 0);
+        ctxVtbl[96].fn(vthis(ctx, ctxVtbl[96]), Instance, 0, 0, 0);
     }
     ctx->m_pCurrentDrawState--;
 }
@@ -1107,11 +1107,11 @@ extern "C" void cSpring_writeToReplayFrame(void* p, void* stream);
  *
  * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, cBxReplayFrame* stream)
+void cFlexBridgeNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
-    cSpring_writeToReplayFrame((char*)&self->Mesh, stream);
-    stream->write((const char*)&self->BottomLeftOffset, 0x30);
+    cInstanceNode_writeToReplayFrame(this, stream);
+    cSpring_writeToReplayFrame((char*)&Mesh, stream);
+    stream->write((const char*)&BottomLeftOffset, 0x30);
 }
 #endif
 
@@ -1239,11 +1239,11 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
  * Slots 47 and 48 differ between the three vtables that use this update, and are empty in one of them; they are
  * probably per-type hooks that move the rail's points and matrices.
  */
-extern "C" void cFlexRailNode_update(cFlexRailNode* self)
+void cFlexRailNode::update()
 {
-    self->updateNodes();
-    self->updateMats();
-    self->updateSpaceHash();
+    updateNodes();
+    updateMats();
+    updateSpaceHash();
 }
 #endif
 
@@ -1312,11 +1312,11 @@ struct sFlex_3480C8 {
  * Quirks: the loops have no body, so nothing is drawn; and rows 4 to 7 of the table repeat t = 3/7 instead of
  * continuing to 1.
  */
-extern "C" void cFlexRailNode_render(cFlexRailNode* self)
+void cFlexRailNode::render()
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx);
-    if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
+    if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&BoundBox), ((char*)&BoundBox.MaxPoint),
                                   ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == GM_CLIPCODE_OUTSIDE) return;
     if (D_004A5980 == 0) {
         D_004FF6C0[0][0] = 0.0f;
@@ -1355,7 +1355,7 @@ extern "C" void cFlexRailNode_render(cFlexRailNode* self)
     }
     ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
     ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
-    int n = self->NumNodes - 1;
+    int n = NumNodes - 1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < 8; j++) {
         }
@@ -1716,10 +1716,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, cBxReplayFrame* stream)
+void cFlexRailNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->NumNodes, 0x30);
+    cInstanceNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&NumNodes, 0x30);
 }
 #endif
 

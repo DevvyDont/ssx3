@@ -47,6 +47,11 @@ struct cOVState_TOPTIMES : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void handleNext(cUIThing* pWidget) __asm__("cOVState_TOPTIMES_handleNext");
+    // retail's destructor cOVState_TOPTIMES__cOVState_TOPTIMES stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_TOPTIMES();
+    virtual void onCreateScreen() __asm__("cOVState_TOPTIMES_onCreateScreen");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVState_TOPTIMES_onGainFocus");
 };
 
 CHECK_OFFSET(cOVState_TOPTIMES, mTopTimesFlow, 0x9C);

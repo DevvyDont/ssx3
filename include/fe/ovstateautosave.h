@@ -71,6 +71,11 @@ struct cOVState_AUTOSAVE : public cFEMemCard {
 
     // Methods bound to their retail symbols by asm labels.
     void displayOn() __asm__("cOVState_AUTOSAVE_displayOn");
+    // retail's destructor cOVState_AUTOSAVE__cOVState_AUTOSAVE stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_AUTOSAVE();
+    virtual void displayStatus() __asm__("cOVState_AUTOSAVE_displayStatus");
+    virtual void updateDone() __asm__("cOVState_AUTOSAVE_updateDone");
 };
 
 CHECK_OFFSET(cOVState_AUTOSAVE, mParentScreen, 0x22C);

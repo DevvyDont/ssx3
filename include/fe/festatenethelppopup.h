@@ -86,6 +86,12 @@ struct cFEStateNetHelpPopup : public cUIState {
     void clear() __asm__("cFEStateNetHelpPopup_clear");
     void setNumHelpOptions(int numOptions) __asm__("cFEStateNetHelpPopup_setNumHelpOptions__FPvi");
     void setDescription(int descriptionNum, int description) __asm__("cFEStateNetHelpPopup_setDescription__FPvii");
+    // retail's destructor cFEStateNetHelpPopup__cFEStateNetHelpPopup stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetHelpPopup();
+    virtual void onCreateScreen() __asm__("cFEStateNetHelpPopup_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateNetHelpPopup_onUpdate");
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateNetHelpPopup_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateNetHelpPopup, miNumOptions, 0x048);

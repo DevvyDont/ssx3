@@ -59,15 +59,15 @@ extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* self);
  * the action buttons. Display state +0x214 (On Tour mScreenStatus, set by cFEMemCard_triggerDisplayState) 3 runs
  * cOVState_PROFILE_displayOn, any other cOVState_PROFILE_displayOff. It is the displayStatus slot (+0xD4) of cOVState_PROFILE_vtbl.
  */
-extern "C" void cOVState_PROFILE_displayStatus(cOVState_PROFILE* self)
+void cOVState_PROFILE::displayStatus()
 {
-    if (self->mState != 0) {
-        self->mIsOn = 1;
+    if (mState != 0) {
+        mIsOn = 1;
     }
-    if (self->mScreenStatus == cFEMemCard::kDISPLAY_ON) {
-        self->displayOn();
+    if (mScreenStatus == cFEMemCard::kDISPLAY_ON) {
+        displayOn();
     } else {
-        self->displayOff();
+        displayOff();
     }
 }
 #endif
@@ -340,16 +340,16 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * Tour cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone
  * slot (+0x10C) of cOVState_PROFILE_vtbl.
  */
-extern "C" void cOVState_PROFILE_updateDone(cOVState_PROFILE* self)
+void cOVState_PROFILE::updateDone()
 {
-    if (self->mIsDone == 0) {
-        if (self->mParentOV == kOVSTATE_QUIT) {
+    if (mIsDone == 0) {
+        if (mParentOV == kOVSTATE_QUIT) {
             cGame_exit(SSXApp->Game, 0);
         } else {
-            cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
+            cUIStateStack_popToStateInclusive(&mpEngine->mStateStack);
         }
     }
-    self->mIsDone = 1;
+    mIsDone = 1;
 }
 #endif
 
@@ -724,13 +724,13 @@ extern char str_autosave_text[];
  * Calls displayOn when the memory card state (+0x1C0) is neither 0 nor 6, else hides "autosave_text" (virtual
  * slot 9).
  */
-extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
+void cOVState_AUTOSAVE::displayStatus()
 {
-    int status = self->mState;
+    int status = mState;
     if (status != cFEMemCard::kSTART && status != cFEMemCard::kDONE) {
-        self->displayOn();
+        displayOn();
     } else {
-        cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
+        cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_autosave_text));
         autosaveText->setVisible(0);
     }
 }
@@ -797,12 +797,12 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * When +0x1AC (On Tour mIsDone) is clear, calls cUIStateStack_popToStateInclusive (On Tour cUIStateStack::popToStateInclusive) on
  * mpEngine's state stack (+0x18); then sets +0x1AC. It is the updateDone slot (+0x10C) of cOVState_AUTOSAVE_vtbl.
  */
-extern "C" void cOVState_AUTOSAVE_updateDone(cOVState_AUTOSAVE* self)
+void cOVState_AUTOSAVE::updateDone()
 {
-    if (self->mIsDone == 0) {
-        cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
+    if (mIsDone == 0) {
+        cUIStateStack_popToStateInclusive(&mpEngine->mStateStack);
     }
-    self->mIsDone = 1;
+    mIsDone = 1;
 }
 #endif
 

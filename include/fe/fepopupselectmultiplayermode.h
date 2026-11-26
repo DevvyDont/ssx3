@@ -20,6 +20,13 @@ struct cFEPopupSelectMultiplayerMode : public cUIState {
     // --- cFEPopupSelectMultiplayerMode
     char mMultiMode;                // 0x048 [O]
     char unk_049[0x3];              // 0x049 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEPopupSelectMultiplayerMode();
+    virtual void onCreateScreen() __asm__("cFEPopupSelectMultiplayerMode_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cFEPopupSelectMultiplayerMode_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEPopupSelectMultiplayerMode, mMultiMode, 0x048);

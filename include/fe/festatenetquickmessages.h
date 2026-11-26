@@ -56,6 +56,12 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateNetQuickMessages1() __asm__("cFEStateNetQuickMessages_cFEStateNetQuickMessages1");
+    // retail's destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetQuickMessages();
+    virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateNetQuickMessages_onPopupEvent");
+    virtual void onCreateScreen() __asm__("cFEStateNetQuickMessages_onCreateScreen");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateNetQuickMessages_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateNetQuickMessages, mbChanged, 0x6D0);

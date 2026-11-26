@@ -90,6 +90,12 @@ struct cFEStateAuthDNAS : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateAuthDNAS1() __asm__("cFEStateAuthDNAS_cFEStateAuthDNAS1");
+    // retail's destructor cFEStateAuthDNAS__cFEStateAuthDNAS stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateAuthDNAS();
+    virtual void onCreateScreen() __asm__("cFEStateAuthDNAS_onCreateScreen");
+    virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateAuthDNAS_onInputBegin");
+    virtual void onUpdate() __asm__("cFEStateAuthDNAS_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateAuthDNAS, mpAuth, 0x6D0);

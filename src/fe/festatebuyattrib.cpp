@@ -43,23 +43,23 @@ extern "C" void func_0028F140(void* self, int a1);
  * (0xA8), runs the five update functions and switches the audio's front-end sound-bank mode to 3
  * (func_0028F140 on gSSXAudio).
  */
-extern "C" void cFEStateBuyAttrib_onCreateScreen(cFEStateBuyAttrib* self)
+void cFEStateBuyAttrib::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_33buyattribs), 0);
-    self->mpAttribScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_33buyattribs), 0);
+    mpAttribScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
-    self->mBank = cBEEconInterface_getMoney(iface, 0, cBELibrary_getCharacterID(0));
-    self->mBuyPrompt = 0;
-    self->mTotalCost = 0;
-    self->updateTotalCost();
-    self->updateLevels();
-    self->updateCostPerLevel();
-    self->updateExperienceDisplay();
-    self->updateBank();
+    mBank = cBEEconInterface_getMoney(iface, 0, cBELibrary_getCharacterID(0));
+    mBuyPrompt = 0;
+    mTotalCost = 0;
+    updateTotalCost();
+    updateLevels();
+    updateCostPerLevel();
+    updateExperienceDisplay();
+    updateBank();
     func_0028F140(cAudioInterface_bxAudio(), 3);
 }
 #endif
@@ -86,12 +86,12 @@ static inline int IsHash_4910(int id, char* s) { return id == GetHashValue32(s);
  *
  * @param widget  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateBuyAttrib_onWidgetCreate(cFEStateBuyAttrib* self, cUIThing* widget)
+void cFEStateBuyAttrib::onWidgetCreate(cUIThing* widget)
 {
     if (IsHash_4910(widget->mHashName, str_BuyAttributesPrompt)) {
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNBuyAttributesColon_b));
     } else if (IsHash_4910(widget->mHashName, str_AttribMenu)) {
-        self->pAttribMenu = (cUIMenu*)widget;
+        pAttribMenu = (cUIMenu*)widget;
     } else if (IsHash_4910(widget->mHashName, str_Buy_yes)) {
         widget->mMiscData = 0;
     } else if (IsHash_4910(widget->mHashName, str_Buy_no)) {
@@ -114,12 +114,12 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* sel
  * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateBuyAttrib_onGainTransition(cFEStateBuyAttrib* self, int on)
+bool cFEStateBuyAttrib::onGainTransition(int on)
 {
     if (on != 0) {
-        self->updateExperienceDisplay();
+        updateExperienceDisplay();
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -312,48 +312,49 @@ static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
  *
  * @param w  the controller input (cUIInput)
  */
-extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInput* w)
+void cFEStateBuyAttrib::onInputAlways(cUIInput* w)
 {
     int changed = 0;
-    cUIState_onInputAlways_2((self), ((char*)w));
+    cUIState_onInputAlways_2((this), ((char*)w));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
-    unsigned char idx = ((cUIMenu*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)))->mScrollItemCurrent;
-    if (self->mBuyPrompt == 0) {
+    unsigned char idx = ((cUIMenu*)cUIScreen_getObjectByHashName(mpAttribScreen,
+            GetHashValue32(str_AttribMenu)))->mScrollItemCurrent;
+    if (mBuyPrompt == 0) {
         if (w->isLeft() != 0) {
-            int* bought = self->mPotentialExperience;
+            int* bought = mPotentialExperience;
             int* cnt = &bought[idx];
             changed = 1;
             if (*cnt > 0) {
                 (*cnt)--;
-                self->mTotalCost -= cBEEconInterface_getAttribCost(iface, self->mExperienceLevel[idx] - 1);
-                self->updateTotalCost();
-                playFrame_4C30((self), str_hl_left_b);
+                mTotalCost -= cBEEconInterface_getAttribCost(iface, mExperienceLevel[idx] - 1);
+                updateTotalCost();
+                playFrame_4C30((this), str_hl_left_b);
             } else {
-                defaultMsg_4C30((self), 4);
+                defaultMsg_4C30((this), 4);
             }
         } else {
             if (w->isRight() != 0) {
-                int* level = self->mExperienceLevel;
+                int* level = mExperienceLevel;
                 int* lvl = &level[idx];
                 changed = 1;
-                int total = cBEEconInterface_getAttribCost(iface, *lvl - 1) + self->mTotalCost;
-                if (*lvl < 11 && total <= self->mBank) {
-                    int* bought = self->mPotentialExperience;
+                int total = cBEEconInterface_getAttribCost(iface, *lvl - 1) + mTotalCost;
+                if (*lvl < 11 && total <= mBank) {
+                    int* bought = mPotentialExperience;
                     int* cnt = &bought[idx];
-                    if (self->mExperience[idx] + *cnt < (*lvl + 1) * 5) {
+                    if (mExperience[idx] + *cnt < (*lvl + 1) * 5) {
                         (*cnt)++;
-                        self->mTotalCost += cBEEconInterface_getAttribCost(iface, *lvl - 1);
-                        self->updateTotalCost();
-                        playFrame_4C30((self), str_hl_right_b);
+                        mTotalCost += cBEEconInterface_getAttribCost(iface, *lvl - 1);
+                        updateTotalCost();
+                        playFrame_4C30((this), str_hl_right_b);
                     }
                 } else {
-                    defaultMsg_4C30((self), 4);
+                    defaultMsg_4C30((this), 4);
                 }
             }
         }
     }
     if (changed) {
-        self->updateExperienceDisplay();
+        updateExperienceDisplay();
     }
 }
 #endif
@@ -652,28 +653,28 @@ extern "C" void func_0028F140(void* self, int a1);
  * the page (0x48), then runs cFEStateCareerStats_initTotalEventMedal() (probably On Tour initTotalEventMedal), cFEStateCareerStats_setupLayout() (shows
  * the page's group, probably setupLayout) and switches the front-end sound-bank mode to 8.
  */
-extern "C" void cFEStateCareerStats_onCreateScreen(cFEStateCareerStats* self)
+void cFEStateCareerStats::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_35car_stat), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_35car_stat), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    self->mTopHighlightNumber = 0;
-    self->mTopRaceEvent = 0;
-    self->mTopFreestyleEvent = 0;
-    self->mTotalRaceEvent = 0;
-    self->mTotalOwnedRaceEvent = 0;
-    self->mbitOpenedRace = (unsigned int)0;
-    self->mbitOwnedRaceMedal = (unsigned int)0;
-    self->mTotalFreestyleEvent = 0;
-    self->mbitOwnedFSMedal = (unsigned int)0;
-    self->mTotalOwnedFSEvent = 0;
-    self->mbitOpenedFS = (unsigned int)0;
-    self->mStatsState = 0;
-    self->initTotalEventMedal();
-    self->setupLayout();
+    mTopHighlightNumber = 0;
+    mTopRaceEvent = 0;
+    mTopFreestyleEvent = 0;
+    mTotalRaceEvent = 0;
+    mTotalOwnedRaceEvent = 0;
+    mbitOpenedRace = (unsigned int)0;
+    mbitOwnedRaceMedal = (unsigned int)0;
+    mTotalFreestyleEvent = 0;
+    mbitOwnedFSMedal = (unsigned int)0;
+    mTotalOwnedFSEvent = 0;
+    mbitOpenedFS = (unsigned int)0;
+    mStatsState = 0;
+    initTotalEventMedal();
+    setupLayout();
     func_0028F140(cAudioInterface_bxAudio(), 8);
 }
 #endif
@@ -692,12 +693,12 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(cFEStateCareerStats* sel
  * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateCareerStats_onGainTransition(cFEStateCareerStats* self, int on)
+bool cFEStateCareerStats::onGainTransition(int on)
 {
     if (on != 0) {
-        self->setupHighlightsList();
+        setupHighlightsList();
     }
-    return 0;
+    return false;
 }
 #endif
 

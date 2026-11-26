@@ -94,6 +94,13 @@ struct cFEStateNetConfig : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetConfig1() __asm__("cFEStateNetConfig_cFEStateNetConfig1");
+    // retail's destructor cFEStateNetConfig__cFEStateNetConfig stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetConfig();
+    virtual void onCreateScreen() __asm__("cFEStateNetConfig_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateNetConfig_onDestroyScreen");
+    virtual void onUpdate() __asm__("cFEStateNetConfig_onUpdate");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateNetConfig_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);
@@ -158,6 +165,13 @@ struct cFEStateNetAccountMem : public cFEStateNet {
                                     //        when it is set
     int miStartState;               // 0xB0C [R] by the constructor's mode: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (func_001B70D0 starts there);
                                     //       [U] cFEStateNetAccountMem_onPopupEvent restarts from it
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateNetAccountMem__cFEStateNetAccountMem stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetAccountMem();
+    virtual void onUpdate() __asm__("cFEStateNetAccountMem_onUpdate");
+    virtual void onPopupEvent(cUIState* w, unsigned int msg) __asm__("cFEStateNetAccountMem_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateNetAccountMem, miResult, 0x6D0);

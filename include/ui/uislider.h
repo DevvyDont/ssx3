@@ -42,6 +42,7 @@ struct cUISlider : public cUIThing {
     void setNumValues(int numValues) __asm__("cUISlider_setNumValues");
     void setBackgroundObject(int background) __asm__("cUISlider_setBackgroundObject");
     void setKnobObject(int knob) __asm__("cUISlider_setKnobObject");
+    virtual void render2D(float dx, float dy) __asm__("cUISlider_render2D");
 };
 
 CHECK_OFFSET(cUISlider, mValue, 0x074);

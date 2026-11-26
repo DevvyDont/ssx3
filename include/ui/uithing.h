@@ -127,24 +127,36 @@ struct cUIThing : public cListNode {
     // getType: pure here ([R] cUIThing_vtbl[22] = __pure_virtual; On Tour's DWARF drops pure entries), and every
     // subclass vtable fills it with its own <class>_getType ([O] each subclass declares virtual char getType()).
     virtual ~cUIThing();                                                  // 1  cUIThing__cUIThing
-    virtual void setActive(int a);                                        // 4  cUIThing_setActive
-    virtual void setCached(int a);                                        // 5  cUIThing_setCached
-    virtual void setEnabled(int a);                                       // 6  cUIThing_setEnabled
-    virtual void setFocus(int a);                                         // 7  cUIThing_setFocus
-    virtual void setStatic(int a);                                        // 8  cUIThing_setStatic
-    virtual void setVisible(int a);                                       // 9  cUIThing_setVisible
+    virtual void setActive(int a)
+        __asm__("cUIThing_setActive");                                        // 4  cUIThing_setActive
+    virtual void setCached(int a)
+        __asm__("cUIThing_setCached");                                        // 5  cUIThing_setCached
+    virtual void setEnabled(int a)
+        __asm__("cUIThing_setEnabled");                                       // 6  cUIThing_setEnabled
+    virtual void setFocus(int a)
+        __asm__("cUIThing_setFocus");                                         // 7  cUIThing_setFocus
+    virtual void setStatic(int a)
+        __asm__("cUIThing_setStatic");                                        // 8  cUIThing_setStatic
+    virtual void setVisible(int a)
+        __asm__("cUIThing_setVisible");                                       // 9  cUIThing_setVisible
     virtual void setUIData(tUIBaseObject* pObj);                          // 10 cUIThing_setUIData
-    virtual void setColour(const tARGB* colour);                          // 11 cUIThing_setColour
-    virtual void setChannelData(unsigned short channel, float data);      // 12 cUIThing_setChannelData
-    virtual void setChannelDataKCP(unsigned int NumChannels, short* pPtr); // 13 cUIThing_setChannelDataKCP
+    virtual void setColour(const tARGB* colour)
+        __asm__("cUIThing_setColour");                          // 11 cUIThing_setColour
+    virtual void setChannelData(unsigned short channel, float data)
+        __asm__("cUIThing_setChannelData");      // 12 cUIThing_setChannelData
+    virtual void setChannelDataKCP(unsigned int NumChannels, short* pPtr)
+        __asm__("cUIThing_setChannelDataKCP"); // 13 cUIThing_setChannelDataKCP
     virtual cUIThing* getObjectByHashName(unsigned int hashname);         // 14 cUIThing_getObjectByHashName
     virtual bool onInput(const cUIInput* pInput);                         // 15 cUIThing_onInput
     virtual void updateLocale();                                          // 16 cUIThing_updateLocale
     virtual void render2D(float x, float y);                              // 17 cUIThing_render2D
     virtual void render3D(cUIRenderContext* pRenCon);                     // 18 cUIThing_render3D
-    virtual void update(unsigned short FrameNum);                         // 19 cUIThing_update
-    virtual void getSize(t3Vector* vec);                                  // 20 cUIThing_getSize
-    virtual void setSize(const t3Vector* vec);                            // 21 cUIThing_setSize
+    virtual void update(unsigned short FrameNum)
+        __asm__("cUIThing_update");                         // 19 cUIThing_update
+    virtual void getSize(t3Vector* vec)
+        __asm__("cUIThing_getSize");                                  // 20 cUIThing_getSize
+    virtual void setSize(const t3Vector* vec)
+        __asm__("cUIThing_setSize");                            // 21 cUIThing_setSize
     virtual char getType() = 0;                                           // 22 __pure_virtual
 
     // Methods bound to their retail symbols by asm labels.

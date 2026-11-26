@@ -79,6 +79,13 @@ struct cFEStateAudioOptions : public cFEState {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateAudioOptions1() __asm__("cFEStateAudioOptions_cFEStateAudioOptions1");
     int isInStore() __asm__("cFEStateAudioOptions_isInStore");
+    // retail's destructor cFEStateAudioOptions__cFEStateAudioOptions stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateAudioOptions();
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateAudioOptions_onWidgetCreate");
+    virtual void onCreateScreen() __asm__("cFEStateAudioOptions_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateAudioOptions_onDestroyScreen");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateAudioOptions_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateAudioOptions, mpHelpText, 0x048);

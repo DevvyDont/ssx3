@@ -76,6 +76,14 @@ struct cFEStateVideoPlayer : public cFEState {
         __asm__("cFEStateVideoPlayer_setVideoSourceFiles");
     void Start() __asm__("cFEStateVideoPlayer_Start");
     void Stop() __asm__("cFEStateVideoPlayer_Stop");
+    // retail's destructor cFEStateVideoPlayer__cFEStateVideoPlayer stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateVideoPlayer();
+    virtual void onCreateScreen() __asm__("cFEStateVideoPlayer_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateVideoPlayer_onDestroyScreen");
+    virtual void onRender2D() __asm__("cFEStateVideoPlayer_onRender2D");
+    virtual void onUpdate() __asm__("cFEStateVideoPlayer_onUpdate");
+    virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateVideoPlayer_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateVideoPlayer, mVideoFileName, 0x048);

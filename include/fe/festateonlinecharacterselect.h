@@ -68,6 +68,14 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateOnlineCharacterSelect1() __asm__("cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1");
+    // retail's destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOnlineCharacterSelect();
+    virtual void onPopupEvent(cUIState*pPopup, unsigned int Event)
+        __asm__("cFEStateOnlineCharacterSelect_onPopupEvent");
+    virtual void onCreateScreen() __asm__("cFEStateOnlineCharacterSelect_onCreateScreen");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateOnlineCharacterSelect_onGainTransition");
+    virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateOnlineCharacterSelect_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpLBChallengerSelect, 0x6D0);

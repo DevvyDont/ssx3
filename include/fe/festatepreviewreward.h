@@ -35,6 +35,12 @@ struct cFEStatePreviewReward : public cUIState {
     void setReward(int kind, void* data) __asm__("cFEStatePreviewReward_setReward");
     void loadTexture(const char* fileName) __asm__("cFEStatePreviewReward_loadTexture");
     void updateTextureLoad() __asm__("cFEStatePreviewReward_updateTextureLoad");
+    // retail's destructor cFEStatePreviewReward__cFEStatePreviewReward stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStatePreviewReward();
+    virtual void onCreateScreen() __asm__("cFEStatePreviewReward_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStatePreviewReward_onUpdate");
+    virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStatePreviewReward_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStatePreviewReward, mpIcon, 0x048);

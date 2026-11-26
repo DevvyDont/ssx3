@@ -125,6 +125,13 @@ struct cMultiSplineModifier : public cTransformModifier {
     int incFocusCount() __asm__("cMultiSplineModifier_incFocusCount__FPv");
     int decFocusCount() __asm__("cMultiSplineModifier_decFocusCount__FPv");
     void* updateNodes() __asm__("cMultiSplineModifier_updateNodes");
+    // retail's destructor cMultiSplineModifier__cMultiSplineModifier stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cMultiSplineModifier();
+    virtual void update() __asm__("cMultiSplineModifier_update");
+    virtual void updateOverlapSystem() __asm__("cMultiSplineModifier_updateOverlapSystem");
+    virtual void render() __asm__("cMultiSplineModifier_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMultiSplineModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cMultiSplineModifier, NumModels, 0x04);

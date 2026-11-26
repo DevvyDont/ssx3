@@ -2383,11 +2383,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getAsciiKey);
 /**
  * Returns the character code of the last typed key: +0x14 (On Tour miAsciiKey).
  *
- * @param input  the input (this)
  * @return the character code
  */
-extern "C" int cFEInput_getAsciiKey(cFEInput* input) {
-    return (input->miAsciiKey);
+int cFEInput::getAsciiKey() const
+{
+    return (miAsciiKey);
 }
 #endif
 

@@ -105,6 +105,12 @@ struct cFEStateNetMessenger : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetMessenger1() __asm__("cFEStateNetMessenger_cFEStateNetMessenger1");
+    // retail's destructor cFEStateNetMessenger__cFEStateNetMessenger stays a C function (g++ 2.95 takes no asm label on
+    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetMessenger();
+    virtual void onCreateScreen() __asm__("cFEStateNetMessenger_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateNetMessenger_onUpdate");
+    virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateNetMessenger_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);

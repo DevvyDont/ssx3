@@ -24,6 +24,13 @@ struct cFEPopupVideoCalibration : public cUIState {
     // Its state id (mHashName). [R] cFEStateOptionsGame_onWidgetEvent stores 27 after constructing it;
     // [U] cFEStateOptionsGame_onPopupEvent recognises the popup by it.
     enum { kStateID = 27 };
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEPopupVideoCalibration__cFEPopupVideoCalibration stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEPopupVideoCalibration();
+    virtual void onCreateScreen() __asm__("cFEPopupVideoCalibration_onCreateScreen");
+    virtual bool onInputBegin(cUIInput* in) __asm__("cFEPopupVideoCalibration_onInputBegin");
 };
 
 CHECK_OFFSET(cFEPopupVideoCalibration, mImage, 0x048);

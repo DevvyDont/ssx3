@@ -115,13 +115,13 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang);
  *
  * @param lang  the language index (the options' eOptionSpeechLanguage: kOPTLANG_English, French, German, Spanish)
  */
-extern "C" void cFELocale_setLanguage(cFELocale* self, signed char lang)
+void cFELocale::setLanguage(signed char lang)
 {
-    if (self->mLanguage != lang) {
-        self->mLanguage = lang;
-        int flags = *(signed char*)&self->mAttrLocale;
+    if (mLanguage != lang) {
+        mLanguage = lang;
+        int flags = *(signed char*)&mAttrLocale;
         if ((flags & 1) == 0) {
-            cFELocale_deleteAllFiles(self);
+            cFELocale_deleteAllFiles(this);
             int langIndex = -1;
             switch (lang) {
             case kOPTLANG_English:
@@ -137,11 +137,11 @@ extern "C" void cFELocale_setLanguage(cFELocale* self, signed char lang)
                 langIndex = 3;
                 break;
             }
-            self->addFile(langIndex);
-            if (self->mModule == cFELocale::kModuleFrontEnd) {
-                self->loadFE();
+            addFile(langIndex);
+            if (mModule == cFELocale::kModuleFrontEnd) {
+                loadFE();
             } else {
-                self->loadOV();
+                loadOV();
             }
         }
     }
@@ -515,12 +515,12 @@ public:
  * In game it tells the "hud" state v24(3, 0); in the front end it calls func_0028F140(cAudioInterface_bxAudio(), 4).
  * The new screen is kept at +0x40 and starts at frame 0.
  */
-extern "C" void cFEStateAudioOptions_onCreateScreen(cFEStateAudioOptions* self)
+void cFEStateAudioOptions::onCreateScreen()
 {
     char* name;
     if ((void*)SSXApp->Game != 0) {
         name = str_142audio_pda;
-        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(&mpEngine->mStateStack, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(3, 0);
         }
@@ -528,9 +528,9 @@ extern "C" void cFEStateAudioOptions_onCreateScreen(cFEStateAudioOptions* self)
         name = str_140audio;
         func_0028F140(cAudioInterface_bxAudio(), 4);
     }
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(name), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(name), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -579,15 +579,16 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 /**
  * Closes the audio options screen; in game it first tells the "hud" state v24(4, 0).
  */
-extern "C" void cFEStateAudioOptions_onDestroyScreen(cFEStateAudioOptions* self)
+void cFEStateAudioOptions::onDestroyScreen()
 {
     if ((void*)SSXApp->Game != 0) {
-        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(&mpEngine->mStateStack,
+                GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(4, 0);
         }
     }
-    cUIState_onDestroyScreen(self);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -603,18 +604,18 @@ INCLUDE_ASM("util/locale", cFEStateAudioOptions_onGainTransition);
  * @param bFirstTime  nonzero on the state's first transition
  * @return always 0
  */
-extern "C" int cFEStateAudioOptions_onGainTransition(cFEStateAudioOptions* self, int bFirstTime)
+bool cFEStateAudioOptions::onGainTransition(int bFirstTime)
 {
-    if (bFirstTime != 0 && self->mCreatedRequestList == 0) {
-        self->mpRequestLineOption->setVisible(0);
-        self->mpPlaylistOption->setVisible(0);
-        self->mpChecks[1]->setVisible(0);
-        self->mpChecks[3]->setVisible(0);
-        if (self->mInStore == 0) {
-            self->mpEditRequestOption->setVisible(0);
+    if (bFirstTime != 0 && mCreatedRequestList == 0) {
+        mpRequestLineOption->setVisible(0);
+        mpPlaylistOption->setVisible(0);
+        mpChecks[1]->setVisible(0);
+        mpChecks[3]->setVisible(0);
+        if (mInStore == 0) {
+            mpEditRequestOption->setVisible(0);
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

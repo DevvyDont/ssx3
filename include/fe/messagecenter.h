@@ -97,6 +97,14 @@ struct cOVState_MESSAGECENTER : public cOVState {
                                     //       (cUIEngine_addScreenByHashName, then cUIScreen_playFrame); func_001E50C8 reads
                                     //       its word at 0xD0 (the screen's engine path to the state stack); onWidgetEvent
                                     //       plays its "TransitionOut" frame
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_MESSAGECENTER__cOVState_MESSAGECENTER stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_MESSAGECENTER();
+    virtual void onCreateScreen() __asm__("cOVState_MESSAGECENTER_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cOVState_MESSAGECENTER_onDestroyScreen");
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cOVState_MESSAGECENTER_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpUnreadMail, 0x9C);
@@ -146,6 +154,14 @@ struct cOVState_ViewPopup : public cUIState {
                                     //       (func_001E5428, cOVState_ViewPopup_onWidgetMenu); func_001E58E0 steps it to the next message
     int miNumber;                   // 0x06C [R] the ctor's 5th argument; [U] func_001E5428 prints it with "%d"
                                     //       (D_004A2138); func_001E58E0 increments / recomputes it
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_ViewPopup__cOVState_ViewPopup stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_ViewPopup();
+    virtual void onCreateScreen() __asm__("cOVState_ViewPopup_onCreateScreen");
+    virtual bool onGainTransition(int on) __asm__("cOVState_ViewPopup_onGainTransition");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cOVState_ViewPopup_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVState_ViewPopup, mpNumberLabel, 0x48);

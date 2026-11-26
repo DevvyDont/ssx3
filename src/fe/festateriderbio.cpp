@@ -41,24 +41,24 @@ extern char str_154rider_details[];
  * front-end rider with the player's character, calls func_0028F140 with 1, and sets +0x50 when the character
  * has any cheat characters unlocked (cBERewardInterface_getNumOwnedCheatChars).
  */
-extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
+void cFEStateRiderDetail::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_154rider_details), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_154rider_details), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFEStateCharSetup_updateWidget(self);
+    cFEStateCharSetup_updateWidget(this);
     cBENewPlayerInterface* pi = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
+    int charID = cBENewPlayerInterface_getPlayerCharID(pi, mUserNum);
     pi->discard();
-    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
-    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
+    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, mUserNum, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, charID, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    self->mbCheatCharEnable = 1;
-    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, charID) == 0) {
-        self->mbCheatCharEnable = 0;
+    mbCheatCharEnable = 1;
+    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum, charID) == 0) {
+        mbCheatCharEnable = 0;
     }
 }
 #endif
@@ -117,10 +117,10 @@ extern char str_Option_2[];
  *
  * DisableTextWidget disables the widget and caps its alpha at 0.5.
  */
-extern "C" void cFEStateRiderDetail_onPreRender2D(cFEStateRiderDetail* self)
+void cFEStateRiderDetail::onPreRender2D()
 {
-    if (self->mbCheatCharEnable == 0) {
-        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_2));
+    if (mbCheatCharEnable == 0) {
+        void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Option_2));
         if (obj != 0) {
             DisableTextWidget(obj);
         }
@@ -157,10 +157,10 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void*);
  * cFEStateCharSetup_updateCharacter3DPos() (shared with the character-setup state) places the loaded rider model and, when the state asks
  * for it, restarts its animation.
  */
-extern "C" void cFEStateRiderDetail_onUpdate(cFEStateRiderDetail* self)
+void cFEStateRiderDetail::onUpdate()
 {
-    cUIState_onUpdate(self);
-    cFEStateCharSetup_updateCharacter3DPos(self);
+    cUIState_onUpdate(this);
+    cFEStateCharSetup_updateCharacter3DPos(this);
 }
 #endif
 
@@ -249,7 +249,7 @@ extern const char str_FEOptions[];
  * @param item  the widget (ignored when 0); its mMiscData is the option
  * @param msg  the widget event
  */
-extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUIThing* item, unsigned int msg)
+void cFEStateRiderDetail::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((char*)item) == 0) return;
     switch (msg) {
@@ -257,7 +257,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         int sub = item->mMiscData;
         if (sub == 8) {
             cKeyboardPopup* w = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
-                cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), self->mpEngine, ((char*)self), 0, 0xF);
+                cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), mpEngine, ((char*)this), 0, 0xF);
             w->miCurrentKey = 55;
             cKeyboardPopup_setMaxCharacters(w, 8);
             cKeyboardPopup_setIncludeKey(w, 75, 1, 2);
@@ -273,42 +273,43 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
             cKeyboardPopup_setIncludeKey(w, 0x40, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 65, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 66, 0, 2);
-            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, w);
-            cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum));
-            cFEStateCharSetup_show3DCharacter(((char*)self), 0);
+            cUIStateStack_pushPopup(&mpEngine->mStateStack, w);
+            cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1),
+                    mUserNum));
+            cFEStateCharSetup_show3DCharacter(((char*)this), 0);
         } else if (sub == 6) {
-            int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
-            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, cid) > 0) {
+            int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
+            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum, cid) > 0) {
                 cFEStateCheatCharSelect* w = (cFEStateCheatCharSelect*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(
-                    cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), self->mpEngine, ((char*)self),
-                    self->mUserNum, cid);
-                w->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, self->mUserNum);
-                cUIStateStack_pushPopup(&self->mpEngine->mStateStack, w);
-                cFEStateCharSetup_show3DCharacter(((char*)self), 0);
+                    cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), mpEngine, ((char*)this),
+                    mUserNum, cid);
+                w->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)mpEngine->mpCustom, mUserNum);
+                cUIStateStack_pushPopup(&mpEngine->mStateStack, w);
+                cFEStateCharSetup_show3DCharacter(((char*)this), 0);
             }
         } else {
-            cUICustomInterface* obj = self->mpEngine->mpCustom;
-            void* nextState = obj->getNextState((cUIState*)self, sub);
+            cUICustomInterface* obj = mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)this, sub);
             if (nextState != 0) {
-                cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+                cUIStateStack_push(&mpEngine->mStateStack, nextState);
             }
         }
-        cFEStateCharSetup_show3DCharacter(((char*)self), 0);
+        cFEStateCharSetup_show3DCharacter(((char*)this), 0);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
-            cFEStateCharSetup_show3DCharacter(((char*)self), 0);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
+            cFEStateCharSetup_show3DCharacter(((char*)this), 0);
         }
         break;
     }
     case cUIState::kONOPTION: {
-        cUIState* w = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
+        cUIState* w = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         w->mAttrState = (w->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
-        cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, w, 0, 0);
+        cUIStateStack_pushSpecial(&mpEngine->mStateStack, w, 0, 0);
         break;
     }
     }

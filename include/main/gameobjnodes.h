@@ -45,6 +45,13 @@ struct cAIVisualEffectsObjNode : public cObjNode {
     cAIVisualEffectsMan* AIVisualEffectsMan;    // 0x10 [O]; [R] cGame_load stores cAIVisualEffectsMan_construct()'s
                                                 //      result; [U] update / render call its slots 2 / 3, the dtor its
                                                 //      slot 1 (flags 3) when non-null
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cAIVisualEffectsObjNode__cAIVisualEffectsObjNode stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cAIVisualEffectsObjNode();
+    virtual void update() __asm__("cAIVisualEffectsObjNode_update");
+    virtual void render() __asm__("cAIVisualEffectsObjNode_render");
 };
 
 CHECK_OFFSET(cAIVisualEffectsObjNode, AIVisualEffectsMan, 0x10);
@@ -57,6 +64,13 @@ struct cVisualEffectsObjNode : public cObjNode {
     cVisualEffectsMan* VisualEffectsMan;        // 0x10 [O]; [R] cGame_load stores cVisualEffectsMan_construct()'s
                                                 //      result; [U] update / render call its slots 2 / 3, the dtor its
                                                 //      slot 1 (flags 3) when non-null
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cVisualEffectsObjNode__cVisualEffectsObjNode stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cVisualEffectsObjNode();
+    virtual void update() __asm__("cVisualEffectsObjNode_update");
+    virtual void render() __asm__("cVisualEffectsObjNode_render");
 };
 
 CHECK_OFFSET(cVisualEffectsObjNode, VisualEffectsMan, 0x10);
@@ -69,6 +83,13 @@ struct cSSXStatsObjNode : public cObjNode {
     cSSXStatsMan* SSXStatsMan;                  // 0x10 [O]; [R] cGame_load stores cSSXStatsMan_construct()'s result;
                                                 //      [U] the dtor frees it (operator delete, no dtor call); update /
                                                 //      render pass it to cSSXStatsMan_update / cSSXStatsMan_render
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cSSXStatsObjNode__cSSXStatsObjNode stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cSSXStatsObjNode();
+    virtual void update() __asm__("cSSXStatsObjNode_update");
+    virtual void render() __asm__("cSSXStatsObjNode_render");
 };
 
 CHECK_OFFSET(cSSXStatsObjNode, SSXStatsMan, 0x10);

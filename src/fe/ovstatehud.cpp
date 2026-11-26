@@ -53,30 +53,30 @@ static inline int HasScores1E8FF0(char* hs)
  * 0xE.
  */
 // Builds the hi-score list screen and shows/hides its panels for the current game mode.
-extern "C" void cOVStateHiScoreList_onCreateScreen(cOVStateHiScoreList* self)
+void cOVStateHiScoreList::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_hiscorelist), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_hiscorelist), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (cBENewRaceInterface_newRace.cGameMode) {
     case kGAMEMODE_RACE: case kGAMEMODE_TIMECHALLENGE:
-        cUIState_showObjSafe(self, str_helptext02);
+        cUIState_showObjSafe(this, str_helptext02);
         break;
     case kGAMEMODE_SLOPESTYLE: case kGAMEMODE_BIGAIR: case kGAMEMODE_HALFPIPE: case kGAMEMODE_FREERIDE:
     case kGAMEMODE_PNTSCHALLENGE:
     default:
-        cUIState_hideObjSafe(self, str_helptext01);
+        cUIState_hideObjSafe(this, str_helptext01);
         break;
     }
     char* hs = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     if (!HasScores1E8FF0(hs)) {
-        cUIState_hideObjSafe(self, str_helptxt01);
-        cUIState_hideObjSafe(self, str_helptxt02);
+        cUIState_hideObjSafe(this, str_helptxt01);
+        cUIState_hideObjSafe(this, str_helptxt02);
     }
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
@@ -852,11 +852,10 @@ static inline unsigned short* getLocString_9AD0(char* id)
  * "-" and "11". Builds the hint boxes: a random Uber trick (L1 or R1 + Square, BXrand() & 1 kept at +0x55C),
  * RECOVER and "%s @skip %s" (kT_OVRCMNPress, kT_OVRCMNToSkip).
  *
- * @param vself  the HUD state (this)
  */
-extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
+void cOVStateHUD1P::onCreateScreen()
 {
-    sHUD1P* self = (sHUD1P*)vself;
+    sHUD1P* self = (sHUD1P*)this;
     self->hash = GetHashValue32(str_hud_b);
     sTok_9AD0* entry = gTextPictDB_9AD0;
     while (entry->hash != 0) {

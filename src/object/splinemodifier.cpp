@@ -112,59 +112,59 @@ struct cSplineModifier_9698 {
  * kSplineSeq_PingPong reflects the overshoot at the start (-pos), but at the far end its pos - (pos - (Length - 0.1))
  * comes to Length - 0.1 instead of a reflection.
  */
-extern "C" void cSplineModifier_update(cSplineModifier* self)
+void cSplineModifier::update()
 {
     float zeroF = 0.0f;
-    if (zeroF < self->ForceTime) {
-        self->ForceTime -= cObjectInterface_getUpdateTime();
-        self->Velocity += self->Force * cObjectInterface_getUpdateTime();
+    if (zeroF < ForceTime) {
+        ForceTime -= cObjectInterface_getUpdateTime();
+        Velocity += Force * cObjectInterface_getUpdateTime();
     }
-    if (self->Start == 0) {
+    if (Start == 0) {
         return;
     }
-    if (self->Complete != 0) {
+    if (Complete != 0) {
         return;
     }
-    float pos = self->OffsetDistance + self->Velocity * cObjectInterface_getUpdateTime();
-    self->OffsetDistance = pos;
+    float pos = OffsetDistance + Velocity * cObjectInterface_getUpdateTime();
+    OffsetDistance = pos;
     if (pos < zeroF) {
-        int mode = self->SequenceType;
+        int mode = SequenceType;
         if (mode == 0) {
-            self->Velocity = -self->Velocity;
-            self->OffsetDistance = zeroF;
-            self->Complete = 1;
-            self->Start = 0;
+            Velocity = -Velocity;
+            OffsetDistance = zeroF;
+            Complete = 1;
+            Start = 0;
         } else if (mode == kSplineSeq_PingPong) {
-            self->Velocity = -self->Velocity;
-            self->OffsetDistance = -pos;
+            Velocity = -Velocity;
+            OffsetDistance = -pos;
         } else if (mode == 4) {
-            self->Velocity = -self->Velocity;
-            self->OffsetDistance = zeroF;
-            self->Complete = 1;
-            self->Start = 0;
+            Velocity = -Velocity;
+            OffsetDistance = zeroF;
+            Complete = 1;
+            Start = 0;
         } else {
-            self->OffsetDistance = pos + self->Spline.Length;
+            OffsetDistance = pos + Spline.Length;
         }
-    } else if (self->Spline.Length <= pos) {
-        int mode = self->SequenceType;
+    } else if (Spline.Length <= pos) {
+        int mode = SequenceType;
         if (mode == 0) {
-            self->Start = 0;
-            self->Complete = 1;
-            self->Velocity = -self->Velocity;
-            self->OffsetDistance = self->Spline.Length - 0.10000000149011612f;
+            Start = 0;
+            Complete = 1;
+            Velocity = -Velocity;
+            OffsetDistance = Spline.Length - 0.10000000149011612f;
         } else if (mode == kSplineSeq_PingPong) {
-            self->Velocity = -self->Velocity;
-            self->OffsetDistance = pos - (pos - (self->Spline.Length - 0.10000000149011612f));
+            Velocity = -Velocity;
+            OffsetDistance = pos - (pos - (Spline.Length - 0.10000000149011612f));
         } else if (mode == 4) {
-            self->Start = 0;
-            self->Complete = 1;
-            self->Velocity = -self->Velocity;
-            self->OffsetDistance = self->Spline.Length - 0.10000000149011612f;
+            Start = 0;
+            Complete = 1;
+            Velocity = -Velocity;
+            OffsetDistance = Spline.Length - 0.10000000149011612f;
         } else {
-            self->OffsetDistance = pos - self->Spline.Length;
+            OffsetDistance = pos - Spline.Length;
         }
     }
-    self->RootTransformDirty = 1;
+    RootTransformDirty = 1;
 }
 #endif
 
@@ -296,34 +296,34 @@ static inline void vu0CopyMat_9830(t4Matrix* d, const t4Matrix* s)
  * kSplineOrient_Pitch or kSplineOrient_HeadingPitch adds pitch along Dir; that rotation and Pos form Transform (+0x60),
  * turned by HeadTweak (+0x38) about the up axis (t4vect_ZAxis) when it is nonzero. Clears RootTransformDirty (+0x58).
  */
-extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
+void cSplineModifier::updateRootTransform()
 {
     float rx = 0.0f;
     float ry = 0.0f;
     float rz = 0.0f;
-    cSpline_getPos(((char*)&self->Spline), self->OffsetDistance, &self->Pos, &self->Dir, &self->DDir);
-    self->X2 = self->Dir.x * self->Dir.x;
-    self->Y2 = self->Dir.y * self->Dir.y;
-    t4Vector n = vu0Normalize(self->Dir);
-    if ((unsigned)(self->OrientType - kSplineOrient_Heading) < 2) {
+    cSpline_getPos(((char*)&Spline), OffsetDistance, &Pos, &Dir, &DDir);
+    X2 = Dir.x * Dir.x;
+    Y2 = Dir.y * Dir.y;
+    t4Vector n = vu0Normalize(Dir);
+    if ((unsigned)(OrientType - kSplineOrient_Heading) < 2) {
         rz = ry - Atan2_9830(n.y, n.x);
     }
-    if (self->OrientType == kSplineOrient_Pitch || self->OrientType == kSplineOrient_HeadingPitch) {
-        float len = fsqrt(self->X2 + self->Y2);
-        ry += Atan2_9830(self->Dir.z, len);
+    if (OrientType == kSplineOrient_Pitch || OrientType == kSplineOrient_HeadingPitch) {
+        float len = fsqrt(X2 + Y2);
+        ry += Atan2_9830(Dir.z, len);
     }
     t3Vector rot;
     rot.x = rx;
     rot.y = ry;
     rot.z = rz;
     t3Vector pos;
-    pos.x = self->Pos.x;
-    pos.y = self->Pos.y;
-    pos.z = self->Pos.z;
+    pos.x = Pos.x;
+    pos.y = Pos.y;
+    pos.z = Pos.z;
     t4Matrix rotMat;
     t4Matrix copyMat;
     t4Matrix product;
-    t4Matrix* rootMat = (&self->Transform);
+    t4Matrix* rootMat = (&Transform);
     float sc[4][2];
     fSinCos(&sc[0][0], &sc[0][1], rot.x);
     fSinCos(&sc[1][0], &sc[1][1], rot.y);
@@ -337,24 +337,24 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;
-    self->Transform.row[0].x = cy * cz;
-    self->Transform.row[0].y = -cy * sz;
-    self->Transform.row[0].z = sy;
-    self->Transform.row[0].w = 0.0f;
-    self->Transform.row[1].x = sxsy * cz + cxsz;
-    self->Transform.row[1].y = cx * cz - sxsy * sz;
-    self->Transform.row[1].z = -sx * cy;
-    self->Transform.row[1].w = 0.0f;
-    self->Transform.row[2].x = sx * sz - cxsy * cz;
-    self->Transform.row[2].y = cxsz * sy + sx * cz;
-    self->Transform.row[2].z = cx * cy;
-    self->Transform.row[2].w = 0.0f;
-    self->Transform.row[3].x = pos.x;
-    self->Transform.row[3].y = pos.y;
-    self->Transform.row[3].z = pos.z;
-    self->Transform.row[3].w = 1.0f;
-    cSplineModifierState* state = (cSplineModifierState*)&self->BoundBox; // the cSplineModifierState part (+0x10)
-    if (self->HeadTweak != 0.0f) {
+    Transform.row[0].x = cy * cz;
+    Transform.row[0].y = -cy * sz;
+    Transform.row[0].z = sy;
+    Transform.row[0].w = 0.0f;
+    Transform.row[1].x = sxsy * cz + cxsz;
+    Transform.row[1].y = cx * cz - sxsy * sz;
+    Transform.row[1].z = -sx * cy;
+    Transform.row[1].w = 0.0f;
+    Transform.row[2].x = sx * sz - cxsy * cz;
+    Transform.row[2].y = cxsz * sy + sx * cz;
+    Transform.row[2].z = cx * cy;
+    Transform.row[2].w = 0.0f;
+    Transform.row[3].x = pos.x;
+    Transform.row[3].y = pos.y;
+    Transform.row[3].z = pos.z;
+    Transform.row[3].w = 1.0f;
+    cSplineModifierState* state = (cSplineModifierState*)&BoundBox; // the cSplineModifierState part (+0x10)
+    if (HeadTweak != 0.0f) {
         const t3Vector* axis = &t4vect_ZAxis;
         fSinCos(&sc[3][0], &sc[3][1], state->HeadTweak);
         float k = 1.0f - sc[3][1];
@@ -385,7 +385,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
         vu0CopyMat_9830(tp, &product);
         vu0CopyMat_9830(rootMat, tp);
     }
-    self->RootTransformDirty = 0;
+    RootTransformDirty = 0;
 }
 #endif
 
@@ -618,10 +618,10 @@ extern "C" void cSpline_writeToReplayFrame(cSpline* self, cBxReplayFrame* stream
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cSplineModifier_writeToReplayFrame(cSplineModifier* self, cBxReplayFrame* stream)
+void cSplineModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((char*)&self->BoundBox, 80);
-    cSpline_writeToReplayFrame(&self->Spline, stream);
+    stream->write((char*)&BoundBox, 80);
+    cSpline_writeToReplayFrame(&Spline, stream);
 }
 #endif
 
@@ -920,16 +920,16 @@ extern "C" float cObjectInterface_getUpdateTime();
  * OffsetDistance (+0x10) moves by Velocity (+0x14) times the tick period and wraps into [0, Length) (+0x54);
  * RootTransformDirty (+0x30) is set.
  */
-extern "C" void cMultiSplineModifier_update(cMultiSplineModifier* self)
+void cMultiSplineModifier::update()
 {
-    float newOffset = self->OffsetDistance + self->Velocity * cObjectInterface_getUpdateTime();
-    self->OffsetDistance = newOffset;
+    float newOffset = OffsetDistance + Velocity * cObjectInterface_getUpdateTime();
+    OffsetDistance = newOffset;
     if (newOffset < 0.0f) {
-        self->OffsetDistance = newOffset + self->Spline.Length;
-    } else if (newOffset >= self->Spline.Length) {
-        self->OffsetDistance = newOffset - self->Spline.Length;
+        OffsetDistance = newOffset + Spline.Length;
+    } else if (newOffset >= Spline.Length) {
+        OffsetDistance = newOffset - Spline.Length;
     }
-    self->RootTransformDirty = 1;
+    RootTransformDirty = 1;
 }
 #endif
 
@@ -1236,25 +1236,25 @@ static inline void setMax_A918(tInstanceRecord* in, const t4Vector& v)
  * nash_Nash_movenode() moves it from the old box, and the box is also written to the copy's record (+0x60
  * min, +0x6C max).
  */
-extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* self)
+void cMultiSplineModifier::updateOverlapSystem()
 {
-    if (self->RootTransformDirty != 0) {
-        self->updateRootTransform();
+    if (RootTransformDirty != 0) {
+        updateRootTransform();
     }
-    for (int i = 1; i < self->NumModels; i++) {
-        tBoundBox old = (self->Nodes)[i].BoundBox;
-        float halfSize = self->Radius;
+    for (int i = 1; i < NumModels; i++) {
+        tBoundBox old = Nodes[i].BoundBox;
+        float halfSize = Radius;
         t4Vector ext;
         ext.x = halfSize;
         ext.y = halfSize;
         ext.z = halfSize;
         ext.w = 0.0f;
-        (*(&(self->Nodes)[i].BoundBox.MinPoint)) = vu0Sub_A918(instPos_A918(self, i), ext);
-        (*(&(self->Nodes)[i].BoundBox.MaxPoint)) = vu0Add_A918(instPos_A918(self, i), ext);
-        void* id = ((char*)self->NodeInst[i]);
-        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &(self->Nodes)[i].BoundBox, &old);
-        setMin_A918((tInstanceRecord*)self->NodeInst[i], (*(&(self->Nodes)[i].BoundBox.MinPoint)));
-        setMax_A918((tInstanceRecord*)self->NodeInst[i], (*(&(self->Nodes)[i].BoundBox.MaxPoint)));
+        (*(&Nodes[i].BoundBox.MinPoint)) = vu0Sub_A918(instPos_A918(this, i), ext);
+        (*(&Nodes[i].BoundBox.MaxPoint)) = vu0Add_A918(instPos_A918(this, i), ext);
+        void* id = ((char*)NodeInst[i]);
+        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &Nodes[i].BoundBox, &old);
+        setMin_A918((tInstanceRecord*)NodeInst[i], (*(&Nodes[i].BoundBox.MinPoint)));
+        setMax_A918((tInstanceRecord*)NodeInst[i], (*(&Nodes[i].BoundBox.MaxPoint)));
     }
 }
 #endif
@@ -1727,31 +1727,31 @@ extern "C" void cSpline_draw(void* a, void* b);
  * needs clipping (GM_CLIPCODE_CROSSING) or 0x400 when inside (GM_CLIPCODE_INSIDE). DrawPath (+0x1C) draws the spline in
  * Colour (+0x20) through cSpline_draw.
  */
-extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
+void cMultiSplineModifier::render()
 {
-    if (self->RootTransformDirty != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_AT(self, 0);
-        vt[3].fn(vthis(self, vt[3])); // slot 3: updateRootTransform
+    if (RootTransformDirty != 0) {
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_AT(this, 0);
+        vt[3].fn(vthis(this, vt[3])); // slot 3: updateRootTransform
     }
-    cInstanceNode* model = self->Instance->m_pActiveNode;
+    cInstanceNode* model = Instance->m_pActiveNode;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    for (int i = 1; i < self->NumModels; i++) {
+    for (int i = 1; i < NumModels; i++) {
         tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, w);
         void* thisp = vthis(w, vt[93]);
-        tMultiNode* box = &(self->Nodes)[i];
+        tMultiNode* box = &Nodes[i];
         tNetMatrixSlot* vt2 = (tNetMatrixSlot*)VPTR_OF(cGraphicsMan, w);
         int hit = vt[93].fn(thisp, &box->BoundBox.MinPoint, &box->BoundBox.MaxPoint, vt2[43].fn(vthis(w, vt2[43])));
         if (hit != GM_CLIPCODE_OUTSIDE) {
-            model->makeAnimMats((const t4Matrix*)&self->NodeInst[i]->m_fmTransform, self->AnimMats);
+            model->makeAnimMats((const t4Matrix*)&NodeInst[i]->m_fmTransform, AnimMats);
             if (hit != GM_CLIPCODE_INSIDE) {
-                model->renderModel(self->AnimMats, 1056);
+                model->renderModel(AnimMats, 1056);
             } else {
-                model->renderModel(self->AnimMats, 0x400);
+                model->renderModel(AnimMats, 0x400);
             }
         }
     }
-    if (self->DrawPath != 0) {
-        cSpline_draw(&self->Spline, &self->Colour);
+    if (DrawPath != 0) {
+        cSpline_draw(&Spline, &Colour);
     }
 }
 #endif
@@ -1769,13 +1769,13 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_writeToReplayFrame);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cBxReplayFrame* stream)
+void cMultiSplineModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((const char*)&self->NumModels, 52);
-    cSpline_writeToReplayFrame(&self->Spline, stream);
-    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
-    for (int i = 0; i < self->NumModels; i++) {
-        stream->write((const char*)&self->NodeInst[i]->m_RID, 4);
+    stream->write((const char*)&NumModels, 52);
+    cSpline_writeToReplayFrame(&Spline, stream);
+    stream->writeReplayInstance((const tInstanceRecord*)Instance);
+    for (int i = 0; i < NumModels; i++) {
+        stream->write((const char*)&NodeInst[i]->m_RID, 4);
     }
 }
 #endif

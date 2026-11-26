@@ -851,6 +851,16 @@ struct cRider : public cRiderState, public cBeing {
     int checkForPrewind(int isJumpHeld, int isJumpPressed) __asm__("cRider_checkForPrewind");
     int checkForFinishLine() __asm__("cRider_checkForFinishLine");
     int checkForPunch(int isLeft, int isRight) __asm__("cRider_checkForPunch");
+    // retail's destructor cRider__cRider stays a C function (g++ 2.95 takes no asm label on a destructor); declared
+    // first, it keeps the vtable out of the units defining the overrides
+    virtual ~cRider();
+    virtual void flagEventSpeedBoost(float amount) __asm__("cRider_flagEventSpeedBoost");
+    virtual void flagEventTrickBoost(float amount) __asm__("cRider_flagEventTrickBoost");
+    virtual void flagEventTrickMultiplier(float value) __asm__("cRider_flagEventTrickMultiplier");
+    virtual int getAIIndex() __asm__("cRider_getAIIndex__FPv");
+    virtual void initForMission(t4Matrix* mat) __asm__("cRider_initForMission");
+    virtual void applyBoost(t4Vector* impulse) __asm__("cRider_applyBoost");
+    virtual bool isIntersecting(tInstanceRecord* instance) __asm__("cRider_isIntersecting");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

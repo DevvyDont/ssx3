@@ -56,6 +56,11 @@ struct cUIPair : public cUIThing {
     void setEntry(cUIThing* obj) __asm__("cUIPair_setEntry");
     int getWidget() __asm__("cUIPair_getWidget");
     void setWidget(cUIThing* obj) __asm__("cUIPair_setWidget");
+    virtual void setVisible(int on) __asm__("cUIPair_setVisible");
+    virtual void setFocus(int on) __asm__("cUIPair_setFocus");
+    virtual void updateLocale() __asm__("cUIPair_updateLocale");
+    virtual void render2D(float x, float y) __asm__("cUIPair_render2D");
+    virtual void update(unsigned short ev) __asm__("cUIPair_update");
 };
 
 CHECK_OFFSET(cUIPair, mAttrPair, 0x074);

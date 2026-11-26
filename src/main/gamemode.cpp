@@ -641,7 +641,7 @@ struct sGM00238C80 {
  * and iCheatCharacters, then calls the handler's own slot +0x2C (cGameModeHandler_cleanRiderRanksTime by default). It is slot +0x1C of every
  * handler vtable; cGameModeMan_initGameMode calls it on the old handler.
  */
-extern "C" void cGameModeHandler_purge(cGameModeHandler* self)
+void cGameModeHandler::purge()
 {
     cGameModeMan* gm = cGameModeHandler_pManager;
     gm->bIsEventDone = 1;
@@ -664,7 +664,7 @@ extern "C" void cGameModeHandler_purge(cGameModeHandler* self)
     gm->unk_94 = 0;
     memset(gm->iCharacters, 0, 40);
     memset(cGameModeHandler_pManager->iCheatCharacters, 0, 40);
-    self->cleanRiderRanksTime();
+    cleanRiderRanksTime();
 }
 #endif
 
@@ -778,7 +778,7 @@ static inline cAI* race_238E20()
  * heat and ranks on heat 3. When the game path (newRace.cGamePath) is not 0 it first sets up a single heat-3 event with fresh
  * line-up. It fills the init slot (+0x14), which cGameModeMan_restartHeat calls.
  */
-extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
+void cGMBigAirHandler::init()
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int i;
@@ -801,15 +801,15 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         } else {
             gameModeMan->unk_94 = 0;
         }
-        memset(self->uiScore, 0, 0x78);
-        self->cleanRiderRanksPoints();
+        memset(uiScore, 0, 0x78);
+        cleanRiderRanksPoints();
         if (cGameModeHandler_pManager->bIsEventDone == true) {
-            func_00239938_self(self);
+            func_00239938_self(this);
         }
         cGameModeMan* modeMan = cGameModeHandler_pManager;
         modeMan->iNextHeat = 3;
         modeMan->iRestoreHeat = 3;
-        cGMBigAirHandler_fillScoreTable((sScore_239AA0*)self);
+        cGMBigAirHandler_fillScoreTable((sScore_239AA0*)this);
     }
     cGameModeHandler_pManager->uiTimeLimit = cBENewRaceInterface_getTimeLimit(race, cGameModeHandler_pManager->iHeatNum) * 60;
     cGameModeMan* modeManager = cGameModeHandler_pManager;
@@ -835,19 +835,19 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         manager->unk_80 = 0;
         manager->iSimAI = 5;
         manager->iNextLocation = -1;
-        self->uiScore[0][0] = 0;
-        self->uiScore[1][0] = 0;
-        self->uiScore[2][0] = 0;
-        unsigned int* firstHeatScores = self->uiScore[0];
+        uiScore[0][0] = 0;
+        uiScore[1][0] = 0;
+        uiScore[2][0] = 0;
+        unsigned int* firstHeatScores = uiScore[0];
         if (manager->bIsEventDone == true) {
             memset(firstHeatScores, 0, 0x78);
-            self->cleanRiderRanksPoints();
-            func_00239938_self(self);
-            cGMBigAirHandler_fillScoreTable((sScore_239AA0*)self);
+            cleanRiderRanksPoints();
+            func_00239938_self(this);
+            cGMBigAirHandler_fillScoreTable((sScore_239AA0*)this);
         }
         D_00536640[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            D_00536640[i] = self->uiScore[2][i];
+            D_00536640[i] = uiScore[2][i];
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         {
@@ -869,7 +869,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         manager->bIsLastHeat = 0;
         D_00536640[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            D_00536640[i] = self->uiScore[1][i] + self->uiScore[0][i];
+            D_00536640[i] = uiScore[1][i] + uiScore[0][i];
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         break;
@@ -882,7 +882,7 @@ extern "C" void cGMBigAirHandler_init(cGMBigAirHandler* self)
         manager->bIsEventDone = 0;
         D_00536640[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            D_00536640[i] = self->uiScore[2][i];
+            D_00536640[i] = uiScore[2][i];
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         break;
@@ -1051,7 +1051,7 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_riderCheckpointHit);
  * @param secs  seconds to add
  * @return true, or false when the extended limit has already run out
  */
-extern "C" bool cGMBigAirHandler_riderCheckpointHit(cGMBigAirHandler* self, int player, int secs)
+bool cGMBigAirHandler::riderCheckpointHit(int player, int secs)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     if (gameModeMan->iCurrentGameEvent == kGAMEEVENT_SLOPESTYLE) {
@@ -1206,12 +1206,12 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_getHeatScore);
  * @param row  the heat
  * @return the score, or 0 when @p row is past iHeatNum
  */
-extern "C" int cGMBigAirHandler_getHeatScore(cGMBigAirHandler* self, int col, int row)
+unsigned int cGMBigAirHandler::getHeatScore(int col, int row)
 {
     if (cGameModeHandler_pManager->iHeatNum < row) {
         return 0;
     }
-    return self->uiScore[row][col];
+    return uiScore[row][col];
 }
 #endif
 
@@ -1292,7 +1292,7 @@ struct sGM_239D88 {
  * Sets a single last heat (3) with no AI, a time limit of cBENewRaceInterface_getTimeLimit(race, 3) * 60, runs slot +0x24, puts both
  * players' characters and cheat characters in the tables and clears the two per-player counters (+0x4, +0x6).
  */
-extern "C" void cGMMPSlopeHandler_init(cGMMPSlopeHandler* self)
+void cGMMPSlopeHandler::init()
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1317,13 +1317,13 @@ extern "C" void cGMMPSlopeHandler_init(cGMMPSlopeHandler* self)
     gm2->bHasPointTarget = 0;
     gm2->uiTimeLimit = heatTimeLimit * 60;
     memset(gm2->iCharacters, -1, 40);
-    self->cleanRiderRanksPoints();
+    cleanRiderRanksPoints();
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
     cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
     cGameModeHandler_pManager->iCheatCharacters[1] = cBENewPlayerInterface_getPlayerCheatCharID(player, 1);
-    self->LastCheckpointHit[0] = 0;
-    self->LastCheckpointHit[1] = 0;
+    LastCheckpointHit[0] = 0;
+    LastCheckpointHit[1] = 0;
 }
 #endif
 
@@ -1339,7 +1339,7 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_raceFinish);
  *
  * @param idx  the rider index
  */
-extern "C" void cGMMPSlopeHandler_raceFinish(cGMMPSlopeHandler* self, int idx)
+void cGMMPSlopeHandler::raceFinish(int idx)
 {
     cAI* race = Race_239230();
     tRiderStats st = *(&race->Riders[idx]->mMetrix->Totals);
@@ -1379,9 +1379,9 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
  * @param secs  seconds to add
  * @return true when the player took the lead (and time was added)
  */
-extern "C" bool cGMMPSlopeHandler_riderCheckpointHit(cGMMPSlopeHandler* self, int player, int secs)
+bool cGMMPSlopeHandler::riderCheckpointHit(int player, int secs)
 {
-    short* score = self->LastCheckpointHit;
+    short* score = LastCheckpointHit;
     short* mine = &score[player];
     short newScore = ++*mine;
     int other = 0;
@@ -1472,7 +1472,7 @@ static inline void fillOthers_23A108(int* dst, int p)
  * (cGameModeMan_iCharRank) in the next line-up and apply it, and reset the score and rank tables. +0x8 and +0xC
  * remember which heat set-up already ran.
  */
-extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
+void cGMRaceHandler::init()
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     gameModeMan->bAreResultsLocked = 0;
@@ -1482,7 +1482,7 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
     int quick = cBENewRaceInterface_newRace.cGamePath;
     if (quick != 0 && cGameModeHandler_pManager->iHeatNum != cGameModeMan::kFinalHeat) {
         cGameModeHandler_pManager->iHeatNum = cGameModeMan::kFinalHeat;
-        self->mHeat3Ready = 0;
+        mHeat3Ready = 0;
     }
     cGameModeMan* gm = cGameModeHandler_pManager;
     int state = gm->iHeatNum;
@@ -1496,11 +1496,11 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
         gm->iSimAI = 0;
         gm->iNumberAI = 5;
         if (gm->bIsEventDone == true) {
-            func_0023A4F0(self);
-            func_0023A668(self);
+            func_0023A4F0(this);
+            func_0023A668(this);
         }
-        memset(self->uiTime, 9, 0x78);
-        self->cleanRiderRanksTime();
+        memset(uiTime, 9, 0x78);
+        cleanRiderRanksTime();
         {
             cGameModeMan* manager = cGameModeHandler_pManager;
             manager->iNextLocation = -1;
@@ -1513,18 +1513,18 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
             manager->unk_90 = 1;
             manager->unk_94 = 0;
         }
-        self->mHeat2Ready = 0;
-        self->mHeat3Ready = 0;
+        mHeat2Ready = 0;
+        mHeat3Ready = 0;
         break;
     case cGameModeMan::kHeat2:
         gm->bIsLastHeat = 0;
         gm->iNumberAI = 5;
         gm->iSimAI = 0;
-        if (self->mHeat2Ready == 0) {
+        if (mHeat2Ready == 0) {
             int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
-            self->mLineup[1][0] = cBENewPlayerInterface_getRiderCharID(player, humanRider);
-            fillOthers_23A108(&self->mLineup[1][1], humanRider);
-            func_0023A668(self);
+            mLineup[1][0] = cBENewPlayerInterface_getRiderCharID(player, humanRider);
+            fillOthers_23A108(&mLineup[1][1], humanRider);
+            func_0023A668(this);
         }
         {
             cGameModeMan* manager = cGameModeHandler_pManager;
@@ -1534,7 +1534,7 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
         }
         memset(D_00536640, 9, 40);
         memset(cGameModeMan_iRanking, 0, 40);
-        memset(self->uiTime[1], 9, 40);
+        memset(uiTime[1], 9, 40);
         {
             cGameModeMan* manager = cGameModeHandler_pManager;
             manager->uiTimeLimit = 0;
@@ -1544,27 +1544,27 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
             manager->unk_90 = 0;
             manager->unk_94 = 0;
         }
-        self->mHeat2Ready = 1;
-        self->mHeat3Ready = 0;
+        mHeat2Ready = 1;
+        mHeat3Ready = 0;
         break;
     case cGameModeMan::kFinalHeat:
         gm->iNumberAI = 5;
         gm->iSimAI = 0;
         gm->bIsLastHeat = 1;
-        if (self->mHeat3Ready == 0) {
+        if (mHeat3Ready == 0) {
             if (quick != 0) {
-                func_0023A4F0(self);
+                func_0023A4F0(this);
                 cGameModeHandler_pManager->iHeatNum = 1;
-                func_0023A668(self);
+                func_0023A668(this);
                 cGameModeHandler_pManager->iHeatNum = state;
-                memset(self->uiTime, 9, 0x78);
-                self->cleanRiderRanksTime();
+                memset(uiTime, 9, 0x78);
+                cleanRiderRanksTime();
             } else {
                 int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
-                self->mLineup[2][0] = cBENewPlayerInterface_getRiderCharID(player, humanRider);
-                self->mLineup[2][1] = cBENewRaceInterface_getRival(race);
-                fillOthers_23A108(&self->mLineup[2][2], humanRider);
-                func_0023A668(self);
+                mLineup[2][0] = cBENewPlayerInterface_getRiderCharID(player, humanRider);
+                mLineup[2][1] = cBENewRaceInterface_getRival(race);
+                fillOthers_23A108(&mLineup[2][2], humanRider);
+                func_0023A668(this);
             }
         }
         {
@@ -1575,7 +1575,7 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
         }
         memset(D_00536640, 9, 40);
         memset(cGameModeMan_iRanking, 9, 40);
-        memset(self->uiTime[2], 9, 40);
+        memset(uiTime[2], 9, 40);
         {
             cGameModeMan* manager = cGameModeHandler_pManager;
             manager->uiTimeLimit = 0;
@@ -1585,8 +1585,8 @@ extern "C" void cGMRaceHandler_init(cGMRaceHandler* self)
             manager->unk_90 = 0;
             manager->unk_94 = 0;
         }
-        self->mHeat3Ready = 1;
-        self->mHeat2Ready = 0;
+        mHeat3Ready = 1;
+        mHeat2Ready = 0;
         break;
     }
 }
@@ -1804,7 +1804,7 @@ static inline int vcall_23A760(char* obj, int slot)
  * @param idx  the rider index
  */
 // cGMRaceHandler slot 7: records rider idx's heat time, ranks the heat and moves the heat state on.
-extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
+void cGMRaceHandler::raceFinish(int idx)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1814,10 +1814,10 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     if (cAI_isRaceFinished(rc) == 0 || vcall_23A760((char*)&VPTR_AT(GetRace()->riders[idx], sizeof(cRiderState)), 9) == 0) {
         int tick = rc->riders[idx]->mFinishTick;
         if (GetRace()->riders[idx]->mDidNotFinish) {
-            self->uiTime[heat][idx] = 360000;
+            uiTime[heat][idx] = 360000;
             D_005366A8[idx] = 1;
         } else {
-            self->uiTime[heat][idx] = tick;
+            uiTime[heat][idx] = tick;
             D_005366A8[idx] = 0;
         }
     }
@@ -1829,9 +1829,9 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     }
     for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
         if (!Finished(rc->riders[i])) {
-            self->uiTime[heat][i] = cRider_estimateFinishTick(rc->riders[i]);
+            uiTime[heat][i] = cRider_estimateFinishTick(rc->riders[i]);
         }
-        D_00536640[i] = self->uiTime[heat][i];
+        D_00536640[i] = uiTime[heat][i];
     }
     cGameModeMan_sortTimes_A760(cGameModeHandler_pManager, 10);
     cGameModeMan* gm = cGameModeHandler_pManager;
@@ -1861,8 +1861,8 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
         }
     } else {
         gm->iNextHeat = gm->iHeatNum;
-        self->mHeat2Ready = 1;
-        self->mHeat3Ready = 1;
+        mHeat2Ready = 1;
+        mHeat3Ready = 1;
         GetRace()->riders[idx]->ShouldCelebrateAtFinish = 0;
         if (cBENewRaceInterface_newRace.cGamePath == 0) {
             if (cGameModeHandler_pManager->iHeatNum < cGameModeMan::kHeat2 ||
@@ -1975,7 +1975,7 @@ struct sGM_23AC88 {
  * says it is a network game), no time limit, fills the time table (+0x4) with 9s, runs slot +0x2C and stores both
  * players' characters. When the event was done it also runs func_0023B0A8.
  */
-extern "C" void cGMMPRaceHandler_init(cGMMPRaceHandler* self)
+void cGMMPRaceHandler::init()
 {
     int one = 1;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2003,14 +2003,14 @@ extern "C" void cGMMPRaceHandler_init(cGMMPRaceHandler* self)
     gm2->uiTimeLimit = 0;
     gm2->uiPointTarget = 0;
     gm2->bHasPointTarget = 0;
-    memset(&self->uiTime[0], 9, 40);
-    self->cleanRiderRanksTime();
+    memset(&uiTime[0], 9, 40);
+    cleanRiderRanksTime();
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
     cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
     cGameModeHandler_pManager->iCheatCharacters[1] = cBENewPlayerInterface_getPlayerCheatCharID(player, 1);
     if (cGameModeHandler_pManager->bIsEventDone == one) {
-        func_0023B0A8(self);
+        func_0023B0A8(this);
     }
     cGameModeHandler_pManager->bIsEventDone = 0;
 }
@@ -2273,7 +2273,7 @@ struct sMode_23B268 {
  * 60 and also becomes the point target. Runs slot +0x2C, gives the human its character and clears the checkpoint
  * counter (+0x8). Slot +0x14 (init) of cGMTimeHandler_vtbl.
  */
-extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
+void cGMTimeHandler::init()
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2300,21 +2300,22 @@ extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
         break;
     }
     int medalResult = cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
-    self->mCurrentDifficulty = 0;
+    mCurrentDifficulty = 0;
     if (medalResult == kMEDAL_GOLD || medalResult == kMEDAL_SILVER) {
-        self->mCurrentDifficulty = 2;
+        mCurrentDifficulty = 2;
     } else if (medalResult == kMEDAL_BRONZE) {
-        self->mCurrentDifficulty = 1;
+        mCurrentDifficulty = 1;
     }
-    int tierTime = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, self->mCurrentDifficulty);
+    int tierTime = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent,
+            mCurrentDifficulty);
     cGameModeMan* gm2 = cGameModeHandler_pManager;
-    self->uiTimeToBeat = tierTime * 60;
+    uiTimeToBeat = tierTime * 60;
     gm2->bIsTimedEvent = 1;
-    gm2->uiTimeLimit = (int)self->uiTimeToBeat;
-    gm2->uiPointTarget = (int)self->uiTimeToBeat;
+    gm2->uiTimeLimit = (int)uiTimeToBeat;
+    gm2->uiPointTarget = (int)uiTimeToBeat;
     gm2->iNextHeat = 2;
     gm2->iRestoreHeat = 2;
-    self->cleanRiderRanksTime();
+    cleanRiderRanksTime();
     memset(cGameModeHandler_pManager->iCharacters, -1, 40);
     int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
@@ -2325,7 +2326,7 @@ extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
     gm3->unk_94 = 0;
     gm3->bIsLastHeat = 0;
     gm3->bAreResultsLocked = 0;
-    *(short*)&self->uiTrackProgress = 0;
+    *(short*)&uiTrackProgress = 0;
 }
 #endif
 
@@ -2379,7 +2380,7 @@ static inline char* rider_23B468(char* g, int off)
  *
  * @param riderIndex  the rider index
  */
-extern "C" void cGMTimeHandler_raceFinish(cGMTimeHandler* self, int riderIndex)
+void cGMTimeHandler::raceFinish(int riderIndex)
 {
     int one = 1;
     int off = riderIndex << 2;
@@ -2395,7 +2396,7 @@ extern "C" void cGMTimeHandler_raceFinish(cGMTimeHandler* self, int riderIndex)
         *(int*)(rider_23B468(ssxApp, off) + 0x100) = 0;
         gm->iNextHeat = one;
         D_005366A8[riderIndex] = one;
-    } else if (self->uiTimeToBeat < *timeSlot) {
+    } else if (uiTimeToBeat < *timeSlot) {
         rider->ShouldCelebrateAtFinish = 0;
         gm->iNextHeat = one;
         D_005366A8[riderIndex] = 0;
@@ -2875,7 +2876,7 @@ struct sGM_23C0D0 {
  * * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot +0x14 (init) of
  * cGMPointHandler_vtbl.
  */
-extern "C" void cGMPointHandler_init(cGMPointHandler* self)
+void cGMPointHandler::init()
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2901,22 +2902,23 @@ extern "C" void cGMPointHandler_init(cGMPointHandler* self)
         break;
     }
     unsigned int medalResult = (unsigned int)cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
-    self->mCurrentDifficulty = 0;
+    mCurrentDifficulty = 0;
     if (medalResult < 3) {
-        self->mCurrentDifficulty = 2;
+        mCurrentDifficulty = 2;
     } else if (medalResult == kMEDAL_BRONZE) {
-        self->mCurrentDifficulty = 1;
+        mCurrentDifficulty = 1;
     }
-    int pointTarget = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, self->mCurrentDifficulty) * 100;
+    int pointTarget = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent,
+            mCurrentDifficulty) * 100;
     cGameModeMan* gm2 = cGameModeHandler_pManager;
-    self->uiScoreToBeat = pointTarget;
+    uiScoreToBeat = pointTarget;
     gm2->uiPointTarget = pointTarget;
-    int heatTimeLimit = cBENewRaceInterface_getPeakTimeLimit(race, gm2->iCurrentGameEvent, self->mCurrentDifficulty);
+    int heatTimeLimit = cBENewRaceInterface_getPeakTimeLimit(race, gm2->iCurrentGameEvent, mCurrentDifficulty);
     cGameModeMan* gm3 = cGameModeHandler_pManager;
     gm3->iNextHeat = 2;
     gm3->iRestoreHeat = 2;
     gm3->uiTimeLimit = heatTimeLimit * 60;
-    self->cleanRiderRanksPoints();
+    cleanRiderRanksPoints();
     memset(cGameModeHandler_pManager->iCharacters, -1, 40);
     int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
@@ -2929,7 +2931,7 @@ extern "C" void cGMPointHandler_init(cGMPointHandler* self)
     gm4->unk_94 = 0;
     gm4->bIsLastHeat = 0;
     gm4->bAreResultsLocked = 0;
-    *(short*)&self->uiTrackProgress = 0;
+    *(short*)&uiTrackProgress = 0;
 }
 #endif
 
@@ -2984,7 +2986,7 @@ struct sClk_23C2D8 {
  *
  * @param idx  the rider index
  */
-extern "C" void cGMPointHandler_raceFinish(cGMPointHandler* self, int idx)
+void cGMPointHandler::raceFinish(int idx)
 {
     sClk_23C2D8* clk = (sClk_23C2D8*)SSXApp->Game->AI;
     tRiderStats st = *(tRiderStats*)(*(char**)(clk->riders[idx] + 0x790) + 0xFC);

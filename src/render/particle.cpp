@@ -2991,19 +2991,19 @@ extern char D_005059D8[];
  * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (func_00367360, mTexMan), and
  * finally calls func_00361F40 on the render queue D_005059D8.
  */
-extern "C" void cPS2GraphicsMan_Purge(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::Purge()
 {
     DisableIntc(2);
-    RemoveIntcHandler(2, self->mIntcHandlerId);
+    RemoveIntcHandler(2, mIntcHandlerId);
     DisableDmac(1);
-    RemoveDmacHandler(0, self->mDmacHandlerId);
-    TerminateThread(self->mKickThreadId);
-    DeleteThread(self->mKickThreadId);
-    DeleteSema(self->mKickSema);
-    DeleteSema(self->mQueueMutex);
-    operator_delete((int*)self->mpDeferMan);
-    func_00367360(self->mTexMan);
-    operator_delete((int*)self->mTexMan);
+    RemoveDmacHandler(0, mDmacHandlerId);
+    TerminateThread(mKickThreadId);
+    DeleteThread(mKickThreadId);
+    DeleteSema(mKickSema);
+    DeleteSema(mQueueMutex);
+    operator_delete((int*)mpDeferMan);
+    func_00367360(mTexMan);
+    operator_delete((int*)mTexMan);
     func_00361F40(D_005059D8);
 }
 #endif
@@ -3047,12 +3047,11 @@ struct sPartTexCache {
  * @param id  the mode id (+0xA0) to match
  * @return the matching mode index, or -1
  */
-extern "C" int cPS2GraphicsMan_GetDisplayMode(cPS2GraphicsMan* self, int width, int height, unsigned int bpp,
-                             unsigned int clutBpp, int fmt, int id)
+int cPS2GraphicsMan::GetDisplayMode(int width, int height, unsigned int bpp, unsigned int clutBpp, int fmt, int id)
 {
     int i;
-    sPartTexEntA4* displayMode = (sPartTexEntA4*)self->DisplayModes;
-    for (i = 0; i < self->NumDisplayModes; i++, displayMode++) {
+    sPartTexEntA4* displayMode = (sPartTexEntA4*)DisplayModes;
+    for (i = 0; i < NumDisplayModes; i++, displayMode++) {
         if (displayMode->width == width && displayMode->height == height && displayMode->id == id) {
             int ok1 = 0;
             int ok2 = 0;
@@ -3134,22 +3133,22 @@ int func_0037BD98_3764C0(void* self, unsigned int a1, unsigned int a2, unsigned 
  * @param idx  the display-mode index (records of 0xA4 bytes)
  * @return 1, always
  */
-extern "C" int cPS2GraphicsMan_SetDisplayMode1(cPS2GraphicsMan* self, int idx)
+bool cPS2GraphicsMan::SetDisplayMode1(int idx)
 {
-    if (self->CurrentDisplayMode == idx) {
-        return 1;
+    if (CurrentDisplayMode == idx) {
+        return true;
     }
-    func_0037BD98_3764C0(self, ((unsigned int)(self->DisplayModes)[idx].mDisplayWidth),
-                         ((unsigned int)(self->DisplayModes)[idx].mDisplayHeight),
-                         ((unsigned int)(self->DisplayModes)[idx].mFrameWidth),
-                         ((unsigned int)(self->DisplayModes)[idx].mFrameHeight),
-                         ((unsigned int)(self->DisplayModes)[idx].mDisplayPSM),
-                         ((unsigned int)(self->DisplayModes)[idx].mFramePSM),
-                         ((unsigned int)(self->DisplayModes)[idx].mZBufferPSM), 0,
-                         (*(bool*)&(self->DisplayModes)[idx].mInterlace) ? 1 : 0,
-                         (*(bool*)&(self->DisplayModes)[idx].mInterlace) ? 0 : 1, (self->DisplayModes)[idx].mDTV);
-    self->CurrentDisplayMode = idx;
-    return 1;
+    func_0037BD98_3764C0(this, ((unsigned int)(DisplayModes)[idx].mDisplayWidth),
+                         ((unsigned int)(DisplayModes)[idx].mDisplayHeight),
+                         ((unsigned int)(DisplayModes)[idx].mFrameWidth),
+                         ((unsigned int)(DisplayModes)[idx].mFrameHeight),
+                         ((unsigned int)(DisplayModes)[idx].mDisplayPSM),
+                         ((unsigned int)(DisplayModes)[idx].mFramePSM),
+                         ((unsigned int)(DisplayModes)[idx].mZBufferPSM), 0,
+                         (*(bool*)&DisplayModes[idx].mInterlace) ? 1 : 0,
+                         (*(bool*)&DisplayModes[idx].mInterlace) ? 0 : 1, DisplayModes[idx].mDTV);
+    CurrentDisplayMode = idx;
+    return true;
 }
 #endif
 
@@ -3163,9 +3162,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetDisplayModeName);
  * @param mode  the display mode index (On Tour mode)
  * @return the mode's name string
  */
-extern "C" void* cPS2GraphicsMan_GetDisplayModeName(cPS2GraphicsMan* self, int mode)
+const char* cPS2GraphicsMan::GetDisplayModeName(int mode)
 {
-    return (char*)&self->DisplayModes[mode];
+    return (char*)&DisplayModes[mode];
 }
 #endif
 
@@ -3185,10 +3184,10 @@ struct sPartVEntry122 {
  * @param enable  non-zero to enable DTV output (On Tour Enable)
  * @return the result of slot 122
  */
-extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int enable)
+int cPS2GraphicsMan::SetDTV(int enable)
 {
-    sPartVEntry122* vt = (sPartVEntry122*)VPTR_OF(cGraphicsMan, self);
-    return vt[122].fn(vthis(self, vt[122]), 0x200, 0x1C0, 0x18, 0x20, 0x18, enable);
+    sPartVEntry122* vt = (sPartVEntry122*)VPTR_OF(cGraphicsMan, this);
+    return vt[122].fn(vthis(this, vt[122]), 0x200, 0x1C0, 0x18, 0x20, 0x18, enable);
 }
 #endif
 
@@ -3254,29 +3253,29 @@ extern "C" void cPS2GraphicsMan_sViewportStack_operatorE(sViewportStack* dst, sV
  * mClipMax) into mViewportStack[mViewportDepth], then increments mViewportDepth and copies the entry into the new top
  * (cPS2GraphicsMan_sViewportStack_operatorE). No overflow check.
  */
-extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::PushViewport()
 {
-    sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *(tDeferViewPort*)&viewportStack->mScissor[0] = *(tDeferViewPort*)&self->mScissor[0];
-    viewportStack->mDeferScissorIndex = self->mpDeferMan->mActivePortIndex;
-    viewportStack->mPerspFar = self->mPerspFar;
-    viewportStack->mPerspFov = self->mPerspFov;
-    vu0CopyMtx65B8((&viewportStack->mScreenMatrix), (&self->mScreenMatrix));
-    *(&viewportStack->mClipMin) = *(&self->mClipMin);
-    *(&viewportStack->mClipMax) = *(&self->mClipMax);
-    vu0CopyMtx65B8((&viewportStack->mWorld), (&self->mWorld));
-    vu0CopyMtx65B8((&viewportStack->mView), (&self->mView));
-    vu0CopyMtx65B8((&viewportStack->mGuardBandMatrix), (&self->mGuardBandMatrix));
-    *(&viewportStack->mGuardScale) = *(&self->mGuardScale);
-    *(&viewportStack->mGuardOffset) = *(&self->mGuardOffset);
-    vu0CopyMtx65B8((&viewportStack->mViewProj), (&self->mViewProj));
-    vu0CopyMtx65B8((&viewportStack->mNetMatrix), (&self->mNetMatrix));
-    *(&viewportStack->mScreenScale) = *(&self->mScreenScale);
-    *(&viewportStack->mScreenOffset) = *(&self->mScreenOffset);
-    viewportStack->mSortZFar = self->mSortZFar;
-    *(&viewportStack->mSortZScale) = *(&self->mSortZScale);
-    self->mViewportDepth++;
-    cPS2GraphicsMan_sViewportStack_operatorE(&((&self->mViewportStack[0]))[self->mViewportDepth], viewportStack);
+    sViewportStack* viewportStack = &((&mViewportStack[0]))[mViewportDepth];
+    *(tDeferViewPort*)&viewportStack->mScissor[0] = *(tDeferViewPort*)&mScissor[0];
+    viewportStack->mDeferScissorIndex = mpDeferMan->mActivePortIndex;
+    viewportStack->mPerspFar = mPerspFar;
+    viewportStack->mPerspFov = mPerspFov;
+    vu0CopyMtx65B8((&viewportStack->mScreenMatrix), (&mScreenMatrix));
+    *(&viewportStack->mClipMin) = *(&mClipMin);
+    *(&viewportStack->mClipMax) = *(&mClipMax);
+    vu0CopyMtx65B8((&viewportStack->mWorld), (&mWorld));
+    vu0CopyMtx65B8((&viewportStack->mView), (&mView));
+    vu0CopyMtx65B8((&viewportStack->mGuardBandMatrix), (&mGuardBandMatrix));
+    *(&viewportStack->mGuardScale) = *(&mGuardScale);
+    *(&viewportStack->mGuardOffset) = *(&mGuardOffset);
+    vu0CopyMtx65B8((&viewportStack->mViewProj), (&mViewProj));
+    vu0CopyMtx65B8((&viewportStack->mNetMatrix), (&mNetMatrix));
+    *(&viewportStack->mScreenScale) = *(&mScreenScale);
+    *(&viewportStack->mScreenOffset) = *(&mScreenOffset);
+    viewportStack->mSortZFar = mSortZFar;
+    *(&viewportStack->mSortZScale) = *(&mSortZScale);
+    mViewportDepth++;
+    cPS2GraphicsMan_sViewportStack_operatorE(&((&mViewportStack[0]))[mViewportDepth], viewportStack);
 }
 #endif
 
@@ -3343,33 +3342,33 @@ extern "C" void func_00364B88(void* table, void* key);
  * The scissor is re-registered with DeferMan (func_00364B88) when the saved scissor index is kNoActivePort, otherwise
  * the index is put back. Clears mMatricesValid.
  */
-extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::PopViewport()
 {
-    self->mViewportDepth--;
-    sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *(tDeferViewPort*)&self->mScissor[0] = *(tDeferViewPort*)&viewportStack->mScissor[0];
+    mViewportDepth--;
+    sViewportStack* viewportStack = &((&mViewportStack[0]))[mViewportDepth];
+    *(tDeferViewPort*)&mScissor[0] = *(tDeferViewPort*)&viewportStack->mScissor[0];
     if (viewportStack->mDeferScissorIndex == cPS2DeferManager::kNoActivePort) {
-        func_00364B88((char*)self->mpDeferMan, (tDeferViewPort*)&self->mScissor[0]);
+        func_00364B88((char*)mpDeferMan, (tDeferViewPort*)&mScissor[0]);
     } else {
-        self->mpDeferMan->mActivePortIndex = viewportStack->mDeferScissorIndex;
+        mpDeferMan->mActivePortIndex = viewportStack->mDeferScissorIndex;
     }
-    self->mPerspFar = viewportStack->mPerspFar;
-    self->mPerspFov = viewportStack->mPerspFov;
-    vu0CopyMtx6768((&self->mScreenMatrix), (&viewportStack->mScreenMatrix));
-    *(&self->mClipMin) = *(&viewportStack->mClipMin);
-    *(&self->mClipMax) = *(&viewportStack->mClipMax);
-    vu0CopyMtx6768((&self->mWorld), (&viewportStack->mWorld));
-    vu0CopyMtx6768((&self->mView), (&viewportStack->mView));
-    vu0CopyMtx6768((&self->mGuardBandMatrix), (&viewportStack->mGuardBandMatrix));
-    *(&self->mGuardScale) = *(&viewportStack->mGuardScale);
-    *(&self->mGuardOffset) = *(&viewportStack->mGuardOffset);
-    vu0CopyMtx6768((&self->mViewProj), (&viewportStack->mViewProj));
-    vu0CopyMtx6768((&self->mNetMatrix), (&viewportStack->mNetMatrix));
-    *(&self->mScreenScale) = *(&viewportStack->mScreenScale);
-    *(&self->mScreenOffset) = *(&viewportStack->mScreenOffset);
-    self->mSortZFar = viewportStack->mSortZFar;
-    *(&self->mSortZScale) = *(&viewportStack->mSortZScale);
-    self->mMatricesValid = 0;
+    mPerspFar = viewportStack->mPerspFar;
+    mPerspFov = viewportStack->mPerspFov;
+    vu0CopyMtx6768((&mScreenMatrix), (&viewportStack->mScreenMatrix));
+    *(&mClipMin) = *(&viewportStack->mClipMin);
+    *(&mClipMax) = *(&viewportStack->mClipMax);
+    vu0CopyMtx6768((&mWorld), (&viewportStack->mWorld));
+    vu0CopyMtx6768((&mView), (&viewportStack->mView));
+    vu0CopyMtx6768((&mGuardBandMatrix), (&viewportStack->mGuardBandMatrix));
+    *(&mGuardScale) = *(&viewportStack->mGuardScale);
+    *(&mGuardOffset) = *(&viewportStack->mGuardOffset);
+    vu0CopyMtx6768((&mViewProj), (&viewportStack->mViewProj));
+    vu0CopyMtx6768((&mNetMatrix), (&viewportStack->mNetMatrix));
+    *(&mScreenScale) = *(&viewportStack->mScreenScale);
+    *(&mScreenOffset) = *(&viewportStack->mScreenOffset);
+    mSortZFar = viewportStack->mSortZFar;
+    *(&mSortZScale) = *(&viewportStack->mSortZScale);
+    mMatricesValid = 0;
 }
 #endif
 
@@ -3519,10 +3518,10 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportFOV);
  *
  * @return the field of view
  */
-extern "C" float cPS2GraphicsMan_GetViewportFOV(cPS2GraphicsMan* self)
+float cPS2GraphicsMan::GetViewportFOV()
 {
-    int i = self->mViewportDepth;
-    return self->mViewportStack[i].mProjParams[2];
+    int i = mViewportDepth;
+    return mViewportStack[i].mProjParams[2];
 }
 #endif
 
@@ -3617,21 +3616,21 @@ static inline void ClampScale6C58(cPS2GraphicsMan* self, float& x, float& y)
  * @param zNear  the near plane
  * @param zFar  the far plane
  */
-extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, float fov, float zNear, float zFar)
+void cPS2GraphicsMan::SetViewportPerspective(float fov, float zNear, float zFar)
 {
-    sViewportStack* viewEntry = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    sViewportStack* viewEntry = &((&mViewportStack[0]))[mViewportDepth];
     viewEntry->mProjectionType = 0;
     viewEntry->mProjParams[0] = zNear;
     viewEntry->mProjParams[1] = zFar;
     viewEntry->mProjParams[2] = fov;
-    // PORT: int-arithmetic view address (as in cPS2GraphicsMan_GetViewportFOV); the typed self->views[i] reads score 94-95%.
-    char* viewBase = (char*)self + self->mViewportDepth * 0x230;
+    // PORT: int-arithmetic view address (as in cPS2GraphicsMan_GetViewportFOV); the typed views[i] reads score 94-95%.
+    char* viewBase = (char*)this + mViewportDepth * 0x230;
     float x = *(float*)(viewBase + 0x6D20);
     float y = *(float*)(viewBase + 0x6D24);
     float w = *(float*)(viewBase + 0x6D28);
     float viewHeight = *(float*)(viewBase + 0x6D2C);
     float zlo, zhi, zscale;
-    if (self->mCurrentZBFormat == kGS_PSMZ24) {
+    if (mCurrentZBFormat == kGS_PSMZ24) {
         zscale = 16777215.0f;
         zlo = -8388467.5f;
         zhi = 8388467.5f;
@@ -3640,117 +3639,117 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
         zlo = -32767.5f;
         zhi = 32767.5f;
     }
-    self->mPerspFar = zFar;
-    self->mPerspFov = fov;
-    sPtVtU6C58* vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[11];
-    unsigned height = vtEntry->fn(vthis(self, *vtEntry));
-    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[10];
-    unsigned width = vtEntry->fn(vthis(self, *vtEntry));
+    mPerspFar = zFar;
+    mPerspFov = fov;
+    sPtVtU6C58* vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, this))[11];
+    unsigned height = vtEntry->fn(vthis(this, *vtEntry));
+    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, this))[10];
+    unsigned width = vtEntry->fn(vthis(this, *vtEntry));
     float aspect = (float)height * 1.3333334f / (float)width;
     float sinFov, cosFov;
     SinCos_6C58(fov, &sinFov, &cosFov);
     float sx = (w * 0.5f) / (sinFov / cosFov);
     float sy = sx * aspect;
-    ClampScale6C58(self, sx, sy);
-    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[10];
-    float offX = 32768.0f - (float)(vtEntry->fn(vthis(self, *vtEntry)) * 8);
-    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[11];
-    float offY = 32768.0f - (float)(vtEntry->fn(vthis(self, *vtEntry)) * 8);
+    ClampScale6C58(this, sx, sy);
+    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, this))[10];
+    float offX = 32768.0f - (float)(vtEntry->fn(vthis(this, *vtEntry)) * 8);
+    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, this))[11];
+    float offY = 32768.0f - (float)(vtEntry->fn(vthis(this, *vtEntry)) * 8);
     float zA = (-zscale * zNear) / (zFar - zNear);
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][0] = sx * 16.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][0] = (w * 0.5f + x) * 16.0f + offX;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][1] = -sy * 16.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][1] = (viewHeight * 0.5f + y) * 16.0f + offY;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][2] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][2] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][2] = zA;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[0][0] = sx * 16.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[1][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[2][0] = (w * 0.5f + x) * 16.0f + offX;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[3][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[0][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[1][1] = -sy * 16.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[2][1] = (viewHeight * 0.5f + y) * 16.0f + offY;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[3][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[0][2] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[1][2] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[2][2] = zA;
     float zB = -zFar * zA + viewEntry->mZBias;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][2] = zB;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][3] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][3] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][3] = 1.0f;
-    (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][3] = 0.0f;
-    ((float*)&(*(&self->mClipMin)).x)[0] = x * 16.0f + offX;
-    ((float*)&(*(&self->mClipMin)).x)[1] = y * 16.0f + offY;
-    ((float*)&(*(&self->mClipMin)).x)[2] = zA * zNear + zB;
-    ((float*)&(*(&self->mClipMax)).x)[0] = (x + w) * 16.0f + offX;
-    ((float*)&(*(&self->mClipMax)).x)[1] = (y + viewHeight) * 16.0f + offY;
-    ((float*)&(*(&self->mClipMax)).x)[2] = zA * zFar + zB;
-    ((float*)&(*(&self->mClipMin)).x)[3] = 1.0f / zNear;
-    ((float*)&(*(&self->mClipMax)).x)[3] = 1.0f / zFar;
-    self->mMatricesValid = 0;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[3][2] = zB;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[0][3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[1][3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[2][3] = 1.0f;
+    (*(sPtMatrix_6C58*)&mScreenMatrix).m[3][3] = 0.0f;
+    ((float*)&(*(&mClipMin)).x)[0] = x * 16.0f + offX;
+    ((float*)&(*(&mClipMin)).x)[1] = y * 16.0f + offY;
+    ((float*)&(*(&mClipMin)).x)[2] = zA * zNear + zB;
+    ((float*)&(*(&mClipMax)).x)[0] = (x + w) * 16.0f + offX;
+    ((float*)&(*(&mClipMax)).x)[1] = (y + viewHeight) * 16.0f + offY;
+    ((float*)&(*(&mClipMax)).x)[2] = zA * zFar + zB;
+    ((float*)&(*(&mClipMin)).x)[3] = 1.0f / zNear;
+    ((float*)&(*(&mClipMax)).x)[3] = 1.0f / zFar;
+    mMatricesValid = 0;
     float aspect2 = aspect * (w / viewHeight);
     float px = 1.0f / tanf(fov);
     float py = 1.0f / tanf(fov) * aspect2;
-    ClampScale6C58(self, px, py);
-    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[10];
-    float sw = (float)vtEntry->fn(vthis(self, *vtEntry));
+    ClampScale6C58(this, px, py);
+    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, this))[10];
+    float sw = (float)vtEntry->fn(vthis(this, *vtEntry));
     float cx = (w * 0.5f - sw * 0.5f) + x;
-    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[11];
-    float sh = (float)vtEntry->fn(vthis(self, *vtEntry));
+    vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, this))[11];
+    float sh = (float)vtEntry->fn(vthis(this, *vtEntry));
     float cy = (viewHeight * 0.5f - sh * 0.5f) + y;
     float zz = (zFar + zNear) / (zFar - zNear);
     float zw = -(2.0f * zFar * zNear) / (zFar - zNear);
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[0][0] = px;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[0][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[0][2] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[0][3] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[1][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[1][1] = py;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[1][2] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[1][3] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[2][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[2][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[2][2] = zz;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[2][3] = 1.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[3][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[3][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[3][2] = zw;
-    (*(sPtMatrix_6C58*)&self->mViewProj).m[3][3] = 0.0f;
-    ((float*)&(*(&self->mScreenScale)).x)[0] = w * 0.5f;
-    ((float*)&(*(&self->mScreenScale)).x)[1] = -(viewHeight * 0.5f);
-    ((float*)&(*(&self->mScreenScale)).x)[2] = zlo;
-    ((float*)&(*(&self->mScreenScale)).x)[3] = 0.0f;
-    ((float*)&(*(&self->mScreenOffset)).x)[0] = cx + 2047.5f;
-    ((float*)&(*(&self->mScreenOffset)).x)[1] = cy + 2047.5f;
-    ((float*)&(*(&self->mScreenOffset)).x)[2] = zhi + viewEntry->mZBias;
-    ((float*)&(*(&self->mScreenOffset)).x)[3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[0][0] = px;
+    (*(sPtMatrix_6C58*)&mViewProj).m[0][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[0][2] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[0][3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[1][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[1][1] = py;
+    (*(sPtMatrix_6C58*)&mViewProj).m[1][2] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[1][3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[2][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[2][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[2][2] = zz;
+    (*(sPtMatrix_6C58*)&mViewProj).m[2][3] = 1.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[3][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[3][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mViewProj).m[3][2] = zw;
+    (*(sPtMatrix_6C58*)&mViewProj).m[3][3] = 0.0f;
+    ((float*)&(*(&mScreenScale)).x)[0] = w * 0.5f;
+    ((float*)&(*(&mScreenScale)).x)[1] = -(viewHeight * 0.5f);
+    ((float*)&(*(&mScreenScale)).x)[2] = zlo;
+    ((float*)&(*(&mScreenScale)).x)[3] = 0.0f;
+    ((float*)&(*(&mScreenOffset)).x)[0] = cx + 2047.5f;
+    ((float*)&(*(&mScreenOffset)).x)[1] = cy + 2047.5f;
+    ((float*)&(*(&mScreenOffset)).x)[2] = zhi + viewEntry->mZBias;
+    ((float*)&(*(&mScreenOffset)).x)[3] = 0.0f;
     float gw = 2048.0f - 2.0f * fsAbs_6C58(cx);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(cy);
-    (*(sPtMatrix_6C58*)&self->mView).m[0][0] = (w / gw) * px;
-    (*(sPtMatrix_6C58*)&self->mView).m[0][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[0][2] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[0][3] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[1][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[1][1] = (viewHeight / gh) * py;
-    (*(sPtMatrix_6C58*)&self->mView).m[1][2] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[1][3] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[2][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[2][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[2][2] = zz;
-    (*(sPtMatrix_6C58*)&self->mView).m[2][3] = 1.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[3][0] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[3][1] = 0.0f;
-    (*(sPtMatrix_6C58*)&self->mView).m[3][2] = zw;
-    (*(sPtMatrix_6C58*)&self->mView).m[3][3] = 0.0f;
-    ((float*)&(*(&self->mGuardScale)).x)[0] = gw * 0.5f;
-    ((float*)&(*(&self->mGuardScale)).x)[1] = -(gh * 0.5f);
-    ((float*)&(*(&self->mGuardScale)).x)[2] = zlo;
-    ((float*)&(*(&self->mGuardScale)).x)[3] = 0.0f;
-    ((float*)&(*(&self->mGuardOffset)).x)[0] = cx + 2047.5f;
-    ((float*)&(*(&self->mGuardOffset)).x)[1] = cy + 2047.5f;
-    ((float*)&(*(&self->mGuardOffset)).x)[2] = zhi + viewEntry->mZBias;
-    ((float*)&(*(&self->mGuardOffset)).x)[3] = 0.0f;
-    func_00376938_6C58(self, x, y, w, viewHeight);
-    self->mSortZFar = 40000.0f;
-    ((float*)&(*(&self->mSortZScale)).x)[0] = 1023.0f;
-    ((float*)&(*(&self->mSortZScale)).x)[1] = 0.0f;
-    ((float*)&(*(&self->mSortZScale)).x)[2] = 0.0f;
-    ((float*)&(*(&self->mSortZScale)).x)[3] = 1023.0f / 40000.0f;
+    (*(sPtMatrix_6C58*)&mView).m[0][0] = (w / gw) * px;
+    (*(sPtMatrix_6C58*)&mView).m[0][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[0][2] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[0][3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[1][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[1][1] = (viewHeight / gh) * py;
+    (*(sPtMatrix_6C58*)&mView).m[1][2] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[1][3] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[2][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[2][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[2][2] = zz;
+    (*(sPtMatrix_6C58*)&mView).m[2][3] = 1.0f;
+    (*(sPtMatrix_6C58*)&mView).m[3][0] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[3][1] = 0.0f;
+    (*(sPtMatrix_6C58*)&mView).m[3][2] = zw;
+    (*(sPtMatrix_6C58*)&mView).m[3][3] = 0.0f;
+    ((float*)&(*(&mGuardScale)).x)[0] = gw * 0.5f;
+    ((float*)&(*(&mGuardScale)).x)[1] = -(gh * 0.5f);
+    ((float*)&(*(&mGuardScale)).x)[2] = zlo;
+    ((float*)&(*(&mGuardScale)).x)[3] = 0.0f;
+    ((float*)&(*(&mGuardOffset)).x)[0] = cx + 2047.5f;
+    ((float*)&(*(&mGuardOffset)).x)[1] = cy + 2047.5f;
+    ((float*)&(*(&mGuardOffset)).x)[2] = zhi + viewEntry->mZBias;
+    ((float*)&(*(&mGuardOffset)).x)[3] = 0.0f;
+    func_00376938_6C58(this, x, y, w, viewHeight);
+    mSortZFar = 40000.0f;
+    ((float*)&(*(&mSortZScale)).x)[0] = 1023.0f;
+    ((float*)&(*(&mSortZScale)).x)[1] = 0.0f;
+    ((float*)&(*(&mSortZScale)).x)[2] = 0.0f;
+    ((float*)&(*(&mSortZScale)).x)[3] = 1023.0f / 40000.0f;
 }
 #endif
 
@@ -4051,27 +4050,27 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTVDisplayFormat);
  *
  * @param mode  the display format (GMDisplayFormat): 0 full screen, 1 widescreen (letterbox), 2 anamorphic
  */
-extern "C" void cPS2GraphicsMan_SetTVDisplayFormat(cPS2GraphicsMan* self, int mode)
+void cPS2GraphicsMan::SetTVDisplayFormat(int mode)
 {
-    self->mTVDisplayFormat.mDisplayFormat = mode;
+    mTVDisplayFormat.mDisplayFormat = mode;
     switch (mode) {
     case GM_FULLSCREEN:
-        self->mTVDisplayFormat.mfTVYOffset = 0.0f;
-        self->mTVDisplayFormat.mfTVYScale = 1.0f;
-        self->mTVDisplayFormat.mfXAspectAdjust = 1.0f;
-        self->mTVDisplayFormat.mfYAspectAdjust = 1.0f;
+        mTVDisplayFormat.mfTVYOffset = 0.0f;
+        mTVDisplayFormat.mfTVYScale = 1.0f;
+        mTVDisplayFormat.mfXAspectAdjust = 1.0f;
+        mTVDisplayFormat.mfYAspectAdjust = 1.0f;
         break;
     case GM_WIDESCREEN:
-        self->mTVDisplayFormat.mfTVYOffset = 0.125f;
-        self->mTVDisplayFormat.mfTVYScale = 0.75f;
-        self->mTVDisplayFormat.mfXAspectAdjust = 0.75f;
-        self->mTVDisplayFormat.mfYAspectAdjust = 0.75f;
+        mTVDisplayFormat.mfTVYOffset = 0.125f;
+        mTVDisplayFormat.mfTVYScale = 0.75f;
+        mTVDisplayFormat.mfXAspectAdjust = 0.75f;
+        mTVDisplayFormat.mfYAspectAdjust = 0.75f;
         break;
     case GM_ANIMORPHIC:
-        self->mTVDisplayFormat.mfXAspectAdjust = 0.75f;
-        self->mTVDisplayFormat.mfTVYOffset = 0.0f;
-        self->mTVDisplayFormat.mfTVYScale = 1.0f;
-        self->mTVDisplayFormat.mfYAspectAdjust = 1.0f;
+        mTVDisplayFormat.mfXAspectAdjust = 0.75f;
+        mTVDisplayFormat.mfTVYOffset = 0.0f;
+        mTVDisplayFormat.mfTVYScale = 1.0f;
+        mTVDisplayFormat.mfYAspectAdjust = 1.0f;
         break;
     }
 }
@@ -6360,10 +6359,10 @@ void cTextureMan_SetTextureMemType(void* p, int a1);
  *
  * @param memtype  the memory type for textures (On Tour memtype)
  */
-extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
+void cPS2GraphicsMan::InitTextures(int memtype)
 {
-    MEM_fill(&self->mTextureAdded[0], 0, 8000);
-    cTextureMan_SetTextureMemType(self->mTexMan, memtype);
+    MEM_fill(&mTextureAdded[0], 0, 8000);
+    cTextureMan_SetTextureMemType(mTexMan, memtype);
 }
 #endif
 
@@ -6395,12 +6394,12 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformPurgeTextures);
  * Removes every loaded texture: for each of the 2000 slots with a non-zero mTextureUploaded entry calls virtual slot 50
  * (the remove) with its index.
  */
-extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::PlatformPurgeTextures()
 {
     int i;
     for (i = 0; i < 2000; i++) {
-        if (self->mTextureUploaded[i] != 0) {
-            self->RemoveTexture(i);
+        if (mTextureUploaded[i] != 0) {
+            RemoveTexture(i);
         }
     }
 }
@@ -6419,9 +6418,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTextureMemType);
  * Declared with only the this pointer: On Tour's SetTextureMemType(int memtype) passes the type, which stays in $a1
  * and reaches cTextureMan_SetTextureMemType.
  */
-extern "C" void cPS2GraphicsMan_SetTextureMemType(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::SetTextureMemType()
 {
-    cTextureMan_SetTextureMemType__FPvi(self->mTexMan);
+    cTextureMan_SetTextureMemType__FPvi(mTexMan);
 }
 #endif
 
@@ -6585,10 +6584,10 @@ extern "C" void cTextureMan_RemoveTexture(void* tbl, int idx);
  *
  * @param idx  the texture id (On Tour texid)
  */
-extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
+void cPS2GraphicsMan::RemoveTexture(int idx)
 {
-    cTextureMan_RemoveTexture(self->mTexMan, idx);
-    self->mTextureUploaded[idx] = 0;
+    cTextureMan_RemoveTexture(mTexMan, idx);
+    mTextureUploaded[idx] = 0;
 }
 #endif
 
@@ -6628,9 +6627,9 @@ struct sPartTexTable {
  * @param idx  the texture id (On Tour texid)
  * @return 1 if valid, else 0
  */
-extern "C" int cPS2GraphicsMan_IsValidTexture(cPS2GraphicsMan* self, int idx)
+bool cPS2GraphicsMan::IsValidTexture(int idx)
 {
-    sPartTexTable* texTable = (sPartTexTable*)self->mTexMan;
+    sPartTexTable* texTable = (sPartTexTable*)mTexMan;
     int valid;
     if (idx >= 0) {
         if (idx < 2000) {
@@ -7077,9 +7076,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RestoreFrameLock);
  * @return 0
  */
 // PORT: 64-bit `ulong` GS packet words; uncached (0x30000000) pointers held in int.
-extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
+bool cPS2GraphicsMan::RestoreFrameLock()
 {
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     // ORIGINAL-PTR: the GS packet and the defer record are written through the EE's uncached-accelerated alias
     // (address | 0x30000000, a hardware address segment)
     ulong* packet = (ulong*)(buf | 0x30000000);
@@ -7089,19 +7088,19 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
     packet[3] = (ulong)0x50000005 << 32;
     packet[4] = ((ulong)0x10000000 << 32) | 0x8004;
     packet[5] = 0xE;
-    packet[6] = (ulong)((unsigned int)self->mCurrentFrameBufferPage) | ((ulong)((unsigned int)self->mFrameBufferWidth) << 16) | ((ulong)((unsigned int)self->mCurrentFBFormat) << 24);
+    packet[6] = (ulong)((unsigned int)mCurrentFrameBufferPage) | ((ulong)((unsigned int)mFrameBufferWidth) << 16) | ((ulong)((unsigned int)mCurrentFBFormat) << 24);
     packet[7] = 76;
-    packet[8] = (ulong)self->mScissor[0] | ((ulong)(self->mScissor[0] + (self->mScissor[2] - 1)) << 16) | ((ulong)self->mScissor[1] << 32) | ((ulong)(self->mScissor[1] + (self->mScissor[3] - 1)) << 48);
+    packet[8] = (ulong)mScissor[0] | ((ulong)(mScissor[0] + (mScissor[2] - 1)) << 16) | ((ulong)mScissor[1] << 32) | ((ulong)(mScissor[1] + (mScissor[3] - 1)) << 48);
     packet[9] = 0x40;
-    packet[10] = (ulong)self->mScissor[0] | ((ulong)(self->mScissor[0] + (self->mScissor[2] - 1)) << 16) | ((ulong)self->mScissor[1] << 32) | ((ulong)(self->mScissor[1] + (self->mScissor[3] - 1)) << 48);
+    packet[10] = (ulong)mScissor[0] | ((ulong)(mScissor[0] + (mScissor[2] - 1)) << 16) | ((ulong)mScissor[1] << 32) | ((ulong)(mScissor[1] + (mScissor[3] - 1)) << 48);
     packet[11] = 65;
-    packet[12] = (ulong)((0x800 - (((unsigned int)self->mFBWidth) >> 1)) << 4) | ((ulong)((0x800 - (((unsigned int)self->mFBHeight) >> 1)) << 4) << 32);
+    packet[12] = (ulong)((0x800 - (((unsigned int)mFBWidth) >> 1)) << 4) | ((ulong)((0x800 - (((unsigned int)mFBHeight) >> 1)) << 4) << 32);
     packet[13] = 0x18;
     packet += 14;
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-    cPS2DeferManager* ring = self->mpDeferMan;
-    sDrawState* rs = self->m_pCurrentDrawState;
-    self->mVifCursor = next;
+    cPS2DeferManager* ring = mpDeferMan;
+    sDrawState* rs = m_pCurrentDrawState;
+    mVifCursor = next;
     int one = 1;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
@@ -7113,8 +7112,8 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
         ringEntry->mViewIndex = key;
         ringEntry->mPacket = buf;
     }
-    self->mVifCursor += 0x10;
-    return 0;
+    mVifCursor += 0x10;
+    return false;
 }
 #endif
 
@@ -7311,9 +7310,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureWidth);
  * @return the width in texels
  */
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
-extern "C" int cPS2GraphicsMan_GetTextureWidth(cPS2GraphicsMan* self, int idx)
+int cPS2GraphicsMan::GetTextureWidth(int idx)
 {
-    sPartTexTable* texTable = (sPartTexTable*)self->mTexMan;
+    sPartTexTable* texTable = (sPartTexTable*)mTexMan;
     return 1 << texTable->entries[idx]->tex0.TW;
 }
 #endif
@@ -7328,9 +7327,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureHeight);
  * @return the height in texels
  */
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
-extern "C" int cPS2GraphicsMan_GetTextureHeight(cPS2GraphicsMan* self, int idx)
+int cPS2GraphicsMan::GetTextureHeight(int idx)
 {
-    sPartTexTable* texTable = (sPartTexTable*)self->mTexMan;
+    sPartTexTable* texTable = (sPartTexTable*)mTexMan;
     return 1 << texTable->entries[idx]->tex0.TH;
 }
 #endif
@@ -9115,20 +9114,19 @@ static inline t4Vector Add2170(const t4Vector& a, const t4Vector& b)
  * first, coloured from @p col (A, R, G, B scaled by 128), and draws them with slot 73 (cPS2GraphicsMan_RenderLineStrip) before popping
  * the view (slot 32).
  *
- * @param mgr     the graphics manager (this)
  * @param pos     the centre
  * @param col     the colour, four floats A, R, G, B (On Tour tARGB)
  * @param radius  the radius
  * @param segs    the detail step, or 0 to pick it from the distance
  */
-extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, float* col, float radius, int segs)
+void cPS2GraphicsMan::DrawSphere(t4Vector* pos, float* col, float radius, int segs)
 {
     t4Matrix viewMat;
     int step;
     int i;
     int k;
 
-    CopyMat2170(&viewMat, (t4Matrix *)mgr->GetView());
+    CopyMat2170(&viewMat, (t4Matrix *)GetView());
     t4Vector viewCenter = MulMat2170(&viewMat, *pos);
     if (3000.0f < viewCenter.z) {
         return;
@@ -9209,10 +9207,10 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, 
         D_004FFBC0[15].w = 0.0f;
         D_004A59A0 = 1;
     }
-    mgr->m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
-    mgr->m_pCurrentDrawState->m_bitGroups[1] = (((int)(mgr->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
-    mgr->PushView();
-    mgr->IdentityView();
+    m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
+    m_pCurrentDrawState->m_bitGroups[1] = (((int)(m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
+    PushView();
+    IdentityView();
 
     tBxVertex verts[17];
     i = 0;
@@ -9232,9 +9230,9 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, 
     t4Vector circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[0], radius));
     verts[i].p = circlePoint;
     i++;
-    mgr->RenderLineStrip(i, verts, 0);
-    mgr->m_pCurrentDrawState->m_bitGroups[1] = (((int)(mgr->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
-    mgr->PopView();
+    RenderLineStrip(i, verts, 0);
+    m_pCurrentDrawState->m_bitGroups[1] = (((int)(m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
+    PopView();
 }
 #endif
 
@@ -11094,11 +11092,11 @@ extern "C" void func_0036C740(void* self, int a1);
  *
  * @param view  the view index (On Tour View)
  */
-extern "C" void cPS2GraphicsMan_UpdateFullScreenEffects(cPS2GraphicsMan* self, int view)
+void cPS2GraphicsMan::UpdateFullScreenEffects(int view)
 {
-    func_0036ABA0(self, view);
-    func_00390458(self, view);
-    func_0036C740(self, view);
+    func_0036ABA0(this, view);
+    func_00390458(this, view);
+    func_0036C740(this, view);
 }
 #endif
 
@@ -11139,12 +11137,12 @@ static inline void CopyMatrix_FSE(const t4Matrix* src, t4Matrix* dst)
  *
  * @param i  the view index (On Tour View)
  */
-extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, int i)
+void cPS2GraphicsMan::RenderFullScreenEffects(int i)
 {
     // the helper's argument forms &mViewScreenMatrix[i] index first, as retail does
-    CopyMatrix_FSE(&self->mScreenMatrix, &self->mViewScreenMatrix[i]);
-    CopyScissor(self->mViewScissor[i], self->mScissor);
-    self->mNumViews = i + 1;
+    CopyMatrix_FSE(&mScreenMatrix, &mViewScreenMatrix[i]);
+    CopyScissor(mViewScissor[i], mScissor);
+    mNumViews = i + 1;
 }
 #endif
 
@@ -11435,9 +11433,9 @@ void cGraphicsMan_update(void* self);
 /**
  * Per-frame graphics update: calls cGraphicsMan_update.
  */
-extern "C" void cPS2GraphicsMan_update(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::update()
 {
-    cGraphicsMan_update(self);
+    cGraphicsMan_update(this);
 }
 #endif
 
@@ -11670,33 +11668,33 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, cPS2GraphicsMan* self)
  * @param strips  the trails (0x14 bytes each: ring table, start index, vertex count, alpha, alpha step)
  * @param n  number of trails
  */
-extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self, BoardTrailInfoT* strips, int n)
+void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
 {
-    *((sRS_6E78*)self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f8 = (((sRS_6E78*)self->m_pCurrentDrawState)->f8 & ~0x3E0) | 0x60;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f0 = (((sRS_6E78*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
-    if (self->mMatricesValid == 0) {
-        func_0037D968((cPS2GraphicsMan*)self);
+    *((sRS_6E78*)m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
+    ((sRS_6E78*)m_pCurrentDrawState)->f8 = (((sRS_6E78*)m_pCurrentDrawState)->f8 & ~0x3E0) | 0x60;
+    ((sRS_6E78*)m_pCurrentDrawState)->f0 = (((sRS_6E78*)m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
+    ((sRS_6E78*)m_pCurrentDrawState)->fC &= 0xC0000000;
+    if (mMatricesValid == 0) {
+        func_0037D968((cPS2GraphicsMan*)this);
     }
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 = (((sRS_6E78*)self->m_pCurrentDrawState)->f4 & ~0x400000) | 0x400000;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 = (((sRS_6E78*)self->m_pCurrentDrawState)->f4 & ~0x1800000) | 0x1000000;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 &= ~0x300000;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 &= ~0xFF000;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 = (((sRS_6E78*)self->m_pCurrentDrawState)->f4 & ~0x7C) | 0x14;
-    int tex = self->_EffectTexMap[D_004A45D4.texIndex];
-    ((sRS_6E78*)self->m_pCurrentDrawState)->tex = tex;
+    ((sRS_6E78*)m_pCurrentDrawState)->f4 = (((sRS_6E78*)m_pCurrentDrawState)->f4 & ~0x400000) | 0x400000;
+    ((sRS_6E78*)m_pCurrentDrawState)->f4 = (((sRS_6E78*)m_pCurrentDrawState)->f4 & ~0x1800000) | 0x1000000;
+    ((sRS_6E78*)m_pCurrentDrawState)->f4 &= ~0x300000;
+    ((sRS_6E78*)m_pCurrentDrawState)->f4 &= ~0xFF000;
+    ((sRS_6E78*)m_pCurrentDrawState)->f4 = (((sRS_6E78*)m_pCurrentDrawState)->f4 & ~0x7C) | 0x14;
+    int tex = _EffectTexMap[D_004A45D4.texIndex];
+    ((sRS_6E78*)m_pCurrentDrawState)->tex = tex;
 
-    int width = self->GetScreenWidth();
+    int width = GetScreenWidth();
     sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
-    unsigned int fbp = ((unsigned int)self->mCurrentFrameBufferPage);
-    unsigned int zbp = ((unsigned int)self->mCurrentZBufferPage);
-    unsigned int start = self->mVifCursor;
+    unsigned int fbp = ((unsigned int)mCurrentFrameBufferPage);
+    unsigned int zbp = ((unsigned int)mCurrentZBufferPage);
+    unsigned int start = mVifCursor;
     MEM_fill(pkt, 0, 0x30);
 
     // pass 1: alpha-only FRAME, ZBUF masked, TEST ztst always; guard band
     {
-        ulong* packetBase = (ulong*)(self->mVifCursor | 0x30000000);
+        ulong* packetBase = (ulong*)(mVifCursor | 0x30000000);
         pkt->dma = packetBase;
         pkt->cur = packetBase + 2;
         pkt->cl = 1;
@@ -11711,25 +11709,25 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardScale));
-    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardOffset));
+    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardScale));
+    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardOffset));
     UnpackEnd_6E78(pkt);
-    DmaEnd_6E78(pkt, self);
-    func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+    DmaEnd_6E78(pkt, this);
+    func_00386D10(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 2: TEST ztst gequal, FBA on
-    DmaBegin_6E78(pkt, self->mVifCursor);
+    DmaBegin_6E78(pkt, mVifCursor);
     Flush_6E78(pkt);
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, 0x50000, 71);
     AddReg_6E78(pkt, 1, 74);
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
-    DmaEnd_6E78(pkt, self);
-    func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+    DmaEnd_6E78(pkt, this);
+    func_00386D10(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 3: ZBUF unmasked, destination-alpha test, FBA off; guard band without depth
-    DmaBegin_6E78(pkt, self->mVifCursor);
+    DmaBegin_6E78(pkt, mVifCursor);
     Flush_6E78(pkt);
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, (ulong)(zbp | 0x1000000), 78);
@@ -11741,23 +11739,23 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     {
         t4Vector flatGuardScale;
         t4Vector flatGuardOffset;
-        flatGuardScale.x = (*(t4Vector*)&self->mGuardScale).x;
-        flatGuardScale.y = (*(t4Vector*)&self->mGuardScale).y;
+        flatGuardScale.x = (*(t4Vector*)&mGuardScale).x;
+        flatGuardScale.y = (*(t4Vector*)&mGuardScale).y;
         flatGuardScale.z = 0.0f;
-        flatGuardScale.w = (*(t4Vector*)&self->mGuardScale).w;
-        flatGuardOffset.x = (*(t4Vector*)&self->mGuardOffset).x;
-        flatGuardOffset.y = (*(t4Vector*)&self->mGuardOffset).y;
+        flatGuardScale.w = (*(t4Vector*)&mGuardScale).w;
+        flatGuardOffset.x = (*(t4Vector*)&mGuardOffset).x;
+        flatGuardOffset.y = (*(t4Vector*)&mGuardOffset).y;
         flatGuardOffset.z = 0.0f;
-        flatGuardOffset.w = (*(t4Vector*)&self->mGuardOffset).w;
+        flatGuardOffset.w = (*(t4Vector*)&mGuardOffset).w;
         AddQuad_6E78(pkt, flatGuardScale);
         AddQuad_6E78(pkt, flatGuardOffset);
     }
     UnpackEnd_6E78(pkt);
-    DmaEnd_6E78(pkt, self);
-    func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+    DmaEnd_6E78(pkt, this);
+    func_00386D10(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 4: full FRAME, TEST ztst gequal, FBA if enabled; then the edges
-    DmaBegin_6E78(pkt, self->mVifCursor);
+    DmaBegin_6E78(pkt, mVifCursor);
     Flush_6E78(pkt);
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, (ulong)fbp | ((ulong)(width / 64) << 16), 76);
@@ -11768,39 +11766,39 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardScale));
-    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardOffset));
+    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardScale));
+    AddQuad_6E78(pkt, (*(t4Vector*)&mGuardOffset));
     UnpackEnd_6E78(pkt);
-    DmaEnd_6E78(pkt, self);
-    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)2, 0, (void*)1);
-    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, 0, (void*)3, (void*)1);
-    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)3, (void*)4, (void*)1);
-    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)4, (void*)1, (void*)1);
-    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)1, (void*)5, (void*)1);
+    DmaEnd_6E78(pkt, this);
+    func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, (void*)2, 0, (void*)1);
+    func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, 0, (void*)3, (void*)1);
+    func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, (void*)3, (void*)4, (void*)1);
+    func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, (void*)4, (void*)1, (void*)1);
+    func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, (void*)1, (void*)5, (void*)1);
 
     if (D_004A45CC.fba) {
-        DmaBegin_6E78(pkt, self->mVifCursor);
+        DmaBegin_6E78(pkt, mVifCursor);
         Flush_6E78(pkt);
         GifBegin_6E78(pkt);
         AddReg_6E78(pkt, 0x54000, 71);
         AddReg_6E78(pkt, 0, 74);
         GifEnd_6E78(pkt);
         DirectEnd_6E78(pkt);
-        DmaEnd_6E78(pkt, self);
-        func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, 0, (void*)1, (void*)1);
+        DmaEnd_6E78(pkt, this);
+        func_00386DD0((void*)this, (sPartStrip_6DD0*)strips, n, 0, (void*)1, (void*)1);
 
-        DmaBegin_6E78(pkt, self->mVifCursor);
+        DmaBegin_6E78(pkt, mVifCursor);
         Flush_6E78(pkt);
         GifBegin_6E78(pkt);
         AddReg_6E78(pkt, 0x50000, 71);
         GifEnd_6E78(pkt);
         DirectEnd_6E78(pkt);
-        DmaEnd_6E78(pkt, self);
+        DmaEnd_6E78(pkt, this);
     }
 
-    cPS2DeferManager* ring = self->mpDeferMan;
-    unsigned int next = self->mVifCursor;
-    sRS_6E78* rs = ((sRS_6E78*)self->m_pCurrentDrawState);
+    cPS2DeferManager* ring = mpDeferMan;
+    unsigned int next = mVifCursor;
+    sRS_6E78* rs = ((sRS_6E78*)m_pCurrentDrawState);
     if (ring->mNumSubmitDMA < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -11812,10 +11810,10 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
         deferEntry->key = key;
         deferEntry->flag = 0;
     }
-    self->mVifCursor += 0x10;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sRS_6E78*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
-    *((sRS_6E78*)self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
+    mVifCursor += 0x10;
+    ((sRS_6E78*)m_pCurrentDrawState)->f0 &= ~0x3C0;
+    ((sRS_6E78*)m_pCurrentDrawState)->fC &= 0xC0000000;
+    *((sRS_6E78*)m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
 }
 #endif
 
@@ -12270,12 +12268,12 @@ extern "C" void RemoveDmacHandler(int, int);
  * Calls DisableIntc(2) and removes the INTC 2 handler (+0x5AC0), then DisableDmac(1) and removes the DMAC 0 handler
  * (+0x5AC4): the same first steps as cPS2GraphicsMan_Purge, leaving the threads and memory alone.
  */
-extern "C" void cPS2GraphicsMan_loadexecpurge(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::loadexecpurge()
 {
     DisableIntc(2);
-    RemoveIntcHandler(2, self->mIntcHandlerId);
+    RemoveIntcHandler(2, mIntcHandlerId);
     DisableDmac(1);
-    RemoveDmacHandler(0, self->mDmacHandlerId);
+    RemoveDmacHandler(0, mDmacHandlerId);
 }
 #endif
 

@@ -80,10 +80,10 @@ struct cMoveNode : public cInstanceNode {
     // subclass's (each ctor stores its own); [U] every virtual call (cMoveNode_apply, update, render, ...). Its new
     // slots ([R] cMoveNode_vtbl, 51 in all; names from its entries, types [O] On Tour's cMoveNode definitions):
     virtual void updateAnimState();                                 // 47
-    virtual void setupOverlapSystem();                              // 48
-    virtual void restoreOverlapSystem();                            // 49
-    virtual void updateOverlapSystem();                             // 50
-    virtual void updateRootTransform();                             // 51
+    virtual void setupOverlapSystem() __asm__("cMoveNode_setupOverlapSystem");                              // 48
+    virtual void restoreOverlapSystem() __asm__("cMoveNode_restoreOverlapSystem");                            // 49
+    virtual void updateOverlapSystem() __asm__("cMoveNode_updateOverlapSystem");                             // 50
+    virtual void updateRootTransform() __asm__("cMoveNode_updateRootTransform");                             // 51
     // cMoveNode's notes on its bases' fields:
     //   Flags: [R] cMoveNode_cMoveNode1 sets bit 0 (RootTransformDirty); [U] cMoveNode_updateRootTransform,
     //       preUpdateModifierBlock
@@ -139,6 +139,14 @@ struct cMoveNode : public cInstanceNode {
     void remHaloModifier() __asm__("cMoveNode_remHaloModifier");
     void remEffectModifier() __asm__("cMoveNode_remEffectModifier");
     void fadeEffectModifier() __asm__("cMoveNode_fadeEffectModifier");
+    virtual bool shouldRebound() __asm__("cMoveNode_shouldRebound");
+    virtual void setDebounce(float secs) __asm__("cMoveNode_setDebounce");
+    virtual void update() __asm__("cMoveNode_update");
+    virtual void render() __asm__("cMoveNode_render");
+    virtual bool hasBoundBox() __asm__("cMoveNode_hasBoundBox");
+    virtual bool hasIntersect() const __asm__("cMoveNode_hasIntersect");
+    virtual bool hasFocusCount() const __asm__("cMoveNode_hasFocusCount");
+    virtual int getFocusCount() const __asm__("cMoveNode_getFocusCount");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

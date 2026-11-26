@@ -2868,9 +2868,9 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isActive);
  *
  * @return true when the controller pointer (+0x18) and its device are set
  */
-extern "C" bool cFEInput_isActive(cFEInput* self)
+bool cFEInput::isActive()
 {
-    void* input = self->mpInput;
+    void* input = mpInput;
     if (input != 0) {
         return **(int**)input != 0;
     }

@@ -47,23 +47,23 @@ struct sRewardGallery_F0B0 {
  * of
  * +0x48 is set, cFEStateRewardGalleryBase_loadIcons().
  */
-extern "C" void cFEStateRewardGalleryBase_onCreateScreen(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_129_rewardgallery), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_129_rewardgallery), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     int i;
     for (i = 0; i < 180; i++) {
-        ((sRewardGallery_F0B0*)self)->entries[i].name[0] = 0;
-        ((sRewardGallery_F0B0*)self)->entries[i].id = -1;
+        ((sRewardGallery_F0B0*)this)->entries[i].name[0] = 0;
+        ((sRewardGallery_F0B0*)this)->entries[i].id = -1;
     }
-    self->mNumIcons = 0;
-    self->loadRewards();
-    if (((self->mLoadingState >> 3) & 1) == 0) {
-        self->loadIcons();
+    mNumIcons = 0;
+    loadRewards();
+    if (((mLoadingState >> 3) & 1) == 0) {
+        loadIcons();
     }
 }
 #endif
@@ -123,11 +123,11 @@ extern "C" void* cUIState_onUpdate(void* self);
  *
  * Vtable slot 12 of the gallery vtables (cFEStateCharEquip_onUpdate's slot). Calls cFEStateRewardGalleryBase_updateRewardsLoad() and cFEStateRewardGalleryBase_updateIconsLoad().
  */
-extern "C" void cFEStateRewardGalleryBase_onUpdate(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::onUpdate()
 {
-    self->updateRewardsLoad();
-    self->updateIconsLoad();
-    cUIState_onUpdate(self);
+    updateRewardsLoad();
+    updateIconsLoad();
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -204,11 +204,11 @@ static inline void Play_F270(cUISoundInterface* snd, int id)
  * @param in  the input object; its vtable slots are the button tests
  * @return true when the input was handled (every back, accept and move input)
  */
-extern "C" bool cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, cUIInput* in)
+bool cFEStateRewardGalleryBase::onInputBegin(cUIInput* in)
 {
     cUISoundInterface* snd = &gUISoundNull_F270;
-    if (*(cUISoundInterface**)&self->mpEngine->mpSound != 0) {
-        snd = *(cUISoundInterface**)&self->mpEngine->mpSound;
+    if (*(cUISoundInterface**)&mpEngine->mpSound != 0) {
+        snd = *(cUISoundInterface**)&mpEngine->mpSound;
     }
     if (Test_F270(((char*)in), 6)) {
         Play_F270(snd, 3);
@@ -216,44 +216,44 @@ extern "C" bool cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase
         for (i = 0; i < 4; i++) {
             int j;
             for (j = 0; j < 8; j++) {
-                cUIIcon* w = self->mpIcons[i][j];
+                cUIIcon* w = mpIcons[i][j];
                 if (w != 0) {
                     w->setVisible(0);
                 }
             }
         }
-        cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-        cUICustomInterface* mgr = self->mpEngine->mpCustom;
-        void* backState = mgr->getPrevState((cUIState*)self, self->mStoreNum >= 0);
-        cUIStateStack_push(&self->mpEngine->mStateStack, backState);
+        cUIScreen_playFrame(mpScreen, cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut)), 1);
+        cUICustomInterface* mgr = mpEngine->mpCustom;
+        void* backState = mgr->getPrevState((cUIState*)this, mStoreNum >= 0);
+        cUIStateStack_push(&mpEngine->mStateStack, backState);
         return true;
     }
-    cUIIcon* cur = self->mpSelected;
+    cUIIcon* cur = mpSelected;
     int curIdx = 0;
     if (((char*)cur) != 0) {
         curIdx = cur->mMiscData;
     }
     int changed = 0;
-    int row = curIdx / self->mMaxRewardColumns;
-    int col = curIdx % self->mMaxRewardColumns;
-    int scroll = self->mFirstVisibleRow;
+    int row = curIdx / mMaxRewardColumns;
+    int col = curIdx % mMaxRewardColumns;
+    int scroll = mFirstVisibleRow;
     if (Test_F270(((char*)in), 5)) {
-        int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + curIdx;
-        if (self->mNumTotalRewards > 0) {
-            if (Call_F270(((char*)self), 38, idx)) {
-                if (self->mRewardType != kRewardCheatChar) {
+        int idx = mFirstVisibleRow * mMaxRewardColumns + curIdx;
+        if (mNumTotalRewards > 0) {
+            if (Call_F270(((char*)this), 38, idx)) {
+                if (mRewardType != kRewardCheatChar) {
                     Play_F270(snd, 6);
-                    CallV_F270(((char*)self), 31, idx);
+                    CallV_F270(((char*)this), 31, idx);
                 } else {
                     Play_F270(snd, 4);
                 }
             } else {
-                if (self->mStoreNum >= 0) {
-                    int item = Call_F270(((char*)self), 34, idx);
-                    int kind = self->mStoreNum;
-                    if (kind == Call_F270(((char*)self), 36, item) && Call_F270(((char*)self), 35, item) <= self->mMoney) {
+                if (mStoreNum >= 0) {
+                    int item = Call_F270(((char*)this), 34, idx);
+                    int kind = mStoreNum;
+                    if (kind == Call_F270(((char*)this), 36, item) && Call_F270(((char*)this), 35, item) <= mMoney) {
                         Play_F270(snd, 6);
-                        CallV_F270(((char*)self), 32, idx);
+                        CallV_F270(((char*)this), 32, idx);
                     } else {
                         Play_F270(snd, 4);
                     }
@@ -268,40 +268,40 @@ extern "C" bool cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase
     } else {
         if (Test_F270(((char*)in), 19)) {
             col--;
-            if (col < 0) col = self->mMaxRewardColumns - 1;
+            if (col < 0) col = mMaxRewardColumns - 1;
             changed = 1;
         } else if (Test_F270(((char*)in), 20)) {
             col++;
-            if (col >= self->mMaxRewardColumns || (self->mFirstVisibleRow + row) * self->mMaxRewardColumns + col >= self->mNumTotalRewards) col = 0;
+            if (col >= mMaxRewardColumns || (mFirstVisibleRow + row) * mMaxRewardColumns + col >= mNumTotalRewards) col = 0;
             changed = 1;
         } else if (Test_F270(((char*)in), 17)) {
             row--;
-            if (row < 0) row = self->mMaxRewardRows - 1;
+            if (row < 0) row = mMaxRewardRows - 1;
             changed = 1;
         } else if (Test_F270(((char*)in), 18)) {
             row++;
-            if (row >= self->mMaxRewardRows || self->mNumRows < self->mFirstVisibleRow + row) row = 0;
+            if (row >= mMaxRewardRows || mNumRows < mFirstVisibleRow + row) row = 0;
             changed = 1;
         } else if (Test_F270(((char*)in), 27)) {
-            scroll -= self->mMaxRewardRows;
-            if (scroll < 0) scroll = (self->mNumRows - 1) / self->mMaxRewardRows * self->mMaxRewardRows;
+            scroll -= mMaxRewardRows;
+            if (scroll < 0) scroll = (mNumRows - 1) / mMaxRewardRows * mMaxRewardRows;
             changed = 1;
         } else if (Test_F270(((char*)in), 25)) {
             changed = 1;
-            scroll += self->mMaxRewardRows;
-            if (scroll >= self->mNumRows) scroll = 0;
+            scroll += mMaxRewardRows;
+            if (scroll >= mNumRows) scroll = 0;
         }
         if (changed) {
-        int cols = self->mMaxRewardColumns;
+        int cols = mMaxRewardColumns;
         int local = row * cols + col;
         int idx = local + scroll * cols;
-        if (idx >= self->mNumTotalRewards) idx = self->mNumTotalRewards - 1;
+        if (idx >= mNumTotalRewards) idx = mNumTotalRewards - 1;
         local = idx - scroll * cols;
-        if (curIdx != local || scroll != self->mFirstVisibleRow) {
-            self->mFirstVisibleRow = scroll;
-            self->mpSelected = self->mpIcons[local / cols][local % cols];
-            self->updateList();
-            Call_F270(((char*)self), 33, idx);
+        if (curIdx != local || scroll != mFirstVisibleRow) {
+            mFirstVisibleRow = scroll;
+            mpSelected = mpIcons[local / cols][local % cols];
+            updateList();
+            Call_F270(((char*)this), 33, idx);
             if (Test_F270(((char*)in), 17) || Test_F270(((char*)in), 18)) {
                 Play_F270(snd, 2);
             } else {
@@ -877,16 +877,16 @@ extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
  *
  * @param rewardIndex  index of the reward in the gallery's list
  */
-extern "C" void cFEStateRewardGalleryBase_buyReward(cFEStateRewardGalleryBase* self, int rewardIndex)
+void cFEStateRewardGalleryBase::buyReward(int rewardIndex)
 {
-    cBERewardInterface_buyReward(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
-                  self->mCharID, self->mRewardType, rewardIndex, 1);
-    self->mMoney = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum,
-                                                self->mCharID);
-    self->updateRewardInfo();
-    self->updateHelpText(rewardIndex);
-    self->updateAvailableCash();
-    self->updateHighlither();
+    cBERewardInterface_buyReward(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum,
+                  mCharID, mRewardType, rewardIndex, 1);
+    mMoney = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), mUserNum,
+                                                mCharID);
+    updateRewardInfo();
+    updateHelpText(rewardIndex);
+    updateAvailableCash();
+    updateHighlither();
 }
 #endif
 
@@ -988,10 +988,10 @@ extern "C" void cBERewardInterface_isRewardOwned1(void* iface, int a, int b, int
  *
  * @param rewardIndex  index of the reward in the gallery's list
  */
-extern "C" void cFEStateRewardGalleryBase_isRewardOwned(cFEStateRewardGalleryBase* self, int rewardIndex)
+bool cFEStateRewardGalleryBase::isRewardOwned(int rewardIndex)
 {
-    cBERewardInterface_isRewardOwned1(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
-                  self->mCharID, self->mRewardType, rewardIndex);
+    cBERewardInterface_isRewardOwned1(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum,
+                  mCharID, mRewardType, rewardIndex);
 }
 #endif
 
@@ -1028,63 +1028,63 @@ static inline void setHelp_0648(char* self, char* key)
  * @param idx  reward index (On Tour rIndex)
  */
 // PORT: item pointers passed through int vtable parameters.
-extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBase* self, int idx)
+void cFEStateRewardGalleryBase::updateHelpText(int idx)
 {
-    cUIThing* txt = self->mpHelpText;
+    cUIThing* txt = mpHelpText;
     if (txt == 0)
         return;
     txt->setVisible(0);
-    tCheatCharInfo* item = (tCheatCharInfo*)self->getReward(idx);
+    tCheatCharInfo* item = (tCheatCharInfo*)getReward(idx);
     if (((char*)item) == 0)
         return;
-    int state = self->getRewardStoreNum((const void*)item);
-    self->mpHelpText->setVisible(1);
-    if (self->mRewardType == kRewardCheatChar) {
-        if (self->isRewardOwned(idx)) {
-            setHelp_0648(((char*)self), str_kT_129HELPSelectCheatChar);
+    int state = getRewardStoreNum((const void*)item);
+    mpHelpText->setVisible(1);
+    if (mRewardType == kRewardCheatChar) {
+        if (isRewardOwned(idx)) {
+            setHelp_0648(((char*)this), str_kT_129HELPSelectCheatChar);
         } else if (state < 0) {
-            setHelp_0648(((char*)self), ((const tCheatCharInfo*)item)->mpHelpStringID);
+            setHelp_0648(((char*)this), ((const tCheatCharInfo*)item)->mpHelpStringID);
         } else {
-            int selected = self->mStoreNum;
+            int selected = mStoreNum;
             if (selected >= 0) {
                 if (state != selected) {
                     if (state == 1)
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak1);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyInPeak1);
                     else if (state == 2)
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak2);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyInPeak2);
                     else
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak3);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyInPeak3);
                 } else {
-                    if (self->mMoney < self->getRewardCost((const void*)item))
-                        setHelp_0648(((char*)self), str_kT_129HELPSaveCashItem);
+                    if (mMoney < getRewardCost((const void*)item))
+                        setHelp_0648(((char*)this), str_kT_129HELPSaveCashItem);
                     else
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyItem);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyItem);
                 }
             } else {
-                setHelp_0648(((char*)self), str_kT_129HELPBuyInCTM);
+                setHelp_0648(((char*)this), str_kT_129HELPBuyInCTM);
             }
         }
     } else {
-        if (self->isRewardOwned(idx)) {
-            setHelp_0648(((char*)self), str_kT_129HELPViewItem);
+        if (isRewardOwned(idx)) {
+            setHelp_0648(((char*)this), str_kT_129HELPViewItem);
         } else {
-            int selected = self->mStoreNum;
+            int selected = mStoreNum;
             if (selected >= 0) {
                 if (state != selected) {
                     if (state == 1)
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak1);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyInPeak1);
                     else if (state == 2)
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak2);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyInPeak2);
                     else
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak3);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyInPeak3);
                 } else {
-                    if (self->mMoney < self->getRewardCost((const void*)item))
-                        setHelp_0648(((char*)self), str_kT_129HELPSaveCashItem);
+                    if (mMoney < getRewardCost((const void*)item))
+                        setHelp_0648(((char*)this), str_kT_129HELPSaveCashItem);
                     else
-                        setHelp_0648(((char*)self), str_kT_129HELPBuyItem);
+                        setHelp_0648(((char*)this), str_kT_129HELPBuyItem);
                 }
             } else {
-                setHelp_0648(((char*)self), str_kT_129HELPBuyInCTM);
+                setHelp_0648(((char*)this), str_kT_129HELPBuyInCTM);
             }
         }
     }
@@ -1115,48 +1115,48 @@ static inline void show_08A0(cUIIcon* c, int on)
  *
  * @param row  grid row on screen (On Tour rowNum)
  */
-extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* self, int row)
+void cFEStateRewardGalleryBase::updateRow(int row)
 {
-    int idx = (self->mFirstVisibleRow + row) * self->mMaxRewardColumns;
-    for (int col = 0; col < self->mMaxRewardColumns; col++, idx++) {
-        if (idx < self->mNumTotalRewards) {
-            show_08A0(self->mpIcons[row][col], 1);
-            self->mpIconBacks[row][col]->setVisible(1);
-            if (self->isRewardOwned(idx) != 0) {
-                int rewardIndex = self->getIconID(idx);
+    int idx = (mFirstVisibleRow + row) * mMaxRewardColumns;
+    for (int col = 0; col < mMaxRewardColumns; col++, idx++) {
+        if (idx < mNumTotalRewards) {
+            show_08A0(mpIcons[row][col], 1);
+            mpIconBacks[row][col]->setVisible(1);
+            if (isRewardOwned(idx) != 0) {
+                int rewardIndex = getIconID(idx);
                 if (rewardIndex >= 0) {
-                    cUIIcon* cell = self->mpIcons[row][col];
+                    cUIIcon* cell = mpIcons[row][col];
                     cell->mTextureID = rewardIndex;
                     (*(void**)&cell->mpTextureElem) = 0;
                 } else {
-                    int texture = (int)self->getTextureElement(idx);
+                    int texture = (int)getTextureElement(idx);
                     if (texture != 0) {
-                        cUIIcon* cell = self->mpIcons[row][col];
+                        cUIIcon* cell = mpIcons[row][col];
                         (*(void**)&cell->mpTextureElem) = (void*)texture;
                         cell->mTextureID = -1;
                     }
                 }
             } else {
-                int rewardItem = (int)self->getReward(idx);
+                int rewardItem = (int)getReward(idx);
                 void* icon;
-                if (self->mStoreNum >= 0 && self->getRewardStoreNum((const void*)rewardItem) == self->mStoreNum) {
-                    cUIEngine* ui = self->mpEngine;
+                if (mStoreNum >= 0 && getRewardStoreNum((const void*)rewardItem) == mStoreNum) {
+                    cUIEngine* ui = mpEngine;
                     int iconHash = GetHashValue32(str_dollar_sign);
                     icon = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
                 } else {
-                    cUIEngine* ui = self->mpEngine;
+                    cUIEngine* ui = mpEngine;
                     int iconHash = GetHashValue32(str_questmark);
                     icon = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
                 }
-                cUIIcon* cell = self->mpIcons[row][col];
+                cUIIcon* cell = mpIcons[row][col];
                 (*(void**)&cell->mpTextureElem) = icon;
                 cell->mTextureID = -1;
             }
-            cUIIcon* cell = self->mpIcons[row][col];
+            cUIIcon* cell = mpIcons[row][col];
             cell->setColour((const tARGB*)gFadedColour);
         } else {
-            show_08A0(self->mpIcons[row][col], 0);
-            self->mpIconBacks[row][col]->setVisible(0);
+            show_08A0(mpIcons[row][col], 0);
+            mpIconBacks[row][col]->setVisible(0);
         }
     }
 }
@@ -1173,17 +1173,17 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateList);
  * Calls vtable slot 39 (cFEStateRewardGalleryBase_updateRow) for each of the +0x58 rows, then slots 46 (cFEStateRewardGalleryBase_updateArrows),
  * 45 (cFEStateRewardGalleryBase_updateHighlither), 44 (cFEStateRewardGalleryBase_updateCounter), 41 (cFEStateRewardGalleryBase_updatePageNumber) and 42 (cFEStateRewardGalleryBase_updateRewardInfo).
  */
-extern "C" void cFEStateRewardGalleryBase_updateList(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateList()
 {
     int i;
-    for (i = 0; i < self->mMaxRewardRows; i++) {
-        self->updateRow(i);
+    for (i = 0; i < mMaxRewardRows; i++) {
+        updateRow(i);
     }
-    self->updateArrows();
-    self->updateHighlither();
-    self->updateCounter();
-    self->updatePageNumber();
-    self->updateRewardInfo();
+    updateArrows();
+    updateHighlither();
+    updateCounter();
+    updatePageNumber();
+    updateRewardInfo();
 }
 #endif
 
@@ -1207,11 +1207,11 @@ extern char str_empty_d[];
  *
  * Clears the text when the localized format kT_OVRCMNPageOf is missing.
  */
-extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updatePageNumber()
 {
-    if (self->mpPageNumberText == 0)
+    if (mpPageNumberText == 0)
         return;
-    cUILocaleInterface* locale = self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+    cUILocaleInterface* locale = mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (locale != 0) {
         // getStringByHash (slot 4), called by hand
         sVEntry<unsigned short*(void*, int)>* vt =
@@ -1220,22 +1220,22 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGallery
         unsigned short* fmt = vt[4].fn(thisp, GetHashValue32(str_kT_OVRCMNPageOf));
         if (fmt != 0) {
             unsigned short buf[100];
-            int per = self->mMaxRewardRows;
-            int pages = (self->mNumRows + per - 1) / per;
-            sprintf1(buf, fmt, (self->mFirstVisibleRow + per - 1) / per + 1, pages);
-            cUIText_setUnicodeString(self->mpPageNumberText, buf);
-            cUIThing* buttonPrompt = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_R1_ps2));
+            int per = mMaxRewardRows;
+            int pages = (mNumRows + per - 1) / per;
+            sprintf1(buf, fmt, (mFirstVisibleRow + per - 1) / per + 1, pages);
+            cUIText_setUnicodeString(mpPageNumberText, buf);
+            cUIThing* buttonPrompt = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_R1_ps2));
             if (buttonPrompt != 0) {
                 buttonPrompt->setVisible(pages > 1);
             }
-            buttonPrompt = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_L1_ps2));
+            buttonPrompt = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_L1_ps2));
             if (buttonPrompt != 0) {
                 buttonPrompt->setVisible(pages > 1);
             }
             return;
         }
     }
-    cUIText_setAsciiString(self->mpPageNumberText, str_empty_d);
+    cUIText_setAsciiString(mpPageNumberText, str_empty_d);
 }
 #endif
 
@@ -1258,30 +1258,30 @@ extern char str_empty_d[];
  * (slot 37) goes into reward_name, and reward_cost shows getDollarString() of its cost (slot 35) when that is above 0
  * and the reward is not owned (slot 38), else an empty string. Missing text widgets are skipped.
  */
-extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateRewardInfo()
 {
-    cUIIcon* grid = self->mpSelected;
+    cUIIcon* grid = mpSelected;
     if (((char*)grid) == 0) {
-        if (self->mpRewardNameText != 0)
-            cUIText_setAsciiString(self->mpRewardNameText, str_empty_d);
-        if (self->mpRewardCostText != 0)
-            cUIText_setAsciiString(self->mpRewardCostText, str_empty_d);
+        if (mpRewardNameText != 0)
+            cUIText_setAsciiString(mpRewardNameText, str_empty_d);
+        if (mpRewardCostText != 0)
+            cUIText_setAsciiString(mpRewardCostText, str_empty_d);
         return;
     }
-    int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
-    void* item = (void*)self->getReward(idx);
-    if (self->mpRewardNameText != 0) {
-        cUIText_setAsciiString(self->mpRewardNameText, self->getRewardName(item));
+    int idx = mFirstVisibleRow * mMaxRewardColumns + grid->mMiscData;
+    void* item = (void*)getReward(idx);
+    if (mpRewardNameText != 0) {
+        cUIText_setAsciiString(mpRewardNameText, getRewardName(item));
     }
-    if (self->mpRewardCostText != 0) {
-        int price = self->getRewardCost(item);
+    if (mpRewardCostText != 0) {
+        int price = getRewardCost(item);
         if (price > 0) {
-            if (self->isRewardOwned(idx) == 0) {
-                cUIText_setAsciiString(self->mpRewardCostText, getDollarString_i(price));
+            if (isRewardOwned(idx) == 0) {
+                cUIText_setAsciiString(mpRewardCostText, getDollarString_i(price));
                 return;
             }
         }
-        cUIText_setAsciiString(self->mpRewardCostText, str_empty_d);
+        cUIText_setAsciiString(mpRewardCostText, str_empty_d);
     }
 }
 #endif
@@ -1296,10 +1296,10 @@ extern "C" const char* getDollarString(void* a0);
 /**
  * Shows the player's cash (+0x54) as a dollar string in the "you_have_amount" text (+0x910), when that widget exists.
  */
-extern "C" void cFEStateRewardGalleryBase_updateAvailableCash(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateAvailableCash()
 {
-    if (self->mpAvailableCashText != 0) {
-        cUIText_setAsciiString(self->mpAvailableCashText, getDollarString((void*)self->mMoney));
+    if (mpAvailableCashText != 0) {
+        cUIText_setAsciiString(mpAvailableCashText, getDollarString((void*)mMoney));
     }
 }
 #endif
@@ -1319,16 +1319,16 @@ extern char str_pct_d_b[];
  * A missing widget is skipped. Likely bug: cFEStateRewardGalleryBase_onWidgetCreate fills the same widgets the other
  * way round (max_rewards from +0x68, num_rewards from +0x6C), so one of the two has the pair swapped.
  */
-extern "C" void cFEStateRewardGalleryBase_updateCounter(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateCounter()
 {
     char buf[32];
-    if (self->mpTotalRewards != 0) {
-        sprintf(buf, str_pct_d_b, self->mNumUnlockedRewards);
-        cUIText_setAsciiString(self->mpTotalRewards, buf);
+    if (mpTotalRewards != 0) {
+        sprintf(buf, str_pct_d_b, mNumUnlockedRewards);
+        cUIText_setAsciiString(mpTotalRewards, buf);
     }
-    if (self->mpNumRewards != 0) {
-        sprintf(buf, str_pct_d_b, self->mNumTotalRewards);
-        cUIText_setAsciiString(self->mpNumRewards, buf);
+    if (mpNumRewards != 0) {
+        sprintf(buf, str_pct_d_b, mNumTotalRewards);
+        cUIText_setAsciiString(mpNumRewards, buf);
     }
 }
 #endif
@@ -1349,42 +1349,42 @@ extern char gSolidColour[];
  * mpTextureElem 0, or, when that id is negative, mTextureID -1 and mpTextureElem from slot 27 (the texture-element
  * lookup the cheat-character gallery fills in). Finally sets the cell's colour (setColour) to gSolidColour.
  */
-extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateHighlither()
 {
-    cUIThing* icon = self->mpHilighter;
+    cUIThing* icon = mpHilighter;
     if (((char*)icon) != 0) {
-        if ((char*)self->mpSelected != 0) {
+        if ((char*)mpSelected != 0) {
             t3Vector cellPos;
             t3Vector barPos;
-            cUIThing_getAbsPosition((char*)self->mpSelected, &cellPos);
-            cUIThing_getAbsPosition((char*)self->mpHilighter, &barPos);
-            barPos.y = cellPos.y + self->mVertHilighterOffset;
-            barPos.x = cellPos.x + self->mHorizHilighterOffset;
-            *(&self->mpHilighter->mPosition) = barPos;
-            cUIThing* selectBar = self->mpHilighter;
+            cUIThing_getAbsPosition((char*)mpSelected, &cellPos);
+            cUIThing_getAbsPosition((char*)mpHilighter, &barPos);
+            barPos.y = cellPos.y + mVertHilighterOffset;
+            barPos.x = cellPos.x + mHorizHilighterOffset;
+            *(&mpHilighter->mPosition) = barPos;
+            cUIThing* selectBar = mpHilighter;
             selectBar->setVisible(1);
         } else {
             icon->setVisible(0);
         }
     }
-    cUIIcon* grid = self->mpSelected;
+    cUIIcon* grid = mpSelected;
     if (((char*)grid) == 0)
         return;
-    int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
-    if (self->isRewardOwned(idx) != 0) {
-        int iconId = self->getIconID(idx);
+    int idx = mFirstVisibleRow * mMaxRewardColumns + grid->mMiscData;
+    if (isRewardOwned(idx) != 0) {
+        int iconId = getIconID(idx);
         if (iconId < 0) {
-            int textureElement = (int)self->getTextureElement(idx);
-            cUIIcon* curCell = self->mpSelected;
+            int textureElement = (int)getTextureElement(idx);
+            cUIIcon* curCell = mpSelected;
             curCell->mTextureID = -1;
             curCell->mpTextureElem = (const cTextureElement*)textureElement;
         } else {
-            cUIIcon* curCell = self->mpSelected;
+            cUIIcon* curCell = mpSelected;
             curCell->mTextureID = iconId;
             curCell->mpTextureElem = 0;
         }
     }
-    cUIIcon* curCell = self->mpSelected;
+    cUIIcon* curCell = mpSelected;
     curCell->setColour((const tARGB*)gSolidColour);
 }
 #endif
@@ -1397,15 +1397,15 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateArrows);
  * Shows the up arrow (+0x91C) when the first visible row (+0x64) is past 0, and the down arrow (+0x920) when more rows
  * (+0x60) follow the visible ones (+0x58).
  */
-extern "C" void cFEStateRewardGalleryBase_updateArrows(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::updateArrows()
 {
-    cUIIcon* obj = self->mpArrowUp;
+    cUIIcon* obj = mpArrowUp;
     if (obj != 0) {
-        obj->setVisible(self->mFirstVisibleRow > 0);
+        obj->setVisible(mFirstVisibleRow > 0);
     }
-    cUIIcon* obj2 = self->mpArrowDown;
+    cUIIcon* obj2 = mpArrowDown;
     if (obj2 != 0) {
-        obj2->setVisible(self->mFirstVisibleRow + self->mMaxRewardRows < self->mNumRows);
+        obj2->setVisible(mFirstVisibleRow + mMaxRewardRows < mNumRows);
     }
 }
 #endif
@@ -1503,13 +1503,13 @@ extern "C" cBERewardDB* cBERewardInterface_getDB();
  * (cBERewardInterface_getDB()); entry k of mpPosters gets &mpDBPosters[k] (16-byte reward records) and mNumTotalRewards
  * counts them. There is no check against the 43 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryPosters_allocRewards(cFEStateRewardGalleryPosters* self)
+void cFEStateRewardGalleryPosters::allocRewards()
 {
     int n = cBERewardInterface_getTotalNumPosters(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->mNumTotalRewards = 0;
-    self->mpDBPosters = cBERewardInterface_getDB()->mpPosters;
+    mNumTotalRewards = 0;
+    mpDBPosters = cBERewardInterface_getDB()->mpPosters;
     for (int i = 0; i < n; i++) {
-        self->mpPosters[self->mNumTotalRewards++] = &self->mpDBPosters[i];
+        mpPosters[mNumTotalRewards++] = &mpDBPosters[i];
     }
 }
 #endif
@@ -1522,13 +1522,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_purgeRewards);
  *
  * Vtable slot 29 of the posters vtable cFEStateRewardGalleryPosters_vtbl.
  */
-extern "C" void cFEStateRewardGalleryPosters_purgeRewards(cFEStateRewardGalleryPosters* self)
+void cFEStateRewardGalleryPosters::purgeRewards()
 {
     int i;
-    self->mNumTotalRewards = 0;
-    self->mpDBPosters = 0;
+    mNumTotalRewards = 0;
+    mpDBPosters = 0;
     for (i = 42; i >= 0; i--) {
-        self->mpPosters[i] = 0;
+        mpPosters[i] = 0;
     }
 }
 #endif
@@ -1625,13 +1625,13 @@ extern "C" cBERewardDB* cBERewardInterface_getDB();
  * mpTradingCards (cBERewardInterface_getDB()); entry k of mpTradingCards gets &mpDBTradingCards[k] (16-byte reward
  * records) and mNumTotalRewards counts them. There is no check against the 116 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(cFEStateRewardGalleryTradingCards* self)
+void cFEStateRewardGalleryTradingCards::allocRewards()
 {
     int n = cBERewardInterface_getTotalNumTradingCards(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->mNumTotalRewards = 0;
-    self->mpDBTradingCards = cBERewardInterface_getDB()->mpTradingCards;
+    mNumTotalRewards = 0;
+    mpDBTradingCards = cBERewardInterface_getDB()->mpTradingCards;
     for (int i = 0; i < n; i++) {
-        self->mpTradingCards[self->mNumTotalRewards++] = &self->mpDBTradingCards[i];
+        mpTradingCards[mNumTotalRewards++] = &mpDBTradingCards[i];
     }
 }
 #endif
@@ -1645,13 +1645,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_purgeRewards)
  *
  * Vtable slot 29 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl.
  */
-extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(cFEStateRewardGalleryTradingCards* self)
+void cFEStateRewardGalleryTradingCards::purgeRewards()
 {
     int i;
-    self->mNumTotalRewards = 0;
-    self->mpDBTradingCards = 0;
+    mNumTotalRewards = 0;
+    mpDBTradingCards = 0;
     for (i = 115; i >= 0; i--) {
-        self->mpTradingCards[i] = 0;
+        mpTradingCards[i] = 0;
     }
 }
 #endif
@@ -1748,13 +1748,13 @@ extern "C" cBERewardDB* cBERewardInterface_getDB();
  * mpConceptArts (cBERewardInterface_getDB()); entry k of mpConceptArts gets &mpDBConceptArts[k] (16-byte reward
  * records) and mNumTotalRewards counts them. There is no check against the 100 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(cFEStateRewardGalleryConceptArts* self)
+void cFEStateRewardGalleryConceptArts::allocRewards()
 {
     int n = cBERewardInterface_getTotalNumConceptArts(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->mNumTotalRewards = 0;
-    self->mpDBConceptArts = cBERewardInterface_getDB()->mpConceptArts;
+    mNumTotalRewards = 0;
+    mpDBConceptArts = cBERewardInterface_getDB()->mpConceptArts;
     for (int i = 0; i < n; i++) {
-        self->mpConceptArts[self->mNumTotalRewards++] = &self->mpDBConceptArts[i];
+        mpConceptArts[mNumTotalRewards++] = &mpDBConceptArts[i];
     }
 }
 #endif
@@ -1767,13 +1767,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_purgeRewards);
  *
  * Vtable slot 29 of the art vtable cFEStateRewardGalleryConceptArts_vtbl.
  */
-extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(cFEStateRewardGalleryConceptArts* self)
+void cFEStateRewardGalleryConceptArts::purgeRewards()
 {
     int i;
-    self->mNumTotalRewards = 0;
-    self->mpDBConceptArts = 0;
+    mNumTotalRewards = 0;
+    mpDBConceptArts = 0;
     for (i = 99; i >= 0; i--) {
-        self->mpConceptArts[i] = 0;
+        mpConceptArts[i] = 0;
     }
 }
 #endif
@@ -1871,13 +1871,13 @@ extern "C" cBERewardDB* cBERewardInterface_getDB();
  * counts them. There is no check against the 2 entries the object has room for, so more than 2 videos in the database
  * would overrun it.
  */
-extern "C" void cFEStateRewardGalleryVideos_allocRewards(cFEStateRewardGalleryVideos* self)
+void cFEStateRewardGalleryVideos::allocRewards()
 {
     int n = cBERewardInterface_getTotalNumVideos(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->mNumTotalRewards = 0;
-    self->mpDBVideos = cBERewardInterface_getDB()->mpVideos;
+    mNumTotalRewards = 0;
+    mpDBVideos = cBERewardInterface_getDB()->mpVideos;
     for (int i = 0; i < n; i++) {
-        self->mpVideos[self->mNumTotalRewards++] = &self->mpDBVideos[i];
+        mpVideos[mNumTotalRewards++] = &mpDBVideos[i];
     }
 }
 #endif
@@ -1890,13 +1890,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_purgeRewards);
  *
  * Vtable slot 29 of the video vtable cFEStateRewardGalleryVideos_vtbl.
  */
-extern "C" void cFEStateRewardGalleryVideos_purgeRewards(cFEStateRewardGalleryVideos* self)
+void cFEStateRewardGalleryVideos::purgeRewards()
 {
     int i;
-    self->mNumTotalRewards = 0;
-    self->mpDBVideos = 0;
+    mNumTotalRewards = 0;
+    mpDBVideos = 0;
     for (i = 1; i >= 0; i--) {
-        self->mpVideos[i] = 0;
+        mpVideos[i] = 0;
     }
 }
 #endif
@@ -1992,13 +1992,13 @@ extern "C" cBERewardDB* cBERewardInterface_getDB();
  * (cBERewardInterface_getDB()); entry k of mpToys gets &mpDBToys[k] (16-byte reward records) and mNumTotalRewards
  * counts them. There is no check against the 28 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryToys_allocRewards(cFEStateRewardGalleryToys* self)
+void cFEStateRewardGalleryToys::allocRewards()
 {
     int n = cBERewardInterface_getTotalNumToys(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->mNumTotalRewards = 0;
-    self->mpDBToys = cBERewardInterface_getDB()->mpToys;
+    mNumTotalRewards = 0;
+    mpDBToys = cBERewardInterface_getDB()->mpToys;
     for (int i = 0; i < n; i++) {
-        self->mpToys[self->mNumTotalRewards++] = &self->mpDBToys[i];
+        mpToys[mNumTotalRewards++] = &mpDBToys[i];
     }
 }
 #endif
@@ -2011,13 +2011,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_purgeRewards);
  *
  * Vtable slot 29 of the toy vtable cFEStateRewardGalleryToys_vtbl.
  */
-extern "C" void cFEStateRewardGalleryToys_purgeRewards(cFEStateRewardGalleryToys* self)
+void cFEStateRewardGalleryToys::purgeRewards()
 {
     int i;
-    self->mNumTotalRewards = 0;
-    self->mpDBToys = 0;
+    mNumTotalRewards = 0;
+    mpDBToys = 0;
     for (i = 27; i >= 0; i--) {
-        self->mpToys[i] = 0;
+        mpToys[i] = 0;
     }
 }
 #endif
@@ -2072,13 +2072,13 @@ extern "C" cBERewardDB* cBERewardInterface_getDB();
  * mpCheatChars (cBERewardInterface_getDB()); entry k of mpCheatChars gets &mpDBCheatChars[k] (16-byte reward records)
  * and mNumTotalRewards counts them. There is no check against the 28 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(cFEStateRewardGalleryCheatChars* self)
+void cFEStateRewardGalleryCheatChars::allocRewards()
 {
     int n = cBERewardInterface_getTotalNumCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->mNumTotalRewards = 0;
-    self->mpDBCheatChars = cBERewardInterface_getDB()->mpCheatChars;
+    mNumTotalRewards = 0;
+    mpDBCheatChars = cBERewardInterface_getDB()->mpCheatChars;
     for (int i = 0; i < n; i++) {
-        self->mpCheatChars[self->mNumTotalRewards++] = &self->mpDBCheatChars[i];
+        mpCheatChars[mNumTotalRewards++] = &mpDBCheatChars[i];
     }
 }
 #endif
@@ -2092,13 +2092,13 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_purgeRewards);
  *
  * Vtable slot 29 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl.
  */
-extern "C" void cFEStateRewardGalleryCheatChars_purgeRewards(cFEStateRewardGalleryCheatChars* self)
+void cFEStateRewardGalleryCheatChars::purgeRewards()
 {
     int i;
-    self->mNumTotalRewards = 0;
-    self->mpDBCheatChars = 0;
+    mNumTotalRewards = 0;
+    mpDBCheatChars = 0;
     for (i = 27; i >= 0; i--) {
-        self->mpCheatChars[i] = 0;
+        mpCheatChars[i] = 0;
     }
 }
 #endif
@@ -2230,15 +2230,15 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 /**
  * Creates the reward preview screen ("130rewardposter") and sets flag 8 on its "Menu" object.
  */
-extern "C" void cFEStatePreviewReward_onCreateScreen(cFEStatePreviewReward* self)
+void cFEStatePreviewReward::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_130rewardposter), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_130rewardposter), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
+    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu));
     if (((void*)obj) != 0) {
         *(int*)&obj->mAttrMenu |= 8;
     }
@@ -2428,12 +2428,12 @@ extern "C" void* cUIState_onUpdate(void* self);
  * is handed to GrMan, the slot is released and set to -1 and the preview widget shows it. Then runs the base
  * UI-state update cUIState_onUpdate().
  */
-extern "C" void cFEStatePreviewReward_onUpdate(cFEStatePreviewReward* self)
+void cFEStatePreviewReward::onUpdate()
 {
-    if (self->mTextureFileIndex >= 0) {
-        self->updateTextureLoad();
+    if (mTextureFileIndex >= 0) {
+        updateTextureLoad();
     }
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -2469,10 +2469,10 @@ extern sDefObj_1FF0 gUISoundNull;
  * @param obj  the input (On Tour cUIInput* pInput)
  * @return true when the preview closes
  */
-extern "C" bool cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, cUIInput* obj)
+bool cFEStatePreviewReward::onInputBegin(cUIInput* obj)
 {
     if (obj->isPrevious() != 0) {
-    sDefObj_1FF0* sound = *(sDefObj_1FF0**)&self->mpEngine->mpSound;
+    sDefObj_1FF0* sound = *(sDefObj_1FF0**)&mpEngine->mpSound;
     if (sound == 0) {
         sound = &gUISoundNull;
     }
@@ -2481,13 +2481,13 @@ extern "C" bool cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, 
     }
     int i;
     for (i = 0; i < 3; i++) {
-        cUIIcon* bitmap = self->mpIcon[i];
+        cUIIcon* bitmap = mpIcon[i];
         if (bitmap != 0) {
             bitmap->setVisible(0);
         }
     }
-    cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+    cUIScreen_playFrame(mpScreen, cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut)), 1);
+    cUIStateStack_pop(&mpEngine->mStateStack, 1);
     return true;
     }
     return false;
@@ -2703,10 +2703,10 @@ extern char str_MoviePlayer[];
  * Vtable slot 4 of cFEStateVideoPlayer_vtbl (the create-screen slot; no screen is created). Allocates 68 bytes under the tag
  * "MoviePlayer", constructs them with cMoviePlayer_cMoviePlayer() into +0x248 and calls cFEStateVideoPlayer_Start().
  */
-extern "C" void cFEStateVideoPlayer_onCreateScreen(cFEStateVideoPlayer* self)
+void cFEStateVideoPlayer::onCreateScreen()
 {
-    self->mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
-    self->Start();
+    mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
+    Start();
 }
 #endif
 
@@ -2721,13 +2721,13 @@ extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
  *
  * Vtable slot 5 of cFEStateVideoPlayer_vtbl.
  */
-extern "C" void cFEStateVideoPlayer_onDestroyScreen(cFEStateVideoPlayer* self)
+void cFEStateVideoPlayer::onDestroyScreen()
 {
-    void* moviePlayer = self->mpMoviePlayer;
+    void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
         cMoviePlayer__cMoviePlayer(moviePlayer, 3);
     }
-    self->mpMoviePlayer = 0;
+    mpMoviePlayer = 0;
 }
 #endif
 
@@ -2743,14 +2743,14 @@ extern "C" void* cUIState_onRender2D(void* self);
  *
  * Vtable slot 15 of cFEStateVideoPlayer_vtbl.
  */
-extern "C" void cFEStateVideoPlayer_onRender2D(cFEStateVideoPlayer* self)
+void cFEStateVideoPlayer::onRender2D()
 {
-    void* moviePlayer = self->mpMoviePlayer;
+    void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
-        self->mRenderOnce = 1;
+        mRenderOnce = 1;
         cMoviePlayer_asyncRender(moviePlayer, 0);
     }
-    cUIState_onRender2D(self);
+    cUIState_onRender2D(this);
 }
 #endif
 
@@ -2769,18 +2769,18 @@ extern "C" void* cUIState_onUpdate(void* self);
  * since playback started (+0x278), or when the player's first word (its status) is nonzero. Then runs
  * cUIState_onUpdate().
  */
-extern "C" void cFEStateVideoPlayer_onUpdate(cFEStateVideoPlayer* self)
+void cFEStateVideoPlayer::onUpdate()
 {
-    void* moviePlayer = self->mpMoviePlayer;
+    void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
-        self->mUpdatedOnce = 1;
+        mUpdatedOnce = 1;
         cMoviePlayer_asyncUpdate(moviePlayer);
-        if ((self->mStopPending != 0 && self->mRenderOnce != 0)
-            || *(int*)self->mpMoviePlayer != 0) {
-            self->Stop();
+        if ((mStopPending != 0 && mRenderOnce != 0)
+            || *(int*)mpMoviePlayer != 0) {
+            Stop();
         }
     }
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -2808,11 +2808,11 @@ static inline int vcall001D2518(void* obj, int slot)
  * @param obj  the input object
  * @return true when a stop was requested
  */
-extern "C" bool cFEStateVideoPlayer_onInputBegin(cFEStateVideoPlayer* self, cUIInput* obj)
+bool cFEStateVideoPlayer::onInputBegin(cUIInput* obj)
 {
-    if (self->mInterruptible != 0) {
+    if (mInterruptible != 0) {
         if (vcall001D2518(obj, 5) != 0 || vcall001D2518(obj, 6) != 0) {
-            self->mStopPending = 1;
+            mStopPending = 1;
             return true;
         }
     }

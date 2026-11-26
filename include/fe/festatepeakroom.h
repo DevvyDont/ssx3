@@ -39,6 +39,11 @@ struct cFEStatePeakRoom : public cUIState {
     void* cFEStatePeakRoom1() __asm__("cFEStatePeakRoom_cFEStatePeakRoom1");
     void updateHelpText(int index) __asm__("cFEStatePeakRoom_updateHelpText");
     void updateMedalsList(int peak) __asm__("cFEStatePeakRoom_updateMedalsList");
+    // retail's destructor cFEStatePeakRoom__cFEStatePeakRoom stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStatePeakRoom();
+    virtual void onCreateScreen() __asm__("cFEStatePeakRoom_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int key) __asm__("cFEStatePeakRoom_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStatePeakRoom, mpTrophyIcons, 0x048);

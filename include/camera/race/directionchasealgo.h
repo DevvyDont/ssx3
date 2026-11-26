@@ -36,6 +36,12 @@ struct cRiderCameraTarget;
 struct cDEFAULT_2ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_2ChaseAlgorithm_vtbl: cDEFAULT_2ChaseAlgorithm_getRestDrop)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void update() __asm__("cDEFAULT_2ChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cDEFAULT_2ChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
@@ -54,6 +60,12 @@ CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
 struct cDEFAULT_3ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_3ChaseAlgorithm_vtbl: cDEFAULT_3ChaseAlgorithm_getRestDrop)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void update() __asm__("cDEFAULT_3ChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cDEFAULT_3ChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cDEFAULT_3ChaseAlgorithm, 0x390);
@@ -69,6 +81,12 @@ CHECK_SIZE(cDEFAULT_3ChaseAlgorithm, 0x390);
 struct cDEFAULT_4ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_4ChaseAlgorithm_vtbl: cDEFAULT_4ChaseAlgorithm_getRestDrop)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void update() __asm__("cDEFAULT_4ChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cDEFAULT_4ChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cDEFAULT_4ChaseAlgorithm, 0x390);
@@ -84,6 +102,12 @@ struct cDirectionChaseAlgorithm : public cLookAtChaseAlgorithm {
     float Angle;                    // 0x390 [O] (On Tour 0x380); [R] ctor = dir * pi/4 (swc1); [U] update
                                     //       cDirectionChaseAlgorithm_update passes it to cLookAtChaseAlgorithm_updateRotation (lwc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cDirectionChaseAlgorithm_update");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cDirectionChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void snap(int id) __asm__("cDirectionChaseAlgorithm_snap");
 };
 
 CHECK_OFFSET(cDirectionChaseAlgorithm, Angle, 0x390);

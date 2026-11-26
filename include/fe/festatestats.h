@@ -56,6 +56,12 @@ struct cFEStateStats : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateStats1() __asm__("cFEStateStats_cFEStateStats1");
+    // retail's destructor cFEStateStats__cFEStateStats stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateStats();
+    virtual void onCreateScreen() __asm__("cFEStateStats_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateStats_onWidgetCreate");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateStats_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateStats, mpMenus, 0x6D0);

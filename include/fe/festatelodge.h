@@ -27,6 +27,14 @@ struct cFEStateLodge : public cUIState {
     // 6) with the kT_OVRCMNQuitTitlePrompt popup and kPathSaveProgress with kT_CMNSaveProgress; onPopupEvent stores
     // kPathSaveBeforeQuit with kT_CMNSaveBeforeQuit and branches on all three.
     enum { kPathQuit = 6, kPathSaveProgress = 0x10, kPathSaveBeforeQuit = 0x11 };
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateLodge__cFEStateLodge stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateLodge();
+    virtual void onCreateScreen() __asm__("cFEStateLodge_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateLodge_onWidgetCreate");
+    virtual void onPopupEvent(cUIState* msg, unsigned int id) __asm__("cFEStateLodge_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateLodge, mCheatCharID, 0x048);

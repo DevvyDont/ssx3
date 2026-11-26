@@ -91,6 +91,11 @@ struct cUIVector : public cUIThing {
     // Methods bound to their retail symbols by asm labels.
     void setColour(tARGB* colour) __asm__("cUIVector_setColour");
     void* cUIVector1() __asm__("cUIVector_cUIVector1");
+    virtual void setChannelData(unsigned short key, float data) __asm__("cUIVector_setChannelData");
+    virtual void setChannelDataKCP(unsigned int n, short* keys) __asm__("cUIVector_setChannelDataKCP");
+    virtual void render2D(float x, float y) __asm__("cUIVector_render2D");
+    virtual void update(unsigned short ev) __asm__("cUIVector_update");
+    virtual void getSize(t3Vector* out) __asm__("cUIVector_getSize");
 };
 
 CHECK_OFFSET(cUIVector, mAttrVector, 0x074);

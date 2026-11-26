@@ -96,7 +96,7 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen((cOVState*)((cOVState_MAP*)self));
+    ((cOVState_MAP*)self)->cOVState::onCreateScreen();
     self->fC4 = cFEAsyncManager_GetFreeAsyncFile(SSXApp->mFEAsyncManager);
     self->fDC = 0;
     self->fBC = 0;
@@ -179,11 +179,10 @@ extern char gPaths[];
  * player's rider (cPathSys_getNearestSessionPoint on gPaths, minus 1), shows the indicators and gives the confirm Yes/No
  * entries misc data 0/1 and the regular colour.
  *
- * @param selfp  the cOVState_MAP (raw pointer)
  * @param on  nonzero when the transition starts; 0 does nothing
  * @return always 0
  */
-extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
+bool cOVState_MAP::onGainTransition(int on)
 {
     if (on != 0) {
         int i = 0;
@@ -195,9 +194,9 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             char buf[0x20];
             unsigned short text[40];
             sprintf(buf, str_SessionPointpct_d, i);
-            menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(buf));
+            menuItem = (cUIThing*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(buf));
             if (i < n) {
-                (selfp)->mbSessionUnlocked[i] = 1;
+                mbSessionUnlocked[i] = 1;
                 cFELocale* locale = SSXApp->FELocale;
                 // getStringByHash (slot 4) by hand, as in cOVState_MAP_setupPopup.
                 tLocaleGetStringSlot* vt = (tLocaleGetStringSlot*)VPTR_OF(cUILocaleInterface, locale);
@@ -218,12 +217,12 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
                 }
                 menuItem->mMiscData = i + 1;
             } else {
-                (selfp)->mbSessionUnlocked[i] = 0;
+                mbSessionUnlocked[i] = 0;
                 menuItem->setVisible(0);
                 menuItem->setStatic(1);
             }
         }
-        void* menu = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
+        void* menu = cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_SessionViewPoints));
         cGame* game = SSXApp->Game;
         if (((char*)game) != 0) {
             cRider* rider = game->AI->Riders[0];
@@ -239,19 +238,19 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             }
             cUIMenu_setSelectedByIndex(menu, idx);
         }
-        selfp->showIndicators();
-        menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
+        showIndicators();
+        menuItem = (cUIThing*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
         if (menuItem != 0) {
             menuItem->mMiscData = 0;
             menuItem->setColour((const tARGB*)kMAPCOLOR_REGULAR);
         }
-        menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
+        menuItem = (cUIThing*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
         if (menuItem != 0) {
             menuItem->mMiscData = 1;
             menuItem->setColour((const tARGB*)kMAPCOLOR_REGULAR);
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -297,11 +296,11 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self);
  * Unloads the async file slot kept at 0xC4, deletes the cursor and the two sets of 8 widgets (cOVState_MAP_cleanupIndicators()),
  * then calls cOVState_onDestroyScreen().
  */
-extern "C" void cOVState_MAP_onDestroyScreen(cOVState_MAP* self)
+void cOVState_MAP::onDestroyScreen()
 {
-    cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, self->mFEAsyncMapFileIndex);
-    self->cleanupIndicators();
-    cOVState_onDestroyScreen((cOVState*)self);
+    cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, mFEAsyncMapFileIndex);
+    cleanupIndicators();
+    this->cOVState::onDestroyScreen();
 }
 #endif
 
@@ -674,57 +673,57 @@ extern "C" void cOVState_onUpdate(void* self);
  * highlight icons (mpSessionHighlights) is placed at its base position (mHighlightOriginalPos) minus half the growth,
  * so it stays centred, and sized to that size.
  */
-extern "C" void cOVState_MAP_onUpdate(cOVState_MAP* self)
+void cOVState_MAP::onUpdate()
 {
-    cOVState_onUpdate(self);
-    if (self->mScreenExiting != 0) {
+    cOVState_onUpdate(this);
+    if (mScreenExiting != 0) {
         return;
     }
-    if (self->mMapTextureSet != 0) {
-        if (self->mMapPicAlpha < 1.0f) {
-            self->mMapPicAlpha += 0.10000000149011612f;
+    if (mMapTextureSet != 0) {
+        if (mMapPicAlpha < 1.0f) {
+            mMapPicAlpha += 0.10000000149011612f;
         }
-        cUIIcon* feObj = self->mpMap;
+        cUIIcon* feObj = mpMap;
         tARGB colour = feObj->mColour;
-        colour.A = self->mMapPicAlpha;
+        colour.A = mMapPicAlpha;
         feObj->setColour(&colour);
-        self->mpMap->setVisible(1);
+        mpMap->setVisible(1);
     } else {
-        self->mMapPicAlpha = 0.0f;
-        self->mpMap->setVisible(0);
+        mMapPicAlpha = 0.0f;
+        mpMap->setVisible(0);
     }
     cFEAsyncManager* am = SSXApp->mFEAsyncManager;
-    if (cFEAsyncManager_GetFileStatus(am, self->mFEAsyncMapFileIndex) == kFileLoaded && self->mMapTextureSet == 0) {
-        cUIIcon* feObj = self->mpMap;
+    if (cFEAsyncManager_GetFileStatus(am, mFEAsyncMapFileIndex) == kFileLoaded && mMapTextureSet == 0) {
+        cUIIcon* feObj = mpMap;
         if (feObj != 0) {
-            int data = am->fileList[self->mFEAsyncMapFileIndex].texID;
+            int data = am->fileList[mFEAsyncMapFileIndex].texID;
             feObj->mpTextureElem = 0;
             feObj->mTextureID = data;
-            self->mMapTextureSet = 1;
-            self->mMapPicAlpha = 0.0f;
+            mMapTextureSet = 1;
+            mMapPicAlpha = 0.0f;
         }
     }
-    if (0.0f < self->mIndicatorSizeDiff) {
-        if (21.5f < self->mIndicatorSize) {
-            self->mIndicatorSizeDiff = -0.1599999964237213f;
+    if (0.0f < mIndicatorSizeDiff) {
+        if (21.5f < mIndicatorSize) {
+            mIndicatorSizeDiff = -0.1599999964237213f;
         }
-    } else if (self->mIndicatorSize < 18.0f) {
-        self->mIndicatorSizeDiff = 0.1599999964237213f;
+    } else if (mIndicatorSize < 18.0f) {
+        mIndicatorSizeDiff = 0.1599999964237213f;
     }
-    self->mIndicatorSize += self->mIndicatorSizeDiff;
+    mIndicatorSize += mIndicatorSizeDiff;
     int i;
     for (i = 0; i < 8; i++) {
-        cUIIcon* feObj = self->mpSessionHighlights[i];
+        cUIIcon* feObj = mpSessionHighlights[i];
         if (feObj != 0) {
-            t3Vector* bp = &self->mHighlightOriginalPos[i];
-            float halfGrowth = (self->mIndicatorSize - 18.0f) * 0.5f;
+            t3Vector* bp = &mHighlightOriginalPos[i];
+            float halfGrowth = (mIndicatorSize - 18.0f) * 0.5f;
             t3Vector placedPos;
             placedPos.x = bp->x - halfGrowth;
             placedPos.y = bp->y - halfGrowth;
             feObj->mPosition = placedPos;
-            tSetSizeSlot* vt = (tSetSizeSlot*)VPTR_OF(cListNode, self->mpSessionHighlights[i]);
-            vt[21].fn(vthis(self->mpSessionHighlights[i], vt[21]),
-                tMapVector3(self->mIndicatorSize, self->mIndicatorSize, 0.0f));
+            tSetSizeSlot* vt = (tSetSizeSlot*)VPTR_OF(cListNode, mpSessionHighlights[i]);
+            vt[21].fn(vthis(mpSessionHighlights[i], vt[21]),
+                tMapVector3(mIndicatorSize, mIndicatorSize, 0.0f));
         }
     }
 }
@@ -1123,9 +1122,9 @@ extern "C" cUIState* cUIStateStack_findState(void* list, int hash);
  * (cCutSceneTransitionMan_ForceToRegularMode) and sets mRestoreCutSceneMode when it was in, or going to, cut-scene mode. Then calls
  * virtual slot 24 of the "hud" state with (3, 0).
  */
-extern "C" void cOVState_onCreateScreen(cOVState* self)
+void cOVState::onCreateScreen()
 {
-    self->mRestoreCutSceneMode = 0;
+    mRestoreCutSceneMode = 0;
     cGame* game = SSXApp->Game;
     if (((char*)game) != 0) {
         cCutSceneTransitionMan* cutSceneMan = game->CutSceneTransitionMan;
@@ -1134,11 +1133,11 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
             cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
             if (mode == cCutSceneTransitionMan::kCutSceneMode
                 || mode == cCutSceneTransitionMan::kTransitionToCutSceneMode) {
-                self->mRestoreCutSceneMode = 1;
+                mRestoreCutSceneMode = 1;
             }
         }
     }
-    cUIState* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
+    cUIState* obj = cUIStateStack_findState(&mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         obj->handleEvent(3, 0);
     }
@@ -1161,23 +1160,23 @@ void* cUIState_onDestroyScreen(void* self);
  * Undoes cOVState_onCreateScreen (cCutSceneTransitionMan_ForceToCutSceneMode when mRestoreCutSceneMode is set; "hud" slot 24 with (4, 0)),
  * calls cOVStateManager_removePDATemplate when mRemovePDA is set, then cUIState_onDestroyScreen.
  */
-extern "C" void cOVState_onDestroyScreen(cOVState* self)
+void cOVState::onDestroyScreen()
 {
-    if (self->mRestoreCutSceneMode != 0) {
+    if (mRestoreCutSceneMode != 0) {
         cGame* game = SSXApp->Game;
         if (((char*)game) != 0) {
             cCutSceneTransitionMan_ForceToCutSceneMode(game->CutSceneTransitionMan);
-            self->mRestoreCutSceneMode = 0;
+            mRestoreCutSceneMode = 0;
         }
     }
-    cUIState* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
+    cUIState* obj = cUIStateStack_findState(&mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         obj->handleEvent(4, 0);
     }
-    if (self->mRemovePDA != 0) {
+    if (mRemovePDA != 0) {
         cOVStateManager_removePDATemplate();
     }
-    cUIState_onDestroyScreen(self);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 

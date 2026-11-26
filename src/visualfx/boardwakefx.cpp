@@ -5147,26 +5147,26 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
  * (+0x44) and not paused (+0x40), the time (+0x48) is set from +0x3C when +0x18 is positive, from a tracked
  * value (+0x70) times the total length, or else advanced by one frame (1 / frame rate).
  */
-extern "C" void cTransitionMan_update(cTransitionMan* self)
+void cTransitionMan::update()
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    if (self->mRequestingDelete != 0) {
-        if (ctx->getCurrentFrameCount() - self->mRequestDeleteFrame >= 3) {
-            ctx->RemoveScreenGrabTexture(self->mScreenGrabHandle);
-            self->mRequestingDelete = 0;
+    if (mRequestingDelete != 0) {
+        if (ctx->getCurrentFrameCount() - mRequestDeleteFrame >= 3) {
+            ctx->RemoveScreenGrabTexture(mScreenGrabHandle);
+            mRequestingDelete = 0;
         }
     }
-    if (self->mbPlayingTransition == 0) return;
-    if (self->mNumPause != 0) return;
-    if (self->mInUse > 0) {
-        self->mfCurrentTime = self->mInfo.currTime;
-    } else if (self->mExternalTimePercentage != 0) {
-        self->mfCurrentTime = *self->mExternalTimePercentage * (self->mfInTime + self->mfHoldTime + self->mfOutTime);
+    if (mbPlayingTransition == 0) return;
+    if (mNumPause != 0) return;
+    if (mInUse > 0) {
+        mfCurrentTime = mInfo.currTime;
+    } else if (mExternalTimePercentage != 0) {
+        mfCurrentTime = *mExternalTimePercentage * (mfInTime + mfHoldTime + mfOutTime);
     } else {
-        self->mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
+        mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     }
-    if (self->mfInTime + self->mfHoldTime + self->mfOutTime <= self->mfCurrentTime) {
-        self->EndTransition();
+    if (mfInTime + mfHoldTime + mfOutTime <= mfCurrentTime) {
+        EndTransition();
     }
 }
 #endif
@@ -5215,35 +5215,35 @@ static inline int fadeTex47E8(cTransitionMan* self)
  * is released when the hold ends. At an alpha of 0.93 or more it also resets the world painter
  * (cWorldPainterMan_reset).
  */
-extern "C" void cTransitionMan_render(cTransitionMan* self)
+void cTransitionMan::render()
 {
-    if (self->mViewIndex != (int)SSXApp->Game->ViewMan->m_uiCurrentView) {
+    if (mViewIndex != (int)SSXApp->Game->ViewMan->m_uiCurrentView) {
         return;
     }
     FigureOutTransitionUVs();
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    if (self->mbPlayingTransition == 0) {
+    if (mbPlayingTransition == 0) {
         return;
     }
-    float curTime = self->mfCurrentTime;
-    if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
-        ctx->TakeScreenGrab(self->mScreenGrabHandle);
-        self->mRequestingScreenGrab = 0;
+    float curTime = mfCurrentTime;
+    if (mRequestingScreenGrab != 0 && mfInTime + mfHoldTime <= curTime) {
+        ctx->TakeScreenGrab(mScreenGrabHandle);
+        mRequestingScreenGrab = 0;
     }
     cTransitionObj* transition;
     float alpha;
-    if (self->mTransitionIn == 0) {
-        alpha = 1.0f - (curTime - self->mfHoldTime) / self->mfOutTime;
-        transition = self->mTransitionOut;
-    } else if (curTime < self->mfInTime || self->mTransitionOut == 0) {
-        alpha = curTime / self->mfInTime;
-        transition = self->mTransitionIn;
-    } else if (curTime < self->mfInTime + self->mfHoldTime) {
+    if (mTransitionIn == 0) {
+        alpha = 1.0f - (curTime - mfHoldTime) / mfOutTime;
+        transition = mTransitionOut;
+    } else if (curTime < mfInTime || mTransitionOut == 0) {
+        alpha = curTime / mfInTime;
+        transition = mTransitionIn;
+    } else if (curTime < mfInTime + mfHoldTime) {
         alpha = 1.0f;
-        transition = self->mTransitionIn;
+        transition = mTransitionIn;
     } else {
-        alpha = 1.0f - (curTime - (self->mfInTime + self->mfHoldTime)) / self->mfOutTime;
-        transition = self->mTransitionOut;
+        alpha = 1.0f - (curTime - (mfInTime + mfHoldTime)) / mfOutTime;
+        transition = mTransitionOut;
     }
     float clamped = wakeClampE058(alpha, 0.0f, 1.0f);
     if (clamped >= 0.93f) {
@@ -5264,12 +5264,12 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     rsSet047E8(ctx, 0xC, 2, 3);
     rsSetA47E8(ctx, 0x3, 0, 2);
     rsSetB47E8(ctx, 0x1FFFFC00, 10, 0);
-    if (self->mUsingScreenGrab != 0) {
-        ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = fadeTex47E8((self));
+    if (mUsingScreenGrab != 0) {
+        ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = fadeTex47E8((this));
     } else {
         ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
     }
-    if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
+    if (mUsingScreenGrab == 0 || mRequestingScreenGrab == 0) {
         tTransitionDrawSlot* ov = *(tTransitionDrawSlot**)transition; // its vptr, at 0x0
         ov[2].fn(vthis(transition, ov[2]), clamped);
     }
@@ -6167,9 +6167,8 @@ extern "C" void cSplashManager_ReportSnowfall(void* obj, float v);
  * the render-state manager (entries 6 and 7). The snow intensity also goes to cSplashManager_ReportSnowfall with the view's
  * cGame_getSplashManager object.
  *
- * @param self  the snowfall node
  */
-extern "C" void cSnowFall_update(cSnowFall* self)
+void cSnowFall::update()
 {
     tWorldPainterSnowfallParameters params[2];
     unsigned int i;
@@ -6216,7 +6215,7 @@ extern "C" void cSnowFall_update(cSnowFall* self)
     }
     int j;
     for (j = 0; j < 12; j++) {
-        cSnowBox* snowBox = self->mSnowBoxes[j];
+        cSnowBox* snowBox = mSnowBoxes[j];
         if (snowBox != 0) {
             cSnowBox_update(snowBox, &params[snowBox->mViewNum]);
         }
@@ -6296,7 +6295,7 @@ static inline void rsSetB_6008(cPS2GraphicsMan* ctx, int mask, int shift, int v)
  * (mLastCameraPosition). The cell the boxes draw in starts at the camera direction times 0.6, minus 0.5. Skipped when
  * cRenderToggles_m_DisableSnowFall is set; cSnowfallToggles_m_TestAdditive selects additive blending.
  */
-extern "C" void cSnowFall_render(cSnowFall* self)
+void cSnowFall::render()
 {
     if (cRenderToggles_m_DisableSnowFall != 0) {
         return;
@@ -6304,8 +6303,8 @@ extern "C" void cSnowFall_render(cSnowFall* self)
     cGameViewMan* views = riders_6008();
     int k = views->m_uiCurrentView;
     t4Vector camPos = views->PlayerCamera[k]->Pose.P;
-    t4Vector camDiff = sub_6008(camPos, self->mLastCameraPosition[k]);
-    self->mLastCameraPosition[k] = camPos;
+    t4Vector camDiff = sub_6008(camPos, mLastCameraPosition[k]);
+    mLastCameraPosition[k] = camPos;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
@@ -6330,10 +6329,10 @@ extern "C" void cSnowFall_render(cSnowFall* self)
     float boxMinZ = camDir.z * 0.6f + -0.5f;
     int i;
     for (i = 0; i < 12; i++) {
-        cSnowBox* snowBox = self->mSnowBoxes[i];
+        cSnowBox* snowBox = mSnowBoxes[i];
         if (snowBox != 0 && snowBox->mViewNum == k) {
             cSnowBox_updateForCameraPosition(snowBox, &camDiff);
-            cSnowBox_render(self->mSnowBoxes[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
+            cSnowBox_render(mSnowBoxes[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
         }
     }
     ctx->m_pCurrentDrawState--;

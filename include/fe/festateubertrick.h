@@ -35,6 +35,14 @@ struct cFEStateUberTrick : public cUIState {
     void trickVisible(int on) __asm__("cFEStateUberTrick_trickVisible");
     void updateTrickMenu() __asm__("cFEStateUberTrick_updateTrickMenu");
     void updateTrickMenuEntry() __asm__("cFEStateUberTrick_updateTrickMenuEntry");
+    // retail's destructor cFEStateUberTrick__cFEStateUberTrick stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateUberTrick();
+    virtual void onCreateScreen() __asm__("cFEStateUberTrick_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cFEStateUberTrick_onDestroyScreen");
+    virtual bool onGainTransition(int on) __asm__("cFEStateUberTrick_onGainTransition");
+    virtual void onUpdate() __asm__("cFEStateUberTrick_onUpdate");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateUberTrick_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateUberTrick, mbModelVisible, 0x048);

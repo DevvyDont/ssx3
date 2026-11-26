@@ -45,8 +45,10 @@ struct cUITextScroll : public cUIThing {
     // --- cUITextScroll
     // cUITextScroll's own slots ([R] cUITextScroll_vtbl; types [O] On Tour's class cUITextScroll):
     virtual char getType();                                               // 22 cUITextScroll_getType__FPv
-    virtual void setShadow(int a);                                        // 23 cUITextScroll_setShadow
-    virtual void setUnicode(int a);                                       // 24 cUITextScroll_setUnicode
+    virtual void setShadow(int a)
+        __asm__("cUITextScroll_setShadow");                                        // 23 cUITextScroll_setShadow
+    virtual void setUnicode(int a)
+        __asm__("cUITextScroll_setUnicode");                                       // 24 cUITextScroll_setUnicode
     tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor cUITextScroll_cUITextScroll clears mMode/mShadow/mUnicode/mStaticColour
                                      //       (lbu/andi 0xC6/sb 0x74), cUITextScroll_cUITextScroll1 calls its ctor tAttrTextScroll_tAttrTextScroll; [U] setUIData
                                      //       cUITextScroll_setUIData (lw/sw), accessors cUITextScroll_setFontIndex..cUITextScroll_setUnicode, cUITextScroll_setChatWindowMode/90
@@ -96,6 +98,8 @@ struct cUITextScroll : public cUIThing {
     unsigned short getLineSize() __asm__("cUITextScroll_getLineSize");
     void setSelectedIndex(short selectedIndex) __asm__("cUITextScroll_setSelectedIndex");
     unsigned short getSelectedIndex() __asm__("cUITextScroll_getSelectedIndex");
+    int getFont() __asm__("cUITextScroll_getFont");
+    void setInputMap(char value) __asm__("cUITextScroll_setInputMap");
 };
 
 CHECK_OFFSET(cUITextScroll, mAttrTextScroll, 0x074);

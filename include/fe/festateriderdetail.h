@@ -62,6 +62,15 @@ struct cFEStateRiderDetail : public cFEState {
                                     //       character owns cheat characters (cBERewardInterface_getNumOwnedCheatChars),
                                     //       onPreRender2D greys out "Option_2" (the cheat character option) while 0;
                                     //       not set by the ctor
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateRiderDetail__cFEStateRiderDetail stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRiderDetail();
+    virtual void onCreateScreen() __asm__("cFEStateRiderDetail_onCreateScreen");
+    virtual void onPreRender2D() __asm__("cFEStateRiderDetail_onPreRender2D");
+    virtual void onUpdate() __asm__("cFEStateRiderDetail_onUpdate");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateRiderDetail_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateRiderDetail, mbIsFirst, 0x048);

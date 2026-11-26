@@ -159,10 +159,10 @@ typedef sVEntry<void(void*)> tExecPauseSlot;
  * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app's execution manager's slot 11
  * (prepause), SYNCTASK_run(0), THREAD_yield(0) and its slot 12 (postpause).
  */
-extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
+void cGraphicsMan::FlushRenderer()
 {
     for (;;) {
-        if (self->IsRenderIdle() != 0) break;
+        if (IsRenderIdle() != 0) break;
         cExecutionMan* exec = cAppMan_TheAppMan->ExecutionMan;
         tExecPauseSlot* vt = (tExecPauseSlot*)exec->mVtbl;
         vt[11].fn(vthis(exec, vt[11]));

@@ -4986,9 +4986,9 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_updateRootTransform);
 /**
  * Marks a move node's root transform as up to date by clearing bit 0 of its flags (+0x12).
  */
-extern "C" void cMoveNode_updateRootTransform(cMoveNode* self)
+void cMoveNode::updateRootTransform()
 {
-    unsigned short* nodeFlags = (unsigned short*)((char*)&self->Flags);
+    unsigned short* nodeFlags = (unsigned short*)((char*)&Flags);
     *nodeFlags &= 0xFFFE;
 }
 #endif

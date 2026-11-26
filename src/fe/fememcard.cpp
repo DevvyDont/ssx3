@@ -32,16 +32,16 @@ extern "C" void* cSSXApp_getMCManager(void* p);
  * Also calls cSSXApp_getMCManager() and discards the result; the "mc messages" object is used without a null
  * check.
  */
-extern "C" void cFEStateMemCard_onCreateScreen(cFEStateMemCard* self)
+void cFEStateMemCard::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_06cAutoload), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_06cAutoload), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cSSXApp_getMCManager(SSXApp);
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages))->setVisible(0);
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_mc_messages))->setVisible(0);
 }
 #endif
 
@@ -61,15 +61,15 @@ extern "C" void cUIThing_deleteAnimation(void* obj);
  * done (cMCOverlayManager_isManagerDone) or mState is kDONE, it deletes the animation of the "!"
  * object, when there is one, and hides "mc messages" (slot 9 with 0). "mc messages" is used without a null check.
  */
-extern "C" void cFEStateMemCard_onUpdate(cFEStateMemCard* self)
+void cFEStateMemCard::onUpdate()
 {
-    cFEMemCard_onUpdate(self);
-    if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || self->mState == cFEMemCard::kDONE) {
-        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_exclam));
+    cFEMemCard_onUpdate(this);
+    if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || mState == cFEMemCard::kDONE) {
+        void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_exclam));
         if (obj != 0) {
             cUIThing_deleteAnimation(obj);
         }
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages))->setVisible(0);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_mc_messages))->setVisible(0);
     }
 }
 #endif
@@ -668,19 +668,19 @@ static inline int moviePlaying_K1874E8(void* vvmp)
  * (cMCOverlayManager_ReturnToDevSelectScreen) and starts the profile read (cFEStateMemCard_startProfileRead); otherwise cFEStateMemCard_exitScreen
  * leaves the screen.
  */
-extern "C" void cFEStateMemCard_updateDone(cFEStateMemCard* self)
+void cFEStateMemCard::updateDone()
 {
-    if (self->mIsDone != 0)
+    if (mIsDone != 0)
         return;
     void* mp = cSSXApp_getMCManager(SSXApp);
     if (moviePlaying_K1874E8(mp))
         return;
-    if (cFEStateMemCard_mStage == 4 && ((self->mCard1MissingSavedFileTypeFlags ^ 1) & 1)) {
+    if (cFEStateMemCard_mStage == 4 && ((mCard1MissingSavedFileTypeFlags ^ 1) & 1)) {
         cMCOverlayManager_ReturnToDevSelectScreen(mp);
         cFEStateMemCard_startProfileRead();
         return;
     }
-    self->exitScreen();
+    exitScreen();
 }
 #endif
 

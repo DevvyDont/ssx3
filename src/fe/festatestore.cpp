@@ -178,20 +178,20 @@ extern char str_yell_dollar_sign[];
  * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
  * (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. onCreateScreen slot (+0x24) of the vtable cFEStateUberTrick_vtbl.
  */
-extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
+void cFEStateUberTrick::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_66ut_btnmap), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_66ut_btnmap), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
     cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
-    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
+    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, mUserNum);
     {
         player->discard();
     }
-    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
-    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, charID, 0);
+    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, mUserNum, 0);
     cFE* realFe = SSXApp->RealFE;
     t4Vector camPos;
     t4Vector lookAt;
@@ -209,23 +209,23 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     cSimpleCamera_setupCamWithPosAndTarget(&realFe->mCamera, &camPos, &lookAt);
     realFe->mCamera.View = 0.4363323450088501f;
     {
-        cUIEngine* uiEngine = self->mpEngine;
+        cUIEngine* uiEngine = mpEngine;
         int iconHash = GetHashValue32(str_empty_box);
-        self->mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
+        mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     {
-        cUIEngine* uiEngine = self->mpEngine;
+        cUIEngine* uiEngine = mpEngine;
         int iconHash = GetHashValue32(str_checkbox);
-        self->mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
+        mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     {
-        cUIEngine* uiEngine = self->mpEngine;
+        cUIEngine* uiEngine = mpEngine;
         int iconHash = GetHashValue32(str_yell_dollar_sign);
-        self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
+        mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     func_0028F140(cAudioInterface_bxAudio(), 5);
-    self->costVisible(0);
-    self->previewVisible(0);
+    costVisible(0);
+    previewVisible(0);
 }
 #endif
 
@@ -241,13 +241,13 @@ void* cUIState_onDestroyScreen(void* self);
  * The rider is hidden with cFERiderManager_setHumanVisible (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
  * onDestroyScreen slot (+0x2C) of the vtable cFEStateUberTrick_vtbl.
  */
-extern "C" void cFEStateUberTrick_onDestroyScreen(cFEStateUberTrick* self)
+void cFEStateUberTrick::onDestroyScreen()
 {
     cFE* mgr = SSXApp->RealFE;
     if (((char*)mgr) != 0) {
-        cFERiderManager_setHumanVisible(&mgr->mRiderManager, self->mUserNum, 0);
+        cFERiderManager_setHumanVisible(&mgr->mRiderManager, mUserNum, 0);
     }
-    cUIState_onDestroyScreen(self);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -264,12 +264,12 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
  * @param on  non-zero to refill the trick list
  * @return 0
  */
-extern "C" int cFEStateUberTrick_onGainTransition(cFEStateUberTrick* self, int on)
+bool cFEStateUberTrick::onGainTransition(int on)
 {
     if (on != 0) {
-        cFEStateUberTrick_updateTrickMenu(self);
+        cFEStateUberTrick_updateTrickMenu(this);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -365,10 +365,10 @@ static inline t4VectorXYZW AxisAngle_184C60(const t4Vector& axis, float angle)
  * turns are 0; fSinCos gives the sines) with cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and
  * sets mbModelVisible. onUpdate slot (+0x64) of the vtable cFEStateUberTrick_vtbl.
  */
-extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
+void cFEStateUberTrick::onUpdate()
 {
-    if (self->mbModelVisible == 0) {
-        cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+    if (mbModelVisible == 0) {
+        cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
         int ok = 0;
         if ((unsigned int)rider->mCharID < 10 && rider->mDoneLoadingTextures != 0) {
             ok = rider->mCompiledModel != 0;
@@ -390,7 +390,7 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
                 position.w = 1.0f;
                 pos = position;
                 xf.P = position;
-                self->mbModelVisible = 1;
+                mbModelVisible = 1;
                 xf.Q.x = 0.0f;
                 xf.Q.y = 0.0f;
                 xf.Q.z = 0.0f;
@@ -400,10 +400,10 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
             xf.Q = QuatMul_184C60(xf.Q, AxisAngle_184C60(t4vect_YAxis, 0.0f));
             xf.Q = QuatMul_184C60(xf.Q, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
             cFERider_setPose(rider, &xf);
-            cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 1);
+            cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, mUserNum, 1);
         }
     }
-    cUIState_onUpdate(((char*)self));
+    cUIState_onUpdate(((char*)this));
 }
 #endif
 
@@ -504,7 +504,7 @@ static inline int Is_185080(int id, char* s)
  *
  * @param widget  the widget just created (On Tour pWidget)
  */
-extern "C" void cFEStateUberTrick_onWidgetCreate(cFEStateUberTrick* self, cUIThing* widget)
+void cFEStateUberTrick::onWidgetCreate(cUIThing* widget)
 {
     cUIText* text = (cUIText*)widget;
     for (int i = 0; i < 6; i++) {
@@ -542,9 +542,9 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(cFEStateUberTrick* self, cUIThi
     if (Is_185080(widget->mHashName, str_done)) {
         widget->mMiscData = -1;
     } else if (Is_185080(widget->mHashName, str_MenuMain)) {
-        self->mpMainMenu = (cUIMenu*)widget;
+        mpMainMenu = (cUIMenu*)widget;
     } else if (Is_185080(widget->mHashName, str_MenuTrick)) {
-        self->mpTrickMenu = (cUIMenu*)widget;
+        mpTrickMenu = (cUIMenu*)widget;
     }
 }
 #endif

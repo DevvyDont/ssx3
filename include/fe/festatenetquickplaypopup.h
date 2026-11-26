@@ -91,6 +91,11 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateNetQuickPlayPopup1() __asm__("cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1");
+    // retail's destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup stays a C function (g++ 2.95 takes no
+    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateNetQuickPlayPopup();
+    virtual void onCreateScreen() __asm__("cFEStateNetQuickPlayPopup_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateNetQuickPlayPopup_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, miSearchOptions, 0x6D0);

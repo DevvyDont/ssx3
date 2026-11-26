@@ -98,6 +98,12 @@ struct cOVState_MAP : public cOVState {
     void showIndicators() __asm__("cOVState_MAP_showIndicators");
     void hideIndicators() __asm__("cOVState_MAP_hideIndicators");
     void cleanupIndicators() __asm__("cOVState_MAP_cleanupIndicators");
+    // retail's destructor cOVState_MAP__cOVState_MAP stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_MAP();
+    virtual bool onGainTransition(int on) __asm__("cOVState_MAP_onGainTransition");
+    virtual void onDestroyScreen() __asm__("cOVState_MAP_onDestroyScreen");
+    virtual void onUpdate() __asm__("cOVState_MAP_onUpdate");
 };
 
 CHECK_OFFSET(cOVState_MAP, mbSessionUnlocked, 0x9C);

@@ -362,7 +362,7 @@ extern char cBERules_mRules[];
  * @param msg  the widget (its rule in mMiscData; a cUIPair for kONNEXT, a cUIListBox for kONCHANGE), or 0
  * @param type  widget event number (On Tour Event)
  */
-extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUIThing* msg, unsigned int type)
+void cFEStateRuleSelect::onWidgetEvent(cUIThing* msg, unsigned int type)
 {
     if (msg == 0) {
         return;
@@ -370,32 +370,32 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUITh
     switch (type) {
     case cUIState::kONNEXT:
         if (((cUIPair*)msg)->mpWidget->mMiscData == 0) {
-            cUICustomInterface* custom = self->mpEngine->mpCustom;
-            void* st = custom->getNextState((cUIState*)self, msg->mMiscData);
+            cUICustomInterface* custom = mpEngine->mpCustom;
+            void* st = custom->getNextState((cUIState*)this, msg->mMiscData);
             if (st) {
-                cUIStateStack_push(&self->mpEngine->mStateStack, st);
+                cUIStateStack_push(&mpEngine->mStateStack, st);
             }
         }
         break;
     case cUIState::kONPREV: {
-        cUICustomInterface* custom = self->mpEngine->mpCustom;
-        void* st = custom->getPrevState((cUIState*)self, msg->mMiscData);
+        cUICustomInterface* custom = mpEngine->mpCustom;
+        void* st = custom->getPrevState((cUIState*)this, msg->mMiscData);
         if (st) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, st);
+            cUIStateStack_push(&mpEngine->mStateStack, st);
         }
         MEM_fill(cBERules_mRules, 0, 0x20);
         break;
     }
     case cUIState::kONCHANGE: {
         int id = msg->mMiscData;
-        self->updateBE(id, cUIListBox_getCurrentEntryData(msg));
-        self->checkConflictForMenu((cUIListBox*)msg);
+        updateBE(id, cUIListBox_getCurrentEntryData(msg));
+        checkConflictForMenu((cUIListBox*)msg);
         break;
     }
     case cUIState::kONOPTION: {
-        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
+        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
+        cUIStateStack_pushSpecial(&mpEngine->mStateStack, st, 0, 0);
         break;
     }
     }

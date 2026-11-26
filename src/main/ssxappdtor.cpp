@@ -2029,9 +2029,9 @@ public:
  *
  * Slot +0x14 (update) of cVisualEffectsObjNode_vtbl.
  */
-extern "C" void cVisualEffectsObjNode_update(cVisualEffectsObjNode* self)
+void cVisualEffectsObjNode::update()
 {
-    ((cAppDtorVirt44*)self->VisualEffectsMan)->update();
+    ((cAppDtorVirt44*)VisualEffectsMan)->update();
 }
 #endif
 
@@ -2043,9 +2043,9 @@ INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode_render);
  *
  * Slot +0x24 (render) of cVisualEffectsObjNode_vtbl.
  */
-extern "C" void cVisualEffectsObjNode_render(cVisualEffectsObjNode* self)
+void cVisualEffectsObjNode::render()
 {
-    ((cAppDtorVirt44*)self->VisualEffectsMan)->render();
+    ((cAppDtorVirt44*)VisualEffectsMan)->render();
 }
 #endif
 
@@ -2860,9 +2860,9 @@ public:
  *
  * Slot +0x14 (update) of cAIVisualEffectsObjNode_vtbl.
  */
-extern "C" void cAIVisualEffectsObjNode_update(cAIVisualEffectsObjNode* self)
+void cAIVisualEffectsObjNode::update()
 {
-    ((cAppDtorVirt04*)self->AIVisualEffectsMan)->update();
+    ((cAppDtorVirt04*)AIVisualEffectsMan)->update();
 }
 #endif
 
@@ -2875,9 +2875,9 @@ INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode_render);
  *
  * Slot +0x24 (render) of cAIVisualEffectsObjNode_vtbl.
  */
-extern "C" void cAIVisualEffectsObjNode_render(cAIVisualEffectsObjNode* self)
+void cAIVisualEffectsObjNode::render()
 {
-    ((cAppDtorVirt04*)self->AIVisualEffectsMan)->render();
+    ((cAppDtorVirt04*)AIVisualEffectsMan)->render();
 }
 #endif
 
@@ -2911,9 +2911,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_update);
 /**
  * Updates the stats node by calling cSSXStatsMan_update() on the object it holds (+0x10); that function is empty.
  */
-extern "C" void cSSXStatsObjNode_update(cSSXStatsObjNode* self)
+void cSSXStatsObjNode::update()
 {
-    cSSXStatsMan_update(self->SSXStatsMan);
+    cSSXStatsMan_update(SSXStatsMan);
 }
 #endif
 
@@ -2925,9 +2925,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_render);
 /**
  * Renders the stats node by calling cSSXStatsMan_render() on the object it holds (+0x10); that function is empty.
  */
-extern "C" void cSSXStatsObjNode_render(cSSXStatsObjNode* self)
+void cSSXStatsObjNode::render()
 {
-    cSSXStatsMan_render(self->SSXStatsMan);
+    cSSXStatsMan_render(SSXStatsMan);
 }
 #endif
 
@@ -3544,26 +3544,26 @@ extern char str_99QPEvent[];
  * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
  * 1). Slot +0x24 (onCreateScreen) of cGameLoadState_vtbl.
  */
-extern "C" void cGameLoadState_onCreateScreen(cGameLoadState* self)
+void cGameLoadState::onCreateScreen()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        void* engine = self->mpEngine;
-        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_102MPMatch), 0);
-        self->mpScreen = (cUIScreen*)screen;
+        void* engine = mpEngine;
+        void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_102MPMatch), 0);
+        mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
     } else {
-        void* engine = self->mpEngine;
-        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_99QPEvent), 0);
-        self->mpScreen = (cUIScreen*)screen;
+        void* engine = mpEngine;
+        void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_99QPEvent), 0);
+        mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
     }
-    func_00246CF8(self, 0);
-    func_00246CF8(self, 1);
+    func_00246CF8(this, 0);
+    func_00246CF8(this, 1);
 }
 #endif
 
@@ -3585,19 +3585,19 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * @param refresh  non-zero to refresh both player panels
  * @return 0
  */
-extern "C" int cGameLoadState_onGainTransition(cGameLoadState* self, int refresh)
+bool cGameLoadState::onGainTransition(int refresh)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     if (refresh != 0) {
-        func_00246CF8(self, 0);
-        func_00246CF8(self, 1);
+        func_00246CF8(this, 0);
+        func_00246CF8(this, 1);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -3663,11 +3663,11 @@ extern char str_118loadoutlodge[];
  * Creates the leaving-the-lodge loading screen ("118loadoutlodge"): adds it to the UI engine (+0x10) with this state as
  * owner, keeps it at +0x40 and plays its first frame. Slot +0x24 (onCreateScreen) of cGameLoadStateOutLodge_vtbl.
  */
-extern "C" void cGameLoadStateOutLodge_onCreateScreen(cGameLoadStateOutLodge* self)
+void cGameLoadStateOutLodge::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_118loadoutlodge), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_118loadoutlodge), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }

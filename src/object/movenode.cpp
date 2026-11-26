@@ -73,7 +73,7 @@ void* cMoveNode_cMoveNode_3(void* vself, void* bucket, void* stream)
         self->addModifierBlock();
         tModifierBlock_readFromReplayFrame(self->ModifierBlock, stream);
     }
-    cMoveNode_setupOverlapSystem((cMoveNode*)self);
+    self->cMoveNode::setupOverlapSystem();
     self->Flags |= 1;
     return ((void*)self);
 }
@@ -98,7 +98,7 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 extern "C" void cMoveNode__cMoveNode(cMoveNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = (void**)cMoveNode_vtbl;
-    cMoveNode_restoreOverlapSystem(self);
+    self->cMoveNode::restoreOverlapSystem();
     tModifierBlock* block = self->ModifierBlock;
     if (block != 0) {
         tModifierBlock__tModifierBlock(block, 3);
@@ -116,15 +116,15 @@ INCLUDE_ASM("object/movenode", cMoveNode_shouldRebound);
  * @return 1 when the node has no modifier block or no transform modifier in it, otherwise the modifier's
  *         shouldRebound() (vtable slot 8)
  */
-extern "C" int cMoveNode_shouldRebound(cMoveNode* self)
+bool cMoveNode::shouldRebound()
 {
-    tModifierBlock* block = self->ModifierBlock;
+    tModifierBlock* block = ModifierBlock;
     if (block == 0) {
-        return 1;
+        return true;
     }
     cTransformModifier* node = block->RootTransform;
     if (node == 0) {
-        return 1;
+        return true;
     }
     return node->shouldRebound();
 }
@@ -378,9 +378,9 @@ INCLUDE_ASM("object/movenode", cMoveNode_setDebounce);
  *
  * @param secs  debounce time in seconds
  */
-extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
+void cMoveNode::setDebounce(float secs)
 {
-    self->Debounce = (int)((float)cAppMan_TheAppMan->TimerHz * secs);
+    Debounce = (int)((float)cAppMan_TheAppMan->TimerHz * secs);
 }
 #endif
 
@@ -939,26 +939,25 @@ extern "C" void tModifierBlock_clearComplete(void* block);
  * it.
  * When the modifier block reports completion the node expires (slot 34 with 1).
  *
- * @param selfv  the node
  */
-extern "C" void cMoveNode_update(cMoveNode* selfv)
+void cMoveNode::update()
 {
-    cMoveNode* self = (cMoveNode*)selfv;
-    if (selfv->Debounce > 0) {
-        selfv->Debounce -= 1;
+    cMoveNode* self = (cMoveNode*)this;
+    if (Debounce > 0) {
+        Debounce -= 1;
     }
-    if (selfv->hasFocusCount() != 0) {
-        if (selfv->getFocusCount() <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
-            selfv->loseFocus();
+    if (hasFocusCount() != 0) {
+        if (getFocusCount() <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
+            loseFocus();
             return;
         }
     }
     self->preUpdateModifierBlock();
-    if (selfv->updateNode() != 0) {
+    if (updateNode() != 0) {
         self->postUpdateModifierBlock();
         if (((void*)self->ModifierBlock) != 0 && tModifierBlock_isComplete(((void*)self->ModifierBlock)) != 0) {
             tModifierBlock_clearComplete(((void*)self->ModifierBlock));
-            selfv->expire(1);
+            expire(1);
         }
     }
 }
@@ -1181,34 +1180,34 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
  * animation matrices or the root transform, applies modifier rotation and lighting (flag 0x2000 under a
  * kTransform_AvaSpline modifier), and draws with its fade through GrMan slot 95.
  */
-extern "C" void cMoveNode_render(cMoveNode* self)
+void cMoveNode::render()
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
-    sMnObj_6298* obj = ((sMnObj_6298*)self->Instance);
+    sMnObj_6298* obj = ((sMnObj_6298*)Instance);
     if (!Visible_6298(cam, obj)) {
         return;
     }
     int flags = 0;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-    if (((sMnMod_6298*)self->ModifierBlock)) {
-        tModifierBlock_render(((sMnMod_6298*)self->ModifierBlock));
-        cMnOwner_6298* modOwner = ((sMnMod_6298*)self->ModifierBlock)->owner;
+    if (((sMnMod_6298*)ModifierBlock)) {
+        tModifierBlock_render(((sMnMod_6298*)ModifierBlock));
+        cMnOwner_6298* modOwner = ((sMnMod_6298*)ModifierBlock)->owner;
         if (modOwner) {
             if (modOwner->getTransformType() == cTransformModifier::kTransform_AvaSpline) {
                 flags |= 0x2000;
             }
         }
     }
-    if (!(((sMnObj_6298*)self->Instance)->flags & 4)) {
+    if (!(((sMnObj_6298*)Instance)->flags & 4)) {
         return;
     }
-    if (self->TransferHack) {
+    if (TransferHack) {
         return;
     }
-    void* mat = ((cMnNode_6298*)self)->hasBoundBox();
+    void* mat = ((cMnNode_6298*)this)->hasBoundBox();
     int res;
     if (mat) {
-        t4Vector* boundBox = ((cMnNode_6298*)self)->getBoundBox();
+        t4Vector* boundBox = ((cMnNode_6298*)this)->getBoundBox();
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, boundBox, boundBox + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
@@ -1216,13 +1215,13 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         t4Vector objBounds[2];
-        objBounds[0].x = ((sMnObj_6298*)self->Instance)->pos[0];
-        objBounds[0].y = ((sMnObj_6298*)self->Instance)->pos[1];
-        objBounds[0].z = ((sMnObj_6298*)self->Instance)->pos[2];
+        objBounds[0].x = ((sMnObj_6298*)Instance)->pos[0];
+        objBounds[0].y = ((sMnObj_6298*)Instance)->pos[1];
+        objBounds[0].z = ((sMnObj_6298*)Instance)->pos[2];
         objBounds[0].w = 1.0f;
-        objBounds[1].x = ((sMnObj_6298*)self->Instance)->scl[0];
-        objBounds[1].y = ((sMnObj_6298*)self->Instance)->scl[1];
-        objBounds[1].z = ((sMnObj_6298*)self->Instance)->scl[2];
+        objBounds[1].x = ((sMnObj_6298*)Instance)->scl[0];
+        objBounds[1].y = ((sMnObj_6298*)Instance)->scl[1];
+        objBounds[1].z = ((sMnObj_6298*)Instance)->scl[2];
         objBounds[1].w = 1.0f;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, &objBounds[0], &objBounds[1], ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
     }
@@ -1234,28 +1233,28 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         flags |= 0x20;
     }
     if (!mat) {
-        if (cObjectInterface_isSphereOccluded(((sMnObj_6298*)self->Instance)->box)) {
+        if (cObjectInterface_isSphereOccluded(((sMnObj_6298*)Instance)->box)) {
             return;
         }
     }
     void* rot = 0;
     void* tex;
     void* xf;
-    if (((cMnNode_6298*)self)->hasAnimMats()) {
-        tex = ((cMnNode_6298*)self)->getAnimMats();
+    if (((cMnNode_6298*)this)->hasAnimMats()) {
+        tex = ((cMnNode_6298*)this)->getAnimMats();
         xf = t4mat_Identity;
     } else {
         tex = 0;
-        xf = ((cMnNode_6298*)self)->getRootTransform();
+        xf = ((cMnNode_6298*)this)->getRootTransform();
     }
     t4Matrix rm;
-    if (HasRot_6298(((sMnMod_6298*)self->ModifierBlock))) {
-        rot = RotOf_6298(((cMnNode_6298*)self), &rm);
+    if (HasRot_6298(((sMnMod_6298*)ModifierBlock))) {
+        rot = RotOf_6298(((cMnNode_6298*)this), &rm);
         flags |= 2;
     }
-    void* light = HasLight_6298(((sMnMod_6298*)self->ModifierBlock)) ? LightOf_6298(((cMnNode_6298*)self)) : ((sMnObj_6298*)self->Instance)->light;
+    void* light = HasLight_6298(((sMnMod_6298*)ModifierBlock)) ? LightOf_6298(((cMnNode_6298*)this)) : ((sMnObj_6298*)Instance)->light;
     sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
-    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, ((sMnObj_6298*)self->Instance), light, xf, tex, rot, flags, self->Fade);
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, ((sMnObj_6298*)Instance), light, xf, tex, rot, flags, Fade);
 }
 #endif
 
@@ -1311,9 +1310,9 @@ void tModifierBlock_setRadius_K(tModifierBlock* mb, float r) __asm__("tModifierB
  * @param self_  the move node
  */
 // Copies the instance's bounding box and radius into its modifier block, when it has one with data.
-extern "C" void cMoveNode_setupOverlapSystem(cMoveNode* self_)
+void cMoveNode::setupOverlapSystem()
 {
-    int* mb = (int*)self_->ModifierBlock;
+    int* mb = (int*)ModifierBlock;
     int n = mb != 0;
     if (n)
         n = *mb;
@@ -1322,9 +1321,9 @@ extern "C" void cMoveNode_setupOverlapSystem(cMoveNode* self_)
     if (n) {
         tBoundBox box;
         float radius;
-        cInstanceNode_getBoundBoxInfo(((char*)self_), &box, &radius);
-        tModifierBlock_setBoundBox_K(self_->ModifierBlock, &box);
-        tModifierBlock_setRadius_K(self_->ModifierBlock, radius);
+        cInstanceNode_getBoundBoxInfo(((char*)this), &box, &radius);
+        tModifierBlock_setBoundBox_K(ModifierBlock, &box);
+        tModifierBlock_setRadius_K(ModifierBlock, radius);
     }
 }
 #endif
@@ -1349,17 +1348,17 @@ extern "C" void nash_Nash_movenode_67E0(void* mgr, int a, void* obj, tBoundBox* 
  * @param vself  the node
  */
 // Sets the modifier block's bound box from the node's own extents (self->18 + 0x60) and re-files it.
-extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
+void cMoveNode::restoreOverlapSystem()
 {
-    char** modBlock = (char**)vself->ModifierBlock;
+    char** modBlock = (char**)ModifierBlock;
     char* blk = modBlock ? *modBlock : 0;
     // Binding a reference to the object matches the target register allocation (see cMoveNode_getRootTransform).
     char*& transformModifier = blk;
     if (transformModifier == 0)
         return;
     tBoundBox box;
-    tBoundBox old = *tModifierBlock_getBoundBox_67E0(vself->ModifierBlock);
-    tInstanceRecord* n = vself->Instance;
+    tBoundBox old = *tModifierBlock_getBoundBox_67E0(ModifierBlock);
+    tInstanceRecord* n = Instance;
     t4Vector corner;
     corner.x = n->m_fvMin.m[0];
     corner.y = n->m_fvMin.m[1];
@@ -1370,8 +1369,8 @@ extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
     corner.y = n->m_fvMax.m[1];
     corner.z = n->m_fvMax.m[2];
     box.MaxPoint = corner;
-    tModifierBlock_setBoundBox_K(vself->ModifierBlock, &box);
-    void* obj = vself->Instance;
+    tModifierBlock_setBoundBox_K(ModifierBlock, &box);
+    void* obj = Instance;
     nash_Nash_movenode_67E0(cObjectInterface_getNash(), 0, obj, &box, &old);
 }
 #endif
@@ -1446,27 +1445,27 @@ static inline void VCall24_68B0(char*& o)
  * overlap system.
  */
 // Refits the modifier block's bound box around the node's position (radius from the block) and re-files it.
-extern "C" void cMoveNode_updateOverlapSystem(cMoveNode* self)
+void cMoveNode::updateOverlapSystem()
 {
-    char** modBlock = (char**)self->ModifierBlock;
+    char** modBlock = (char**)ModifierBlock;
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier == 0)
         return;
     tBoundBox box;
-    tBoundBox old = *tModifierBlock_getBoundBox_68B0(self->ModifierBlock);
-    float radius = tModifierBlock_getRadius(self->ModifierBlock);
+    tBoundBox old = *tModifierBlock_getBoundBox_68B0(ModifierBlock);
+    float radius = tModifierBlock_getRadius(ModifierBlock);
     t4Vector rv;
     rv.w = 0.0f;
     rv.x = radius;
     rv.y = radius;
     rv.z = radius;
     t4Vector corner;
-    vu0Sub_68B0(corner, pos_68B0(((char*)self)), rv);
+    vu0Sub_68B0(corner, pos_68B0(((char*)this)), rv);
     box.MinPoint = corner;
-    vu0Add_68B0(corner, pos_68B0(((char*)self)), rv);
+    vu0Add_68B0(corner, pos_68B0(((char*)this)), rv);
     box.MaxPoint = corner;
-    tModifierBlock_setBoundBox_K(self->ModifierBlock, &box);
-    void* obj = self->Instance;
+    tModifierBlock_setBoundBox_K(ModifierBlock, &box);
+    void* obj = Instance;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, obj, &box, &old);
     VCall24_68B0(transformModifier);
 }
@@ -1482,10 +1481,10 @@ extern "C" int tModifierBlock_getBoundBox(void*);
  *
  * @return true when the node has a modifier block whose tModifierBlock_getBoundBox() is non-null
  */
-extern "C" bool cMoveNode_hasBoundBox(cMoveNode* self)
+bool cMoveNode::hasBoundBox()
 {
-    if (((void*)self->ModifierBlock) != 0) {
-        return tModifierBlock_getBoundBox(((void*)self->ModifierBlock)) != 0;
+    if (((void*)ModifierBlock) != 0) {
+        return tModifierBlock_getBoundBox(((void*)ModifierBlock)) != 0;
     }
     return false;
 }
@@ -1519,15 +1518,15 @@ INCLUDE_ASM("object/movenode", cMoveNode_hasIntersect);
  * @return 0 without a modifier block or transform modifier, otherwise the modifier's hasIntersect() (vtable
  *         slot 20)
  */
-extern "C" int cMoveNode_hasIntersect(cMoveNode* self)
+bool cMoveNode::hasIntersect() const
 {
-    tModifierBlock* block = self->ModifierBlock;
+    tModifierBlock* block = ModifierBlock;
     if (block == 0) {
-        return 0;
+        return false;
     }
     cTransformModifier* node = block->RootTransform;
     if (node == 0) {
-        return 0;
+        return false;
     }
     return node->hasIntersect();
 }
@@ -1674,9 +1673,9 @@ static inline int VCall_6BF0(char* o, int i)
  * @return true when it does
  */
 // Does the modifier object's virtual slot 26 report state 2?
-extern "C" bool cMoveNode_hasFocusCount(cMoveNode* self)
+bool cMoveNode::hasFocusCount() const
 {
-    char** modBlock = (char**)self->ModifierBlock;
+    char** modBlock = (char**)ModifierBlock;
     if (modBlock != 0) {
         char* transformModifier = *modBlock;
         if (transformModifier != 0 && VCall_6BF0(transformModifier, 26) == cTransformModifier::kTransform_MultiSpline)
@@ -1764,9 +1763,9 @@ INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
  *
  * @return the modifier's count, or 0 when there is no modifier block, no modifier or another modifier type
  */
-extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
+int cMoveNode::getFocusCount() const
 {
-    tModifierBlock* block = self->ModifierBlock;
+    tModifierBlock* block = ModifierBlock;
     if (block == 0) {
         return 0;
     }
@@ -1777,7 +1776,7 @@ extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
     if (node->getTransformType() != cTransformModifier::kTransform_MultiSpline) {
         return 0;
     }
-    return ((cMultiSplineModifier*)self->ModifierBlock->RootTransform)->FocusCount;
+    return ((cMultiSplineModifier*)ModifierBlock->RootTransform)->FocusCount;
 }
 #endif
 
@@ -1993,11 +1992,11 @@ INCLUDE_ASM("object/movenode", cPositionModifier_updateRootTransform);
  * Rebuilds the position modifier's transform: Offset goes into the matrix's row 3 (translation) and the dirty flag
  * is cleared.
  */
-extern "C" void cPositionModifier_updateRootTransform(cPositionModifier* self)
+void cPositionModifier::updateRootTransform()
 {
-    cQuad128 offset = *(cQuad128*)&self->Offset;
-    self->RootTransformDirty = 0;
-    *(cQuad128*)&self->Transform.row[3] = offset;
+    cQuad128 offset = *(cQuad128*)&Offset;
+    RootTransformDirty = 0;
+    *(cQuad128*)&Transform.row[3] = offset;
 }
 #endif
 
@@ -2010,9 +2009,9 @@ INCLUDE_ASM("object/movenode", cPositionModifier_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cBxReplayFrame* obj)
+void cPositionModifier::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)&self->BoundBox, 0x40);
+    obj->write((const char*)&BoundBox, 0x40);
 }
 #endif
 
@@ -2147,18 +2146,19 @@ static inline t4Vector vel_357108(char* vself)
  * matrix applied to Offset (the local view's vel_357108 is Transform row 3, +0x80). Clears RootTransformDirty in
  * any case.
  */
-extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
+void cParentModifier::updateRootTransform()
 {
-    cInstanceNode* parentNode = (cInstanceNode*)self->ParentInst->m_pActiveNode;
+    cInstanceNode* parentNode = (cInstanceNode*)ParentInst->m_pActiveNode;
     if (((char*)parentNode) != 0) {
         if (parentNode->hasAnimMats() != 0) {
-            vu0CopyMtx_357108(&self->Transform, (t4Matrix*)parentNode->getAnimMat(self->Mesh));
+            vu0CopyMtx_357108(&Transform, (t4Matrix*)parentNode->getAnimMat(Mesh));
         } else {
-            cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
+            cInstanceNode_buildMeshMat(ParentInst, Mesh, ((&Transform)));
         }
-        *(&self->Transform.row[3]) = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108(((&self->Transform)), ((&self->Offset))));
+        *(&Transform.row[3]) = vu0Add_357108(vel_357108(((char*)this)), vu0MtxApply_357108(((&Transform)),
+                ((&Offset))));
     }
-    self->RootTransformDirty = 0;
+    RootTransformDirty = 0;
 }
 #endif
 
@@ -2203,11 +2203,11 @@ INCLUDE_ASM("object/movenode", cParentModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, cBxReplayFrame* stream)
+void cParentModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cPositionModifier_writeToReplayFrame((cPositionModifier*)self, stream);
-    stream->write((const char*)&self->Mesh, 4);
-    stream->writeReplayInstance((const tInstanceRecord*)self->ParentInst);
+    this->cPositionModifier::writeToReplayFrame(stream);
+    stream->write((const char*)&Mesh, 4);
+    stream->writeReplayInstance((const tInstanceRecord*)ParentInst);
 }
 #endif
 
@@ -2375,25 +2375,25 @@ struct sMnMover_3573F8 {
  * Offset. Within 50 units AllowCollide is set; otherwise Offset moves by d * Speed * Time / |d|, clamped to d
  * (which also sets AllowCollide). Marks the root transform dirty.
  */
-extern "C" void cMagnetModifier_update(cMagnetModifier* self)
+void cMagnetModifier::update()
 {
-    if (self->Being < 0) {
+    if (Being < 0) {
         return;
     }
-    self->Time += cObjectInterface_getUpdateTime();
-    t4Vector delta = vu0Sub_3573F8(*(t4Vector*)cObjectInterface_getPosition(self->Being), *(&self->Offset));
+    Time += cObjectInterface_getUpdateTime();
+    t4Vector delta = vu0Sub_3573F8(*(t4Vector*)cObjectInterface_getPosition(Being), *(&Offset));
     float len = vu0Length_3573F8(delta);
     if (len < 50.0f) {
-        self->AllowCollide = 1;
+        AllowCollide = 1;
     } else {
-        t4Vector step = vu0Scale_3573F8(delta, self->Speed / len * self->Time);
+        t4Vector step = vu0Scale_3573F8(delta, Speed / len * Time);
         if (len < vu0Length_3573F8(step)) {
-            self->AllowCollide = 1;
+            AllowCollide = 1;
             step = delta;
         }
-        vu0AddTo_3573F8(*(&self->Offset), step);
+        vu0AddTo_3573F8(*(&Offset), step);
     }
-    self->RootTransformDirty = 1;
+    RootTransformDirty = 1;
 }
 #endif
 
@@ -2403,11 +2403,11 @@ INCLUDE_ASM("object/movenode", cMagnetModifier_updateRootTransform);
 /**
  * Rebuilds the magnet's transform: Offset goes into the matrix's row 3 (translation) and the dirty flag is cleared.
  */
-extern "C" void cMagnetModifier_updateRootTransform(cMagnetModifier* self)
+void cMagnetModifier::updateRootTransform()
 {
-    cQuad128 offset = *(cQuad128*)&self->Offset;
-    self->RootTransformDirty = 0;
-    *(cQuad128*)&self->Transform.row[3] = offset;
+    cQuad128 offset = *(cQuad128*)&Offset;
+    RootTransformDirty = 0;
+    *(cQuad128*)&Transform.row[3] = offset;
 }
 #endif
 
@@ -2457,11 +2457,11 @@ INCLUDE_ASM("object/movenode", cMagnetModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, cBxReplayFrame* stream)
+void cMagnetModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
-    stream->write((const char*)&self->Offset, 80);
-    stream->write((const char*)&self->Transform, 0x40);
+    stream->writeReplayInstance((const tInstanceRecord*)Instance);
+    stream->write((const char*)&Offset, 80);
+    stream->write((const char*)&Transform, 0x40);
 }
 #endif
 
@@ -2543,9 +2543,9 @@ void* cObjectInterface_getAvaSplineTransform_2(void*, void*) __asm__("cObjectInt
  * Updates the avalanche spline modifier: fills Transform (+0x40) from its instance (cObjectInterface_getAvaSplineTransform, called with two
  * arguments though declared with one).
  */
-extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
+void cAvaSplineModifier::update()
 {
-    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)&self->Transform);
+    cObjectInterface_getAvaSplineTransform_2(Instance, (char*)&Transform);
 }
 #endif
 
@@ -2560,10 +2560,10 @@ INCLUDE_ASM("object/movenode", cAvaSplineModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, cBxReplayFrame* stream)
+void cAvaSplineModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
-    stream->write((const char*)&self->BoundBox, 0x30);
+    stream->writeReplayInstance((const tInstanceRecord*)Instance);
+    stream->write((const char*)&BoundBox, 0x30);
 }
 #endif
 
@@ -2632,7 +2632,7 @@ extern "C" void cMoveNode_update(cMoveNode* self);
  */
 extern "C" void cParticleNode_update(cParticleNode* self)
 {
-    cMoveNode_update((cMoveNode*)self);
+    self->cMoveNode::update();
     tModifierBlock* mb = self->ModifierBlock;
     if (mb != 0 && *(int*)&mb->Effect != 0) {
         return;

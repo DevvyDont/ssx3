@@ -768,15 +768,15 @@ int cList_traverseFlat_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("cL
  *
  * @param on  nonzero to focus (On Tour focus)
  */
-extern "C" void cUIGroup_setFocus(cUIGroup* self, int on)
+void cUIGroup::setFocus(int on)
 {
     cUIGroup_setFocus_sFunctor focusOp;
     focusOp.vt = cListOperator_vtbl;
     focusOp.vt = cListOpSetFocus_vtbl;
     focusOp.arg = on;
-    cList_traverseFlat_f((char*)&self->mList, &focusOp);
+    cList_traverseFlat_f((char*)&mList, &focusOp);
     focusOp.vt = cListOperator_vtbl;
-    ((cUIGroup_setFocus_sFlags*)&self->mAttr)->on = (on != 0);
+    ((cUIGroup_setFocus_sFlags*)&mAttr)->on = (on != 0);
 }
 #endif
 
@@ -828,9 +828,9 @@ int cListNode_isSentinel(cListNode*);
  *
  * Calls updateLocale (vtable slot 16) on each child in the group's list.
  */
-extern "C" void cUIGroup_updateLocale(cUIGroup* self)
+void cUIGroup::updateLocale()
 {
-    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    cUIThing* n = (cUIThing*)cList_first((cList*)&mList);
     if (((void*)n) != 0) {
         do {
             n->updateLocale();
@@ -904,13 +904,13 @@ INCLUDE_ASM("ui/uiengine", cUIGroup_render2D);
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
+void cUIGroup::render2D(float x, float y)
 {
-    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    cUIThing* n = (cUIThing*)cList_first((cList*)&mList);
     if (((void*)n) != 0) {
         do {
             if ((n->mAttr >> 6) & 1) {
-                n->render2D(self->mPosition.x + x, self->mPosition.y + y);
+                n->render2D(mPosition.x + x, mPosition.y + y);
             }
             n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -934,16 +934,16 @@ extern "C" void cUIThing_update(void* self, unsigned short ev);
  *
  * @param ev  frame number (On Tour: FrameNum), passed to every update
  */
-extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
+void cUIGroup::update(unsigned short ev)
 {
-    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    cUIThing* n = (cUIThing*)cList_first((cList*)&mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             n->update(ev);
             n = (cUIThing*)((void*)n->mpNext);
         }
     }
-    cUIThing_update(self, ev);
+    cUIThing_update(this, ev);
 }
 #endif
 
@@ -1592,23 +1592,23 @@ extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx
  * stores it (cUIListBox_setUnicodePrivate); then sets the box cached (slot 5, setCached(1)). Does nothing without a
  * locale.
  */
-extern "C" void cUIListBox_updateLocale(cUIListBox* self)
+void cUIListBox::updateLocale()
 {
-    cUIScreen* screen = self->mpScreen;
+    cUIScreen* screen = mpScreen;
     cUIState* state = screen->mpState;
     cUIEngine* engine = state->mpEngine;
     cUILocaleInterface* loc = engine->mpLocaleInterface;
     if (loc != 0) {
-        for (unsigned char i = 0; i < self->mNumEntries; i++) {
-            int id = self->mpEntries[i].mStringID;
+        for (unsigned char i = 0; i < mNumEntries; i++) {
+            int id = mpEntries[i].mStringID;
             if (id != 0) {
                 unsigned short* unicodeStr = loc->getStringByHash(id);
                 if (unicodeStr != 0) {
-                    self->setUnicodePrivate(i, unicodeStr);
+                    setUnicodePrivate(i, unicodeStr);
                 }
             }
         }
-        self->setCached(1);
+        setCached(1);
     }
 }
 #endif
@@ -1674,58 +1674,58 @@ static inline void setLayer_9F00(cUIListBox* self)
  * @param x  the parent's x offset
  * @param y  the parent's y offset
  */
-extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
+void cUIListBox::render2D(float x, float y)
 {
-    cFont* font = (cFont*)self->getFont();
-    if (font == 0 || self->mNumEntries == 0) {
+    cFont* font = (cFont*)getFont();
+    if (font == 0 || mNumEntries == 0) {
         return;
     }
-    t2Vector listScale(self->mScale.x, self->mScale.y);
+    t2Vector listScale(mScale.x, mScale.y);
     (*(t2Vector*)&font->Scale[0]).x = (*(t2Vector*)&font->BaseScale[0]).x * listScale.x;
     (*(t2Vector*)&font->Scale[0]).y = (*(t2Vector*)&font->BaseScale[0]).y * listScale.y;
-    if (((self->mAttr >> 5) & 1) && ((*(int*)&self->mAttrListBox >> 5) & 1)) {
-        (*(tARGB*)&font->Color[0]) = (*(&self->mStaticColour));
+    if (((mAttr >> 5) & 1) && ((*(int*)&mAttrListBox >> 5) & 1)) {
+        (*(tARGB*)&font->Color[0]) = (*(&mStaticColour));
     } else {
-        (*(tARGB*)&font->Color[0]) = (*(&self->mColour));
+        (*(tARGB*)&font->Color[0]) = (*(&mColour));
     }
-    if ((*(int*)&self->mAttrListBox >> 2) & 1) {
-        tARGB shadow = (*(&self->mShadowColour));
-        shadow.A = self->mColour.A;
+    if ((*(int*)&mAttrListBox >> 2) & 1) {
+        tARGB shadow = (*(&mShadowColour));
+        shadow.A = mColour.A;
         (*(tARGB*)&font->ShadowColor[0]) = shadow;
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(2.0f, 2.0f);
     } else {
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
     int str;
-    if (*(int*)&self->mAttrListBox & 0x10) {
-        str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[0].str;
+    if (*(int*)&mAttrListBox & 0x10) {
+        str = ((sStrEntry_9F00*)&mpEntries[0].mpString)[0].str;
     } else {
-        str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[self->mCurrentEntry].str;
+        str = ((sStrEntry_9F00*)&mpEntries[0].mpString)[mCurrentEntry].str;
     }
-    setLayer_9F00((self));
+    setLayer_9F00((this));
     int over = 0;
-    float* box = &self->mSize.x;
+    float* box = &mSize.x;
     {
         sRect_9F00 textRect;
         cFont_textExtent1(font, str, &textRect, 0, listScale.x, listScale.y);
-        if (self->mSize.x < textRect.x1) {
+        if (mSize.x < textRect.x1) {
             over = 1;
         }
-        sV3_9F00 size(textRect.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
-        sV3_9F00 position(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
-        cUIThing_applyPivot((self), &position, &size);
+        sV3_9F00 size(textRect.x1, mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
+        sV3_9F00 position(mPosition.x + x, mPosition.y + y, 0.0f);
+        cUIThing_applyPivot((this), &position, &size);
         cFont_text1(font, position.x, position.y, str);
     }
-    char* loc = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+    char* loc = *(char**)(*(char**)(*(char**)((char*)mpScreen + 0xD0) + 0x10) + 0x10);
     if (loc == 0) {
         return;
     }
     if ((*(int*)loc >> 26) & 1) {
-        sV3_9F00 position = *(sV3_9F00*)&self->mPosition;
+        sV3_9F00 position = *(sV3_9F00*)&mPosition;
         position.x += x;
         position.y += y;
-        cUIThing_applyPivot((self), &position, box);
-        setLayer_9F00((self));
+        cUIThing_applyPivot((this), &position, box);
+        setLayer_9F00((this));
         sVert_9F00 verts[5];
         unsigned int i;
         if (!over) {
@@ -1744,10 +1744,10 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
                 vertexPos.w = 1.0f;
                 verts[i].pos = vertexPos;
             }
-            verts[1].pos.x += self->mSize.x;
-            verts[2].pos.x += self->mSize.x;
-            verts[2].pos.y += self->mSize.y;
-            verts[3].pos.y += self->mSize.y;
+            verts[1].pos.x += mSize.x;
+            verts[2].pos.x += mSize.x;
+            verts[2].pos.y += mSize.y;
+            verts[3].pos.y += mSize.y;
             sVE_9F00* vt = *(sVE_9F00**)(GrMan_9F00 + 0x10D8);
             vt[73].fn(vthis(GrMan_9F00, vt[73]), 5, verts, 0);
         } else {
@@ -1767,10 +1767,10 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
                 vertexPos.w = 1.0f;
                 verts[i].pos = vertexPos;
             }
-            verts[1].pos.x += self->mSize.x;
-            verts[2].pos.y += self->mSize.y;
-            verts[3].pos.x += self->mSize.x;
-            verts[3].pos.y += self->mSize.y;
+            verts[1].pos.x += mSize.x;
+            verts[2].pos.y += mSize.y;
+            verts[3].pos.x += mSize.x;
+            verts[3].pos.y += mSize.y;
             sVE_9F00* vt = *(sVE_9F00**)(GrMan_9F00 + 0x10D8);
             vt[71].fn(vthis(GrMan_9F00, vt[71]), 4, verts, 0);
         }

@@ -28,6 +28,11 @@ struct cFEInput : public cUIInput {
 
     // Methods bound to their retail symbols by asm labels.
     int getInput() __asm__("cFEInput_getInput");
+    // retail's destructor cFEInput__cFEInput stays a C function (g++ 2.95 takes no asm label on a destructor); declared
+    // first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEInput();
+    virtual bool isActive() __asm__("cFEInput_isActive");
+    virtual int getAsciiKey() const __asm__("cFEInput_getAsciiKey");
 };
 
 CHECK_OFFSET(cFEInput, mbKeyReady, 0x0C);

@@ -38,6 +38,12 @@ struct cOVState_HEAT_PREEVENT : public cOVState {
     //   mpScreen: [U] onCreateScreen stores the screen; widget lookups go through it
     // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVTemplate_Simple (vtable 0x474D30; On Tour 0x90): no members
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_HEAT_PREEVENT();
+    virtual void onUpdate() __asm__("cOVState_HEAT_PREEVENT_onUpdate");
 };
 
 CHECK_SIZE(cOVState_HEAT_PREEVENT, 0x9C);

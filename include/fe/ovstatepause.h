@@ -105,6 +105,14 @@ struct cOVState_PAUSE_OPTIONS : public cOVState {
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the options screen; every widget lookup goes through it
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_PAUSE_OPTIONS();
+    virtual void onPreRender2D() __asm__("cOVState_PAUSE_OPTIONS_onPreRender2D");
+    virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cOVState_PAUSE_OPTIONS_onWidgetEvent");
+    virtual void onUpdate() __asm__("cOVState_PAUSE_OPTIONS_onUpdate");
 };
 
 CHECK_SIZE(cOVState_PAUSE_OPTIONS, 0x9C);
@@ -139,6 +147,10 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     void setContinueOptionVisible(int visible) __asm__("cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible");
     void setContinueHighLight(int on) __asm__("cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight");
     void setCancelHighLight(int on) __asm__("cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight");
+    // retail's destructor cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLINE_ERROR stays a C function (g++ 2.95 takes
+    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_PAUSE_ONLINE_ERROR();
+    virtual void onUpdate() __asm__("cOVState_PAUSE_ONLINE_ERROR_onUpdate");
 };
 
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, miStartPingTick, 0x9C);

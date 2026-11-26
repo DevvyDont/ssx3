@@ -49,23 +49,34 @@ struct cFEStateRewardGalleryBase : public cUIState {
     virtual const cTextureElement* getTextureElement(int index);                    // 27
     virtual void allocRewards();                                                    // 28
     virtual void purgeRewards();                                                    // 29
-    virtual void buyReward(int rIndex);                                             // 30
+    virtual void buyReward(int rIndex)
+        __asm__("cFEStateRewardGalleryBase_buyReward");                                             // 30
     virtual void showReward(int rIndex);                                            // 31
     virtual void showBuyPopup(int rIndex);                                          // 32
-    virtual void updateHelpText(int rIndex);                                        // 33
+    virtual void updateHelpText(int rIndex)
+        __asm__("cFEStateRewardGalleryBase_updateHelpText");                                        // 33
     virtual const void* getReward(int index);                                       // 34
     virtual int getRewardCost(const void* pReward);                                 // 35
     virtual int getRewardStoreNum(const void* pReward);                             // 36
     virtual const char* getRewardName(const void* pReward);                         // 37
-    virtual bool isRewardOwned(int rIndex);                                         // 38
-    virtual void updateRow(int rowNum);                                             // 39
-    virtual void updateList();                                                      // 40
-    virtual void updatePageNumber();                                                // 41
-    virtual void updateRewardInfo();                                                // 42
-    virtual void updateAvailableCash();                                             // 43
-    virtual void updateCounter();                                                   // 44
-    virtual void updateHighlither();                                                // 45
-    virtual void updateArrows();                                                    // 46
+    virtual bool isRewardOwned(int rIndex)
+        __asm__("cFEStateRewardGalleryBase_isRewardOwned");                                         // 38
+    virtual void updateRow(int rowNum)
+        __asm__("cFEStateRewardGalleryBase_updateRow");                                             // 39
+    virtual void updateList()
+        __asm__("cFEStateRewardGalleryBase_updateList");                                                      // 40
+    virtual void updatePageNumber()
+        __asm__("cFEStateRewardGalleryBase_updatePageNumber");                                                // 41
+    virtual void updateRewardInfo()
+        __asm__("cFEStateRewardGalleryBase_updateRewardInfo");                                                // 42
+    virtual void updateAvailableCash()
+        __asm__("cFEStateRewardGalleryBase_updateAvailableCash");                                             // 43
+    virtual void updateCounter()
+        __asm__("cFEStateRewardGalleryBase_updateCounter");                                                   // 44
+    virtual void updateHighlither()
+        __asm__("cFEStateRewardGalleryBase_updateHighlither");                                                // 45
+    virtual void updateArrows()
+        __asm__("cFEStateRewardGalleryBase_updateArrows");                                                    // 46
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
     int mCharID;                    // 0x050 [O]
@@ -110,6 +121,9 @@ struct cFEStateRewardGalleryBase : public cUIState {
     void purgeIcons() __asm__("cFEStateRewardGalleryBase_purgeIcons");
     void loadRewards() __asm__("cFEStateRewardGalleryBase_loadRewards");
     void updateRewardsLoad() __asm__("cFEStateRewardGalleryBase_updateRewardsLoad");
+    virtual void onCreateScreen() __asm__("cFEStateRewardGalleryBase_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateRewardGalleryBase_onUpdate");
+    virtual bool onInputBegin(cUIInput* in) __asm__("cFEStateRewardGalleryBase_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryBase, mLoadingState, 0x048);
@@ -192,6 +206,11 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryPosters1() __asm__("cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1");
+    // retail's destructor cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters stays a C function (g++ 2.95 takes
+    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRewardGalleryPosters();
+    virtual void allocRewards() __asm__("cFEStateRewardGalleryPosters_allocRewards");
+    virtual void purgeRewards() __asm__("cFEStateRewardGalleryPosters_purgeRewards");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mpDBPosters, 0xA24);
@@ -216,6 +235,14 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryTradingCards1()
         __asm__("cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1");
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards stays a C function (g++
+    // 2.95 takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the
+    // overrides
+    virtual ~cFEStateRewardGalleryTradingCards();
+    virtual void allocRewards() __asm__("cFEStateRewardGalleryTradingCards_allocRewards");
+    virtual void purgeRewards() __asm__("cFEStateRewardGalleryTradingCards_purgeRewards");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpDBTradingCards, 0xA24);
@@ -240,6 +267,14 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryConceptArts1()
         __asm__("cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1");
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts stays a C function (g++
+    // 2.95 takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the
+    // overrides
+    virtual ~cFEStateRewardGalleryConceptArts();
+    virtual void allocRewards() __asm__("cFEStateRewardGalleryConceptArts_allocRewards");
+    virtual void purgeRewards() __asm__("cFEStateRewardGalleryConceptArts_purgeRewards");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpDBConceptArts, 0xA24);
@@ -263,6 +298,11 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryVideos1() __asm__("cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1");
+    // retail's destructor cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos stays a C function (g++ 2.95 takes
+    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRewardGalleryVideos();
+    virtual void allocRewards() __asm__("cFEStateRewardGalleryVideos_allocRewards");
+    virtual void purgeRewards() __asm__("cFEStateRewardGalleryVideos_purgeRewards");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mpDBVideos, 0xA24);
@@ -286,6 +326,11 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryToys1() __asm__("cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1");
+    // retail's destructor cFEStateRewardGalleryToys__cFEStateRewardGalleryToys stays a C function (g++ 2.95 takes no
+    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRewardGalleryToys();
+    virtual void allocRewards() __asm__("cFEStateRewardGalleryToys_allocRewards");
+    virtual void purgeRewards() __asm__("cFEStateRewardGalleryToys_purgeRewards");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryToys, mpDBToys, 0xA24);
@@ -310,6 +355,13 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryCheatChars1()
         __asm__("cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1");
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRewardGalleryCheatChars();
+    virtual void allocRewards() __asm__("cFEStateRewardGalleryCheatChars_allocRewards");
+    virtual void purgeRewards() __asm__("cFEStateRewardGalleryCheatChars_purgeRewards");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpDBCheatChars, 0xA24);

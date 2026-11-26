@@ -20,6 +20,12 @@ struct cFEStateTransition : public cUIState {
     // --- cFEStateTransition
     cUIScreen* mpSnow;              // 0x048 [O]
     cUIScreen* mpWhite;             // 0x04C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateTransition__cFEStateTransition stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateTransition();
+    virtual void onCreateScreen() __asm__("cFEStateTransition_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateTransition, mpSnow, 0x048);
@@ -47,6 +53,12 @@ struct cFEStateBackground : public cUIState {
     //   [R] cFEStateBackground_vtbl (ctors, cRealFE_loadStartState, dtor)
     // cFEStateBackground's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "snowanim" through it and plays it (mpScreen is not set)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateBackground__cFEStateBackground stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateBackground();
+    virtual void onCreateScreen() __asm__("cFEStateBackground_onCreateScreen");
 };
 
 CHECK_SIZE(cFEStateBackground, 0x48);

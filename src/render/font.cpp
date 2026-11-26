@@ -1196,10 +1196,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetScreenOffset);
  * @param xoffset  the horizontal offset in pixels
  * @param yoffset  the vertical offset in pixels
  */
-extern "C" void cGraphicsMan_SetScreenOffset(cGraphicsMan* self, int xoffset, int yoffset)
+void cGraphicsMan::SetScreenOffset(int xoffset, int yoffset)
 {
-    self->m_screenOffset[0] = (float)xoffset;
-    self->m_screenOffset[1] = (float)yoffset;
+    m_screenOffset[0] = (float)xoffset;
+    m_screenOffset[1] = (float)yoffset;
 }
 #endif
 
@@ -1211,9 +1211,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetScreenXOffset);
  *
  * @return the X offset in pixels
  */
-extern "C" int cGraphicsMan_GetScreenXOffset(cGraphicsMan* self)
+int cGraphicsMan::GetScreenXOffset()
 {
-    return (int)self->m_screenOffset[0];
+    return (int)m_screenOffset[0];
 }
 #endif
 
@@ -1225,9 +1225,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetScreenYOffset);
  *
  * @return the Y offset in pixels
  */
-extern "C" int cGraphicsMan_GetScreenYOffset(cGraphicsMan* self)
+int cGraphicsMan::GetScreenYOffset()
 {
-    return (int)self->m_screenOffset[1];
+    return (int)m_screenOffset[1];
 }
 #endif
 
@@ -4035,10 +4035,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_ClearProjTextures__FPv);
  *
  * Sets mNumShdw (+0x13EC) to 0; cPS2GraphicsMan_AddProjectiveTexture() adds them again.
  */
-void cPS2GraphicsMan_ClearProjTextures(void* vself)
+void cPS2GraphicsMan::ClearProjTextures()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    self->mNumShdw = 0;
+    mNumShdw = 0;
 }
 #endif
 
@@ -7428,27 +7427,27 @@ extern char D_1150[];
  * microprogram at D_1150. cPS2GraphicsMan_DrawCharModel calls it through slot 124 with a scale of 1.0, which this code
  * ignores.
  */
-extern "C" void cPS2GraphicsMan_InitCharMatrices(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::InitCharMatrices()
 {
-    sDrawState* rs = self->m_pCurrentDrawState;
+    sDrawState* rs = m_pCurrentDrawState;
     unsigned int addrMask = 0x3FFFFFFF;
     rs->m_bitGroups[0] = (((int)rs->m_bitGroups[0]) & ~0x3C0) | 0x180;
-    sDrawState* rs2 = self->m_pCurrentDrawState;
-    rs2->m_bitGroups[3] = (((int)rs2->m_bitGroups[3]) & 0xC0000000) | (self->mVifCursor & addrMask);
-    unsigned long* packet = (unsigned long*)(self->mVifCursor | 0x30000000);
+    sDrawState* rs2 = m_pCurrentDrawState;
+    rs2->m_bitGroups[3] = (((int)rs2->m_bitGroups[3]) & 0xC0000000) | (mVifCursor & addrMask);
+    unsigned long* packet = (unsigned long*)(mVifCursor | 0x30000000);
     packet[0] = 0x6000000C;
     packet[2] = (unsigned long)0x8000 << 45;
     packet[3] = 0x6C0A000701000101;
     packet[1] = 0;
     packet += 4;
-    cQuad128_6B40* src = (cQuad128_6B40*)(((char*)self) + 0x6BB0);
+    cQuad128_6B40* src = (cQuad128_6B40*)(((char*)this) + 0x6BB0);
     for (int i = 0; i < 10; i++) {
         ((cQuad128_6B40*)packet)[i] = src[i];
     }
     packet[20] = 0;
     packet[21] = (unsigned long)(((unsigned int)D_1150 >> 3) | 0x14000000) << 32;
     packet += 22;
-    self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
+    mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
 }
 #endif
 

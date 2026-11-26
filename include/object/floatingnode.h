@@ -55,6 +55,13 @@ struct cFloatingNode : public cMoveNode {
     void* cFloatingNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFloatingNode_cFloatingNode1");
     void initInfo() __asm__("cFloatingNode_initInfo__FP13cFloatingNode");
     void purgeInfo() __asm__("cFloatingNode_purgeInfo");
+    // retail's destructor cFloatingNode__cFloatingNode stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFloatingNode();
+    virtual void updateOverlapSystem() __asm__("cFloatingNode_updateOverlapSystem");
+    virtual void restoreOverlapSystem() __asm__("cFloatingNode_restoreOverlapSystem");
+    virtual bool updateNode() __asm__("cFloatingNode_updateNode");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFloatingNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cFloatingNode, ZSpring, 0x2C);

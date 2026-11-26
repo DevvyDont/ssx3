@@ -742,7 +742,7 @@ static inline float randf_34C668()
  * The step's range is 0.15, 0.3 or 0.45 by a per-location level read from the new-race BE (cObjectInterface_getPeakNumber,
  * probably the location's wind); the wind is kept within 0..1 and interpolated over the second.
  */
-extern "C" void cFlagManager_update(cFlagManager* self)
+void cFlagManager::update()
 {
     float amp = 0.15f;
     switch (cObjectInterface_getPeakNumber()) {
@@ -756,23 +756,23 @@ extern "C" void cFlagManager_update(cFlagManager* self)
         break;
     }
     float one = 1.0f;
-    self->mWindTime += one / (float)cAppMan_TheAppMan->TimerHz;
-    if (one <= self->mWindTime) {
-        self->mWindTime -= one;
-        self->mWindBase += self->mWindDelta;
+    mWindTime += one / (float)cAppMan_TheAppMan->TimerHz;
+    if (one <= mWindTime) {
+        mWindTime -= one;
+        mWindBase += mWindDelta;
         float lo = -amp;
-        self->mWindDelta = lo + (amp - lo) * randf_34C668();
-        if (self->mWindBase + self->mWindDelta < 0.0f) {
-            self->mWindDelta = -self->mWindBase;
+        mWindDelta = lo + (amp - lo) * randf_34C668();
+        if (mWindBase + mWindDelta < 0.0f) {
+            mWindDelta = -mWindBase;
         }
-        if (one < self->mWindBase + self->mWindDelta) {
-            self->mWindDelta = one - self->mWindBase;
+        if (one < mWindBase + mWindDelta) {
+            mWindDelta = one - mWindBase;
         }
     }
-    self->mCurrentWindFactor = self->mWindBase + self->mWindDelta * self->mWindTime;
+    mCurrentWindFactor = mWindBase + mWindDelta * mWindTime;
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet* entry = &((&self->mFlagSets[0]))[i];
+        cFlagSet* entry = &((&mFlagSets[0]))[i];
         if (entry->mCurrentNumInstances != 0) {
             entry->update();
         }
@@ -790,11 +790,11 @@ extern "C" void cFlagSet_render(cFlagSet* e);
  *
  * Walks the 15 flag sets (mFlagSets) and calls cFlagSet_render() on each that holds instances (mCurrentNumInstances).
  */
-extern "C" void cFlagManager_render(cFlagManager* self)
+void cFlagManager::render()
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet* entry = &self->mFlagSets[i];
+        cFlagSet* entry = &mFlagSets[i];
         if (entry->mCurrentNumInstances != 0) {
             entry->render();
         }
@@ -821,11 +821,11 @@ extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, cBxReplayFrame* arg)
  *
  * @param stream  the replay frame
  */
-extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, cBxReplayFrame* stream)
+void cFlagManager::writeToReplayFrame(cBxReplayFrame* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        (((&self->mFlagSets[0]))[i]).writeToReplayFrame(stream);
+        (((&mFlagSets[0]))[i]).writeToReplayFrame(stream);
     }
 }
 #endif
@@ -848,11 +848,11 @@ extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, cBxReplayFrame* arg
  *
  * @param stream  the replay frame
  */
-extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, cBxReplayFrame* stream)
+void cFlagManager::readFromReplayFrame(cBxReplayFrame* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        (((&self->mFlagSets[0]))[i]).readFromReplayFrame(stream);
+        (((&mFlagSets[0]))[i]).readFromReplayFrame(stream);
     }
 }
 #endif
@@ -1592,15 +1592,15 @@ INCLUDE_ASM("object/flagset", cFenceNode_render);
  * loaded.
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void cFenceNode_render(cFenceNode* self)
+void cFenceNode::render()
 {
-    if (!IsLoaded_34B9B0(self->Instance)) {
+    if (!IsLoaded_34B9B0(Instance)) {
         return;
     }
     cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
     float one = 1.0f;
     {
-        tInstanceRecord* model = self->Instance;
+        tInstanceRecord* model = Instance;
         tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, gm);
         void* thisp = vthis(gm, vt[93]);
         t4VectorXYZW boxMin(model->m_fvMin.m[0], model->m_fvMin.m[1], model->m_fvMin.m[2], one);
@@ -1617,9 +1617,9 @@ extern "C" void cFenceNode_render(cFenceNode* self)
     gm->m_pCurrentDrawState = renderState + 1;
     // the pushed state's blend mode (bits 2-6 of its second word) = 5
     renderState[1].m_bitGroups[1] = ((int)renderState[1].m_bitGroups[1] & ~0x7C) | 0x14;
-    tInstanceRecord* model = self->Instance;
+    tInstanceRecord* model = Instance;
     void* pos = &model->m_fmTransform;
-    cGridMesh* gridMesh = self->GridMesh;
+    cGridMesh* gridMesh = GridMesh;
     if (gridMesh != 0) {
         tGridMeshRenderSlot* hv = (tGridMeshRenderSlot*)gridMesh->mVtbl;
         hv[7].fn(vthis(gridMesh, hv[7]), pos, model->m_MaterialBlock, 0);
@@ -1642,10 +1642,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, cBxReplayFrame* stream)
+void cFenceNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->FenceData, 36);
+    cInstanceNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&FenceData, 36);
 }
 #endif
 

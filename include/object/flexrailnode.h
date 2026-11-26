@@ -120,6 +120,9 @@ struct cFlexRailNode : public cInstanceNode {
     void updateMat(t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2,
                    const float* ctrlPoint3)
         __asm__("cFlexRailNode_updateMat");
+    virtual void update() __asm__("cFlexRailNode_update");
+    virtual void render() __asm__("cFlexRailNode_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlexRailNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cFlexRailNode, unk_01C, 0x01C);

@@ -46,6 +46,13 @@ struct cOVState_HEAT_STANDINGS : public cOVState {
     // cOVState_HEAT_STANDINGS's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_HEAT_STANDINGS();
+    virtual void onCreateScreen() __asm__("cOVState_HEAT_STANDINGS_onCreateScreen");
+    virtual bool onInputBegin(cUIInput* input) __asm__("cOVState_HEAT_STANDINGS_onInputBegin");
 };
 
 CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);
@@ -65,6 +72,15 @@ struct cOVState_FINAL_STANDINGS : public cOVState {
     int doInit;                      // 0x09C [O] bool doInit (On Tour 0x90, its only member); [U] onCreateScreen
                                      //       cOVState_FINAL_STANDINGS_onCreateScreen sets it, onGainTransition cOVState_FINAL_STANDINGS_onGainTransition tests and clears it
                                      //       (lw/sw: a word, as retail bools are)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_FINAL_STANDINGS();
+    virtual void onCreateScreen() __asm__("cOVState_FINAL_STANDINGS_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* menu) __asm__("cOVState_FINAL_STANDINGS_onWidgetCreate");
+    virtual void onUpdate() __asm__("cOVState_FINAL_STANDINGS_onUpdate");
+    virtual bool onInputBegin(cUIInput* input) __asm__("cOVState_FINAL_STANDINGS_onInputBegin");
 };
 
 CHECK_OFFSET(cOVState_FINAL_STANDINGS, doInit, 0x09C);
@@ -88,6 +104,13 @@ struct cOVState_RACE_FINISHOV : public cOVState {
                                      //       (slot 24) clears it on event 0 and sets it on 1; onUpdate, onWidgetEvent /
                                      //       onWidgetMenu (slots 19 / 20) move on only while it is set. Preview: the
                                      //       same store of 1 in its ctor and the same handleEvent
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_RACE_FINISHOV();
+    virtual void onCreateScreen() __asm__("cOVState_RACE_FINISHOV_onCreateScreen");
+    virtual void onUpdate() __asm__("cOVState_RACE_FINISHOV_onUpdate");
 };
 
 CHECK_OFFSET(cOVState_RACE_FINISHOV, mElapsedTime, 0x09C);
@@ -113,6 +136,13 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
                                      //       (slot 24) clears it on event 0 and sets it on 1; onUpdate, onWidgetEvent /
                                      //       onWidgetMenu (slots 19 / 20) move on only while it is set. Preview: the
                                      //       same store of 1 in its ctor and the same handleEvent
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_BASSSP_QUAL_FINISHOV();
+    virtual void onCreateScreen() __asm__("cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen");
+    virtual void onUpdate() __asm__("cOVState_BASSSP_QUAL_FINISHOV_onUpdate");
 };
 
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mElapsedTime, 0x09C);
@@ -129,6 +159,12 @@ struct cOVState_TOURNAMENT_STANDINGS : public cOVState {
     // cOVState_TOURNAMENT_STANDINGS's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS stays a C function (g++ 2.95
+    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_TOURNAMENT_STANDINGS();
+    virtual void onCreateScreen() __asm__("cOVState_TOURNAMENT_STANDINGS_onCreateScreen");
 };
 
 CHECK_SIZE(cOVState_TOURNAMENT_STANDINGS, 0x9C);

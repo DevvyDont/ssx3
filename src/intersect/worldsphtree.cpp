@@ -6183,35 +6183,35 @@ typedef void (*Fn1_00342880)(void*, void*);
  * slowed (slot 8, cBoostModifier_applyDrag) when the factor (+0x24) is negative, else pushed (slot 7, cBoostModifier_applyBoost).
  * boostStart (slot 9) and boostEnd (slot 10) bracket the loop.
  */
-extern "C" void cBoostModifier_update(cBoostModifier* self)
+void cBoostModifier::update()
 {
-    self->Active = 0;
-    if (self->Type == 0) {
-        self->Active = 1;
+    Active = 0;
+    if (Type == 0) {
+        Active = 1;
     }
-    int timeLeft = self->Time;
+    int timeLeft = Time;
     if (timeLeft > 0) {
         timeLeft--;
-        self->Time = timeLeft;
+        Time = timeLeft;
         if (timeLeft > 0) {
-            self->Active = 1;
+            Active = 1;
         }
     }
-    self->boostStart();
-    if (self->Type == cBoostModifier::kBoostModType_Timed || self->Time <= 0) {
+    boostStart();
+    if (Type == cBoostModifier::kBoostModType_Timed || Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             cBeing* obj = cObjectInterface_getBeing(i);
-            if (obj->isIntersecting(self->Instance) != 0) {
-                self->Active = 1;
-                if (self->Drag < 0.0f) {
-                    self->applyDrag(obj);
+            if (obj->isIntersecting(Instance) != 0) {
+                Active = 1;
+                if (Drag < 0.0f) {
+                    applyDrag(obj);
                 } else {
-                    self->applyBoost(obj);
+                    applyBoost(obj);
                 }
             }
         }
     }
-    self->boostEnd();
+    boostEnd();
 }
 #endif
 
@@ -6246,9 +6246,10 @@ extern "C" float cObjectInterface_getUpdateTime();
  *
  * @param obj  the rider in the zone (On Tour cBeing* pBeing)
  */
-extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cBeing* obj)
+void cBoostModifier::applyDrag(cBeing*obj)
 {
-    t4Vector newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
+    t4Vector newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), Drag + 1.0f),
+            cObjectInterface_getUpdateTime());
     obj->applyBoost(&newVelocity);
 }
 #endif
@@ -6374,11 +6375,11 @@ extern "C" void cPhysicsModifier_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, cBxReplayFrame* stream)
+void cBoostModifier::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cPhysicsModifier_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Boost, 0x30);
-    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
+    cPhysicsModifier_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Boost, 0x30);
+    stream->writeReplayInstance((const tInstanceRecord*)Instance);
 }
 #endif
 

@@ -68,6 +68,12 @@ struct cOVTemplate_Dialog : public cOVState {
         kDialogRestart = 0, kDialogQuit = 1, kDialogRestartChallenge = 2, kDialogQuitChallenge = 3,
         kDialogQuitCompetition = 4, kDialogGiveUp = 5, kDialogSavePrompt = 6
     };
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVTemplate_Dialog__cOVTemplate_Dialog stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVTemplate_Dialog();
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cOVTemplate_Dialog_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);
@@ -96,6 +102,12 @@ struct cPDATemplate : public cUIState {
     //   mHashName: [U] onCreateScreen stores 41
     //   mpEngine: [U] onCreateScreen adds "PDATemplate" and "bganim1" through it
     //   mpScreen: [U] onCreateScreen stores the "PDATemplate" screen and looks "temperature" up on it
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cPDATemplate__cPDATemplate stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cPDATemplate();
+    virtual void onCreateScreen() __asm__("cPDATemplate_onCreateScreen");
 };
 
 CHECK_SIZE(cPDATemplate, 0x48);

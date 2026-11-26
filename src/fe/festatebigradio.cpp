@@ -100,16 +100,16 @@ static inline bool isNet_2DB0()
  * hides the second player's widgets.
  */
 // Bragging rights screen: builds the rule rows of both player panels for the current mode.
-extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* self)
+void cFEStateBraggingRights::onCreateScreen()
 {
-    void* engine = ((void*)self->mpEngine);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_65bragrights), 0);
-    (*(void**)&self->mpScreen) = screen;
+    void* engine = ((void*)mpEngine);
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_65bragrights), 0);
+    (*(void**)&mpScreen) = screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
-    cBraggingRightsMenu* firstPanel = &self->mMenuCtrl[0];
-    cBraggingRightsMenu* secondPanel = &self->mMenuCtrl[1];
-    if ((self->mAttrState >> 4) & 1) {
+    cBraggingRightsMenu* firstPanel = &mMenuCtrl[0];
+    cBraggingRightsMenu* secondPanel = &mMenuCtrl[1];
+    if ((mAttrState >> 4) & 1) {
         cBraggingRightsMenu_setConfirmed_2DB0(firstPanel, 0);
         cBraggingRightsMenu_setConfirmed_2DB0(secondPanel, 0);
     }
@@ -118,27 +118,27 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
     unsigned int mask = 0;
     switch (cBENewRaceInterface_newRace.cGameEvent) {
     case kGAMEEVENT_RACE:
-        (*(signed char**)&self->mpGameEventMapping) = D_004A1710;
+        (*(signed char**)&mpGameEventMapping) = D_004A1710;
         n = 6;
         break;
     case kGAMEEVENT_SLOPESTYLE:
-        (*(signed char**)&self->mpGameEventMapping) = D_004A1718;
+        (*(signed char**)&mpGameEventMapping) = D_004A1718;
         n = 7;
         break;
     case kGAMEEVENT_BIGAIR:
-        (*(signed char**)&self->mpGameEventMapping) = D_004A1720;
+        (*(signed char**)&mpGameEventMapping) = D_004A1720;
         n = 7;
         break;
     case kGAMEEVENT_SUPERPIPE:
-        (*(signed char**)&self->mpGameEventMapping) = D_004A1728;
+        (*(signed char**)&mpGameEventMapping) = D_004A1728;
         n = 7;
         break;
     case kGAMEEVENT_RIVALTIME:
-        (*(signed char**)&self->mpGameEventMapping) = D_004A1730;
+        (*(signed char**)&mpGameEventMapping) = D_004A1730;
         n = 5;
         break;
     case kGAMEEVENT_RIVALPOINTS:
-        (*(signed char**)&self->mpGameEventMapping) = D_004A1738;
+        (*(signed char**)&mpGameEventMapping) = D_004A1738;
         n = 7;
         break;
     }
@@ -146,18 +146,18 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
         mask |= 1 << i;
     cBraggingRightsMenu_setEnableFlag(firstPanel, mask);
     cBraggingRightsMenu_setEnableFlag(secondPanel, mask);
-    cBraggingRightsMenu_setEnableItem_2DB0(firstPanel, ((void*)self->mpScreen));
-    cBraggingRightsMenu_setEnableItem_2DB0(secondPanel, ((void*)self->mpScreen));
+    cBraggingRightsMenu_setEnableItem_2DB0(firstPanel, ((void*)mpScreen));
+    cBraggingRightsMenu_setEnableItem_2DB0(secondPanel, ((void*)mpScreen));
     sStr2_2DB0 name = *(sStr2_2DB0*)D_004A14F8;
     for (int row = 0; row < n; row++) {
         name.c[0] = row + '1';
-        cUIText* txt = (cUIText*)find_2DB0(self, name.c);
+        cUIText* txt = (cUIText*)find_2DB0(this, name.c);
         if (txt != 0)
-            cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441108[((signed char*)self->mpGameEventMapping)[row]]));
+            cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441108[((signed char*)mpGameEventMapping)[row]]));
         for (int playerIndex = 0; playerIndex < 2; playerIndex++) {
             unsigned char out = 0;
-            void* lb = (&((cBraggingRightsMenu*)(&self->mMenuCtrl[0]))[playerIndex].mpListBox[0])[row];
-            switch (((signed char*)self->mpGameEventMapping)[row]) {
+            void* lb = (&((cBraggingRightsMenu*)(&mMenuCtrl[0]))[playerIndex].mpListBox[0])[row];
+            switch (((signed char*)mpGameEventMapping)[row]) {
             case kBRAGRIGHTS_GIVEFULLBOOST:
             case kBRAGRIGHTS_GIVEFASTRECOVERY:
             case kBRAGRIGHTS_TAKENOUBER:
@@ -166,7 +166,8 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
             case kBRAGRIGHTS_TAKEHALFPOINTS:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNNo), 0);
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNYes), 1);
-                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, ((signed char*)self->mpGameEventMapping)[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(this, playerIndex,
+                        ((signed char*)mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case kBRAGRIGHTS_GIVEHEADSTART:
@@ -175,7 +176,8 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10s, 10);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15s, 15);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_20s, 20);
-                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, ((signed char*)self->mpGameEventMapping)[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(this, playerIndex,
+                        ((signed char*)mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case kBRAGRIGHTS_STARTINHOLE:
@@ -184,20 +186,21 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_5000, 5000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10000, 10000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15000, 15000);
-                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, ((signed char*)self->mpGameEventMapping)[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(this, playerIndex,
+                        ((signed char*)mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             }
         }
     }
-    cUIObj_2DB0* onGroupWidget = (cUIObj_2DB0*)find_2DB0(self, str_ongroup);
+    cUIObj_2DB0* onGroupWidget = (cUIObj_2DB0*)find_2DB0(this, str_ongroup);
     if (onGroupWidget != 0) {
         if (isNet_2DB0()) {
             onGroupWidget->setVisible(1);
-            cUIObj_2DB0* hiddenWidget = (cUIObj_2DB0*)find_2DB0(self, str_x_continue2);
+            cUIObj_2DB0* hiddenWidget = (cUIObj_2DB0*)find_2DB0(this, str_x_continue2);
             if (hiddenWidget != 0)
                 hiddenWidget->setVisible(0);
-            cUIObj_2DB0* player2Widget = (cUIObj_2DB0*)find_2DB0(self, str_nml_player2);
+            cUIObj_2DB0* player2Widget = (cUIObj_2DB0*)find_2DB0(this, str_nml_player2);
             if (player2Widget != 0)
                 player2Widget->setVisible(0);
         } else {
@@ -205,10 +208,10 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
         }
     }
     if (isNet_2DB0()) {
-        cUIObj_2DB0* hiddenWidget = (cUIObj_2DB0*)find_2DB0(self, str_fegroup);
+        cUIObj_2DB0* hiddenWidget = (cUIObj_2DB0*)find_2DB0(this, str_fegroup);
         if (hiddenWidget != 0)
             hiddenWidget->setVisible(0);
-        cUIObj_2DB0* player2Widget = (cUIObj_2DB0*)find_2DB0(self, str_x_nml_player2);
+        cUIObj_2DB0* player2Widget = (cUIObj_2DB0*)find_2DB0(this, str_x_nml_player2);
         if (player2Widget != 0)
             player2Widget->setVisible(0);
     }
@@ -297,11 +300,11 @@ static inline int get6F8_3338(void* p) { return *(int*)((char*)p + 0x6F8); }
  * on a locked panel unlocks it, rebuilds it, selects its first row and plays the label "11" or "21"; online
  * that is also sent to the peer (func_00265700).
  */
-extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
+void cFEStateBraggingRights::onUpdate()
 {
     int n = isNet_2DB0() ? 1 : 2;
     int i;
-    cUIInput* obj = (cUIInput*)(self->mpEngine->mpInput);
+    cUIInput* obj = (cUIInput*)(mpEngine->mpInput);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (i = 0; i < n; i++) {
         int panelIdx;
@@ -316,24 +319,24 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
         sVESet_3338* vt = (sVESet_3338*)VPTR_OF(cUIInput, obj);
         vt[44].fn(vthis(obj, vt[44]), id);
         sVEGet_3338* vt2 = (sVEGet_3338*)VPTR_OF(cUIInput, obj);
-        if (vt2[40].fn(vthis(obj, vt2[40])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) == 0) {
-            void* menu = *(void**)((char*)self + panelIdx * 0x34 + 0x6D0);
+        if (vt2[40].fn(vthis(obj, vt2[40])) != 0 && get6F8_3338((char*)this + panelIdx * 0x34) == 0) {
+            void* menu = *(void**)((char*)this + panelIdx * 0x34 + 0x6D0);
             sVEPtr_3338* vt3 = *(sVEPtr_3338**)((char*)menu + 8);
             vt3[15].fn(vthis(menu, vt3[15]), obj);
         } else {
             sVEGet_3338* vt4 = (sVEGet_3338*)VPTR_OF(cUIInput, obj);
-            if (vt4[6].fn(vthis(obj, vt4[6])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
+            if (vt4[6].fn(vthis(obj, vt4[6])) != 0 && get6F8_3338((char*)this + panelIdx * 0x34) != 0) {
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)str_11;
                 memset_3338(label + 3, 0, 2);
-                cBraggingRightsMenu_setConfirmed(&((&self->mMenuCtrl[0]))[panelIdx], 0);
-                cBraggingRightsMenu_setEnableItem_2DB0(&((&self->mMenuCtrl[0]))[panelIdx], self->mpScreen);
+                cBraggingRightsMenu_setConfirmed(&((&mMenuCtrl[0]))[panelIdx], 0);
+                cBraggingRightsMenu_setEnableItem_2DB0(&((&mMenuCtrl[0]))[panelIdx], mpScreen);
                 if (panelIdx != 0)
                     label[0] = '2';
-                cUIMenu_setSelectedByIndex_3338(*(void**)((char*)self + panelIdx * 0x34 + 0x6D0), 0);
-                int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(label));
+                cUIMenu_setSelectedByIndex_3338(*(void**)((char*)this + panelIdx * 0x34 + 0x6D0), 0);
+                int frame = cUIScreen_getFrameByLabel((cUIScreen*)mpScreen, GetHashValue32(label));
                 if (frame != cUIScreen::kNoFrame)
-                    cUIScreen_playFrame(self->mpScreen, frame, 1);
+                    cUIScreen_playFrame(mpScreen, frame, 1);
                 if (isNet_2DB0())
                     func_00265700(cSetupMan_mSetupMan);
             }

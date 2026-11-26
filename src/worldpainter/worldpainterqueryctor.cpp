@@ -232,61 +232,63 @@ static inline void set_0778(tWPInGameData* o, float* d, float v)
  * @param blend  the blend weight, or -99999 for the distance rule (On Tour blend)
  * @return the query's result (On Tour const tWPInGameData*)
  */
-extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* self, float x, float z, float blend)
+const tWPInGameData* cWorldPainterQuery::queryPosition(float x, float z, float blend)
 {
     int first = 1;
     cWorldPainterMan* map = SSXApp->Game->World->m_pWorldPainterMan;
-    if ((self->m_data)->m_wpTravelDistance != -99999.0f) {
+    if (m_data->m_wpTravelDistance != -99999.0f) {
         first = 0;
     }
     if (!first) {
-        float dx = self->m_x - x;
-        float dz = self->m_y - z;
-        (self->m_data)->m_wpTravelDistance += Sqrt_0778(dx * dx + dz * dz);
+        float dx = m_x - x;
+        float dz = m_y - z;
+        m_data->m_wpTravelDistance += Sqrt_0778(dx * dx + dz * dz);
     }
     int idx = cWorldPainterMan_m_iCurrSection;
-    self->m_x = x;
-    self->m_y = z;
+    m_x = x;
+    m_y = z;
     while (valid_0778(&(map->m_pCache)[idx])) {
         cWorldPainterSection* entry = (cWorldPainterSection*)((char*)map->m_pCache + idx * (int)sizeof(cWorldPainterSection));
-        void* cell = ((sLayer_0778*)entry->m_pWPHeader)->cells[*(unsigned char*)&(*(unsigned int*)&self->m_regionType)];
+        void* cell = ((sLayer_0778*)entry->m_pWPHeader)->cells[*(unsigned char*)&(*(unsigned int*)&m_regionType)];
         if (cell == 0) {
             if (first) {
-                end_0778((self->m_data));
+                end_0778((m_data));
             }
             break;
         }
-        sHit_0778* hit = cWorldPainterQuery_lookupRegion_q(self, cell, self->m_x, self->m_y);
+        sHit_0778* hit = cWorldPainterQuery_lookupRegion_q(this, cell, m_x, m_y);
         if (hit == 0) {
             break;
         }
-        if (hit->key != ((*(unsigned int*)&self->m_regionType) >> 8)) {
-            return (self->m_data);
+        if (hit->key != ((*(unsigned int*)&m_regionType) >> 8)) {
+            return (m_data);
         }
-        if (((tTest_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData, (self->m_data)))[68].fn)((char*)(self->m_data) + ((sOutVt_0778*)VPTR_OF(tWPInGameData, (self->m_data)))[68].delta, hit->data)) {
-            (self->m_data)->m_wpTravelDistance = 0.0f;
+        if (((tTest_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData,
+                (m_data)))[68].fn)((char*)(m_data) + ((sOutVt_0778*)VPTR_OF(tWPInGameData, (m_data)))[68].delta,
+                hit->data)) {
+            m_data->m_wpTravelDistance = 0.0f;
         }
         if (first) {
-            set_0778((self->m_data), hit->data, -1.0f);
-            (self->m_data)->m_wpTravelDistance = 0.0f;
-            return (self->m_data);
+            set_0778((m_data), hit->data, -1.0f);
+            m_data->m_wpTravelDistance = 0.0f;
+            return (m_data);
         }
         if (blend == -99999.0f) {
             blend = 0.0f;
             float layerValue = *hit->data;
-            if (blend <= layerValue && layerValue <= (self->m_data)->m_wpTravelDistance) {
-                set_0778((self->m_data), hit->data, 1.0f);
-                (self->m_data)->m_wpTravelDistance = blend;
+            if (blend <= layerValue && layerValue <= m_data->m_wpTravelDistance) {
+                set_0778((m_data), hit->data, 1.0f);
+                m_data->m_wpTravelDistance = blend;
             } else {
-                set_0778((self->m_data), hit->data, -*hit->data);
+                set_0778((m_data), hit->data, -*hit->data);
             }
         } else {
-            set_0778((self->m_data), hit->data, blend);
+            set_0778((m_data), hit->data, blend);
         }
-        return (self->m_data);
+        return (m_data);
     }
-    end_0778((self->m_data));
-    return (self->m_data);
+    end_0778((m_data));
+    return (m_data);
 }
 #endif
 

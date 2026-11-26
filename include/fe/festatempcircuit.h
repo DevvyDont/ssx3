@@ -21,6 +21,11 @@ struct cFEStateMPCircuit : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateMPCircuit1() __asm__("cFEStateMPCircuit_cFEStateMPCircuit1");
+    // retail's destructor cFEStateMPCircuit__cFEStateMPCircuit stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateMPCircuit();
+    virtual void onCreateScreen() __asm__("cFEStateMPCircuit_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateMPCircuit_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateMPCircuit, 0x48);

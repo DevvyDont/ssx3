@@ -39,11 +39,11 @@ extern char str_Bitmap0000_b[];
  * Hints cycle through kT_FEHINTTitle%d / kT_FEHINTDES%d numbers 1-15, skipping 12 (counter D_004A2C38). The
  * image comes from the load info at +0x48 (its word at +0x10) and goes on the "Bitmap0000" widget.
  */
-extern "C" void cFELoadHintState_onCreateScreen(cFELoadHintState* self)
+void cFELoadHintState::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_101QPMPHints), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_101QPMPHints), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -57,17 +57,17 @@ extern "C" void cFELoadHintState_onCreateScreen(cFELoadHintState* self)
     sprintf(title, str_kT_FEHINTTitlepct_d, n);
     sprintf(body, str_kT_FEHINTDESpct_d, n);
     D_004A2C38 = (D_004A2C38 + 1) % 15;
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hint_title));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hint_title));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(title));
     }
-    text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hint_body));
+    text = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hint_body));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(body));
     }
-    cUIIcon* icon = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000_b));
+    cUIIcon* icon = (cUIIcon*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Bitmap0000_b));
     if (((char*)icon) != 0) {
-        cFELoadScreen* loadInfo = self->mpParentModule;
+        cFELoadScreen* loadInfo = mpParentModule;
         if (((char*)loadInfo) != 0) {
             int textureId = loadInfo->mTexID[0];
             if (textureId != 0) {
@@ -160,22 +160,22 @@ extern char str_100QPStat[];
  * The online check is the new-race game path (newRace.cGamePath == kGAMEPATH_MULTIPLAYER); the two-player screen is
  * filled with InitwidgetMultiP() for players 0 and 1.
  */
-extern "C" void cFELoadState_onCreateScreen(cFELoadState* self)
+void cFELoadState::onCreateScreen()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        void* engine = self->mpEngine;
-        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_103MPStat), 0);
-        self->mpScreen = (cUIScreen*)screen;
+        void* engine = mpEngine;
+        void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_103MPStat), 0);
+        mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
-            cFELoadState_InitwidgetMultiP(self, 0);
-            cFELoadState_InitwidgetMultiP(self, 1);
+            cFELoadState_InitwidgetMultiP(this, 0);
+            cFELoadState_InitwidgetMultiP(this, 1);
         }
     } else {
-        void* engine = self->mpEngine;
-        void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_100QPStat), 0);
-        self->mpScreen = (cUIScreen*)screen;
+        void* engine = mpEngine;
+        void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_100QPStat), 0);
+        mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
@@ -228,11 +228,11 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
  *
  * @param widget  the widget being created
  */
-extern "C" void cFELoadState_onWidgetCreate(cFELoadState* self, cUIThing* widget)
+void cFELoadState::onWidgetCreate(cUIThing* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER) {
-        self->widgetCreateQP(widget);
+        widgetCreateQP(widget);
     }
 }
 #endif
@@ -269,11 +269,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the in-lodge loading screen ("117loadinlodge") and plays its first frame.
  */
-extern "C" void cFELoadStateInLodge_onCreateScreen(cFELoadStateInLodge* self)
+void cFELoadStateInLodge::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_117loadinlodge), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_117loadinlodge), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }

@@ -57,6 +57,10 @@ struct cOVState_REPLAY : public cOVState {
     // Methods bound to their retail symbols by asm labels.
     void setupCameraName() __asm__("cOVState_REPLAY_setupCameraName");
     void setupTicker() __asm__("cOVState_REPLAY_setupTicker");
+    // retail's destructor cOVState_REPLAY__cOVState_REPLAY stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_REPLAY();
+    virtual void onUpdate() __asm__("cOVState_REPLAY_onUpdate");
 };
 
 CHECK_OFFSET(cOVState_REPLAY, mShowPopupMenu, 0x9C);

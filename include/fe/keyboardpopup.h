@@ -205,6 +205,14 @@ struct cKeyboardPopup : public cUIState {
     int isAcceptText() __asm__("cKeyboardPopup_isAcceptText");
     void cursorRight() __asm__("cKeyboardPopup_cursorRight");
     void cursorLeft() __asm__("cKeyboardPopup_cursorLeft");
+    // retail's destructor cKeyboardPopup__cKeyboardPopup stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cKeyboardPopup();
+    virtual void onCreateScreen() __asm__("cKeyboardPopup_onCreateScreen");
+    virtual void onUpdate() __asm__("cKeyboardPopup_onUpdate");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cKeyboardPopup_onWidgetCreate");
+    virtual bool onGainTransition(int first) __asm__("cKeyboardPopup_onGainTransition");
+    virtual bool onInputBegin(cUIInput* ev) __asm__("cKeyboardPopup_onInputBegin");
 };
 
 CHECK_OFFSET(cKeyboardPopup, mpBackCompact, 0x48);

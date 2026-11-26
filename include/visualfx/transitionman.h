@@ -175,6 +175,11 @@ struct cTransitionMan : public cObjNode {
     int GetTransitionInitiator() __asm__("cTransitionMan_GetTransitionInitiator");
     int GetViewIndex() __asm__("cTransitionMan_GetViewIndex__FPv");
     int IsUsingTexture() __asm__("cTransitionMan_IsUsingTexture");
+    // retail's destructor cTransitionMan__cTransitionMan stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cTransitionMan();
+    virtual void update() __asm__("cTransitionMan_update");
+    virtual void render() __asm__("cTransitionMan_render");
 };
 
 CHECK_OFFSET(cTransitionMan, mObjType, 0x10);

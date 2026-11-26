@@ -46,7 +46,7 @@ public:
     // (class cGameModeHandler) where On Tour has the method (purge and the two cleanRiderRanks* are retail's only).
     virtual ~cGameModeHandler();                                          // 1
     virtual void init();                                                  // 2
-    virtual void purge();                                                 // 3
+    virtual void purge() __asm__("cGameModeHandler_purge");                                                 // 3
     virtual void cleanRiderRanksPoints();                                 // 4
     virtual void cleanRiderRanksTime();                                   // 5
     virtual bool riderCheckpointHit(int iRider, int iSecsAdded);          // 6
@@ -68,6 +68,14 @@ struct cGMBigAirHandler : public cGameModeHandler {
     unsigned int uiScore[3][10];    // 0x04 [R] init clears 0x78 bytes; [U] getHeatScore returns uiScore[heat][rider]
                                     //      (row stride 0x28), raceFinish / cGMBigAirHandler_fillScoreTable fill it. Quirk: the replay
                                     //      slots 10 / 11 write and read 0xA0 bytes from 0x04, 0x28 past the object
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGMBigAirHandler__cGMBigAirHandler stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGMBigAirHandler();
+    virtual void init() __asm__("cGMBigAirHandler_init");
+    virtual bool riderCheckpointHit(int player, int secs) __asm__("cGMBigAirHandler_riderCheckpointHit");
+    virtual unsigned int getHeatScore(int col, int row) __asm__("cGMBigAirHandler_getHeatScore");
 };
 
 CHECK_OFFSET(cGMBigAirHandler, uiScore, 0x04);
@@ -89,6 +97,13 @@ struct cGMRaceHandler : public cGameModeHandler {
                                     //      copies row iHeatNum - 1 into cGameModeMan's iCharacters
     unsigned int uiTime[3][10];     // 0x58 [O] uiTime (On Tour [62][3], rider-major); [U] retail is heat-major:
                                     //      init fills rows with 9s, raceFinish stores tbl[heat][rider] (360000 = DNF)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGMRaceHandler__cGMRaceHandler stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGMRaceHandler();
+    virtual void init() __asm__("cGMRaceHandler_init");
+    virtual void raceFinish(int idx) __asm__("cGMRaceHandler_raceFinish");
 };
 
 CHECK_OFFSET(cGMRaceHandler, unk_04, 0x04);
@@ -105,6 +120,12 @@ struct cGMMPRaceHandler : public cGameModeHandler {
     // 0x00: the vptr: [R] cGMMPRaceHandler_vtbl
     unsigned int uiTime[10];        // 0x04 [O] uiTime (On Tour [62]); [U] init fills 9s (40 bytes), raceFinish stores
                                     //      each rider's finish tick (360000 = DNF) and copies it to D_00536640
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGMMPRaceHandler__cGMMPRaceHandler stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGMMPRaceHandler();
+    virtual void init() __asm__("cGMMPRaceHandler_init");
 };
 
 CHECK_OFFSET(cGMMPRaceHandler, uiTime, 0x04);
@@ -118,6 +139,14 @@ struct cGMMPSlopeHandler : public cGameModeHandler {
     // 0x00: the vptr: [R] cGMMPSlopeHandler_vtbl
     short LastCheckpointHit[2];     // 0x04 [O] short LastCheckpointHit[2]; [R] init clears both (sh 0x4 / 0x6);
                                     //      [U] riderCheckpointHit counts per player and compares with the other
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGMMPSlopeHandler__cGMMPSlopeHandler stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGMMPSlopeHandler();
+    virtual void init() __asm__("cGMMPSlopeHandler_init");
+    virtual void raceFinish(int idx) __asm__("cGMMPSlopeHandler_raceFinish");
+    virtual bool riderCheckpointHit(int player, int secs) __asm__("cGMMPSlopeHandler_riderCheckpointHit");
 };
 
 CHECK_OFFSET(cGMMPSlopeHandler, LastCheckpointHit, 0x04);
@@ -134,6 +163,13 @@ struct cGMTimeHandler : public cGameModeHandler {
                                     //      cBENewRaceInterface_getPeakSplitTimePoints and increments it
     short mCurrentDifficulty;       // 0x0A [O]; [R] init: 0 / 1 / 2 from the best medal won (the goal tier);
                                     //      [U] riderCheckpointHit
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGMTimeHandler__cGMTimeHandler stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGMTimeHandler();
+    virtual void init() __asm__("cGMTimeHandler_init");
+    virtual void raceFinish(int riderIndex) __asm__("cGMTimeHandler_raceFinish");
 };
 
 CHECK_OFFSET(cGMTimeHandler, uiTimeToBeat, 0x04);
@@ -150,6 +186,13 @@ struct cGMPointHandler : public cGameModeHandler {
                                     //      also cGameModeMan's uiPointTarget
     unsigned short uiTrackProgress; // 0x08 [O]; [R] init 0; [U] riderCheckpointHit passes it on and increments it
     short mCurrentDifficulty;       // 0x0A [O]; [R] init: the goal tier from the best medal; [U] riderCheckpointHit
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGMPointHandler__cGMPointHandler stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGMPointHandler();
+    virtual void init() __asm__("cGMPointHandler_init");
+    virtual void raceFinish(int idx) __asm__("cGMPointHandler_raceFinish");
 };
 
 CHECK_OFFSET(cGMPointHandler, uiScoreToBeat, 0x04);

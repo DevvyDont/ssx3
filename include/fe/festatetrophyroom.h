@@ -76,6 +76,12 @@ struct cFEStateTrophyRoom : public cFEState {
     void loadTextures() __asm__("cFEStateTrophyRoom_loadTextures");
     void updateTexturesLoad() __asm__("cFEStateTrophyRoom_updateTexturesLoad");
     void purgeTextures() __asm__("cFEStateTrophyRoom_purgeTextures");
+    // retail's destructor cFEStateTrophyRoom__cFEStateTrophyRoom stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateTrophyRoom();
+    virtual void onCreateScreen() __asm__("cFEStateTrophyRoom_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateTrophyRoom_onWidgetCreate");
+    virtual void onUpdate() __asm__("cFEStateTrophyRoom_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateTrophyRoom, mpBigIcon, 0x048);

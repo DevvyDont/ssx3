@@ -265,6 +265,10 @@ struct cOVStateHUD1P : public cUIState {
         __asm__("cOVStateHUD1P_renderMultiText");
     void renderMultiText1(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int flags, float* rect)
         __asm__("cOVStateHUD1P_renderMultiText1");
+    // retail's destructor cOVStateHUD1P__cOVStateHUD1P stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVStateHUD1P();
+    virtual void onCreateScreen() __asm__("cOVStateHUD1P_onCreateScreen");
 };
 
 CHECK_OFFSET(cTextureElement, mSourceShape, 0x00);
@@ -411,6 +415,12 @@ struct cOVStateHiScoreList : public cOVState {
     //       slot 4 and pushes the result on its stack (+0x18)
     //   mpScreen: [U] onCreateScreen stores the screen; cUIState_showObjSafe / hideObjSafe(this, ...) use it
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVStateHiScoreList__cOVStateHiScoreList stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVStateHiScoreList();
+    virtual void onCreateScreen() __asm__("cOVStateHiScoreList_onCreateScreen");
 };
 
 CHECK_SIZE(cOVStateHiScoreList, 0x9C);

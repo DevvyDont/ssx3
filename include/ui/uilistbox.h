@@ -73,8 +73,10 @@ struct cUIListBox : public cUIThing {
 
     // cUIListBox's own slots ([R] cUIListBox_vtbl; types [O] On Tour's class cUIListBox):
     virtual char getType();                                               // 22 cUIListBox_getType__FPv
-    virtual void setShadow(int a);                                        // 23 cUIListBox_setShadow
-    virtual void setUseStaticColour(int a);                               // 24 cUIListBox_setUseStaticColour
+    virtual void setShadow(int a)
+        __asm__("cUIListBox_setShadow");                                        // 23 cUIListBox_setShadow
+    virtual void setUseStaticColour(int a)
+        __asm__("cUIListBox_setUseStaticColour");                               // 24 cUIListBox_setUseStaticColour
     tAttrListBox mAttrListBox;       // 0x074 [O] tAttrListBox; [R] the ctor cUIListBox_cUIListBox sets mShadow, clears mUnicode /
                                      //       mCallback (lbu/sb 0x74), cUIListBox_cUIListBox1 calls its ctor tAttrListBox_tAttrListBox; [U] setUIData
                                      //       cUIListBox_setUIData (lw/sw), accessors cUIListBox_setFontIndex..cUIListBox_setUseStaticColour (lw/sw)
@@ -112,6 +114,8 @@ struct cUIListBox : public cUIThing {
     void setStaticColour(tARGB* in) __asm__("cUIListBox_setStaticColour");
     unsigned char getCurrentEntryIndex() __asm__("cUIListBox_getCurrentEntryIndex");
     unsigned char getNumEntries() __asm__("cUIListBox_getNumEntries");
+    virtual void updateLocale() __asm__("cUIListBox_updateLocale");
+    virtual void render2D(float x, float y) __asm__("cUIListBox_render2D");
 };
 
 CHECK_OFFSET(cUIListBox, mAttrListBox, 0x074);

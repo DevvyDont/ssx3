@@ -33,6 +33,10 @@ struct cFEStateRuleSelect : public cUIState {
     int getBEData(int rule) __asm__("cFEStateRuleSelect_getBEData");
     void checkConflictForMenu(cUIListBox* item) __asm__("cFEStateRuleSelect_checkConflictForMenu");
     void updateMenuColor() __asm__("cFEStateRuleSelect_updateMenuColor");
+    // retail's destructor cFEStateRuleSelect__cFEStateRuleSelect stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateRuleSelect();
+    virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cFEStateRuleSelect_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateRuleSelect, mpGameEventMapping, 0x048);
@@ -153,6 +157,11 @@ struct cFEStateBraggingRights : public cFEStateNet {
     void* cFEStateBraggingRights1() __asm__("cFEStateBraggingRights_cFEStateBraggingRights1");
     void updateBE(int player, int which, int value) __asm__("cFEStateBraggingRights_updateBE");
     void updateConfirmedState() __asm__("cFEStateBraggingRights_updateConfirmedState");
+    // retail's destructor cFEStateBraggingRights__cFEStateBraggingRights stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateBraggingRights();
+    virtual void onCreateScreen() __asm__("cFEStateBraggingRights_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateBraggingRights_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);

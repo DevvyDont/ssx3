@@ -48,18 +48,18 @@ struct cWScriptTask {
     virtual void update();                                         // 2
     virtual void dispatchTaskEvent(const struct tWScriptEvent& event); // 3
     virtual void taskStart();                                      // 4
-    virtual void taskUpdate();                                     // 5
+    virtual void taskUpdate() __asm__("cWScriptTask_taskUpdate");                                     // 5
     virtual void taskEnd();                                        // 6
-    virtual void eventOnCollide();                                 // 7
-    virtual void eventOnJump();                                    // 8
-    virtual void eventOnLand();                                    // 9
-    virtual void eventOnTrick();                                   // 10
-    virtual void eventOnWipeout();                                 // 11
-    virtual void eventOnReset();                                   // 12
-    virtual void eventOnCollect();                                 // 13
-    virtual void eventOnEvent1();                                  // 14
-    virtual void eventOnEvent2();                                  // 15
-    virtual void eventOnEvent3();                                  // 16
+    virtual void eventOnCollide() __asm__("cWScriptTask_eventOnCollide");                                 // 7
+    virtual void eventOnJump() __asm__("cWScriptTask_eventOnJump");                                    // 8
+    virtual void eventOnLand() __asm__("cWScriptTask_eventOnLand");                                    // 9
+    virtual void eventOnTrick() __asm__("cWScriptTask_eventOnTrick");                                   // 10
+    virtual void eventOnWipeout() __asm__("cWScriptTask_eventOnWipeout");                                 // 11
+    virtual void eventOnReset() __asm__("cWScriptTask_eventOnReset");                                   // 12
+    virtual void eventOnCollect() __asm__("cWScriptTask_eventOnCollect");                                 // 13
+    virtual void eventOnEvent1() __asm__("cWScriptTask_eventOnEvent1");                                  // 14
+    virtual void eventOnEvent2() __asm__("cWScriptTask_eventOnEvent2");                                  // 15
+    virtual void eventOnEvent3() __asm__("cWScriptTask_eventOnEvent3");                                  // 16
 
     // Methods bound to their retail symbols by asm labels.
     int getLocalTable() __asm__("cWScriptTask_getLocalTable");

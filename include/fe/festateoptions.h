@@ -58,6 +58,12 @@ struct cFEStateOptionsController : public cFEState {
     void updateWidget() __asm__("cFEStateOptionsController_updateWidget");
     void displayPadConfig(int on) __asm__("cFEStateOptionsController_displayPadConfig");
     void vibratePad(int idx, float x, float y) __asm__("cFEStateOptionsController_vibratePad");
+    // retail's destructor cFEStateOptionsController__cFEStateOptionsController stays a C function (g++ 2.95 takes no
+    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOptionsController();
+    virtual void onCreateScreen() __asm__("cFEStateOptionsController_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsController_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEStateOptionsController_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateOptionsController, mTimer, 0x048);
@@ -128,6 +134,17 @@ struct cFEStateOptionsDeviceSelect : public cFEMemCard {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateOptionsDeviceSelect1(int engine, int cardMode, int isSave, int isOnline)
         __asm__("cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1");
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect stays a C function (g++ 2.95 takes
+    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOptionsDeviceSelect();
+    virtual void onCreateScreen() __asm__("cFEStateOptionsDeviceSelect_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event)
+        __asm__("cFEStateOptionsDeviceSelect_onWidgetEvent");
+    virtual void hideActionButtons(int on) __asm__("cFEStateOptionsDeviceSelect_hideActionButtons");
+    virtual void updateDone() __asm__("cFEStateOptionsDeviceSelect_updateDone");
+    virtual void displayStatus() __asm__("cFEStateOptionsDeviceSelect_displayStatus");
 };
 
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsSaveScreen, 0x22C);
@@ -183,6 +200,13 @@ struct cFEStateOptions : public cFEState {
 
     // Methods bound to their retail symbols by asm labels.
     void saveOptionPrompt() __asm__("cFEStateOptions_saveOptionPrompt");
+    // retail's destructor cFEStateOptions__cFEStateOptions stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOptions();
+    virtual void onCreateScreen() __asm__("cFEStateOptions_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateOptions_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptions_onWidgetEvent");
+    virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateOptions_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateOptions, mbToSaveOptionScreen, 0x048);
@@ -228,6 +252,13 @@ struct cFEStateOptionsSaveLoad : public cFEState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateOptionsSaveLoad1() __asm__("cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1");
+    // retail's destructor cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateOptionsSaveLoad();
+    virtual void onCreateScreen() __asm__("cFEStateOptionsSaveLoad_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateOptionsSaveLoad_onWidgetCreate");
+    virtual void onPreRender2D() __asm__("cFEStateOptionsSaveLoad_onPreRender2D");
+    virtual void onPopupEvent(cUIState* widget, unsigned int event) __asm__("cFEStateOptionsSaveLoad_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateOptionsSaveLoad, mSaveLoadCurrentCtrl, 0x048);

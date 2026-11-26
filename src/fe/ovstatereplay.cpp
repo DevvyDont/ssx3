@@ -310,12 +310,11 @@ extern char str_bottom[];
  * +0xB0); "hidehelp" shows at the start, "showhelp" at the end, and "bottom" takes the position as its y.
  * "ReplayMenuPopup" shows while the menu is open, else the replay advances (cReplay_updateCameraSelect).
  *
- * @param vself  the replay overlay state (this)
  */
-extern "C" void cOVState_REPLAY_onUpdate(cOVState_REPLAY* vself)
+void cOVState_REPLAY::onUpdate()
 {
-    cOVState_REPLAY* self = vself;
-    cOVState_onUpdate((cOVState*)self);
+    cOVState_REPLAY* self = this;
+    self->cOVState::onUpdate();
     self->mBottom_y += self->mBottom_ydiff;
     if (self->mBottom_y <= self->mMinBottom_y) {
         self->mBottom_y = self->mMinBottom_y;
@@ -473,10 +472,10 @@ extern "C" void cUIState_onUpdate(void* self);
 /**
  * Updates the overlay state: calls cGame_activatePauseMenu(SSXApp->Game, 1), then the UI-screen update cUIState_onUpdate().
  */
-extern "C" void cOVState_onUpdate(cOVState* self)
+void cOVState::onUpdate()
 {
     cGame_activatePauseMenu(SSXApp->Game, 1);
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(this);
 }
 #endif
 

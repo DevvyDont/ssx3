@@ -198,14 +198,17 @@ public:
     virtual bool GetDTV();                                                                               // slot 9: [R] cPS2GraphicsMan_GetDTV__FPv; parameters [O]
     virtual int GetScreenWidth() = 0;                                                                    // slot 10: [R] cPS2GraphicsMan_GetScreenWidth
     virtual int GetScreenHeight() = 0;                                                                   // slot 11: [R] cPS2GraphicsMan_GetScreenHeight
-    virtual void SetScreenOffset(int xoffset, int yoffset);                                              // slot 12: [R] cGraphicsMan_SetScreenOffset
-    virtual int GetScreenXOffset();                                                                      // slot 13: [R] cGraphicsMan_GetScreenXOffset
-    virtual int GetScreenYOffset();                                                                      // slot 14: [R] cGraphicsMan_GetScreenYOffset
+    // slot 12: [R] cGraphicsMan_SetScreenOffset
+    virtual void SetScreenOffset(int xoffset, int yoffset) __asm__("cGraphicsMan_SetScreenOffset");
+    // slot 13: [R] cGraphicsMan_GetScreenXOffset
+    virtual int GetScreenXOffset() __asm__("cGraphicsMan_GetScreenXOffset");
+    // slot 14: [R] cGraphicsMan_GetScreenYOffset
+    virtual int GetScreenYOffset() __asm__("cGraphicsMan_GetScreenYOffset");
     virtual void SetScreenClearColour(const tRGB& col) = 0;                                              // slot 15: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetScreenClearColour
     virtual void SetAIUpdatesPerRender(int aiupdatesperrender);                                          // slot 16: [R] cGraphicsMan_SetAIUpdatesPerRender__FPv; parameters [O]
     virtual bool IsRenderReady();                                                                        // slot 17: [R] cPS2GraphicsMan_IsRenderReady__FPv; parameters [O]
     virtual bool IsRenderIdle();                                                                         // slot 18: [R] cPS2GraphicsMan_IsRenderIdle__FPv; parameters [O]
-    virtual void FlushRenderer();                                                                        // slot 19: [R] cGraphicsMan_FlushRenderer
+    virtual void FlushRenderer() __asm__("cGraphicsMan_FlushRenderer"); // slot 19: [R] cGraphicsMan_FlushRenderer
     virtual void DrawFrame() = 0;                                                                        // slot 20: [R] cPS2GraphicsMan_DrawFrame
     virtual void PushViewport() = 0;                                                                     // slot 21: [R] cPS2GraphicsMan_PushViewport
     virtual void PopViewport() = 0;                                                                      // slot 22: [R] cPS2GraphicsMan_PopViewport

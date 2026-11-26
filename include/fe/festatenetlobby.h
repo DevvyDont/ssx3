@@ -92,6 +92,13 @@ struct cFEStateLobbyMenu : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateLobbyMenu1() __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu1");
+    // retail's destructor cFEStateLobbyMenu__cFEStateLobbyMenu stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateLobbyMenu();
+    virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateLobbyMenu_onPopupEvent");
+    virtual void onCreateScreen() __asm__("cFEStateLobbyMenu_onCreateScreen");
+    virtual bool onGainTransition(int reset) __asm__("cFEStateLobbyMenu_onGainTransition");
+    virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateLobbyMenu_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateLobbyMenu, mpMenuPlayers, 0x6D0);

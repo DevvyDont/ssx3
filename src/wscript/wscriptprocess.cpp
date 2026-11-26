@@ -1014,11 +1014,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-collide script (EventScriptCode[0], +0x14), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnCollide(cWScriptTask* self)
+void cWScriptTask::eventOnCollide()
 {
-    void* script = self->EventScriptCode[0];
+    void* script = EventScriptCode[0];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1032,11 +1032,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-jump script (EventScriptCode[1], +0x18), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnJump(cWScriptTask* self)
+void cWScriptTask::eventOnJump()
 {
-    void* script = self->EventScriptCode[1];
+    void* script = EventScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1050,11 +1050,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-land script (EventScriptCode[2], +0x1C), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnLand(cWScriptTask* self)
+void cWScriptTask::eventOnLand()
 {
-    void* script = self->EventScriptCode[2];
+    void* script = EventScriptCode[2];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1068,11 +1068,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-trick script (EventScriptCode[3], +0x20), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnTrick(cWScriptTask* self)
+void cWScriptTask::eventOnTrick()
 {
-    void* script = self->EventScriptCode[3];
+    void* script = EventScriptCode[3];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1086,11 +1086,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-wipeout script (EventScriptCode[4], +0x24), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnWipeout(cWScriptTask* self)
+void cWScriptTask::eventOnWipeout()
 {
-    void* script = self->EventScriptCode[4];
+    void* script = EventScriptCode[4];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1104,11 +1104,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-reset script (EventScriptCode[5], +0x28), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnReset(cWScriptTask* self)
+void cWScriptTask::eventOnReset()
 {
-    void* script = self->EventScriptCode[5];
+    void* script = EventScriptCode[5];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1122,11 +1122,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-collect script (EventScriptCode[6], +0x2C), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnCollect(cWScriptTask* self)
+void cWScriptTask::eventOnCollect()
 {
-    void* script = self->EventScriptCode[6];
+    void* script = EventScriptCode[6];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1140,11 +1140,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's event-1 script (EventScriptCode[7], +0x30), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnEvent1(cWScriptTask* self)
+void cWScriptTask::eventOnEvent1()
 {
-    void* script = self->EventScriptCode[7];
+    void* script = EventScriptCode[7];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1158,11 +1158,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's event-2 script (EventScriptCode[8], +0x34), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnEvent2(cWScriptTask* self)
+void cWScriptTask::eventOnEvent2()
 {
-    void* script = self->EventScriptCode[8];
+    void* script = EventScriptCode[8];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1176,11 +1176,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's event-3 script (EventScriptCode[9], +0x38), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnEvent3(cWScriptTask* self)
+void cWScriptTask::eventOnEvent3()
 {
-    void* script = self->EventScriptCode[9];
+    void* script = EventScriptCode[9];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif
@@ -1215,11 +1215,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's update script (TaskScriptCode[1], +0xC), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_taskUpdate(cWScriptTask* self)
+void cWScriptTask::taskUpdate()
 {
-    void* script = self->TaskScriptCode[1];
+    void* script = TaskScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+        cWScriptMan_runScriptCode1(Process->Manager, this, script);
     }
 }
 #endif

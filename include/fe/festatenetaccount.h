@@ -82,6 +82,11 @@ struct cFEUseExistingAccount : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEUseExistingAccount1() __asm__("cFEUseExistingAccount_cFEUseExistingAccount1");
+    // retail's destructor cFEUseExistingAccount__cFEUseExistingAccount stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEUseExistingAccount();
+    virtual void onCreateScreen() __asm__("cFEUseExistingAccount_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEUseExistingAccount_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEUseExistingAccount, unk_6D0, 0x6D0);
@@ -119,6 +124,10 @@ struct cFEStateSelectPersona : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateSelectPersona1() __asm__("cFEStateSelectPersona_cFEStateSelectPersona1");
+    // retail's destructor cFEStateSelectPersona__cFEStateSelectPersona stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateSelectPersona();
+    virtual void onCreateScreen() __asm__("cFEStateSelectPersona_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateSelectPersona, mbExistingPersona, 0x6D0);

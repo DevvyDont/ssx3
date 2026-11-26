@@ -35,11 +35,11 @@ extern "C" void cFERider_setVisible(void* self, int a1);
  * and a field of view of 0.436 (25 degrees). Calls cFERider_setVisible with 0 on the user's front-end rider, sets
  * +0x80 to 1, +0x5C to -1 and +0x58 and +0x60 to 0.
  */
-extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
+void cFEStateCharSelect::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_08sel_char), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_08sel_char), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -56,11 +56,11 @@ extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
     lookAt.w = 1.0f;
     cSimpleCamera_setupCamWithPosAndTarget(&cam->mCamera, &pos, &lookAt);
     cam->mCamera.View = 0.4363323450088501f;
-    cFERider_setVisible(cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
-    self->mbDraw3D = 1;
-    self->mPan = -1.0f;
-    *(int*)&self->mZoom = 0;
-    *(int*)&self->mPlayerRotation = 0;
+    cFERider_setVisible(cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum), 0);
+    mbDraw3D = 1;
+    mPan = -1.0f;
+    *(int*)&mZoom = 0;
+    *(int*)&mPlayerRotation = 0;
 }
 #endif
 
@@ -80,14 +80,14 @@ void* cUIState_onDestroyScreen(void* self);
  * The rider (cFE::mRiderManager slot for mUserNum) gets cFERider_setVisible with 0, then cUIState_onDestroyScreen()
  * runs.
  */
-extern "C" void cFEStateCharSelect_onDestroyScreen(cFEStateCharSelect* self)
+void cFEStateCharSelect::onDestroyScreen()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cFE* mgr = SSXApp->RealFE;
     if (((char*)mgr) != 0 && cBENewRaceInterface_newRace.cGamePath != 0) {
-        cFERider_setVisible(cFERiderManager_getHuman1(&mgr->mRiderManager, self->mUserNum), 0);
+        cFERider_setVisible(cFERiderManager_getHuman1(&mgr->mRiderManager, mUserNum), 0);
     }
-    cUIState_onDestroyScreen(self);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -109,13 +109,13 @@ extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed ch
  * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateCharSelect_onGainTransition(cFEStateCharSelect* self, int on)
+bool cFEStateCharSelect::onGainTransition(int on)
 {
     if (on != 0) {
-        int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
-        cFEStateCharSelect_updateWidget(self, self->mUserNum, id);
+        int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
+        cFEStateCharSelect_updateWidget(this, mUserNum, id);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -194,10 +194,10 @@ extern "C" void* cUIState_onUpdate(void* self);
  * asks for it. cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and
  * its screens.
  */
-extern "C" void cFEStateCharSelect_onUpdate(cFEStateCharSelect* self)
+void cFEStateCharSelect::onUpdate()
 {
-    self->updateCharacter3DPos();
-    cUIState_onUpdate(self);
+    updateCharacter3DPos();
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -249,19 +249,19 @@ static inline float clamp_1450(float v, float lo, float hi)
  * @param pInput  the input object
  * @return 1 when any of the values changed, else 0
  */
-extern "C" int cFEStateCharSelect_onInputBegin(cFEStateCharSelect* self, cUIInput* pInput)
+bool cFEStateCharSelect::onInputBegin(cUIInput* pInput)
 {
     int changed = 0;
     if (padBtn_1450(((char*)pInput), 35)) {
-        self->mPlayerRotation += padAxis_1450(((char*)pInput), 38) * 3.0f;
-        if (self->mPlayerRotation >= 360.0f) {
-            float angle = self->mPlayerRotation;
+        mPlayerRotation += padAxis_1450(((char*)pInput), 38) * 3.0f;
+        if (mPlayerRotation >= 360.0f) {
+            float angle = mPlayerRotation;
             do
                 angle -= 360.0f;
             while (angle >= 360.0f);
-            self->mPlayerRotation = angle;
+            mPlayerRotation = angle;
         }
-        float angle = self->mPlayerRotation;
+        float angle = mPlayerRotation;
         float minAngle = 0.0f;
         if (angle < minAngle) {
             float wrapped;
@@ -269,16 +269,16 @@ extern "C" int cFEStateCharSelect_onInputBegin(cFEStateCharSelect* self, cUIInpu
                 wrapped = angle + 360.0f;
                 angle = wrapped;
             } while (wrapped < minAngle);
-            self->mPlayerRotation = wrapped;
+            mPlayerRotation = wrapped;
         }
         changed = 1;
     }
     if (padBtn_1450(((char*)pInput), 33)) {
-        self->mZoom = clamp_1450(self->mZoom + padAxis_1450(((char*)pInput), 36) * -0.10000000149011612f, 0.0f, 1.0f);
+        mZoom = clamp_1450(mZoom + padAxis_1450(((char*)pInput), 36) * -0.10000000149011612f, 0.0f, 1.0f);
         changed = 1;
     }
     if (padBtn_1450(((char*)pInput), 34)) {
-        self->mPan = clamp_1450(self->mPan + padAxis_1450(((char*)pInput), 37) * -0.10000000149011612f, -1.0f, 1.0f);
+        mPan = clamp_1450(mPan + padAxis_1450(((char*)pInput), 37) * -0.10000000149011612f, -1.0f, 1.0f);
         changed = 1;
     }
     return changed;
@@ -870,11 +870,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the cheat-character select screen "131cheat_char" and plays its first frame.
  */
-extern "C" void cFEStateCheatCharSelect_onCreateScreen(cFEStateCheatCharSelect* self)
+void cFEStateCheatCharSelect::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_131cheat_char), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_131cheat_char), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -998,7 +998,7 @@ extern char gBigSize[];
  * @param menu  the picture widget (ignored when 0); its id plus the menu's scroll offset is the entry
  * @param msg  the widget event
  */
-extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* self, cUIThing* menu, unsigned int msg)
+void cFEStateCheatCharSelect::onWidgetEvent(cUIThing* menu, unsigned int msg)
 {
     if (((void*)menu) == 0)
         return;
@@ -1008,26 +1008,26 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         break;
     }
     case cUIState::kONGAINFOCUS: {
-        int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
+        int sel = menu->mMiscData + mpMenu->mScrollItemOffset;
         menu->setSize((const t3Vector*)gBigSize);
-        cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
+        cUIText_setAsciiString(mpNameWidget, mpCharNames[sel]);
         break;
     }
     case cUIState::kONPREV:
-        self->mCheatCharID = 0;
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        mCheatCharID = 0;
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
         break;
     case cUIState::kONNEXT: {
-        int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
+        int sel = menu->mMiscData + mpMenu->mScrollItemOffset;
         if (sel == 0)
-            self->mCheatCharID = 0;
+            mCheatCharID = 0;
         else
-            self->mCheatCharID = self->mCharIDs[sel];
+            mCheatCharID = mCharIDs[sel];
         cBENewPlayerInterface* pl = (cBENewPlayerInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 1));
-        cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
+        cBENewPlayerInterface_setPlayerCheatCharID(pl, mUserNum, mCheatCharID);
         pl->submit();
-        self->mDone = 1;
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        mDone = 1;
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
         break;
     }
     }

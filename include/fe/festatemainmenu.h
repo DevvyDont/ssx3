@@ -28,6 +28,14 @@ struct cFEStateMainMenu : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateMainMenu1() __asm__("cFEStateMainMenu_cFEStateMainMenu1");
+    // retail's destructor cFEStateMainMenu__cFEStateMainMenu stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEStateMainMenu();
+    virtual void onCreateScreen() __asm__("cFEStateMainMenu_onCreateScreen");
+    virtual void onPreRender2D() __asm__("cFEStateMainMenu_onPreRender2D");
+    virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateMainMenu_onWidgetCreate");
+    virtual void onUpdate() __asm__("cFEStateMainMenu_onUpdate");
+    virtual void onWidgetEvent(cUIThing* item_, unsigned int type) __asm__("cFEStateMainMenu_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateMainMenu, mGoToNextState, 0x048);

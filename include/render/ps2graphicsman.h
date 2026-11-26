@@ -350,8 +350,10 @@ public:
     sViewportStack mViewportStack[4]; // 0x6D20 [P] sViewportStack; [R] ctor's fifth array loop (4); [U] mViewportDepth
     // [R] cPS2GraphicsMan_vtbl's slots past cGraphicsMan_vtbl's 121
     virtual void* SetDisplayMode();                                                                      // slot 122: [R] cPS2GraphicsMan_SetDisplayMode
-    virtual int GetDisplayMode(int width, int height, unsigned int bpp, unsigned int clutBpp, int fmt, int id); // slot 123: [R] cPS2GraphicsMan_GetDisplayMode
-    virtual void InitCharMatrices();                                                                     // slot 124: [R] cPS2GraphicsMan_InitCharMatrices
+    virtual int GetDisplayMode(int width, int height, unsigned int bpp, unsigned int clutBpp, int fmt, int id)
+        __asm__("cPS2GraphicsMan_GetDisplayMode"); // slot 123: [R] cPS2GraphicsMan_GetDisplayMode
+    // slot 124: [R] cPS2GraphicsMan_InitCharMatrices
+    virtual void InitCharMatrices() __asm__("cPS2GraphicsMan_InitCharMatrices");
 
     // Methods bound to their retail symbols by asm labels.
     int GetNumProjTextures() __asm__("cPS2GraphicsMan_GetNumProjTextures");
@@ -378,6 +380,32 @@ public:
     int CalcSortZ(void* vec) __asm__("cPS2GraphicsMan_CalcSortZ");
     int projOutCode(t4Vector* vec) __asm__("cPS2GraphicsMan_projOutCode");
     void PageFlip(int arg1) __asm__("cPS2GraphicsMan_PageFlip");
+    virtual void ClearProjTextures() __asm__("cPS2GraphicsMan_ClearProjTextures__FPv");
+    virtual void Purge() __asm__("cPS2GraphicsMan_Purge");
+    virtual bool SetDisplayMode1(int idx) __asm__("cPS2GraphicsMan_SetDisplayMode1");
+    virtual const char* GetDisplayModeName(int mode) __asm__("cPS2GraphicsMan_GetDisplayModeName");
+    virtual int SetDTV(int enable) __asm__("cPS2GraphicsMan_SetDTV");
+    virtual void PushViewport() __asm__("cPS2GraphicsMan_PushViewport");
+    virtual void PopViewport() __asm__("cPS2GraphicsMan_PopViewport");
+    virtual float GetViewportFOV() __asm__("cPS2GraphicsMan_GetViewportFOV");
+    virtual void SetViewportPerspective(float fov, float zNear, float zFar)
+        __asm__("cPS2GraphicsMan_SetViewportPerspective");
+    virtual void SetTVDisplayFormat(int mode) __asm__("cPS2GraphicsMan_SetTVDisplayFormat");
+    virtual void InitTextures(int memtype) __asm__("cPS2GraphicsMan_InitTextures");
+    virtual void PlatformPurgeTextures() __asm__("cPS2GraphicsMan_PlatformPurgeTextures");
+    virtual void SetTextureMemType() __asm__("cPS2GraphicsMan_SetTextureMemType");
+    virtual void RemoveTexture(int idx) __asm__("cPS2GraphicsMan_RemoveTexture");
+    virtual bool IsValidTexture(int idx) __asm__("cPS2GraphicsMan_IsValidTexture");
+    virtual bool RestoreFrameLock() __asm__("cPS2GraphicsMan_RestoreFrameLock");
+    virtual int GetTextureWidth(int idx) __asm__("cPS2GraphicsMan_GetTextureWidth");
+    virtual int GetTextureHeight(int idx) __asm__("cPS2GraphicsMan_GetTextureHeight");
+    virtual void DrawSphere(t4Vector* pos, float* col, float radius, int segs) __asm__("cPS2GraphicsMan_DrawSphere");
+    virtual void UpdateFullScreenEffects(int view) __asm__("cPS2GraphicsMan_UpdateFullScreenEffects");
+    virtual void RenderFullScreenEffects(int i) __asm__("cPS2GraphicsMan_RenderFullScreenEffects");
+    virtual void update() __asm__("cPS2GraphicsMan_update");
+    virtual void RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
+        __asm__("cPS2GraphicsMan_RenderMultipleBoardTrails");
+    virtual void loadexecpurge() __asm__("cPS2GraphicsMan_loadexecpurge");
 };
 
 // --- layout checks

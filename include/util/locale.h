@@ -95,7 +95,8 @@ public:
     char unk_0BE[0x2];              // 0x0BE tail padding
     // cFELocale_vtbl (0x0046BF98) [R]; slot 2 stays cUILocaleInterface_setDisplayMode
     virtual ~cFELocale();                                            // slot 1 cFELocale__cFELocale
-    virtual void setLanguage(signed char language);                  // slot 3 cFELocale_setLanguage
+    virtual void setLanguage(signed char language)
+        __asm__("cFELocale_setLanguage");                  // slot 3 cFELocale_setLanguage
     virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cFELocale_getStringByHash
     virtual unsigned short* getStringByIndex(unsigned int index);    // slot 5 cFELocale_getStringByIndex
 
