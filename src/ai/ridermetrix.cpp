@@ -198,7 +198,7 @@ void cRiderMetrix::reset()
     TrickHistoryPtr = 0;
     resetCurTrick();
     resetComboChain();
-    *(int*)&CurAvgSpeedCPS = 0;
+    CurAvgSpeedCPS = 0.0f;
     ComboResetDelay = -1.0f;
     MEM_fill(&ActiveFXListCache[0], 0, 8);
     IsActiveFXListCacheInvalid = 1;
@@ -398,9 +398,9 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  */
 void cRiderMetrix::resetCurTrick()
 {
-    *(int*)&CurTrickPower = 0;
+    CurTrickPower = 0.0f;
     CurTrickPointMult = 1.0f;
-    *(int*)&CurTrickStylePower = 0;
+    CurTrickStylePower = 0.0f;
     InitTrickIsFakie = 0;
     InitTrickIsPipe = 0;
     InitTrickIsLateSpin = 0;
@@ -411,12 +411,12 @@ void cRiderMetrix::resetCurTrick()
     CurTrickPressMode = 0;
     CurTrickPressSec = -1.0f;
     CurTrickAirSec = -1.0f;
-    *(int*)&CurTrickSpinAng = 0;
-    *(int*)&CurTrickFlipAng = 0;
-    *(int*)&CurGrabPowerPerTick = 0;
+    CurTrickSpinAng = 0.0f;
+    CurTrickFlipAng = 0.0f;
+    CurGrabPowerPerTick = 0.0f;
     CurGrabHoldSec = -1.0f;
-    *(int*)&CurTrickTotalGrabHoldSec = 0;
-    *(int*)&CurTrickMaxGrabHoldSec = 0;
+    CurTrickTotalGrabHoldSec = 0.0f;
+    CurTrickMaxGrabHoldSec = 0.0f;
     CurTrickNumGrabs = 0;
     CurTrickNumTweaks = 0;
     CurTrickNumUbers = 0;
@@ -1159,8 +1159,7 @@ void cRiderMetrix::updateStaticHUD()
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addTrick);
 #ifdef SKIP_ASM
-struct sTrickId;
-extern "C" void gGenTrickName(char* buf, sTrickId* id, int size);
+extern "C" void gGenTrickName(char* buf, tTrickNameDef* id, int size);
 extern "C" void cRiderMetrix_addHUDfx(void* self, int a, const char* b, float c, int d);
 extern "C" void cWScriptMan_eventTrick(void* self, void* d);
 extern void* cWScriptMan_TheWScriptMan;
@@ -1174,7 +1173,7 @@ extern void* cWScriptMan_TheWScriptMan;
  * @param id  the trick (On Tour tTrickNameDef *td)
  * @param repeat  On Tour isRepeat: the trick repeats a recent one
  */
-extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repeat)
+extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, tTrickNameDef* id, int repeat)
 {
     char buf[0x100];
     gGenTrickName(buf, id, 0xFF);
@@ -1216,12 +1215,6 @@ void cRiderMetrix::addGrab(int value)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addToHistory);
 #ifdef SKIP_ASM
-struct sTrickId;
-
-struct sTrickId190F0 {
-    int w0;
-    int w1;
-};
 
 
 static inline int func_trickIdEqual(const void* a, const void* b, int size)
@@ -1249,9 +1242,8 @@ static inline int func_trickIdEqual(const void* a, const void* b, int size)
  * @param id_  the trick name id (8 bytes)
  * @return the number of earlier copies
  */
-// sTrickId is defined later in the unit, hence the casts. Don't copy id_ into a typed
-// local: a separate local shifts every register by one.
-extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self_, sTrickId* id_)
+// Don't copy id_ into a local: a separate local shifts every register by one.
+extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self_, tTrickNameDef* id_)
 {
     cRiderMetrix* self = self_;
     int count;
@@ -1260,14 +1252,14 @@ extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self_, sTrickId* id_)
         return 0;
     }
     count = 0;
-    if ((((sTrickId190F0*)id_)->w1 & 0x3F800) != 0x800 && (((sTrickId190F0*)id_)->w0 & 0xFC00000) != 0x400000) {
+    if (id_->lateGrab != 1 && id_->special != 1) {
         for (int i = 0; i < 10; i++) {
-            if (func_trickIdEqual(id_, &((sTrickId190F0*)&self->TrickHistory[0])[i], 8)) {
+            if (func_trickIdEqual(id_, &self->TrickHistory[i], 8)) {
                 count++;
             }
         }
     }
-    ((sTrickId190F0*)&self->TrickHistory[0])[self->TrickHistoryPtr] = *(sTrickId190F0*)id_;
+    self->TrickHistory[self->TrickHistoryPtr] = *id_;
     self->TrickHistoryPtr++;
     self->TrickHistoryPtr %= 10;
     return count;
@@ -1961,7 +1953,7 @@ float cRiderMetrix::evHandplantStart(int plant)
 {
     CurTrickHandplant = plant;
     CurTrickAirSec = -1.0f;
-    *(int*)&CurTrickHandplantHoldSec = 0;
+    CurTrickHandplantHoldSec = 0.0f;
     CurTrickPower += 0.04999999701976776f;
     cancelComboChainReset();
     return 0.0f;
@@ -1987,7 +1979,7 @@ float cRiderMetrix::evHandplantEnd()
     CurTrickNumHandplants += 1;
     float powerUp = earnNameAndPoints(0, 0, 0, 0, 1);
     this->resetCurTrick();
-    *(int*)&CurTrickAirSec = 0;
+    CurTrickAirSec = 0.0f;
     return powerUp;
 }
 #endif
@@ -2065,18 +2057,18 @@ float cRiderMetrix::evLand(int stance, int alternate, int style, int flag)
     if (style != 0)
     {
         CurTrickRailslideMode = style;
-        *(int*)&CurTrickRailslideDist = 0;
+        CurTrickRailslideDist = 0.0f;
     }
     if (flag != 0)
     {
         CurTrickPressMode = flag;
-        *(int*)&CurTrickPressSec = 0;
+        CurTrickPressSec = 0.0f;
     }
     if (saved != 0)
     {
         CurTrickUberGrind = saved;
         CurTrickIsUber = 1;
-        *(int*)&CurTrickUberGrindHoldSec = 0;
+        CurTrickUberGrindHoldSec = 0.0f;
     }
     return powerUp;
 }
@@ -2118,7 +2110,7 @@ float cRiderMetrix::evTakeoff(int isFakieTakeoff, int isPipeTakeoff)
     InitTrickPressMode = curPressMode;
     InitTrickIsPipe = isPipeTakeoff;
     InitTrickIsFakie = isFakieTakeoff;
-    *(int*)&CurTrickAirSec = 0;
+    CurTrickAirSec = 0.0f;
     return powerUp;
 }
 #endif
@@ -2284,15 +2276,14 @@ float cRiderMetrix::evMissionSuccess(int amount)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnName);
 #ifdef SKIP_ASM
-struct sTrickId;
-extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style,
+extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* self, tTrickNameDef* id, int stance, int alternate, int style,
                                             int flag);
-extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id);
+extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, tTrickNameDef* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
-extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, sTrickId* id);
-extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repeat);
+extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, cRider* rider);
+extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, tTrickNameDef* id);
+extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, tTrickNameDef* id, int repeat);
 
 
 /**
@@ -2310,7 +2301,7 @@ extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repe
 void cRiderMetrix::earnName(int stance, int alternate, int style, int flag)
 {
     tTrickNameDef idv;
-    sTrickId* id = (sTrickId*)&idv;
+    tTrickNameDef* id = &idv;
     if (cRiderMetrix_buildTrickName(this, id, stance, alternate, style, flag) != 0)
     {
         int pts = cRiderMetrix_checkForMonsterTrick(this, id);
@@ -2318,18 +2309,12 @@ void cRiderMetrix::earnName(int stance, int alternate, int style, int flag)
         {
             CurTrickPower += pts * 9.999999747378752e-05f;
             cRiderMetrix_addHUDfx1(this, 50, pts, 0, 1.5f);
-            cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), (int)Rider);
+            cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), Rider);
         }
         cRiderMetrix_addTrick(this, id, cRiderMetrix_addToHistory(this, id) > 0);
     }
 }
 #endif
-
-// 8-byte packed trick identity built by cRiderMetrix_buildTrickName
-struct sTrickId {
-    int w0;
-    int w1;
-};
 
 // cBENewRaceInterface_newRace's game mode and path as bytes (see sGameSettings_119608 above for why).
 struct sGameSettings {
@@ -2341,20 +2326,20 @@ extern sGameSettings cBENewRaceInterface_newRaceSettings __asm__("cBENewRaceInte
 
 extern "C" void cRiderMetrix_removeHUDfx(cRiderMetrix* self, int type);
 extern "C" int cAI_isRaceFinished(void* race);
-extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style,
+extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* self, tTrickNameDef* id, int stance, int alternate, int style,
                                             int flag);
 extern "C" int cRiderMetrix_getCurTrickPoints(cRiderMetrix* self);
-extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id);
+extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, tTrickNameDef* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
-extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, sTrickId* id);
-extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repeat);
+extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, cRider* rider);
+extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, tTrickNameDef* id);
+extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, tTrickNameDef* id, int repeat);
 extern "C" int cRiderMetrix_getCurTrickPointsWithMult(cRiderMetrix* self);
 extern "C" int cRiderMetrix_calcTrickLevel(cRiderMetrix* self, int points);
 extern "C" int cRiderMetrix_getCurTrickStyleSubPoints(cRiderMetrix* self);
 extern "C" void cRiderMetrix_addToComboChain(cRiderMetrix* self, int points);
-extern "C" void cSSXAudio_LandedUberTrick(void* audio, int rider, int ubers, int runUbers);
+extern "C" void cSSXAudio_LandedUberTrick(void* audio, cRider* rider, int ubers, int runUbers);
 extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 extern "C" void cRiderMetrix_delayComboChainReset(cRiderMetrix* self, float seconds);
 extern "C" void* cBE_getBE();
@@ -2405,7 +2390,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnNameAndPoints);
  */
 float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int flag, int takeoff)
 {
-    sTrickId id;
+    tTrickNameDef id;
     float delta;
     int valid;
     int repeats;
@@ -2441,7 +2426,7 @@ float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int 
             if (bonus > 0) {
                 CurTrickPower += (float)bonus * 0.0001f;
                 cRiderMetrix_addHUDfx1(this, 50, bonus, 0, 1.5f);
-                cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), (int)Rider);
+                cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), Rider);
             }
             repeats = cRiderMetrix_addToHistory(this, &id);
             cRiderMetrix_addTrick(this, &id, repeats > 0);
@@ -2463,7 +2448,7 @@ float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int 
 
         if (Totals.BestTrickPoints < pending) {
             Totals.BestTrickPoints = pending;
-            *(sTrickId*)&Totals.BestTrick[0] = id;
+            Totals.BestTrick = id;
         }
 
         spin = func_roundDegrees((int)(CurTrickSpinAng * 57.295776f));
@@ -2475,7 +2460,7 @@ float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int 
         Totals.NumHandplants += CurTrickNumHandplants;
 
         if (CurTrickNumUbers > 0) {
-            cSSXAudio_LandedUberTrick(cAudioInterface_bxAudio(), (int)Rider, CurTrickNumUbers,
+            cSSXAudio_LandedUberTrick(cAudioInterface_bxAudio(), Rider, CurTrickNumUbers,
                           Totals.NumUberTricks);
         }
 
@@ -2613,7 +2598,8 @@ struct sTrickBits_A8C8 {
  * @param flag  the press landed in (On Tour pressLand)
  * @return nonzero when the trick has a name
  */
-extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, int stance, int alternate, int style,
+extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* vself, tTrickNameDef* vid, int stance, int alternate,
+        int style,
                                             int flag)
 {
     cRiderMetrix* self = vself;
@@ -2809,23 +2795,6 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 
 extern tMonsterTrick gMonsterComboTable[];
 
-struct sTrickBits_11B1A8
-{
-    unsigned int pad0 : 10;
-    unsigned int a : 2;     // bits 10-11
-    unsigned int b : 4;     // bits 12-15
-    unsigned int c : 3;     // bits 16-18
-    unsigned int d : 3;     // bits 19-21
-    unsigned int pad1 : 6;
-    unsigned int e : 4;     // bits 28-31
-    unsigned int pad2 : 3;
-    unsigned int f : 7;     // bits 3-9
-    unsigned int pad3 : 1;
-    unsigned int g : 7;     // bits 11-17
-    unsigned int pad4 : 9;
-    unsigned int grade : 5; // bits 27-31
-};
-
 /**
  * Checks whether the trick is one of the named monster tricks and, if so, renames it and returns its bonus.
  *
@@ -2835,21 +2804,21 @@ struct sTrickBits_11B1A8
  * @param id  the trick name (On Tour tTrickNameDef &tn); replaced on a match
  * @return the monster trick's bonus points, or 0
  */
-extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id)
+extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, tTrickNameDef* id)
 {
-    sTrickBits_11B1A8* trick = (sTrickBits_11B1A8*)id;
+    tTrickNameDef* trick = id;
     tMonsterTrick* comboEntry = gMonsterComboTable;
     for (int i = 0; i < 24; i++, comboEntry++)
     {
-        if (trick->a != comboEntry->reqOrient) continue;
-        if (trick->b != comboEntry->reqSpin) continue;
-        if (trick->c != comboEntry->reqReps) continue;
-        if (trick->d != comboEntry->reqFlip) continue;
-        if (trick->e != comboEntry->reqPostSpin) continue;
-        if (trick->f != comboEntry->reqGrab) continue;
-        if (trick->g != comboEntry->reqLateGrab) continue;
+        if (trick->orient != comboEntry->reqOrient) continue;
+        if (trick->spin != comboEntry->reqSpin) continue;
+        if (trick->reps != comboEntry->reqReps) continue;
+        if (trick->flip != comboEntry->reqFlip) continue;
+        if (trick->postSpin != comboEntry->reqPostSpin) continue;
+        if (trick->grab != comboEntry->reqGrab) continue;
+        if (trick->lateGrab != comboEntry->reqLateGrab) continue;
         MEM_fill(id, 0, 8);
-        trick->grade = comboEntry->id;
+        trick->monster = comboEntry->id;
         return comboEntry->points;
     }
     return 0;

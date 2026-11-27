@@ -1089,7 +1089,7 @@ extern "C" void func_0031A3C0(void* buf);
  */
 void cPS2ExecutionMan::prepause()
 {
-    if ((int)mpLoadModule != 0) {
+    if (mpLoadModule != 0) {
         func_0031A3C0((char*)&mVU0State);
     }
 }
@@ -1106,7 +1106,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_postpause);
  */
 void cPS2ExecutionMan::postpause()
 {
-    if ((int)mpLoadModule != 0) {
+    if (mpLoadModule != 0) {
         func_0031A308((char*)&mVU0State);
     }
 }
@@ -1365,9 +1365,9 @@ extern "C" void SignalSema(int);
  *
  * @param module  the job object
  */
-void cPS2ExecutionMan::load(int module)
+void cPS2ExecutionMan::load(cAppModule* module)
 {
-    mpLoadModule = (cAppModule*)module;
+    mpLoadModule = module;
     SignalSema(mLoadSema);
 }
 #endif
@@ -1382,7 +1382,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_isLoadDone);
  */
 bool cPS2ExecutionMan::isLoadDone()
 {
-    return (int)mpLoadModule == 0;
+    return mpLoadModule == 0;
 }
 #endif
 

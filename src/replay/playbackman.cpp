@@ -72,6 +72,8 @@ extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPl
     self->InputPad = (cInputPad*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
     self->InputPad->NumButtons = 0;
     cInput* replayStream = (cInput*)cMemMan_alloc(8, str_cInput, 0x20000000, 0);
+    // ORIGINAL-PTR: the retail symbols cInput_setPad__FPvi / cInput_setMap__FPvi mangle the pad and the map as int, so
+    // the original converted the pointers to them too
     cInput_setPad(replayStream, (int)self->InputPad);
     cInput_setMap(replayStream, (int)map);
     self->Input = replayStream;
@@ -247,23 +249,23 @@ void cPlaybackMan::purgeLocation()
         for (int i = 0; i < self->NumPlaybackFiles; i++) {
             if (((void*)(self->PlaybackFiles)[i].PackData) != 0) {
                 cMemMan_free(((void*)(self->PlaybackFiles)[i].PackData));
-                (*(void**)&(self->PlaybackFiles)[i].PackData) = 0;
+                (self->PlaybackFiles)[i].PackData = 0;
             }
             (self->PlaybackFiles)[i].Size = 0;
         }
         if (self->PlaybackFiles != 0) {
             cMemMan_free(self->PlaybackFiles);
         }
-        *(tPlaybackFile**)&self->PlaybackFiles = 0;
+        self->PlaybackFiles = 0;
     }
     if (((void*)self->SaveFrameData) != 0) {
         cMemMan_free(((void*)self->SaveFrameData));
-        *(void**)&self->SaveFrameData = 0;
+        self->SaveFrameData = 0;
     }
     self->SaveFrame = 0;
     if (((int*)self->CurrentFrame) != 0) {
         operator_delete(((int*)self->CurrentFrame));
-        *(int**)&self->CurrentFrame = 0;
+        self->CurrentFrame = 0;
     }
     self->State = 0;
 }
@@ -288,7 +290,7 @@ bool cPlaybackMan::isLoaded(int fileId)
 {
     int idx = cPlaybackMan_findFileById();
     if (idx >= 0) {
-        if ((int)PlaybackFiles[idx].PackData != 0)
+        if (PlaybackFiles[idx].PackData != 0)
             return true;
         if (AsyncHandle < 0)
             return true;
@@ -428,8 +430,7 @@ void cPlaybackMan::reset()
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_saveFrame);
 #ifdef SKIP_ASM
-struct sPbBytes4;
-extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* src);
+extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, tReplayFrameType* src);
 
 
 /**
@@ -446,8 +447,7 @@ void cPlaybackMan::saveFrame()
         desc.Type = one;
         desc.Highlights = 0;
         desc.Chapter = 0;
-        cReplay_saveFrame1((cReplay*)(Game->Replay), (cReplayFrame*)((char*)&SaveFramePtr),
-                      (sPbBytes4*)&desc);
+        cReplay_saveFrame1(Game->Replay, &SaveFramePtr, &desc);
         SaveFrame = one;
     }
 }
@@ -481,7 +481,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_startPreview);
 #ifdef SKIP_ASM
 extern "C" void cAI_purgeMissionRiders(void*);
 extern "C" void cAI_reinitMissionRiders(void* self);
-extern "C" void cCamera_switchChaseControllerTargetRider(void* self, int value);
+extern "C" void cCamera_switchChaseControllerTargetRider(void* self, cRider* rider);
 void cReplay_setReplayState(void* self, int val);
 extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self);
 void AIsetseed(void* self);
@@ -509,7 +509,7 @@ void cPlaybackMan::startPreview()
         AI->AITick = CurrentFrame->AITick;
         State = 1;
         cMissionRider* x = AI->MissionRiders[0];
-        int targetRider = x ? (int)x->mRider : 0;
+        cRider* targetRider = x ? x->mRider : 0;
         cCamera_switchChaseControllerTargetRider(Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
@@ -520,7 +520,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_stopPreview);
 #ifdef SKIP_ASM
 extern "C" void cAI_purgeMissionRiders(void*);
 extern "C" void cAI_reinitMissionRiders(void* self);
-extern "C" void cCamera_switchChaseControllerTargetRider(void* self, int value);
+extern "C" void cCamera_switchChaseControllerTargetRider(void* self, cRider* rider);
 void cReplay_setReplayState(void* self, int val);
 
 /**
@@ -539,7 +539,7 @@ void cPlaybackMan::stopPreview()
         cReplay_setReplayState(replay, replay->SaveState);
         restoreFrame();
         State = 0;
-        int targetRider = (int)AI->Riders[0];
+        cRider* targetRider = AI->Riders[0];
         cCamera_switchChaseControllerTargetRider(Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
@@ -698,7 +698,7 @@ int cPlaybackMan::findFileById(int id)
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_setupFile);
 #ifdef SKIP_ASM
-extern "C" int HUFF_decode(void* src, int a, int dst);
+extern "C" int HUFF_decode(void* src, int a, void* dst);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 /**
@@ -716,7 +716,7 @@ bool cPlaybackMan::setupFile(int idx)
 {
     char* data = PlaybackFiles[idx].PackData;
     if (data != 0) {
-        HUFF_decode(data, 0, (int)CurrentFrame);
+        HUFF_decode(data, 0, CurrentFrame);
         return true;
     }
     tPlaybackFrame* buf = CurrentFrame;
@@ -830,7 +830,7 @@ extern "C" bool cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* cmd)
  */
 int cReplayCache::updateControlCmd(tControlCmd* controlCmd)
 {
-    if ((int)CmdFrame == 0) {
+    if (CmdFrame == 0) {
         return 0;
     }
     int result = 1;
@@ -1040,7 +1040,7 @@ bool cReplayCache::moveTo(unsigned int pos)
 INCLUDE_ASM("replay/playbackman", cReplayCache_load);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern "C" int HUFF_decode(void* src, int a, int dst);
+extern "C" int HUFF_decode(void* src, int a, void* dst);
 
 /**
  * Loads a replay input cache from saved replay data.
@@ -1064,7 +1064,7 @@ int cReplayCache::load(char** pp)
     *(int*)this = hdr.value;
     MEM_copy(&size, *pp, 4);
     *pp += 4;
-    HUFF_decode(*pp, 0, (int)CmdFrame);
+    HUFF_decode(*pp, 0, CmdFrame);
     *pp += size;
     return 1;
 }
@@ -1098,12 +1098,6 @@ extern "C" void* cReplayFrame_cReplayFrame(cReplayFrame* self)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayFrame_clearFrame);
 #ifdef SKIP_ASM
-struct sPlaybackKey {
-    short a;
-    char b;
-    char c;
-};
-
 /**
  * Resets a replay frame's fields to their empty values.
  *
@@ -1113,13 +1107,13 @@ struct sPlaybackKey {
  */
 void cReplayFrame::clearFrame()
 {
-    sPlaybackKey k;
-    k.a = 0;
-    k.b = 0;
-    k.c = 0;
+    tReplayFrameType k;
+    k.Type = 0;
+    k.Highlights = 0;
+    k.Chapter = 0;
     FrameStartTick = 0;
     FrameEndTick = -1;
-    *(sPlaybackKey*)&FrameType = k;
+    FrameType = k;
     Ranking[0] = -1;
     Ranking[1] = -1;
     HighlightEndTick[0] = -1;
@@ -1254,10 +1248,6 @@ void* cReplay::saveReplayFrame(tReplayFrameType* src)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplay_saveFrame1);
 #ifdef SKIP_ASM
-struct sPbBytes4 {
-    char b[4];
-};
-
 extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* out);
 
 /**
@@ -1269,9 +1259,9 @@ extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* out);
  * @param out  the replay frame to fill
  * @param src  the 4-byte frame type descriptor
  */
-extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* src)
+extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, tReplayFrameType* src)
 {
-    *(sPbBytes4*)&out->FrameType = *src;
+    out->FrameType = *src;
     self->saveFrame((cBxReplayFrame*)out);
     out->FrameStartTick = self->RecordTick;
 }

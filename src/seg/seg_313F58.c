@@ -1351,9 +1351,7 @@ unsigned char *decode_sleb128_a(unsigned char *buf, int *out) {
 //100%
 INCLUDE_ASM("seg/seg_313F58", fde_merge);
 #ifdef SKIP_ASM
-struct K13BD0 { int f0; int f4; int key; };
-struct L13BD0 { struct K13BD0 **items; unsigned n; };
-void fde_merge_a(struct L13BD0 *dstVec, struct L13BD0 *srcVec) __asm__("fde_merge");
+void fde_merge_a(fde_vector *dstVec, const fde_vector *srcVec) __asm__("fde_merge");
 /**
  * Merges a sorted vector of FDE pointers into another sorted vector in place, from the back.
  *
@@ -1364,26 +1362,26 @@ void fde_merge_a(struct L13BD0 *dstVec, struct L13BD0 *srcVec) __asm__("fde_merg
  * @param dstVec  the linear (sorted) vector, extended in place
  * @param srcVec  the sorted erratic entries
  */
-void fde_merge_a(struct L13BD0 *dstVec, struct L13BD0 *srcVec) {
-    unsigned srcCount = srcVec->n;
-    unsigned n;
-    unsigned j;
+void fde_merge_a(fde_vector *dstVec, const fde_vector *srcVec) {
+    size_t srcCount = srcVec->count;
+    size_t n;
+    size_t j;
     j = srcCount;
     if (srcCount != 0) {
-        n = dstVec->n;
+        n = dstVec->count;
         do {
-            struct K13BD0 *x;
+            fde *x;
             j--;
-            x = srcVec->items[j];
-            if (n != 0 && dstVec->items[n - 1]->key - x->key > 0) {
+            x = srcVec->array[j];
+            if (n != 0 && fde_compare(dstVec->array[n - 1], x) > 0) {
                 do {
-                    dstVec->items[n + j] = dstVec->items[n - 1];
+                    dstVec->array[n + j] = dstVec->array[n - 1];
                     n--;
-                } while (n != 0 && dstVec->items[n - 1]->key - x->key > 0);
+                } while (n != 0 && fde_compare(dstVec->array[n - 1], x) > 0);
             }
-            dstVec->items[n + j] = x;
+            dstVec->array[n + j] = x;
         } while (j != 0);
-        dstVec->n = dstVec->n + srcCount;
+        dstVec->count = dstVec->count + srcCount;
     }
 }
 #endif
@@ -1485,11 +1483,6 @@ end_fde_sort (fde_accumulator *accu, size_t count)
 //100%
 INCLUDE_ASM("seg/seg_313F58", count_fdes);
 #ifdef SKIP_ASM
-struct N13F38 {
-    int off;
-    int a;
-    int b;
-};
 /**
  * Counts the FDEs in one .eh_frame section.
  *
@@ -1499,14 +1492,14 @@ struct N13F38 {
  * @param n  the first entry of the section
  * @return the number of usable FDEs
  */
-int count_fdes(struct N13F38 *n) {
-    int cnt = 0;
-    if (n->off != 0) {
+size_t count_fdes(fde *n) {
+    size_t cnt = 0;
+    if (n->length != 0) {
         do {
-            if (n->a != 0 && n->b != 0)
+            if (n->CIE_delta != 0 && n->pc_begin != 0)
                 cnt++;
-            n = (struct N13F38 *)((char *)n + n->off + 4);
-        } while (n->off);
+            n = next_fde(n);
+        } while (n->length);
     }
     return cnt;
 }
@@ -1515,16 +1508,6 @@ int count_fdes(struct N13F38 *n) {
 //100%
 INCLUDE_ASM("seg/seg_313F58", add_fdes);
 #ifdef SKIP_ASM
-struct N13F80 {
-    int off;
-    int a;
-    unsigned addr;
-    int size;
-};
-struct L13F80 {
-    struct N13F80 **arr;
-    int cnt;
-};
 /**
  * Appends the FDEs of one .eh_frame section to an accumulator and widens the covered address range.
  *
@@ -1536,20 +1519,22 @@ struct L13F80 {
  * @param lo           in/out: lowest pc_begin seen
  * @param hi           in/out: highest pc end seen
  */
-void add_fdes(struct N13F80 *n, struct L13F80 *accumulator, unsigned *lo, unsigned *hi) {
-    unsigned mn = *lo;
-    unsigned mx = *hi;
-    if (n->off != 0) {
+void add_fdes(fde *n, fde_accumulator *accumulator, void **lo, void **hi) {
+    void *mn = *lo;
+    void *mx = *hi;
+    if (n->length != 0) {
         do {
-            if (n->a != 0 && n->addr != 0) {
-                accumulator->arr[accumulator->cnt++] = n;
-                if (n->addr < mn)
-                    mn = n->addr;
-                if (mx < n->addr + n->size)
-                    mx = n->addr + n->size;
+            if (n->CIE_delta != 0 && n->pc_begin != 0) {
+                accumulator->linear.array[accumulator->linear.count++] = n;
+                if (n->pc_begin < mn)
+                    mn = n->pc_begin;
+                /* ORIGINAL-PTR: gcc-2.95.3 gcc/frame.c add_fdes computes the FDE's end as
+                   this_fde->pc_begin + this_fde->pc_range (void * arithmetic). */
+                if (mx < n->pc_begin + n->pc_range)
+                    mx = n->pc_begin + n->pc_range;
             }
-            n = (struct N13F80 *)((char *)n + n->off + 4);
-        } while (n->off);
+            n = next_fde(n);
+        } while (n->length);
     }
     *lo = mn;
     *hi = mx;
@@ -1559,22 +1544,8 @@ void add_fdes(struct N13F80 *n, struct L13F80 *accumulator, unsigned *lo, unsign
 //100%
 INCLUDE_ASM("seg/seg_313F58", frame_init);
 #ifdef SKIP_ASM
-struct N14008 {
-    unsigned lo;
-    unsigned hi;
-    struct N13F80 *root;
-    struct N13F80 **roots;
-    int cnt;
-};
-struct LL14008 {
-    int *a;
-    int na;
-    int *b;
-    int nb;
-};
-extern int *malloc_a(int) __asm__("malloc");
-extern struct N13F80 **end_fde_sort_a(struct LL14008 *, int) __asm__("end_fde_sort");
-void frame_init_a(struct N14008 *n) __asm__("frame_init");
+extern fde **end_fde_sort_a(fde_accumulator *, size_t) __asm__("end_fde_sort");
+void frame_init_a(struct object *n) __asm__("frame_init");
 /**
  * Builds an unwind object's sorted FDE table and its covered address range on first use.
  *
@@ -1585,41 +1556,42 @@ void frame_init_a(struct N14008 *n) __asm__("frame_init");
  *
  * @param n  the registered unwind object
  */
-void frame_init_a(struct N14008 *n) {
-    struct N13F80 **pp;
-    int cnt, bytes;
-    struct LL14008 accumulator;
-    unsigned lo, hi;
-    if (n->roots != 0) {
-        pp = n->roots;
+void frame_init_a(struct object *n) {
+    fde **pp;
+    size_t cnt, bytes;
+    fde_accumulator accumulator;
+    void *lo, *hi;
+    if (n->fde_array != 0) {
+        pp = n->fde_array;
         cnt = 0;
         while (*pp != 0) {
-            cnt += count_fdes((struct N13F38 *)*pp);
+            cnt += count_fdes(*pp);
             pp++;
         }
     } else {
-        cnt = count_fdes((struct N13F38 *)n->root);
+        cnt = count_fdes(n->fde_begin);
     }
-    bytes = cnt * 4;
-    n->cnt = cnt;
-    accumulator.a = malloc_a(bytes);
-    accumulator.b = malloc_a(bytes);
-    accumulator.na = 0;
-    accumulator.nb = 0;
-    lo = 0xFFFFFFFF;
+    bytes = cnt * sizeof(fde *);
+    n->count = cnt;
+    accumulator.linear.array = (fde **)malloc(bytes);
+    accumulator.erratic.array = (fde **)malloc(bytes);
+    accumulator.linear.count = 0;
+    accumulator.erratic.count = 0;
+    /* ORIGINAL-PTR: gcc-2.95.3 gcc/frame.c frame_init starts the range at pc_begin = (void*)(uaddr)-1. */
+    lo = (void *)(uaddr)-1;
     hi = 0;
-    if (n->roots != 0) {
-        pp = n->roots;
+    if (n->fde_array != 0) {
+        pp = n->fde_array;
         while (*pp != 0) {
-            add_fdes(*pp, (struct L13F80 *)&accumulator, &lo, &hi);
+            add_fdes(*pp, &accumulator, &lo, &hi);
             pp++;
         }
     } else {
-        add_fdes(n->root, (struct L13F80 *)&accumulator, &lo, &hi);
+        add_fdes(n->fde_begin, &accumulator, &lo, &hi);
     }
-    n->roots = end_fde_sort_a(&accumulator, cnt);
-    n->lo = lo;
-    n->hi = hi;
+    n->fde_array = end_fde_sort_a(&accumulator, cnt);
+    n->pc_begin = lo;
+    n->pc_end = hi;
 }
 #endif
 
@@ -1681,52 +1653,45 @@ find_fde (void *pc)
 //100%
 INCLUDE_ASM("seg/seg_313F58", extract_cie_info);
 #ifdef SKIP_ASM
-extern int D_004998F0[];
-extern int D_004998F8[];
-extern int strcmp_a(int, int) __asm__("strcmp");
-struct C14230 {
-    char *aug;
-    int f4;
-    unsigned f8;
-    int fC;
-    int f10;
-};
-struct U14230 {
-    int v;
-} __attribute__((packed));
+extern char D_004998F0[];
+extern char D_004998F8[];
+extern int strcmp_a(const char *, const char *) __asm__("strcmp");
 extern int strlen(char *);
-unsigned char *extract_cie_info_a(int *cie, struct C14230 *cieInfo) __asm__("extract_cie_info");
+unsigned char *extract_cie_info_a(fde *f, struct cie_info *cieInfo) __asm__("extract_cie_info");
 /**
  * Reads the CIE that an FDE refers to into a cie_info and returns the address of its first instruction.
  *
- * Despite its name the first parameter is the FDE: the CIE is at the FDE's CIE-pointer field minus its value, and its
+ * The first parameter is the FDE: the CIE is at the FDE's CIE-pointer field minus its value (get_cie), and its
  * augmentation string at CIE + 9. Only "" (D_004998F0), "eh" (D_004998F8) and strings starting with 'z' are accepted
  * (strcmp is strcmp); others return 0. "eh" is followed by a 4-byte eh_ptr (+4, else 0); then come the code
  * alignment (ULEB128, +8), the data alignment (SLEB128, +0xC) and the return-address column (one byte, +0x10); a 'z'
  * augmentation then skips its ULEB128-sized data block.
  *
- * @param cie  the FDE whose CIE is read
- * @param cieInfo    receives the CIE fields (augmentation string at +0)
+ * @param f        the FDE whose CIE is read
+ * @param cieInfo  receives the CIE fields (augmentation string at +0)
  * @return the CIE's first call-frame instruction, or 0 for an unknown augmentation
  */
-unsigned char *extract_cie_info_a(int *cie, struct C14230 *cieInfo) {
+unsigned char *extract_cie_info_a(fde *f, struct cie_info *cieInfo) {
     char *augmentationEnd;
     unsigned char *cursor;
     unsigned augDataLength;
-    cieInfo->aug = (char *)cie - cie[1] + 13;
-    if (strcmp_a((int)cieInfo->aug, (int)D_004998F0) == 0 || strcmp_a((int)cieInfo->aug, (int)D_004998F8) == 0 || *cieInfo->aug == 'z') {
-        augmentationEnd = cieInfo->aug + strlen(cieInfo->aug);
+    cieInfo->augmentation = get_cie(f)->augmentation;
+    if (strcmp_a(cieInfo->augmentation, D_004998F0) == 0 || strcmp_a(cieInfo->augmentation, D_004998F8) == 0
+        || *cieInfo->augmentation == 'z') {
+        /* ORIGINAL-PTR: gcc-2.95.3 gcc/frame.c extract_cie_info steps over the augmentation string as
+           c->augmentation + strlen (c->augmentation) + 1. */
+        augmentationEnd = cieInfo->augmentation + strlen(cieInfo->augmentation);
         cursor = (unsigned char *)augmentationEnd + 1;
-        if (strcmp_a((int)cieInfo->aug, (int)D_004998F8) == 0) {
-            cieInfo->f4 = ((struct U14230 *)cursor)->v;
-            cursor += 4;
+        if (strcmp_a(cieInfo->augmentation, D_004998F8) == 0) {
+            cieInfo->eh_ptr = read_pointer(cursor);
+            cursor += sizeof(void *);
         } else {
-            cieInfo->f4 = 0;
+            cieInfo->eh_ptr = 0;
         }
-        cursor = decode_uleb128_a(cursor, &cieInfo->f8);
-        cursor = decode_sleb128_a(cursor, &cieInfo->fC);
-        cieInfo->f10 = *cursor++;
-        if (*cieInfo->aug == 'z')
+        cursor = decode_uleb128_a(cursor, &cieInfo->code_align);
+        cursor = decode_sleb128_a(cursor, &cieInfo->data_align);
+        cieInfo->ra_regno = *cursor++;
+        if (*cieInfo->augmentation == 'z')
             cursor = decode_uleb128_a(cursor, &augDataLength) + augDataLength;
         return cursor;
     }
@@ -1882,7 +1847,6 @@ execute_cfa_insn (void *insnPtr, struct frame_state_internal *state,
 //100%
 INCLUDE_ASM("seg/seg_313F58", __register_frame_info);
 #ifdef SKIP_ASM
-extern int *D_0052ADE8;
 /**
  * Registers an .eh_frame section for unwinding, using an object record the caller supplies.
  *
@@ -1892,22 +1856,21 @@ extern int *D_0052ADE8;
  * @param begin  the first entry of the .eh_frame section
  * @param frameObject  the 0x18-byte object record to fill and link
  */
-void __register_frame_info(int begin, int *frameObject) {
-    frameObject[2] = begin;
-    frameObject[5] = (int)D_0052ADE8;
-    D_0052ADE8 = frameObject;
-    frameObject[0] = 0;
-    frameObject[3] = 0;
-    frameObject[4] = 0;
-    frameObject[1] = 0;
+void __register_frame_info(void *begin, struct object *frameObject) {
+    frameObject->fde_begin = begin;
+    frameObject->next = objects;
+    objects = frameObject;
+    frameObject->pc_begin = 0;
+    frameObject->fde_array = 0;
+    frameObject->count = 0;
+    frameObject->pc_end = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", __register_frame);
 #ifdef SKIP_ASM
-extern void __register_frame_info(int, int *);
-extern int *malloc_a(int) __asm__("malloc");
+extern void __register_frame_info(void *, struct object *);
 /**
  * Registers an .eh_frame section for unwinding with a newly allocated object record.
  *
@@ -1915,15 +1878,14 @@ extern int *malloc_a(int) __asm__("malloc");
  *
  * @param begin  the first entry of the .eh_frame section
  */
-void __register_frame(int begin) {
-    __register_frame_info(begin, malloc_a(0x18));
+void __register_frame(void *begin) {
+    __register_frame_info(begin, (struct object *)malloc(sizeof(struct object)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", __register_frame_info_table);
 #ifdef SKIP_ASM
-extern int *D_0052ADE8;
 /**
  * Registers a null-terminated table of .eh_frame sections for unwinding, using an object record the caller supplies.
  *
@@ -1933,22 +1895,21 @@ extern int *D_0052ADE8;
  * @param begin  the table of section pointers
  * @param frameObject  the 0x18-byte object record to fill and link
  */
-void __register_frame_info_table(int begin, int *frameObject) {
-    frameObject[2] = begin;
-    frameObject[5] = (int)D_0052ADE8;
-    D_0052ADE8 = frameObject;
-    frameObject[1] = 0;
-    frameObject[0] = 0;
-    frameObject[4] = 0;
-    frameObject[3] = begin;
+void __register_frame_info_table(void *begin, struct object *frameObject) {
+    frameObject->fde_begin = begin;
+    frameObject->next = objects;
+    objects = frameObject;
+    frameObject->pc_end = 0;
+    frameObject->pc_begin = 0;
+    frameObject->count = 0;
+    frameObject->fde_array = begin;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", __register_frame_table);
 #ifdef SKIP_ASM
-extern void __register_frame_info_table(int, int *);
-extern int *malloc_a(int) __asm__("malloc");
+extern void __register_frame_info_table(void *, struct object *);
 /**
  * Registers a table of .eh_frame sections for unwinding with a newly allocated object record.
  *
@@ -1956,16 +1917,14 @@ extern int *malloc_a(int) __asm__("malloc");
  *
  * @param begin  the table of section pointers
  */
-void __register_frame_table(int begin) {
-    __register_frame_info_table(begin, malloc_a(0x18));
+void __register_frame_table(void *begin) {
+    __register_frame_info_table(begin, (struct object *)malloc(sizeof(struct object)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", __deregister_frame_info);
 #ifdef SKIP_ASM
-extern int *D_0052ADE8;
-extern void free_a(int) __asm__("free");
 extern void abort_a() __asm__("abort");
 /**
  * Unregisters an .eh_frame section and returns its object record.
@@ -1977,22 +1936,22 @@ extern void abort_a() __asm__("abort");
  * @param key  the section (or table) the object was registered with
  * @return the unlinked object record
  */
-int __deregister_frame_info(key)
-    int key;
+void *__deregister_frame_info(key)
+    void *key;
 {
-    int **pp = &D_0052ADE8;
-    int *n;
-    if (D_0052ADE8 != 0) {
+    struct object **pp = &objects;
+    struct object *n;
+    if (objects != 0) {
         do {
             n = *pp;
-            if (n[2] == key) {
-                *pp = (int *)n[5];
-                if (n[0] != 0)
-                    free_a(n[3]);
-                return (int)n;
+            if (n->fde_begin == key) {
+                *pp = n->next;
+                if (n->pc_begin != 0)
+                    free(n->fde_array);
+                return n;
             }
-            pp = (int **)&n[5];
-        } while (n[5] != 0);
+            pp = &n->next;
+        } while (n->next != 0);
     }
     abort_a(key, pp);
 }
@@ -2001,8 +1960,7 @@ int __deregister_frame_info(key)
 //100%
 INCLUDE_ASM("seg/seg_313F58", __deregister_frame);
 #ifdef SKIP_ASM
-extern int __deregister_frame_info();
-extern void free_a(int) __asm__("free");
+extern void *__deregister_frame_info();
 /**
  * Unregisters an .eh_frame section and frees the object record __register_frame allocated for it.
  *
@@ -2010,7 +1968,7 @@ extern void free_a(int) __asm__("free");
  * untouched; the returned record is freed with free.
  */
 void __deregister_frame(void) {
-    free_a(__deregister_frame_info());
+    free(__deregister_frame_info());
 }
 #endif
 
@@ -2060,6 +2018,7 @@ __frame_state_for (void *pc_target, struct frame_state *state_in)
   while (insn < end)
     insn = execute_cfa_insn (insn, &state, &info, 0);
 
+  /* ORIGINAL-PTR: gcc-2.95.3 gcc/frame.c __frame_state_for starts the FDE's instructions at ((fde *)f) + 1. */
   insn = ((fde *)entry) + 1;
 
   if (info.augmentation[0] == 'z')

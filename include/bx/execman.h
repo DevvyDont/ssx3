@@ -42,7 +42,7 @@ struct cExecutionMan {
 
     // Methods bound to their retail symbols by asm labels.
     int checkHalt(int flag) __asm__("cExecutionMan_checkHalt__FPvi");
-    void halt(int callback, int data) __asm__("cExecutionMan_halt");
+    void halt(void (*callback)(void*), void* data) __asm__("cExecutionMan_halt");
 };
 
 CHECK_OFFSET(cExecutionMan, HaltCallback, 0x0);
@@ -106,7 +106,7 @@ struct cPS2ExecutionMan {
     void* waitHalt() __asm__("cPS2ExecutionMan_waitHalt__FPv");
     void signalHalt() __asm__("cPS2ExecutionMan_signalHalt");
     void halt() __asm__("cPS2ExecutionMan_halt");
-    void load(int module) __asm__("cPS2ExecutionMan_load");
+    void load(cAppModule* module) __asm__("cPS2ExecutionMan_load");
     bool isLoadDone() __asm__("cPS2ExecutionMan_isLoadDone");
     void* getCurrentThreadId() __asm__("cPS2ExecutionMan_getCurrentThreadId__FPv");
     void setTimerHz() __asm__("cPS2ExecutionMan_setTimerHz__FPv");

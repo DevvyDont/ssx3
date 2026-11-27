@@ -56,13 +56,14 @@ struct cDataManager {
     // Methods bound to their retail symbols by asm labels.
     tDataInstanceInfo* AttachData(int pName, void* data, int size) __asm__("cDataManager_AttachData");
     void DetachAll() __asm__("cDataManager_DetachAll");
-    int GetData(tDataInstanceInfo* dataHandle) __asm__("cDataManager_GetData");
-    void GetDataUserData(tDataInstanceInfo* dataHandle, int* out0, int* out1) __asm__("cDataManager_GetDataUserData");
+    const void* GetData(tDataInstanceInfo* dataHandle) __asm__("cDataManager_GetData");
+    void GetDataUserData(tDataInstanceInfo* dataHandle, void** out0, void** out1)
+        __asm__("cDataManager_GetDataUserData");
     tDataInstanceInfo* AttachDataFromBigfile(char* big, tDataInstanceInfo* prev)
         __asm__("cDataManager_AttachDataFromBigfile");
     void AddToEmptyInstanceList(void* vnode) __asm__("cDataManager_AddToEmptyInstanceList__FPvT0");
     void* GetEmptyInstance() __asm__("cDataManager_GetEmptyInstance__FPv");
-    int DetachData(tDataInstanceInfo* entry) __asm__("cDataManager_DetachData");
+    void* DetachData(tDataInstanceInfo* entry) __asm__("cDataManager_DetachData");
 };
 
 CHECK_OFFSET(cDataManager, mMaxDataInstances, 0x0);

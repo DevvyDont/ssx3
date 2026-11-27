@@ -1148,7 +1148,7 @@ extern "C" tCmpChanCache* gGenCacheBucket(int bank, int n)
     {
         gChanCache_310F18[bank][i].next = &gChanCache_310F18[bank][i] + 1;
         gChanCache_310F18[bank][i].prev = &gChanCache_310F18[bank][i] - 1;
-        (*(int*)&gChanCache_310F18[bank][i].animChunk) = 0;
+        gChanCache_310F18[bank][i].animChunk = 0;
         gChanCache_310F18[bank][i].cmpAccess.mChannels = new (str_AnimChanCache, 0x20000000, 0) tCmpChannel[n];
     }
     gChanCache_310F18[bank][0].prev = &gChanCache_310F18[bank][19];

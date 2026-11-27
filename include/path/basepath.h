@@ -61,7 +61,7 @@ struct cPath {
     float getProximity(float* point) __asm__("cPath_getProximity");
     float getLength() __asm__("cPath_getLength");
     bool isPathInBox(float* lo, float* hi) __asm__("cPath_isPathInBox");
-    int getAllEvents() __asm__("cPath_getAllEvents");
+    tPathEventNode* getAllEvents() __asm__("cPath_getAllEvents");
 };
 
 CHECK_OFFSET(cPath, NumEvents, 0x000);

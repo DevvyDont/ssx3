@@ -53,8 +53,8 @@ extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* sel
     *(&self->Dir) = t4vect_Zero;
     *(&self->DDir) = t4vect_Zero;
     self->RootTransformDirty = 1;
-    *(int*)&self->X2 = 0;
-    *(int*)&self->Y2 = 0;
+    self->X2 = 0.0f;
+    self->Y2 = 0.0f;
     return (self);
 }
 #endif
@@ -568,7 +568,7 @@ void cSplineModifier::updateIntersectInfo(tIntersectInfo& body)
     w.y = rateY * Velocity;
     w.w = 0.0f;
     w = vu0MulMat_9CF8(&(*(&Transform)), w);
-    t4Vector relPos = vu0Sub_9CF8(body.Ipos, *(t4Vector*)&Pos);
+    t4Vector relPos = vu0Sub_9CF8(body.Ipos, Pos);
     vu0AddTo_9CF8(body.Ivel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
     vu0AddTo_9CF8(body.Iangvel, w);
 }
@@ -662,8 +662,8 @@ extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier*
     self->Spline.SplineId = 0xFFFFFFFF;
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
-    *(int*)&self->Spline.Length = 0;
-    *(int*)&self->Radius = 0;
+    self->Spline.Length = 0.0f;
+    self->Radius = 0.0f;
     self->NumModels = desc->NumModels;
     self->OrientType = desc->Orient;
     self->HeadTweak = desc->Heading * 0.01745329424738884f;
@@ -888,7 +888,7 @@ void cMultiSplineModifier::setupNodes()
         cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)self->NodeInst[i],
                                   ((void*)self->Instance));
         self->NodeInst[i]->m_iFlags = (((unsigned int)self->NodeInst[i]->m_iFlags) & ~0x40) | 0x20;
-        (*(unsigned int*)&self->NodeInst[i]->m_iFlags) &= ~0x100;
+        self->NodeInst[i]->m_iFlags &= ~0x100u;
     }
 }
 #endif
@@ -1090,13 +1090,13 @@ void cMultiSplineModifier::setupOverlapSystem()
         {
             t4Vector corner;
             vu0Sub_A5F8(corner, instPos_A5F8(self, i), ext);
-            (*(sBoundBox*)&(self->Nodes)[i].BoundBox).min = corner;
+            self->Nodes[i].BoundBox.MinPoint = corner;
             vu0Add_A5F8(corner, instPos_A5F8(self, i), ext);
-            (*(sBoundBox*)&(self->Nodes)[i].BoundBox).max = corner;
+            self->Nodes[i].BoundBox.MaxPoint = corner;
         }
-        void* item = ((sSmInst_A5F8*)self->NodeInst[i]);
+        void* item = self->NodeInst[i];
         char* w = (char*)cObjectInterface_getNash();
-        insert_A5F8(w, item, &(*(sBoundBox*)&(self->Nodes)[i].BoundBox).min);
+        insert_A5F8(w, item, &self->Nodes[i].BoundBox.MinPoint);
     }
 }
 #endif
@@ -1653,14 +1653,14 @@ void* cMultiSplineModifier::updateNodes()
         float rx = 0.0f;
         float ry = rx;
         float rz = rx;
-        cSpline_getPos_AC20((char*)&self->Spline, &(*(t4Vector*)&pt->Pos), &(*(t4Vector*)&pt->Dir), &(*(t4Vector*)&pt->DDir), offsets[i]);
-        pt->X2 = (*(t4Vector*)&pt->Dir).x * (*(t4Vector*)&pt->Dir).x;
-        pt->Y2 = (*(t4Vector*)&pt->Dir).y * (*(t4Vector*)&pt->Dir).y;
+        cSpline_getPos_AC20((char*)&self->Spline, &pt->Pos, &pt->Dir, &pt->DDir, offsets[i]);
+        pt->X2 = pt->Dir.x * pt->Dir.x;
+        pt->Y2 = pt->Dir.y * pt->Dir.y;
         if (self->OrientType == kSplineOrient_Heading || self->OrientType == kSplineOrient_HeadingPitch) {
-            rz -= atan2_AC20((*(t4Vector*)&pt->Dir).y, (*(t4Vector*)&pt->Dir).x);
+            rz -= atan2_AC20(pt->Dir.y, pt->Dir.x);
         }
         if (self->OrientType == kSplineOrient_Pitch || self->OrientType == kSplineOrient_HeadingPitch) {
-            ry += atan2_AC20((*(t4Vector*)&pt->Dir).z, Sqrt_AC20(pt->X2 + pt->Y2));
+            ry += atan2_AC20(pt->Dir.z, Sqrt_AC20(pt->X2 + pt->Y2));
         }
         ang.x = rx;
         ang.y = ry;
@@ -1685,9 +1685,9 @@ void* cMultiSplineModifier::updateNodes()
         node->mat.r[2].y = cxsz * sy + sx * cz;
         node->mat.r[2].z = cx * cy;
         node->mat.r[2].w = 0.0f;
-        node->mat.r[3].x = (*(t4Vector*)&pt->Pos).x;
-        node->mat.r[3].y = (*(t4Vector*)&pt->Pos).y;
-        node->mat.r[3].z = (*(t4Vector*)&pt->Pos).z;
+        node->mat.r[3].x = pt->Pos.x;
+        node->mat.r[3].y = pt->Pos.y;
+        node->mat.r[3].z = pt->Pos.z;
         node->mat.r[3].w = 1.0f;
         if (self->HeadTweak != 0.0f) {
             *nodeMat = mulMat_AC20(*nodeMat, rot);
@@ -2194,7 +2194,7 @@ char* cRailModifier::cRailModifier1(cBxReplayFrame* src)
     Next = 0;
     Prev = 0;
     src->read((char*)&BoundBox, 0x30);
-    Instance = (tInstanceRecord*)(int)src->readReplayInstance();
+    Instance = src->readReplayInstance();
     cRailModifier_buildXform(((char*)this));
     insert_BA88((char*)cObjectInterface_getNash(), Node, (sSmBox_BA88*)(&BoundBox));
     sSmTrack_BA88* track = ((sSmRef_BA88*)(&SplineId))->get();
@@ -2375,29 +2375,6 @@ extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
 //100%
 INCLUDE_ASM("object/splinemodifier", cRailModifier_updateBoundBox);
 #ifdef SKIP_ASM
-
-
-struct sSmVEntryI_C040 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
-struct sSmVEntryB_C040 {
-    short delta;
-    short index;
-    tBoundBox* (*fn)(void*);
-};
-
-struct sSmVtbl_C040 {
-    char pad_0x0[0x160];
-    sSmVEntryI_C040 v44;    // 0x160
-    sSmVEntryB_C040 v45;    // 0x168
-};
-
-
-
-
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a -= b, 4 floats).
 static inline void vecSubEq_C040(t4Vector& a, const t4Vector& b)
 {
@@ -2440,9 +2417,9 @@ static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
 void cRailModifier::updateBoundBox()
 {
     cInstanceNode* ownerObj = Instance->m_pActiveNode;
-    if (((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v44.fn(vthis(ownerObj, ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v44)) != 0) {
+    if (ownerObj->hasBoundBox()) {
         ownerObj = Instance->m_pActiveNode;
-        tBoundBox* bounds = ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v45.fn(vthis(ownerObj, ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v45));
+        const tBoundBox* bounds = ownerObj->getBoundBox();
         (*(&BoundBox)) = *bounds;
         t4Vector margin;
         margin.x = 100.0f;

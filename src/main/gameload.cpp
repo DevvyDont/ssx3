@@ -29,6 +29,8 @@
 #include "main/loadscreens.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
+#include "render/playerlights.h"
+#include "render/2drender.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
 #include "online/commsystem.h"
@@ -460,10 +462,10 @@ extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* o);
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cBigFile_open(void* bf, const char* name, int flags);
 extern "C" void cWorld_load(void* a, const char* name, void* b);
-void* cSkyBox_cSkyBox(void* p);
-extern "C" void* cSectionMan_cSectionMan(void* p, void* game);
+cSkyBox* cSkyBox_cSkyBox(void* p);
+extern "C" cSectionMan* cSectionMan_cSectionMan(void* p, void* game);
 extern "C" void func_002C2F18(void* p);
-extern "C" void* cWorldSound_cWorldSound(void* p, int a);
+extern "C" cWorldSound* cWorldSound_cWorldSound(void* p, int a);
 extern "C" void cBXNash_initTheAIFwdDiffCache(void* p);
 extern "C" void cSectionMan_activate(void* p, int id, int a);
 extern "C" int cSectionMan_isLoaded(void* p, int id);
@@ -473,7 +475,7 @@ extern "C" void THREAD_yield(int a);
 // PORT: cCameraTriggerMan_loadTriggersIfNotStreaming__FPv also receives the path string (passed through in $5)
 void cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(void* p, const char* s) __asm__("cCameraTriggerMan_loadTriggersIfNotStreaming__FPv");
 extern "C" void cFogParticleMan_cFogParticleMan(void* p);
-void* cLensFxMan_construct();
+cLensFxMan* cLensFxMan_construct();
 extern "C" void cRenderStateMan_init();
 
 struct sElem4_F6B0 {
@@ -540,11 +542,11 @@ void cGame::loadTrack()
     sTbl_F6B0*& tbl = (sTbl_F6B0*)SurfPropCache;
     char*& ent = (char*)FogMan;
     cWorld_load(World, name.Str, BXNash);
-    *(void**)&SkyBox = cSkyBox_cSkyBox(cMemMan_alloc(0x18, str_SkyBox, 0, 0));
-    *(void**)&SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)this));
+    SkyBox = cSkyBox_cSkyBox(cMemMan_alloc(0x18, str_SkyBox, 0, 0));
+    SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)this));
     tbl = new (str_SurfPropCache, 0, 0) sTbl_F6B0;
     func_002C2F18(SurfPropCache);
-    *(void**)&WorldSound = cWorldSound_cWorldSound(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
+    WorldSound = cWorldSound_cWorldSound(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
     cBXNash_initTheAIFwdDiffCache(BXNash);
     cBXString dir;
     dir.Str = cBXString_EmptyString;
@@ -578,7 +580,7 @@ void cGame::loadTrack()
     obj->mVtbl = cPS2FogParticleMan_vtbl;
     new ((char*)&obj->mSprites[0]) sElemFF_F6B0[256];
     ent = ((char*)obj);
-    *(void**)&LensFxMan = cLensFxMan_construct();
+    LensFxMan = cLensFxMan_construct();
     cRenderStateMan_init();
     cBXString__cBXString(&dir, 2);
     cBXString__cBXString(&name, 2);
@@ -773,11 +775,11 @@ void cGame::purge()
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        be->RemoveTexture((int)(void*)mBoxTextureID);
+        be->RemoveTexture(mBoxTextureID);
     }
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
-    *(void**)&SSXApp->Game = 0;
+    SSXApp->Game = 0;
     if (WorldSound != 0) cWorldSound__cWorldSound(WorldSound, 3);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameDeInit(gSSXAudio);
@@ -956,20 +958,22 @@ extern "C" void cGame_setState(cGame* self, int a, int b, int refresh);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_RestartEvent(void* mgr);
 
-static inline int numRiders_2302A8(void* game)
+// Inline copies of cAI::getNumRiders() / cAI::getRider(int) (EA's header has them inline: On Tour inlines both into
+// several all_in_one units; retail's out-of-line copies are cAI_getNumRiders / cAI_getRider).
+static inline int aiNumRiders(cAI* ai)
 {
-    return *(int*)(*(char**)((char*)game + 0xC) + 0x78);
+    return ai->NumberOfRidersAllocated;
 }
 
-static inline cRider* rider_2302A8(void* game, int i)
+static inline cRider* aiRider(cAI* ai, int i)
 {
-    return ((cGame*)game)->AI->Riders[i];
+    return ai->Riders[i];
 }
 
 /**
  * Restarts the current event from the start.
  *
- * Runs cGame_partialRestart() and cGameModeMan_restartHeat(), clears every allocated rider's unk_2F8 (which the
+ * Runs cGame_partialRestart() and cGameModeMan_restartHeat(), clears every allocated rider's BoostPowerBar (which the
  * game-mode code sets to 0.7, 0.35 or 0 by the player's place), switches the game to state 1 at once
  * (cGame_setState(self, 1, 2, 1)), and calls cSSXAudio_RestartEvent() on the audio system.
  */
@@ -978,8 +982,8 @@ void cGame::restart()
     partialRestart();
     cGameModeMan_restartHeat(SSXApp->GameModeMan);
     int i;
-    for (i = 0; i < numRiders_2302A8(this); i++) {
-        *(int*)&rider_2302A8(this, i)->BoostPowerBar = 0;
+    for (i = 0; i < aiNumRiders(AI); i++) {
+        aiRider(AI, i)->BoostPowerBar = 0.0f;
     }
     setState(1, 2, 1);
     cSSXAudio_RestartEvent(cAudioInterface_bxAudio());
@@ -1124,6 +1128,8 @@ void cGame::exit(int toFrontEnd)
     if (VoipMan != 0) {
         func_00266DF8(VoipMan);
     }
+    // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
+    // int, so the original converted the new module's pointer to it too
     if (toFrontEnd != 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_PreGameLoadScreen, 0x100, 0)));
     } else {
@@ -1218,9 +1224,9 @@ INCLUDE_ASM("main/gameload", cGame_getTransitionMan__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cTransitionMan
  */
-int cGame::getTransitionMan(int i)
+cTransitionMan* cGame::getTransitionMan(int i)
 {
-    return (int)TransitionMan[i];
+    return TransitionMan[i];
 }
 #endif
 
@@ -1233,9 +1239,9 @@ INCLUDE_ASM("main/gameload", cGame_getSplashManager__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cSplashManager
  */
-int cGame::getSplashManager(int i)
+cSplashManager* cGame::getSplashManager(int i)
 {
-    return (int)SplashManager[i];
+    return SplashManager[i];
 }
 #endif
 
@@ -1616,36 +1622,17 @@ extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
 void cSSXScriptEngine_DeInit(void* self);
 void cBXLoadIndicator_DeInit(void* self);
 
-struct sVec3_00230E98 {
-    float x, y, z;
-    sVec3_00230E98(float ax, float ay, float az) { x = ax; y = ay; z = az; }
+// tRGB with On Tour's tRGB(float red, float green, float blue) constructor, for the temporary colour.
+struct tRGBInit : tRGB {
+    tRGBInit(float r, float g, float b) { R = r; G = g; B = b; }
 };
-struct cMgr00230E98 {
-    char pad0[0x270];
-    int f270;
-    char pad274[0x10D8 - 0x274];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void SetScreenClearColour(const sVec3_00230E98& v);
-};
+
 
 /**
  * Lets the game give up focus, once the stream pause (its virtual slot 3) and the screen fade allow it.
  *
- * On success it calls the graphics manager's v15 with (0, 0, 0), sets its +0x270 flag, turns the screen
- * effects off, and calls helpers on the script engine and the load indicator.
+ * On success it sets a black screen clear colour, sets the graphics manager's view count (cGraphicsMan::mNumViews)
+ * to 1, turns the screen effects off, and calls helpers on the script engine and the load indicator.
  *
  * @return true when focus was given up, false while the stream pause or the fade is still busy
  */
@@ -1659,9 +1646,8 @@ bool cGame::loseFocus()
     if (((cFadeScreen*)this)->loseFocus() == 0) {
         return false;
     }
-    cPS2GraphicsMan* mgr = GrMan;
-    ((cMgr00230E98*)mgr)->SetScreenClearColour(sVec3_00230E98(0.0f, 0.0f, 0.0f));
-    ((cMgr00230E98*)GrMan)->f270 = 1;
+    GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
+    GrMan->cGraphicsMan::mNumViews = 1;
     cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
     cLightGlow_m_Enable = 0;
@@ -2513,8 +2499,7 @@ void* cFadeScreen::update()
 //100%
 INCLUDE_ASM("main/gameload", cFadeScreen_drawFade);
 #ifdef SKIP_ASM
-extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
-extern int G2D;
+extern c2DRender* G2D;
 extern t4Matrix t4mat_Identity;
 
 extern sDrawState sDrawState_s_defaultDrawState;
@@ -2564,8 +2549,8 @@ bool cFadeScreen::drawFade()
     col[1] = 0.0f;
     col[2] = 0.0f;
     col[3] = 0.0f;
-    c2DRender_drawRect4((void*)G2D, minCorner, maxCorner, col, 0.0f);
-    *(int*)&GrMan->m_pCurrentDrawState -= 20;
+    G2D->drawRect4(minCorner, maxCorner, col, 0.0f);
+    GrMan->m_pCurrentDrawState--;
     return alpha >= 1.0f;
     }
     return false;
@@ -2613,10 +2598,6 @@ struct sV2_1FC0 {
 struct sV4_1FC0 {
     float x, y, z, w;
     sV4_1FC0(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
-};
-
-struct sCol_1FC0 {
-    float r, g, b, a;
 };
 
 
@@ -2676,7 +2657,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void v70(); virtual void v71(); virtual void v72(); virtual void v73();
     virtual void v74(); virtual void v75(); virtual void v76();
-    virtual void DrawSprite(const sV4_1FC0&, const sV2_1FC0&, const sV2_1FC0&, const sV2_1FC0&, const sCol_1FC0&);
+    virtual void DrawSprite(const sV4_1FC0&, const sV2_1FC0&, const sV2_1FC0&, const sV2_1FC0&, const tARGB&);
 };
 
 struct sVE_1FC0 {
@@ -2724,10 +2705,10 @@ void cLoadIndicator::render()
     // stored through a plain pointer: an in-struct store would let GrMan's later reload be dropped
     short* textureId = &GrMan->m_pCurrentDrawState->m_textureState.m_texid[0];
     *textureId = f10v;
-    (*(sCol_1FC0*)&colour).r = alpha;
+    colour.A = alpha;
     sV2_1FC0 uv0(0.0f, 0.0f);
     sV2_1FC0 uv1(1.0f, 1.0f);
-    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, (*(sCol_1FC0*)&colour));
+    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, colour);
     ((cGfx_1FC0*)GrMan)->PopView();
     ((cGfx_1FC0*)GrMan)->PopViewport();
     ((cGfx_1FC0*)GrMan)->stateTop--;
@@ -2747,10 +2728,9 @@ INCLUDE_ASM("main/gameload", cPreStartScreen_cPreStartScreen__FPv);
 void* cPreStartScreen_cPreStartScreen(void* vself)
 {
     cPreStartScreen* self = (cPreStartScreen*)vself;
-    int zero = 0;
-    *(int*)&self->progressivetimer = zero;
-    *(int*)self = (int)(void*)cPreStartScreen_vtbl;
-    self->nextscreen = (cInitLoadScreen*)zero;
+    self->progressivetimer = 0.0f;
+    self->mVtbl = cPreStartScreen_vtbl;
+    self->nextscreen = 0;
     return ((void*)self);
 }
 #endif

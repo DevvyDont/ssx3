@@ -104,7 +104,8 @@ struct cInstanceNode : public cSortObjNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cInstanceNode1(void* bucket, int type, cInstanceNode* node) __asm__("cInstanceNode_cInstanceNode1");
-    void clearActiveNode(cInstanceNode* inst) __asm__("cInstanceNode_clearActiveNode");
+    void setActiveNode(tInstanceRecord* inst) __asm__("cInstanceNode_setActiveNode");
+    void clearActiveNode(tInstanceRecord* inst) __asm__("cInstanceNode_clearActiveNode");
     void runInitScript() __asm__("cInstanceNode_runInitScript");
     void* runExpireScript() __asm__("cInstanceNode_runExpireScript__FPv");
     void* runOnLoseFocusScript() __asm__("cInstanceNode_runOnLoseFocusScript__FPv");

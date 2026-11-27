@@ -32,7 +32,7 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
 {
     cSortObjNode_cSortObjNode(self, bucket, stream);
     VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
-    self->Instance = (tInstanceRecord*)(int)stream->readReplayInstance((cInstanceNode*)self);
+    self->Instance = stream->readReplayInstance(self);
     return ((void*)self);
 }
 #endif
@@ -41,7 +41,7 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
 INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cInstanceNode_clearActiveNode(cInstanceNode* self, cInstanceNode* a1);
+extern "C" void cInstanceNode_clearActiveNode(cInstanceNode* self, tInstanceRecord* inst);
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
 /**
@@ -57,7 +57,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
-    self->clearActiveNode((cInstanceNode*)self->Instance);
+    self->clearActiveNode(self->Instance);
     self->Instance->m_iFlags &= 0xFFFF0300;
     {
         tInstanceRecord* instance = self->Instance;
@@ -73,14 +73,13 @@ extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 INCLUDE_ASM("object/instancenode", cInstanceNode_setActiveNode);
 #ifdef SKIP_ASM
 /**
- * Makes an instance node the active node of an instance record (record +0xC).
+ * Makes this node the active node of an instance record (m_pActiveNode, record +0xC).
  *
- * @param node  the instance node
  * @param inst  instance record
  */
-extern "C" void cInstanceNode_setActiveNode(int node, cInstanceNode* inst)
+void cInstanceNode::setActiveNode(tInstanceRecord* inst)
 {
-    VPTR_OF(cObjNode, inst) = (void**)node;
+    inst->m_pActiveNode = this;
 }
 #endif
 
@@ -92,22 +91,22 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_clearActiveNode);
  *
  * @param inst  instance record (may be 0)
  */
-void cInstanceNode::clearActiveNode(cInstanceNode* inst)
+void cInstanceNode::clearActiveNode(tInstanceRecord* inst)
 {
-    if (((void*)inst) != 0) {
-        if ((int)VPTR_OF(cObjNode, inst) == (int)this) {
-            VPTR_OF(cObjNode, inst) = 0;
+    if (inst != 0) {
+        if (inst->m_pActiveNode == this) {
+            inst->m_pActiveNode = 0;
         }
     }
 }
 #endif
 
-extern "C" void* cObjectInterface_runExpireScript(int);
+extern "C" void* cObjectInterface_runExpireScript(tInstanceRecord* inst);
 
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_runInitScript);
 #ifdef SKIP_ASM
-extern "C" void cObjectInterface_runInitScript(int);
+extern "C" void cObjectInterface_runInitScript(tInstanceRecord* inst);
 
 /**
  * Runs the init world script (type 0) of the node's instance (cObjectInterface_runInitScript on Instance).
@@ -115,7 +114,7 @@ extern "C" void cObjectInterface_runInitScript(int);
  */
 void cInstanceNode::runInitScript()
 {
-    cObjectInterface_runInitScript(((int)Instance));
+    cObjectInterface_runInitScript(Instance);
 }
 #endif
 
@@ -129,11 +128,11 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runExpireScript__FPv);
  */
 void* cInstanceNode::runExpireScript()
 {
-    return cObjectInterface_runExpireScript((int)Instance);
+    return cObjectInterface_runExpireScript(Instance);
 }
 #endif
 
-extern "C" void* cObjectInterface_runOnLoseFocusScript(int);
+extern "C" void* cObjectInterface_runOnLoseFocusScript(tInstanceRecord* inst);
 
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_runOnLoseFocusScript__FPv);
@@ -147,7 +146,7 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runOnLoseFocusScript__FPv);
  */
 void* cInstanceNode::runOnLoseFocusScript()
 {
-    return cObjectInterface_runOnLoseFocusScript((int)Instance);
+    return cObjectInterface_runOnLoseFocusScript(Instance);
 }
 #endif
 
@@ -228,7 +227,7 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_makeThisDead);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_DeadNode_b[];
-extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, int v);
+extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, tInstanceRecord* inst);
 
 /**
  * Replaces an instance node by a dead node: deletes this node and creates a cDeadNode for the same record.
@@ -239,7 +238,7 @@ extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, int v);
  */
 void cInstanceNode::makeThisDead()
 {
-    int instance = (int)Instance;
+    tInstanceRecord* instance = Instance;
     delete this;
     cDeadNode_cDeadNode((cDeadNode*)cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
@@ -693,7 +692,7 @@ extern "C" bool hasAnimationChannels(tInstanceRecord* self)
     int count = list->m_iNumMeshes;
     tMeshHeirarchyRecord* meshEntry = (list->m_MeshHeirarchy);
     for (i = 0; i < count; i++, meshEntry++) {
-        if (((int)meshEntry->m_MeshAnim) != 0) {
+        if (meshEntry->m_MeshAnim != 0) {
             return true;
         }
     }
@@ -704,7 +703,7 @@ extern "C" bool hasAnimationChannels(tInstanceRecord* self)
 //100%
 INCLUDE_ASM("object/instancenode", cDeadNode_cDeadNode);
 #ifdef SKIP_ASM
-extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, int a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int bucket, int type, tInstanceRecord* inst);
 extern char cDeadNode_vtbl[];
 
 /**
@@ -717,7 +716,7 @@ extern char cDeadNode_vtbl[];
  * @param pInst  the instance record (On Tour pInst)
  * @return the constructed node (self)
  */
-extern "C" void* cDeadNode_cDeadNode(cDeadNode* self, int pInst)
+extern "C" void* cDeadNode_cDeadNode(cDeadNode* self, tInstanceRecord* pInst)
 {
     cInstanceNode_cInstanceNode1(self, 8, 6, pInst);
     VPTR_OF(cObjNode, self) = (void**)cDeadNode_vtbl;

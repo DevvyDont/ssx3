@@ -454,6 +454,12 @@ extern char str_The_display_mode_has_been_switched_to_Pr[];
 extern char str_The_display_mode_has_been_set_to_interla[];
 extern char str_kT_CMNContinue_c[];
 
+// The display-mode popup's UI state (vtable D_0047DA58; the class name is not known, ours): a cUIState and two fields.
+// [R] func_002452D8 allocates 0x50 bytes for it and sets mInterlaced; [U] func_00245F50 / func_00246098.
+struct cUIStateDisplayModePopup : public cUIState {
+    signed char mInterlaced;        // 0x48 (name ours) [U] 0: the popup says the mode was switched to progressive
+    int mConfirmTimer;              // 0x4C (name ours) [U] func_00245F50 starts it at 300; func_00246098 counts it down
+};
 
 /**
  * Creates the display-mode popup's "supopup" screen and fills in its message and buttons (onCreateScreen slot of
@@ -465,7 +471,7 @@ extern char str_kT_CMNContinue_c[];
  * slot 9, with 0) and made static (setStatic, slot 8, with 1). Starts the 300-frame countdown at +0x4C. The state is
  * pushed by func_002452D8() after the progressive-scan choice.
  */
-extern "C" void func_00245F50(cUIState* self)
+extern "C" void func_00245F50(cUIStateDisplayModePopup* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_supopup), 0);
@@ -475,7 +481,7 @@ extern "C" void func_00245F50(cUIState* self)
     }
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_b));
     if (text != 0) {
-        if (*(signed char*)((char*)self + 0x48) == 0)
+        if (self->mInterlaced == 0)
             cUIText_setAsciiString(text, str_The_display_mode_has_been_switched_to_Pr);
         else
             cUIText_setAsciiString(text, str_The_display_mode_has_been_set_to_interla);
@@ -487,11 +493,11 @@ extern "C" void func_00245F50(cUIState* self)
     cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
     if (((char*)noButton) != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, noButton);
-        vt[9].fn(((char*)noButton) + vt[9].delta, 0);
+        vt[9].fn(vthis(noButton, vt[9]), 0);
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, noButton);
-        vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
+        vt2[8].fn(vthis(noButton, vt2[8]), 1);
     }
-    *(int*)((char*)self + 0x4C) = 300;
+    self->mConfirmTimer = 300;
 }
 #endif
 
@@ -511,12 +517,6 @@ extern char str_The_display_mode_has_been_switched_to_Pr[];
 extern char str_The_display_mode_has_been_set_to_interla[];
 extern char str_kT_CMNContinue_c[];
 
-struct sVEK246098 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Counts down the display-mode popup's confirm timer and, when it runs out unanswered, switches back to interlaced
  * output (onUpdate slot of D_0047DA58).
@@ -525,15 +525,15 @@ struct sVEK246098 {
  * flag to 1, rewrites "Title", "yes" and "no" as func_00245F50() does (so the text now says the mode was set to
  * interlaced) and calls cGraphicsMan_TheGraphicsMan's SetDTV (slot 8) with 0. Always ends with cUIState_onUpdate().
  */
-extern "C" void func_00246098(cUIState* self)
+extern "C" void func_00246098(cUIStateDisplayModePopup* self)
 {
-    if (*(int*)((char*)self + 0x4C) != 0) {
-        if (--*(int*)((char*)self + 0x4C) == 0) {
-            if (*(signed char*)((char*)self + 0x48) == 0) {
-                *(signed char*)((char*)self + 0x48) = 1;
+    if (self->mConfirmTimer != 0) {
+        if (--self->mConfirmTimer == 0) {
+            if (self->mInterlaced == 0) {
+                self->mInterlaced = 1;
                 cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_b));
                 if (text != 0) {
-                    if (*(signed char*)((char*)self + 0x48) == 0)
+                    if (self->mInterlaced == 0)
                         cUIText_setAsciiString(text, str_The_display_mode_has_been_switched_to_Pr);
                     else
                         cUIText_setAsciiString(text, str_The_display_mode_has_been_set_to_interla);
@@ -544,14 +544,14 @@ extern "C" void func_00246098(cUIState* self)
                 }
                 cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
                 if (((char*)noButton) != 0) {
-                    sVEK246098* vt = (sVEK246098*)VPTR_OF(cListNode, noButton);
-                    vt[9].fn(((char*)noButton) + vt[9].delta, 0);
-                    sVEK246098* vt2 = (sVEK246098*)VPTR_OF(cListNode, noButton);
-                    vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
+                    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, noButton);
+                    vt[9].fn(vthis(noButton, vt[9]), 0);
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, noButton);
+                    vt2[8].fn(vthis(noButton, vt2[8]), 1);
                 }
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-                sVEK246098* vt3 = (sVEK246098*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-                vt3[8].fn((char*)ps2GraphicsMan + vt3[8].delta, 0);
+                sVEntry<void(void*, int)>* vt3 = (sVEntry<void(void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
+                vt3[8].fn(vthis(ps2GraphicsMan, vt3[8]), 0);
             }
         }
     }

@@ -52,14 +52,15 @@ void cPreStartScreen::update()
     if (*fade > 1.0f) {
         *fade = 1.0f;
     }
-    if ((int)SSXApp->LoadingModule == 0) {
+    if (SSXApp->LoadingModule == 0) {
         cInitLoadScreen* loadScreen = (cInitLoadScreen*)cMemMan_alloc(0xC, str_InitLoadScreen, 0x100, 0);
         cAppMan* app = (cAppMan*)SSXApp;
         loadScreen->mVtbl = cInitLoadScreen_vtbl;
         loadScreen->progressive = 0;
         loadScreen->ending = 0;
-        *(cInitLoadScreen**)&nextscreen = loadScreen;
-        // PORT: setNextModule takes the module pointer as an unsigned int
+        nextscreen = loadScreen;
+        // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
+        // int, so the original converted the new module's pointer to it too
         cAppMan_setNextModule(app, (unsigned int)loadScreen);
     }
     progressivetimer += 0.01666666753590107f;
@@ -191,7 +192,9 @@ void cInitLoadScreen::update()
             *fade = 1.0f;
         }
     }
-    if ((int)SSXApp->LoadingModule == 0) {
+    if (SSXApp->LoadingModule == 0) {
+        // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
+        // int, so the original converted the new module's pointer to it too
         cAppMan_setNextModule((cAppMan*)SSXApp,
             (unsigned int)cStartScreen_cStartScreen((cStartScreen*)cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0),
                     progressive ? 2 : 0));
@@ -284,7 +287,7 @@ void* cPreGameLoadScreen_cPreGameLoadScreen(void* vself)
 {
     cPreGameLoadScreen* self = (cPreGameLoadScreen*)vself;
     self->ending = 0;
-    *(int*)self = (int)(void*)cPreGameLoadScreen_vtbl;
+    self->mVtbl = cPreGameLoadScreen_vtbl;
     return ((void*)self);
 }
 #endif
@@ -305,7 +308,7 @@ void* cPreFELoadScreen_cPreFELoadScreen(void* vself)
 {
     cPreFELoadScreen* self = (cPreFELoadScreen*)vself;
     self->ending = 0;
-    *(int*)self = (int)(void*)cPreFELoadScreen_vtbl;
+    self->mVtbl = cPreFELoadScreen_vtbl;
     return ((void*)self);
 }
 #endif
@@ -494,9 +497,11 @@ void cPreGameLoadScreen::update()
             *fade = 1.0f;
         }
     }
-    if ((int)SSXApp->LoadingModule == 0) {
+    if (SSXApp->LoadingModule == 0) {
         cGameLoadScreen* loadScreen = (cGameLoadScreen*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
         cFadeScreen_cFadeScreen_r(loadScreen);
+        // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
+        // int, so the original held the new module as that integer too
         endingThenModule = (unsigned int)loadScreen;
         loadScreen->mVtbl = cGameLoadScreen_vtbl;
         loadScreen->mpUI = 0;
@@ -551,9 +556,11 @@ void cPreFELoadScreen::update()
             *fade = 1.0f;
         }
     }
-    if ((int)SSXApp->LoadingModule == 0) {
+    if (SSXApp->LoadingModule == 0) {
         cFELoadScreen* loadScreen = (cFELoadScreen*)cMemMan_alloc(0x1C, str_FELoad, 0x100, 0);
         cFadeScreen_cFadeScreen_r(loadScreen);
+        // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
+        // int, so the original held the new module as that integer too
         endingThenModule = (unsigned int)loadScreen;
         loadScreen->mVtbl = cFELoadScreen_vtbl;
         loadScreen->mpUI = 0;

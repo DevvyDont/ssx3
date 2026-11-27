@@ -17,21 +17,6 @@
 #include "object/transformmodifier.h"
 #include "render/graphicsman.h"
 
-struct sBoundBoxTarget {
-    char pad_0x00[0x68];
-    short field_0x68;
-    char pad_0x6A[2];
-    void (*fnBoundBox)(void*); // 0x6C
-    char pad_0x70[0x78 - 0x70];
-    short field_0x78;
-    char pad_0x7A[2];
-    void (*fnRadius)(void*); // 0x7C
-};
-
-struct sBoundBoxNode {
-    sBoundBoxTarget* target; // 0x0
-};
-
 
 extern void* cEffectLink_vtbl[16];
 extern void* cRailLink_vtbl[16];
@@ -112,11 +97,11 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_getBoundBox);
  *
  * @return the node's result, or 0 when the block has no node
  */
-int tModifierBlock::getBoundBox()
+const tBoundBox* tModifierBlock::getBoundBox()
 {
     cTransformModifier* node = RootTransform;
     if (node != 0) {
-        return (int)node->getBoundBox();
+        return node->getBoundBox();
     }
     return 0;
 }
@@ -169,14 +154,15 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_setRadius__FP14tModifierBlock
  * Passes a radius to the modifier block's root transform modifier through its virtual setRadius (slot 15).
  *
  * Does nothing without a root transform modifier (+0x0, On Tour RootTransform). The radius (On Tour's float
- * argument) travels in $f12 untouched; the mangled name and the C declare no float parameter.
+ * argument) travels in $f12 untouched; the mangled name declares no float parameter.
+ *
+ * @param radius  the new radius
  */
-void tModifierBlock::setRadius()
+void tModifierBlock::setRadius(float radius)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)RootTransform;
+    cTransformModifier* node = RootTransform;
     if (node != 0) {
-        sBoundBoxTarget* target = node->target;
-        target->fnRadius((char*)node + target->field_0x78);
+        node->setRadius(radius);
     }
 }
 #endif
@@ -556,7 +542,7 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_fadeEffectModifier);
  */
 void tModifierBlock::fadeEffectModifier()
 {
-    cEffectLink* head = *(cEffectLink**)&Effect;
+    cEffectLink* head = Effect.Next;
     if (head != 0) {
         cEffectLink* link = head;
         do {
@@ -580,7 +566,7 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remHaloModifier);
  */
 void tModifierBlock::remHaloModifier()
 {
-    cEffectLink* head = *(cEffectLink**)&Effect;
+    cEffectLink* head = Effect.Next;
     if (head != 0) {
         cEffectLink* link = head;
         do {
@@ -610,7 +596,7 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_remRailModifier);
  */
 void tModifierBlock::remRailModifier(unsigned int id)
 {
-    cRailModifier* head = *(cRailModifier**)&Rail;
+    cRailModifier* head = (cRailModifier*)Rail.Next;
     if (head == 0) return;
     cRailModifier* rail = head;
     if (~id) {
@@ -650,14 +636,14 @@ extern "C" void cEffectLink_append(void* pool, void* item);
  */
 void tModifierBlock::transferEffectModifier(cEffectLink* list)
 {
-    cEffectLink* effect = (cEffectLink*)(*(void**)list);
-    while (((void*)effect) != 0) {
-        void* next = *(void**)effect;
+    cEffectLink* effect = list->Next;
+    while (effect != 0) {
+        cEffectLink* next = effect->Next;
         effect->fadeEffect();
         cEffectLink_append(&Effect, effect);
-        effect = (cEffectLink*)next;
+        effect = next;
     }
-    *(void**)list = 0;
+    list->Next = 0;
     list->Prev = 0;
 }
 #endif
@@ -665,12 +651,6 @@ void tModifierBlock::transferEffectModifier(cEffectLink* list)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_findRail);
 #ifdef SKIP_ASM
-struct sModifierLink {
-    sModifierLink* next; // 0x0
-    char pad_0x4[0x30 - 0x4];
-    int id;              // 0x30
-};
-
 /**
  * Tells whether the modifier block has a rail modifier for a given spline.
  *
@@ -681,12 +661,12 @@ struct sModifierLink {
  */
 bool tModifierBlock::findRail(int id)
 {
-    sModifierLink* rail = *(sModifierLink**)&Rail;
+    cRailModifier* rail = (cRailModifier*)Rail.Next;
     while (rail != 0) {
-        if (rail->id == id) {
+        if (rail->SplineId == id) {
             return true;
         }
-        rail = rail->next;
+        rail = (cRailModifier*)rail->Next;
     }
     return false;
 }
@@ -752,13 +732,13 @@ void tModifierBlock::writeToReplayFrame(cBxReplayFrame* stream)
         info.Flags |= 8;
         info.PhysicsType = VCall0_353448(oC, 4, 5);
     }
-    for (char* link = *(char**)&Effect; link; link = *(char**)link) {
-        info.EffectType[info.NumEffects++] = VCall0_353448(link, 8, 2);
+    for (cEffectLink* link = Effect.Next; link; link = link->Next) {
+        info.EffectType[info.NumEffects++] = VCall0_353448((char*)link, 8, 2);
     }
     if (info.NumEffects > 0) {
         info.Flags |= 0x10;
     }
-    for (char* link = *(char**)&Rail; link; link = *(char**)link) {
+    for (cRailLink* link = Rail.Next; link; link = link->Next) {
         info.NumRails++;
     }
     if (info.NumRails > 0) {
@@ -782,13 +762,13 @@ void tModifierBlock::writeToReplayFrame(cBxReplayFrame* stream)
         VCall1_353448(wC, 4, 6, stream);
     }
     if (info.NumEffects > 0) {
-        for (char* link = *(char**)&Effect; link; link = *(char**)link) {
-            VCall1_353448(link, 8, 4, stream);
+        for (cEffectLink* link = Effect.Next; link; link = link->Next) {
+            VCall1_353448((char*)link, 8, 4, stream);
         }
     }
     if (info.NumRails > 0) {
-        for (char* link = *(char**)&Rail; link; link = *(char**)link) {
-            VCall1_353448(link, 8, 2, stream);
+        for (cRailLink* link = Rail.Next; link; link = link->Next) {
+            VCall1_353448((char*)link, 8, 2, stream);
         }
     }
 }
@@ -798,15 +778,6 @@ void tModifierBlock::writeToReplayFrame(cBxReplayFrame* stream)
 INCLUDE_ASM("object/modifierblock", tModifierBlock_readFromReplayFrame);
 #ifdef SKIP_ASM
 
-
-struct sMbReplayHdr36D8 {
-    unsigned int flags;      // 0x00
-    int type;                // 0x04
-    int kind;                // 0x08
-    int numA;                // 0x0C
-    int numB;                // 0x10
-    signed char typesA[32];  // 0x14
-};
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cSplineModifier_cSplineModifier(void* self, cReplayFramePtr* s);
@@ -853,65 +824,65 @@ extern const char str_RailModifier[];
  */
 void tModifierBlock::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    sMbReplayHdr36D8 hdr;
+    tModifierBlockInfo hdr;
     int i;
 
-    *(void**)&RootTransform = 0;
+    RootTransform = 0;
     UVScroll = 0;
     TexFlip = 0;
     Physics = 0;
     stream->read((char*)&hdr, 52);
 
-    if (hdr.flags & 1) {
-        if (hdr.type == cTransformModifier::kTransform_Spline) {
+    if (hdr.Flags & 1) {
+        if (hdr.TransformType == cTransformModifier::kTransform_Spline) {
             RootTransform = (cTransformModifier*)cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0,
                     str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == cTransformModifier::kTransform_MultiSpline) {
+        } else if (hdr.TransformType == cTransformModifier::kTransform_MultiSpline) {
             RootTransform = (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88,
                     str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == cTransformModifier::kTransform_Parent) {
+        } else if (hdr.TransformType == cTransformModifier::kTransform_Parent) {
             RootTransform = (cTransformModifier*)cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier,
                     0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == cTransformModifier::kTransform_Position) {
+        } else if (hdr.TransformType == cTransformModifier::kTransform_Position) {
             RootTransform = (cTransformModifier*)cPositionModifier_cPositionModifier2(cMemMan_alloc(144,
                     str_PositionModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == cTransformModifier::kTransform_Roller) {
+        } else if (hdr.TransformType == cTransformModifier::kTransform_Roller) {
             RootTransform = (cTransformModifier*)cRollerModifier_cRollerModifier1(cMemMan_alloc(720,
                     str_RollerModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == cTransformModifier::kTransform_Magnet) {
+        } else if (hdr.TransformType == cTransformModifier::kTransform_Magnet) {
             RootTransform = (cTransformModifier*)cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176,
                     str_MagnetModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.type == cTransformModifier::kTransform_AvaSpline) {
+        } else if (hdr.TransformType == cTransformModifier::kTransform_AvaSpline) {
             RootTransform = (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144,
                     str_AvaSplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         }
     }
-    if (hdr.flags & 2) {
+    if (hdr.Flags & 2) {
         UVScroll = (cUVScrollModifier*)cUVScrollModifier_cUVScrollModifier1(cMemMan_alloc(80, str_UVScrollModifier,
                 0x20000000, 0), (cReplayFramePtr*)stream);
     }
-    if (hdr.flags & 4) {
+    if (hdr.Flags & 4) {
         TexFlip = (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier,
                 0x20000000, 0), (cReplayFramePtr*)stream);
     }
-    if ((hdr.flags & 8) && hdr.kind == cPhysicsModifier::kPhysics_Boost) {
+    if ((hdr.Flags & 8) && hdr.PhysicsType == cPhysicsModifier::kPhysics_Boost) {
         Physics = (cPhysicsModifier*)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000,
                 0), (cReplayFramePtr*)stream);
     }
-    for (i = 0; i < hdr.numA; i++) {
+    for (i = 0; i < hdr.NumEffects; i++) {
         void* effect;
-        if (hdr.typesA[i] == cEffectLink::kEffect_Particle) {
+        if (hdr.EffectType[i] == cEffectLink::kEffect_Particle) {
             effect = cParticleModifier_cParticleModifier1(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.typesA[i] == cEffectLink::kEffect_DynamicParticle) {
+        } else if (hdr.EffectType[i] == cEffectLink::kEffect_DynamicParticle) {
             effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
-        } else if (hdr.typesA[i] == cEffectLink::kEffect_Halo) {
+        } else if (hdr.EffectType[i] == cEffectLink::kEffect_Halo) {
             effect = cHaloModifier_cHaloModifier1(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else {
             effect = 0;
         }
         cEffectLink_append(&Effect, effect);
     }
-    for (i = 0; i < hdr.numB; i++) {
+    for (i = 0; i < hdr.NumRails; i++) {
         cRailLink_append((char*)&Rail, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000,
                 0), (cReplayFramePtr*)stream));
     }
@@ -960,7 +931,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
 void* cSkyBox__cSkyBox(void* vself)
 {
     cSkyBox* self = (cSkyBox*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cSkyBox_vtbl);
+    VPTR_OF(cObjNode, self) = cSkyBox_vtbl;
     return cObjNode__cObjNode(self);
 }
 #endif

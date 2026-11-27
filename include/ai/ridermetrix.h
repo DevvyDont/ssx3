@@ -135,7 +135,7 @@ struct tRiderStats {
     int LongestCombo;                // 0x88 [O]
     int BestComboPoints;             // 0x8C [O]
     int BestTrickPoints;             // 0x90 [O]; [U] earnNameAndPoints keeps the best
-    unsigned int BestTrick[2];       // 0x94 [O] tTrickNameDef (8 bytes in retail); [U] stored with BestTrickPoints
+    tTrickNameDef BestTrick;         // 0x94 [O] (8 bytes in retail); [U] stored with BestTrickPoints
     int TotalPoints;                 // 0x9C [O]; [U] evAddPoints
     int TotalStylePoints;            // 0xA0 [O]
     int TotalPointsLostToWipeouts;   // 0xA4 [O]; [U] evWipeout
@@ -202,7 +202,7 @@ struct cRiderMetrix {
     int NumCombos;                   // 0x09C [O]; [U] resetComboChain
     int ComboPoints;                 // 0x0A0 [O]; [U] resetComboChain, losePoints
     float ComboResetDelay;           // 0x0A4 [O]; [U] delayComboChainReset, cancelComboChainReset
-    unsigned int TrickHistory[10][2]; // 0x0A8 [O] tTrickNameDef[10] (8 bytes each in retail)
+    tTrickNameDef TrickHistory[10];  // 0x0A8 [O] (8 bytes each in retail)
     int TrickHistoryPtr;             // 0x0F8 [O]
     tRiderStats Totals;              // 0x0FC [O]
     float CurAvgSpeedCPS;            // 0x1A8 [O]

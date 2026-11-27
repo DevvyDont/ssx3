@@ -367,17 +367,17 @@ static inline int clutPsm_7440(int f)
  * @param bindId  the id to use, or a negative value to take a free non-bound id
  * @return the texture id, or kNoTexID for a format with no bit depth
  */
-int cTextureMan::AddTexture(int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
-                            int clutFormat, int clutData, int vramMode, int ownsData, int bindId)
+int cTextureMan::AddTexture(void* pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
+                            int clutFormat, void* clutData, int vramMode, int ownsData, int bindId)
 {
-    void* data = (void*)pixelData;
+    void* data = pixelData;
     const char* name = (const char*)texName;
     unsigned int w = texWidth;
     unsigned int height = texHeight;
     int mip = mipCount;
     int fmt = texelFormat;
     int clutFmt = clutFormat;
-    void* clut = (void*)clutData;
+    void* clut = clutData;
     int id;
     if (bindId < 0) {
         id = NewNonBindTexID();
@@ -1551,7 +1551,7 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
     self->m_AIUpdatesPerRender = 0;
     MEM_fill(&self->_EffectTexMap[0], 0xFFFFFFFF, 344);
     self->mNumViews = 1;
-    *(int*)&self->mFarPlane = 0;
+    self->mFarPlane = 0.0f;
     self->mViewIndex = 0;
     self->m_blendedMatrixHistory = 0;
     self->m_blendedMatrixHistorySize = 0;
@@ -1695,6 +1695,8 @@ INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_InitTextureFiles__FPvii);
  */
 void cGraphicsMan::InitTextureFiles(int numFiles, int fileNames)
 {
+    // ORIGINAL-PTR: the retail symbol cGraphicsMan_InitTextureFiles__FPvii mangles the file-name list as int, so the
+    // original converted it back to the pointer too
     mTextureFiles = (void**)fileNames;
     mNumTextureFiles = numFiles;
     mNumTexRefs = 0;

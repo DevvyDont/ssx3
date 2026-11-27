@@ -25,8 +25,8 @@ INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern "C" void* cStaticEmitter_cStaticEmitter(void* p);
-extern "C" void cStaticEmitter_setupEmitter(void* sys, void* data, int n);
+extern "C" cStaticEmitter* cStaticEmitter_cStaticEmitter(void* p);
+extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* sys, t4Matrix* transform, tParticleData* particleData);
 extern char str_InstIds[];
 extern char str_Emitter[];
 extern t4Matrix t4mat_Identity;
@@ -51,11 +51,11 @@ void cMultiParticle::setupMultiParticle()
 {
     sMPRef** slot = &(*(sMPRef**)&InstIds);
     *slot = new (str_InstIds, 0x20000000, 0) sMPRef[MaxInst];
-    (*(void**)&Emitter) = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
+    Emitter = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
     for (int i = 0; i < MaxInst; i++) {
         InstIds[i] = tResourceID::Invalid();
     }
-    cStaticEmitter_setupEmitter(((void*)Emitter), &t4mat_Identity, ((int)Particle));
+    cStaticEmitter_setupEmitter(Emitter, &t4mat_Identity, Particle);
 }
 #endif
 
@@ -904,8 +904,8 @@ bool cAnimComboNode::updateNode()
 {
     FrameStart = 10000000000.0f;
     FrameEnd = 10000000000.0f;
-    if (*(signed char*)&AnimComplete2 == 0) {
-        if (*(signed char*)&AnimActive2 != 0) {
+    if (AnimComplete2 == 0) {
+        if (AnimActive2 != 0) {
             int countdown = Delay;
             if (countdown >= 0) {
                 if (countdown > 0) {
@@ -919,10 +919,10 @@ bool cAnimComboNode::updateNode()
                     CurrTime2 = pos;
                     if (max <= pos) {
                         CurrTime2 = max;
-                        if (*(signed char*)&Stop != 0) {
-                            *(signed char*)&AnimComplete2 = 1;
+                        if (Stop != 0) {
+                            AnimComplete2 = 1;
                         }
-                        *(signed char*)&AnimActive2 = 0;
+                        AnimActive2 = 0;
                     }
                     if (cAnimNode_frameUpdate(&CurrTime) == 0) {
                         return false;
@@ -942,11 +942,7 @@ bool cAnimComboNode::updateNode()
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_updateIntersectInfo);
 #ifdef SKIP_ASM
-struct sMpQuad {
-    float v[4];
-} __attribute__((aligned(16)));
-
-extern sMpQuad t4vect_Zero;
+extern t4Vector t4vect_Zero;
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
 
 /**
@@ -960,8 +956,8 @@ extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
 void cAnimComboNode::updateIntersectInfo(tIntersectInfo* out)
 {
     cMoveNode_updateIntersectInfo(&MoveNodeBase, out);
-    *(sMpQuad*)&out->Ivel = t4vect_Zero;
-    *(sMpQuad*)&out->Iangvel = t4vect_Zero;
+    out->Ivel = t4vect_Zero;
+    out->Iangvel = t4vect_Zero;
 }
 #endif
 
@@ -1058,7 +1054,7 @@ extern "C" void cInstanceNode_loseFocus(void*);
  */
 void cAnimComboNode::loseFocus()
 {
-    if (*(signed char*)&AnimComplete2 == 0) {
+    if (AnimComplete2 == 0) {
         cInstanceNode_loseFocus(&MoveNodeBase);
     }
 }
@@ -1104,11 +1100,11 @@ void cAnimComboNode::cacheFrame()
     if ((AnimFrames) == 0) {
         return;
     }
-    if (*(signed char*)&AnimActive2 == 0) {
-        if (*(signed char*)&StopInPlace == 0) {
+    if (AnimActive2 == 0) {
+        if (StopInPlace == 0) {
             return;
         }
-        if (*(signed char*)&AnimComplete2 == 0) {
+        if (AnimComplete2 == 0) {
             return;
         }
     }
@@ -1144,7 +1140,7 @@ void* cAnimDeltaNode::cAnimDeltaNode1(int bucket, int instRecord, int animData)
 {
     cAnimObjectNode_cAnimObjectNode1(this, bucket, 2, instRecord, animData);
     mVtbl = cAnimDeltaNode_vtbl;
-    *(int*)&Delta = 0;
+    Delta = 0.0f;
     AnimActive = 0;
     return ((void*)this);
 }
@@ -1306,8 +1302,8 @@ extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, tAddSpl
     self->Spline.SplineId = 0xFFFFFFFF;
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
-    *(int*)&self->Spline.Length = 0;
-    *(int*)&self->Radius = 0;
+    self->Spline.Length = 0.0f;
+    self->Radius = 0.0f;
     self->SequenceType = desc->Sequence;
     self->OrientType = desc->Orient;
     self->HeadTweak = desc->Heading * 0.01745329424738884f;
@@ -1330,11 +1326,11 @@ extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, tAddSpl
     if (self->OffsetDistance < zeroF || self->Spline.Length < self->OffsetDistance) {
         self->OffsetDistance = zeroF;
     }
-    *(sMpQuad*)&self->Dir = t4vect_Zero;
-    *(sMpQuad*)&self->DDir = t4vect_Zero;
+    self->Dir = t4vect_Zero;
+    self->DDir = t4vect_Zero;
     self->RootTransformDirty = 1;
-    *(int*)&self->X2 = 0;
-    *(int*)&self->Y2 = 0;
+    self->X2 = 0.0f;
+    self->Y2 = 0.0f;
     return ((char*)self);
 }
 #endif

@@ -83,17 +83,13 @@ void cMemMan_free(void*);
  * Unless it already is the empty string, decrements NumRefs, frees the block (Str - 0xC) when the count
  * reaches exactly 0, and points Str at cBXString::EmptyString.
  */
-// PORT: pointer held in int to get the target's negative header offsets.
 void cBXString::Reset()
 {
-    int buffer = (int)Str;
-    if ((char*)buffer != D_0048DCD4)
+    if (Str != D_0048DCD4)
     {
-        int rc = *(int*)(buffer - 0xC) - 1;
-        *(int*)(buffer - 0xC) = rc;
-        if (rc == 0)
+        if (--getData()->NumRefs == 0)
         {
-            void* header = (void*)((int)Str - 0xC);
+            tStringData* header = getData();
             if (header != 0)
                 cMemMan_free(header);
         }
@@ -204,17 +200,13 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-// PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString__cBXString(cBXString* self, int flags)
 {
-    int strAddr = (int)self->Str;
-    if ((char*)strAddr != D_0048DCD4)
+    if (self->Str != D_0048DCD4)
     {
-        int rc = *(int*)(strAddr - 0xC) - 1;
-        *(int*)(strAddr - 0xC) = rc;
-        if (rc <= 0)
+        if (--self->getData()->NumRefs <= 0)
         {
-            void* header = (void*)((int)self->Str - 0xC);
+            tStringData* header = self->getData();
             if (header != 0)
                 cMemMan_free(header);
         }
@@ -305,14 +297,13 @@ extern char D_0048DCD4[];
  * @param len  number of characters to copy
  * @param str  the source text (it need not end at @p len)
  */
-// PORT: pointer held in int to get the target's negative store offset.
 void cBXString::InitFromCString(int len, const char* str)
 {
     Resize(len);
     if (Str != D_0048DCD4)
     {
         func_0041605C(Str, str, len);
-        *(int*)((int)Str - 8) = len;
+        getData()->DataLength = len;
         Str[len] = 0;
     }
 }
@@ -333,22 +324,19 @@ extern char D_0048DCD4[];
  * @param other  the string to assign
  * @return @p self
  */
-// PORT: pointers held in int to get the target's negative header offsets
-// (refcount at -0xC, length at -8).
 cBXString* cBXString::operatorE(cBXString* other)
 {
     if (Str != other->Str)
     {
-        if ((*(int*)((int)Str - 0xC) < 0 && Str != D_0048DCD4) ||
-            *(int*)((int)other->Str - 0xC) < 0)
+        if ((getData()->NumRefs < 0 && Str != D_0048DCD4) || other->getData()->NumRefs < 0)
         {
-            InitFromCString(*(int*)((int)other->Str - 8), other->Str);
+            InitFromCString(other->getData()->DataLength, other->Str);
         }
         else
         {
             Reset();
             Str = other->Str;
-            (*(int*)((int)Str - 0xC))++;
+            getData()->NumRefs++;
         }
     }
     return this;
@@ -430,16 +418,14 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @param right  the second string
  * @return @p self
  */
-// cBXString(a + b). PORT: pointer held in int for the negative header offsets.
+// cBXString(a + b).
 extern "C" cBXString* func_003185C8(cBXString* self, cBXString* left, cBXString* right)
 {
-    char* joined = cBXString_EmptyString;
-    // PORT: read as int; reading a->Str (char*) schedules these loads differently (refactor gate, 2026-11-16)
-    int sa = *(int*)left;
-    int sb = *(int*)right;
-    ((cBXString*)&joined)->concatCopy(*(int*)(sa - 8), (char*)sa, *(int*)(sb - 8), (char*)sb);
-    self->cBXString1((cBXString*)&joined);
-    cBXString__cBXString((cBXString*)&joined, 2);
+    cBXString joined;
+    joined.Str = cBXString_EmptyString;
+    joined.concatCopy(left->getData()->DataLength, left->Str, right->getData()->DataLength, right->Str);
+    self->cBXString1(&joined);
+    cBXString__cBXString(&joined, 2);
     return self;
 }
 #endif
@@ -464,19 +450,21 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @param str  the C string to append, or null
  * @return @p self
  */
-// cBXString(a + str). PORT: pointer held in int for the negative header offsets.
+// cBXString(a + str).
 extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const char* str)
 {
-    char* joined = cBXString_EmptyString;
-    int* lenp = (int*)((int)bxString->Str - 8);
+    cBXString joined;
+    joined.Str = cBXString_EmptyString;
+    // Retail takes the length's address before strlen and reads it after.
+    int* lenp = &bxString->getData()->DataLength;
     int len;
     if (str != 0)
         len = strlen(str);
     else
         len = 0;
-    ((cBXString*)&joined)->concatCopy(*lenp, bxString->Str, len, str);
-    self->cBXString1((cBXString*)&joined);
-    cBXString__cBXString((cBXString*)&joined, 2);
+    joined.concatCopy(*lenp, bxString->Str, len, str);
+    self->cBXString1(&joined);
+    cBXString__cBXString(&joined, 2);
     return self;
 }
 #endif
@@ -501,19 +489,19 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @param bxString  the string to append
  * @return @p self
  */
-// cBXString(str + b). PORT: pointer held in int for the negative header offset.
+// cBXString(str + b).
 extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* bxString)
 {
-    char* joined = cBXString_EmptyString;
+    cBXString joined;
+    joined.Str = cBXString_EmptyString;
     int len;
     if (str != 0)
         len = strlen(str);
     else
         len = 0;
-    int sb = (int)bxString->Str;
-    ((cBXString*)&joined)->concatCopy(len, str, *(int*)(sb - 8), (char*)sb);
-    self->cBXString1((cBXString*)&joined);
-    cBXString__cBXString((cBXString*)&joined, 2);
+    joined.concatCopy(len, str, bxString->getData()->DataLength, bxString->Str);
+    self->cBXString1(&joined);
+    cBXString__cBXString(&joined, 2);
     return self;
 }
 #endif
@@ -521,13 +509,6 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318760);
 #ifdef SKIP_ASM
-// local string temp: non-POD (user copy ctor) so it gets a 16-byte BLKmode stack slot
-struct sBXTmp_318760 {
-    char* p;
-    sBXTmp_318760(char* s) : p(s) {}
-    sBXTmp_318760(const sBXTmp_318760& o) : p(o.p) {}
-};
-
 /**
  * Builds @p self as a string followed by one character.
  *
@@ -539,28 +520,21 @@ struct sBXTmp_318760 {
  * @param ch  the character to append
  * @return @p self
  */
-// cBXString(a + ch). PORT: pointer held in int for the negative header offset.
+// cBXString(a + ch).
 extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char ch)
 {
-    sBXTmp_318760 joined(cBXString_EmptyString);
+    cBXString joined;
+    joined.Str = cBXString_EmptyString;
     char charBuf = ch;
-    int sa = (int)bxString->Str;
-    ((cBXString*)&joined)->concatCopy(*(int*)(sa - 8), (char*)sa, 1, &charBuf);
-    self->cBXString1((cBXString*)&joined);
-    cBXString__cBXString((cBXString*)&joined, 2);
+    joined.concatCopy(bxString->getData()->DataLength, bxString->Str, 1, &charBuf);
+    self->cBXString1(&joined);
+    cBXString__cBXString(&joined, 2);
     return self;
 }
 #endif
 //100%
 INCLUDE_ASM("bx/bxstring", func_003187C8);
 #ifdef SKIP_ASM
-// local string temp: non-POD (user copy ctor) so it gets a 16-byte BLKmode stack slot
-struct sBXTmp_3187C8 {
-    char* p;
-    sBXTmp_3187C8(char* s) : p(s) {}
-    sBXTmp_3187C8(const sBXTmp_3187C8& o) : p(o.p) {}
-};
-
 /**
  * Builds @p self as one character followed by a string.
  *
@@ -572,15 +546,15 @@ struct sBXTmp_3187C8 {
  * @param bxString  the string
  * @return @p self
  */
-// cBXString(ch + b). PORT: pointer held in int for the negative header offset.
+// cBXString(ch + b).
 extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* bxString)
 {
-    sBXTmp_3187C8 joined(cBXString_EmptyString);
+    cBXString joined;
+    joined.Str = cBXString_EmptyString;
     char charBuf = ch;
-    int sb = (int)bxString->Str;
-    ((cBXString*)&joined)->concatCopy(1, &charBuf, *(int*)(sb - 8), (char*)sb);
-    self->cBXString1((cBXString*)&joined);
-    cBXString__cBXString((cBXString*)&joined, 2);
+    joined.concatCopy(1, &charBuf, bxString->getData()->DataLength, bxString->Str);
+    self->cBXString1(&joined);
+    cBXString__cBXString(&joined, 2);
     return self;
 }
 #endif
@@ -686,9 +660,9 @@ extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
  * @param other  the string to append
  * @return @p self
  */
-extern "C" cBXString* func_003189A0(cBXString* self, char** other)
+extern "C" cBXString* func_003189A0(cBXString* self, cBXString* other)
 {
-    self->ConcatImpl(*(int*)(*other - 8), *other);
+    self->ConcatImpl(other->getData()->DataLength, other->Str);
     return self;
 }
 #endif
@@ -741,7 +715,6 @@ extern char D_0048DCD4[];
  *
  * @param len  the new length (On Tour newlen), or kMeasureLength to measure the text
  */
-// PORT: pointer held in int to get the target's negative store offset.
 void cBXString::releaseBuffer(int len)
 {
     copyBeforeWrite();
@@ -749,7 +722,7 @@ void cBXString::releaseBuffer(int len)
         len = strlen(Str);
     if (Str != D_0048DCD4)
     {
-        *(int*)((int)Str - 8) = len;
+        getData()->DataLength = len;
         Str[len] = 0;
     }
 }

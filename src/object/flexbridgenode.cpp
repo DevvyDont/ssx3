@@ -20,7 +20,7 @@ INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_setupGrid);
 #ifdef SKIP_ASM
 struct sBox00348058;
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box, tBoundBox* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* node, tBoundBox* box, tBoundBox* old);
 void cMemMan_free(void*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -186,9 +186,8 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridV4 ext(100.0f, 100.0f, 100.0f, 0.0f);
     gridVecSub(self->box.min, self->box.min, ext);
     gridVecAdd(self->box.max, self->box.max, ext);
-    // PORT: the unit declares nash_Nash_movenode's third parameter as int; the def pointer is passed through it
-    int id = (int)self->def;
-    nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (tBoundBox*)&self->box, (tBoundBox*)&old);
+    sGridDef* node = self->def;
+    nash_Nash_movenode(cObjectInterface_getNash(), 0, node, (tBoundBox*)&self->box, (tBoundBox*)&old);
     int baseVertex = 0;
     int j = 0;
     for (int k = 0; k < ntris - 1; k += 2) {
@@ -594,10 +593,10 @@ void cFlexBridgeNode::updateIntersectInfo(tIntersectInfo& intInfo)
         t4Vector* matrix = (t4Vector*)getRootTransform();
         tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
         t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&t4vect_XAxis_70D0, entry->W));
-        t4Vector arm = vu0Sub_70D0(((&intInfo.Ipos))[0], vu0MtxMul_70D0(matrix, (*(&entry->P))));
-        t4Vector pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, (*(&entry->V))), vu0Cross_70D0(arm, axisVec));
-        vu0AddEq_70D0(((&intInfo.Ipos))[2], pointVelocity);
-        vu0AddEq_70D0(((&intInfo.Ipos))[3], axisVec);
+        t4Vector arm = vu0Sub_70D0(intInfo.Ipos, vu0MtxMul_70D0(matrix, entry->P));
+        t4Vector pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, entry->V), vu0Cross_70D0(arm, axisVec));
+        vu0AddEq_70D0(intInfo.Ivel, pointVelocity);
+        vu0AddEq_70D0(intInfo.Iangvel, axisVec);
     }
 }
 #endif
@@ -608,6 +607,11 @@ INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_intersect);
 // t4Vector with the constructors the original's vector class has (the hit position's scale is built in place).
 struct t4VectorCtor : public t4Vector {
     t4VectorCtor() {}
+    // t4vect::x()/y()/z()/w() in On Tour (component accessors returning a reference).
+    float& X() { return x; }
+    float& Y() { return y; }
+    float& Z() { return z; }
+    float& W() { return w; }
     t4VectorCtor(float ax, float ay, float az, float aw)
     {
         x = ax;
@@ -666,7 +670,7 @@ static inline t4VectorCtor Scale_7268(float s, const t4VectorCtor& v)
 }
 
 // PORT: PS2-only VU0 inline asm (m * v).
-static inline t4VectorCtor MulVec_7268(const t4Matrix* m, const t4VectorCtor& v)
+static inline t4VectorCtor MulVec_7268(const t4Matrix* m, const t4Vector& v)
 {
     t4VectorCtor r;
     __asm__(
@@ -691,26 +695,26 @@ static inline t4VectorCtor Pos_7268(const t4Matrix* m)
     return *(const t4VectorCtor*)&m->row[3];
 }
 
-static inline t4VectorCtor Mul_7268(const t4VectorCtor& a, const t4VectorCtor& b)
+static inline t4VectorCtor Mul_7268(const t4Vector& a, const t4VectorCtor& b)
 {
     return t4VectorCtor(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
 }
 
 static inline void Reset_7268(tIntersectInfo* h)
 {
-    (*(int*)&h->Patch) = 0;
-    (*(void**)&h->Inst) = 0;
-    (*(int*)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
     h->HitType = 2;
     h->Stype = -1;
-    (*(t4VectorCtor*)&h->Ivel) = t4vect_Zero_v7268;
-    (*(t4VectorCtor*)&h->Iangvel) = t4vect_Zero_v7268;
-    (*(int*)&h->T) = 0;
-    (*(int*)&h->u) = 0;
-    (*(int*)&h->v) = 0;
+    h->Ivel = t4vect_Zero_v7268;
+    h->Iangvel = t4vect_Zero_v7268;
+    h->T = 0.0f;
+    h->u = 0.0f;
+    h->v = 0.0f;
 }
 
 // Orthonormal inverse in place: transpose the 3x3 part, position = R^T * -t.
@@ -748,14 +752,14 @@ int cFlexBridgeNode::intersect(cWorldIntersectType& tester, tIntersectInfo* out,
     tPolyModelMesh mesh;
     mesh.NumFaces = (Mesh.Width - 1) * 2;
     mesh.NumVertices = Mesh.Width * 2;
-    (*(void**)&mesh.Face) = ((void*)Faces);
-    (*(t4VectorCtor**)&mesh.Vertex) = ((t4VectorCtor*)Verts);
-    (*(t4VectorCtor**)&mesh.Normal) = ((t4VectorCtor*)FaceNorms);
+    mesh.Face = (unsigned char(*)[3])Faces;
+    mesh.Vertex = Verts;
+    mesh.Normal = FaceNorms;
     t4Matrix* matrix = (t4Matrix*)getRootTransform();
     t4Matrix inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    tester.Transform(*(const t4Matrix*)&inv, 1.0f / Instance->m_fScale);
+    tester.Transform(inv, 1.0f / Instance->m_fScale);
     int n = cWorldIntersectType_IsMeshInt(&tester, &mesh, 1, out, cap);
     tester.UnTransform();
     for (int i = 0; i < n; i++) {
@@ -763,18 +767,16 @@ int cFlexBridgeNode::intersect(cWorldIntersectType& tester, tIntersectInfo* out,
         Reset_7268(hit);
         float dataScale = Instance->m_fScale;
         float one = 1.0f;
-        (*(t4VectorCtor*)&hit->Ipos) = MulVec_7268(matrix, Mul_7268((*(t4VectorCtor*)&hit->Ipos),
-                                                                    t4VectorCtor(dataScale, dataScale, dataScale,
-                                                                                 one)));
-        (*(t4VectorCtor*)&hit->Inorm) = MulVec_7268(matrix, (*(t4VectorCtor*)&hit->Inorm));
+        hit->Ipos = MulVec_7268(matrix, Mul_7268(hit->Ipos, t4VectorCtor(dataScale, dataScale, dataScale, one)));
+        hit->Inorm = MulVec_7268(matrix, hit->Inorm);
         hit->HitType = 1;
-        (*(void**)&hit->Inst) = Instance;
+        hit->Inst = Instance;
         int k = Instance->m_Model->m_iNumMeshes - 1;
-        (*(int*)&hit->SphTree) = 0;
+        hit->SphTree = 0;
         hit->Mesh = k;
-        (*(t4VectorCtor*)&hit->Ivel) = t4vect_Zero_v7268;
-        (*(t4VectorCtor*)&hit->Iangvel) = t4vect_Zero_v7268;
-        hit->Stype = *(short*)(((char*)(Instance)->m_pCollideRecord) + k * 12 + 0x1A);
+        hit->Ivel = t4vect_Zero_v7268;
+        hit->Iangvel = t4vect_Zero_v7268;
+        hit->Stype = (Instance->m_pCollideRecord->Surfaces + k)->Stype;
     }
     return n;
 }
@@ -804,7 +806,8 @@ INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateGrid);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void* cObjectInterface_getNash();
 // PORT: the unit declares nash_Nash_movenode with sBox00348058 (defined later); bound by asm label.
-extern "C" void nash_Nash_movenode_75D8(void* world, int type, int id, void* box, void* old) __asm__("nash_Nash_movenode");
+extern "C" void nash_Nash_movenode_75D8(void* world, int type, void* node, void* box, void* old)
+    __asm__("nash_Nash_movenode");
 
 // t3Vector with an empty constructor and assignment from a t4Vector (x, y, z), as the grid's position array needs.
 struct t3VectorFrom4 : public t3Vector {
@@ -1017,8 +1020,8 @@ void cFlexBridgeNode::updateGrid()
     corner.y = maxY;
     corner.z = maxZ;
     self->BoundBox.MaxPoint = corner;
-    int id = ((int)self->Instance);
-    nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
+    tInstanceRecord* inst = self->Instance;
+    nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, inst, box, &old);
     sVEntry<void(...)>* vt = (sVEntry<void(...)>*)self->GridMesh->mVtbl;
     vt[3].fn(vthis(self->GridMesh, vt[3]), pos);
 }
@@ -1254,7 +1257,7 @@ INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_updateSpaceHash);
 
 
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box, tBoundBox* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* node, tBoundBox* box, tBoundBox* old);
 
 /**
  * Recomputes a flexible rail's bounding box and moves it in the Nash space hash.
@@ -1269,7 +1272,7 @@ void cFlexRailNode::updateSpaceHash()
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
     self->updateBoundBox();
-    nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
+    nash_Nash_movenode(cObjectInterface_getNash(), 2, self->Node, box, &old);
 }
 #endif
 
@@ -1277,30 +1280,12 @@ void cFlexRailNode::updateSpaceHash()
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMat_3480C8 {
-    float m[4][4];
-} __attribute__((aligned(16)));
+// The graphics manager's ClipBoundBox (slot 93) with the matrix by reference, as render/graphicsman.h declares it.
+typedef sVEntry<int(void*, const t4Vector*, const t4Vector*, const t4Matrix&)> tClipBoundBoxRefSlot;
 
-
-typedef sMat_3480C8 (*tGetMat_3480C8)(void*);
-typedef int (*tCull_3480C8)(void*, void*, void*, const sMat_3480C8&);
-
-struct sCtx_3480C8 {
-    char pad0[0xE84];
-    sDrawState* top;        // 0xE84
-    char padE88[0x10D8 - 0xE88];
-    sVEntry<void>* vt;         // 0x10D8
-};
 extern int D_004A5980;
 extern float D_004FF6C0[8][4];
 
-struct sFlex_3480C8 {
-    char pad0[0x20];
-    int count;              // 0x20
-    char pad24[0xC];
-    char boxMin[0x10];      // 0x30
-    char boxMax[0x10];      // 0x40
-};
 
 /**
  * Starts drawing a flex rail but draws nothing.
@@ -1315,9 +1300,10 @@ struct sFlex_3480C8 {
 void cFlexRailNode::render()
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx);
-    if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&BoundBox), ((char*)&BoundBox.MaxPoint),
-                                  ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == GM_CLIPCODE_OUTSIDE) return;
+    tClipBoundBoxRefSlot* vt = (tClipBoundBoxRefSlot*)VPTR_OF(cGraphicsMan, ctx);
+    tGetNetMatrixSlot* vtMat = (tGetNetMatrixSlot*)vt;
+    if (vt[93].fn(vthis(ctx, vt[93]), &BoundBox.MinPoint, &BoundBox.MaxPoint, vtMat[43].fn(vthis(ctx, vtMat[43])))
+        == GM_CLIPCODE_OUTSIDE) return;
     if (D_004A5980 == 0) {
         D_004FF6C0[0][0] = 0.0f;
         D_004FF6C0[0][1] = 0.0f;
@@ -1366,21 +1352,10 @@ void cFlexRailNode::render()
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_splineIntersect);
 #ifdef SKIP_ASM
-struct sFbV_8290 {
-    float x, y, z, w;
-    sFbV_8290() {}
-    // t4vect::x()/y()/z()/w() in On Tour (component accessors returning a reference).
-    float& X() { return x; }
-    float& Y() { return y; }
-    float& Z() { return z; }
-    float& W() { return w; }
-} __attribute__((aligned(16)));
-
-
 // PORT: PS2-only VU0 inline asm (out = m * v).
-static inline sFbV_8290 fbApply_8290(const t4Matrix* m, const sFbV_8290& v)
+static inline t4VectorCtor fbApply_8290(const t4Matrix* m, const t4Vector& v)
 {
-    sFbV_8290 out;
+    t4VectorCtor out;
     __asm__(
         "lqc2         $vf8, %2\n"
         "lqc2         $vf4, 0x0(%1)\n"
@@ -1399,9 +1374,9 @@ static inline sFbV_8290 fbApply_8290(const t4Matrix* m, const sFbV_8290& v)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sFbV_8290 fbSub_8290(const sFbV_8290& a, const sFbV_8290& b)
+static inline t4VectorCtor fbSub_8290(const t4Vector& a, const t4Vector& b)
 {
-    sFbV_8290 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1414,9 +1389,9 @@ static inline sFbV_8290 fbSub_8290(const sFbV_8290& a, const sFbV_8290& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sFbV_8290 fbAdd_8290(const sFbV_8290& a, const sFbV_8290& b)
+static inline t4VectorCtor fbAdd_8290(const t4Vector& a, const t4Vector& b)
 {
-    sFbV_8290 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1429,9 +1404,9 @@ static inline sFbV_8290 fbAdd_8290(const sFbV_8290& a, const sFbV_8290& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sFbV_8290 fbScale_8290(const sFbV_8290& v, float s)
+static inline t4VectorCtor fbScale_8290(const t4Vector& v, float s)
 {
-    sFbV_8290 r;
+    t4VectorCtor r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1446,7 +1421,7 @@ static inline sFbV_8290 fbScale_8290(const sFbV_8290& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float fbDot_8290(const sFbV_8290& a, const sFbV_8290& b)
+static inline float fbDot_8290(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1466,7 +1441,7 @@ static inline float fbDot_8290(const sFbV_8290& a, const sFbV_8290& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float fbLength_8290(const sFbV_8290& v)
+static inline float fbLength_8290(const t4Vector& v)
 {
     float r;
     int t;
@@ -1487,9 +1462,9 @@ static inline float fbLength_8290(const sFbV_8290& v)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sFbV_8290 fbNormalize_8290(const sFbV_8290& v)
+static inline t4VectorCtor fbNormalize_8290(const t4Vector& v)
 {
-    sFbV_8290 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1517,9 +1492,9 @@ static inline float fbAbs_8290(float x)
 
 // splineEval / splineSlope (On Tour names): the cubic segment and its derivative at t.
 // On Tour: splineEval_8290(const t4Matrix&, float): the point at t, (t^3, t^2, t, 1) through the coefficient rows.
-static inline sFbV_8290 splineEval_8290(const t4Matrix& mat, float t)
+static inline t4VectorCtor splineEval_8290(const t4Matrix& mat, float t)
 {
-    sFbV_8290 v;
+    t4VectorCtor v;
     v.W() = 1.0f;
     v.Z() = t;
     v.Y() = t * v.Z();
@@ -1528,9 +1503,9 @@ static inline sFbV_8290 splineEval_8290(const t4Matrix& mat, float t)
 }
 
 // On Tour: splineSlope_8290(const t4Matrix&, float): the tangent at t, (3t^2, 2t, 1, 0).
-static inline sFbV_8290 splineSlope_8290(const t4Matrix& mat, float t)
+static inline t4VectorCtor splineSlope_8290(const t4Matrix& mat, float t)
 {
-    sFbV_8290 v;
+    t4VectorCtor v;
     v.W() = 0.0f;
     v.Z() = 1.0f;
     v.Y() = t * 2.0f;
@@ -1551,21 +1526,21 @@ static inline float bracket_8290(float lo, float x, float hi)
 
 
 
-extern sFbV_8290 t4vect_Zero;
+extern t4VectorCtor t4vect_Zero;
 
 // tIntersectInfo::Init (On Tour name).
 static inline void Init_8290(tIntersectInfo* h)
 {
     h->HitType = 2;
-    (*(int*)&h->Patch) = 0;
-    (*(void**)&h->Inst) = 0;
-    (*(int*)&h->Spline) = 0;
+    h->Patch = 0;
+    h->Inst = 0;
+    h->Spline = 0;
     h->Mesh = -1;
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(sFbV_8290*)&h->Ivel) = t4vect_Zero;
-    (*(sFbV_8290*)&h->Iangvel) = t4vect_Zero;
+    h->Ivel = t4vect_Zero;
+    h->Iangvel = t4vect_Zero;
     h->T = 0.0f;
     h->u = 0.0f;
     h->v = 0.0f;
@@ -1583,7 +1558,7 @@ extern float D_0048E7F0[5];
  * search bracket for it from D_0048E7D8/D_0048E7F0 and narrows it by golden-section search (at most 24 steps, until the
  * bracket is under 0.0005). When *hit is 0 or the distance beats *dist, it sets *hit and *dist and fills intInfo: type
  * 2, position, unit tangent, Instance as the object, the mesh from vtable entry 49 (getMesh), the segment, t and the
- * surface from the instance's mesh table (+0x88, short at +0x1A per 12-byte entry; eST_Undefined becomes eST_Default).
+ * surface type from the instance's collide record (Surfaces[mesh].Stype; eST_Undefined becomes eST_Default).
  * minBpos and maxBpos are not used.
  *
  * Quirk: the chord projection is clamped at 0 but not at 1.
@@ -1596,22 +1571,23 @@ extern float D_0048E7F0[5];
  * @param dist  best distance so far; updated on a hit
  * @param intInfo  intersect info filled on a hit
  */
-extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
-                              unsigned int splineFilterMask, int* hit, float* dist, tIntersectInfo* intInfo)
+extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const t4Vector* minBpos, const t4Vector* maxBpos,
+                                              const t4Vector* bpos, unsigned int splineFilterMask, int* hit,
+                                              float* dist, tIntersectInfo* intInfo)
 {
     if (((unsigned int)self->RailFlags & splineFilterMask) == 0) {
         return;
     }
     for (int seg = 0; seg < self->NumNodes - 1; seg++) {
         int i;
-        sFbV_8290 lastp;
+        t4VectorCtor lastp;
         const float kTopSplit = 0.6180340051651001f;
         const float kBottomSplit = 1.0f - kTopSplit;
         float distLo, distMidLo, distMidHi, distHi;
         float x0 = 0.0f;
         float x3 = 1.0f;
-        sFbV_8290 nextp;
-        sFbV_8290 tmp;
+        t4VectorCtor nextp;
+        t4VectorCtor tmp;
         const t4Matrix& mat = (self->Mats)[seg];
         lastp = splineEval_8290(mat, x0);
         float cd = fbLength_8290(fbSub_8290(*bpos, lastp));
@@ -1680,18 +1656,18 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             *hit = 1;
             *dist = lastd;
             Init_8290(intInfo);
-            (*(sFbV_8290*)&intInfo->Ipos) = lastp;
-            (*(sFbV_8290*)&intInfo->Inorm) = fbNormalize_8290(splineSlope_8290(mat, lastt));
-            (*(void**)&intInfo->Inst) = (void*)self->Instance;
+            intInfo->Ipos = lastp;
+            intInfo->Inorm = fbNormalize_8290(splineSlope_8290(mat, lastt));
+            intInfo->Inst = self->Instance;
             intInfo->Mesh = self->getMesh(seg);
             intInfo->Seg = seg;
-            (*(int*)&intInfo->Spline) = 0;
+            intInfo->Spline = 0;
             intInfo->T = lastt;
             int mesh = intInfo->Mesh;
             if (mesh <= 0) {
                 mesh = 0;
             }
-            short* surf = (short*)((char*)self->Instance->m_pCollideRecord + 0x1A + mesh * 12);
+            short* surf = &self->Instance->m_pCollideRecord->Surfaces[mesh].Stype;
             if (*surf == eST_Undefined) {
                 intInfo->Stype = eST_Default;
             } else {

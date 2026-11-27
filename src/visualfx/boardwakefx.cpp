@@ -868,8 +868,7 @@ void cBoardWakeFX::createSeg()
     mCurrentWakeLine = (mCurrentWakeLine + mWakeMaxNumLines - 1) % mWakeMaxNumLines;
     char* sub = (char*)&VPTR_AT(mRider, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    // m_colour is On Tour's tARGB m_colour (the header keeps it as float[4], the same layout)
-    tARGB col = *(const tARGB*)cRenderStateMan_m_state[vt[7].fn(sub + vt[7].delta)].m_colour;
+    tARGB col = cRenderStateMan_m_state[vt[7].fn(sub + vt[7].delta)].m_colour;
     col.A *= 2.0f;
     col.R *= 2.0f;
     col.G *= 2.0f;
@@ -2147,8 +2146,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     char* sub2 = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
-    // m_colour is On Tour's tARGB m_colour (the header keeps it as float[4], the same layout)
-    const tARGB* colourRow = (const tARGB*)cRenderStateMan_m_state[idx].m_colour;
+    const tARGB* colourRow = &cRenderStateMan_m_state[idx].m_colour;
     t4Vector groundColour;
     groundColour.x = colourRow->R;
     groundColour.y = colourRow->G;

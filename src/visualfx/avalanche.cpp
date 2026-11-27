@@ -775,12 +775,6 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_buildArray);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_ActiveNodeArray[];
 
-struct tActiveAvalanche_node {
-    char pad[0x2E4];
-    tActiveAvalanche_node* next; // 0x2E4
-};
-
-
 /**
  * Builds an array of pointers to the active avalanche's nodes, in list order.
  *
@@ -789,16 +783,15 @@ struct tActiveAvalanche_node {
  */
 void tActiveAvalanche::buildArray()
 {
-    tActiveAvalanche_node* node;
+    tActiveAvalancheNode* node;
     int n = 0;
-    for (node = ((tActiveAvalanche_node*)m_activeNodeList); node != 0; node = node->next) {
+    for (node = m_activeNodeList; node != 0; node = node->m_next) {
         n++;
     }
-    *(tActiveAvalanche_node***)&m_activeNodeArray = (tActiveAvalanche_node**)operator_new_tag(n * 4,
-            str_ActiveNodeArray, 0, 0);
+    m_activeNodeArray = (tActiveAvalancheNode**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
     int i = 0;
-    for (node = ((tActiveAvalanche_node*)m_activeNodeList); node != 0; node = node->next) {
-        m_activeNodeArray[i++] = (tActiveAvalancheNode*)node;
+    for (node = m_activeNodeList; node != 0; node = node->m_next) {
+        m_activeNodeArray[i++] = node;
     }
 }
 #endif
@@ -1002,7 +995,7 @@ extern "C" void cAvalanche_SaveData(void)
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_writeData);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void FILESYS_writesync(void* a, void* b, void* data, int size, int prio);
+extern "C" void FILESYS_writesync(int handle, int offset, void* data, int size, int prio);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_buffer[];
@@ -1023,7 +1016,7 @@ extern char str_buffer[];
  * @param rows  number of units
  * @return the number of bytes written (@p stride * @p rows)
  */
-extern "C" int cAvalanche_writeData(int direct, void* handle, void* offset, char* src, int stride, int rows)
+extern "C" int cAvalanche_writeData(int direct, int handle, int offset, char* src, int stride, int rows)
 {
     if (direct) {
         FILESYS_writesync(handle, offset, src, stride * rows, 100);
@@ -1061,7 +1054,7 @@ extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int FILESYS_opensync(char* name, int mode, int prio, int* fd);
 extern "C" void FILESYS_closesync(int fd, int prio);
-extern "C" int cAvalanche_writeData(int direct, void* a, void* b, char* src, int stride, int rows);
+extern "C" int cAvalanche_writeData(int direct, int handle, int offset, char* src, int stride, int rows);
 
 
 /**
@@ -1076,7 +1069,6 @@ extern "C" int cAvalanche_writeData(int direct, void* a, void* b, char* src, int
  *                always pass 1
  * @param name  file extension
  */
-// PORT: cAvalanche_writeData takes the file handle and offset as void* (ints passed through pointers).
 extern "C" void cAvalanche_SaveData1(int direct, char* name)
 {
     if (cAvalanche_m_avalancheList == 0) {
@@ -1103,34 +1095,34 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
             }
         }
         int magic = cAvalanche::kFileMagic;
-        cAvalanche_writeData(direct, (void*)fd, 0, (char*)&magic, 4, 1);
-        cAvalanche_writeData(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
+        cAvalanche_writeData(direct, fd, 0, (char*)&magic, 4, 1);
+        cAvalanche_writeData(direct, fd, 4, (char*)&off, 4, 1);
         off = 8;
         for (avalanche = cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->m_next) {
             unsigned short header;
             for (tAvalancheNode* node = (avalanche->m_nodeList); node != 0; node = node->m_next) {
                 header = 48879;
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+                off += cAvalanche_writeData(direct, fd, off, (char*)&header, 2, 1);
                 header = (int)node->m_life * 10 + 0xC;
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)((float*)&node->m_start), 4, 3);
-                off += cAvalanche_writeData(1, (void*)fd, (void*)off, ((char*)node->m_history), 10, (int)node->m_life);
+                off += cAvalanche_writeData(direct, fd, off, (char*)&header, 2, 1);
+                off += cAvalanche_writeData(direct, fd, off, (char*)((float*)&node->m_start), 4, 3);
+                off += cAvalanche_writeData(1, fd, off, ((char*)node->m_history), 10, (int)node->m_life);
             }
             header = avalanche->m_numCollisions;
-            off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+            off += cAvalanche_writeData(direct, fd, off, (char*)&header, 2, 1);
             header = avalanche->m_numGroundCollisions;
-            off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+            off += cAvalanche_writeData(direct, fd, off, (char*)&header, 2, 1);
             int k;
             for (k = 0; k < avalanche->m_numCollisions; k++) {
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->m_collisions[k].m_time,
+                off += cAvalanche_writeData(direct, fd, off, (char*)&avalanche->m_collisions[k].m_time,
                                             4, 1);
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off,
+                off += cAvalanche_writeData(direct, fd, off,
                                             (char*)&avalanche->m_collisions[k].m_inst->m_RID, 4, 1);
             }
             for (k = 0; k < avalanche->m_numGroundCollisions; k++) {
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off,
+                off += cAvalanche_writeData(direct, fd, off,
                                             (char*)&avalanche->m_groundCollisions[k].m_nodeId, 2, 1);
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off,
+                off += cAvalanche_writeData(direct, fd, off,
                                             (char*)&avalanche->m_groundCollisions[k].m_time, 2, 1);
             }
         }
@@ -1465,7 +1457,7 @@ void tActiveAvalancheNode::renderLines()
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->m_bitGroups[1]), 0x7C, 2, 1);
     if (cAvalanche_m_RenderLines != 0) {
         int i = 0;
-        t4Vector pos = (*(t4Vector*)&(node->m_node)->m_start);
+        t4Vector pos = node->m_node->m_start;
         for (; i < (int)(node->m_node)->m_life; i++) {
             t4VectorCtor scratchVec(((node->m_node)->m_history)[i].m_x * 2.0f,
                                     ((node->m_node)->m_history)[i].m_y * 2.0f,
@@ -1490,7 +1482,7 @@ void tActiveAvalancheNode::renderLines()
             (sVEntry<void(void*, int, void*, int)>*)VPTR_OF(cGraphicsMan, GrMan);
         vtable[73].fn(vthis(GrMan, vtable[73]), (int)(node->m_node)->m_life, vertlist_8A00, 0);
     }
-    (*(sDrawState**)&GrMan->m_pCurrentDrawState)--;
+    GrMan->m_pCurrentDrawState--;
 }
 #endif
 
@@ -1715,18 +1707,18 @@ extern tAvalanche* cAvalanche_m_avalancheList;
  * Sets the emitter parameters of the avalanche node bound to an instance and marks it as having an emitter.
  *
  * Searches every avalanche in cAvalanche_m_avalancheList (linked through +0x8) and each one's node list (+0x4, linked
- * through +0xF4) for the node whose instance (+0xF8) is @p id. Nodes of type 2 (+0xF0) are left alone; otherwise it
+ * through +0xF4) for the node whose instance (+0xF8) is @p inst. Nodes of type 2 (+0xF0) are left alone; otherwise it
  * sets the emitter flag (+0xF2) to 1 and copies the 0xD8 bytes of @p params over the node's start. Stops at the first
  * match. The world script function SetAvalancheEmitterDataFunc calls it.
  *
- * @param id  the instance record the node belongs to
+ * @param inst  the instance record the node belongs to
  * @param params  the 0xD8-byte emitter parameters to copy
  */
-extern "C" void cAvalanche_setAvalancheNodeEmitterData(int id, tParticleData* params)
+extern "C" void cAvalanche_setAvalancheNodeEmitterData(tInstanceRecord* inst, tParticleData* params)
 {
     for (tAvalanche* group = (tAvalanche*)cAvalanche_m_avalancheList; group != 0; group = group->m_next) {
         for (tAvalancheNode* n = (group->m_nodeList); n != 0; n = n->m_next) {
-            if (((int)n->m_instance) == id) {
+            if (n->m_instance == inst) {
                 if (n->m_baseType == tAvalancheNode::kBase_Permanent) return;
                 n->m_hasEmitter = 1;
                 n->m_data = *params;
@@ -1892,8 +1884,8 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
         for (int i = 0; i < 16; i++, slot++) {
             if ((slot->m_avalanche) != 0)
                 continue;
-            (*(tAvalanche**)&slot->m_avalanche) = avalanche;
-            (*(tActiveAvalancheNode**)&slot->m_activeNodeList) = 0;
+            slot->m_avalanche = avalanche;
+            slot->m_activeNodeList = 0;
             slot->m_currTime = 0.0f;
             slot->m_nextCollision = 0;
             slot->m_nextGroundCollision = 0;
@@ -1902,10 +1894,10 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
             for (tAvalancheNode* n = (avalanche->m_nodeList); n != 0; n = n->m_next) {
                 for (; k < cAvalanche::kMaxActiveNodes; k++, act++) {
                     if ((act->m_node) == 0) {
-                        (*(tAvalancheNode**)&act->m_node) = n;
+                        act->m_node = n;
                         n->m_activeNode = act;
                         act->m_next = (slot->m_activeNodeList);
-                        (*(tActiveAvalancheNode**)&slot->m_activeNodeList) = act;
+                        slot->m_activeNodeList = act;
                         act->m_lastKeyFrame = 0;
                         act->m_lastKeyFramePosition = n->m_start;
                         CopyMatrix_D97A8(&act->m_lastKeyFrameRotation, &t4mat_Identity_D97A8);
@@ -1931,11 +1923,11 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                     }
                 }
                 if (k == cAvalanche::kMaxActiveNodes) {
-                    (*(tAvalanche**)&slot->m_avalanche) = 0;
+                    slot->m_avalanche = 0;
                     for (act = (slot->m_activeNodeList); act != 0; act = act->m_next) {
                         if ((act->m_node))
                             (act->m_node)->m_activeNode = 0;
-                        (*(tAvalancheNode**)&act->m_node) = 0;
+                        act->m_node = 0;
                     }
                     return (int)0x80000000;
                 }

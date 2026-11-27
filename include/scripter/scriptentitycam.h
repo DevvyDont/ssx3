@@ -40,7 +40,7 @@ struct cScriptEntityCamera {
                                            //      the camera header's signed sub-type byte, OnInSeqRelease 9,
                                            //      cScriptEntityCamera_GetSubType
     cScriptObjCameraManager* mpCamManager; // 0x10 [O]; [P] SetCameraManager (sw); [R] ctor 0; [U]
-                                           //      cScriptEntityCamera_SetCameraManager (declared int), the camera
+                                           //      cScriptEntityCamera_SetCameraManager stores it, the camera
                                            //      manager's ctor sets it to itself; IsMatchingEntity reads its
                                            //      mViewIndex (+0xF8)
 
@@ -50,7 +50,7 @@ struct cScriptEntityCamera {
     void OnInSeqLock(cScriptPlayerEntity* pEntity) __asm__("cScriptEntityCamera_OnInSeqLock");
     void OnInSeqRelease() __asm__("cScriptEntityCamera_OnInSeqRelease");
     bool IsMatchingEntity(cScriptPlayerEntity* pEntity, int type) __asm__("cScriptEntityCamera_IsMatchingEntity");
-    void SetCameraManager(int camManager) __asm__("cScriptEntityCamera_SetCameraManager");
+    void SetCameraManager(cScriptObjCameraManager* camManager) __asm__("cScriptEntityCamera_SetCameraManager");
     int GetSubType() __asm__("cScriptEntityCamera_GetSubType");
 };
 

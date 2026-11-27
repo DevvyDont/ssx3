@@ -247,7 +247,7 @@ struct cWScriptCache {
     void update() __asm__("cWScriptCache_update");
     void load(int index, int fileNum) __asm__("cWScriptCache_load");
     void load1(int index, int value) __asm__("cWScriptCache_load1");
-    int getScriptBase(int sectionId) __asm__("cWScriptCache_getScriptBase");
+    tScriptFileHeader* getScriptBase(int sectionId) __asm__("cWScriptCache_getScriptBase");
 };
 
 CHECK_OFFSET(cWScriptCache, mpWorld, 0x000);

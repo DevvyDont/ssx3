@@ -28,7 +28,7 @@ extern "C" void* cAppMan_cAppMan(cAppMan* self)
     self->LoadingModule = 0;
     self->Tick = 0;
     self->TimerTick = 0;
-    *(int*)&self->FracTick = 0;
+    self->FracTick = 0.0f;
     self->FrameRate = 0.0f;
     self->m_AIUpdatesPerRender = 0;
     cAppMan_TheAppMan = self;
@@ -90,6 +90,15 @@ static inline void call1_6D60(char* o, int vtoff, int slot, int a)
     vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
+struct sVtM_6D60 { short delta; short index; void (*fn)(void*, cAppModule*); };
+
+// The execution manager's load (slot 9) takes the module to load.
+static inline void callm_6D60(char* o, int vtoff, int slot, cAppModule* module)
+{
+    sVtM_6D60* vt = *(sVtM_6D60**)(o + vtoff);
+    vt[slot].fn(vthis(o, vt[slot]), module);
+}
+
 /**
  * Runs the application: sets a 60 Hz timer, starts the app, loads the first module and runs the main loop
  * until it quits.
@@ -99,18 +108,18 @@ static inline void call1_6D60(char* o, int vtoff, int slot, int a)
  *
  * @param exec  the execution manager (On Tour cExecutionMan* ex)
  * @param ac  command-line argument count
- * @param av  command-line arguments (char**, passed as int)
+ * @param av  command-line arguments
  * @return 0
  */
-int cAppMan::run(char* exec, int ac, int av)
+int cAppMan::run(cExecutionMan* exec, int ac, char** av)
 {
     TimerPeriod = 0.01666666753590107f;
-    ExecutionMan = (cExecutionMan*)exec;
+    ExecutionMan = exec;
     TimerHz = 60;
-    call1_6D60(exec, 8, 2, 60);
-    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)mVtbl;
+    call1_6D60((char*)exec, 8, 2, 60);
+    sVEntry<void(void*, int, char**)>* vt = (sVEntry<void(void*, int, char**)>*)mVtbl;
     vt[3].fn(vthis(this, vt[3]), ac, av);
-    call1_6D60((char*)ExecutionMan, 8, 9, (int)LoadingModule);
+    callm_6D60((char*)ExecutionMan, 8, 9, LoadingModule);
     while (call0_6D60((char*)ExecutionMan, 8, 10) == 0) {
         callv_6D60((char*)ExecutionMan, 8, 11);
         SYNCTASK_run(0);
@@ -144,6 +153,8 @@ INCLUDE_ASM("bx/appman", cAppMan_setNextModule__FP7cAppManUi);
  */
 void cAppMan::setNextModule(unsigned int module)
 {
+    // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
+    // int, so the original converted it back to the module pointer too
     LoadingModule = (cAppModule*)module;
 }
 #endif
@@ -242,7 +253,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
         case cAppMan::kLoadIdle:
             if (self->LoadingModule) {
                 self->LoadTimer.startload(10.0f);
-                call1_6F00((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
+                callm_6D60((char*)self->ExecutionMan, 8, 9, self->LoadingModule);
                 *(volatile int*)&self->LoadState = cAppMan::kLoadActive;
             }
             break;
@@ -282,7 +293,7 @@ int cExecutionMan_checkHalt(void* self, int flag);
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_halt);
 #ifdef SKIP_ASM
-extern "C" void cExecutionMan_halt(int);
+extern "C" void cExecutionMan_halt(cExecutionMan*);
 
 /**
  * Halts through the execution manager: calls cExecutionMan_halt on the app manager's execution manager (+0x8).
@@ -293,7 +304,7 @@ extern "C" void cExecutionMan_halt(int);
  */
 void cAppMan::halt()
 {
-    cExecutionMan_halt((int)ExecutionMan);
+    cExecutionMan_halt(ExecutionMan);
 }
 #endif
 
@@ -406,9 +417,9 @@ INCLUDE_ASM("bx/appman", cExecutionMan_cExecutionMan__FP13cExecutionMan);
  */
 cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self)
 {
-    (*(int*)&self->HaltCallback) = 0;
-    (*(void**)&self->mVtbl) = cExecutionMan_vtbl;
-    (*(int*)&self->HaltData) = 0;
+    self->HaltCallback = 0;
+    self->mVtbl = cExecutionMan_vtbl;
+    self->HaltData = 0;
     return self;
 }
 #endif
@@ -417,8 +428,6 @@ cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self)
 INCLUDE_ASM("bx/appman", cExecutionMan_halt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// LANDING: the unit declares `extern "C" void cExecutionMan_halt(int);` (line ~245, used by cAppMan_halt);
-// retype it to (cExecutionMan*, int, int) or keep the alias below.
 
 
 /**
@@ -429,11 +438,11 @@ INCLUDE_ASM("bx/appman", cExecutionMan_halt);
  * @param callback  the halt callback
  * @param data  the data passed to it
  */
-void cExecutionMan::halt(int callback, int data)
+void cExecutionMan::halt(void (*callback)(void*), void* data)
 {
-    (*(int*)&HaltData) = data;
+    HaltData = data;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)((void*)mVtbl);
-    (*(int*)&HaltCallback) = callback;
+    HaltCallback = callback;
     vt[13].fn(vthis(this, vt[13]));
 }
 #endif
@@ -493,9 +502,9 @@ INCLUDE_ASM("bx/appman", getTheExecutionMan__Fv);
  *
  * @return the execution manager
  */
-int getTheExecutionMan(void)
+cExecutionMan* getTheExecutionMan(void)
 {
-    return (int)cAppMan_TheAppMan->ExecutionMan;
+    return cAppMan_TheAppMan->ExecutionMan;
 }
 #endif
 
@@ -515,11 +524,11 @@ INCLUDE_ASM("bx/appman", cLoadTimer_startload__FPvf);
 void cLoadTimer::startload(float rateScale)
 {
     loadtime = rateScale;
-    *(int*)&loadpercent = 0;
-    *(int*)&target = 0;
-    *(int*)&offset = 0;
-    *(int*)&scale = 0;
-    *(int*)&decay = 0;
+    loadpercent = 0.0f;
+    target = 0.0f;
+    offset = 0.0f;
+    scale = 0.0f;
+    decay = 0.0f;
 }
 #endif
 
@@ -588,7 +597,7 @@ INCLUDE_ASM("bx/appman", cLoadTimer_endload__FPv);
 void cLoadTimer::endload()
 {
     offset = 100.0f;
-    *(int*)&scale = 0;
+    scale = 0.0f;
     loadpercent = 100.0f;
 }
 #endif

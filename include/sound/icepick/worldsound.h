@@ -156,6 +156,25 @@ CHECK_OFFSET(cAudioOverlapList, unk_104, 0x104);
 CHECK_OFFSET(cAudioOverlapList, lastposition, 0x110);
 CHECK_SIZE(cAudioOverlapList, 0x120);
 
+// The nash query's callback that collects audio instances into an overlap list (On Tour struct AudioOverlapCallback,
+// 0x4). [U] cAudioOverlapList_update passes one, for both the crossing and the inside cells, to the query helper
+// func_002B83F8 (On Tour QueryHelper::help(const AudioOverlapCallback& oncross, const AudioOverlapCallback& oninside,
+// const PointProximityTest& test, const Cell* cell, const CellKey& cellkey)), which appends the cells' kSNT_AudioVolume
+// nodes to the list.
+struct AudioOverlapCallback {
+    cAudioOverlapList* overlaplist;  // 0x0 [O] (cAudioOverlapList& in On Tour)
+};
+
+// The nash query's point test (On Tour struct PointProximityTest, 0x4): the position the cells are tested against.
+struct PointProximityTest {
+    const t4Vector* position;        // 0x0 [O] (const t4Vector& in On Tour); [U] func_002B83F8 tests each cell with it
+};
+
+CHECK_OFFSET(AudioOverlapCallback, overlaplist, 0x0);
+CHECK_SIZE(AudioOverlapCallback, 0x4);
+CHECK_OFFSET(PointProximityTest, position, 0x0);
+CHECK_SIZE(PointProximityTest, 0x4);
+
 struct t3Vector;
 struct t4Vector;
 

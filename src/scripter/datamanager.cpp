@@ -35,10 +35,11 @@ extern const char str_tDataInstanceInfo[];
  */
 extern "C" cDataManager* cDataManager_cDataManager(cDataManager* self, int flags, int count)
 {
-    *(void**)&self->mVtbl = cDataManager_vtbl;
+    self->mVtbl = (void**)cDataManager_vtbl;
     self->mMaxDataInstances = count;
-    *(tDataInstanceInfo**)&self->mpDataInstanceHeap = (tDataInstanceInfo*)operator_new_tag(count * sizeof(tDataInstanceInfo), str_tDataInstanceInfo, flags, 0);
-    *(int*)&self->mpEmptyDataInstanceList = 0;
+    self->mpDataInstanceHeap =
+        (tDataInstanceInfo*)operator_new_tag(count * sizeof(tDataInstanceInfo), str_tDataInstanceInfo, flags, 0);
+    self->mpEmptyDataInstanceList = 0;
     for (int i = 0; i < count; i++) {
         self->AddToEmptyInstanceList(&(self->mpDataInstanceHeap)[i]);
     }
@@ -114,12 +115,12 @@ tDataInstanceInfo* cDataManager::AttachData(int pName, void* data, int size)
     if (big != 0) {
         sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*,
                 void*)>*)mVtbl;
-        vt[4].fn(vthis(this, vt[4]), pName, data, size, n, &(*(int*)&n->pUserData2));
+        vt[4].fn(vthis(this, vt[4]), pName, data, size, n, &n->pUserData2);
         AttachDataFromBigfile((char*)data, n);
     } else {
         sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*,
                 void*)>*)mVtbl;
-        vt[2].fn(vthis(this, vt[2]), pName, data, size, n, &(*(int*)&n->pUserData2));
+        vt[2].fn(vthis(this, vt[2]), pName, data, size, n, &n->pUserData2);
     }
     return n;
 }
@@ -144,9 +145,9 @@ typedef sVEntry<void(void*, void*, int, void*, void*)> tDetachHookSlot;
  * (OnDetachDataBigFile) when it had linked instances, otherwise slot 3.
  *
  * @param entry  the data handle returned by the attach
- * @return the detached data pointer, the handle's first word (On Tour returns void* pData)
+ * @return the detached data pointer, the handle's pData (On Tour returns void* pData)
  */
-int cDataManager::DetachData(tDataInstanceInfo* entry)
+void* cDataManager::DetachData(tDataInstanceInfo* entry)
 {
     tDataInstanceInfo* first = entry->pNext;
     if (first != 0) {
@@ -164,9 +165,9 @@ int cDataManager::DetachData(tDataInstanceInfo* entry)
         tDetachHookSlot* vt = (tDetachHookSlot*)mVtbl;
         vt[3].fn(vthis(this, vt[3]), entry->pData, entry->dataSize, entry->pUserData1, entry->pUserData2);
     }
-    int key = ((int)entry->pData);
+    void* data = entry->pData;
     AddToEmptyInstanceList(entry);
-    return key;
+    return data;
 }
 #endif
 
@@ -200,9 +201,9 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetData);
  * @param dataHandle  the handle cDataManager_AttachData returned
  * @return the attached data
  */
-int cDataManager::GetData(tDataInstanceInfo* dataHandle)
+const void* cDataManager::GetData(tDataInstanceInfo* dataHandle)
 {
-    return (int)dataHandle->pData;
+    return dataHandle->pData;
 }
 #endif
 //100%
@@ -215,10 +216,10 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetDataUserData);
  * @param out0  receives the first user-data word
  * @param out1  receives the second user-data word
  */
-void cDataManager::GetDataUserData(tDataInstanceInfo* dataHandle, int* out0, int* out1)
+void cDataManager::GetDataUserData(tDataInstanceInfo* dataHandle, void** out0, void** out1)
 {
-    *out0 = *(int*)dataHandle;
-    *out1 = (int)dataHandle->pUserData2;
+    *out0 = dataHandle->pUserData1;
+    *out1 = dataHandle->pUserData2;
 }
 #endif
 
@@ -266,13 +267,13 @@ tDataInstanceInfo* cDataManager::AttachDataFromBigfile(char* big, tDataInstanceI
             prev = AttachDataFromBigfile(sub, prev);
         } else {
             tDataInstanceInfo* n = (tDataInstanceInfo*)GetEmptyInstance();
-            (*(char**)&n->pData) = sub;
+            n->pData = sub;
             n->dataSize = ent[1];
             prev->pNext = n;
             prev = n;
             sVEntry<void(void*, char*, char*, int, void*, void*)>* vt = (sVEntry<void(void*, char*, char*, int, void*,
                     void*)>*)mVtbl;
-            vt[2].fn(vthis(this, vt[2]), name, sub, ent[1], prev, &(*(int*)&prev->pUserData2));
+            vt[2].fn(vthis(this, vt[2]), name, sub, ent[1], prev, &prev->pUserData2);
         }
         name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
     }
@@ -1601,7 +1602,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptPlay);
 #ifdef SKIP_ASM
 extern "C" int tNISList_IsPlayingScriptOwner(tNISList* self, cScriptPlayerMain* obj);
 char* GetSSXScriptHeader(void* obj);
-extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
+extern "C" void cRenderStateMan_setCustomIrradiance(const char* name);
 extern char str_TRANSP[];
 
 /**
@@ -1620,7 +1621,7 @@ void tNISList::OnScriptPlay(int requestHandle, cScriptPlayerMain* obj)
         char* name = GetSSXScriptHeader(obj);
         char* msg = str_TRANSP;
         if (*name != 0) {
-            cRenderStateMan_setCustomIrradiance((int)msg); // PORT: string pointer passed as int (unit declares cRenderStateMan_setCustomIrradiance(int))
+            cRenderStateMan_setCustomIrradiance(msg);
         }
     }
 }
@@ -1691,7 +1692,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptStop);
 #ifdef SKIP_ASM
 extern "C" int tNISList_IsPlayingScriptOwner(tNISList* self, cScriptPlayerMain* obj);
 char* GetSSXScriptHeader(void* obj);
-extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
+extern "C" void cRenderStateMan_setCustomIrradiance(const char* name);
 
 /**
  * Script stop callback: drops the custom irradiance the list's script had set.
@@ -2282,9 +2283,9 @@ extern void* D_00482168[];
 extern void* cSSXScriptEngine_vtbl[];
 extern void* D_004A34B0;
 
-struct sScriptSlot_7F20 {
-    char data[0x120];
-    sScriptSlot_7F20() { cScriptObjCameraManager_cScriptObjCameraManager(this); }
+// A camera manager built in place by its retail constructor (the class itself declares no constructor).
+struct cScriptObjCameraManagerCtor : public cScriptObjCameraManager {
+    cScriptObjCameraManagerCtor() { cScriptObjCameraManager_cScriptObjCameraManager(this); }
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
@@ -2307,35 +2308,35 @@ extern "C" cSSXScriptEngine* cSSXScriptEngine_cSSXScriptEngine(cSSXScriptEngine*
     self->mVidEngineVtbl = D_004821A0;
     self->mDataManagerVtbl = D_00482168;
     self->mVtbl = cSSXScriptEngine_vtbl;
-    new ((char*)&self->mObjectCameraManager[0]) sScriptSlot_7F20[2];
+    new (self->mObjectCameraManager) cScriptObjCameraManagerCtor[2];
     cScriptObjGS_cScriptObjGS(&self->mObjectGameState);
     cScriptObjEvent_cScriptObjEvent(&self->mObjectEvent);
     cScriptAnimBankManager_cScriptAnimBankManager(&self->mAnimationBankManager, 0, 10, 0xF0);
     cScriptSoundBankManager_cScriptSoundBankManager(self->mSoundBankManager, 0, 10, 17);
-    (*(int*)&self->mpMasterTableHeader) = 0;
-    (*(int*)&self->mpMasterTable) = 0;
-    (*(int*)&self->mpMasterTableDebug) = 0;
-    (*(int*)&self->mFilterTableAsyncHandle) = 0;
-    (*(int*)&self->mpFilterTableHeader) = 0;
-    (*(int*)&self->mpCategoryFilterTable) = 0;
-    (*(int*)&self->mpSetupInfoHeap) = 0;
-    (*(int*)&self->mpSetupInfoUnused) = 0;
+    self->mpMasterTableHeader = 0;
+    self->mpMasterTable = 0;
+    self->mpMasterTableDebug = 0;
+    self->mFilterTableAsyncHandle = 0;
+    self->mpFilterTableHeader = 0;
+    self->mpCategoryFilterTable = 0;
+    self->mpSetupInfoHeap = 0;
+    self->mpSetupInfoUnused = 0;
     D_004A34B0 = self;
     self->mCurrAttachingBankNum = 10;
     self->mPlayingNISList = 2;
-    (*(int*)&self->mpNISLists) = 0;
+    self->mpNISLists = 0;
     self->mNumFramesNoSkip = 0;
     self->mNumAsyncs = 0;
-    (*(int*)&self->mpIdleLists) = 0;
+    self->mpIdleLists = 0;
     int i;
     for (i = 49; i >= 0; i--) {
-        ((int*)&self->mpAnchorTableDB[0])[i] = 0;
+        self->mpAnchorTableDB[i] = 0;
     }
     for (i = 0; i < 10; i++) {
-        tSSXScriptBankInfo_Clear(((char (*)[16])&self->mScriptDataBanks[0])[i]);
+        tSSXScriptBankInfo_Clear(&self->mScriptDataBanks[i]);
     }
     for (i = 0; i < 2; i++) {
-        cScriptObjCameraManager_SetViewIndex(((char (*)[288])&self->mObjectCameraManager[0])[i], i);
+        cScriptObjCameraManager_SetViewIndex(&self->mObjectCameraManager[i], i);
     }
     return self;
 }
@@ -2356,12 +2357,6 @@ extern "C" void cDataManager__cDataManager(cDataManager* self, int flags);
 extern "C" void cVidEngine__cVidEngine(void* self, int flags);
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);
 
-struct sVE_780B8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 /**
  * Destroys the script engine: runs DeInitOnce() if needed, then destroys the members and bases in reverse
@@ -2376,7 +2371,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     self->mVidEngineVtbl = D_004821A0;
     self->mDataManagerVtbl = D_00482168;
     self->mVtbl = cSSXScriptEngine_vtbl;
-    if ((int)self->mpMasterTableHeader != 0) {
+    if (self->mpMasterTableHeader != 0) {
         self->DeInitOnce();
     }
     D_004A34B0 = 0;
@@ -2394,7 +2389,8 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
         do {
             while (begin != cameraManager) {
                 cameraManager--;
-                ((sVE_780B8*)cameraManager->mVtbl)[1].fn(vthis(cameraManager, ((sVE_780B8*)cameraManager->mVtbl)[1]), 0);
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)cameraManager->mVtbl;
+                vt[1].fn(vthis(cameraManager, vt[1]), 0);
             }
         } while (0);
     }
@@ -2413,17 +2409,6 @@ extern char* kpScriptMasterTableFilename;
 extern char* kpScriptMasterTableDebugFilename;
 
 
-struct sDmEngine8210 {
-    char pad_0x0[0x52C];
-    int* hdr;                   // 0x52C
-    tSSXHiveScriptMaster* scripts;     // 0x530
-    char* base;                 // 0x534
-    char pad_0x538[0x1C];
-    int field_0x554;            // 0x554
-    char pad_0x558[0xC8];
-    int field_0x620;            // 0x620
-};
-
 /**
  * Loads the script master table (and its debug name table) and sets up the base script engine for it.
  *
@@ -2431,26 +2416,28 @@ struct sDmEngine8210 {
  * Then
  * SetupBXEngine() is called with the script count, 10 and 0x4000.
  */
-// PORT: script offsets are rebased into pointers held in int.
-extern "C" void cSSXScriptEngine_InitOnce(sDmEngine8210* self)
+// PORT: the file's 32-bit name offsets are rebased in place into pointers (tSSXHiveScriptNameDebug).
+extern "C" void cSSXScriptEngine_InitOnce(cSSXScriptEngine* self)
 {
-    int* hdr = (int*)FILE_loadz(kpScriptMasterTableFilename, 0);
-    self->hdr = hdr;
-    self->scripts = (tSSXHiveScriptMaster*)(hdr + 1);
+    tSSXHiveScriptMasterTableHeader* hdr =
+        (tSSXHiveScriptMasterTableHeader*)FILE_loadz(kpScriptMasterTableFilename, 0);
+    self->mpMasterTableHeader = hdr;
+    self->mpMasterTable = &hdr->masterTableStart;
     char* base = (char*)FILE_loadz(kpScriptMasterTableDebugFilename, 0);
-    self->base = base;
+    self->mpMasterTableDebug = base;
     if (base != 0) {
-        for (int i = 0; i < *self->hdr; i++) {
-            (*(int*)&self->scripts[i].debugNamePtr) = (int)self->base + (*(int*)&self->scripts[i].debugNamePtr);
+        for (int i = 0; i < self->mpMasterTableHeader->numScripts; i++) {
+            self->mpMasterTable[i].debugNamePtr.pScriptName =
+                self->mpMasterTableDebug + self->mpMasterTable[i].debugNamePtr.scriptNameOffset;
         }
     } else {
-        for (int i = 0; i < *self->hdr; i++) {
-            (*(int*)&self->scripts[i].debugNamePtr) = 0;
+        for (int i = 0; i < self->mpMasterTableHeader->numScripts; i++) {
+            self->mpMasterTable[i].debugNamePtr.pScriptName = 0;
         }
     }
-    self->field_0x554 = 0;
-    self->field_0x620 = 0;
-    cBXScriptEngine_SetupBXEngine(self, *self->hdr, 10, 0x4000);
+    self->mNumFramesNoSkip = 0;
+    self->mNumAsyncs = 0;
+    cBXScriptEngine_SetupBXEngine(self, self->mpMasterTableHeader->numScripts, 10, 0x4000);
 }
 #endif
 

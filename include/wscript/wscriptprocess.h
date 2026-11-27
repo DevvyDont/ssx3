@@ -107,7 +107,7 @@ struct cWScriptProcess {
     void runScriptCode1() __asm__("cWScriptProcess_runScriptCode1");
     void dispatchProcessEvent(tWScriptEvent* vmsg) __asm__("cWScriptProcess_dispatchProcessEvent");
     unsigned int getRunningTaskId() __asm__("cWScriptProcess_getRunningTaskId");
-    void dispatchTaskEvent(int event) __asm__("cWScriptProcess_dispatchTaskEvent");
+    void dispatchTaskEvent(const tWScriptEvent* event) __asm__("cWScriptProcess_dispatchTaskEvent");
     void eventOnCollide() __asm__("cWScriptProcess_eventOnCollide");
     void eventOnJump() __asm__("cWScriptProcess_eventOnJump");
     void eventOnLand() __asm__("cWScriptProcess_eventOnLand");

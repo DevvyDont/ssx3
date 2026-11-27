@@ -221,7 +221,7 @@ extern "C" void HUFF_writebits_impl(HuffEncodeContext* encodeCtx, HUFFMemStruct*
         out->len++;
         encodeCtx->workpattern <<= 8;
         encodeCtx->packbits -= 8;
-        (*(int*)&encodeCtx->plen)++;
+        encodeCtx->plen++;
     }
 }
 #endif
@@ -229,20 +229,19 @@ extern "C" void HUFF_writebits_impl(HuffEncodeContext* encodeCtx, HUFFMemStruct*
 //100%
 INCLUDE_ASM("seg/seg_1C9348", HUFF_treechase);
 #ifdef SKIP_ASM
-struct HS_86F8 { char pad[0x1524]; int l[0x208]; int r[0x208]; int a[256]; };
 /**
  * Walks the Huffman tree from a node and records each leaf's code length.
  *
  * @param i  the node; values below 256 are byte symbols (On Tour node)
  * @param bits  the node's depth
  */
-extern "C" void HUFF_treechase(HS_86F8 *self, unsigned i, int bits) {
+extern "C" void HUFF_treechase(HuffEncodeContext *self, unsigned i, int bits) {
     if (i < 0x100) {
-        self->a[i] = bits;
+        self->bitsarray[i] = bits;
         return;
     }
-    HUFF_treechase(self, self->l[i], bits + 1);
-    HUFF_treechase(self, self->r[i], bits + 1);
+    HUFF_treechase(self, self->tree_left[i], bits + 1);
+    HUFF_treechase(self, self->tree_right[i], bits + 1);
 }
 #endif
 
@@ -251,15 +250,14 @@ INCLUDE_ASM("seg/seg_1C9348", HUFF_maketree);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct HS_8770 { char pad0[0x100]; unsigned freq[256]; char pad1[0x1524 - 0x500]; int l[0x208]; int r[0x208]; int a[256]; char pad2[0x2DC4 - 0x2964]; int count; };
-extern "C" void HUFF_treechase_8770(struct HS_8770 *self, unsigned i, int d) __asm__("HUFF_treechase");
+extern "C" void HUFF_treechase_8770(HuffEncodeContext *self, unsigned i, int d) __asm__("HUFF_treechase");
 /**
  * Builds the Huffman tree from the byte frequencies by joining the two lightest nodes until one is left, then
  * sets the code lengths.
  *
  * Bytes that never occur get length 99; a single used byte gets length 1.
  */
-extern "C" void HUFF_maketree(struct HS_8770 *self) {
+extern "C" void HUFF_maketree(HuffEncodeContext *self) {
     unsigned w[260];
     unsigned id[260];
     unsigned n = 1;
@@ -267,14 +265,14 @@ extern "C" void HUFF_maketree(struct HS_8770 *self) {
     unsigned i;
     w[0] = 0;
     for (i = 0; i < 256; i++) {
-        self->a[i] = 99;
-        if (self->freq[i]) {
-            w[n] = self->freq[i];
+        self->bitsarray[i] = 99;
+        if (self->count[i]) {
+            w[n] = self->count[i];
             id[n] = i;
             n++;
         }
     }
-    self->count = n - 1;
+    self->codes = n - 1;
     if (n >= 3) {
         do {
             i = n - 1;
@@ -309,10 +307,10 @@ extern "C" void HUFF_maketree(struct HS_8770 *self) {
             unsigned right = id[imin];
             w[imax] = mx + mn;
             id[imax] = node;
-            self->l[node] = left;
+            self->tree_left[node] = left;
             n--;
             w[imin] = w[n];
-            self->r[node] = right;
+            self->tree_right[node] = right;
             node++;
             id[imin] = id[n];
         } while (n >= 3);
@@ -327,14 +325,6 @@ extern "C" void HUFF_maketree(struct HS_8770 *self) {
 INCLUDE_ASM("seg/seg_1C9348", HUFF_minrep);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct HS_8970 {
-    char pad0[0x100];
-    int used[0x311];        // 0x100
-    int len[0x608];         // 0xD44
-    int a[256];             // 0x2564
-    int b[0x11A];           // 0x2964
-    int cur;                // 0x2DCC
-};
 /**
  * Returns the cheapest bit cost of coding a run with the repeat codes up to @p n, or with one clue-coded run
  * length.
@@ -343,14 +333,14 @@ struct HS_8970 {
  * @param n  the longest repeat code to consider (On Tour r)
  * @return the cost in bits
  */
-extern "C" int HUFF_minrep(HS_8970* self, unsigned remaining, unsigned n)
+extern "C" int HUFF_minrep(HuffEncodeContext* self, unsigned remaining, unsigned n)
 {
     int best;
     if (n != 0) {
         best = HUFF_minrep(self, remaining, n - 1);
-        if (self->used[self->cur + n] != 0) {
+        if (self->count[self->clue + n] != 0) {
             unsigned repCount = remaining / n;
-            int cost = HUFF_minrep(self, remaining - repCount * n, n - 1) + self->a[self->cur + n] * repCount;
+            int cost = HUFF_minrep(self, remaining - repCount * n, n - 1) + self->bitsarray[self->clue + n] * repCount;
             if (cost < best) {
                 best = cost;
             }
@@ -360,7 +350,7 @@ extern "C" int HUFF_minrep(HS_8970* self, unsigned remaining, unsigned n)
         if (remaining != 0) {
             best = 20;
             if (remaining < 0xFC) {
-                best = self->a[self->cur] + 3 + self->len[remaining] * 2;
+                best = self->bitsarray[self->clue] + 3 + self->repbits[remaining] * 2;
             }
         }
     }
@@ -372,12 +362,11 @@ extern "C" int HUFF_minrep(HS_8970* self, unsigned remaining, unsigned n)
 INCLUDE_ASM("seg/seg_1C9348", HUFF_writenum);
 #ifdef SKIP_ASM
 
-struct HuffOut_8A78;
-
-extern "C" void HUFF_writebits_8A78(HuffEncodeContext* s, HuffOut_8A78* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
+extern "C" void HUFF_writebits_8A78(HuffEncodeContext* s, HUFFMemStruct* out, unsigned int code, unsigned int len)
+    __asm__("HUFF_writebits");
 
 // PORT: the unit declares this with other parameter types; defined under an asm label
-extern "C" void HUFF_writenum_impl(HuffEncodeContext* s, HuffOut_8A78* out, unsigned int v) __asm__("HUFF_writenum");
+extern "C" void HUFF_writenum_impl(HuffEncodeContext* s, HUFFMemStruct* out, unsigned int v) __asm__("HUFF_writenum");
 /**
  * Writes a number to the Huffman bit stream as a size prefix followed by the offset within that size class.
  *
@@ -390,7 +379,7 @@ extern "C" void HUFF_writenum_impl(HuffEncodeContext* s, HuffOut_8A78* out, unsi
  * @param out  the output stream (HUFFMemStruct)
  * @param num    the number to write
  */
-extern "C" void HUFF_writenum_impl(HuffEncodeContext* encodeContext, HuffOut_8A78* out, unsigned int num)
+extern "C" void HUFF_writenum_impl(HuffEncodeContext* encodeContext, HUFFMemStruct* out, unsigned int num)
 {
     unsigned int base;
     unsigned int bits;
@@ -446,11 +435,10 @@ extern "C" void HUFF_writenum_impl(HuffEncodeContext* encodeContext, HuffOut_8A7
 INCLUDE_ASM("seg/seg_1C9348", HUFF_writeexp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct HS_8C30 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
-extern void HUFF_writebits_8C30(HS_8C30 *, int, int, int) __asm__("HUFF_writebits");
-extern "C" void HUFF_writenum(HS_8C30 *, int, int);
+extern void HUFF_writebits_8C30(HuffEncodeContext *, HUFFMemStruct *, int, int) __asm__("HUFF_writebits");
+extern "C" void HUFF_writenum(HuffEncodeContext *, HUFFMemStruct *, int);
 
-extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) __asm__("HUFF_writeexp");
+extern "C" void HUFF_writeexp_impl(HuffEncodeContext *self, HUFFMemStruct *out, int y) __asm__("HUFF_writeexp");
 /**
  * Writes an escaped symbol: the escape code, a zero count, then the symbol itself as a raw 9-bit value.
  *
@@ -458,13 +446,13 @@ extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) __asm__("HUFF_wr
  * from the length table (+0x2564), written with HUFF_writebits. Then HUFF_writenum writes 0 and
  * HUFF_writebits writes @p y in 9 bits.
  *
- * @param x  the output stream (HUFFMemStruct)
+ * @param out  the output stream (HUFFMemStruct)
  * @param y  the symbol to write
  */
-extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) {
-    HUFF_writebits_8C30(self, x, self->b[self->cur], self->a[self->cur]);
-    HUFF_writenum(self, x, 0);
-    HUFF_writebits_8C30(self, x, y, 9);
+extern "C" void HUFF_writeexp_impl(HuffEncodeContext *self, HUFFMemStruct *out, int y) {
+    HUFF_writebits_8C30(self, out, self->patternarray[self->clue], self->bitsarray[self->clue]);
+    HUFF_writenum(self, out, 0);
+    HUFF_writebits_8C30(self, out, y, 9);
 }
 #endif
 
@@ -546,15 +534,6 @@ INCLUDE_ASM("seg/seg_1C9348", HUFF_analysis);
 INCLUDE_ASM("seg/seg_1C9348", HUFF_pack);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct HS_9A48 {
-    signed char used[256];          // 0x0000
-    int clue[0x300];                // 0x0100: nonzero = slot usable as a run clue
-    unsigned int dlen[17];          // 0x0D00 (1-based)
-    unsigned int len[252];          // 0x0D44
-    char pad_0x1134[0x2564 - 0x1134];
-    unsigned int bitnum[256];       // 0x2564
-    unsigned int code[0x112];       // 0x2964
-};
 
 
 extern "C" void huffBits_9A48(void* s, void* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
@@ -578,8 +557,7 @@ extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("HUFF
 // allocation depends on that reuse.
 extern "C" void HUFF_pack(HuffEncodeContext* vs, HUFFMemStruct* out, int opt)
 {
-    HS_9A48* encoder = (HS_9A48*)vs;
-    HuffEncodeContext* encoderInfo = (HuffEncodeContext*)vs;
+    HuffEncodeContext* encoder = vs;
     unsigned int i;
     unsigned int k;
     unsigned int repCount;
@@ -589,59 +567,59 @@ extern "C" void HUFF_pack(HuffEncodeContext* vs, HUFFMemStruct* out, int opt)
     unsigned int mode;
     unsigned char* srcPtr;
 
-    huffBits_9A48(encoder, out, encoderInfo->clue, 8);
-    for (i = 1; i <= encoderInfo->mostbits; i++)
-        huffNum_9A48(encoder, out, encoder->dlen[i]);
+    huffBits_9A48(encoder, out, encoder->clue, 8);
+    for (i = 1; i <= encoder->mostbits; i++)
+        huffNum_9A48(encoder, out, encoder->bitnum[i]);
     for (i = 0; i < 256; i++)
-        encoder->used[i] = 0;
+        encoder->qleapcode[i] = 0;
     run = 0xFF;
-    for (i = 0; i < encoderInfo->codes; i++) {
+    for (i = 0; i < encoder->codes; i++) {
         int n = -1;
-        last = encoderInfo->sortptr[i];
+        last = encoder->sortptr[i];
         do {
             run = (run + 1) & 0xFF;
-            if (!encoder->used[run])
+            if (!encoder->qleapcode[run])
                 n++;
         } while (last != run);
-        encoder->used[run] = 1;
+        encoder->qleapcode[run] = 1;
         huffNum_9A48(encoder, out, n);
     }
-    mode = encoderInfo->clues;
+    mode = encoder->clues;
     if (mode == 0)
-        encoderInfo->clue = 32000;
-    srcPtr = encoderInfo->buffer;
+        encoder->clue = 32000;
+    srcPtr = encoder->buffer;
     last = 0x100;
-    while (srcPtr < encoderInfo->bufptr) {
+    while (srcPtr < encoder->bufptr) {
         i = *srcPtr++;
         if (i == last) {
             unsigned char* lim = srcPtr + 30000;
-            if (encoderInfo->bufptr < lim)
-                lim = encoderInfo->bufptr;
+            if (encoder->bufptr < lim)
+                lim = encoder->bufptr;
             run = 0;
-            mode = encoderInfo->clues;
+            mode = encoder->clues;
             if (srcPtr < lim) {
                 do {
                     i = *srcPtr++;
                     run++;
                 } while (i == last && srcPtr < lim);
             }
-            unsigned int cost1 = run * encoder->bitnum[last];
+            unsigned int cost1 = run * encoder->bitsarray[last];
             unsigned int cost2 = 32000;
             unsigned int cost3 = 32000;
             if (mode != 0) {
-                if (encoder->clue[encoderInfo->clue] != 0) {
+                if (encoder->count[encoder->clue] != 0) {
                     cost2 = 20;
                     if (run < 252)
-                        cost2 = encoder->bitnum[encoderInfo->clue] + 3 + encoder->len[run] * 2;
+                        cost2 = encoder->bitsarray[encoder->clue] + 3 + encoder->repbits[run] * 2;
                 }
                 if (mode >= 2) {
                     rem = run;
                     cost3 = 0;
                     for (k = mode - 1; k != 0; k--) {
-                        if (encoder->clue[encoderInfo->clue + k] != 0) {
+                        if (encoder->count[encoder->clue + k] != 0) {
                             repCount = rem / k;
                             rem -= repCount * k;
-                            cost3 += repCount * encoder->bitnum[encoderInfo->clue + k];
+                            cost3 += repCount * encoder->bitsarray[encoder->clue + k];
                         }
                     }
                     if (rem != 0)
@@ -652,29 +630,29 @@ extern "C" void HUFF_pack(HuffEncodeContext* vs, HUFFMemStruct* out, int opt)
                 while (run--)
                     huffSym_9A48(encoder, out, last);
             } else if (cost2 < cost3) {
-                huffBits_9A48(encoder, out, encoder->code[encoderInfo->clue], encoder->bitnum[encoderInfo->clue]);
+                huffBits_9A48(encoder, out, encoder->patternarray[encoder->clue], encoder->bitsarray[encoder->clue]);
                 huffNum_9A48(encoder, out, run);
             } else {
                 rem = run;
                 for (k = mode - 1; k != 0; k--) {
-                    if (encoder->clue[encoderInfo->clue + k] != 0) {
+                    if (encoder->count[encoder->clue + k] != 0) {
                         repCount = rem / k;
                         rem -= repCount * k;
                         while (repCount--)
-                            huffSym_9A48(encoder, out, encoderInfo->clue + k);
+                            huffSym_9A48(encoder, out, encoder->clue + k);
                     }
                 }
             }
         }
         k = 0;
-        if (((int)encoderInfo->dclues) != 0) {
+        if (((int)encoder->dclues) != 0) {
             int diff = i - last;
-            if (diff <= encoderInfo->maxdelta && diff >= encoderInfo->mindelta) {
-                diff = (diff - 1) * 2 + encoderInfo->dclue;
+            if (diff <= encoder->maxdelta && diff >= encoder->mindelta) {
+                diff = (diff - 1) * 2 + encoder->dclue;
                 if (i < last)
-                    diff = ((last - i) - 1) * 2 + encoderInfo->dclue + 1;
-                if (encoder->bitnum[diff] < encoder->bitnum[i]) {
-                    huffBits_9A48(encoder, out, encoder->code[diff], encoder->bitnum[diff]);
+                    diff = ((last - i) - 1) * 2 + encoder->dclue + 1;
+                if (encoder->bitsarray[diff] < encoder->bitsarray[i]) {
+                    huffBits_9A48(encoder, out, encoder->patternarray[diff], encoder->bitsarray[diff]);
                     k = 1;
                 }
             }
@@ -683,7 +661,7 @@ extern "C" void HUFF_pack(HuffEncodeContext* vs, HUFFMemStruct* out, int opt)
         if (!k)
             huffSym_9A48(encoder, out, i);
     }
-    huffBits_9A48(encoder, out, encoder->code[encoderInfo->clue], encoder->bitnum[encoderInfo->clue]);
+    huffBits_9A48(encoder, out, encoder->patternarray[encoder->clue], encoder->bitsarray[encoder->clue]);
     huffNum_9A48(encoder, out, 0);
     huffBits_9A48(encoder, out, 2, 2);
     huffBits_9A48(encoder, out, 0, 7);
@@ -797,21 +775,21 @@ extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
         case 1:
             deltaBuf = operator_new_tag(len, str_huffdeltadata, 0x20000000, 0);
             HUFF_deltabytes((unsigned char*)src, (unsigned char*)deltaBuf, len);
-            (*(void**)&in.ptr) = deltaBuf;
+            in.ptr = (char*)deltaBuf;
             break;
         case 2:
             deltaBuf = operator_new_tag(len, str_huffdeltadata, 0x20000000, 0);
             HUFF_deltabytes((unsigned char*)src, (unsigned char*)deltaBuf, len);
             HUFF_deltabytes((unsigned char*)deltaBuf, (unsigned char*)deltaBuf, len);
-            (*(void**)&in.ptr) = deltaBuf;
+            in.ptr = (char*)deltaBuf;
             break;
         case 0:
         default:
-            (*(void**)&in.ptr) = src;
+            in.ptr = (char*)src;
             break;
         }
         in.len = len;
-        (*(void**)&out.ptr) = dst;
+        out.ptr = (char*)dst;
         out.len = len;
         result = HUFF_packfile_A100(encodeCtx, &in, &out, len, mode);
         if (deltaBuf) cMemMan_free(deltaBuf);

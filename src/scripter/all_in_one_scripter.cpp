@@ -327,9 +327,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetPlayer);
  *
  * @return its player entity
  */
-int cScriptEntity::GetPlayer()
+cScriptPlayerEntity* cScriptEntity::GetPlayer()
 {
-    return ((int)mpEntity);
+    return mpEntity;
 }
 #endif
 
@@ -413,9 +413,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_SetCameraManager
  *
  * @param camManager  the camera manager (cScriptObjCameraManager)
  */
-void cScriptEntityCamera::SetCameraManager(int camManager)
+void cScriptEntityCamera::SetCameraManager(cScriptObjCameraManager* camManager)
 {
-    mpCamManager = (cScriptObjCameraManager*)camManager;
+    mpCamManager = camManager;
 }
 #endif
 
@@ -653,18 +653,6 @@ int cSSXScriptEngine::GetActiveNIS()
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_IsBankAvailable);
 #ifdef SKIP_ASM
-struct sSlot_49F8 {
-    int f0;     // 0x628
-    int f4;
-    int f8;     // 0x630
-    int fC;
-};
-
-struct sEngine_49F8 {
-    char pad[0x628];
-    sSlot_49F8 slots[1];
-};
-
 /**
  * Returns whether script data bank @p idx is free: no async load in flight and no data attached.
  *
@@ -672,13 +660,13 @@ struct sEngine_49F8 {
  * are both 0.
  *
  * @param idx  the bank index (0-9)
- * @return 1 if the bank is free, else 0
+ * @return true if the bank is free, else false
  */
-extern "C" int cSSXScriptEngine_IsBankAvailable(sEngine_49F8* self, int idx)
+bool cSSXScriptEngine::IsBankAvailable(int idx)
 {
-    int available = 0;
-    if (self->slots[idx].f8 == 0) {
-        available = self->slots[idx].f0 == 0;
+    bool available = false;
+    if (mScriptDataBanks[idx].asyncHandle == 0) {
+        available = mScriptDataBanks[idx].dataBankHandle == 0;
     }
     return available;
 }
@@ -710,9 +698,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraEntity);
  *
  * @return its camera entity
  */
-int cScriptObjCamera::GetCameraEntity()
+cScriptEntityCamera* cScriptObjCamera::GetCameraEntity()
 {
-    return ((int)mpCameraEntity);
+    return mpCameraEntity;
 }
 #endif
 
@@ -808,9 +796,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraManager);
  *
  * @return its camera manager
  */
-int cScriptObjCamera::GetCameraManager()
+cScriptObjCameraManager* cScriptObjCamera::GetCameraManager()
 {
-    return ((int)mpCameraManager);
+    return mpCameraManager;
 }
 #endif
 
@@ -854,9 +842,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_SetCameraAlgorithm)
  *
  * @param algorithm  the camera algorithm
  */
-void cScriptObjCamera::SetCameraAlgorithm(int algorithm)
+void cScriptObjCamera::SetCameraAlgorithm(cScriptAlgorithm* algorithm)
 {
-    mpCameraAlgorithm = (cScriptAlgorithm*)algorithm;
+    mpCameraAlgorithm = algorithm;
 }
 #endif
 
@@ -868,9 +856,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraAlgorithm)
  *
  * @return its camera algorithm
  */
-int cScriptObjCamera::GetCameraAlgorithm()
+cScriptAlgorithm* cScriptObjCamera::GetCameraAlgorithm()
 {
-    return ((int)mpCameraAlgorithm);
+    return mpCameraAlgorithm;
 }
 #endif
 
@@ -913,9 +901,9 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetCameraManage
  *
  * @return its camera manager
  */
-int cScriptObjTransition::GetCameraManager()
+cScriptObjCameraManager* cScriptObjTransition::GetCameraManager()
 {
-    return ((int)mpCameraManager);
+    return mpCameraManager;
 }
 #endif
 

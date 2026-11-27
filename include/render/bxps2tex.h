@@ -136,8 +136,8 @@ struct cTextureMan {
     void DeleteNonBindTexID(int id) __asm__("cTextureMan_DeleteNonBindTexID");
     void NewBindTexID(int id) __asm__("cTextureMan_NewBindTexID");
     void DeleteBindTexID(int idx) __asm__("cTextureMan_DeleteBindTexID");
-    int AddTexture(int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
-                   int clutFormat, int clutData, int vramMode, int ownsData, int bindId)
+    int AddTexture(void* pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat,
+                   int clutFormat, void* clutData, int vramMode, int ownsData, int bindId)
         __asm__("cTextureMan_AddTexture");
     void RemoveTexture(int id) __asm__("cTextureMan_RemoveTexture");
     int AddLockedFrameTexture(int width, int height, int format) __asm__("cTextureMan_AddLockedFrameTexture");

@@ -168,7 +168,7 @@ void cFlagSet::PurgeMesh()
 INCLUDE_ASM("object/flagset", cFlagSet_update);
 #ifdef SKIP_ASM
 extern int cFlags_m_EnableUpdate;
-extern "C" void* cObjectInterface_getFlagManager();
+extern "C" cFlagManager* cObjectInterface_getFlagManager();
 extern "C" int cObjectInterface_getAITick();
 extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
 
@@ -199,7 +199,7 @@ void cFlagSet::update()
     if (self->mGridMesh == 0) {
         return;
     }
-    cFlagManager* wind = (cFlagManager*)cObjectInterface_getFlagManager();
+    cFlagManager* wind = cObjectInterface_getFlagManager();
     float k = self->mFlagData.mMinWindFactor;
     float windBlend = k + wind->mCurrentWindFactor * (1.0f - k);
     int i;
@@ -310,7 +310,7 @@ void cFlagSet::render()
     cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
     gm->m_pCurrentDrawState[1] = gm->m_pCurrentDrawState[0];
     *++gm->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
-    if (*(signed char*)&mFlagData.mOverSaturate != 0) {
+    if (mFlagData.mOverSaturate != 0) {
         SetDrawStateAlpha(cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState, 0xFF);
         SetDrawStateBlendMode(cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState, 11);
     } else {
@@ -417,7 +417,7 @@ void cFlagSet::updateGrid(t3Vector* vout)
     sFsV3_CM* out = (sFsV3_CM*)vout;
     int bothHeld = self->b0 != 0 && self->mode != 0;
     int neitherHeld = self->b0 == 0 && self->mode == 0;
-    float windRatio = self->blend + *(float*)((char*)cObjectInterface_getFlagManager() + 0x10) * (1.0f - self->blend);
+    float windRatio = self->blend + cObjectInterface_getFlagManager()->mCurrentWindFactor * (1.0f - self->blend);
     float aTime[4];
     float mag[4];
     int i;
@@ -601,8 +601,8 @@ extern "C" cFlagManager* cFlagManager_cFlagManager(cFlagManager* self, void* buc
     }
     self->mWindBase = 0.5f;
     self->mWindDelta = 0.25f;
-    *(int*)&self->mWindTime = 0;
-    *(int*)&self->mCurrentWindFactor = 0;
+    self->mWindTime = 0.0f;
+    self->mCurrentWindFactor = 0.0f;
     return (self);
 }
 #endif
@@ -974,9 +974,9 @@ cFenceNode* cFenceNode::cFenceNode1(int bucket, void* pInst, tMakeFenceData* tda
     VPTR_OF(cObjNode, this) = cFenceNode_vtbl;
     new (((t3Vector_C8E8*)&Verts[0])) t3Vector_C8E8[16];
     *(&FenceData) = *tdata;
-    *(int*)&ForceMax = 0;
-    *(int*)&Force = 0;
-    *(int*)&ForceStep = 0;
+    ForceMax = 0.0f;
+    Force = 0.0f;
+    ForceStep = 0.0f;
     FenceData.InstId = 0xFFFFFFFF;
     setupFence();
     NextPropTime = 0;
@@ -984,10 +984,10 @@ cFenceNode* cFenceNode::cFenceNode1(int bucket, void* pInst, tMakeFenceData* tda
     if (GridMesh != 0) {
         t4Vector dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(&Instance->m_fmTransform), &t4vect_XAxis));
         float speed = fabs_C8E8(info->Vel);
-        force = Dot_C8E8(dir, *(t4Vector*)&info->Direct);
+        force = Dot_C8E8(dir, info->Direct);
         force = speed * (force * 0.0010000000474974513f);
     } else {
-        force = Dot_C8E8(*(t4Vector*)&info->Reflect, *(t4Vector*)&info->Direct);
+        force = Dot_C8E8(info->Reflect, info->Direct);
         force = force * 0.0010000000474974513f * fabs_C8E8(info->Vel);
     }
     setForce(force);
@@ -1002,35 +1002,14 @@ cFenceNode* cFenceNode::cFenceNode1(int bucket, void* pInst, tMakeFenceData* tda
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode2);
 #ifdef SKIP_ASM
-struct sFlagBlock_CAB8 {
-    unsigned int w[4];
-};
-
-struct sFlagElem_CAB8 {
-    float v[4];
-    sFlagElem_CAB8() {}
-    void* operator new[](unsigned int, void* p) { return p; }
-};
-
-struct sFlagSet_CAB8 {
-    char pad0[0xC];
-    void** vtable;              // 0xC
-    char pad10[0xC];
-    sFlagBlock_CAB8 block;      // 0x1C
-    int field_0x2c;             // 0x2C
-    int field_0x30;             // 0x30
-    int field_0x34;             // 0x34
-    int field_0x38;             // 0x38
-    int field_0x3c;             // 0x3C
-};
-
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* obj);
 extern "C" void cFenceNode_setupFence(cFenceNode* self);
 extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
 extern void* cFenceNode_vtbl[];
 
 // PORT: the unit declares this as void (callers ignore the result); bound by asm label.
-extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt) __asm__("cFenceNode_cFenceNode2");
+extern "C" cFenceNode* cFenceNode_cFenceNode2_ctor(cFenceNode* self, int bucket, void* obj, tMakeFenceData* desc,
+                                                  int flag, float dt) __asm__("cFenceNode_cFenceNode2");
 /**
  * Constructs a fence node for a neighbouring fence instance that a swinging fence pushes.
  *
@@ -1045,21 +1024,22 @@ extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int a
  * @param dt  force to start with
  * @return self
  */
-extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int bucket, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
+extern "C" cFenceNode* cFenceNode_cFenceNode2_ctor(cFenceNode* self, int bucket, void* obj, tMakeFenceData* desc,
+                                                  int flag, float dt)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 9, obj);
-    self->block.w[0] = 0xFFFFFFFF;
-    self->vtable = cFenceNode_vtbl;
-    new ((char*)self + 0x40) sFlagElem_CAB8[16];
-    self->block = *desc;
-    self->field_0x30 = 0;
-    self->field_0x2c = 0;
-    self->field_0x34 = 0;
-    self->block.w[0] = 0xFFFFFFFF;
-    ((cFenceNode*)self)->setupFence();
-    ((cFenceNode*)self)->setForce(dt);
-    self->field_0x38 = 4;
-    self->field_0x3c = 4;
+    self->FenceData.InstId = 0xFFFFFFFF;
+    VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
+    new ((t3Vector_C8E8*)&self->Verts[0]) t3Vector_C8E8[16];
+    self->FenceData = *desc;
+    self->ForceMax = 0.0f;
+    self->Force = 0.0f;
+    self->ForceStep = 0.0f;
+    self->FenceData.InstId = 0xFFFFFFFF;
+    self->setupFence();
+    self->setForce(dt);
+    self->NextPropTime = 4;
+    self->PrevPropTime = 4;
     return self;
 }
 #endif
@@ -1170,7 +1150,7 @@ static inline float fabs_34CC80(float x)
  */
 void cFenceNode::makeNeighbour(tInstanceRecord* obj, int flag)
 {
-    if ((int)GridMesh == 0) {
+    if (GridMesh == 0) {
         return;
     }
     if (((char*)obj) == 0) {

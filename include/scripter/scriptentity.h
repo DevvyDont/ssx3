@@ -46,7 +46,7 @@ struct cScriptEntity {
     void OnInSeqRelease() __asm__("cScriptEntity_OnInSeqRelease");
     void PauseEntityScript() __asm__("cScriptEntity_PauseEntityScript");
     void ResumeEntityScript() __asm__("cScriptEntity_ResumeEntityScript");
-    int GetPlayer() __asm__("cScriptEntity_GetPlayer");
+    cScriptPlayerEntity* GetPlayer() __asm__("cScriptEntity_GetPlayer");
     int GetDatabaseID() __asm__("cScriptEntity_GetDatabaseID");
     void SetDatabaseID(int databaseId) __asm__("cScriptEntity_SetDatabaseID");
     void ClearDatabaseID() __asm__("cScriptEntity_ClearDatabaseID");

@@ -68,7 +68,7 @@ struct cAppMan {
     void prepause() __asm__("cAppMan_prepause");
     void postpause() __asm__("cAppMan_postpause");
     void lockThirtyFps(int value) __asm__("cAppMan_lockThirtyFps");
-    int run(char* exec, int ac, int av) __asm__("cAppMan_run");
+    int run(cExecutionMan* exec, int ac, char** av) __asm__("cAppMan_run");
     void setNextModule(unsigned int module) __asm__("cAppMan_setNextModule__FP7cAppManUi");
     void halt() __asm__("cAppMan_halt");
     void loadexecpurge() __asm__("cAppMan_loadexecpurge");

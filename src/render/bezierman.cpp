@@ -203,28 +203,28 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, tPatchRecord* patchRec, 
         case kPatchGrid_4x4:
             if (bezierMan->mNum4x4Patches < 900) {
                 tBezierPatchEntry* patchEntry = &((&bezierMan->m4x4Patches[0]))[bezierMan->mNum4x4Patches++];
-                (*(int*)&patchEntry->unk_04) = extra;
+                patchEntry->unk_04 = extra;
                 patchEntry->mpPatch = patchRec;
                 patchEntry->mLod = kPatchLod_4x4;
-                patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[0]);
+                patchEntry->unk_0C = patchRec->m_sCacheRecord[0];
             }
             break;
         case kPatchGrid_6x6:
             if (bezierMan->mNum6x6Patches < 220) {
                 tBezierPatchEntry* patchEntry = &((&bezierMan->m6x6Patches[0]))[bezierMan->mNum6x6Patches++];
-                (*(int*)&patchEntry->unk_04) = extra;
+                patchEntry->unk_04 = extra;
                 patchEntry->mLod = kPatchLod_6x6;
                 patchEntry->mpPatch = patchRec;
-                patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[1]);
+                patchEntry->unk_0C = patchRec->m_sCacheRecord[1];
             }
             break;
         case kPatchGrid_8x8:
             if (bezierMan->mNum8x8Patches < 50) {
                 tBezierPatchEntry* patchEntry = &((&bezierMan->m8x8Patches[0]))[bezierMan->mNum8x8Patches++];
-                (*(int*)&patchEntry->unk_04) = extra;
+                patchEntry->unk_04 = extra;
                 patchEntry->mLod = kPatchLod_8x8;
                 patchEntry->mpPatch = patchRec;
-                patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[2]);
+                patchEntry->unk_0C = patchRec->m_sCacheRecord[2];
             }
             break;
         }
@@ -232,12 +232,12 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, tPatchRecord* patchRec, 
     }
     if (bezierMan->mNumMixedPatches < 75) {
         tBezierMixedPatchEntry* patchEntry = &((&bezierMan->mMixedPatches[0]))[bezierMan->mNumMixedPatches++];
-        (*(int*)&patchEntry->unk_04) = extra;
+        patchEntry->unk_04 = extra;
         patchEntry->mpPatch = patchRec;
         int* pk = &patchEntry->mLod;
         *pk = (edgeLods[0] == kPatchGrid_8x8 || edgeLods[1] == kPatchGrid_8x8 || edgeLods[2] == kPatchGrid_8x8
                 || edgeLods[3] == kPatchGrid_8x8) ? 2 : 0;
-        patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[2]);
+        patchEntry->unk_0C = patchRec->m_sCacheRecord[2];
         for (int i = 0; i < 4; i++) {
             patchEntry->mEdgeLods[i] = edgeLods[i];
         }
@@ -1799,14 +1799,6 @@ extern "C" void func_0038D690(cPS2BezierMan* self, void* obj, tBezierPatchEntry*
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/bezierman", func_0038D968);
 #ifdef SKIP_ASM
-struct sBezMixPatch_D968 {
-    void* obj;
-    int extra;
-    int kind;
-    unsigned short tex;
-    short pad;
-    unsigned char types[4];
-};
 extern int cRenderToggles_m_DisableSparkles;
 extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D968 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_0037D968(cPS2GraphicsMan* ctx);
@@ -1852,9 +1844,10 @@ extern "C" void func_0038D968(cPS2BezierMan* self, unsigned int* packetHandle)
         func_0038D690(self, func_0038F708(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
     }
     for (int i = 0; i < self->mNumMixedPatches; i++) {
-        sBezMixPatch_D968* patchEntry = &((sBezMixPatch_D968*)&self->mMixedPatches[0])[i];
-        if (patchEntry->kind > 0) {
-            func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
+        tBezierMixedPatchEntry* patchEntry = &self->mMixedPatches[i];
+        if (patchEntry->mLod > 0) {
+            func_0038D690(self, func_0038F708(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry,
+                          packetHandle);
         }
     }
     ctx->m_pCurrentDrawState--;

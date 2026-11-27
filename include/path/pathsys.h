@@ -58,7 +58,7 @@ struct cPathSys {
     int getTrackPathIndex(cTrackPath* entry) __asm__("cPathSys_getTrackPathIndex");
     int getAIPathIndex(cAIPath* entry) __asm__("cPathSys_getAIPathIndex");
     bool isStartpoint(int type, int startpointId) __asm__("cPathSys_isStartpoint");
-    int getStartpointByIndex(int index) __asm__("cPathSys_getStartpointByIndex");
+    tPathStartpoint* getStartpointByIndex(int index) __asm__("cPathSys_getStartpointByIndex");
     int loadCheckpoints(char* cursor) __asm__("cPathSys_loadCheckpoints");
     int loadStartpoints(char* cursor) __asm__("cPathSys_loadStartpoints");
     void removeInjectedPathFile() __asm__("cPathSys_removeInjectedPathFile__FPv");

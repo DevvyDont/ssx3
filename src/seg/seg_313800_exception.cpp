@@ -106,8 +106,21 @@ void unexpected_848(void)
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __cp_exception_info);
 #ifdef SKIP_ASM
+// A C++ exception record (cp/exception.cc struct cp_eh_info, 0x30): the generic __eh_info header (match function,
+// language, version), then the thrown object and its handling state. This compiler stores the bool caught as a word.
+struct sCpEh {
+    int (*match)(int*, int (*)(void), short*);
+    short lang, ver;
+    void* value;
+    void* type;
+    void (*cleanup)(void*, int);
+    int caught;
+    sCpEh *next;
+    long handlers;
+    void* orig;
+};
 // __cp_exception_info(): address of the current exception's value in its cp_eh_info
-extern void* __get_eh_info_v(void) __asm__("__get_eh_info");
+extern sCpEh** __get_eh_info_v(void) __asm__("__get_eh_info");
 void* cp_exception_info_860(void) __asm__("__cp_exception_info");
 /**
  * Returns the address of the current C++ exception's value field.
@@ -118,20 +131,20 @@ void* cp_exception_info_860(void) __asm__("__cp_exception_info");
  */
 void* cp_exception_info_860(void)
 {
-    return (char*)*(void**)__get_eh_info_v() + 8;
+    return &(*__get_eh_info_v())->value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __cp_eh_info);
 #ifdef SKIP_ASM
-extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
+extern sCpEh **__get_eh_info_a(void) __asm__("__get_eh_info");
 /**
  * Returns the current C++ exception's info record (the word __get_eh_info points at).
  *
  * @return the record
  */
-int __cp_eh_info(void) {
+sCpEh *__cp_eh_info(void) {
     return *__get_eh_info_a();
 }
 #endif
@@ -139,8 +152,8 @@ int __cp_eh_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __start_cp_handler);
 #ifdef SKIP_ASM
-extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
-int *start_cp_handler_8a8(void) __asm__("__start_cp_handler");
+extern sCpEh **__get_eh_info_a(void) __asm__("__get_eh_info");
+sCpEh *start_cp_handler_8a8(void) __asm__("__start_cp_handler");
 /**
  * Marks the current C++ exception as caught and counts one more active handler.
  *
@@ -148,10 +161,10 @@ int *start_cp_handler_8a8(void) __asm__("__start_cp_handler");
  *
  * @return the record
  */
-int *start_cp_handler_8a8(void) {
-    int *ehInfo = (int *)*__get_eh_info_a();
-    ehInfo[5] = 1;
-    *(long *)(ehInfo + 8) += 1;
+sCpEh *start_cp_handler_8a8(void) {
+    sCpEh *ehInfo = *__get_eh_info_a();
+    ehInfo->caught = 1;
+    ehInfo->handlers += 1;
     return ehInfo;
 }
 #endif
@@ -226,9 +239,9 @@ int __cplus_type_matcher(int *info, int (*fn)(void), short *exceptionTable) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __cp_push_exception);
 #ifdef SKIP_ASM
-extern int *eh_alloc_998(int) __asm__("__eh_alloc");
-extern int *__get_eh_info_l(void) __asm__("__get_eh_info");
-void cp_push_exception_998(int value, int type, int cleanup) __asm__("__cp_push_exception");
+extern sCpEh *eh_alloc_998(int) __asm__("__eh_alloc");
+extern sCpEh **__get_eh_info_l(void) __asm__("__get_eh_info");
+void cp_push_exception_998(void* value, void* type, void (*cleanup)(void*, int)) __asm__("__cp_push_exception");
 /**
  * Pushes a new C++ exception record for a throw onto the exception chain.
  *
@@ -241,30 +254,29 @@ void cp_push_exception_998(int value, int type, int cleanup) __asm__("__cp_push_
  * @param type     the thrown object's type_info
  * @param cleanup  the object's destructor, called with (value, 2) when the record is popped; null for none
  */
-void cp_push_exception_998(int value, int type, int cleanup) {
-    int *ehInfo = eh_alloc_998(0x30);
-    int *infoChain;
-    ehInfo[3] = type;
-    ehInfo[4] = cleanup;
-    ehInfo[2] = value;
-    ehInfo[10] = value;
-    *(long long *)(ehInfo + 8) = 0;
-    ehInfo[5] = 0;
-    ehInfo[0] = (int)__cplus_type_matcher;
-    ((short *)ehInfo)[2] = 4;
-    ((short *)ehInfo)[3] = 1;
+void cp_push_exception_998(void* value, void* type, void (*cleanup)(void*, int)) {
+    sCpEh *ehInfo = eh_alloc_998(sizeof(sCpEh));
+    sCpEh **infoChain;
+    ehInfo->type = type;
+    ehInfo->cleanup = cleanup;
+    ehInfo->value = value;
+    ehInfo->orig = value;
+    ehInfo->handlers = 0;
+    ehInfo->caught = 0;
+    ehInfo->match = __cplus_type_matcher;
+    ehInfo->lang = 4;
+    ehInfo->ver = 1;
     infoChain = __get_eh_info_l();
-    ehInfo[6] = *infoChain;
-    *infoChain = (int)ehInfo;
+    ehInfo->next = *infoChain;
+    *infoChain = ehInfo;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __cp_pop_exception);
 #ifdef SKIP_ASM
-struct sCpEh { int (*match)(void); short lang, ver; int value; int type; void (*cleanup)(int, int); int caught; sCpEh *next; long handlers; int orig; };
 extern sCpEh **eh_get_a28(void) __asm__("__get_eh_info");
-extern int ptr_type_a28(int) __asm__("__is_pointer");
+extern int ptr_type_a28(void*) __asm__("__is_pointer");
 extern void eh_free_a28(void *) __asm__("__eh_free");
 extern int term_a28(void) __asm__("terminate") __attribute__((noreturn));
 void cp_pop_exception_a28(sCpEh *ehInfo) __asm__("__cp_pop_exception");
@@ -295,7 +307,7 @@ void cp_pop_exception_a28(sCpEh *ehInfo) {
     if (ehInfo->cleanup)
         ehInfo->cleanup(ehInfo->value, 2);
     if (!ptr_type_a28(ehInfo->type))
-        eh_free_a28((void *)ehInfo->orig);
+        eh_free_a28(ehInfo->orig);
     eh_free_a28(ehInfo);
 }
 #endif
@@ -303,7 +315,7 @@ void cp_pop_exception_a28(sCpEh *ehInfo) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __uncatch_exception);
 #ifdef SKIP_ASM
-extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
+extern sCpEh **__get_eh_info_a(void) __asm__("__get_eh_info");
 extern int term_af0(void) __asm__("terminate") __attribute__((noreturn));
 /**
  * Marks the current C++ exception as uncaught again, as a rethrow requires.
@@ -312,11 +324,11 @@ extern int term_af0(void) __asm__("terminate") __attribute__((noreturn));
  * otherwise it clears the record's caught flag (+0x14). __check_eh_spec calls it before each rethrow (__throw).
  */
 void __uncatch_exception(void) {
-    int *ehInfo = (int *)*__get_eh_info_a();
+    sCpEh *ehInfo = *__get_eh_info_a();
     if (ehInfo == 0) {
         term_af0();
     }
-    ehInfo[5] = 0;
+    ehInfo->caught = 0;
 }
 #endif
 
@@ -526,8 +538,7 @@ __throw_bad_typeid (void)
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", uncaught_exception);
 #ifdef SKIP_ASM
-struct sCpEhInfoDD8 { int pad[5]; int caught; };
-extern sCpEhInfoDD8** __get_eh_info_dd8(void) __asm__("__get_eh_info");
+extern sCpEh** __get_eh_info_dd8(void) __asm__("__get_eh_info");
 // uncaught_exception(): an exception is being thrown and no handler has caught it yet
 bool uncaught_exception_dd8(void) __asm__("uncaught_exception");
 /**
@@ -539,7 +550,7 @@ bool uncaught_exception_dd8(void) __asm__("uncaught_exception");
  */
 bool uncaught_exception_dd8(void)
 {
-    sCpEhInfoDD8* ehInfo = *__get_eh_info_dd8();
+    sCpEh* ehInfo = *__get_eh_info_dd8();
     return ehInfo && !ehInfo->caught;
 }
 #endif
@@ -604,10 +615,10 @@ void *bad_exception_bad_exception(void **excObject) {
 INCLUDE_ASM("seg/seg_313800_exception", __tf13bad_exception);
 #ifdef SKIP_ASM
 extern int D_0053EA10[];
-extern int D_004998D0[];
+extern char D_004998D0[];
 extern int D_004A5BA8[];
 extern int *__tf9exception_a(void) __asm__("__tf9exception");
-extern void __rtti_si(int *, int, int);
+extern void __rtti_si(void *, const char *, const void *);
 int *__tf13bad_exception_a(void) __asm__("__tf13bad_exception");
 /**
  * Returns the type_info object of class bad_exception, building it on first use.
@@ -621,7 +632,7 @@ int *__tf13bad_exception_a(void) __asm__("__tf13bad_exception");
 int *__tf13bad_exception_a(void) {
     if (D_0053EA10[0] == 0) {
         __tf9exception_a();
-        __rtti_si(D_0053EA10, (int)D_004998D0, (int)D_004A5BA8);
+        __rtti_si(D_0053EA10, D_004998D0, D_004A5BA8);
     }
     return D_0053EA10;
 }
@@ -667,9 +678,9 @@ int *exception_exception(int **excObject) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __tf9exception);
 #ifdef SKIP_ASM
-extern int D_004998E0[];
+extern char D_004998E0[];
 extern int D_004A5BA8[];
-extern void __rtti_user(int *, int);
+extern void __rtti_user(void *, const char *);
 int *__tf9exception_a(void) __asm__("__tf9exception");
 /**
  * Returns the type_info object of class exception, building it on first use.
@@ -681,7 +692,7 @@ int *__tf9exception_a(void) __asm__("__tf9exception");
  */
 int *__tf9exception_a(void) {
     if (D_004A5BA8[0] == 0)
-        __rtti_user(D_004A5BA8, (int)D_004998E0);
+        __rtti_user(D_004A5BA8, D_004998E0);
     return D_004A5BA8;
 }
 #endif

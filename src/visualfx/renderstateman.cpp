@@ -1039,7 +1039,7 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_setInNIS);
 #ifdef SKIP_ASM
-extern void* cRenderStateMan_m_inNIS;
+extern int cRenderStateMan_m_inNIS;
 extern int cPlants_m_Enable;
 
 /**
@@ -1049,7 +1049,7 @@ extern int cPlants_m_Enable;
  *
  * @param innis  nonzero while a cut scene plays (On Tour innis)
  */
-extern "C" void cRenderStateMan_setInNIS(void* innis)
+extern "C" void cRenderStateMan_setInNIS(int innis)
 {
     cRenderStateMan_m_inNIS = innis;
     cPlants_m_Enable = innis != 0;
@@ -1151,7 +1151,7 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_reset);
 void cAirStreamerFX::reset()
 {
     int mode = (mRider->mViewIndex >= 0) ? 25 : 18;
-    *(int*)&mVOffset = 0;
+    mVOffset = 0.0f;
     StreamBufHead = 0;
     StreamBufLen = 0;
     mMaxStreamerSegments = mode;
@@ -1256,8 +1256,8 @@ void cAirStreamerFX::update()
         t4Vector boardOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
         t4Vector boardDir = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
         t4Vector streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
-        (*(t4Vector*)&StreamBuf[StreamBufHead].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
-        (*(t4Vector*)&StreamBuf[StreamBufHead].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        StreamBuf[StreamBufHead].l = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        StreamBuf[StreamBufHead].r = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         if ((AITick() & 1) == 0) {
             int old = StreamBufHead;
             StreamBufHead = old + 1;
@@ -1519,7 +1519,7 @@ void cAirStreamerFX::render()
 //100%
 INCLUDE_ASM("visualfx/renderstateman", visualEffectsMan);
 #ifdef SKIP_ASM
-extern void* gVisualEffectsMan;
+extern cVisualEffectsMan* gVisualEffectsMan;
 
 /**
  * Returns the visual effects manager (gVisualEffectsMan), which cVisualEffectsMan_cVisualEffectsMan records.
@@ -1528,8 +1528,8 @@ extern void* gVisualEffectsMan;
  *
  * @return the manager
  */
-extern "C" int visualEffectsMan(void) {
-    return (*(int*)&gVisualEffectsMan);
+extern "C" cVisualEffectsMan* visualEffectsMan(void) {
+    return gVisualEffectsMan;
 }
 #endif
 
@@ -1542,10 +1542,6 @@ struct sRSEntry_002EFF98 {
     int f8;
     int pad[5];
 };
-struct sRSMan_002EFF98 {
-    int f[17];
-    void* vt;
-};
 extern char cVisualEffectsMan_vtbl[];
 extern sRSEntry_002EFF98* cGraphicsMan_TheGraphicsMan_renderstateman __asm__("cGraphicsMan_TheGraphicsMan");
 struct sShadowCfg_002EFF98 {
@@ -1553,7 +1549,7 @@ struct sShadowCfg_002EFF98 {
 };
 extern sShadowCfg_002EFF98 D_004A45D4;
 extern int D_004A443C;
-extern void* gVisualEffectsMan;
+extern cVisualEffectsMan* gVisualEffectsMan;
 
 /**
  * Constructs the visual-effects manager base: empty effect slots, default effect textures, global pointer.
@@ -1565,26 +1561,26 @@ extern void* gVisualEffectsMan;
  *
  * @return self
  */
-extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
+extern "C" void* cVisualEffectsMan_cVisualEffectsMan(cVisualEffectsMan* self)
 {
-    self->vt = cVisualEffectsMan_vtbl;
-    self->f[0] = 0;
-    self->f[1] = 0;
-    self->f[2] = 0;
-    self->f[3] = 0;
-    self->f[4] = 0;
-    self->f[5] = 0;
-    self->f[6] = 0;
-    self->f[7] = 0;
-    self->f[8] = 0;
-    self->f[9] = 0;
-    self->f[10] = 0;
-    self->f[11] = 0;
-    self->f[12] = 0;
-    self->f[13] = 0;
-    self->f[14] = 0;
-    self->f[15] = 0;
-    self->f[16] = 0;
+    self->mVtbl = (void**)cVisualEffectsMan_vtbl;
+    self->m_RenderToggles = 0;
+    self->m_VisualEffectsTest = 0;
+    self->m_LightGlow = 0;
+    self->m_Plants = 0;
+    self->m_DepthFog = 0;
+    self->m_HeightFog = 0;
+    self->m_DetailSystem = 0;
+    self->m_ScreenTint = 0;
+    self->m_Shadow = 0;
+    self->m_SnowSurface = 0;
+    self->m_BoardTrail = 0;
+    self->m_Flags = 0;
+    self->m_PowerUpFXToggles = 0;
+    self->m_SnowfallToggles = 0;
+    self->m_SplashToggles = 0;
+    self->m_Tube = 0;
+    self->m_PathArrow = 0;
     D_004A45D4.texIndex = 55;
     D_004A443C = 0x30;
     gVisualEffectsMan = self;
@@ -1639,7 +1635,7 @@ extern "C" float cRenderStateMan_LightGlowBlend2(int i);
 extern "C" float cRenderStateMan_LightGlowBlend3(int i);
 extern "C" float cRenderStateMan_SnowSparkleDensity(int i);
 extern "C" bool func_002F7BE0(void* p);
-extern void* cRenderStateMan_m_inNIS;
+extern int cRenderStateMan_m_inNIS;
 extern int cDepthFog_m_OverrideWP;
 extern int cDepthFog_m_Exponent;
 extern float cDepthFog_m_Density;
@@ -1724,7 +1720,7 @@ void cVisualEffectsMan::commonUpdate(int i)
         cLightGlow_m_PS2IntensityTex2 = cRenderStateMan_LightGlowBlend2(i);
         cLightGlow_m_PS2IntensityTex3 = cRenderStateMan_LightGlowBlend3(i);
     }
-    ctx->m_isInNIS[i] = (int)cRenderStateMan_m_inNIS;
+    ctx->m_isInNIS[i] = cRenderStateMan_m_inNIS;
     ctx->m_SnowSparkleDensity[i] = cRenderStateMan_SnowSparkleDensity(i);
     ctx->m_DrawDistance[i] = cRenderStateMan_DrawDistance(i);
     ctx->m_FogDensity[i] = cRenderStateMan_FogDensity(i);
@@ -1745,7 +1741,7 @@ void cVisualEffectsMan::commonUpdate(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", aivisualEffectsMan);
 #ifdef SKIP_ASM
-extern void* gAIVisualEffectsMan;
+extern cAIVisualEffectsMan* gAIVisualEffectsMan;
 
 /**
  * Returns the AI visual effects manager (gAIVisualEffectsMan), which cAIVisualEffectsMan_cAIVisualEffectsMan records.
@@ -1754,8 +1750,8 @@ extern void* gAIVisualEffectsMan;
  *
  * @return the manager
  */
-extern "C" int aivisualEffectsMan(void) {
-    return (*(int*)&gAIVisualEffectsMan);
+extern "C" cAIVisualEffectsMan* aivisualEffectsMan(void) {
+    return gAIVisualEffectsMan;
 }
 #endif
 
@@ -1763,7 +1759,7 @@ extern "C" int aivisualEffectsMan(void) {
 INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_cAIVisualEffectsMan);
 #ifdef SKIP_ASM
 extern void* cAIVisualEffectsMan_vtbl[];
-extern void* gAIVisualEffectsMan;
+extern cAIVisualEffectsMan* gAIVisualEffectsMan;
 
 /**
  * Constructs the base AI visual effects manager and makes it the current one.
@@ -1774,9 +1770,9 @@ extern void* gAIVisualEffectsMan;
  */
 extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(cAIVisualEffectsMan* self)
 {
-    *(int*)self = 0;
+    self->m_Avalanche = 0;
     self->mVtbl = cAIVisualEffectsMan_vtbl;
-    gAIVisualEffectsMan = ((void*)self);
+    gAIVisualEffectsMan = self;
     return ((void*)self);
 }
 #endif

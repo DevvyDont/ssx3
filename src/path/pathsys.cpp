@@ -20,11 +20,9 @@ extern void* cTrackPath_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
-struct sPathB310 {
-    char pad_0x0[0x34];
-    void** vtable;          // 0x34
-    int field_0x38;         // 0x38
-    sPathB310() { vtable = cTrackPath_vtbl; }
+// cTrackPath with the constructor the original inlines into the array new (it only installs the vtable).
+struct cTrackPathCtor : public cTrackPath {
+    cTrackPathCtor() { mVtbl = cTrackPath_vtbl; }
 };
 
 
@@ -38,14 +36,14 @@ struct sPathB310 {
 int cPathSys::loadTrackPaths(char* data)
 {
     int count;
-    sPathB310** slot = (sPathB310**)&TrackPaths;
+    cTrackPath** slot = &TrackPaths;
     char* start = data;
     pathREAD_tInt32(&count, data);
     data += 4;
     NumTrackPaths = count;
-    *slot = new (operator_new_tag(count * sizeof(sPathB310), str_TrackPaths, 0, 0)) sPathB310[count];
+    *slot = new (operator_new_tag(count * sizeof(cTrackPathCtor), str_TrackPaths, 0, 0)) cTrackPathCtor[count];
     for (int i = 0; i < NumTrackPaths; i++) {
-        data += cPath_initPath(&((sPathB310*)TrackPaths)[i], data);
+        data += cPath_initPath(&TrackPaths[i], data);
     }
     return data - start;
 }
@@ -61,12 +59,9 @@ extern "C" int cPath_initPath(void* path, char* data);
 extern char str_AIPaths[];
 extern void* cAIPath_vtbl[];
 
-struct sPathB410 {
-    char pad_0x0[0x34];
-    void** vtable;          // 0x34
-    int field_0x38;         // 0x38
-    int field_0x3C;         // 0x3C
-    sPathB410() { vtable = cAIPath_vtbl; }
+// cAIPath with the constructor the original inlines into the array new (it only installs the vtable).
+struct cAIPathCtor : public cAIPath {
+    cAIPathCtor() { mVtbl = cAIPath_vtbl; }
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
@@ -80,14 +75,14 @@ struct sPathB410 {
 int cPathSys::loadAIPaths(char* data)
 {
     int count;
-    sPathB410** slot = (sPathB410**)&AIPaths;
+    cAIPath** slot = &AIPaths;
     char* start = data;
     pathREAD_tInt32(&count, data);
     data += 4;
     NumAIPaths = count;
-    *slot = new (operator_new_tag(count * sizeof(sPathB410), str_AIPaths, 0, 0)) sPathB410[count];
+    *slot = new (operator_new_tag(count * sizeof(cAIPathCtor), str_AIPaths, 0, 0)) cAIPathCtor[count];
     for (int i = 0; i < NumAIPaths; i++) {
-        data += cPath_initPath(&((sPathB410*)AIPaths)[i], data);
+        data += cPath_initPath(&AIPaths[i], data);
     }
     return data - start;
 }
@@ -229,7 +224,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_getStartpointByIndex);
  * @param index  the startpoint index
  * @return the startpoint, or 0
  */
-int cPathSys::getStartpointByIndex(int index)
+tPathStartpoint* cPathSys::getStartpointByIndex(int index)
 {
     int temp_2;
 
@@ -237,7 +232,7 @@ int cPathSys::getStartpointByIndex(int index)
     if ((temp_2 <= 0) || (index >= temp_2) || (index < 0)) {
         return 0;
     }
-    return ((int)Startpoints) + (index * 40);
+    return &Startpoints[index];
 }
 #endif
 
@@ -344,9 +339,9 @@ int cPathSys::loadCheckpoints(char* cursor)
     pathREAD_tInt32(&count, cursor);
     cursor += 4;
     for (int i = 0; i < count; i++) {
-        pathREAD_float(&(*(int*)&((&CheckpointList[0]))[i].DistanceLeft), cursor);
+        pathREAD_float(&CheckpointList[i].DistanceLeft, cursor);
         cursor += 4;
-        pathREAD_tInt32(&((&CheckpointList[0]))[i].TimeBonusSec, cursor);
+        pathREAD_tInt32(&CheckpointList[i].TimeBonusSec, cursor);
         cursor += 4;
     }
     return cursor - start;
@@ -383,7 +378,7 @@ int cPathSys::loadStartpoints(char* cursor)
     char* start = cursor;
     pathREAD_tInt32(&fileWord, cursor);
     cursor += 4;
-    *(tPathStartpoint**)&Startpoints = (tPathStartpoint*)cursor;
+    Startpoints = (tPathStartpoint*)cursor;
     NumStartpoints = fileWord;
     for (int i = 0; i < NumStartpoints; i++) {
         pathREAD_tInt32(&Startpoints[i].Arg, cursor);
@@ -405,8 +400,8 @@ int cPathSys::loadStartpoints(char* cursor)
                 break;
             }
         }
-        (*(char**)&Startpoints[i].InitAIPath) = (char*)&AIPaths[aiPathIndex];
-        (*(char**)&Startpoints[i].InitTrackPath) = (char*)&TrackPaths[trackPathIndex];
+        Startpoints[i].InitAIPath = &AIPaths[aiPathIndex];
+        Startpoints[i].InitTrackPath = &TrackPaths[trackPathIndex];
     }
     return cursor - start;
 }
@@ -688,12 +683,12 @@ INCLUDE_ASM("path/pathsys", cPath_getStart);
  * @param src  the path
  * @return @p dst
  */
-extern "C" void* cPath_getStart(void* dst, cPath* src)
+extern "C" t4Vector* cPath_getStart(t4Vector* dst, cPath* src)
 {
-    *(float*)((char*)dst + 0x0) = src->Start[0];
-    *(float*)((char*)dst + 0x4) = src->Start[1];
-    *(float*)((char*)dst + 0x8) = src->Start[2];
-    *(float*)((char*)dst + 0xC) = 1.0f;
+    dst->x = src->Start[0];
+    dst->y = src->Start[1];
+    dst->z = src->Start[2];
+    dst->w = 1.0f;
     return dst;
 }
 #endif
@@ -705,9 +700,9 @@ INCLUDE_ASM("path/pathsys", cPath_getAllEvents);
  *
  * @return the 16-byte event nodes
  */
-int cPath::getAllEvents()
+tPathEventNode* cPath::getAllEvents()
 {
-    return ((int)Events);
+    return Events;
 }
 #endif
 //100%

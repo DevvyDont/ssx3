@@ -58,7 +58,7 @@ void* cPS2LensFxMan_cPS2LensFxMan_impl(void* vself)
 {
     cPS2LensFxMan* self = (cPS2LensFxMan*)vself;
     cLensFxMan_cLensFxMan(self);
-    self->mVtbl = (void**)((int)(void*)cPS2LensFxMan_vtbl);
+    self->mVtbl = cPS2LensFxMan_vtbl;
     return ((void*)self);
 }
 #endif
@@ -80,7 +80,7 @@ INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan__cPS2LensFxMan__FPv);
 void* cPS2LensFxMan__cPS2LensFxMan(void* vself)
 {
     cPS2LensFxMan* self = (cPS2LensFxMan*)vself;
-    self->mVtbl = (void**)((int)(void*)cPS2LensFxMan_vtbl);
+    self->mVtbl = cPS2LensFxMan_vtbl;
     return cLensFxMan__cLensFxMan(self);
 }
 #endif
@@ -114,7 +114,6 @@ void* func_002EC9D0(void* self)
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface);
 #ifdef SKIP_ASM
 extern void* cBoltOnFXInterface_vtbl[];
-struct sLensFx;
 extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
 
 /**
@@ -129,16 +128,17 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self, int rider, int emitterOwner)
+extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self, cRider* rider,
+                                                       cAttachedEmitterFX* emitterOwner)
 {
     self->mVtbl = cBoltOnFXInterface_vtbl;
     self->mDirty = 1;
-    self->mpRider = (cRider*)rider;
-    self->mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
+    self->mpRider = rider;
+    self->mAttachedEmitterFX = emitterOwner;
     self->mpCharId = 0;
-    char* entry = (char*)&self->mEntries[0];
+    tBoltOnFXEntry* entry = &self->mEntries[0];
     int i;
-    for (i = 14; i != -1; i--, entry += 0xC) {
+    for (i = 14; i != -1; i--, entry++) {
         func_002EC9D0(entry);
     }
     func_002ECAF0(self);
@@ -150,7 +150,6 @@ extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self,
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface1);
 #ifdef SKIP_ASM
 extern void* cBoltOnFXInterface_vtbl[];
-struct sLensFx;
 extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
 
 /**
@@ -164,16 +163,16 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-void* cBoltOnFXInterface::cBoltOnFXInterface1(int charIdPtr, int emitterOwner)
+void* cBoltOnFXInterface::cBoltOnFXInterface1(int* charIdPtr, cAttachedEmitterFX* emitterOwner)
 {
     mVtbl = cBoltOnFXInterface_vtbl;
     mDirty = 1;
-    mpCharId = (int*)charIdPtr;
-    mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
+    mpCharId = charIdPtr;
+    mAttachedEmitterFX = emitterOwner;
     mpRider = 0;
-    char* entry = (char*)&mEntries[0];
+    tBoltOnFXEntry* entry = &mEntries[0];
     int i;
-    for (i = 14; i != -1; i--, entry += 0xC) {
+    for (i = 14; i != -1; i--, entry++) {
         func_002EC9D0(entry);
     }
     func_002ECAF0(this);
@@ -184,17 +183,6 @@ void* cBoltOnFXInterface::cBoltOnFXInterface1(int charIdPtr, int emitterOwner)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECAF0);
 #ifdef SKIP_ASM
-struct sLensEntry {
-    int id;
-    int a;
-    int b;
-};
-
-struct sLensFx {
-    char pad00[0x10];
-    sLensEntry entries[15];
-};
-
 /**
  * Marks all 15 entries of a bolt-on effect set as free (emitter index -1).
  *
@@ -204,7 +192,7 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        ((sLensEntry*)&self->mEntries[0])[i].id = -1;
+        self->mEntries[i].mEmitter = tBoltOnFXEntry::kNoEmitter;
     }
 }
 #endif
@@ -213,7 +201,7 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface__cBoltOnFXInterface);
 #ifdef SKIP_ASM
 extern void* cBoltOnFXInterface_vtbl[];
-extern "C" void func_002F2218(int a, int id);
+extern "C" void func_002F2218(cAttachedEmitterFX* owner, int id);
 void operator_delete(int* ptr);
 
 /**
@@ -225,14 +213,14 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(sLensFx* self, int flags)
+extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(cBoltOnFXInterface* self, int flags)
 {
-    *(void***)((char*)self + 0xC4) = cBoltOnFXInterface_vtbl;
+    self->mVtbl = cBoltOnFXInterface_vtbl;
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->entries[i].id != tBoltOnFXEntry::kNoEmitter) {
-            func_002F2218(*(int*)((char*)self + 0xC), self->entries[i].id);
-            self->entries[i].id = tBoltOnFXEntry::kNoEmitter;
+        if (self->mEntries[i].mEmitter != tBoltOnFXEntry::kNoEmitter) {
+            func_002F2218(self->mAttachedEmitterFX, self->mEntries[i].mEmitter);
+            self->mEntries[i].mEmitter = tBoltOnFXEntry::kNoEmitter;
         }
     }
     if (flags & 1) {
@@ -244,17 +232,6 @@ extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(sLensFx* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECBC0);
 #ifdef SKIP_ASM
-struct func_002ECBC0_sEntry {
-    int id;
-    int b;
-    int c;
-};
-
-struct func_002ECBC0_sMgr {
-    char pad[0x10];
-    func_002ECBC0_sEntry entries[15];
-};
-
 extern "C" int func_002ECC28(cBoltOnFXInterface* self, int a1, int a2);
 
 /**
@@ -268,23 +245,23 @@ extern "C" int func_002ECC28(cBoltOnFXInterface* self, int a1, int a2);
  * @param itemId  the item (attach point) id
  * @return the entry index
  */
-extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int kind, int itemId)
+extern "C" int func_002ECBC0(cBoltOnFXInterface* self, int kind, int itemId)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->entries[i].id != tBoltOnFXEntry::kNoEmitter && self->entries[i].b == itemId &&
-            self->entries[i].c == kind) {
+        if (self->mEntries[i].mEmitter != tBoltOnFXEntry::kNoEmitter && self->mEntries[i].mItem == itemId &&
+            self->mEntries[i].mKind == kind) {
             return i;
         }
     }
-    return func_002ECC28((cBoltOnFXInterface*)self, kind, itemId);
+    return func_002ECC28(self, kind, itemId);
 }
 #endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
 #ifdef SKIP_ASM
-extern "C" int func_002F2130(int a, int x, int y);
+extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex);
 
 /**
  * Creates an attached emitter of a given kind on an item in the first free entry of a bolt-on effect set.
@@ -302,10 +279,10 @@ extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
     cBoltOnFXInterface* self = lensMgr;
     int i;
     for (i = 0; i < 15; i++) {
-        if (((sLensEntry*)&self->mEntries[0])[i].id == tBoltOnFXEntry::kNoEmitter) {
-            ((sLensEntry*)&self->mEntries[0])[i].id = func_002F2130((int)self->mAttachedEmitterFX, x, y);
-            ((sLensEntry*)&self->mEntries[0])[i].a = y;
-            ((sLensEntry*)&self->mEntries[0])[i].b = x;
+        if (self->mEntries[i].mEmitter == tBoltOnFXEntry::kNoEmitter) {
+            self->mEntries[i].mEmitter = func_002F2130(self->mAttachedEmitterFX, x, y);
+            self->mEntries[i].mItem = y;
+            self->mEntries[i].mKind = x;
             return i;
         }
     }
@@ -326,7 +303,7 @@ extern "C" void* func_0014D998(void* self, int i);
 extern "C" int cRider_getCheatIdentity(void* self);
 extern "C" int cRider_getIdentity(void* self);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
-extern "C" void func_002F2218(int a, int id);
+extern "C" void func_002F2218(cAttachedEmitterFX* owner, int id);
 
 struct sVEi_CCB8 {
     short delta;
@@ -370,12 +347,12 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     void* lib = cBEBoltInterface_getThis();
     cBECharProfileDB* tbl = 0;
     int id = -1;
-    cRider* rider = (cRider*)((char*)self->mpRider);
-    if (((char*)rider) != 0) {
-        tbl = (cBECharProfileDB*)((char*)func_0014AD50(lib, rider->getAIIndex()));
-        id = cRider_getCheatIdentity(((char*)self->mpRider));
+    cRider* rider = self->mpRider;
+    if (rider != 0) {
+        tbl = (cBECharProfileDB*)func_0014AD50(lib, rider->getAIIndex());
+        id = cRider_getCheatIdentity(self->mpRider);
         if (id < 10) {
-            id = cRider_getIdentity(((char*)self->mpRider));
+            id = cRider_getIdentity(self->mpRider);
         }
     } else if (self->mpCharId != 0) {
         cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&SSXApp->RealFE->mpUI->mStateStack);
@@ -384,7 +361,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     }
     void* lib2 = func_0014BDB8_noarg();
     int n;
-    sLensEntry* ents = ((sLensEntry*)&self->mEntries[0]);
+    tBoltOnFXEntry* ents = &self->mEntries[0];
     n = func_0014D988(lib2, id);
     sLensItem_CCB8* item = (sLensItem_CCB8*)func_0014D998(lib2, id);
     for (int i = 0; i < n; i++, item++) {
@@ -408,17 +385,17 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
                 continue;
             }
             if (k >= 50) {
-                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 50, itemId)] = 1;
-                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 49, itemId)] = 1;
+                used[func_002ECBC0(self, k - 50, itemId)] = 1;
+                used[func_002ECBC0(self, k - 49, itemId)] = 1;
             } else {
-                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k, itemId)] = 1;
+                used[func_002ECBC0(self, k, itemId)] = 1;
             }
         }
     }
     for (int entryIdx = 0; entryIdx < 15; entryIdx++) {
-        if (ents[entryIdx].id != tBoltOnFXEntry::kNoEmitter && used[entryIdx] == 0) {
-            func_002F2218(((int)self->mAttachedEmitterFX), ents[entryIdx].id);
-            ents[entryIdx].id = tBoltOnFXEntry::kNoEmitter;
+        if (ents[entryIdx].mEmitter != tBoltOnFXEntry::kNoEmitter && used[entryIdx] == 0) {
+            func_002F2218(self->mAttachedEmitterFX, ents[entryIdx].mEmitter);
+            ents[entryIdx].mEmitter = tBoltOnFXEntry::kNoEmitter;
         }
     }
     self->mDirty = 0;
@@ -437,7 +414,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* self);
  */
 extern "C" void func_002ECF78(cBoltOnFXInterface* self)
 {
-    if (*(int*)self != 0) {
+    if (self->mDirty != 0) {
         func_002ECCB8(self);
     }
 }
@@ -447,19 +424,13 @@ extern "C" void func_002ECF78(cBoltOnFXInterface* self)
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sLensRow_CFA0 {
-    char* objs[9];
-    char pad[0xF0 - 0x24];
-};
-
 struct sLensVE_CFA0 {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-// The unit declares cRenderStateMan_m_state later as sLensFxSlot[]; bind a row view to the same symbol.
-extern sLensRow_CFA0 D_lensRows_CFA0[] __asm__("cRenderStateMan_m_state");
+extern tRenderState cRenderStateMan_m_state[];
 extern int cRenderStateMan_m_initialized;
 
 /**
@@ -476,8 +447,8 @@ extern "C" void cRenderStateMan_purge(void)
         for (i = 0; i < 8; i++) {
             int j;
             for (j = 0; j < 9; j++) {
-                tWorldPainterQuery* queryObj = (tWorldPainterQuery*)D_lensRows_CFA0[i].objs[j];
-                if (((char*)queryObj) != 0) {
+                tWorldPainterQuery* queryObj = cRenderStateMan_m_state[i].m_query[j];
+                if (queryObj != 0) {
                     delete queryObj;
                 }
             }
@@ -507,7 +478,7 @@ struct sLensRow_ED048 {
     char pad48[0xF0 - 0x48];
 };
 
-// The unit declares cRenderStateMan_m_state later as sLensFxSlot[]; bind views to the labels.
+// The unit declares cRenderStateMan_m_state later as tRenderState[]; bind views to the labels.
 extern sLensRow_ED048 D_lensRows_ED048[] __asm__("cRenderStateMan_m_state");
 extern int cRenderStateMan_m_initialized;
 extern cWorldPainterManArg kWPR_Camera;
@@ -571,27 +542,21 @@ extern "C" void cRenderStateMan_init(void)
 //100%
 INCLUDE_ASM("visualfx/lensfx", tRenderState_blendToColour);
 #ifdef SKIP_ASM
-struct sLerpV4_D1D0 {
-    float x, y, z, w;
-    sLerpV4_D1D0() {}
-    sLerpV4_D1D0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+// tARGB built from its four components, and the colour arithmetic tRenderState_blendToColour / _blendToColour1 use.
+struct sLerpARGB : tARGB {
+    sLerpARGB() {}
+    sLerpARGB(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
-static inline sLerpV4_D1D0 operator*(const sLerpV4_D1D0& a, float s)
+static inline sLerpARGB operator*(const tARGB& a, float s)
 {
-    return sLerpV4_D1D0(a.x * s, a.y * s, a.z * s, a.w * s);
+    return sLerpARGB(a.A * s, a.R * s, a.G * s, a.B * s);
 }
 
-static inline sLerpV4_D1D0 operator+(const sLerpV4_D1D0& a, const sLerpV4_D1D0& b)
+static inline sLerpARGB operator+(const tARGB& a, const tARGB& b)
 {
-    return sLerpV4_D1D0(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
+    return sLerpARGB(a.A + b.A, a.R + b.R, a.G + b.G, a.B + b.B);
 }
-
-struct sLensLerp_D1D0 {
-    char pad00[0x28];
-    sLerpV4_D1D0 a;
-    sLerpV4_D1D0 b;
-};
 
 /**
  * Blends a render state's two colours toward new targets: 90% of the way, or all the way when @p full is set.
@@ -602,7 +567,7 @@ struct sLensLerp_D1D0 {
  * @param targetB  the target for the colour at +0x38
  * @param full  nonzero to jump straight to the targets
  */
-extern "C" void tRenderState_blendToColour(tRenderState* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
+extern "C" void tRenderState_blendToColour(tRenderState* self, const tARGB* targetA, const tARGB* targetB, int full)
 {
     float weight = 0.8999999761581421f;
     float keep;
@@ -610,35 +575,16 @@ extern "C" void tRenderState_blendToColour(tRenderState* self, const sLerpV4_D1D
         weight = 1.0f;
     }
     keep = 1.0f - weight;
-    (*(sLerpV4_D1D0*)&self->m_colour[0]) = sLerpV4_D1D0(self->m_colour[0] * keep, self->m_colour[1] * keep, self->m_colour[2] * keep, self->m_colour[3] * keep) + *targetA * weight;
-    (*(sLerpV4_D1D0*)&self->m_lightMapColour[0]) = sLerpV4_D1D0(self->m_lightMapColour[0] * keep, self->m_lightMapColour[1] * keep, self->m_lightMapColour[2] * keep, self->m_lightMapColour[3] * keep) + *targetB * weight;
+    self->m_colour = sLerpARGB(self->m_colour.A * keep, self->m_colour.R * keep, self->m_colour.G * keep,
+                       self->m_colour.B * keep) + *targetA * weight;
+    self->m_lightMapColour = sLerpARGB(self->m_lightMapColour.A * keep, self->m_lightMapColour.R * keep,
+                               self->m_lightMapColour.G * keep, self->m_lightMapColour.B * keep) + *targetB * weight;
 }
 #endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", tRenderState_blendToColour1);
 #ifdef SKIP_ASM
-struct sLerpV4 {
-    float x, y, z, w;
-    sLerpV4() {}
-    sLerpV4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-};
-
-static inline sLerpV4 operator*(const sLerpV4& a, float s)
-{
-    return sLerpV4(a.x * s, a.y * s, a.z * s, a.w * s);
-}
-
-static inline sLerpV4 operator+(const sLerpV4& a, const sLerpV4& b)
-{
-    return sLerpV4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
-}
-
-struct sLensLerp {
-    char pad00[0x28];
-    sLerpV4 a;
-    sLerpV4 b;
-};
 
 /**
  * Blends a render state's two colours toward new targets by @p weight.
@@ -649,11 +595,14 @@ struct sLensLerp {
  * @param targetB  the target for the colour at +0x38
  * @param weight  the blend weight, 0..1
  */
-extern "C" void tRenderState_blendToColour1(tRenderState* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
+extern "C" void tRenderState_blendToColour1(tRenderState* self, const tARGB* targetA, const tARGB* targetB,
+        float weight)
 {
     float keep = 1.0f - weight;
-    (*(sLerpV4*)&self->m_colour[0]) = sLerpV4(self->m_colour[0] * keep, self->m_colour[1] * keep, self->m_colour[2] * keep, self->m_colour[3] * keep) + *targetA * weight;
-    (*(sLerpV4*)&self->m_lightMapColour[0]) = sLerpV4(self->m_lightMapColour[0] * keep, self->m_lightMapColour[1] * keep, self->m_lightMapColour[2] * keep, self->m_lightMapColour[3] * keep) + *targetB * weight;
+    self->m_colour = sLerpARGB(self->m_colour.A * keep, self->m_colour.R * keep, self->m_colour.G * keep,
+                       self->m_colour.B * keep) + *targetA * weight;
+    self->m_lightMapColour = sLerpARGB(self->m_lightMapColour.A * keep, self->m_lightMapColour.R * keep,
+                               self->m_lightMapColour.G * keep, self->m_lightMapColour.B * keep) + *targetB * weight;
 }
 #endif
 
@@ -827,8 +776,7 @@ extern "C" float cRenderStateMan_calculateIrradianceBlend(tARGB* self)
 }
 #endif
 
-// the lens table cRenderStateMan_m_state (8 rows of 0xF0 bytes, config size 0x780); the unit types it as sLensFxSlot[] further down
-extern char D_lensTable_DFB8[] __asm__("cRenderStateMan_m_state");
+extern tRenderState cRenderStateMan_m_state[];
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_getIrradiance);
@@ -843,7 +791,7 @@ INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_getIrradiance);
  */
 extern "C" void* cRenderStateMan_getIrradiance(int index)
 {
-    return D_lensTable_DFB8 + 0x50 + index * 0xf0;
+    return cRenderStateMan_m_state[index].m_irradiance;
 }
 #endif
 

@@ -57,9 +57,9 @@ struct tModifierBlock {
                                        //      modifier list's head (findRail, remRailModifier)
 
     // Methods bound to their retail symbols by asm labels.
-    int getBoundBox() __asm__("tModifierBlock_getBoundBox");
+    const tBoundBox* getBoundBox() __asm__("tModifierBlock_getBoundBox");
     float getRadius() __asm__("tModifierBlock_getRadius");
-    void setRadius() __asm__("tModifierBlock_setRadius__FP14tModifierBlock");
+    void setRadius(float radius) __asm__("tModifierBlock_setRadius__FP14tModifierBlock");
     void preUpdate() __asm__("tModifierBlock_preUpdate");
     void postUpdate() __asm__("tModifierBlock_postUpdate");
     void render() __asm__("tModifierBlock_render");

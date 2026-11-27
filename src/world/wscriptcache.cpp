@@ -84,7 +84,7 @@ extern "C" void cWScriptCache__cWScriptCache(cWScriptCache* self, int flags)
 //100%
 INCLUDE_ASM("world/wscriptcache", cWScriptCache_update);
 #ifdef SKIP_ASM
-extern "C" void cWScriptCacheEntry_update(int);
+extern "C" void cWScriptCacheEntry_update(cWScriptCacheEntry* entry);
 
 /**
  * Updates every section's script cache entry: cWScriptCacheEntry_update on each of the mNumSections entries (0xC bytes each).
@@ -96,14 +96,13 @@ void cWScriptCache::update()
     unsigned int i;
 
     for (i = 0; i < mNumSections; i++) {
-        cWScriptCacheEntry_update((int)mpCache + i * 0xC);
+        cWScriptCacheEntry_update(&mpCache[i]);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("world/wscriptcache", cWScriptCache_load);
 #ifdef SKIP_ASM
-extern "C" void cWScriptCacheEntry_load(int, int);
 
 /**
  * Starts loading section @p index's script file by name: cWScriptCacheEntry_load on that cache entry.
@@ -115,7 +114,7 @@ extern "C" void cWScriptCacheEntry_load(int, int);
  */
 void cWScriptCache::load(int index, int fileNum)
 {
-    cWScriptCacheEntry_load(((int)mpCache) + (index * 0xC), fileNum);
+    mpCache[index].load(fileNum);
 }
 #endif
 
@@ -152,10 +151,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
  * @param sectionId  the section id
  * @return the script file header
  */
-int cWScriptCache::getScriptBase(int sectionId)
+tScriptFileHeader* cWScriptCache::getScriptBase(int sectionId)
 {
     cWScriptCacheEntry* entries = mpCache;
-    return ((int)entries[sectionId].mpScriptHeader);
+    return entries[sectionId].mpScriptHeader;
 }
 #endif
 
@@ -173,7 +172,7 @@ void* cWScriptCacheEntry_cWScriptCacheEntry(void* vself)
     int zero = 0;
     *(short*)self = (short)zero;
     self->mAsyncHandle = -1;
-    self->mpScriptHeader = (tScriptFileHeader*)zero;
+    self->mpScriptHeader = 0;
     self->mStreamed = (short)zero;
     return ((void*)self);
 }
@@ -206,13 +205,13 @@ extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(cWScriptCacheEntry* self,
 INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void ASYNCFILE_release_CAD0(int, int *, int *) __asm__("ASYNCFILE_release");
-extern "C" void MEM_free_CAD0(int) __asm__("MEM_free");
-extern "C" void unpack_CAD0(int, int) __asm__("unpack");
-extern "C" int unpacksizez_CAD0(int) __asm__("unpacksizez");
+extern "C" void ASYNCFILE_release_CAD0(int, void **, int *) __asm__("ASYNCFILE_release");
+extern "C" void MEM_free_CAD0(void *) __asm__("MEM_free");
+extern "C" void unpack_CAD0(void *, void *) __asm__("unpack");
+extern "C" int unpacksizez_CAD0(void *) __asm__("unpacksizez");
 extern "C" int ASYNCFILE_getstatus_CAD0(int) __asm__("ASYNCFILE_getstatus");
-extern "C" void MEM_copy_CAD0(int, int, int) __asm__("MEM_copy");
-int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
+extern "C" void MEM_copy_CAD0(void *, void *, int) __asm__("MEM_copy");
+void* operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_WScriptFile[];
 extern "C" void cWScriptCacheEntry_update_impl(void *self_) __asm__("cWScriptCacheEntry_update");
 /**
@@ -228,18 +227,18 @@ extern "C" void cWScriptCacheEntry_update_impl(void *self_) {
     cWScriptCacheEntry* self = (cWScriptCacheEntry*)self_;
     short st = *(short*)self;
     if (st == kWSCacheState_Loading && ASYNCFILE_getstatus_CAD0(self->mAsyncHandle) == st) {
-        int data = 0;
+        void* data = 0;
         int size = 0;
         ASYNCFILE_release_CAD0(self->mAsyncHandle, &data, &size);
         if (data != 0) {
             if (size > 0) {
                 int unpackedSize = unpacksizez_CAD0(data);
                 if (unpackedSize > 0) {
-                    int buffer = operator_new_CAD0(unpackedSize, str_WScriptFile, 0x20000000, 0);
+                    void* buffer = operator_new_CAD0(unpackedSize, str_WScriptFile, 0x20000000, 0);
                     self->mpScriptHeader = (tScriptFileHeader*)buffer;
                     unpack_CAD0(data, buffer);
                 } else {
-                    int buffer = operator_new_CAD0(size, str_WScriptFile, 0x20000000, 0);
+                    void* buffer = operator_new_CAD0(size, str_WScriptFile, 0x20000000, 0);
                     self->mpScriptHeader = (tScriptFileHeader*)buffer;
                     MEM_copy_CAD0(buffer, data, size);
                 }

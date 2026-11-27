@@ -67,7 +67,7 @@ struct cScriptObjTransition {
     bool IsInUseByPlayer(int playerID) __asm__("cScriptObjTransition_IsInUseByPlayer");
     void PauseObjScript() __asm__("cScriptObjTransition_PauseObjScript");
     void ResumeObjScript() __asm__("cScriptObjTransition_ResumeObjScript");
-    int GetCameraManager() __asm__("cScriptObjTransition_GetCameraManager");
+    cScriptObjCameraManager* GetCameraManager() __asm__("cScriptObjTransition_GetCameraManager");
 };
 
 CHECK_OFFSET(cScriptObjTransition, mObjType, 0x00);

@@ -59,7 +59,8 @@ struct cBoltOnFXInterface {
     void** mVtbl;                           // 0xC4 [R] cBoltOnFXInterface_vtbl (_vt$18cBoltOnFXInterface), stored by the ctors / dtor
 
     // Methods bound to their retail symbols by asm labels.
-    void* cBoltOnFXInterface1(int charIdPtr, int emitterOwner) __asm__("cBoltOnFXInterface_cBoltOnFXInterface1");
+    void* cBoltOnFXInterface1(int* charIdPtr, cAttachedEmitterFX* emitterOwner)
+        __asm__("cBoltOnFXInterface_cBoltOnFXInterface1");
 };
 
 CHECK_OFFSET(tBoltOnFXEntry, mEmitter, 0x0);

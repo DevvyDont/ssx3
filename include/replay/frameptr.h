@@ -65,7 +65,7 @@ struct cReplayFramePtr : public cBxReplayFrame {
     void setBlock(char* data, int size) __asm__("cReplayFramePtr_setBlock");
     void purgeBlock() __asm__("cReplayFramePtr_purgeBlock");
     void readRewind() __asm__("cReplayFramePtr_readRewind__FP15cReplayFramePtr");
-    int writeRewind() __asm__("cReplayFramePtr_writeRewind__FPv");
+    char* writeRewind() __asm__("cReplayFramePtr_writeRewind__FPv");
     short peekObjNodeType() __asm__("cReplayFramePtr_peekObjNodeType");
     int loadBlock(char** pp, tFramePtrSave* src) __asm__("cReplayFramePtr_loadBlock");
     void clearBlock() __asm__("cReplayFramePtr_clearBlock");

@@ -37,7 +37,7 @@ extern const char str_FlexRailSpaceNode[];
 void cFlexRailNode::addSpaceHash()
 {
     cFlexRailSpaceNode* n = (cFlexRailSpaceNode*)cMemMan_alloc(0x10, str_FlexRailSpaceNode, 0x20000000, 0);
-    (*(void**)&n->FlexNode) = ((void*)this);
+    n->FlexNode = this;
     n->type = 3;
     Node = (cFlexRailSpaceNode*)n;
     nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
@@ -96,7 +96,7 @@ void cFlexRailNode::remSpaceHash()
     nash_Cell_remnode(octant->rootcell, 2, node, &key, octant);
     if (octEmpty_8C48(octant->rootcell)) {
         operator_delete((int*)(octant->rootcell));
-        (*(nash_Cell**)&octant->rootcell) = 0;
+        octant->rootcell = 0;
     }
     operator_delete((int*)Node);
     Node = 0;
@@ -303,7 +303,7 @@ void cFloatRailNode::updateBoundBox()
 {
     sFrBoxElem* points = (sFrBoxElem*)Nodes;
     int n = NumNodes;
-    *(t4Vector*)&BoundBox = *(t4Vector*)&BoundBox.MaxPoint = points[0].pos;
+    BoundBox.MinPoint = BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
         t4Vector* point = &points[i].pos;
         if (point->x < BoundBox.MinPoint.x) {
@@ -330,8 +330,8 @@ void cFloatRailNode::updateBoundBox()
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(*(t4Vector*)&BoundBox, margin);
-    vu0AddFRBox(*(t4Vector*)&BoundBox.MaxPoint, margin);
+    vu0SubFRBox(BoundBox.MinPoint, margin);
+    vu0AddFRBox(BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -380,8 +380,8 @@ void cFloatRailNode::getPosition(tFloatRailNode* node)
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(getRailInstance(node->InstId), node->Mesh, &boneMat);
     t4Vector bonePos = boneMat.r[3];
-    (*(t4Vector*)&node->OPos) = bonePos;
-    (*(t4Vector*)&node->Pos) = bonePos;
+    node->OPos = bonePos;
+    node->Pos = bonePos;
 }
 #endif
 
@@ -887,7 +887,7 @@ void cSpringRailNode::updateBoundBox()
 {
     sFrBoxElem60* points = (sFrBoxElem60*)Nodes;
     int n = NumNodes;
-    *(t4Vector*)&BoundBox = *(t4Vector*)&BoundBox.MaxPoint = points[0].pos;
+    BoundBox.MinPoint = BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
         t4Vector* point = &points[i].pos;
         if (point->x < BoundBox.MinPoint.x) {
@@ -914,8 +914,8 @@ void cSpringRailNode::updateBoundBox()
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(*(t4Vector*)&BoundBox, margin);
-    vu0AddFRBox(*(t4Vector*)&BoundBox.MaxPoint, margin);
+    vu0SubFRBox(BoundBox.MinPoint, margin);
+    vu0AddFRBox(BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -932,7 +932,7 @@ void cSpringRailNode::getPosition(tSpringRailNode* node)
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(getRailInstance(node->InstId), node->Mesh, &boneMat);
     t4Vector bonePos = boneMat.r[3];
-    (*(t4Vector*)&node->P) = bonePos;
+    node->P = bonePos;
 }
 #endif
 
@@ -1699,8 +1699,8 @@ extern "C" void* cFlagSet_cFlagSet(cFlagSet* self)
     cFlagSet* flagSet = self;
     int i;
     tFlagSetState_tFlagSetState(self);
-    (*(int*)&flagSet->mGridMesh) = 0;
-    (*(int*)&flagSet->mVerts) = 0;
+    flagSet->mGridMesh = 0;
+    flagSet->mVerts = 0;
     flagSet->mVtbl = cFlagSet_vtbl;
     for (i = 0; i < 60; i++) {
         flagSet->mInstances[i] = 0;

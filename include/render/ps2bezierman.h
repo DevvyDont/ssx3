@@ -39,7 +39,8 @@ enum ePatchLod { kPatchLod_4x4 = 0, kPatchLod_6x6 = 1, kPatchLod_8x8 = 2 };
 // and a halfword read from the patch record (+0x1A6/+0x1A8/+0x1AA) at 0xC.
 struct tBezierPatchEntry {
     void* mpPatch;                   // 0x0 [U]
-    void* unk_04;                    // 0x4 [U] the caller's second pointer
+    int unk_04;                      // 0x4 [U] func_0038B190 stores its int argument; the draw paths index a
+                                     //     table with it (tbl + unk_04 * 8)
     int mLod;                        // 0x8 [U] 0, 1 or 2
     unsigned short unk_0C;           // 0xC [U] sh
     char unk_0E[0x2];                // 0xE padding
@@ -54,7 +55,7 @@ CHECK_SIZE(tBezierPatchEntry, 0x10);
 // One queued patch with mixed edge LODs (0x14): a tBezierPatchEntry plus its four edge LOD bytes (copied in a loop).
 struct tBezierMixedPatchEntry {
     void* mpPatch;                   // 0x00 [U]
-    void* unk_04;                    // 0x04 [U]
+    int unk_04;                      // 0x04 [U] as tBezierPatchEntry::unk_04
     int mLod;                        // 0x08 [U] 2 if any edge is 8, else 0
     unsigned short unk_0C;           // 0x0C [U] sh
     char unk_0E[0x2];                // 0x0E padding

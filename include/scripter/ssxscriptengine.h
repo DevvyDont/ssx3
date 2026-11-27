@@ -71,7 +71,7 @@ CHECK_SIZE(tSSXHiveScriptMaster, 0xC);
 
 // The master script table file (On Tour struct tSSXHiveScriptMasterTableHeader, 0x10): the count, then the
 // tSSXHiveScriptMaster records. [O]; [R] InitOnce loads it into mpMasterTableHeader and points mpMasterTable at
-// &masterTableStart (header + 4); [U] its loops run to numScripts (view sDmEngine8210 hdr).
+// &masterTableStart (header + 4); [U] its loops run to numScripts (InitOnce).
 struct tSSXHiveScriptMasterTableHeader {
     int numScripts;                 // 0x0 [O]; [U] the master table's loop bound
     tSSXHiveScriptMaster masterTableStart; // 0x4 [O]; [R] mpMasterTable = &masterTableStart (the first record)
@@ -756,6 +756,7 @@ struct cSSXScriptEngine {
     void* AllocScriptSetupInfo() __asm__("cSSXScriptEngine_AllocScriptSetupInfo__FPv");
     void ReleaseScriptSetupInfo(void* vsetupInfo) __asm__("cSSXScriptEngine_ReleaseScriptSetupInfo__FPvT0");
     bool IsBankLoading(int i) __asm__("cSSXScriptEngine_IsBankLoading");
+    bool IsBankAvailable(int idx) __asm__("cSSXScriptEngine_IsBankAvailable");
     void ClearNISPlayListState() __asm__("cSSXScriptEngine_ClearNISPlayListState");
     bool IsNISActive() __asm__("cSSXScriptEngine_IsNISActive");
     int GetActiveNIS() __asm__("cSSXScriptEngine_GetActiveNIS");

@@ -56,13 +56,13 @@ extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, cWScript
     self->mVtbl = (void**)cWScriptProcess_vtbl;
     MEM_fill(self->ProcessScriptCode, 0, 0xC);
     self->SectionId = (unsigned int)sectionId;
-    self->Manager = (cWScriptMan*)man;
+    self->Manager = man;
     self->ProcessId = (unsigned int)((int)def->ProcessId);
     self->Local = 0;
     for (int i = 0; i < 3; i++)
-        self->ProcessScriptCode[i] = (char*)cWScriptMan_getScriptCode_2(self->Manager, ((int*)&def->ProcessScriptId[0])[i]);
+        self->ProcessScriptCode[i] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->ProcessScriptId[i]);
     for (int j = 0; j < 10; j++)
-        self->EventScriptCode[j] = (char*)cWScriptMan_getScriptCode_2(self->Manager, ((int*)&def->EventScriptId[0])[j]);
+        self->EventScriptCode[j] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->EventScriptId[j]);
     int n = def->NumTasks;
     self->NumTasks = n;
     sElem_307598** pv = (sElem_307598**)&self->Tasks;
@@ -286,11 +286,11 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_dispatchTaskEvent);
  *
  * @param event  the event (its address)
  */
-void cWScriptProcess::dispatchTaskEvent(int event)
+void cWScriptProcess::dispatchTaskEvent(const tWScriptEvent* event)
 {
     int i = RunningTask;
     if (i < NumTasks) {
-        Tasks[i].dispatchTaskEvent(*(const tWScriptEvent*)event);
+        Tasks[i].dispatchTaskEvent(*event);
     }
 }
 #endif
@@ -518,7 +518,7 @@ void cWScriptProcess::processStart()
     if (((void*)Local) != 0) {
         luno_cLunoTable__cLunoTable(((void*)Local), 3);
     }
-    (*(void**)&Local) = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
+    Local = (cLunoTable*)luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
     State = 1;
     RunningTask = 0;
     if (((void*)ProcessScriptCode[0]) != 0) {
@@ -731,7 +731,7 @@ void cWScriptProcess::advanceToTask(int id)
 }
 #endif
 
-extern "C" void* cWScriptMan_getScriptCode(int);
+extern "C" void* cWScriptMan_getScriptCode(cWScriptMan* man);
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getScriptCode__FPv);
@@ -747,7 +747,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getScriptCode__FPv);
  */
 void* cWScriptProcess::getScriptCode()
 {
-    return cWScriptMan_getScriptCode((int)Manager);
+    return cWScriptMan_getScriptCode(Manager);
 }
 #endif
 
@@ -1956,7 +1956,7 @@ void cWScriptMan::update()
             if (event->EventId & 0x20000)
                 proc->dispatchProcessEvent(event);
             if (event->EventId & 0x10000)
-                proc->dispatchTaskEvent((int)event);
+                proc->dispatchTaskEvent(event);
         }
         Inst = 0;
         CurrentProcess = 0;

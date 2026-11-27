@@ -152,8 +152,8 @@ struct cGame {
     void exit(int toFrontEnd) __asm__("cGame_exit");
     void startReplay() __asm__("cGame_startReplay");
     void stopReplay() __asm__("cGame_stopReplay");
-    int getTransitionMan(int i) __asm__("cGame_getTransitionMan__FPvi");
-    int getSplashManager(int i) __asm__("cGame_getSplashManager__FPvi");
+    cTransitionMan* getTransitionMan(int i) __asm__("cGame_getTransitionMan__FPvi");
+    cSplashManager* getSplashManager(int i) __asm__("cGame_getSplashManager__FPvi");
     void update() __asm__("cGame_update");
     bool loseFocus() __asm__("cGame_loseFocus");
     void updateState() __asm__("cGame_updateState");

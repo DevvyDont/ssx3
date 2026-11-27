@@ -214,13 +214,13 @@ struct cWorldTriggerManager {
     void Update() __asm__("cWorldTriggerManager_Update");
     void StopAllTriggers() __asm__("cWorldTriggerManager_StopAllTriggers");
     void StopTrigger(int id) __asm__("cWorldTriggerManager_StopTrigger");
-    int HandleCollision(void* evt, int id, cRider* rider, int vol) __asm__("cWorldTriggerManager_HandleCollision");
+    int HandleCollision(int inst, int id, cRider* rider, int vol) __asm__("cWorldTriggerManager_HandleCollision");
     int TriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
         __asm__("cWorldTriggerManager_TriggerToPatch");
     int AdvancedTriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort)
         __asm__("cWorldTriggerManager_AdvancedTriggerToPatch");
     int SwapTriggerToString(int idx, char* out) __asm__("cWorldTriggerManager_SwapTriggerToString");
-    bool HasAfterCollisionTrigger(void* obj) __asm__("cWorldTriggerManager_HasAfterCollisionTrigger");
+    bool HasAfterCollisionTrigger(int inst) __asm__("cWorldTriggerManager_HasAfterCollisionTrigger");
     bool AfterCollisionTrigger(unsigned int i) __asm__("cWorldTriggerManager_AfterCollisionTrigger");
     int ObjectHit(int id) __asm__("cWorldTriggerManager_ObjectHit");
     void AddHitObject(int id) __asm__("cWorldTriggerManager_AddHitObject");
@@ -229,7 +229,7 @@ struct cWorldTriggerManager {
     bool SwapTrigger(int trigger) __asm__("cWorldTriggerManager_SwapTrigger");
     void MonitorTriggers(int enable, int delay) __asm__("cWorldTriggerManager_MonitorTriggers");
     bool SyncToAnimationTrigger(unsigned int i) __asm__("cWorldTriggerManager_SyncToAnimationTrigger");
-    int ObjectRefFirstFrame(tInstanceRecord* src, cWorldTriggerInstance* state)
+    int ObjectRefFirstFrame(int objectRef, cWorldTriggerInstance* state)
         __asm__("cWorldTriggerManager_ObjectRefFirstFrame");
     bool DuckAmbientAudioTrigger(unsigned int idx) __asm__("cWorldTriggerManager_DuckAmbientAudioTrigger");
     int AdvancedTriggerToString() __asm__("cWorldTriggerManager_AdvancedTriggerToString__FPv");

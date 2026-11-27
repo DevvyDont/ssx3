@@ -33,7 +33,7 @@ void cAIFwdDiffCache::Init(int n)
     for (int k = n - 1; k != -1; k--, entry++) {
         tAIFwdDiff_tAIFwdDiff(entry);
     }
-    *(tAIFwdDiff**)&mCache = mem;
+    mCache = mem;
     for (int i = 0; i < n; i++) {
         mCache[i].mNext = &mCache[i] + 1;
         mCache[i].mPrev = &mCache[i] - 1;
@@ -42,8 +42,8 @@ void cAIFwdDiffCache::Init(int n)
     mCache[0].mPrev = (mCache) + n - 1;
     mCache[n - 1].mNext = (mCache);
     mHashSize = n * 2 + 13;
-    *(tAIFwdDiff**)&mAgeQueue = (mCache);
-    *(tAIFwdDiff***)&mPatchHash = (tAIFwdDiff**)operator_new_tag(((int)mHashSize) * 4, str_AIFwdDiffHash, 0x80000000,
+    mAgeQueue = mCache;
+    mPatchHash = (tAIFwdDiff**)operator_new_tag(((int)mHashSize) * 4, str_AIFwdDiffHash, 0x80000000,
             0);
 }
 #endif
@@ -52,12 +52,10 @@ void cAIFwdDiffCache::Init(int n)
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_GetFwdDiff);
 #ifdef SKIP_ASM
 struct sFwdDiffList;
-struct sFwdDiffLink;
 struct sFwdDiffTable;
-extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(cAIFwdDiffCache* list, sFwdDiffLink* n);
 extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
 extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, tAIFwdDiff* node);
-extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, cAIFwdDiffCache* node);
+extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, tPatchRecord* src, tAIFwdDiff* node);
 
 
 
@@ -81,7 +79,7 @@ void cAIFwdDiffCache::GetFwdDiff(tPatchRecord* src, tAIFwdDiff** out)
     tAIFwdDiff* n = mPatchHash[key % mHashSize];
     while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->mKey)) {
         if (n->mKey == key) {
-            cAIFwdDiffCache_MoveToAgeQueueTail(this, (sFwdDiffLink*)n);
+            MoveToAgeQueueTail(n);
             *out = n;
             return;
         }
@@ -91,8 +89,8 @@ void cAIFwdDiffCache::GetFwdDiff(tPatchRecord* src, tAIFwdDiff** out)
     cAIFwdDiffCache_RemoveFromHash(this, n);
     n->mKey = key;
     AddToHash(n);
-    *(tAIFwdDiff**)&mAgeQueue = n->mNext;
-    TesselatePatch(src, (cAIFwdDiffCache*)n);
+    mAgeQueue = n->mNext;
+    TesselatePatch(src, n);
     *out = n;
 }
 #endif
@@ -100,37 +98,29 @@ void cAIFwdDiffCache::GetFwdDiff(tPatchRecord* src, tAIFwdDiff** out)
 //100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_MoveToAgeQueueTail);
 #ifdef SKIP_ASM
-struct sFwdDiffLink {
-    int pad0;
-    sFwdDiffLink* next;   // 0x4
-    sFwdDiffLink* prev;   // 0x8
-};
-
-
 /**
  * Moves an AI forward-difference cache node to the tail of the age queue, making it the most recently used.
  *
  * The queue is circular with its head (oldest) at +0x4: if the node is the head the head just moves on, if it is
  * already the tail (head->prev) nothing changes, otherwise it is unlinked and reinserted before the head.
  *
- * @param list  the cache (this)
  * @param n  the node (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(cAIFwdDiffCache* list, sFwdDiffLink* n)
+void cAIFwdDiffCache::MoveToAgeQueueTail(tAIFwdDiff* n)
 {
-    if (((sFwdDiffLink*)list->mAgeQueue) == n) {
-        (*(sFwdDiffLink**)&list->mAgeQueue) = n->next;
+    if (mAgeQueue == n) {
+        mAgeQueue = n->mNext;
         return;
     }
-    if (((sFwdDiffLink*)list->mAgeQueue)->prev == n) {
+    if (mAgeQueue->mPrev == n) {
         return;
     }
-    n->prev->next = n->next;
-    n->next->prev = n->prev;
-    n->prev = ((sFwdDiffLink*)list->mAgeQueue)->prev;
-    n->next = ((sFwdDiffLink*)list->mAgeQueue);
-    ((sFwdDiffLink*)list->mAgeQueue)->prev->next = n;
-    ((sFwdDiffLink*)list->mAgeQueue)->prev = n;
+    n->mPrev->mNext = n->mNext;
+    n->mNext->mPrev = n->mPrev;
+    n->mPrev = mAgeQueue->mPrev;
+    n->mNext = mAgeQueue;
+    mAgeQueue->mPrev->mNext = n;
+    mAgeQueue->mPrev = n;
 }
 #endif
 
@@ -216,13 +206,13 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  * @param patch  the terrain patch record (On Tour const tPatchRecord&)
  * @param fwdDiff  the cache node to fill (On Tour node)
  */
-void cAIFwdDiffCache::TesselatePatch(void* patch, cAIFwdDiffCache* fwdDiff)
+void cAIFwdDiffCache::TesselatePatch(tPatchRecord* patch, tAIFwdDiff* fwdDiff)
 {
     sGp2930* patchEval = &D_004A5A20;
-    func_00391418(patchEval, (char*)patch + 0x40);
-    InitializeCache((tAIFwdDiff*)fwdDiff);
+    func_00391418(patchEval, patch->m_fBm0);
+    InitializeCache(fwdDiff);
     func_003914F8(patchEval);
-    func_00391480(patchEval, (char*)fwdDiff + 0x10);
+    func_00391480(patchEval, fwdDiff->mVertex);
 }
 #endif
 
@@ -282,7 +272,7 @@ bxSphereTree* bxSphereTree::operatorE(bxSphereTree* src)
     }
     (*(&transCenter)) = (*(&src->transCenter));
     (*(&staticInfo)) = (*(&src->staticInfo));
-    (*(tSphTreeInfo**)&treeInfo) = &(*(&staticInfo));
+    treeInfo = &staticInfo;
     return this;
 }
 #endif
@@ -311,7 +301,7 @@ int bxSphereTree::Load(char* buf, int aTreeID)
     }
     staticInfo.treeID = aTreeID;
     staticInfo.lastBufID = 0;
-    (*(tSphTreeInfo**)&this->treeInfo) = &(*(&staticInfo));
+    treeInfo = &staticInfo;
     staticInfo.refCount = 1;
     int len0;
     int len1;
@@ -349,7 +339,7 @@ int bxSphereTree::Load(char* buf, int aTreeID)
 //100%
 INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_IsRiderTreeCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(void* self);
+extern "C" unsigned char* SphereTree_AllocBuf(void* self);
 extern "C" int SphereTree_isSphereCollision(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
 
 
@@ -371,7 +361,7 @@ bool bxSphereTree::IsRiderTreeCollision(cRiderSphereTree* shape, int outPush, in
 {
     tSphTreeInfo* tree = treeInfo;
     if (tree->isCompressed != 0) {
-        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
+        treeInfo->bitTree = SphereTree_AllocBuf(tree);
     }
     if (SphereTree_isSphereCollision(this, ((float*)&shape->boundCen), &transCenter, 0, 0, outPush, outContact,
             shape->boundRad) == 0) {
@@ -499,7 +489,7 @@ void bxSphereTree::Draw()
 
     temp_4 = (tSphTreeInfo*)((void*)treeInfo);
     if ((temp_4->isCompressed) != 0) {
-        treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(temp_4);
+        treeInfo->bitTree = SphereTree_AllocBuf(temp_4);
     }
     bxSphereTree_drawLeaves(this, (treeInfo->depth), &transCenter, 0, 0);
 }

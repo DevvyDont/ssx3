@@ -39,6 +39,7 @@
 // paired methods for layout_xlate.py).
 
 #include "layout.h"
+#include "ui/uithing.h"
 
 struct tWorldPainterQuery;   // worldpainter/worldpainterquery.h (cWorldPainterQuery, 0x18; m_data at 0x0)
 
@@ -53,10 +54,10 @@ struct tRenderState {
                                     //       write/readFromReplayFrame call q[8]'s data slots 64 / 65
     float m_inTunnel;               // 0x024 [O]; [R] init zeroes it; [U] update blends it (x * 0.9 [+ 0.1 in a tunnel]);
                                     //       SnowIntensity / WindIntensity / SnowSparkleDensity scale by it (lwc1)
-    float m_colour[4];              // 0x028 [O] tARGB m_colour {A, R, G, B}; [R] init sets 1.0 x4; [U] blendToColour /
+    tARGB m_colour;                 // 0x028 [O] tARGB m_colour {A, R, G, B}; [R] init sets 1.0 x4; [U] blendToColour /
                                     //       blendToColour1 (self + 0x28, sdl/sdr); boardsparkfx / boardwakefx read
                                     //       m_state[ai].m_colour
-    float m_lightMapColour[4];      // 0x038 [O] tARGB m_lightMapColour; [R] init sets 1.0 x4; [U] blendToColour (+0x38);
+    tARGB m_lightMapColour;         // 0x038 [O]; [R] init sets 1.0 x4; [U] blendToColour (+0x38);
                                     //       update passes &m_state[i].m_lightMapColour to calculateIrradianceBlend
     char unk_048[0x8];              // 0x048 alignment gap: m_irradiance is 16-byte aligned (lq/sq)
     char m_irradiance[0xA0];        // 0x050 [O] cIrradiance m_irradiance (retail 0xA0: cIrradianceDataBase_Get's stride);

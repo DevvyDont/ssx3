@@ -96,7 +96,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
  */
 void cReplayFramePtr::readRewind()
 {
-    *(int*)&ReadData = ((int)Block);
+    ReadData = Block;
 }
 #endif
 
@@ -110,11 +110,11 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeRewind__FPv);
  *
  * @return the block start (Block)
  */
-int cReplayFramePtr::writeRewind()
+char* cReplayFramePtr::writeRewind()
 {
-    int block = (int)Block;
+    char* block = Block;
     Size = 0;
-    WriteData = (char*)block;
+    WriteData = block;
     return block;
 }
 #endif
@@ -765,7 +765,7 @@ void cReplay::reset()
     void** pp = (void**)(&InputCache[0]);
     do {
         if (*pp) cReplayCache_reset(*pp);
-        *(int*)&highlight->Frame = 0;
+        highlight->Frame = 0;
         highlight->PlayerId = none;
         MEM_fill(highlightData, 0, 172);
         highlightData += 0xB4;
@@ -855,7 +855,8 @@ extern "C" void* cReplay_saveReplayFrame_F4A8(void* self, sFrameDesc_F4A8* desc)
 // PORT: cReplay_addReplayFrame is mangled with one parameter (__FPv) but is called here
 // with (self, block); bind the 2-arg form to the symbol.
 void cReplay_addReplayFrame_F4A8(void* self, void* block) __asm__("cReplay_addReplayFrame__FPv");
-extern "C" void cReplay_startReplay_F4A8(void* self, int a1, int a2, int a3) __asm__("cReplay_startReplay");
+extern "C" void cReplay_startReplay_F4A8(void* self, cReplayFrame* frame, int instantReplay, int autoReplay)
+    __asm__("cReplay_startReplay");
 extern "C" void cReplay_updateInput(void* self, int a1);
 extern "C" void cReplay_processInput(cReplay* self);
 extern "C" void cReplay_purgeIdleFrames(void* self);
@@ -939,7 +940,7 @@ void cReplay::update()
             return;
         }
         if (StartInstantReplay != 0) {
-            cReplay_startReplay_F4A8((this), (int)InstantReplayFrame, 1, 0);
+            cReplay_startReplay_F4A8((this), InstantReplayFrame, 1, 0);
             setReplayState(kInstantPlayback);
             StartInstantReplay = 0;
             InstantReplay = 1;
@@ -1431,7 +1432,7 @@ void cReplay::processInput()
     }
     case kReplayCmd_NextFrame:
         redraw = 1;
-        if ((int)PlaybackFrame->Next != 0) {
+        if (PlaybackFrame->Next != 0) {
             cReplay_nextFrame(((char*)this));
             cReplay_stepFrame(((char*)this), 1);
             cReplay_setReplayState(((char*)this), kPlaybackUpdate);

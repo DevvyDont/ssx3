@@ -1010,12 +1010,12 @@ extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n) __as
 extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n)
 {
     luno_cLunoTableData* newTable = (luno_cLunoTableData*)new (str_LunoTable, 0xA0000000, 0) luno_cLunoTableData;
-    cLunoTableEntry** slot = &(*(cLunoTableEntry**)&newTable->Entries);
-    (*(cLunoTableEntry**)&newTable->Entries) = 0;
+    luno_cLunoTableEntry** slot = &newTable->Entries;
+    newTable->Entries = 0;
     newTable->RefCount = 0;
     newTable->Modulus = 0;
     ref->table = newTable;
-    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[n];
+    *slot = (luno_cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[n];
     ref->table->Modulus = n - 1;
     ref->table->RefCount = 1;
 }
@@ -1077,8 +1077,8 @@ extern "C" void luno_cLunoTable_emptyTable(cLunoTableRef* ref)
         tArrayNewCookie* array = (tArrayNewCookie*)ref->table->Entries;
         cMemMan_free(&array[-1]);
     }
-    cLunoTableEntry** slot = &(*(cLunoTableEntry**)&ref->table->Entries);
-    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[ref->table->Modulus + 1];
+    luno_cLunoTableEntry** slot = &ref->table->Entries;
+    *slot = (luno_cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[ref->table->Modulus + 1];
 }
 #endif
 
@@ -1472,8 +1472,8 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, cBxRepl
         cMemMan_free(&array[-1]);
     }
     stream->read((char*)self->table, 8);
-    cLunoTableEntry** slot = &(*(cLunoTableEntry**)&self->table->Entries);
-    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->Modulus + 1];
+    luno_cLunoTableEntry** slot = &self->table->Entries;
+    *slot = (luno_cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->Modulus + 1];
     int i;
     int cnt;
     cLunoValue key;
